@@ -140,26 +140,14 @@
 
 /*
     ================================================================
-    РАБОЧАЯ ОБЛАСТЬ
+    ОСНОВНОЙ ОТКРЫВАЕМЫЙ ЭКРАН
     ================================================================
 */
 
-.workspace {
-    flex-grow: 1;
-    flex-direction: row;
-    margin-top: 12px;
-    margin-bottom: 78px;
-}
-
 .main-screen-scroll {
     flex-grow: 1;
-    margin-right: 12px;
-}
-
-.reports-column {
-    width: 320px;
-    min-width: 280px;
-    max-width: 360px;
+    margin-top: 12px;
+    margin-bottom: 300px;
 }
 
 .game-screen {
@@ -450,26 +438,6 @@
     white-space: normal;
 }
 
-.active-expedition-report-title {
-    margin-bottom: 5px;
-    color: #AFA58E;
-    font-size: 12px;
-    -unity-font-style: bold;
-}
-
-.active-expedition-last-report {
-    min-height: 42px;
-    margin-bottom: 12px;
-    padding-left: 9px;
-    padding-right: 9px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    background-color: #1C2027;
-    color: #C8C4B8;
-    border-radius: 4px;
-    white-space: normal;
-}
-
 .return-expedition-button {
     height: 38px;
     background-color: #70372F;
@@ -500,8 +468,24 @@
     ================================================================
 */
 
+.reports-dock {
+    position: absolute;
+    left: 24px;
+    bottom: 22px;
+
+    width: 430px;
+    height: 270px;
+}
+
 .reports-panel {
-    min-height: 150px;
+    flex-grow: 1;
+    margin-bottom: 0;
+}
+
+.report-history-scroll {
+    flex-grow: 1;
+    min-height: 205px;
+    max-height: 205px;
 }
 
 .report-text {

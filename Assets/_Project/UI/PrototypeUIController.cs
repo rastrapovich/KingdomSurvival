@@ -26,6 +26,7 @@ public class PrototypeUIController : MonoBehaviour
     private VisualElement capitalScreen;
     private VisualElement armyScreen;
     private VisualElement expeditionsScreen;
+    private MainScreen? openedScreen;
 
     private Label dayLabel;
     private Label goldLabel;
@@ -41,7 +42,6 @@ public class PrototypeUIController : MonoBehaviour
     private Label armyStatusLabel;
 
     private Label expeditionStatusLabel;
-    private Label reportLabel;
 
     private Button sendRuinsButton;
     private Button sendMineButton;
@@ -50,8 +50,11 @@ public class PrototypeUIController : MonoBehaviour
     private VisualElement activeExpeditionCard;
     private Label activeExpeditionTitle;
     private Label activeExpeditionDetails;
-    private Label activeExpeditionLastReport;
     private Button returnExpeditionButton;
+
+    private ScrollView reportHistoryScroll;
+    private Label reportHistoryLabel;
+    private readonly List<string> reportHistory = new List<string>();
 
     private bool callbacksRegistered;
 
@@ -78,10 +81,10 @@ public class PrototypeUIController : MonoBehaviour
         ConfigureCommanderDropdown();
         RegisterCallbacks();
 
-        reportLabel.text =
-            "Прототип запущен. Откройте нужный экран круглой кнопкой слева сверху.";
+        AddReport(
+            "Прототип запущен. Откройте нужный экран круглой кнопкой слева сверху.");
 
-        ShowScreen(MainScreen.Capital);
+        OpenScreen(MainScreen.Capital);
         RefreshInterface();
     }
 
@@ -108,7 +111,6 @@ public class PrototypeUIController : MonoBehaviour
         armyStatusLabel = root.Q<Label>("army-status-label");
 
         expeditionStatusLabel = root.Q<Label>("expedition-status-label");
-        reportLabel = root.Q<Label>("report-label");
 
         sendRuinsButton = root.Q<Button>("send-ruins-button");
         sendMineButton = root.Q<Button>("send-mine-button");
@@ -117,8 +119,10 @@ public class PrototypeUIController : MonoBehaviour
         activeExpeditionCard = root.Q<VisualElement>("active-expedition-card");
         activeExpeditionTitle = root.Q<Label>("active-expedition-title");
         activeExpeditionDetails = root.Q<Label>("active-expedition-details");
-        activeExpeditionLastReport = root.Q<Label>("active-expedition-last-report");
         returnExpeditionButton = root.Q<Button>("return-expedition-button");
+
+        reportHistoryScroll = root.Q<ScrollView>("report-history-scroll");
+        reportHistoryLabel = root.Q<Label>("report-history-label");
     }
 
     private bool AllRequiredElementsExist()
@@ -141,19 +145,33 @@ public class PrototypeUIController : MonoBehaviour
             commanderDetailLabel != null &&
             armyStatusLabel != null &&
             expeditionStatusLabel != null &&
-            reportLabel != null &&
             sendRuinsButton != null &&
             sendMineButton != null &&
             sendForestButton != null &&
             activeExpeditionCard != null &&
             activeExpeditionTitle != null &&
             activeExpeditionDetails != null &&
-            activeExpeditionLastReport != null &&
-            returnExpeditionButton != null;
+            returnExpeditionButton != null &&
+            reportHistoryScroll != null &&
+            reportHistoryLabel != null;
     }
 
-    private void ShowScreen(MainScreen screen)
+    // Повторный щелчок по активной кнопке сворачивает экран.
+    private void ToggleScreen(MainScreen screen)
     {
+        if (openedScreen.HasValue && openedScreen.Value == screen)
+        {
+            CloseMainScreen();
+            return;
+        }
+
+        OpenScreen(screen);
+    }
+
+    private void OpenScreen(MainScreen screen)
+    {
+        openedScreen = screen;
+
         capitalScreen.style.display =
             screen == MainScreen.Capital
                 ? DisplayStyle.Flex
@@ -182,6 +200,19 @@ public class PrototypeUIController : MonoBehaviour
             screen == MainScreen.Expeditions);
     }
 
+    private void CloseMainScreen()
+    {
+        openedScreen = null;
+
+        capitalScreen.style.display = DisplayStyle.None;
+        armyScreen.style.display = DisplayStyle.None;
+        expeditionsScreen.style.display = DisplayStyle.None;
+
+        SetNavigationButtonActive(navCapitalButton, false);
+        SetNavigationButtonActive(navArmyButton, false);
+        SetNavigationButtonActive(navExpeditionsButton, false);
+    }
+
     private void SetNavigationButtonActive(Button button, bool isActive)
     {
         if (isActive)
@@ -192,17 +223,17 @@ public class PrototypeUIController : MonoBehaviour
 
     private void OnCapitalNavigationClicked()
     {
-        ShowScreen(MainScreen.Capital);
+        ToggleScreen(MainScreen.Capital);
     }
 
     private void OnArmyNavigationClicked()
     {
-        ShowScreen(MainScreen.Army);
+        ToggleScreen(MainScreen.Army);
     }
 
     private void OnExpeditionsNavigationClicked()
     {
-        ShowScreen(MainScreen.Expeditions);
+        ToggleScreen(MainScreen.Expeditions);
     }
 
     private void ConfigureCommanderDropdown()
@@ -262,9 +293,9 @@ public class PrototypeUIController : MonoBehaviour
 
         if (commanderChanged)
         {
-            reportLabel.text =
+            AddReport(
                 changeEvent.newValue +
-                " назначен командиром армии.";
+                " назначен командиром армии.");
         }
 
         RefreshInterface();
@@ -273,7 +304,9 @@ public class PrototypeUIController : MonoBehaviour
     private void OnEndDayClicked()
     {
         DayResolutionResult result = DayResolver.ResolveDay(gameState);
-        reportLabel.text = string.Join("\n", result.Messages);
+
+        AddReport(string.Join("\n", result.Messages));
+
         RefreshInterface();
     }
 
@@ -300,7 +333,7 @@ public class PrototypeUIController : MonoBehaviour
             locationId,
             out resultMessage);
 
-        reportLabel.text = resultMessage;
+        AddReport(resultMessage);
         RefreshInterface();
     }
 
@@ -320,8 +353,22 @@ public class PrototypeUIController : MonoBehaviour
             gameState.TryOrderReturn(out resultMessage);
         }
 
-        reportLabel.text = resultMessage;
+        AddReport(resultMessage);
         RefreshInterface();
+    }
+
+    // Королевские донесения хранят историю действий за текущий запуск.
+    // Новые записи добавляются вниз и не стирают старые.
+    private void AddReport(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        reportHistory.Add(
+            "День " + gameState.Day + "\n" + message);
+
+        reportHistoryLabel.text =
+            string.Join("\n\n", reportHistory);
     }
 
     private void RefreshInterface()
@@ -429,11 +476,6 @@ public class PrototypeUIController : MonoBehaviour
                 "Осталось дней пути: " + expedition.DaysRemaining;
         }
 
-        string cancellationInformation =
-            gameState.CanCancelExpeditionBeforeDayEnd
-                ? "\nПриказ ещё можно отменить до завершения текущего дня."
-                : string.Empty;
-
         activeExpeditionDetails.text =
             "Командир: " + commander.Name + "\n" +
             "Армия: " + expedition.FighterIds.Count + " отдельных воинов\n" +
@@ -441,10 +483,7 @@ public class PrototypeUIController : MonoBehaviour
             "Состояние: " + stateText + "\n" +
             "Текущая задача: " + currentTask + "\n" +
             daysInformation + "\n" +
-            "Снабжение: пока не рассчитывается" +
-            cancellationInformation;
-
-        activeExpeditionLastReport.text = reportLabel.text;
+            "Снабжение: пока не рассчитывается";
 
         bool canCancel = gameState.CanCancelExpeditionBeforeDayEnd;
         bool alreadyReturning =

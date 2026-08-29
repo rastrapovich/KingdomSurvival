@@ -18,12 +18,15 @@ public class DayResolutionResult
 
 public static class DayResolver
 {
+    private const int GoldIncomePerDay = 3;
+
     public static DayResolutionResult ResolveDay(GameState state)
     {
         DayResolutionResult result = new DayResolutionResult();
 
         int finishedDay = state.Day;
 
+        ResolveGoldIncome(state, result);
         ResolveCityFood(state, result);
         ResolveExpedition(state, result);
 
@@ -35,6 +38,23 @@ public static class DayResolver
             "День " + finishedDay + " завершён.");
 
         return result;
+    }
+
+    // --------------------------------------------------------
+    // ЗОЛОТО ГОРОДА
+    // Временное правило прототипа: +3 золота за завершённый день.
+    // --------------------------------------------------------
+
+    private static void ResolveGoldIncome(
+        GameState state,
+        DayResolutionResult result)
+    {
+        state.Gold += GoldIncomePerDay;
+
+        result.Messages.Add(
+            "Казна получила " +
+            GoldIncomePerDay +
+            " золота.");
     }
 
     // --------------------------------------------------------

@@ -28,6 +28,10 @@ public class PrototypeUIController : MonoBehaviour
     private VisualElement expeditionsScreen;
     private MainScreen? openedScreen;
 
+    // Короткая защита от повторного прокликивания навигации.
+    private const float NavigationClickCooldownSeconds = 0.18f;
+    private float lastNavigationClickTime = -NavigationClickCooldownSeconds;
+
     private Label dayLabel;
     private Label goldLabel;
     private Label foodLabel;
@@ -221,18 +225,41 @@ public class PrototypeUIController : MonoBehaviour
             button.RemoveFromClassList("nav-button-active");
     }
 
+    private bool CanProcessNavigationClick()
+    {
+        float currentTime = Time.unscaledTime;
+
+        if (currentTime - lastNavigationClickTime <
+            NavigationClickCooldownSeconds)
+        {
+            return false;
+        }
+
+        lastNavigationClickTime = currentTime;
+        return true;
+    }
+
     private void OnCapitalNavigationClicked()
     {
+        if (!CanProcessNavigationClick())
+            return;
+
         ToggleScreen(MainScreen.Capital);
     }
 
     private void OnArmyNavigationClicked()
     {
+        if (!CanProcessNavigationClick())
+            return;
+
         ToggleScreen(MainScreen.Army);
     }
 
     private void OnExpeditionsNavigationClicked()
     {
+        if (!CanProcessNavigationClick())
+            return;
+
         ToggleScreen(MainScreen.Expeditions);
     }
 
@@ -378,6 +405,14 @@ public class PrototypeUIController : MonoBehaviour
 
         reportHistoryLabel.text =
             string.Join("\n\n", reportHistory);
+
+        // Размер содержимого ScrollView пересчитывается не мгновенно,
+        // поэтому прокручиваем историю вниз на следующем тике UI Toolkit.
+        reportHistoryScroll.schedule.Execute(() =>
+        {
+            reportHistoryScroll.verticalScroller.value =
+                reportHistoryScroll.verticalScroller.highValue;
+        }).ExecuteLater(1);
     }
 
     private void RefreshInterface()

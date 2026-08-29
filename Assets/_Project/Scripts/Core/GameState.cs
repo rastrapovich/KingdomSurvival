@@ -96,6 +96,10 @@ public class ExpeditionData
 
     public CommanderState Phase;
     public int DaysRemaining;
+
+    // Номер дня, в который был отдан приказ на отправку.
+    // Пока этот день не завершён, приказ можно отменить полностью.
+    public int StartedOnDay;
 }
 
 // ============================================================
@@ -132,6 +136,19 @@ public class GameState
         {
             return ActiveExpedition != null &&
                    ActiveExpedition.IsActive;
+        }
+    }
+
+    // До первого завершения дня после отправки приказ можно
+    // отменить без времени пути и походных последствий.
+    public bool CanCancelExpeditionBeforeDayEnd
+    {
+        get
+        {
+            return HasActiveExpedition &&
+                   ActiveExpedition.StartedOnDay == Day &&
+                   ActiveExpedition.Phase ==
+                       CommanderState.TravellingToLocation;
         }
     }
 
@@ -296,6 +313,7 @@ public class GameState
         expedition.LocationId = location.Id;
         expedition.Phase = CommanderState.TravellingToLocation;
         expedition.DaysRemaining = location.DistanceDays;
+        expedition.StartedOnDay = Day;
 
         // В экспедицию отправляются именно отдельные воины.
         foreach (FighterData fighter in Fighters)
@@ -308,12 +326,57 @@ public class GameState
             commander.Name +
             " и " +
             Fighters.Count +
-            " воинов отправлены в локацию «" +
+            " воинов получили приказ отправиться в локацию «" +
             location.Name +
-            "». Столица осталась без этой армии.";
+            "». До завершения текущего дня приказ можно отменить.";
 
         return true;
-    }    
+    }
+
+    // --------------------------------------------------------
+    // ОТМЕНА ОТПРАВКИ ДО ЗАВЕРШЕНИЯ ДНЯ
+    // Это отмена приказа, а не отзыв армии из уже начавшегося пути.
+    // --------------------------------------------------------
+
+    public bool TryCancelExpeditionBeforeDayEnd(
+        out string resultMessage)
+    {
+        if (!CanCancelExpeditionBeforeDayEnd)
+        {
+            resultMessage =
+                "Отменить отправку уже нельзя. Используйте приказ о возвращении.";
+
+            return false;
+        }
+
+        CommanderData commander =
+            FindCommander(ActiveExpedition.CommanderId);
+
+        LocationData location =
+            FindLocation(ActiveExpedition.LocationId);
+
+        if (commander == null || location == null)
+        {
+            resultMessage =
+                "Не удалось определить данные экспедиции.";
+
+            return false;
+        }
+
+        commander.State = CommanderState.InCastle;
+        ActiveExpedition.IsActive = false;
+        ActiveExpedition = null;
+
+        resultMessage =
+            "Приказ на отправку в локацию «" +
+            location.Name +
+            "» отменён. " +
+            commander.Name +
+            " и армия остаются в столице. День не завершён.";
+
+        return true;
+    }
+
     // --------------------------------------------------------
     // ДОСРОЧНОЕ ВОЗВРАЩЕНИЕ ЭКСПЕДИЦИИ
     // --------------------------------------------------------
@@ -324,6 +387,14 @@ public class GameState
         {
             resultMessage =
                 "Сейчас нет активной экспедиции.";
+
+            return false;
+        }
+
+        if (CanCancelExpeditionBeforeDayEnd)
+        {
+            resultMessage =
+                "Текущий день ещё не завершён. Сначала можно полностью отменить отправку.";
 
             return false;
         }

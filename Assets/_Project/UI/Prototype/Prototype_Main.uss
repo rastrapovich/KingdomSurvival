@@ -6,6 +6,7 @@
 
 .screen {
     flex-grow: 1;
+    position: relative;
 
     padding-left: 16px;
     padding-right: 16px;
@@ -16,16 +17,65 @@
     color: rgb(225, 218, 200);
 }
 
-
 /*
     ================================================================
-    ВЕРХНЯЯ ПАНЕЛЬ
+    ВЕРХ: НАВИГАЦИЯ И РЕСУРСЫ
     ================================================================
 */
 
+.header-row {
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.navigation-bar {
+    width: 200px;
+    min-width: 200px;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 12px;
+}
+
+.nav-button {
+    width: 58px;
+    min-width: 58px;
+    max-width: 58px;
+    height: 58px;
+    margin-right: 8px;
+
+    background-color: rgb(43, 48, 58);
+    color: rgb(224, 213, 188);
+
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(91, 96, 107);
+    border-right-color: rgb(91, 96, 107);
+    border-top-color: rgb(91, 96, 107);
+    border-bottom-color: rgb(91, 96, 107);
+    border-radius: 29px;
+
+    font-size: 19px;
+    -unity-font-style: bold;
+}
+
+.nav-button:hover {
+    background-color: rgb(59, 65, 77);
+}
+
+.nav-button-active {
+    background-color: rgb(112, 78, 43);
+    color: rgb(255, 239, 202);
+    border-left-color: rgb(207, 165, 89);
+    border-right-color: rgb(207, 165, 89);
+    border-top-color: rgb(207, 165, 89);
+    border-bottom-color: rgb(207, 165, 89);
+}
+
 .top-bar {
     min-height: 76px;
-
+    flex-grow: 1;
     flex-direction: row;
     align-items: center;
 
@@ -35,27 +85,22 @@
     padding-bottom: 10px;
 
     background-color: rgb(35, 39, 47);
-
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-
     border-left-color: rgb(92, 80, 58);
     border-right-color: rgb(92, 80, 58);
     border-top-color: rgb(92, 80, 58);
     border-bottom-color: rgb(92, 80, 58);
-
     border-radius: 6px;
 }
 
 .game-title {
     min-width: 210px;
     margin-right: 16px;
-
     color: rgb(224, 187, 102);
     font-size: 21px;
-
     -unity-font-style: bold;
 }
 
@@ -67,15 +112,12 @@
 
 .resource-box {
     min-width: 112px;
-
     margin-right: 8px;
     margin-bottom: 4px;
-
     padding-left: 9px;
     padding-right: 9px;
     padding-top: 7px;
     padding-bottom: 7px;
-
     background-color: rgb(47, 51, 60);
     border-radius: 4px;
 }
@@ -96,127 +138,118 @@
     font-size: 11px;
 }
 
-.end-day-button {
-    min-width: 150px;
-    height: 45px;
-
-    margin-left: 12px;
-
-    background-color: rgb(116, 75, 42);
-    color: rgb(255, 240, 204);
-
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-
-    border-left-color: rgb(199, 154, 82);
-    border-right-color: rgb(199, 154, 82);
-    border-top-color: rgb(199, 154, 82);
-    border-bottom-color: rgb(199, 154, 82);
-
-    border-radius: 5px;
-
-    font-size: 15px;
-    -unity-font-style: bold;
-}
-
-.end-day-button:hover {
-    background-color: rgb(145, 94, 51);
-}
-
-
 /*
     ================================================================
-    ОСНОВНАЯ ОБЛАСТЬ
+    РАБОЧАЯ ОБЛАСТЬ
     ================================================================
 */
 
-.main-scroll {
+.workspace {
     flex-grow: 1;
-    margin-top: 12px;
-}
-
-.main-grid {
     flex-direction: row;
-    align-items: flex-start;
+    margin-top: 12px;
+    margin-bottom: 78px;
 }
 
-.left-column {
+.main-screen-scroll {
     flex-grow: 1;
-    flex-basis: 52%;
-
-    min-width: 470px;
     margin-right: 12px;
 }
 
-.right-column {
-    flex-grow: 1;
-    flex-basis: 48%;
+.reports-column {
+    width: 320px;
+    min-width: 280px;
+    max-width: 360px;
+}
 
-    min-width: 410px;
+.game-screen {
+    display: none;
 }
 
 .panel {
     margin-bottom: 12px;
-
     padding-left: 14px;
     padding-right: 14px;
     padding-top: 13px;
     padding-bottom: 14px;
 
     background-color: rgb(31, 35, 43);
-
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-
     border-left-color: rgb(69, 74, 84);
     border-right-color: rgb(69, 74, 84);
     border-top-color: rgb(69, 74, 84);
     border-bottom-color: rgb(69, 74, 84);
-
     border-radius: 6px;
 }
 
 .panel-title {
     margin-bottom: 5px;
-
     color: rgb(224, 187, 102);
     font-size: 19px;
-
     -unity-font-style: bold;
 }
 
 .panel-description {
     margin-bottom: 10px;
-
     color: rgb(158, 163, 171);
     font-size: 12px;
-
     white-space: normal;
 }
 
 .section-title {
     margin-top: 7px;
     margin-bottom: 7px;
-
     color: rgb(193, 183, 158);
     font-size: 13px;
-
     -unity-font-style: bold;
 }
 
 .section-divider {
     height: 1px;
-
     margin-top: 12px;
     margin-bottom: 8px;
-
     background-color: rgb(72, 76, 85);
 }
 
+/*
+    ================================================================
+    КРУГЛАЯ КНОПКА «ЗАВЕРШИТЬ ДЕНЬ»
+    ================================================================
+*/
+
+.end-day-button {
+    position: absolute;
+    right: 24px;
+    bottom: 22px;
+
+    width: 76px;
+    min-width: 76px;
+    max-width: 76px;
+    height: 76px;
+
+    background-color: rgb(116, 75, 42);
+    color: rgb(255, 240, 204);
+
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(199, 154, 82);
+    border-right-color: rgb(199, 154, 82);
+    border-top-color: rgb(199, 154, 82);
+    border-bottom-color: rgb(199, 154, 82);
+    border-radius: 38px;
+
+    font-size: 13px;
+    -unity-font-style: bold;
+}
+
+.end-day-button:hover {
+    background-color: rgb(145, 94, 51);
+}
 
 /*
     ================================================================
@@ -230,32 +263,27 @@
 }
 
 .building-card {
-    width: 48%;
-    min-height: 43px;
-
+    width: 31%;
+    min-height: 48px;
     margin-right: 2%;
     margin-bottom: 8px;
 
     background-color: rgb(50, 55, 65);
     color: rgb(222, 216, 199);
-
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-
     border-left-color: rgb(82, 87, 97);
     border-right-color: rgb(82, 87, 97);
     border-top-color: rgb(82, 87, 97);
     border-bottom-color: rgb(82, 87, 97);
-
     border-radius: 4px;
 }
 
 .building-card:hover {
     background-color: rgb(63, 69, 80);
 }
-
 
 /*
     ================================================================
@@ -269,78 +297,61 @@
 
 .commander-dropdown > .unity-base-field__label {
     min-width: 90px;
-
     color: rgb(205, 196, 174);
     -unity-font-style: bold;
 }
 
 .commander-dropdown .unity-base-field__input {
     min-height: 34px;
-
     background-color: rgb(46, 51, 60);
     color: rgb(238, 230, 210);
-
     border-radius: 4px;
 }
 
 .commander-detail {
     margin-bottom: 7px;
-
     color: rgb(208, 202, 187);
     font-size: 13px;
-
     white-space: normal;
 }
 
 .status-label {
     margin-top: 3px;
     margin-bottom: 8px;
-
     padding-left: 8px;
     padding-right: 8px;
     padding-top: 6px;
     padding-bottom: 6px;
-
     background-color: rgb(42, 47, 56);
     color: rgb(183, 194, 203);
-
     border-radius: 3px;
-
     white-space: normal;
 }
 
 .fighter-card {
     min-height: 50px;
-
     margin-bottom: 6px;
-
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 7px;
     padding-bottom: 7px;
-
     background-color: rgb(43, 47, 56);
-
     border-left-width: 3px;
     border-left-color: rgb(146, 112, 62);
-
     border-radius: 3px;
 }
 
 .fighter-name {
     color: rgb(232, 222, 197);
     font-size: 14px;
-
     -unity-font-style: bold;
 }
 
 .fighter-info {
     margin-top: 2px;
-
     color: rgb(156, 163, 173);
     font-size: 12px;
 }
-
 
 /*
     ================================================================
@@ -350,40 +361,32 @@
 
 .location-card {
     margin-bottom: 9px;
-
     padding-left: 11px;
     padding-right: 11px;
     padding-top: 10px;
     padding-bottom: 10px;
-
     background-color: rgb(42, 46, 55);
-
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-
     border-left-color: rgb(72, 78, 89);
     border-right-color: rgb(72, 78, 89);
     border-top-color: rgb(72, 78, 89);
     border-bottom-color: rgb(72, 78, 89);
-
     border-radius: 5px;
 }
 
 .location-name {
     margin-bottom: 7px;
-
     color: rgb(230, 219, 192);
     font-size: 16px;
-
     -unity-font-style: bold;
 }
 
 .location-info-row {
     flex-direction: row;
     justify-content: space-between;
-
     margin-bottom: 9px;
 }
 
@@ -391,40 +394,50 @@
     color: #AEA289;
     font-size: 13px;
 }
-/* ============================================================= */
-/* КАРТОЧКА АКТИВНОЙ ЭКСПЕДИЦИИ                                 */
-/* ============================================================= */
+
+.threat-low { color: #84B889; }
+.threat-medium { color: #D2B46C; }
+.threat-high { color: #D57E72; }
+
+.send-button {
+    height: 34px;
+    background-color: #384B43;
+    color: #E4E9DD;
+    border-radius: 4px;
+}
+
+.send-button:hover {
+    background-color: #466054;
+}
+
+/*
+    ================================================================
+    КАРТОЧКА АКТИВНОЙ ЭКСПЕДИЦИИ
+    ================================================================
+*/
 
 .active-expedition-card {
-    /* Пока экспедиции нет, карточка скрыта */
     display: none;
-
     margin-top: 10px;
     margin-bottom: 14px;
-
     padding-left: 14px;
     padding-right: 14px;
     padding-top: 12px;
     padding-bottom: 12px;
-
     background-color: #272C35;
-
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-
     border-left-color: #806A45;
     border-right-color: #806A45;
     border-top-color: #806A45;
     border-bottom-color: #806A45;
-
     border-radius: 5px;
 }
 
 .active-expedition-title {
     margin-bottom: 10px;
-
     color: #E5BD63;
     font-size: 17px;
     -unity-font-style: bold;
@@ -432,7 +445,6 @@
 
 .active-expedition-details {
     margin-bottom: 12px;
-
     color: #DDD4C2;
     font-size: 14px;
     white-space: normal;
@@ -440,7 +452,6 @@
 
 .active-expedition-report-title {
     margin-bottom: 5px;
-
     color: #AFA58E;
     font-size: 12px;
     -unity-font-style: bold;
@@ -449,35 +460,28 @@
 .active-expedition-last-report {
     min-height: 42px;
     margin-bottom: 12px;
-
     padding-left: 9px;
     padding-right: 9px;
     padding-top: 8px;
     padding-bottom: 8px;
-
     background-color: #1C2027;
     color: #C8C4B8;
-
     border-radius: 4px;
     white-space: normal;
 }
 
 .return-expedition-button {
     height: 38px;
-
     background-color: #70372F;
     color: #F0E4D0;
-
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-
     border-left-color: #B06A53;
     border-right-color: #B06A53;
     border-top-color: #B06A53;
     border-bottom-color: #B06A53;
-
     border-radius: 4px;
     -unity-font-style: bold;
 }
@@ -488,4 +492,20 @@
 
 .return-expedition-button:disabled {
     opacity: 0.55;
+}
+
+/*
+    ================================================================
+    КОРОЛЕВСКИЕ ДОНЕСЕНИЯ
+    ================================================================
+*/
+
+.reports-panel {
+    min-height: 150px;
+}
+
+.report-text {
+    color: rgb(206, 201, 188);
+    font-size: 13px;
+    white-space: normal;
 }

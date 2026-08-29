@@ -233,7 +233,43 @@
                         <ui:Label
                             name="expedition-status-label"
                             text="Активная экспедиция: нет"
-                            class="status-label" />
+                            class="status-label" /> 
+                            
+                            <!-- ====================================================== -->
+                            <!-- КАРТОЧКА АКТИВНОЙ ЭКСПЕДИЦИИ                           -->
+                            <!-- В начале игры скрыта. C# покажет её после отправки.    -->
+                            <!-- ====================================================== -->
+
+                            <ui:VisualElement
+                                name="active-expedition-card"
+                                class="active-expedition-card">
+
+                                <ui:Label
+                                    name="active-expedition-title"
+                                    text="АКТИВНАЯ ЭКСПЕДИЦИЯ"
+                                    class="active-expedition-title" />
+
+                                <ui:Label
+                                    name="active-expedition-details"
+                                    text="Данные экспедиции"
+                                    class="active-expedition-details" />
+
+                                <ui:Label
+                                    text="ПОСЛЕДНЕЕ ДОНЕСЕНИЕ"
+                                    class="active-expedition-report-title" />
+
+                                <ui:Label
+                                    name="active-expedition-last-report"
+                                    text="Донесений пока нет."
+                                    class="active-expedition-last-report" />
+
+                                <ui:Button
+                                    name="return-expedition-button"
+                                    text="Приказать возвращаться"
+                                    class="return-expedition-button" />
+
+                            </ui:VisualElement>
+
 
                         <ui:Label
                             text="НАЙДЕННЫЕ ЛОКАЦИИ"

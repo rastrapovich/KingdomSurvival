@@ -2,376 +2,585 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-/// <summary>
-/// Управляет первым тестовым экраном Kingdom Survival.
-///
-/// Этот скрипт пока не является полноценной игровой системой.
-/// Его задача — проверить интерфейс и основные правила прототипа.
-/// </summary>
+// ============================================================
+// СВЯЗЬ ИГРОВЫХ ДАННЫХ С ИНТЕРФЕЙСОМ
+// Этот компонент должен находиться рядом с UI Document.
+// ============================================================
+
 [RequireComponent(typeof(UIDocument))]
-public sealed class PrototypeUIController : MonoBehaviour
+public class PrototypeUIController : MonoBehaviour
 {
-    // =========================================================
-    // НАЧАЛЬНЫЕ ДАННЫЕ ПРОТОТИПА
-    // Позже они будут вынесены в отдельную систему состояния игры.
-    // =========================================================
+    // ========================================================
+    // ИГРОВОЕ СОСТОЯНИЕ
+    // ========================================================
 
-    private const int FoodPerResident = 1;
-    private const int ArmySize = 5;
+    private GameState gameState;
 
-    private int _day = 1;
-    private int _gold = 120;
-    private int _food = 72;
-    private int _population = 24;
-    private int _mood = 64;
+    // ========================================================
+    // ВЕРХНЯЯ ПАНЕЛЬ
+    // ========================================================
 
-    // Одновременно разрешена только одна экспедиция.
-    private bool _expeditionActive;
-    private string _activeLocation = "";
-    private int _remainingTravelDays;
+    private Label dayLabel;
+    private Label goldLabel;
+    private Label foodLabel;
+    private Label populationLabel;
+    private Label moodLabel;
+    private Label foodConsumptionLabel;
 
-    // =========================================================
-    // ССЫЛКИ НА ЭЛЕМЕНТЫ ИНТЕРФЕЙСА
-    // Эти элементы будут найдены по их именам из UXML.
-    // =========================================================
+    private Button endDayButton;
 
-    private Label _dayLabel;
-    private Label _goldLabel;
-    private Label _foodLabel;
-    private Label _populationLabel;
-    private Label _moodLabel;
-    private Label _foodConsumptionLabel;
+    // ========================================================
+    // ПАНЕЛЬ АРМИИ
+    // ========================================================
 
-    private DropdownField _commanderDropdown;
-    private Label _commanderDetailLabel;
-    private Label _armyStatusLabel;
-    private Label _expeditionStatusLabel;
-    private Label _reportLabel;
+    private DropdownField commanderDropdown;
+    private Label commanderDetailLabel;
+    private Label armyStatusLabel;
 
-    private Button _endDayButton;
-    private Button _ruinsButton;
-    private Button _mineButton;
-    private Button _forestButton;
+    // ========================================================
+    // ПАНЕЛЬ ЭКСПЕДИЦИИ
+    // ========================================================
 
-    // Доступные командиры.
-    // Выбор нового имени НЕ создаёт дополнительную армию.
-    private readonly List<string> _commanderNames = new List<string>
-    {
-        "Сэр Альрик",
-        "Леди Мирена",
-        "Бран Каменная Рука"
-    };
+    private Label expeditionStatusLabel;
+    private Label reportLabel;
 
-    // Небольшие описания для теста выпадающего списка.
-    private readonly Dictionary<string, string> _commanderDescriptions =
-        new Dictionary<string, string>
-        {
-            {
-                "Сэр Альрик",
-                "опытный защитник, усиливающий гвардейцев"
-            },
-            {
-                "Леди Мирена",
-                "разведчица, лучше оценивающая угрозу"
-            },
-            {
-                "Бран Каменная Рука",
-                "тяжёлый воин, повышающий стойкость армии"
-            }
-        };
+    private Button sendRuinsButton;
+    private Button sendMineButton;
+    private Button sendForestButton;
 
-    // =========================================================
-    // ONENABLE
-    // Unity уже загрузила UXML, поэтому здесь можно искать кнопки
-    // и подключать к ним игровую логику.
-    // =========================================================
+    // ========================================================
+    // КАРТОЧКА АКТИВНОЙ ЭКСПЕДИЦИИ
+    // ========================================================
+
+    private VisualElement activeExpeditionCard;
+    private Label activeExpeditionTitle;
+    private Label activeExpeditionDetails;
+    private Label activeExpeditionLastReport;
+    private Button returnExpeditionButton;
+
+    // Показывает, подключены ли события кнопок.
+    private bool callbacksRegistered;
+
+    // ========================================================
+    // ЗАПУСК КОНТРОЛЛЕРА
+    // ========================================================
 
     private void OnEnable()
     {
-        UIDocument uiDocument = GetComponent<UIDocument>();
-        VisualElement root = uiDocument.rootVisualElement;
+        UIDocument document = GetComponent<UIDocument>();
+        VisualElement root = document.rootVisualElement;
 
-        // Основные показатели.
-        _dayLabel = root.Q<Label>("day-label");
-        _goldLabel = root.Q<Label>("gold-label");
-        _foodLabel = root.Q<Label>("food-label");
-        _populationLabel = root.Q<Label>("population-label");
-        _moodLabel = root.Q<Label>("mood-label");
-        _foodConsumptionLabel = root.Q<Label>("food-consumption-label");
+        FindInterfaceElements(root);
 
-        // Командир и армия.
-        _commanderDropdown =
-            root.Q<DropdownField>("commander-dropdown");
+        if (!AllRequiredElementsExist())
+        {
+            Debug.LogError(
+                "PrototypeUIController: в Prototype_Main.uxml " +
+                "отсутствуют необходимые элементы.");
 
-        _commanderDetailLabel =
-            root.Q<Label>("commander-detail-label");
+            enabled = false;
+            return;
+        }
 
-        _armyStatusLabel =
-            root.Q<Label>("army-status-label");
+        // Создаём новое временное состояние игры.
+        // Сохранения добавим позже.
+        gameState = new GameState();
+        gameState.CreateNewGame();
 
-        // Экспедиции и донесения.
-        _expeditionStatusLabel =
-            root.Q<Label>("expedition-status-label");
+        ConfigureCommanderDropdown();
+        RegisterCallbacks();
 
-        _reportLabel =
-            root.Q<Label>("report-label");
+        reportLabel.text =
+            "Прототип запущен. Выберите командира " +
+            "или отправьте экспедицию.";
 
-        // Кнопки.
-        _endDayButton =
-            root.Q<Button>("end-day-button");
-
-        _ruinsButton =
-            root.Q<Button>("send-ruins-button");
-
-        _mineButton =
-            root.Q<Button>("send-mine-button");
-
-        _forestButton =
-            root.Q<Button>("send-forest-button");
-
-        // Заполняем открывающийся список командиров.
-        _commanderDropdown.choices = _commanderNames;
-        _commanderDropdown.index = 0;
-
-        // Подключаем реакции на действия игрока.
-        _commanderDropdown.RegisterValueChangedCallback(
-            OnCommanderChanged
-        );
-
-        _endDayButton.clicked += EndDay;
-        _ruinsButton.clicked += SendToRuins;
-        _mineButton.clicked += SendToMine;
-        _forestButton.clicked += SendToForest;
-
-        // Показываем стартовые значения.
-        RefreshResourceLabels();
-        RefreshCommanderPanel();
-
-        _armyStatusLabel.text =
-            $"Статус армии: в столице. " +
-            $"{ArmySize} воинов защищают город.";
-
-        _expeditionStatusLabel.text =
-            "Активная экспедиция: нет.";
+        RefreshInterface();
     }
 
-    // =========================================================
-    // ONDISABLE
-    // Отсоединяем обработчики, чтобы они не дублировались
-    // после повторного включения объекта или сцены.
-    // =========================================================
+    // ========================================================
+    // ПОИСК ЭЛЕМЕНТОВ В UXML
+    // Имена здесь должны совпадать с атрибутами name в UXML.
+    // ========================================================
+
+    private void FindInterfaceElements(VisualElement root)
+    {
+        // Верхняя панель
+        dayLabel = root.Q<Label>("day-label");
+        goldLabel = root.Q<Label>("gold-label");
+        foodLabel = root.Q<Label>("food-label");
+
+        populationLabel =
+            root.Q<Label>("population-label");
+
+        moodLabel = root.Q<Label>("mood-label");
+
+        foodConsumptionLabel =
+            root.Q<Label>("food-consumption-label");
+
+        endDayButton =
+            root.Q<Button>("end-day-button");
+
+        // Армия
+        commanderDropdown =
+            root.Q<DropdownField>("commander-dropdown");
+
+        commanderDetailLabel =
+            root.Q<Label>("commander-detail-label");
+
+        armyStatusLabel =
+            root.Q<Label>("army-status-label");
+
+        // Экспедиции
+        expeditionStatusLabel =
+            root.Q<Label>("expedition-status-label");
+
+        reportLabel =
+            root.Q<Label>("report-label");
+
+        sendRuinsButton =
+            root.Q<Button>("send-ruins-button");
+
+        sendMineButton =
+            root.Q<Button>("send-mine-button");
+
+        sendForestButton =
+            root.Q<Button>("send-forest-button");
+
+        // Карточка активной экспедиции
+        activeExpeditionCard =
+            root.Q<VisualElement>("active-expedition-card");
+
+        activeExpeditionTitle =
+            root.Q<Label>("active-expedition-title");
+
+        activeExpeditionDetails =
+            root.Q<Label>("active-expedition-details");
+
+        activeExpeditionLastReport =
+            root.Q<Label>("active-expedition-last-report");
+
+        returnExpeditionButton =
+            root.Q<Button>("return-expedition-button");
+    }
+
+    // ========================================================
+    // ПРОВЕРКА UXML
+    // Если имя хотя бы одного элемента неправильное,
+    // Unity покажет нашу понятную ошибку в Console.
+    // ========================================================
+
+    private bool AllRequiredElementsExist()
+    {
+        return
+            dayLabel != null &&
+            goldLabel != null &&
+            foodLabel != null &&
+            populationLabel != null &&
+            moodLabel != null &&
+            foodConsumptionLabel != null &&
+            endDayButton != null &&
+
+            commanderDropdown != null &&
+            commanderDetailLabel != null &&
+            armyStatusLabel != null &&
+
+            expeditionStatusLabel != null &&
+            reportLabel != null &&
+            sendRuinsButton != null &&
+            sendMineButton != null &&
+            sendForestButton != null &&
+
+            activeExpeditionCard != null &&
+            activeExpeditionTitle != null &&
+            activeExpeditionDetails != null &&
+            activeExpeditionLastReport != null &&
+            returnExpeditionButton != null;
+    }
+
+    // ========================================================
+    // НАСТРОЙКА СПИСКА КОМАНДИРОВ
+    // ========================================================
+
+    private void ConfigureCommanderDropdown()
+    {
+        List<string> commanderNames =
+            gameState.GetCommanderNames();
+
+        commanderDropdown.choices = commanderNames;
+
+        CommanderData selectedCommander =
+            gameState.GetSelectedCommander();
+
+        commanderDropdown.SetValueWithoutNotify(
+            selectedCommander.Name);
+    }
+
+    // ========================================================
+    // ПОДКЛЮЧЕНИЕ СОБЫТИЙ
+    // ========================================================
+
+    private void RegisterCallbacks()
+    {
+        endDayButton.clicked += OnEndDayClicked;
+
+        sendRuinsButton.clicked += OnSendRuinsClicked;
+        sendMineButton.clicked += OnSendMineClicked;
+        sendForestButton.clicked += OnSendForestClicked;
+
+        returnExpeditionButton.clicked +=
+            OnReturnExpeditionClicked;
+
+        commanderDropdown.RegisterValueChangedCallback(
+            OnCommanderChanged);
+
+        callbacksRegistered = true;
+    }
+
+    // ========================================================
+    // ОТКЛЮЧЕНИЕ СОБЫТИЙ
+    // Это предотвращает повторное срабатывание кнопок.
+    // ========================================================
 
     private void OnDisable()
     {
-        if (_commanderDropdown != null)
-        {
-            _commanderDropdown.UnregisterValueChangedCallback(
-                OnCommanderChanged
-            );
-        }
-
-        if (_endDayButton != null)
-            _endDayButton.clicked -= EndDay;
-
-        if (_ruinsButton != null)
-            _ruinsButton.clicked -= SendToRuins;
-
-        if (_mineButton != null)
-            _mineButton.clicked -= SendToMine;
-
-        if (_forestButton != null)
-            _forestButton.clicked -= SendToForest;
-    }
-
-    // =========================================================
-    // ОБНОВЛЕНИЕ ПОКАЗАТЕЛЕЙ
-    // =========================================================
-
-    private void RefreshResourceLabels()
-    {
-        _dayLabel.text = $"День: {_day}";
-        _goldLabel.text = $"Золото: {_gold}";
-        _foodLabel.text = $"Пища: {_food}";
-        _populationLabel.text = $"Население: {_population}";
-        _moodLabel.text = $"Настроение: {_mood}/100";
-
-        // Главное утверждённое правило:
-        // каждый житель потребляет одну пищу за день.
-        int dailyFoodConsumption =
-            _population * FoodPerResident;
-
-        _foodConsumptionLabel.text =
-            $"Расход: {dailyFoodConsumption} в день";
-    }
-
-    private void RefreshCommanderPanel()
-    {
-        string commanderName = _commanderDropdown.value;
-
-        if (string.IsNullOrEmpty(commanderName))
+        if (!callbacksRegistered)
             return;
 
-        string description =
-            _commanderDescriptions[commanderName];
+        endDayButton.clicked -= OnEndDayClicked;
 
-        _commanderDetailLabel.text =
-            $"{commanderName} — {description}. " +
-            $"Под командованием: {ArmySize} отдельных воинов.";
+        sendRuinsButton.clicked -= OnSendRuinsClicked;
+        sendMineButton.clicked -= OnSendMineClicked;
+        sendForestButton.clicked -= OnSendForestClicked;
+
+        returnExpeditionButton.clicked -=
+            OnReturnExpeditionClicked;
+
+        commanderDropdown.UnregisterValueChangedCallback(
+            OnCommanderChanged);
+
+        callbacksRegistered = false;
     }
 
-    // =========================================================
-    // ВЫБОР КОМАНДИРА
-    // Меняется руководитель, но не создаётся новая армия.
-    // =========================================================
+    // ========================================================
+    // СМЕНА КОМАНДИРА
+    // Новый командир возглавляет ту же единственную армию.
+    // ========================================================
 
-    private void OnCommanderChanged(ChangeEvent<string> evt)
+    private void OnCommanderChanged(
+        ChangeEvent<string> changeEvent)
     {
-        RefreshCommanderPanel();
+        bool commanderChanged =
+            gameState.SelectCommanderByName(
+                changeEvent.newValue);
 
-        _reportLabel.text =
-            $"{evt.newValue} назначен руководителем " +
-            $"единственной армии из {ArmySize} воинов.";
-    }
-
-    // =========================================================
-    // ЗАВЕРШЕНИЕ ДНЯ И СПИСАНИЕ ПИЩИ
-    // =========================================================
-
-    private void EndDay()
-    {
-        int requiredFood =
-            _population * FoodPerResident;
-
-        // Если пищи мало, списываем всё, что осталось.
-        int consumedFood =
-            Mathf.Min(_food, requiredFood);
-
-        _food -= consumedFood;
-        _day++;
-
-        string dailyReport =
-            $"Наступил день {_day}. " +
-            $"Население потребило {consumedFood} пищи.";
-
-        // Последствия голода пока не определены каноном.
-        // Поэтому сейчас только сообщаем о нехватке.
-        if (consumedFood < requiredFood)
+        if (commanderChanged)
         {
-            int foodShortage =
-                requiredFood - consumedFood;
-
-            dailyReport +=
-                $" Не хватило {foodShortage} пищи. " +
-                "Последствия голода пока не реализованы.";
+            reportLabel.text =
+                changeEvent.newValue +
+                " назначен командиром единственной армии.";
         }
 
-        // Если армия находится в пути, уменьшаем расстояние.
-        if (_expeditionActive && _remainingTravelDays > 0)
-        {
-            _remainingTravelDays--;
+        RefreshInterface();
+    }
 
-            if (_remainingTravelDays > 0)
-            {
-                _expeditionStatusLabel.text =
-                    $"Экспедиция: {_activeLocation}. " +
-                    $"Осталось дней пути: {_remainingTravelDays}.";
-            }
-            else
-            {
-                _expeditionStatusLabel.text =
-                    $"Экспедиция достигла локации: " +
-                    $"{_activeLocation}. Ожидает решения.";
-            }
+    // ========================================================
+    // ЗАВЕРШЕНИЕ ДНЯ
+    // ========================================================
+
+    private void OnEndDayClicked()
+    {
+        DayResolutionResult result =
+            DayResolver.ResolveDay(gameState);
+
+        reportLabel.text =
+            string.Join("\n", result.Messages);
+
+        RefreshInterface();
+    }
+
+    // ========================================================
+    // КНОПКИ ОТПРАВКИ
+    // ========================================================
+
+    private void OnSendRuinsClicked()
+    {
+        TrySendExpedition("ruins");
+    }
+
+    private void OnSendMineClicked()
+    {
+        TrySendExpedition("mine");
+    }
+
+    private void OnSendForestClicked()
+    {
+        TrySendExpedition("forest");
+    }
+
+    // ========================================================
+    // СОЗДАНИЕ ЭКСПЕДИЦИИ
+    // ========================================================
+
+    private void TrySendExpedition(string locationId)
+    {
+        string resultMessage;
+
+        gameState.TryStartExpedition(
+            locationId,
+            out resultMessage);
+
+        reportLabel.text = resultMessage;
+
+        RefreshInterface();
+    }
+
+    // ========================================================
+    // ПРИКАЗ О ВОЗВРАЩЕНИИ
+    // ========================================================
+
+    private void OnReturnExpeditionClicked()
+    {
+        string resultMessage;
+
+        gameState.TryOrderReturn(out resultMessage);
+
+        reportLabel.text = resultMessage;
+
+        RefreshInterface();
+    }
+
+    // ========================================================
+    // ОБНОВЛЕНИЕ ВСЕГО ИНТЕРФЕЙСА
+    // ========================================================
+
+    private void RefreshInterface()
+    {
+        dayLabel.text =
+            "День: " + gameState.Day;
+
+        goldLabel.text =
+            "Золото: " + gameState.Gold;
+
+        foodLabel.text =
+            "Пища: " + gameState.Food;
+
+        populationLabel.text =
+            "Население: " + gameState.Population;
+
+        moodLabel.text =
+            "Настроение: " +
+            gameState.Mood +
+            "/100";
+
+        foodConsumptionLabel.text =
+            "Расход: " +
+            gameState.DailyFoodConsumption +
+            " в день";
+
+        RefreshArmyPanel();
+        RefreshExpeditionPanel();
+    }
+
+    // ========================================================
+    // ОБНОВЛЕНИЕ ПАНЕЛИ АРМИИ
+    // ========================================================
+
+    private void RefreshArmyPanel()
+    {
+        CommanderData commander =
+            gameState.GetSelectedCommander();
+
+        commanderDetailLabel.text =
+            "Выбран: " +
+            commander.Name +
+            " · " +
+            GetCommanderStateText(commander.State);
+
+        if (gameState.HasActiveExpedition)
+        {
+            armyStatusLabel.text =
+                commander.Name +
+                " → " +
+                gameState.Fighters.Count +
+                " отдельных воинов. " +
+                "Армия находится вне столицы. " +
+                "Столица не защищена этой армией.";
         }
-
-        _reportLabel.text = dailyReport;
-
-        RefreshResourceLabels();
-    }
-
-    // =========================================================
-    // КНОПКИ ТРЁХ ЛОКАЦИЙ
-    // =========================================================
-
-    private void SendToRuins()
-    {
-        TrySendExpedition(
-            "Затопленные руины",
-            2,
-            "низкая"
-        );
-    }
-
-    private void SendToMine()
-    {
-        TrySendExpedition(
-            "Старая шахта",
-            3,
-            "средняя"
-        );
-    }
-
-    private void SendToForest()
-    {
-        TrySendExpedition(
-            "Чёрный лес",
-            5,
-            "высокая"
-        );
-    }
-
-    // =========================================================
-    // ОТПРАВКА ЕДИНСТВЕННОЙ АРМИИ
-    // =========================================================
-
-    private void TrySendExpedition(
-        string locationName,
-        int distance,
-        string threat)
-    {
-        // Защита от запуска второй экспедиции.
-        if (_expeditionActive)
+        else
         {
-            _reportLabel.text =
-                "Нельзя отправить вторую экспедицию: " +
-                "единственная армия уже покинула столицу.";
+            armyStatusLabel.text =
+                commander.Name +
+                " → " +
+                gameState.Fighters.Count +
+                " отдельных воинов. " +
+                "Армия находится в столице и защищает её.";
+        }
+    }
+
+    // ========================================================
+    // ОБНОВЛЕНИЕ ПАНЕЛИ ЭКСПЕДИЦИИ
+    // ========================================================
+
+    private void RefreshExpeditionPanel()
+    {
+        bool expeditionActive =
+            gameState.HasActiveExpedition;
+
+        // Пока действует одна экспедиция,
+        // вторую отправить нельзя.
+        commanderDropdown.SetEnabled(!expeditionActive);
+
+        sendRuinsButton.SetEnabled(!expeditionActive);
+        sendMineButton.SetEnabled(!expeditionActive);
+        sendForestButton.SetEnabled(!expeditionActive);
+
+        // Показываем карточку только во время экспедиции.
+        activeExpeditionCard.style.display =
+            expeditionActive
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+
+        if (!expeditionActive)
+        {
+            expeditionStatusLabel.text =
+                "Активная экспедиция: нет";
 
             return;
         }
 
-        _expeditionActive = true;
-        _activeLocation = locationName;
-        _remainingTravelDays = distance;
+        ExpeditionData expedition =
+            gameState.ActiveExpedition;
 
-        string commanderName =
-            _commanderDropdown.value;
+        LocationData location =
+            gameState.FindLocation(
+                expedition.LocationId);
 
-        _expeditionStatusLabel.text =
-            $"Экспедиция: {locationName}. " +
-            $"До цели: {distance} дн. " +
-            $"Угроза: {threat}.";
+        CommanderData commander =
+            gameState.FindCommander(
+                expedition.CommanderId);
 
-        _armyStatusLabel.text =
-            $"Статус армии: в экспедиции. " +
-            $"{commanderName} и {ArmySize} воинов " +
-            "не защищают столицу.";
+        string stateText =
+            GetCommanderStateText(
+                expedition.Phase);
 
-        _reportLabel.text =
-            $"{commanderName} отправлен в локацию " +
-            $"«{locationName}» вместе с " +
-            $"{ArmySize} отдельными воинами.";
+        // Короткая строка над карточкой.
+        expeditionStatusLabel.text =
+            "Активная экспедиция: " +
+            commander.Name +
+            " · " +
+            location.Name +
+            " · " +
+            stateText;
 
-        // Пока армия отсутствует, нельзя сменить командира.
-        _commanderDropdown.SetEnabled(false);
+        // Заголовок карточки.
+        activeExpeditionTitle.text =
+            "ЭКСПЕДИЦИЯ: " +
+            location.Name.ToUpper();
 
-        // И нельзя отправить эту же армию во второе место.
-        SetExpeditionButtonsEnabled(false);
+        string currentTask;
+        string daysInformation;
+
+        // Определяем задачу и отображение расстояния.
+        if (expedition.Phase ==
+            CommanderState.TravellingToLocation)
+        {
+            currentTask =
+                "Добраться до цели";
+
+            daysInformation =
+                "Осталось дней пути: " +
+                expedition.DaysRemaining;
+        }
+        else if (expedition.Phase ==
+                 CommanderState.AtLocation)
+        {
+            currentTask =
+                "Исследовать локацию";
+
+            daysInformation =
+                "Расстояние до столицы: " +
+                location.DistanceDays +
+                " дн.";
+        }
+        else
+        {
+            currentTask =
+                "Вернуться в столицу";
+
+            daysInformation =
+                "Осталось дней пути: " +
+                expedition.DaysRemaining;
+        }
+
+        // Полная информация в карточке.
+        activeExpeditionDetails.text =
+            "Командир: " +
+            commander.Name +
+            "\n" +
+
+            "Армия: " +
+            expedition.FighterIds.Count +
+            " отдельных воинов\n" +
+
+            "Цель: " +
+            location.Name +
+            "\n" +
+
+            "Состояние: " +
+            stateText +
+            "\n" +
+
+            "Текущая задача: " +
+            currentTask +
+            "\n" +
+
+            daysInformation +
+            "\n" +
+
+            // Числовую формулу снабжения ещё не утверждали.
+            "Снабжение: пока не рассчитывается";
+
+        // Повторяем последнее сообщение в карточке.
+        activeExpeditionLastReport.text =
+            reportLabel.text;
+
+        bool alreadyReturning =
+            expedition.Phase ==
+            CommanderState.ReturningToCastle;
+
+        // Повторно приказывать возвращаться нельзя.
+        returnExpeditionButton.SetEnabled(
+            !alreadyReturning);
+
+        returnExpeditionButton.text =
+            alreadyReturning
+                ? "Возвращение уже приказано"
+                : "Приказать возвращаться";
     }
 
-    private void SetExpeditionButtonsEnabled(bool enabled)
+    // ========================================================
+    // РУССКИЕ НАЗВАНИЯ СОСТОЯНИЙ
+    // ========================================================
+
+    private string GetCommanderStateText(
+        CommanderState state)
     {
-        _ruinsButton.SetEnabled(enabled);
-        _mineButton.SetEnabled(enabled);
-        _forestButton.SetEnabled(enabled);
+        switch (state)
+        {
+            case CommanderState.InCastle:
+                return "в замке";
+
+            case CommanderState.TravellingToLocation:
+                return "в пути к цели";
+
+            case CommanderState.AtLocation:
+                return "действует в локации";
+
+            case CommanderState.ReturningToCastle:
+                return "возвращается в замок";
+
+            default:
+                return "состояние неизвестно";
+        }
     }
 }

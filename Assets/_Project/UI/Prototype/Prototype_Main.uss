@@ -391,3 +391,101 @@
     color: #AEA289;
     font-size: 13px;
 }
+/* ============================================================= */
+/* КАРТОЧКА АКТИВНОЙ ЭКСПЕДИЦИИ                                 */
+/* ============================================================= */
+
+.active-expedition-card {
+    /* Пока экспедиции нет, карточка скрыта */
+    display: none;
+
+    margin-top: 10px;
+    margin-bottom: 14px;
+
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+
+    background-color: #272C35;
+
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+
+    border-left-color: #806A45;
+    border-right-color: #806A45;
+    border-top-color: #806A45;
+    border-bottom-color: #806A45;
+
+    border-radius: 5px;
+}
+
+.active-expedition-title {
+    margin-bottom: 10px;
+
+    color: #E5BD63;
+    font-size: 17px;
+    -unity-font-style: bold;
+}
+
+.active-expedition-details {
+    margin-bottom: 12px;
+
+    color: #DDD4C2;
+    font-size: 14px;
+    white-space: normal;
+}
+
+.active-expedition-report-title {
+    margin-bottom: 5px;
+
+    color: #AFA58E;
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.active-expedition-last-report {
+    min-height: 42px;
+    margin-bottom: 12px;
+
+    padding-left: 9px;
+    padding-right: 9px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    background-color: #1C2027;
+    color: #C8C4B8;
+
+    border-radius: 4px;
+    white-space: normal;
+}
+
+.return-expedition-button {
+    height: 38px;
+
+    background-color: #70372F;
+    color: #F0E4D0;
+
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+
+    border-left-color: #B06A53;
+    border-right-color: #B06A53;
+    border-top-color: #B06A53;
+    border-bottom-color: #B06A53;
+
+    border-radius: 4px;
+    -unity-font-style: bold;
+}
+
+.return-expedition-button:hover {
+    background-color: #88483B;
+}
+
+.return-expedition-button:disabled {
+    opacity: 0.55;
+}

@@ -1,70 +1,47 @@
 using System;
 using System.Collections.Generic;
 
-// ============================================================
-// РЕЗУЛЬТАТ РАСЧЁТА ДНЯ
-// Сообщения отсюда попадут в Королевские донесения.
-// ============================================================
-
 public class DayResolutionResult
 {
     public List<string> Messages = new List<string>();
 }
 
-// ============================================================
-// РАСЧЁТ ЗАВЕРШЕНИЯ ДНЯ
-// Один клик по кнопке = один пакет расчётов.
-// ============================================================
-
 public static class DayResolver
 {
-    private const int GoldIncomePerDay = 3;
+    // Временные значения прототипа, не финальный баланс.
+    private const int MoodLossPerShortageDay = 1;
+    private const int PopulationLossPerStarvationDay = 1;
+    private const int MoodOnlyShortageDays = 3;
 
     public static DayResolutionResult ResolveDay(GameState state)
     {
         DayResolutionResult result = new DayResolutionResult();
-
         int finishedDay = state.Day;
 
         ResolveGoldIncome(state, result);
+        ResolveFoodIncome(state, result);
         ResolveCityFood(state, result);
         ResolveExpedition(state, result);
 
-        // Новый день начинается только после всех расчётов.
         state.Day++;
 
-        result.Messages.Insert(
-            0,
-            "День " + finishedDay + " завершён.");
-
+        result.Messages.Insert(0, "День " + finishedDay + " завершён.");
         return result;
     }
 
-    // --------------------------------------------------------
-    // ЗОЛОТО ГОРОДА
-    // Временное правило прототипа: +3 золота за завершённый день.
-    // --------------------------------------------------------
-
-    private static void ResolveGoldIncome(
-        GameState state,
-        DayResolutionResult result)
+    private static void ResolveGoldIncome(GameState state, DayResolutionResult result)
     {
-        state.Gold += GoldIncomePerDay;
-
-        result.Messages.Add(
-            "Казна получила " +
-            GoldIncomePerDay +
-            " золота.");
+        state.Gold += state.DailyGoldIncome;
+        result.Messages.Add("Казна получила " + state.DailyGoldIncome + " золота.");
     }
 
-    // --------------------------------------------------------
-    // ПИЩА ГОРОДА
-    // Население × 1 пища.
-    // --------------------------------------------------------
+    private static void ResolveFoodIncome(GameState state, DayResolutionResult result)
+    {
+        state.Food += state.DailyFoodIncome;
+        result.Messages.Add("Город получил " + state.DailyFoodIncome + " пищи.");
+    }
 
-    private static void ResolveCityFood(
-        GameState state,
-        DayResolutionResult result)
+    private static void ResolveCityFood(GameState state, DayResolutionResult result)
     {
         int requiredFood = state.DailyFoodConsumption;
         int availableFood = state.Food;
@@ -74,125 +51,102 @@ public static class DayResolver
             state.Food -= requiredFood;
 
             result.Messages.Add(
-                "Город израсходовал " +
-                requiredFood +
-                " пищи для " +
-                state.Population +
-                " жителей.");
+                "Город израсходовал " + requiredFood +
+                " пищи для " + state.Population + " жителей.");
+
+            if (state.ConsecutiveFoodShortageDays > 0)
+                result.Messages.Add("Нехватка пищи прекратилась.");
+
+            state.ConsecutiveFoodShortageDays = 0;
+            return;
+        }
+
+        int shortage = requiredFood - availableFood;
+        state.Food = 0;
+        state.ConsecutiveFoodShortageDays++;
+
+        result.Messages.Add(
+            "Городу не хватило " + shortage + " пищи. " +
+            "День нехватки подряд: " + state.ConsecutiveFoodShortageDays + ".");
+
+        if (state.ConsecutiveFoodShortageDays <= MoodOnlyShortageDays)
+        {
+            int previousMood = state.Mood;
+            state.Mood = Math.Max(0, state.Mood - MoodLossPerShortageDay);
+            int moodLost = previousMood - state.Mood;
+
+            result.Messages.Add(
+                "Из-за нехватки пищи настроение снизилось на " + moodLost + ".");
         }
         else
         {
-            int shortage = requiredFood - availableFood;
-
-            state.Food = 0;
+            int previousPopulation = state.Population;
+            state.Population = Math.Max(
+                0,
+                state.Population - PopulationLossPerStarvationDay);
+            int populationLost = previousPopulation - state.Population;
 
             result.Messages.Add(
-                "Городу не хватило " +
-                shortage +
-                " пищи.");
+                "Голод затянулся: население уменьшилось на " + populationLost + ".");
         }
-
-        // Последствия голода пока не добавляем:
-        // их формула ещё не утверждена.
     }
 
-    // --------------------------------------------------------
-    // ПРОДВИЖЕНИЕ ЭКСПЕДИЦИИ
-    // --------------------------------------------------------
-
-    private static void ResolveExpedition(
-        GameState state,
-        DayResolutionResult result)
+    private static void ResolveExpedition(GameState state, DayResolutionResult result)
     {
         if (!state.HasActiveExpedition)
             return;
 
-        ExpeditionData expedition =
-            state.ActiveExpedition;
-
-        CommanderData commander =
-            state.FindCommander(expedition.CommanderId);
-
-        LocationData location =
-            state.FindLocation(expedition.LocationId);
+        ExpeditionData expedition = state.ActiveExpedition;
+        CommanderData commander = state.FindCommander(expedition.CommanderId);
+        LocationData location = state.FindLocation(expedition.LocationId);
 
         if (commander == null || location == null)
         {
-            result.Messages.Add(
-                "Ошибка данных активной экспедиции.");
-
+            result.Messages.Add("Ошибка данных активной экспедиции.");
             return;
         }
 
-        // ====================================================
-        // ПУТЬ К ЦЕЛИ
-        // ====================================================
-
-        if (expedition.Phase ==
-            CommanderState.TravellingToLocation)
+        if (expedition.Phase == CommanderState.TravellingToLocation)
         {
-            expedition.DaysRemaining =
-                Math.Max(0, expedition.DaysRemaining - 1);
+            expedition.DaysRemaining = Math.Max(0, expedition.DaysRemaining - 1);
 
             if (expedition.DaysRemaining > 0)
             {
                 result.Messages.Add(
-                    "Экспедиция движется к локации «" +
-                    location.Name +
-                    "». Осталось дней пути: " +
-                    expedition.DaysRemaining +
-                    ".");
+                    "Экспедиция движется к локации «" + location.Name +
+                    "». Осталось дней пути: " + expedition.DaysRemaining + ".");
             }
             else
             {
-                expedition.Phase =
-                    CommanderState.AtLocation;
-
-                commander.State =
-                    CommanderState.AtLocation;
+                expedition.Phase = CommanderState.AtLocation;
+                commander.State = CommanderState.AtLocation;
 
                 result.Messages.Add(
-                    commander.Name +
-                    " прибыл в локацию «" +
-                    location.Name +
-                    "» и начал исследование.");
+                    commander.Name + " прибыл в локацию «" +
+                    location.Name + "» и начал исследование.");
             }
 
             return;
         }
 
-        // ====================================================
-        // ВОЗВРАЩЕНИЕ В СТОЛИЦУ
-        // ====================================================
-
-        if (expedition.Phase ==
-            CommanderState.ReturningToCastle)
+        if (expedition.Phase == CommanderState.ReturningToCastle)
         {
-            expedition.DaysRemaining =
-                Math.Max(0, expedition.DaysRemaining - 1);
+            expedition.DaysRemaining = Math.Max(0, expedition.DaysRemaining - 1);
 
             if (expedition.DaysRemaining > 0)
             {
                 result.Messages.Add(
-                    commander.Name +
-                    " возвращается в столицу. " +
-                    "Осталось дней пути: " +
-                    expedition.DaysRemaining +
-                    ".");
+                    commander.Name + " возвращается в столицу. " +
+                    "Осталось дней пути: " + expedition.DaysRemaining + ".");
             }
             else
             {
-                commander.State =
-                    CommanderState.InCastle;
-
+                commander.State = CommanderState.InCastle;
                 expedition.IsActive = false;
 
                 result.Messages.Add(
-                    commander.Name +
-                    " и " +
-                    expedition.FighterIds.Count +
-                    " воинов вернулись в столицу. " +
-                    "Армия снова защищает город.");
+                    commander.Name + " и " + expedition.FighterIds.Count +
+                    " воинов вернулись в столицу. Армия снова защищает город.");
             }
         }
     }

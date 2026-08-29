@@ -1,22 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-// ============================================================
-// СОСТОЯНИЕ КОМАНДИРА
-// ============================================================
-
 public enum CommanderState
 {
-    InCastle,             // Находится в столице
-    TravellingToLocation, // Едет к найденной локации
-    AtLocation,           // Действует внутри локации
-    ReturningToCastle     // Возвращается в столицу
+    InCastle,
+    TravellingToLocation,
+    AtLocation,
+    ReturningToCastle
 }
-
-// ============================================================
-// ОТДЕЛЬНЫЙ ПОСТОЯННЫЙ ВОИН
-// Никаких отрядов и вложенных групп здесь нет.
-// ============================================================
 
 [Serializable]
 public class FighterData
@@ -33,11 +24,6 @@ public class FighterData
     }
 }
 
-// ============================================================
-// КОМАНДИР
-// Выбранный командир управляет одной армией из 4–6 воинов.
-// ============================================================
-
 [Serializable]
 public class CommanderData
 {
@@ -53,11 +39,6 @@ public class CommanderData
     }
 }
 
-// ============================================================
-// НАЙДЕННАЯ ЛОКАЦИЯ
-// Предполагаемая награда намеренно отсутствует.
-// ============================================================
-
 [Serializable]
 public class LocationData
 {
@@ -66,11 +47,7 @@ public class LocationData
     public int DistanceDays;
     public string Threat;
 
-    public LocationData(
-        string id,
-        string name,
-        int distanceDays,
-        string threat)
+    public LocationData(string id, string name, int distanceDays, string threat)
     {
         Id = id;
         Name = name;
@@ -79,33 +56,17 @@ public class LocationData
     }
 }
 
-// ============================================================
-// АКТИВНАЯ ЭКСПЕДИЦИЯ
-// Одновременно может существовать не более одной экспедиции.
-// ============================================================
-
 [Serializable]
 public class ExpeditionData
 {
     public bool IsActive;
     public string CommanderId;
     public string LocationId;
-
-    // Здесь находятся идентификаторы отдельных воинов.
     public List<string> FighterIds = new List<string>();
-
     public CommanderState Phase;
     public int DaysRemaining;
-
-    // Номер дня, в который был отдан приказ на отправку.
-    // Пока этот день не завершён, приказ можно отменить полностью.
     public int StartedOnDay;
 }
-
-// ============================================================
-// ОБЩЕЕ СОСТОЯНИЕ ИГРЫ
-// Этот класс хранит игровые данные, но не управляет интерфейсом.
-// ============================================================
 
 [Serializable]
 public class GameState
@@ -115,46 +76,27 @@ public class GameState
     public int Food;
     public int Population;
     public int Mood;
+    public int ConsecutiveFoodShortageDays;
 
     public string SelectedCommanderId;
-
     public List<CommanderData> Commanders;
     public List<FighterData> Fighters;
     public List<LocationData> Locations;
-
     public ExpeditionData ActiveExpedition;
 
-    // Каждый житель потребляет ровно 1 пищу в день.
-    public int DailyFoodConsumption
-    {
-        get { return Population; }
-    }
+    // Временные базовые доходы прототипа. Источники дохода добавим позже.
+    public int DailyGoldIncome => 3;
+    public int DailyFoodIncome => 7;
 
-    public bool HasActiveExpedition
-    {
-        get
-        {
-            return ActiveExpedition != null &&
-                   ActiveExpedition.IsActive;
-        }
-    }
+    public int DailyFoodConsumption => Population;
 
-    // До первого завершения дня после отправки приказ можно
-    // отменить без времени пути и походных последствий.
-    public bool CanCancelExpeditionBeforeDayEnd
-    {
-        get
-        {
-            return HasActiveExpedition &&
-                   ActiveExpedition.StartedOnDay == Day &&
-                   ActiveExpedition.Phase ==
-                       CommanderState.TravellingToLocation;
-        }
-    }
+    public bool HasActiveExpedition =>
+        ActiveExpedition != null && ActiveExpedition.IsActive;
 
-    // --------------------------------------------------------
-    // СОЗДАНИЕ НОВОЙ ИГРЫ
-    // --------------------------------------------------------
+    public bool CanCancelExpeditionBeforeDayEnd =>
+        HasActiveExpedition &&
+        ActiveExpedition.StartedOnDay == Day &&
+        ActiveExpedition.Phase == CommanderState.TravellingToLocation;
 
     public void CreateNewGame()
     {
@@ -163,6 +105,7 @@ public class GameState
         Food = 72;
         Population = 24;
         Mood = 64;
+        ConsecutiveFoodShortageDays = 0;
 
         Commanders = new List<CommanderData>
         {
@@ -173,8 +116,6 @@ public class GameState
 
         SelectedCommanderId = "alric";
 
-        // Сейчас у армии пять отдельных постоянных воинов.
-        // Это укладывается в утверждённый диапазон 4–6.
         Fighters = new List<FighterData>
         {
             new FighterData("garrick", "Гаррик", 1),
@@ -186,31 +127,13 @@ public class GameState
 
         Locations = new List<LocationData>
         {
-            new LocationData(
-                "ruins",
-                "Затопленные руины",
-                2,
-                "низкая"),
-
-            new LocationData(
-                "mine",
-                "Старая шахта",
-                3,
-                "средняя"),
-
-            new LocationData(
-                "forest",
-                "Чёрный лес",
-                5,
-                "высокая")
+            new LocationData("ruins", "Затопленные руины", 2, "низкая"),
+            new LocationData("mine", "Старая шахта", 3, "средняя"),
+            new LocationData("forest", "Чёрный лес", 5, "высокая")
         };
 
         ActiveExpedition = null;
     }
-
-    // --------------------------------------------------------
-    // ПОИСК ИГРОВЫХ ОБЪЕКТОВ
-    // --------------------------------------------------------
 
     public CommanderData GetSelectedCommander()
     {
@@ -242,20 +165,13 @@ public class GameState
     public List<string> GetCommanderNames()
     {
         List<string> names = new List<string>();
-
         foreach (CommanderData commander in Commanders)
             names.Add(commander.Name);
-
         return names;
     }
 
-    // --------------------------------------------------------
-    // ВЫБОР КОМАНДИРА
-    // --------------------------------------------------------
-
     public bool SelectCommanderByName(string commanderName)
     {
-        // Во время экспедиции заменить командира нельзя.
         if (HasActiveExpedition)
             return false;
 
@@ -271,27 +187,17 @@ public class GameState
         return false;
     }
 
-    // --------------------------------------------------------
-    // ОТПРАВКА ЭКСПЕДИЦИИ
-    // --------------------------------------------------------
-
-    public bool TryStartExpedition(
-        string locationId,
-        out string resultMessage)
+    public bool TryStartExpedition(string locationId, out string resultMessage)
     {
         if (HasActiveExpedition)
         {
-            resultMessage =
-                "Нельзя отправить вторую экспедицию: один поход уже активен.";
-
+            resultMessage = "Нельзя отправить вторую экспедицию: один поход уже активен.";
             return false;
         }
 
         if (Fighters.Count < 4 || Fighters.Count > 6)
         {
-            resultMessage =
-                "Армия должна состоять из 4–6 отдельных воинов.";
-
+            resultMessage = "Армия должна состоять из 4–6 отдельных воинов.";
             return false;
         }
 
@@ -300,22 +206,20 @@ public class GameState
 
         if (commander == null || location == null)
         {
-            resultMessage =
-                "Не удалось найти командира или выбранную локацию.";
-
+            resultMessage = "Не удалось найти командира или выбранную локацию.";
             return false;
         }
 
-        ExpeditionData expedition = new ExpeditionData();
+        ExpeditionData expedition = new ExpeditionData
+        {
+            IsActive = true,
+            CommanderId = commander.Id,
+            LocationId = location.Id,
+            Phase = CommanderState.TravellingToLocation,
+            DaysRemaining = location.DistanceDays,
+            StartedOnDay = Day
+        };
 
-        expedition.IsActive = true;
-        expedition.CommanderId = commander.Id;
-        expedition.LocationId = location.Id;
-        expedition.Phase = CommanderState.TravellingToLocation;
-        expedition.DaysRemaining = location.DistanceDays;
-        expedition.StartedOnDay = Day;
-
-        // В экспедицию отправляются именно отдельные воины.
         foreach (FighterData fighter in Fighters)
             expedition.FighterIds.Add(fighter.Id);
 
@@ -323,43 +227,27 @@ public class GameState
         commander.State = CommanderState.TravellingToLocation;
 
         resultMessage =
-            commander.Name +
-            " и " +
-            Fighters.Count +
+            commander.Name + " и " + Fighters.Count +
             " воинов получили приказ отправиться в локацию «" +
-            location.Name +
-            "». До завершения текущего дня приказ можно отменить.";
+            location.Name + "». До завершения текущего дня приказ можно отменить.";
 
         return true;
     }
 
-    // --------------------------------------------------------
-    // ОТМЕНА ОТПРАВКИ ДО ЗАВЕРШЕНИЯ ДНЯ
-    // Это отмена приказа, а не отзыв армии из уже начавшегося пути.
-    // --------------------------------------------------------
-
-    public bool TryCancelExpeditionBeforeDayEnd(
-        out string resultMessage)
+    public bool TryCancelExpeditionBeforeDayEnd(out string resultMessage)
     {
         if (!CanCancelExpeditionBeforeDayEnd)
         {
-            resultMessage =
-                "Отменить отправку уже нельзя. Используйте приказ о возвращении.";
-
+            resultMessage = "Отменить отправку уже нельзя. Используйте приказ о возвращении.";
             return false;
         }
 
-        CommanderData commander =
-            FindCommander(ActiveExpedition.CommanderId);
-
-        LocationData location =
-            FindLocation(ActiveExpedition.LocationId);
+        CommanderData commander = FindCommander(ActiveExpedition.CommanderId);
+        LocationData location = FindLocation(ActiveExpedition.LocationId);
 
         if (commander == null || location == null)
         {
-            resultMessage =
-                "Не удалось определить данные экспедиции.";
-
+            resultMessage = "Не удалось определить данные экспедиции.";
             return false;
         }
 
@@ -368,95 +256,60 @@ public class GameState
         ActiveExpedition = null;
 
         resultMessage =
-            "Приказ на отправку в локацию «" +
-            location.Name +
-            "» отменён. " +
-            commander.Name +
-            " и армия остаются в столице. День не завершён.";
+            "Приказ на отправку в локацию «" + location.Name + "» отменён. " +
+            commander.Name + " и армия остаются в столице. День не завершён.";
 
         return true;
     }
-
-    // --------------------------------------------------------
-    // ДОСРОЧНОЕ ВОЗВРАЩЕНИЕ ЭКСПЕДИЦИИ
-    // --------------------------------------------------------
 
     public bool TryOrderReturn(out string resultMessage)
     {
         if (!HasActiveExpedition)
         {
-            resultMessage =
-                "Сейчас нет активной экспедиции.";
-
+            resultMessage = "Сейчас нет активной экспедиции.";
             return false;
         }
 
         if (CanCancelExpeditionBeforeDayEnd)
         {
-            resultMessage =
-                "Текущий день ещё не завершён. Сначала можно полностью отменить отправку.";
-
+            resultMessage = "Текущий день ещё не завершён. Сначала можно полностью отменить отправку.";
             return false;
         }
 
-        if (ActiveExpedition.Phase ==
-            CommanderState.ReturningToCastle)
+        if (ActiveExpedition.Phase == CommanderState.ReturningToCastle)
         {
-            resultMessage =
-                "Экспедиция уже возвращается в столицу.";
-
+            resultMessage = "Экспедиция уже возвращается в столицу.";
             return false;
         }
 
-        LocationData location =
-            FindLocation(ActiveExpedition.LocationId);
-
-        CommanderData commander =
-            FindCommander(ActiveExpedition.CommanderId);
+        LocationData location = FindLocation(ActiveExpedition.LocationId);
+        CommanderData commander = FindCommander(ActiveExpedition.CommanderId);
 
         if (location == null || commander == null)
         {
-            resultMessage =
-                "Не удалось определить данные экспедиции.";
-
+            resultMessage = "Не удалось определить данные экспедиции.";
             return false;
         }
 
         int returnDays;
 
-        if (ActiveExpedition.Phase ==
-            CommanderState.TravellingToLocation)
+        if (ActiveExpedition.Phase == CommanderState.TravellingToLocation)
         {
-            // Считаем, сколько дней армия уже прошла от столицы.
-            int travelledDays =
-                location.DistanceDays -
-                ActiveExpedition.DaysRemaining;
-
-            // Минимум один день нужен, чтобы приказ
-            // не телепортировал армию обратно мгновенно.
+            int travelledDays = location.DistanceDays - ActiveExpedition.DaysRemaining;
             returnDays = Math.Max(1, travelledDays);
         }
         else
         {
-            // Если армия уже достигла локации,
-            // возвращение занимает полное расстояние.
             returnDays = location.DistanceDays;
         }
 
-        ActiveExpedition.Phase =
-            CommanderState.ReturningToCastle;
-
+        ActiveExpedition.Phase = CommanderState.ReturningToCastle;
         ActiveExpedition.DaysRemaining = returnDays;
-
-        commander.State =
-            CommanderState.ReturningToCastle;
+        commander.State = CommanderState.ReturningToCastle;
 
         resultMessage =
-            commander.Name +
-            " получил приказ возвращаться. " +
-            "До столицы осталось дней: " +
-            returnDays +
-            ". До прибытия армия не защищает город.";
+            commander.Name + " получил приказ возвращаться. До столицы осталось дней: " +
+            returnDays + ". До прибытия армия не защищает город.";
 
         return true;
     }

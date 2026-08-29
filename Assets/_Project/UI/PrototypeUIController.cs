@@ -2,11 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-// ============================================================
-// СВЯЗЬ ИГРОВЫХ ДАННЫХ С ИНТЕРФЕЙСОМ
-// Этот компонент должен находиться рядом с UI Document.
-// ============================================================
-
 [RequireComponent(typeof(UIDocument))]
 public class PrototypeUIController : MonoBehaviour
 {
@@ -28,13 +23,14 @@ public class PrototypeUIController : MonoBehaviour
     private VisualElement expeditionsScreen;
     private MainScreen? openedScreen;
 
-    // Короткая защита от повторного прокликивания навигации.
     private const float NavigationClickCooldownSeconds = 0.18f;
     private float lastNavigationClickTime = -NavigationClickCooldownSeconds;
 
     private Label dayLabel;
     private Label goldLabel;
+    private Label goldIncomeLabel;
     private Label foodLabel;
+    private Label foodIncomeLabel;
     private Label populationLabel;
     private Label moodLabel;
     private Label foodConsumptionLabel;
@@ -46,7 +42,6 @@ public class PrototypeUIController : MonoBehaviour
     private Label armyStatusLabel;
 
     private Label expeditionStatusLabel;
-
     private Button sendRuinsButton;
     private Button sendMineButton;
     private Button sendForestButton;
@@ -72,9 +67,7 @@ public class PrototypeUIController : MonoBehaviour
         if (!AllRequiredElementsExist())
         {
             Debug.LogError(
-                "PrototypeUIController: в Prototype_Main.uxml " +
-                "отсутствуют необходимые элементы.");
-
+                "PrototypeUIController: в Prototype_Main.uxml отсутствуют необходимые элементы.");
             enabled = false;
             return;
         }
@@ -88,7 +81,8 @@ public class PrototypeUIController : MonoBehaviour
         AddReport(
             "Прототип запущен. Откройте нужный экран круглой кнопкой слева сверху.");
 
-        OpenScreen(MainScreen.Capital);
+        // При старте игры ни один основной экран не открыт.
+        CloseMainScreen();
         RefreshInterface();
     }
 
@@ -104,7 +98,9 @@ public class PrototypeUIController : MonoBehaviour
 
         dayLabel = root.Q<Label>("day-label");
         goldLabel = root.Q<Label>("gold-label");
+        goldIncomeLabel = root.Q<Label>("gold-income-label");
         foodLabel = root.Q<Label>("food-label");
+        foodIncomeLabel = root.Q<Label>("food-income-label");
         populationLabel = root.Q<Label>("population-label");
         moodLabel = root.Q<Label>("mood-label");
         foodConsumptionLabel = root.Q<Label>("food-consumption-label");
@@ -115,7 +111,6 @@ public class PrototypeUIController : MonoBehaviour
         armyStatusLabel = root.Q<Label>("army-status-label");
 
         expeditionStatusLabel = root.Q<Label>("expedition-status-label");
-
         sendRuinsButton = root.Q<Button>("send-ruins-button");
         sendMineButton = root.Q<Button>("send-mine-button");
         sendForestButton = root.Q<Button>("send-forest-button");
@@ -140,7 +135,9 @@ public class PrototypeUIController : MonoBehaviour
             expeditionsScreen != null &&
             dayLabel != null &&
             goldLabel != null &&
+            goldIncomeLabel != null &&
             foodLabel != null &&
+            foodIncomeLabel != null &&
             populationLabel != null &&
             moodLabel != null &&
             foodConsumptionLabel != null &&
@@ -160,7 +157,6 @@ public class PrototypeUIController : MonoBehaviour
             reportHistoryLabel != null;
     }
 
-    // Повторный щелчок по активной кнопке сворачивает экран.
     private void ToggleScreen(MainScreen screen)
     {
         if (openedScreen.HasValue && openedScreen.Value == screen)
@@ -177,37 +173,20 @@ public class PrototypeUIController : MonoBehaviour
         openedScreen = screen;
 
         capitalScreen.style.display =
-            screen == MainScreen.Capital
-                ? DisplayStyle.Flex
-                : DisplayStyle.None;
-
+            screen == MainScreen.Capital ? DisplayStyle.Flex : DisplayStyle.None;
         armyScreen.style.display =
-            screen == MainScreen.Army
-                ? DisplayStyle.Flex
-                : DisplayStyle.None;
-
+            screen == MainScreen.Army ? DisplayStyle.Flex : DisplayStyle.None;
         expeditionsScreen.style.display =
-            screen == MainScreen.Expeditions
-                ? DisplayStyle.Flex
-                : DisplayStyle.None;
+            screen == MainScreen.Expeditions ? DisplayStyle.Flex : DisplayStyle.None;
 
-        SetNavigationButtonActive(
-            navCapitalButton,
-            screen == MainScreen.Capital);
-
-        SetNavigationButtonActive(
-            navArmyButton,
-            screen == MainScreen.Army);
-
-        SetNavigationButtonActive(
-            navExpeditionsButton,
-            screen == MainScreen.Expeditions);
+        SetNavigationButtonActive(navCapitalButton, screen == MainScreen.Capital);
+        SetNavigationButtonActive(navArmyButton, screen == MainScreen.Army);
+        SetNavigationButtonActive(navExpeditionsButton, screen == MainScreen.Expeditions);
     }
 
     private void CloseMainScreen()
     {
         openedScreen = null;
-
         capitalScreen.style.display = DisplayStyle.None;
         armyScreen.style.display = DisplayStyle.None;
         expeditionsScreen.style.display = DisplayStyle.None;
@@ -229,11 +208,8 @@ public class PrototypeUIController : MonoBehaviour
     {
         float currentTime = Time.unscaledTime;
 
-        if (currentTime - lastNavigationClickTime <
-            NavigationClickCooldownSeconds)
-        {
+        if (currentTime - lastNavigationClickTime < NavigationClickCooldownSeconds)
             return false;
-        }
 
         lastNavigationClickTime = currentTime;
         return true;
@@ -241,33 +217,25 @@ public class PrototypeUIController : MonoBehaviour
 
     private void OnCapitalNavigationClicked()
     {
-        if (!CanProcessNavigationClick())
-            return;
-
-        ToggleScreen(MainScreen.Capital);
+        if (CanProcessNavigationClick())
+            ToggleScreen(MainScreen.Capital);
     }
 
     private void OnArmyNavigationClicked()
     {
-        if (!CanProcessNavigationClick())
-            return;
-
-        ToggleScreen(MainScreen.Army);
+        if (CanProcessNavigationClick())
+            ToggleScreen(MainScreen.Army);
     }
 
     private void OnExpeditionsNavigationClicked()
     {
-        if (!CanProcessNavigationClick())
-            return;
-
-        ToggleScreen(MainScreen.Expeditions);
+        if (CanProcessNavigationClick())
+            ToggleScreen(MainScreen.Expeditions);
     }
 
     private void ConfigureCommanderDropdown()
     {
-        List<string> commanderNames = gameState.GetCommanderNames();
-        commanderDropdown.choices = commanderNames;
-
+        commanderDropdown.choices = gameState.GetCommanderNames();
         CommanderData selectedCommander = gameState.GetSelectedCommander();
         commanderDropdown.SetValueWithoutNotify(selectedCommander.Name);
     }
@@ -277,17 +245,12 @@ public class PrototypeUIController : MonoBehaviour
         navCapitalButton.clicked += OnCapitalNavigationClicked;
         navArmyButton.clicked += OnArmyNavigationClicked;
         navExpeditionsButton.clicked += OnExpeditionsNavigationClicked;
-
         endDayButton.clicked += OnEndDayClicked;
-
         sendRuinsButton.clicked += OnSendRuinsClicked;
         sendMineButton.clicked += OnSendMineClicked;
         sendForestButton.clicked += OnSendForestClicked;
-
         returnExpeditionButton.clicked += OnExpeditionActionClicked;
-
         commanderDropdown.RegisterValueChangedCallback(OnCommanderChanged);
-
         callbacksRegistered = true;
     }
 
@@ -299,31 +262,19 @@ public class PrototypeUIController : MonoBehaviour
         navCapitalButton.clicked -= OnCapitalNavigationClicked;
         navArmyButton.clicked -= OnArmyNavigationClicked;
         navExpeditionsButton.clicked -= OnExpeditionsNavigationClicked;
-
         endDayButton.clicked -= OnEndDayClicked;
-
         sendRuinsButton.clicked -= OnSendRuinsClicked;
         sendMineButton.clicked -= OnSendMineClicked;
         sendForestButton.clicked -= OnSendForestClicked;
-
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
-
         commanderDropdown.UnregisterValueChangedCallback(OnCommanderChanged);
-
         callbacksRegistered = false;
     }
 
     private void OnCommanderChanged(ChangeEvent<string> changeEvent)
     {
-        bool commanderChanged =
-            gameState.SelectCommanderByName(changeEvent.newValue);
-
-        if (commanderChanged)
-        {
-            AddReport(
-                changeEvent.newValue +
-                " назначен командиром армии.");
-        }
+        if (gameState.SelectCommanderByName(changeEvent.newValue))
+            AddReport(changeEvent.newValue + " назначен командиром армии.");
 
         RefreshInterface();
     }
@@ -331,83 +282,45 @@ public class PrototypeUIController : MonoBehaviour
     private void OnEndDayClicked()
     {
         int finishedDay = gameState.Day;
-
         DayResolutionResult result = DayResolver.ResolveDay(gameState);
-
-        AddReport(
-            string.Join("\n", result.Messages),
-            finishedDay);
-
+        AddReport(string.Join("\n", result.Messages), finishedDay);
         RefreshInterface();
     }
 
-    private void OnSendRuinsClicked()
-    {
-        TrySendExpedition("ruins");
-    }
-
-    private void OnSendMineClicked()
-    {
-        TrySendExpedition("mine");
-    }
-
-    private void OnSendForestClicked()
-    {
-        TrySendExpedition("forest");
-    }
+    private void OnSendRuinsClicked() => TrySendExpedition("ruins");
+    private void OnSendMineClicked() => TrySendExpedition("mine");
+    private void OnSendForestClicked() => TrySendExpedition("forest");
 
     private void TrySendExpedition(string locationId)
     {
         string resultMessage;
-
-        gameState.TryStartExpedition(
-            locationId,
-            out resultMessage);
-
+        gameState.TryStartExpedition(locationId, out resultMessage);
         AddReport(resultMessage);
         RefreshInterface();
     }
 
-    // До завершения дня эта кнопка отменяет приказ.
-    // После завершения дня она отдаёт обычный приказ возвращаться.
     private void OnExpeditionActionClicked()
     {
         string resultMessage;
 
         if (gameState.CanCancelExpeditionBeforeDayEnd)
-        {
-            gameState.TryCancelExpeditionBeforeDayEnd(
-                out resultMessage);
-        }
+            gameState.TryCancelExpeditionBeforeDayEnd(out resultMessage);
         else
-        {
             gameState.TryOrderReturn(out resultMessage);
-        }
 
         AddReport(resultMessage);
         RefreshInterface();
     }
 
-    // Королевские донесения хранят историю действий за текущий запуск.
-    // Новые записи добавляются вниз и не стирают старые.
     private void AddReport(string message, int? dayOverride = null)
     {
         if (string.IsNullOrWhiteSpace(message))
             return;
 
-        int reportDay =
-            dayOverride.HasValue
-                ? dayOverride.Value
-                : gameState.Day;
+        int reportDay = dayOverride ?? gameState.Day;
+        reportHistory.Add("День " + reportDay + "\n" + message);
+        reportHistoryLabel.text = string.Join("\n\n", reportHistory);
 
-        reportHistory.Add(
-            "День " + reportDay + "\n" + message);
-
-        reportHistoryLabel.text =
-            string.Join("\n\n", reportHistory);
-
-        // Размер содержимого ScrollView пересчитывается не мгновенно,
-        // поэтому прокручиваем историю вниз на следующем тике UI Toolkit.
         reportHistoryScroll.schedule.Execute(() =>
         {
             reportHistoryScroll.verticalScroller.value =
@@ -419,7 +332,9 @@ public class PrototypeUIController : MonoBehaviour
     {
         dayLabel.text = "День: " + gameState.Day;
         goldLabel.text = "Золото: " + gameState.Gold;
+        goldIncomeLabel.text = "+" + gameState.DailyGoldIncome;
         foodLabel.text = "Пища: " + gameState.Food;
+        foodIncomeLabel.text = "+" + gameState.DailyFoodIncome;
         populationLabel.text = "Население: " + gameState.Population;
         moodLabel.text = "Настроение: " + gameState.Mood + "/100";
         foodConsumptionLabel.text =
@@ -434,29 +349,20 @@ public class PrototypeUIController : MonoBehaviour
         CommanderData commander = gameState.GetSelectedCommander();
 
         commanderDetailLabel.text =
-            "Выбран: " +
-            commander.Name +
-            " · " +
-            GetCommanderStateText(commander.State);
+            "Выбран: " + commander.Name + " · " + GetCommanderStateText(commander.State);
 
         if (gameState.HasActiveExpedition)
         {
             armyStatusLabel.text =
-                commander.Name +
-                " → " +
-                gameState.Fighters.Count +
-                " отдельных воинов. " +
-                "Армия находится вне столицы. " +
+                commander.Name + " → " + gameState.Fighters.Count +
+                " отдельных воинов. Армия находится вне столицы. " +
                 "Столица не защищена этой армией.";
         }
         else
         {
             armyStatusLabel.text =
-                commander.Name +
-                " → " +
-                gameState.Fighters.Count +
-                " отдельных воинов. " +
-                "Армия находится в столице и защищает её.";
+                commander.Name + " → " + gameState.Fighters.Count +
+                " отдельных воинов. Армия находится в столице и защищает её.";
         }
     }
 
@@ -470,9 +376,7 @@ public class PrototypeUIController : MonoBehaviour
         sendForestButton.SetEnabled(!expeditionActive);
 
         activeExpeditionCard.style.display =
-            expeditionActive
-                ? DisplayStyle.Flex
-                : DisplayStyle.None;
+            expeditionActive ? DisplayStyle.Flex : DisplayStyle.None;
 
         if (!expeditionActive)
         {
@@ -486,15 +390,10 @@ public class PrototypeUIController : MonoBehaviour
         string stateText = GetCommanderStateText(expedition.Phase);
 
         expeditionStatusLabel.text =
-            "Активная экспедиция: " +
-            commander.Name +
-            " · " +
-            location.Name +
-            " · " +
-            stateText;
+            "Активная экспедиция: " + commander.Name + " · " +
+            location.Name + " · " + stateText;
 
-        activeExpeditionTitle.text =
-            "ЭКСПЕДИЦИЯ: " + location.Name.ToUpper();
+        activeExpeditionTitle.text = "ЭКСПЕДИЦИЯ: " + location.Name.ToUpper();
 
         string currentTask;
         string daysInformation;
@@ -502,22 +401,18 @@ public class PrototypeUIController : MonoBehaviour
         if (expedition.Phase == CommanderState.TravellingToLocation)
         {
             currentTask = "Добраться до цели";
-            daysInformation =
-                "Осталось дней пути: " + expedition.DaysRemaining;
+            daysInformation = "Осталось дней пути: " + expedition.DaysRemaining;
         }
         else if (expedition.Phase == CommanderState.AtLocation)
         {
             currentTask = "Исследовать локацию";
             daysInformation =
-                "Расстояние до столицы: " +
-                location.DistanceDays +
-                " дн.";
+                "Расстояние до столицы: " + location.DistanceDays + " дн.";
         }
         else
         {
             currentTask = "Вернуться в столицу";
-            daysInformation =
-                "Осталось дней пути: " + expedition.DaysRemaining;
+            daysInformation = "Осталось дней пути: " + expedition.DaysRemaining;
         }
 
         activeExpeditionDetails.text =
@@ -530,8 +425,7 @@ public class PrototypeUIController : MonoBehaviour
             "Снабжение: пока не рассчитывается";
 
         bool canCancel = gameState.CanCancelExpeditionBeforeDayEnd;
-        bool alreadyReturning =
-            expedition.Phase == CommanderState.ReturningToCastle;
+        bool alreadyReturning = expedition.Phase == CommanderState.ReturningToCastle;
 
         if (canCancel)
         {
@@ -556,16 +450,12 @@ public class PrototypeUIController : MonoBehaviour
         {
             case CommanderState.InCastle:
                 return "в замке";
-
             case CommanderState.TravellingToLocation:
                 return "в пути к цели";
-
             case CommanderState.AtLocation:
                 return "действует в локации";
-
             case CommanderState.ReturningToCastle:
                 return "возвращается в замок";
-
             default:
                 return "состояние неизвестно";
         }

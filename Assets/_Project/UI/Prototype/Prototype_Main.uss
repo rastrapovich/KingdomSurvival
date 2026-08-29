@@ -1,71 +1,21 @@
-/*
-    ================================================================
-    ОБЩИЙ ЭКРАН
-    ================================================================
-*/
+/* ================================================================
+   ОБЩИЙ ЭКРАН
+   ================================================================ */
 
 .screen {
     flex-grow: 1;
     position: relative;
-
     padding-left: 16px;
     padding-right: 16px;
     padding-top: 16px;
     padding-bottom: 16px;
-
     background-color: rgb(20, 23, 29);
     color: rgb(225, 218, 200);
 }
 
-/*
-    ================================================================
-    ВЕРХ: НАВИГАЦИЯ И РЕСУРСЫ
-    ================================================================
-*/
-
-.navigation-bar {
-    height: 58px;
-    flex-direction: row;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.nav-button {
-    width: 58px;
-    min-width: 58px;
-    max-width: 58px;
-    height: 58px;
-    margin-right: 8px;
-
-    background-color: rgb(43, 48, 58);
-    color: rgb(224, 213, 188);
-
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: rgb(91, 96, 107);
-    border-right-color: rgb(91, 96, 107);
-    border-top-color: rgb(91, 96, 107);
-    border-bottom-color: rgb(91, 96, 107);
-    border-radius: 29px;
-
-    font-size: 19px;
-    -unity-font-style: bold;
-}
-
-.nav-button:hover {
-    background-color: rgb(59, 65, 77);
-}
-
-.nav-button-active {
-    background-color: rgb(112, 78, 43);
-    color: rgb(255, 239, 202);
-    border-left-color: rgb(207, 165, 89);
-    border-right-color: rgb(207, 165, 89);
-    border-top-color: rgb(207, 165, 89);
-    border-bottom-color: rgb(207, 165, 89);
-}
+/* ================================================================
+   ВЕРХ: РЕСУРСЫ И НАВИГАЦИЯ
+   ================================================================ */
 
 .top-bar {
     width: 100%;
@@ -73,12 +23,10 @@
     flex-shrink: 0;
     flex-direction: row;
     align-items: center;
-
     padding-left: 14px;
     padding-right: 14px;
     padding-top: 10px;
     padding-bottom: 10px;
-
     background-color: rgb(35, 39, 47);
     border-left-width: 1px;
     border-right-width: 1px;
@@ -119,6 +67,8 @@
 
 .food-box {
     min-width: 135px;
+    position: relative;
+    overflow: visible;
 }
 
 .resource-value {
@@ -127,17 +77,88 @@
     -unity-font-style: bold;
 }
 
-.resource-note {
+.resource-income {
     margin-top: 2px;
-    color: rgb(182, 171, 143);
+    color: rgb(137, 190, 137);
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+.food-expense-popup {
+    display: none;
+    position: absolute;
+    left: 0px;
+    top: 48px;
+    min-width: 150px;
+    padding-left: 9px;
+    padding-right: 9px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    background-color: rgb(28, 32, 39);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(92, 80, 58);
+    border-right-color: rgb(92, 80, 58);
+    border-top-color: rgb(92, 80, 58);
+    border-bottom-color: rgb(92, 80, 58);
+    border-radius: 4px;
+}
+
+.food-box:hover .food-expense-popup {
+    display: flex;
+}
+
+.food-expense-text {
+    color: rgb(195, 187, 166);
     font-size: 11px;
 }
 
-/*
-    ================================================================
-    ОСНОВНОЙ ОТКРЫВАЕМЫЙ ЭКРАН
-    ================================================================
-*/
+.navigation-bar {
+    height: 58px;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.nav-button {
+    width: 58px;
+    min-width: 58px;
+    max-width: 58px;
+    height: 58px;
+    margin-right: 8px;
+    background-color: rgb(43, 48, 58);
+    color: rgb(224, 213, 188);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(91, 96, 107);
+    border-right-color: rgb(91, 96, 107);
+    border-top-color: rgb(91, 96, 107);
+    border-bottom-color: rgb(91, 96, 107);
+    border-radius: 29px;
+    font-size: 19px;
+    -unity-font-style: bold;
+}
+
+.nav-button:hover {
+    background-color: rgb(59, 65, 77);
+}
+
+.nav-button-active {
+    background-color: rgb(112, 78, 43);
+    color: rgb(255, 239, 202);
+    border-left-color: rgb(207, 165, 89);
+    border-right-color: rgb(207, 165, 89);
+    border-top-color: rgb(207, 165, 89);
+    border-bottom-color: rgb(207, 165, 89);
+}
+
+/* ================================================================
+   ОСНОВНОЙ ЭКРАН
+   ================================================================ */
 
 .main-screen-scroll {
     flex-grow: 1;
@@ -155,7 +176,6 @@
     padding-right: 14px;
     padding-top: 13px;
     padding-bottom: 14px;
-
     background-color: rgb(31, 35, 43);
     border-left-width: 1px;
     border-right-width: 1px;
@@ -197,25 +217,20 @@
     background-color: rgb(72, 76, 85);
 }
 
-/*
-    ================================================================
-    КРУГЛАЯ КНОПКА «ЗАВЕРШИТЬ ДЕНЬ»
-    ================================================================
-*/
+/* ================================================================
+   ЗАВЕРШИТЬ ДЕНЬ
+   ================================================================ */
 
 .end-day-button {
     position: absolute;
     right: 24px;
     bottom: 22px;
-
     width: 76px;
     min-width: 76px;
     max-width: 76px;
     height: 76px;
-
     background-color: rgb(116, 75, 42);
     color: rgb(255, 240, 204);
-
     border-left-width: 2px;
     border-right-width: 2px;
     border-top-width: 2px;
@@ -225,7 +240,6 @@
     border-top-color: rgb(199, 154, 82);
     border-bottom-color: rgb(199, 154, 82);
     border-radius: 38px;
-
     font-size: 13px;
     -unity-font-style: bold;
 }
@@ -234,11 +248,9 @@
     background-color: rgb(145, 94, 51);
 }
 
-/*
-    ================================================================
-    ЗДАНИЯ СТОЛИЦЫ
-    ================================================================
-*/
+/* ================================================================
+   СТОЛИЦА
+   ================================================================ */
 
 .building-grid {
     flex-direction: row;
@@ -250,7 +262,6 @@
     min-height: 48px;
     margin-right: 2%;
     margin-bottom: 8px;
-
     background-color: rgb(50, 55, 65);
     color: rgb(222, 216, 199);
     border-left-width: 1px;
@@ -268,11 +279,9 @@
     background-color: rgb(63, 69, 80);
 }
 
-/*
-    ================================================================
-    КОМАНДИР И АРМИЯ
-    ================================================================
-*/
+/* ================================================================
+   АРМИЯ
+   ================================================================ */
 
 .commander-dropdown {
     margin-bottom: 8px;
@@ -336,11 +345,9 @@
     font-size: 12px;
 }
 
-/*
-    ================================================================
-    КАРТОЧКИ НАЙДЕННЫХ ЛОКАЦИЙ
-    ================================================================
-*/
+/* ================================================================
+   ЭКСПЕДИЦИИ
+   ================================================================ */
 
 .location-card {
     margin-bottom: 9px;
@@ -373,11 +380,7 @@
     margin-bottom: 9px;
 }
 
-.location-info {
-    color: #AEA289;
-    font-size: 13px;
-}
-
+.location-info { color: #AEA289; font-size: 13px; }
 .threat-low { color: #84B889; }
 .threat-medium { color: #D2B46C; }
 .threat-high { color: #D57E72; }
@@ -389,15 +392,7 @@
     border-radius: 4px;
 }
 
-.send-button:hover {
-    background-color: #466054;
-}
-
-/*
-    ================================================================
-    КАРТОЧКА АКТИВНОЙ ЭКСПЕДИЦИИ
-    ================================================================
-*/
+.send-button:hover { background-color: #466054; }
 
 .active-expedition-card {
     display: none;
@@ -449,25 +444,17 @@
     -unity-font-style: bold;
 }
 
-.return-expedition-button:hover {
-    background-color: #88483B;
-}
+.return-expedition-button:hover { background-color: #88483B; }
+.return-expedition-button:disabled { opacity: 0.55; }
 
-.return-expedition-button:disabled {
-    opacity: 0.55;
-}
-
-/*
-    ================================================================
-    КОРОЛЕВСКИЕ ДОНЕСЕНИЯ
-    ================================================================
-*/
+/* ================================================================
+   КОРОЛЕВСКИЕ ДОНЕСЕНИЯ
+   ================================================================ */
 
 .reports-dock {
     position: absolute;
     left: 24px;
     bottom: 22px;
-
     width: 430px;
     height: 270px;
 }

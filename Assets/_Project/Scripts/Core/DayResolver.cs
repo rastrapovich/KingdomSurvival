@@ -106,6 +106,8 @@ public static class DayResolver
             return;
         }
 
+        ResolveExpeditionSupply(state, expedition, result);
+
         if (expedition.Phase == CommanderState.TravellingToLocation)
         {
             expedition.DaysRemaining = Math.Max(0, expedition.DaysRemaining - 1);
@@ -149,5 +151,34 @@ public static class DayResolver
                     " воинов вернулись в столицу. Армия снова защищает город.");
             }
         }
+    }
+
+    private static void ResolveExpeditionSupply(
+        GameState state,
+        ExpeditionData expedition,
+        DayResolutionResult result)
+    {
+        int requiredSupply = expedition.FighterIds.Count + 1;
+        int availableSupply = state.ArmySupply;
+
+        if (availableSupply >= requiredSupply)
+        {
+            state.ArmySupply -= requiredSupply;
+
+            result.Messages.Add(
+                "Экспедиция израсходовала " + requiredSupply +
+                " снабжения. Осталось: " + state.ArmySupply + ".");
+
+            return;
+        }
+
+        int shortage = requiredSupply - availableSupply;
+        state.ArmySupply = 0;
+
+        result.Messages.Add(
+            "<color=#D57E72>Экспедиции не хватило " + shortage +
+            " единиц снабжения. Израсходованы последние " +
+            availableSupply +
+            ". Штраф за голод экспедиции пока не применяется.</color>");
     }
 }

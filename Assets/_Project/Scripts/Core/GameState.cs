@@ -14,12 +14,14 @@ public class FighterData
 {
     public string Id;
     public string Name;
+    public string Role;
     public int Level;
 
-    public FighterData(string id, string name, int level)
+    public FighterData(string id, string name, string role, int level)
     {
         Id = id;
         Name = name;
+        Role = role;
         Level = level;
     }
 }
@@ -78,6 +80,9 @@ public class GameState
     public int Mood;
     public int ConsecutiveFoodShortageDays;
 
+    // Снабжение принадлежит единственной армии, а не конкретному командиру.
+    public int ArmySupply;
+
     public string SelectedCommanderId;
     public List<CommanderData> Commanders;
     public List<FighterData> Fighters;
@@ -90,6 +95,27 @@ public class GameState
 
     public int DailyFoodConsumption => Population;
 
+    // В походе по 1 единице снабжения потребляют командир и каждый боец.
+    public int ExpeditionSupplyConsumption
+    {
+        get
+        {
+            if (HasActiveExpedition)
+                return ActiveExpedition.FighterIds.Count + 1;
+
+            return Fighters.Count + 1;
+        }
+    }
+
+    public int FullSupplyDays
+    {
+        get
+        {
+            int dailyConsumption = ExpeditionSupplyConsumption;
+            return dailyConsumption > 0 ? ArmySupply / dailyConsumption : 0;
+        }
+    }
+
     public bool HasActiveExpedition =>
         ActiveExpedition != null && ActiveExpedition.IsActive;
 
@@ -97,6 +123,18 @@ public class GameState
         HasActiveExpedition &&
         ActiveExpedition.StartedOnDay == Day &&
         ActiveExpedition.Phase == CommanderState.TravellingToLocation;
+
+    public bool CanAdjustArmySupply
+    {
+        get
+        {
+            CommanderData commander = GetSelectedCommander();
+
+            return commander != null &&
+                   commander.State == CommanderState.InCastle &&
+                   !HasActiveExpedition;
+        }
+    }
 
     public void CreateNewGame()
     {
@@ -106,6 +144,7 @@ public class GameState
         Population = 24;
         Mood = 64;
         ConsecutiveFoodShortageDays = 0;
+        ArmySupply = 0;
 
         Commanders = new List<CommanderData>
         {
@@ -118,11 +157,11 @@ public class GameState
 
         Fighters = new List<FighterData>
         {
-            new FighterData("garrick", "Гаррик", 1),
-            new FighterData("edric", "Эдрик", 1),
-            new FighterData("marta", "Марта", 1),
-            new FighterData("torvin", "Торвин", 1),
-            new FighterData("agnessa", "Агнесса", 1)
+            new FighterData("garrick", "Гаррик", "Гвардеец", 1),
+            new FighterData("edric", "Эдрик", "Лучник", 1),
+            new FighterData("marta", "Марта", "Лекарь", 1),
+            new FighterData("torvin", "Торвин", "Копейщик", 1),
+            new FighterData("agnessa", "Агнесса", "Разведчик", 1)
         };
 
         Locations = new List<LocationData>
@@ -165,8 +204,10 @@ public class GameState
     public List<string> GetCommanderNames()
     {
         List<string> names = new List<string>();
+
         foreach (CommanderData commander in Commanders)
             names.Add(commander.Name);
+
         return names;
     }
 
@@ -185,6 +226,26 @@ public class GameState
         }
 
         return false;
+    }
+
+    public bool TryAddArmySupply()
+    {
+        if (!CanAdjustArmySupply || Food <= 0)
+            return false;
+
+        Food--;
+        ArmySupply++;
+        return true;
+    }
+
+    public bool TryRemoveArmySupply()
+    {
+        if (!CanAdjustArmySupply || ArmySupply <= 0)
+            return false;
+
+        ArmySupply--;
+        Food++;
+        return true;
     }
 
     public bool TryStartExpedition(string locationId, out string resultMessage)

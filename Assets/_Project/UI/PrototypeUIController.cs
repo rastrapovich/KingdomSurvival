@@ -41,6 +41,13 @@ public class PrototypeUIController : MonoBehaviour
     private Label commanderDetailLabel;
     private Label armyStatusLabel;
 
+    private Button supplyMinusButton;
+    private Label supplyValueLabel;
+    private Button supplyPlusButton;
+    private Label supplyConsumptionLabel;
+    private Label supplyDaysLabel;
+    private VisualElement fightersList;
+
     private Label expeditionStatusLabel;
     private Button sendRuinsButton;
     private Button sendMineButton;
@@ -75,13 +82,15 @@ public class PrototypeUIController : MonoBehaviour
         gameState = new GameState();
         gameState.CreateNewGame();
 
+        // Нехватка снабжения выделяется цветом прямо в общей истории донесений.
+        reportHistoryLabel.enableRichText = true;
+
         ConfigureCommanderDropdown();
         RegisterCallbacks();
 
         AddReport(
             "Прототип запущен. Откройте нужный экран круглой кнопкой слева сверху.");
 
-        // При старте игры ни один основной экран не открыт.
         CloseMainScreen();
         RefreshInterface();
     }
@@ -109,6 +118,13 @@ public class PrototypeUIController : MonoBehaviour
         commanderDropdown = root.Q<DropdownField>("commander-dropdown");
         commanderDetailLabel = root.Q<Label>("commander-detail-label");
         armyStatusLabel = root.Q<Label>("army-status-label");
+
+        supplyMinusButton = root.Q<Button>("supply-minus-button");
+        supplyValueLabel = root.Q<Label>("supply-value-label");
+        supplyPlusButton = root.Q<Button>("supply-plus-button");
+        supplyConsumptionLabel = root.Q<Label>("supply-consumption-label");
+        supplyDaysLabel = root.Q<Label>("supply-days-label");
+        fightersList = root.Q<VisualElement>("fighters-list");
 
         expeditionStatusLabel = root.Q<Label>("expedition-status-label");
         sendRuinsButton = root.Q<Button>("send-ruins-button");
@@ -145,6 +161,12 @@ public class PrototypeUIController : MonoBehaviour
             commanderDropdown != null &&
             commanderDetailLabel != null &&
             armyStatusLabel != null &&
+            supplyMinusButton != null &&
+            supplyValueLabel != null &&
+            supplyPlusButton != null &&
+            supplyConsumptionLabel != null &&
+            supplyDaysLabel != null &&
+            fightersList != null &&
             expeditionStatusLabel != null &&
             sendRuinsButton != null &&
             sendMineButton != null &&
@@ -246,10 +268,15 @@ public class PrototypeUIController : MonoBehaviour
         navArmyButton.clicked += OnArmyNavigationClicked;
         navExpeditionsButton.clicked += OnExpeditionsNavigationClicked;
         endDayButton.clicked += OnEndDayClicked;
+
+        supplyMinusButton.clicked += OnSupplyMinusClicked;
+        supplyPlusButton.clicked += OnSupplyPlusClicked;
+
         sendRuinsButton.clicked += OnSendRuinsClicked;
         sendMineButton.clicked += OnSendMineClicked;
         sendForestButton.clicked += OnSendForestClicked;
         returnExpeditionButton.clicked += OnExpeditionActionClicked;
+
         commanderDropdown.RegisterValueChangedCallback(OnCommanderChanged);
         callbacksRegistered = true;
     }
@@ -263,10 +290,15 @@ public class PrototypeUIController : MonoBehaviour
         navArmyButton.clicked -= OnArmyNavigationClicked;
         navExpeditionsButton.clicked -= OnExpeditionsNavigationClicked;
         endDayButton.clicked -= OnEndDayClicked;
+
+        supplyMinusButton.clicked -= OnSupplyMinusClicked;
+        supplyPlusButton.clicked -= OnSupplyPlusClicked;
+
         sendRuinsButton.clicked -= OnSendRuinsClicked;
         sendMineButton.clicked -= OnSendMineClicked;
         sendForestButton.clicked -= OnSendForestClicked;
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
+
         commanderDropdown.UnregisterValueChangedCallback(OnCommanderChanged);
         callbacksRegistered = false;
     }
@@ -276,6 +308,18 @@ public class PrototypeUIController : MonoBehaviour
         if (gameState.SelectCommanderByName(changeEvent.newValue))
             AddReport(changeEvent.newValue + " назначен командиром армии.");
 
+        RefreshInterface();
+    }
+
+    private void OnSupplyPlusClicked()
+    {
+        gameState.TryAddArmySupply();
+        RefreshInterface();
+    }
+
+    private void OnSupplyMinusClicked()
+    {
+        gameState.TryRemoveArmySupply();
         RefreshInterface();
     }
 
@@ -364,6 +408,47 @@ public class PrototypeUIController : MonoBehaviour
                 commander.Name + " → " + gameState.Fighters.Count +
                 " отдельных воинов. Армия находится в столице и защищает её.";
         }
+
+        RefreshSupplyBlock();
+        RefreshFightersList();
+    }
+
+    private void RefreshSupplyBlock()
+    {
+        int dailyConsumption = gameState.ExpeditionSupplyConsumption;
+        int fullDays = gameState.FullSupplyDays;
+        bool canAdjust = gameState.CanAdjustArmySupply;
+
+        supplyValueLabel.text = gameState.ArmySupply.ToString();
+        supplyConsumptionLabel.text =
+            "Расход в походе: " + dailyConsumption + " / день";
+        supplyDaysLabel.text =
+            "Хватит на " + fullDays + " " + GetDayWord(fullDays);
+
+        supplyPlusButton.SetEnabled(canAdjust && gameState.Food > 0);
+        supplyMinusButton.SetEnabled(canAdjust && gameState.ArmySupply > 0);
+    }
+
+    private void RefreshFightersList()
+    {
+        fightersList.Clear();
+
+        foreach (FighterData fighter in gameState.Fighters)
+        {
+            VisualElement card = new VisualElement();
+            card.AddToClassList("fighter-card");
+
+            Label roleLabel = new Label(fighter.Role);
+            roleLabel.AddToClassList("fighter-role");
+            card.Add(roleLabel);
+
+            Label infoLabel = new Label(
+                "Уровень " + fighter.Level + " · в строю");
+            infoLabel.AddToClassList("fighter-info");
+            card.Add(infoLabel);
+
+            fightersList.Add(card);
+        }
     }
 
     private void RefreshExpeditionPanel()
@@ -421,8 +506,7 @@ public class PrototypeUIController : MonoBehaviour
             "Цель: " + location.Name + "\n" +
             "Состояние: " + stateText + "\n" +
             "Текущая задача: " + currentTask + "\n" +
-            daysInformation + "\n" +
-            "Снабжение: пока не рассчитывается";
+            daysInformation;
 
         bool canCancel = gameState.CanCancelExpeditionBeforeDayEnd;
         bool alreadyReturning = expedition.Phase == CommanderState.ReturningToCastle;
@@ -441,6 +525,26 @@ public class PrototypeUIController : MonoBehaviour
         {
             returnExpeditionButton.SetEnabled(true);
             returnExpeditionButton.text = "Приказать возвращаться";
+        }
+    }
+
+    private string GetDayWord(int value)
+    {
+        int lastTwoDigits = value % 100;
+
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 14)
+            return "дней";
+
+        switch (value % 10)
+        {
+            case 1:
+                return "день";
+            case 2:
+            case 3:
+            case 4:
+                return "дня";
+            default:
+                return "дней";
         }
     }
 

@@ -77,36 +77,31 @@
                     <ui:Label name="commander-detail-label" text="Командир пока не выбран" class="commander-detail" />
                     <ui:Label name="army-status-label" text="Статус армии: в столице" class="status-label" />
 
+                    <ui:VisualElement class="supply-block">
+                        <ui:Label text="СНАБЖЕНИЕ" class="supply-title" />
+
+                        <ui:VisualElement class="supply-controls">
+                            <ui:Button name="supply-minus-button" text="−" class="supply-step-button" />
+                            <ui:Label name="supply-value-label" text="0" class="supply-value" />
+                            <ui:Button name="supply-plus-button" text="+" class="supply-step-button" />
+                        </ui:VisualElement>
+
+                        <ui:Label
+                            name="supply-consumption-label"
+                            text="Расход в походе: 6 / день"
+                            class="supply-note" />
+
+                        <ui:Label
+                            name="supply-days-label"
+                            text="Хватит на 0 дней"
+                            class="supply-note" />
+                    </ui:VisualElement>
+
                     <ui:VisualElement class="section-divider" />
                     <ui:Label text="ВОИНЫ — 5 ИЗ 6" class="section-title" />
                     <ui:Label text="Каждая карточка представляет одного отдельного воина" class="panel-description" />
 
-                    <ui:VisualElement name="fighters-list">
-                        <ui:VisualElement class="fighter-card">
-                            <ui:Label text="Годрик Железный" class="fighter-name" />
-                            <ui:Label text="Гвардеец · уровень 2 · здоров" class="fighter-info" />
-                        </ui:VisualElement>
-
-                        <ui:VisualElement class="fighter-card">
-                            <ui:Label text="Элина Меткий Глаз" class="fighter-name" />
-                            <ui:Label text="Лучница · уровень 1 · здорова" class="fighter-info" />
-                        </ui:VisualElement>
-
-                        <ui:VisualElement class="fighter-card">
-                            <ui:Label text="Торвальд" class="fighter-name" />
-                            <ui:Label text="Копейщик · уровень 1 · здоров" class="fighter-info" />
-                        </ui:VisualElement>
-
-                        <ui:VisualElement class="fighter-card">
-                            <ui:Label text="Марта" class="fighter-name" />
-                            <ui:Label text="Лекарь · уровень 1 · здорова" class="fighter-info" />
-                        </ui:VisualElement>
-
-                        <ui:VisualElement class="fighter-card">
-                            <ui:Label text="Борислав" class="fighter-name" />
-                            <ui:Label text="Разведчик · уровень 1 · здоров" class="fighter-info" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
+                    <ui:VisualElement name="fighters-list" />
                 </ui:VisualElement>
             </ui:VisualElement>
 

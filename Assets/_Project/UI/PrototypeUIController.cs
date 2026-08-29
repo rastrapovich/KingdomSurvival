@@ -303,9 +303,13 @@ public class PrototypeUIController : MonoBehaviour
 
     private void OnEndDayClicked()
     {
+        int finishedDay = gameState.Day;
+
         DayResolutionResult result = DayResolver.ResolveDay(gameState);
 
-        AddReport(string.Join("\n", result.Messages));
+        AddReport(
+            string.Join("\n", result.Messages),
+            finishedDay);
 
         RefreshInterface();
     }
@@ -359,13 +363,18 @@ public class PrototypeUIController : MonoBehaviour
 
     // Королевские донесения хранят историю действий за текущий запуск.
     // Новые записи добавляются вниз и не стирают старые.
-    private void AddReport(string message)
+    private void AddReport(string message, int? dayOverride = null)
     {
         if (string.IsNullOrWhiteSpace(message))
             return;
 
+        int reportDay =
+            dayOverride.HasValue
+                ? dayOverride.Value
+                : gameState.Day;
+
         reportHistory.Add(
-            "День " + gameState.Day + "\n" + message);
+            "День " + reportDay + "\n" + message);
 
         reportHistoryLabel.text =
             string.Join("\n\n", reportHistory);

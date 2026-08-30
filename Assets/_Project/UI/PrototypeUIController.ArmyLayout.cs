@@ -1,24 +1,27 @@
-using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
-    private bool armyLayoutRuntimeInitialized;
-    private bool armyPointerCallbacksRegistered;
+    private bool stableArmyLayoutInitialized;
+    private bool stableArmyPointerCallbacksRegistered;
+    private bool stableArmyResourceCallbacksBound;
 
-    private string armyDraggedFighterId;
-    private int armyDraggedPointerId = -1;
-    private Vector2 armyDragStartPosition;
-    private bool armyDragStarted;
-    private VisualElement armyDraggedCard;
-    private VisualElement armyDragGhost;
+    private IVisualElementScheduledItem stableArmyInitItem;
+    private IVisualElementScheduledItem stableArmyMaintenanceItem;
+
+    private string stableDraggedFighterId;
+    private int stableDraggedPointerId = -1;
+    private Vector2 stableDragStartPosition;
+    private bool stableDragStarted;
+    private VisualElement stableDraggedCard;
+    private VisualElement stableDragGhost;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    private static void InitializeArmyLayoutRuntime()
+    private static void InitializeStableArmyLayoutRuntime()
     {
         PrototypeUIController controller =
-            Object.FindFirstObjectByType<PrototypeUIController>();
+            UnityEngine.Object.FindAnyObjectByType<PrototypeUIController>();
 
         if (controller == null)
             return;
@@ -28,14 +31,14 @@ public partial class PrototypeUIController
         if (document == null)
             return;
 
-        document.rootVisualElement.schedule
-            .Execute(controller.TryInitializeArmyLayoutRuntime)
+        controller.stableArmyInitItem = document.rootVisualElement.schedule
+            .Execute(controller.TryInitializeStableArmyLayout)
             .Every(100);
     }
 
-    private void TryInitializeArmyLayoutRuntime()
+    private void TryInitializeStableArmyLayout()
     {
-        if (armyLayoutRuntimeInitialized)
+        if (stableArmyLayoutInitialized)
             return;
 
         if (interfaceRoot == null ||
@@ -44,46 +47,115 @@ public partial class PrototypeUIController
             commanderGarrisonDropZone == null ||
             commanderGarrisonList == null ||
             capitalGarrisonDropZone == null ||
-            capitalGarrisonList == null)
+            capitalGarrisonList == null ||
+            !journeySummaryInitialized ||
+            journeySummaryBlock == null)
         {
             return;
         }
 
-        RegisterArmyPointerCallbacks();
-        ApplyArmyScreenLayout();
-        RefreshArmyCardsRuntime();
+        BindStableArmyResourceButtons();
+        RegisterStableArmyPointerCallbacks();
+        BuildStableArmyLayout();
+        RefreshStableArmyCards();
 
-        interfaceRoot.schedule
-            .Execute(RefreshArmyScreenRuntime)
+        stableArmyMaintenanceItem = interfaceRoot.schedule
+            .Execute(MaintainStableArmyCards)
             .Every(100);
 
-        armyLayoutRuntimeInitialized = true;
+        stableArmyLayoutInitialized = true;
+        stableArmyInitItem?.Pause();
     }
 
-    private void RegisterArmyPointerCallbacks()
+    private void BindStableArmyResourceButtons()
     {
-        if (armyPointerCallbacksRegistered || interfaceRoot == null)
+        if (stableArmyResourceCallbacksBound)
+            return;
+
+        armyGoldMinusButton.clicked -= OnArmyGoldMinusClicked;
+        armyGoldPlusButton.clicked -= OnArmyGoldPlusClicked;
+        supplyMinusButton.clicked -= OnSupplyMinusClicked;
+        supplyPlusButton.clicked -= OnSupplyPlusClicked;
+
+        armyGoldMinusButton.clicked += OnStableArmyGoldMinusClicked;
+        armyGoldPlusButton.clicked += OnStableArmyGoldPlusClicked;
+        supplyMinusButton.clicked += OnStableSupplyMinusClicked;
+        supplyPlusButton.clicked += OnStableSupplyPlusClicked;
+
+        stableArmyResourceCallbacksBound = true;
+    }
+
+    private void OnStableArmyGoldPlusClicked()
+    {
+        if (!isGameOver && gameState.CanAdjustArmySupply && gameState.Gold > 0)
+        {
+            gameState.Gold--;
+            gameState.ArmyGold++;
+        }
+
+        RefreshStableArmyResourceValues();
+    }
+
+    private void OnStableArmyGoldMinusClicked()
+    {
+        if (!isGameOver &&
+            gameState.CanAdjustArmySupply &&
+            gameState.ArmyGold > 0)
+        {
+            gameState.ArmyGold--;
+            gameState.Gold++;
+        }
+
+        RefreshStableArmyResourceValues();
+    }
+
+    private void OnStableSupplyPlusClicked()
+    {
+        if (!isGameOver)
+            gameState.TryAddArmySupply();
+
+        RefreshStableArmyResourceValues();
+    }
+
+    private void OnStableSupplyMinusClicked()
+    {
+        if (!isGameOver)
+            gameState.TryRemoveArmySupply();
+
+        RefreshStableArmyResourceValues();
+    }
+
+    private void RefreshStableArmyResourceValues()
+    {
+        goldLabel.text = "Золото: " + gameState.Gold;
+        foodLabel.text = "Пища: " + gameState.Food;
+
+        RefreshSupplyBlock();
+
+        VisualElement supplyBlock =
+            armyScreen.Q<VisualElement>(className: "military-supply-block");
+
+        if (supplyBlock != null)
+            ConfigureStableSupplyBlock(supplyBlock);
+    }
+
+    private void RegisterStableArmyPointerCallbacks()
+    {
+        if (stableArmyPointerCallbacksRegistered || interfaceRoot == null)
             return;
 
         interfaceRoot.RegisterCallback<PointerDownEvent>(
-            OnArmyRootPointerDown,
+            OnStableArmyPointerDown,
             TrickleDown.TrickleDown);
-        interfaceRoot.RegisterCallback<PointerMoveEvent>(OnArmyRootPointerMove);
-        interfaceRoot.RegisterCallback<PointerUpEvent>(OnArmyRootPointerUp);
+        interfaceRoot.RegisterCallback<PointerMoveEvent>(
+            OnStableArmyPointerMove);
+        interfaceRoot.RegisterCallback<PointerUpEvent>(
+            OnStableArmyPointerUp);
 
-        armyPointerCallbacksRegistered = true;
+        stableArmyPointerCallbacksRegistered = true;
     }
 
-    private void RefreshArmyScreenRuntime()
-    {
-        if (interfaceRoot == null || gameState == null)
-            return;
-
-        ApplyArmyScreenLayout();
-        RefreshArmyCardsRuntime();
-    }
-
-    private void ApplyArmyScreenLayout()
+    private void BuildStableArmyLayout()
     {
         VisualElement armyPanel =
             armyScreen.Q<VisualElement>(className: "army-panel");
@@ -107,17 +179,11 @@ public partial class PrototypeUIController
             return;
         }
 
-        ScrollView armyScroll =
-            armyScreen.Q<ScrollView>(className: "military-army-column");
+        RemoveOuterArmyScroll(armyPanel);
 
-        if (armyScroll != null)
-        {
-            armyScroll.style.width = Length.Percent(100);
-            armyScroll.style.height = Length.Percent(100);
-            armyScroll.style.minHeight = 0;
-            armyScroll.contentContainer.style.flexGrow = 1;
-            armyScroll.contentContainer.style.minHeight = 0;
-        }
+        armyScreen.style.width = Length.Percent(100);
+        armyScreen.style.height = Length.Percent(100);
+        armyScreen.style.minHeight = 0;
 
         armyPanel.style.width = Length.Percent(100);
         armyPanel.style.height = Length.Percent(100);
@@ -127,54 +193,39 @@ public partial class PrototypeUIController
         armyPanel.style.paddingRight = 0;
         armyPanel.style.paddingTop = 0;
         armyPanel.style.paddingBottom = 0;
-        armyPanel.style.backgroundColor = ArmyRgb(18, 21, 26);
-        SetArmyBorder(armyPanel, 0, Color.clear);
+        armyPanel.style.backgroundColor = ArmyStableRgb(18, 21, 26);
+        SetStableArmyBorder(armyPanel, 0, Color.clear);
 
-        Label title = armyPanel.Q<Label>(className: "panel-title");
-        Label description = armyPanel.Q<Label>(className: "panel-description");
-
-        if (title != null)
-            title.style.display = DisplayStyle.None;
-        if (description != null)
-            description.style.display = DisplayStyle.None;
-        if (armyStatusLabel != null)
-            armyStatusLabel.style.display = DisplayStyle.None;
-        if (fighterSelectionHintLabel != null)
-            fighterSelectionHintLabel.style.display = DisplayStyle.None;
+        HideLegacyArmyLabels(armyPanel);
 
         topRow.style.width = Length.Percent(82);
-        topRow.style.height = Length.Percent(60);
-        topRow.style.minHeight = 285;
-        topRow.style.maxHeight = 430;
+        topRow.style.height = Length.Percent(56);
+        topRow.style.minHeight = 300;
+        topRow.style.maxHeight = 390;
         topRow.style.flexGrow = 0;
         topRow.style.flexShrink = 1;
         topRow.style.flexDirection = FlexDirection.Row;
         topRow.style.alignItems = Align.Stretch;
         topRow.style.justifyContent = Justify.FlexStart;
         topRow.style.alignSelf = Align.FlexStart;
-        topRow.style.marginBottom = 4;
+        topRow.style.marginBottom = 5;
 
-        ConfigureCommanderBlock(commanderProfile);
-        ConfigureJourneyBlock();
-        ConfigureSupplyBlock(supplyBlock);
+        ConfigureStableCommanderBlock(commanderProfile);
+        ConfigureStableJourneyBlock();
+        ConfigureStableSupplyBlock(supplyBlock);
 
         if (transferArrows != null)
             transferArrows.style.display = DisplayStyle.None;
 
-        // По макету сначала гарнизон столицы, ниже — гарнизон командира.
-        if (capitalGarrisonDropZone.parent == transferBoard &&
-            commanderGarrisonDropZone.parent == transferBoard)
-        {
-            capitalGarrisonDropZone.RemoveFromHierarchy();
-            commanderGarrisonDropZone.RemoveFromHierarchy();
-            transferBoard.Add(capitalGarrisonDropZone);
-            transferBoard.Add(commanderGarrisonDropZone);
-        }
+        PutCapitalGarrisonFirst(transferBoard);
+        RemoveRosterScroll(capitalGarrisonDropZone, capitalGarrisonList);
+        RemoveRosterScroll(commanderGarrisonDropZone, commanderGarrisonList);
 
         transferBoard.style.width = Length.Percent(82);
-        transferBoard.style.height = Length.Percent(40);
+        transferBoard.style.height = Length.Percent(42);
         transferBoard.style.minHeight = 220;
-        transferBoard.style.flexGrow = 1;
+        transferBoard.style.maxHeight = 280;
+        transferBoard.style.flexGrow = 0;
         transferBoard.style.flexShrink = 1;
         transferBoard.style.flexDirection = FlexDirection.Column;
         transferBoard.style.alignItems = Align.Stretch;
@@ -182,12 +233,47 @@ public partial class PrototypeUIController
         transferBoard.style.marginTop = 0;
         transferBoard.style.marginBottom = 0;
 
-        ConfigureGarrisonZone(capitalGarrisonDropZone, true);
-        ConfigureGarrisonZone(commanderGarrisonDropZone, false);
-        RefreshArmyDropZoneColors(false, false);
+        ConfigureStableGarrisonZone(capitalGarrisonDropZone, capitalGarrisonList, true);
+        ConfigureStableGarrisonZone(
+            commanderGarrisonDropZone,
+            commanderGarrisonList,
+            false);
+
+        RefreshStableArmyDropZoneColors(false, false);
     }
 
-    private void ConfigureCommanderBlock(VisualElement commanderProfile)
+    private void RemoveOuterArmyScroll(VisualElement armyPanel)
+    {
+        ScrollView armyScroll =
+            armyScreen.Q<ScrollView>(className: "military-army-column");
+
+        if (armyScroll == null || armyPanel.parent == armyScreen)
+            return;
+
+        armyPanel.RemoveFromHierarchy();
+        armyScroll.RemoveFromHierarchy();
+        armyScreen.Add(armyPanel);
+    }
+
+    private void HideLegacyArmyLabels(VisualElement armyPanel)
+    {
+        Label title = armyPanel.Q<Label>(className: "panel-title");
+        Label description = armyPanel.Q<Label>(className: "panel-description");
+
+        if (title != null)
+            title.style.display = DisplayStyle.None;
+
+        if (description != null)
+            description.style.display = DisplayStyle.None;
+
+        if (armyStatusLabel != null)
+            armyStatusLabel.style.display = DisplayStyle.None;
+
+        if (fighterSelectionHintLabel != null)
+            fighterSelectionHintLabel.style.display = DisplayStyle.None;
+    }
+
+    private void ConfigureStableCommanderBlock(VisualElement commanderProfile)
     {
         commanderProfile.style.width = Length.Percent(33);
         commanderProfile.style.minWidth = 210;
@@ -197,57 +283,55 @@ public partial class PrototypeUIController
         commanderProfile.style.paddingRight = 10;
         commanderProfile.style.paddingTop = 10;
         commanderProfile.style.paddingBottom = 9;
-        commanderProfile.style.backgroundColor = ArmyRgb(43, 47, 55);
-        SetArmyBorder(commanderProfile, 1, ArmyRgb(91, 79, 61));
-        SetArmyRadius(commanderProfile, 5);
+        commanderProfile.style.backgroundColor = ArmyStableRgb(42, 46, 54);
+        SetStableArmyBorder(
+            commanderProfile,
+            1,
+            ArmyStableRgb(91, 80, 62));
+        SetStableArmyRadius(commanderProfile, 5);
 
         Label sectionTitle =
             commanderProfile.Q<Label>(className: "commander-section-title");
 
         if (sectionTitle != null)
         {
-            sectionTitle.style.color = ArmyRgb(218, 181, 108);
+            sectionTitle.style.color = ArmyStableRgb(219, 181, 107);
             sectionTitle.style.fontSize = 13;
             sectionTitle.style.marginBottom = 6;
         }
 
         VisualElement image =
-            commanderProfile.Q<VisualElement>(className: "commander-image-placeholder");
+            commanderProfile.Q<VisualElement>(
+                className: "commander-image-placeholder");
 
         if (image != null)
         {
             image.style.width = Length.Percent(100);
-            image.style.height = Length.Percent(62);
-            image.style.minHeight = 150;
-            image.style.maxHeight = 260;
+            image.style.height = Length.Percent(68);
+            image.style.minHeight = 160;
+            image.style.maxHeight = 270;
             image.style.marginBottom = 8;
-            image.style.backgroundColor = ArmyRgb(32, 36, 43);
-            SetArmyBorder(image, 1, ArmyRgb(73, 78, 88));
-            SetArmyRadius(image, 4);
+            image.style.backgroundColor = ArmyStableRgb(31, 35, 42);
+            SetStableArmyBorder(image, 1, ArmyStableRgb(72, 78, 88));
+            SetStableArmyRadius(image, 4);
         }
 
-        if (commanderDropdown != null)
-        {
-            commanderDropdown.style.width = Length.Percent(100);
-            commanderDropdown.style.marginTop = 0;
-            commanderDropdown.style.marginBottom = 4;
-        }
+        commanderDropdown.style.width = Length.Percent(100);
+        commanderDropdown.style.marginTop = 0;
+        commanderDropdown.style.marginBottom = 4;
 
-        if (commanderDetailLabel != null)
-        {
-            commanderDetailLabel.style.color = ArmyRgb(185, 184, 177);
-            commanderDetailLabel.style.fontSize = 10;
-            commanderDetailLabel.style.whiteSpace = WhiteSpace.Normal;
-        }
+        commanderDetailLabel.style.color = ArmyStableRgb(184, 184, 178);
+        commanderDetailLabel.style.fontSize = 10;
+        commanderDetailLabel.style.whiteSpace = WhiteSpace.Normal;
     }
 
-    private void ConfigureJourneyBlock()
+    private void ConfigureStableJourneyBlock()
     {
         if (journeySummaryBlock == null)
             return;
 
-        journeySummaryBlock.style.width = Length.Percent(33);
-        journeySummaryBlock.style.minWidth = 210;
+        journeySummaryBlock.style.width = Length.Percent(37);
+        journeySummaryBlock.style.minWidth = 220;
         journeySummaryBlock.style.height = Length.Percent(100);
         journeySummaryBlock.style.minHeight = 0;
         journeySummaryBlock.style.marginLeft = 0;
@@ -258,62 +342,159 @@ public partial class PrototypeUIController
         journeySummaryBlock.style.paddingRight = 10;
         journeySummaryBlock.style.paddingTop = 10;
         journeySummaryBlock.style.paddingBottom = 10;
-        journeySummaryBlock.style.backgroundColor = ArmyRgb(47, 50, 57);
-        SetArmyBorder(journeySummaryBlock, 1, ArmyRgb(105, 87, 61));
-        SetArmyRadius(journeySummaryBlock, 5);
+        journeySummaryBlock.style.backgroundColor = ArmyStableRgb(45, 49, 56);
+        SetStableArmyBorder(
+            journeySummaryBlock,
+            1,
+            ArmyStableRgb(103, 86, 61));
+        SetStableArmyRadius(journeySummaryBlock, 5);
 
-        Label title = journeySummaryBlock.Q<Label>(className: "supply-title");
+        Label title =
+            journeySummaryBlock.Q<Label>(className: "supply-title");
 
         if (title != null)
         {
-            title.style.color = ArmyRgb(222, 185, 109);
+            title.style.color = ArmyStableRgb(222, 185, 109);
             title.style.fontSize = 13;
+            title.style.marginBottom = 7;
         }
 
         if (journeySummaryScroll != null)
         {
             journeySummaryScroll.style.flexGrow = 1;
             journeySummaryScroll.style.minHeight = 0;
+            journeySummaryScroll.style.width = Length.Percent(100);
         }
     }
 
-    private void ConfigureSupplyBlock(VisualElement supplyBlock)
+    private void ConfigureStableSupplyBlock(VisualElement supplyBlock)
     {
-        supplyBlock.style.width = Length.Percent(31);
-        supplyBlock.style.minWidth = 185;
-        supplyBlock.style.height = 132;
-        supplyBlock.style.minHeight = 132;
-        supplyBlock.style.maxHeight = 132;
+        supplyBlock.style.width = Length.Percent(28);
+        supplyBlock.style.minWidth = 205;
+        supplyBlock.style.height = 176;
+        supplyBlock.style.minHeight = 176;
+        supplyBlock.style.maxHeight = 176;
         supplyBlock.style.marginLeft = 0;
         supplyBlock.style.marginRight = 0;
         supplyBlock.style.marginTop = 0;
-        supplyBlock.style.paddingLeft = 10;
-        supplyBlock.style.paddingRight = 10;
+        supplyBlock.style.marginBottom = 0;
+        supplyBlock.style.paddingLeft = 11;
+        supplyBlock.style.paddingRight = 11;
         supplyBlock.style.paddingTop = 10;
-        supplyBlock.style.paddingBottom = 8;
-        supplyBlock.style.backgroundColor = ArmyRgb(51, 52, 55);
-        SetArmyBorder(supplyBlock, 1, ArmyRgb(112, 94, 61));
-        SetArmyRadius(supplyBlock, 5);
+        supplyBlock.style.paddingBottom = 9;
+        supplyBlock.style.backgroundColor = ArmyStableRgb(48, 49, 53);
+        SetStableArmyBorder(
+            supplyBlock,
+            1,
+            ArmyStableRgb(111, 94, 62));
+        SetStableArmyRadius(supplyBlock, 5);
 
         Label title = supplyBlock.Q<Label>(className: "supply-title");
 
         if (title != null)
         {
-            title.style.color = ArmyRgb(225, 190, 116);
+            title.style.color = ArmyStableRgb(225, 190, 116);
             title.style.fontSize = 13;
+            title.style.marginBottom = 6;
         }
+
+        supplyBlock.Query<Label>(className: "supply-subtitle")
+            .ForEach(label =>
+            {
+                label.style.marginTop = 1;
+                label.style.marginBottom = 2;
+                label.style.fontSize = 9;
+                label.style.color = ArmyStableRgb(185, 180, 164);
+            });
+
+        supplyBlock.Query<VisualElement>(className: "supply-controls")
+            .ForEach(row =>
+            {
+                row.style.height = 28;
+                row.style.minHeight = 28;
+                row.style.marginBottom = 3;
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+            });
+
+        supplyBlock.Query<Button>(className: "supply-step-button")
+            .ForEach(button =>
+            {
+                button.style.width = 32;
+                button.style.minWidth = 32;
+                button.style.maxWidth = 32;
+                button.style.height = 26;
+                button.style.minHeight = 26;
+                button.style.paddingLeft = 0;
+                button.style.paddingRight = 0;
+            });
+
+        supplyBlock.Query<Label>(className: "supply-value")
+            .ForEach(label =>
+            {
+                label.style.minWidth = 42;
+                label.style.marginLeft = 5;
+                label.style.marginRight = 5;
+                label.style.fontSize = 14;
+                label.style.unityTextAlign = TextAnchor.MiddleCenter;
+            });
+
+        supplyBlock.Query<Label>(className: "supply-note")
+            .ForEach(label =>
+            {
+                label.style.marginTop = 1;
+                label.style.marginBottom = 0;
+                label.style.fontSize = 9;
+                label.style.whiteSpace = WhiteSpace.Normal;
+                label.style.color = ArmyStableRgb(160, 160, 154);
+            });
     }
 
-    private void ConfigureGarrisonZone(VisualElement zone, bool capital)
+    private void PutCapitalGarrisonFirst(VisualElement transferBoard)
     {
-        if (zone == null)
+        if (capitalGarrisonDropZone.parent != transferBoard ||
+            commanderGarrisonDropZone.parent != transferBoard)
+        {
+            return;
+        }
+
+        capitalGarrisonDropZone.RemoveFromHierarchy();
+        commanderGarrisonDropZone.RemoveFromHierarchy();
+        transferBoard.Add(capitalGarrisonDropZone);
+        transferBoard.Add(commanderGarrisonDropZone);
+    }
+
+    private void RemoveRosterScroll(
+        VisualElement zone,
+        VisualElement list)
+    {
+        if (zone == null || list == null)
+            return;
+
+        ScrollView scroll =
+            zone.Q<ScrollView>(className: "army-roster-scroll");
+
+        if (scroll == null)
+            return;
+
+        list.RemoveFromHierarchy();
+        scroll.RemoveFromHierarchy();
+        zone.Add(list);
+    }
+
+    private void ConfigureStableGarrisonZone(
+        VisualElement zone,
+        VisualElement list,
+        bool capital)
+    {
+        if (zone == null || list == null)
             return;
 
         zone.style.position = Position.Relative;
         zone.style.width = Length.Percent(100);
         zone.style.height = Length.Percent(49);
         zone.style.minHeight = 104;
-        zone.style.maxHeight = 150;
+        zone.style.maxHeight = 136;
         zone.style.flexGrow = 1;
         zone.style.flexShrink = 1;
         zone.style.marginBottom = capital ? 5 : 0;
@@ -321,84 +502,113 @@ public partial class PrototypeUIController
         zone.style.paddingRight = 10;
         zone.style.paddingTop = 7;
         zone.style.paddingBottom = 7;
-        SetArmyRadius(zone, 5);
+        SetStableArmyRadius(zone, 5);
 
         Label title = zone.Q<Label>(className: "army-roster-title");
         Label summary = zone.Q<Label>(className: "army-roster-summary");
         Label empty = zone.Q<Label>(className: "army-roster-empty-label");
-        ScrollView scroll = zone.Q<ScrollView>(className: "army-roster-scroll");
-        VisualElement list = zone.Q<VisualElement>(className: "army-roster-list");
 
         if (title != null)
         {
             title.style.marginBottom = 1;
             title.style.fontSize = 11;
             title.style.color = capital
-                ? ArmyRgb(150, 190, 164)
-                : ArmyRgb(220, 181, 105);
+                ? ArmyStableRgb(151, 192, 165)
+                : ArmyStableRgb(220, 181, 105);
         }
 
         if (summary != null)
         {
             summary.style.marginBottom = 3;
             summary.style.fontSize = 9;
-            summary.style.color = ArmyRgb(165, 167, 164);
+            summary.style.color = ArmyStableRgb(164, 166, 162);
         }
 
-        if (scroll != null)
-        {
-            scroll.style.width = Length.Percent(100);
-            scroll.style.height = 78;
-            scroll.style.maxHeight = 78;
-            scroll.style.minHeight = 68;
-            scroll.style.flexGrow = 1;
-        }
-
-        if (list != null)
-        {
-            list.style.minWidth = Length.Percent(100);
-            list.style.minHeight = 72;
-            list.style.height = 72;
-            list.style.flexDirection = FlexDirection.Row;
-            list.style.flexWrap = Wrap.NoWrap;
-            list.style.alignItems = Align.Center;
-        }
+        list.style.width = Length.Percent(100);
+        list.style.height = 80;
+        list.style.minHeight = 80;
+        list.style.maxHeight = 80;
+        list.style.minWidth = Length.Percent(100);
+        list.style.flexDirection = FlexDirection.Row;
+        list.style.flexWrap = Wrap.NoWrap;
+        list.style.alignItems = Align.Center;
+        list.style.flexGrow = 0;
+        list.style.flexShrink = 0;
 
         if (empty != null)
         {
             empty.style.left = 10;
             empty.style.right = 10;
-            empty.style.top = 43;
+            empty.style.top = 42;
             empty.style.bottom = 7;
             empty.style.fontSize = 9;
             empty.style.unityTextAlign = TextAnchor.MiddleCenter;
         }
     }
 
-    private void RefreshArmyCardsRuntime()
+    private void MaintainStableArmyCards()
     {
-        if (gameState == null)
+        if (!stableArmyLayoutInitialized ||
+            gameState == null ||
+            armyScreen == null)
+        {
             return;
+        }
 
-        PrepareArmyCardsInList(capitalGarrisonList, true);
-        PrepareArmyCardsInList(commanderGarrisonList, false);
+        if (StableArmyCardsNeedRefresh(capitalGarrisonList) ||
+            StableArmyCardsNeedRefresh(commanderGarrisonList))
+        {
+            RefreshStableArmyCards();
+        }
     }
 
-    private void PrepareArmyCardsInList(VisualElement list, bool capital)
+    private bool StableArmyCardsNeedRefresh(VisualElement list)
+    {
+        if (list == null)
+            return false;
+
+        bool needsRefresh = false;
+
+        list.Query<VisualElement>(className: "fighter-card")
+            .ForEach(card =>
+            {
+                if (needsRefresh)
+                    return;
+
+                if (!(card.userData is string) ||
+                    card.childCount != 1 ||
+                    card.Q<Label>(className: "fighter-name") != null)
+                {
+                    needsRefresh = true;
+                }
+            });
+
+        return needsRefresh;
+    }
+
+    private void RefreshStableArmyCards()
+    {
+        PrepareStableArmyCardsInList(capitalGarrisonList, true);
+        PrepareStableArmyCardsInList(commanderGarrisonList, false);
+        RefreshStableArmyDropZoneColors(false, false);
+    }
+
+    private void PrepareStableArmyCardsInList(
+        VisualElement list,
+        bool capital)
     {
         if (list == null)
             return;
 
         list.Query<VisualElement>(className: "fighter-card")
-            .ForEach(card => PrepareArmyFighterCard(card, capital));
+            .ForEach(card => PrepareStableArmyCard(card, capital));
     }
 
-    private void PrepareArmyFighterCard(VisualElement card, bool capital)
+    private void PrepareStableArmyCard(
+        VisualElement card,
+        bool capital)
     {
-        if (card == null)
-            return;
-
-        FighterData fighter = ResolveFighterForCard(card);
+        FighterData fighter = ResolveStableFighterForCard(card);
 
         if (fighter == null)
             return;
@@ -407,6 +617,7 @@ public partial class PrototypeUIController
         card.tooltip = gameState.HasActiveExpedition
             ? "Состав зафиксирован до возвращения экспедиции"
             : "Перетащите бойца в другой гарнизон";
+        card.SetEnabled(!gameState.HasActiveExpedition && !isGameOver);
 
         VisualElement image =
             card.Q<VisualElement>(className: "fighter-image-placeholder");
@@ -429,16 +640,15 @@ public partial class PrototypeUIController
 
         typeLabel.text = fighter.Role;
 
-        // В карточке остаётся только изображение-заглушка с типом бойца.
         card.Clear();
         card.Add(image);
 
-        card.style.width = 92;
-        card.style.minWidth = 92;
-        card.style.maxWidth = 92;
-        card.style.height = 74;
-        card.style.minHeight = 74;
-        card.style.maxHeight = 74;
+        card.style.width = 104;
+        card.style.minWidth = 104;
+        card.style.maxWidth = 104;
+        card.style.height = 78;
+        card.style.minHeight = 78;
+        card.style.maxHeight = 78;
         card.style.flexGrow = 0;
         card.style.flexShrink = 0;
         card.style.marginRight = 7;
@@ -448,35 +658,35 @@ public partial class PrototypeUIController
         card.style.paddingTop = 5;
         card.style.paddingBottom = 5;
         card.style.backgroundColor = capital
-            ? ArmyRgb(43, 58, 52)
-            : ArmyRgb(59, 51, 38);
-        SetArmyBorder(
+            ? ArmyStableRgb(42, 57, 51)
+            : ArmyStableRgb(58, 50, 38);
+        SetStableArmyBorder(
             card,
             1,
             capital
-                ? ArmyRgb(79, 119, 96)
-                : ArmyRgb(139, 109, 65));
-        SetArmyRadius(card, 4);
+                ? ArmyStableRgb(78, 118, 95)
+                : ArmyStableRgb(139, 109, 65));
+        SetStableArmyRadius(card, 4);
 
         image.style.width = Length.Percent(100);
         image.style.height = Length.Percent(100);
         image.style.marginBottom = 0;
         image.style.alignItems = Align.Center;
         image.style.justifyContent = Justify.Center;
-        image.style.backgroundColor = ArmyRgb(30, 34, 40);
-        SetArmyBorder(image, 1, ArmyRgb(70, 76, 86));
-        SetArmyRadius(image, 3);
+        image.style.backgroundColor = ArmyStableRgb(29, 33, 39);
+        SetStableArmyBorder(image, 1, ArmyStableRgb(69, 76, 86));
+        SetStableArmyRadius(image, 3);
 
         typeLabel.style.color = capital
-            ? ArmyRgb(167, 202, 179)
-            : ArmyRgb(226, 191, 119);
+            ? ArmyStableRgb(168, 202, 180)
+            : ArmyStableRgb(226, 191, 119);
         typeLabel.style.fontSize = 10;
         typeLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
         typeLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
         typeLabel.style.whiteSpace = WhiteSpace.Normal;
     }
 
-    private FighterData ResolveFighterForCard(VisualElement card)
+    private FighterData ResolveStableFighterForCard(VisualElement card)
     {
         if (card == null || gameState == null)
             return null;
@@ -500,7 +710,7 @@ public partial class PrototypeUIController
         return null;
     }
 
-    private void OnArmyRootPointerDown(PointerDownEvent pointerEvent)
+    private void OnStableArmyPointerDown(PointerDownEvent pointerEvent)
     {
         if (pointerEvent.button != 0 ||
             isGameOver ||
@@ -511,79 +721,81 @@ public partial class PrototypeUIController
         }
 
         VisualElement target = pointerEvent.target as VisualElement;
-        VisualElement card = FindArmyFighterCard(target);
+        VisualElement card = FindStableArmyFighterCard(target);
 
         if (card == null)
             return;
 
-        bool capital = IsCardInList(card, capitalGarrisonList);
-        PrepareArmyFighterCard(card, capital);
+        FighterData fighter = ResolveStableFighterForCard(card);
 
-        string fighterId = card.userData as string;
-
-        if (string.IsNullOrEmpty(fighterId))
+        if (fighter == null)
             return;
 
-        CleanupArmyDragRuntime();
+        CleanupStableArmyDrag();
 
-        armyDraggedFighterId = fighterId;
-        armyDraggedPointerId = pointerEvent.pointerId;
-        armyDragStartPosition = pointerEvent.position;
-        armyDraggedCard = card;
-        armyDragStarted = false;
+        stableDraggedFighterId = fighter.Id;
+        stableDraggedPointerId = pointerEvent.pointerId;
+        stableDragStartPosition = pointerEvent.position;
+        stableDraggedCard = card;
+        stableDragStarted = false;
 
         interfaceRoot.CapturePointer(pointerEvent.pointerId);
         pointerEvent.StopImmediatePropagation();
     }
 
-    private void OnArmyRootPointerMove(PointerMoveEvent pointerEvent)
+    private void OnStableArmyPointerMove(PointerMoveEvent pointerEvent)
     {
-        if (armyDraggedCard == null ||
-            armyDraggedPointerId != pointerEvent.pointerId ||
+        if (stableDraggedCard == null ||
+            stableDraggedPointerId != pointerEvent.pointerId ||
             interfaceRoot == null ||
             !interfaceRoot.HasPointerCapture(pointerEvent.pointerId))
         {
             return;
         }
 
-        if (!armyDragStarted &&
-            Vector2.Distance(armyDragStartPosition, pointerEvent.position) >=
-            FighterDragThreshold)
+        if (!stableDragStarted &&
+            Vector2.Distance(
+                stableDragStartPosition,
+                pointerEvent.position) >= FighterDragThreshold)
         {
-            BeginArmyDragRuntime(pointerEvent.position);
+            BeginStableArmyDrag(pointerEvent.position);
         }
 
-        if (armyDragStarted)
+        if (stableDragStarted)
         {
-            UpdateArmyDragGhost(pointerEvent.position);
+            UpdateStableArmyDragGhost(pointerEvent.position);
 
             bool overCommander =
-                commanderGarrisonDropZone.worldBound.Contains(pointerEvent.position);
+                commanderGarrisonDropZone.worldBound.Contains(
+                    pointerEvent.position);
             bool overCapital =
-                capitalGarrisonDropZone.worldBound.Contains(pointerEvent.position);
+                capitalGarrisonDropZone.worldBound.Contains(
+                    pointerEvent.position);
 
-            RefreshArmyDropZoneColors(overCapital, overCommander);
+            RefreshStableArmyDropZoneColors(overCapital, overCommander);
         }
 
         pointerEvent.StopImmediatePropagation();
     }
 
-    private void OnArmyRootPointerUp(PointerUpEvent pointerEvent)
+    private void OnStableArmyPointerUp(PointerUpEvent pointerEvent)
     {
-        if (armyDraggedCard == null ||
-            armyDraggedPointerId != pointerEvent.pointerId)
+        if (stableDraggedCard == null ||
+            stableDraggedPointerId != pointerEvent.pointerId)
         {
             return;
         }
 
-        string fighterId = armyDraggedFighterId;
-        bool wasDragging = armyDragStarted;
+        string fighterId = stableDraggedFighterId;
+        bool wasDragging = stableDragStarted;
         bool droppedToCommander =
             wasDragging &&
-            commanderGarrisonDropZone.worldBound.Contains(pointerEvent.position);
+            commanderGarrisonDropZone.worldBound.Contains(
+                pointerEvent.position);
         bool droppedToCapital =
             wasDragging &&
-            capitalGarrisonDropZone.worldBound.Contains(pointerEvent.position);
+            capitalGarrisonDropZone.worldBound.Contains(
+                pointerEvent.position);
 
         if (interfaceRoot != null &&
             interfaceRoot.HasPointerCapture(pointerEvent.pointerId))
@@ -591,98 +803,107 @@ public partial class PrototypeUIController
             interfaceRoot.ReleasePointer(pointerEvent.pointerId);
         }
 
-        CleanupArmyDragRuntime();
+        CleanupStableArmyDrag();
 
-        // Обычный клик намеренно ничего не делает.
         if (wasDragging && droppedToCommander)
+        {
             MoveFighterToCommander(fighterId, true);
+            RefreshStableArmyCards();
+        }
         else if (wasDragging && droppedToCapital)
+        {
             MoveFighterToCommander(fighterId, false);
+            RefreshStableArmyCards();
+        }
 
         pointerEvent.StopImmediatePropagation();
     }
 
-    private void BeginArmyDragRuntime(Vector2 pointerPosition)
+    private void BeginStableArmyDrag(Vector2 pointerPosition)
     {
-        FighterData fighter = gameState.FindFighter(armyDraggedFighterId);
+        FighterData fighter = gameState.FindFighter(stableDraggedFighterId);
 
         if (fighter == null || interfaceRoot == null)
             return;
 
-        armyDragStarted = true;
-        armyDraggedCard.style.opacity = 0.32f;
+        stableDragStarted = true;
+        stableDraggedCard.style.opacity = 0.32f;
 
-        armyDragGhost = new VisualElement();
-        armyDragGhost.pickingMode = PickingMode.Ignore;
-        armyDragGhost.style.position = Position.Absolute;
-        armyDragGhost.style.width = 92;
-        armyDragGhost.style.height = 74;
-        armyDragGhost.style.paddingLeft = 5;
-        armyDragGhost.style.paddingRight = 5;
-        armyDragGhost.style.paddingTop = 5;
-        armyDragGhost.style.paddingBottom = 5;
-        armyDragGhost.style.backgroundColor = ArmyRgb(54, 48, 38);
-        armyDragGhost.style.opacity = 0.96f;
-        SetArmyBorder(armyDragGhost, 2, ArmyRgb(218, 176, 96));
-        SetArmyRadius(armyDragGhost, 4);
+        stableDragGhost = new VisualElement();
+        stableDragGhost.pickingMode = PickingMode.Ignore;
+        stableDragGhost.style.position = Position.Absolute;
+        stableDragGhost.style.width = 104;
+        stableDragGhost.style.height = 78;
+        stableDragGhost.style.paddingLeft = 5;
+        stableDragGhost.style.paddingRight = 5;
+        stableDragGhost.style.paddingTop = 5;
+        stableDragGhost.style.paddingBottom = 5;
+        stableDragGhost.style.backgroundColor = ArmyStableRgb(54, 48, 38);
+        stableDragGhost.style.opacity = 0.96f;
+        SetStableArmyBorder(
+            stableDragGhost,
+            2,
+            ArmyStableRgb(218, 176, 96));
+        SetStableArmyRadius(stableDragGhost, 4);
 
         VisualElement image = new VisualElement();
         image.style.width = Length.Percent(100);
         image.style.height = Length.Percent(100);
         image.style.alignItems = Align.Center;
         image.style.justifyContent = Justify.Center;
-        image.style.backgroundColor = ArmyRgb(29, 33, 39);
-        SetArmyBorder(image, 1, ArmyRgb(79, 83, 91));
-        SetArmyRadius(image, 3);
+        image.style.backgroundColor = ArmyStableRgb(29, 33, 39);
+        SetStableArmyBorder(image, 1, ArmyStableRgb(79, 83, 91));
+        SetStableArmyRadius(image, 3);
 
         Label role = new Label(fighter.Role);
-        role.style.color = ArmyRgb(231, 197, 127);
+        role.style.color = ArmyStableRgb(231, 197, 127);
         role.style.fontSize = 10;
         role.style.unityFontStyleAndWeight = FontStyle.Bold;
         role.style.unityTextAlign = TextAnchor.MiddleCenter;
         role.style.whiteSpace = WhiteSpace.Normal;
-        image.Add(role);
-        armyDragGhost.Add(image);
 
-        interfaceRoot.Add(armyDragGhost);
-        armyDragGhost.BringToFront();
-        UpdateArmyDragGhost(pointerPosition);
+        image.Add(role);
+        stableDragGhost.Add(image);
+
+        interfaceRoot.Add(stableDragGhost);
+        stableDragGhost.BringToFront();
+        UpdateStableArmyDragGhost(pointerPosition);
     }
 
-    private void UpdateArmyDragGhost(Vector2 pointerPosition)
+    private void UpdateStableArmyDragGhost(Vector2 pointerPosition)
     {
-        if (armyDragGhost == null)
+        if (stableDragGhost == null)
             return;
 
-        armyDragGhost.style.left = pointerPosition.x - 46f;
-        armyDragGhost.style.top = pointerPosition.y - 37f;
+        stableDragGhost.style.left = pointerPosition.x - 52f;
+        stableDragGhost.style.top = pointerPosition.y - 39f;
     }
 
-    private void CleanupArmyDragRuntime()
+    private void CleanupStableArmyDrag()
     {
         if (interfaceRoot != null &&
-            armyDraggedPointerId >= 0 &&
-            interfaceRoot.HasPointerCapture(armyDraggedPointerId))
+            stableDraggedPointerId >= 0 &&
+            interfaceRoot.HasPointerCapture(stableDraggedPointerId))
         {
-            interfaceRoot.ReleasePointer(armyDraggedPointerId);
+            interfaceRoot.ReleasePointer(stableDraggedPointerId);
         }
 
-        if (armyDraggedCard != null)
-            armyDraggedCard.style.opacity = 1f;
+        if (stableDraggedCard != null)
+            stableDraggedCard.style.opacity = 1f;
 
-        if (armyDragGhost != null)
-            armyDragGhost.RemoveFromHierarchy();
+        if (stableDragGhost != null)
+            stableDragGhost.RemoveFromHierarchy();
 
-        RefreshArmyDropZoneColors(false, false);
+        RefreshStableArmyDropZoneColors(false, false);
 
-        armyDraggedFighterId = null;
-        armyDraggedPointerId = -1;
-        armyDraggedCard = null;
-        armyDragGhost = null;
-        armyDragStarted = false;
+        stableDraggedFighterId = null;
+        stableDraggedPointerId = -1;
+        stableDraggedCard = null;
+        stableDragGhost = null;
+        stableDragStarted = false;
     }
 
-    private void RefreshArmyDropZoneColors(
+    private void RefreshStableArmyDropZoneColors(
         bool capitalHighlighted,
         bool commanderHighlighted)
     {
@@ -692,41 +913,44 @@ public partial class PrototypeUIController
                 capitalGarrisonList != null &&
                 capitalGarrisonList.childCount == 0;
 
-            Color capitalBackground = empty
-                ? ArmyRgb(61, 42, 43)
-                : ArmyRgb(39, 55, 49);
-            Color capitalBorder = empty
-                ? ArmyRgb(130, 74, 70)
-                : ArmyRgb(75, 112, 91);
+            Color background = empty
+                ? ArmyStableRgb(61, 42, 43)
+                : ArmyStableRgb(38, 54, 48);
+            Color border = empty
+                ? ArmyStableRgb(129, 74, 70)
+                : ArmyStableRgb(75, 112, 91);
 
             if (capitalHighlighted)
             {
-                capitalBackground = ArmyRgb(48, 72, 60);
-                capitalBorder = ArmyRgb(126, 174, 140);
+                background = ArmyStableRgb(48, 72, 60);
+                border = ArmyStableRgb(126, 174, 140);
             }
 
-            capitalGarrisonDropZone.style.backgroundColor = capitalBackground;
-            SetArmyBorder(capitalGarrisonDropZone, capitalHighlighted ? 2 : 1, capitalBorder);
+            capitalGarrisonDropZone.style.backgroundColor = background;
+            SetStableArmyBorder(
+                capitalGarrisonDropZone,
+                capitalHighlighted ? 2 : 1,
+                border);
         }
 
         if (commanderGarrisonDropZone != null)
         {
-            Color commanderBackground = commanderHighlighted
-                ? ArmyRgb(71, 61, 43)
-                : ArmyRgb(51, 45, 35);
-            Color commanderBorder = commanderHighlighted
-                ? ArmyRgb(218, 177, 98)
-                : ArmyRgb(132, 103, 62);
+            Color background = commanderHighlighted
+                ? ArmyStableRgb(71, 61, 43)
+                : ArmyStableRgb(50, 44, 34);
+            Color border = commanderHighlighted
+                ? ArmyStableRgb(218, 177, 98)
+                : ArmyStableRgb(132, 103, 62);
 
-            commanderGarrisonDropZone.style.backgroundColor = commanderBackground;
-            SetArmyBorder(
+            commanderGarrisonDropZone.style.backgroundColor = background;
+            SetStableArmyBorder(
                 commanderGarrisonDropZone,
                 commanderHighlighted ? 2 : 1,
-                commanderBorder);
+                border);
         }
     }
 
-    private VisualElement FindArmyFighterCard(VisualElement element)
+    private VisualElement FindStableArmyFighterCard(VisualElement element)
     {
         VisualElement current = element;
 
@@ -741,30 +965,12 @@ public partial class PrototypeUIController
         return null;
     }
 
-    private static bool IsCardInList(VisualElement card, VisualElement list)
-    {
-        if (card == null || list == null)
-            return false;
-
-        VisualElement current = card.parent;
-
-        while (current != null)
-        {
-            if (current == list)
-                return true;
-
-            current = current.parent;
-        }
-
-        return false;
-    }
-
-    private static Color ArmyRgb(byte r, byte g, byte b)
+    private static Color ArmyStableRgb(byte r, byte g, byte b)
     {
         return new Color32(r, g, b, 255);
     }
 
-    private static void SetArmyBorder(
+    private static void SetStableArmyBorder(
         VisualElement element,
         float width,
         Color color)
@@ -782,7 +988,9 @@ public partial class PrototypeUIController
         element.style.borderBottomColor = color;
     }
 
-    private static void SetArmyRadius(VisualElement element, float radius)
+    private static void SetStableArmyRadius(
+        VisualElement element,
+        float radius)
     {
         if (element == null)
             return;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -13,20 +14,20 @@ public class PrototypeUIController : MonoBehaviour
     }
 
     private const int MaxIncidentNotificationButtons = 6;
+    private const float NavigationClickCooldownSeconds = 0.18f;
 
     private GameState gameState;
+    private MainScreen? openedScreen;
+    private float lastNavigationClickTime = -NavigationClickCooldownSeconds;
+    private bool callbacksRegistered;
+    private bool isGameOver;
 
     private Button navCapitalButton;
     private Button navArmyButton;
     private Button navExpeditionsButton;
-
     private VisualElement capitalScreen;
     private VisualElement armyScreen;
     private VisualElement expeditionsScreen;
-    private MainScreen? openedScreen;
-
-    private const float NavigationClickCooldownSeconds = 0.18f;
-    private float lastNavigationClickTime = -NavigationClickCooldownSeconds;
 
     private Label dayLabel;
     private Label goldLabel;
@@ -36,13 +37,20 @@ public class PrototypeUIController : MonoBehaviour
     private Label populationLabel;
     private Label moodLabel;
     private Label foodConsumptionLabel;
-
     private Button endDayButton;
+
+    private Button goldMinus10Button;
+    private Button goldPlus10Button;
+    private Button foodMinus10Button;
+    private Button foodPlus10Button;
+    private Button populationMinus10Button;
+    private Button populationPlus10Button;
+    private Button moodMinus10Button;
+    private Button moodPlus10Button;
 
     private DropdownField commanderDropdown;
     private Label commanderDetailLabel;
     private Label armyStatusLabel;
-
     private Button supplyMinusButton;
     private Label supplyValueLabel;
     private Button supplyPlusButton;
@@ -54,7 +62,6 @@ public class PrototypeUIController : MonoBehaviour
     private Button sendRuinsButton;
     private Button sendMineButton;
     private Button sendForestButton;
-
     private VisualElement activeExpeditionCard;
     private Label activeExpeditionTitle;
     private Label activeExpeditionDetails;
@@ -71,17 +78,18 @@ public class PrototypeUIController : MonoBehaviour
     private Label incidentModalConsequence;
     private Button incidentUnderstoodButton;
     private VisualElement incidentModalTextColumn;
-
     private Button decisionOptionAButton;
     private Button decisionOptionBButton;
+
+    private VisualElement gameOverOverlay;
+    private Label gameOverDaysLabel;
+    private Button restartGameButton;
 
     private readonly List<ExpeditionIncidentOccurrence> unreadIncidents =
         new List<ExpeditionIncidentOccurrence>();
 
     private ExpeditionIncidentOccurrence openedIncident;
     private ExpeditionDecisionOccurrence openedDecision;
-
-    private bool callbacksRegistered;
 
     private void OnEnable()
     {
@@ -98,21 +106,11 @@ public class PrototypeUIController : MonoBehaviour
             return;
         }
 
-        gameState = new GameState();
-        gameState.CreateNewGame();
-
         reportHistoryLabel.enableRichText = true;
 
         CreateDecisionChoiceButtons();
-        ConfigureCommanderDropdown();
         RegisterCallbacks();
-        HideIncidentModal();
-
-        AddReport(
-            "Прототип запущен. Откройте нужный экран круглой кнопкой слева сверху.");
-
-        CloseMainScreen();
-        RefreshInterface();
+        StartNewGame();
     }
 
     private void FindInterfaceElements(VisualElement root)
@@ -134,6 +132,15 @@ public class PrototypeUIController : MonoBehaviour
         moodLabel = root.Q<Label>("mood-label");
         foodConsumptionLabel = root.Q<Label>("food-consumption-label");
         endDayButton = root.Q<Button>("end-day-button");
+
+        goldMinus10Button = root.Q<Button>("gold-minus10-button");
+        goldPlus10Button = root.Q<Button>("gold-plus10-button");
+        foodMinus10Button = root.Q<Button>("food-minus10-button");
+        foodPlus10Button = root.Q<Button>("food-plus10-button");
+        populationMinus10Button = root.Q<Button>("population-minus10-button");
+        populationPlus10Button = root.Q<Button>("population-plus10-button");
+        moodMinus10Button = root.Q<Button>("mood-minus10-button");
+        moodPlus10Button = root.Q<Button>("mood-plus10-button");
 
         commanderDropdown = root.Q<DropdownField>("commander-dropdown");
         commanderDetailLabel = root.Q<Label>("commander-detail-label");
@@ -169,6 +176,10 @@ public class PrototypeUIController : MonoBehaviour
         incidentUnderstoodButton = root.Q<Button>("incident-understood-button");
         incidentModalTextColumn =
             root.Q<VisualElement>(className: "incident-modal-text-column");
+
+        gameOverOverlay = root.Q<VisualElement>("game-over-overlay");
+        gameOverDaysLabel = root.Q<Label>("game-over-days-label");
+        restartGameButton = root.Q<Button>("restart-game-button");
     }
 
     private bool AllRequiredElementsExist()
@@ -189,6 +200,14 @@ public class PrototypeUIController : MonoBehaviour
             moodLabel != null &&
             foodConsumptionLabel != null &&
             endDayButton != null &&
+            goldMinus10Button != null &&
+            goldPlus10Button != null &&
+            foodMinus10Button != null &&
+            foodPlus10Button != null &&
+            populationMinus10Button != null &&
+            populationPlus10Button != null &&
+            moodMinus10Button != null &&
+            moodPlus10Button != null &&
             commanderDropdown != null &&
             commanderDetailLabel != null &&
             armyStatusLabel != null &&
@@ -214,7 +233,10 @@ public class PrototypeUIController : MonoBehaviour
             incidentModalDescription != null &&
             incidentModalConsequence != null &&
             incidentUnderstoodButton != null &&
-            incidentModalTextColumn != null;
+            incidentModalTextColumn != null &&
+            gameOverOverlay != null &&
+            gameOverDaysLabel != null &&
+            restartGameButton != null;
     }
 
     private void CreateDecisionChoiceButtons()
@@ -235,6 +257,28 @@ public class PrototypeUIController : MonoBehaviour
 
         incidentModalTextColumn.Add(decisionOptionAButton);
         incidentModalTextColumn.Add(decisionOptionBButton);
+    }
+
+    private void StartNewGame()
+    {
+        gameState = new GameState();
+        gameState.CreateNewGame();
+
+        isGameOver = false;
+        lastNavigationClickTime = -NavigationClickCooldownSeconds;
+        unreadIncidents.Clear();
+        reportHistory.Clear();
+        reportHistoryLabel.text = string.Empty;
+
+        ConfigureCommanderDropdown();
+        HideIncidentModal();
+        HideGameOver();
+
+        AddReport(
+            "Прототип запущен. Откройте нужный экран круглой кнопкой слева сверху.");
+
+        CloseMainScreen();
+        RefreshInterface();
     }
 
     private void ToggleScreen(MainScreen screen)
@@ -327,6 +371,15 @@ public class PrototypeUIController : MonoBehaviour
         navExpeditionsButton.clicked += OnExpeditionsNavigationClicked;
         endDayButton.clicked += OnEndDayClicked;
 
+        goldMinus10Button.clicked += OnGoldMinus10Clicked;
+        goldPlus10Button.clicked += OnGoldPlus10Clicked;
+        foodMinus10Button.clicked += OnFoodMinus10Clicked;
+        foodPlus10Button.clicked += OnFoodPlus10Clicked;
+        populationMinus10Button.clicked += OnPopulationMinus10Clicked;
+        populationPlus10Button.clicked += OnPopulationPlus10Clicked;
+        moodMinus10Button.clicked += OnMoodMinus10Clicked;
+        moodPlus10Button.clicked += OnMoodPlus10Clicked;
+
         supplyMinusButton.clicked += OnSupplyMinusClicked;
         supplyPlusButton.clicked += OnSupplyPlusClicked;
 
@@ -335,6 +388,7 @@ public class PrototypeUIController : MonoBehaviour
         sendForestButton.clicked += OnSendForestClicked;
         returnExpeditionButton.clicked += OnExpeditionActionClicked;
         incidentUnderstoodButton.clicked += OnIncidentUnderstoodClicked;
+        restartGameButton.clicked += OnRestartGameClicked;
 
         commanderDropdown.RegisterValueChangedCallback(OnCommanderChanged);
         callbacksRegistered = true;
@@ -350,6 +404,15 @@ public class PrototypeUIController : MonoBehaviour
         navExpeditionsButton.clicked -= OnExpeditionsNavigationClicked;
         endDayButton.clicked -= OnEndDayClicked;
 
+        goldMinus10Button.clicked -= OnGoldMinus10Clicked;
+        goldPlus10Button.clicked -= OnGoldPlus10Clicked;
+        foodMinus10Button.clicked -= OnFoodMinus10Clicked;
+        foodPlus10Button.clicked -= OnFoodPlus10Clicked;
+        populationMinus10Button.clicked -= OnPopulationMinus10Clicked;
+        populationPlus10Button.clicked -= OnPopulationPlus10Clicked;
+        moodMinus10Button.clicked -= OnMoodMinus10Clicked;
+        moodPlus10Button.clicked -= OnMoodPlus10Clicked;
+
         supplyMinusButton.clicked -= OnSupplyMinusClicked;
         supplyPlusButton.clicked -= OnSupplyPlusClicked;
 
@@ -358,6 +421,7 @@ public class PrototypeUIController : MonoBehaviour
         sendForestButton.clicked -= OnSendForestClicked;
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
         incidentUnderstoodButton.clicked -= OnIncidentUnderstoodClicked;
+        restartGameButton.clicked -= OnRestartGameClicked;
 
         commanderDropdown.UnregisterValueChangedCallback(OnCommanderChanged);
         callbacksRegistered = false;
@@ -369,6 +433,52 @@ public class PrototypeUIController : MonoBehaviour
             AddReport(changeEvent.newValue + " назначен командиром армии.");
 
         RefreshInterface();
+    }
+
+    private void OnGoldMinus10Clicked() => AdjustGold(-10);
+    private void OnGoldPlus10Clicked() => AdjustGold(10);
+    private void OnFoodMinus10Clicked() => AdjustFood(-10);
+    private void OnFoodPlus10Clicked() => AdjustFood(10);
+    private void OnPopulationMinus10Clicked() => AdjustPopulation(-10);
+    private void OnPopulationPlus10Clicked() => AdjustPopulation(10);
+    private void OnMoodMinus10Clicked() => AdjustMood(-10);
+    private void OnMoodPlus10Clicked() => AdjustMood(10);
+
+    private void AdjustGold(int delta)
+    {
+        if (isGameOver)
+            return;
+
+        gameState.Gold = Math.Max(0, gameState.Gold + delta);
+        RefreshInterface();
+    }
+
+    private void AdjustFood(int delta)
+    {
+        if (isGameOver)
+            return;
+
+        gameState.Food = Math.Max(0, gameState.Food + delta);
+        RefreshInterface();
+    }
+
+    private void AdjustPopulation(int delta)
+    {
+        if (isGameOver)
+            return;
+
+        gameState.Population = Math.Max(0, gameState.Population + delta);
+        RefreshInterface();
+    }
+
+    private void AdjustMood(int delta)
+    {
+        if (isGameOver)
+            return;
+
+        gameState.Mood = Math.Max(0, Math.Min(100, gameState.Mood + delta));
+        RefreshInterface();
+        CheckForDefeat();
     }
 
     private void OnSupplyPlusClicked()
@@ -385,6 +495,9 @@ public class PrototypeUIController : MonoBehaviour
 
     private void OnEndDayClicked()
     {
+        if (isGameOver)
+            return;
+
         int finishedDay = gameState.Day;
         DayResolutionResult result = DayResolver.ResolveDay(gameState);
 
@@ -393,6 +506,12 @@ public class PrototypeUIController : MonoBehaviour
 
         AddReport(string.Join("\n", result.Messages), finishedDay);
         RefreshInterface();
+        CheckForDefeat();
+    }
+
+    private void OnRestartGameClicked()
+    {
+        StartNewGame();
     }
 
     private void OnSendRuinsClicked() => TrySendExpedition("ruins");
@@ -448,9 +567,24 @@ public class PrototypeUIController : MonoBehaviour
         foodConsumptionLabel.text =
             "Расход: " + gameState.DailyFoodConsumption + " в день";
 
+        RefreshResourceTestButtons();
         RefreshArmyPanel();
         RefreshExpeditionPanel();
         RefreshIncidentNotifications();
+    }
+
+    private void RefreshResourceTestButtons()
+    {
+        bool available = !isGameOver;
+
+        goldMinus10Button.SetEnabled(available && gameState.Gold > 0);
+        goldPlus10Button.SetEnabled(available);
+        foodMinus10Button.SetEnabled(available && gameState.Food > 0);
+        foodPlus10Button.SetEnabled(available);
+        populationMinus10Button.SetEnabled(available && gameState.Population > 0);
+        populationPlus10Button.SetEnabled(available);
+        moodMinus10Button.SetEnabled(available && gameState.Mood > 0);
+        moodPlus10Button.SetEnabled(available && gameState.Mood < 100);
     }
 
     private void RefreshArmyPanel()
@@ -482,7 +616,7 @@ public class PrototypeUIController : MonoBehaviour
     {
         int dailyConsumption = gameState.ExpeditionSupplyConsumption;
         int fullDays = gameState.FullSupplyDays;
-        bool canAdjust = gameState.CanAdjustArmySupply;
+        bool canAdjust = gameState.CanAdjustArmySupply && !isGameOver;
 
         supplyValueLabel.text = gameState.ArmySupply.ToString();
         supplyConsumptionLabel.text =
@@ -520,11 +654,12 @@ public class PrototypeUIController : MonoBehaviour
     {
         bool expeditionActive = gameState.HasActiveExpedition;
         bool awaitingDecision = gameState.HasPendingExpeditionDecision;
+        bool controlsAvailable = !isGameOver;
 
-        commanderDropdown.SetEnabled(!expeditionActive);
-        sendRuinsButton.SetEnabled(!expeditionActive);
-        sendMineButton.SetEnabled(!expeditionActive);
-        sendForestButton.SetEnabled(!expeditionActive);
+        commanderDropdown.SetEnabled(controlsAvailable && !expeditionActive);
+        sendRuinsButton.SetEnabled(controlsAvailable && !expeditionActive);
+        sendMineButton.SetEnabled(controlsAvailable && !expeditionActive);
+        sendForestButton.SetEnabled(controlsAvailable && !expeditionActive);
 
         activeExpeditionCard.style.display =
             expeditionActive ? DisplayStyle.Flex : DisplayStyle.None;
@@ -584,7 +719,12 @@ public class PrototypeUIController : MonoBehaviour
         bool canCancel = gameState.CanCancelExpeditionBeforeDayEnd;
         bool alreadyReturning = expedition.Phase == CommanderState.ReturningToCastle;
 
-        if (awaitingDecision)
+        if (!controlsAvailable)
+        {
+            returnExpeditionButton.SetEnabled(false);
+            returnExpeditionButton.text = "Партия завершена";
+        }
+        else if (awaitingDecision)
         {
             returnExpeditionButton.SetEnabled(false);
             returnExpeditionButton.text = "Сначала требуется приказ";
@@ -609,6 +749,9 @@ public class PrototypeUIController : MonoBehaviour
     private void RefreshIncidentNotifications()
     {
         incidentNotificationStack.Clear();
+
+        if (isGameOver)
+            return;
 
         bool hasDecision = gameState.HasPendingExpeditionDecision;
         int availableBackgroundSlots =
@@ -682,7 +825,7 @@ public class PrototypeUIController : MonoBehaviour
 
     private void OpenIncident(ExpeditionIncidentOccurrence occurrence)
     {
-        if (occurrence == null)
+        if (occurrence == null || isGameOver)
             return;
 
         openedDecision = null;
@@ -701,7 +844,7 @@ public class PrototypeUIController : MonoBehaviour
 
     private void OpenDecision(ExpeditionDecisionOccurrence occurrence)
     {
-        if (occurrence == null)
+        if (occurrence == null || isGameOver)
             return;
 
         openedIncident = null;
@@ -799,6 +942,31 @@ public class PrototypeUIController : MonoBehaviour
             incidentUnderstoodButton.style.display = DisplayStyle.Flex;
 
         incidentModalOverlay.style.display = DisplayStyle.None;
+    }
+
+    private void CheckForDefeat()
+    {
+        if (isGameOver || gameState.Mood > 0)
+            return;
+
+        isGameOver = true;
+        int survivedDays = Math.Max(0, gameState.Day - 1);
+
+        HideIncidentModal();
+        endDayButton.SetEnabled(false);
+        gameOverDaysLabel.text =
+            "Вы удерживали трон: " + survivedDays + " " + GetDayWord(survivedDays);
+        gameOverOverlay.style.display = DisplayStyle.Flex;
+
+        RefreshResourceTestButtons();
+        RefreshIncidentNotifications();
+    }
+
+    private void HideGameOver()
+    {
+        isGameOver = false;
+        endDayButton.SetEnabled(true);
+        gameOverOverlay.style.display = DisplayStyle.None;
     }
 
     private string GetDayWord(int value)

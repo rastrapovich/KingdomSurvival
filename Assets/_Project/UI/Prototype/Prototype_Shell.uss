@@ -1,0 +1,393 @@
+/* ================================================================
+   ОСНОВНАЯ ОБОЛОЧКА ПРОТОТИПА
+   Макет: постоянные донесения слева, рабочая область по центру,
+   навигация и ресурсы в нижней панели.
+   ================================================================ */
+
+.shell-screen {
+    flex-grow: 1;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    background-color: rgb(18, 21, 26);
+    color: rgb(226, 219, 204);
+}
+
+.shell-main-row {
+    flex-grow: 1;
+    min-height: 0;
+    flex-direction: row;
+    margin-bottom: 10px;
+}
+
+.shell-sidebar {
+    width: 330px;
+    min-width: 330px;
+    max-width: 330px;
+    min-height: 0;
+    margin-right: 12px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 10px;
+    padding-bottom: 8px;
+    background-color: rgb(30, 33, 39);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(112, 86, 53);
+    border-right-color: rgb(75, 68, 58);
+    border-top-color: rgb(75, 68, 58);
+    border-bottom-color: rgb(75, 68, 58);
+    border-radius: 5px;
+}
+
+.shell-game-title {
+    height: 48px;
+    flex-shrink: 0;
+    color: rgb(218, 177, 91);
+    font-size: 19px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.shell-reports-dock {
+    position: relative;
+    left: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 0px;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.shell-reports-panel {
+    flex-grow: 1;
+    min-height: 0;
+    margin-bottom: 0;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background-color: rgb(34, 38, 45);
+    border-left-color: rgb(72, 76, 83);
+    border-right-color: rgb(72, 76, 83);
+    border-top-color: rgb(72, 76, 83);
+    border-bottom-color: rgb(72, 76, 83);
+}
+
+.shell-reports-title {
+    margin-bottom: 11px;
+    color: rgb(218, 177, 91);
+    font-size: 16px;
+}
+
+.shell-report-scroll {
+    flex-grow: 1;
+    min-height: 0;
+    max-height: 9999px;
+}
+
+.shell-report-text {
+    color: rgb(205, 200, 188);
+    font-size: 12px;
+    white-space: normal;
+}
+
+.shell-workspace {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+    background-color: rgb(18, 21, 26);
+}
+
+.shell-workspace-content {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.shell-content-screen {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+.shell-screen-scroll {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+.shell-content-panel {
+    min-height: 100%;
+    margin-bottom: 0;
+    background-color: rgb(29, 33, 40);
+    border-left-color: rgb(62, 67, 76);
+    border-right-color: rgb(62, 67, 76);
+    border-top-color: rgb(62, 67, 76);
+    border-bottom-color: rgb(62, 67, 76);
+}
+
+.shell-expedition-panel {
+    max-width: 1120px;
+}
+
+/* ================================================================
+   НИЖНЯЯ ПАНЕЛЬ
+   ================================================================ */
+
+.shell-bottom-bar {
+    height: 82px;
+    min-height: 82px;
+    max-height: 82px;
+    flex-shrink: 0;
+    flex-direction: row;
+    background-color: rgb(34, 38, 45);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(78, 69, 55);
+    border-right-color: rgb(78, 69, 55);
+    border-top-color: rgb(78, 69, 55);
+    border-bottom-color: rgb(78, 69, 55);
+    border-radius: 4px;
+}
+
+.shell-navigation-bar {
+    width: 330px;
+    min-width: 330px;
+    max-width: 330px;
+    height: 100%;
+    margin-top: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.shell-nav-button {
+    height: 100%;
+    min-height: 0;
+    width: 106px;
+    min-width: 0;
+    max-width: 106px;
+    flex-grow: 1;
+    margin-right: 3px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 3px;
+    color: rgb(226, 219, 204);
+    font-size: 14px;
+    -unity-font-style: normal;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+}
+
+.shell-nav-button.nav-capital {
+    background-color: rgb(91, 77, 48);
+    border-left-color: rgb(150, 125, 73);
+    border-right-color: rgb(150, 125, 73);
+    border-top-color: rgb(150, 125, 73);
+    border-bottom-color: rgb(150, 125, 73);
+}
+
+.shell-nav-button.nav-army {
+    background-color: rgb(92, 58, 58);
+    border-left-color: rgb(145, 83, 81);
+    border-right-color: rgb(145, 83, 81);
+    border-top-color: rgb(145, 83, 81);
+    border-bottom-color: rgb(145, 83, 81);
+}
+
+.shell-nav-button.nav-expedition {
+    background-color: rgb(57, 82, 67);
+    border-left-color: rgb(82, 126, 98);
+    border-right-color: rgb(82, 126, 98);
+    border-top-color: rgb(82, 126, 98);
+    border-bottom-color: rgb(82, 126, 98);
+}
+
+.shell-nav-button:hover {
+    color: rgb(247, 239, 218);
+    -unity-font-style: bold;
+}
+
+.shell-nav-button.nav-capital:hover { background-color: rgb(112, 94, 57); }
+.shell-nav-button.nav-army:hover { background-color: rgb(112, 68, 67); }
+.shell-nav-button.nav-expedition:hover { background-color: rgb(68, 101, 80); }
+
+.shell-nav-button.nav-button-active {
+    color: rgb(255, 242, 207);
+    -unity-font-style: bold;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+}
+
+.shell-resource-bar {
+    flex-grow: 1;
+    min-width: 0;
+    height: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    padding-left: 12px;
+    padding-right: 10px;
+}
+
+.shell-resource-strip {
+    flex-grow: 0;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.shell-resource-box {
+    min-width: 96px;
+    height: 54px;
+    margin-right: 6px;
+    margin-bottom: 0;
+    padding-left: 9px;
+    padding-right: 9px;
+    padding-top: 7px;
+    padding-bottom: 6px;
+    justify-content: center;
+    background-color: rgb(45, 49, 57);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(57, 62, 71);
+    border-right-color: rgb(57, 62, 71);
+    border-top-color: rgb(57, 62, 71);
+    border-bottom-color: rgb(57, 62, 71);
+    border-radius: 4px;
+}
+
+.shell-mood-box {
+    min-width: 142px;
+}
+
+.shell-resource-box .resource-value {
+    color: rgb(224, 219, 207);
+    font-size: 12px;
+}
+
+.shell-resource-box .resource-income {
+    margin-top: 2px;
+    color: rgb(126, 172, 125);
+    font-size: 9px;
+}
+
+.shell-resource-box.food-box {
+    position: relative;
+    overflow: visible;
+}
+
+.shell-resource-box .food-expense-popup {
+    left: 0;
+    top: auto;
+    bottom: 58px;
+    min-width: 160px;
+    background-color: rgb(29, 33, 40);
+    border-left-color: rgb(75, 69, 59);
+    border-right-color: rgb(75, 69, 59);
+    border-top-color: rgb(75, 69, 59);
+    border-bottom-color: rgb(75, 69, 59);
+}
+
+.shell-end-day-button {
+    position: relative;
+    right: 0px;
+    bottom: 0px;
+    width: 92px;
+    min-width: 92px;
+    max-width: 92px;
+    height: 54px;
+    margin-left: 8px;
+    background-color: rgb(186, 132, 29);
+    color: rgb(28, 24, 17);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(222, 170, 57);
+    border-right-color: rgb(222, 170, 57);
+    border-top-color: rgb(222, 170, 57);
+    border-bottom-color: rgb(222, 170, 57);
+    border-radius: 8px;
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+.shell-end-day-button:hover {
+    background-color: rgb(213, 155, 35);
+}
+
+/* ================================================================
+   ОБЩАЯ ПАЛИТРА
+   ================================================================ */
+
+.panel {
+    background-color: rgb(29, 33, 40);
+    border-left-color: rgb(62, 67, 76);
+    border-right-color: rgb(62, 67, 76);
+    border-top-color: rgb(62, 67, 76);
+    border-bottom-color: rgb(62, 67, 76);
+}
+
+.panel-title,
+.supply-title,
+.army-roster-title,
+.active-expedition-title {
+    color: rgb(218, 177, 91);
+}
+
+.panel-description,
+.supply-note,
+.army-roster-summary {
+    color: rgb(165, 166, 163);
+}
+
+.status-label {
+    background-color: rgb(39, 44, 52);
+    color: rgb(188, 197, 201);
+}
+
+.building-card,
+.location-card,
+.supply-block,
+.army-roster-drop-zone {
+    background-color: rgb(38, 43, 51);
+}
+
+.location-name,
+.fighter-name,
+.commander-detail {
+    color: rgb(226, 219, 204);
+}
+
+.send-button {
+    background-color: rgb(57, 82, 67);
+    color: rgb(225, 232, 220);
+}
+
+.send-button:hover {
+    background-color: rgb(68, 101, 80);
+}
+
+/* Уведомления держим над новой нижней панелью. */
+.incident-notification-stack {
+    right: 30px;
+    bottom: 108px;
+}

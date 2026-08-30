@@ -247,10 +247,13 @@ public static class DayResolver
 
         if (expedition.ExplorationDaysRemaining > 0)
         {
+            int completedDays =
+                Math.Max(0, location.ExplorationDays - expedition.ExplorationDaysRemaining);
+
             result.Messages.Add(
-                "Отряд исследует локацию «" + location.Name +
-                "». Осталось дней исследования: " +
-                expedition.ExplorationDaysRemaining + ".");
+                "Исследование локации «" + location.Name + "» — " +
+                completedDays + "/" + location.ExplorationDays +
+                ". Награда ещё не получена.");
             return;
         }
 
@@ -261,11 +264,21 @@ public static class DayResolver
         state.ArmySupply += location.RewardArmySupply;
         result.HadNotableOccurrence = true;
 
+        List<string> rewardParts = new List<string>();
+
+        if (location.RewardArmyGold > 0)
+            rewardParts.Add("золото +" + location.RewardArmyGold);
+
+        if (location.RewardArmySupply > 0)
+            rewardParts.Add("снабжение +" + location.RewardArmySupply);
+
+        string rewardText = rewardParts.Count > 0
+            ? string.Join(", ", rewardParts)
+            : "добычи нет";
+
         result.Messages.Add(
             "<color=#84B889>Локация «" + location.Name +
-            "» исследована. Добыча отряда: золото +" +
-            location.RewardArmyGold + ", снабжение +" +
-            location.RewardArmySupply +
+            "» исследована. Добыча отряда: " + rewardText +
             ". Ресурсы находятся у отряда и попадут в столицу только после возвращения.</color>");
     }
 

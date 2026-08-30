@@ -1,0 +1,123 @@
+/* ================================================================
+   ВРЕМЕННЫЕ КНОПКИ ТЕСТИРОВАНИЯ РЕСУРСОВ
+   ================================================================ */
+
+.resource-test-controls {
+    flex-direction: row;
+    margin-top: 5px;
+}
+
+.resource-test-button {
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    height: 22px;
+    margin-right: 4px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    background-color: rgb(57, 62, 72);
+    color: rgb(205, 199, 184);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(83, 88, 99);
+    border-right-color: rgb(83, 88, 99);
+    border-top-color: rgb(83, 88, 99);
+    border-bottom-color: rgb(83, 88, 99);
+    border-radius: 3px;
+    font-size: 10px;
+    -unity-font-style: bold;
+}
+
+.resource-test-button:hover {
+    background-color: rgb(72, 78, 90);
+}
+
+.resource-test-button:disabled {
+    opacity: 0.4;
+}
+
+/* ================================================================
+   ЭКРАН СВЕРЖЕНИЯ
+   ================================================================ */
+
+.game-over-overlay {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(9, 10, 13, 0.92);
+}
+
+.game-over-window {
+    width: 540px;
+    max-width: 86%;
+    padding-left: 28px;
+    padding-right: 28px;
+    padding-top: 28px;
+    padding-bottom: 26px;
+    align-items: center;
+    background-color: rgb(31, 34, 41);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(129, 65, 57);
+    border-right-color: rgb(129, 65, 57);
+    border-top-color: rgb(129, 65, 57);
+    border-bottom-color: rgb(129, 65, 57);
+    border-radius: 8px;
+}
+
+.game-over-title {
+    margin-bottom: 16px;
+    color: rgb(215, 112, 96);
+    font-size: 28px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.game-over-description {
+    max-width: 450px;
+    margin-bottom: 20px;
+    color: rgb(217, 209, 190);
+    font-size: 14px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.game-over-days {
+    margin-bottom: 22px;
+    color: rgb(235, 194, 104);
+    font-size: 18px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.game-over-restart-button {
+    width: 220px;
+    height: 44px;
+    background-color: rgb(92, 63, 43);
+    color: rgb(248, 234, 204);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(180, 133, 72);
+    border-right-color: rgb(180, 133, 72);
+    border-top-color: rgb(180, 133, 72);
+    border-bottom-color: rgb(180, 133, 72);
+    border-radius: 5px;
+    -unity-font-style: bold;
+}
+
+.game-over-restart-button:hover {
+    background-color: rgb(115, 78, 49);
+}

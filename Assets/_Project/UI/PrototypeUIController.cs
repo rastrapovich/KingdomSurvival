@@ -15,12 +15,14 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private const int MaxIncidentNotificationButtons = 6;
     private const float NavigationClickCooldownSeconds = 0.18f;
+    private const float FighterDragThreshold = 6f;
 
     private GameState gameState;
     private MainScreen? openedScreen;
     private float lastNavigationClickTime = -NavigationClickCooldownSeconds;
     private bool callbacksRegistered;
     private bool isGameOver;
+    private VisualElement interfaceRoot;
 
     private Button navCapitalButton;
     private Button navArmyButton;
@@ -59,20 +61,25 @@ public partial class PrototypeUIController : MonoBehaviour
     private Button supplyPlusButton;
     private Label supplyConsumptionLabel;
     private Label supplyDaysLabel;
-    private VisualElement fightersList;
-    private Label fightersTitleLabel;
     private Label fighterSelectionHintLabel;
-    private VisualElement expeditionPreview;
-    private Label expeditionPreviewCountLabel;
-    private Label expeditionPreviewPowerLabel;
-    private Label expeditionPreviewNamesLabel;
-    private VisualElement garrisonPreview;
-    private Label garrisonPreviewCountLabel;
-    private Label garrisonPreviewPowerLabel;
-    private Label garrisonPreviewNamesLabel;
+    private VisualElement commanderGarrisonDropZone;
+    private VisualElement commanderGarrisonList;
+    private Label commanderGarrisonSummaryLabel;
+    private Label commanderGarrisonEmptyLabel;
+    private VisualElement capitalGarrisonDropZone;
+    private VisualElement capitalGarrisonList;
+    private Label capitalGarrisonSummaryLabel;
+    private Label capitalGarrisonEmptyLabel;
 
     private readonly HashSet<string> selectedFighterIds =
         new HashSet<string>();
+
+    private string draggedFighterId;
+    private int draggedFighterPointerId = -1;
+    private Vector2 fighterDragStartPosition;
+    private bool fighterDragStarted;
+    private VisualElement draggedFighterCard;
+    private VisualElement fighterDragGhost;
 
     private Label expeditionStatusLabel;
     private Button sendRuinsButton;
@@ -132,6 +139,7 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private void FindInterfaceElements(VisualElement root)
     {
+        interfaceRoot = root;
         navCapitalButton = root.Q<Button>("nav-capital-button");
         navArmyButton = root.Q<Button>("nav-army-button");
         navExpeditionsButton = root.Q<Button>("nav-expeditions-button");
@@ -171,24 +179,24 @@ public partial class PrototypeUIController : MonoBehaviour
         supplyPlusButton = root.Q<Button>("supply-plus-button");
         supplyConsumptionLabel = root.Q<Label>("supply-consumption-label");
         supplyDaysLabel = root.Q<Label>("supply-days-label");
-        fightersList = root.Q<VisualElement>("fighters-list");
-        fightersTitleLabel = root.Q<Label>("fighters-title-label");
         fighterSelectionHintLabel =
             root.Q<Label>("fighter-selection-hint-label");
-        expeditionPreview = root.Q<VisualElement>("expedition-preview");
-        expeditionPreviewCountLabel =
-            root.Q<Label>("expedition-preview-count-label");
-        expeditionPreviewPowerLabel =
-            root.Q<Label>("expedition-preview-power-label");
-        expeditionPreviewNamesLabel =
-            root.Q<Label>("expedition-preview-names-label");
-        garrisonPreview = root.Q<VisualElement>("garrison-preview");
-        garrisonPreviewCountLabel =
-            root.Q<Label>("garrison-preview-count-label");
-        garrisonPreviewPowerLabel =
-            root.Q<Label>("garrison-preview-power-label");
-        garrisonPreviewNamesLabel =
-            root.Q<Label>("garrison-preview-names-label");
+        commanderGarrisonDropZone =
+            root.Q<VisualElement>("commander-garrison-drop-zone");
+        commanderGarrisonList =
+            root.Q<VisualElement>("commander-garrison-list");
+        commanderGarrisonSummaryLabel =
+            root.Q<Label>("commander-garrison-summary-label");
+        commanderGarrisonEmptyLabel =
+            root.Q<Label>("commander-garrison-empty-label");
+        capitalGarrisonDropZone =
+            root.Q<VisualElement>("capital-garrison-drop-zone");
+        capitalGarrisonList =
+            root.Q<VisualElement>("capital-garrison-list");
+        capitalGarrisonSummaryLabel =
+            root.Q<Label>("capital-garrison-summary-label");
+        capitalGarrisonEmptyLabel =
+            root.Q<Label>("capital-garrison-empty-label");
 
         expeditionStatusLabel = root.Q<Label>("expedition-status-label");
         sendRuinsButton = root.Q<Button>("send-ruins-button");
@@ -257,17 +265,15 @@ public partial class PrototypeUIController : MonoBehaviour
             supplyPlusButton != null &&
             supplyConsumptionLabel != null &&
             supplyDaysLabel != null &&
-            fightersList != null &&
-            fightersTitleLabel != null &&
             fighterSelectionHintLabel != null &&
-            expeditionPreview != null &&
-            expeditionPreviewCountLabel != null &&
-            expeditionPreviewPowerLabel != null &&
-            expeditionPreviewNamesLabel != null &&
-            garrisonPreview != null &&
-            garrisonPreviewCountLabel != null &&
-            garrisonPreviewPowerLabel != null &&
-            garrisonPreviewNamesLabel != null &&
+            commanderGarrisonDropZone != null &&
+            commanderGarrisonList != null &&
+            commanderGarrisonSummaryLabel != null &&
+            commanderGarrisonEmptyLabel != null &&
+            capitalGarrisonDropZone != null &&
+            capitalGarrisonList != null &&
+            capitalGarrisonSummaryLabel != null &&
+            capitalGarrisonEmptyLabel != null &&
             expeditionStatusLabel != null &&
             sendRuinsButton != null &&
             sendMineButton != null &&
@@ -313,6 +319,7 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private void StartNewGame()
     {
+        CleanupFighterDrag();
         gameState = new GameState();
         gameState.CreateNewGame();
 
@@ -452,6 +459,8 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private void OnDisable()
     {
+        CleanupFighterDrag();
+
         if (!callbacksRegistered)
             return;
 
@@ -714,7 +723,6 @@ public partial class PrototypeUIController : MonoBehaviour
         }
 
         RefreshSupplyBlock();
-        RefreshArmySplitPreview();
         RefreshFightersList();
     }
 
@@ -747,128 +755,322 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private void RefreshFightersList()
     {
-        fightersList.Clear();
+        commanderGarrisonList.Clear();
+        capitalGarrisonList.Clear();
 
         bool expeditionActive = gameState.HasActiveExpedition;
-        fightersTitleLabel.text = expeditionActive
-            ? "ВОИНЫ ЕДИНСТВЕННОЙ АРМИИ"
-            : "ВЫБЕРИТЕ БОЙЦОВ В ЭКСПЕДИЦИЮ";
-
         fighterSelectionHintLabel.text = expeditionActive
-            ? "Состав зафиксирован до возвращения экспедиции."
-            : "Нажимайте на карточки: выбранные отправятся с командиром, остальные останутся гарнизоном столицы.";
+            ? "Состав обоих гарнизонов зафиксирован до возвращения экспедиции."
+            : "Перетаскивайте карточки между гарнизонами. Щелчок по карточке также перемещает бойца.";
+
+        List<string> commanderFighterIds = expeditionActive
+            ? new List<string>(gameState.ActiveExpedition.FighterIds)
+            : GetSelectedFighterIdsInArmyOrder();
+        List<string> capitalFighterIds = new List<string>();
 
         foreach (FighterData fighter in gameState.Fighters)
         {
-            string fighterId = fighter.Id;
-            bool assignedToExpedition = expeditionActive
-                ? gameState.IsFighterInActiveExpedition(fighterId)
-                : selectedFighterIds.Contains(fighterId);
+            bool withCommander = commanderFighterIds.Contains(fighter.Id);
 
-            Button card = new Button(
-                () => OnFighterCardClicked(fighterId));
-            card.AddToClassList("fighter-card");
-            card.AddToClassList(
-                assignedToExpedition
-                    ? "fighter-card-selected"
-                    : "fighter-card-garrison");
-            card.SetEnabled(!expeditionActive && !isGameOver);
+            if (!withCommander)
+                capitalFighterIds.Add(fighter.Id);
 
-            VisualElement imagePlaceholder = new VisualElement();
-            imagePlaceholder.AddToClassList("fighter-image-placeholder");
+            Button card = CreateFighterCard(
+                fighter,
+                withCommander,
+                expeditionActive);
 
-            Label imagePlaceholderLabel = new Label("ИЗОБРАЖЕНИЕ");
-            imagePlaceholderLabel.AddToClassList("fighter-image-placeholder-text");
-            imagePlaceholder.Add(imagePlaceholderLabel);
-            card.Add(imagePlaceholder);
-
-            Label nameLabel = new Label(fighter.Name);
-            nameLabel.AddToClassList("fighter-name");
-            card.Add(nameLabel);
-
-            Label roleLabel = new Label(fighter.Role);
-            roleLabel.AddToClassList("fighter-role");
-            card.Add(roleLabel);
-
-            Label infoLabel = new Label(
-                "Ур. " + fighter.Level + " · оборона " +
-                fighter.DefensePower);
-            infoLabel.AddToClassList("fighter-info");
-            card.Add(infoLabel);
-
-            string assignmentText;
-
-            if (expeditionActive)
-            {
-                assignmentText = assignedToExpedition
-                    ? "В ЭКСПЕДИЦИИ"
-                    : "ГАРНИЗОН СТОЛИЦЫ";
-            }
+            if (withCommander)
+                commanderGarrisonList.Add(card);
             else
-            {
-                assignmentText = assignedToExpedition
-                    ? "В ЭКСПЕДИЦИЮ"
-                    : "ОСТАНЕТСЯ В СТОЛИЦЕ";
-            }
-
-            Label assignmentLabel = new Label(assignmentText);
-            assignmentLabel.AddToClassList("fighter-assignment");
-            card.Add(assignmentLabel);
-
-            fightersList.Add(card);
+                capitalGarrisonList.Add(card);
         }
+
+        int commanderPower =
+            gameState.CalculateDefensePower(commanderFighterIds);
+        int capitalPower =
+            gameState.CalculateDefensePower(capitalFighterIds);
+        int totalPower = gameState.TotalArmyDefensePower;
+
+        commanderGarrisonSummaryLabel.text =
+            commanderFighterIds.Count + " " +
+            GetFighterWord(commanderFighterIds.Count) +
+            " · сила " + commanderPower;
+        capitalGarrisonSummaryLabel.text =
+            capitalFighterIds.Count + " " +
+            GetFighterWord(capitalFighterIds.Count) +
+            " · оборона " + capitalPower + "/" + totalPower;
+
+        commanderGarrisonEmptyLabel.style.display =
+            commanderFighterIds.Count == 0
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+        capitalGarrisonEmptyLabel.style.display =
+            capitalFighterIds.Count == 0
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+
+        if (capitalFighterIds.Count == 0)
+            capitalGarrisonDropZone.AddToClassList("army-roster-empty-danger");
+        else
+            capitalGarrisonDropZone.RemoveFromClassList("army-roster-empty-danger");
     }
 
-    private void OnFighterCardClicked(string fighterId)
+    private Button CreateFighterCard(
+        FighterData fighter,
+        bool withCommander,
+        bool expeditionActive)
+    {
+        string fighterId = fighter.Id;
+        Button card = new Button();
+        card.AddToClassList("fighter-card");
+        card.AddToClassList(
+            withCommander
+                ? "fighter-card-selected"
+                : "fighter-card-garrison");
+        card.tooltip = expeditionActive
+            ? "Состав зафиксирован до возвращения"
+            : "Перетащите бойца в другой гарнизон";
+        card.SetEnabled(!expeditionActive && !isGameOver);
+
+        VisualElement imagePlaceholder = new VisualElement();
+        imagePlaceholder.AddToClassList("fighter-image-placeholder");
+
+        Label imagePlaceholderLabel = new Label("ИЗОБРАЖЕНИЕ");
+        imagePlaceholderLabel.AddToClassList("fighter-image-placeholder-text");
+        imagePlaceholder.Add(imagePlaceholderLabel);
+        card.Add(imagePlaceholder);
+
+        Label nameLabel = new Label(fighter.Name);
+        nameLabel.AddToClassList("fighter-name");
+        card.Add(nameLabel);
+
+        Label roleLabel = new Label(fighter.Role);
+        roleLabel.AddToClassList("fighter-role");
+        card.Add(roleLabel);
+
+        Label infoLabel = new Label(
+            "Ур. " + fighter.Level + " · оборона " +
+            fighter.DefensePower);
+        infoLabel.AddToClassList("fighter-info");
+        card.Add(infoLabel);
+
+        string assignmentText;
+
+        if (expeditionActive)
+        {
+            assignmentText = withCommander
+                ? "В ЭКСПЕДИЦИИ"
+                : "ГАРНИЗОН СТОЛИЦЫ";
+        }
+        else
+        {
+            assignmentText = withCommander
+                ? "С КОМАНДИРОМ"
+                : "ЗАЩИЩАЕТ СТОЛИЦУ";
+        }
+
+        Label assignmentLabel = new Label(assignmentText);
+        assignmentLabel.AddToClassList("fighter-assignment");
+        card.Add(assignmentLabel);
+
+        card.RegisterCallback<PointerDownEvent>(
+            evt => OnFighterPointerDown(evt, fighterId, card));
+        card.RegisterCallback<PointerMoveEvent>(OnFighterPointerMove);
+        card.RegisterCallback<PointerUpEvent>(OnFighterPointerUp);
+
+        return card;
+    }
+
+    private void OnFighterPointerDown(
+        PointerDownEvent pointerEvent,
+        string fighterId,
+        VisualElement card)
+    {
+        if (pointerEvent.button != 0 ||
+            isGameOver ||
+            gameState.HasActiveExpedition)
+        {
+            return;
+        }
+
+        CleanupFighterDrag();
+        draggedFighterId = fighterId;
+        draggedFighterPointerId = pointerEvent.pointerId;
+        fighterDragStartPosition = pointerEvent.position;
+        draggedFighterCard = card;
+        fighterDragStarted = false;
+        card.CapturePointer(pointerEvent.pointerId);
+        pointerEvent.StopPropagation();
+    }
+
+    private void OnFighterPointerMove(PointerMoveEvent pointerEvent)
+    {
+        if (draggedFighterCard == null ||
+            draggedFighterPointerId != pointerEvent.pointerId ||
+            !draggedFighterCard.HasPointerCapture(pointerEvent.pointerId))
+        {
+            return;
+        }
+
+        if (!fighterDragStarted &&
+            Vector2.Distance(fighterDragStartPosition, pointerEvent.position) >=
+            FighterDragThreshold)
+        {
+            BeginFighterDrag(pointerEvent.position);
+        }
+
+        if (fighterDragStarted)
+        {
+            UpdateFighterDragGhost(pointerEvent.position);
+            UpdateFighterDropHighlights(pointerEvent.position);
+        }
+
+        pointerEvent.StopPropagation();
+    }
+
+    private void OnFighterPointerUp(PointerUpEvent pointerEvent)
+    {
+        if (draggedFighterCard == null ||
+            draggedFighterPointerId != pointerEvent.pointerId)
+        {
+            return;
+        }
+
+        string fighterId = draggedFighterId;
+        bool wasDragging = fighterDragStarted;
+        bool droppedToCommander =
+            commanderGarrisonDropZone.worldBound.Contains(pointerEvent.position);
+        bool droppedToCapital =
+            capitalGarrisonDropZone.worldBound.Contains(pointerEvent.position);
+
+        if (draggedFighterCard.HasPointerCapture(pointerEvent.pointerId))
+            draggedFighterCard.ReleasePointer(pointerEvent.pointerId);
+
+        CleanupFighterDrag();
+
+        if (!wasDragging)
+            ToggleFighterAssignment(fighterId);
+        else if (droppedToCommander)
+            MoveFighterToCommander(fighterId, true);
+        else if (droppedToCapital)
+            MoveFighterToCommander(fighterId, false);
+
+        pointerEvent.StopPropagation();
+    }
+
+    private void BeginFighterDrag(Vector2 pointerPosition)
+    {
+        FighterData fighter = gameState.FindFighter(draggedFighterId);
+
+        if (fighter == null || interfaceRoot == null)
+            return;
+
+        fighterDragStarted = true;
+        draggedFighterCard.AddToClassList("fighter-card-dragging");
+
+        fighterDragGhost = new VisualElement();
+        fighterDragGhost.AddToClassList("fighter-drag-ghost");
+        fighterDragGhost.pickingMode = PickingMode.Ignore;
+
+        Label nameLabel = new Label(fighter.Name);
+        nameLabel.AddToClassList("fighter-drag-ghost-name");
+        fighterDragGhost.Add(nameLabel);
+
+        Label roleLabel = new Label(
+            fighter.Role + " · оборона " + fighter.DefensePower);
+        roleLabel.AddToClassList("fighter-drag-ghost-role");
+        fighterDragGhost.Add(roleLabel);
+
+        interfaceRoot.Add(fighterDragGhost);
+        fighterDragGhost.BringToFront();
+        UpdateFighterDragGhost(pointerPosition);
+    }
+
+    private void UpdateFighterDragGhost(Vector2 pointerPosition)
+    {
+        if (fighterDragGhost == null)
+            return;
+
+        fighterDragGhost.style.left = pointerPosition.x - 66f;
+        fighterDragGhost.style.top = pointerPosition.y - 37f;
+    }
+
+    private void UpdateFighterDropHighlights(Vector2 pointerPosition)
+    {
+        bool overCommander =
+            commanderGarrisonDropZone.worldBound.Contains(pointerPosition);
+        bool overCapital =
+            capitalGarrisonDropZone.worldBound.Contains(pointerPosition);
+
+        SetDropZoneHighlighted(commanderGarrisonDropZone, overCommander);
+        SetDropZoneHighlighted(capitalGarrisonDropZone, overCapital);
+    }
+
+    private void SetDropZoneHighlighted(
+        VisualElement dropZone,
+        bool highlighted)
+    {
+        if (highlighted)
+            dropZone.AddToClassList("army-roster-drop-hover");
+        else
+            dropZone.RemoveFromClassList("army-roster-drop-hover");
+    }
+
+    private void CleanupFighterDrag()
+    {
+        if (draggedFighterCard != null &&
+            draggedFighterPointerId >= 0 &&
+            draggedFighterCard.HasPointerCapture(draggedFighterPointerId))
+        {
+            draggedFighterCard.ReleasePointer(draggedFighterPointerId);
+        }
+
+        if (draggedFighterCard != null)
+            draggedFighterCard.RemoveFromClassList("fighter-card-dragging");
+
+        if (fighterDragGhost != null)
+            fighterDragGhost.RemoveFromHierarchy();
+
+        if (commanderGarrisonDropZone != null)
+            commanderGarrisonDropZone.RemoveFromClassList("army-roster-drop-hover");
+
+        if (capitalGarrisonDropZone != null)
+            capitalGarrisonDropZone.RemoveFromClassList("army-roster-drop-hover");
+
+        draggedFighterId = null;
+        draggedFighterPointerId = -1;
+        draggedFighterCard = null;
+        fighterDragGhost = null;
+        fighterDragStarted = false;
+    }
+
+    private void ToggleFighterAssignment(string fighterId)
     {
         if (isGameOver || gameState.HasActiveExpedition)
             return;
 
-        if (!selectedFighterIds.Add(fighterId))
-            selectedFighterIds.Remove(fighterId);
+        MoveFighterToCommander(
+            fighterId,
+            !selectedFighterIds.Contains(fighterId));
+    }
+
+    private void MoveFighterToCommander(
+        string fighterId,
+        bool moveToCommander)
+    {
+        if (isGameOver || gameState.HasActiveExpedition)
+            return;
+
+        bool changed = moveToCommander
+            ? selectedFighterIds.Add(fighterId)
+            : selectedFighterIds.Remove(fighterId);
+
+        if (!changed)
+            return;
 
         RefreshArmyPanel();
         RefreshExpeditionPanel();
-    }
-
-    private void RefreshArmySplitPreview()
-    {
-        List<string> expeditionIds = gameState.HasActiveExpedition
-            ? new List<string>(gameState.ActiveExpedition.FighterIds)
-            : GetSelectedFighterIdsInArmyOrder();
-        List<string> garrisonIds = new List<string>();
-
-        foreach (FighterData fighter in gameState.Fighters)
-        {
-            if (!expeditionIds.Contains(fighter.Id))
-                garrisonIds.Add(fighter.Id);
-        }
-
-        int expeditionPower = gameState.CalculateDefensePower(expeditionIds);
-        int garrisonPower = gameState.CalculateDefensePower(garrisonIds);
-        int totalPower = gameState.TotalArmyDefensePower;
-
-        expeditionPreviewCountLabel.text =
-            "Бойцов: " + expeditionIds.Count;
-        expeditionPreviewPowerLabel.text =
-            "Сила отряда: " + expeditionPower;
-        expeditionPreviewNamesLabel.text = expeditionIds.Count > 0
-            ? GetFighterNames(expeditionIds)
-            : "Никто не выбран";
-
-        garrisonPreviewCountLabel.text =
-            "Гарнизон: " + garrisonIds.Count + " " +
-            GetFighterWord(garrisonIds.Count);
-        garrisonPreviewPowerLabel.text =
-            "Оборона: " + garrisonPower + "/" + totalPower;
-        garrisonPreviewNamesLabel.text = garrisonIds.Count > 0
-            ? GetFighterNames(garrisonIds)
-            : "СТОЛИЦА ОСТАНЕТСЯ БЕЗ ГАРНИЗОНА";
-
-        if (garrisonIds.Count == 0)
-            garrisonPreview.AddToClassList("garrison-preview-empty");
-        else
-            garrisonPreview.RemoveFromClassList("garrison-preview-empty");
     }
 
     private List<string> GetSelectedFighterIdsInArmyOrder()

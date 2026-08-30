@@ -146,25 +146,161 @@
     margin-right: 4px;
 }
 
-.fighters-scroll {
-    width: 100%;
-    height: 196px;
-    max-height: 196px;
+/* ================================================================
+   ДВА ГАРНИЗОНА И ПЕРЕТАСКИВАНИЕ БОЙЦОВ
+   ================================================================ */
+
+.fighter-selection-hint {
+    margin-top: 7px;
+    margin-bottom: 8px;
+    color: rgb(204, 193, 168);
+    font-size: 11px;
+    white-space: normal;
 }
 
-.fighters-list-horizontal {
+.army-transfer-board {
+    width: 100%;
+    min-height: 244px;
+    flex-direction: row;
+    align-items: stretch;
+    margin-bottom: 6px;
+}
+
+.army-roster-drop-zone {
+    position: relative;
+    width: 45%;
+    min-width: 0;
+    min-height: 238px;
+    padding-left: 9px;
+    padding-right: 9px;
+    padding-top: 9px;
+    padding-bottom: 8px;
+    background-color: rgb(36, 41, 49);
+    border-left-width: 2px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-radius: 5px;
+}
+
+.commander-garrison-zone {
+    border-left-color: rgb(195, 152, 76);
+    border-right-color: rgb(100, 82, 55);
+    border-top-color: rgb(100, 82, 55);
+    border-bottom-color: rgb(100, 82, 55);
+}
+
+.capital-garrison-zone {
+    border-left-color: rgb(82, 139, 96);
+    border-right-color: rgb(61, 88, 70);
+    border-top-color: rgb(61, 88, 70);
+    border-bottom-color: rgb(61, 88, 70);
+}
+
+.army-roster-drop-hover {
+    background-color: rgb(62, 66, 55);
+    border-left-color: rgb(237, 196, 103);
+    border-right-color: rgb(237, 196, 103);
+    border-top-color: rgb(237, 196, 103);
+    border-bottom-color: rgb(237, 196, 103);
+}
+
+.capital-garrison-zone.army-roster-drop-hover {
+    background-color: rgb(43, 65, 51);
+    border-left-color: rgb(134, 195, 145);
+    border-right-color: rgb(134, 195, 145);
+    border-top-color: rgb(134, 195, 145);
+    border-bottom-color: rgb(134, 195, 145);
+}
+
+.capital-garrison-zone.army-roster-empty-danger {
+    background-color: rgb(65, 40, 41);
+    border-left-color: rgb(190, 87, 79);
+    border-right-color: rgb(124, 64, 61);
+    border-top-color: rgb(124, 64, 61);
+    border-bottom-color: rgb(124, 64, 61);
+}
+
+.army-roster-title {
+    margin-bottom: 3px;
+    color: rgb(224, 187, 102);
+    font-size: 11px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.capital-garrison-zone .army-roster-title {
+    color: rgb(142, 190, 151);
+}
+
+.army-roster-summary {
+    margin-bottom: 7px;
+    color: rgb(184, 180, 168);
+    font-size: 10px;
+    white-space: normal;
+}
+
+.army-roster-scroll {
+    width: 100%;
+    height: 181px;
+    max-height: 181px;
+}
+
+.army-roster-list {
+    min-width: 100%;
+    min-height: 169px;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: flex-start;
 }
 
-.fighters-list-horizontal .fighter-card {
+.army-roster-empty-label {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 66px;
+    bottom: 12px;
+    color: rgb(139, 126, 98);
+    font-size: 10px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.army-roster-empty-warning {
+    color: rgb(219, 111, 101);
+}
+
+.army-transfer-arrows {
+    width: 10%;
+    min-width: 42px;
+    align-items: center;
+    justify-content: center;
+}
+
+.army-transfer-arrows-icon {
+    color: rgb(214, 181, 105);
+    font-size: 25px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.army-transfer-arrows-label {
+    margin-top: 2px;
+    color: rgb(124, 126, 128);
+    font-size: 7px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.army-roster-list .fighter-card {
     width: 112px;
     min-width: 112px;
     max-width: 112px;
     min-height: 166px;
     margin-right: 7px;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     padding-left: 6px;
     padding-right: 6px;
     padding-top: 6px;
@@ -207,12 +343,12 @@
     -unity-text-align: middle-center;
 }
 
-.fighters-list-horizontal .fighter-role {
+.army-roster-list .fighter-role {
     font-size: 12px;
     white-space: normal;
 }
 
-.fighters-list-horizontal .fighter-info {
+.army-roster-list .fighter-info {
     font-size: 9px;
     white-space: normal;
 }
@@ -254,92 +390,41 @@
     opacity: 1;
 }
 
-/* ================================================================
-   ВЫБОР БОЙЦОВ И ПРЕДПРОСМОТР ГАРНИЗОНА
-   ================================================================ */
-
-.fighter-selection-hint {
-    margin-top: 7px;
-    margin-bottom: 7px;
-    color: rgb(204, 193, 168);
-    font-size: 11px;
-    white-space: normal;
+.fighter-card-dragging {
+    opacity: 0.32;
 }
 
-.army-split-preview-row {
-    width: 100%;
-    flex-direction: row;
-    align-items: stretch;
-    margin-bottom: 5px;
-}
-
-.army-split-preview {
-    width: 49%;
-    min-width: 0;
+.fighter-drag-ghost {
+    position: absolute;
+    width: 132px;
+    height: 74px;
     padding-left: 10px;
     padding-right: 10px;
-    padding-top: 8px;
+    padding-top: 9px;
     padding-bottom: 8px;
-    background-color: rgb(37, 42, 50);
-    border-left-width: 1px;
+    background-color: rgb(65, 56, 40);
+    border-left-width: 2px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-    border-radius: 4px;
+    border-left-color: rgb(235, 194, 104);
+    border-right-color: rgb(167, 132, 70);
+    border-top-color: rgb(167, 132, 70);
+    border-bottom-color: rgb(167, 132, 70);
+    border-radius: 5px;
+    opacity: 0.94;
 }
 
-.expedition-preview {
-    margin-right: 2%;
-    border-left-color: rgb(137, 109, 60);
-    border-right-color: rgb(89, 77, 57);
-    border-top-color: rgb(89, 77, 57);
-    border-bottom-color: rgb(89, 77, 57);
+.fighter-drag-ghost-name {
+    color: rgb(244, 232, 203);
+    font-size: 13px;
+    -unity-font-style: bold;
 }
 
-.garrison-preview {
-    border-left-color: rgb(73, 112, 82);
-    border-right-color: rgb(61, 82, 68);
-    border-top-color: rgb(61, 82, 68);
-    border-bottom-color: rgb(61, 82, 68);
-}
-
-.garrison-preview-empty {
-    background-color: rgb(67, 42, 42);
-    border-left-color: rgb(184, 91, 82);
-    border-right-color: rgb(132, 68, 63);
-    border-top-color: rgb(132, 68, 63);
-    border-bottom-color: rgb(132, 68, 63);
-}
-
-.army-split-preview-title {
-    margin-bottom: 5px;
-    color: rgb(224, 187, 102);
+.fighter-drag-ghost-role {
+    margin-top: 5px;
+    color: rgb(190, 183, 164);
     font-size: 10px;
-    -unity-font-style: bold;
-    white-space: normal;
-}
-
-.garrison-preview .army-split-preview-title {
-    color: rgb(142, 190, 151);
-}
-
-.garrison-preview-empty .army-split-preview-title {
-    color: rgb(222, 116, 106);
-}
-
-.army-split-preview-value {
-    color: rgb(235, 230, 215);
-    font-size: 12px;
-    -unity-font-style: bold;
-    white-space: normal;
-}
-
-.army-split-preview-note,
-.army-split-preview-names {
-    margin-top: 3px;
-    color: rgb(164, 166, 165);
-    font-size: 9px;
-    white-space: normal;
 }
 
 .military-expedition-column .location-info-row {

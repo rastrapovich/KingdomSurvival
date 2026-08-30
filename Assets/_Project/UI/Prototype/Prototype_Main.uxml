@@ -146,32 +146,53 @@
 
                         <ui:Label
                             name="fighter-selection-hint-label"
-                            text="Нажмите на карточки бойцов, которых нужно отправить."
+                            text="Перетаскивайте бойцов между гарнизоном командира и столицей."
                             class="fighter-selection-hint" />
 
-                        <ui:VisualElement class="army-split-preview-row">
-                            <ui:VisualElement name="expedition-preview" class="army-split-preview expedition-preview">
-                                <ui:Label text="В ЭКСПЕДИЦИЮ" class="army-split-preview-title" />
-                                <ui:Label name="expedition-preview-count-label" text="Бойцов: 0" class="army-split-preview-value" />
-                                <ui:Label name="expedition-preview-power-label" text="Сила отряда: 0" class="army-split-preview-note" />
-                                <ui:Label name="expedition-preview-names-label" text="Никто не выбран" class="army-split-preview-names" />
+                        <ui:VisualElement class="army-transfer-board">
+                            <ui:VisualElement
+                                name="commander-garrison-drop-zone"
+                                class="army-roster-drop-zone commander-garrison-zone">
+                                <ui:Label text="ГАРНИЗОН КОМАНДИРА" class="army-roster-title" />
+                                <ui:Label
+                                    name="commander-garrison-summary-label"
+                                    text="0 бойцов · сила 0"
+                                    class="army-roster-summary" />
+                                <ui:ScrollView class="army-roster-scroll" mode="Horizontal">
+                                    <ui:VisualElement
+                                        name="commander-garrison-list"
+                                        class="army-roster-list" />
+                                </ui:ScrollView>
+                                <ui:Label
+                                    name="commander-garrison-empty-label"
+                                    text="ПЕРЕТАЩИТЕ БОЙЦОВ СЮДА"
+                                    class="army-roster-empty-label" />
                             </ui:VisualElement>
 
-                            <ui:VisualElement name="garrison-preview" class="army-split-preview garrison-preview">
-                                <ui:Label text="ОСТАНЕТСЯ В СТОЛИЦЕ" class="army-split-preview-title" />
-                                <ui:Label name="garrison-preview-count-label" text="Гарнизон: 5 бойцов" class="army-split-preview-value" />
-                                <ui:Label name="garrison-preview-power-label" text="Оборона: 11/11" class="army-split-preview-note" />
-                                <ui:Label name="garrison-preview-names-label" text="Все бойцы" class="army-split-preview-names" />
+                            <ui:VisualElement class="army-transfer-arrows">
+                                <ui:Label text="⇄" class="army-transfer-arrows-icon" />
+                                <ui:Label text="ПЕРЕТАЩИТЕ" class="army-transfer-arrows-label" />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement
+                                name="capital-garrison-drop-zone"
+                                class="army-roster-drop-zone capital-garrison-zone">
+                                <ui:Label text="ГАРНИЗОН СТОЛИЦЫ" class="army-roster-title" />
+                                <ui:Label
+                                    name="capital-garrison-summary-label"
+                                    text="5 бойцов · оборона 11/11"
+                                    class="army-roster-summary" />
+                                <ui:ScrollView class="army-roster-scroll" mode="Horizontal">
+                                    <ui:VisualElement
+                                        name="capital-garrison-list"
+                                        class="army-roster-list" />
+                                </ui:ScrollView>
+                                <ui:Label
+                                    name="capital-garrison-empty-label"
+                                    text="СТОЛИЦА ОСТАНЕТСЯ БЕЗ ГАРНИЗОНА"
+                                    class="army-roster-empty-label army-roster-empty-warning" />
                             </ui:VisualElement>
                         </ui:VisualElement>
-
-                        <ui:VisualElement class="section-divider" />
-                        <ui:Label name="fighters-title-label" text="ВОИНЫ — 5" class="section-title" />
-                        <ui:Label text="Постоянные бойцы единственной армии" class="panel-description" />
-
-                        <ui:ScrollView class="fighters-scroll" mode="Horizontal">
-                            <ui:VisualElement name="fighters-list" class="fighters-list-horizontal" />
-                        </ui:ScrollView>
                     </ui:VisualElement>
                 </ui:ScrollView>
 

@@ -12,6 +12,8 @@ public class PrototypeUIController : MonoBehaviour
         Expeditions
     }
 
+    private const int MaxIncidentNotificationButtons = 6;
+
     private GameState gameState;
 
     private Button navCapitalButton;
@@ -62,6 +64,18 @@ public class PrototypeUIController : MonoBehaviour
     private Label reportHistoryLabel;
     private readonly List<string> reportHistory = new List<string>();
 
+    private VisualElement incidentNotificationStack;
+    private VisualElement incidentModalOverlay;
+    private Label incidentModalTitle;
+    private Label incidentModalDescription;
+    private Label incidentModalConsequence;
+    private Button incidentUnderstoodButton;
+
+    private readonly List<ExpeditionIncidentOccurrence> unreadIncidents =
+        new List<ExpeditionIncidentOccurrence>();
+
+    private ExpeditionIncidentOccurrence openedIncident;
+
     private bool callbacksRegistered;
 
     private void OnEnable()
@@ -82,11 +96,11 @@ public class PrototypeUIController : MonoBehaviour
         gameState = new GameState();
         gameState.CreateNewGame();
 
-        // Нехватка снабжения выделяется цветом прямо в общей истории донесений.
         reportHistoryLabel.enableRichText = true;
 
         ConfigureCommanderDropdown();
         RegisterCallbacks();
+        HideIncidentModal();
 
         AddReport(
             "Прототип запущен. Откройте нужный экран круглой кнопкой слева сверху.");
@@ -138,6 +152,15 @@ public class PrototypeUIController : MonoBehaviour
 
         reportHistoryScroll = root.Q<ScrollView>("report-history-scroll");
         reportHistoryLabel = root.Q<Label>("report-history-label");
+
+        incidentNotificationStack =
+            root.Q<VisualElement>("incident-notification-stack");
+        incidentModalOverlay =
+            root.Q<VisualElement>("incident-modal-overlay");
+        incidentModalTitle = root.Q<Label>("incident-modal-title");
+        incidentModalDescription = root.Q<Label>("incident-modal-description");
+        incidentModalConsequence = root.Q<Label>("incident-modal-consequence");
+        incidentUnderstoodButton = root.Q<Button>("incident-understood-button");
     }
 
     private bool AllRequiredElementsExist()
@@ -176,7 +199,13 @@ public class PrototypeUIController : MonoBehaviour
             activeExpeditionDetails != null &&
             returnExpeditionButton != null &&
             reportHistoryScroll != null &&
-            reportHistoryLabel != null;
+            reportHistoryLabel != null &&
+            incidentNotificationStack != null &&
+            incidentModalOverlay != null &&
+            incidentModalTitle != null &&
+            incidentModalDescription != null &&
+            incidentModalConsequence != null &&
+            incidentUnderstoodButton != null;
     }
 
     private void ToggleScreen(MainScreen screen)
@@ -276,6 +305,7 @@ public class PrototypeUIController : MonoBehaviour
         sendMineButton.clicked += OnSendMineClicked;
         sendForestButton.clicked += OnSendForestClicked;
         returnExpeditionButton.clicked += OnExpeditionActionClicked;
+        incidentUnderstoodButton.clicked += OnIncidentUnderstoodClicked;
 
         commanderDropdown.RegisterValueChangedCallback(OnCommanderChanged);
         callbacksRegistered = true;
@@ -298,6 +328,7 @@ public class PrototypeUIController : MonoBehaviour
         sendMineButton.clicked -= OnSendMineClicked;
         sendForestButton.clicked -= OnSendForestClicked;
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
+        incidentUnderstoodButton.clicked -= OnIncidentUnderstoodClicked;
 
         commanderDropdown.UnregisterValueChangedCallback(OnCommanderChanged);
         callbacksRegistered = false;
@@ -327,6 +358,10 @@ public class PrototypeUIController : MonoBehaviour
     {
         int finishedDay = gameState.Day;
         DayResolutionResult result = DayResolver.ResolveDay(gameState);
+
+        if (result.NewExpeditionIncidents.Count > 0)
+            unreadIncidents.AddRange(result.NewExpeditionIncidents);
+
         AddReport(string.Join("\n", result.Messages), finishedDay);
         RefreshInterface();
     }
@@ -386,6 +421,7 @@ public class PrototypeUIController : MonoBehaviour
 
         RefreshArmyPanel();
         RefreshExpeditionPanel();
+        RefreshIncidentNotifications();
     }
 
     private void RefreshArmyPanel()
@@ -526,6 +562,102 @@ public class PrototypeUIController : MonoBehaviour
             returnExpeditionButton.SetEnabled(true);
             returnExpeditionButton.text = "Приказать возвращаться";
         }
+    }
+
+    private void RefreshIncidentNotifications()
+    {
+        incidentNotificationStack.Clear();
+
+        int unreadCount = unreadIncidents.Count;
+
+        if (unreadCount == 0)
+            return;
+
+        if (unreadCount <= MaxIncidentNotificationButtons)
+        {
+            foreach (ExpeditionIncidentOccurrence occurrence in unreadIncidents)
+                incidentNotificationStack.Add(CreateIncidentButton(occurrence));
+
+            return;
+        }
+
+        int visibleIncidentCount = MaxIncidentNotificationButtons - 1;
+        int hiddenCount = unreadCount - visibleIncidentCount;
+
+        Button overflowButton = new Button(() => OpenIncident(unreadIncidents[0]));
+        overflowButton.text = "+" + hiddenCount;
+        overflowButton.tooltip =
+            "Ещё " + hiddenCount + " непрочитанных происшествий";
+        overflowButton.AddToClassList("incident-notification-button");
+        overflowButton.AddToClassList("incident-overflow");
+        incidentNotificationStack.Add(overflowButton);
+
+        int firstVisibleIndex = unreadCount - visibleIncidentCount;
+
+        for (int i = firstVisibleIndex; i < unreadCount; i++)
+            incidentNotificationStack.Add(CreateIncidentButton(unreadIncidents[i]));
+    }
+
+    private Button CreateIncidentButton(ExpeditionIncidentOccurrence occurrence)
+    {
+        Button button = new Button(() => OpenIncident(occurrence));
+        button.text = string.Empty;
+        button.tooltip = "Непрочитанное происшествие";
+        button.AddToClassList("incident-notification-button");
+        button.AddToClassList(GetIncidentToneClass(occurrence.Tone));
+        return button;
+    }
+
+    private string GetIncidentToneClass(ExpeditionIncidentTone tone)
+    {
+        switch (tone)
+        {
+            case ExpeditionIncidentTone.Positive:
+                return "incident-positive";
+            case ExpeditionIncidentTone.Negative:
+                return "incident-negative";
+            case ExpeditionIncidentTone.Mixed:
+                return "incident-mixed";
+            default:
+                return "incident-overflow";
+        }
+    }
+
+    private void OpenIncident(ExpeditionIncidentOccurrence occurrence)
+    {
+        if (occurrence == null)
+            return;
+
+        openedIncident = occurrence;
+        incidentModalTitle.text =
+            "ДЕНЬ " + occurrence.Day + " · " + occurrence.Title.ToUpper();
+        incidentModalDescription.text = occurrence.Description;
+        incidentModalConsequence.text =
+            "Последствие: " + occurrence.ConsequenceText;
+        incidentModalOverlay.style.display = DisplayStyle.Flex;
+    }
+
+    private void OnIncidentUnderstoodClicked()
+    {
+        if (openedIncident == null)
+        {
+            HideIncidentModal();
+            return;
+        }
+
+        int readIncidentId = openedIncident.Id;
+
+        unreadIncidents.RemoveAll(
+            occurrence => occurrence.Id == readIncidentId);
+
+        HideIncidentModal();
+        RefreshIncidentNotifications();
+    }
+
+    private void HideIncidentModal()
+    {
+        openedIncident = null;
+        incidentModalOverlay.style.display = DisplayStyle.None;
     }
 
     private string GetDayWord(int value)

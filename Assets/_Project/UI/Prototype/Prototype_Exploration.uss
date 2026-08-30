@@ -41,3 +41,194 @@
 .research-expedition-button:disabled {
     opacity: 0.55;
 }
+
+/* ================================================================
+   НАДЁЖНЫЙ SPLIT-VIEW АРМИИ / ЭКСПЕДИЦИЙ
+   ================================================================ */
+
+.military-split-screen {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.military-column-scroll {
+    width: 50%;
+    min-width: 0;
+    height: 100%;
+    flex-grow: 0;
+    flex-shrink: 1;
+}
+
+.military-column-divider {
+    width: 8px;
+    min-width: 8px;
+    max-width: 8px;
+    height: 100%;
+    margin-left: 5px;
+    margin-right: 5px;
+    background-color: rgb(20, 23, 29);
+}
+
+.military-panel-fill {
+    min-height: 100%;
+    margin-bottom: 0;
+}
+
+.commander-supply-row {
+    width: 100%;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.commander-profile-column {
+    width: 52%;
+    min-width: 0;
+    margin-right: 10px;
+}
+
+.commander-section-title {
+    margin-top: 0;
+}
+
+.commander-image-placeholder {
+    width: 170px;
+    max-width: 100%;
+    height: 190px;
+    margin-bottom: 9px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(40, 45, 54);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(92, 80, 58);
+    border-right-color: rgb(92, 80, 58);
+    border-top-color: rgb(92, 80, 58);
+    border-bottom-color: rgb(92, 80, 58);
+    border-radius: 5px;
+}
+
+.commander-image-placeholder-text {
+    max-width: 145px;
+    color: rgb(119, 124, 133);
+    font-size: 10px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.commander-profile-column .commander-dropdown {
+    width: 100%;
+}
+
+.commander-profile-column .commander-dropdown > .unity-base-field__label {
+    min-width: 72px;
+}
+
+.military-supply-block {
+    width: 44%;
+    min-width: 190px;
+    margin-top: 0;
+}
+
+.military-supply-block .supply-controls {
+    width: 100%;
+}
+
+.military-supply-block .supply-value {
+    min-width: 54px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.fighters-scroll {
+    width: 100%;
+    height: 180px;
+    max-height: 180px;
+}
+
+.fighters-list-horizontal {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+}
+
+.fighters-list-horizontal .fighter-card {
+    width: 104px;
+    min-width: 104px;
+    max-width: 104px;
+    min-height: 150px;
+    margin-right: 7px;
+    margin-bottom: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(92, 80, 58);
+    border-right-color: rgb(72, 76, 85);
+    border-top-color: rgb(72, 76, 85);
+    border-bottom-color: rgb(72, 76, 85);
+}
+
+.fighter-image-placeholder {
+    width: 90px;
+    height: 88px;
+    margin-bottom: 6px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(35, 40, 48);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(74, 80, 91);
+    border-right-color: rgb(74, 80, 91);
+    border-top-color: rgb(74, 80, 91);
+    border-bottom-color: rgb(74, 80, 91);
+    border-radius: 3px;
+}
+
+.fighter-image-placeholder-text {
+    color: rgb(105, 111, 121);
+    font-size: 8px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.fighters-list-horizontal .fighter-role {
+    font-size: 12px;
+    white-space: normal;
+}
+
+.fighters-list-horizontal .fighter-info {
+    font-size: 9px;
+    white-space: normal;
+}
+
+.military-expedition-column .location-info-row {
+    flex-wrap: wrap;
+}
+
+.military-expedition-column .active-expedition-details,
+.military-expedition-column .location-name,
+.military-expedition-column .location-info,
+.military-expedition-column .status-label {
+    white-space: normal;
+}
+
+/* ================================================================
+   ВСПЛЫВАЮЩИЙ РАСХОД ГОРОДСКОЙ ПИЩИ
+   ================================================================ */
+
+.food-expense-popup {
+    top: 66px;
+}

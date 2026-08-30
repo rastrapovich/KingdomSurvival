@@ -8,7 +8,6 @@
     <Style src="Prototype_Main.uss" />
     <Style src="Prototype_DebugAndGameOver.uss" />
     <Style src="Prototype_Exploration.uss" />
-    <Style src="Prototype_MilitarySplit.uss" />
 
     <ui:VisualElement name="screen" class="screen">
 
@@ -66,8 +65,11 @@
         <ui:VisualElement class="navigation-bar">
             <ui:Button name="nav-capital-button" text="С" tooltip="Столица" class="nav-button" />
             <ui:Button name="nav-army-button" text="АЭ" tooltip="Армия / Экспедиции" class="nav-button" />
-            <ui:Button name="nav-expeditions-button" text="Э" tooltip="Экспедиции" class="nav-button nav-button-hidden" />
         </ui:VisualElement>
+
+        <!-- Технические скрытые элементы сохранены только для совместимости
+             с текущим контроллером. В навигации и на экране они не отображаются. -->
+        <ui:Button name="nav-expeditions-button" text="" style="display: none;" />
 
         <ui:VisualElement name="main-screen-scroll" class="main-screen-scroll">
 
@@ -87,8 +89,14 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:VisualElement name="army-screen" class="game-screen military-split-screen">
-                <ui:ScrollView class="military-column-scroll military-army-column">
+            <ui:VisualElement
+                name="army-screen"
+                class="game-screen military-split-screen"
+                style="flex-direction: row; width: 100%; height: 100%; min-height: 0;">
+
+                <ui:ScrollView
+                    class="military-column-scroll military-army-column"
+                    style="width: 50%; min-width: 0; height: 100%; flex-grow: 0; flex-shrink: 1;">
                     <ui:VisualElement class="panel army-panel military-panel-fill">
                         <ui:Label text="АРМИЯ" class="panel-title" />
                         <ui:Label text="Командир, бойцы и походные запасы единственной армии" class="panel-description" />
@@ -148,7 +156,9 @@
 
                 <ui:VisualElement class="military-column-divider" />
 
-                <ui:ScrollView class="military-column-scroll military-expedition-column">
+                <ui:ScrollView
+                    class="military-column-scroll military-expedition-column"
+                    style="width: 50%; min-width: 0; height: 100%; flex-grow: 0; flex-shrink: 1;">
                     <ui:VisualElement class="panel expedition-panel military-panel-fill">
                         <ui:Label text="ЭКСПЕДИЦИИ" class="panel-title" />
                         <ui:Label name="expedition-status-label" text="Активная экспедиция: нет" class="status-label" />
@@ -192,7 +202,7 @@
                 </ui:ScrollView>
             </ui:VisualElement>
 
-            <ui:VisualElement name="expeditions-screen" class="game-screen legacy-expeditions-screen" />
+            <ui:VisualElement name="expeditions-screen" class="game-screen" style="display: none;" />
 
         </ui:VisualElement>
 

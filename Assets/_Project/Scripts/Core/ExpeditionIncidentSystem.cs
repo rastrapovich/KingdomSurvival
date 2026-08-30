@@ -164,42 +164,62 @@ public static class ExpeditionIncidentSystem
         if (!state.HasActiveExpedition)
             return;
 
-        List<IncidentDefinition> eligible = GetEligibleDefinitions(state);
+        int requestedIncidentCount = Random.Next(0, 3);
 
-        if (eligible.Count == 0)
+        if (requestedIncidentCount == 0)
             return;
 
-        int incidentCount = Random.Next(0, 3);
-        incidentCount = Math.Min(incidentCount, eligible.Count);
+        List<string> usedDefinitionIds = new List<string>();
+        List<ExpeditionIncidentOccurrence> created =
+            new List<ExpeditionIncidentOccurrence>();
 
-        if (incidentCount == 0)
-            return;
-
-        List<IncidentDefinition> selected =
-            PickWithoutReplacement(eligible, incidentCount);
-
-        List<string> summaryLines = new List<string>();
-
-        foreach (IncidentDefinition definition in selected)
+        for (int i = 0; i < requestedIncidentCount; i++)
         {
+            List<IncidentDefinition> eligible =
+                GetEligibleDefinitions(state, usedDefinitionIds);
+
+            if (eligible.Count == 0)
+                break;
+
+            IncidentDefinition definition =
+                eligible[Random.Next(0, eligible.Count)];
+
+            usedDefinitionIds.Add(definition.Id);
+
             ExpeditionIncidentOccurrence occurrence =
                 ApplyIncident(state, definition, finishedDay);
 
+            created.Add(occurrence);
             result.NewExpeditionIncidents.Add(occurrence);
+        }
+
+        if (created.Count == 0)
+            return;
+
+        List<string> summaryLines = new List<string>();
+
+        foreach (ExpeditionIncidentOccurrence occurrence in created)
+        {
             summaryLines.Add(
                 "• " + occurrence.Title + " — " + occurrence.ConsequenceText);
         }
 
         result.Messages.Add(
-            "Экспедиция: " + incidentCount +
-            GetIncidentWord(incidentCount) +
+            "Экспедиция: " + created.Count +
+            GetIncidentWord(created.Count) +
             "\n" +
             string.Join("\n", summaryLines));
     }
 
-    private static List<IncidentDefinition> GetEligibleDefinitions(GameState state)
+    private static List<IncidentDefinition> GetEligibleDefinitions(
+        GameState state,
+        List<string> usedDefinitionIds)
     {
         List<IncidentDefinition> eligible = new List<IncidentDefinition>();
+
+        if (!state.HasActiveExpedition)
+            return eligible;
+
         ExpeditionData expedition = state.ActiveExpedition;
 
         bool canChangeTravel =
@@ -210,6 +230,9 @@ public static class ExpeditionIncidentSystem
 
         foreach (IncidentDefinition definition in Definitions)
         {
+            if (usedDefinitionIds.Contains(definition.Id))
+                continue;
+
             bool needsTravel =
                 definition.EffectKind == IncidentEffectKind.Travel ||
                 definition.EffectKind == IncidentEffectKind.SupplyAndTravel;
@@ -221,23 +244,6 @@ public static class ExpeditionIncidentSystem
         }
 
         return eligible;
-    }
-
-    private static List<IncidentDefinition> PickWithoutReplacement(
-        List<IncidentDefinition> source,
-        int count)
-    {
-        List<IncidentDefinition> pool = new List<IncidentDefinition>(source);
-        List<IncidentDefinition> selected = new List<IncidentDefinition>();
-
-        for (int i = 0; i < count; i++)
-        {
-            int index = Random.Next(0, pool.Count);
-            selected.Add(pool[index]);
-            pool.RemoveAt(index);
-        }
-
-        return selected;
     }
 
     private static ExpeditionIncidentOccurrence ApplyIncident(
@@ -258,7 +264,10 @@ public static class ExpeditionIncidentSystem
             definition.EffectKind == IncidentEffectKind.SupplyAndTravel)
         {
             int actualTravelDelta = ApplyTravelDelta(state, definition.TravelDelta);
-            consequences.Add(FormatTravelConsequence(actualTravelDelta));
+            string travelConsequence = FormatTravelConsequence(actualTravelDelta);
+            string arrivalText = GetArrivalText(state, actualTravelDelta);
+
+            consequences.Add(travelConsequence + arrivalText);
         }
 
         ExpeditionIncidentOccurrence occurrence =
@@ -308,7 +317,56 @@ public static class ExpeditionIncidentSystem
             requestedReduction);
 
         expedition.DaysRemaining -= actualReduction;
+
+        if (actualReduction > 0 && expedition.DaysRemaining == 0)
+            ResolveArrivalAfterShortcut(state, expedition);
+
         return -actualReduction;
+    }
+
+    private static void ResolveArrivalAfterShortcut(
+        GameState state,
+        ExpeditionData expedition)
+    {
+        CommanderData commander = state.FindCommander(expedition.CommanderId);
+
+        if (commander == null)
+            return;
+
+        if (expedition.Phase == CommanderState.TravellingToLocation)
+        {
+            expedition.Phase = CommanderState.AtLocation;
+            commander.State = CommanderState.AtLocation;
+            return;
+        }
+
+        if (expedition.Phase == CommanderState.ReturningToCastle)
+        {
+            commander.State = CommanderState.InCastle;
+            expedition.IsActive = false;
+        }
+    }
+
+    private static string GetArrivalText(GameState state, int travelDelta)
+    {
+        if (travelDelta >= 0 || state.ActiveExpedition == null)
+            return string.Empty;
+
+        ExpeditionData expedition = state.ActiveExpedition;
+
+        if (expedition.DaysRemaining > 0)
+            return string.Empty;
+
+        if (expedition.Phase == CommanderState.AtLocation)
+            return " Экспедиция достигла цели.";
+
+        if (!expedition.IsActive &&
+            expedition.Phase == CommanderState.ReturningToCastle)
+        {
+            return " Армия вернулась в столицу.";
+        }
+
+        return string.Empty;
     }
 
     private static string FormatSupplyConsequence(int delta)

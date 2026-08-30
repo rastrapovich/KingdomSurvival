@@ -6,6 +6,7 @@
     editor-extension-mode="False">
 
     <Style src="Prototype_Main.uss" />
+    <Style src="Prototype_DebugAndGameOver.uss" />
 
     <ui:VisualElement name="screen" class="screen">
 
@@ -20,11 +21,19 @@
                 <ui:VisualElement class="resource-box">
                     <ui:Label name="gold-label" text="Золото: 120" class="resource-value" />
                     <ui:Label name="gold-income-label" text="+3" class="resource-income" />
+                    <ui:VisualElement class="resource-test-controls">
+                        <ui:Button name="gold-minus10-button" text="−10" class="resource-test-button" />
+                        <ui:Button name="gold-plus10-button" text="+10" class="resource-test-button" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <ui:VisualElement class="resource-box food-box">
                     <ui:Label name="food-label" text="Пища: 72" class="resource-value" />
                     <ui:Label name="food-income-label" text="+7" class="resource-income" />
+                    <ui:VisualElement class="resource-test-controls">
+                        <ui:Button name="food-minus10-button" text="−10" class="resource-test-button" />
+                        <ui:Button name="food-plus10-button" text="+10" class="resource-test-button" />
+                    </ui:VisualElement>
 
                     <ui:VisualElement class="food-expense-popup">
                         <ui:Label
@@ -36,10 +45,18 @@
 
                 <ui:VisualElement class="resource-box">
                     <ui:Label name="population-label" text="Население: 24" class="resource-value" />
+                    <ui:VisualElement class="resource-test-controls">
+                        <ui:Button name="population-minus10-button" text="−10" class="resource-test-button" />
+                        <ui:Button name="population-plus10-button" text="+10" class="resource-test-button" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <ui:VisualElement class="resource-box">
                     <ui:Label name="mood-label" text="Настроение: 64/100" class="resource-value" />
+                    <ui:VisualElement class="resource-test-controls">
+                        <ui:Button name="mood-minus10-button" text="−10" class="resource-test-button" />
+                        <ui:Button name="mood-plus10-button" text="+10" class="resource-test-button" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -196,6 +213,23 @@
                     name="incident-understood-button"
                     text="ПОНЯТНО"
                     class="incident-understood-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="game-over-overlay" class="game-over-overlay">
+            <ui:VisualElement class="game-over-window">
+                <ui:Label text="ВАС СВЕРГЛИ" class="game-over-title" />
+                <ui:Label
+                    text="Подданные наконец достигли редкого политического согласия: король им больше не нужен."
+                    class="game-over-description" />
+                <ui:Label
+                    name="game-over-days-label"
+                    text="Вы удерживали трон: 0 дней"
+                    class="game-over-days" />
+                <ui:Button
+                    name="restart-game-button"
+                    text="НАЧАТЬ ЗАНОВО"
+                    class="game-over-restart-button" />
             </ui:VisualElement>
         </ui:VisualElement>
 

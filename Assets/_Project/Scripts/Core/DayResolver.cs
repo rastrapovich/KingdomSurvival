@@ -25,9 +25,19 @@ public static class DayResolver
         ResolveCityFood(state, result);
         ResolveExpedition(state, result);
 
-        // Фоновые происшествия возникают после обычного дневного
-        // продвижения экспедиции и применяют последствия сразу.
-        ExpeditionIncidentSystem.ResolveForDay(
+        // Пока экспедиция ждёт значимого приказа, она не продвигается
+        // и не получает фоновых происшествий. Мир и расход снабжения идут дальше.
+        if (!state.HasPendingExpeditionDecision)
+        {
+            ExpeditionIncidentSystem.ResolveForDay(
+                state,
+                finishedDay,
+                result);
+        }
+
+        // После обычного продвижения и фоновых происшествий может возникнуть
+        // не более одного значимого события, требующего решения короля.
+        ExpeditionDecisionSystem.ResolveForDay(
             state,
             finishedDay,
             result);
@@ -116,6 +126,15 @@ public static class DayResolver
         }
 
         ResolveExpeditionSupply(state, expedition, result);
+
+        if (state.HasPendingExpeditionDecision)
+        {
+            result.Messages.Add(
+                "Экспедиция ждёт приказа по событию «" +
+                expedition.PendingDecision.Title +
+                "» и сегодня не продвигается.");
+            return;
+        }
 
         if (expedition.Phase == CommanderState.TravellingToLocation)
         {

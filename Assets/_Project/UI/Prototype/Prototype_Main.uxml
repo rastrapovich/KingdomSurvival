@@ -36,7 +36,7 @@
                         <ui:Button name="food-plus10-button" text="+10" class="resource-test-button" />
                     </ui:VisualElement>
 
-                    <ui:VisualElement class="food-expense-popup">
+                    <ui:VisualElement class="food-expense-popup" style="top: 100%; margin-top: 2px;">
                         <ui:Label
                             name="food-consumption-label"
                             text="Расход: 24 в день"
@@ -174,6 +174,9 @@
 
                         <ui:VisualElement class="location-card">
                             <ui:Label text="Затопленные руины" class="location-name" />
+                            <ui:VisualElement class="location-image-placeholder">
+                                <ui:Label text="ИЗОБРАЖЕНИЕ ЛОКАЦИИ" class="location-image-placeholder-text" />
+                            </ui:VisualElement>
                             <ui:VisualElement class="location-info-row">
                                 <ui:Label text="Расстояние: 2 дня" class="location-info" />
                                 <ui:Label text="Угроза: низкая" class="threat-low" />
@@ -183,6 +186,9 @@
 
                         <ui:VisualElement class="location-card">
                             <ui:Label text="Старая шахта" class="location-name" />
+                            <ui:VisualElement class="location-image-placeholder">
+                                <ui:Label text="ИЗОБРАЖЕНИЕ ЛОКАЦИИ" class="location-image-placeholder-text" />
+                            </ui:VisualElement>
                             <ui:VisualElement class="location-info-row">
                                 <ui:Label text="Расстояние: 3 дня" class="location-info" />
                                 <ui:Label text="Угроза: средняя" class="threat-medium" />
@@ -192,6 +198,9 @@
 
                         <ui:VisualElement class="location-card">
                             <ui:Label text="Чёрный лес" class="location-name" />
+                            <ui:VisualElement class="location-image-placeholder">
+                                <ui:Label text="ИЗОБРАЖЕНИЕ ЛОКАЦИИ" class="location-image-placeholder-text" />
+                            </ui:VisualElement>
                             <ui:VisualElement class="location-info-row">
                                 <ui:Label text="Расстояние: 5 дней" class="location-info" />
                                 <ui:Label text="Угроза: высокая" class="threat-high" />

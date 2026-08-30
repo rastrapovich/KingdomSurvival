@@ -70,11 +70,16 @@ public class PrototypeUIController : MonoBehaviour
     private Label incidentModalDescription;
     private Label incidentModalConsequence;
     private Button incidentUnderstoodButton;
+    private VisualElement incidentModalTextColumn;
+
+    private Button decisionOptionAButton;
+    private Button decisionOptionBButton;
 
     private readonly List<ExpeditionIncidentOccurrence> unreadIncidents =
         new List<ExpeditionIncidentOccurrence>();
 
     private ExpeditionIncidentOccurrence openedIncident;
+    private ExpeditionDecisionOccurrence openedDecision;
 
     private bool callbacksRegistered;
 
@@ -98,6 +103,7 @@ public class PrototypeUIController : MonoBehaviour
 
         reportHistoryLabel.enableRichText = true;
 
+        CreateDecisionChoiceButtons();
         ConfigureCommanderDropdown();
         RegisterCallbacks();
         HideIncidentModal();
@@ -161,6 +167,8 @@ public class PrototypeUIController : MonoBehaviour
         incidentModalDescription = root.Q<Label>("incident-modal-description");
         incidentModalConsequence = root.Q<Label>("incident-modal-consequence");
         incidentUnderstoodButton = root.Q<Button>("incident-understood-button");
+        incidentModalTextColumn =
+            root.Q<VisualElement>(className: "incident-modal-text-column");
     }
 
     private bool AllRequiredElementsExist()
@@ -205,7 +213,28 @@ public class PrototypeUIController : MonoBehaviour
             incidentModalTitle != null &&
             incidentModalDescription != null &&
             incidentModalConsequence != null &&
-            incidentUnderstoodButton != null;
+            incidentUnderstoodButton != null &&
+            incidentModalTextColumn != null;
+    }
+
+    private void CreateDecisionChoiceButtons()
+    {
+        decisionOptionAButton = new Button(OnDecisionOptionAClicked);
+        decisionOptionAButton.AddToClassList("incident-understood-button");
+        decisionOptionAButton.text = "Вариант 1";
+        decisionOptionAButton.style.width = 360;
+        decisionOptionAButton.style.height = 54;
+        decisionOptionAButton.style.alignSelf = Align.FlexStart;
+
+        decisionOptionBButton = new Button(OnDecisionOptionBClicked);
+        decisionOptionBButton.AddToClassList("incident-understood-button");
+        decisionOptionBButton.text = "Вариант 2";
+        decisionOptionBButton.style.width = 360;
+        decisionOptionBButton.style.height = 54;
+        decisionOptionBButton.style.alignSelf = Align.FlexStart;
+
+        incidentModalTextColumn.Add(decisionOptionAButton);
+        incidentModalTextColumn.Add(decisionOptionBButton);
     }
 
     private void ToggleScreen(MainScreen screen)
@@ -490,6 +519,7 @@ public class PrototypeUIController : MonoBehaviour
     private void RefreshExpeditionPanel()
     {
         bool expeditionActive = gameState.HasActiveExpedition;
+        bool awaitingDecision = gameState.HasPendingExpeditionDecision;
 
         commanderDropdown.SetEnabled(!expeditionActive);
         sendRuinsButton.SetEnabled(!expeditionActive);
@@ -508,7 +538,9 @@ public class PrototypeUIController : MonoBehaviour
         ExpeditionData expedition = gameState.ActiveExpedition;
         LocationData location = gameState.FindLocation(expedition.LocationId);
         CommanderData commander = gameState.FindCommander(expedition.CommanderId);
-        string stateText = GetCommanderStateText(expedition.Phase);
+        string stateText = awaitingDecision
+            ? "ожидает приказа"
+            : GetCommanderStateText(expedition.Phase);
 
         expeditionStatusLabel.text =
             "Активная экспедиция: " + commander.Name + " · " +
@@ -519,7 +551,12 @@ public class PrototypeUIController : MonoBehaviour
         string currentTask;
         string daysInformation;
 
-        if (expedition.Phase == CommanderState.TravellingToLocation)
+        if (awaitingDecision)
+        {
+            currentTask = "Ожидает приказа короля";
+            daysInformation = "Осталось дней пути: " + expedition.DaysRemaining;
+        }
+        else if (expedition.Phase == CommanderState.TravellingToLocation)
         {
             currentTask = "Добраться до цели";
             daysInformation = "Осталось дней пути: " + expedition.DaysRemaining;
@@ -547,7 +584,12 @@ public class PrototypeUIController : MonoBehaviour
         bool canCancel = gameState.CanCancelExpeditionBeforeDayEnd;
         bool alreadyReturning = expedition.Phase == CommanderState.ReturningToCastle;
 
-        if (canCancel)
+        if (awaitingDecision)
+        {
+            returnExpeditionButton.SetEnabled(false);
+            returnExpeditionButton.text = "Сначала требуется приказ";
+        }
+        else if (canCancel)
         {
             returnExpeditionButton.SetEnabled(true);
             returnExpeditionButton.text = "Отменить отправку";
@@ -568,34 +610,49 @@ public class PrototypeUIController : MonoBehaviour
     {
         incidentNotificationStack.Clear();
 
+        bool hasDecision = gameState.HasPendingExpeditionDecision;
+        int availableBackgroundSlots =
+            hasDecision
+                ? MaxIncidentNotificationButtons - 1
+                : MaxIncidentNotificationButtons;
+
         int unreadCount = unreadIncidents.Count;
 
-        if (unreadCount == 0)
-            return;
-
-        if (unreadCount <= MaxIncidentNotificationButtons)
+        if (unreadCount <= availableBackgroundSlots)
         {
             foreach (ExpeditionIncidentOccurrence occurrence in unreadIncidents)
                 incidentNotificationStack.Add(CreateIncidentButton(occurrence));
+        }
+        else
+        {
+            int visibleIncidentCount = availableBackgroundSlots - 1;
+            int hiddenCount = unreadCount - visibleIncidentCount;
 
-            return;
+            Button overflowButton =
+                new Button(() => OpenIncident(unreadIncidents[0]));
+            overflowButton.text = "+" + hiddenCount;
+            overflowButton.tooltip =
+                "Ещё " + hiddenCount + " непрочитанных происшествий";
+            overflowButton.AddToClassList("incident-notification-button");
+            overflowButton.AddToClassList("incident-overflow");
+            incidentNotificationStack.Add(overflowButton);
+
+            int firstVisibleIndex = unreadCount - visibleIncidentCount;
+
+            for (int i = firstVisibleIndex; i < unreadCount; i++)
+                incidentNotificationStack.Add(CreateIncidentButton(unreadIncidents[i]));
         }
 
-        int visibleIncidentCount = MaxIncidentNotificationButtons - 1;
-        int hiddenCount = unreadCount - visibleIncidentCount;
-
-        Button overflowButton = new Button(() => OpenIncident(unreadIncidents[0]));
-        overflowButton.text = "+" + hiddenCount;
-        overflowButton.tooltip =
-            "Ещё " + hiddenCount + " непрочитанных происшествий";
-        overflowButton.AddToClassList("incident-notification-button");
-        overflowButton.AddToClassList("incident-overflow");
-        incidentNotificationStack.Add(overflowButton);
-
-        int firstVisibleIndex = unreadCount - visibleIncidentCount;
-
-        for (int i = firstVisibleIndex; i < unreadCount; i++)
-            incidentNotificationStack.Add(CreateIncidentButton(unreadIncidents[i]));
+        if (hasDecision)
+        {
+            Button decisionButton = new Button(
+                () => OpenDecision(gameState.ActiveExpedition.PendingDecision));
+            decisionButton.text = "!";
+            decisionButton.tooltip = "Требуется приказ по экспедиции";
+            decisionButton.AddToClassList("incident-notification-button");
+            decisionButton.AddToClassList("incident-mixed");
+            incidentNotificationStack.Add(decisionButton);
+        }
     }
 
     private Button CreateIncidentButton(ExpeditionIncidentOccurrence occurrence)
@@ -628,12 +685,51 @@ public class PrototypeUIController : MonoBehaviour
         if (occurrence == null)
             return;
 
+        openedDecision = null;
         openedIncident = occurrence;
         incidentModalTitle.text =
             "ДЕНЬ " + occurrence.Day + " · " + occurrence.Title.ToUpper();
         incidentModalDescription.text = occurrence.Description;
         incidentModalConsequence.text =
             "Последствие: " + occurrence.ConsequenceText;
+
+        incidentUnderstoodButton.style.display = DisplayStyle.Flex;
+        decisionOptionAButton.style.display = DisplayStyle.None;
+        decisionOptionBButton.style.display = DisplayStyle.None;
+        incidentModalOverlay.style.display = DisplayStyle.Flex;
+    }
+
+    private void OpenDecision(ExpeditionDecisionOccurrence occurrence)
+    {
+        if (occurrence == null)
+            return;
+
+        openedIncident = null;
+        openedDecision = occurrence;
+
+        incidentModalTitle.text =
+            "ДЕНЬ " + occurrence.Day + " · " + occurrence.Title.ToUpper();
+        incidentModalDescription.text = occurrence.Description;
+        incidentModalConsequence.text =
+            "Требуется приказ. Экспедиция не будет продвигаться, пока решение не принято.";
+
+        decisionOptionAButton.text =
+            occurrence.OptionA.Label + "\n" + occurrence.OptionA.ConsequencePreview;
+        decisionOptionBButton.text =
+            occurrence.OptionB.Label + "\n" + occurrence.OptionB.ConsequencePreview;
+
+        decisionOptionAButton.SetEnabled(
+            ExpeditionDecisionSystem.CanChooseOption(
+                gameState,
+                occurrence.OptionA.Id));
+        decisionOptionBButton.SetEnabled(
+            ExpeditionDecisionSystem.CanChooseOption(
+                gameState,
+                occurrence.OptionB.Id));
+
+        incidentUnderstoodButton.style.display = DisplayStyle.None;
+        decisionOptionAButton.style.display = DisplayStyle.Flex;
+        decisionOptionBButton.style.display = DisplayStyle.Flex;
         incidentModalOverlay.style.display = DisplayStyle.Flex;
     }
 
@@ -654,9 +750,54 @@ public class PrototypeUIController : MonoBehaviour
         RefreshIncidentNotifications();
     }
 
+    private void OnDecisionOptionAClicked()
+    {
+        if (openedDecision == null)
+            return;
+
+        ResolveOpenedDecisionChoice(openedDecision.OptionA.Id);
+    }
+
+    private void OnDecisionOptionBClicked()
+    {
+        if (openedDecision == null)
+            return;
+
+        ResolveOpenedDecisionChoice(openedDecision.OptionB.Id);
+    }
+
+    private void ResolveOpenedDecisionChoice(string optionId)
+    {
+        string resultMessage;
+
+        if (!ExpeditionDecisionSystem.TryApplyChoice(
+                gameState,
+                optionId,
+                out resultMessage))
+        {
+            incidentModalConsequence.text = resultMessage;
+            return;
+        }
+
+        AddReport(resultMessage);
+        HideIncidentModal();
+        RefreshInterface();
+    }
+
     private void HideIncidentModal()
     {
         openedIncident = null;
+        openedDecision = null;
+
+        if (decisionOptionAButton != null)
+            decisionOptionAButton.style.display = DisplayStyle.None;
+
+        if (decisionOptionBButton != null)
+            decisionOptionBButton.style.display = DisplayStyle.None;
+
+        if (incidentUnderstoodButton != null)
+            incidentUnderstoodButton.style.display = DisplayStyle.Flex;
+
         incidentModalOverlay.style.display = DisplayStyle.None;
     }
 

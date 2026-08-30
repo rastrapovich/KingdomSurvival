@@ -226,9 +226,39 @@
 }
 
 /* ================================================================
+   ИЗОБРАЖЕНИЯ НА КАРТОЧКАХ ЛОКАЦИЙ
+   ================================================================ */
+
+.location-image-placeholder {
+    width: 100%;
+    height: 112px;
+    margin-bottom: 9px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(35, 40, 48);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(74, 80, 91);
+    border-right-color: rgb(74, 80, 91);
+    border-top-color: rgb(74, 80, 91);
+    border-bottom-color: rgb(74, 80, 91);
+    border-radius: 4px;
+}
+
+.location-image-placeholder-text {
+    color: rgb(105, 111, 121);
+    font-size: 9px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* ================================================================
    ВСПЛЫВАЮЩИЙ РАСХОД ГОРОДСКОЙ ПИЩИ
    ================================================================ */
 
 .food-expense-popup {
-    top: 66px;
+    top: 100%;
+    margin-top: 2px;
 }

@@ -52,6 +52,8 @@ public class PrototypeUIController : MonoBehaviour
     private Label commanderDetailLabel;
     private Label armyStatusLabel;
     private Label armyGoldLabel;
+    private Button armyGoldMinusButton;
+    private Button armyGoldPlusButton;
     private Button supplyMinusButton;
     private Label supplyValueLabel;
     private Button supplyPlusButton;
@@ -148,6 +150,8 @@ public class PrototypeUIController : MonoBehaviour
         commanderDetailLabel = root.Q<Label>("commander-detail-label");
         armyStatusLabel = root.Q<Label>("army-status-label");
         armyGoldLabel = root.Q<Label>("army-gold-label");
+        armyGoldMinusButton = root.Q<Button>("army-gold-minus-button");
+        armyGoldPlusButton = root.Q<Button>("army-gold-plus-button");
 
         supplyMinusButton = root.Q<Button>("supply-minus-button");
         supplyValueLabel = root.Q<Label>("supply-value-label");
@@ -216,6 +220,8 @@ public class PrototypeUIController : MonoBehaviour
             commanderDetailLabel != null &&
             armyStatusLabel != null &&
             armyGoldLabel != null &&
+            armyGoldMinusButton != null &&
+            armyGoldPlusButton != null &&
             supplyMinusButton != null &&
             supplyValueLabel != null &&
             supplyPlusButton != null &&
@@ -386,6 +392,8 @@ public class PrototypeUIController : MonoBehaviour
         moodMinus10Button.clicked += OnMoodMinus10Clicked;
         moodPlus10Button.clicked += OnMoodPlus10Clicked;
 
+        armyGoldMinusButton.clicked += OnArmyGoldMinusClicked;
+        armyGoldPlusButton.clicked += OnArmyGoldPlusClicked;
         supplyMinusButton.clicked += OnSupplyMinusClicked;
         supplyPlusButton.clicked += OnSupplyPlusClicked;
 
@@ -420,6 +428,8 @@ public class PrototypeUIController : MonoBehaviour
         moodMinus10Button.clicked -= OnMoodMinus10Clicked;
         moodPlus10Button.clicked -= OnMoodPlus10Clicked;
 
+        armyGoldMinusButton.clicked -= OnArmyGoldMinusClicked;
+        armyGoldPlusButton.clicked -= OnArmyGoldPlusClicked;
         supplyMinusButton.clicked -= OnSupplyMinusClicked;
         supplyPlusButton.clicked -= OnSupplyPlusClicked;
 
@@ -487,6 +497,28 @@ public class PrototypeUIController : MonoBehaviour
         gameState.Mood = Math.Max(0, Math.Min(100, gameState.Mood + delta));
         RefreshInterface();
         CheckForDefeat();
+    }
+
+    private void OnArmyGoldPlusClicked()
+    {
+        if (!isGameOver && gameState.CanAdjustArmySupply && gameState.Gold > 0)
+        {
+            gameState.Gold--;
+            gameState.ArmyGold++;
+        }
+
+        RefreshInterface();
+    }
+
+    private void OnArmyGoldMinusClicked()
+    {
+        if (!isGameOver && gameState.CanAdjustArmySupply && gameState.ArmyGold > 0)
+        {
+            gameState.ArmyGold--;
+            gameState.Gold++;
+        }
+
+        RefreshInterface();
     }
 
     private void OnSupplyPlusClicked()
@@ -637,13 +669,15 @@ public class PrototypeUIController : MonoBehaviour
         int fullDays = gameState.FullSupplyDays;
         bool canAdjust = gameState.CanAdjustArmySupply && !isGameOver;
 
-        armyGoldLabel.text = "Золото отряда: " + gameState.ArmyGold;
+        armyGoldLabel.text = gameState.ArmyGold.ToString();
         supplyValueLabel.text = gameState.ArmySupply.ToString();
         supplyConsumptionLabel.text =
             "Расход в походе: " + dailyConsumption + " / день";
         supplyDaysLabel.text =
             "Хватит на " + fullDays + " " + GetDayWord(fullDays);
 
+        armyGoldPlusButton.SetEnabled(canAdjust && gameState.Gold > 0);
+        armyGoldMinusButton.SetEnabled(canAdjust && gameState.ArmyGold > 0);
         supplyPlusButton.SetEnabled(canAdjust && gameState.Food > 0);
         supplyMinusButton.SetEnabled(canAdjust && gameState.ArmySupply > 0);
     }
@@ -656,6 +690,14 @@ public class PrototypeUIController : MonoBehaviour
         {
             VisualElement card = new VisualElement();
             card.AddToClassList("fighter-card");
+
+            VisualElement imagePlaceholder = new VisualElement();
+            imagePlaceholder.AddToClassList("fighter-image-placeholder");
+
+            Label imagePlaceholderLabel = new Label("ИЗОБРАЖЕНИЕ");
+            imagePlaceholderLabel.AddToClassList("fighter-image-placeholder-text");
+            imagePlaceholder.Add(imagePlaceholderLabel);
+            card.Add(imagePlaceholder);
 
             Label roleLabel = new Label(fighter.Role);
             roleLabel.AddToClassList("fighter-role");

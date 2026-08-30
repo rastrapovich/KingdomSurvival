@@ -53,7 +53,7 @@ public partial class PrototypeUIController
         if (!debugMenuInitialized)
             return;
 
-        if (isGameOver && debugPanel.style.display == DisplayStyle.Flex)
+        if (isGameOver && debugPanel.resolvedStyle.display == DisplayStyle.Flex)
             debugPanel.style.display = DisplayStyle.None;
 
         RefreshDebugMenu();
@@ -195,10 +195,8 @@ public partial class PrototypeUIController
 
     private void HideOldResourceTestContainers(VisualElement root)
     {
-        UQueryState<VisualElement> query =
-            root.Query<VisualElement>(className: "resource-test-controls");
-
-        query.ForEach(container => container.style.display = DisplayStyle.None);
+        root.Query<VisualElement>(className: "resource-test-controls")
+            .ForEach(container => container.style.display = DisplayStyle.None);
     }
 
     private VisualElement CreateDebugResourceRow(
@@ -267,10 +265,9 @@ public partial class PrototypeUIController
         if (!DebugToolsAvailable || isGameOver)
             return;
 
+        bool isOpen = debugPanel.resolvedStyle.display == DisplayStyle.Flex;
         debugPanel.style.display =
-            debugPanel.style.display == DisplayStyle.Flex
-                ? DisplayStyle.None
-                : DisplayStyle.Flex;
+            isOpen ? DisplayStyle.None : DisplayStyle.Flex;
 
         RefreshDebugMenu();
     }

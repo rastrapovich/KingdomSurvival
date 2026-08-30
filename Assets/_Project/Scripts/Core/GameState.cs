@@ -68,6 +68,11 @@ public class ExpeditionData
     public CommanderState Phase;
     public int DaysRemaining;
     public int StartedOnDay;
+
+    // Значимое происшествие не меняет канонические состояния командира.
+    // Это отдельное состояние самой экспедиции: она ждёт приказа короля.
+    public ExpeditionDecisionOccurrence PendingDecision;
+    public List<string> UsedDecisionIds = new List<string>();
 }
 
 [Serializable]
@@ -118,6 +123,10 @@ public class GameState
 
     public bool HasActiveExpedition =>
         ActiveExpedition != null && ActiveExpedition.IsActive;
+
+    public bool HasPendingExpeditionDecision =>
+        HasActiveExpedition &&
+        ActiveExpedition.PendingDecision != null;
 
     public bool CanCancelExpeditionBeforeDayEnd =>
         HasActiveExpedition &&
@@ -278,7 +287,8 @@ public class GameState
             LocationId = location.Id,
             Phase = CommanderState.TravellingToLocation,
             DaysRemaining = location.DistanceDays,
-            StartedOnDay = Day
+            StartedOnDay = Day,
+            PendingDecision = null
         };
 
         foreach (FighterData fighter in Fighters)
@@ -328,6 +338,13 @@ public class GameState
         if (!HasActiveExpedition)
         {
             resultMessage = "Сейчас нет активной экспедиции.";
+            return false;
+        }
+
+        if (HasPendingExpeditionDecision)
+        {
+            resultMessage =
+                "Экспедиция ждёт приказа по значимому происшествию. Сначала выберите решение.";
             return false;
         }
 

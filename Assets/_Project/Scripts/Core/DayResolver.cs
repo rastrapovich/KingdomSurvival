@@ -27,6 +27,15 @@ public static class DayResolver
         ResolveGoldIncome(state, result);
         ResolveFoodIncome(state, result);
         ResolveCityFood(state, result);
+
+        // Кризис столицы рассчитывается до движения экспедиции.
+        // Если армия возвращается в столицу именно в этот день,
+        // во время кризиса она ещё считается находящейся вне города.
+        CapitalCrisisSystem.ResolveForDay(
+            state,
+            finishedDay,
+            result);
+
         ResolveExpedition(state, result);
 
         // Пока экспедиция ждёт значимого приказа, она не продвигается

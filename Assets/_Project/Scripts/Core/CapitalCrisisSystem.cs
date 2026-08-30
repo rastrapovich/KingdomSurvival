@@ -10,6 +10,8 @@ public static class CapitalCrisisSystem
 
     // Временные последствия первого кризиса прототипа.
     private const int MoodLossWithArmyHome = 1;
+    private const int FoodLossWithPartialGarrison = 3;
+    private const int MoodLossWithPartialGarrison = 2;
     private const int FoodLossWithArmyAway = 6;
     private const int MoodLossWithArmyAway = 3;
 
@@ -21,12 +23,15 @@ public static class CapitalCrisisSystem
         if (Random.NextDouble() >= CrisisChancePerDay)
             return;
 
-        bool armyAway = state.HasActiveExpedition;
+        int garrisonPower = state.GarrisonDefensePower;
+        int totalArmyPower = state.TotalArmyDefensePower;
+        bool garrisonEmpty = garrisonPower <= 0;
+        bool garrisonPartial = garrisonPower > 0 && garrisonPower < totalArmyPower;
 
         string description;
         string consequenceText;
 
-        if (armyAway)
+        if (garrisonEmpty)
         {
             int actualFoodLoss = Math.Min(state.Food, FoodLossWithArmyAway);
             int previousMood = state.Mood;
@@ -44,7 +49,30 @@ public static class CapitalCrisisSystem
             consequenceText =
                 FormatFoodLoss(actualFoodLoss) + " " +
                 FormatMoodLoss(actualMoodLoss) +
-                " Армия отсутствует.";
+                " Гарнизон пуст.";
+        }
+        else if (garrisonPartial)
+        {
+            int actualFoodLoss =
+                Math.Min(state.Food, FoodLossWithPartialGarrison);
+            int previousMood = state.Mood;
+
+            state.Food -= actualFoodLoss;
+            state.Mood =
+                Math.Max(0, state.Mood - MoodLossWithPartialGarrison);
+
+            int actualMoodLoss = previousMood - state.Mood;
+
+            description =
+                "Оставшийся гарнизон удержал толпу от полного разграбления " +
+                "амбара, но людей не хватило, чтобы быстро восстановить порядок. " +
+                "Часть единственной армии всё ещё находится в экспедиции.";
+
+            consequenceText =
+                FormatFoodLoss(actualFoodLoss) + " " +
+                FormatMoodLoss(actualMoodLoss) +
+                " Сила гарнизона: " + garrisonPower +
+                "/" + totalArmyPower + ".";
         }
         else
         {

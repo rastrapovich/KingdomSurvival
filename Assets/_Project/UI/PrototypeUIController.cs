@@ -60,6 +60,19 @@ public partial class PrototypeUIController : MonoBehaviour
     private Label supplyConsumptionLabel;
     private Label supplyDaysLabel;
     private VisualElement fightersList;
+    private Label fightersTitleLabel;
+    private Label fighterSelectionHintLabel;
+    private VisualElement expeditionPreview;
+    private Label expeditionPreviewCountLabel;
+    private Label expeditionPreviewPowerLabel;
+    private Label expeditionPreviewNamesLabel;
+    private VisualElement garrisonPreview;
+    private Label garrisonPreviewCountLabel;
+    private Label garrisonPreviewPowerLabel;
+    private Label garrisonPreviewNamesLabel;
+
+    private readonly HashSet<string> selectedFighterIds =
+        new HashSet<string>();
 
     private Label expeditionStatusLabel;
     private Button sendRuinsButton;
@@ -159,6 +172,23 @@ public partial class PrototypeUIController : MonoBehaviour
         supplyConsumptionLabel = root.Q<Label>("supply-consumption-label");
         supplyDaysLabel = root.Q<Label>("supply-days-label");
         fightersList = root.Q<VisualElement>("fighters-list");
+        fightersTitleLabel = root.Q<Label>("fighters-title-label");
+        fighterSelectionHintLabel =
+            root.Q<Label>("fighter-selection-hint-label");
+        expeditionPreview = root.Q<VisualElement>("expedition-preview");
+        expeditionPreviewCountLabel =
+            root.Q<Label>("expedition-preview-count-label");
+        expeditionPreviewPowerLabel =
+            root.Q<Label>("expedition-preview-power-label");
+        expeditionPreviewNamesLabel =
+            root.Q<Label>("expedition-preview-names-label");
+        garrisonPreview = root.Q<VisualElement>("garrison-preview");
+        garrisonPreviewCountLabel =
+            root.Q<Label>("garrison-preview-count-label");
+        garrisonPreviewPowerLabel =
+            root.Q<Label>("garrison-preview-power-label");
+        garrisonPreviewNamesLabel =
+            root.Q<Label>("garrison-preview-names-label");
 
         expeditionStatusLabel = root.Q<Label>("expedition-status-label");
         sendRuinsButton = root.Q<Button>("send-ruins-button");
@@ -228,6 +258,16 @@ public partial class PrototypeUIController : MonoBehaviour
             supplyConsumptionLabel != null &&
             supplyDaysLabel != null &&
             fightersList != null &&
+            fightersTitleLabel != null &&
+            fighterSelectionHintLabel != null &&
+            expeditionPreview != null &&
+            expeditionPreviewCountLabel != null &&
+            expeditionPreviewPowerLabel != null &&
+            expeditionPreviewNamesLabel != null &&
+            garrisonPreview != null &&
+            garrisonPreviewCountLabel != null &&
+            garrisonPreviewPowerLabel != null &&
+            garrisonPreviewNamesLabel != null &&
             expeditionStatusLabel != null &&
             sendRuinsButton != null &&
             sendMineButton != null &&
@@ -280,6 +320,7 @@ public partial class PrototypeUIController : MonoBehaviour
         lastNavigationClickTime = -NavigationClickCooldownSeconds;
         unreadIncidents.Clear();
         reportHistory.Clear();
+        selectedFighterIds.Clear();
         reportHistoryLabel.text = string.Empty;
 
         ConfigureCommanderDropdown();
@@ -538,8 +579,12 @@ public partial class PrototypeUIController : MonoBehaviour
         if (isGameOver)
             return;
 
+        bool expeditionWasActive = gameState.HasActiveExpedition;
         int finishedDay = gameState.Day;
         DayResolutionResult result = DayResolver.ResolveDay(gameState);
+
+        if (expeditionWasActive && !gameState.HasActiveExpedition)
+            selectedFighterIds.Clear();
 
         if (result.NewExpeditionIncidents.Count > 0)
             unreadIncidents.AddRange(result.NewExpeditionIncidents);
@@ -561,7 +606,8 @@ public partial class PrototypeUIController : MonoBehaviour
     private void TrySendExpedition(string locationId)
     {
         string resultMessage;
-        gameState.TryStartExpedition(locationId, out resultMessage);
+        List<string> selectedIds = GetSelectedFighterIdsInArmyOrder();
+        gameState.TryStartExpedition(locationId, selectedIds, out resultMessage);
         AddReport(resultMessage);
         RefreshInterface();
     }
@@ -580,11 +626,18 @@ public partial class PrototypeUIController : MonoBehaviour
     private void OnExpeditionActionClicked()
     {
         string resultMessage;
+        bool cancelledBeforeDayEnd = false;
 
         if (gameState.CanCancelExpeditionBeforeDayEnd)
-            gameState.TryCancelExpeditionBeforeDayEnd(out resultMessage);
+        {
+            cancelledBeforeDayEnd =
+                gameState.TryCancelExpeditionBeforeDayEnd(out resultMessage);
+        }
         else
             gameState.TryOrderReturn(out resultMessage);
+
+        if (cancelledBeforeDayEnd)
+            selectedFighterIds.Clear();
 
         AddReport(resultMessage);
         RefreshInterface();
@@ -648,9 +701,10 @@ public partial class PrototypeUIController : MonoBehaviour
         if (gameState.HasActiveExpedition)
         {
             armyStatusLabel.text =
-                commander.Name + " → " + gameState.Fighters.Count +
-                " отдельных воинов. Армия находится вне столицы. " +
-                "Столица не защищена этой армией.";
+                commander.Name + " и " +
+                gameState.ActiveExpedition.FighterIds.Count +
+                " бойцов находятся в экспедиции. В столице осталось: " +
+                gameState.GarrisonFighterCount + ".";
         }
         else
         {
@@ -660,21 +714,30 @@ public partial class PrototypeUIController : MonoBehaviour
         }
 
         RefreshSupplyBlock();
+        RefreshArmySplitPreview();
         RefreshFightersList();
     }
 
     private void RefreshSupplyBlock()
     {
-        int dailyConsumption = gameState.ExpeditionSupplyConsumption;
-        int fullDays = gameState.FullSupplyDays;
+        int dailyConsumption = gameState.HasActiveExpedition
+            ? gameState.ExpeditionSupplyConsumption
+            : selectedFighterIds.Count > 0
+                ? selectedFighterIds.Count + 1
+                : 0;
+        int fullDays = dailyConsumption > 0
+            ? gameState.ArmySupply / dailyConsumption
+            : 0;
         bool canAdjust = gameState.CanAdjustArmySupply && !isGameOver;
 
         armyGoldLabel.text = gameState.ArmyGold.ToString();
         supplyValueLabel.text = gameState.ArmySupply.ToString();
-        supplyConsumptionLabel.text =
-            "Расход в походе: " + dailyConsumption + " / день";
-        supplyDaysLabel.text =
-            "Хватит на " + fullDays + " " + GetDayWord(fullDays);
+        supplyConsumptionLabel.text = dailyConsumption > 0
+            ? "Расход выбранного отряда: " + dailyConsumption + " / день"
+            : "Расход: выберите бойцов";
+        supplyDaysLabel.text = dailyConsumption > 0
+            ? "Хватит на " + fullDays + " " + GetDayWord(fullDays)
+            : "Дни снабжения пока не рассчитаны";
 
         armyGoldPlusButton.SetEnabled(canAdjust && gameState.Gold > 0);
         armyGoldMinusButton.SetEnabled(canAdjust && gameState.ArmyGold > 0);
@@ -686,10 +749,30 @@ public partial class PrototypeUIController : MonoBehaviour
     {
         fightersList.Clear();
 
+        bool expeditionActive = gameState.HasActiveExpedition;
+        fightersTitleLabel.text = expeditionActive
+            ? "ВОИНЫ ЕДИНСТВЕННОЙ АРМИИ"
+            : "ВЫБЕРИТЕ БОЙЦОВ В ЭКСПЕДИЦИЮ";
+
+        fighterSelectionHintLabel.text = expeditionActive
+            ? "Состав зафиксирован до возвращения экспедиции."
+            : "Нажимайте на карточки: выбранные отправятся с командиром, остальные останутся гарнизоном столицы.";
+
         foreach (FighterData fighter in gameState.Fighters)
         {
-            VisualElement card = new VisualElement();
+            string fighterId = fighter.Id;
+            bool assignedToExpedition = expeditionActive
+                ? gameState.IsFighterInActiveExpedition(fighterId)
+                : selectedFighterIds.Contains(fighterId);
+
+            Button card = new Button(
+                () => OnFighterCardClicked(fighterId));
             card.AddToClassList("fighter-card");
+            card.AddToClassList(
+                assignedToExpedition
+                    ? "fighter-card-selected"
+                    : "fighter-card-garrison");
+            card.SetEnabled(!expeditionActive && !isGameOver);
 
             VisualElement imagePlaceholder = new VisualElement();
             imagePlaceholder.AddToClassList("fighter-image-placeholder");
@@ -699,16 +782,142 @@ public partial class PrototypeUIController : MonoBehaviour
             imagePlaceholder.Add(imagePlaceholderLabel);
             card.Add(imagePlaceholder);
 
+            Label nameLabel = new Label(fighter.Name);
+            nameLabel.AddToClassList("fighter-name");
+            card.Add(nameLabel);
+
             Label roleLabel = new Label(fighter.Role);
             roleLabel.AddToClassList("fighter-role");
             card.Add(roleLabel);
 
             Label infoLabel = new Label(
-                "Уровень " + fighter.Level + " · в строю");
+                "Ур. " + fighter.Level + " · оборона " +
+                fighter.DefensePower);
             infoLabel.AddToClassList("fighter-info");
             card.Add(infoLabel);
 
+            string assignmentText;
+
+            if (expeditionActive)
+            {
+                assignmentText = assignedToExpedition
+                    ? "В ЭКСПЕДИЦИИ"
+                    : "ГАРНИЗОН СТОЛИЦЫ";
+            }
+            else
+            {
+                assignmentText = assignedToExpedition
+                    ? "В ЭКСПЕДИЦИЮ"
+                    : "ОСТАНЕТСЯ В СТОЛИЦЕ";
+            }
+
+            Label assignmentLabel = new Label(assignmentText);
+            assignmentLabel.AddToClassList("fighter-assignment");
+            card.Add(assignmentLabel);
+
             fightersList.Add(card);
+        }
+    }
+
+    private void OnFighterCardClicked(string fighterId)
+    {
+        if (isGameOver || gameState.HasActiveExpedition)
+            return;
+
+        if (!selectedFighterIds.Add(fighterId))
+            selectedFighterIds.Remove(fighterId);
+
+        RefreshArmyPanel();
+        RefreshExpeditionPanel();
+    }
+
+    private void RefreshArmySplitPreview()
+    {
+        List<string> expeditionIds = gameState.HasActiveExpedition
+            ? new List<string>(gameState.ActiveExpedition.FighterIds)
+            : GetSelectedFighterIdsInArmyOrder();
+        List<string> garrisonIds = new List<string>();
+
+        foreach (FighterData fighter in gameState.Fighters)
+        {
+            if (!expeditionIds.Contains(fighter.Id))
+                garrisonIds.Add(fighter.Id);
+        }
+
+        int expeditionPower = gameState.CalculateDefensePower(expeditionIds);
+        int garrisonPower = gameState.CalculateDefensePower(garrisonIds);
+        int totalPower = gameState.TotalArmyDefensePower;
+
+        expeditionPreviewCountLabel.text =
+            "Бойцов: " + expeditionIds.Count;
+        expeditionPreviewPowerLabel.text =
+            "Сила отряда: " + expeditionPower;
+        expeditionPreviewNamesLabel.text = expeditionIds.Count > 0
+            ? GetFighterNames(expeditionIds)
+            : "Никто не выбран";
+
+        garrisonPreviewCountLabel.text =
+            "Гарнизон: " + garrisonIds.Count + " " +
+            GetFighterWord(garrisonIds.Count);
+        garrisonPreviewPowerLabel.text =
+            "Оборона: " + garrisonPower + "/" + totalPower;
+        garrisonPreviewNamesLabel.text = garrisonIds.Count > 0
+            ? GetFighterNames(garrisonIds)
+            : "СТОЛИЦА ОСТАНЕТСЯ БЕЗ ГАРНИЗОНА";
+
+        if (garrisonIds.Count == 0)
+            garrisonPreview.AddToClassList("garrison-preview-empty");
+        else
+            garrisonPreview.RemoveFromClassList("garrison-preview-empty");
+    }
+
+    private List<string> GetSelectedFighterIdsInArmyOrder()
+    {
+        List<string> result = new List<string>();
+
+        foreach (FighterData fighter in gameState.Fighters)
+        {
+            if (selectedFighterIds.Contains(fighter.Id))
+                result.Add(fighter.Id);
+        }
+
+        return result;
+    }
+
+    private string GetFighterNames(List<string> fighterIds)
+    {
+        List<string> names = new List<string>();
+
+        foreach (string fighterId in fighterIds)
+        {
+            FighterData fighter = gameState.FindFighter(fighterId);
+
+            if (fighter != null)
+                names.Add(fighter.Name);
+        }
+
+        return names.Count > 0
+            ? string.Join(", ", names)
+            : "—";
+    }
+
+    private string GetFighterWord(int count)
+    {
+        int lastTwoDigits = count % 100;
+
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 14)
+            return "бойцов";
+
+        switch (count % 10)
+        {
+            case 1:
+                return "боец";
+            case 2:
+            case 3:
+            case 4:
+                return "бойца";
+            default:
+                return "бойцов";
         }
     }
 
@@ -717,18 +926,25 @@ public partial class PrototypeUIController : MonoBehaviour
         bool expeditionActive = gameState.HasActiveExpedition;
         bool awaitingDecision = gameState.HasPendingExpeditionDecision;
         bool controlsAvailable = !isGameOver;
+        bool hasSelectedFighters = selectedFighterIds.Count > 0;
 
         commanderDropdown.SetEnabled(controlsAvailable && !expeditionActive);
-        sendRuinsButton.SetEnabled(controlsAvailable && !expeditionActive);
-        sendMineButton.SetEnabled(controlsAvailable && !expeditionActive);
-        sendForestButton.SetEnabled(controlsAvailable && !expeditionActive);
+        sendRuinsButton.SetEnabled(
+            controlsAvailable && !expeditionActive && hasSelectedFighters);
+        sendMineButton.SetEnabled(
+            controlsAvailable && !expeditionActive && hasSelectedFighters);
+        sendForestButton.SetEnabled(
+            controlsAvailable && !expeditionActive && hasSelectedFighters);
 
         activeExpeditionCard.style.display =
             expeditionActive ? DisplayStyle.Flex : DisplayStyle.None;
 
         if (!expeditionActive)
         {
-            expeditionStatusLabel.text = "Активная экспедиция: нет";
+            expeditionStatusLabel.text = hasSelectedFighters
+                ? "Подготовка экспедиции: выбрано бойцов — " +
+                  selectedFighterIds.Count + ". Выберите локацию."
+                : "Активная экспедиция: нет. Сначала выберите бойцов слева.";
             researchExpeditionButton.style.display = DisplayStyle.None;
             return;
         }
@@ -797,7 +1013,12 @@ public partial class PrototypeUIController : MonoBehaviour
 
         activeExpeditionDetails.text =
             "Командир: " + commander.Name + "\n" +
-            "Армия: " + expedition.FighterIds.Count + " отдельных воинов\n" +
+            "Бойцы: " + GetFighterNames(expedition.FighterIds) + "\n" +
+            "Сила отряда: " + gameState.ExpeditionDefensePower + "\n" +
+            "Гарнизон столицы: " + gameState.GarrisonFighterCount +
+            " " + GetFighterWord(gameState.GarrisonFighterCount) +
+            " · оборона " + gameState.GarrisonDefensePower +
+            "/" + gameState.TotalArmyDefensePower + "\n" +
             "Цель: " + location.Name + "\n" +
             "Состояние: " + stateText + "\n" +
             "Текущая задача: " + currentTask + "\n" +

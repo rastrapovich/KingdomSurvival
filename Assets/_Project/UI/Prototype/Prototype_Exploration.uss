@@ -148,8 +148,8 @@
 
 .fighters-scroll {
     width: 100%;
-    height: 180px;
-    max-height: 180px;
+    height: 196px;
+    max-height: 196px;
 }
 
 .fighters-list-horizontal {
@@ -159,10 +159,10 @@
 }
 
 .fighters-list-horizontal .fighter-card {
-    width: 104px;
-    min-width: 104px;
-    max-width: 104px;
-    min-height: 150px;
+    width: 112px;
+    min-width: 112px;
+    max-width: 112px;
+    min-height: 166px;
     margin-right: 7px;
     margin-bottom: 4px;
     padding-left: 6px;
@@ -177,6 +177,9 @@
     border-right-color: rgb(72, 76, 85);
     border-top-color: rgb(72, 76, 85);
     border-bottom-color: rgb(72, 76, 85);
+    border-radius: 4px;
+    align-items: flex-start;
+    -unity-text-align: upper-left;
 }
 
 .fighter-image-placeholder {
@@ -210,6 +213,131 @@
 }
 
 .fighters-list-horizontal .fighter-info {
+    font-size: 9px;
+    white-space: normal;
+}
+
+.fighter-name {
+    margin-bottom: 2px;
+    color: rgb(237, 232, 217);
+    font-size: 12px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.fighter-assignment {
+    margin-top: 5px;
+    color: rgb(147, 186, 151);
+    font-size: 8px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.fighter-card-selected {
+    background-color: rgb(67, 57, 39);
+    border-left-color: rgb(224, 187, 102);
+    border-right-color: rgb(165, 132, 73);
+    border-top-color: rgb(165, 132, 73);
+    border-bottom-color: rgb(165, 132, 73);
+}
+
+.fighter-card-selected .fighter-assignment {
+    color: rgb(235, 194, 104);
+}
+
+.fighter-card-garrison {
+    background-color: rgb(39, 51, 47);
+    border-left-color: rgb(92, 138, 102);
+}
+
+.fighter-card:disabled {
+    opacity: 1;
+}
+
+/* ================================================================
+   ВЫБОР БОЙЦОВ И ПРЕДПРОСМОТР ГАРНИЗОНА
+   ================================================================ */
+
+.fighter-selection-hint {
+    margin-top: 7px;
+    margin-bottom: 7px;
+    color: rgb(204, 193, 168);
+    font-size: 11px;
+    white-space: normal;
+}
+
+.army-split-preview-row {
+    width: 100%;
+    flex-direction: row;
+    align-items: stretch;
+    margin-bottom: 5px;
+}
+
+.army-split-preview {
+    width: 49%;
+    min-width: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background-color: rgb(37, 42, 50);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-radius: 4px;
+}
+
+.expedition-preview {
+    margin-right: 2%;
+    border-left-color: rgb(137, 109, 60);
+    border-right-color: rgb(89, 77, 57);
+    border-top-color: rgb(89, 77, 57);
+    border-bottom-color: rgb(89, 77, 57);
+}
+
+.garrison-preview {
+    border-left-color: rgb(73, 112, 82);
+    border-right-color: rgb(61, 82, 68);
+    border-top-color: rgb(61, 82, 68);
+    border-bottom-color: rgb(61, 82, 68);
+}
+
+.garrison-preview-empty {
+    background-color: rgb(67, 42, 42);
+    border-left-color: rgb(184, 91, 82);
+    border-right-color: rgb(132, 68, 63);
+    border-top-color: rgb(132, 68, 63);
+    border-bottom-color: rgb(132, 68, 63);
+}
+
+.army-split-preview-title {
+    margin-bottom: 5px;
+    color: rgb(224, 187, 102);
+    font-size: 10px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.garrison-preview .army-split-preview-title {
+    color: rgb(142, 190, 151);
+}
+
+.garrison-preview-empty .army-split-preview-title {
+    color: rgb(222, 116, 106);
+}
+
+.army-split-preview-value {
+    color: rgb(235, 230, 215);
+    font-size: 12px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.army-split-preview-note,
+.army-split-preview-names {
+    margin-top: 3px;
+    color: rgb(164, 166, 165);
     font-size: 9px;
     white-space: normal;
 }

@@ -16,13 +16,20 @@ public class FighterData
     public string Name;
     public string Role;
     public int Level;
+    public int DefensePower;
 
-    public FighterData(string id, string name, string role, int level)
+    public FighterData(
+        string id,
+        string name,
+        string role,
+        int level,
+        int defensePower)
     {
         Id = id;
         Name = name;
         Role = role;
         Level = level;
+        DefensePower = defensePower;
     }
 }
 
@@ -148,6 +155,65 @@ public class GameState
         HasActiveExpedition &&
         ActiveExpedition.PendingDecision != null;
 
+    public int TotalArmyDefensePower
+    {
+        get
+        {
+            int total = 0;
+
+            foreach (FighterData fighter in Fighters)
+                total += Math.Max(0, fighter.DefensePower);
+
+            return total;
+        }
+    }
+
+    public int GarrisonFighterCount
+    {
+        get
+        {
+            if (!HasActiveExpedition)
+                return Fighters.Count;
+
+            int count = 0;
+
+            foreach (FighterData fighter in Fighters)
+            {
+                if (!IsFighterInActiveExpedition(fighter.Id))
+                    count++;
+            }
+
+            return count;
+        }
+    }
+
+    public int GarrisonDefensePower
+    {
+        get
+        {
+            int total = 0;
+
+            foreach (FighterData fighter in Fighters)
+            {
+                if (!IsFighterInActiveExpedition(fighter.Id))
+                    total += Math.Max(0, fighter.DefensePower);
+            }
+
+            return total;
+        }
+    }
+
+    public int ExpeditionDefensePower
+    {
+        get
+        {
+            if (!HasActiveExpedition)
+                return 0;
+
+            return CalculateDefensePower(ActiveExpedition.FighterIds);
+        }
+    }
+
     public bool CanCancelExpeditionBeforeDayEnd =>
         HasActiveExpedition &&
         ActiveExpedition.StartedOnDay == Day &&
@@ -212,11 +278,12 @@ public class GameState
 
         Fighters = new List<FighterData>
         {
-            new FighterData("garrick", "Гаррик", "Гвардеец", 1),
-            new FighterData("edric", "Эдрик", "Лучник", 1),
-            new FighterData("marta", "Марта", "Лекарь", 1),
-            new FighterData("torvin", "Торвин", "Копейщик", 1),
-            new FighterData("agnessa", "Агнесса", "Разведчик", 1)
+            // Сила обороны — временные числа серого прототипа, не финальный баланс.
+            new FighterData("garrick", "Гаррик", "Гвардеец", 1, 3),
+            new FighterData("edric", "Эдрик", "Лучник", 1, 2),
+            new FighterData("marta", "Марта", "Лекарь", 1, 1),
+            new FighterData("torvin", "Торвин", "Копейщик", 1, 3),
+            new FighterData("agnessa", "Агнесса", "Разведчик", 1, 2)
         };
 
         Locations = new List<LocationData>
@@ -274,6 +341,45 @@ public class GameState
         return null;
     }
 
+    public FighterData FindFighter(string fighterId)
+    {
+        foreach (FighterData fighter in Fighters)
+        {
+            if (fighter.Id == fighterId)
+                return fighter;
+        }
+
+        return null;
+    }
+
+    public bool IsFighterInActiveExpedition(string fighterId)
+    {
+        return HasActiveExpedition &&
+               ActiveExpedition.FighterIds.Contains(fighterId);
+    }
+
+    public int CalculateDefensePower(IEnumerable<string> fighterIds)
+    {
+        if (fighterIds == null)
+            return 0;
+
+        int total = 0;
+        HashSet<string> countedIds = new HashSet<string>();
+
+        foreach (string fighterId in fighterIds)
+        {
+            if (!countedIds.Add(fighterId))
+                continue;
+
+            FighterData fighter = FindFighter(fighterId);
+
+            if (fighter != null)
+                total += Math.Max(0, fighter.DefensePower);
+        }
+
+        return total;
+    }
+
     public List<string> GetCommanderNames()
     {
         List<string> names = new List<string>();
@@ -321,7 +427,10 @@ public class GameState
         return true;
     }
 
-    public bool TryStartExpedition(string locationId, out string resultMessage)
+    public bool TryStartExpedition(
+        string locationId,
+        List<string> selectedFighterIds,
+        out string resultMessage)
     {
         if (HasActiveExpedition)
         {
@@ -333,6 +442,33 @@ public class GameState
         {
             resultMessage = "Армия должна состоять из 4–6 отдельных воинов.";
             return false;
+        }
+
+        if (selectedFighterIds == null || selectedFighterIds.Count == 0)
+        {
+            resultMessage =
+                "Сначала выберите хотя бы одного бойца для экспедиции.";
+            return false;
+        }
+
+        HashSet<string> uniqueSelectedIds =
+            new HashSet<string>(selectedFighterIds);
+
+        if (uniqueSelectedIds.Count != selectedFighterIds.Count)
+        {
+            resultMessage = "В составе экспедиции один боец указан несколько раз.";
+            return false;
+        }
+
+        foreach (string fighterId in uniqueSelectedIds)
+        {
+            if (FindFighter(fighterId) == null)
+            {
+                resultMessage =
+                    "В составе экспедиции найден неизвестный боец: " +
+                    fighterId + ".";
+                return false;
+            }
         }
 
         CommanderData commander = GetSelectedCommander();
@@ -357,17 +493,25 @@ public class GameState
             PendingDecision = null
         };
 
+        // Сохраняем порядок общей армии, чтобы состав всегда одинаково
+        // отображался в интерфейсе и донесениях.
         foreach (FighterData fighter in Fighters)
-            expedition.FighterIds.Add(fighter.Id);
+        {
+            if (uniqueSelectedIds.Contains(fighter.Id))
+                expedition.FighterIds.Add(fighter.Id);
+        }
 
         ConsecutiveExpeditionSupplyShortageDays = 0;
         ActiveExpedition = expedition;
         commander.State = CommanderState.TravellingToLocation;
 
         resultMessage =
-            commander.Name + " и " + Fighters.Count +
+            commander.Name + " и " + expedition.FighterIds.Count +
             " воинов получили приказ отправиться в локацию «" +
-            location.Name + "». До завершения текущего дня приказ можно отменить.";
+            location.Name + "». В столице осталось бойцов: " +
+            GarrisonFighterCount + ", сила гарнизона: " +
+            GarrisonDefensePower + "/" + TotalArmyDefensePower +
+            ". До завершения текущего дня приказ можно отменить.";
 
         return true;
     }
@@ -396,7 +540,8 @@ public class GameState
 
         resultMessage =
             "Приказ на отправку в локацию «" + location.Name + "» отменён. " +
-            commander.Name + " и армия остаются в столице. День не завершён.";
+            commander.Name + " и выбранные бойцы остаются в столице. " +
+            "День не завершён.";
 
         return true;
     }
@@ -502,7 +647,7 @@ public class GameState
 
         resultMessage =
             commander.Name + " получил приказ возвращаться. До столицы осталось дней: " +
-            returnDays + ". До прибытия армия не защищает город.";
+            returnDays + ". До прибытия бойцы экспедиции не усиливают гарнизон.";
 
         return true;
     }

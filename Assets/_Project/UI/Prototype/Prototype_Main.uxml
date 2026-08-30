@@ -144,9 +144,30 @@
 
                         <ui:Label name="army-status-label" text="Статус армии: в столице" class="status-label" />
 
+                        <ui:Label
+                            name="fighter-selection-hint-label"
+                            text="Нажмите на карточки бойцов, которых нужно отправить."
+                            class="fighter-selection-hint" />
+
+                        <ui:VisualElement class="army-split-preview-row">
+                            <ui:VisualElement name="expedition-preview" class="army-split-preview expedition-preview">
+                                <ui:Label text="В ЭКСПЕДИЦИЮ" class="army-split-preview-title" />
+                                <ui:Label name="expedition-preview-count-label" text="Бойцов: 0" class="army-split-preview-value" />
+                                <ui:Label name="expedition-preview-power-label" text="Сила отряда: 0" class="army-split-preview-note" />
+                                <ui:Label name="expedition-preview-names-label" text="Никто не выбран" class="army-split-preview-names" />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="garrison-preview" class="army-split-preview garrison-preview">
+                                <ui:Label text="ОСТАНЕТСЯ В СТОЛИЦЕ" class="army-split-preview-title" />
+                                <ui:Label name="garrison-preview-count-label" text="Гарнизон: 5 бойцов" class="army-split-preview-value" />
+                                <ui:Label name="garrison-preview-power-label" text="Оборона: 11/11" class="army-split-preview-note" />
+                                <ui:Label name="garrison-preview-names-label" text="Все бойцы" class="army-split-preview-names" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
                         <ui:VisualElement class="section-divider" />
-                        <ui:Label text="ВОИНЫ — 5 ИЗ 6" class="section-title" />
-                        <ui:Label text="Постоянные бойцы отряда" class="panel-description" />
+                        <ui:Label name="fighters-title-label" text="ВОИНЫ — 5" class="section-title" />
+                        <ui:Label text="Постоянные бойцы единственной армии" class="panel-description" />
 
                         <ui:ScrollView class="fighters-scroll" mode="Horizontal">
                             <ui:VisualElement name="fighters-list" class="fighters-list-horizontal" />

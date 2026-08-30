@@ -227,7 +227,7 @@ public static class DayResolver
 
                 result.Messages.Add(
                     commander.Name + " и " + fighterCount +
-                    " воинов вернулись в столицу. Армия снова защищает город. " +
+                    " воинов вернулись в столицу. Гарнизон снова собран полностью. " +
                     deliveredResources);
             }
         }

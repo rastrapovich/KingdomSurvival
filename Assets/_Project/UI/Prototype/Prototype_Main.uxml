@@ -8,6 +8,7 @@
     <Style src="Prototype_Main.uss" />
     <Style src="Prototype_DebugAndGameOver.uss" />
     <Style src="Prototype_Exploration.uss" />
+    <Style src="Prototype_MilitarySplit.uss" />
 
     <ui:VisualElement name="screen" class="screen">
 
@@ -64,11 +65,11 @@
 
         <ui:VisualElement class="navigation-bar">
             <ui:Button name="nav-capital-button" text="С" tooltip="Столица" class="nav-button" />
-            <ui:Button name="nav-army-button" text="А" tooltip="Армия" class="nav-button" />
-            <ui:Button name="nav-expeditions-button" text="Э" tooltip="Экспедиции" class="nav-button" />
+            <ui:Button name="nav-army-button" text="АЭ" tooltip="Армия / Экспедиции" class="nav-button" />
+            <ui:Button name="nav-expeditions-button" text="Э" tooltip="Экспедиции" class="nav-button nav-button-hidden" />
         </ui:VisualElement>
 
-        <ui:ScrollView name="main-screen-scroll" class="main-screen-scroll">
+        <ui:VisualElement name="main-screen-scroll" class="main-screen-scroll">
 
             <ui:VisualElement name="capital-screen" class="game-screen">
                 <ui:VisualElement class="panel">
@@ -86,89 +87,114 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:VisualElement name="army-screen" class="game-screen">
-                <ui:VisualElement class="panel army-panel">
-                    <ui:Label text="АРМИЯ" class="panel-title" />
-                    <ui:Label text="Выберите одного руководителя армии" class="panel-description" />
+            <ui:VisualElement name="army-screen" class="game-screen military-split-screen">
+                <ui:ScrollView class="military-column-scroll military-army-column">
+                    <ui:VisualElement class="panel army-panel military-panel-fill">
+                        <ui:Label text="АРМИЯ" class="panel-title" />
+                        <ui:Label text="Командир, бойцы и походные запасы единственной армии" class="panel-description" />
 
-                    <ui:DropdownField name="commander-dropdown" label="Командир" class="commander-dropdown" />
-                    <ui:Label name="commander-detail-label" text="Командир пока не выбран" class="commander-detail" />
-                    <ui:Label name="army-status-label" text="Статус армии: в столице" class="status-label" />
+                        <ui:VisualElement class="commander-supply-row">
+                            <ui:VisualElement class="commander-profile-column">
+                                <ui:Label text="КОМАНДИР" class="section-title commander-section-title" />
 
-                    <ui:VisualElement class="supply-block">
-                        <ui:Label text="ЗАПАСЫ ОТРЯДА" class="supply-title" />
-                        <ui:Label name="army-gold-label" text="Золото отряда: 0" class="army-gold-value" />
-                        <ui:Label text="СНАБЖЕНИЕ" class="supply-subtitle" />
+                                <ui:VisualElement class="commander-image-placeholder">
+                                    <ui:Label text="ИЗОБРАЖЕНИЕ КОМАНДИРА" class="commander-image-placeholder-text" />
+                                </ui:VisualElement>
 
-                        <ui:VisualElement class="supply-controls">
-                            <ui:Button name="supply-minus-button" text="−" class="supply-step-button" />
-                            <ui:Label name="supply-value-label" text="0" class="supply-value" />
-                            <ui:Button name="supply-plus-button" text="+" class="supply-step-button" />
+                                <ui:DropdownField name="commander-dropdown" label="Командир" class="commander-dropdown" />
+                                <ui:Label name="commander-detail-label" text="Командир пока не выбран" class="commander-detail" />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement class="supply-block military-supply-block">
+                                <ui:Label text="ЗАПАСЫ ОТРЯДА" class="supply-title" />
+
+                                <ui:Label text="ЗОЛОТО" class="supply-subtitle" />
+                                <ui:VisualElement class="supply-controls">
+                                    <ui:Button name="army-gold-minus-button" text="−" class="supply-step-button" />
+                                    <ui:Label name="army-gold-label" text="0" class="supply-value" />
+                                    <ui:Button name="army-gold-plus-button" text="+" class="supply-step-button" />
+                                </ui:VisualElement>
+
+                                <ui:Label text="СНАБЖЕНИЕ" class="supply-subtitle" />
+                                <ui:VisualElement class="supply-controls">
+                                    <ui:Button name="supply-minus-button" text="−" class="supply-step-button" />
+                                    <ui:Label name="supply-value-label" text="0" class="supply-value" />
+                                    <ui:Button name="supply-plus-button" text="+" class="supply-step-button" />
+                                </ui:VisualElement>
+
+                                <ui:Label
+                                    name="supply-consumption-label"
+                                    text="Расход в походе: 6 / день"
+                                    class="supply-note" />
+
+                                <ui:Label
+                                    name="supply-days-label"
+                                    text="Хватит на 0 дней"
+                                    class="supply-note" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
 
-                        <ui:Label
-                            name="supply-consumption-label"
-                            text="Расход в походе: 6 / день"
-                            class="supply-note" />
+                        <ui:Label name="army-status-label" text="Статус армии: в столице" class="status-label" />
 
-                        <ui:Label
-                            name="supply-days-label"
-                            text="Хватит на 0 дней"
-                            class="supply-note" />
+                        <ui:VisualElement class="section-divider" />
+                        <ui:Label text="ВОИНЫ — 5 ИЗ 6" class="section-title" />
+                        <ui:Label text="Постоянные бойцы отряда" class="panel-description" />
+
+                        <ui:ScrollView class="fighters-scroll" mode="Horizontal">
+                            <ui:VisualElement name="fighters-list" class="fighters-list-horizontal" />
+                        </ui:ScrollView>
                     </ui:VisualElement>
+                </ui:ScrollView>
 
-                    <ui:VisualElement class="section-divider" />
-                    <ui:Label text="ВОИНЫ — 5 ИЗ 6" class="section-title" />
-                    <ui:Label text="Каждая карточка представляет одного отдельного воина" class="panel-description" />
+                <ui:VisualElement class="military-column-divider" />
 
-                    <ui:VisualElement name="fighters-list" />
-                </ui:VisualElement>
+                <ui:ScrollView class="military-column-scroll military-expedition-column">
+                    <ui:VisualElement class="panel expedition-panel military-panel-fill">
+                        <ui:Label text="ЭКСПЕДИЦИИ" class="panel-title" />
+                        <ui:Label name="expedition-status-label" text="Активная экспедиция: нет" class="status-label" />
+
+                        <ui:VisualElement name="active-expedition-card" class="active-expedition-card">
+                            <ui:Label name="active-expedition-title" text="АКТИВНАЯ ЭКСПЕДИЦИЯ" class="active-expedition-title" />
+                            <ui:Label name="active-expedition-details" text="Данные экспедиции" class="active-expedition-details" />
+                            <ui:Button name="research-expedition-button" text="ИССЛЕДОВАТЬ" class="research-expedition-button" />
+                            <ui:Button name="return-expedition-button" text="Приказать возвращаться" class="return-expedition-button" />
+                        </ui:VisualElement>
+
+                        <ui:Label text="НАЙДЕННЫЕ ЛОКАЦИИ" class="section-title" />
+
+                        <ui:VisualElement class="location-card">
+                            <ui:Label text="Затопленные руины" class="location-name" />
+                            <ui:VisualElement class="location-info-row">
+                                <ui:Label text="Расстояние: 2 дня" class="location-info" />
+                                <ui:Label text="Угроза: низкая" class="threat-low" />
+                            </ui:VisualElement>
+                            <ui:Button name="send-ruins-button" text="Отправить" class="send-button" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="location-card">
+                            <ui:Label text="Старая шахта" class="location-name" />
+                            <ui:VisualElement class="location-info-row">
+                                <ui:Label text="Расстояние: 3 дня" class="location-info" />
+                                <ui:Label text="Угроза: средняя" class="threat-medium" />
+                            </ui:VisualElement>
+                            <ui:Button name="send-mine-button" text="Отправить" class="send-button" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="location-card">
+                            <ui:Label text="Чёрный лес" class="location-name" />
+                            <ui:VisualElement class="location-info-row">
+                                <ui:Label text="Расстояние: 5 дней" class="location-info" />
+                                <ui:Label text="Угроза: высокая" class="threat-high" />
+                            </ui:VisualElement>
+                            <ui:Button name="send-forest-button" text="Отправить" class="send-button" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:ScrollView>
             </ui:VisualElement>
 
-            <ui:VisualElement name="expeditions-screen" class="game-screen">
-                <ui:VisualElement class="panel expedition-panel">
-                    <ui:Label text="ЭКСПЕДИЦИИ" class="panel-title" />
-                    <ui:Label name="expedition-status-label" text="Активная экспедиция: нет" class="status-label" />
+            <ui:VisualElement name="expeditions-screen" class="game-screen legacy-expeditions-screen" />
 
-                    <ui:VisualElement name="active-expedition-card" class="active-expedition-card">
-                        <ui:Label name="active-expedition-title" text="АКТИВНАЯ ЭКСПЕДИЦИЯ" class="active-expedition-title" />
-                        <ui:Label name="active-expedition-details" text="Данные экспедиции" class="active-expedition-details" />
-                        <ui:Button name="research-expedition-button" text="ИССЛЕДОВАТЬ" class="research-expedition-button" />
-                        <ui:Button name="return-expedition-button" text="Приказать возвращаться" class="return-expedition-button" />
-                    </ui:VisualElement>
-
-                    <ui:Label text="НАЙДЕННЫЕ ЛОКАЦИИ" class="section-title" />
-
-                    <ui:VisualElement class="location-card">
-                        <ui:Label text="Затопленные руины" class="location-name" />
-                        <ui:VisualElement class="location-info-row">
-                            <ui:Label text="Расстояние: 2 дня" class="location-info" />
-                            <ui:Label text="Угроза: низкая" class="threat-low" />
-                        </ui:VisualElement>
-                        <ui:Button name="send-ruins-button" text="Отправить" class="send-button" />
-                    </ui:VisualElement>
-
-                    <ui:VisualElement class="location-card">
-                        <ui:Label text="Старая шахта" class="location-name" />
-                        <ui:VisualElement class="location-info-row">
-                            <ui:Label text="Расстояние: 3 дня" class="location-info" />
-                            <ui:Label text="Угроза: средняя" class="threat-medium" />
-                        </ui:VisualElement>
-                        <ui:Button name="send-mine-button" text="Отправить" class="send-button" />
-                    </ui:VisualElement>
-
-                    <ui:VisualElement class="location-card">
-                        <ui:Label text="Чёрный лес" class="location-name" />
-                        <ui:VisualElement class="location-info-row">
-                            <ui:Label text="Расстояние: 5 дней" class="location-info" />
-                            <ui:Label text="Угроза: высокая" class="threat-high" />
-                        </ui:VisualElement>
-                        <ui:Button name="send-forest-button" text="Отправить" class="send-button" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-            </ui:VisualElement>
-
-        </ui:ScrollView>
+        </ui:VisualElement>
 
         <ui:VisualElement class="reports-dock">
             <ui:VisualElement class="panel reports-panel">

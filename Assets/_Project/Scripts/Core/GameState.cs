@@ -102,6 +102,7 @@ public class GameState
     public int Population;
     public int Mood;
     public int ConsecutiveFoodShortageDays;
+    public int ConsecutiveExpeditionSupplyShortageDays;
 
     // Походные ресурсы принадлежат единственному отряду.
     public int ArmySupply;
@@ -183,7 +184,8 @@ public class GameState
 
             return location != null &&
                    location.ExplorationDays > 0 &&
-                   !location.IsExplored;
+                   !location.IsExplored &&
+                   ArmySupply >= ExpeditionSupplyConsumption;
         }
     }
 
@@ -195,6 +197,7 @@ public class GameState
         Population = 24;
         Mood = 64;
         ConsecutiveFoodShortageDays = 0;
+        ConsecutiveExpeditionSupplyShortageDays = 0;
         ArmySupply = 0;
         ArmyGold = 0;
 
@@ -348,6 +351,7 @@ public class GameState
         foreach (FighterData fighter in Fighters)
             expedition.FighterIds.Add(fighter.Id);
 
+        ConsecutiveExpeditionSupplyShortageDays = 0;
         ActiveExpedition = expedition;
         commander.State = CommanderState.TravellingToLocation;
 
@@ -379,6 +383,7 @@ public class GameState
         commander.State = CommanderState.InCastle;
         ActiveExpedition.IsActive = false;
         ActiveExpedition = null;
+        ConsecutiveExpeditionSupplyShortageDays = 0;
 
         resultMessage =
             "Приказ на отправку в локацию «" + location.Name + "» отменён. " +
@@ -391,11 +396,30 @@ public class GameState
     {
         resultMessage = "Исследование сейчас недоступно.";
 
-        if (!CanResearchActiveLocation)
+        if (!HasActiveExpedition || HasPendingExpeditionDecision)
             return false;
 
         ExpeditionData expedition = ActiveExpedition;
         LocationData location = FindLocation(expedition.LocationId);
+
+        if (location == null ||
+            expedition.Phase != CommanderState.AtLocation ||
+            expedition.IsExplorationInProgress ||
+            location.ExplorationDays <= 0 ||
+            location.IsExplored)
+        {
+            return false;
+        }
+
+        int requiredSupply = ExpeditionSupplyConsumption;
+
+        if (ArmySupply < requiredSupply)
+        {
+            resultMessage =
+                "Для исследования нужен полный дневной рацион. Требуется снабжения: " +
+                requiredSupply + ".";
+            return false;
+        }
 
         expedition.IsExplorationInProgress = true;
         expedition.ExplorationDaysRemaining = location.ExplorationDays;
@@ -474,6 +498,57 @@ public class GameState
         return true;
     }
 
+    public bool ForceReturnFromSupplyFailure(out string resultMessage)
+    {
+        resultMessage = "Не удалось начать вынужденное возвращение.";
+
+        if (!HasActiveExpedition)
+            return false;
+
+        ExpeditionData expedition = ActiveExpedition;
+        LocationData location = FindLocation(expedition.LocationId);
+        CommanderData commander = FindCommander(expedition.CommanderId);
+
+        if (location == null || commander == null)
+            return false;
+
+        // Голод важнее ожидающего приказа или уже начатого исследования:
+        // отряд прекращает другие действия и занимается возвращением.
+        expedition.PendingDecision = null;
+        expedition.IsExplorationInProgress = false;
+        expedition.ExplorationDaysRemaining = 0;
+
+        if (expedition.Phase == CommanderState.ReturningToCastle)
+        {
+            commander.State = CommanderState.ReturningToCastle;
+            resultMessage =
+                "Отряд уже возвращается в столицу и продолжает обратный путь.";
+            return true;
+        }
+
+        int returnDays;
+
+        if (expedition.Phase == CommanderState.TravellingToLocation)
+        {
+            int travelledDays = location.DistanceDays - expedition.DaysRemaining;
+            returnDays = Math.Max(1, travelledDays);
+        }
+        else
+        {
+            returnDays = location.DistanceDays;
+        }
+
+        expedition.Phase = CommanderState.ReturningToCastle;
+        expedition.DaysRemaining = returnDays;
+        commander.State = CommanderState.ReturningToCastle;
+
+        resultMessage =
+            "Поход сорван: из-за второй подряд нехватки снабжения отряд вынужденно возвращается. " +
+            "До столицы осталось дней: " + returnDays + ".";
+
+        return true;
+    }
+
     public string CompleteExpeditionReturn()
     {
         if (ActiveExpedition == null)
@@ -487,6 +562,7 @@ public class GameState
         Food += deliveredFood;
         ArmyGold = 0;
         ArmySupply = 0;
+        ConsecutiveExpeditionSupplyShortageDays = 0;
 
         if (commander != null)
             commander.State = CommanderState.InCastle;

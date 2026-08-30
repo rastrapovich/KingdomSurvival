@@ -10,6 +10,11 @@ public class DayResolutionResult
     // Отмечает события, которые выходят за рамки обычного дохода,
     // потребления и рутинного движения экспедиции.
     public bool HadNotableOccurrence;
+
+    // Во второй подряд день нехватки снабжения отряд занимается
+    // аварийным возвращением. В этот день не создаём новые походные
+    // происшествия и значимые решения поверх уже понятного кризиса.
+    public bool SkipExpeditionOccurrencesForDay;
 }
 
 public static class DayResolver
@@ -40,7 +45,8 @@ public static class DayResolver
 
         // Пока экспедиция ждёт значимого приказа, она не продвигается
         // и не получает фоновых происшествий. Мир и расход снабжения идут дальше.
-        if (!state.HasPendingExpeditionDecision)
+        if (!state.HasPendingExpeditionDecision &&
+            !result.SkipExpeditionOccurrencesForDay)
         {
             ExpeditionIncidentSystem.ResolveForDay(
                 state,
@@ -55,10 +61,13 @@ public static class DayResolver
 
         // После обычного продвижения и фоновых происшествий может возникнуть
         // не более одного значимого события, требующего решения короля.
-        ExpeditionDecisionSystem.ResolveForDay(
-            state,
-            finishedDay,
-            result);
+        if (!result.SkipExpeditionOccurrencesForDay)
+        {
+            ExpeditionDecisionSystem.ResolveForDay(
+                state,
+                finishedDay,
+                result);
+        }
 
         if (!hadPendingDecisionBefore && state.HasPendingExpeditionDecision)
             result.HadNotableOccurrence = true;
@@ -271,6 +280,7 @@ public static class DayResolver
         if (availableSupply >= requiredSupply)
         {
             state.ArmySupply -= requiredSupply;
+            state.ConsecutiveExpeditionSupplyShortageDays = 0;
 
             result.Messages.Add(
                 "Экспедиция израсходовала " + requiredSupply +
@@ -281,12 +291,34 @@ public static class DayResolver
 
         int shortage = requiredSupply - availableSupply;
         state.ArmySupply = 0;
+        state.ConsecutiveExpeditionSupplyShortageDays++;
         result.HadNotableOccurrence = true;
 
+        if (state.ConsecutiveExpeditionSupplyShortageDays == 1)
+        {
+            result.Messages.Add(
+                "<color=#D57E72>Армии не хватает снабжения. Не хватило " +
+                shortage + " единиц; израсходованы последние " +
+                availableSupply +
+                ". Это первый голодный день подряд: отряд ещё выполняет текущую задачу, " +
+                "но следующий такой день сорвёт поход.</color>");
+            return;
+        }
+
+        result.SkipExpeditionOccurrencesForDay = true;
+
+        string forcedReturnMessage;
+        bool returnStarted =
+            state.ForceReturnFromSupplyFailure(out forcedReturnMessage);
+
+        if (!returnStarted)
+            forcedReturnMessage =
+                "Не удалось автоматически определить путь домой; проверьте данные экспедиции.";
+
         result.Messages.Add(
-            "<color=#D57E72>Экспедиции не хватило " + shortage +
-            " единиц снабжения. Израсходованы последние " +
-            availableSupply +
-            ". Штраф за голод экспедиции пока не применяется.</color>");
+            "<color=#D57E72>Армии снова не хватило снабжения. Не хватило " +
+            shortage + " единиц; израсходованы последние " +
+            availableSupply + ". Второй голодный день подряд. " +
+            forcedReturnMessage + "</color>");
     }
 }

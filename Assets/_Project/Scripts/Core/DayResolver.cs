@@ -4,6 +4,8 @@ using System.Collections.Generic;
 public class DayResolutionResult
 {
     public List<string> Messages = new List<string>();
+    public List<ExpeditionIncidentOccurrence> NewExpeditionIncidents =
+        new List<ExpeditionIncidentOccurrence>();
 }
 
 public static class DayResolver
@@ -22,6 +24,13 @@ public static class DayResolver
         ResolveFoodIncome(state, result);
         ResolveCityFood(state, result);
         ResolveExpedition(state, result);
+
+        // Фоновые происшествия возникают после обычного дневного
+        // продвижения экспедиции и применяют последствия сразу.
+        ExpeditionIncidentSystem.ResolveForDay(
+            state,
+            finishedDay,
+            result);
 
         state.Day++;
 

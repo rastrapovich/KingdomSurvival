@@ -1,0 +1,177 @@
+/* ================================================================
+   ОБЪЕДИНЁННЫЙ ЭКРАН АРМИИ И ЭКСПЕДИЦИЙ
+   ================================================================ */
+
+.nav-button-hidden {
+    display: none;
+}
+
+.main-screen-scroll {
+    overflow: hidden;
+}
+
+.military-split-screen {
+    height: 100%;
+    min-height: 0;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.military-column-scroll {
+    width: 49%;
+    min-width: 0;
+    flex-grow: 1;
+}
+
+.military-column-divider {
+    width: 10px;
+    min-width: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: rgb(20, 23, 29);
+}
+
+.military-panel-fill {
+    min-height: 100%;
+    margin-bottom: 0;
+}
+
+.legacy-expeditions-screen {
+    display: none;
+}
+
+/* ================================================================
+   КОМАНДИР И ЗАПАСЫ
+   ================================================================ */
+
+.commander-supply-row {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.commander-profile-column {
+    width: 48%;
+    min-width: 190px;
+    margin-right: 12px;
+}
+
+.commander-section-title {
+    margin-top: 0;
+}
+
+.commander-image-placeholder {
+    width: 180px;
+    height: 210px;
+    margin-bottom: 9px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(40, 45, 54);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(92, 80, 58);
+    border-right-color: rgb(92, 80, 58);
+    border-top-color: rgb(92, 80, 58);
+    border-bottom-color: rgb(92, 80, 58);
+    border-radius: 5px;
+}
+
+.commander-image-placeholder-text {
+    max-width: 145px;
+    color: rgb(119, 124, 133);
+    font-size: 10px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.commander-profile-column .commander-dropdown {
+    width: 100%;
+}
+
+.military-supply-block {
+    width: 250px;
+    min-width: 250px;
+    margin-top: 0;
+}
+
+/* ================================================================
+   ГОРИЗОНТАЛЬНЫЙ ОТРЯД
+   ================================================================ */
+
+.fighters-scroll {
+    height: 190px;
+    max-height: 190px;
+}
+
+.fighters-list-horizontal {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+}
+
+.fighter-card {
+    width: 112px;
+    min-width: 112px;
+    max-width: 112px;
+    min-height: 158px;
+    margin-right: 8px;
+    margin-bottom: 4px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(92, 80, 58);
+    border-right-color: rgb(72, 76, 85);
+    border-top-color: rgb(72, 76, 85);
+    border-bottom-color: rgb(72, 76, 85);
+}
+
+.fighter-image-placeholder {
+    width: 96px;
+    height: 92px;
+    margin-bottom: 7px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(35, 40, 48);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(74, 80, 91);
+    border-right-color: rgb(74, 80, 91);
+    border-top-color: rgb(74, 80, 91);
+    border-bottom-color: rgb(74, 80, 91);
+    border-radius: 3px;
+}
+
+.fighter-image-placeholder-text {
+    color: rgb(105, 111, 121);
+    font-size: 8px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.fighter-role {
+    font-size: 12px;
+    white-space: normal;
+}
+
+.fighter-info {
+    font-size: 9px;
+    white-space: normal;
+}
+
+/* ================================================================
+   ВСПЛЫВАЮЩИЙ РАСХОД ПИЩИ
+   ================================================================ */
+
+.food-expense-popup {
+    top: 60px;
+}

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [RequireComponent(typeof(UIDocument))]
-public class PrototypeUIController : MonoBehaviour
+public partial class PrototypeUIController : MonoBehaviour
 {
     private enum MainScreen
     {

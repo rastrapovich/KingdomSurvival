@@ -158,7 +158,46 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <ui:VisualElement
+            name="incident-notification-stack"
+            class="incident-notification-stack" />
+
         <ui:Button name="end-day-button" text="ДЕНЬ" tooltip="Завершить день" class="end-day-button" />
+
+        <ui:VisualElement
+            name="incident-modal-overlay"
+            class="incident-modal-overlay">
+
+            <ui:VisualElement class="incident-modal-window">
+                <ui:Label
+                    name="incident-modal-title"
+                    text="ПРОИСШЕСТВИЕ"
+                    class="incident-modal-title" />
+
+                <ui:VisualElement class="incident-modal-body">
+                    <ui:VisualElement class="incident-image-placeholder">
+                        <ui:Label text="ИЗОБРАЖЕНИЕ" class="incident-image-placeholder-text" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="incident-modal-text-column">
+                        <ui:Label
+                            name="incident-modal-description"
+                            text="Описание происшествия"
+                            class="incident-modal-description" />
+
+                        <ui:Label
+                            name="incident-modal-consequence"
+                            text="Последствие"
+                            class="incident-modal-consequence" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:Button
+                    name="incident-understood-button"
+                    text="ПОНЯТНО"
+                    class="incident-understood-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
 
     </ui:VisualElement>
 

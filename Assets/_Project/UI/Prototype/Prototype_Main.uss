@@ -544,3 +544,187 @@
     font-size: 13px;
     white-space: normal;
 }
+
+/* ================================================================
+   ФОНОВЫЕ ПРОИСШЕСТВИЯ ЭКСПЕДИЦИИ
+   ================================================================ */
+
+.incident-notification-stack {
+    position: absolute;
+    right: 40px;
+    bottom: 108px;
+    width: 44px;
+    align-items: center;
+}
+
+.incident-notification-button {
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    height: 42px;
+    margin-top: 5px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(217, 204, 177);
+    border-right-color: rgb(217, 204, 177);
+    border-top-color: rgb(217, 204, 177);
+    border-bottom-color: rgb(217, 204, 177);
+    border-radius: 21px;
+    color: rgb(250, 243, 224);
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.incident-positive {
+    background-color: rgb(62, 112, 73);
+}
+
+.incident-positive:hover {
+    background-color: rgb(78, 137, 90);
+}
+
+.incident-negative {
+    background-color: rgb(126, 62, 55);
+}
+
+.incident-negative:hover {
+    background-color: rgb(153, 75, 66);
+}
+
+.incident-mixed {
+    background-color: rgb(132, 106, 53);
+}
+
+.incident-mixed:hover {
+    background-color: rgb(157, 128, 65);
+}
+
+.incident-overflow {
+    background-color: rgb(63, 68, 78);
+}
+
+.incident-overflow:hover {
+    background-color: rgb(78, 84, 96);
+}
+
+.incident-modal-overlay {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(10, 12, 16, 0.86);
+}
+
+.incident-modal-window {
+    width: 650px;
+    max-width: 88%;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: rgb(31, 35, 43);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(133, 111, 69);
+    border-right-color: rgb(133, 111, 69);
+    border-top-color: rgb(133, 111, 69);
+    border-bottom-color: rgb(133, 111, 69);
+    border-radius: 7px;
+}
+
+.incident-modal-title {
+    margin-bottom: 15px;
+    color: rgb(229, 189, 99);
+    font-size: 22px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.incident-modal-body {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.incident-image-placeholder {
+    width: 210px;
+    min-width: 210px;
+    max-width: 210px;
+    height: 210px;
+    margin-right: 18px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(44, 49, 58);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(88, 93, 104);
+    border-right-color: rgb(88, 93, 104);
+    border-top-color: rgb(88, 93, 104);
+    border-bottom-color: rgb(88, 93, 104);
+}
+
+.incident-image-placeholder-text {
+    color: rgb(127, 133, 143);
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.incident-modal-text-column {
+    flex-grow: 1;
+}
+
+.incident-modal-description {
+    color: rgb(215, 208, 191);
+    font-size: 14px;
+    white-space: normal;
+}
+
+.incident-modal-consequence {
+    margin-top: 18px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    background-color: rgb(42, 47, 56);
+    color: rgb(239, 222, 181);
+    border-radius: 4px;
+    font-size: 13px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.incident-understood-button {
+    width: 180px;
+    height: 38px;
+    margin-top: 18px;
+    align-self: flex-end;
+    background-color: rgb(87, 68, 42);
+    color: rgb(247, 235, 207);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(176, 139, 77);
+    border-right-color: rgb(176, 139, 77);
+    border-top-color: rgb(176, 139, 77);
+    border-bottom-color: rgb(176, 139, 77);
+    border-radius: 4px;
+    -unity-font-style: bold;
+}
+
+.incident-understood-button:hover {
+    background-color: rgb(108, 83, 48);
+}

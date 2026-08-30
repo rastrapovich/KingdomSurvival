@@ -48,13 +48,28 @@ public class LocationData
     public string Name;
     public int DistanceDays;
     public string Threat;
+    public int ExplorationDays;
+    public int RewardArmyGold;
+    public int RewardArmySupply;
+    public bool IsExplored;
 
-    public LocationData(string id, string name, int distanceDays, string threat)
+    public LocationData(
+        string id,
+        string name,
+        int distanceDays,
+        string threat,
+        int explorationDays = 0,
+        int rewardArmyGold = 0,
+        int rewardArmySupply = 0)
     {
         Id = id;
         Name = name;
         DistanceDays = distanceDays;
         Threat = threat;
+        ExplorationDays = explorationDays;
+        RewardArmyGold = rewardArmyGold;
+        RewardArmySupply = rewardArmySupply;
+        IsExplored = false;
     }
 }
 
@@ -68,6 +83,9 @@ public class ExpeditionData
     public CommanderState Phase;
     public int DaysRemaining;
     public int StartedOnDay;
+
+    public bool IsExplorationInProgress;
+    public int ExplorationDaysRemaining;
 
     // Значимое происшествие не меняет канонические состояния командира.
     // Это отдельное состояние самой экспедиции: она ждёт приказа короля.
@@ -85,8 +103,9 @@ public class GameState
     public int Mood;
     public int ConsecutiveFoodShortageDays;
 
-    // Снабжение принадлежит единственной армии, а не конкретному командиру.
+    // Походные ресурсы принадлежат единственному отряду.
     public int ArmySupply;
+    public int ArmyGold;
 
     public string SelectedCommanderId;
     public List<CommanderData> Commanders;
@@ -145,6 +164,29 @@ public class GameState
         }
     }
 
+    public bool CanResearchActiveLocation
+    {
+        get
+        {
+            if (!HasActiveExpedition || HasPendingExpeditionDecision)
+                return false;
+
+            ExpeditionData expedition = ActiveExpedition;
+
+            if (expedition.Phase != CommanderState.AtLocation ||
+                expedition.IsExplorationInProgress)
+            {
+                return false;
+            }
+
+            LocationData location = FindLocation(expedition.LocationId);
+
+            return location != null &&
+                   location.ExplorationDays > 0 &&
+                   !location.IsExplored;
+        }
+    }
+
     public void CreateNewGame()
     {
         Day = 1;
@@ -154,6 +196,7 @@ public class GameState
         Mood = 64;
         ConsecutiveFoodShortageDays = 0;
         ArmySupply = 0;
+        ArmyGold = 0;
 
         Commanders = new List<CommanderData>
         {
@@ -175,7 +218,16 @@ public class GameState
 
         Locations = new List<LocationData>
         {
-            new LocationData("ruins", "Затопленные руины", 2, "низкая"),
+            // Первая рабочая локация прототипа: 1 день исследования,
+            // награда сразу становится походным запасом отряда.
+            new LocationData(
+                "ruins",
+                "Затопленные руины",
+                2,
+                "низкая",
+                1,
+                100,
+                200),
             new LocationData("mine", "Старая шахта", 3, "средняя"),
             new LocationData("forest", "Чёрный лес", 5, "высокая")
         };
@@ -288,6 +340,8 @@ public class GameState
             Phase = CommanderState.TravellingToLocation,
             DaysRemaining = location.DistanceDays,
             StartedOnDay = Day,
+            IsExplorationInProgress = false,
+            ExplorationDaysRemaining = 0,
             PendingDecision = null
         };
 
@@ -333,6 +387,27 @@ public class GameState
         return true;
     }
 
+    public bool TryStartLocationResearch(out string resultMessage)
+    {
+        resultMessage = "Исследование сейчас недоступно.";
+
+        if (!CanResearchActiveLocation)
+            return false;
+
+        ExpeditionData expedition = ActiveExpedition;
+        LocationData location = FindLocation(expedition.LocationId);
+
+        expedition.IsExplorationInProgress = true;
+        expedition.ExplorationDaysRemaining = location.ExplorationDays;
+
+        resultMessage =
+            "Отряд начал исследование локации «" + location.Name +
+            "». Требуется дней: " + location.ExplorationDays +
+            ". До завершения исследования приказ о возвращении недоступен.";
+
+        return true;
+    }
+
     public bool TryOrderReturn(out string resultMessage)
     {
         if (!HasActiveExpedition)
@@ -345,6 +420,13 @@ public class GameState
         {
             resultMessage =
                 "Экспедиция ждёт приказа по значимому происшествию. Сначала выберите решение.";
+            return false;
+        }
+
+        if (ActiveExpedition.IsExplorationInProgress)
+        {
+            resultMessage =
+                "Исследование уже начато. Сначала завершите текущий день исследования.";
             return false;
         }
 
@@ -390,5 +472,31 @@ public class GameState
             returnDays + ". До прибытия армия не защищает город.";
 
         return true;
+    }
+
+    public string CompleteExpeditionReturn()
+    {
+        if (ActiveExpedition == null)
+            return "Походные запасы не переданы: данные экспедиции отсутствуют.";
+
+        CommanderData commander = FindCommander(ActiveExpedition.CommanderId);
+        int deliveredGold = Math.Max(0, ArmyGold);
+        int deliveredFood = Math.Max(0, ArmySupply);
+
+        Gold += deliveredGold;
+        Food += deliveredFood;
+        ArmyGold = 0;
+        ArmySupply = 0;
+
+        if (commander != null)
+            commander.State = CommanderState.InCastle;
+
+        ActiveExpedition.IsExplorationInProgress = false;
+        ActiveExpedition.ExplorationDaysRemaining = 0;
+        ActiveExpedition.IsActive = false;
+
+        return
+            "В столицу передано: золото +" + deliveredGold +
+            ", пища +" + deliveredFood + ".";
     }
 }

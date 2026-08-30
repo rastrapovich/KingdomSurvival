@@ -221,7 +221,9 @@ public static class ExpeditionDecisionSystem
         List<string> consequences = new List<string>();
 
         int actualSupplyDelta = ApplySupplyDelta(state, option.SupplyDelta);
-        int actualTravelDelta = ApplyTravelDelta(state, option.TravelDelta);
+        string arrivalText;
+        int actualTravelDelta =
+            ApplyTravelDelta(state, option.TravelDelta, out arrivalText);
 
         if (option.SupplyDelta != 0)
             consequences.Add(FormatSupplyConsequence(actualSupplyDelta));
@@ -229,14 +231,14 @@ public static class ExpeditionDecisionSystem
         if (option.TravelDelta != 0)
             consequences.Add(FormatTravelConsequence(actualTravelDelta));
 
-        string arrivalText = GetArrivalText(state, actualTravelDelta);
-
         if (!string.IsNullOrWhiteSpace(arrivalText))
             consequences.Add(arrivalText);
 
         if (consequences.Count == 0)
             consequences.Add("Механических изменений нет.");
 
+        // ActiveExpedition остаётся доступной даже после фактического возвращения,
+        // поэтому pending можно безопасно очистить и после CompleteExpeditionReturn().
         state.ActiveExpedition.PendingDecision = null;
 
         resultMessage =
@@ -353,8 +355,12 @@ public static class ExpeditionDecisionSystem
         return -actualLoss;
     }
 
-    private static int ApplyTravelDelta(GameState state, int requestedDelta)
+    private static int ApplyTravelDelta(
+        GameState state,
+        int requestedDelta,
+        out string arrivalText)
     {
+        arrivalText = string.Empty;
         ExpeditionData expedition = state.ActiveExpedition;
 
         if (expedition == null || expedition.DaysRemaining <= 0)
@@ -370,51 +376,31 @@ public static class ExpeditionDecisionSystem
         expedition.DaysRemaining -= reduction;
 
         if (reduction > 0 && expedition.DaysRemaining == 0)
-            ResolveArrival(state, expedition);
+            arrivalText = ResolveArrival(state, expedition);
 
         return -reduction;
     }
 
-    private static void ResolveArrival(
+    private static string ResolveArrival(
         GameState state,
         ExpeditionData expedition)
     {
         CommanderData commander = state.FindCommander(expedition.CommanderId);
 
         if (commander == null)
-            return;
+            return string.Empty;
 
         if (expedition.Phase == CommanderState.TravellingToLocation)
         {
             expedition.Phase = CommanderState.AtLocation;
             commander.State = CommanderState.AtLocation;
-            return;
+            return "Экспедиция достигла цели.";
         }
 
         if (expedition.Phase == CommanderState.ReturningToCastle)
         {
-            commander.State = CommanderState.InCastle;
-            expedition.IsActive = false;
-        }
-    }
-
-    private static string GetArrivalText(GameState state, int travelDelta)
-    {
-        if (travelDelta >= 0 || state.ActiveExpedition == null)
-            return string.Empty;
-
-        ExpeditionData expedition = state.ActiveExpedition;
-
-        if (expedition.DaysRemaining > 0)
-            return string.Empty;
-
-        if (expedition.Phase == CommanderState.AtLocation)
-            return "Экспедиция достигла цели.";
-
-        if (!expedition.IsActive &&
-            expedition.Phase == CommanderState.ReturningToCastle)
-        {
-            return "Армия вернулась в столицу.";
+            string deliveredResources = state.CompleteExpeditionReturn();
+            return "Армия вернулась в столицу. " + deliveredResources;
         }
 
         return string.Empty;

@@ -182,11 +182,21 @@ public static class DayResolver
                 commander.State = CommanderState.AtLocation;
                 result.HadNotableOccurrence = true;
 
+                string arrivalAction = location.ExplorationDays > 0
+                    ? " Можно начать исследование или приказать возвращаться."
+                    : " Исследование этой локации пока не реализовано.";
+
                 result.Messages.Add(
                     commander.Name + " прибыл в локацию «" +
-                    location.Name + "» и начал исследование.");
+                    location.Name + "»." + arrivalAction);
             }
 
+            return;
+        }
+
+        if (expedition.Phase == CommanderState.AtLocation)
+        {
+            ResolveLocationResearch(state, expedition, location, result);
             return;
         }
 
@@ -202,15 +212,52 @@ public static class DayResolver
             }
             else
             {
-                commander.State = CommanderState.InCastle;
-                expedition.IsActive = false;
+                int fighterCount = expedition.FighterIds.Count;
+                string deliveredResources = state.CompleteExpeditionReturn();
                 result.HadNotableOccurrence = true;
 
                 result.Messages.Add(
-                    commander.Name + " и " + expedition.FighterIds.Count +
-                    " воинов вернулись в столицу. Армия снова защищает город.");
+                    commander.Name + " и " + fighterCount +
+                    " воинов вернулись в столицу. Армия снова защищает город. " +
+                    deliveredResources);
             }
         }
+    }
+
+    private static void ResolveLocationResearch(
+        GameState state,
+        ExpeditionData expedition,
+        LocationData location,
+        DayResolutionResult result)
+    {
+        if (!expedition.IsExplorationInProgress)
+            return;
+
+        expedition.ExplorationDaysRemaining =
+            Math.Max(0, expedition.ExplorationDaysRemaining - 1);
+
+        if (expedition.ExplorationDaysRemaining > 0)
+        {
+            result.Messages.Add(
+                "Отряд исследует локацию «" + location.Name +
+                "». Осталось дней исследования: " +
+                expedition.ExplorationDaysRemaining + ".");
+            return;
+        }
+
+        expedition.IsExplorationInProgress = false;
+        location.IsExplored = true;
+
+        state.ArmyGold += location.RewardArmyGold;
+        state.ArmySupply += location.RewardArmySupply;
+        result.HadNotableOccurrence = true;
+
+        result.Messages.Add(
+            "<color=#84B889>Локация «" + location.Name +
+            "» исследована. Добыча отряда: золото +" +
+            location.RewardArmyGold + ", снабжение +" +
+            location.RewardArmySupply +
+            ". Ресурсы находятся у отряда и попадут в столицу только после возвращения.</color>");
     }
 
     private static void ResolveExpeditionSupply(

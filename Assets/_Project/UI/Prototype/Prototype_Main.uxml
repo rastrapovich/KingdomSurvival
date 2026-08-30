@@ -7,6 +7,7 @@
 
     <Style src="Prototype_Main.uss" />
     <Style src="Prototype_DebugAndGameOver.uss" />
+    <Style src="Prototype_Exploration.uss" />
 
     <ui:VisualElement name="screen" class="screen">
 
@@ -95,7 +96,9 @@
                     <ui:Label name="army-status-label" text="Статус армии: в столице" class="status-label" />
 
                     <ui:VisualElement class="supply-block">
-                        <ui:Label text="СНАБЖЕНИЕ" class="supply-title" />
+                        <ui:Label text="ЗАПАСЫ ОТРЯДА" class="supply-title" />
+                        <ui:Label name="army-gold-label" text="Золото отряда: 0" class="army-gold-value" />
+                        <ui:Label text="СНАБЖЕНИЕ" class="supply-subtitle" />
 
                         <ui:VisualElement class="supply-controls">
                             <ui:Button name="supply-minus-button" text="−" class="supply-step-button" />
@@ -130,6 +133,7 @@
                     <ui:VisualElement name="active-expedition-card" class="active-expedition-card">
                         <ui:Label name="active-expedition-title" text="АКТИВНАЯ ЭКСПЕДИЦИЯ" class="active-expedition-title" />
                         <ui:Label name="active-expedition-details" text="Данные экспедиции" class="active-expedition-details" />
+                        <ui:Button name="research-expedition-button" text="ИССЛЕДОВАТЬ" class="research-expedition-button" />
                         <ui:Button name="return-expedition-button" text="Приказать возвращаться" class="return-expedition-button" />
                     </ui:VisualElement>
 

@@ -1,0 +1,43 @@
+/* ================================================================
+   ДОБЫЧА ОТРЯДА И ИССЛЕДОВАНИЕ ЛОКАЦИИ
+   ================================================================ */
+
+.army-gold-value {
+    margin-bottom: 8px;
+    color: rgb(235, 194, 104);
+    font-size: 15px;
+    -unity-font-style: bold;
+}
+
+.supply-subtitle {
+    margin-bottom: 5px;
+    color: rgb(193, 183, 158);
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+.research-expedition-button {
+    display: none;
+    height: 38px;
+    margin-bottom: 7px;
+    background-color: rgb(56, 79, 64);
+    color: rgb(228, 235, 220);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(103, 140, 109);
+    border-right-color: rgb(103, 140, 109);
+    border-top-color: rgb(103, 140, 109);
+    border-bottom-color: rgb(103, 140, 109);
+    border-radius: 4px;
+    -unity-font-style: bold;
+}
+
+.research-expedition-button:hover {
+    background-color: rgb(69, 96, 77);
+}
+
+.research-expedition-button:disabled {
+    opacity: 0.55;
+}

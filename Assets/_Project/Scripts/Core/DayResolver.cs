@@ -6,6 +6,10 @@ public class DayResolutionResult
     public List<string> Messages = new List<string>();
     public List<ExpeditionIncidentOccurrence> NewExpeditionIncidents =
         new List<ExpeditionIncidentOccurrence>();
+
+    // Отмечает события, которые выходят за рамки обычного дохода,
+    // потребления и рутинного движения экспедиции.
+    public bool HadNotableOccurrence;
 }
 
 public static class DayResolver
@@ -33,7 +37,12 @@ public static class DayResolver
                 state,
                 finishedDay,
                 result);
+
+            if (result.NewExpeditionIncidents.Count > 0)
+                result.HadNotableOccurrence = true;
         }
+
+        bool hadPendingDecisionBefore = state.HasPendingExpeditionDecision;
 
         // После обычного продвижения и фоновых происшествий может возникнуть
         // не более одного значимого события, требующего решения короля.
@@ -41,6 +50,12 @@ public static class DayResolver
             state,
             finishedDay,
             result);
+
+        if (!hadPendingDecisionBefore && state.HasPendingExpeditionDecision)
+            result.HadNotableOccurrence = true;
+
+        if (!result.HadNotableOccurrence)
+            result.Messages.Add("Ничего особенного не произошло.");
 
         state.Day++;
 
@@ -74,7 +89,10 @@ public static class DayResolver
                 " пищи для " + state.Population + " жителей.");
 
             if (state.ConsecutiveFoodShortageDays > 0)
+            {
                 result.Messages.Add("Нехватка пищи прекратилась.");
+                result.HadNotableOccurrence = true;
+            }
 
             state.ConsecutiveFoodShortageDays = 0;
             return;
@@ -83,6 +101,7 @@ public static class DayResolver
         int shortage = requiredFood - availableFood;
         state.Food = 0;
         state.ConsecutiveFoodShortageDays++;
+        result.HadNotableOccurrence = true;
 
         result.Messages.Add(
             "Городу не хватило " + shortage + " пищи. " +
@@ -122,6 +141,7 @@ public static class DayResolver
         if (commander == null || location == null)
         {
             result.Messages.Add("Ошибка данных активной экспедиции.");
+            result.HadNotableOccurrence = true;
             return;
         }
 
@@ -133,6 +153,7 @@ public static class DayResolver
                 "Экспедиция ждёт приказа по событию «" +
                 expedition.PendingDecision.Title +
                 "» и сегодня не продвигается.");
+            result.HadNotableOccurrence = true;
             return;
         }
 
@@ -150,6 +171,7 @@ public static class DayResolver
             {
                 expedition.Phase = CommanderState.AtLocation;
                 commander.State = CommanderState.AtLocation;
+                result.HadNotableOccurrence = true;
 
                 result.Messages.Add(
                     commander.Name + " прибыл в локацию «" +
@@ -173,6 +195,7 @@ public static class DayResolver
             {
                 commander.State = CommanderState.InCastle;
                 expedition.IsActive = false;
+                result.HadNotableOccurrence = true;
 
                 result.Messages.Add(
                     commander.Name + " и " + expedition.FighterIds.Count +
@@ -202,6 +225,7 @@ public static class DayResolver
 
         int shortage = requiredSupply - availableSupply;
         state.ArmySupply = 0;
+        result.HadNotableOccurrence = true;
 
         result.Messages.Add(
             "<color=#D57E72>Экспедиции не хватило " + shortage +

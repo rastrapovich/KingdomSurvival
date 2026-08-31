@@ -7,6 +7,9 @@ public partial class PrototypeUIController
     private bool stableUiInitialized;
     private bool stableUiInitializing;
     private int renderedReportHash = int.MinValue;
+    private IVisualElementScheduledItem supplyHoldSchedule;
+    private int supplyHoldDelta;
+    private bool supplyHoldRepeated;
 
     private VisualElement persistentCommanderPanel;
     private VisualElement persistentCommanderGarrisonHost;
@@ -112,6 +115,8 @@ public partial class PrototypeUIController
         armyGoldPlusButton.clicked += OnStableArmyGoldPlusClicked;
         supplyMinusButton.clicked += OnStableSupplyMinusClicked;
         supplyPlusButton.clicked += OnStableSupplyPlusClicked;
+        RegisterSupplyHoldCallbacks(supplyMinusButton, -1);
+        RegisterSupplyHoldCallbacks(supplyPlusButton, 1);
 
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
         returnExpeditionButton.clicked += OnStableExpeditionActionClicked;
@@ -174,8 +179,11 @@ public partial class PrototypeUIController
 
     private void OnStableEndDayClicked()
     {
-        if (isGameOver)
+        if (isGameOver || HasBlockingModalWork())
+        {
+            TryShowNextQueuedModal();
             return;
+        }
 
         if (gameState.HasActiveExpedition &&
             gameState.CanCancelExpeditionBeforeDayEnd)
@@ -187,19 +195,20 @@ public partial class PrototypeUIController
                 departingCommander.State = CommanderState.TravellingToLocation;
         }
 
-        bool expeditionWasActive = gameState.HasActiveExpedition;
         int finishedDay = gameState.Day;
+        ExpeditionReturnSnapshot returnSnapshot = CaptureExpeditionReturnSnapshot();
         DayResolutionResult result = DayResolver.ResolveDay(gameState);
-
-        if (expeditionWasActive && !gameState.HasActiveExpedition)
-            selectedFighterIds.Clear();
+        AddReturnNoticeIfCompleted(result, returnSnapshot);
 
         if (result.NewExpeditionIncidents.Count > 0)
             unreadIncidents.AddRange(result.NewExpeditionIncidents);
 
-        AddReport(string.Join("\n", result.Messages), finishedDay);
+        int reportIndex = AddReport(string.Join("\n", result.Messages), finishedDay);
+        RegisterIncidentReports(result.NewExpeditionIncidents, reportIndex);
+        QueueDayResolutionModals(result, reportIndex);
         RefreshInterface();
         RefreshStableUiAfterStateChange();
+        TryShowNextQueuedModal();
         CheckForDefeat();
     }
 
@@ -285,6 +294,9 @@ public partial class PrototypeUIController
 
     private void OnStableSupplyPlusClicked()
     {
+        if (ConsumeRepeatedSupplyClick())
+            return;
+
         if (!isGameOver)
             gameState.TryAddArmySupply();
         RefreshStableResourceUi();
@@ -292,6 +304,9 @@ public partial class PrototypeUIController
 
     private void OnStableSupplyMinusClicked()
     {
+        if (ConsumeRepeatedSupplyClick())
+            return;
+
         if (!isGameOver)
             gameState.TryRemoveArmySupply();
         RefreshStableResourceUi();
@@ -318,6 +333,7 @@ public partial class PrototypeUIController
         RefreshJourneySummaryFromState();
         RefreshIncidentNotifications();
         RefreshPersistentCommanderNavigationState();
+        RefreshEndDayAvailability();
         ScheduleRoyalReportsRefresh();
     }
 
@@ -717,8 +733,13 @@ public partial class PrototypeUIController
             return;
 
         int hash = 17;
-        foreach (string entry in reportHistory)
+        for (int i = 0; i < reportHistory.Count; i++)
+        {
+            string entry = reportHistory[i];
             hash = hash * 31 + (entry != null ? entry.GetHashCode() : 0);
+            hash = hash * 31 +
+                (i < reportReadStates.Count && reportReadStates[i] ? 1 : 0);
+        }
 
         if (hash == renderedReportHash)
         {
@@ -731,6 +752,12 @@ public partial class PrototypeUIController
         for (int i = reportHistory.Count - 1; i >= 0; i--)
         {
             string entry = reportHistory[i] ?? string.Empty;
+            if (i < reportRequiresAcknowledgement.Count &&
+                reportRequiresAcknowledgement[i])
+            {
+                bool isRead = i < reportReadStates.Count && reportReadStates[i];
+                entry = (isRead ? "[ПРОЧИТАНО]\n" : "[НЕ ПРОЧИТАНО]\n") + entry;
+            }
             entry = entry.Replace(
                 "Откройте нужный экран круглой кнопкой слева сверху.",
                 "Выберите нужный раздел в нижнем меню.");

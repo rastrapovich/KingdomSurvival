@@ -15,6 +15,18 @@ public class DayResolutionResult
     // аварийным возвращением. В этот день не создаём новые походные
     // происшествия и значимые решения поверх уже понятного кризиса.
     public bool SkipExpeditionOccurrencesForDay;
+
+    // Структурированные итоги нужны интерфейсу, чтобы показывать важные
+    // результаты отдельными модальными плашками, не разбирая текст донесения.
+    public DayModalNotice ResearchNotice;
+    public DayModalNotice ExpeditionReturnNotice;
+}
+
+public class DayModalNotice
+{
+    public string Title;
+    public string Description;
+    public string Consequence;
 }
 
 public static class DayResolver
@@ -241,8 +253,21 @@ public static class DayResolver
 
                 result.Messages.Add(
                     commander.Name + " и " + fighterCount +
-                    " воинов вернулись в столицу. Гарнизон снова собран полностью. " +
+                    " воинов вернулись в столицу и остаются отрядом командира. " +
                     deliveredResources);
+
+                result.ExpeditionReturnNotice = new DayModalNotice
+                {
+                    Title = "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ",
+                    Description =
+                        commander.Name + " и " + fighterCount +
+                        " воинов прибыли в столицу. Отряд не расформирован: " +
+                        "перемещение бойцов между гарнизонами выполняет только игрок.",
+                    Consequence =
+                        deliveredResources + "\nПотери: нет.\n" +
+                        "Опыт: система пока не реализована.\n" +
+                        "Состояние бойцов: без изменений."
+                };
             }
         }
     }
@@ -294,6 +319,16 @@ public static class DayResolver
             "<color=#84B889>Локация «" + location.Name +
             "» исследована. Добыча отряда: " + rewardText +
             ". Ресурсы находятся у отряда и попадут в столицу только после возвращения.</color>");
+
+        result.ResearchNotice = new DayModalNotice
+        {
+            Title = "ИССЛЕДОВАНИЕ ЗАВЕРШЕНО",
+            Description =
+                "Локация «" + location.Name + "» полностью исследована.",
+            Consequence =
+                "Добыча отряда: " + rewardText + ".\n" +
+                "Ресурсы находятся у отряда и попадут в столицу только после возвращения."
+        };
     }
 
     private static void ResolveExpeditionSupply(

@@ -91,6 +91,8 @@ public partial class PrototypeUIController : MonoBehaviour
     private ScrollView reportHistoryScroll;
     private Label reportHistoryLabel;
     private readonly List<string> reportHistory = new List<string>();
+    private readonly List<bool> reportRequiresAcknowledgement = new List<bool>();
+    private readonly List<bool> reportReadStates = new List<bool>();
 
     private VisualElement incidentNotificationStack;
     private VisualElement incidentModalOverlay;
@@ -320,7 +322,10 @@ public partial class PrototypeUIController : MonoBehaviour
         lastNavigationClickTime = -NavigationClickCooldownSeconds;
         unreadIncidents.Clear();
         reportHistory.Clear();
+        reportRequiresAcknowledgement.Clear();
+        reportReadStates.Clear();
         selectedFighterIds.Clear();
+        ClearQueuedModals();
         ResetWorldMapSelection();
         reportHistoryLabel.text = string.Empty;
 
@@ -579,18 +584,19 @@ public partial class PrototypeUIController : MonoBehaviour
         if (isGameOver)
             return;
 
-        bool expeditionWasActive = gameState.HasActiveExpedition;
         int finishedDay = gameState.Day;
+        ExpeditionReturnSnapshot returnSnapshot = CaptureExpeditionReturnSnapshot();
         DayResolutionResult result = DayResolver.ResolveDay(gameState);
-
-        if (expeditionWasActive && !gameState.HasActiveExpedition)
-            selectedFighterIds.Clear();
+        AddReturnNoticeIfCompleted(result, returnSnapshot);
 
         if (result.NewExpeditionIncidents.Count > 0)
             unreadIncidents.AddRange(result.NewExpeditionIncidents);
 
-        AddReport(string.Join("\n", result.Messages), finishedDay);
+        int reportIndex = AddReport(string.Join("\n", result.Messages), finishedDay);
+        RegisterIncidentReports(result.NewExpeditionIncidents, reportIndex);
+        QueueDayResolutionModals(result, reportIndex);
         RefreshInterface();
+        TryShowNextQueuedModal();
         CheckForDefeat();
     }
 
@@ -642,13 +648,15 @@ public partial class PrototypeUIController : MonoBehaviour
         RefreshInterface();
     }
 
-    private void AddReport(string message, int? dayOverride = null)
+    private int AddReport(string message, int? dayOverride = null)
     {
         if (string.IsNullOrWhiteSpace(message))
-            return;
+            return -1;
 
         int reportDay = dayOverride ?? gameState.Day;
         reportHistory.Add("День " + reportDay + "\n" + message);
+        reportRequiresAcknowledgement.Add(false);
+        reportReadStates.Add(true);
         reportHistoryLabel.text = string.Join("\n\n", reportHistory);
 
         reportHistoryScroll.schedule.Execute(() =>
@@ -656,6 +664,8 @@ public partial class PrototypeUIController : MonoBehaviour
             reportHistoryScroll.verticalScroller.value =
                 reportHistoryScroll.verticalScroller.highValue;
         }).ExecuteLater(1);
+
+        return reportHistory.Count - 1;
     }
 
     private void RefreshInterface()
@@ -1431,6 +1441,12 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private void OnIncidentUnderstoodClicked()
     {
+        if (activeQueuedModal != null && activeQueuedModal.Decision == null)
+        {
+            FinishActiveQueuedModal();
+            return;
+        }
+
         if (openedIncident == null)
         {
             HideIncidentModal();
@@ -1441,6 +1457,8 @@ public partial class PrototypeUIController : MonoBehaviour
 
         unreadIncidents.RemoveAll(
             occurrence => occurrence.Id == readIncidentId);
+
+        AcknowledgeIncidentReport(readIncidentId);
 
         HideIncidentModal();
         RefreshIncidentNotifications();
@@ -1465,6 +1483,7 @@ public partial class PrototypeUIController : MonoBehaviour
     private void ResolveOpenedDecisionChoice(string optionId)
     {
         string resultMessage;
+        ExpeditionReturnSnapshot returnSnapshot = CaptureExpeditionReturnSnapshot();
 
         if (!ExpeditionDecisionSystem.TryApplyChoice(
                 gameState,
@@ -1475,9 +1494,23 @@ public partial class PrototypeUIController : MonoBehaviour
             return;
         }
 
-        AddReport(resultMessage);
-        HideIncidentModal();
+        int resultReportIndex = AddReport(resultMessage);
+        DayResolutionResult decisionResult = new DayResolutionResult();
+        AddReturnNoticeIfCompleted(decisionResult, returnSnapshot);
+
+        if (decisionResult.ExpeditionReturnNotice != null)
+        {
+            QueueNotice(decisionResult.ExpeditionReturnNotice, resultReportIndex);
+            MarkReportUnread(resultReportIndex);
+        }
+
+        if (activeQueuedModal != null)
+            FinishActiveQueuedModal();
+        else
+            HideIncidentModal();
+
         RefreshInterface();
+        TryShowNextQueuedModal();
     }
 
     private void HideIncidentModal()
@@ -1506,6 +1539,7 @@ public partial class PrototypeUIController : MonoBehaviour
         int survivedDays = Math.Max(0, gameState.Day - 1);
 
         HideIncidentModal();
+        ClearQueuedModals();
         endDayButton.SetEnabled(false);
         gameOverDaysLabel.text =
             "Вы удерживали трон: " + survivedDays + " " + GetDayWord(survivedDays);

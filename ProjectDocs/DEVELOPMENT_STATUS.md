@@ -8,7 +8,7 @@
 
 **Этап: переход стратегического слоя с дискретного `ХОД` на непрерывное время.**
 
-Новое время утверждено как канон. Актуальный документ — `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_6.docx`; предыдущий v1.5 переносится в `ProjectDocs/Archive` как историческая версия и больше не является конкурирующим актуальным каноном.
+Новое время утверждено как канон. Актуальный документ — `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_6.md`; предыдущий v1.5 переносится в `ProjectDocs/Archive` как историческая версия и больше не является конкурирующим актуальным каноном.
 
 Подготовлена первая рабочая реализация непрерывной симуляции.
 
@@ -146,7 +146,7 @@ A* и квадратная сетка сохраняются. Изменён с�
 - `Assets/_Project/UI/PrototypeUIController.ContinuousTimePresentation.cs` (+ `.meta`)
 - `Assets/_Project/Tests/EditMode/ContinuousSimulationTests.cs` (+ `.meta`)
 - обновлён `ProjectDocs/DEVELOPMENT_STATUS.md`;
-- добавлен актуальный `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_6.docx`;
+- добавлен актуальный `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_6.md`;
 - `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_5.docx` переносится в `ProjectDocs/Archive/` как историческая версия.
 
 ## 9. Тесты

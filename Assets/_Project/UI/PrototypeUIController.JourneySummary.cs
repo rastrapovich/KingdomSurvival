@@ -30,11 +30,39 @@ public partial class PrototypeUIController
     private int journeyPendingReportStartIndex;
     private bool journeySummaryInitialized;
 
-    private void Update()
+    private void InitializeJourneySummaryUi()
     {
-        if (!journeySummaryInitialized)
-            TryInitializeJourneySummary();
+        journeySummaryBlock =
+            interfaceRoot.Q<VisualElement>("journey-summary-block");
+        journeySummaryScroll =
+            interfaceRoot.Q<ScrollView>("journey-summary-scroll");
+        journeySummaryList =
+            interfaceRoot.Q<VisualElement>("journey-summary-list");
 
+        if (journeySummaryBlock == null ||
+            journeySummaryScroll == null ||
+            journeySummaryList == null)
+        {
+            Debug.LogError(
+                "Journey summary: статический блок не найден в Prototype_Main.uxml.");
+            return;
+        }
+
+        journeySummaryInitialized = true;
+        journeyTrackedGameState = gameState;
+        journeyTrackedExpedition =
+            gameState != null ? gameState.ActiveExpedition : null;
+        journeyTrackedPendingDecision = null;
+        journeyPendingReportStartIndex = reportHistory.Count;
+        journeyProcessedIncidentIds.Clear();
+        journeySummaryEntries.Clear();
+
+        RenderJourneySummary();
+        RefreshJourneySummaryFromState();
+    }
+
+    private void RefreshJourneySummaryFromState()
+    {
         if (!journeySummaryInitialized || gameState == null)
             return;
 
@@ -46,112 +74,6 @@ public partial class PrototypeUIController
         RefreshJourneyEmptyState();
     }
 
-    private void TryInitializeJourneySummary()
-    {
-        UIDocument document = GetComponent<UIDocument>();
-
-        if (document == null)
-            return;
-
-        VisualElement root = document.rootVisualElement;
-        VisualElement commanderSupplyRow =
-            root.Q<VisualElement>(className: "commander-supply-row");
-        VisualElement commanderProfile =
-            root.Q<VisualElement>(className: "commander-profile-column");
-        VisualElement supplyBlock =
-            root.Q<VisualElement>(className: "military-supply-block");
-
-        if (commanderSupplyRow == null ||
-            commanderProfile == null ||
-            supplyBlock == null ||
-            armyStatusLabel == null)
-        {
-            return;
-        }
-
-        MoveArmyStatusAboveJourneyRow(commanderSupplyRow);
-        ConfigureJourneyColumns(commanderProfile, supplyBlock);
-        CreateJourneySummaryBlock(commanderSupplyRow);
-
-        journeySummaryInitialized = true;
-        journeyTrackedGameState = gameState;
-        journeyTrackedExpedition = gameState != null ? gameState.ActiveExpedition : null;
-        RenderJourneySummary();
-    }
-
-    private void MoveArmyStatusAboveJourneyRow(VisualElement commanderSupplyRow)
-    {
-        VisualElement parent = commanderSupplyRow.parent;
-
-        if (parent == null)
-            return;
-
-        armyStatusLabel.RemoveFromHierarchy();
-        parent.Add(armyStatusLabel);
-        armyStatusLabel.PlaceBehind(commanderSupplyRow);
-
-        armyStatusLabel.style.marginTop = 0;
-        armyStatusLabel.style.marginBottom = 10;
-        armyStatusLabel.style.fontSize = 12;
-        armyStatusLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-    }
-
-    private void ConfigureJourneyColumns(
-        VisualElement commanderProfile,
-        VisualElement supplyBlock)
-    {
-        commanderProfile.style.width = Length.Percent(29);
-        commanderProfile.style.minWidth = 0;
-        commanderProfile.style.marginRight = 8;
-
-        supplyBlock.style.width = Length.Percent(29);
-        supplyBlock.style.minWidth = 160;
-        supplyBlock.style.marginLeft = 0;
-        supplyBlock.style.marginRight = 0;
-    }
-
-    private void CreateJourneySummaryBlock(VisualElement commanderSupplyRow)
-    {
-        journeySummaryBlock = new VisualElement();
-        journeySummaryBlock.name = "journey-summary-block";
-        journeySummaryBlock.AddToClassList("supply-block");
-        journeySummaryBlock.style.width = Length.Percent(38);
-        journeySummaryBlock.style.minWidth = 190;
-        journeySummaryBlock.style.height = 252;
-        journeySummaryBlock.style.marginTop = 0;
-        journeySummaryBlock.style.marginLeft = 0;
-        journeySummaryBlock.style.marginRight = 8;
-        journeySummaryBlock.style.marginBottom = 8;
-        journeySummaryBlock.style.paddingLeft = 10;
-        journeySummaryBlock.style.paddingRight = 10;
-        journeySummaryBlock.style.paddingTop = 10;
-        journeySummaryBlock.style.paddingBottom = 10;
-
-        Label title = new Label("СВОДКА ПОХОДА");
-        title.AddToClassList("supply-title");
-        journeySummaryBlock.Add(title);
-
-        journeySummaryScroll = new ScrollView(ScrollViewMode.Vertical);
-        journeySummaryScroll.name = "journey-summary-scroll";
-        journeySummaryScroll.style.flexGrow = 1;
-        journeySummaryScroll.style.minHeight = 0;
-        journeySummaryScroll.style.width = Length.Percent(100);
-        journeySummaryBlock.Add(journeySummaryScroll);
-
-        journeySummaryList = new VisualElement();
-        journeySummaryList.style.width = Length.Percent(100);
-        journeySummaryScroll.Add(journeySummaryList);
-
-        journeySummaryEmptyLabel = new Label();
-        journeySummaryEmptyLabel.style.color = new Color(0.62f, 0.64f, 0.67f);
-        journeySummaryEmptyLabel.style.fontSize = 10;
-        journeySummaryEmptyLabel.style.whiteSpace = WhiteSpace.Normal;
-        journeySummaryEmptyLabel.style.marginTop = 4;
-        journeySummaryList.Add(journeySummaryEmptyLabel);
-
-        commanderSupplyRow.Insert(1, journeySummaryBlock);
-    }
-
     private void TrackJourneyGameState()
     {
         if (ReferenceEquals(journeyTrackedGameState, gameState))
@@ -160,7 +82,7 @@ public partial class PrototypeUIController
         journeyTrackedGameState = gameState;
         journeyTrackedExpedition = gameState.ActiveExpedition;
         journeyTrackedPendingDecision = null;
-        journeyPendingReportStartIndex = 0;
+        journeyPendingReportStartIndex = reportHistory.Count;
         journeyProcessedIncidentIds.Clear();
         journeySummaryEntries.Clear();
         RenderJourneySummary();
@@ -168,17 +90,22 @@ public partial class PrototypeUIController
 
     private void TrackJourneyExpedition()
     {
-        ExpeditionData currentExpedition = gameState.ActiveExpedition;
+        ExpeditionData current = gameState.ActiveExpedition;
 
-        if (currentExpedition == null ||
-            ReferenceEquals(currentExpedition, journeyTrackedExpedition))
+        if (ReferenceEquals(current, journeyTrackedExpedition))
+            return;
+
+        if (current == null)
         {
+            journeyTrackedExpedition = null;
+            journeyTrackedPendingDecision = null;
+            journeyPendingReportStartIndex = reportHistory.Count;
+            RefreshJourneyEmptyState();
             return;
         }
 
-        // Новая экспедиция начинает новую локальную сводку. После возвращения
-        // старая сводка остаётся на экране до фактического старта следующей.
-        journeyTrackedExpedition = currentExpedition;
+        // Новая экспедиция начинает новую локальную сводку.
+        journeyTrackedExpedition = current;
         journeyTrackedPendingDecision = null;
         journeyPendingReportStartIndex = reportHistory.Count;
         journeyProcessedIncidentIds.Clear();
@@ -203,6 +130,7 @@ public partial class PrototypeUIController
                 continue;
 
             captured.Add(occurrence);
+
             AddJourneySummaryEntry(
                 occurrence.Day,
                 occurrence.Title,
@@ -214,16 +142,12 @@ public partial class PrototypeUIController
         if (captured.Count == 0)
             return;
 
-        // Положительные ID сейчас принадлежат только фоновым походным
-        // происшествиям. Кризисы столицы используют отрицательные ID и остаются
-        // в правых уведомлениях. Значимые решения живут отдельной системой '!'.
         unreadIncidents.RemoveAll(IsJourneyBackgroundIncident);
-
         AppendJourneyArtTextToRoyalReport(captured);
-        RefreshIncidentNotifications();
     }
 
-    private bool IsJourneyBackgroundIncident(ExpeditionIncidentOccurrence occurrence)
+    private bool IsJourneyBackgroundIncident(
+        ExpeditionIncidentOccurrence occurrence)
     {
         return occurrence != null && occurrence.Id > 0;
     }
@@ -272,7 +196,7 @@ public partial class PrototypeUIController
                 string.Join("\n\n", details);
         }
 
-        reportHistoryLabel.text = string.Join("\n\n", reportHistory);
+        ScheduleRoyalReportsRefresh();
     }
 
     private int FindLatestReportIndexForDay(int day)
@@ -336,12 +260,11 @@ public partial class PrototypeUIController
         for (int i = reportHistory.Count - 1; i >= firstAllowedReportIndex; i--)
         {
             string report = reportHistory[i];
-            int markerIndex = report.IndexOf(marker, StringComparison.Ordinal);
+            int markerIndex =
+                report.IndexOf(marker, StringComparison.Ordinal);
 
-            if (markerIndex < 0)
-                continue;
-
-            return report.Substring(markerIndex).Trim();
+            if (markerIndex >= 0)
+                return report.Substring(markerIndex).Trim();
         }
 
         return string.Empty;
@@ -378,7 +301,8 @@ public partial class PrototypeUIController
         if (journeySummaryEntries.Count == 0)
         {
             journeySummaryEmptyLabel = new Label();
-            journeySummaryEmptyLabel.style.color = new Color(0.62f, 0.64f, 0.67f);
+            journeySummaryEmptyLabel.style.color =
+                new Color(0.62f, 0.64f, 0.67f);
             journeySummaryEmptyLabel.style.fontSize = 10;
             journeySummaryEmptyLabel.style.whiteSpace = WhiteSpace.Normal;
             journeySummaryEmptyLabel.style.marginTop = 4;
@@ -393,7 +317,8 @@ public partial class PrototypeUIController
             journeySummaryList.Add(CreateJourneySummaryEntryView(entry));
     }
 
-    private VisualElement CreateJourneySummaryEntryView(JourneySummaryEntry entry)
+    private VisualElement CreateJourneySummaryEntryView(
+        JourneySummaryEntry entry)
     {
         VisualElement card = new VisualElement();
         card.style.marginBottom = 8;
@@ -405,8 +330,8 @@ public partial class PrototypeUIController
         card.style.borderLeftWidth = 2;
         card.style.borderLeftColor = GetJourneyToneColor(entry.Tone);
 
-        Label header = new Label(
-            "ДЕНЬ " + entry.Day + " · " + entry.Title.ToUpper());
+        Label header =
+            new Label("ДЕНЬ " + entry.Day + " · " + entry.Title.ToUpper());
         header.style.color = new Color(0.82f, 0.78f, 0.68f);
         header.style.fontSize = 10;
         header.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -467,7 +392,16 @@ public partial class PrototypeUIController
 
         ExpeditionData expedition = gameState.ActiveExpedition;
         LocationData location = gameState.FindLocation(expedition.LocationId);
-        string locationName = location != null ? location.Name : "неизвестная локация";
+        string locationName =
+            location != null ? location.Name : "неизвестная локация";
+
+        if (gameState.CanCancelExpeditionBeforeDayEnd)
+        {
+            armyStatusLabel.text =
+                "СТАТУС АРМИИ: В ЗАМКЕ · ПРИКАЗ: " +
+                locationName.ToUpper();
+            return;
+        }
 
         if (gameState.HasPendingExpeditionDecision)
         {
@@ -478,7 +412,8 @@ public partial class PrototypeUIController
         if (expedition.IsExplorationInProgress)
         {
             armyStatusLabel.text =
-                "СТАТУС АРМИИ: ИССЛЕДУЕТ · " + locationName.ToUpper();
+                "СТАТУС АРМИИ: ИССЛЕДУЕТ · " +
+                locationName.ToUpper();
             return;
         }
 
@@ -486,14 +421,17 @@ public partial class PrototypeUIController
         {
             case CommanderState.TravellingToLocation:
                 armyStatusLabel.text =
-                    "СТАТУС АРМИИ: В ПУТИ · " + locationName.ToUpper();
+                    "СТАТУС АРМИИ: В ПУТИ · " +
+                    locationName.ToUpper();
                 break;
             case CommanderState.AtLocation:
                 armyStatusLabel.text =
-                    "СТАТУС АРМИИ: В ЛОКАЦИИ · " + locationName.ToUpper();
+                    "СТАТУС АРМИИ: В ЛОКАЦИИ · " +
+                    locationName.ToUpper();
                 break;
             case CommanderState.ReturningToCastle:
-                armyStatusLabel.text = "СТАТУС АРМИИ: ВОЗВРАЩАЕТСЯ В СТОЛИЦУ";
+                armyStatusLabel.text =
+                    "СТАТУС АРМИИ: ВОЗВРАЩАЕТСЯ В СТОЛИЦУ";
                 break;
             default:
                 armyStatusLabel.text = "СТАТУС АРМИИ: В СТОЛИЦЕ";

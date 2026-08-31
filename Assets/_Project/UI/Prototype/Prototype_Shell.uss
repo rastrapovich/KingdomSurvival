@@ -1,393 +1,122 @@
-/* ================================================================
-   ОСНОВНАЯ ОБОЛОЧКА ПРОТОТИПА
-   Макет: постоянные донесения слева, рабочая область по центру,
-   навигация и ресурсы в нижней панели.
-   ================================================================ */
+/* Static layout for the current prototype shell. */
 
 .shell-screen {
-    flex-grow: 1;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    flex-direction: column;
     padding-left: 14px;
     padding-right: 14px;
     padding-top: 14px;
     padding-bottom: 14px;
     background-color: rgb(18, 21, 26);
-    color: rgb(226, 219, 204);
 }
 
-.shell-main-row {
-    flex-grow: 1;
-    min-height: 0;
-    flex-direction: row;
-    margin-bottom: 10px;
-}
-
+.shell-main-row { flex-grow: 1; flex-shrink: 1; min-height: 0px; flex-direction: row; margin-bottom: 10px; }
 .shell-sidebar {
-    width: 330px;
-    min-width: 330px;
-    max-width: 330px;
-    min-height: 0;
-    margin-right: 12px;
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 10px;
-    padding-bottom: 8px;
-    background-color: rgb(30, 33, 39);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: rgb(112, 86, 53);
-    border-right-color: rgb(75, 68, 58);
-    border-top-color: rgb(75, 68, 58);
-    border-bottom-color: rgb(75, 68, 58);
-    border-radius: 5px;
+    width: 300px; min-width: 300px; max-width: 300px; min-height: 0px; flex-shrink: 0; flex-direction: column; margin-right: 12px;
+    padding-left: 8px; padding-right: 8px; padding-top: 10px; padding-bottom: 8px; background-color: rgb(30, 33, 39);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(79, 72, 63); border-right-color: rgb(79, 72, 63); border-top-color: rgb(79, 72, 63); border-bottom-color: rgb(79, 72, 63); border-radius: 5px;
 }
+.shell-game-title { height: 48px; min-height: 48px; flex-shrink: 0; color: rgb(221, 181, 99); font-size: 18px; -unity-font-style: bold; -unity-text-align: middle-center; }
+.shell-reports-dock { position: relative; left: 0px; right: 0px; top: 0px; bottom: 0px; width: 100%; height: 0px; min-height: 120px; flex-grow: 1; flex-shrink: 1; }
+.shell-reports-panel { flex-grow: 1; flex-shrink: 1; min-height: 0px; margin-bottom: 0px; padding-left: 12px; padding-right: 12px; padding-top: 12px; padding-bottom: 12px; background-color: rgb(34, 38, 45); border-left-color: rgb(70, 75, 84); border-right-color: rgb(70, 75, 84); border-top-color: rgb(70, 75, 84); border-bottom-color: rgb(70, 75, 84); }
+.shell-reports-title { margin-bottom: 10px; color: rgb(221, 181, 99); font-size: 15px; }
+.shell-report-scroll { flex-grow: 1; flex-shrink: 1; min-height: 0px; max-height: 10000px; }
+.shell-report-text { color: rgb(205, 200, 188); font-size: 12px; white-space: normal; }
 
-.shell-game-title {
-    height: 48px;
-    flex-shrink: 0;
-    color: rgb(218, 177, 91);
-    font-size: 19px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
+.persistent-commander-panel {
+    width: 100%; height: 231px; min-height: 231px; max-height: 231px; flex-grow: 0; flex-shrink: 0; margin-top: 7px;
+    padding-left: 10px; padding-right: 10px; padding-top: 9px; padding-bottom: 9px; background-color: rgb(31, 35, 41);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(104, 84, 57); border-right-color: rgb(104, 84, 57); border-top-color: rgb(104, 84, 57); border-bottom-color: rgb(104, 84, 57); border-radius: 4px;
 }
+.persistent-commander-title { height: 18px; min-height: 18px; margin-bottom: 6px; color: rgb(220, 181, 103); font-size: 12px; -unity-font-style: bold; }
+.persistent-commander-status { width: 100%; height: 38px; min-height: 38px; max-height: 38px; flex-shrink: 0; margin-bottom: 6px; padding-left: 7px; padding-right: 7px; padding-top: 3px; padding-bottom: 3px; background-color: rgb(27, 31, 37); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(62, 69, 78); border-right-color: rgb(62, 69, 78); border-top-color: rgb(62, 69, 78); border-bottom-color: rgb(62, 69, 78); border-radius: 3px; }
+.persistent-commander-state { height: 15px; font-size: 10px; color: rgb(163, 197, 174); -unity-font-style: bold; }
+.persistent-commander-target { height: 15px; font-size: 9px; color: rgb(177, 178, 174); white-space: nowrap; }
+.persistent-commander-content { width: 100%; flex-grow: 1; min-height: 0px; flex-direction: row; align-items: stretch; }
+.persistent-commander-portrait { width: 44%; min-width: 0px; height: 100%; margin-right: 8px; align-items: center; justify-content: center; background-color: rgb(27, 31, 37); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(69, 75, 85); border-right-color: rgb(69, 75, 85); border-top-color: rgb(69, 75, 85); border-bottom-color: rgb(69, 75, 85); border-radius: 3px; }
+.persistent-commander-portrait-text { color: rgb(112, 118, 128); font-size: 9px; -unity-font-style: bold; -unity-text-align: middle-center; white-space: normal; }
+.persistent-commander-buttons { flex-grow: 1; min-width: 0px; height: 100%; flex-direction: column; }
+.persistent-commander-button-row { width: 100%; height: 50%; flex-grow: 1; min-height: 0px; flex-direction: row; align-items: stretch; }
+.persistent-commander-button { width: 50%; height: 100%; flex-grow: 1; min-width: 0px; min-height: 0px; margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px; padding-left: 3px; padding-right: 3px; padding-top: 2px; padding-bottom: 2px; border-radius: 3px; color: rgb(226, 219, 204); font-size: 9px; -unity-font-style: bold; }
+.persistent-commander-empty { background-color: rgb(41, 46, 53); opacity: 0.65; }
+.persistent-commander-army-button { background-color: rgb(76, 51, 52); }
+.persistent-commander-expedition-button { background-color: rgb(49, 76, 61); }
+.persistent-commander-army-button.persistent-nav-active { background-color: rgb(112, 67, 68); }
+.persistent-commander-expedition-button.persistent-nav-active { background-color: rgb(66, 104, 81); }
 
-.shell-reports-dock {
-    position: relative;
-    left: 0px;
-    bottom: 0px;
-    width: 100%;
-    height: 0px;
-    flex-grow: 1;
-    min-height: 0;
-}
+.shell-workspace { flex-grow: 1; flex-shrink: 1; min-width: 0px; min-height: 0px; flex-direction: column; align-items: stretch; background-color: rgb(18, 21, 26); }
+.shell-workspace-content { flex-grow: 1; flex-shrink: 1; min-width: 0px; min-height: 0px; margin-top: 0px; margin-bottom: 0px; }
+.shell-content-screen { width: 100%; height: 100%; min-height: 0px; }
+.shell-screen-scroll { width: 100%; height: 100%; min-height: 0px; }
+.shell-content-panel { min-height: 100%; margin-bottom: 0px; background-color: rgb(29, 33, 40); }
+.shell-expedition-panel { width: 100%; }
+.persistent-commander-garrison-host { width: 100%; height: 113px; min-height: 113px; max-height: 113px; flex-grow: 0; flex-shrink: 0; flex-direction: row; align-items: flex-start; margin-top: 5px; }
 
-.shell-reports-panel {
-    flex-grow: 1;
-    min-height: 0;
-    margin-bottom: 0;
-    padding-left: 12px;
-    padding-right: 12px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    background-color: rgb(34, 38, 45);
-    border-left-color: rgb(72, 76, 83);
-    border-right-color: rgb(72, 76, 83);
-    border-top-color: rgb(72, 76, 83);
-    border-bottom-color: rgb(72, 76, 83);
-}
+.army-stable-panel { width: 100%; height: 100%; min-height: 0px; margin-bottom: 0px; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; flex-direction: column; justify-content: space-between; background-color: rgb(18, 21, 26); border-left-width: 0px; border-right-width: 0px; border-top-width: 0px; border-bottom-width: 0px; }
+.army-legacy-hidden, .army-aux-hidden { display: none; }
+.army-top-row { width: 82%; height: 330px; min-height: 330px; max-height: 330px; flex-grow: 0; flex-shrink: 0; flex-direction: row; align-items: stretch; justify-content: flex-start; }
+.army-commander-block { width: 33%; min-width: 210px; height: 100%; margin-right: 5px; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 9px; background-color: rgb(42, 46, 54); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62); border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62); border-radius: 5px; }
+.army-commander-block .commander-section-title { margin-top: 0px; margin-bottom: 6px; color: rgb(219, 181, 107); font-size: 13px; }
+.army-commander-block .commander-image-placeholder { width: 100%; height: 68%; min-height: 160px; max-height: 270px; margin-bottom: 8px; background-color: rgb(31, 35, 42); }
+.army-commander-block .commander-dropdown { width: 100%; margin-top: 0px; margin-bottom: 4px; }
+.army-commander-block .commander-detail { color: rgb(184, 184, 178); font-size: 10px; white-space: normal; }
+.journey-summary-block { width: 37%; min-width: 220px; height: 100%; min-height: 0px; margin-right: 5px; margin-top: 0px; margin-bottom: 0px; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px; background-color: rgb(45, 49, 56); }
+.journey-summary-scroll { flex-grow: 1; min-height: 0px; width: 100%; }
+.journey-summary-list { width: 100%; }
+.military-supply-block { width: 28%; min-width: 205px; height: 190px; min-height: 190px; max-height: 190px; margin-top: 0px; margin-bottom: 0px; padding-left: 11px; padding-right: 11px; padding-top: 10px; padding-bottom: 10px; background-color: rgb(48, 49, 53); }
+.military-supply-block .supply-title { margin-bottom: 6px; color: rgb(225, 190, 116); font-size: 13px; }
+.military-supply-block .supply-subtitle { margin-top: 1px; margin-bottom: 2px; font-size: 9px; color: rgb(185, 180, 164); }
+.military-supply-block .supply-controls { height: 28px; min-height: 28px; margin-bottom: 3px; flex-direction: row; align-items: center; }
+.military-supply-block .supply-step-button { width: 32px; min-width: 32px; max-width: 32px; height: 26px; min-height: 26px; padding-left: 0px; padding-right: 0px; }
+.military-supply-block .supply-value { min-width: 42px; margin-left: 5px; margin-right: 5px; font-size: 14px; -unity-text-align: middle-center; }
+.military-supply-block .supply-note { height: 14px; min-height: 14px; max-height: 14px; margin-top: 1px; margin-bottom: 0px; font-size: 9px; white-space: nowrap; }
 
-.shell-reports-title {
-    margin-bottom: 11px;
-    color: rgb(218, 177, 91);
-    font-size: 16px;
-}
+.army-transfer-board { width: 82%; height: 113px; min-height: 113px; max-height: 113px; flex-grow: 0; flex-shrink: 0; flex-direction: column; align-items: stretch; align-self: flex-start; margin-top: 0px; margin-bottom: 0px; }
+.army-roster-drop-zone { position: relative; width: 100%; height: 113px; min-height: 113px; max-height: 113px; flex-grow: 0; flex-shrink: 0; margin-bottom: 0px; padding-left: 10px; padding-right: 10px; padding-top: 7px; padding-bottom: 7px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-radius: 5px; }
+.capital-garrison-zone { background-color: rgb(38, 54, 48); border-left-color: rgb(75, 112, 91); border-right-color: rgb(75, 112, 91); border-top-color: rgb(75, 112, 91); border-bottom-color: rgb(75, 112, 91); }
+.commander-garrison-zone { width: 82%; background-color: rgb(50, 44, 34); border-left-color: rgb(132, 103, 62); border-right-color: rgb(132, 103, 62); border-top-color: rgb(132, 103, 62); border-bottom-color: rgb(132, 103, 62); }
+.capital-garrison-zone.army-roster-empty-danger { background-color: rgb(61, 42, 43); }
+.army-roster-drop-hover { border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; }
+.capital-garrison-zone.army-roster-drop-hover { background-color: rgb(48, 72, 60); }
+.commander-garrison-zone.army-roster-drop-hover { background-color: rgb(71, 61, 43); }
+.army-roster-title { height: 14px; min-height: 14px; max-height: 14px; margin-top: 0px; margin-bottom: 4px; color: rgb(220, 181, 105); font-size: 11px; -unity-font-style: bold; }
+.capital-garrison-zone .army-roster-title { color: rgb(151, 192, 165); }
+.army-roster-list { width: 100%; min-width: 100%; height: 78px; min-height: 78px; max-height: 78px; flex-direction: row; flex-wrap: nowrap; align-items: flex-start; justify-content: flex-start; }
+.army-roster-list .fighter-card { width: 104px; min-width: 104px; max-width: 104px; height: 78px; min-height: 78px; max-height: 78px; flex-grow: 0; flex-shrink: 0; margin-left: 0px; margin-right: 8px; margin-top: 0px; margin-bottom: 0px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-radius: 4px; }
+.army-roster-list .fighter-card-garrison { background-color: rgb(42, 57, 51); }
+.army-roster-list .fighter-card-selected { background-color: rgb(58, 50, 38); }
+.army-roster-list .fighter-name, .army-roster-list .fighter-role, .army-roster-list .fighter-info, .army-roster-list .fighter-assignment { display: none; }
+.army-roster-list .fighter-image-placeholder { width: 100%; height: 100%; margin-bottom: 0px; align-items: center; justify-content: center; background-color: rgb(29, 33, 39); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(69, 76, 86); border-right-color: rgb(69, 76, 86); border-top-color: rgb(69, 76, 86); border-bottom-color: rgb(69, 76, 86); }
+.army-roster-list .fighter-image-placeholder-text { color: rgb(226, 191, 119); font-size: 10px; -unity-font-style: bold; -unity-text-align: middle-center; white-space: normal; }
+.capital-garrison-zone .fighter-image-placeholder-text { color: rgb(168, 202, 180); }
 
-.shell-report-scroll {
-    flex-grow: 1;
-    min-height: 0;
-    max-height: 9999px;
-}
+.big-expedition-location-grid { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: flex-start; justify-content: flex-start; }
+.big-expedition-location-grid .location-card { width: 31%; min-width: 280px; flex-grow: 1; flex-shrink: 1; margin-left: 4px; margin-right: 4px; margin-top: 4px; margin-bottom: 4px; }
+.big-expedition-location-grid .location-image-placeholder { width: 100%; height: 150px; min-height: 150px; max-height: 150px; }
+.legacy-send-button { display: none; }
 
-.shell-report-text {
-    color: rgb(205, 200, 188);
-    font-size: 12px;
-    white-space: normal;
-}
-
-.shell-workspace {
-    flex-grow: 1;
-    min-width: 0;
-    min-height: 0;
-    background-color: rgb(18, 21, 26);
-}
-
-.shell-workspace-content {
-    flex-grow: 1;
-    min-width: 0;
-    min-height: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-.shell-content-screen {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-}
-
-.shell-screen-scroll {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-}
-
-.shell-content-panel {
-    min-height: 100%;
-    margin-bottom: 0;
-    background-color: rgb(29, 33, 40);
-    border-left-color: rgb(62, 67, 76);
-    border-right-color: rgb(62, 67, 76);
-    border-top-color: rgb(62, 67, 76);
-    border-bottom-color: rgb(62, 67, 76);
-}
-
-.shell-expedition-panel {
-    max-width: 1120px;
-}
-
-/* ================================================================
-   НИЖНЯЯ ПАНЕЛЬ
-   ================================================================ */
-
-.shell-bottom-bar {
-    height: 82px;
-    min-height: 82px;
-    max-height: 82px;
-    flex-shrink: 0;
-    flex-direction: row;
-    background-color: rgb(34, 38, 45);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: rgb(78, 69, 55);
-    border-right-color: rgb(78, 69, 55);
-    border-top-color: rgb(78, 69, 55);
-    border-bottom-color: rgb(78, 69, 55);
-    border-radius: 4px;
-}
-
-.shell-navigation-bar {
-    width: 330px;
-    min-width: 330px;
-    max-width: 330px;
-    height: 100%;
-    margin-top: 0;
-    padding-left: 4px;
-    padding-right: 4px;
-    flex-shrink: 0;
-    flex-direction: row;
-    align-items: stretch;
-}
-
-.shell-nav-button {
-    height: 100%;
-    min-height: 0;
-    width: 106px;
-    min-width: 0;
-    max-width: 106px;
-    flex-grow: 1;
-    margin-right: 3px;
-    padding-left: 8px;
-    padding-right: 8px;
-    border-radius: 3px;
-    color: rgb(226, 219, 204);
-    font-size: 14px;
-    -unity-font-style: normal;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-}
-
-.shell-nav-button.nav-capital {
-    background-color: rgb(91, 77, 48);
-    border-left-color: rgb(150, 125, 73);
-    border-right-color: rgb(150, 125, 73);
-    border-top-color: rgb(150, 125, 73);
-    border-bottom-color: rgb(150, 125, 73);
-}
-
-.shell-nav-button.nav-army {
-    background-color: rgb(92, 58, 58);
-    border-left-color: rgb(145, 83, 81);
-    border-right-color: rgb(145, 83, 81);
-    border-top-color: rgb(145, 83, 81);
-    border-bottom-color: rgb(145, 83, 81);
-}
-
-.shell-nav-button.nav-expedition {
-    background-color: rgb(57, 82, 67);
-    border-left-color: rgb(82, 126, 98);
-    border-right-color: rgb(82, 126, 98);
-    border-top-color: rgb(82, 126, 98);
-    border-bottom-color: rgb(82, 126, 98);
-}
-
-.shell-nav-button:hover {
-    color: rgb(247, 239, 218);
-    -unity-font-style: bold;
-}
-
-.shell-nav-button.nav-capital:hover { background-color: rgb(112, 94, 57); }
-.shell-nav-button.nav-army:hover { background-color: rgb(112, 68, 67); }
-.shell-nav-button.nav-expedition:hover { background-color: rgb(68, 101, 80); }
-
-.shell-nav-button.nav-button-active {
-    color: rgb(255, 242, 207);
-    -unity-font-style: bold;
-    border-left-width: 2px;
-    border-right-width: 2px;
-    border-top-width: 2px;
-    border-bottom-width: 2px;
-}
-
-.shell-resource-bar {
-    flex-grow: 1;
-    min-width: 0;
-    height: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    padding-left: 12px;
-    padding-right: 10px;
-}
-
-.shell-resource-strip {
-    flex-grow: 0;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.shell-resource-box {
-    min-width: 96px;
-    height: 54px;
-    margin-right: 6px;
-    margin-bottom: 0;
-    padding-left: 9px;
-    padding-right: 9px;
-    padding-top: 7px;
-    padding-bottom: 6px;
-    justify-content: center;
-    background-color: rgb(45, 49, 57);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: rgb(57, 62, 71);
-    border-right-color: rgb(57, 62, 71);
-    border-top-color: rgb(57, 62, 71);
-    border-bottom-color: rgb(57, 62, 71);
-    border-radius: 4px;
-}
-
-.shell-mood-box {
-    min-width: 142px;
-}
-
-.shell-resource-box .resource-value {
-    color: rgb(224, 219, 207);
-    font-size: 12px;
-}
-
-.shell-resource-box .resource-income {
-    margin-top: 2px;
-    color: rgb(126, 172, 125);
-    font-size: 9px;
-}
-
-.shell-resource-box.food-box {
-    position: relative;
-    overflow: visible;
-}
-
-.shell-resource-box .food-expense-popup {
-    left: 0;
-    top: auto;
-    bottom: 58px;
-    min-width: 160px;
-    background-color: rgb(29, 33, 40);
-    border-left-color: rgb(75, 69, 59);
-    border-right-color: rgb(75, 69, 59);
-    border-top-color: rgb(75, 69, 59);
-    border-bottom-color: rgb(75, 69, 59);
-}
-
-.shell-end-day-button {
-    position: relative;
-    right: 0px;
-    bottom: 0px;
-    width: 92px;
-    min-width: 92px;
-    max-width: 92px;
-    height: 54px;
-    margin-left: 8px;
-    background-color: rgb(186, 132, 29);
-    color: rgb(28, 24, 17);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: rgb(222, 170, 57);
-    border-right-color: rgb(222, 170, 57);
-    border-top-color: rgb(222, 170, 57);
-    border-bottom-color: rgb(222, 170, 57);
-    border-radius: 8px;
-    font-size: 16px;
-    -unity-font-style: bold;
-}
-
-.shell-end-day-button:hover {
-    background-color: rgb(213, 155, 35);
-}
-
-/* ================================================================
-   ОБЩАЯ ПАЛИТРА
-   ================================================================ */
-
-.panel {
-    background-color: rgb(29, 33, 40);
-    border-left-color: rgb(62, 67, 76);
-    border-right-color: rgb(62, 67, 76);
-    border-top-color: rgb(62, 67, 76);
-    border-bottom-color: rgb(62, 67, 76);
-}
-
-.panel-title,
-.supply-title,
-.army-roster-title,
-.active-expedition-title {
-    color: rgb(218, 177, 91);
-}
-
-.panel-description,
-.supply-note,
-.army-roster-summary {
-    color: rgb(165, 166, 163);
-}
-
-.status-label {
-    background-color: rgb(39, 44, 52);
-    color: rgb(188, 197, 201);
-}
-
-.building-card,
-.location-card,
-.supply-block,
-.army-roster-drop-zone {
-    background-color: rgb(38, 43, 51);
-}
-
-.location-name,
-.fighter-name,
-.commander-detail {
-    color: rgb(226, 219, 204);
-}
-
-.send-button {
-    background-color: rgb(57, 82, 67);
-    color: rgb(225, 232, 220);
-}
-
-.send-button:hover {
-    background-color: rgb(68, 101, 80);
-}
-
-/* Уведомления держим над новой нижней панелью. */
-.incident-notification-stack {
-    right: 30px;
-    bottom: 108px;
-}
+.shell-bottom-bar { height: 82px; min-height: 82px; max-height: 82px; flex-shrink: 0; flex-direction: row; background-color: rgb(33, 37, 44); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(78, 69, 55); border-right-color: rgb(78, 69, 55); border-top-color: rgb(78, 69, 55); border-bottom-color: rgb(78, 69, 55); border-radius: 4px; }
+.shell-navigation-bar { width: 300px; min-width: 300px; max-width: 300px; height: 100%; margin-top: 0px; padding-left: 4px; padding-right: 4px; flex-shrink: 0; flex-direction: row; align-items: stretch; }
+.shell-nav-button { height: 100%; min-height: 0px; flex-grow: 1; min-width: 0px; margin-right: 3px; padding-left: 5px; padding-right: 5px; border-radius: 3px; color: rgb(235, 226, 205); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; }
+.shell-nav-button.nav-capital { width: 94px; max-width: 94px; background-color: rgb(96, 82, 53); }
+.shell-nav-button.nav-army { width: 94px; max-width: 94px; background-color: rgb(91, 59, 61); }
+.shell-nav-button.nav-expedition { width: 98px; max-width: 98px; background-color: rgb(55, 82, 70); font-size: 11px; }
+.shell-nav-button.nav-button-active { color: rgb(255, 242, 207); -unity-font-style: bold; border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; }
+.shell-resource-bar { flex-grow: 1; flex-shrink: 1; min-width: 0px; height: 100%; flex-direction: row; align-items: center; justify-content: flex-end; padding-left: 12px; padding-right: 10px; }
+.shell-resource-strip { flex-grow: 0; flex-shrink: 0; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: flex-end; }
+.shell-resource-box { width: 100px; min-width: 100px; height: 54px; min-height: 54px; max-height: 54px; flex-grow: 0; flex-shrink: 0; margin-right: 6px; margin-bottom: 0px; padding-left: 9px; padding-right: 9px; padding-top: 7px; padding-bottom: 6px; justify-content: center; background-color: rgb(45, 49, 57); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(59, 64, 73); border-right-color: rgb(59, 64, 73); border-top-color: rgb(59, 64, 73); border-bottom-color: rgb(59, 64, 73); border-radius: 4px; }
+.shell-resource-box.food-box { width: 108px; min-width: 108px; position: relative; overflow: visible; }
+.shell-mood-box { width: 142px; min-width: 142px; }
+.shell-resource-box .resource-value { color: rgb(224, 219, 207); font-size: 12px; }
+.shell-resource-box .resource-income { margin-top: 2px; color: rgb(126, 172, 125); font-size: 9px; }
+.shell-resource-box .food-expense-popup { left: 0px; top: auto; bottom: 58px; min-width: 160px; }
+.shell-end-day-button { position: relative; right: 0px; bottom: 0px; width: 92px; min-width: 92px; max-width: 92px; height: 54px; margin-left: 8px; background-color: rgb(188, 136, 39); color: rgb(28, 24, 17); border-radius: 8px; font-size: 15px; -unity-font-style: bold; }
+.shell-debug-host { position: absolute; right: 14px; top: 14px; width: 84px; min-width: 84px; max-width: 84px; height: 38px; min-height: 38px; max-height: 38px; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; background-color: rgba(0, 0, 0, 0); border-left-width: 0px; border-right-width: 0px; border-top-width: 0px; border-bottom-width: 0px; align-items: center; justify-content: flex-end; }
+.incident-notification-stack { right: 30px; bottom: 108px; }
+.quick-expedition-popup { position: absolute; width: 330px; height: 322px; min-height: 322px; max-height: 322px; padding-left: 10px; padding-right: 10px; padding-top: 9px; padding-bottom: 9px; background-color: rgb(29, 33, 39); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(105, 88, 61); border-right-color: rgb(105, 88, 61); border-top-color: rgb(105, 88, 61); border-bottom-color: rgb(105, 88, 61); border-radius: 5px; }

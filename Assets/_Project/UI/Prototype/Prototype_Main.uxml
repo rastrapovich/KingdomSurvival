@@ -132,41 +132,34 @@
                                     <ui:Button name="research-expedition-button" text="ИССЛЕДОВАТЬ" class="research-expedition-button" />
                                     <ui:Button name="return-expedition-button" text="Приказать возвращаться" class="return-expedition-button" />
                                 </ui:VisualElement>
-                                <ui:Label text="НАЙДЕННЫЕ ЛОКАЦИИ" class="section-title" />
-                                <ui:VisualElement name="big-expedition-location-grid" class="big-expedition-location-grid">
-                                    <ui:VisualElement class="location-card">
-                                        <ui:Label text="Затопленные руины" class="location-name" />
-                                        <ui:VisualElement class="location-image-placeholder">
-                                            <ui:Label text="ИЗОБРАЖЕНИЕ ЛОКАЦИИ" class="location-image-placeholder-text" />
-                                        </ui:VisualElement>
-                                        <ui:VisualElement class="location-info-row">
-                                            <ui:Label text="Расстояние: 2 дня" class="location-info" />
-                                            <ui:Label text="Угроза: низкая" class="threat-low" />
-                                        </ui:VisualElement>
-                                        <ui:Button name="send-ruins-button" text="Отправить" class="send-button legacy-send-button" />
+                                <ui:Label text="КАРТА ОКРЕСТНОСТЕЙ" class="section-title world-map-section-title" />
+                                <ui:Label
+                                    name="world-map-hint-label"
+                                    text="Выберите неизведанную область. Маршрут армия пройдёт автоматически."
+                                    class="world-map-hint" />
+
+                                <ui:VisualElement name="world-map" class="world-map">
+                                    <ui:VisualElement class="world-map-land world-map-land-west" />
+                                    <ui:VisualElement class="world-map-land world-map-land-north" />
+                                    <ui:VisualElement class="world-map-land world-map-land-east" />
+                                    <ui:Label text="С&#10;↑" class="world-map-compass" />
+                                    <ui:VisualElement name="world-map-routes" class="world-map-layer world-map-routes" />
+                                    <ui:VisualElement name="world-map-markers" class="world-map-layer world-map-markers" />
+                                    <ui:Button
+                                        name="world-map-capital-button"
+                                        text="СТОЛИЦА"
+                                        tooltip="Во время похода нажмите, чтобы приказать армии возвращаться"
+                                        class="world-map-capital" />
+                                    <ui:VisualElement name="world-map-army-marker" class="world-map-army-marker">
+                                        <ui:Label text="ОТРЯД" class="world-map-army-badge" />
+                                        <ui:Label name="world-map-army-marker-label" text="" class="world-map-army-label" />
                                     </ui:VisualElement>
-                                    <ui:VisualElement class="location-card">
-                                        <ui:Label text="Старая шахта" class="location-name" />
-                                        <ui:VisualElement class="location-image-placeholder">
-                                            <ui:Label text="ИЗОБРАЖЕНИЕ ЛОКАЦИИ" class="location-image-placeholder-text" />
-                                        </ui:VisualElement>
-                                        <ui:VisualElement class="location-info-row">
-                                            <ui:Label text="Расстояние: 3 дня" class="location-info" />
-                                            <ui:Label text="Угроза: средняя" class="threat-medium" />
-                                        </ui:VisualElement>
-                                        <ui:Button name="send-mine-button" text="Отправить" class="send-button legacy-send-button" />
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="location-card">
-                                        <ui:Label text="Чёрный лес" class="location-name" />
-                                        <ui:VisualElement class="location-image-placeholder">
-                                            <ui:Label text="ИЗОБРАЖЕНИЕ ЛОКАЦИИ" class="location-image-placeholder-text" />
-                                        </ui:VisualElement>
-                                        <ui:VisualElement class="location-info-row">
-                                            <ui:Label text="Расстояние: 5 дней" class="location-info" />
-                                            <ui:Label text="Угроза: высокая" class="threat-high" />
-                                        </ui:VisualElement>
-                                        <ui:Button name="send-forest-button" text="Отправить" class="send-button legacy-send-button" />
-                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <ui:VisualElement name="map-selection-card" class="map-selection-card">
+                                    <ui:Label name="map-selection-title" text="ВЫБЕРИТЕ ОБЛАСТЬ НА КАРТЕ" class="map-selection-title" />
+                                    <ui:Label name="map-selection-details" text="Здесь появятся сведения о цели похода." class="map-selection-details" />
+                                    <ui:Button name="map-send-button" text="ОТПРАВИТЬ НА РАЗВЕДКУ" class="send-button map-send-button" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:ScrollView>

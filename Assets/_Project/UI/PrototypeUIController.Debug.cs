@@ -323,14 +323,17 @@ public partial class PrototypeUIController
                 "Состояние: армия в столице\n" +
                 "Активная экспедиция: нет\n" +
                 "Голод экспедиции подряд: " +
-                gameState.ConsecutiveExpeditionSupplyShortageDays;
+                gameState.ConsecutiveExpeditionSupplyShortageDays +
+                BuildDebugWorldLayoutText();
         }
 
         ExpeditionData expedition = gameState.ActiveExpedition;
         LocationData location = gameState.FindLocation(expedition.LocationId);
         CommanderData commander = gameState.FindCommander(expedition.CommanderId);
 
-        string locationName = location != null ? location.Name : "неизвестно";
+        string locationName = location != null
+            ? location.TravelTargetName
+            : "неизвестно";
         string commanderName = commander != null ? commander.Name : "неизвестно";
         string phaseText = gameState.HasPendingExpeditionDecision
             ? "ожидает приказа"
@@ -369,7 +372,22 @@ public partial class PrototypeUIController
             "Состояние: " + phaseText + "\n" +
             "Осталось дней пути: " + expedition.DaysRemaining + "\n" +
             "Голод подряд: " + gameState.ConsecutiveExpeditionSupplyShortageDays + "\n" +
-            "Исследование: " + researchText;
+            "Исследование: " + researchText +
+            BuildDebugWorldLayoutText();
+    }
+
+    private string BuildDebugWorldLayoutText()
+    {
+        string result = "\nSeed карты: " + gameState.WorldSeed;
+
+        foreach (LocationData location in gameState.Locations)
+        {
+            result +=
+                "\n" + location.RegionName + " → " + location.Name +
+                (location.IsDiscovered ? " [открыта]" : " [скрыта]");
+        }
+
+        return result;
     }
 
     private void AdjustDebugArmyGold(int delta)

@@ -53,12 +53,21 @@ public class LocationData
 {
     public string Id;
     public string Name;
+    public string RegionId;
+    public string RegionName;
+    public int MapSlotIndex;
+    public float MapXPercent;
+    public float MapYPercent;
     public int DistanceDays;
     public string Threat;
     public int ExplorationDays;
     public int RewardArmyGold;
     public int RewardArmySupply;
+    public bool IsDiscovered;
     public bool IsExplored;
+
+    public string TravelTargetName =>
+        IsDiscovered ? Name : RegionName;
 
     public LocationData(
         string id,
@@ -76,7 +85,25 @@ public class LocationData
         ExplorationDays = explorationDays;
         RewardArmyGold = rewardArmyGold;
         RewardArmySupply = rewardArmySupply;
+        IsDiscovered = true;
         IsExplored = false;
+    }
+
+    public void AssignToRegion(
+        string regionId,
+        string regionName,
+        int mapSlotIndex,
+        float mapXPercent,
+        float mapYPercent,
+        int distanceDays)
+    {
+        RegionId = regionId;
+        RegionName = regionName;
+        MapSlotIndex = mapSlotIndex;
+        MapXPercent = mapXPercent;
+        MapYPercent = mapYPercent;
+        DistanceDays = distanceDays;
+        IsDiscovered = false;
     }
 }
 
@@ -89,6 +116,7 @@ public class ExpeditionData
     public List<string> FighterIds = new List<string>();
     public CommanderState Phase;
     public int DaysRemaining;
+    public int LegTotalDays;
     public int StartedOnDay;
 
     public bool IsExplorationInProgress;
@@ -103,6 +131,7 @@ public class ExpeditionData
 [Serializable]
 public class GameState
 {
+    public int WorldSeed;
     public int Day;
     public int Gold;
     public int Food;
@@ -255,8 +284,9 @@ public class GameState
         }
     }
 
-    public void CreateNewGame()
+    public void CreateNewGame(int? worldSeed = null)
     {
+        WorldSeed = worldSeed ?? Guid.NewGuid().GetHashCode();
         Day = 1;
         Gold = 120;
         Food = 72;
@@ -286,9 +316,9 @@ public class GameState
             new FighterData("agnessa", "Агнесса", "Разведчик", 1, 2)
         };
 
-        Locations = new List<LocationData>
+        List<LocationData> locationPool = new List<LocationData>
         {
-            // Затопленные руины: короткое исследование с большой наградой снабжением.
+            // Затопленные руины: однодневное исследование с большой наградой снабжением.
             new LocationData(
                 "ruins",
                 "Затопленные руины",
@@ -298,7 +328,7 @@ public class GameState
                 100,
                 200),
 
-            // Старая шахта: длиннее и дороже по снабжению, зато даёт чистое золото.
+            // Старая шахта: двухдневное исследование с наградой чистым золотом.
             new LocationData(
                 "mine",
                 "Старая шахта",
@@ -311,7 +341,49 @@ public class GameState
             new LocationData("forest", "Чёрный лес", 5, "высокая")
         };
 
+        ShuffleLocations(locationPool, new Random(WorldSeed));
+
+        // Три области являются постоянными художественными точками карты.
+        // Конкретные локации распределяются между ними заново для каждой партии.
+        // Координаты и расстояния — временные значения серого прототипа.
+        locationPool[0].AssignToRegion(
+            "west",
+            "Западные земли",
+            0,
+            5f,
+            17f,
+            2);
+        locationPool[1].AssignToRegion(
+            "north",
+            "Северные земли",
+            1,
+            36f,
+            6f,
+            3);
+        locationPool[2].AssignToRegion(
+            "east",
+            "Восточные земли",
+            2,
+            67f,
+            20f,
+            5);
+
+        Locations = locationPool;
+
         ActiveExpedition = null;
+    }
+
+    private static void ShuffleLocations(
+        List<LocationData> locations,
+        Random random)
+    {
+        for (int i = locations.Count - 1; i > 0; i--)
+        {
+            int swapIndex = random.Next(i + 1);
+            LocationData temporary = locations[i];
+            locations[i] = locations[swapIndex];
+            locations[swapIndex] = temporary;
+        }
     }
 
     public CommanderData GetSelectedCommander()
@@ -487,6 +559,7 @@ public class GameState
             LocationId = location.Id,
             Phase = CommanderState.TravellingToLocation,
             DaysRemaining = location.DistanceDays,
+            LegTotalDays = location.DistanceDays,
             StartedOnDay = Day,
             IsExplorationInProgress = false,
             ExplorationDaysRemaining = 0,
@@ -505,10 +578,14 @@ public class GameState
         ActiveExpedition = expedition;
         commander.State = CommanderState.TravellingToLocation;
 
+        string destinationText = location.IsDiscovered
+            ? "локацию «" + location.Name + "»"
+            : "неизведанную область «" + location.RegionName + "»";
+
         resultMessage =
             commander.Name + " и " + expedition.FighterIds.Count +
-            " воинов получили приказ отправиться в локацию «" +
-            location.Name + "». В столице осталось бойцов: " +
+            " воинов получили приказ отправиться в " +
+            destinationText + ". В столице осталось бойцов: " +
             GarrisonFighterCount + ", сила гарнизона: " +
             GarrisonDefensePower + "/" + TotalArmyDefensePower +
             ". До завершения текущего дня приказ можно отменить.";
@@ -539,7 +616,8 @@ public class GameState
         ConsecutiveExpeditionSupplyShortageDays = 0;
 
         resultMessage =
-            "Приказ на отправку в локацию «" + location.Name + "» отменён. " +
+            "Приказ на отправку к цели «" +
+            location.TravelTargetName + "» отменён. " +
             commander.Name + " и выбранные бойцы остаются в столице. " +
             "День не завершён.";
 
@@ -643,6 +721,7 @@ public class GameState
 
         ActiveExpedition.Phase = CommanderState.ReturningToCastle;
         ActiveExpedition.DaysRemaining = returnDays;
+        ActiveExpedition.LegTotalDays = returnDays;
         commander.State = CommanderState.ReturningToCastle;
 
         resultMessage =
@@ -694,6 +773,7 @@ public class GameState
 
         expedition.Phase = CommanderState.ReturningToCastle;
         expedition.DaysRemaining = returnDays;
+        expedition.LegTotalDays = returnDays;
         commander.State = CommanderState.ReturningToCastle;
 
         resultMessage =

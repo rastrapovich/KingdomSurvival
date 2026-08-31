@@ -177,12 +177,13 @@ public static class DayResolver
 
         if (expedition.Phase == CommanderState.TravellingToLocation)
         {
+            string travelTargetName = location.TravelTargetName;
             expedition.DaysRemaining = Math.Max(0, expedition.DaysRemaining - 1);
 
             if (expedition.DaysRemaining > 0)
             {
                 result.Messages.Add(
-                    "Экспедиция движется к локации «" + location.Name +
+                    "Экспедиция движется к цели «" + travelTargetName +
                     "». Осталось дней пути: " + expedition.DaysRemaining + ".");
             }
             else
@@ -191,13 +192,26 @@ public static class DayResolver
                 commander.State = CommanderState.AtLocation;
                 result.HadNotableOccurrence = true;
 
+                bool locationWasHidden = !location.IsDiscovered;
+                location.IsDiscovered = true;
+
                 string arrivalAction = location.ExplorationDays > 0
                     ? " Можно начать исследование или приказать возвращаться."
                     : " Исследование этой локации пока не реализовано.";
 
-                result.Messages.Add(
-                    commander.Name + " прибыл в локацию «" +
-                    location.Name + "»." + arrivalAction);
+                if (locationWasHidden)
+                {
+                    result.Messages.Add(
+                        commander.Name + " достиг области «" +
+                        location.RegionName + "» и обнаружил локацию «" +
+                        location.Name + "»." + arrivalAction);
+                }
+                else
+                {
+                    result.Messages.Add(
+                        commander.Name + " прибыл в локацию «" +
+                        location.Name + "»." + arrivalAction);
+                }
             }
 
             return;

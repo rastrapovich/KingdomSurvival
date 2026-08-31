@@ -113,13 +113,6 @@ public partial class PrototypeUIController
         supplyMinusButton.clicked += OnStableSupplyMinusClicked;
         supplyPlusButton.clicked += OnStableSupplyPlusClicked;
 
-        sendRuinsButton.clicked -= OnSendRuinsClicked;
-        sendMineButton.clicked -= OnSendMineClicked;
-        sendForestButton.clicked -= OnSendForestClicked;
-        sendRuinsButton.clicked += OnStableSendRuinsClicked;
-        sendMineButton.clicked += OnStableSendMineClicked;
-        sendForestButton.clicked += OnStableSendForestClicked;
-
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
         returnExpeditionButton.clicked += OnStableExpeditionActionClicked;
         researchExpeditionButton.clicked -= OnResearchExpeditionClicked;
@@ -209,10 +202,6 @@ public partial class PrototypeUIController
         RefreshStableUiAfterStateChange();
         CheckForDefeat();
     }
-
-    private void OnStableSendRuinsClicked() => TrySendExpeditionFromStableUi("ruins");
-    private void OnStableSendMineClicked() => TrySendExpeditionFromStableUi("mine");
-    private void OnStableSendForestClicked() => TrySendExpeditionFromStableUi("forest");
 
     private void TrySendExpeditionFromStableUi(string locationId)
     {

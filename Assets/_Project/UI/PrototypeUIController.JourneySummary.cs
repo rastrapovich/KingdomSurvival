@@ -392,8 +392,9 @@ public partial class PrototypeUIController
 
         ExpeditionData expedition = gameState.ActiveExpedition;
         LocationData location = gameState.FindLocation(expedition.LocationId);
-        string locationName =
-            location != null ? location.Name : "неизвестная локация";
+        string locationName = location != null
+            ? location.TravelTargetName
+            : "неизвестная локация";
 
         if (gameState.CanCancelExpeditionBeforeDayEnd)
         {

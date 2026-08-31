@@ -475,3 +475,295 @@
     top: 100%;
     margin-top: 2px;
 }
+
+/* ================================================================
+   СХЕМАТИЧЕСКАЯ КАРТА ОКРЕСТНОСТЕЙ
+   ================================================================ */
+
+.world-map-section-title {
+    margin-bottom: 3px;
+}
+
+.world-map-hint {
+    margin-bottom: 8px;
+    color: rgb(163, 158, 143);
+    font-size: 10px;
+    white-space: normal;
+}
+
+.world-map {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    min-height: 350px;
+    margin-bottom: 9px;
+    overflow: hidden;
+    background-color: rgb(38, 40, 39);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(112, 96, 67);
+    border-right-color: rgb(87, 77, 58);
+    border-top-color: rgb(112, 96, 67);
+    border-bottom-color: rgb(72, 65, 52);
+    border-radius: 5px;
+}
+
+.world-map-land {
+    position: absolute;
+    background-color: rgb(48, 51, 46);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(75, 79, 67);
+    border-right-color: rgb(64, 68, 59);
+    border-top-color: rgb(75, 79, 67);
+    border-bottom-color: rgb(64, 68, 59);
+    border-radius: 18px;
+    opacity: 0.72;
+}
+
+.world-map-land-west {
+    left: -4%;
+    top: 10%;
+    width: 42%;
+    height: 44%;
+}
+
+.world-map-land-north {
+    left: 29%;
+    top: -7%;
+    width: 42%;
+    height: 41%;
+}
+
+.world-map-land-east {
+    left: 62%;
+    top: 13%;
+    width: 44%;
+    height: 48%;
+}
+
+.world-map-compass {
+    position: absolute;
+    left: 4%;
+    top: 73%;
+    width: 30px;
+    color: rgb(164, 145, 100);
+    font-size: 11px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.world-map-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.world-map-route-dot {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: rgb(103, 99, 84);
+    border-radius: 3px;
+    opacity: 0.54;
+}
+
+.world-map-route-dot-active {
+    width: 7px;
+    height: 7px;
+    background-color: rgb(226, 187, 99);
+    border-radius: 4px;
+    opacity: 0.96;
+}
+
+.world-map-node {
+    position: absolute;
+    width: 28%;
+    min-height: 58px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    color: rgb(205, 198, 178);
+    background-color: rgb(47, 50, 49);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(110, 107, 94);
+    border-right-color: rgb(85, 83, 74);
+    border-top-color: rgb(110, 107, 94);
+    border-bottom-color: rgb(85, 83, 74);
+    border-radius: 5px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.world-map-node:hover {
+    background-color: rgb(59, 62, 57);
+    border-left-color: rgb(183, 151, 85);
+    border-right-color: rgb(183, 151, 85);
+    border-top-color: rgb(183, 151, 85);
+    border-bottom-color: rgb(183, 151, 85);
+}
+
+.world-map-node-unknown {
+    color: rgb(176, 172, 159);
+    background-color: rgb(43, 46, 46);
+    border-left-color: rgb(91, 96, 95);
+    border-right-color: rgb(76, 80, 80);
+    border-top-color: rgb(91, 96, 95);
+    border-bottom-color: rgb(76, 80, 80);
+}
+
+.world-map-node-known {
+    color: rgb(236, 220, 180);
+    background-color: rgb(58, 55, 45);
+    border-left-color: rgb(151, 124, 70);
+}
+
+.world-map-node-explored {
+    color: rgb(182, 215, 184);
+    background-color: rgb(42, 59, 49);
+    border-left-color: rgb(95, 150, 107);
+    border-right-color: rgb(69, 109, 79);
+    border-top-color: rgb(95, 150, 107);
+    border-bottom-color: rgb(69, 109, 79);
+}
+
+.world-map-node-selected {
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(235, 194, 104);
+    border-right-color: rgb(235, 194, 104);
+    border-top-color: rgb(235, 194, 104);
+    border-bottom-color: rgb(235, 194, 104);
+}
+
+.world-map-node-active {
+    background-color: rgb(72, 58, 38);
+    color: rgb(250, 222, 159);
+}
+
+.world-map-capital {
+    position: absolute;
+    left: 37%;
+    top: 74%;
+    width: 26%;
+    height: 48px;
+    color: rgb(226, 225, 214);
+    background-color: rgb(47, 54, 61);
+    border-left-width: 2px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(150, 158, 164);
+    border-right-color: rgb(96, 105, 113);
+    border-top-color: rgb(96, 105, 113);
+    border-bottom-color: rgb(96, 105, 113);
+    border-radius: 5px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.world-map-capital:hover {
+    background-color: rgb(61, 69, 76);
+}
+
+.world-map-capital-return {
+    color: rgb(245, 218, 175);
+    background-color: rgb(82, 57, 45);
+    border-left-color: rgb(195, 129, 86);
+    border-right-color: rgb(143, 92, 66);
+    border-top-color: rgb(143, 92, 66);
+    border-bottom-color: rgb(143, 92, 66);
+}
+
+.world-map-capital:disabled {
+    opacity: 0.78;
+}
+
+.world-map-army-marker {
+    display: none;
+    position: absolute;
+    width: 74px;
+    min-height: 38px;
+    align-items: center;
+}
+
+.world-map-army-badge {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    color: rgb(42, 34, 22);
+    background-color: rgb(232, 192, 98);
+    border-radius: 3px;
+    font-size: 9px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.world-map-army-label {
+    margin-top: 2px;
+    color: rgb(243, 218, 162);
+    font-size: 8px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.map-selection-card {
+    margin-bottom: 8px;
+    padding-left: 11px;
+    padding-right: 11px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    background-color: rgb(40, 44, 50);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(92, 84, 65);
+    border-right-color: rgb(70, 68, 62);
+    border-top-color: rgb(92, 84, 65);
+    border-bottom-color: rgb(70, 68, 62);
+    border-radius: 5px;
+}
+
+.map-selection-title {
+    margin-bottom: 5px;
+    color: rgb(229, 210, 167);
+    font-size: 13px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.map-selection-details {
+    margin-bottom: 8px;
+    color: rgb(184, 180, 167);
+    font-size: 10px;
+    white-space: normal;
+}
+
+.map-send-button {
+    min-height: 36px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.map-send-button:disabled {
+    opacity: 0.48;
+}

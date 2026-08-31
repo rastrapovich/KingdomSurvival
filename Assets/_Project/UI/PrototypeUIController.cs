@@ -82,9 +82,6 @@ public partial class PrototypeUIController : MonoBehaviour
     private VisualElement fighterDragGhost;
 
     private Label expeditionStatusLabel;
-    private Button sendRuinsButton;
-    private Button sendMineButton;
-    private Button sendForestButton;
     private VisualElement activeExpeditionCard;
     private Label activeExpeditionTitle;
     private Label activeExpeditionDetails;
@@ -199,9 +196,7 @@ public partial class PrototypeUIController : MonoBehaviour
             root.Q<Label>("capital-garrison-empty-label");
 
         expeditionStatusLabel = root.Q<Label>("expedition-status-label");
-        sendRuinsButton = root.Q<Button>("send-ruins-button");
-        sendMineButton = root.Q<Button>("send-mine-button");
-        sendForestButton = root.Q<Button>("send-forest-button");
+        FindWorldMapElements(root);
 
         activeExpeditionCard = root.Q<VisualElement>("active-expedition-card");
         activeExpeditionTitle = root.Q<Label>("active-expedition-title");
@@ -275,9 +270,7 @@ public partial class PrototypeUIController : MonoBehaviour
             capitalGarrisonSummaryLabel != null &&
             capitalGarrisonEmptyLabel != null &&
             expeditionStatusLabel != null &&
-            sendRuinsButton != null &&
-            sendMineButton != null &&
-            sendForestButton != null &&
+            WorldMapElementsExist() &&
             activeExpeditionCard != null &&
             activeExpeditionTitle != null &&
             activeExpeditionDetails != null &&
@@ -328,6 +321,7 @@ public partial class PrototypeUIController : MonoBehaviour
         unreadIncidents.Clear();
         reportHistory.Clear();
         selectedFighterIds.Clear();
+        ResetWorldMapSelection();
         reportHistoryLabel.text = string.Empty;
 
         ConfigureCommanderDropdown();
@@ -335,7 +329,8 @@ public partial class PrototypeUIController : MonoBehaviour
         HideGameOver();
 
         AddReport(
-            "Прототип запущен. Откройте нужный экран круглой кнопкой слева сверху.");
+            "Прототип запущен. На экране «Армия» перенесите бойцов в " +
+            "гарнизон командира, затем выберите цель на карте экспедиций.");
 
         CloseMainScreen();
         RefreshInterface();
@@ -445,9 +440,7 @@ public partial class PrototypeUIController : MonoBehaviour
         supplyMinusButton.clicked += OnSupplyMinusClicked;
         supplyPlusButton.clicked += OnSupplyPlusClicked;
 
-        sendRuinsButton.clicked += OnSendRuinsClicked;
-        sendMineButton.clicked += OnSendMineClicked;
-        sendForestButton.clicked += OnSendForestClicked;
+        RegisterWorldMapCallbacks();
         researchExpeditionButton.clicked += OnResearchExpeditionClicked;
         returnExpeditionButton.clicked += OnExpeditionActionClicked;
         incidentUnderstoodButton.clicked += OnIncidentUnderstoodClicked;
@@ -483,9 +476,7 @@ public partial class PrototypeUIController : MonoBehaviour
         supplyMinusButton.clicked -= OnSupplyMinusClicked;
         supplyPlusButton.clicked -= OnSupplyPlusClicked;
 
-        sendRuinsButton.clicked -= OnSendRuinsClicked;
-        sendMineButton.clicked -= OnSendMineClicked;
-        sendForestButton.clicked -= OnSendForestClicked;
+        UnregisterWorldMapCallbacks();
         researchExpeditionButton.clicked -= OnResearchExpeditionClicked;
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
         incidentUnderstoodButton.clicked -= OnIncidentUnderstoodClicked;
@@ -608,12 +599,11 @@ public partial class PrototypeUIController : MonoBehaviour
         StartNewGame();
     }
 
-    private void OnSendRuinsClicked() => TrySendExpedition("ruins");
-    private void OnSendMineClicked() => TrySendExpedition("mine");
-    private void OnSendForestClicked() => TrySendExpedition("forest");
-
     private void TrySendExpedition(string locationId)
     {
+        if (isGameOver)
+            return;
+
         string resultMessage;
         List<string> selectedIds = GetSelectedFighterIdsInArmyOrder();
         gameState.TryStartExpedition(locationId, selectedIds, out resultMessage);
@@ -1131,12 +1121,7 @@ public partial class PrototypeUIController : MonoBehaviour
         bool hasSelectedFighters = selectedFighterIds.Count > 0;
 
         commanderDropdown.SetEnabled(controlsAvailable && !expeditionActive);
-        sendRuinsButton.SetEnabled(
-            controlsAvailable && !expeditionActive && hasSelectedFighters);
-        sendMineButton.SetEnabled(
-            controlsAvailable && !expeditionActive && hasSelectedFighters);
-        sendForestButton.SetEnabled(
-            controlsAvailable && !expeditionActive && hasSelectedFighters);
+        RefreshWorldMapPanel();
 
         activeExpeditionCard.style.display =
             expeditionActive ? DisplayStyle.Flex : DisplayStyle.None;
@@ -1145,8 +1130,8 @@ public partial class PrototypeUIController : MonoBehaviour
         {
             expeditionStatusLabel.text = hasSelectedFighters
                 ? "Подготовка экспедиции: выбрано бойцов — " +
-                  selectedFighterIds.Count + ". Выберите локацию."
-                : "Активная экспедиция: нет. Сначала выберите бойцов слева.";
+                  selectedFighterIds.Count + ". Выберите цель на карте."
+                : "Активная экспедиция: нет. Сначала выберите бойцов на экране «Армия».";
             researchExpeditionButton.style.display = DisplayStyle.None;
             return;
         }
@@ -1165,9 +1150,10 @@ public partial class PrototypeUIController : MonoBehaviour
 
         expeditionStatusLabel.text =
             "Активная экспедиция: " + commander.Name + " · " +
-            location.Name + " · " + stateText;
+            location.TravelTargetName + " · " + stateText;
 
-        activeExpeditionTitle.text = "ЭКСПЕДИЦИЯ: " + location.Name.ToUpper();
+        activeExpeditionTitle.text =
+            "ЭКСПЕДИЦИЯ: " + location.TravelTargetName.ToUpper();
 
         string currentTask;
         string daysInformation;
@@ -1221,7 +1207,7 @@ public partial class PrototypeUIController : MonoBehaviour
             " " + GetFighterWord(gameState.GarrisonFighterCount) +
             " · оборона " + gameState.GarrisonDefensePower +
             "/" + gameState.TotalArmyDefensePower + "\n" +
-            "Цель: " + location.Name + "\n" +
+            "Цель: " + location.TravelTargetName + "\n" +
             "Состояние: " + stateText + "\n" +
             "Текущая задача: " + currentTask + "\n" +
             daysInformation;

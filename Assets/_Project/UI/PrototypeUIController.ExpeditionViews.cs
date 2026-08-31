@@ -11,6 +11,12 @@ public partial class PrototypeUIController
         new Dictionary<string, Button>();
     private readonly Dictionary<string, Label> quickExpeditionImageLabels =
         new Dictionary<string, Label>();
+    private readonly Dictionary<string, Label> quickExpeditionNameLabels =
+        new Dictionary<string, Label>();
+    private readonly Dictionary<string, Label> quickExpeditionDistanceLabels =
+        new Dictionary<string, Label>();
+    private readonly Dictionary<string, Label> quickExpeditionThreatLabels =
+        new Dictionary<string, Label>();
     private readonly Dictionary<string, VisualElement> bigExpeditionImages =
         new Dictionary<string, VisualElement>();
     private readonly Dictionary<string, Label> bigExpeditionImageLabels =
@@ -91,12 +97,13 @@ public partial class PrototypeUIController
         SetExpeditionBorder(card, 1, ExpeditionRgb(65, 72, 82));
         SetExpeditionRadius(card, 4);
 
-        Label name = new Label(location.Name);
+        Label name = new Label(location.TravelTargetName);
         name.style.height = 16;
         name.style.fontSize = 10;
         name.style.unityFontStyleAndWeight = FontStyle.Bold;
         name.style.color = ExpeditionRgb(215, 210, 197);
         card.Add(name);
+        quickExpeditionNameLabels[location.Id] = name;
 
         VisualElement row = new VisualElement();
         row.style.flexGrow = 1;
@@ -142,12 +149,19 @@ public partial class PrototypeUIController
         distance.style.fontSize = 9;
         distance.style.color = ExpeditionRgb(180, 178, 169);
         info.Add(distance);
+        quickExpeditionDistanceLabels[location.Id] = distance;
 
-        Label threat = new Label("Угроза: " + location.Threat);
+        Label threat = new Label(
+            location.IsDiscovered
+                ? "Угроза: " + location.Threat
+                : "Угроза: неизвестна");
         threat.style.height = 16;
         threat.style.fontSize = 9;
-        threat.style.color = ThreatColor(location.Threat);
+        threat.style.color = location.IsDiscovered
+            ? ThreatColor(location.Threat)
+            : ExpeditionRgb(129, 136, 146);
         info.Add(threat);
+        quickExpeditionThreatLabels[location.Id] = threat;
         row.Add(info);
         return card;
     }
@@ -322,7 +336,9 @@ public partial class PrototypeUIController
 
         ExpeditionData expedition = gameState.ActiveExpedition;
         LocationData location = gameState.FindLocation(expedition.LocationId);
-        string locationName = location != null ? location.Name : "—";
+        string locationName = location != null
+            ? location.TravelTargetName
+            : "—";
 
         if (gameState.CanCancelExpeditionBeforeDayEnd)
         {
@@ -367,7 +383,9 @@ public partial class PrototypeUIController
         {
             LocationData location =
                 gameState.FindLocation(gameState.ActiveExpedition.LocationId);
-            string locationName = location != null ? location.Name : "неизвестно";
+            string locationName = location != null
+                ? location.TravelTargetName
+                : "неизвестно";
             quickExpeditionOrderLabel.text = gameState.CanCancelExpeditionBeforeDayEnd
                 ? "ПРИКАЗ НА СЕГОДНЯ: " + locationName
                 : "ЭКСПЕДИЦИЯ: " + GetShortExpeditionState() + " → " + locationName;
@@ -377,9 +395,36 @@ public partial class PrototypeUIController
         {
             Button button;
             Label label;
+            Label name;
+            Label distance;
+            Label threat;
+
+            if (quickExpeditionNameLabels.TryGetValue(location.Id, out name))
+                name.text = location.TravelTargetName;
+
+            if (quickExpeditionDistanceLabels.TryGetValue(
+                    location.Id,
+                    out distance))
+            {
+                distance.text = location.DistanceDays + " " +
+                    GetDayWord(location.DistanceDays);
+            }
+
+            if (quickExpeditionThreatLabels.TryGetValue(
+                    location.Id,
+                    out threat))
+            {
+                threat.text = location.IsDiscovered
+                    ? "Угроза: " + location.Threat
+                    : "Угроза: неизвестна";
+                threat.style.color = location.IsDiscovered
+                    ? ThreatColor(location.Threat)
+                    : ExpeditionRgb(129, 136, 146);
+            }
+
             if (quickExpeditionImageButtons.TryGetValue(location.Id, out button) &&
                 quickExpeditionImageLabels.TryGetValue(location.Id, out label))
-                ApplyExpeditionImageState(location.Id, button, label);
+                ApplyExpeditionImageState(location, button, label);
         }
     }
 
@@ -391,15 +436,16 @@ public partial class PrototypeUIController
             Label label;
             if (bigExpeditionImages.TryGetValue(location.Id, out image) &&
                 bigExpeditionImageLabels.TryGetValue(location.Id, out label))
-                ApplyExpeditionImageState(location.Id, image, label);
+                ApplyExpeditionImageState(location, image, label);
         }
     }
 
     private void ApplyExpeditionImageState(
-        string locationId,
+        LocationData location,
         VisualElement image,
         Label label)
     {
+        string locationId = location.Id;
         bool hasExpedition = gameState.HasActiveExpedition;
         bool isTarget = hasExpedition &&
             gameState.ActiveExpedition.LocationId == locationId;
@@ -410,7 +456,9 @@ public partial class PrototypeUIController
             image.SetEnabled(true);
             image.style.backgroundColor = ExpeditionRgb(28, 32, 38);
             SetExpeditionBorder(image, 1, ExpeditionRgb(73, 81, 91));
-            label.text = "ИЗОБРАЖЕНИЕ ЛОКАЦИИ\nНАЖАТЬ: ОТПРАВИТЬ";
+            label.text = location.IsDiscovered
+                ? "ИЗОБРАЖЕНИЕ ЛОКАЦИИ\nНАЖАТЬ: ОТПРАВИТЬ"
+                : "НЕИЗВЕДАННАЯ ОБЛАСТЬ\nНАЖАТЬ: ОТПРАВИТЬ";
             label.style.color = ExpeditionRgb(134, 141, 151);
             return;
         }

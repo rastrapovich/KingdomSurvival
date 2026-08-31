@@ -399,6 +399,8 @@ public static class ExpeditionDecisionSystem
         string optionId,
         out string resultMessage)
     {
+        resultMessage = "Не удалось выполнить приказ по обнаруженной локации.";
+
         ExpeditionData expedition = state.ActiveExpedition;
         LocationData location =
             state.FindLocation(expedition.LocationId);

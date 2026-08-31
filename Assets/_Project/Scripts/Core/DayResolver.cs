@@ -168,7 +168,7 @@ public static class DayResolver
         CommanderData commander = state.FindCommander(expedition.CommanderId);
         LocationData location = state.FindLocation(expedition.LocationId);
 
-        if (commander == null || location == null)
+        if (commander == null)
         {
             result.Messages.Add("Ошибка данных активной экспедиции.");
             result.HadNotableOccurrence = true;
@@ -189,8 +189,10 @@ public static class DayResolver
 
         if (expedition.Phase == CommanderState.TravellingToLocation)
         {
-            string travelTargetName = location.TravelTargetName;
-            expedition.DaysRemaining = Math.Max(0, expedition.DaysRemaining - 1);
+            string travelTargetName = location != null
+                ? location.TravelTargetName
+                : "точка разведки";
+            AdvanceExpeditionRoute(expedition);
 
             if (expedition.DaysRemaining > 0)
             {
@@ -204,22 +206,35 @@ public static class DayResolver
                 commander.State = CommanderState.AtLocation;
                 result.HadNotableOccurrence = true;
 
-                bool locationWasHidden = !location.IsDiscovered;
-                location.IsDiscovered = true;
-
-                string arrivalAction = location.ExplorationDays > 0
-                    ? " Можно начать исследование или приказать возвращаться."
-                    : " Исследование этой локации пока не реализовано.";
-
-                if (locationWasHidden)
+                if (expedition.IsScoutingTarget)
                 {
-                    result.Messages.Add(
-                        commander.Name + " достиг области «" +
-                        location.RegionName + "» и обнаружил локацию «" +
-                        location.Name + "»." + arrivalAction);
+                    location = state.RevealLocationNear(
+                        expedition.CurrentMapXPercent,
+                        expedition.CurrentMapYPercent);
+                    expedition.LocationId = location != null ? location.Id : string.Empty;
+                    expedition.IsScoutingTarget = false;
+
+                    if (location != null)
+                    {
+                        result.Messages.Add(
+                            commander.Name + " разведал выбранный сектор и обнаружил " +
+                            "локацию «" + location.Name + "». Можно начать исследование " +
+                            "или приказать возвращаться.");
+                    }
+                    else
+                    {
+                        result.Messages.Add(
+                            commander.Name + " разведал выбранный сектор, но новых " +
+                            "локаций больше не обнаружено. Можно приказать возвращаться.");
+                    }
                 }
                 else
                 {
+                    location.IsVisibleOnMap = true;
+                    location.IsDiscovered = true;
+                    string arrivalAction = location.ExplorationDays > 0
+                        ? " Можно начать исследование или приказать возвращаться."
+                        : " Исследование этой локации пока не реализовано.";
                     result.Messages.Add(
                         commander.Name + " прибыл в локацию «" +
                         location.Name + "»." + arrivalAction);
@@ -231,13 +246,14 @@ public static class DayResolver
 
         if (expedition.Phase == CommanderState.AtLocation)
         {
-            ResolveLocationResearch(state, expedition, location, result);
+            if (location != null)
+                ResolveLocationResearch(state, expedition, location, result);
             return;
         }
 
         if (expedition.Phase == CommanderState.ReturningToCastle)
         {
-            expedition.DaysRemaining = Math.Max(0, expedition.DaysRemaining - 1);
+            AdvanceExpeditionRoute(expedition);
 
             if (expedition.DaysRemaining > 0)
             {
@@ -270,6 +286,11 @@ public static class DayResolver
                 };
             }
         }
+    }
+
+    private static void AdvanceExpeditionRoute(ExpeditionData expedition)
+    {
+        WorldMapNavigation.AdvanceRoute(expedition, 1);
     }
 
     private static void ResolveLocationResearch(

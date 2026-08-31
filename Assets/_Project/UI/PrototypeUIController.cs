@@ -1150,7 +1150,10 @@ public partial class PrototypeUIController : MonoBehaviour
         LocationData location = gameState.FindLocation(expedition.LocationId);
         CommanderData commander = gameState.FindCommander(expedition.CommanderId);
         bool exploring = expedition.IsExplorationInProgress;
-        bool researchImplemented = location.ExplorationDays > 0;
+        bool researchImplemented = location != null && location.ExplorationDays > 0;
+        string targetName = location != null
+            ? location.TravelTargetName
+            : expedition.IsScoutingTarget ? "точка разведки" : "выбранный сектор";
 
         string stateText = awaitingDecision
             ? "ожидает приказа"
@@ -1160,10 +1163,10 @@ public partial class PrototypeUIController : MonoBehaviour
 
         expeditionStatusLabel.text =
             "Активная экспедиция: " + commander.Name + " · " +
-            location.TravelTargetName + " · " + stateText;
+            targetName + " · " + stateText;
 
         activeExpeditionTitle.text =
-            "ЭКСПЕДИЦИЯ: " + location.TravelTargetName.ToUpper();
+            "ЭКСПЕДИЦИЯ: " + targetName.ToUpper();
 
         string currentTask;
         string daysInformation;
@@ -1189,7 +1192,7 @@ public partial class PrototypeUIController : MonoBehaviour
             daysInformation =
                 "Осталось дней исследования: " + expedition.ExplorationDaysRemaining;
         }
-        else if (location.IsExplored)
+        else if (location != null && location.IsExplored)
         {
             currentTask = "Локация исследована";
             daysInformation =
@@ -1202,11 +1205,16 @@ public partial class PrototypeUIController : MonoBehaviour
                 "Исследование займёт: " + location.ExplorationDays + " " +
                 GetDayWord(location.ExplorationDays);
         }
-        else
+        else if (location != null)
         {
             currentTask = "Исследование этой локации пока не реализовано";
             daysInformation =
                 "Расстояние до столицы: " + location.DistanceDays + " дн.";
+        }
+        else
+        {
+            currentTask = "Разведка сектора завершена";
+            daysInformation = "Можно приказать возвращаться";
         }
 
         activeExpeditionDetails.text =
@@ -1217,7 +1225,7 @@ public partial class PrototypeUIController : MonoBehaviour
             " " + GetFighterWord(gameState.GarrisonFighterCount) +
             " · оборона " + gameState.GarrisonDefensePower +
             "/" + gameState.TotalArmyDefensePower + "\n" +
-            "Цель: " + location.TravelTargetName + "\n" +
+            "Цель: " + targetName + "\n" +
             "Состояние: " + stateText + "\n" +
             "Текущая задача: " + currentTask + "\n" +
             daysInformation;

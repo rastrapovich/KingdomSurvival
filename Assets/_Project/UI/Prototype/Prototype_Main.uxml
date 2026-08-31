@@ -143,6 +143,7 @@
                                     <ui:VisualElement class="world-map-land world-map-land-north" />
                                     <ui:VisualElement class="world-map-land world-map-land-east" />
                                     <ui:Label text="С&#10;↑" class="world-map-compass" />
+                                    <ui:VisualElement name="world-map-terrain" class="world-map-layer world-map-terrain" />
                                     <ui:VisualElement name="world-map-routes" class="world-map-layer world-map-routes" />
                                     <ui:VisualElement name="world-map-markers" class="world-map-layer world-map-markers" />
                                     <ui:Button

@@ -1,76 +1,64 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
-    private const float WorldMapCapitalXPercent = 50f;
-    private const float WorldMapCapitalYPercent = 81f;
-    private const float WorldMapNodeCenterXOffsetPercent = 14f;
-    private const float WorldMapNodeCenterYOffsetPercent = 9f;
-    private const int WorldMapRouteDotCount = 7;
-
     private VisualElement worldMap;
+    private VisualElement worldMapTerrain;
     private VisualElement worldMapRoutes;
     private VisualElement worldMapMarkers;
     private Button worldMapCapitalButton;
     private VisualElement worldMapArmyMarker;
     private Label worldMapArmyMarkerLabel;
     private Label worldMapHintLabel;
-
     private VisualElement mapSelectionCard;
     private Label mapSelectionTitle;
     private Label mapSelectionDetails;
     private Button mapSendButton;
-
     private string selectedMapLocationId;
+    private bool hasSelectedMapPoint;
+    private float selectedMapXPercent;
+    private float selectedMapYPercent;
+    private List<MapPointData> selectedMapRoute = new List<MapPointData>();
 
     private void FindWorldMapElements(VisualElement root)
     {
         worldMap = root.Q<VisualElement>("world-map");
+        worldMapTerrain = root.Q<VisualElement>("world-map-terrain");
         worldMapRoutes = root.Q<VisualElement>("world-map-routes");
         worldMapMarkers = root.Q<VisualElement>("world-map-markers");
         worldMapCapitalButton = root.Q<Button>("world-map-capital-button");
         worldMapArmyMarker = root.Q<VisualElement>("world-map-army-marker");
-        worldMapArmyMarkerLabel =
-            root.Q<Label>("world-map-army-marker-label");
+        worldMapArmyMarkerLabel = root.Q<Label>("world-map-army-marker-label");
         worldMapHintLabel = root.Q<Label>("world-map-hint-label");
-
         mapSelectionCard = root.Q<VisualElement>("map-selection-card");
         mapSelectionTitle = root.Q<Label>("map-selection-title");
         mapSelectionDetails = root.Q<Label>("map-selection-details");
         mapSendButton = root.Q<Button>("map-send-button");
-
-        if (worldMapRoutes != null)
-            worldMapRoutes.pickingMode = PickingMode.Ignore;
-
-        if (worldMapArmyMarker != null)
-            worldMapArmyMarker.pickingMode = PickingMode.Ignore;
+        if (worldMapTerrain != null) worldMapTerrain.pickingMode = PickingMode.Ignore;
+        if (worldMapRoutes != null) worldMapRoutes.pickingMode = PickingMode.Ignore;
+        if (worldMapArmyMarker != null) worldMapArmyMarker.pickingMode = PickingMode.Ignore;
     }
 
-    private bool WorldMapElementsExist()
-    {
-        return
-            worldMap != null &&
-            worldMapRoutes != null &&
-            worldMapMarkers != null &&
-            worldMapCapitalButton != null &&
-            worldMapArmyMarker != null &&
-            worldMapArmyMarkerLabel != null &&
-            worldMapHintLabel != null &&
-            mapSelectionCard != null &&
-            mapSelectionTitle != null &&
-            mapSelectionDetails != null &&
-            mapSendButton != null;
-    }
+    private bool WorldMapElementsExist() =>
+        worldMap != null && worldMapTerrain != null && worldMapRoutes != null &&
+        worldMapMarkers != null && worldMapCapitalButton != null &&
+        worldMapArmyMarker != null && worldMapArmyMarkerLabel != null &&
+        worldMapHintLabel != null && mapSelectionCard != null &&
+        mapSelectionTitle != null && mapSelectionDetails != null && mapSendButton != null;
 
     private void RegisterWorldMapCallbacks()
     {
+        worldMap.RegisterCallback<PointerDownEvent>(OnWorldMapPointerDown);
         worldMapCapitalButton.clicked += OnWorldMapCapitalClicked;
         mapSendButton.clicked += OnWorldMapSendClicked;
     }
 
     private void UnregisterWorldMapCallbacks()
     {
+        worldMap.UnregisterCallback<PointerDownEvent>(OnWorldMapPointerDown);
         worldMapCapitalButton.clicked -= OnWorldMapCapitalClicked;
         mapSendButton.clicked -= OnWorldMapSendClicked;
     }
@@ -78,143 +66,158 @@ public partial class PrototypeUIController
     private void ResetWorldMapSelection()
     {
         selectedMapLocationId = null;
+        hasSelectedMapPoint = false;
+        selectedMapRoute.Clear();
     }
 
-    private void OnWorldMapSendClicked()
+    private void OnWorldMapPointerDown(PointerDownEvent evt)
     {
-        if (string.IsNullOrEmpty(selectedMapLocationId))
+        if (evt.button != 0 || isGameOver || gameState.HasActiveExpedition)
             return;
-
-        TrySendExpeditionFromStableUi(selectedMapLocationId);
+        VisualElement clicked = evt.target as VisualElement;
+        if (clicked != worldMap && clicked != worldMapTerrain &&
+            clicked != worldMapRoutes && clicked != worldMapMarkers)
+            return;
+        Vector2 local = worldMap.WorldToLocal(evt.position);
+        float width = Math.Max(1f, worldMap.resolvedStyle.width);
+        float height = Math.Max(1f, worldMap.resolvedStyle.height);
+        SelectWorldMapPoint(
+            WorldMapNavigation.ClampMapX(local.x / width * 100f),
+            WorldMapNavigation.ClampMapY(local.y / height * 100f));
+        evt.StopPropagation();
     }
 
-    private void OnWorldMapCapitalClicked()
+    private void SelectWorldMapPoint(float xPercent, float yPercent)
     {
-        if (!gameState.HasActiveExpedition)
-            return;
-
-        OnStableExpeditionActionClicked();
+        selectedMapLocationId = null;
+        hasSelectedMapPoint = true;
+        selectedMapXPercent = xPercent;
+        selectedMapYPercent = yPercent;
+        selectedMapRoute = WorldMapNavigation.FindPath(
+            WorldMapNavigation.CapitalXPercent, WorldMapNavigation.CapitalYPercent,
+            xPercent, yPercent);
+        if (selectedMapRoute.Count > 0)
+        {
+            MapPointData snappedTarget = selectedMapRoute[selectedMapRoute.Count - 1];
+            selectedMapXPercent = snappedTarget.XPercent;
+            selectedMapYPercent = snappedTarget.YPercent;
+        }
+        RefreshWorldMapPanel();
     }
 
     private void SelectWorldMapLocation(string locationId)
     {
-        if (gameState.FindLocation(locationId) == null)
-            return;
-
-        selectedMapLocationId = locationId;
+        LocationData location = gameState.FindLocation(locationId);
+        if (location == null || !location.IsVisibleOnMap) return;
+        selectedMapLocationId = location.Id;
+        hasSelectedMapPoint = true;
+        selectedMapXPercent = location.MapXPercent;
+        selectedMapYPercent = location.MapYPercent;
+        selectedMapRoute = WorldMapNavigation.FindPath(
+            WorldMapNavigation.CapitalXPercent, WorldMapNavigation.CapitalYPercent,
+            selectedMapXPercent, selectedMapYPercent);
         RefreshWorldMapPanel();
+    }
+
+    private void OnWorldMapSendClicked()
+    {
+        if (!hasSelectedMapPoint) return;
+        string resultMessage;
+        bool started = gameState.TryStartExpeditionToMapPoint(
+            selectedMapXPercent, selectedMapYPercent, selectedMapLocationId,
+            string.IsNullOrEmpty(selectedMapLocationId),
+            new List<string>(selectedFighterIds), out resultMessage);
+        AddReport(resultMessage);
+        if (started)
+        {
+            CommanderData commander = gameState.FindCommander(
+                gameState.ActiveExpedition.CommanderId);
+            if (commander != null) commander.State = CommanderState.InCastle;
+        }
+        RefreshStableUiAfterStateChange();
+    }
+
+    private void OnWorldMapCapitalClicked()
+    {
+        if (gameState.HasActiveExpedition) OnStableExpeditionActionClicked();
     }
 
     private void RefreshWorldMapPanel()
     {
-        if (gameState == null || !WorldMapElementsExist())
-            return;
-
-        if (gameState.HasActiveExpedition &&
-            string.IsNullOrEmpty(selectedMapLocationId))
-        {
-            selectedMapLocationId = gameState.ActiveExpedition.LocationId;
-        }
-
-        if (!string.IsNullOrEmpty(selectedMapLocationId) &&
-            gameState.FindLocation(selectedMapLocationId) == null)
-        {
-            selectedMapLocationId = null;
-        }
-
+        if (gameState == null || !WorldMapElementsExist()) return;
+        worldMapTerrain.Clear();
         worldMapRoutes.Clear();
         worldMapMarkers.Clear();
-
-        string activeLocationId = gameState.HasActiveExpedition
-            ? gameState.ActiveExpedition.LocationId
-            : null;
-
+        DrawBlockedTerrain();
         foreach (LocationData location in gameState.Locations)
-        {
-            bool isActiveTarget = location.Id == activeLocationId;
-            CreateWorldMapRoute(location, isActiveTarget);
-            CreateWorldMapNode(location, isActiveTarget);
-        }
-
+            if (location.IsVisibleOnMap) CreateWorldMapNode(location);
+        if (gameState.HasActiveExpedition)
+            DrawRoute(gameState.ActiveExpedition.Route, "world-map-route-dot-active");
+        else if (hasSelectedMapPoint)
+            DrawRoute(selectedMapRoute, "world-map-route-dot-preview");
+        if (hasSelectedMapPoint && !gameState.HasActiveExpedition) CreateDestinationMarker();
         RefreshWorldMapHint();
         RefreshWorldMapCapital();
         RefreshWorldMapArmyMarker();
         RefreshWorldMapSelectionCard();
     }
 
-    private void CreateWorldMapRoute(
-        LocationData location,
-        bool isActiveTarget)
+    private void DrawBlockedTerrain()
     {
-        float targetX =
-            location.MapXPercent + WorldMapNodeCenterXOffsetPercent;
-        float targetY =
-            location.MapYPercent + WorldMapNodeCenterYOffsetPercent;
-
-        for (int i = 1; i <= WorldMapRouteDotCount; i++)
+        for (int y = 0; y < WorldMapNavigation.GridHeight; y++)
+        for (int x = 0; x < WorldMapNavigation.GridWidth; x++)
         {
-            float progress = i / (float)(WorldMapRouteDotCount + 1);
+            float px = x * 100f / (WorldMapNavigation.GridWidth - 1);
+            float py = y * 100f / (WorldMapNavigation.GridHeight - 1);
+            if (!WorldMapNavigation.IsBlockedPercent(px, py)) continue;
+            VisualElement cell = new VisualElement();
+            cell.AddToClassList("world-map-blocked-cell");
+            cell.style.left = new Length(px, LengthUnit.Percent);
+            cell.style.top = new Length(py, LengthUnit.Percent);
+            worldMapTerrain.Add(cell);
+        }
+    }
+
+    private void DrawRoute(List<MapPointData> route, string extraClass)
+    {
+        if (route == null) return;
+        for (int i = 1; i < route.Count; i++)
+        {
             VisualElement dot = new VisualElement();
             dot.AddToClassList("world-map-route-dot");
-
-            if (isActiveTarget)
-                dot.AddToClassList("world-map-route-dot-active");
-
-            dot.style.left = new Length(
-                Mathf.Lerp(WorldMapCapitalXPercent, targetX, progress),
-                LengthUnit.Percent);
-            dot.style.top = new Length(
-                Mathf.Lerp(WorldMapCapitalYPercent, targetY, progress),
-                LengthUnit.Percent);
+            dot.AddToClassList(extraClass);
+            dot.style.left = new Length(route[i].XPercent, LengthUnit.Percent);
+            dot.style.top = new Length(route[i].YPercent, LengthUnit.Percent);
             worldMapRoutes.Add(dot);
         }
     }
 
-    private void CreateWorldMapNode(
-        LocationData location,
-        bool isActiveTarget)
+    private void CreateWorldMapNode(LocationData location)
     {
-        string locationId = location.Id;
-        Button node = new Button(() => SelectWorldMapLocation(locationId));
-        node.name = "world-map-node-" + location.RegionId;
+        string id = location.Id;
+        Button node = new Button(() => SelectWorldMapLocation(id));
+        node.name = "world-map-node-" + id;
+        node.text = location.IsExplored ? "✓" : "●";
+        node.tooltip = location.Name + "\n" + location.RegionName + "\nУгроза: " + location.Threat;
         node.AddToClassList("world-map-node");
-        node.style.left = new Length(
-            location.MapXPercent,
-            LengthUnit.Percent);
-        node.style.top = new Length(
-            location.MapYPercent,
-            LengthUnit.Percent);
-
-        if (location.IsDiscovered)
-        {
-            node.text =
-                location.Name.ToUpper() + "\n" +
-                location.RegionName + " · " + location.DistanceDays + " дн.";
-            node.tooltip =
-                location.RegionName + ". Угроза: " + location.Threat + ".";
-            node.AddToClassList("world-map-node-known");
-
-            if (location.IsExplored)
-                node.AddToClassList("world-map-node-explored");
-        }
-        else
-        {
-            node.text =
-                "?\n" + location.RegionName.ToUpper() + "\n" +
-                location.DistanceDays + " дн. пути";
-            node.tooltip =
-                "Неизведанная область. Локация откроется после прибытия.";
-            node.AddToClassList("world-map-node-unknown");
-        }
-
-        if (location.Id == selectedMapLocationId)
-            node.AddToClassList("world-map-node-selected");
-
-        if (isActiveTarget)
+        node.AddToClassList("world-map-node-known");
+        node.style.left = new Length(location.MapXPercent, LengthUnit.Percent);
+        node.style.top = new Length(location.MapYPercent, LengthUnit.Percent);
+        if (location.IsExplored) node.AddToClassList("world-map-node-explored");
+        if (location.Id == selectedMapLocationId) node.AddToClassList("world-map-node-selected");
+        if (gameState.HasActiveExpedition && location.Id == gameState.ActiveExpedition.LocationId)
             node.AddToClassList("world-map-node-active");
-
-        node.SetEnabled(!isGameOver);
+        node.SetEnabled(!isGameOver && !gameState.HasActiveExpedition);
         worldMapMarkers.Add(node);
+    }
+
+    private void CreateDestinationMarker()
+    {
+        VisualElement marker = new VisualElement();
+        marker.AddToClassList("world-map-destination-marker");
+        marker.style.left = new Length(selectedMapXPercent, LengthUnit.Percent);
+        marker.style.top = new Length(selectedMapYPercent, LengthUnit.Percent);
+        worldMapMarkers.Add(marker);
     }
 
     private void RefreshWorldMapHint()
@@ -222,83 +225,29 @@ public partial class PrototypeUIController
         if (!gameState.HasActiveExpedition)
         {
             worldMapHintLabel.text = selectedFighterIds.Count > 0
-                ? "Выберите область или открытую локацию. Путь армия пройдёт автоматически."
+                ? "Нажмите на любую точку для разведки или выберите кружок известной локации. Маршрут рассчитывается автоматически."
                 : "Сначала перенесите бойцов в гарнизон командира на экране «Армия».";
             return;
         }
-
         ExpeditionData expedition = gameState.ActiveExpedition;
-        LocationData location = gameState.FindLocation(expedition.LocationId);
-        string targetName = location != null
-            ? location.TravelTargetName
-            : "неизвестная цель";
-
         if (gameState.HasPendingExpeditionDecision)
-        {
-            worldMapHintLabel.text =
-                "Армия остановилась и ждёт приказа по значимому событию.";
-        }
+            worldMapHintLabel.text = "Армия остановилась и ждёт приказа по значимому событию.";
         else if (expedition.Phase == CommanderState.TravellingToLocation)
-        {
-            worldMapHintLabel.text =
-                "Армия идёт к цели «" + targetName + "». Осталось: " +
-                expedition.DaysRemaining + " " +
-                GetDayWord(expedition.DaysRemaining) + ".";
-        }
+            worldMapHintLabel.text = "Армия движется к цели. Осталось: " + expedition.DaysRemaining + " " + GetDayWord(expedition.DaysRemaining) + ".";
         else if (expedition.Phase == CommanderState.ReturningToCastle)
-        {
-            worldMapHintLabel.text =
-                "Армия возвращается в столицу. Осталось: " +
-                expedition.DaysRemaining + " " +
-                GetDayWord(expedition.DaysRemaining) + ".";
-        }
-        else
-        {
-            worldMapHintLabel.text =
-                "Армия находится в локации «" + targetName + "».";
-        }
+            worldMapHintLabel.text = "Армия возвращается с текущей позиции. Осталось: " + expedition.DaysRemaining + " " + GetDayWord(expedition.DaysRemaining) + ".";
+        else worldMapHintLabel.text = "Армия находится в выбранной точке карты.";
     }
 
     private void RefreshWorldMapCapital()
     {
-        bool expeditionActive = gameState.HasActiveExpedition;
-        bool canOrderReturn = false;
-
-        worldMapCapitalButton.RemoveFromClassList(
-            "world-map-capital-return");
-
-        if (expeditionActive)
-        {
-            ExpeditionData expedition = gameState.ActiveExpedition;
-            bool returning =
-                expedition.Phase == CommanderState.ReturningToCastle;
-            bool exploring = expedition.IsExplorationInProgress;
-
-            canOrderReturn =
-                !isGameOver &&
-                !gameState.HasPendingExpeditionDecision &&
-                !returning &&
-                !exploring;
-
-            worldMapCapitalButton.AddToClassList(
-                "world-map-capital-return");
-            worldMapCapitalButton.text = gameState.CanCancelExpeditionBeforeDayEnd
-                ? "СТОЛИЦА\nОТМЕНИТЬ ПРИКАЗ"
-                : returning
-                    ? "СТОЛИЦА\nАРМИЯ ВОЗВРАЩАЕТСЯ"
-                    : "СТОЛИЦА\nВЕРНУТЬ АРМИЮ";
-            worldMapCapitalButton.tooltip = canOrderReturn
-                ? "Нажмите, чтобы отдать приказ на возвращение"
-                : "Сейчас новый приказ на возвращение недоступен";
-        }
-        else
-        {
-            worldMapCapitalButton.text = "СТОЛИЦА";
-            worldMapCapitalButton.tooltip =
-                "Здесь находится армия, когда нет активной экспедиции";
-        }
-
-        worldMapCapitalButton.SetEnabled(canOrderReturn);
+        bool active = gameState.HasActiveExpedition;
+        worldMapCapitalButton.RemoveFromClassList("world-map-capital-return");
+        if (active) worldMapCapitalButton.AddToClassList("world-map-capital-return");
+        worldMapCapitalButton.text = active ? "ВЕРНУТЬСЯ\nВ СТОЛИЦУ" : "СТОЛИЦА";
+        worldMapCapitalButton.SetEnabled(active && !gameState.HasPendingExpeditionDecision &&
+            gameState.ActiveExpedition.Phase != CommanderState.ReturningToCastle &&
+            !gameState.ActiveExpedition.IsExplorationInProgress);
     }
 
     private void RefreshWorldMapArmyMarker()
@@ -308,167 +257,49 @@ public partial class PrototypeUIController
             worldMapArmyMarker.style.display = DisplayStyle.None;
             return;
         }
-
         ExpeditionData expedition = gameState.ActiveExpedition;
-        LocationData location = gameState.FindLocation(expedition.LocationId);
-
-        if (location == null)
-        {
-            worldMapArmyMarker.style.display = DisplayStyle.None;
-            return;
-        }
-
-        float targetX =
-            location.MapXPercent + WorldMapNodeCenterXOffsetPercent;
-        float targetY =
-            location.MapYPercent + WorldMapNodeCenterYOffsetPercent;
-        float markerX;
-        float markerY;
-
-        if (expedition.Phase == CommanderState.TravellingToLocation)
-        {
-            float progress = GetWorldMapLegProgress(expedition);
-            markerX = Mathf.Lerp(WorldMapCapitalXPercent, targetX, progress);
-            markerY = Mathf.Lerp(WorldMapCapitalYPercent, targetY, progress);
-        }
-        else if (expedition.Phase == CommanderState.ReturningToCastle)
-        {
-            float progress = GetWorldMapLegProgress(expedition);
-            float returnStartFraction = Mathf.Clamp01(
-                expedition.LegTotalDays / (float)Mathf.Max(1, location.DistanceDays));
-            float returnStartX = Mathf.Lerp(
-                WorldMapCapitalXPercent,
-                targetX,
-                returnStartFraction);
-            float returnStartY = Mathf.Lerp(
-                WorldMapCapitalYPercent,
-                targetY,
-                returnStartFraction);
-
-            markerX = Mathf.Lerp(
-                returnStartX,
-                WorldMapCapitalXPercent,
-                progress);
-            markerY = Mathf.Lerp(
-                returnStartY,
-                WorldMapCapitalYPercent,
-                progress);
-        }
-        else
-        {
-            markerX = targetX;
-            markerY = targetY;
-        }
-
-        worldMapArmyMarker.style.left = new Length(
-            Mathf.Clamp(markerX - 7f, 0f, 88f),
-            LengthUnit.Percent);
-        worldMapArmyMarker.style.top = new Length(
-            Mathf.Clamp(markerY - 4f, 1f, 90f),
-            LengthUnit.Percent);
         worldMapArmyMarker.style.display = DisplayStyle.Flex;
-
-        if (gameState.HasPendingExpeditionDecision)
-        {
-            worldMapArmyMarkerLabel.text = "ЖДЁТ ПРИКАЗА";
-        }
-        else if (expedition.Phase == CommanderState.TravellingToLocation)
-        {
-            worldMapArmyMarkerLabel.text =
-                "→ " + expedition.DaysRemaining + " ДН.";
-        }
-        else if (expedition.Phase == CommanderState.ReturningToCastle)
-        {
-            worldMapArmyMarkerLabel.text =
-                "← " + expedition.DaysRemaining + " ДН.";
-        }
-        else if (expedition.IsExplorationInProgress)
-        {
-            worldMapArmyMarkerLabel.text = "ИССЛЕДУЕТ";
-        }
-        else
-        {
-            worldMapArmyMarkerLabel.text = "НА МЕСТЕ";
-        }
-    }
-
-    private float GetWorldMapLegProgress(ExpeditionData expedition)
-    {
-        int totalDays = Mathf.Max(1, expedition.LegTotalDays);
-        return Mathf.Clamp01(
-            (totalDays - expedition.DaysRemaining) / (float)totalDays);
+        worldMapArmyMarker.style.left = new Length(expedition.CurrentMapXPercent, LengthUnit.Percent);
+        worldMapArmyMarker.style.top = new Length(expedition.CurrentMapYPercent, LengthUnit.Percent);
+        worldMapArmyMarkerLabel.text = expedition.DaysRemaining > 0 ? expedition.DaysRemaining + " дн." : "на месте";
     }
 
     private void RefreshWorldMapSelectionCard()
     {
-        LocationData selectedLocation = string.IsNullOrEmpty(selectedMapLocationId)
-            ? null
-            : gameState.FindLocation(selectedMapLocationId);
-
-        if (selectedLocation == null)
+        if (gameState.HasActiveExpedition)
         {
-            mapSelectionTitle.text = "ВЫБЕРИТЕ ОБЛАСТЬ НА КАРТЕ";
-            mapSelectionDetails.text =
-                "Три области доступны с начала партии, но локации внутри них неизвестны.";
+            mapSelectionTitle.text = "АКТИВНЫЙ МАРШРУТ";
+            mapSelectionDetails.text = "Маркер показывает фактическую позицию армии. Возврат строится отсюда, а не от конечной цели.";
+            mapSendButton.text = "АРМИЯ УЖЕ В ПОХОДЕ";
+            mapSendButton.SetEnabled(false);
+            return;
+        }
+        if (!hasSelectedMapPoint)
+        {
+            mapSelectionTitle.text = "ВЫБЕРИТЕ ТОЧКУ НА КАРТЕ";
+            mapSelectionDetails.text = "Пустая точка запускает разведку сектора. Кружок отправляет армию в известную локацию.";
             mapSendButton.text = "ВЫБЕРИТЕ ЦЕЛЬ";
             mapSendButton.SetEnabled(false);
             return;
         }
-
-        if (selectedLocation.IsDiscovered)
-        {
-            mapSelectionTitle.text = selectedLocation.Name.ToUpper();
-            mapSelectionDetails.text =
-                selectedLocation.RegionName + " · расстояние: " +
-                selectedLocation.DistanceDays + " " +
-                GetDayWord(selectedLocation.DistanceDays) + "\n" +
-                "Угроза: " + selectedLocation.Threat + ". " +
-                GetWorldMapLocationStatus(selectedLocation);
-        }
-        else
-        {
-            mapSelectionTitle.text = selectedLocation.RegionName.ToUpper();
-            mapSelectionDetails.text =
-                "Расстояние: " + selectedLocation.DistanceDays + " " +
-                GetDayWord(selectedLocation.DistanceDays) + ". " +
-                "Неизведанная область: по прибытии разведчики обнаружат " +
-                "скрытую локацию. Угроза и добыча пока неизвестны.";
-        }
-
-        bool canSend =
-            !isGameOver &&
-            !gameState.HasActiveExpedition &&
-            selectedFighterIds.Count > 0;
-
-        if (gameState.HasActiveExpedition)
-        {
-            mapSendButton.text = "АРМИЯ УЖЕ В ПОХОДЕ";
-        }
-        else if (selectedFighterIds.Count == 0)
-        {
-            mapSendButton.text = "СНАЧАЛА ВЫБЕРИТЕ БОЙЦОВ";
-        }
-        else
-        {
-            mapSendButton.text = selectedLocation.IsDiscovered
-                ? "ОТПРАВИТЬ В ЛОКАЦИЮ"
-                : "ОТПРАВИТЬ НА РАЗВЕДКУ";
-        }
-
+        LocationData location = string.IsNullOrEmpty(selectedMapLocationId) ? null : gameState.FindLocation(selectedMapLocationId);
+        int days = WorldMapNavigation.CalculateDays(selectedMapRoute);
+        int expectedSupply = days * gameState.ExpeditionSupplyConsumption;
+        mapSelectionTitle.text = location != null ? location.Name.ToUpper() : "РАЗВЕДКА СЕКТОРА";
+        mapSelectionDetails.text = GameState.GetRegionName(selectedMapXPercent, selectedMapYPercent) +
+            " · путь: " + days + " " + GetDayWord(days) + " · снабжение в одну сторону: " + expectedSupply + ".\n" +
+            (location != null ? "Угроза: " + location.Threat + ". " + GetWorldMapLocationStatus(location)
+                : "По прибытии откроется одна из ещё не найденных локаций текущего правления.");
+        bool canSend = !isGameOver && selectedFighterIds.Count > 0 && days > 0;
+        mapSendButton.text = selectedFighterIds.Count == 0 ? "СНАЧАЛА ВЫБЕРИТЕ БОЙЦОВ"
+            : location != null ? "ОТПРАВИТЬ В ЛОКАЦИЮ" : "ОТПРАВИТЬ НА РАЗВЕДКУ";
         mapSendButton.SetEnabled(canSend);
     }
 
-    private string GetWorldMapLocationStatus(LocationData location)
+    private static string GetWorldMapLocationStatus(LocationData location)
     {
-        if (location.IsExplored)
-            return "Статус: исследована.";
-
-        if (gameState.HasActiveExpedition &&
-            gameState.ActiveExpedition.LocationId == location.Id)
-        {
-            return "Статус: цель активной экспедиции.";
-        }
-
-        return "Статус: обнаружена, но не исследована.";
+        if (location.IsExplored) return "Состояние: исследована.";
+        if (location.ExplorationDays > 0) return "Состояние: доступна для исследования.";
+        return "Состояние: обнаружена.";
     }
 }

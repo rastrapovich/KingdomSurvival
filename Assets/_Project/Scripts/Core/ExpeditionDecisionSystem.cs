@@ -368,12 +368,12 @@ public static class ExpeditionDecisionSystem
 
         if (requestedDelta >= 0)
         {
-            expedition.DaysRemaining += requestedDelta;
+            WorldMapNavigation.AddTravelDelay(expedition, requestedDelta);
             return requestedDelta;
         }
 
         int reduction = Math.Min(expedition.DaysRemaining, -requestedDelta);
-        expedition.DaysRemaining -= reduction;
+        WorldMapNavigation.AdvanceRoute(expedition, reduction);
 
         if (reduction > 0 && expedition.DaysRemaining == 0)
             arrivalText = ResolveArrival(state, expedition);

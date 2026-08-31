@@ -9,6 +9,8 @@ public partial class PrototypeUIController
 
     private readonly Dictionary<string, Button> quickExpeditionImageButtons =
         new Dictionary<string, Button>();
+    private readonly Dictionary<string, VisualElement> quickExpeditionCards =
+        new Dictionary<string, VisualElement>();
     private readonly Dictionary<string, Label> quickExpeditionImageLabels =
         new Dictionary<string, Label>();
     private readonly Dictionary<string, Label> quickExpeditionNameLabels =
@@ -84,6 +86,10 @@ public partial class PrototypeUIController
     private VisualElement CreateQuickLocationCard(LocationData location)
     {
         VisualElement card = new VisualElement();
+        quickExpeditionCards[location.Id] = card;
+        card.style.display = location.IsVisibleOnMap
+            ? DisplayStyle.Flex
+            : DisplayStyle.None;
         card.style.width = Length.Percent(100);
         card.style.height = 82;
         card.style.minHeight = 82;
@@ -338,7 +344,7 @@ public partial class PrototypeUIController
         LocationData location = gameState.FindLocation(expedition.LocationId);
         string locationName = location != null
             ? location.TravelTargetName
-            : "—";
+            : expedition.IsScoutingTarget ? "точка разведки" : "—";
 
         if (gameState.CanCancelExpeditionBeforeDayEnd)
         {
@@ -385,7 +391,9 @@ public partial class PrototypeUIController
                 gameState.FindLocation(gameState.ActiveExpedition.LocationId);
             string locationName = location != null
                 ? location.TravelTargetName
-                : "неизвестно";
+                : gameState.ActiveExpedition.IsScoutingTarget
+                    ? "точка разведки"
+                    : "неизвестно";
             quickExpeditionOrderLabel.text = gameState.CanCancelExpeditionBeforeDayEnd
                 ? "ПРИКАЗ НА СЕГОДНЯ: " + locationName
                 : "ЭКСПЕДИЦИЯ: " + GetShortExpeditionState() + " → " + locationName;
@@ -398,6 +406,12 @@ public partial class PrototypeUIController
             Label name;
             Label distance;
             Label threat;
+            VisualElement card;
+
+            if (quickExpeditionCards.TryGetValue(location.Id, out card))
+                card.style.display = location.IsVisibleOnMap
+                    ? DisplayStyle.Flex
+                    : DisplayStyle.None;
 
             if (quickExpeditionNameLabels.TryGetValue(location.Id, out name))
                 name.text = location.TravelTargetName;

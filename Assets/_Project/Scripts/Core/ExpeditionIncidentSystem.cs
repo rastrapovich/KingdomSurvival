@@ -312,7 +312,7 @@ public static class ExpeditionIncidentSystem
 
         if (requestedDelta >= 0)
         {
-            expedition.DaysRemaining += requestedDelta;
+            WorldMapNavigation.AddTravelDelay(expedition, requestedDelta);
             return requestedDelta;
         }
 
@@ -321,7 +321,7 @@ public static class ExpeditionIncidentSystem
             expedition.DaysRemaining,
             requestedReduction);
 
-        expedition.DaysRemaining -= actualReduction;
+        WorldMapNavigation.AdvanceRoute(expedition, actualReduction);
 
         if (actualReduction > 0 && expedition.DaysRemaining == 0)
             arrivalText = ResolveArrivalAfterShortcut(state, expedition);

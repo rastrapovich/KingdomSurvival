@@ -97,6 +97,57 @@ public class ContinuousTimePolishTests
             Is.EqualTo(2));
     }
 
+    [Test]
+    public void LocationArrival_CancelLeavesArmyAtLocation()
+    {
+        GameState state = CreateArmyAtRuins();
+        ExpeditionDecisionOccurrence decision;
+
+        bool created =
+            LocationArrivalDecisionFactory.TryCreate(state, out decision);
+
+        Assert.That(created, Is.True);
+        Assert.That(decision.OptionA.Label, Is.EqualTo("Исследовать"));
+        Assert.That(decision.OptionB.Label, Is.EqualTo("Отменить"));
+
+        string message;
+        bool resolved = ExpeditionDecisionSystem.TryApplyChoice(
+            state,
+            decision.OptionB.Id,
+            out message);
+
+        Assert.That(resolved, Is.True, message);
+        Assert.That(state.HasPendingExpeditionDecision, Is.False);
+        Assert.That(
+            state.ActiveExpedition.Phase,
+            Is.EqualTo(CommanderState.AtLocation));
+        Assert.That(
+            state.ActiveExpedition.LocationId,
+            Is.EqualTo("ruins"));
+    }
+
+    [Test]
+    public void LocationArrival_InvestigateStartsResearch()
+    {
+        GameState state = CreateArmyAtRuins();
+        state.ArmySupply = 100;
+
+        ExpeditionDecisionOccurrence decision;
+        Assert.That(
+            LocationArrivalDecisionFactory.TryCreate(state, out decision),
+            Is.True);
+
+        string message;
+        bool resolved = ExpeditionDecisionSystem.TryApplyChoice(
+            state,
+            decision.OptionA.Id,
+            out message);
+
+        Assert.That(resolved, Is.True, message);
+        Assert.That(state.HasPendingExpeditionDecision, Is.False);
+        Assert.That(state.ActiveExpedition.IsExplorationInProgress, Is.True);
+    }
+
     private static GameState CreatePreparedExpedition()
     {
         GameState state = new GameState();
@@ -112,6 +163,38 @@ public class ContinuousTimePolishTests
             out message);
 
         Assert.That(started, Is.True, message);
+        return state;
+    }
+
+    private static GameState CreateArmyAtRuins()
+    {
+        GameState state = new GameState();
+        state.CreateNewGame(888);
+
+        LocationData location = state.FindLocation("ruins");
+        Assert.That(location, Is.Not.Null);
+
+        string message;
+        bool started = state.TryStartExpeditionToMapPoint(
+            location.MapXPercent,
+            location.MapYPercent,
+            location.Id,
+            false,
+            new List<string> { "garrick", "edric" },
+            out message);
+
+        Assert.That(started, Is.True, message);
+
+        state.ActiveExpedition.Phase = CommanderState.AtLocation;
+        state.ActiveExpedition.CurrentMapXPercent = location.MapXPercent;
+        state.ActiveExpedition.CurrentMapYPercent = location.MapYPercent;
+        state.ActiveExpedition.DaysRemaining = 0;
+
+        CommanderData commander =
+            state.FindCommander(state.ActiveExpedition.CommanderId);
+        Assert.That(commander, Is.Not.Null);
+        commander.State = CommanderState.AtLocation;
+
         return state;
     }
 }

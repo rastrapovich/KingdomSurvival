@@ -55,6 +55,24 @@ public partial class PrototypeUIController
         if (notice == null)
             return;
 
+        // В непрерывной модели прибытие в известную локацию является
+        // обязательным выбором, а не пассивной плашкой "ПОНЯТНО".
+        // ProcessContinuousSimulationBatch вызывает QueueNotice для
+        // MandatoryNotice до QueueDayResolutionModals, поэтому достаточно
+        // создать PendingDecision здесь: следующий шаг очереди подхватит его
+        // ровно один раз.
+        if (notice.Title == "АРМИЯ ПРИБЫЛА")
+        {
+            ExpeditionDecisionOccurrence arrivalDecision;
+
+            if (LocationArrivalDecisionFactory.TryCreate(
+                    gameState,
+                    out arrivalDecision))
+            {
+                return;
+            }
+        }
+
         queuedModals.Enqueue(new QueuedModal
         {
             Title = notice.Title,

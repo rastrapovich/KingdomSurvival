@@ -617,25 +617,25 @@ public partial class PrototypeUIController
         stableDragGhost.style.paddingRight = 5;
         stableDragGhost.style.paddingTop = 5;
         stableDragGhost.style.paddingBottom = 5;
-        stableDragGhost.style.backgroundColor = new Color32(54, 48, 38, 255);
+        stableDragGhost.style.backgroundColor = (Color)new Color32(54, 48, 38, 255);
         stableDragGhost.style.borderLeftWidth = 2;
         stableDragGhost.style.borderRightWidth = 2;
         stableDragGhost.style.borderTopWidth = 2;
         stableDragGhost.style.borderBottomWidth = 2;
-        stableDragGhost.style.borderLeftColor = new Color32(218, 176, 96, 255);
-        stableDragGhost.style.borderRightColor = new Color32(218, 176, 96, 255);
-        stableDragGhost.style.borderTopColor = new Color32(218, 176, 96, 255);
-        stableDragGhost.style.borderBottomColor = new Color32(218, 176, 96, 255);
+        stableDragGhost.style.borderLeftColor = (Color)new Color32(218, 176, 96, 255);
+        stableDragGhost.style.borderRightColor = (Color)new Color32(218, 176, 96, 255);
+        stableDragGhost.style.borderTopColor = (Color)new Color32(218, 176, 96, 255);
+        stableDragGhost.style.borderBottomColor = (Color)new Color32(218, 176, 96, 255);
 
         VisualElement image = new VisualElement();
         image.style.width = Length.Percent(100);
         image.style.height = Length.Percent(100);
         image.style.alignItems = Align.Center;
         image.style.justifyContent = Justify.Center;
-        image.style.backgroundColor = new Color32(29, 33, 39, 255);
+        image.style.backgroundColor = (Color)new Color32(29, 33, 39, 255);
 
         Label role = new Label(fighter.Role);
-        role.style.color = new Color32(231, 197, 127, 255);
+        role.style.color = (Color)new Color32(231, 197, 127, 255);
         role.style.fontSize = 10;
         role.style.unityFontStyleAndWeight = FontStyle.Bold;
         role.style.unityTextAlign = TextAnchor.MiddleCenter;

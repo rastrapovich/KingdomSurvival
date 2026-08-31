@@ -23,6 +23,12 @@ public class ExpeditionDecisionOccurrence
 
 public static class ExpeditionDecisionSystem
 {
+    private const string LocationDiscoveryDefinitionId = "location_discovered";
+    private const string InvestigateDiscoveredLocationOptionId =
+        "investigate_discovered_location";
+    private const string ContinueInterruptedRouteOptionId =
+        "continue_interrupted_route";
+
     private class DecisionOptionDefinition
     {
         public string Id;
@@ -135,6 +141,14 @@ public static class ExpeditionDecisionSystem
         int finishedDay,
         DayResolutionResult result)
     {
+        if (TryCreateLocationDiscoveryDecision(
+                state,
+                finishedDay,
+                result))
+        {
+            return;
+        }
+
         if (!CanGenerateDecision(state))
             return;
 
@@ -174,7 +188,31 @@ public static class ExpeditionDecisionSystem
         GameState state,
         string optionId)
     {
-        DecisionOptionDefinition option = FindPendingOption(state, optionId);
+        if (IsLocationDiscoveryDecision(state))
+        {
+            if (optionId == ContinueInterruptedRouteOptionId)
+                return true;
+
+            if (optionId == InvestigateDiscoveredLocationOptionId)
+            {
+                LocationData location =
+                    state.FindLocation(state.ActiveExpedition.LocationId);
+
+                if (location == null || location.IsWaypoint)
+                    return false;
+
+                if (location.ExplorationDays <= 0 || location.IsExplored)
+                    return true;
+
+                return
+                    state.ArmySupply >= state.ExpeditionSupplyConsumption;
+            }
+
+            return false;
+        }
+
+        DecisionOptionDefinition option =
+            FindPendingOption(state, optionId);
 
         if (option == null)
             return false;
@@ -192,10 +230,19 @@ public static class ExpeditionDecisionSystem
         if (!state.HasPendingExpeditionDecision)
             return false;
 
+        if (IsLocationDiscoveryDecision(state))
+        {
+            return TryApplyLocationDiscoveryChoice(
+                state,
+                optionId,
+                out resultMessage);
+        }
+
         ExpeditionDecisionOccurrence occurrence =
             state.ActiveExpedition.PendingDecision;
 
-        DecisionDefinition definition = FindDefinition(occurrence.DefinitionId);
+        DecisionDefinition definition =
+            FindDefinition(occurrence.DefinitionId);
 
         if (definition == null)
             return false;
@@ -220,16 +267,22 @@ public static class ExpeditionDecisionSystem
 
         List<string> consequences = new List<string>();
 
-        int actualSupplyDelta = ApplySupplyDelta(state, option.SupplyDelta);
+        int actualSupplyDelta =
+            ApplySupplyDelta(state, option.SupplyDelta);
         string arrivalText;
         int actualTravelDelta =
-            ApplyTravelDelta(state, option.TravelDelta, out arrivalText);
+            ApplyTravelDelta(
+                state,
+                option.TravelDelta,
+                out arrivalText);
 
         if (option.SupplyDelta != 0)
-            consequences.Add(FormatSupplyConsequence(actualSupplyDelta));
+            consequences.Add(
+                FormatSupplyConsequence(actualSupplyDelta));
 
         if (option.TravelDelta != 0)
-            consequences.Add(FormatTravelConsequence(actualTravelDelta));
+            consequences.Add(
+                FormatTravelConsequence(actualTravelDelta));
 
         if (!string.IsNullOrWhiteSpace(arrivalText))
             consequences.Add(arrivalText);
@@ -249,10 +302,191 @@ public static class ExpeditionDecisionSystem
         return true;
     }
 
+    private static bool TryCreateLocationDiscoveryDecision(
+        GameState state,
+        int finishedDay,
+        DayResolutionResult result)
+    {
+        if (!state.HasActiveExpedition ||
+            state.HasPendingExpeditionDecision)
+        {
+            return false;
+        }
+
+        ExpeditionData expedition = state.ActiveExpedition;
+        bool arrivedAtWaypoint =
+            expedition.Phase == CommanderState.AtLocation &&
+            state.FindLocation(expedition.LocationId) != null &&
+            state.FindLocation(expedition.LocationId).IsWaypoint;
+
+        if (arrivedAtWaypoint)
+        {
+            result.Messages.RemoveAll(
+                message => message.Contains("Точка маршрута"));
+        }
+
+        if (expedition.LastTravelPoints == null ||
+            expedition.LastTravelPoints.Count == 0)
+        {
+            return false;
+        }
+
+        LocationData location =
+            state.FindFirstHiddenLocationAlongLastTravel();
+
+        if (location == null)
+        {
+            expedition.LastTravelPoints.Clear();
+
+            if (arrivedAtWaypoint)
+            {
+                result.Messages.Add(
+                    "Армия достигла выбранной точки маршрута. " +
+                    "Новый приказ можно отдать кликом по карте.");
+            }
+
+            return false;
+        }
+
+        string stopMessage;
+        if (!state.StopAtDiscoveredLocation(
+                location,
+                out stopMessage))
+        {
+            expedition.LastTravelPoints.Clear();
+            return false;
+        }
+
+        ExpeditionDecisionOccurrence occurrence =
+            new ExpeditionDecisionOccurrence
+            {
+                Id = nextOccurrenceId++,
+                Day = finishedDay,
+                DefinitionId = LocationDiscoveryDefinitionId,
+                Title = "Обнаружена локация «" + location.Name + "»",
+                Description =
+                    "Вы обнаружили локацию «" + location.Name +
+                    "». Армия немедленно остановилась у неё.",
+                OptionA = new ExpeditionDecisionOptionView
+                {
+                    Id = InvestigateDiscoveredLocationOptionId,
+                    Label = "Исследовать",
+                    ConsequencePreview =
+                        location.ExplorationDays > 0
+                            ? "Начать исследование локации"
+                            : "Осмотреть найденное место"
+                },
+                OptionB = new ExpeditionDecisionOptionView
+                {
+                    Id = ContinueInterruptedRouteOptionId,
+                    Label = "Продолжить маршрут",
+                    ConsequencePreview =
+                        "Вернуться к прерванной цели"
+                }
+            };
+
+        state.ActiveExpedition.PendingDecision = occurrence;
+
+        result.Messages.Add(
+            "<color=#E5BD63>" + stopMessage +
+            " Требуется приказ: исследовать находку или продолжить прежний маршрут.</color>");
+        result.HadNotableOccurrence = true;
+        return true;
+    }
+
+    private static bool TryApplyLocationDiscoveryChoice(
+        GameState state,
+        string optionId,
+        out string resultMessage)
+    {
+        ExpeditionData expedition = state.ActiveExpedition;
+        LocationData location =
+            state.FindLocation(expedition.LocationId);
+
+        if (location == null || location.IsWaypoint)
+        {
+            resultMessage =
+                "Данные обнаруженной локации потеряны.";
+            return false;
+        }
+
+        if (optionId == ContinueInterruptedRouteOptionId)
+        {
+            expedition.PendingDecision = null;
+
+            if (state.TryResumeInterruptedRoute(out resultMessage))
+                return true;
+
+            // Если возобновить уже нечего, оставляем отряд у найденной локации,
+            // но обязательное решение считаем обработанным.
+            expedition.Phase = CommanderState.AtLocation;
+            CommanderData commander =
+                state.FindCommander(expedition.CommanderId);
+            if (commander != null)
+                commander.State = CommanderState.AtLocation;
+
+            resultMessage =
+                "Прежняя цель уже недоступна. Армия остаётся у локации «" +
+                location.Name + "».";
+            return true;
+        }
+
+        if (optionId != InvestigateDiscoveredLocationOptionId)
+            return false;
+
+        if (location.ExplorationDays > 0 &&
+            !location.IsExplored &&
+            state.ArmySupply < state.ExpeditionSupplyConsumption)
+        {
+            resultMessage =
+                "Для исследования нужен полный дневной рацион. Требуется снабжения: " +
+                state.ExpeditionSupplyConsumption + ".";
+            return false;
+        }
+
+        expedition.PendingDecision = null;
+        expedition.HasInterruptedRoute = false;
+
+        if (location.ExplorationDays > 0 && !location.IsExplored)
+        {
+            string researchMessage;
+
+            if (state.TryStartLocationResearch(out researchMessage))
+            {
+                resultMessage =
+                    "Армия остаётся у обнаруженной локации. " +
+                    researchMessage;
+                return true;
+            }
+
+            resultMessage = researchMessage;
+            return false;
+        }
+
+        resultMessage = location.IsExplored
+            ? "Локация «" + location.Name +
+              "» уже исследована. Армия остаётся на месте."
+            : "Армия остановилась у локации «" + location.Name +
+              "». Полноценное исследование этой локации пока не реализовано.";
+
+        return true;
+    }
+
+    private static bool IsLocationDiscoveryDecision(GameState state)
+    {
+        return
+            state.HasPendingExpeditionDecision &&
+            state.ActiveExpedition.PendingDecision.DefinitionId ==
+            LocationDiscoveryDefinitionId;
+    }
+
     private static bool CanGenerateDecision(GameState state)
     {
-        if (!state.HasActiveExpedition || state.HasPendingExpeditionDecision)
+        if (!state.HasActiveExpedition ||
+            state.HasPendingExpeditionDecision)
+        {
             return false;
+        }
 
         ExpeditionData expedition = state.ActiveExpedition;
 
@@ -264,9 +498,11 @@ public static class ExpeditionDecisionSystem
             expedition.Phase == CommanderState.ReturningToCastle;
     }
 
-    private static List<DecisionDefinition> GetEligibleDefinitions(GameState state)
+    private static List<DecisionDefinition> GetEligibleDefinitions(
+        GameState state)
     {
-        List<DecisionDefinition> eligible = new List<DecisionDefinition>();
+        List<DecisionDefinition> eligible =
+            new List<DecisionDefinition>();
         ExpeditionData expedition = state.ActiveExpedition;
 
         foreach (DecisionDefinition definition in Definitions)
@@ -285,11 +521,13 @@ public static class ExpeditionDecisionSystem
         {
             Id = option.Id,
             Label = option.Label,
-            ConsequencePreview = BuildConsequencePreview(option)
+            ConsequencePreview =
+                BuildConsequencePreview(option)
         };
     }
 
-    private static string BuildConsequencePreview(DecisionOptionDefinition option)
+    private static string BuildConsequencePreview(
+        DecisionOptionDefinition option)
     {
         List<string> parts = new List<string>();
 
@@ -308,7 +546,8 @@ public static class ExpeditionDecisionSystem
             : "без механических изменений";
     }
 
-    private static DecisionDefinition FindDefinition(string definitionId)
+    private static DecisionDefinition FindDefinition(
+        string definitionId)
     {
         foreach (DecisionDefinition definition in Definitions)
         {
@@ -327,7 +566,8 @@ public static class ExpeditionDecisionSystem
             return null;
 
         DecisionDefinition definition =
-            FindDefinition(state.ActiveExpedition.PendingDecision.DefinitionId);
+            FindDefinition(
+                state.ActiveExpedition.PendingDecision.DefinitionId);
 
         if (definition == null)
             return null;
@@ -341,7 +581,9 @@ public static class ExpeditionDecisionSystem
         return null;
     }
 
-    private static int ApplySupplyDelta(GameState state, int requestedDelta)
+    private static int ApplySupplyDelta(
+        GameState state,
+        int requestedDelta)
     {
         if (requestedDelta >= 0)
         {
@@ -350,7 +592,8 @@ public static class ExpeditionDecisionSystem
         }
 
         int requestedLoss = -requestedDelta;
-        int actualLoss = Math.Min(state.ArmySupply, requestedLoss);
+        int actualLoss =
+            Math.Min(state.ArmySupply, requestedLoss);
         state.ArmySupply -= actualLoss;
         return -actualLoss;
     }
@@ -361,22 +604,38 @@ public static class ExpeditionDecisionSystem
         out string arrivalText)
     {
         arrivalText = string.Empty;
-        ExpeditionData expedition = state.ActiveExpedition;
+        ExpeditionData expedition =
+            state.ActiveExpedition;
 
-        if (expedition == null || expedition.DaysRemaining <= 0)
+        if (expedition == null ||
+            expedition.DaysRemaining <= 0)
+        {
             return 0;
+        }
 
         if (requestedDelta >= 0)
         {
-            WorldMapNavigation.AddTravelDelay(expedition, requestedDelta);
+            WorldMapNavigation.AddTravelDelay(
+                expedition,
+                requestedDelta);
             return requestedDelta;
         }
 
-        int reduction = Math.Min(expedition.DaysRemaining, -requestedDelta);
-        WorldMapNavigation.AdvanceRoute(expedition, reduction);
+        int reduction =
+            Math.Min(
+                expedition.DaysRemaining,
+                -requestedDelta);
 
-        if (reduction > 0 && expedition.DaysRemaining == 0)
-            arrivalText = ResolveArrival(state, expedition);
+        WorldMapNavigation.AdvanceRoute(
+            expedition,
+            reduction);
+
+        if (reduction > 0 &&
+            expedition.DaysRemaining == 0)
+        {
+            arrivalText =
+                ResolveArrival(state, expedition);
+        }
 
         return -reduction;
     }
@@ -385,22 +644,30 @@ public static class ExpeditionDecisionSystem
         GameState state,
         ExpeditionData expedition)
     {
-        CommanderData commander = state.FindCommander(expedition.CommanderId);
+        CommanderData commander =
+            state.FindCommander(expedition.CommanderId);
 
         if (commander == null)
             return string.Empty;
 
-        if (expedition.Phase == CommanderState.TravellingToLocation)
+        if (expedition.Phase ==
+            CommanderState.TravellingToLocation)
         {
-            expedition.Phase = CommanderState.AtLocation;
-            commander.State = CommanderState.AtLocation;
+            expedition.Phase =
+                CommanderState.AtLocation;
+            commander.State =
+                CommanderState.AtLocation;
             return "Экспедиция достигла цели.";
         }
 
-        if (expedition.Phase == CommanderState.ReturningToCastle)
+        if (expedition.Phase ==
+            CommanderState.ReturningToCastle)
         {
-            string deliveredResources = state.CompleteExpeditionReturn();
-            return "Армия вернулась в столицу. " + deliveredResources;
+            string deliveredResources =
+                state.CompleteExpeditionReturn();
+            return
+                "Армия вернулась в столицу. " +
+                deliveredResources;
         }
 
         return string.Empty;
@@ -420,10 +687,12 @@ public static class ExpeditionDecisionSystem
     private static string FormatTravelConsequence(int delta)
     {
         if (delta > 0)
-            return "Оставшийся путь +" + delta + " день.";
+            return
+                "Оставшийся путь +" + delta + " день.";
 
         if (delta < 0)
-            return "Оставшийся путь " + delta + " день.";
+            return
+                "Оставшийся путь " + delta + " день.";
 
         return "Длина пути не изменилась.";
     }

@@ -66,8 +66,10 @@ public class LocationData
     public bool IsDiscovered;
     public bool IsExplored;
     public bool IsVisibleOnMap;
+    public bool IsWaypoint;
 
     public string TravelTargetName =>
+        IsWaypoint ? "точка маршрута" :
         IsDiscovered ? Name : RegionName;
 
     public LocationData(
@@ -89,6 +91,7 @@ public class LocationData
         IsDiscovered = true;
         IsExplored = false;
         IsVisibleOnMap = true;
+        IsWaypoint = false;
     }
 
     public void AssignToRegion(
@@ -107,6 +110,7 @@ public class LocationData
         DistanceDays = distanceDays;
         IsDiscovered = false;
         IsVisibleOnMap = false;
+        IsWaypoint = false;
     }
 }
 
@@ -137,11 +141,28 @@ public class ExpeditionData
     // Это отдельное состояние самой экспедиции: она ждёт приказа короля.
     public ExpeditionDecisionOccurrence PendingDecision;
     public List<string> UsedDecisionIds = new List<string>();
+
+    // Каждый расчёт пути запоминает реально пройденные клетки этого перемещения.
+    // По ним система разведки проверяет скрытые локации вдоль всего маршрута.
+    public List<MapPointData> LastTravelPoints = new List<MapPointData>();
+    public CommanderState LastTravelStartedPhase;
+    public string LastTravelTargetLocationId;
+    public float LastTravelTargetXPercent;
+    public float LastTravelTargetYPercent;
+
+    // Если движение прервано обнаруженной локацией, сохраняем прежнюю цель.
+    public bool HasInterruptedRoute;
+    public CommanderState InterruptedPhase;
+    public string InterruptedTargetLocationId;
+    public float InterruptedTargetXPercent;
+    public float InterruptedTargetYPercent;
 }
 
 [Serializable]
 public class GameState
 {
+    private const string RouteWaypointId = "__route_waypoint";
+
     public int WorldSeed;
     public int Day;
     public int Gold;
@@ -289,6 +310,7 @@ public class GameState
             LocationData location = FindLocation(expedition.LocationId);
 
             return location != null &&
+                   !location.IsWaypoint &&
                    location.ExplorationDays > 0 &&
                    !location.IsExplored &&
                    ArmySupply >= ExpeditionSupplyConsumption;
@@ -355,8 +377,7 @@ public class GameState
         Random worldRandom = new Random(WorldSeed);
         ShuffleLocations(locationPool, worldRandom);
 
-        // Локации детерминированно размещаются на проходимых клетках карты,
-        // но остаются скрытыми до разведки выбранной игроком точки.
+        // Локации существуют в мире заранее и больше не переносятся в точку клика.
         float[,] candidatePositions =
         {
             { 13f, 20f }, { 48f, 12f }, { 80f, 25f }
@@ -371,11 +392,13 @@ public class GameState
                 WorldMapNavigation.CapitalYPercent,
                 x,
                 y);
+
             if (candidateRoute.Count > 0)
             {
                 x = candidateRoute[candidateRoute.Count - 1].XPercent;
                 y = candidateRoute[candidateRoute.Count - 1].YPercent;
             }
+
             locationPool[i].AssignToRegion(
                 "sector-" + i,
                 GetRegionName(x, y),
@@ -386,7 +409,6 @@ public class GameState
         }
 
         Locations = locationPool;
-
         ActiveExpedition = null;
     }
 
@@ -421,6 +443,9 @@ public class GameState
 
     public LocationData FindLocation(string locationId)
     {
+        if (string.IsNullOrEmpty(locationId) || Locations == null)
+            return null;
+
         foreach (LocationData location in Locations)
         {
             if (location.Id == locationId)
@@ -533,36 +558,9 @@ public class GameState
             return false;
         }
 
-        if (selectedFighterIds == null || selectedFighterIds.Count == 0)
-        {
-            resultMessage =
-                "Сначала выберите хотя бы одного бойца для экспедиции.";
-            return false;
-        }
-
-        HashSet<string> uniqueSelectedIds =
-            new HashSet<string>(selectedFighterIds);
-
-        if (uniqueSelectedIds.Count != selectedFighterIds.Count)
-        {
-            resultMessage = "В составе экспедиции один боец указан несколько раз.";
-            return false;
-        }
-
-        foreach (string fighterId in uniqueSelectedIds)
-        {
-            if (FindFighter(fighterId) == null)
-            {
-                resultMessage =
-                    "В составе экспедиции найден неизвестный боец: " +
-                    fighterId + ".";
-                return false;
-            }
-        }
-
         LocationData location = FindLocation(locationId);
 
-        if (location == null)
+        if (location == null || location.IsWaypoint)
         {
             resultMessage = "Не удалось найти выбранную локацию.";
             return false;
@@ -591,38 +589,23 @@ public class GameState
             return false;
         }
 
-        if (selectedFighterIds == null || selectedFighterIds.Count == 0)
-        {
-            resultMessage = "Сначала выберите хотя бы одного бойца для экспедиции.";
+        if (!ValidateExpeditionFighters(selectedFighterIds, out resultMessage))
             return false;
-        }
-
-        HashSet<string> uniqueSelectedIds = new HashSet<string>(selectedFighterIds);
-
-        if (uniqueSelectedIds.Count != selectedFighterIds.Count)
-        {
-            resultMessage = "В составе экспедиции один боец указан несколько раз.";
-            return false;
-        }
-
-        foreach (string fighterId in uniqueSelectedIds)
-        {
-            if (FindFighter(fighterId) == null)
-            {
-                resultMessage = "В составе экспедиции найден неизвестный боец: " + fighterId + ".";
-                return false;
-            }
-        }
 
         CommanderData commander = GetSelectedCommander();
-        LocationData location = string.IsNullOrEmpty(locationId)
-            ? null
-            : FindLocation(locationId);
 
         if (commander == null)
         {
             resultMessage = "Не удалось найти выбранного командира.";
             return false;
+        }
+
+        LocationData location = FindLocation(locationId);
+
+        if (location == null)
+        {
+            location = GetOrCreateRouteWaypoint(targetXPercent, targetYPercent);
+            isScoutingTarget = false;
         }
 
         List<MapPointData> route = WorldMapNavigation.FindPath(
@@ -642,7 +625,7 @@ public class GameState
         {
             IsActive = true,
             CommanderId = commander.Id,
-            LocationId = location != null ? location.Id : string.Empty,
+            LocationId = location.Id,
             Phase = CommanderState.TravellingToLocation,
             DaysRemaining = travelDays,
             LegTotalDays = travelDays,
@@ -657,14 +640,17 @@ public class GameState
             Route = route,
             IsExplorationInProgress = false,
             ExplorationDaysRemaining = 0,
-            PendingDecision = null
+            PendingDecision = null,
+            HasInterruptedRoute = false
         };
+
+        HashSet<string> selectedIds = new HashSet<string>(selectedFighterIds);
 
         // Сохраняем порядок общей армии, чтобы состав всегда одинаково
         // отображался в интерфейсе и донесениях.
         foreach (FighterData fighter in Fighters)
         {
-            if (uniqueSelectedIds.Contains(fighter.Id))
+            if (selectedIds.Contains(fighter.Id))
                 expedition.FighterIds.Add(fighter.Id);
         }
 
@@ -672,17 +658,92 @@ public class GameState
         ActiveExpedition = expedition;
         commander.State = CommanderState.TravellingToLocation;
 
-        string destinationText = location != null
-            ? "локацию «" + location.Name + "»"
-            : "выбранную точку для разведки";
+        string destinationText = location.IsWaypoint
+            ? "выбранную точку"
+            : "локацию «" + location.Name + "»";
 
         resultMessage =
             commander.Name + " и " + expedition.FighterIds.Count +
-            " воинов получили приказ отправиться в " +
+            " воинов получили приказ двигаться в " +
             destinationText + ". В столице осталось бойцов: " +
             GarrisonFighterCount + ", сила гарнизона: " +
             GarrisonDefensePower + "/" + TotalArmyDefensePower +
-            ". До завершения текущего дня приказ можно отменить.";
+            ". До завершения текущего дня приказ можно отменить или изменить.";
+
+        return true;
+    }
+
+    public bool TryChangeExpeditionRoute(
+        float targetXPercent,
+        float targetYPercent,
+        string locationId,
+        out string resultMessage)
+    {
+        resultMessage = "Не удалось изменить маршрут.";
+
+        if (!HasActiveExpedition)
+        {
+            resultMessage = "Сейчас нет активной экспедиции.";
+            return false;
+        }
+
+        if (HasPendingExpeditionDecision)
+        {
+            resultMessage = "Сначала требуется принять обязательное решение.";
+            return false;
+        }
+
+        if (ActiveExpedition.IsExplorationInProgress)
+        {
+            resultMessage = "Нельзя менять маршрут во время начатого исследования.";
+            return false;
+        }
+
+        CommanderData commander = FindCommander(ActiveExpedition.CommanderId);
+
+        if (commander == null)
+        {
+            resultMessage = "Не удалось определить командира экспедиции.";
+            return false;
+        }
+
+        LocationData location = FindLocation(locationId);
+        if (location == null)
+            location = GetOrCreateRouteWaypoint(targetXPercent, targetYPercent);
+
+        List<MapPointData> route = WorldMapNavigation.FindPath(
+            ActiveExpedition.CurrentMapXPercent,
+            ActiveExpedition.CurrentMapYPercent,
+            targetXPercent,
+            targetYPercent);
+        int days = WorldMapNavigation.CalculateDays(route);
+
+        if (route.Count < 2 || days <= 0)
+        {
+            resultMessage = "Новая цель совпадает с текущей позицией или недоступна.";
+            return false;
+        }
+
+        ActiveExpedition.LocationId = location.Id;
+        ActiveExpedition.Phase = CommanderState.TravellingToLocation;
+        ActiveExpedition.DaysRemaining = days;
+        ActiveExpedition.LegTotalDays = days;
+        ActiveExpedition.Route = route;
+        ActiveExpedition.RouteIndex = 0;
+        ActiveExpedition.TravelDelayDays = 0;
+        ActiveExpedition.TargetMapXPercent = route[route.Count - 1].XPercent;
+        ActiveExpedition.TargetMapYPercent = route[route.Count - 1].YPercent;
+        ActiveExpedition.IsScoutingTarget = false;
+        ActiveExpedition.HasInterruptedRoute = false;
+        ActiveExpedition.LastTravelPoints.Clear();
+
+        if (!CanCancelExpeditionBeforeDayEnd)
+            commander.State = CommanderState.TravellingToLocation;
+
+        resultMessage = location.IsWaypoint
+            ? "Маршрут изменён. Армия направляется к новой точке от своей текущей позиции."
+            : "Маршрут изменён. Армия направляется к локации «" + location.Name +
+              "» от своей текущей позиции.";
 
         return true;
     }
@@ -726,6 +787,7 @@ public class GameState
         LocationData location = FindLocation(expedition.LocationId);
 
         if (location == null ||
+            location.IsWaypoint ||
             expedition.Phase != CommanderState.AtLocation ||
             expedition.IsExplorationInProgress ||
             location.ExplorationDays <= 0 ||
@@ -779,7 +841,8 @@ public class GameState
 
         if (CanCancelExpeditionBeforeDayEnd)
         {
-            resultMessage = "Текущий день ещё не завершён. Сначала можно полностью отменить отправку.";
+            resultMessage =
+                "Текущий день ещё не завершён. Нажатие на столицу отменяет отправку.";
             return false;
         }
 
@@ -812,6 +875,8 @@ public class GameState
         ActiveExpedition.TravelDelayDays = 0;
         ActiveExpedition.TargetMapXPercent = WorldMapNavigation.CapitalXPercent;
         ActiveExpedition.TargetMapYPercent = WorldMapNavigation.CapitalYPercent;
+        ActiveExpedition.HasInterruptedRoute = false;
+        ActiveExpedition.LastTravelPoints.Clear();
         commander.State = CommanderState.ReturningToCastle;
 
         resultMessage =
@@ -839,6 +904,7 @@ public class GameState
         expedition.PendingDecision = null;
         expedition.IsExplorationInProgress = false;
         expedition.ExplorationDaysRemaining = 0;
+        expedition.HasInterruptedRoute = false;
 
         if (expedition.Phase == CommanderState.ReturningToCastle)
         {
@@ -863,6 +929,7 @@ public class GameState
         expedition.TravelDelayDays = 0;
         expedition.TargetMapXPercent = WorldMapNavigation.CapitalXPercent;
         expedition.TargetMapYPercent = WorldMapNavigation.CapitalYPercent;
+        expedition.LastTravelPoints.Clear();
         commander.State = CommanderState.ReturningToCastle;
 
         resultMessage =
@@ -892,11 +959,169 @@ public class GameState
 
         ActiveExpedition.IsExplorationInProgress = false;
         ActiveExpedition.ExplorationDaysRemaining = 0;
+        ActiveExpedition.PendingDecision = null;
+        ActiveExpedition.HasInterruptedRoute = false;
         ActiveExpedition.IsActive = false;
 
         return
             "В столицу передано: золото +" + deliveredGold +
             ", пища +" + deliveredFood + ".";
+    }
+
+    public LocationData FindFirstHiddenLocationAlongLastTravel()
+    {
+        if (!HasActiveExpedition ||
+            ActiveExpedition.LastTravelPoints == null ||
+            ActiveExpedition.LastTravelPoints.Count == 0)
+        {
+            return null;
+        }
+
+        foreach (MapPointData point in ActiveExpedition.LastTravelPoints)
+        {
+            foreach (LocationData location in Locations)
+            {
+                if (location.IsWaypoint || location.IsVisibleOnMap)
+                    continue;
+
+                if (WorldMapNavigation.IsWithinDiscoveryRadius(
+                        point.XPercent,
+                        point.YPercent,
+                        location.MapXPercent,
+                        location.MapYPercent))
+                {
+                    return location;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public bool StopAtDiscoveredLocation(
+        LocationData location,
+        out string resultMessage)
+    {
+        resultMessage = "Не удалось остановиться у обнаруженной локации.";
+
+        if (!HasActiveExpedition || location == null || location.IsWaypoint)
+            return false;
+
+        ExpeditionData expedition = ActiveExpedition;
+        CommanderData commander = FindCommander(expedition.CommanderId);
+
+        if (commander == null)
+            return false;
+
+        expedition.HasInterruptedRoute = true;
+        expedition.InterruptedPhase = expedition.LastTravelStartedPhase;
+        expedition.InterruptedTargetLocationId =
+            expedition.LastTravelTargetLocationId;
+        expedition.InterruptedTargetXPercent =
+            expedition.LastTravelTargetXPercent;
+        expedition.InterruptedTargetYPercent =
+            expedition.LastTravelTargetYPercent;
+
+        location.IsVisibleOnMap = true;
+        location.IsDiscovered = true;
+        location.RegionName = GetRegionName(
+            location.MapXPercent,
+            location.MapYPercent);
+        location.DistanceDays = WorldMapNavigation.CalculateDays(
+            WorldMapNavigation.FindPath(
+                WorldMapNavigation.CapitalXPercent,
+                WorldMapNavigation.CapitalYPercent,
+                location.MapXPercent,
+                location.MapYPercent));
+
+        expedition.LocationId = location.Id;
+        expedition.Phase = CommanderState.AtLocation;
+        expedition.CurrentMapXPercent = location.MapXPercent;
+        expedition.CurrentMapYPercent = location.MapYPercent;
+        expedition.TargetMapXPercent = location.MapXPercent;
+        expedition.TargetMapYPercent = location.MapYPercent;
+        expedition.DaysRemaining = 0;
+        expedition.LegTotalDays = 0;
+        expedition.RouteIndex = 0;
+        expedition.TravelDelayDays = 0;
+        expedition.Route = new List<MapPointData>
+        {
+            new MapPointData(location.MapXPercent, location.MapYPercent)
+        };
+        expedition.LastTravelPoints.Clear();
+        commander.State = CommanderState.AtLocation;
+
+        resultMessage =
+            "Вы обнаружили локацию «" + location.Name +
+            "». Армия остановилась у неё.";
+
+        return true;
+    }
+
+    public bool TryResumeInterruptedRoute(out string resultMessage)
+    {
+        resultMessage = "Прерванного маршрута больше нет.";
+
+        if (!HasActiveExpedition || !ActiveExpedition.HasInterruptedRoute)
+            return false;
+
+        ExpeditionData expedition = ActiveExpedition;
+        CommanderData commander = FindCommander(expedition.CommanderId);
+
+        if (commander == null)
+            return false;
+
+        CommanderState resumePhase = expedition.InterruptedPhase;
+        string targetLocationId = expedition.InterruptedTargetLocationId;
+        float targetX = expedition.InterruptedTargetXPercent;
+        float targetY = expedition.InterruptedTargetYPercent;
+
+        List<MapPointData> route = WorldMapNavigation.FindPath(
+            expedition.CurrentMapXPercent,
+            expedition.CurrentMapYPercent,
+            targetX,
+            targetY);
+        int days = WorldMapNavigation.CalculateDays(route);
+
+        expedition.HasInterruptedRoute = false;
+        expedition.PendingDecision = null;
+
+        if (route.Count < 2 || days <= 0)
+        {
+            if (resumePhase == CommanderState.ReturningToCastle)
+            {
+                string delivered = CompleteExpeditionReturn();
+                resultMessage = "Армия уже у столицы. " + delivered;
+                return true;
+            }
+
+            expedition.LocationId = targetLocationId;
+            expedition.Phase = CommanderState.AtLocation;
+            commander.State = CommanderState.AtLocation;
+            resultMessage = "Армия уже достигла прежней цели.";
+            return true;
+        }
+
+        expedition.LocationId = targetLocationId;
+        expedition.Phase = resumePhase == CommanderState.ReturningToCastle
+            ? CommanderState.ReturningToCastle
+            : CommanderState.TravellingToLocation;
+        expedition.DaysRemaining = days;
+        expedition.LegTotalDays = days;
+        expedition.Route = route;
+        expedition.RouteIndex = 0;
+        expedition.TravelDelayDays = 0;
+        expedition.TargetMapXPercent = route[route.Count - 1].XPercent;
+        expedition.TargetMapYPercent = route[route.Count - 1].YPercent;
+        expedition.LastTravelPoints.Clear();
+
+        commander.State = expedition.Phase;
+
+        resultMessage = expedition.Phase == CommanderState.ReturningToCastle
+            ? "Армия продолжила прерванное возвращение в столицу."
+            : "Армия продолжила прежний маршрут от обнаруженной локации.";
+
+        return true;
     }
 
     public LocationData RevealLocationNear(float xPercent, float yPercent)
@@ -906,8 +1131,17 @@ public class GameState
 
         foreach (LocationData location in Locations)
         {
-            if (location.IsVisibleOnMap)
+            if (location.IsWaypoint || location.IsVisibleOnMap)
                 continue;
+
+            if (!WorldMapNavigation.IsWithinDiscoveryRadius(
+                    xPercent,
+                    yPercent,
+                    location.MapXPercent,
+                    location.MapYPercent))
+            {
+                continue;
+            }
 
             float deltaX = location.MapXPercent - xPercent;
             float deltaY = location.MapYPercent - yPercent;
@@ -920,21 +1154,19 @@ public class GameState
             }
         }
 
-        // Разведка всегда даёт понятный результат прототипа: ближайшая ещё
-        // неизвестная локация появляется в исследованном секторе карты.
         if (nearest != null)
         {
-            nearest.MapXPercent = xPercent;
-            nearest.MapYPercent = yPercent;
-            nearest.RegionName = GetRegionName(xPercent, yPercent);
+            nearest.RegionName = GetRegionName(
+                nearest.MapXPercent,
+                nearest.MapYPercent);
             nearest.IsVisibleOnMap = true;
             nearest.IsDiscovered = true;
             nearest.DistanceDays = WorldMapNavigation.CalculateDays(
                 WorldMapNavigation.FindPath(
                     WorldMapNavigation.CapitalXPercent,
                     WorldMapNavigation.CapitalYPercent,
-                    xPercent,
-                    yPercent));
+                    nearest.MapXPercent,
+                    nearest.MapYPercent));
         }
 
         return nearest;
@@ -942,12 +1174,88 @@ public class GameState
 
     public static string GetRegionName(float xPercent, float yPercent)
     {
-        if (yPercent < 34f)
-            return "Северные земли";
-        if (xPercent < 40f)
+        // Сначала делим карту по горизонтали. Так северо-запад не превращается
+        // автоматически в "Север", а три тестовые зоны действительно дают
+        // Запад / Север / Восток.
+        if (xPercent < 34f)
             return "Западные земли";
-        if (xPercent > 60f)
+
+        if (xPercent > 66f)
             return "Восточные земли";
+
+        if (yPercent < 40f)
+            return "Северные земли";
+
         return "Центральные земли";
+    }
+
+    private bool ValidateExpeditionFighters(
+        List<string> selectedFighterIds,
+        out string resultMessage)
+    {
+        if (selectedFighterIds == null || selectedFighterIds.Count == 0)
+        {
+            resultMessage = "Сначала выберите хотя бы одного бойца для экспедиции.";
+            return false;
+        }
+
+        HashSet<string> uniqueSelectedIds =
+            new HashSet<string>(selectedFighterIds);
+
+        if (uniqueSelectedIds.Count != selectedFighterIds.Count)
+        {
+            resultMessage = "В составе экспедиции один боец указан несколько раз.";
+            return false;
+        }
+
+        foreach (string fighterId in uniqueSelectedIds)
+        {
+            if (FindFighter(fighterId) == null)
+            {
+                resultMessage =
+                    "В составе экспедиции найден неизвестный боец: " +
+                    fighterId + ".";
+                return false;
+            }
+        }
+
+        resultMessage = string.Empty;
+        return true;
+    }
+
+    private LocationData GetOrCreateRouteWaypoint(
+        float xPercent,
+        float yPercent)
+    {
+        LocationData waypoint = FindLocation(RouteWaypointId);
+
+        if (waypoint == null)
+        {
+            waypoint = new LocationData(
+                RouteWaypointId,
+                "Точка маршрута",
+                0,
+                "—");
+            waypoint.IsWaypoint = true;
+            Locations.Add(waypoint);
+        }
+
+        waypoint.MapXPercent = WorldMapNavigation.ClampMapX(xPercent);
+        waypoint.MapYPercent = WorldMapNavigation.ClampMapY(yPercent);
+        waypoint.RegionId = "waypoint";
+        waypoint.RegionName = GetRegionName(
+            waypoint.MapXPercent,
+            waypoint.MapYPercent);
+        waypoint.DistanceDays = WorldMapNavigation.CalculateDays(
+            WorldMapNavigation.FindPath(
+                WorldMapNavigation.CapitalXPercent,
+                WorldMapNavigation.CapitalYPercent,
+                waypoint.MapXPercent,
+                waypoint.MapYPercent));
+        waypoint.IsVisibleOnMap = false;
+        waypoint.IsDiscovered = true;
+        waypoint.IsExplored = false;
+        waypoint.IsWaypoint = true;
+        return waypoint;
     }
 }

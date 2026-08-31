@@ -19,6 +19,7 @@ public static class WorldMapNavigation
     public const int GridWidth = 24;
     public const int GridHeight = 16;
     public const int CellsPerDay = 4;
+    public const int DiscoveryRadiusCells = 1;
     public const float CapitalXPercent = 50f;
     public const float CapitalYPercent = 81f;
 
@@ -94,19 +95,26 @@ public static class WorldMapNavigation
 
             for (int i = 0; i < NeighborOffsets.GetLength(0); i++)
             {
-                int nextX = currentX + NeighborOffsets[i, 0];
-                int nextY = currentY + NeighborOffsets[i, 1];
+                int offsetX = NeighborOffsets[i, 0];
+                int offsetY = NeighborOffsets[i, 1];
+                int nextX = currentX + offsetX;
+                int nextY = currentY + offsetY;
 
-                if (!IsInside(nextX, nextY) || IsBlocked(nextX, nextY))
+                if (!CanTraverseStep(
+                        currentX,
+                        currentY,
+                        nextX,
+                        nextY))
+                {
                     continue;
+                }
 
                 int next = ToIndex(nextX, nextY);
 
                 if (closed[next])
                     continue;
 
-                bool diagonal =
-                    NeighborOffsets[i, 0] != 0 && NeighborOffsets[i, 1] != 0;
+                bool diagonal = offsetX != 0 && offsetY != 0;
                 float nextCost = costs[current] + (diagonal ? 1.4142f : 1f);
 
                 if (nextCost >= costs[next])
@@ -123,7 +131,9 @@ public static class WorldMapNavigation
         return new List<MapPointData>();
     }
 
-    public static int CalculateDays(List<MapPointData> path, int routeIndex = 0)
+    public static int CalculateDays(
+        List<MapPointData> path,
+        int routeIndex = 0)
     {
         if (path == null || path.Count <= 1)
             return 0;
@@ -137,6 +147,14 @@ public static class WorldMapNavigation
         if (expedition == null || days <= 0)
             return;
 
+        if (expedition.LastTravelPoints.Count == 0)
+        {
+            expedition.LastTravelStartedPhase = expedition.Phase;
+            expedition.LastTravelTargetLocationId = expedition.LocationId;
+            expedition.LastTravelTargetXPercent = expedition.TargetMapXPercent;
+            expedition.LastTravelTargetYPercent = expedition.TargetMapYPercent;
+        }
+
         if (expedition.TravelDelayDays > 0)
         {
             int usedDelay = Math.Min(days, expedition.TravelDelayDays);
@@ -144,14 +162,28 @@ public static class WorldMapNavigation
             days -= usedDelay;
         }
 
-        if (days > 0 && expedition.Route != null && expedition.Route.Count > 0)
+        if (days > 0 &&
+            expedition.Route != null &&
+            expedition.Route.Count > 0)
         {
-            expedition.RouteIndex = Math.Min(
-                expedition.Route.Count - 1,
-                expedition.RouteIndex + CellsPerDay * days);
-            MapPointData position = expedition.Route[expedition.RouteIndex];
-            expedition.CurrentMapXPercent = position.XPercent;
-            expedition.CurrentMapYPercent = position.YPercent;
+            int cellsToMove = CellsPerDay * days;
+
+            for (int i = 0; i < cellsToMove; i++)
+            {
+                if (expedition.RouteIndex >= expedition.Route.Count - 1)
+                    break;
+
+                expedition.RouteIndex++;
+                MapPointData position =
+                    expedition.Route[expedition.RouteIndex];
+
+                expedition.CurrentMapXPercent = position.XPercent;
+                expedition.CurrentMapYPercent = position.YPercent;
+                expedition.LastTravelPoints.Add(
+                    new MapPointData(
+                        position.XPercent,
+                        position.YPercent));
+            }
         }
 
         expedition.DaysRemaining = CalculateDays(
@@ -163,19 +195,87 @@ public static class WorldMapNavigation
     {
         if (expedition == null || days <= 0)
             return;
+
         expedition.TravelDelayDays += days;
         expedition.DaysRemaining += days;
     }
 
     public static bool IsBlockedPercent(float xPercent, float yPercent)
     {
-        return IsBlocked(PercentToGridX(xPercent), PercentToGridY(yPercent));
+        return IsBlocked(
+            PercentToGridX(xPercent),
+            PercentToGridY(yPercent));
     }
 
-    public static float ClampMapX(float value) => Math.Max(2f, Math.Min(98f, value));
-    public static float ClampMapY(float value) => Math.Max(2f, Math.Min(96f, value));
+    public static bool IsBlockedGridCell(int x, int y)
+    {
+        return IsBlocked(x, y);
+    }
 
-    private static List<MapPointData> BuildPath(int[] parents, int current)
+    public static int GridXFromPercent(float value)
+    {
+        return PercentToGridX(value);
+    }
+
+    public static int GridYFromPercent(float value)
+    {
+        return PercentToGridY(value);
+    }
+
+    public static bool IsWithinDiscoveryRadius(
+        float firstXPercent,
+        float firstYPercent,
+        float secondXPercent,
+        float secondYPercent)
+    {
+        int firstX = PercentToGridX(firstXPercent);
+        int firstY = PercentToGridY(firstYPercent);
+        int secondX = PercentToGridX(secondXPercent);
+        int secondY = PercentToGridY(secondYPercent);
+
+        int gridDistance = Math.Max(
+            Math.Abs(firstX - secondX),
+            Math.Abs(firstY - secondY));
+
+        return gridDistance <= DiscoveryRadiusCells;
+    }
+
+    public static float ClampMapX(float value) =>
+        Math.Max(2f, Math.Min(98f, value));
+
+    public static float ClampMapY(float value) =>
+        Math.Max(2f, Math.Min(96f, value));
+
+    private static bool CanTraverseStep(
+        int currentX,
+        int currentY,
+        int nextX,
+        int nextY)
+    {
+        if (!IsInside(nextX, nextY) || IsBlocked(nextX, nextY))
+            return false;
+
+        int deltaX = nextX - currentX;
+        int deltaY = nextY - currentY;
+        bool diagonal = deltaX != 0 && deltaY != 0;
+
+        if (!diagonal)
+            return true;
+
+        // Диагональный шаг разрешён только если обе клетки по сторонам угла
+        // проходимы. Так A* не может "протискиваться" между двумя препятствиями.
+        if (IsBlocked(currentX + deltaX, currentY))
+            return false;
+
+        if (IsBlocked(currentX, currentY + deltaY))
+            return false;
+
+        return true;
+    }
+
+    private static List<MapPointData> BuildPath(
+        int[] parents,
+        int current)
     {
         List<MapPointData> reversed = new List<MapPointData>();
 
@@ -183,7 +283,10 @@ public static class WorldMapNavigation
         {
             int x = current % GridWidth;
             int y = current / GridWidth;
-            reversed.Add(new MapPointData(GridToPercentX(x), GridToPercentY(y)));
+            reversed.Add(
+                new MapPointData(
+                    GridToPercentX(x),
+                    GridToPercentY(y)));
             current = parents[current];
         }
 
@@ -193,7 +296,9 @@ public static class WorldMapNavigation
 
     private static void FindNearestWalkable(ref int x, ref int y)
     {
-        for (int radius = 1; radius < Math.Max(GridWidth, GridHeight); radius++)
+        for (int radius = 1;
+             radius < Math.Max(GridWidth, GridHeight);
+             radius++)
         {
             for (int offsetY = -radius; offsetY <= radius; offsetY++)
             {
@@ -221,22 +326,51 @@ public static class WorldMapNavigation
 
         // Два временных горных массива серого прототипа. Между ними
         // оставлены проходы, чтобы A* всегда мог найти путь по суше.
-        bool westernRidge = x >= 7 && x <= 9 && y >= 3 && y <= 10 && y != 7;
-        bool easternRidge = x >= 15 && x <= 17 && y >= 1 && y <= 9 && y != 5;
-        bool northernLake = x >= 11 && x <= 13 && y >= 1 && y <= 3;
+        bool westernRidge =
+            x >= 7 && x <= 9 && y >= 3 && y <= 10 && y != 7;
+        bool easternRidge =
+            x >= 15 && x <= 17 && y >= 1 && y <= 9 && y != 5;
+        bool northernLake =
+            x >= 11 && x <= 13 && y >= 1 && y <= 3;
+
         return westernRidge || easternRidge || northernLake;
     }
 
     private static bool IsInside(int x, int y) =>
-        x >= 0 && x < GridWidth && y >= 0 && y < GridHeight;
+        x >= 0 && x < GridWidth &&
+        y >= 0 && y < GridHeight;
 
-    private static int ToIndex(int x, int y) => y * GridWidth + x;
+    private static int ToIndex(int x, int y) =>
+        y * GridWidth + x;
+
     private static int PercentToGridX(float value) =>
-        Math.Max(0, Math.Min(GridWidth - 1, (int)Math.Round(value * (GridWidth - 1) / 100f)));
+        Math.Max(
+            0,
+            Math.Min(
+                GridWidth - 1,
+                (int)Math.Round(
+                    value * (GridWidth - 1) / 100f)));
+
     private static int PercentToGridY(float value) =>
-        Math.Max(0, Math.Min(GridHeight - 1, (int)Math.Round(value * (GridHeight - 1) / 100f)));
-    private static float GridToPercentX(int value) => value * 100f / (GridWidth - 1);
-    private static float GridToPercentY(int value) => value * 100f / (GridHeight - 1);
-    private static float Heuristic(int x, int y, int targetX, int targetY) =>
-        Math.Max(Math.Abs(targetX - x), Math.Abs(targetY - y));
+        Math.Max(
+            0,
+            Math.Min(
+                GridHeight - 1,
+                (int)Math.Round(
+                    value * (GridHeight - 1) / 100f)));
+
+    private static float GridToPercentX(int value) =>
+        value * 100f / (GridWidth - 1);
+
+    private static float GridToPercentY(int value) =>
+        value * 100f / (GridHeight - 1);
+
+    private static float Heuristic(
+        int x,
+        int y,
+        int targetX,
+        int targetY) =>
+        Math.Max(
+            Math.Abs(targetX - x),
+            Math.Abs(targetY - y));
 }

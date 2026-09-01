@@ -75,6 +75,8 @@ public partial class PrototypeUIController
 
         interfaceRoot.Add(fighterDetailsDimmer);
 
+        // Один делегированный обработчик отвечает за все карточки бойцов.
+        // Карточки гарнизонов регулярно пересоздаются, поэтому нельзя все от того, успел ли конкретный экземпляр получить локальный callback.
         interfaceRoot.RegisterCallback<PointerDownEvent>(
             CaptureFighterDetailsAnchor,
             TrickleDown.TrickleDown);
@@ -87,21 +89,81 @@ public partial class PrototypeUIController
 
     private void CaptureFighterDetailsAnchor(PointerDownEvent evt)
     {
-        if (evt.button != 1)
+        if (evt.button != 1 || isGameOver || gameState == null)
             return;
 
-        VisualElement current = evt.target as VisualElement;
+        VisualElement anchor = FindFighterCard(evt.target as VisualElement);
+
+        // Disabled Button может не стать обычной целью события. Panel.Pick
+        // позволяет всё равно найти фактическую карточку под курсором.
+        if (anchor == null && interfaceRoot != null && interfaceRoot.panel != null)
+        {
+            VisualElement picked = interfaceRoot.panel.Pick(evt.position);
+            anchor = FindFighterCard(picked);
+        }
+
+        if (anchor == null)
+            return;
+
+        string fighterId = ResolveFighterIdFromCard(anchor);
+        if (string.IsNullOrEmpty(fighterId))
+            return;
+
+        pendingFighterDetailsAnchor = anchor;
+        OpenFighterDetails(fighterId);
+
+        // Не отдаём ПКМ дальше локальным обработчикам карточки: открытие уже
+        // выполнено здесь один раз и больше не зависит от polling-декоратора.
+        evt.StopPropagation();
+    }
+
+    private VisualElement FindFighterCard(VisualElement start)
+    {
+        VisualElement current = start;
         while (current != null && current != interfaceRoot)
         {
             if (current.ClassListContains("fighter-card") ||
                 current.ClassListContains("battle-fighter-card") ||
                 current.ClassListContains("battle-result-fighter-card"))
             {
-                pendingFighterDetailsAnchor = current;
-                return;
+                return current;
             }
+
             current = current.parent;
         }
+
+        return null;
+    }
+
+    private string ResolveFighterIdFromCard(VisualElement card)
+    {
+        if (card == null || gameState == null || gameState.Fighters == null)
+            return null;
+
+        foreach (FighterData fighter in gameState.Fighters)
+        {
+            if (CardContainsExactLabel(card, fighter.Name))
+                return fighter.Id;
+        }
+
+        return null;
+    }
+
+    private static bool CardContainsExactLabel(
+        VisualElement element,
+        string expectedText)
+    {
+        Label label = element as Label;
+        if (label != null && label.text == expectedText)
+            return true;
+
+        foreach (VisualElement child in element.Children())
+        {
+            if (CardContainsExactLabel(child, expectedText))
+                return true;
+        }
+
+        return false;
     }
 
     private void TickFighterDetailsAnchor()

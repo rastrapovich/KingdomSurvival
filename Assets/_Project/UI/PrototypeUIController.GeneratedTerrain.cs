@@ -6,6 +6,7 @@ public partial class PrototypeUIController
     private bool generatedTerrainUiInitialized;
     private int renderedTerrainSeed = int.MinValue;
     private IVisualElementScheduledItem generatedTerrainPoll;
+    private VisualElement generatedTerrainLayer;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InitializeGeneratedTerrainRuntime()
@@ -29,7 +30,7 @@ public partial class PrototypeUIController
         if (generatedTerrainUiInitialized)
             return;
 
-        if (interfaceRoot == null || worldMapTerrain == null || gameState == null)
+        if (interfaceRoot == null || worldMap == null || gameState == null)
         {
             UIDocument document = GetComponent<UIDocument>();
             if (document != null)
@@ -41,6 +42,7 @@ public partial class PrototypeUIController
             return;
         }
 
+        EnsureGeneratedTerrainLayer();
         generatedTerrainPoll = interfaceRoot.schedule
             .Execute(TickGeneratedTerrainUi)
             .Every(50);
@@ -50,10 +52,11 @@ public partial class PrototypeUIController
 
     private void TickGeneratedTerrainUi()
     {
-        if (gameState == null || worldMapTerrain == null)
+        if (gameState == null || worldMap == null)
             return;
 
         WorldMapNavigation.ConfigureTerrain(gameState.WorldSeed);
+        EnsureGeneratedTerrainLayer();
 
         if (renderedTerrainSeed != gameState.WorldSeed)
         {
@@ -61,10 +64,41 @@ public partial class PrototypeUIController
             DrawGeneratedTerrain();
             renderedTerrainSeed = gameState.WorldSeed;
         }
-        else if (worldMapTerrain.childCount == 0)
+        else if (generatedTerrainLayer.childCount == 0)
         {
             DrawGeneratedTerrain();
         }
+    }
+
+    private void EnsureGeneratedTerrainLayer()
+    {
+        if (worldMap == null)
+            return;
+
+        if (generatedTerrainLayer != null &&
+            generatedTerrainLayer.parent == worldMap)
+        {
+            return;
+        }
+
+        if (generatedTerrainLayer != null)
+            generatedTerrainLayer.RemoveFromHierarchy();
+
+        generatedTerrainLayer = new VisualElement
+        {
+            name = "generated-terrain-layer",
+            pickingMode = PickingMode.Ignore
+        };
+        generatedTerrainLayer.style.position = Position.Absolute;
+        generatedTerrainLayer.style.left = 0f;
+        generatedTerrainLayer.style.right = 0f;
+        generatedTerrainLayer.style.top = 0f;
+        generatedTerrainLayer.style.bottom = 0f;
+
+        // Это отдельный постоянный слой. RefreshWorldMapPanel очищает старый
+        // worldMapTerrain, но больше не затрагивает визуал холмов и гор.
+        worldMap.Add(generatedTerrainLayer);
+        generatedTerrainLayer.SendToBack();
     }
 
     private void RefreshLocationTravelEstimatesForTerrain()
@@ -89,7 +123,12 @@ public partial class PrototypeUIController
 
     private void DrawGeneratedTerrain()
     {
-        worldMapTerrain.Clear();
+        EnsureGeneratedTerrainLayer();
+        if (generatedTerrainLayer == null)
+            return;
+
+        generatedTerrainLayer.Clear();
+        generatedTerrainLayer.SendToBack();
 
         float cellWidth = 100f / WorldMapNavigation.GridWidth;
         float cellHeight = 100f / WorldMapNavigation.GridHeight;
@@ -139,7 +178,7 @@ public partial class PrototypeUIController
                 }
 
                 cell.Add(symbol);
-                worldMapTerrain.Add(cell);
+                generatedTerrainLayer.Add(cell);
             }
         }
     }

@@ -35,7 +35,7 @@ public partial class PrototypeUIController
 
         if (interfaceRoot == null ||
             gameState == null ||
-            endDayButton == null ||
+            timeToggleButton == null ||
             worldMap == null ||
             worldMapCapitalButton == null ||
             returnExpeditionButton == null ||
@@ -69,10 +69,8 @@ public partial class PrototypeUIController
 
     private void RebindContinuousTimeButtons()
     {
-        endDayButton.clicked -= OnEndDayClicked;
-        endDayButton.clicked -= OnStableEndDayClicked;
-        endDayButton.clicked -= OnContinuousPauseClicked;
-        endDayButton.clicked += OnContinuousPauseClicked;
+        timeToggleButton.clicked -= OnContinuousPauseClicked;
+        timeToggleButton.clicked += OnContinuousPauseClicked;
 
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
         returnExpeditionButton.clicked -= OnStableExpeditionActionClicked;
@@ -259,7 +257,7 @@ public partial class PrototypeUIController
             MarkReportUnread(reportIndex);
         }
 
-        QueueDayResolutionModals(batch.Result, reportIndex);
+        QueueStrategicResultModals(batch.Result, reportIndex);
 
         RefreshInterface();
         if (stableUiInitialized)
@@ -304,11 +302,10 @@ public partial class PrototypeUIController
             return;
         }
 
-        ContinuousSimulationSystem.NotifyResearchStarted(gameState);
         LocationData location =
             gameState.FindLocation(gameState.ActiveExpedition.LocationId);
         double hours =
-            location != null ? location.ExplorationDays * 24.0 : 24.0;
+            location != null ? location.ExplorationHours : 0.0;
 
         AddReport(
             "Исследование начато. Расчётное время: " +
@@ -322,21 +319,19 @@ public partial class PrototypeUIController
             return;
 
         if (gameState.HasPendingExpeditionDecision ||
-            gameState.ActiveExpedition.IsExplorationInProgress)
+            gameState.ActiveExpedition.IsLocationResearchInProgress)
         {
             return;
         }
 
         string resultMessage;
 
-        if (!ContinuousSimulationSystem.HasExpeditionStartedMoving(gameState))
+        if (gameState.CanCancelPreparedExpedition)
         {
-            if (gameState.TryCancelExpeditionBeforeDayEnd(out resultMessage))
-            {
-                resultMessage =
-                    "Приказ на отправку отменён. Командир и выбранные бойцы " +
-                    "остаются в столице; течение времени не изменилось.";
-            }
+            gameState.TryCancelPreparedExpedition(out resultMessage);
+            resultMessage =
+                "Приказ на отправку отменён. Командир и выбранные бойцы " +
+                "остаются в столице; течение времени не изменилось.";
         }
         else
         {
@@ -356,7 +351,7 @@ public partial class PrototypeUIController
     {
         if (!gameState.HasActiveExpedition ||
             gameState.HasPendingExpeditionDecision ||
-            gameState.ActiveExpedition.IsExplorationInProgress)
+            gameState.ActiveExpedition.IsLocationResearchInProgress)
         {
             return;
         }

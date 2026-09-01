@@ -203,7 +203,7 @@
                         <ui:Label name="mood-label" text="Настроение: 64/100" class="resource-value" /><ui:VisualElement class="resource-test-controls"><ui:Button name="mood-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="mood-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="end-day-button" text="ХОД" tooltip="Завершить день" class="end-day-button shell-end-day-button" />
+                <ui:Button name="time-toggle-button" text="ПУСК" tooltip="Продолжить течение времени" class="time-toggle-button shell-time-toggle-button" />
             </ui:VisualElement>
         </ui:VisualElement>
 

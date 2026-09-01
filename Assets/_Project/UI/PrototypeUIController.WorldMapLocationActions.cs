@@ -274,7 +274,7 @@ public partial class PrototypeUIController
             return;
         }
 
-        if (expedition.IsExplorationInProgress)
+        if (expedition.IsLocationResearchInProgress)
         {
             worldMapLocationCardResearchButton.text = "ИССЛЕДОВАНИЕ...";
             worldMapLocationCardResearchButton.SetEnabled(false);
@@ -283,7 +283,7 @@ public partial class PrototypeUIController
             return;
         }
 
-        if (location.ExplorationDays <= 0)
+        if (location.ExplorationHours <= 0)
         {
             worldMapLocationCardResearchButton.text = "ИССЛЕДОВАТЬ";
             worldMapLocationCardResearchButton.SetEnabled(false);

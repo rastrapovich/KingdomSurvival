@@ -29,7 +29,7 @@ public static partial class ContinuousSimulationSystem
 
     private static void ResolveCityFoodAtMidnight(
         GameState state,
-        DayResolutionResult result)
+        StrategicSimulationResult result)
     {
         int requiredFood = state.DailyFoodConsumption;
         int availableFood = state.Food;
@@ -81,7 +81,7 @@ public static partial class ContinuousSimulationSystem
     private static void ResolveExpeditionSupplyAtMidnight(
         GameState state,
         RuntimeState runtime,
-        DayResolutionResult result)
+        StrategicSimulationResult result)
     {
         if (!state.HasActiveExpedition)
             return;
@@ -162,42 +162,6 @@ public static partial class ContinuousSimulationSystem
         runtime.TrackedRoute = expedition != null ? expedition.Route : null;
         runtime.TrackedRouteIndex = expedition != null ? expedition.RouteIndex : 0;
         runtime.SegmentProgress = 0.0;
-        runtime.DelayHourProgress = 0.0;
-    }
-
-    private static void EnsureResearchTracking(
-        GameState state,
-        RuntimeState runtime)
-    {
-        if (state == null ||
-            !state.HasActiveExpedition ||
-            !state.ActiveExpedition.IsExplorationInProgress)
-        {
-            ResetResearchTracking(runtime);
-            return;
-        }
-
-        ExpeditionData expedition = state.ActiveExpedition;
-        string locationId = expedition.LocationId ?? string.Empty;
-
-        if (runtime.TrackedResearchExpedition == expedition &&
-            runtime.TrackedResearchLocationId == locationId &&
-            runtime.ResearchHoursRemaining >= 0.0)
-        {
-            return;
-        }
-
-        runtime.TrackedResearchExpedition = expedition;
-        runtime.TrackedResearchLocationId = locationId;
-        int remainingDays = Math.Max(1, expedition.ExplorationDaysRemaining);
-        runtime.ResearchHoursRemaining = remainingDays * 24.0;
-    }
-
-    private static void ResetResearchTracking(RuntimeState runtime)
-    {
-        runtime.TrackedResearchExpedition = null;
-        runtime.TrackedResearchLocationId = null;
-        runtime.ResearchHoursRemaining = -1.0;
     }
 
     private static double GetRemainingCells(
@@ -213,16 +177,15 @@ public static partial class ContinuousSimulationSystem
         return Math.Max(0.0, fullSegments - runtime.SegmentProgress);
     }
 
-    private static void UpdateLegacyRemainingDistance(
+    private static void UpdateRemainingRouteCells(
         ExpeditionData expedition,
         RuntimeState runtime)
     {
         if (expedition == null)
             return;
 
-        expedition.DaysRemaining = (int)Math.Ceiling(
-            GetRemainingCells(expedition, runtime) +
-            Math.Max(0, expedition.TravelDelayDays));
+        expedition.RemainingRouteCells =
+            (int)Math.Ceiling(GetRemainingCells(expedition, runtime));
     }
 
     private static float Lerp(float a, float b, float t) =>
@@ -269,7 +232,7 @@ public static partial class ContinuousSimulationSystem
         if (!hadExpedition || snapshot == null || state.HasActiveExpedition)
             return;
 
-        batch.Result.ExpeditionReturnNotice = new DayModalNotice
+        batch.Result.ExpeditionReturnNotice = new StrategicModalNotice
         {
             Title = "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ",
             Description =

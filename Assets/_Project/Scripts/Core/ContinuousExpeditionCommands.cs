@@ -21,7 +21,7 @@ public static class ContinuousExpeditionCommands
             return false;
         }
 
-        if (expedition.IsExplorationInProgress)
+        if (expedition.IsLocationResearchInProgress)
         {
             resultMessage = "Нельзя возвращаться во время начатого исследования.";
             return false;
@@ -63,11 +63,12 @@ public static class ContinuousExpeditionCommands
         }
 
         expedition.Phase = CommanderState.ReturningToCastle;
+        expedition.ActiveActivity = null;
         expedition.Route = route;
         expedition.RouteIndex = 0;
-        expedition.TravelDelayDays = 0;
-        expedition.DaysRemaining = Math.Max(1, route.Count - 1);
-        expedition.LegTotalDays = expedition.DaysRemaining;
+        expedition.RouteDelayHoursRemaining = 0;
+        expedition.RemainingRouteCells = Math.Max(1, route.Count - 1);
+        expedition.RouteLengthCells = expedition.RemainingRouteCells;
         expedition.TargetMapXPercent = WorldMapNavigation.CapitalXPercent;
         expedition.TargetMapYPercent = WorldMapNavigation.CapitalYPercent;
         expedition.HasInterruptedRoute = false;

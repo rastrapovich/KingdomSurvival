@@ -104,9 +104,6 @@ public partial class PrototypeUIController
 
     private void RebindStableUiCallbacks()
     {
-        endDayButton.clicked -= OnEndDayClicked;
-        endDayButton.clicked += OnStableEndDayClicked;
-
         armyGoldMinusButton.clicked -= OnArmyGoldMinusClicked;
         armyGoldPlusButton.clicked -= OnArmyGoldPlusClicked;
         supplyMinusButton.clicked -= OnSupplyMinusClicked;
@@ -177,41 +174,6 @@ public partial class PrototypeUIController
             .ExecuteLater(1);
     }
 
-    private void OnStableEndDayClicked()
-    {
-        if (isGameOver || HasBlockingModalWork())
-        {
-            TryShowNextQueuedModal();
-            return;
-        }
-
-        if (gameState.HasActiveExpedition &&
-            gameState.CanCancelExpeditionBeforeDayEnd)
-        {
-            CommanderData departingCommander =
-                gameState.FindCommander(gameState.ActiveExpedition.CommanderId);
-
-            if (departingCommander != null)
-                departingCommander.State = CommanderState.TravellingToLocation;
-        }
-
-        int finishedDay = gameState.Day;
-        ExpeditionReturnSnapshot returnSnapshot = CaptureExpeditionReturnSnapshot();
-        DayResolutionResult result = DayResolver.ResolveDay(gameState);
-        AddReturnNoticeIfCompleted(result, returnSnapshot);
-
-        if (result.NewExpeditionIncidents.Count > 0)
-            unreadIncidents.AddRange(result.NewExpeditionIncidents);
-
-        int reportIndex = AddReport(string.Join("\n", result.Messages), finishedDay);
-        RegisterIncidentReports(result.NewExpeditionIncidents, reportIndex);
-        QueueDayResolutionModals(result, reportIndex);
-        RefreshInterface();
-        RefreshStableUiAfterStateChange();
-        TryShowNextQueuedModal();
-        CheckForDefeat();
-    }
-
     private void TrySendExpeditionFromStableUi(string locationId)
     {
         if (isGameOver)
@@ -255,10 +217,10 @@ public partial class PrototypeUIController
         string resultMessage;
         bool cancelled = false;
 
-        if (gameState.CanCancelExpeditionBeforeDayEnd)
+        if (gameState.CanCancelPreparedExpedition)
         {
             cancelled =
-                gameState.TryCancelExpeditionBeforeDayEnd(out resultMessage);
+                gameState.TryCancelPreparedExpedition(out resultMessage);
 
             if (cancelled)
                 selectedFighterIds.Clear();
@@ -333,7 +295,7 @@ public partial class PrototypeUIController
         RefreshJourneySummaryFromState();
         RefreshIncidentNotifications();
         RefreshPersistentCommanderNavigationState();
-        RefreshEndDayAvailability();
+        RefreshTimeControlAvailability();
         ScheduleRoyalReportsRefresh();
     }
 

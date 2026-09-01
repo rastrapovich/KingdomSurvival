@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 
 // Shared result containers for the continuous strategic simulation and modal UI.
-// The historical name DayResolutionResult is retained for compatibility with
-// existing event systems; it no longer implies a player-triggered day step.
-public class DayResolutionResult
+public class StrategicSimulationResult
 {
     public List<string> Messages = new List<string>();
     public List<ExpeditionIncidentOccurrence> NewExpeditionIncidents =
@@ -11,15 +9,11 @@ public class DayResolutionResult
 
     public bool HadNotableOccurrence;
 
-    // Retained while the existing event definitions are migrated. The continuous
-    // simulation does not use this field to advance a discrete turn.
-    public bool SkipExpeditionOccurrencesForDay;
-
-    public DayModalNotice ResearchNotice;
-    public DayModalNotice ExpeditionReturnNotice;
+    public StrategicModalNotice ResearchNotice;
+    public StrategicModalNotice ExpeditionReturnNotice;
 }
 
-public class DayModalNotice
+public class StrategicModalNotice
 {
     public string Title;
     public string Description;

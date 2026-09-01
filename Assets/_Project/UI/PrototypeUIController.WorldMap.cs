@@ -12,6 +12,12 @@ public partial class PrototypeUIController
     private Button worldMapCapitalButton;
     private VisualElement worldMapArmyMarker;
     private Label worldMapArmyMarkerLabel;
+    private VisualElement worldMapArmyActivity;
+    private VisualElement worldMapArmyActivityFill;
+    private Label worldMapArmyActivityLabel;
+    private VisualElement worldMapLocationActivity;
+    private VisualElement worldMapLocationActivityFill;
+    private Label worldMapLocationActivityLabel;
     private Label worldMapHintLabel;
     private VisualElement mapSelectionCard;
     private Label mapSelectionTitle;
@@ -251,17 +257,17 @@ public partial class PrototypeUIController
     {
         if (!gameState.HasActiveExpedition ||
             gameState.HasPendingExpeditionDecision ||
-            gameState.ActiveExpedition.IsExplorationInProgress)
+            gameState.ActiveExpedition.IsLocationResearchInProgress)
         {
             return;
         }
 
         string resultMessage;
 
-        if (gameState.CanCancelExpeditionBeforeDayEnd)
+        if (gameState.CanCancelPreparedExpedition)
         {
             bool cancelled =
-                gameState.TryCancelExpeditionBeforeDayEnd(
+                gameState.TryCancelPreparedExpedition(
                     out resultMessage);
 
             if (cancelled)
@@ -446,7 +452,7 @@ public partial class PrototypeUIController
             !isGameOver &&
             (!gameState.HasActiveExpedition ||
              (!gameState.HasPendingExpeditionDecision &&
-              !gameState.ActiveExpedition.IsExplorationInProgress));
+              !gameState.ActiveExpedition.IsLocationResearchInProgress));
 
         node.SetEnabled(canChangeRoute);
         worldMapMarkers.Add(node);
@@ -484,7 +490,7 @@ public partial class PrototypeUIController
         bool canUseCapital =
             active &&
             !gameState.HasPendingExpeditionDecision &&
-            !gameState.ActiveExpedition.IsExplorationInProgress &&
+            !gameState.ActiveExpedition.IsLocationResearchInProgress &&
             gameState.ActiveExpedition.Phase !=
                 CommanderState.ReturningToCastle;
 
@@ -498,6 +504,7 @@ public partial class PrototypeUIController
         {
             worldMapArmyMarker.style.display =
                 DisplayStyle.None;
+            HideWorldMapActivityProgress();
             return;
         }
 
@@ -516,9 +523,139 @@ public partial class PrototypeUIController
                 LengthUnit.Percent);
 
         worldMapArmyMarkerLabel.text =
-            expedition.DaysRemaining > 0
-                ? expedition.DaysRemaining + " дн."
+            expedition.RemainingRouteCells > 0
+                ? ContinuousExpeditionCommands.FormatHours(
+                    ContinuousSimulationSystem.GetTravelHoursRemaining(gameState))
                 : "на месте";
+
+        RefreshWorldMapActivityProgress(expedition);
+    }
+
+    private void RefreshWorldMapActivityProgress(ExpeditionData expedition)
+    {
+        ExpeditionActivityData activity = expedition.ActiveActivity;
+
+        if (activity == null)
+        {
+            HideWorldMapActivityProgress();
+            return;
+        }
+
+        if (activity.Kind == ExpeditionActivityKind.RoadStop)
+        {
+            EnsureWorldMapArmyActivity();
+            worldMapArmyActivity.style.display = DisplayStyle.Flex;
+            UpdateWorldMapActivity(
+                worldMapArmyActivityFill,
+                worldMapArmyActivityLabel,
+                activity);
+
+            if (worldMapLocationActivity != null)
+                worldMapLocationActivity.style.display = DisplayStyle.None;
+            return;
+        }
+
+        LocationData location = gameState.FindLocation(activity.LocationId);
+        if (location == null || worldMapMarkers == null)
+        {
+            HideWorldMapActivityProgress();
+            return;
+        }
+
+        EnsureWorldMapLocationActivity();
+        worldMapLocationActivity.style.display = DisplayStyle.Flex;
+        worldMapLocationActivity.style.left = new Length(
+            location.MapXPercent,
+            LengthUnit.Percent);
+        worldMapLocationActivity.style.top = new Length(
+            location.MapYPercent,
+            LengthUnit.Percent);
+        UpdateWorldMapActivity(
+            worldMapLocationActivityFill,
+            worldMapLocationActivityLabel,
+            activity);
+
+        if (worldMapArmyActivity != null)
+            worldMapArmyActivity.style.display = DisplayStyle.None;
+    }
+
+    private void EnsureWorldMapArmyActivity()
+    {
+        if (worldMapArmyActivity != null &&
+            worldMapArmyActivity.parent == worldMapArmyMarker)
+        {
+            return;
+        }
+
+        CreateWorldMapActivityElements(
+            out worldMapArmyActivity,
+            out worldMapArmyActivityFill,
+            out worldMapArmyActivityLabel);
+        worldMapArmyActivity.AddToClassList("world-map-army-activity");
+        worldMapArmyMarker.Add(worldMapArmyActivity);
+    }
+
+    private void EnsureWorldMapLocationActivity()
+    {
+        if (worldMapLocationActivity != null &&
+            worldMapLocationActivity.parent == worldMapMarkers)
+        {
+            return;
+        }
+
+        CreateWorldMapActivityElements(
+            out worldMapLocationActivity,
+            out worldMapLocationActivityFill,
+            out worldMapLocationActivityLabel);
+        worldMapLocationActivity.AddToClassList("world-map-location-activity");
+        worldMapMarkers.Add(worldMapLocationActivity);
+    }
+
+    private static void CreateWorldMapActivityElements(
+        out VisualElement container,
+        out VisualElement fill,
+        out Label label)
+    {
+        container = new VisualElement();
+        container.AddToClassList("world-map-activity");
+        container.pickingMode = PickingMode.Ignore;
+
+        label = new Label();
+        label.AddToClassList("world-map-activity-label");
+        label.pickingMode = PickingMode.Ignore;
+
+        VisualElement track = new VisualElement();
+        track.AddToClassList("world-map-activity-track");
+        track.pickingMode = PickingMode.Ignore;
+
+        fill = new VisualElement();
+        fill.AddToClassList("world-map-activity-fill");
+        fill.pickingMode = PickingMode.Ignore;
+
+        track.Add(fill);
+        container.Add(label);
+        container.Add(track);
+    }
+
+    private static void UpdateWorldMapActivity(
+        VisualElement fill,
+        Label label,
+        ExpeditionActivityData activity)
+    {
+        fill.style.width = new Length(
+            (float)(activity.Progress01 * 100.0),
+            LengthUnit.Percent);
+        label.text =
+            activity.DisplayName + " · " +
+            ContinuousExpeditionCommands.FormatHours(activity.RemainingHours);
+    }
+
+    private void HideWorldMapActivityProgress()
+    {
+        if (worldMapArmyActivity != null)
+            worldMapArmyActivity.style.display = DisplayStyle.None;
+        if (worldMapLocationActivity != null)
+            worldMapLocationActivity.style.display = DisplayStyle.None;
     }
 
     private void RefreshWorldMapSelectionCard()
@@ -534,7 +671,7 @@ public partial class PrototypeUIController
         if (location.IsExplored)
             return "Состояние: исследована.";
 
-        if (location.ExplorationDays > 0)
+        if (location.ExplorationHours > 0)
             return "Состояние: доступна для исследования.";
 
         return "Состояние: обнаружена.";

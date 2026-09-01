@@ -34,21 +34,30 @@ public static class ExpeditionDecisionSystem
         public string Id;
         public string Label;
         public int SupplyDelta;
-        public int TravelDelta;
+        public double RouteDelayHours;
+        public int RouteShortcutCells;
         public int RequiredSupply;
+        public string ActivityName;
+        public double ActivityHours;
 
         public DecisionOptionDefinition(
             string id,
             string label,
             int supplyDelta,
-            int travelDelta,
-            int requiredSupply)
+            double routeDelayHours,
+            int routeShortcutCells,
+            int requiredSupply,
+            string activityName = null,
+            double activityHours = 0.0)
         {
             Id = id;
             Label = label;
             SupplyDelta = supplyDelta;
-            TravelDelta = travelDelta;
+            RouteDelayHours = routeDelayHours;
+            RouteShortcutCells = routeShortcutCells;
             RequiredSupply = requiredSupply;
+            ActivityName = activityName;
+            ActivityHours = activityHours;
         }
     }
 
@@ -79,7 +88,7 @@ public static class ExpeditionDecisionSystem
     private static int nextOccurrenceId = 1;
 
     // Временная вероятность для тестового прототипа.
-    private const double DecisionChancePerTravelDay = 0.5;
+    private const double DecisionChancePerScheduledCheck = 0.5;
 
     private static readonly List<DecisionDefinition> Definitions =
         new List<DecisionDefinition>
@@ -92,13 +101,15 @@ public static class ExpeditionDecisionSystem
                     "shortcut",
                     "Срезать через овраг",
                     -2,
-                    -1,
+                    0.0,
+                    1,
                     2),
                 new DecisionOptionDefinition(
                     "safe_road",
                     "Идти безопасной дорогой",
                     0,
-                    1,
+                    1.0,
+                    0,
                     0)),
 
             new DecisionDefinition(
@@ -109,12 +120,16 @@ public static class ExpeditionDecisionSystem
                     "gather_berries",
                     "Остановиться и собрать ягоды",
                     3,
-                    1,
-                    0),
+                    0.0,
+                    0,
+                    0,
+                    "СБОР ЯГОД",
+                    3.0),
                 new DecisionOptionDefinition(
                     "keep_moving",
                     "Не задерживаться",
                     0,
+                    0.0,
                     0,
                     0)),
 
@@ -126,20 +141,22 @@ public static class ExpeditionDecisionSystem
                     "share",
                     "Поделиться припасами",
                     -4,
-                    -1,
+                    0.0,
+                    1,
                     4),
                 new DecisionOptionDefinition(
                     "refuse",
                     "Отказать и продолжить путь",
                     0,
+                    0.0,
                     0,
                     0))
         };
 
-    public static void ResolveForDay(
+    public static void ResolveAtScheduledCheck(
         GameState state,
         int finishedDay,
-        DayResolutionResult result)
+        StrategicSimulationResult result)
     {
         if (TryCreateLocationDiscoveryDecision(
                 state,
@@ -152,7 +169,7 @@ public static class ExpeditionDecisionSystem
         if (!CanGenerateDecision(state))
             return;
 
-        if (Random.NextDouble() >= DecisionChancePerTravelDay)
+        if (Random.NextDouble() >= DecisionChancePerScheduledCheck)
             return;
 
         List<DecisionDefinition> eligible = GetEligibleDefinitions(state);
@@ -201,7 +218,7 @@ public static class ExpeditionDecisionSystem
                 if (location == null || location.IsWaypoint)
                     return false;
 
-                if (location.ExplorationDays <= 0 || location.IsExplored)
+                if (location.ExplorationHours <= 0 || location.IsExplored)
                     return true;
 
                 return
@@ -265,24 +282,55 @@ public static class ExpeditionDecisionSystem
             return false;
         }
 
+        if (option.ActivityHours > 0.0)
+        {
+            state.ActiveExpedition.PendingDecision = null;
+            string activityMessage;
+            bool started = state.TryStartRoadActivity(
+                "decision:" + definition.Id + ":" + option.Id,
+                option.ActivityName,
+                option.ActivityHours,
+                0,
+                Math.Max(0, option.SupplyDelta),
+                out activityMessage);
+
+            if (!started)
+            {
+                state.ActiveExpedition.PendingDecision = occurrence;
+                resultMessage = activityMessage;
+                return false;
+            }
+
+            resultMessage =
+                "Приказ по событию «" + occurrence.Title + "»: " +
+                option.Label + ". " + activityMessage;
+            return true;
+        }
+
         List<string> consequences = new List<string>();
 
         int actualSupplyDelta =
             ApplySupplyDelta(state, option.SupplyDelta);
         string arrivalText;
-        int actualTravelDelta =
-            ApplyTravelDelta(
+        double actualDelayHours =
+            ApplyRouteDelay(state, option.RouteDelayHours);
+        int actualShortcutCells =
+            ApplyRouteShortcut(
                 state,
-                option.TravelDelta,
+                option.RouteShortcutCells,
                 out arrivalText);
 
         if (option.SupplyDelta != 0)
             consequences.Add(
                 FormatSupplyConsequence(actualSupplyDelta));
 
-        if (option.TravelDelta != 0)
+        if (option.RouteDelayHours > 0.0)
             consequences.Add(
-                FormatTravelConsequence(actualTravelDelta));
+                FormatRouteDelayConsequence(actualDelayHours));
+
+        if (option.RouteShortcutCells > 0)
+            consequences.Add(
+                FormatRouteShortcutConsequence(actualShortcutCells));
 
         if (!string.IsNullOrWhiteSpace(arrivalText))
             consequences.Add(arrivalText);
@@ -305,10 +353,11 @@ public static class ExpeditionDecisionSystem
     private static bool TryCreateLocationDiscoveryDecision(
         GameState state,
         int finishedDay,
-        DayResolutionResult result)
+        StrategicSimulationResult result)
     {
         if (!state.HasActiveExpedition ||
-            state.HasPendingExpeditionDecision)
+            state.HasPendingExpeditionDecision ||
+            state.ActiveExpedition.HasTimedActivity)
         {
             return false;
         }
@@ -372,7 +421,7 @@ public static class ExpeditionDecisionSystem
                     Id = InvestigateDiscoveredLocationOptionId,
                     Label = "Исследовать",
                     ConsequencePreview =
-                        location.ExplorationDays > 0
+                        location.ExplorationHours > 0
                             ? "Начать исследование локации"
                             : "Осмотреть найденное место"
                 },
@@ -436,12 +485,12 @@ public static class ExpeditionDecisionSystem
         if (optionId != InvestigateDiscoveredLocationOptionId)
             return false;
 
-        if (location.ExplorationDays > 0 &&
+        if (location.ExplorationHours > 0 &&
             !location.IsExplored &&
             state.ArmySupply < state.ExpeditionSupplyConsumption)
         {
             resultMessage =
-                "Для исследования нужен полный дневной рацион. Требуется снабжения: " +
+                "Для исследования нужен достаточный запас снабжения. Требуется: " +
                 state.ExpeditionSupplyConsumption + ".";
             return false;
         }
@@ -449,7 +498,7 @@ public static class ExpeditionDecisionSystem
         expedition.PendingDecision = null;
         expedition.HasInterruptedRoute = false;
 
-        if (location.ExplorationDays > 0 && !location.IsExplored)
+        if (location.ExplorationHours > 0 && !location.IsExplored)
         {
             string researchMessage;
 
@@ -485,14 +534,15 @@ public static class ExpeditionDecisionSystem
     private static bool CanGenerateDecision(GameState state)
     {
         if (!state.HasActiveExpedition ||
-            state.HasPendingExpeditionDecision)
+            state.HasPendingExpeditionDecision ||
+            state.ActiveExpedition.HasTimedActivity)
         {
             return false;
         }
 
         ExpeditionData expedition = state.ActiveExpedition;
 
-        if (expedition.DaysRemaining <= 0)
+        if (expedition.RemainingRouteCells <= 0)
             return false;
 
         return
@@ -538,10 +588,18 @@ public static class ExpeditionDecisionSystem
         else if (option.SupplyDelta < 0)
             parts.Add("снабжение " + option.SupplyDelta);
 
-        if (option.TravelDelta > 0)
-            parts.Add("путь +" + option.TravelDelta + " день");
-        else if (option.TravelDelta < 0)
-            parts.Add("путь " + option.TravelDelta + " день");
+        if (option.RouteDelayHours > 0.0)
+            parts.Add(
+                "остановка на " +
+                ContinuousExpeditionCommands.FormatHours(
+                    option.RouteDelayHours));
+
+        if (option.RouteShortcutCells > 0)
+            parts.Add("маршрут -" + option.RouteShortcutCells + " клетка");
+
+        if (option.ActivityHours > 0.0)
+            parts.Add(
+                ContinuousExpeditionCommands.FormatHours(option.ActivityHours));
 
         return parts.Count > 0
             ? string.Join(", ", parts)
@@ -600,9 +658,26 @@ public static class ExpeditionDecisionSystem
         return -actualLoss;
     }
 
-    private static int ApplyTravelDelta(
+    private static double ApplyRouteDelay(
         GameState state,
-        int requestedDelta,
+        double requestedHours)
+    {
+        if (requestedHours <= 0.0 ||
+            state == null ||
+            !state.HasActiveExpedition)
+        {
+            return 0.0;
+        }
+
+        WorldMapNavigation.AddRouteDelayHours(
+            state.ActiveExpedition,
+            requestedHours);
+        return requestedHours;
+    }
+
+    private static int ApplyRouteShortcut(
+        GameState state,
+        int requestedCells,
         out string arrivalText)
     {
         arrivalText = string.Empty;
@@ -610,36 +685,28 @@ public static class ExpeditionDecisionSystem
             state.ActiveExpedition;
 
         if (expedition == null ||
-            expedition.DaysRemaining <= 0)
+            expedition.RemainingRouteCells <= 0)
         {
             return 0;
         }
 
-        if (requestedDelta >= 0)
-        {
-            WorldMapNavigation.AddTravelDelay(
-                expedition,
-                requestedDelta);
-            return requestedDelta;
-        }
-
         int reduction =
             Math.Min(
-                expedition.DaysRemaining,
-                -requestedDelta);
+                expedition.RemainingRouteCells,
+                Math.Max(0, requestedCells));
 
-        WorldMapNavigation.AdvanceRoute(
+        WorldMapNavigation.AdvanceRouteByCells(
             expedition,
             reduction);
 
         if (reduction > 0 &&
-            expedition.DaysRemaining == 0)
+            expedition.RemainingRouteCells == 0)
         {
             arrivalText =
                 ResolveArrival(state, expedition);
         }
 
-        return -reduction;
+        return reduction;
     }
 
     private static string ResolveArrival(
@@ -686,15 +753,19 @@ public static class ExpeditionDecisionSystem
         return "Снабжение не изменилось.";
     }
 
-    private static string FormatTravelConsequence(int delta)
+    private static string FormatRouteDelayConsequence(double hours)
     {
-        if (delta > 0)
-            return
-                "Оставшийся путь +" + delta + " день.";
+        if (hours > 0.0)
+            return "Задержка маршрута: " +
+                ContinuousExpeditionCommands.FormatHours(hours) + ".";
 
-        if (delta < 0)
-            return
-                "Оставшийся путь " + delta + " день.";
+        return "Время пути не изменилось.";
+    }
+
+    private static string FormatRouteShortcutConsequence(int cells)
+    {
+        if (cells > 0)
+            return "Маршрут сокращён на " + cells + " клетку.";
 
         return "Длина пути не изменилась.";
     }

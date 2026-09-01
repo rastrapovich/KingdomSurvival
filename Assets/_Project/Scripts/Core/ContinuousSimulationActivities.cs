@@ -18,14 +18,14 @@ public static partial class ContinuousSimulationSystem
             runtime.CapitalCrisisChecked = true;
             processed = true;
             int incidentCountBefore = batch.Result.NewExpeditionIncidents.Count;
-            CapitalCrisisSystem.ResolveForDay(state, state.Day, batch.Result);
+            CapitalCrisisSystem.ResolveAtScheduledCheck(state, state.Day, batch.Result);
 
             if (batch.Result.NewExpeditionIncidents.Count > incidentCountBefore)
             {
                 ExpeditionIncidentOccurrence crisis =
                     batch.Result.NewExpeditionIncidents[
                         batch.Result.NewExpeditionIncidents.Count - 1];
-                batch.MandatoryNotice = new DayModalNotice
+                batch.MandatoryNotice = new StrategicModalNotice
                 {
                     Title = crisis.Title.ToUpper(),
                     Description = crisis.Description,
@@ -43,18 +43,25 @@ public static partial class ContinuousSimulationSystem
         {
             runtime.ExpeditionIncidentChecked = true;
             processed = true;
+            bool expeditionIsBusy =
+                state.HasActiveExpedition &&
+                state.ActiveExpedition.HasTimedActivity;
+
+            if (expeditionIsBusy)
+                return processed;
+
             bool hadExpedition = state.HasActiveExpedition;
             ExpeditionReturnSnapshotData returnSnapshot =
                 CaptureReturnSnapshot(state);
 
-            ExpeditionIncidentSystem.ResolveForDay(
+            ExpeditionIncidentSystem.ResolveAtScheduledCheck(
                 state,
                 state.Day,
                 batch.Result);
 
             EnsureRouteTracking(state, runtime);
 
-            if (ConsumeLegacyTravelPoints(state, runtime, batch))
+            if (ConsumeQueuedTravelPoints(state, runtime, batch))
                 batch.RequestAutoPause = true;
 
             AddReturnNoticeIfNeeded(
@@ -63,7 +70,7 @@ public static partial class ContinuousSimulationSystem
                 returnSnapshot,
                 batch);
 
-            // Старое фоновое событие «короткая тропа» умеет мгновенно
+            // Фоновое событие «короткая тропа» умеет мгновенно
             // закончить последний сегмент маршрута. В непрерывной модели
             // такое фактическое прибытие тоже является важным результатом
             // и не должно пройти незаметно без автопаузы.
@@ -84,9 +91,16 @@ public static partial class ContinuousSimulationSystem
         {
             runtime.ExpeditionDecisionChecked = true;
             processed = true;
+            bool expeditionIsBusy =
+                state.HasActiveExpedition &&
+                state.ActiveExpedition.HasTimedActivity;
+
+            if (expeditionIsBusy)
+                return processed;
+
             bool hadPending = state.HasPendingExpeditionDecision;
 
-            ExpeditionDecisionSystem.ResolveForDay(
+            ExpeditionDecisionSystem.ResolveAtScheduledCheck(
                 state,
                 state.Day,
                 batch.Result);
@@ -101,68 +115,84 @@ public static partial class ContinuousSimulationSystem
         return processed;
     }
 
-    private static void AdvanceOngoingActivities(
+    private static double AdvanceOngoingActivities(
         GameState state,
         RuntimeState runtime,
         double gameHours,
         ContinuousSimulationBatch batch)
     {
-        AdvanceResearch(state, runtime, gameHours, batch);
+        double elapsedHours;
+        double movementHours = AdvanceTimedActivity(
+            state,
+            gameHours,
+            batch,
+            out elapsedHours);
 
         if (batch.RequestAutoPause)
-            return;
+            return elapsedHours;
 
-        AdvanceExpeditionMovement(state, runtime, gameHours, batch);
+        AdvanceExpeditionMovement(state, runtime, movementHours, batch);
+        return gameHours;
     }
 
-    private static void AdvanceResearch(
+    private static double AdvanceTimedActivity(
         GameState state,
-        RuntimeState runtime,
         double gameHours,
-        ContinuousSimulationBatch batch)
+        ContinuousSimulationBatch batch,
+        out double elapsedHours)
     {
-        EnsureResearchTracking(state, runtime);
+        elapsedHours = gameHours;
 
-        if (runtime.ResearchHoursRemaining < 0.0 ||
-            !state.HasActiveExpedition ||
-            !state.ActiveExpedition.IsExplorationInProgress ||
-            state.HasPendingExpeditionDecision)
+        if (!state.HasActiveExpedition ||
+            !state.ActiveExpedition.HasTimedActivity)
         {
-            return;
+            return gameHours;
         }
-
-        runtime.ResearchHoursRemaining = Math.Max(
-            0.0,
-            runtime.ResearchHoursRemaining - gameHours);
-
-        state.ActiveExpedition.ExplorationDaysRemaining =
-            (int)Math.Ceiling(runtime.ResearchHoursRemaining / 24.0);
-
-        if (runtime.ResearchHoursRemaining > Epsilon)
-            return;
 
         ExpeditionData expedition = state.ActiveExpedition;
-        LocationData location = state.FindLocation(expedition.LocationId);
+        ExpeditionActivityData activity = expedition.ActiveActivity;
 
-        if (location == null || location.IsWaypoint)
+        if (state.HasPendingExpeditionDecision)
+            return 0.0;
+
+        double usedHours = Math.Min(
+            gameHours,
+            Math.Max(0.0, activity.RemainingHours));
+        activity.RemainingHours = Math.Max(
+            0.0,
+            activity.RemainingHours - usedHours);
+
+        if (activity.RemainingHours > Epsilon)
+            return 0.0;
+
+        expedition.ActiveActivity = null;
+
+        if (activity.Kind == ExpeditionActivityKind.RoadStop)
         {
-            expedition.IsExplorationInProgress = false;
-            ResetResearchTracking(runtime);
-            return;
+            state.ArmyGold += Math.Max(0, activity.RewardArmyGold);
+            state.ArmySupply += Math.Max(0, activity.RewardArmySupply);
+
+            List<string> roadRewards = BuildActivityRewards(activity);
+            batch.Result.Messages.Add(
+                activity.DisplayName + " завершён. " +
+                (roadRewards.Count > 0
+                    ? "Добыча отряда: " + string.Join(", ", roadRewards) + "."
+                    : "Отряд продолжил маршрут."));
+            batch.Result.HadNotableOccurrence = true;
+            batch.ReportDay = state.Day;
+            return Math.Max(0.0, gameHours - usedHours);
         }
 
-        expedition.IsExplorationInProgress = false;
-        expedition.ExplorationDaysRemaining = 0;
+        LocationData location = state.FindLocation(activity.LocationId);
+        if (location == null || location.IsWaypoint)
+            return 0.0;
+
         location.IsExplored = true;
 
-        state.ArmyGold += location.RewardArmyGold;
-        state.ArmySupply += location.RewardArmySupply;
+        state.ArmyGold += Math.Max(0, activity.RewardArmyGold);
+        state.ArmySupply += Math.Max(0, activity.RewardArmySupply);
 
-        List<string> rewards = new List<string>();
-        if (location.RewardArmyGold > 0)
-            rewards.Add("золото +" + location.RewardArmyGold);
-        if (location.RewardArmySupply > 0)
-            rewards.Add("снабжение +" + location.RewardArmySupply);
+        List<string> rewards = BuildActivityRewards(activity);
 
         string rewardText = rewards.Count > 0
             ? string.Join(", ", rewards)
@@ -171,7 +201,7 @@ public static partial class ContinuousSimulationSystem
         batch.Result.Messages.Add(
             "Локация «" + location.Name +
             "» исследована. Добыча отряда: " + rewardText + ".");
-        batch.Result.ResearchNotice = new DayModalNotice
+        batch.Result.ResearchNotice = new StrategicModalNotice
         {
             Title = "ИССЛЕДОВАНИЕ ЗАВЕРШЕНО",
             Description = "Локация «" + location.Name + "» полностью исследована.",
@@ -182,7 +212,21 @@ public static partial class ContinuousSimulationSystem
         batch.Result.HadNotableOccurrence = true;
         batch.RequestAutoPause = true;
         batch.ReportDay = state.Day;
-        ResetResearchTracking(runtime);
+        elapsedHours = usedHours;
+        return 0.0;
+    }
+
+    private static List<string> BuildActivityRewards(
+        ExpeditionActivityData activity)
+    {
+        List<string> rewards = new List<string>();
+
+        if (activity.RewardArmyGold > 0)
+            rewards.Add("золото +" + activity.RewardArmyGold);
+        if (activity.RewardArmySupply > 0)
+            rewards.Add("снабжение +" + activity.RewardArmySupply);
+
+        return rewards;
     }
 
     private static void AdvanceExpeditionMovement(
@@ -199,7 +243,7 @@ public static partial class ContinuousSimulationSystem
 
         ExpeditionData expedition = state.ActiveExpedition;
 
-        if (expedition.IsExplorationInProgress ||
+        if (expedition.HasTimedActivity ||
             (expedition.Phase != CommanderState.TravellingToLocation &&
              expedition.Phase != CommanderState.ReturningToCastle))
         {
@@ -208,9 +252,8 @@ public static partial class ContinuousSimulationSystem
 
         EnsureRouteTracking(state, runtime);
 
-        // Старый UI до фактического старта мог оставлять командира в замке.
-        // Как только непрерывная симуляция действительно начинает движение,
-        // каноническое состояние синхронизируется с фазой экспедиции.
+        // До фактического старта подготовленный командир остаётся в замке.
+        // При начале движения состояние синхронизируется с фазой экспедиции.
         CommanderData movingCommander = state.FindCommander(expedition.CommanderId);
         if (movingCommander != null)
             movingCommander.State = expedition.Phase;
@@ -222,7 +265,7 @@ public static partial class ContinuousSimulationSystem
 
         if (movementHours <= Epsilon)
         {
-            UpdateLegacyRemainingDistance(expedition, runtime);
+            UpdateRemainingRouteCells(expedition, runtime);
             return;
         }
 
@@ -283,7 +326,7 @@ public static partial class ContinuousSimulationSystem
         }
 
         if (state.HasActiveExpedition)
-            UpdateLegacyRemainingDistance(state.ActiveExpedition, runtime);
+            UpdateRemainingRouteCells(state.ActiveExpedition, runtime);
     }
 
     private static double ConsumeTravelDelay(
@@ -291,29 +334,15 @@ public static partial class ContinuousSimulationSystem
         RuntimeState runtime,
         double gameHours)
     {
-        if (expedition.TravelDelayDays <= 0)
-        {
-            runtime.DelayHourProgress = 0.0;
+        if (expedition.RouteDelayHoursRemaining <= Epsilon)
             return gameHours;
-        }
 
-        double delayRemaining = Math.Max(
+        double usedDelay = Math.Min(
+            gameHours,
+            expedition.RouteDelayHoursRemaining);
+        expedition.RouteDelayHoursRemaining = Math.Max(
             0.0,
-            expedition.TravelDelayDays - runtime.DelayHourProgress);
-        double usedDelay = Math.Min(gameHours, delayRemaining);
-        runtime.DelayHourProgress += usedDelay;
-
-        while (runtime.DelayHourProgress >= 1.0 - Epsilon &&
-               expedition.TravelDelayDays > 0)
-        {
-            expedition.TravelDelayDays--;
-            runtime.DelayHourProgress = Math.Max(
-                0.0,
-                runtime.DelayHourProgress - 1.0);
-        }
-
-        if (expedition.TravelDelayDays <= 0)
-            runtime.DelayHourProgress = 0.0;
+            expedition.RouteDelayHoursRemaining - usedDelay);
 
         return Math.Max(0.0, gameHours - usedDelay);
     }
@@ -346,7 +375,7 @@ public static partial class ContinuousSimulationSystem
             {
                 Id = "investigate_discovered_location",
                 Label = "Исследовать",
-                ConsequencePreview = location.ExplorationDays > 0
+                ConsequencePreview = location.ExplorationHours > 0
                     ? "Начать исследование локации"
                     : "Осмотреть найденное место"
             },
@@ -368,7 +397,7 @@ public static partial class ContinuousSimulationSystem
         return true;
     }
 
-    private static bool ConsumeLegacyTravelPoints(
+    private static bool ConsumeQueuedTravelPoints(
         GameState state,
         RuntimeState runtime,
         ContinuousSimulationBatch batch)
@@ -402,10 +431,9 @@ public static partial class ContinuousSimulationSystem
         if (commander == null)
             return;
 
-        expedition.DaysRemaining = 0;
-        expedition.LegTotalDays = 0;
-        expedition.TravelDelayDays = 0;
-        runtime.DelayHourProgress = 0.0;
+        expedition.RemainingRouteCells = 0;
+        expedition.RouteLengthCells = 0;
+        expedition.RouteDelayHoursRemaining = 0.0;
 
         if (expedition.Phase == CommanderState.ReturningToCastle)
         {
@@ -418,7 +446,7 @@ public static partial class ContinuousSimulationSystem
             batch.Result.Messages.Add(
                 commanderName + " и " + fighterCount +
                 " воинов вернулись в столицу. " + delivered);
-            batch.Result.ExpeditionReturnNotice = new DayModalNotice
+            batch.Result.ExpeditionReturnNotice = new StrategicModalNotice
             {
                 Title = "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ",
                 Description =
@@ -446,25 +474,21 @@ public static partial class ContinuousSimulationSystem
             string arrival =
                 commander.Name + " прибыл в локацию «" + location.Name + "».";
             batch.Result.Messages.Add(arrival);
-            batch.MandatoryNotice = new DayModalNotice
+            batch.MandatoryNotice = new StrategicModalNotice
             {
                 Title = "АРМИЯ ПРИБЫЛА",
                 Description = arrival,
-                Consequence = location.ExplorationDays > 0 && !location.IsExplored
+                Consequence = location.ExplorationHours > 0 && !location.IsExplored
                     ? "Можно начать исследование, изменить маршрут или приказать возвращаться."
                     : "Можно изменить маршрут или приказать возвращаться."
             };
         }
         else
         {
-            string arrival = commander.Name + " достиг выбранной точки маршрута.";
+            string arrival = commander.Name + " достиг выбранной точки и остановился.";
             batch.Result.Messages.Add(arrival);
-            batch.MandatoryNotice = new DayModalNotice
-            {
-                Title = "ТОЧКА МАРШРУТА ДОСТИГНУТА",
-                Description = arrival,
-                Consequence = "Армия остановилась и ждёт нового приказа."
-            };
+            ResetRouteTracking(runtime, expedition);
+            return;
         }
 
         batch.Result.HadNotableOccurrence = true;
@@ -494,18 +518,20 @@ public static partial class ContinuousSimulationSystem
             location.IsVisibleOnMap = true;
             location.IsDiscovered = true;
             description = commander.Name + " прибыл в локацию «" + location.Name + "».";
-            consequence = location.ExplorationDays > 0 && !location.IsExplored
+            consequence = location.ExplorationHours > 0 && !location.IsExplored
                 ? "Можно начать исследование, изменить маршрут или приказать возвращаться."
                 : "Можно изменить маршрут или приказать возвращаться.";
         }
         else
         {
-            description = commander.Name + " достиг выбранной точки маршрута.";
-            consequence = "Армия остановилась и ждёт нового приказа.";
+            batch.Result.Messages.Add(
+                commander.Name + " достиг выбранной точки и остановился.");
+            batch.ReportDay = state.Day;
+            return;
         }
 
         batch.Result.Messages.Add(description);
-        batch.MandatoryNotice = new DayModalNotice
+        batch.MandatoryNotice = new StrategicModalNotice
         {
             Title = location != null && !location.IsWaypoint
                 ? "АРМИЯ ПРИБЫЛА"

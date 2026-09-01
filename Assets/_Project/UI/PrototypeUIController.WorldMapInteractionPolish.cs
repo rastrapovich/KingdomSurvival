@@ -226,8 +226,9 @@ public partial class PrototypeUIController
         if (worldMapLocationCard == null)
             return;
 
-        string researchText = location.ExplorationDays > 0
-            ? "Исследование: " + location.ExplorationDays + " дн."
+        string researchText = location.ExplorationHours > 0
+            ? "Исследование: " +
+              ContinuousExpeditionCommands.FormatHours(location.ExplorationHours)
             : "Исследование: пока не реализовано";
 
         worldMapLocationCardTitle.text = location.Name.ToUpper();

@@ -26,7 +26,7 @@ public static class LocationArrivalDecisionFactory
         ExpeditionData expedition = state.ActiveExpedition;
 
         if (expedition.Phase != CommanderState.AtLocation ||
-            expedition.IsExplorationInProgress)
+            expedition.IsLocationResearchInProgress)
         {
             return false;
         }
@@ -37,7 +37,7 @@ public static class LocationArrivalDecisionFactory
             return false;
 
         bool researchImplemented =
-            location.ExplorationDays > 0 && !location.IsExplored;
+            location.ExplorationHours > 0 && !location.IsExplored;
 
         occurrence = new ExpeditionDecisionOccurrence
         {

@@ -25,8 +25,8 @@ public partial class PrototypeUIController
         new Dictionary<int, int>();
     private QueuedModal activeQueuedModal;
 
-    private void QueueDayResolutionModals(
-        DayResolutionResult result,
+    private void QueueStrategicResultModals(
+        StrategicSimulationResult result,
         int reportIndex)
     {
         if (result == null)
@@ -47,10 +47,10 @@ public partial class PrototypeUIController
         if (queuedModals.Count > 0)
             MarkReportUnread(reportIndex);
 
-        RefreshEndDayAvailability();
+        RefreshTimeControlAvailability();
     }
 
-    private void QueueNotice(DayModalNotice notice, int reportIndex)
+    private void QueueNotice(StrategicModalNotice notice, int reportIndex)
     {
         if (notice == null)
             return;
@@ -58,7 +58,7 @@ public partial class PrototypeUIController
         // В непрерывной модели прибытие в известную локацию является
         // обязательным выбором, а не пассивной плашкой "ПОНЯТНО".
         // ProcessContinuousSimulationBatch вызывает QueueNotice для
-        // MandatoryNotice до QueueDayResolutionModals, поэтому достаточно
+        // MandatoryNotice до QueueStrategicResultModals, поэтому достаточно
         // создать PendingDecision здесь: следующий шаг очереди подхватит его
         // ровно один раз.
         if (notice.Title == "АРМИЯ ПРИБЫЛА")
@@ -100,7 +100,7 @@ public partial class PrototypeUIController
     }
 
     private void AddReturnNoticeIfCompleted(
-        DayResolutionResult result,
+        StrategicSimulationResult result,
         ExpeditionReturnSnapshot snapshot)
     {
         if (result == null || snapshot == null ||
@@ -110,7 +110,7 @@ public partial class PrototypeUIController
             return;
         }
 
-        result.ExpeditionReturnNotice = new DayModalNotice
+        result.ExpeditionReturnNotice = new StrategicModalNotice
         {
             Title = "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ",
             Description =
@@ -150,7 +150,7 @@ public partial class PrototypeUIController
             incidentModalOverlay.style.display = DisplayStyle.Flex;
         }
 
-        RefreshEndDayAvailability();
+        RefreshTimeControlAvailability();
     }
 
     private void FinishActiveQueuedModal()
@@ -164,7 +164,7 @@ public partial class PrototypeUIController
         MarkReportReadIfFullyAcknowledged(reportIndex);
         ScheduleRoyalReportsRefresh();
         TryShowNextQueuedModal();
-        RefreshEndDayAvailability();
+        RefreshTimeControlAvailability();
     }
 
     private void ClearQueuedModals()
@@ -229,16 +229,18 @@ public partial class PrototypeUIController
                 queuedModals.Count > 0);
     }
 
-    private void RefreshEndDayAvailability()
+    private void RefreshTimeControlAvailability()
     {
-        if (endDayButton == null || gameState == null)
+        if (timeToggleButton == null || gameState == null)
             return;
 
         bool blocked = HasBlockingModalWork();
-        endDayButton.SetEnabled(!isGameOver && !blocked);
-        endDayButton.tooltip = blocked
+        timeToggleButton.SetEnabled(!isGameOver && !blocked);
+        timeToggleButton.tooltip = blocked
             ? "Сначала примите обязательное решение или закройте важное донесение"
-            : "Завершить день";
+            : ContinuousSimulationSystem.IsPaused(gameState)
+                ? "Продолжить течение времени"
+                : "Поставить время на паузу";
     }
 
     private void MarkReportUnread(int reportIndex)

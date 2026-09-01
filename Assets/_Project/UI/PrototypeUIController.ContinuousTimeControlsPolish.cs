@@ -5,7 +5,6 @@ using UnityEngine.UIElements;
 public partial class PrototypeUIController
 {
     private bool continuousControlsPolishInitialized;
-    private bool continuousStableBindingsPurged;
     private Button continuousSpeed1Button;
     private Button continuousSpeed3Button;
     private Button continuousSpeed5Button;
@@ -37,7 +36,7 @@ public partial class PrototypeUIController
         if (!continuousTimeInitialized ||
             interfaceRoot == null ||
             gameState == null ||
-            endDayButton == null ||
+            timeToggleButton == null ||
             dayLabel == null ||
             continuousSpeedButton == null)
         {
@@ -82,17 +81,6 @@ public partial class PrototypeUIController
         {
             RefreshExtendedSpeedButtons();
             return;
-        }
-
-        // Stable UI может инициализироваться позже непрерывного времени и
-        // повторно подписать старый OnStableEndDayClicked. Как только stable UI
-        // готов, ещё раз забираем кнопку времени в единоличное владение
-        // непрерывной системы. После этого нажатие ПУСК/ПАУЗА физически не может
-        // вызвать DayResolver.
-        if (!continuousStableBindingsPurged && stableUiInitialized)
-        {
-            RebindContinuousTimeButtons();
-            continuousStableBindingsPurged = true;
         }
 
         RefreshExtendedSpeedButtons();
@@ -226,21 +214,21 @@ public partial class PrototypeUIController
     private void RepositionContinuousDayBox()
     {
         if (dayLabel == null ||
-            endDayButton == null ||
+            timeToggleButton == null ||
             dayLabel.parent == null ||
-            endDayButton.parent == null)
+            timeToggleButton.parent == null)
         {
             return;
         }
 
         VisualElement dayBox = dayLabel.parent;
-        VisualElement timeControlHost = endDayButton.parent;
+        VisualElement timeControlHost = timeToggleButton.parent;
 
         if (dayBox.parent != timeControlHost)
         {
             dayBox.RemoveFromHierarchy();
             timeControlHost.Add(dayBox);
-            endDayButton.BringToFront();
+            timeToggleButton.BringToFront();
         }
 
         dayBox.style.flexGrow = 0f;

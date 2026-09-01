@@ -21,7 +21,6 @@ public static class WorldMapNavigation
     // read as approximately square cells instead of stretched rectangles.
     public const int GridWidth = 26;
     public const int GridHeight = 16;
-    public const int CellsPerDay = 1;
     public const int DiscoveryRadiusCells = 1;
     public const float CapitalXPercent = 50f;
     public const float CapitalYPercent = 81f;
@@ -137,18 +136,17 @@ public static class WorldMapNavigation
         return new List<MapPointData>();
     }
 
-    public static int CalculateDays(List<MapPointData> path, int routeIndex = 0)
+    public static int CalculateRouteCells(List<MapPointData> path, int routeIndex = 0)
     {
         if (path == null || path.Count <= 1)
             return 0;
 
-        int remainingCells = Math.Max(0, path.Count - 1 - routeIndex);
-        return (remainingCells + CellsPerDay - 1) / CellsPerDay;
+        return Math.Max(0, path.Count - 1 - routeIndex);
     }
 
-    public static void AdvanceRoute(ExpeditionData expedition, int days)
+    public static void AdvanceRouteByCells(ExpeditionData expedition, int cells)
     {
-        if (expedition == null || days <= 0)
+        if (expedition == null || cells <= 0)
             return;
 
         if (expedition.LastTravelPoints.Count == 0)
@@ -159,18 +157,9 @@ public static class WorldMapNavigation
             expedition.LastTravelTargetYPercent = expedition.TargetMapYPercent;
         }
 
-        if (expedition.TravelDelayDays > 0)
+        if (expedition.Route != null && expedition.Route.Count > 0)
         {
-            int usedDelay = Math.Min(days, expedition.TravelDelayDays);
-            expedition.TravelDelayDays -= usedDelay;
-            days -= usedDelay;
-        }
-
-        if (days > 0 && expedition.Route != null && expedition.Route.Count > 0)
-        {
-            int cellsToMove = CellsPerDay * days;
-
-            for (int i = 0; i < cellsToMove; i++)
+            for (int i = 0; i < cells; i++)
             {
                 if (expedition.RouteIndex >= expedition.Route.Count - 1)
                     break;
@@ -184,18 +173,16 @@ public static class WorldMapNavigation
             }
         }
 
-        expedition.DaysRemaining =
-            CalculateDays(expedition.Route, expedition.RouteIndex) +
-            expedition.TravelDelayDays;
+        expedition.RemainingRouteCells =
+            CalculateRouteCells(expedition.Route, expedition.RouteIndex);
     }
 
-    public static void AddTravelDelay(ExpeditionData expedition, int days)
+    public static void AddRouteDelayHours(ExpeditionData expedition, double hours)
     {
-        if (expedition == null || days <= 0)
+        if (expedition == null || hours <= 0.0)
             return;
 
-        expedition.TravelDelayDays += days;
-        expedition.DaysRemaining += days;
+        expedition.RouteDelayHoursRemaining += hours;
     }
 
     public static bool IsBlockedPercent(float xPercent, float yPercent) =>

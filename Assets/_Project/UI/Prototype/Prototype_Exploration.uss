@@ -763,6 +763,60 @@
     white-space: normal;
 }
 
+.world-map-activity {
+    display: none;
+    position: absolute;
+    width: 138px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 4px;
+    padding-bottom: 5px;
+    background-color: rgba(24, 27, 31, 0.94);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(203, 165, 82);
+    border-right-color: rgb(111, 91, 51);
+    border-top-color: rgb(203, 165, 82);
+    border-bottom-color: rgb(111, 91, 51);
+    border-radius: 4px;
+}
+
+.world-map-army-activity {
+    left: -32px;
+    bottom: 40px;
+}
+
+.world-map-location-activity {
+    margin-left: -69px;
+    margin-top: -58px;
+}
+
+.world-map-activity-label {
+    margin-bottom: 3px;
+    color: rgb(242, 218, 163);
+    font-size: 8px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.world-map-activity-track {
+    width: 100%;
+    height: 7px;
+    background-color: rgb(48, 48, 44);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.world-map-activity-fill {
+    width: 0%;
+    height: 100%;
+    background-color: rgb(220, 177, 78);
+    border-radius: 3px;
+}
+
 .map-selection-card {
     margin-bottom: 8px;
     padding-left: 11px;

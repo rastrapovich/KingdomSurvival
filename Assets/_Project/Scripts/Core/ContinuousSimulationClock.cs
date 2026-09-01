@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 public sealed class ContinuousSimulationBatch
 {
-    public readonly DayResolutionResult Result = new DayResolutionResult();
-    public DayModalNotice MandatoryNotice;
+    public readonly StrategicSimulationResult Result = new StrategicSimulationResult();
+    public StrategicModalNotice MandatoryNotice;
     public bool RequestAutoPause;
     public bool StateChanged;
     public int ReportDay;
@@ -60,11 +60,6 @@ public static partial class ContinuousSimulationSystem
         public List<MapPointData> TrackedRoute;
         public int TrackedRouteIndex;
         public double SegmentProgress;
-        public double DelayHourProgress;
-
-        public ExpeditionData TrackedResearchExpedition;
-        public string TrackedResearchLocationId;
-        public double ResearchHoursRemaining;
     }
 
     private static readonly Dictionary<GameState, RuntimeState> RuntimeStates =
@@ -82,14 +77,12 @@ public static partial class ContinuousSimulationSystem
             HourOfDay = StartHour,
             IsPaused = true,
             SpeedMultiplier = NormalSpeedMultiplier,
-            Random = new Random(state.WorldSeed ^ 0x4B534354),
-            ResearchHoursRemaining = -1.0
+            Random = new Random(state.WorldSeed ^ 0x4B534354)
         };
 
         RuntimeStates[state] = runtime;
         ScheduleDailyChecks(state, runtime, StartHour);
         ResetRouteTracking(runtime, state.ActiveExpedition);
-        ResetResearchTracking(runtime);
     }
 
     public static ContinuousClockSnapshot GetClock(GameState state)
@@ -162,13 +155,6 @@ public static partial class ContinuousSimulationSystem
         ResetRouteTracking(runtime, expedition);
     }
 
-    public static void NotifyResearchStarted(GameState state)
-    {
-        RuntimeState runtime = GetRuntime(state);
-        ResetResearchTracking(runtime);
-        EnsureResearchTracking(state, runtime);
-    }
-
     public static double GetTravelHoursRemaining(GameState state)
     {
         if (state == null || !state.HasActiveExpedition)
@@ -186,17 +172,22 @@ public static partial class ContinuousSimulationSystem
 
         double remainingCells = GetRemainingCells(expedition, runtime);
         double movementHours = remainingCells / CellsPerGameHour;
-        double delayHours = Math.Max(
-            0.0,
-            expedition.TravelDelayDays - runtime.DelayHourProgress);
+        double delayHours = Math.Max(0.0, expedition.RouteDelayHoursRemaining);
         return movementHours + delayHours;
     }
 
     public static double GetResearchHoursRemaining(GameState state)
     {
-        RuntimeState runtime = GetRuntime(state);
-        EnsureResearchTracking(state, runtime);
-        return Math.Max(0.0, runtime.ResearchHoursRemaining);
+        if (state == null ||
+            !state.HasActiveExpedition ||
+            !state.ActiveExpedition.IsLocationResearchInProgress)
+        {
+            return 0.0;
+        }
+
+        return Math.Max(
+            0.0,
+            state.ActiveExpedition.ActiveActivity.RemainingHours);
     }
 
     public static ContinuousSimulationBatch Advance(
@@ -218,9 +209,8 @@ public static partial class ContinuousSimulationSystem
             return batch;
 
         EnsureRouteTracking(state, runtime);
-        EnsureResearchTracking(state, runtime);
 
-        if (ConsumeLegacyTravelPoints(state, runtime, batch))
+        if (ConsumeQueuedTravelPoints(state, runtime, batch))
         {
             PauseIfRequested(runtime, batch);
             return batch;
@@ -269,9 +259,13 @@ public static partial class ContinuousSimulationSystem
                 break;
             }
 
-            AdvanceOngoingActivities(state, runtime, stepHours, batch);
-            runtime.HourOfDay += stepHours;
-            remainingGameHours -= stepHours;
+            double advancedHours = AdvanceOngoingActivities(
+                state,
+                runtime,
+                stepHours,
+                batch);
+            runtime.HourOfDay += advancedHours;
+            remainingGameHours -= advancedHours;
             batch.StateChanged = true;
             batch.EventHour = runtime.HourOfDay;
 
@@ -303,8 +297,24 @@ public static partial class ContinuousSimulationSystem
         return hours.ToString("00") + ":" + minutes.ToString("00");
     }
 
-    private static double CellsPerGameHour =>
+    public static double CellsPerGameHour =>
         ArmyCellsPerRealSecond / GameHoursPerRealSecond;
+
+    public static double CalculateTravelHours(
+        List<MapPointData> route,
+        int routeIndex = 0)
+    {
+        int cells = WorldMapNavigation.CalculateRouteCells(route, routeIndex);
+        return cells / CellsPerGameHour;
+    }
+
+    public static string FormatTravelTime(
+        List<MapPointData> route,
+        int routeIndex = 0)
+    {
+        return ContinuousExpeditionCommands.FormatHours(
+            CalculateTravelHours(route, routeIndex));
+    }
 
     private static RuntimeState GetRuntime(GameState state)
     {
@@ -314,8 +324,7 @@ public static partial class ContinuousSimulationSystem
                 HourOfDay = StartHour,
                 IsPaused = true,
                 SpeedMultiplier = NormalSpeedMultiplier,
-                Random = new Random(1),
-                ResearchHoursRemaining = -1.0
+                Random = new Random(1)
             };
 
         RuntimeState runtime;

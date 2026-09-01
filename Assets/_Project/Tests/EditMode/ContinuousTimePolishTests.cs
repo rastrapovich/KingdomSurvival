@@ -145,7 +145,7 @@ public class ContinuousTimePolishTests
 
         Assert.That(resolved, Is.True, message);
         Assert.That(state.HasPendingExpeditionDecision, Is.False);
-        Assert.That(state.ActiveExpedition.IsExplorationInProgress, Is.True);
+        Assert.That(state.ActiveExpedition.IsLocationResearchInProgress, Is.True);
     }
 
     private static GameState CreatePreparedExpedition()
@@ -188,7 +188,7 @@ public class ContinuousTimePolishTests
         state.ActiveExpedition.Phase = CommanderState.AtLocation;
         state.ActiveExpedition.CurrentMapXPercent = location.MapXPercent;
         state.ActiveExpedition.CurrentMapYPercent = location.MapYPercent;
-        state.ActiveExpedition.DaysRemaining = 0;
+        state.ActiveExpedition.RemainingRouteCells = 0;
 
         CommanderData commander =
             state.FindCommander(state.ActiveExpedition.CommanderId);

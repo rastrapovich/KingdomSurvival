@@ -396,7 +396,7 @@ public partial class PrototypeUIController
             ? location.TravelTargetName
             : expedition.IsScoutingTarget ? "точка разведки" : "неизвестная локация";
 
-        if (gameState.CanCancelExpeditionBeforeDayEnd)
+        if (gameState.CanCancelPreparedExpedition)
         {
             armyStatusLabel.text =
                 "СТАТУС АРМИИ: В ЗАМКЕ · ПРИКАЗ: " +
@@ -410,7 +410,7 @@ public partial class PrototypeUIController
             return;
         }
 
-        if (expedition.IsExplorationInProgress)
+        if (expedition.IsLocationResearchInProgress)
         {
             armyStatusLabel.text =
                 "СТАТУС АРМИИ: ИССЛЕДУЕТ · " +

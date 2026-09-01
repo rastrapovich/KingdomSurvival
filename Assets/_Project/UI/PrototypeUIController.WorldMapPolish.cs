@@ -195,7 +195,7 @@ public partial class PrototypeUIController
         if (pointerEvent.button != 0 ||
             gameState == null ||
             !gameState.HasActiveExpedition ||
-            !gameState.CanCancelExpeditionBeforeDayEnd)
+            !gameState.CanCancelPreparedExpedition)
         {
             return;
         }

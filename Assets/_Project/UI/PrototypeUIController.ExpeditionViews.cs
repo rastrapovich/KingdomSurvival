@@ -150,7 +150,9 @@ public partial class PrototypeUIController
         info.style.minWidth = 0;
         info.style.justifyContent = Justify.Center;
 
-        Label distance = new Label(location.DistanceDays + " дня");
+        Label distance = new Label(
+            ContinuousExpeditionCommands.FormatHours(
+                location.TravelHoursFromCapital));
         distance.style.height = 16;
         distance.style.fontSize = 9;
         distance.style.color = ExpeditionRgb(180, 178, 169);
@@ -313,7 +315,7 @@ public partial class PrototypeUIController
             gameState.ActiveExpedition != null &&
             gameState.ActiveExpedition.LocationId == locationId;
 
-        if (sameTarget && gameState.CanCancelExpeditionBeforeDayEnd)
+        if (sameTarget && gameState.CanCancelPreparedExpedition)
             OnStableExpeditionActionClicked();
     }
 
@@ -346,7 +348,7 @@ public partial class PrototypeUIController
             ? location.TravelTargetName
             : expedition.IsScoutingTarget ? "точка разведки" : "—";
 
-        if (gameState.CanCancelExpeditionBeforeDayEnd)
+        if (gameState.CanCancelPreparedExpedition)
         {
             persistentCommanderStateLabel.text = "В ЗАМКЕ";
             persistentCommanderStateLabel.style.color = ExpeditionRgb(221, 181, 103);
@@ -394,7 +396,7 @@ public partial class PrototypeUIController
                 : gameState.ActiveExpedition.IsScoutingTarget
                     ? "точка разведки"
                     : "неизвестно";
-            quickExpeditionOrderLabel.text = gameState.CanCancelExpeditionBeforeDayEnd
+            quickExpeditionOrderLabel.text = gameState.CanCancelPreparedExpedition
                 ? "ПРИКАЗ НА СЕГОДНЯ: " + locationName
                 : "ЭКСПЕДИЦИЯ: " + GetShortExpeditionState() + " → " + locationName;
         }
@@ -420,8 +422,8 @@ public partial class PrototypeUIController
                     location.Id,
                     out distance))
             {
-                distance.text = location.DistanceDays + " " +
-                    GetDayWord(location.DistanceDays);
+                distance.text = ContinuousExpeditionCommands.FormatHours(
+                    location.TravelHoursFromCapital);
             }
 
             if (quickExpeditionThreatLabels.TryGetValue(
@@ -463,7 +465,7 @@ public partial class PrototypeUIController
         bool hasExpedition = gameState.HasActiveExpedition;
         bool isTarget = hasExpedition &&
             gameState.ActiveExpedition.LocationId == locationId;
-        bool cancellable = isTarget && gameState.CanCancelExpeditionBeforeDayEnd;
+        bool cancellable = isTarget && gameState.CanCancelPreparedExpedition;
 
         if (!hasExpedition)
         {

@@ -294,18 +294,20 @@ public partial class PrototypeUIController
 
         bool hasExpedition = gameState.HasActiveExpedition;
         bool hasDecision = gameState.HasPendingExpeditionDecision;
+        bool hasTimedActivity =
+            hasExpedition && gameState.ActiveExpedition.HasTimedActivity;
 
         debugCapitalCrisisButton.SetEnabled(available);
         debugBackgroundIncidentButton.SetEnabled(
-            available && hasExpedition && !hasDecision);
+            available && hasExpedition && !hasDecision && !hasTimedActivity);
 
         bool canCreateDecision = false;
 
-        if (hasExpedition && !hasDecision)
+        if (hasExpedition && !hasDecision && !hasTimedActivity)
         {
             ExpeditionData expedition = gameState.ActiveExpedition;
             canCreateDecision =
-                expedition.DaysRemaining > 0 &&
+                expedition.RemainingRouteCells > 0 &&
                 (expedition.Phase == CommanderState.TravellingToLocation ||
                  expedition.Phase == CommanderState.ReturningToCastle);
         }
@@ -337,7 +339,7 @@ public partial class PrototypeUIController
         string commanderName = commander != null ? commander.Name : "неизвестно";
         string phaseText = gameState.HasPendingExpeditionDecision
             ? "ожидает приказа"
-            : expedition.IsExplorationInProgress
+            : expedition.IsLocationResearchInProgress
                 ? "исследует локацию"
                 : GetCommanderStateText(expedition.Phase);
 
@@ -349,16 +351,22 @@ public partial class PrototypeUIController
             {
                 researchText = "завершено";
             }
-            else if (expedition.IsExplorationInProgress)
+            else if (expedition.IsLocationResearchInProgress)
             {
-                int completed = Math.Max(
-                    0,
-                    location.ExplorationDays - expedition.ExplorationDaysRemaining);
-                researchText = completed + "/" + location.ExplorationDays;
+                double completed = Math.Max(
+                    0.0,
+                    location.ExplorationHours -
+                    expedition.ActiveActivity.RemainingHours);
+                researchText =
+                    ContinuousExpeditionCommands.FormatHours(completed) + "/" +
+                    ContinuousExpeditionCommands.FormatHours(
+                        location.ExplorationHours);
             }
-            else if (location.ExplorationDays > 0)
+            else if (location.ExplorationHours > 0)
             {
-                researchText = "0/" + location.ExplorationDays;
+                researchText = "0 ч./" +
+                    ContinuousExpeditionCommands.FormatHours(
+                        location.ExplorationHours);
             }
             else
             {
@@ -370,7 +378,9 @@ public partial class PrototypeUIController
             "Командир: " + commanderName + "\n" +
             "Цель: " + locationName + "\n" +
             "Состояние: " + phaseText + "\n" +
-            "Осталось дней пути: " + expedition.DaysRemaining + "\n" +
+            "Расчётное время пути: " +
+            ContinuousExpeditionCommands.FormatHours(
+                ContinuousSimulationSystem.GetTravelHoursRemaining(gameState)) + "\n" +
             "Голод подряд: " + gameState.ConsecutiveExpeditionSupplyShortageDays + "\n" +
             "Исследование: " + researchText +
             BuildDebugWorldLayoutText();
@@ -413,12 +423,12 @@ public partial class PrototypeUIController
         if (isGameOver)
             return;
 
-        DayResolutionResult resolved = null;
+        StrategicSimulationResult resolved = null;
 
         for (int attempt = 0; attempt < 100; attempt++)
         {
-            DayResolutionResult candidate = new DayResolutionResult();
-            CapitalCrisisSystem.ResolveForDay(gameState, gameState.Day, candidate);
+            StrategicSimulationResult candidate = new StrategicSimulationResult();
+            CapitalCrisisSystem.ResolveAtScheduledCheck(gameState, gameState.Day, candidate);
 
             if (candidate.NewExpeditionIncidents.Count > 0)
             {
@@ -440,18 +450,19 @@ public partial class PrototypeUIController
     {
         if (isGameOver ||
             !gameState.HasActiveExpedition ||
-            gameState.HasPendingExpeditionDecision)
+            gameState.HasPendingExpeditionDecision ||
+            gameState.ActiveExpedition.HasTimedActivity)
         {
             AddReport("[DEBUG] Фоновое происшествие сейчас недоступно.");
             return;
         }
 
-        DayResolutionResult resolved = null;
+        StrategicSimulationResult resolved = null;
 
         for (int attempt = 0; attempt < 30; attempt++)
         {
-            DayResolutionResult candidate = new DayResolutionResult();
-            ExpeditionIncidentSystem.ResolveForDay(
+            StrategicSimulationResult candidate = new StrategicSimulationResult();
+            ExpeditionIncidentSystem.ResolveAtScheduledCheck(
                 gameState,
                 gameState.Day,
                 candidate);
@@ -476,18 +487,19 @@ public partial class PrototypeUIController
     {
         if (isGameOver ||
             !gameState.HasActiveExpedition ||
-            gameState.HasPendingExpeditionDecision)
+            gameState.HasPendingExpeditionDecision ||
+            gameState.ActiveExpedition.HasTimedActivity)
         {
             AddReport("[DEBUG] Значимое событие сейчас недоступно.");
             return;
         }
 
-        DayResolutionResult resolved = null;
+        StrategicSimulationResult resolved = null;
 
         for (int attempt = 0; attempt < 30; attempt++)
         {
-            DayResolutionResult candidate = new DayResolutionResult();
-            ExpeditionDecisionSystem.ResolveForDay(
+            StrategicSimulationResult candidate = new StrategicSimulationResult();
+            ExpeditionDecisionSystem.ResolveAtScheduledCheck(
                 gameState,
                 gameState.Day,
                 candidate);
@@ -511,7 +523,7 @@ public partial class PrototypeUIController
     }
 
     private void ApplyDebugResolutionResult(
-        DayResolutionResult result,
+        StrategicSimulationResult result,
         string fallbackMessage)
     {
         if (result.NewExpeditionIncidents.Count > 0)

@@ -9,6 +9,30 @@ public enum CommanderState
     ReturningToCastle
 }
 
+public enum ExpeditionActivityKind
+{
+    LocationResearch,
+    RoadStop
+}
+
+[Serializable]
+public class ExpeditionActivityData
+{
+    public string Id;
+    public string DisplayName;
+    public ExpeditionActivityKind Kind;
+    public string LocationId;
+    public double TotalHours;
+    public double RemainingHours;
+    public int RewardArmyGold;
+    public int RewardArmySupply;
+
+    public double Progress01 =>
+        TotalHours <= 0.0
+            ? 1.0
+            : Math.Max(0.0, Math.Min(1.0, 1.0 - RemainingHours / TotalHours));
+}
+
 [Serializable]
 public class FighterData
 {
@@ -58,9 +82,9 @@ public class LocationData
     public int MapSlotIndex;
     public float MapXPercent;
     public float MapYPercent;
-    public int DistanceDays;
+    public double TravelHoursFromCapital;
     public string Threat;
-    public int ExplorationDays;
+    public double ExplorationHours;
     public int RewardArmyGold;
     public int RewardArmySupply;
     public bool IsDiscovered;
@@ -75,17 +99,17 @@ public class LocationData
     public LocationData(
         string id,
         string name,
-        int distanceDays,
+        double travelHoursFromCapital,
         string threat,
-        int explorationDays = 0,
+        double explorationHours = 0.0,
         int rewardArmyGold = 0,
         int rewardArmySupply = 0)
     {
         Id = id;
         Name = name;
-        DistanceDays = distanceDays;
+        TravelHoursFromCapital = travelHoursFromCapital;
         Threat = threat;
-        ExplorationDays = explorationDays;
+        ExplorationHours = explorationHours;
         RewardArmyGold = rewardArmyGold;
         RewardArmySupply = rewardArmySupply;
         IsDiscovered = true;
@@ -100,14 +124,14 @@ public class LocationData
         int mapSlotIndex,
         float mapXPercent,
         float mapYPercent,
-        int distanceDays)
+        double travelHoursFromCapital)
     {
         RegionId = regionId;
         RegionName = regionName;
         MapSlotIndex = mapSlotIndex;
         MapXPercent = mapXPercent;
         MapYPercent = mapYPercent;
-        DistanceDays = distanceDays;
+        TravelHoursFromCapital = travelHoursFromCapital;
         IsDiscovered = false;
         IsVisibleOnMap = false;
         IsWaypoint = false;
@@ -122,20 +146,25 @@ public class ExpeditionData
     public string LocationId;
     public List<string> FighterIds = new List<string>();
     public CommanderState Phase;
-    public int DaysRemaining;
-    public int LegTotalDays;
-    public int StartedOnDay;
+    public int RemainingRouteCells;
+    public int RouteLengthCells;
     public float CurrentMapXPercent;
     public float CurrentMapYPercent;
     public float TargetMapXPercent;
     public float TargetMapYPercent;
     public bool IsScoutingTarget;
     public int RouteIndex;
-    public int TravelDelayDays;
+    public double RouteDelayHoursRemaining;
     public List<MapPointData> Route = new List<MapPointData>();
+    public ExpeditionActivityData ActiveActivity;
 
-    public bool IsExplorationInProgress;
-    public int ExplorationDaysRemaining;
+    public bool HasTimedActivity => ActiveActivity != null;
+    public bool IsLocationResearchInProgress =>
+        ActiveActivity != null &&
+        ActiveActivity.Kind == ExpeditionActivityKind.LocationResearch;
+    public bool IsRoadStopInProgress =>
+        ActiveActivity != null &&
+        ActiveActivity.Kind == ExpeditionActivityKind.RoadStop;
 
     // Значимое происшествие не меняет канонические состояния командира.
     // Это отдельное состояние самой экспедиции: она ждёт приказа короля.
@@ -275,10 +304,12 @@ public class GameState
         }
     }
 
-    public bool CanCancelExpeditionBeforeDayEnd =>
+    public bool CanCancelPreparedExpedition =>
         HasActiveExpedition &&
-        ActiveExpedition.StartedOnDay == Day &&
-        ActiveExpedition.Phase == CommanderState.TravellingToLocation;
+        ActiveExpedition.Phase == CommanderState.TravellingToLocation &&
+        !HasPendingExpeditionDecision &&
+        !ActiveExpedition.HasTimedActivity &&
+        !ContinuousSimulationSystem.HasExpeditionStartedMoving(this);
 
     public bool CanAdjustArmySupply
     {
@@ -302,7 +333,7 @@ public class GameState
             ExpeditionData expedition = ActiveExpedition;
 
             if (expedition.Phase != CommanderState.AtLocation ||
-                expedition.IsExplorationInProgress)
+                expedition.HasTimedActivity)
             {
                 return false;
             }
@@ -311,7 +342,7 @@ public class GameState
 
             return location != null &&
                    !location.IsWaypoint &&
-                   location.ExplorationDays > 0 &&
+                   location.ExplorationHours > 0.0 &&
                    !location.IsExplored &&
                    ArmySupply >= ExpeditionSupplyConsumption;
         }
@@ -351,23 +382,23 @@ public class GameState
 
         List<LocationData> locationPool = new List<LocationData>
         {
-            // Затопленные руины: однодневное исследование с большой наградой снабжением.
+            // Низкая угроза: короткое двухчасовое исследование.
             new LocationData(
                 "ruins",
                 "Затопленные руины",
                 2,
                 "низкая",
-                1,
+                2.0,
                 100,
                 200),
 
-            // Старая шахта: двухдневное исследование с наградой чистым золотом.
+            // Средняя угроза: полное пятичасовое исследование.
             new LocationData(
                 "mine",
                 "Старая шахта",
                 3,
                 "средняя",
-                2,
+                5.0,
                 300,
                 0),
 
@@ -405,7 +436,7 @@ public class GameState
                 i,
                 x,
                 y,
-                0);
+                ContinuousSimulationSystem.CalculateTravelHours(candidateRoute));
         }
 
         Locations = locationPool;
@@ -613,9 +644,9 @@ public class GameState
             WorldMapNavigation.CapitalYPercent,
             targetXPercent,
             targetYPercent);
-        int travelDays = WorldMapNavigation.CalculateDays(route);
+        int routeCells = WorldMapNavigation.CalculateRouteCells(route);
 
-        if (route.Count < 2 || travelDays <= 0)
+        if (route.Count < 2 || routeCells <= 0)
         {
             resultMessage = "До выбранной точки нельзя построить доступный маршрут.";
             return false;
@@ -627,19 +658,17 @@ public class GameState
             CommanderId = commander.Id,
             LocationId = location.Id,
             Phase = CommanderState.TravellingToLocation,
-            DaysRemaining = travelDays,
-            LegTotalDays = travelDays,
-            StartedOnDay = Day,
+            RemainingRouteCells = routeCells,
+            RouteLengthCells = routeCells,
             CurrentMapXPercent = route[0].XPercent,
             CurrentMapYPercent = route[0].YPercent,
             TargetMapXPercent = route[route.Count - 1].XPercent,
             TargetMapYPercent = route[route.Count - 1].YPercent,
             IsScoutingTarget = isScoutingTarget,
             RouteIndex = 0,
-            TravelDelayDays = 0,
+            RouteDelayHoursRemaining = 0.0,
             Route = route,
-            IsExplorationInProgress = false,
-            ExplorationDaysRemaining = 0,
+            ActiveActivity = null,
             PendingDecision = null,
             HasInterruptedRoute = false
         };
@@ -668,7 +697,7 @@ public class GameState
             destinationText + ". В столице осталось бойцов: " +
             GarrisonFighterCount + ", сила гарнизона: " +
             GarrisonDefensePower + "/" + TotalArmyDefensePower +
-            ". До завершения текущего дня приказ можно отменить или изменить.";
+            ". До начала фактического движения приказ можно отменить или изменить.";
 
         return true;
     }
@@ -693,7 +722,7 @@ public class GameState
             return false;
         }
 
-        if (ActiveExpedition.IsExplorationInProgress)
+        if (ActiveExpedition.IsLocationResearchInProgress)
         {
             resultMessage = "Нельзя менять маршрут во время начатого исследования.";
             return false;
@@ -716,9 +745,9 @@ public class GameState
             ActiveExpedition.CurrentMapYPercent,
             targetXPercent,
             targetYPercent);
-        int days = WorldMapNavigation.CalculateDays(route);
+        int routeCells = WorldMapNavigation.CalculateRouteCells(route);
 
-        if (route.Count < 2 || days <= 0)
+        if (route.Count < 2 || routeCells <= 0)
         {
             resultMessage = "Новая цель совпадает с текущей позицией или недоступна.";
             return false;
@@ -726,19 +755,19 @@ public class GameState
 
         ActiveExpedition.LocationId = location.Id;
         ActiveExpedition.Phase = CommanderState.TravellingToLocation;
-        ActiveExpedition.DaysRemaining = days;
-        ActiveExpedition.LegTotalDays = days;
+        CancelRoadActivity(ActiveExpedition);
+        ActiveExpedition.RemainingRouteCells = routeCells;
+        ActiveExpedition.RouteLengthCells = routeCells;
         ActiveExpedition.Route = route;
         ActiveExpedition.RouteIndex = 0;
-        ActiveExpedition.TravelDelayDays = 0;
+        ActiveExpedition.RouteDelayHoursRemaining = 0.0;
         ActiveExpedition.TargetMapXPercent = route[route.Count - 1].XPercent;
         ActiveExpedition.TargetMapYPercent = route[route.Count - 1].YPercent;
         ActiveExpedition.IsScoutingTarget = false;
         ActiveExpedition.HasInterruptedRoute = false;
         ActiveExpedition.LastTravelPoints.Clear();
 
-        if (!CanCancelExpeditionBeforeDayEnd)
-            commander.State = CommanderState.TravellingToLocation;
+        commander.State = CommanderState.TravellingToLocation;
 
         resultMessage = location.IsWaypoint
             ? "Маршрут изменён. Армия направляется к новой точке от своей текущей позиции."
@@ -748,9 +777,9 @@ public class GameState
         return true;
     }
 
-    public bool TryCancelExpeditionBeforeDayEnd(out string resultMessage)
+    public bool TryCancelPreparedExpedition(out string resultMessage)
     {
-        if (!CanCancelExpeditionBeforeDayEnd)
+        if (!CanCancelPreparedExpedition)
         {
             resultMessage = "Отменить отправку уже нельзя. Используйте приказ о возвращении.";
             return false;
@@ -771,7 +800,7 @@ public class GameState
         resultMessage =
             "Приказ на отправку отменён. " +
             commander.Name + " и выбранные бойцы остаются в столице. " +
-            "День не завершён.";
+            "Стратегическое время не продвинулось.";
 
         return true;
     }
@@ -789,8 +818,8 @@ public class GameState
         if (location == null ||
             location.IsWaypoint ||
             expedition.Phase != CommanderState.AtLocation ||
-            expedition.IsExplorationInProgress ||
-            location.ExplorationDays <= 0 ||
+            expedition.HasTimedActivity ||
+            location.ExplorationHours <= 0.0 ||
             location.IsExplored)
         {
             return false;
@@ -801,19 +830,72 @@ public class GameState
         if (ArmySupply < requiredSupply)
         {
             resultMessage =
-                "Для исследования нужен полный дневной рацион. Требуется снабжения: " +
+                "Для исследования нужен достаточный запас снабжения. Требуется: " +
                 requiredSupply + ".";
             return false;
         }
 
-        expedition.IsExplorationInProgress = true;
-        expedition.ExplorationDaysRemaining = location.ExplorationDays;
+        expedition.ActiveActivity = new ExpeditionActivityData
+        {
+            Id = "research:" + location.Id,
+            DisplayName = "ИССЛЕДОВАНИЕ",
+            Kind = ExpeditionActivityKind.LocationResearch,
+            LocationId = location.Id,
+            TotalHours = location.ExplorationHours,
+            RemainingHours = location.ExplorationHours,
+            RewardArmyGold = location.RewardArmyGold,
+            RewardArmySupply = location.RewardArmySupply
+        };
 
         resultMessage =
             "Отряд начал исследование локации «" + location.Name +
-            "». Требуется дней: " + location.ExplorationDays +
+            "». Требуется времени: " +
+            ContinuousExpeditionCommands.FormatHours(location.ExplorationHours) +
             ". До завершения исследования приказ о возвращении недоступен.";
 
+        return true;
+    }
+
+    public bool TryStartRoadActivity(
+        string activityId,
+        string displayName,
+        double durationHours,
+        int rewardArmyGold,
+        int rewardArmySupply,
+        out string resultMessage)
+    {
+        resultMessage = "Походное действие сейчас недоступно.";
+
+        if (!HasActiveExpedition ||
+            HasPendingExpeditionDecision ||
+            durationHours <= 0.0 ||
+            ActiveExpedition.HasTimedActivity)
+        {
+            return false;
+        }
+
+        ExpeditionData expedition = ActiveExpedition;
+        if (expedition.Phase != CommanderState.TravellingToLocation &&
+            expedition.Phase != CommanderState.ReturningToCastle)
+        {
+            return false;
+        }
+
+        expedition.ActiveActivity = new ExpeditionActivityData
+        {
+            Id = activityId,
+            DisplayName = displayName,
+            Kind = ExpeditionActivityKind.RoadStop,
+            TotalHours = durationHours,
+            RemainingHours = durationHours,
+            RewardArmyGold = rewardArmyGold,
+            RewardArmySupply = rewardArmySupply
+        };
+
+        resultMessage =
+            displayName + " начат. Отряд остановится на " +
+            ContinuousExpeditionCommands.FormatHours(durationHours) +
+            " и затем автоматически продолжит маршрут.";
         return true;
     }
 
@@ -832,17 +914,17 @@ public class GameState
             return false;
         }
 
-        if (ActiveExpedition.IsExplorationInProgress)
+        if (ActiveExpedition.IsLocationResearchInProgress)
         {
             resultMessage =
-                "Исследование уже начато. Сначала завершите текущий день исследования.";
+                "Исследование уже начато. Сначала дождитесь его завершения.";
             return false;
         }
 
-        if (CanCancelExpeditionBeforeDayEnd)
+        if (CanCancelPreparedExpedition)
         {
             resultMessage =
-                "Текущий день ещё не завершён. Нажатие на столицу отменяет отправку.";
+                "Армия ещё не начала движение. Нажатие на столицу отменяет отправку.";
             return false;
         }
 
@@ -865,14 +947,17 @@ public class GameState
             ActiveExpedition.CurrentMapYPercent,
             WorldMapNavigation.CapitalXPercent,
             WorldMapNavigation.CapitalYPercent);
-        int returnDays = Math.Max(1, WorldMapNavigation.CalculateDays(returnRoute));
+        int returnCells = Math.Max(
+            1,
+            WorldMapNavigation.CalculateRouteCells(returnRoute));
 
         ActiveExpedition.Phase = CommanderState.ReturningToCastle;
-        ActiveExpedition.DaysRemaining = returnDays;
-        ActiveExpedition.LegTotalDays = returnDays;
+        CancelRoadActivity(ActiveExpedition);
+        ActiveExpedition.RemainingRouteCells = returnCells;
+        ActiveExpedition.RouteLengthCells = returnCells;
         ActiveExpedition.Route = returnRoute;
         ActiveExpedition.RouteIndex = 0;
-        ActiveExpedition.TravelDelayDays = 0;
+        ActiveExpedition.RouteDelayHoursRemaining = 0.0;
         ActiveExpedition.TargetMapXPercent = WorldMapNavigation.CapitalXPercent;
         ActiveExpedition.TargetMapYPercent = WorldMapNavigation.CapitalYPercent;
         ActiveExpedition.HasInterruptedRoute = false;
@@ -880,8 +965,9 @@ public class GameState
         commander.State = CommanderState.ReturningToCastle;
 
         resultMessage =
-            commander.Name + " получил приказ возвращаться. До столицы осталось дней: " +
-            returnDays + ". До прибытия бойцы экспедиции не усиливают гарнизон.";
+            commander.Name + " получил приказ возвращаться. Расчётное время пути: " +
+            ContinuousSimulationSystem.FormatTravelTime(returnRoute) +
+            ". До прибытия бойцы экспедиции не усиливают гарнизон.";
 
         return true;
     }
@@ -902,8 +988,7 @@ public class GameState
         // Голод важнее ожидающего приказа или уже начатого исследования:
         // отряд прекращает другие действия и занимается возвращением.
         expedition.PendingDecision = null;
-        expedition.IsExplorationInProgress = false;
-        expedition.ExplorationDaysRemaining = 0;
+        expedition.ActiveActivity = null;
         expedition.HasInterruptedRoute = false;
 
         if (expedition.Phase == CommanderState.ReturningToCastle)
@@ -919,14 +1004,16 @@ public class GameState
             expedition.CurrentMapYPercent,
             WorldMapNavigation.CapitalXPercent,
             WorldMapNavigation.CapitalYPercent);
-        int returnDays = Math.Max(1, WorldMapNavigation.CalculateDays(returnRoute));
+        int returnCells = Math.Max(
+            1,
+            WorldMapNavigation.CalculateRouteCells(returnRoute));
 
         expedition.Phase = CommanderState.ReturningToCastle;
-        expedition.DaysRemaining = returnDays;
-        expedition.LegTotalDays = returnDays;
+        expedition.RemainingRouteCells = returnCells;
+        expedition.RouteLengthCells = returnCells;
         expedition.Route = returnRoute;
         expedition.RouteIndex = 0;
-        expedition.TravelDelayDays = 0;
+        expedition.RouteDelayHoursRemaining = 0.0;
         expedition.TargetMapXPercent = WorldMapNavigation.CapitalXPercent;
         expedition.TargetMapYPercent = WorldMapNavigation.CapitalYPercent;
         expedition.LastTravelPoints.Clear();
@@ -934,7 +1021,8 @@ public class GameState
 
         resultMessage =
             "Поход сорван: из-за второй подряд нехватки снабжения отряд вынужденно возвращается. " +
-            "До столицы осталось дней: " + returnDays + ".";
+            "Расчётное время пути: " +
+            ContinuousSimulationSystem.FormatTravelTime(returnRoute) + ".";
 
         return true;
     }
@@ -957,8 +1045,7 @@ public class GameState
         if (commander != null)
             commander.State = CommanderState.InCastle;
 
-        ActiveExpedition.IsExplorationInProgress = false;
-        ActiveExpedition.ExplorationDaysRemaining = 0;
+        ActiveExpedition.ActiveActivity = null;
         ActiveExpedition.PendingDecision = null;
         ActiveExpedition.HasInterruptedRoute = false;
         ActiveExpedition.IsActive = false;
@@ -1027,8 +1114,9 @@ public class GameState
         location.RegionName = GetRegionName(
             location.MapXPercent,
             location.MapYPercent);
-        location.DistanceDays = WorldMapNavigation.CalculateDays(
-            WorldMapNavigation.FindPath(
+        location.TravelHoursFromCapital =
+            ContinuousSimulationSystem.CalculateTravelHours(
+                WorldMapNavigation.FindPath(
                 WorldMapNavigation.CapitalXPercent,
                 WorldMapNavigation.CapitalYPercent,
                 location.MapXPercent,
@@ -1040,10 +1128,11 @@ public class GameState
         expedition.CurrentMapYPercent = location.MapYPercent;
         expedition.TargetMapXPercent = location.MapXPercent;
         expedition.TargetMapYPercent = location.MapYPercent;
-        expedition.DaysRemaining = 0;
-        expedition.LegTotalDays = 0;
+        expedition.RemainingRouteCells = 0;
+        expedition.RouteLengthCells = 0;
         expedition.RouteIndex = 0;
-        expedition.TravelDelayDays = 0;
+        expedition.RouteDelayHoursRemaining = 0.0;
+        expedition.ActiveActivity = null;
         expedition.Route = new List<MapPointData>
         {
             new MapPointData(location.MapXPercent, location.MapYPercent)
@@ -1081,12 +1170,12 @@ public class GameState
             expedition.CurrentMapYPercent,
             targetX,
             targetY);
-        int days = WorldMapNavigation.CalculateDays(route);
+        int routeCells = WorldMapNavigation.CalculateRouteCells(route);
 
         expedition.HasInterruptedRoute = false;
         expedition.PendingDecision = null;
 
-        if (route.Count < 2 || days <= 0)
+        if (route.Count < 2 || routeCells <= 0)
         {
             if (resumePhase == CommanderState.ReturningToCastle)
             {
@@ -1106,11 +1195,12 @@ public class GameState
         expedition.Phase = resumePhase == CommanderState.ReturningToCastle
             ? CommanderState.ReturningToCastle
             : CommanderState.TravellingToLocation;
-        expedition.DaysRemaining = days;
-        expedition.LegTotalDays = days;
+        expedition.RemainingRouteCells = routeCells;
+        expedition.RouteLengthCells = routeCells;
         expedition.Route = route;
         expedition.RouteIndex = 0;
-        expedition.TravelDelayDays = 0;
+        expedition.RouteDelayHoursRemaining = 0.0;
+        expedition.ActiveActivity = null;
         expedition.TargetMapXPercent = route[route.Count - 1].XPercent;
         expedition.TargetMapYPercent = route[route.Count - 1].YPercent;
         expedition.LastTravelPoints.Clear();
@@ -1161,8 +1251,9 @@ public class GameState
                 nearest.MapYPercent);
             nearest.IsVisibleOnMap = true;
             nearest.IsDiscovered = true;
-            nearest.DistanceDays = WorldMapNavigation.CalculateDays(
-                WorldMapNavigation.FindPath(
+            nearest.TravelHoursFromCapital =
+                ContinuousSimulationSystem.CalculateTravelHours(
+                    WorldMapNavigation.FindPath(
                     WorldMapNavigation.CapitalXPercent,
                     WorldMapNavigation.CapitalYPercent,
                     nearest.MapXPercent,
@@ -1246,8 +1337,9 @@ public class GameState
         waypoint.RegionName = GetRegionName(
             waypoint.MapXPercent,
             waypoint.MapYPercent);
-        waypoint.DistanceDays = WorldMapNavigation.CalculateDays(
-            WorldMapNavigation.FindPath(
+        waypoint.TravelHoursFromCapital =
+            ContinuousSimulationSystem.CalculateTravelHours(
+                WorldMapNavigation.FindPath(
                 WorldMapNavigation.CapitalXPercent,
                 WorldMapNavigation.CapitalYPercent,
                 waypoint.MapXPercent,
@@ -1257,5 +1349,11 @@ public class GameState
         waypoint.IsExplored = false;
         waypoint.IsWaypoint = true;
         return waypoint;
+    }
+
+    private static void CancelRoadActivity(ExpeditionData expedition)
+    {
+        if (expedition != null && expedition.IsRoadStopInProgress)
+            expedition.ActiveActivity = null;
     }
 }

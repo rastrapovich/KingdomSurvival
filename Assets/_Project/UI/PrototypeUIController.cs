@@ -39,7 +39,7 @@ public partial class PrototypeUIController : MonoBehaviour
     private Label populationLabel;
     private Label moodLabel;
     private Label foodConsumptionLabel;
-    private Button endDayButton;
+    private Button timeToggleButton;
 
     private Button goldMinus10Button;
     private Button goldPlus10Button;
@@ -155,7 +155,7 @@ public partial class PrototypeUIController : MonoBehaviour
         populationLabel = root.Q<Label>("population-label");
         moodLabel = root.Q<Label>("mood-label");
         foodConsumptionLabel = root.Q<Label>("food-consumption-label");
-        endDayButton = root.Q<Button>("end-day-button");
+        timeToggleButton = root.Q<Button>("time-toggle-button");
 
         goldMinus10Button = root.Q<Button>("gold-minus10-button");
         goldPlus10Button = root.Q<Button>("gold-plus10-button");
@@ -242,7 +242,7 @@ public partial class PrototypeUIController : MonoBehaviour
             populationLabel != null &&
             moodLabel != null &&
             foodConsumptionLabel != null &&
-            endDayButton != null &&
+            timeToggleButton != null &&
             goldMinus10Button != null &&
             goldPlus10Button != null &&
             foodMinus10Button != null &&
@@ -429,7 +429,6 @@ public partial class PrototypeUIController : MonoBehaviour
         navCapitalButton.clicked += OnCapitalNavigationClicked;
         navArmyButton.clicked += OnArmyNavigationClicked;
         navExpeditionsButton.clicked += OnExpeditionsNavigationClicked;
-        endDayButton.clicked += OnEndDayClicked;
 
         goldMinus10Button.clicked += OnGoldMinus10Clicked;
         goldPlus10Button.clicked += OnGoldPlus10Clicked;
@@ -465,7 +464,6 @@ public partial class PrototypeUIController : MonoBehaviour
         navCapitalButton.clicked -= OnCapitalNavigationClicked;
         navArmyButton.clicked -= OnArmyNavigationClicked;
         navExpeditionsButton.clicked -= OnExpeditionsNavigationClicked;
-        endDayButton.clicked -= OnEndDayClicked;
 
         goldMinus10Button.clicked -= OnGoldMinus10Clicked;
         goldPlus10Button.clicked -= OnGoldPlus10Clicked;
@@ -579,27 +577,6 @@ public partial class PrototypeUIController : MonoBehaviour
         RefreshInterface();
     }
 
-    private void OnEndDayClicked()
-    {
-        if (isGameOver)
-            return;
-
-        int finishedDay = gameState.Day;
-        ExpeditionReturnSnapshot returnSnapshot = CaptureExpeditionReturnSnapshot();
-        DayResolutionResult result = DayResolver.ResolveDay(gameState);
-        AddReturnNoticeIfCompleted(result, returnSnapshot);
-
-        if (result.NewExpeditionIncidents.Count > 0)
-            unreadIncidents.AddRange(result.NewExpeditionIncidents);
-
-        int reportIndex = AddReport(string.Join("\n", result.Messages), finishedDay);
-        RegisterIncidentReports(result.NewExpeditionIncidents, reportIndex);
-        QueueDayResolutionModals(result, reportIndex);
-        RefreshInterface();
-        TryShowNextQueuedModal();
-        CheckForDefeat();
-    }
-
     private void OnRestartGameClicked()
     {
         StartNewGame();
@@ -631,17 +608,17 @@ public partial class PrototypeUIController : MonoBehaviour
     private void OnExpeditionActionClicked()
     {
         string resultMessage;
-        bool cancelledBeforeDayEnd = false;
+        bool cancelledBeforeMovement = false;
 
-        if (gameState.CanCancelExpeditionBeforeDayEnd)
+        if (gameState.CanCancelPreparedExpedition)
         {
-            cancelledBeforeDayEnd =
-                gameState.TryCancelExpeditionBeforeDayEnd(out resultMessage);
+            cancelledBeforeMovement =
+                gameState.TryCancelPreparedExpedition(out resultMessage);
         }
         else
             gameState.TryOrderReturn(out resultMessage);
 
-        if (cancelledBeforeDayEnd)
+        if (cancelledBeforeMovement)
             selectedFighterIds.Clear();
 
         AddReport(resultMessage);
@@ -1149,8 +1126,8 @@ public partial class PrototypeUIController : MonoBehaviour
         ExpeditionData expedition = gameState.ActiveExpedition;
         LocationData location = gameState.FindLocation(expedition.LocationId);
         CommanderData commander = gameState.FindCommander(expedition.CommanderId);
-        bool exploring = expedition.IsExplorationInProgress;
-        bool researchImplemented = location != null && location.ExplorationDays > 0;
+        bool exploring = expedition.IsLocationResearchInProgress;
+        bool researchImplemented = location != null && location.ExplorationHours > 0;
         string targetName = location != null
             ? location.TravelTargetName
             : expedition.IsScoutingTarget ? "точка разведки" : "выбранный сектор";
@@ -1159,6 +1136,8 @@ public partial class PrototypeUIController : MonoBehaviour
             ? "ожидает приказа"
             : exploring
                 ? "исследует локацию"
+                : expedition.IsRoadStopInProgress
+                    ? expedition.ActiveActivity.DisplayName.ToLowerInvariant()
                 : GetCommanderStateText(expedition.Phase);
 
         expeditionStatusLabel.text =
@@ -1169,52 +1148,71 @@ public partial class PrototypeUIController : MonoBehaviour
             "ЭКСПЕДИЦИЯ: " + targetName.ToUpper();
 
         string currentTask;
-        string daysInformation;
+        string timingInformation;
 
         if (awaitingDecision)
         {
             currentTask = "Ожидает приказа короля";
-            daysInformation = "Осталось дней пути: " + expedition.DaysRemaining;
-        }
-        else if (expedition.Phase == CommanderState.TravellingToLocation)
-        {
-            currentTask = "Добраться до цели";
-            daysInformation = "Осталось дней пути: " + expedition.DaysRemaining;
-        }
-        else if (expedition.Phase == CommanderState.ReturningToCastle)
-        {
-            currentTask = "Вернуться в столицу";
-            daysInformation = "Осталось дней пути: " + expedition.DaysRemaining;
+            timingInformation = "Время остановлено до решения.";
         }
         else if (exploring)
         {
             currentTask = "Исследовать локацию";
-            daysInformation =
-                "Осталось дней исследования: " + expedition.ExplorationDaysRemaining;
+            timingInformation =
+                "До завершения исследования: " +
+                ContinuousExpeditionCommands.FormatHours(
+                    expedition.ActiveActivity.RemainingHours);
+        }
+        else if (expedition.IsRoadStopInProgress)
+        {
+            currentTask = expedition.ActiveActivity.DisplayName;
+            timingInformation =
+                "До продолжения маршрута: " +
+                ContinuousExpeditionCommands.FormatHours(
+                    expedition.ActiveActivity.RemainingHours);
+        }
+        else if (expedition.Phase == CommanderState.TravellingToLocation)
+        {
+            currentTask = "Добраться до цели";
+            timingInformation = "До цели: " +
+                ContinuousExpeditionCommands.FormatHours(
+                    ContinuousSimulationSystem.GetTravelHoursRemaining(gameState));
+        }
+        else if (expedition.Phase == CommanderState.ReturningToCastle)
+        {
+            currentTask = "Вернуться в столицу";
+            timingInformation = "До столицы: " +
+                ContinuousExpeditionCommands.FormatHours(
+                    ContinuousSimulationSystem.GetTravelHoursRemaining(gameState));
         }
         else if (location != null && location.IsExplored)
         {
             currentTask = "Локация исследована";
-            daysInformation =
-                "Расстояние до столицы: " + location.DistanceDays + " дн.";
+            timingInformation =
+                "Расстояние до столицы: " +
+                ContinuousExpeditionCommands.FormatHours(
+                    location.TravelHoursFromCapital);
         }
         else if (researchImplemented)
         {
             currentTask = "Выбрать: исследовать или возвращаться";
-            daysInformation =
-                "Исследование займёт: " + location.ExplorationDays + " " +
-                GetDayWord(location.ExplorationDays);
+            timingInformation =
+                "Исследование займёт: " +
+                ContinuousExpeditionCommands.FormatHours(
+                    location.ExplorationHours);
         }
         else if (location != null)
         {
             currentTask = "Исследование этой локации пока не реализовано";
-            daysInformation =
-                "Расстояние до столицы: " + location.DistanceDays + " дн.";
+            timingInformation =
+                "Расстояние до столицы: " +
+                ContinuousExpeditionCommands.FormatHours(
+                    location.TravelHoursFromCapital);
         }
         else
         {
             currentTask = "Разведка сектора завершена";
-            daysInformation = "Можно приказать возвращаться";
+            timingInformation = "Можно приказать возвращаться";
         }
 
         activeExpeditionDetails.text =
@@ -1228,7 +1226,7 @@ public partial class PrototypeUIController : MonoBehaviour
             "Цель: " + targetName + "\n" +
             "Состояние: " + stateText + "\n" +
             "Текущая задача: " + currentTask + "\n" +
-            daysInformation;
+            timingInformation;
 
         RefreshResearchButton(
             controlsAvailable,
@@ -1237,7 +1235,7 @@ public partial class PrototypeUIController : MonoBehaviour
             location,
             researchImplemented);
 
-        bool canCancel = gameState.CanCancelExpeditionBeforeDayEnd;
+        bool canCancel = gameState.CanCancelPreparedExpedition;
         bool alreadyReturning = expedition.Phase == CommanderState.ReturningToCastle;
 
         if (!controlsAvailable)
@@ -1298,12 +1296,13 @@ public partial class PrototypeUIController : MonoBehaviour
             researchExpeditionButton.SetEnabled(false);
             researchExpeditionButton.text = "Сначала требуется приказ";
         }
-        else if (expedition.IsExplorationInProgress)
+        else if (expedition.IsLocationResearchInProgress)
         {
             researchExpeditionButton.SetEnabled(false);
             researchExpeditionButton.text =
-                "ИССЛЕДОВАНИЕ — " + expedition.ExplorationDaysRemaining + " " +
-                GetDayWord(expedition.ExplorationDaysRemaining).ToUpper();
+                "ИССЛЕДОВАНИЕ — " +
+                ContinuousExpeditionCommands.FormatHours(
+                    expedition.ActiveActivity.RemainingHours);
         }
         else if (location.IsExplored)
         {
@@ -1503,7 +1502,7 @@ public partial class PrototypeUIController : MonoBehaviour
         }
 
         int resultReportIndex = AddReport(resultMessage);
-        DayResolutionResult decisionResult = new DayResolutionResult();
+        StrategicSimulationResult decisionResult = new StrategicSimulationResult();
         AddReturnNoticeIfCompleted(decisionResult, returnSnapshot);
 
         if (decisionResult.ExpeditionReturnNotice != null)
@@ -1548,7 +1547,7 @@ public partial class PrototypeUIController : MonoBehaviour
 
         HideIncidentModal();
         ClearQueuedModals();
-        endDayButton.SetEnabled(false);
+        timeToggleButton.SetEnabled(false);
         gameOverDaysLabel.text =
             "Вы удерживали трон: " + survivedDays + " " + GetDayWord(survivedDays);
         gameOverOverlay.style.display = DisplayStyle.Flex;
@@ -1561,7 +1560,7 @@ public partial class PrototypeUIController : MonoBehaviour
     private void HideGameOver()
     {
         isGameOver = false;
-        endDayButton.SetEnabled(true);
+        timeToggleButton.SetEnabled(true);
         gameOverOverlay.style.display = DisplayStyle.None;
     }
 

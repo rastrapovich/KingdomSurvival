@@ -15,10 +15,10 @@ public static class CapitalCrisisSystem
     private const int FoodLossWithArmyAway = 6;
     private const int MoodLossWithArmyAway = 3;
 
-    public static void ResolveForDay(
+    public static void ResolveAtScheduledCheck(
         GameState state,
         int finishedDay,
-        DayResolutionResult result)
+        StrategicSimulationResult result)
     {
         if (Random.NextDouble() >= CrisisChancePerDay)
             return;

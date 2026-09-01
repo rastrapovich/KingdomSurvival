@@ -12,7 +12,7 @@ public static class ContinuousPreparationCommands
         return expedition != null &&
                expedition.Phase == CommanderState.TravellingToLocation &&
                !state.HasPendingExpeditionDecision &&
-               !expedition.IsExplorationInProgress &&
+               !expedition.HasTimedActivity &&
                !ContinuousSimulationSystem.HasExpeditionStartedMoving(state);
     }
 

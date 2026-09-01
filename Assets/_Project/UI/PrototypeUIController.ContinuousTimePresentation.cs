@@ -18,7 +18,7 @@ public partial class PrototypeUIController
 
     private void RefreshContinuousClockOnly()
     {
-        if (gameState == null || dayLabel == null || endDayButton == null)
+        if (gameState == null || dayLabel == null || timeToggleButton == null)
             return;
 
         ContinuousClockSnapshot clock =
@@ -28,8 +28,8 @@ public partial class PrototypeUIController
             "День " + gameState.Day + " · " +
             ContinuousSimulationSystem.FormatClock(clock.HourOfDay);
 
-        endDayButton.text = clock.IsPaused ? "ПУСК" : "ПАУЗА";
-        endDayButton.tooltip = HasBlockingModalWork()
+        timeToggleButton.text = clock.IsPaused ? "ПУСК" : "ПАУЗА";
+        timeToggleButton.tooltip = HasBlockingModalWork()
             ? "Сначала закройте обязательное событие"
             : clock.IsPaused
                 ? "Продолжить течение времени"
@@ -49,9 +49,6 @@ public partial class PrototypeUIController
             continuousSpeedButton.SetEnabled(!isGameOver);
         }
 
-        // Старые прототипные события ещё хранят часть эффектов как +/- день
-        // пути. В непрерывном runtime они трактуются как краткая задержка или
-        // изменение маршрута, поэтому пользовательский preview нормализуем.
         if (openedDecision != null)
         {
             if (decisionOptionAButton != null)
@@ -79,18 +76,18 @@ public partial class PrototypeUIController
             worldMapArmyMarkerLabel != null)
         {
             ExpeditionData expedition = gameState.ActiveExpedition;
-            if (expedition.Phase == CommanderState.TravellingToLocation ||
+            if (expedition.HasTimedActivity)
+            {
+                worldMapArmyMarkerLabel.text =
+                    ContinuousExpeditionCommands.FormatHours(
+                        expedition.ActiveActivity.RemainingHours);
+            }
+            else if (expedition.Phase == CommanderState.TravellingToLocation ||
                 expedition.Phase == CommanderState.ReturningToCastle)
             {
                 worldMapArmyMarkerLabel.text =
                     ContinuousExpeditionCommands.FormatHours(
                         ContinuousSimulationSystem.GetTravelHoursRemaining(gameState));
-            }
-            else if (expedition.IsExplorationInProgress)
-            {
-                worldMapArmyMarkerLabel.text =
-                    ContinuousExpeditionCommands.FormatHours(
-                        ContinuousSimulationSystem.GetResearchHoursRemaining(gameState));
             }
             else
             {
@@ -119,13 +116,21 @@ public partial class PrototypeUIController
             stateText = "ожидает приказа";
             timingText = "Время остановлено до решения.";
         }
-        else if (expedition.IsExplorationInProgress)
+        else if (expedition.IsLocationResearchInProgress)
         {
             stateText = "исследует локацию";
             timingText =
                 "До завершения исследования: " +
                 ContinuousExpeditionCommands.FormatHours(
                     ContinuousSimulationSystem.GetResearchHoursRemaining(gameState));
+        }
+        else if (expedition.IsRoadStopInProgress)
+        {
+            stateText = expedition.ActiveActivity.DisplayName.ToLowerInvariant();
+            timingText =
+                "До продолжения маршрута: " +
+                ContinuousExpeditionCommands.FormatHours(
+                    expedition.ActiveActivity.RemainingHours);
         }
         else if (expedition.Phase == CommanderState.TravellingToLocation)
         {
@@ -161,14 +166,11 @@ public partial class PrototypeUIController
             "Состояние: " + stateText + "\n" +
             timingText;
 
-        bool startedMoving =
-            ContinuousSimulationSystem.HasExpeditionStartedMoving(gameState);
-
         if (!isGameOver &&
             !gameState.HasPendingExpeditionDecision &&
-            !expedition.IsExplorationInProgress)
+            !expedition.IsLocationResearchInProgress)
         {
-            if (!startedMoving)
+            if (gameState.CanCancelPreparedExpedition)
             {
                 returnExpeditionButton.text = "Отменить отправку";
                 returnExpeditionButton.SetEnabled(true);
@@ -185,7 +187,7 @@ public partial class PrototypeUIController
             }
         }
 
-        if (expedition.IsExplorationInProgress)
+        if (expedition.IsLocationResearchInProgress)
         {
             researchExpeditionButton.text =
                 "ИССЛЕДОВАНИЕ · " +
@@ -213,9 +215,9 @@ public partial class PrototypeUIController
             if (location.Name.ToUpper() != worldMapLocationCardTitle.text)
                 continue;
 
-            string researchText = location.ExplorationDays > 0
+            string researchText = location.ExplorationHours > 0
                 ? "Исследование: " +
-                  ContinuousExpeditionCommands.FormatHours(location.ExplorationDays * 24.0)
+                  ContinuousExpeditionCommands.FormatHours(location.ExplorationHours)
                 : "Исследование: пока не реализовано";
 
             worldMapLocationCardDetails.text =
@@ -233,22 +235,7 @@ public partial class PrototypeUIController
         if (string.IsNullOrEmpty(text))
             return text;
 
-        return text
-            .Replace(
-                "До завершения текущего дня приказ можно отменить или изменить.",
-                "До начала фактического движения приказ можно отменить или изменить.")
-            .Replace(
-                "День не завершён.",
-                "Течение времени не продвинулось.")
-            .Replace(
-                "Текущий день ещё не завершён. Нажатие на столицу отменяет отправку.",
-                "Армия ещё не начала движение. Нажатие на столицу отменяет отправку.")
-            .Replace("Осталось дней пути:", "Осталось клеток маршрута:")
-            .Replace("До столицы осталось дней:", "До столицы осталось клеток:")
-            .Replace("Оставшийся путь +1 день.", "Маршрут задержан примерно на 1 игровой час.")
-            .Replace("Оставшийся путь -1 день.", "Маршрут сокращён примерно на одну клетку.")
-            .Replace("путь +1 день", "задержка ~1 игровой час")
-            .Replace("путь -1 день", "путь -1 клетка");
+        return text;
     }
 
     private static string NormalizeContinuousDecisionPreview(string text)
@@ -256,10 +243,6 @@ public partial class PrototypeUIController
         if (string.IsNullOrEmpty(text))
             return text;
 
-        return text
-            .Replace("путь +1 день", "задержка ~1 игровой час")
-            .Replace("путь -1 день", "путь -1 клетка")
-            .Replace("путь +1 день.", "задержка ~1 игровой час.")
-            .Replace("путь -1 день.", "путь -1 клетка.");
+        return text;
     }
 }

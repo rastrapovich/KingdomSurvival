@@ -24,8 +24,8 @@ public static class ExpeditionIncidentSystem
     private enum IncidentEffectKind
     {
         Supply,
-        Travel,
-        SupplyAndTravel
+        Route,
+        SupplyAndRoute
     }
 
     private class IncidentDefinition
@@ -36,7 +36,7 @@ public static class ExpeditionIncidentSystem
         public ExpeditionIncidentTone Tone;
         public IncidentEffectKind EffectKind;
         public int SupplyDelta;
-        public int TravelDelta;
+        public int RouteAdjustment;
 
         public IncidentDefinition(
             string id,
@@ -45,7 +45,7 @@ public static class ExpeditionIncidentSystem
             ExpeditionIncidentTone tone,
             IncidentEffectKind effectKind,
             int supplyDelta,
-            int travelDelta)
+            int routeAdjustment)
         {
             Id = id;
             Title = title;
@@ -53,7 +53,7 @@ public static class ExpeditionIncidentSystem
             Tone = tone;
             EffectKind = effectKind;
             SupplyDelta = supplyDelta;
-            TravelDelta = travelDelta;
+            RouteAdjustment = routeAdjustment;
         }
     }
 
@@ -102,9 +102,9 @@ public static class ExpeditionIncidentSystem
             new IncidentDefinition(
                 "washed_road",
                 "Размытая дорога",
-                "Дорога впереди превратилась в вязкое месиво. Пришлось искать обход и часть дневного продвижения оказалась потеряна.",
+                "Дорога впереди превратилась в вязкое месиво. Пришлось искать обход, и отряд потерял часть времени.",
                 ExpeditionIncidentTone.Negative,
-                IncidentEffectKind.Travel,
+                IncidentEffectKind.Route,
                 0,
                 1),
 
@@ -113,7 +113,7 @@ public static class ExpeditionIncidentSystem
                 "Короткая тропа",
                 "Разведчик заметил старую тропу между холмами. Она выглядит неприятно, зато действительно сокращает путь.",
                 ExpeditionIncidentTone.Positive,
-                IncidentEffectKind.Travel,
+                IncidentEffectKind.Route,
                 0,
                 -1),
 
@@ -122,7 +122,7 @@ public static class ExpeditionIncidentSystem
                 "Холодный ливень",
                 "Ливень промочил часть запасов и заставил отряд искать более длинный, но безопасный проход.",
                 ExpeditionIncidentTone.Mixed,
-                IncidentEffectKind.SupplyAndTravel,
+                IncidentEffectKind.SupplyAndRoute,
                 -1,
                 1),
 
@@ -149,17 +149,18 @@ public static class ExpeditionIncidentSystem
                 "Удачный переход",
                 "Местность впереди оказалась проще, чем обещали старые карты. Отряд прошёл заметно дальше обычного.",
                 ExpeditionIncidentTone.Positive,
-                IncidentEffectKind.Travel,
+                IncidentEffectKind.Route,
                 0,
                 -1)
         };
 
-    public static void ResolveForDay(
+    public static void ResolveAtScheduledCheck(
         GameState state,
         int finishedDay,
-        DayResolutionResult result)
+        StrategicSimulationResult result)
     {
-        if (!state.HasActiveExpedition)
+        if (!state.HasActiveExpedition ||
+            state.ActiveExpedition.HasTimedActivity)
             return;
 
         int requestedIncidentCount = Random.Next(0, 3);
@@ -222,7 +223,7 @@ public static class ExpeditionIncidentSystem
 
         bool canChangeTravel =
             expedition != null &&
-            expedition.DaysRemaining > 0 &&
+            expedition.RemainingRouteCells > 0 &&
             (expedition.Phase == CommanderState.TravellingToLocation ||
              expedition.Phase == CommanderState.ReturningToCastle);
 
@@ -232,8 +233,8 @@ public static class ExpeditionIncidentSystem
                 continue;
 
             bool needsTravel =
-                definition.EffectKind == IncidentEffectKind.Travel ||
-                definition.EffectKind == IncidentEffectKind.SupplyAndTravel;
+                definition.EffectKind == IncidentEffectKind.Route ||
+                definition.EffectKind == IncidentEffectKind.SupplyAndRoute;
 
             if (needsTravel && !canChangeTravel)
                 continue;
@@ -252,20 +253,24 @@ public static class ExpeditionIncidentSystem
         List<string> consequences = new List<string>();
 
         if (definition.EffectKind == IncidentEffectKind.Supply ||
-            definition.EffectKind == IncidentEffectKind.SupplyAndTravel)
+            definition.EffectKind == IncidentEffectKind.SupplyAndRoute)
         {
             int actualSupplyDelta = ApplySupplyDelta(state, definition.SupplyDelta);
             consequences.Add(FormatSupplyConsequence(actualSupplyDelta));
         }
 
-        if (definition.EffectKind == IncidentEffectKind.Travel ||
-            definition.EffectKind == IncidentEffectKind.SupplyAndTravel)
+        if (definition.EffectKind == IncidentEffectKind.Route ||
+            definition.EffectKind == IncidentEffectKind.SupplyAndRoute)
         {
             string arrivalText;
-            int actualTravelDelta =
-                ApplyTravelDelta(state, definition.TravelDelta, out arrivalText);
+            int actualRouteAdjustment =
+                ApplyRouteAdjustment(
+                    state,
+                    definition.RouteAdjustment,
+                    out arrivalText);
 
-            consequences.Add(FormatTravelConsequence(actualTravelDelta));
+            consequences.Add(
+                FormatRouteConsequence(actualRouteAdjustment));
 
             if (!string.IsNullOrWhiteSpace(arrivalText))
                 consequences.Add(arrivalText);
@@ -299,7 +304,7 @@ public static class ExpeditionIncidentSystem
         return -actualLoss;
     }
 
-    private static int ApplyTravelDelta(
+    private static int ApplyRouteAdjustment(
         GameState state,
         int requestedDelta,
         out string arrivalText)
@@ -307,23 +312,23 @@ public static class ExpeditionIncidentSystem
         arrivalText = string.Empty;
         ExpeditionData expedition = state.ActiveExpedition;
 
-        if (expedition == null || expedition.DaysRemaining <= 0)
+        if (expedition == null || expedition.RemainingRouteCells <= 0)
             return 0;
 
         if (requestedDelta >= 0)
         {
-            WorldMapNavigation.AddTravelDelay(expedition, requestedDelta);
+            WorldMapNavigation.AddRouteDelayHours(expedition, requestedDelta);
             return requestedDelta;
         }
 
         int requestedReduction = -requestedDelta;
         int actualReduction = Math.Min(
-            expedition.DaysRemaining,
+            expedition.RemainingRouteCells,
             requestedReduction);
 
-        WorldMapNavigation.AdvanceRoute(expedition, actualReduction);
+        WorldMapNavigation.AdvanceRouteByCells(expedition, actualReduction);
 
-        if (actualReduction > 0 && expedition.DaysRemaining == 0)
+        if (actualReduction > 0 && expedition.RemainingRouteCells == 0)
             arrivalText = ResolveArrivalAfterShortcut(state, expedition);
 
         return -actualReduction;
@@ -365,13 +370,14 @@ public static class ExpeditionIncidentSystem
         return "Снабжение не изменилось: запас уже пуст.";
     }
 
-    private static string FormatTravelConsequence(int delta)
+    private static string FormatRouteConsequence(int adjustment)
     {
-        if (delta > 0)
-            return "Оставшийся путь +" + delta + " день.";
+        if (adjustment > 0)
+            return "Задержка маршрута: " +
+                ContinuousExpeditionCommands.FormatHours(adjustment) + ".";
 
-        if (delta < 0)
-            return "Оставшийся путь " + delta + " день.";
+        if (adjustment < 0)
+            return "Маршрут сокращён на " + (-adjustment) + " клетку.";
 
         return "Длина пути не изменилась.";
     }

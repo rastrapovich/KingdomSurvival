@@ -8,5 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/Prototype_Main.unity
     guid: ecc0d0611a4c2524abf27fce570c2144
-  m_configObjects:
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  - enabled: 1
+    path: Assets/_Project/Scenes/BattleSandbox.unity
+    guid: 24cf2ba8dac8fb003cdcdfa08e29040d
+  m_configObjects: {}

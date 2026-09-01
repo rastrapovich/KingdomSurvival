@@ -1,0 +1,596 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace KingdomSurvival.BattleSandbox
+{
+    public enum SandboxTeam
+    {
+        Player,
+        Enemy
+    }
+
+    public enum SandboxUnitRole
+    {
+        Guard,
+        Archer,
+        Healer,
+        Spearman,
+        Scout,
+        Militia,
+        Beast
+    }
+
+    public enum SandboxTerrain
+    {
+        Normal,
+        Difficult,
+        Impassable
+    }
+
+    public enum SandboxBattlePhase
+    {
+        Preparing,
+        InProgress,
+        PlayerVictory,
+        EnemyVictory
+    }
+
+    public sealed class SandboxUnitDefinition
+    {
+        public string Id { get; }
+        public string Name { get; }
+        public string RoleLabel { get; }
+        public SandboxUnitRole Role { get; }
+        public int MaxHitPoints { get; }
+        public int Attack { get; }
+        public int Defense { get; }
+        public int Movement { get; }
+        public int Initiative { get; }
+        public int AttackRange { get; }
+
+        public SandboxUnitDefinition(
+            string id,
+            string name,
+            string roleLabel,
+            SandboxUnitRole role,
+            int maxHitPoints,
+            int attack,
+            int defense,
+            int movement,
+            int initiative,
+            int attackRange)
+        {
+            Id = id;
+            Name = name;
+            RoleLabel = roleLabel;
+            Role = role;
+            MaxHitPoints = Math.Max(1, maxHitPoints);
+            Attack = Math.Max(0, attack);
+            Defense = Math.Max(0, defense);
+            Movement = Math.Max(1, movement);
+            Initiative = Math.Max(0, initiative);
+            AttackRange = Math.Max(1, attackRange);
+        }
+    }
+
+    public sealed class SandboxUnitState
+    {
+        public const int ActionsPerActivation = 2;
+
+        public SandboxUnitDefinition Definition { get; }
+        public SandboxTeam Team { get; }
+        public HexCoord Position { get; internal set; }
+        public int HitPoints { get; internal set; }
+        public int ActionPoints { get; internal set; }
+        public bool HasAttacked { get; internal set; }
+        public bool IsGuarding { get; internal set; }
+
+        public string Id => Definition.Id;
+        public string Name => Definition.Name;
+        public SandboxUnitRole Role => Definition.Role;
+        public int MaxHitPoints => Definition.MaxHitPoints;
+        public int Attack => Definition.Attack;
+        public int Defense => Definition.Defense;
+        public int Movement => Definition.Movement;
+        public int Initiative => Definition.Initiative;
+        public int AttackRange => Definition.AttackRange;
+        public bool IsDefeated => HitPoints <= 0;
+
+        public SandboxUnitState(
+            SandboxUnitDefinition definition,
+            SandboxTeam team,
+            HexCoord position)
+        {
+            Definition = definition ?? throw new ArgumentNullException(nameof(definition));
+            Team = team;
+            Position = position;
+            HitPoints = definition.MaxHitPoints;
+        }
+
+        internal void BeginActivation()
+        {
+            ActionPoints = ActionsPerActivation;
+            HasAttacked = false;
+            IsGuarding = false;
+        }
+
+        internal void ReceiveDamage(int damage)
+        {
+            HitPoints = Math.Max(0, HitPoints - Math.Max(0, damage));
+            if (IsDefeated)
+            {
+                ActionPoints = 0;
+                IsGuarding = false;
+            }
+        }
+    }
+
+    public sealed class SandboxAttackPreview
+    {
+        public static SandboxAttackPreview Invalid(string reason)
+        {
+            return new SandboxAttackPreview(false, reason, 0, 0);
+        }
+
+        public bool IsValid { get; }
+        public string Reason { get; }
+        public int Damage { get; }
+        public int TargetHitPointsAfter { get; }
+
+        public SandboxAttackPreview(
+            bool isValid,
+            string reason,
+            int damage,
+            int targetHitPointsAfter)
+        {
+            IsValid = isValid;
+            Reason = reason;
+            Damage = damage;
+            TargetHitPointsAfter = targetHitPointsAfter;
+        }
+    }
+
+    public sealed class SandboxBattle
+    {
+        private readonly List<SandboxUnitState> units;
+        private readonly Dictionary<HexCoord, SandboxTerrain> terrain;
+        private readonly List<string> turnOrderIds = new List<string>();
+        private int currentTurnIndex = -1;
+
+        public int Width { get; }
+        public int Height { get; }
+        public int Round { get; private set; }
+        public SandboxBattlePhase Phase { get; private set; } = SandboxBattlePhase.Preparing;
+        public IReadOnlyList<SandboxUnitState> Units => units;
+        public IReadOnlyList<string> TurnOrderIds => turnOrderIds;
+        public int CurrentTurnIndex => currentTurnIndex;
+
+        public SandboxUnitState CurrentUnit
+        {
+            get
+            {
+                if (Phase != SandboxBattlePhase.InProgress ||
+                    currentTurnIndex < 0 || currentTurnIndex >= turnOrderIds.Count)
+                {
+                    return null;
+                }
+
+                return GetUnit(turnOrderIds[currentTurnIndex]);
+            }
+        }
+
+        public SandboxBattle(
+            int width,
+            int height,
+            IEnumerable<SandboxUnitState> units,
+            IDictionary<HexCoord, SandboxTerrain> terrain = null)
+        {
+            if (width < 2 || height < 2)
+                throw new ArgumentOutOfRangeException(nameof(width));
+
+            Width = width;
+            Height = height;
+            this.units = units != null
+                ? new List<SandboxUnitState>(units)
+                : throw new ArgumentNullException(nameof(units));
+            this.terrain = terrain != null
+                ? new Dictionary<HexCoord, SandboxTerrain>(terrain)
+                : new Dictionary<HexCoord, SandboxTerrain>();
+
+            ValidateInitialState();
+        }
+
+        public void Start()
+        {
+            if (Phase != SandboxBattlePhase.Preparing)
+                return;
+
+            Phase = SandboxBattlePhase.InProgress;
+            Round = 1;
+            BuildRoundOrder();
+            currentTurnIndex = 0;
+            BeginCurrentActivationOrAdvance();
+        }
+
+        public SandboxUnitState GetUnit(string unitId)
+        {
+            return units.FirstOrDefault(unit => unit.Id == unitId);
+        }
+
+        public SandboxUnitState GetUnitAt(HexCoord position)
+        {
+            return units.FirstOrDefault(unit => !unit.IsDefeated && unit.Position == position);
+        }
+
+        public SandboxTerrain GetTerrain(HexCoord position)
+        {
+            SandboxTerrain value;
+            return terrain.TryGetValue(position, out value) ? value : SandboxTerrain.Normal;
+        }
+
+        public bool IsInside(HexCoord position)
+        {
+            return position.Q >= 0 && position.Q < Width &&
+                   position.R >= 0 && position.R < Height;
+        }
+
+        public IReadOnlyDictionary<HexCoord, int> GetReachable(string unitId)
+        {
+            SandboxUnitState unit = GetUnit(unitId);
+            Dictionary<HexCoord, int> result = new Dictionary<HexCoord, int>();
+            if (unit == null || unit.IsDefeated || unit.ActionPoints <= 0)
+                return result;
+
+            Dictionary<HexCoord, int> costs = new Dictionary<HexCoord, int>
+            {
+                { unit.Position, 0 }
+            };
+            List<HexCoord> frontier = new List<HexCoord> { unit.Position };
+
+            while (frontier.Count > 0)
+            {
+                int bestIndex = 0;
+                for (int i = 1; i < frontier.Count; i++)
+                {
+                    if (costs[frontier[i]] < costs[frontier[bestIndex]])
+                        bestIndex = i;
+                }
+
+                HexCoord current = frontier[bestIndex];
+                frontier.RemoveAt(bestIndex);
+
+                foreach (HexCoord next in current.Neighbors())
+                {
+                    if (!IsInside(next) || GetTerrain(next) == SandboxTerrain.Impassable)
+                        continue;
+                    if (GetUnitAt(next) != null && next != unit.Position)
+                        continue;
+
+                    int stepCost = GetTerrain(next) == SandboxTerrain.Difficult ? 2 : 1;
+                    int newCost = costs[current] + stepCost;
+                    if (newCost > unit.Movement)
+                        continue;
+
+                    int oldCost;
+                    if (costs.TryGetValue(next, out oldCost) && oldCost <= newCost)
+                        continue;
+
+                    costs[next] = newCost;
+                    frontier.Add(next);
+                }
+            }
+
+            foreach (KeyValuePair<HexCoord, int> pair in costs)
+            {
+                if (pair.Key != unit.Position)
+                    result[pair.Key] = pair.Value;
+            }
+
+            return result;
+        }
+
+        public bool TryMove(string unitId, HexCoord destination, out string message)
+        {
+            message = "Перемещение недоступно.";
+            SandboxUnitState unit = CurrentUnit;
+            if (Phase != SandboxBattlePhase.InProgress || unit == null || unit.Id != unitId)
+                return false;
+            if (unit.ActionPoints <= 0)
+            {
+                message = "У бойца не осталось действий.";
+                return false;
+            }
+            if (GetUnitAt(destination) != null)
+            {
+                message = "Гекс уже занят.";
+                return false;
+            }
+
+            IReadOnlyDictionary<HexCoord, int> reachable = GetReachable(unitId);
+            if (!reachable.ContainsKey(destination))
+            {
+                message = "Гекс находится вне доступного маршрута.";
+                return false;
+            }
+
+            HexCoord origin = unit.Position;
+            unit.Position = destination;
+            unit.ActionPoints--;
+            message = unit.Name + " перемещается " + origin + " → " + destination + ".";
+            return true;
+        }
+
+        public SandboxAttackPreview PreviewAttack(string attackerId, string targetId)
+        {
+            if (Phase != SandboxBattlePhase.InProgress)
+                return SandboxAttackPreview.Invalid("Бой уже завершён.");
+
+            SandboxUnitState attacker = GetUnit(attackerId);
+            SandboxUnitState target = GetUnit(targetId);
+            if (attacker == null || target == null || attacker.IsDefeated || target.IsDefeated)
+                return SandboxAttackPreview.Invalid("Цель недоступна.");
+            if (CurrentUnit == null || CurrentUnit.Id != attackerId)
+                return SandboxAttackPreview.Invalid("Сейчас ход другого участника.");
+            if (attacker.Team == target.Team)
+                return SandboxAttackPreview.Invalid("Нельзя атаковать союзника.");
+            if (attacker.ActionPoints <= 0)
+                return SandboxAttackPreview.Invalid("Не осталось действий.");
+            if (attacker.HasAttacked)
+                return SandboxAttackPreview.Invalid("Обычная атака уже использована.");
+            if (attacker.Position.DistanceTo(target.Position) > attacker.AttackRange)
+                return SandboxAttackPreview.Invalid("Цель вне дальности.");
+
+            int effectiveDefense = target.Defense + (target.IsGuarding ? 2 : 0);
+            int damage = Math.Max(5, 15 + (attacker.Attack - effectiveDefense) * 5);
+            if (attacker.Role == SandboxUnitRole.Spearman && target.Role == SandboxUnitRole.Beast)
+                damage += 5;
+
+            return new SandboxAttackPreview(
+                true,
+                string.Empty,
+                damage,
+                Math.Max(0, target.HitPoints - damage));
+        }
+
+        public bool TryAttack(string attackerId, string targetId, out string message)
+        {
+            SandboxAttackPreview preview = PreviewAttack(attackerId, targetId);
+            if (!preview.IsValid)
+            {
+                message = preview.Reason;
+                return false;
+            }
+
+            SandboxUnitState attacker = GetUnit(attackerId);
+            SandboxUnitState target = GetUnit(targetId);
+            target.ReceiveDamage(preview.Damage);
+            attacker.ActionPoints--;
+            attacker.HasAttacked = true;
+
+            message = attacker.Name + " наносит " + target.Name + " " +
+                      preview.Damage + " урона" +
+                      (target.IsDefeated ? " и выводит цель из строя." : ".");
+            EvaluateBattleOutcome();
+            return true;
+        }
+
+        public bool TryGuard(string unitId, out string message)
+        {
+            message = "Защитная стойка недоступна.";
+            SandboxUnitState unit = CurrentUnit;
+            if (Phase != SandboxBattlePhase.InProgress || unit == null || unit.Id != unitId)
+                return false;
+            if (unit.ActionPoints <= 0 || unit.IsGuarding)
+                return false;
+
+            unit.ActionPoints--;
+            unit.IsGuarding = true;
+            message = unit.Name + " занимает защитную стойку: защита +2 до следующей активации.";
+            return true;
+        }
+
+        public void EndActivation()
+        {
+            if (Phase != SandboxBattlePhase.InProgress || CurrentUnit == null)
+                return;
+
+            CurrentUnit.ActionPoints = 0;
+            AdvanceTurnIndex();
+        }
+
+        public SandboxUnitState FindClosestOpponent(SandboxUnitState unit)
+        {
+            if (unit == null)
+                return null;
+
+            return units
+                .Where(candidate => !candidate.IsDefeated && candidate.Team != unit.Team)
+                .OrderBy(candidate => unit.Position.DistanceTo(candidate.Position))
+                .ThenBy(candidate => candidate.HitPoints)
+                .ThenBy(candidate => candidate.Id, StringComparer.Ordinal)
+                .FirstOrDefault();
+        }
+
+        public HexCoord FindBestMoveToward(SandboxUnitState unit, HexCoord target)
+        {
+            IReadOnlyDictionary<HexCoord, int> reachable = GetReachable(unit.Id);
+            HexCoord best = unit.Position;
+            int bestDistance = best.DistanceTo(target);
+            int bestCost = 0;
+
+            foreach (KeyValuePair<HexCoord, int> pair in reachable)
+            {
+                int distance = pair.Key.DistanceTo(target);
+                if (distance < bestDistance ||
+                    (distance == bestDistance && pair.Value < bestCost) ||
+                    (distance == bestDistance && pair.Value == bestCost && pair.Key.CompareTo(best) < 0))
+                {
+                    best = pair.Key;
+                    bestDistance = distance;
+                    bestCost = pair.Value;
+                }
+            }
+
+            return best;
+        }
+
+        private void ValidateInitialState()
+        {
+            HashSet<string> ids = new HashSet<string>();
+            HashSet<HexCoord> occupied = new HashSet<HexCoord>();
+            foreach (SandboxUnitState unit in units)
+            {
+                if (!ids.Add(unit.Id))
+                    throw new ArgumentException("ID участников боя должны быть уникальными.");
+                if (!IsInside(unit.Position))
+                    throw new ArgumentException("Участник размещён вне поля: " + unit.Id);
+                if (GetTerrain(unit.Position) == SandboxTerrain.Impassable)
+                    throw new ArgumentException("Участник размещён на непроходимом гексе: " + unit.Id);
+                if (!occupied.Add(unit.Position))
+                    throw new ArgumentException("Два участника занимают один стартовый гекс.");
+            }
+
+            if (!units.Any(unit => unit.Team == SandboxTeam.Player) ||
+                !units.Any(unit => unit.Team == SandboxTeam.Enemy))
+            {
+                throw new ArgumentException("Для боя нужны обе стороны.");
+            }
+        }
+
+        private void BuildRoundOrder()
+        {
+            turnOrderIds.Clear();
+            turnOrderIds.AddRange(
+                units
+                    .Where(unit => !unit.IsDefeated)
+                    .OrderByDescending(unit => unit.Initiative)
+                    .ThenBy(unit => unit.Team)
+                    .ThenBy(unit => unit.Id, StringComparer.Ordinal)
+                    .Select(unit => unit.Id));
+        }
+
+        private void AdvanceTurnIndex()
+        {
+            EvaluateBattleOutcome();
+            if (Phase != SandboxBattlePhase.InProgress)
+                return;
+
+            currentTurnIndex++;
+            BeginCurrentActivationOrAdvance();
+        }
+
+        private void BeginCurrentActivationOrAdvance()
+        {
+            while (Phase == SandboxBattlePhase.InProgress)
+            {
+                if (currentTurnIndex >= turnOrderIds.Count)
+                {
+                    Round++;
+                    BuildRoundOrder();
+                    currentTurnIndex = 0;
+                }
+
+                if (turnOrderIds.Count == 0)
+                {
+                    EvaluateBattleOutcome();
+                    return;
+                }
+
+                SandboxUnitState candidate = GetUnit(turnOrderIds[currentTurnIndex]);
+                if (candidate != null && !candidate.IsDefeated)
+                {
+                    candidate.BeginActivation();
+                    return;
+                }
+
+                currentTurnIndex++;
+            }
+        }
+
+        private void EvaluateBattleOutcome()
+        {
+            bool playersAlive = units.Any(unit => unit.Team == SandboxTeam.Player && !unit.IsDefeated);
+            bool enemiesAlive = units.Any(unit => unit.Team == SandboxTeam.Enemy && !unit.IsDefeated);
+
+            if (!enemiesAlive)
+                Phase = SandboxBattlePhase.PlayerVictory;
+            else if (!playersAlive)
+                Phase = SandboxBattlePhase.EnemyVictory;
+        }
+    }
+
+    public static class SandboxEnemyPlanner
+    {
+        public static IReadOnlyList<string> TakeCurrentTurn(SandboxBattle battle)
+        {
+            List<string> events = new List<string>();
+            SandboxUnitState enemy = battle != null ? battle.CurrentUnit : null;
+            if (enemy == null || enemy.Team != SandboxTeam.Enemy)
+                return events;
+
+            SandboxUnitState target = SelectAttackTarget(battle, enemy);
+            if (target == null)
+            {
+                SandboxUnitState closest = battle.FindClosestOpponent(enemy);
+                if (closest != null)
+                {
+                    HexCoord destination = battle.FindBestMoveToward(enemy, closest.Position);
+                    if (destination != enemy.Position)
+                    {
+                        string moveMessage;
+                        if (battle.TryMove(enemy.Id, destination, out moveMessage))
+                            events.Add(moveMessage);
+                    }
+                }
+            }
+
+            if (battle.Phase == SandboxBattlePhase.InProgress)
+            {
+                target = SelectAttackTarget(battle, enemy);
+                if (target != null)
+                {
+                    string attackMessage;
+                    if (battle.TryAttack(enemy.Id, target.Id, out attackMessage))
+                        events.Add(attackMessage);
+                }
+            }
+
+            if (battle.Phase == SandboxBattlePhase.InProgress &&
+                battle.CurrentUnit != null && battle.CurrentUnit.Id == enemy.Id &&
+                enemy.ActionPoints > 0)
+            {
+                string guardMessage;
+                if (battle.TryGuard(enemy.Id, out guardMessage))
+                    events.Add(guardMessage);
+            }
+
+            if (battle.Phase == SandboxBattlePhase.InProgress &&
+                battle.CurrentUnit != null && battle.CurrentUnit.Id == enemy.Id)
+            {
+                battle.EndActivation();
+            }
+
+            return events;
+        }
+
+        private static SandboxUnitState SelectAttackTarget(
+            SandboxBattle battle,
+            SandboxUnitState attacker)
+        {
+            return battle.Units
+                .Where(unit => !unit.IsDefeated && unit.Team != attacker.Team)
+                .Select(unit => new
+                {
+                    Unit = unit,
+                    Preview = battle.PreviewAttack(attacker.Id, unit.Id)
+                })
+                .Where(candidate => candidate.Preview.IsValid)
+                .OrderBy(candidate => candidate.Unit.HitPoints)
+                .ThenByDescending(candidate => candidate.Preview.Damage)
+                .ThenBy(candidate => candidate.Unit.Id, StringComparer.Ordinal)
+                .Select(candidate => candidate.Unit)
+                .FirstOrDefault();
+        }
+    }
+}

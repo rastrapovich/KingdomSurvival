@@ -1,0 +1,21 @@
+{
+  "name": "KingdomSurvival.BattleSandbox.EditModeTests",
+  "rootNamespace": "KingdomSurvival.BattleSandbox.Tests",
+  "references": [
+    "KingdomSurvival.BattleSandbox.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

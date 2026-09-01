@@ -1,0 +1,16 @@
+{
+  "name": "KingdomSurvival.BattleSandbox.UI",
+  "rootNamespace": "KingdomSurvival.BattleSandbox",
+  "references": [
+    "KingdomSurvival.BattleSandbox.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

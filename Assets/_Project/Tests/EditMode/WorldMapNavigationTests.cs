@@ -18,128 +18,47 @@ public class WorldMapNavigationTests
     }
 
     [Test]
-    public void AdvanceRoute_MovesFourCellsAndRemembersTravelledCells()
+    public void ContinuousReturn_StartsAtExactCurrentPosition()
     {
-        List<MapPointData> route = WorldMapNavigation.FindPath(
-            WorldMapNavigation.CapitalXPercent,
-            WorldMapNavigation.CapitalYPercent,
-            90f,
-            20f);
+        GameState state = CreateTravellingState(12345);
+        ContinuousSimulationSystem.Reset(state);
+        ContinuousSimulationSystem.NotifyRouteChanged(state);
+        ContinuousSimulationSystem.SetPaused(state, false);
 
-        Assert.That(route.Count, Is.GreaterThan(5));
+        // Half a cell at x1: the army is deliberately between grid nodes.
+        ContinuousSimulationSystem.Advance(state, 1f, false);
 
-        ExpeditionData expedition = new ExpeditionData
-        {
-            IsActive = true,
-            Phase = CommanderState.TravellingToLocation,
-            LocationId = "target",
-            Route = route,
-            RouteIndex = 0,
-            DaysRemaining = WorldMapNavigation.CalculateDays(route),
-            CurrentMapXPercent = route[0].XPercent,
-            CurrentMapYPercent = route[0].YPercent,
-            TargetMapXPercent = route[route.Count - 1].XPercent,
-            TargetMapYPercent = route[route.Count - 1].YPercent
-        };
-
-        WorldMapNavigation.AdvanceRoute(expedition, 1);
-
-        Assert.That(
-            expedition.RouteIndex,
-            Is.EqualTo(Math.Min(
-                WorldMapNavigation.CellsPerDay,
-                route.Count - 1)));
-        Assert.That(
-            expedition.LastTravelPoints.Count,
-            Is.EqualTo(expedition.RouteIndex));
-        Assert.That(
-            expedition.CurrentMapXPercent,
-            Is.EqualTo(route[expedition.RouteIndex].XPercent).Within(0.001f));
-        Assert.That(
-            expedition.CurrentMapYPercent,
-            Is.EqualTo(route[expedition.RouteIndex].YPercent).Within(0.001f));
-    }
-
-    [Test]
-    public void OrderReturn_StartsAtActualCurrentPosition()
-    {
-        GameState state = new GameState();
-        state.CreateNewGame(12345);
+        float currentX = state.ActiveExpedition.CurrentMapXPercent;
+        float currentY = state.ActiveExpedition.CurrentMapYPercent;
 
         string message;
-        bool started = state.TryStartExpeditionToMapPoint(
-            88f,
-            18f,
-            null,
-            false,
-            new List<string> { "garrick", "edric" },
-            out message);
-
-        Assert.That(started, Is.True, message);
-
-        WorldMapNavigation.AdvanceRoute(
-            state.ActiveExpedition,
-            1);
-
-        float currentX =
-            state.ActiveExpedition.CurrentMapXPercent;
-        float currentY =
-            state.ActiveExpedition.CurrentMapYPercent;
-
-        // После первого завершённого дня приказ уже нельзя просто отменить.
-        state.Day = state.ActiveExpedition.StartedOnDay + 1;
-
         bool returning =
-            state.TryOrderReturn(out message);
+            ContinuousExpeditionCommands.TryOrderReturn(state, out message);
 
         Assert.That(returning, Is.True, message);
         Assert.That(
             state.ActiveExpedition.Phase,
             Is.EqualTo(CommanderState.ReturningToCastle));
-        Assert.That(
-            state.ActiveExpedition.Route.Count,
-            Is.GreaterThan(1));
+        Assert.That(state.ActiveExpedition.Route.Count, Is.GreaterThan(1));
 
-        MapPointData routeStart =
-            state.ActiveExpedition.Route[0];
-
-        Assert.That(
-            WorldMapNavigation.GridXFromPercent(routeStart.XPercent),
-            Is.EqualTo(
-                WorldMapNavigation.GridXFromPercent(currentX)));
-        Assert.That(
-            WorldMapNavigation.GridYFromPercent(routeStart.YPercent),
-            Is.EqualTo(
-                WorldMapNavigation.GridYFromPercent(currentY)));
+        MapPointData routeStart = state.ActiveExpedition.Route[0];
+        Assert.That(routeStart.XPercent, Is.EqualTo(currentX).Within(0.001f));
+        Assert.That(routeStart.YPercent, Is.EqualTo(currentY).Within(0.001f));
     }
 
     [Test]
-    public void ChangeRoute_RebuildsFromActualCurrentPosition()
+    public void ContinuousRouteChange_PreservesMidCellPosition()
     {
-        GameState state = new GameState();
-        state.CreateNewGame(54321);
+        GameState state = CreateTravellingState(54321);
+        ContinuousSimulationSystem.Reset(state);
+        ContinuousSimulationSystem.NotifyRouteChanged(state);
+        ContinuousSimulationSystem.SetPaused(state, false);
+
+        ContinuousSimulationSystem.Advance(state, 1f, false);
+        float currentX = state.ActiveExpedition.CurrentMapXPercent;
+        float currentY = state.ActiveExpedition.CurrentMapYPercent;
 
         string message;
-        Assert.That(
-            state.TryStartExpeditionToMapPoint(
-                85f,
-                20f,
-                null,
-                false,
-                new List<string> { "garrick" },
-                out message),
-            Is.True,
-            message);
-
-        WorldMapNavigation.AdvanceRoute(
-            state.ActiveExpedition,
-            1);
-
-        float currentX =
-            state.ActiveExpedition.CurrentMapXPercent;
-        float currentY =
-            state.ActiveExpedition.CurrentMapYPercent;
-
         Assert.That(
             state.TryChangeExpeditionRoute(
                 15f,
@@ -149,17 +68,17 @@ public class WorldMapNavigationTests
             Is.True,
             message);
 
-        MapPointData routeStart =
-            state.ActiveExpedition.Route[0];
+        ContinuousSimulationSystem.NotifyRouteChanged(state);
 
+        MapPointData routeStart = state.ActiveExpedition.Route[0];
+        Assert.That(routeStart.XPercent, Is.EqualTo(currentX).Within(0.001f));
+        Assert.That(routeStart.YPercent, Is.EqualTo(currentY).Within(0.001f));
         Assert.That(
-            WorldMapNavigation.GridXFromPercent(routeStart.XPercent),
-            Is.EqualTo(
-                WorldMapNavigation.GridXFromPercent(currentX)));
+            state.ActiveExpedition.CurrentMapXPercent,
+            Is.EqualTo(currentX).Within(0.001f));
         Assert.That(
-            WorldMapNavigation.GridYFromPercent(routeStart.YPercent),
-            Is.EqualTo(
-                WorldMapNavigation.GridYFromPercent(currentY)));
+            state.ActiveExpedition.CurrentMapYPercent,
+            Is.EqualTo(currentY).Within(0.001f));
     }
 
     [TestCase(10f, 20f, "Западные земли")]
@@ -176,32 +95,44 @@ public class WorldMapNavigationTests
             Is.EqualTo(expected));
     }
 
+    private static GameState CreateTravellingState(int seed)
+    {
+        GameState state = new GameState();
+        state.CreateNewGame(seed);
+
+        string message;
+        bool started = state.TryStartExpeditionToMapPoint(
+            90f,
+            20f,
+            null,
+            false,
+            new List<string> { "garrick", "edric" },
+            out message);
+
+        Assert.That(started, Is.True, message);
+        Assert.That(state.ActiveExpedition.Route.Count, Is.GreaterThan(5));
+        return state;
+    }
+
     private static void AssertRouteHasNoBlockedDiagonalCorners(
         List<MapPointData> route)
     {
         for (int i = 1; i < route.Count; i++)
         {
             int previousX =
-                WorldMapNavigation.GridXFromPercent(
-                    route[i - 1].XPercent);
+                WorldMapNavigation.GridXFromPercent(route[i - 1].XPercent);
             int previousY =
-                WorldMapNavigation.GridYFromPercent(
-                    route[i - 1].YPercent);
+                WorldMapNavigation.GridYFromPercent(route[i - 1].YPercent);
             int currentX =
-                WorldMapNavigation.GridXFromPercent(
-                    route[i].XPercent);
+                WorldMapNavigation.GridXFromPercent(route[i].XPercent);
             int currentY =
-                WorldMapNavigation.GridYFromPercent(
-                    route[i].YPercent);
+                WorldMapNavigation.GridYFromPercent(route[i].YPercent);
 
             int deltaX = currentX - previousX;
             int deltaY = currentY - previousY;
 
-            if (Math.Abs(deltaX) != 1 ||
-                Math.Abs(deltaY) != 1)
-            {
+            if (Math.Abs(deltaX) != 1 || Math.Abs(deltaY) != 1)
                 continue;
-            }
 
             Assert.That(
                 WorldMapNavigation.IsBlockedGridCell(
@@ -209,7 +140,6 @@ public class WorldMapNavigationTests
                     previousY),
                 Is.False,
                 "Диагональ пересекает заблокированный горизонтальный угол.");
-
             Assert.That(
                 WorldMapNavigation.IsBlockedGridCell(
                     previousX,

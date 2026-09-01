@@ -24,6 +24,9 @@ public static class CapitalCrisisSystem
         if (!BattleSystem.TryPrepareCapitalBattle(state, out prepareMessage))
             return;
 
+        string buildingDefenseMessage =
+            BuildingSystem.ApplyCapitalDefenseToPendingBattle(state);
+
         PendingBattleData pending = BattleSystem.GetPendingBattle(state);
         if (pending == null || pending.Result == null)
             return;
@@ -38,7 +41,10 @@ public static class CapitalCrisisSystem
                 Title = "Нападение на городской амбар",
                 Description =
                     pending.Context.Description + " " +
-                    "Войска экспедиции в расчёт защиты столицы не входят.",
+                    "Войска экспедиции в расчёт защиты столицы не входят." +
+                    (string.IsNullOrWhiteSpace(buildingDefenseMessage)
+                        ? string.Empty
+                        : " " + buildingDefenseMessage),
                 ConsequenceText = BattleSystem.BuildCompactPreview(pending.Result),
                 Tone = ExpeditionIncidentTone.Negative
             };

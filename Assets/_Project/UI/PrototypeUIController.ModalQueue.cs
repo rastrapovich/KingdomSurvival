@@ -61,7 +61,8 @@ public partial class PrototypeUIController
         // ProcessContinuousSimulationBatch вызывает QueueNotice для
         // MandatoryNotice до QueueStrategicResultModals, поэтому достаточно
         // создать PendingDecision здесь: следующий шаг очереди подхватит его
-        // ровно один раз.
+        // ровно один раз. Для опасной локации фабрика вместо обычного решения
+        // подготавливает PendingBattle, и после этой плашки откроется прогноз боя.
         if (notice.Title == "АРМИЯ ПРИБЫЛА")
         {
             ExpeditionDecisionOccurrence arrivalDecision;
@@ -121,8 +122,8 @@ public partial class PrototypeUIController
             Consequence =
                 "В столицу передано: золото +" + snapshot.ArmyGold +
                 ", пища +" + snapshot.ArmySupply + ".\n" +
-                "Потери: нет.\nОпыт: система пока не реализована.\n" +
-                "Состояние бойцов: без изменений."
+                "Состояние выживших бойцов сохраняется; раненые начинают " +
+                "восстанавливаться только после фактического возвращения."
         };
     }
 
@@ -229,6 +230,8 @@ public partial class PrototypeUIController
     {
         return gameState != null &&
                (gameState.HasPendingExpeditionDecision ||
+                BattleSystem.HasPendingBattle(gameState) ||
+                openedBattle != null ||
                 openedIncident != null ||
                 openedDecision != null ||
                 activeQueuedModal != null ||

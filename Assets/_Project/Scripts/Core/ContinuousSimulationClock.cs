@@ -264,6 +264,12 @@ public static partial class ContinuousSimulationSystem
                 runtime,
                 stepHours,
                 batch);
+
+            // Восстановление использует ровно то игровое время, которое реально
+            // продвинулось в этом шаге. Бойцы активной экспедиции внутри
+            // BattleSystem отфильтровываются и пассивно не лечатся.
+            BattleSystem.AdvanceCapitalRecovery(state, advancedHours);
+
             runtime.HourOfDay += advancedHours;
             remainingGameHours -= advancedHours;
             batch.StateChanged = true;

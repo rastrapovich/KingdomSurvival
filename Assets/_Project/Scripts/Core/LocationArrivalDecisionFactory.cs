@@ -36,6 +36,19 @@ public static class LocationArrivalDecisionFactory
         if (location == null || location.IsWaypoint)
             return false;
 
+        // В опасной тестовой локации обычное решение «исследовать/отменить»
+        // заменяется обязательным боевым прогнозом. Игрок всё ещё принимает
+        // решение до применения потерь — выбирает доктрину и видит точный исход.
+        if (BattleSystem.HasUnresolvedLocationEncounter(state, location.Id))
+        {
+            string ignoredMessage;
+            BattleSystem.TryPrepareLocationBattle(
+                state,
+                location.Id,
+                out ignoredMessage);
+            return false;
+        }
+
         bool researchImplemented =
             location.ExplorationHours > 0 && !location.IsExplored;
 

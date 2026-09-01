@@ -1,5 +1,5 @@
 ﻿<Solution>
   <Project Path="KingdomSurvival.Core.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="KingdomSurvival.Core.EditModeTests.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
 </Solution>

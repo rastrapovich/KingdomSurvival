@@ -417,9 +417,9 @@ public partial class PrototypeUIController
         if (acceleratedSupplyHoldButton == null || acceleratedSupplyDelta == 0)
             return;
 
-        acceleratedSupplySchedule = interfaceRoot.schedule
-            .Execute(PerformAcceleratedSupplyStep)
-            .ExecuteLater(delayMs);
+        acceleratedSupplySchedule =
+            interfaceRoot.schedule.Execute(PerformAcceleratedSupplyStep);
+        acceleratedSupplySchedule.ExecuteLater(delayMs);
     }
 
     private void PerformAcceleratedSupplyStep()

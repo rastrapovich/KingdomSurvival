@@ -18,6 +18,27 @@ public class WorldMapNavigationTests
     }
 
     [Test]
+    public void FindPath_PreservesExactEndpointsInsideWalkableCells()
+    {
+        const float startX = 50f;
+        const float startY = 81f;
+        const float targetX = 51f;
+        const float targetY = 80.5f;
+
+        List<MapPointData> route = WorldMapNavigation.FindPath(
+            startX,
+            startY,
+            targetX,
+            targetY);
+
+        Assert.That(route.Count, Is.EqualTo(2));
+        Assert.That(route[0].XPercent, Is.EqualTo(startX).Within(0.001f));
+        Assert.That(route[0].YPercent, Is.EqualTo(startY).Within(0.001f));
+        Assert.That(route[1].XPercent, Is.EqualTo(targetX).Within(0.001f));
+        Assert.That(route[1].YPercent, Is.EqualTo(targetY).Within(0.001f));
+    }
+
+    [Test]
     public void ContinuousReturn_StartsAtExactCurrentPosition()
     {
         GameState state = CreateTravellingState(12345);
@@ -42,8 +63,17 @@ public class WorldMapNavigationTests
         Assert.That(state.ActiveExpedition.Route.Count, Is.GreaterThan(1));
 
         MapPointData routeStart = state.ActiveExpedition.Route[0];
+        MapPointData routeEnd =
+            state.ActiveExpedition.Route[state.ActiveExpedition.Route.Count - 1];
+
         Assert.That(routeStart.XPercent, Is.EqualTo(currentX).Within(0.001f));
         Assert.That(routeStart.YPercent, Is.EqualTo(currentY).Within(0.001f));
+        Assert.That(
+            routeEnd.XPercent,
+            Is.EqualTo(WorldMapNavigation.CapitalXPercent).Within(0.001f));
+        Assert.That(
+            routeEnd.YPercent,
+            Is.EqualTo(WorldMapNavigation.CapitalYPercent).Within(0.001f));
     }
 
     [Test]

@@ -26,6 +26,8 @@ public static class WorldMapNavigation
     public const float CapitalXPercent = 50f;
     public const float CapitalYPercent = 81f;
 
+    private const float ExactPointEpsilon = 0.0001f;
+
     private static readonly int[,] NeighborOffsets =
     {
         { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 },
@@ -42,8 +44,9 @@ public static class WorldMapNavigation
         int startY = PercentToGridY(startYPercent);
         int targetX = PercentToGridX(targetXPercent);
         int targetY = PercentToGridY(targetYPercent);
+        bool targetWasBlocked = IsBlocked(targetX, targetY);
 
-        if (IsBlocked(targetX, targetY))
+        if (targetWasBlocked)
             FindNearestWalkable(ref targetX, ref targetY);
 
         int nodeCount = GridWidth * GridHeight;
@@ -87,7 +90,15 @@ public static class WorldMapNavigation
             open.RemoveAt(bestOpenIndex);
 
             if (current == targetIndex)
-                return BuildPath(parents, current);
+            {
+                return ApplyExactEndpoints(
+                    BuildPath(parents, current),
+                    startXPercent,
+                    startYPercent,
+                    targetXPercent,
+                    targetYPercent,
+                    !targetWasBlocked);
+            }
 
             if (closed[current])
                 continue;
@@ -242,6 +253,45 @@ public static class WorldMapNavigation
             return false;
 
         return true;
+    }
+
+    private static List<MapPointData> ApplyExactEndpoints(
+        List<MapPointData> path,
+        float startXPercent,
+        float startYPercent,
+        float targetXPercent,
+        float targetYPercent,
+        bool preserveExactTarget)
+    {
+        if (path == null || path.Count == 0)
+            return path ?? new List<MapPointData>();
+
+        float resolvedTargetX = preserveExactTarget
+            ? targetXPercent
+            : path[path.Count - 1].XPercent;
+        float resolvedTargetY = preserveExactTarget
+            ? targetYPercent
+            : path[path.Count - 1].YPercent;
+
+        path[0].XPercent = startXPercent;
+        path[0].YPercent = startYPercent;
+
+        if (path.Count == 1)
+        {
+            float dx = resolvedTargetX - startXPercent;
+            float dy = resolvedTargetY - startYPercent;
+
+            if (dx * dx + dy * dy > ExactPointEpsilon * ExactPointEpsilon)
+            {
+                path.Add(new MapPointData(resolvedTargetX, resolvedTargetY));
+            }
+
+            return path;
+        }
+
+        path[path.Count - 1].XPercent = resolvedTargetX;
+        path[path.Count - 1].YPercent = resolvedTargetY;
+        return path;
     }
 
     private static List<MapPointData> BuildPath(int[] parents, int current)

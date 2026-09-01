@@ -4,11 +4,15 @@ using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
-    private const int SupplyHoldInitialDelayMs = 360;
+    private const int AcceleratedSupplyInitialDelayMs = 360;
 
     private bool navigationAndInteractionFixesInitialized;
-    private Button activeSupplyHoldButton;
-    private int activeSupplyHoldPointerId = -1;
+    private Button acceleratedSupplyHoldButton;
+    private int acceleratedSupplyPointerId = -1;
+    private int acceleratedSupplyDelta;
+    private int acceleratedSupplyRepeatCount;
+    private bool acceleratedSupplyRepeated;
+    private IVisualElementScheduledItem acceleratedSupplySchedule;
     private Vector2 latestPortraitDragPointerPosition;
 
     private readonly Dictionary<string, Button> quickLocationActionButtons =
@@ -42,7 +46,9 @@ public partial class PrototypeUIController
             gameState == null ||
             navExpeditionsButton == null ||
             persistentCommanderExpeditionButton == null ||
-            quickExpeditionPopup == null)
+            quickExpeditionPopup == null ||
+            supplyMinusButton == null ||
+            supplyPlusButton == null)
         {
             ScheduleNavigationAndInteractionFixesRetry();
             return;
@@ -50,6 +56,7 @@ public partial class PrototypeUIController
 
         ApplyMapAndLocationsLabels();
         EnsureQuickLocationActionButtons();
+        RegisterAcceleratedSupplyInput();
 
         interfaceRoot.RegisterCallback<PointerMoveEvent>(
             OnPortraitDragGhostPointerMove,
@@ -84,8 +91,7 @@ public partial class PrototypeUIController
 
         if (expeditionsScreen != null)
         {
-            Label mapTitle =
-                expeditionsScreen.Q<Label>(className: "panel-title");
+            Label mapTitle = expeditionsScreen.Q<Label>(className: "panel-title");
             if (mapTitle != null)
                 mapTitle.text = "КАРТА";
         }
@@ -103,23 +109,17 @@ public partial class PrototypeUIController
         foreach (LocationData location in gameState.Locations)
         {
             VisualElement card;
-            if (!quickExpeditionCards.TryGetValue(location.Id, out card) ||
-                card == null)
-            {
+            if (!quickExpeditionCards.TryGetValue(location.Id, out card) || card == null)
                 continue;
-            }
 
-            Button existing =
-                card.Q<Button>("quick-location-action-" + location.Id);
+            Button existing = card.Q<Button>("quick-location-action-" + location.Id);
             if (existing != null)
             {
                 quickLocationActionButtons[location.Id] = existing;
                 continue;
             }
 
-            VisualElement row = card.childCount > 1
-                ? card.ElementAt(1)
-                : null;
+            VisualElement row = card.childCount > 1 ? card.ElementAt(1) : null;
             VisualElement info = row != null && row.childCount > 1
                 ? row.ElementAt(1)
                 : null;
@@ -147,19 +147,14 @@ public partial class PrototypeUIController
                 (Color)new Color32(57, 50, 38, 255);
             actionButton.style.color =
                 (Color)new Color32(229, 193, 116, 255);
-            SetExpeditionBorder(
-                actionButton,
-                1f,
-                ExpeditionRgb(112, 91, 56));
+            SetExpeditionBorder(actionButton, 1f, ExpeditionRgb(112, 91, 56));
             SetExpeditionRadius(actionButton, 3f);
 
             info.Add(actionButton);
             quickLocationActionButtons[location.Id] = actionButton;
 
             Button imageButton;
-            if (quickExpeditionImageButtons.TryGetValue(
-                    location.Id,
-                    out imageButton) &&
+            if (quickExpeditionImageButtons.TryGetValue(location.Id, out imageButton) &&
                 imageButton != null)
             {
                 imageButton.pickingMode = PickingMode.Ignore;
@@ -168,9 +163,7 @@ public partial class PrototypeUIController
             }
 
             Label legacyImageLabel;
-            if (quickExpeditionImageLabels.TryGetValue(
-                    location.Id,
-                    out legacyImageLabel) &&
+            if (quickExpeditionImageLabels.TryGetValue(location.Id, out legacyImageLabel) &&
                 legacyImageLabel != null)
             {
                 legacyImageLabel.style.display = DisplayStyle.None;
@@ -309,7 +302,6 @@ public partial class PrototypeUIController
             return;
 
         latestPortraitDragPointerPosition = evt.position;
-
         interfaceRoot.schedule
             .Execute(ApplyPortraitDragGhostGeometry)
             .ExecuteLater(1);
@@ -330,154 +322,168 @@ public partial class PrototypeUIController
 
         stableDragGhost.style.width = width;
         stableDragGhost.style.height = height;
-        stableDragGhost.style.left =
-            latestPortraitDragPointerPosition.x - width * 0.5f;
-        stableDragGhost.style.top =
-            latestPortraitDragPointerPosition.y - height * 0.5f;
+        stableDragGhost.style.left = latestPortraitDragPointerPosition.x - width * 0.5f;
+        stableDragGhost.style.top = latestPortraitDragPointerPosition.y - height * 0.5f;
     }
 
-    private void RegisterSupplyHoldCallbacks(Button button, int delta)
+    private void RegisterAcceleratedSupplyInput()
     {
-        if (button == null || delta == 0)
-            return;
-
-        button.RegisterCallback<PointerDownEvent>(
-            evt => OnSupplyHoldPointerDown(evt, button, delta),
+        interfaceRoot.RegisterCallback<PointerDownEvent>(
+            OnAcceleratedSupplyPointerDown,
             TrickleDown.TrickleDown);
-        button.RegisterCallback<PointerUpEvent>(
-            evt => OnSupplyHoldPointerUp(evt, button),
+        interfaceRoot.RegisterCallback<PointerUpEvent>(
+            OnAcceleratedSupplyPointerUp,
             TrickleDown.TrickleDown);
-        button.RegisterCallback<PointerCaptureOutEvent>(
-            evt => OnSupplyHoldPointerCaptureOut(button));
+        interfaceRoot.RegisterCallback<PointerCaptureOutEvent>(
+            OnAcceleratedSupplyPointerCaptureOut,
+            TrickleDown.TrickleDown);
     }
 
-    private void OnSupplyHoldPointerDown(
-        PointerDownEvent evt,
-        Button button,
-        int delta)
+    private void OnAcceleratedSupplyPointerDown(PointerDownEvent evt)
     {
-        if (evt.button != 0 ||
-            isGameOver ||
-            gameState == null ||
-            !gameState.CanAdjustArmySupply)
+        if (evt.button != 0)
+            return;
+
+        Button button = FindSupplyButton(evt.target as VisualElement);
+        if (button == null)
+            return;
+
+        // Перехватываем событие раньше старого Button/Clickable и старых
+        // supply-hold callbacks. Так короткий клик и удержание имеют ровно один
+        // источник истины и не могут сработать дважды.
+        evt.StopImmediatePropagation();
+
+        if (isGameOver || gameState == null || !gameState.CanAdjustArmySupply)
+            return;
+
+        int delta = button == supplyPlusButton ? 1 : -1;
+        bool canTransfer = delta > 0 ? gameState.Food > 0 : gameState.ArmySupply > 0;
+        if (!canTransfer)
+            return;
+
+        StopAcceleratedSupplyHold();
+        acceleratedSupplyHoldButton = button;
+        acceleratedSupplyPointerId = evt.pointerId;
+        acceleratedSupplyDelta = delta;
+        acceleratedSupplyRepeatCount = 0;
+        acceleratedSupplyRepeated = false;
+
+        if (!interfaceRoot.HasPointerCapture(evt.pointerId))
+            interfaceRoot.CapturePointer(evt.pointerId);
+
+        ScheduleAcceleratedSupplyStep(AcceleratedSupplyInitialDelayMs);
+    }
+
+    private void OnAcceleratedSupplyPointerUp(PointerUpEvent evt)
+    {
+        if (acceleratedSupplyHoldButton == null ||
+            evt.pointerId != acceleratedSupplyPointerId)
         {
             return;
         }
 
-        StopSupplyHold(false);
-        activeSupplyHoldButton = button;
-        activeSupplyHoldPointerId = evt.pointerId;
-        supplyHoldDelta = delta;
-        supplyHoldRepeatCount = 0;
-        supplyHoldRepeated = false;
+        evt.StopImmediatePropagation();
 
-        ScheduleNextSupplyHoldStep(SupplyHoldInitialDelayMs);
+        if (!acceleratedSupplyRepeated)
+            TransferAcceleratedSupplyOnce();
+
+        StopAcceleratedSupplyHold();
     }
 
-    private void OnSupplyHoldPointerUp(PointerUpEvent evt, Button button)
+    private void OnAcceleratedSupplyPointerCaptureOut(PointerCaptureOutEvent evt)
     {
-        if (button != activeSupplyHoldButton ||
-            evt.pointerId != activeSupplyHoldPointerId)
+        if (acceleratedSupplyHoldButton == null)
+            return;
+
+        StopAcceleratedSupplyHold();
+    }
+
+    private Button FindSupplyButton(VisualElement target)
+    {
+        VisualElement current = target;
+        while (current != null && current != interfaceRoot)
         {
-            return;
+            if (current == supplyPlusButton)
+                return supplyPlusButton;
+            if (current == supplyMinusButton)
+                return supplyMinusButton;
+            current = current.parent;
         }
-
-        FinishSupplyHold(button);
+        return null;
     }
 
-    private void OnSupplyHoldPointerCaptureOut(Button button)
+    private void ScheduleAcceleratedSupplyStep(int delayMs)
     {
-        if (button != activeSupplyHoldButton)
+        if (acceleratedSupplyHoldButton == null || acceleratedSupplyDelta == 0)
             return;
 
-        FinishSupplyHold(button);
-    }
-
-    private void FinishSupplyHold(Button button)
-    {
-        bool repeated = supplyHoldRepeated;
-        StopSupplyHold(repeated);
-
-        if (repeated && button != null)
-        {
-            button.schedule
-                .Execute(() => supplyHoldRepeated = false)
-                .ExecuteLater(40);
-        }
-    }
-
-    private void ScheduleNextSupplyHoldStep(int delayMs)
-    {
-        if (activeSupplyHoldButton == null || supplyHoldDelta == 0)
-            return;
-
-        supplyHoldSchedule = activeSupplyHoldButton.schedule
-            .Execute(PerformSupplyHoldStep)
+        acceleratedSupplySchedule = interfaceRoot.schedule
+            .Execute(PerformAcceleratedSupplyStep)
             .ExecuteLater(delayMs);
     }
 
-    private void PerformSupplyHoldStep()
+    private void PerformAcceleratedSupplyStep()
     {
-        if (activeSupplyHoldButton == null)
-            return;
-
-        if (isGameOver ||
+        if (acceleratedSupplyHoldButton == null ||
             gameState == null ||
+            isGameOver ||
             !gameState.CanAdjustArmySupply)
         {
-            FinishSupplyHold(activeSupplyHoldButton);
+            StopAcceleratedSupplyHold();
             return;
         }
 
-        bool canTransfer = supplyHoldDelta > 0
+        bool canTransfer = acceleratedSupplyDelta > 0
             ? gameState.Food > 0
             : gameState.ArmySupply > 0;
-
         if (!canTransfer)
         {
-            FinishSupplyHold(activeSupplyHoldButton);
+            StopAcceleratedSupplyHold();
             return;
         }
 
-        supplyHoldRepeated = true;
-        supplyHoldRepeatCount++;
+        TransferAcceleratedSupplyOnce();
+        acceleratedSupplyRepeated = true;
+        acceleratedSupplyRepeatCount++;
 
-        if (supplyHoldDelta > 0)
+        int nextDelay = acceleratedSupplyRepeatCount < 5
+            ? 170
+            : acceleratedSupplyRepeatCount < 14
+                ? 95
+                : 50;
+        ScheduleAcceleratedSupplyStep(nextDelay);
+    }
+
+    private void TransferAcceleratedSupplyOnce()
+    {
+        if (gameState == null || acceleratedSupplyDelta == 0)
+            return;
+
+        if (acceleratedSupplyDelta > 0)
             gameState.TryAddArmySupply();
         else
             gameState.TryRemoveArmySupply();
 
         RefreshStableResourceUi();
-
-        int nextDelay = supplyHoldRepeatCount < 5
-            ? 170
-            : supplyHoldRepeatCount < 14
-                ? 95
-                : 50;
-        ScheduleNextSupplyHoldStep(nextDelay);
     }
 
-    private void StopSupplyHold(bool preserveRepeatedFlag)
+    private void StopAcceleratedSupplyHold()
     {
-        if (supplyHoldSchedule != null)
-            supplyHoldSchedule.Pause();
+        if (acceleratedSupplySchedule != null)
+            acceleratedSupplySchedule.Pause();
 
-        supplyHoldSchedule = null;
-        activeSupplyHoldButton = null;
-        activeSupplyHoldPointerId = -1;
-        supplyHoldDelta = 0;
-        supplyHoldRepeatCount = 0;
+        if (interfaceRoot != null &&
+            acceleratedSupplyPointerId >= 0 &&
+            interfaceRoot.HasPointerCapture(acceleratedSupplyPointerId))
+        {
+            interfaceRoot.ReleasePointer(acceleratedSupplyPointerId);
+        }
 
-        if (!preserveRepeatedFlag)
-            supplyHoldRepeated = false;
-    }
-
-    private bool ConsumeRepeatedSupplyClick()
-    {
-        if (!supplyHoldRepeated)
-            return false;
-
-        supplyHoldRepeated = false;
-        return true;
+        acceleratedSupplySchedule = null;
+        acceleratedSupplyHoldButton = null;
+        acceleratedSupplyPointerId = -1;
+        acceleratedSupplyDelta = 0;
+        acceleratedSupplyRepeatCount = 0;
+        acceleratedSupplyRepeated = false;
     }
 }

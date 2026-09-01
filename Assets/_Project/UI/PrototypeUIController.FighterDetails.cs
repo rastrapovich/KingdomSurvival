@@ -152,23 +152,15 @@ public partial class PrototypeUIController
             image.style.left = 4f;
             image.style.right = 4f;
             image.style.top = 4f;
-            image.style.bottom = 23f;
+            image.style.bottom = 14f;
             image.style.width = StyleKeyword.Auto;
             image.style.height = StyleKeyword.Auto;
             image.style.marginBottom = 0f;
         }
 
-        nameLabel.style.display = DisplayStyle.Flex;
-        nameLabel.style.position = Position.Absolute;
-        nameLabel.style.left = 4f;
-        nameLabel.style.right = 4f;
-        nameLabel.style.bottom = 11f;
-        nameLabel.style.height = 12f;
-        nameLabel.style.fontSize = 9f;
-        nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-        nameLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-        nameLabel.style.color = new Color(0.9f, 0.87f, 0.78f, 1f);
-        nameLabel.style.backgroundColor = new Color(0.08f, 0.09f, 0.11f, 0.88f);
+        // Имя используется для поиска FighterData, но на компактной карточке
+        // никогда не показывается. Это устраняет конфликт с портретным USS.
+        nameLabel.style.display = DisplayStyle.None;
 
         Label roleLabel = card.Q<Label>(className: "fighter-role");
         Label infoLabel = card.Q<Label>(className: "fighter-info");

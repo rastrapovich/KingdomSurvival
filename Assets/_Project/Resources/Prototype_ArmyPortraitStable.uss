@@ -1,0 +1,119 @@
+/* Stable army portrait layout. Loaded once at runtime after the base shell USS. */
+
+.shell-main-row {
+    margin-bottom: 5px;
+}
+
+.shell-bottom-bar {
+    height: 42px;
+    min-height: 42px;
+    max-height: 42px;
+}
+
+.shell-navigation-bar {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.shell-nav-button {
+    font-size: 11px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.shell-resource-bar {
+    padding-left: 8px;
+    padding-right: 6px;
+}
+
+.shell-resource-box {
+    height: 32px;
+    min-height: 32px;
+    max-height: 32px;
+    margin-right: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.shell-resource-box .resource-income {
+    margin-top: 0px;
+    font-size: 8px;
+}
+
+.shell-resource-box .food-expense-popup {
+    bottom: 36px;
+}
+
+.shell-time-toggle-button {
+    height: 32px;
+    min-height: 32px;
+    max-height: 32px;
+    margin-left: 6px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.incident-notification-stack {
+    bottom: 68px;
+}
+
+.persistent-commander-garrison-host,
+.army-transfer-board,
+.army-roster-drop-zone {
+    height: 128px;
+    min-height: 128px;
+    max-height: 128px;
+}
+
+.army-roster-drop-zone {
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.army-roster-title {
+    display: none;
+}
+
+.army-roster-list {
+    height: 112px;
+    min-height: 112px;
+    max-height: 112px;
+    align-items: flex-start;
+}
+
+.army-roster-list .fighter-card {
+    position: relative;
+    width: 76px;
+    min-width: 76px;
+    max-width: 76px;
+    height: 112px;
+    min-height: 112px;
+    max-height: 112px;
+    margin-right: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.army-roster-list .fighter-name,
+.army-roster-list .fighter-role,
+.army-roster-list .fighter-info,
+.army-roster-list .fighter-assignment {
+    display: none;
+}
+
+.army-roster-list .fighter-image-placeholder {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    top: 4px;
+    bottom: 14px;
+    width: auto;
+    height: auto;
+    margin-bottom: 0px;
+}

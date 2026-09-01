@@ -12,11 +12,19 @@ public static partial class ContinuousSimulationSystem
         batch.ReportDay = finishedDay;
         batch.EventHour = 0.0;
 
-        state.Gold += state.DailyGoldIncome;
-        state.Food += state.DailyFoodIncome;
+        BuildingSystem.Synchronize(state);
+        int dailyGoldIncome = BuildingSystem.GetDailyGoldIncome(state);
+        int dailyFoodIncome = BuildingSystem.GetDailyFoodIncome(state);
+        int dailyGoldUpkeep = BuildingSystem.GetDailyGoldUpkeep(state);
+
+        state.Gold = Math.Max(
+            0,
+            state.Gold + dailyGoldIncome - dailyGoldUpkeep);
+        state.Food += dailyFoodIncome;
         batch.Result.Messages.Add(
-            "Полночь. Казна получила " + state.DailyGoldIncome +
-            " золота, город получил " + state.DailyFoodIncome + " пищи.");
+            "Полночь. Казна получила " + dailyGoldIncome +
+            " золота, содержание построек: " + dailyGoldUpkeep +
+            ". Город получил " + dailyFoodIncome + " пищи.");
 
         ResolveCityFoodAtMidnight(state, batch.Result);
         ResolveExpeditionSupplyAtMidnight(state, runtime, batch.Result);

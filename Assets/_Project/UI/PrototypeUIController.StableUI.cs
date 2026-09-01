@@ -9,6 +9,7 @@ public partial class PrototypeUIController
     private int renderedReportHash = int.MinValue;
     private IVisualElementScheduledItem supplyHoldSchedule;
     private int supplyHoldDelta;
+    private int supplyHoldRepeatCount;
     private bool supplyHoldRepeated;
 
     private VisualElement persistentCommanderPanel;

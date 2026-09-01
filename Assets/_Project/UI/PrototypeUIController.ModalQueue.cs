@@ -24,6 +24,7 @@ public partial class PrototypeUIController
     private readonly Dictionary<int, int> incidentReportIndexes =
         new Dictionary<int, int>();
     private QueuedModal activeQueuedModal;
+    private bool resumeAfterBlockingModal;
 
     private void QueueStrategicResultModals(
         StrategicSimulationResult result,
@@ -131,6 +132,7 @@ public partial class PrototypeUIController
             return;
 
         activeQueuedModal = queuedModals.Dequeue();
+        PauseForBlockingModal();
 
         if (activeQueuedModal.Decision != null)
         {
@@ -165,6 +167,7 @@ public partial class PrototypeUIController
         ScheduleRoyalReportsRefresh();
         TryShowNextQueuedModal();
         RefreshTimeControlAvailability();
+        ResumeAfterBlockingModalIfReady();
     }
 
     private void ClearQueuedModals()
@@ -172,6 +175,7 @@ public partial class PrototypeUIController
         queuedModals.Clear();
         incidentReportIndexes.Clear();
         activeQueuedModal = null;
+        resumeAfterBlockingModal = false;
     }
 
     private void RegisterIncidentReports(
@@ -225,8 +229,39 @@ public partial class PrototypeUIController
     {
         return gameState != null &&
                (gameState.HasPendingExpeditionDecision ||
+                openedIncident != null ||
+                openedDecision != null ||
                 activeQueuedModal != null ||
                 queuedModals.Count > 0);
+    }
+
+    private void PauseForBlockingModal(bool autoPauseRequested = false)
+    {
+        if (gameState == null || isGameOver)
+            return;
+
+        bool wasPaused = ContinuousSimulationSystem.IsPaused(gameState);
+        if (autoPauseRequested || !wasPaused)
+            resumeAfterBlockingModal = true;
+
+        ContinuousSimulationSystem.SetPaused(gameState, true);
+    }
+
+    private void ResumeAfterBlockingModalIfReady()
+    {
+        if (gameState == null || isGameOver)
+            return;
+
+        if (!resumeAfterBlockingModal || HasBlockingModalWork())
+        {
+            RefreshTimeControlAvailability();
+            return;
+        }
+
+        resumeAfterBlockingModal = false;
+        ContinuousSimulationSystem.SetPaused(gameState, false);
+        RefreshContinuousClockOnly();
+        RefreshTimeControlAvailability();
     }
 
     private void RefreshTimeControlAvailability()
@@ -273,6 +308,7 @@ public partial class PrototypeUIController
 
             StopSupplyHold();
             supplyHoldDelta = delta;
+            supplyHoldRepeatCount = 0;
             supplyHoldRepeated = false;
             supplyHoldSchedule = button.schedule
                 .Execute(RepeatSupplyWhileHeld)
@@ -293,9 +329,10 @@ public partial class PrototypeUIController
             return;
         }
 
-        bool changed = supplyHoldDelta > 0
-            ? gameState.TryAddArmySupply()
-            : gameState.TryRemoveArmySupply();
+        supplyHoldRepeatCount++;
+        int batchSize = GetSupplyHoldBatchSize(supplyHoldRepeatCount);
+        bool changed = gameState.AdjustArmySupply(
+            supplyHoldDelta * batchSize) != 0;
 
         if (!changed)
         {
@@ -305,6 +342,20 @@ public partial class PrototypeUIController
 
         supplyHoldRepeated = true;
         RefreshStableResourceUi();
+    }
+
+    private static int GetSupplyHoldBatchSize(int repeatCount)
+    {
+        if (repeatCount <= 4)
+            return 1;
+
+        if (repeatCount <= 12)
+            return 2;
+
+        if (repeatCount <= 24)
+            return 5;
+
+        return 10;
     }
 
     private void StopSupplyHold()

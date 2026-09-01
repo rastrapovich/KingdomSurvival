@@ -34,30 +34,27 @@ public static class ExpeditionDecisionSystem
         public string Id;
         public string Label;
         public int SupplyDelta;
-        public double RouteDelayHours;
+        public double ActivityHours;
         public int RouteShortcutCells;
         public int RequiredSupply;
         public string ActivityName;
-        public double ActivityHours;
 
         public DecisionOptionDefinition(
             string id,
             string label,
             int supplyDelta,
-            double routeDelayHours,
+            double activityHours,
             int routeShortcutCells,
             int requiredSupply,
-            string activityName = null,
-            double activityHours = 0.0)
+            string activityName = null)
         {
             Id = id;
             Label = label;
             SupplyDelta = supplyDelta;
-            RouteDelayHours = routeDelayHours;
+            ActivityHours = activityHours;
             RouteShortcutCells = routeShortcutCells;
             RequiredSupply = requiredSupply;
             ActivityName = activityName;
-            ActivityHours = activityHours;
         }
     }
 
@@ -110,7 +107,8 @@ public static class ExpeditionDecisionSystem
                     0,
                     1.0,
                     0,
-                    0)),
+                    0,
+                    "БЕЗОПАСНЫЙ ОБХОД")),
 
             new DecisionDefinition(
                 "berry_bushes",
@@ -120,11 +118,10 @@ public static class ExpeditionDecisionSystem
                     "gather_berries",
                     "Остановиться и собрать ягоды",
                     3,
-                    0.0,
+                    3.0,
                     0,
                     0,
-                    "СБОР ЯГОД",
-                    3.0),
+                    "СБОР ЯГОД"),
                 new DecisionOptionDefinition(
                     "keep_moving",
                     "Не задерживаться",
@@ -288,7 +285,7 @@ public static class ExpeditionDecisionSystem
             string activityMessage;
             bool started = state.TryStartRoadActivity(
                 "decision:" + definition.Id + ":" + option.Id,
-                option.ActivityName,
+                GetActivityDisplayName(option),
                 option.ActivityHours,
                 0,
                 Math.Max(0, option.SupplyDelta),
@@ -312,8 +309,6 @@ public static class ExpeditionDecisionSystem
         int actualSupplyDelta =
             ApplySupplyDelta(state, option.SupplyDelta);
         string arrivalText;
-        double actualDelayHours =
-            ApplyRouteDelay(state, option.RouteDelayHours);
         int actualShortcutCells =
             ApplyRouteShortcut(
                 state,
@@ -323,10 +318,6 @@ public static class ExpeditionDecisionSystem
         if (option.SupplyDelta != 0)
             consequences.Add(
                 FormatSupplyConsequence(actualSupplyDelta));
-
-        if (option.RouteDelayHours > 0.0)
-            consequences.Add(
-                FormatRouteDelayConsequence(actualDelayHours));
 
         if (option.RouteShortcutCells > 0)
             consequences.Add(
@@ -588,17 +579,12 @@ public static class ExpeditionDecisionSystem
         else if (option.SupplyDelta < 0)
             parts.Add("снабжение " + option.SupplyDelta);
 
-        if (option.RouteDelayHours > 0.0)
-            parts.Add(
-                "остановка на " +
-                ContinuousExpeditionCommands.FormatHours(
-                    option.RouteDelayHours));
-
         if (option.RouteShortcutCells > 0)
             parts.Add("маршрут -" + option.RouteShortcutCells + " клетка");
 
         if (option.ActivityHours > 0.0)
             parts.Add(
+                "время: " +
                 ContinuousExpeditionCommands.FormatHours(option.ActivityHours));
 
         return parts.Count > 0
@@ -656,23 +642,6 @@ public static class ExpeditionDecisionSystem
             Math.Min(state.ArmySupply, requestedLoss);
         state.ArmySupply -= actualLoss;
         return -actualLoss;
-    }
-
-    private static double ApplyRouteDelay(
-        GameState state,
-        double requestedHours)
-    {
-        if (requestedHours <= 0.0 ||
-            state == null ||
-            !state.HasActiveExpedition)
-        {
-            return 0.0;
-        }
-
-        WorldMapNavigation.AddRouteDelayHours(
-            state.ActiveExpedition,
-            requestedHours);
-        return requestedHours;
     }
 
     private static int ApplyRouteShortcut(
@@ -753,13 +722,12 @@ public static class ExpeditionDecisionSystem
         return "Снабжение не изменилось.";
     }
 
-    private static string FormatRouteDelayConsequence(double hours)
+    private static string GetActivityDisplayName(
+        DecisionOptionDefinition option)
     {
-        if (hours > 0.0)
-            return "Задержка маршрута: " +
-                ContinuousExpeditionCommands.FormatHours(hours) + ".";
-
-        return "Время пути не изменилось.";
+        return string.IsNullOrWhiteSpace(option.ActivityName)
+            ? option.Label.ToUpperInvariant()
+            : option.ActivityName;
     }
 
     private static string FormatRouteShortcutConsequence(int cells)

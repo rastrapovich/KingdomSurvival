@@ -190,6 +190,13 @@ public static class ExpeditionIncidentSystem
 
             created.Add(occurrence);
             result.NewExpeditionIncidents.Add(occurrence);
+
+            // У экспедиции может быть только одно активное действие. Если
+            // происшествие запустило остановку с таймером, остальные проверки
+            // этого пакета откладываются до следующего игрового дня.
+            if (state.HasActiveExpedition &&
+                state.ActiveExpedition.HasTimedActivity)
+                break;
         }
 
         if (created.Count == 0)
@@ -266,6 +273,8 @@ public static class ExpeditionIncidentSystem
             int actualRouteAdjustment =
                 ApplyRouteAdjustment(
                     state,
+                    definition.Id,
+                    definition.Title,
                     definition.RouteAdjustment,
                     out arrivalText);
 
@@ -306,6 +315,8 @@ public static class ExpeditionIncidentSystem
 
     private static int ApplyRouteAdjustment(
         GameState state,
+        string incidentId,
+        string incidentTitle,
         int requestedDelta,
         out string arrivalText)
     {
@@ -317,8 +328,15 @@ public static class ExpeditionIncidentSystem
 
         if (requestedDelta >= 0)
         {
-            WorldMapNavigation.AddRouteDelayHours(expedition, requestedDelta);
-            return requestedDelta;
+            string activityMessage;
+            bool started = state.TryStartRoadActivity(
+                "incident:" + incidentId,
+                incidentTitle.ToUpperInvariant(),
+                requestedDelta,
+                0,
+                0,
+                out activityMessage);
+            return started ? requestedDelta : 0;
         }
 
         int requestedReduction = -requestedDelta;
@@ -373,7 +391,7 @@ public static class ExpeditionIncidentSystem
     private static string FormatRouteConsequence(int adjustment)
     {
         if (adjustment > 0)
-            return "Задержка маршрута: " +
+            return "Остановка в пути: " +
                 ContinuousExpeditionCommands.FormatHours(adjustment) + ".";
 
         if (adjustment < 0)

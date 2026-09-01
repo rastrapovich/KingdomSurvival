@@ -157,7 +157,7 @@ public partial class PrototypeUIController
         if (gameState == null || isGameOver)
             return;
 
-        ContinuousSimulationSystem.SetPaused(gameState, true);
+        PauseForBlockingModal();
 
         if (unreadIncidents.Count > 0)
             OpenIncident(unreadIncidents[unreadIncidents.Count - 1]);
@@ -170,7 +170,7 @@ public partial class PrototypeUIController
         if (gameState == null || isGameOver || !gameState.HasPendingExpeditionDecision)
             return;
 
-        ContinuousSimulationSystem.SetPaused(gameState, true);
+        PauseForBlockingModal();
         OpenDecision(gameState.ActiveExpedition.PendingDecision);
         RefreshContinuousClockOnly();
     }
@@ -221,7 +221,7 @@ public partial class PrototypeUIController
         ContinuousSimulationBatch batch)
     {
         if (batch.RequestAutoPause)
-            ContinuousSimulationSystem.SetPaused(gameState, true);
+            PauseForBlockingModal(true);
 
         // Кризис, который уже открыт обязательной плашкой, не дублируем
         // вторым непрочитанным кружком. Фоновые происшествия сохраняем как раньше.

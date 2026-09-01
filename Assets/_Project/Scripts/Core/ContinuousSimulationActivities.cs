@@ -174,7 +174,7 @@ public static partial class ContinuousSimulationSystem
 
             List<string> roadRewards = BuildActivityRewards(activity);
             batch.Result.Messages.Add(
-                activity.DisplayName + " завершён. " +
+                "Действие «" + activity.DisplayName + "» завершено. " +
                 (roadRewards.Count > 0
                     ? "Добыча отряда: " + string.Join(", ", roadRewards) + "."
                     : "Отряд продолжил маршрут."));

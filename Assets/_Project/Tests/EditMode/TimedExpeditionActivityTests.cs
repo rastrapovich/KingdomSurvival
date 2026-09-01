@@ -90,6 +90,73 @@ public class TimedExpeditionActivityTests
     }
 
     [Test]
+    public void SafeRoadDecision_UsesGenericTimedActivityAndVisibleProgressData()
+    {
+        GameState state = CreateTravellingState();
+        MakeEveryLocationVisible(state);
+        ContinuousSimulationSystem.Reset(state);
+        ContinuousSimulationSystem.NotifyRouteChanged(state);
+        state.ActiveExpedition.PendingDecision =
+            new ExpeditionDecisionOccurrence
+            {
+                DefinitionId = "unmapped_fork",
+                Title = "Развилка без карты"
+            };
+
+        string message;
+        Assert.That(
+            ExpeditionDecisionSystem.TryApplyChoice(
+                state,
+                "safe_road",
+                out message),
+            Is.True,
+            message);
+
+        ExpeditionActivityData activity =
+            state.ActiveExpedition.ActiveActivity;
+        Assert.That(activity, Is.Not.Null);
+        Assert.That(activity.Kind, Is.EqualTo(ExpeditionActivityKind.RoadStop));
+        Assert.That(activity.DisplayName, Is.EqualTo("БЕЗОПАСНЫЙ ОБХОД"));
+        Assert.That(activity.TotalHours, Is.EqualTo(1.0));
+        Assert.That(activity.Progress01, Is.EqualTo(0.0).Within(0.001));
+        Assert.That(state.ActiveExpedition.RouteDelayHoursRemaining, Is.Zero);
+
+        ContinuousSimulationSystem.SetPaused(state, false);
+        ContinuousSimulationSystem.Advance(state, 2.5f, false);
+
+        Assert.That(activity.Progress01, Is.EqualTo(0.5).Within(0.01));
+        Assert.That(state.ActiveExpedition.RouteIndex, Is.Zero);
+
+        ContinuousSimulationBatch completed =
+            ContinuousSimulationSystem.Advance(state, 7f, false);
+
+        Assert.That(state.ActiveExpedition.ActiveActivity, Is.Null);
+        Assert.That(state.ActiveExpedition.RouteIndex, Is.GreaterThan(0));
+        Assert.That(completed.RequestAutoPause, Is.False);
+    }
+
+    [Test]
+    public void ArmySupplyBatchAdjustment_TransfersAvailableAmountOnly()
+    {
+        GameState state = new GameState();
+        state.CreateNewGame(604);
+        state.Food = 7;
+        state.ArmySupply = 2;
+
+        Assert.That(state.AdjustArmySupply(5), Is.EqualTo(5));
+        Assert.That(state.Food, Is.EqualTo(2));
+        Assert.That(state.ArmySupply, Is.EqualTo(7));
+
+        Assert.That(state.AdjustArmySupply(10), Is.EqualTo(2));
+        Assert.That(state.Food, Is.Zero);
+        Assert.That(state.ArmySupply, Is.EqualTo(9));
+
+        Assert.That(state.AdjustArmySupply(-20), Is.EqualTo(-9));
+        Assert.That(state.Food, Is.EqualTo(9));
+        Assert.That(state.ArmySupply, Is.Zero);
+    }
+
+    [Test]
     public void RouteChange_CancelsRoadActivityWithoutReward()
     {
         GameState state = CreateTravellingState();

@@ -554,22 +554,31 @@ public class GameState
 
     public bool TryAddArmySupply()
     {
-        if (!CanAdjustArmySupply || Food <= 0)
-            return false;
-
-        Food--;
-        ArmySupply++;
-        return true;
+        return AdjustArmySupply(1) > 0;
     }
 
     public bool TryRemoveArmySupply()
     {
-        if (!CanAdjustArmySupply || ArmySupply <= 0)
-            return false;
+        return AdjustArmySupply(-1) < 0;
+    }
 
-        ArmySupply--;
-        Food++;
-        return true;
+    public int AdjustArmySupply(int requestedDelta)
+    {
+        if (!CanAdjustArmySupply || requestedDelta == 0)
+            return 0;
+
+        if (requestedDelta > 0)
+        {
+            int transferred = Math.Min(Food, requestedDelta);
+            Food -= transferred;
+            ArmySupply += transferred;
+            return transferred;
+        }
+
+        int returned = Math.Min(ArmySupply, -requestedDelta);
+        ArmySupply -= returned;
+        Food += returned;
+        return -returned;
     }
 
     public bool TryStartExpedition(

@@ -1398,6 +1398,7 @@ public partial class PrototypeUIController : MonoBehaviour
         if (occurrence == null || isGameOver)
             return;
 
+        PauseForBlockingModal();
         openedDecision = null;
         openedIncident = occurrence;
         incidentModalTitle.text =
@@ -1410,6 +1411,7 @@ public partial class PrototypeUIController : MonoBehaviour
         decisionOptionAButton.style.display = DisplayStyle.None;
         decisionOptionBButton.style.display = DisplayStyle.None;
         incidentModalOverlay.style.display = DisplayStyle.Flex;
+        RefreshTimeControlAvailability();
     }
 
     private void OpenDecision(ExpeditionDecisionOccurrence occurrence)
@@ -1417,6 +1419,7 @@ public partial class PrototypeUIController : MonoBehaviour
         if (occurrence == null || isGameOver)
             return;
 
+        PauseForBlockingModal();
         openedIncident = null;
         openedDecision = occurrence;
 
@@ -1444,6 +1447,7 @@ public partial class PrototypeUIController : MonoBehaviour
         decisionOptionAButton.style.display = DisplayStyle.Flex;
         decisionOptionBButton.style.display = DisplayStyle.Flex;
         incidentModalOverlay.style.display = DisplayStyle.Flex;
+        RefreshTimeControlAvailability();
     }
 
     private void OnIncidentUnderstoodClicked()
@@ -1457,6 +1461,7 @@ public partial class PrototypeUIController : MonoBehaviour
         if (openedIncident == null)
         {
             HideIncidentModal();
+            ResumeAfterBlockingModalIfReady();
             return;
         }
 
@@ -1469,6 +1474,7 @@ public partial class PrototypeUIController : MonoBehaviour
 
         HideIncidentModal();
         RefreshIncidentNotifications();
+        ResumeAfterBlockingModalIfReady();
     }
 
     private void OnDecisionOptionAClicked()
@@ -1518,6 +1524,7 @@ public partial class PrototypeUIController : MonoBehaviour
 
         RefreshInterface();
         TryShowNextQueuedModal();
+        ResumeAfterBlockingModalIfReady();
     }
 
     private void HideIncidentModal()

@@ -18,6 +18,8 @@ public partial class PrototypeUIController
     private VisualElement worldMapLocationActivity;
     private VisualElement worldMapLocationActivityFill;
     private Label worldMapLocationActivityLabel;
+    private List<MapPointData> renderedWorldMapRoute;
+    private int renderedWorldMapRouteIndex = -1;
     private Label worldMapHintLabel;
     private VisualElement mapSelectionCard;
     private Label mapSelectionTitle;
@@ -296,6 +298,8 @@ public partial class PrototypeUIController
         worldMapTerrain.Clear();
         worldMapRoutes.Clear();
         worldMapMarkers.Clear();
+        renderedWorldMapRoute = null;
+        renderedWorldMapRouteIndex = -1;
 
         DrawBlockedTerrain();
 
@@ -315,6 +319,8 @@ public partial class PrototypeUIController
             DrawRoute(
                 gameState.ActiveExpedition.Route,
                 "world-map-route-dot-active");
+            renderedWorldMapRoute = gameState.ActiveExpedition.Route;
+            renderedWorldMapRouteIndex = gameState.ActiveExpedition.RouteIndex;
         }
 
         RefreshWorldMapCapital();
@@ -401,6 +407,66 @@ public partial class PrototypeUIController
 
             worldMapRoutes.Add(dot);
         }
+    }
+
+    private void RefreshWorldMapRouteProgress()
+    {
+        if (worldMapRoutes == null || gameState == null)
+            return;
+
+        if (!gameState.HasActiveExpedition ||
+            gameState.ActiveExpedition.Route == null)
+        {
+            if (worldMapRoutes.childCount > 0)
+                worldMapRoutes.Clear();
+
+            renderedWorldMapRoute = null;
+            renderedWorldMapRouteIndex = -1;
+            return;
+        }
+
+        ExpeditionData expedition = gameState.ActiveExpedition;
+        bool routeChanged =
+            !object.ReferenceEquals(renderedWorldMapRoute, expedition.Route) ||
+            renderedWorldMapRouteIndex != expedition.RouteIndex;
+
+        if (routeChanged)
+        {
+            worldMapRoutes.Clear();
+            DrawRoute(expedition.Route, "world-map-route-dot-active");
+            renderedWorldMapRoute = expedition.Route;
+            renderedWorldMapRouteIndex = expedition.RouteIndex;
+        }
+
+        FadeNextRoutePoint(expedition);
+    }
+
+    private void FadeNextRoutePoint(ExpeditionData expedition)
+    {
+        if (worldMapRoutes.childCount == 0 ||
+            expedition.RouteIndex < 0 ||
+            expedition.RouteIndex >= expedition.Route.Count - 1)
+        {
+            return;
+        }
+
+        MapPointData from = expedition.Route[expedition.RouteIndex];
+        MapPointData to = expedition.Route[expedition.RouteIndex + 1];
+        float dx = to.XPercent - from.XPercent;
+        float dy = to.YPercent - from.YPercent;
+        float lengthSquared = dx * dx + dy * dy;
+        float progress = 0f;
+
+        if (lengthSquared > 0.0001f)
+        {
+            float currentDx = expedition.CurrentMapXPercent - from.XPercent;
+            float currentDy = expedition.CurrentMapYPercent - from.YPercent;
+            progress = Mathf.Clamp01(
+                (currentDx * dx + currentDy * dy) / lengthSquared);
+        }
+
+        worldMapRoutes.ElementAt(0).style.opacity =
+            Mathf.Lerp(0.96f, 0.08f, progress);
     }
 
     private void CreateWorldMapNode(

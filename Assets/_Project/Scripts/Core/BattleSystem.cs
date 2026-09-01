@@ -75,6 +75,36 @@ public sealed class FighterCombatState
 }
 
 [Serializable]
+public sealed class BattleEnemyUnit
+{
+    public string Id;
+    public string Name;
+    public string TypeLabel;
+    public int MaxHitPoints;
+    public int AttackPower;
+    public int DefensePower;
+    public BattleEnemyTag Tags;
+
+    public BattleEnemyUnit(
+        string id,
+        string name,
+        string typeLabel,
+        int maxHitPoints,
+        int attackPower,
+        int defensePower,
+        BattleEnemyTag tags = BattleEnemyTag.None)
+    {
+        Id = id;
+        Name = name;
+        TypeLabel = typeLabel;
+        MaxHitPoints = maxHitPoints;
+        AttackPower = attackPower;
+        DefensePower = defensePower;
+        Tags = tags;
+    }
+}
+
+[Serializable]
 public sealed class BattleContext
 {
     public string Id;
@@ -83,12 +113,19 @@ public sealed class BattleContext
     public string Title;
     public string Description;
     public string EnemyName;
+
+    // Оставлено только как совместимый fallback для старого UI.
+    // Resolver больше не использует одно агрегированное EnemyPower.
     public int EnemyPower;
+
     public BattleTerrain Terrain;
     public BattleEnemyTag EnemyTags;
     public BattleDoctrine Doctrine;
     public string CommanderId;
+    public int BaseRewardGold;
+    public int BaseRewardSupply;
     public readonly List<string> FighterIds = new List<string>();
+    public readonly List<BattleEnemyUnit> Enemies = new List<BattleEnemyUnit>();
 }
 
 [Serializable]
@@ -122,10 +159,10 @@ public sealed class BattleResult
     public string Title;
     public BattleDoctrine Doctrine;
     public BattleOutcome Outcome;
-    public readonly List<BattlePhaseResult> Phases =
-        new List<BattlePhaseResult>();
+    public readonly List<BattlePhaseResult> Phases = new List<BattlePhaseResult>();
     public readonly List<FighterBattleConsequence> FighterConsequences =
         new List<FighterBattleConsequence>();
+    public int GoldDelta;
     public int FoodDelta;
     public int MoodDelta;
     public int ArmyGoldDelta;
@@ -163,9 +200,11 @@ public static class BattleSystem
         public string Title;
         public string Description;
         public string EnemyName;
-        public int EnemyPower;
         public BattleTerrain Terrain;
         public BattleEnemyTag Tags;
+        public int BaseRewardGold;
+        public int BaseRewardSupply;
+        public readonly List<BattleEnemyUnit> Enemies = new List<BattleEnemyUnit>();
 
         public LocationEncounterProfile(
             string id,
@@ -173,18 +212,22 @@ public static class BattleSystem
             string title,
             string description,
             string enemyName,
-            int enemyPower,
             BattleTerrain terrain,
-            BattleEnemyTag tags)
+            BattleEnemyTag tags,
+            int baseRewardGold,
+            int baseRewardSupply,
+            params BattleEnemyUnit[] enemies)
         {
             Id = id;
             LocationId = locationId;
             Title = title;
             Description = description;
             EnemyName = enemyName;
-            EnemyPower = enemyPower;
             Terrain = terrain;
             Tags = tags;
+            BaseRewardGold = baseRewardGold;
+            BaseRewardSupply = baseRewardSupply;
+            Enemies.AddRange(enemies);
         }
     }
 
@@ -223,9 +266,14 @@ public static class BattleSystem
                 "Между деревьями отряд окружает стая лесных тварей. " +
                 "Отступить без столкновения уже нельзя: сначала нужно выбрать доктрину боя.",
                 "лесные твари",
-                16,
                 BattleTerrain.Forest,
-                BattleEnemyTag.Ambush | BattleEnemyTag.Beast)
+                BattleEnemyTag.Ambush | BattleEnemyTag.Beast,
+                4,
+                2,
+                Enemy("forest_wolf_1", "Лесной волк", "зверь", 60, 5, 2, BattleEnemyTag.Beast),
+                Enemy("forest_wolf_2", "Лесной волк", "зверь", 60, 5, 2, BattleEnemyTag.Beast),
+                Enemy("dire_wolf", "Матёрый волк", "зверь", 90, 6, 4, BattleEnemyTag.Beast | BattleEnemyTag.Charge),
+                Enemy("forest_beast", "Лесная тварь", "зверь", 100, 7, 5, BattleEnemyTag.Beast | BattleEnemyTag.Ambush))
         };
 
     public static bool HasPendingBattle(GameState state)
@@ -238,9 +286,7 @@ public static class BattleSystem
         return state != null ? GetRuntime(state).PendingBattle : null;
     }
 
-    public static FighterCombatState GetFighterCombatState(
-        GameState state,
-        string fighterId)
+    public static FighterCombatState GetFighterCombatState(GameState state, string fighterId)
     {
         if (state == null || string.IsNullOrEmpty(fighterId))
             return null;
@@ -249,14 +295,10 @@ public static class BattleSystem
         SyncFighters(state, runtime);
 
         FighterCombatState fighter;
-        return runtime.Fighters.TryGetValue(fighterId, out fighter)
-            ? fighter
-            : null;
+        return runtime.Fighters.TryGetValue(fighterId, out fighter) ? fighter : null;
     }
 
-    public static bool HasUnresolvedLocationEncounter(
-        GameState state,
-        string locationId)
+    public static bool HasUnresolvedLocationEncounter(GameState state, string locationId)
     {
         if (state == null || string.IsNullOrEmpty(locationId))
             return false;
@@ -273,11 +315,8 @@ public static class BattleSystem
     {
         resultMessage = "Бой в этой локации сейчас недоступен.";
 
-        if (state == null || !state.HasActiveExpedition ||
-            state.HasPendingExpeditionDecision)
-        {
+        if (state == null || !state.HasActiveExpedition || state.HasPendingExpeditionDecision)
             return false;
-        }
 
         if (HasPendingBattle(state))
         {
@@ -290,11 +329,8 @@ public static class BattleSystem
             return false;
 
         LocationEncounterProfile encounter = FindLocationEncounter(locationId);
-        if (encounter == null ||
-            GetRuntime(state).ResolvedEncounterIds.Contains(encounter.Id))
-        {
+        if (encounter == null || GetRuntime(state).ResolvedEncounterIds.Contains(encounter.Id))
             return false;
-        }
 
         BattleContext context = new BattleContext
         {
@@ -304,22 +340,25 @@ public static class BattleSystem
             Title = encounter.Title,
             Description = encounter.Description,
             EnemyName = encounter.EnemyName,
-            EnemyPower = encounter.EnemyPower,
             Terrain = encounter.Terrain,
             EnemyTags = encounter.Tags,
             Doctrine = BattleDoctrine.Balanced,
-            CommanderId = expedition.CommanderId
+            CommanderId = expedition.CommanderId,
+            BaseRewardGold = encounter.BaseRewardGold,
+            BaseRewardSupply = encounter.BaseRewardSupply
         };
+
+        CopyEnemies(encounter.Enemies, context.Enemies);
+        context.EnemyPower = CalculateLegacyEnemyPower(context);
 
         foreach (string fighterId in expedition.FighterIds)
             context.FighterIds.Add(fighterId);
 
-        PendingBattleData pending = new PendingBattleData
+        GetRuntime(state).PendingBattle = new PendingBattleData
         {
             Context = context,
             Result = Resolve(state, context)
         };
-        GetRuntime(state).PendingBattle = pending;
 
         resultMessage =
             "Подготовлен бой «" + encounter.Title +
@@ -327,12 +366,9 @@ public static class BattleSystem
         return true;
     }
 
-    public static bool TryPrepareCurrentLocationBattle(
-        GameState state,
-        out string resultMessage)
+    public static bool TryPrepareCurrentLocationBattle(GameState state, out string resultMessage)
     {
         resultMessage = "Опасного столкновения в текущей локации нет.";
-
         if (state == null || !state.HasActiveExpedition)
             return false;
 
@@ -342,12 +378,9 @@ public static class BattleSystem
             out resultMessage);
     }
 
-    public static bool TryPrepareCapitalBattle(
-        GameState state,
-        out string resultMessage)
+    public static bool TryPrepareCapitalBattle(GameState state, out string resultMessage)
     {
         resultMessage = "Нападение на столицу сейчас не может быть рассчитано.";
-
         if (state == null || HasPendingBattle(state))
             return false;
 
@@ -360,13 +393,20 @@ public static class BattleSystem
             Description =
                 "Вооружённая толпа пытается прорваться к городскому амбару. " +
                 "В бой вступают только бойцы, которые фактически находятся в столице.",
-            EnemyName = "вооружённая толпа",
-            EnemyPower = 14,
+            EnemyName = "налётчики",
             Terrain = BattleTerrain.City,
             EnemyTags = BattleEnemyTag.Charge,
             Doctrine = BattleDoctrine.Balanced,
-            CommanderId = GetCapitalCommanderId(state)
+            CommanderId = GetCapitalCommanderId(state),
+            BaseRewardGold = 2,
+            BaseRewardSupply = 0
         };
+
+        context.Enemies.Add(Enemy("raider_1", "Налётчик", "человек", 70, 4, 2, BattleEnemyTag.Charge));
+        context.Enemies.Add(Enemy("raider_2", "Налётчик", "человек", 70, 4, 2, BattleEnemyTag.Charge));
+        context.Enemies.Add(Enemy("bruiser", "Громила", "человек", 90, 5, 4, BattleEnemyTag.Charge));
+        context.Enemies.Add(Enemy("looter", "Грабитель", "человек", 60, 3, 1));
+        context.EnemyPower = CalculateLegacyEnemyPower(context);
 
         foreach (FighterData fighter in state.Fighters)
         {
@@ -374,12 +414,11 @@ public static class BattleSystem
                 context.FighterIds.Add(fighter.Id);
         }
 
-        PendingBattleData pending = new PendingBattleData
+        GetRuntime(state).PendingBattle = new PendingBattleData
         {
             Context = context,
             Result = Resolve(state, context)
         };
-        GetRuntime(state).PendingBattle = pending;
 
         resultMessage =
             "Нападение на столицу началось. Выберите доктрину обороны и " +
@@ -387,9 +426,7 @@ public static class BattleSystem
         return true;
     }
 
-    public static BattleResult SelectPendingDoctrine(
-        GameState state,
-        BattleDoctrine doctrine)
+    public static BattleResult SelectPendingDoctrine(GameState state, BattleDoctrine doctrine)
     {
         PendingBattleData pending = GetPendingBattle(state);
         if (pending == null)
@@ -415,15 +452,11 @@ public static class BattleSystem
         BattleRuntimeState runtime = GetRuntime(state);
         BattleResult result = pending.Result;
 
-        // Никакого повторного расчёта здесь нет: применяем ровно тот BattleResult,
-        // который был показан игроку после выбора доктрины.
         foreach (FighterBattleConsequence consequence in result.FighterConsequences)
         {
             FighterCombatState combatant;
-            if (!runtime.Fighters.TryGetValue(consequence.FighterId, out combatant))
-                continue;
-
-            combatant.HitPoints = consequence.AfterHitPoints;
+            if (runtime.Fighters.TryGetValue(consequence.FighterId, out combatant))
+                combatant.HitPoints = consequence.AfterHitPoints;
         }
 
         List<string> deadIds = new List<string>();
@@ -436,16 +469,13 @@ public static class BattleSystem
         if (deadIds.Count > 0)
         {
             if (state.ActiveExpedition != null)
-            {
-                state.ActiveExpedition.FighterIds.RemoveAll(
-                    fighterId => deadIds.Contains(fighterId));
-            }
-
+                state.ActiveExpedition.FighterIds.RemoveAll(id => deadIds.Contains(id));
             state.Fighters.RemoveAll(fighter => deadIds.Contains(fighter.Id));
         }
 
         if (result.Kind == BattleKind.CapitalDefense)
         {
+            state.Gold = Math.Max(0, state.Gold + result.GoldDelta);
             state.Food = Math.Max(0, state.Food + result.FoodDelta);
             state.Mood = Math.Max(0, Math.Min(100, state.Mood + result.MoodDelta));
         }
@@ -467,18 +497,7 @@ public static class BattleSystem
         result.Applied = true;
         runtime.PendingBattle = null;
         appliedResult = result;
-
-        string returnMessage = string.Empty;
-        if (result.Kind == BattleKind.ExpeditionLocation && result.ForceRetreat &&
-            state.HasActiveExpedition)
-        {
-            state.TryOrderReturn(out returnMessage);
-        }
-
         reportText = BuildBattleReport(result);
-        if (!string.IsNullOrWhiteSpace(returnMessage))
-            reportText += "\n" + returnMessage;
-
         return true;
     }
 
@@ -509,9 +528,7 @@ public static class BattleSystem
         }
     }
 
-    public static FighterHealthState GetHealthState(
-        double hitPoints,
-        int maxHitPoints)
+    public static FighterHealthState GetHealthState(double hitPoints, int maxHitPoints)
     {
         if (maxHitPoints <= 0 || hitPoints <= 0.0)
             return FighterHealthState.Dead;
@@ -528,16 +545,11 @@ public static class BattleSystem
     {
         switch (state)
         {
-            case FighterHealthState.Healthy:
-                return "здоров";
-            case FighterHealthState.Wounded:
-                return "ранен";
-            case FighterHealthState.SeverelyWounded:
-                return "тяжело ранен";
-            case FighterHealthState.Dead:
-                return "погиб";
-            default:
-                return "неизвестно";
+            case FighterHealthState.Healthy: return "здоров";
+            case FighterHealthState.Wounded: return "ранен";
+            case FighterHealthState.SeverelyWounded: return "тяжело ранен";
+            case FighterHealthState.Dead: return "погиб";
+            default: return "неизвестно";
         }
     }
 
@@ -545,18 +557,12 @@ public static class BattleSystem
     {
         switch (role)
         {
-            case FighterCombatRole.Guard:
-                return "гвардеец";
-            case FighterCombatRole.Archer:
-                return "лучник";
-            case FighterCombatRole.Healer:
-                return "лекарь";
-            case FighterCombatRole.Spearman:
-                return "копейщик";
-            case FighterCombatRole.Scout:
-                return "разведчик";
-            default:
-                return "боец";
+            case FighterCombatRole.Guard: return "гвардеец";
+            case FighterCombatRole.Archer: return "лучник";
+            case FighterCombatRole.Healer: return "лекарь";
+            case FighterCombatRole.Spearman: return "копейщик";
+            case FighterCombatRole.Scout: return "разведчик";
+            default: return "боец";
         }
     }
 
@@ -564,12 +570,9 @@ public static class BattleSystem
     {
         switch (doctrine)
         {
-            case BattleDoctrine.Cautious:
-                return "Осторожная";
-            case BattleDoctrine.Assault:
-                return "Натиск";
-            default:
-                return "Сбалансированная";
+            case BattleDoctrine.Cautious: return "Осторожная";
+            case BattleDoctrine.Assault: return "Натиск";
+            default: return "Сбалансированная";
         }
     }
 
@@ -577,14 +580,10 @@ public static class BattleSystem
     {
         switch (outcome)
         {
-            case BattleOutcome.Victory:
-                return "ПОБЕДА";
-            case BattleOutcome.CostlyVictory:
-                return "ТЯЖЁЛАЯ ПОБЕДА";
-            case BattleOutcome.Withdrawal:
-                return "ОРГАНИЗОВАННЫЙ ОТХОД";
-            default:
-                return "РАЗГРОМ";
+            case BattleOutcome.Victory: return "ПОБЕДА";
+            case BattleOutcome.CostlyVictory: return "ТЯЖЁЛАЯ ПОБЕДА";
+            case BattleOutcome.Withdrawal: return "ОРГАНИЗОВАННЫЙ ОТХОД";
+            default: return "РАЗГРОМ";
         }
     }
 
@@ -601,18 +600,17 @@ public static class BattleSystem
         };
 
         foreach (BattlePhaseResult phase in result.Phases)
-        {
-            lines.Add(
-                phase.Name + ": " + phase.PlayerScore +
-                " против " + phase.EnemyScore + ". " + phase.Explanation);
-        }
+            lines.Add(phase.Name + ": " + phase.PlayerScore + " против " + phase.EnemyScore + ". " + phase.Explanation);
 
         List<string> losses = BuildConsequenceLines(result);
-        lines.Add("Потери: " +
-            (losses.Count > 0 ? string.Join("; ", losses) : "ранений не ожидается"));
+        lines.Add("Потери: " + (losses.Count > 0 ? string.Join("; ", losses) : "ранений не ожидается"));
         lines.Add(result.DeathPossible
             ? "Гибель: возможна и уже указана по конкретному бойцу."
             : "Гибель: невозможна в показанном расчёте.");
+
+        string reward = BuildRewardLine(result);
+        if (!string.IsNullOrEmpty(reward))
+            lines.Add(reward);
 
         if (result.FoodDelta != 0 || result.MoodDelta != 0)
         {
@@ -620,9 +618,6 @@ public static class BattleSystem
                 "Последствия для столицы: пища " + FormatSigned(result.FoodDelta) +
                 ", настроение " + FormatSigned(result.MoodDelta) + ".");
         }
-
-        if (result.ForceRetreat)
-            lines.Add("После боя отряд будет вынужден возвращаться в столицу.");
 
         lines.Add("После подтверждения будет применён именно этот сохранённый расчёт.");
         return string.Join("\n", lines);
@@ -649,21 +644,19 @@ public static class BattleSystem
 
         List<string> lines = new List<string>
         {
-            "Бой: «" + result.Title + "». Доктрина: " +
-            GetDoctrineLabel(result.Doctrine) + ".",
+            "Бой: «" + result.Title + "». Доктрина: " + GetDoctrineLabel(result.Doctrine) + ".",
             "Итог: " + GetOutcomeLabel(result.Outcome) + "."
         };
 
         foreach (BattlePhaseResult phase in result.Phases)
-        {
-            lines.Add(
-                phase.Name + ": " + phase.PlayerScore +
-                "/" + phase.EnemyScore + " — " + phase.Explanation);
-        }
+            lines.Add(phase.Name + ": " + phase.PlayerScore + "/" + phase.EnemyScore + " — " + phase.Explanation);
 
         List<string> losses = BuildConsequenceLines(result);
-        lines.Add("Бойцы: " +
-            (losses.Count > 0 ? string.Join("; ", losses) : "без новых ранений"));
+        lines.Add("Бойцы: " + (losses.Count > 0 ? string.Join("; ", losses) : "без новых ранений"));
+
+        string reward = BuildRewardLine(result);
+        if (!string.IsNullOrEmpty(reward))
+            lines.Add(reward);
 
         if (result.FoodDelta != 0 || result.MoodDelta != 0)
         {
@@ -703,46 +696,36 @@ public static class BattleSystem
         {
             double healthFactor = GetHealthCombatFactor(fighter.HealthState);
             approach += (int)Math.Round(fighter.AttackPower * healthFactor);
-            clash += (int)Math.Round(
-                (fighter.AttackPower + fighter.DefensePower) * 0.5 * healthFactor);
+            clash += (int)Math.Round((fighter.AttackPower + fighter.DefensePower) * 0.5 * healthFactor);
             hold += (int)Math.Round(fighter.DefensePower * healthFactor);
 
             switch (fighter.RoleCode)
             {
                 case FighterCombatRole.Scout:
                     int scoutBonus = 3;
-                    if ((context.EnemyTags & BattleEnemyTag.Ambush) != 0 ||
-                        context.Terrain == BattleTerrain.Forest)
-                    {
+                    if ((context.EnemyTags & BattleEnemyTag.Ambush) != 0 || context.Terrain == BattleTerrain.Forest)
                         scoutBonus += 2;
-                    }
                     approach += scoutBonus;
                     approachNotes.Add("разведчик сорвал внезапность +" + scoutBonus);
                     break;
-
                 case FighterCombatRole.Archer:
                     approach += 3;
                     approachNotes.Add("лучник ослабил противника до схватки +3");
                     break;
-
                 case FighterCombatRole.Guard:
                     clash += 2;
                     hold += 3;
                     clashNotes.Add("гвардеец удержал линию +2");
                     holdNotes.Add("гвардеец прикрыл строй +3");
                     break;
-
                 case FighterCombatRole.Spearman:
                     int spearBonus =
                         ((context.EnemyTags & BattleEnemyTag.Charge) != 0 ||
-                         (context.EnemyTags & BattleEnemyTag.Beast) != 0)
-                            ? 5
-                            : 2;
+                         (context.EnemyTags & BattleEnemyTag.Beast) != 0) ? 5 : 2;
                     clash += spearBonus;
                     hold += 1;
                     clashNotes.Add("копейщик остановил натиск +" + spearBonus);
                     break;
-
                 case FighterCombatRole.Healer:
                     hold += 1;
                     holdNotes.Add("лекарь стабилизировал строй +1");
@@ -787,18 +770,10 @@ public static class BattleSystem
             approachNotes.Add("нехватка снабжения -" + supplyPenalty);
         }
 
-        int enemyApproach = context.EnemyPower;
-        int enemyClash = context.EnemyPower;
-        int enemyHold = context.EnemyPower;
-
-        if ((context.EnemyTags & BattleEnemyTag.Ambush) != 0)
-            enemyApproach += 3;
-        if ((context.EnemyTags & BattleEnemyTag.Ranged) != 0)
-            enemyApproach += 2;
-        if ((context.EnemyTags & BattleEnemyTag.Charge) != 0)
-            enemyClash += 3;
-        if ((context.EnemyTags & BattleEnemyTag.Beast) != 0)
-            enemyClash += 2;
+        int enemyApproach;
+        int enemyClash;
+        int enemyHold;
+        CalculateEnemyPhaseScores(context, out enemyApproach, out enemyClash, out enemyHold);
 
         int playerTotal = approach + clash + hold;
         int enemyTotal = enemyApproach + enemyClash + enemyHold;
@@ -813,9 +788,7 @@ public static class BattleSystem
             Title = context.Title,
             Doctrine = context.Doctrine,
             Outcome = outcome,
-            ForceRetreat =
-                context.Kind == BattleKind.ExpeditionLocation &&
-                (outcome == BattleOutcome.Withdrawal || outcome == BattleOutcome.Defeat)
+            ForceRetreat = false
         };
 
         result.Phases.Add(new BattlePhaseResult
@@ -840,15 +813,36 @@ public static class BattleSystem
             Explanation = BuildPhaseExplanation(holdNotes)
         });
 
-        BuildFighterConsequences(
-            state,
-            context,
-            fighters,
-            margin,
-            outcome,
-            result);
-        ApplyStrategicConsequences(state, result);
+        BuildFighterConsequences(state, context, fighters, margin, outcome, result);
+        ApplyStrategicConsequences(state, context, result);
         return result;
+    }
+
+    private static void CalculateEnemyPhaseScores(
+        BattleContext context,
+        out int approach,
+        out int clash,
+        out int hold)
+    {
+        approach = 0;
+        clash = 0;
+        hold = 0;
+
+        foreach (BattleEnemyUnit enemy in context.Enemies)
+        {
+            approach += Math.Max(0, enemy.AttackPower);
+            clash += (int)Math.Round((Math.Max(0, enemy.AttackPower) + Math.Max(0, enemy.DefensePower)) * 0.5);
+            hold += Math.Max(0, enemy.DefensePower);
+        }
+
+        if ((context.EnemyTags & BattleEnemyTag.Ambush) != 0)
+            approach += 3;
+        if ((context.EnemyTags & BattleEnemyTag.Ranged) != 0)
+            approach += 2;
+        if ((context.EnemyTags & BattleEnemyTag.Charge) != 0)
+            clash += 3;
+        if ((context.EnemyTags & BattleEnemyTag.Beast) != 0)
+            clash += 2;
     }
 
     private static void BuildFighterConsequences(
@@ -859,15 +853,11 @@ public static class BattleSystem
         BattleOutcome outcome,
         BattleResult result)
     {
-        List<FighterCombatState> riskOrder =
-            new List<FighterCombatState>(fighters);
+        List<FighterCombatState> riskOrder = new List<FighterCombatState>(fighters);
         riskOrder.Sort((a, b) =>
         {
-            int riskComparison =
-                GetRiskScore(b, context).CompareTo(GetRiskScore(a, context));
-            return riskComparison != 0
-                ? riskComparison
-                : string.CompareOrdinal(a.FighterId, b.FighterId);
+            int comparison = GetRiskScore(b, context).CompareTo(GetRiskScore(a, context));
+            return comparison != 0 ? comparison : string.CompareOrdinal(a.FighterId, b.FighterId);
         });
 
         int injurySlots = GetInjurySlots(outcome, margin, context.Doctrine, fighters.Count);
@@ -890,13 +880,8 @@ public static class BattleSystem
                     beforeState == FighterHealthState.SeverelyWounded;
                 afterState = AdvanceHealthState(beforeState, severity, lethalAllowed);
 
-                // Даже разгром или натиск не убивает полностью здорового бойца
-                // за один бой. Такой риск становится тяжёлым ранением и виден заранее.
-                if (beforeState == FighterHealthState.Healthy &&
-                    afterState == FighterHealthState.Dead)
-                {
+                if (beforeState == FighterHealthState.Healthy && afterState == FighterHealthState.Dead)
                     afterState = FighterHealthState.SeverelyWounded;
-                }
             }
 
             int afterHp = GetTargetHitPoints(combatant, beforeState, afterState);
@@ -932,7 +917,6 @@ public static class BattleSystem
         {
             if ((int)consequence.AfterState <= (int)consequence.BeforeState)
                 continue;
-
             if (target == null || (int)consequence.AfterState > (int)target.AfterState)
                 target = consequence;
         }
@@ -950,12 +934,8 @@ public static class BattleSystem
             MaxHitPoints = DefaultMaxHitPoints,
             HitPoints = target.BeforeHitPoints
         };
-        target.AfterHitPoints = GetTargetHitPoints(
-            template,
-            target.BeforeState,
-            mitigated);
-        target.RecoveryHours =
-            CalculateRecoveryHours(target.AfterHitPoints, DefaultMaxHitPoints);
+        target.AfterHitPoints = GetTargetHitPoints(template, target.BeforeState, mitigated);
+        target.RecoveryHours = CalculateRecoveryHours(target.AfterHitPoints, DefaultMaxHitPoints);
         target.MitigatedByHealer = true;
 
         BattlePhaseResult hold = result.Phases.Count >= 3 ? result.Phases[2] : null;
@@ -969,31 +949,56 @@ public static class BattleSystem
 
     private static void ApplyStrategicConsequences(
         GameState state,
+        BattleContext context,
         BattleResult result)
     {
-        if (result.Kind != BattleKind.CapitalDefense)
+        if (result.Kind == BattleKind.ExpeditionLocation)
+        {
+            switch (result.Outcome)
+            {
+                case BattleOutcome.Victory:
+                    result.ArmyGoldDelta = context.BaseRewardGold;
+                    result.ArmySupplyDelta = context.BaseRewardSupply;
+                    break;
+                case BattleOutcome.CostlyVictory:
+                    result.ArmyGoldDelta = (int)Math.Floor(context.BaseRewardGold * 0.75);
+                    result.ArmySupplyDelta = (int)Math.Floor(context.BaseRewardSupply * 0.75);
+                    break;
+                case BattleOutcome.Withdrawal:
+                    result.ArmyGoldDelta = (int)Math.Floor(context.BaseRewardGold * 0.25);
+                    result.ArmySupplyDelta = 0;
+                    break;
+                default:
+                    result.ArmyGoldDelta = 0;
+                    result.ArmySupplyDelta = context.BaseRewardSupply > 0 ? 1 : 0;
+                    break;
+            }
             return;
+        }
 
         int foodLoss;
         int moodLoss;
-
         switch (result.Outcome)
         {
             case BattleOutcome.Victory:
                 foodLoss = 0;
                 moodLoss = 0;
+                result.GoldDelta = context.BaseRewardGold;
                 break;
             case BattleOutcome.CostlyVictory:
                 foodLoss = 2;
                 moodLoss = 1;
+                result.GoldDelta = Math.Max(1, context.BaseRewardGold / 2);
                 break;
             case BattleOutcome.Withdrawal:
                 foodLoss = 4;
                 moodLoss = 2;
+                result.GoldDelta = 0;
                 break;
             default:
                 foodLoss = 6;
                 moodLoss = 3;
+                result.GoldDelta = 0;
                 break;
         }
 
@@ -1001,9 +1006,7 @@ public static class BattleSystem
         result.MoodDelta = -Math.Min(state.Mood, moodLoss);
     }
 
-    private static BattleOutcome DetermineOutcome(
-        int margin,
-        BattleDoctrine doctrine)
+    private static BattleOutcome DetermineOutcome(int margin, BattleDoctrine doctrine)
     {
         if (margin >= 10)
             return BattleOutcome.Victory;
@@ -1026,31 +1029,20 @@ public static class BattleSystem
         int slots;
         switch (outcome)
         {
-            case BattleOutcome.Victory:
-                slots = margin >= 18 ? 0 : 1;
-                break;
-            case BattleOutcome.CostlyVictory:
-                slots = 1;
-                break;
-            case BattleOutcome.Withdrawal:
-                slots = 1;
-                break;
-            default:
-                slots = Math.Min(3, Math.Max(1, (fighterCount + 1) / 2));
-                break;
+            case BattleOutcome.Victory: slots = margin >= 18 ? 0 : 1; break;
+            case BattleOutcome.CostlyVictory: slots = 1; break;
+            case BattleOutcome.Withdrawal: slots = 1; break;
+            default: slots = Math.Min(3, Math.Max(1, (fighterCount + 1) / 2)); break;
         }
 
         if (doctrine == BattleDoctrine.Cautious)
             slots = Math.Max(0, slots - 1);
         else if (doctrine == BattleDoctrine.Assault)
             slots = Math.Min(fighterCount, slots + 1);
-
         return slots;
     }
 
-    private static int GetFirstInjurySeverity(
-        BattleOutcome outcome,
-        BattleDoctrine doctrine)
+    private static int GetFirstInjurySeverity(BattleOutcome outcome, BattleDoctrine doctrine)
     {
         int severity = outcome == BattleOutcome.Defeat ? 2 : 1;
         if (doctrine == BattleDoctrine.Assault)
@@ -1088,14 +1080,10 @@ public static class BattleSystem
     {
         switch (state)
         {
-            case FighterHealthState.Dead:
-                return FighterHealthState.SeverelyWounded;
-            case FighterHealthState.SeverelyWounded:
-                return FighterHealthState.Wounded;
-            case FighterHealthState.Wounded:
-                return FighterHealthState.Healthy;
-            default:
-                return FighterHealthState.Healthy;
+            case FighterHealthState.Dead: return FighterHealthState.SeverelyWounded;
+            case FighterHealthState.SeverelyWounded: return FighterHealthState.Wounded;
+            case FighterHealthState.Wounded: return FighterHealthState.Healthy;
+            default: return FighterHealthState.Healthy;
         }
     }
 
@@ -1123,27 +1111,19 @@ public static class BattleSystem
         }
     }
 
-    private static int GetRiskScore(
-        FighterCombatState fighter,
-        BattleContext context)
+    private static int GetRiskScore(FighterCombatState fighter, BattleContext context)
     {
         int risk = 0;
         switch (fighter.RoleCode)
         {
-            case FighterCombatRole.Guard:
-                risk += 35;
-                break;
-            case FighterCombatRole.Spearman:
-                risk += 30;
-                break;
+            case FighterCombatRole.Guard: risk += 35; break;
+            case FighterCombatRole.Spearman: risk += 30; break;
             case FighterCombatRole.Scout:
                 risk += 15;
                 if ((context.EnemyTags & BattleEnemyTag.Ambush) != 0)
                     risk += 15;
                 break;
-            case FighterCombatRole.Archer:
-                risk += 8;
-                break;
+            case FighterCombatRole.Archer: risk += 8; break;
             case FighterCombatRole.Healer:
                 if ((context.EnemyTags & BattleEnemyTag.Hunter) != 0)
                     risk += 35;
@@ -1154,7 +1134,6 @@ public static class BattleSystem
             risk += 10;
         else if (fighter.HealthState == FighterHealthState.SeverelyWounded)
             risk += 25;
-
         return risk;
     }
 
@@ -1201,13 +1180,10 @@ public static class BattleSystem
     {
         switch (commanderId)
         {
-            case "mirena":
-                return 4;
+            case "mirena": return 4;
             case "alric":
-            case "bran":
-                return 3;
-            default:
-                return string.IsNullOrEmpty(commanderId) ? 0 : 2;
+            case "bran": return 3;
+            default: return string.IsNullOrEmpty(commanderId) ? 0 : 2;
         }
     }
 
@@ -1223,14 +1199,10 @@ public static class BattleSystem
     {
         switch (state)
         {
-            case FighterHealthState.Wounded:
-                return 0.80;
-            case FighterHealthState.SeverelyWounded:
-                return 0.55;
-            case FighterHealthState.Dead:
-                return 0.0;
-            default:
-                return 1.0;
+            case FighterHealthState.Wounded: return 0.80;
+            case FighterHealthState.SeverelyWounded: return 0.55;
+            case FighterHealthState.Dead: return 0.0;
+            default: return 1.0;
         }
     }
 
@@ -1243,9 +1215,7 @@ public static class BattleSystem
 
     private static string BuildPhaseExplanation(List<string> notes)
     {
-        return notes.Count > 0
-            ? string.Join(", ", notes) + "."
-            : "без специальных модификаторов.";
+        return notes.Count > 0 ? string.Join(", ", notes) + "." : "без специальных модификаторов.";
     }
 
     private static List<string> BuildConsequenceLines(BattleResult result)
@@ -1255,30 +1225,76 @@ public static class BattleSystem
         {
             if (consequence.AfterState == consequence.BeforeState &&
                 consequence.AfterHitPoints == consequence.BeforeHitPoints)
-            {
                 continue;
-            }
 
             string text =
-                consequence.FighterName + ": " +
-                consequence.BeforeHitPoints + "→" + consequence.AfterHitPoints +
-                " HP, " + GetHealthLabel(consequence.AfterState);
+                consequence.FighterName + ": " + consequence.BeforeHitPoints + "→" +
+                consequence.AfterHitPoints + " HP, " + GetHealthLabel(consequence.AfterState);
             if (consequence.MitigatedByHealer)
                 text += " (лекарь смягчил травму)";
-            if (consequence.AfterState != FighterHealthState.Dead &&
-                consequence.RecoveryHours > 0.0)
-            {
-                text += ", восстановление ≈" +
-                    Math.Ceiling(consequence.RecoveryHours) + " ч.";
-            }
+            if (consequence.AfterState != FighterHealthState.Dead && consequence.RecoveryHours > 0.0)
+                text += ", восстановление ≈" + Math.Ceiling(consequence.RecoveryHours) + " ч.";
             lines.Add(text);
         }
         return lines;
     }
 
+    private static string BuildRewardLine(BattleResult result)
+    {
+        if (result.Kind == BattleKind.ExpeditionLocation)
+        {
+            if (result.ArmyGoldDelta == 0 && result.ArmySupplyDelta == 0)
+                return string.Empty;
+            return "Добыча: золото отряда " + FormatSigned(result.ArmyGoldDelta) +
+                   ", снабжение " + FormatSigned(result.ArmySupplyDelta) + ".";
+        }
+
+        return result.GoldDelta != 0
+            ? "Трофеи защитников: золото " + FormatSigned(result.GoldDelta) + "."
+            : string.Empty;
+    }
+
     private static string FormatSigned(int value)
     {
         return value > 0 ? "+" + value : value.ToString();
+    }
+
+    private static BattleEnemyUnit Enemy(
+        string id,
+        string name,
+        string typeLabel,
+        int hp,
+        int attack,
+        int defense,
+        BattleEnemyTag tags = BattleEnemyTag.None)
+    {
+        return new BattleEnemyUnit(id, name, typeLabel, hp, attack, defense, tags);
+    }
+
+    private static void CopyEnemies(
+        List<BattleEnemyUnit> source,
+        List<BattleEnemyUnit> destination)
+    {
+        foreach (BattleEnemyUnit enemy in source)
+        {
+            destination.Add(new BattleEnemyUnit(
+                enemy.Id,
+                enemy.Name,
+                enemy.TypeLabel,
+                enemy.MaxHitPoints,
+                enemy.AttackPower,
+                enemy.DefensePower,
+                enemy.Tags));
+        }
+    }
+
+    private static int CalculateLegacyEnemyPower(BattleContext context)
+    {
+        int approach;
+        int clash;
+        int hold;
+        CalculateEnemyPhaseScores(context, out approach, out clash, out hold);
+        return Math.Max(1, (int)Math.Round((approach + clash + hold) / 3.0));
     }
 
     private static LocationEncounterProfile FindLocationEncounter(string locationId)
@@ -1315,11 +1331,7 @@ public static class BattleSystem
 
             CombatProfile profile;
             if (!KnownProfiles.TryGetValue(fighter.Id, out profile))
-            {
-                profile = new CombatProfile(
-                    FighterCombatRole.Unknown,
-                    Math.Max(1, fighter.DefensePower));
-            }
+                profile = new CombatProfile(FighterCombatRole.Unknown, Math.Max(1, fighter.DefensePower));
 
             runtime.Fighters[fighter.Id] = new FighterCombatState
             {

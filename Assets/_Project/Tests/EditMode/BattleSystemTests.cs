@@ -31,6 +31,35 @@ public class BattleSystemTests
     }
 
     [Test]
+    public void ForestBattle_UsesConcreteEnemyRoster()
+    {
+        GameState state = CreateAtForest("garrick", "edric", "marta", "torvin", "agnessa");
+        string message;
+        Assert.That(BattleSystem.TryPrepareCurrentLocationBattle(state, out message), Is.True, message);
+
+        BattleContext context = BattleSystem.GetPendingBattle(state).Context;
+        Assert.That(context.Enemies.Count, Is.EqualTo(4));
+        Assert.That(context.Enemies[0].Name, Is.EqualTo("Лесной волк"));
+        Assert.That(context.Enemies[2].Name, Is.EqualTo("Матёрый волк"));
+        Assert.That(context.Enemies[3].MaxHitPoints, Is.EqualTo(100));
+        Assert.That(context.Enemies[3].AttackPower, Is.EqualTo(7));
+        Assert.That(context.Enemies[3].DefensePower, Is.EqualTo(5));
+    }
+
+    [Test]
+    public void ForestEnemyRoster_DrivesThreeEnemyPhaseScores()
+    {
+        GameState state = CreateAtForest("garrick", "edric", "marta", "torvin", "agnessa");
+        string message;
+        Assert.That(BattleSystem.TryPrepareCurrentLocationBattle(state, out message), Is.True, message);
+
+        BattleResult result = BattleSystem.GetPendingBattle(state).Result;
+        Assert.That(result.Phases[0].EnemyScore, Is.EqualTo(26));
+        Assert.That(result.Phases[1].EnemyScore, Is.EqualTo(21));
+        Assert.That(result.Phases[2].EnemyScore, Is.EqualTo(13));
+    }
+
+    [Test]
     public void Resolver_IsDeterministicForSameDoctrineAndState()
     {
         GameState state = CreateAtForest(
@@ -50,6 +79,8 @@ public class BattleSystemTests
         Assert.That(second.Outcome, Is.EqualTo(first.Outcome));
         Assert.That(second.Phases.Count, Is.EqualTo(first.Phases.Count));
         Assert.That(second.FighterConsequences.Count, Is.EqualTo(first.FighterConsequences.Count));
+        Assert.That(second.ArmyGoldDelta, Is.EqualTo(first.ArmyGoldDelta));
+        Assert.That(second.ArmySupplyDelta, Is.EqualTo(first.ArmySupplyDelta));
 
         for (int i = 0; i < first.FighterConsequences.Count; i++)
         {
@@ -97,6 +128,28 @@ public class BattleSystemTests
             else
                 Assert.That((int)fighter.HitPoints, Is.EqualTo(pair.Value));
         }
+    }
+
+    [Test]
+    public void ExpeditionBattle_AppliesStoredResourceReward()
+    {
+        GameState state = CreateAtForest("garrick", "edric", "marta", "torvin", "agnessa");
+        string message;
+        Assert.That(BattleSystem.TryPrepareCurrentLocationBattle(state, out message), Is.True, message);
+
+        BattleResult preview = BattleSystem.SelectPendingDoctrine(state, BattleDoctrine.Balanced);
+        int goldBefore = state.ArmyGold;
+        int supplyBefore = state.ArmySupply;
+
+        Assert.That(preview.ArmyGoldDelta, Is.GreaterThan(0));
+        Assert.That(preview.ArmySupplyDelta, Is.GreaterThan(0));
+
+        BattleResult applied;
+        string report;
+        Assert.That(BattleSystem.TryApplyPendingBattle(state, out applied, out report), Is.True, report);
+        Assert.That(state.ArmyGold, Is.EqualTo(goldBefore + preview.ArmyGoldDelta));
+        Assert.That(state.ArmySupply, Is.EqualTo(supplyBefore + preview.ArmySupplyDelta));
+        Assert.That(report, Does.Contain("Добыча"));
     }
 
     [Test]
@@ -202,18 +255,26 @@ public class BattleSystemTests
     }
 
     [Test]
-    public void FullCapitalGarrison_WinsTestRaid()
+    public void FullCapitalGarrison_WinsTestRaidAndReceivesTrophyGold()
     {
         GameState state = new GameState();
         state.CreateNewGame(1003);
+        int goldBefore = state.Gold;
 
         string message;
         Assert.That(BattleSystem.TryPrepareCapitalBattle(state, out message), Is.True, message);
-        BattleResult result = BattleSystem.GetPendingBattle(state).Result;
+        BattleResult preview = BattleSystem.GetPendingBattle(state).Result;
 
-        Assert.That(result.Outcome, Is.EqualTo(BattleOutcome.Victory));
-        Assert.That(result.FoodDelta, Is.EqualTo(0));
-        Assert.That(result.MoodDelta, Is.EqualTo(0));
+        Assert.That(preview.Outcome, Is.EqualTo(BattleOutcome.Victory));
+        Assert.That(preview.FoodDelta, Is.EqualTo(0));
+        Assert.That(preview.MoodDelta, Is.EqualTo(0));
+        Assert.That(preview.GoldDelta, Is.EqualTo(2));
+
+        BattleResult applied;
+        string report;
+        Assert.That(BattleSystem.TryApplyPendingBattle(state, out applied, out report), Is.True, report);
+        Assert.That(state.Gold, Is.EqualTo(goldBefore + 2));
+        Assert.That(report, Does.Contain("Трофеи"));
     }
 
     [Test]

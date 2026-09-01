@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,6 +20,9 @@ public partial class PrototypeUIController
     private VisualElement battleIncidentImage;
     private PendingBattleData openedBattle;
     private IVisualElementScheduledItem battleUiPoll;
+    private GameState battleObservedState;
+    private readonly HashSet<string> completedBattleLocationIds =
+        new HashSet<string>();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InitializeBattleUiRuntime()
@@ -68,7 +72,7 @@ public partial class PrototypeUIController
             interfaceRoot.Q<VisualElement>(className: "incident-image-placeholder");
 
         CreateBattleCompositionUi();
-
+        battleObservedState = gameState;
         battleUiPoll = interfaceRoot.schedule
             .Execute(TickBattleUi)
             .Every(100);
@@ -174,22 +178,26 @@ public partial class PrototypeUIController
         if (gameState == null || isGameOver)
             return;
 
-        // Скрытая опасная локация сначала создаёт обычное решение
-        // «исследовать/продолжить». Если игрок остаётся в локации,
-        // после закрытия решения подготавливается обязательный бой.
-        if (!BattleSystem.HasPendingBattle(gameState) &&
+        if (!ReferenceEquals(battleObservedState, gameState))
+        {
+            battleObservedState = gameState;
+            completedBattleLocationIds.Clear();
+            openedBattle = null;
+        }
+
+        if (openedBattle == null &&
+            !BattleSystem.HasPendingBattle(gameState) &&
             !gameState.HasPendingExpeditionDecision &&
             gameState.HasActiveExpedition &&
             !gameState.ActiveExpedition.HasTimedActivity &&
             gameState.ActiveExpedition.Phase == CommanderState.AtLocation &&
+            !completedBattleLocationIds.Contains(gameState.ActiveExpedition.LocationId) &&
             BattleSystem.HasUnresolvedLocationEncounter(
                 gameState,
                 gameState.ActiveExpedition.LocationId))
         {
             string ignoredMessage;
-            BattleSystem.TryPrepareCurrentLocationBattle(
-                gameState,
-                out ignoredMessage);
+            BattleSystem.TryPrepareCurrentLocationBattle(gameState, out ignoredMessage);
         }
 
         EnsurePendingBattleModalShown();
@@ -246,7 +254,7 @@ public partial class PrototypeUIController
         incidentUnderstoodButton.clicked -= OnIncidentUnderstoodClicked;
         incidentUnderstoodButton.clicked -= OnBattleConfirmClicked;
         incidentUnderstoodButton.clicked += OnBattleConfirmClicked;
-        incidentUnderstoodButton.text = "ПОДТВЕРДИТЬ БОЙ";
+        incidentUnderstoodButton.text = "НАЧАТЬ БОЙ";
         incidentUnderstoodButton.style.display = DisplayStyle.Flex;
 
         RefreshDoctrineButtonSelection();
@@ -260,8 +268,7 @@ public partial class PrototypeUIController
         if (openedBattle == null || !BattleSystem.HasPendingBattle(gameState))
             return;
 
-        BattleResult result =
-            BattleSystem.SelectPendingDoctrine(gameState, doctrine);
+        BattleResult result = BattleSystem.SelectPendingDoctrine(gameState, doctrine);
         if (result == null)
             return;
 
@@ -291,9 +298,7 @@ public partial class PrototypeUIController
 
         battlePlayerColumn.Clear();
         battleEnemyColumn.Clear();
-
-        Label playerTitle = CreateBattleColumnTitle("ОТРЯД");
-        battlePlayerColumn.Add(playerTitle);
+        battlePlayerColumn.Add(CreateBattleColumnTitle("ОТРЯД"));
 
         if (openedBattle.Context.FighterIds.Count == 0)
         {
@@ -313,17 +318,15 @@ public partial class PrototypeUIController
                 if (fighter == null || combat == null)
                     continue;
 
-                FighterBattleConsequence consequence =
-                    FindFighterConsequence(openedBattle.Result, fighterId);
-                battlePlayerColumn.Add(
-                    CreateBattleFighterCard(fighter, combat, consequence));
+                battlePlayerColumn.Add(CreateBattleFighterCard(
+                    fighter,
+                    combat,
+                    FindFighterConsequence(openedBattle.Result, fighterId)));
             }
         }
 
-        Label enemyTitle = CreateBattleColumnTitle("ПРОТИВНИК");
-        battleEnemyColumn.Add(enemyTitle);
+        battleEnemyColumn.Add(CreateBattleColumnTitle("ПРОТИВНИК"));
         battleEnemyColumn.Add(CreateBattleEnemyCard(openedBattle.Context));
-
         battleOutcomeLabel.text =
             "ПРОГНОЗ\n" + GetBattleOutcomeLabel(openedBattle.Result.Outcome).ToUpper();
         battleStrategicConsequenceLabel.text =
@@ -348,6 +351,7 @@ public partial class PrototypeUIController
         FighterBattleConsequence consequence)
     {
         VisualElement card = new VisualElement();
+        card.AddToClassList("battle-fighter-card");
         card.style.height = 68f;
         card.style.marginBottom = 7f;
         card.style.paddingLeft = 8f;
@@ -385,10 +389,7 @@ public partial class PrototypeUIController
         info.Add(name);
 
         int beforeHp = (int)Math.Ceiling(combat.HitPoints);
-        int afterHp = consequence != null
-            ? consequence.AfterHitPoints
-            : beforeHp;
-
+        int afterHp = consequence != null ? consequence.AfterHitPoints : beforeHp;
         Label hpText = new Label(
             consequence != null && afterHp != beforeHp
                 ? beforeHp + " → " + afterHp + " HP"
@@ -409,7 +410,6 @@ public partial class PrototypeUIController
         hpBar.Add(hpFill);
         UpdateHealthBar(hpFill, afterHp, combat.MaxHitPoints);
         info.Add(hpBar);
-
         card.Add(info);
 
         string fighterId = fighter.Id;
@@ -421,7 +421,6 @@ public partial class PrototypeUIController
             evt.StopPropagation();
         });
         card.tooltip = "ПКМ — открыть сведения о бойце";
-
         return card;
     }
 
@@ -465,7 +464,6 @@ public partial class PrototypeUIController
         enemyPower.style.fontSize = 11f;
         enemyPower.style.color = new Color(0.68f, 0.57f, 0.55f, 1f);
         card.Add(enemyPower);
-
         return card;
     }
 
@@ -478,22 +476,17 @@ public partial class PrototypeUIController
             if (consequence.FighterId == fighterId)
                 return consequence;
         }
-
         return null;
     }
 
     private string BuildShortStrategicConsequence(BattleResult result)
     {
         string text = string.Empty;
-
         if (result.FoodDelta != 0)
             text += "Пища " + FormatSigned(result.FoodDelta);
         if (result.MoodDelta != 0)
             text += (text.Length > 0 ? " · " : "") +
                 "Настроение " + FormatSigned(result.MoodDelta);
-        if (result.ForceRetreat)
-            text += (text.Length > 0 ? "\n" : "") + "Отряд начнёт возвращение";
-
         return text.Length > 0 ? text : "Стратегических потерь нет";
     }
 
@@ -519,8 +512,16 @@ public partial class PrototypeUIController
 
     private void OnBattleConfirmClicked()
     {
-        if (openedBattle == null || isGameOver)
+        if (openedBattle == null || openedBattle.Result == null || isGameOver)
             return;
+
+        BattleContext completedContext = openedBattle.Context;
+
+        // С версии 1.10 исход боя никогда сам не отдаёт приказ возвращаться.
+        // BattleSystem пока хранит совместимое поле ForceRetreat, поэтому перед
+        // применением явно отключаем старое поведение сохранённого результата.
+        if (openedBattle.Result.Kind == BattleKind.ExpeditionLocation)
+            openedBattle.Result.ForceRetreat = false;
 
         BattleResult appliedResult;
         string reportText;
@@ -533,16 +534,22 @@ public partial class PrototypeUIController
             return;
         }
 
+        if (appliedResult.Kind == BattleKind.ExpeditionLocation)
+        {
+            completedBattleLocationIds.Add(completedContext.SourceId);
+            StopExpeditionAfterBattle();
+        }
+
         selectedFighterIds.RemoveWhere(
             fighterId => gameState.FindFighter(fighterId) == null);
 
-        ContinuousClockSnapshot clock =
-            ContinuousSimulationSystem.GetClock(gameState);
+        ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(gameState);
         AddReport(
             "[" + ContinuousSimulationSystem.FormatClock(clock.HourOfDay) + "]\n" +
             reportText);
 
-        openedBattle = null;
+        // openedBattle остаётся непустым до закрытия отдельного окна результата.
+        // Это удерживает общую блокирующую систему на паузе без промежуточного кадра.
         RestoreStandardIncidentPresentation();
         HideIncidentModal();
         RefreshInterface();
@@ -550,7 +557,40 @@ public partial class PrototypeUIController
             RefreshStableUiAfterStateChange();
         RefreshContinuousTimeUi(true);
         CheckForDefeat();
-        ResumeAfterBlockingModalIfReady();
+        ShowBattleResult(completedContext, appliedResult);
+        RefreshTimeControlAvailability();
+    }
+
+    private void StopExpeditionAfterBattle()
+    {
+        if (gameState == null || !gameState.HasActiveExpedition)
+            return;
+
+        ExpeditionData expedition = gameState.ActiveExpedition;
+        CommanderData commander = gameState.FindCommander(expedition.CommanderId);
+
+        expedition.Phase = CommanderState.AtLocation;
+        expedition.RemainingRouteCells = 0;
+        expedition.RouteLengthCells = 0;
+        expedition.RouteIndex = 0;
+        expedition.RouteDelayHoursRemaining = 0.0;
+        expedition.ActiveActivity = null;
+        expedition.PendingDecision = null;
+        expedition.HasInterruptedRoute = false;
+        expedition.LastTravelPoints.Clear();
+        expedition.TargetMapXPercent = expedition.CurrentMapXPercent;
+        expedition.TargetMapYPercent = expedition.CurrentMapYPercent;
+        expedition.Route = new List<MapPointData>
+        {
+            new MapPointData(
+                expedition.CurrentMapXPercent,
+                expedition.CurrentMapYPercent)
+        };
+
+        if (commander != null)
+            commander.State = CommanderState.AtLocation;
+
+        ContinuousSimulationSystem.NotifyRouteChanged(gameState);
     }
 
     private void RestoreStandardIncidentPresentation()

@@ -14,24 +14,38 @@ public class MapPointData
     }
 }
 
+public enum WorldMapTerrainType
+{
+    Plains,
+    Hills,
+    Mountains
+}
+
 public static class WorldMapNavigation
 {
-    // 26 x 16 gives the map a landscape grid close to the available 16:10-ish
-    // workspace once the expedition garrison strip is hidden. Grid nodes therefore
-    // read as approximately square cells instead of stretched rectangles.
     public const int GridWidth = 26;
     public const int GridHeight = 16;
     public const int DiscoveryRadiusCells = 1;
     public const float CapitalXPercent = 50f;
     public const float CapitalYPercent = 81f;
 
-    private const float ExactPointEpsilon = 0.0001f;
+    private const int ProtectedCapitalRadiusCells = 2;
+    private const int HillClusterCount = 8;
+    private const int MountainClusterCount = 5;
 
-    private static readonly int[,] NeighborOffsets =
+    private static int configuredTerrainSeed;
+    private static bool terrainConfigured;
+    private static WorldMapTerrainType[,] terrainGrid;
+
+    public static void ConfigureTerrain(int worldSeed)
     {
-        { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 },
-        { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 }
-    };
+        if (terrainConfigured && configuredTerrainSeed == worldSeed && terrainGrid != null)
+            return;
+
+        configuredTerrainSeed = worldSeed;
+        terrainConfigured = true;
+        terrainGrid = GenerateTerrain(worldSeed);
+    }
 
     public static List<MapPointData> FindPath(
         float startXPercent,
@@ -39,103 +53,58 @@ public static class WorldMapNavigation
         float targetXPercent,
         float targetYPercent)
     {
-        int startX = PercentToGridX(startXPercent);
-        int startY = PercentToGridY(startYPercent);
-        int targetX = PercentToGridX(targetXPercent);
-        int targetY = PercentToGridY(targetYPercent);
-        bool targetWasBlocked = IsBlocked(targetX, targetY);
+        EnsureTerrainConfigured();
 
-        if (targetWasBlocked)
-            FindNearestWalkable(ref targetX, ref targetY);
+        float startX = ClampMapX(startXPercent);
+        float startY = ClampMapY(startYPercent);
+        float targetX = ClampMapX(targetXPercent);
+        float targetY = ClampMapY(targetYPercent);
 
-        int nodeCount = GridWidth * GridHeight;
-        float[] costs = new float[nodeCount];
-        int[] parents = new int[nodeCount];
-        bool[] closed = new bool[nodeCount];
-        List<int> open = new List<int>();
+        double dxCells = (targetX - startX) * (GridWidth - 1) / 100.0;
+        double dyCells = (targetY - startY) * (GridHeight - 1) / 100.0;
+        double distanceCells = Math.Sqrt(dxCells * dxCells + dyCells * dyCells);
 
-        for (int i = 0; i < nodeCount; i++)
+        List<MapPointData> route = new List<MapPointData>
         {
-            costs[i] = float.MaxValue;
-            parents[i] = -1;
-        }
+            new MapPointData(startX, startY)
+        };
 
-        int startIndex = ToIndex(startX, startY);
-        int targetIndex = ToIndex(targetX, targetY);
-        costs[startIndex] = 0f;
-        open.Add(startIndex);
+        if (distanceCells <= 0.0001)
+            return route;
 
-        while (open.Count > 0)
+        int baseSegments = Math.Max(1, (int)Math.Ceiling(distanceCells));
+
+        for (int segment = 1; segment <= baseSegments; segment++)
         {
-            int bestOpenIndex = 0;
-            float bestScore = float.MaxValue;
+            float fromT = (segment - 1f) / baseSegments;
+            float toT = segment / (float)baseSegments;
+            float midpointT = (fromT + toT) * 0.5f;
+            float midpointX = Lerp(startX, targetX, midpointT);
+            float midpointY = Lerp(startY, targetY, midpointT);
+            int terrainCost = GetTerrainTravelCost(
+                GetTerrainAtPercent(midpointX, midpointY));
 
-            for (int i = 0; i < open.Count; i++)
+            // Точки остаются на прямой. Дополнительные подточки лишь растягивают
+            // время прохождения трудной местности для существующей симуляции.
+            for (int part = 1; part <= terrainCost; part++)
             {
-                int candidate = open[i];
-                int candidateX = candidate % GridWidth;
-                int candidateY = candidate / GridWidth;
-                float score = costs[candidate] +
-                    Heuristic(candidateX, candidateY, targetX, targetY);
-
-                if (score < bestScore)
-                {
-                    bestScore = score;
-                    bestOpenIndex = i;
-                }
-            }
-
-            int current = open[bestOpenIndex];
-            open.RemoveAt(bestOpenIndex);
-
-            if (current == targetIndex)
-            {
-                return ApplyExactEndpoints(
-                    BuildPath(parents, current),
-                    startXPercent,
-                    startYPercent,
-                    targetXPercent,
-                    targetYPercent,
-                    !targetWasBlocked);
-            }
-
-            if (closed[current])
-                continue;
-
-            closed[current] = true;
-            int currentX = current % GridWidth;
-            int currentY = current / GridWidth;
-
-            for (int i = 0; i < NeighborOffsets.GetLength(0); i++)
-            {
-                int nextX = currentX + NeighborOffsets[i, 0];
-                int nextY = currentY + NeighborOffsets[i, 1];
-
-                if (!CanTraverseStep(currentX, currentY, nextX, nextY))
-                    continue;
-
-                int next = ToIndex(nextX, nextY);
-                if (closed[next])
-                    continue;
-
-                bool diagonal =
-                    NeighborOffsets[i, 0] != 0 && NeighborOffsets[i, 1] != 0;
-                float nextCost = costs[current] + (diagonal ? 1.4142f : 1f);
-
-                if (nextCost >= costs[next])
-                    continue;
-
-                costs[next] = nextCost;
-                parents[next] = current;
-
-                if (!open.Contains(next))
-                    open.Add(next);
+                float localT = part / (float)terrainCost;
+                float t = fromT + (toT - fromT) * localT;
+                route.Add(new MapPointData(
+                    Lerp(startX, targetX, t),
+                    Lerp(startY, targetY, t)));
             }
         }
 
-        return new List<MapPointData>();
+        route[0].XPercent = startXPercent;
+        route[0].YPercent = startYPercent;
+        route[route.Count - 1].XPercent = targetXPercent;
+        route[route.Count - 1].YPercent = targetYPercent;
+        return route;
     }
 
+    // В существующей симуляции один сегмент маршрута занимает одну базовую
+    // единицу движения. На холмах/горах FindPath добавляет 2/3 под-сегмента.
     public static int CalculateRouteCells(List<MapPointData> path, int routeIndex = 0)
     {
         if (path == null || path.Count <= 1)
@@ -143,6 +112,76 @@ public static class WorldMapNavigation
 
         return Math.Max(0, path.Count - 1 - routeIndex);
     }
+
+    public static double CalculateGeometricDistanceCells(List<MapPointData> path)
+    {
+        if (path == null || path.Count <= 1)
+            return 0.0;
+
+        double total = 0.0;
+        for (int i = 1; i < path.Count; i++)
+        {
+            double dx = (path[i].XPercent - path[i - 1].XPercent) *
+                (GridWidth - 1) / 100.0;
+            double dy = (path[i].YPercent - path[i - 1].YPercent) *
+                (GridHeight - 1) / 100.0;
+            total += Math.Sqrt(dx * dx + dy * dy);
+        }
+
+        return total;
+    }
+
+    public static int GetTerrainTravelCost(WorldMapTerrainType terrain)
+    {
+        switch (terrain)
+        {
+            case WorldMapTerrainType.Hills:
+                return 2;
+            case WorldMapTerrainType.Mountains:
+                return 3;
+            default:
+                return 1;
+        }
+    }
+
+    public static float GetTerrainSpeedMultiplier(WorldMapTerrainType terrain)
+    {
+        switch (terrain)
+        {
+            case WorldMapTerrainType.Hills:
+                return 0.5f;
+            case WorldMapTerrainType.Mountains:
+                return 1f / 3f;
+            default:
+                return 1f;
+        }
+    }
+
+    public static WorldMapTerrainType GetTerrainAtPercent(
+        float xPercent,
+        float yPercent)
+    {
+        EnsureTerrainConfigured();
+        return GetTerrainAtGridCell(
+            PercentToGridX(xPercent),
+            PercentToGridY(yPercent));
+    }
+
+    public static WorldMapTerrainType GetTerrainAtGridCell(int x, int y)
+    {
+        EnsureTerrainConfigured();
+        if (!IsInside(x, y))
+            return WorldMapTerrainType.Plains;
+        return terrainGrid[x, y];
+    }
+
+    // Оставлены для совместимости со старым UI/тестами. Непроходимых клеток
+    // больше нет: холмы и горы замедляют, но не блокируют движение.
+    public static bool IsBlockedPercent(float xPercent, float yPercent) => false;
+    public static bool IsBlockedGridCell(int x, int y) => false;
+
+    public static int GridXFromPercent(float value) => PercentToGridX(value);
+    public static int GridYFromPercent(float value) => PercentToGridY(value);
 
     public static void AdvanceRouteByCells(ExpeditionData expedition, int cells)
     {
@@ -181,17 +220,8 @@ public static class WorldMapNavigation
     {
         if (expedition == null || hours <= 0.0)
             return;
-
         expedition.RouteDelayHoursRemaining += hours;
     }
-
-    public static bool IsBlockedPercent(float xPercent, float yPercent) =>
-        IsBlocked(PercentToGridX(xPercent), PercentToGridY(yPercent));
-
-    public static bool IsBlockedGridCell(int x, int y) => IsBlocked(x, y);
-
-    public static int GridXFromPercent(float value) => PercentToGridX(value);
-    public static int GridYFromPercent(float value) => PercentToGridY(value);
 
     public static bool IsWithinDiscoveryRadius(
         float firstXPercent,
@@ -207,7 +237,6 @@ public static class WorldMapNavigation
         int gridDistance = Math.Max(
             Math.Abs(firstX - secondX),
             Math.Abs(firstY - secondY));
-
         return gridDistance <= DiscoveryRadiusCells;
     }
 
@@ -217,125 +246,131 @@ public static class WorldMapNavigation
     public static float ClampMapY(float value) =>
         Math.Max(2f, Math.Min(96f, value));
 
-    private static bool CanTraverseStep(
-        int currentX,
-        int currentY,
-        int nextX,
-        int nextY)
+    private static void EnsureTerrainConfigured()
     {
-        if (!IsInside(nextX, nextY) || IsBlocked(nextX, nextY))
-            return false;
-
-        int deltaX = nextX - currentX;
-        int deltaY = nextY - currentY;
-        bool diagonal = deltaX != 0 && deltaY != 0;
-
-        if (!diagonal)
-            return true;
-
-        if (IsBlocked(currentX + deltaX, currentY))
-            return false;
-
-        if (IsBlocked(currentX, currentY + deltaY))
-            return false;
-
-        return true;
+        if (!terrainConfigured || terrainGrid == null)
+            ConfigureTerrain(0);
     }
 
-    private static List<MapPointData> ApplyExactEndpoints(
-        List<MapPointData> path,
-        float startXPercent,
-        float startYPercent,
-        float targetXPercent,
-        float targetYPercent,
-        bool preserveExactTarget)
+    private static WorldMapTerrainType[,] GenerateTerrain(int worldSeed)
     {
-        if (path == null || path.Count == 0)
-            return path ?? new List<MapPointData>();
+        WorldMapTerrainType[,] result =
+            new WorldMapTerrainType[GridWidth, GridHeight];
+        Random random = new Random(unchecked(worldSeed ^ 0x4B53544E));
 
-        float resolvedTargetX = preserveExactTarget
-            ? targetXPercent
-            : path[path.Count - 1].XPercent;
-        float resolvedTargetY = preserveExactTarget
-            ? targetYPercent
-            : path[path.Count - 1].YPercent;
+        PaintClusters(
+            result,
+            random,
+            WorldMapTerrainType.Hills,
+            HillClusterCount,
+            4,
+            8,
+            true);
+        PaintClusters(
+            result,
+            random,
+            WorldMapTerrainType.Mountains,
+            MountainClusterCount,
+            3,
+            6,
+            false);
 
-        path[0].XPercent = startXPercent;
-        path[0].YPercent = startYPercent;
-
-        if (path.Count == 1)
+        int capitalX = PercentToGridX(CapitalXPercent);
+        int capitalY = PercentToGridY(CapitalYPercent);
+        for (int y = 0; y < GridHeight; y++)
         {
-            float dx = resolvedTargetX - startXPercent;
-            float dy = resolvedTargetY - startYPercent;
-
-            if (dx * dx + dy * dy > ExactPointEpsilon * ExactPointEpsilon)
+            for (int x = 0; x < GridWidth; x++)
             {
-                path.Add(new MapPointData(resolvedTargetX, resolvedTargetY));
-            }
-
-            return path;
-        }
-
-        path[path.Count - 1].XPercent = resolvedTargetX;
-        path[path.Count - 1].YPercent = resolvedTargetY;
-        return path;
-    }
-
-    private static List<MapPointData> BuildPath(int[] parents, int current)
-    {
-        List<MapPointData> reversed = new List<MapPointData>();
-
-        while (current >= 0)
-        {
-            int x = current % GridWidth;
-            int y = current / GridWidth;
-            reversed.Add(new MapPointData(GridToPercentX(x), GridToPercentY(y)));
-            current = parents[current];
-        }
-
-        reversed.Reverse();
-        return reversed;
-    }
-
-    private static void FindNearestWalkable(ref int x, ref int y)
-    {
-        for (int radius = 1; radius < Math.Max(GridWidth, GridHeight); radius++)
-        {
-            for (int offsetY = -radius; offsetY <= radius; offsetY++)
-            {
-                for (int offsetX = -radius; offsetX <= radius; offsetX++)
+                if (Math.Max(Math.Abs(x - capitalX), Math.Abs(y - capitalY)) <=
+                    ProtectedCapitalRadiusCells)
                 {
-                    int candidateX = x + offsetX;
-                    int candidateY = y + offsetY;
-
-                    if (IsInside(candidateX, candidateY) &&
-                        !IsBlocked(candidateX, candidateY))
-                    {
-                        x = candidateX;
-                        y = candidateY;
-                        return;
-                    }
+                    result[x, y] = WorldMapTerrainType.Plains;
                 }
             }
         }
+
+        return result;
     }
 
-    private static bool IsBlocked(int x, int y)
+    private static void PaintClusters(
+        WorldMapTerrainType[,] grid,
+        Random random,
+        WorldMapTerrainType terrain,
+        int clusterCount,
+        int minLength,
+        int maxLength,
+        bool broad)
     {
-        if (!IsInside(x, y))
-            return true;
+        for (int cluster = 0; cluster < clusterCount; cluster++)
+        {
+            int x = random.Next(1, GridWidth - 1);
+            int y = random.Next(1, GridHeight - 1);
+            int length = random.Next(minLength, maxLength + 1);
+            int directionX = random.Next(-1, 2);
+            int directionY = random.Next(-1, 2);
+            if (directionX == 0 && directionY == 0)
+                directionX = 1;
 
-        // Same grey-prototype obstacles, rescaled horizontally for the 26-column grid.
-        bool westernRidge = x >= 8 && x <= 10 && y >= 3 && y <= 10 && y != 7;
-        bool easternRidge = x >= 16 && x <= 19 && y >= 1 && y <= 9 && y != 5;
-        bool northernLake = x >= 12 && x <= 14 && y >= 1 && y <= 3;
-        return westernRidge || easternRidge || northernLake;
+            for (int step = 0; step < length; step++)
+            {
+                PaintCell(grid, x, y, terrain);
+
+                if (broad)
+                {
+                    if (random.NextDouble() < 0.75)
+                        PaintCell(grid, x + 1, y, terrain);
+                    if (random.NextDouble() < 0.75)
+                        PaintCell(grid, x - 1, y, terrain);
+                    if (random.NextDouble() < 0.60)
+                        PaintCell(grid, x, y + 1, terrain);
+                    if (random.NextDouble() < 0.60)
+                        PaintCell(grid, x, y - 1, terrain);
+                }
+                else if (random.NextDouble() < 0.45)
+                {
+                    PaintCell(grid, x + directionY, y - directionX, terrain);
+                }
+
+                if (random.NextDouble() < 0.35)
+                {
+                    directionX = Math.Max(-1, Math.Min(1, directionX + random.Next(-1, 2)));
+                    directionY = Math.Max(-1, Math.Min(1, directionY + random.Next(-1, 2)));
+                    if (directionX == 0 && directionY == 0)
+                        directionX = random.Next(0, 2) == 0 ? -1 : 1;
+                }
+
+                x = Math.Max(1, Math.Min(GridWidth - 2, x + directionX));
+                y = Math.Max(1, Math.Min(GridHeight - 2, y + directionY));
+            }
+        }
+    }
+
+    private static void PaintCell(
+        WorldMapTerrainType[,] grid,
+        int x,
+        int y,
+        WorldMapTerrainType terrain)
+    {
+        if (!IsInside(x, y) || IsProtectedCapitalCell(x, y))
+            return;
+
+        if (terrain == WorldMapTerrainType.Mountains ||
+            grid[x, y] == WorldMapTerrainType.Plains)
+        {
+            grid[x, y] = terrain;
+        }
+    }
+
+    private static bool IsProtectedCapitalCell(int x, int y)
+    {
+        int capitalX = PercentToGridX(CapitalXPercent);
+        int capitalY = PercentToGridY(CapitalYPercent);
+        return Math.Max(Math.Abs(x - capitalX), Math.Abs(y - capitalY)) <=
+            ProtectedCapitalRadiusCells;
     }
 
     private static bool IsInside(int x, int y) =>
         x >= 0 && x < GridWidth && y >= 0 && y < GridHeight;
-
-    private static int ToIndex(int x, int y) => y * GridWidth + x;
 
     private static int PercentToGridX(float value) =>
         Math.Max(0, Math.Min(
@@ -347,12 +382,6 @@ public static class WorldMapNavigation
             GridHeight - 1,
             (int)Math.Round(value * (GridHeight - 1) / 100f)));
 
-    private static float GridToPercentX(int value) =>
-        value * 100f / (GridWidth - 1);
-
-    private static float GridToPercentY(int value) =>
-        value * 100f / (GridHeight - 1);
-
-    private static float Heuristic(int x, int y, int targetX, int targetY) =>
-        Math.Max(Math.Abs(targetX - x), Math.Abs(targetY - y));
+    private static float Lerp(float a, float b, float t) =>
+        a + (b - a) * t;
 }

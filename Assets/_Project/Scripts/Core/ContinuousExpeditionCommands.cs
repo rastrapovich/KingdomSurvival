@@ -40,6 +40,7 @@ public static class ContinuousExpeditionCommands
             return false;
         }
 
+        WorldMapNavigation.ConfigureTerrain(state.WorldSeed);
         float exactStartX = expedition.CurrentMapXPercent;
         float exactStartY = expedition.CurrentMapYPercent;
         List<MapPointData> route = WorldMapNavigation.FindPath(
@@ -78,8 +79,8 @@ public static class ContinuousExpeditionCommands
         ContinuousSimulationSystem.NotifyRouteChanged(state);
         double hours = ContinuousSimulationSystem.GetTravelHoursRemaining(state);
         resultMessage =
-            commander.Name + " получил приказ возвращаться. " +
-            "Расчётное время пути: " + FormatHours(hours) + ".";
+            commander.Name + " получил приказ возвращаться по прямому маршруту. " +
+            "Расчётное время пути с учётом рельефа: " + FormatHours(hours) + ".";
         return true;
     }
 

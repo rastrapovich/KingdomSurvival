@@ -65,6 +65,23 @@ public partial class PrototypeUIController
         if (gameState == null || isGameOver)
             return;
 
+        WorldMapNavigation.ConfigureTerrain(gameState.WorldSeed);
+
+        float startX = gameState.HasActiveExpedition
+            ? gameState.ActiveExpedition.CurrentMapXPercent
+            : WorldMapNavigation.CapitalXPercent;
+        float startY = gameState.HasActiveExpedition
+            ? gameState.ActiveExpedition.CurrentMapYPercent
+            : WorldMapNavigation.CapitalYPercent;
+        var previewRoute = WorldMapNavigation.FindPath(
+            startX,
+            startY,
+            targetXPercent,
+            targetYPercent);
+        double distance =
+            WorldMapNavigation.CalculateGeometricDistanceCells(previewRoute);
+        string travelTime = ContinuousSimulationSystem.FormatTravelTime(previewRoute);
+
         string ignoredMessage;
         bool changed;
 
@@ -88,8 +105,9 @@ public partial class PrototypeUIController
             {
                 ContinuousSimulationSystem.NotifyRouteChanged(gameState);
                 AddReport(
-                    "Приказ на экспедицию отдан. Армия начнёт движение " +
-                    "сразу после снятия паузы.");
+                    "Приказ на экспедицию отдан. Прямой маршрут: " +
+                    distance.ToString("0.0") + " кл. · расчётное время с учётом рельефа: " +
+                    travelTime + ". Армия начнёт движение после снятия паузы.");
             }
             else
             {
@@ -124,7 +142,9 @@ public partial class PrototypeUIController
 
                 ContinuousSimulationSystem.NotifyRouteChanged(gameState);
                 AddReport(
-                    "Маршрут изменён. Новый путь построен от текущей позиции армии.");
+                    "Маршрут изменён от текущей позиции. Прямой путь: " +
+                    distance.ToString("0.0") + " кл. · расчётное время с учётом рельефа: " +
+                    travelTime + ".");
             }
             else
             {
@@ -180,5 +200,4 @@ public partial class PrototypeUIController
         }
         return false;
     }
-
 }

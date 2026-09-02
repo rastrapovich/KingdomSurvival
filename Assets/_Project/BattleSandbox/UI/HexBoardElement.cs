@@ -15,10 +15,10 @@ namespace KingdomSurvival.BattleSandbox
         private const float HealthBarHeight = 4.2f;
         private const float HealthBarBottomInset = 8f;
 
-        private static readonly Color NormalColor = new Color(0.16f, 0.20f, 0.22f, 1f);
-        private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 1f);
-        private static readonly Color ImpassableColor = new Color(0.07f, 0.08f, 0.09f, 1f);
-        private static readonly Color ReachableColor = new Color(0.16f, 0.33f, 0.40f, 1f);
+        private static readonly Color NormalColor = new Color(0.16f, 0.20f, 0.22f, 0.80f);
+        private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 0.80f);
+        private static readonly Color ImpassableColor = new Color(0.07f, 0.08f, 0.09f, 0.80f);
+        private static readonly Color ReachableColor = new Color(0.28f, 0.75f, 0.90f, 0.78f);
 
         private SandboxBattle battle;
         private string selectedTargetId;
@@ -482,19 +482,34 @@ namespace KingdomSurvival.BattleSandbox
                     SandboxUnitState occupant = battle.GetUnitAt(coord);
                     Color fill = GetTerrainColor(terrain);
 
-                    if (reachable.ContainsKey(coord))
-                        fill = ReachableColor;
-
                     if (occupant != null && occupant.Id == selectedTargetId)
-                        fill = new Color(0.58f, 0.20f, 0.17f, 1f);
+                        fill = new Color(0.58f, 0.20f, 0.17f, 0.80f);
 
                     DrawHex(
                         painter,
                         layout.GetCenter(coord),
                         layout.Size - 1.5f,
                         fill,
-                        new Color(0.36f, 0.38f, 0.38f, 1f),
+                        new Color(0.36f, 0.38f, 0.38f, 0.80f),
                         1.2f);
+                }
+            }
+
+            if (!IsAnimating && reachable.Count > 0)
+            {
+                foreach (KeyValuePair<HexCoord, int> pair in reachable)
+                {
+                    if (current != null && pair.Key == current.Position)
+                        continue;
+
+                    DrawHex(
+                        painter,
+                        layout.GetCenter(pair.Key),
+                        layout.Size - 2.6f,
+                        new Color(0f, 0f, 0f, 0f),
+                        ReachableColor,
+                        2.2f,
+                        false);
                 }
             }
 
@@ -1096,7 +1111,8 @@ namespace KingdomSurvival.BattleSandbox
             float radius,
             Color fill,
             Color stroke,
-            float lineWidth)
+            float lineWidth,
+            bool fillShape = true)
         {
             painter.fillColor = fill;
             painter.strokeColor = stroke;
@@ -1114,7 +1130,8 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             painter.ClosePath();
-            painter.Fill();
+            if (fillShape)
+                painter.Fill();
             painter.Stroke();
         }
 

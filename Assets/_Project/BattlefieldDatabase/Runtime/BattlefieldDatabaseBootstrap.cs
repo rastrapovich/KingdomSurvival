@@ -197,19 +197,19 @@ namespace KingdomSurvival.BattlefieldDatabase
                 success &= SetStaticColor(
                     boardType,
                     "NormalColor",
-                    new Color(0.12f, 0.16f, 0.17f, 0.05f));
+                    new Color(0.12f, 0.16f, 0.17f, 0.04f));
                 success &= SetStaticColor(
                     boardType,
                     "DifficultColor",
-                    new Color(0.42f, 0.31f, 0.12f, 0.24f));
+                    new Color(0.42f, 0.31f, 0.12f, 0.192f));
                 success &= SetStaticColor(
                     boardType,
                     "ImpassableColor",
-                    new Color(0.03f, 0.04f, 0.04f, 0.48f));
+                    new Color(0.03f, 0.04f, 0.04f, 0.384f));
                 success &= SetStaticColor(
                     boardType,
                     "ReachableColor",
-                    new Color(0.10f, 0.43f, 0.56f, 0.28f));
+                    new Color(0.28f, 0.75f, 0.90f, 0.78f));
                 return success;
             }
             catch (Exception exception)

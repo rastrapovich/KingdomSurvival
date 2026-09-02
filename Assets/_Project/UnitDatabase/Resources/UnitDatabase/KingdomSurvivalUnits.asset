@@ -66,6 +66,8 @@ MonoBehaviour:
     initiative: 3
     attackRange: 1
     portrait: {fileID: 0}
+    portraitScale: 1
+    portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 0}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
@@ -87,6 +89,8 @@ MonoBehaviour:
     initiative: 5
     attackRange: 4
     portrait: {fileID: 0}
+    portraitScale: 1
+    portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 0}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
@@ -106,6 +110,8 @@ MonoBehaviour:
     initiative: 3
     attackRange: 1
     portrait: {fileID: 0}
+    portraitScale: 1
+    portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 0}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
@@ -126,6 +132,8 @@ MonoBehaviour:
     initiative: 4
     attackRange: 1
     portrait: {fileID: 0}
+    portraitScale: 1
+    portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 0}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
@@ -145,6 +153,8 @@ MonoBehaviour:
     initiative: 6
     attackRange: 1
     portrait: {fileID: 0}
+    portraitScale: 1
+    portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 0}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
@@ -165,6 +175,8 @@ MonoBehaviour:
     initiative: 2
     attackRange: 1
     portrait: {fileID: 0}
+    portraitScale: 1
+    portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 0}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
@@ -184,6 +196,8 @@ MonoBehaviour:
     initiative: 5
     attackRange: 1
     portrait: {fileID: 0}
+    portraitScale: 1
+    portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 0}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
@@ -203,6 +217,8 @@ MonoBehaviour:
     initiative: 4
     attackRange: 1
     portrait: {fileID: 0}
+    portraitScale: 1
+    portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 0}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
@@ -222,6 +238,8 @@ MonoBehaviour:
     initiative: 2
     attackRange: 1
     portrait: {fileID: 0}
+    portraitScale: 1
+    portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 0}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}

@@ -152,7 +152,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
             unitList = new ListView();
             unitList.style.flexGrow = 1f;
             unitList.style.marginTop = 8f;
-            unitList.fixedItemHeight = 54f;
+            unitList.fixedItemHeight = 60f;
             unitList.selectionType = SelectionType.Single;
             unitList.makeItem = CreateUnitListItem;
             unitList.bindItem = BindUnitListItem;
@@ -207,12 +207,27 @@ namespace KingdomSurvival.UnitDatabase.Editor
             row.style.paddingLeft = 5f;
             row.style.paddingRight = 5f;
 
-            Image thumbnail = new Image { name = "thumbnail", scaleMode = ScaleMode.ScaleToFit };
-            thumbnail.style.width = 42f;
-            thumbnail.style.height = 46f;
-            thumbnail.style.marginRight = 8f;
-            thumbnail.style.backgroundColor = new Color(0.10f, 0.10f, 0.10f, 1f);
-            row.Add(thumbnail);
+            VisualElement thumbnailFrame = new VisualElement { name = "thumbnail-frame" };
+            thumbnailFrame.style.width = 39f;
+            thumbnailFrame.style.height = 52f;
+            thumbnailFrame.style.flexShrink = 0f;
+            thumbnailFrame.style.marginRight = 8f;
+            thumbnailFrame.style.backgroundColor = new Color(0.10f, 0.10f, 0.10f, 1f);
+            thumbnailFrame.style.overflow = Overflow.Hidden;
+
+            Image thumbnail = new Image
+            {
+                name = "thumbnail",
+                scaleMode = ScaleMode.ScaleAndCrop,
+                pickingMode = PickingMode.Ignore
+            };
+            thumbnail.style.position = Position.Absolute;
+            thumbnail.style.left = 0f;
+            thumbnail.style.right = 0f;
+            thumbnail.style.top = 0f;
+            thumbnail.style.bottom = 0f;
+            thumbnailFrame.Add(thumbnail);
+            row.Add(thumbnailFrame);
 
             VisualElement text = new VisualElement();
             text.style.flexGrow = 1f;
@@ -237,7 +252,10 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 ? "БЕЗ НАЗВАНИЯ ТИПА"
                 : unit.DisplayLabel;
             element.Q<Label>("id").text = unit.Id + " · " + GetCategoryLabel(unit.Category);
-            element.Q<Image>("thumbnail").sprite = unit.Portrait;
+
+            Image thumbnail = element.Q<Image>("thumbnail");
+            thumbnail.sprite = unit.Portrait;
+            ApplyImageFraming(thumbnail, unit.PortraitScale, unit.PortraitOffset);
         }
 
         private void RefreshUnitList()
@@ -357,9 +375,30 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             AddHeader("ИЗОБРАЖЕНИЯ");
             AddField(unit, "portrait", "Портрет");
+            AddField(unit, "portraitScale", "Масштаб портрета");
+            AddField(unit, "portraitOffset", "Смещение портрета X / Y");
+
+            Button resetPortrait = new Button(ResetPortraitFraming)
+            {
+                text = "СБРОСИТЬ КАДРИРОВАНИЕ ПОРТРЕТА"
+            };
+            resetPortrait.style.marginTop = 4f;
+            resetPortrait.style.marginBottom = 6f;
+            detailPane.Add(resetPortrait);
+
+            Label portraitHint = new Label(
+                "Портрет заполняет вертикальную рамку 3:4 через ScaleAndCrop. " +
+                "Рекомендуемый исходник — 900×1200 или 1200×1600. " +
+                "Квадратные изображения тоже поддерживаются и автоматически обрезаются по краям.");
+            portraitHint.style.whiteSpace = WhiteSpace.Normal;
+            portraitHint.style.fontSize = 10f;
+            portraitHint.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
+            portraitHint.style.marginBottom = 8f;
+            detailPane.Add(portraitHint);
+
             AddField(unit, "battlefieldSprite", "Миниатюра на поле");
             AddField(unit, "battlefieldScale", "Масштаб миниатюры");
-            AddField(unit, "battlefieldOffset", "Смещение миниатюры");
+            AddField(unit, "battlefieldOffset", "Смещение миниатюры X / Y");
             AddField(unit, "sandboxEncounterCount", "Количество в тестовой засаде");
 
             AddHeader("ТЕГИ");
@@ -368,10 +407,20 @@ namespace KingdomSurvival.UnitDatabase.Editor
             AddHeader("ПРЕДПРОСМОТР");
             VisualElement previews = new VisualElement();
             previews.style.flexDirection = FlexDirection.Row;
-            previews.style.height = 220f;
+            previews.style.height = 250f;
 
-            VisualElement portraitCard = CreatePreview("ПОРТРЕТ", 240f, out portraitPreview);
-            VisualElement battlefieldCard = CreatePreview("ПОЛЕ", 240f, out battlefieldPreview);
+            VisualElement portraitCard = CreatePreview(
+                "ПОРТРЕТ · 3:4",
+                150f,
+                200f,
+                ScaleMode.ScaleAndCrop,
+                out portraitPreview);
+            VisualElement battlefieldCard = CreatePreview(
+                "ПОЛЕВАЯ МИНИАТЮРА",
+                150f,
+                200f,
+                ScaleMode.ScaleToFit,
+                out battlefieldPreview);
             previews.Add(portraitCard);
             previews.Add(battlefieldCard);
             detailPane.Add(previews);
@@ -435,17 +484,20 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
         private static VisualElement CreatePreview(
             string label,
-            float width,
+            float frameWidth,
+            float frameHeight,
+            ScaleMode scaleMode,
             out Image image)
         {
             VisualElement card = new VisualElement();
-            card.style.width = width;
-            card.style.height = 205f;
+            card.style.width = Mathf.Max(frameWidth + 24f, 190f);
+            card.style.height = frameHeight + 42f;
             card.style.marginRight = 12f;
             card.style.paddingLeft = 8f;
             card.style.paddingRight = 8f;
             card.style.paddingTop = 8f;
             card.style.paddingBottom = 8f;
+            card.style.alignItems = Align.Center;
             card.style.backgroundColor = new Color(0.10f, 0.11f, 0.13f, 1f);
 
             Label title = new Label(label);
@@ -453,11 +505,26 @@ namespace KingdomSurvival.UnitDatabase.Editor
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
             card.Add(title);
 
-            image = new Image { scaleMode = ScaleMode.ScaleToFit };
-            image.style.flexGrow = 1f;
-            image.style.marginTop = 6f;
-            image.style.backgroundColor = new Color(0.055f, 0.06f, 0.07f, 1f);
-            card.Add(image);
+            VisualElement viewport = new VisualElement();
+            viewport.style.width = frameWidth;
+            viewport.style.height = frameHeight;
+            viewport.style.marginTop = 6f;
+            viewport.style.position = Position.Relative;
+            viewport.style.overflow = Overflow.Hidden;
+            viewport.style.backgroundColor = new Color(0.055f, 0.06f, 0.07f, 1f);
+            card.Add(viewport);
+
+            image = new Image
+            {
+                scaleMode = scaleMode,
+                pickingMode = PickingMode.Ignore
+            };
+            image.style.position = Position.Absolute;
+            image.style.left = 0f;
+            image.style.right = 0f;
+            image.style.top = 0f;
+            image.style.bottom = 0f;
+            viewport.Add(image);
             return card;
         }
 
@@ -471,13 +538,38 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             UnitDefinitionData unit = database.Units[selectedUnitIndex];
             portraitPreview.sprite = unit.Portrait;
+            ApplyImageFraming(portraitPreview, unit.PortraitScale, unit.PortraitOffset);
+
             battlefieldPreview.sprite = unit.BattlefieldSprite;
-            battlefieldPreview.style.scale = new Scale(
-                new Vector3(unit.BattlefieldScale, unit.BattlefieldScale, 1f));
-            battlefieldPreview.transform.position = new Vector3(
-                unit.BattlefieldOffset.x,
-                unit.BattlefieldOffset.y,
-                0f);
+            ApplyImageFraming(
+                battlefieldPreview,
+                unit.BattlefieldScale,
+                unit.BattlefieldOffset);
+        }
+
+        private static void ApplyImageFraming(Image image, float scale, Vector2 offset)
+        {
+            if (image == null)
+                return;
+
+            float safeScale = Mathf.Max(0.1f, scale);
+            image.style.scale = new Scale(new Vector3(safeScale, safeScale, 1f));
+            image.transform.position = new Vector3(offset.x, offset.y, 0f);
+        }
+
+        private void ResetPortraitFraming()
+        {
+            if (selectedUnitIndex < 0 || selectedUnitIndex >= unitsProperty.arraySize)
+                return;
+
+            serializedDatabase.Update();
+            SerializedProperty unit = unitsProperty.GetArrayElementAtIndex(selectedUnitIndex);
+            unit.FindPropertyRelative("portraitScale").floatValue = 1f;
+            unit.FindPropertyRelative("portraitOffset").vector2Value = Vector2.zero;
+            serializedDatabase.ApplyModifiedProperties();
+            EditorUtility.SetDirty(database);
+            ShowSelectedUnit();
+            unitList.RefreshItems();
         }
 
         private void AddUnit()
@@ -498,6 +590,8 @@ namespace KingdomSurvival.UnitDatabase.Editor
             unit.FindPropertyRelative("initiative").intValue = 1;
             unit.FindPropertyRelative("attackRange").intValue = 1;
             unit.FindPropertyRelative("portrait").objectReferenceValue = null;
+            unit.FindPropertyRelative("portraitScale").floatValue = 1f;
+            unit.FindPropertyRelative("portraitOffset").vector2Value = Vector2.zero;
             unit.FindPropertyRelative("battlefieldSprite").objectReferenceValue = null;
             unit.FindPropertyRelative("battlefieldScale").floatValue = 1f;
             unit.FindPropertyRelative("battlefieldOffset").vector2Value = Vector2.zero;

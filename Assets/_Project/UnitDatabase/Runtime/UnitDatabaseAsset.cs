@@ -59,6 +59,8 @@ namespace KingdomSurvival.UnitDatabase
 
         [Header("Изображения")]
         [SerializeField] private Sprite portrait;
+        [SerializeField, Min(0.1f)] private float portraitScale = 1f;
+        [SerializeField] private Vector2 portraitOffset = Vector2.zero;
         [SerializeField] private Sprite battlefieldSprite;
         [SerializeField, Min(0.1f)] private float battlefieldScale = 1f;
         [SerializeField] private Vector2 battlefieldOffset = Vector2.zero;
@@ -81,6 +83,8 @@ namespace KingdomSurvival.UnitDatabase
         public int Initiative => initiative;
         public int AttackRange => attackRange;
         public Sprite Portrait => portrait;
+        public float PortraitScale => Mathf.Max(0.1f, portraitScale);
+        public Vector2 PortraitOffset => portraitOffset;
         public Sprite BattlefieldSprite => battlefieldSprite;
         public float BattlefieldScale => Mathf.Max(0.1f, battlefieldScale);
         public Vector2 BattlefieldOffset => battlefieldOffset;

@@ -615,7 +615,8 @@ namespace KingdomSurvival.BattleSandbox
                     "АТК " + current.Attack + "  ·  ЗАЩ " + current.Defense +
                     "  ·  УРОН " + current.Damage + "\n" +
                     "ДВИЖ " + current.RemainingMovement + "/" + current.Movement +
-                    "  ·  ИНИЦ " + current.Initiative;
+                    "  ·  ИНИЦ " + current.Initiative + "\n" +
+                    "ОТВЕТНЫЙ УДАР: " + (current.CanRetaliate ? "ГОТОВ" : "ПОТРАЧЕН");
             }
             else
             {
@@ -660,7 +661,8 @@ namespace KingdomSurvival.BattleSandbox
                           (movementCost > 0 ? " · сближение " + movementCost : string.Empty)
                         : reachableForAttack
                             ? hoverHint
-                            : "\nЦель находится вне доступной зоны атаки.");
+                            : "\nЦель находится вне доступной зоны атаки.") +
+                    "\nОтветный удар: " + (target.CanRetaliate ? "готов" : "потрачен");
             }
 
             guardButton.SetEnabled(
@@ -672,7 +674,7 @@ namespace KingdomSurvival.BattleSandbox
             instructionLabel.text = combatAnimationRunning
                 ? "Выполняется перемещение или атака… управление возобновится после завершения анимации."
                 : playerTurn
-                ? "Синие гексы — оставшееся движение. Наведение показывает маршрут. Меч выбирает грань удара; значок выстрела появляется на цели без выбора стороны. ПКМ открывает карточку."
+                ? "Синие гексы — оставшееся движение. Меч выбирает грань удара; выжившая цель может ответить один раз за раунд. Выстрел ответ не вызывает. ПКМ открывает карточку."
                 : battle.Phase == SandboxBattlePhase.InProgress
                     ? "Противник выполняет свою активацию…"
                     : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";
@@ -840,12 +842,7 @@ namespace KingdomSurvival.BattleSandbox
                     if (attackApplied)
                         AddBattleLog(message);
                 },
-                () =>
-                {
-                    combatAnimationRunning = false;
-                    onComplete?.Invoke(attackApplied);
-                    RefreshBattleScreen();
-                });
+                () => ContinueAttackSequence(attackApplied, onComplete));
 
             if (started)
                 return;
@@ -854,6 +851,46 @@ namespace KingdomSurvival.BattleSandbox
             attackApplied = battle.TryAttack(attackerId, targetId, out fallbackMessage);
             if (attackApplied)
                 AddBattleLog(fallbackMessage);
+            ContinueAttackSequence(attackApplied, onComplete);
+        }
+
+        private void ContinueAttackSequence(bool attackApplied, Action<bool> onComplete)
+        {
+            if (attackApplied && battle != null && board != null && battle.HasPendingRetaliation)
+            {
+                string retaliationDefenderId = battle.PendingRetaliationDefenderId;
+                string retaliationAttackerId = battle.PendingRetaliationAttackerId;
+                SandboxAttackPreview retaliationPreview = battle.PreviewPendingRetaliation();
+                if (retaliationPreview.IsValid &&
+                    !string.IsNullOrEmpty(retaliationDefenderId) &&
+                    !string.IsNullOrEmpty(retaliationAttackerId))
+                {
+                    bool retaliationStarted = board.PlayAttackAnimation(
+                        retaliationDefenderId,
+                        retaliationAttackerId,
+                        retaliationPreview.Damage,
+                        () =>
+                        {
+                            string retaliationMessage;
+                            if (battle.TryResolvePendingRetaliation(out retaliationMessage))
+                                AddBattleLog(retaliationMessage);
+                        },
+                        () => FinishAttackSequence(attackApplied, onComplete));
+
+                    if (retaliationStarted)
+                        return;
+                }
+
+                string fallbackRetaliationMessage;
+                if (battle.TryResolvePendingRetaliation(out fallbackRetaliationMessage))
+                    AddBattleLog(fallbackRetaliationMessage);
+            }
+
+            FinishAttackSequence(attackApplied, onComplete);
+        }
+
+        private void FinishAttackSequence(bool attackApplied, Action<bool> onComplete)
+        {
             combatAnimationRunning = false;
             onComplete?.Invoke(attackApplied);
             RefreshBattleScreen();

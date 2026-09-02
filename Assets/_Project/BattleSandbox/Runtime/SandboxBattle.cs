@@ -328,6 +328,51 @@ namespace KingdomSurvival.BattleSandbox
             unit.RemainingMovement = Math.Max(0, unit.RemainingMovement - movementCost);
             message = unit.DisplayLabel + " перемещается " + origin + " → " + destination +
                       ". Осталось движения: " + unit.RemainingMovement + ".";
+            if (unit.RemainingMovement == 0)
+            {
+                message += " Движение исчерпано — активация завершена.";
+                EndActivation();
+            }
+            return true;
+        }
+
+        public bool TryGetMeleeAttackPosition(
+            string attackerId,
+            string targetId,
+            HexCoord requestedPosition,
+            out int movementCost)
+        {
+            movementCost = 0;
+            SandboxUnitState attacker = GetUnit(attackerId);
+            SandboxUnitState target = GetUnit(targetId);
+            if (!CanPrepareAttack(attacker, target) || attacker.AttackRange != 1 ||
+                requestedPosition.DistanceTo(target.Position) != 1 ||
+                !IsInside(requestedPosition) ||
+                GetTerrain(requestedPosition) == SandboxTerrain.Impassable)
+            {
+                return false;
+            }
+
+            SandboxUnitState occupant = GetUnitAt(requestedPosition);
+            if (occupant != null && occupant.Id != attacker.Id)
+                return false;
+
+            int routeCost = 0;
+            if (requestedPosition != attacker.Position)
+            {
+                IReadOnlyDictionary<HexCoord, int> reachable = GetReachable(attackerId);
+                if (!reachable.TryGetValue(requestedPosition, out routeCost))
+                    return false;
+            }
+
+            int strikeStepCost = GetMovementCost(target.Position);
+            if (strikeStepCost == int.MaxValue ||
+                routeCost + strikeStepCost > attacker.RemainingMovement)
+            {
+                return false;
+            }
+
+            movementCost = routeCost;
             return true;
         }
 
@@ -342,17 +387,44 @@ namespace KingdomSurvival.BattleSandbox
 
             SandboxUnitState attacker = GetUnit(attackerId);
             SandboxUnitState target = GetUnit(targetId);
-            if (Phase != SandboxBattlePhase.InProgress ||
-                attacker == null || target == null ||
-                attacker.IsDefeated || target.IsDefeated ||
-                CurrentUnit == null || CurrentUnit.Id != attackerId ||
-                attacker.Team == target.Team ||
-                attacker.ActionPoints <= 0 || attacker.HasAttacked)
-            {
+            if (!CanPrepareAttack(attacker, target))
                 return false;
-            }
 
             position = attacker.Position;
+            if (attacker.AttackRange == 1)
+            {
+                bool meleeFound = false;
+                int bestMeleeCost = int.MaxValue;
+                HexCoord bestMeleePosition = attacker.Position;
+                foreach (HexCoord neighbor in target.Position.Neighbors())
+                {
+                    int candidateCost;
+                    if (!TryGetMeleeAttackPosition(
+                            attackerId,
+                            targetId,
+                            neighbor,
+                            out candidateCost))
+                    {
+                        continue;
+                    }
+
+                    if (!meleeFound || candidateCost < bestMeleeCost ||
+                        (candidateCost == bestMeleeCost && neighbor.CompareTo(bestMeleePosition) < 0))
+                    {
+                        meleeFound = true;
+                        bestMeleeCost = candidateCost;
+                        bestMeleePosition = neighbor;
+                    }
+                }
+
+                if (!meleeFound)
+                    return false;
+
+                position = bestMeleePosition;
+                movementCost = bestMeleeCost;
+                return true;
+            }
+
             if (attacker.Position.DistanceTo(target.Position) <= attacker.AttackRange)
                 return true;
 
@@ -361,7 +433,8 @@ namespace KingdomSurvival.BattleSandbox
             HexCoord best = attacker.Position;
             foreach (KeyValuePair<HexCoord, int> pair in GetReachable(attackerId))
             {
-                if (pair.Key.DistanceTo(target.Position) > attacker.AttackRange)
+                if (pair.Value >= attacker.RemainingMovement ||
+                    pair.Key.DistanceTo(target.Position) > attacker.AttackRange)
                     continue;
 
                 if (!found || pair.Value < bestCost ||
@@ -412,6 +485,8 @@ namespace KingdomSurvival.BattleSandbox
                 return SandboxAttackPreview.Invalid("Нельзя атаковать союзника.");
             if (attacker.ActionPoints <= 0)
                 return SandboxAttackPreview.Invalid("Не осталось действий.");
+            if (attacker.RemainingMovement <= 0)
+                return SandboxAttackPreview.Invalid("Движение исчерпано, активация завершена.");
             if (attacker.HasAttacked)
                 return SandboxAttackPreview.Invalid("Обычная атака уже использована.");
             if (attacker.Position.DistanceTo(target.Position) > attacker.AttackRange)
@@ -603,6 +678,27 @@ namespace KingdomSurvival.BattleSandbox
                 string.Empty,
                 damage,
                 Math.Max(0, target.HitPoints - damage));
+        }
+
+        private bool CanPrepareAttack(
+            SandboxUnitState attacker,
+            SandboxUnitState target)
+        {
+            return Phase == SandboxBattlePhase.InProgress &&
+                   attacker != null && target != null &&
+                   !attacker.IsDefeated && !target.IsDefeated &&
+                   CurrentUnit != null && CurrentUnit.Id == attacker.Id &&
+                   attacker.Team != target.Team &&
+                   attacker.ActionPoints > 0 && attacker.RemainingMovement > 0 &&
+                   !attacker.HasAttacked;
+        }
+
+        private int GetMovementCost(HexCoord position)
+        {
+            SandboxTerrain value = GetTerrain(position);
+            if (value == SandboxTerrain.Impassable)
+                return int.MaxValue;
+            return value == SandboxTerrain.Difficult ? 2 : 1;
         }
     }
 

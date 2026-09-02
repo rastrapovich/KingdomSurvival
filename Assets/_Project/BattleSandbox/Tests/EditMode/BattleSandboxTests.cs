@@ -54,6 +54,22 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
+        public void ExhaustingMovementEndsActivationAutomatically()
+        {
+            SandboxBattle battle = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(4, 1),
+                playerMovement: 1);
+
+            string message;
+            Assert.That(battle.TryMove("player", new HexCoord(1, 1), out message), Is.True);
+            Assert.That(battle.GetUnit("player").RemainingMovement, Is.EqualTo(0));
+            Assert.That(battle.GetUnit("player").ActionPoints, Is.EqualTo(0));
+            Assert.That(battle.CurrentUnit.Id, Is.EqualTo("enemy"));
+            Assert.That(message, Does.Contain("активация завершена"));
+        }
+
+        [Test]
         public void AttackPositionUsesRemainingMovementAndAttackRange()
         {
             SandboxBattle battle = CreateBattle(
@@ -72,12 +88,38 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 Is.True);
             Assert.That(attackPosition.DistanceTo(new HexCoord(3, 1)), Is.EqualTo(1));
             Assert.That(movementCost, Is.EqualTo(2));
+            Assert.That(
+                battle.TryGetMeleeAttackPosition(
+                    "player",
+                    "enemy",
+                    attackPosition,
+                    out movementCost),
+                Is.True);
+            Assert.That(
+                battle.TryGetMeleeAttackPosition(
+                    "player",
+                    "enemy",
+                    new HexCoord(4, 1),
+                    out movementCost),
+                Is.False);
             Assert.That(battle.PreviewReachableAttack("player", "enemy").IsValid, Is.True);
             Assert.That(battle.PreviewReachableAttack("player", "enemy").Damage, Is.EqualTo(15));
 
             string message;
             Assert.That(battle.TryMove("player", attackPosition, out message), Is.True);
             Assert.That(battle.PreviewAttack("player", "enemy").IsValid, Is.True);
+
+            SandboxBattle outsideMovement = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(3, 1),
+                playerMovement: 2);
+            Assert.That(
+                outsideMovement.TryFindAttackPosition(
+                    "player",
+                    "enemy",
+                    out attackPosition,
+                    out movementCost),
+                Is.False);
         }
 
         [Test]

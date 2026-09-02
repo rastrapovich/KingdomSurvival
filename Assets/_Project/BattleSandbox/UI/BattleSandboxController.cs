@@ -247,6 +247,7 @@ namespace KingdomSurvival.BattleSandbox
             board.style.marginRight = 14f;
             board.HexClicked += OnBoardHexClicked;
             board.UnitDetailsRequested += OnBoardUnitDetailsRequested;
+            board.AttackRequested += OnBoardAttackRequested;
             body.Add(board);
 
             VisualElement sidebar = CreatePanel();
@@ -338,8 +339,6 @@ namespace KingdomSurvival.BattleSandbox
             {
                 if (occupant.Team == SandboxTeam.Enemy)
                 {
-                    if (TryBeginDirectAttack(current, occupant))
-                        return;
                     selectedTargetId = occupant.Id;
                 }
                 else
@@ -361,6 +360,29 @@ namespace KingdomSurvival.BattleSandbox
             }
         }
 
+        private void OnBoardAttackRequested(string targetId, HexCoord? requestedPosition)
+        {
+            if (combatAnimationRunning || battle == null ||
+                battle.Phase != SandboxBattlePhase.InProgress)
+            {
+                return;
+            }
+
+            SandboxUnitState current = battle.CurrentUnit;
+            SandboxUnitState target = battle.GetUnit(targetId);
+            if (current == null || target == null ||
+                current.Team != SandboxTeam.Player || target.Team == current.Team)
+            {
+                return;
+            }
+
+            if (!TryBeginDirectAttack(current, target, requestedPosition))
+            {
+                selectedTargetId = target.Id;
+                RefreshBattleScreen();
+            }
+        }
+
         private void OnBoardUnitDetailsRequested(string unitId, Vector2 panelPosition)
         {
             if (combatAnimationRunning || battle == null || fighterDetailsView == null || root == null)
@@ -376,18 +398,33 @@ namespace KingdomSurvival.BattleSandbox
 
         private bool TryBeginDirectAttack(
             SandboxUnitState attacker,
-            SandboxUnitState target)
+            SandboxUnitState target,
+            HexCoord? requestedPosition)
         {
             if (battle == null || attacker == null || target == null)
                 return false;
 
             HexCoord attackPosition;
             int movementCost;
-            if (!battle.TryFindAttackPosition(
-                    attacker.Id,
-                    target.Id,
-                    out attackPosition,
-                    out movementCost))
+            if (attacker.AttackRange <= 1)
+            {
+                if (!requestedPosition.HasValue ||
+                    !battle.TryGetMeleeAttackPosition(
+                        attacker.Id,
+                        target.Id,
+                        requestedPosition.Value,
+                        out movementCost))
+                {
+                    return false;
+                }
+
+                attackPosition = requestedPosition.Value;
+            }
+            else if (!battle.TryFindAttackPosition(
+                         attacker.Id,
+                         target.Id,
+                         out attackPosition,
+                         out movementCost))
             {
                 return false;
             }
@@ -399,6 +436,9 @@ namespace KingdomSurvival.BattleSandbox
                     return false;
                 AddBattleLog(moveMessage);
             }
+
+            if (battle.CurrentUnit == null || battle.CurrentUnit.Id != attacker.Id)
+                return false;
 
             SandboxAttackPreview preview = battle.PreviewAttack(attacker.Id, target.Id);
             if (!preview.IsValid)
@@ -526,7 +566,7 @@ namespace KingdomSurvival.BattleSandbox
                           displayedPreview.TargetHitPointsAfter + " HP" +
                           (movementCost > 0 ? " · сближение " + movementCost : string.Empty)
                         : reachableForAttack
-                            ? "\nМожно приблизиться и атаковать нажатием на значок."
+                            ? "\nНаведите курсор на цель и выберите грань атаки."
                             : "\nЦель находится вне доступной зоны атаки.");
             }
 
@@ -539,7 +579,7 @@ namespace KingdomSurvival.BattleSandbox
             instructionLabel.text = combatAnimationRunning
                 ? "Выполняется атака… управление возобновится после завершения анимации."
                 : playerTurn
-                ? "Синие гексы — оставшееся движение. Красный значок — удар сейчас, оранжевый — сначала приблизиться. ПКМ открывает карточку."
+                ? "Синие гексы — оставшееся движение. Наведите курсор на врага: меч выбирает грань удара, значок выстрела — дальнюю атаку. ПКМ открывает карточку."
                 : battle.Phase == SandboxBattlePhase.InProgress
                     ? "Противник выполняет свою активацию…"
                     : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";

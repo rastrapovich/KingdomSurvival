@@ -15,6 +15,7 @@ namespace KingdomSurvival.BattleSandbox
         private const float HealthBarHeight = 4.2f;
         private const float HealthBarBottomInset = 8f;
         private const float MeleeAutoSelectRadiusScale = 0.48f;
+        private const float GridVerticalScale = 0.85f;
 
         private static readonly Color NormalColor = new Color(0.16f, 0.20f, 0.22f, 0.80f);
         private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 0.80f);
@@ -320,7 +321,8 @@ namespace KingdomSurvival.BattleSandbox
                 Vector2 targetCenter = layout.GetCenter(target.Position);
                 float autoSelectRadius = layout.Size * MeleeAutoSelectRadiusScale;
                 autoSelectMeleeSide =
-                    (pointerPosition - targetCenter).sqrMagnitude <= autoSelectRadius * autoSelectRadius;
+                    layout.GetSquaredGridDistance(pointerPosition, targetCenter) <=
+                    autoSelectRadius * autoSelectRadius;
 
                 if (autoSelectMeleeSide)
                 {
@@ -405,9 +407,12 @@ namespace KingdomSurvival.BattleSandbox
             HexLayout layout)
         {
             Vector2 targetCenter = layout.GetCenter(target.Position);
-            Vector2 pointerDirection = pointerPosition - targetCenter;
+            Vector2 pointerDirection = layout.ToGridSpaceVector(pointerPosition - targetCenter);
             if (pointerDirection.sqrMagnitude <= 4f)
-                pointerDirection = layout.GetCenter(attacker.Position) - targetCenter;
+            {
+                pointerDirection = layout.ToGridSpaceVector(
+                    layout.GetCenter(attacker.Position) - targetCenter);
+            }
             pointerDirection = pointerDirection.sqrMagnitude > 0.001f
                 ? pointerDirection.normalized
                 : Vector2.left;
@@ -416,7 +421,8 @@ namespace KingdomSurvival.BattleSandbox
             float bestDot = float.MinValue;
             foreach (HexCoord neighbor in target.Position.Neighbors())
             {
-                Vector2 direction = layout.GetCenter(neighbor) - targetCenter;
+                Vector2 direction = layout.ToGridSpaceVector(
+                    layout.GetCenter(neighbor) - targetCenter);
                 float dot = Vector2.Dot(pointerDirection, direction.normalized);
                 if (dot > bestDot)
                 {
@@ -473,7 +479,9 @@ namespace KingdomSurvival.BattleSandbox
                     if (!IsBoardCell(coord))
                         continue;
 
-                    float distance = (layout.GetCenter(coord) - pointerPosition).sqrMagnitude;
+                    float distance = layout.GetSquaredGridDistance(
+                        layout.GetCenter(coord),
+                        pointerPosition);
                     if (distance < bestDistance)
                     {
                         bestDistance = distance;
@@ -520,7 +528,9 @@ namespace KingdomSurvival.BattleSandbox
                         layout.Size - 1.5f,
                         fill,
                         new Color(0.36f, 0.38f, 0.38f, 0.80f),
-                        1.2f);
+                        1.2f,
+                        true,
+                        layout.VerticalScale);
                 }
             }
 
@@ -540,7 +550,8 @@ namespace KingdomSurvival.BattleSandbox
                         new Color(0f, 0f, 0f, 0f),
                         ReachableColor,
                         2.2f,
-                        false);
+                        false,
+                        layout.VerticalScale);
                 }
             }
 
@@ -566,7 +577,9 @@ namespace KingdomSurvival.BattleSandbox
                         layout.Size - 4f,
                         new Color(0.82f, 0.64f, 0.18f, 0.16f),
                         new Color(0.98f, 0.80f, 0.32f, 0.95f),
-                        3f);
+                        3f,
+                        true,
+                        layout.VerticalScale);
                 }
             }
         }
@@ -1143,7 +1156,8 @@ namespace KingdomSurvival.BattleSandbox
             Color fill,
             Color stroke,
             float lineWidth,
-            bool fillShape = true)
+            bool fillShape = true,
+            float verticalScale = 1f)
         {
             painter.fillColor = fill;
             painter.strokeColor = stroke;
@@ -1153,7 +1167,9 @@ namespace KingdomSurvival.BattleSandbox
             for (int i = 0; i < 6; i++)
             {
                 float angle = Mathf.Deg2Rad * (60f * i - 30f);
-                Vector2 point = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+                Vector2 point = center + new Vector2(
+                    Mathf.Cos(angle) * radius,
+                    Mathf.Sin(angle) * radius * verticalScale);
                 if (i == 0)
                     painter.MoveTo(point);
                 else
@@ -1229,7 +1245,8 @@ namespace KingdomSurvival.BattleSandbox
             bool compactArena = SandboxArenaShape.MatchesDimensions(battle.Width, battle.Height);
             float stagger = compactArena ? 0f : (battle.Height > 1 ? 0.5f : 0f);
             float widthUnits = Mathf.Sqrt(3f) * (battle.Width + stagger);
-            float heightUnits = 1.5f * (battle.Height - 1) + 2f;
+            float unscaledHeightUnits = 1.5f * (battle.Height - 1) + 2f;
+            float heightUnits = unscaledHeightUnits * GridVerticalScale;
             float size = Mathf.Min(availableWidth / widthUnits, availableHeight / heightUnits);
             size = Mathf.Max(18f, size);
 
@@ -1237,27 +1254,39 @@ namespace KingdomSurvival.BattleSandbox
             float boardHeight = heightUnits * size;
             Vector2 origin = new Vector2(
                 (contentRect.width - boardWidth) * 0.5f + Mathf.Sqrt(3f) * size * 0.5f,
-                (contentRect.height - boardHeight) * 0.5f + size);
-            return new HexLayout(size, origin);
+                (contentRect.height - boardHeight) * 0.5f + size * GridVerticalScale);
+            return new HexLayout(size, origin, GridVerticalScale);
         }
 
         private readonly struct HexLayout
         {
             public float Size { get; }
+            public float VerticalScale { get; }
             private Vector2 Origin { get; }
 
-            public HexLayout(float size, Vector2 origin)
+            public HexLayout(float size, Vector2 origin, float verticalScale)
             {
                 Size = size;
                 Origin = origin;
+                VerticalScale = Mathf.Max(0.01f, verticalScale);
             }
 
             public Vector2 GetCenter(HexCoord coord)
             {
                 float rowOffset = (coord.R & 1) == 0 ? 0f : 0.5f;
                 float x = Size * Mathf.Sqrt(3f) * (coord.Q + rowOffset);
-                float y = Size * 1.5f * coord.R;
+                float y = Size * 1.5f * coord.R * VerticalScale;
                 return Origin + new Vector2(x, y);
+            }
+
+            public Vector2 ToGridSpaceVector(Vector2 vector)
+            {
+                return new Vector2(vector.x, vector.y / VerticalScale);
+            }
+
+            public float GetSquaredGridDistance(Vector2 first, Vector2 second)
+            {
+                return ToGridSpaceVector(first - second).sqrMagnitude;
             }
         }
     }

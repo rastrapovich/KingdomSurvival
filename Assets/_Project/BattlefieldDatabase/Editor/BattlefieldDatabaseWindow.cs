@@ -440,6 +440,7 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
 
         private sealed class GridPreview : VisualElement
         {
+            private const float GridVerticalScale = 0.85f;
             private static readonly int[] RowStarts = { 1, 0, 0, 0, 0, 0, 1 };
             private static readonly int[] RowLengths = { 7, 8, 9, 8, 9, 8, 7 };
 
@@ -458,13 +459,13 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
                 float aw = contentRect.width - 28f;
                 float ah = contentRect.height - 28f;
                 float wu = Mathf.Sqrt(3f) * width;
-                float hu = 1.5f * (height - 1) + 2f;
+                float hu = (1.5f * (height - 1) + 2f) * GridVerticalScale;
                 float size = Mathf.Min(aw / wu, ah / hu);
                 float bw = wu * size;
                 float bh = hu * size;
                 Vector2 origin = new Vector2(
                     (contentRect.width - bw) * 0.5f + Mathf.Sqrt(3f) * size * 0.5f,
-                    (contentRect.height - bh) * 0.5f + size);
+                    (contentRect.height - bh) * 0.5f + size * GridVerticalScale);
                 Painter2D painter = context.painter2D;
                 painter.strokeColor = new Color(0.90f, 0.92f, 0.88f, 0.78f);
                 painter.lineWidth = 1.3f;
@@ -477,7 +478,7 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
                     {
                         Vector2 center = origin + new Vector2(
                             size * Mathf.Sqrt(3f) * (q + rowOffset),
-                            size * 1.5f * r);
+                            size * 1.5f * r * GridVerticalScale);
                         DrawHex(painter, center, size - 1.5f);
                     }
                 }
@@ -489,7 +490,9 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
                 for (int i = 0; i < 6; i++)
                 {
                     float angle = Mathf.Deg2Rad * (60f * i - 30f);
-                    Vector2 point = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+                    Vector2 point = center + new Vector2(
+                        Mathf.Cos(angle) * radius,
+                        Mathf.Sin(angle) * radius * GridVerticalScale);
                     if (i == 0) painter.MoveTo(point); else painter.LineTo(point);
                 }
                 painter.ClosePath();

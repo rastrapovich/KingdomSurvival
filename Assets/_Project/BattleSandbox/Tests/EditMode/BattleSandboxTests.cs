@@ -23,17 +23,17 @@ namespace KingdomSurvival.BattleSandbox.Tests
             HexCoord evenRow = new HexCoord(2, 2);
             HexCoord oddRow = new HexCoord(2, 3);
 
-            Assert.That(evenRow.Neighbors(), Does.Contain(new HexCoord(1, 1)));
-            Assert.That(evenRow.Neighbors(), Does.Contain(new HexCoord(2, 1)));
-            Assert.That(evenRow.Neighbors(), Does.Contain(new HexCoord(1, 3)));
-            Assert.That(evenRow.Neighbors(), Does.Contain(new HexCoord(2, 3)));
-            Assert.That(evenRow.Neighbors(), Does.Not.Contain(new HexCoord(3, 1)));
+            Assert.That(evenRow.Neighbors().Contains(new HexCoord(1, 1)), Is.True);
+            Assert.That(evenRow.Neighbors().Contains(new HexCoord(2, 1)), Is.True);
+            Assert.That(evenRow.Neighbors().Contains(new HexCoord(1, 3)), Is.True);
+            Assert.That(evenRow.Neighbors().Contains(new HexCoord(2, 3)), Is.True);
+            Assert.That(evenRow.Neighbors().Contains(new HexCoord(3, 1)), Is.False);
 
-            Assert.That(oddRow.Neighbors(), Does.Contain(new HexCoord(2, 2)));
-            Assert.That(oddRow.Neighbors(), Does.Contain(new HexCoord(3, 2)));
-            Assert.That(oddRow.Neighbors(), Does.Contain(new HexCoord(2, 4)));
-            Assert.That(oddRow.Neighbors(), Does.Contain(new HexCoord(3, 4)));
-            Assert.That(oddRow.Neighbors(), Does.Not.Contain(new HexCoord(1, 2)));
+            Assert.That(oddRow.Neighbors().Contains(new HexCoord(2, 2)), Is.True);
+            Assert.That(oddRow.Neighbors().Contains(new HexCoord(3, 2)), Is.True);
+            Assert.That(oddRow.Neighbors().Contains(new HexCoord(2, 4)), Is.True);
+            Assert.That(oddRow.Neighbors().Contains(new HexCoord(3, 4)), Is.True);
+            Assert.That(oddRow.Neighbors().Contains(new HexCoord(1, 2)), Is.False);
         }
 
         [Test]

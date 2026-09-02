@@ -33,6 +33,7 @@ namespace KingdomSurvival.BattleSandbox
         private Label targetLabel;
         private Label instructionLabel;
         private Label logLabel;
+        private Button returnToSetupButton;
         private Button attackButton;
         private Button guardButton;
         private Button endActivationButton;
@@ -41,6 +42,7 @@ namespace KingdomSurvival.BattleSandbox
         private string selectedTargetId;
         private bool initialized;
         private bool enemyStepScheduled;
+        private bool combatAnimationRunning;
 
         private void OnEnable()
         {
@@ -67,6 +69,7 @@ namespace KingdomSurvival.BattleSandbox
         private void BuildSetupScreen()
         {
             enemyStepScheduled = false;
+            combatAnimationRunning = false;
             selectedTargetId = null;
             battle = null;
             rosterButtons.Clear();
@@ -217,14 +220,14 @@ namespace KingdomSurvival.BattleSandbox
             heading.Add(roundLabel);
             header.Add(heading);
 
-            Button returnButton = new Button(BuildSetupScreen) { text = "НОВЫЙ СОСТАВ" };
-            StyleSecondaryButton(returnButton);
-            returnButton.style.width = 170f;
-            header.Add(returnButton);
+            returnToSetupButton = new Button(BuildSetupScreen) { text = "НОВЫЙ СОСТАВ" };
+            StyleSecondaryButton(returnToSetupButton);
+            returnToSetupButton.style.width = 170f;
+            header.Add(returnToSetupButton);
             screen.Add(header);
 
             initiativeRow = new VisualElement();
-            initiativeRow.style.height = 82f;
+            initiativeRow.style.height = 98f;
             initiativeRow.style.marginTop = 12f;
             initiativeRow.style.marginBottom = 12f;
             initiativeRow.style.paddingLeft = 8f;
@@ -326,6 +329,9 @@ namespace KingdomSurvival.BattleSandbox
 
         private void OnBoardHexClicked(HexCoord coord)
         {
+            if (combatAnimationRunning)
+                return;
+
             SandboxUnitState current = battle != null ? battle.CurrentUnit : null;
             if (current == null || current.Team != SandboxTeam.Player ||
                 battle.Phase != SandboxBattlePhase.InProgress)
@@ -359,7 +365,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void OnBoardUnitDetailsRequested(string unitId, Vector2 panelPosition)
         {
-            if (battle == null || fighterDetailsView == null || root == null)
+            if (combatAnimationRunning || battle == null || fighterDetailsView == null || root == null)
                 return;
 
             SandboxUnitState unit = battle.GetUnit(unitId);
@@ -372,22 +378,36 @@ namespace KingdomSurvival.BattleSandbox
 
         private void PerformAttack()
         {
+            if (combatAnimationRunning)
+                return;
+
             SandboxUnitState current = battle != null ? battle.CurrentUnit : null;
             if (current == null || string.IsNullOrEmpty(selectedTargetId))
                 return;
 
-            string message;
-            if (battle.TryAttack(current.Id, selectedTargetId, out message))
-            {
-                AddBattleLog(message);
-                selectedTargetId = null;
-                FinishActivationIfEmpty();
-                RefreshBattleScreen();
-            }
+            SandboxAttackPreview preview = battle.PreviewAttack(current.Id, selectedTargetId);
+            if (!preview.IsValid)
+                return;
+
+            string attackerId = current.Id;
+            string targetId = selectedTargetId;
+            BeginAttackAnimation(
+                attackerId,
+                targetId,
+                preview.Damage,
+                applied =>
+                {
+                    selectedTargetId = null;
+                    if (applied)
+                        FinishActivationIfEmpty();
+                });
         }
 
         private void PerformGuard()
         {
+            if (combatAnimationRunning)
+                return;
+
             SandboxUnitState current = battle != null ? battle.CurrentUnit : null;
             if (current == null)
                 return;
@@ -403,7 +423,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void EndPlayerActivation()
         {
-            if (battle == null || battle.CurrentUnit == null ||
+            if (combatAnimationRunning || battle == null || battle.CurrentUnit == null ||
                 battle.CurrentUnit.Team != SandboxTeam.Player)
             {
                 return;
@@ -437,6 +457,7 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState current = battle.CurrentUnit;
             bool playerTurn = battle.Phase == SandboxBattlePhase.InProgress &&
                               current != null && current.Team == SandboxTeam.Player;
+            bool playerInteractionAvailable = playerTurn && !combatAnimationRunning;
 
             if (current != null)
             {
@@ -479,12 +500,18 @@ namespace KingdomSurvival.BattleSandbox
                 attackButton.text = preview != null && preview.IsValid
                     ? "АТАКОВАТЬ · " + preview.Damage + " УРОНА"
                     : "АТАКА НЕДОСТУПНА";
-                attackButton.SetEnabled(playerTurn && preview != null && preview.IsValid);
+                attackButton.SetEnabled(playerInteractionAvailable && preview != null && preview.IsValid);
             }
 
-            guardButton.SetEnabled(playerTurn && current.ActionPoints > 0 && !current.IsGuarding);
-            endActivationButton.SetEnabled(playerTurn);
-            instructionLabel.text = playerTurn
+            guardButton.SetEnabled(
+                playerInteractionAvailable && current != null &&
+                current.ActionPoints > 0 && !current.IsGuarding);
+            endActivationButton.SetEnabled(playerInteractionAvailable);
+            if (returnToSetupButton != null)
+                returnToSetupButton.SetEnabled(!combatAnimationRunning);
+            instructionLabel.text = combatAnimationRunning
+                ? "Выполняется атака… управление возобновится после завершения анимации."
+                : playerTurn
                 ? "Синие гексы — перемещение, красные — цели. ПКМ по любой фигурке открывает карточку; повреждения и HP обновляются сразу."
                 : battle.Phase == SandboxBattlePhase.InProgress
                     ? "Противник выполняет свою активацию…"
@@ -498,10 +525,6 @@ namespace KingdomSurvival.BattleSandbox
         private void RefreshInitiativeRow()
         {
             initiativeRow.Clear();
-            Label caption = CreateLabel("ОЧЕРЕДЬ", 10, new Color(0.55f, 0.55f, 0.52f, 1f));
-            caption.style.width = 70f;
-            caption.style.unityFontStyleAndWeight = FontStyle.Bold;
-            initiativeRow.Add(caption);
 
             foreach (string unitId in battle.TurnOrderIds)
             {
@@ -515,6 +538,7 @@ namespace KingdomSurvival.BattleSandbox
                     captured,
                     active,
                     () => fighterDetailsView.Open(captured.Definition, captured));
+                card.SetEnabled(!combatAnimationRunning);
                 initiativeRow.Add(card);
             }
         }
@@ -536,7 +560,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void QueueEnemyStepIfNeeded()
         {
-            if (enemyStepScheduled || battle == null ||
+            if (enemyStepScheduled || combatAnimationRunning || battle == null ||
                 battle.Phase != SandboxBattlePhase.InProgress ||
                 battle.CurrentUnit == null || battle.CurrentUnit.Team != SandboxTeam.Enemy)
             {
@@ -546,19 +570,132 @@ namespace KingdomSurvival.BattleSandbox
             enemyStepScheduled = true;
             root.schedule.Execute(() =>
             {
-                enemyStepScheduled = false;
                 if (battle == null || battle.Phase != SandboxBattlePhase.InProgress ||
                     battle.CurrentUnit == null || battle.CurrentUnit.Team != SandboxTeam.Enemy)
                 {
+                    enemyStepScheduled = false;
                     return;
                 }
 
-                IReadOnlyList<string> events = SandboxEnemyPlanner.TakeCurrentTurn(battle);
-                foreach (string entry in events)
-                    AddBattleLog(entry);
-                selectedTargetId = null;
+                SandboxUnitState enemy = battle.CurrentUnit;
+                SandboxUnitState target = SelectEnemyAttackTarget(enemy);
+                if (target == null)
+                {
+                    SandboxUnitState closest = battle.FindClosestOpponent(enemy);
+                    if (closest != null)
+                    {
+                        HexCoord destination = battle.FindBestMoveToward(enemy, closest.Position);
+                        if (destination != enemy.Position)
+                        {
+                            string moveMessage;
+                            if (battle.TryMove(enemy.Id, destination, out moveMessage))
+                                AddBattleLog(moveMessage);
+                        }
+                    }
+                }
+
+                target = SelectEnemyAttackTarget(enemy);
+                if (target != null)
+                {
+                    SandboxAttackPreview preview = battle.PreviewAttack(enemy.Id, target.Id);
+                    BeginAttackAnimation(
+                        enemy.Id,
+                        target.Id,
+                        preview.Damage,
+                        _ => CompleteEnemyActivation(enemy.Id));
+                    return;
+                }
+
+                CompleteEnemyActivation(enemy.Id);
                 RefreshBattleScreen();
             }).ExecuteLater(420);
+        }
+
+        private void BeginAttackAnimation(
+            string attackerId,
+            string targetId,
+            int damage,
+            Action<bool> onComplete)
+        {
+            if (battle == null || board == null || combatAnimationRunning)
+                return;
+
+            combatAnimationRunning = true;
+            bool attackApplied = false;
+            RefreshBattleScreen();
+
+            bool started = board.PlayAttackAnimation(
+                attackerId,
+                targetId,
+                damage,
+                () =>
+                {
+                    string message;
+                    attackApplied = battle.TryAttack(attackerId, targetId, out message);
+                    if (attackApplied)
+                        AddBattleLog(message);
+                },
+                () =>
+                {
+                    combatAnimationRunning = false;
+                    onComplete?.Invoke(attackApplied);
+                    RefreshBattleScreen();
+                });
+
+            if (started)
+                return;
+
+            string fallbackMessage;
+            attackApplied = battle.TryAttack(attackerId, targetId, out fallbackMessage);
+            if (attackApplied)
+                AddBattleLog(fallbackMessage);
+            combatAnimationRunning = false;
+            onComplete?.Invoke(attackApplied);
+            RefreshBattleScreen();
+        }
+
+        private SandboxUnitState SelectEnemyAttackTarget(SandboxUnitState attacker)
+        {
+            if (battle == null || attacker == null)
+                return null;
+
+            return battle.Units
+                .Where(unit => !unit.IsDefeated && unit.Team != attacker.Team)
+                .Select(unit => new
+                {
+                    Unit = unit,
+                    Preview = battle.PreviewAttack(attacker.Id, unit.Id)
+                })
+                .Where(candidate => candidate.Preview.IsValid)
+                .OrderBy(candidate => candidate.Unit.HitPoints)
+                .ThenByDescending(candidate => candidate.Preview.Damage)
+                .ThenBy(candidate => candidate.Unit.Id, StringComparer.Ordinal)
+                .Select(candidate => candidate.Unit)
+                .FirstOrDefault();
+        }
+
+        private void CompleteEnemyActivation(string enemyId)
+        {
+            if (battle != null && battle.Phase == SandboxBattlePhase.InProgress &&
+                battle.CurrentUnit != null && battle.CurrentUnit.Id == enemyId)
+            {
+                SandboxUnitState enemy = battle.CurrentUnit;
+                if (enemy.ActionPoints > 0 && !enemy.IsGuarding)
+                {
+                    string guardMessage;
+                    if (battle.TryGuard(enemy.Id, out guardMessage))
+                        AddBattleLog(guardMessage);
+                }
+
+                if (battle.Phase == SandboxBattlePhase.InProgress &&
+                    battle.CurrentUnit != null && battle.CurrentUnit.Id == enemyId)
+                {
+                    battle.EndActivation();
+                }
+            }
+
+            enemyStepScheduled = false;
+            selectedTargetId = null;
         }
 
         private void AddBattleLog(string entry)

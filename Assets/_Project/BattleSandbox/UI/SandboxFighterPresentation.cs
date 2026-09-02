@@ -51,19 +51,19 @@ namespace KingdomSurvival.BattleSandbox
             bool active,
             Action onDetails)
         {
-            int damageTaken = unit.DamageTaken;
             bool damaged = unit.IsDamaged;
             Button card = new Button(onDetails);
             card.name = "sandbox-initiative-card-" + unit.Id;
             card.userData = unit.Id;
-            card.style.width = 126f;
-            card.style.height = 68f;
+            card.style.width = active ? 64f : 58f;
+            card.style.height = active ? 86f : 78f;
             card.style.flexShrink = 0f;
             card.style.marginRight = 6f;
-            card.style.paddingLeft = 7f;
-            card.style.paddingRight = 7f;
-            card.style.paddingTop = 5f;
-            card.style.paddingBottom = 5f;
+            card.style.paddingLeft = 4f;
+            card.style.paddingRight = 4f;
+            card.style.paddingTop = 4f;
+            card.style.paddingBottom = 4f;
+            card.style.alignItems = Align.Stretch;
             card.style.backgroundColor = active
                 ? damaged
                     ? new Color(0.29f, 0.18f, 0.14f, 1f)
@@ -81,29 +81,23 @@ namespace KingdomSurvival.BattleSandbox
                         : unit.Team == SandboxTeam.Player
                             ? new Color(0.45f, 0.38f, 0.23f, 1f)
                             : new Color(0.45f, 0.24f, 0.23f, 1f),
-                active ? 2f : 1f);
+                active ? 3f : damaged ? 2f : 1f);
             SetRadius(card, 4f);
 
-            Label type = new Label(unit.DisplayLabel.ToUpper());
-            type.style.fontSize = 10f;
-            type.style.unityFontStyleAndWeight = FontStyle.Bold;
-            type.style.unityTextAlign = TextAnchor.MiddleLeft;
-            type.pickingMode = PickingMode.Ignore;
-            card.Add(type);
-
-            Label state = new Label(
-                damaged
-                    ? "РАНЕН −" + damageTaken + " HP · ИНИЦ " + unit.Initiative
-                    : "HP " + unit.HitPoints + "/" + unit.MaxHitPoints + " · ИНИЦ " + unit.Initiative);
-            state.style.fontSize = 8f;
-            state.style.color = damaged
-                ? new Color(0.93f, 0.50f, 0.42f, 1f)
-                : new Color(0.63f, 0.63f, 0.60f, 1f);
-            state.pickingMode = PickingMode.Ignore;
-            card.Add(state);
+            SandboxInitiativePortrait portrait = new SandboxInitiativePortrait(
+                unit.Role,
+                unit.Team,
+                damaged);
+            portrait.style.flexGrow = 1f;
+            portrait.style.minHeight = 0f;
+            portrait.style.backgroundColor = unit.Team == SandboxTeam.Player
+                ? new Color(0.08f, 0.11f, 0.14f, 1f)
+                : new Color(0.16f, 0.075f, 0.08f, 1f);
+            SetRadius(portrait, 2f);
+            card.Add(portrait);
 
             VisualElement healthBar = CreateHealthBar(unit.HitPoints, unit.MaxHitPoints, 5f);
-            healthBar.style.marginTop = 4f;
+            healthBar.style.marginTop = 3f;
             card.Add(healthBar);
             card.RegisterCallback<PointerDownEvent>(evt =>
             {
@@ -112,7 +106,9 @@ namespace KingdomSurvival.BattleSandbox
                 onDetails?.Invoke();
                 evt.StopPropagation();
             });
-            card.tooltip = "ЛКМ или ПКМ — открыть карточку типа";
+            card.tooltip = unit.DisplayLabel + " · инициатива " + unit.Initiative +
+                           " · HP " + unit.HitPoints + "/" + unit.MaxHitPoints +
+                           " · ЛКМ или ПКМ — открыть карточку";
             return card;
         }
 
@@ -288,6 +284,139 @@ namespace KingdomSurvival.BattleSandbox
             element.style.borderTopRightRadius = radius;
             element.style.borderBottomLeftRadius = radius;
             element.style.borderBottomRightRadius = radius;
+        }
+    }
+
+    internal sealed class SandboxInitiativePortrait : VisualElement
+    {
+        private readonly SandboxUnitRole role;
+        private readonly SandboxTeam team;
+        private readonly bool damaged;
+
+        public SandboxInitiativePortrait(
+            SandboxUnitRole role,
+            SandboxTeam team,
+            bool damaged)
+        {
+            this.role = role;
+            this.team = team;
+            this.damaged = damaged;
+            pickingMode = PickingMode.Ignore;
+            generateVisualContent += DrawPortrait;
+        }
+
+        private void DrawPortrait(MeshGenerationContext context)
+        {
+            if (contentRect.width <= 1f || contentRect.height <= 1f)
+                return;
+
+            Painter2D painter = context.painter2D;
+            float width = contentRect.width;
+            float height = contentRect.height;
+            Color silhouette = team == SandboxTeam.Player
+                ? new Color(0.78f, 0.62f, 0.27f, damaged ? 0.68f : 0.95f)
+                : new Color(0.72f, 0.27f, 0.23f, damaged ? 0.68f : 0.95f);
+
+            Vector2 headCenter = new Vector2(width * 0.5f, height * 0.29f);
+            float headRadius = Mathf.Min(width, height) * 0.12f;
+            DrawCircle(painter, headCenter, headRadius, silhouette);
+
+            painter.fillColor = silhouette;
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(width * 0.20f, height * 0.78f));
+            painter.LineTo(new Vector2(width * 0.27f, height * 0.52f));
+            painter.LineTo(new Vector2(width * 0.42f, height * 0.43f));
+            painter.LineTo(new Vector2(width * 0.58f, height * 0.43f));
+            painter.LineTo(new Vector2(width * 0.73f, height * 0.52f));
+            painter.LineTo(new Vector2(width * 0.80f, height * 0.78f));
+            painter.ClosePath();
+            painter.Fill();
+
+            DrawRoleMark(
+                painter,
+                new Vector2(width * 0.5f, height * 0.63f),
+                Mathf.Min(width, height) * 0.16f);
+        }
+
+        private void DrawRoleMark(Painter2D painter, Vector2 center, float half)
+        {
+            painter.strokeColor = new Color(0.055f, 0.05f, 0.045f, 0.92f);
+            painter.lineWidth = 2f;
+            painter.BeginPath();
+
+            if (role == SandboxUnitRole.Archer)
+            {
+                painter.MoveTo(center + new Vector2(-half, half));
+                painter.LineTo(center + new Vector2(half, -half));
+                painter.LineTo(center + new Vector2(half * 0.25f, -half));
+                painter.MoveTo(center + new Vector2(half, -half));
+                painter.LineTo(center + new Vector2(half, -half * 0.25f));
+            }
+            else if (role == SandboxUnitRole.Guard)
+            {
+                painter.MoveTo(center + new Vector2(-half, -half));
+                painter.LineTo(center + new Vector2(-half, half * 0.35f));
+                painter.LineTo(center + new Vector2(0f, half));
+                painter.LineTo(center + new Vector2(half, half * 0.35f));
+                painter.LineTo(center + new Vector2(half, -half));
+                painter.ClosePath();
+            }
+            else if (role == SandboxUnitRole.Healer)
+            {
+                painter.MoveTo(center + new Vector2(-half, 0f));
+                painter.LineTo(center + new Vector2(half, 0f));
+                painter.MoveTo(center + new Vector2(0f, -half));
+                painter.LineTo(center + new Vector2(0f, half));
+            }
+            else if (role == SandboxUnitRole.Spearman)
+            {
+                painter.MoveTo(center + new Vector2(-half, half));
+                painter.LineTo(center + new Vector2(half, -half));
+            }
+            else if (role == SandboxUnitRole.Scout)
+            {
+                painter.MoveTo(center + new Vector2(0f, -half));
+                painter.LineTo(center + new Vector2(half, 0f));
+                painter.LineTo(center + new Vector2(0f, half));
+                painter.LineTo(center + new Vector2(-half, 0f));
+                painter.ClosePath();
+            }
+            else if (role == SandboxUnitRole.Beast)
+            {
+                painter.MoveTo(center + new Vector2(-half, -half));
+                painter.LineTo(center + new Vector2(0f, half));
+                painter.LineTo(center + new Vector2(half, -half));
+            }
+            else
+            {
+                painter.MoveTo(center + new Vector2(-half, 0f));
+                painter.LineTo(center + new Vector2(half, 0f));
+            }
+
+            painter.Stroke();
+        }
+
+        private static void DrawCircle(
+            Painter2D painter,
+            Vector2 center,
+            float radius,
+            Color fill)
+        {
+            const int segments = 16;
+            painter.fillColor = fill;
+            painter.BeginPath();
+            for (int i = 0; i < segments; i++)
+            {
+                float angle = Mathf.PI * 2f * i / segments;
+                Vector2 point = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+                if (i == 0)
+                    painter.MoveTo(point);
+                else
+                    painter.LineTo(point);
+            }
+
+            painter.ClosePath();
+            painter.Fill();
         }
     }
 

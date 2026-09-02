@@ -7,6 +7,10 @@ namespace KingdomSurvival.BattleSandbox
 {
     public sealed class HexBoardElement : VisualElement
     {
+        private const float AttackLungeDuration = 0.12f;
+        private const float AttackReturnDuration = 0.10f;
+        private const float DamageFloatDuration = 0.58f;
+
         private static readonly Color NormalColor = new Color(0.16f, 0.20f, 0.22f, 1f);
         private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 1f);
         private static readonly Color ImpassableColor = new Color(0.07f, 0.08f, 0.09f, 1f);
@@ -15,9 +19,21 @@ namespace KingdomSurvival.BattleSandbox
 
         private SandboxBattle battle;
         private string selectedTargetId;
+        private readonly Label damageLabel;
+        private IVisualElementScheduledItem attackAnimationItem;
+        private string animationAttackerId;
+        private string animationTargetId;
+        private Vector2 attackerOffset;
+        private Vector2 targetOffset;
+        private float targetFlash;
+        private float attackAnimationStartedAt;
+        private bool impactApplied;
+        private Action impactCallback;
+        private Action completionCallback;
 
         public event Action<HexCoord> HexClicked;
         public event Action<string, Vector2> UnitDetailsRequested;
+        public bool IsAnimating { get; private set; }
 
         public HexBoardElement()
         {
@@ -40,6 +56,19 @@ namespace KingdomSurvival.BattleSandbox
             generateVisualContent += DrawBoard;
             RegisterCallback<PointerDownEvent>(OnPointerDown);
             RegisterCallback<GeometryChangedEvent>(_ => MarkDirtyRepaint());
+
+            damageLabel = new Label();
+            damageLabel.name = "sandbox-floating-damage";
+            damageLabel.pickingMode = PickingMode.Ignore;
+            damageLabel.style.display = DisplayStyle.None;
+            damageLabel.style.position = Position.Absolute;
+            damageLabel.style.width = 120f;
+            damageLabel.style.height = 36f;
+            damageLabel.style.fontSize = 23f;
+            damageLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            damageLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            damageLabel.style.color = new Color(0.98f, 0.33f, 0.25f, 1f);
+            Add(damageLabel);
         }
 
         public void SetBattle(SandboxBattle value, string targetId)
@@ -49,9 +78,44 @@ namespace KingdomSurvival.BattleSandbox
             MarkDirtyRepaint();
         }
 
+        public bool PlayAttackAnimation(
+            string attackerId,
+            string targetId,
+            int damage,
+            Action onImpact,
+            Action onComplete)
+        {
+            if (IsAnimating || battle == null)
+                return false;
+
+            SandboxUnitState attacker = battle.GetUnit(attackerId);
+            SandboxUnitState target = battle.GetUnit(targetId);
+            if (attacker == null || target == null || attacker.IsDefeated || target.IsDefeated)
+                return false;
+
+            IsAnimating = true;
+            animationAttackerId = attackerId;
+            animationTargetId = targetId;
+            attackerOffset = Vector2.zero;
+            targetOffset = Vector2.zero;
+            targetFlash = 0f;
+            impactApplied = false;
+            impactCallback = onImpact;
+            completionCallback = onComplete;
+            attackAnimationStartedAt = Time.realtimeSinceStartup;
+
+            damageLabel.text = "−" + Mathf.Max(0, damage);
+            damageLabel.style.display = DisplayStyle.None;
+            damageLabel.style.opacity = 1f;
+
+            attackAnimationItem = schedule.Execute(UpdateAttackAnimation).Every(16);
+            MarkDirtyRepaint();
+            return true;
+        }
+
         private void OnPointerDown(PointerDownEvent evt)
         {
-            if (battle == null || (evt.button != 0 && evt.button != 1))
+            if (battle == null || IsAnimating || (evt.button != 0 && evt.button != 1))
                 return;
 
             HexLayout layout = CalculateLayout();
@@ -104,7 +168,7 @@ namespace KingdomSurvival.BattleSandbox
             HexLayout layout = CalculateLayout();
             SandboxUnitState current = battle.CurrentUnit;
             IReadOnlyDictionary<HexCoord, int> reachable =
-                current != null && current.Team == SandboxTeam.Player
+                !IsAnimating && current != null && current.Team == SandboxTeam.Player
                     ? battle.GetReachable(current.Id)
                     : new Dictionary<HexCoord, int>();
 
@@ -120,7 +184,7 @@ namespace KingdomSurvival.BattleSandbox
                     if (reachable.ContainsKey(coord))
                         fill = ReachableColor;
 
-                    if (current != null && current.Team == SandboxTeam.Player &&
+                    if (!IsAnimating && current != null && current.Team == SandboxTeam.Player &&
                         occupant != null && occupant.Team == SandboxTeam.Enemy &&
                         battle.PreviewAttack(current.Id, occupant.Id).IsValid)
                     {
@@ -142,7 +206,8 @@ namespace KingdomSurvival.BattleSandbox
 
             foreach (SandboxUnitState unit in battle.Units)
             {
-                if (unit.IsDefeated)
+                bool animatedDefeatedTarget = IsAnimating && unit.Id == animationTargetId;
+                if (unit.IsDefeated && !animatedDefeatedTarget)
                     continue;
                 DrawUnit(painter, layout, unit, current);
             }
@@ -155,10 +220,17 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState current)
         {
             Vector2 center = layout.GetCenter(unit.Position);
+            if (IsAnimating && unit.Id == animationAttackerId)
+                center += attackerOffset;
+            else if (IsAnimating && unit.Id == animationTargetId)
+                center += targetOffset;
+
             float radius = layout.Size * 0.55f;
             Color fill = unit.Team == SandboxTeam.Player
                 ? new Color(0.78f, 0.62f, 0.27f, 1f)
                 : new Color(0.70f, 0.25f, 0.22f, 1f);
+            if (IsAnimating && unit.Id == animationTargetId && targetFlash > 0f)
+                fill = Color.Lerp(fill, Color.white, targetFlash * 0.72f);
 
             Color outline = current != null && current.Id == unit.Id
                 ? Color.white
@@ -196,6 +268,92 @@ namespace KingdomSurvival.BattleSandbox
                     : new Color(0.84f, 0.31f, 0.26f, 1f));
 
             DrawRoleMark(painter, center, layout.Size, unit.Role);
+        }
+
+        private void UpdateAttackAnimation()
+        {
+            if (!IsAnimating || battle == null)
+            {
+                FinishAttackAnimation();
+                return;
+            }
+
+            SandboxUnitState attacker = battle.GetUnit(animationAttackerId);
+            SandboxUnitState target = battle.GetUnit(animationTargetId);
+            if (attacker == null || target == null)
+            {
+                FinishAttackAnimation();
+                return;
+            }
+
+            float elapsed = Mathf.Max(0f, Time.realtimeSinceStartup - attackAnimationStartedAt);
+            HexLayout layout = CalculateLayout();
+            Vector2 direction = layout.GetCenter(target.Position) - layout.GetCenter(attacker.Position);
+            direction = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
+            float lungeDistance = layout.Size * 0.34f;
+
+            if (elapsed < AttackLungeDuration)
+            {
+                float progress = Mathf.Clamp01(elapsed / AttackLungeDuration);
+                float eased = 1f - Mathf.Pow(1f - progress, 3f);
+                attackerOffset = direction * lungeDistance * eased;
+            }
+            else
+            {
+                if (!impactApplied)
+                {
+                    impactApplied = true;
+                    damageLabel.style.display = DisplayStyle.Flex;
+                    impactCallback?.Invoke();
+                }
+
+                float sinceImpact = elapsed - AttackLungeDuration;
+                float returnProgress = Mathf.Clamp01(sinceImpact / AttackReturnDuration);
+                attackerOffset = direction * lungeDistance * (1f - Mathf.SmoothStep(0f, 1f, returnProgress));
+
+                float reactionProgress = Mathf.Clamp01(sinceImpact / 0.24f);
+                float reactionStrength = 1f - reactionProgress;
+                Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+                targetOffset = perpendicular * Mathf.Sin(sinceImpact * 72f) * 5f * reactionStrength;
+                targetFlash = reactionStrength;
+
+                float floatProgress = Mathf.Clamp01(sinceImpact / DamageFloatDuration);
+                Vector2 targetCenter = layout.GetCenter(target.Position) + targetOffset;
+                damageLabel.style.left = targetCenter.x - 60f;
+                damageLabel.style.top = targetCenter.y - layout.Size * 0.88f - floatProgress * 38f;
+                damageLabel.style.opacity = 1f - floatProgress;
+
+                if (sinceImpact >= DamageFloatDuration)
+                {
+                    FinishAttackAnimation();
+                    return;
+                }
+            }
+
+            MarkDirtyRepaint();
+        }
+
+        private void FinishAttackAnimation()
+        {
+            if (!IsAnimating)
+                return;
+
+            attackAnimationItem?.Pause();
+            attackAnimationItem = null;
+            IsAnimating = false;
+            animationAttackerId = null;
+            animationTargetId = null;
+            attackerOffset = Vector2.zero;
+            targetOffset = Vector2.zero;
+            targetFlash = 0f;
+            damageLabel.style.display = DisplayStyle.None;
+            damageLabel.style.opacity = 1f;
+            impactCallback = null;
+
+            Action callback = completionCallback;
+            completionCallback = null;
+            MarkDirtyRepaint();
+            callback?.Invoke();
         }
 
         private static void DrawRoleMark(

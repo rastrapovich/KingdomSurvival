@@ -1,0 +1,18 @@
+{
+  "name": "KingdomSurvival.BattlefieldDatabase.Editor",
+  "rootNamespace": "KingdomSurvival.BattlefieldDatabase.Editor",
+  "references": [
+    "KingdomSurvival.BattlefieldDatabase"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

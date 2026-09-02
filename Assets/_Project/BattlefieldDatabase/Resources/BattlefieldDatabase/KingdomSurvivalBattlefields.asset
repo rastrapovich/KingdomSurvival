@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58d9ca7bf8e247b82d531ee2ef574a2c, type: 3}
+  m_Name: KingdomSurvivalBattlefields
+  m_EditorClassIdentifier:
+  sandboxBattlefieldId: forest_clearing_01
+  tags:
+  - id: biome.forest
+    displayLabel: Лес
+    category: Биом
+    color: {r: 0.29, g: 0.45, b: 0.27, a: 1}
+    description: Лесная местность и опушка тёмного леса.
+  - id: terrain.clearing
+    displayLabel: Поляна
+    category: Местность
+    color: {r: 0.46, g: 0.43, b: 0.28, a: 1}
+    description: Открытый участок среди лесной растительности.
+  - id: terrain.swamp
+    displayLabel: Болото
+    category: Местность
+    color: {r: 0.28, g: 0.38, b: 0.32, a: 1}
+    description: Сырая болотистая местность.
+  - id: terrain.ruins
+    displayLabel: Руины
+    category: Местность
+    color: {r: 0.43, g: 0.42, b: 0.39, a: 1}
+    description: Разрушенные постройки и каменные остатки.
+  - id: mood.dark
+    displayLabel: Мрачное
+    category: Атмосфера
+    color: {r: 0.31, g: 0.34, b: 0.38, a: 1}
+    description: Приглушённая суровая атмосфера низкого фэнтези.
+  battlefields:
+  - id: forest_clearing_01
+    displayLabel: Лесная поляна
+    background: {fileID: -1236586470678737434, guid: 99c0459483d7cd5488f88584504670dd, type: 3}
+    backgroundScale: 1
+    backgroundOffset: {x: 0, y: 0}
+    tagIds:
+    - biome.forest
+    - terrain.clearing
+    - mood.dark

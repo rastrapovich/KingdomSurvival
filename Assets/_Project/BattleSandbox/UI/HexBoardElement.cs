@@ -54,6 +54,7 @@ namespace KingdomSurvival.BattleSandbox
                 return;
 
             HexLayout layout = CalculateLayout();
+            Vector2 pointerPosition = new Vector2(evt.localPosition.x, evt.localPosition.y);
             float bestDistance = float.MaxValue;
             HexCoord best = default;
             bool found = false;
@@ -64,7 +65,7 @@ namespace KingdomSurvival.BattleSandbox
                 {
                     HexCoord coord = new HexCoord(q, r);
                     Vector2 center = layout.GetCenter(coord);
-                    float distance = (center - evt.localPosition).sqrMagnitude;
+                    float distance = (center - pointerPosition).sqrMagnitude;
                     if (distance < bestDistance)
                     {
                         bestDistance = distance;

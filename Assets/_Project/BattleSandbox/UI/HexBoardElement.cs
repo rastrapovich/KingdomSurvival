@@ -14,6 +14,7 @@ namespace KingdomSurvival.BattleSandbox
         private const float HealthBarWidthScale = 0.875f;
         private const float HealthBarHeight = 4.2f;
         private const float HealthBarBottomInset = 8f;
+        private const float MeleeAutoSelectRadiusScale = 0.48f;
 
         private static readonly Color NormalColor = new Color(0.16f, 0.20f, 0.22f, 0.80f);
         private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 0.80f);
@@ -301,6 +302,7 @@ namespace KingdomSurvival.BattleSandbox
             HexCoord attackPosition;
             int movementCost;
             bool valid;
+            bool autoSelectMeleeSide = false;
             if (attacker.AttackRange > 1)
             {
                 valid = battle.TryFindAttackPosition(
@@ -314,32 +316,53 @@ namespace KingdomSurvival.BattleSandbox
             }
             else
             {
-                attackPosition = SelectMeleeAttackPosition(
-                    attacker,
-                    target,
-                    pointerPosition,
-                    layout);
-                valid = battle.TryGetMeleeAttackPosition(
-                    attacker.Id,
-                    target.Id,
-                    attackPosition,
-                    out movementCost);
                 hoverRangedAttack = false;
                 Vector2 targetCenter = layout.GetCenter(target.Position);
-                Vector2 attackCenter = layout.GetCenter(attackPosition);
-                Vector2 fromTarget = attackCenter - targetCenter;
-                fromTarget = fromTarget.sqrMagnitude > 0.001f
-                    ? fromTarget.normalized
-                    : Vector2.left;
-                hoverCursorPosition = targetCenter + fromTarget * layout.Size * 0.82f;
-                hoverAttackDirection = -fromTarget;
+                float autoSelectRadius = layout.Size * MeleeAutoSelectRadiusScale;
+                autoSelectMeleeSide =
+                    (pointerPosition - targetCenter).sqrMagnitude <= autoSelectRadius * autoSelectRadius;
+
+                if (autoSelectMeleeSide)
+                {
+                    valid = battle.TryFindAttackPosition(
+                        attacker.Id,
+                        target.Id,
+                        out attackPosition,
+                        out movementCost);
+                }
+                else
+                {
+                    attackPosition = SelectMeleeAttackPosition(
+                        attacker,
+                        target,
+                        pointerPosition,
+                        layout);
+                    valid = battle.TryGetMeleeAttackPosition(
+                        attacker.Id,
+                        target.Id,
+                        attackPosition,
+                        out movementCost);
+                }
+
+                if (valid)
+                {
+                    Vector2 attackCenter = layout.GetCenter(attackPosition);
+                    Vector2 fromTarget = attackCenter - targetCenter;
+                    fromTarget = fromTarget.sqrMagnitude > 0.001f
+                        ? fromTarget.normalized
+                        : Vector2.left;
+                    hoverCursorPosition = targetCenter + fromTarget * layout.Size * 0.82f;
+                    hoverAttackDirection = -fromTarget;
+                }
             }
 
             if (!valid)
             {
                 tooltip = attacker.AttackRange > 1
                     ? "Цель находится вне доступной зоны выстрела."
-                    : "С выбранной грани подойти и ударить нельзя.";
+                    : autoSelectMeleeSide
+                        ? "К цели нельзя подойти для удара в пределах оставшегося движения."
+                        : "С выбранной грани подойти и ударить нельзя.";
                 MarkDirtyRepaint();
                 return;
             }

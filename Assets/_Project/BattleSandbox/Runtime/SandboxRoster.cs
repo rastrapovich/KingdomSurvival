@@ -8,37 +8,67 @@ namespace KingdomSurvival.BattleSandbox
     {
         private static readonly SandboxUnitDefinition[] PlayerRosterData =
         {
-            new SandboxUnitDefinition("guard", "Гвардеец", SandboxUnitRole.Guard, 100, 3, 6, 14, 3, 5, 1),
-            new SandboxUnitDefinition("archer", "Лучник", SandboxUnitRole.Archer, 90, 4, 2, 16, 3, 6, 4),
-            new SandboxUnitDefinition("healer", "Лекарь", SandboxUnitRole.Healer, 85, 1, 2, 15, 3, 4, 1),
-            new SandboxUnitDefinition("spearman", "Копейщик", SandboxUnitRole.Spearman, 100, 3, 4, 18, 3, 5, 1),
-            new SandboxUnitDefinition("scout", "Разведчик", SandboxUnitRole.Scout, 90, 2, 3, 13, 4, 8, 1),
-            new SandboxUnitDefinition("militia", "Ополченец", SandboxUnitRole.Militia, 100, 2, 3, 15, 3, 4, 1)
+            new SandboxUnitDefinition("guard", "Гвардеец", SandboxUnitRole.Guard, 100, 3, 6, 14, 3, 5, 1,
+                new[] { "species.human", "combat.melee", "role.defender", "trait.armored" }),
+            new SandboxUnitDefinition("archer", "Лучник", SandboxUnitRole.Archer, 90, 4, 2, 16, 3, 6, 4,
+                new[] { "species.human", "combat.ranged" }),
+            new SandboxUnitDefinition("healer", "Лекарь", SandboxUnitRole.Healer, 85, 1, 2, 15, 3, 4, 1,
+                new[] { "species.human", "combat.melee", "role.support" }),
+            new SandboxUnitDefinition("spearman", "Копейщик", SandboxUnitRole.Spearman, 100, 3, 4, 18, 3, 5, 1,
+                new[] { "species.human", "combat.melee" }),
+            new SandboxUnitDefinition("scout", "Разведчик", SandboxUnitRole.Scout, 90, 2, 3, 13, 4, 8, 1,
+                new[] { "species.human", "combat.melee", "role.scout" }),
+            new SandboxUnitDefinition("militia", "Ополченец", SandboxUnitRole.Militia, 100, 2, 3, 15, 3, 4, 1,
+                new[] { "species.human", "combat.melee" })
         };
 
         private static readonly SandboxUnitDefinition[] EnemyRosterData =
         {
-            new SandboxUnitDefinition("forest_beast_1", "Зверь", SandboxUnitRole.Beast, 60, 5, 2, 14, 4, 7, 1),
-            new SandboxUnitDefinition("forest_beast_2", "Зверь", SandboxUnitRole.Beast, 60, 5, 2, 14, 4, 7, 1),
-            new SandboxUnitDefinition("forest_beast_3", "Зверь", SandboxUnitRole.Beast, 90, 6, 4, 16, 4, 6, 1),
-            new SandboxUnitDefinition("forest_beast_4", "Зверь", SandboxUnitRole.Beast, 100, 7, 5, 18, 3, 3, 1)
+            new SandboxUnitDefinition("forest_beast_1", "Зверь", SandboxUnitRole.Beast, 60, 5, 2, 14, 4, 7, 1,
+                new[] { SandboxUnitTags.Beast, "combat.melee" }),
+            new SandboxUnitDefinition("forest_beast_2", "Зверь", SandboxUnitRole.Beast, 60, 5, 2, 14, 4, 7, 1,
+                new[] { SandboxUnitTags.Beast, "combat.melee" }),
+            new SandboxUnitDefinition("forest_beast_3", "Зверь", SandboxUnitRole.Beast, 90, 6, 4, 16, 4, 6, 1,
+                new[] { SandboxUnitTags.Beast, "combat.melee" }),
+            new SandboxUnitDefinition("forest_beast_4", "Зверь", SandboxUnitRole.Beast, 100, 7, 5, 18, 3, 3, 1,
+                new[] { SandboxUnitTags.Beast, "combat.melee" })
         };
 
         public static IReadOnlyList<SandboxUnitDefinition> PlayerRoster => PlayerRosterData;
         public static IReadOnlyList<SandboxUnitDefinition> EnemyRoster => EnemyRosterData;
 
-        public static SandboxBattle CreateDefaultBattle(IEnumerable<string> selectedFighterIds)
+        public static SandboxBattle CreateDefaultBattle(IEnumerable<string> selectedFighterTypeIds)
         {
-            if (selectedFighterIds == null)
-                throw new ArgumentNullException(nameof(selectedFighterIds));
+            return CreateDefaultBattle(
+                selectedFighterTypeIds,
+                PlayerRosterData,
+                EnemyRosterData);
+        }
 
-            HashSet<string> selected = new HashSet<string>(selectedFighterIds);
-            List<SandboxUnitDefinition> fighters = PlayerRosterData
-                .Where(definition => selected.Contains(definition.Id))
+        public static SandboxBattle CreateDefaultBattle(
+            IEnumerable<string> selectedFighterTypeIds,
+            IEnumerable<SandboxUnitDefinition> playerRoster,
+            IEnumerable<SandboxUnitDefinition> enemyEncounter)
+        {
+            if (selectedFighterTypeIds == null)
+                throw new ArgumentNullException(nameof(selectedFighterTypeIds));
+            if (playerRoster == null)
+                throw new ArgumentNullException(nameof(playerRoster));
+            if (enemyEncounter == null)
+                throw new ArgumentNullException(nameof(enemyEncounter));
+
+            HashSet<string> selected = new HashSet<string>(selectedFighterTypeIds);
+            List<SandboxUnitDefinition> fighters = playerRoster
+                .Where(definition => definition != null && selected.Contains(definition.Id))
+                .ToList();
+            List<SandboxUnitDefinition> enemies = enemyEncounter
+                .Where(definition => definition != null)
                 .ToList();
 
             if (fighters.Count < 1 || fighters.Count > 6)
                 throw new ArgumentException("Для полигона нужно выбрать от одного до шести бойцов.");
+            if (enemies.Count < 1 || enemies.Count > 4)
+                throw new ArgumentException("Тестовая засада должна содержать от одного до четырёх существ.");
 
             HexCoord[] playerPositions =
             {
@@ -60,10 +90,22 @@ namespace KingdomSurvival.BattleSandbox
 
             List<SandboxUnitState> units = new List<SandboxUnitState>();
             for (int i = 0; i < fighters.Count; i++)
-                units.Add(new SandboxUnitState(fighters[i], SandboxTeam.Player, playerPositions[i]));
+            {
+                units.Add(new SandboxUnitState(
+                    "player:" + fighters[i].Id + ":" + (i + 1),
+                    fighters[i],
+                    SandboxTeam.Player,
+                    playerPositions[i]));
+            }
 
-            for (int i = 0; i < EnemyRosterData.Length; i++)
-                units.Add(new SandboxUnitState(EnemyRosterData[i], SandboxTeam.Enemy, enemyPositions[i]));
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                units.Add(new SandboxUnitState(
+                    "enemy:" + enemies[i].Id + ":" + (i + 1),
+                    enemies[i],
+                    SandboxTeam.Enemy,
+                    enemyPositions[i]));
+            }
 
             Dictionary<HexCoord, SandboxTerrain> terrain = new Dictionary<HexCoord, SandboxTerrain>
             {

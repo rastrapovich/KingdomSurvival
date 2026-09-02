@@ -258,6 +258,77 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
+        public void InstanceIdIsSeparateFromStableTypeId()
+        {
+            SandboxUnitDefinition definition = new SandboxUnitDefinition(
+                "guard",
+                "Гвардеец",
+                SandboxUnitRole.Guard,
+                100,
+                3,
+                6,
+                14,
+                3,
+                5,
+                1);
+            SandboxUnitState first = new SandboxUnitState(
+                "save-unit-a",
+                definition,
+                SandboxTeam.Player,
+                new HexCoord(0, 0));
+            SandboxUnitState second = new SandboxUnitState(
+                "save-unit-b",
+                definition,
+                SandboxTeam.Player,
+                new HexCoord(1, 0));
+
+            Assert.That(first.TypeId, Is.EqualTo("guard"));
+            Assert.That(second.TypeId, Is.EqualTo("guard"));
+            Assert.That(first.Id, Is.Not.EqualTo(second.Id));
+        }
+
+        [Test]
+        public void SpearmanBonusUsesBeastTagInsteadOfCreatureRole()
+        {
+            SandboxUnitDefinition spearman = new SandboxUnitDefinition(
+                "spearman",
+                "Копейщик",
+                SandboxUnitRole.Spearman,
+                100,
+                3,
+                3,
+                10,
+                3,
+                10,
+                1);
+            SandboxUnitDefinition taggedTarget = new SandboxUnitDefinition(
+                "tagged_target",
+                "Цель",
+                SandboxUnitRole.Militia,
+                100,
+                3,
+                3,
+                10,
+                3,
+                5,
+                1,
+                new[] { SandboxUnitTags.Beast });
+            SandboxBattle battle = new SandboxBattle(
+                3,
+                3,
+                new[]
+                {
+                    new SandboxUnitState("spearman-instance", spearman, SandboxTeam.Player, new HexCoord(0, 1)),
+                    new SandboxUnitState("target-instance", taggedTarget, SandboxTeam.Enemy, new HexCoord(1, 1))
+                });
+            battle.Start();
+
+            Assert.That(
+                battle.PreviewAttack("spearman-instance", "target-instance").Damage,
+                Is.EqualTo(15));
+        }
+
+        [Test]
         public void DamageStateAlwaysMatchesCurrentHitPoints()
         {
             SandboxBattle battle = CreateBattle(
@@ -336,6 +407,8 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Assert.That(battle.Height, Is.EqualTo(7));
             Assert.That(battle.Units.Count(unit => unit.Team == SandboxTeam.Player), Is.EqualTo(3));
             Assert.That(battle.Units.Count(unit => unit.Team == SandboxTeam.Enemy), Is.EqualTo(4));
+            Assert.That(battle.Units.Select(unit => unit.Id).Distinct().Count(), Is.EqualTo(battle.Units.Count));
+            Assert.That(battle.Units.All(unit => !string.IsNullOrWhiteSpace(unit.TypeId)), Is.True);
             Assert.That(battle.Phase, Is.EqualTo(SandboxBattlePhase.InProgress));
         }
 

@@ -19,6 +19,10 @@ namespace KingdomSurvival.BattleSandbox
 
         private SandboxBattle battle;
         private string selectedTargetId;
+        private IReadOnlyDictionary<string, SandboxUnitVisual> unitVisuals =
+            new Dictionary<string, SandboxUnitVisual>();
+        private readonly Dictionary<string, Image> unitImages =
+            new Dictionary<string, Image>();
         private readonly Label damageLabel;
 
         private IVisualElementScheduledItem attackAnimationItem;
@@ -76,8 +80,16 @@ namespace KingdomSurvival.BattleSandbox
             RegisterCallback<PointerDownEvent>(OnPointerDown);
             RegisterCallback<PointerMoveEvent>(OnPointerMove);
             RegisterCallback<PointerLeaveEvent>(_ => ClearPointerPreview());
-            RegisterCallback<DetachFromPanelEvent>(_ => ClearPointerPreview(false));
-            RegisterCallback<GeometryChangedEvent>(_ => MarkDirtyRepaint());
+            RegisterCallback<DetachFromPanelEvent>(_ =>
+            {
+                ClearPointerPreview(false);
+                ClearUnitImages();
+            });
+            RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                SyncUnitImages();
+                MarkDirtyRepaint();
+            });
 
             damageLabel = new Label();
             damageLabel.name = "sandbox-floating-damage";
@@ -93,11 +105,20 @@ namespace KingdomSurvival.BattleSandbox
             Add(damageLabel);
         }
 
+        public void SetUnitVisuals(
+            IReadOnlyDictionary<string, SandboxUnitVisual> visuals)
+        {
+            unitVisuals = visuals ?? new Dictionary<string, SandboxUnitVisual>();
+            SyncUnitImages();
+            MarkDirtyRepaint();
+        }
+
         public void SetBattle(SandboxBattle value, string targetId)
         {
             battle = value;
             selectedTargetId = targetId;
             ClearPointerPreview(false);
+            SyncUnitImages();
             MarkDirtyRepaint();
         }
 
@@ -122,6 +143,7 @@ namespace KingdomSurvival.BattleSandbox
             movementVisualPosition = CalculateLayout().GetCenter(path[0]);
             movementCompletionCallback = onComplete;
             movementAnimationItem = schedule.Execute(UpdateMovementAnimation).Every(16);
+            SyncUnitImages();
             MarkDirtyRepaint();
             return true;
         }
@@ -159,6 +181,7 @@ namespace KingdomSurvival.BattleSandbox
             damageLabel.style.opacity = 1f;
 
             attackAnimationItem = schedule.Execute(UpdateAttackAnimation).Every(16);
+            SyncUnitImages();
             MarkDirtyRepaint();
             return true;
         }
@@ -575,7 +598,8 @@ namespace KingdomSurvival.BattleSandbox
                     ? new Color(0.32f, 0.72f, 0.38f, 1f)
                     : new Color(0.84f, 0.31f, 0.26f, 1f));
 
-            DrawRoleMark(painter, center, layout.Size, unit.Role);
+            if (!HasBattlefieldSprite(unit.TypeId))
+                DrawRoleMark(painter, center, layout.Size, unit.Role);
         }
 
         private static void DrawAttackCursor(
@@ -662,6 +686,7 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
+            SyncUnitImages();
             MarkDirtyRepaint();
         }
 
@@ -680,6 +705,7 @@ namespace KingdomSurvival.BattleSandbox
 
             Action callback = movementCompletionCallback;
             movementCompletionCallback = null;
+            SyncUnitImages();
             MarkDirtyRepaint();
             callback?.Invoke();
         }
@@ -744,6 +770,7 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
+            SyncUnitImages();
             MarkDirtyRepaint();
         }
 
@@ -766,8 +793,108 @@ namespace KingdomSurvival.BattleSandbox
 
             Action callback = completionCallback;
             completionCallback = null;
+            SyncUnitImages();
             MarkDirtyRepaint();
             callback?.Invoke();
+        }
+
+        private bool HasBattlefieldSprite(string typeId)
+        {
+            SandboxUnitVisual visual;
+            return !string.IsNullOrWhiteSpace(typeId) &&
+                   unitVisuals.TryGetValue(typeId, out visual) &&
+                   visual != null &&
+                   visual.BattlefieldSprite != null;
+        }
+
+        private void SyncUnitImages()
+        {
+            if (battle == null || contentRect.width <= 1f || contentRect.height <= 1f)
+            {
+                ClearUnitImages();
+                return;
+            }
+
+            HexLayout layout = CalculateLayout();
+            HashSet<string> visibleIds = new HashSet<string>();
+            foreach (SandboxUnitState unit in battle.Units)
+            {
+                bool animatedDefeatedTarget = IsAnimating && unit.Id == animationTargetId;
+                if (unit.IsDefeated && !animatedDefeatedTarget)
+                    continue;
+
+                SandboxUnitVisual visual;
+                if (!unitVisuals.TryGetValue(unit.TypeId, out visual) ||
+                    visual == null ||
+                    visual.BattlefieldSprite == null)
+                {
+                    continue;
+                }
+
+                Image image;
+                if (!unitImages.TryGetValue(unit.Id, out image))
+                {
+                    image = new Image
+                    {
+                        pickingMode = PickingMode.Ignore,
+                        scaleMode = ScaleMode.ScaleToFit
+                    };
+                    image.style.position = Position.Absolute;
+                    unitImages.Add(unit.Id, image);
+                    Add(image);
+                }
+
+                visibleIds.Add(unit.Id);
+                image.sprite = visual.BattlefieldSprite;
+                float size = layout.Size * 1.35f * visual.BattlefieldScale;
+                Vector2 center = GetUnitVisualCenter(layout, unit) + visual.BattlefieldOffset;
+                image.style.width = size;
+                image.style.height = size;
+                image.style.left = center.x - size * 0.5f;
+                image.style.top = center.y - size * 0.5f;
+                image.tintColor = IsAnimating && unit.Id == animationTargetId && targetFlash > 0f
+                    ? Color.Lerp(Color.white, new Color(1f, 0.58f, 0.52f, 1f), targetFlash)
+                    : Color.white;
+                image.style.display = DisplayStyle.Flex;
+            }
+
+            List<string> removedIds = null;
+            foreach (KeyValuePair<string, Image> pair in unitImages)
+            {
+                if (visibleIds.Contains(pair.Key))
+                    continue;
+                if (removedIds == null)
+                    removedIds = new List<string>();
+                removedIds.Add(pair.Key);
+                pair.Value.RemoveFromHierarchy();
+            }
+
+            if (removedIds != null)
+            {
+                for (int i = 0; i < removedIds.Count; i++)
+                    unitImages.Remove(removedIds[i]);
+            }
+
+            damageLabel.BringToFront();
+        }
+
+        private Vector2 GetUnitVisualCenter(HexLayout layout, SandboxUnitState unit)
+        {
+            Vector2 center = layout.GetCenter(unit.Position);
+            if (IsAnimating && unit.Id == movementUnitId && movementPath != null)
+                return movementVisualPosition;
+            if (IsAnimating && unit.Id == animationAttackerId)
+                return center + attackerOffset;
+            if (IsAnimating && unit.Id == animationTargetId)
+                return center + targetOffset;
+            return center;
+        }
+
+        private void ClearUnitImages()
+        {
+            foreach (Image image in unitImages.Values)
+                image.RemoveFromHierarchy();
+            unitImages.Clear();
         }
 
         private static void DrawRoleMark(

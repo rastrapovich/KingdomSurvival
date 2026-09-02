@@ -1,10 +1,7 @@
 {
-  "name": "KingdomSurvival.BattleSandbox.UI",
-  "rootNamespace": "KingdomSurvival.BattleSandbox",
-  "references": [
-    "KingdomSurvival.BattleSandbox.Runtime",
-    "KingdomSurvival.UnitDatabase"
-  ],
+  "name": "KingdomSurvival.UnitDatabase",
+  "rootNamespace": "KingdomSurvival.UnitDatabase",
+  "references": [],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

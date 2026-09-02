@@ -19,6 +19,7 @@ namespace KingdomSurvival.BattleSandbox
         private readonly Dictionary<string, Button> rosterButtons = new Dictionary<string, Button>();
         private readonly List<string> battleLog = new List<string>();
 
+        private SandboxUnitContent unitContent;
         private VisualElement root;
         private Label selectedCountLabel;
         private Button startBattleButton;
@@ -59,6 +60,12 @@ namespace KingdomSurvival.BattleSandbox
                 return;
 
             initialized = true;
+            unitContent = SandboxUnitDatabaseAdapter.Load();
+            selectedFighterIds.RemoveWhere(typeId =>
+                !unitContent.PlayerRoster.Any(definition => definition.Id == typeId));
+            if (selectedFighterIds.Count == 0 && unitContent.PlayerRoster.Count > 0)
+                selectedFighterIds.Add(unitContent.PlayerRoster[0].Id);
+
             root.style.flexGrow = 1f;
             root.style.backgroundColor = new Color(0.035f, 0.043f, 0.050f, 1f);
             root.style.color = new Color(0.88f, 0.84f, 0.76f, 1f);
@@ -108,13 +115,15 @@ namespace KingdomSurvival.BattleSandbox
             rosterGrid.style.flexDirection = FlexDirection.Row;
             rosterGrid.style.flexWrap = Wrap.Wrap;
             rosterGrid.style.marginTop = 10f;
-            foreach (SandboxUnitDefinition definition in SandboxRoster.PlayerRoster)
+            foreach (SandboxUnitDefinition definition in unitContent.PlayerRoster)
             {
                 SandboxUnitDefinition captured = definition;
+                SandboxUnitVisual visual = unitContent.GetVisual(captured.Id);
                 Button card = SandboxFighterCardFactory.CreateRosterCard(
                     captured,
+                    visual.Portrait,
                     () => ToggleFighter(captured.Id),
-                    () => fighterDetailsView.Open(captured));
+                    () => fighterDetailsView.Open(captured, portrait: visual.Portrait));
                 rosterButtons[definition.Id] = card;
                 rosterGrid.Add(card);
             }
@@ -133,12 +142,14 @@ namespace KingdomSurvival.BattleSandbox
             enemyGrid.style.flexDirection = FlexDirection.Row;
             enemyGrid.style.flexWrap = Wrap.Wrap;
             enemyGrid.style.marginTop = 10f;
-            foreach (SandboxUnitDefinition enemy in SandboxRoster.EnemyRoster)
+            foreach (SandboxUnitDefinition enemy in unitContent.EnemyEncounter)
             {
                 SandboxUnitDefinition captured = enemy;
+                SandboxUnitVisual visual = unitContent.GetVisual(captured.Id);
                 Button enemyCard = SandboxFighterCardFactory.CreateEnemyPreviewCard(
                     captured,
-                    () => fighterDetailsView.Open(captured));
+                    visual.Portrait,
+                    () => fighterDetailsView.Open(captured, portrait: visual.Portrait));
                 enemyGrid.Add(enemyCard);
             }
             enemyPanel.Add(enemyGrid);
@@ -184,7 +195,10 @@ namespace KingdomSurvival.BattleSandbox
             if (selectedFighterIds.Count == 0)
                 return;
 
-            battle = SandboxRoster.CreateDefaultBattle(selectedFighterIds);
+            battle = SandboxRoster.CreateDefaultBattle(
+                selectedFighterIds,
+                unitContent.PlayerRoster,
+                unitContent.EnemyEncounter);
             battleLog.Clear();
             battleLog.Add("Бой начался. Враг перекрывает дорогу через Чёрный лес.");
             selectedTargetId = null;
@@ -244,6 +258,7 @@ namespace KingdomSurvival.BattleSandbox
             body.style.alignItems = Align.Stretch;
 
             board = new HexBoardElement();
+            board.SetUnitVisuals(unitContent.Visuals);
             board.style.marginRight = 14f;
             board.HexClicked += OnBoardHexClicked;
             board.UnitDetailsRequested += OnBoardUnitDetailsRequested;
@@ -394,7 +409,11 @@ namespace KingdomSurvival.BattleSandbox
                 return;
 
             Vector2 rootPosition = root.WorldToLocal(panelPosition);
-            fighterDetailsView.Open(unit.Definition, unit, rootPosition);
+            fighterDetailsView.Open(
+                unit.Definition,
+                unit,
+                rootPosition,
+                unitContent.GetVisual(unit.TypeId).Portrait);
         }
 
         private bool TryBeginDirectAttack(
@@ -675,10 +694,15 @@ namespace KingdomSurvival.BattleSandbox
 
                 bool active = battle.CurrentUnit != null && battle.CurrentUnit.Id == unit.Id;
                 SandboxUnitState captured = unit;
+                SandboxUnitVisual visual = unitContent.GetVisual(captured.TypeId);
                 Button card = SandboxFighterCardFactory.CreateInitiativeCard(
                     captured,
+                    visual.Portrait,
                     active,
-                    () => fighterDetailsView.Open(captured.Definition, captured));
+                    () => fighterDetailsView.Open(
+                        captured.Definition,
+                        captured,
+                        portrait: visual.Portrait));
                 card.SetEnabled(!combatAnimationRunning);
                 initiativeRow.Add(card);
             }

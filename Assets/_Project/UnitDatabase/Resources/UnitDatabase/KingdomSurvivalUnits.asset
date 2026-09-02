@@ -1,0 +1,231 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f6a8d629e1644bd8b451c1cf11db201, type: 3}
+  m_Name: KingdomSurvivalUnits
+  m_EditorClassIdentifier:
+  tags:
+  - id: species.human
+    displayLabel: Человек
+    category: Происхождение
+    color: {r: 0.72, g: 0.61, b: 0.42, a: 1}
+    description: Разумный человек.
+  - id: species.beast
+    displayLabel: Зверь
+    category: Происхождение
+    color: {r: 0.62, g: 0.27, b: 0.20, a: 1}
+    description: Зверь; используется способностями и бонусом копейщика.
+  - id: combat.melee
+    displayLabel: Ближний бой
+    category: Тип атаки
+    color: {r: 0.62, g: 0.48, b: 0.24, a: 1}
+    description: Основная атака выполняется в ближнем бою.
+  - id: combat.ranged
+    displayLabel: Дальний бой
+    category: Тип атаки
+    color: {r: 0.28, g: 0.53, b: 0.66, a: 1}
+    description: Может атаковать на расстоянии.
+  - id: role.defender
+    displayLabel: Защитник
+    category: Роль
+    color: {r: 0.35, g: 0.49, b: 0.62, a: 1}
+    description: Специализируется на удержании линии.
+  - id: role.support
+    displayLabel: Поддержка
+    category: Роль
+    color: {r: 0.35, g: 0.63, b: 0.43, a: 1}
+    description: Помогает другим участникам боя.
+  - id: role.scout
+    displayLabel: Разведчик
+    category: Роль
+    color: {r: 0.42, g: 0.60, b: 0.38, a: 1}
+    description: Специализируется на разведке и мобильности.
+  - id: trait.armored
+    displayLabel: Бронированный
+    category: Особенность
+    color: {r: 0.49, g: 0.51, b: 0.53, a: 1}
+    description: Имеет тяжёлую защиту.
+  units:
+  - id: guard
+    displayLabel: Гвардеец
+    category: 0
+    combatRole: 0
+    maxHitPoints: 100
+    attack: 3
+    defense: 6
+    damage: 14
+    movement: 3
+    initiative: 5
+    attackRange: 1
+    portrait: {fileID: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    sandboxEncounterCount: 0
+    tagIds:
+    - species.human
+    - combat.melee
+    - role.defender
+    - trait.armored
+  - id: archer
+    displayLabel: Лучник
+    category: 0
+    combatRole: 1
+    maxHitPoints: 90
+    attack: 4
+    defense: 2
+    damage: 16
+    movement: 3
+    initiative: 6
+    attackRange: 4
+    portrait: {fileID: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    sandboxEncounterCount: 0
+    tagIds:
+    - species.human
+    - combat.ranged
+  - id: healer
+    displayLabel: Лекарь
+    category: 0
+    combatRole: 2
+    maxHitPoints: 85
+    attack: 1
+    defense: 2
+    damage: 15
+    movement: 3
+    initiative: 4
+    attackRange: 1
+    portrait: {fileID: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    sandboxEncounterCount: 0
+    tagIds:
+    - species.human
+    - combat.melee
+    - role.support
+  - id: spearman
+    displayLabel: Копейщик
+    category: 0
+    combatRole: 3
+    maxHitPoints: 100
+    attack: 3
+    defense: 4
+    damage: 18
+    movement: 3
+    initiative: 5
+    attackRange: 1
+    portrait: {fileID: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    sandboxEncounterCount: 0
+    tagIds:
+    - species.human
+    - combat.melee
+  - id: scout
+    displayLabel: Разведчик
+    category: 0
+    combatRole: 4
+    maxHitPoints: 90
+    attack: 2
+    defense: 3
+    damage: 13
+    movement: 4
+    initiative: 8
+    attackRange: 1
+    portrait: {fileID: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    sandboxEncounterCount: 0
+    tagIds:
+    - species.human
+    - combat.melee
+    - role.scout
+  - id: militia
+    displayLabel: Ополченец
+    category: 0
+    combatRole: 5
+    maxHitPoints: 100
+    attack: 2
+    defense: 3
+    damage: 15
+    movement: 3
+    initiative: 4
+    attackRange: 1
+    portrait: {fileID: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    sandboxEncounterCount: 0
+    tagIds:
+    - species.human
+    - combat.melee
+  - id: forest_beast
+    displayLabel: Зверь
+    category: 1
+    combatRole: 6
+    maxHitPoints: 60
+    attack: 5
+    defense: 2
+    damage: 14
+    movement: 4
+    initiative: 7
+    attackRange: 1
+    portrait: {fileID: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    sandboxEncounterCount: 2
+    tagIds:
+    - species.beast
+    - combat.melee
+  - id: forest_beast_strong
+    displayLabel: Зверь
+    category: 1
+    combatRole: 6
+    maxHitPoints: 90
+    attack: 6
+    defense: 4
+    damage: 16
+    movement: 4
+    initiative: 6
+    attackRange: 1
+    portrait: {fileID: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    sandboxEncounterCount: 1
+    tagIds:
+    - species.beast
+    - combat.melee
+  - id: forest_beast_alpha
+    displayLabel: Зверь
+    category: 1
+    combatRole: 6
+    maxHitPoints: 100
+    attack: 7
+    defense: 5
+    damage: 18
+    movement: 3
+    initiative: 3
+    attackRange: 1
+    portrait: {fileID: 0}
+    battlefieldSprite: {fileID: 0}
+    battlefieldScale: 1
+    battlefieldOffset: {x: 0, y: 0}
+    sandboxEncounterCount: 1
+    tagIds:
+    - species.beast
+    - combat.melee

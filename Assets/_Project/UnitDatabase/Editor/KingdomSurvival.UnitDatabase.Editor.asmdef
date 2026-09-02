@@ -1,11 +1,12 @@
 {
-  "name": "KingdomSurvival.BattleSandbox.UI",
-  "rootNamespace": "KingdomSurvival.BattleSandbox",
+  "name": "KingdomSurvival.UnitDatabase.Editor",
+  "rootNamespace": "KingdomSurvival.UnitDatabase.Editor",
   "references": [
-    "KingdomSurvival.BattleSandbox.Runtime",
     "KingdomSurvival.UnitDatabase"
   ],
-  "includePlatforms": [],
+  "includePlatforms": [
+    "Editor"
+  ],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,

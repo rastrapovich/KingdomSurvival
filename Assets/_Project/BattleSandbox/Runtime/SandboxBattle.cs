@@ -21,6 +21,11 @@ namespace KingdomSurvival.BattleSandbox
         Beast
     }
 
+    public static class SandboxUnitTags
+    {
+        public const string Beast = "species.beast";
+    }
+
     public enum SandboxTerrain
     {
         Normal,
@@ -38,6 +43,8 @@ namespace KingdomSurvival.BattleSandbox
 
     public sealed class SandboxUnitDefinition
     {
+        private readonly HashSet<string> tagIds;
+
         public string Id { get; }
         public string RoleLabel { get; }
         public SandboxUnitRole Role { get; }
@@ -48,6 +55,7 @@ namespace KingdomSurvival.BattleSandbox
         public int Movement { get; }
         public int Initiative { get; }
         public int AttackRange { get; }
+        public IReadOnlyCollection<string> TagIds => tagIds;
 
         public SandboxUnitDefinition(
             string id,
@@ -59,10 +67,14 @@ namespace KingdomSurvival.BattleSandbox
             int damage,
             int movement,
             int initiative,
-            int attackRange)
+            int attackRange,
+            IEnumerable<string> tags = null)
         {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentException("ID типа бойца не может быть пустым.", nameof(id));
+
             Id = id;
-            RoleLabel = roleLabel;
+            RoleLabel = string.IsNullOrWhiteSpace(roleLabel) ? id : roleLabel;
             Role = role;
             MaxHitPoints = Math.Max(1, maxHitPoints);
             Attack = Math.Max(0, attack);
@@ -71,12 +83,24 @@ namespace KingdomSurvival.BattleSandbox
             Movement = Math.Max(1, movement);
             Initiative = Math.Max(0, initiative);
             AttackRange = Math.Max(1, attackRange);
+            tagIds = tags != null
+                ? new HashSet<string>(
+                    tags.Where(tag => !string.IsNullOrWhiteSpace(tag)),
+                    StringComparer.Ordinal)
+                : new HashSet<string>(StringComparer.Ordinal);
+        }
+
+        public bool HasTag(string tagId)
+        {
+            return !string.IsNullOrWhiteSpace(tagId) && tagIds.Contains(tagId);
         }
     }
 
     public sealed class SandboxUnitState
     {
         public const int ActionsPerActivation = 1;
+
+        private readonly string instanceId;
 
         public SandboxUnitDefinition Definition { get; }
         public SandboxTeam Team { get; }
@@ -87,7 +111,8 @@ namespace KingdomSurvival.BattleSandbox
         public bool HasAttacked { get; internal set; }
         public bool IsGuarding { get; internal set; }
 
-        public string Id => Definition.Id;
+        public string Id => instanceId;
+        public string TypeId => Definition.Id;
         public string DisplayLabel => Definition.RoleLabel;
         public SandboxUnitRole Role => Definition.Role;
         public int MaxHitPoints => Definition.MaxHitPoints;
@@ -101,11 +126,29 @@ namespace KingdomSurvival.BattleSandbox
         public int DamageTaken => Math.Max(0, MaxHitPoints - HitPoints);
         public bool IsDamaged => DamageTaken > 0;
 
+        public bool HasTag(string tagId)
+        {
+            return Definition.HasTag(tagId);
+        }
+
         public SandboxUnitState(
             SandboxUnitDefinition definition,
             SandboxTeam team,
             HexCoord position)
+            : this(definition != null ? definition.Id : null, definition, team, position)
         {
+        }
+
+        public SandboxUnitState(
+            string instanceId,
+            SandboxUnitDefinition definition,
+            SandboxTeam team,
+            HexCoord position)
+        {
+            if (string.IsNullOrWhiteSpace(instanceId))
+                throw new ArgumentException("ID экземпляра бойца не может быть пустым.", nameof(instanceId));
+
+            this.instanceId = instanceId;
             Definition = definition ?? throw new ArgumentNullException(nameof(definition));
             Team = team;
             Position = position;
@@ -696,8 +739,11 @@ namespace KingdomSurvival.BattleSandbox
             int damage = Math.Max(
                 1,
                 (int)Math.Floor(attacker.Damage * damageMultiplier));
-            if (attacker.Role == SandboxUnitRole.Spearman && target.Role == SandboxUnitRole.Beast)
+            if (attacker.Role == SandboxUnitRole.Spearman &&
+                target.HasTag(SandboxUnitTags.Beast))
+            {
                 damage += 5;
+            }
 
             return new SandboxAttackPreview(
                 true,

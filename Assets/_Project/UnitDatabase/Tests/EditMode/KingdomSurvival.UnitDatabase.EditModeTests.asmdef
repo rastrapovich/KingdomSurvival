@@ -1,0 +1,21 @@
+{
+  "name": "KingdomSurvival.UnitDatabase.EditModeTests",
+  "rootNamespace": "KingdomSurvival.UnitDatabase.Tests",
+  "references": [
+    "KingdomSurvival.UnitDatabase"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

@@ -2,4 +2,7 @@
   <Project Path="KingdomSurvival.Core.csproj" />
   <Project Path="KingdomSurvival.Core.EditModeTests.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="KingdomSurvival.BattleSandbox.UI.csproj" />
+  <Project Path="KingdomSurvival.BattleSandbox.Runtime.csproj" />
+  <Project Path="KingdomSurvival.BattleSandbox.EditModeTests.csproj" />
 </Solution>

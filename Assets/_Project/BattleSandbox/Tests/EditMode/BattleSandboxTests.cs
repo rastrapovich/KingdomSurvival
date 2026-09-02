@@ -37,7 +37,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
-        public void MoveConsumesOneActionAndSecondMoveRemainsAvailable()
+        public void MovementCanBeSplitWithoutSpendingCombatAction()
         {
             SandboxBattle battle = CreateBattle(
                 playerPosition: new HexCoord(0, 1),
@@ -47,8 +47,37 @@ namespace KingdomSurvival.BattleSandbox.Tests
             string message;
             Assert.That(battle.TryMove("player", new HexCoord(1, 1), out message), Is.True);
             Assert.That(battle.CurrentUnit.ActionPoints, Is.EqualTo(1));
+            Assert.That(battle.CurrentUnit.RemainingMovement, Is.EqualTo(2));
             Assert.That(battle.TryMove("player", new HexCoord(2, 1), out message), Is.True);
-            Assert.That(battle.CurrentUnit.ActionPoints, Is.EqualTo(0));
+            Assert.That(battle.CurrentUnit.ActionPoints, Is.EqualTo(1));
+            Assert.That(battle.CurrentUnit.RemainingMovement, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void AttackPositionUsesRemainingMovementAndAttackRange()
+        {
+            SandboxBattle battle = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(3, 1),
+                playerMovement: 3);
+
+            HexCoord attackPosition;
+            int movementCost;
+            Assert.That(
+                battle.TryFindAttackPosition(
+                    "player",
+                    "enemy",
+                    out attackPosition,
+                    out movementCost),
+                Is.True);
+            Assert.That(attackPosition.DistanceTo(new HexCoord(3, 1)), Is.EqualTo(1));
+            Assert.That(movementCost, Is.EqualTo(2));
+            Assert.That(battle.PreviewReachableAttack("player", "enemy").IsValid, Is.True);
+            Assert.That(battle.PreviewReachableAttack("player", "enemy").Damage, Is.EqualTo(15));
+
+            string message;
+            Assert.That(battle.TryMove("player", attackPosition, out message), Is.True);
+            Assert.That(battle.PreviewAttack("player", "enemy").IsValid, Is.True);
         }
 
         [Test]
@@ -68,6 +97,8 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Assert.That(preview.Damage, Is.EqualTo(25));
             Assert.That(battle.TryAttack("player", "enemy", out message), Is.True);
             Assert.That(battle.GetUnit("enemy").HitPoints, Is.EqualTo(75));
+            Assert.That(battle.GetUnit("player").ActionPoints, Is.EqualTo(0));
+            Assert.That(battle.GetUnit("player").RemainingMovement, Is.EqualTo(0));
             Assert.That(battle.PreviewAttack("player", "enemy").IsValid, Is.False);
         }
 

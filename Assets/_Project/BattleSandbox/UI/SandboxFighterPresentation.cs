@@ -626,7 +626,7 @@ namespace KingdomSurvival.BattleSandbox
                 info,
                 "ХОД",
                 "—",
-                "Максимальная стоимость маршрута за одно действие перемещения. Обычный гекс стоит 1, сложный — 2.");
+                "Общий запас движения на активацию. Его можно расходовать частями: обычный гекс стоит 1, сложный — 2. Перемещение не тратит ОД.");
             initiativeValue = CreateStatRow(
                 info,
                 "ИНИЦИАТИВА",
@@ -639,9 +639,9 @@ namespace KingdomSurvival.BattleSandbox
                 "Максимальная гексовая дистанция обычной атаки до цели.");
             actionsValue = CreateStatRow(
                 info,
-                "ДЕЙСТВИЯ",
+                "ОЧКИ ДЕЙСТВИЯ",
                 "—",
-                "В начале активации выдаётся 2 действия. Перемещение, атака и защитная стойка расходуют по одному.");
+                "В начале активации выдаётся 1 ОД на атаку или защитную стойку. Использование ОД завершает оставшееся движение.");
 
             stateValue = CreateLabel("Состояние: —", 11, new Color(0.66f, 0.67f, 0.65f, 1f));
             stateValue.style.marginTop = 10f;
@@ -769,6 +769,9 @@ namespace KingdomSurvival.BattleSandbox
             int actions = openedState != null
                 ? openedState.ActionPoints
                 : SandboxUnitState.ActionsPerActivation;
+            int remainingMovement = openedState != null
+                ? openedState.RemainingMovement
+                : openedDefinition.Movement;
             int damageTaken = openedState != null ? openedState.DamageTaken : 0;
             bool damaged = damageTaken > 0;
 
@@ -782,7 +785,7 @@ namespace KingdomSurvival.BattleSandbox
             attackValue.text = openedDefinition.Attack.ToString();
             defenseValue.text = openedDefinition.Defense +
                 (openedState != null && openedState.IsGuarding ? " + 2" : string.Empty);
-            movementValue.text = openedDefinition.Movement.ToString();
+            movementValue.text = remainingMovement + " / " + openedDefinition.Movement;
             initiativeValue.text = openedDefinition.Initiative.ToString();
             rangeValue.text = openedDefinition.AttackRange.ToString();
             actionsValue.text = actions + " / " + SandboxUnitState.ActionsPerActivation;

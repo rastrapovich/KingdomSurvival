@@ -73,13 +73,14 @@ namespace KingdomSurvival.BattleSandbox
 
     public sealed class SandboxUnitState
     {
-        public const int ActionsPerActivation = 2;
+        public const int ActionsPerActivation = 1;
 
         public SandboxUnitDefinition Definition { get; }
         public SandboxTeam Team { get; }
         public HexCoord Position { get; internal set; }
         public int HitPoints { get; internal set; }
         public int ActionPoints { get; internal set; }
+        public int RemainingMovement { get; internal set; }
         public bool HasAttacked { get; internal set; }
         public bool IsGuarding { get; internal set; }
 
@@ -110,6 +111,7 @@ namespace KingdomSurvival.BattleSandbox
         internal void BeginActivation()
         {
             ActionPoints = ActionsPerActivation;
+            RemainingMovement = Movement;
             HasAttacked = false;
             IsGuarding = false;
         }
@@ -120,6 +122,7 @@ namespace KingdomSurvival.BattleSandbox
             if (IsDefeated)
             {
                 ActionPoints = 0;
+                RemainingMovement = 0;
                 IsGuarding = false;
             }
         }
@@ -238,7 +241,8 @@ namespace KingdomSurvival.BattleSandbox
         {
             SandboxUnitState unit = GetUnit(unitId);
             Dictionary<HexCoord, int> result = new Dictionary<HexCoord, int>();
-            if (unit == null || unit.IsDefeated || unit.ActionPoints <= 0)
+            if (unit == null || unit.IsDefeated ||
+                unit.ActionPoints <= 0 || unit.RemainingMovement <= 0)
                 return result;
 
             Dictionary<HexCoord, int> costs = new Dictionary<HexCoord, int>
@@ -268,7 +272,7 @@ namespace KingdomSurvival.BattleSandbox
 
                     int stepCost = GetTerrain(next) == SandboxTerrain.Difficult ? 2 : 1;
                     int newCost = costs[current] + stepCost;
-                    if (newCost > unit.Movement)
+                    if (newCost > unit.RemainingMovement)
                         continue;
 
                     int oldCost;
@@ -300,6 +304,11 @@ namespace KingdomSurvival.BattleSandbox
                 message = "У бойца не осталось действий.";
                 return false;
             }
+            if (unit.RemainingMovement <= 0)
+            {
+                message = "У бойца не осталось очков движения.";
+                return false;
+            }
             if (GetUnitAt(destination) != null)
             {
                 message = "Гекс уже занят.";
@@ -314,10 +323,78 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             HexCoord origin = unit.Position;
+            int movementCost = reachable[destination];
             unit.Position = destination;
-            unit.ActionPoints--;
-            message = unit.DisplayLabel + " перемещается " + origin + " → " + destination + ".";
+            unit.RemainingMovement = Math.Max(0, unit.RemainingMovement - movementCost);
+            message = unit.DisplayLabel + " перемещается " + origin + " → " + destination +
+                      ". Осталось движения: " + unit.RemainingMovement + ".";
             return true;
+        }
+
+        public bool TryFindAttackPosition(
+            string attackerId,
+            string targetId,
+            out HexCoord position,
+            out int movementCost)
+        {
+            position = default;
+            movementCost = 0;
+
+            SandboxUnitState attacker = GetUnit(attackerId);
+            SandboxUnitState target = GetUnit(targetId);
+            if (Phase != SandboxBattlePhase.InProgress ||
+                attacker == null || target == null ||
+                attacker.IsDefeated || target.IsDefeated ||
+                CurrentUnit == null || CurrentUnit.Id != attackerId ||
+                attacker.Team == target.Team ||
+                attacker.ActionPoints <= 0 || attacker.HasAttacked)
+            {
+                return false;
+            }
+
+            position = attacker.Position;
+            if (attacker.Position.DistanceTo(target.Position) <= attacker.AttackRange)
+                return true;
+
+            bool found = false;
+            int bestCost = int.MaxValue;
+            HexCoord best = attacker.Position;
+            foreach (KeyValuePair<HexCoord, int> pair in GetReachable(attackerId))
+            {
+                if (pair.Key.DistanceTo(target.Position) > attacker.AttackRange)
+                    continue;
+
+                if (!found || pair.Value < bestCost ||
+                    (pair.Value == bestCost && pair.Key.CompareTo(best) < 0))
+                {
+                    found = true;
+                    best = pair.Key;
+                    bestCost = pair.Value;
+                }
+            }
+
+            if (!found)
+                return false;
+
+            position = best;
+            movementCost = bestCost;
+            return true;
+        }
+
+        public SandboxAttackPreview PreviewReachableAttack(string attackerId, string targetId)
+        {
+            HexCoord attackPosition;
+            int movementCost;
+            if (!TryFindAttackPosition(
+                    attackerId,
+                    targetId,
+                    out attackPosition,
+                    out movementCost))
+            {
+                return SandboxAttackPreview.Invalid("Цель находится вне доступной зоны атаки.");
+            }
+
+            return BuildAttackPreview(GetUnit(attackerId), GetUnit(targetId));
         }
 
         public SandboxAttackPreview PreviewAttack(string attackerId, string targetId)
@@ -340,16 +417,7 @@ namespace KingdomSurvival.BattleSandbox
             if (attacker.Position.DistanceTo(target.Position) > attacker.AttackRange)
                 return SandboxAttackPreview.Invalid("Цель вне дальности.");
 
-            int effectiveDefense = target.Defense + (target.IsGuarding ? 2 : 0);
-            int damage = Math.Max(5, 15 + (attacker.Attack - effectiveDefense) * 5);
-            if (attacker.Role == SandboxUnitRole.Spearman && target.Role == SandboxUnitRole.Beast)
-                damage += 5;
-
-            return new SandboxAttackPreview(
-                true,
-                string.Empty,
-                damage,
-                Math.Max(0, target.HitPoints - damage));
+            return BuildAttackPreview(attacker, target);
         }
 
         public bool TryAttack(string attackerId, string targetId, out string message)
@@ -365,6 +433,7 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState target = GetUnit(targetId);
             target.ReceiveDamage(preview.Damage);
             attacker.ActionPoints--;
+            attacker.RemainingMovement = 0;
             attacker.HasAttacked = true;
 
             message = attacker.DisplayLabel + " наносит " + target.DisplayLabel + " " +
@@ -384,6 +453,7 @@ namespace KingdomSurvival.BattleSandbox
                 return false;
 
             unit.ActionPoints--;
+            unit.RemainingMovement = 0;
             unit.IsGuarding = true;
             message = unit.DisplayLabel + " занимает защитную стойку: защита +2 до следующей активации.";
             return true;
@@ -395,6 +465,7 @@ namespace KingdomSurvival.BattleSandbox
                 return;
 
             CurrentUnit.ActionPoints = 0;
+            CurrentUnit.RemainingMovement = 0;
             AdvanceTurnIndex();
         }
 
@@ -516,6 +587,22 @@ namespace KingdomSurvival.BattleSandbox
                 Phase = SandboxBattlePhase.PlayerVictory;
             else if (!playersAlive)
                 Phase = SandboxBattlePhase.EnemyVictory;
+        }
+
+        private static SandboxAttackPreview BuildAttackPreview(
+            SandboxUnitState attacker,
+            SandboxUnitState target)
+        {
+            int effectiveDefense = target.Defense + (target.IsGuarding ? 2 : 0);
+            int damage = Math.Max(5, 15 + (attacker.Attack - effectiveDefense) * 5);
+            if (attacker.Role == SandboxUnitRole.Spearman && target.Role == SandboxUnitRole.Beast)
+                damage += 5;
+
+            return new SandboxAttackPreview(
+                true,
+                string.Empty,
+                damage,
+                Math.Max(0, target.HitPoints - damage));
         }
     }
 

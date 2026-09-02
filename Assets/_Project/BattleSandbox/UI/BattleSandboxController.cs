@@ -34,7 +34,6 @@ namespace KingdomSurvival.BattleSandbox
         private Label instructionLabel;
         private Label logLabel;
         private Button returnToSetupButton;
-        private Button attackButton;
         private Button guardButton;
         private Button endActivationButton;
         private VisualElement resultBanner;
@@ -265,7 +264,7 @@ namespace KingdomSurvival.BattleSandbox
             sidebar.Add(currentStatsLabel);
 
             instructionLabel = CreateLabel(
-                "Синие гексы — перемещение, красные — цели. ПКМ по любой фигурке открывает её динамическую карточку прямо над полем.",
+                "Синие гексы расходуют запас движения. Нажмите значок меча или выстрела на враге, чтобы сразу приблизиться и атаковать.",
                 11,
                 new Color(0.58f, 0.65f, 0.67f, 1f));
             instructionLabel.style.marginTop = 13f;
@@ -276,11 +275,6 @@ namespace KingdomSurvival.BattleSandbox
             targetLabel.style.marginTop = 14f;
             targetLabel.style.whiteSpace = WhiteSpace.Normal;
             sidebar.Add(targetLabel);
-
-            attackButton = new Button(PerformAttack) { text = "АТАКОВАТЬ" };
-            StylePrimaryButton(attackButton);
-            attackButton.style.marginTop = 9f;
-            sidebar.Add(attackButton);
 
             guardButton = new Button(PerformGuard) { text = "ЗАЩИТНАЯ СТОЙКА" };
             StyleSecondaryButton(guardButton);
@@ -343,7 +337,11 @@ namespace KingdomSurvival.BattleSandbox
             if (occupant != null)
             {
                 if (occupant.Team == SandboxTeam.Enemy)
+                {
+                    if (TryBeginDirectAttack(current, occupant))
+                        return;
                     selectedTargetId = occupant.Id;
+                }
                 else
                 {
                     selectedTargetId = null;
@@ -376,24 +374,40 @@ namespace KingdomSurvival.BattleSandbox
             fighterDetailsView.Open(unit.Definition, unit, rootPosition);
         }
 
-        private void PerformAttack()
+        private bool TryBeginDirectAttack(
+            SandboxUnitState attacker,
+            SandboxUnitState target)
         {
-            if (combatAnimationRunning)
-                return;
+            if (battle == null || attacker == null || target == null)
+                return false;
 
-            SandboxUnitState current = battle != null ? battle.CurrentUnit : null;
-            if (current == null || string.IsNullOrEmpty(selectedTargetId))
-                return;
+            HexCoord attackPosition;
+            int movementCost;
+            if (!battle.TryFindAttackPosition(
+                    attacker.Id,
+                    target.Id,
+                    out attackPosition,
+                    out movementCost))
+            {
+                return false;
+            }
 
-            SandboxAttackPreview preview = battle.PreviewAttack(current.Id, selectedTargetId);
+            if (movementCost > 0 && attackPosition != attacker.Position)
+            {
+                string moveMessage;
+                if (!battle.TryMove(attacker.Id, attackPosition, out moveMessage))
+                    return false;
+                AddBattleLog(moveMessage);
+            }
+
+            SandboxAttackPreview preview = battle.PreviewAttack(attacker.Id, target.Id);
             if (!preview.IsValid)
-                return;
+                return false;
 
-            string attackerId = current.Id;
-            string targetId = selectedTargetId;
+            selectedTargetId = target.Id;
             BeginAttackAnimation(
-                attackerId,
-                targetId,
+                attacker.Id,
+                target.Id,
                 preview.Damage,
                 applied =>
                 {
@@ -401,6 +415,7 @@ namespace KingdomSurvival.BattleSandbox
                     if (applied)
                         FinishActivationIfEmpty();
                 });
+            return true;
         }
 
         private void PerformGuard()
@@ -451,7 +466,7 @@ namespace KingdomSurvival.BattleSandbox
 
             board.SetBattle(battle, selectedTargetId);
             fighterDetailsView.Refresh(battle);
-            roundLabel.text = "Раунд " + battle.Round + " · два действия на активацию";
+            roundLabel.text = "Раунд " + battle.Round + " · движение + одно боевое действие";
             RefreshInitiativeRow();
 
             SandboxUnitState current = battle.CurrentUnit;
@@ -467,9 +482,10 @@ namespace KingdomSurvival.BattleSandbox
                 currentStatsLabel.text =
                     current.Definition.RoleLabel + "\n" +
                     "HP " + current.HitPoints + "/" + current.MaxHitPoints +
-                    "  ·  действия " + current.ActionPoints + "/2\n" +
+                    "  ·  ОД " + current.ActionPoints + "/" + SandboxUnitState.ActionsPerActivation + "\n" +
                     "АТК " + current.Attack + "  ·  ЗАЩ " + current.Defense +
-                    "  ·  ХОД " + current.Movement + "  ·  ИНИЦ " + current.Initiative;
+                    "  ·  ДВИЖ " + current.RemainingMovement + "/" + current.Movement +
+                    "  ·  ИНИЦ " + current.Initiative;
             }
             else
             {
@@ -487,20 +503,31 @@ namespace KingdomSurvival.BattleSandbox
             if (target == null || target.IsDefeated)
             {
                 targetLabel.text = "Цель не выбрана";
-                attackButton.text = "АТАКОВАТЬ";
-                attackButton.SetEnabled(false);
             }
             else
             {
+                HexCoord attackPosition;
+                int movementCost = 0;
+                bool reachableForAttack = current != null && battle.TryFindAttackPosition(
+                    current.Id,
+                    target.Id,
+                    out attackPosition,
+                    out movementCost);
+                SandboxAttackPreview reachablePreview = reachableForAttack && current != null
+                    ? battle.PreviewReachableAttack(current.Id, target.Id)
+                    : null;
+                SandboxAttackPreview displayedPreview = preview != null && preview.IsValid
+                    ? preview
+                    : reachablePreview;
                 targetLabel.text =
                     "Цель: " + target.DisplayLabel + " · HP " + target.HitPoints + "/" + target.MaxHitPoints +
-                    (preview != null && preview.IsValid
-                        ? "\nПрогноз: " + preview.Damage + " урона · останется " + preview.TargetHitPointsAfter + " HP"
-                        : "\n" + (preview != null ? preview.Reason : "Недоступно"));
-                attackButton.text = preview != null && preview.IsValid
-                    ? "АТАКОВАТЬ · " + preview.Damage + " УРОНА"
-                    : "АТАКА НЕДОСТУПНА";
-                attackButton.SetEnabled(playerInteractionAvailable && preview != null && preview.IsValid);
+                    (displayedPreview != null && displayedPreview.IsValid
+                        ? "\nПрогноз: " + displayedPreview.Damage + " урона · останется " +
+                          displayedPreview.TargetHitPointsAfter + " HP" +
+                          (movementCost > 0 ? " · сближение " + movementCost : string.Empty)
+                        : reachableForAttack
+                            ? "\nМожно приблизиться и атаковать нажатием на значок."
+                            : "\nЦель находится вне доступной зоны атаки.");
             }
 
             guardButton.SetEnabled(
@@ -512,7 +539,7 @@ namespace KingdomSurvival.BattleSandbox
             instructionLabel.text = combatAnimationRunning
                 ? "Выполняется атака… управление возобновится после завершения анимации."
                 : playerTurn
-                ? "Синие гексы — перемещение, красные — цели. ПКМ по любой фигурке открывает карточку; повреждения и HP обновляются сразу."
+                ? "Синие гексы — оставшееся движение. Красный значок — удар сейчас, оранжевый — сначала приблизиться. ПКМ открывает карточку."
                 : battle.Phase == SandboxBattlePhase.InProgress
                     ? "Противник выполняет свою активацию…"
                     : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";

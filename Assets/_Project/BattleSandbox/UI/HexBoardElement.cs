@@ -16,6 +16,14 @@ namespace KingdomSurvival.BattleSandbox
         private static readonly Color ImpassableColor = new Color(0.07f, 0.08f, 0.09f, 1f);
         private static readonly Color ReachableColor = new Color(0.16f, 0.33f, 0.40f, 1f);
         private static readonly Color AttackableColor = new Color(0.42f, 0.16f, 0.15f, 1f);
+        private static readonly Color ApproachAttackableColor = new Color(0.43f, 0.27f, 0.11f, 1f);
+
+        private enum AttackAffordance
+        {
+            None,
+            Immediate,
+            AfterMove
+        }
 
         private SandboxBattle battle;
         private string selectedTargetId;
@@ -55,6 +63,8 @@ namespace KingdomSurvival.BattleSandbox
 
             generateVisualContent += DrawBoard;
             RegisterCallback<PointerDownEvent>(OnPointerDown);
+            RegisterCallback<PointerMoveEvent>(OnPointerMove);
+            RegisterCallback<PointerLeaveEvent>(_ => tooltip = string.Empty);
             RegisterCallback<GeometryChangedEvent>(_ => MarkDirtyRepaint());
 
             damageLabel = new Label();
@@ -118,29 +128,9 @@ namespace KingdomSurvival.BattleSandbox
             if (battle == null || IsAnimating || (evt.button != 0 && evt.button != 1))
                 return;
 
-            HexLayout layout = CalculateLayout();
             Vector2 pointerPosition = new Vector2(evt.localPosition.x, evt.localPosition.y);
-            float bestDistance = float.MaxValue;
-            HexCoord best = default;
-            bool found = false;
-
-            for (int r = 0; r < battle.Height; r++)
-            {
-                for (int q = 0; q < battle.Width; q++)
-                {
-                    HexCoord coord = new HexCoord(q, r);
-                    Vector2 center = layout.GetCenter(coord);
-                    float distance = (center - pointerPosition).sqrMagnitude;
-                    if (distance < bestDistance)
-                    {
-                        bestDistance = distance;
-                        best = coord;
-                        found = true;
-                    }
-                }
-            }
-
-            if (found && bestDistance <= layout.Size * layout.Size)
+            HexCoord best;
+            if (TryGetHexAt(pointerPosition, out best))
             {
                 if (evt.button == 1)
                 {
@@ -157,6 +147,61 @@ namespace KingdomSurvival.BattleSandbox
                 HexClicked?.Invoke(best);
                 evt.StopPropagation();
             }
+        }
+
+        private void OnPointerMove(PointerMoveEvent evt)
+        {
+            tooltip = string.Empty;
+            if (battle == null || IsAnimating)
+                return;
+
+            HexCoord coord;
+            Vector2 pointerPosition = new Vector2(evt.localPosition.x, evt.localPosition.y);
+            if (!TryGetHexAt(pointerPosition, out coord))
+                return;
+
+            SandboxUnitState attacker = battle.CurrentUnit;
+            SandboxUnitState target = battle.GetUnitAt(coord);
+            AttackAffordance affordance = GetAttackAffordance(attacker, target);
+            if (affordance == AttackAffordance.None)
+                return;
+
+            SandboxAttackPreview preview = battle.PreviewReachableAttack(attacker.Id, target.Id);
+            if (!preview.IsValid)
+                return;
+
+            string action = attacker.AttackRange > 1 ? "Выстрел" : "Удар мечом";
+            string approach = affordance == AttackAffordance.AfterMove
+                ? " · сначала приблизиться"
+                : string.Empty;
+            tooltip = action + approach + " · " + preview.Damage + " урона · ЛКМ для атаки";
+        }
+
+        private bool TryGetHexAt(Vector2 pointerPosition, out HexCoord best)
+        {
+            best = default;
+            if (battle == null)
+                return false;
+
+            HexLayout layout = CalculateLayout();
+            float bestDistance = float.MaxValue;
+            bool found = false;
+            for (int r = 0; r < battle.Height; r++)
+            {
+                for (int q = 0; q < battle.Width; q++)
+                {
+                    HexCoord coord = new HexCoord(q, r);
+                    float distance = (layout.GetCenter(coord) - pointerPosition).sqrMagnitude;
+                    if (distance < bestDistance)
+                    {
+                        bestDistance = distance;
+                        best = coord;
+                        found = true;
+                    }
+                }
+            }
+
+            return found && bestDistance <= layout.Size * layout.Size;
         }
 
         private void DrawBoard(MeshGenerationContext context)
@@ -184,15 +229,22 @@ namespace KingdomSurvival.BattleSandbox
                     if (reachable.ContainsKey(coord))
                         fill = ReachableColor;
 
-                    if (!IsAnimating && current != null && current.Team == SandboxTeam.Player &&
-                        occupant != null && occupant.Team == SandboxTeam.Enemy &&
-                        battle.PreviewAttack(current.Id, occupant.Id).IsValid)
+                    AttackAffordance attackAffordance = GetAttackAffordance(current, occupant);
+                    if (attackAffordance == AttackAffordance.Immediate)
                     {
                         fill = AttackableColor;
                     }
+                    else if (attackAffordance == AttackAffordance.AfterMove)
+                    {
+                        fill = ApproachAttackableColor;
+                    }
 
                     if (occupant != null && occupant.Id == selectedTargetId)
-                        fill = new Color(0.58f, 0.20f, 0.17f, 1f);
+                    {
+                        fill = attackAffordance == AttackAffordance.None && !IsAnimating
+                            ? new Color(0.30f, 0.23f, 0.22f, 1f)
+                            : new Color(0.58f, 0.20f, 0.17f, 1f);
+                    }
 
                     DrawHex(
                         painter,
@@ -209,7 +261,12 @@ namespace KingdomSurvival.BattleSandbox
                 bool animatedDefeatedTarget = IsAnimating && unit.Id == animationTargetId;
                 if (unit.IsDefeated && !animatedDefeatedTarget)
                     continue;
-                DrawUnit(painter, layout, unit, current);
+                DrawUnit(
+                    painter,
+                    layout,
+                    unit,
+                    current,
+                    GetAttackAffordance(current, unit));
             }
         }
 
@@ -217,7 +274,8 @@ namespace KingdomSurvival.BattleSandbox
             Painter2D painter,
             HexLayout layout,
             SandboxUnitState unit,
-            SandboxUnitState current)
+            SandboxUnitState current,
+            AttackAffordance attackAffordance)
         {
             Vector2 center = layout.GetCenter(unit.Position);
             if (IsAnimating && unit.Id == animationAttackerId)
@@ -268,6 +326,82 @@ namespace KingdomSurvival.BattleSandbox
                     : new Color(0.84f, 0.31f, 0.26f, 1f));
 
             DrawRoleMark(painter, center, layout.Size, unit.Role);
+
+            if (attackAffordance != AttackAffordance.None)
+            {
+                DrawAttackBadge(
+                    painter,
+                    center + new Vector2(radius * 0.72f, -radius * 0.72f),
+                    Mathf.Max(10f, radius * 0.38f),
+                    current != null && current.AttackRange > 1,
+                    attackAffordance == AttackAffordance.Immediate);
+            }
+        }
+
+        private AttackAffordance GetAttackAffordance(
+            SandboxUnitState attacker,
+            SandboxUnitState candidate)
+        {
+            if (IsAnimating || attacker == null || candidate == null ||
+                attacker.Team != SandboxTeam.Player || candidate.Team == attacker.Team ||
+                candidate.IsDefeated)
+            {
+                return AttackAffordance.None;
+            }
+
+            if (battle.PreviewAttack(attacker.Id, candidate.Id).IsValid)
+                return AttackAffordance.Immediate;
+
+            HexCoord attackPosition;
+            int movementCost;
+            return battle.TryFindAttackPosition(
+                attacker.Id,
+                candidate.Id,
+                out attackPosition,
+                out movementCost) && movementCost > 0
+                ? AttackAffordance.AfterMove
+                : AttackAffordance.None;
+        }
+
+        private static void DrawAttackBadge(
+            Painter2D painter,
+            Vector2 center,
+            float radius,
+            bool ranged,
+            bool immediate)
+        {
+            DrawCircle(
+                painter,
+                center,
+                radius,
+                immediate
+                    ? new Color(0.78f, 0.18f, 0.14f, 1f)
+                    : new Color(0.82f, 0.48f, 0.12f, 1f),
+                new Color(0.98f, 0.86f, 0.61f, 1f),
+                2f);
+
+            painter.strokeColor = new Color(0.98f, 0.93f, 0.82f, 1f);
+            painter.lineWidth = 2.4f;
+            painter.BeginPath();
+            float half = radius * 0.58f;
+
+            if (ranged)
+            {
+                painter.MoveTo(center + new Vector2(-half, 0f));
+                painter.LineTo(center + new Vector2(half, 0f));
+                painter.MoveTo(center + new Vector2(half * 0.25f, -half * 0.55f));
+                painter.LineTo(center + new Vector2(half, 0f));
+                painter.LineTo(center + new Vector2(half * 0.25f, half * 0.55f));
+            }
+            else
+            {
+                painter.MoveTo(center + new Vector2(-half * 0.55f, half * 0.55f));
+                painter.LineTo(center + new Vector2(half * 0.62f, -half * 0.62f));
+                painter.MoveTo(center + new Vector2(-half * 0.62f, -half * 0.05f));
+                painter.LineTo(center + new Vector2(half * 0.05f, half * 0.62f));
+            }
+
+            painter.Stroke();
         }
 
         private void UpdateAttackAnimation()

@@ -4,17 +4,17 @@ namespace KingdomSurvival.BattleSandbox
 {
     /// <summary>
     /// Standard compact sandbox arena described from top to bottom as
-    /// 7 / 8 / 9 / 8 / 9 / 8 / 7 active pointy-top hexes.
+    /// 6 / 7 / 8 / 7 / 8 / 7 / 6 active pointy-top hexes.
     /// Rows share one visual center: odd rows are shifted by half a hex.
     /// </summary>
     public static class SandboxArenaShape
     {
-        public const int Width = 9;
+        public const int Width = 8;
         public const int Height = 7;
-        public const int CellCount = 56;
+        public const int CellCount = 49;
 
         private static readonly int[] RowStarts = { 1, 0, 0, 0, 0, 0, 1 };
-        private static readonly int[] RowLengths = { 7, 8, 9, 8, 9, 8, 7 };
+        private static readonly int[] RowLengths = { 6, 7, 8, 7, 8, 7, 6 };
 
         public static int GetRowStart(int row)
         {

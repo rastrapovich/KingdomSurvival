@@ -39,7 +39,6 @@ namespace KingdomSurvival.BattleSandbox
     public sealed class SandboxUnitDefinition
     {
         public string Id { get; }
-        public string Name { get; }
         public string RoleLabel { get; }
         public SandboxUnitRole Role { get; }
         public int MaxHitPoints { get; }
@@ -51,7 +50,6 @@ namespace KingdomSurvival.BattleSandbox
 
         public SandboxUnitDefinition(
             string id,
-            string name,
             string roleLabel,
             SandboxUnitRole role,
             int maxHitPoints,
@@ -62,7 +60,6 @@ namespace KingdomSurvival.BattleSandbox
             int attackRange)
         {
             Id = id;
-            Name = name;
             RoleLabel = roleLabel;
             Role = role;
             MaxHitPoints = Math.Max(1, maxHitPoints);
@@ -87,7 +84,7 @@ namespace KingdomSurvival.BattleSandbox
         public bool IsGuarding { get; internal set; }
 
         public string Id => Definition.Id;
-        public string Name => Definition.Name;
+        public string DisplayLabel => Definition.RoleLabel;
         public SandboxUnitRole Role => Definition.Role;
         public int MaxHitPoints => Definition.MaxHitPoints;
         public int Attack => Definition.Attack;
@@ -319,7 +316,7 @@ namespace KingdomSurvival.BattleSandbox
             HexCoord origin = unit.Position;
             unit.Position = destination;
             unit.ActionPoints--;
-            message = unit.Name + " перемещается " + origin + " → " + destination + ".";
+            message = unit.DisplayLabel + " перемещается " + origin + " → " + destination + ".";
             return true;
         }
 
@@ -370,7 +367,7 @@ namespace KingdomSurvival.BattleSandbox
             attacker.ActionPoints--;
             attacker.HasAttacked = true;
 
-            message = attacker.Name + " наносит " + target.Name + " " +
+            message = attacker.DisplayLabel + " наносит " + target.DisplayLabel + " " +
                       preview.Damage + " урона" +
                       (target.IsDefeated ? " и выводит цель из строя." : ".");
             EvaluateBattleOutcome();
@@ -388,7 +385,7 @@ namespace KingdomSurvival.BattleSandbox
 
             unit.ActionPoints--;
             unit.IsGuarding = true;
-            message = unit.Name + " занимает защитную стойку: защита +2 до следующей активации.";
+            message = unit.DisplayLabel + " занимает защитную стойку: защита +2 до следующей активации.";
             return true;
         }
 

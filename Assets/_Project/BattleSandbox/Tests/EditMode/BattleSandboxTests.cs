@@ -91,6 +91,20 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
+        public void BattlePresentationUsesUnitTypeLabels()
+        {
+            SandboxBattle battle = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(4, 1));
+
+            Assert.That(battle.CurrentUnit.DisplayLabel, Is.EqualTo("Тест"));
+
+            string message;
+            Assert.That(battle.TryMove("player", new HexCoord(1, 1), out message), Is.True);
+            Assert.That(message, Does.StartWith("Тест перемещается"));
+        }
+
+        [Test]
         public void GuardAddsTwoDefenseUntilNextActivation()
         {
             SandboxBattle battle = CreateBattle(
@@ -130,7 +144,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void DefaultBattleUsesSelectedFightersAndBlackForestEnemies()
         {
             SandboxBattle battle = SandboxRoster.CreateDefaultBattle(
-                new[] { "garrick", "edric", "agnessa" });
+                new[] { "guard", "archer", "scout" });
 
             Assert.That(battle.Width, Is.EqualTo(9));
             Assert.That(battle.Height, Is.EqualTo(7));
@@ -154,7 +168,6 @@ namespace KingdomSurvival.BattleSandbox.Tests
         {
             SandboxUnitDefinition player = new SandboxUnitDefinition(
                 "player",
-                "Боец",
                 "Тест",
                 SandboxUnitRole.Militia,
                 100,
@@ -165,7 +178,6 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 1);
             SandboxUnitDefinition enemy = new SandboxUnitDefinition(
                 "enemy",
-                "Враг",
                 "Тест",
                 SandboxUnitRole.Beast,
                 enemyHitPoints,

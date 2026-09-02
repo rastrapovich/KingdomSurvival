@@ -11,10 +11,10 @@ namespace KingdomSurvival.BattleSandbox
     {
         private readonly HashSet<string> selectedFighterIds = new HashSet<string>
         {
-            "garrick",
-            "edric",
-            "torvin",
-            "agnessa"
+            "guard",
+            "archer",
+            "spearman",
+            "scout"
         };
         private readonly Dictionary<string, Button> rosterButtons = new Dictionary<string, Button>();
         private readonly List<string> battleLog = new List<string>();
@@ -409,7 +409,7 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             }
 
-            AddBattleLog(battle.CurrentUnit.Name + " завершает активацию.");
+            AddBattleLog(battle.CurrentUnit.DisplayLabel + " завершает активацию.");
             battle.EndActivation();
             selectedTargetId = null;
             RefreshBattleScreen();
@@ -442,7 +442,7 @@ namespace KingdomSurvival.BattleSandbox
             {
                 currentUnitLabel.text =
                     (current.Team == SandboxTeam.Player ? "ВАШ ХОД · " : "ХОД ВРАГА · ") +
-                    current.Name.ToUpper();
+                    current.DisplayLabel.ToUpper();
                 currentStatsLabel.text =
                     current.Definition.RoleLabel + "\n" +
                     "HP " + current.HitPoints + "/" + current.MaxHitPoints +
@@ -472,7 +472,7 @@ namespace KingdomSurvival.BattleSandbox
             else
             {
                 targetLabel.text =
-                    "Цель: " + target.Name + " · HP " + target.HitPoints + "/" + target.MaxHitPoints +
+                    "Цель: " + target.DisplayLabel + " · HP " + target.HitPoints + "/" + target.MaxHitPoints +
                     (preview != null && preview.IsValid
                         ? "\nПрогноз: " + preview.Damage + " урона · останется " + preview.TargetHitPointsAfter + " HP"
                         : "\n" + (preview != null ? preview.Reason : "Недоступно"));

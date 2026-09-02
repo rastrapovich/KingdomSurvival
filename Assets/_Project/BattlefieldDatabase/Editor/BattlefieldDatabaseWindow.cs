@@ -259,7 +259,7 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
             tagBook.Add(new PropertyField(tagsProperty, "Теги базы"));
             details.Add(tagBook);
 
-            AddHeader("ПРЕДПРОСМОТР 9 × 7");
+            AddHeader("ПРЕДПРОСМОТР 9 × 9");
             previewViewport = new VisualElement();
             previewViewport.style.height = 360f;
             previewViewport.style.position = Position.Relative;
@@ -449,12 +449,12 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
             private void Draw(MeshGenerationContext context)
             {
                 const int width = 9;
-                const int height = 7;
+                const int height = 9;
                 if (contentRect.width <= 1f || contentRect.height <= 1f)
                     return;
                 float aw = contentRect.width - 28f;
                 float ah = contentRect.height - 28f;
-                float wu = Mathf.Sqrt(3f) * (width + (height - 1) * 0.5f);
+                float wu = Mathf.Sqrt(3f) * (width + 0.5f);
                 float hu = 1.5f * (height - 1) + 2f;
                 float size = Mathf.Min(aw / wu, ah / hu);
                 float bw = wu * size;
@@ -464,8 +464,16 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
                 painter.strokeColor = new Color(0.90f, 0.92f, 0.88f, 0.78f);
                 painter.lineWidth = 1.3f;
                 for (int r = 0; r < height; r++)
+                {
+                    float rowOffset = (r & 1) == 0 ? 0f : 0.5f;
                     for (int q = 0; q < width; q++)
-                        DrawHex(painter, origin + new Vector2(size * Mathf.Sqrt(3f) * (q + r * 0.5f), size * 1.5f * r), size - 1.5f);
+                    {
+                        Vector2 center = origin + new Vector2(
+                            size * Mathf.Sqrt(3f) * (q + rowOffset),
+                            size * 1.5f * r);
+                        DrawHex(painter, center, size - 1.5f);
+                    }
+                }
             }
 
             private static void DrawHex(Painter2D painter, Vector2 center, float radius)

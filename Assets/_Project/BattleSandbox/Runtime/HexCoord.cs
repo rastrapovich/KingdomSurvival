@@ -4,23 +4,55 @@ using System.Collections.Generic;
 namespace KingdomSurvival.BattleSandbox
 {
     /// <summary>
-    /// Axial coordinate for a pointy-top hex grid.
+    /// Odd-row offset coordinate for a pointy-top hex grid.
+    /// Horizontal rows alternate by half a hex, matching the compact
+    /// rectangular battlefields used by King's Bounty-style arenas.
     /// </summary>
     public readonly struct HexCoord : IEquatable<HexCoord>, IComparable<HexCoord>
     {
-        private static readonly HexCoord[] Directions =
+        private static readonly HexCoord[] EvenRowDirections =
         {
             new HexCoord(1, 0),
-            new HexCoord(1, -1),
             new HexCoord(0, -1),
+            new HexCoord(-1, -1),
             new HexCoord(-1, 0),
             new HexCoord(-1, 1),
             new HexCoord(0, 1)
         };
 
+        private static readonly HexCoord[] OddRowDirections =
+        {
+            new HexCoord(1, 0),
+            new HexCoord(1, -1),
+            new HexCoord(0, -1),
+            new HexCoord(-1, 0),
+            new HexCoord(0, 1),
+            new HexCoord(1, 1)
+        };
+
+        /// <summary>
+        /// Zero-based column in the rectangular odd-row grid.
+        /// Kept as Q for compatibility with the existing sandbox API.
+        /// </summary>
         public int Q { get; }
+
+        /// <summary>
+        /// Zero-based row in the rectangular odd-row grid.
+        /// </summary>
         public int R { get; }
-        public int S => -Q - R;
+
+        /// <summary>
+        /// Third cube coordinate used for distance calculations.
+        /// </summary>
+        public int S
+        {
+            get
+            {
+                int cubeX = ToCubeX(Q, R);
+                int cubeZ = R;
+                return -cubeX - cubeZ;
+            }
+        }
 
         public HexCoord(int q, int r)
         {
@@ -30,16 +62,32 @@ namespace KingdomSurvival.BattleSandbox
 
         public IEnumerable<HexCoord> Neighbors()
         {
-            foreach (HexCoord direction in Directions)
+            HexCoord[] directions = (R & 1) == 0
+                ? EvenRowDirections
+                : OddRowDirections;
+            foreach (HexCoord direction in directions)
                 yield return this + direction;
         }
 
         public int DistanceTo(HexCoord other)
         {
-            int q = Math.Abs(Q - other.Q);
-            int r = Math.Abs(R - other.R);
-            int s = Math.Abs(S - other.S);
-            return Math.Max(q, Math.Max(r, s));
+            int thisX = ToCubeX(Q, R);
+            int thisZ = R;
+            int thisY = -thisX - thisZ;
+
+            int otherX = ToCubeX(other.Q, other.R);
+            int otherZ = other.R;
+            int otherY = -otherX - otherZ;
+
+            int x = Math.Abs(thisX - otherX);
+            int y = Math.Abs(thisY - otherY);
+            int z = Math.Abs(thisZ - otherZ);
+            return Math.Max(x, Math.Max(y, z));
+        }
+
+        private static int ToCubeX(int column, int row)
+        {
+            return column - (row - (row & 1)) / 2;
         }
 
         public int CompareTo(HexCoord other)

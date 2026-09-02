@@ -19,7 +19,7 @@ namespace KingdomSurvival.BattleSandbox
         private static readonly Color NormalColor = new Color(0.16f, 0.20f, 0.22f, 0.80f);
         private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 0.80f);
         private static readonly Color ImpassableColor = new Color(0.07f, 0.08f, 0.09f, 0.80f);
-        private static readonly Color ReachableColor = new Color(0.28f, 0.75f, 0.90f, 0.78f);
+        private static readonly Color ReachableColor = new Color(0.28f, 0.75f, 0.90f, 0.40f);
 
         private SandboxBattle battle;
         private string selectedTargetId;
@@ -1207,7 +1207,8 @@ namespace KingdomSurvival.BattleSandbox
         {
             float availableWidth = Mathf.Max(100f, contentRect.width - 36f);
             float availableHeight = Mathf.Max(100f, contentRect.height - 36f);
-            float widthUnits = Mathf.Sqrt(3f) * (battle.Width + (battle.Height - 1) * 0.5f);
+            float stagger = battle.Height > 1 ? 0.5f : 0f;
+            float widthUnits = Mathf.Sqrt(3f) * (battle.Width + stagger);
             float heightUnits = 1.5f * (battle.Height - 1) + 2f;
             float size = Mathf.Min(availableWidth / widthUnits, availableHeight / heightUnits);
             size = Mathf.Max(18f, size);
@@ -1233,7 +1234,8 @@ namespace KingdomSurvival.BattleSandbox
 
             public Vector2 GetCenter(HexCoord coord)
             {
-                float x = Size * Mathf.Sqrt(3f) * (coord.Q + coord.R * 0.5f);
+                float rowOffset = (coord.R & 1) == 0 ? 0f : 0.5f;
+                float x = Size * Mathf.Sqrt(3f) * (coord.Q + rowOffset);
                 float y = Size * 1.5f * coord.R;
                 return Origin + new Vector2(x, y);
             }

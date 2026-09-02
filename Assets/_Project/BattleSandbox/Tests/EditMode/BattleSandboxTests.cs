@@ -10,11 +10,30 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void HexDistanceIsSymmetricAndCellHasSixNeighbors()
         {
             HexCoord origin = new HexCoord(0, 0);
-            HexCoord target = new HexCoord(3, -2);
+            HexCoord target = new HexCoord(2, 2);
 
             Assert.That(origin.Neighbors().Distinct().Count(), Is.EqualTo(6));
             Assert.That(origin.DistanceTo(target), Is.EqualTo(3));
             Assert.That(target.DistanceTo(origin), Is.EqualTo(3));
+        }
+
+        [Test]
+        public void OddRowOffsetAlternatesDiagonalNeighbors()
+        {
+            HexCoord evenRow = new HexCoord(2, 2);
+            HexCoord oddRow = new HexCoord(2, 3);
+
+            Assert.That(evenRow.Neighbors(), Does.Contain(new HexCoord(1, 1)));
+            Assert.That(evenRow.Neighbors(), Does.Contain(new HexCoord(2, 1)));
+            Assert.That(evenRow.Neighbors(), Does.Contain(new HexCoord(1, 3)));
+            Assert.That(evenRow.Neighbors(), Does.Contain(new HexCoord(2, 3)));
+            Assert.That(evenRow.Neighbors(), Does.Not.Contain(new HexCoord(3, 1)));
+
+            Assert.That(oddRow.Neighbors(), Does.Contain(new HexCoord(2, 2)));
+            Assert.That(oddRow.Neighbors(), Does.Contain(new HexCoord(3, 2)));
+            Assert.That(oddRow.Neighbors(), Does.Contain(new HexCoord(2, 4)));
+            Assert.That(oddRow.Neighbors(), Does.Contain(new HexCoord(3, 4)));
+            Assert.That(oddRow.Neighbors(), Does.Not.Contain(new HexCoord(1, 2)));
         }
 
         [Test]
@@ -417,11 +436,12 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 new[] { "guard", "archer", "scout" });
 
             Assert.That(battle.Width, Is.EqualTo(9));
-            Assert.That(battle.Height, Is.EqualTo(7));
+            Assert.That(battle.Height, Is.EqualTo(9));
             Assert.That(battle.Units.Count(unit => unit.Team == SandboxTeam.Player), Is.EqualTo(3));
             Assert.That(battle.Units.Count(unit => unit.Team == SandboxTeam.Enemy), Is.EqualTo(4));
             Assert.That(battle.Units.Select(unit => unit.Id).Distinct().Count(), Is.EqualTo(battle.Units.Count));
             Assert.That(battle.Units.All(unit => !string.IsNullOrWhiteSpace(unit.TypeId)), Is.True);
+            Assert.That(battle.Units.All(unit => battle.IsInside(unit.Position)), Is.True);
             Assert.That(battle.Phase, Is.EqualTo(SandboxBattlePhase.InProgress));
         }
 

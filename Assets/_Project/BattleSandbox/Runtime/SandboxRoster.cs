@@ -75,8 +75,8 @@ namespace KingdomSurvival.BattleSandbox
                 new HexCoord(0, 1),
                 new HexCoord(0, 3),
                 new HexCoord(0, 5),
+                new HexCoord(0, 7),
                 new HexCoord(1, 2),
-                new HexCoord(1, 4),
                 new HexCoord(1, 6)
             };
 
@@ -85,7 +85,7 @@ namespace KingdomSurvival.BattleSandbox
                 new HexCoord(8, 1),
                 new HexCoord(8, 3),
                 new HexCoord(8, 5),
-                new HexCoord(7, 2)
+                new HexCoord(8, 7)
             };
 
             List<SandboxUnitState> units = new List<SandboxUnitState>();
@@ -111,14 +111,14 @@ namespace KingdomSurvival.BattleSandbox
             {
                 { new HexCoord(4, 1), SandboxTerrain.Impassable },
                 { new HexCoord(4, 2), SandboxTerrain.Impassable },
-                { new HexCoord(4, 4), SandboxTerrain.Impassable },
-                { new HexCoord(4, 5), SandboxTerrain.Impassable },
-                { new HexCoord(3, 3), SandboxTerrain.Difficult },
-                { new HexCoord(4, 3), SandboxTerrain.Difficult },
-                { new HexCoord(5, 3), SandboxTerrain.Difficult }
+                { new HexCoord(4, 6), SandboxTerrain.Impassable },
+                { new HexCoord(4, 7), SandboxTerrain.Impassable },
+                { new HexCoord(3, 4), SandboxTerrain.Difficult },
+                { new HexCoord(4, 4), SandboxTerrain.Difficult },
+                { new HexCoord(5, 4), SandboxTerrain.Difficult }
             };
 
-            SandboxBattle battle = new SandboxBattle(9, 7, units, terrain);
+            SandboxBattle battle = new SandboxBattle(9, 9, units, terrain);
             battle.Start();
             return battle;
         }

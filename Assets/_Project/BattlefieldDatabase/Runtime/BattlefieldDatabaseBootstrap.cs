@@ -209,7 +209,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                 success &= SetStaticColor(
                     boardType,
                     "ReachableColor",
-                    new Color(0.28f, 0.75f, 0.90f, 0.78f));
+                    new Color(0.28f, 0.75f, 0.90f, 0.40f));
                 return success;
             }
             catch (Exception exception)

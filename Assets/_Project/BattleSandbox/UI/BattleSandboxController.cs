@@ -265,7 +265,7 @@ namespace KingdomSurvival.BattleSandbox
             sidebar.Add(currentStatsLabel);
 
             instructionLabel = CreateLabel(
-                "Синие гексы расходуют запас движения. Нажмите значок меча или выстрела на враге, чтобы сразу приблизиться и атаковать.",
+                "Синие гексы расходуют запас движения. Наведение показывает маршрут. Меч выбирает грань удара, а выстрел не зависит от стороны гекса.",
                 11,
                 new Color(0.58f, 0.65f, 0.67f, 1f));
             instructionLabel.style.marginTop = 13f;
@@ -350,14 +350,15 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             }
 
-            string message;
-            if (battle.TryMove(current.Id, coord, out message))
-            {
-                AddBattleLog(message);
-                selectedTargetId = null;
-                FinishActivationIfEmpty();
-                RefreshBattleScreen();
-            }
+            selectedTargetId = null;
+            BeginMoveAnimation(
+                current.Id,
+                coord,
+                moved =>
+                {
+                    if (moved)
+                        FinishActivationIfEmpty();
+                });
         }
 
         private void OnBoardAttackRequested(string targetId, HexCoord? requestedPosition)
@@ -429,25 +430,40 @@ namespace KingdomSurvival.BattleSandbox
                 return false;
             }
 
+            selectedTargetId = target.Id;
             if (movementCost > 0 && attackPosition != attacker.Position)
             {
-                string moveMessage;
-                if (!battle.TryMove(attacker.Id, attackPosition, out moveMessage))
-                    return false;
-                AddBattleLog(moveMessage);
+                string attackerId = attacker.Id;
+                string targetId = target.Id;
+                return BeginMoveAnimation(
+                    attackerId,
+                    attackPosition,
+                    moved =>
+                    {
+                        if (moved)
+                            BeginPreparedAttack(attackerId, targetId);
+                    });
             }
 
-            if (battle.CurrentUnit == null || battle.CurrentUnit.Id != attacker.Id)
-                return false;
+            return BeginPreparedAttack(attacker.Id, target.Id);
+        }
 
-            SandboxAttackPreview preview = battle.PreviewAttack(attacker.Id, target.Id);
+        private bool BeginPreparedAttack(string attackerId, string targetId)
+        {
+            if (battle == null || battle.CurrentUnit == null ||
+                battle.CurrentUnit.Id != attackerId)
+            {
+                return false;
+            }
+
+            SandboxAttackPreview preview = battle.PreviewAttack(attackerId, targetId);
             if (!preview.IsValid)
                 return false;
 
-            selectedTargetId = target.Id;
+            selectedTargetId = targetId;
             BeginAttackAnimation(
-                attacker.Id,
-                target.Id,
+                attackerId,
+                targetId,
                 preview.Damage,
                 applied =>
                 {
@@ -455,6 +471,58 @@ namespace KingdomSurvival.BattleSandbox
                     if (applied)
                         FinishActivationIfEmpty();
                 });
+            return true;
+        }
+
+        private bool BeginMoveAnimation(
+            string unitId,
+            HexCoord destination,
+            Action<bool> onComplete)
+        {
+            if (battle == null || board == null || combatAnimationRunning)
+                return false;
+
+            IReadOnlyList<HexCoord> path;
+            int movementCost;
+            if (!SandboxMovementPath.TryBuild(
+                    battle,
+                    unitId,
+                    destination,
+                    out path,
+                    out movementCost) ||
+                path.Count < 2 || movementCost <= 0)
+            {
+                return false;
+            }
+
+            combatAnimationRunning = true;
+            RefreshBattleScreen();
+
+            bool started = board.PlayMoveAnimation(
+                unitId,
+                path,
+                () =>
+                {
+                    string message;
+                    bool moved = battle != null && battle.TryMove(unitId, destination, out message);
+                    if (moved)
+                        AddBattleLog(message);
+
+                    combatAnimationRunning = false;
+                    onComplete?.Invoke(moved);
+                    RefreshBattleScreen();
+                });
+
+            if (started)
+                return true;
+
+            string fallbackMessage;
+            bool fallbackMoved = battle.TryMove(unitId, destination, out fallbackMessage);
+            if (fallbackMoved)
+                AddBattleLog(fallbackMessage);
+            combatAnimationRunning = false;
+            onComplete?.Invoke(fallbackMoved);
+            RefreshBattleScreen();
             return true;
         }
 
@@ -559,6 +627,9 @@ namespace KingdomSurvival.BattleSandbox
                 SandboxAttackPreview displayedPreview = preview != null && preview.IsValid
                     ? preview
                     : reachablePreview;
+                string hoverHint = current != null && current.AttackRange > 1
+                    ? "\nНаведите курсор на цель для выстрела. Сторона гекса не выбирается."
+                    : "\nНаведите курсор на цель и выберите грань атаки.";
                 targetLabel.text =
                     "Цель: " + target.DisplayLabel + " · HP " + target.HitPoints + "/" + target.MaxHitPoints +
                     (displayedPreview != null && displayedPreview.IsValid
@@ -566,7 +637,7 @@ namespace KingdomSurvival.BattleSandbox
                           displayedPreview.TargetHitPointsAfter + " HP" +
                           (movementCost > 0 ? " · сближение " + movementCost : string.Empty)
                         : reachableForAttack
-                            ? "\nНаведите курсор на цель и выберите грань атаки."
+                            ? hoverHint
                             : "\nЦель находится вне доступной зоны атаки.");
             }
 
@@ -577,9 +648,9 @@ namespace KingdomSurvival.BattleSandbox
             if (returnToSetupButton != null)
                 returnToSetupButton.SetEnabled(!combatAnimationRunning);
             instructionLabel.text = combatAnimationRunning
-                ? "Выполняется атака… управление возобновится после завершения анимации."
+                ? "Выполняется перемещение или атака… управление возобновится после завершения анимации."
                 : playerTurn
-                ? "Синие гексы — оставшееся движение. Наведите курсор на врага: меч выбирает грань удара, значок выстрела — дальнюю атаку. ПКМ открывает карточку."
+                ? "Синие гексы — оставшееся движение. Наведение показывает маршрут. Меч выбирает грань удара; значок выстрела появляется на цели без выбора стороны. ПКМ открывает карточку."
                 : battle.Phase == SandboxBattlePhase.InProgress
                     ? "Противник выполняет свою активацию…"
                     : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";
@@ -646,36 +717,76 @@ namespace KingdomSurvival.BattleSandbox
 
                 SandboxUnitState enemy = battle.CurrentUnit;
                 SandboxUnitState target = SelectEnemyAttackTarget(enemy);
-                if (target == null)
-                {
-                    SandboxUnitState closest = battle.FindClosestOpponent(enemy);
-                    if (closest != null)
-                    {
-                        HexCoord destination = battle.FindBestMoveToward(enemy, closest.Position);
-                        if (destination != enemy.Position)
-                        {
-                            string moveMessage;
-                            if (battle.TryMove(enemy.Id, destination, out moveMessage))
-                                AddBattleLog(moveMessage);
-                        }
-                    }
-                }
-
-                target = SelectEnemyAttackTarget(enemy);
                 if (target != null)
                 {
-                    SandboxAttackPreview preview = battle.PreviewAttack(enemy.Id, target.Id);
-                    BeginAttackAnimation(
-                        enemy.Id,
-                        target.Id,
-                        preview.Damage,
-                        _ => CompleteEnemyActivation(enemy.Id));
+                    BeginEnemyAttack(enemy, target);
                     return;
+                }
+
+                SandboxUnitState closest = battle.FindClosestOpponent(enemy);
+                if (closest != null)
+                {
+                    HexCoord destination = battle.FindBestMoveToward(enemy, closest.Position);
+                    if (destination != enemy.Position)
+                    {
+                        string enemyId = enemy.Id;
+                        if (BeginMoveAnimation(
+                                enemyId,
+                                destination,
+                                _ => ContinueEnemyAfterMovement(enemyId)))
+                        {
+                            return;
+                        }
+                    }
                 }
 
                 CompleteEnemyActivation(enemy.Id);
                 RefreshBattleScreen();
             }).ExecuteLater(420);
+        }
+
+        private void ContinueEnemyAfterMovement(string enemyId)
+        {
+            if (battle == null || battle.Phase != SandboxBattlePhase.InProgress ||
+                battle.CurrentUnit == null || battle.CurrentUnit.Id != enemyId)
+            {
+                CompleteEnemyActivation(enemyId);
+                return;
+            }
+
+            SandboxUnitState enemy = battle.CurrentUnit;
+            SandboxUnitState target = SelectEnemyAttackTarget(enemy);
+            if (target != null)
+            {
+                BeginEnemyAttack(enemy, target);
+                return;
+            }
+
+            CompleteEnemyActivation(enemyId);
+        }
+
+        private void BeginEnemyAttack(SandboxUnitState enemy, SandboxUnitState target)
+        {
+            if (enemy == null || target == null)
+            {
+                if (enemy != null)
+                    CompleteEnemyActivation(enemy.Id);
+                return;
+            }
+
+            SandboxAttackPreview preview = battle.PreviewAttack(enemy.Id, target.Id);
+            if (!preview.IsValid)
+            {
+                CompleteEnemyActivation(enemy.Id);
+                RefreshBattleScreen();
+                return;
+            }
+
+            BeginAttackAnimation(
+                enemy.Id,
+                target.Id,
+                preview.Damage,
+                _ => CompleteEnemyActivation(enemy.Id));
         }
 
         private void BeginAttackAnimation(

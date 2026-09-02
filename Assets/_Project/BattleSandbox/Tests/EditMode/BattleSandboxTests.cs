@@ -37,6 +37,29 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
+        public void CompactArenaShapeUsesSevenEightNineRowPattern()
+        {
+            int[] expectedRowLengths = { 7, 8, 9, 8, 9, 8, 7 };
+            HexCoord[] cells = SandboxArenaShape.Cells().ToArray();
+
+            Assert.That(cells.Length, Is.EqualTo(SandboxArenaShape.CellCount));
+            Assert.That(cells.Distinct().Count(), Is.EqualTo(56));
+            for (int row = 0; row < expectedRowLengths.Length; row++)
+            {
+                Assert.That(SandboxArenaShape.GetRowLength(row), Is.EqualTo(expectedRowLengths[row]));
+                Assert.That(cells.Count(cell => cell.R == row), Is.EqualTo(expectedRowLengths[row]));
+            }
+
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(0, 0)), Is.False);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(8, 0)), Is.False);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(1, 0)), Is.True);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(7, 0)), Is.True);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(8, 2)), Is.True);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(0, 6)), Is.False);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(8, 6)), Is.False);
+        }
+
+        [Test]
         public void ReachableHexesExcludeObstaclesAndOccupiedCells()
         {
             SandboxBattle battle = CreateBattle(
@@ -435,13 +458,18 @@ namespace KingdomSurvival.BattleSandbox.Tests
             SandboxBattle battle = SandboxRoster.CreateDefaultBattle(
                 new[] { "guard", "archer", "scout" });
 
-            Assert.That(battle.Width, Is.EqualTo(9));
-            Assert.That(battle.Height, Is.EqualTo(9));
+            Assert.That(battle.Width, Is.EqualTo(SandboxArenaShape.Width));
+            Assert.That(battle.Height, Is.EqualTo(SandboxArenaShape.Height));
             Assert.That(battle.Units.Count(unit => unit.Team == SandboxTeam.Player), Is.EqualTo(3));
             Assert.That(battle.Units.Count(unit => unit.Team == SandboxTeam.Enemy), Is.EqualTo(4));
             Assert.That(battle.Units.Select(unit => unit.Id).Distinct().Count(), Is.EqualTo(battle.Units.Count));
             Assert.That(battle.Units.All(unit => !string.IsNullOrWhiteSpace(unit.TypeId)), Is.True);
             Assert.That(battle.Units.All(unit => battle.IsInside(unit.Position)), Is.True);
+            Assert.That(battle.Units.All(unit => SandboxArenaShape.Contains(unit.Position)), Is.True);
+            Assert.That(
+                SandboxArenaShape.InactiveCells().All(
+                    cell => battle.GetTerrain(cell) == SandboxTerrain.Impassable),
+                Is.True);
             Assert.That(battle.Phase, Is.EqualTo(SandboxBattlePhase.InProgress));
         }
 

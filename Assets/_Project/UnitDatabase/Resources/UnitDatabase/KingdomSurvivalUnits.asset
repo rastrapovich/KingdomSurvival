@@ -58,12 +58,12 @@ MonoBehaviour:
     displayLabel: Гвардеец
     category: 0
     combatRole: 0
-    maxHitPoints: 100
-    attack: 3
-    defense: 6
-    damage: 14
+    maxHitPoints: 18
+    attack: 2
+    defense: 4
+    damage: 3
     movement: 3
-    initiative: 5
+    initiative: 3
     attackRange: 1
     portrait: {fileID: 0}
     battlefieldSprite: {fileID: 0}
@@ -79,12 +79,12 @@ MonoBehaviour:
     displayLabel: Лучник
     category: 0
     combatRole: 1
-    maxHitPoints: 90
-    attack: 4
-    defense: 2
-    damage: 16
+    maxHitPoints: 11
+    attack: 3
+    defense: 1
+    damage: 3
     movement: 3
-    initiative: 6
+    initiative: 5
     attackRange: 4
     portrait: {fileID: 0}
     battlefieldSprite: {fileID: 0}
@@ -98,12 +98,12 @@ MonoBehaviour:
     displayLabel: Лекарь
     category: 0
     combatRole: 2
-    maxHitPoints: 85
+    maxHitPoints: 12
     attack: 1
     defense: 2
-    damage: 15
+    damage: 3
     movement: 3
-    initiative: 4
+    initiative: 3
     attackRange: 1
     portrait: {fileID: 0}
     battlefieldSprite: {fileID: 0}
@@ -118,12 +118,12 @@ MonoBehaviour:
     displayLabel: Копейщик
     category: 0
     combatRole: 3
-    maxHitPoints: 100
+    maxHitPoints: 15
     attack: 3
-    defense: 4
-    damage: 18
+    defense: 3
+    damage: 3
     movement: 3
-    initiative: 5
+    initiative: 4
     attackRange: 1
     portrait: {fileID: 0}
     battlefieldSprite: {fileID: 0}
@@ -137,12 +137,12 @@ MonoBehaviour:
     displayLabel: Разведчик
     category: 0
     combatRole: 4
-    maxHitPoints: 90
+    maxHitPoints: 12
     attack: 2
-    defense: 3
-    damage: 13
+    defense: 2
+    damage: 3
     movement: 4
-    initiative: 8
+    initiative: 6
     attackRange: 1
     portrait: {fileID: 0}
     battlefieldSprite: {fileID: 0}
@@ -157,12 +157,12 @@ MonoBehaviour:
     displayLabel: Ополченец
     category: 0
     combatRole: 5
-    maxHitPoints: 100
+    maxHitPoints: 14
     attack: 2
-    defense: 3
-    damage: 15
+    defense: 2
+    damage: 3
     movement: 3
-    initiative: 4
+    initiative: 2
     attackRange: 1
     portrait: {fileID: 0}
     battlefieldSprite: {fileID: 0}
@@ -176,12 +176,12 @@ MonoBehaviour:
     displayLabel: Зверь
     category: 1
     combatRole: 6
-    maxHitPoints: 60
-    attack: 5
-    defense: 2
-    damage: 14
+    maxHitPoints: 10
+    attack: 2
+    defense: 1
+    damage: 3
     movement: 4
-    initiative: 7
+    initiative: 5
     attackRange: 1
     portrait: {fileID: 0}
     battlefieldSprite: {fileID: 0}
@@ -195,12 +195,12 @@ MonoBehaviour:
     displayLabel: Зверь
     category: 1
     combatRole: 6
-    maxHitPoints: 90
-    attack: 6
-    defense: 4
-    damage: 16
+    maxHitPoints: 14
+    attack: 3
+    defense: 2
+    damage: 4
     movement: 4
-    initiative: 6
+    initiative: 4
     attackRange: 1
     portrait: {fileID: 0}
     battlefieldSprite: {fileID: 0}
@@ -214,12 +214,12 @@ MonoBehaviour:
     displayLabel: Зверь
     category: 1
     combatRole: 6
-    maxHitPoints: 100
-    attack: 7
-    defense: 5
-    damage: 18
+    maxHitPoints: 18
+    attack: 4
+    defense: 3
+    damage: 5
     movement: 3
-    initiative: 3
+    initiative: 2
     attackRange: 1
     portrait: {fileID: 0}
     battlefieldSprite: {fileID: 0}

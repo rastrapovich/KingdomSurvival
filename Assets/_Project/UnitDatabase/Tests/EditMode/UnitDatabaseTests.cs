@@ -22,6 +22,22 @@ namespace KingdomSurvival.UnitDatabase.Tests
         }
 
         [Test]
+        public void DefaultUnitsUseCompactFirstLevelStatScale()
+        {
+            UnitDatabaseAsset database = Resources.Load<UnitDatabaseAsset>(
+                UnitDatabaseAsset.ResourcesPath);
+
+            Assert.That(database.Units.All(unit =>
+                unit.MaxHitPoints >= 10 && unit.MaxHitPoints <= 18), Is.True);
+            Assert.That(database.Units.All(unit =>
+                unit.Attack >= 1 && unit.Attack <= 4), Is.True);
+            Assert.That(database.Units.All(unit =>
+                unit.Defense >= 1 && unit.Defense <= 4), Is.True);
+            Assert.That(database.Units.All(unit =>
+                unit.Damage >= 3 && unit.Damage <= 5), Is.True);
+        }
+
+        [Test]
         public void BeastTagDefinesFourCreatureInstancesForSandboxEncounter()
         {
             UnitDatabaseAsset database = Resources.Load<UnitDatabaseAsset>(

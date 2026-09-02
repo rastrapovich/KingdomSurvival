@@ -8,29 +8,29 @@ namespace KingdomSurvival.BattleSandbox
     {
         private static readonly SandboxUnitDefinition[] PlayerRosterData =
         {
-            new SandboxUnitDefinition("guard", "Гвардеец", SandboxUnitRole.Guard, 100, 3, 6, 14, 3, 5, 1,
+            new SandboxUnitDefinition("guard", "Гвардеец", SandboxUnitRole.Guard, 18, 2, 4, 3, 3, 3, 1,
                 new[] { "species.human", "combat.melee", "role.defender", "trait.armored" }),
-            new SandboxUnitDefinition("archer", "Лучник", SandboxUnitRole.Archer, 90, 4, 2, 16, 3, 6, 4,
+            new SandboxUnitDefinition("archer", "Лучник", SandboxUnitRole.Archer, 11, 3, 1, 3, 3, 5, 4,
                 new[] { "species.human", "combat.ranged" }),
-            new SandboxUnitDefinition("healer", "Лекарь", SandboxUnitRole.Healer, 85, 1, 2, 15, 3, 4, 1,
+            new SandboxUnitDefinition("healer", "Лекарь", SandboxUnitRole.Healer, 12, 1, 2, 3, 3, 3, 1,
                 new[] { "species.human", "combat.melee", "role.support" }),
-            new SandboxUnitDefinition("spearman", "Копейщик", SandboxUnitRole.Spearman, 100, 3, 4, 18, 3, 5, 1,
+            new SandboxUnitDefinition("spearman", "Копейщик", SandboxUnitRole.Spearman, 15, 3, 3, 3, 3, 4, 1,
                 new[] { "species.human", "combat.melee" }),
-            new SandboxUnitDefinition("scout", "Разведчик", SandboxUnitRole.Scout, 90, 2, 3, 13, 4, 8, 1,
+            new SandboxUnitDefinition("scout", "Разведчик", SandboxUnitRole.Scout, 12, 2, 2, 3, 4, 6, 1,
                 new[] { "species.human", "combat.melee", "role.scout" }),
-            new SandboxUnitDefinition("militia", "Ополченец", SandboxUnitRole.Militia, 100, 2, 3, 15, 3, 4, 1,
+            new SandboxUnitDefinition("militia", "Ополченец", SandboxUnitRole.Militia, 14, 2, 2, 3, 3, 2, 1,
                 new[] { "species.human", "combat.melee" })
         };
 
         private static readonly SandboxUnitDefinition[] EnemyRosterData =
         {
-            new SandboxUnitDefinition("forest_beast_1", "Зверь", SandboxUnitRole.Beast, 60, 5, 2, 14, 4, 7, 1,
+            new SandboxUnitDefinition("forest_beast_1", "Зверь", SandboxUnitRole.Beast, 10, 2, 1, 3, 4, 5, 1,
                 new[] { SandboxUnitTags.Beast, "combat.melee" }),
-            new SandboxUnitDefinition("forest_beast_2", "Зверь", SandboxUnitRole.Beast, 60, 5, 2, 14, 4, 7, 1,
+            new SandboxUnitDefinition("forest_beast_2", "Зверь", SandboxUnitRole.Beast, 10, 2, 1, 3, 4, 5, 1,
                 new[] { SandboxUnitTags.Beast, "combat.melee" }),
-            new SandboxUnitDefinition("forest_beast_3", "Зверь", SandboxUnitRole.Beast, 90, 6, 4, 16, 4, 6, 1,
+            new SandboxUnitDefinition("forest_beast_3", "Зверь", SandboxUnitRole.Beast, 14, 3, 2, 4, 4, 4, 1,
                 new[] { SandboxUnitTags.Beast, "combat.melee" }),
-            new SandboxUnitDefinition("forest_beast_4", "Зверь", SandboxUnitRole.Beast, 100, 7, 5, 18, 3, 3, 1,
+            new SandboxUnitDefinition("forest_beast_4", "Зверь", SandboxUnitRole.Beast, 18, 4, 3, 5, 3, 2, 1,
                 new[] { SandboxUnitTags.Beast, "combat.melee" })
         };
 

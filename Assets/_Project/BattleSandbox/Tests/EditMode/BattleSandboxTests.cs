@@ -325,7 +325,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
 
             Assert.That(
                 battle.PreviewAttack("spearman-instance", "target-instance").Damage,
-                Is.EqualTo(15));
+                Is.EqualTo(12));
         }
 
         [Test]
@@ -395,6 +395,19 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Assert.That(battle.TryAttack("player", "enemy", out message), Is.True);
             Assert.That(battle.Phase, Is.EqualTo(SandboxBattlePhase.PlayerVictory));
             Assert.That(battle.CurrentUnit, Is.Null);
+        }
+
+        [Test]
+        public void DefaultRosterUsesFirstLevelStatScale()
+        {
+            SandboxUnitDefinition[] roster = SandboxRoster.PlayerRoster
+                .Concat(SandboxRoster.EnemyRoster)
+                .ToArray();
+
+            Assert.That(roster.All(unit => unit.MaxHitPoints >= 10 && unit.MaxHitPoints <= 18), Is.True);
+            Assert.That(roster.All(unit => unit.Attack >= 1 && unit.Attack <= 4), Is.True);
+            Assert.That(roster.All(unit => unit.Defense >= 1 && unit.Defense <= 4), Is.True);
+            Assert.That(roster.All(unit => unit.Damage >= 3 && unit.Damage <= 5), Is.True);
         }
 
         [Test]

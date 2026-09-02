@@ -742,7 +742,7 @@ namespace KingdomSurvival.BattleSandbox
             if (attacker.Role == SandboxUnitRole.Spearman &&
                 target.HasTag(SandboxUnitTags.Beast))
             {
-                damage += 5;
+                damage += 2;
             }
 
             return new SandboxAttackPreview(

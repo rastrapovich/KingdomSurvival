@@ -244,6 +244,7 @@ namespace KingdomSurvival.BattleSandbox
             board = new HexBoardElement();
             board.style.marginRight = 14f;
             board.HexClicked += OnBoardHexClicked;
+            board.UnitDetailsRequested += OnBoardUnitDetailsRequested;
             body.Add(board);
 
             VisualElement sidebar = CreatePanel();
@@ -261,7 +262,7 @@ namespace KingdomSurvival.BattleSandbox
             sidebar.Add(currentStatsLabel);
 
             instructionLabel = CreateLabel(
-                "Синие гексы — перемещение, красные — доступные цели. Карточка в очереди открывает сведения; наведите курсор на характеристику для пояснения.",
+                "Синие гексы — перемещение, красные — цели. ПКМ по любой фигурке открывает её динамическую карточку прямо над полем.",
                 11,
                 new Color(0.58f, 0.65f, 0.67f, 1f));
             instructionLabel.style.marginTop = 13f;
@@ -354,6 +355,19 @@ namespace KingdomSurvival.BattleSandbox
                 FinishActivationIfEmpty();
                 RefreshBattleScreen();
             }
+        }
+
+        private void OnBoardUnitDetailsRequested(string unitId, Vector2 panelPosition)
+        {
+            if (battle == null || fighterDetailsView == null || root == null)
+                return;
+
+            SandboxUnitState unit = battle.GetUnit(unitId);
+            if (unit == null)
+                return;
+
+            Vector2 rootPosition = root.WorldToLocal(panelPosition);
+            fighterDetailsView.Open(unit.Definition, unit, rootPosition);
         }
 
         private void PerformAttack()
@@ -471,7 +485,7 @@ namespace KingdomSurvival.BattleSandbox
             guardButton.SetEnabled(playerTurn && current.ActionPoints > 0 && !current.IsGuarding);
             endActivationButton.SetEnabled(playerTurn);
             instructionLabel.text = playerTurn
-                ? "Синие гексы — перемещение, красные — цели. Нажмите союзника на поле или любую карточку очереди, чтобы открыть сведения."
+                ? "Синие гексы — перемещение, красные — цели. ПКМ по любой фигурке открывает карточку; повреждения и HP обновляются сразу."
                 : battle.Phase == SandboxBattlePhase.InProgress
                     ? "Противник выполняет свою активацию…"
                     : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";

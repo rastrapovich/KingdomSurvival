@@ -51,6 +51,8 @@ namespace KingdomSurvival.BattleSandbox
             bool active,
             Action onDetails)
         {
+            int damageTaken = unit.DamageTaken;
+            bool damaged = unit.IsDamaged;
             Button card = new Button(onDetails);
             card.name = "sandbox-initiative-card-" + unit.Id;
             card.userData = unit.Id;
@@ -63,16 +65,22 @@ namespace KingdomSurvival.BattleSandbox
             card.style.paddingTop = 5f;
             card.style.paddingBottom = 5f;
             card.style.backgroundColor = active
-                ? new Color(0.25f, 0.25f, 0.21f, 1f)
-                : CardBackground;
+                ? damaged
+                    ? new Color(0.29f, 0.18f, 0.14f, 1f)
+                    : new Color(0.25f, 0.25f, 0.21f, 1f)
+                : damaged
+                    ? new Color(0.18f, 0.095f, 0.105f, 1f)
+                    : CardBackground;
             card.style.color = unit.Team == SandboxTeam.Player ? PlayerAccent : EnemyAccent;
             SetBorder(
                 card,
                 active
                     ? new Color(0.94f, 0.80f, 0.45f, 1f)
-                    : unit.Team == SandboxTeam.Player
-                        ? new Color(0.45f, 0.38f, 0.23f, 1f)
-                        : new Color(0.45f, 0.24f, 0.23f, 1f),
+                    : damaged
+                        ? new Color(0.78f, 0.30f, 0.25f, 1f)
+                        : unit.Team == SandboxTeam.Player
+                            ? new Color(0.45f, 0.38f, 0.23f, 1f)
+                            : new Color(0.45f, 0.24f, 0.23f, 1f),
                 active ? 2f : 1f);
             SetRadius(card, 4f);
 
@@ -83,9 +91,14 @@ namespace KingdomSurvival.BattleSandbox
             name.pickingMode = PickingMode.Ignore;
             card.Add(name);
 
-            Label role = new Label(unit.Definition.RoleLabel + " · ИНИЦ " + unit.Initiative);
+            Label role = new Label(
+                damaged
+                    ? "РАНЕН −" + damageTaken + " HP · ИНИЦ " + unit.Initiative
+                    : unit.Definition.RoleLabel + " · ИНИЦ " + unit.Initiative);
             role.style.fontSize = 8f;
-            role.style.color = new Color(0.63f, 0.63f, 0.60f, 1f);
+            role.style.color = damaged
+                ? new Color(0.93f, 0.50f, 0.42f, 1f)
+                : new Color(0.63f, 0.63f, 0.60f, 1f);
             role.pickingMode = PickingMode.Ignore;
             card.Add(role);
 
@@ -282,7 +295,9 @@ namespace KingdomSurvival.BattleSandbox
         private readonly Label tooltipTitle;
         private readonly Label tooltipText;
         private readonly Label fighterName;
+        private readonly Label damageBadge;
         private readonly Label fighterRole;
+        private readonly VisualElement portraitPanel;
         private readonly Label portraitLabel;
         private readonly Label teamLabel;
         private readonly VisualElement healthFill;
@@ -348,9 +363,27 @@ namespace KingdomSurvival.BattleSandbox
             header.style.alignItems = Align.Center;
             header.style.justifyContent = Justify.SpaceBetween;
 
+            VisualElement identity = new VisualElement();
+            identity.style.flexGrow = 1f;
+            identity.style.flexDirection = FlexDirection.Row;
+            identity.style.alignItems = Align.Center;
+
             fighterName = CreateLabel("БОЕЦ", 20, new Color(0.90f, 0.74f, 0.40f, 1f));
             fighterName.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.Add(fighterName);
+            identity.Add(fighterName);
+
+            damageBadge = CreateLabel(string.Empty, 10, Color.white);
+            damageBadge.style.display = DisplayStyle.None;
+            damageBadge.style.marginLeft = 12f;
+            damageBadge.style.paddingLeft = 9f;
+            damageBadge.style.paddingRight = 9f;
+            damageBadge.style.paddingTop = 4f;
+            damageBadge.style.paddingBottom = 4f;
+            damageBadge.style.backgroundColor = new Color(0.62f, 0.19f, 0.17f, 1f);
+            damageBadge.style.unityFontStyleAndWeight = FontStyle.Bold;
+            SetRadius(damageBadge, 3f);
+            identity.Add(damageBadge);
+            header.Add(identity);
 
             Button closeButton = new Button(Close) { text = "×" };
             closeButton.style.width = 36f;
@@ -368,21 +401,21 @@ namespace KingdomSurvival.BattleSandbox
             body.style.flexDirection = FlexDirection.Row;
             body.style.marginTop = 10f;
 
-            VisualElement portrait = new VisualElement();
-            portrait.style.width = 210f;
-            portrait.style.height = 390f;
-            portrait.style.flexShrink = 0f;
-            portrait.style.alignItems = Align.Center;
-            portrait.style.justifyContent = Justify.Center;
-            portrait.style.backgroundColor = new Color(0.075f, 0.085f, 0.105f, 1f);
-            SetBorder(portrait, new Color(0.27f, 0.30f, 0.34f, 1f));
-            SetRadius(portrait, 4f);
+            portraitPanel = new VisualElement();
+            portraitPanel.style.width = 210f;
+            portraitPanel.style.height = 390f;
+            portraitPanel.style.flexShrink = 0f;
+            portraitPanel.style.alignItems = Align.Center;
+            portraitPanel.style.justifyContent = Justify.Center;
+            portraitPanel.style.backgroundColor = new Color(0.075f, 0.085f, 0.105f, 1f);
+            SetBorder(portraitPanel, new Color(0.27f, 0.30f, 0.34f, 1f));
+            SetRadius(portraitPanel, 4f);
 
             portraitLabel = CreateLabel("ИЗОБРАЖЕНИЕ\nБОЙЦА", 15, new Color(0.50f, 0.48f, 0.42f, 1f));
             portraitLabel.style.whiteSpace = WhiteSpace.Normal;
             portraitLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             portraitLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            portrait.Add(portraitLabel);
+            portraitPanel.Add(portraitLabel);
 
             fighterRole = CreateLabel("Роль", 13, new Color(0.78f, 0.65f, 0.39f, 1f));
             fighterRole.style.position = Position.Absolute;
@@ -391,7 +424,7 @@ namespace KingdomSurvival.BattleSandbox
             fighterRole.style.bottom = 54f;
             fighterRole.style.unityTextAlign = TextAnchor.MiddleCenter;
             fighterRole.style.unityFontStyleAndWeight = FontStyle.Bold;
-            portrait.Add(fighterRole);
+            portraitPanel.Add(fighterRole);
 
             teamLabel = CreateLabel("ОТРЯД", 9, new Color(0.52f, 0.54f, 0.54f, 1f));
             teamLabel.style.position = Position.Absolute;
@@ -399,7 +432,7 @@ namespace KingdomSurvival.BattleSandbox
             teamLabel.style.right = 8f;
             teamLabel.style.bottom = 35f;
             teamLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            portrait.Add(teamLabel);
+            portraitPanel.Add(teamLabel);
 
             VisualElement hpBar = new VisualElement();
             hpBar.style.position = Position.Absolute;
@@ -413,8 +446,8 @@ namespace KingdomSurvival.BattleSandbox
             healthFill.style.height = Length.Percent(100f);
             SetRadius(healthFill, 3f);
             hpBar.Add(healthFill);
-            portrait.Add(hpBar);
-            body.Add(portrait);
+            portraitPanel.Add(hpBar);
+            body.Add(portraitPanel);
 
             VisualElement info = new VisualElement();
             info.style.flexGrow = 1f;
@@ -501,7 +534,8 @@ namespace KingdomSurvival.BattleSandbox
 
         public void Open(
             SandboxUnitDefinition definition,
-            SandboxUnitState state = null)
+            SandboxUnitState state = null,
+            Vector2? anchorPosition = null)
         {
             if (definition == null)
                 return;
@@ -512,7 +546,7 @@ namespace KingdomSurvival.BattleSandbox
             HideTooltip();
             dimmer.style.display = DisplayStyle.Flex;
             window.style.display = DisplayStyle.Flex;
-            PositionWindow();
+            PositionWindow(anchorPosition);
             dimmer.BringToFront();
             window.BringToFront();
             dimmer.Focus();
@@ -586,6 +620,8 @@ namespace KingdomSurvival.BattleSandbox
             int actions = openedState != null
                 ? openedState.ActionPoints
                 : SandboxUnitState.ActionsPerActivation;
+            int damageTaken = openedState != null ? openedState.DamageTaken : 0;
+            bool damaged = damageTaken > 0;
 
             fighterName.text = openedDefinition.Name.ToUpper();
             fighterRole.text = openedDefinition.RoleLabel.ToUpper();
@@ -602,13 +638,31 @@ namespace KingdomSurvival.BattleSandbox
             rangeValue.text = openedDefinition.AttackRange.ToString();
             actionsValue.text = actions + " / " + SandboxUnitState.ActionsPerActivation;
 
+            damageBadge.style.display = damaged ? DisplayStyle.Flex : DisplayStyle.None;
+            damageBadge.text = openedState != null && openedState.IsDefeated
+                ? "ВЫБЫЛ"
+                : "РАНЕН · −" + damageTaken + " HP";
+            SetBorder(
+                window,
+                damaged
+                    ? new Color(0.69f, 0.28f, 0.23f, 1f)
+                    : new Color(0.45f, 0.38f, 0.25f, 1f),
+                damaged ? 2f : 1f);
+            portraitPanel.style.backgroundColor = damaged
+                ? new Color(0.15f, 0.075f, 0.085f, 1f)
+                : new Color(0.075f, 0.085f, 0.105f, 1f);
+
             stateValue.text = openedState == null
                 ? "Состояние: готов к бою"
                 : openedState.IsDefeated
                     ? "Состояние: выведен из строя"
-                    : openedState.IsGuarding
-                        ? "Состояние: защитная стойка"
-                        : "Состояние: в бою";
+                    : damaged && openedState.IsGuarding
+                        ? "Состояние: ранен · защитная стойка"
+                        : damaged
+                            ? "Состояние: ранен · потеряно " + damageTaken + " HP"
+                            : openedState.IsGuarding
+                                ? "Состояние: защитная стойка"
+                                : "Состояние: в бою";
 
             float fraction = Mathf.Clamp01(
                 (float)hitPoints / Mathf.Max(1, openedDefinition.MaxHitPoints));
@@ -620,7 +674,7 @@ namespace KingdomSurvival.BattleSandbox
                     : new Color(0.66f, 0.28f, 0.26f, 1f);
         }
 
-        private void PositionWindow()
+        private void PositionWindow(Vector2? anchorPosition)
         {
             float rootWidth = root.resolvedStyle.width;
             float rootHeight = root.resolvedStyle.height;
@@ -629,8 +683,25 @@ namespace KingdomSurvival.BattleSandbox
             if (float.IsNaN(rootHeight) || rootHeight < WindowHeight)
                 rootHeight = 720f;
 
-            window.style.left = Mathf.Max(12f, (rootWidth - WindowWidth) * 0.5f);
-            window.style.top = Mathf.Max(12f, (rootHeight - WindowHeight) * 0.5f);
+            float left = (rootWidth - WindowWidth) * 0.5f;
+            float top = (rootHeight - WindowHeight) * 0.5f;
+            if (anchorPosition.HasValue)
+            {
+                Vector2 anchor = anchorPosition.Value;
+                left = anchor.x + 22f;
+                if (left + WindowWidth > rootWidth - 12f)
+                    left = anchor.x - WindowWidth - 22f;
+                top = anchor.y - 90f;
+            }
+
+            window.style.left = Mathf.Clamp(
+                left,
+                12f,
+                Mathf.Max(12f, rootWidth - WindowWidth - 12f));
+            window.style.top = Mathf.Clamp(
+                top,
+                12f,
+                Mathf.Max(12f, rootHeight - WindowHeight - 12f));
         }
 
         private void ShowTooltip(VisualElement anchor, string title, string explanation)

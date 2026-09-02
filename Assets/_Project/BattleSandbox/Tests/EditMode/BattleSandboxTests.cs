@@ -72,6 +72,25 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
+        public void DamageStateAlwaysMatchesCurrentHitPoints()
+        {
+            SandboxBattle battle = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(1, 1),
+                playerAttack: 5,
+                enemyDefense: 3,
+                enemyHitPoints: 100);
+
+            string message;
+            Assert.That(battle.TryAttack("player", "enemy", out message), Is.True);
+
+            SandboxUnitState enemy = battle.GetUnit("enemy");
+            Assert.That(enemy.HitPoints, Is.EqualTo(75));
+            Assert.That(enemy.DamageTaken, Is.EqualTo(25));
+            Assert.That(enemy.IsDamaged, Is.True);
+        }
+
+        [Test]
         public void GuardAddsTwoDefenseUntilNextActivation()
         {
             SandboxBattle battle = CreateBattle(

@@ -17,6 +17,7 @@ namespace KingdomSurvival.BattleSandbox
         private string selectedTargetId;
 
         public event Action<HexCoord> HexClicked;
+        public event Action<string, Vector2> UnitDetailsRequested;
 
         public HexBoardElement()
         {
@@ -50,7 +51,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void OnPointerDown(PointerDownEvent evt)
         {
-            if (evt.button != 0 || battle == null)
+            if (battle == null || (evt.button != 0 && evt.button != 1))
                 return;
 
             HexLayout layout = CalculateLayout();
@@ -77,6 +78,18 @@ namespace KingdomSurvival.BattleSandbox
 
             if (found && bestDistance <= layout.Size * layout.Size)
             {
+                if (evt.button == 1)
+                {
+                    SandboxUnitState occupant = battle.GetUnitAt(best);
+                    if (occupant == null)
+                        return;
+
+                    Vector2 panelPosition = new Vector2(evt.position.x, evt.position.y);
+                    UnitDetailsRequested?.Invoke(occupant.Id, panelPosition);
+                    evt.StopPropagation();
+                    return;
+                }
+
                 HexClicked?.Invoke(best);
                 evt.StopPropagation();
             }

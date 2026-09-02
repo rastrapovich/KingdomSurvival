@@ -96,6 +96,8 @@ namespace KingdomSurvival.BattleSandbox
         public int Initiative => Definition.Initiative;
         public int AttackRange => Definition.AttackRange;
         public bool IsDefeated => HitPoints <= 0;
+        public int DamageTaken => Math.Max(0, MaxHitPoints - HitPoints);
+        public bool IsDamaged => DamageTaken > 0;
 
         public SandboxUnitState(
             SandboxUnitDefinition definition,

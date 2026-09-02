@@ -36,6 +36,11 @@ namespace KingdomSurvival.BattleSandbox
             return coord.Q >= start && coord.Q < start + length;
         }
 
+        public static bool MatchesDimensions(int width, int height)
+        {
+            return width == Width && height == Height;
+        }
+
         public static IEnumerable<HexCoord> Cells()
         {
             for (int row = 0; row < Height; row++)
@@ -44,6 +49,19 @@ namespace KingdomSurvival.BattleSandbox
                 int end = start + RowLengths[row];
                 for (int column = start; column < end; column++)
                     yield return new HexCoord(column, row);
+            }
+        }
+
+        public static IEnumerable<HexCoord> InactiveCells()
+        {
+            for (int row = 0; row < Height; row++)
+            {
+                for (int column = 0; column < Width; column++)
+                {
+                    HexCoord coord = new HexCoord(column, row);
+                    if (!Contains(coord))
+                        yield return coord;
+                }
             }
         }
     }

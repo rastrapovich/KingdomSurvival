@@ -11,6 +11,9 @@ namespace KingdomSurvival.BattleSandbox
         private const float AttackReturnDuration = 0.10f;
         private const float DamageFloatDuration = 0.58f;
         private const float MovementSegmentDuration = 0.14f;
+        private const float HealthBarWidthScale = 0.875f;
+        private const float HealthBarHeight = 4.2f;
+        private const float HealthBarBottomInset = 8f;
 
         private static readonly Color NormalColor = new Color(0.16f, 0.20f, 0.22f, 1f);
         private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 1f);
@@ -23,6 +26,10 @@ namespace KingdomSurvival.BattleSandbox
             new Dictionary<string, SandboxUnitVisual>();
         private readonly Dictionary<string, Image> unitImages =
             new Dictionary<string, Image>();
+        private readonly Dictionary<string, VisualElement> unitHealthBars =
+            new Dictionary<string, VisualElement>();
+        private readonly Dictionary<string, VisualElement> unitHealthFills =
+            new Dictionary<string, VisualElement>();
         private readonly Label damageLabel;
 
         private IVisualElementScheduledItem attackAnimationItem;
@@ -557,22 +564,37 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             float radius = layout.Size * 0.55f;
-            Color fill = unit.Team == SandboxTeam.Player
-                ? new Color(0.78f, 0.62f, 0.27f, 1f)
-                : new Color(0.70f, 0.25f, 0.22f, 1f);
-            if (IsAnimating && unit.Id == animationTargetId && targetFlash > 0f)
-                fill = Color.Lerp(fill, Color.white, targetFlash * 0.72f);
+            bool hasBattlefieldSprite = HasBattlefieldSprite(unit.TypeId);
+            if (!hasBattlefieldSprite)
+            {
+                Color fill = unit.Team == SandboxTeam.Player
+                    ? new Color(0.78f, 0.62f, 0.27f, 1f)
+                    : new Color(0.70f, 0.25f, 0.22f, 1f);
+                if (IsAnimating && unit.Id == animationTargetId && targetFlash > 0f)
+                    fill = Color.Lerp(fill, Color.white, targetFlash * 0.72f);
 
-            Color outline = current != null && current.Id == unit.Id
-                ? Color.white
-                : new Color(0.05f, 0.05f, 0.05f, 1f);
-            DrawCircle(
-                painter,
-                center,
-                radius,
-                fill,
-                outline,
-                current != null && current.Id == unit.Id ? 4f : 2f);
+                Color outline = current != null && current.Id == unit.Id
+                    ? Color.white
+                    : new Color(0.05f, 0.05f, 0.05f, 1f);
+                DrawCircle(
+                    painter,
+                    center,
+                    radius,
+                    fill,
+                    outline,
+                    current != null && current.Id == unit.Id ? 4f : 2f);
+            }
+            else if (current != null && current.Id == unit.Id)
+            {
+                DrawCircle(
+                    painter,
+                    center,
+                    radius,
+                    new Color(0f, 0f, 0f, 0f),
+                    Color.white,
+                    4f,
+                    false);
+            }
 
             if (unit.IsGuarding)
             {
@@ -586,19 +608,7 @@ namespace KingdomSurvival.BattleSandbox
                     false);
             }
 
-            float barWidth = layout.Size * 1.25f;
-            float barHeight = 6f;
-            Vector2 barOrigin = center + new Vector2(-barWidth * 0.5f, -radius - 12f);
-            DrawRectangle(painter, barOrigin, new Vector2(barWidth, barHeight), new Color(0.05f, 0.05f, 0.05f, 1f));
-            DrawRectangle(
-                painter,
-                barOrigin,
-                new Vector2(barWidth * unit.HitPoints / unit.MaxHitPoints, barHeight),
-                unit.HitPoints > unit.MaxHitPoints * 0.35f
-                    ? new Color(0.32f, 0.72f, 0.38f, 1f)
-                    : new Color(0.84f, 0.31f, 0.26f, 1f));
-
-            if (!HasBattlefieldSprite(unit.TypeId))
+            if (!hasBattlefieldSprite)
                 DrawRoleMark(painter, center, layout.Size, unit.Role);
         }
 
@@ -816,66 +826,151 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             HexLayout layout = CalculateLayout();
-            HashSet<string> visibleIds = new HashSet<string>();
+            HashSet<string> visibleUnitIds = new HashSet<string>();
+            HashSet<string> visibleImageIds = new HashSet<string>();
             foreach (SandboxUnitState unit in battle.Units)
             {
                 bool animatedDefeatedTarget = IsAnimating && unit.Id == animationTargetId;
                 if (unit.IsDefeated && !animatedDefeatedTarget)
                     continue;
 
+                visibleUnitIds.Add(unit.Id);
+                Vector2 unitCenter = GetUnitVisualCenter(layout, unit);
+                Vector2 healthCenter = unitCenter;
+                float healthTop = unitCenter.y + layout.Size * 0.34f;
+
                 SandboxUnitVisual visual;
-                if (!unitVisuals.TryGetValue(unit.TypeId, out visual) ||
-                    visual == null ||
-                    visual.BattlefieldSprite == null)
+                bool hasBattlefieldSprite =
+                    unitVisuals.TryGetValue(unit.TypeId, out visual) &&
+                    visual != null &&
+                    visual.BattlefieldSprite != null;
+                if (hasBattlefieldSprite)
                 {
-                    continue;
-                }
-
-                Image image;
-                if (!unitImages.TryGetValue(unit.Id, out image))
-                {
-                    image = new Image
+                    Image image;
+                    if (!unitImages.TryGetValue(unit.Id, out image))
                     {
-                        pickingMode = PickingMode.Ignore,
-                        scaleMode = ScaleMode.ScaleToFit
-                    };
-                    image.style.position = Position.Absolute;
-                    unitImages.Add(unit.Id, image);
-                    Add(image);
+                        image = new Image
+                        {
+                            pickingMode = PickingMode.Ignore,
+                            scaleMode = ScaleMode.ScaleToFit
+                        };
+                        image.style.position = Position.Absolute;
+                        unitImages.Add(unit.Id, image);
+                        Add(image);
+                    }
+
+                    visibleImageIds.Add(unit.Id);
+                    image.sprite = visual.BattlefieldSprite;
+                    float size = layout.Size * 1.35f * visual.BattlefieldScale;
+                    Vector2 center = unitCenter + visual.BattlefieldOffset;
+                    image.style.width = size;
+                    image.style.height = size;
+                    image.style.left = center.x - size * 0.5f;
+                    image.style.top = center.y - size * 0.5f;
+                    image.tintColor = IsAnimating && unit.Id == animationTargetId && targetFlash > 0f
+                        ? Color.Lerp(Color.white, new Color(1f, 0.58f, 0.52f, 1f), targetFlash)
+                        : Color.white;
+                    image.style.display = DisplayStyle.Flex;
+
+                    healthCenter = center;
+                    healthTop = center.y + size * 0.5f - HealthBarBottomInset - HealthBarHeight;
                 }
 
-                visibleIds.Add(unit.Id);
-                image.sprite = visual.BattlefieldSprite;
-                float size = layout.Size * 1.35f * visual.BattlefieldScale;
-                Vector2 center = GetUnitVisualCenter(layout, unit) + visual.BattlefieldOffset;
-                image.style.width = size;
-                image.style.height = size;
-                image.style.left = center.x - size * 0.5f;
-                image.style.top = center.y - size * 0.5f;
-                image.tintColor = IsAnimating && unit.Id == animationTargetId && targetFlash > 0f
-                    ? Color.Lerp(Color.white, new Color(1f, 0.58f, 0.52f, 1f), targetFlash)
-                    : Color.white;
-                image.style.display = DisplayStyle.Flex;
+                SyncHealthBar(unit, healthCenter, healthTop, layout.Size * HealthBarWidthScale);
             }
 
-            List<string> removedIds = null;
+            List<string> removedImageIds = null;
             foreach (KeyValuePair<string, Image> pair in unitImages)
             {
-                if (visibleIds.Contains(pair.Key))
+                if (visibleImageIds.Contains(pair.Key))
                     continue;
-                if (removedIds == null)
-                    removedIds = new List<string>();
-                removedIds.Add(pair.Key);
+                if (removedImageIds == null)
+                    removedImageIds = new List<string>();
+                removedImageIds.Add(pair.Key);
                 pair.Value.RemoveFromHierarchy();
             }
 
-            if (removedIds != null)
+            if (removedImageIds != null)
             {
-                for (int i = 0; i < removedIds.Count; i++)
-                    unitImages.Remove(removedIds[i]);
+                for (int i = 0; i < removedImageIds.Count; i++)
+                    unitImages.Remove(removedImageIds[i]);
+            }
+
+            List<string> removedHealthIds = null;
+            foreach (KeyValuePair<string, VisualElement> pair in unitHealthBars)
+            {
+                if (visibleUnitIds.Contains(pair.Key))
+                    continue;
+                if (removedHealthIds == null)
+                    removedHealthIds = new List<string>();
+                removedHealthIds.Add(pair.Key);
+                pair.Value.RemoveFromHierarchy();
+            }
+
+            if (removedHealthIds != null)
+            {
+                for (int i = 0; i < removedHealthIds.Count; i++)
+                {
+                    unitHealthBars.Remove(removedHealthIds[i]);
+                    unitHealthFills.Remove(removedHealthIds[i]);
+                }
             }
 
             damageLabel.BringToFront();
+        }
+
+        private void SyncHealthBar(
+            SandboxUnitState unit,
+            Vector2 center,
+            float top,
+            float width)
+        {
+            VisualElement healthBar;
+            VisualElement healthFill;
+            if (!unitHealthBars.TryGetValue(unit.Id, out healthBar))
+            {
+                healthBar = new VisualElement
+                {
+                    pickingMode = PickingMode.Ignore
+                };
+                healthBar.style.position = Position.Absolute;
+                healthBar.style.backgroundColor = new Color(0.04f, 0.04f, 0.04f, 0.92f);
+                healthBar.style.overflow = Overflow.Hidden;
+                healthBar.style.borderTopLeftRadius = 2f;
+                healthBar.style.borderTopRightRadius = 2f;
+                healthBar.style.borderBottomLeftRadius = 2f;
+                healthBar.style.borderBottomRightRadius = 2f;
+
+                healthFill = new VisualElement
+                {
+                    pickingMode = PickingMode.Ignore
+                };
+                healthFill.style.position = Position.Absolute;
+                healthFill.style.left = 0f;
+                healthFill.style.top = 0f;
+                healthFill.style.bottom = 0f;
+                healthBar.Add(healthFill);
+
+                unitHealthBars.Add(unit.Id, healthBar);
+                unitHealthFills.Add(unit.Id, healthFill);
+                Add(healthBar);
+            }
+            else
+            {
+                healthFill = unitHealthFills[unit.Id];
+            }
+
+            float ratio = Mathf.Clamp01((float)unit.HitPoints / Mathf.Max(1, unit.MaxHitPoints));
+            healthBar.style.width = width;
+            healthBar.style.height = HealthBarHeight;
+            healthBar.style.left = center.x - width * 0.5f;
+            healthBar.style.top = top;
+            healthBar.style.display = DisplayStyle.Flex;
+            healthFill.style.width = Length.Percent(ratio * 100f);
+            healthFill.style.backgroundColor = unit.HitPoints > unit.MaxHitPoints * 0.35f
+                ? new Color(0.32f, 0.72f, 0.38f, 1f)
+                : new Color(0.84f, 0.31f, 0.26f, 1f);
+            healthBar.BringToFront();
         }
 
         private Vector2 GetUnitVisualCenter(HexLayout layout, SandboxUnitState unit)
@@ -895,6 +990,11 @@ namespace KingdomSurvival.BattleSandbox
             foreach (Image image in unitImages.Values)
                 image.RemoveFromHierarchy();
             unitImages.Clear();
+
+            foreach (VisualElement healthBar in unitHealthBars.Values)
+                healthBar.RemoveFromHierarchy();
+            unitHealthBars.Clear();
+            unitHealthFills.Clear();
         }
 
         private static void DrawRoleMark(

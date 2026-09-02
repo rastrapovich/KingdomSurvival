@@ -470,6 +470,9 @@ namespace KingdomSurvival.BattleSandbox
                 for (int q = 0; q < battle.Width; q++)
                 {
                     HexCoord coord = new HexCoord(q, r);
+                    if (!IsBoardCell(coord))
+                        continue;
+
                     float distance = (layout.GetCenter(coord) - pointerPosition).sqrMagnitude;
                     if (distance < bestDistance)
                     {
@@ -501,6 +504,9 @@ namespace KingdomSurvival.BattleSandbox
                 for (int q = 0; q < battle.Width; q++)
                 {
                     HexCoord coord = new HexCoord(q, r);
+                    if (!IsBoardCell(coord))
+                        continue;
+
                     SandboxTerrain terrain = battle.GetTerrain(coord);
                     SandboxUnitState occupant = battle.GetUnitAt(coord);
                     Color fill = GetTerrainColor(terrain);
@@ -523,6 +529,8 @@ namespace KingdomSurvival.BattleSandbox
                 foreach (KeyValuePair<HexCoord, int> pair in reachable)
                 {
                     if (current != null && pair.Key == current.Position)
+                        continue;
+                    if (!IsBoardCell(pair.Key))
                         continue;
 
                     DrawHex(
@@ -1203,11 +1211,23 @@ namespace KingdomSurvival.BattleSandbox
             painter.Stroke();
         }
 
+        private bool IsBoardCell(HexCoord coord)
+        {
+            if (battle == null || !battle.IsInside(coord))
+                return false;
+
+            if (!SandboxArenaShape.MatchesDimensions(battle.Width, battle.Height))
+                return true;
+
+            return SandboxArenaShape.Contains(coord);
+        }
+
         private HexLayout CalculateLayout()
         {
             float availableWidth = Mathf.Max(100f, contentRect.width - 36f);
             float availableHeight = Mathf.Max(100f, contentRect.height - 36f);
-            float stagger = battle.Height > 1 ? 0.5f : 0f;
+            bool compactArena = SandboxArenaShape.MatchesDimensions(battle.Width, battle.Height);
+            float stagger = compactArena ? 0f : (battle.Height > 1 ? 0.5f : 0f);
             float widthUnits = Mathf.Sqrt(3f) * (battle.Width + stagger);
             float heightUnits = 1.5f * (battle.Height - 1) + 2f;
             float size = Mathf.Min(availableWidth / widthUnits, availableHeight / heightUnits);

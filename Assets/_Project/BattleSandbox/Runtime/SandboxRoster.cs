@@ -82,10 +82,10 @@ namespace KingdomSurvival.BattleSandbox
 
             HexCoord[] enemyPositions =
             {
-                new HexCoord(7, 1),
-                new HexCoord(8, 2),
-                new HexCoord(7, 3),
-                new HexCoord(8, 4)
+                new HexCoord(6, 1),
+                new HexCoord(7, 2),
+                new HexCoord(6, 3),
+                new HexCoord(7, 4)
             };
 
             List<SandboxUnitState> units = new List<SandboxUnitState>();

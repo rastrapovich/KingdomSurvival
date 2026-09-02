@@ -30,6 +30,7 @@ namespace KingdomSurvival.BattleSandbox
             new Dictionary<string, VisualElement>();
         private readonly Dictionary<string, VisualElement> unitHealthFills =
             new Dictionary<string, VisualElement>();
+        private readonly VisualElement attackCursorOverlay;
         private readonly Label damageLabel;
 
         private IVisualElementScheduledItem attackAnimationItem;
@@ -83,6 +84,19 @@ namespace KingdomSurvival.BattleSandbox
             style.borderBottomColor = borderColor;
             pickingMode = PickingMode.Position;
 
+            attackCursorOverlay = new VisualElement
+            {
+                name = "sandbox-attack-cursor-overlay",
+                pickingMode = PickingMode.Ignore
+            };
+            attackCursorOverlay.style.position = Position.Absolute;
+            attackCursorOverlay.style.left = 0f;
+            attackCursorOverlay.style.top = 0f;
+            attackCursorOverlay.style.right = 0f;
+            attackCursorOverlay.style.bottom = 0f;
+            attackCursorOverlay.generateVisualContent += DrawAttackCursorOverlay;
+            Add(attackCursorOverlay);
+
             generateVisualContent += DrawBoard;
             RegisterCallback<PointerDownEvent>(OnPointerDown);
             RegisterCallback<PointerMoveEvent>(OnPointerMove);
@@ -96,6 +110,7 @@ namespace KingdomSurvival.BattleSandbox
             {
                 SyncUnitImages();
                 MarkDirtyRepaint();
+                attackCursorOverlay.MarkDirtyRepaint();
             });
 
             damageLabel = new Label();
@@ -357,6 +372,7 @@ namespace KingdomSurvival.BattleSandbox
                       (movementCost > 0 ? " · движение " + movementCost : string.Empty) +
                       " · " + preview.Damage + " урона · ЛКМ для атаки";
             MarkDirtyRepaint();
+            attackCursorOverlay.MarkDirtyRepaint();
         }
 
         private static HexCoord SelectMeleeAttackPosition(
@@ -412,6 +428,7 @@ namespace KingdomSurvival.BattleSandbox
                 nativeCursorHidden = false;
             }
 
+            attackCursorOverlay.MarkDirtyRepaint();
             if (repaint)
                 MarkDirtyRepaint();
         }
@@ -505,13 +522,19 @@ namespace KingdomSurvival.BattleSandbox
                         new Color(0.98f, 0.80f, 0.32f, 0.95f),
                         3f);
                 }
-
-                DrawAttackCursor(
-                    painter,
-                    hoverCursorPosition,
-                    hoverRangedAttack,
-                    hoverAttackDirection);
             }
+        }
+
+        private void DrawAttackCursorOverlay(MeshGenerationContext context)
+        {
+            if (!attackCursorActive || IsAnimating || battle == null)
+                return;
+
+            DrawAttackCursor(
+                context.painter2D,
+                hoverCursorPosition,
+                hoverRangedAttack,
+                hoverAttackDirection);
         }
 
         private static void DrawMovePath(
@@ -574,7 +597,7 @@ namespace KingdomSurvival.BattleSandbox
                     fill = Color.Lerp(fill, Color.white, targetFlash * 0.72f);
 
                 Color outline = current != null && current.Id == unit.Id
-                    ? Color.white
+                    ? new Color(1f, 1f, 1f, 0.5f)
                     : new Color(0.05f, 0.05f, 0.05f, 1f);
                 DrawCircle(
                     painter,
@@ -591,7 +614,7 @@ namespace KingdomSurvival.BattleSandbox
                     center,
                     radius,
                     new Color(0f, 0f, 0f, 0f),
-                    Color.white,
+                    new Color(1f, 1f, 1f, 0.5f),
                     4f,
                     false);
             }
@@ -916,6 +939,7 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
+            attackCursorOverlay.BringToFront();
             damageLabel.BringToFront();
         }
 

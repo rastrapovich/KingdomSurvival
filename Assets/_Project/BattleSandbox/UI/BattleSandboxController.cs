@@ -22,6 +22,7 @@ namespace KingdomSurvival.BattleSandbox
         private VisualElement root;
         private Label selectedCountLabel;
         private Button startBattleButton;
+        private SandboxFighterDetailsView fighterDetailsView;
 
         private SandboxBattle battle;
         private HexBoardElement board;
@@ -70,6 +71,7 @@ namespace KingdomSurvival.BattleSandbox
             battle = null;
             rosterButtons.Clear();
             root.Clear();
+            fighterDetailsView = new SandboxFighterDetailsView(root);
 
             ScrollView scroll = new ScrollView(ScrollViewMode.Vertical);
             scroll.style.flexGrow = 1f;
@@ -89,7 +91,7 @@ namespace KingdomSurvival.BattleSandbox
             scroll.Add(title);
 
             Label description = CreateLabel(
-                "Выберите от одного до шести бойцов. Полигон не читает и не изменяет состояние основной игры.",
+                "Выберите от одного до шести бойцов. ЛКМ меняет состав, ПКМ открывает карточку бойца. Полигон не изменяет состояние основной игры.",
                 13,
                 new Color(0.72f, 0.72f, 0.69f, 1f));
             description.style.marginTop = 8f;
@@ -107,21 +109,10 @@ namespace KingdomSurvival.BattleSandbox
             foreach (SandboxUnitDefinition definition in SandboxRoster.PlayerRoster)
             {
                 SandboxUnitDefinition captured = definition;
-                Button card = new Button(() => ToggleFighter(captured.Id));
-                card.text = BuildRosterCardText(definition);
-                card.style.width = 190f;
-                card.style.height = 126f;
-                card.style.marginRight = 10f;
-                card.style.marginBottom = 10f;
-                card.style.paddingLeft = 12f;
-                card.style.paddingRight = 12f;
-                card.style.paddingTop = 10f;
-                card.style.paddingBottom = 10f;
-                card.style.whiteSpace = WhiteSpace.Normal;
-                card.style.unityTextAlign = TextAnchor.MiddleLeft;
-                card.style.unityFontStyleAndWeight = FontStyle.Bold;
-                card.style.fontSize = 12f;
-                SetRadius(card, 5f);
+                Button card = SandboxFighterCardFactory.CreateRosterCard(
+                    captured,
+                    () => ToggleFighter(captured.Id),
+                    () => fighterDetailsView.Open(captured));
                 rosterButtons[definition.Id] = card;
                 rosterGrid.Add(card);
             }
@@ -142,22 +133,10 @@ namespace KingdomSurvival.BattleSandbox
             enemyGrid.style.marginTop = 10f;
             foreach (SandboxUnitDefinition enemy in SandboxRoster.EnemyRoster)
             {
-                Label enemyCard = CreateLabel(
-                    enemy.Name.ToUpper() + "\n" +
-                    enemy.MaxHitPoints + " HP  ·  АТК " + enemy.Attack + "  ·  ЗАЩ " + enemy.Defense,
-                    11,
-                    new Color(0.88f, 0.71f, 0.68f, 1f));
-                enemyCard.style.width = 190f;
-                enemyCard.style.height = 72f;
-                enemyCard.style.marginRight = 10f;
-                enemyCard.style.marginBottom = 8f;
-                enemyCard.style.paddingLeft = 11f;
-                enemyCard.style.paddingRight = 11f;
-                enemyCard.style.paddingTop = 10f;
-                enemyCard.style.backgroundColor = new Color(0.20f, 0.10f, 0.11f, 1f);
-                enemyCard.style.whiteSpace = WhiteSpace.Normal;
-                SetBorder(enemyCard, new Color(0.39f, 0.20f, 0.20f, 1f));
-                SetRadius(enemyCard, 4f);
+                SandboxUnitDefinition captured = enemy;
+                Button enemyCard = SandboxFighterCardFactory.CreateEnemyPreviewCard(
+                    captured,
+                    () => fighterDetailsView.Open(captured));
                 enemyGrid.Add(enemyCard);
             }
             enemyPanel.Add(enemyGrid);
@@ -189,18 +168,7 @@ namespace KingdomSurvival.BattleSandbox
             foreach (KeyValuePair<string, Button> pair in rosterButtons)
             {
                 bool selected = selectedFighterIds.Contains(pair.Key);
-                pair.Value.style.backgroundColor = selected
-                    ? new Color(0.28f, 0.25f, 0.16f, 1f)
-                    : new Color(0.12f, 0.14f, 0.16f, 1f);
-                SetBorder(
-                    pair.Value,
-                    selected
-                        ? new Color(0.80f, 0.65f, 0.31f, 1f)
-                        : new Color(0.28f, 0.30f, 0.31f, 1f),
-                    selected ? 2f : 1f);
-                pair.Value.style.color = selected
-                    ? new Color(0.96f, 0.87f, 0.67f, 1f)
-                    : new Color(0.70f, 0.70f, 0.68f, 1f);
+                SandboxFighterCardFactory.SetRosterSelected(pair.Value, selected);
             }
 
             selectedCountLabel.text =
@@ -225,6 +193,7 @@ namespace KingdomSurvival.BattleSandbox
         private void BuildBattleScreen()
         {
             root.Clear();
+            fighterDetailsView = new SandboxFighterDetailsView(root);
 
             VisualElement screen = new VisualElement();
             screen.style.flexGrow = 1f;
@@ -255,7 +224,7 @@ namespace KingdomSurvival.BattleSandbox
             screen.Add(header);
 
             initiativeRow = new VisualElement();
-            initiativeRow.style.height = 54f;
+            initiativeRow.style.height = 82f;
             initiativeRow.style.marginTop = 12f;
             initiativeRow.style.marginBottom = 12f;
             initiativeRow.style.paddingLeft = 8f;
@@ -292,7 +261,7 @@ namespace KingdomSurvival.BattleSandbox
             sidebar.Add(currentStatsLabel);
 
             instructionLabel = CreateLabel(
-                "Синие гексы — перемещение. Красные — доступные цели. Сначала выберите врага, затем подтвердите атаку.",
+                "Синие гексы — перемещение, красные — доступные цели. Карточка в очереди открывает сведения; наведите курсор на характеристику для пояснения.",
                 11,
                 new Color(0.58f, 0.65f, 0.67f, 1f));
             instructionLabel.style.marginTop = 13f;
@@ -369,7 +338,10 @@ namespace KingdomSurvival.BattleSandbox
                 if (occupant.Team == SandboxTeam.Enemy)
                     selectedTargetId = occupant.Id;
                 else
+                {
                     selectedTargetId = null;
+                    fighterDetailsView.Open(occupant.Definition, occupant);
+                }
                 RefreshBattleScreen();
                 return;
             }
@@ -444,6 +416,7 @@ namespace KingdomSurvival.BattleSandbox
                 return;
 
             board.SetBattle(battle, selectedTargetId);
+            fighterDetailsView.Refresh(battle);
             roundLabel.text = "Раунд " + battle.Round + " · два действия на активацию";
             RefreshInitiativeRow();
 
@@ -498,7 +471,7 @@ namespace KingdomSurvival.BattleSandbox
             guardButton.SetEnabled(playerTurn && current.ActionPoints > 0 && !current.IsGuarding);
             endActivationButton.SetEnabled(playerTurn);
             instructionLabel.text = playerTurn
-                ? "Синие гексы — перемещение. Красные — доступные цели. Сначала выберите врага, затем подтвердите атаку."
+                ? "Синие гексы — перемещение, красные — цели. Нажмите союзника на поле или любую карточку очереди, чтобы открыть сведения."
                 : battle.Phase == SandboxBattlePhase.InProgress
                     ? "Противник выполняет свою активацию…"
                     : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";
@@ -523,28 +496,12 @@ namespace KingdomSurvival.BattleSandbox
                     continue;
 
                 bool active = battle.CurrentUnit != null && battle.CurrentUnit.Id == unit.Id;
-                Label chip = CreateLabel(
-                    unit.Name + " · " + unit.HitPoints,
-                    10,
-                    unit.Team == SandboxTeam.Player
-                        ? new Color(0.93f, 0.80f, 0.54f, 1f)
-                        : new Color(0.90f, 0.58f, 0.55f, 1f));
-                chip.style.height = 32f;
-                chip.style.paddingLeft = 9f;
-                chip.style.paddingRight = 9f;
-                chip.style.marginRight = 5f;
-                chip.style.unityTextAlign = TextAnchor.MiddleCenter;
-                chip.style.backgroundColor = active
-                    ? new Color(0.29f, 0.30f, 0.25f, 1f)
-                    : new Color(0.12f, 0.14f, 0.15f, 1f);
-                SetBorder(
-                    chip,
-                    active
-                        ? new Color(0.90f, 0.77f, 0.42f, 1f)
-                        : new Color(0.25f, 0.26f, 0.26f, 1f),
-                    active ? 2f : 1f);
-                SetRadius(chip, 4f);
-                initiativeRow.Add(chip);
+                SandboxUnitState captured = unit;
+                Button card = SandboxFighterCardFactory.CreateInitiativeCard(
+                    captured,
+                    active,
+                    () => fighterDetailsView.Open(captured.Definition, captured));
+                initiativeRow.Add(card);
             }
         }
 
@@ -594,15 +551,6 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (!string.IsNullOrWhiteSpace(entry))
                 battleLog.Add("• " + entry);
-        }
-
-        private static string BuildRosterCardText(SandboxUnitDefinition definition)
-        {
-            return definition.Name.ToUpper() + "\n" + definition.RoleLabel + "\n" +
-                   "HP " + definition.MaxHitPoints + "   АТК " + definition.Attack +
-                   "   ЗАЩ " + definition.Defense + "\n" +
-                   "ХОД " + definition.Movement + "   ИНИЦ " + definition.Initiative +
-                   "   ДАЛЬН " + definition.AttackRange;
         }
 
         private static VisualElement CreatePanel()

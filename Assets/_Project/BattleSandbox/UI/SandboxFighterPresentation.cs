@@ -1,0 +1,696 @@
+using System;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+namespace KingdomSurvival.BattleSandbox
+{
+    internal static class SandboxFighterCardFactory
+    {
+        private static readonly Color PlayerAccent = new Color(0.78f, 0.62f, 0.27f, 1f);
+        private static readonly Color EnemyAccent = new Color(0.68f, 0.27f, 0.23f, 1f);
+        private static readonly Color CardBackground = new Color(0.10f, 0.115f, 0.135f, 1f);
+
+        public static Button CreateRosterCard(
+            SandboxUnitDefinition definition,
+            Action onSelect,
+            Action onDetails)
+        {
+            Button card = CreatePortraitCard(definition, SandboxTeam.Player, onSelect, onDetails);
+            card.name = "sandbox-roster-card-" + definition.Id;
+            card.style.width = 142f;
+            card.style.height = 202f;
+            card.style.flexShrink = 0f;
+            card.style.marginRight = 10f;
+            card.style.marginBottom = 10f;
+
+            Label hint = new Label("ЛКМ: выбрать · ПКМ: сведения");
+            hint.style.fontSize = 8f;
+            hint.style.color = new Color(0.48f, 0.49f, 0.48f, 1f);
+            hint.style.unityTextAlign = TextAnchor.MiddleCenter;
+            hint.pickingMode = PickingMode.Ignore;
+            card.Add(hint);
+            return card;
+        }
+
+        public static Button CreateEnemyPreviewCard(
+            SandboxUnitDefinition definition,
+            Action onDetails)
+        {
+            Button card = CreatePortraitCard(definition, SandboxTeam.Enemy, onDetails, onDetails);
+            card.name = "sandbox-enemy-card-" + definition.Id;
+            card.style.width = 142f;
+            card.style.height = 184f;
+            card.style.flexShrink = 0f;
+            card.style.marginRight = 10f;
+            card.style.marginBottom = 10f;
+            return card;
+        }
+
+        public static Button CreateInitiativeCard(
+            SandboxUnitState unit,
+            bool active,
+            Action onDetails)
+        {
+            Button card = new Button(onDetails);
+            card.name = "sandbox-initiative-card-" + unit.Id;
+            card.userData = unit.Id;
+            card.style.width = 126f;
+            card.style.height = 68f;
+            card.style.flexShrink = 0f;
+            card.style.marginRight = 6f;
+            card.style.paddingLeft = 7f;
+            card.style.paddingRight = 7f;
+            card.style.paddingTop = 5f;
+            card.style.paddingBottom = 5f;
+            card.style.backgroundColor = active
+                ? new Color(0.25f, 0.25f, 0.21f, 1f)
+                : CardBackground;
+            card.style.color = unit.Team == SandboxTeam.Player ? PlayerAccent : EnemyAccent;
+            SetBorder(
+                card,
+                active
+                    ? new Color(0.94f, 0.80f, 0.45f, 1f)
+                    : unit.Team == SandboxTeam.Player
+                        ? new Color(0.45f, 0.38f, 0.23f, 1f)
+                        : new Color(0.45f, 0.24f, 0.23f, 1f),
+                active ? 2f : 1f);
+            SetRadius(card, 4f);
+
+            Label name = new Label(unit.Name.ToUpper());
+            name.style.fontSize = 10f;
+            name.style.unityFontStyleAndWeight = FontStyle.Bold;
+            name.style.unityTextAlign = TextAnchor.MiddleLeft;
+            name.pickingMode = PickingMode.Ignore;
+            card.Add(name);
+
+            Label role = new Label(unit.Definition.RoleLabel + " · ИНИЦ " + unit.Initiative);
+            role.style.fontSize = 8f;
+            role.style.color = new Color(0.63f, 0.63f, 0.60f, 1f);
+            role.pickingMode = PickingMode.Ignore;
+            card.Add(role);
+
+            VisualElement healthBar = CreateHealthBar(unit.HitPoints, unit.MaxHitPoints, 5f);
+            healthBar.style.marginTop = 4f;
+            card.Add(healthBar);
+            card.tooltip = "Открыть карточку участника боя";
+            return card;
+        }
+
+        public static void SetRosterSelected(Button card, bool selected)
+        {
+            if (card == null)
+                return;
+
+            card.style.backgroundColor = selected
+                ? new Color(0.25f, 0.22f, 0.14f, 1f)
+                : CardBackground;
+            SetBorder(
+                card,
+                selected
+                    ? new Color(0.84f, 0.68f, 0.32f, 1f)
+                    : new Color(0.31f, 0.32f, 0.32f, 1f),
+                selected ? 2f : 1f);
+
+            Label badge = card.Q<Label>("sandbox-selection-badge");
+            if (badge != null)
+            {
+                badge.text = selected ? "✓" : string.Empty;
+                badge.style.backgroundColor = selected
+                    ? new Color(0.69f, 0.53f, 0.22f, 1f)
+                    : new Color(0f, 0f, 0f, 0f);
+            }
+        }
+
+        private static Button CreatePortraitCard(
+            SandboxUnitDefinition definition,
+            SandboxTeam team,
+            Action onClick,
+            Action onDetails)
+        {
+            Button card = new Button(onClick);
+            card.userData = definition.Id;
+            card.style.paddingLeft = 7f;
+            card.style.paddingRight = 7f;
+            card.style.paddingTop = 7f;
+            card.style.paddingBottom = 7f;
+            card.style.backgroundColor = CardBackground;
+            card.style.color = new Color(0.84f, 0.82f, 0.75f, 1f);
+            card.style.position = Position.Relative;
+            card.style.alignItems = Align.Stretch;
+            SetBorder(
+                card,
+                team == SandboxTeam.Player
+                    ? new Color(0.36f, 0.34f, 0.29f, 1f)
+                    : new Color(0.43f, 0.24f, 0.23f, 1f));
+            SetRadius(card, 4f);
+
+            VisualElement portrait = new VisualElement();
+            portrait.style.height = 106f;
+            portrait.style.alignItems = Align.Center;
+            portrait.style.justifyContent = Justify.Center;
+            portrait.style.backgroundColor = team == SandboxTeam.Player
+                ? new Color(0.11f, 0.13f, 0.16f, 1f)
+                : new Color(0.17f, 0.095f, 0.10f, 1f);
+            SetBorder(
+                portrait,
+                team == SandboxTeam.Player
+                    ? new Color(0.29f, 0.32f, 0.36f, 1f)
+                    : new Color(0.43f, 0.22f, 0.21f, 1f));
+            SetRadius(portrait, 3f);
+            portrait.pickingMode = PickingMode.Ignore;
+
+            Label portraitRole = new Label(definition.RoleLabel.ToUpper());
+            portraitRole.style.fontSize = 10f;
+            portraitRole.style.unityFontStyleAndWeight = FontStyle.Bold;
+            portraitRole.style.unityTextAlign = TextAnchor.MiddleCenter;
+            portraitRole.style.color = team == SandboxTeam.Player ? PlayerAccent : EnemyAccent;
+            portraitRole.pickingMode = PickingMode.Ignore;
+            portrait.Add(portraitRole);
+            card.Add(portrait);
+
+            Label name = new Label(definition.Name.ToUpper());
+            name.style.marginTop = 6f;
+            name.style.fontSize = 11f;
+            name.style.unityFontStyleAndWeight = FontStyle.Bold;
+            name.style.unityTextAlign = TextAnchor.MiddleCenter;
+            name.pickingMode = PickingMode.Ignore;
+            card.Add(name);
+
+            Label stats = new Label(
+                "HP " + definition.MaxHitPoints + "  ·  АТК " + definition.Attack +
+                "  ·  ЗАЩ " + definition.Defense);
+            stats.style.marginTop = 3f;
+            stats.style.fontSize = 8f;
+            stats.style.color = new Color(0.61f, 0.62f, 0.60f, 1f);
+            stats.style.unityTextAlign = TextAnchor.MiddleCenter;
+            stats.pickingMode = PickingMode.Ignore;
+            card.Add(stats);
+
+            VisualElement healthBar = CreateHealthBar(
+                definition.MaxHitPoints,
+                definition.MaxHitPoints,
+                5f);
+            healthBar.style.marginTop = 5f;
+            card.Add(healthBar);
+
+            Label badge = new Label();
+            badge.name = "sandbox-selection-badge";
+            badge.style.position = Position.Absolute;
+            badge.style.right = 5f;
+            badge.style.top = 5f;
+            badge.style.width = 22f;
+            badge.style.height = 22f;
+            badge.style.unityTextAlign = TextAnchor.MiddleCenter;
+            badge.style.unityFontStyleAndWeight = FontStyle.Bold;
+            badge.style.color = Color.white;
+            SetRadius(badge, 11f);
+            badge.pickingMode = PickingMode.Ignore;
+            card.Add(badge);
+
+            card.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (evt.button != 1)
+                    return;
+                onDetails?.Invoke();
+                evt.StopPropagation();
+            });
+            card.tooltip = team == SandboxTeam.Player
+                ? "ЛКМ — выбрать. ПКМ — открыть карточку бойца."
+                : "Открыть карточку противника.";
+            return card;
+        }
+
+        private static VisualElement CreateHealthBar(int hitPoints, int maxHitPoints, float height)
+        {
+            VisualElement bar = new VisualElement();
+            bar.style.height = height;
+            bar.style.backgroundColor = new Color(0.055f, 0.06f, 0.07f, 1f);
+            SetRadius(bar, 2f);
+            bar.pickingMode = PickingMode.Ignore;
+
+            VisualElement fill = new VisualElement();
+            fill.style.height = Length.Percent(100f);
+            fill.style.width = Length.Percent(
+                Mathf.Clamp01((float)hitPoints / Mathf.Max(1, maxHitPoints)) * 100f);
+            fill.style.backgroundColor = GetHealthColor(hitPoints, maxHitPoints);
+            SetRadius(fill, 2f);
+            fill.pickingMode = PickingMode.Ignore;
+            bar.Add(fill);
+            return bar;
+        }
+
+        private static Color GetHealthColor(int hitPoints, int maxHitPoints)
+        {
+            float fraction = Mathf.Clamp01((float)hitPoints / Mathf.Max(1, maxHitPoints));
+            if (fraction > 0.60f)
+                return new Color(0.32f, 0.62f, 0.40f, 1f);
+            if (fraction > 0.30f)
+                return new Color(0.72f, 0.57f, 0.25f, 1f);
+            return new Color(0.66f, 0.28f, 0.26f, 1f);
+        }
+
+        private static void SetBorder(VisualElement element, Color color, float width = 1f)
+        {
+            element.style.borderLeftWidth = width;
+            element.style.borderRightWidth = width;
+            element.style.borderTopWidth = width;
+            element.style.borderBottomWidth = width;
+            element.style.borderLeftColor = color;
+            element.style.borderRightColor = color;
+            element.style.borderTopColor = color;
+            element.style.borderBottomColor = color;
+        }
+
+        private static void SetRadius(VisualElement element, float radius)
+        {
+            element.style.borderTopLeftRadius = radius;
+            element.style.borderTopRightRadius = radius;
+            element.style.borderBottomLeftRadius = radius;
+            element.style.borderBottomRightRadius = radius;
+        }
+    }
+
+    internal sealed class SandboxFighterDetailsView
+    {
+        private const float WindowWidth = 650f;
+        private const float WindowHeight = 500f;
+
+        private readonly VisualElement root;
+        private readonly VisualElement dimmer;
+        private readonly VisualElement window;
+        private readonly VisualElement statTooltip;
+        private readonly Label tooltipTitle;
+        private readonly Label tooltipText;
+        private readonly Label fighterName;
+        private readonly Label fighterRole;
+        private readonly Label portraitLabel;
+        private readonly Label teamLabel;
+        private readonly VisualElement healthFill;
+        private readonly Label healthText;
+        private readonly Label attackValue;
+        private readonly Label defenseValue;
+        private readonly Label movementValue;
+        private readonly Label initiativeValue;
+        private readonly Label rangeValue;
+        private readonly Label actionsValue;
+        private readonly Label stateValue;
+
+        private SandboxUnitDefinition openedDefinition;
+        private SandboxUnitState openedState;
+
+        public SandboxFighterDetailsView(VisualElement root)
+        {
+            this.root = root ?? throw new ArgumentNullException(nameof(root));
+
+            dimmer = new VisualElement { focusable = true };
+            dimmer.name = "sandbox-fighter-details-dimmer";
+            dimmer.style.display = DisplayStyle.None;
+            dimmer.style.position = Position.Absolute;
+            dimmer.style.left = 0f;
+            dimmer.style.right = 0f;
+            dimmer.style.top = 0f;
+            dimmer.style.bottom = 0f;
+            dimmer.style.backgroundColor = new Color(0.01f, 0.015f, 0.02f, 0.74f);
+            dimmer.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (evt.button != 0 || evt.target != dimmer)
+                    return;
+                Close();
+                evt.StopPropagation();
+            });
+            dimmer.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode != KeyCode.Escape)
+                    return;
+                Close();
+                evt.StopPropagation();
+            });
+            root.Add(dimmer);
+
+            window = new VisualElement();
+            window.name = "sandbox-fighter-details-window";
+            window.style.display = DisplayStyle.None;
+            window.style.position = Position.Absolute;
+            window.style.width = WindowWidth;
+            window.style.height = WindowHeight;
+            window.style.paddingLeft = 18f;
+            window.style.paddingRight = 18f;
+            window.style.paddingTop = 15f;
+            window.style.paddingBottom = 15f;
+            window.style.backgroundColor = new Color(0.105f, 0.12f, 0.145f, 0.995f);
+            SetBorder(window, new Color(0.45f, 0.38f, 0.25f, 1f), 1f);
+            SetRadius(window, 6f);
+            root.Add(window);
+
+            VisualElement header = new VisualElement();
+            header.style.height = 40f;
+            header.style.flexDirection = FlexDirection.Row;
+            header.style.alignItems = Align.Center;
+            header.style.justifyContent = Justify.SpaceBetween;
+
+            fighterName = CreateLabel("БОЕЦ", 20, new Color(0.90f, 0.74f, 0.40f, 1f));
+            fighterName.style.unityFontStyleAndWeight = FontStyle.Bold;
+            header.Add(fighterName);
+
+            Button closeButton = new Button(Close) { text = "×" };
+            closeButton.style.width = 36f;
+            closeButton.style.height = 32f;
+            closeButton.style.fontSize = 19f;
+            closeButton.style.backgroundColor = new Color(0.20f, 0.22f, 0.26f, 1f);
+            closeButton.style.color = new Color(0.88f, 0.85f, 0.78f, 1f);
+            SetBorder(closeButton, new Color(0.34f, 0.35f, 0.36f, 1f));
+            SetRadius(closeButton, 3f);
+            header.Add(closeButton);
+            window.Add(header);
+
+            VisualElement body = new VisualElement();
+            body.style.flexGrow = 1f;
+            body.style.flexDirection = FlexDirection.Row;
+            body.style.marginTop = 10f;
+
+            VisualElement portrait = new VisualElement();
+            portrait.style.width = 210f;
+            portrait.style.height = 390f;
+            portrait.style.flexShrink = 0f;
+            portrait.style.alignItems = Align.Center;
+            portrait.style.justifyContent = Justify.Center;
+            portrait.style.backgroundColor = new Color(0.075f, 0.085f, 0.105f, 1f);
+            SetBorder(portrait, new Color(0.27f, 0.30f, 0.34f, 1f));
+            SetRadius(portrait, 4f);
+
+            portraitLabel = CreateLabel("ИЗОБРАЖЕНИЕ\nБОЙЦА", 15, new Color(0.50f, 0.48f, 0.42f, 1f));
+            portraitLabel.style.whiteSpace = WhiteSpace.Normal;
+            portraitLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            portraitLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            portrait.Add(portraitLabel);
+
+            fighterRole = CreateLabel("Роль", 13, new Color(0.78f, 0.65f, 0.39f, 1f));
+            fighterRole.style.position = Position.Absolute;
+            fighterRole.style.left = 8f;
+            fighterRole.style.right = 8f;
+            fighterRole.style.bottom = 54f;
+            fighterRole.style.unityTextAlign = TextAnchor.MiddleCenter;
+            fighterRole.style.unityFontStyleAndWeight = FontStyle.Bold;
+            portrait.Add(fighterRole);
+
+            teamLabel = CreateLabel("ОТРЯД", 9, new Color(0.52f, 0.54f, 0.54f, 1f));
+            teamLabel.style.position = Position.Absolute;
+            teamLabel.style.left = 8f;
+            teamLabel.style.right = 8f;
+            teamLabel.style.bottom = 35f;
+            teamLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            portrait.Add(teamLabel);
+
+            VisualElement hpBar = new VisualElement();
+            hpBar.style.position = Position.Absolute;
+            hpBar.style.left = 12f;
+            hpBar.style.right = 12f;
+            hpBar.style.bottom = 13f;
+            hpBar.style.height = 12f;
+            hpBar.style.backgroundColor = new Color(0.055f, 0.06f, 0.07f, 1f);
+            SetRadius(hpBar, 3f);
+            healthFill = new VisualElement();
+            healthFill.style.height = Length.Percent(100f);
+            SetRadius(healthFill, 3f);
+            hpBar.Add(healthFill);
+            portrait.Add(hpBar);
+            body.Add(portrait);
+
+            VisualElement info = new VisualElement();
+            info.style.flexGrow = 1f;
+            info.style.marginLeft = 20f;
+
+            Label section = CreateLabel("БОЕВЫЕ ХАРАКТЕРИСТИКИ", 12, new Color(0.72f, 0.67f, 0.56f, 1f));
+            section.style.unityFontStyleAndWeight = FontStyle.Bold;
+            section.style.marginBottom = 8f;
+            info.Add(section);
+
+            healthText = CreateStatRow(
+                info,
+                "ЖИЗНИ",
+                "—",
+                "Запас здоровья участника. При 0 HP боец выбывает из текущего боя.");
+            attackValue = CreateStatRow(
+                info,
+                "АТАКА",
+                "—",
+                "Увеличивает урон. Формула: max(5, 15 + (Атака − эффективная Защита) × 5).");
+            defenseValue = CreateStatRow(
+                info,
+                "ЗАЩИТА",
+                "—",
+                "Снижает входящий урон на 5 за каждое очко относительно Атаки врага. Стойка временно добавляет +2.");
+            movementValue = CreateStatRow(
+                info,
+                "ХОД",
+                "—",
+                "Максимальная стоимость маршрута за одно действие перемещения. Обычный гекс стоит 1, сложный — 2.");
+            initiativeValue = CreateStatRow(
+                info,
+                "ИНИЦИАТИВА",
+                "—",
+                "Определяет порядок активаций в каждом раунде. Чем выше значение, тем раньше ходит участник.");
+            rangeValue = CreateStatRow(
+                info,
+                "ДАЛЬНОСТЬ",
+                "—",
+                "Максимальная гексовая дистанция обычной атаки до цели.");
+            actionsValue = CreateStatRow(
+                info,
+                "ДЕЙСТВИЯ",
+                "—",
+                "В начале активации выдаётся 2 действия. Перемещение, атака и защитная стойка расходуют по одному.");
+
+            stateValue = CreateLabel("Состояние: —", 11, new Color(0.66f, 0.67f, 0.65f, 1f));
+            stateValue.style.marginTop = 10f;
+            info.Add(stateValue);
+
+            Label hoverHint = CreateLabel(
+                "Наведите курсор на характеристику, чтобы увидеть точное объяснение.",
+                9,
+                new Color(0.49f, 0.56f, 0.58f, 1f));
+            hoverHint.style.marginTop = 10f;
+            hoverHint.style.whiteSpace = WhiteSpace.Normal;
+            info.Add(hoverHint);
+
+            body.Add(info);
+            window.Add(body);
+
+            statTooltip = new VisualElement();
+            statTooltip.name = "sandbox-stat-tooltip";
+            statTooltip.pickingMode = PickingMode.Ignore;
+            statTooltip.style.display = DisplayStyle.None;
+            statTooltip.style.position = Position.Absolute;
+            statTooltip.style.width = 330f;
+            statTooltip.style.paddingLeft = 12f;
+            statTooltip.style.paddingRight = 12f;
+            statTooltip.style.paddingTop = 10f;
+            statTooltip.style.paddingBottom = 10f;
+            statTooltip.style.backgroundColor = new Color(0.055f, 0.065f, 0.075f, 0.995f);
+            SetBorder(statTooltip, new Color(0.58f, 0.47f, 0.26f, 1f));
+            SetRadius(statTooltip, 4f);
+            tooltipTitle = CreateLabel(string.Empty, 11, new Color(0.91f, 0.76f, 0.43f, 1f));
+            tooltipTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
+            statTooltip.Add(tooltipTitle);
+            tooltipText = CreateLabel(string.Empty, 10, new Color(0.76f, 0.76f, 0.72f, 1f));
+            tooltipText.style.marginTop = 5f;
+            tooltipText.style.whiteSpace = WhiteSpace.Normal;
+            statTooltip.Add(tooltipText);
+            root.Add(statTooltip);
+        }
+
+        public void Open(
+            SandboxUnitDefinition definition,
+            SandboxUnitState state = null)
+        {
+            if (definition == null)
+                return;
+
+            openedDefinition = definition;
+            openedState = state;
+            RefreshValues();
+            HideTooltip();
+            dimmer.style.display = DisplayStyle.Flex;
+            window.style.display = DisplayStyle.Flex;
+            PositionWindow();
+            dimmer.BringToFront();
+            window.BringToFront();
+            dimmer.Focus();
+        }
+
+        public void Refresh(SandboxBattle battle)
+        {
+            if (openedDefinition == null || window.resolvedStyle.display == DisplayStyle.None)
+                return;
+
+            openedState = battle != null ? battle.GetUnit(openedDefinition.Id) : null;
+            RefreshValues();
+        }
+
+        public void Close()
+        {
+            openedDefinition = null;
+            openedState = null;
+            HideTooltip();
+            window.style.display = DisplayStyle.None;
+            dimmer.style.display = DisplayStyle.None;
+        }
+
+        private Label CreateStatRow(
+            VisualElement parent,
+            string title,
+            string value,
+            string explanation)
+        {
+            VisualElement row = new VisualElement();
+            row.style.height = 36f;
+            row.style.marginBottom = 5f;
+            row.style.paddingLeft = 10f;
+            row.style.paddingRight = 10f;
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.alignItems = Align.Center;
+            row.style.justifyContent = Justify.SpaceBetween;
+            row.style.backgroundColor = new Color(0.13f, 0.145f, 0.165f, 1f);
+            SetBorder(row, new Color(0.25f, 0.27f, 0.29f, 1f));
+            SetRadius(row, 3f);
+
+            Label titleLabel = CreateLabel(title, 10, new Color(0.64f, 0.63f, 0.58f, 1f));
+            titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            titleLabel.pickingMode = PickingMode.Ignore;
+            row.Add(titleLabel);
+
+            Label valueLabel = CreateLabel(value, 13, new Color(0.91f, 0.79f, 0.54f, 1f));
+            valueLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            valueLabel.pickingMode = PickingMode.Ignore;
+            row.Add(valueLabel);
+
+            row.RegisterCallback<PointerEnterEvent>(_ =>
+            {
+                row.style.backgroundColor = new Color(0.20f, 0.19f, 0.14f, 1f);
+                ShowTooltip(row, title, explanation);
+            });
+            row.RegisterCallback<PointerLeaveEvent>(_ =>
+            {
+                row.style.backgroundColor = new Color(0.13f, 0.145f, 0.165f, 1f);
+                HideTooltip();
+            });
+            parent.Add(row);
+            return valueLabel;
+        }
+
+        private void RefreshValues()
+        {
+            int hitPoints = openedState != null
+                ? openedState.HitPoints
+                : openedDefinition.MaxHitPoints;
+            int actions = openedState != null
+                ? openedState.ActionPoints
+                : SandboxUnitState.ActionsPerActivation;
+
+            fighterName.text = openedDefinition.Name.ToUpper();
+            fighterRole.text = openedDefinition.RoleLabel.ToUpper();
+            portraitLabel.text = openedDefinition.RoleLabel.ToUpper() + "\n\nИЗОБРАЖЕНИЕ\nБОЙЦА";
+            teamLabel.text = openedState == null || openedState.Team == SandboxTeam.Player
+                ? "ОТРЯД КОРОЛЕВСТВА"
+                : "ПРОТИВНИК";
+            healthText.text = hitPoints + " / " + openedDefinition.MaxHitPoints;
+            attackValue.text = openedDefinition.Attack.ToString();
+            defenseValue.text = openedDefinition.Defense +
+                (openedState != null && openedState.IsGuarding ? " + 2" : string.Empty);
+            movementValue.text = openedDefinition.Movement.ToString();
+            initiativeValue.text = openedDefinition.Initiative.ToString();
+            rangeValue.text = openedDefinition.AttackRange.ToString();
+            actionsValue.text = actions + " / " + SandboxUnitState.ActionsPerActivation;
+
+            stateValue.text = openedState == null
+                ? "Состояние: готов к бою"
+                : openedState.IsDefeated
+                    ? "Состояние: выведен из строя"
+                    : openedState.IsGuarding
+                        ? "Состояние: защитная стойка"
+                        : "Состояние: в бою";
+
+            float fraction = Mathf.Clamp01(
+                (float)hitPoints / Mathf.Max(1, openedDefinition.MaxHitPoints));
+            healthFill.style.width = Length.Percent(fraction * 100f);
+            healthFill.style.backgroundColor = fraction > 0.60f
+                ? new Color(0.32f, 0.62f, 0.40f, 1f)
+                : fraction > 0.30f
+                    ? new Color(0.72f, 0.57f, 0.25f, 1f)
+                    : new Color(0.66f, 0.28f, 0.26f, 1f);
+        }
+
+        private void PositionWindow()
+        {
+            float rootWidth = root.resolvedStyle.width;
+            float rootHeight = root.resolvedStyle.height;
+            if (float.IsNaN(rootWidth) || rootWidth < WindowWidth)
+                rootWidth = 1280f;
+            if (float.IsNaN(rootHeight) || rootHeight < WindowHeight)
+                rootHeight = 720f;
+
+            window.style.left = Mathf.Max(12f, (rootWidth - WindowWidth) * 0.5f);
+            window.style.top = Mathf.Max(12f, (rootHeight - WindowHeight) * 0.5f);
+        }
+
+        private void ShowTooltip(VisualElement anchor, string title, string explanation)
+        {
+            tooltipTitle.text = title;
+            tooltipText.text = explanation;
+            statTooltip.style.display = DisplayStyle.Flex;
+            statTooltip.BringToFront();
+
+            Rect bounds = anchor.worldBound;
+            Vector2 topRight = root.WorldToLocal(new Vector2(bounds.xMax, bounds.yMin));
+            Vector2 topLeft = root.WorldToLocal(new Vector2(bounds.xMin, bounds.yMin));
+            float rootWidth = root.resolvedStyle.width;
+            float rootHeight = root.resolvedStyle.height;
+            if (float.IsNaN(rootWidth) || rootWidth < 400f)
+                rootWidth = 1280f;
+            if (float.IsNaN(rootHeight) || rootHeight < 300f)
+                rootHeight = 720f;
+
+            float left = topRight.x + 10f;
+            if (left + 330f > rootWidth - 12f)
+                left = topLeft.x - 340f;
+            statTooltip.style.left = Mathf.Clamp(left, 12f, Mathf.Max(12f, rootWidth - 342f));
+            statTooltip.style.top = Mathf.Clamp(
+                topRight.y,
+                12f,
+                Mathf.Max(12f, rootHeight - 120f));
+        }
+
+        private void HideTooltip()
+        {
+            statTooltip.style.display = DisplayStyle.None;
+        }
+
+        private static Label CreateLabel(string text, int size, Color color)
+        {
+            Label label = new Label(text);
+            label.style.fontSize = size;
+            label.style.color = color;
+            return label;
+        }
+
+        private static void SetBorder(VisualElement element, Color color, float width = 1f)
+        {
+            element.style.borderLeftWidth = width;
+            element.style.borderRightWidth = width;
+            element.style.borderTopWidth = width;
+            element.style.borderBottomWidth = width;
+            element.style.borderLeftColor = color;
+            element.style.borderRightColor = color;
+            element.style.borderTopColor = color;
+            element.style.borderBottomColor = color;
+        }
+
+        private static void SetRadius(VisualElement element, float radius)
+        {
+            element.style.borderTopLeftRadius = radius;
+            element.style.borderTopRightRadius = radius;
+            element.style.borderBottomLeftRadius = radius;
+            element.style.borderBottomRightRadius = radius;
+        }
+    }
+}

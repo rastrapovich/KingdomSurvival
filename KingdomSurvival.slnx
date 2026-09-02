@@ -1,11 +1,14 @@
 ﻿<Solution>
   <Project Path="KingdomSurvival.Core.csproj" />
+  <Project Path="KingdomSurvival.BattlefieldDatabase.csproj" />
   <Project Path="KingdomSurvival.Core.EditModeTests.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="KingdomSurvival.BattleSandbox.UI.csproj" />
   <Project Path="KingdomSurvival.UnitDatabase.Editor.csproj" />
   <Project Path="KingdomSurvival.BattleSandbox.Runtime.csproj" />
+  <Project Path="KingdomSurvival.BattlefieldDatabase.Editor.csproj" />
   <Project Path="KingdomSurvival.BattleSandbox.EditModeTests.csproj" />
+  <Project Path="KingdomSurvival.BattlefieldDatabase.EditModeTests.csproj" />
   <Project Path="KingdomSurvival.UnitDatabase.csproj" />
   <Project Path="KingdomSurvival.UnitDatabase.EditModeTests.csproj" />
 </Solution>

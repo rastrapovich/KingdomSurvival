@@ -11,51 +11,60 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f6a8d629e1644bd8b451c1cf11db201, type: 3}
   m_Name: KingdomSurvivalUnits
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   tags:
   - id: species.human
-    displayLabel: Человек
-    category: Происхождение
+    displayLabel: "\u0427\u0435\u043B\u043E\u0432\u0435\u043A"
+    category: "\u041F\u0440\u043E\u0438\u0441\u0445\u043E\u0436\u0434\u0435\u043D\u0438\u0435"
     color: {r: 0.72, g: 0.61, b: 0.42, a: 1}
-    description: Разумный человек.
+    description: "\u0420\u0430\u0437\u0443\u043C\u043D\u044B\u0439 \u0447\u0435\u043B\u043E\u0432\u0435\u043A."
   - id: species.beast
-    displayLabel: Зверь
-    category: Происхождение
-    color: {r: 0.62, g: 0.27, b: 0.20, a: 1}
-    description: Зверь; используется способностями и бонусом копейщика.
+    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
+    category: "\u041F\u0440\u043E\u0438\u0441\u0445\u043E\u0436\u0434\u0435\u043D\u0438\u0435"
+    color: {r: 0.62, g: 0.27, b: 0.2, a: 1}
+    description: "\u0417\u0432\u0435\u0440\u044C; \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442\u0441\u044F
+      \u0441\u043F\u043E\u0441\u043E\u0431\u043D\u043E\u0441\u0442\u044F\u043C\u0438
+      \u0438 \u0431\u043E\u043D\u0443\u0441\u043E\u043C \u043A\u043E\u043F\u0435\u0439\u0449\u0438\u043A\u0430."
   - id: combat.melee
-    displayLabel: Ближний бой
-    category: Тип атаки
+    displayLabel: "\u0411\u043B\u0438\u0436\u043D\u0438\u0439 \u0431\u043E\u0439"
+    category: "\u0422\u0438\u043F \u0430\u0442\u0430\u043A\u0438"
     color: {r: 0.62, g: 0.48, b: 0.24, a: 1}
-    description: Основная атака выполняется в ближнем бою.
+    description: "\u041E\u0441\u043D\u043E\u0432\u043D\u0430\u044F \u0430\u0442\u0430\u043A\u0430
+      \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u0435\u0442\u0441\u044F \u0432 \u0431\u043B\u0438\u0436\u043D\u0435\u043C
+      \u0431\u043E\u044E."
   - id: combat.ranged
-    displayLabel: Дальний бой
-    category: Тип атаки
+    displayLabel: "\u0414\u0430\u043B\u044C\u043D\u0438\u0439 \u0431\u043E\u0439"
+    category: "\u0422\u0438\u043F \u0430\u0442\u0430\u043A\u0438"
     color: {r: 0.28, g: 0.53, b: 0.66, a: 1}
-    description: Может атаковать на расстоянии.
+    description: "\u041C\u043E\u0436\u0435\u0442 \u0430\u0442\u0430\u043A\u043E\u0432\u0430\u0442\u044C
+      \u043D\u0430 \u0440\u0430\u0441\u0441\u0442\u043E\u044F\u043D\u0438\u0438."
   - id: role.defender
-    displayLabel: Защитник
-    category: Роль
+    displayLabel: "\u0417\u0430\u0449\u0438\u0442\u043D\u0438\u043A"
+    category: "\u0420\u043E\u043B\u044C"
     color: {r: 0.35, g: 0.49, b: 0.62, a: 1}
-    description: Специализируется на удержании линии.
+    description: "\u0421\u043F\u0435\u0446\u0438\u0430\u043B\u0438\u0437\u0438\u0440\u0443\u0435\u0442\u0441\u044F
+      \u043D\u0430 \u0443\u0434\u0435\u0440\u0436\u0430\u043D\u0438\u0438 \u043B\u0438\u043D\u0438\u0438."
   - id: role.support
-    displayLabel: Поддержка
-    category: Роль
+    displayLabel: "\u041F\u043E\u0434\u0434\u0435\u0440\u0436\u043A\u0430"
+    category: "\u0420\u043E\u043B\u044C"
     color: {r: 0.35, g: 0.63, b: 0.43, a: 1}
-    description: Помогает другим участникам боя.
+    description: "\u041F\u043E\u043C\u043E\u0433\u0430\u0435\u0442 \u0434\u0440\u0443\u0433\u0438\u043C
+      \u0443\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u0430\u043C \u0431\u043E\u044F."
   - id: role.scout
-    displayLabel: Разведчик
-    category: Роль
-    color: {r: 0.42, g: 0.60, b: 0.38, a: 1}
-    description: Специализируется на разведке и мобильности.
+    displayLabel: "\u0420\u0430\u0437\u0432\u0435\u0434\u0447\u0438\u043A"
+    category: "\u0420\u043E\u043B\u044C"
+    color: {r: 0.42, g: 0.6, b: 0.38, a: 1}
+    description: "\u0421\u043F\u0435\u0446\u0438\u0430\u043B\u0438\u0437\u0438\u0440\u0443\u0435\u0442\u0441\u044F
+      \u043D\u0430 \u0440\u0430\u0437\u0432\u0435\u0434\u043A\u0435 \u0438 \u043C\u043E\u0431\u0438\u043B\u044C\u043D\u043E\u0441\u0442\u0438."
   - id: trait.armored
-    displayLabel: Бронированный
-    category: Особенность
+    displayLabel: "\u0411\u0440\u043E\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439"
+    category: "\u041E\u0441\u043E\u0431\u0435\u043D\u043D\u043E\u0441\u0442\u044C"
     color: {r: 0.49, g: 0.51, b: 0.53, a: 1}
-    description: Имеет тяжёлую защиту.
+    description: "\u0418\u043C\u0435\u0435\u0442 \u0442\u044F\u0436\u0451\u043B\u0443\u044E
+      \u0437\u0430\u0449\u0438\u0442\u0443."
   units:
   - id: guard
-    displayLabel: Гвардеец
+    displayLabel: "\u0413\u0432\u0430\u0440\u0434\u0435\u0435\u0446"
     category: 0
     combatRole: 0
     maxHitPoints: 18
@@ -65,11 +74,11 @@ MonoBehaviour:
     movement: 3
     initiative: 3
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 79af6e7e03e2f6942a5fe938089b24c9, type: 3}
     portraitScale: 1
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 32b48566879ff6c4d8063745b56ed1dc, type: 3}
+    battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     sandboxEncounterCount: 0
     tagIds:
@@ -78,7 +87,7 @@ MonoBehaviour:
     - role.defender
     - trait.armored
   - id: archer
-    displayLabel: Лучник
+    displayLabel: "\u041B\u0443\u0447\u043D\u0438\u043A"
     category: 0
     combatRole: 1
     maxHitPoints: 11
@@ -88,18 +97,18 @@ MonoBehaviour:
     movement: 3
     initiative: 5
     attackRange: 4
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 12eeb18031f28d04aa287d3e74c811fa, type: 3}
     portraitScale: 1
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: d1a6f2b01ae79bf469142894f97132c3, type: 3}
+    battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     sandboxEncounterCount: 0
     tagIds:
     - species.human
     - combat.ranged
   - id: healer
-    displayLabel: Лекарь
+    displayLabel: "\u041B\u0435\u043A\u0430\u0440\u044C"
     category: 0
     combatRole: 2
     maxHitPoints: 12
@@ -109,11 +118,11 @@ MonoBehaviour:
     movement: 3
     initiative: 3
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 5aef72efb74b347469238bdf7cf72043, type: 3}
     portraitScale: 1
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 1eccaf5e038a4cf429a22efb7329b9e0, type: 3}
+    battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     sandboxEncounterCount: 0
     tagIds:
@@ -121,7 +130,7 @@ MonoBehaviour:
     - combat.melee
     - role.support
   - id: spearman
-    displayLabel: Копейщик
+    displayLabel: "\u041A\u043E\u043F\u0435\u0439\u0449\u0438\u043A"
     category: 0
     combatRole: 3
     maxHitPoints: 15
@@ -131,18 +140,18 @@ MonoBehaviour:
     movement: 3
     initiative: 4
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 7e8977c8e23779b448743ce1a2c8a826, type: 3}
     portraitScale: 1
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
-    battlefieldOffset: {x: 0, y: 0}
+    battlefieldSprite: {fileID: 21300000, guid: 33d59b9f2ab812144bb12006abf93d57, type: 3}
+    battlefieldScale: 1.2
+    battlefieldOffset: {x: -9, y: 0}
     sandboxEncounterCount: 0
     tagIds:
     - species.human
     - combat.melee
   - id: scout
-    displayLabel: Разведчик
+    displayLabel: "\u0420\u0430\u0437\u0432\u0435\u0434\u0447\u0438\u043A"
     category: 0
     combatRole: 4
     maxHitPoints: 12
@@ -152,11 +161,11 @@ MonoBehaviour:
     movement: 4
     initiative: 6
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: a8549f6d1f7aab643ba8864ac16027e2, type: 3}
     portraitScale: 1
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 01305b5437ca7594d852d81c84fbda8c, type: 3}
+    battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     sandboxEncounterCount: 0
     tagIds:
@@ -164,7 +173,7 @@ MonoBehaviour:
     - combat.melee
     - role.scout
   - id: militia
-    displayLabel: Ополченец
+    displayLabel: "\u041E\u043F\u043E\u043B\u0447\u0435\u043D\u0435\u0446"
     category: 0
     combatRole: 5
     maxHitPoints: 14
@@ -174,18 +183,18 @@ MonoBehaviour:
     movement: 3
     initiative: 2
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 6e6b1183fa308e64e8773ce8b59a02c9, type: 3}
     portraitScale: 1
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: a3f58b9cc469b1448bc71da24f86c310, type: 3}
+    battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     sandboxEncounterCount: 0
     tagIds:
     - species.human
     - combat.melee
   - id: forest_beast
-    displayLabel: Зверь
+    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
     category: 1
     combatRole: 6
     maxHitPoints: 10
@@ -195,18 +204,18 @@ MonoBehaviour:
     movement: 4
     initiative: 5
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 4bf98c43e23bb7d4ebc699a7047c2885, type: 3}
     portraitScale: 1
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 0b2ce88e830b4a641a116a7f2440dd6b, type: 3}
+    battlefieldScale: 1.1
     battlefieldOffset: {x: 0, y: 0}
     sandboxEncounterCount: 2
     tagIds:
     - species.beast
     - combat.melee
   - id: forest_beast_strong
-    displayLabel: Зверь
+    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
     category: 1
     combatRole: 6
     maxHitPoints: 14
@@ -216,10 +225,10 @@ MonoBehaviour:
     movement: 4
     initiative: 4
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: c86db8b3513d1414aa505ccca893339d, type: 3}
     portraitScale: 1
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
+    battlefieldSprite: {fileID: 21300000, guid: 3fb5f8e2f73bcb541ac5618e33045b14, type: 3}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     sandboxEncounterCount: 1
@@ -227,7 +236,7 @@ MonoBehaviour:
     - species.beast
     - combat.melee
   - id: forest_beast_alpha
-    displayLabel: Зверь
+    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
     category: 1
     combatRole: 6
     maxHitPoints: 18
@@ -237,10 +246,10 @@ MonoBehaviour:
     movement: 3
     initiative: 2
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 83fa1a0ca6eee6d49bd02a9b5a3da1c8, type: 3}
     portraitScale: 1
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
+    battlefieldSprite: {fileID: 21300000, guid: f307f18609cf733428ea3cf99fca80e4, type: 3}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     sandboxEncounterCount: 1

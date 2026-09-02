@@ -22,9 +22,12 @@ MonoBehaviour:
   m_AdditionalPlatformBuildSettings: []
   m_OverrideGlobalSceneList: 1
   m_Scenes:
-  - m_enabled: 1
+  - m_enabled: 0
     m_path: Assets/_Project/Scenes/Prototype_Main.unity
     m_guid: ecc0d0611a4c2524abf27fce570c2144
+  - m_enabled: 1
+    m_path: Assets/_Project/Scenes/BattleSandbox.unity
+    m_guid: 24cf2ba8dac8fb003cdcdfa08e29040d
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:

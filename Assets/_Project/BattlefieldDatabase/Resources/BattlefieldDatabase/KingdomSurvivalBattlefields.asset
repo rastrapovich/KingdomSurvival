@@ -11,39 +11,47 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 58d9ca7bf8e247b82d531ee2ef574a2c, type: 3}
   m_Name: KingdomSurvivalBattlefields
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   sandboxBattlefieldId: forest_clearing_01
   tags:
   - id: biome.forest
-    displayLabel: Лес
-    category: Биом
+    displayLabel: "\u041B\u0435\u0441"
+    category: "\u0411\u0438\u043E\u043C"
     color: {r: 0.29, g: 0.45, b: 0.27, a: 1}
-    description: Лесная местность и опушка тёмного леса.
+    description: "\u041B\u0435\u0441\u043D\u0430\u044F \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u044C
+      \u0438 \u043E\u043F\u0443\u0448\u043A\u0430 \u0442\u0451\u043C\u043D\u043E\u0433\u043E
+      \u043B\u0435\u0441\u0430."
   - id: terrain.clearing
-    displayLabel: Поляна
-    category: Местность
+    displayLabel: "\u041F\u043E\u043B\u044F\u043D\u0430"
+    category: "\u041C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u044C"
     color: {r: 0.46, g: 0.43, b: 0.28, a: 1}
-    description: Открытый участок среди лесной растительности.
+    description: "\u041E\u0442\u043A\u0440\u044B\u0442\u044B\u0439 \u0443\u0447\u0430\u0441\u0442\u043E\u043A
+      \u0441\u0440\u0435\u0434\u0438 \u043B\u0435\u0441\u043D\u043E\u0439 \u0440\u0430\u0441\u0442\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u0438."
   - id: terrain.swamp
-    displayLabel: Болото
-    category: Местность
+    displayLabel: "\u0411\u043E\u043B\u043E\u0442\u043E"
+    category: "\u041C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u044C"
     color: {r: 0.28, g: 0.38, b: 0.32, a: 1}
-    description: Сырая болотистая местность.
+    description: "\u0421\u044B\u0440\u0430\u044F \u0431\u043E\u043B\u043E\u0442\u0438\u0441\u0442\u0430\u044F
+      \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u044C."
   - id: terrain.ruins
-    displayLabel: Руины
-    category: Местность
+    displayLabel: "\u0420\u0443\u0438\u043D\u044B"
+    category: "\u041C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u044C"
     color: {r: 0.43, g: 0.42, b: 0.39, a: 1}
-    description: Разрушенные постройки и каменные остатки.
+    description: "\u0420\u0430\u0437\u0440\u0443\u0448\u0435\u043D\u043D\u044B\u0435
+      \u043F\u043E\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0438 \u043A\u0430\u043C\u0435\u043D\u043D\u044B\u0435
+      \u043E\u0441\u0442\u0430\u0442\u043A\u0438."
   - id: mood.dark
-    displayLabel: Мрачное
-    category: Атмосфера
+    displayLabel: "\u041C\u0440\u0430\u0447\u043D\u043E\u0435"
+    category: "\u0410\u0442\u043C\u043E\u0441\u0444\u0435\u0440\u0430"
     color: {r: 0.31, g: 0.34, b: 0.38, a: 1}
-    description: Приглушённая суровая атмосфера низкого фэнтези.
+    description: "\u041F\u0440\u0438\u0433\u043B\u0443\u0448\u0451\u043D\u043D\u0430\u044F
+      \u0441\u0443\u0440\u043E\u0432\u0430\u044F \u0430\u0442\u043C\u043E\u0441\u0444\u0435\u0440\u0430
+      \u043D\u0438\u0437\u043A\u043E\u0433\u043E \u0444\u044D\u043D\u0442\u0435\u0437\u0438."
   battlefields:
   - id: forest_clearing_01
-    displayLabel: Лесная поляна
-    background: {fileID: -1236586470678737434, guid: 99c0459483d7cd5488f88584504670dd, type: 3}
-    backgroundScale: 1
+    displayLabel: "\u041B\u0435\u0441\u043D\u0430\u044F \u043F\u043E\u043B\u044F\u043D\u0430"
+    background: {fileID: 21300000, guid: 99c0459483d7cd5488f88584504670dd, type: 3}
+    backgroundScale: 1.1
     backgroundOffset: {x: 0, y: 0}
     tagIds:
     - biome.forest

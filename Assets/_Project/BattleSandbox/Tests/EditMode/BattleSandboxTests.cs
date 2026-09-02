@@ -37,6 +37,66 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
+        public void MovementPathReconstructsCheapestReachableRoute()
+        {
+            HexCoord blocked = new HexCoord(1, 1);
+            HexCoord destination = new HexCoord(2, 1);
+            SandboxBattle battle = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(4, 3),
+                playerMovement: 4,
+                terrain: new Dictionary<HexCoord, SandboxTerrain>
+                {
+                    { blocked, SandboxTerrain.Impassable }
+                });
+
+            IReadOnlyList<HexCoord> path;
+            int movementCost;
+            Assert.That(
+                SandboxMovementPath.TryBuild(
+                    battle,
+                    "player",
+                    destination,
+                    out path,
+                    out movementCost),
+                Is.True);
+
+            Assert.That(path.First(), Is.EqualTo(new HexCoord(0, 1)));
+            Assert.That(path.Last(), Is.EqualTo(destination));
+            Assert.That(path.Contains(blocked), Is.False);
+            Assert.That(movementCost, Is.EqualTo(3));
+            for (int i = 1; i < path.Count; i++)
+                Assert.That(path[i - 1].DistanceTo(path[i]), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void MovementPathPreservesDifficultTerrainCost()
+        {
+            HexCoord destination = new HexCoord(1, 1);
+            SandboxBattle battle = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(4, 3),
+                playerMovement: 3,
+                terrain: new Dictionary<HexCoord, SandboxTerrain>
+                {
+                    { destination, SandboxTerrain.Difficult }
+                });
+
+            IReadOnlyList<HexCoord> path;
+            int movementCost;
+            Assert.That(
+                SandboxMovementPath.TryBuild(
+                    battle,
+                    "player",
+                    destination,
+                    out path,
+                    out movementCost),
+                Is.True);
+            Assert.That(path, Has.Count.EqualTo(2));
+            Assert.That(movementCost, Is.EqualTo(2));
+        }
+
+        [Test]
         public void MovementCanBeSplitWithoutSpendingCombatAction()
         {
             SandboxBattle battle = CreateBattle(

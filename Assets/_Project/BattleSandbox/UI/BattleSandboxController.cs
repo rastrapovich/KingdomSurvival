@@ -503,8 +503,10 @@ namespace KingdomSurvival.BattleSandbox
                 path,
                 () =>
                 {
-                    string message;
-                    bool moved = battle != null && battle.TryMove(unitId, destination, out message);
+                    bool moved = false;
+                    string message = string.Empty;
+                    if (battle != null)
+                        moved = battle.TryMove(unitId, destination, out message);
                     if (moved)
                         AddBattleLog(message);
 

@@ -125,7 +125,7 @@ Runtime assembly не ссылается на core основной игры. UI
 Изменены на этом этапе:
 
 - `Assets/_Project/BattleSandbox/UI/HexBoardElement.cs` — маршрут, анимация перемещения, независимый от граней курсор дальней атаки;
-- `Assets/_Project/BattleSandbox/UI/BattleSandboxController.cs` — последовательность перемещения и атаки для игрока и ИИ;
+- `Assets/_Project/BattleSandbox/UI/BattleSandboxController.cs` — последовательность перемещения и атаки для игрока и ИИ; hotfix `CS0165` в callback завершения движения;
 - `Assets/_Project/BattleSandbox/Tests/EditMode/BattleSandboxTests.cs` — тесты восстановления маршрута;
 - `ProjectDocs/DEVELOPMENT_STATUS.md`.
 
@@ -151,6 +151,13 @@ Hotfix после добавления боевого курсора:
 - исправлена ошибка `CS0104` в `HexBoardElement.cs` на обращениях к `Cursor.visible`;
 - причина: одновременно подключены `UnityEngine` и `UnityEngine.UIElements`, в обоих пространствах имён существует тип `Cursor`;
 - скрытие и восстановление системного курсора явно используют `UnityEngine.Cursor.visible`.
+
+Hotfix после добавления анимации перемещения:
+
+- исправлена ошибка Unity `CS0165` в `BattleSandboxController.cs:509` — локальная переменная `message` могла считаться неинициализированной из-за короткого замыкания в выражении `battle != null && battle.TryMove(..., out message)`;
+- callback движения теперь заранее инициализирует `moved = false` и `message = string.Empty`, а `TryMove` вызывается отдельным `if (battle != null)`;
+- проверены остальные новые вызовы `out` в контроллере: аналогичного чтения неинициализированной локальной переменной не найдено;
+- игровая логика, стоимость движения, маршрут и последовательность `перемещение → атака` не изменены.
 
 Проверка маршрута и анимации:
 
@@ -212,7 +219,8 @@ Hotfix после первого запуска сцены:
 - `HexBoardElement.cs` содержит только два обращения к `Cursor.visible`, оба квалифицированы как `UnityEngine.Cursor.visible`;
 - для дальней атаки `hoverCursorPosition` устанавливается в центр гекса цели, а выбор стороны вызывается только в ветке `AttackRange <= 1`;
 - UI и ИИ вызывают один и тот же метод анимации перемещения;
-- базовый удалённый `main` перед этим этапом: `57824eb3c7398da6e0ef407c72b25e270a7aecb2`.
+- в callback завершения перемещения `message` всегда инициализирован до возможного чтения;
+- базовый удалённый `main` перед hotfix `CS0165`: `fb46225f5d65247126dc61c01b752364cfd90841`.
 
 В подключённом окружении нет Unity Editor и C#-компилятора. Фактическую Unity-компиляцию, Test Runner и визуальную проверку сцены здесь запустить нельзя.
 

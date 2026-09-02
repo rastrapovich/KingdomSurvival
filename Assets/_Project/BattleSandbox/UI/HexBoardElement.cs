@@ -10,6 +10,7 @@ namespace KingdomSurvival.BattleSandbox
         private const float AttackLungeDuration = 0.12f;
         private const float AttackReturnDuration = 0.10f;
         private const float DamageFloatDuration = 0.58f;
+        private const float MovementSegmentDuration = 0.14f;
 
         private static readonly Color NormalColor = new Color(0.16f, 0.20f, 0.22f, 1f);
         private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 1f);
@@ -19,6 +20,7 @@ namespace KingdomSurvival.BattleSandbox
         private SandboxBattle battle;
         private string selectedTargetId;
         private readonly Label damageLabel;
+
         private IVisualElementScheduledItem attackAnimationItem;
         private string animationAttackerId;
         private string animationTargetId;
@@ -29,6 +31,15 @@ namespace KingdomSurvival.BattleSandbox
         private bool impactApplied;
         private Action impactCallback;
         private Action completionCallback;
+
+        private IVisualElementScheduledItem movementAnimationItem;
+        private string movementUnitId;
+        private IReadOnlyList<HexCoord> movementPath;
+        private int movementSegmentIndex;
+        private float movementSegmentStartedAt;
+        private Vector2 movementVisualPosition;
+        private Action movementCompletionCallback;
+
         private string hoverAttackTargetId;
         private HexCoord? hoverAttackPosition;
         private Vector2 hoverCursorPosition;
@@ -36,6 +47,7 @@ namespace KingdomSurvival.BattleSandbox
         private bool hoverRangedAttack;
         private bool attackCursorActive;
         private bool nativeCursorHidden;
+        private readonly List<HexCoord> hoverMovePath = new List<HexCoord>();
 
         public event Action<HexCoord> HexClicked;
         public event Action<string, Vector2> UnitDetailsRequested;
@@ -63,8 +75,8 @@ namespace KingdomSurvival.BattleSandbox
             generateVisualContent += DrawBoard;
             RegisterCallback<PointerDownEvent>(OnPointerDown);
             RegisterCallback<PointerMoveEvent>(OnPointerMove);
-            RegisterCallback<PointerLeaveEvent>(_ => ClearAttackCursor());
-            RegisterCallback<DetachFromPanelEvent>(_ => ClearAttackCursor(false));
+            RegisterCallback<PointerLeaveEvent>(_ => ClearPointerPreview());
+            RegisterCallback<DetachFromPanelEvent>(_ => ClearPointerPreview(false));
             RegisterCallback<GeometryChangedEvent>(_ => MarkDirtyRepaint());
 
             damageLabel = new Label();
@@ -85,8 +97,33 @@ namespace KingdomSurvival.BattleSandbox
         {
             battle = value;
             selectedTargetId = targetId;
-            ClearAttackCursor(false);
+            ClearPointerPreview(false);
             MarkDirtyRepaint();
+        }
+
+        public bool PlayMoveAnimation(
+            string unitId,
+            IReadOnlyList<HexCoord> path,
+            Action onComplete)
+        {
+            if (IsAnimating || battle == null || path == null || path.Count < 2)
+                return false;
+
+            SandboxUnitState unit = battle.GetUnit(unitId);
+            if (unit == null || unit.IsDefeated || path[0] != unit.Position)
+                return false;
+
+            ClearPointerPreview(false);
+            IsAnimating = true;
+            movementUnitId = unitId;
+            movementPath = new List<HexCoord>(path);
+            movementSegmentIndex = 0;
+            movementSegmentStartedAt = Time.realtimeSinceStartup;
+            movementVisualPosition = CalculateLayout().GetCenter(path[0]);
+            movementCompletionCallback = onComplete;
+            movementAnimationItem = schedule.Execute(UpdateMovementAnimation).Every(16);
+            MarkDirtyRepaint();
+            return true;
         }
 
         public bool PlayAttackAnimation(
@@ -99,7 +136,7 @@ namespace KingdomSurvival.BattleSandbox
             if (IsAnimating || battle == null)
                 return false;
 
-            ClearAttackCursor(false);
+            ClearPointerPreview(false);
 
             SandboxUnitState attacker = battle.GetUnit(attackerId);
             SandboxUnitState target = battle.GetUnit(targetId);
@@ -133,46 +170,46 @@ namespace KingdomSurvival.BattleSandbox
 
             Vector2 pointerPosition = new Vector2(evt.localPosition.x, evt.localPosition.y);
             HexCoord best;
-            if (TryGetHexAt(pointerPosition, out best))
+            if (!TryGetHexAt(pointerPosition, out best))
+                return;
+
+            if (evt.button == 1)
             {
-                if (evt.button == 1)
-                {
-                    SandboxUnitState occupant = battle.GetUnitAt(best);
-                    if (occupant == null)
-                        return;
-
-                    Vector2 panelPosition = new Vector2(evt.position.x, evt.position.y);
-                    UnitDetailsRequested?.Invoke(occupant.Id, panelPosition);
-                    evt.StopPropagation();
+                SandboxUnitState occupant = battle.GetUnitAt(best);
+                if (occupant == null)
                     return;
-                }
 
-                UpdateAttackCursor(pointerPosition);
-                SandboxUnitState target = battle.GetUnitAt(best);
-                if (attackCursorActive && target != null && target.Id == hoverAttackTargetId)
-                {
-                    string targetId = hoverAttackTargetId;
-                    HexCoord? attackPosition = hoverAttackPosition;
-                    ClearAttackCursor();
-                    AttackRequested?.Invoke(targetId, attackPosition);
-                    evt.StopPropagation();
-                    return;
-                }
-
-                HexClicked?.Invoke(best);
+                Vector2 panelPosition = new Vector2(evt.position.x, evt.position.y);
+                UnitDetailsRequested?.Invoke(occupant.Id, panelPosition);
                 evt.StopPropagation();
+                return;
             }
+
+            UpdatePointerPreview(pointerPosition);
+            SandboxUnitState target = battle.GetUnitAt(best);
+            if (attackCursorActive && target != null && target.Id == hoverAttackTargetId)
+            {
+                string targetId = hoverAttackTargetId;
+                HexCoord? attackPosition = hoverAttackPosition;
+                ClearPointerPreview();
+                AttackRequested?.Invoke(targetId, attackPosition);
+                evt.StopPropagation();
+                return;
+            }
+
+            HexClicked?.Invoke(best);
+            evt.StopPropagation();
         }
 
         private void OnPointerMove(PointerMoveEvent evt)
         {
             Vector2 pointerPosition = new Vector2(evt.localPosition.x, evt.localPosition.y);
-            UpdateAttackCursor(pointerPosition);
+            UpdatePointerPreview(pointerPosition);
         }
 
-        private void UpdateAttackCursor(Vector2 pointerPosition)
+        private void UpdatePointerPreview(Vector2 pointerPosition)
         {
-            ClearAttackCursor(false);
+            ClearPointerPreview(false);
             if (battle == null || IsAnimating)
                 return;
 
@@ -181,13 +218,40 @@ namespace KingdomSurvival.BattleSandbox
                 return;
 
             SandboxUnitState attacker = battle.CurrentUnit;
+            if (attacker == null || attacker.Team != SandboxTeam.Player)
+                return;
+
             SandboxUnitState target = battle.GetUnitAt(coord);
-            if (attacker == null || target == null ||
-                attacker.Team != SandboxTeam.Player || target.Team == attacker.Team)
+            if (target != null && target.Team != attacker.Team)
             {
+                UpdateAttackCursor(pointerPosition, attacker, target);
                 return;
             }
 
+            if (target != null)
+                return;
+
+            IReadOnlyList<HexCoord> path;
+            int movementCost;
+            if (SandboxMovementPath.TryBuild(
+                    battle,
+                    attacker.Id,
+                    coord,
+                    out path,
+                    out movementCost) &&
+                path.Count > 1)
+            {
+                hoverMovePath.AddRange(path);
+                tooltip = "Маршрут · " + movementCost + " движения · ЛКМ для перемещения";
+                MarkDirtyRepaint();
+            }
+        }
+
+        private void UpdateAttackCursor(
+            Vector2 pointerPosition,
+            SandboxUnitState attacker,
+            SandboxUnitState target)
+        {
             HexLayout layout = CalculateLayout();
             HexCoord attackPosition;
             int movementCost;
@@ -200,7 +264,7 @@ namespace KingdomSurvival.BattleSandbox
                     out attackPosition,
                     out movementCost);
                 hoverRangedAttack = true;
-                hoverCursorPosition = pointerPosition;
+                hoverCursorPosition = layout.GetCenter(target.Position);
                 hoverAttackDirection = Vector2.right;
             }
             else
@@ -238,6 +302,21 @@ namespace KingdomSurvival.BattleSandbox
             SandboxAttackPreview preview = battle.PreviewReachableAttack(attacker.Id, target.Id);
             if (!preview.IsValid)
                 return;
+
+            if (movementCost > 0 && attackPosition != attacker.Position)
+            {
+                IReadOnlyList<HexCoord> path;
+                int pathCost;
+                if (SandboxMovementPath.TryBuild(
+                        battle,
+                        attacker.Id,
+                        attackPosition,
+                        out path,
+                        out pathCost))
+                {
+                    hoverMovePath.AddRange(path);
+                }
+            }
 
             hoverAttackTargetId = target.Id;
             hoverAttackPosition = attackPosition;
@@ -278,6 +357,14 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             return selected;
+        }
+
+        private void ClearPointerPreview(bool repaint = true)
+        {
+            hoverMovePath.Clear();
+            ClearAttackCursor(false);
+            if (repaint)
+                MarkDirtyRepaint();
         }
 
         private void ClearAttackCursor(bool repaint = true)
@@ -364,6 +451,9 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
+            if (hoverMovePath.Count > 1 && !IsAnimating)
+                DrawMovePath(painter, layout, hoverMovePath);
+
             foreach (SandboxUnitState unit in battle.Units)
             {
                 bool animatedDefeatedTarget = IsAnimating && unit.Id == animationTargetId;
@@ -394,6 +484,35 @@ namespace KingdomSurvival.BattleSandbox
             }
         }
 
+        private static void DrawMovePath(
+            Painter2D painter,
+            HexLayout layout,
+            IReadOnlyList<HexCoord> path)
+        {
+            if (path == null || path.Count < 2)
+                return;
+
+            Color routeColor = new Color(0.62f, 0.86f, 0.92f, 0.86f);
+            painter.strokeColor = routeColor;
+            painter.lineWidth = 3f;
+            painter.BeginPath();
+            painter.MoveTo(layout.GetCenter(path[0]));
+            for (int i = 1; i < path.Count; i++)
+                painter.LineTo(layout.GetCenter(path[i]));
+            painter.Stroke();
+
+            for (int i = 1; i < path.Count; i++)
+            {
+                DrawCircle(
+                    painter,
+                    layout.GetCenter(path[i]),
+                    4.5f,
+                    routeColor,
+                    new Color(0.90f, 0.97f, 0.98f, 0.95f),
+                    1.2f);
+            }
+        }
+
         private void DrawUnit(
             Painter2D painter,
             HexLayout layout,
@@ -401,10 +520,18 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState current)
         {
             Vector2 center = layout.GetCenter(unit.Position);
-            if (IsAnimating && unit.Id == animationAttackerId)
+            if (IsAnimating && unit.Id == movementUnitId && movementPath != null)
+            {
+                center = movementVisualPosition;
+            }
+            else if (IsAnimating && unit.Id == animationAttackerId)
+            {
                 center += attackerOffset;
+            }
             else if (IsAnimating && unit.Id == animationTargetId)
+            {
                 center += targetOffset;
+            }
 
             float radius = layout.Size * 0.55f;
             Color fill = unit.Team == SandboxTeam.Player
@@ -497,6 +624,66 @@ namespace KingdomSurvival.BattleSandbox
             painter.Stroke();
         }
 
+        private void UpdateMovementAnimation()
+        {
+            if (!IsAnimating || battle == null || movementPath == null || movementPath.Count < 2)
+            {
+                FinishMovementAnimation();
+                return;
+            }
+
+            if (movementSegmentIndex >= movementPath.Count - 1)
+            {
+                FinishMovementAnimation();
+                return;
+            }
+
+            float duration = MovementSegmentDuration;
+            if (battle.GetTerrain(movementPath[movementSegmentIndex + 1]) == SandboxTerrain.Difficult)
+                duration *= 1.35f;
+
+            float elapsed = Mathf.Max(0f, Time.realtimeSinceStartup - movementSegmentStartedAt);
+            float progress = Mathf.Clamp01(elapsed / duration);
+            float eased = Mathf.SmoothStep(0f, 1f, progress);
+            HexLayout layout = CalculateLayout();
+            Vector2 start = layout.GetCenter(movementPath[movementSegmentIndex]);
+            Vector2 end = layout.GetCenter(movementPath[movementSegmentIndex + 1]);
+            movementVisualPosition = Vector2.Lerp(start, end, eased);
+
+            if (progress >= 1f)
+            {
+                movementSegmentIndex++;
+                movementSegmentStartedAt = Time.realtimeSinceStartup;
+                movementVisualPosition = end;
+                if (movementSegmentIndex >= movementPath.Count - 1)
+                {
+                    FinishMovementAnimation();
+                    return;
+                }
+            }
+
+            MarkDirtyRepaint();
+        }
+
+        private void FinishMovementAnimation()
+        {
+            if (movementAnimationItem == null && movementPath == null)
+                return;
+
+            movementAnimationItem?.Pause();
+            movementAnimationItem = null;
+            IsAnimating = false;
+            movementUnitId = null;
+            movementPath = null;
+            movementSegmentIndex = 0;
+            movementVisualPosition = Vector2.zero;
+
+            Action callback = movementCompletionCallback;
+            movementCompletionCallback = null;
+            MarkDirtyRepaint();
+            callback?.Invoke();
+        }
+
         private void UpdateAttackAnimation()
         {
             if (!IsAnimating || battle == null)
@@ -562,7 +749,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void FinishAttackAnimation()
         {
-            if (!IsAnimating)
+            if (attackAnimationItem == null && string.IsNullOrEmpty(animationAttackerId))
                 return;
 
             attackAnimationItem?.Pause();

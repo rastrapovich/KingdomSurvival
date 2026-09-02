@@ -44,6 +44,7 @@ namespace KingdomSurvival.BattleSandbox
         public int MaxHitPoints { get; }
         public int Attack { get; }
         public int Defense { get; }
+        public int Damage { get; }
         public int Movement { get; }
         public int Initiative { get; }
         public int AttackRange { get; }
@@ -55,6 +56,7 @@ namespace KingdomSurvival.BattleSandbox
             int maxHitPoints,
             int attack,
             int defense,
+            int damage,
             int movement,
             int initiative,
             int attackRange)
@@ -65,6 +67,7 @@ namespace KingdomSurvival.BattleSandbox
             MaxHitPoints = Math.Max(1, maxHitPoints);
             Attack = Math.Max(0, attack);
             Defense = Math.Max(0, defense);
+            Damage = Math.Max(1, damage);
             Movement = Math.Max(1, movement);
             Initiative = Math.Max(0, initiative);
             AttackRange = Math.Max(1, attackRange);
@@ -90,6 +93,7 @@ namespace KingdomSurvival.BattleSandbox
         public int MaxHitPoints => Definition.MaxHitPoints;
         public int Attack => Definition.Attack;
         public int Defense => Definition.Defense;
+        public int Damage => Definition.Damage;
         public int Movement => Definition.Movement;
         public int Initiative => Definition.Initiative;
         public int AttackRange => Definition.AttackRange;
@@ -669,7 +673,9 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState target)
         {
             int effectiveDefense = target.Defense + (target.IsGuarding ? 2 : 0);
-            int damage = Math.Max(5, 15 + (attacker.Attack - effectiveDefense) * 5);
+            int damage = Math.Max(
+                5,
+                attacker.Damage + (attacker.Attack - effectiveDefense) * 5);
             if (attacker.Role == SandboxUnitRole.Spearman && target.Role == SandboxUnitRole.Beast)
                 damage += 5;
 

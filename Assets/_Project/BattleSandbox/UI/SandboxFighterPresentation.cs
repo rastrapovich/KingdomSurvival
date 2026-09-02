@@ -194,12 +194,13 @@ namespace KingdomSurvival.BattleSandbox
             card.Add(type);
 
             Label stats = new Label(
-                "HP " + definition.MaxHitPoints + "  ·  АТК " + definition.Attack +
-                "  ·  ЗАЩ " + definition.Defense);
+                "HP " + definition.MaxHitPoints + "  ·  УРОН " + definition.Damage + "\n" +
+                "АТК " + definition.Attack + "  ·  ЗАЩ " + definition.Defense);
             stats.style.marginTop = 3f;
             stats.style.fontSize = 8f;
             stats.style.color = new Color(0.61f, 0.62f, 0.60f, 1f);
             stats.style.unityTextAlign = TextAnchor.MiddleCenter;
+            stats.style.whiteSpace = WhiteSpace.Normal;
             stats.pickingMode = PickingMode.Ignore;
             card.Add(stats);
 
@@ -441,6 +442,7 @@ namespace KingdomSurvival.BattleSandbox
         private readonly Label healthText;
         private readonly Label attackValue;
         private readonly Label defenseValue;
+        private readonly Label damageValue;
         private readonly Label movementValue;
         private readonly Label initiativeValue;
         private readonly Label rangeValue;
@@ -616,12 +618,17 @@ namespace KingdomSurvival.BattleSandbox
                 info,
                 "АТАКА",
                 "—",
-                "Увеличивает урон. Формула: max(5, 15 + (Атака − эффективная Защита) × 5).");
+                "Преодолевает Защиту цели. Каждое очко разницы между Атакой и эффективной Защитой изменяет базовый Урон на 5.");
             defenseValue = CreateStatRow(
                 info,
                 "ЗАЩИТА",
                 "—",
                 "Снижает входящий урон на 5 за каждое очко относительно Атаки врага. Стойка временно добавляет +2.");
+            damageValue = CreateStatRow(
+                info,
+                "УРОН",
+                "—",
+                "Базовая сила обычного удара или выстрела. Формула: max(5, Урон + (Атака − эффективная Защита) × 5).");
             movementValue = CreateStatRow(
                 info,
                 "ХОД",
@@ -726,8 +733,8 @@ namespace KingdomSurvival.BattleSandbox
             string explanation)
         {
             VisualElement row = new VisualElement();
-            row.style.height = 36f;
-            row.style.marginBottom = 5f;
+            row.style.height = 34f;
+            row.style.marginBottom = 4f;
             row.style.paddingLeft = 10f;
             row.style.paddingRight = 10f;
             row.style.flexDirection = FlexDirection.Row;
@@ -785,6 +792,7 @@ namespace KingdomSurvival.BattleSandbox
             attackValue.text = openedDefinition.Attack.ToString();
             defenseValue.text = openedDefinition.Defense +
                 (openedState != null && openedState.IsGuarding ? " + 2" : string.Empty);
+            damageValue.text = openedDefinition.Damage.ToString();
             movementValue.text = remainingMovement + " / " + openedDefinition.Movement;
             initiativeValue.text = openedDefinition.Initiative.ToString();
             rangeValue.text = openedDefinition.AttackRange.ToString();

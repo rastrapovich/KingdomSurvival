@@ -205,6 +205,26 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
+        public void BaseDamageChangesResultIndependentlyFromAttack()
+        {
+            SandboxBattle lighterBattle = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(1, 1),
+                playerAttack: 3,
+                playerDamage: 10,
+                enemyDefense: 3);
+            SandboxBattle heavierBattle = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(1, 1),
+                playerAttack: 3,
+                playerDamage: 18,
+                enemyDefense: 3);
+
+            Assert.That(lighterBattle.PreviewAttack("player", "enemy").Damage, Is.EqualTo(10));
+            Assert.That(heavierBattle.PreviewAttack("player", "enemy").Damage, Is.EqualTo(18));
+        }
+
+        [Test]
         public void DamageStateAlwaysMatchesCurrentHitPoints()
         {
             SandboxBattle battle = CreateBattle(
@@ -292,8 +312,10 @@ namespace KingdomSurvival.BattleSandbox.Tests
             int playerMovement = 3,
             int playerAttack = 3,
             int playerDefense = 3,
+            int playerDamage = 15,
             int enemyAttack = 3,
             int enemyDefense = 3,
+            int enemyDamage = 15,
             int enemyHitPoints = 100,
             int playerInitiative = 10,
             int enemyInitiative = 5,
@@ -306,6 +328,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 100,
                 playerAttack,
                 playerDefense,
+                playerDamage,
                 playerMovement,
                 playerInitiative,
                 1);
@@ -316,6 +339,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 enemyHitPoints,
                 enemyAttack,
                 enemyDefense,
+                enemyDamage,
                 3,
                 enemyInitiative,
                 1);

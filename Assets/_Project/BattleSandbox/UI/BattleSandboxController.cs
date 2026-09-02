@@ -594,7 +594,8 @@ namespace KingdomSurvival.BattleSandbox
                     "HP " + current.HitPoints + "/" + current.MaxHitPoints +
                     "  ·  ОД " + current.ActionPoints + "/" + SandboxUnitState.ActionsPerActivation + "\n" +
                     "АТК " + current.Attack + "  ·  ЗАЩ " + current.Defense +
-                    "  ·  ДВИЖ " + current.RemainingMovement + "/" + current.Movement +
+                    "  ·  УРОН " + current.Damage + "\n" +
+                    "ДВИЖ " + current.RemainingMovement + "/" + current.Movement +
                     "  ·  ИНИЦ " + current.Initiative;
             }
             else

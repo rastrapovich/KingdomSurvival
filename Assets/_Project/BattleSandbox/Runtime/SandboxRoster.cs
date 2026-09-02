@@ -8,20 +8,20 @@ namespace KingdomSurvival.BattleSandbox
     {
         private static readonly SandboxUnitDefinition[] PlayerRosterData =
         {
-            new SandboxUnitDefinition("guard", "Гвардеец", SandboxUnitRole.Guard, 100, 3, 6, 3, 5, 1),
-            new SandboxUnitDefinition("archer", "Лучник", SandboxUnitRole.Archer, 90, 4, 2, 3, 6, 4),
-            new SandboxUnitDefinition("healer", "Лекарь", SandboxUnitRole.Healer, 85, 1, 2, 3, 4, 1),
-            new SandboxUnitDefinition("spearman", "Копейщик", SandboxUnitRole.Spearman, 100, 3, 4, 3, 5, 1),
-            new SandboxUnitDefinition("scout", "Разведчик", SandboxUnitRole.Scout, 90, 2, 3, 4, 8, 1),
-            new SandboxUnitDefinition("militia", "Ополченец", SandboxUnitRole.Militia, 100, 2, 3, 3, 4, 1)
+            new SandboxUnitDefinition("guard", "Гвардеец", SandboxUnitRole.Guard, 100, 3, 6, 14, 3, 5, 1),
+            new SandboxUnitDefinition("archer", "Лучник", SandboxUnitRole.Archer, 90, 4, 2, 16, 3, 6, 4),
+            new SandboxUnitDefinition("healer", "Лекарь", SandboxUnitRole.Healer, 85, 1, 2, 15, 3, 4, 1),
+            new SandboxUnitDefinition("spearman", "Копейщик", SandboxUnitRole.Spearman, 100, 3, 4, 18, 3, 5, 1),
+            new SandboxUnitDefinition("scout", "Разведчик", SandboxUnitRole.Scout, 90, 2, 3, 13, 4, 8, 1),
+            new SandboxUnitDefinition("militia", "Ополченец", SandboxUnitRole.Militia, 100, 2, 3, 15, 3, 4, 1)
         };
 
         private static readonly SandboxUnitDefinition[] EnemyRosterData =
         {
-            new SandboxUnitDefinition("forest_beast_1", "Зверь", SandboxUnitRole.Beast, 60, 5, 2, 4, 7, 1),
-            new SandboxUnitDefinition("forest_beast_2", "Зверь", SandboxUnitRole.Beast, 60, 5, 2, 4, 7, 1),
-            new SandboxUnitDefinition("forest_beast_3", "Зверь", SandboxUnitRole.Beast, 90, 6, 4, 4, 6, 1),
-            new SandboxUnitDefinition("forest_beast_4", "Зверь", SandboxUnitRole.Beast, 100, 7, 5, 3, 3, 1)
+            new SandboxUnitDefinition("forest_beast_1", "Зверь", SandboxUnitRole.Beast, 60, 5, 2, 14, 4, 7, 1),
+            new SandboxUnitDefinition("forest_beast_2", "Зверь", SandboxUnitRole.Beast, 60, 5, 2, 14, 4, 7, 1),
+            new SandboxUnitDefinition("forest_beast_3", "Зверь", SandboxUnitRole.Beast, 90, 6, 4, 16, 4, 6, 1),
+            new SandboxUnitDefinition("forest_beast_4", "Зверь", SandboxUnitRole.Beast, 100, 7, 5, 18, 3, 3, 1)
         };
 
         public static IReadOnlyList<SandboxUnitDefinition> PlayerRoster => PlayerRosterData;

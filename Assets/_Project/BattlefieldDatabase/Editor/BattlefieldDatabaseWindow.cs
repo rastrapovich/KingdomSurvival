@@ -259,7 +259,7 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
             tagBook.Add(new PropertyField(tagsProperty, "Теги базы"));
             details.Add(tagBook);
 
-            AddHeader("ПРЕДПРОСМОТР 9 × 9");
+            AddHeader("ПРЕДПРОСМОТР 56 ГЕКСОВ · 7 / 8 / 9 / 8 / 9 / 8 / 7");
             previewViewport = new VisualElement();
             previewViewport.style.height = 360f;
             previewViewport.style.position = Position.Relative;
@@ -440,6 +440,9 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
 
         private sealed class GridPreview : VisualElement
         {
+            private static readonly int[] RowStarts = { 1, 0, 0, 0, 0, 0, 1 };
+            private static readonly int[] RowLengths = { 7, 8, 9, 8, 9, 8, 7 };
+
             public GridPreview()
             {
                 pickingMode = PickingMode.Ignore;
@@ -449,24 +452,28 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
             private void Draw(MeshGenerationContext context)
             {
                 const int width = 9;
-                const int height = 9;
+                const int height = 7;
                 if (contentRect.width <= 1f || contentRect.height <= 1f)
                     return;
                 float aw = contentRect.width - 28f;
                 float ah = contentRect.height - 28f;
-                float wu = Mathf.Sqrt(3f) * (width + 0.5f);
+                float wu = Mathf.Sqrt(3f) * width;
                 float hu = 1.5f * (height - 1) + 2f;
                 float size = Mathf.Min(aw / wu, ah / hu);
                 float bw = wu * size;
                 float bh = hu * size;
-                Vector2 origin = new Vector2((contentRect.width - bw) * 0.5f + Mathf.Sqrt(3f) * size * 0.5f, (contentRect.height - bh) * 0.5f + size);
+                Vector2 origin = new Vector2(
+                    (contentRect.width - bw) * 0.5f + Mathf.Sqrt(3f) * size * 0.5f,
+                    (contentRect.height - bh) * 0.5f + size);
                 Painter2D painter = context.painter2D;
                 painter.strokeColor = new Color(0.90f, 0.92f, 0.88f, 0.78f);
                 painter.lineWidth = 1.3f;
                 for (int r = 0; r < height; r++)
                 {
                     float rowOffset = (r & 1) == 0 ? 0f : 0.5f;
-                    for (int q = 0; q < width; q++)
+                    int start = RowStarts[r];
+                    int end = start + RowLengths[r];
+                    for (int q = start; q < end; q++)
                     {
                         Vector2 center = origin + new Vector2(
                             size * Mathf.Sqrt(3f) * (q + rowOffset),

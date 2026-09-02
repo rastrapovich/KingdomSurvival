@@ -109,11 +109,12 @@ namespace KingdomSurvival.BattleSandbox
                 : new Color(0.16f, 0.075f, 0.08f, 1f);
             SetRadius(portrait, 2f);
 
-            if (portraitSprite != null)
+            Sprite resolvedPortrait = ResolvePortrait(unit.TypeId, portraitSprite);
+            if (resolvedPortrait != null)
             {
                 Image image = new Image
                 {
-                    sprite = portraitSprite,
+                    sprite = resolvedPortrait,
                     scaleMode = ScaleMode.ScaleAndCrop,
                     pickingMode = PickingMode.Ignore,
                     tintColor = damaged
@@ -226,11 +227,12 @@ namespace KingdomSurvival.BattleSandbox
             SetRadius(portrait, 3f);
             portrait.pickingMode = PickingMode.Ignore;
 
-            if (portraitSprite != null)
+            Sprite resolvedPortrait = ResolvePortrait(definition.Id, portraitSprite);
+            if (resolvedPortrait != null)
             {
                 Image image = new Image
                 {
-                    sprite = portraitSprite,
+                    sprite = resolvedPortrait,
                     scaleMode = ScaleMode.ScaleAndCrop,
                     pickingMode = PickingMode.Ignore
                 };
@@ -306,6 +308,23 @@ namespace KingdomSurvival.BattleSandbox
                 ? "ЛКМ — выбрать. ПКМ — открыть карточку бойца."
                 : "Открыть карточку противника.";
             return card;
+        }
+
+        internal static Sprite ResolvePortrait(string typeId, Sprite preferred = null)
+        {
+            if (preferred != null)
+                return preferred;
+
+            if (portraitDatabase == null)
+            {
+                portraitDatabase = Resources.Load<UnitDatabaseAsset>(
+                    UnitDatabaseAsset.ResourcesPath);
+            }
+
+            UnitDefinitionData data = portraitDatabase != null
+                ? portraitDatabase.FindById(typeId)
+                : null;
+            return data != null ? data.Portrait : null;
         }
 
         internal static void ApplyPortraitFraming(Image image, string typeId)
@@ -824,14 +843,28 @@ namespace KingdomSurvival.BattleSandbox
             openedDefinition = definition;
             openedState = state;
             openedInstanceId = state != null ? state.Id : null;
-            openedPortrait = portrait;
-            RefreshValues();
+            openedPortrait = SandboxFighterCardFactory.ResolvePortrait(definition.Id, portrait);
             HideTooltip();
             dimmer.style.display = DisplayStyle.Flex;
             window.style.display = DisplayStyle.Flex;
             PositionWindow(anchorPosition);
             dimmer.BringToFront();
             window.BringToFront();
+            RefreshValues();
+
+            string openedTypeId = definition.Id;
+            window.schedule.Execute(() =>
+            {
+                if (openedDefinition == null || openedDefinition.Id != openedTypeId)
+                    return;
+
+                openedPortrait = SandboxFighterCardFactory.ResolvePortrait(
+                    openedDefinition.Id,
+                    openedPortrait);
+                RefreshValues();
+                portraitImage.MarkDirtyRepaint();
+            }).ExecuteLater(1);
+
             dimmer.Focus();
         }
 
@@ -852,6 +885,7 @@ namespace KingdomSurvival.BattleSandbox
             openedState = null;
             openedInstanceId = null;
             openedPortrait = null;
+            portraitImage.sprite = null;
             HideTooltip();
             window.style.display = DisplayStyle.None;
             dimmer.style.display = DisplayStyle.None;
@@ -901,6 +935,13 @@ namespace KingdomSurvival.BattleSandbox
 
         private void RefreshValues()
         {
+            if (openedDefinition == null)
+                return;
+
+            openedPortrait = SandboxFighterCardFactory.ResolvePortrait(
+                openedDefinition.Id,
+                openedPortrait);
+
             int hitPoints = openedState != null
                 ? openedState.HitPoints
                 : openedDefinition.MaxHitPoints;
@@ -925,6 +966,7 @@ namespace KingdomSurvival.BattleSandbox
             portraitImage.tintColor = damaged
                 ? new Color(1f, 0.64f, 0.64f, 0.88f)
                 : Color.white;
+            portraitImage.MarkDirtyRepaint();
             portraitLabel.style.display = openedPortrait == null
                 ? DisplayStyle.Flex
                 : DisplayStyle.None;

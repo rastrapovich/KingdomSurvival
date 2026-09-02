@@ -116,6 +116,7 @@ Runtime assembly не ссылается на core основной игры. UI
 
 Изменены:
 
+- `Assets/_Project/BattleSandbox/UI/HexBoardElement.cs` — устранён конфликт типов `Cursor` в Unity 6;
 - `ProjectSettings/EditorBuildSettings.asset`;
 - `ProjectDocs/DEVELOPMENT_STATUS.md`.
 
@@ -135,6 +136,13 @@ Hotfix после первой Unity-компиляции:
 - `PointerDownEvent.localPosition` в Unity 6 возвращает `Vector3`, а центр гекса хранится как `Vector2`;
 - координаты указателя теперь один раз явно переводятся в `Vector2` перед поиском ближайшего гекса;
 - других смешанных операций `Vector2 / Vector3` в UI полигона не найдено.
+
+Hotfix после добавления боевого курсора:
+
+- исправлена ошибка `CS0104` в `HexBoardElement.cs` на обращениях к `Cursor.visible`;
+- причина: одновременно подключены `UnityEngine` и `UnityEngine.UIElements`, в обоих пространствах имён существует тип `Cursor`;
+- скрытие и восстановление системного курсора теперь явно используют `UnityEngine.Cursor.visible`;
+- механика движения, атаки, расчёт урона и правила доступности цели не изменены.
 
 Hotfix после первого запуска сцены:
 
@@ -186,6 +194,8 @@ Hotfix после первого запуска сцены:
 - GUID контроллера совпадает с его ссылкой в сцене;
 - `.asmdef` являются корректным JSON;
 - новые `.meta` имеют уникальные GUID;
+- в `HexBoardElement.cs` не осталось неоднозначных обращений `Cursor.visible`; оба обращения квалифицированы как `UnityEngine.Cursor.visible`;
+- базовый `main` перед исправлением `CS0104`: `5ce140bf5f8ea03b673015decfe49cec3cdfa655`;
 - базовый `main` перед изменением управления атакой: `ae1ba0934046e4f0648f1cc5c0997c00773ddcee`.
 
 В подключённом окружении нет Unity Editor. Фактическую Unity-компиляцию, Test Runner и визуальную проверку сцены здесь запустить нельзя.

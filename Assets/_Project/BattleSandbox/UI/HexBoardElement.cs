@@ -243,7 +243,7 @@ namespace KingdomSurvival.BattleSandbox
             hoverAttackPosition = attackPosition;
             attackCursorActive = true;
             nativeCursorHidden = true;
-            Cursor.visible = false;
+            UnityEngine.Cursor.visible = false;
             tooltip = (hoverRangedAttack ? "Выстрел" : "Удар мечом") +
                       (movementCost > 0 ? " · движение " + movementCost : string.Empty) +
                       " · " + preview.Damage + " урона · ЛКМ для атаки";
@@ -291,7 +291,7 @@ namespace KingdomSurvival.BattleSandbox
             tooltip = string.Empty;
             if (nativeCursorHidden)
             {
-                Cursor.visible = true;
+                UnityEngine.Cursor.visible = true;
                 nativeCursorHidden = false;
             }
 

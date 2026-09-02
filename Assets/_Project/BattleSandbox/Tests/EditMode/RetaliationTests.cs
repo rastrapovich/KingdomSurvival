@@ -127,9 +127,9 @@ namespace KingdomSurvival.BattleSandbox.Tests
 
             Assert.That(battle.IsInside(new HexCoord(0, 0)), Is.False);
             Assert.That(battle.IsInside(new HexCoord(1, 0)), Is.True);
-            Assert.That(battle.IsInside(new HexCoord(8, 0)), Is.False);
-            Assert.That(battle.IsInside(new HexCoord(7, 1)), Is.True);
-            Assert.That(battle.IsInside(new HexCoord(8, 1)), Is.False);
+            Assert.That(battle.IsInside(new HexCoord(7, 0)), Is.False);
+            Assert.That(battle.IsInside(new HexCoord(6, 1)), Is.True);
+            Assert.That(battle.IsInside(new HexCoord(7, 1)), Is.False);
             Assert.That(battle.IsInside(new HexCoord(0, 6)), Is.False);
             Assert.That(battle.IsInside(new HexCoord(1, 6)), Is.True);
 

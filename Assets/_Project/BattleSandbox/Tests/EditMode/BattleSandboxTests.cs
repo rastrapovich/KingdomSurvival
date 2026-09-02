@@ -37,13 +37,13 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
-        public void CompactArenaShapeUsesSevenEightNineRowPattern()
+        public void CompactArenaShapeUsesSixSevenEightRowPattern()
         {
-            int[] expectedRowLengths = { 7, 8, 9, 8, 9, 8, 7 };
+            int[] expectedRowLengths = { 6, 7, 8, 7, 8, 7, 6 };
             HexCoord[] cells = SandboxArenaShape.Cells().ToArray();
 
             Assert.That(cells.Length, Is.EqualTo(SandboxArenaShape.CellCount));
-            Assert.That(cells.Distinct().Count(), Is.EqualTo(56));
+            Assert.That(cells.Distinct().Count(), Is.EqualTo(49));
             for (int row = 0; row < expectedRowLengths.Length; row++)
             {
                 Assert.That(SandboxArenaShape.GetRowLength(row), Is.EqualTo(expectedRowLengths[row]));
@@ -51,12 +51,12 @@ namespace KingdomSurvival.BattleSandbox.Tests
             }
 
             Assert.That(SandboxArenaShape.Contains(new HexCoord(0, 0)), Is.False);
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(8, 0)), Is.False);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(7, 0)), Is.False);
             Assert.That(SandboxArenaShape.Contains(new HexCoord(1, 0)), Is.True);
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(7, 0)), Is.True);
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(8, 2)), Is.True);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(6, 0)), Is.True);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(7, 2)), Is.True);
             Assert.That(SandboxArenaShape.Contains(new HexCoord(0, 6)), Is.False);
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(8, 6)), Is.False);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(7, 6)), Is.False);
         }
 
         [Test]

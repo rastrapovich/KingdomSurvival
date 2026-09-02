@@ -1,4 +1,5 @@
 using System;
+using KingdomSurvival.UnitDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,6 +10,7 @@ namespace KingdomSurvival.BattleSandbox
         private static readonly Color PlayerAccent = new Color(0.78f, 0.62f, 0.27f, 1f);
         private static readonly Color EnemyAccent = new Color(0.68f, 0.27f, 0.23f, 1f);
         private static readonly Color CardBackground = new Color(0.10f, 0.115f, 0.135f, 1f);
+        private static UnitDatabaseAsset portraitDatabase;
 
         public static Button CreateRosterCard(
             SandboxUnitDefinition definition,
@@ -97,34 +99,49 @@ namespace KingdomSurvival.BattleSandbox
                 active ? 3f : damaged ? 2f : 1f);
             SetRadius(card, 4f);
 
-            VisualElement portrait;
+            VisualElement portrait = new VisualElement();
+            portrait.style.flexGrow = 1f;
+            portrait.style.minHeight = 0f;
+            portrait.style.position = Position.Relative;
+            portrait.style.overflow = Overflow.Hidden;
+            portrait.style.backgroundColor = unit.Team == SandboxTeam.Player
+                ? new Color(0.08f, 0.11f, 0.14f, 1f)
+                : new Color(0.16f, 0.075f, 0.08f, 1f);
+            SetRadius(portrait, 2f);
+
             if (portraitSprite != null)
             {
                 Image image = new Image
                 {
                     sprite = portraitSprite,
-                    scaleMode = ScaleMode.ScaleToFit,
+                    scaleMode = ScaleMode.ScaleAndCrop,
                     pickingMode = PickingMode.Ignore,
                     tintColor = damaged
                         ? new Color(1f, 0.62f, 0.62f, 0.82f)
                         : Color.white
                 };
-                portrait = image;
+                image.style.position = Position.Absolute;
+                image.style.left = 0f;
+                image.style.right = 0f;
+                image.style.top = 0f;
+                image.style.bottom = 0f;
+                ApplyPortraitFraming(image, unit.TypeId);
+                portrait.Add(image);
             }
             else
             {
-                portrait = new SandboxInitiativePortrait(
+                SandboxInitiativePortrait fallback = new SandboxInitiativePortrait(
                     unit.Role,
                     unit.Team,
                     damaged);
+                fallback.style.position = Position.Absolute;
+                fallback.style.left = 0f;
+                fallback.style.right = 0f;
+                fallback.style.top = 0f;
+                fallback.style.bottom = 0f;
+                portrait.Add(fallback);
             }
 
-            portrait.style.flexGrow = 1f;
-            portrait.style.minHeight = 0f;
-            portrait.style.backgroundColor = unit.Team == SandboxTeam.Player
-                ? new Color(0.08f, 0.11f, 0.14f, 1f)
-                : new Color(0.16f, 0.075f, 0.08f, 1f);
-            SetRadius(portrait, 2f);
             card.Add(portrait);
 
             VisualElement healthBar = CreateHealthBar(unit.HitPoints, unit.MaxHitPoints, 5f);
@@ -194,8 +211,10 @@ namespace KingdomSurvival.BattleSandbox
 
             VisualElement portrait = new VisualElement();
             portrait.style.height = 106f;
+            portrait.style.position = Position.Relative;
             portrait.style.alignItems = Align.Center;
             portrait.style.justifyContent = Justify.Center;
+            portrait.style.overflow = Overflow.Hidden;
             portrait.style.backgroundColor = team == SandboxTeam.Player
                 ? new Color(0.11f, 0.13f, 0.16f, 1f)
                 : new Color(0.17f, 0.095f, 0.10f, 1f);
@@ -212,11 +231,15 @@ namespace KingdomSurvival.BattleSandbox
                 Image image = new Image
                 {
                     sprite = portraitSprite,
-                    scaleMode = ScaleMode.ScaleToFit,
+                    scaleMode = ScaleMode.ScaleAndCrop,
                     pickingMode = PickingMode.Ignore
                 };
-                image.style.width = Length.Percent(100f);
-                image.style.height = Length.Percent(100f);
+                image.style.position = Position.Absolute;
+                image.style.left = 0f;
+                image.style.right = 0f;
+                image.style.top = 0f;
+                image.style.bottom = 0f;
+                ApplyPortraitFraming(image, definition.Id);
                 portrait.Add(image);
             }
             else
@@ -283,6 +306,35 @@ namespace KingdomSurvival.BattleSandbox
                 ? "ЛКМ — выбрать. ПКМ — открыть карточку бойца."
                 : "Открыть карточку противника.";
             return card;
+        }
+
+        internal static void ApplyPortraitFraming(Image image, string typeId)
+        {
+            if (image == null)
+                return;
+
+            image.scaleMode = ScaleMode.ScaleAndCrop;
+            float scale = 1f;
+            Vector2 offset = Vector2.zero;
+
+            if (portraitDatabase == null)
+            {
+                portraitDatabase = Resources.Load<UnitDatabaseAsset>(
+                    UnitDatabaseAsset.ResourcesPath);
+            }
+
+            UnitDefinitionData data = portraitDatabase != null
+                ? portraitDatabase.FindById(typeId)
+                : null;
+            if (data != null)
+            {
+                scale = data.PortraitScale;
+                offset = data.PortraitOffset;
+            }
+
+            float safeScale = Mathf.Max(0.1f, scale);
+            image.style.scale = new Scale(new Vector3(safeScale, safeScale, 1f));
+            image.transform.position = new Vector3(offset.x, offset.y, 0f);
         }
 
         private static VisualElement CreateHealthBar(int hitPoints, int maxHitPoints, float height)
@@ -612,17 +664,27 @@ namespace KingdomSurvival.BattleSandbox
             SetBorder(portraitPanel, new Color(0.27f, 0.30f, 0.34f, 1f));
             SetRadius(portraitPanel, 4f);
 
+            VisualElement portraitViewport = new VisualElement();
+            portraitViewport.style.position = Position.Absolute;
+            portraitViewport.style.left = 12f;
+            portraitViewport.style.right = 12f;
+            portraitViewport.style.top = 12f;
+            portraitViewport.style.bottom = 72f;
+            portraitViewport.style.overflow = Overflow.Hidden;
+            portraitViewport.pickingMode = PickingMode.Ignore;
+            portraitPanel.Add(portraitViewport);
+
             portraitImage = new Image
             {
-                scaleMode = ScaleMode.ScaleToFit,
+                scaleMode = ScaleMode.ScaleAndCrop,
                 pickingMode = PickingMode.Ignore
             };
             portraitImage.style.position = Position.Absolute;
-            portraitImage.style.left = 12f;
-            portraitImage.style.right = 12f;
-            portraitImage.style.top = 12f;
-            portraitImage.style.bottom = 72f;
-            portraitPanel.Add(portraitImage);
+            portraitImage.style.left = 0f;
+            portraitImage.style.right = 0f;
+            portraitImage.style.top = 0f;
+            portraitImage.style.bottom = 0f;
+            portraitViewport.Add(portraitImage);
 
             portraitLabel = CreateLabel("ИЗОБРАЖЕНИЕ\nБОЙЦА", 15, new Color(0.50f, 0.48f, 0.42f, 1f));
             portraitLabel.style.whiteSpace = WhiteSpace.Normal;
@@ -854,6 +916,9 @@ namespace KingdomSurvival.BattleSandbox
             fighterTitle.text = openedDefinition.RoleLabel.ToUpper();
             fighterRole.text = openedDefinition.RoleLabel.ToUpper();
             portraitImage.sprite = openedPortrait;
+            SandboxFighterCardFactory.ApplyPortraitFraming(
+                portraitImage,
+                openedDefinition.Id);
             portraitImage.style.display = openedPortrait != null
                 ? DisplayStyle.Flex
                 : DisplayStyle.None;

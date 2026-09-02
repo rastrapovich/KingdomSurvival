@@ -673,9 +673,29 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState target)
         {
             int effectiveDefense = target.Defense + (target.IsGuarding ? 2 : 0);
+            int statDifference = attacker.Attack - effectiveDefense;
+            decimal damageMultiplier;
+
+            if (statDifference > 0)
+            {
+                damageMultiplier = Math.Min(
+                    5m,
+                    1m + statDifference * 0.25m);
+            }
+            else if (statDifference < 0)
+            {
+                damageMultiplier = Math.Max(
+                    0.3m,
+                    1m - (-statDifference * 0.125m));
+            }
+            else
+            {
+                damageMultiplier = 1m;
+            }
+
             int damage = Math.Max(
-                5,
-                attacker.Damage + (attacker.Attack - effectiveDefense) * 5);
+                1,
+                (int)Math.Floor(attacker.Damage * damageMultiplier));
             if (attacker.Role == SandboxUnitRole.Spearman && target.Role == SandboxUnitRole.Beast)
                 damage += 5;
 

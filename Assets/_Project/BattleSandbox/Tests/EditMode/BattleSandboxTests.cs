@@ -183,7 +183,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
-        public void AttackPreviewMatchesDamageAndAttackCanOnlyBeUsedOnce()
+        public void AttackAdvantageAddsTwentyFivePercentPerPointAndRoundsDown()
         {
             SandboxBattle battle = CreateBattle(
                 playerPosition: new HexCoord(0, 1),
@@ -196,9 +196,9 @@ namespace KingdomSurvival.BattleSandbox.Tests
             string message;
 
             Assert.That(preview.IsValid, Is.True);
-            Assert.That(preview.Damage, Is.EqualTo(25));
+            Assert.That(preview.Damage, Is.EqualTo(22));
             Assert.That(battle.TryAttack("player", "enemy", out message), Is.True);
-            Assert.That(battle.GetUnit("enemy").HitPoints, Is.EqualTo(75));
+            Assert.That(battle.GetUnit("enemy").HitPoints, Is.EqualTo(78));
             Assert.That(battle.GetUnit("player").ActionPoints, Is.EqualTo(0));
             Assert.That(battle.GetUnit("player").RemainingMovement, Is.EqualTo(0));
             Assert.That(battle.PreviewAttack("player", "enemy").IsValid, Is.False);
@@ -225,6 +225,39 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
+        public void DefenseAdvantageReducesDamageByTwelvePointFivePercentPerPoint()
+        {
+            SandboxBattle battle = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(1, 1),
+                playerAttack: 3,
+                playerDamage: 15,
+                enemyDefense: 4);
+
+            Assert.That(battle.PreviewAttack("player", "enemy").Damage, Is.EqualTo(13));
+        }
+
+        [Test]
+        public void DamageMultipliersRespectHeroesStyleCaps()
+        {
+            SandboxBattle overwhelmingAttack = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(1, 1),
+                playerAttack: 100,
+                playerDamage: 10,
+                enemyDefense: 0);
+            SandboxBattle overwhelmingDefense = CreateBattle(
+                playerPosition: new HexCoord(0, 1),
+                enemyPosition: new HexCoord(1, 1),
+                playerAttack: 0,
+                playerDamage: 10,
+                enemyDefense: 100);
+
+            Assert.That(overwhelmingAttack.PreviewAttack("player", "enemy").Damage, Is.EqualTo(50));
+            Assert.That(overwhelmingDefense.PreviewAttack("player", "enemy").Damage, Is.EqualTo(3));
+        }
+
+        [Test]
         public void DamageStateAlwaysMatchesCurrentHitPoints()
         {
             SandboxBattle battle = CreateBattle(
@@ -238,8 +271,8 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Assert.That(battle.TryAttack("player", "enemy", out message), Is.True);
 
             SandboxUnitState enemy = battle.GetUnit("enemy");
-            Assert.That(enemy.HitPoints, Is.EqualTo(75));
-            Assert.That(enemy.DamageTaken, Is.EqualTo(25));
+            Assert.That(enemy.HitPoints, Is.EqualTo(78));
+            Assert.That(enemy.DamageTaken, Is.EqualTo(22));
             Assert.That(enemy.IsDamaged, Is.True);
         }
 

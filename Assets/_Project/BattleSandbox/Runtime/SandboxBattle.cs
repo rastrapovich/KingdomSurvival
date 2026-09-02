@@ -110,6 +110,7 @@ namespace KingdomSurvival.BattleSandbox
         public int RemainingMovement { get; internal set; }
         public bool HasAttacked { get; internal set; }
         public bool IsGuarding { get; internal set; }
+        public bool HasRetaliatedThisRound { get; internal set; }
 
         public string Id => instanceId;
         public string TypeId => Definition.Id;
@@ -125,6 +126,7 @@ namespace KingdomSurvival.BattleSandbox
         public bool IsDefeated => HitPoints <= 0;
         public int DamageTaken => Math.Max(0, MaxHitPoints - HitPoints);
         public bool IsDamaged => DamageTaken > 0;
+        public bool CanRetaliate => !IsDefeated && !HasRetaliatedThisRound;
 
         public bool HasTag(string tagId)
         {
@@ -204,8 +206,11 @@ namespace KingdomSurvival.BattleSandbox
     {
         private readonly List<SandboxUnitState> units;
         private readonly Dictionary<HexCoord, SandboxTerrain> terrain;
+        private readonly bool usesCompactArenaShape;
         private readonly List<string> turnOrderIds = new List<string>();
         private int currentTurnIndex = -1;
+        private string pendingRetaliationDefenderId;
+        private string pendingRetaliationAttackerId;
 
         public int Width { get; }
         public int Height { get; }
@@ -214,6 +219,11 @@ namespace KingdomSurvival.BattleSandbox
         public IReadOnlyList<SandboxUnitState> Units => units;
         public IReadOnlyList<string> TurnOrderIds => turnOrderIds;
         public int CurrentTurnIndex => currentTurnIndex;
+        public bool HasPendingRetaliation =>
+            !string.IsNullOrEmpty(pendingRetaliationDefenderId) &&
+            !string.IsNullOrEmpty(pendingRetaliationAttackerId);
+        public string PendingRetaliationDefenderId => pendingRetaliationDefenderId;
+        public string PendingRetaliationAttackerId => pendingRetaliationAttackerId;
 
         public SandboxUnitState CurrentUnit
         {
@@ -246,6 +256,10 @@ namespace KingdomSurvival.BattleSandbox
             this.terrain = terrain != null
                 ? new Dictionary<HexCoord, SandboxTerrain>(terrain)
                 : new Dictionary<HexCoord, SandboxTerrain>();
+            usesCompactArenaShape = SandboxArenaShape.MatchesDimensions(width, height) &&
+                                    SandboxArenaShape.InactiveCells().All(coord =>
+                                        this.terrain.TryGetValue(coord, out SandboxTerrain value) &&
+                                        value == SandboxTerrain.Impassable);
 
             ValidateInitialState();
         }
@@ -257,6 +271,7 @@ namespace KingdomSurvival.BattleSandbox
 
             Phase = SandboxBattlePhase.InProgress;
             Round = 1;
+            ResetRoundRetaliations();
             BuildRoundOrder();
             currentTurnIndex = 0;
             BeginCurrentActivationOrAdvance();
@@ -280,15 +295,20 @@ namespace KingdomSurvival.BattleSandbox
 
         public bool IsInside(HexCoord position)
         {
-            return position.Q >= 0 && position.Q < Width &&
-                   position.R >= 0 && position.R < Height;
+            bool insideRectangle =
+                position.Q >= 0 && position.Q < Width &&
+                position.R >= 0 && position.R < Height;
+            if (!insideRectangle)
+                return false;
+
+            return !usesCompactArenaShape || SandboxArenaShape.Contains(position);
         }
 
         public IReadOnlyDictionary<HexCoord, int> GetReachable(string unitId)
         {
             SandboxUnitState unit = GetUnit(unitId);
             Dictionary<HexCoord, int> result = new Dictionary<HexCoord, int>();
-            if (unit == null || unit.IsDefeated ||
+            if (HasPendingRetaliation || unit == null || unit.IsDefeated ||
                 unit.ActionPoints <= 0 || unit.RemainingMovement <= 0)
                 return result;
 
@@ -343,6 +363,12 @@ namespace KingdomSurvival.BattleSandbox
         public bool TryMove(string unitId, HexCoord destination, out string message)
         {
             message = "Перемещение недоступно.";
+            if (HasPendingRetaliation)
+            {
+                message = "Сначала должен завершиться ответный удар.";
+                return false;
+            }
+
             SandboxUnitState unit = CurrentUnit;
             if (Phase != SandboxBattlePhase.InProgress || unit == null || unit.Id != unitId)
                 return false;
@@ -519,6 +545,8 @@ namespace KingdomSurvival.BattleSandbox
 
         public SandboxAttackPreview PreviewAttack(string attackerId, string targetId)
         {
+            if (HasPendingRetaliation)
+                return SandboxAttackPreview.Invalid("Сначала должен завершиться ответный удар.");
             if (Phase != SandboxBattlePhase.InProgress)
                 return SandboxAttackPreview.Invalid("Бой уже завершён.");
 
@@ -553,6 +581,7 @@ namespace KingdomSurvival.BattleSandbox
 
             SandboxUnitState attacker = GetUnit(attackerId);
             SandboxUnitState target = GetUnit(targetId);
+            ClearPendingRetaliation();
             target.ReceiveDamage(preview.Damage);
             attacker.ActionPoints--;
             attacker.RemainingMovement = 0;
@@ -561,6 +590,65 @@ namespace KingdomSurvival.BattleSandbox
             message = attacker.DisplayLabel + " наносит " + target.DisplayLabel + " " +
                       preview.Damage + " урона" +
                       (target.IsDefeated ? " и выводит цель из строя." : ".");
+
+            EvaluateBattleOutcome();
+            if (Phase == SandboxBattlePhase.InProgress &&
+                attacker.AttackRange == 1 &&
+                !target.IsDefeated &&
+                target.CanRetaliate &&
+                attacker.Position.DistanceTo(target.Position) == 1)
+            {
+                pendingRetaliationDefenderId = target.Id;
+                pendingRetaliationAttackerId = attacker.Id;
+            }
+            else if (Phase != SandboxBattlePhase.InProgress)
+            {
+                ClearPendingRetaliation();
+            }
+
+            return true;
+        }
+
+        public SandboxAttackPreview PreviewPendingRetaliation()
+        {
+            if (!HasPendingRetaliation)
+                return SandboxAttackPreview.Invalid("Ответный удар не ожидается.");
+            if (Phase != SandboxBattlePhase.InProgress)
+                return SandboxAttackPreview.Invalid("Бой уже завершён.");
+
+            SandboxUnitState defender = GetUnit(pendingRetaliationDefenderId);
+            SandboxUnitState attacker = GetUnit(pendingRetaliationAttackerId);
+            if (defender == null || attacker == null ||
+                defender.IsDefeated || attacker.IsDefeated ||
+                defender.Team == attacker.Team ||
+                defender.HasRetaliatedThisRound ||
+                defender.Position.DistanceTo(attacker.Position) != 1)
+            {
+                return SandboxAttackPreview.Invalid("Ответный удар больше недоступен.");
+            }
+
+            return BuildAttackPreview(defender, attacker);
+        }
+
+        public bool TryResolvePendingRetaliation(out string message)
+        {
+            SandboxAttackPreview preview = PreviewPendingRetaliation();
+            if (!preview.IsValid)
+            {
+                message = preview.Reason;
+                ClearPendingRetaliation();
+                return false;
+            }
+
+            SandboxUnitState defender = GetUnit(pendingRetaliationDefenderId);
+            SandboxUnitState attacker = GetUnit(pendingRetaliationAttackerId);
+            defender.HasRetaliatedThisRound = true;
+            attacker.ReceiveDamage(preview.Damage);
+            ClearPendingRetaliation();
+
+            message = defender.DisplayLabel + " отвечает " + attacker.DisplayLabel + " и наносит " +
+                      preview.Damage + " урона" +
+                      (attacker.IsDefeated ? " и выводит атакующего из строя." : ".");
             EvaluateBattleOutcome();
             return true;
         }
@@ -568,6 +656,12 @@ namespace KingdomSurvival.BattleSandbox
         public bool TryGuard(string unitId, out string message)
         {
             message = "Защитная стойка недоступна.";
+            if (HasPendingRetaliation)
+            {
+                message = "Сначала должен завершиться ответный удар.";
+                return false;
+            }
+
             SandboxUnitState unit = CurrentUnit;
             if (Phase != SandboxBattlePhase.InProgress || unit == null || unit.Id != unitId)
                 return false;
@@ -583,8 +677,11 @@ namespace KingdomSurvival.BattleSandbox
 
         public void EndActivation()
         {
-            if (Phase != SandboxBattlePhase.InProgress || CurrentUnit == null)
+            if (HasPendingRetaliation ||
+                Phase != SandboxBattlePhase.InProgress || CurrentUnit == null)
+            {
                 return;
+            }
 
             CurrentUnit.ActionPoints = 0;
             CurrentUnit.RemainingMovement = 0;
@@ -679,6 +776,7 @@ namespace KingdomSurvival.BattleSandbox
                 if (currentTurnIndex >= turnOrderIds.Count)
                 {
                     Round++;
+                    ResetRoundRetaliations();
                     BuildRoundOrder();
                     currentTurnIndex = 0;
                 }
@@ -709,6 +807,22 @@ namespace KingdomSurvival.BattleSandbox
                 Phase = SandboxBattlePhase.PlayerVictory;
             else if (!playersAlive)
                 Phase = SandboxBattlePhase.EnemyVictory;
+
+            if (Phase != SandboxBattlePhase.InProgress)
+                ClearPendingRetaliation();
+        }
+
+        private void ResetRoundRetaliations()
+        {
+            ClearPendingRetaliation();
+            foreach (SandboxUnitState unit in units)
+                unit.HasRetaliatedThisRound = false;
+        }
+
+        private void ClearPendingRetaliation()
+        {
+            pendingRetaliationDefenderId = null;
+            pendingRetaliationAttackerId = null;
         }
 
         private static SandboxAttackPreview BuildAttackPreview(
@@ -756,7 +870,8 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState attacker,
             SandboxUnitState target)
         {
-            return Phase == SandboxBattlePhase.InProgress &&
+            return !HasPendingRetaliation &&
+                   Phase == SandboxBattlePhase.InProgress &&
                    attacker != null && target != null &&
                    !attacker.IsDefeated && !target.IsDefeated &&
                    CurrentUnit != null && CurrentUnit.Id == attacker.Id &&
@@ -806,7 +921,15 @@ namespace KingdomSurvival.BattleSandbox
                 {
                     string attackMessage;
                     if (battle.TryAttack(enemy.Id, target.Id, out attackMessage))
+                    {
                         events.Add(attackMessage);
+                        if (battle.HasPendingRetaliation)
+                        {
+                            string retaliationMessage;
+                            if (battle.TryResolvePendingRetaliation(out retaliationMessage))
+                                events.Add(retaliationMessage);
+                        }
+                    }
                 }
             }
 

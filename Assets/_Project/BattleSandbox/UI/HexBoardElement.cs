@@ -105,7 +105,7 @@ namespace KingdomSurvival.BattleSandbox
             Add(damageLabel);
         }
 
-        public void SetUnitVisuals(
+        internal void SetUnitVisuals(
             IReadOnlyDictionary<string, SandboxUnitVisual> visuals)
         {
             unitVisuals = visuals ?? new Dictionary<string, SandboxUnitVisual>();

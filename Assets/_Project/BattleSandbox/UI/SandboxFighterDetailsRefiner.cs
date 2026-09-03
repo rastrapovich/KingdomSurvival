@@ -38,11 +38,12 @@ namespace KingdomSurvival.BattleSandbox
         private Label tagTooltipTitle;
         private Label tagTooltipText;
         private Label titleLabel;
+        private Image portraitImage;
         private Label defenseValueLabel;
         private VisualElement statTooltip;
         private Label statTooltipTitle;
         private Label statTooltipText;
-        private string renderedTypeLabel;
+        private string renderedUnitKey;
 
         private void Awake()
         {
@@ -113,7 +114,12 @@ namespace KingdomSurvival.BattleSandbox
                 if (portraitPanel.hierarchy.childCount > 3)
                     portraitPanel.hierarchy.ElementAt(3).style.display = DisplayStyle.None;
                 if (portraitPanel.hierarchy.childCount > 0)
-                    portraitPanel.hierarchy.ElementAt(0).style.bottom = 36f;
+                {
+                    VisualElement viewport = portraitPanel.hierarchy.ElementAt(0);
+                    viewport.style.bottom = 36f;
+                    if (viewport.hierarchy.childCount > 0)
+                        portraitImage = viewport.hierarchy.ElementAt(0) as Image;
+                }
             }
 
             if (info != null)
@@ -142,10 +148,7 @@ namespace KingdomSurvival.BattleSandbox
                 tagRow = info.Q<VisualElement>(TagRowName);
                 if (tagRow == null)
                 {
-                    tagRow = new VisualElement
-                    {
-                        name = TagRowName
-                    };
+                    tagRow = new VisualElement { name = TagRowName };
                     tagRow.style.flexDirection = FlexDirection.Row;
                     tagRow.style.flexWrap = Wrap.Wrap;
                     tagRow.style.alignItems = Align.FlexStart;
@@ -177,10 +180,10 @@ namespace KingdomSurvival.BattleSandbox
 
         private void RefreshDefensePresentation()
         {
-            if (database == null || titleLabel == null || defenseValueLabel == null)
+            if (defenseValueLabel == null)
                 return;
 
-            UnitDefinitionData unit = FindUnitByDisplayLabel(titleLabel.text);
+            UnitDefinitionData unit = FindCurrentUnit();
             if (unit != null)
                 defenseValueLabel.text = unit.Defense.ToString();
         }
@@ -279,15 +282,15 @@ namespace KingdomSurvival.BattleSandbox
             if (database == null || tagRow == null || titleLabel == null)
                 return;
 
-            string currentLabel = titleLabel.text ?? string.Empty;
-            if (!force && string.Equals(renderedTypeLabel, currentLabel, StringComparison.Ordinal))
+            UnitDefinitionData unit = FindCurrentUnit();
+            string currentKey = unit != null ? unit.Id : (titleLabel.text ?? string.Empty);
+            if (!force && string.Equals(renderedUnitKey, currentKey, StringComparison.Ordinal))
                 return;
 
-            renderedTypeLabel = currentLabel;
+            renderedUnitKey = currentKey;
             HideTagTooltip();
             tagRow.Clear();
 
-            UnitDefinitionData unit = FindUnitByDisplayLabel(currentLabel);
             if (unit == null || unit.TagIds == null || unit.TagIds.Count == 0)
             {
                 tagRow.style.display = DisplayStyle.None;
@@ -358,6 +361,39 @@ namespace KingdomSurvival.BattleSandbox
                 : DisplayStyle.None;
         }
 
+        private UnitDefinitionData FindCurrentUnit()
+        {
+            if (database == null || database.Units == null || titleLabel == null)
+                return null;
+
+            string normalized = (titleLabel.text ?? string.Empty).Trim();
+            UnitDefinitionData labelFallback = null;
+            Sprite currentPortrait = portraitImage != null ? portraitImage.sprite : null;
+
+            for (int i = 0; i < database.Units.Count; i++)
+            {
+                UnitDefinitionData unit = database.Units[i];
+                if (unit == null)
+                    continue;
+
+                bool labelMatches =
+                    string.Equals(unit.DisplayLabel, normalized, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(
+                        unit.DisplayLabel != null ? unit.DisplayLabel.ToUpperInvariant() : string.Empty,
+                        normalized,
+                        StringComparison.Ordinal);
+                if (!labelMatches)
+                    continue;
+
+                if (labelFallback == null)
+                    labelFallback = unit;
+                if (currentPortrait != null && unit.Portrait == currentPortrait)
+                    return unit;
+            }
+
+            return labelFallback;
+        }
+
         private void ShowTagTooltip(
             VisualElement anchor,
             string title,
@@ -407,34 +443,6 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (tagTooltip != null)
                 tagTooltip.style.display = DisplayStyle.None;
-        }
-
-        private UnitDefinitionData FindUnitByDisplayLabel(string displayedTitle)
-        {
-            if (database == null || database.Units == null)
-                return null;
-
-            string normalized = (displayedTitle ?? string.Empty).Trim();
-            for (int i = 0; i < database.Units.Count; i++)
-            {
-                UnitDefinitionData unit = database.Units[i];
-                if (unit == null)
-                    continue;
-
-                if (string.Equals(
-                        unit.DisplayLabel,
-                        normalized,
-                        StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(
-                        unit.DisplayLabel != null ? unit.DisplayLabel.ToUpperInvariant() : string.Empty,
-                        normalized,
-                        StringComparison.Ordinal))
-                {
-                    return unit;
-                }
-            }
-
-            return null;
         }
 
         private static void SetBorder(VisualElement element, Color color, float width)

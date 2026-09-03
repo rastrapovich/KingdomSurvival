@@ -22,6 +22,7 @@
 
 *.csproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user
@@ -38,6 +39,7 @@
 # Unity generated files
 # ================================
 
+/UIElementsSchema/
 sysinfo.txt
 
 *.apk

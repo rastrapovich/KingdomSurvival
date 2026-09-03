@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 public sealed class ContinuousSimulationBatch
 {
@@ -62,8 +63,8 @@ public static partial class ContinuousSimulationSystem
         public double SegmentProgress;
     }
 
-    private static readonly Dictionary<GameState, RuntimeState> RuntimeStates =
-        new Dictionary<GameState, RuntimeState>();
+    private static readonly ConditionalWeakTable<GameState, RuntimeState> RuntimeStates =
+        new ConditionalWeakTable<GameState, RuntimeState>();
 
     private static int nextContinuousDecisionId = 100000;
 
@@ -80,7 +81,8 @@ public static partial class ContinuousSimulationSystem
             Random = new Random(state.WorldSeed ^ 0x4B534354)
         };
 
-        RuntimeStates[state] = runtime;
+        RuntimeStates.Remove(state);
+        RuntimeStates.Add(state, runtime);
         ScheduleDailyChecks(state, runtime, StartHour);
         ResetRouteTracking(runtime, state.ActiveExpedition);
     }
@@ -337,7 +339,7 @@ public static partial class ContinuousSimulationSystem
         if (!RuntimeStates.TryGetValue(state, out runtime))
         {
             Reset(state);
-            runtime = RuntimeStates[state];
+            RuntimeStates.TryGetValue(state, out runtime);
         }
 
         return runtime;

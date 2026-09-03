@@ -131,7 +131,16 @@ public static partial class ContinuousSimulationSystem
         if (batch.RequestAutoPause)
             return elapsedHours;
 
-        AdvanceExpeditionMovement(state, runtime, movementHours, batch);
+        double nonMovementHours = Math.Max(0.0, gameHours - movementHours);
+        double movementElapsedHours = AdvanceExpeditionMovement(
+            state,
+            runtime,
+            movementHours,
+            batch);
+
+        if (batch.RequestAutoPause)
+            return Math.Min(gameHours, nonMovementHours + movementElapsedHours);
+
         return gameHours;
     }
 
@@ -229,7 +238,7 @@ public static partial class ContinuousSimulationSystem
         return rewards;
     }
 
-    private static void AdvanceExpeditionMovement(
+    private static double AdvanceExpeditionMovement(
         GameState state,
         RuntimeState runtime,
         double gameHours,
@@ -238,7 +247,7 @@ public static partial class ContinuousSimulationSystem
         if (!state.HasActiveExpedition ||
             state.HasPendingExpeditionDecision)
         {
-            return;
+            return gameHours;
         }
 
         ExpeditionData expedition = state.ActiveExpedition;
@@ -247,7 +256,7 @@ public static partial class ContinuousSimulationSystem
             (expedition.Phase != CommanderState.TravellingToLocation &&
              expedition.Phase != CommanderState.ReturningToCastle))
         {
-            return;
+            return gameHours;
         }
 
         EnsureRouteTracking(state, runtime);
@@ -262,14 +271,16 @@ public static partial class ContinuousSimulationSystem
             expedition,
             runtime,
             gameHours);
+        double delayHoursUsed = Math.Max(0.0, gameHours - movementHours);
 
         if (movementHours <= Epsilon)
         {
             UpdateRemainingRouteCells(expedition, runtime);
-            return;
+            return gameHours;
         }
 
-        double cellsToMove = movementHours * CellsPerGameHour;
+        double initialCellsToMove = movementHours * CellsPerGameHour;
+        double cellsToMove = initialCellsToMove;
 
         while (cellsToMove > Epsilon && state.HasActiveExpedition)
         {
@@ -327,6 +338,15 @@ public static partial class ContinuousSimulationSystem
 
         if (state.HasActiveExpedition)
             UpdateRemainingRouteCells(state.ActiveExpedition, runtime);
+
+        if (batch.RequestAutoPause)
+        {
+            double cellsUsed = Math.Max(0.0, initialCellsToMove - cellsToMove);
+            double movementHoursUsed = cellsUsed / CellsPerGameHour;
+            return Math.Min(gameHours, delayHoursUsed + movementHoursUsed);
+        }
+
+        return gameHours;
     }
 
     private static double ConsumeTravelDelay(

@@ -121,17 +121,19 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
-        public void CompactArenaTreatsHiddenCornersAsOutsideBattlefield()
+        public void WideArenaTreatsHiddenCornersAsOutsideBattlefield()
         {
             SandboxBattle battle = SandboxRoster.CreateDefaultBattle(new[] { "guard" });
 
-            Assert.That(battle.IsInside(new HexCoord(0, 0)), Is.False);
-            Assert.That(battle.IsInside(new HexCoord(1, 0)), Is.True);
-            Assert.That(battle.IsInside(new HexCoord(7, 0)), Is.False);
-            Assert.That(battle.IsInside(new HexCoord(6, 1)), Is.True);
-            Assert.That(battle.IsInside(new HexCoord(7, 1)), Is.False);
-            Assert.That(battle.IsInside(new HexCoord(0, 6)), Is.False);
-            Assert.That(battle.IsInside(new HexCoord(1, 6)), Is.True);
+            Assert.That(battle.IsInside(new HexCoord(1, 0)), Is.False);
+            Assert.That(battle.IsInside(new HexCoord(2, 0)), Is.True);
+            Assert.That(battle.IsInside(new HexCoord(9, 0)), Is.False);
+            Assert.That(battle.IsInside(new HexCoord(1, 1)), Is.True);
+            Assert.That(battle.IsInside(new HexCoord(9, 1)), Is.False);
+            Assert.That(battle.IsInside(new HexCoord(0, 3)), Is.True);
+            Assert.That(battle.IsInside(new HexCoord(9, 3)), Is.True);
+            Assert.That(battle.IsInside(new HexCoord(1, 6)), Is.False);
+            Assert.That(battle.IsInside(new HexCoord(2, 6)), Is.True);
 
             int activeCells = Enumerable.Range(0, battle.Height)
                 .SelectMany(row => Enumerable.Range(0, battle.Width)

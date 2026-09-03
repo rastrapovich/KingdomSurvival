@@ -440,7 +440,7 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
 
         private sealed class GridPreview : VisualElement
         {
-            private const float GridVerticalScale = 0.85f;
+            private const float GridVerticalScale = 0.75f;
             private static readonly int[] RowStarts = { 1, 0, 0, 0, 0, 0, 1 };
             private static readonly int[] RowLengths = { 6, 7, 8, 7, 8, 7, 6 };
 

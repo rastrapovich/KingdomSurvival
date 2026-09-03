@@ -6,7 +6,6 @@ namespace KingdomSurvival.BattleSandbox
     {
         public const string Human = "species.human";
         public const string Beast = "species.beast";
-        public const string Melee = "combat.melee";
         public const string Ranged = "combat.ranged";
         public const string Defender = "role.defender";
         public const string Armored = "trait.armored";

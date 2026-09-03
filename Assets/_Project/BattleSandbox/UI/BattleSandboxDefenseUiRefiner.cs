@@ -11,17 +11,31 @@ namespace KingdomSurvival.BattleSandbox
         private static readonly BindingFlags InstanceFlags =
             BindingFlags.Instance | BindingFlags.NonPublic;
 
+        private static readonly Color NormalStatColor =
+            new Color(0.91f, 0.79f, 0.54f, 1f);
+        private static readonly Color BonusStatColor =
+            new Color(0.42f, 0.82f, 0.47f, 1f);
+        private const string BonusColorHex = "#6BD178";
+
         private static readonly FieldInfo BattleField =
             typeof(BattleSandboxController).GetField("battle", InstanceFlags);
         private static readonly FieldInfo CurrentStatsLabelField =
             typeof(BattleSandboxController).GetField("currentStatsLabel", InstanceFlags);
         private static readonly FieldInfo FighterDetailsViewField =
             typeof(BattleSandboxController).GetField("fighterDetailsView", InstanceFlags);
+        private static readonly FieldInfo GuardButtonField =
+            typeof(BattleSandboxController).GetField("guardButton", InstanceFlags);
+        private static readonly FieldInfo SelectedTargetIdField =
+            typeof(BattleSandboxController).GetField("selectedTargetId", InstanceFlags);
 
         private static readonly FieldInfo DetailsOpenedStateField =
             typeof(SandboxFighterDetailsView).GetField("openedState", InstanceFlags);
+        private static readonly FieldInfo DetailsAttackValueField =
+            typeof(SandboxFighterDetailsView).GetField("attackValue", InstanceFlags);
         private static readonly FieldInfo DetailsDefenseValueField =
             typeof(SandboxFighterDetailsView).GetField("defenseValue", InstanceFlags);
+        private static readonly FieldInfo DetailsRangeValueField =
+            typeof(SandboxFighterDetailsView).GetField("rangeValue", InstanceFlags);
         private static readonly FieldInfo DetailsTooltipTitleField =
             typeof(SandboxFighterDetailsView).GetField("tooltipTitle", InstanceFlags);
         private static readonly FieldInfo DetailsTooltipTextField =
@@ -61,8 +75,24 @@ namespace KingdomSurvival.BattleSandbox
             if (battle == null)
                 return;
 
+            RefreshGuardButton();
             RefreshCurrentUnitStats(battle);
             RefreshOpenedFighterDetails(battle);
+        }
+
+        private void RefreshGuardButton()
+        {
+            Button button = GuardButtonField != null
+                ? GuardButtonField.GetValue(controller) as Button
+                : null;
+            if (button == null)
+                return;
+
+            button.tooltip =
+                "Защитная стойка\n" +
+                "+50% к защите после всех модификаторов.\n" +
+                "Округление вниз, минимум +1.\n" +
+                "Расходует 1 ОД и завершает движение.";
         }
 
         private void RefreshCurrentUnitStats(SandboxBattle battle)
@@ -75,28 +105,32 @@ namespace KingdomSurvival.BattleSandbox
             if (label == null || current == null)
                 return;
 
+            SandboxUnitState selectedTarget = GetSelectedTarget(battle);
+            SandboxAttackSnapshot attack =
+                SandboxCombatStatPresentation.GetAttackSnapshot(current, selectedTarget);
             SandboxDefenseSnapshot defense =
                 SandboxDefensePresentation.GetSnapshot(battle, current);
+            SandboxRangeSnapshot range =
+                SandboxCombatStatPresentation.GetRangeSnapshot(current);
+
+            label.enableRichText = true;
             label.text =
                 current.Definition.RoleLabel + "\n" +
                 "HP " + current.HitPoints + "/" + current.MaxHitPoints +
                 "  ·  ОД " + current.ActionPoints + "/" + SandboxUnitState.ActionsPerActivation + "\n" +
-                "АТК " + current.Attack + "  ·  ЗАЩ " + defense.EffectiveDefense +
+                "АТК " + FormatStat(attack.EffectiveAttack.ToString("0.##"), attack.HasPositiveBonus) +
+                "  ·  ЗАЩ " + FormatStat(defense.EffectiveDefense.ToString(), defense.EffectiveDefense > defense.BaseDefense) +
                 "  ·  УРОН " + current.Damage + "\n" +
-                "ЗАЩИТА: " + defense.BuildCompactBreakdown() + "\n" +
-                "ДВИЖ " + current.RemainingMovement + "/" + current.Movement +
+                "ДАЛ " + FormatStat(range.EffectiveRange.ToString(), range.HasBonus) +
+                "  ·  ДВИЖ " + current.RemainingMovement + "/" + current.Movement +
                 "  ·  ИНИЦ " + current.Initiative + "\n" +
                 "ОТВЕТНЫЙ УДАР: " + (current.CanRetaliate ? "ГОТОВ" : "ПОТРАЧЕН");
         }
 
         private void RefreshOpenedFighterDetails(SandboxBattle battle)
         {
-            if (FighterDetailsViewField == null ||
-                DetailsOpenedStateField == null ||
-                DetailsDefenseValueField == null)
-            {
+            if (FighterDetailsViewField == null || DetailsOpenedStateField == null)
                 return;
-            }
 
             SandboxFighterDetailsView details =
                 FighterDetailsViewField.GetValue(controller) as SandboxFighterDetailsView;
@@ -105,29 +139,121 @@ namespace KingdomSurvival.BattleSandbox
 
             SandboxUnitState state =
                 DetailsOpenedStateField.GetValue(details) as SandboxUnitState;
-            Label defenseValue =
-                DetailsDefenseValueField.GetValue(details) as Label;
-            if (state == null || defenseValue == null)
+            if (state == null)
                 return;
 
+            SandboxUnitState target = state == battle.CurrentUnit
+                ? GetSelectedTarget(battle)
+                : null;
+            SandboxAttackSnapshot attack =
+                SandboxCombatStatPresentation.GetAttackSnapshot(state, target);
             SandboxDefenseSnapshot defense =
                 SandboxDefensePresentation.GetSnapshot(battle, state);
-            defenseValue.text = defense.EffectiveDefense.ToString();
-            defenseValue.tooltip = defense.BuildCompactBreakdown();
+            SandboxRangeSnapshot range =
+                SandboxCombatStatPresentation.GetRangeSnapshot(state);
 
-            Label tooltipTitle = DetailsTooltipTitleField != null
-                ? DetailsTooltipTitleField.GetValue(details) as Label
-                : null;
-            Label tooltipText = DetailsTooltipTextField != null
-                ? DetailsTooltipTextField.GetValue(details) as Label
-                : null;
-            if (tooltipTitle != null && tooltipText != null && tooltipTitle.text == "ЗАЩИТА")
+            Label attackValue = GetDetailsLabel(details, DetailsAttackValueField);
+            Label defenseValue = GetDetailsLabel(details, DetailsDefenseValueField);
+            Label rangeValue = GetDetailsLabel(details, DetailsRangeValueField);
+
+            if (attackValue != null)
+            {
+                attackValue.text = attack.EffectiveAttack.ToString("0.##");
+                attackValue.style.color = attack.HasPositiveBonus ? BonusStatColor : NormalStatColor;
+                attackValue.tooltip = attack.BuildBreakdown();
+            }
+
+            if (defenseValue != null)
+            {
+                defenseValue.text = defense.EffectiveDefense.ToString();
+                defenseValue.style.color = defense.EffectiveDefense > defense.BaseDefense
+                    ? BonusStatColor
+                    : NormalStatColor;
+                defenseValue.tooltip = BuildDefenseBreakdown(defense);
+            }
+
+            if (rangeValue != null)
+            {
+                rangeValue.text = range.EffectiveRange.ToString();
+                rangeValue.style.color = range.HasBonus ? BonusStatColor : NormalStatColor;
+                rangeValue.tooltip = range.BuildBreakdown();
+            }
+
+            RefreshSharedTooltip(details, attack, defense, range);
+        }
+
+        private void RefreshSharedTooltip(
+            SandboxFighterDetailsView details,
+            SandboxAttackSnapshot attack,
+            SandboxDefenseSnapshot defense,
+            SandboxRangeSnapshot range)
+        {
+            Label tooltipTitle = GetDetailsLabel(details, DetailsTooltipTitleField);
+            Label tooltipText = GetDetailsLabel(details, DetailsTooltipTextField);
+            if (tooltipTitle == null || tooltipText == null)
+                return;
+
+            if (tooltipTitle.text == "АТАКА")
             {
                 tooltipText.text =
-                    "Эффективная защита используется в расчёте входящего урона. " +
-                    defense.BuildCompactBreakdown() + ". Защитная стойка добавляет 50% от защиты после брони и холма, " +
-                    "бонус округляется вниз и не может быть меньше +1.";
+                    "Формула урона:\n" +
+                    "Разница = Атака − Защита.\n" +
+                    "Если разница > 0: урон × min(5; 1 + разница × 25%).\n" +
+                    "Если разница < 0: урон × max(0,3; 1 − |разница| × 12,5%).\n\n" +
+                    attack.BuildBreakdown();
             }
+            else if (tooltipTitle.text == "ЗАЩИТА")
+            {
+                tooltipText.text =
+                    "Формула урона:\n" +
+                    "Разница = Атака врага − Защита.\n" +
+                    "Каждый пункт преимущества Защиты снижает базовый урон на 12,5%.\n" +
+                    "Максимальное снижение — 70%.\n\n" +
+                    BuildDefenseBreakdown(defense);
+            }
+            else if (tooltipTitle.text == "ДАЛЬНОСТЬ")
+            {
+                tooltipText.text =
+                    "Максимальная гексовая дистанция обычной атаки.\n" +
+                    "Боец с тегом «Дальний бой» получает +1 к дальности, пока стоит на холме.\n\n" +
+                    range.BuildBreakdown();
+            }
+        }
+
+        private SandboxUnitState GetSelectedTarget(SandboxBattle battle)
+        {
+            if (SelectedTargetIdField == null)
+                return null;
+
+            string targetId = SelectedTargetIdField.GetValue(controller) as string;
+            return string.IsNullOrEmpty(targetId) ? null : battle.GetUnit(targetId);
+        }
+
+        private static Label GetDetailsLabel(
+            SandboxFighterDetailsView details,
+            FieldInfo field)
+        {
+            return field != null ? field.GetValue(details) as Label : null;
+        }
+
+        private static string BuildDefenseBreakdown(SandboxDefenseSnapshot defense)
+        {
+            string result = defense.BaseDefense + "  база";
+            if (defense.ArmorBonus > 0)
+                result += "\n+" + defense.ArmorBonus + "  броня";
+            if (defense.HillBonus > 0)
+                result += "\n+" + defense.HillBonus + "  расположение: холм";
+            if (defense.GuardBonus > 0)
+                result += "\n+" + defense.GuardBonus + "  защитная стойка";
+            result += "\n=" + defense.EffectiveDefense + "  итог";
+            return result;
+        }
+
+        private static string FormatStat(string value, bool boosted)
+        {
+            return boosted
+                ? "<color=" + BonusColorHex + ">" + value + "</color>"
+                : value;
         }
     }
 }

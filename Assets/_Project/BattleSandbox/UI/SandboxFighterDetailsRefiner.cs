@@ -38,7 +38,12 @@ namespace KingdomSurvival.BattleSandbox
         private Label tagTooltipTitle;
         private Label tagTooltipText;
         private Label titleLabel;
-        private string renderedTypeLabel;
+        private Image portraitImage;
+        private Label defenseValueLabel;
+        private VisualElement statTooltip;
+        private Label statTooltipTitle;
+        private Label statTooltipText;
+        private string renderedUnitKey;
 
         private void Awake()
         {
@@ -54,6 +59,7 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             RefreshTags();
+            RefreshDefensePresentation();
         }
 
         private void FindAndPrepareWindow()
@@ -76,6 +82,7 @@ namespace KingdomSurvival.BattleSandbox
                 window = candidate;
                 ApplyStaticLayout();
                 RefreshTags(true);
+                RefreshDefensePresentation();
                 return;
             }
         }
@@ -102,20 +109,21 @@ namespace KingdomSurvival.BattleSandbox
 
             if (portraitPanel != null)
             {
-                // Portrait child layout: viewport, fallback label, duplicate role,
-                // team label, HP bar. Keep only the image/fallback and HP bar.
                 if (portraitPanel.hierarchy.childCount > 2)
                     portraitPanel.hierarchy.ElementAt(2).style.display = DisplayStyle.None;
                 if (portraitPanel.hierarchy.childCount > 3)
                     portraitPanel.hierarchy.ElementAt(3).style.display = DisplayStyle.None;
                 if (portraitPanel.hierarchy.childCount > 0)
-                    portraitPanel.hierarchy.ElementAt(0).style.bottom = 36f;
+                {
+                    VisualElement viewport = portraitPanel.hierarchy.ElementAt(0);
+                    viewport.style.bottom = 36f;
+                    if (viewport.hierarchy.childCount > 0)
+                        portraitImage = viewport.hierarchy.ElementAt(0) as Image;
+                }
             }
 
             if (info != null)
             {
-                // Original layout: heading, HP, ATK, DEF, DMG, MOVE, INIT,
-                // RANGE, ACTIONS, state, hover hint.
                 HideChild(info, 0);
                 HideChild(info, 7);
                 HideChild(info, 8);
@@ -125,13 +133,22 @@ namespace KingdomSurvival.BattleSandbox
                 for (int index = 1; index <= 6; index++)
                     MakeStatRowCompact(info, index);
 
+                if (info.hierarchy.childCount > 3)
+                {
+                    VisualElement defenseRow = info.hierarchy.ElementAt(3);
+                    if (defenseRow.hierarchy.childCount > 1)
+                        defenseValueLabel = defenseRow.hierarchy.ElementAt(1) as Label;
+
+                    defenseRow.RegisterCallback<PointerEnterEvent>(_ =>
+                    {
+                        defenseRow.schedule.Execute(OverrideDefenseTooltip).ExecuteLater(1);
+                    });
+                }
+
                 tagRow = info.Q<VisualElement>(TagRowName);
                 if (tagRow == null)
                 {
-                    tagRow = new VisualElement
-                    {
-                        name = TagRowName
-                    };
+                    tagRow = new VisualElement { name = TagRowName };
                     tagRow.style.flexDirection = FlexDirection.Row;
                     tagRow.style.flexWrap = Wrap.Wrap;
                     tagRow.style.alignItems = Align.FlexStart;
@@ -140,23 +157,52 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
-            VisualElement tooltip = root.Q<VisualElement>(TooltipName);
-            if (tooltip != null)
+            statTooltip = root.Q<VisualElement>(TooltipName);
+            if (statTooltip != null)
             {
-                if (tooltip.hierarchy.childCount > 0 &&
-                    tooltip.hierarchy.ElementAt(0) is Label tooltipTitle)
+                if (statTooltip.hierarchy.childCount > 0 &&
+                    statTooltip.hierarchy.ElementAt(0) is Label tooltipTitle)
                 {
-                    tooltipTitle.style.fontSize = 16f;
+                    statTooltipTitle = tooltipTitle;
+                    statTooltipTitle.style.fontSize = 16f;
                 }
 
-                if (tooltip.hierarchy.childCount > 1 &&
-                    tooltip.hierarchy.ElementAt(1) is Label tooltipText)
+                if (statTooltip.hierarchy.childCount > 1 &&
+                    statTooltip.hierarchy.ElementAt(1) is Label tooltipText)
                 {
-                    tooltipText.style.fontSize = 15f;
+                    statTooltipText = tooltipText;
+                    statTooltipText.style.fontSize = 15f;
                 }
             }
 
             EnsureTagTooltip();
+        }
+
+        private void RefreshDefensePresentation()
+        {
+            if (defenseValueLabel == null)
+                return;
+
+            UnitDefinitionData unit = FindCurrentUnit();
+            if (unit != null)
+                defenseValueLabel.text = unit.Defense.ToString();
+        }
+
+        private void OverrideDefenseTooltip()
+        {
+            if (statTooltip == null || statTooltipTitle == null || statTooltipText == null ||
+                statTooltip.resolvedStyle.display == DisplayStyle.None)
+            {
+                return;
+            }
+
+            statTooltipTitle.text = "ЗАЩИТА";
+            statTooltipText.text =
+                "Снижает входящий урон через сравнение с Атакой врага. " +
+                "Тег «Бронированный» постоянно добавляет +2 к Защите. " +
+                "Защитная стойка увеличивает итоговую Защиту на 50%; " +
+                "тег «Защитник» в стойке добавляет ещё +25%. " +
+                "Плоский бонус брони применяется до процентного бонуса стойки.";
         }
 
         private void EnsureTagTooltip()
@@ -236,15 +282,15 @@ namespace KingdomSurvival.BattleSandbox
             if (database == null || tagRow == null || titleLabel == null)
                 return;
 
-            string currentLabel = titleLabel.text ?? string.Empty;
-            if (!force && string.Equals(renderedTypeLabel, currentLabel, StringComparison.Ordinal))
+            UnitDefinitionData unit = FindCurrentUnit();
+            string currentKey = unit != null ? unit.Id : (titleLabel.text ?? string.Empty);
+            if (!force && string.Equals(renderedUnitKey, currentKey, StringComparison.Ordinal))
                 return;
 
-            renderedTypeLabel = currentLabel;
+            renderedUnitKey = currentKey;
             HideTagTooltip();
             tagRow.Clear();
 
-            UnitDefinitionData unit = FindUnitByDisplayLabel(currentLabel);
             if (unit == null || unit.TagIds == null || unit.TagIds.Count == 0)
             {
                 tagRow.style.display = DisplayStyle.None;
@@ -315,6 +361,39 @@ namespace KingdomSurvival.BattleSandbox
                 : DisplayStyle.None;
         }
 
+        private UnitDefinitionData FindCurrentUnit()
+        {
+            if (database == null || database.Units == null || titleLabel == null)
+                return null;
+
+            string normalized = (titleLabel.text ?? string.Empty).Trim();
+            UnitDefinitionData labelFallback = null;
+            Sprite currentPortrait = portraitImage != null ? portraitImage.sprite : null;
+
+            for (int i = 0; i < database.Units.Count; i++)
+            {
+                UnitDefinitionData unit = database.Units[i];
+                if (unit == null)
+                    continue;
+
+                bool labelMatches =
+                    string.Equals(unit.DisplayLabel, normalized, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(
+                        unit.DisplayLabel != null ? unit.DisplayLabel.ToUpperInvariant() : string.Empty,
+                        normalized,
+                        StringComparison.Ordinal);
+                if (!labelMatches)
+                    continue;
+
+                if (labelFallback == null)
+                    labelFallback = unit;
+                if (currentPortrait != null && unit.Portrait == currentPortrait)
+                    return unit;
+            }
+
+            return labelFallback;
+        }
+
         private void ShowTagTooltip(
             VisualElement anchor,
             string title,
@@ -364,34 +443,6 @@ namespace KingdomSurvival.BattleSandbox
         {
             if (tagTooltip != null)
                 tagTooltip.style.display = DisplayStyle.None;
-        }
-
-        private UnitDefinitionData FindUnitByDisplayLabel(string displayedTitle)
-        {
-            if (database == null || database.Units == null)
-                return null;
-
-            string normalized = (displayedTitle ?? string.Empty).Trim();
-            for (int i = 0; i < database.Units.Count; i++)
-            {
-                UnitDefinitionData unit = database.Units[i];
-                if (unit == null)
-                    continue;
-
-                if (string.Equals(
-                        unit.DisplayLabel,
-                        normalized,
-                        StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(
-                        unit.DisplayLabel != null ? unit.DisplayLabel.ToUpperInvariant() : string.Empty,
-                        normalized,
-                        StringComparison.Ordinal))
-                {
-                    return unit;
-                }
-            }
-
-            return null;
         }
 
         private static void SetBorder(VisualElement element, Color color, float width)

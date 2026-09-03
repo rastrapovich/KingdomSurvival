@@ -540,7 +540,7 @@ namespace KingdomSurvival.BattleSandbox
                 return SandboxAttackPreview.Invalid("Цель находится вне доступной зоны атаки.");
             }
 
-            return BuildAttackPreview(GetUnit(attackerId), GetUnit(targetId));
+            return BuildAttackPreview(GetUnit(attackerId), GetUnit(targetId), attackPosition);
         }
 
         public SandboxAttackPreview PreviewAttack(string attackerId, string targetId)
@@ -567,7 +567,7 @@ namespace KingdomSurvival.BattleSandbox
             if (attacker.Position.DistanceTo(target.Position) > attacker.AttackRange)
                 return SandboxAttackPreview.Invalid("Цель вне дальности.");
 
-            return BuildAttackPreview(attacker, target);
+            return BuildAttackPreview(attacker, target, attacker.Position);
         }
 
         public bool TryAttack(string attackerId, string targetId, out string message)
@@ -627,7 +627,7 @@ namespace KingdomSurvival.BattleSandbox
                 return SandboxAttackPreview.Invalid("Ответный удар больше недоступен.");
             }
 
-            return BuildAttackPreview(defender, attacker);
+            return BuildAttackPreview(defender, attacker, defender.Position);
         }
 
         public bool TryResolvePendingRetaliation(out string message)
@@ -671,7 +671,9 @@ namespace KingdomSurvival.BattleSandbox
             unit.ActionPoints--;
             unit.RemainingMovement = 0;
             unit.IsGuarding = true;
-            message = unit.DisplayLabel + " занимает защитную стойку: защита +2 до следующей активации.";
+            message = unit.DisplayLabel + " занимает защитную стойку: защита +" +
+                      SandboxCombatTagRules.GetGuardDefensePercent(unit) +
+                      "% до следующей активации.";
             return true;
         }
 
@@ -895,19 +897,24 @@ namespace KingdomSurvival.BattleSandbox
 
         private static SandboxAttackPreview BuildAttackPreview(
             SandboxUnitState attacker,
-            SandboxUnitState target)
+            SandboxUnitState target,
+            HexCoord attackPosition)
         {
-            int effectiveDefense = target.Defense + (target.IsGuarding ? 2 : 0);
-            int statDifference = attacker.Attack - effectiveDefense;
+            decimal effectiveAttack = SandboxCombatTagRules.GetEffectiveAttack(
+                attacker,
+                target,
+                attackPosition);
+            decimal effectiveDefense = SandboxCombatTagRules.GetEffectiveDefense(target);
+            decimal statDifference = effectiveAttack - effectiveDefense;
             decimal damageMultiplier;
 
-            if (statDifference > 0)
+            if (statDifference > 0m)
             {
                 damageMultiplier = Math.Min(
                     5m,
                     1m + statDifference * 0.25m);
             }
-            else if (statDifference < 0)
+            else if (statDifference < 0m)
             {
                 damageMultiplier = Math.Max(
                     0.3m,
@@ -921,11 +928,6 @@ namespace KingdomSurvival.BattleSandbox
             int damage = Math.Max(
                 1,
                 (int)Math.Floor(attacker.Damage * damageMultiplier));
-            if (attacker.Role == SandboxUnitRole.Spearman &&
-                target.HasTag(SandboxUnitTags.Beast))
-            {
-                damage += 2;
-            }
 
             return new SandboxAttackPreview(
                 true,

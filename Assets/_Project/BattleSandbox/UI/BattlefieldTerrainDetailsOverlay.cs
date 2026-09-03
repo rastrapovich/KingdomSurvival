@@ -155,7 +155,7 @@ namespace KingdomSurvival.BattleSandbox
             popup.Add(title);
 
             Label description = new Label(
-                "Труднопроходимая возвышенность. Боец на холме получает преимущество в обороне.");
+                "Труднопроходимая возвышенность. Даёт оборонительное преимущество и улучшает позицию стрелков.");
             description.style.marginTop = 8f;
             description.style.fontSize = 12f;
             description.style.whiteSpace = WhiteSpace.Normal;
@@ -177,6 +177,14 @@ namespace KingdomSurvival.BattleSandbox
             defense.style.color = new Color(0.90f, 0.75f, 0.48f, 1f);
             popup.Add(defense);
 
+            Label range = new Label(
+                "Дальний бой: +" + SandboxTerrainRules.HillRangedAttackRangeBonus + " к дальности");
+            range.style.marginTop = 4f;
+            range.style.fontSize = 12f;
+            range.style.unityFontStyleAndWeight = FontStyle.Bold;
+            range.style.color = new Color(0.48f, 0.82f, 0.53f, 1f);
+            popup.Add(range);
+
             Button close = new Button(ClosePopup) { text = "ПОНЯТНО" };
             close.style.marginTop = 14f;
             close.style.height = 30f;
@@ -189,7 +197,7 @@ namespace KingdomSurvival.BattleSandbox
             float rootWidth = root.resolvedStyle.width;
             float rootHeight = root.resolvedStyle.height;
             float maxLeft = Mathf.Max(12f, rootWidth - 352f);
-            float maxTop = Mathf.Max(12f, rootHeight - 230f);
+            float maxTop = Mathf.Max(12f, rootHeight - 250f);
             popup.style.left = Mathf.Clamp(position.x + 12f, 12f, maxLeft);
             popup.style.top = Mathf.Clamp(position.y + 12f, 12f, maxTop);
         }

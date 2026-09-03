@@ -122,7 +122,7 @@ namespace KingdomSurvival.BattleSandbox
         public int Damage => Definition.Damage;
         public int Movement => Definition.Movement;
         public int Initiative => Definition.Initiative;
-        public int AttackRange => Definition.AttackRange;
+        public int AttackRange => SandboxTerrainRules.GetEffectiveAttackRange(this);
         public bool IsDefeated => HitPoints <= 0;
         public int DamageTaken => Math.Max(0, MaxHitPoints - HitPoints);
         public bool IsDamaged => DamageTaken > 0;

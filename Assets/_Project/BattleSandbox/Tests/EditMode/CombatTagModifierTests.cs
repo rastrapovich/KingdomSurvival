@@ -8,21 +8,12 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void Guard_UsesFiftyPercentDefenseBonus()
         {
             SandboxUnitState defender = CreateState(
-                "defender",
-                SandboxTeam.Player,
-                2,
-                2,
-                2,
-                1,
+                "defender", SandboxTeam.Player, 2, 2, 2, 1,
                 new[] { SandboxCombatTagRules.Human });
             SandboxUnitState enemy = CreateState(
-                "enemy",
-                SandboxTeam.Enemy,
-                2,
-                2,
-                1,
-                1,
-                new[] { SandboxCombatTagRules.Beast });
+                "enemy", SandboxTeam.Enemy, 2, 2, 1, 1,
+                new[] { SandboxCombatTagRules.Beast },
+                new HexCoord(3, 0));
             SandboxBattle battle = CreateBattle(defender, enemy);
             battle.Start();
 
@@ -34,12 +25,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void DefenderAndArmored_UseFlatArmorBeforeSeventyFivePercentGuardBonus()
         {
             SandboxUnitState defender = CreateState(
-                "defender",
-                SandboxTeam.Player,
-                2,
-                4,
-                2,
-                1,
+                "defender", SandboxTeam.Player, 2, 4, 2, 1,
                 new[]
                 {
                     SandboxCombatTagRules.Human,
@@ -47,13 +33,9 @@ namespace KingdomSurvival.BattleSandbox.Tests
                     SandboxCombatTagRules.Armored
                 });
             SandboxUnitState enemy = CreateState(
-                "enemy",
-                SandboxTeam.Enemy,
-                2,
-                2,
-                1,
-                1,
-                new[] { SandboxCombatTagRules.Beast });
+                "enemy", SandboxTeam.Enemy, 2, 2, 1, 1,
+                new[] { SandboxCombatTagRules.Beast },
+                new HexCoord(3, 0));
             SandboxBattle battle = CreateBattle(defender, enemy);
             battle.Start();
 
@@ -66,21 +48,12 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void BeastSlayer_AddsFiftyPercentAttackAgainstBeast()
         {
             SandboxUnitState attacker = CreateState(
-                "spearman",
-                SandboxTeam.Player,
-                3,
-                3,
-                3,
-                1,
+                "spearman", SandboxTeam.Player, 3, 3, 3, 1,
                 new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.BeastSlayer });
             SandboxUnitState target = CreateState(
-                "beast",
-                SandboxTeam.Enemy,
-                2,
-                1,
-                3,
-                1,
-                new[] { SandboxCombatTagRules.Beast });
+                "beast", SandboxTeam.Enemy, 2, 1, 3, 1,
+                new[] { SandboxCombatTagRules.Beast },
+                new HexCoord(1, 0));
 
             Assert.That(
                 SandboxCombatTagRules.GetEffectiveAttack(attacker, target, attacker.Position),
@@ -91,21 +64,12 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void HumanSlayer_AddsFiftyPercentAttackAgainstHuman()
         {
             SandboxUnitState attacker = CreateState(
-                "alpha",
-                SandboxTeam.Enemy,
-                4,
-                3,
-                5,
-                1,
+                "alpha", SandboxTeam.Enemy, 4, 3, 5, 1,
                 new[] { SandboxCombatTagRules.Beast, SandboxCombatTagRules.HumanSlayer });
             SandboxUnitState target = CreateState(
-                "human",
-                SandboxTeam.Player,
-                2,
-                2,
-                3,
-                1,
-                new[] { SandboxCombatTagRules.Human });
+                "human", SandboxTeam.Player, 2, 2, 3, 1,
+                new[] { SandboxCombatTagRules.Human },
+                new HexCoord(1, 0));
 
             Assert.That(
                 SandboxCombatTagRules.GetEffectiveAttack(attacker, target, attacker.Position),
@@ -116,20 +80,10 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void RangedTag_HalvesAttackAtAdjacentHex()
         {
             SandboxUnitState attacker = CreateState(
-                "archer",
-                SandboxTeam.Player,
-                3,
-                1,
-                3,
-                4,
+                "archer", SandboxTeam.Player, 3, 1, 3, 4,
                 new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Ranged });
             SandboxUnitState target = CreateState(
-                "target",
-                SandboxTeam.Enemy,
-                2,
-                2,
-                3,
-                1,
+                "target", SandboxTeam.Enemy, 2, 2, 3, 1,
                 new[] { SandboxCombatTagRules.Beast },
                 new HexCoord(1, 0));
 
@@ -142,20 +96,10 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void RangedTag_KeepsFullAttackBeyondAdjacentHex()
         {
             SandboxUnitState attacker = CreateState(
-                "archer",
-                SandboxTeam.Player,
-                3,
-                1,
-                3,
-                4,
+                "archer", SandboxTeam.Player, 3, 1, 3, 4,
                 new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Ranged });
             SandboxUnitState target = CreateState(
-                "target",
-                SandboxTeam.Enemy,
-                2,
-                2,
-                3,
-                1,
+                "target", SandboxTeam.Enemy, 2, 2, 3, 1,
                 new[] { SandboxCombatTagRules.Beast },
                 new HexCoord(3, 0));
 
@@ -168,20 +112,10 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void PreviewAttack_UsesTagDrivenRangedPenalty()
         {
             SandboxUnitState archer = CreateState(
-                "archer",
-                SandboxTeam.Player,
-                3,
-                2,
-                4,
-                4,
+                "archer", SandboxTeam.Player, 3, 2, 4, 4,
                 new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Ranged });
             SandboxUnitState target = CreateState(
-                "target",
-                SandboxTeam.Enemy,
-                1,
-                2,
-                3,
-                1,
+                "target", SandboxTeam.Enemy, 1, 2, 3, 1,
                 new[] { SandboxCombatTagRules.Beast },
                 new HexCoord(1, 0));
             SandboxBattle battle = CreateBattle(archer, target);
@@ -197,20 +131,10 @@ namespace KingdomSurvival.BattleSandbox.Tests
         public void Retaliation_UsesHumanSlayerAttackModifier()
         {
             SandboxUnitState human = CreateState(
-                "human",
-                SandboxTeam.Player,
-                2,
-                2,
-                2,
-                1,
+                "human", SandboxTeam.Player, 2, 2, 2, 1,
                 new[] { SandboxCombatTagRules.Human });
             SandboxUnitState alpha = CreateState(
-                "alpha",
-                SandboxTeam.Enemy,
-                4,
-                3,
-                5,
-                1,
+                "alpha", SandboxTeam.Enemy, 4, 3, 5, 1,
                 new[]
                 {
                     SandboxCombatTagRules.Beast,

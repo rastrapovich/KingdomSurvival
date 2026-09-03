@@ -9,6 +9,7 @@ namespace KingdomSurvival.BattleSandbox
     internal sealed class BattleSandboxCombatLogScrollRefiner : MonoBehaviour
     {
         private const string ScrollName = "battle-sandbox-combat-log-scroll";
+        private const float WheelStep = 24f;
 
         private static readonly BindingFlags InstanceFlags =
             BindingFlags.Instance | BindingFlags.NonPublic;
@@ -93,7 +94,38 @@ namespace KingdomSurvival.BattleSandbox
             logLabel.style.width = Length.Percent(100f);
 
             scroll.Add(logLabel);
+            RegisterWheelScrolling(scroll);
             parent.Insert(index, scroll);
+        }
+
+        private static void RegisterWheelScrolling(ScrollView scroll)
+        {
+            scroll.RegisterCallback<WheelEvent>(evt =>
+            {
+                if (Mathf.Approximately(evt.delta.y, 0f))
+                    return;
+
+                float contentHeight = scroll.contentContainer.layout.height;
+                float viewportHeight = scroll.contentViewport.layout.height;
+                if (float.IsNaN(contentHeight) || float.IsNaN(viewportHeight))
+                    return;
+
+                float maxOffset = Mathf.Max(0f, contentHeight - viewportHeight);
+                if (maxOffset <= 0f)
+                    return;
+
+                float direction = Mathf.Sign(evt.delta.y);
+                float nextOffset = Mathf.Clamp(
+                    scroll.scrollOffset.y + direction * WheelStep,
+                    0f,
+                    maxOffset);
+
+                if (Mathf.Approximately(nextOffset, scroll.scrollOffset.y))
+                    return;
+
+                scroll.scrollOffset = new Vector2(0f, nextOffset);
+                evt.StopPropagation();
+            }, TrickleDown.TrickleDown);
         }
     }
 }

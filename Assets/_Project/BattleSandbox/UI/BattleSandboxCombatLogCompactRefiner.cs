@@ -50,7 +50,7 @@ namespace KingdomSurvival.BattleSandbox
         private const string SourceScrollName = "battle-sandbox-log-scroll";
         private const string LegacyDisplayName = "battle-sandbox-meaningful-log";
         private const string CompactDisplayName = "battle-sandbox-compact-log";
-        private const int PageSize = 3;
+        private const int VisibleEntryCount = 3;
         private const float PanelWidth = 584f;
 
         private static readonly Color DamageColor = new Color(0.78f, 0.38f, 0.36f, 1f);
@@ -68,8 +68,7 @@ namespace KingdomSurvival.BattleSandbox
         private VisualElement entriesContainer;
         private Button newerButton;
         private Button olderButton;
-        private Label pageLabel;
-        private int pageIndex;
+        private int scrollOffset;
 
         private void Update()
         {
@@ -105,7 +104,7 @@ namespace KingdomSurvival.BattleSandbox
             sourceLabel = candidateSource;
             meaningfulEntries.Clear();
             previousSourceLines.Clear();
-            pageIndex = 0;
+            scrollOffset = 0;
 
             StyleSidebar(sidebar);
             sourceScroll.style.display = DisplayStyle.None;
@@ -127,34 +126,33 @@ namespace KingdomSurvival.BattleSandbox
             oldCompact?.RemoveFromHierarchy();
 
             VisualElement display = new VisualElement { name = CompactDisplayName };
-            display.style.flexDirection = FlexDirection.Column;
+            display.style.flexDirection = FlexDirection.Row;
+            display.style.alignItems = Align.Stretch;
             display.style.marginTop = 0f;
             sidebar.Add(display);
 
             entriesContainer = new VisualElement();
-            entriesContainer.style.height = 52f;
-            entriesContainer.style.flexShrink = 0f;
+            entriesContainer.style.height = 66f;
+            entriesContainer.style.flexGrow = 1f;
+            entriesContainer.style.flexShrink = 1f;
+            entriesContainer.style.minWidth = 0f;
             entriesContainer.style.overflow = Overflow.Hidden;
+            entriesContainer.style.justifyContent = Justify.FlexStart;
             display.Add(entriesContainer);
 
             VisualElement navigation = new VisualElement();
-            navigation.style.height = 20f;
-            navigation.style.marginTop = 1f;
-            navigation.style.flexDirection = FlexDirection.Row;
+            navigation.style.width = 28f;
+            navigation.style.height = 66f;
+            navigation.style.marginLeft = 4f;
+            navigation.style.flexShrink = 0f;
+            navigation.style.flexDirection = FlexDirection.Column;
             navigation.style.alignItems = Align.Center;
             navigation.style.justifyContent = Justify.Center;
             display.Add(navigation);
 
-            newerButton = CreateNavigationButton("‹", ShowNewerPage);
-            olderButton = CreateNavigationButton("›", ShowOlderPage);
-            pageLabel = new Label();
-            pageLabel.style.width = 56f;
-            pageLabel.style.fontSize = 10f;
-            pageLabel.style.color = MutedTextColor;
-            pageLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-
+            newerButton = CreateNavigationButton("▲", ShowNewerEntry);
+            olderButton = CreateNavigationButton("▼", ShowOlderEntry);
             navigation.Add(newerButton);
-            navigation.Add(pageLabel);
             navigation.Add(olderButton);
 
             CaptureNewEntries();
@@ -174,7 +172,7 @@ namespace KingdomSurvival.BattleSandbox
             panel.style.marginLeft = -PanelWidth * 0.5f;
             panel.style.marginRight = 0f;
             panel.style.paddingLeft = 12f;
-            panel.style.paddingRight = 12f;
+            panel.style.paddingRight = 8f;
             panel.style.paddingTop = 5f;
             panel.style.paddingBottom = 4f;
             panel.style.backgroundColor = new Color(0.045f, 0.052f, 0.055f, 0.624f);
@@ -195,7 +193,7 @@ namespace KingdomSurvival.BattleSandbox
                     continue;
 
                 meaningfulEntries.Add(entry);
-                pageIndex = 0;
+                scrollOffset = 0;
             }
 
             previousSourceLines = current;
@@ -267,46 +265,41 @@ namespace KingdomSurvival.BattleSandbox
                    entry.StartsWith("Бой начался", StringComparison.OrdinalIgnoreCase);
         }
 
-        private void ShowNewerPage()
+        private void ShowNewerEntry()
         {
-            if (pageIndex > 0)
-            {
-                pageIndex--;
-                RefreshDisplay();
-            }
+            if (scrollOffset <= 0)
+                return;
+
+            scrollOffset--;
+            RefreshDisplay();
         }
 
-        private void ShowOlderPage()
+        private void ShowOlderEntry()
         {
-            if (pageIndex < GetPageCount() - 1)
-            {
-                pageIndex++;
-                RefreshDisplay();
-            }
-        }
+            int maxOffset = Math.Max(0, meaningfulEntries.Count - VisibleEntryCount);
+            if (scrollOffset >= maxOffset)
+                return;
 
-        private int GetPageCount()
-        {
-            return Math.Max(1, (meaningfulEntries.Count + PageSize - 1) / PageSize);
+            scrollOffset++;
+            RefreshDisplay();
         }
 
         private void RefreshDisplay()
         {
-            if (entriesContainer == null || newerButton == null || olderButton == null || pageLabel == null)
+            if (entriesContainer == null || newerButton == null || olderButton == null)
                 return;
 
-            int pageCount = GetPageCount();
-            pageIndex = Mathf.Clamp(pageIndex, 0, pageCount - 1);
+            int maxOffset = Math.Max(0, meaningfulEntries.Count - VisibleEntryCount);
+            scrollOffset = Mathf.Clamp(scrollOffset, 0, maxOffset);
             entriesContainer.Clear();
 
-            int newestIndex = meaningfulEntries.Count - 1 - pageIndex * PageSize;
-            int oldestIndex = Math.Max(0, newestIndex - PageSize + 1);
+            int newestIndex = meaningfulEntries.Count - 1 - scrollOffset;
+            int oldestIndex = Math.Max(0, newestIndex - VisibleEntryCount + 1);
             for (int i = newestIndex; i >= oldestIndex && i >= 0; i--)
                 entriesContainer.Add(CreateEntryLabel(meaningfulEntries[i]));
 
-            pageLabel.text = (pageIndex + 1) + " / " + pageCount;
-            StyleNavigationAvailability(newerButton, pageIndex > 0);
-            StyleNavigationAvailability(olderButton, pageIndex < pageCount - 1);
+            StyleNavigationAvailability(newerButton, scrollOffset > 0);
+            StyleNavigationAvailability(olderButton, scrollOffset < maxOffset);
         }
 
         private static Label CreateEntryLabel(string entry)
@@ -316,7 +309,10 @@ namespace KingdomSurvival.BattleSandbox
             label.style.fontSize = 14f;
             label.style.color = TextColor;
             label.style.whiteSpace = WhiteSpace.Normal;
-            label.style.marginBottom = 1f;
+            label.style.marginTop = 0f;
+            label.style.marginBottom = 0f;
+            label.style.paddingTop = 0f;
+            label.style.paddingBottom = 0f;
             return label;
         }
 
@@ -341,13 +337,17 @@ namespace KingdomSurvival.BattleSandbox
         private static Button CreateNavigationButton(string text, Action clicked)
         {
             Button button = new Button(clicked) { text = text };
-            button.style.width = 30f;
-            button.style.height = 18f;
-            button.style.marginLeft = 3f;
-            button.style.marginRight = 3f;
+            button.style.width = 24f;
+            button.style.height = 24f;
+            button.style.marginLeft = 0f;
+            button.style.marginRight = 0f;
+            button.style.marginTop = 1f;
+            button.style.marginBottom = 1f;
             button.style.paddingLeft = 0f;
             button.style.paddingRight = 0f;
-            button.style.fontSize = 13f;
+            button.style.paddingTop = 0f;
+            button.style.paddingBottom = 0f;
+            button.style.fontSize = 11f;
             button.style.color = MutedTextColor;
             button.style.backgroundColor = ButtonBackground;
             SetBorder(button, ButtonBorder, 1f);
@@ -363,7 +363,7 @@ namespace KingdomSurvival.BattleSandbox
                 return;
 
             button.style.display = DisplayStyle.Flex;
-            button.style.opacity = available ? 0.82f : 0.34f;
+            button.style.opacity = available ? 0.82f : 0.30f;
         }
 
         private static void SetBorder(VisualElement element, Color color, float width)

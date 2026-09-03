@@ -464,7 +464,7 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
                 float bw = wu * size;
                 float bh = hu * size;
                 Vector2 origin = new Vector2(
-                    (contentRect.width - bw) * 0.5f + Mathf.Sqrt(3f) * size * 0.5f,
+                    (contentRect.width - bw) * 0.5f,
                     (contentRect.height - bh) * 0.5f + size * GridVerticalScale);
                 Painter2D painter = context.painter2D;
                 painter.strokeColor = new Color(0.90f, 0.92f, 0.88f, 0.78f);

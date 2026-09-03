@@ -9,29 +9,29 @@ namespace KingdomSurvival.BattleSandbox
         private static readonly SandboxUnitDefinition[] PlayerRosterData =
         {
             new SandboxUnitDefinition("guard", "Гвардеец", SandboxUnitRole.Guard, 18, 2, 4, 3, 3, 3, 1,
-                new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Melee, SandboxCombatTagRules.Defender, SandboxCombatTagRules.Armored }),
+                new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Defender, SandboxCombatTagRules.Armored }),
             new SandboxUnitDefinition("archer", "Лучник", SandboxUnitRole.Archer, 11, 3, 1, 3, 3, 5, 4,
                 new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Ranged }),
             new SandboxUnitDefinition("healer", "Лекарь", SandboxUnitRole.Healer, 12, 1, 2, 3, 3, 3, 1,
-                new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Melee }),
+                new[] { SandboxCombatTagRules.Human }),
             new SandboxUnitDefinition("spearman", "Копейщик", SandboxUnitRole.Spearman, 15, 3, 3, 3, 3, 4, 1,
-                new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Melee, SandboxCombatTagRules.BeastSlayer }),
+                new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.BeastSlayer }),
             new SandboxUnitDefinition("scout", "Разведчик", SandboxUnitRole.Scout, 12, 2, 2, 3, 4, 6, 1,
-                new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Melee }),
+                new[] { SandboxCombatTagRules.Human }),
             new SandboxUnitDefinition("militia", "Ополченец", SandboxUnitRole.Militia, 14, 2, 2, 3, 3, 2, 1,
-                new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Melee })
+                new[] { SandboxCombatTagRules.Human })
         };
 
         private static readonly SandboxUnitDefinition[] EnemyRosterData =
         {
             new SandboxUnitDefinition("forest_beast_1", "Зверь", SandboxUnitRole.Beast, 10, 2, 1, 3, 4, 5, 1,
-                new[] { SandboxCombatTagRules.Beast, SandboxCombatTagRules.Melee }),
+                new[] { SandboxCombatTagRules.Beast }),
             new SandboxUnitDefinition("forest_beast_2", "Зверь", SandboxUnitRole.Beast, 10, 2, 1, 3, 4, 5, 1,
-                new[] { SandboxCombatTagRules.Beast, SandboxCombatTagRules.Melee }),
+                new[] { SandboxCombatTagRules.Beast }),
             new SandboxUnitDefinition("forest_beast_3", "Зверь", SandboxUnitRole.Beast, 14, 3, 2, 4, 4, 4, 1,
-                new[] { SandboxCombatTagRules.Beast, SandboxCombatTagRules.Melee }),
+                new[] { SandboxCombatTagRules.Beast }),
             new SandboxUnitDefinition("forest_beast_4", "Зверь", SandboxUnitRole.Beast, 18, 4, 3, 5, 3, 2, 1,
-                new[] { SandboxCombatTagRules.Beast, SandboxCombatTagRules.Melee, SandboxCombatTagRules.HumanSlayer })
+                new[] { SandboxCombatTagRules.Beast, SandboxCombatTagRules.HumanSlayer })
         };
 
         public static IReadOnlyList<SandboxUnitDefinition> PlayerRoster => PlayerRosterData;

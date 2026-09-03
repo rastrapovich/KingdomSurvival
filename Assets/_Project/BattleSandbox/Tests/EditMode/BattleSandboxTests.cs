@@ -37,26 +37,27 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
-        public void CompactArenaShapeUsesSixSevenEightRowPattern()
+        public void WideArenaShapeUsesSevenEightNineTenRowPattern()
         {
-            int[] expectedRowLengths = { 6, 7, 8, 7, 8, 7, 6 };
+            int[] expectedRowLengths = { 7, 8, 9, 10, 9, 8, 7 };
             HexCoord[] cells = SandboxArenaShape.Cells().ToArray();
 
             Assert.That(cells.Length, Is.EqualTo(SandboxArenaShape.CellCount));
-            Assert.That(cells.Distinct().Count(), Is.EqualTo(49));
+            Assert.That(cells.Distinct().Count(), Is.EqualTo(58));
             for (int row = 0; row < expectedRowLengths.Length; row++)
             {
                 Assert.That(SandboxArenaShape.GetRowLength(row), Is.EqualTo(expectedRowLengths[row]));
                 Assert.That(cells.Count(cell => cell.R == row), Is.EqualTo(expectedRowLengths[row]));
             }
 
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(0, 0)), Is.False);
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(7, 0)), Is.False);
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(1, 0)), Is.True);
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(6, 0)), Is.True);
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(7, 2)), Is.True);
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(0, 6)), Is.False);
-            Assert.That(SandboxArenaShape.Contains(new HexCoord(7, 6)), Is.False);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(1, 0)), Is.False);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(9, 0)), Is.False);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(2, 0)), Is.True);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(8, 0)), Is.True);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(0, 3)), Is.True);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(9, 3)), Is.True);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(1, 6)), Is.False);
+            Assert.That(SandboxArenaShape.Contains(new HexCoord(8, 6)), Is.True);
         }
 
         [Test]

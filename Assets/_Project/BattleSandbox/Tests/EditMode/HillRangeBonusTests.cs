@@ -71,16 +71,26 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 SandboxTeam.Player,
                 4,
                 new[] { SandboxCombatTagRules.Human, SandboxCombatTagRules.Ranged },
-                new HexCoord(0, 0));
+                new HexCoord(0, 0),
+                10);
+            SandboxUnitState enemy = CreateUnit(
+                "enemy",
+                SandboxTeam.Enemy,
+                1,
+                new[] { SandboxCombatTagRules.Beast },
+                new HexCoord(7, 3),
+                1);
             Dictionary<HexCoord, SandboxTerrain> terrain = new Dictionary<HexCoord, SandboxTerrain>
             {
                 { new HexCoord(0, 0), SandboxTerrain.Difficult }
             };
+            SandboxUnitState[] units = { archer, enemy };
+            SandboxTerrainRules.RegisterBattle(units, terrain);
+            SandboxBattle battle = new SandboxBattle(8, 4, units, terrain);
+            battle.Start();
 
-            SandboxTerrainRules.RegisterBattle(new[] { archer }, terrain);
             Assert.That(archer.AttackRange, Is.EqualTo(5));
-
-            archer.Position = new HexCoord(1, 0);
+            Assert.That(battle.TryMove(archer.Id, new HexCoord(1, 0), out _), Is.True);
             Assert.That(archer.AttackRange, Is.EqualTo(4));
         }
 

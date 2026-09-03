@@ -11,6 +11,12 @@ namespace KingdomSurvival.UnitDatabase.Editor
         private const string MarkerName = "battlefield-anchor-marker";
         private const float AnchorFromBottom = 0.15f;
         private const float MarkerSize = 10f;
+        private const float PreviewViewportWidth = 260f;
+        private const float PreviewViewportHeight = 320f;
+        private const float PreviewCardWidth = 300f;
+        private const float PreviewCardHeight = 370f;
+        private const float BaseSpriteBoxSize = 220f;
+        private const float AnchorViewportY = 0.68f;
 
         private static readonly BindingFlags FieldFlags =
             BindingFlags.Instance | BindingFlags.NonPublic;
@@ -54,19 +60,24 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             UnitDefinitionData unit = database.Units[selectedIndex];
             VisualElement viewport = preview.parent;
+            VisualElement card = viewport.parent;
+            VisualElement previewsRow = card != null ? card.parent : null;
+
+            StyleWorkspace(viewport, card, previewsRow);
+
             float viewportWidth = viewport.resolvedStyle.width;
             float viewportHeight = viewport.resolvedStyle.height;
             if (viewportWidth <= 1f || viewportHeight <= 1f)
                 return;
 
             float safeScale = Mathf.Max(0.1f, unit.BattlefieldScale);
-            float spriteBoxSize = Mathf.Min(viewportWidth, viewportHeight) * safeScale;
+            float spriteBoxSize = BaseSpriteBoxSize * safeScale;
             Vector2 offset = unit.BattlefieldOffset;
-            float centerX = viewportWidth * 0.5f;
-            float centerY = viewportHeight * 0.5f;
+            float anchorX = viewportWidth * 0.5f;
+            float anchorY = viewportHeight * AnchorViewportY;
 
-            preview.style.left = centerX - spriteBoxSize * 0.5f + offset.x;
-            preview.style.top = centerY - spriteBoxSize * (1f - AnchorFromBottom) + offset.y;
+            preview.style.left = anchorX - spriteBoxSize * 0.5f + offset.x;
+            preview.style.top = anchorY - spriteBoxSize * (1f - AnchorFromBottom) + offset.y;
             preview.style.right = StyleKeyword.Auto;
             preview.style.bottom = StyleKeyword.Auto;
             preview.style.width = spriteBoxSize;
@@ -103,9 +114,39 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 viewport.Add(marker);
             }
 
-            marker.style.left = centerX - MarkerSize * 0.5f;
-            marker.style.top = centerY - MarkerSize * 0.5f;
+            marker.style.left = anchorX - MarkerSize * 0.5f;
+            marker.style.top = anchorY - MarkerSize * 0.5f;
             marker.BringToFront();
+        }
+
+        private static void StyleWorkspace(
+            VisualElement viewport,
+            VisualElement card,
+            VisualElement previewsRow)
+        {
+            viewport.style.width = PreviewViewportWidth;
+            viewport.style.height = PreviewViewportHeight;
+            viewport.style.minWidth = PreviewViewportWidth;
+            viewport.style.minHeight = PreviewViewportHeight;
+            viewport.style.overflow = Overflow.Visible;
+
+            if (card != null)
+            {
+                card.style.width = PreviewCardWidth;
+                card.style.height = PreviewCardHeight;
+                card.style.minWidth = PreviewCardWidth;
+                card.style.minHeight = PreviewCardHeight;
+                card.style.flexShrink = 0f;
+                card.style.overflow = Overflow.Visible;
+            }
+
+            if (previewsRow != null)
+            {
+                previewsRow.style.height = PreviewCardHeight + 24f;
+                previewsRow.style.minHeight = PreviewCardHeight + 24f;
+                previewsRow.style.alignItems = Align.FlexStart;
+                previewsRow.style.overflow = Overflow.Visible;
+            }
         }
     }
 }

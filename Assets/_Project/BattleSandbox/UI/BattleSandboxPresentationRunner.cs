@@ -277,7 +277,7 @@ namespace KingdomSurvival.BattleSandbox
             sidebar.style.left = 14f;
             sidebar.style.bottom = 14f;
             sidebar.style.width = 292f;
-            sidebar.style.maxHeight = 270f;
+            sidebar.style.maxHeight = 132f;
             sidebar.style.paddingLeft = 11f;
             sidebar.style.paddingRight = 11f;
             sidebar.style.paddingTop = 10f;
@@ -301,11 +301,11 @@ namespace KingdomSurvival.BattleSandbox
             VisualElement log = sidebar[7];
             VisualElement result = sidebar[8];
 
+            currentUnit.style.display = DisplayStyle.None;
+            currentStats.style.display = DisplayStyle.None;
             instruction.style.display = DisplayStyle.None;
-            currentUnit.style.marginBottom = 1f;
-            currentStats.style.marginTop = 2f;
-            target.style.marginTop = 7f;
-            logTitle.style.marginTop = 8f;
+            target.style.display = DisplayStyle.None;
+            logTitle.style.marginTop = 0f;
 
             ScrollView logScroll = new ScrollView(ScrollViewMode.Vertical)
             {
@@ -313,7 +313,7 @@ namespace KingdomSurvival.BattleSandbox
                 verticalScrollerVisibility = ScrollerVisibility.Auto,
                 horizontalScrollerVisibility = ScrollerVisibility.Hidden
             };
-            logScroll.style.height = 78f;
+            logScroll.style.height = 88f;
             logScroll.style.marginTop = 3f;
             logScroll.style.backgroundColor = new Color(0f, 0f, 0f, 0.08f);
             logScroll.style.overflow = Overflow.Hidden;

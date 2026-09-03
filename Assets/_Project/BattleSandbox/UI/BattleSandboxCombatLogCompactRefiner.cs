@@ -129,6 +129,7 @@ namespace KingdomSurvival.BattleSandbox
             display.style.flexDirection = FlexDirection.Row;
             display.style.alignItems = Align.Stretch;
             display.style.marginTop = 0f;
+            display.RegisterCallback<WheelEvent>(OnCombatLogWheel, TrickleDown.TrickleDown);
             sidebar.Add(display);
 
             entriesContainer = new VisualElement();
@@ -263,6 +264,21 @@ namespace KingdomSurvival.BattleSandbox
             return entry.IndexOf("урона", StringComparison.OrdinalIgnoreCase) >= 0 ||
                    entry.IndexOf("защитную стойку", StringComparison.OrdinalIgnoreCase) >= 0 ||
                    entry.StartsWith("Бой начался", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void OnCombatLogWheel(WheelEvent evt)
+        {
+            if (evt == null || Mathf.Approximately(evt.delta.y, 0f))
+                return;
+
+            int previousOffset = scrollOffset;
+            if (evt.delta.y > 0f)
+                ShowOlderEntry();
+            else
+                ShowNewerEntry();
+
+            if (scrollOffset != previousOffset)
+                evt.StopPropagation();
         }
 
         private void ShowNewerEntry()

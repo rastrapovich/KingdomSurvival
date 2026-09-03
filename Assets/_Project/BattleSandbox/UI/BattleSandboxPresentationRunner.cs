@@ -48,6 +48,7 @@ namespace KingdomSurvival.BattleSandbox
         private const string ActionsName = "battle-sandbox-actions";
         private const string ResultOverlayName = "battle-sandbox-result-overlay";
         private const string LogScrollName = "battle-sandbox-log-scroll";
+        private const float BattleGridVerticalScale = 0.75f;
 
         private VisualElement styledScreen;
         private VisualElement styledSurface;
@@ -89,6 +90,7 @@ namespace KingdomSurvival.BattleSandbox
                     styledSurface = surface;
                 }
 
+                CenterActiveArena(board);
                 TrimRoundLabel(FindRoundLabel(screen));
                 return;
             }
@@ -181,6 +183,27 @@ namespace KingdomSurvival.BattleSandbox
             board.style.borderRightWidth = 0f;
             board.style.borderTopWidth = 0f;
             board.style.borderBottomWidth = 0f;
+        }
+
+        private static void CenterActiveArena(VisualElement board)
+        {
+            float width = board.resolvedStyle.width;
+            float height = board.resolvedStyle.height;
+            if (width <= 1f || height <= 1f)
+                return;
+
+            float availableWidth = Mathf.Max(100f, width - 36f);
+            float availableHeight = Mathf.Max(100f, height - 36f);
+            float widthUnits = Mathf.Sqrt(3f) * SandboxArenaShape.Width;
+            float heightUnits = (1.5f * (SandboxArenaShape.Height - 1) + 2f) * BattleGridVerticalScale;
+            float size = Mathf.Min(availableWidth / widthUnits, availableHeight / heightUnits);
+            size = Mathf.Max(18f, size);
+
+            // HexBoardElement currently adds half a hex to the compact arena origin.
+            // Shift the whole interactive board back by exactly that amount so the
+            // outermost active hex edges are equidistant from the screen edges.
+            float halfHexOffset = Mathf.Sqrt(3f) * size * 0.5f;
+            board.transform.position = new Vector3(-halfHexOffset, 0f, 0f);
         }
 
         private static void StyleHeader(VisualElement header)

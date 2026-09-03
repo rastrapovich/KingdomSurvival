@@ -351,6 +351,7 @@ public class GameState
     public void CreateNewGame(int? worldSeed = null)
     {
         WorldSeed = worldSeed ?? Guid.NewGuid().GetHashCode();
+        WorldMapNavigation.ConfigureTerrain(WorldSeed);
         Day = 1;
         Gold = 120;
         Food = 72;
@@ -1263,10 +1264,10 @@ public class GameState
             nearest.TravelHoursFromCapital =
                 ContinuousSimulationSystem.CalculateTravelHours(
                     WorldMapNavigation.FindPath(
-                    WorldMapNavigation.CapitalXPercent,
-                    WorldMapNavigation.CapitalYPercent,
-                    nearest.MapXPercent,
-                    nearest.MapYPercent));
+                        WorldMapNavigation.CapitalXPercent,
+                        WorldMapNavigation.CapitalYPercent,
+                        nearest.MapXPercent,
+                        nearest.MapYPercent));
         }
 
         return nearest;
@@ -1349,10 +1350,10 @@ public class GameState
         waypoint.TravelHoursFromCapital =
             ContinuousSimulationSystem.CalculateTravelHours(
                 WorldMapNavigation.FindPath(
-                WorldMapNavigation.CapitalXPercent,
-                WorldMapNavigation.CapitalYPercent,
-                waypoint.MapXPercent,
-                waypoint.MapYPercent));
+                    WorldMapNavigation.CapitalXPercent,
+                    WorldMapNavigation.CapitalYPercent,
+                    waypoint.MapXPercent,
+                    waypoint.MapYPercent));
         waypoint.IsVisibleOnMap = false;
         waypoint.IsDiscovered = true;
         waypoint.IsExplored = false;

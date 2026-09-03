@@ -693,6 +693,10 @@ namespace KingdomSurvival.BattleSandbox
             if (unit == null)
                 return null;
 
+            SandboxUnitState attackable = FindBestReachableAttackTarget(unit);
+            if (attackable != null)
+                return attackable;
+
             return units
                 .Where(candidate => !candidate.IsDefeated && candidate.Team != unit.Team)
                 .OrderBy(candidate => unit.Position.DistanceTo(candidate.Position))
@@ -703,6 +707,21 @@ namespace KingdomSurvival.BattleSandbox
 
         public HexCoord FindBestMoveToward(SandboxUnitState unit, HexCoord target)
         {
+            SandboxUnitState targetUnit = GetUnitAt(target);
+            if (unit != null && targetUnit != null && targetUnit.Team != unit.Team)
+            {
+                HexCoord plannedAttackPosition;
+                int plannedMovementCost;
+                if (TryFindAttackPosition(
+                        unit.Id,
+                        targetUnit.Id,
+                        out plannedAttackPosition,
+                        out plannedMovementCost))
+                {
+                    return plannedAttackPosition;
+                }
+            }
+
             IReadOnlyDictionary<HexCoord, int> reachable = GetReachable(unit.Id);
             HexCoord best = unit.Position;
             int bestDistance = best.DistanceTo(target);
@@ -719,6 +738,55 @@ namespace KingdomSurvival.BattleSandbox
                     bestDistance = distance;
                     bestCost = pair.Value;
                 }
+            }
+
+            return best;
+        }
+
+        private SandboxUnitState FindBestReachableAttackTarget(SandboxUnitState attacker)
+        {
+            SandboxUnitState best = null;
+            int bestHitPoints = int.MaxValue;
+            int bestDamage = int.MinValue;
+            int bestMovementCost = int.MaxValue;
+
+            foreach (SandboxUnitState candidate in units)
+            {
+                if (candidate.IsDefeated || candidate.Team == attacker.Team)
+                    continue;
+
+                HexCoord position;
+                int movementCost;
+                if (!TryFindAttackPosition(
+                        attacker.Id,
+                        candidate.Id,
+                        out position,
+                        out movementCost))
+                {
+                    continue;
+                }
+
+                SandboxAttackPreview preview = PreviewReachableAttack(attacker.Id, candidate.Id);
+                if (!preview.IsValid)
+                    continue;
+
+                bool better =
+                    best == null ||
+                    candidate.HitPoints < bestHitPoints ||
+                    (candidate.HitPoints == bestHitPoints && preview.Damage > bestDamage) ||
+                    (candidate.HitPoints == bestHitPoints && preview.Damage == bestDamage &&
+                     movementCost < bestMovementCost) ||
+                    (candidate.HitPoints == bestHitPoints && preview.Damage == bestDamage &&
+                     movementCost == bestMovementCost &&
+                     string.CompareOrdinal(candidate.Id, best.Id) < 0);
+
+                if (!better)
+                    continue;
+
+                best = candidate;
+                bestHitPoints = candidate.HitPoints;
+                bestDamage = preview.Damage;
+                bestMovementCost = movementCost;
             }
 
             return best;

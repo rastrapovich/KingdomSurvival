@@ -3,18 +3,18 @@ using System.Collections.Generic;
 namespace KingdomSurvival.BattleSandbox
 {
     /// <summary>
-    /// Standard compact sandbox arena described from top to bottom as
-    /// 6 / 7 / 8 / 7 / 8 / 7 / 6 active pointy-top hexes.
+    /// Standard wide sandbox arena described from top to bottom as
+    /// 7 / 8 / 9 / 10 / 9 / 8 / 7 active pointy-top hexes.
     /// Rows share one visual center: odd rows are shifted by half a hex.
     /// </summary>
     public static class SandboxArenaShape
     {
-        public const int Width = 8;
+        public const int Width = 10;
         public const int Height = 7;
-        public const int CellCount = 49;
+        public const int CellCount = 58;
 
-        private static readonly int[] RowStarts = { 1, 0, 0, 0, 0, 0, 1 };
-        private static readonly int[] RowLengths = { 6, 7, 8, 7, 8, 7, 6 };
+        private static readonly int[] RowStarts = { 2, 1, 1, 0, 1, 1, 2 };
+        private static readonly int[] RowLengths = { 7, 8, 9, 10, 9, 8, 7 };
 
         public static int GetRowStart(int row)
         {

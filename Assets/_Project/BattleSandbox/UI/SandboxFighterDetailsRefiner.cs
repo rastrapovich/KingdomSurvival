@@ -39,7 +39,6 @@ namespace KingdomSurvival.BattleSandbox
         private Label tagTooltipText;
         private Label titleLabel;
         private Image portraitImage;
-        private Label defenseValueLabel;
         private VisualElement statTooltip;
         private Label statTooltipTitle;
         private Label statTooltipText;
@@ -59,7 +58,6 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             RefreshTags();
-            RefreshDefensePresentation();
         }
 
         private void FindAndPrepareWindow()
@@ -82,7 +80,6 @@ namespace KingdomSurvival.BattleSandbox
                 window = candidate;
                 ApplyStaticLayout();
                 RefreshTags(true);
-                RefreshDefensePresentation();
                 return;
             }
         }
@@ -122,41 +119,6 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
-            if (info != null)
-            {
-                HideChild(info, 0);
-                HideChild(info, 7);
-                HideChild(info, 8);
-                HideChild(info, 9);
-                HideChild(info, 10);
-
-                for (int index = 1; index <= 6; index++)
-                    MakeStatRowCompact(info, index);
-
-                if (info.hierarchy.childCount > 3)
-                {
-                    VisualElement defenseRow = info.hierarchy.ElementAt(3);
-                    if (defenseRow.hierarchy.childCount > 1)
-                        defenseValueLabel = defenseRow.hierarchy.ElementAt(1) as Label;
-
-                    defenseRow.RegisterCallback<PointerEnterEvent>(_ =>
-                    {
-                        defenseRow.schedule.Execute(OverrideDefenseTooltip).ExecuteLater(1);
-                    });
-                }
-
-                tagRow = info.Q<VisualElement>(TagRowName);
-                if (tagRow == null)
-                {
-                    tagRow = new VisualElement { name = TagRowName };
-                    tagRow.style.flexDirection = FlexDirection.Row;
-                    tagRow.style.flexWrap = Wrap.Wrap;
-                    tagRow.style.alignItems = Align.FlexStart;
-                    tagRow.style.marginTop = 10f;
-                    info.Add(tagRow);
-                }
-            }
-
             statTooltip = root.Q<VisualElement>(TooltipName);
             if (statTooltip != null)
             {
@@ -175,20 +137,87 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
+            if (info != null)
+            {
+                HideChild(info, 0);
+                HideChild(info, 8);
+                HideChild(info, 9);
+                HideChild(info, 10);
+
+                ConfigureStatRow(
+                    info,
+                    1,
+                    "ЖИЗНИ",
+                    "Текущий запас здоровья бойца. При 0 жизней боец выбывает из боя.");
+                ConfigureStatRow(
+                    info,
+                    2,
+                    "АТАКА",
+                    "Сравнивается с Защитой цели и определяет множитель наносимого урона.");
+                ConfigureStatRow(
+                    info,
+                    3,
+                    "ЗАЩИТА",
+                    "Сравнивается с Атакой противника и влияет на количество получаемого урона.");
+                ConfigureStatRow(
+                    info,
+                    4,
+                    "УРОН",
+                    "Базовое количество урона до применения результата сравнения Атаки и Защиты.");
+                ConfigureStatRow(
+                    info,
+                    5,
+                    "ХОД",
+                    "Запас движения бойца на активацию. Стоимость перемещения зависит от пройденных гексов и местности.");
+                ConfigureStatRow(
+                    info,
+                    6,
+                    "ИНИЦИАТИВА",
+                    "Определяет порядок активации бойцов в начале каждого раунда.");
+                ConfigureStatRow(
+                    info,
+                    7,
+                    "ДАЛЬНОСТЬ АТАКИ",
+                    "Максимальное расстояние в гексах, с которого боец может атаковать цель.");
+
+                tagRow = info.Q<VisualElement>(TagRowName);
+                if (tagRow == null)
+                {
+                    tagRow = new VisualElement { name = TagRowName };
+                    tagRow.style.flexDirection = FlexDirection.Row;
+                    tagRow.style.flexWrap = Wrap.Wrap;
+                    tagRow.style.alignItems = Align.FlexStart;
+                    tagRow.style.marginTop = 10f;
+                    info.Add(tagRow);
+                }
+            }
+
             EnsureTagTooltip();
         }
 
-        private void RefreshDefensePresentation()
+        private void ConfigureStatRow(
+            VisualElement info,
+            int index,
+            string titleText,
+            string description)
         {
-            if (defenseValueLabel == null)
+            if (info == null || index < 0 || index >= info.hierarchy.childCount)
                 return;
 
-            UnitDefinitionData unit = FindCurrentUnit();
-            if (unit != null)
-                defenseValueLabel.text = unit.Defense.ToString();
+            VisualElement row = info.hierarchy.ElementAt(index);
+            row.style.display = DisplayStyle.Flex;
+            MakeStatRowCompact(info, index);
+
+            if (row.hierarchy.childCount > 0 && row.hierarchy.ElementAt(0) is Label title)
+                title.text = titleText;
+
+            row.RegisterCallback<PointerEnterEvent>(_ =>
+            {
+                row.schedule.Execute(() => OverrideStatTooltip(titleText, description)).ExecuteLater(1);
+            });
         }
 
-        private void OverrideDefenseTooltip()
+        private void OverrideStatTooltip(string title, string description)
         {
             if (statTooltip == null || statTooltipTitle == null || statTooltipText == null ||
                 statTooltip.resolvedStyle.display == DisplayStyle.None)
@@ -196,13 +225,8 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             }
 
-            statTooltipTitle.text = "ЗАЩИТА";
-            statTooltipText.text =
-                "Снижает входящий урон через сравнение с Атакой врага. " +
-                "Тег «Бронированный» постоянно добавляет +2 к Защите. " +
-                "Защитная стойка увеличивает итоговую Защиту на 50%; " +
-                "тег «Защитник» в стойке добавляет ещё +25%. " +
-                "Плоский бонус брони применяется до процентного бонуса стойки.";
+            statTooltipTitle.text = title;
+            statTooltipText.text = description;
         }
 
         private void EnsureTagTooltip()

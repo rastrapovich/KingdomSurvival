@@ -88,11 +88,15 @@ namespace KingdomSurvival.BattleSandbox
             if (button == null)
                 return;
 
-            button.tooltip =
-                "Защитная стойка\n" +
+            button.text =
+                "ЗАЩИТНАЯ СТОЙКА\n" +
                 "+50% к защите после всех модификаторов.\n" +
-                "Округление вниз, минимум +1.\n" +
-                "Расходует 1 ОД и завершает движение.";
+                "Округление вниз, минимум +1.";
+            button.tooltip = string.Empty;
+            button.style.height = 72f;
+            button.style.whiteSpace = WhiteSpace.Normal;
+            button.style.unityTextAlign = TextAnchor.MiddleCenter;
+            button.style.fontSize = 10f;
         }
 
         private void RefreshCurrentUnitStats(SandboxBattle battle)
@@ -196,19 +200,15 @@ namespace KingdomSurvival.BattleSandbox
             if (tooltipTitle.text == "АТАКА")
             {
                 tooltipText.text =
-                    "Формула урона:\n" +
-                    "Разница = Атака − Защита.\n" +
-                    "Если разница > 0: урон × min(5; 1 + разница × 25%).\n" +
-                    "Если разница < 0: урон × max(0,3; 1 − |разница| × 12,5%).\n\n" +
+                    "Каждый пункт Атаки выше Защиты врага увеличивает базовый урон на 25%.\n" +
+                    "Максимальный множитель урона — ×5.\n\n" +
                     attack.BuildBreakdown();
             }
             else if (tooltipTitle.text == "ЗАЩИТА")
             {
                 tooltipText.text =
-                    "Формула урона:\n" +
-                    "Разница = Атака врага − Защита.\n" +
-                    "Каждый пункт преимущества Защиты снижает базовый урон на 12,5%.\n" +
-                    "Максимальное снижение — 70%.\n\n" +
+                    "Каждый пункт Защиты выше Атаки врага уменьшает базовый урон на 12,5%.\n" +
+                    "Максимальное снижение урона — 70%.\n\n" +
                     BuildDefenseBreakdown(defense);
             }
             else if (tooltipTitle.text == "ДАЛЬНОСТЬ")

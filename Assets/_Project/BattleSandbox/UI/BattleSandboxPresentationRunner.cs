@@ -89,7 +89,7 @@ namespace KingdomSurvival.BattleSandbox
                     styledSurface = surface;
                 }
 
-                RefreshDynamicHeader(screen);
+                TrimRoundLabel(FindRoundLabel(screen));
                 return;
             }
         }
@@ -115,7 +115,6 @@ namespace KingdomSurvival.BattleSandbox
             body.style.marginBottom = 0f;
 
             StyleBoardViewport(board);
-
             if (surface != null)
                 StyleBattlefieldSurface(surface, board);
 
@@ -202,12 +201,15 @@ namespace KingdomSurvival.BattleSandbox
                 VisualElement heading = header[0];
                 if (heading.childCount > 0 && heading[0] is Label title)
                     title.style.display = DisplayStyle.None;
+
                 if (heading.childCount > 1 && heading[1] is Label round)
                 {
                     round.style.fontSize = 14f;
                     round.style.marginTop = 0f;
                     round.style.unityFontStyleAndWeight = FontStyle.Bold;
                     round.style.color = new Color(0.92f, 0.84f, 0.68f, 1f);
+                    TrimRoundLabel(round);
+                    round.schedule.Execute(() => TrimRoundLabel(round)).Every(16);
                 }
             }
 
@@ -220,17 +222,22 @@ namespace KingdomSurvival.BattleSandbox
             }
         }
 
-        private static void RefreshDynamicHeader(VisualElement screen)
+        private static Label FindRoundLabel(VisualElement screen)
         {
             if (screen == null || screen.childCount == 0)
-                return;
+                return null;
 
             VisualElement header = screen[0];
             if (header.childCount == 0)
-                return;
+                return null;
 
             VisualElement heading = header[0];
-            if (heading.childCount < 2 || !(heading[1] is Label round))
+            return heading.childCount > 1 ? heading[1] as Label : null;
+        }
+
+        private static void TrimRoundLabel(Label round)
+        {
+            if (round == null)
                 return;
 
             string text = round.text ?? string.Empty;
@@ -277,7 +284,7 @@ namespace KingdomSurvival.BattleSandbox
             sidebar.style.left = 14f;
             sidebar.style.bottom = 14f;
             sidebar.style.width = 292f;
-            sidebar.style.maxHeight = 132f;
+            sidebar.style.maxHeight = 124f;
             sidebar.style.paddingLeft = 11f;
             sidebar.style.paddingRight = 11f;
             sidebar.style.paddingTop = 10f;
@@ -313,7 +320,7 @@ namespace KingdomSurvival.BattleSandbox
                 verticalScrollerVisibility = ScrollerVisibility.Auto,
                 horizontalScrollerVisibility = ScrollerVisibility.Hidden
             };
-            logScroll.style.height = 88f;
+            logScroll.style.height = 78f;
             logScroll.style.marginTop = 3f;
             logScroll.style.backgroundColor = new Color(0f, 0f, 0f, 0.08f);
             logScroll.style.overflow = Overflow.Hidden;

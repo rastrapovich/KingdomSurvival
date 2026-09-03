@@ -166,8 +166,8 @@ namespace KingdomSurvival.BattleSandbox
         private static void StyleBoardViewport(VisualElement board)
         {
             board.style.position = Position.Absolute;
-            board.style.left = Length.Percent(15f);
-            board.style.right = Length.Percent(15f);
+            board.style.left = Length.Percent(10f);
+            board.style.right = Length.Percent(10f);
             board.style.top = Length.Percent(10f);
             board.style.bottom = Length.Percent(8f);
             board.style.marginLeft = 0f;

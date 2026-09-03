@@ -5,10 +5,10 @@ namespace KingdomSurvival.BattleSandbox.Tests
     public sealed class CombatTagModifierTests
     {
         [Test]
-        public void Guard_UsesFiftyPercentDefenseBonus()
+        public void Guard_UsesFiftyPercentDefenseBonusRoundedDown()
         {
             SandboxUnitState defender = CreateState(
-                "defender", SandboxTeam.Player, 2, 2, 2, 1,
+                "defender", SandboxTeam.Player, 2, 3, 2, 1,
                 new[] { SandboxCombatTagRules.Human });
             SandboxUnitState enemy = CreateState(
                 "enemy", SandboxTeam.Enemy, 2, 2, 1, 1,
@@ -18,11 +18,28 @@ namespace KingdomSurvival.BattleSandbox.Tests
             battle.Start();
 
             Assert.That(battle.TryGuard(defender.Id, out _), Is.True);
-            Assert.That(SandboxCombatTagRules.GetEffectiveDefense(defender), Is.EqualTo(3m));
+            Assert.That(SandboxCombatTagRules.GetEffectiveDefense(defender), Is.EqualTo(4m));
         }
 
         [Test]
-        public void DefenderAndArmored_UseFlatArmorBeforeSeventyFivePercentGuardBonus()
+        public void Guard_HasMinimumOneDefenseBonus()
+        {
+            SandboxUnitState defender = CreateState(
+                "defender", SandboxTeam.Player, 2, 1, 2, 1,
+                new[] { SandboxCombatTagRules.Human });
+            SandboxUnitState enemy = CreateState(
+                "enemy", SandboxTeam.Enemy, 2, 2, 1, 1,
+                new[] { SandboxCombatTagRules.Beast },
+                new HexCoord(3, 0));
+            SandboxBattle battle = CreateBattle(defender, enemy);
+            battle.Start();
+
+            Assert.That(battle.TryGuard(defender.Id, out _), Is.True);
+            Assert.That(SandboxCombatTagRules.GetEffectiveDefense(defender), Is.EqualTo(2m));
+        }
+
+        [Test]
+        public void DefenderAndArmored_UseSameFiftyPercentGuardBonus()
         {
             SandboxUnitState defender = CreateState(
                 "defender", SandboxTeam.Player, 2, 4, 2, 1,
@@ -41,7 +58,8 @@ namespace KingdomSurvival.BattleSandbox.Tests
 
             Assert.That(SandboxCombatTagRules.GetEffectiveDefense(defender), Is.EqualTo(6m));
             Assert.That(battle.TryGuard(defender.Id, out _), Is.True);
-            Assert.That(SandboxCombatTagRules.GetEffectiveDefense(defender), Is.EqualTo(10.5m));
+            Assert.That(SandboxCombatTagRules.GetEffectiveDefense(defender), Is.EqualTo(9m));
+            Assert.That(SandboxCombatTagRules.GetGuardDefensePercent(defender), Is.EqualTo(50));
         }
 
         [Test]

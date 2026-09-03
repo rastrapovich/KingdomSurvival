@@ -17,6 +17,8 @@ namespace KingdomSurvival.BattleSandbox
             new Color(0.42f, 0.82f, 0.47f, 1f);
         private const string BonusColorHex = "#6BD178";
 
+        private static readonly FieldInfo RootField =
+            typeof(BattleSandboxController).GetField("root", InstanceFlags);
         private static readonly FieldInfo BattleField =
             typeof(BattleSandboxController).GetField("battle", InstanceFlags);
         private static readonly FieldInfo CurrentStatsLabelField =
@@ -36,12 +38,19 @@ namespace KingdomSurvival.BattleSandbox
             typeof(SandboxFighterDetailsView).GetField("defenseValue", InstanceFlags);
         private static readonly FieldInfo DetailsRangeValueField =
             typeof(SandboxFighterDetailsView).GetField("rangeValue", InstanceFlags);
+        private static readonly FieldInfo DetailsStatTooltipField =
+            typeof(SandboxFighterDetailsView).GetField("statTooltip", InstanceFlags);
         private static readonly FieldInfo DetailsTooltipTitleField =
             typeof(SandboxFighterDetailsView).GetField("tooltipTitle", InstanceFlags);
         private static readonly FieldInfo DetailsTooltipTextField =
             typeof(SandboxFighterDetailsView).GetField("tooltipText", InstanceFlags);
 
         private BattleSandboxController controller;
+        private Button registeredGuardButton;
+        private VisualElement registeredRangeRow;
+        private VisualElement hoverPopup;
+        private Label hoverPopupTitle;
+        private Label hoverPopupText;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
@@ -78,6 +87,12 @@ namespace KingdomSurvival.BattleSandbox
             RefreshGuardButton();
             RefreshCurrentUnitStats(battle);
             RefreshOpenedFighterDetails(battle);
+            EnsureRangeHover();
+        }
+
+        private void OnDisable()
+        {
+            HideHoverPopup();
         }
 
         private void RefreshGuardButton()
@@ -88,15 +103,26 @@ namespace KingdomSurvival.BattleSandbox
             if (button == null)
                 return;
 
-            button.text =
-                "ЗАЩИТНАЯ СТОЙКА\n" +
-                "+50% к защите после всех модификаторов.\n" +
-                "Округление вниз, минимум +1.";
+            button.text = "ЗАЩИТНАЯ СТОЙКА";
             button.tooltip = string.Empty;
-            button.style.height = 72f;
-            button.style.whiteSpace = WhiteSpace.Normal;
+            button.style.height = 36f;
+            button.style.whiteSpace = WhiteSpace.NoWrap;
             button.style.unityTextAlign = TextAnchor.MiddleCenter;
-            button.style.fontSize = 10f;
+            button.style.fontSize = 11f;
+
+            if (registeredGuardButton == button)
+                return;
+
+            registeredGuardButton = button;
+            button.RegisterCallback<PointerEnterEvent>(_ =>
+            {
+                ShowHoverPopup(
+                    button,
+                    "ЗАЩИТНАЯ СТОЙКА",
+                    "+50% к защите после всех модификаторов.\n" +
+                    "Округление вниз, минимум +1.");
+            });
+            button.RegisterCallback<PointerLeaveEvent>(_ => HideHoverPopup());
         }
 
         private void RefreshCurrentUnitStats(SandboxBattle battle)
@@ -180,10 +206,57 @@ namespace KingdomSurvival.BattleSandbox
             {
                 rangeValue.text = range.EffectiveRange.ToString();
                 rangeValue.style.color = range.HasBonus ? BonusStatColor : NormalStatColor;
-                rangeValue.tooltip = range.BuildBreakdown();
+                rangeValue.tooltip = string.Empty;
             }
 
             RefreshSharedTooltip(details, attack, defense, range);
+        }
+
+        private void EnsureRangeHover()
+        {
+            if (FighterDetailsViewField == null ||
+                DetailsOpenedStateField == null ||
+                DetailsRangeValueField == null)
+            {
+                return;
+            }
+
+            SandboxFighterDetailsView details =
+                FighterDetailsViewField.GetValue(controller) as SandboxFighterDetailsView;
+            Label rangeValue = details != null
+                ? GetDetailsLabel(details, DetailsRangeValueField)
+                : null;
+            VisualElement row = rangeValue != null ? rangeValue.parent : null;
+            if (row == null || registeredRangeRow == row)
+                return;
+
+            registeredRangeRow = row;
+            row.RegisterCallback<PointerEnterEvent>(_ =>
+            {
+                SandboxFighterDetailsView currentDetails =
+                    FighterDetailsViewField.GetValue(controller) as SandboxFighterDetailsView;
+                SandboxUnitState state = currentDetails != null
+                    ? DetailsOpenedStateField.GetValue(currentDetails) as SandboxUnitState
+                    : null;
+                if (state == null)
+                    return;
+
+                VisualElement builtInTooltip = DetailsStatTooltipField != null
+                    ? DetailsStatTooltipField.GetValue(currentDetails) as VisualElement
+                    : null;
+                if (builtInTooltip != null)
+                    builtInTooltip.style.display = DisplayStyle.None;
+
+                SandboxRangeSnapshot range =
+                    SandboxCombatStatPresentation.GetRangeSnapshot(state);
+                ShowHoverPopup(
+                    row,
+                    "ДАЛЬНОСТЬ",
+                    "Максимальная гексовая дистанция обычной атаки.\n" +
+                    "Для бойца с тегом «Дальний бой» холм даёт +1 к дальности.\n\n" +
+                    range.BuildBreakdown());
+            });
+            row.RegisterCallback<PointerLeaveEvent>(_ => HideHoverPopup());
         }
 
         private void RefreshSharedTooltip(
@@ -215,9 +288,91 @@ namespace KingdomSurvival.BattleSandbox
             {
                 tooltipText.text =
                     "Максимальная гексовая дистанция обычной атаки.\n" +
-                    "Боец с тегом «Дальний бой» получает +1 к дальности, пока стоит на холме.\n\n" +
+                    "Для бойца с тегом «Дальний бой» холм даёт +1 к дальности.\n\n" +
                     range.BuildBreakdown();
             }
+        }
+
+        private void ShowHoverPopup(VisualElement anchor, string title, string text)
+        {
+            VisualElement root = RootField != null
+                ? RootField.GetValue(controller) as VisualElement
+                : null;
+            if (root == null || anchor == null)
+                return;
+
+            EnsureHoverPopup(root);
+            hoverPopupTitle.text = title;
+            hoverPopupText.text = text;
+            hoverPopup.style.display = DisplayStyle.Flex;
+            hoverPopup.BringToFront();
+
+            Rect bounds = anchor.worldBound;
+            Vector2 topRight = root.WorldToLocal(new Vector2(bounds.xMax, bounds.yMin));
+            Vector2 topLeft = root.WorldToLocal(new Vector2(bounds.xMin, bounds.yMin));
+            float rootWidth = root.resolvedStyle.width;
+            float rootHeight = root.resolvedStyle.height;
+            if (float.IsNaN(rootWidth) || rootWidth < 400f)
+                rootWidth = 1280f;
+            if (float.IsNaN(rootHeight) || rootHeight < 300f)
+                rootHeight = 720f;
+
+            const float popupWidth = 330f;
+            float left = topRight.x + 10f;
+            if (left + popupWidth > rootWidth - 12f)
+                left = topLeft.x - popupWidth - 10f;
+
+            hoverPopup.style.left = Mathf.Clamp(
+                left,
+                12f,
+                Mathf.Max(12f, rootWidth - popupWidth - 12f));
+            hoverPopup.style.top = Mathf.Clamp(
+                topRight.y,
+                12f,
+                Mathf.Max(12f, rootHeight - 170f));
+        }
+
+        private void EnsureHoverPopup(VisualElement root)
+        {
+            if (hoverPopup != null && hoverPopup.parent == root)
+                return;
+
+            hoverPopup = new VisualElement
+            {
+                name = "battle-sandbox-hover-help",
+                pickingMode = PickingMode.Ignore
+            };
+            hoverPopup.style.display = DisplayStyle.None;
+            hoverPopup.style.position = Position.Absolute;
+            hoverPopup.style.width = 330f;
+            hoverPopup.style.paddingLeft = 12f;
+            hoverPopup.style.paddingRight = 12f;
+            hoverPopup.style.paddingTop = 10f;
+            hoverPopup.style.paddingBottom = 10f;
+            hoverPopup.style.backgroundColor = new Color(0.055f, 0.065f, 0.075f, 0.995f);
+            SetBorder(hoverPopup, new Color(0.58f, 0.47f, 0.26f, 1f));
+            SetRadius(hoverPopup, 4f);
+
+            hoverPopupTitle = new Label();
+            hoverPopupTitle.style.fontSize = 11f;
+            hoverPopupTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
+            hoverPopupTitle.style.color = new Color(0.91f, 0.76f, 0.43f, 1f);
+            hoverPopup.Add(hoverPopupTitle);
+
+            hoverPopupText = new Label();
+            hoverPopupText.style.marginTop = 5f;
+            hoverPopupText.style.fontSize = 10f;
+            hoverPopupText.style.whiteSpace = WhiteSpace.Normal;
+            hoverPopupText.style.color = new Color(0.76f, 0.76f, 0.72f, 1f);
+            hoverPopup.Add(hoverPopupText);
+
+            root.Add(hoverPopup);
+        }
+
+        private void HideHoverPopup()
+        {
+            if (hoverPopup != null)
+                hoverPopup.style.display = DisplayStyle.None;
         }
 
         private SandboxUnitState GetSelectedTarget(SandboxBattle battle)
@@ -254,6 +409,26 @@ namespace KingdomSurvival.BattleSandbox
             return boosted
                 ? "<color=" + BonusColorHex + ">" + value + "</color>"
                 : value;
+        }
+
+        private static void SetBorder(VisualElement element, Color color, float width = 1f)
+        {
+            element.style.borderLeftWidth = width;
+            element.style.borderRightWidth = width;
+            element.style.borderTopWidth = width;
+            element.style.borderBottomWidth = width;
+            element.style.borderLeftColor = color;
+            element.style.borderRightColor = color;
+            element.style.borderTopColor = color;
+            element.style.borderBottomColor = color;
+        }
+
+        private static void SetRadius(VisualElement element, float radius)
+        {
+            element.style.borderTopLeftRadius = radius;
+            element.style.borderTopRightRadius = radius;
+            element.style.borderBottomLeftRadius = radius;
+            element.style.borderBottomRightRadius = radius;
         }
     }
 }

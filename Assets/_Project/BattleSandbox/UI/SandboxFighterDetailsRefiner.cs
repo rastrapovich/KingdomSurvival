@@ -146,7 +146,6 @@ namespace KingdomSurvival.BattleSandbox
                     tooltip.hierarchy.ElementAt(1) is Label tooltipText)
                 {
                     tooltipText.style.fontSize = 15f;
-                    tooltipText.style.lineHeight = 19f;
                 }
             }
         }

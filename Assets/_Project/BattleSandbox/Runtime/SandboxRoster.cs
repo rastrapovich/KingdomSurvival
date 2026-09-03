@@ -72,20 +72,20 @@ namespace KingdomSurvival.BattleSandbox
 
             HexCoord[] playerPositions =
             {
-                new HexCoord(1, 0),
-                new HexCoord(0, 1),
-                new HexCoord(0, 2),
+                new HexCoord(2, 0),
+                new HexCoord(1, 1),
+                new HexCoord(1, 2),
                 new HexCoord(0, 3),
-                new HexCoord(0, 4),
-                new HexCoord(0, 5)
+                new HexCoord(1, 4),
+                new HexCoord(1, 5)
             };
 
             HexCoord[] enemyPositions =
             {
-                new HexCoord(6, 1),
-                new HexCoord(7, 2),
-                new HexCoord(6, 3),
-                new HexCoord(7, 4)
+                new HexCoord(8, 1),
+                new HexCoord(9, 2),
+                new HexCoord(9, 3),
+                new HexCoord(9, 4)
             };
 
             List<SandboxUnitState> units = new List<SandboxUnitState>();
@@ -111,13 +111,13 @@ namespace KingdomSurvival.BattleSandbox
             foreach (HexCoord inactive in SandboxArenaShape.InactiveCells())
                 terrain[inactive] = SandboxTerrain.Impassable;
 
-            terrain[new HexCoord(4, 1)] = SandboxTerrain.Impassable;
-            terrain[new HexCoord(4, 2)] = SandboxTerrain.Impassable;
-            terrain[new HexCoord(4, 4)] = SandboxTerrain.Impassable;
-            terrain[new HexCoord(4, 5)] = SandboxTerrain.Impassable;
-            terrain[new HexCoord(3, 3)] = SandboxTerrain.Difficult;
+            terrain[new HexCoord(5, 1)] = SandboxTerrain.Impassable;
+            terrain[new HexCoord(5, 2)] = SandboxTerrain.Impassable;
+            terrain[new HexCoord(5, 4)] = SandboxTerrain.Impassable;
+            terrain[new HexCoord(5, 5)] = SandboxTerrain.Impassable;
             terrain[new HexCoord(4, 3)] = SandboxTerrain.Difficult;
             terrain[new HexCoord(5, 3)] = SandboxTerrain.Difficult;
+            terrain[new HexCoord(6, 3)] = SandboxTerrain.Difficult;
 
             SandboxBattle battle = new SandboxBattle(
                 SandboxArenaShape.Width,

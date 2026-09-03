@@ -259,7 +259,7 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
             tagBook.Add(new PropertyField(tagsProperty, "Теги базы"));
             details.Add(tagBook);
 
-            AddHeader("ПРЕДПРОСМОТР 49 ГЕКСОВ · 6 / 7 / 8 / 7 / 8 / 7 / 6");
+            AddHeader("ПРЕДПРОСМОТР 58 ГЕКСОВ · 7 / 8 / 9 / 10 / 9 / 8 / 7");
             previewViewport = new VisualElement();
             previewViewport.style.height = 360f;
             previewViewport.style.position = Position.Relative;
@@ -441,8 +441,8 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
         private sealed class GridPreview : VisualElement
         {
             private const float GridVerticalScale = 0.75f;
-            private static readonly int[] RowStarts = { 1, 0, 0, 0, 0, 0, 1 };
-            private static readonly int[] RowLengths = { 6, 7, 8, 7, 8, 7, 6 };
+            private static readonly int[] RowStarts = { 2, 1, 1, 0, 1, 1, 2 };
+            private static readonly int[] RowLengths = { 7, 8, 9, 10, 9, 8, 7 };
 
             public GridPreview()
             {
@@ -452,7 +452,7 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
 
             private void Draw(MeshGenerationContext context)
             {
-                const int width = 8;
+                const int width = 10;
                 const int height = 7;
                 if (contentRect.width <= 1f || contentRect.height <= 1f)
                     return;

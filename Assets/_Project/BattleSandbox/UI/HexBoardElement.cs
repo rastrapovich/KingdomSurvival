@@ -15,7 +15,7 @@ namespace KingdomSurvival.BattleSandbox
         private const float HealthBarHeight = 4.2f;
         private const float HealthBarBottomInset = 8f;
         private const float MeleeAutoSelectRadiusScale = 0.48f;
-        private const float GridVerticalScale = 0.85f;
+        private const float GridVerticalScale = 0.75f;
 
         private static readonly Color NormalColor = new Color(0.16f, 0.20f, 0.22f, 0.80f);
         private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 0.80f);

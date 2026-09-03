@@ -17,7 +17,7 @@ namespace KingdomSurvival.BattleSandbox
         private const float MeleeAutoSelectRadiusScale = 0.48f;
         private const float GridVerticalScale = 0.75f;
 
-        private static readonly Color NormalColor = new Color(0.16f, 0.20f, 0.22f, 0.80f);
+        private static readonly Color NormalColor = new Color(0f, 0f, 0f, 0f);
         private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 0.80f);
         private static readonly Color ImpassableColor = new Color(0.07f, 0.08f, 0.09f, 0.80f);
         private static readonly Color ReachableColor = new Color(0.28f, 0.75f, 0.90f, 0.40f);

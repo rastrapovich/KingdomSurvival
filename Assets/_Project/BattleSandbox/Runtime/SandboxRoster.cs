@@ -6,6 +6,12 @@ namespace KingdomSurvival.BattleSandbox
 {
     public static class SandboxRoster
     {
+        private const int MinDifficultCells = 6;
+        private const int MaxDifficultCells = 10;
+        private const int MinImpassableCells = 3;
+        private const int MaxImpassableCells = 5;
+        private const int TerrainGenerationAttempts = 64;
+
         private static readonly SandboxUnitDefinition[] PlayerRosterData =
         {
             new SandboxUnitDefinition("guard", "Гвардеец", SandboxUnitRole.Guard, 18, 2, 4, 3, 3, 3, 1,
@@ -48,7 +54,8 @@ namespace KingdomSurvival.BattleSandbox
         public static SandboxBattle CreateDefaultBattle(
             IEnumerable<string> selectedFighterTypeIds,
             IEnumerable<SandboxUnitDefinition> playerRoster,
-            IEnumerable<SandboxUnitDefinition> enemyEncounter)
+            IEnumerable<SandboxUnitDefinition> enemyEncounter,
+            int? terrainSeed = null)
         {
             if (selectedFighterTypeIds == null)
                 throw new ArgumentNullException(nameof(selectedFighterTypeIds));
@@ -107,17 +114,8 @@ namespace KingdomSurvival.BattleSandbox
                     enemyPositions[i]));
             }
 
-            Dictionary<HexCoord, SandboxTerrain> terrain = new Dictionary<HexCoord, SandboxTerrain>();
-            foreach (HexCoord inactive in SandboxArenaShape.InactiveCells())
-                terrain[inactive] = SandboxTerrain.Impassable;
-
-            terrain[new HexCoord(5, 1)] = SandboxTerrain.Impassable;
-            terrain[new HexCoord(5, 2)] = SandboxTerrain.Impassable;
-            terrain[new HexCoord(5, 4)] = SandboxTerrain.Impassable;
-            terrain[new HexCoord(5, 5)] = SandboxTerrain.Impassable;
-            terrain[new HexCoord(4, 3)] = SandboxTerrain.Difficult;
-            terrain[new HexCoord(5, 3)] = SandboxTerrain.Difficult;
-            terrain[new HexCoord(6, 3)] = SandboxTerrain.Difficult;
+            Random random = new Random(terrainSeed ?? Guid.NewGuid().GetHashCode());
+            Dictionary<HexCoord, SandboxTerrain> terrain = GenerateTerrain(units, random);
 
             SandboxBattle battle = new SandboxBattle(
                 SandboxArenaShape.Width,
@@ -126,6 +124,119 @@ namespace KingdomSurvival.BattleSandbox
                 terrain);
             battle.Start();
             return battle;
+        }
+
+        private static Dictionary<HexCoord, SandboxTerrain> GenerateTerrain(
+            IReadOnlyCollection<SandboxUnitState> units,
+            Random random)
+        {
+            HashSet<HexCoord> occupied = new HashSet<HexCoord>(units.Select(unit => unit.Position));
+            List<HexCoord> candidates = new List<HexCoord>();
+            for (int r = 0; r < SandboxArenaShape.Height; r++)
+            {
+                for (int q = 0; q < SandboxArenaShape.Width; q++)
+                {
+                    HexCoord coord = new HexCoord(q, r);
+                    if (SandboxArenaShape.Contains(coord) && !occupied.Contains(coord))
+                        candidates.Add(coord);
+                }
+            }
+
+            for (int attempt = 0; attempt < TerrainGenerationAttempts; attempt++)
+            {
+                Dictionary<HexCoord, SandboxTerrain> terrain = CreateBaseTerrain();
+                Shuffle(candidates, random);
+
+                int impassableCount = random.Next(MinImpassableCells, MaxImpassableCells + 1);
+                int difficultCount = random.Next(MinDifficultCells, MaxDifficultCells + 1);
+
+                for (int i = 0; i < impassableCount; i++)
+                    terrain[candidates[i]] = SandboxTerrain.Impassable;
+                for (int i = impassableCount; i < impassableCount + difficultCount; i++)
+                    terrain[candidates[i]] = SandboxTerrain.Difficult;
+
+                if (AllUnitSpawnsConnected(units, terrain))
+                    return terrain;
+            }
+
+            return CreateSafeFallbackTerrain(candidates, units, random);
+        }
+
+        private static Dictionary<HexCoord, SandboxTerrain> CreateBaseTerrain()
+        {
+            Dictionary<HexCoord, SandboxTerrain> terrain = new Dictionary<HexCoord, SandboxTerrain>();
+            foreach (HexCoord inactive in SandboxArenaShape.InactiveCells())
+                terrain[inactive] = SandboxTerrain.Impassable;
+            return terrain;
+        }
+
+        private static Dictionary<HexCoord, SandboxTerrain> CreateSafeFallbackTerrain(
+            List<HexCoord> candidates,
+            IReadOnlyCollection<SandboxUnitState> units,
+            Random random)
+        {
+            for (int attempt = 0; attempt < TerrainGenerationAttempts; attempt++)
+            {
+                Dictionary<HexCoord, SandboxTerrain> terrain = CreateBaseTerrain();
+                Shuffle(candidates, random);
+
+                for (int i = 0; i < MinImpassableCells; i++)
+                    terrain[candidates[i]] = SandboxTerrain.Impassable;
+                for (int i = MinImpassableCells; i < MinImpassableCells + MinDifficultCells; i++)
+                    terrain[candidates[i]] = SandboxTerrain.Difficult;
+
+                if (AllUnitSpawnsConnected(units, terrain))
+                    return terrain;
+            }
+
+            Dictionary<HexCoord, SandboxTerrain> fallback = CreateBaseTerrain();
+            for (int i = 0; i < MinDifficultCells; i++)
+                fallback[candidates[i]] = SandboxTerrain.Difficult;
+            return fallback;
+        }
+
+        private static bool AllUnitSpawnsConnected(
+            IReadOnlyCollection<SandboxUnitState> units,
+            IReadOnlyDictionary<HexCoord, SandboxTerrain> terrain)
+        {
+            SandboxUnitState first = units.FirstOrDefault();
+            if (first == null)
+                return false;
+
+            HashSet<HexCoord> visited = new HashSet<HexCoord> { first.Position };
+            Queue<HexCoord> frontier = new Queue<HexCoord>();
+            frontier.Enqueue(first.Position);
+
+            while (frontier.Count > 0)
+            {
+                HexCoord current = frontier.Dequeue();
+                foreach (HexCoord next in current.Neighbors())
+                {
+                    if (!SandboxArenaShape.Contains(next) || visited.Contains(next))
+                        continue;
+                    if (terrain.TryGetValue(next, out SandboxTerrain value) &&
+                        value == SandboxTerrain.Impassable)
+                    {
+                        continue;
+                    }
+
+                    visited.Add(next);
+                    frontier.Enqueue(next);
+                }
+            }
+
+            return units.All(unit => visited.Contains(unit.Position));
+        }
+
+        private static void Shuffle(List<HexCoord> cells, Random random)
+        {
+            for (int i = cells.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                HexCoord temp = cells[i];
+                cells[i] = cells[j];
+                cells[j] = temp;
+            }
         }
     }
 }

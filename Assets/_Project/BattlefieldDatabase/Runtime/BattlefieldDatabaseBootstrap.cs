@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -48,11 +47,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         private const string BoardElementName = "battle-sandbox-board";
         private const string SurfaceElementName = "battlefield-surface";
         private const string BackgroundElementName = "battlefield-background";
-        private const float FallbackOverlayOpacity = 0.72f;
 
         private BattlefieldDatabaseAsset database;
-        private bool paletteAttempted;
-        private bool transparentPaletteApplied;
         private VisualElement wrappedSurface;
 
         private void Awake()
@@ -89,16 +85,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                 if (board.parent != null && board.parent.name == SurfaceElementName)
                     continue;
 
-                if (!paletteAttempted)
-                {
-                    paletteAttempted = true;
-                    transparentPaletteApplied = TryApplyTransparentHexPalette();
-                }
-
-                wrappedSurface = WrapBoard(
-                    board,
-                    battlefield,
-                    transparentPaletteApplied);
+                wrappedSurface = WrapBoard(board, battlefield);
                 if (wrappedSurface != null)
                     return;
             }
@@ -106,8 +93,7 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         private static VisualElement WrapBoard(
             VisualElement board,
-            BattlefieldDefinitionData battlefield,
-            bool placeBackgroundBelowGrid)
+            BattlefieldDefinitionData battlefield)
         {
             VisualElement parent = board.parent;
             if (parent == null)
@@ -154,18 +140,10 @@ namespace KingdomSurvival.BattlefieldDatabase
             board.style.bottom = 0f;
             board.style.backgroundColor = Color.clear;
 
-            if (placeBackgroundBelowGrid)
-            {
-                surface.Add(background);
-                surface.Add(board);
-            }
-            else
-            {
-                surface.Add(board);
-                background.style.opacity = FallbackOverlayOpacity;
-                board.Insert(0, background);
-            }
-
+            // Фон всегда находится под интерактивной сеткой. Никаких изменений
+            // private/static полей через reflection и никаких overlay-fallback.
+            surface.Add(background);
+            surface.Add(board);
             parent.Insert(index, surface);
 
             Action applyFraming = () =>
@@ -182,56 +160,6 @@ namespace KingdomSurvival.BattlefieldDatabase
             surface.RegisterCallback<GeometryChangedEvent>(_ => applyFraming());
             applyFraming();
             return surface;
-        }
-
-        private static bool TryApplyTransparentHexPalette()
-        {
-            try
-            {
-                Type boardType = Type.GetType(
-                    "KingdomSurvival.BattleSandbox.HexBoardElement, KingdomSurvival.BattleSandbox.UI");
-                if (boardType == null)
-                    return false;
-
-                bool success = true;
-                success &= SetStaticColor(
-                    boardType,
-                    "NormalColor",
-                    new Color(0.12f, 0.16f, 0.17f, 0.04f));
-                success &= SetStaticColor(
-                    boardType,
-                    "DifficultColor",
-                    new Color(0.42f, 0.31f, 0.12f, 0.192f));
-                success &= SetStaticColor(
-                    boardType,
-                    "ImpassableColor",
-                    new Color(0.03f, 0.04f, 0.04f, 0.384f));
-                success &= SetStaticColor(
-                    boardType,
-                    "ReachableColor",
-                    new Color(0.28f, 0.75f, 0.90f, 0.40f));
-                return success;
-            }
-            catch (Exception exception)
-            {
-                Debug.LogWarning(
-                    "Battlefield database could not adjust sandbox hex transparency; " +
-                    "using visual fallback instead. " + exception.Message);
-                return false;
-            }
-        }
-
-        private static bool SetStaticColor(Type type, string fieldName, Color value)
-        {
-            FieldInfo field = type.GetField(
-                fieldName,
-                BindingFlags.Static | BindingFlags.NonPublic);
-            if (field == null || field.FieldType != typeof(Color))
-                return false;
-
-            field.SetValue(null, value);
-            object result = field.GetValue(null);
-            return result is Color color && Mathf.Abs(color.a - value.a) < 0.001f;
         }
     }
 }

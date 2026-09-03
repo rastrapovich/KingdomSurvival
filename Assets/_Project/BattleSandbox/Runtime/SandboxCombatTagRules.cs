@@ -12,11 +12,11 @@ namespace KingdomSurvival.BattleSandbox
         public const string BeastSlayer = "trait.beast_slayer";
         public const string HumanSlayer = "trait.human_slayer";
 
-        public const decimal GuardDefenseMultiplier = 1.50m;
-        public const decimal DefenderGuardBonus = 0.25m;
         public const decimal SlayerAttackMultiplier = 1.50m;
         public const decimal RangedMeleeAttackMultiplier = 0.50m;
         public const int ArmoredDefenseBonus = 2;
+        public const int GuardDefensePercent = 50;
+        public const int MinimumGuardDefenseBonus = 1;
 
         public static decimal GetEffectiveAttack(
             SandboxUnitState attacker,
@@ -57,24 +57,24 @@ namespace KingdomSurvival.BattleSandbox
             if (target == null)
                 return 0m;
 
-            decimal effectiveDefense = target.Defense;
+            int effectiveDefense = target.Defense;
             if (target.HasTag(Armored))
                 effectiveDefense += ArmoredDefenseBonus;
 
             if (target.IsGuarding)
             {
-                decimal multiplier = GuardDefenseMultiplier;
-                if (target.HasTag(Defender))
-                    multiplier += DefenderGuardBonus;
-                effectiveDefense *= multiplier;
+                int guardBonus = Math.Max(
+                    MinimumGuardDefenseBonus,
+                    (int)Math.Floor(effectiveDefense * 0.50m));
+                effectiveDefense += guardBonus;
             }
 
-            return Math.Max(0m, effectiveDefense);
+            return Math.Max(0, effectiveDefense);
         }
 
         public static int GetGuardDefensePercent(SandboxUnitState unit)
         {
-            return unit != null && unit.HasTag(Defender) ? 75 : 50;
+            return GuardDefensePercent;
         }
     }
 }

@@ -23,11 +23,6 @@ MonoBehaviour:
     category: "Происхождение"
     color: {r: 0.62, g: 0.27, b: 0.2, a: 1}
     description: "Порождение дикой чащи, привыкшее решать споры клыками и когтями."
-  - id: combat.melee
-    displayLabel: "Ближний бой"
-    category: "Тип атаки"
-    color: {r: 0.62, g: 0.48, b: 0.24, a: 1}
-    description: "Дальность обычного удара — 1 гекс."
   - id: combat.ranged
     displayLabel: "Дальний бой"
     category: "Тип атаки"
@@ -74,7 +69,6 @@ MonoBehaviour:
     sandboxEncounterCount: 0
     tagIds:
     - species.human
-    - combat.melee
     - role.defender
     - trait.armored
   - id: archer
@@ -118,7 +112,6 @@ MonoBehaviour:
     sandboxEncounterCount: 0
     tagIds:
     - species.human
-    - combat.melee
   - id: spearman
     displayLabel: "Копейщик"
     category: 0
@@ -139,7 +132,6 @@ MonoBehaviour:
     sandboxEncounterCount: 0
     tagIds:
     - species.human
-    - combat.melee
     - trait.beast_slayer
   - id: scout
     displayLabel: "Разведчик"
@@ -161,7 +153,6 @@ MonoBehaviour:
     sandboxEncounterCount: 0
     tagIds:
     - species.human
-    - combat.melee
   - id: militia
     displayLabel: "Ополченец"
     category: 0
@@ -182,7 +173,6 @@ MonoBehaviour:
     sandboxEncounterCount: 0
     tagIds:
     - species.human
-    - combat.melee
   - id: forest_beast
     displayLabel: "Зверь"
     category: 1
@@ -203,7 +193,6 @@ MonoBehaviour:
     sandboxEncounterCount: 2
     tagIds:
     - species.beast
-    - combat.melee
   - id: forest_beast_strong
     displayLabel: "Зверь"
     category: 1
@@ -224,7 +213,6 @@ MonoBehaviour:
     sandboxEncounterCount: 1
     tagIds:
     - species.beast
-    - combat.melee
   - id: forest_beast_alpha
     displayLabel: "Зверь"
     category: 1
@@ -245,5 +233,4 @@ MonoBehaviour:
     sandboxEncounterCount: 1
     tagIds:
     - species.beast
-    - combat.melee
     - trait.human_slayer

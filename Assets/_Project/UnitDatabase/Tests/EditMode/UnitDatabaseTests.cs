@@ -50,5 +50,16 @@ namespace KingdomSurvival.UnitDatabase.Tests
             Assert.That(creatures.All(unit => unit.HasTag("species.beast")), Is.True);
             Assert.That(creatures.Sum(unit => unit.SandboxEncounterCount), Is.EqualTo(4));
         }
+
+        [Test]
+        public void DefaultDatabaseDoesNotUseRedundantMeleeTag()
+        {
+            UnitDatabaseAsset database = Resources.Load<UnitDatabaseAsset>(
+                UnitDatabaseAsset.ResourcesPath);
+
+            Assert.That(database.FindTag("combat.melee"), Is.Null);
+            Assert.That(database.Units.All(unit => !unit.HasTag("combat.melee")), Is.True);
+            Assert.That(database.Units.All(unit => unit.AttackRange >= 1), Is.True);
+        }
     }
 }

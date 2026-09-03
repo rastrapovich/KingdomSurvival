@@ -112,9 +112,7 @@ namespace KingdomSurvival.BattleSandbox
             body.style.marginTop = 0f;
             body.style.marginBottom = 0f;
 
-            board.style.marginRight = 0f;
-            board.style.minWidth = 0f;
-            board.style.minHeight = 0f;
+            StyleBoardViewport(board);
 
             if (surface != null)
                 StyleBattlefieldSurface(surface, board);
@@ -161,9 +159,23 @@ namespace KingdomSurvival.BattleSandbox
             surface.style.marginBottom = 0f;
             surface.style.position = Position.Relative;
 
+            StyleBoardViewport(board);
+        }
+
+        private static void StyleBoardViewport(VisualElement board)
+        {
+            board.style.position = Position.Absolute;
+            board.style.left = Length.Percent(11f);
+            board.style.right = Length.Percent(11f);
+            board.style.top = Length.Percent(10f);
+            board.style.bottom = Length.Percent(8f);
+            board.style.marginLeft = 0f;
             board.style.marginRight = 0f;
+            board.style.marginTop = 0f;
+            board.style.marginBottom = 0f;
             board.style.minWidth = 0f;
             board.style.minHeight = 0f;
+            board.style.backgroundColor = Color.clear;
         }
 
         private static void StyleHeader(VisualElement header)

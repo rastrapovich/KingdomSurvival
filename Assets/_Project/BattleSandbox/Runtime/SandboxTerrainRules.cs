@@ -8,6 +8,7 @@ namespace KingdomSurvival.BattleSandbox
     {
         public const int HillMovementCost = 2;
         public const int HillDefenseBonus = 2;
+        public const int HillRangedAttackRangeBonus = 1;
 
         private sealed class TerrainContext
         {
@@ -47,13 +48,35 @@ namespace KingdomSurvival.BattleSandbox
 
         public static int GetDefenseBonus(SandboxUnitState unit)
         {
-            if (unit == null || !ContextByUnit.TryGetValue(unit, out TerrainContext context))
+            if (!IsOnHill(unit))
                 return 0;
 
+            return HillDefenseBonus;
+        }
+
+        public static int GetAttackRangeBonus(SandboxUnitState unit)
+        {
+            if (unit == null || !unit.HasTag(SandboxCombatTagRules.Ranged) || !IsOnHill(unit))
+                return 0;
+
+            return HillRangedAttackRangeBonus;
+        }
+
+        public static int GetEffectiveAttackRange(SandboxUnitState unit)
+        {
+            if (unit == null)
+                return 0;
+
+            return Math.Max(1, unit.Definition.AttackRange + GetAttackRangeBonus(unit));
+        }
+
+        public static bool IsOnHill(SandboxUnitState unit)
+        {
+            if (unit == null || !ContextByUnit.TryGetValue(unit, out TerrainContext context))
+                return false;
+
             return context.Terrain.TryGetValue(unit.Position, out SandboxTerrain terrain) &&
-                   terrain == SandboxTerrain.Difficult
-                ? HillDefenseBonus
-                : 0;
+                   terrain == SandboxTerrain.Difficult;
         }
     }
 }

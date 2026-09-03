@@ -331,7 +331,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
-        public void SpearmanBonusUsesBeastTagInsteadOfCreatureRole()
+        public void BeastSlayerBonusUsesTagsInsteadOfUnitRole()
         {
             SandboxUnitDefinition spearman = new SandboxUnitDefinition(
                 "spearman",
@@ -343,7 +343,8 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 10,
                 3,
                 10,
-                1);
+                1,
+                new[] { SandboxCombatTagRules.BeastSlayer });
             SandboxUnitDefinition taggedTarget = new SandboxUnitDefinition(
                 "tagged_target",
                 "Цель",
@@ -355,7 +356,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
                 3,
                 5,
                 1,
-                new[] { SandboxUnitTags.Beast });
+                new[] { SandboxCombatTagRules.Beast });
             SandboxBattle battle = new SandboxBattle(
                 3,
                 3,
@@ -368,7 +369,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
 
             Assert.That(
                 battle.PreviewAttack("spearman-instance", "target-instance").Damage,
-                Is.EqualTo(12));
+                Is.EqualTo(13));
         }
 
         [Test]
@@ -405,7 +406,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
         }
 
         [Test]
-        public void GuardAddsTwoDefenseUntilNextActivation()
+        public void GuardAddsFiftyPercentDefenseUntilNextActivation()
         {
             SandboxBattle battle = CreateBattle(
                 playerPosition: new HexCoord(0, 1),
@@ -421,7 +422,7 @@ namespace KingdomSurvival.BattleSandbox.Tests
 
             SandboxAttackPreview preview = battle.PreviewAttack("enemy", "player");
             Assert.That(preview.IsValid, Is.True);
-            Assert.That(preview.Damage, Is.EqualTo(15));
+            Assert.That(preview.Damage, Is.EqualTo(16));
         }
 
         [Test]

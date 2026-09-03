@@ -47,6 +47,7 @@ namespace KingdomSurvival.BattleSandbox
         private const string SurfaceName = "battlefield-surface";
         private const string ActionsName = "battle-sandbox-actions";
         private const string ResultOverlayName = "battle-sandbox-result-overlay";
+        private const string LogScrollName = "battle-sandbox-log-scroll";
 
         private VisualElement styledScreen;
         private VisualElement styledSurface;
@@ -88,6 +89,7 @@ namespace KingdomSurvival.BattleSandbox
                     styledSurface = surface;
                 }
 
+                RefreshDynamicHeader(screen);
                 return;
             }
         }
@@ -165,8 +167,8 @@ namespace KingdomSurvival.BattleSandbox
         private static void StyleBoardViewport(VisualElement board)
         {
             board.style.position = Position.Absolute;
-            board.style.left = Length.Percent(11f);
-            board.style.right = Length.Percent(11f);
+            board.style.left = Length.Percent(15f);
+            board.style.right = Length.Percent(15f);
             board.style.top = Length.Percent(10f);
             board.style.bottom = Length.Percent(8f);
             board.style.marginLeft = 0f;
@@ -176,6 +178,10 @@ namespace KingdomSurvival.BattleSandbox
             board.style.minWidth = 0f;
             board.style.minHeight = 0f;
             board.style.backgroundColor = Color.clear;
+            board.style.borderLeftWidth = 0f;
+            board.style.borderRightWidth = 0f;
+            board.style.borderTopWidth = 0f;
+            board.style.borderBottomWidth = 0f;
         }
 
         private static void StyleHeader(VisualElement header)
@@ -187,7 +193,7 @@ namespace KingdomSurvival.BattleSandbox
             header.style.left = 16f;
             header.style.right = 16f;
             header.style.top = 12f;
-            header.style.height = 48f;
+            header.style.height = 40f;
             header.style.alignItems = Align.FlexStart;
             header.style.backgroundColor = Color.clear;
 
@@ -195,11 +201,13 @@ namespace KingdomSurvival.BattleSandbox
             {
                 VisualElement heading = header[0];
                 if (heading.childCount > 0 && heading[0] is Label title)
-                    title.style.fontSize = 14f;
+                    title.style.display = DisplayStyle.None;
                 if (heading.childCount > 1 && heading[1] is Label round)
                 {
-                    round.style.fontSize = 10f;
-                    round.style.marginTop = 1f;
+                    round.style.fontSize = 14f;
+                    round.style.marginTop = 0f;
+                    round.style.unityFontStyleAndWeight = FontStyle.Bold;
+                    round.style.color = new Color(0.92f, 0.84f, 0.68f, 1f);
                 }
             }
 
@@ -207,8 +215,28 @@ namespace KingdomSurvival.BattleSandbox
             {
                 setupButton.style.width = 136f;
                 setupButton.style.height = 32f;
-                setupButton.style.opacity = 0.88f;
+                setupButton.style.opacity = 1f;
+                StyleInteractiveButton(setupButton);
             }
+        }
+
+        private static void RefreshDynamicHeader(VisualElement screen)
+        {
+            if (screen == null || screen.childCount == 0)
+                return;
+
+            VisualElement header = screen[0];
+            if (header.childCount == 0)
+                return;
+
+            VisualElement heading = header[0];
+            if (heading.childCount < 2 || !(heading[1] is Label round))
+                return;
+
+            string text = round.text ?? string.Empty;
+            int separator = text.IndexOf('·');
+            if (separator >= 0)
+                round.text = text.Substring(0, separator).TrimEnd();
         }
 
         private static void StyleInitiative(VisualElement initiative)
@@ -249,7 +277,7 @@ namespace KingdomSurvival.BattleSandbox
             sidebar.style.left = 14f;
             sidebar.style.bottom = 14f;
             sidebar.style.width = 292f;
-            sidebar.style.maxHeight = 250f;
+            sidebar.style.maxHeight = 270f;
             sidebar.style.paddingLeft = 11f;
             sidebar.style.paddingRight = 11f;
             sidebar.style.paddingTop = 10f;
@@ -278,9 +306,23 @@ namespace KingdomSurvival.BattleSandbox
             currentStats.style.marginTop = 2f;
             target.style.marginTop = 7f;
             logTitle.style.marginTop = 8f;
-            log.style.marginTop = 3f;
-            log.style.maxHeight = 64f;
-            log.style.overflow = Overflow.Hidden;
+
+            ScrollView logScroll = new ScrollView(ScrollViewMode.Vertical)
+            {
+                name = LogScrollName,
+                verticalScrollerVisibility = ScrollerVisibility.Auto,
+                horizontalScrollerVisibility = ScrollerVisibility.Hidden
+            };
+            logScroll.style.height = 78f;
+            logScroll.style.marginTop = 3f;
+            logScroll.style.backgroundColor = new Color(0f, 0f, 0f, 0.08f);
+            logScroll.style.overflow = Overflow.Hidden;
+            log.style.marginTop = 0f;
+            log.style.maxHeight = StyleKeyword.None;
+            log.style.overflow = Overflow.Visible;
+            log.RemoveFromHierarchy();
+            logScroll.Add(log);
+            sidebar.Insert(7, logScroll);
 
             VisualElement actions = new VisualElement { name = ActionsName };
             actions.style.position = Position.Absolute;
@@ -298,6 +340,10 @@ namespace KingdomSurvival.BattleSandbox
             endTurn.style.marginTop = 0f;
             actions.Add(guard);
             actions.Add(endTurn);
+            if (guard is Button guardButton)
+                StyleInteractiveButton(guardButton);
+            if (endTurn is Button endTurnButton)
+                StyleInteractiveButton(endTurnButton);
 
             VisualElement resultOverlay = new VisualElement { name = ResultOverlayName };
             resultOverlay.style.position = Position.Absolute;
@@ -316,6 +362,46 @@ namespace KingdomSurvival.BattleSandbox
             result.style.marginTop = 0f;
             result.pickingMode = PickingMode.Position;
             resultOverlay.Add(result);
+        }
+
+        private static void StyleInteractiveButton(Button button)
+        {
+            if (button == null)
+                return;
+
+            Color normalBackground = new Color(0.14f, 0.16f, 0.17f, 0.96f);
+            Color hoverBackground = new Color(0.23f, 0.25f, 0.24f, 1f);
+            Color pressedBackground = new Color(0.31f, 0.27f, 0.17f, 1f);
+            Color normalBorder = new Color(0.31f, 0.33f, 0.33f, 0.95f);
+            Color hoverBorder = new Color(0.78f, 0.64f, 0.34f, 1f);
+
+            void Apply(Color background, Color border)
+            {
+                button.style.backgroundColor = background;
+                button.style.borderLeftColor = border;
+                button.style.borderRightColor = border;
+                button.style.borderTopColor = border;
+                button.style.borderBottomColor = border;
+            }
+
+            Apply(normalBackground, normalBorder);
+            button.pickingMode = PickingMode.Position;
+            button.RegisterCallback<PointerEnterEvent>(_ =>
+            {
+                if (button.enabledSelf)
+                    Apply(hoverBackground, hoverBorder);
+            });
+            button.RegisterCallback<PointerLeaveEvent>(_ => Apply(normalBackground, normalBorder));
+            button.RegisterCallback<PointerDownEvent>(_ =>
+            {
+                if (button.enabledSelf)
+                    Apply(pressedBackground, hoverBorder);
+            });
+            button.RegisterCallback<PointerUpEvent>(_ =>
+            {
+                if (button.enabledSelf)
+                    Apply(hoverBackground, hoverBorder);
+            });
         }
     }
 }

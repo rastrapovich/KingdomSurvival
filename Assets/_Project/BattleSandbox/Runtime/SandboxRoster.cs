@@ -116,6 +116,7 @@ namespace KingdomSurvival.BattleSandbox
 
             Random random = new Random(terrainSeed ?? Guid.NewGuid().GetHashCode());
             Dictionary<HexCoord, SandboxTerrain> terrain = GenerateTerrain(units, random);
+            SandboxTerrainRules.RegisterBattle(units, terrain);
 
             SandboxBattle battle = new SandboxBattle(
                 SandboxArenaShape.Width,

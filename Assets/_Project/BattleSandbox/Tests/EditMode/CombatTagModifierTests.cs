@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace KingdomSurvival.BattleSandbox.Tests
@@ -60,6 +61,58 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Assert.That(battle.TryGuard(defender.Id, out _), Is.True);
             Assert.That(SandboxCombatTagRules.GetEffectiveDefense(defender), Is.EqualTo(9m));
             Assert.That(SandboxCombatTagRules.GetGuardDefensePercent(defender), Is.EqualTo(50));
+        }
+
+        [Test]
+        public void Hill_AddsTwoDefense()
+        {
+            HexCoord hill = new HexCoord(0, 0);
+            SandboxUnitState defender = CreateState(
+                "hill_defender", SandboxTeam.Player, 2, 4, 2, 1,
+                new[] { SandboxCombatTagRules.Human },
+                hill);
+
+            SandboxTerrainRules.RegisterBattle(
+                new[] { defender },
+                new Dictionary<HexCoord, SandboxTerrain>
+                {
+                    { hill, SandboxTerrain.Difficult }
+                });
+
+            Assert.That(SandboxTerrainRules.GetDefenseBonus(defender), Is.EqualTo(2));
+            Assert.That(SandboxCombatTagRules.GetEffectiveDefense(defender), Is.EqualTo(6m));
+        }
+
+        [Test]
+        public void HillAndArmor_AreAppliedBeforeGuardBonus()
+        {
+            HexCoord hill = new HexCoord(0, 0);
+            SandboxUnitState defender = CreateState(
+                "hill_guard", SandboxTeam.Player, 2, 4, 2, 1,
+                new[]
+                {
+                    SandboxCombatTagRules.Human,
+                    SandboxCombatTagRules.Armored
+                },
+                hill);
+            SandboxUnitState enemy = CreateState(
+                "enemy", SandboxTeam.Enemy, 2, 2, 1, 1,
+                new[] { SandboxCombatTagRules.Beast },
+                new HexCoord(3, 0));
+
+            SandboxTerrainRules.RegisterBattle(
+                new[] { defender, enemy },
+                new Dictionary<HexCoord, SandboxTerrain>
+                {
+                    { hill, SandboxTerrain.Difficult }
+                });
+
+            SandboxBattle battle = CreateBattle(defender, enemy);
+            battle.Start();
+
+            Assert.That(SandboxCombatTagRules.GetEffectiveDefense(defender), Is.EqualTo(8m));
+            Assert.That(battle.TryGuard(defender.Id, out _), Is.True);
+            Assert.That(SandboxCombatTagRules.GetEffectiveDefense(defender), Is.EqualTo(12m));
         }
 
         [Test]

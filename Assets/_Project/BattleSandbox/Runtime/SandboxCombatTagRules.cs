@@ -61,6 +61,8 @@ namespace KingdomSurvival.BattleSandbox
             if (target.HasTag(Armored))
                 effectiveDefense += ArmoredDefenseBonus;
 
+            effectiveDefense += SandboxTerrainRules.GetDefenseBonus(target);
+
             if (target.IsGuarding)
             {
                 int guardBonus = Math.Max(

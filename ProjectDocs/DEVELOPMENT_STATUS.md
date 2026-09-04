@@ -219,7 +219,7 @@ Unity-прототип всё ещё частично содержит стар�
 - новый актуальный канон `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_21.md`;
 - `ProjectDocs/NARRATIVE.md`;
 - `ProjectDocs/DEVELOPMENT_STATUS.md`;
-- предыдущий `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_20.md` переносится целиком в `ProjectDocs/Archive/` и удаляется из корня.
+- предыдущий `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_20.md` **перенесён целиком** в `ProjectDocs/Archive/` и удалён из корня.
 
 Игровые C#-, UXML-, USS-, сцены, ScriptableObject-данные и баланс на этом этапе не меняются.
 

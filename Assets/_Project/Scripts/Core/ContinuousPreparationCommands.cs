@@ -50,9 +50,12 @@ public static class ContinuousPreparationCommands
             }
         }
 
-        if (requestedIds.Count == 0)
+        if (requestedIds.Count != GameState.ExpeditionFighterSlots)
         {
-            resultMessage = "У командира должен остаться хотя бы один боец.";
+            resultMessage =
+                "Подготовленный поход должен содержать ровно " +
+                GameState.ExpeditionFighterSlots +
+                " обычных бойцов. Командир входит автоматически.";
             return false;
         }
 
@@ -69,8 +72,8 @@ public static class ContinuousPreparationCommands
         expedition.FighterIds.AddRange(orderedIds);
 
         resultMessage =
-            "Состав подготовленного отряда изменён. Бойцов у командира: " +
-            expedition.FighterIds.Count + ".";
+            "Состав подготовленного похода изменён: командир + " +
+            expedition.FighterIds.Count + " бойца.";
         return true;
     }
 }

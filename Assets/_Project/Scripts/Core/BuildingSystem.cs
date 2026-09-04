@@ -66,7 +66,6 @@ public sealed class RecruitmentStateData
 
 public static class BuildingSystem
 {
-    public const string ThroneHallId = "throne_hall";
     public const string FieldsAndGranariesId = "fields_granaries";
     public const string MarketId = "market";
     public const string BarracksId = "barracks";
@@ -95,16 +94,9 @@ public static class BuildingSystem
         new List<BuildingDefinition>
         {
             new BuildingDefinition(
-                ThroneHallId,
-                "Тронный зал",
-                "Сердце власти и исходная постройка столицы.",
-                "Построен со старта. Отдельный бонус в сером прототипе не используется.",
-                0,
-                0.0),
-            new BuildingDefinition(
                 FieldsAndGranariesId,
                 "Поля и амбары",
-                "Безопасная продовольственная основа города.",
+                "Продовольственная основа поселения.",
                 "+10 пищи в сутки. Содержание: 1 золото в сутки.",
                 60,
                 12.0,
@@ -113,7 +105,7 @@ public static class BuildingSystem
             new BuildingDefinition(
                 MarketId,
                 "Рынок",
-                "Даёт столице устойчивый денежный поток.",
+                "Даёт поселению устойчивый денежный поток.",
                 "+5 золота в сутки. Содержание: 1 золото в сутки.",
                 80,
                 16.0,
@@ -122,16 +114,16 @@ public static class BuildingSystem
             new BuildingDefinition(
                 BarracksId,
                 "Казармы",
-                "Связывают развитие столицы с единственной армией.",
-                "Усиливают оборону пропорционально гарнизону и открывают найм бойцов. Содержание: 2 золота в сутки.",
+                "Открывают подготовку новых постоянных бойцов.",
+                "Открывают найм бойцов. Содержание: 2 золота в сутки.",
                 100,
                 20.0,
                 dailyGoldUpkeep: 2),
             new BuildingDefinition(
                 CityWallsId,
-                "Городские стены",
-                "Постоянное вложение в переживание внутренних нападений.",
-                "Дополнительно усиливают оборону столицы. Содержание: 1 золото в сутки.",
+                "Укрепления",
+                "Заготовка оборонительного развития поселения до утверждения правил защиты дома.",
+                "Содержание: 1 золото в сутки. Конкретный оборонительный эффект пока не утверждён.",
                 140,
                 28.0,
                 dailyGoldUpkeep: 1),
@@ -240,7 +232,7 @@ public static class BuildingSystem
 
         if (HasActiveConstruction(state))
         {
-            resultMessage = "В столице уже идёт строительство. Для прототипа одновременно доступна только одна стройка.";
+            resultMessage = "В поселении уже идёт строительство. Для прототипа одновременно доступна только одна стройка.";
             return false;
         }
 
@@ -369,8 +361,8 @@ public static class BuildingSystem
         if (state.Fighters == null || state.Fighters.Count >= PrototypeMaxFighters)
         {
             resultMessage =
-                "Для прототипа армия ограничена " + PrototypeMaxFighters +
-                " живыми бойцами. Найм нужен прежде всего для замены потерь.";
+                "Для текущего прототипа общий список ограничен " + PrototypeMaxFighters +
+                " живыми бойцами. Это временный технический лимит, а не размер походного отряда.";
             return false;
         }
 
@@ -432,64 +424,6 @@ public static class BuildingSystem
             : 0.0;
     }
 
-    public static int GetCapitalDefenseRating(GameState state)
-    {
-        if (state == null)
-            return 0;
-
-        int rating = 0;
-        if (IsCompleted(state, BarracksId))
-            rating += Math.Max(0, state.GarrisonFighterCount);
-        if (IsCompleted(state, CityWallsId))
-            rating += 4;
-        return rating;
-    }
-
-    public static string ApplyCapitalDefenseToPendingBattle(GameState state)
-    {
-        if (state == null)
-            return string.Empty;
-
-        PendingBattleData pending = BattleSystem.GetPendingBattle(state);
-        if (pending == null || pending.Context == null ||
-            pending.Context.Kind != BattleKind.CapitalDefense)
-        {
-            return string.Empty;
-        }
-
-        if (!string.IsNullOrEmpty(pending.Context.Description) &&
-            pending.Context.Description.Contains("Оборона построек:"))
-        {
-            return string.Empty;
-        }
-
-        int rating = GetCapitalDefenseRating(state);
-        if (rating <= 0)
-            return string.Empty;
-
-        int enemyPowerReduction = Math.Max(
-            1,
-            (int)Math.Round(rating / 3.0, MidpointRounding.AwayFromZero));
-        enemyPowerReduction = Math.Min(
-            Math.Max(0, pending.Context.EnemyPower - 1),
-            enemyPowerReduction);
-
-        if (enemyPowerReduction <= 0)
-            return string.Empty;
-
-        pending.Context.EnemyPower -= enemyPowerReduction;
-        pending.Context.Description +=
-            " Оборона построек: рейтинг " + rating +
-            ", давление нападающих снижено на " + enemyPowerReduction + ".";
-        pending.Result = BattleSystem.SelectPendingDoctrine(
-            state,
-            pending.Context.Doctrine);
-
-        return
-            "Постройки столицы усилили оборону: рейтинг " + rating +
-            ", сила нападения снижена на " + enemyPowerReduction + ".";
-    }
-
     public static List<string> ConsumeNotices(GameState state)
     {
         Synchronize(state);
@@ -516,11 +450,9 @@ public static class BuildingSystem
             runtime.Buildings[definition.Id] = new BuildingStateData
             {
                 BuildingId = definition.Id,
-                Status = definition.Id == ThroneHallId
-                    ? BuildingStatus.Completed
-                    : definition.Id == MineId
-                        ? BuildingStatus.Locked
-                        : BuildingStatus.Available
+                Status = definition.Id == MineId
+                    ? BuildingStatus.Locked
+                    : BuildingStatus.Available
             };
         }
         return runtime;
@@ -538,7 +470,7 @@ public static class BuildingSystem
         if (state.Fighters.Count >= PrototypeMaxFighters)
         {
             runtime.Notices.Enqueue(
-                "Подготовка бойца завершилась, но лимит армии уже достигнут. Золото возвращено в казну.");
+                "Подготовка бойца завершилась, но технический лимит списка уже достигнут. Золото возвращено.");
             state.Gold += RecruitGoldCost;
             runtime.Recruitment = new RecruitmentStateData();
             return;
@@ -556,7 +488,7 @@ public static class BuildingSystem
 
         runtime.Notices.Enqueue(
             "Казармы подготовили нового бойца: " + fighterName +
-            ". Он находится в гарнизоне столицы.");
+            ". Он остаётся в поселении до назначения в походный отряд.");
         runtime.Recruitment = new RecruitmentStateData();
     }
 

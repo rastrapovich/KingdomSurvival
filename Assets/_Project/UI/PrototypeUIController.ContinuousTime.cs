@@ -132,9 +132,6 @@ public partial class PrototypeUIController
             (Color)new Color32(132, 102, 48, 255);
         continuousSpeedButton.style.unityFontStyleAndWeight = FontStyle.Bold;
 
-        // В текущем top-bar DEBUG создаётся динамически. Добавление в тот же
-        // контейнер гарантирует соседнее расположение и не зависит от API
-        // индексирования UI Toolkit между версиями Unity.
         topBar.Add(continuousSpeedButton);
     }
 
@@ -143,26 +140,10 @@ public partial class PrototypeUIController
         if (continuousDebugAutopauseRegistered)
             return;
 
-        if (debugCapitalCrisisButton != null)
-            debugCapitalCrisisButton.clicked += OnContinuousDebugCrisisCompleted;
         if (debugSignificantDecisionButton != null)
             debugSignificantDecisionButton.clicked += OnContinuousDebugDecisionCompleted;
 
-        continuousDebugAutopauseRegistered =
-            debugCapitalCrisisButton != null || debugSignificantDecisionButton != null;
-    }
-
-    private void OnContinuousDebugCrisisCompleted()
-    {
-        if (gameState == null || isGameOver)
-            return;
-
-        PauseForBlockingModal();
-
-        if (unreadIncidents.Count > 0)
-            OpenIncident(unreadIncidents[unreadIncidents.Count - 1]);
-
-        RefreshContinuousClockOnly();
+        continuousDebugAutopauseRegistered = debugSignificantDecisionButton != null;
     }
 
     private void OnContinuousDebugDecisionCompleted()
@@ -223,8 +204,6 @@ public partial class PrototypeUIController
         if (batch.RequestAutoPause)
             PauseForBlockingModal(true);
 
-        // Кризис, который уже открыт обязательной плашкой, не дублируем
-        // вторым непрочитанным кружком. Фоновые происшествия сохраняем как раньше.
         if (batch.MandatoryNotice == null &&
             batch.Result.NewExpeditionIncidents.Count > 0)
         {
@@ -331,7 +310,7 @@ public partial class PrototypeUIController
             gameState.TryCancelPreparedExpedition(out resultMessage);
             resultMessage =
                 "Приказ на отправку отменён. Командир и выбранные бойцы " +
-                "остаются в столице; течение времени не изменилось.";
+                "остаются в поселении; течение времени не изменилось.";
         }
         else
         {
@@ -358,5 +337,4 @@ public partial class PrototypeUIController
 
         OnContinuousExpeditionActionClicked();
     }
-
 }

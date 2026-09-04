@@ -208,10 +208,11 @@ public class WorldMapNavigationTests
             20f,
             null,
             false,
-            new List<string> { "garrick", "edric" },
+            new List<string> { "garrick", "edric", "marta", "torvin" },
             out message);
 
         Assert.That(started, Is.True, message);
+        Assert.That(state.ActiveExpedition.FighterIds.Count, Is.EqualTo(4));
         Assert.That(state.ActiveExpedition.Route.Count, Is.GreaterThan(5));
         return state;
     }

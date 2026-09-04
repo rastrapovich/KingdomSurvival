@@ -56,17 +56,12 @@ public partial class PrototypeUIController
         if (notice == null)
             return;
 
-        // В непрерывной модели прибытие в известную локацию является
-        // обязательным выбором, а не пассивной плашкой "ПОНЯТНО".
-        // ProcessContinuousSimulationBatch вызывает QueueNotice для
-        // MandatoryNotice до QueueStrategicResultModals, поэтому достаточно
-        // создать PendingDecision здесь: следующий шаг очереди подхватит его
-        // ровно один раз. Для опасной локации фабрика вместо обычного решения
-        // подготавливает PendingBattle, и после этой плашки откроется прогноз боя.
-        if (notice.Title == "АРМИЯ ПРИБЫЛА")
+        // Прибытие в известную локацию является обязательным выбором.
+        // Старый PendingBattle удалён; фабрика всегда создаёт обычное
+        // сюжетно-исследовательское решение, пока не появится мост BattleSandbox.
+        if (notice.Title == "АРМИЯ ПРИБЫЛА" || notice.Title == "ОТРЯД ПРИБЫЛ")
         {
             ExpeditionDecisionOccurrence arrivalDecision;
-
             if (LocationArrivalDecisionFactory.TryCreate(
                     gameState,
                     out arrivalDecision))
@@ -117,13 +112,10 @@ public partial class PrototypeUIController
             Title = "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ",
             Description =
                 snapshot.CommanderName + " и " + snapshot.FighterCount +
-                " воинов прибыли в столицу. Отряд не расформирован: " +
-                "перемещение бойцов между гарнизонами выполняет только игрок.",
+                " бойцов прибыли в поселение.",
             Consequence =
-                "В столицу передано: золото +" + snapshot.ArmyGold +
-                ", пища +" + snapshot.ArmySupply + ".\n" +
-                "Состояние выживших бойцов сохраняется; раненые начинают " +
-                "восстанавливаться только после фактического возвращения."
+                "В поселение передано: золото +" + snapshot.ArmyGold +
+                ", пища +" + snapshot.ArmySupply + "."
         };
     }
 
@@ -207,8 +199,7 @@ public partial class PrototypeUIController
         if (reportIndex < 0)
             return;
 
-        if (activeQueuedModal != null &&
-            activeQueuedModal.ReportIndex == reportIndex)
+        if (activeQueuedModal != null && activeQueuedModal.ReportIndex == reportIndex)
             return;
 
         foreach (QueuedModal queued in queuedModals)
@@ -230,8 +221,6 @@ public partial class PrototypeUIController
     {
         return gameState != null &&
                (gameState.HasPendingExpeditionDecision ||
-                BattleSystem.HasPendingBattle(gameState) ||
-                openedBattle != null ||
                 openedIncident != null ||
                 openedDecision != null ||
                 activeQueuedModal != null ||
@@ -351,13 +340,10 @@ public partial class PrototypeUIController
     {
         if (repeatCount <= 4)
             return 1;
-
         if (repeatCount <= 12)
             return 2;
-
         if (repeatCount <= 24)
             return 5;
-
         return 10;
     }
 

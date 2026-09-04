@@ -217,11 +217,10 @@ public partial class PrototypeUIController
 
                 if (isBarracks)
                 {
-                    int defenseRating = BuildingSystem.GetCapitalDefenseRating(gameState);
                     view.MetaLabel.text =
-                        "Оборона построек: " + defenseRating +
-                        " · армия: " + gameState.Fighters.Count +
-                        "/" + BuildingSystem.PrototypeMaxFighters;
+                        "Постоянные бойцы: " + gameState.Fighters.Count +
+                        "/" + BuildingSystem.PrototypeMaxFighters +
+                        " · организация защиты поселения ещё не утверждена";
 
                     if (recruiting)
                     {
@@ -266,7 +265,7 @@ public partial class PrototypeUIController
 
             case BuildingStatus.Locked:
                 view.StatusLabel.text = "ПОЗЖЕ";
-                view.MetaLabel.text = "Не входит в первый слой городской системы.";
+                view.MetaLabel.text = "Не входит в первый слой развития поселения.";
                 view.Progress.style.display = DisplayStyle.None;
                 view.ActionButton.text = "ЗАБЛОКИРОВАНО";
                 view.ActionButton.SetEnabled(false);
@@ -297,9 +296,6 @@ public partial class PrototypeUIController
             parts.Add("доход +" + definition.DailyFoodIncome + " пищи/сутки");
         if (definition.DailyGoldUpkeep != 0)
             parts.Add("содержание " + definition.DailyGoldUpkeep + " золота/сутки");
-
-        if (definition.Id == BuildingSystem.CityWallsId)
-            parts.Add("оборона столицы +4");
 
         return parts.Count > 0
             ? string.Join(" · ", parts)

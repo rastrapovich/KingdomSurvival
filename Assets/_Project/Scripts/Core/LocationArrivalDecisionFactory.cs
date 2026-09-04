@@ -36,19 +36,9 @@ public static class LocationArrivalDecisionFactory
         if (location == null || location.IsWaypoint)
             return false;
 
-        // В опасной тестовой локации обычное решение «исследовать/отменить»
-        // заменяется обязательным боевым прогнозом. Игрок всё ещё принимает
-        // решение до применения потерь — выбирает доктрину и видит точный исход.
-        if (BattleSystem.HasUnresolvedLocationEncounter(state, location.Id))
-        {
-            string ignoredMessage;
-            BattleSystem.TryPrepareLocationBattle(
-                state,
-                location.Id,
-                out ignoredMessage);
-            return false;
-        }
-
+        // Стратегический BattleSystem удалён. Пока отдельный мост кампании в
+        // BattleSandbox не спроектирован, прибытие всегда остаётся обычным
+        // сюжетно-исследовательским решением и не запускает скрытый автобой.
         bool researchImplemented =
             location.ExplorationHours > 0 && !location.IsExplored;
 
@@ -57,9 +47,9 @@ public static class LocationArrivalDecisionFactory
             Id = nextArrivalDecisionId--,
             Day = state.Day,
             DefinitionId = LocationDiscoveryDefinitionId,
-            Title = "Армия прибыла в локацию «" + location.Name + "»",
+            Title = "Отряд прибыл в локацию «" + location.Name + "»",
             Description =
-                "Армия находится внутри локации «" + location.Name +
+                "Отряд находится внутри локации «" + location.Name +
                 "». Время остановлено до решения игрока.",
             OptionA = new ExpeditionDecisionOptionView
             {

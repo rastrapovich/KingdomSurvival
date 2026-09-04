@@ -236,7 +236,7 @@ public class TimedExpeditionActivityTests
                 80.5f,
                 null,
                 false,
-                new List<string> { "garrick", "edric" },
+                new List<string> { "garrick", "edric", "marta", "torvin" },
                 out message),
             Is.True,
             message);
@@ -289,7 +289,7 @@ public class TimedExpeditionActivityTests
                 20f,
                 null,
                 false,
-                new List<string> { "garrick", "edric" },
+                new List<string> { "garrick", "edric", "marta", "torvin" },
                 out message),
             Is.True,
             message);
@@ -309,7 +309,7 @@ public class TimedExpeditionActivityTests
                 ruins.MapYPercent,
                 ruins.Id,
                 false,
-                new List<string> { "garrick", "edric" },
+                new List<string> { "garrick", "edric", "marta", "torvin" },
                 out message),
             Is.True,
             message);

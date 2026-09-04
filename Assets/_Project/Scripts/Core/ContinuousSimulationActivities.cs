@@ -12,32 +12,6 @@ public static partial class ContinuousSimulationSystem
         batch.ReportDay = state.Day;
         batch.EventHour = runtime.HourOfDay;
 
-        if (!runtime.CapitalCrisisChecked &&
-            runtime.HourOfDay + Epsilon >= runtime.CapitalCrisisCheckHour)
-        {
-            runtime.CapitalCrisisChecked = true;
-            processed = true;
-            int incidentCountBefore = batch.Result.NewExpeditionIncidents.Count;
-            CapitalCrisisSystem.ResolveAtScheduledCheck(state, state.Day, batch.Result);
-
-            if (batch.Result.NewExpeditionIncidents.Count > incidentCountBefore)
-            {
-                ExpeditionIncidentOccurrence crisis =
-                    batch.Result.NewExpeditionIncidents[
-                        batch.Result.NewExpeditionIncidents.Count - 1];
-                batch.MandatoryNotice = new StrategicModalNotice
-                {
-                    Title = crisis.Title.ToUpper(),
-                    Description = crisis.Description,
-                    Consequence = crisis.ConsequenceText
-                };
-                batch.RequestAutoPause = true;
-            }
-        }
-
-        if (batch.RequestAutoPause)
-            return processed;
-
         if (!runtime.ExpeditionIncidentChecked &&
             runtime.HourOfDay + Epsilon >= runtime.ExpeditionIncidentCheckHour)
         {
@@ -70,10 +44,6 @@ public static partial class ContinuousSimulationSystem
                 returnSnapshot,
                 batch);
 
-            // Фоновое событие «короткая тропа» умеет мгновенно
-            // закончить последний сегмент маршрута. В непрерывной модели
-            // такое фактическое прибытие тоже является важным результатом
-            // и не должно пройти незаметно без автопаузы.
             if (!batch.RequestAutoPause &&
                 hadExpedition &&
                 state.HasActiveExpedition &&
@@ -216,7 +186,7 @@ public static partial class ContinuousSimulationSystem
             Description = "Локация «" + location.Name + "» полностью исследована.",
             Consequence =
                 "Добыча отряда: " + rewardText + ".\n" +
-                "Ресурсы остаются у отряда до возвращения в столицу."
+                "Ресурсы остаются у отряда до возвращения в поселение."
         };
         batch.Result.HadNotableOccurrence = true;
         batch.RequestAutoPause = true;
@@ -261,7 +231,7 @@ public static partial class ContinuousSimulationSystem
 
         EnsureRouteTracking(state, runtime);
 
-        // До фактического старта подготовленный командир остаётся в замке.
+        // До фактического старта подготовленный командир остаётся дома.
         // При начале движения состояние синхронизируется с фазой экспедиции.
         CommanderData movingCommander = state.FindCommander(expedition.CommanderId);
         if (movingCommander != null)
@@ -390,7 +360,7 @@ public static partial class ContinuousSimulationSystem
             Title = "Обнаружена локация «" + location.Name + "»",
             Description =
                 "Вы обнаружили локацию «" + location.Name +
-                "». Армия немедленно остановилась у неё.",
+                "». Отряд немедленно остановился у неё.",
             OptionA = new ExpeditionDecisionOptionView
             {
                 Id = "investigate_discovered_location",
@@ -465,17 +435,16 @@ public static partial class ContinuousSimulationSystem
 
             batch.Result.Messages.Add(
                 commanderName + " и " + fighterCount +
-                " воинов вернулись в столицу. " + delivered);
+                " бойцов вернулись в поселение. " + delivered);
             batch.Result.ExpeditionReturnNotice = new StrategicModalNotice
             {
                 Title = "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ",
                 Description =
                     commanderName + " и " + fighterCount +
-                    " воинов прибыли в столицу. Отряд не расформирован.",
+                    " бойцов прибыли в поселение.",
                 Consequence =
-                    "В столицу передано: золото +" + deliveredGold +
-                    ", пища +" + deliveredFood + ".\n" +
-                    "Состояние бойцов: без изменений."
+                    "В поселение передано: золото +" + deliveredGold +
+                    ", пища +" + deliveredFood + "."
             };
             batch.Result.HadNotableOccurrence = true;
             batch.RequestAutoPause = true;
@@ -496,7 +465,7 @@ public static partial class ContinuousSimulationSystem
             batch.Result.Messages.Add(arrival);
             batch.MandatoryNotice = new StrategicModalNotice
             {
-                Title = "АРМИЯ ПРИБЫЛА",
+                Title = "ОТРЯД ПРИБЫЛ",
                 Description = arrival,
                 Consequence = location.ExplorationHours > 0 && !location.IsExplored
                     ? "Можно начать исследование, изменить маршрут или приказать возвращаться."
@@ -554,7 +523,7 @@ public static partial class ContinuousSimulationSystem
         batch.MandatoryNotice = new StrategicModalNotice
         {
             Title = location != null && !location.IsWaypoint
-                ? "АРМИЯ ПРИБЫЛА"
+                ? "ОТРЯД ПРИБЫЛ"
                 : "ТОЧКА МАРШРУТА ДОСТИГНУТА",
             Description = description,
             Consequence = consequence
@@ -563,5 +532,4 @@ public static partial class ContinuousSimulationSystem
         batch.RequestAutoPause = true;
         batch.ReportDay = state.Day;
     }
-
 }

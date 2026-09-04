@@ -54,7 +54,25 @@ public class ContinuousTimePolishTests
     }
 
     [Test]
-    public void PreparedRoster_CanChangeBeforeMovement()
+    public void PreparedRoster_CanChangeBeforeMovement_WhenFourFightersRemainSelected()
+    {
+        GameState state = CreatePreparedExpedition();
+        ContinuousSimulationSystem.Reset(state);
+
+        string message;
+        bool changed = ContinuousPreparationCommands.TrySetPreparedRoster(
+            state,
+            new List<string> { "edric", "marta", "torvin", "agnessa" },
+            out message);
+
+        Assert.That(changed, Is.True, message);
+        Assert.That(
+            state.ActiveExpedition.FighterIds,
+            Is.EqualTo(new[] { "edric", "marta", "torvin", "agnessa" }));
+    }
+
+    [Test]
+    public void PreparedRoster_RejectsLessThanFourFighters()
     {
         GameState state = CreatePreparedExpedition();
         ContinuousSimulationSystem.Reset(state);
@@ -65,10 +83,9 @@ public class ContinuousTimePolishTests
             new List<string> { "garrick" },
             out message);
 
-        Assert.That(changed, Is.True, message);
-        Assert.That(
-            state.ActiveExpedition.FighterIds,
-            Is.EqualTo(new[] { "garrick" }));
+        Assert.That(changed, Is.False);
+        Assert.That(state.ActiveExpedition.FighterIds.Count, Is.EqualTo(4));
+        StringAssert.Contains("ровно 4", message);
     }
 
     [Test]
@@ -88,13 +105,13 @@ public class ContinuousTimePolishTests
         string message;
         bool changed = ContinuousPreparationCommands.TrySetPreparedRoster(
             state,
-            new List<string> { "garrick" },
+            new List<string> { "edric", "marta", "torvin", "agnessa" },
             out message);
 
         Assert.That(changed, Is.False);
         Assert.That(
             state.ActiveExpedition.FighterIds.Count,
-            Is.EqualTo(2));
+            Is.EqualTo(4));
     }
 
     [Test]
@@ -159,7 +176,7 @@ public class ContinuousTimePolishTests
             20f,
             null,
             false,
-            new List<string> { "garrick", "edric" },
+            new List<string> { "garrick", "edric", "marta", "torvin" },
             out message);
 
         Assert.That(started, Is.True, message);
@@ -180,7 +197,7 @@ public class ContinuousTimePolishTests
             location.MapYPercent,
             location.Id,
             false,
-            new List<string> { "garrick", "edric" },
+            new List<string> { "garrick", "edric", "marta", "torvin" },
             out message);
 
         Assert.That(started, Is.True, message);

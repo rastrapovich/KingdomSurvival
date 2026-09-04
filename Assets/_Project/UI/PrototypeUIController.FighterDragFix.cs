@@ -49,9 +49,6 @@ public partial class PrototypeUIController
             return;
         }
 
-        // StableUI успевает зарегистрировать старый PointerDown раньше нас.
-        // Убираем этот вход, а новый TrickleDown lifecycle блокирует все
-        // последующие старые card/continuous handlers.
         interfaceRoot.UnregisterCallback<PointerDownEvent>(
             OnStableArmyPointerDown,
             TrickleDown.TrickleDown);
@@ -154,11 +151,9 @@ public partial class PrototypeUIController
         string fighterId = stableDraggedFighterId;
         bool wasDragging = stableDragStarted;
         bool toCommander =
-            wasDragging &&
-            commanderGarrisonDropZone.worldBound.Contains(evt.position);
+            wasDragging && commanderGarrisonDropZone.worldBound.Contains(evt.position);
         bool toCapital =
-            wasDragging &&
-            capitalGarrisonDropZone.worldBound.Contains(evt.position);
+            wasDragging && capitalGarrisonDropZone.worldBound.Contains(evt.position);
 
         CleanupStableArmyDrag();
 
@@ -219,6 +214,24 @@ public partial class PrototypeUIController
     {
         if (!CanEditArmyRosterNow())
             return;
+
+        int currentCount = gameState.HasActiveExpedition
+            ? gameState.ActiveExpedition.FighterIds.Count
+            : selectedFighterIds.Count;
+        bool alreadyWithCommander = gameState.HasActiveExpedition
+            ? gameState.ActiveExpedition.FighterIds.Contains(fighterId)
+            : selectedFighterIds.Contains(fighterId);
+
+        if (withCommander &&
+            !alreadyWithCommander &&
+            currentCount >= GameState.ExpeditionFighterSlots)
+        {
+            AddReport(
+                "В походном отряде ровно четыре места для обычных бойцов. " +
+                "Командир входит в состав автоматически и занимает отдельное место.");
+            RefreshStableUiAfterStateChange();
+            return;
+        }
 
         if (gameState.HasActiveExpedition)
             SetContinuousPreparedFighterAssignment(fighterId, withCommander);
@@ -315,7 +328,7 @@ public partial class PrototypeUIController
         {
             capitalMoveAllButton = CreateMoveAllButton(
                 true,
-                "Переместить всех бойцов столицы к командиру.");
+                "Заполнить свободные места походного отряда бойцами из поселения.");
             capitalGarrisonDropZone.Add(capitalMoveAllButton);
         }
 
@@ -323,7 +336,7 @@ public partial class PrototypeUIController
         {
             commanderMoveAllButton = CreateMoveAllButton(
                 false,
-                "Переместить всех бойцов командира в столицу.");
+                "Вернуть всех выбранных бойцов в поселение.");
             commanderGarrisonDropZone.Add(commanderMoveAllButton);
         }
     }
@@ -378,21 +391,9 @@ public partial class PrototypeUIController
 
         if (gameState.HasActiveExpedition)
         {
-            if (!toCommander)
-            {
-                AddReport(
-                    "Подготовленный приказ нельзя оставить без бойцов. " +
-                    "Отмените приказ или переносите бойцов по одному.");
-                RefreshArmyTransferControls();
-                return;
-            }
-
-            foreach (FighterData fighter in gameState.Fighters)
-            {
-                if (!gameState.ActiveExpedition.FighterIds.Contains(fighter.Id))
-                    SetContinuousPreparedFighterAssignment(fighter.Id, true);
-            }
-
+            AddReport(
+                "После создания приказа состав меняется по одному бойцу. " +
+                "Походный лимит остаётся: командир + четыре бойца.");
             RefreshArmyTransferControls();
             return;
         }
@@ -401,7 +402,11 @@ public partial class PrototypeUIController
         if (toCommander)
         {
             foreach (FighterData fighter in gameState.Fighters)
+            {
+                if (selectedFighterIds.Count >= GameState.ExpeditionFighterSlots)
+                    break;
                 selectedFighterIds.Add(fighter.Id);
+            }
         }
 
         RefreshStableUiAfterStateChange();
@@ -423,10 +428,13 @@ public partial class PrototypeUIController
         int commanderCount = gameState.HasActiveExpedition
             ? gameState.ActiveExpedition.FighterIds.Count
             : selectedFighterIds.Count;
-        int capitalCount =
-            Mathf.Max(0, gameState.Fighters.Count - commanderCount);
+        int capitalCount = Mathf.Max(0, gameState.Fighters.Count - commanderCount);
 
-        capitalMoveAllButton.SetEnabled(canEdit && capitalCount > 0);
+        capitalMoveAllButton.SetEnabled(
+            canEdit &&
+            !prepared &&
+            capitalCount > 0 &&
+            commanderCount < GameState.ExpeditionFighterSlots);
         commanderMoveAllButton.SetEnabled(
             canEdit && commanderCount > 0 && !prepared);
 
@@ -437,15 +445,18 @@ public partial class PrototypeUIController
             return;
         }
 
-        capitalMoveAllButton.tooltip = capitalCount > 0
-            ? "Переместить всех бойцов столицы к командиру."
-            : "В столичном гарнизоне нет бойцов.";
+        capitalMoveAllButton.tooltip = prepared
+            ? "Подготовленный приказ меняйте по одному бойцу или отмените его."
+            : commanderCount >= GameState.ExpeditionFighterSlots
+                ? "Все четыре места бойцов уже заполнены."
+                : capitalCount > 0
+                    ? "Заполнить свободные места отряда бойцами из поселения."
+                    : "В поселении нет свободных бойцов.";
 
         commanderMoveAllButton.tooltip = prepared
-            ? "Подготовленный приказ нельзя оставить без бойцов. " +
-              "Переносите бойцов по одному или отмените приказ."
+            ? "Подготовленный приказ меняйте по одному бойцу или отмените его."
             : commanderCount > 0
-                ? "Переместить всех бойцов командира в столицу."
-                : "У командира нет бойцов.";
+                ? "Вернуть всех выбранных бойцов в поселение."
+                : "У командира нет выбранных бойцов.";
     }
 }

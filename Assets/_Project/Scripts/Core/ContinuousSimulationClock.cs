@@ -50,10 +50,8 @@ public static partial class ContinuousSimulationSystem
         public Random Random;
 
         public int ScheduledDay;
-        public double CapitalCrisisCheckHour;
         public double ExpeditionIncidentCheckHour;
         public double ExpeditionDecisionCheckHour;
-        public bool CapitalCrisisChecked;
         public bool ExpeditionIncidentChecked;
         public bool ExpeditionDecisionChecked;
 
@@ -144,10 +142,6 @@ public static partial class ContinuousSimulationSystem
         RuntimeState runtime = GetRuntime(state);
         ExpeditionData expedition = state != null ? state.ActiveExpedition : null;
 
-        // Новый A* всё ещё начинается с ближайшего узла сетки. При смене
-        // приказа посреди клетки сохраняем фактическую позицию армии как
-        // первый визуальный сегмент нового маршрута, чтобы маркер не прыгал
-        // обратно к центру ближайшей клетки.
         if (expedition != null && expedition.Route != null && expedition.Route.Count > 0)
         {
             expedition.Route[0].XPercent = expedition.CurrentMapXPercent;
@@ -267,11 +261,6 @@ public static partial class ContinuousSimulationSystem
                 stepHours,
                 batch);
 
-            // Восстановление использует ровно то игровое время, которое реально
-            // продвинулось в этом шаге. Бойцы активной экспедиции внутри
-            // BattleSystem отфильтровываются и пассивно не лечатся.
-            BattleSystem.AdvanceCapitalRecovery(state, advancedHours);
-
             runtime.HourOfDay += advancedHours;
             remainingGameHours -= advancedHours;
             batch.StateChanged = true;
@@ -353,10 +342,8 @@ public static partial class ContinuousSimulationSystem
         runtime.ScheduledDay = state.Day;
         double from = Math.Max(0.0, Math.Min(23.95, earliestHour));
         double span = Math.Max(0.04, 23.95 - from);
-        runtime.CapitalCrisisCheckHour = from + runtime.Random.NextDouble() * span;
         runtime.ExpeditionIncidentCheckHour = from + runtime.Random.NextDouble() * span;
         runtime.ExpeditionDecisionCheckHour = from + runtime.Random.NextDouble() * span;
-        runtime.CapitalCrisisChecked = false;
         runtime.ExpeditionIncidentChecked = false;
         runtime.ExpeditionDecisionChecked = false;
     }
@@ -365,8 +352,6 @@ public static partial class ContinuousSimulationSystem
     {
         double next = double.MaxValue;
 
-        if (!runtime.CapitalCrisisChecked)
-            next = Math.Min(next, runtime.CapitalCrisisCheckHour - runtime.HourOfDay);
         if (!runtime.ExpeditionIncidentChecked)
             next = Math.Min(next, runtime.ExpeditionIncidentCheckHour - runtime.HourOfDay);
         if (!runtime.ExpeditionDecisionChecked)

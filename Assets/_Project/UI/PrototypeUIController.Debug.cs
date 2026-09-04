@@ -19,6 +19,8 @@ public partial class PrototypeUIController
     private Button debugArmyGoldPlus10Button;
     private Button debugArmySupplyMinus10Button;
     private Button debugArmySupplyPlus10Button;
+    // Поле сохранено для совместимости с ContinuousTime. Кнопка теперь всегда
+    // отключена: старый CapitalCrisisSystem удалён.
     private Button debugCapitalCrisisButton;
     private Button debugBackgroundIncidentButton;
     private Button debugSignificantDecisionButton;
@@ -105,7 +107,7 @@ public partial class PrototypeUIController
         scroll.AddToClassList("debug-scroll");
         debugPanel.Add(scroll);
 
-        AddDebugSectionTitle(scroll, "ГОРОД");
+        AddDebugSectionTitle(scroll, "ПОСЕЛЕНИЕ");
 
         debugGoldValueLabel = CreateDebugValueLabel();
         scroll.Add(CreateDebugResourceRow(
@@ -162,8 +164,9 @@ public partial class PrototypeUIController
         scroll.Add(debugExpeditionStateLabel);
 
         debugCapitalCrisisButton = CreateDebugActionButton(
-            "ВЫЗВАТЬ КРИЗИС СТОЛИЦЫ",
-            DebugTriggerCapitalCrisis);
+            "ЗАЩИТА ДОМА — НЕ УТВЕРЖДЕНА",
+            () => AddReport("[DEBUG] Старая система кризиса/автобоя удалена. Модель защиты поселения требует отдельного решения."));
+        debugCapitalCrisisButton.SetEnabled(false);
         scroll.Add(debugCapitalCrisisButton);
 
         debugBackgroundIncidentButton = CreateDebugActionButton(
@@ -186,7 +189,7 @@ public partial class PrototypeUIController
 
         Label note = new Label(
             "Debug доступен только в Unity Editor и Development Build. " +
-            "Принудительные события не завершают день.");
+            "Старый стратегический BattleSystem и кризис столицы удалены.");
         note.AddToClassList("debug-note");
         scroll.Add(note);
 
@@ -215,7 +218,6 @@ public partial class PrototypeUIController
         MoveButtonToDebugRow(minusButton, row);
         row.Add(valueLabel);
         MoveButtonToDebugRow(plusButton, row);
-
         return row;
     }
 
@@ -235,20 +237,14 @@ public partial class PrototypeUIController
 
     private Button CreateDebugStepButton(string text, Action clicked)
     {
-        Button button = new Button(clicked)
-        {
-            text = text
-        };
+        Button button = new Button(clicked) { text = text };
         button.AddToClassList("debug-step-button");
         return button;
     }
 
     private Button CreateDebugActionButton(string text, Action clicked)
     {
-        Button button = new Button(clicked)
-        {
-            text = text
-        };
+        Button button = new Button(clicked) { text = text };
         button.AddToClassList("debug-action-button");
         return button;
     }
@@ -266,9 +262,7 @@ public partial class PrototypeUIController
             return;
 
         bool isOpen = debugPanel.resolvedStyle.display == DisplayStyle.Flex;
-        debugPanel.style.display =
-            isOpen ? DisplayStyle.None : DisplayStyle.Flex;
-
+        debugPanel.style.display = isOpen ? DisplayStyle.None : DisplayStyle.Flex;
         RefreshDebugMenu();
     }
 
@@ -278,7 +272,6 @@ public partial class PrototypeUIController
             return;
 
         debugToggleButton.SetEnabled(!isGameOver);
-
         debugGoldValueLabel.text = gameState.Gold.ToString();
         debugFoodValueLabel.text = gameState.Food.ToString();
         debugPopulationValueLabel.text = gameState.Population.ToString();
@@ -291,18 +284,16 @@ public partial class PrototypeUIController
         debugArmyGoldPlus10Button.SetEnabled(available);
         debugArmySupplyMinus10Button.SetEnabled(available && gameState.ArmySupply > 0);
         debugArmySupplyPlus10Button.SetEnabled(available);
+        debugCapitalCrisisButton.SetEnabled(false);
 
         bool hasExpedition = gameState.HasActiveExpedition;
         bool hasDecision = gameState.HasPendingExpeditionDecision;
-        bool hasTimedActivity =
-            hasExpedition && gameState.ActiveExpedition.HasTimedActivity;
+        bool hasTimedActivity = hasExpedition && gameState.ActiveExpedition.HasTimedActivity;
 
-        debugCapitalCrisisButton.SetEnabled(available);
         debugBackgroundIncidentButton.SetEnabled(
             available && hasExpedition && !hasDecision && !hasTimedActivity);
 
         bool canCreateDecision = false;
-
         if (hasExpedition && !hasDecision && !hasTimedActivity)
         {
             ExpeditionData expedition = gameState.ActiveExpedition;
@@ -322,7 +313,7 @@ public partial class PrototypeUIController
         if (!gameState.HasActiveExpedition)
         {
             return
-                "Состояние: армия в столице\n" +
+                "Состояние: отряд дома\n" +
                 "Активная экспедиция: нет\n" +
                 "Голод экспедиции подряд: " +
                 gameState.ConsecutiveExpeditionSupplyShortageDays +
@@ -333,45 +324,32 @@ public partial class PrototypeUIController
         LocationData location = gameState.FindLocation(expedition.LocationId);
         CommanderData commander = gameState.FindCommander(expedition.CommanderId);
 
-        string locationName = location != null
-            ? location.TravelTargetName
-            : "неизвестно";
+        string locationName = location != null ? location.TravelTargetName : "неизвестно";
         string commanderName = commander != null ? commander.Name : "неизвестно";
         string phaseText = gameState.HasPendingExpeditionDecision
-            ? "ожидает приказа"
+            ? "ожидает решения"
             : expedition.IsLocationResearchInProgress
                 ? "исследует локацию"
                 : GetCommanderStateText(expedition.Phase);
 
         string researchText = "не начато";
-
         if (location != null)
         {
             if (location.IsExplored)
-            {
                 researchText = "завершено";
-            }
             else if (expedition.IsLocationResearchInProgress)
             {
                 double completed = Math.Max(
                     0.0,
-                    location.ExplorationHours -
-                    expedition.ActiveActivity.RemainingHours);
+                    location.ExplorationHours - expedition.ActiveActivity.RemainingHours);
                 researchText =
                     ContinuousExpeditionCommands.FormatHours(completed) + "/" +
-                    ContinuousExpeditionCommands.FormatHours(
-                        location.ExplorationHours);
+                    ContinuousExpeditionCommands.FormatHours(location.ExplorationHours);
             }
             else if (location.ExplorationHours > 0)
-            {
-                researchText = "0 ч./" +
-                    ContinuousExpeditionCommands.FormatHours(
-                        location.ExplorationHours);
-            }
+                researchText = "0 ч./" + ContinuousExpeditionCommands.FormatHours(location.ExplorationHours);
             else
-            {
                 researchText = "не реализовано";
-            }
         }
 
         return
@@ -389,14 +367,12 @@ public partial class PrototypeUIController
     private string BuildDebugWorldLayoutText()
     {
         string result = "\nSeed карты: " + gameState.WorldSeed;
-
         foreach (LocationData location in gameState.Locations)
         {
             result +=
                 "\n" + location.RegionName + " → " + location.Name +
                 (location.IsDiscovered ? " [открыта]" : " [скрыта]");
         }
-
         return result;
     }
 
@@ -404,7 +380,6 @@ public partial class PrototypeUIController
     {
         if (isGameOver)
             return;
-
         gameState.ArmyGold = Math.Max(0, gameState.ArmyGold + delta);
         RefreshInterface();
     }
@@ -413,37 +388,8 @@ public partial class PrototypeUIController
     {
         if (isGameOver)
             return;
-
         gameState.ArmySupply = Math.Max(0, gameState.ArmySupply + delta);
         RefreshInterface();
-    }
-
-    private void DebugTriggerCapitalCrisis()
-    {
-        if (isGameOver)
-            return;
-
-        StrategicSimulationResult resolved = null;
-
-        for (int attempt = 0; attempt < 100; attempt++)
-        {
-            StrategicSimulationResult candidate = new StrategicSimulationResult();
-            CapitalCrisisSystem.ResolveAtScheduledCheck(gameState, gameState.Day, candidate);
-
-            if (candidate.NewExpeditionIncidents.Count > 0)
-            {
-                resolved = candidate;
-                break;
-            }
-        }
-
-        if (resolved == null)
-        {
-            AddReport("[DEBUG] Не удалось принудительно вызвать кризис столицы.");
-            return;
-        }
-
-        ApplyDebugResolutionResult(resolved, "Кризис столицы вызван вручную.");
     }
 
     private void DebugTriggerBackgroundIncident()
@@ -458,15 +404,10 @@ public partial class PrototypeUIController
         }
 
         StrategicSimulationResult resolved = null;
-
         for (int attempt = 0; attempt < 30; attempt++)
         {
             StrategicSimulationResult candidate = new StrategicSimulationResult();
-            ExpeditionIncidentSystem.ResolveAtScheduledCheck(
-                gameState,
-                gameState.Day,
-                candidate);
-
+            ExpeditionIncidentSystem.ResolveAtScheduledCheck(gameState, gameState.Day, candidate);
             if (candidate.NewExpeditionIncidents.Count > 0)
             {
                 resolved = candidate;
@@ -495,15 +436,10 @@ public partial class PrototypeUIController
         }
 
         StrategicSimulationResult resolved = null;
-
         for (int attempt = 0; attempt < 30; attempt++)
         {
             StrategicSimulationResult candidate = new StrategicSimulationResult();
-            ExpeditionDecisionSystem.ResolveAtScheduledCheck(
-                gameState,
-                gameState.Day,
-                candidate);
-
+            ExpeditionDecisionSystem.ResolveAtScheduledCheck(gameState, gameState.Day, candidate);
             if (gameState.HasPendingExpeditionDecision)
             {
                 resolved = candidate;

@@ -23,7 +23,7 @@ jobs:
           python .tmp_nikiforovsky_integrate.py
           rm .tmp_nikiforovsky_integrate.py
           rm .github/workflows/apply-nikiforovsky-integration.yml
-          test "$(git diff --name-only | sort)" = $'ProjectDocs/BESTIARY.md\nProjectDocs/DEVELOPMENT_STATUS.md\nProjectDocs/LORE.md'
+          test "$(git diff --name-only -- ProjectDocs | sort)" = $'ProjectDocs/BESTIARY.md\nProjectDocs/DEVELOPMENT_STATUS.md\nProjectDocs/LORE.md'
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ProjectDocs/LORE.md ProjectDocs/BESTIARY.md ProjectDocs/DEVELOPMENT_STATUS.md .tmp_nikiforovsky_integrate.py .github/workflows/apply-nikiforovsky-integration.yml

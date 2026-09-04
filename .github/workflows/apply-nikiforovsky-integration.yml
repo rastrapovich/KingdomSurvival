@@ -1,0 +1,32 @@
+name: Apply Nikiforovsky integration
+
+on:
+  push:
+    branches:
+      - work/nikiforovsky-finalize
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/nikiforovsky-finalize
+          fetch-depth: 0
+
+      - name: Integrate approved Nikiforovsky decisions
+        shell: bash
+        run: |
+          python .tmp_nikiforovsky_integrate.py
+          rm .tmp_nikiforovsky_integrate.py
+          rm .github/workflows/apply-nikiforovsky-integration.yml
+          test "$(git diff --name-only | sort)" = $'ProjectDocs/BESTIARY.md\nProjectDocs/DEVELOPMENT_STATUS.md\nProjectDocs/LORE.md'
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ProjectDocs/LORE.md ProjectDocs/BESTIARY.md ProjectDocs/DEVELOPMENT_STATUS.md .tmp_nikiforovsky_integrate.py .github/workflows/apply-nikiforovsky-integration.yml
+          git diff --cached --name-status
+          git commit -m "docs: integrate Nikiforovsky decisions after Gnatiuk"
+          git push origin HEAD:work/nikiforovsky-finalize

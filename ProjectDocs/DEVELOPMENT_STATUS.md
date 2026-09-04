@@ -635,8 +635,9 @@ GitHub Actions/CI для проекта не настроены, поэтому 
 
 ### Реализация и проверка
 
-- изменяются только `ProjectDocs/LORE.md`, `ProjectDocs/BESTIARY.md` и `ProjectDocs/DEVELOPMENT_STATUS.md`;
-- изменения документальные, поэтому Unity compilation и Unity Test Runner не запускаются;
-- проверяется, что новые утверждённые принципы не противоречат разделам 54–58 `LORE.md` и 24–27 `BESTIARY.md`;
+- `ProjectDocs/LORE.md`, `ProjectDocs/BESTIARY.md` и `ProjectDocs/DEVELOPMENT_STATUS.md` интегрированы поверх решений Гнатюка commit `10521bc` (`docs: integrate Nikiforovsky folklore decisions`);
+- итоговая интеграция затрагивает только эти три документа; код, сцены, UXML/USS и игровые данные не менялись;
+- изменения документальные, поэтому Unity compilation и Unity Test Runner не запускались;
+- проверено, что утверждённые принципы Никифоровского не противоречат разделам 54–58 `LORE.md` и 24–27 `BESTIARY.md`; новые разделы получили номера 59 и 28 соответственно;
 - источник реально использован: Н. Я. Никифоровский — **«Нечистики»** (1907);
-- после публикации требуется только Pull актуального `main`; техническая миграция в Unity не нужна.
+- после Pull актуального `main` техническая миграция в Unity не требуется.

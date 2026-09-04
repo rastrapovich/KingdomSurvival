@@ -21,3 +21,4 @@ if old not in text:
     raise RuntimeError('status block not found')
 p.write_text(text.replace(old, new, 1), encoding='utf-8')
 print('status finalized')
+# trigger valid workflow

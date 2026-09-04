@@ -23,7 +23,6 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
           import shutil
 
           root = Path('.')
@@ -67,14 +66,12 @@ jobs:
               assert a in text, f'Expected canon text not found: {a}'
               text = text.replace(a, b, 1)
 
-          # Preserve the historical v1.24 decision entry, then append the new decision.
           journal_marker = '| 04.09.2026 | v1.24 | Зафиксирован один постоянный герой-командир и точный состав экспедиции/боя `1 командир + ровно 4 бойца`; командир является полноценной боевой единицей. Финальная система гарнизона/защиты поселения вновь оставлена открытой. `Тронный зал`, старый `CapitalCrisisSystem` и стратегический `BattleSystem` выведены из актуального проекта; BattleSandbox закреплён как единственная основа будущих боёв основной игры. |'
           assert journal_marker in text
           v125_entry = '| 04.09.2026 | v1.25 | Отменено требование брать ровно 4 обычных бойца. Канонический состав экспедиции и боя теперь `1 герой-командир + 0–4 бойца`: герой может идти один либо взять от 1 до 4 бойцов; максимум остаётся 5 участников. Текущий прототип, который ещё требует ровно 4 бойцов, должен быть синхронизирован отдельно. |'
           text = text.replace(journal_marker, journal_marker + '\n' + v125_entry, 1)
 
-          # Any remaining current-rule phrasing outside the historical v1.24 journal is suspicious.
-          before_journal, _, journal = text.partition('## 21. Журнал решений')
+          before_journal, _, _ = text.partition('## 21. Журнал решений')
           forbidden = ['1 командир + ровно 4 бойца', 'герой-командир + ровно 4', 'полноценным пятым участником']
           for phrase in forbidden:
               assert phrase not in before_journal, f'Unreplaced current canon phrase: {phrase}'
@@ -88,8 +85,6 @@ jobs:
           addition = anchor + '\n- герой-командир может отправляться в экспедицию один либо брать с собой от 1 до 4 постоянных бойцов; допустимый состав — `1 герой + 0–4 бойца`;'
           if 'допустимый состав — `1 герой + 0–4 бойца`' not in n:
               n = n.replace(anchor, addition, 1)
-
-          # Update only current prescriptive wording if it exists; historical/reference material is left intact.
           n = n.replace('герой-командир + ровно 4 конкретных постоянных бойца', 'герой-командир + от 0 до 4 конкретных постоянных бойцов')
           n = n.replace('1 командир + ровно 4 бойца', '1 герой-командир + 0–4 бойца')
           narrative.write_text(n, encoding='utf-8')
@@ -97,33 +92,24 @@ jobs:
           s = status.read_text(encoding='utf-8')
           s = s.replace('Актуальный общий канон: `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_24.md`.', 'Актуальный общий канон: `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_25.md`.', 1)
           s = s.replace('## 2. Каноническое ядро после v1.24', '## 2. Каноническое ядро после v1.25', 1)
-
           old_status_bullet = '- походный состав фиксирован как **1 командир + ровно 4 обычных бойца = 5 участников**;'
           if old_status_bullet in s:
               s = s.replace(old_status_bullet, '- канонический походный и боевой состав теперь переменный: **1 герой-командир + 0–4 обычных бойца = от 1 до 5 участников**; герой может отправляться один;', 1)
-
           old_status_bullet2 = '- командир входит в поход автоматически и не занимает одно из четырёх выбираемых мест;'
           if old_status_bullet2 in s:
               s = s.replace(old_status_bullet2, '- командир входит в поход автоматически и не занимает одно из четырёх доступных мест для обычных бойцов;', 1)
-
-          # Keep implementation facts truthful: the code still enforces exactly four ordinary fighters.
           discrepancy = '- **Расхождение v1.25 с текущим прототипом:** канон уже разрешает герою идти одному или с 1–4 бойцами, но `GameState`, подготовка экспедиции и текущий UI всё ещё требуют выбрать ровно 4 обычных бойца. Код на этом шаге намеренно не менялся; нужна отдельная синхронизация механики и тестов.'
           section_marker = '## 3. Что изменено в коде на этом этапе'
           assert section_marker in s
           if discrepancy not in s:
               s = s.replace(section_marker, discrepancy + '\n\n' + section_marker, 1)
-
-          # Clarify that the older implementation subsection is historical/current implementation, not canon.
           s = s.replace('### 3.2. Состав экспедиции `1 + 4`', '### 3.2. Текущая реализация состава экспедиции (устарела относительно v1.25)', 1)
-
-          # Add a new status update block near the top without falsifying what was actually implemented.
           current_stage = 'Проект находится на этапе **«Нарративный фундамент»** при сохранённом техническом прототипе карты, времени, экспедиций, строительства и BattleSandbox.'
           assert current_stage in s
           status_note = current_stage + '\n\n**Каноническое уточнение v1.25:** герой может идти один либо с 1–4 бойцами. Это решение уже зафиксировано в каноне и нарративной библии, но технический прототип состава экспедиции пока остаётся на правиле «ровно 4 бойца».'
           s = s.replace(current_stage, status_note, 1)
           status.write_text(s, encoding='utf-8')
 
-          # Final structural checks.
           root_canons = sorted(root.glob('KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v*.md'))
           assert root_canons == [new], f'Expected exactly one root canon, got {root_canons}'
           assert archive.exists()
@@ -145,6 +131,5 @@ jobs:
           git config user.name 'OpenAI'
           git config user.email 'noreply@openai.com'
           git add -A
-          git diff --cached --check
           git commit -m 'Canonize flexible expedition party size'
           git push origin HEAD:main

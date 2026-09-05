@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   integrate:
-    if: ${{ github.event.head_commit.message == 'chore: activate Mickiewicz integration' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,17 +21,8 @@ jobs:
         run: |
           python3 .github/mickiewicz_patch.py
           git diff --check
-          expected="ProjectDocs/BESTIARY.md
-          ProjectDocs/DEVELOPMENT_STATUS.md
-          ProjectDocs/LORE.md
-          ProjectDocs/MICKIEWICZ_BALLADY_I_ROMANSE_ADAPTATION.md
-          ProjectDocs/NARRATIVE.md"
-          actual="$(git status --short ProjectDocs | awk '{$1=""; sub(/^ /,""); print}' | sort)"
-          if [ "$actual" != "$expected" ]; then
-            echo "Unexpected ProjectDocs diff:"
-            printf '%s\n' "$actual"
-            exit 1
-          fi
+          actual="$(git status --short ProjectDocs | awk '{$1=""; sub(/^ /,""); print}' | sort | paste -sd ',' -)"
+          test "$actual" = "ProjectDocs/BESTIARY.md,ProjectDocs/DEVELOPMENT_STATUS.md,ProjectDocs/LORE.md,ProjectDocs/MICKIEWICZ_BALLADY_I_ROMANSE_ADAPTATION.md,ProjectDocs/NARRATIVE.md"
           rm -f .github/workflows/mickiewicz-one-shot.yml .github/mickiewicz_patch.py
           rmdir .github/workflows 2>/dev/null || true
           rmdir .github 2>/dev/null || true

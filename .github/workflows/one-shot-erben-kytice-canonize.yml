@@ -36,6 +36,31 @@ jobs:
       - name: Apply approved Kytice canonization
         run: python3 ProjectDocs/erben_kytice_canonize_once.py
 
+      - name: Normalize changed adaptation status lines
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('ProjectDocs/ERBEN_KYTICE_ADAPTATION.md')
+          text = path.read_text(encoding='utf-8')
+          changed_lines = [
+              '**Статус:** локальное `[ВЕРОВАНИЕ]` + утверждённая возможность реального локального явления/сущности. В каноническом квесте `«Полдень»` реальность сверхъестественного проявления зафиксирована, но его объективная природа остаётся открытой до подробной разработки.',
+              '**Статус:** `[УТВЕРЖДЕНО — ДОПУСТИМАЯ ЛОКАЛЬНАЯ ВОЗМОЖНОСТЬ]`.',
+              '**Статус:** утверждённое `[ВЕРОВАНИЕ]` + утверждённая возможность отдельных конкретных сверхъестественных случаев без единой метафизики.',
+              '**Статус:** `[УТВЕРЖДЕНО — ДОПУСТИМАЯ ИНДИВИДУАЛЬНАЯ СУЩНОСТЬ]`.',
+              '**Статус:** `[УТВЕРЖДЕНО][ВЕРОВАНИЕ]` + утверждённая возможность отдельного реального локального явления.',
+          ]
+          # The local-possibility status appears twice (sections 20 and 27).
+          expected_counts = {line: (2 if line == changed_lines[1] else 1) for line in changed_lines}
+          for line, expected in expected_counts.items():
+              old = line + '  \n'
+              count = text.count(old)
+              if count != expected:
+                  raise RuntimeError(f'expected {expected} trailing-space occurrences for {line!r}, found {count}')
+              text = text.replace(old, line + '\n')
+          path.write_text(text, encoding='utf-8')
+          PY
+
       - name: Remove one-shot helpers
         run: |
           rm -f .github/workflows/one-shot-erben-kytice-canonize.yml

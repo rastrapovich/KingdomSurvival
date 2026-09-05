@@ -22,15 +22,17 @@ jobs:
       - name: Apply approved Gogol decisions
         run: python3 ProjectDocs/gogol_sync_once.py
 
-      - name: Normalize Markdown EOF
+      - name: Normalize Markdown whitespace
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          adaptation = Path('ProjectDocs/GOGOL_ADAPTATION.md')
+          lines = adaptation.read_text(encoding='utf-8').splitlines()
+          adaptation.write_text('\n'.join(line.rstrip() for line in lines).rstrip() + '\n', encoding='utf-8')
           for name in [
               'ProjectDocs/BESTIARY.md',
               'ProjectDocs/DEVELOPMENT_STATUS.md',
-              'ProjectDocs/GOGOL_ADAPTATION.md',
               'ProjectDocs/LORE.md',
               'ProjectDocs/NARRATIVE.md',
           ]:

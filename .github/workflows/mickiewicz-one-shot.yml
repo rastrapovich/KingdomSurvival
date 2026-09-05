@@ -20,6 +20,7 @@ jobs:
         shell: bash
         run: |
           python3 .github/mickiewicz_patch.py
+          python3 -c "from pathlib import Path; files=['ProjectDocs/LORE.md','ProjectDocs/BESTIARY.md','ProjectDocs/NARRATIVE.md','ProjectDocs/DEVELOPMENT_STATUS.md','ProjectDocs/MICKIEWICZ_BALLADY_I_ROMANSE_ADAPTATION.md']; [p.write_text(p.read_text(encoding='utf-8').rstrip()+'\\n',encoding='utf-8') for p in map(Path,files)]"
           git diff --check
           actual="$(git status --short ProjectDocs | awk '{$1=""; sub(/^ /,""); print}' | sort | paste -sd ',' -)"
           test "$actual" = "ProjectDocs/BESTIARY.md,ProjectDocs/DEVELOPMENT_STATUS.md,ProjectDocs/LORE.md,ProjectDocs/MICKIEWICZ_BALLADY_I_ROMANSE_ADAPTATION.md,ProjectDocs/NARRATIVE.md"

@@ -22,6 +22,23 @@ jobs:
       - name: Apply approved Gogol decisions
         run: python3 ProjectDocs/gogol_sync_once.py
 
+      - name: Normalize Markdown EOF
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in [
+              'ProjectDocs/BESTIARY.md',
+              'ProjectDocs/DEVELOPMENT_STATUS.md',
+              'ProjectDocs/GOGOL_ADAPTATION.md',
+              'ProjectDocs/LORE.md',
+              'ProjectDocs/NARRATIVE.md',
+          ]:
+              path = Path(name)
+              text = path.read_text(encoding='utf-8')
+              path.write_text(text.rstrip() + '\n', encoding='utf-8')
+          PY
+
       - name: Remove one-shot helpers
         run: |
           rm -f .github/workflows/one-shot-gogol-sync.yml

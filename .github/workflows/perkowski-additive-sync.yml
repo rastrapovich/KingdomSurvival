@@ -30,7 +30,6 @@ jobs:
             else
               printf '\n' >> "$target"
               cat "$fragment" >> "$target"
-              printf '\n' >> "$target"
               echo "appended $target"
             fi
           }

@@ -1,0 +1,55 @@
+name: One-shot Erben Kytice canonization sync
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/one-shot-erben-kytice-canonize.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply approved Kytice canonization
+        run: python3 ProjectDocs/erben_kytice_canonize_once.py
+
+      - name: Remove one-shot helpers
+        run: |
+          rm -f .github/workflows/one-shot-erben-kytice-canonize.yml
+          rm -f ProjectDocs/erben_kytice_canonize_once.py
+
+      - name: Validate final diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          printf '%s\n' \
+            '.github/workflows/one-shot-erben-kytice-canonize.yml' \
+            'ProjectDocs/BESTIARY.md' \
+            'ProjectDocs/DEVELOPMENT_STATUS.md' \
+            'ProjectDocs/ERBEN_KYTICE_ADAPTATION.md' \
+            'ProjectDocs/LORE.md' \
+            'ProjectDocs/NARRATIVE.md' \
+            'ProjectDocs/erben_kytice_canonize_once.py' | sort > /tmp/expected-files.txt
+          git diff --name-only | sort > /tmp/actual-files.txt
+          diff -u /tmp/expected-files.txt /tmp/actual-files.txt
+          git diff --stat
+
+      - name: Commit synchronized docs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'docs: canonize Kytice package and Poluden quest'
+          git push origin HEAD:main

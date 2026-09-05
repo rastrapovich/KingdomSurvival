@@ -27,6 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           git rm .github/workflows/polesie-docs-sync.yml .github/scripts/polesie_sync.py
+          git add -A
           test "$(find . -maxdepth 1 -type f -name 'KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v*.md' | wc -l)" -eq 1
           test -f KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_26.md
           test -f ProjectDocs/POLESIE_DEMONOLOGY_ADAPTATION.md
@@ -34,7 +35,7 @@ jobs:
           grep -q '# 12A. Полесские дополнения' ProjectDocs/BESTIARY.md
           grep -q '## 25.11. Пакет Полесья' ProjectDocs/NARRATIVE.md
           grep -q 'Документальная интеграция 05.09.2026 — Полесье' ProjectDocs/DEVELOPMENT_STATUS.md
-          git diff --check
+          git diff --cached --check
           python - <<'PY'
           import subprocess
           expected = {
@@ -46,7 +47,7 @@ jobs:
               'ProjectDocs/DEVELOPMENT_STATUS.md',
               'ProjectDocs/POLESIE_DEMONOLOGY_ADAPTATION.md',
           }
-          changed = set(subprocess.check_output(['git','diff','--name-only'], text=True).splitlines())
+          changed = set(subprocess.check_output(['git','diff','--cached','--name-only'], text=True).splitlines())
           if changed != expected:
               raise SystemExit(f'Unexpected changed files: {sorted(changed)}')
           PY
@@ -57,6 +58,5 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
           git commit -m 'docs: integrate Polesie demonology decisions'
           git push origin HEAD:work/polesie-demonology-integration

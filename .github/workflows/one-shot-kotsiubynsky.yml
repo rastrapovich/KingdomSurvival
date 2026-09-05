@@ -28,8 +28,9 @@ jobs:
           import re
           import subprocess
 
+          payload_commit = "a67015a41dcbf659d43b3e90c707e01190f97d86"
           payload = subprocess.check_output(
-              ["git", "show", "HEAD^:.github/workflows/one-shot-kotsiubynsky.yml"],
+              ["git", "show", f"{payload_commit}:.github/workflows/one-shot-kotsiubynsky.yml"],
               text=True,
           )
           pattern = re.compile(
@@ -48,6 +49,10 @@ jobs:
                   handle.write(body)
                   if not body.endswith("\n"):
                       handle.write("\n")
+
+          adaptation = Path("ProjectDocs/KOTSIUBYNSKY_SHADOWS_ADAPTATION.md")
+          cleaned = "\n".join(line.rstrip(" \t") for line in adaptation.read_text(encoding="utf-8").splitlines()) + "\n"
+          adaptation.write_text(cleaned, encoding="utf-8")
           PY
 
       - name: Validate final diff

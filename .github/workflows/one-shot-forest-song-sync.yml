@@ -1,0 +1,55 @@
+name: One-shot Forest Song documentation sync
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/one-shot-forest-song-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply approved Forest Song decisions
+        run: python3 ProjectDocs/forest_song_sync_once.py
+
+      - name: Remove one-shot helpers
+        run: |
+          rm -f .github/workflows/one-shot-forest-song-sync.yml
+          rm -f ProjectDocs/forest_song_sync_once.py
+
+      - name: Validate final diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          printf '%s\n' \
+            '.github/workflows/one-shot-forest-song-sync.yml' \
+            'ProjectDocs/BESTIARY.md' \
+            'ProjectDocs/DEVELOPMENT_STATUS.md' \
+            'ProjectDocs/LESYA_UKRAINKA_FOREST_SONG_ADAPTATION.md' \
+            'ProjectDocs/LORE.md' \
+            'ProjectDocs/NARRATIVE.md' \
+            'ProjectDocs/forest_song_sync_once.py' | sort > /tmp/expected-files.txt
+          git diff --name-only | sort > /tmp/actual-files.txt
+          diff -u /tmp/expected-files.txt /tmp/actual-files.txt
+          git diff --stat
+
+      - name: Commit synchronized docs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'docs: integrate Forest Song narrative decisions'
+          git push origin HEAD:main

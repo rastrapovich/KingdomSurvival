@@ -1,0 +1,62 @@
+name: Perkowski section renumber
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/perkowski-renumber.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  renumber:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Renumber only newly added Perkowski sections
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def renumber_suffix(path, marker, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              idx = text.find(marker)
+              if idx < 0:
+                  raise SystemExit(f'marker not found: {path}: {marker}')
+              prefix, suffix = text[:idx], text[idx:]
+              suffix2 = suffix.replace(f'# {old}. Jan L. Perkowski', f'# {new}. Jan L. Perkowski', 1)
+              suffix2 = suffix2.replace(f'## {old}.', f'## {new}.')
+              if suffix2 == suffix:
+                  raise SystemExit(f'no renumbering performed: {path}')
+              p.write_text(prefix + suffix2, encoding='utf-8')
+
+          renumber_suffix(
+              'ProjectDocs/BESTIARY.md',
+              '# 38. Jan L. Perkowski — вампирский случай',
+              '38', '40')
+          renumber_suffix(
+              'ProjectDocs/LORE.md',
+              '# 69. Jan L. Perkowski — опасный покойник',
+              '69', '71')
+          PY
+
+      - name: Verify and commit cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq '# 40. Jan L. Perkowski — вампирский случай' ProjectDocs/BESTIARY.md
+          grep -Fq '# 71. Jan L. Perkowski — опасный покойник' ProjectDocs/LORE.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ProjectDocs/BESTIARY.md ProjectDocs/LORE.md
+          git rm .github/workflows/perkowski-renumber.yml
+          git diff --cached --check
+          git commit -m "docs: fix Perkowski section numbering"
+          git push origin HEAD:main

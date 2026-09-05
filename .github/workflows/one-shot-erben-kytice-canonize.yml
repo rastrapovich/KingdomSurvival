@@ -19,6 +19,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Patch one-shot helper marker
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('ProjectDocs/erben_kytice_canonize_once.py')
+          text = path.read_text(encoding='utf-8')
+          old = '    "- `«Полдень»`;",'
+          new = '    "- «Полдень»;",'
+          if text.count(old) != 1:
+              raise RuntimeError(f'expected one stale status marker, found {text.count(old)}')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
       - name: Apply approved Kytice canonization
         run: python3 ProjectDocs/erben_kytice_canonize_once.py
 

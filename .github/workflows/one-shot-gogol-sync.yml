@@ -48,6 +48,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          git add -N ProjectDocs/GOGOL_ADAPTATION.md
           git diff --check
           printf '%s\n' \
             '.github/workflows/one-shot-gogol-sync.yml' \

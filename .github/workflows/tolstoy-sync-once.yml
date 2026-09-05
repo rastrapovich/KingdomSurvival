@@ -24,11 +24,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          for attempt in 1 2 3 4 5 6; do
-            git fetch origin main
-            git reset --hard origin/main
-
-            python - <<'PY'
+          apply_patch() {
+          python - <<'PY'
           from pathlib import Path
 
           lore_path = Path('ProjectDocs/LORE.md')
@@ -305,6 +302,12 @@ jobs:
               status += status_block
               status_path.write_text(status, encoding='utf-8')
           PY
+          }
+
+          for attempt in 1 2 3 4 5 6; do
+            git fetch origin main
+            git reset --hard origin/main
+            apply_patch
 
             git rm -f --ignore-unmatch .github/workflows/tolstoy-sync-once.yml
             git add ProjectDocs/LORE.md ProjectDocs/BESTIARY.md ProjectDocs/DEVELOPMENT_STATUS.md

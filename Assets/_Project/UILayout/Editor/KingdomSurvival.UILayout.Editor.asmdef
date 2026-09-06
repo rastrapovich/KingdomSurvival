@@ -1,0 +1,14 @@
+{
+  "name": "KingdomSurvival.UILayout.Editor",
+  "rootNamespace": "KingdomSurvival.UILayout.Editor",
+  "references": ["KingdomSurvival.UILayout"],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

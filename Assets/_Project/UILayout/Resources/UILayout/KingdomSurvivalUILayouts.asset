@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d82114358ff4c9998a739c306f57301, type: 3}
+  m_Name: KingdomSurvivalUILayouts
+  m_EditorClassIdentifier:
+  referenceResolution: {x: 1920, y: 1080}
+  screens:
+  - id: narrative-dialogue
+    displayName: "Диалог"
+    elements:
+    - id: overlay
+      displayName: "Затемнение"
+      rect: {x: 0, y: 0, width: 1920, height: 1080}
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+    - id: panel
+      displayName: "Панель диалога"
+      rect: {x: 1190, y: 0, width: 730, height: 1080}
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+    - id: portrait
+      displayName: "Портрет"
+      rect: {x: 780, y: 195, width: 440, height: 625}
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+    - id: speaker
+      displayName: "Имя"
+      rect: {x: 44, y: 58, width: 642, height: 42}
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+    - id: role
+      displayName: "Роль"
+      rect: {x: 44, y: 105, width: 642, height: 28}
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+    - id: text
+      displayName: "Текст"
+      rect: {x: 44, y: 175, width: 642, height: 430}
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+    - id: choices
+      displayName: "Варианты ответа"
+      rect: {x: 44, y: 650, width: 642, height: 360}
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1

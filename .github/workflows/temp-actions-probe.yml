@@ -1,0 +1,12 @@
+name: Temporary Actions probe
+on:
+  push:
+    branches:
+      - temp/canonize-home-on-borrowed-water-20260906
+    paths:
+      - .github/workflows/temp-actions-probe.yml
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ok

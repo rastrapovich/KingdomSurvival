@@ -45,6 +45,7 @@ public sealed class NarrativeDialogueNode
     private readonly List<NarrativeDialogueChoice> choices;
 
     public string Id { get; }
+    public string SpeakerId { get; }
     public string Speaker { get; }
     public string Role { get; }
     public string Text { get; }
@@ -52,6 +53,17 @@ public sealed class NarrativeDialogueNode
 
     public NarrativeDialogueNode(
         string id,
+        string speaker,
+        string role,
+        string text,
+        params NarrativeDialogueChoice[] choices)
+        : this(id, string.Empty, speaker, role, text, choices)
+    {
+    }
+
+    public NarrativeDialogueNode(
+        string id,
+        string speakerId,
         string speaker,
         string role,
         string text,
@@ -67,6 +79,7 @@ public sealed class NarrativeDialogueNode
             throw new ArgumentException("Dialogue text cannot be empty.", nameof(text));
 
         Id = id;
+        SpeakerId = speakerId ?? string.Empty;
         Speaker = speaker;
         Role = role ?? string.Empty;
         Text = text;

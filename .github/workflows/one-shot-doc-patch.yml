@@ -1,0 +1,41 @@
+name: one-shot-doc-patch
+
+on:
+  push:
+    branches:
+      - docs/oota-rebase-staging-final3-20260906
+
+permissions:
+  contents: write
+
+jobs:
+  patch-docs:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: docs/oota-rebase-staging-final3-20260906
+          fetch-depth: 0
+
+      - name: Apply approved documentation changes
+        run: python .automation_patch.py
+
+      - name: Remove one-shot service files
+        run: rm -f .automation_patch.py .github/workflows/one-shot-doc-patch.yml
+
+      - name: Validate diff
+        run: git diff --check
+
+      - name: Commit patched documentation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ProjectDocs .automation_patch.py .github/workflows/one-shot-doc-patch.yml
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "docs: integrate Ravenloft and Forgotten Realms decisions"
+          git push origin HEAD:docs/oota-rebase-staging-final3-20260906

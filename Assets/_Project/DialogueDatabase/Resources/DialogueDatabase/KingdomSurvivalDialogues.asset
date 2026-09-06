@@ -42,6 +42,8 @@ MonoBehaviour:
       - text: Вернёмся к этому позже.
         nextNodeId:
         endsDialogue: 1
+      editorPosition: {x: 60, y: 180}
+      hasEditorPosition: 1
     - id: details
       speakerId: miller
       text: Сначала просели опоры у старого шлюза. Рабочие говорят, что утром вода уже шла ниже обычного.
@@ -55,6 +57,8 @@ MonoBehaviour:
       - text: Пока достаточно.
         nextNodeId:
         endsDialogue: 1
+      editorPosition: {x: 490, y: 40}
+      hasEditorPosition: 1
     - id: cause
       speakerId: miller
       text: После паводка всякое бывает. Но здесь слишком многое изменилось за одну ночь. Я бы сперва осмотрел старую часть плотины.
@@ -71,6 +75,8 @@ MonoBehaviour:
       - text: Ясно. Продолжим позже.
         nextNodeId:
         endsDialogue: 1
+      editorPosition: {x: 490, y: 430}
+      hasEditorPosition: 1
     - id: tracks
       speakerId: miller
       text: Следы есть, но после паводка двор весь в грязи. Один рабочий уверяет, что видел свежие отметины у настила.
@@ -84,6 +90,8 @@ MonoBehaviour:
       - text: Этого пока хватит.
         nextNodeId:
         endsDialogue: 1
+      editorPosition: {x: 920, y: 40}
+      hasEditorPosition: 1
     - id: workers
       speakerId: miller
       text: Один говорит, что вода резко поднялась. Другой — что она, наоборот, ушла. Оба стояли здесь в одну и ту же ночь.
@@ -94,6 +102,8 @@ MonoBehaviour:
       - text: Я поговорю с ними позже.
         nextNodeId:
         endsDialogue: 1
+      editorPosition: {x: 920, y: 420}
+      hasEditorPosition: 1
     - id: old_dam
       speakerId: miller
       text: Начни со старого шлюза. Там дерево темнее и крепёж старый — сразу увидишь. Потом сравни с новыми опорами.
@@ -104,3 +114,5 @@ MonoBehaviour:
       - text: Ещё один вопрос.
         nextNodeId: opening
         endsDialogue: 0
+      editorPosition: {x: 1350, y: 250}
+      hasEditorPosition: 1

@@ -14,11 +14,19 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             Validation
         }
 
+        private enum DialogueStructureMode
+        {
+            Graph,
+            Table
+        }
+
         private const float LeftWidth = 250f;
         private const float RightWidth = 330f;
 
         private DialogueDatabaseAsset database;
         private WindowTab tab;
+        private DialogueStructureMode structureMode = DialogueStructureMode.Graph;
+        private bool dialogueMetaExpanded = true;
         private int selectedDialogueIndex;
         private int selectedSpeakerIndex;
         private Vector2 leftScroll;
@@ -152,6 +160,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     {
                         selectedDialogueIndex = i;
                         ResetPreview();
+                        ResetGraphViewState();
                     }
                 }
             }
@@ -186,22 +195,47 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             selectedDialogueIndex = Mathf.Clamp(selectedDialogueIndex, 0, dialogues.arraySize - 1);
             SerializedProperty dialogue = dialogues.GetArrayElementAtIndex(selectedDialogueIndex);
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            dialogueMetaExpanded = EditorGUILayout.Foldout(dialogueMetaExpanded, "ДИАЛОГ", true);
+            if (dialogueMetaExpanded)
+            {
+                EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("id"), new GUIContent("ID"));
+                EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("title"), new GUIContent("Название"));
+                EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("category"), new GUIContent("Категория"));
+                EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("status"), new GUIContent("Статус"));
+                EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("developerComment"), new GUIContent("Комментарий разработчика"));
+                EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("tags"), new GUIContent("Теги"), true);
+
+                SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
+                DrawStartNodePopup(dialogue.FindPropertyRelative("startNodeId"), nodes);
+            }
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            GUILayout.Label("СТРУКТУРА", EditorStyles.boldLabel, GUILayout.Width(90f));
+            if (GUILayout.Toggle(structureMode == DialogueStructureMode.Graph, "Граф", EditorStyles.toolbarButton, GUILayout.Width(70f)))
+                structureMode = DialogueStructureMode.Graph;
+            if (GUILayout.Toggle(structureMode == DialogueStructureMode.Table, "Таблица", EditorStyles.toolbarButton, GUILayout.Width(70f)))
+                structureMode = DialogueStructureMode.Table;
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            if (structureMode == DialogueStructureMode.Graph)
+                DrawDialogueGraph(dialogue);
+            else
+                DrawDialogueTable(dialogue);
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawDialogueTable(SerializedProperty dialogue)
+        {
+            SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
             centerScroll = EditorGUILayout.BeginScrollView(centerScroll);
 
-            EditorGUILayout.LabelField("ДИАЛОГ", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("id"), new GUIContent("ID"));
-            EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("title"), new GUIContent("Название"));
-            EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("category"), new GUIContent("Категория"));
-            EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("status"), new GUIContent("Статус"));
-            EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("developerComment"), new GUIContent("Комментарий разработчика"));
-            EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("tags"), new GUIContent("Теги"), true);
-
-            SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
-            DrawStartNodePopup(dialogue.FindPropertyRelative("startNodeId"), nodes);
-
-            GUILayout.Space(10f);
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("СТРУКТУРА", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("УЗЛЫ И ПЕРЕХОДЫ", EditorStyles.boldLabel);
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("+ Узел", GUILayout.Width(90f)))
                 AddNode(dialogue);
@@ -211,7 +245,6 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 DrawNode(dialogue, nodes, i);
 
             EditorGUILayout.EndScrollView();
-            EditorGUILayout.EndVertical();
         }
 
         private void DrawNode(SerializedProperty dialogue, SerializedProperty nodes, int nodeIndex)
@@ -346,6 +379,5 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (next >= 0 && next < speakers.Count)
                 speakerId.stringValue = speakers[next].Id;
         }
-
     }
 }

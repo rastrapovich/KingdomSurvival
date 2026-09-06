@@ -55,11 +55,15 @@ namespace KingdomSurvival.DialogueDatabase
         [SerializeField] private string speakerId = string.Empty;
         [SerializeField, TextArea(3, 8)] private string text = string.Empty;
         [SerializeField] private List<DialogueChoiceData> choices = new List<DialogueChoiceData>();
+        [SerializeField, HideInInspector] private Vector2 editorPosition = Vector2.zero;
+        [SerializeField, HideInInspector] private bool hasEditorPosition;
 
         public string Id => id;
         public string SpeakerId => speakerId;
         public string Text => text;
         public IReadOnlyList<DialogueChoiceData> Choices => choices ?? (IReadOnlyList<DialogueChoiceData>)Array.Empty<DialogueChoiceData>();
+        public Vector2 EditorPosition => editorPosition;
+        public bool HasEditorPosition => hasEditorPosition;
     }
 
     [Serializable]

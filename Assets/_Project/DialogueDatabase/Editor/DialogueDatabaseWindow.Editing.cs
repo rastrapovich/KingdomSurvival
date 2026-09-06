@@ -10,10 +10,17 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private void AddNode(SerializedProperty dialogue)
         {
             SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
+            Vector2 position = new Vector2(80f + nodes.arraySize * 36f, 80f + nodes.arraySize * 36f);
+            AddNodeAtPosition(dialogue, position);
+        }
+
+        private string AddNodeAtPosition(SerializedProperty dialogue, Vector2 position)
+        {
+            SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
+            string id = MakeUniqueNodeId(nodes, "node");
             int index = nodes.arraySize;
             nodes.arraySize++;
             SerializedProperty node = nodes.GetArrayElementAtIndex(index);
-            string id = MakeUniqueNodeId(nodes, "node");
             node.FindPropertyRelative("id").stringValue = id;
             node.FindPropertyRelative("speakerId").stringValue = database.Speakers.Count > 0 ? database.Speakers[0].Id : string.Empty;
             node.FindPropertyRelative("text").stringValue = "Новая реплика.";
@@ -23,7 +30,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             choice.FindPropertyRelative("text").stringValue = "Завершить разговор.";
             choice.FindPropertyRelative("nextNodeId").stringValue = string.Empty;
             choice.FindPropertyRelative("endsDialogue").boolValue = true;
+            SetNodeEditorPosition(node, position);
             node.isExpanded = true;
+            return id;
         }
 
         private static void AddChoice(SerializedProperty choices)
@@ -34,6 +43,16 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             choice.FindPropertyRelative("text").stringValue = "Новый ответ";
             choice.FindPropertyRelative("nextNodeId").stringValue = string.Empty;
             choice.FindPropertyRelative("endsDialogue").boolValue = true;
+        }
+
+        private static void SetNodeEditorPosition(SerializedProperty node, Vector2 position)
+        {
+            SerializedProperty editorPosition = node.FindPropertyRelative("editorPosition");
+            SerializedProperty hasEditorPosition = node.FindPropertyRelative("hasEditorPosition");
+            if (editorPosition != null)
+                editorPosition.vector2Value = position;
+            if (hasEditorPosition != null)
+                hasEditorPosition.boolValue = true;
         }
 
         private void InitializeDialogue(SerializedProperty dialogue, string id)
@@ -58,6 +77,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             choice.FindPropertyRelative("text").stringValue = "Завершить разговор.";
             choice.FindPropertyRelative("nextNodeId").stringValue = string.Empty;
             choice.FindPropertyRelative("endsDialogue").boolValue = true;
+            SetNodeEditorPosition(node, new Vector2(80f, 80f));
         }
 
         private static void CopyDialogue(SerializedProperty source, SerializedProperty destination)
@@ -97,6 +117,15 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     destinationChoice.FindPropertyRelative("nextNodeId").stringValue = sourceChoice.FindPropertyRelative("nextNodeId").stringValue;
                     destinationChoice.FindPropertyRelative("endsDialogue").boolValue = sourceChoice.FindPropertyRelative("endsDialogue").boolValue;
                 }
+
+                SerializedProperty sourcePosition = sourceNode.FindPropertyRelative("editorPosition");
+                SerializedProperty sourceHasPosition = sourceNode.FindPropertyRelative("hasEditorPosition");
+                SerializedProperty destinationPosition = destinationNode.FindPropertyRelative("editorPosition");
+                SerializedProperty destinationHasPosition = destinationNode.FindPropertyRelative("hasEditorPosition");
+                if (sourcePosition != null && destinationPosition != null)
+                    destinationPosition.vector2Value = sourcePosition.vector2Value;
+                if (sourceHasPosition != null && destinationHasPosition != null)
+                    destinationHasPosition.boolValue = sourceHasPosition.boolValue;
             }
         }
 

@@ -7,7 +7,7 @@ public partial class PrototypeUIController
     private const float NarrativeReadHistoryOpacity = 0.42f;
     private int narrativePresentationHistoryCount = -1;
 
-    private void LateUpdate()
+    private void RefreshNarrativePresentationFrame()
     {
         if (!IsNarrativeDialogueActive ||
             narrativeDialogueSession == null ||

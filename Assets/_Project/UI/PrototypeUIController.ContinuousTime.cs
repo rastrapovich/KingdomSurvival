@@ -158,6 +158,8 @@ public partial class PrototypeUIController
 
     private void Update()
     {
+        RefreshNarrativePresentationFrame();
+
         if (gameState == null)
             return;
 

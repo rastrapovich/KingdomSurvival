@@ -16,6 +16,7 @@ namespace KingdomSurvival.UILayout
     {
         [SerializeField] private string id = string.Empty;
         [SerializeField] private string displayName = string.Empty;
+        [SerializeField] private string parentId = string.Empty;
         [SerializeField] private Rect rect = new Rect(0f, 0f, 320f, 180f);
         [SerializeField] private Sprite sprite;
         [SerializeField] private Texture2D texture;
@@ -27,6 +28,7 @@ namespace KingdomSurvival.UILayout
 
         public string Id => id;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? id : displayName;
+        public string ParentId => parentId ?? string.Empty;
         public Rect Rect => rect;
         public Sprite Sprite => sprite;
         public Texture2D Texture => texture;
@@ -55,11 +57,12 @@ namespace KingdomSurvival.UILayout
 
         public string Id => id;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? id : displayName;
-        public IReadOnlyList<UILayoutElementDefinition> Elements => elements;
+        public IReadOnlyList<UILayoutElementDefinition> Elements =>
+            elements ?? (IReadOnlyList<UILayoutElementDefinition>)Array.Empty<UILayoutElementDefinition>();
 
         public UILayoutElementDefinition FindElement(string elementId)
         {
-            if (string.IsNullOrWhiteSpace(elementId))
+            if (string.IsNullOrWhiteSpace(elementId) || elements == null)
                 return null;
 
             for (int i = 0; i < elements.Count; i++)
@@ -82,11 +85,12 @@ namespace KingdomSurvival.UILayout
         [SerializeField] private List<UILayoutScreenDefinition> screens = new List<UILayoutScreenDefinition>();
 
         public Vector2Int ReferenceResolution => referenceResolution;
-        public IReadOnlyList<UILayoutScreenDefinition> Screens => screens;
+        public IReadOnlyList<UILayoutScreenDefinition> Screens =>
+            screens ?? (IReadOnlyList<UILayoutScreenDefinition>)Array.Empty<UILayoutScreenDefinition>();
 
         public UILayoutScreenDefinition FindScreen(string screenId)
         {
-            if (string.IsNullOrWhiteSpace(screenId))
+            if (string.IsNullOrWhiteSpace(screenId) || screens == null)
                 return null;
 
             for (int i = 0; i < screens.Count; i++)
@@ -106,9 +110,9 @@ namespace KingdomSurvival.UILayout
 
             issues.Clear();
             HashSet<string> screenIds = new HashSet<string>(StringComparer.Ordinal);
-            for (int screenIndex = 0; screenIndex < screens.Count; screenIndex++)
+            for (int screenIndex = 0; screenIndex < Screens.Count; screenIndex++)
             {
-                UILayoutScreenDefinition screen = screens[screenIndex];
+                UILayoutScreenDefinition screen = Screens[screenIndex];
                 if (screen == null || string.IsNullOrWhiteSpace(screen.Id))
                 {
                     issues.Add("Экран #" + (screenIndex + 1) + ": отсутствует ID.");
@@ -133,6 +137,87 @@ namespace KingdomSurvival.UILayout
                     if (element.Rect.width <= 0f || element.Rect.height <= 0f)
                         issues.Add(screen.Id + "/" + element.Id + ": ширина и высота должны быть больше нуля.");
                 }
+
+                for (int elementIndex = 0; elementIndex < screen.Elements.Count; elementIndex++)
+                {
+                    UILayoutElementDefinition element = screen.Elements[elementIndex];
+                    if (element == null || string.IsNullOrWhiteSpace(element.Id) || string.IsNullOrWhiteSpace(element.ParentId))
+                        continue;
+
+                    if (string.Equals(element.Id, element.ParentId, StringComparison.Ordinal))
+                    {
+                        issues.Add(screen.Id + "/" + element.Id + ": элемент не может быть родителем самому себе.");
+                        continue;
+                    }
+
+                    if (screen.FindElement(element.ParentId) == null)
+                    {
+                        issues.Add(screen.Id + "/" + element.Id + ": не найден родитель '" + element.ParentId + "'.");
+                        continue;
+                    }
+
+                    if (HasParentCycle(screen, element))
+                        issues.Add(screen.Id + "/" + element.Id + ": обнаружен цикл в иерархии родителей.");
+                }
+
+                if (string.Equals(screen.Id, "narrative-dialogue", StringComparison.Ordinal))
+                    ValidateNarrativeDialogueHierarchy(screen, issues);
+            }
+        }
+
+        private static bool HasParentCycle(
+            UILayoutScreenDefinition screen,
+            UILayoutElementDefinition start)
+        {
+            HashSet<string> visited = new HashSet<string>(StringComparer.Ordinal);
+            UILayoutElementDefinition current = start;
+            while (current != null)
+            {
+                if (!visited.Add(current.Id))
+                    return true;
+                if (string.IsNullOrWhiteSpace(current.ParentId))
+                    return false;
+                current = screen.FindElement(current.ParentId);
+            }
+
+            return false;
+        }
+
+        private static void ValidateNarrativeDialogueHierarchy(
+            UILayoutScreenDefinition screen,
+            List<string> issues)
+        {
+            ValidateRequiredElement(screen, issues, "overlay", string.Empty);
+            ValidateRequiredElement(screen, issues, "panel", "overlay");
+            ValidateRequiredElement(screen, issues, "portrait", "overlay");
+            ValidateRequiredElement(screen, issues, "speaker", "overlay");
+            ValidateRequiredElement(screen, issues, "role", "overlay");
+            ValidateRequiredElement(screen, issues, "text", "panel");
+            ValidateRequiredElement(screen, issues, "choices", "panel");
+        }
+
+        private static void ValidateRequiredElement(
+            UILayoutScreenDefinition screen,
+            List<string> issues,
+            string elementId,
+            string expectedParentId)
+        {
+            UILayoutElementDefinition element = screen.FindElement(elementId);
+            if (element == null)
+            {
+                issues.Add(screen.Id + ": отсутствует обязательный элемент '" + elementId + "'.");
+                return;
+            }
+
+            if (!string.Equals(element.ParentId, expectedParentId, StringComparison.Ordinal))
+            {
+                string expected = string.IsNullOrWhiteSpace(expectedParentId)
+                    ? "корень экрана"
+                    : "'" + expectedParentId + "'";
+                issues.Add(
+                    screen.Id + "/" + elementId +
+                    ": ожидаемый родитель — " + expected +
+                    ", текущий — '" + element.ParentId + "'.");
             }
         }
     }

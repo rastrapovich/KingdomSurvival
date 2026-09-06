@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KingdomSurvival.DialogueDatabase;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,8 +12,10 @@ namespace KingdomSurvival.UILayout.Editor
         private const float CanvasAspect = 16f / 9f;
 
         private UILayoutDatabaseAsset database;
+        private DialogueDatabaseAsset dialogueDatabase;
         private int screenIndex;
         private int elementIndex;
+        private int previewDialogueIndex;
         private Vector2 leftScroll;
         private Vector2 rightScroll;
         private float previewScale = 0.7f;
@@ -31,6 +34,8 @@ namespace KingdomSurvival.UILayout.Editor
         {
             if (database == null)
                 database = Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
+            if (dialogueDatabase == null)
+                dialogueDatabase = Resources.Load<DialogueDatabaseAsset>(DialogueDatabaseAsset.ResourcesPath);
         }
 
         private void OnGUI()
@@ -80,7 +85,9 @@ namespace KingdomSurvival.UILayout.Editor
                 EditorGUILayout.LabelField("ЭЛЕМЕНТЫ", EditorStyles.boldLabel);
                 for (int i = 0; i < screen.Elements.Count; i++)
                 {
-                    if (GUILayout.Toggle(elementIndex == i, screen.Elements[i].DisplayName, "Button"))
+                    UILayoutElementDefinition element = screen.Elements[i];
+                    string indent = string.IsNullOrWhiteSpace(element.ParentId) ? string.Empty : "   ↳ ";
+                    if (GUILayout.Toggle(elementIndex == i, indent + element.DisplayName, "Button"))
                         elementIndex = i;
                 }
             }
@@ -95,6 +102,10 @@ namespace KingdomSurvival.UILayout.Editor
             previewScale = EditorGUILayout.Slider("Масштаб preview", previewScale, 0.25f, 1f);
             Vector2Int reference = database != null ? database.ReferenceResolution : new Vector2Int(1920, 1080);
             EditorGUILayout.LabelField(reference.x + " × " + reference.y, EditorStyles.miniLabel);
+
+            UILayoutScreenDefinition screen = CurrentScreen;
+            if (screen != null && screen.Id == "narrative-dialogue")
+                DrawNarrativePreviewToolbar();
 
             Rect host = GUILayoutUtility.GetRect(
                 100f,
@@ -116,33 +127,184 @@ namespace KingdomSurvival.UILayout.Editor
             EditorGUI.DrawRect(canvas, new Color(0.12f, 0.13f, 0.14f, 1f));
             GUI.Box(canvas, GUIContent.none);
 
-            UILayoutScreenDefinition screen = CurrentScreen;
             if (screen != null)
             {
                 float sx = canvas.width / Mathf.Max(1f, reference.x);
                 float sy = canvas.height / Mathf.Max(1f, reference.y);
+                bool narrativePreview = screen.Id == "narrative-dialogue" && CurrentPreviewDialogue != null;
+
                 for (int i = 0; i < screen.Elements.Count; i++)
                 {
                     UILayoutElementDefinition element = screen.Elements[i];
-                    Rect r = element.Rect;
-                    Rect draw = new Rect(
-                        canvas.x + r.x * sx,
-                        canvas.y + r.y * sy,
-                        r.width * sx,
-                        r.height * sy);
+                    Rect draw = ToCanvasRect(canvas, element.Rect, sx, sy);
                     DrawElementImage(draw, element, sx, sy);
                     EditorGUI.DrawRect(
                         draw,
                         i == elementIndex
                             ? new Color(0.75f, 0.54f, 0.18f, 0.20f)
                             : new Color(0.4f, 0.4f, 0.4f, 0.08f));
-                    GUI.Box(draw, element.DisplayName);
+                    GUI.Box(draw, narrativePreview ? GUIContent.none : new GUIContent(element.DisplayName));
+
+                    if (narrativePreview)
+                    {
+                        Rect tag = new Rect(draw.x + 2f, draw.y + 2f, Mathf.Min(draw.width - 4f, 120f), 16f);
+                        GUI.Label(tag, element.DisplayName, EditorStyles.miniLabel);
+                    }
+
                     if (i == elementIndex)
                         HandleSelectedElement(draw, sx, sy, element);
                 }
+
+                if (narrativePreview)
+                    DrawNarrativeContentPreview(canvas, screen, sx, sy);
             }
 
             EditorGUILayout.EndVertical();
+        }
+
+        private void DrawNarrativePreviewToolbar()
+        {
+            dialogueDatabase = (DialogueDatabaseAsset)EditorGUILayout.ObjectField(
+                "База диалогов",
+                dialogueDatabase,
+                typeof(DialogueDatabaseAsset),
+                false);
+
+            if (dialogueDatabase == null || dialogueDatabase.Dialogues.Count == 0)
+            {
+                EditorGUILayout.HelpBox("Нет доступных диалогов для preview.", MessageType.Info);
+                return;
+            }
+
+            string[] labels = new string[dialogueDatabase.Dialogues.Count];
+            for (int i = 0; i < labels.Length; i++)
+            {
+                DialogueDefinitionData dialogue = dialogueDatabase.Dialogues[i];
+                labels[i] = dialogue.Title + "  [" + dialogue.Id + "]";
+            }
+
+            previewDialogueIndex = Mathf.Clamp(previewDialogueIndex, 0, labels.Length - 1);
+            previewDialogueIndex = EditorGUILayout.Popup("Диалог preview", previewDialogueIndex, labels);
+        }
+
+        private void DrawNarrativeContentPreview(
+            Rect canvas,
+            UILayoutScreenDefinition screen,
+            float sx,
+            float sy)
+        {
+            DialogueDefinitionData dialogue = CurrentPreviewDialogue;
+            DialogueNodeData node = FindPreviewNode(dialogue);
+            if (dialogue == null || node == null)
+                return;
+
+            DialogueSpeakerData speaker = dialogueDatabase != null
+                ? dialogueDatabase.FindSpeaker(node.SpeakerId)
+                : null;
+
+            UILayoutElementDefinition portrait = screen.FindElement("portrait");
+            if (portrait != null && speaker != null && speaker.Portrait != null)
+            {
+                Rect portraitRect = ToCanvasRect(canvas, portrait.Rect, sx, sy);
+                GUI.DrawTexture(portraitRect, speaker.Portrait.texture, ScaleMode.ScaleAndCrop, true);
+            }
+
+            if (speaker != null)
+            {
+                DrawPreviewText(
+                    canvas,
+                    screen.FindElement("speaker"),
+                    speaker.DisplayName,
+                    sx,
+                    sy,
+                    Mathf.Max(9, Mathf.RoundToInt(25f * sx)),
+                    FontStyle.Bold);
+                DrawPreviewText(
+                    canvas,
+                    screen.FindElement("role"),
+                    speaker.Role,
+                    sx,
+                    sy,
+                    Mathf.Max(8, Mathf.RoundToInt(11f * sx)),
+                    FontStyle.Normal);
+            }
+
+            DrawPreviewText(
+                canvas,
+                screen.FindElement("text"),
+                node.Text,
+                sx,
+                sy,
+                Mathf.Max(9, Mathf.RoundToInt(17f * sx)),
+                FontStyle.Normal);
+
+            string choices = string.Empty;
+            for (int i = 0; i < node.Choices.Count; i++)
+            {
+                if (i > 0)
+                    choices += "\n\n";
+                choices += "› " + node.Choices[i].Text;
+            }
+
+            DrawPreviewText(
+                canvas,
+                screen.FindElement("choices"),
+                choices,
+                sx,
+                sy,
+                Mathf.Max(8, Mathf.RoundToInt(13f * sx)),
+                FontStyle.Normal);
+        }
+
+        private static void DrawPreviewText(
+            Rect canvas,
+            UILayoutElementDefinition element,
+            string text,
+            float sx,
+            float sy,
+            int fontSize,
+            FontStyle fontStyle)
+        {
+            if (element == null || string.IsNullOrEmpty(text))
+                return;
+
+            Rect rect = ToCanvasRect(canvas, element.Rect, sx, sy);
+            rect.x += 5f;
+            rect.y += 18f;
+            rect.width = Mathf.Max(0f, rect.width - 10f);
+            rect.height = Mathf.Max(0f, rect.height - 22f);
+            GUIStyle style = new GUIStyle(EditorStyles.label)
+            {
+                wordWrap = true,
+                fontSize = fontSize,
+                fontStyle = fontStyle,
+                alignment = TextAnchor.UpperLeft
+            };
+            GUI.Label(rect, text, style);
+        }
+
+        private DialogueNodeData FindPreviewNode(DialogueDefinitionData dialogue)
+        {
+            if (dialogue == null)
+                return null;
+
+            for (int i = 0; i < dialogue.Nodes.Count; i++)
+            {
+                DialogueNodeData node = dialogue.Nodes[i];
+                if (node != null && node.Id == dialogue.StartNodeId)
+                    return node;
+            }
+
+            return dialogue.Nodes.Count > 0 ? dialogue.Nodes[0] : null;
+        }
+
+        private static Rect ToCanvasRect(Rect canvas, Rect referenceRect, float sx, float sy)
+        {
+            return new Rect(
+                canvas.x + referenceRect.x * sx,
+                canvas.y + referenceRect.y * sy,
+                referenceRect.width * sx,
+                referenceRect.height * sy);
         }
 
         private static void DrawElementImage(
@@ -276,6 +438,9 @@ namespace KingdomSurvival.UILayout.Editor
                 SerializedProperty selected = elements.GetArrayElementAtIndex(elementIndex);
 
                 EditorGUI.BeginChangeCheck();
+                EditorGUILayout.PropertyField(
+                    selected.FindPropertyRelative("parentId"),
+                    new GUIContent("Родитель ID"));
                 EditorGUILayout.PropertyField(selected.FindPropertyRelative("rect"));
                 EditorGUILayout.Space(8f);
                 EditorGUILayout.LabelField("ИЗОБРАЖЕНИЕ", EditorStyles.boldLabel);
@@ -320,6 +485,17 @@ namespace KingdomSurvival.UILayout.Editor
 
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
+        }
+
+        private DialogueDefinitionData CurrentPreviewDialogue
+        {
+            get
+            {
+                if (dialogueDatabase == null || dialogueDatabase.Dialogues.Count == 0)
+                    return null;
+                previewDialogueIndex = Mathf.Clamp(previewDialogueIndex, 0, dialogueDatabase.Dialogues.Count - 1);
+                return dialogueDatabase.Dialogues[previewDialogueIndex];
+            }
         }
 
         private UILayoutScreenDefinition CurrentScreen

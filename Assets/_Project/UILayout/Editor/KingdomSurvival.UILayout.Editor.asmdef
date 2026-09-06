@@ -1,7 +1,10 @@
 {
   "name": "KingdomSurvival.UILayout.Editor",
   "rootNamespace": "KingdomSurvival.UILayout.Editor",
-  "references": ["KingdomSurvival.UILayout"],
+  "references": [
+    "KingdomSurvival.UILayout",
+    "KingdomSurvival.DialogueDatabase"
+  ],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

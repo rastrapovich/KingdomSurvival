@@ -16,6 +16,18 @@ public sealed class NarrativeDialogueTests
     }
 
     [Test]
+    public void Session_History_StartsWithOpeningSpeakerLine()
+    {
+        NarrativeDialogueSession session = new NarrativeDialogueSession();
+
+        session.Start(CreateDialogue());
+
+        Assert.AreEqual(1, session.History.Count);
+        Assert.AreEqual(NarrativeDialogueHistoryEntryKind.Speaker, session.History[0].Kind);
+        Assert.AreEqual("Start", session.History[0].Text);
+    }
+
+    [Test]
     public void Choice_CanBranchToDifferentNodes()
     {
         NarrativeDialogueSession session = new NarrativeDialogueSession();
@@ -24,6 +36,21 @@ public sealed class NarrativeDialogueTests
         session.SelectChoice(1);
 
         Assert.AreEqual("right", session.CurrentNode.Id);
+    }
+
+    [Test]
+    public void Choice_AppendsPlayerAnswerAndNextSpeakerLineToHistory()
+    {
+        NarrativeDialogueSession session = new NarrativeDialogueSession();
+        session.Start(CreateDialogue());
+
+        session.SelectChoice(0);
+
+        Assert.AreEqual(3, session.History.Count);
+        Assert.AreEqual(NarrativeDialogueHistoryEntryKind.PlayerChoice, session.History[1].Kind);
+        Assert.AreEqual("Left", session.History[1].Text);
+        Assert.AreEqual(NarrativeDialogueHistoryEntryKind.Speaker, session.History[2].Kind);
+        Assert.AreEqual("Left", session.History[2].Text);
     }
 
     [Test]
@@ -50,6 +77,8 @@ public sealed class NarrativeDialogueTests
         Assert.IsFalse(continues);
         Assert.IsFalse(session.IsActive);
         Assert.IsNull(session.CurrentNode);
+        Assert.AreEqual(2, session.History.Count);
+        Assert.AreEqual("Exit", session.History[1].Text);
     }
 
     [Test]

@@ -80,10 +80,38 @@
     margin-bottom: 24px;
 }
 
-.narrative-dialogue-text {
+.narrative-dialogue-history {
+    flex-grow: 1;
     padding-right: 8px;
+}
+
+.narrative-dialogue-history-entry {
+    margin-bottom: 18px;
+}
+
+.narrative-dialogue-history-speaker {
+    margin-bottom: 4px;
+    color: rgb(178, 148, 91);
+    font-size: 12px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.narrative-dialogue-history-text {
     color: rgb(224, 219, 205);
     font-size: 17px;
+    white-space: normal;
+}
+
+.narrative-dialogue-history-player {
+    margin-left: 24px;
+    margin-bottom: 18px;
+    padding-left: 12px;
+    border-left-width: 2px;
+    border-left-color: rgb(119, 96, 58);
+    color: rgb(194, 187, 170);
+    font-size: 14px;
+    -unity-font-style: italic;
     white-space: normal;
 }
 

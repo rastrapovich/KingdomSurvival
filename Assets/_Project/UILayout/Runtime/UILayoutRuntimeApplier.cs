@@ -12,9 +12,42 @@ namespace KingdomSurvival.UILayout
             return Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
         }
 
+        public static bool TryGetLocalReferenceRect(
+            UILayoutScreenDefinition screen,
+            UILayoutElementDefinition definition,
+            out Rect localRect)
+        {
+            localRect = definition != null ? definition.Rect : default(Rect);
+            if (definition == null)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(definition.ParentId))
+                return true;
+            if (screen == null)
+                return false;
+
+            UILayoutElementDefinition parent = screen.FindElement(definition.ParentId);
+            if (parent == null)
+                return false;
+
+            localRect = definition.Rect;
+            localRect.position -= parent.Rect.position;
+            return true;
+        }
+
         public static void ApplyRect(
             VisualElement target,
             UILayoutElementDefinition definition,
+            Vector2 referenceResolution,
+            Vector2 actualResolution)
+        {
+            ApplyRect(target, definition, null, referenceResolution, actualResolution);
+        }
+
+        public static void ApplyRect(
+            VisualElement target,
+            UILayoutElementDefinition definition,
+            UILayoutScreenDefinition screen,
             Vector2 referenceResolution,
             Vector2 actualResolution)
         {
@@ -28,7 +61,10 @@ namespace KingdomSurvival.UILayout
                 ? actualResolution.y / referenceResolution.y
                 : 1f;
 
-            Rect r = definition.Rect;
+            Rect r;
+            if (!TryGetLocalReferenceRect(screen, definition, out r))
+                r = definition.Rect;
+
             target.style.position = Position.Absolute;
             target.style.left = r.x * sx;
             target.style.top = r.y * sy;

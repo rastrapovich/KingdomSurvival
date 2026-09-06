@@ -171,12 +171,69 @@ public sealed class NarrativeDialogueDefinition
     }
 }
 
+public enum NarrativeDialogueHistoryEntryKind
+{
+    Speaker,
+    PlayerChoice
+}
+
+public sealed class NarrativeDialogueHistoryEntry
+{
+    public NarrativeDialogueHistoryEntryKind Kind { get; }
+    public string SpeakerId { get; }
+    public string Speaker { get; }
+    public string Role { get; }
+    public string Text { get; }
+
+    private NarrativeDialogueHistoryEntry(
+        NarrativeDialogueHistoryEntryKind kind,
+        string speakerId,
+        string speaker,
+        string role,
+        string text)
+    {
+        Kind = kind;
+        SpeakerId = speakerId ?? string.Empty;
+        Speaker = speaker ?? string.Empty;
+        Role = role ?? string.Empty;
+        Text = text ?? string.Empty;
+    }
+
+    public static NarrativeDialogueHistoryEntry FromNode(NarrativeDialogueNode node)
+    {
+        if (node == null)
+            throw new ArgumentNullException(nameof(node));
+
+        return new NarrativeDialogueHistoryEntry(
+            NarrativeDialogueHistoryEntryKind.Speaker,
+            node.SpeakerId,
+            node.Speaker,
+            node.Role,
+            node.Text);
+    }
+
+    public static NarrativeDialogueHistoryEntry FromPlayerChoice(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            throw new ArgumentException("Player dialogue history text cannot be empty.", nameof(text));
+
+        return new NarrativeDialogueHistoryEntry(
+            NarrativeDialogueHistoryEntryKind.PlayerChoice,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            text);
+    }
+}
+
 public sealed class NarrativeDialogueSession
 {
     private NarrativeDialogueDefinition definition;
+    private readonly List<NarrativeDialogueHistoryEntry> history = new List<NarrativeDialogueHistoryEntry>();
 
     public bool IsActive { get; private set; }
     public NarrativeDialogueNode CurrentNode { get; private set; }
+    public IReadOnlyList<NarrativeDialogueHistoryEntry> History => history;
 
     public void Start(NarrativeDialogueDefinition dialogue)
     {
@@ -184,8 +241,10 @@ public sealed class NarrativeDialogueSession
             throw new ArgumentNullException(nameof(dialogue));
 
         definition = dialogue;
+        history.Clear();
         CurrentNode = definition.GetNode(definition.StartNodeId);
         IsActive = true;
+        history.Add(NarrativeDialogueHistoryEntry.FromNode(CurrentNode));
     }
 
     public bool SelectChoice(int choiceIndex)
@@ -197,6 +256,8 @@ public sealed class NarrativeDialogueSession
             throw new ArgumentOutOfRangeException(nameof(choiceIndex));
 
         NarrativeDialogueChoice choice = CurrentNode.Choices[choiceIndex];
+        history.Add(NarrativeDialogueHistoryEntry.FromPlayerChoice(choice.Text));
+
         if (choice.EndsDialogue)
         {
             End();
@@ -204,6 +265,7 @@ public sealed class NarrativeDialogueSession
         }
 
         CurrentNode = definition.GetNode(choice.NextNodeId);
+        history.Add(NarrativeDialogueHistoryEntry.FromNode(CurrentNode));
         return true;
     }
 

@@ -32,7 +32,7 @@ MonoBehaviour:
       imageScale: 1
       imageOffset: {x: 0, y: 0}
       tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
+      opacity: 0.22
     - id: panel
       displayName: "\u041F\u0430\u043D\u0435\u043B\u044C \u0434\u0438\u0430\u043B\u043E\u0433\u0430"
       parentId: overlay
@@ -70,8 +70,8 @@ MonoBehaviour:
       parentId: overlay
       rect:
         serializedVersion: 2
-        x: 1092.2786
-        y: 488.45865
+        x: 1116.9874
+        y: 79.2365
         width: 188.708
         height: 39.12672
       sprite: {fileID: 0}
@@ -86,10 +86,10 @@ MonoBehaviour:
       parentId: overlay
       rect:
         serializedVersion: 2
-        x: 1085.1759
-        y: 526.07324
-        width: 210.62079
-        height: 44.996254
+        x: 1118.2635
+        y: 123.50763
+        width: 185.72803
+        height: 40.110756
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -104,8 +104,8 @@ MonoBehaviour:
         serializedVersion: 2
         x: 1380.5236
         y: 170.89005
-        width: 425.5497
-        height: 371.93716
+        width: 410.89322
+        height: 373.56567
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -120,8 +120,8 @@ MonoBehaviour:
         serializedVersion: 2
         x: 1383.8743
         y: 566.2827
-        width: 425.54974
-        height: 398.74344
+        width: 410.89325
+        height: 400.37195
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0

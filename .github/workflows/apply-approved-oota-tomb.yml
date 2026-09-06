@@ -1,0 +1,59 @@
+name: Apply approved OOTA and Tomb docs
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  apply-approved-docs:
+    if: github.head_ref == 'docs/oota-tomb-approved-20260906'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Apply approved documentation changes
+        run: python tools/apply_oota_tomb_docs.py
+
+      - name: Remove temporary integration helpers
+        run: |
+          rm -f tools/apply_oota_tomb_docs.py
+          rm -f .github/workflows/apply-approved-oota-tomb.yml
+
+      - name: Validate documentation diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          test "$(find . -maxdepth 1 -type f -name 'KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v*.md' | wc -l)" -eq 1
+          grep -q '\[D&D / OOTA\]' ProjectDocs/NARRATIVE.md
+          grep -q 'Долгое преследование как форма экспедиции' ProjectDocs/NARRATIVE.md
+          grep -q 'экспедиционная причинность региона' ProjectDocs/LORE.md
+          grep -q 'экспедиционные функции существ' ProjectDocs/BESTIARY.md
+          grep -q 'второй проход по Tomb of Annihilation' ProjectDocs/TOMB_OF_ANNIHILATION_ADAPTATION.md
+          grep -q 'Преследователь существует на той же карте' ProjectDocs/OUT_OF_THE_ABYSS_ADAPTATION.md
+          grep -q 'Интеграция Tomb of Annihilation / Out of the Abyss' ProjectDocs/DEVELOPMENT_STATUS.md
+          bad=$(git diff --name-only | grep -Ev '^(ProjectDocs/|tools/apply_oota_tomb_docs.py$|\.github/workflows/apply-approved-oota-tomb.yml$)' || true)
+          test -z "$bad"
+
+      - name: Commit generated documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No generated changes to commit.'
+            exit 0
+          fi
+          git commit -m 'docs: integrate OOTA and Tomb expedition tools'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}

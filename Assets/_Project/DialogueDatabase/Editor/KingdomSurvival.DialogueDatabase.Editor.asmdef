@@ -1,19 +1,17 @@
 {
-  "name": "KingdomSurvival.Core.EditModeTests",
-  "rootNamespace": "",
+  "name": "KingdomSurvival.DialogueDatabase.Editor",
+  "rootNamespace": "KingdomSurvival.DialogueDatabase.Editor",
   "references": [
     "KingdomSurvival.Core",
-    "KingdomSurvival.DialogueDatabase",
-    "KingdomSurvival.UILayout"
+    "KingdomSurvival.DialogueDatabase"
   ],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,
   "precompiledReferences": [],
-  "autoReferenced": false,
+  "autoReferenced": true,
   "defineConstraints": [],
   "versionDefines": [],
-  "noEngineReferences": false,
-  "optionalUnityReferences": ["TestAssemblies"]
+  "noEngineReferences": false
 }

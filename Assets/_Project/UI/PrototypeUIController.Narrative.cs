@@ -1,4 +1,5 @@
 using System.Collections;
+using KingdomSurvival.DialogueDatabase;
 using KingdomSurvival.UILayout;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -6,9 +7,11 @@ using UnityEngine.UIElements;
 public partial class PrototypeUIController
 {
     private NarrativeDialogueSession narrativeDialogueSession;
+    private DialogueDatabaseAsset narrativeDialogueDatabase;
     private VisualElement narrativeDialogueOverlay;
     private VisualElement narrativePortrait;
     private VisualElement narrativePanel;
+    private Label narrativePortraitPlaceholder;
     private Label narrativeSpeakerLabel;
     private Label narrativeRoleLabel;
     private Label narrativeTextLabel;
@@ -20,6 +23,7 @@ public partial class PrototypeUIController
     private void Awake()
     {
         narrativeDialogueSession = new NarrativeDialogueSession();
+        narrativeDialogueDatabase = DialogueDatabaseRuntime.LoadDefaultDatabase();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         StartCoroutine(InstallNarrativeDebugTrigger());
 #endif
@@ -43,8 +47,29 @@ public partial class PrototypeUIController
     {
         if (debugPanel != null)
             debugPanel.style.display = DisplayStyle.None;
-        if (!TryOpenNarrativeDialogue(CreateNarrativePrototypeDialogue()))
+        if (!TryOpenNarrativeDialogueById("prototype_miller"))
             AddReport("[DEBUG] Тестовый диалог сейчас нельзя открыть.");
+    }
+
+    public bool TryOpenNarrativeDialogueById(string dialogueId)
+    {
+        if (narrativeDialogueDatabase == null)
+            narrativeDialogueDatabase = DialogueDatabaseRuntime.LoadDefaultDatabase();
+        if (narrativeDialogueDatabase == null)
+        {
+            Debug.LogError("Narrative UI: не найдена база диалогов Resources/" + DialogueDatabaseAsset.ResourcesPath + ".asset");
+            return false;
+        }
+
+        NarrativeDialogueDefinition dialogue;
+        string error;
+        if (!narrativeDialogueDatabase.TryBuildRuntime(dialogueId, out dialogue, out error))
+        {
+            Debug.LogError("Narrative UI: не удалось открыть диалог '" + dialogueId + "'.\n" + error);
+            return false;
+        }
+
+        return TryOpenNarrativeDialogue(dialogue);
     }
 
     public bool TryOpenNarrativeDialogue(NarrativeDialogueDefinition dialogue)
@@ -86,9 +111,9 @@ public partial class PrototypeUIController
         narrativeDialogueOverlay.AddToClassList("narrative-dialogue-overlay");
         narrativePortrait = new VisualElement { name = "narrative-dialogue-portrait" };
         narrativePortrait.AddToClassList("narrative-dialogue-portrait");
-        Label portraitPlaceholder = new Label("ПОРТРЕТ\nПЕРСОНАЖА");
-        portraitPlaceholder.AddToClassList("narrative-dialogue-portrait-placeholder");
-        narrativePortrait.Add(portraitPlaceholder);
+        narrativePortraitPlaceholder = new Label("ПОРТРЕТ\nПЕРСОНАЖА");
+        narrativePortraitPlaceholder.AddToClassList("narrative-dialogue-portrait-placeholder");
+        narrativePortrait.Add(narrativePortraitPlaceholder);
 
         narrativePanel = new VisualElement { name = "narrative-dialogue-panel" };
         narrativePanel.AddToClassList("narrative-dialogue-panel");
@@ -164,6 +189,7 @@ public partial class PrototypeUIController
         narrativeSpeakerLabel.text = node.Speaker;
         narrativeRoleLabel.text = node.Role;
         narrativeTextLabel.text = node.Text;
+        ApplyNarrativeSpeakerPortrait(node.SpeakerId);
         narrativeChoicesContainer.Clear();
         for (int i = 0; i < node.Choices.Count; i++)
         {
@@ -174,6 +200,29 @@ public partial class PrototypeUIController
             if (choice.EndsDialogue)
                 button.AddToClassList("narrative-dialogue-choice-exit");
             narrativeChoicesContainer.Add(button);
+        }
+    }
+
+    private void ApplyNarrativeSpeakerPortrait(string speakerId)
+    {
+        if (narrativePortrait == null)
+            return;
+
+        DialogueSpeakerData speaker = narrativeDialogueDatabase != null
+            ? narrativeDialogueDatabase.FindSpeaker(speakerId)
+            : null;
+        Sprite portrait = speaker != null ? speaker.Portrait : null;
+        if (portrait != null)
+        {
+            narrativePortrait.style.backgroundImage = new StyleBackground(portrait);
+            if (narrativePortraitPlaceholder != null)
+                narrativePortraitPlaceholder.style.display = DisplayStyle.None;
+        }
+        else
+        {
+            narrativePortrait.style.backgroundImage = default(StyleBackground);
+            if (narrativePortraitPlaceholder != null)
+                narrativePortraitPlaceholder.style.display = DisplayStyle.Flex;
         }
     }
 
@@ -200,36 +249,5 @@ public partial class PrototypeUIController
             narrativeChoicesContainer.Clear();
         RefreshTimeControlAvailability();
         ResumeAfterBlockingModalIfReady();
-    }
-
-    private static NarrativeDialogueDefinition CreateNarrativePrototypeDialogue()
-    {
-        const string speaker = "Мельник";
-        const string role = "Житель Дома · прототип";
-        return new NarrativeDialogueDefinition(
-            "prototype_miller", "opening",
-            new NarrativeDialogueNode("opening", speaker, role, "Плотину после паводка повело сильнее, чем я думал. Вода уходит не туда, куда должна.",
-                new NarrativeDialogueChoice("Покажи, где заметили проблему.", "details"),
-                new NarrativeDialogueChoice("Что могло это вызвать?", "cause"),
-                NarrativeDialogueChoice.Exit("Вернёмся к этому позже.")),
-            new NarrativeDialogueNode("details", speaker, role, "Сначала просели опоры у старого шлюза. Рабочие говорят, что утром вода уже шла ниже обычного.",
-                new NarrativeDialogueChoice("А следы вокруг проверяли?", "tracks"),
-                new NarrativeDialogueChoice("Что ты сам думаешь?", "cause"),
-                NarrativeDialogueChoice.Exit("Пока достаточно.")),
-            new NarrativeDialogueNode("cause", speaker, role, "После паводка всякое бывает. Но здесь слишком многое изменилось за одну ночь. Я бы сперва осмотрел старую часть плотины.",
-                new NarrativeDialogueChoice("Покажи старую часть плотины.", "old_dam"),
-                new NarrativeDialogueChoice("Рабочие что-нибудь заметили?", "workers"),
-                new NarrativeDialogueChoice("Вернёмся к тому, что ты видел.", "details"),
-                NarrativeDialogueChoice.Exit("Ясно. Продолжим позже.")),
-            new NarrativeDialogueNode("tracks", speaker, role, "Следы есть, но после паводка двор весь в грязи. Один рабочий уверяет, что видел свежие отметины у настила.",
-                new NarrativeDialogueChoice("Позови тех, кто работал ночью.", "workers"),
-                new NarrativeDialogueChoice("Сначала хочу ещё раз услышать всё с начала.", "opening"),
-                NarrativeDialogueChoice.Exit("Этого пока хватит.")),
-            new NarrativeDialogueNode("workers", speaker, role, "Один говорит, что вода резко поднялась. Другой — что она, наоборот, ушла. Оба стояли здесь в одну и ту же ночь.",
-                new NarrativeDialogueChoice("Значит, осмотрим всё по порядку.", "old_dam"),
-                NarrativeDialogueChoice.Exit("Я поговорю с ними позже.")),
-            new NarrativeDialogueNode("old_dam", speaker, role, "Начни со старого шлюза. Там дерево темнее и крепёж старый — сразу увидишь. Потом сравни с новыми опорами.",
-                NarrativeDialogueChoice.Exit("Хорошо. Я осмотрю."),
-                new NarrativeDialogueChoice("Ещё один вопрос.", "opening")));
     }
 }

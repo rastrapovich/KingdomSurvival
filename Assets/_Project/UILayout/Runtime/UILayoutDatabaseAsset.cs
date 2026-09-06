@@ -11,6 +11,20 @@ namespace KingdomSurvival.UILayout
         Stretch
     }
 
+    public enum UILayoutTextHorizontalAlignment
+    {
+        Left,
+        Center,
+        Right
+    }
+
+    public enum UILayoutTextVerticalAlignment
+    {
+        Top,
+        Middle,
+        Bottom
+    }
+
     [Serializable]
     public sealed class UILayoutElementDefinition
     {
@@ -25,6 +39,12 @@ namespace KingdomSurvival.UILayout
         [SerializeField] private Vector2 imageOffset = Vector2.zero;
         [SerializeField] private Color tint = Color.white;
         [SerializeField, Range(0f, 1f)] private float opacity = 1f;
+        [SerializeField] private Font font;
+        [SerializeField, Min(1)] private int fontSize = 16;
+        [SerializeField] private Color textColor = Color.white;
+        [SerializeField] private FontStyle fontStyle = FontStyle.Normal;
+        [SerializeField] private UILayoutTextHorizontalAlignment horizontalAlignment = UILayoutTextHorizontalAlignment.Left;
+        [SerializeField] private UILayoutTextVerticalAlignment verticalAlignment = UILayoutTextVerticalAlignment.Top;
 
         public string Id => id;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? id : displayName;
@@ -37,6 +57,12 @@ namespace KingdomSurvival.UILayout
         public Vector2 ImageOffset => imageOffset;
         public Color Tint => tint;
         public float Opacity => Mathf.Clamp01(opacity);
+        public Font Font => font;
+        public int FontSize => Mathf.Max(1, fontSize);
+        public Color TextColor => textColor;
+        public FontStyle FontStyle => fontStyle;
+        public UILayoutTextHorizontalAlignment HorizontalAlignment => horizontalAlignment;
+        public UILayoutTextVerticalAlignment VerticalAlignment => verticalAlignment;
 
         public void SetRect(Rect value) => rect = value;
         public void SetImageScale(float value) => imageScale = Mathf.Max(0.05f, value);
@@ -53,10 +79,12 @@ namespace KingdomSurvival.UILayout
     {
         [SerializeField] private string id = string.Empty;
         [SerializeField] private string displayName = string.Empty;
+        [SerializeField, Range(0f, 1f)] private float dimmingOpacity = 0.68f;
         [SerializeField] private List<UILayoutElementDefinition> elements = new List<UILayoutElementDefinition>();
 
         public string Id => id;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? id : displayName;
+        public float DimmingOpacity => Mathf.Clamp01(dimmingOpacity);
         public IReadOnlyList<UILayoutElementDefinition> Elements =>
             elements ?? (IReadOnlyList<UILayoutElementDefinition>)Array.Empty<UILayoutElementDefinition>();
 
@@ -136,6 +164,8 @@ namespace KingdomSurvival.UILayout
                         issues.Add(screen.Id + ": повторяющийся ID элемента " + element.Id + ".");
                     if (element.Rect.width <= 0f || element.Rect.height <= 0f)
                         issues.Add(screen.Id + "/" + element.Id + ": ширина и высота должны быть больше нуля.");
+                    if (element.FontSize <= 0)
+                        issues.Add(screen.Id + "/" + element.Id + ": размер шрифта должен быть больше нуля.");
                 }
 
                 for (int elementIndex = 0; elementIndex < screen.Elements.Count; elementIndex++)

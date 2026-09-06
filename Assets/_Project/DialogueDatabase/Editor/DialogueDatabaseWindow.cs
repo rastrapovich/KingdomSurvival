@@ -212,6 +212,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
             EditorGUILayout.EndVertical();
 
+            SerializedProperty structureNodes = dialogue.FindPropertyRelative("nodes");
+            bool deleteGraphNode = false;
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             GUILayout.Label("СТРУКТУРА", EditorStyles.boldLabel, GUILayout.Width(90f));
             if (GUILayout.Toggle(structureMode == DialogueStructureMode.Graph, "Граф", EditorStyles.toolbarButton, GUILayout.Width(70f)))
@@ -219,7 +221,22 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (GUILayout.Toggle(structureMode == DialogueStructureMode.Table, "Таблица", EditorStyles.toolbarButton, GUILayout.Width(70f)))
                 structureMode = DialogueStructureMode.Table;
             GUILayout.FlexibleSpace();
+
+            bool canDeleteGraphNode = structureMode == DialogueStructureMode.Graph &&
+                                      structureNodes.arraySize > 1 &&
+                                      graphSelectedNodeIndex >= 0 &&
+                                      graphSelectedNodeIndex < structureNodes.arraySize;
+            GUI.enabled = canDeleteGraphNode;
+            if (GUILayout.Button("Удалить реплику", EditorStyles.toolbarButton, GUILayout.Width(115f)))
+                deleteGraphNode = true;
+            GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
+
+            if (deleteGraphNode && TryDeleteDialogueNode(dialogue, graphSelectedNodeIndex))
+            {
+                GUIUtility.ExitGUI();
+                return;
+            }
 
             if (structureMode == DialogueStructureMode.Graph)
                 DrawDialogueGraph(dialogue);
@@ -262,10 +279,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             GUI.enabled = nodes.arraySize > 1;
             if (GUILayout.Button("×", GUILayout.Width(28f)))
             {
-                nodes.DeleteArrayElementAtIndex(nodeIndex);
                 GUI.enabled = true;
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.EndVertical();
+                if (TryDeleteDialogueNode(dialogue, nodeIndex))
+                    GUIUtility.ExitGUI();
                 return;
             }
             GUI.enabled = true;

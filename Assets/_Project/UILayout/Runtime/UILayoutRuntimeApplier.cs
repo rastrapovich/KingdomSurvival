@@ -123,5 +123,75 @@ namespace KingdomSurvival.UILayout
                 definition.ImageScale,
                 1f));
         }
+
+        public static void ApplyDimming(
+            VisualElement target,
+            UILayoutScreenDefinition screen)
+        {
+            if (target == null || screen == null)
+                return;
+
+            target.style.backgroundColor = new Color(
+                5f / 255f,
+                7f / 255f,
+                8f / 255f,
+                screen.DimmingOpacity);
+        }
+
+        public static void ApplyTextStyle(
+            VisualElement target,
+            UILayoutElementDefinition definition,
+            Vector2 referenceResolution,
+            Vector2 actualResolution)
+        {
+            if (target == null || definition == null)
+                return;
+
+            float sx = referenceResolution.x > 0f && actualResolution.x > 0f
+                ? actualResolution.x / referenceResolution.x
+                : 1f;
+            float sy = referenceResolution.y > 0f && actualResolution.y > 0f
+                ? actualResolution.y / referenceResolution.y
+                : 1f;
+            float textScale = Mathf.Max(0.01f, Mathf.Min(sx, sy));
+
+            if (definition.Font != null)
+                target.style.unityFont = definition.Font;
+            target.style.fontSize = Mathf.Max(1f, definition.FontSize * textScale);
+            target.style.color = definition.TextColor;
+            target.style.unityFontStyleAndWeight = definition.FontStyle;
+            target.style.unityTextAlign = ResolveTextAnchor(
+                definition.HorizontalAlignment,
+                definition.VerticalAlignment);
+        }
+
+        public static TextAnchor ResolveTextAnchor(
+            UILayoutTextHorizontalAlignment horizontal,
+            UILayoutTextVerticalAlignment vertical)
+        {
+            if (vertical == UILayoutTextVerticalAlignment.Middle)
+            {
+                if (horizontal == UILayoutTextHorizontalAlignment.Center)
+                    return TextAnchor.MiddleCenter;
+                if (horizontal == UILayoutTextHorizontalAlignment.Right)
+                    return TextAnchor.MiddleRight;
+                return TextAnchor.MiddleLeft;
+            }
+
+            if (vertical == UILayoutTextVerticalAlignment.Bottom)
+            {
+                if (horizontal == UILayoutTextHorizontalAlignment.Center)
+                    return TextAnchor.LowerCenter;
+                if (horizontal == UILayoutTextHorizontalAlignment.Right)
+                    return TextAnchor.LowerRight;
+                return TextAnchor.LowerLeft;
+            }
+
+            if (horizontal == UILayoutTextHorizontalAlignment.Center)
+                return TextAnchor.UpperCenter;
+            if (horizontal == UILayoutTextHorizontalAlignment.Right)
+                return TextAnchor.UpperRight;
+            return TextAnchor.UpperLeft;
+        }
     }
 }

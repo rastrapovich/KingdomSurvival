@@ -125,6 +125,12 @@ namespace KingdomSurvival.UILayout.Editor
                 height);
 
             EditorGUI.DrawRect(canvas, new Color(0.12f, 0.13f, 0.14f, 1f));
+            if (screen != null && screen.Id == "narrative-dialogue")
+            {
+                EditorGUI.DrawRect(
+                    canvas,
+                    new Color(5f / 255f, 7f / 255f, 8f / 255f, screen.DimmingOpacity));
+            }
             GUI.Box(canvas, GUIContent.none);
 
             if (screen != null)
@@ -147,7 +153,7 @@ namespace KingdomSurvival.UILayout.Editor
 
                     if (narrativePreview)
                     {
-                        Rect tag = new Rect(draw.x + 2f, draw.y + 2f, Mathf.Min(draw.width - 4f, 120f), 16f);
+                        Rect tag = new Rect(draw.x + 2f, draw.y + 2f, Mathf.Min(Mathf.Max(0f, draw.width - 4f), 120f), 16f);
                         GUI.Label(tag, element.DisplayName, EditorStyles.miniLabel);
                     }
 
@@ -216,17 +222,13 @@ namespace KingdomSurvival.UILayout.Editor
                     screen.FindElement("speaker"),
                     speaker.DisplayName,
                     sx,
-                    sy,
-                    Mathf.Max(9, Mathf.RoundToInt(25f * sx)),
-                    FontStyle.Bold);
+                    sy);
                 DrawPreviewText(
                     canvas,
                     screen.FindElement("role"),
                     speaker.Role,
                     sx,
-                    sy,
-                    Mathf.Max(8, Mathf.RoundToInt(11f * sx)),
-                    FontStyle.Normal);
+                    sy);
             }
 
             DrawPreviewText(
@@ -234,9 +236,7 @@ namespace KingdomSurvival.UILayout.Editor
                 screen.FindElement("text"),
                 node.Text,
                 sx,
-                sy,
-                Mathf.Max(9, Mathf.RoundToInt(17f * sx)),
-                FontStyle.Normal);
+                sy);
 
             string choices = string.Empty;
             for (int i = 0; i < node.Choices.Count; i++)
@@ -251,9 +251,7 @@ namespace KingdomSurvival.UILayout.Editor
                 screen.FindElement("choices"),
                 choices,
                 sx,
-                sy,
-                Mathf.Max(8, Mathf.RoundToInt(13f * sx)),
-                FontStyle.Normal);
+                sy);
         }
 
         private static void DrawPreviewText(
@@ -261,25 +259,29 @@ namespace KingdomSurvival.UILayout.Editor
             UILayoutElementDefinition element,
             string text,
             float sx,
-            float sy,
-            int fontSize,
-            FontStyle fontStyle)
+            float sy)
         {
             if (element == null || string.IsNullOrEmpty(text))
                 return;
 
             Rect rect = ToCanvasRect(canvas, element.Rect, sx, sy);
             rect.x += 5f;
-            rect.y += 18f;
+            rect.y += 5f;
             rect.width = Mathf.Max(0f, rect.width - 10f);
-            rect.height = Mathf.Max(0f, rect.height - 22f);
+            rect.height = Mathf.Max(0f, rect.height - 10f);
+            float textScale = Mathf.Max(0.01f, Mathf.Min(sx, sy));
             GUIStyle style = new GUIStyle(EditorStyles.label)
             {
                 wordWrap = true,
-                fontSize = fontSize,
-                fontStyle = fontStyle,
-                alignment = TextAnchor.UpperLeft
+                fontSize = Mathf.Max(7, Mathf.RoundToInt(element.FontSize * textScale)),
+                fontStyle = element.FontStyle,
+                alignment = UILayoutRuntimeApplier.ResolveTextAnchor(
+                    element.HorizontalAlignment,
+                    element.VerticalAlignment)
             };
+            if (element.Font != null)
+                style.font = element.Font;
+            style.normal.textColor = element.TextColor;
             GUI.Label(rect, text, style);
         }
 
@@ -438,10 +440,33 @@ namespace KingdomSurvival.UILayout.Editor
                 SerializedProperty selected = elements.GetArrayElementAtIndex(elementIndex);
 
                 EditorGUI.BeginChangeCheck();
+
+                if (CurrentScreen != null && CurrentScreen.Id == "narrative-dialogue")
+                {
+                    EditorGUILayout.LabelField("ЭКРАН", EditorStyles.boldLabel);
+                    EditorGUILayout.PropertyField(
+                        screen.FindPropertyRelative("dimmingOpacity"),
+                        new GUIContent("Затемнение фона"));
+                    EditorGUILayout.Space(8f);
+                }
+
                 EditorGUILayout.PropertyField(
                     selected.FindPropertyRelative("parentId"),
                     new GUIContent("Родитель ID"));
                 EditorGUILayout.PropertyField(selected.FindPropertyRelative("rect"));
+
+                if (IsTextElement(element.Id))
+                {
+                    EditorGUILayout.Space(8f);
+                    EditorGUILayout.LabelField("ТЕКСТ", EditorStyles.boldLabel);
+                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("font"), new GUIContent("Шрифт"));
+                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("fontSize"), new GUIContent("Размер"));
+                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("textColor"), new GUIContent("Цвет"));
+                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("fontStyle"), new GUIContent("Начертание"));
+                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("horizontalAlignment"), new GUIContent("По горизонтали"));
+                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("verticalAlignment"), new GUIContent("По вертикали"));
+                }
+
                 EditorGUILayout.Space(8f);
                 EditorGUILayout.LabelField("ИЗОБРАЖЕНИЕ", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(selected.FindPropertyRelative("sprite"));
@@ -454,6 +479,7 @@ namespace KingdomSurvival.UILayout.Editor
                 if (EditorGUI.EndChangeCheck())
                 {
                     so.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(database);
                     Repaint();
                 }
 
@@ -485,6 +511,14 @@ namespace KingdomSurvival.UILayout.Editor
 
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
+        }
+
+        private static bool IsTextElement(string elementId)
+        {
+            return elementId == "speaker" ||
+                   elementId == "role" ||
+                   elementId == "text" ||
+                   elementId == "choices";
         }
 
         private DialogueDefinitionData CurrentPreviewDialogue

@@ -1,3 +1,5 @@
+using KingdomSurvival.UILayout;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
@@ -33,6 +35,8 @@ public partial class PrototypeUIController
         if (narrativeHistoryContainer == null || narrativeTextScroll == null)
             return;
 
+        ApplyNarrativeLayoutPresentation();
+
         int childCount = narrativeHistoryContainer.childCount;
         for (int i = 0; i < childCount; i++)
         {
@@ -41,6 +45,62 @@ public partial class PrototypeUIController
         }
 
         ScheduleNarrativeScrollToBottom();
+    }
+
+    private void ApplyNarrativeLayoutPresentation()
+    {
+        UILayoutDatabaseAsset database = UILayoutRuntimeApplier.LoadDefaultDatabase();
+        UILayoutScreenDefinition layout = database != null ? database.FindScreen("narrative-dialogue") : null;
+        if (database == null || layout == null)
+            return;
+
+        VisualElement screen = interfaceRoot != null
+            ? interfaceRoot.Q<VisualElement>("screen")
+            : null;
+        float actualWidth = screen != null ? screen.resolvedStyle.width : 0f;
+        float actualHeight = screen != null ? screen.resolvedStyle.height : 0f;
+        if (actualWidth <= 0f || actualHeight <= 0f)
+        {
+            actualWidth = database.ReferenceResolution.x;
+            actualHeight = database.ReferenceResolution.y;
+        }
+
+        Vector2 reference = database.ReferenceResolution;
+        Vector2 actual = new Vector2(actualWidth, actualHeight);
+        UILayoutElementDefinition speakerDefinition = layout.FindElement("speaker");
+        UILayoutElementDefinition roleDefinition = layout.FindElement("role");
+        UILayoutElementDefinition textDefinition = layout.FindElement("text");
+        UILayoutElementDefinition choicesDefinition = layout.FindElement("choices");
+
+        UILayoutRuntimeApplier.ApplyDimming(narrativeDialogueOverlay, layout);
+        UILayoutRuntimeApplier.ApplyTextStyle(narrativeSpeakerLabel, speakerDefinition, reference, actual);
+        UILayoutRuntimeApplier.ApplyTextStyle(narrativeRoleLabel, roleDefinition, reference, actual);
+
+        if (narrativeHistoryContainer != null)
+        {
+            for (int i = 0; i < narrativeHistoryContainer.childCount; i++)
+            {
+                VisualElement entry = narrativeHistoryContainer.ElementAt(i);
+                if (entry.ClassListContains("narrative-dialogue-history-player"))
+                {
+                    UILayoutRuntimeApplier.ApplyTextStyle(entry, choicesDefinition, reference, actual);
+                    continue;
+                }
+
+                Label textLabel = entry.Q<Label>(className: "narrative-dialogue-history-text");
+                if (textLabel != null)
+                    UILayoutRuntimeApplier.ApplyTextStyle(textLabel, textDefinition, reference, actual);
+            }
+        }
+
+        if (narrativeChoicesContainer != null)
+        {
+            for (int i = 0; i < narrativeChoicesContainer.childCount; i++)
+            {
+                VisualElement choice = narrativeChoicesContainer.ElementAt(i);
+                UILayoutRuntimeApplier.ApplyTextStyle(choice, choicesDefinition, reference, actual);
+            }
+        }
     }
 
     private void ScheduleNarrativeScrollToBottom()

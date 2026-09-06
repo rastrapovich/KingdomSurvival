@@ -41,4 +41,39 @@ public sealed class UILayoutDatabaseTests
         Assert.AreEqual(text.Rect.width, local.width, 0.001f);
         Assert.AreEqual(text.Rect.height, local.height, 0.001f);
     }
+
+    [Test]
+    public void Narrative_Default_Layout_Exposes_Dimming_And_Text_Presentation()
+    {
+        UILayoutDatabaseAsset database = Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
+        UILayoutScreenDefinition screen = database.FindScreen("narrative-dialogue");
+        UILayoutElementDefinition speaker = screen.FindElement("speaker");
+        UILayoutElementDefinition choices = screen.FindElement("choices");
+
+        Assert.AreEqual(0.68f, screen.DimmingOpacity, 0.001f);
+        Assert.AreEqual(27, speaker.FontSize);
+        Assert.AreEqual(FontStyle.Bold, speaker.FontStyle);
+        Assert.AreEqual(TextAnchor.UpperLeft, UILayoutRuntimeApplier.ResolveTextAnchor(
+            speaker.HorizontalAlignment,
+            speaker.VerticalAlignment));
+        Assert.AreEqual(13, choices.FontSize);
+        Assert.AreEqual(TextAnchor.MiddleLeft, UILayoutRuntimeApplier.ResolveTextAnchor(
+            choices.HorizontalAlignment,
+            choices.VerticalAlignment));
+    }
+
+    [Test]
+    public void Text_Alignment_Resolver_Covers_Center_And_Right()
+    {
+        Assert.AreEqual(
+            TextAnchor.MiddleCenter,
+            UILayoutRuntimeApplier.ResolveTextAnchor(
+                UILayoutTextHorizontalAlignment.Center,
+                UILayoutTextVerticalAlignment.Middle));
+        Assert.AreEqual(
+            TextAnchor.LowerRight,
+            UILayoutRuntimeApplier.ResolveTextAnchor(
+                UILayoutTextHorizontalAlignment.Right,
+                UILayoutTextVerticalAlignment.Bottom));
+    }
 }

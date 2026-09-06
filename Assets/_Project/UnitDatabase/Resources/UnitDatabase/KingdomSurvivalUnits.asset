@@ -11,46 +11,73 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f6a8d629e1644bd8b451c1cf11db201, type: 3}
   m_Name: KingdomSurvivalUnits
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   tags:
   - id: species.human
-    displayLabel: "Человек"
-    category: "Происхождение"
+    displayLabel: "\u0427\u0435\u043B\u043E\u0432\u0435\u043A"
+    category: "\u041F\u0440\u043E\u0438\u0441\u0445\u043E\u0436\u0434\u0435\u043D\u0438\u0435"
     color: {r: 0.72, g: 0.61, b: 0.42, a: 1}
-    description: "Человек разумный."
+    description: "\u0427\u0435\u043B\u043E\u0432\u0435\u043A \u0440\u0430\u0437\u0443\u043C\u043D\u044B\u0439."
   - id: species.beast
-    displayLabel: "Зверь"
-    category: "Происхождение"
+    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
+    category: "\u041F\u0440\u043E\u0438\u0441\u0445\u043E\u0436\u0434\u0435\u043D\u0438\u0435"
     color: {r: 0.62, g: 0.27, b: 0.2, a: 1}
-    description: "Порождение дикой чащи, привыкшее решать споры клыками и когтями."
+    description: "\u041F\u043E\u0440\u043E\u0436\u0434\u0435\u043D\u0438\u0435 \u0434\u0438\u043A\u043E\u0439
+      \u0447\u0430\u0449\u0438, \u043F\u0440\u0438\u0432\u044B\u043A\u0448\u0435\u0435
+      \u0440\u0435\u0448\u0430\u0442\u044C \u0441\u043F\u043E\u0440\u044B \u043A\u043B\u044B\u043A\u0430\u043C\u0438
+      \u0438 \u043A\u043E\u0433\u0442\u044F\u043C\u0438."
   - id: combat.ranged
-    displayLabel: "Дальний бой"
-    category: "Тип атаки"
+    displayLabel: "\u0414\u0430\u043B\u044C\u043D\u0438\u0439 \u0431\u043E\u0439"
+    category: "\u0422\u0438\u043F \u0430\u0442\u0430\u043A\u0438"
     color: {r: 0.28, g: 0.53, b: 0.66, a: 1}
-    description: "Может атаковать на расстоянии. При атаке цели на соседнем гексе Атака снижается на 50%."
+    description: "\u041C\u043E\u0436\u0435\u0442 \u0430\u0442\u0430\u043A\u043E\u0432\u0430\u0442\u044C
+      \u043D\u0430 \u0440\u0430\u0441\u0441\u0442\u043E\u044F\u043D\u0438\u0438.
+      \u041F\u0440\u0438 \u0430\u0442\u0430\u043A\u0435 \u0446\u0435\u043B\u0438
+      \u043D\u0430 \u0441\u043E\u0441\u0435\u0434\u043D\u0435\u043C \u0433\u0435\u043A\u0441\u0435
+      \u0410\u0442\u0430\u043A\u0430 \u0441\u043D\u0438\u0436\u0430\u0435\u0442\u0441\u044F
+      \u043D\u0430 50%."
   - id: role.defender
-    displayLabel: "Защитник"
-    category: "Роль"
+    displayLabel: "\u0417\u0430\u0449\u0438\u0442\u043D\u0438\u043A"
+    category: "\u0420\u043E\u043B\u044C"
     color: {r: 0.35, g: 0.49, b: 0.62, a: 1}
-    description: "Лучше других удерживает позицию под натиском врага. В защитной стойке получает ещё +25% к Защите."
+    description: "\u041B\u0443\u0447\u0448\u0435 \u0434\u0440\u0443\u0433\u0438\u0445
+      \u0443\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442 \u043F\u043E\u0437\u0438\u0446\u0438\u044E
+      \u043F\u043E\u0434 \u043D\u0430\u0442\u0438\u0441\u043A\u043E\u043C \u0432\u0440\u0430\u0433\u0430.
+      \u0412 \u0437\u0430\u0449\u0438\u0442\u043D\u043E\u0439 \u0441\u0442\u043E\u0439\u043A\u0435
+      \u043F\u043E\u043B\u0443\u0447\u0430\u0435\u0442 \u0435\u0449\u0451 +25% \u043A
+      \u0417\u0430\u0449\u0438\u0442\u0435."
   - id: trait.armored
-    displayLabel: "Бронированный"
-    category: "Особенность"
+    displayLabel: "\u0411\u0440\u043E\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439"
+    category: "\u041E\u0441\u043E\u0431\u0435\u043D\u043D\u043E\u0441\u0442\u044C"
     color: {r: 0.49, g: 0.51, b: 0.53, a: 1}
-    description: "Тяжёлая защита принимает часть удара на себя. Постоянно даёт +2 к Защите."
+    description: "\u0422\u044F\u0436\u0451\u043B\u0430\u044F \u0437\u0430\u0449\u0438\u0442\u0430
+      \u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0435\u0442 \u0447\u0430\u0441\u0442\u044C
+      \u0443\u0434\u0430\u0440\u0430 \u043D\u0430 \u0441\u0435\u0431\u044F. \u041F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u043E
+      \u0434\u0430\u0451\u0442 +2 \u043A \u0417\u0430\u0449\u0438\u0442\u0435."
   - id: trait.beast_slayer
-    displayLabel: "Гроза зверей"
-    category: "Особенность"
+    displayLabel: "\u0413\u0440\u043E\u0437\u0430 \u0437\u0432\u0435\u0440\u0435\u0439"
+    category: "\u041E\u0441\u043E\u0431\u0435\u043D\u043D\u043E\u0441\u0442\u044C"
     color: {r: 0.68, g: 0.45, b: 0.22, a: 1}
-    description: "Знает, куда бить тварь, чтобы она больше не поднялась. Атака против существ с тегом «Зверь» увеличивается на 50%."
+    description: "\u0417\u043D\u0430\u0435\u0442, \u043A\u0443\u0434\u0430 \u0431\u0438\u0442\u044C
+      \u0442\u0432\u0430\u0440\u044C, \u0447\u0442\u043E\u0431\u044B \u043E\u043D\u0430
+      \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435 \u043F\u043E\u0434\u043D\u044F\u043B\u0430\u0441\u044C.
+      \u0410\u0442\u0430\u043A\u0430 \u043F\u0440\u043E\u0442\u0438\u0432 \u0441\u0443\u0449\u0435\u0441\u0442\u0432
+      \u0441 \u0442\u0435\u0433\u043E\u043C \xAB\u0417\u0432\u0435\u0440\u044C\xBB
+      \u0443\u0432\u0435\u043B\u0438\u0447\u0438\u0432\u0430\u0435\u0442\u0441\u044F
+      \u043D\u0430 50%."
   - id: trait.human_slayer
-    displayLabel: "Гроза людей"
-    category: "Особенность"
+    displayLabel: "\u0413\u0440\u043E\u0437\u0430 \u043B\u044E\u0434\u0435\u0439"
+    category: "\u041E\u0441\u043E\u0431\u0435\u043D\u043D\u043E\u0441\u0442\u044C"
     color: {r: 0.62, g: 0.22, b: 0.19, a: 1}
-    description: "Слишком хорошо знает вкус человеческой крови. Атака против существ с тегом «Человек» увеличивается на 50%."
+    description: "\u0421\u043B\u0438\u0448\u043A\u043E\u043C \u0445\u043E\u0440\u043E\u0448\u043E
+      \u0437\u043D\u0430\u0435\u0442 \u0432\u043A\u0443\u0441 \u0447\u0435\u043B\u043E\u0432\u0435\u0447\u0435\u0441\u043A\u043E\u0439
+      \u043A\u0440\u043E\u0432\u0438. \u0410\u0442\u0430\u043A\u0430 \u043F\u0440\u043E\u0442\u0438\u0432
+      \u0441\u0443\u0449\u0435\u0441\u0442\u0432 \u0441 \u0442\u0435\u0433\u043E\u043C
+      \xAB\u0427\u0435\u043B\u043E\u0432\u0435\u043A\xBB \u0443\u0432\u0435\u043B\u0438\u0447\u0438\u0432\u0430\u0435\u0442\u0441\u044F
+      \u043D\u0430 50%."
   units:
   - id: guard
-    displayLabel: "Гвардеец"
+    displayLabel: "\u0413\u0432\u0430\u0440\u0434\u0435\u0435\u0446"
     category: 0
     combatRole: 0
     maxHitPoints: 18
@@ -72,7 +99,7 @@ MonoBehaviour:
     - role.defender
     - trait.armored
   - id: archer
-    displayLabel: "Лучник"
+    displayLabel: "\u041B\u0443\u0447\u043D\u0438\u043A"
     category: 0
     combatRole: 1
     maxHitPoints: 11
@@ -93,7 +120,7 @@ MonoBehaviour:
     - species.human
     - combat.ranged
   - id: healer
-    displayLabel: "Лекарь"
+    displayLabel: "\u041B\u0435\u043A\u0430\u0440\u044C"
     category: 0
     combatRole: 2
     maxHitPoints: 12
@@ -113,7 +140,7 @@ MonoBehaviour:
     tagIds:
     - species.human
   - id: spearman
-    displayLabel: "Копейщик"
+    displayLabel: "\u041A\u043E\u043F\u0435\u0439\u0449\u0438\u043A"
     category: 0
     combatRole: 3
     maxHitPoints: 15
@@ -134,7 +161,7 @@ MonoBehaviour:
     - species.human
     - trait.beast_slayer
   - id: scout
-    displayLabel: "Разведчик"
+    displayLabel: "\u0420\u0430\u0437\u0432\u0435\u0434\u0447\u0438\u043A"
     category: 0
     combatRole: 4
     maxHitPoints: 12
@@ -154,7 +181,7 @@ MonoBehaviour:
     tagIds:
     - species.human
   - id: militia
-    displayLabel: "Ополченец"
+    displayLabel: "\u041E\u043F\u043E\u043B\u0447\u0435\u043D\u0435\u0446"
     category: 0
     combatRole: 5
     maxHitPoints: 14
@@ -174,7 +201,7 @@ MonoBehaviour:
     tagIds:
     - species.human
   - id: forest_beast
-    displayLabel: "Зверь"
+    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
     category: 1
     combatRole: 6
     maxHitPoints: 10
@@ -194,7 +221,7 @@ MonoBehaviour:
     tagIds:
     - species.beast
   - id: forest_beast_strong
-    displayLabel: "Зверь"
+    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
     category: 1
     combatRole: 6
     maxHitPoints: 14
@@ -214,7 +241,7 @@ MonoBehaviour:
     tagIds:
     - species.beast
   - id: forest_beast_alpha
-    displayLabel: "Зверь"
+    displayLabel: "\u0417\u0432\u0435\u0440\u044C"
     category: 1
     combatRole: 6
     maxHitPoints: 18

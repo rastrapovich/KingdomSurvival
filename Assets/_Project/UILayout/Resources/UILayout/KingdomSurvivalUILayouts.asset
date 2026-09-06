@@ -11,15 +11,20 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d82114358ff4c9998a739c306f57301, type: 3}
   m_Name: KingdomSurvivalUILayouts
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   referenceResolution: {x: 1920, y: 1080}
   screens:
   - id: narrative-dialogue
-    displayName: "Диалог"
+    displayName: "\u0414\u0438\u0430\u043B\u043E\u0433"
     elements:
     - id: overlay
-      displayName: "Затемнение"
-      rect: {x: 0, y: 0, width: 1920, height: 1080}
+      displayName: "\u0417\u0430\u0442\u0435\u043C\u043D\u0435\u043D\u0438\u0435"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1922.8547
+        height: 1087.6118
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -28,8 +33,13 @@ MonoBehaviour:
       tint: {r: 1, g: 1, b: 1, a: 1}
       opacity: 1
     - id: panel
-      displayName: "Панель диалога"
-      rect: {x: 1190, y: 0, width: 730, height: 1080}
+      displayName: "\u041F\u0430\u043D\u0435\u043B\u044C \u0434\u0438\u0430\u043B\u043E\u0433\u0430"
+      rect:
+        serializedVersion: 2
+        x: 1306.7129
+        y: -4.666832
+        width: 546.0193
+        height: 1082.705
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -38,8 +48,13 @@ MonoBehaviour:
       tint: {r: 1, g: 1, b: 1, a: 1}
       opacity: 1
     - id: portrait
-      displayName: "Портрет"
-      rect: {x: 780, y: 195, width: 440, height: 625}
+      displayName: "\u041F\u043E\u0440\u0442\u0440\u0435\u0442"
+      rect:
+        serializedVersion: 2
+        x: 1041.0635
+        y: 170.99272
+        width: 280.00992
+        height: 336.0119
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -48,8 +63,13 @@ MonoBehaviour:
       tint: {r: 1, g: 1, b: 1, a: 1}
       opacity: 1
     - id: speaker
-      displayName: "Имя"
-      rect: {x: 44, y: 58, width: 642, height: 42}
+      displayName: "\u0418\u043C\u044F"
+      rect:
+        serializedVersion: 2
+        x: 1092.2786
+        y: 488.45865
+        width: 188.708
+        height: 39.12672
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -58,8 +78,13 @@ MonoBehaviour:
       tint: {r: 1, g: 1, b: 1, a: 1}
       opacity: 1
     - id: role
-      displayName: "Роль"
-      rect: {x: 44, y: 105, width: 642, height: 28}
+      displayName: "\u0420\u043E\u043B\u044C"
+      rect:
+        serializedVersion: 2
+        x: 1085.1759
+        y: 526.07324
+        width: 210.62079
+        height: 44.996254
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -68,8 +93,13 @@ MonoBehaviour:
       tint: {r: 1, g: 1, b: 1, a: 1}
       opacity: 1
     - id: text
-      displayName: "Текст"
-      rect: {x: 44, y: 175, width: 642, height: 430}
+      displayName: "\u0422\u0435\u043A\u0441\u0442"
+      rect:
+        serializedVersion: 2
+        x: 1380.5236
+        y: 170.89005
+        width: 425.5497
+        height: 371.93716
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -78,8 +108,13 @@ MonoBehaviour:
       tint: {r: 1, g: 1, b: 1, a: 1}
       opacity: 1
     - id: choices
-      displayName: "Варианты ответа"
-      rect: {x: 44, y: 650, width: 642, height: 360}
+      displayName: "\u0412\u0430\u0440\u0438\u0430\u043D\u0442\u044B \u043E\u0442\u0432\u0435\u0442\u0430"
+      rect:
+        serializedVersion: 2
+        x: 1383.8743
+        y: 566.2827
+        width: 425.54974
+        height: 398.74344
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0

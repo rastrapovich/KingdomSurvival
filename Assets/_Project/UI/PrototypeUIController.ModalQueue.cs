@@ -220,7 +220,8 @@ public partial class PrototypeUIController
     private bool HasBlockingModalWork()
     {
         return gameState != null &&
-               (gameState.HasPendingExpeditionDecision ||
+               (IsNarrativeDialogueActive ||
+                gameState.HasPendingExpeditionDecision ||
                 openedIncident != null ||
                 openedDecision != null ||
                 activeQueuedModal != null ||
@@ -264,7 +265,9 @@ public partial class PrototypeUIController
         bool blocked = HasBlockingModalWork();
         timeToggleButton.SetEnabled(!isGameOver && !blocked);
         timeToggleButton.tooltip = blocked
-            ? "Сначала примите обязательное решение или закройте важное донесение"
+            ? IsNarrativeDialogueActive
+                ? "Сначала завершите разговор"
+                : "Сначала примите обязательное решение или закройте важное донесение"
             : ContinuousSimulationSystem.IsPaused(gameState)
                 ? "Продолжить течение времени"
                 : "Поставить время на паузу";

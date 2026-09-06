@@ -1,0 +1,129 @@
+.narrative-dialogue-overlay {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(5, 7, 8, 0.68);
+}
+
+.narrative-dialogue-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 38%;
+    min-width: 500px;
+    padding-left: 44px;
+    padding-right: 42px;
+    padding-top: 58px;
+    padding-bottom: 48px;
+    background-color: rgba(12, 14, 15, 0.98);
+    border-left-width: 1px;
+    border-left-color: rgb(94, 87, 70);
+}
+
+.narrative-dialogue-portrait {
+    position: absolute;
+    right: 34%;
+    top: 18%;
+    width: 23%;
+    max-width: 430px;
+    height: 58%;
+    min-height: 360px;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(31, 34, 34);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(113, 101, 76);
+    border-right-color: rgb(113, 101, 76);
+    border-top-color: rgb(113, 101, 76);
+    border-bottom-color: rgb(113, 101, 76);
+}
+
+.narrative-dialogue-portrait-placeholder {
+    color: rgb(117, 116, 108);
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.narrative-dialogue-speaker {
+    margin-bottom: 5px;
+    color: rgb(218, 182, 111);
+    font-size: 27px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.narrative-dialogue-role {
+    margin-bottom: 15px;
+    color: rgb(133, 130, 120);
+    font-size: 11px;
+    white-space: normal;
+}
+
+.narrative-dialogue-divider {
+    height: 1px;
+    margin-bottom: 22px;
+    background-color: rgb(89, 77, 56);
+}
+
+.narrative-dialogue-text-scroll {
+    flex-grow: 1;
+    min-height: 120px;
+    margin-bottom: 24px;
+}
+
+.narrative-dialogue-text {
+    padding-right: 8px;
+    color: rgb(224, 219, 205);
+    font-size: 17px;
+    white-space: normal;
+}
+
+.narrative-dialogue-choices {
+    flex-shrink: 0;
+}
+
+.narrative-dialogue-choice {
+    width: 100%;
+    min-height: 48px;
+    margin-bottom: 8px;
+    padding-left: 18px;
+    padding-right: 18px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    background-color: rgba(24, 26, 25, 0.88);
+    color: rgb(209, 205, 193);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(64, 65, 60);
+    border-right-color: rgb(64, 65, 60);
+    border-top-color: rgb(64, 65, 60);
+    border-bottom-color: rgb(64, 65, 60);
+    border-radius: 2px;
+    font-size: 13px;
+    -unity-text-align: middle-left;
+    white-space: normal;
+}
+
+.narrative-dialogue-choice:hover {
+    background-color: rgba(53, 46, 32, 0.95);
+    color: rgb(241, 226, 194);
+    border-left-color: rgb(184, 137, 65);
+    border-right-color: rgb(184, 137, 65);
+    border-top-color: rgb(184, 137, 65);
+    border-bottom-color: rgb(184, 137, 65);
+}
+
+.narrative-dialogue-choice-exit {
+    color: rgb(148, 146, 139);
+}

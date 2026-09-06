@@ -3,6 +3,7 @@
   "rootNamespace": "",
   "references": [
     "KingdomSurvival.Core",
+    "KingdomSurvival.DialogueDatabase",
     "KingdomSurvival.UILayout"
   ],
   "includePlatforms": ["Editor"],

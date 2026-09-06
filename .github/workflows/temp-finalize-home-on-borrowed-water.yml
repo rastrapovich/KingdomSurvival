@@ -34,6 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 /tmp/finalize.py
+          python3 -c "from pathlib import Path; p=Path('ProjectDocs/DEVELOPMENT_STATUS.md'); p.write_text(p.read_text(encoding='utf-8').rstrip()+'\n', encoding='utf-8')"
           git diff --check
           printf '%s\n' \
             ProjectDocs/DEVELOPMENT_STATUS.md \

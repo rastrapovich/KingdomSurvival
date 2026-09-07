@@ -25,12 +25,42 @@ namespace KingdomSurvival.UILayout
         Bottom
     }
 
+    /// <summary>
+    /// Роль элемента в экране. Определяет, какие группы свойств показывает
+    /// конструктор и что применяет рантайм. Значение по умолчанию `Panel`
+    /// сохраняет поведение старых записей базы.
+    /// </summary>
+    public enum UILayoutElementKind
+    {
+        Panel,
+        Text,
+        Image,
+        Button,
+        Container
+    }
+
+    [Serializable]
+    public sealed class UILayoutRequiredElement
+    {
+        [SerializeField] private string elementId = string.Empty;
+        [SerializeField] private string expectedParentId = string.Empty;
+
+        public string ElementId => elementId ?? string.Empty;
+        public string ExpectedParentId => expectedParentId ?? string.Empty;
+    }
+
     [Serializable]
     public sealed class UILayoutElementDefinition
     {
         [SerializeField] private string id = string.Empty;
         [SerializeField] private string displayName = string.Empty;
         [SerializeField] private string parentId = string.Empty;
+        [SerializeField] private UILayoutElementKind kind = UILayoutElementKind.Panel;
+        [SerializeField] private string targetName = string.Empty;
+        [SerializeField] private bool overrideRect;
+        [SerializeField] private bool overrideBackground;
+        [SerializeField] private bool overrideText;
+        [SerializeField] private string previewText = string.Empty;
         [SerializeField] private Rect rect = new Rect(0f, 0f, 320f, 180f);
         [SerializeField] private Sprite sprite;
         [SerializeField] private Texture2D texture;
@@ -49,6 +79,18 @@ namespace KingdomSurvival.UILayout
         public string Id => id;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? id : displayName;
         public string ParentId => parentId ?? string.Empty;
+        public UILayoutElementKind Kind => kind;
+
+        /// <summary>
+        /// Имя элемента в UXML, к которому привязывается запись. Если не задано,
+        /// используется <see cref="Id"/>.
+        /// </summary>
+        public string TargetName => string.IsNullOrWhiteSpace(targetName) ? id : targetName;
+
+        public bool OverrideRect => overrideRect;
+        public bool OverrideBackground => overrideBackground;
+        public bool OverrideText => overrideText;
+        public string PreviewText => previewText ?? string.Empty;
         public Rect Rect => rect;
         public Sprite Sprite => sprite;
         public Texture2D Texture => texture;
@@ -64,9 +106,17 @@ namespace KingdomSurvival.UILayout
         public UILayoutTextHorizontalAlignment HorizontalAlignment => horizontalAlignment;
         public UILayoutTextVerticalAlignment VerticalAlignment => verticalAlignment;
 
+        public bool HasImage => sprite != null || texture != null;
+
+        /// <summary>
+        /// Текстовые свойства применимы к элементу.
+        /// </summary>
+        public bool IsTextual => kind == UILayoutElementKind.Text || kind == UILayoutElementKind.Button;
+
         public void SetRect(Rect value) => rect = value;
         public void SetImageScale(float value) => imageScale = Mathf.Max(0.05f, value);
         public void SetImageOffset(Vector2 value) => imageOffset = value;
+
         public void ResetImageTransform()
         {
             imageScale = 1f;
@@ -79,12 +129,34 @@ namespace KingdomSurvival.UILayout
     {
         [SerializeField] private string id = string.Empty;
         [SerializeField] private string displayName = string.Empty;
+        [SerializeField] private string description = string.Empty;
+        [SerializeField] private bool usesDimming = true;
         [SerializeField, Range(0f, 1f)] private float dimmingOpacity = 0.68f;
+
+        [Tooltip("Применять экран generic-байндером по именам элементов UXML. " +
+                 "Экраны с собственным кодом применения (narrative-dialogue) держат флаг выключенным.")]
+        [SerializeField] private bool autoApply;
+
+        [SerializeField] private string rootName = string.Empty;
+        [SerializeField] private List<UILayoutRequiredElement> requiredElements = new List<UILayoutRequiredElement>();
         [SerializeField] private List<UILayoutElementDefinition> elements = new List<UILayoutElementDefinition>();
 
         public string Id => id;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? id : displayName;
+        public string Description => description ?? string.Empty;
+        public bool UsesDimming => usesDimming;
         public float DimmingOpacity => Mathf.Clamp01(dimmingOpacity);
+        public bool AutoApply => autoApply;
+
+        /// <summary>
+        /// Имя корневого элемента UXML, внутри которого ищутся элементы экрана.
+        /// Пустое значение означает поиск от корня интерфейса.
+        /// </summary>
+        public string RootName => rootName ?? string.Empty;
+
+        public IReadOnlyList<UILayoutRequiredElement> RequiredElements =>
+            requiredElements ?? (IReadOnlyList<UILayoutRequiredElement>)Array.Empty<UILayoutRequiredElement>();
+
         public IReadOnlyList<UILayoutElementDefinition> Elements =>
             elements ?? (IReadOnlyList<UILayoutElementDefinition>)Array.Empty<UILayoutElementDefinition>();
 
@@ -108,6 +180,12 @@ namespace KingdomSurvival.UILayout
     public sealed class UILayoutDatabaseAsset : ScriptableObject
     {
         public const string ResourcesPath = "UILayout/KingdomSurvivalUILayouts";
+
+        /// <summary>
+        /// Экран диалога применяется собственным кодом `PrototypeUIController` и
+        /// не проходит через generic-байндер.
+        /// </summary>
+        public const string NarrativeDialogueScreenId = "narrative-dialogue";
 
         [SerializeField] private Vector2Int referenceResolution = new Vector2Int(1920, 1080);
         [SerializeField] private List<UILayoutScreenDefinition> screens = new List<UILayoutScreenDefinition>();
@@ -150,48 +228,65 @@ namespace KingdomSurvival.UILayout
                 if (!screenIds.Add(screen.Id))
                     issues.Add("Повторяющийся ID экрана: " + screen.Id + ".");
 
-                HashSet<string> elementIds = new HashSet<string>(StringComparer.Ordinal);
-                for (int elementIndex = 0; elementIndex < screen.Elements.Count; elementIndex++)
-                {
-                    UILayoutElementDefinition element = screen.Elements[elementIndex];
-                    if (element == null || string.IsNullOrWhiteSpace(element.Id))
-                    {
-                        issues.Add(screen.Id + ": элемент #" + (elementIndex + 1) + " без ID.");
-                        continue;
-                    }
+                ValidateElements(screen, issues);
+                ValidateParents(screen, issues);
+                ValidateRequiredElements(screen, issues);
+            }
+        }
 
-                    if (!elementIds.Add(element.Id))
-                        issues.Add(screen.Id + ": повторяющийся ID элемента " + element.Id + ".");
-                    if (element.Rect.width <= 0f || element.Rect.height <= 0f)
-                        issues.Add(screen.Id + "/" + element.Id + ": ширина и высота должны быть больше нуля.");
-                    if (element.FontSize <= 0)
-                        issues.Add(screen.Id + "/" + element.Id + ": размер шрифта должен быть больше нуля.");
+        private static void ValidateElements(
+            UILayoutScreenDefinition screen,
+            List<string> issues)
+        {
+            HashSet<string> elementIds = new HashSet<string>(StringComparer.Ordinal);
+            for (int elementIndex = 0; elementIndex < screen.Elements.Count; elementIndex++)
+            {
+                UILayoutElementDefinition element = screen.Elements[elementIndex];
+                if (element == null || string.IsNullOrWhiteSpace(element.Id))
+                {
+                    issues.Add(screen.Id + ": элемент #" + (elementIndex + 1) + " без ID.");
+                    continue;
                 }
 
-                for (int elementIndex = 0; elementIndex < screen.Elements.Count; elementIndex++)
+                if (!elementIds.Add(element.Id))
+                    issues.Add(screen.Id + ": повторяющийся ID элемента " + element.Id + ".");
+                if (element.Rect.width <= 0f || element.Rect.height <= 0f)
+                    issues.Add(screen.Id + "/" + element.Id + ": ширина и высота должны быть больше нуля.");
+                if (element.FontSize <= 0)
+                    issues.Add(screen.Id + "/" + element.Id + ": размер шрифта должен быть больше нуля.");
+                if (element.OverrideText && !element.IsTextual)
                 {
-                    UILayoutElementDefinition element = screen.Elements[elementIndex];
-                    if (element == null || string.IsNullOrWhiteSpace(element.Id) || string.IsNullOrWhiteSpace(element.ParentId))
-                        continue;
+                    issues.Add(
+                        screen.Id + "/" + element.Id +
+                        ": включено переопределение текста, но тип элемента не текстовый.");
+                }
+            }
+        }
 
-                    if (string.Equals(element.Id, element.ParentId, StringComparison.Ordinal))
-                    {
-                        issues.Add(screen.Id + "/" + element.Id + ": элемент не может быть родителем самому себе.");
-                        continue;
-                    }
+        private static void ValidateParents(
+            UILayoutScreenDefinition screen,
+            List<string> issues)
+        {
+            for (int elementIndex = 0; elementIndex < screen.Elements.Count; elementIndex++)
+            {
+                UILayoutElementDefinition element = screen.Elements[elementIndex];
+                if (element == null || string.IsNullOrWhiteSpace(element.Id) || string.IsNullOrWhiteSpace(element.ParentId))
+                    continue;
 
-                    if (screen.FindElement(element.ParentId) == null)
-                    {
-                        issues.Add(screen.Id + "/" + element.Id + ": не найден родитель '" + element.ParentId + "'.");
-                        continue;
-                    }
-
-                    if (HasParentCycle(screen, element))
-                        issues.Add(screen.Id + "/" + element.Id + ": обнаружен цикл в иерархии родителей.");
+                if (string.Equals(element.Id, element.ParentId, StringComparison.Ordinal))
+                {
+                    issues.Add(screen.Id + "/" + element.Id + ": элемент не может быть родителем самому себе.");
+                    continue;
                 }
 
-                if (string.Equals(screen.Id, "narrative-dialogue", StringComparison.Ordinal))
-                    ValidateNarrativeDialogueHierarchy(screen, issues);
+                if (screen.FindElement(element.ParentId) == null)
+                {
+                    issues.Add(screen.Id + "/" + element.Id + ": не найден родитель '" + element.ParentId + "'.");
+                    continue;
+                }
+
+                if (HasParentCycle(screen, element))
+                    issues.Add(screen.Id + "/" + element.Id + ": обнаружен цикл в иерархии родителей.");
             }
         }
 
@@ -213,10 +308,31 @@ namespace KingdomSurvival.UILayout
             return false;
         }
 
-        private static void ValidateNarrativeDialogueHierarchy(
+        /// <summary>
+        /// Схема обязательных элементов задаётся данными экрана. Для экрана
+        /// диалога сохранена встроенная схема на случай, если данные пусты.
+        /// </summary>
+        private static void ValidateRequiredElements(
             UILayoutScreenDefinition screen,
             List<string> issues)
         {
+            IReadOnlyList<UILayoutRequiredElement> required = screen.RequiredElements;
+            if (required.Count > 0)
+            {
+                for (int i = 0; i < required.Count; i++)
+                {
+                    UILayoutRequiredElement entry = required[i];
+                    if (entry == null || string.IsNullOrWhiteSpace(entry.ElementId))
+                        continue;
+                    ValidateRequiredElement(screen, issues, entry.ElementId, entry.ExpectedParentId);
+                }
+
+                return;
+            }
+
+            if (!string.Equals(screen.Id, NarrativeDialogueScreenId, StringComparison.Ordinal))
+                return;
+
             ValidateRequiredElement(screen, issues, "overlay", string.Empty);
             ValidateRequiredElement(screen, issues, "panel", "overlay");
             ValidateRequiredElement(screen, issues, "portrait", "overlay");

@@ -134,6 +134,7 @@ public partial class PrototypeUIController : MonoBehaviour
         CreateDecisionChoiceButtons();
         RegisterCallbacks();
         StartNewGame();
+        InitializeUILayoutScreens();
     }
 
     private void FindInterfaceElements(VisualElement root)

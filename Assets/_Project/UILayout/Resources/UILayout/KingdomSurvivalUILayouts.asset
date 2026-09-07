@@ -16,12 +16,37 @@ MonoBehaviour:
   screens:
   - id: narrative-dialogue
     displayName: "\u0414\u0438\u0430\u043B\u043E\u0433"
+    description: "\u0414\u0438\u0430\u043B\u043E\u0433\u043E\u0432\u043E\u0435 \u043E\u043A\u043D\u043E. \u041F\u0440\u0438\u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u044B\u043C \u043A\u043E\u0434\u043E\u043C PrototypeUIController."
+    usesDimming: 1
     dimmingOpacity: 0.72
+    autoApply: 0
+    rootName: 
+    requiredElements:
+    - elementId: overlay
+      expectedParentId: 
+    - elementId: panel
+      expectedParentId: overlay
+    - elementId: portrait
+      expectedParentId: overlay
+    - elementId: speaker
+      expectedParentId: overlay
+    - elementId: role
+      expectedParentId: overlay
+    - elementId: text
+      expectedParentId: panel
+    - elementId: choices
+      expectedParentId: panel
     elements:
     - id: overlay
       displayName: "\u0417\u0430\u0442\u0435\u043C\u043D\u0435\u043D\u0438\u0435
         \u044D\u043A\u0440\u0430\u043D\u0430"
       parentId: 
+      kind: 0
+      targetName: narrative-dialogue-overlay
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
       rect:
         serializedVersion: 2
         x: -0.000000009909145
@@ -44,6 +69,12 @@ MonoBehaviour:
     - id: panel
       displayName: "\u041F\u0430\u043D\u0435\u043B\u044C \u0434\u0438\u0430\u043B\u043E\u0433\u0430"
       parentId: overlay
+      kind: 0
+      targetName: narrative-dialogue-panel
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
       rect:
         serializedVersion: 2
         x: 1306.7114
@@ -66,6 +97,12 @@ MonoBehaviour:
     - id: portrait
       displayName: "\u041F\u043E\u0440\u0442\u0440\u0435\u0442"
       parentId: overlay
+      kind: 2
+      targetName: narrative-dialogue-portrait
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
       rect:
         serializedVersion: 2
         x: 1041.0615
@@ -88,6 +125,12 @@ MonoBehaviour:
     - id: speaker
       displayName: "\u0418\u043C\u044F"
       parentId: overlay
+      kind: 1
+      targetName: narrative-dialogue-speaker
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
       rect:
         serializedVersion: 2
         x: 910.81573
@@ -110,6 +153,12 @@ MonoBehaviour:
     - id: role
       displayName: "\u0420\u043E\u043B\u044C"
       parentId: overlay
+      kind: 1
+      targetName: narrative-dialogue-role
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
       rect:
         serializedVersion: 2
         x: 908.3677
@@ -132,6 +181,12 @@ MonoBehaviour:
     - id: text
       displayName: "\u0422\u0435\u043A\u0441\u0442"
       parentId: panel
+      kind: 1
+      targetName: narrative-dialogue-text
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
       rect:
         serializedVersion: 2
         x: 1380.5198
@@ -154,6 +209,12 @@ MonoBehaviour:
     - id: choices
       displayName: "\u041E\u0442\u0432\u0435\u0442\u044B"
       parentId: panel
+      kind: 1
+      targetName: narrative-dialogue-choices
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
       rect:
         serializedVersion: 2
         x: 1383.8699
@@ -173,3 +234,3435 @@ MonoBehaviour:
       fontStyle: 0
       horizontalAlignment: 0
       verticalAlignment: 1
+  - id: capital-screen
+    displayName: "\u0414\u043E\u043C \u2014 \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u0435"
+    description: "\u042D\u043A\u0440\u0430\u043D \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F: \u043F\u043E\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0438 \u0433\u043E\u0440\u043E\u0434\u0441\u043A\u0438\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F. \u0414\u043E\u0447\u0435\u0440\u043D\u0438\u0435 \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u044B \u0441\u0435\u0442\u043A\u0438 \u043F\u043E\u0441\u0442\u0440\u043E\u0435\u043A \u0441\u043E\u0437\u0434\u0430\u044E\u0442\u0441\u044F \u043A\u043E\u0434\u043E\u043C \u0438 \u043F\u043E\u043A\u0430 \u043D\u0435 \u0438\u043C\u0435\u044E\u0442 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u044B\u0445 \u0438\u043C\u0451\u043D \u0432 UXML."
+    usesDimming: 0
+    dimmingOpacity: 0.68
+    autoApply: 1
+    rootName: capital-screen
+    requiredElements: []
+    elements:
+    - id: capital-screen
+      displayName: "\u042D\u043A\u0440\u0430\u043D \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+      parentId: 
+      kind: 0
+      targetName: capital-screen
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 10
+        width: 1588
+        height: 978
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-grid
+      displayName: "\u0421\u0435\u0442\u043A\u0430 \u043F\u043E\u0441\u0442\u0440\u043E\u0435\u043A"
+      parentId: capital-screen
+      kind: 4
+      targetName: building-grid
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 130
+        width: 1540
+        height: 820
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-fields_granaries
+      displayName: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430: \u041F\u043E\u043B\u044F \u0438 \u0430\u043C\u0431\u0430\u0440\u044B"
+      parentId: building-grid
+      kind: 0
+      targetName: building-card-fields_granaries
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 130
+        width: 500
+        height: 392
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-fields_granaries-title
+      displayName: "  \u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A"
+      parentId: building-card-fields_granaries
+      kind: 1
+      targetName: building-card-fields_granaries-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u041E\u041B\u042F \u0418 \u0410\u041C\u0411\u0410\u0420\u042B"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 140
+        width: 400
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 15
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-fields_granaries-status
+      displayName: "  \u0421\u0442\u0430\u0442\u0443\u0441"
+      parentId: building-card-fields_granaries
+      kind: 1
+      targetName: building-card-fields_granaries-status
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0433\u043E\u0442\u043E\u0432\u043E"
+      rect:
+        serializedVersion: 2
+        x: 758
+        y: 140
+        width: 76
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 2
+      verticalAlignment: 0
+    - id: building-card-fields_granaries-image
+      displayName: "  \u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435"
+      parentId: building-card-fields_granaries
+      kind: 2
+      targetName: building-card-fields_granaries-image
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0418\u0417\u041E\u0411\u0420\u0410\u0416\u0415\u041D\u0418\u0415 \u041F\u041E\u0421\u0422\u0420\u041E\u0419\u041A\u0418"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 174
+        width: 476
+        height: 72
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 1
+    - id: building-card-fields_granaries-description
+      displayName: "  \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435"
+      parentId: building-card-fields_granaries
+      kind: 1
+      targetName: building-card-fields_granaries-description
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u043F\u043E\u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 254
+        width: 476
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-fields_granaries-effect
+      displayName: "  \u042D\u0444\u0444\u0435\u043A\u0442"
+      parentId: building-card-fields_granaries
+      kind: 1
+      targetName: building-card-fields_granaries-effect
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "+10 \u043F\u0438\u0449\u0438 \u0432 \u0441\u0443\u0442\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 304
+        width: 476
+        height: 40
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-fields_granaries-meta
+      displayName: "  \u0421\u0442\u043E\u0438\u043C\u043E\u0441\u0442\u044C \u0438 \u0441\u0440\u043E\u043A"
+      parentId: building-card-fields_granaries
+      kind: 1
+      targetName: building-card-fields_granaries-meta
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "60 \u0437\u043E\u043B\u043E\u0442\u0430 \u00B7 12 \u0447\u0430\u0441\u043E\u0432"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 350
+        width: 476
+        height: 36
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-fields_granaries-progress
+      displayName: "  \u041F\u0440\u043E\u0433\u0440\u0435\u0441\u0441 \u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+      parentId: building-card-fields_granaries
+      kind: 4
+      targetName: building-card-fields_granaries-progress
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 392
+        width: 476
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-fields_granaries-action
+      displayName: "  \u041A\u043D\u043E\u043F\u043A\u0430 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F"
+      parentId: building-card-fields_granaries
+      kind: 3
+      targetName: building-card-fields_granaries-action
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u041E\u0421\u0422\u0420\u041E\u0418\u0422\u042C"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 420
+        width: 476
+        height: 34
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: building-card-market
+      displayName: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430: \u0420\u044B\u043D\u043E\u043A"
+      parentId: building-grid
+      kind: 0
+      targetName: building-card-market
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 858
+        y: 130
+        width: 500
+        height: 392
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-market-title
+      displayName: "  \u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A"
+      parentId: building-card-market
+      kind: 1
+      targetName: building-card-market-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0420\u042B\u041D\u041E\u041A"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 140
+        width: 400
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 15
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-market-status
+      displayName: "  \u0421\u0442\u0430\u0442\u0443\u0441"
+      parentId: building-card-market
+      kind: 1
+      targetName: building-card-market-status
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0433\u043E\u0442\u043E\u0432\u043E"
+      rect:
+        serializedVersion: 2
+        x: 1270
+        y: 140
+        width: 76
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 2
+      verticalAlignment: 0
+    - id: building-card-market-image
+      displayName: "  \u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435"
+      parentId: building-card-market
+      kind: 2
+      targetName: building-card-market-image
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0418\u0417\u041E\u0411\u0420\u0410\u0416\u0415\u041D\u0418\u0415 \u041F\u041E\u0421\u0422\u0420\u041E\u0419\u041A\u0418"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 174
+        width: 476
+        height: 72
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 1
+    - id: building-card-market-description
+      displayName: "  \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435"
+      parentId: building-card-market
+      kind: 1
+      targetName: building-card-market-description
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u043F\u043E\u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 254
+        width: 476
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-market-effect
+      displayName: "  \u042D\u0444\u0444\u0435\u043A\u0442"
+      parentId: building-card-market
+      kind: 1
+      targetName: building-card-market-effect
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "+5 \u0437\u043E\u043B\u043E\u0442\u0430 \u0432 \u0441\u0443\u0442\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 304
+        width: 476
+        height: 40
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-market-meta
+      displayName: "  \u0421\u0442\u043E\u0438\u043C\u043E\u0441\u0442\u044C \u0438 \u0441\u0440\u043E\u043A"
+      parentId: building-card-market
+      kind: 1
+      targetName: building-card-market-meta
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "60 \u0437\u043E\u043B\u043E\u0442\u0430 \u00B7 12 \u0447\u0430\u0441\u043E\u0432"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 350
+        width: 476
+        height: 36
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-market-progress
+      displayName: "  \u041F\u0440\u043E\u0433\u0440\u0435\u0441\u0441 \u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+      parentId: building-card-market
+      kind: 4
+      targetName: building-card-market-progress
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 392
+        width: 476
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-market-action
+      displayName: "  \u041A\u043D\u043E\u043F\u043A\u0430 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F"
+      parentId: building-card-market
+      kind: 3
+      targetName: building-card-market-action
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u041E\u0421\u0422\u0420\u041E\u0418\u0422\u042C"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 420
+        width: 476
+        height: 34
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: building-card-barracks
+      displayName: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430: \u041A\u0430\u0437\u0430\u0440\u043C\u044B"
+      parentId: building-grid
+      kind: 0
+      targetName: building-card-barracks
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1370
+        y: 130
+        width: 500
+        height: 392
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-barracks-title
+      displayName: "  \u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A"
+      parentId: building-card-barracks
+      kind: 1
+      targetName: building-card-barracks-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041A\u0410\u0417\u0410\u0420\u041C\u042B"
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 140
+        width: 400
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 15
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-barracks-status
+      displayName: "  \u0421\u0442\u0430\u0442\u0443\u0441"
+      parentId: building-card-barracks
+      kind: 1
+      targetName: building-card-barracks-status
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0433\u043E\u0442\u043E\u0432\u043E"
+      rect:
+        serializedVersion: 2
+        x: 1782
+        y: 140
+        width: 76
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 2
+      verticalAlignment: 0
+    - id: building-card-barracks-image
+      displayName: "  \u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435"
+      parentId: building-card-barracks
+      kind: 2
+      targetName: building-card-barracks-image
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0418\u0417\u041E\u0411\u0420\u0410\u0416\u0415\u041D\u0418\u0415 \u041F\u041E\u0421\u0422\u0420\u041E\u0419\u041A\u0418"
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 174
+        width: 476
+        height: 72
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 1
+    - id: building-card-barracks-description
+      displayName: "  \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435"
+      parentId: building-card-barracks
+      kind: 1
+      targetName: building-card-barracks-description
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u043F\u043E\u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 254
+        width: 476
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-barracks-effect
+      displayName: "  \u042D\u0444\u0444\u0435\u043A\u0442"
+      parentId: building-card-barracks
+      kind: 1
+      targetName: building-card-barracks-effect
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u0442\u043A\u0440\u044B\u0432\u0430\u044E\u0442 \u043D\u0430\u0439\u043C \u0431\u043E\u0439\u0446\u043E\u0432"
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 304
+        width: 476
+        height: 40
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-barracks-meta
+      displayName: "  \u0421\u0442\u043E\u0438\u043C\u043E\u0441\u0442\u044C \u0438 \u0441\u0440\u043E\u043A"
+      parentId: building-card-barracks
+      kind: 1
+      targetName: building-card-barracks-meta
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "60 \u0437\u043E\u043B\u043E\u0442\u0430 \u00B7 12 \u0447\u0430\u0441\u043E\u0432"
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 350
+        width: 476
+        height: 36
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-barracks-progress
+      displayName: "  \u041F\u0440\u043E\u0433\u0440\u0435\u0441\u0441 \u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+      parentId: building-card-barracks
+      kind: 4
+      targetName: building-card-barracks-progress
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 392
+        width: 476
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-barracks-action
+      displayName: "  \u041A\u043D\u043E\u043F\u043A\u0430 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F"
+      parentId: building-card-barracks
+      kind: 3
+      targetName: building-card-barracks-action
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u041E\u0421\u0422\u0420\u041E\u0418\u0422\u042C"
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 420
+        width: 476
+        height: 34
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: building-card-city_walls
+      displayName: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430: \u0423\u043A\u0440\u0435\u043F\u043B\u0435\u043D\u0438\u044F"
+      parentId: building-grid
+      kind: 0
+      targetName: building-card-city_walls
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 530
+        width: 500
+        height: 392
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-city_walls-title
+      displayName: "  \u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A"
+      parentId: building-card-city_walls
+      kind: 1
+      targetName: building-card-city_walls-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0423\u041A\u0420\u0415\u041F\u041B\u0415\u041D\u0418\u042F"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 540
+        width: 400
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 15
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-city_walls-status
+      displayName: "  \u0421\u0442\u0430\u0442\u0443\u0441"
+      parentId: building-card-city_walls
+      kind: 1
+      targetName: building-card-city_walls-status
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0433\u043E\u0442\u043E\u0432\u043E"
+      rect:
+        serializedVersion: 2
+        x: 758
+        y: 540
+        width: 76
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 2
+      verticalAlignment: 0
+    - id: building-card-city_walls-image
+      displayName: "  \u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435"
+      parentId: building-card-city_walls
+      kind: 2
+      targetName: building-card-city_walls-image
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0418\u0417\u041E\u0411\u0420\u0410\u0416\u0415\u041D\u0418\u0415 \u041F\u041E\u0421\u0422\u0420\u041E\u0419\u041A\u0418"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 574
+        width: 476
+        height: 72
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 1
+    - id: building-card-city_walls-description
+      displayName: "  \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435"
+      parentId: building-card-city_walls
+      kind: 1
+      targetName: building-card-city_walls-description
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u043F\u043E\u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 654
+        width: 476
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-city_walls-effect
+      displayName: "  \u042D\u0444\u0444\u0435\u043A\u0442"
+      parentId: building-card-city_walls
+      kind: 1
+      targetName: building-card-city_walls-effect
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0421\u043E\u0434\u0435\u0440\u0436\u0430\u043D\u0438\u0435: 1 \u0437\u043E\u043B\u043E\u0442\u043E \u0432 \u0441\u0443\u0442\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 704
+        width: 476
+        height: 40
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-city_walls-meta
+      displayName: "  \u0421\u0442\u043E\u0438\u043C\u043E\u0441\u0442\u044C \u0438 \u0441\u0440\u043E\u043A"
+      parentId: building-card-city_walls
+      kind: 1
+      targetName: building-card-city_walls-meta
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "60 \u0437\u043E\u043B\u043E\u0442\u0430 \u00B7 12 \u0447\u0430\u0441\u043E\u0432"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 750
+        width: 476
+        height: 36
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-city_walls-progress
+      displayName: "  \u041F\u0440\u043E\u0433\u0440\u0435\u0441\u0441 \u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+      parentId: building-card-city_walls
+      kind: 4
+      targetName: building-card-city_walls-progress
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 792
+        width: 476
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-city_walls-action
+      displayName: "  \u041A\u043D\u043E\u043F\u043A\u0430 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F"
+      parentId: building-card-city_walls
+      kind: 3
+      targetName: building-card-city_walls-action
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u041E\u0421\u0422\u0420\u041E\u0418\u0422\u042C"
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 820
+        width: 476
+        height: 34
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: building-card-mine
+      displayName: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430: \u0428\u0430\u0445\u0442\u0430"
+      parentId: building-grid
+      kind: 0
+      targetName: building-card-mine
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 858
+        y: 530
+        width: 500
+        height: 392
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-mine-title
+      displayName: "  \u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A"
+      parentId: building-card-mine
+      kind: 1
+      targetName: building-card-mine-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0428\u0410\u0425\u0422\u0410"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 540
+        width: 400
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 15
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-mine-status
+      displayName: "  \u0421\u0442\u0430\u0442\u0443\u0441"
+      parentId: building-card-mine
+      kind: 1
+      targetName: building-card-mine-status
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0433\u043E\u0442\u043E\u0432\u043E"
+      rect:
+        serializedVersion: 2
+        x: 1270
+        y: 540
+        width: 76
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 2
+      verticalAlignment: 0
+    - id: building-card-mine-image
+      displayName: "  \u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435"
+      parentId: building-card-mine
+      kind: 2
+      targetName: building-card-mine-image
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0418\u0417\u041E\u0411\u0420\u0410\u0416\u0415\u041D\u0418\u0415 \u041F\u041E\u0421\u0422\u0420\u041E\u0419\u041A\u0418"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 574
+        width: 476
+        height: 72
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 1
+    - id: building-card-mine-description
+      displayName: "  \u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435"
+      parentId: building-card-mine
+      kind: 1
+      targetName: building-card-mine-description
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u043F\u043E\u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 654
+        width: 476
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-mine-effect
+      displayName: "  \u042D\u0444\u0444\u0435\u043A\u0442"
+      parentId: building-card-mine
+      kind: 1
+      targetName: building-card-mine-effect
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0417\u0430\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u043D\u043E"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 704
+        width: 476
+        height: 40
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-mine-meta
+      displayName: "  \u0421\u0442\u043E\u0438\u043C\u043E\u0441\u0442\u044C \u0438 \u0441\u0440\u043E\u043A"
+      parentId: building-card-mine
+      kind: 1
+      targetName: building-card-mine-meta
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "60 \u0437\u043E\u043B\u043E\u0442\u0430 \u00B7 12 \u0447\u0430\u0441\u043E\u0432"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 750
+        width: 476
+        height: 36
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-mine-progress
+      displayName: "  \u041F\u0440\u043E\u0433\u0440\u0435\u0441\u0441 \u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+      parentId: building-card-mine
+      kind: 4
+      targetName: building-card-mine-progress
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 792
+        width: 476
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: building-card-mine-action
+      displayName: "  \u041A\u043D\u043E\u043F\u043A\u0430 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F"
+      parentId: building-card-mine
+      kind: 3
+      targetName: building-card-mine-action
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u041E\u0421\u0422\u0420\u041E\u0418\u0422\u042C"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 820
+        width: 476
+        height: 34
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+  - id: army-screen
+    displayName: "\u041E\u0442\u0440\u044F\u0434"
+    description: "\u042D\u043A\u0440\u0430\u043D \u043E\u0442\u0440\u044F\u0434\u0430: \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440, \u0441\u043D\u0430\u0431\u0436\u0435\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u043E\u0445\u043E\u0434\u0430 \u0438 \u0433\u0430\u0440\u043D\u0438\u0437\u043E\u043D \u0434\u043E\u043C\u0430."
+    usesDimming: 0
+    dimmingOpacity: 0.68
+    autoApply: 1
+    rootName: army-screen
+    requiredElements: []
+    elements:
+    - id: army-screen
+      displayName: "\u042D\u043A\u0440\u0430\u043D \u043E\u0442\u0440\u044F\u0434\u0430"
+      parentId: 
+      kind: 0
+      targetName: army-screen
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 10
+        width: 1588
+        height: 978
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: commander-dropdown
+      displayName: "\u0412\u044B\u0431\u043E\u0440 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430"
+      parentId: army-screen
+      kind: 3
+      targetName: commander-dropdown
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041A\u043E\u043C\u0430\u043D\u0434\u0438\u0440"
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 260
+        width: 340
+        height: 32
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 13
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: commander-detail-label
+      displayName: "\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430"
+      parentId: army-screen
+      kind: 1
+      targetName: commander-detail-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u043F\u044B\u0442, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u0441\u043D\u0430\u0440\u044F\u0436\u0435\u043D\u0438\u0435"
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 300
+        width: 340
+        height: 60
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journey-summary-block
+      displayName: "\u0418\u0442\u043E\u0433\u0438 \u043F\u043E\u0445\u043E\u0434\u0430"
+      parentId: army-screen
+      kind: 0
+      targetName: journey-summary-block
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 722
+        y: 40
+        width: 520
+        height: 330
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journey-summary-list
+      displayName: "\u0421\u043F\u0438\u0441\u043E\u043A \u0438\u0442\u043E\u0433\u043E\u0432"
+      parentId: journey-summary-block
+      kind: 1
+      targetName: journey-summary-list
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u043E\u0442\u0435\u0440\u0438, \u043D\u0430\u0445\u043E\u0434\u043A\u0438, \u0432\u0440\u0435\u043C\u044F \u0432 \u043F\u0443\u0442\u0438"
+      rect:
+        serializedVersion: 2
+        x: 738
+        y: 80
+        width: 488
+        height: 280
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: army-status-label
+      displayName: "\u0421\u0442\u0430\u0442\u0443\u0441 \u043E\u0442\u0440\u044F\u0434\u0430"
+      parentId: army-screen
+      kind: 1
+      targetName: army-status-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u0442\u0440\u044F\u0434 \u0433\u043E\u0442\u043E\u0432 \u043A \u0432\u044B\u0445\u043E\u0434\u0443"
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 380
+        width: 600
+        height: 28
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 13
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: army-gold-label
+      displayName: "\u0417\u043E\u043B\u043E\u0442\u043E \u043E\u0442\u0440\u044F\u0434\u0430"
+      parentId: army-screen
+      kind: 1
+      targetName: army-gold-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 120
+      rect:
+        serializedVersion: 2
+        x: 1282
+        y: 50
+        width: 160
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 14
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: supply-value-label
+      displayName: "\u0421\u043D\u0430\u0431\u0436\u0435\u043D\u0438\u0435"
+      parentId: army-screen
+      kind: 1
+      targetName: supply-value-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 40
+      rect:
+        serializedVersion: 2
+        x: 1282
+        y: 90
+        width: 160
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 14
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: supply-consumption-label
+      displayName: "\u0420\u0430\u0441\u0445\u043E\u0434 \u0441\u043D\u0430\u0431\u0436\u0435\u043D\u0438\u044F"
+      parentId: army-screen
+      kind: 1
+      targetName: supply-consumption-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0420\u0430\u0441\u0445\u043E\u0434: 5 / \u0441\u0443\u0442\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 1282
+        y: 122
+        width: 260
+        height: 22
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: supply-days-label
+      displayName: "\u0417\u0430\u043F\u0430\u0441 \u0432 \u0441\u0443\u0442\u043A\u0430\u0445"
+      parentId: army-screen
+      kind: 1
+      targetName: supply-days-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0425\u0432\u0430\u0442\u0438\u0442 \u043D\u0430 8 \u0441\u0443\u0442\u043E\u043A"
+      rect:
+        serializedVersion: 2
+        x: 1282
+        y: 146
+        width: 260
+        height: 22
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: fighter-selection-hint-label
+      displayName: "\u041F\u043E\u0434\u0441\u043A\u0430\u0437\u043A\u0430 \u0432\u044B\u0431\u043E\u0440\u0430 \u0431\u043E\u0439\u0446\u043E\u0432"
+      parentId: army-screen
+      kind: 1
+      targetName: fighter-selection-hint-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u0435\u0440\u0435\u0442\u0430\u0449\u0438\u0442\u0435 \u0431\u043E\u0439\u0446\u043E\u0432 \u0432 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u043E\u0445\u043E\u0434\u0430"
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 420
+        width: 700
+        height: 24
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: capital-garrison-drop-zone
+      displayName: "\u0417\u043E\u043D\u0430 \u0433\u0430\u0440\u043D\u0438\u0437\u043E\u043D\u0430 \u0434\u043E\u043C\u0430"
+      parentId: army-screen
+      kind: 4
+      targetName: capital-garrison-drop-zone
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 460
+        width: 700
+        height: 200
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: capital-garrison-summary-label
+      displayName: "\u0421\u0432\u043E\u0434\u043A\u0430 \u0433\u0430\u0440\u043D\u0438\u0437\u043E\u043D\u0430"
+      parentId: capital-garrison-drop-zone
+      kind: 1
+      targetName: capital-garrison-summary-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0414\u043E\u043C\u0430 \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F: 3"
+      rect:
+        serializedVersion: 2
+        x: 364
+        y: 468
+        width: 400
+        height: 24
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: capital-garrison-list
+      displayName: "\u0421\u043F\u0438\u0441\u043E\u043A \u0433\u0430\u0440\u043D\u0438\u0437\u043E\u043D\u0430"
+      parentId: capital-garrison-drop-zone
+      kind: 4
+      targetName: capital-garrison-list
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 364
+        y: 496
+        width: 676
+        height: 156
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: capital-garrison-empty-label
+      displayName: "\u0413\u0430\u0440\u043D\u0438\u0437\u043E\u043D \u043F\u0443\u0441\u0442"
+      parentId: capital-garrison-drop-zone
+      kind: 1
+      targetName: capital-garrison-empty-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0414\u043E\u043C\u0430 \u043D\u0438\u043A\u043E\u0433\u043E \u043D\u0435 \u043E\u0441\u0442\u0430\u043B\u043E\u0441\u044C"
+      rect:
+        serializedVersion: 2
+        x: 364
+        y: 540
+        width: 400
+        height: 24
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+  - id: expeditions-screen
+    displayName: "\u042D\u043A\u0441\u043F\u0435\u0434\u0438\u0446\u0438\u0438 \u0438 \u043A\u0430\u0440\u0442\u0430"
+    description: "\u0413\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u0430\u044F \u043A\u0430\u0440\u0442\u0430, \u0430\u043A\u0442\u0438\u0432\u043D\u044B\u0439 \u043F\u043E\u0445\u043E\u0434 \u0438 \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u0439 \u0442\u043E\u0447\u043A\u0438."
+    usesDimming: 0
+    dimmingOpacity: 0.68
+    autoApply: 1
+    rootName: expeditions-screen
+    requiredElements: []
+    elements:
+    - id: expeditions-screen
+      displayName: "\u042D\u043A\u0440\u0430\u043D \u044D\u043A\u0441\u043F\u0435\u0434\u0438\u0446\u0438\u0439"
+      parentId: 
+      kind: 0
+      targetName: expeditions-screen
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 10
+        width: 1588
+        height: 978
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: expedition-status-label
+      displayName: "\u0421\u0442\u0430\u0442\u0443\u0441 \u044D\u043A\u0441\u043F\u0435\u0434\u0438\u0446\u0438\u0438"
+      parentId: expeditions-screen
+      kind: 1
+      targetName: expedition-status-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041A\u043E\u043C\u0430\u043D\u0434\u0438\u0440 \u0434\u043E\u043C\u0430"
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 34
+        width: 700
+        height: 28
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 14
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: world-map-hint-label
+      displayName: "\u041F\u043E\u0434\u0441\u043A\u0430\u0437\u043A\u0430 \u043A\u0430\u0440\u0442\u044B"
+      parentId: expeditions-screen
+      kind: 1
+      targetName: world-map-hint-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0442\u043E\u0447\u043A\u0443 \u043D\u0430 \u043A\u0430\u0440\u0442\u0435"
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 68
+        width: 700
+        height: 22
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: world-map
+      displayName: "\u041A\u0430\u0440\u0442\u0430 \u043C\u0438\u0440\u0430"
+      parentId: expeditions-screen
+      kind: 4
+      targetName: world-map
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 100
+        width: 1080
+        height: 700
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: world-map-terrain
+      displayName: "\u0421\u043B\u043E\u0439 \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u0438"
+      parentId: world-map
+      kind: 2
+      targetName: world-map-terrain
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 100
+        width: 1080
+        height: 700
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: world-map-routes
+      displayName: "\u0421\u043B\u043E\u0439 \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u043E\u0432"
+      parentId: world-map
+      kind: 4
+      targetName: world-map-routes
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 100
+        width: 1080
+        height: 700
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: world-map-markers
+      displayName: "\u0421\u043B\u043E\u0439 \u043C\u0430\u0440\u043A\u0435\u0440\u043E\u0432"
+      parentId: world-map
+      kind: 4
+      targetName: world-map-markers
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 100
+        width: 1080
+        height: 700
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: world-map-capital-button
+      displayName: "\u041C\u0435\u0442\u043A\u0430 \u0434\u043E\u043C\u0430"
+      parentId: world-map-markers
+      kind: 3
+      targetName: world-map-capital-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0414\u043E\u043C"
+      rect:
+        serializedVersion: 2
+        x: 622
+        y: 390
+        width: 120
+        height: 34
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: world-map-army-marker
+      displayName: "\u041C\u0435\u0442\u043A\u0430 \u043E\u0442\u0440\u044F\u0434\u0430"
+      parentId: world-map-markers
+      kind: 2
+      targetName: world-map-army-marker
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 742
+        y: 350
+        width: 40
+        height: 40
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: world-map-army-marker-label
+      displayName: "\u041F\u043E\u0434\u043F\u0438\u0441\u044C \u043E\u0442\u0440\u044F\u0434\u0430"
+      parentId: world-map-army-marker
+      kind: 1
+      targetName: world-map-army-marker-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u0442\u0440\u044F\u0434"
+      rect:
+        serializedVersion: 2
+        x: 742
+        y: 392
+        width: 120
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: active-expedition-card
+      displayName: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u043F\u043E\u0445\u043E\u0434\u0430"
+      parentId: expeditions-screen
+      kind: 0
+      targetName: active-expedition-card
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1462
+        y: 100
+        width: 400
+        height: 260
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: active-expedition-title
+      displayName: "\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A \u043F\u043E\u0445\u043E\u0434\u0430"
+      parentId: active-expedition-card
+      kind: 1
+      targetName: active-expedition-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0422\u0435\u043A\u0443\u0449\u0438\u0439 \u043F\u043E\u0445\u043E\u0434"
+      rect:
+        serializedVersion: 2
+        x: 1478
+        y: 114
+        width: 368
+        height: 28
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 15
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: active-expedition-details
+      displayName: "\u0414\u0435\u0442\u0430\u043B\u0438 \u043F\u043E\u0445\u043E\u0434\u0430"
+      parentId: active-expedition-card
+      kind: 1
+      targetName: active-expedition-details
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0426\u0435\u043B\u044C, \u0440\u0430\u0441\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u0440\u0438\u0441\u043A"
+      rect:
+        serializedVersion: 2
+        x: 1478
+        y: 148
+        width: 368
+        height: 180
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: research-expedition-button
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u044F"
+      parentId: active-expedition-card
+      kind: 3
+      targetName: research-expedition-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0418\u0421\u0421\u041B\u0415\u0414\u041E\u0412\u0410\u0422\u042C"
+      rect:
+        serializedVersion: 2
+        x: 1478
+        y: 306
+        width: 180
+        height: 36
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: return-expedition-button
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0435\u043D\u0438\u044F"
+      parentId: active-expedition-card
+      kind: 3
+      targetName: return-expedition-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0412\u0415\u0420\u041D\u0423\u0422\u042C\u0421\u042F"
+      rect:
+        serializedVersion: 2
+        x: 1670
+        y: 306
+        width: 176
+        height: 36
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: map-selection-card
+      displayName: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u0432\u044B\u0431\u043E\u0440\u0430"
+      parentId: expeditions-screen
+      kind: 0
+      targetName: map-selection-card
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1462
+        y: 380
+        width: 400
+        height: 240
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: map-selection-title
+      displayName: "\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A \u0432\u044B\u0431\u043E\u0440\u0430"
+      parentId: map-selection-card
+      kind: 1
+      targetName: map-selection-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0412\u044B\u0431\u0440\u0430\u043D\u043D\u0430\u044F \u0442\u043E\u0447\u043A\u0430"
+      rect:
+        serializedVersion: 2
+        x: 1478
+        y: 394
+        width: 368
+        height: 28
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 15
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: map-selection-details
+      displayName: "\u0414\u0435\u0442\u0430\u043B\u0438 \u0432\u044B\u0431\u043E\u0440\u0430"
+      parentId: map-selection-card
+      kind: 1
+      targetName: map-selection-details
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0422\u0438\u043F \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u0438, \u043F\u0443\u0442\u044C, \u0432\u0440\u0435\u043C\u044F"
+      rect:
+        serializedVersion: 2
+        x: 1478
+        y: 428
+        width: 368
+        height: 140
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: map-send-button
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \u043E\u0442\u043F\u0440\u0430\u0432\u043A\u0438"
+      parentId: map-selection-card
+      kind: 3
+      targetName: map-send-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u0422\u041F\u0420\u0410\u0412\u0418\u0422\u042C"
+      rect:
+        serializedVersion: 2
+        x: 1478
+        y: 576
+        width: 368
+        height: 36
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+  - id: incident-modal
+    displayName: "\u041E\u043A\u043D\u043E \u043F\u0440\u043E\u0438\u0441\u0448\u0435\u0441\u0442\u0432\u0438\u044F"
+    description: "\u0411\u043B\u043E\u043A\u0438\u0440\u0443\u044E\u0449\u0435\u0435 \u043C\u043E\u0434\u0430\u043B\u044C\u043D\u043E\u0435 \u043E\u043A\u043D\u043E \u0441\u043E\u0431\u044B\u0442\u0438\u044F."
+    usesDimming: 1
+    dimmingOpacity: 0.72
+    autoApply: 1
+    rootName: incident-modal-overlay
+    requiredElements: []
+    elements:
+    - id: overlay
+      displayName: "\u0417\u0430\u0442\u0435\u043C\u043D\u0435\u043D\u0438\u0435 \u044D\u043A\u0440\u0430\u043D\u0430"
+      parentId: 
+      kind: 0
+      targetName: incident-modal-overlay
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1920
+        height: 1080
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: incident-modal-title
+      displayName: "\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A"
+      parentId: overlay
+      kind: 1
+      targetName: incident-modal-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u0420\u041E\u0418\u0421\u0428\u0415\u0421\u0422\u0412\u0418\u0415"
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 300
+        width: 600
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 22
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: incident-modal-description
+      displayName: "\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435"
+      parentId: overlay
+      kind: 1
+      targetName: incident-modal-description
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0438\u0441\u0448\u0435\u0441\u0442\u0432\u0438\u044F"
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 360
+        width: 600
+        height: 200
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 14
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: incident-modal-consequence
+      displayName: "\u041F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u0435"
+      parentId: overlay
+      kind: 1
+      targetName: incident-modal-consequence
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u0435"
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 570
+        width: 600
+        height: 100
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 13
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: incident-understood-button
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \u00AB\u041F\u043E\u043D\u044F\u0442\u043D\u043E\u00BB"
+      parentId: overlay
+      kind: 3
+      targetName: incident-understood-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u041E\u041D\u042F\u0422\u041D\u041E"
+      rect:
+        serializedVersion: 2
+        x: 860
+        y: 700
+        width: 200
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 14
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+  - id: game-over
+    displayName: "\u042D\u043A\u0440\u0430\u043D \u043F\u043E\u0440\u0430\u0436\u0435\u043D\u0438\u044F"
+    description: "\u0424\u0438\u043D\u0430\u043B\u044C\u043D\u043E\u0435 \u043E\u043A\u043D\u043E \u043F\u0440\u043E\u0438\u0433\u0440\u044B\u0448\u0430 \u0441 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0443\u0441\u043A\u043E\u043C."
+    usesDimming: 1
+    dimmingOpacity: 0.85
+    autoApply: 1
+    rootName: game-over-overlay
+    requiredElements: []
+    elements:
+    - id: overlay
+      displayName: "\u0417\u0430\u0442\u0435\u043C\u043D\u0435\u043D\u0438\u0435 \u044D\u043A\u0440\u0430\u043D\u0430"
+      parentId: 
+      kind: 0
+      targetName: game-over-overlay
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1920
+        height: 1080
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: game-over-days-label
+      displayName: "\u0421\u0447\u0451\u0442\u0447\u0438\u043A \u0434\u043D\u0435\u0439"
+      parentId: overlay
+      kind: 1
+      targetName: game-over-days-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0412\u044B \u0443\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u043B\u0438 \u0434\u043E\u043C: 0 \u0434\u043D\u0435\u0439"
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 520
+        width: 600
+        height: 40
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: restart-game-button
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0443\u0441\u043A\u0430"
+      parentId: overlay
+      kind: 3
+      targetName: restart-game-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041D\u0410\u0427\u0410\u0422\u042C \u0417\u0410\u041D\u041E\u0412\u041E"
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 600
+        width: 300
+        height: 48
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 15
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+  - id: commander-panel
+    displayName: "\u041F\u0430\u043D\u0435\u043B\u044C \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430"
+    description: "\u041F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u0430\u044F \u043F\u0430\u043D\u0435\u043B\u044C \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430 \u0432 \u043B\u0435\u0432\u043E\u0439 \u043A\u043E\u043B\u043E\u043D\u043A\u0435: \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435, \u043A\u043D\u043E\u043F\u043A\u0438 \u0438 \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u043E\u0445\u043E\u0434\u0430."
+    usesDimming: 0
+    dimmingOpacity: 0.68
+    autoApply: 1
+    rootName: persistent-commander-panel
+    requiredElements: []
+    elements:
+    - id: persistent-commander-panel
+      displayName: "\u041F\u0430\u043D\u0435\u043B\u044C \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430"
+      parentId: 
+      kind: 0
+      targetName: persistent-commander-panel
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 640
+        width: 300
+        height: 231
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: persistent-commander-status
+      displayName: "\u0411\u043B\u043E\u043A \u0441\u0442\u0430\u0442\u0443\u0441\u0430"
+      parentId: persistent-commander-panel
+      kind: 0
+      targetName: persistent-commander-status
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 672
+        width: 284
+        height: 38
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: persistent-commander-state
+      displayName: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435"
+      parentId: persistent-commander-status
+      kind: 1
+      targetName: persistent-commander-state
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0414\u043E\u043C\u0430"
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 676
+        width: 272
+        height: 16
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: persistent-commander-target
+      displayName: "\u0426\u0435\u043B\u044C"
+      parentId: persistent-commander-status
+      kind: 1
+      targetName: persistent-commander-target
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0426\u0435\u043B\u044C \u043D\u0435 \u0432\u044B\u0431\u0440\u0430\u043D\u0430"
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 692
+        width: 272
+        height: 16
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 9
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: persistent-commander-army-button
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \u043E\u0442\u0440\u044F\u0434\u0430"
+      parentId: persistent-commander-panel
+      kind: 3
+      targetName: persistent-commander-army-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u0422\u0420\u042F\u0414"
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 720
+        width: 130
+        height: 34
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 9
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: persistent-commander-expedition-button
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \u043F\u043E\u0445\u043E\u0434\u0430"
+      parentId: persistent-commander-panel
+      kind: 3
+      targetName: persistent-commander-expedition-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u041E\u0425\u041E\u0414"
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 758
+        width: 130
+        height: 34
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 9
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: persistent-commander-garrison-host
+      displayName: "\u0421\u0432\u0438\u0442\u0430 \u043F\u0440\u0438 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0435"
+      parentId: persistent-commander-panel
+      kind: 4
+      targetName: persistent-commander-garrison-host
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 876
+        width: 300
+        height: 113
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: commander-garrison-drop-zone
+      displayName: "\u0417\u043E\u043D\u0430 \u0441\u043E\u0441\u0442\u0430\u0432\u0430 \u043F\u043E\u0445\u043E\u0434\u0430"
+      parentId: persistent-commander-garrison-host
+      kind: 4
+      targetName: commander-garrison-drop-zone
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 880
+        width: 284
+        height: 105
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: commander-garrison-summary-label
+      displayName: "\u0421\u0432\u043E\u0434\u043A\u0430 \u0441\u043E\u0441\u0442\u0430\u0432\u0430"
+      parentId: commander-garrison-drop-zone
+      kind: 1
+      targetName: commander-garrison-summary-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0412 \u043F\u043E\u0445\u043E\u0434\u0435: 0 \u0438\u0437 4"
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 884
+        width: 272
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: commander-garrison-list
+      displayName: "\u0421\u043F\u0438\u0441\u043E\u043A \u0441\u043E\u0441\u0442\u0430\u0432\u0430"
+      parentId: commander-garrison-drop-zone
+      kind: 4
+      targetName: commander-garrison-list
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 906
+        width: 272
+        height: 76
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: commander-garrison-empty-label
+      displayName: "\u0421\u043E\u0441\u0442\u0430\u0432 \u043F\u0443\u0441\u0442"
+      parentId: commander-garrison-drop-zone
+      kind: 1
+      targetName: commander-garrison-empty-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041A\u043E\u043C\u0430\u043D\u0434\u0438\u0440 \u0438\u0434\u0451\u0442 \u043E\u0434\u0438\u043D"
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 930
+        width: 272
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+  - id: shell-hud
+    displayName: "\u041E\u0431\u043E\u043B\u043E\u0447\u043A\u0430 \u0438 \u0440\u0435\u0441\u0443\u0440\u0441\u044B"
+    description: "\u041F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u044B\u0439 \u043A\u0430\u0440\u043A\u0430\u0441: \u0445\u0440\u043E\u043D\u0438\u043A\u0430, \u043F\u043E\u043B\u043E\u0441\u0430 \u0440\u0435\u0441\u0443\u0440\u0441\u043E\u0432, \u043D\u0430\u0432\u0438\u0433\u0430\u0446\u0438\u044F \u0438 \u0441\u0442\u043E\u043F\u043A\u0430 \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u0439."
+    usesDimming: 0
+    dimmingOpacity: 0.68
+    autoApply: 1
+    rootName: 
+    requiredElements: []
+    elements:
+    - id: report-history-scroll
+      displayName: "\u041B\u0435\u043D\u0442\u0430 \u0445\u0440\u043E\u043D\u0438\u043A\u0438"
+      parentId: 
+      kind: 4
+      targetName: report-history-scroll
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 70
+        width: 276
+        height: 540
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: report-history-label
+      displayName: "\u0422\u0435\u043A\u0441\u0442 \u0445\u0440\u043E\u043D\u0438\u043A\u0438"
+      parentId: report-history-scroll
+      kind: 1
+      targetName: report-history-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0414\u0435\u043D\u044C 1, 08:00 \u2014 \u043E\u0431\u044B\u0447\u043D\u043E\u0435 \u0443\u0442\u0440\u043E."
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 70
+        width: 276
+        height: 540
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: day-label
+      displayName: "\u0414\u0435\u043D\u044C \u0438 \u0432\u0440\u0435\u043C\u044F"
+      parentId: 
+      kind: 1
+      targetName: day-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0414\u0435\u043D\u044C 1, 08:00"
+      rect:
+        serializedVersion: 2
+        x: 342
+        y: 1014
+        width: 200
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 14
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: gold-label
+      displayName: "\u0417\u043E\u043B\u043E\u0442\u043E"
+      parentId: 
+      kind: 1
+      targetName: gold-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 120
+      rect:
+        serializedVersion: 2
+        x: 1240
+        y: 1012
+        width: 100
+        height: 22
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: gold-income-label
+      displayName: "\u0414\u043E\u0445\u043E\u0434 \u0437\u043E\u043B\u043E\u0442\u0430"
+      parentId: 
+      kind: 1
+      targetName: gold-income-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "+5 / \u0441\u0443\u0442\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 1240
+        y: 1036
+        width: 100
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 9
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: food-label
+      displayName: "\u041F\u0438\u0449\u0430"
+      parentId: 
+      kind: 1
+      targetName: food-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 80
+      rect:
+        serializedVersion: 2
+        x: 1346
+        y: 1012
+        width: 108
+        height: 22
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: food-income-label
+      displayName: "\u0414\u043E\u0445\u043E\u0434 \u043F\u0438\u0449\u0438"
+      parentId: 
+      kind: 1
+      targetName: food-income-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "+10 / \u0441\u0443\u0442\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 1346
+        y: 1036
+        width: 108
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 9
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: food-consumption-label
+      displayName: "\u0420\u0430\u0441\u0445\u043E\u0434 \u043F\u0438\u0449\u0438"
+      parentId: 
+      kind: 1
+      targetName: food-consumption-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "-6 / \u0441\u0443\u0442\u043A\u0438"
+      rect:
+        serializedVersion: 2
+        x: 1346
+        y: 1054
+        width: 108
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 9
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: population-label
+      displayName: "\u041D\u0430\u0441\u0435\u043B\u0435\u043D\u0438\u0435"
+      parentId: 
+      kind: 1
+      targetName: population-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 24
+      rect:
+        serializedVersion: 2
+        x: 1460
+        y: 1012
+        width: 100
+        height: 22
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: mood-label
+      displayName: "\u041D\u0430\u0441\u0442\u0440\u043E\u0435\u043D\u0438\u0435"
+      parentId: 
+      kind: 1
+      targetName: mood-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0421\u043F\u043E\u043A\u043E\u0439\u043D\u043E"
+      rect:
+        serializedVersion: 2
+        x: 1566
+        y: 1012
+        width: 142
+        height: 22
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: time-toggle-button
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \u0432\u0440\u0435\u043C\u0435\u043D\u0438"
+      parentId: 
+      kind: 3
+      targetName: time-toggle-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u0410\u0423\u0417\u0410"
+      rect:
+        serializedVersion: 2
+        x: 1714
+        y: 1012
+        width: 180
+        height: 54
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 13
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: nav-capital-button
+      displayName: "\u041D\u0430\u0432\u0438\u0433\u0430\u0446\u0438\u044F: \u0434\u043E\u043C"
+      parentId: 
+      kind: 3
+      targetName: nav-capital-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0414\u041E\u041C"
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 998
+        width: 94
+        height: 82
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: nav-army-button
+      displayName: "\u041D\u0430\u0432\u0438\u0433\u0430\u0446\u0438\u044F: \u043E\u0442\u0440\u044F\u0434"
+      parentId: 
+      kind: 3
+      targetName: nav-army-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041E\u0422\u0420\u042F\u0414"
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 998
+        width: 94
+        height: 82
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: nav-expeditions-button
+      displayName: "\u041D\u0430\u0432\u0438\u0433\u0430\u0446\u0438\u044F: \u043F\u043E\u0445\u043E\u0434\u044B"
+      parentId: 
+      kind: 3
+      targetName: nav-expeditions-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041F\u041E\u0425\u041E\u0414\u042B"
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 998
+        width: 98
+        height: 82
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: incident-notification-stack
+      displayName: "\u0421\u0442\u043E\u043F\u043A\u0430 \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u0439"
+      parentId: 
+      kind: 4
+      targetName: incident-notification-stack
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 30
+        width: 340
+        height: 300
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+  - id: map-overlays
+    displayName: "\u0412\u0441\u043F\u043B\u044B\u0432\u0430\u044E\u0449\u0438\u0435 \u043E\u043A\u043D\u0430 \u043A\u0430\u0440\u0442\u044B"
+    description: "\u041E\u043A\u043D\u0430 \u0438 \u0441\u043B\u043E\u0438, \u0441\u043E\u0437\u0434\u0430\u0432\u0430\u0435\u043C\u044B\u0435 \u043A\u043E\u0434\u043E\u043C \u043F\u043E\u0432\u0435\u0440\u0445 \u043A\u0430\u0440\u0442\u044B \u043C\u0438\u0440\u0430."
+    usesDimming: 0
+    dimmingOpacity: 0.68
+    autoApply: 1
+    rootName: 
+    requiredElements: []
+    elements:
+    - id: quick-expedition-popup
+      displayName: "\u0411\u044B\u0441\u0442\u0440\u044B\u0439 \u0432\u044B\u0431\u043E\u0440 \u043F\u043E\u0445\u043E\u0434\u0430"
+      parentId: 
+      kind: 0
+      targetName: quick-expedition-popup
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 400
+        width: 520
+        height: 280
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: world-map-location-inspection-card
+      displayName: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u043E\u0441\u043C\u043E\u0442\u0440\u0430 \u043C\u0435\u0441\u0442\u0430"
+      parentId: 
+      kind: 0
+      targetName: world-map-location-inspection-card
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1240
+        y: 300
+        width: 420
+        height: 300
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: quick-location-static-image-label
+      displayName: "\u041F\u043E\u0434\u043F\u0438\u0441\u044C \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u043C\u0435\u0441\u0442\u0430"
+      parentId: world-map-location-inspection-card
+      kind: 1
+      targetName: quick-location-static-image-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u043C\u0435\u0441\u0442\u0430"
+      rect:
+        serializedVersion: 2
+        x: 1256
+        y: 316
+        width: 388
+        height: 24
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: world-map-grid-overlay
+      displayName: "\u0421\u0435\u0442\u043A\u0430 \u043A\u0430\u0440\u0442\u044B"
+      parentId: 
+      kind: 4
+      targetName: world-map-grid-overlay
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 100
+        width: 1080
+        height: 700
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: generated-terrain-layer
+      displayName: "\u0421\u0433\u0435\u043D\u0435\u0440\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u0430\u044F \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u044C"
+      parentId: 
+      kind: 2
+      targetName: generated-terrain-layer
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 100
+        width: 1080
+        height: 700
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0

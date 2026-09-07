@@ -7,8 +7,8 @@ namespace KingdomSurvival.UILayout.Editor
 {
     public sealed class UILayoutEditorWindow : EditorWindow
     {
-        private const float LeftWidth = 220f;
-        private const float RightWidth = 300f;
+        private const float LeftWidth = 240f;
+        private const float RightWidth = 320f;
         private const float CanvasAspect = 16f / 9f;
 
         private UILayoutDatabaseAsset database;
@@ -23,6 +23,7 @@ namespace KingdomSurvival.UILayout.Editor
         private bool resizing;
         private Vector2 dragStart;
         private Rect rectStart;
+        private bool showPreviewContent = true;
 
         [MenuItem("Kingdom Survival/UI Конструктор")]
         private static void Open()
@@ -47,6 +48,10 @@ namespace KingdomSurvival.UILayout.Editor
             EditorGUILayout.EndHorizontal();
         }
 
+        // ------------------------------------------------------------------
+        // Левая панель: экраны и элементы
+        // ------------------------------------------------------------------
+
         private void DrawLeftPanel()
         {
             EditorGUILayout.BeginVertical(GUILayout.Width(LeftWidth));
@@ -64,11 +69,16 @@ namespace KingdomSurvival.UILayout.Editor
             }
 
             leftScroll = EditorGUILayout.BeginScrollView(leftScroll);
-            IReadOnlyList<UILayoutScreenDefinition> screens = database.Screens;
+
             EditorGUILayout.LabelField("ЭКРАНЫ", EditorStyles.boldLabel);
+            IReadOnlyList<UILayoutScreenDefinition> screens = database.Screens;
             for (int i = 0; i < screens.Count; i++)
             {
-                if (GUILayout.Toggle(screenIndex == i, screens[i].DisplayName, "Button"))
+                UILayoutScreenDefinition entry = screens[i];
+                string label = entry.DisplayName;
+                if (entry.AutoApply)
+                    label += "  ●";
+                if (GUILayout.Toggle(screenIndex == i, label, "Button"))
                 {
                     if (screenIndex != i)
                     {
@@ -77,6 +87,19 @@ namespace KingdomSurvival.UILayout.Editor
                     }
                 }
             }
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("+ Экран"))
+                AddScreen();
+            using (new EditorGUI.DisabledScope(CurrentScreen == null))
+            {
+                if (GUILayout.Button("Дублировать"))
+                    DuplicateScreen();
+                if (GUILayout.Button("−"))
+                    DeleteScreen();
+            }
+
+            EditorGUILayout.EndHorizontal();
 
             UILayoutScreenDefinition screen = CurrentScreen;
             if (screen != null)
@@ -87,14 +110,39 @@ namespace KingdomSurvival.UILayout.Editor
                 {
                     UILayoutElementDefinition element = screen.Elements[i];
                     string indent = string.IsNullOrWhiteSpace(element.ParentId) ? string.Empty : "   ↳ ";
-                    if (GUILayout.Toggle(elementIndex == i, indent + element.DisplayName, "Button"))
+                    string mark = element.OverrideRect || element.OverrideBackground || element.OverrideText
+                        ? " ●"
+                        : string.Empty;
+                    if (GUILayout.Toggle(elementIndex == i, indent + element.DisplayName + mark, "Button"))
                         elementIndex = i;
                 }
+
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("+ Элемент"))
+                    AddElement();
+                using (new EditorGUI.DisabledScope(CurrentElement == null))
+                {
+                    if (GUILayout.Button("↑"))
+                        MoveElement(-1);
+                    if (GUILayout.Button("↓"))
+                        MoveElement(1);
+                    if (GUILayout.Button("−"))
+                        DeleteElement();
+                }
+
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.LabelField(
+                    "● — элемент переопределяет вёрстку в игре",
+                    EditorStyles.miniLabel);
             }
 
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
         }
+
+        // ------------------------------------------------------------------
+        // Центр: холст
+        // ------------------------------------------------------------------
 
         private void DrawCanvas()
         {
@@ -104,7 +152,8 @@ namespace KingdomSurvival.UILayout.Editor
             EditorGUILayout.LabelField(reference.x + " × " + reference.y, EditorStyles.miniLabel);
 
             UILayoutScreenDefinition screen = CurrentScreen;
-            if (screen != null && screen.Id == "narrative-dialogue")
+            showPreviewContent = EditorGUILayout.ToggleLeft("Показывать содержимое preview", showPreviewContent);
+            if (screen != null && IsNarrativeDialogue(screen) && showPreviewContent)
                 DrawNarrativePreviewToolbar();
 
             Rect host = GUILayoutUtility.GetRect(
@@ -125,19 +174,22 @@ namespace KingdomSurvival.UILayout.Editor
                 height);
 
             EditorGUI.DrawRect(canvas, new Color(0.12f, 0.13f, 0.14f, 1f));
-            if (screen != null && screen.Id == "narrative-dialogue")
+            if (screen != null && screen.UsesDimming)
             {
                 EditorGUI.DrawRect(
                     canvas,
                     new Color(5f / 255f, 7f / 255f, 8f / 255f, screen.DimmingOpacity));
             }
+
             GUI.Box(canvas, GUIContent.none);
 
             if (screen != null)
             {
                 float sx = canvas.width / Mathf.Max(1f, reference.x);
                 float sy = canvas.height / Mathf.Max(1f, reference.y);
-                bool narrativePreview = screen.Id == "narrative-dialogue" && CurrentPreviewDialogue != null;
+                bool narrativePreview = showPreviewContent &&
+                                        IsNarrativeDialogue(screen) &&
+                                        CurrentPreviewDialogue != null;
 
                 for (int i = 0; i < screen.Elements.Count; i++)
                 {
@@ -149,11 +201,18 @@ namespace KingdomSurvival.UILayout.Editor
                         i == elementIndex
                             ? new Color(0.75f, 0.54f, 0.18f, 0.20f)
                             : new Color(0.4f, 0.4f, 0.4f, 0.08f));
-                    GUI.Box(draw, narrativePreview ? GUIContent.none : new GUIContent(element.DisplayName));
 
-                    if (narrativePreview)
+                    bool hasOwnContent = narrativePreview ||
+                                         (showPreviewContent && !string.IsNullOrEmpty(element.PreviewText));
+                    GUI.Box(draw, hasOwnContent ? GUIContent.none : new GUIContent(element.DisplayName));
+
+                    if (hasOwnContent)
                     {
-                        Rect tag = new Rect(draw.x + 2f, draw.y + 2f, Mathf.Min(Mathf.Max(0f, draw.width - 4f), 120f), 16f);
+                        Rect tag = new Rect(
+                            draw.x + 2f,
+                            draw.y + 2f,
+                            Mathf.Min(Mathf.Max(0f, draw.width - 4f), 140f),
+                            16f);
                         GUI.Label(tag, element.DisplayName, EditorStyles.miniLabel);
                     }
 
@@ -163,9 +222,30 @@ namespace KingdomSurvival.UILayout.Editor
 
                 if (narrativePreview)
                     DrawNarrativeContentPreview(canvas, screen, sx, sy);
+                else if (showPreviewContent)
+                    DrawGenericContentPreview(canvas, screen, sx, sy);
             }
 
             EditorGUILayout.EndVertical();
+        }
+
+        /// <summary>
+        /// Preview для любого экрана: рисует текст-заглушку каждого текстового
+        /// элемента его собственным шрифтом, размером, цветом и выравниванием.
+        /// </summary>
+        private static void DrawGenericContentPreview(
+            Rect canvas,
+            UILayoutScreenDefinition screen,
+            float sx,
+            float sy)
+        {
+            for (int i = 0; i < screen.Elements.Count; i++)
+            {
+                UILayoutElementDefinition element = screen.Elements[i];
+                if (element == null || string.IsNullOrEmpty(element.PreviewText))
+                    continue;
+                DrawPreviewText(canvas, element, element.PreviewText, sx, sy);
+            }
         }
 
         private void DrawNarrativePreviewToolbar()
@@ -217,26 +297,11 @@ namespace KingdomSurvival.UILayout.Editor
 
             if (speaker != null)
             {
-                DrawPreviewText(
-                    canvas,
-                    screen.FindElement("speaker"),
-                    speaker.DisplayName,
-                    sx,
-                    sy);
-                DrawPreviewText(
-                    canvas,
-                    screen.FindElement("role"),
-                    speaker.Role,
-                    sx,
-                    sy);
+                DrawPreviewText(canvas, screen.FindElement("speaker"), speaker.DisplayName, sx, sy);
+                DrawPreviewText(canvas, screen.FindElement("role"), speaker.Role, sx, sy);
             }
 
-            DrawPreviewText(
-                canvas,
-                screen.FindElement("text"),
-                node.Text,
-                sx,
-                sy);
+            DrawPreviewText(canvas, screen.FindElement("text"), node.Text, sx, sy);
 
             string choices = string.Empty;
             for (int i = 0; i < node.Choices.Count; i++)
@@ -246,12 +311,7 @@ namespace KingdomSurvival.UILayout.Editor
                 choices += "› " + node.Choices[i].Text;
             }
 
-            DrawPreviewText(
-                canvas,
-                screen.FindElement("choices"),
-                choices,
-                sx,
-                sy);
+            DrawPreviewText(canvas, screen.FindElement("choices"), choices, sx, sy);
         }
 
         private static void DrawPreviewText(
@@ -421,104 +481,357 @@ namespace KingdomSurvival.UILayout.Editor
             }
         }
 
+        // ------------------------------------------------------------------
+        // Правая панель: свойства
+        // ------------------------------------------------------------------
+
         private void DrawRightPanel()
         {
             EditorGUILayout.BeginVertical(GUILayout.Width(RightWidth));
             rightScroll = EditorGUILayout.BeginScrollView(rightScroll);
+
+            UILayoutScreenDefinition currentScreen = CurrentScreen;
             UILayoutElementDefinition element = CurrentElement;
-            if (database == null || element == null)
+            if (database == null || currentScreen == null)
             {
-                EditorGUILayout.HelpBox("Выберите элемент.", MessageType.Info);
+                EditorGUILayout.HelpBox("Выберите экран.", MessageType.Info);
+                EditorGUILayout.EndScrollView();
+                EditorGUILayout.EndVertical();
+                return;
+            }
+
+            SerializedObject so = new SerializedObject(database);
+            SerializedProperty screens = so.FindProperty("screens");
+            SerializedProperty screen = screens.GetArrayElementAtIndex(screenIndex);
+
+            EditorGUI.BeginChangeCheck();
+
+            EditorGUILayout.LabelField("ЭКРАН", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(screen.FindPropertyRelative("id"), new GUIContent("ID"));
+            EditorGUILayout.PropertyField(screen.FindPropertyRelative("displayName"), new GUIContent("Название"));
+            EditorGUILayout.PropertyField(screen.FindPropertyRelative("description"), new GUIContent("Описание"));
+            EditorGUILayout.PropertyField(screen.FindPropertyRelative("rootName"), new GUIContent("Корень UXML"));
+            EditorGUILayout.PropertyField(screen.FindPropertyRelative("usesDimming"), new GUIContent("Затемнять фон"));
+            using (new EditorGUI.DisabledScope(!currentScreen.UsesDimming))
+            {
+                EditorGUILayout.PropertyField(
+                    screen.FindPropertyRelative("dimmingOpacity"),
+                    new GUIContent("Сила затемнения"));
+            }
+
+            if (IsNarrativeDialogue(currentScreen))
+            {
+                EditorGUILayout.HelpBox(
+                    "Экран диалога применяется собственным кодом PrototypeUIController. " +
+                    "Флаг автоприменения для него намеренно выключен.",
+                    MessageType.Info);
             }
             else
             {
-                EditorGUILayout.LabelField(element.DisplayName, EditorStyles.boldLabel);
-                SerializedObject so = new SerializedObject(database);
-                SerializedProperty screens = so.FindProperty("screens");
-                SerializedProperty screen = screens.GetArrayElementAtIndex(screenIndex);
-                SerializedProperty elements = screen.FindPropertyRelative("elements");
-                SerializedProperty selected = elements.GetArrayElementAtIndex(elementIndex);
-
-                EditorGUI.BeginChangeCheck();
-
-                if (CurrentScreen != null && CurrentScreen.Id == "narrative-dialogue")
-                {
-                    EditorGUILayout.LabelField("ЭКРАН", EditorStyles.boldLabel);
-                    EditorGUILayout.PropertyField(
-                        screen.FindPropertyRelative("dimmingOpacity"),
-                        new GUIContent("Затемнение фона"));
-                    EditorGUILayout.Space(8f);
-                }
-
                 EditorGUILayout.PropertyField(
-                    selected.FindPropertyRelative("parentId"),
-                    new GUIContent("Родитель ID"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("rect"));
-
-                if (IsTextElement(element.Id))
-                {
-                    EditorGUILayout.Space(8f);
-                    EditorGUILayout.LabelField("ТЕКСТ", EditorStyles.boldLabel);
-                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("font"), new GUIContent("Шрифт"));
-                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("fontSize"), new GUIContent("Размер"));
-                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("textColor"), new GUIContent("Цвет"));
-                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("fontStyle"), new GUIContent("Начертание"));
-                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("horizontalAlignment"), new GUIContent("По горизонтали"));
-                    EditorGUILayout.PropertyField(selected.FindPropertyRelative("verticalAlignment"), new GUIContent("По вертикали"));
-                }
-
-                EditorGUILayout.Space(8f);
-                EditorGUILayout.LabelField("ИЗОБРАЖЕНИЕ", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("sprite"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("texture"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageMode"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageScale"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageOffset"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("tint"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("opacity"));
-                if (EditorGUI.EndChangeCheck())
-                {
-                    so.ApplyModifiedProperties();
-                    EditorUtility.SetDirty(database);
-                    Repaint();
-                }
-
-                GUILayout.Space(8f);
-                if (GUILayout.Button("Сбросить положение изображения"))
-                {
-                    Undo.RecordObject(database, "Reset UI Image Transform");
-                    element.ResetImageTransform();
-                    EditorUtility.SetDirty(database);
-                    Repaint();
-                }
-
-                if (GUILayout.Button("Сохранить Asset"))
-                {
-                    EditorUtility.SetDirty(database);
-                    AssetDatabase.SaveAssets();
-                }
-
-                if (GUILayout.Button("Проверить базу"))
-                {
-                    List<string> issues = new List<string>();
-                    database.CollectValidationIssues(issues);
-                    if (issues.Count == 0)
-                        Debug.Log("UI Layout Database: ошибок не найдено.");
-                    else
-                        Debug.LogWarning("UI Layout Database:\n" + string.Join("\n", issues));
-                }
+                    screen.FindPropertyRelative("autoApply"),
+                    new GUIContent("Применять в игре"));
             }
 
+            EditorGUILayout.PropertyField(
+                screen.FindPropertyRelative("requiredElements"),
+                new GUIContent("Обязательные элементы"),
+                true);
+
+            if (element == null)
+            {
+                if (EditorGUI.EndChangeCheck())
+                    ApplyChanges(so);
+                EditorGUILayout.Space(8f);
+                EditorGUILayout.HelpBox("В экране нет элементов.", MessageType.Info);
+                DrawDatabaseButtons();
+                EditorGUILayout.EndScrollView();
+                EditorGUILayout.EndVertical();
+                return;
+            }
+
+            SerializedProperty elements = screen.FindPropertyRelative("elements");
+            SerializedProperty selected = elements.GetArrayElementAtIndex(elementIndex);
+
+            EditorGUILayout.Space(10f);
+            EditorGUILayout.LabelField("ЭЛЕМЕНТ — " + element.DisplayName, EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("id"), new GUIContent("ID"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("displayName"), new GUIContent("Название"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("kind"), new GUIContent("Тип"));
+            DrawParentField(selected, element);
+            EditorGUILayout.PropertyField(
+                selected.FindPropertyRelative("targetName"),
+                new GUIContent("Имя в UXML"));
+            if (string.IsNullOrWhiteSpace(element.TargetName))
+                EditorGUILayout.HelpBox("Не задано имя элемента UXML — привязка невозможна.", MessageType.Warning);
+
+            EditorGUILayout.Space(8f);
+            EditorGUILayout.LabelField("ПРИМЕНЕНИЕ В ИГРЕ", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(
+                selected.FindPropertyRelative("overrideRect"),
+                new GUIContent("Переопределять прямоугольник"));
+            EditorGUILayout.PropertyField(
+                selected.FindPropertyRelative("overrideBackground"),
+                new GUIContent("Переопределять фон"));
+            using (new EditorGUI.DisabledScope(!element.IsTextual))
+            {
+                EditorGUILayout.PropertyField(
+                    selected.FindPropertyRelative("overrideText"),
+                    new GUIContent("Переопределять текст"));
+            }
+
+            if (!IsNarrativeDialogue(currentScreen) &&
+                !currentScreen.AutoApply &&
+                (element.OverrideRect || element.OverrideBackground || element.OverrideText))
+            {
+                EditorGUILayout.HelpBox(
+                    "Переопределения включены, но у экрана выключено «Применять в игре».",
+                    MessageType.Warning);
+            }
+
+            EditorGUILayout.Space(8f);
+            EditorGUILayout.LabelField("ГЕОМЕТРИЯ", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("rect"));
+
+            if (element.IsTextual)
+            {
+                EditorGUILayout.Space(8f);
+                EditorGUILayout.LabelField("ТЕКСТ", EditorStyles.boldLabel);
+                EditorGUILayout.PropertyField(selected.FindPropertyRelative("font"), new GUIContent("Шрифт"));
+                EditorGUILayout.PropertyField(selected.FindPropertyRelative("fontSize"), new GUIContent("Размер"));
+                EditorGUILayout.PropertyField(selected.FindPropertyRelative("textColor"), new GUIContent("Цвет"));
+                EditorGUILayout.PropertyField(selected.FindPropertyRelative("fontStyle"), new GUIContent("Начертание"));
+                EditorGUILayout.PropertyField(selected.FindPropertyRelative("horizontalAlignment"), new GUIContent("По горизонтали"));
+                EditorGUILayout.PropertyField(selected.FindPropertyRelative("verticalAlignment"), new GUIContent("По вертикали"));
+                EditorGUILayout.PropertyField(selected.FindPropertyRelative("previewText"), new GUIContent("Текст preview"));
+            }
+
+            EditorGUILayout.Space(8f);
+            EditorGUILayout.LabelField("ИЗОБРАЖЕНИЕ", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("sprite"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("texture"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageMode"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageScale"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageOffset"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("tint"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("opacity"));
+
+            if (EditorGUI.EndChangeCheck())
+                ApplyChanges(so);
+
+            GUILayout.Space(8f);
+            if (GUILayout.Button("Сбросить положение изображения"))
+            {
+                Undo.RecordObject(database, "Reset UI Image Transform");
+                element.ResetImageTransform();
+                EditorUtility.SetDirty(database);
+                Repaint();
+            }
+
+            DrawDatabaseButtons();
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
         }
 
-        private static bool IsTextElement(string elementId)
+        /// <summary>
+        /// Выпадающий выбор родителя из элементов того же экрана вместо
+        /// ручного ввода строки.
+        /// </summary>
+        private void DrawParentField(
+            SerializedProperty selected,
+            UILayoutElementDefinition element)
         {
-            return elementId == "speaker" ||
-                   elementId == "role" ||
-                   elementId == "text" ||
-                   elementId == "choices";
+            UILayoutScreenDefinition current = CurrentScreen;
+            if (current == null)
+                return;
+
+            List<string> options = new List<string> { "— корень экрана —" };
+            List<string> ids = new List<string> { string.Empty };
+            for (int i = 0; i < current.Elements.Count; i++)
+            {
+                UILayoutElementDefinition candidate = current.Elements[i];
+                if (candidate == null || candidate == element)
+                    continue;
+                options.Add(candidate.DisplayName);
+                ids.Add(candidate.Id);
+            }
+
+            int index = ids.IndexOf(element.ParentId);
+            if (index < 0)
+                index = 0;
+            int picked = EditorGUILayout.Popup("Родитель", index, options.ToArray());
+            if (picked != index)
+                selected.FindPropertyRelative("parentId").stringValue = ids[picked];
+        }
+
+        private void DrawDatabaseButtons()
+        {
+            GUILayout.Space(8f);
+            if (GUILayout.Button("Сохранить Asset"))
+            {
+                EditorUtility.SetDirty(database);
+                AssetDatabase.SaveAssets();
+            }
+
+            if (GUILayout.Button("Проверить базу"))
+            {
+                List<string> issues = new List<string>();
+                database.CollectValidationIssues(issues);
+                if (issues.Count == 0)
+                    Debug.Log("UI Layout Database: ошибок не найдено.");
+                else
+                    Debug.LogWarning("UI Layout Database:\n" + string.Join("\n", issues));
+            }
+        }
+
+        private void ApplyChanges(SerializedObject so)
+        {
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(database);
+            Repaint();
+        }
+
+        // ------------------------------------------------------------------
+        // Операции над экранами и элементами
+        // ------------------------------------------------------------------
+
+        private void AddScreen()
+        {
+            Undo.RecordObject(database, "Add UI Screen");
+            SerializedObject so = new SerializedObject(database);
+            SerializedProperty screens = so.FindProperty("screens");
+            int index = screens.arraySize;
+            screens.InsertArrayElementAtIndex(index);
+            SerializedProperty screen = screens.GetArrayElementAtIndex(index);
+            screen.FindPropertyRelative("id").stringValue = "new-screen-" + (index + 1);
+            screen.FindPropertyRelative("displayName").stringValue = "Новый экран";
+            screen.FindPropertyRelative("description").stringValue = string.Empty;
+            screen.FindPropertyRelative("rootName").stringValue = string.Empty;
+            screen.FindPropertyRelative("usesDimming").boolValue = false;
+            screen.FindPropertyRelative("autoApply").boolValue = false;
+            screen.FindPropertyRelative("requiredElements").ClearArray();
+            screen.FindPropertyRelative("elements").ClearArray();
+            ApplyChanges(so);
+            screenIndex = index;
+            elementIndex = 0;
+        }
+
+        private void DuplicateScreen()
+        {
+            UILayoutScreenDefinition source = CurrentScreen;
+            if (source == null)
+                return;
+
+            Undo.RecordObject(database, "Duplicate UI Screen");
+            SerializedObject so = new SerializedObject(database);
+            SerializedProperty screens = so.FindProperty("screens");
+            screens.InsertArrayElementAtIndex(screenIndex);
+            SerializedProperty copy = screens.GetArrayElementAtIndex(screenIndex + 1);
+            copy.FindPropertyRelative("id").stringValue = source.Id + "-copy";
+            copy.FindPropertyRelative("displayName").stringValue = source.DisplayName + " (копия)";
+            copy.FindPropertyRelative("autoApply").boolValue = false;
+            ApplyChanges(so);
+            screenIndex += 1;
+            elementIndex = 0;
+        }
+
+        private void DeleteScreen()
+        {
+            UILayoutScreenDefinition screen = CurrentScreen;
+            if (screen == null)
+                return;
+
+            if (!EditorUtility.DisplayDialog(
+                    "Удалить экран",
+                    "Удалить экран «" + screen.DisplayName + "» со всеми элементами?",
+                    "Удалить",
+                    "Отмена"))
+                return;
+
+            Undo.RecordObject(database, "Delete UI Screen");
+            SerializedObject so = new SerializedObject(database);
+            SerializedProperty screens = so.FindProperty("screens");
+            screens.DeleteArrayElementAtIndex(screenIndex);
+            ApplyChanges(so);
+            screenIndex = Mathf.Max(0, screenIndex - 1);
+            elementIndex = 0;
+        }
+
+        private void AddElement()
+        {
+            UILayoutScreenDefinition screen = CurrentScreen;
+            if (screen == null)
+                return;
+
+            Undo.RecordObject(database, "Add UI Element");
+            SerializedObject so = new SerializedObject(database);
+            SerializedProperty screens = so.FindProperty("screens");
+            SerializedProperty screenProperty = screens.GetArrayElementAtIndex(screenIndex);
+            SerializedProperty elements = screenProperty.FindPropertyRelative("elements");
+            int index = elements.arraySize;
+            elements.InsertArrayElementAtIndex(index);
+            SerializedProperty element = elements.GetArrayElementAtIndex(index);
+            element.FindPropertyRelative("id").stringValue = "element-" + (index + 1);
+            element.FindPropertyRelative("displayName").stringValue = "Новый элемент";
+            element.FindPropertyRelative("parentId").stringValue = string.Empty;
+            element.FindPropertyRelative("targetName").stringValue = string.Empty;
+            element.FindPropertyRelative("overrideRect").boolValue = false;
+            element.FindPropertyRelative("overrideBackground").boolValue = false;
+            element.FindPropertyRelative("overrideText").boolValue = false;
+            element.FindPropertyRelative("previewText").stringValue = string.Empty;
+            element.FindPropertyRelative("rect").rectValue = new Rect(80f, 80f, 320f, 180f);
+            ApplyChanges(so);
+            elementIndex = index;
+        }
+
+        private void DeleteElement()
+        {
+            UILayoutScreenDefinition screen = CurrentScreen;
+            UILayoutElementDefinition element = CurrentElement;
+            if (screen == null || element == null)
+                return;
+
+            if (!EditorUtility.DisplayDialog(
+                    "Удалить элемент",
+                    "Удалить элемент «" + element.DisplayName + "»?",
+                    "Удалить",
+                    "Отмена"))
+                return;
+
+            Undo.RecordObject(database, "Delete UI Element");
+            SerializedObject so = new SerializedObject(database);
+            SerializedProperty screens = so.FindProperty("screens");
+            SerializedProperty screenProperty = screens.GetArrayElementAtIndex(screenIndex);
+            SerializedProperty elements = screenProperty.FindPropertyRelative("elements");
+            elements.DeleteArrayElementAtIndex(elementIndex);
+            ApplyChanges(so);
+            elementIndex = Mathf.Max(0, elementIndex - 1);
+        }
+
+        private void MoveElement(int offset)
+        {
+            UILayoutScreenDefinition screen = CurrentScreen;
+            if (screen == null)
+                return;
+
+            int target = elementIndex + offset;
+            if (target < 0 || target >= screen.Elements.Count)
+                return;
+
+            Undo.RecordObject(database, "Move UI Element");
+            SerializedObject so = new SerializedObject(database);
+            SerializedProperty screens = so.FindProperty("screens");
+            SerializedProperty screenProperty = screens.GetArrayElementAtIndex(screenIndex);
+            SerializedProperty elements = screenProperty.FindPropertyRelative("elements");
+            elements.MoveArrayElement(elementIndex, target);
+            ApplyChanges(so);
+            elementIndex = target;
+        }
+
+        private static bool IsNarrativeDialogue(UILayoutScreenDefinition screen)
+        {
+            return screen != null &&
+                   screen.Id == UILayoutDatabaseAsset.NarrativeDialogueScreenId;
         }
 
         private DialogueDefinitionData CurrentPreviewDialogue

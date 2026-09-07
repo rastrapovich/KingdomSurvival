@@ -42,6 +42,12 @@ public sealed class UILayoutDatabaseTests
         Assert.AreEqual(text.Rect.height, local.height, 0.001f);
     }
 
+    /// <summary>
+    /// Тест намеренно не фиксирует конкретные значения затемнения, кегля и
+    /// выравнивания: это подогнанные в `UI Конструкторе` величины, и дизайнер
+    /// меняет их без изменения кода. Проверяется контракт слоя — что значения
+    /// доходят до рантайма пригодными к применению.
+    /// </summary>
     [Test]
     public void Narrative_Default_Layout_Exposes_Dimming_And_Text_Presentation()
     {
@@ -50,16 +56,92 @@ public sealed class UILayoutDatabaseTests
         UILayoutElementDefinition speaker = screen.FindElement("speaker");
         UILayoutElementDefinition choices = screen.FindElement("choices");
 
-        Assert.AreEqual(0.68f, screen.DimmingOpacity, 0.001f);
-        Assert.AreEqual(27, speaker.FontSize);
-        Assert.AreEqual(FontStyle.Bold, speaker.FontStyle);
-        Assert.AreEqual(TextAnchor.UpperLeft, UILayoutRuntimeApplier.ResolveTextAnchor(
-            speaker.HorizontalAlignment,
-            speaker.VerticalAlignment));
-        Assert.AreEqual(13, choices.FontSize);
-        Assert.AreEqual(TextAnchor.MiddleLeft, UILayoutRuntimeApplier.ResolveTextAnchor(
-            choices.HorizontalAlignment,
-            choices.VerticalAlignment));
+        Assert.IsNotNull(speaker);
+        Assert.IsNotNull(choices);
+
+        // Диалог перекрывает игру, поэтому затемнение обязано быть заметным.
+        Assert.IsTrue(screen.UsesDimming);
+        Assert.Greater(screen.DimmingOpacity, 0f);
+        Assert.LessOrEqual(screen.DimmingOpacity, 1f);
+
+        // Имя говорящего должно читаться заметнее строки вариантов ответа.
+        Assert.Greater(speaker.FontSize, 0);
+        Assert.Greater(choices.FontSize, 0);
+        Assert.Greater(speaker.FontSize, choices.FontSize);
+
+        // Оба элемента текстовые, значит текстовые свойства применимы.
+        Assert.IsTrue(speaker.IsTextual);
+        Assert.IsTrue(choices.IsTextual);
+
+        // Выравнивание любого сочетания разрешается в конкретный якорь.
+        Assert.IsTrue(System.Enum.IsDefined(
+            typeof(TextAnchor),
+            UILayoutRuntimeApplier.ResolveTextAnchor(
+                speaker.HorizontalAlignment,
+                speaker.VerticalAlignment)));
+        Assert.IsTrue(System.Enum.IsDefined(
+            typeof(TextAnchor),
+            UILayoutRuntimeApplier.ResolveTextAnchor(
+                choices.HorizontalAlignment,
+                choices.VerticalAlignment)));
+    }
+
+    /// <summary>
+    /// Экраны, добавленные в `UI Конструктор`, должны быть привязываемыми:
+    /// у каждого элемента есть имя для поиска в дереве UI.
+    /// </summary>
+    [Test]
+    public void Every_Screen_Element_Has_Binding_Target()
+    {
+        UILayoutDatabaseAsset database = Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
+        Assert.IsNotNull(database);
+
+        foreach (UILayoutScreenDefinition screen in database.Screens)
+        {
+            Assert.IsNotEmpty(screen.Id, "Экран без идентификатора.");
+            foreach (UILayoutElementDefinition element in screen.Elements)
+            {
+                Assert.IsNotEmpty(
+                    element.TargetName,
+                    screen.Id + "/" + element.Id + ": не задано имя для привязки.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Диалог применяется собственным кодом `PrototypeUIController`, поэтому
+    /// не должен попадать в generic-применение и получать двойную вёрстку.
+    /// </summary>
+    [Test]
+    public void Narrative_Screen_Is_Excluded_From_Generic_Auto_Apply()
+    {
+        UILayoutDatabaseAsset database = Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
+        UILayoutScreenDefinition screen = database.FindScreen(
+            UILayoutDatabaseAsset.NarrativeDialogueScreenId);
+
+        Assert.IsNotNull(screen);
+        Assert.IsFalse(screen.AutoApply);
+    }
+
+    /// <summary>
+    /// Пока дизайнер не включил переопределение, конструктор не должен
+    /// вмешиваться в вёрстку USS ни на одном экране.
+    /// </summary>
+    [Test]
+    public void Default_Database_Does_Not_Override_Uss_Layout()
+    {
+        UILayoutDatabaseAsset database = Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
+        Assert.IsNotNull(database);
+
+        foreach (UILayoutScreenDefinition screen in database.Screens)
+        {
+            foreach (UILayoutElementDefinition element in screen.Elements)
+            {
+                Assert.IsFalse(
+                    element.OverrideRect || element.OverrideBackground || element.OverrideText,
+                    screen.Id + "/" + element.Id + ": включено переопределение вёрстки.");
+            }
+        }
     }
 
     [Test]

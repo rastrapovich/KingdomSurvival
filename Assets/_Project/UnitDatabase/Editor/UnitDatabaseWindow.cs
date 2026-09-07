@@ -108,7 +108,18 @@ namespace KingdomSurvival.UnitDatabase.Editor
             Button addTag = new Button(AddTag) { text = "+ ТЕГ" };
             Button validate = new Button(ValidateDatabase) { text = "ПРОВЕРИТЬ БАЗУ" };
 
-            foreach (Button button in new[] { add, duplicate, remove, addTag, validate })
+            // Экран героя показывает существа этой базы как заглушки в пустых
+            // местах состава, поэтому из базы полезно открывать его разметку.
+            // Вызов идёт через пункт меню, чтобы не заводить зависимость
+            // KingdomSurvival.UnitDatabase.Editor → KingdomSurvival.UILayout.Editor.
+            Button heroScreen = new Button(OpenHeroScreenLayout)
+            {
+                text = "ЭКРАН ГЕРОЯ",
+                tooltip = "Открыть разметку экрана героя в UI Конструкторе. " +
+                          "Существа этой базы показываются там как заглушки состава."
+            };
+
+            foreach (Button button in new[] { add, duplicate, remove, addTag, validate, heroScreen })
             {
                 button.style.height = 26f;
                 button.style.marginRight = 6f;
@@ -121,6 +132,20 @@ namespace KingdomSurvival.UnitDatabase.Editor
             validationLabel.style.unityTextAlign = TextAnchor.MiddleRight;
             toolbar.Add(validationLabel);
             rootVisualElement.Add(toolbar);
+        }
+
+        private static void OpenHeroScreenLayout()
+        {
+            if (!EditorApplication.ExecuteMenuItem("Kingdom Survival/UI Конструктор"))
+            {
+                Debug.LogWarning(
+                    "Не удалось открыть UI Конструктор: пункт меню недоступен.");
+                return;
+            }
+
+            Debug.Log(
+                "UI Конструктор открыт. Выберите экран «Экран героя», " +
+                "чтобы настроить разметку блоков состава, характеристик и снаряжения.");
         }
 
         private VisualElement BuildListPane()

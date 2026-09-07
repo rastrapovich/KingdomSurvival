@@ -134,6 +134,7 @@ public partial class PrototypeUIController : MonoBehaviour
         CreateDecisionChoiceButtons();
         RegisterCallbacks();
         StartNewGame();
+        InitializeHeroScreenUi();
         InitializeUILayoutScreens();
     }
 

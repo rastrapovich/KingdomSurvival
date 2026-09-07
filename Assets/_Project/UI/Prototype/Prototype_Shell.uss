@@ -102,11 +102,12 @@
 .legacy-send-button { display: none; }
 
 .shell-bottom-bar { height: 82px; min-height: 82px; max-height: 82px; flex-shrink: 0; flex-direction: row; background-color: rgb(33, 37, 44); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(78, 69, 55); border-right-color: rgb(78, 69, 55); border-top-color: rgb(78, 69, 55); border-bottom-color: rgb(78, 69, 55); border-radius: 4px; }
-.shell-navigation-bar { width: 300px; min-width: 300px; max-width: 300px; height: 100%; margin-top: 0px; padding-left: 4px; padding-right: 4px; flex-shrink: 0; flex-direction: row; align-items: stretch; }
+.shell-navigation-bar { width: 396px; min-width: 396px; max-width: 396px; height: 100%; margin-top: 0px; padding-left: 4px; padding-right: 4px; flex-shrink: 0; flex-direction: row; align-items: stretch; }
 .shell-nav-button { height: 100%; min-height: 0px; flex-grow: 1; min-width: 0px; margin-right: 3px; padding-left: 5px; padding-right: 5px; border-radius: 3px; color: rgb(235, 226, 205); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; }
 .shell-nav-button.nav-capital { width: 94px; max-width: 94px; background-color: rgb(96, 82, 53); }
 .shell-nav-button.nav-army { width: 94px; max-width: 94px; background-color: rgb(91, 59, 61); }
 .shell-nav-button.nav-expedition { width: 98px; max-width: 98px; background-color: rgb(55, 82, 70); font-size: 11px; }
+.shell-nav-button.nav-hero { width: 94px; max-width: 94px; background-color: rgb(74, 63, 92); }
 .shell-nav-button.nav-button-active { color: rgb(255, 242, 207); -unity-font-style: bold; border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; }
 .shell-resource-bar { flex-grow: 1; flex-shrink: 1; min-width: 0px; height: 100%; flex-direction: row; align-items: center; justify-content: flex-end; padding-left: 12px; padding-right: 10px; }
 .shell-resource-strip { flex-grow: 0; flex-shrink: 0; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: flex-end; }

@@ -3666,3 +3666,1328 @@ MonoBehaviour:
       fontStyle: 0
       horizontalAlignment: 0
       verticalAlignment: 0
+  - id: hero-screen
+    displayName: "\u042D\u043A\u0440\u0430\u043D \u0433\u0435\u0440\u043E\u044F"
+    description: "\u041F\u043E\u043B\u043D\u043E\u044D\u043A\u0440\u0430\u043D\u043D\u044B\u0439 \u0441\u043B\u043E\u0439 \u0433\u0435\u0440\u043E\u044F: \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u043E\u0445\u043E\u0434\u0430, \u0445\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A\u0438, \u0442\u0435\u0433\u0438, \u0441\u0432\u0438\u0442\u0430, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F, \u043E\u043F\u044B\u0442, \u0441\u043F\u043E\u0441\u043E\u0431\u043D\u043E\u0441\u0442\u0438, \u0441\u043D\u0430\u0440\u044F\u0436\u0435\u043D\u0438\u0435 \u0438 \u0438\u043D\u0432\u0435\u043D\u0442\u0430\u0440\u044C. \u0421\u0442\u0440\u043E\u0438\u0442\u0441\u044F \u043A\u043E\u0434\u043E\u043C \u0432 PrototypeUIController.HeroScreen."
+    usesDimming: 0
+    dimmingOpacity: 0.68
+    autoApply: 1
+    rootName: hero-screen-overlay
+    requiredElements: []
+    elements:
+    - id: hero-screen-overlay
+      displayName: "\u042D\u043A\u0440\u0430\u043D \u0433\u0435\u0440\u043E\u044F (\u0444\u043E\u043D)"
+      parentId: 
+      kind: 0
+      targetName: hero-screen-overlay
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1920
+        height: 1080
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-header
+      displayName: "\u0428\u0430\u043F\u043A\u0430"
+      parentId: hero-screen-overlay
+      kind: 4
+      targetName: hero-screen-header
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 12
+        width: 1884
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-title
+      displayName: "  \u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A"
+      parentId: hero-screen-header
+      kind: 1
+      targetName: hero-screen-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0413\u0415\u0420\u041E\u0419"
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 12
+        width: 300
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 20
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-close-button
+      displayName: "  \u041A\u043D\u043E\u043F\u043A\u0430 \u0437\u0430\u043A\u0440\u044B\u0442\u0438\u044F"
+      parentId: hero-screen-header
+      kind: 3
+      targetName: hero-screen-close-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0417\u0410\u041A\u0420\u042B\u0422\u042C"
+      rect:
+        serializedVersion: 2
+        x: 1782
+        y: 18
+        width: 120
+        height: 32
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 1
+    - id: hero-screen-columns
+      displayName: "\u041A\u043E\u043B\u043E\u043D\u043A\u0438"
+      parentId: hero-screen-overlay
+      kind: 4
+      targetName: hero-screen-columns
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 66
+        width: 1884
+        height: 712
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-left-column
+      displayName: "\u041B\u0435\u0432\u0430\u044F \u043A\u043E\u043B\u043E\u043D\u043A\u0430"
+      parentId: hero-screen-columns
+      kind: 4
+      targetName: hero-screen-left-column
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 66
+        width: 478
+        height: 712
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-identity
+      displayName: "  \u041B\u0438\u0447\u043D\u043E\u0441\u0442\u044C \u0433\u0435\u0440\u043E\u044F"
+      parentId: hero-screen-left-column
+      kind: 0
+      targetName: hero-screen-identity
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 66
+        width: 478
+        height: 420
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-portrait
+      displayName: "    \u041F\u043E\u0440\u0442\u0440\u0435\u0442 \u0433\u0435\u0440\u043E\u044F"
+      parentId: hero-screen-identity
+      kind: 2
+      targetName: hero-screen-portrait
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 96
+        width: 458
+        height: 240
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-name
+      displayName: "    \u0418\u043C\u044F"
+      parentId: hero-screen-identity
+      kind: 1
+      targetName: hero-screen-name
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041A\u043E\u043C\u0430\u043D\u0434\u0438\u0440"
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 344
+        width: 458
+        height: 26
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 17
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-role
+      displayName: "    \u0420\u043E\u043B\u044C"
+      parentId: hero-screen-identity
+      kind: 1
+      targetName: hero-screen-role
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u041A\u043E\u043C\u0430\u043D\u0434\u0438\u0440 \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 372
+        width: 458
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-experience
+      displayName: "    \u041E\u043F\u044B\u0442 \u0438 \u0443\u0440\u043E\u0432\u0435\u043D\u044C"
+      parentId: hero-screen-identity
+      kind: 4
+      targetName: hero-screen-experience
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 398
+        width: 458
+        height: 40
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-level
+      displayName: "      \u0423\u0440\u043E\u0432\u0435\u043D\u044C"
+      parentId: hero-screen-experience
+      kind: 1
+      targetName: hero-screen-level
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0423\u0440\u043E\u0432\u0435\u043D\u044C 1"
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 398
+        width: 200
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-experience-label
+      displayName: "      \u041F\u043E\u0434\u043F\u0438\u0441\u044C \u043E\u043F\u044B\u0442\u0430"
+      parentId: hero-screen-experience
+      kind: 1
+      targetName: hero-screen-experience-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0441\u0438\u0441\u0442\u0435\u043C\u0430 \u043E\u043F\u044B\u0442\u0430 \u043D\u0435 \u043F\u0440\u043E\u0434\u0443\u043C\u0430\u043D\u0430"
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 398
+        width: 186
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 9
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 2
+      verticalAlignment: 0
+    - id: hero-screen-experience-track
+      displayName: "      \u0428\u043A\u0430\u043B\u0430 \u043E\u043F\u044B\u0442\u0430"
+      parentId: hero-screen-experience
+      kind: 4
+      targetName: hero-screen-experience-track
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 420
+        width: 458
+        height: 12
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-experience-fill
+      displayName: "        \u0417\u0430\u043F\u043E\u043B\u043D\u0435\u043D\u0438\u0435"
+      parentId: hero-screen-experience-track
+      kind: 0
+      targetName: hero-screen-experience-fill
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 420
+        width: 120
+        height: 12
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-states
+      displayName: "  \u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F"
+      parentId: hero-screen-left-column
+      kind: 0
+      targetName: hero-screen-states
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 496
+        width: 478
+        height: 160
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-states-row
+      displayName: "    \u0421\u0442\u0440\u043E\u043A\u0430 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0439"
+      parentId: hero-screen-states
+      kind: 4
+      targetName: hero-screen-states-row
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 526
+        width: 458
+        height: 120
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-center-column
+      displayName: "\u0426\u0435\u043D\u0442\u0440\u0430\u043B\u044C\u043D\u0430\u044F \u043A\u043E\u043B\u043E\u043D\u043A\u0430"
+      parentId: hero-screen-columns
+      kind: 4
+      targetName: hero-screen-center-column
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 66
+        width: 888
+        height: 712
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-stats
+      displayName: "  \u0425\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A\u0438"
+      parentId: hero-screen-center-column
+      kind: 0
+      targetName: hero-screen-stats
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 66
+        width: 888
+        height: 230
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-stats-grid
+      displayName: "    \u0421\u0435\u0442\u043A\u0430 \u0445\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A"
+      parentId: hero-screen-stats
+      kind: 4
+      targetName: hero-screen-stats-grid
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 518
+        y: 96
+        width: 868
+        height: 190
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-tags
+      displayName: "  \u0422\u0435\u0433\u0438"
+      parentId: hero-screen-center-column
+      kind: 0
+      targetName: hero-screen-tags
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 306
+        width: 888
+        height: 150
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-tags-row
+      displayName: "    \u0421\u0442\u0440\u043E\u043A\u0430 \u0442\u0435\u0433\u043E\u0432"
+      parentId: hero-screen-tags
+      kind: 4
+      targetName: hero-screen-tags-row
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 518
+        y: 336
+        width: 868
+        height: 110
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-abilities
+      displayName: "  \u0421\u043F\u043E\u0441\u043E\u0431\u043D\u043E\u0441\u0442\u0438"
+      parentId: hero-screen-center-column
+      kind: 0
+      targetName: hero-screen-abilities
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 466
+        width: 888
+        height: 200
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-abilities-row
+      displayName: "    \u0421\u0442\u0440\u043E\u043A\u0430 \u0441\u043F\u043E\u0441\u043E\u0431\u043D\u043E\u0441\u0442\u0435\u0439"
+      parentId: hero-screen-abilities
+      kind: 4
+      targetName: hero-screen-abilities-row
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 518
+        y: 496
+        width: 868
+        height: 160
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-right-column
+      displayName: "\u041F\u0440\u0430\u0432\u0430\u044F \u043A\u043E\u043B\u043E\u043D\u043A\u0430"
+      parentId: hero-screen-columns
+      kind: 4
+      targetName: hero-screen-right-column
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 66
+        width: 494
+        height: 712
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-equipment
+      displayName: "  \u0421\u043D\u0430\u0440\u044F\u0436\u0435\u043D\u0438\u0435"
+      parentId: hero-screen-right-column
+      kind: 0
+      targetName: hero-screen-equipment
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 66
+        width: 494
+        height: 300
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-equipment-grid
+      displayName: "    \u0421\u0435\u0442\u043A\u0430 \u0441\u043D\u0430\u0440\u044F\u0436\u0435\u043D\u0438\u044F"
+      parentId: hero-screen-equipment
+      kind: 4
+      targetName: hero-screen-equipment-grid
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1418
+        y: 96
+        width: 474
+        height: 260
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-inventory
+      displayName: "  \u0418\u043D\u0432\u0435\u043D\u0442\u0430\u0440\u044C"
+      parentId: hero-screen-right-column
+      kind: 0
+      targetName: hero-screen-inventory
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 376
+        width: 494
+        height: 402
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-inventory-grid
+      displayName: "    \u0421\u0435\u0442\u043A\u0430 \u0438\u043D\u0432\u0435\u043D\u0442\u0430\u0440\u044F"
+      parentId: hero-screen-inventory
+      kind: 4
+      targetName: hero-screen-inventory-grid
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1418
+        y: 406
+        width: 474
+        height: 362
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-roster-bar
+      displayName: "\u041D\u0438\u0436\u043D\u044F\u044F \u043F\u043E\u043B\u043E\u0441\u0430"
+      parentId: hero-screen-overlay
+      kind: 4
+      targetName: hero-screen-roster-bar
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 788
+        width: 1884
+        height: 258
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-roster
+      displayName: "  \u0421\u043E\u0441\u0442\u0430\u0432 \u043F\u043E\u0445\u043E\u0434\u0430"
+      parentId: hero-screen-roster-bar
+      kind: 0
+      targetName: hero-screen-roster
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 788
+        width: 1540
+        height: 258
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-roster-title
+      displayName: "    \u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A \u0441\u043E\u0441\u0442\u0430\u0432\u0430"
+      parentId: hero-screen-roster
+      kind: 1
+      targetName: hero-screen-roster-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0421\u041E\u0421\u0422\u0410\u0412 \u041F\u041E\u0425\u041E\u0414\u0410"
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 798
+        width: 1520
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-roster-row
+      displayName: "    \u0420\u044F\u0434 \u043A\u0430\u0440\u0442\u043E\u0447\u0435\u043A"
+      parentId: hero-screen-roster
+      kind: 4
+      targetName: hero-screen-roster-row
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 822
+        width: 1520
+        height: 214
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-roster-commander
+      displayName: "      \u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430"
+      parentId: hero-screen-roster-row
+      kind: 0
+      targetName: hero-screen-roster-commander
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 822
+        width: 168
+        height: 214
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-roster-fighter-1
+      displayName: "      \u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u0431\u043E\u0439\u0446\u0430 1"
+      parentId: hero-screen-roster-row
+      kind: 0
+      targetName: hero-screen-roster-fighter-1
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 822
+        width: 168
+        height: 214
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-roster-fighter-2
+      displayName: "      \u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u0431\u043E\u0439\u0446\u0430 2"
+      parentId: hero-screen-roster-row
+      kind: 0
+      targetName: hero-screen-roster-fighter-2
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 380
+        y: 822
+        width: 168
+        height: 214
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-roster-fighter-3
+      displayName: "      \u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u0431\u043E\u0439\u0446\u0430 3"
+      parentId: hero-screen-roster-row
+      kind: 0
+      targetName: hero-screen-roster-fighter-3
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 556
+        y: 822
+        width: 168
+        height: 214
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-roster-fighter-4
+      displayName: "      \u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u0431\u043E\u0439\u0446\u0430 4"
+      parentId: hero-screen-roster-row
+      kind: 0
+      targetName: hero-screen-roster-fighter-4
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 822
+        width: 168
+        height: 214
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-retinue
+      displayName: "  \u0421\u0432\u0438\u0442\u0430"
+      parentId: hero-screen-roster-bar
+      kind: 0
+      targetName: hero-screen-retinue
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1570
+        y: 788
+        width: 332
+        height: 258
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-retinue-row
+      displayName: "    \u0420\u044F\u0434 \u0441\u0432\u0438\u0442\u044B"
+      parentId: hero-screen-retinue
+      kind: 4
+      targetName: hero-screen-retinue-row
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1580
+        y: 818
+        width: 312
+        height: 218
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-retinue-1
+      displayName: "      \u0421\u0432\u0438\u0442\u0430 1"
+      parentId: hero-screen-retinue-row
+      kind: 4
+      targetName: hero-screen-retinue-1
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1580
+        y: 818
+        width: 92
+        height: 100
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-retinue-2
+      displayName: "      \u0421\u0432\u0438\u0442\u0430 2"
+      parentId: hero-screen-retinue-row
+      kind: 4
+      targetName: hero-screen-retinue-2
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1678
+        y: 818
+        width: 92
+        height: 100
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-retinue-3
+      displayName: "      \u0421\u0432\u0438\u0442\u0430 3"
+      parentId: hero-screen-retinue-row
+      kind: 4
+      targetName: hero-screen-retinue-3
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1776
+        y: 818
+        width: 92
+        height: 100
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-unit-card
+      displayName: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0430 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0430"
+      parentId: hero-screen-overlay
+      kind: 0
+      targetName: hero-screen-unit-card
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 614
+        y: 194
+        width: 520
+        height: 360
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-unit-card-title
+      displayName: "  \u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435"
+      parentId: hero-screen-unit-card
+      kind: 1
+      targetName: hero-screen-unit-card-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "\u0417\u0432\u0435\u0440\u044C"
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 206
+        width: 400
+        height: 24
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-unit-card-portrait
+      displayName: "  \u041F\u043E\u0440\u0442\u0440\u0435\u0442"
+      parentId: hero-screen-unit-card
+      kind: 2
+      targetName: hero-screen-unit-card-portrait
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 238
+        width: 150
+        height: 150
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-unit-card-tags
+      displayName: "  \u0422\u0435\u0433\u0438 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0430"
+      parentId: hero-screen-unit-card
+      kind: 4
+      targetName: hero-screen-unit-card-tags
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 398
+        width: 492
+        height: 60
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0

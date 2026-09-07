@@ -16,15 +16,16 @@ MonoBehaviour:
   screens:
   - id: narrative-dialogue
     displayName: "\u0414\u0438\u0430\u043B\u043E\u0433"
-    dimmingOpacity: 0.68
+    dimmingOpacity: 0.72
     elements:
     - id: overlay
-      displayName: "\u0417\u0430\u0442\u0435\u043C\u043D\u0435\u043D\u0438\u0435 \u044D\u043A\u0440\u0430\u043D\u0430"
-      parentId:
+      displayName: "\u0417\u0430\u0442\u0435\u043C\u043D\u0435\u043D\u0438\u0435
+        \u044D\u043A\u0440\u0430\u043D\u0430"
+      parentId: 
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
+        x: -0.000000009909145
+        y: -2.3264272
         width: 1922.845
         height: 1087.6067
       sprite: {fileID: 0}
@@ -32,8 +33,8 @@ MonoBehaviour:
       imageMode: 0
       imageScale: 1
       imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 0.22
+      tint: {r: 0.028301895, g: 0.028301895, b: 0.028301895, a: 1}
+      opacity: 1
       font: {fileID: 0}
       fontSize: 16
       textColor: {r: 1, g: 1, b: 1, a: 1}
@@ -89,10 +90,10 @@ MonoBehaviour:
       parentId: overlay
       rect:
         serializedVersion: 2
-        x: 1092.277
-        y: 488.4588
-        width: 188.71124
-        height: 39.130676
+        x: 910.81573
+        y: 97.1538
+        width: 379.47824
+        height: 50.76281
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -104,17 +105,17 @@ MonoBehaviour:
       fontSize: 27
       textColor: {r: 0.854902, g: 0.7137255, b: 0.43529412, a: 1}
       fontStyle: 1
-      horizontalAlignment: 0
-      verticalAlignment: 0
+      horizontalAlignment: 2
+      verticalAlignment: 1
     - id: role
       displayName: "\u0420\u043E\u043B\u044C"
       parentId: overlay
       rect:
         serializedVersion: 2
-        x: 1085.1761
-        y: 526.067
-        width: 210.62457
-        height: 45
+        x: 908.3677
+        y: 127.69258
+        width: 382.78015
+        height: 38.020718
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -123,11 +124,11 @@ MonoBehaviour:
       tint: {r: 1, g: 1, b: 1, a: 1}
       opacity: 1
       font: {fileID: 0}
-      fontSize: 11
+      fontSize: 17
       textColor: {r: 0.52156866, g: 0.50980395, b: 0.47058824, a: 1}
       fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
+      horizontalAlignment: 2
+      verticalAlignment: 1
     - id: text
       displayName: "\u0422\u0435\u043A\u0441\u0442"
       parentId: panel

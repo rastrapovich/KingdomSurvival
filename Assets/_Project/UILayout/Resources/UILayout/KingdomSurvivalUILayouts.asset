@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39ffef651b3a470a987e603a841fd13d, type: 3}
+  m_Script: {fileID: 11500000, guid: 8d82114358ff4c9998a739c306f57301, type: 3}
   m_Name: KingdomSurvivalUILayouts
   m_EditorClassIdentifier: KingdomSurvival.UILayout::KingdomSurvival.UILayout.UILayoutDatabaseAsset
   referenceResolution: {x: 1920, y: 1080}

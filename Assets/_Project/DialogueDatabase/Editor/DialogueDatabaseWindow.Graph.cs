@@ -17,6 +17,18 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private const float GraphPadding = 10f;
         private const float GraphGrid = 64f;
 
+        // Активная проверка имеет два порта вместо одного (§13): зелёный
+        // успех и красный провал. graphConnectingPortKind запоминает, какой
+        // порт сейчас перетаскивается, чтобы завершение перетаскивания
+        // записало результат в нужное поле (successNodeId/failureNodeId
+        // вместо nextNodeId).
+        private enum GraphChoicePortKind
+        {
+            Normal,
+            Success,
+            Failure
+        }
+
         private Vector2 graphPan = new Vector2(40f, 40f);
         private Vector2 graphCanvasSize = new Vector2(700f, 500f);
         private float graphZoom = 1f;
@@ -25,6 +37,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private bool graphPanning;
         private int graphConnectingNodeIndex = -1;
         private int graphConnectingChoiceIndex = -1;
+        private GraphChoicePortKind graphConnectingPortKind = GraphChoicePortKind.Normal;
         private bool graphNeedsCenter = true;
 
         private void ResetGraphViewState()
@@ -36,6 +49,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             graphPanning = false;
             graphConnectingNodeIndex = -1;
             graphConnectingChoiceIndex = -1;
+            graphConnectingPortKind = GraphChoicePortKind.Normal;
             graphNeedsCenter = true;
         }
 
@@ -103,7 +117,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             GUILayout.Space(8f);
             GUILayout.Label(
-                "Перетаскивай ноды · тяни жёлтый порт ответа на нужный нод · колесо = масштаб · Alt+ЛКМ/СКМ = поле",
+                "Перетаскивай ноды · тяни жёлтый порт ответа, зелёный порт успеха или красный порт провала на нужный нод · точный выбор узла для проверок — в «Таблице» · колесо = масштаб · Alt+ЛКМ/СКМ = поле",
                 EditorStyles.miniLabel);
 
             GUILayout.FlexibleSpace();
@@ -247,9 +261,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             int sourceNodeIndex = graphConnectingNodeIndex;
             int sourceChoiceIndex = graphConnectingChoiceIndex;
+            GraphChoicePortKind portKind = graphConnectingPortKind;
             int targetNodeIndex = FindNodeAt(nodes, mouse);
             graphConnectingNodeIndex = -1;
             graphConnectingChoiceIndex = -1;
+            graphConnectingPortKind = GraphChoicePortKind.Normal;
 
             if (targetNodeIndex >= 0 &&
                 sourceNodeIndex >= 0 &&
@@ -263,8 +279,21 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                         .FindPropertyRelative("id").stringValue;
                     Undo.RecordObject(database, "Connect Dialogue Nodes");
                     SerializedProperty choice = choices.GetArrayElementAtIndex(sourceChoiceIndex);
-                    choice.FindPropertyRelative("endsDialogue").boolValue = false;
-                    choice.FindPropertyRelative("nextNodeId").stringValue = targetId;
+
+                    switch (portKind)
+                    {
+                        case GraphChoicePortKind.Success:
+                            choice.FindPropertyRelative("successNodeId").stringValue = targetId;
+                            break;
+                        case GraphChoicePortKind.Failure:
+                            choice.FindPropertyRelative("failureNodeId").stringValue = targetId;
+                            break;
+                        default:
+                            choice.FindPropertyRelative("endsDialogue").boolValue = false;
+                            choice.FindPropertyRelative("nextNodeId").stringValue = targetId;
+                            break;
+                    }
+
                     EditorUtility.SetDirty(database);
                     ResetPreview();
                 }
@@ -273,6 +302,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             current.Use();
             Repaint();
         }
+
+        private static readonly Color GraphNormalEdgeColorDark = new Color(0.55f, 0.78f, 1f, 0.9f);
+        private static readonly Color GraphNormalEdgeColorLight = new Color(0.12f, 0.35f, 0.62f, 0.9f);
+        private static readonly Color GraphSuccessEdgeColor = new Color(0.42f, 0.78f, 0.42f, 0.95f);
+        private static readonly Color GraphFailureEdgeColor = new Color(0.86f, 0.36f, 0.34f, 0.95f);
 
         private void DrawGraphConnections(SerializedProperty nodes)
         {
@@ -288,45 +322,65 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 for (int choiceIndex = 0; choiceIndex < choices.arraySize; choiceIndex++)
                 {
                     SerializedProperty choice = choices.GetArrayElementAtIndex(choiceIndex);
-                    if (choice.FindPropertyRelative("endsDialogue").boolValue)
+                    DialogueChoiceKind kind = (DialogueChoiceKind)choice.FindPropertyRelative("kind").enumValueIndex;
+
+                    if (kind == DialogueChoiceKind.Exit || choice.FindPropertyRelative("endsDialogue").boolValue)
                         continue;
 
-                    Vector2 from = GetChoicePortCenter(sourceRect, choiceIndex);
-                    string targetId = choice.FindPropertyRelative("nextNodeId").stringValue;
-                    int targetIndex;
-
-                    if (string.IsNullOrWhiteSpace(targetId) ||
-                        !indicesById.TryGetValue(targetId, out targetIndex))
+                    if (kind == DialogueChoiceKind.ActiveReturnable || kind == DialogueChoiceKind.ActiveDecisive)
                     {
-                        Vector2 invalidEnd = from + Vector2.right * (55f * graphZoom);
-                        Handles.DrawBezier(
-                            from,
-                            invalidEnd,
-                            from + Vector2.right * (30f * graphZoom),
-                            invalidEnd + Vector2.left * (10f * graphZoom),
-                            new Color(0.95f, 0.35f, 0.3f, 0.9f),
-                            null,
-                            2f);
+                        DrawGraphChoiceEdge(
+                            nodes, indicesById, GetChoicePortCenter(sourceRect, choiceIndex, -12f * graphZoom),
+                            choice.FindPropertyRelative("successNodeId").stringValue, GraphSuccessEdgeColor);
+                        DrawGraphChoiceEdge(
+                            nodes, indicesById, GetChoicePortCenter(sourceRect, choiceIndex, 12f * graphZoom),
+                            choice.FindPropertyRelative("failureNodeId").stringValue, GraphFailureEdgeColor);
                         continue;
                     }
 
-                    Rect targetRect = GetNodeScreenRect(nodes.GetArrayElementAtIndex(targetIndex));
-                    Vector2 to = GetInputPortCenter(targetRect);
-                    float tangent = Mathf.Max(45f, Mathf.Abs(to.x - from.x) * 0.35f);
-
-                    Handles.DrawBezier(
-                        from,
-                        to,
-                        from + Vector2.right * tangent,
-                        to + Vector2.left * tangent,
-                        EditorGUIUtility.isProSkin
-                            ? new Color(0.55f, 0.78f, 1f, 0.9f)
-                            : new Color(0.12f, 0.35f, 0.62f, 0.9f),
-                        null,
-                        Mathf.Max(1.5f, 2.1f * graphZoom));
+                    Color normalColor = EditorGUIUtility.isProSkin ? GraphNormalEdgeColorDark : GraphNormalEdgeColorLight;
+                    DrawGraphChoiceEdge(
+                        nodes, indicesById, GetChoicePortCenter(sourceRect, choiceIndex),
+                        choice.FindPropertyRelative("nextNodeId").stringValue, normalColor);
                 }
             }
             Handles.EndGUI();
+        }
+
+        private void DrawGraphChoiceEdge(
+            SerializedProperty nodes,
+            Dictionary<string, int> indicesById,
+            Vector2 from,
+            string targetId,
+            Color color)
+        {
+            int targetIndex;
+            if (string.IsNullOrWhiteSpace(targetId) || !indicesById.TryGetValue(targetId, out targetIndex))
+            {
+                Vector2 invalidEnd = from + Vector2.right * (55f * graphZoom);
+                Handles.DrawBezier(
+                    from,
+                    invalidEnd,
+                    from + Vector2.right * (30f * graphZoom),
+                    invalidEnd + Vector2.left * (10f * graphZoom),
+                    new Color(0.95f, 0.35f, 0.3f, 0.9f),
+                    null,
+                    2f);
+                return;
+            }
+
+            Rect targetRect = GetNodeScreenRect(nodes.GetArrayElementAtIndex(targetIndex));
+            Vector2 to = GetInputPortCenter(targetRect);
+            float tangent = Mathf.Max(45f, Mathf.Abs(to.x - from.x) * 0.35f);
+
+            Handles.DrawBezier(
+                from,
+                to,
+                from + Vector2.right * tangent,
+                to + Vector2.left * tangent,
+                color,
+                null,
+                Mathf.Max(1.5f, 2.1f * graphZoom));
         }
 
         private void DrawPendingConnection(SerializedProperty nodes)
@@ -336,9 +390,20 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 return;
 
             Rect sourceRect = GetNodeScreenRect(nodes.GetArrayElementAtIndex(graphConnectingNodeIndex));
-            Vector2 from = GetChoicePortCenter(sourceRect, graphConnectingChoiceIndex);
+            float portOffset = graphConnectingPortKind == GraphChoicePortKind.Success
+                ? -12f * graphZoom
+                : graphConnectingPortKind == GraphChoicePortKind.Failure
+                    ? 12f * graphZoom
+                    : 0f;
+            Vector2 from = GetChoicePortCenter(sourceRect, graphConnectingChoiceIndex, portOffset);
             Vector2 to = Event.current.mousePosition;
             float tangent = Mathf.Max(40f, Mathf.Abs(to.x - from.x) * 0.35f);
+
+            Color pendingColor = graphConnectingPortKind == GraphChoicePortKind.Success
+                ? GraphSuccessEdgeColor
+                : graphConnectingPortKind == GraphChoicePortKind.Failure
+                    ? GraphFailureEdgeColor
+                    : new Color(0.95f, 0.72f, 0.25f, 0.95f);
 
             Handles.BeginGUI();
             Handles.DrawBezier(
@@ -346,7 +411,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 to,
                 from + Vector2.right * tangent,
                 to + Vector2.left * tangent,
-                new Color(0.95f, 0.72f, 0.25f, 0.95f),
+                pendingColor,
                 null,
                 2f);
             Handles.EndGUI();
@@ -606,8 +671,26 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             textStyle.wordWrap = true;
             text.stringValue = EditorGUI.TextArea(textRect, text.stringValue, textStyle);
 
+            DialogueChoiceKind kind = (DialogueChoiceKind)choice.FindPropertyRelative("kind").enumValueIndex;
+
+            if (kind == DialogueChoiceKind.ActiveReturnable || kind == DialogueChoiceKind.ActiveDecisive)
+            {
+                DrawGraphActiveChoicePorts(nodeIndex, choiceIndex, nodeRect, choice, targetRect);
+                return;
+            }
+
             SerializedProperty nextNodeId = choice.FindPropertyRelative("nextNodeId");
             SerializedProperty endsDialogue = choice.FindPropertyRelative("endsDialogue");
+            bool isExit = kind == DialogueChoiceKind.Exit || endsDialogue.boolValue;
+
+            if (kind == DialogueChoiceKind.Exit)
+            {
+                // Kind.Exit — явное завершение разговора; не путать с
+                // Table-режимом, где EndsDialogue тоже может быть true у
+                // обычного (не Exit) варианта — тот случай остаётся ниже.
+                GUI.Label(targetRect, "EXIT", ScaledStyle(EditorStyles.miniLabel, 10, TextAnchor.MiddleCenter));
+                return;
+            }
 
             List<string> labels = new List<string>();
             labels.Add("EXIT");
@@ -618,7 +701,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
 
             int selectedTarget = 0;
-            if (!endsDialogue.boolValue)
+            if (!isExit)
             {
                 for (int i = 0; i < nodes.arraySize; i++)
                 {
@@ -664,11 +747,78 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 {
                     graphConnectingNodeIndex = nodeIndex;
                     graphConnectingChoiceIndex = choiceIndex;
+                    graphConnectingPortKind = GraphChoicePortKind.Normal;
                     graphSelectedNodeIndex = nodeIndex;
                     GUI.FocusControl(null);
                     current.Use();
                 }
             }
+        }
+
+        // Активная проверка (§13): вместо одного жёлтого порта и выпадающего
+        // списка — два порта (зелёный успех / красный провал) и две
+        // подписи текущей цели. Точный выбор узла для success/failure
+        // делается в режиме «Таблица»: здесь можно только перетащить связь.
+        private void DrawGraphActiveChoicePorts(
+            int nodeIndex,
+            int choiceIndex,
+            Rect nodeRect,
+            SerializedProperty choice,
+            Rect targetRect)
+        {
+            SerializedProperty successNodeId = choice.FindPropertyRelative("successNodeId");
+            SerializedProperty failureNodeId = choice.FindPropertyRelative("failureNodeId");
+
+            Rect successLabelRect = new Rect(targetRect.x, targetRect.y, targetRect.width, targetRect.height * 0.5f);
+            Rect failureLabelRect = new Rect(
+                targetRect.x,
+                targetRect.y + targetRect.height * 0.5f,
+                targetRect.width,
+                targetRect.height * 0.5f);
+
+            GUIStyle successStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleRight);
+            successStyle.normal.textColor = GraphSuccessEdgeColor;
+            GUIStyle failureStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleRight);
+            failureStyle.normal.textColor = GraphFailureEdgeColor;
+
+            GUI.Label(successLabelRect, "✓ " + GraphShortNodeLabel(successNodeId.stringValue), successStyle);
+            GUI.Label(failureLabelRect, "✗ " + GraphShortNodeLabel(failureNodeId.stringValue), failureStyle);
+
+            DrawGraphChoicePort(nodeIndex, choiceIndex, nodeRect, -12f * graphZoom, GraphChoicePortKind.Success, GraphSuccessEdgeColor);
+            DrawGraphChoicePort(nodeIndex, choiceIndex, nodeRect, 12f * graphZoom, GraphChoicePortKind.Failure, GraphFailureEdgeColor);
+        }
+
+        private void DrawGraphChoicePort(
+            int nodeIndex,
+            int choiceIndex,
+            Rect nodeRect,
+            float verticalOffset,
+            GraphChoicePortKind portKind,
+            Color color)
+        {
+            Vector2 portCenter = GetChoicePortCenter(nodeRect, choiceIndex, verticalOffset);
+            Rect portRect = RectAround(portCenter, Mathf.Max(5f, 6f * graphZoom));
+            EditorGUI.DrawRect(portRect, color);
+
+            Event current = Event.current;
+            if (current.type == EventType.MouseDown &&
+                current.button == 0 &&
+                portRect.Contains(current.mousePosition))
+            {
+                graphConnectingNodeIndex = nodeIndex;
+                graphConnectingChoiceIndex = choiceIndex;
+                graphConnectingPortKind = portKind;
+                graphSelectedNodeIndex = nodeIndex;
+                GUI.FocusControl(null);
+                current.Use();
+            }
+        }
+
+        private static string GraphShortNodeLabel(string nodeId)
+        {
+            if (string.IsNullOrWhiteSpace(nodeId))
+                return "<нет>";
+            return nodeId.Length > 12 ? nodeId.Substring(0, 11) + "…" : nodeId;
         }
 
         private void AutoLayoutDialogue(SerializedProperty dialogue, bool recordUndo)
@@ -701,17 +851,16 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 for (int choiceIndex = 0; choiceIndex < choices.arraySize; choiceIndex++)
                 {
                     SerializedProperty choice = choices.GetArrayElementAtIndex(choiceIndex);
-                    if (choice.FindPropertyRelative("endsDialogue").boolValue)
-                        continue;
+                    foreach (string targetId in GetGraphChoiceTargets(choice))
+                    {
+                        int targetIndex;
+                        if (!indicesById.TryGetValue(targetId, out targetIndex) ||
+                            depthByIndex.ContainsKey(targetIndex))
+                            continue;
 
-                    string targetId = choice.FindPropertyRelative("nextNodeId").stringValue;
-                    int targetIndex;
-                    if (!indicesById.TryGetValue(targetId, out targetIndex) ||
-                        depthByIndex.ContainsKey(targetIndex))
-                        continue;
-
-                    depthByIndex[targetIndex] = currentDepth + 1;
-                    queue.Enqueue(targetIndex);
+                        depthByIndex[targetIndex] = currentDepth + 1;
+                        queue.Enqueue(targetIndex);
+                    }
                 }
             }
 
@@ -809,7 +958,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 nodeRect.yMin + GraphHeaderHeight * 0.5f * graphZoom);
         }
 
-        private Vector2 GetChoicePortCenter(Rect nodeRect, int choiceIndex)
+        private Vector2 GetChoicePortCenter(Rect nodeRect, int choiceIndex, float verticalOffset = 0f)
         {
             float y =
                 nodeRect.yMin +
@@ -819,7 +968,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                  GraphChoiceTitleHeight +
                  GraphChoiceHeight * choiceIndex +
                  GraphChoiceHeight * 0.5f +
-                 6f) * graphZoom;
+                 6f) * graphZoom +
+                verticalOffset;
             return new Vector2(nodeRect.xMax, y);
         }
 
@@ -872,16 +1022,44 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 for (int choiceIndex = 0; choiceIndex < choices.arraySize; choiceIndex++)
                 {
                     SerializedProperty choice = choices.GetArrayElementAtIndex(choiceIndex);
-                    if (choice.FindPropertyRelative("endsDialogue").boolValue)
-                        continue;
-
-                    string target = choice.FindPropertyRelative("nextNodeId").stringValue;
-                    if (!string.IsNullOrWhiteSpace(target) && indicesById.ContainsKey(target))
-                        queue.Enqueue(target);
+                    foreach (string target in GetGraphChoiceTargets(choice))
+                    {
+                        if (indicesById.ContainsKey(target))
+                            queue.Enqueue(target);
+                    }
                 }
             }
 
             return reachable;
+        }
+
+        // Единая точка вычисления целей одного варианта ответа для
+        // автораскладки и подсветки достижимости в Графе: обычный переход —
+        // один узел, активная проверка — узлы успеха и провала, EXIT — ни
+        // одного. Совпадает по смыслу с DialogueDatabaseAsset.GetChoiceTargets,
+        // но работает через SerializedProperty, а не готовые данные.
+        private static IEnumerable<string> GetGraphChoiceTargets(SerializedProperty choice)
+        {
+            DialogueChoiceKind kind = (DialogueChoiceKind)choice.FindPropertyRelative("kind").enumValueIndex;
+            bool endsDialogue = choice.FindPropertyRelative("endsDialogue").boolValue;
+
+            if (kind == DialogueChoiceKind.Exit || endsDialogue)
+                yield break;
+
+            if (kind == DialogueChoiceKind.ActiveReturnable || kind == DialogueChoiceKind.ActiveDecisive)
+            {
+                string successId = choice.FindPropertyRelative("successNodeId").stringValue;
+                string failureId = choice.FindPropertyRelative("failureNodeId").stringValue;
+                if (!string.IsNullOrWhiteSpace(successId))
+                    yield return successId;
+                if (!string.IsNullOrWhiteSpace(failureId))
+                    yield return failureId;
+                yield break;
+            }
+
+            string nextId = choice.FindPropertyRelative("nextNodeId").stringValue;
+            if (!string.IsNullOrWhiteSpace(nextId))
+                yield return nextId;
         }
 
         private GUIStyle ScaledStyle(GUIStyle source, int baseFontSize, TextAnchor alignment)

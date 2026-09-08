@@ -150,6 +150,31 @@ public sealed class DialogueDatabaseCheckSystemTests
         Object.DestroyImmediate(asset);
     }
 
+    // §13: достижимость в режиме «Граф» должна учитывать ветвление
+    // успех/провал активной проверки, а не только NextNodeId.
+    [Test]
+    public void GraphMode_Reachability_Follows_Active_Check_Branches()
+    {
+        DialogueDatabaseAsset asset = BuildDemoDatabase();
+        DialogueDatabaseWindow window = ScriptableObject.CreateInstance<DialogueDatabaseWindow>();
+        SetField(window, "database", asset);
+
+        SerializedObject serializedAsset = new SerializedObject(asset);
+        SerializedProperty dialogueProperty = serializedAsset.FindProperty("dialogues").GetArrayElementAtIndex(0);
+
+        MethodInfo collectReachable = typeof(DialogueDatabaseWindow).GetMethod("CollectReachableNodeIds", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.IsNotNull(collectReachable);
+        HashSet<string> reachable = (HashSet<string>)collectReachable.Invoke(window, new object[] { dialogueProperty });
+
+        Assert.IsTrue(reachable.Contains("returnable_success"));
+        Assert.IsTrue(reachable.Contains("returnable_failed"));
+        Assert.IsTrue(reachable.Contains("decisive_success"));
+        Assert.IsTrue(reachable.Contains("decisive_failure"));
+
+        Object.DestroyImmediate(window);
+        Object.DestroyImmediate(asset);
+    }
+
     [Test]
     public void RegenerateNarrativeIdentifiers_Creates_New_Ids_And_Remaps_Unlock_Reference()
     {
@@ -181,6 +206,123 @@ public sealed class DialogueDatabaseCheckSystemTests
         Assert.AreNotEqual("eff_unlock_returnable", copyUnlockEffect.EffectExecutionId);
 
         Object.DestroyImmediate(asset);
+    }
+
+    // §19: "единственная обязательная улика, закрытая одной проверкой".
+    [Test]
+    public void SingleDecisiveKnowledgeGrant_Is_Flagged_As_Fragile()
+    {
+        DialogueDatabaseAsset asset = BuildKnowledgeGateDatabase(grantOnDecisiveOnly: true);
+        List<string> issues = new List<string>();
+        asset.CollectValidationIssuesForDialogue("knowledge_gate", issues);
+
+        Assert.IsTrue(issues.Exists(issue => issue.Contains("secret_clue")), string.Join("\n", issues));
+
+        Object.DestroyImmediate(asset);
+    }
+
+    [Test]
+    public void KnowledgeGrant_With_Alternate_Source_Is_Not_Flagged()
+    {
+        DialogueDatabaseAsset asset = BuildKnowledgeGateDatabase(grantOnDecisiveOnly: false);
+        List<string> issues = new List<string>();
+        asset.CollectValidationIssuesForDialogue("knowledge_gate", issues);
+
+        Assert.IsFalse(issues.Exists(issue => issue.Contains("secret_clue")), string.Join("\n", issues));
+
+        Object.DestroyImmediate(asset);
+    }
+
+    private static DialogueDatabaseAsset BuildKnowledgeGateDatabase(bool grantOnDecisiveOnly)
+    {
+        DialogueDatabaseAsset asset = ScriptableObject.CreateInstance<DialogueDatabaseAsset>();
+        SetField(asset, "speakers", new List<DialogueSpeakerData> { MakeSpeaker("narrator", "Рассказчик") });
+
+        NarrativeConditionGroup requiresClue = new NarrativeConditionGroup
+        {
+            Combinator = NarrativeConditionCombinator.All,
+            Conditions = new List<NarrativeCondition>
+            {
+                new NarrativeCondition { Type = NarrativeConditionType.KnowledgeKnown, StringParam = "secret_clue" }
+            }
+        };
+
+        NarrativeCheckSpec decisiveCheck = new NarrativeCheckSpec
+        {
+            CheckId = "gate_decisive",
+            Kind = NarrativeCheckKind.ActiveDecisive,
+            Quality = HeroQuality.Judgment,
+            Difficulty = NarrativeDifficulty.Obvious
+        };
+
+        List<DialogueChoiceData> startChoices = new List<DialogueChoiceData>
+        {
+            MakeActiveChoice(
+                "c_decisive_grant",
+                "Разгадать тайну.",
+                DialogueChoiceKind.ActiveDecisive,
+                decisiveCheck,
+                "granted",
+                "not_granted",
+                successEffects: new List<NarrativeEffect>
+                {
+                    new NarrativeEffect { EffectExecutionId = "eff_grant_clue", Type = NarrativeEffectType.AddKnowledge, StringParam = "secret_clue" }
+                }),
+            MakeNormalChoice("c_use_clue", "Использовать разгадку.", "start", requiresClue, DialogueChoiceUnavailablePresentation.Hidden),
+            MakeExitChoice("c_exit", "Уйти.")
+        };
+
+        if (!grantOnDecisiveOnly)
+            startChoices.Add(MakeNormalChoice("c_alt_grant", "Спросить прямо.", "granted_alt"));
+
+        DialogueNodeData startNode = MakeNode(
+            "start",
+            "narrator",
+            new List<DialogueTextBlockData> { MakeTextBlock("b_main", DialogueTextBlockKind.MainLine, "Начало.") },
+            startChoices);
+
+        DialogueNodeData grantedNode = MakeNode(
+            "granted",
+            "narrator",
+            new List<DialogueTextBlockData> { MakeTextBlock("b_g", DialogueTextBlockKind.MainLine, "Тайна раскрыта.") },
+            new List<DialogueChoiceData> { MakeExitChoice("exit_g", "Уйти.") });
+
+        DialogueNodeData notGrantedNode = MakeNode(
+            "not_granted",
+            "narrator",
+            new List<DialogueTextBlockData> { MakeTextBlock("b_ng", DialogueTextBlockKind.MainLine, "Тайна осталась загадкой.") },
+            new List<DialogueChoiceData> { MakeExitChoice("exit_ng", "Уйти.") });
+
+        List<DialogueNodeData> nodes = new List<DialogueNodeData> { startNode, grantedNode, notGrantedNode };
+
+        if (!grantOnDecisiveOnly)
+        {
+            DialogueNodeData grantedAltNode = MakeNode(
+                "granted_alt",
+                "narrator",
+                new List<DialogueTextBlockData>
+                {
+                    MakeTextBlock(
+                        "b_ga",
+                        DialogueTextBlockKind.MainLine,
+                        "Тебе рассказали прямо.",
+                        onRevealEffects: new List<NarrativeEffect>
+                        {
+                            new NarrativeEffect
+                            {
+                                EffectExecutionId = "eff_grant_clue_alt",
+                                Type = NarrativeEffectType.AddKnowledge,
+                                StringParam = "secret_clue"
+                            }
+                        })
+                },
+                new List<DialogueChoiceData> { MakeExitChoice("exit_ga", "Уйти.") });
+            nodes.Add(grantedAltNode);
+        }
+
+        DialogueDefinitionData dialogue = MakeDialogue("knowledge_gate", "start", nodes);
+        SetField(asset, "dialogues", new List<DialogueDefinitionData> { dialogue });
+        return asset;
     }
 
     private static bool HasChoice(IReadOnlyList<NarrativeDialogueChoiceView> list, string choiceId)

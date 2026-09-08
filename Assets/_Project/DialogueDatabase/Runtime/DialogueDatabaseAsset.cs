@@ -464,6 +464,8 @@ namespace KingdomSurvival.DialogueDatabase
             HashSet<string> effectIdsInDialogue = new HashSet<string>(StringComparer.Ordinal);
             HashSet<string> returnableChecksNeedingUnlock = new HashSet<string>(StringComparer.Ordinal);
             HashSet<string> unlockedCheckIds = new HashSet<string>(StringComparer.Ordinal);
+            HashSet<string> requiredKnowledgeIds = new HashSet<string>(StringComparer.Ordinal);
+            List<NarrativeKnowledgeGrantSource> knowledgeGrants = new List<NarrativeKnowledgeGrantSource>();
 
             for (int i = 0; i < dialogue.Nodes.Count; i++)
             {
@@ -520,6 +522,9 @@ namespace KingdomSurvival.DialogueDatabase
                     if (string.IsNullOrWhiteSpace(block.Text))
                         issues.Add(blockPrefix + ": пустой текст блока.");
 
+                    CollectRequiredKnowledge(block.Conditions, requiredKnowledgeIds);
+                    CollectKnowledgeGrants(block.OnRevealEffects, blockPrefix, false, null, knowledgeGrants);
+
                     if (block.HasPassiveCheck)
                     {
                         ValidateCheckSpec(
@@ -551,6 +556,14 @@ namespace KingdomSurvival.DialogueDatabase
                         issues.Add(choicePrefix + ": пустой текст ответа.");
 
                     ValidateChoiceTransitions(choice, choicePrefix, nodesById, issues);
+                    CollectRequiredKnowledge(choice.Conditions, requiredKnowledgeIds);
+
+                    bool isDecisiveGrant = choice.Kind == DialogueChoiceKind.ActiveDecisive;
+                    string returnableCheckIdForGrant = choice.Kind == DialogueChoiceKind.ActiveReturnable
+                        ? choice.Check.CheckId
+                        : null;
+                    CollectKnowledgeGrants(choice.SuccessEffects, choicePrefix + " / успех", isDecisiveGrant, returnableCheckIdForGrant, knowledgeGrants);
+                    CollectKnowledgeGrants(choice.FailureEffects, choicePrefix + " / провал", isDecisiveGrant, returnableCheckIdForGrant, knowledgeGrants);
 
                     if (choice.IsActiveCheck)
                     {
@@ -583,6 +596,38 @@ namespace KingdomSurvival.DialogueDatabase
                     issues.Add(
                         prefix + ": возвратная проверка '" + checkId +
                         "' не имеет ни одного доступного эффекта UnlockCheck в этом диалоге.");
+                }
+            }
+
+            // §19: "единственная обязательная улика, закрытая одной
+            // проверкой". Если знание требуется условием где-то в диалоге и
+            // единственный способ его получить — решающая проверка (без
+            // повтора) или возвратная без доступной разблокировки, автор
+            // рискует необратимо запереть прогресс.
+            foreach (string knowledgeId in requiredKnowledgeIds)
+            {
+                NarrativeKnowledgeGrantSource onlySource = null;
+                int sourceCount = 0;
+                for (int i = 0; i < knowledgeGrants.Count; i++)
+                {
+                    if (knowledgeGrants[i].KnowledgeId != knowledgeId)
+                        continue;
+                    sourceCount++;
+                    onlySource = knowledgeGrants[i];
+                }
+
+                if (sourceCount != 1 || onlySource == null)
+                    continue;
+
+                bool isFragile = onlySource.IsDecisiveGrant ||
+                    (onlySource.ReturnableCheckId != null && !unlockedCheckIds.Contains(onlySource.ReturnableCheckId));
+
+                if (isFragile)
+                {
+                    issues.Add(
+                        prefix + ": знание '" + knowledgeId +
+                        "' требуется условием, но единственный способ получить его — " + onlySource.Location +
+                        " — непереигрываемая или не имеющая разблокировки проверка.");
                 }
             }
 
@@ -739,6 +784,62 @@ namespace KingdomSurvival.DialogueDatabase
                         prefix + ": повторное использование EffectExecutionId '" +
                         effect.EffectExecutionId + "' в этом диалоге.");
                 }
+            }
+        }
+
+        // Один источник знания, отслеживаемый для §19-эвристики ниже.
+        private sealed class NarrativeKnowledgeGrantSource
+        {
+            public string KnowledgeId;
+            public bool IsDecisiveGrant;
+            public string ReturnableCheckId;
+            public string Location;
+        }
+
+        private static void CollectRequiredKnowledge(NarrativeConditionGroup conditions, HashSet<string> requiredKnowledgeIds)
+        {
+            if (conditions == null || conditions.Conditions == null)
+                return;
+
+            for (int i = 0; i < conditions.Conditions.Count; i++)
+            {
+                NarrativeCondition condition = conditions.Conditions[i];
+                if (condition != null &&
+                    condition.Type == NarrativeConditionType.KnowledgeKnown &&
+                    !string.IsNullOrWhiteSpace(condition.StringParam))
+                {
+                    requiredKnowledgeIds.Add(condition.StringParam);
+                }
+            }
+        }
+
+        private static void CollectKnowledgeGrants(
+            IReadOnlyList<NarrativeEffect> effects,
+            string location,
+            bool isDecisiveGrant,
+            string returnableCheckId,
+            List<NarrativeKnowledgeGrantSource> grants)
+        {
+            if (effects == null)
+                return;
+
+            for (int i = 0; i < effects.Count; i++)
+            {
+                NarrativeEffect effect = effects[i];
+                if (effect == null ||
+                    effect.Type != NarrativeEffectType.AddKnowledge ||
+                    string.IsNullOrWhiteSpace(effect.StringParam))
+                {
+                    continue;
+                }
+
+                grants.Add(new NarrativeKnowledgeGrantSource
+                {
+                    KnowledgeId = effect.StringParam,
+                    IsDecisiveGrant = isDecisiveGrant,
+                    ReturnableCheckId = returnableCheckId,
+                    Location = location
+                });
             }
         }
 

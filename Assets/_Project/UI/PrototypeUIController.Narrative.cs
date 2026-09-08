@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using KingdomSurvival.DialogueDatabase;
@@ -7,8 +8,47 @@ using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
-    private NarrativeDialogueSession narrativeDialogueSession;
+    private enum NarrativeUiHistoryKind
+    {
+        Block,
+        PlayerChoice,
+        CheckResult
+    }
+
+    // Строится самим UI поверх NarrativeDialogueView — сама сессия v2
+    // истории не хранит (§12). Не влияет на игровое состояние.
+    private sealed class NarrativeUiHistoryEntry
+    {
+        public NarrativeUiHistoryKind Kind;
+        public string SpeakerDisplayName;
+        public string SpeakerRole;
+        public string Text;
+
+        public static NarrativeUiHistoryEntry ForBlock(string speakerDisplayName, string speakerRole, string text)
+        {
+            return new NarrativeUiHistoryEntry
+            {
+                Kind = NarrativeUiHistoryKind.Block,
+                SpeakerDisplayName = speakerDisplayName,
+                SpeakerRole = speakerRole,
+                Text = text
+            };
+        }
+
+        public static NarrativeUiHistoryEntry ForPlayerChoice(string text)
+        {
+            return new NarrativeUiHistoryEntry { Kind = NarrativeUiHistoryKind.PlayerChoice, Text = text };
+        }
+
+        public static NarrativeUiHistoryEntry ForCheckResult(string text)
+        {
+            return new NarrativeUiHistoryEntry { Kind = NarrativeUiHistoryKind.CheckResult, Text = text };
+        }
+    }
+
+    private NarrativeDialogueRuntimeSession narrativeDialogueSession;
     private DialogueDatabaseAsset narrativeDialogueDatabase;
+    private readonly List<NarrativeUiHistoryEntry> narrativeHistory = new List<NarrativeUiHistoryEntry>();
     private VisualElement narrativeDialogueOverlay;
     private VisualElement narrativePortrait;
     private VisualElement narrativePanel;
@@ -31,7 +71,7 @@ public partial class PrototypeUIController
 
     private void Awake()
     {
-        narrativeDialogueSession = new NarrativeDialogueSession();
+        narrativeDialogueSession = new NarrativeDialogueRuntimeSession();
         narrativeDialogueDatabase = DialogueDatabaseRuntime.LoadDefaultDatabase();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         StartCoroutine(InstallNarrativeDebugTrigger());
@@ -156,6 +196,10 @@ public partial class PrototypeUIController
     }
 #endif
 
+    // Единственная точка входа игрового кода в диалог. Активные проверки
+    // разрешаются через общий NarrativeCheckResolver (§7); принудительного
+    // исхода здесь нет и быть не может — это привилегия только Preview
+    // в редакторе (§13/§20).
     public bool TryOpenNarrativeDialogueById(string dialogueId)
     {
         if (narrativeDialogueDatabase == null)
@@ -166,28 +210,45 @@ public partial class PrototypeUIController
             return false;
         }
 
-        NarrativeDialogueDefinition dialogue;
-        string error;
-        if (!narrativeDialogueDatabase.TryBuildRuntime(dialogueId, out dialogue, out error))
+        if (gameState == null || isGameOver || IsNarrativeDialogueActive || HasBlockingModalWork())
+            return false;
+
+        CommanderData commander = gameState.GetSelectedCommander();
+        if (commander == null)
+            return false;
+        if (commander.HeroProfile == null)
+            commander.HeroProfile = new HeroProfileData();
+        if (gameState.Narrative == null)
+            gameState.Narrative = new NarrativeStateData();
+
+        List<string> presentCompanionIds = new List<string>();
+        if (gameState.HasActiveExpedition)
+            presentCompanionIds.AddRange(gameState.ActiveExpedition.FighterIds);
+
+        bool started = narrativeDialogueSession.Start(
+            narrativeDialogueDatabase,
+            dialogueId,
+            commander.HeroProfile,
+            gameState.Narrative,
+            out NarrativeDialogueView view,
+            out string error,
+            presentCompanionIds,
+            null,
+            gameState.WorldSeed);
+
+        if (!started)
         {
             Debug.LogError("Narrative UI: не удалось открыть диалог '" + dialogueId + "'.\n" + error);
             return false;
         }
 
-        return TryOpenNarrativeDialogue(dialogue);
-    }
-
-    public bool TryOpenNarrativeDialogue(NarrativeDialogueDefinition dialogue)
-    {
-        if (dialogue == null || gameState == null || isGameOver || IsNarrativeDialogueActive || HasBlockingModalWork())
-            return false;
         if (!EnsureNarrativeDialogueUi())
             return false;
 
-        narrativeDialogueSession.Start(dialogue);
+        narrativeHistory.Clear();
         PauseForBlockingModal();
         narrativeDialogueOverlay.style.display = DisplayStyle.Flex;
-        RenderNarrativeDialogueNode();
+        DisplayNarrativeView(view, null);
         if (timeToggleButton != null)
         {
             timeToggleButton.SetEnabled(false);
@@ -324,41 +385,95 @@ public partial class PrototypeUIController
         UILayoutRuntimeApplier.ApplyBackground(target, definition);
     }
 
-    private void RenderNarrativeDialogueNode()
+    // Единая точка показа нового представления узла: сначала причинный
+    // результат проверки (если был), затем видимые блоки, затем варианты
+    // ответа — порядок из §14 ("сначала причинный текст, затем механика").
+    private void DisplayNarrativeView(NarrativeDialogueView view, NarrativeCheckResult checkResult)
     {
-        if (!IsNarrativeDialogueActive)
-            return;
+        if (checkResult != null)
+            narrativeHistory.Add(NarrativeUiHistoryEntry.ForCheckResult(BuildNarrativeCheckResultLine(checkResult)));
 
-        NarrativeDialogueNode node = narrativeDialogueSession.CurrentNode;
-        narrativeSpeakerLabel.text = node.Speaker;
-        narrativeRoleLabel.text = node.Role;
-        ApplyNarrativeSpeakerPortrait(node.SpeakerId);
-        RenderNarrativeDialogueHistory();
-
-        narrativeChoicesContainer.Clear();
-        for (int i = 0; i < node.Choices.Count; i++)
+        for (int i = 0; i < view.VisibleTextBlocks.Count; i++)
         {
-            int choiceIndex = i;
-            NarrativeDialogueChoice choice = node.Choices[i];
-            Button button = new Button(() => OnNarrativeDialogueChoiceSelected(choiceIndex)) { text = choice.Text };
+            NarrativeDialogueVisibleBlock block = view.VisibleTextBlocks[i];
+            narrativeHistory.Add(NarrativeUiHistoryEntry.ForBlock(block.SpeakerDisplayName, block.SpeakerRole, block.Text));
+        }
+
+        NarrativeDialogueVisibleBlock latestBlock = view.VisibleTextBlocks.Count > 0
+            ? view.VisibleTextBlocks[view.VisibleTextBlocks.Count - 1]
+            : null;
+        narrativeSpeakerLabel.text = latestBlock != null ? latestBlock.SpeakerDisplayName : string.Empty;
+        narrativeRoleLabel.text = latestBlock != null ? latestBlock.SpeakerRole : string.Empty;
+        ApplyNarrativeSpeakerPortrait(latestBlock != null ? latestBlock.SpeakerId : string.Empty);
+
+        RenderNarrativeDialogueHistory();
+        RenderNarrativeDialogueChoices(view);
+    }
+
+    private static string BuildNarrativeCheckResultLine(NarrativeCheckResult result)
+    {
+        string outcome = result.Success ? "Успех." : "Провал.";
+        string dice = result.HasDice
+            ? " (" + result.DieOne + "+" + result.DieTwo + " против " + result.Difficulty + ")"
+            : string.Empty;
+        return outcome + dice;
+    }
+
+    private void RenderNarrativeDialogueChoices(NarrativeDialogueView view)
+    {
+        narrativeChoicesContainer.Clear();
+
+        for (int i = 0; i < view.AvailableChoices.Count; i++)
+        {
+            NarrativeDialogueChoiceView choiceView = view.AvailableChoices[i];
+            string choiceId = choiceView.ChoiceId;
+            string choiceText = choiceView.Text;
+
+            Button button = new Button(() => OnNarrativeDialogueChoiceSelected(choiceId, choiceText)) { text = choiceText };
             button.AddToClassList("narrative-dialogue-choice");
-            if (choice.EndsDialogue)
+            if (choiceView.Kind == DialogueChoiceKind.Exit)
                 button.AddToClassList("narrative-dialogue-choice-exit");
             narrativeChoicesContainer.Add(button);
+
+            if (!string.IsNullOrWhiteSpace(choiceView.MechanicalSummary))
+            {
+                Label mechanic = new Label(choiceView.MechanicalSummary);
+                mechanic.AddToClassList("narrative-dialogue-choice-mechanic");
+                narrativeChoicesContainer.Add(mechanic);
+            }
+        }
+
+        for (int i = 0; i < view.DisabledChoices.Count; i++)
+        {
+            NarrativeDialogueChoiceView disabledView = view.DisabledChoices[i];
+
+            Button button = new Button { text = disabledView.Text };
+            button.AddToClassList("narrative-dialogue-choice");
+            button.AddToClassList("narrative-dialogue-choice-disabled");
+            button.SetEnabled(false);
+            narrativeChoicesContainer.Add(button);
+
+            if (!string.IsNullOrWhiteSpace(disabledView.DisabledHint))
+            {
+                Label hint = new Label(disabledView.DisabledHint);
+                hint.AddToClassList("narrative-dialogue-choice-hint");
+                narrativeChoicesContainer.Add(hint);
+            }
         }
     }
 
     private void RenderNarrativeDialogueHistory()
     {
-        if (narrativeHistoryContainer == null || narrativeDialogueSession == null)
+        if (narrativeHistoryContainer == null)
             return;
 
         narrativeHistoryContainer.Clear();
         VisualElement lastEntry = null;
-        for (int i = 0; i < narrativeDialogueSession.History.Count; i++)
+        for (int i = 0; i < narrativeHistory.Count; i++)
         {
-            NarrativeDialogueHistoryEntry entry = narrativeDialogueSession.History[i];
-            if (entry.Kind == NarrativeDialogueHistoryEntryKind.PlayerChoice)
+            NarrativeUiHistoryEntry entry = narrativeHistory[i];
+
+            if (entry.Kind == NarrativeUiHistoryKind.PlayerChoice)
             {
                 Label playerLine = new Label("Вы: " + entry.Text);
                 playerLine.AddToClassList("narrative-dialogue-history-player");
@@ -367,10 +482,19 @@ public partial class PrototypeUIController
                 continue;
             }
 
+            if (entry.Kind == NarrativeUiHistoryKind.CheckResult)
+            {
+                Label checkLine = new Label(entry.Text);
+                checkLine.AddToClassList("narrative-dialogue-history-check-result");
+                narrativeHistoryContainer.Add(checkLine);
+                lastEntry = checkLine;
+                continue;
+            }
+
             VisualElement block = new VisualElement();
             block.AddToClassList("narrative-dialogue-history-entry");
 
-            Label speaker = new Label(entry.Speaker);
+            Label speaker = new Label(entry.SpeakerDisplayName);
             speaker.AddToClassList("narrative-dialogue-history-speaker");
             block.Add(speaker);
 
@@ -417,25 +541,38 @@ public partial class PrototypeUIController
         }
     }
 
-    private void OnNarrativeDialogueChoiceSelected(int choiceIndex)
+    private void OnNarrativeDialogueChoiceSelected(string choiceId, string choiceText)
     {
         if (!IsNarrativeDialogueActive)
             return;
 
-        bool continues = narrativeDialogueSession.SelectChoice(choiceIndex);
-        if (!continues)
+        narrativeHistory.Add(NarrativeUiHistoryEntry.ForPlayerChoice(choiceText));
+
+        NarrativeDialogueSelectionResult result;
+        try
+        {
+            result = narrativeDialogueSession.SelectChoice(choiceId);
+        }
+        catch (InvalidOperationException exception)
+        {
+            Debug.LogError("Narrative UI: не удалось выбрать ответ '" + choiceId + "'.\n" + exception.Message);
+            return;
+        }
+
+        if (result.DialogueEnded)
         {
             CloseNarrativeDialogue();
             return;
         }
 
-        RenderNarrativeDialogueNode();
+        DisplayNarrativeView(result.View, result.CheckResult);
     }
 
     private void CloseNarrativeDialogue()
     {
         if (narrativeDialogueSession != null && narrativeDialogueSession.IsActive)
             narrativeDialogueSession.End();
+        narrativeHistory.Clear();
         if (narrativeDialogueOverlay != null)
             narrativeDialogueOverlay.style.display = DisplayStyle.None;
         if (narrativeChoicesContainer != null)

@@ -33,6 +33,9 @@ public partial class PrototypeUIController
     private VisualElement heroScreenRetinueRow;
     private VisualElement heroScreenTagsRow;
     private VisualElement heroScreenStatsGrid;
+    private VisualElement heroScreenQualitiesGrid;
+    private VisualElement heroScreenCompetenciesRow;
+    private VisualElement heroScreenTraitsRow;
     private VisualElement heroScreenStatesRow;
     private VisualElement heroScreenAbilitiesRow;
     private VisualElement heroScreenEquipmentGrid;
@@ -392,7 +395,27 @@ public partial class PrototypeUIController
         column.style.minWidth = 0f;
         column.style.marginRight = 12f;
 
-        VisualElement stats = CreateHeroScreenPanel("hero-screen-stats", "ХАРАКТЕРИСТИКИ");
+        // Качества, компетенции и боевые характеристики визуально не
+        // смешиваются (§17 производственной инструкции по качествам и
+        // проверкам) — три отдельные панели вместо одной общей сетки.
+        VisualElement qualities = CreateHeroScreenPanel("hero-screen-qualities", "КАЧЕСТВА");
+        heroScreenQualitiesGrid = new VisualElement { name = "hero-screen-qualities-grid" };
+        heroScreenQualitiesGrid.style.flexDirection = FlexDirection.Row;
+        heroScreenQualitiesGrid.style.flexWrap = Wrap.Wrap;
+        qualities.Add(heroScreenQualitiesGrid);
+        column.Add(qualities);
+
+        VisualElement competencies = CreateHeroScreenPanel("hero-screen-competencies", "КОМПЕТЕНЦИИ");
+        heroScreenCompetenciesRow = new VisualElement { name = "hero-screen-competencies-row" };
+        competencies.Add(heroScreenCompetenciesRow);
+        column.Add(competencies);
+
+        VisualElement traits = CreateHeroScreenPanel("hero-screen-traits", "ОСОБЕННОСТИ");
+        heroScreenTraitsRow = CreateHeroScreenWrapRow("hero-screen-traits-row");
+        traits.Add(heroScreenTraitsRow);
+        column.Add(traits);
+
+        VisualElement stats = CreateHeroScreenPanel("hero-screen-stats", "БОЕВЫЕ ХАРАКТЕРИСТИКИ");
         heroScreenStatsGrid = new VisualElement { name = "hero-screen-stats-grid" };
         heroScreenStatsGrid.style.flexDirection = FlexDirection.Row;
         heroScreenStatsGrid.style.flexWrap = Wrap.Wrap;
@@ -493,7 +516,11 @@ public partial class PrototypeUIController
         ApplyHeroScreenPortrait(heroScreenPortrait, heroUnit);
         heroScreenExperienceFill.style.width = Length.Percent(0f);
 
-        RefreshHeroScreenStats(heroUnit);
+        HeroProfileData heroProfile = commander != null ? commander.HeroProfile : null;
+        RefreshHeroScreenQualities(heroProfile);
+        RefreshHeroScreenCompetencies(heroProfile);
+        RefreshHeroScreenTraits(heroProfile);
+        RefreshHeroScreenStats(heroUnit, heroProfile);
         RefreshHeroScreenTags(heroUnit);
         RefreshHeroScreenStates(commander);
         RefreshHeroScreenAbilities();
@@ -513,7 +540,102 @@ public partial class PrototypeUIController
         "", "", "", "", "", "", "", "", "", "", "", ""
     };
 
-    private void RefreshHeroScreenStats(UnitDefinitionData unit)
+    // Шесть качеств героя 1-10 (§2 инструкции по качествам и проверкам) —
+    // отдельная панель, не связанная с боевыми характеристиками UnitDatabase.
+    private void RefreshHeroScreenQualities(HeroProfileData hero)
+    {
+        heroScreenQualitiesGrid.Clear();
+        AddHeroScreenQuality(HeroQuality.Strength, "Сила", "Физическое воздействие.", hero);
+        AddHeroScreenQuality(HeroQuality.Dexterity, "Сноровка", "Координация, точность и скорость.", hero);
+        AddHeroScreenQuality(HeroQuality.Fortitude, "Стойкость", "Здоровье и физические лишения.", hero);
+        AddHeroScreenQuality(HeroQuality.Instinct, "Чутьё", "Наблюдение, следы и опасность.", hero);
+        AddHeroScreenQuality(HeroQuality.Judgment, "Суждение", "Анализ, планирование и интерпретация.", hero);
+        AddHeroScreenQuality(HeroQuality.Character, "Характер", "Сила личности, влияние и сопротивление давлению.", hero);
+    }
+
+    private void AddHeroScreenQuality(HeroQuality quality, string label, string meaning, HeroProfileData hero)
+    {
+        int value = hero != null ? hero.GetQuality(quality) : HeroProfileData.DefaultQualityValue;
+        string explanation =
+            label + " " + value + " из 10 (" + GetHeroScreenQualityRangeLabel(value) + "). " + meaning;
+
+        VisualElement box = new VisualElement { name = "hero-screen-quality-" + HeroScreenSlug(label) };
+        box.style.width = new Length(33f, LengthUnit.Percent);
+        box.style.paddingLeft = 8f;
+        box.style.paddingRight = 8f;
+        box.style.paddingTop = 6f;
+        box.style.paddingBottom = 6f;
+        box.style.marginBottom = 4f;
+
+        Label caption = new Label(label);
+        caption.style.color = HeroScreenMuted;
+        caption.style.fontSize = 10f;
+        caption.pickingMode = PickingMode.Ignore;
+        box.Add(caption);
+
+        Label number = new Label(value + " / " + HeroProfileData.MaxQualityValue);
+        number.style.color = HeroScreenText;
+        number.style.fontSize = 18f;
+        number.style.unityFontStyleAndWeight = FontStyle.Bold;
+        number.pickingMode = PickingMode.Ignore;
+        box.Add(number);
+
+        box.RegisterCallback<PointerEnterEvent>(_ => ShowHeroScreenStatTooltip(box, label.ToUpperInvariant(), explanation));
+        box.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenStatTooltip());
+
+        heroScreenQualitiesGrid.Add(box);
+    }
+
+    // Диапазоны интерпретации из §2 инструкции.
+    private static string GetHeroScreenQualityRangeLabel(int value)
+    {
+        if (value <= 2) return "серьёзная слабость";
+        if (value <= 4) return "ниже среднего";
+        if (value <= 6) return "нормальное развитие";
+        if (value <= 8) return "выраженный талант";
+        return "исключительное качество";
+    }
+
+    // Следопытство — первая полностью реализованная компетенция (§3).
+    // Архитектура допускает другие компетенции позже без переделки экрана.
+    private void RefreshHeroScreenCompetencies(HeroProfileData hero)
+    {
+        heroScreenCompetenciesRow.Clear();
+        int fieldcraft = hero != null ? hero.GetCompetency(NarrativeCompetencyIds.Fieldcraft) : 0;
+        CreateHeroScreenStatRow(
+            heroScreenCompetenciesRow,
+            NarrativeCompetencyLabels.GetLabel(NarrativeCompetencyIds.Fieldcraft).ToUpperInvariant(),
+            fieldcraft + " / 5",
+            "Чтение следов, разведка, поиск скрытых мест, выбор маршрута, устройство лагеря, обнаружение засад и подготовка к дорожным встречам.");
+    }
+
+    // Особенности героя (§4): стабильные строковые ID, показываются как
+    // теги с подсказкой — так же, как боевые теги существ из UnitDatabase.
+    private void RefreshHeroScreenTraits(HeroProfileData hero)
+    {
+        heroScreenTraitsRow.Clear();
+
+        if (hero != null && hero.HasTrait(NarrativeTraitIds.KnowsTheWay))
+        {
+            heroScreenTraitsRow.Add(CreateHeroScreenChip(
+                "Знающий дорогу",
+                HeroScreenGold,
+                "При успешном обнаружении дорожный Encounter начинается в подготовленном состоянии: герой замечает событие раньше, может наблюдать, обойти или занять выгодную позицию."));
+        }
+
+        if (hero != null && hero.HasTrait(NarrativeTraitIds.Naturalist))
+        {
+            heroScreenTraitsRow.Add(CreateHeroScreenChip(
+                "Натуралист",
+                HeroScreenGold,
+                "Открывает авторские блоки и варианты, связанные с растениями, животными, погодой, болезнями, водой и природными изменениями."));
+        }
+
+        if (heroScreenTraitsRow.childCount == 0)
+            heroScreenTraitsRow.Add(CreateHeroScreenHint("У героя пока нет особенностей."));
+    }
+
+    private void RefreshHeroScreenStats(UnitDefinitionData unit, HeroProfileData hero)
     {
         heroScreenStatsGrid.Clear();
         AddHeroScreenStat("Здоровье", unit != null ? unit.MaxHitPoints : 0);
@@ -521,8 +643,49 @@ public partial class PrototypeUIController
         AddHeroScreenStat("Защита", unit != null ? unit.Defense : 0);
         AddHeroScreenStat("Урон", unit != null ? unit.Damage : 0);
         AddHeroScreenStat("Движение", unit != null ? unit.Movement : 0);
-        AddHeroScreenStat("Инициатива", unit != null ? unit.Initiative : 0);
+        AddHeroScreenInitiativeStat(unit, hero);
         AddHeroScreenStat("Дальность атаки", unit != null ? unit.AttackRange : 0);
+    }
+
+    // Единственная боевая характеристика командира, куда сейчас подключено
+    // качество (§16: Сноровка -> Инициатива). Подсказка показывает
+    // происхождение производного значения, как того требует §17.
+    private void AddHeroScreenInitiativeStat(UnitDefinitionData unit, HeroProfileData hero)
+    {
+        int baseInitiative = unit != null ? unit.Initiative : 0;
+        int dexterity = hero != null ? hero.GetQuality(HeroQuality.Dexterity) : HeroProfileData.DefaultQualityValue;
+        int modifier = HeroCombatStatsBuilder.GetCombatModifier(dexterity);
+        int finalInitiative = Mathf.Max(0, baseInitiative + modifier);
+
+        string explanation = "База: " + baseInitiative;
+        if (modifier != 0)
+            explanation += "\nСноровка " + dexterity + ": " + (modifier > 0 ? "+" + modifier : modifier.ToString());
+
+        VisualElement box = new VisualElement { name = "hero-screen-stat-initiative" };
+        box.style.width = new Length(33f, LengthUnit.Percent);
+        box.style.paddingLeft = 8f;
+        box.style.paddingRight = 8f;
+        box.style.paddingTop = 6f;
+        box.style.paddingBottom = 6f;
+        box.style.marginBottom = 4f;
+
+        Label caption = new Label("Инициатива");
+        caption.style.color = HeroScreenMuted;
+        caption.style.fontSize = 10f;
+        caption.pickingMode = PickingMode.Ignore;
+        box.Add(caption);
+
+        Label number = new Label(finalInitiative.ToString());
+        number.style.color = HeroScreenText;
+        number.style.fontSize = 18f;
+        number.style.unityFontStyleAndWeight = FontStyle.Bold;
+        number.pickingMode = PickingMode.Ignore;
+        box.Add(number);
+
+        box.RegisterCallback<PointerEnterEvent>(_ => ShowHeroScreenStatTooltip(box, "ИНИЦИАТИВА", explanation));
+        box.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenStatTooltip());
+
+        heroScreenStatsGrid.Add(box);
     }
 
     private void AddHeroScreenStat(string label, int value)

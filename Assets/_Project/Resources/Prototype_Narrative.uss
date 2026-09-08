@@ -155,3 +155,37 @@
 .narrative-dialogue-choice-exit {
     color: rgb(148, 146, 139);
 }
+
+.narrative-dialogue-choice-mechanic {
+    margin-top: -4px;
+    margin-bottom: 8px;
+    margin-left: 18px;
+    color: rgb(150, 145, 128);
+    font-size: 10px;
+    white-space: normal;
+}
+
+.narrative-dialogue-choice-disabled {
+    opacity: 0.55;
+}
+
+.narrative-dialogue-choice-hint {
+    margin-top: -4px;
+    margin-bottom: 8px;
+    margin-left: 18px;
+    color: rgb(158, 112, 92);
+    font-size: 10px;
+    white-space: normal;
+}
+
+.narrative-dialogue-history-check-result {
+    margin-left: 24px;
+    margin-bottom: 18px;
+    padding-left: 12px;
+    border-left-width: 2px;
+    border-left-color: rgb(74, 84, 74);
+    color: rgb(150, 168, 150);
+    font-size: 12px;
+    -unity-font-style: italic;
+    white-space: normal;
+}

@@ -57,6 +57,8 @@ public static class ExpeditionIncidentSystem
         }
     }
 
+    private const string RoadPredatorEncounterId = "road_predator";
+
     private static readonly Random Random = new Random();
     private static int nextOccurrenceId = 1;
 
@@ -151,7 +153,22 @@ public static class ExpeditionIncidentSystem
                 ExpeditionIncidentTone.Positive,
                 IncidentEffectKind.Route,
                 0,
-                -1)
+                -1),
+
+            // Единственный дорожный Encounter, подключённый к общему
+            // NarrativeCheckResolver (§15, §21 инструкции по качествам и
+            // проверкам) — вертикальный тест связки. Остальные происшествия
+            // выше сознательно не переписаны. SupplyDelta/RouteAdjustment
+            // здесь не используются: ApplyIncident разрешает это событие
+            // отдельным методом ApplyRoadPredatorEncounter.
+            new IncidentDefinition(
+                RoadPredatorEncounterId,
+                "Хищник у тропы",
+                "Тропа сужается между камней, и Чутьё подсказывает: здесь недавно кто-то был.",
+                ExpeditionIncidentTone.Mixed,
+                IncidentEffectKind.Route,
+                0,
+                0)
         };
 
     public static void ResolveAtScheduledCheck(
@@ -257,6 +274,9 @@ public static class ExpeditionIncidentSystem
         IncidentDefinition definition,
         int finishedDay)
     {
+        if (definition.Id == RoadPredatorEncounterId)
+            return ApplyRoadPredatorEncounter(state, definition, finishedDay);
+
         List<string> consequences = new List<string>();
 
         if (definition.EffectKind == IncidentEffectKind.Supply ||
@@ -297,6 +317,123 @@ public static class ExpeditionIncidentSystem
             };
 
         return occurrence;
+    }
+
+    // Единственное значимое отличие входа в этот Encounter (§15). Публичный
+    // и не зависящий от GameState/IncidentDefinition — легко тестируется
+    // напрямую, без обхода приватных типов через reflection.
+    public enum RoadPredatorEntryState
+    {
+        Unaware,
+        Aware,
+        Prepared
+    }
+
+    public static NarrativeCheckSpec BuildRoadPredatorDetectionCheck(string checkId)
+    {
+        return new NarrativeCheckSpec
+        {
+            CheckId = checkId ?? string.Empty,
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Instinct,
+            CompetencyId = NarrativeCompetencyIds.Fieldcraft,
+            Difficulty = NarrativeDifficulty.Ordinary
+        };
+    }
+
+    // Чутьё+Следопытство решает, каким состоянием начинается Encounter, а
+    // не появится ли он и не насколько он выгоден (§15): успех не гарантирует
+    // хороший исход, knows_the_way не гарантирует финальный успех, а
+    // naturalistBonus — это только дополнительное наблюдение в тексте,
+    // не механическое преимущество.
+    public static RoadPredatorEntryState ResolveRoadPredatorEntryState(
+        HeroProfileData hero,
+        NarrativeStateData narrativeState,
+        string checkId,
+        out bool naturalistBonus)
+    {
+        NarrativeEvaluationContext context = new NarrativeEvaluationContext(hero, narrativeState);
+        NarrativeCheckSpec detectionCheck = BuildRoadPredatorDetectionCheck(checkId);
+        NarrativeCheckMathBreakdown breakdown = NarrativeCheckResolver.ComputeBreakdown(detectionCheck, context);
+        bool detected = NarrativeCheckMath.PassiveBase + breakdown.Bonus >= detectionCheck.Difficulty;
+        naturalistBonus = detected && hero.HasTrait(NarrativeTraitIds.Naturalist);
+
+        if (!detected)
+            return RoadPredatorEntryState.Unaware;
+
+        return hero.HasTrait(NarrativeTraitIds.KnowsTheWay)
+            ? RoadPredatorEntryState.Prepared
+            : RoadPredatorEntryState.Aware;
+    }
+
+    private static ExpeditionIncidentOccurrence ApplyRoadPredatorEncounter(
+        GameState state,
+        IncidentDefinition definition,
+        int finishedDay)
+    {
+        int occurrenceId = nextOccurrenceId++;
+
+        CommanderData commander = state.ActiveExpedition != null
+            ? state.FindCommander(state.ActiveExpedition.CommanderId)
+            : null;
+        HeroProfileData hero = commander != null && commander.HeroProfile != null
+            ? commander.HeroProfile
+            : new HeroProfileData();
+        NarrativeStateData narrativeState = state.Narrative ?? new NarrativeStateData();
+
+        bool naturalistBonus;
+        RoadPredatorEntryState entryState = ResolveRoadPredatorEntryState(
+            hero,
+            narrativeState,
+            "road_predator_detection_" + finishedDay + "_" + occurrenceId,
+            out naturalistBonus);
+
+        List<string> consequences = new List<string>();
+        ExpeditionIncidentTone tone;
+
+        if (entryState == RoadPredatorEntryState.Unaware)
+        {
+            int supplyLoss = ApplySupplyDelta(state, -3);
+            string arrivalText;
+            int routeDelay = ApplyRouteAdjustment(state, definition.Id + "_unaware", definition.Title, 1, out arrivalText);
+            consequences.Add(FormatSupplyConsequence(supplyLoss));
+            if (routeDelay != 0)
+                consequences.Add(FormatRouteConsequence(routeDelay));
+            if (!string.IsNullOrWhiteSpace(arrivalText))
+                consequences.Add(arrivalText);
+            consequences.Add("Хищник бросается из зарослей раньше, чем отряд успевает понять, что не так.");
+            tone = ExpeditionIncidentTone.Negative;
+        }
+        else if (entryState == RoadPredatorEntryState.Prepared)
+        {
+            int supplyGain = ApplySupplyDelta(state, 2);
+            consequences.Add(FormatSupplyConsequence(supplyGain));
+            consequences.Add(
+                "Знание местных троп подсказывает, где зверь предпочитает выжидать — отряд обходит опасное место заранее и подбирает то, что хищник бросил у прежней добычи.");
+            tone = ExpeditionIncidentTone.Positive;
+        }
+        else
+        {
+            consequences.Add(
+                "Ты замечаешь примятую траву и запах зверя — отряд успевает перестроиться и отогнать хищника, не потеряв припасов.");
+            tone = ExpeditionIncidentTone.Mixed;
+        }
+
+        if (naturalistBonus)
+        {
+            consequences.Add(
+                "Натуралист в тебе успевает разглядеть больше: судя по следам, зверь молод и держится этих мест недавно — вряд ли он местный старожил.");
+        }
+
+        return new ExpeditionIncidentOccurrence
+        {
+            Id = occurrenceId,
+            Day = finishedDay,
+            Title = definition.Title,
+            Description = definition.Description,
+            ConsequenceText = string.Join(" ", consequences),
+            Tone = tone
+        };
     }
 
     private static int ApplySupplyDelta(GameState state, int requestedDelta)

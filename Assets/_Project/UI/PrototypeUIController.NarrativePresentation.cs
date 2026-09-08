@@ -10,7 +10,6 @@ public partial class PrototypeUIController
     private void RefreshNarrativePresentationFrame()
     {
         if (!IsNarrativeDialogueActive ||
-            narrativeDialogueSession == null ||
             narrativeHistoryContainer == null ||
             narrativeTextScroll == null)
         {
@@ -18,7 +17,7 @@ public partial class PrototypeUIController
             return;
         }
 
-        int historyCount = narrativeDialogueSession.History.Count;
+        int historyCount = narrativeHistory.Count;
         int renderedCount = narrativeHistoryContainer.childCount;
         if (historyCount <= 0 || renderedCount <= 0)
             return;
@@ -81,7 +80,8 @@ public partial class PrototypeUIController
             for (int i = 0; i < narrativeHistoryContainer.childCount; i++)
             {
                 VisualElement entry = narrativeHistoryContainer.ElementAt(i);
-                if (entry.ClassListContains("narrative-dialogue-history-player"))
+                if (entry.ClassListContains("narrative-dialogue-history-player") ||
+                    entry.ClassListContains("narrative-dialogue-history-check-result"))
                 {
                     UILayoutRuntimeApplier.ApplyTextStyle(entry, choicesDefinition, reference, actual);
                     continue;
@@ -98,6 +98,17 @@ public partial class PrototypeUIController
             for (int i = 0; i < narrativeChoicesContainer.childCount; i++)
             {
                 VisualElement choice = narrativeChoicesContainer.ElementAt(i);
+
+                // Вторичные строки (механика/подсказка недоступности) не
+                // являются кнопками ответа — у них собственный, более
+                // мелкий стиль из USS, который не должен перебиваться
+                // общим текстовым стилем варианта (§14).
+                if (choice.ClassListContains("narrative-dialogue-choice-mechanic") ||
+                    choice.ClassListContains("narrative-dialogue-choice-hint"))
+                {
+                    continue;
+                }
+
                 UILayoutRuntimeApplier.ApplyTextStyle(choice, choicesDefinition, reference, actual);
             }
         }

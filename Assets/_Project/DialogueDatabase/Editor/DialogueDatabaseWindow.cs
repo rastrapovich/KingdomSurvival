@@ -387,14 +387,14 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 DrawTextBlockKindPopup(kind);
                 EditorGUILayout.PropertyField(block.FindPropertyRelative("speakerIdOverride"), new GUIContent("Говорящий (переопределение)"));
                 EditorGUILayout.PropertyField(block.FindPropertyRelative("text"), new GUIContent("Текст"));
-                EditorGUILayout.PropertyField(block.FindPropertyRelative("conditions"), new GUIContent("Условия показа"), true);
+                DrawConditionGroup(block.FindPropertyRelative("conditions"), "Условия показа");
 
                 SerializedProperty hasPassiveCheck = block.FindPropertyRelative("hasPassiveCheck");
                 EditorGUILayout.PropertyField(hasPassiveCheck, new GUIContent("Есть пассивная проверка"));
                 if (hasPassiveCheck.boolValue)
-                    EditorGUILayout.PropertyField(block.FindPropertyRelative("passiveCheck"), new GUIContent("Пассивная проверка"), true);
+                    DrawCheckSpec(block.FindPropertyRelative("passiveCheck"), "Пассивная проверка");
 
-                EditorGUILayout.PropertyField(block.FindPropertyRelative("onRevealEffects"), new GUIContent("Эффекты при показе"), true);
+                DrawEffectsList(block.FindPropertyRelative("onRevealEffects"), "Эффекты при показе");
             }
             EditorGUILayout.EndVertical();
         }
@@ -421,27 +421,27 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.LabelField("Вид: " + ChoiceKindLabel(choiceKind), EditorStyles.miniLabel);
-            EditorGUILayout.PropertyField(choice.FindPropertyRelative("conditions"), new GUIContent("Условия показа"), true);
+            DrawConditionGroup(choice.FindPropertyRelative("conditions"), "Условия показа");
             if (choiceKind != DialogueChoiceKind.Normal || choice.FindPropertyRelative("conditions").FindPropertyRelative("Conditions").arraySize > 0)
                 DrawUnavailablePresentationPopup(choice.FindPropertyRelative("unavailablePresentation"));
 
             switch (choiceKind)
             {
                 case DialogueChoiceKind.Exit:
-                    EditorGUILayout.LabelField("Завершает разговор (EXIT).", EditorStyles.miniLabel);
+                    EditorGUILayout.LabelField("Завершает разговор (ВЫХОД).", EditorStyles.miniLabel);
                     break;
 
                 case DialogueChoiceKind.ActiveReturnable:
                 case DialogueChoiceKind.ActiveDecisive:
-                    EditorGUILayout.PropertyField(choice.FindPropertyRelative("check"), new GUIContent("Проверка"), true);
+                    DrawCheckSpec(choice.FindPropertyRelative("check"), "Проверка");
                     DrawNodeTargetPopup(choice.FindPropertyRelative("successNodeId"), nodes, "Узел при успехе");
                     DrawNodeTargetPopup(choice.FindPropertyRelative("failureNodeId"), nodes, "Узел при провале");
-                    EditorGUILayout.PropertyField(choice.FindPropertyRelative("successEffects"), new GUIContent("Эффекты успеха"), true);
-                    EditorGUILayout.PropertyField(choice.FindPropertyRelative("failureEffects"), new GUIContent("Эффекты провала"), true);
+                    DrawEffectsList(choice.FindPropertyRelative("successEffects"), "Эффекты успеха");
+                    DrawEffectsList(choice.FindPropertyRelative("failureEffects"), "Эффекты провала");
                     break;
 
                 default:
-                    endsDialogue.boolValue = EditorGUILayout.ToggleLeft("Завершает разговор (EXIT)", endsDialogue.boolValue);
+                    endsDialogue.boolValue = EditorGUILayout.ToggleLeft("Завершает разговор (ВЫХОД)", endsDialogue.boolValue);
                     if (endsDialogue.boolValue)
                         nextNodeId.stringValue = string.Empty;
                     else
@@ -524,6 +524,438 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             int next = EditorGUILayout.Popup("Если недоступен", selected, labels);
             if (next >= 0 && next < UnavailablePresentationValues.Length)
                 presentationProperty.enumValueIndex = (int)UnavailablePresentationValues[next];
+        }
+
+        // Условия показа (NarrativeConditionGroup/NarrativeCondition, Core)
+        // рисовались обычным PropertyField, поэтому Combinator/Type/имена
+        // полей и значения HeroQuality выходили на английском (см. запрос
+        // о русификации базы диалогов). Этот блок — единственное место, где
+        // условия рисуются, и используется и «Таблицей», и «Графом»
+        // (DrawChoice/DrawTextBlock общие для обоих режимов).
+
+        private static readonly NarrativeConditionCombinator[] CombinatorValues =
+            (NarrativeConditionCombinator[])Enum.GetValues(typeof(NarrativeConditionCombinator));
+
+        private static string CombinatorLabel(NarrativeConditionCombinator combinator)
+        {
+            switch (combinator)
+            {
+                case NarrativeConditionCombinator.All: return "Все условия (И)";
+                case NarrativeConditionCombinator.Any: return "Любое условие (ИЛИ)";
+                default: return combinator.ToString();
+            }
+        }
+
+        private static void DrawConditionCombinatorPopup(SerializedProperty combinatorProperty)
+        {
+            string[] labels = new string[CombinatorValues.Length];
+            int selected = 0;
+            for (int i = 0; i < CombinatorValues.Length; i++)
+            {
+                labels[i] = CombinatorLabel(CombinatorValues[i]);
+                if (combinatorProperty.enumValueIndex == (int)CombinatorValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("Оператор", selected, labels);
+            if (next >= 0 && next < CombinatorValues.Length)
+                combinatorProperty.enumValueIndex = (int)CombinatorValues[next];
+        }
+
+        private static readonly NarrativeConditionType[] ConditionTypeValues =
+            (NarrativeConditionType[])Enum.GetValues(typeof(NarrativeConditionType));
+
+        private static string ConditionTypeLabel(NarrativeConditionType type)
+        {
+            switch (type)
+            {
+                case NarrativeConditionType.FlagSet: return "Флаг установлен";
+                case NarrativeConditionType.KnowledgeKnown: return "Знание известно";
+                case NarrativeConditionType.RelationAtLeast: return "Отношение не меньше";
+                case NarrativeConditionType.RelationAtMost: return "Отношение не больше";
+                case NarrativeConditionType.CompanionPresent: return "Спутник присутствует";
+                case NarrativeConditionType.ItemPresent: return "Предмет есть";
+                case NarrativeConditionType.QualityAtLeast: return "Качество не меньше";
+                case NarrativeConditionType.CompetencyAtLeast: return "Компетенция не меньше";
+                case NarrativeConditionType.CheckSucceeded: return "Проверка пройдена";
+                case NarrativeConditionType.CheckFailed: return "Проверка провалена";
+                case NarrativeConditionType.CheckNotAttempted: return "Проверка ни разу не пройдена";
+                case NarrativeConditionType.TraitPresent: return "Особенность есть";
+                default: return type.ToString();
+            }
+        }
+
+        private static void DrawConditionTypePopup(SerializedProperty typeProperty)
+        {
+            string[] labels = new string[ConditionTypeValues.Length];
+            int selected = 0;
+            for (int i = 0; i < ConditionTypeValues.Length; i++)
+            {
+                labels[i] = ConditionTypeLabel(ConditionTypeValues[i]);
+                if (typeProperty.enumValueIndex == (int)ConditionTypeValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("Тип", selected, labels);
+            if (next >= 0 && next < ConditionTypeValues.Length)
+                typeProperty.enumValueIndex = (int)ConditionTypeValues[next];
+        }
+
+        private static readonly HeroQuality[] HeroQualityValues =
+            (HeroQuality[])Enum.GetValues(typeof(HeroQuality));
+
+        private static void DrawHeroQualityPopup(SerializedProperty qualityProperty, string label)
+        {
+            string[] labels = new string[HeroQualityValues.Length];
+            int selected = 0;
+            for (int i = 0; i < HeroQualityValues.Length; i++)
+            {
+                labels[i] = NarrativeQualityLabels.GetLabel(HeroQualityValues[i]);
+                if (qualityProperty.enumValueIndex == (int)HeroQualityValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup(label, selected, labels);
+            if (next >= 0 && next < HeroQualityValues.Length)
+                qualityProperty.enumValueIndex = (int)HeroQualityValues[next];
+        }
+
+        private static void DrawConditionGroup(SerializedProperty group, string label)
+        {
+            EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+
+            DrawConditionCombinatorPopup(group.FindPropertyRelative("Combinator"));
+
+            SerializedProperty conditions = group.FindPropertyRelative("Conditions");
+            for (int i = 0; i < conditions.arraySize; i++)
+            {
+                if (DrawCondition(conditions, i))
+                    break;
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("+ Условие", EditorStyles.miniButton, GUILayout.Width(110f)))
+                AddCondition(conditions);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUI.indentLevel--;
+        }
+
+        // Возвращает true, если условие было удалено — тогда вызывающий
+        // цикл должен остановиться в этом кадре (индексы после удаления
+        // сместились).
+        private static bool DrawCondition(SerializedProperty conditions, int index)
+        {
+            SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
+            SerializedProperty type = condition.FindPropertyRelative("Type");
+            SerializedProperty stringParam = condition.FindPropertyRelative("StringParam");
+            SerializedProperty qualityParam = condition.FindPropertyRelative("QualityParam");
+            SerializedProperty intParam = condition.FindPropertyRelative("IntParam");
+            SerializedProperty negate = condition.FindPropertyRelative("Negate");
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Условие " + (index + 1), EditorStyles.miniBoldLabel);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("×", GUILayout.Width(24f)))
+            {
+                conditions.DeleteArrayElementAtIndex(index);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+                return true;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            DrawConditionTypePopup(type);
+            NarrativeConditionType kind = (NarrativeConditionType)type.enumValueIndex;
+
+            switch (kind)
+            {
+                case NarrativeConditionType.QualityAtLeast:
+                    DrawHeroQualityPopup(qualityParam, "Качество");
+                    EditorGUILayout.PropertyField(intParam, new GUIContent("Не меньше"));
+                    break;
+
+                case NarrativeConditionType.CompetencyAtLeast:
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID компетенции"));
+                    EditorGUILayout.PropertyField(intParam, new GUIContent("Не меньше"));
+                    break;
+
+                case NarrativeConditionType.RelationAtLeast:
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID субъекта отношения"));
+                    EditorGUILayout.PropertyField(intParam, new GUIContent("Не меньше"));
+                    break;
+
+                case NarrativeConditionType.RelationAtMost:
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID субъекта отношения"));
+                    EditorGUILayout.PropertyField(intParam, new GUIContent("Не больше"));
+                    break;
+
+                case NarrativeConditionType.FlagSet:
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID флага"));
+                    break;
+
+                case NarrativeConditionType.KnowledgeKnown:
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID знания"));
+                    break;
+
+                case NarrativeConditionType.CompanionPresent:
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID спутника"));
+                    break;
+
+                case NarrativeConditionType.ItemPresent:
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID предмета"));
+                    break;
+
+                case NarrativeConditionType.CheckSucceeded:
+                case NarrativeConditionType.CheckFailed:
+                case NarrativeConditionType.CheckNotAttempted:
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID проверки"));
+                    break;
+
+                case NarrativeConditionType.TraitPresent:
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID особенности"));
+                    break;
+            }
+
+            EditorGUILayout.PropertyField(negate, new GUIContent("Инвертировать (НЕ)"));
+
+            EditorGUILayout.EndVertical();
+            return false;
+        }
+
+        private static void AddCondition(SerializedProperty conditions)
+        {
+            conditions.arraySize++;
+            SerializedProperty added = conditions.GetArrayElementAtIndex(conditions.arraySize - 1);
+            added.FindPropertyRelative("Type").enumValueIndex = 0;
+            added.FindPropertyRelative("StringParam").stringValue = string.Empty;
+            added.FindPropertyRelative("QualityParam").enumValueIndex = 0;
+            added.FindPropertyRelative("IntParam").intValue = 0;
+            added.FindPropertyRelative("Negate").boolValue = false;
+        }
+
+        // Проверка (NarrativeCheckSpec, Core) и эффекты (NarrativeEffect,
+        // Core) — та же проблема и тот же приём, что и с условиями: обычный
+        // PropertyField показывал английские имена полей/enum-констант.
+        // Общие для «Таблицы» и панели «СВОЙСТВА УЗЛА» в «Графе».
+
+        private static readonly NarrativeCheckKind[] CheckKindValues =
+            (NarrativeCheckKind[])Enum.GetValues(typeof(NarrativeCheckKind));
+
+        private static string CheckKindLabel(NarrativeCheckKind kind)
+        {
+            switch (kind)
+            {
+                case NarrativeCheckKind.Passive: return "Пассивная";
+                case NarrativeCheckKind.ActiveReturnable: return "Активная возвратная";
+                case NarrativeCheckKind.ActiveDecisive: return "Активная решающая";
+                default: return kind.ToString();
+            }
+        }
+
+        private static void DrawCheckKindPopup(SerializedProperty kindProperty)
+        {
+            string[] labels = new string[CheckKindValues.Length];
+            int selected = 0;
+            for (int i = 0; i < CheckKindValues.Length; i++)
+            {
+                labels[i] = CheckKindLabel(CheckKindValues[i]);
+                if (kindProperty.enumValueIndex == (int)CheckKindValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("Вид проверки", selected, labels);
+            if (next >= 0 && next < CheckKindValues.Length)
+                kindProperty.enumValueIndex = (int)CheckKindValues[next];
+        }
+
+        private static void DrawCheckSpec(SerializedProperty check, string label)
+        {
+            EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+
+            EditorGUILayout.PropertyField(check.FindPropertyRelative("CheckId"), new GUIContent("ID проверки"));
+            DrawCheckKindPopup(check.FindPropertyRelative("Kind"));
+            DrawHeroQualityPopup(check.FindPropertyRelative("Quality"), "Качество");
+            EditorGUILayout.PropertyField(
+                check.FindPropertyRelative("CompetencyId"),
+                new GUIContent("ID компетенции (пусто — не участвует)"));
+            EditorGUILayout.PropertyField(check.FindPropertyRelative("Difficulty"), new GUIContent("Сложность (9-23)"));
+
+            SerializedProperty modifierRules = check.FindPropertyRelative("ModifierRules");
+            EditorGUILayout.LabelField("Контекстные модификаторы", EditorStyles.miniBoldLabel);
+            for (int i = 0; i < modifierRules.arraySize; i++)
+            {
+                if (DrawModifierRule(modifierRules, i))
+                    break;
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("+ Модификатор", EditorStyles.miniButton, GUILayout.Width(130f)))
+                AddModifierRule(modifierRules);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUI.indentLevel--;
+        }
+
+        private static bool DrawModifierRule(SerializedProperty rules, int index)
+        {
+            SerializedProperty rule = rules.GetArrayElementAtIndex(index);
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Модификатор " + (index + 1), EditorStyles.miniBoldLabel);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("×", GUILayout.Width(24f)))
+            {
+                rules.DeleteArrayElementAtIndex(index);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+                return true;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.PropertyField(rule.FindPropertyRelative("SourceId"), new GUIContent("ID источника"));
+            EditorGUILayout.PropertyField(rule.FindPropertyRelative("Label"), new GUIContent("Подпись"));
+            EditorGUILayout.PropertyField(rule.FindPropertyRelative("Value"), new GUIContent("Значение"));
+            DrawConditionGroup(rule.FindPropertyRelative("Condition"), "Условие применения");
+
+            EditorGUILayout.EndVertical();
+            return false;
+        }
+
+        private static void AddModifierRule(SerializedProperty rules)
+        {
+            rules.arraySize++;
+            SerializedProperty added = rules.GetArrayElementAtIndex(rules.arraySize - 1);
+            added.FindPropertyRelative("SourceId").stringValue = string.Empty;
+            added.FindPropertyRelative("Label").stringValue = string.Empty;
+            added.FindPropertyRelative("Value").intValue = 0;
+            SerializedProperty condition = added.FindPropertyRelative("Condition");
+            condition.FindPropertyRelative("Combinator").enumValueIndex = 0;
+            condition.FindPropertyRelative("Conditions").ClearArray();
+        }
+
+        private static readonly NarrativeEffectType[] EffectTypeValues =
+            (NarrativeEffectType[])Enum.GetValues(typeof(NarrativeEffectType));
+
+        private static string EffectTypeLabel(NarrativeEffectType type)
+        {
+            switch (type)
+            {
+                case NarrativeEffectType.SetFlag: return "Установить флаг";
+                case NarrativeEffectType.ClearFlag: return "Снять флаг";
+                case NarrativeEffectType.AddKnowledge: return "Добавить знание";
+                case NarrativeEffectType.ChangeRelation: return "Изменить отношение";
+                case NarrativeEffectType.UnlockCheck: return "Разблокировать проверку";
+                case NarrativeEffectType.GrantTrait: return "Дать особенность";
+                case NarrativeEffectType.RemoveTrait: return "Убрать особенность";
+                default: return type.ToString();
+            }
+        }
+
+        private static void DrawEffectTypePopup(SerializedProperty typeProperty)
+        {
+            string[] labels = new string[EffectTypeValues.Length];
+            int selected = 0;
+            for (int i = 0; i < EffectTypeValues.Length; i++)
+            {
+                labels[i] = EffectTypeLabel(EffectTypeValues[i]);
+                if (typeProperty.enumValueIndex == (int)EffectTypeValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("Тип эффекта", selected, labels);
+            if (next >= 0 && next < EffectTypeValues.Length)
+                typeProperty.enumValueIndex = (int)EffectTypeValues[next];
+        }
+
+        private static string EffectStringParamLabel(NarrativeEffectType type)
+        {
+            switch (type)
+            {
+                case NarrativeEffectType.SetFlag:
+                case NarrativeEffectType.ClearFlag:
+                    return "ID флага";
+                case NarrativeEffectType.AddKnowledge:
+                    return "ID знания";
+                case NarrativeEffectType.ChangeRelation:
+                    return "ID субъекта отношения";
+                case NarrativeEffectType.UnlockCheck:
+                    return "ID блокируемой проверки";
+                case NarrativeEffectType.GrantTrait:
+                case NarrativeEffectType.RemoveTrait:
+                    return "ID особенности";
+                default:
+                    return "Параметр";
+            }
+        }
+
+        private static void DrawEffectsList(SerializedProperty effects, string label)
+        {
+            EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+
+            for (int i = 0; i < effects.arraySize; i++)
+            {
+                if (DrawEffect(effects, i))
+                    break;
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("+ Эффект", EditorStyles.miniButton, GUILayout.Width(110f)))
+                AddEffect(effects);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUI.indentLevel--;
+        }
+
+        private static bool DrawEffect(SerializedProperty effects, int index)
+        {
+            SerializedProperty effect = effects.GetArrayElementAtIndex(index);
+            SerializedProperty type = effect.FindPropertyRelative("Type");
+            SerializedProperty stringParam = effect.FindPropertyRelative("StringParam");
+            SerializedProperty intParam = effect.FindPropertyRelative("IntParam");
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Эффект " + (index + 1), EditorStyles.miniBoldLabel);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("×", GUILayout.Width(24f)))
+            {
+                effects.DeleteArrayElementAtIndex(index);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+                return true;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.PropertyField(
+                effect.FindPropertyRelative("EffectExecutionId"),
+                new GUIContent("ID применения (уникальный)"));
+            DrawEffectTypePopup(type);
+            NarrativeEffectType kind = (NarrativeEffectType)type.enumValueIndex;
+            EditorGUILayout.PropertyField(stringParam, new GUIContent(EffectStringParamLabel(kind)));
+            if (kind == NarrativeEffectType.ChangeRelation)
+                EditorGUILayout.PropertyField(intParam, new GUIContent("Изменение (дельта)"));
+
+            EditorGUILayout.EndVertical();
+            return false;
+        }
+
+        private static void AddEffect(SerializedProperty effects)
+        {
+            effects.arraySize++;
+            SerializedProperty added = effects.GetArrayElementAtIndex(effects.arraySize - 1);
+            added.FindPropertyRelative("EffectExecutionId").stringValue = string.Empty;
+            added.FindPropertyRelative("Type").enumValueIndex = 0;
+            added.FindPropertyRelative("StringParam").stringValue = string.Empty;
+            added.FindPropertyRelative("IntParam").intValue = 0;
         }
 
         private void DrawStartNodePopup(SerializedProperty startNodeId, SerializedProperty nodes)

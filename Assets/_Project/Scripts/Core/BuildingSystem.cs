@@ -484,7 +484,8 @@ public static class BuildingSystem
                 fighterName,
                 "Ополченец",
                 1,
-                2));
+                2,
+                "militia"));
 
         runtime.Notices.Enqueue(
             "Казармы подготовили нового бойца: " + fighterName +

@@ -42,18 +42,25 @@ public class FighterData
     public int Level;
     public int DefensePower;
 
+    // Id записи в UnitDatabase (например "guard", "archer"), по которому
+    // GameState.UnitStatsProvider ищет реальные боевые характеристики.
+    // Пусто — значит моста для этого бойца ещё нет, используется DefensePower.
+    public string UnitTypeId;
+
     public FighterData(
         string id,
         string name,
         string role,
         int level,
-        int defensePower)
+        int defensePower,
+        string unitTypeId = null)
     {
         Id = id;
         Name = name;
         Role = role;
         Level = level;
         DefensePower = defensePower;
+        UnitTypeId = unitTypeId;
     }
 }
 
@@ -192,6 +199,11 @@ public class GameState
     private const string RouteWaypointId = "__route_waypoint";
     public const int ExpeditionFighterSlots = 4;
 
+    // Внешний мост к реальным боевым характеристикам (UnitDatabase/BattleSandbox).
+    // Основная игра назначает его при старте; без назначения все расчёты
+    // защиты остаются на legacy-поле FighterData.DefensePower.
+    public static IUnitStatsProvider UnitStatsProvider { get; set; }
+
     public int WorldSeed;
     public int Day;
     public int Gold;
@@ -242,16 +254,18 @@ public class GameState
         HasActiveExpedition &&
         ActiveExpedition.PendingDecision != null;
 
-    // Ниже сохранены только совместимые прототипные агрегаты старого UI.
-    // Они НЕ являются утверждённой системой защиты поселения и не используются
-    // удалённым стратегическим BattleSystem.
+    // Ниже сохранены совместимые прототипные агрегаты старого UI. Они НЕ
+    // являются утверждённой системой защиты поселения. Значение по каждому
+    // бойцу берётся из UnitStatsProvider (реальные данные UnitDatabase), если
+    // у бойца задан UnitTypeId и провайдер назначен; иначе — из legacy
+    // FighterData.DefensePower.
     public int TotalArmyDefensePower
     {
         get
         {
             int total = 0;
             foreach (FighterData fighter in Fighters)
-                total += Math.Max(0, fighter.DefensePower);
+                total += GetFighterDefensePower(fighter);
             return total;
         }
     }
@@ -281,7 +295,7 @@ public class GameState
             foreach (FighterData fighter in Fighters)
             {
                 if (!IsFighterInActiveExpedition(fighter.Id))
-                    total += Math.Max(0, fighter.DefensePower);
+                    total += GetFighterDefensePower(fighter);
             }
             return total;
         }
@@ -365,13 +379,14 @@ public class GameState
 
         Fighters = new List<FighterData>
         {
-            // DefensePower сохранён только как legacy-поле прототипного UI.
-            // Финальные боевые характеристики должны идти из UnitDatabase/BattleSandbox.
-            new FighterData("garrick", "Гаррик", "Гвардеец", 1, 3),
-            new FighterData("edric", "Эдрик", "Лучник", 1, 2),
-            new FighterData("marta", "Марта", "Лекарь", 1, 1),
-            new FighterData("torvin", "Торвин", "Копейщик", 1, 3),
-            new FighterData("agnessa", "Агнесса", "Разведчик", 1, 2)
+            // DefensePower остаётся как fallback для legacy-UI. UnitTypeId
+            // указывает на роль в UnitDatabase ("guard"/"archer"/...), откуда
+            // GameState.UnitStatsProvider берёт настоящие боевые характеристики.
+            new FighterData("garrick", "Гаррик", "Гвардеец", 1, 3, "guard"),
+            new FighterData("edric", "Эдрик", "Лучник", 1, 2, "archer"),
+            new FighterData("marta", "Марта", "Лекарь", 1, 1, "healer"),
+            new FighterData("torvin", "Торвин", "Копейщик", 1, 3, "spearman"),
+            new FighterData("agnessa", "Агнесса", "Разведчик", 1, 2, "scout")
         };
 
         List<LocationData> locationPool = new List<LocationData>
@@ -509,9 +524,24 @@ public class GameState
 
             FighterData fighter = FindFighter(fighterId);
             if (fighter != null)
-                total += Math.Max(0, fighter.DefensePower);
+                total += GetFighterDefensePower(fighter);
         }
         return total;
+    }
+
+    private static int GetFighterDefensePower(FighterData fighter)
+    {
+        if (fighter == null)
+            return 0;
+
+        if (UnitStatsProvider != null &&
+            !string.IsNullOrWhiteSpace(fighter.UnitTypeId) &&
+            UnitStatsProvider.TryGetCombatStats(fighter.UnitTypeId, out UnitCombatStats stats))
+        {
+            return Math.Max(0, stats.Defense);
+        }
+
+        return Math.Max(0, fighter.DefensePower);
     }
 
     public List<string> GetCommanderNames()

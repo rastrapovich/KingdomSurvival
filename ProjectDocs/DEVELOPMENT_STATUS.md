@@ -1,6 +1,6 @@
 # Kingdom Survival — Development Status
 
-Последнее обновление: 2026-09-07
+Последнее обновление: 2026-09-08
 
 > Технический журнал фактически реализованного состояния Unity-проекта и зафиксированных проектных решений.
 >
@@ -1557,3 +1557,29 @@ Unity-код, сцены, UXML/USS, ScriptableObject-данные, `Packages` и
 - следующий практический шаг остаётся контентным: конкретный герой, нормальная жизнь Дома и первые реальные сцены `«Дома на чужой воде»`; минимальная архитектура проектируется только после их проверки.
 
 Целевой commit: `docs: закрепить контекстную Encounter-модель`.
+
+---
+
+## Техническая база моста GameState ⇄ UnitDatabase — 08.09.2026
+
+Реализована только техническая база связи гарнизона кампании с настоящими боевыми характеристиками из `UnitDatabase`. Полный переход `кампания → BattleSandbox → результат боя → кампания` (открытый пункт №29 канона) сознательно не заполнялся: игровые решения о том, когда запускается бой и что происходит при поражении, остаются проектным вопросом.
+
+### Фактически сделано
+
+- в `KingdomSurvival.Core` (без Unity-зависимостей) добавлены нейтральная структура `UnitCombatStats` и интерфейс `IUnitStatsProvider` (`Assets/_Project/Scripts/Core/UnitCombatStats.cs`);
+- `GameState` получил статический мост `GameState.UnitStatsProvider`: если он назначен и у бойца задан `FighterData.UnitTypeId`, агрегаты `TotalArmyDefensePower`, `GarrisonDefensePower` и `CalculateDefensePower` берут `Defense` из `UnitDatabase`; без провайдера или без `UnitTypeId` поведение не меняется — используется legacy-поле `DefensePower`;
+- добавлен `UnitTypeId` пяти стартовым бойцам гарнизона (`garrick→guard`, `edric→archer`, `marta→healer`, `torvin→spearman`, `agnessa→scout`) и новобранцам казармы (`→militia`) — эти роли уже существовали как записи `UnitDatabase` и совпадают по русским названиям ролей;
+- в `KingdomSurvival.UnitDatabase` (Unity-слой) добавлен `UnitDatabaseStatsProvider : IUnitStatsProvider`, читающий `UnitDatabaseAsset` из `Resources`; сборка `KingdomSurvival.UnitDatabase.asmdef` подключена к `KingdomSurvival.Core`;
+- `PrototypeUIController` при `OnEnable` назначает `GameState.UnitStatsProvider = new UnitDatabaseStatsProvider()` до `StartNewGame()`, так что основная сцена реально использует базу существ/бойцов, а не тестовые данные;
+- постоянный герой-командир (`CommanderData`) мост пока не получил — для него в `UnitDatabase` нет записи, а его боевые характеристики канон явно относит к нерешённому пункту №29.
+
+### Что намеренно не сделано
+
+- не добавлен запуск `BattleSandbox` из основной кампании (по локациям, происшествиям или Encounter) и не спроектирован возврат результата боя (HP/ранения/смерть/трофеи) в `GameState`;
+- не изменены `BattleSandbox` и `SandboxUnitDatabaseAdapter` — сэндбокс остаётся отдельной сценой на своих тестовых данных;
+- не добавлены новые записи существ или бойцов в `KingdomSurvivalUnits.asset`;
+- `DefensePower` не удалён из `FighterData`: он остаётся легитимным fallback, а не мёртвым кодом.
+
+### Проверка и ограничения
+
+В подключённом окружении нет Unity Editor, поэтому C# compilation и Unity Test Runner здесь не запускались. После Pull нужно дождаться компиляции, проверить Console на ошибки сборки (в первую очередь — новую ссылку `KingdomSurvival.UnitDatabase → KingdomSurvival.Core` в asmdef) и вручную сверить в инспекторе, что `TotalArmyDefensePower`/`GarrisonDefensePower` в `Prototype_Main` действительно меняются вместе со значениями `defense` в `KingdomSurvivalUnits.asset`.

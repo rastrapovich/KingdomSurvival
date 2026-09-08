@@ -131,6 +131,12 @@ public partial class PrototypeUIController : MonoBehaviour
 
         reportHistoryLabel.enableRichText = true;
 
+        // Мост кампании с базой существ/бойцов: боевые агрегаты GameState
+        // (TotalArmyDefensePower и т.п.) начинают читать настоящие
+        // характеристики из UnitDatabase вместо legacy-полей прототипа.
+        if (GameState.UnitStatsProvider == null)
+            GameState.UnitStatsProvider = new KingdomSurvival.UnitDatabase.UnitDatabaseStatsProvider();
+
         CreateDecisionChoiceButtons();
         RegisterCallbacks();
         StartNewGame();

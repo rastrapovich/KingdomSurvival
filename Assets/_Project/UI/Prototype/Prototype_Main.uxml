@@ -41,7 +41,6 @@
                                 <ui:Button text="" class="persistent-commander-button persistent-commander-empty" />
                             </ui:VisualElement>
                             <ui:VisualElement class="persistent-commander-button-row">
-                                <ui:Button name="persistent-commander-army-button" text="АРМИЯ" class="persistent-commander-button persistent-commander-army-button" />
                                 <ui:Button name="persistent-commander-expedition-button" text="ЭКСПЕДИЦИЯ" class="persistent-commander-button persistent-commander-expedition-button" />
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -66,59 +65,6 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:ScrollView>
-                    </ui:VisualElement>
-
-                    <ui:VisualElement name="army-screen" class="game-screen shell-content-screen">
-                        <ui:VisualElement class="panel army-panel shell-content-panel army-stable-panel">
-                            <ui:Label text="АРМИЯ" class="panel-title army-legacy-hidden" />
-                            <ui:Label text="Командир, бойцы и походные запасы единственной армии" class="panel-description army-legacy-hidden" />
-                            <ui:VisualElement class="commander-supply-row army-top-row">
-                                <ui:VisualElement class="commander-profile-column army-commander-block">
-                                    <ui:Label text="КОМАНДИР" class="section-title commander-section-title" />
-                                    <ui:VisualElement class="commander-image-placeholder">
-                                        <ui:Label text="ИЗОБРАЖЕНИЕ КОМАНДИРА" class="commander-image-placeholder-text" />
-                                    </ui:VisualElement>
-                                    <ui:DropdownField name="commander-dropdown" label="Командир" class="commander-dropdown" />
-                                    <ui:Label name="commander-detail-label" text="Командир пока не выбран" class="commander-detail" />
-                                </ui:VisualElement>
-
-                                <ui:VisualElement name="journey-summary-block" class="supply-block journey-summary-block">
-                                    <ui:Label text="СВОДКА ПОХОДА" class="supply-title" />
-                                    <ui:ScrollView name="journey-summary-scroll" class="journey-summary-scroll">
-                                        <ui:VisualElement name="journey-summary-list" class="journey-summary-list" />
-                                    </ui:ScrollView>
-                                </ui:VisualElement>
-
-                                <ui:VisualElement class="supply-block military-supply-block">
-                                    <ui:Label text="ЗАПАСЫ ОТРЯДА" class="supply-title" />
-                                    <ui:Label text="ЗОЛОТО" class="supply-subtitle" />
-                                    <ui:VisualElement class="supply-controls">
-                                        <ui:Button name="army-gold-minus-button" text="−" class="supply-step-button" />
-                                        <ui:Label name="army-gold-label" text="0" class="supply-value" />
-                                        <ui:Button name="army-gold-plus-button" text="+" class="supply-step-button" />
-                                    </ui:VisualElement>
-                                    <ui:Label text="СНАБЖЕНИЕ" class="supply-subtitle" />
-                                    <ui:VisualElement class="supply-controls">
-                                        <ui:Button name="supply-minus-button" text="−" class="supply-step-button" />
-                                        <ui:Label name="supply-value-label" text="0" class="supply-value" />
-                                        <ui:Button name="supply-plus-button" text="+" class="supply-step-button" />
-                                    </ui:VisualElement>
-                                    <ui:Label name="supply-consumption-label" text="Расход: —" class="supply-note" />
-                                    <ui:Label name="supply-days-label" text="Хватит на: —" class="supply-note" />
-                                </ui:VisualElement>
-                            </ui:VisualElement>
-
-                            <ui:Label name="army-status-label" text="Статус армии: в столице" class="status-label army-legacy-hidden" />
-                            <ui:Label name="fighter-selection-hint-label" text="Перетаскивайте бойцов между гарнизонами." class="fighter-selection-hint army-legacy-hidden" />
-                            <ui:VisualElement class="army-transfer-board">
-                                <ui:VisualElement name="capital-garrison-drop-zone" class="army-roster-drop-zone capital-garrison-zone">
-                                    <ui:Label text="ГАРНИЗОН СТОЛИЦЫ" class="army-roster-title" />
-                                    <ui:Label name="capital-garrison-summary-label" text="5 бойцов · оборона 11/11" class="army-roster-summary army-aux-hidden" />
-                                    <ui:VisualElement name="capital-garrison-list" class="army-roster-list" />
-                                    <ui:Label name="capital-garrison-empty-label" text="СТОЛИЦА ОСТАНЕТСЯ БЕЗ ГАРНИЗОНА" class="army-roster-empty-label army-roster-empty-warning army-aux-hidden" />
-                                </ui:VisualElement>
-                            </ui:VisualElement>
-                        </ui:VisualElement>
                     </ui:VisualElement>
 
                     <ui:VisualElement name="expeditions-screen" class="game-screen shell-content-screen">
@@ -167,21 +113,12 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
 
-                <ui:VisualElement name="persistent-commander-garrison-host" class="persistent-commander-garrison-host">
-                    <ui:VisualElement name="commander-garrison-drop-zone" class="army-roster-drop-zone commander-garrison-zone">
-                        <ui:Label text="ГАРНИЗОН КОМАНДИРА" class="army-roster-title" />
-                        <ui:Label name="commander-garrison-summary-label" text="0 бойцов · сила 0" class="army-roster-summary army-aux-hidden" />
-                        <ui:VisualElement name="commander-garrison-list" class="army-roster-list" />
-                        <ui:Label name="commander-garrison-empty-label" text="ПЕРЕТАЩИТЕ БОЙЦОВ СЮДА" class="army-roster-empty-label army-aux-hidden" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <ui:VisualElement class="shell-bottom-bar">
             <ui:VisualElement class="navigation-bar shell-navigation-bar">
                 <ui:Button name="nav-capital-button" text="Столица" tooltip="Столица" class="nav-button shell-nav-button nav-capital" />
-                <ui:Button name="nav-army-button" text="Армия" tooltip="Армия" class="nav-button shell-nav-button nav-army" />
                 <ui:Button name="nav-expeditions-button" text="Экспедиция" tooltip="Экспедиции" class="nav-button shell-nav-button nav-expedition" />
                 <ui:Button name="nav-hero-button" text="Герой" tooltip="Экран героя: состав похода, характеристики, снаряжение" class="nav-button shell-nav-button nav-hero" />
             </ui:VisualElement>

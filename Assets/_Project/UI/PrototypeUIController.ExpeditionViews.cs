@@ -257,12 +257,6 @@ public partial class PrototypeUIController
         float popupHeight = 322f;
         float bottomLimit = screenBounds.height - 90f;
 
-        if (persistentCommanderGarrisonHost != null)
-        {
-            Rect garrisonBounds = persistentCommanderGarrisonHost.worldBound;
-            bottomLimit = garrisonBounds.yMin - screenBounds.y - 7f;
-        }
-
         float top = bottomLimit - popupHeight;
         top = Mathf.Clamp(
             top,

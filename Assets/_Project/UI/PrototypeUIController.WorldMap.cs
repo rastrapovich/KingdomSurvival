@@ -205,13 +205,6 @@ public partial class PrototypeUIController
 
         if (!gameState.HasActiveExpedition)
         {
-            if (selectedFighterIds.Count == 0)
-            {
-                AddReport(
-                    "Сначала перенесите бойцов в гарнизон командира.");
-                return;
-            }
-
             changed =
                 gameState.TryStartExpeditionToMapPoint(
                     targetXPercent,

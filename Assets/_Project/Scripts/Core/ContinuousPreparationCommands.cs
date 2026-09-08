@@ -50,10 +50,10 @@ public static class ContinuousPreparationCommands
             }
         }
 
-        if (requestedIds.Count != GameState.ExpeditionFighterSlots)
+        if (requestedIds.Count > GameState.ExpeditionFighterSlots)
         {
             resultMessage =
-                "Подготовленный поход должен содержать ровно " +
+                "В подготовленный поход можно взять не больше " +
                 GameState.ExpeditionFighterSlots +
                 " обычных бойцов. Командир входит автоматически.";
             return false;

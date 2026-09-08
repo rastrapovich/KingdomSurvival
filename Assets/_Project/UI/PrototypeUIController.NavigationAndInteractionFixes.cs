@@ -4,16 +4,7 @@ using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
-    private const int AcceleratedSupplyInitialDelayMs = 360;
-
     private bool navigationAndInteractionFixesInitialized;
-    private Button acceleratedSupplyHoldButton;
-    private int acceleratedSupplyPointerId = -1;
-    private int acceleratedSupplyDelta;
-    private int acceleratedSupplyRepeatCount;
-    private bool acceleratedSupplyRepeated;
-    private IVisualElementScheduledItem acceleratedSupplySchedule;
-    private Vector2 latestPortraitDragPointerPosition;
 
     private readonly Dictionary<string, Button> quickLocationActionButtons =
         new Dictionary<string, Button>();
@@ -46,9 +37,7 @@ public partial class PrototypeUIController
             gameState == null ||
             navExpeditionsButton == null ||
             persistentCommanderExpeditionButton == null ||
-            quickExpeditionPopup == null ||
-            supplyMinusButton == null ||
-            supplyPlusButton == null)
+            quickExpeditionPopup == null)
         {
             ScheduleNavigationAndInteractionFixesRetry();
             return;
@@ -56,11 +45,6 @@ public partial class PrototypeUIController
 
         ApplyMapAndLocationsLabels();
         EnsureQuickLocationActionButtons();
-        RegisterAcceleratedSupplyInput();
-
-        interfaceRoot.RegisterCallback<PointerMoveEvent>(
-            OnPortraitDragGhostPointerMove,
-            TrickleDown.TrickleDown);
 
         quickExpeditionPopup.schedule
             .Execute(RefreshQuickLocationActionButtons)
@@ -219,8 +203,8 @@ public partial class PrototypeUIController
             if (!hasExpedition)
             {
                 button.text = "ОТПРАВИТЬ";
-                button.tooltip = "Отправить отряд к этой локации.";
-                button.SetEnabled(selectedFighterIds.Count > 0);
+                button.tooltip = "Отправить героя (и выбранных бойцов) к этой локации.";
+                button.SetEnabled(true);
                 continue;
             }
 
@@ -296,194 +280,4 @@ public partial class PrototypeUIController
         RefreshQuickLocationActionButtons();
     }
 
-    private void OnPortraitDragGhostPointerMove(PointerMoveEvent evt)
-    {
-        if (stableDraggedCard == null)
-            return;
-
-        latestPortraitDragPointerPosition = evt.position;
-        interfaceRoot.schedule
-            .Execute(ApplyPortraitDragGhostGeometry)
-            .ExecuteLater(1);
-    }
-
-    private void ApplyPortraitDragGhostGeometry()
-    {
-        if (stableDragGhost == null || stableDraggedCard == null)
-            return;
-
-        float width = stableDraggedCard.resolvedStyle.width;
-        float height = stableDraggedCard.resolvedStyle.height;
-
-        if (float.IsNaN(width) || width < 20f)
-            width = 76f;
-        if (float.IsNaN(height) || height < 20f)
-            height = 112f;
-
-        stableDragGhost.style.width = width;
-        stableDragGhost.style.height = height;
-        stableDragGhost.style.left = latestPortraitDragPointerPosition.x - width * 0.5f;
-        stableDragGhost.style.top = latestPortraitDragPointerPosition.y - height * 0.5f;
-    }
-
-    private void RegisterAcceleratedSupplyInput()
-    {
-        interfaceRoot.RegisterCallback<PointerDownEvent>(
-            OnAcceleratedSupplyPointerDown,
-            TrickleDown.TrickleDown);
-        interfaceRoot.RegisterCallback<PointerUpEvent>(
-            OnAcceleratedSupplyPointerUp,
-            TrickleDown.TrickleDown);
-        interfaceRoot.RegisterCallback<PointerCaptureOutEvent>(
-            OnAcceleratedSupplyPointerCaptureOut,
-            TrickleDown.TrickleDown);
-    }
-
-    private void OnAcceleratedSupplyPointerDown(PointerDownEvent evt)
-    {
-        if (evt.button != 0)
-            return;
-
-        Button button = FindSupplyButton(evt.target as VisualElement);
-        if (button == null)
-            return;
-
-        // Перехватываем событие раньше старого Button/Clickable и старых
-        // supply-hold callbacks. Так короткий клик и удержание имеют ровно один
-        // источник истины и не могут сработать дважды.
-        evt.StopImmediatePropagation();
-
-        if (isGameOver || gameState == null || !gameState.CanAdjustArmySupply)
-            return;
-
-        int delta = button == supplyPlusButton ? 1 : -1;
-        bool canTransfer = delta > 0 ? gameState.Food > 0 : gameState.ArmySupply > 0;
-        if (!canTransfer)
-            return;
-
-        StopAcceleratedSupplyHold();
-        acceleratedSupplyHoldButton = button;
-        acceleratedSupplyPointerId = evt.pointerId;
-        acceleratedSupplyDelta = delta;
-        acceleratedSupplyRepeatCount = 0;
-        acceleratedSupplyRepeated = false;
-
-        if (!interfaceRoot.HasPointerCapture(evt.pointerId))
-            interfaceRoot.CapturePointer(evt.pointerId);
-
-        ScheduleAcceleratedSupplyStep(AcceleratedSupplyInitialDelayMs);
-    }
-
-    private void OnAcceleratedSupplyPointerUp(PointerUpEvent evt)
-    {
-        if (acceleratedSupplyHoldButton == null ||
-            evt.pointerId != acceleratedSupplyPointerId)
-        {
-            return;
-        }
-
-        evt.StopImmediatePropagation();
-
-        if (!acceleratedSupplyRepeated)
-            TransferAcceleratedSupplyOnce();
-
-        StopAcceleratedSupplyHold();
-    }
-
-    private void OnAcceleratedSupplyPointerCaptureOut(PointerCaptureOutEvent evt)
-    {
-        if (acceleratedSupplyHoldButton == null)
-            return;
-
-        StopAcceleratedSupplyHold();
-    }
-
-    private Button FindSupplyButton(VisualElement target)
-    {
-        VisualElement current = target;
-        while (current != null && current != interfaceRoot)
-        {
-            if (current == supplyPlusButton)
-                return supplyPlusButton;
-            if (current == supplyMinusButton)
-                return supplyMinusButton;
-            current = current.parent;
-        }
-        return null;
-    }
-
-    private void ScheduleAcceleratedSupplyStep(int delayMs)
-    {
-        if (acceleratedSupplyHoldButton == null || acceleratedSupplyDelta == 0)
-            return;
-
-        acceleratedSupplySchedule =
-            interfaceRoot.schedule.Execute(PerformAcceleratedSupplyStep);
-        acceleratedSupplySchedule.ExecuteLater(delayMs);
-    }
-
-    private void PerformAcceleratedSupplyStep()
-    {
-        if (acceleratedSupplyHoldButton == null ||
-            gameState == null ||
-            isGameOver ||
-            !gameState.CanAdjustArmySupply)
-        {
-            StopAcceleratedSupplyHold();
-            return;
-        }
-
-        bool canTransfer = acceleratedSupplyDelta > 0
-            ? gameState.Food > 0
-            : gameState.ArmySupply > 0;
-        if (!canTransfer)
-        {
-            StopAcceleratedSupplyHold();
-            return;
-        }
-
-        TransferAcceleratedSupplyOnce();
-        acceleratedSupplyRepeated = true;
-        acceleratedSupplyRepeatCount++;
-
-        int nextDelay = acceleratedSupplyRepeatCount < 5
-            ? 170
-            : acceleratedSupplyRepeatCount < 14
-                ? 95
-                : 50;
-        ScheduleAcceleratedSupplyStep(nextDelay);
-    }
-
-    private void TransferAcceleratedSupplyOnce()
-    {
-        if (gameState == null || acceleratedSupplyDelta == 0)
-            return;
-
-        if (acceleratedSupplyDelta > 0)
-            gameState.TryAddArmySupply();
-        else
-            gameState.TryRemoveArmySupply();
-
-        RefreshStableResourceUi();
-    }
-
-    private void StopAcceleratedSupplyHold()
-    {
-        if (acceleratedSupplySchedule != null)
-            acceleratedSupplySchedule.Pause();
-
-        if (interfaceRoot != null &&
-            acceleratedSupplyPointerId >= 0 &&
-            interfaceRoot.HasPointerCapture(acceleratedSupplyPointerId))
-        {
-            interfaceRoot.ReleasePointer(acceleratedSupplyPointerId);
-        }
-
-        acceleratedSupplySchedule = null;
-        acceleratedSupplyHoldButton = null;
-        acceleratedSupplyPointerId = -1;
-        acceleratedSupplyDelta = 0;
-        acceleratedSupplyRepeatCount = 0;
-        acceleratedSupplyRepeated = false;
-    }
 }

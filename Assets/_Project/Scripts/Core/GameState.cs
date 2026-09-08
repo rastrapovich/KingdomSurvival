@@ -226,7 +226,9 @@ public class GameState
     public int DailyFoodIncome => 7;
     public int DailyFoodConsumption => Population;
 
-    // Канонический поход: командир + ровно четыре обычных бойца.
+    // Канонический поход: командир + от 0 до ExpeditionFighterSlots бойцов.
+    // Без активной экспедиции возвращается расход на максимальный состав —
+    // это оценка "худшего случая" для отображения запаса снабжения.
     public int ExpeditionSupplyConsumption
     {
         get
@@ -605,14 +607,6 @@ public class GameState
         if (HasActiveExpedition)
         {
             resultMessage = "Нельзя отправить вторую экспедицию: один поход уже активен.";
-            return false;
-        }
-
-        if (Fighters == null || Fighters.Count < ExpeditionFighterSlots)
-        {
-            resultMessage =
-                "Для похода нужны командир и ровно " + ExpeditionFighterSlots +
-                " доступных бойца.";
             return false;
         }
 
@@ -1253,15 +1247,22 @@ public class GameState
         return "Центральные земли";
     }
 
+    // Канонический состав похода — командир и от 0 до 4 бойцов
+    // (KINGDOM_SURVIVAL_GAME_CONCEPT_CANON v1.25): герой может уйти один.
     private bool ValidateExpeditionFighters(
         List<string> selectedFighterIds,
         out string resultMessage)
     {
-        if (selectedFighterIds == null ||
-            selectedFighterIds.Count != ExpeditionFighterSlots)
+        if (selectedFighterIds == null)
+        {
+            resultMessage = "Не удалось определить состав похода.";
+            return false;
+        }
+
+        if (selectedFighterIds.Count > ExpeditionFighterSlots)
         {
             resultMessage =
-                "В поход нужно выбрать ровно " + ExpeditionFighterSlots +
+                "В поход можно взять не больше " + ExpeditionFighterSlots +
                 " бойцов. Командир входит в отряд автоматически и занимает отдельное место.";
             return false;
         }

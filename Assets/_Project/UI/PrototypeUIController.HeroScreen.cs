@@ -43,6 +43,15 @@ public partial class PrototypeUIController
     private Label heroScreenLevelLabel;
     private VisualElement heroScreenExperienceFill;
     private Label heroScreenExperienceLabel;
+    private Label heroScreenArmyGoldLabel;
+    private Button heroScreenArmyGoldMinusButton;
+    private Button heroScreenArmyGoldPlusButton;
+    private Label heroScreenSupplyValueLabel;
+    private Button heroScreenSupplyMinusButton;
+    private Button heroScreenSupplyPlusButton;
+    private Label heroScreenSupplyConsumptionLabel;
+    private Label heroScreenSupplyDaysLabel;
+
     private VisualElement heroScreenUnitCard;
     private VisualElement heroScreenUnitCardDimmer;
     private VisualElement heroScreenStatTooltip;
@@ -139,7 +148,32 @@ public partial class PrototypeUIController
         columns.Add(BuildHeroScreenRightColumn());
 
         heroScreenOverlay.Add(BuildHeroScreenRosterBar());
+        heroScreenOverlay.Add(BuildHeroScreenJourneySummaryPanel());
         BuildHeroScreenUnitCard();
+    }
+
+    // Перенесено с удалённого экрана «Армия»: тот же журнал происшествий и
+    // решений похода (PrototypeUIController.JourneySummary.cs), только его
+    // контейнеры («journey-summary-block/-scroll/-list») теперь строятся
+    // здесь — JourneySummary.cs находит их по тем же именам через Q<>().
+    private VisualElement BuildHeroScreenJourneySummaryPanel()
+    {
+        VisualElement panel = CreateHeroScreenPanel("journey-summary-block", "СВОДКА ПОХОДА");
+        panel.style.marginTop = 10f;
+        panel.style.marginBottom = 0f;
+        panel.style.flexShrink = 0f;
+        panel.style.height = 150f;
+
+        ScrollView scroll = new ScrollView { name = "journey-summary-scroll" };
+        scroll.style.flexGrow = 1f;
+        scroll.style.minHeight = 0f;
+
+        VisualElement list = new VisualElement { name = "journey-summary-list" };
+        list.style.width = Length.Percent(100f);
+        scroll.Add(list);
+
+        panel.Add(scroll);
+        return panel;
     }
 
     private VisualElement BuildHeroScreenHeader()
@@ -204,7 +238,111 @@ public partial class PrototypeUIController
         states.Add(heroScreenStatesRow);
         column.Add(states);
 
+        column.Add(BuildHeroScreenSupplyPanel());
+
         return column;
+    }
+
+    // Перенесено с удалённого экрана «Армия»: то же снабжение похода,
+    // только теперь оно живёт на экране героя.
+    private VisualElement BuildHeroScreenSupplyPanel()
+    {
+        VisualElement panel = CreateHeroScreenPanel("hero-screen-supply", "ЗАПАСЫ ОТРЯДА");
+
+        Label goldSubtitle = new Label("ЗОЛОТО");
+        goldSubtitle.style.color = HeroScreenMuted;
+        goldSubtitle.style.fontSize = 9f;
+        goldSubtitle.style.unityFontStyleAndWeight = FontStyle.Bold;
+        goldSubtitle.style.marginBottom = 3f;
+        panel.Add(goldSubtitle);
+
+        VisualElement goldRow = new VisualElement();
+        goldRow.style.flexDirection = FlexDirection.Row;
+        goldRow.style.alignItems = Align.Center;
+        goldRow.style.marginBottom = 6f;
+
+        heroScreenArmyGoldMinusButton = new Button(OnStableArmyGoldMinusClicked) { text = "−" };
+        StyleHeroScreenButton(heroScreenArmyGoldMinusButton, 30f, 26f);
+        goldRow.Add(heroScreenArmyGoldMinusButton);
+
+        heroScreenArmyGoldLabel = new Label("0");
+        heroScreenArmyGoldLabel.style.color = HeroScreenText;
+        heroScreenArmyGoldLabel.style.fontSize = 15f;
+        heroScreenArmyGoldLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+        heroScreenArmyGoldLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+        heroScreenArmyGoldLabel.style.flexGrow = 1f;
+        goldRow.Add(heroScreenArmyGoldLabel);
+
+        heroScreenArmyGoldPlusButton = new Button(OnStableArmyGoldPlusClicked) { text = "+" };
+        StyleHeroScreenButton(heroScreenArmyGoldPlusButton, 30f, 26f);
+        goldRow.Add(heroScreenArmyGoldPlusButton);
+        panel.Add(goldRow);
+
+        Label supplySubtitle = new Label("СНАБЖЕНИЕ");
+        supplySubtitle.style.color = HeroScreenMuted;
+        supplySubtitle.style.fontSize = 9f;
+        supplySubtitle.style.unityFontStyleAndWeight = FontStyle.Bold;
+        supplySubtitle.style.marginBottom = 3f;
+        panel.Add(supplySubtitle);
+
+        VisualElement supplyRow = new VisualElement();
+        supplyRow.style.flexDirection = FlexDirection.Row;
+        supplyRow.style.alignItems = Align.Center;
+        supplyRow.style.marginBottom = 4f;
+
+        heroScreenSupplyMinusButton = new Button(OnStableSupplyMinusClicked) { text = "−" };
+        StyleHeroScreenButton(heroScreenSupplyMinusButton, 30f, 26f);
+        supplyRow.Add(heroScreenSupplyMinusButton);
+
+        heroScreenSupplyValueLabel = new Label("0");
+        heroScreenSupplyValueLabel.style.color = HeroScreenText;
+        heroScreenSupplyValueLabel.style.fontSize = 15f;
+        heroScreenSupplyValueLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+        heroScreenSupplyValueLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+        heroScreenSupplyValueLabel.style.flexGrow = 1f;
+        supplyRow.Add(heroScreenSupplyValueLabel);
+
+        heroScreenSupplyPlusButton = new Button(OnStableSupplyPlusClicked) { text = "+" };
+        StyleHeroScreenButton(heroScreenSupplyPlusButton, 30f, 26f);
+        supplyRow.Add(heroScreenSupplyPlusButton);
+        panel.Add(supplyRow);
+
+        heroScreenSupplyConsumptionLabel = CreateHeroScreenHint("Расход: —");
+        panel.Add(heroScreenSupplyConsumptionLabel);
+        heroScreenSupplyDaysLabel = CreateHeroScreenHint("Хватит на: —");
+        panel.Add(heroScreenSupplyDaysLabel);
+
+        return panel;
+    }
+
+    // Как в старом RefreshSupplyBlock/ApplyCompactSupplyText экрана «Армия»,
+    // но нацелено на новую панель здесь, на экране героя.
+    private void RefreshHeroScreenSupplyPanel()
+    {
+        if (heroScreenArmyGoldLabel == null || gameState == null)
+            return;
+
+        int dailyConsumption = gameState.HasActiveExpedition
+            ? gameState.ExpeditionSupplyConsumption
+            : selectedFighterIds.Count > 0
+                ? selectedFighterIds.Count + 1
+                : 1;
+        int fullDays = dailyConsumption > 0
+            ? gameState.ArmySupply / dailyConsumption
+            : 0;
+        bool canAdjust = gameState.CanAdjustArmySupply && !isGameOver;
+
+        heroScreenArmyGoldLabel.text = gameState.ArmyGold.ToString();
+        heroScreenSupplyValueLabel.text = gameState.ArmySupply.ToString();
+        heroScreenSupplyConsumptionLabel.text =
+            "Расход: " + dailyConsumption + " / день";
+        heroScreenSupplyDaysLabel.text =
+            "Хватит на " + fullDays + " " + GetDayWord(fullDays);
+
+        heroScreenArmyGoldPlusButton.SetEnabled(canAdjust && gameState.Gold > 0);
+        heroScreenArmyGoldMinusButton.SetEnabled(canAdjust && gameState.ArmyGold > 0);
+        heroScreenSupplyPlusButton.SetEnabled(canAdjust && gameState.Food > 0);
+        heroScreenSupplyMinusButton.SetEnabled(canAdjust && gameState.ArmySupply > 0);
     }
 
     private VisualElement BuildHeroScreenExperienceBlock()

@@ -72,8 +72,9 @@ public class ContinuousTimePolishTests
     }
 
     [Test]
-    public void PreparedRoster_RejectsLessThanFourFighters()
+    public void PreparedRoster_AcceptsFewerThanFourFighters()
     {
+        // Канон v1.25: командир + от 0 до 4 бойцов, герой может уйти один.
         GameState state = CreatePreparedExpedition();
         ContinuousSimulationSystem.Reset(state);
 
@@ -83,9 +84,25 @@ public class ContinuousTimePolishTests
             new List<string> { "garrick" },
             out message);
 
+        Assert.That(changed, Is.True, message);
+        Assert.That(state.ActiveExpedition.FighterIds, Is.EqualTo(new[] { "garrick" }));
+    }
+
+    [Test]
+    public void PreparedRoster_RejectsMoreThanFourFighters()
+    {
+        GameState state = CreatePreparedExpedition();
+        ContinuousSimulationSystem.Reset(state);
+
+        string message;
+        bool changed = ContinuousPreparationCommands.TrySetPreparedRoster(
+            state,
+            new List<string> { "garrick", "edric", "marta", "torvin", "agnessa" },
+            out message);
+
         Assert.That(changed, Is.False);
         Assert.That(state.ActiveExpedition.FighterIds.Count, Is.EqualTo(4));
-        StringAssert.Contains("ровно 4", message);
+        StringAssert.Contains("не больше 4", message);
     }
 
     [Test]

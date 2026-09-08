@@ -70,7 +70,6 @@ public partial class PrototypeUIController
         TrackJourneyExpedition();
         CaptureJourneyBackgroundIncidents();
         TrackResolvedJourneyDecision();
-        RefreshJourneyArmyStatus();
         RefreshJourneyEmptyState();
     }
 
@@ -379,64 +378,4 @@ public partial class PrototypeUIController
             : "Армия находится в столице. Новых происшествий нет.";
     }
 
-    private void RefreshJourneyArmyStatus()
-    {
-        if (armyStatusLabel == null || gameState == null)
-            return;
-
-        if (!gameState.HasActiveExpedition)
-        {
-            armyStatusLabel.text = "СТАТУС АРМИИ: В СТОЛИЦЕ";
-            return;
-        }
-
-        ExpeditionData expedition = gameState.ActiveExpedition;
-        LocationData location = gameState.FindLocation(expedition.LocationId);
-        string locationName = location != null
-            ? location.TravelTargetName
-            : expedition.IsScoutingTarget ? "точка разведки" : "неизвестная локация";
-
-        if (gameState.CanCancelPreparedExpedition)
-        {
-            armyStatusLabel.text =
-                "СТАТУС АРМИИ: В ЗАМКЕ · ПРИКАЗ: " +
-                locationName.ToUpper();
-            return;
-        }
-
-        if (gameState.HasPendingExpeditionDecision)
-        {
-            armyStatusLabel.text = "СТАТУС АРМИИ: ОЖИДАЕТ ПРИКАЗА";
-            return;
-        }
-
-        if (expedition.IsLocationResearchInProgress)
-        {
-            armyStatusLabel.text =
-                "СТАТУС АРМИИ: ИССЛЕДУЕТ · " +
-                locationName.ToUpper();
-            return;
-        }
-
-        switch (expedition.Phase)
-        {
-            case CommanderState.TravellingToLocation:
-                armyStatusLabel.text =
-                    "СТАТУС АРМИИ: В ПУТИ · " +
-                    locationName.ToUpper();
-                break;
-            case CommanderState.AtLocation:
-                armyStatusLabel.text =
-                    "СТАТУС АРМИИ: В ЛОКАЦИИ · " +
-                    locationName.ToUpper();
-                break;
-            case CommanderState.ReturningToCastle:
-                armyStatusLabel.text =
-                    "СТАТУС АРМИИ: ВОЗВРАЩАЕТСЯ В СТОЛИЦУ";
-                break;
-            default:
-                armyStatusLabel.text = "СТАТУС АРМИИ: В СТОЛИЦЕ";
-                break;
-        }
-    }
 }

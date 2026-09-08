@@ -28,7 +28,7 @@ public partial class PrototypeUIController
         if (v124RosterPresentationInitialized)
             return;
 
-        if (interfaceRoot == null || gameState == null || armyStatusLabel == null)
+        if (interfaceRoot == null || gameState == null)
         {
             UIDocument document = GetComponent<UIDocument>();
             if (document != null)
@@ -51,55 +51,6 @@ public partial class PrototypeUIController
     {
         if (gameState == null)
             return;
-
-        CommanderData commander = gameState.GetSelectedCommander();
-        string commanderName = commander != null ? commander.Name : "Командир";
-        int selectedCount = gameState.HasActiveExpedition
-            ? gameState.ActiveExpedition.FighterIds.Count
-            : selectedFighterIds.Count;
-        int homeCount = Mathf.Max(0, gameState.Fighters.Count - selectedCount);
-
-        if (commanderDropdown != null)
-        {
-            commanderDropdown.SetEnabled(false);
-            commanderDropdown.style.display = DisplayStyle.None;
-        }
-
-        if (commanderDetailLabel != null)
-        {
-            commanderDetailLabel.text =
-                "Постоянный герой: " + commanderName + " · " +
-                (commander != null ? GetCommanderStateText(commander.State) : "—");
-        }
-
-        if (fighterSelectionHintLabel != null)
-        {
-            fighterSelectionHintLabel.text = gameState.HasActiveExpedition
-                ? "Состав похода зафиксирован: командир + четыре выбранных бойца."
-                : "Выберите ровно 4 бойцов. Командир входит в поход автоматически и занимает отдельное место.";
-        }
-
-        if (commanderGarrisonSummaryLabel != null)
-        {
-            commanderGarrisonSummaryLabel.text =
-                selectedCount + "/" + GameState.ExpeditionFighterSlots +
-                " бойцов · плюс командир";
-        }
-
-        if (capitalGarrisonSummaryLabel != null)
-        {
-            capitalGarrisonSummaryLabel.text =
-                homeCount + " остаются в поселении · правила защиты дома ещё не утверждены";
-        }
-
-        if (armyStatusLabel != null)
-        {
-            armyStatusLabel.text = gameState.HasActiveExpedition
-                ? commanderName + " и четыре бойца находятся в экспедиции. " +
-                  "Остальные бойцы остаются в поселении."
-                : "Один постоянный командир и " + gameState.Fighters.Count +
-                  " обычных бойцов. Для похода выберите ровно четыре.";
-        }
 
         if (activeExpeditionDetails != null && gameState.HasActiveExpedition)
             activeExpeditionDetails.text = RemoveLegacyDefenseLines(activeExpeditionDetails.text);

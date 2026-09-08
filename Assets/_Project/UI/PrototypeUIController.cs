@@ -9,13 +9,11 @@ public partial class PrototypeUIController : MonoBehaviour
     private enum MainScreen
     {
         Capital,
-        Army,
         Expeditions
     }
 
     private const int MaxIncidentNotificationButtons = 6;
     private const float NavigationClickCooldownSeconds = 0.18f;
-    private const float FighterDragThreshold = 6f;
 
     private GameState gameState;
     private MainScreen? openedScreen;
@@ -25,10 +23,8 @@ public partial class PrototypeUIController : MonoBehaviour
     private VisualElement interfaceRoot;
 
     private Button navCapitalButton;
-    private Button navArmyButton;
     private Button navExpeditionsButton;
     private VisualElement capitalScreen;
-    private VisualElement armyScreen;
     private VisualElement expeditionsScreen;
 
     private Label dayLabel;
@@ -50,36 +46,8 @@ public partial class PrototypeUIController : MonoBehaviour
     private Button moodMinus10Button;
     private Button moodPlus10Button;
 
-    private DropdownField commanderDropdown;
-    private Label commanderDetailLabel;
-    private Label armyStatusLabel;
-    private Label armyGoldLabel;
-    private Button armyGoldMinusButton;
-    private Button armyGoldPlusButton;
-    private Button supplyMinusButton;
-    private Label supplyValueLabel;
-    private Button supplyPlusButton;
-    private Label supplyConsumptionLabel;
-    private Label supplyDaysLabel;
-    private Label fighterSelectionHintLabel;
-    private VisualElement commanderGarrisonDropZone;
-    private VisualElement commanderGarrisonList;
-    private Label commanderGarrisonSummaryLabel;
-    private Label commanderGarrisonEmptyLabel;
-    private VisualElement capitalGarrisonDropZone;
-    private VisualElement capitalGarrisonList;
-    private Label capitalGarrisonSummaryLabel;
-    private Label capitalGarrisonEmptyLabel;
-
     private readonly HashSet<string> selectedFighterIds =
         new HashSet<string>();
-
-    private string draggedFighterId;
-    private int draggedFighterPointerId = -1;
-    private Vector2 fighterDragStartPosition;
-    private bool fighterDragStarted;
-    private VisualElement draggedFighterCard;
-    private VisualElement fighterDragGhost;
 
     private Label expeditionStatusLabel;
     private VisualElement activeExpeditionCard;
@@ -148,11 +116,9 @@ public partial class PrototypeUIController : MonoBehaviour
     {
         interfaceRoot = root;
         navCapitalButton = root.Q<Button>("nav-capital-button");
-        navArmyButton = root.Q<Button>("nav-army-button");
         navExpeditionsButton = root.Q<Button>("nav-expeditions-button");
 
         capitalScreen = root.Q<VisualElement>("capital-screen");
-        armyScreen = root.Q<VisualElement>("army-screen");
         expeditionsScreen = root.Q<VisualElement>("expeditions-screen");
 
         dayLabel = root.Q<Label>("day-label");
@@ -173,37 +139,6 @@ public partial class PrototypeUIController : MonoBehaviour
         populationPlus10Button = root.Q<Button>("population-plus10-button");
         moodMinus10Button = root.Q<Button>("mood-minus10-button");
         moodPlus10Button = root.Q<Button>("mood-plus10-button");
-
-        commanderDropdown = root.Q<DropdownField>("commander-dropdown");
-        commanderDetailLabel = root.Q<Label>("commander-detail-label");
-        armyStatusLabel = root.Q<Label>("army-status-label");
-        armyGoldLabel = root.Q<Label>("army-gold-label");
-        armyGoldMinusButton = root.Q<Button>("army-gold-minus-button");
-        armyGoldPlusButton = root.Q<Button>("army-gold-plus-button");
-
-        supplyMinusButton = root.Q<Button>("supply-minus-button");
-        supplyValueLabel = root.Q<Label>("supply-value-label");
-        supplyPlusButton = root.Q<Button>("supply-plus-button");
-        supplyConsumptionLabel = root.Q<Label>("supply-consumption-label");
-        supplyDaysLabel = root.Q<Label>("supply-days-label");
-        fighterSelectionHintLabel =
-            root.Q<Label>("fighter-selection-hint-label");
-        commanderGarrisonDropZone =
-            root.Q<VisualElement>("commander-garrison-drop-zone");
-        commanderGarrisonList =
-            root.Q<VisualElement>("commander-garrison-list");
-        commanderGarrisonSummaryLabel =
-            root.Q<Label>("commander-garrison-summary-label");
-        commanderGarrisonEmptyLabel =
-            root.Q<Label>("commander-garrison-empty-label");
-        capitalGarrisonDropZone =
-            root.Q<VisualElement>("capital-garrison-drop-zone");
-        capitalGarrisonList =
-            root.Q<VisualElement>("capital-garrison-list");
-        capitalGarrisonSummaryLabel =
-            root.Q<Label>("capital-garrison-summary-label");
-        capitalGarrisonEmptyLabel =
-            root.Q<Label>("capital-garrison-empty-label");
 
         expeditionStatusLabel = root.Q<Label>("expedition-status-label");
         FindWorldMapElements(root);
@@ -237,10 +172,8 @@ public partial class PrototypeUIController : MonoBehaviour
     {
         return
             navCapitalButton != null &&
-            navArmyButton != null &&
             navExpeditionsButton != null &&
             capitalScreen != null &&
-            armyScreen != null &&
             expeditionsScreen != null &&
             dayLabel != null &&
             goldLabel != null &&
@@ -259,26 +192,6 @@ public partial class PrototypeUIController : MonoBehaviour
             populationPlus10Button != null &&
             moodMinus10Button != null &&
             moodPlus10Button != null &&
-            commanderDropdown != null &&
-            commanderDetailLabel != null &&
-            armyStatusLabel != null &&
-            armyGoldLabel != null &&
-            armyGoldMinusButton != null &&
-            armyGoldPlusButton != null &&
-            supplyMinusButton != null &&
-            supplyValueLabel != null &&
-            supplyPlusButton != null &&
-            supplyConsumptionLabel != null &&
-            supplyDaysLabel != null &&
-            fighterSelectionHintLabel != null &&
-            commanderGarrisonDropZone != null &&
-            commanderGarrisonList != null &&
-            commanderGarrisonSummaryLabel != null &&
-            commanderGarrisonEmptyLabel != null &&
-            capitalGarrisonDropZone != null &&
-            capitalGarrisonList != null &&
-            capitalGarrisonSummaryLabel != null &&
-            capitalGarrisonEmptyLabel != null &&
             expeditionStatusLabel != null &&
             WorldMapElementsExist() &&
             activeExpeditionCard != null &&
@@ -322,7 +235,6 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private void StartNewGame()
     {
-        CleanupFighterDrag();
         gameState = new GameState();
         gameState.CreateNewGame();
 
@@ -337,13 +249,12 @@ public partial class PrototypeUIController : MonoBehaviour
         ResetWorldMapSelection();
         reportHistoryLabel.text = string.Empty;
 
-        ConfigureCommanderDropdown();
         HideIncidentModal();
         HideGameOver();
 
         AddReport(
-            "Прототип запущен. На экране «Армия» перенесите бойцов в " +
-            "гарнизон командира, затем выберите цель на карте экспедиций.");
+            "Прототип запущен. Выберите цель на карте экспедиций — герой " +
+            "отправится в путь с текущим составом отряда.");
 
         CloseMainScreen();
         RefreshInterface();
@@ -366,13 +277,10 @@ public partial class PrototypeUIController : MonoBehaviour
 
         capitalScreen.style.display =
             screen == MainScreen.Capital ? DisplayStyle.Flex : DisplayStyle.None;
-        armyScreen.style.display =
-            screen == MainScreen.Army ? DisplayStyle.Flex : DisplayStyle.None;
         expeditionsScreen.style.display =
             screen == MainScreen.Expeditions ? DisplayStyle.Flex : DisplayStyle.None;
 
         SetNavigationButtonActive(navCapitalButton, screen == MainScreen.Capital);
-        SetNavigationButtonActive(navArmyButton, screen == MainScreen.Army);
         SetNavigationButtonActive(navExpeditionsButton, screen == MainScreen.Expeditions);
     }
 
@@ -380,11 +288,9 @@ public partial class PrototypeUIController : MonoBehaviour
     {
         openedScreen = null;
         capitalScreen.style.display = DisplayStyle.None;
-        armyScreen.style.display = DisplayStyle.None;
         expeditionsScreen.style.display = DisplayStyle.None;
 
         SetNavigationButtonActive(navCapitalButton, false);
-        SetNavigationButtonActive(navArmyButton, false);
         SetNavigationButtonActive(navExpeditionsButton, false);
     }
 
@@ -413,29 +319,15 @@ public partial class PrototypeUIController : MonoBehaviour
             ToggleScreen(MainScreen.Capital);
     }
 
-    private void OnArmyNavigationClicked()
-    {
-        if (CanProcessNavigationClick())
-            ToggleScreen(MainScreen.Army);
-    }
-
     private void OnExpeditionsNavigationClicked()
     {
         if (CanProcessNavigationClick())
             ToggleScreen(MainScreen.Expeditions);
     }
 
-    private void ConfigureCommanderDropdown()
-    {
-        commanderDropdown.choices = gameState.GetCommanderNames();
-        CommanderData selectedCommander = gameState.GetSelectedCommander();
-        commanderDropdown.SetValueWithoutNotify(selectedCommander.Name);
-    }
-
     private void RegisterCallbacks()
     {
         navCapitalButton.clicked += OnCapitalNavigationClicked;
-        navArmyButton.clicked += OnArmyNavigationClicked;
         navExpeditionsButton.clicked += OnExpeditionsNavigationClicked;
 
         goldMinus10Button.clicked += OnGoldMinus10Clicked;
@@ -447,30 +339,21 @@ public partial class PrototypeUIController : MonoBehaviour
         moodMinus10Button.clicked += OnMoodMinus10Clicked;
         moodPlus10Button.clicked += OnMoodPlus10Clicked;
 
-        armyGoldMinusButton.clicked += OnArmyGoldMinusClicked;
-        armyGoldPlusButton.clicked += OnArmyGoldPlusClicked;
-        supplyMinusButton.clicked += OnSupplyMinusClicked;
-        supplyPlusButton.clicked += OnSupplyPlusClicked;
-
         RegisterWorldMapCallbacks();
         researchExpeditionButton.clicked += OnResearchExpeditionClicked;
         returnExpeditionButton.clicked += OnExpeditionActionClicked;
         incidentUnderstoodButton.clicked += OnIncidentUnderstoodClicked;
         restartGameButton.clicked += OnRestartGameClicked;
 
-        commanderDropdown.RegisterValueChangedCallback(OnCommanderChanged);
         callbacksRegistered = true;
     }
 
     private void OnDisable()
     {
-        CleanupFighterDrag();
-
         if (!callbacksRegistered)
             return;
 
         navCapitalButton.clicked -= OnCapitalNavigationClicked;
-        navArmyButton.clicked -= OnArmyNavigationClicked;
         navExpeditionsButton.clicked -= OnExpeditionsNavigationClicked;
 
         goldMinus10Button.clicked -= OnGoldMinus10Clicked;
@@ -482,27 +365,13 @@ public partial class PrototypeUIController : MonoBehaviour
         moodMinus10Button.clicked -= OnMoodMinus10Clicked;
         moodPlus10Button.clicked -= OnMoodPlus10Clicked;
 
-        armyGoldMinusButton.clicked -= OnArmyGoldMinusClicked;
-        armyGoldPlusButton.clicked -= OnArmyGoldPlusClicked;
-        supplyMinusButton.clicked -= OnSupplyMinusClicked;
-        supplyPlusButton.clicked -= OnSupplyPlusClicked;
-
         UnregisterWorldMapCallbacks();
         researchExpeditionButton.clicked -= OnResearchExpeditionClicked;
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
         incidentUnderstoodButton.clicked -= OnIncidentUnderstoodClicked;
         restartGameButton.clicked -= OnRestartGameClicked;
 
-        commanderDropdown.UnregisterValueChangedCallback(OnCommanderChanged);
         callbacksRegistered = false;
-    }
-
-    private void OnCommanderChanged(ChangeEvent<string> changeEvent)
-    {
-        if (gameState.SelectCommanderByName(changeEvent.newValue))
-            AddReport(changeEvent.newValue + " назначен командиром армии.");
-
-        RefreshInterface();
     }
 
     private void OnGoldMinus10Clicked() => AdjustGold(-10);
@@ -549,40 +418,6 @@ public partial class PrototypeUIController : MonoBehaviour
         gameState.Mood = Math.Max(0, Math.Min(100, gameState.Mood + delta));
         RefreshInterface();
         CheckForDefeat();
-    }
-
-    private void OnArmyGoldPlusClicked()
-    {
-        if (!isGameOver && gameState.CanAdjustArmySupply && gameState.Gold > 0)
-        {
-            gameState.Gold--;
-            gameState.ArmyGold++;
-        }
-
-        RefreshInterface();
-    }
-
-    private void OnArmyGoldMinusClicked()
-    {
-        if (!isGameOver && gameState.CanAdjustArmySupply && gameState.ArmyGold > 0)
-        {
-            gameState.ArmyGold--;
-            gameState.Gold++;
-        }
-
-        RefreshInterface();
-    }
-
-    private void OnSupplyPlusClicked()
-    {
-        gameState.TryAddArmySupply();
-        RefreshInterface();
-    }
-
-    private void OnSupplyMinusClicked()
-    {
-        gameState.TryRemoveArmySupply();
-        RefreshInterface();
     }
 
     private void OnRestartGameClicked()
@@ -666,7 +501,7 @@ public partial class PrototypeUIController : MonoBehaviour
             "Расход: " + gameState.DailyFoodConsumption + " в день";
 
         RefreshResourceTestButtons();
-        RefreshArmyPanel();
+        RefreshHeroScreenSupplyPanel();
         RefreshExpeditionPanel();
         RefreshIncidentNotifications();
     }
@@ -683,379 +518,6 @@ public partial class PrototypeUIController : MonoBehaviour
         populationPlus10Button.SetEnabled(available);
         moodMinus10Button.SetEnabled(available && gameState.Mood > 0);
         moodPlus10Button.SetEnabled(available && gameState.Mood < 100);
-    }
-
-    private void RefreshArmyPanel()
-    {
-        CommanderData commander = gameState.GetSelectedCommander();
-
-        commanderDetailLabel.text =
-            "Выбран: " + commander.Name + " · " + GetCommanderStateText(commander.State);
-
-        if (gameState.HasActiveExpedition)
-        {
-            armyStatusLabel.text =
-                commander.Name + " и " +
-                gameState.ActiveExpedition.FighterIds.Count +
-                " бойцов находятся в экспедиции. В столице осталось: " +
-                gameState.GarrisonFighterCount + ".";
-        }
-        else
-        {
-            armyStatusLabel.text =
-                commander.Name + " → " + gameState.Fighters.Count +
-                " отдельных воинов. Армия находится в столице и защищает её.";
-        }
-
-        RefreshSupplyBlock();
-        RefreshFightersList();
-    }
-
-    private void RefreshSupplyBlock()
-    {
-        int dailyConsumption = gameState.HasActiveExpedition
-            ? gameState.ExpeditionSupplyConsumption
-            : selectedFighterIds.Count > 0
-                ? selectedFighterIds.Count + 1
-                : 0;
-        int fullDays = dailyConsumption > 0
-            ? gameState.ArmySupply / dailyConsumption
-            : 0;
-        bool canAdjust = gameState.CanAdjustArmySupply && !isGameOver;
-
-        armyGoldLabel.text = gameState.ArmyGold.ToString();
-        supplyValueLabel.text = gameState.ArmySupply.ToString();
-        supplyConsumptionLabel.text = dailyConsumption > 0
-            ? "Расход выбранного отряда: " + dailyConsumption + " / день"
-            : "Расход: выберите бойцов";
-        supplyDaysLabel.text = dailyConsumption > 0
-            ? "Хватит на " + fullDays + " " + GetDayWord(fullDays)
-            : "Дни снабжения пока не рассчитаны";
-
-        armyGoldPlusButton.SetEnabled(canAdjust && gameState.Gold > 0);
-        armyGoldMinusButton.SetEnabled(canAdjust && gameState.ArmyGold > 0);
-        supplyPlusButton.SetEnabled(canAdjust && gameState.Food > 0);
-        supplyMinusButton.SetEnabled(canAdjust && gameState.ArmySupply > 0);
-    }
-
-    private void RefreshFightersList()
-    {
-        commanderGarrisonList.Clear();
-        capitalGarrisonList.Clear();
-
-        bool expeditionActive = gameState.HasActiveExpedition;
-        fighterSelectionHintLabel.text = expeditionActive
-            ? "Состав обоих гарнизонов зафиксирован до возвращения экспедиции."
-            : "Перетаскивайте карточки между гарнизонами. Щелчок по карточке также перемещает бойца.";
-
-        List<string> commanderFighterIds = expeditionActive
-            ? new List<string>(gameState.ActiveExpedition.FighterIds)
-            : GetSelectedFighterIdsInArmyOrder();
-        List<string> capitalFighterIds = new List<string>();
-
-        foreach (FighterData fighter in gameState.Fighters)
-        {
-            bool withCommander = commanderFighterIds.Contains(fighter.Id);
-
-            if (!withCommander)
-                capitalFighterIds.Add(fighter.Id);
-
-            Button card = CreateFighterCard(
-                fighter,
-                withCommander,
-                expeditionActive);
-
-            if (withCommander)
-                commanderGarrisonList.Add(card);
-            else
-                capitalGarrisonList.Add(card);
-        }
-
-        int commanderPower =
-            gameState.CalculateDefensePower(commanderFighterIds);
-        int capitalPower =
-            gameState.CalculateDefensePower(capitalFighterIds);
-        int totalPower = gameState.TotalArmyDefensePower;
-
-        commanderGarrisonSummaryLabel.text =
-            commanderFighterIds.Count + " " +
-            GetFighterWord(commanderFighterIds.Count) +
-            " · сила " + commanderPower;
-        capitalGarrisonSummaryLabel.text =
-            capitalFighterIds.Count + " " +
-            GetFighterWord(capitalFighterIds.Count) +
-            " · оборона " + capitalPower + "/" + totalPower;
-
-        commanderGarrisonEmptyLabel.style.display =
-            commanderFighterIds.Count == 0
-                ? DisplayStyle.Flex
-                : DisplayStyle.None;
-        capitalGarrisonEmptyLabel.style.display =
-            capitalFighterIds.Count == 0
-                ? DisplayStyle.Flex
-                : DisplayStyle.None;
-
-        if (capitalFighterIds.Count == 0)
-            capitalGarrisonDropZone.AddToClassList("army-roster-empty-danger");
-        else
-            capitalGarrisonDropZone.RemoveFromClassList("army-roster-empty-danger");
-    }
-
-    private Button CreateFighterCard(
-        FighterData fighter,
-        bool withCommander,
-        bool expeditionActive)
-    {
-        string fighterId = fighter.Id;
-        Button card = new Button();
-        card.AddToClassList("fighter-card");
-        card.AddToClassList(
-            withCommander
-                ? "fighter-card-selected"
-                : "fighter-card-garrison");
-        card.tooltip = expeditionActive
-            ? "Состав зафиксирован до возвращения"
-            : "Перетащите бойца в другой гарнизон";
-        card.SetEnabled(!expeditionActive && !isGameOver);
-
-        VisualElement imagePlaceholder = new VisualElement();
-        imagePlaceholder.AddToClassList("fighter-image-placeholder");
-
-        Label imagePlaceholderLabel = new Label("ИЗОБРАЖЕНИЕ");
-        imagePlaceholderLabel.AddToClassList("fighter-image-placeholder-text");
-        imagePlaceholder.Add(imagePlaceholderLabel);
-        card.Add(imagePlaceholder);
-
-        Label nameLabel = new Label(fighter.Name);
-        nameLabel.AddToClassList("fighter-name");
-        card.Add(nameLabel);
-
-        Label roleLabel = new Label(fighter.Role);
-        roleLabel.AddToClassList("fighter-role");
-        card.Add(roleLabel);
-
-        Label infoLabel = new Label(
-            "Ур. " + fighter.Level + " · оборона " +
-            fighter.DefensePower);
-        infoLabel.AddToClassList("fighter-info");
-        card.Add(infoLabel);
-
-        string assignmentText;
-
-        if (expeditionActive)
-        {
-            assignmentText = withCommander
-                ? "В ЭКСПЕДИЦИИ"
-                : "ГАРНИЗОН СТОЛИЦЫ";
-        }
-        else
-        {
-            assignmentText = withCommander
-                ? "С КОМАНДИРОМ"
-                : "ЗАЩИЩАЕТ СТОЛИЦУ";
-        }
-
-        Label assignmentLabel = new Label(assignmentText);
-        assignmentLabel.AddToClassList("fighter-assignment");
-        card.Add(assignmentLabel);
-
-        card.RegisterCallback<PointerDownEvent>(
-            evt => OnFighterPointerDown(evt, fighterId, card));
-        card.RegisterCallback<PointerMoveEvent>(OnFighterPointerMove);
-        card.RegisterCallback<PointerUpEvent>(OnFighterPointerUp);
-
-        return card;
-    }
-
-    private void OnFighterPointerDown(
-        PointerDownEvent pointerEvent,
-        string fighterId,
-        VisualElement card)
-    {
-        if (pointerEvent.button != 0 ||
-            isGameOver ||
-            gameState.HasActiveExpedition)
-        {
-            return;
-        }
-
-        CleanupFighterDrag();
-        draggedFighterId = fighterId;
-        draggedFighterPointerId = pointerEvent.pointerId;
-        fighterDragStartPosition = pointerEvent.position;
-        draggedFighterCard = card;
-        fighterDragStarted = false;
-        card.CapturePointer(pointerEvent.pointerId);
-        pointerEvent.StopPropagation();
-    }
-
-    private void OnFighterPointerMove(PointerMoveEvent pointerEvent)
-    {
-        if (draggedFighterCard == null ||
-            draggedFighterPointerId != pointerEvent.pointerId ||
-            !draggedFighterCard.HasPointerCapture(pointerEvent.pointerId))
-        {
-            return;
-        }
-
-        if (!fighterDragStarted &&
-            Vector2.Distance(fighterDragStartPosition, pointerEvent.position) >=
-            FighterDragThreshold)
-        {
-            BeginFighterDrag(pointerEvent.position);
-        }
-
-        if (fighterDragStarted)
-        {
-            UpdateFighterDragGhost(pointerEvent.position);
-            UpdateFighterDropHighlights(pointerEvent.position);
-        }
-
-        pointerEvent.StopPropagation();
-    }
-
-    private void OnFighterPointerUp(PointerUpEvent pointerEvent)
-    {
-        if (draggedFighterCard == null ||
-            draggedFighterPointerId != pointerEvent.pointerId)
-        {
-            return;
-        }
-
-        string fighterId = draggedFighterId;
-        bool wasDragging = fighterDragStarted;
-        bool droppedToCommander =
-            commanderGarrisonDropZone.worldBound.Contains(pointerEvent.position);
-        bool droppedToCapital =
-            capitalGarrisonDropZone.worldBound.Contains(pointerEvent.position);
-
-        if (draggedFighterCard.HasPointerCapture(pointerEvent.pointerId))
-            draggedFighterCard.ReleasePointer(pointerEvent.pointerId);
-
-        CleanupFighterDrag();
-
-        if (!wasDragging)
-            ToggleFighterAssignment(fighterId);
-        else if (droppedToCommander)
-            MoveFighterToCommander(fighterId, true);
-        else if (droppedToCapital)
-            MoveFighterToCommander(fighterId, false);
-
-        pointerEvent.StopPropagation();
-    }
-
-    private void BeginFighterDrag(Vector2 pointerPosition)
-    {
-        FighterData fighter = gameState.FindFighter(draggedFighterId);
-
-        if (fighter == null || interfaceRoot == null)
-            return;
-
-        fighterDragStarted = true;
-        draggedFighterCard.AddToClassList("fighter-card-dragging");
-
-        fighterDragGhost = new VisualElement();
-        fighterDragGhost.AddToClassList("fighter-drag-ghost");
-        fighterDragGhost.pickingMode = PickingMode.Ignore;
-
-        Label nameLabel = new Label(fighter.Name);
-        nameLabel.AddToClassList("fighter-drag-ghost-name");
-        fighterDragGhost.Add(nameLabel);
-
-        Label roleLabel = new Label(
-            fighter.Role + " · оборона " + fighter.DefensePower);
-        roleLabel.AddToClassList("fighter-drag-ghost-role");
-        fighterDragGhost.Add(roleLabel);
-
-        interfaceRoot.Add(fighterDragGhost);
-        fighterDragGhost.BringToFront();
-        UpdateFighterDragGhost(pointerPosition);
-    }
-
-    private void UpdateFighterDragGhost(Vector2 pointerPosition)
-    {
-        if (fighterDragGhost == null)
-            return;
-
-        fighterDragGhost.style.left = pointerPosition.x - 66f;
-        fighterDragGhost.style.top = pointerPosition.y - 37f;
-    }
-
-    private void UpdateFighterDropHighlights(Vector2 pointerPosition)
-    {
-        bool overCommander =
-            commanderGarrisonDropZone.worldBound.Contains(pointerPosition);
-        bool overCapital =
-            capitalGarrisonDropZone.worldBound.Contains(pointerPosition);
-
-        SetDropZoneHighlighted(commanderGarrisonDropZone, overCommander);
-        SetDropZoneHighlighted(capitalGarrisonDropZone, overCapital);
-    }
-
-    private void SetDropZoneHighlighted(
-        VisualElement dropZone,
-        bool highlighted)
-    {
-        if (highlighted)
-            dropZone.AddToClassList("army-roster-drop-hover");
-        else
-            dropZone.RemoveFromClassList("army-roster-drop-hover");
-    }
-
-    private void CleanupFighterDrag()
-    {
-        if (draggedFighterCard != null &&
-            draggedFighterPointerId >= 0 &&
-            draggedFighterCard.HasPointerCapture(draggedFighterPointerId))
-        {
-            draggedFighterCard.ReleasePointer(draggedFighterPointerId);
-        }
-
-        if (draggedFighterCard != null)
-            draggedFighterCard.RemoveFromClassList("fighter-card-dragging");
-
-        if (fighterDragGhost != null)
-            fighterDragGhost.RemoveFromHierarchy();
-
-        if (commanderGarrisonDropZone != null)
-            commanderGarrisonDropZone.RemoveFromClassList("army-roster-drop-hover");
-
-        if (capitalGarrisonDropZone != null)
-            capitalGarrisonDropZone.RemoveFromClassList("army-roster-drop-hover");
-
-        draggedFighterId = null;
-        draggedFighterPointerId = -1;
-        draggedFighterCard = null;
-        fighterDragGhost = null;
-        fighterDragStarted = false;
-    }
-
-    private void ToggleFighterAssignment(string fighterId)
-    {
-        if (isGameOver || gameState.HasActiveExpedition)
-            return;
-
-        MoveFighterToCommander(
-            fighterId,
-            !selectedFighterIds.Contains(fighterId));
-    }
-
-    private void MoveFighterToCommander(
-        string fighterId,
-        bool moveToCommander)
-    {
-        if (isGameOver || gameState.HasActiveExpedition)
-            return;
-
-        bool changed = moveToCommander
-            ? selectedFighterIds.Add(fighterId)
-            : selectedFighterIds.Remove(fighterId);
-
-        if (!changed)
-            return;
-
-        RefreshArmyPanel();
-        RefreshExpeditionPanel();
     }
 
     private List<string> GetSelectedFighterIdsInArmyOrder()
@@ -1115,7 +577,6 @@ public partial class PrototypeUIController : MonoBehaviour
         bool controlsAvailable = !isGameOver;
         bool hasSelectedFighters = selectedFighterIds.Count > 0;
 
-        commanderDropdown.SetEnabled(controlsAvailable && !expeditionActive);
         RefreshWorldMapPanel();
 
         activeExpeditionCard.style.display =
@@ -1126,7 +587,8 @@ public partial class PrototypeUIController : MonoBehaviour
             expeditionStatusLabel.text = hasSelectedFighters
                 ? "Подготовка экспедиции: выбрано бойцов — " +
                   selectedFighterIds.Count + ". Выберите цель на карте."
-                : "Активная экспедиция: нет. Сначала выберите бойцов на экране «Армия».";
+                : "Активная экспедиция: нет. Выберите цель на карте — герой " +
+                  "может отправиться и один.";
             researchExpeditionButton.style.display = DisplayStyle.None;
             return;
         }

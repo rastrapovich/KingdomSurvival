@@ -45,9 +45,7 @@
 .persistent-commander-button-row { width: 100%; height: 50%; flex-grow: 1; min-height: 0px; flex-direction: row; align-items: stretch; }
 .persistent-commander-button { width: 50%; height: 100%; flex-grow: 1; min-width: 0px; min-height: 0px; margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px; padding-left: 3px; padding-right: 3px; padding-top: 2px; padding-bottom: 2px; border-radius: 3px; color: rgb(226, 219, 204); font-size: 9px; -unity-font-style: bold; }
 .persistent-commander-empty { background-color: rgb(41, 46, 53); opacity: 0.65; }
-.persistent-commander-army-button { background-color: rgb(76, 51, 52); }
 .persistent-commander-expedition-button { background-color: rgb(49, 76, 61); }
-.persistent-commander-army-button.persistent-nav-active { background-color: rgb(112, 67, 68); }
 .persistent-commander-expedition-button.persistent-nav-active { background-color: rgb(66, 104, 81); }
 
 .shell-workspace { flex-grow: 1; flex-shrink: 1; min-width: 0px; min-height: 0px; flex-direction: column; align-items: stretch; background-color: rgb(18, 21, 26); }
@@ -56,45 +54,6 @@
 .shell-screen-scroll { width: 100%; height: 100%; min-height: 0px; }
 .shell-content-panel { min-height: 100%; margin-bottom: 0px; background-color: rgb(29, 33, 40); }
 .shell-expedition-panel { width: 100%; }
-.persistent-commander-garrison-host { width: 100%; height: 113px; min-height: 113px; max-height: 113px; flex-grow: 0; flex-shrink: 0; flex-direction: row; align-items: flex-start; margin-top: 5px; }
-
-.army-stable-panel { width: 100%; height: 100%; min-height: 0px; margin-bottom: 0px; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; flex-direction: column; justify-content: space-between; background-color: rgb(18, 21, 26); border-left-width: 0px; border-right-width: 0px; border-top-width: 0px; border-bottom-width: 0px; }
-.army-legacy-hidden, .army-aux-hidden { display: none; }
-.army-top-row { width: 82%; height: 330px; min-height: 330px; max-height: 330px; flex-grow: 0; flex-shrink: 0; flex-direction: row; align-items: stretch; justify-content: flex-start; }
-.army-commander-block { width: 33%; min-width: 210px; height: 100%; margin-right: 5px; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 9px; background-color: rgb(42, 46, 54); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62); border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62); border-radius: 5px; }
-.army-commander-block .commander-section-title { margin-top: 0px; margin-bottom: 6px; color: rgb(219, 181, 107); font-size: 13px; }
-.army-commander-block .commander-image-placeholder { width: 100%; height: 68%; min-height: 160px; max-height: 270px; margin-bottom: 8px; background-color: rgb(31, 35, 42); }
-.army-commander-block .commander-dropdown { width: 100%; margin-top: 0px; margin-bottom: 4px; }
-.army-commander-block .commander-detail { color: rgb(184, 184, 178); font-size: 10px; white-space: normal; }
-.journey-summary-block { width: 37%; min-width: 220px; height: 100%; min-height: 0px; margin-right: 5px; margin-top: 0px; margin-bottom: 0px; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px; background-color: rgb(45, 49, 56); }
-.journey-summary-scroll { flex-grow: 1; min-height: 0px; width: 100%; }
-.journey-summary-list { width: 100%; }
-.military-supply-block { width: 28%; min-width: 205px; height: 190px; min-height: 190px; max-height: 190px; margin-top: 0px; margin-bottom: 0px; padding-left: 11px; padding-right: 11px; padding-top: 10px; padding-bottom: 10px; background-color: rgb(48, 49, 53); }
-.military-supply-block .supply-title { margin-bottom: 6px; color: rgb(225, 190, 116); font-size: 13px; }
-.military-supply-block .supply-subtitle { margin-top: 1px; margin-bottom: 2px; font-size: 9px; color: rgb(185, 180, 164); }
-.military-supply-block .supply-controls { height: 28px; min-height: 28px; margin-bottom: 3px; flex-direction: row; align-items: center; }
-.military-supply-block .supply-step-button { width: 32px; min-width: 32px; max-width: 32px; height: 26px; min-height: 26px; padding-left: 0px; padding-right: 0px; }
-.military-supply-block .supply-value { min-width: 42px; margin-left: 5px; margin-right: 5px; font-size: 14px; -unity-text-align: middle-center; }
-.military-supply-block .supply-note { height: 14px; min-height: 14px; max-height: 14px; margin-top: 1px; margin-bottom: 0px; font-size: 9px; white-space: nowrap; }
-
-.army-transfer-board { width: 82%; height: 113px; min-height: 113px; max-height: 113px; flex-grow: 0; flex-shrink: 0; flex-direction: column; align-items: stretch; align-self: flex-start; margin-top: 0px; margin-bottom: 0px; }
-.army-roster-drop-zone { position: relative; width: 100%; height: 113px; min-height: 113px; max-height: 113px; flex-grow: 0; flex-shrink: 0; margin-bottom: 0px; padding-left: 10px; padding-right: 10px; padding-top: 7px; padding-bottom: 7px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-radius: 5px; }
-.capital-garrison-zone { background-color: rgb(38, 54, 48); border-left-color: rgb(75, 112, 91); border-right-color: rgb(75, 112, 91); border-top-color: rgb(75, 112, 91); border-bottom-color: rgb(75, 112, 91); }
-.commander-garrison-zone { width: 82%; background-color: rgb(50, 44, 34); border-left-color: rgb(132, 103, 62); border-right-color: rgb(132, 103, 62); border-top-color: rgb(132, 103, 62); border-bottom-color: rgb(132, 103, 62); }
-.capital-garrison-zone.army-roster-empty-danger { background-color: rgb(61, 42, 43); }
-.army-roster-drop-hover { border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; }
-.capital-garrison-zone.army-roster-drop-hover { background-color: rgb(48, 72, 60); }
-.commander-garrison-zone.army-roster-drop-hover { background-color: rgb(71, 61, 43); }
-.army-roster-title { height: 14px; min-height: 14px; max-height: 14px; margin-top: 0px; margin-bottom: 4px; color: rgb(220, 181, 105); font-size: 11px; -unity-font-style: bold; }
-.capital-garrison-zone .army-roster-title { color: rgb(151, 192, 165); }
-.army-roster-list { width: 100%; min-width: 100%; height: 78px; min-height: 78px; max-height: 78px; flex-direction: row; flex-wrap: nowrap; align-items: flex-start; justify-content: flex-start; }
-.army-roster-list .fighter-card { width: 104px; min-width: 104px; max-width: 104px; height: 78px; min-height: 78px; max-height: 78px; flex-grow: 0; flex-shrink: 0; margin-left: 0px; margin-right: 8px; margin-top: 0px; margin-bottom: 0px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-radius: 4px; }
-.army-roster-list .fighter-card-garrison { background-color: rgb(42, 57, 51); }
-.army-roster-list .fighter-card-selected { background-color: rgb(58, 50, 38); }
-.army-roster-list .fighter-name, .army-roster-list .fighter-role, .army-roster-list .fighter-info, .army-roster-list .fighter-assignment { display: none; }
-.army-roster-list .fighter-image-placeholder { width: 100%; height: 100%; margin-bottom: 0px; align-items: center; justify-content: center; background-color: rgb(29, 33, 39); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(69, 76, 86); border-right-color: rgb(69, 76, 86); border-top-color: rgb(69, 76, 86); border-bottom-color: rgb(69, 76, 86); }
-.army-roster-list .fighter-image-placeholder-text { color: rgb(226, 191, 119); font-size: 10px; -unity-font-style: bold; -unity-text-align: middle-center; white-space: normal; }
-.capital-garrison-zone .fighter-image-placeholder-text { color: rgb(168, 202, 180); }
 
 .big-expedition-location-grid { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: flex-start; justify-content: flex-start; }
 .big-expedition-location-grid .location-card { width: 31%; min-width: 280px; flex-grow: 1; flex-shrink: 1; margin-left: 4px; margin-right: 4px; margin-top: 4px; margin-bottom: 4px; }
@@ -105,7 +64,6 @@
 .shell-navigation-bar { width: 396px; min-width: 396px; max-width: 396px; height: 100%; margin-top: 0px; padding-left: 4px; padding-right: 4px; flex-shrink: 0; flex-direction: row; align-items: stretch; }
 .shell-nav-button { height: 100%; min-height: 0px; flex-grow: 1; min-width: 0px; margin-right: 3px; padding-left: 5px; padding-right: 5px; border-radius: 3px; color: rgb(235, 226, 205); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; }
 .shell-nav-button.nav-capital { width: 94px; max-width: 94px; background-color: rgb(96, 82, 53); }
-.shell-nav-button.nav-army { width: 94px; max-width: 94px; background-color: rgb(91, 59, 61); }
 .shell-nav-button.nav-expedition { width: 98px; max-width: 98px; background-color: rgb(55, 82, 70); font-size: 11px; }
 .shell-nav-button.nav-hero { width: 94px; max-width: 94px; background-color: rgb(74, 63, 92); }
 .shell-nav-button.nav-button-active { color: rgb(255, 242, 207); -unity-font-style: bold; border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; }

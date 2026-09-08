@@ -55,9 +55,7 @@ public partial class PrototypeUIController
             TrickleDown.TrickleDown);
 
         RegisterMapLayoutRefreshButton("nav-capital-button");
-        RegisterMapLayoutRefreshButton("nav-army-button");
         RegisterMapLayoutRefreshButton("nav-expeditions-button");
-        RegisterMapLayoutRefreshButton("persistent-commander-army-button");
         RegisterMapLayoutRefreshButton("persistent-commander-expedition-button");
 
         EnsureWorldMapLocationCard();
@@ -84,23 +82,9 @@ public partial class PrototypeUIController
 
     private void RefreshWorldMapPresentation()
     {
-        if (persistentCommanderGarrisonHost == null)
-        {
-            persistentCommanderGarrisonHost =
-                interfaceRoot.Q<VisualElement>("persistent-commander-garrison-host");
-        }
-
         bool expeditionMapOpen =
             openedScreen.HasValue &&
             openedScreen.Value == MainScreen.Expeditions;
-
-        if (persistentCommanderGarrisonHost != null)
-        {
-            persistentCommanderGarrisonHost.style.display =
-                expeditionMapOpen
-                    ? DisplayStyle.None
-                    : DisplayStyle.Flex;
-        }
 
         if (expeditionMapOpen)
         {

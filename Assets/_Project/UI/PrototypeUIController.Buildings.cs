@@ -200,7 +200,7 @@ public partial class PrototypeUIController
             foreach (string notice in notices)
                 AddReport(notice);
 
-            RefreshArmyPanel();
+            RefreshHeroScreenSupplyPanel();
         }
 
         if (goldIncomeLabel != null)

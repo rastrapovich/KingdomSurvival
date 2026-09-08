@@ -4,6 +4,7 @@
   "references": [
     "KingdomSurvival.Core",
     "KingdomSurvival.DialogueDatabase",
+    "KingdomSurvival.DialogueDatabase.Editor",
     "KingdomSurvival.UILayout"
   ],
   "includePlatforms": ["Editor"],

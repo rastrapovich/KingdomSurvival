@@ -34,10 +34,24 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private Vector2 rightScroll;
         private string search = string.Empty;
         private int categoryFilter;
-        private NarrativeDialogueSession previewSession;
+        private NarrativeDialogueRuntimeSession previewSession;
+        private NarrativeDialogueView previewView;
         private string previewDialogueId = string.Empty;
         private string previewMessage = string.Empty;
         private readonly List<string> validationIssues = new List<string>();
+
+        // Авторский Preview-контекст (§13): не связан с реальным сохранением
+        // игры, существует только пока открыто окно редактора.
+        private HeroProfileData previewHero = new HeroProfileData();
+        private NarrativeStateData previewState = new NarrativeStateData();
+        private bool previewHeroExpanded;
+        private string previewCompanionsCsv = string.Empty;
+        private string previewItemsCsv = string.Empty;
+        private string previewFlagsCsv = string.Empty;
+        private string previewKnowledgeCsv = string.Empty;
+        private string previewRelationsCsv = string.Empty;
+        private int previewWorldSeed = 12345;
+        private NarrativeCheckForcedOutcome previewForcedOutcome = NarrativeCheckForcedOutcome.None;
 
         [MenuItem("Kingdom Survival/База диалогов")]
         private static void Open()
@@ -230,6 +244,13 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (GUILayout.Button("Удалить реплику", EditorStyles.toolbarButton, GUILayout.Width(115f)))
                 deleteGraphNode = true;
             GUI.enabled = true;
+
+            SerializedProperty schemaVersionProperty = dialogue.FindPropertyRelative("schemaVersion");
+            if (schemaVersionProperty != null && schemaVersionProperty.intValue < DialogueDefinitionData.CurrentSchemaVersion)
+            {
+                if (GUILayout.Button("Мигрировать на новую схему", EditorStyles.toolbarButton, GUILayout.Width(190f)))
+                    MigrateDialogueSchema(dialogue);
+            }
             EditorGUILayout.EndHorizontal();
 
             if (deleteGraphNode && TryDeleteDialogueNode(dialogue, graphSelectedNodeIndex))
@@ -293,18 +314,88 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 EditorGUILayout.PropertyField(node.FindPropertyRelative("id"), new GUIContent("Node ID"));
                 DrawSpeakerPopup(node.FindPropertyRelative("speakerId"));
-                EditorGUILayout.PropertyField(node.FindPropertyRelative("text"), new GUIContent("Реплика"));
+                EditorGUILayout.PropertyField(node.FindPropertyRelative("text"), new GUIContent("Реплика (legacy)"));
 
                 GUILayout.Space(5f);
+                SerializedProperty textBlocks = node.FindPropertyRelative("textBlocks");
+                EditorGUILayout.LabelField("Текстовые блоки", EditorStyles.boldLabel);
+                for (int blockIndex = 0; blockIndex < textBlocks.arraySize; blockIndex++)
+                    DrawTextBlock(textBlocks, blockIndex);
+
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("+ Основная реплика", EditorStyles.miniButton))
+                    AddTextBlock(textBlocks, DialogueTextBlockKind.MainLine);
+                if (GUILayout.Button("+ Наблюдение", EditorStyles.miniButton))
+                    AddTextBlock(textBlocks, DialogueTextBlockKind.Observation);
+                if (GUILayout.Button("+ Воспоминание", EditorStyles.miniButton))
+                    AddTextBlock(textBlocks, DialogueTextBlockKind.Memory);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("+ Мысль героя", EditorStyles.miniButton))
+                    AddTextBlock(textBlocks, DialogueTextBlockKind.HeroThought);
+                if (GUILayout.Button("+ Реплика спутника", EditorStyles.miniButton))
+                    AddTextBlock(textBlocks, DialogueTextBlockKind.CompanionLine);
+                if (GUILayout.Button("+ Повествование", EditorStyles.miniButton))
+                    AddTextBlock(textBlocks, DialogueTextBlockKind.Narration);
+                EditorGUILayout.EndHorizontal();
+
+                GUILayout.Space(8f);
                 SerializedProperty choices = node.FindPropertyRelative("choices");
                 EditorGUILayout.LabelField("Ответы игрока", EditorStyles.boldLabel);
                 for (int choiceIndex = 0; choiceIndex < choices.arraySize; choiceIndex++)
                     DrawChoice(nodes, choices, choiceIndex);
 
-                if (GUILayout.Button("+ Ответ"))
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("+ Обычный ответ", EditorStyles.miniButton))
                     AddChoice(choices);
+                if (GUILayout.Button("+ Возвратная проверка", EditorStyles.miniButton))
+                    AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveReturnable);
+                if (GUILayout.Button("+ Решающая проверка", EditorStyles.miniButton))
+                    AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveDecisive);
+                if (GUILayout.Button("+ Завершить разговор", EditorStyles.miniButton))
+                    AddExitChoice(choices);
+                EditorGUILayout.EndHorizontal();
             }
 
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawTextBlock(SerializedProperty textBlocks, int blockIndex)
+        {
+            SerializedProperty block = textBlocks.GetArrayElementAtIndex(blockIndex);
+            SerializedProperty kind = block.FindPropertyRelative("kind");
+            SerializedProperty blockId = block.FindPropertyRelative("blockId");
+            string label = "[" + (DialogueTextBlockKind)kind.enumValueIndex + "] " +
+                            (string.IsNullOrWhiteSpace(blockId.stringValue) ? "<без ID>" : blockId.stringValue);
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginHorizontal();
+            block.isExpanded = EditorGUILayout.Foldout(block.isExpanded, label, true);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("×", GUILayout.Width(24f)))
+            {
+                textBlocks.DeleteArrayElementAtIndex(blockIndex);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+                return;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (block.isExpanded)
+            {
+                EditorGUILayout.PropertyField(blockId, new GUIContent("Block ID"));
+                EditorGUILayout.PropertyField(kind, new GUIContent("Тип"));
+                EditorGUILayout.PropertyField(block.FindPropertyRelative("speakerIdOverride"), new GUIContent("Говорящий (переопределение)"));
+                EditorGUILayout.PropertyField(block.FindPropertyRelative("text"), new GUIContent("Текст"));
+                EditorGUILayout.PropertyField(block.FindPropertyRelative("conditions"), new GUIContent("Условия показа"), true);
+
+                SerializedProperty hasPassiveCheck = block.FindPropertyRelative("hasPassiveCheck");
+                EditorGUILayout.PropertyField(hasPassiveCheck, new GUIContent("Есть пассивная проверка"));
+                if (hasPassiveCheck.boolValue)
+                    EditorGUILayout.PropertyField(block.FindPropertyRelative("passiveCheck"), new GUIContent("Пассивная проверка"), true);
+
+                EditorGUILayout.PropertyField(block.FindPropertyRelative("onRevealEffects"), new GUIContent("Эффекты при показе"), true);
+            }
             EditorGUILayout.EndVertical();
         }
 
@@ -312,8 +403,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         {
             SerializedProperty choice = choices.GetArrayElementAtIndex(choiceIndex);
             SerializedProperty text = choice.FindPropertyRelative("text");
+            SerializedProperty kind = choice.FindPropertyRelative("kind");
             SerializedProperty nextNodeId = choice.FindPropertyRelative("nextNodeId");
             SerializedProperty endsDialogue = choice.FindPropertyRelative("endsDialogue");
+            DialogueChoiceKind choiceKind = (DialogueChoiceKind)kind.enumValueIndex;
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal();
@@ -327,16 +420,48 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
             EditorGUILayout.EndHorizontal();
 
-            endsDialogue.boolValue = EditorGUILayout.ToggleLeft("Завершает разговор (EXIT)", endsDialogue.boolValue);
-            if (endsDialogue.boolValue)
+            EditorGUILayout.LabelField("Вид: " + ChoiceKindLabel(choiceKind), EditorStyles.miniLabel);
+            EditorGUILayout.PropertyField(choice.FindPropertyRelative("conditions"), new GUIContent("Условия показа"), true);
+            if (choiceKind != DialogueChoiceKind.Normal || choice.FindPropertyRelative("conditions").FindPropertyRelative("Conditions").arraySize > 0)
+                EditorGUILayout.PropertyField(choice.FindPropertyRelative("unavailablePresentation"), new GUIContent("Если недоступен"));
+
+            switch (choiceKind)
             {
-                nextNodeId.stringValue = string.Empty;
+                case DialogueChoiceKind.Exit:
+                    EditorGUILayout.LabelField("Завершает разговор (EXIT).", EditorStyles.miniLabel);
+                    break;
+
+                case DialogueChoiceKind.ActiveReturnable:
+                case DialogueChoiceKind.ActiveDecisive:
+                    EditorGUILayout.PropertyField(choice.FindPropertyRelative("check"), new GUIContent("Проверка"), true);
+                    DrawNodeTargetPopup(choice.FindPropertyRelative("successNodeId"), nodes, "Узел при успехе");
+                    DrawNodeTargetPopup(choice.FindPropertyRelative("failureNodeId"), nodes, "Узел при провале");
+                    EditorGUILayout.PropertyField(choice.FindPropertyRelative("successEffects"), new GUIContent("Эффекты успеха"), true);
+                    EditorGUILayout.PropertyField(choice.FindPropertyRelative("failureEffects"), new GUIContent("Эффекты провала"), true);
+                    break;
+
+                default:
+                    endsDialogue.boolValue = EditorGUILayout.ToggleLeft("Завершает разговор (EXIT)", endsDialogue.boolValue);
+                    if (endsDialogue.boolValue)
+                        nextNodeId.stringValue = string.Empty;
+                    else
+                        DrawNodeTargetPopup(nextNodeId, nodes, "Переход");
+                    break;
             }
-            else
-            {
-                DrawNodeTargetPopup(nextNodeId, nodes);
-            }
+
             EditorGUILayout.EndVertical();
+        }
+
+        private static string ChoiceKindLabel(DialogueChoiceKind kind)
+        {
+            switch (kind)
+            {
+                case DialogueChoiceKind.Normal: return "обычный";
+                case DialogueChoiceKind.ActiveReturnable: return "возвратная проверка";
+                case DialogueChoiceKind.ActiveDecisive: return "решающая проверка";
+                case DialogueChoiceKind.Exit: return "завершение";
+                default: return kind.ToString();
+            }
         }
 
         private void DrawStartNodePopup(SerializedProperty startNodeId, SerializedProperty nodes)
@@ -356,21 +481,21 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 startNodeId.stringValue = ids[next];
         }
 
-        private void DrawNodeTargetPopup(SerializedProperty nextNodeId, SerializedProperty nodes)
+        private void DrawNodeTargetPopup(SerializedProperty targetNodeId, SerializedProperty nodes, string label = "Переход")
         {
             string[] ids = GetNodeIds(nodes);
             if (ids.Length == 0)
             {
-                EditorGUILayout.PropertyField(nextNodeId, new GUIContent("Переход"));
+                EditorGUILayout.PropertyField(targetNodeId, new GUIContent(label));
                 return;
             }
 
-            int selected = Array.IndexOf(ids, nextNodeId.stringValue);
+            int selected = Array.IndexOf(ids, targetNodeId.stringValue);
             if (selected < 0)
                 selected = 0;
-            int next = EditorGUILayout.Popup("Переход", selected, ids);
+            int next = EditorGUILayout.Popup(label, selected, ids);
             if (next >= 0 && next < ids.Length)
-                nextNodeId.stringValue = ids[next];
+                targetNodeId.stringValue = ids[next];
         }
 
         private void DrawSpeakerPopup(SerializedProperty speakerId)

@@ -26,6 +26,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             SerializedProperty dialogue = dialogues.GetArrayElementAtIndex(selectedDialogueIndex);
             string dialogueId = dialogue.FindPropertyRelative("id").stringValue;
 
+            DrawPreviewAuthoringContext();
+
             if (GUILayout.Button("Проверить выбранный"))
             {
                 serializedDatabase.ApplyModifiedProperties();
@@ -57,37 +59,153 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUILayout.EndVertical();
         }
 
+        // §13: тестовый контекст Preview — качества, компетенции, особенности,
+        // флаги, знания, отношения, спутники, предметы, принудительный исход.
+        // Не связан с реальным игровым сохранением.
+        private void DrawPreviewAuthoringContext()
+        {
+            previewHeroExpanded = EditorGUILayout.Foldout(previewHeroExpanded, "Тестовый герой (Preview)", true);
+            if (!previewHeroExpanded)
+                return;
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+            previewHero.Strength = EditorGUILayout.IntSlider("Сила", previewHero.Strength, HeroProfileData.MinQualityValue, HeroProfileData.MaxQualityValue);
+            previewHero.Dexterity = EditorGUILayout.IntSlider("Сноровка", previewHero.Dexterity, HeroProfileData.MinQualityValue, HeroProfileData.MaxQualityValue);
+            previewHero.Fortitude = EditorGUILayout.IntSlider("Стойкость", previewHero.Fortitude, HeroProfileData.MinQualityValue, HeroProfileData.MaxQualityValue);
+            previewHero.Instinct = EditorGUILayout.IntSlider("Чутьё", previewHero.Instinct, HeroProfileData.MinQualityValue, HeroProfileData.MaxQualityValue);
+            previewHero.Judgment = EditorGUILayout.IntSlider("Суждение", previewHero.Judgment, HeroProfileData.MinQualityValue, HeroProfileData.MaxQualityValue);
+            previewHero.Character = EditorGUILayout.IntSlider("Характер", previewHero.Character, HeroProfileData.MinQualityValue, HeroProfileData.MaxQualityValue);
+
+            GUILayout.Space(4f);
+            int fieldcraft = previewHero.GetCompetency(NarrativeCompetencyIds.Fieldcraft);
+            int nextFieldcraft = EditorGUILayout.IntSlider("Следопытство", fieldcraft, 0, 5);
+            if (nextFieldcraft != fieldcraft)
+                previewHero.SetCompetency(NarrativeCompetencyIds.Fieldcraft, nextFieldcraft);
+
+            GUILayout.Space(4f);
+            bool knowsTheWay = previewHero.HasTrait(NarrativeTraitIds.KnowsTheWay);
+            if (EditorGUILayout.ToggleLeft("Знающий дорогу", knowsTheWay) != knowsTheWay)
+            {
+                if (knowsTheWay) previewHero.RemoveTrait(NarrativeTraitIds.KnowsTheWay);
+                else previewHero.GrantTrait(NarrativeTraitIds.KnowsTheWay);
+            }
+
+            bool naturalist = previewHero.HasTrait(NarrativeTraitIds.Naturalist);
+            if (EditorGUILayout.ToggleLeft("Натуралист", naturalist) != naturalist)
+            {
+                if (naturalist) previewHero.RemoveTrait(NarrativeTraitIds.Naturalist);
+                else previewHero.GrantTrait(NarrativeTraitIds.Naturalist);
+            }
+
+            GUILayout.Space(4f);
+            previewFlagsCsv = EditorGUILayout.TextField("Флаги (через запятую)", previewFlagsCsv);
+            previewKnowledgeCsv = EditorGUILayout.TextField("Знания (через запятую)", previewKnowledgeCsv);
+            previewRelationsCsv = EditorGUILayout.TextField("Отношения (id:значение,...)", previewRelationsCsv);
+            previewCompanionsCsv = EditorGUILayout.TextField("Спутники (через запятую)", previewCompanionsCsv);
+            previewItemsCsv = EditorGUILayout.TextField("Предметы (через запятую)", previewItemsCsv);
+            previewWorldSeed = EditorGUILayout.IntField("World Seed", previewWorldSeed);
+
+            GUILayout.Space(4f);
+            previewForcedOutcome = (NarrativeCheckForcedOutcome)EditorGUILayout.EnumPopup(
+                "Исход активной проверки", previewForcedOutcome);
+            EditorGUILayout.HelpBox(
+                "Принудительный исход действует только в этом окне Preview. Игровой runtime всегда честно бросает кубики.",
+                MessageType.None);
+
+            EditorGUILayout.EndVertical();
+        }
+
         private void DrawPreview(string dialogueId)
         {
             if (!string.IsNullOrWhiteSpace(previewMessage))
                 EditorGUILayout.HelpBox(previewMessage, MessageType.Info);
 
-            if (previewSession == null || !previewSession.IsActive || !string.Equals(previewDialogueId, dialogueId, StringComparison.Ordinal))
-                return;
-
-            NarrativeDialogueNode node = previewSession.CurrentNode;
-            EditorGUILayout.BeginVertical("box");
-            EditorGUILayout.LabelField(node.Speaker, EditorStyles.boldLabel);
-            if (!string.IsNullOrWhiteSpace(node.Role))
-                EditorGUILayout.LabelField(node.Role, EditorStyles.miniLabel);
-            GUILayout.Space(4f);
-            EditorGUILayout.LabelField(node.Text, EditorStyles.wordWrappedLabel);
-            GUILayout.Space(8f);
-
-            for (int i = 0; i < node.Choices.Count; i++)
+            if (previewSession == null || !previewSession.IsActive || previewView == null ||
+                !string.Equals(previewDialogueId, dialogueId, StringComparison.Ordinal))
             {
-                int choiceIndex = i;
-                NarrativeDialogueChoice choice = node.Choices[i];
-                string label = choice.EndsDialogue ? choice.Text + "  [EXIT]" : choice.Text;
-                if (GUILayout.Button(label, GUILayout.MinHeight(32f)))
+                return;
+            }
+
+            EditorGUILayout.BeginVertical("box");
+
+            for (int i = 0; i < previewView.VisibleTextBlocks.Count; i++)
+            {
+                NarrativeDialogueVisibleBlock block = previewView.VisibleTextBlocks[i];
+                EditorGUILayout.LabelField(
+                    block.SpeakerDisplayName + "  [" + block.Kind + "]",
+                    EditorStyles.boldLabel);
+                if (!string.IsNullOrWhiteSpace(block.SpeakerRole))
+                    EditorGUILayout.LabelField(block.SpeakerRole, EditorStyles.miniLabel);
+                EditorGUILayout.LabelField(block.Text, EditorStyles.wordWrappedLabel);
+                GUILayout.Space(6f);
+            }
+
+            GUILayout.Space(4f);
+
+            for (int i = 0; i < previewView.AvailableChoices.Count; i++)
+            {
+                NarrativeDialogueChoiceView choiceView = previewView.AvailableChoices[i];
+                string label = choiceView.Text;
+                if (choiceView.Kind == DialogueChoiceKind.Exit)
+                    label += "  [EXIT]";
+
+                if (GUILayout.Button(label, GUILayout.MinHeight(30f)))
+                    ApplyPreviewSelection(choiceView.ChoiceId);
+
+                if (!string.IsNullOrWhiteSpace(choiceView.MechanicalSummary))
+                    EditorGUILayout.LabelField(choiceView.MechanicalSummary, EditorStyles.miniLabel);
+            }
+
+            if (previewView.DisabledChoices.Count > 0)
+            {
+                GUILayout.Space(4f);
+                for (int i = 0; i < previewView.DisabledChoices.Count; i++)
                 {
-                    bool continues = previewSession.SelectChoice(choiceIndex);
-                    if (!continues)
-                        previewMessage = "Диалог завершён. Нажмите «Запустить / с начала», чтобы пройти его снова.";
-                    Repaint();
+                    NarrativeDialogueChoiceView disabledView = previewView.DisabledChoices[i];
+                    GUI.enabled = false;
+                    GUILayout.Button(disabledView.Text, GUILayout.MinHeight(26f));
+                    GUI.enabled = true;
+                    EditorGUILayout.LabelField(disabledView.DisabledHint, EditorStyles.miniLabel);
                 }
             }
+
             EditorGUILayout.EndVertical();
+        }
+
+        private void ApplyPreviewSelection(string choiceId)
+        {
+            try
+            {
+                NarrativeDialogueSelectionResult result = previewSession.SelectChoicePreview(choiceId, previewForcedOutcome);
+                if (result.DialogueEnded)
+                {
+                    previewView = null;
+                    previewMessage = "Диалог завершён. Нажмите «Запустить / с начала», чтобы пройти его снова.";
+                }
+                else
+                {
+                    previewView = result.View;
+                    previewMessage = BuildCheckResultMessage(result.CheckResult);
+                }
+            }
+            catch (InvalidOperationException exception)
+            {
+                previewMessage = exception.Message;
+            }
+
+            Repaint();
+        }
+
+        private static string BuildCheckResultMessage(NarrativeCheckResult result)
+        {
+            if (result == null)
+                return string.Empty;
+
+            string outcome = result.Success ? "Успех" : "Провал";
+            string dice = result.HasDice ? " (" + result.DieOne + "+" + result.DieTwo + ")" : string.Empty;
+            string forced = result.IsForcedByPreview ? " [принудительно]" : string.Empty;
+            return outcome + dice + ": итог " + result.Total + " против сложности " + result.Difficulty + forced + ".";
         }
 
         private void DrawSpeakersTab()
@@ -238,6 +356,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             ResetPreview();
         }
 
+        // Использует SerializedProperty.DuplicateCommand(), чтобы глубоко
+        // скопировать весь диалог (включая textBlocks/choices/проверки/
+        // эффекты произвольной вложенности), а не переписывать копирование
+        // вручную поле за полем при каждом расширении схемы.
         private void DuplicateDialogue(SerializedObject serializedDatabase)
         {
             SerializedProperty dialogues = serializedDatabase.FindProperty("dialogues");
@@ -246,17 +368,20 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             selectedDialogueIndex = Mathf.Clamp(selectedDialogueIndex, 0, dialogues.arraySize - 1);
             Undo.RecordObject(database, "Duplicate Dialogue");
-            SerializedProperty source = dialogues.GetArrayElementAtIndex(selectedDialogueIndex);
-            int newIndex = dialogues.arraySize;
-            dialogues.arraySize++;
-            SerializedProperty destination = dialogues.GetArrayElementAtIndex(newIndex);
-            CopyDialogue(source, destination);
 
+            SerializedProperty source = dialogues.GetArrayElementAtIndex(selectedDialogueIndex);
             string originalId = source.FindPropertyRelative("id").stringValue;
             string originalTitle = source.FindPropertyRelative("title").stringValue;
+
+            source.DuplicateCommand();
+            int newIndex = selectedDialogueIndex + 1;
+            SerializedProperty destination = dialogues.GetArrayElementAtIndex(newIndex);
+
             destination.FindPropertyRelative("id").stringValue = MakeUniqueDialogueId(originalId + "_copy");
             destination.FindPropertyRelative("title").stringValue = originalTitle + " — копия";
             destination.FindPropertyRelative("status").enumValueIndex = (int)DialogueProductionStatus.Working;
+
+            RegenerateNarrativeIdentifiers(destination);
 
             serializedDatabase.ApplyModifiedProperties();
             selectedDialogueIndex = newIndex;

@@ -69,6 +69,10 @@ public class CommanderData : FighterData
 {
     public CommanderState State;
 
+    // Качества, компетенции и особенности героя — см. производственную
+    // инструкцию "качества, проверки и реактивный текст" §8.
+    public HeroProfileData HeroProfile;
+
     public CommanderData(
         string id,
         string name,
@@ -78,6 +82,7 @@ public class CommanderData : FighterData
         : base(id, name, role, level, defensePower)
     {
         State = CommanderState.InCastle;
+        HeroProfile = new HeroProfileData();
     }
 }
 
@@ -221,6 +226,10 @@ public class GameState
     public List<FighterData> Fighters;
     public List<LocationData> Locations;
     public ExpeditionData ActiveExpedition;
+
+    // Флаги, знания, отношения и история проверок диалогов/Encounter —
+    // см. §8, §18 производственной инструкции по качествам и проверкам.
+    public NarrativeStateData Narrative;
 
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
@@ -447,6 +456,7 @@ public class GameState
 
         Locations = locationPool;
         ActiveExpedition = null;
+        Narrative = new NarrativeStateData();
     }
 
     private static void ShuffleLocations(

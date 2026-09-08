@@ -70,6 +70,18 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                             endsDialogue.boolValue = true;
                             nextNodeId.stringValue = string.Empty;
                         }
+
+                        // Ветки активных проверок не превращаются в EXIT
+                        // молча — очищенная ссылка ловится валидацией
+                        // ("нет ветки успеха/провала"), автор обязан
+                        // выбрать новый узел явно.
+                        SerializedProperty successNodeId = choice.FindPropertyRelative("successNodeId");
+                        if (successNodeId != null && string.Equals(successNodeId.stringValue, nodeId, StringComparison.Ordinal))
+                            successNodeId.stringValue = string.Empty;
+
+                        SerializedProperty failureNodeId = choice.FindPropertyRelative("failureNodeId");
+                        if (failureNodeId != null && string.Equals(failureNodeId.stringValue, nodeId, StringComparison.Ordinal))
+                            failureNodeId.stringValue = string.Empty;
                     }
                 }
             }

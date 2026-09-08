@@ -540,8 +540,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         {
             switch (combinator)
             {
-                case NarrativeConditionCombinator.All: return "Все условия (И)";
-                case NarrativeConditionCombinator.Any: return "Любое условие (ИЛИ)";
+                case NarrativeConditionCombinator.All: return "Выполнены все условия";
+                case NarrativeConditionCombinator.Any: return "Выполнено хотя бы одно";
                 default: return combinator.ToString();
             }
         }
@@ -557,7 +557,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     selected = i;
             }
 
-            int next = EditorGUILayout.Popup("Оператор", selected, labels);
+            int next = EditorGUILayout.Popup("Как проверять", selected, labels);
             if (next >= 0 && next < CombinatorValues.Length)
                 combinatorProperty.enumValueIndex = (int)CombinatorValues[next];
         }
@@ -569,18 +569,18 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         {
             switch (type)
             {
-                case NarrativeConditionType.FlagSet: return "Флаг установлен";
-                case NarrativeConditionType.KnowledgeKnown: return "Знание известно";
-                case NarrativeConditionType.RelationAtLeast: return "Отношение не меньше";
-                case NarrativeConditionType.RelationAtMost: return "Отношение не больше";
-                case NarrativeConditionType.CompanionPresent: return "Спутник присутствует";
-                case NarrativeConditionType.ItemPresent: return "Предмет есть";
-                case NarrativeConditionType.QualityAtLeast: return "Качество не меньше";
-                case NarrativeConditionType.CompetencyAtLeast: return "Компетенция не меньше";
-                case NarrativeConditionType.CheckSucceeded: return "Проверка пройдена";
-                case NarrativeConditionType.CheckFailed: return "Проверка провалена";
-                case NarrativeConditionType.CheckNotAttempted: return "Проверка ни разу не пройдена";
-                case NarrativeConditionType.TraitPresent: return "Особенность есть";
+                case NarrativeConditionType.FlagSet: return "Событие / решение уже было";
+                case NarrativeConditionType.KnowledgeKnown: return "Герой это знает";
+                case NarrativeConditionType.RelationAtLeast: return "Отношение не ниже";
+                case NarrativeConditionType.RelationAtMost: return "Отношение не выше";
+                case NarrativeConditionType.CompanionPresent: return "Спутник рядом";
+                case NarrativeConditionType.ItemPresent: return "Предмет есть у героя";
+                case NarrativeConditionType.QualityAtLeast: return "Качество не ниже";
+                case NarrativeConditionType.CompetencyAtLeast: return "Компетенция не ниже";
+                case NarrativeConditionType.CheckSucceeded: return "Проверка была успешной";
+                case NarrativeConditionType.CheckFailed: return "Проверка была провалена";
+                case NarrativeConditionType.CheckNotAttempted: return "Проверка ещё не выполнялась";
+                case NarrativeConditionType.TraitPresent: return "У героя есть особенность";
                 default: return type.ToString();
             }
         }
@@ -675,52 +675,52 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 case NarrativeConditionType.QualityAtLeast:
                     DrawHeroQualityPopup(qualityParam, "Качество");
-                    EditorGUILayout.PropertyField(intParam, new GUIContent("Не меньше"));
+                    EditorGUILayout.PropertyField(intParam, new GUIContent("Минимум"));
                     break;
 
                 case NarrativeConditionType.CompetencyAtLeast:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID компетенции"));
-                    EditorGUILayout.PropertyField(intParam, new GUIContent("Не меньше"));
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Компетенция (ID)"));
+                    EditorGUILayout.PropertyField(intParam, new GUIContent("Минимум"));
                     break;
 
                 case NarrativeConditionType.RelationAtLeast:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID субъекта отношения"));
-                    EditorGUILayout.PropertyField(intParam, new GUIContent("Не меньше"));
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("С кем считаем отношение (ID)"));
+                    EditorGUILayout.PropertyField(intParam, new GUIContent("Минимум"));
                     break;
 
                 case NarrativeConditionType.RelationAtMost:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID субъекта отношения"));
-                    EditorGUILayout.PropertyField(intParam, new GUIContent("Не больше"));
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("С кем считаем отношение (ID)"));
+                    EditorGUILayout.PropertyField(intParam, new GUIContent("Максимум"));
                     break;
 
                 case NarrativeConditionType.FlagSet:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID флага"));
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Событие / решение (ID)"));
                     break;
 
                 case NarrativeConditionType.KnowledgeKnown:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID знания"));
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Знание (ID)"));
                     break;
 
                 case NarrativeConditionType.CompanionPresent:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID спутника"));
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Спутник (ID)"));
                     break;
 
                 case NarrativeConditionType.ItemPresent:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID предмета"));
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Предмет (ID)"));
                     break;
 
                 case NarrativeConditionType.CheckSucceeded:
                 case NarrativeConditionType.CheckFailed:
                 case NarrativeConditionType.CheckNotAttempted:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID проверки"));
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Проверка (ID)"));
                     break;
 
                 case NarrativeConditionType.TraitPresent:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("ID особенности"));
+                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Особенность (ID)"));
                     break;
             }
 
-            EditorGUILayout.PropertyField(negate, new GUIContent("Инвертировать (НЕ)"));
+            EditorGUILayout.PropertyField(negate, new GUIContent("Обратить условие"));
 
             EditorGUILayout.EndVertical();
             return false;

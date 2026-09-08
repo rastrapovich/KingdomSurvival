@@ -44,6 +44,13 @@ public partial class PrototypeUIController
     private VisualElement heroScreenExperienceFill;
     private Label heroScreenExperienceLabel;
     private VisualElement heroScreenUnitCard;
+    private VisualElement heroScreenUnitCardDimmer;
+    private VisualElement heroScreenStatTooltip;
+    private Label heroScreenStatTooltipTitle;
+    private Label heroScreenStatTooltipText;
+    private VisualElement heroScreenTagTooltip;
+    private Label heroScreenTagTooltipTitle;
+    private Label heroScreenTagTooltipText;
     private Button heroScreenNavButton;
 
     private UnitDatabaseAsset heroScreenUnits;
@@ -682,24 +689,99 @@ public partial class PrototypeUIController
     }
 
     // ------------------------------------------------------------------
-    // Подробная карточка существа/бойца
+    // Подробная карточка существа/бойца — по образцу SandboxFighterDetailsView
+    // из BattleSandbox: модальное окно с затемнением, боксы характеристик и
+    // теги с настоящими всплывающими подсказками по наведению.
+    //
+    // UI Toolkit в Player (не в редакторе) НЕ показывает встроенный
+    // VisualElement.tooltip — поэтому здесь, как и в BattleSandbox,
+    // подсказки рисуются вручную отдельными плавающими панелями.
     // ------------------------------------------------------------------
+
+    private const float HeroScreenUnitCardWidth = 650f;
+    private const float HeroScreenUnitCardHeight = 500f;
 
     private void BuildHeroScreenUnitCard()
     {
+        heroScreenUnitCardDimmer = new VisualElement
+        {
+            name = "hero-screen-unit-card-dimmer",
+            focusable = true
+        };
+        heroScreenUnitCardDimmer.style.position = Position.Absolute;
+        heroScreenUnitCardDimmer.style.left = 0f;
+        heroScreenUnitCardDimmer.style.right = 0f;
+        heroScreenUnitCardDimmer.style.top = 0f;
+        heroScreenUnitCardDimmer.style.bottom = 0f;
+        heroScreenUnitCardDimmer.style.backgroundColor = new Color(0.01f, 0.015f, 0.02f, 0.74f);
+        heroScreenUnitCardDimmer.style.display = DisplayStyle.None;
+        heroScreenUnitCardDimmer.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (evt.button != 0 || evt.target != heroScreenUnitCardDimmer)
+                return;
+            HideHeroScreenUnitCard();
+            evt.StopPropagation();
+        });
+        heroScreenUnitCardDimmer.RegisterCallback<KeyDownEvent>(evt =>
+        {
+            if (evt.keyCode != KeyCode.Escape)
+                return;
+            HideHeroScreenUnitCard();
+            evt.StopPropagation();
+        });
+        heroScreenOverlay.Add(heroScreenUnitCardDimmer);
+
         heroScreenUnitCard = new VisualElement { name = "hero-screen-unit-card" };
         heroScreenUnitCard.style.position = Position.Absolute;
-        heroScreenUnitCard.style.left = Length.Percent(32f);
-        heroScreenUnitCard.style.top = Length.Percent(18f);
-        heroScreenUnitCard.style.width = 520f;
-        heroScreenUnitCard.style.paddingLeft = 14f;
-        heroScreenUnitCard.style.paddingRight = 14f;
-        heroScreenUnitCard.style.paddingTop = 12f;
-        heroScreenUnitCard.style.paddingBottom = 12f;
-        heroScreenUnitCard.style.backgroundColor = HeroScreenPanel;
+        heroScreenUnitCard.style.left = Length.Percent(50f);
+        heroScreenUnitCard.style.top = Length.Percent(50f);
+        heroScreenUnitCard.style.marginLeft = -HeroScreenUnitCardWidth / 2f;
+        heroScreenUnitCard.style.marginTop = -HeroScreenUnitCardHeight / 2f;
+        heroScreenUnitCard.style.width = HeroScreenUnitCardWidth;
+        heroScreenUnitCard.style.height = HeroScreenUnitCardHeight;
+        heroScreenUnitCard.style.paddingLeft = 18f;
+        heroScreenUnitCard.style.paddingRight = 18f;
+        heroScreenUnitCard.style.paddingTop = 15f;
+        heroScreenUnitCard.style.paddingBottom = 15f;
+        heroScreenUnitCard.style.backgroundColor = new Color(0.105f, 0.12f, 0.145f, 0.995f);
         heroScreenUnitCard.style.display = DisplayStyle.None;
-        SetHeroScreenBorder(heroScreenUnitCard, 2f);
+        SetHeroScreenBorder(heroScreenUnitCard, new Color(0.45f, 0.38f, 0.25f, 1f), 1f);
+        SetHeroScreenRadius(heroScreenUnitCard, 6f);
         heroScreenOverlay.Add(heroScreenUnitCard);
+
+        heroScreenStatTooltip = new VisualElement { name = "hero-screen-stat-tooltip", pickingMode = PickingMode.Ignore };
+        heroScreenStatTooltip.style.display = DisplayStyle.None;
+        heroScreenStatTooltip.style.position = Position.Absolute;
+        heroScreenStatTooltip.style.width = 330f;
+        heroScreenStatTooltip.style.paddingLeft = 12f;
+        heroScreenStatTooltip.style.paddingRight = 12f;
+        heroScreenStatTooltip.style.paddingTop = 10f;
+        heroScreenStatTooltip.style.paddingBottom = 10f;
+        heroScreenStatTooltip.style.backgroundColor = new Color(0.055f, 0.065f, 0.075f, 0.995f);
+        SetHeroScreenBorder(heroScreenStatTooltip, new Color(0.58f, 0.47f, 0.26f, 1f), 1f);
+        SetHeroScreenRadius(heroScreenStatTooltip, 4f);
+        heroScreenStatTooltipTitle = new Label { style = { fontSize = 11f, unityFontStyleAndWeight = FontStyle.Bold, color = new Color(0.91f, 0.76f, 0.43f, 1f) } };
+        heroScreenStatTooltip.Add(heroScreenStatTooltipTitle);
+        heroScreenStatTooltipText = new Label { style = { fontSize = 10f, marginTop = 5f, whiteSpace = WhiteSpace.Normal, color = new Color(0.76f, 0.76f, 0.72f, 1f) } };
+        heroScreenStatTooltip.Add(heroScreenStatTooltipText);
+        heroScreenOverlay.Add(heroScreenStatTooltip);
+
+        heroScreenTagTooltip = new VisualElement { name = "hero-screen-tag-tooltip", pickingMode = PickingMode.Ignore };
+        heroScreenTagTooltip.style.display = DisplayStyle.None;
+        heroScreenTagTooltip.style.position = Position.Absolute;
+        heroScreenTagTooltip.style.width = 330f;
+        heroScreenTagTooltip.style.paddingLeft = 12f;
+        heroScreenTagTooltip.style.paddingRight = 12f;
+        heroScreenTagTooltip.style.paddingTop = 10f;
+        heroScreenTagTooltip.style.paddingBottom = 10f;
+        heroScreenTagTooltip.style.backgroundColor = new Color(0.055f, 0.065f, 0.075f, 0.995f);
+        SetHeroScreenBorder(heroScreenTagTooltip, new Color(0.58f, 0.47f, 0.26f, 1f), 1f);
+        SetHeroScreenRadius(heroScreenTagTooltip, 4f);
+        heroScreenTagTooltipTitle = new Label { style = { fontSize = 14f, unityFontStyleAndWeight = FontStyle.Bold, color = new Color(0.91f, 0.76f, 0.43f, 1f) } };
+        heroScreenTagTooltip.Add(heroScreenTagTooltipTitle);
+        heroScreenTagTooltipText = new Label { style = { fontSize = 13f, marginTop = 5f, whiteSpace = WhiteSpace.Normal, color = new Color(0.76f, 0.76f, 0.72f, 1f) } };
+        heroScreenTagTooltip.Add(heroScreenTagTooltipText);
+        heroScreenOverlay.Add(heroScreenTagTooltip);
     }
 
     private void ShowHeroScreenUnitCard(UnitDefinitionData unit)
@@ -710,60 +792,79 @@ public partial class PrototypeUIController
         heroScreenUnitCard.Clear();
 
         VisualElement header = new VisualElement();
+        header.style.height = 40f;
         header.style.flexDirection = FlexDirection.Row;
         header.style.justifyContent = Justify.SpaceBetween;
         header.style.alignItems = Align.Center;
-        header.style.marginBottom = 8f;
 
-        Label title = new Label(unit.DisplayLabel) { name = "hero-screen-unit-card-title" };
+        Label title = new Label(unit.DisplayLabel.ToUpperInvariant()) { name = "hero-screen-unit-card-title" };
         title.style.color = HeroScreenGold;
-        title.style.fontSize = 16f;
+        title.style.fontSize = 20f;
         title.style.unityFontStyleAndWeight = FontStyle.Bold;
         header.Add(title);
 
         Button close = new Button(HideHeroScreenUnitCard) { text = "×" };
-        StyleHeroScreenButton(close, 34f, 26f);
+        StyleHeroScreenButton(close, 36f, 32f);
         header.Add(close);
         heroScreenUnitCard.Add(header);
 
         VisualElement body = new VisualElement();
+        body.style.flexGrow = 1f;
         body.style.flexDirection = FlexDirection.Row;
+        body.style.marginTop = 10f;
 
         VisualElement portrait = new VisualElement { name = "hero-screen-unit-card-portrait" };
-        portrait.style.width = 150f;
-        portrait.style.height = 150f;
-        portrait.style.marginRight = 12f;
-        portrait.style.backgroundColor = HeroScreenPanelDeep;
-        SetHeroScreenBorder(portrait, 1f);
+        portrait.style.width = 210f;
+        portrait.style.height = 390f;
+        portrait.style.flexShrink = 0f;
+        portrait.style.marginRight = 20f;
+        portrait.style.position = Position.Relative;
+        portrait.style.backgroundColor = new Color(0.075f, 0.085f, 0.105f, 1f);
+        SetHeroScreenBorder(portrait, new Color(0.27f, 0.30f, 0.34f, 1f), 1f);
+        SetHeroScreenRadius(portrait, 4f);
         ApplyHeroScreenPortrait(portrait, unit);
+
+        VisualElement portraitHealthBar = CreateHeroScreenHealthBar(unit.MaxHitPoints, unit.MaxHitPoints, 12f);
+        portraitHealthBar.style.position = Position.Absolute;
+        portraitHealthBar.style.left = 12f;
+        portraitHealthBar.style.right = 12f;
+        portraitHealthBar.style.bottom = 13f;
+        portraitHealthBar.style.marginTop = 0f;
+        portraitHealthBar.style.marginBottom = 0f;
+        portrait.Add(portraitHealthBar);
         body.Add(portrait);
 
         VisualElement stats = new VisualElement();
         stats.style.flexGrow = 1f;
-        stats.Add(CreateHeroScreenHealthBar(unit.MaxHitPoints, unit.MaxHitPoints, 6f));
-        AddHeroScreenUnitCardRow(
-            stats, "Здоровье", unit.MaxHitPoints,
+
+        Label section = new Label("БОЕВЫЕ ХАРАКТЕРИСТИКИ");
+        section.style.fontSize = 12f;
+        section.style.color = new Color(0.72f, 0.67f, 0.56f, 1f);
+        section.style.unityFontStyleAndWeight = FontStyle.Bold;
+        section.style.marginBottom = 8f;
+        stats.Add(section);
+
+        CreateHeroScreenStatRow(
+            stats, "ЖИЗНИ", unit.MaxHitPoints.ToString(),
             "Текущий запас здоровья бойца. При 0 жизней боец выбывает из боя.");
-        AddHeroScreenUnitCardRow(
-            stats, "Атака", unit.Attack,
+        CreateHeroScreenStatRow(
+            stats, "АТАКА", unit.Attack.ToString(),
             "Сравнивается с Защитой цели и определяет множитель наносимого урона.");
-        AddHeroScreenUnitCardRow(
-            stats, "Защита", unit.Defense,
+        CreateHeroScreenStatRow(
+            stats, "ЗАЩИТА", unit.Defense.ToString(),
             "Сравнивается с Атакой противника и влияет на количество получаемого урона.");
-        AddHeroScreenUnitCardRow(
-            stats, "Урон", unit.Damage,
+        CreateHeroScreenStatRow(
+            stats, "УРОН", unit.Damage.ToString(),
             "Базовое количество урона до применения результата сравнения Атаки и Защиты.");
-        AddHeroScreenUnitCardRow(
-            stats, "Движение", unit.Movement,
-            "Запас движения бойца на активацию.");
-        AddHeroScreenUnitCardRow(
-            stats, "Инициатива", unit.Initiative,
+        CreateHeroScreenStatRow(
+            stats, "ХОД", unit.Movement.ToString(),
+            "Запас движения бойца на активацию. Стоимость перемещения зависит от пройденных гексов и местности.");
+        CreateHeroScreenStatRow(
+            stats, "ИНИЦИАТИВА", unit.Initiative.ToString(),
             "Определяет порядок активации бойцов в начале каждого раунда.");
-        AddHeroScreenUnitCardRow(
-            stats, "Дальность атаки", unit.AttackRange,
+        CreateHeroScreenStatRow(
+            stats, "ДАЛЬНОСТЬ АТАКИ", unit.AttackRange.ToString(),
             "Максимальное расстояние в гексах, с которого боец может атаковать цель.");
-        body.Add(stats);
-        heroScreenUnitCard.Add(body);
 
         VisualElement tags = CreateHeroScreenWrapRow("hero-screen-unit-card-tags");
         tags.style.marginTop = 10f;
@@ -776,37 +877,131 @@ public partial class PrototypeUIController
                     tags.Add(CreateHeroScreenChip(tag.DisplayLabel, tag.Color, tag.Description));
             }
         }
+        stats.Add(tags);
 
-        heroScreenUnitCard.Add(tags);
+        body.Add(stats);
+        heroScreenUnitCard.Add(body);
+
+        heroScreenUnitCardDimmer.style.display = DisplayStyle.Flex;
         heroScreenUnitCard.style.display = DisplayStyle.Flex;
+        heroScreenUnitCardDimmer.BringToFront();
         heroScreenUnitCard.BringToFront();
+        heroScreenUnitCardDimmer.Focus();
     }
 
     private void HideHeroScreenUnitCard()
     {
+        HideHeroScreenStatTooltip();
+        HideHeroScreenTagTooltip();
+
         if (heroScreenUnitCard != null)
             heroScreenUnitCard.style.display = DisplayStyle.None;
+        if (heroScreenUnitCardDimmer != null)
+            heroScreenUnitCardDimmer.style.display = DisplayStyle.None;
     }
 
-    private void AddHeroScreenUnitCardRow(VisualElement host, string label, int value, string description)
+    // Боксированная строка характеристики: подсветка и всплывающая подсказка
+    // по наведению — как CreateStatRow в SandboxFighterDetailsView.
+    private void CreateHeroScreenStatRow(VisualElement parent, string title, string value, string explanation)
     {
-        VisualElement row = new VisualElement { tooltip = description };
+        Color idleColor = new Color(0.13f, 0.145f, 0.165f, 1f);
+        Color hoverColor = new Color(0.20f, 0.19f, 0.14f, 1f);
+
+        VisualElement row = new VisualElement();
+        row.style.height = 34f;
+        row.style.marginBottom = 4f;
+        row.style.paddingLeft = 10f;
+        row.style.paddingRight = 10f;
         row.style.flexDirection = FlexDirection.Row;
+        row.style.alignItems = Align.Center;
         row.style.justifyContent = Justify.SpaceBetween;
-        row.style.marginBottom = 2f;
+        row.style.backgroundColor = idleColor;
+        SetHeroScreenBorder(row, new Color(0.25f, 0.27f, 0.29f, 1f), 1f);
+        SetHeroScreenRadius(row, 3f);
 
-        Label caption = new Label(label);
-        caption.style.color = HeroScreenMuted;
-        caption.style.fontSize = 11f;
-        row.Add(caption);
+        Label titleLabel = new Label(title);
+        titleLabel.style.fontSize = 10f;
+        titleLabel.style.color = new Color(0.64f, 0.63f, 0.58f, 1f);
+        titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+        titleLabel.pickingMode = PickingMode.Ignore;
+        row.Add(titleLabel);
 
-        Label number = new Label(value.ToString());
-        number.style.color = HeroScreenText;
-        number.style.fontSize = 12f;
-        number.style.unityFontStyleAndWeight = FontStyle.Bold;
-        row.Add(number);
+        Label valueLabel = new Label(value);
+        valueLabel.style.fontSize = 13f;
+        valueLabel.style.color = new Color(0.91f, 0.79f, 0.54f, 1f);
+        valueLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+        valueLabel.pickingMode = PickingMode.Ignore;
+        row.Add(valueLabel);
 
-        host.Add(row);
+        row.RegisterCallback<PointerEnterEvent>(_ =>
+        {
+            row.style.backgroundColor = hoverColor;
+            ShowHeroScreenStatTooltip(row, title, explanation);
+        });
+        row.RegisterCallback<PointerLeaveEvent>(_ =>
+        {
+            row.style.backgroundColor = idleColor;
+            HideHeroScreenStatTooltip();
+        });
+
+        parent.Add(row);
+    }
+
+    private void ShowHeroScreenStatTooltip(VisualElement anchor, string title, string explanation)
+    {
+        ShowHeroScreenTooltip(heroScreenStatTooltip, heroScreenStatTooltipTitle, heroScreenStatTooltipText, anchor, title, explanation);
+    }
+
+    private void HideHeroScreenStatTooltip()
+    {
+        if (heroScreenStatTooltip != null)
+            heroScreenStatTooltip.style.display = DisplayStyle.None;
+    }
+
+    private void ShowHeroScreenTagTooltip(VisualElement anchor, string title, string explanation)
+    {
+        ShowHeroScreenTooltip(heroScreenTagTooltip, heroScreenTagTooltipTitle, heroScreenTagTooltipText, anchor, title.ToUpperInvariant(), explanation);
+    }
+
+    private void HideHeroScreenTagTooltip()
+    {
+        if (heroScreenTagTooltip != null)
+            heroScreenTagTooltip.style.display = DisplayStyle.None;
+    }
+
+    private void ShowHeroScreenTooltip(
+        VisualElement tooltip,
+        Label tooltipTitle,
+        Label tooltipText,
+        VisualElement anchor,
+        string title,
+        string explanation)
+    {
+        if (tooltip == null || tooltipTitle == null || tooltipText == null || anchor == null)
+            return;
+
+        tooltipTitle.text = title;
+        tooltipText.text = string.IsNullOrWhiteSpace(explanation)
+            ? "Описание для этого пункта пока не задано."
+            : explanation;
+        tooltip.style.display = DisplayStyle.Flex;
+        tooltip.BringToFront();
+
+        Rect bounds = anchor.worldBound;
+        Vector2 topRight = heroScreenOverlay.WorldToLocal(new Vector2(bounds.xMax, bounds.yMin));
+        Vector2 topLeft = heroScreenOverlay.WorldToLocal(new Vector2(bounds.xMin, bounds.yMin));
+        float rootWidth = heroScreenOverlay.resolvedStyle.width;
+        float rootHeight = heroScreenOverlay.resolvedStyle.height;
+        if (float.IsNaN(rootWidth) || rootWidth < 400f)
+            rootWidth = 1280f;
+        if (float.IsNaN(rootHeight) || rootHeight < 300f)
+            rootHeight = 720f;
+
+        float left = topRight.x + 10f;
+        if (left + 330f > rootWidth - 12f)
+            left = topLeft.x - 340f;
+        tooltip.style.left = Mathf.Clamp(left, 12f, Mathf.Max(12f, rootWidth - 342f));
+        tooltip.style.top = Mathf.Clamp(topRight.y, 12f, Mathf.Max(12f, rootHeight - 120f));
     }
 
     // Как в BattleSandbox: узкая полоса, закрашенная пропорционально
@@ -975,10 +1170,12 @@ public partial class PrototypeUIController
         return row;
     }
 
-    private static VisualElement CreateHeroScreenChip(string text, Color color, string tooltip)
+    // UI Toolkit в Player не показывает встроенный Label.tooltip, поэтому
+    // описание при наведении рисуется вручную через heroScreenTagTooltip —
+    // как всплывающая подсказка тега в BattleSandbox.
+    private VisualElement CreateHeroScreenChip(string text, Color color, string description)
     {
         Label chip = new Label(text);
-        chip.tooltip = tooltip;
         chip.style.marginRight = 5f;
         chip.style.marginTop = 3f;
         chip.style.paddingLeft = 7f;
@@ -987,13 +1184,31 @@ public partial class PrototypeUIController
         chip.style.paddingBottom = 2f;
         chip.style.fontSize = 10f;
         chip.style.color = HeroScreenText;
-        Color background = color;
-        background.a = 0.42f;
-        chip.style.backgroundColor = background;
+
+        Color idleBackground = color;
+        idleBackground.a = 0.42f;
+        Color hoverBackground = color;
+        hoverBackground.a = 0.65f;
+        chip.style.backgroundColor = idleBackground;
         chip.style.borderTopLeftRadius = 3f;
         chip.style.borderTopRightRadius = 3f;
         chip.style.borderBottomLeftRadius = 3f;
         chip.style.borderBottomRightRadius = 3f;
+
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            chip.RegisterCallback<PointerEnterEvent>(_ =>
+            {
+                chip.style.backgroundColor = hoverBackground;
+                ShowHeroScreenTagTooltip(chip, text, description);
+            });
+            chip.RegisterCallback<PointerLeaveEvent>(_ =>
+            {
+                chip.style.backgroundColor = idleBackground;
+                HideHeroScreenTagTooltip();
+            });
+        }
+
         return chip;
     }
 
@@ -1019,14 +1234,19 @@ public partial class PrototypeUIController
 
     private static void SetHeroScreenBorder(VisualElement element, float width)
     {
+        SetHeroScreenBorder(element, HeroScreenBorder, width);
+    }
+
+    private static void SetHeroScreenBorder(VisualElement element, Color color, float width)
+    {
         element.style.borderLeftWidth = width;
         element.style.borderRightWidth = width;
         element.style.borderTopWidth = width;
         element.style.borderBottomWidth = width;
-        element.style.borderLeftColor = HeroScreenBorder;
-        element.style.borderRightColor = HeroScreenBorder;
-        element.style.borderTopColor = HeroScreenBorder;
-        element.style.borderBottomColor = HeroScreenBorder;
+        element.style.borderLeftColor = color;
+        element.style.borderRightColor = color;
+        element.style.borderTopColor = color;
+        element.style.borderBottomColor = color;
     }
 
     private static string HeroScreenSlug(string value)

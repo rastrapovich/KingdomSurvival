@@ -312,7 +312,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             if (node.isExpanded)
             {
-                EditorGUILayout.PropertyField(node.FindPropertyRelative("id"), new GUIContent("Node ID"));
+                EditorGUILayout.PropertyField(node.FindPropertyRelative("id"), new GUIContent("ID узла"));
                 DrawSpeakerPopup(node.FindPropertyRelative("speakerId"));
                 EditorGUILayout.PropertyField(node.FindPropertyRelative("text"), new GUIContent("Реплика (legacy)"));
 
@@ -365,7 +365,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             SerializedProperty block = textBlocks.GetArrayElementAtIndex(blockIndex);
             SerializedProperty kind = block.FindPropertyRelative("kind");
             SerializedProperty blockId = block.FindPropertyRelative("blockId");
-            string label = "[" + (DialogueTextBlockKind)kind.enumValueIndex + "] " +
+            string label = "[" + TextBlockKindLabel((DialogueTextBlockKind)kind.enumValueIndex) + "] " +
                             (string.IsNullOrWhiteSpace(blockId.stringValue) ? "<без ID>" : blockId.stringValue);
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -383,8 +383,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             if (block.isExpanded)
             {
-                EditorGUILayout.PropertyField(blockId, new GUIContent("Block ID"));
-                EditorGUILayout.PropertyField(kind, new GUIContent("Тип"));
+                EditorGUILayout.PropertyField(blockId, new GUIContent("ID блока"));
+                DrawTextBlockKindPopup(kind);
                 EditorGUILayout.PropertyField(block.FindPropertyRelative("speakerIdOverride"), new GUIContent("Говорящий (переопределение)"));
                 EditorGUILayout.PropertyField(block.FindPropertyRelative("text"), new GUIContent("Текст"));
                 EditorGUILayout.PropertyField(block.FindPropertyRelative("conditions"), new GUIContent("Условия показа"), true);
@@ -423,7 +423,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUILayout.LabelField("Вид: " + ChoiceKindLabel(choiceKind), EditorStyles.miniLabel);
             EditorGUILayout.PropertyField(choice.FindPropertyRelative("conditions"), new GUIContent("Условия показа"), true);
             if (choiceKind != DialogueChoiceKind.Normal || choice.FindPropertyRelative("conditions").FindPropertyRelative("Conditions").arraySize > 0)
-                EditorGUILayout.PropertyField(choice.FindPropertyRelative("unavailablePresentation"), new GUIContent("Если недоступен"));
+                DrawUnavailablePresentationPopup(choice.FindPropertyRelative("unavailablePresentation"));
 
             switch (choiceKind)
             {
@@ -462,6 +462,68 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 case DialogueChoiceKind.Exit: return "завершение";
                 default: return kind.ToString();
             }
+        }
+
+        private static readonly DialogueTextBlockKind[] TextBlockKindValues =
+            (DialogueTextBlockKind[])Enum.GetValues(typeof(DialogueTextBlockKind));
+
+        private static string TextBlockKindLabel(DialogueTextBlockKind kind)
+        {
+            switch (kind)
+            {
+                case DialogueTextBlockKind.MainLine: return "Основная реплика";
+                case DialogueTextBlockKind.Observation: return "Наблюдение";
+                case DialogueTextBlockKind.Memory: return "Воспоминание";
+                case DialogueTextBlockKind.HeroThought: return "Мысль героя";
+                case DialogueTextBlockKind.CompanionLine: return "Реплика спутника";
+                case DialogueTextBlockKind.Narration: return "Повествование";
+                default: return kind.ToString();
+            }
+        }
+
+        private static void DrawTextBlockKindPopup(SerializedProperty kindProperty)
+        {
+            string[] labels = new string[TextBlockKindValues.Length];
+            int selected = 0;
+            for (int i = 0; i < TextBlockKindValues.Length; i++)
+            {
+                labels[i] = TextBlockKindLabel(TextBlockKindValues[i]);
+                if (kindProperty.enumValueIndex == (int)TextBlockKindValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("Тип", selected, labels);
+            if (next >= 0 && next < TextBlockKindValues.Length)
+                kindProperty.enumValueIndex = (int)TextBlockKindValues[next];
+        }
+
+        private static readonly DialogueChoiceUnavailablePresentation[] UnavailablePresentationValues =
+            (DialogueChoiceUnavailablePresentation[])Enum.GetValues(typeof(DialogueChoiceUnavailablePresentation));
+
+        private static string UnavailablePresentationLabel(DialogueChoiceUnavailablePresentation presentation)
+        {
+            switch (presentation)
+            {
+                case DialogueChoiceUnavailablePresentation.Hidden: return "Скрыт";
+                case DialogueChoiceUnavailablePresentation.DisabledWithHint: return "Показан неактивным с подсказкой";
+                default: return presentation.ToString();
+            }
+        }
+
+        private static void DrawUnavailablePresentationPopup(SerializedProperty presentationProperty)
+        {
+            string[] labels = new string[UnavailablePresentationValues.Length];
+            int selected = 0;
+            for (int i = 0; i < UnavailablePresentationValues.Length; i++)
+            {
+                labels[i] = UnavailablePresentationLabel(UnavailablePresentationValues[i]);
+                if (presentationProperty.enumValueIndex == (int)UnavailablePresentationValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("Если недоступен", selected, labels);
+            if (next >= 0 && next < UnavailablePresentationValues.Length)
+                presentationProperty.enumValueIndex = (int)UnavailablePresentationValues[next];
         }
 
         private void DrawStartNodePopup(SerializedProperty startNodeId, SerializedProperty nodes)

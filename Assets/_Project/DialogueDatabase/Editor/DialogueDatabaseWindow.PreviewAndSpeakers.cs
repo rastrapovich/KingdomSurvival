@@ -104,7 +104,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             previewRelationsCsv = EditorGUILayout.TextField("Отношения (id:значение,...)", previewRelationsCsv);
             previewCompanionsCsv = EditorGUILayout.TextField("Спутники (через запятую)", previewCompanionsCsv);
             previewItemsCsv = EditorGUILayout.TextField("Предметы (через запятую)", previewItemsCsv);
-            previewWorldSeed = EditorGUILayout.IntField("World Seed", previewWorldSeed);
+            previewWorldSeed = EditorGUILayout.IntField("Seed мира", previewWorldSeed);
 
             GUILayout.Space(4f);
             previewForcedOutcome = (NarrativeCheckForcedOutcome)EditorGUILayout.EnumPopup(

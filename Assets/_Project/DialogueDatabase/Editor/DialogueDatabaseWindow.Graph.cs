@@ -29,6 +29,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             Failure
         }
 
+        private const float GraphInspectorWidth = 360f;
+
         private Vector2 graphPan = new Vector2(40f, 40f);
         private Vector2 graphCanvasSize = new Vector2(700f, 500f);
         private float graphZoom = 1f;
@@ -39,6 +41,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private int graphConnectingChoiceIndex = -1;
         private GraphChoicePortKind graphConnectingPortKind = GraphChoicePortKind.Normal;
         private bool graphNeedsCenter = true;
+        private Vector2 graphInspectorScroll;
+        private int graphInspectorLastNodeIndex = -1;
 
         private void ResetGraphViewState()
         {
@@ -51,6 +55,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             graphConnectingChoiceIndex = -1;
             graphConnectingPortKind = GraphChoicePortKind.Normal;
             graphNeedsCenter = true;
+            graphInspectorScroll = Vector2.zero;
+            graphInspectorLastNodeIndex = -1;
         }
 
         private void DrawDialogueGraph(SerializedProperty dialogue)
@@ -58,6 +64,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
             EnsureGraphPositions(dialogue);
             DrawGraphToolbar(dialogue, nodes);
+
+            EditorGUILayout.BeginHorizontal();
 
             Rect canvasRect = GUILayoutUtility.GetRect(
                 180f,
@@ -91,6 +99,43 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             DrawPendingConnection(nodes);
 
             GUI.EndGroup();
+
+            DrawGraphInspectorPanel(dialogue, nodes);
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        // Панель свойств выбранного узла в режиме «Граф» (§18 доработки):
+        // текстовые блоки, условия, проверки, эффекты и переходы — тот же
+        // DrawNode/DrawChoice/DrawTextBlock, что и в режиме «Таблица», без
+        // дублирования логики. Холст остаётся местом для перетаскивания
+        // связей, точное редактирование полей — здесь.
+        private void DrawGraphInspectorPanel(SerializedProperty dialogue, SerializedProperty nodes)
+        {
+            EditorGUILayout.BeginVertical(GUILayout.Width(GraphInspectorWidth), GUILayout.ExpandHeight(true));
+            EditorGUILayout.LabelField("СВОЙСТВА УЗЛА", EditorStyles.boldLabel);
+
+            if (graphSelectedNodeIndex < 0 || graphSelectedNodeIndex >= nodes.arraySize)
+            {
+                EditorGUILayout.HelpBox(
+                    "Выберите узел на холсте, чтобы отредактировать его текстовые блоки, ответы, условия, проверки и эффекты — так же, как в «Таблице».",
+                    MessageType.Info);
+                EditorGUILayout.EndVertical();
+                return;
+            }
+
+            SerializedProperty node = nodes.GetArrayElementAtIndex(graphSelectedNodeIndex);
+            if (graphInspectorLastNodeIndex != graphSelectedNodeIndex)
+            {
+                node.isExpanded = true;
+                graphInspectorLastNodeIndex = graphSelectedNodeIndex;
+            }
+
+            graphInspectorScroll = EditorGUILayout.BeginScrollView(graphInspectorScroll);
+            DrawNode(dialogue, nodes, graphSelectedNodeIndex);
+            EditorGUILayout.EndScrollView();
+
+            EditorGUILayout.EndVertical();
         }
 
         private void DrawGraphToolbar(SerializedProperty dialogue, SerializedProperty nodes)
@@ -117,7 +162,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             GUILayout.Space(8f);
             GUILayout.Label(
-                "Перетаскивай ноды · тяни жёлтый порт ответа, зелёный порт успеха или красный порт провала на нужный нод · точный выбор узла для проверок — в «Таблице» · колесо = масштаб · Alt+ЛКМ/СКМ = поле",
+                "Перетаскивай ноды · тяни жёлтый порт ответа, зелёный порт успеха или красный порт провала на нужный нод · выбери узел, чтобы открыть его свойства справа · колесо = масштаб · Alt+ЛКМ/СКМ = поле",
                 EditorStyles.miniLabel);
 
             GUILayout.FlexibleSpace();
@@ -495,7 +540,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 headerRect.height - 8f * graphZoom);
             GUI.Label(
                 idRect,
-                string.IsNullOrWhiteSpace(nodeId) ? "<без Node ID>" : nodeId,
+                string.IsNullOrWhiteSpace(nodeId) ? "<без ID узла>" : nodeId,
                 ScaledStyle(EditorStyles.boldLabel, 11, TextAnchor.MiddleLeft));
 
             if (isStart)
@@ -505,7 +550,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     headerRect.y + 5f * graphZoom,
                     48f * graphZoom,
                     headerRect.height - 10f * graphZoom);
-                GUI.Label(startRect, "START", ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleCenter));
+                GUI.Label(startRect, "СТАРТ", ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleCenter));
             }
 
             float y = headerRect.yMax + 6f * graphZoom;
@@ -688,12 +733,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 // Kind.Exit — явное завершение разговора; не путать с
                 // Table-режимом, где EndsDialogue тоже может быть true у
                 // обычного (не Exit) варианта — тот случай остаётся ниже.
-                GUI.Label(targetRect, "EXIT", ScaledStyle(EditorStyles.miniLabel, 10, TextAnchor.MiddleCenter));
+                GUI.Label(targetRect, "ВЫХОД", ScaledStyle(EditorStyles.miniLabel, 10, TextAnchor.MiddleCenter));
                 return;
             }
 
             List<string> labels = new List<string>();
-            labels.Add("EXIT");
+            labels.Add("ВЫХОД");
             for (int i = 0; i < nodes.arraySize; i++)
             {
                 string id = nodes.GetArrayElementAtIndex(i).FindPropertyRelative("id").stringValue;

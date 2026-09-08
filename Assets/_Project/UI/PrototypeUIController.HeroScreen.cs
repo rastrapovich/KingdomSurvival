@@ -212,6 +212,10 @@ public partial class PrototypeUIController
         column.style.marginRight = 12f;
         column.style.minWidth = 0f;
 
+        ScrollView scroll = CreateHeroScreenColumnScroll("hero-screen-left-column-scroll");
+        column.Add(scroll);
+        VisualElement content = scroll.contentContainer;
+
         VisualElement identity = CreateHeroScreenPanel("hero-screen-identity", "ГЕРОЙ");
 
         heroScreenPortrait = new VisualElement { name = "hero-screen-portrait" };
@@ -234,14 +238,14 @@ public partial class PrototypeUIController
         identity.Add(heroScreenRoleLabel);
 
         identity.Add(BuildHeroScreenExperienceBlock());
-        column.Add(identity);
+        content.Add(identity);
 
         VisualElement states = CreateHeroScreenPanel("hero-screen-states", "СОСТОЯНИЯ");
         heroScreenStatesRow = CreateHeroScreenWrapRow("hero-screen-states-row");
         states.Add(heroScreenStatesRow);
-        column.Add(states);
+        content.Add(states);
 
-        column.Add(BuildHeroScreenSupplyPanel());
+        content.Add(BuildHeroScreenSupplyPanel());
 
         return column;
     }
@@ -395,6 +399,10 @@ public partial class PrototypeUIController
         column.style.minWidth = 0f;
         column.style.marginRight = 12f;
 
+        ScrollView scroll = CreateHeroScreenColumnScroll("hero-screen-center-column-scroll");
+        column.Add(scroll);
+        VisualElement content = scroll.contentContainer;
+
         // Качества, компетенции и боевые характеристики визуально не
         // смешиваются (§17 производственной инструкции по качествам и
         // проверкам) — три отдельные панели вместо одной общей сетки.
@@ -403,34 +411,34 @@ public partial class PrototypeUIController
         heroScreenQualitiesGrid.style.flexDirection = FlexDirection.Row;
         heroScreenQualitiesGrid.style.flexWrap = Wrap.Wrap;
         qualities.Add(heroScreenQualitiesGrid);
-        column.Add(qualities);
+        content.Add(qualities);
 
         VisualElement competencies = CreateHeroScreenPanel("hero-screen-competencies", "КОМПЕТЕНЦИИ");
         heroScreenCompetenciesRow = new VisualElement { name = "hero-screen-competencies-row" };
         competencies.Add(heroScreenCompetenciesRow);
-        column.Add(competencies);
+        content.Add(competencies);
 
         VisualElement traits = CreateHeroScreenPanel("hero-screen-traits", "ОСОБЕННОСТИ");
         heroScreenTraitsRow = CreateHeroScreenWrapRow("hero-screen-traits-row");
         traits.Add(heroScreenTraitsRow);
-        column.Add(traits);
+        content.Add(traits);
 
         VisualElement stats = CreateHeroScreenPanel("hero-screen-stats", "БОЕВЫЕ ХАРАКТЕРИСТИКИ");
         heroScreenStatsGrid = new VisualElement { name = "hero-screen-stats-grid" };
         heroScreenStatsGrid.style.flexDirection = FlexDirection.Row;
         heroScreenStatsGrid.style.flexWrap = Wrap.Wrap;
         stats.Add(heroScreenStatsGrid);
-        column.Add(stats);
+        content.Add(stats);
 
         VisualElement tags = CreateHeroScreenPanel("hero-screen-tags", "ТЕГИ");
         heroScreenTagsRow = CreateHeroScreenWrapRow("hero-screen-tags-row");
         tags.Add(heroScreenTagsRow);
-        column.Add(tags);
+        content.Add(tags);
 
         VisualElement abilities = CreateHeroScreenPanel("hero-screen-abilities", "СПОСОБНОСТИ");
         heroScreenAbilitiesRow = CreateHeroScreenWrapRow("hero-screen-abilities-row");
         abilities.Add(heroScreenAbilitiesRow);
-        column.Add(abilities);
+        content.Add(abilities);
 
         return column;
     }
@@ -441,12 +449,16 @@ public partial class PrototypeUIController
         column.style.width = new Length(26f, LengthUnit.Percent);
         column.style.minWidth = 0f;
 
+        ScrollView scroll = CreateHeroScreenColumnScroll("hero-screen-right-column-scroll");
+        column.Add(scroll);
+        VisualElement content = scroll.contentContainer;
+
         VisualElement equipment = CreateHeroScreenPanel("hero-screen-equipment", "СНАРЯЖЕНИЕ");
         heroScreenEquipmentGrid = new VisualElement { name = "hero-screen-equipment-grid" };
         heroScreenEquipmentGrid.style.flexDirection = FlexDirection.Row;
         heroScreenEquipmentGrid.style.flexWrap = Wrap.Wrap;
         equipment.Add(heroScreenEquipmentGrid);
-        column.Add(equipment);
+        content.Add(equipment);
 
         VisualElement inventory = CreateHeroScreenPanel("hero-screen-inventory", "ИНВЕНТАРЬ");
         inventory.style.flexGrow = 1f;
@@ -454,9 +466,18 @@ public partial class PrototypeUIController
         heroScreenInventoryGrid.style.flexDirection = FlexDirection.Row;
         heroScreenInventoryGrid.style.flexWrap = Wrap.Wrap;
         inventory.Add(heroScreenInventoryGrid);
-        column.Add(inventory);
+        content.Add(inventory);
 
         return column;
+    }
+
+    private static ScrollView CreateHeroScreenColumnScroll(string name)
+    {
+        ScrollView scroll = new ScrollView(ScrollViewMode.Vertical) { name = name };
+        scroll.style.flexGrow = 1f;
+        scroll.style.minHeight = 0f;
+        scroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+        return scroll;
     }
 
     private VisualElement BuildHeroScreenRosterBar()

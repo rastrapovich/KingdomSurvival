@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using KingdomSurvival.DialogueDatabase;
 using UnityEditor;
@@ -557,7 +558,7 @@ namespace KingdomSurvival.UILayout.Editor
             EditorGUILayout.LabelField("ЭЛЕМЕНТ — " + element.DisplayName, EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("id"), new GUIContent("ID"));
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("displayName"), new GUIContent("Название"));
-            EditorGUILayout.PropertyField(selected.FindPropertyRelative("kind"), new GUIContent("Тип"));
+            DrawElementKindPopup(selected.FindPropertyRelative("kind"));
             DrawParentField(selected, element);
             EditorGUILayout.PropertyField(
                 selected.FindPropertyRelative("targetName"),
@@ -591,7 +592,7 @@ namespace KingdomSurvival.UILayout.Editor
 
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("ГЕОМЕТРИЯ", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(selected.FindPropertyRelative("rect"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("rect"), new GUIContent("Прямоугольник"));
 
             if (element.IsTextual)
             {
@@ -600,21 +601,21 @@ namespace KingdomSurvival.UILayout.Editor
                 EditorGUILayout.PropertyField(selected.FindPropertyRelative("font"), new GUIContent("Шрифт"));
                 EditorGUILayout.PropertyField(selected.FindPropertyRelative("fontSize"), new GUIContent("Размер"));
                 EditorGUILayout.PropertyField(selected.FindPropertyRelative("textColor"), new GUIContent("Цвет"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("fontStyle"), new GUIContent("Начертание"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("horizontalAlignment"), new GUIContent("По горизонтали"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("verticalAlignment"), new GUIContent("По вертикали"));
-                EditorGUILayout.PropertyField(selected.FindPropertyRelative("previewText"), new GUIContent("Текст preview"));
+                DrawFontStylePopup(selected.FindPropertyRelative("fontStyle"));
+                DrawHorizontalAlignmentPopup(selected.FindPropertyRelative("horizontalAlignment"));
+                DrawVerticalAlignmentPopup(selected.FindPropertyRelative("verticalAlignment"));
+                EditorGUILayout.PropertyField(selected.FindPropertyRelative("previewText"), new GUIContent("Текст предпросмотра"));
             }
 
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("ИЗОБРАЖЕНИЕ", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(selected.FindPropertyRelative("sprite"));
-            EditorGUILayout.PropertyField(selected.FindPropertyRelative("texture"));
-            EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageMode"));
-            EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageScale"));
-            EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageOffset"));
-            EditorGUILayout.PropertyField(selected.FindPropertyRelative("tint"));
-            EditorGUILayout.PropertyField(selected.FindPropertyRelative("opacity"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("sprite"), new GUIContent("Спрайт"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("texture"), new GUIContent("Текстура"));
+            DrawImageModePopup(selected.FindPropertyRelative("imageMode"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageScale"), new GUIContent("Масштаб"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageOffset"), new GUIContent("Смещение"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("tint"), new GUIContent("Оттенок"));
+            EditorGUILayout.PropertyField(selected.FindPropertyRelative("opacity"), new GUIContent("Непрозрачность"));
 
             if (EditorGUI.EndChangeCheck())
                 ApplyChanges(so);
@@ -662,6 +663,164 @@ namespace KingdomSurvival.UILayout.Editor
             int picked = EditorGUILayout.Popup("Родитель", index, options.ToArray());
             if (picked != index)
                 selected.FindPropertyRelative("parentId").stringValue = ids[picked];
+        }
+
+        // Русские подписи для перечислений (§19 русификации): обычный
+        // PropertyField на enum-поле рисует английские имена констант
+        // C#, поэтому здесь — свои Popup с переводом, как ChoiceKindLabel
+        // в DialogueDatabaseWindow.
+
+        private static readonly UILayoutElementKind[] ElementKindValues =
+            (UILayoutElementKind[])Enum.GetValues(typeof(UILayoutElementKind));
+
+        private static string ElementKindLabel(UILayoutElementKind kind)
+        {
+            switch (kind)
+            {
+                case UILayoutElementKind.Panel: return "Панель";
+                case UILayoutElementKind.Text: return "Текст";
+                case UILayoutElementKind.Image: return "Изображение";
+                case UILayoutElementKind.Button: return "Кнопка";
+                case UILayoutElementKind.Container: return "Контейнер";
+                default: return kind.ToString();
+            }
+        }
+
+        private static void DrawElementKindPopup(SerializedProperty kindProperty)
+        {
+            string[] labels = new string[ElementKindValues.Length];
+            int selected = 0;
+            for (int i = 0; i < ElementKindValues.Length; i++)
+            {
+                labels[i] = ElementKindLabel(ElementKindValues[i]);
+                if (kindProperty.enumValueIndex == (int)ElementKindValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("Тип", selected, labels);
+            if (next >= 0 && next < ElementKindValues.Length)
+                kindProperty.enumValueIndex = (int)ElementKindValues[next];
+        }
+
+        private static readonly FontStyle[] FontStyleValues =
+            (FontStyle[])Enum.GetValues(typeof(FontStyle));
+
+        private static string FontStyleLabel(FontStyle style)
+        {
+            switch (style)
+            {
+                case FontStyle.Normal: return "Обычное";
+                case FontStyle.Bold: return "Жирное";
+                case FontStyle.Italic: return "Курсив";
+                case FontStyle.BoldAndItalic: return "Жирный курсив";
+                default: return style.ToString();
+            }
+        }
+
+        private static void DrawFontStylePopup(SerializedProperty fontStyleProperty)
+        {
+            string[] labels = new string[FontStyleValues.Length];
+            int selected = 0;
+            for (int i = 0; i < FontStyleValues.Length; i++)
+            {
+                labels[i] = FontStyleLabel(FontStyleValues[i]);
+                if (fontStyleProperty.enumValueIndex == (int)FontStyleValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("Начертание", selected, labels);
+            if (next >= 0 && next < FontStyleValues.Length)
+                fontStyleProperty.enumValueIndex = (int)FontStyleValues[next];
+        }
+
+        private static readonly UILayoutImageMode[] ImageModeValues =
+            (UILayoutImageMode[])Enum.GetValues(typeof(UILayoutImageMode));
+
+        private static string ImageModeLabel(UILayoutImageMode mode)
+        {
+            switch (mode)
+            {
+                case UILayoutImageMode.Cover: return "Заполнить (с обрезкой)";
+                case UILayoutImageMode.Contain: return "Вписать целиком";
+                case UILayoutImageMode.Stretch: return "Растянуть";
+                default: return mode.ToString();
+            }
+        }
+
+        private static void DrawImageModePopup(SerializedProperty imageModeProperty)
+        {
+            string[] labels = new string[ImageModeValues.Length];
+            int selected = 0;
+            for (int i = 0; i < ImageModeValues.Length; i++)
+            {
+                labels[i] = ImageModeLabel(ImageModeValues[i]);
+                if (imageModeProperty.enumValueIndex == (int)ImageModeValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("Режим изображения", selected, labels);
+            if (next >= 0 && next < ImageModeValues.Length)
+                imageModeProperty.enumValueIndex = (int)ImageModeValues[next];
+        }
+
+        private static readonly UILayoutTextHorizontalAlignment[] HorizontalAlignmentValues =
+            (UILayoutTextHorizontalAlignment[])Enum.GetValues(typeof(UILayoutTextHorizontalAlignment));
+
+        private static string HorizontalAlignmentLabel(UILayoutTextHorizontalAlignment alignment)
+        {
+            switch (alignment)
+            {
+                case UILayoutTextHorizontalAlignment.Left: return "Слева";
+                case UILayoutTextHorizontalAlignment.Center: return "По центру";
+                case UILayoutTextHorizontalAlignment.Right: return "Справа";
+                default: return alignment.ToString();
+            }
+        }
+
+        private static void DrawHorizontalAlignmentPopup(SerializedProperty alignmentProperty)
+        {
+            string[] labels = new string[HorizontalAlignmentValues.Length];
+            int selected = 0;
+            for (int i = 0; i < HorizontalAlignmentValues.Length; i++)
+            {
+                labels[i] = HorizontalAlignmentLabel(HorizontalAlignmentValues[i]);
+                if (alignmentProperty.enumValueIndex == (int)HorizontalAlignmentValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("По горизонтали", selected, labels);
+            if (next >= 0 && next < HorizontalAlignmentValues.Length)
+                alignmentProperty.enumValueIndex = (int)HorizontalAlignmentValues[next];
+        }
+
+        private static readonly UILayoutTextVerticalAlignment[] VerticalAlignmentValues =
+            (UILayoutTextVerticalAlignment[])Enum.GetValues(typeof(UILayoutTextVerticalAlignment));
+
+        private static string VerticalAlignmentLabel(UILayoutTextVerticalAlignment alignment)
+        {
+            switch (alignment)
+            {
+                case UILayoutTextVerticalAlignment.Top: return "Сверху";
+                case UILayoutTextVerticalAlignment.Middle: return "По центру";
+                case UILayoutTextVerticalAlignment.Bottom: return "Снизу";
+                default: return alignment.ToString();
+            }
+        }
+
+        private static void DrawVerticalAlignmentPopup(SerializedProperty alignmentProperty)
+        {
+            string[] labels = new string[VerticalAlignmentValues.Length];
+            int selected = 0;
+            for (int i = 0; i < VerticalAlignmentValues.Length; i++)
+            {
+                labels[i] = VerticalAlignmentLabel(VerticalAlignmentValues[i]);
+                if (alignmentProperty.enumValueIndex == (int)VerticalAlignmentValues[i])
+                    selected = i;
+            }
+
+            int next = EditorGUILayout.Popup("По вертикали", selected, labels);
+            if (next >= 0 && next < VerticalAlignmentValues.Length)
+                alignmentProperty.enumValueIndex = (int)VerticalAlignmentValues[next];
         }
 
         private void DrawDatabaseButtons()

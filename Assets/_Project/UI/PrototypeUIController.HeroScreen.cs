@@ -655,17 +655,22 @@ public partial class PrototypeUIController
 
         if (unit != null)
         {
+            card.Add(CreateHeroScreenHealthBar(unit.MaxHitPoints, unit.MaxHitPoints, 5f));
+
             card.Add(CreateHeroScreenChip(
                 HeroScreenRoleLabel(unit),
                 HeroScreenBorder,
                 "Ключевая роль в бою."));
 
-            // Левая кнопка открывает подробную карточку бойца, правая — окно
-            // существа из базы. Содержимое одно и то же, поэтому обе ветки
-            // ведут в общий просмотр.
+            Label hint = CreateHeroScreenHint("ПКМ: сведения");
+            hint.style.unityTextAlign = TextAnchor.MiddleCenter;
+            card.Add(hint);
+
+            // Как в BattleSandbox: правая кнопка открывает подробную
+            // карточку бойца/существа из UnitDatabase.
             card.RegisterCallback<PointerDownEvent>(evt =>
             {
-                if (evt.button != 0 && evt.button != 1)
+                if (evt.button != 1)
                     return;
 
                 ShowHeroScreenUnitCard(unit);
@@ -735,13 +740,28 @@ public partial class PrototypeUIController
 
         VisualElement stats = new VisualElement();
         stats.style.flexGrow = 1f;
-        AddHeroScreenUnitCardRow(stats, "Здоровье", unit.MaxHitPoints);
-        AddHeroScreenUnitCardRow(stats, "Атака", unit.Attack);
-        AddHeroScreenUnitCardRow(stats, "Защита", unit.Defense);
-        AddHeroScreenUnitCardRow(stats, "Урон", unit.Damage);
-        AddHeroScreenUnitCardRow(stats, "Движение", unit.Movement);
-        AddHeroScreenUnitCardRow(stats, "Инициатива", unit.Initiative);
-        AddHeroScreenUnitCardRow(stats, "Дальность атаки", unit.AttackRange);
+        stats.Add(CreateHeroScreenHealthBar(unit.MaxHitPoints, unit.MaxHitPoints, 6f));
+        AddHeroScreenUnitCardRow(
+            stats, "Здоровье", unit.MaxHitPoints,
+            "Текущий запас здоровья бойца. При 0 жизней боец выбывает из боя.");
+        AddHeroScreenUnitCardRow(
+            stats, "Атака", unit.Attack,
+            "Сравнивается с Защитой цели и определяет множитель наносимого урона.");
+        AddHeroScreenUnitCardRow(
+            stats, "Защита", unit.Defense,
+            "Сравнивается с Атакой противника и влияет на количество получаемого урона.");
+        AddHeroScreenUnitCardRow(
+            stats, "Урон", unit.Damage,
+            "Базовое количество урона до применения результата сравнения Атаки и Защиты.");
+        AddHeroScreenUnitCardRow(
+            stats, "Движение", unit.Movement,
+            "Запас движения бойца на активацию.");
+        AddHeroScreenUnitCardRow(
+            stats, "Инициатива", unit.Initiative,
+            "Определяет порядок активации бойцов в начале каждого раунда.");
+        AddHeroScreenUnitCardRow(
+            stats, "Дальность атаки", unit.AttackRange,
+            "Максимальное расстояние в гексах, с которого боец может атаковать цель.");
         body.Add(stats);
         heroScreenUnitCard.Add(body);
 
@@ -768,9 +788,9 @@ public partial class PrototypeUIController
             heroScreenUnitCard.style.display = DisplayStyle.None;
     }
 
-    private void AddHeroScreenUnitCardRow(VisualElement host, string label, int value)
+    private void AddHeroScreenUnitCardRow(VisualElement host, string label, int value, string description)
     {
-        VisualElement row = new VisualElement();
+        VisualElement row = new VisualElement { tooltip = description };
         row.style.flexDirection = FlexDirection.Row;
         row.style.justifyContent = Justify.SpaceBetween;
         row.style.marginBottom = 2f;
@@ -787,6 +807,47 @@ public partial class PrototypeUIController
         row.Add(number);
 
         host.Add(row);
+    }
+
+    // Как в BattleSandbox: узкая полоса, закрашенная пропорционально
+    // текущему HP от максимума (цвет зависит от доли здоровья).
+    private static VisualElement CreateHeroScreenHealthBar(int hitPoints, int maxHitPoints, float height)
+    {
+        VisualElement bar = new VisualElement();
+        bar.style.height = height;
+        bar.style.marginTop = 4f;
+        bar.style.marginBottom = 4f;
+        bar.style.backgroundColor = new Color(0.055f, 0.06f, 0.07f, 1f);
+        SetHeroScreenRadius(bar, 2f);
+        bar.pickingMode = PickingMode.Ignore;
+
+        VisualElement fill = new VisualElement();
+        fill.style.height = Length.Percent(100f);
+        fill.style.width = Length.Percent(
+            Mathf.Clamp01((float)hitPoints / Mathf.Max(1, maxHitPoints)) * 100f);
+        fill.style.backgroundColor = GetHeroScreenHealthColor(hitPoints, maxHitPoints);
+        SetHeroScreenRadius(fill, 2f);
+        fill.pickingMode = PickingMode.Ignore;
+        bar.Add(fill);
+        return bar;
+    }
+
+    private static Color GetHeroScreenHealthColor(int hitPoints, int maxHitPoints)
+    {
+        float fraction = Mathf.Clamp01((float)hitPoints / Mathf.Max(1, maxHitPoints));
+        if (fraction > 0.60f)
+            return new Color(0.32f, 0.62f, 0.40f, 1f);
+        if (fraction > 0.30f)
+            return new Color(0.72f, 0.57f, 0.25f, 1f);
+        return new Color(0.66f, 0.28f, 0.26f, 1f);
+    }
+
+    private static void SetHeroScreenRadius(VisualElement element, float radius)
+    {
+        element.style.borderTopLeftRadius = radius;
+        element.style.borderTopRightRadius = radius;
+        element.style.borderBottomLeftRadius = radius;
+        element.style.borderBottomRightRadius = radius;
     }
 
     // ------------------------------------------------------------------

@@ -42,22 +42,101 @@ MonoBehaviour:
         \u0441\u0438\u043B\u044C\u043D\u0435\u0435, \u0447\u0435\u043C \u044F \u0434\u0443\u043C\u0430\u043B.
         \u0412\u043E\u0434\u0430 \u0443\u0445\u043E\u0434\u0438\u0442 \u043D\u0435
         \u0442\u0443\u0434\u0430, \u043A\u0443\u0434\u0430 \u0434\u043E\u043B\u0436\u043D\u0430."
+      textBlocks: []
       choices:
       - text: "\u041F\u043E\u043A\u0430\u0436\u0438, \u0433\u0434\u0435 \u0437\u0430\u043C\u0435\u0442\u0438\u043B\u0438
           \u043F\u0440\u043E\u0431\u043B\u0435\u043C\u0443."
         nextNodeId: details
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: 
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u0427\u0442\u043E \u043C\u043E\u0433\u043B\u043E \u044D\u0442\u043E
           \u0432\u044B\u0437\u0432\u0430\u0442\u044C?"
         nextNodeId: cause
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u0412\u0435\u0440\u043D\u0451\u043C\u0441\u044F \u043A \u044D\u0442\u043E\u043C\u0443
           \u043F\u043E\u0437\u0436\u0435."
         nextNodeId: 
         endsDialogue: 1
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u043F\u0430\u043C"
         nextNodeId: 
         endsDialogue: 1
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: 
+            QualityParam: 5
+            IntParam: 10
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       editorPosition: {x: 60, y: 60}
       hasEditorPosition: 1
     - id: details
@@ -68,17 +147,69 @@ MonoBehaviour:
         \u0433\u043E\u0432\u043E\u0440\u044F\u0442, \u0447\u0442\u043E \u0443\u0442\u0440\u043E\u043C
         \u0432\u043E\u0434\u0430 \u0443\u0436\u0435 \u0448\u043B\u0430 \u043D\u0438\u0436\u0435
         \u043E\u0431\u044B\u0447\u043D\u043E\u0433\u043E."
+      textBlocks: []
       choices:
       - text: "\u0410 \u0441\u043B\u0435\u0434\u044B \u0432\u043E\u043A\u0440\u0443\u0433
           \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u043B\u0438?"
         nextNodeId: tracks
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u0427\u0442\u043E \u0442\u044B \u0441\u0430\u043C \u0434\u0443\u043C\u0430\u0435\u0448\u044C?"
         nextNodeId: cause
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u041F\u043E\u043A\u0430 \u0434\u043E\u0441\u0442\u0430\u0442\u043E\u0447\u043D\u043E."
         nextNodeId: 
         endsDialogue: 1
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       editorPosition: {x: 490, y: 60}
       hasEditorPosition: 1
     - id: cause
@@ -90,23 +221,92 @@ MonoBehaviour:
         \u0437\u0430 \u043E\u0434\u043D\u0443 \u043D\u043E\u0447\u044C. \u042F \u0431\u044B
         \u0441\u043F\u0435\u0440\u0432\u0430 \u043E\u0441\u043C\u043E\u0442\u0440\u0435\u043B
         \u0441\u0442\u0430\u0440\u0443\u044E \u0447\u0430\u0441\u0442\u044C \u043F\u043B\u043E\u0442\u0438\u043D\u044B."
+      textBlocks: []
       choices:
       - text: "\u041F\u043E\u043A\u0430\u0436\u0438 \u0441\u0442\u0430\u0440\u0443\u044E
           \u0447\u0430\u0441\u0442\u044C \u043F\u043B\u043E\u0442\u0438\u043D\u044B."
         nextNodeId: old_dam
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u0420\u0430\u0431\u043E\u0447\u0438\u0435 \u0447\u0442\u043E-\u043D\u0438\u0431\u0443\u0434\u044C
           \u0437\u0430\u043C\u0435\u0442\u0438\u043B\u0438?"
         nextNodeId: workers
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u0412\u0435\u0440\u043D\u0451\u043C\u0441\u044F \u043A \u0442\u043E\u043C\u0443,
           \u0447\u0442\u043E \u0442\u044B \u0432\u0438\u0434\u0435\u043B."
         nextNodeId: details
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u042F\u0441\u043D\u043E. \u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u043C
           \u043F\u043E\u0437\u0436\u0435."
         nextNodeId: 
         endsDialogue: 1
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       editorPosition: {x: 490, y: 498}
       hasEditorPosition: 1
     - id: tracks
@@ -117,19 +317,71 @@ MonoBehaviour:
         \u041E\u0434\u0438\u043D \u0440\u0430\u0431\u043E\u0447\u0438\u0439 \u0443\u0432\u0435\u0440\u044F\u0435\u0442,
         \u0447\u0442\u043E \u0432\u0438\u0434\u0435\u043B \u0441\u0432\u0435\u0436\u0438\u0435
         \u043E\u0442\u043C\u0435\u0442\u0438\u043D\u044B \u0443 \u043D\u0430\u0441\u0442\u0438\u043B\u0430."
+      textBlocks: []
       choices:
       - text: "\u041F\u043E\u0437\u043E\u0432\u0438 \u0442\u0435\u0445, \u043A\u0442\u043E
           \u0440\u0430\u0431\u043E\u0442\u0430\u043B \u043D\u043E\u0447\u044C\u044E."
         nextNodeId: workers
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0445\u043E\u0447\u0443
           \u0435\u0449\u0451 \u0440\u0430\u0437 \u0443\u0441\u043B\u044B\u0448\u0430\u0442\u044C
           \u0432\u0441\u0451 \u0441 \u043D\u0430\u0447\u0430\u043B\u0430."
         nextNodeId: opening
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u042D\u0442\u043E\u0433\u043E \u043F\u043E\u043A\u0430 \u0445\u0432\u0430\u0442\u0438\u0442."
         nextNodeId: 
         endsDialogue: 1
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       editorPosition: {x: 920, y: 60}
       hasEditorPosition: 1
     - id: workers
@@ -141,15 +393,50 @@ MonoBehaviour:
         \u0443\u0448\u043B\u0430. \u041E\u0431\u0430 \u0441\u0442\u043E\u044F\u043B\u0438
         \u0437\u0434\u0435\u0441\u044C \u0432 \u043E\u0434\u043D\u0443 \u0438 \u0442\u0443
         \u0436\u0435 \u043D\u043E\u0447\u044C."
+      textBlocks: []
       choices:
       - text: "\u0417\u043D\u0430\u0447\u0438\u0442, \u043E\u0441\u043C\u043E\u0442\u0440\u0438\u043C
           \u0432\u0441\u0451 \u043F\u043E \u043F\u043E\u0440\u044F\u0434\u043A\u0443."
         nextNodeId: old_dam
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u042F \u043F\u043E\u0433\u043E\u0432\u043E\u0440\u044E \u0441 \u043D\u0438\u043C\u0438
           \u043F\u043E\u0437\u0436\u0435."
         nextNodeId: 
         endsDialogue: 1
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       editorPosition: {x: 920, y: 498}
       hasEditorPosition: 1
     - id: old_dam
@@ -161,12 +448,48 @@ MonoBehaviour:
         \u0443\u0432\u0438\u0434\u0438\u0448\u044C. \u041F\u043E\u0442\u043E\u043C
         \u0441\u0440\u0430\u0432\u043D\u0438 \u0441 \u043D\u043E\u0432\u044B\u043C\u0438
         \u043E\u043F\u043E\u0440\u0430\u043C\u0438."
+      textBlocks: []
       choices:
       - text: "\u0425\u043E\u0440\u043E\u0448\u043E. \u042F \u043E\u0441\u043C\u043E\u0442\u0440\u044E."
         nextNodeId: 
         endsDialogue: 1
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       - text: "\u0415\u0449\u0451 \u043E\u0434\u0438\u043D \u0432\u043E\u043F\u0440\u043E\u0441."
         nextNodeId: opening
         endsDialogue: 0
+        choiceId: 
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
       editorPosition: {x: 920, y: 882}
       hasEditorPosition: 1
+    schemaVersion: 0

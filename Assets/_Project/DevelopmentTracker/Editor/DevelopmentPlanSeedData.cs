@@ -118,9 +118,11 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P00-T07", "DEC-12 — Доля сверхъестественного",
                     "Сохранить неоднозначность: практическая причина доказуема, проявление памяти воды допустимо, но не обязано иметь одно объяснение.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 7,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 7,
                     acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в NARRATIVE.md" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-12)."),
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Пользователь принял рекомендацию без изменений: неоднозначность сохранена как сознательное решение (не как открытый вопрос). Согласуется с общим каноном LORE.md §11.1. Внесено в LORE.md §6.1.2 и NARRATIVE.md §26.3/§27."),
 
                 Task("P00-T08", "DEC-01 — Минимальная конкретика героя",
                     "Утвердить роль, исходную позицию в Доме и голос героя до финального написания реплик.",

@@ -23,6 +23,13 @@ public sealed class NarrativeCheckResult
     // Игровой runtime такой результат никогда не создаёт.
     public bool IsForcedByPreview;
 
+    // Снимок реально сработавших контекстных модификаторов в момент
+    // расчёта (§8 инструкции по визуализации проверок). Список правил
+    // (NarrativeContextModifierRule) сюда не попадает — только неизменяемая
+    // копия SourceId/Label/Value, чтобы tooltip не пересчитывал математику
+    // заново по изменившемуся состоянию мира.
+    public List<NarrativeAppliedModifierSnapshot> AppliedModifiers = new List<NarrativeAppliedModifierSnapshot>();
+
     public bool HasDice => DieOne > 0 && DieTwo > 0;
 
     public NarrativeCheckResult()
@@ -41,7 +48,8 @@ public sealed class NarrativeCheckResult
         int appliedContextModifier,
         int total,
         int difficulty,
-        bool isForcedByPreview = false)
+        bool isForcedByPreview = false,
+        IReadOnlyList<NarrativeAppliedModifierSnapshot> appliedModifiers = null)
     {
         CheckId = checkId ?? string.Empty;
         AttemptNumber = attemptNumber;
@@ -55,6 +63,9 @@ public sealed class NarrativeCheckResult
         Total = total;
         Difficulty = difficulty;
         IsForcedByPreview = isForcedByPreview;
+        AppliedModifiers = appliedModifiers != null
+            ? new List<NarrativeAppliedModifierSnapshot>(appliedModifiers)
+            : new List<NarrativeAppliedModifierSnapshot>();
     }
 }
 

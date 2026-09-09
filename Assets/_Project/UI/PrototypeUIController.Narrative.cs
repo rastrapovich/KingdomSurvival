@@ -24,14 +24,24 @@ public partial class PrototypeUIController
         public string SpeakerRole;
         public string Text;
 
-        public static NarrativeUiHistoryEntry ForBlock(string speakerDisplayName, string speakerRole, string text)
+        // Заполнено для Block (пассивная проверка блока) и для CheckResult
+        // (активная проверка) — единый Narrative Check Presentation Layer,
+        // см. PrototypeUIController.NarrativeCheckPresentation.cs.
+        public NarrativeCheckPresentationData CheckPresentation;
+
+        public static NarrativeUiHistoryEntry ForBlock(
+            string speakerDisplayName,
+            string speakerRole,
+            string text,
+            NarrativeCheckPresentationData checkPresentation)
         {
             return new NarrativeUiHistoryEntry
             {
                 Kind = NarrativeUiHistoryKind.Block,
                 SpeakerDisplayName = speakerDisplayName,
                 SpeakerRole = speakerRole,
-                Text = text
+                Text = text,
+                CheckPresentation = checkPresentation
             };
         }
 
@@ -40,9 +50,13 @@ public partial class PrototypeUIController
             return new NarrativeUiHistoryEntry { Kind = NarrativeUiHistoryKind.PlayerChoice, Text = text };
         }
 
-        public static NarrativeUiHistoryEntry ForCheckResult(string text)
+        public static NarrativeUiHistoryEntry ForCheckResult(NarrativeCheckPresentationData checkPresentation)
         {
-            return new NarrativeUiHistoryEntry { Kind = NarrativeUiHistoryKind.CheckResult, Text = text };
+            return new NarrativeUiHistoryEntry
+            {
+                Kind = NarrativeUiHistoryKind.CheckResult,
+                CheckPresentation = checkPresentation
+            };
         }
     }
 
@@ -392,15 +406,16 @@ public partial class PrototypeUIController
     // Единая точка показа нового представления узла: сначала причинный
     // результат проверки (если был), затем видимые блоки, затем варианты
     // ответа — порядок из §14 ("сначала причинный текст, затем механика").
-    private void DisplayNarrativeView(NarrativeDialogueView view, NarrativeCheckResult checkResult)
+    private void DisplayNarrativeView(NarrativeDialogueView view, NarrativeCheckPresentationData checkPresentation)
     {
-        if (checkResult != null)
-            narrativeHistory.Add(NarrativeUiHistoryEntry.ForCheckResult(BuildNarrativeCheckResultLine(checkResult)));
+        if (checkPresentation != null)
+            narrativeHistory.Add(NarrativeUiHistoryEntry.ForCheckResult(checkPresentation));
 
         for (int i = 0; i < view.VisibleTextBlocks.Count; i++)
         {
             NarrativeDialogueVisibleBlock block = view.VisibleTextBlocks[i];
-            narrativeHistory.Add(NarrativeUiHistoryEntry.ForBlock(block.SpeakerDisplayName, block.SpeakerRole, block.Text));
+            narrativeHistory.Add(NarrativeUiHistoryEntry.ForBlock(
+                block.SpeakerDisplayName, block.SpeakerRole, block.Text, block.CheckPresentation));
         }
 
         NarrativeDialogueVisibleBlock latestBlock = view.VisibleTextBlocks.Count > 0
@@ -412,15 +427,6 @@ public partial class PrototypeUIController
 
         RenderNarrativeDialogueHistory();
         RenderNarrativeDialogueChoices(view);
-    }
-
-    private static string BuildNarrativeCheckResultLine(NarrativeCheckResult result)
-    {
-        string outcome = result.Success ? "Успех." : "Провал.";
-        string dice = result.HasDice
-            ? " (" + result.DieOne + "+" + result.DieTwo + " против " + result.Difficulty + ")"
-            : string.Empty;
-        return outcome + dice;
     }
 
     private void RenderNarrativeDialogueChoices(NarrativeDialogueView view)
@@ -488,8 +494,9 @@ public partial class PrototypeUIController
 
             if (entry.Kind == NarrativeUiHistoryKind.CheckResult)
             {
-                Label checkLine = new Label(entry.Text);
+                VisualElement checkLine = new VisualElement();
                 checkLine.AddToClassList("narrative-dialogue-history-check-result");
+                checkLine.Add(BuildNarrativeCheckHeaderElement(entry.CheckPresentation));
                 narrativeHistoryContainer.Add(checkLine);
                 lastEntry = checkLine;
                 continue;
@@ -497,6 +504,9 @@ public partial class PrototypeUIController
 
             VisualElement block = new VisualElement();
             block.AddToClassList("narrative-dialogue-history-entry");
+
+            if (entry.CheckPresentation != null)
+                block.Add(BuildNarrativeCheckHeaderElement(entry.CheckPresentation));
 
             Label speaker = new Label(entry.SpeakerDisplayName);
             speaker.AddToClassList("narrative-dialogue-history-speaker");
@@ -569,13 +579,14 @@ public partial class PrototypeUIController
             return;
         }
 
-        DisplayNarrativeView(result.View, result.CheckResult);
+        DisplayNarrativeView(result.View, result.CheckPresentation);
     }
 
     private void CloseNarrativeDialogue()
     {
         if (narrativeDialogueSession != null && narrativeDialogueSession.IsActive)
             narrativeDialogueSession.End();
+        HideNarrativeCheckTooltip();
         narrativeHistory.Clear();
         if (narrativeDialogueOverlay != null)
             narrativeDialogueOverlay.style.display = DisplayStyle.None;

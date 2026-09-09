@@ -151,15 +151,19 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P00-T11", "DEC-08 — Навык «Ремесло»",
                     "Пока не добавлять; использовать Суждение, Следопытство, знания и контекст. Вернуться, если появятся минимум три регулярных применения.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 11,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 11,
                     acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя (в т. ч. явное решение отложить)" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-08)."),
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Пользователь ОТСТУПИЛ от рекомендации инструкции: компетенция «Ремесло» добавляется в Главу 01, а не откладывается. Регистрация в HeroProfile.cs сознательно отложена до P03 (см. P03-T07) — в этой сессии код не менялся. Зафиксировано в DEVELOPMENT_STATUS.md §2 как явное отступление от §1.4/§6.0 сводной инструкции."),
 
                 Task("P00-T12", "DEC-09 — Трейт «Читает воду»",
                     "В первой главе сначала дать знание/вывод. Трейт выдавать только при подтверждённом применении в следующих главах.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 12,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 12,
                     acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя (в т. ч. явное решение отложить)" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-09).")
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Пользователь подтвердил рекомендацию без изменений: в Главе 01 трейт не выдаётся, только знание/вывод; трейт возможен не раньше следующих глав при подтверждённом применении.")
             );
         }
 
@@ -445,7 +449,20 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                     {
                         "Тест подтверждает взаимоисключение repair_old/repair_new",
                         "Тест подтверждает, что обе ветки доходят до N07"
-                    })
+                    }),
+
+                Task("P03-T07", "Зарегистрировать компетенцию «Ремесло»",
+                    "По решению DEC-08 (отступление от рекомендации инструкции, зафиксировано в DEVELOPMENT_STATUS.md §2): зарегистрировать новую нарративную компетенцию «Ремесло» рядом с существующим Следопытством, без изменения других качеств/компетенций/трейтов.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 7,
+                    dependencies: new[] { "P00-T11" },
+                    fileReferences: new[] { "Assets/_Project/Scripts/Core/HeroProfile.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Компетенция «Ремесло» зарегистрирована с диапазоном 0–5, как Следопытство",
+                        "Существующие качества, компетенции и трейты не изменены",
+                        "N08 («Семь зубцов», P07-T04) может использовать «Ремесло» как одну из проверок толкования предмета"
+                    },
+                    manualChecks: new[] { "Прогнать HeroCombatStatsBuilderTests и связанные EditMode-тесты в Unity" })
             );
         }
 
@@ -601,9 +618,9 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                     acceptanceCriteria: new[] { "Игрок получает направление без квестовой стрелки из воздуха" }),
 
                 Task("P07-T04", "N08 «Семь зубцов»",
-                    "Материальная связь нынешнего сбоя с прежней системой через предмет; Суждение/Следопытство/знания вместо нового навыка.",
+                    "Материальная связь нынешнего сбоя с прежней системой через предмет; Суждение/Следопытство/знания/«Ремесло» (DEC-08, см. P03-T07).",
                     DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
-                    dependencies: new[] { "P00-T05" },
+                    dependencies: new[] { "P00-T05", "P03-T07" },
                     relatedKnowledgeIds: new[] { "chapter01.knowledge.seven_tooth_object", "chapter01.knowledge.old_custom" },
                     relatedFlagIds: new[] { "chapter01.flag.old_trace_found" },
                     acceptanceCriteria: new[]

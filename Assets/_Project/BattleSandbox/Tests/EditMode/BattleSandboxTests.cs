@@ -422,7 +422,13 @@ namespace KingdomSurvival.BattleSandbox.Tests
 
             SandboxAttackPreview preview = battle.PreviewAttack("enemy", "player");
             Assert.That(preview.IsValid, Is.True);
-            Assert.That(preview.Damage, Is.EqualTo(16));
+
+            // Защита 3 -> гвардейский бонус floor(3*0.5)=1 (минимум 1) -> 4
+            // (см. CombatTagModifierTests.Guard_UsesFiftyPercentDefenseBonusRoundedDown
+            // для того же значения защиты и бонуса). Атака 5 против защиты 4
+            // даёт statDifference=1, множитель 1+1*0.25=1.25, урон
+            // floor(15*1.25)=18.
+            Assert.That(preview.Damage, Is.EqualTo(18));
         }
 
         [Test]

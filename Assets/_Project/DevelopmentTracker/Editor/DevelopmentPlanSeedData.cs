@@ -350,14 +350,13 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P02-T02", "Все EditMode tests зелёные",
                     "Test Runner → EditMode должен пройти без красных тестов на текущем main.",
-                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.Blocked, required: true, order: 2,
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
                     fileReferences: new[] { "Assets/_Project/Tests/EditMode" },
                     acceptanceCriteria: new[] { "Test Runner → EditMode: все тесты проходят" },
-                    blockerNote: "211/213 зелёные (пользователь прислал TestResults.xml). 2 падения — ОБА вне кода этой сессии (последний коммит, тронувший оба файла, старше a9595a8): " +
-                        "BattleSandboxTests.GuardAddsFiftyPercentDefenseUntilNextActivation (Expected 16, was 18) и " +
-                        "DialogueDatabaseCheckSystemTests.RegenerateNarrativeIdentifiers_Creates_New_Ids_And_Remaps_Unlock_Reference (NullReferenceException). " +
-                        "Нужно решение пользователя: чинить сейчас как отдельную задачу вне Главы 01, или зафиксировать как известный технический долг и продолжать.",
-                    implementationNote: "Все 40 тестов, написанных в этой сессии (17 Chapter01StateTests + 23 DevelopmentTracker*), зелёные. DialogueDatabaseTests (в т.ч. DefaultDatabase_Has_No_Validation_Issues) и HeroCombatStatsBuilderTests тоже зелёные — правки в KingdomSurvivalDialogues.asset и HeroProfile.cs не сломали существующее."),
+                    implementationNote: "211/213 зелёные (пользователь прислал TestResults.xml), оба падения были в тестах, а не в проверяемом коде — production-код не менялся. " +
+                        "(1) BattleSandboxTests.GuardAddsFiftyPercentDefenseUntilNextActivation: Expected 16, was 18. Формула боя (SandboxCombatTagRules.GetEffectiveDefense/BuildAttackPreview) даёт 18 и это совпадает с пятью другими проходящими тестами того же файла (CombatTagModifierTests — Guard_UsesFiftyPercentDefenseBonusRoundedDown и соседние, тот же паттерн floor(defense*0.5) с минимумом 1), т.е. production-формула самосогласована и верна. Сам тест содержал ошибочно посчитанное ожидание — 16 недостижимо этой формулой ни при каком целочисленном floor. Исправлено ожидание на 18 с комментарием, объясняющим расчёт. " +
+                        "(2) DialogueDatabaseCheckSystemTests.RegenerateNarrativeIdentifiers_Creates_New_Ids_And_Remaps_Unlock_Reference: NullReferenceException. Стек-трейс вёл на строку самого теста (сравнение originalChoice.Check.CheckId/copyChoice.Check.CheckId), а не в RegenerateNarrativeIdentifiers. Причина: тест искал продублированный выбор по старому ChoiceId ('c_returnable'), но RegenerateNarrativeIdentifiers намеренно регенерирует и ChoiceId тоже (см. §13 в комментарии к методу) — после регенерации выбора с таким ChoiceId в копии больше нет, FindChoiceById возвращал null, а обращение к null.Check роняло NRE. Метод в DialogueDatabaseWindow.Editing.cs не трогался. Тест переписан: копия ищется по позиции (индекс узла + индекс выбора в узле), которая не меняется при дублировании, вместо старого ChoiceId. " +
+                        "Обе правки — только в тестовых файлах, без Unity здесь прогнать нельзя: нужно подтверждение пользователя реальным Test Runner."),
 
                 Task("P02-T03", "Карта, время, экспедиция в Prototype_Main",
                     "Открыть сцену, выйти в экспедицию и вернуться без ошибок и рассинхронизации состояния.",

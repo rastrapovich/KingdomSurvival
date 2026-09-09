@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using KingdomSurvival.DialogueDatabase;
@@ -334,8 +335,13 @@ public sealed class DialogueDatabaseCheckSystemTests
         DialogueDefinitionData original = asset.Dialogues[0];
         DialogueDefinitionData copy = asset.Dialogues[1];
 
-        DialogueChoiceData originalChoice = FindChoiceById(original, "c_returnable");
-        DialogueChoiceData copyChoice = FindChoiceById(copy, "c_returnable");
+        // RegenerateNarrativeIdentifiers меняет и сам ChoiceId (§13), поэтому
+        // искать копию по старому "c_returnable" нельзя — берём тот же выбор
+        // по позиции в узле: порядок узлов/выборов при дублировании не
+        // меняется, регенерируются только сами идентификаторы.
+        FindChoicePosition(original, "c_returnable", out int returnableNodeIndex, out int returnableChoiceIndex);
+        DialogueChoiceData originalChoice = original.Nodes[returnableNodeIndex].Choices[returnableChoiceIndex];
+        DialogueChoiceData copyChoice = copy.Nodes[returnableNodeIndex].Choices[returnableChoiceIndex];
         Assert.AreNotEqual(originalChoice.Check.CheckId, copyChoice.Check.CheckId);
 
         DialogueNodeData copyFailedNode = FindNodeById(copy, "returnable_failed");
@@ -543,6 +549,29 @@ public sealed class DialogueDatabaseCheckSystemTests
                 return node;
         }
         return null;
+    }
+
+    // Позиция выбора по его текущему ChoiceId. В отличие от FindChoiceById,
+    // используется до регенерации идентификаторов — сама позиция (индекс
+    // узла + индекс выбора в узле) остаётся стабильной после дублирования,
+    // даже когда RegenerateNarrativeIdentifiers меняет ChoiceId.
+    private static void FindChoicePosition(DialogueDefinitionData dialogue, string choiceId, out int nodeIndex, out int choiceIndex)
+    {
+        for (int n = 0; n < dialogue.Nodes.Count; n++)
+        {
+            DialogueNodeData node = dialogue.Nodes[n];
+            for (int c = 0; c < node.Choices.Count; c++)
+            {
+                if (node.Choices[c].ChoiceId == choiceId)
+                {
+                    nodeIndex = n;
+                    choiceIndex = c;
+                    return;
+                }
+            }
+        }
+
+        throw new InvalidOperationException("Choice not found: " + choiceId);
     }
 
     private static void SetField(object target, string fieldName, object value)

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using KingdomSurvival.DialogueDatabase;
@@ -571,7 +570,7 @@ public sealed class DialogueDatabaseCheckSystemTests
             }
         }
 
-        throw new InvalidOperationException("Choice not found: " + choiceId);
+        throw new System.InvalidOperationException("Choice not found: " + choiceId);
     }
 
     private static void SetField(object target, string fieldName, object value)

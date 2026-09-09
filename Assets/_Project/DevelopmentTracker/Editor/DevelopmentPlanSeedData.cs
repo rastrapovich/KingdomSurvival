@@ -530,15 +530,34 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P04-T04", "Зафиксировать визуальное состояние Дома для рифмы N16",
                     "Сохранить исходное состояние сцены (звук, вода, мельница, скот, настил), чтобы N16 могло показать минимум три изменения.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 4,
                     manualChecks: new[] { "Сверить список зафиксированных мотивов со списком раздела 18" },
-                    acceptanceCriteria: new[] { "Состояние Дома на входе в N01 зафиксировано и доступно для сравнения в N16" }),
+                    acceptanceCriteria: new[] { "Состояние Дома на входе в N01 зафиксировано и доступно для сравнения в N16" },
+                    implementationNote:
+                        "Создан Chapter01HomeState.cs (Assets/_Project/Chapter01/Runtime/) — типизированный resolver пяти мотивов " +
+                        "(Water/Mill/Livestock/Walkway/Sound), вычисляемых из уже существующих Chapter01Ids.Flags " +
+                        "(FloodHappened/FloodLivestockLost/FloodMillDeckDestroyed/RepairOld/RepairNew/RepairCompleted/WaterWrongActive). " +
+                        "Отдельная settlement simulation не введена: NarrativeStateData остаётся единственным источником истины, " +
+                        "Chapter01HomeState только интерпретирует флаги по запросу (ResolveCurrent), ничего не мутирует. " +
+                        "Добавлен один новый persistent-флаг chapter01.flag.home_baseline_captured (Chapter01Ids.Flags), " +
+                        "выставляется onRevealEffect на первом обязательном блоке N01 независимо от исхода пассивного Суждения 11. " +
+                        "В N01 добавлен один короткий Observation-блок (спокойный скот у водопоя, привычная вода) — без изменения " +
+                        "существующей драматургии Ульяны/Остафия/Лады/Мирона. Тесты: Chapter01HomeStateTests.cs (14 тестов — baseline, " +
+                        "приоритеты Wrong/Lost, обе ветви ремонта различимы и не равны RunningNormally/OldIntact, JSON-сериализация " +
+                        "NarrativeStateData через JsonUtility, registry, >=3 изменённых мотива для обеих веток ремонта) плюс три новых " +
+                        "теста в Chapter01FourResidentsTests.cs на фиксацию baseline при открытии N01 независимо от успеха/провала " +
+                        "проверки. Unity Editor и Test Runner в среде недоступны — тесты не прогонялись реально."),
 
                 Task("P04-T05", "Функции жителей Дома в диалогах",
                     "Хранитель старого порядка, молодой мастер, мельник и бытовой голос — у каждого выгода/страх/правда/слепое место (раздел 16.1).",
-                    DevelopmentTaskCategory.Narrative, DevelopmentTaskStatus.NotStarted, required: true, order: 5,
+                    DevelopmentTaskCategory.Narrative, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 5,
                     dependencies: new[] { "P00-T09" },
-                    acceptanceCriteria: new[] { "У каждой функции описаны выгода от воды, страх после паводка, правда и слепое место" })
+                    acceptanceCriteria: new[] { "У каждой функции описаны выгода от воды, страх после паводка, правда и слепое место" },
+                    implementationNote:
+                        "Паспорта Остафия/Лады/Мирона/Ульяны — NARRATIVE.md §26.1.3 (выгода/страх/правда/слепое место/отношения " +
+                        "друг к другу для каждого, таблица распределения знаний). Production-текст N01–N03 заменил черновые " +
+                        "заглушки P03 в KingdomSurvivalDialogues.asset. EditMode-тесты — Chapter01FourResidentsTests.cs. " +
+                        "Unity Editor и Test Runner в среде недоступны — тесты не прогонялись реально.")
             );
         }
 

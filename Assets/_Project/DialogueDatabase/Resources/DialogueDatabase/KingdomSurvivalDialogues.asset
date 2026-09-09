@@ -11,702 +11,799 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a1274bd9904406299a87fe67ad1cb8b, type: 3}
   m_Name: KingdomSurvivalDialogues
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   speakers:
   - id: miller
-    displayName: "Мельник"
-    role: "Технический тест условий диалога"
+    displayName: "\u041C\u0435\u043B\u044C\u043D\u0438\u043A"
+    role: "\u0422\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0442\u0435\u0441\u0442
+      \u0443\u0441\u043B\u043E\u0432\u0438\u0439 \u0434\u0438\u0430\u043B\u043E\u0433\u0430"
     portrait: {fileID: 0}
   dialogues:
   - id: prototype_miller
-    title: "Витрина условий ответа"
+    title: "\u0412\u0438\u0442\u0440\u0438\u043D\u0430 \u0443\u0441\u043B\u043E\u0432\u0438\u0439
+      \u043E\u0442\u0432\u0435\u0442\u0430"
     category: 0
     status: 0
-    developerComment: "Технический диалог для наглядной проверки всех NarrativeConditionType, групп All/Any и Negate. Не является сюжетным каноном."
+    developerComment: "\u0422\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0439
+      \u0434\u0438\u0430\u043B\u043E\u0433 \u0434\u043B\u044F \u043D\u0430\u0433\u043B\u044F\u0434\u043D\u043E\u0439
+      \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438 \u0432\u0441\u0435\u0445 NarrativeConditionType,
+      \u0433\u0440\u0443\u043F\u043F All/Any \u0438 Negate. \u041D\u0435 \u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F
+      \u0441\u044E\u0436\u0435\u0442\u043D\u044B\u043C \u043A\u0430\u043D\u043E\u043D\u043E\u043C."
     startNodeId: opening
     tags:
-    - "тест"
-    - "условия"
-    - "проверки"
+    - "\u0442\u0435\u0441\u0442"
+    - "\u0443\u0441\u043B\u043E\u0432\u0438\u044F"
+    - "\u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438"
     nodes:
     - id: opening
       speakerId: miller
-      text: "Это техническая витрина условий ответа, а не сюжетный диалог. Открой справа «Тестовый герой (Preview)». После изменения параметров нажимай «▶ Запустить / с начала». Серый ответ означает, что условие не выполнено; активная кнопка — что оно сработало."
+      text: "\u043F\u0440\u0438\u0432\u0435\u0442"
       textBlocks: []
       choices:
-      - text: "1. Мир и прошлые решения — флаг, знание, отношение, спутник, предмет."
-        nextNodeId: "world_conditions"
+      - text: "\u041F\u0440\u0438\u0432\u0435\u0442"
+        nextNodeId: world_conditions
         endsDialogue: 0
-        choiceId: "opening_world"
+        choiceId: opening_world
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 6
+            StringParam: 
+            QualityParam: 5
+            IntParam: 10
+            Negate: 0
+        unavailablePresentation: 1
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u043A\u0430\u043A \u0434\u0435\u043B\u0430"
+        nextNodeId: hero_conditions
+        endsDialogue: 0
+        choiceId: opening_hero
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 8
+            StringParam: 
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u0443\u0443\u0443 \u0441\u0443\u043A\u0430"
+        nextNodeId: check_conditions
+        endsDialogue: 0
+        choiceId: opening_checks
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: 
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: 
+        nextNodeId: logic_conditions
+        endsDialogue: 0
+        choiceId: opening_logic
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "2. Герой — качество, компетенция, особенность."
-        nextNodeId: "hero_conditions"
-        endsDialogue: 0
-        choiceId: "opening_hero"
-        kind: 0
-        conditions:
-          Combinator: 0
-          Conditions: []
-        unavailablePresentation: 0
-        check:
-          CheckId: ""
-          Kind: 0
-          Quality: 0
-          CompetencyId: ""
-          Difficulty: 13
-          ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
-        successEffects: []
-        failureEffects: []
-      - text: "3. История проверки — ещё не выполнялась / успех / провал."
-        nextNodeId: "check_conditions"
-        endsDialogue: 0
-        choiceId: "opening_checks"
-        kind: 0
-        conditions:
-          Combinator: 0
-          Conditions: []
-        unavailablePresentation: 0
-        check:
-          CheckId: ""
-          Kind: 0
-          Quality: 0
-          CompetencyId: ""
-          Difficulty: 13
-          ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
-        successEffects: []
-        failureEffects: []
-      - text: "4. Логика группы — ВСЕ / ХОТЯ БЫ ОДНО / обращение условия."
-        nextNodeId: "logic_conditions"
-        endsDialogue: 0
-        choiceId: "opening_logic"
-        kind: 0
-        conditions:
-          Combinator: 0
-          Conditions: []
-        unavailablePresentation: 0
-        check:
-          CheckId: ""
-          Kind: 0
-          Quality: 0
-          CompetencyId: ""
-          Difficulty: 13
-          ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
-        successEffects: []
-        failureEffects: []
-      - text: "Закрыть технический разговор."
-        nextNodeId: ""
+      - text: 
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "opening_exit"
+        choiceId: opening_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 60, y: 60}
       hasEditorPosition: 1
     - id: world_conditions
       speakerId: miller
-      text: "Меняй поля Preview и каждый раз запускай разговор с начала. Для отношений используй запись miller:число. У каждого ответа ниже ровно одно условие — так видно его влияние без примесей."
+      text: "\u041C\u0435\u043D\u044F\u0439 \u043F\u043E\u043B\u044F Preview \u0438
+        \u043A\u0430\u0436\u0434\u044B\u0439 \u0440\u0430\u0437 \u0437\u0430\u043F\u0443\u0441\u043A\u0430\u0439
+        \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440 \u0441 \u043D\u0430\u0447\u0430\u043B\u0430.
+        \u0414\u043B\u044F \u043E\u0442\u043D\u043E\u0448\u0435\u043D\u0438\u0439
+        \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439 \u0437\u0430\u043F\u0438\u0441\u044C
+        miller:\u0447\u0438\u0441\u043B\u043E. \u0423 \u043A\u0430\u0436\u0434\u043E\u0433\u043E
+        \u043E\u0442\u0432\u0435\u0442\u0430 \u043D\u0438\u0436\u0435 \u0440\u043E\u0432\u043D\u043E
+        \u043E\u0434\u043D\u043E \u0443\u0441\u043B\u043E\u0432\u0438\u0435 \u2014
+        \u0442\u0430\u043A \u0432\u0438\u0434\u043D\u043E \u0435\u0433\u043E \u0432\u043B\u0438\u044F\u043D\u0438\u0435
+        \u0431\u0435\u0437 \u043F\u0440\u0438\u043C\u0435\u0441\u0435\u0439."
       textBlocks: []
       choices:
-      - text: "[Событие / решение уже было] Флаг demo_event_done."
-        nextNodeId: "world_conditions"
+      - text: "[\u0421\u043E\u0431\u044B\u0442\u0438\u0435 / \u0440\u0435\u0448\u0435\u043D\u0438\u0435
+          \u0443\u0436\u0435 \u0431\u044B\u043B\u043E] \u0424\u043B\u0430\u0433 demo_event_done."
+        nextNodeId: world_conditions
         endsDialogue: 0
-        choiceId: "world_flag"
+        choiceId: world_flag
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 0
-              StringParam: "demo_event_done"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 0
+          - Type: 0
+            StringParam: demo_event_done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Герой это знает] Знание demo_old_dam."
-        nextNodeId: "world_conditions"
+      - text: "[\u0413\u0435\u0440\u043E\u0439 \u044D\u0442\u043E \u0437\u043D\u0430\u0435\u0442]
+          \u0417\u043D\u0430\u043D\u0438\u0435 demo_old_dam."
+        nextNodeId: world_conditions
         endsDialogue: 0
-        choiceId: "world_knowledge"
+        choiceId: world_knowledge
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 1
-              StringParam: "demo_old_dam"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 0
+          - Type: 1
+            StringParam: demo_old_dam
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Отношение не ниже] miller ≥ 20."
-        nextNodeId: "world_conditions"
+      - text: "[\u041E\u0442\u043D\u043E\u0448\u0435\u043D\u0438\u0435 \u043D\u0435
+          \u043D\u0438\u0436\u0435] miller \u2265 20."
+        nextNodeId: world_conditions
         endsDialogue: 0
-        choiceId: "world_rel_high"
+        choiceId: world_rel_high
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 2
-              StringParam: "miller"
-              QualityParam: 0
-              IntParam: 20
-              Negate: 0
+          - Type: 2
+            StringParam: miller
+            QualityParam: 0
+            IntParam: 20
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Отношение не выше] miller ≤ -20."
-        nextNodeId: "world_conditions"
+      - text: "[\u041E\u0442\u043D\u043E\u0448\u0435\u043D\u0438\u0435 \u043D\u0435
+          \u0432\u044B\u0448\u0435] miller \u2264 -20."
+        nextNodeId: world_conditions
         endsDialogue: 0
-        choiceId: "world_rel_low"
+        choiceId: world_rel_low
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 3
-              StringParam: "miller"
-              QualityParam: 0
-              IntParam: -20
-              Negate: 0
+          - Type: 3
+            StringParam: miller
+            QualityParam: 0
+            IntParam: -20
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Спутник рядом] demo_companion."
-        nextNodeId: "world_conditions"
+      - text: "[\u0421\u043F\u0443\u0442\u043D\u0438\u043A \u0440\u044F\u0434\u043E\u043C]
+          demo_companion."
+        nextNodeId: world_conditions
         endsDialogue: 0
-        choiceId: "world_companion"
+        choiceId: world_companion
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 4
-              StringParam: "demo_companion"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 0
+          - Type: 4
+            StringParam: demo_companion
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Предмет есть у героя] demo_item."
-        nextNodeId: "world_conditions"
+      - text: "[\u041F\u0440\u0435\u0434\u043C\u0435\u0442 \u0435\u0441\u0442\u044C
+          \u0443 \u0433\u0435\u0440\u043E\u044F] demo_item."
+        nextNodeId: world_conditions
         endsDialogue: 0
-        choiceId: "world_item"
+        choiceId: world_item
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 5
-              StringParam: "demo_item"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 0
+          - Type: 5
+            StringParam: demo_item
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "← Назад к разделам."
-        nextNodeId: "opening"
+      - text: "\u2190 \u041D\u0430\u0437\u0430\u0434 \u043A \u0440\u0430\u0437\u0434\u0435\u043B\u0430\u043C."
+        nextNodeId: opening
         endsDialogue: 0
-        choiceId: "world_back"
+        choiceId: world_back
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 500, y: 20}
       hasEditorPosition: 1
     - id: hero_conditions
       speakerId: miller
-      text: "Эти ответы читают профиль тестового героя. Подними нужный параметр справа и перезапусти Preview."
+      text: "\u042D\u0442\u0438 \u043E\u0442\u0432\u0435\u0442\u044B \u0447\u0438\u0442\u0430\u044E\u0442
+        \u043F\u0440\u043E\u0444\u0438\u043B\u044C \u0442\u0435\u0441\u0442\u043E\u0432\u043E\u0433\u043E
+        \u0433\u0435\u0440\u043E\u044F. \u041F\u043E\u0434\u043D\u0438\u043C\u0438
+        \u043D\u0443\u0436\u043D\u044B\u0439 \u043F\u0430\u0440\u0430\u043C\u0435\u0442\u0440
+        \u0441\u043F\u0440\u0430\u0432\u0430 \u0438 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0443\u0441\u0442\u0438
+        Preview."
       textBlocks: []
       choices:
-      - text: "[Качество не ниже] Чутьё ≥ 7."
-        nextNodeId: "hero_conditions"
+      - text: "[\u041A\u0430\u0447\u0435\u0441\u0442\u0432\u043E \u043D\u0435 \u043D\u0438\u0436\u0435]
+          \u0427\u0443\u0442\u044C\u0451 \u2265 7."
+        nextNodeId: hero_conditions
         endsDialogue: 0
-        choiceId: "hero_quality"
+        choiceId: hero_quality
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 6
-              StringParam: ""
-              QualityParam: 3
-              IntParam: 7
-              Negate: 0
+          - Type: 6
+            StringParam: 
+            QualityParam: 3
+            IntParam: 7
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Компетенция не ниже] Следопытство ≥ 3."
-        nextNodeId: "hero_conditions"
+      - text: "[\u041A\u043E\u043C\u043F\u0435\u0442\u0435\u043D\u0446\u0438\u044F
+          \u043D\u0435 \u043D\u0438\u0436\u0435] \u0421\u043B\u0435\u0434\u043E\u043F\u044B\u0442\u0441\u0442\u0432\u043E
+          \u2265 3."
+        nextNodeId: hero_conditions
         endsDialogue: 0
-        choiceId: "hero_comp"
+        choiceId: hero_comp
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 7
-              StringParam: "fieldcraft"
-              QualityParam: 0
-              IntParam: 3
-              Negate: 0
+          - Type: 7
+            StringParam: fieldcraft
+            QualityParam: 0
+            IntParam: 3
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[У героя есть особенность] Натуралист."
-        nextNodeId: "hero_conditions"
+      - text: "[\u0423 \u0433\u0435\u0440\u043E\u044F \u0435\u0441\u0442\u044C \u043E\u0441\u043E\u0431\u0435\u043D\u043D\u043E\u0441\u0442\u044C]
+          \u041D\u0430\u0442\u0443\u0440\u0430\u043B\u0438\u0441\u0442."
+        nextNodeId: hero_conditions
         endsDialogue: 0
-        choiceId: "hero_trait"
+        choiceId: hero_trait
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 11
-              StringParam: "naturalist"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 0
+          - Type: 11
+            StringParam: naturalist
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "← Назад к разделам."
-        nextNodeId: "opening"
+      - text: "\u2190 \u041D\u0430\u0437\u0430\u0434 \u043A \u0440\u0430\u0437\u0434\u0435\u043B\u0430\u043C."
+        nextNodeId: opening
         endsDialogue: 0
-        choiceId: "hero_back"
+        choiceId: hero_back
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 500, y: 520}
       hasEditorPosition: 1
     - id: check_conditions
       speakerId: miller
-      text: "До первой попытки доступно условие «Проверка ещё не выполнялась». Выполни возвратную проверку ниже. После неё станет доступен либо «успех», либо «провал». В Preview можно принудительно выбрать исход."
+      text: "\u0414\u043E \u043F\u0435\u0440\u0432\u043E\u0439 \u043F\u043E\u043F\u044B\u0442\u043A\u0438
+        \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E \u0443\u0441\u043B\u043E\u0432\u0438\u0435
+        \xAB\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0435\u0449\u0451 \u043D\u0435
+        \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u043B\u0430\u0441\u044C\xBB. \u0412\u044B\u043F\u043E\u043B\u043D\u0438
+        \u0432\u043E\u0437\u0432\u0440\u0430\u0442\u043D\u0443\u044E \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443
+        \u043D\u0438\u0436\u0435. \u041F\u043E\u0441\u043B\u0435 \u043D\u0435\u0451
+        \u0441\u0442\u0430\u043D\u0435\u0442 \u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D
+        \u043B\u0438\u0431\u043E \xAB\u0443\u0441\u043F\u0435\u0445\xBB, \u043B\u0438\u0431\u043E
+        \xAB\u043F\u0440\u043E\u0432\u0430\u043B\xBB. \u0412 Preview \u043C\u043E\u0436\u043D\u043E
+        \u043F\u0440\u0438\u043D\u0443\u0434\u0438\u0442\u0435\u043B\u044C\u043D\u043E
+        \u0432\u044B\u0431\u0440\u0430\u0442\u044C \u0438\u0441\u0445\u043E\u0434."
       textBlocks: []
       choices:
-      - text: "[Проверка ещё не выполнялась] demo_condition_check."
-        nextNodeId: "check_conditions"
+      - text: "[\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0435\u0449\u0451
+          \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u043B\u0430\u0441\u044C]
+          demo_condition_check."
+        nextNodeId: check_conditions
         endsDialogue: 0
-        choiceId: "check_not_attempted"
+        choiceId: check_not_attempted
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 10
-              StringParam: "demo_condition_check"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 0
+          - Type: 10
+            StringParam: demo_condition_check
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Проверка была успешной] Последний результат — успех."
-        nextNodeId: "check_conditions"
+      - text: "[\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0431\u044B\u043B\u0430
+          \u0443\u0441\u043F\u0435\u0448\u043D\u043E\u0439] \u041F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439
+          \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u2014 \u0443\u0441\u043F\u0435\u0445."
+        nextNodeId: check_conditions
         endsDialogue: 0
-        choiceId: "check_succeeded"
+        choiceId: check_succeeded
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 8
-              StringParam: "demo_condition_check"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 0
+          - Type: 8
+            StringParam: demo_condition_check
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Проверка была провалена] Последний результат — провал."
-        nextNodeId: "check_conditions"
+      - text: "[\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0431\u044B\u043B\u0430
+          \u043F\u0440\u043E\u0432\u0430\u043B\u0435\u043D\u0430] \u041F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439
+          \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u2014 \u043F\u0440\u043E\u0432\u0430\u043B."
+        nextNodeId: check_conditions
         endsDialogue: 0
-        choiceId: "check_failed"
+        choiceId: check_failed
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 9
-              StringParam: "demo_condition_check"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 0
+          - Type: 9
+            StringParam: demo_condition_check
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Сделать проверку] Чутьё + Следопытство, сложность 13."
-        nextNodeId: ""
+      - text: "[\u0421\u0434\u0435\u043B\u0430\u0442\u044C \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443]
+          \u0427\u0443\u0442\u044C\u0451 + \u0421\u043B\u0435\u0434\u043E\u043F\u044B\u0442\u0441\u0442\u0432\u043E,
+          \u0441\u043B\u043E\u0436\u043D\u043E\u0441\u0442\u044C 13."
+        nextNodeId: 
         endsDialogue: 0
-        choiceId: "checks_roll"
+        choiceId: checks_roll
         kind: 1
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 1
         check:
-          CheckId: "demo_condition_check"
+          CheckId: demo_condition_check
           Kind: 1
           Quality: 3
-          CompetencyId: "fieldcraft"
+          CompetencyId: fieldcraft
           Difficulty: 13
           ModifierRules: []
-        successNodeId: "check_success"
-        failureNodeId: "check_failure"
+        successNodeId: check_success
+        failureNodeId: check_failure
         successEffects:
-          - EffectExecutionId: "demo_unlock_after_success"
-            Type: 4
-            StringParam: "demo_condition_check"
-            IntParam: 0
+        - EffectExecutionId: demo_unlock_after_success
+          Type: 4
+          StringParam: demo_condition_check
+          IntParam: 0
         failureEffects:
-          - EffectExecutionId: "demo_unlock_after_failure"
-            Type: 4
-            StringParam: "demo_condition_check"
-            IntParam: 0
-      - text: "← Назад к разделам."
-        nextNodeId: "opening"
+        - EffectExecutionId: demo_unlock_after_failure
+          Type: 4
+          StringParam: demo_condition_check
+          IntParam: 0
+      - text: "\u2190 \u041D\u0430\u0437\u0430\u0434 \u043A \u0440\u0430\u0437\u0434\u0435\u043B\u0430\u043C."
+        nextNodeId: opening
         endsDialogue: 0
-        choiceId: "checks_back"
+        choiceId: checks_back
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 500, y: 900}
       hasEditorPosition: 1
     - id: check_success
       speakerId: miller
-      text: "Проверка закончилась успехом. Вернись к витрине: «Проверка была успешной» теперь активна, «Проверка была провалена» — нет, а «Проверка ещё не выполнялась» исчезла."
+      text: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0437\u0430\u043A\u043E\u043D\u0447\u0438\u043B\u0430\u0441\u044C
+        \u0443\u0441\u043F\u0435\u0445\u043E\u043C. \u0412\u0435\u0440\u043D\u0438\u0441\u044C
+        \u043A \u0432\u0438\u0442\u0440\u0438\u043D\u0435: \xAB\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u0431\u044B\u043B\u0430 \u0443\u0441\u043F\u0435\u0448\u043D\u043E\u0439\xBB
+        \u0442\u0435\u043F\u0435\u0440\u044C \u0430\u043A\u0442\u0438\u0432\u043D\u0430,
+        \xAB\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0431\u044B\u043B\u0430
+        \u043F\u0440\u043E\u0432\u0430\u043B\u0435\u043D\u0430\xBB \u2014 \u043D\u0435\u0442,
+        \u0430 \xAB\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0435\u0449\u0451
+        \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u043B\u0430\u0441\u044C\xBB
+        \u0438\u0441\u0447\u0435\u0437\u043B\u0430."
       textBlocks: []
       choices:
-      - text: "Вернуться к условиям проверки."
-        nextNodeId: "check_conditions"
+      - text: "\u0412\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F \u043A \u0443\u0441\u043B\u043E\u0432\u0438\u044F\u043C
+          \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438."
+        nextNodeId: check_conditions
         endsDialogue: 0
-        choiceId: "success_back"
+        choiceId: success_back
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 1030, y: 860}
       hasEditorPosition: 1
     - id: check_failure
       speakerId: miller
-      text: "Проверка закончилась провалом. Вернись к витрине: «Проверка была провалена» теперь активна, «Проверка была успешной» — нет, а «Проверка ещё не выполнялась» исчезла."
+      text: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0437\u0430\u043A\u043E\u043D\u0447\u0438\u043B\u0430\u0441\u044C
+        \u043F\u0440\u043E\u0432\u0430\u043B\u043E\u043C. \u0412\u0435\u0440\u043D\u0438\u0441\u044C
+        \u043A \u0432\u0438\u0442\u0440\u0438\u043D\u0435: \xAB\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+        \u0431\u044B\u043B\u0430 \u043F\u0440\u043E\u0432\u0430\u043B\u0435\u043D\u0430\xBB
+        \u0442\u0435\u043F\u0435\u0440\u044C \u0430\u043A\u0442\u0438\u0432\u043D\u0430,
+        \xAB\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0431\u044B\u043B\u0430
+        \u0443\u0441\u043F\u0435\u0448\u043D\u043E\u0439\xBB \u2014 \u043D\u0435\u0442,
+        \u0430 \xAB\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0435\u0449\u0451
+        \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u043B\u0430\u0441\u044C\xBB
+        \u0438\u0441\u0447\u0435\u0437\u043B\u0430."
       textBlocks: []
       choices:
-      - text: "Вернуться к условиям проверки."
-        nextNodeId: "check_conditions"
+      - text: "\u0412\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F \u043A \u0443\u0441\u043B\u043E\u0432\u0438\u044F\u043C
+          \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438."
+        nextNodeId: check_conditions
         endsDialogue: 0
-        choiceId: "failure_back"
+        choiceId: failure_back
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 1030, y: 1120}
       hasEditorPosition: 1
     - id: logic_conditions
       speakerId: miller
-      text: "Здесь условия специально объединены. Первый ответ требует ВСЕ условия, второй — ХОТЯ БЫ ОДНО. Третий использует «Обратить условие»: он доступен, пока предмета demo_item НЕТ."
+      text: "\u0417\u0434\u0435\u0441\u044C \u0443\u0441\u043B\u043E\u0432\u0438\u044F
+        \u0441\u043F\u0435\u0446\u0438\u0430\u043B\u044C\u043D\u043E \u043E\u0431\u044A\u0435\u0434\u0438\u043D\u0435\u043D\u044B.
+        \u041F\u0435\u0440\u0432\u044B\u0439 \u043E\u0442\u0432\u0435\u0442 \u0442\u0440\u0435\u0431\u0443\u0435\u0442
+        \u0412\u0421\u0415 \u0443\u0441\u043B\u043E\u0432\u0438\u044F, \u0432\u0442\u043E\u0440\u043E\u0439
+        \u2014 \u0425\u041E\u0422\u042F \u0411\u042B \u041E\u0414\u041D\u041E. \u0422\u0440\u0435\u0442\u0438\u0439
+        \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442 \xAB\u041E\u0431\u0440\u0430\u0442\u0438\u0442\u044C
+        \u0443\u0441\u043B\u043E\u0432\u0438\u0435\xBB: \u043E\u043D \u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D,
+        \u043F\u043E\u043A\u0430 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u0430
+        demo_item \u041D\u0415\u0422."
       textBlocks: []
       choices:
-      - text: "[Выполнены все условия] Чутьё ≥ 7 И Следопытство ≥ 3."
-        nextNodeId: "logic_conditions"
+      - text: "[\u0412\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u044B \u0432\u0441\u0435
+          \u0443\u0441\u043B\u043E\u0432\u0438\u044F] \u0427\u0443\u0442\u044C\u0451
+          \u2265 7 \u0418 \u0421\u043B\u0435\u0434\u043E\u043F\u044B\u0442\u0441\u0442\u0432\u043E
+          \u2265 3."
+        nextNodeId: logic_conditions
         endsDialogue: 0
-        choiceId: "logic_all"
+        choiceId: logic_all
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 6
-              StringParam: ""
-              QualityParam: 3
-              IntParam: 7
-              Negate: 0
-            - Type: 7
-              StringParam: "fieldcraft"
-              QualityParam: 0
-              IntParam: 3
-              Negate: 0
+          - Type: 6
+            StringParam: 
+            QualityParam: 3
+            IntParam: 7
+            Negate: 0
+          - Type: 7
+            StringParam: fieldcraft
+            QualityParam: 0
+            IntParam: 3
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Выполнено хотя бы одно] demo_event_done ИЛИ Натуралист."
-        nextNodeId: "logic_conditions"
+      - text: "[\u0412\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E \u0445\u043E\u0442\u044F
+          \u0431\u044B \u043E\u0434\u043D\u043E] demo_event_done \u0418\u041B\u0418
+          \u041D\u0430\u0442\u0443\u0440\u0430\u043B\u0438\u0441\u0442."
+        nextNodeId: logic_conditions
         endsDialogue: 0
-        choiceId: "logic_any"
+        choiceId: logic_any
         kind: 0
         conditions:
           Combinator: 1
           Conditions:
-            - Type: 0
-              StringParam: "demo_event_done"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 0
-            - Type: 11
-              StringParam: "naturalist"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 0
+          - Type: 0
+            StringParam: demo_event_done
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 11
+            StringParam: naturalist
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "[Обратить условие] demo_item отсутствует."
-        nextNodeId: "logic_conditions"
+      - text: "[\u041E\u0431\u0440\u0430\u0442\u0438\u0442\u044C \u0443\u0441\u043B\u043E\u0432\u0438\u0435]
+          demo_item \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442."
+        nextNodeId: logic_conditions
         endsDialogue: 0
-        choiceId: "logic_negate"
+        choiceId: logic_negate
         kind: 0
         conditions:
           Combinator: 0
           Conditions:
-            - Type: 5
-              StringParam: "demo_item"
-              QualityParam: 0
-              IntParam: 0
-              Negate: 1
+          - Type: 5
+            StringParam: demo_item
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
         unavailablePresentation: 1
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "← Назад к разделам."
-        nextNodeId: "opening"
+      - text: "\u2190 \u041D\u0430\u0437\u0430\u0434 \u043A \u0440\u0430\u0437\u0434\u0435\u043B\u0430\u043C."
+        nextNodeId: opening
         endsDialogue: 0
-        choiceId: "logic_back"
+        choiceId: logic_back
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 1030, y: 300}

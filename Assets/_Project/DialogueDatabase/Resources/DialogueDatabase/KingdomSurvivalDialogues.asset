@@ -826,11 +826,11 @@ MonoBehaviour:
     title: "N01 — Обычное утро / Лишний хлеб"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "P04-T05 production-текст. Ульяна и второй хлеб без объясняющей лекции; короткий момент с Остафием; Лада показана действием; мельница Мирона — часть фона. Пассивное Суждение 11 — необязательное раннее наблюдение (не лекция, тихое умозаключение героя)."
     startNodeId: chapter01.node.01
     tags:
     - "глава01"
-    - "черновик"
+    - "production"
     nodes:
     - id: chapter01.node.01
       speakerId: ulyana
@@ -860,6 +860,218 @@ MonoBehaviour:
             Type: 0
             StringParam: "chapter01.flag.home_intro_seen"
             IntParam: 0
+      - blockId: "chapter01.node.01_observation"
+        kind: 1
+        speakerIdOverride: ""
+        text: "Она заворачивает буханку не праздничным движением и не так, как подают милостыню, — а буднично, как отдают то, что давно и без спора считается чужим. Дело, а не дар."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 1
+        passiveCheck:
+          CheckId: "chapter01.check.second_loaf_judgment"
+          Kind: 0
+          Quality: 4
+          CompetencyId: ""
+          Difficulty: 11
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n01_knowledge1"
+            Type: 2
+            StringParam: "chapter01.knowledge.second_loaf_is_ration"
+            IntParam: 0
+      choices:
+      - text: "Спросить, кому предназначен хлеб."
+        nextNodeId: "chapter01.node.01_ask"
+        endsDialogue: 0
+        choiceId: "chapter01.node.01_ask_choice"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      - text: "Не спрашивать и заняться своими делами."
+        nextNodeId: "chapter01.node.01_ostafiy"
+        endsDialogue: 0
+        choiceId: "chapter01.node.01_skip_choice"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.01_ask
+      speakerId: ulyana
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.01_ask_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "«Кому?» — переспрашиваешь ты. «Кому всегда», — отвечает Ульяна, не поднимая глаз, и уже тянется за следующей крынкой."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Пойти дальше."
+        nextNodeId: "chapter01.node.01_ostafiy"
+        endsDialogue: 0
+        choiceId: "chapter01.node.01_ask_exit"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.01_ostafiy
+      speakerId: ostafiy
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.01_ostafiy_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Остафий сидит на корточках у старого засова и качает его ладонью — не чинит, просто проверяет, на месте ли. Он смотрит на свёрток у тебя в руках. «Опять к седьмому», — говорит просто, не как вопрос, и возвращается к засову."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Кивнуть и пройти дальше."
+        nextNodeId: "chapter01.node.01_lada"
+        endsDialogue: 0
+        choiceId: "chapter01.node.01_ostafiy_exit"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.01_lada
+      speakerId: lada
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.01_lada_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Лада держит зубами запасной колышек, обеими руками — распорку настила, и одним движением загоняет колышек на место. Только тогда поднимает взгляд. «Если бы Остафий не берёг каждую щепку, я бы переделала это ещё вчера — и правильно»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Пойти дальше, к мельнице."
+        nextNodeId: "chapter01.node.01_mill"
+        endsDialogue: 0
+        choiceId: "chapter01.node.01_lada_exit"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.01_mill
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.01_mill_main"
+        kind: 5
+        speakerIdOverride: ""
+        text: "У мельницы уже шумит колесо — ровно, как каждое утро. Мирон стоит в дверях, отряхивает мучную пыль с рукава и молча кивает проходящему герою: ему сейчас не до разговоров, мешок ждёт."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
       choices:
       - text: "Отнести хлеб к затвору."
         nextNodeId: ""
@@ -888,20 +1100,20 @@ MonoBehaviour:
     title: "N02 — Люди Дома"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "P04-T05 production-текст. Главная ось — бытовой (не философский) спор Остафия и Лады вокруг конкретной вещи (резная зарубка старой распорки настила, по которой читали уровень воды). Мирон и Ульяна не статисты: у каждого своя реплика и своя правда. Хотя бы один явный конфликт и признание, что герой — часть сообщества (к нему обращаются за решением)."
     startNodeId: chapter01.node.02
     tags:
     - "глава01"
-    - "черновик"
+    - "production"
     nodes:
     - id: chapter01.node.02
       speakerId: narrator
       text: ""
       textBlocks:
-      - blockId: "chapter01.node.02_main"
-        kind: 0
+      - blockId: "chapter01.node.02_scene"
+        kind: 5
         speakerIdOverride: ""
-        text: "Дом просыпается обычным порядком: Остафий проверяет, не сдвинулся ли ночью засов на старом затворе; Лада спорит с ним о новой распорке для колеса; Мирон уже стоит у мельницы; Ульяна делит хлеб на утро."
+        text: "У дощатого настила уже собрался небольшой скандал. Остафий держит в руках старую распорку — деревянный брус с резной зарубкой; рядом Лада только что вбила новую, из свежего дерева, без единой зарубки."
         conditions:
           Combinator: 0
           Conditions: []
@@ -918,11 +1130,284 @@ MonoBehaviour:
             Type: 0
             StringParam: "chapter01.flag.house_people_met"
             IntParam: 0
+      - blockId: "chapter01.node.02_ostafiy"
+        kind: 0
+        speakerIdOverride: "ostafiy"
+        text: "«Зарубку сбила», — говорит Остафий, не глядя на Ладу, и вертит в руках старый брус. — «Она не для красоты была — по ней воду читали, сколько ни спроси. Теперь поди пойми, где мерить»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: "chapter01.node.02_lada"
+        kind: 0
+        speakerIdOverride: "lada"
+        text: "«Она бы сгнила через год, зарубка или без», — отвечает Лада, не отрываясь от работы. — «Новая держит вдвое. Хочешь мерить — поставь рядом рейку, дело на пять минут»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: "chapter01.node.02_miron"
+        kind: 0
+        speakerIdOverride: "miron"
+        text: "Мирон, не оборачиваясь от колеса, бросает через плечо: «Мне всё равно, чей брус, — лишь бы колесо не сбоило. Пока не сбоило»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: "chapter01.node.02_ulyana"
+        kind: 0
+        speakerIdOverride: "ulyana"
+        text: "Ульяна проходит мимо с корзиной и вставляет на ходу: «Вы бы лучше решили, кто сегодня подменит Прову у колодца — у неё после стирки опять руки не разгибаются. Дом не только из досок стоит»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: "chapter01.node.02_appeal_ostafiy"
+        kind: 0
+        speakerIdOverride: "ostafiy"
+        text: "«Ты теперь у нас решаешь», — говорит Остафий герою, не то в шутку, не то всерьёз. — «Вот и рассуди»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: "chapter01.node.02_appeal_lada"
+        kind: 0
+        speakerIdOverride: "lada"
+        text: "«Или не рассуждай», — тут же добавляет Лада. — «Просто дай мне закончить — и всё встанет на место без суда»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
       choices:
-      - text: "Пройти мимо, поздоровавшись со всеми."
+      - text: "Поддержать Остафия: «Зарубку стоило сохранить»."
+        nextNodeId: "chapter01.node.02_side_ostafiy"
+        endsDialogue: 0
+        choiceId: "chapter01.node.02_side_ostafiy_choice"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      - text: "Поддержать Ладу: «Главное, чтобы держалось»."
+        nextNodeId: "chapter01.node.02_side_lada"
+        endsDialogue: 0
+        choiceId: "chapter01.node.02_side_lada_choice"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      - text: "Не вставать ни на чью сторону: «Пусть решает тот, кто держит инструмент»."
+        nextNodeId: "chapter01.node.02_neutral"
+        endsDialogue: 0
+        choiceId: "chapter01.node.02_neutral_choice"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.02_side_ostafiy
+      speakerId: ostafiy
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.02_side_ostafiy_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Остафий коротко кивает — не победно, скорее с облегчением, что его вообще услышали. «Хоть один в Доме ещё помнит, что не всё меряется рейкой», — говорит он и возвращается к засову."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n02_relation_ostafiy"
+            Type: 3
+            StringParam: "ostafiy"
+            IntParam: 1
+      choices:
+      - text: "Пойти дальше."
         nextNodeId: ""
         endsDialogue: 1
-        choiceId: "chapter01.node.02_exit"
+        choiceId: "chapter01.node.02_side_ostafiy_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.02_side_lada
+      speakerId: lada
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.02_side_lada_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Лада чуть улыбается — не благодарно, по-деловому. «Вот и славно. Тогда я закончу — и покажу, что не развалится», — и снова берётся за распорку."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n02_relation_lada"
+            Type: 3
+            StringParam: "lada"
+            IntParam: 1
+      choices:
+      - text: "Пойти дальше."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.02_side_lada_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.02_neutral
+      speakerId: miron
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.02_neutral_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Мирон хмыкает, не отрываясь от колеса: «Мудрое дело. Само колесо покажет, кто был прав — оно врать не умеет»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Пойти дальше."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.02_neutral_exit"
         kind: 3
         conditions:
           Combinator: 0
@@ -946,20 +1431,20 @@ MonoBehaviour:
     title: "N03 — Первое давление"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "P04-T05 production-текст. Реакция распределена по разделу 17 инструкции: Мирон — фактическое наблюдение, Лада — механическое объяснение, Остафий — сравнение с прошлым, Ульяна — бытовое последствие. Никто не произносит готовую истину."
     startNodeId: chapter01.node.03
     tags:
     - "глава01"
-    - "черновик"
+    - "production"
     nodes:
     - id: chapter01.node.03
-      speakerId: ostafiy
+      speakerId: narrator
       text: ""
       textBlocks:
-      - blockId: "chapter01.node.03_main"
-        kind: 0
+      - blockId: "chapter01.node.03_scene"
+        kind: 1
         speakerIdOverride: ""
-        text: "Остафий останавливает героя у берега: «Вода шумит не так, как вчера. Может, и ничего. А может — нет»."
+        text: "Вода у берега шумит не так, как вчера — чуть иначе, будто на миг кто-то переставил камень под струёй. Через минуту всё снова звучит привычно, и можно бы забыть, если бы не привычка дослушивать до конца."
         conditions:
           Combinator: 0
           Conditions: []
@@ -976,11 +1461,181 @@ MonoBehaviour:
             Type: 0
             StringParam: "chapter01.flag.first_pressure_seen"
             IntParam: 0
+      - blockId: "chapter01.node.03_miron"
+        kind: 0
+        speakerIdOverride: "miron"
+        text: "Мирон поднимает голову раньше, чем ты успеваешь спросить. «Колесо два раза сбилось за час — не под мою руку, само. Отметил, дальше видно будет»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: "chapter01.node.03_lada"
+        kind: 0
+        speakerIdOverride: "lada"
+        text: "Лада, услышав, пожимает плечами. «Задвижку, может, подперло веткой, или люфт в оси — само уляжется. Если нет, гляну распорку»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: "chapter01.node.03_ostafiy"
+        kind: 0
+        speakerIdOverride: "ostafiy"
+        text: "Остафий останавливается рядом и слушает дольше, чем нужно для ответа. «Так она раньше не делала. Даже в паводок — не так»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: "chapter01.node.03_ulyana"
+        kind: 0
+        speakerIdOverride: "ulyana"
+        text: "Ульяна идёт мимо с ведром и морщится. «Со вчерашнего вода из колодца горчит — не показалось. И скотина не сразу пьёт»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
       choices:
-      - text: "Прислушаться и пойти дальше."
+      - text: "Сходить и взглянуть на затвор самому."
+        nextNodeId: "chapter01.node.03_check"
+        endsDialogue: 0
+        choiceId: "chapter01.node.03_check_choice"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      - text: "Не задерживаться — дел с утра хватает."
+        nextNodeId: "chapter01.node.03_pass"
+        endsDialogue: 0
+        choiceId: "chapter01.node.03_pass_choice"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.03_check
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.03_check_main"
+        kind: 5
+        speakerIdOverride: ""
+        text: "Ты подходишь к затвору. На вид всё как обычно: мокрое дерево, ровный гул. Только слова Остафия не идут из головы: «Может, и ничего. А может — нет»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Пойти дальше."
         nextNodeId: ""
         endsDialogue: 1
-        choiceId: "chapter01.node.03_exit"
+        choiceId: "chapter01.node.03_check_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.03_pass
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.03_pass_main"
+        kind: 5
+        speakerIdOverride: ""
+        text: "Дела не ждут — а паводок, случись он, будет ждать ещё меньше. Ты идёшь дальше, оставляя странность на потом."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Пойти дальше."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.03_pass_exit"
         kind: 3
         conditions:
           Combinator: 0

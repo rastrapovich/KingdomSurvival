@@ -178,19 +178,22 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P01-T01", "Модель данных плана",
                     "DevelopmentPlanAsset описывает DevelopmentPhaseData/DevelopmentTaskData/AcceptanceCriterionData, статусы и категории по разделу 4.3, миграцию schemaVersion.",
-                    DevelopmentTaskCategory.Data, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
+                    DevelopmentTaskCategory.Data, DevelopmentTaskStatus.Completed, required: true, order: 1,
                     fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanAsset.cs" },
                     acceptanceCriteria: new[]
                     {
                         "Сериализуются все поля раздела 4.3 (id/title/details/category/status/required/order/dependencies/acceptanceCriteria/manualChecks/fileReferences/relatedDialogueIds/relatedFlagIds/relatedKnowledgeIds/blockerNote/implementationNote/completedAt/completedCommit/optionalAutoCheckId)",
                         "MigrateIfNeeded поднимает schemaVersion и не падает на null-полях"
                     },
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
                     manualChecks: new[] { "Открыть asset в инспекторе Unity и убедиться, что нет ошибок сериализации" },
-                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanAsset.cs"),
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanAsset.cs",
+                    implementationNote: "Подтверждено реальным Unity Test Runner: компиляция чистая, DevelopmentPlanAssetTests (8/8, включая MigrateIfNeeded_FixesNullListsAndBumpsSchemaVersion) зелёные."),
 
                 Task("P01-T02", "Расчёт прогресса",
                     "DevelopmentPlanProgress считает обязательный прогресс отдельно от опционального и исключает Отложено (раздел 4.5).",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.Completed, required: true, order: 2,
                     fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanProgress.cs" },
                     acceptanceCriteria: new[]
                     {
@@ -198,12 +201,15 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                         "Опциональные задачи считаются отдельно и не уменьшают обязательный процент",
                         "«Следующая рекомендуемая задача» учитывает зависимости"
                     },
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
                     manualChecks: new[] { "Прогнать DevelopmentTrackerProgressTests в Test Runner" },
-                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanProgress.cs"),
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanProgress.cs",
+                    implementationNote: "Подтверждено реальным Unity Test Runner: DevelopmentTrackerProgressTests 6/6 зелёные."),
 
                 Task("P01-T03", "Validator плана",
                     "DevelopmentPlanValidator проверяет структуру плана по 10 пунктам раздела 4.10.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.Completed, required: true, order: 3,
                     fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanValidator.cs" },
                     acceptanceCriteria: new[]
                     {
@@ -212,8 +218,11 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                         "Требует критерий приёмки у обязательной задачи",
                         "Предупреждает о выполненных задачах с незакрытыми критериями"
                     },
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
                     manualChecks: new[] { "Прогнать DevelopmentPlanValidatorTests в Test Runner" },
-                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanValidator.cs"),
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanValidator.cs",
+                    implementationNote: "Подтверждено реальным Unity Test Runner: DevelopmentPlanValidatorTests 9/9 зелёные (дубликаты, циклы, зависимости, blockerNote и т.д.)."),
 
                 Task("P01-T04", "Автоматические проверки",
                     "DevelopmentPlanAutoChecks подтверждает только объективные факты: существование file:/asset: по optionalAutoCheckId (раздел 4.9).",
@@ -272,10 +281,13 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P01-T09", "Editor-only asmdef",
                     "KingdomSurvival.DevelopmentTracker.Editor.asmdef ссылается только на UnityEditor/UI Toolkit; рантайм-билд не получает ссылку на модуль.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 9,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.Completed, required: true, order: 9,
                     fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/KingdomSurvival.DevelopmentTracker.Editor.asmdef" },
                     acceptanceCriteria: new[] { "includePlatforms = [Editor]", "Нет циклической ссылки с Dialogue/Unit Database" },
-                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/KingdomSurvival.DevelopmentTracker.Editor.asmdef"),
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/KingdomSurvival.DevelopmentTracker.Editor.asmdef",
+                    implementationNote: "Подтверждено: чистая Unity-компиляция, никаких ошибок circular reference."),
 
                 Task("P01-T10", "Начальное заполнение плана",
                     "DevelopmentPlanSeedData строит P00–P16 по инструкции; DevelopmentPlanBootstrap создаёт и заполняет asset при первом Unity-запуске после pull, если его ещё нет.",
@@ -296,7 +308,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P01-T11", "EditMode-тесты экрана",
                     "Тесты сериализации, расчёта прогресса и validator по разделу 19.1.",
-                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 11,
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.Completed, required: true, order: 11,
                     dependencies: new[] { "P01-T01", "P01-T02", "P01-T03" },
                     fileReferences: new[]
                     {
@@ -305,8 +317,11 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                         "Assets/_Project/Tests/EditMode/DevelopmentTrackerProgressTests.cs"
                     },
                     acceptanceCriteria: new[] { "Все тесты раздела 19.1 присутствуют и зелёные в Test Runner" },
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
                     manualChecks: new[] { "Запустить Window → General → Test Runner → EditMode" },
-                    optionalAutoCheckId: "file:Assets/_Project/Tests/EditMode/DevelopmentPlanAssetTests.cs"),
+                    optionalAutoCheckId: "file:Assets/_Project/Tests/EditMode/DevelopmentPlanAssetTests.cs",
+                    implementationNote: "Пользователь прислал TestResults.xml реального Unity Test Runner: все 23 теста (8+9+6) зелёные, 0 падений."),
 
                 Task("P01-T12", "UI-настройки в EditorPrefs",
                     "Раскрытые foldout, ширины колонок и активные фильтры хранятся в EditorPrefs, а не сериализуются в asset (раздел 4.8).",
@@ -327,14 +342,22 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P02-T01", "Чистая компиляция после pull",
                     "Открыть проект в Unity 6000.5.10f1 и дождаться Domain Reload без ошибок в Console.",
-                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
-                    acceptanceCriteria: new[] { "Console не содержит ошибок компиляции" }),
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.Completed, required: true, order: 1,
+                    acceptanceCriteria: new[] { "Console не содержит ошибок компиляции" },
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Подтверждено пользователем: TestResults.xml от реального Unity Test Runner содержит 213 тест-кейсов — компиляция чистая (иначе Test Runner не собрал бы сборки)."),
 
                 Task("P02-T02", "Все EditMode tests зелёные",
                     "Test Runner → EditMode должен пройти без красных тестов на текущем main.",
-                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.Blocked, required: true, order: 2,
                     fileReferences: new[] { "Assets/_Project/Tests/EditMode" },
-                    acceptanceCriteria: new[] { "Test Runner → EditMode: все тесты проходят" }),
+                    acceptanceCriteria: new[] { "Test Runner → EditMode: все тесты проходят" },
+                    blockerNote: "211/213 зелёные (пользователь прислал TestResults.xml). 2 падения — ОБА вне кода этой сессии (последний коммит, тронувший оба файла, старше a9595a8): " +
+                        "BattleSandboxTests.GuardAddsFiftyPercentDefenseUntilNextActivation (Expected 16, was 18) и " +
+                        "DialogueDatabaseCheckSystemTests.RegenerateNarrativeIdentifiers_Creates_New_Ids_And_Remaps_Unlock_Reference (NullReferenceException). " +
+                        "Нужно решение пользователя: чинить сейчас как отдельную задачу вне Главы 01, или зафиксировать как известный технический долг и продолжать.",
+                    implementationNote: "Все 40 тестов, написанных в этой сессии (17 Chapter01StateTests + 23 DevelopmentTracker*), зелёные. DialogueDatabaseTests (в т.ч. DefaultDatabase_Has_No_Validation_Issues) и HeroCombatStatsBuilderTests тоже зелёные — правки в KingdomSurvivalDialogues.asset и HeroProfile.cs не сломали существующее."),
 
                 Task("P02-T03", "Карта, время, экспедиция в Prototype_Main",
                     "Открыть сцену, выйти в экспедицию и вернуться без ошибок и рассинхронизации состояния.",
@@ -361,16 +384,20 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P02-T06", "Road Predator Encounter",
                     "Проверить дорожную встречу-хищника через ExpeditionIncidentSystem.",
-                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 6,
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.Completed, required: true, order: 6,
                     fileReferences: new[] { "Assets/_Project/Scripts/Core/ExpeditionIncidentSystem.cs" },
-                    acceptanceCriteria: new[] { "Encounter запускается и завершается без ошибок" }),
+                    acceptanceCriteria: new[] { "Encounter запускается и завершается без ошибок" },
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "RoadPredatorEncounterTests 5/5 зелёные в реальном Unity Test Runner."),
 
                 Task("P02-T07", "Записать smoke test в DEVELOPMENT_STATUS.md",
                     "Зафиксировать дату и результат ручной проверки P02 в техническом журнале.",
-                    DevelopmentTaskCategory.Documentation, DevelopmentTaskStatus.NotStarted, required: true, order: 7,
+                    DevelopmentTaskCategory.Documentation, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 7,
                     dependencies: new[] { "P02-T01", "P02-T02", "P02-T03", "P02-T04", "P02-T05", "P02-T06" },
                     fileReferences: new[] { "ProjectDocs/DEVELOPMENT_STATUS.md" },
-                    acceptanceCriteria: new[] { "В журнале есть запись с датой и результатом ручной проверки P02" })
+                    acceptanceCriteria: new[] { "В журнале есть запись с датой и результатом ручной проверки P02" },
+                    implementationNote: "Частичная запись внесена (компиляция + результаты Test Runner из TestResults.xml). Полное закрытие ждёт P02-T02 (решение по 2 предсуществующим падениям) и ручной проверки P02-T03/T04/T05 (карта/время/экспедиция, три окна, ручной проход prototype_miller — автотесты этого не подтверждают напрямую).")
             );
         }
 

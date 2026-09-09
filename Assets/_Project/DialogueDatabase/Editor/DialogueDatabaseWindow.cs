@@ -38,6 +38,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private NarrativeDialogueView previewView;
         private string previewDialogueId = string.Empty;
         private string previewMessage = string.Empty;
+        private NarrativeCheckPresentationData previewLastCheckPresentation;
         private readonly List<string> validationIssues = new List<string>();
 
         // Авторский Preview-контекст (§13): не связан с реальным сохранением
@@ -52,6 +53,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private string previewRelationsCsv = string.Empty;
         private int previewWorldSeed = 12345;
         private NarrativeCheckForcedOutcome previewForcedOutcome = NarrativeCheckForcedOutcome.None;
+
+        // §17 инструкции по визуализации проверок: доступно только в Preview
+        // редактора, никогда в игровом runtime.
+        private bool previewShowFailedPassiveChecks;
 
         [MenuItem("Kingdom Survival/База диалогов")]
         private static void Open()
@@ -783,7 +788,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUILayout.PropertyField(
                 check.FindPropertyRelative("CompetencyId"),
                 new GUIContent("ID компетенции (пусто — не участвует)"));
-            EditorGUILayout.PropertyField(check.FindPropertyRelative("Difficulty"), new GUIContent("Сложность (9-23)"));
+            SerializedProperty difficultyProperty = check.FindPropertyRelative("Difficulty");
+            EditorGUILayout.PropertyField(difficultyProperty, new GUIContent("Сложность (9-23)"));
+            EditorGUILayout.LabelField("→ " + NarrativeDifficultyLabels.Describe(difficultyProperty.intValue), EditorStyles.miniLabel);
 
             SerializedProperty modifierRules = check.FindPropertyRelative("ModifierRules");
             EditorGUILayout.LabelField("Контекстные модификаторы", EditorStyles.miniBoldLabel);

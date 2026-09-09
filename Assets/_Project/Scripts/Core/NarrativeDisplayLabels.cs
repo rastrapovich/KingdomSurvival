@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 
 // Русские подписи качеств/компетенций для механической строки диалога и
 // будущего экрана героя (§14, §17). Чисто отображение — не влияет на расчёт.
@@ -32,5 +33,36 @@ public static class NarrativeCompetencyLabels
         if (!string.IsNullOrWhiteSpace(competencyId) && Labels.TryGetValue(competencyId, out string label))
             return label;
         return competencyId ?? string.Empty;
+    }
+}
+
+// Человекочитаемые названия именованных значений сложности (§7 инструкции
+// по визуализации проверок). Промежуточные значения (напр. 14) названия не
+// получают — GetLabel возвращает пустую строку, вызывающий код показывает
+// голое число.
+public static class NarrativeDifficultyLabels
+{
+    public static string GetLabel(int difficulty)
+    {
+        switch (difficulty)
+        {
+            case NarrativeDifficulty.Obvious: return "Очевидная";
+            case NarrativeDifficulty.Simple: return "Простая";
+            case NarrativeDifficulty.Ordinary: return "Обычная";
+            case NarrativeDifficulty.Demanding: return "Требовательная";
+            case NarrativeDifficulty.Hard: return "Сложная";
+            case NarrativeDifficulty.VeryHard: return "Очень сложная";
+            case NarrativeDifficulty.Exceptional: return "Исключительная";
+            case NarrativeDifficulty.Legendary: return "Легендарная";
+            default: return string.Empty;
+        }
+    }
+
+    // "Обычная (13)" для именованных значений, просто "14" для промежуточных.
+    public static string Describe(int difficulty)
+    {
+        string label = GetLabel(difficulty);
+        string numberText = difficulty.ToString(CultureInfo.InvariantCulture);
+        return string.IsNullOrEmpty(label) ? numberText : label + " (" + numberText + ")";
     }
 }

@@ -12,6 +12,16 @@ namespace KingdomSurvival.DialogueDatabase
         public string SpeakerDisplayName;
         public string SpeakerRole;
         public string Text;
+
+        // Заполнено, только если у блока есть пассивная проверка (§10
+        // инструкции по визуализации проверок). Null — проверки не было.
+        // В production-runtime блок с провалившейся проверкой сюда вообще
+        // не попадает — см. IsPassiveFailurePreviewOnly.
+        public NarrativeCheckPresentationData CheckPresentation;
+
+        // true только для Preview (§17): проверка провалилась и такой блок
+        // никогда не появился бы в BuildView() игрового runtime.
+        public bool IsPassiveFailurePreviewOnly;
     }
 
     public sealed class NarrativeDialogueChoiceView
@@ -52,6 +62,10 @@ namespace KingdomSurvival.DialogueDatabase
 
         // Заполнено только при выборе активной проверки (Normal/Exit — null).
         public NarrativeCheckResult CheckResult;
+
+        // Presentation-снимок того же результата (§12: активные проверки
+        // используют тот же компонент отображения, что и пассивные).
+        public NarrativeCheckPresentationData CheckPresentation;
 
         // Null, если разговор завершился этим выбором.
         public NarrativeDialogueView View;

@@ -115,6 +115,144 @@ public sealed class DialogueDatabaseCheckSystemTests
         Assert.AreEqual(result.CheckResult.Success ? "returnable_success" : "returnable_failed", result.View.NodeId);
     }
 
+    // §20 инструкции по визуализации проверок, пункты 1, 12: успешная
+    // пассивная проверка создаёт видимый блок с CheckPresentation, и он не
+    // несёт кубиков (пассивная проверка их не бросает).
+    [Test]
+    public void Successful_Passive_Check_Block_Has_CheckPresentation_Without_Dice()
+    {
+        DialogueDatabaseAsset asset = BuildDemoDatabase();
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(asset, "demo_checks", hero, state, out NarrativeDialogueView view, out string error);
+        Assert.IsTrue(started, error);
+
+        NarrativeDialogueVisibleBlock block = FindBlock(view.VisibleTextBlocks, "b_obs");
+        Assert.IsNotNull(block);
+        Assert.IsNotNull(block.CheckPresentation);
+        Assert.IsTrue(block.CheckPresentation.Success);
+        Assert.AreEqual("Чутьё", block.CheckPresentation.QualityLabel);
+        Assert.AreEqual("Следопытство", block.CheckPresentation.CompetencyLabel);
+        Assert.IsFalse(block.CheckPresentation.HasDice);
+        Assert.AreEqual(0, block.CheckPresentation.DieOne);
+        Assert.AreEqual(0, block.CheckPresentation.DieTwo);
+        Assert.IsFalse(block.IsPassiveFailurePreviewOnly);
+
+        Object.DestroyImmediate(asset);
+    }
+
+    // §20, пункт 2: проваленная пассивная проверка отсутствует в
+    // production-view — игрок не видит, что там что-то было спрятано.
+    [Test]
+    public void Failed_Passive_Check_Block_Is_Absent_From_Production_View()
+    {
+        DialogueDatabaseAsset asset = BuildPassiveFailureDatabase();
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(asset, "passive_fail_demo", hero, state, out NarrativeDialogueView view, out string error);
+        Assert.IsTrue(started, error);
+
+        Assert.IsTrue(HasBlock(view.VisibleTextBlocks, "b_main"));
+        Assert.IsFalse(HasBlock(view.VisibleTextBlocks, "b_secret"));
+
+        Object.DestroyImmediate(asset);
+    }
+
+    // §20, пункт 14: Preview может явно запросить провалившийся пассивный
+    // блок, production-путь (BuildView()) — никогда.
+    [Test]
+    public void Preview_Can_Show_Failed_Passive_Block_Production_Cannot()
+    {
+        DialogueDatabaseAsset asset = BuildPassiveFailureDatabase();
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(asset, "passive_fail_demo", hero, state, out _, out string error);
+        Assert.IsTrue(started, error);
+
+        NarrativeDialogueView productionView = session.BuildView();
+        Assert.IsFalse(HasBlock(productionView.VisibleTextBlocks, "b_secret"));
+
+        NarrativeDialogueView previewView = session.BuildViewPreview(includeFailedPassiveChecks: true);
+        NarrativeDialogueVisibleBlock failedBlock = FindBlock(previewView.VisibleTextBlocks, "b_secret");
+        Assert.IsNotNull(failedBlock);
+        Assert.IsTrue(failedBlock.IsPassiveFailurePreviewOnly);
+        Assert.IsNotNull(failedBlock.CheckPresentation);
+        Assert.IsFalse(failedBlock.CheckPresentation.Success);
+
+        Object.DestroyImmediate(asset);
+    }
+
+    // §20, пункты 9, 10: активный успех и активный провал используют тот же
+    // presentation-компонент, что и пассивная проверка.
+    [Test]
+    public void Active_Decisive_Success_Uses_Same_Presentation_Component()
+    {
+        DialogueDatabaseAsset asset = BuildDemoDatabase();
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(asset, "demo_checks", hero, state, out _, out string error);
+        Assert.IsTrue(started, error);
+
+        NarrativeDialogueSelectionResult result = session.SelectChoicePreview("c_decisive", NarrativeCheckForcedOutcome.ForceSuccess);
+
+        Assert.IsNotNull(result.CheckPresentation);
+        Assert.AreEqual(NarrativeCheckKind.ActiveDecisive, result.CheckPresentation.Kind);
+        Assert.IsTrue(result.CheckPresentation.Success);
+        Assert.AreEqual("chk_decisive", result.CheckPresentation.CheckId);
+
+        Object.DestroyImmediate(asset);
+    }
+
+    [Test]
+    public void Active_Returnable_Failure_Uses_Same_Presentation_Component()
+    {
+        DialogueDatabaseAsset asset = BuildDemoDatabase();
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(asset, "demo_checks", hero, state, out _, out string error);
+        Assert.IsTrue(started, error);
+
+        NarrativeDialogueSelectionResult result = session.SelectChoicePreview("c_returnable", NarrativeCheckForcedOutcome.ForceFailure);
+
+        Assert.IsNotNull(result.CheckPresentation);
+        Assert.AreEqual(NarrativeCheckKind.ActiveReturnable, result.CheckPresentation.Kind);
+        Assert.IsFalse(result.CheckPresentation.Success);
+        Assert.AreEqual("chk_returnable", result.CheckPresentation.CheckId);
+
+        Object.DestroyImmediate(asset);
+    }
+
+    // §20, пункт 11: для активной проверки presentation обязан правильно
+    // отражать оба кубика натурального (не Preview-принудительного) броска.
+    [Test]
+    public void Active_Check_Presentation_Shows_Both_Dice_On_Natural_Roll()
+    {
+        DialogueDatabaseAsset asset = BuildDemoDatabase();
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(asset, "demo_checks", hero, state, out _, out string error, worldSeedValue: 555);
+        Assert.IsTrue(started, error);
+
+        NarrativeDialogueSelectionResult result = session.SelectChoice("c_returnable");
+
+        Assert.IsNotNull(result.CheckPresentation);
+        Assert.IsTrue(result.CheckPresentation.HasDice);
+        Assert.AreEqual(result.CheckResult.DieOne, result.CheckPresentation.DieOne);
+        Assert.AreEqual(result.CheckResult.DieTwo, result.CheckPresentation.DieTwo);
+        Assert.GreaterOrEqual(result.CheckPresentation.DieOne, 1);
+        Assert.LessOrEqual(result.CheckPresentation.DieOne, 6);
+        Assert.GreaterOrEqual(result.CheckPresentation.DieTwo, 1);
+        Assert.LessOrEqual(result.CheckPresentation.DieTwo, 6);
+
+        Object.DestroyImmediate(asset);
+    }
+
     [Test]
     public void Migration_Preserves_Legacy_Text_And_Adds_Main_Block()
     {
@@ -333,6 +471,55 @@ public sealed class DialogueDatabaseCheckSystemTests
                 return true;
         }
         return false;
+    }
+
+    private static bool HasBlock(IReadOnlyList<NarrativeDialogueVisibleBlock> list, string blockId)
+    {
+        return FindBlock(list, blockId) != null;
+    }
+
+    private static NarrativeDialogueVisibleBlock FindBlock(IReadOnlyList<NarrativeDialogueVisibleBlock> list, string blockId)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i].BlockId == blockId)
+                return list[i];
+        }
+        return null;
+    }
+
+    // Провал гарантирован для героя по умолчанию (все качества = 5):
+    // база(6) + Чутьё(5) = 11 < VeryHard(19), но проверка остаётся
+    // теоретически достижимой (6+10 качество+3 контекст = 19) — иначе
+    // валидатор базы пометил бы её как невозможную (§19 инструкции по
+    // Главе 01). Используется §20, пункты 2 и 14 — "провал не показан в
+    // production" / "Preview может показать".
+    private static DialogueDatabaseAsset BuildPassiveFailureDatabase()
+    {
+        DialogueDatabaseAsset asset = ScriptableObject.CreateInstance<DialogueDatabaseAsset>();
+        SetField(asset, "speakers", new List<DialogueSpeakerData> { MakeSpeaker("narrator", "Рассказчик") });
+
+        NarrativeCheckSpec passiveCheck = new NarrativeCheckSpec
+        {
+            CheckId = "chk_passive_fail",
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Instinct,
+            Difficulty = NarrativeDifficulty.VeryHard
+        };
+
+        DialogueNodeData startNode = MakeNode(
+            "start",
+            "narrator",
+            new List<DialogueTextBlockData>
+            {
+                MakeTextBlock("b_main", DialogueTextBlockKind.MainLine, "Всё как обычно."),
+                MakeTextBlock("b_secret", DialogueTextBlockKind.Observation, "Скрытая деталь.", passiveCheck: passiveCheck)
+            },
+            new List<DialogueChoiceData> { MakeExitChoice("c_exit", "Уйти.") });
+
+        DialogueDefinitionData dialogue = MakeDialogue("passive_fail_demo", "start", new List<DialogueNodeData> { startNode });
+        SetField(asset, "dialogues", new List<DialogueDefinitionData> { dialogue });
+        return asset;
     }
 
     private static DialogueChoiceData FindChoiceById(DialogueDefinitionData dialogue, string choiceId)

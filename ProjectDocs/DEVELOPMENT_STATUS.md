@@ -275,6 +275,7 @@ Unity Editor, C# compiler и Unity Test Runner в подключённой ср�
 - `NarrativeStateData`, качества 1–10, компетенции 0–5, особенности, условия, эффекты и `NarrativeCheckResolver`;
 - `DialogueDatabaseAsset`, визуальный граф, табличный режим, редактор говорящих, Preview, валидация и runtime v2;
 - возвратные/решающие активные проверки и пассивные проверки;
+- `NarrativeCheckPresentationData`/`NarrativeCheckPresentationBuilder` и единый интерактивный компонент отображения проверок (заголовок + tooltip) для пассивных и активных проверок — см. §9;
 - игровой UI диалога на `NarrativeDialogueRuntimeSession`;
 - один интегрированный дорожный Encounter «Хищник у тропы» как технический вертикальный пример качеств/Следопытства;
 - точечная боевая связь Сноровки с инициативой командира.
@@ -301,7 +302,46 @@ Unity Editor, C# compiler и Unity Test Runner в подключённой ср�
 
 Правка §2 (решения DEC-01…DEC-12), напротив, **осознанно и целенаправленно меняет канон** — но строго по правилу CLAUDE.md: сначала предложение, только после явного согласия пользователя факт заносится в `LORE.md`/`NARRATIVE.md`. Ни одно решение не принято молча; DEC-08 явно зафиксирован как отступление от рекомендации инструкции по прямому выбору пользователя, а не как ошибка процесса.
 
-## 10. Что делать дальше
+## 10. Narrative Check Presentation Layer — 09.09.2026
+
+Техническое расширение существующей нарративной системы поверх уже утверждённой математики проверок (6 + качество + компетенция + контекстные модификаторы ≥ сложность). Канон и формулы **не менялись**.
+
+### 10.1. Проблема
+
+`NarrativeDialogueVisibleBlock` нёс только текст, говорящего и тип блока — UI не мог показать игроку, почему появился текст (какое качество сработало). `NarrativeCheckResult` хранил только суммарный `AppliedContextModifier`, но не список конкретных сработавших модификаторов — tooltip не мог бы честно объяснить итог, если бы состояние мира к моменту показа уже изменилось.
+
+### 10.2. Core (`Assets/_Project/Scripts/Core/`)
+
+- `NarrativeCheckSystem.cs` — новый `NarrativeAppliedModifierSnapshot` (SourceId/Label/Value); `NarrativeCheckResolver.ResolvePassive`/`ResolveActiveCore` теперь копируют реально применившиеся `NarrativeContextModifierRule` в снимок при разрешении проверки.
+- `NarrativeState.cs` — `NarrativeCheckResult.AppliedModifiers` (снимок, не пересчитывается заново).
+- `NarrativeDisplayLabels.cs` — `NarrativeDifficultyLabels` (человекочитаемые названия 9–23: Очевидная…Легендарная; `Describe()` для промежуточных значений возвращает голое число).
+- Новый файл `NarrativeCheckPresentation.cs` — `NarrativeCheckPresentationData` (DTO между runtime и UI: качество/компетенция с подписями и значениями, сложность с названием, кубики, сработавшие модификаторы, сырой/применённый контекст, итог), `NarrativeCheckPresentationBuilder.Build(spec, result)` и `NarrativeCheckPresentationText.BuildFullBreakdown()` (текстовая расшифровка для мест без собственного tooltip-виджета). ID (`CheckId`/`SourceId`/`CompetencyId`) используются только внутри Core — наружу отдаются только русские подписи.
+
+### 10.3. DialogueDatabase runtime
+
+- `NarrativeDialogueViewModel.cs` — `NarrativeDialogueVisibleBlock.CheckPresentation` (null, если проверки не было) и `IsPassiveFailurePreviewOnly`; `NarrativeDialogueSelectionResult.CheckPresentation` для активных проверок.
+- `NarrativeDialogueRuntimeSession.cs` — `BuildView()` разбит на `BuildViewCore(includeFailedPassiveChecks)`; production-путь (`BuildView()`) провалившийся пассивный блок по-прежнему никогда не включает. Новый `BuildViewPreview(bool)` — только для авторского Preview — может включить провалившийся пассивный блок со снимком проверки и без запуска `OnRevealEffects`. Активные проверки (`SelectChoiceInternal`) строят `NarrativeCheckPresentationData` тем же `NarrativeCheckPresentationBuilder`, что и пассивные — единый компонент представления на всю нарративную систему.
+
+### 10.4. Игровой UI (`Assets/_Project/UI/`)
+
+- `PrototypeUIController.Narrative.cs` — история диалога хранит `NarrativeCheckPresentationData` на блоках и на строках результата активной проверки вместо голого текста.
+- Новый файл `PrototypeUIController.NarrativeCheckPresentation.cs` — общий компонент «КАЧЕСТВО [+ КОМПЕТЕНЦИЯ]  УСПЕХ/ПРОВАЛ» для пассивных и активных проверок; наведение/фокус на слово результата открывает собственную UI Toolkit-панель (не системный tooltip) поверх narrative overlay с полной расшифровкой (база/кубики, качество, компетенция, только сработавшие модификаторы, сырая сумма контекста и применённый лимит ±3, итог против сложности). Позиционирование ограничено границами overlay. Наведение только читает уже готовый `NarrativeCheckPresentationData` — проверка повторно не резолвится.
+- `Prototype_Narrative.uss` — новые классы `narrative-check-header/-source/-result(--success/--failure)` и `narrative-check-tooltip*`.
+
+### 10.5. Редактор базы диалогов
+
+- `DialogueDatabaseWindow.cs` — в `DrawCheckSpec` добавлена читаемая строка "→ Обычная (13)" под числовым полем сложности.
+- `DialogueDatabaseWindow.PreviewAndSpeakers.cs` / `.Editing.cs` — новый переключатель Preview «Показывать проваленные пассивные проверки [только Preview]» (по умолчанию выключен, недоступен в production); провалившийся пассивный блок в Preview показывает `[Текст этого блока в игре был бы скрыт]` вместо реального текста. Итог проверки в Preview показывается краткой строкой с нативным (GUIContent) tooltip на полную расшифровку.
+
+### 10.6. Тесты
+
+`NarrativeCheckSystemTests.cs` (Core) и `DialogueDatabaseCheckSystemTests.cs` (DialogueDatabase) дополнены тестами на все 15 пунктов §20 производственной инструкции: снимок применившихся/неприменившихся модификаторов, различие сырой/применённой суммы контекста, значения качества/компетенции в расшифровке, неизменность старого снимка после изменения состояния мира, единый presentation-компонент для активного успеха/провала, оба кубика для активной проверки, отсутствие кубиков у пассивной, отсутствие внутренних ID в player-facing тексте, provable-provал пассивной проверки скрыт в production и виден в Preview, чистота `NarrativeCheckPresentationBuilder.Build` (не резолвит проверку повторно).
+
+### 10.7. Проверка и ограничение среды
+
+В удалённой среде Unity Editor, C# compiler и Unity Test Runner недоступны — реальная Unity-компиляция и EditMode tests здесь не запускались. Код написан статически корректным с учётом существующих сигнатур и стиля модуля; после Pull обязательна ручная проверка: дождаться чистой компиляции, прогнать EditMode tests (включая новые), открыть `Kingdom Survival → База диалогов`, включить переключатель провала Preview и убедиться, что заголовок проверки и tooltip читаемы, затем в игровом UI пройти демонстрационный диалог с проверками и навести курсор на УСПЕХ/ПРОВАЛ.
+
+## 11. Что делать дальше
 
 Все 12 решений P00 закрыты. P01 (экран разработки) и большая часть P03 (каркас Главы 01) подтверждены реальным Unity Test Runner (§2.2) — компиляция чистая, все 40 новых тестов зелёные, ничего существующего не сломано. Дальше по плану:
 

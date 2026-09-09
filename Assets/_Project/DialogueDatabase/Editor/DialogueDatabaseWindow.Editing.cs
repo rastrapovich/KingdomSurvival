@@ -355,15 +355,20 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 previewView = null;
                 previewDialogueId = string.Empty;
                 previewMessage = error;
+                previewLastCheckPresentation = null;
                 if (!string.IsNullOrWhiteSpace(error))
                     validationIssues.Add(error);
                 return;
             }
 
+            if (previewShowFailedPassiveChecks)
+                view = session.BuildViewPreview(true);
+
             previewSession = session;
             previewView = view;
             previewDialogueId = dialogueId;
             previewMessage = string.Empty;
+            previewLastCheckPresentation = null;
         }
 
         private void BuildPreviewContext(
@@ -440,6 +445,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             previewView = null;
             previewDialogueId = string.Empty;
             previewMessage = string.Empty;
+            previewLastCheckPresentation = null;
             validationIssues.Clear();
         }
 

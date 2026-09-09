@@ -73,7 +73,24 @@ namespace KingdomSurvival.DialogueDatabase
             CurrentNodeId = string.Empty;
         }
 
+        // Единственный производственный путь построения представления узла.
+        // Провалившийся пассивный блок в него никогда не попадает — §3
+        // инструкции по визуализации проверок ("пассивный провал игроку не
+        // показывать вообще, иначе это метагейм").
         public NarrativeDialogueView BuildView()
+        {
+            return BuildViewCore(includeFailedPassiveChecks: false);
+        }
+
+        // Только для авторского Preview в редакторе (§17: переключатель
+        // "Показывать проваленные пассивные проверки"). Игровой runtime
+        // обязан вызывать только BuildView() — см. класс-каммент.
+        public NarrativeDialogueView BuildViewPreview(bool includeFailedPassiveChecks)
+        {
+            return BuildViewCore(includeFailedPassiveChecks);
+        }
+
+        private NarrativeDialogueView BuildViewCore(bool includeFailedPassiveChecks)
         {
             RequireActiveSession();
             DialogueNodeData node = RequireNode(CurrentNodeId);
@@ -86,17 +103,23 @@ namespace KingdomSurvival.DialogueDatabase
                 if (block == null || !block.Conditions.Evaluate(context))
                     continue;
 
+                NarrativeCheckResult passiveResult = null;
                 bool included = true;
                 if (block.HasPassiveCheck)
                 {
-                    NarrativeCheckResult result = NarrativeCheckResolver.ResolvePassive(block.PassiveCheck, context);
-                    included = result.Success;
+                    passiveResult = NarrativeCheckResolver.ResolvePassive(block.PassiveCheck, context);
+                    included = passiveResult.Success;
                 }
 
-                if (!included)
+                bool isPreviewOnlyFailure = block.HasPassiveCheck && !included;
+                if (!included && !(includeFailedPassiveChecks && isPreviewOnlyFailure))
                     continue;
 
-                NarrativeEffectApplier.ApplyAll(block.OnRevealEffects, context);
+                // Провалившийся пассивный блок в Preview не должен запускать
+                // игровые эффекты — в production-runtime он никогда не
+                // показывается (§3/§17).
+                if (!isPreviewOnlyFailure)
+                    NarrativeEffectApplier.ApplyAll(block.OnRevealEffects, context);
 
                 string speakerId = string.IsNullOrWhiteSpace(block.SpeakerIdOverride) ? node.SpeakerId : block.SpeakerIdOverride;
                 DialogueSpeakerData speaker = database.FindSpeaker(speakerId);
@@ -107,7 +130,11 @@ namespace KingdomSurvival.DialogueDatabase
                     SpeakerId = speakerId ?? string.Empty,
                     SpeakerDisplayName = speaker != null ? speaker.DisplayName : (speakerId ?? string.Empty),
                     SpeakerRole = speaker != null ? speaker.Role : string.Empty,
-                    Text = block.Text
+                    Text = block.Text,
+                    CheckPresentation = passiveResult != null
+                        ? NarrativeCheckPresentationBuilder.Build(block.PassiveCheck, passiveResult)
+                        : null,
+                    IsPassiveFailurePreviewOnly = isPreviewOnlyFailure
                 });
             }
 
@@ -207,7 +234,10 @@ namespace KingdomSurvival.DialogueDatabase
                 bool success = attempt.Result.Success;
                 NarrativeEffectApplier.ApplyAll(success ? choice.SuccessEffects : choice.FailureEffects, context);
                 string targetNodeId = success ? choice.SuccessNodeId : choice.FailureNodeId;
-                return TransitionTo(targetNodeId, attempt.Result);
+                // Активная проверка использует тот же presentation-компонент,
+                // что и пассивная (§12): и успех, и провал видны игроку.
+                NarrativeCheckPresentationData presentation = NarrativeCheckPresentationBuilder.Build(choice.Check, attempt.Result);
+                return TransitionTo(targetNodeId, attempt.Result, presentation);
             }
 
             if (choice.IsExit)
@@ -216,10 +246,13 @@ namespace KingdomSurvival.DialogueDatabase
                 return new NarrativeDialogueSelectionResult { DialogueEnded = true };
             }
 
-            return TransitionTo(choice.NextNodeId, null);
+            return TransitionTo(choice.NextNodeId, null, null);
         }
 
-        private NarrativeDialogueSelectionResult TransitionTo(string nodeId, NarrativeCheckResult checkResult)
+        private NarrativeDialogueSelectionResult TransitionTo(
+            string nodeId,
+            NarrativeCheckResult checkResult,
+            NarrativeCheckPresentationData checkPresentation)
         {
             if (string.IsNullOrWhiteSpace(nodeId) || FindNode(dialogue, nodeId) == null)
                 throw new InvalidOperationException("Переход ведёт в отсутствующий узел: " + nodeId);
@@ -229,6 +262,7 @@ namespace KingdomSurvival.DialogueDatabase
             {
                 DialogueEnded = false,
                 CheckResult = checkResult,
+                CheckPresentation = checkPresentation,
                 View = BuildView()
             };
         }

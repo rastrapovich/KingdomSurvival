@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 
 public sealed class NarrativeCheckSystemTests
@@ -194,5 +195,230 @@ public sealed class NarrativeCheckSystemTests
         effect.Apply(context);
 
         Assert.AreEqual(5, state.GetRelation("miller"));
+    }
+
+    // §20 инструкции по визуализации проверок, пункты 5-6: в snapshot
+    // попадают только реально сработавшие модификаторы.
+    [Test]
+    public void AppliedModifiers_Snapshot_Contains_Only_Rules_Whose_Condition_Passed()
+    {
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+        state.SetFlag("hunter_present");
+        NarrativeEvaluationContext context = NewContext(hero, state);
+
+        NarrativeCheckSpec spec = new NarrativeCheckSpec
+        {
+            CheckId = "chk_snapshot_filter",
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Instinct,
+            Difficulty = NarrativeDifficulty.Ordinary
+        };
+        spec.ModifierRules.Add(new NarrativeContextModifierRule
+        {
+            SourceId = "companion_hunter",
+            Label = "Охотник рядом",
+            Value = 1,
+            Condition = new NarrativeConditionGroup
+            {
+                Conditions = new List<NarrativeCondition>
+                {
+                    new NarrativeCondition { Type = NarrativeConditionType.FlagSet, StringParam = "hunter_present" }
+                }
+            }
+        });
+        spec.ModifierRules.Add(new NarrativeContextModifierRule
+        {
+            SourceId = "heavy_rain",
+            Label = "Сильный дождь",
+            Value = -1,
+            Condition = new NarrativeConditionGroup
+            {
+                Conditions = new List<NarrativeCondition>
+                {
+                    new NarrativeCondition { Type = NarrativeConditionType.FlagSet, StringParam = "rain_active" }
+                }
+            }
+        });
+
+        NarrativeCheckResult result = NarrativeCheckResolver.ResolvePassive(spec, context);
+
+        Assert.AreEqual(1, result.AppliedModifiers.Count);
+        Assert.AreEqual("companion_hunter", result.AppliedModifiers[0].SourceId);
+        Assert.AreEqual("Охотник рядом", result.AppliedModifiers[0].Label);
+        Assert.AreEqual(1, result.AppliedModifiers[0].Value);
+    }
+
+    // §20, пункт 7: сырая сумма и применённое (ограниченное ±3) значение
+    // должны отображаться по-разному, а не совпадать.
+    [Test]
+    public void RawContextModifier_And_AppliedContextModifier_Differ_When_Clamped()
+    {
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeEvaluationContext context = NewContext(hero, state);
+
+        NarrativeCheckSpec spec = new NarrativeCheckSpec
+        {
+            CheckId = "chk_snapshot_clamp",
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Instinct,
+            Difficulty = NarrativeDifficulty.Ordinary
+        };
+        spec.ModifierRules.Add(new NarrativeContextModifierRule { SourceId = "a", Label = "A", Value = 2 });
+        spec.ModifierRules.Add(new NarrativeContextModifierRule { SourceId = "b", Label = "B", Value = 2 });
+        spec.ModifierRules.Add(new NarrativeContextModifierRule { SourceId = "c", Label = "C", Value = 1 });
+
+        NarrativeCheckResult result = NarrativeCheckResolver.ResolvePassive(spec, context);
+        NarrativeCheckPresentationData presentation = NarrativeCheckPresentationBuilder.Build(spec, result);
+
+        Assert.AreEqual(5, presentation.RawContextModifier);
+        Assert.AreEqual(3, presentation.AppliedContextModifier);
+        Assert.AreNotEqual(presentation.RawContextModifier, presentation.AppliedContextModifier);
+    }
+
+    // §20, пункт 4: качество и компетенция должны попасть в расшифровку
+    // с правильными подписями и значениями.
+    [Test]
+    public void Presentation_Exposes_Quality_And_Competency_With_Correct_Values()
+    {
+        HeroProfileData hero = new HeroProfileData();
+        hero.SetQuality(HeroQuality.Instinct, 7);
+        hero.SetCompetency(NarrativeCompetencyIds.Fieldcraft, 3);
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeEvaluationContext context = NewContext(hero, state);
+
+        NarrativeCheckSpec spec = new NarrativeCheckSpec
+        {
+            CheckId = "chk_presentation_values",
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Instinct,
+            CompetencyId = NarrativeCompetencyIds.Fieldcraft,
+            Difficulty = NarrativeDifficulty.Ordinary
+        };
+
+        NarrativeCheckResult result = NarrativeCheckResolver.ResolvePassive(spec, context);
+        NarrativeCheckPresentationData presentation = NarrativeCheckPresentationBuilder.Build(spec, result);
+
+        Assert.AreEqual("Чутьё", presentation.QualityLabel);
+        Assert.AreEqual(7, presentation.QualityValue);
+        Assert.IsTrue(presentation.HasCompetency);
+        Assert.AreEqual("Следопытство", presentation.CompetencyLabel);
+        Assert.AreEqual(3, presentation.CompetencyValue);
+    }
+
+    // §20, пункт 8: tooltip обязан показывать снимок фактического расчёта,
+    // а не пересчитывать проверку заново по изменившемуся состоянию мира.
+    [Test]
+    public void Presentation_Snapshot_Is_Unaffected_By_Later_World_State_Change()
+    {
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+
+        NarrativeCheckSpec spec = new NarrativeCheckSpec
+        {
+            CheckId = "chk_snapshot_frozen",
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Instinct,
+            Difficulty = NarrativeDifficulty.Ordinary
+        };
+        spec.ModifierRules.Add(new NarrativeContextModifierRule
+        {
+            SourceId = "companion_hunter",
+            Label = "Охотник рядом",
+            Value = 2,
+            Condition = new NarrativeConditionGroup
+            {
+                Conditions = new List<NarrativeCondition>
+                {
+                    new NarrativeCondition { Type = NarrativeConditionType.CompanionPresent, StringParam = "hunter" }
+                }
+            }
+        });
+
+        NarrativeEvaluationContext contextWithHunter = new NarrativeEvaluationContext(
+            hero, state, presentCompanionIds: new[] { "hunter" });
+        NarrativeCheckResult result = NarrativeCheckResolver.ResolvePassive(spec, contextWithHunter);
+        NarrativeCheckPresentationData presentation = NarrativeCheckPresentationBuilder.Build(spec, result);
+
+        Assert.AreEqual(1, presentation.AppliedModifiers.Count);
+        Assert.AreEqual(2, presentation.AppliedModifiers[0].Value);
+
+        // Охотник ушёл из отряда — мир изменился уже после расчёта.
+        NarrativeEvaluationContext contextWithoutHunter = NewContext(hero, state);
+        NarrativeCheckMathBreakdown recomputed = NarrativeCheckResolver.ComputeBreakdown(spec, contextWithoutHunter);
+        Assert.AreEqual(0, recomputed.AppliedModifiers.Count);
+
+        // Старый снимок не пересчитался вслед за миром.
+        Assert.AreEqual(1, presentation.AppliedModifiers.Count);
+        Assert.AreEqual(2, presentation.AppliedModifiers[0].Value);
+        Assert.AreEqual(result.Total, presentation.Total);
+    }
+
+    // §20, пункт 13: внутренние ID (SourceId, CompetencyId) никогда не
+    // должны попадать в текст, который видит игрок.
+    [Test]
+    public void PlayerFacing_Breakdown_Text_Never_Contains_Internal_Ids()
+    {
+        HeroProfileData hero = new HeroProfileData();
+        hero.SetCompetency(NarrativeCompetencyIds.Fieldcraft, 2);
+        NarrativeStateData state = new NarrativeStateData();
+
+        NarrativeCheckSpec spec = new NarrativeCheckSpec
+        {
+            CheckId = "check_dam_waterflow_01",
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Instinct,
+            CompetencyId = NarrativeCompetencyIds.Fieldcraft,
+            Difficulty = NarrativeDifficulty.Ordinary
+        };
+        spec.ModifierRules.Add(new NarrativeContextModifierRule
+        {
+            SourceId = "companion_hunter",
+            Label = "Охотник рядом",
+            Value = 1,
+            Condition = new NarrativeConditionGroup()
+        });
+
+        NarrativeEvaluationContext context = NewContext(hero, state);
+        NarrativeCheckResult result = NarrativeCheckResolver.ResolvePassive(spec, context);
+        NarrativeCheckPresentationData presentation = NarrativeCheckPresentationBuilder.Build(spec, result);
+
+        string sourceLabel = NarrativeCheckPresentationBuilder.BuildSourceLabel(presentation);
+        string breakdown = NarrativeCheckPresentationText.BuildFullBreakdown(presentation);
+
+        Assert.IsFalse(sourceLabel.Contains(NarrativeCompetencyIds.Fieldcraft));
+        Assert.IsFalse(breakdown.Contains("check_dam_waterflow_01"));
+        Assert.IsFalse(breakdown.Contains("companion_hunter"));
+        Assert.IsFalse(breakdown.Contains(NarrativeCompetencyIds.Fieldcraft));
+        StringAssert.Contains("Охотник рядом", breakdown);
+        StringAssert.Contains("Следопытство", breakdown);
+    }
+
+    // §20, пункт 15: hover/повторная сборка presentation читает уже готовый
+    // результат и не запускает проверку заново — Build() не принимает
+    // NarrativeEvaluationContext и не создаёт новую попытку в истории.
+    [Test]
+    public void PresentationBuilder_Build_Does_Not_Reresolve_The_Check()
+    {
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeCheckSpec spec = new NarrativeCheckSpec
+        {
+            CheckId = "chk_no_reresolve",
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Instinct,
+            Difficulty = NarrativeDifficulty.Ordinary
+        };
+
+        NarrativeCheckResult result = NarrativeCheckResolver.ResolvePassive(spec, NewContext(hero, state));
+        Assert.AreEqual(1, state.FindHistory("chk_no_reresolve").Attempts.Count);
+
+        NarrativeCheckPresentationData first = NarrativeCheckPresentationBuilder.Build(spec, result);
+        NarrativeCheckPresentationData second = NarrativeCheckPresentationBuilder.Build(spec, result);
+
+        Assert.AreEqual(1, state.FindHistory("chk_no_reresolve").Attempts.Count);
+        Assert.AreEqual(first.Total, second.Total);
+        Assert.AreEqual(first.Success, second.Success);
     }
 }

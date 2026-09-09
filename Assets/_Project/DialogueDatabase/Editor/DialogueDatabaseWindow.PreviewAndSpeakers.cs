@@ -113,6 +113,14 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 "Принудительный исход действует только в этом окне Preview. Игровой runtime всегда честно бросает кубики.",
                 MessageType.None);
 
+            GUILayout.Space(4f);
+            previewShowFailedPassiveChecks = EditorGUILayout.ToggleLeft(
+                "Показывать проваленные пассивные проверки [только Preview]",
+                previewShowFailedPassiveChecks);
+            EditorGUILayout.HelpBox(
+                "Игрок никогда не видит провал пассивной проверки — это метагейм (§3). Переключатель существует только для настройки сложности здесь, в Preview.",
+                MessageType.None);
+
             EditorGUILayout.EndVertical();
         }
 
@@ -120,6 +128,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         {
             if (!string.IsNullOrWhiteSpace(previewMessage))
                 EditorGUILayout.HelpBox(previewMessage, MessageType.Info);
+
+            if (previewLastCheckPresentation != null)
+                DrawCheckPresentationSummary(previewLastCheckPresentation);
 
             if (previewSession == null || !previewSession.IsActive || previewView == null ||
                 !string.Equals(previewDialogueId, dialogueId, StringComparison.Ordinal))
@@ -132,12 +143,20 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             for (int i = 0; i < previewView.VisibleTextBlocks.Count; i++)
             {
                 NarrativeDialogueVisibleBlock block = previewView.VisibleTextBlocks[i];
-                EditorGUILayout.LabelField(
-                    block.SpeakerDisplayName + "  [" + block.Kind + "]",
-                    EditorStyles.boldLabel);
+                string headerLabel = block.SpeakerDisplayName + "  [" + block.Kind + "]";
+                if (block.IsPassiveFailurePreviewOnly)
+                    headerLabel += "  [ПРОВАЛ — ТОЛЬКО PREVIEW]";
+                EditorGUILayout.LabelField(headerLabel, EditorStyles.boldLabel);
                 if (!string.IsNullOrWhiteSpace(block.SpeakerRole))
                     EditorGUILayout.LabelField(block.SpeakerRole, EditorStyles.miniLabel);
-                EditorGUILayout.LabelField(block.Text, EditorStyles.wordWrappedLabel);
+
+                if (block.CheckPresentation != null)
+                    DrawCheckPresentationSummary(block.CheckPresentation);
+
+                string bodyText = block.IsPassiveFailurePreviewOnly
+                    ? "[Текст этого блока в игре был бы скрыт]"
+                    : block.Text;
+                EditorGUILayout.LabelField(bodyText, EditorStyles.wordWrappedLabel);
                 GUILayout.Space(6f);
             }
 
@@ -182,11 +201,13 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 {
                     previewView = null;
                     previewMessage = "Диалог завершён. Нажмите «Запустить / с начала», чтобы пройти его снова.";
+                    previewLastCheckPresentation = null;
                 }
                 else
                 {
-                    previewView = result.View;
+                    previewView = previewShowFailedPassiveChecks ? previewSession.BuildViewPreview(true) : result.View;
                     previewMessage = BuildCheckResultMessage(result.CheckResult);
+                    previewLastCheckPresentation = result.CheckPresentation;
                 }
             }
             catch (InvalidOperationException exception)
@@ -206,6 +227,21 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             string dice = result.HasDice ? " (" + result.DieOne + "+" + result.DieTwo + ")" : string.Empty;
             string forced = result.IsForcedByPreview ? " [принудительно]" : string.Empty;
             return outcome + dice + ": итог " + result.Total + " против сложности " + result.Difficulty + forced + ".";
+        }
+
+        // §14/§17: "наведение показывает подробную математику". IMGUI не
+        // даёт удобной кастомной панели по hover — используется нативный
+        // однострочный (с переносами) tooltip GUIContent поверх краткой
+        // строки "КАЧЕСТВО [+ КОМПЕТЕНЦИЯ] — УСПЕХ/ПРОВАЛ".
+        private static void DrawCheckPresentationSummary(NarrativeCheckPresentationData data)
+        {
+            string source = NarrativeCheckPresentationBuilder.BuildSourceLabel(data).ToUpperInvariant();
+            string result = data.Success ? "УСПЕХ" : "ПРОВАЛ";
+            string summary = source + " — " + result;
+            string breakdown = NarrativeCheckPresentationText.BuildFullBreakdown(data);
+
+            GUIStyle style = new GUIStyle(EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField(new GUIContent(summary, breakdown), style);
         }
 
         private void DrawSpeakersTab()

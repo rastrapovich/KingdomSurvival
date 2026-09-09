@@ -184,8 +184,90 @@
     padding-left: 12px;
     border-left-width: 2px;
     border-left-color: rgb(74, 84, 74);
-    color: rgb(150, 168, 150);
+    white-space: normal;
+}
+
+/* Narrative Check Presentation Layer — единый компонент для пассивных
+   блоков и активных проверок (§13 инструкции по визуализации проверок). */
+
+.narrative-check-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.narrative-check-source {
+    margin-right: 10px;
+    color: rgb(158, 154, 140);
+    font-size: 11px;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.narrative-check-result {
     font-size: 12px;
-    -unity-font-style: italic;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.narrative-check-result--success {
+    color: rgb(150, 190, 132);
+}
+
+.narrative-check-result--failure {
+    color: rgb(196, 122, 100);
+}
+
+.narrative-check-result:hover {
+    opacity: 0.8;
+}
+
+.narrative-check-tooltip {
+    position: absolute;
+    width: 320px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background-color: rgb(18, 20, 20);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(113, 101, 76);
+    border-right-color: rgb(113, 101, 76);
+    border-top-color: rgb(113, 101, 76);
+    border-bottom-color: rgb(113, 101, 76);
+}
+
+.narrative-check-tooltip-title {
+    margin-bottom: 8px;
+    color: rgb(218, 182, 111);
+    font-size: 12px;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.narrative-check-tooltip-row {
+    margin-bottom: 2px;
+    color: rgb(200, 196, 184);
+    font-size: 11px;
+    white-space: normal;
+}
+
+.narrative-check-tooltip-divider {
+    height: 1px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    background-color: rgb(64, 65, 60);
+}
+
+.narrative-check-tooltip-total {
+    color: rgb(224, 219, 205);
+    font-size: 12px;
+    -unity-font-style: bold;
     white-space: normal;
 }

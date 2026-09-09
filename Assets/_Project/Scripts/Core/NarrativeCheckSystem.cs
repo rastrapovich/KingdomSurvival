@@ -149,6 +149,31 @@ public sealed class NarrativeContextModifierRule
     }
 }
 
+// Неизменяемый снимок одного реально сработавшего контекстного
+// модификатора в момент расчёта проверки. Хранится в NarrativeCheckResult
+// (не в NarrativeCheckSpec/NarrativeContextModifierRule), потому что
+// игровое состояние к моменту показа tooltip могло уже измениться — см.
+// §8 инструкции по визуализации проверок ("tooltip обязан показывать
+// снимок фактического расчёта, а не пересчитывать его заново").
+[Serializable]
+public sealed class NarrativeAppliedModifierSnapshot
+{
+    public string SourceId = string.Empty;
+    public string Label = string.Empty;
+    public int Value;
+
+    public NarrativeAppliedModifierSnapshot()
+    {
+    }
+
+    public NarrativeAppliedModifierSnapshot(string sourceId, string label, int value)
+    {
+        SourceId = sourceId ?? string.Empty;
+        Label = label ?? string.Empty;
+        Value = value;
+    }
+}
+
 [Serializable]
 public sealed class NarrativeCheckSpec
 {
@@ -262,10 +287,33 @@ public static class NarrativeCheckResolver
             breakdown.RawContextModifier,
             breakdown.AppliedContextModifier,
             total,
-            spec.Difficulty);
+            spec.Difficulty,
+            appliedModifiers: BuildAppliedModifierSnapshots(breakdown.AppliedModifiers));
 
         context.State.RecordCheckResult(NarrativeCheckKind.Passive, result);
         return result;
+    }
+
+    // Копия реально сработавших правил в момент расчёта — см. каммент
+    // NarrativeAppliedModifierSnapshot. Список правил (NarrativeContextModifierRule)
+    // сам по себе не сериализуется в результат: только неизменяемый снимок.
+    private static List<NarrativeAppliedModifierSnapshot> BuildAppliedModifierSnapshots(
+        IReadOnlyList<NarrativeContextModifierRule> appliedModifiers)
+    {
+        List<NarrativeAppliedModifierSnapshot> snapshots = new List<NarrativeAppliedModifierSnapshot>();
+        if (appliedModifiers == null)
+            return snapshots;
+
+        for (int i = 0; i < appliedModifiers.Count; i++)
+        {
+            NarrativeContextModifierRule rule = appliedModifiers[i];
+            if (rule == null)
+                continue;
+
+            snapshots.Add(new NarrativeAppliedModifierSnapshot(rule.SourceId, rule.Label, rule.Value));
+        }
+
+        return snapshots;
     }
 
     public static double GetActiveSuccessProbability(NarrativeCheckSpec spec, NarrativeEvaluationContext context)
@@ -348,6 +396,7 @@ public static class NarrativeCheckResolver
         NarrativeCheckHistoryEntry history = context.State.FindHistory(spec.CheckId);
         int attemptNumber = (history?.Attempts.Count ?? 0) + 1;
         NarrativeCheckMathBreakdown breakdown = ComputeBreakdown(spec, context);
+        List<NarrativeAppliedModifierSnapshot> appliedModifiers = BuildAppliedModifierSnapshots(breakdown.AppliedModifiers);
 
         NarrativeCheckResult result;
         if (forcedOutcome == NarrativeCheckForcedOutcome.None)
@@ -366,7 +415,8 @@ public static class NarrativeCheckResolver
                 breakdown.RawContextModifier,
                 breakdown.AppliedContextModifier,
                 total,
-                spec.Difficulty);
+                spec.Difficulty,
+                appliedModifiers: appliedModifiers);
         }
         else
         {
@@ -383,7 +433,8 @@ public static class NarrativeCheckResolver
                 breakdown.AppliedContextModifier,
                 total: breakdown.Bonus,
                 spec.Difficulty,
-                isForcedByPreview: true);
+                isForcedByPreview: true,
+                appliedModifiers: appliedModifiers);
         }
 
         context.State.RecordCheckResult(spec.Kind, result);

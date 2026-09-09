@@ -74,11 +74,13 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P00-T03", "DEC-10 — Люди ниже по течению и условия соглашения",
                     "Утвердить, кто они, что именно поддерживали и какую цену платили обе стороны — человеческое ядро развязки.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 3,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 3,
                     dependencies: new[] { "P00-T01" },
                     relatedKnowledgeIds: new[] { "chapter01.knowledge.downstream_people", "chapter01.knowledge.old_agreement" },
                     acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в LORE.md" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-10)."),
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Пользователь принял предложенный вариант: нижние — малое поселение на нижнем канале/броде (рыболовство + поле на стоке через боковое русло); нижняя смена чистила канал/берега брода в обмен на регулярный сток через семь затворов по сигналу условных стуков; второй хлеб — рацион нижней смене. Внесено в LORE.md §6.1.2. Имя/география поселения остаются рабочими до отдельного решения о месте."),
 
                 Task("P00-T04", "DEC-05 — Второй хлеб",
                     "Утвердить как рацион работнику нижней смены, позже искажённый до подношения.",

@@ -84,11 +84,13 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P00-T04", "DEC-05 — Второй хлеб",
                     "Утвердить как рацион работнику нижней смены, позже искажённый до подношения.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 4,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 4,
                     dependencies: new[] { "P00-T01" },
                     relatedKnowledgeIds: new[] { "chapter01.knowledge.second_loaf_is_ration" },
                     acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в LORE.md" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-05)."),
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Подтверждена арка: второй хлеб — исторически рацион нижней смены (уже утверждено DEC-10); к N01 практический смысл забыт, жители Дома относятся к нему как к суеверию/подношению затвору; практическое объяснение открывается позже через DEC-10. Внесено в LORE.md §6.1.2."),
 
                 Task("P00-T05", "DEC-06 — Старый предмет",
                     "Утвердить семизубую железную пластину как измеритель/калибр затворов.",

@@ -17,34 +17,42 @@ MonoBehaviour:
     displayName: "\u041C\u0435\u043B\u044C\u043D\u0438\u043A"
     role: "\u0422\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0442\u0435\u0441\u0442
       \u0443\u0441\u043B\u043E\u0432\u0438\u0439 \u0434\u0438\u0430\u043B\u043E\u0433\u0430"
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 1f019ee22e3a0a24baad01bf29008baa, type: 3}
   - id: ostafiy
-    displayName: "Остафий"
-    role: "Хранитель старого порядка (рабочее имя, DEC-02)"
-    portrait: {fileID: 0}
+    displayName: "\u041E\u0441\u0442\u0430\u0444\u0438\u0439"
+    role: "\u0425\u0440\u0430\u043D\u0438\u0442\u0435\u043B\u044C \u0441\u0442\u0430\u0440\u043E\u0433\u043E
+      \u043F\u043E\u0440\u044F\u0434\u043A\u0430 (\u0440\u0430\u0431\u043E\u0447\u0435\u0435
+      \u0438\u043C\u044F, DEC-02)"
+    portrait: {fileID: 21300000, guid: 846fcebf0aeda4d4cbf7fc153ecbbb8a, type: 3}
   - id: lada
-    displayName: "Лада"
-    role: "Молодой мастер (рабочее имя, DEC-02)"
-    portrait: {fileID: 0}
+    displayName: "\u041B\u0430\u0434\u0430"
+    role: "\u041C\u043E\u043B\u043E\u0434\u043E\u0439 \u043C\u0430\u0441\u0442\u0435\u0440
+      (\u0440\u0430\u0431\u043E\u0447\u0435\u0435 \u0438\u043C\u044F, DEC-02)"
+    portrait: {fileID: 21300000, guid: 64eb54fc6c18bcf47a465228b4dda272, type: 3}
   - id: miron
-    displayName: "Мирон"
-    role: "Мельник (рабочее имя, DEC-02)"
+    displayName: "\u041C\u0438\u0440\u043E\u043D"
+    role: "\u041C\u0435\u043B\u044C\u043D\u0438\u043A (\u0440\u0430\u0431\u043E\u0447\u0435\u0435
+      \u0438\u043C\u044F, DEC-02)"
     portrait: {fileID: 0}
   - id: ulyana
-    displayName: "Ульяна"
-    role: "Семейный голос (рабочее имя, DEC-02)"
-    portrait: {fileID: 0}
+    displayName: "\u0423\u043B\u044C\u044F\u043D\u0430"
+    role: "\u0421\u0435\u043C\u0435\u0439\u043D\u044B\u0439 \u0433\u043E\u043B\u043E\u0441
+      (\u0440\u0430\u0431\u043E\u0447\u0435\u0435 \u0438\u043C\u044F, DEC-02)"
+    portrait: {fileID: 21300000, guid: 1d9f4582f5660074b8d75a9fbeb85d3e, type: 3}
   - id: narrator
-    displayName: "Рассказчик"
-    role: "Голос сцены"
+    displayName: "\u0420\u0430\u0441\u0441\u043A\u0430\u0437\u0447\u0438\u043A"
+    role: "\u0413\u043E\u043B\u043E\u0441 \u0441\u0446\u0435\u043D\u044B"
     portrait: {fileID: 0}
   - id: downstream_voice
-    displayName: "Человек с низовья"
-    role: "Житель нижнего поселения (имя не утверждено, DEC-10)"
+    displayName: "\u0427\u0435\u043B\u043E\u0432\u0435\u043A \u0441 \u043D\u0438\u0437\u043E\u0432\u044C\u044F"
+    role: "\u0416\u0438\u0442\u0435\u043B\u044C \u043D\u0438\u0436\u043D\u0435\u0433\u043E
+      \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F (\u0438\u043C\u044F
+      \u043D\u0435 \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u043E,
+      DEC-10)"
     portrait: {fileID: 0}
   - id: ford_witness
-    displayName: "Свидетель у брода"
-    role: "Ребёнок Дома"
+    displayName: "\u0421\u0432\u0438\u0434\u0435\u0442\u0435\u043B\u044C \u0443 \u0431\u0440\u043E\u0434\u0430"
+    role: "\u0420\u0435\u0431\u0451\u043D\u043E\u043A \u0414\u043E\u043C\u0430"
     portrait: {fileID: 0}
   dialogues:
   - id: prototype_miller
@@ -65,107 +73,129 @@ MonoBehaviour:
     nodes:
     - id: opening
       speakerId: miller
-      text: "Это техническая витрина условий ответа, а не сюжетный диалог. Открой справа «Тестовый герой (Preview)». После изменения параметров нажимай «▶ Запустить / с начала». Серый ответ означает, что условие не выполнено; активная кнопка — что оно сработало."
+      text: "\u042D\u0442\u043E \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0430\u044F
+        \u0432\u0438\u0442\u0440\u0438\u043D\u0430 \u0443\u0441\u043B\u043E\u0432\u0438\u0439
+        \u043E\u0442\u0432\u0435\u0442\u0430, \u0430 \u043D\u0435 \u0441\u044E\u0436\u0435\u0442\u043D\u044B\u0439
+        \u0434\u0438\u0430\u043B\u043E\u0433. \u041E\u0442\u043A\u0440\u043E\u0439
+        \u0441\u043F\u0440\u0430\u0432\u0430 \xAB\u0422\u0435\u0441\u0442\u043E\u0432\u044B\u0439
+        \u0433\u0435\u0440\u043E\u0439 (Preview)\xBB. \u041F\u043E\u0441\u043B\u0435
+        \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u043F\u0430\u0440\u0430\u043C\u0435\u0442\u0440\u043E\u0432
+        \u043D\u0430\u0436\u0438\u043C\u0430\u0439 \xAB\u25B6 \u0417\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u044C
+        / \u0441 \u043D\u0430\u0447\u0430\u043B\u0430\xBB. \u0421\u0435\u0440\u044B\u0439
+        \u043E\u0442\u0432\u0435\u0442 \u043E\u0437\u043D\u0430\u0447\u0430\u0435\u0442,
+        \u0447\u0442\u043E \u0443\u0441\u043B\u043E\u0432\u0438\u0435 \u043D\u0435
+        \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E; \u0430\u043A\u0442\u0438\u0432\u043D\u0430\u044F
+        \u043A\u043D\u043E\u043F\u043A\u0430 \u2014 \u0447\u0442\u043E \u043E\u043D\u043E
+        \u0441\u0440\u0430\u0431\u043E\u0442\u0430\u043B\u043E."
       textBlocks: []
       choices:
-      - text: "1. Мир и прошлые решения — флаг, знание, отношение, спутник, предмет."
-        nextNodeId: "world_conditions"
+      - text: "1. \u041C\u0438\u0440 \u0438 \u043F\u0440\u043E\u0448\u043B\u044B\u0435
+          \u0440\u0435\u0448\u0435\u043D\u0438\u044F \u2014 \u0444\u043B\u0430\u0433,
+          \u0437\u043D\u0430\u043D\u0438\u0435, \u043E\u0442\u043D\u043E\u0448\u0435\u043D\u0438\u0435,
+          \u0441\u043F\u0443\u0442\u043D\u0438\u043A, \u043F\u0440\u0435\u0434\u043C\u0435\u0442."
+        nextNodeId: world_conditions
         endsDialogue: 0
-        choiceId: "opening_world"
+        choiceId: opening_world
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "2. Герой — качество, компетенция, особенность."
-        nextNodeId: "hero_conditions"
+      - text: "2. \u0413\u0435\u0440\u043E\u0439 \u2014 \u043A\u0430\u0447\u0435\u0441\u0442\u0432\u043E,
+          \u043A\u043E\u043C\u043F\u0435\u0442\u0435\u043D\u0446\u0438\u044F, \u043E\u0441\u043E\u0431\u0435\u043D\u043D\u043E\u0441\u0442\u044C."
+        nextNodeId: hero_conditions
         endsDialogue: 0
-        choiceId: "opening_hero"
+        choiceId: opening_hero
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "3. История проверки — ещё не выполнялась / успех / провал."
-        nextNodeId: "check_conditions"
+      - text: "3. \u0418\u0441\u0442\u043E\u0440\u0438\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438
+          \u2014 \u0435\u0449\u0451 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u043B\u0430\u0441\u044C
+          / \u0443\u0441\u043F\u0435\u0445 / \u043F\u0440\u043E\u0432\u0430\u043B."
+        nextNodeId: check_conditions
         endsDialogue: 0
-        choiceId: "opening_checks"
+        choiceId: opening_checks
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "4. Логика группы — ВСЕ / ХОТЯ БЫ ОДНО / обращение условия."
-        nextNodeId: "logic_conditions"
+      - text: "4. \u041B\u043E\u0433\u0438\u043A\u0430 \u0433\u0440\u0443\u043F\u043F\u044B
+          \u2014 \u0412\u0421\u0415 / \u0425\u041E\u0422\u042F \u0411\u042B \u041E\u0414\u041D\u041E
+          / \u043E\u0431\u0440\u0430\u0449\u0435\u043D\u0438\u0435 \u0443\u0441\u043B\u043E\u0432\u0438\u044F."
+        nextNodeId: logic_conditions
         endsDialogue: 0
-        choiceId: "opening_logic"
+        choiceId: opening_logic
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Закрыть технический разговор."
-        nextNodeId: ""
+      - text: "\u0417\u0430\u043A\u0440\u044B\u0442\u044C \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0439
+          \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "opening_exit"
+        choiceId: opening_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 60, y: 60}
@@ -823,2067 +853,2530 @@ MonoBehaviour:
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_01_ordinary_morning
-    title: "N01 — Обычное утро / Лишний хлеб"
+    title: "N01 \u2014 \u041E\u0431\u044B\u0447\u043D\u043E\u0435 \u0443\u0442\u0440\u043E
+      / \u041B\u0438\u0448\u043D\u0438\u0439 \u0445\u043B\u0435\u0431"
     category: 1
     status: 1
-    developerComment: "P04-T05 production-текст. Ульяна и второй хлеб без объясняющей лекции; короткий момент с Остафием; Лада показана действием; мельница Мирона — часть фона. Пассивное Суждение 11 — необязательное раннее наблюдение (не лекция, тихое умозаключение героя)."
+    developerComment: "P04-T05 production-\u0442\u0435\u043A\u0441\u0442. \u0423\u043B\u044C\u044F\u043D\u0430
+      \u0438 \u0432\u0442\u043E\u0440\u043E\u0439 \u0445\u043B\u0435\u0431 \u0431\u0435\u0437
+      \u043E\u0431\u044A\u044F\u0441\u043D\u044F\u044E\u0449\u0435\u0439 \u043B\u0435\u043A\u0446\u0438\u0438;
+      \u043A\u043E\u0440\u043E\u0442\u043A\u0438\u0439 \u043C\u043E\u043C\u0435\u043D\u0442
+      \u0441 \u041E\u0441\u0442\u0430\u0444\u0438\u0435\u043C; \u041B\u0430\u0434\u0430
+      \u043F\u043E\u043A\u0430\u0437\u0430\u043D\u0430 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435\u043C;
+      \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0430 \u041C\u0438\u0440\u043E\u043D\u0430
+      \u2014 \u0447\u0430\u0441\u0442\u044C \u0444\u043E\u043D\u0430. \u041F\u0430\u0441\u0441\u0438\u0432\u043D\u043E\u0435
+      \u0421\u0443\u0436\u0434\u0435\u043D\u0438\u0435 11 \u2014 \u043D\u0435\u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435
+      \u0440\u0430\u043D\u043D\u0435\u0435 \u043D\u0430\u0431\u043B\u044E\u0434\u0435\u043D\u0438\u0435
+      (\u043D\u0435 \u043B\u0435\u043A\u0446\u0438\u044F, \u0442\u0438\u0445\u043E\u0435
+      \u0443\u043C\u043E\u0437\u0430\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435
+      \u0433\u0435\u0440\u043E\u044F)."
     startNodeId: chapter01.node.01
     tags:
-    - "глава01"
-    - "production"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - production
     nodes:
     - id: chapter01.node.01
       speakerId: ulyana
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.01_main"
+      - blockId: chapter01.node.01_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Ульяна вынимает из печи второй каравай — сверх обычной нормы — и заворачивает его в холстину. «Отнеси к седьмому затвору, как всегда», — говорит она, не поднимая глаз от теста."
+        speakerIdOverride: 
+        text: "\u0423\u043B\u044C\u044F\u043D\u0430 \u0432\u044B\u043D\u0438\u043C\u0430\u0435\u0442
+          \u0438\u0437 \u043F\u0435\u0447\u0438 \u0432\u0442\u043E\u0440\u043E\u0439
+          \u043A\u0430\u0440\u0430\u0432\u0430\u0439 \u2014 \u0441\u0432\u0435\u0440\u0445
+          \u043E\u0431\u044B\u0447\u043D\u043E\u0439 \u043D\u043E\u0440\u043C\u044B
+          \u2014 \u0438 \u0437\u0430\u0432\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0435\u0442
+          \u0435\u0433\u043E \u0432 \u0445\u043E\u043B\u0441\u0442\u0438\u043D\u0443.
+          \xAB\u041E\u0442\u043D\u0435\u0441\u0438 \u043A \u0441\u0435\u0434\u044C\u043C\u043E\u043C\u0443
+          \u0437\u0430\u0442\u0432\u043E\u0440\u0443, \u043A\u0430\u043A \u0432\u0441\u0435\u0433\u0434\u0430\xBB,
+          \u2014 \u0433\u043E\u0432\u043E\u0440\u0438\u0442 \u043E\u043D\u0430, \u043D\u0435
+          \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u044F \u0433\u043B\u0430\u0437
+          \u043E\u0442 \u0442\u0435\u0441\u0442\u0430."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n01_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.started"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n01_flag2"
-            Type: 0
-            StringParam: "chapter01.flag.home_intro_seen"
-            IntParam: 0
-      - blockId: "chapter01.node.01_observation"
+        - EffectExecutionId: chapter01.effect.n01_flag1
+          Type: 0
+          StringParam: chapter01.flag.started
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n01_flag2
+          Type: 0
+          StringParam: chapter01.flag.home_intro_seen
+          IntParam: 0
+      - blockId: chapter01.node.01_observation
         kind: 1
-        speakerIdOverride: ""
-        text: "Она заворачивает буханку не праздничным движением и не так, как подают милостыню, — а буднично, как отдают то, что давно и без спора считается чужим. Дело, а не дар."
+        speakerIdOverride: 
+        text: "\u041E\u043D\u0430 \u0437\u0430\u0432\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0435\u0442
+          \u0431\u0443\u0445\u0430\u043D\u043A\u0443 \u043D\u0435 \u043F\u0440\u0430\u0437\u0434\u043D\u0438\u0447\u043D\u044B\u043C
+          \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435\u043C \u0438 \u043D\u0435
+          \u0442\u0430\u043A, \u043A\u0430\u043A \u043F\u043E\u0434\u0430\u044E\u0442
+          \u043C\u0438\u043B\u043E\u0441\u0442\u044B\u043D\u044E, \u2014 \u0430 \u0431\u0443\u0434\u043D\u0438\u0447\u043D\u043E,
+          \u043A\u0430\u043A \u043E\u0442\u0434\u0430\u044E\u0442 \u0442\u043E, \u0447\u0442\u043E
+          \u0434\u0430\u0432\u043D\u043E \u0438 \u0431\u0435\u0437 \u0441\u043F\u043E\u0440\u0430
+          \u0441\u0447\u0438\u0442\u0430\u0435\u0442\u0441\u044F \u0447\u0443\u0436\u0438\u043C.
+          \u0414\u0435\u043B\u043E, \u0430 \u043D\u0435 \u0434\u0430\u0440."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 1
         passiveCheck:
-          CheckId: "chapter01.check.second_loaf_judgment"
+          CheckId: chapter01.check.second_loaf_judgment
           Kind: 0
           Quality: 4
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 11
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n01_knowledge1"
-            Type: 2
-            StringParam: "chapter01.knowledge.second_loaf_is_ration"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n01_knowledge1
+          Type: 2
+          StringParam: chapter01.knowledge.second_loaf_is_ration
+          IntParam: 0
       choices:
-      - text: "Спросить, кому предназначен хлеб."
-        nextNodeId: "chapter01.node.01_ask"
+      - text: "\u0421\u043F\u0440\u043E\u0441\u0438\u0442\u044C, \u043A\u043E\u043C\u0443
+          \u043F\u0440\u0435\u0434\u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D
+          \u0445\u043B\u0435\u0431."
+        nextNodeId: chapter01.node.01_ask
         endsDialogue: 0
-        choiceId: "chapter01.node.01_ask_choice"
+        choiceId: chapter01.node.01_ask_choice
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Не спрашивать и заняться своими делами."
-        nextNodeId: "chapter01.node.01_ostafiy"
+      - text: "\u041D\u0435 \u0441\u043F\u0440\u0430\u0448\u0438\u0432\u0430\u0442\u044C
+          \u0438 \u0437\u0430\u043D\u044F\u0442\u044C\u0441\u044F \u0441\u0432\u043E\u0438\u043C\u0438
+          \u0434\u0435\u043B\u0430\u043C\u0438."
+        nextNodeId: chapter01.node.01_ostafiy
         endsDialogue: 0
-        choiceId: "chapter01.node.01_skip_choice"
+        choiceId: chapter01.node.01_skip_choice
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     - id: chapter01.node.01_ask
       speakerId: ulyana
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.01_ask_main"
+      - blockId: chapter01.node.01_ask_main
         kind: 0
-        speakerIdOverride: ""
-        text: "«Кому?» — переспрашиваешь ты. «Кому всегда», — отвечает Ульяна, не поднимая глаз, и уже тянется за следующей крынкой."
+        speakerIdOverride: 
+        text: "\xAB\u041A\u043E\u043C\u0443?\xBB \u2014 \u043F\u0435\u0440\u0435\u0441\u043F\u0440\u0430\u0448\u0438\u0432\u0430\u0435\u0448\u044C
+          \u0442\u044B. \xAB\u041A\u043E\u043C\u0443 \u0432\u0441\u0435\u0433\u0434\u0430\xBB,
+          \u2014 \u043E\u0442\u0432\u0435\u0447\u0430\u0435\u0442 \u0423\u043B\u044C\u044F\u043D\u0430,
+          \u043D\u0435 \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u044F \u0433\u043B\u0430\u0437,
+          \u0438 \u0443\u0436\u0435 \u0442\u044F\u043D\u0435\u0442\u0441\u044F \u0437\u0430
+          \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u0439 \u043A\u0440\u044B\u043D\u043A\u043E\u0439."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Пойти дальше."
-        nextNodeId: "chapter01.node.01_ostafiy"
+      - text: "\u041F\u043E\u0439\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: chapter01.node.01_ostafiy
         endsDialogue: 0
-        choiceId: "chapter01.node.01_ask_exit"
+        choiceId: chapter01.node.01_ask_exit
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     - id: chapter01.node.01_ostafiy
       speakerId: ostafiy
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.01_ostafiy_main"
+      - blockId: chapter01.node.01_ostafiy_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Остафий сидит на корточках у старого засова и качает его ладонью — не чинит, просто проверяет, на месте ли. Он смотрит на свёрток у тебя в руках. «Опять к седьмому», — говорит просто, не как вопрос, и возвращается к засову."
+        speakerIdOverride: 
+        text: "\u041E\u0441\u0442\u0430\u0444\u0438\u0439 \u0441\u0438\u0434\u0438\u0442
+          \u043D\u0430 \u043A\u043E\u0440\u0442\u043E\u0447\u043A\u0430\u0445 \u0443
+          \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u0437\u0430\u0441\u043E\u0432\u0430
+          \u0438 \u043A\u0430\u0447\u0430\u0435\u0442 \u0435\u0433\u043E \u043B\u0430\u0434\u043E\u043D\u044C\u044E
+          \u2014 \u043D\u0435 \u0447\u0438\u043D\u0438\u0442, \u043F\u0440\u043E\u0441\u0442\u043E
+          \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u0442, \u043D\u0430 \u043C\u0435\u0441\u0442\u0435
+          \u043B\u0438. \u041E\u043D \u0441\u043C\u043E\u0442\u0440\u0438\u0442 \u043D\u0430
+          \u0441\u0432\u0451\u0440\u0442\u043E\u043A \u0443 \u0442\u0435\u0431\u044F
+          \u0432 \u0440\u0443\u043A\u0430\u0445. \xAB\u041E\u043F\u044F\u0442\u044C
+          \u043A \u0441\u0435\u0434\u044C\u043C\u043E\u043C\u0443\xBB, \u2014 \u0433\u043E\u0432\u043E\u0440\u0438\u0442
+          \u043F\u0440\u043E\u0441\u0442\u043E, \u043D\u0435 \u043A\u0430\u043A \u0432\u043E\u043F\u0440\u043E\u0441,
+          \u0438 \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442\u0441\u044F
+          \u043A \u0437\u0430\u0441\u043E\u0432\u0443."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Кивнуть и пройти дальше."
-        nextNodeId: "chapter01.node.01_lada"
+      - text: "\u041A\u0438\u0432\u043D\u0443\u0442\u044C \u0438 \u043F\u0440\u043E\u0439\u0442\u0438
+          \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: chapter01.node.01_lada
         endsDialogue: 0
-        choiceId: "chapter01.node.01_ostafiy_exit"
+        choiceId: chapter01.node.01_ostafiy_exit
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     - id: chapter01.node.01_lada
       speakerId: lada
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.01_lada_main"
+      - blockId: chapter01.node.01_lada_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Лада держит зубами запасной колышек, обеими руками — распорку настила, и одним движением загоняет колышек на место. Только тогда поднимает взгляд. «Если бы Остафий не берёг каждую щепку, я бы переделала это ещё вчера — и правильно»."
+        speakerIdOverride: 
+        text: "\u041B\u0430\u0434\u0430 \u0434\u0435\u0440\u0436\u0438\u0442 \u0437\u0443\u0431\u0430\u043C\u0438
+          \u0437\u0430\u043F\u0430\u0441\u043D\u043E\u0439 \u043A\u043E\u043B\u044B\u0448\u0435\u043A,
+          \u043E\u0431\u0435\u0438\u043C\u0438 \u0440\u0443\u043A\u0430\u043C\u0438
+          \u2014 \u0440\u0430\u0441\u043F\u043E\u0440\u043A\u0443 \u043D\u0430\u0441\u0442\u0438\u043B\u0430,
+          \u0438 \u043E\u0434\u043D\u0438\u043C \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435\u043C
+          \u0437\u0430\u0433\u043E\u043D\u044F\u0435\u0442 \u043A\u043E\u043B\u044B\u0448\u0435\u043A
+          \u043D\u0430 \u043C\u0435\u0441\u0442\u043E. \u0422\u043E\u043B\u044C\u043A\u043E
+          \u0442\u043E\u0433\u0434\u0430 \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u0435\u0442
+          \u0432\u0437\u0433\u043B\u044F\u0434. \xAB\u0415\u0441\u043B\u0438 \u0431\u044B
+          \u041E\u0441\u0442\u0430\u0444\u0438\u0439 \u043D\u0435 \u0431\u0435\u0440\u0451\u0433
+          \u043A\u0430\u0436\u0434\u0443\u044E \u0449\u0435\u043F\u043A\u0443, \u044F
+          \u0431\u044B \u043F\u0435\u0440\u0435\u0434\u0435\u043B\u0430\u043B\u0430
+          \u044D\u0442\u043E \u0435\u0449\u0451 \u0432\u0447\u0435\u0440\u0430 \u2014
+          \u0438 \u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Пойти дальше, к мельнице."
-        nextNodeId: "chapter01.node.01_mill"
+      - text: "\u041F\u043E\u0439\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435,
+          \u043A \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0435."
+        nextNodeId: chapter01.node.01_mill
         endsDialogue: 0
-        choiceId: "chapter01.node.01_lada_exit"
+        choiceId: chapter01.node.01_lada_exit
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     - id: chapter01.node.01_mill
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.01_mill_main"
+      - blockId: chapter01.node.01_mill_main
         kind: 5
-        speakerIdOverride: ""
-        text: "У мельницы уже шумит колесо — ровно, как каждое утро. Мирон стоит в дверях, отряхивает мучную пыль с рукава и молча кивает проходящему герою: ему сейчас не до разговоров, мешок ждёт."
+        speakerIdOverride: 
+        text: "\u0423 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B \u0443\u0436\u0435
+          \u0448\u0443\u043C\u0438\u0442 \u043A\u043E\u043B\u0435\u0441\u043E \u2014
+          \u0440\u043E\u0432\u043D\u043E, \u043A\u0430\u043A \u043A\u0430\u0436\u0434\u043E\u0435
+          \u0443\u0442\u0440\u043E. \u041C\u0438\u0440\u043E\u043D \u0441\u0442\u043E\u0438\u0442
+          \u0432 \u0434\u0432\u0435\u0440\u044F\u0445, \u043E\u0442\u0440\u044F\u0445\u0438\u0432\u0430\u0435\u0442
+          \u043C\u0443\u0447\u043D\u0443\u044E \u043F\u044B\u043B\u044C \u0441 \u0440\u0443\u043A\u0430\u0432\u0430
+          \u0438 \u043C\u043E\u043B\u0447\u0430 \u043A\u0438\u0432\u0430\u0435\u0442
+          \u043F\u0440\u043E\u0445\u043E\u0434\u044F\u0449\u0435\u043C\u0443 \u0433\u0435\u0440\u043E\u044E:
+          \u0435\u043C\u0443 \u0441\u0435\u0439\u0447\u0430\u0441 \u043D\u0435 \u0434\u043E
+          \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440\u043E\u0432, \u043C\u0435\u0448\u043E\u043A
+          \u0436\u0434\u0451\u0442."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Отнести хлеб к затвору."
-        nextNodeId: ""
+      - text: "\u041E\u0442\u043D\u0435\u0441\u0442\u0438 \u0445\u043B\u0435\u0431
+          \u043A \u0437\u0430\u0442\u0432\u043E\u0440\u0443."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.01_exit"
+        choiceId: chapter01.node.01_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_02_people_of_the_house
-    title: "N02 — Люди Дома"
+    title: "N02 \u2014 \u041B\u044E\u0434\u0438 \u0414\u043E\u043C\u0430"
     category: 1
     status: 1
-    developerComment: "P04-T05 production-текст. Главная ось — бытовой (не философский) спор Остафия и Лады вокруг конкретной вещи (резная зарубка старой распорки настила, по которой читали уровень воды). Мирон и Ульяна не статисты: у каждого своя реплика и своя правда. Хотя бы один явный конфликт и признание, что герой — часть сообщества (к нему обращаются за решением)."
+    developerComment: "P04-T05 production-\u0442\u0435\u043A\u0441\u0442. \u0413\u043B\u0430\u0432\u043D\u0430\u044F
+      \u043E\u0441\u044C \u2014 \u0431\u044B\u0442\u043E\u0432\u043E\u0439 (\u043D\u0435
+      \u0444\u0438\u043B\u043E\u0441\u043E\u0444\u0441\u043A\u0438\u0439) \u0441\u043F\u043E\u0440
+      \u041E\u0441\u0442\u0430\u0444\u0438\u044F \u0438 \u041B\u0430\u0434\u044B
+      \u0432\u043E\u043A\u0440\u0443\u0433 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u043E\u0439
+      \u0432\u0435\u0449\u0438 (\u0440\u0435\u0437\u043D\u0430\u044F \u0437\u0430\u0440\u0443\u0431\u043A\u0430
+      \u0441\u0442\u0430\u0440\u043E\u0439 \u0440\u0430\u0441\u043F\u043E\u0440\u043A\u0438
+      \u043D\u0430\u0441\u0442\u0438\u043B\u0430, \u043F\u043E \u043A\u043E\u0442\u043E\u0440\u043E\u0439
+      \u0447\u0438\u0442\u0430\u043B\u0438 \u0443\u0440\u043E\u0432\u0435\u043D\u044C
+      \u0432\u043E\u0434\u044B). \u041C\u0438\u0440\u043E\u043D \u0438 \u0423\u043B\u044C\u044F\u043D\u0430
+      \u043D\u0435 \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u044B: \u0443 \u043A\u0430\u0436\u0434\u043E\u0433\u043E
+      \u0441\u0432\u043E\u044F \u0440\u0435\u043F\u043B\u0438\u043A\u0430 \u0438
+      \u0441\u0432\u043E\u044F \u043F\u0440\u0430\u0432\u0434\u0430. \u0425\u043E\u0442\u044F
+      \u0431\u044B \u043E\u0434\u0438\u043D \u044F\u0432\u043D\u044B\u0439 \u043A\u043E\u043D\u0444\u043B\u0438\u043A\u0442
+      \u0438 \u043F\u0440\u0438\u0437\u043D\u0430\u043D\u0438\u0435, \u0447\u0442\u043E
+      \u0433\u0435\u0440\u043E\u0439 \u2014 \u0447\u0430\u0441\u0442\u044C \u0441\u043E\u043E\u0431\u0449\u0435\u0441\u0442\u0432\u0430
+      (\u043A \u043D\u0435\u043C\u0443 \u043E\u0431\u0440\u0430\u0449\u0430\u044E\u0442\u0441\u044F
+      \u0437\u0430 \u0440\u0435\u0448\u0435\u043D\u0438\u0435\u043C)."
     startNodeId: chapter01.node.02
     tags:
-    - "глава01"
-    - "production"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - production
     nodes:
     - id: chapter01.node.02
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.02_scene"
+      - blockId: chapter01.node.02_scene
         kind: 5
-        speakerIdOverride: ""
-        text: "У дощатого настила уже собрался небольшой скандал. Остафий держит в руках старую распорку — деревянный брус с резной зарубкой; рядом Лада только что вбила новую, из свежего дерева, без единой зарубки."
+        speakerIdOverride: 
+        text: "\u0423 \u0434\u043E\u0449\u0430\u0442\u043E\u0433\u043E \u043D\u0430\u0441\u0442\u0438\u043B\u0430
+          \u0443\u0436\u0435 \u0441\u043E\u0431\u0440\u0430\u043B\u0441\u044F \u043D\u0435\u0431\u043E\u043B\u044C\u0448\u043E\u0439
+          \u0441\u043A\u0430\u043D\u0434\u0430\u043B. \u041E\u0441\u0442\u0430\u0444\u0438\u0439
+          \u0434\u0435\u0440\u0436\u0438\u0442 \u0432 \u0440\u0443\u043A\u0430\u0445
+          \u0441\u0442\u0430\u0440\u0443\u044E \u0440\u0430\u0441\u043F\u043E\u0440\u043A\u0443
+          \u2014 \u0434\u0435\u0440\u0435\u0432\u044F\u043D\u043D\u044B\u0439 \u0431\u0440\u0443\u0441
+          \u0441 \u0440\u0435\u0437\u043D\u043E\u0439 \u0437\u0430\u0440\u0443\u0431\u043A\u043E\u0439;
+          \u0440\u044F\u0434\u043E\u043C \u041B\u0430\u0434\u0430 \u0442\u043E\u043B\u044C\u043A\u043E
+          \u0447\u0442\u043E \u0432\u0431\u0438\u043B\u0430 \u043D\u043E\u0432\u0443\u044E,
+          \u0438\u0437 \u0441\u0432\u0435\u0436\u0435\u0433\u043E \u0434\u0435\u0440\u0435\u0432\u0430,
+          \u0431\u0435\u0437 \u0435\u0434\u0438\u043D\u043E\u0439 \u0437\u0430\u0440\u0443\u0431\u043A\u0438."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n02_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.house_people_met"
-            IntParam: 0
-      - blockId: "chapter01.node.02_ostafiy"
+        - EffectExecutionId: chapter01.effect.n02_flag1
+          Type: 0
+          StringParam: chapter01.flag.house_people_met
+          IntParam: 0
+      - blockId: chapter01.node.02_ostafiy
         kind: 0
-        speakerIdOverride: "ostafiy"
-        text: "«Зарубку сбила», — говорит Остафий, не глядя на Ладу, и вертит в руках старый брус. — «Она не для красоты была — по ней воду читали, сколько ни спроси. Теперь поди пойми, где мерить»."
+        speakerIdOverride: ostafiy
+        text: "\xAB\u0417\u0430\u0440\u0443\u0431\u043A\u0443 \u0441\u0431\u0438\u043B\u0430\xBB,
+          \u2014 \u0433\u043E\u0432\u043E\u0440\u0438\u0442 \u041E\u0441\u0442\u0430\u0444\u0438\u0439,
+          \u043D\u0435 \u0433\u043B\u044F\u0434\u044F \u043D\u0430 \u041B\u0430\u0434\u0443,
+          \u0438 \u0432\u0435\u0440\u0442\u0438\u0442 \u0432 \u0440\u0443\u043A\u0430\u0445
+          \u0441\u0442\u0430\u0440\u044B\u0439 \u0431\u0440\u0443\u0441. \u2014 \xAB\u041E\u043D\u0430
+          \u043D\u0435 \u0434\u043B\u044F \u043A\u0440\u0430\u0441\u043E\u0442\u044B
+          \u0431\u044B\u043B\u0430 \u2014 \u043F\u043E \u043D\u0435\u0439 \u0432\u043E\u0434\u0443
+          \u0447\u0438\u0442\u0430\u043B\u0438, \u0441\u043A\u043E\u043B\u044C\u043A\u043E
+          \u043D\u0438 \u0441\u043F\u0440\u043E\u0441\u0438. \u0422\u0435\u043F\u0435\u0440\u044C
+          \u043F\u043E\u0434\u0438 \u043F\u043E\u0439\u043C\u0438, \u0433\u0434\u0435
+          \u043C\u0435\u0440\u0438\u0442\u044C\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: "chapter01.node.02_lada"
+      - blockId: chapter01.node.02_lada
         kind: 0
-        speakerIdOverride: "lada"
-        text: "«Она бы сгнила через год, зарубка или без», — отвечает Лада, не отрываясь от работы. — «Новая держит вдвое. Хочешь мерить — поставь рядом рейку, дело на пять минут»."
+        speakerIdOverride: lada
+        text: "\xAB\u041E\u043D\u0430 \u0431\u044B \u0441\u0433\u043D\u0438\u043B\u0430
+          \u0447\u0435\u0440\u0435\u0437 \u0433\u043E\u0434, \u0437\u0430\u0440\u0443\u0431\u043A\u0430
+          \u0438\u043B\u0438 \u0431\u0435\u0437\xBB, \u2014 \u043E\u0442\u0432\u0435\u0447\u0430\u0435\u0442
+          \u041B\u0430\u0434\u0430, \u043D\u0435 \u043E\u0442\u0440\u044B\u0432\u0430\u044F\u0441\u044C
+          \u043E\u0442 \u0440\u0430\u0431\u043E\u0442\u044B. \u2014 \xAB\u041D\u043E\u0432\u0430\u044F
+          \u0434\u0435\u0440\u0436\u0438\u0442 \u0432\u0434\u0432\u043E\u0435. \u0425\u043E\u0447\u0435\u0448\u044C
+          \u043C\u0435\u0440\u0438\u0442\u044C \u2014 \u043F\u043E\u0441\u0442\u0430\u0432\u044C
+          \u0440\u044F\u0434\u043E\u043C \u0440\u0435\u0439\u043A\u0443, \u0434\u0435\u043B\u043E
+          \u043D\u0430 \u043F\u044F\u0442\u044C \u043C\u0438\u043D\u0443\u0442\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: "chapter01.node.02_miron"
+      - blockId: chapter01.node.02_miron
         kind: 0
-        speakerIdOverride: "miron"
-        text: "Мирон, не оборачиваясь от колеса, бросает через плечо: «Мне всё равно, чей брус, — лишь бы колесо не сбоило. Пока не сбоило»."
+        speakerIdOverride: miron
+        text: "\u041C\u0438\u0440\u043E\u043D, \u043D\u0435 \u043E\u0431\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u044F\u0441\u044C
+          \u043E\u0442 \u043A\u043E\u043B\u0435\u0441\u0430, \u0431\u0440\u043E\u0441\u0430\u0435\u0442
+          \u0447\u0435\u0440\u0435\u0437 \u043F\u043B\u0435\u0447\u043E: \xAB\u041C\u043D\u0435
+          \u0432\u0441\u0451 \u0440\u0430\u0432\u043D\u043E, \u0447\u0435\u0439 \u0431\u0440\u0443\u0441,
+          \u2014 \u043B\u0438\u0448\u044C \u0431\u044B \u043A\u043E\u043B\u0435\u0441\u043E
+          \u043D\u0435 \u0441\u0431\u043E\u0438\u043B\u043E. \u041F\u043E\u043A\u0430
+          \u043D\u0435 \u0441\u0431\u043E\u0438\u043B\u043E\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: "chapter01.node.02_ulyana"
+      - blockId: chapter01.node.02_ulyana
         kind: 0
-        speakerIdOverride: "ulyana"
-        text: "Ульяна проходит мимо с корзиной и вставляет на ходу: «Вы бы лучше решили, кто сегодня подменит Прову у колодца — у неё после стирки опять руки не разгибаются. Дом не только из досок стоит»."
+        speakerIdOverride: ulyana
+        text: "\u0423\u043B\u044C\u044F\u043D\u0430 \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u0442
+          \u043C\u0438\u043C\u043E \u0441 \u043A\u043E\u0440\u0437\u0438\u043D\u043E\u0439
+          \u0438 \u0432\u0441\u0442\u0430\u0432\u043B\u044F\u0435\u0442 \u043D\u0430
+          \u0445\u043E\u0434\u0443: \xAB\u0412\u044B \u0431\u044B \u043B\u0443\u0447\u0448\u0435
+          \u0440\u0435\u0448\u0438\u043B\u0438, \u043A\u0442\u043E \u0441\u0435\u0433\u043E\u0434\u043D\u044F
+          \u043F\u043E\u0434\u043C\u0435\u043D\u0438\u0442 \u041F\u0440\u043E\u0432\u0443
+          \u0443 \u043A\u043E\u043B\u043E\u0434\u0446\u0430 \u2014 \u0443 \u043D\u0435\u0451
+          \u043F\u043E\u0441\u043B\u0435 \u0441\u0442\u0438\u0440\u043A\u0438 \u043E\u043F\u044F\u0442\u044C
+          \u0440\u0443\u043A\u0438 \u043D\u0435 \u0440\u0430\u0437\u0433\u0438\u0431\u0430\u044E\u0442\u0441\u044F.
+          \u0414\u043E\u043C \u043D\u0435 \u0442\u043E\u043B\u044C\u043A\u043E \u0438\u0437
+          \u0434\u043E\u0441\u043E\u043A \u0441\u0442\u043E\u0438\u0442\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: "chapter01.node.02_appeal_ostafiy"
+      - blockId: chapter01.node.02_appeal_ostafiy
         kind: 0
-        speakerIdOverride: "ostafiy"
-        text: "«Ты теперь у нас решаешь», — говорит Остафий герою, не то в шутку, не то всерьёз. — «Вот и рассуди»."
+        speakerIdOverride: ostafiy
+        text: "\xAB\u0422\u044B \u0442\u0435\u043F\u0435\u0440\u044C \u0443 \u043D\u0430\u0441
+          \u0440\u0435\u0448\u0430\u0435\u0448\u044C\xBB, \u2014 \u0433\u043E\u0432\u043E\u0440\u0438\u0442
+          \u041E\u0441\u0442\u0430\u0444\u0438\u0439 \u0433\u0435\u0440\u043E\u044E,
+          \u043D\u0435 \u0442\u043E \u0432 \u0448\u0443\u0442\u043A\u0443, \u043D\u0435
+          \u0442\u043E \u0432\u0441\u0435\u0440\u044C\u0451\u0437. \u2014 \xAB\u0412\u043E\u0442
+          \u0438 \u0440\u0430\u0441\u0441\u0443\u0434\u0438\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: "chapter01.node.02_appeal_lada"
+      - blockId: chapter01.node.02_appeal_lada
         kind: 0
-        speakerIdOverride: "lada"
-        text: "«Или не рассуждай», — тут же добавляет Лада. — «Просто дай мне закончить — и всё встанет на место без суда»."
+        speakerIdOverride: lada
+        text: "\xAB\u0418\u043B\u0438 \u043D\u0435 \u0440\u0430\u0441\u0441\u0443\u0436\u0434\u0430\u0439\xBB,
+          \u2014 \u0442\u0443\u0442 \u0436\u0435 \u0434\u043E\u0431\u0430\u0432\u043B\u044F\u0435\u0442
+          \u041B\u0430\u0434\u0430. \u2014 \xAB\u041F\u0440\u043E\u0441\u0442\u043E
+          \u0434\u0430\u0439 \u043C\u043D\u0435 \u0437\u0430\u043A\u043E\u043D\u0447\u0438\u0442\u044C
+          \u2014 \u0438 \u0432\u0441\u0451 \u0432\u0441\u0442\u0430\u043D\u0435\u0442
+          \u043D\u0430 \u043C\u0435\u0441\u0442\u043E \u0431\u0435\u0437 \u0441\u0443\u0434\u0430\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Поддержать Остафия: «Зарубку стоило сохранить»."
-        nextNodeId: "chapter01.node.02_side_ostafiy"
+      - text: "\u041F\u043E\u0434\u0434\u0435\u0440\u0436\u0430\u0442\u044C \u041E\u0441\u0442\u0430\u0444\u0438\u044F:
+          \xAB\u0417\u0430\u0440\u0443\u0431\u043A\u0443 \u0441\u0442\u043E\u0438\u043B\u043E
+          \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C\xBB."
+        nextNodeId: chapter01.node.02_side_ostafiy
         endsDialogue: 0
-        choiceId: "chapter01.node.02_side_ostafiy_choice"
+        choiceId: chapter01.node.02_side_ostafiy_choice
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Поддержать Ладу: «Главное, чтобы держалось»."
-        nextNodeId: "chapter01.node.02_side_lada"
+      - text: "\u041F\u043E\u0434\u0434\u0435\u0440\u0436\u0430\u0442\u044C \u041B\u0430\u0434\u0443:
+          \xAB\u0413\u043B\u0430\u0432\u043D\u043E\u0435, \u0447\u0442\u043E\u0431\u044B
+          \u0434\u0435\u0440\u0436\u0430\u043B\u043E\u0441\u044C\xBB."
+        nextNodeId: chapter01.node.02_side_lada
         endsDialogue: 0
-        choiceId: "chapter01.node.02_side_lada_choice"
+        choiceId: chapter01.node.02_side_lada_choice
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Не вставать ни на чью сторону: «Пусть решает тот, кто держит инструмент»."
-        nextNodeId: "chapter01.node.02_neutral"
+      - text: "\u041D\u0435 \u0432\u0441\u0442\u0430\u0432\u0430\u0442\u044C \u043D\u0438
+          \u043D\u0430 \u0447\u044C\u044E \u0441\u0442\u043E\u0440\u043E\u043D\u0443:
+          \xAB\u041F\u0443\u0441\u0442\u044C \u0440\u0435\u0448\u0430\u0435\u0442
+          \u0442\u043E\u0442, \u043A\u0442\u043E \u0434\u0435\u0440\u0436\u0438\u0442
+          \u0438\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442\xBB."
+        nextNodeId: chapter01.node.02_neutral
         endsDialogue: 0
-        choiceId: "chapter01.node.02_neutral_choice"
+        choiceId: chapter01.node.02_neutral_choice
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 60, y: 60}
+      hasEditorPosition: 1
     - id: chapter01.node.02_side_ostafiy
       speakerId: ostafiy
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.02_side_ostafiy_main"
+      - blockId: chapter01.node.02_side_ostafiy_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Остафий коротко кивает — не победно, скорее с облегчением, что его вообще услышали. «Хоть один в Доме ещё помнит, что не всё меряется рейкой», — говорит он и возвращается к засову."
+        speakerIdOverride: 
+        text: "\u041E\u0441\u0442\u0430\u0444\u0438\u0439 \u043A\u043E\u0440\u043E\u0442\u043A\u043E
+          \u043A\u0438\u0432\u0430\u0435\u0442 \u2014 \u043D\u0435 \u043F\u043E\u0431\u0435\u0434\u043D\u043E,
+          \u0441\u043A\u043E\u0440\u0435\u0435 \u0441 \u043E\u0431\u043B\u0435\u0433\u0447\u0435\u043D\u0438\u0435\u043C,
+          \u0447\u0442\u043E \u0435\u0433\u043E \u0432\u043E\u043E\u0431\u0449\u0435
+          \u0443\u0441\u043B\u044B\u0448\u0430\u043B\u0438. \xAB\u0425\u043E\u0442\u044C
+          \u043E\u0434\u0438\u043D \u0432 \u0414\u043E\u043C\u0435 \u0435\u0449\u0451
+          \u043F\u043E\u043C\u043D\u0438\u0442, \u0447\u0442\u043E \u043D\u0435 \u0432\u0441\u0451
+          \u043C\u0435\u0440\u044F\u0435\u0442\u0441\u044F \u0440\u0435\u0439\u043A\u043E\u0439\xBB,
+          \u2014 \u0433\u043E\u0432\u043E\u0440\u0438\u0442 \u043E\u043D \u0438 \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442\u0441\u044F
+          \u043A \u0437\u0430\u0441\u043E\u0432\u0443."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n02_relation_ostafiy"
-            Type: 3
-            StringParam: "ostafiy"
-            IntParam: 1
+        - EffectExecutionId: chapter01.effect.n02_relation_ostafiy
+          Type: 3
+          StringParam: ostafiy
+          IntParam: 1
       choices:
-      - text: "Пойти дальше."
-        nextNodeId: ""
+      - text: "\u041F\u043E\u0439\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.02_side_ostafiy_exit"
+        choiceId: chapter01.node.02_side_ostafiy_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 490, y: 60}
+      hasEditorPosition: 1
     - id: chapter01.node.02_side_lada
       speakerId: lada
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.02_side_lada_main"
+      - blockId: chapter01.node.02_side_lada_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Лада чуть улыбается — не благодарно, по-деловому. «Вот и славно. Тогда я закончу — и покажу, что не развалится», — и снова берётся за распорку."
+        speakerIdOverride: 
+        text: "\u041B\u0430\u0434\u0430 \u0447\u0443\u0442\u044C \u0443\u043B\u044B\u0431\u0430\u0435\u0442\u0441\u044F
+          \u2014 \u043D\u0435 \u0431\u043B\u0430\u0433\u043E\u0434\u0430\u0440\u043D\u043E,
+          \u043F\u043E-\u0434\u0435\u043B\u043E\u0432\u043E\u043C\u0443. \xAB\u0412\u043E\u0442
+          \u0438 \u0441\u043B\u0430\u0432\u043D\u043E. \u0422\u043E\u0433\u0434\u0430
+          \u044F \u0437\u0430\u043A\u043E\u043D\u0447\u0443 \u2014 \u0438 \u043F\u043E\u043A\u0430\u0436\u0443,
+          \u0447\u0442\u043E \u043D\u0435 \u0440\u0430\u0437\u0432\u0430\u043B\u0438\u0442\u0441\u044F\xBB,
+          \u2014 \u0438 \u0441\u043D\u043E\u0432\u0430 \u0431\u0435\u0440\u0451\u0442\u0441\u044F
+          \u0437\u0430 \u0440\u0430\u0441\u043F\u043E\u0440\u043A\u0443."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n02_relation_lada"
-            Type: 3
-            StringParam: "lada"
-            IntParam: 1
+        - EffectExecutionId: chapter01.effect.n02_relation_lada
+          Type: 3
+          StringParam: lada
+          IntParam: 1
       choices:
-      - text: "Пойти дальше."
-        nextNodeId: ""
+      - text: "\u041F\u043E\u0439\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.02_side_lada_exit"
+        choiceId: chapter01.node.02_side_lada_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 490, y: 390}
+      hasEditorPosition: 1
     - id: chapter01.node.02_neutral
       speakerId: miron
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.02_neutral_main"
+      - blockId: chapter01.node.02_neutral_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Мирон хмыкает, не отрываясь от колеса: «Мудрое дело. Само колесо покажет, кто был прав — оно врать не умеет»."
+        speakerIdOverride: 
+        text: "\u041C\u0438\u0440\u043E\u043D \u0445\u043C\u044B\u043A\u0430\u0435\u0442,
+          \u043D\u0435 \u043E\u0442\u0440\u044B\u0432\u0430\u044F\u0441\u044C \u043E\u0442
+          \u043A\u043E\u043B\u0435\u0441\u0430: \xAB\u041C\u0443\u0434\u0440\u043E\u0435
+          \u0434\u0435\u043B\u043E. \u0421\u0430\u043C\u043E \u043A\u043E\u043B\u0435\u0441\u043E
+          \u043F\u043E\u043A\u0430\u0436\u0435\u0442, \u043A\u0442\u043E \u0431\u044B\u043B
+          \u043F\u0440\u0430\u0432 \u2014 \u043E\u043D\u043E \u0432\u0440\u0430\u0442\u044C
+          \u043D\u0435 \u0443\u043C\u0435\u0435\u0442\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Пойти дальше."
-        nextNodeId: ""
+      - text: "\u041F\u043E\u0439\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.02_neutral_exit"
+        choiceId: chapter01.node.02_neutral_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 490, y: 720}
+      hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_03_first_pressure
-    title: "N03 — Первое давление"
+    title: "N03 \u2014 \u041F\u0435\u0440\u0432\u043E\u0435 \u0434\u0430\u0432\u043B\u0435\u043D\u0438\u0435"
     category: 1
     status: 1
-    developerComment: "P04-T05 production-текст. Реакция распределена по разделу 17 инструкции: Мирон — фактическое наблюдение, Лада — механическое объяснение, Остафий — сравнение с прошлым, Ульяна — бытовое последствие. Никто не произносит готовую истину."
+    developerComment: "P04-T05 production-\u0442\u0435\u043A\u0441\u0442. \u0420\u0435\u0430\u043A\u0446\u0438\u044F
+      \u0440\u0430\u0441\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430 \u043F\u043E
+      \u0440\u0430\u0437\u0434\u0435\u043B\u0443 17 \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u0438:
+      \u041C\u0438\u0440\u043E\u043D \u2014 \u0444\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0435
+      \u043D\u0430\u0431\u043B\u044E\u0434\u0435\u043D\u0438\u0435, \u041B\u0430\u0434\u0430
+      \u2014 \u043C\u0435\u0445\u0430\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0435
+      \u043E\u0431\u044A\u044F\u0441\u043D\u0435\u043D\u0438\u0435, \u041E\u0441\u0442\u0430\u0444\u0438\u0439
+      \u2014 \u0441\u0440\u0430\u0432\u043D\u0435\u043D\u0438\u0435 \u0441 \u043F\u0440\u043E\u0448\u043B\u044B\u043C,
+      \u0423\u043B\u044C\u044F\u043D\u0430 \u2014 \u0431\u044B\u0442\u043E\u0432\u043E\u0435
+      \u043F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u0435. \u041D\u0438\u043A\u0442\u043E
+      \u043D\u0435 \u043F\u0440\u043E\u0438\u0437\u043D\u043E\u0441\u0438\u0442 \u0433\u043E\u0442\u043E\u0432\u0443\u044E
+      \u0438\u0441\u0442\u0438\u043D\u0443."
     startNodeId: chapter01.node.03
     tags:
-    - "глава01"
-    - "production"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - production
     nodes:
     - id: chapter01.node.03
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.03_scene"
+      - blockId: chapter01.node.03_scene
         kind: 1
-        speakerIdOverride: ""
-        text: "Вода у берега шумит не так, как вчера — чуть иначе, будто на миг кто-то переставил камень под струёй. Через минуту всё снова звучит привычно, и можно бы забыть, если бы не привычка дослушивать до конца."
+        speakerIdOverride: 
+        text: "\u0412\u043E\u0434\u0430 \u0443 \u0431\u0435\u0440\u0435\u0433\u0430
+          \u0448\u0443\u043C\u0438\u0442 \u043D\u0435 \u0442\u0430\u043A, \u043A\u0430\u043A
+          \u0432\u0447\u0435\u0440\u0430 \u2014 \u0447\u0443\u0442\u044C \u0438\u043D\u0430\u0447\u0435,
+          \u0431\u0443\u0434\u0442\u043E \u043D\u0430 \u043C\u0438\u0433 \u043A\u0442\u043E-\u0442\u043E
+          \u043F\u0435\u0440\u0435\u0441\u0442\u0430\u0432\u0438\u043B \u043A\u0430\u043C\u0435\u043D\u044C
+          \u043F\u043E\u0434 \u0441\u0442\u0440\u0443\u0451\u0439. \u0427\u0435\u0440\u0435\u0437
+          \u043C\u0438\u043D\u0443\u0442\u0443 \u0432\u0441\u0451 \u0441\u043D\u043E\u0432\u0430
+          \u0437\u0432\u0443\u0447\u0438\u0442 \u043F\u0440\u0438\u0432\u044B\u0447\u043D\u043E,
+          \u0438 \u043C\u043E\u0436\u043D\u043E \u0431\u044B \u0437\u0430\u0431\u044B\u0442\u044C,
+          \u0435\u0441\u043B\u0438 \u0431\u044B \u043D\u0435 \u043F\u0440\u0438\u0432\u044B\u0447\u043A\u0430
+          \u0434\u043E\u0441\u043B\u0443\u0448\u0438\u0432\u0430\u0442\u044C \u0434\u043E
+          \u043A\u043E\u043D\u0446\u0430."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n03_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.first_pressure_seen"
-            IntParam: 0
-      - blockId: "chapter01.node.03_miron"
+        - EffectExecutionId: chapter01.effect.n03_flag1
+          Type: 0
+          StringParam: chapter01.flag.first_pressure_seen
+          IntParam: 0
+      - blockId: chapter01.node.03_miron
         kind: 0
-        speakerIdOverride: "miron"
-        text: "Мирон поднимает голову раньше, чем ты успеваешь спросить. «Колесо два раза сбилось за час — не под мою руку, само. Отметил, дальше видно будет»."
+        speakerIdOverride: miron
+        text: "\u041C\u0438\u0440\u043E\u043D \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u0435\u0442
+          \u0433\u043E\u043B\u043E\u0432\u0443 \u0440\u0430\u043D\u044C\u0448\u0435,
+          \u0447\u0435\u043C \u0442\u044B \u0443\u0441\u043F\u0435\u0432\u0430\u0435\u0448\u044C
+          \u0441\u043F\u0440\u043E\u0441\u0438\u0442\u044C. \xAB\u041A\u043E\u043B\u0435\u0441\u043E
+          \u0434\u0432\u0430 \u0440\u0430\u0437\u0430 \u0441\u0431\u0438\u043B\u043E\u0441\u044C
+          \u0437\u0430 \u0447\u0430\u0441 \u2014 \u043D\u0435 \u043F\u043E\u0434
+          \u043C\u043E\u044E \u0440\u0443\u043A\u0443, \u0441\u0430\u043C\u043E.
+          \u041E\u0442\u043C\u0435\u0442\u0438\u043B, \u0434\u0430\u043B\u044C\u0448\u0435
+          \u0432\u0438\u0434\u043D\u043E \u0431\u0443\u0434\u0435\u0442\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: "chapter01.node.03_lada"
+      - blockId: chapter01.node.03_lada
         kind: 0
-        speakerIdOverride: "lada"
-        text: "Лада, услышав, пожимает плечами. «Задвижку, может, подперло веткой, или люфт в оси — само уляжется. Если нет, гляну распорку»."
+        speakerIdOverride: lada
+        text: "\u041B\u0430\u0434\u0430, \u0443\u0441\u043B\u044B\u0448\u0430\u0432,
+          \u043F\u043E\u0436\u0438\u043C\u0430\u0435\u0442 \u043F\u043B\u0435\u0447\u0430\u043C\u0438.
+          \xAB\u0417\u0430\u0434\u0432\u0438\u0436\u043A\u0443, \u043C\u043E\u0436\u0435\u0442,
+          \u043F\u043E\u0434\u043F\u0435\u0440\u043B\u043E \u0432\u0435\u0442\u043A\u043E\u0439,
+          \u0438\u043B\u0438 \u043B\u044E\u0444\u0442 \u0432 \u043E\u0441\u0438 \u2014
+          \u0441\u0430\u043C\u043E \u0443\u043B\u044F\u0436\u0435\u0442\u0441\u044F.
+          \u0415\u0441\u043B\u0438 \u043D\u0435\u0442, \u0433\u043B\u044F\u043D\u0443
+          \u0440\u0430\u0441\u043F\u043E\u0440\u043A\u0443\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: "chapter01.node.03_ostafiy"
+      - blockId: chapter01.node.03_ostafiy
         kind: 0
-        speakerIdOverride: "ostafiy"
-        text: "Остафий останавливается рядом и слушает дольше, чем нужно для ответа. «Так она раньше не делала. Даже в паводок — не так»."
+        speakerIdOverride: ostafiy
+        text: "\u041E\u0441\u0442\u0430\u0444\u0438\u0439 \u043E\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0435\u0442\u0441\u044F
+          \u0440\u044F\u0434\u043E\u043C \u0438 \u0441\u043B\u0443\u0448\u0430\u0435\u0442
+          \u0434\u043E\u043B\u044C\u0448\u0435, \u0447\u0435\u043C \u043D\u0443\u0436\u043D\u043E
+          \u0434\u043B\u044F \u043E\u0442\u0432\u0435\u0442\u0430. \xAB\u0422\u0430\u043A
+          \u043E\u043D\u0430 \u0440\u0430\u043D\u044C\u0448\u0435 \u043D\u0435 \u0434\u0435\u043B\u0430\u043B\u0430.
+          \u0414\u0430\u0436\u0435 \u0432 \u043F\u0430\u0432\u043E\u0434\u043E\u043A
+          \u2014 \u043D\u0435 \u0442\u0430\u043A\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: "chapter01.node.03_ulyana"
+      - blockId: chapter01.node.03_ulyana
         kind: 0
-        speakerIdOverride: "ulyana"
-        text: "Ульяна идёт мимо с ведром и морщится. «Со вчерашнего вода из колодца горчит — не показалось. И скотина не сразу пьёт»."
+        speakerIdOverride: ulyana
+        text: "\u0423\u043B\u044C\u044F\u043D\u0430 \u0438\u0434\u0451\u0442 \u043C\u0438\u043C\u043E
+          \u0441 \u0432\u0435\u0434\u0440\u043E\u043C \u0438 \u043C\u043E\u0440\u0449\u0438\u0442\u0441\u044F.
+          \xAB\u0421\u043E \u0432\u0447\u0435\u0440\u0430\u0448\u043D\u0435\u0433\u043E
+          \u0432\u043E\u0434\u0430 \u0438\u0437 \u043A\u043E\u043B\u043E\u0434\u0446\u0430
+          \u0433\u043E\u0440\u0447\u0438\u0442 \u2014 \u043D\u0435 \u043F\u043E\u043A\u0430\u0437\u0430\u043B\u043E\u0441\u044C.
+          \u0418 \u0441\u043A\u043E\u0442\u0438\u043D\u0430 \u043D\u0435 \u0441\u0440\u0430\u0437\u0443
+          \u043F\u044C\u0451\u0442\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Сходить и взглянуть на затвор самому."
-        nextNodeId: "chapter01.node.03_check"
+      - text: "\u0421\u0445\u043E\u0434\u0438\u0442\u044C \u0438 \u0432\u0437\u0433\u043B\u044F\u043D\u0443\u0442\u044C
+          \u043D\u0430 \u0437\u0430\u0442\u0432\u043E\u0440 \u0441\u0430\u043C\u043E\u043C\u0443."
+        nextNodeId: chapter01.node.03_check
         endsDialogue: 0
-        choiceId: "chapter01.node.03_check_choice"
+        choiceId: chapter01.node.03_check_choice
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Не задерживаться — дел с утра хватает."
-        nextNodeId: "chapter01.node.03_pass"
+      - text: "\u041D\u0435 \u0437\u0430\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0442\u044C\u0441\u044F
+          \u2014 \u0434\u0435\u043B \u0441 \u0443\u0442\u0440\u0430 \u0445\u0432\u0430\u0442\u0430\u0435\u0442."
+        nextNodeId: chapter01.node.03_pass
         endsDialogue: 0
-        choiceId: "chapter01.node.03_pass_choice"
+        choiceId: chapter01.node.03_pass_choice
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 60, y: 60}
+      hasEditorPosition: 1
     - id: chapter01.node.03_check
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.03_check_main"
+      - blockId: chapter01.node.03_check_main
         kind: 5
-        speakerIdOverride: ""
-        text: "Ты подходишь к затвору. На вид всё как обычно: мокрое дерево, ровный гул. Только слова Остафия не идут из головы: «Может, и ничего. А может — нет»."
+        speakerIdOverride: 
+        text: "\u0422\u044B \u043F\u043E\u0434\u0445\u043E\u0434\u0438\u0448\u044C
+          \u043A \u0437\u0430\u0442\u0432\u043E\u0440\u0443. \u041D\u0430 \u0432\u0438\u0434
+          \u0432\u0441\u0451 \u043A\u0430\u043A \u043E\u0431\u044B\u0447\u043D\u043E:
+          \u043C\u043E\u043A\u0440\u043E\u0435 \u0434\u0435\u0440\u0435\u0432\u043E,
+          \u0440\u043E\u0432\u043D\u044B\u0439 \u0433\u0443\u043B. \u0422\u043E\u043B\u044C\u043A\u043E
+          \u0441\u043B\u043E\u0432\u0430 \u041E\u0441\u0442\u0430\u0444\u0438\u044F
+          \u043D\u0435 \u0438\u0434\u0443\u0442 \u0438\u0437 \u0433\u043E\u043B\u043E\u0432\u044B:
+          \xAB\u041C\u043E\u0436\u0435\u0442, \u0438 \u043D\u0438\u0447\u0435\u0433\u043E.
+          \u0410 \u043C\u043E\u0436\u0435\u0442 \u2014 \u043D\u0435\u0442\xBB."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Пойти дальше."
-        nextNodeId: ""
+      - text: "\u041F\u043E\u0439\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.03_check_exit"
+        choiceId: chapter01.node.03_check_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 490, y: 60}
+      hasEditorPosition: 1
     - id: chapter01.node.03_pass
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.03_pass_main"
+      - blockId: chapter01.node.03_pass_main
         kind: 5
-        speakerIdOverride: ""
-        text: "Дела не ждут — а паводок, случись он, будет ждать ещё меньше. Ты идёшь дальше, оставляя странность на потом."
+        speakerIdOverride: 
+        text: "\u0414\u0435\u043B\u0430 \u043D\u0435 \u0436\u0434\u0443\u0442 \u2014
+          \u0430 \u043F\u0430\u0432\u043E\u0434\u043E\u043A, \u0441\u043B\u0443\u0447\u0438\u0441\u044C
+          \u043E\u043D, \u0431\u0443\u0434\u0435\u0442 \u0436\u0434\u0430\u0442\u044C
+          \u0435\u0449\u0451 \u043C\u0435\u043D\u044C\u0448\u0435. \u0422\u044B \u0438\u0434\u0451\u0448\u044C
+          \u0434\u0430\u043B\u044C\u0448\u0435, \u043E\u0441\u0442\u0430\u0432\u043B\u044F\u044F
+          \u0441\u0442\u0440\u0430\u043D\u043D\u043E\u0441\u0442\u044C \u043D\u0430
+          \u043F\u043E\u0442\u043E\u043C."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Пойти дальше."
-        nextNodeId: ""
+      - text: "\u041F\u043E\u0439\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.03_pass_exit"
+        choiceId: chapter01.node.03_pass_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 490, y: 390}
+      hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_04_flood
-    title: "N04 — Паводок / Синяя ставня"
+    title: "N04 \u2014 \u041F\u0430\u0432\u043E\u0434\u043E\u043A / \u0421\u0438\u043D\u044F\u044F
+      \u0441\u0442\u0430\u0432\u043D\u044F"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.04
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.04
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.04_main"
+      - blockId: chapter01.node.04_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Ночью вода поднимается быстрее, чем кто-либо ожидал. Синяя ставня на плотине трещит под напором. Люди у мельницы кричат, зовут на помощь."
+        speakerIdOverride: 
+        text: "\u041D\u043E\u0447\u044C\u044E \u0432\u043E\u0434\u0430 \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u0435\u0442\u0441\u044F
+          \u0431\u044B\u0441\u0442\u0440\u0435\u0435, \u0447\u0435\u043C \u043A\u0442\u043E-\u043B\u0438\u0431\u043E
+          \u043E\u0436\u0438\u0434\u0430\u043B. \u0421\u0438\u043D\u044F\u044F \u0441\u0442\u0430\u0432\u043D\u044F
+          \u043D\u0430 \u043F\u043B\u043E\u0442\u0438\u043D\u0435 \u0442\u0440\u0435\u0449\u0438\u0442
+          \u043F\u043E\u0434 \u043D\u0430\u043F\u043E\u0440\u043E\u043C. \u041B\u044E\u0434\u0438
+          \u0443 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B \u043A\u0440\u0438\u0447\u0430\u0442,
+          \u0437\u043E\u0432\u0443\u0442 \u043D\u0430 \u043F\u043E\u043C\u043E\u0449\u044C."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n04_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.flood_happened"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_flag1
+          Type: 0
+          StringParam: chapter01.flag.flood_happened
+          IntParam: 0
       choices:
-      - text: "Бежать к плотине."
-        nextNodeId: ""
+      - text: "\u0411\u0435\u0436\u0430\u0442\u044C \u043A \u043F\u043B\u043E\u0442\u0438\u043D\u0435."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.04_exit"
+        choiceId: chapter01.node.04_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 60, y: 60}
+      hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_05_wet_plan
-    title: "N05 — Осмотр плотины / Мокрый чертёж"
+    title: "N05 \u2014 \u041E\u0441\u043C\u043E\u0442\u0440 \u043F\u043B\u043E\u0442\u0438\u043D\u044B
+      / \u041C\u043E\u043A\u0440\u044B\u0439 \u0447\u0435\u0440\u0442\u0451\u0436"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): ветвление без проверки (DEC-04), не полированный текст."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u0432\u0435\u0442\u0432\u043B\u0435\u043D\u0438\u0435 \u0431\u0435\u0437
+      \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438 (DEC-04), \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442."
     startNodeId: chapter01.node.05
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.05
       speakerId: narrator
-      text: "Паводок сошёл, но плотина повреждена. Остафий настаивает на старом, проверенном ремонте всех семи затворов. Лада предлагает новое решение — перекрыть седьмое русло и стабилизировать поток через мельницу. Выбор — за героем."
+      text: "\u041F\u0430\u0432\u043E\u0434\u043E\u043A \u0441\u043E\u0448\u0451\u043B,
+        \u043D\u043E \u043F\u043B\u043E\u0442\u0438\u043D\u0430 \u043F\u043E\u0432\u0440\u0435\u0436\u0434\u0435\u043D\u0430.
+        \u041E\u0441\u0442\u0430\u0444\u0438\u0439 \u043D\u0430\u0441\u0442\u0430\u0438\u0432\u0430\u0435\u0442
+        \u043D\u0430 \u0441\u0442\u0430\u0440\u043E\u043C, \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u043E\u043C
+        \u0440\u0435\u043C\u043E\u043D\u0442\u0435 \u0432\u0441\u0435\u0445 \u0441\u0435\u043C\u0438
+        \u0437\u0430\u0442\u0432\u043E\u0440\u043E\u0432. \u041B\u0430\u0434\u0430
+        \u043F\u0440\u0435\u0434\u043B\u0430\u0433\u0430\u0435\u0442 \u043D\u043E\u0432\u043E\u0435
+        \u0440\u0435\u0448\u0435\u043D\u0438\u0435 \u2014 \u043F\u0435\u0440\u0435\u043A\u0440\u044B\u0442\u044C
+        \u0441\u0435\u0434\u044C\u043C\u043E\u0435 \u0440\u0443\u0441\u043B\u043E
+        \u0438 \u0441\u0442\u0430\u0431\u0438\u043B\u0438\u0437\u0438\u0440\u043E\u0432\u0430\u0442\u044C
+        \u043F\u043E\u0442\u043E\u043A \u0447\u0435\u0440\u0435\u0437 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0443.
+        \u0412\u044B\u0431\u043E\u0440 \u2014 \u0437\u0430 \u0433\u0435\u0440\u043E\u0435\u043C."
       textBlocks: []
       choices:
-      - text: "Восстановить старый порядок."
-        nextNodeId: "chapter01.node.05.old"
+      - text: "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C
+          \u0441\u0442\u0430\u0440\u044B\u0439 \u043F\u043E\u0440\u044F\u0434\u043E\u043A."
+        nextNodeId: chapter01.node.05.old
         endsDialogue: 0
-        choiceId: "chapter01.node.05_choice_old"
+        choiceId: chapter01.node.05_choice_old
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Перейти на новую схему."
-        nextNodeId: "chapter01.node.05.new"
+      - text: "\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043D\u0430 \u043D\u043E\u0432\u0443\u044E
+          \u0441\u0445\u0435\u043C\u0443."
+        nextNodeId: chapter01.node.05.new
         endsDialogue: 0
-        choiceId: "chapter01.node.05_choice_new"
+        choiceId: chapter01.node.05_choice_new
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 60, y: 60}
+      hasEditorPosition: 1
     - id: chapter01.node.05.old
       speakerId: ostafiy
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.05.old_main"
+      - blockId: chapter01.node.05.old_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Остафий кивает: «Значит, всё, как было заведено». Работники берутся за все семь затворов и боковой сброс."
+        speakerIdOverride: 
+        text: "\u041E\u0441\u0442\u0430\u0444\u0438\u0439 \u043A\u0438\u0432\u0430\u0435\u0442:
+          \xAB\u0417\u043D\u0430\u0447\u0438\u0442, \u0432\u0441\u0451, \u043A\u0430\u043A
+          \u0431\u044B\u043B\u043E \u0437\u0430\u0432\u0435\u0434\u0435\u043D\u043E\xBB.
+          \u0420\u0430\u0431\u043E\u0442\u043D\u0438\u043A\u0438 \u0431\u0435\u0440\u0443\u0442\u0441\u044F
+          \u0437\u0430 \u0432\u0441\u0435 \u0441\u0435\u043C\u044C \u0437\u0430\u0442\u0432\u043E\u0440\u043E\u0432
+          \u0438 \u0431\u043E\u043A\u043E\u0432\u043E\u0439 \u0441\u0431\u0440\u043E\u0441."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n05_old_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.dam_inspected"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n05_old_flag2"
-            Type: 0
-            StringParam: "chapter01.flag.repair_old"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n05_old_flag1
+          Type: 0
+          StringParam: chapter01.flag.dam_inspected
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n05_old_flag2
+          Type: 0
+          StringParam: chapter01.flag.repair_old
+          IntParam: 0
       choices:
-      - text: "Начать старый ремонт."
-        nextNodeId: ""
+      - text: "\u041D\u0430\u0447\u0430\u0442\u044C \u0441\u0442\u0430\u0440\u044B\u0439
+          \u0440\u0435\u043C\u043E\u043D\u0442."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.05.old_exit"
+        choiceId: chapter01.node.05.old_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 490, y: 60}
+      hasEditorPosition: 1
     - id: chapter01.node.05.new
       speakerId: lada
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.05.new_main"
+      - blockId: chapter01.node.05.new_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Лада довольна: «Наконец-то избавимся от старой бессмысленной схемы». Седьмое русло перекрывают, поток стабилизируют через мельницу."
+        speakerIdOverride: 
+        text: "\u041B\u0430\u0434\u0430 \u0434\u043E\u0432\u043E\u043B\u044C\u043D\u0430:
+          \xAB\u041D\u0430\u043A\u043E\u043D\u0435\u0446-\u0442\u043E \u0438\u0437\u0431\u0430\u0432\u0438\u043C\u0441\u044F
+          \u043E\u0442 \u0441\u0442\u0430\u0440\u043E\u0439 \u0431\u0435\u0441\u0441\u043C\u044B\u0441\u043B\u0435\u043D\u043D\u043E\u0439
+          \u0441\u0445\u0435\u043C\u044B\xBB. \u0421\u0435\u0434\u044C\u043C\u043E\u0435
+          \u0440\u0443\u0441\u043B\u043E \u043F\u0435\u0440\u0435\u043A\u0440\u044B\u0432\u0430\u044E\u0442,
+          \u043F\u043E\u0442\u043E\u043A \u0441\u0442\u0430\u0431\u0438\u043B\u0438\u0437\u0438\u0440\u0443\u044E\u0442
+          \u0447\u0435\u0440\u0435\u0437 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0443."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n05_new_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.dam_inspected"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n05_new_flag2"
-            Type: 0
-            StringParam: "chapter01.flag.repair_new"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n05_new_flag1
+          Type: 0
+          StringParam: chapter01.flag.dam_inspected
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n05_new_flag2
+          Type: 0
+          StringParam: chapter01.flag.repair_new
+          IntParam: 0
       choices:
-      - text: "Начать новый ремонт."
-        nextNodeId: ""
+      - text: "\u041D\u0430\u0447\u0430\u0442\u044C \u043D\u043E\u0432\u044B\u0439
+          \u0440\u0435\u043C\u043E\u043D\u0442."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.05.new_exit"
+        choiceId: chapter01.node.05.new_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 490, y: 390}
+      hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_06_wrong_water
-    title: "N06 — Вода ведёт себя неправильно"
+    title: "N06 \u2014 \u0412\u043E\u0434\u0430 \u0432\u0435\u0434\u0451\u0442 \u0441\u0435\u0431\u044F
+      \u043D\u0435\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.06
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.06
       speakerId: miron
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.06_main"
+      - blockId: chapter01.node.06_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Ремонт завершён, вода как будто течёт правильно — но Мирон хмурится: что-то в её движении по-прежнему не так, как должно быть."
+        speakerIdOverride: 
+        text: "\u0420\u0435\u043C\u043E\u043D\u0442 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043D,
+          \u0432\u043E\u0434\u0430 \u043A\u0430\u043A \u0431\u0443\u0434\u0442\u043E
+          \u0442\u0435\u0447\u0451\u0442 \u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E
+          \u2014 \u043D\u043E \u041C\u0438\u0440\u043E\u043D \u0445\u043C\u0443\u0440\u0438\u0442\u0441\u044F:
+          \u0447\u0442\u043E-\u0442\u043E \u0432 \u0435\u0451 \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0438
+          \u043F\u043E-\u043F\u0440\u0435\u0436\u043D\u0435\u043C\u0443 \u043D\u0435
+          \u0442\u0430\u043A, \u043A\u0430\u043A \u0434\u043E\u043B\u0436\u043D\u043E
+          \u0431\u044B\u0442\u044C."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n06_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.water_wrong_active"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n06_knowledge1"
-            Type: 2
-            StringParam: "chapter01.knowledge.water_flow_is_wrong"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n06_flag1
+          Type: 0
+          StringParam: chapter01.flag.water_wrong_active
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n06_knowledge1
+          Type: 2
+          StringParam: chapter01.knowledge.water_flow_is_wrong
+          IntParam: 0
       choices:
-      - text: "Обратить на это внимание."
-        nextNodeId: ""
+      - text: "\u041E\u0431\u0440\u0430\u0442\u0438\u0442\u044C \u043D\u0430 \u044D\u0442\u043E
+          \u0432\u043D\u0438\u043C\u0430\u043D\u0438\u0435."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.06_exit"
+        choiceId: chapter01.node.06_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_07a_mill
-    title: "N07A — Колесо, которое не спит"
+    title: "N07A \u2014 \u041A\u043E\u043B\u0435\u0441\u043E, \u043A\u043E\u0442\u043E\u0440\u043E\u0435
+      \u043D\u0435 \u0441\u043F\u0438\u0442"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.07a
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.07a
       speakerId: miron
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.07a_main"
+      - blockId: chapter01.node.07a_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Мирон признаётся: этой ночью колесо мельницы крутилось само, хотя вода стояла почти неподвижно. Раньше седьмой затвор открывали по условным стукам — теперь этого не делает никто."
+        speakerIdOverride: 
+        text: "\u041C\u0438\u0440\u043E\u043D \u043F\u0440\u0438\u0437\u043D\u0430\u0451\u0442\u0441\u044F:
+          \u044D\u0442\u043E\u0439 \u043D\u043E\u0447\u044C\u044E \u043A\u043E\u043B\u0435\u0441\u043E
+          \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B \u043A\u0440\u0443\u0442\u0438\u043B\u043E\u0441\u044C
+          \u0441\u0430\u043C\u043E, \u0445\u043E\u0442\u044F \u0432\u043E\u0434\u0430
+          \u0441\u0442\u043E\u044F\u043B\u0430 \u043F\u043E\u0447\u0442\u0438 \u043D\u0435\u043F\u043E\u0434\u0432\u0438\u0436\u043D\u043E.
+          \u0420\u0430\u043D\u044C\u0448\u0435 \u0441\u0435\u0434\u044C\u043C\u043E\u0439
+          \u0437\u0430\u0442\u0432\u043E\u0440 \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u043B\u0438
+          \u043F\u043E \u0443\u0441\u043B\u043E\u0432\u043D\u044B\u043C \u0441\u0442\u0443\u043A\u0430\u043C
+          \u2014 \u0442\u0435\u043F\u0435\u0440\u044C \u044D\u0442\u043E\u0433\u043E
+          \u043D\u0435 \u0434\u0435\u043B\u0430\u0435\u0442 \u043D\u0438\u043A\u0442\u043E."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n07a_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.investigated_mill"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n07a_knowledge1"
-            Type: 2
-            StringParam: "chapter01.knowledge.mill_moves_at_wrong_time"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n07a_knowledge2"
-            Type: 2
-            StringParam: "chapter01.knowledge.old_seventh_channel"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n07a_flag1
+          Type: 0
+          StringParam: chapter01.flag.investigated_mill
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n07a_knowledge1
+          Type: 2
+          StringParam: chapter01.knowledge.mill_moves_at_wrong_time
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n07a_knowledge2
+          Type: 2
+          StringParam: chapter01.knowledge.old_seventh_channel
+          IntParam: 0
       choices:
-      - text: "Записать услышанное."
-        nextNodeId: ""
+      - text: "\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u0443\u0441\u043B\u044B\u0448\u0430\u043D\u043D\u043E\u0435."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.07a_exit"
+        choiceId: chapter01.node.07a_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_07b_cattle
-    title: "N07B — Скот"
+    title: "N07B \u2014 \u0421\u043A\u043E\u0442"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.07b
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.07b
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.07b_main"
+      - blockId: chapter01.node.07b_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Две коровы упрямо не подходят к одному и тому же рукаву реки, хотя трава там гуще."
+        speakerIdOverride: 
+        text: "\u0414\u0432\u0435 \u043A\u043E\u0440\u043E\u0432\u044B \u0443\u043F\u0440\u044F\u043C\u043E
+          \u043D\u0435 \u043F\u043E\u0434\u0445\u043E\u0434\u044F\u0442 \u043A \u043E\u0434\u043D\u043E\u043C\u0443
+          \u0438 \u0442\u043E\u043C\u0443 \u0436\u0435 \u0440\u0443\u043A\u0430\u0432\u0443
+          \u0440\u0435\u043A\u0438, \u0445\u043E\u0442\u044F \u0442\u0440\u0430\u0432\u0430
+          \u0442\u0430\u043C \u0433\u0443\u0449\u0435."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n07b_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.investigated_cattle"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n07b_knowledge1"
-            Type: 2
-            StringParam: "chapter01.knowledge.cattle_avoid_old_branch"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n07b_flag1
+          Type: 0
+          StringParam: chapter01.flag.investigated_cattle
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n07b_knowledge1
+          Type: 2
+          StringParam: chapter01.knowledge.cattle_avoid_old_branch
+          IntParam: 0
       choices:
-      - text: "Присмотреться к скоту."
-        nextNodeId: ""
+      - text: "\u041F\u0440\u0438\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C\u0441\u044F
+          \u043A \u0441\u043A\u043E\u0442\u0443."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.07b_exit"
+        choiceId: chapter01.node.07b_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_07c_river
-    title: "N07C — Река и рыба"
+    title: "N07C \u2014 \u0420\u0435\u043A\u0430 \u0438 \u0440\u044B\u0431\u0430"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.07c
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.07c
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.07c_main"
+      - blockId: chapter01.node.07c_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Рыба выброшена на берег только выше плотины; ниже — как будто её никогда и не было."
+        speakerIdOverride: 
+        text: "\u0420\u044B\u0431\u0430 \u0432\u044B\u0431\u0440\u043E\u0448\u0435\u043D\u0430
+          \u043D\u0430 \u0431\u0435\u0440\u0435\u0433 \u0442\u043E\u043B\u044C\u043A\u043E
+          \u0432\u044B\u0448\u0435 \u043F\u043B\u043E\u0442\u0438\u043D\u044B; \u043D\u0438\u0436\u0435
+          \u2014 \u043A\u0430\u043A \u0431\u0443\u0434\u0442\u043E \u0435\u0451 \u043D\u0438\u043A\u043E\u0433\u0434\u0430
+          \u0438 \u043D\u0435 \u0431\u044B\u043B\u043E."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n07c_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.investigated_river"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n07c_knowledge1"
-            Type: 2
-            StringParam: "chapter01.knowledge.fish_pattern_changed"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n07c_flag1
+          Type: 0
+          StringParam: chapter01.flag.investigated_river
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n07c_knowledge1
+          Type: 2
+          StringParam: chapter01.knowledge.fish_pattern_changed
+          IntParam: 0
       choices:
-      - text: "Осмотреть берег."
-        nextNodeId: ""
+      - text: "\u041E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u0431\u0435\u0440\u0435\u0433."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.07c_exit"
+        choiceId: chapter01.node.07c_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_08_seven_teeth
-    title: "N08 — Семь зубцов"
+    title: "N08 \u2014 \u0421\u0435\u043C\u044C \u0437\u0443\u0431\u0446\u043E\u0432"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.08
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.08
       speakerId: ostafiy
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.08_main"
+      - blockId: chapter01.node.08_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Ребёнок Дома играет со старой семизубой железной пластиной, используя её как гребень для собаки. Остафий узнаёт вещь — и хмурится: это не игрушка."
+        speakerIdOverride: 
+        text: "\u0420\u0435\u0431\u0451\u043D\u043E\u043A \u0414\u043E\u043C\u0430
+          \u0438\u0433\u0440\u0430\u0435\u0442 \u0441\u043E \u0441\u0442\u0430\u0440\u043E\u0439
+          \u0441\u0435\u043C\u0438\u0437\u0443\u0431\u043E\u0439 \u0436\u0435\u043B\u0435\u0437\u043D\u043E\u0439
+          \u043F\u043B\u0430\u0441\u0442\u0438\u043D\u043E\u0439, \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u044F
+          \u0435\u0451 \u043A\u0430\u043A \u0433\u0440\u0435\u0431\u0435\u043D\u044C
+          \u0434\u043B\u044F \u0441\u043E\u0431\u0430\u043A\u0438. \u041E\u0441\u0442\u0430\u0444\u0438\u0439
+          \u0443\u0437\u043D\u0430\u0451\u0442 \u0432\u0435\u0449\u044C \u2014 \u0438
+          \u0445\u043C\u0443\u0440\u0438\u0442\u0441\u044F: \u044D\u0442\u043E \u043D\u0435
+          \u0438\u0433\u0440\u0443\u0448\u043A\u0430."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n08_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.old_trace_found"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n08_knowledge1"
-            Type: 2
-            StringParam: "chapter01.knowledge.seven_tooth_object"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n08_knowledge2"
-            Type: 2
-            StringParam: "chapter01.knowledge.old_custom"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n08_flag1
+          Type: 0
+          StringParam: chapter01.flag.old_trace_found
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n08_knowledge1
+          Type: 2
+          StringParam: chapter01.knowledge.seven_tooth_object
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n08_knowledge2
+          Type: 2
+          StringParam: chapter01.knowledge.old_custom
+          IntParam: 0
       choices:
-      - text: "Забрать и рассмотреть пластину."
-        nextNodeId: ""
+      - text: "\u0417\u0430\u0431\u0440\u0430\u0442\u044C \u0438 \u0440\u0430\u0441\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C
+          \u043F\u043B\u0430\u0441\u0442\u0438\u043D\u0443."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.08_exit"
+        choiceId: chapter01.node.08_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_09_council_departure
-    title: "N09 — Решение идти дальше"
+    title: "N09 \u2014 \u0420\u0435\u0448\u0435\u043D\u0438\u0435 \u0438\u0434\u0442\u0438
+      \u0434\u0430\u043B\u044C\u0448\u0435"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.09
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.09
       speakerId: ostafiy
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.09_main"
+      - blockId: chapter01.node.09_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Собранного достаточно, чтобы понять: причина не в самом ремонте, а в чём-то более старом. Пора идти туда, откуда течёт вода — за пределы привычных троп Дома."
+        speakerIdOverride: 
+        text: "\u0421\u043E\u0431\u0440\u0430\u043D\u043D\u043E\u0433\u043E \u0434\u043E\u0441\u0442\u0430\u0442\u043E\u0447\u043D\u043E,
+          \u0447\u0442\u043E\u0431\u044B \u043F\u043E\u043D\u044F\u0442\u044C: \u043F\u0440\u0438\u0447\u0438\u043D\u0430
+          \u043D\u0435 \u0432 \u0441\u0430\u043C\u043E\u043C \u0440\u0435\u043C\u043E\u043D\u0442\u0435,
+          \u0430 \u0432 \u0447\u0451\u043C-\u0442\u043E \u0431\u043E\u043B\u0435\u0435
+          \u0441\u0442\u0430\u0440\u043E\u043C. \u041F\u043E\u0440\u0430 \u0438\u0434\u0442\u0438
+          \u0442\u0443\u0434\u0430, \u043E\u0442\u043A\u0443\u0434\u0430 \u0442\u0435\u0447\u0451\u0442
+          \u0432\u043E\u0434\u0430 \u2014 \u0437\u0430 \u043F\u0440\u0435\u0434\u0435\u043B\u044B
+          \u043F\u0440\u0438\u0432\u044B\u0447\u043D\u044B\u0445 \u0442\u0440\u043E\u043F
+          \u0414\u043E\u043C\u0430."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n09_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.far_route_unlocked"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n09_flag1
+          Type: 0
+          StringParam: chapter01.flag.far_route_unlocked
+          IntParam: 0
       choices:
-      - text: "Решить идти дальше."
-        nextNodeId: ""
+      - text: "\u0420\u0435\u0448\u0438\u0442\u044C \u0438\u0434\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.09_exit"
+        choiceId: chapter01.node.09_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_10_gather_party
-    title: "N10 — Сбор отряда"
+    title: "N10 \u2014 \u0421\u0431\u043E\u0440 \u043E\u0442\u0440\u044F\u0434\u0430"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.10
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.10
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.10_main"
+      - blockId: chapter01.node.10_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Герой собирает тех, кто пойдёт с ним — или решает, что пойдёт один."
+        speakerIdOverride: 
+        text: "\u0413\u0435\u0440\u043E\u0439 \u0441\u043E\u0431\u0438\u0440\u0430\u0435\u0442
+          \u0442\u0435\u0445, \u043A\u0442\u043E \u043F\u043E\u0439\u0434\u0451\u0442
+          \u0441 \u043D\u0438\u043C \u2014 \u0438\u043B\u0438 \u0440\u0435\u0448\u0430\u0435\u0442,
+          \u0447\u0442\u043E \u043F\u043E\u0439\u0434\u0451\u0442 \u043E\u0434\u0438\u043D."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n10_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.expedition_started"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n10_flag1
+          Type: 0
+          StringParam: chapter01.flag.expedition_started
+          IntParam: 0
       choices:
-      - text: "Выступить в поход."
-        nextNodeId: ""
+      - text: "\u0412\u044B\u0441\u0442\u0443\u043F\u0438\u0442\u044C \u0432 \u043F\u043E\u0445\u043E\u0434."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.10_exit"
+        choiceId: chapter01.node.10_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_11_first_long_road
-    title: "N11 — Первая дальняя дорога"
+    title: "N11 \u2014 \u041F\u0435\u0440\u0432\u0430\u044F \u0434\u0430\u043B\u044C\u043D\u044F\u044F
+      \u0434\u043E\u0440\u043E\u0433\u0430"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.11
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.11
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.11_main"
+      - blockId: chapter01.node.11_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Дорога уводит дальше привычных маршрутов Дома — туда, где русло реки петляет через незнакомый лес."
+        speakerIdOverride: 
+        text: "\u0414\u043E\u0440\u043E\u0433\u0430 \u0443\u0432\u043E\u0434\u0438\u0442
+          \u0434\u0430\u043B\u044C\u0448\u0435 \u043F\u0440\u0438\u0432\u044B\u0447\u043D\u044B\u0445
+          \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u043E\u0432 \u0414\u043E\u043C\u0430
+          \u2014 \u0442\u0443\u0434\u0430, \u0433\u0434\u0435 \u0440\u0443\u0441\u043B\u043E
+          \u0440\u0435\u043A\u0438 \u043F\u0435\u0442\u043B\u044F\u0435\u0442 \u0447\u0435\u0440\u0435\u0437
+          \u043D\u0435\u0437\u043D\u0430\u043A\u043E\u043C\u044B\u0439 \u043B\u0435\u0441."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n11_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.long_road_started"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11_flag1
+          Type: 0
+          StringParam: chapter01.flag.long_road_started
+          IntParam: 0
       choices:
-      - text: "Продолжить путь."
-        nextNodeId: ""
+      - text: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u043F\u0443\u0442\u044C."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.11_exit"
+        choiceId: chapter01.node.11_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_12_old_ford
-    title: "N12 — Старый брод / Женщина у брода"
+    title: "N12 \u2014 \u0421\u0442\u0430\u0440\u044B\u0439 \u0431\u0440\u043E\u0434
+      / \u0416\u0435\u043D\u0449\u0438\u043D\u0430 \u0443 \u0431\u0440\u043E\u0434\u0430"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.12
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.12
       speakerId: ford_witness
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.12_main"
+      - blockId: chapter01.node.12_main
         kind: 0
-        speakerIdOverride: ""
-        text: "У старого брода из воды торчит ряд гнилых кольев. Ребёнок-свидетель уверяет: здесь у воды видели женщину, ещё до паводка."
+        speakerIdOverride: 
+        text: "\u0423 \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u0431\u0440\u043E\u0434\u0430
+          \u0438\u0437 \u0432\u043E\u0434\u044B \u0442\u043E\u0440\u0447\u0438\u0442
+          \u0440\u044F\u0434 \u0433\u043D\u0438\u043B\u044B\u0445 \u043A\u043E\u043B\u044C\u0435\u0432.
+          \u0420\u0435\u0431\u0451\u043D\u043E\u043A-\u0441\u0432\u0438\u0434\u0435\u0442\u0435\u043B\u044C
+          \u0443\u0432\u0435\u0440\u044F\u0435\u0442: \u0437\u0434\u0435\u0441\u044C
+          \u0443 \u0432\u043E\u0434\u044B \u0432\u0438\u0434\u0435\u043B\u0438 \u0436\u0435\u043D\u0449\u0438\u043D\u0443,
+          \u0435\u0449\u0451 \u0434\u043E \u043F\u0430\u0432\u043E\u0434\u043A\u0430."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n12_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.old_ford_found"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n12_knowledge1"
-            Type: 2
-            StringParam: "chapter01.knowledge.old_ford"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n12_flag1
+          Type: 0
+          StringParam: chapter01.flag.old_ford_found
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n12_knowledge1
+          Type: 2
+          StringParam: chapter01.knowledge.old_ford
+          IntParam: 0
       choices:
-      - text: "Осмотреть брод."
-        nextNodeId: ""
+      - text: "\u041E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u0431\u0440\u043E\u0434."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.12_exit"
+        choiceId: chapter01.node.12_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_13_other_people
-    title: "N13 — Другие люди / У всех есть дом"
+    title: "N13 \u2014 \u0414\u0440\u0443\u0433\u0438\u0435 \u043B\u044E\u0434\u0438
+      / \u0423 \u0432\u0441\u0435\u0445 \u0435\u0441\u0442\u044C \u0434\u043E\u043C"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.13
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.13
       speakerId: downstream_voice
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.13_main"
+      - blockId: chapter01.node.13_main
         kind: 0
-        speakerIdOverride: ""
-        text: "За бродом — человеческое поселение. Его житель встречает отряд не как гостей, а как сторону, от которой уже давно ничего не было слышно."
+        speakerIdOverride: 
+        text: "\u0417\u0430 \u0431\u0440\u043E\u0434\u043E\u043C \u2014 \u0447\u0435\u043B\u043E\u0432\u0435\u0447\u0435\u0441\u043A\u043E\u0435
+          \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u0435. \u0415\u0433\u043E
+          \u0436\u0438\u0442\u0435\u043B\u044C \u0432\u0441\u0442\u0440\u0435\u0447\u0430\u0435\u0442
+          \u043E\u0442\u0440\u044F\u0434 \u043D\u0435 \u043A\u0430\u043A \u0433\u043E\u0441\u0442\u0435\u0439,
+          \u0430 \u043A\u0430\u043A \u0441\u0442\u043E\u0440\u043E\u043D\u0443, \u043E\u0442
+          \u043A\u043E\u0442\u043E\u0440\u043E\u0439 \u0443\u0436\u0435 \u0434\u0430\u0432\u043D\u043E
+          \u043D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u0431\u044B\u043B\u043E
+          \u0441\u043B\u044B\u0448\u043D\u043E."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n13_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.downstream_contact"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n13_knowledge1"
-            Type: 2
-            StringParam: "chapter01.knowledge.downstream_people"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n13_flag1
+          Type: 0
+          StringParam: chapter01.flag.downstream_contact
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n13_knowledge1
+          Type: 2
+          StringParam: chapter01.knowledge.downstream_people
+          IntParam: 0
       choices:
-      - text: "Заговорить с ним."
-        nextNodeId: ""
+      - text: "\u0417\u0430\u0433\u043E\u0432\u043E\u0440\u0438\u0442\u044C \u0441
+          \u043D\u0438\u043C."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.13_exit"
+        choiceId: chapter01.node.13_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_14_agreement_revealed
-    title: "N14 — Раскрытие соглашения"
+    title: "N14 \u2014 \u0420\u0430\u0441\u043A\u0440\u044B\u0442\u0438\u0435 \u0441\u043E\u0433\u043B\u0430\u0448\u0435\u043D\u0438\u044F"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.14
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.14
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.14_main"
+      - blockId: chapter01.node.14_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Вещественный след, слова мельника и людей за бродом складываются в одну причинную картину: водная система Дома никогда не была только его собственной — ей вместе владели и вместе за ней следили."
+        speakerIdOverride: 
+        text: "\u0412\u0435\u0449\u0435\u0441\u0442\u0432\u0435\u043D\u043D\u044B\u0439
+          \u0441\u043B\u0435\u0434, \u0441\u043B\u043E\u0432\u0430 \u043C\u0435\u043B\u044C\u043D\u0438\u043A\u0430
+          \u0438 \u043B\u044E\u0434\u0435\u0439 \u0437\u0430 \u0431\u0440\u043E\u0434\u043E\u043C
+          \u0441\u043A\u043B\u0430\u0434\u044B\u0432\u0430\u044E\u0442\u0441\u044F
+          \u0432 \u043E\u0434\u043D\u0443 \u043F\u0440\u0438\u0447\u0438\u043D\u043D\u0443\u044E
+          \u043A\u0430\u0440\u0442\u0438\u043D\u0443: \u0432\u043E\u0434\u043D\u0430\u044F
+          \u0441\u0438\u0441\u0442\u0435\u043C\u0430 \u0414\u043E\u043C\u0430 \u043D\u0438\u043A\u043E\u0433\u0434\u0430
+          \u043D\u0435 \u0431\u044B\u043B\u0430 \u0442\u043E\u043B\u044C\u043A\u043E
+          \u0435\u0433\u043E \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0439
+          \u2014 \u0435\u0439 \u0432\u043C\u0435\u0441\u0442\u0435 \u0432\u043B\u0430\u0434\u0435\u043B\u0438
+          \u0438 \u0432\u043C\u0435\u0441\u0442\u0435 \u0437\u0430 \u043D\u0435\u0439
+          \u0441\u043B\u0435\u0434\u0438\u043B\u0438."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n14_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.agreement_revealed"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n14_knowledge1"
-            Type: 2
-            StringParam: "chapter01.knowledge.shared_water_system"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n14_knowledge2"
-            Type: 2
-            StringParam: "chapter01.knowledge.home_was_not_self_sufficient"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n14_knowledge3"
-            Type: 2
-            StringParam: "chapter01.knowledge.old_agreement"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n14_flag1
+          Type: 0
+          StringParam: chapter01.flag.agreement_revealed
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n14_knowledge1
+          Type: 2
+          StringParam: chapter01.knowledge.shared_water_system
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n14_knowledge2
+          Type: 2
+          StringParam: chapter01.knowledge.home_was_not_self_sufficient
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n14_knowledge3
+          Type: 2
+          StringParam: chapter01.knowledge.old_agreement
+          IntParam: 0
       choices:
-      - text: "Осознать услышанное."
-        nextNodeId: ""
+      - text: "\u041E\u0441\u043E\u0437\u043D\u0430\u0442\u044C \u0443\u0441\u043B\u044B\u0448\u0430\u043D\u043D\u043E\u0435."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.14_exit"
+        choiceId: chapter01.node.14_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_14b_continue_or_return
-    title: "N14½ — Продолжить или вернуться"
+    title: "N14\xBD \u2014 \u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C
+      \u0438\u043B\u0438 \u0432\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): ветвление без проверки (DEC-04), не полированный текст."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u0432\u0435\u0442\u0432\u043B\u0435\u043D\u0438\u0435 \u0431\u0435\u0437
+      \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438 (DEC-04), \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442."
     startNodeId: chapter01.node.14_5
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.14_5
       speakerId: narrator
-      text: "Знание получено. Впереди — открытый вопрос: идти ли дальше, или уже пора возвращаться домой, пока не начался новый паводок."
+      text: "\u0417\u043D\u0430\u043D\u0438\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u043E.
+        \u0412\u043F\u0435\u0440\u0435\u0434\u0438 \u2014 \u043E\u0442\u043A\u0440\u044B\u0442\u044B\u0439
+        \u0432\u043E\u043F\u0440\u043E\u0441: \u0438\u0434\u0442\u0438 \u043B\u0438
+        \u0434\u0430\u043B\u044C\u0448\u0435, \u0438\u043B\u0438 \u0443\u0436\u0435
+        \u043F\u043E\u0440\u0430 \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u0442\u044C\u0441\u044F
+        \u0434\u043E\u043C\u043E\u0439, \u043F\u043E\u043A\u0430 \u043D\u0435 \u043D\u0430\u0447\u0430\u043B\u0441\u044F
+        \u043D\u043E\u0432\u044B\u0439 \u043F\u0430\u0432\u043E\u0434\u043E\u043A."
       textBlocks: []
       choices:
-      - text: "Идти дальше."
-        nextNodeId: "chapter01.node.14_5.continue"
+      - text: "\u0418\u0434\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: chapter01.node.14_5.continue
         endsDialogue: 0
-        choiceId: "chapter01.node.14_5_choice_continue"
+        choiceId: chapter01.node.14_5_choice_continue
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Возвращаться."
-        nextNodeId: "chapter01.node.14_5.return"
+      - text: "\u0412\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u0442\u044C\u0441\u044F."
+        nextNodeId: chapter01.node.14_5.return
         endsDialogue: 0
-        choiceId: "chapter01.node.14_5_choice_return"
+        choiceId: chapter01.node.14_5_choice_return
         kind: 0
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     - id: chapter01.node.14_5.continue
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.14_5.continue_main"
+      - blockId: chapter01.node.14_5.continue_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Отряд решает не спешить домой — есть время осмотреться и убедиться в услышанном."
+        speakerIdOverride: 
+        text: "\u041E\u0442\u0440\u044F\u0434 \u0440\u0435\u0448\u0430\u0435\u0442
+          \u043D\u0435 \u0441\u043F\u0435\u0448\u0438\u0442\u044C \u0434\u043E\u043C\u043E\u0439
+          \u2014 \u0435\u0441\u0442\u044C \u0432\u0440\u0435\u043C\u044F \u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C\u0441\u044F
+          \u0438 \u0443\u0431\u0435\u0434\u0438\u0442\u044C\u0441\u044F \u0432 \u0443\u0441\u043B\u044B\u0448\u0430\u043D\u043D\u043E\u043C."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n14_5_continue_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.return_started"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n14_5_continue_flag1
+          Type: 0
+          StringParam: chapter01.flag.return_started
+          IntParam: 0
       choices:
-      - text: "Продолжить путь."
-        nextNodeId: ""
+      - text: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u043F\u0443\u0442\u044C."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.14_5.continue_exit"
+        choiceId: chapter01.node.14_5.continue_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     - id: chapter01.node.14_5.return
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.14_5.return_main"
+      - blockId: chapter01.node.14_5.return_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Отряд решает не задерживаться: дома есть кому передать услышанное как можно скорее."
+        speakerIdOverride: 
+        text: "\u041E\u0442\u0440\u044F\u0434 \u0440\u0435\u0448\u0430\u0435\u0442
+          \u043D\u0435 \u0437\u0430\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0442\u044C\u0441\u044F:
+          \u0434\u043E\u043C\u0430 \u0435\u0441\u0442\u044C \u043A\u043E\u043C\u0443
+          \u043F\u0435\u0440\u0435\u0434\u0430\u0442\u044C \u0443\u0441\u043B\u044B\u0448\u0430\u043D\u043D\u043E\u0435
+          \u043A\u0430\u043A \u043C\u043E\u0436\u043D\u043E \u0441\u043A\u043E\u0440\u0435\u0435."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n14_5_return_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.return_started"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n14_5_return_flag1
+          Type: 0
+          StringParam: chapter01.flag.return_started
+          IntParam: 0
       choices:
-      - text: "Повернуть к дому."
-        nextNodeId: ""
+      - text: "\u041F\u043E\u0432\u0435\u0440\u043D\u0443\u0442\u044C \u043A \u0434\u043E\u043C\u0443."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.14_5.return_exit"
+        choiceId: chapter01.node.14_5.return_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_15_changed_return_road
-    title: "N15 — Изменившаяся обратная дорога"
+    title: "N15 \u2014 \u0418\u0437\u043C\u0435\u043D\u0438\u0432\u0448\u0430\u044F\u0441\u044F
+      \u043E\u0431\u0440\u0430\u0442\u043D\u0430\u044F \u0434\u043E\u0440\u043E\u0433\u0430"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.15
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.15
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.15_main"
+      - blockId: chapter01.node.15_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Обратная дорога не повторяет прежнюю: те же места выглядят иначе в свете того, что теперь известно."
+        speakerIdOverride: 
+        text: "\u041E\u0431\u0440\u0430\u0442\u043D\u0430\u044F \u0434\u043E\u0440\u043E\u0433\u0430
+          \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u0442 \u043F\u0440\u0435\u0436\u043D\u044E\u044E:
+          \u0442\u0435 \u0436\u0435 \u043C\u0435\u0441\u0442\u0430 \u0432\u044B\u0433\u043B\u044F\u0434\u044F\u0442
+          \u0438\u043D\u0430\u0447\u0435 \u0432 \u0441\u0432\u0435\u0442\u0435 \u0442\u043E\u0433\u043E,
+          \u0447\u0442\u043E \u0442\u0435\u043F\u0435\u0440\u044C \u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n15_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.return_road_traveled"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n15_flag1
+          Type: 0
+          StringParam: chapter01.flag.return_road_traveled
+          IntParam: 0
       choices:
-      - text: "Идти домой."
-        nextNodeId: ""
+      - text: "\u0418\u0434\u0442\u0438 \u0434\u043E\u043C\u043E\u0439."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.15_exit"
+        choiceId: chapter01.node.15_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_16_home_again
-    title: "N16 — Серьёзное возвращение домой"
+    title: "N16 \u2014 \u0421\u0435\u0440\u044C\u0451\u0437\u043D\u043E\u0435 \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0435\u043D\u0438\u0435
+      \u0434\u043E\u043C\u043E\u0439"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.16
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.16
       speakerId: narrator
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.16_main"
+      - blockId: chapter01.node.16_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Дом встречает героя не докладом, а переменами: звук мельницы, вода у брода, лица людей — всё немного другое, чем было в начале."
+        speakerIdOverride: 
+        text: "\u0414\u043E\u043C \u0432\u0441\u0442\u0440\u0435\u0447\u0430\u0435\u0442
+          \u0433\u0435\u0440\u043E\u044F \u043D\u0435 \u0434\u043E\u043A\u043B\u0430\u0434\u043E\u043C,
+          \u0430 \u043F\u0435\u0440\u0435\u043C\u0435\u043D\u0430\u043C\u0438: \u0437\u0432\u0443\u043A
+          \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B, \u0432\u043E\u0434\u0430
+          \u0443 \u0431\u0440\u043E\u0434\u0430, \u043B\u0438\u0446\u0430 \u043B\u044E\u0434\u0435\u0439
+          \u2014 \u0432\u0441\u0451 \u043D\u0435\u043C\u043D\u043E\u0433\u043E \u0434\u0440\u0443\u0433\u043E\u0435,
+          \u0447\u0435\u043C \u0431\u044B\u043B\u043E \u0432 \u043D\u0430\u0447\u0430\u043B\u0435."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n16_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.returned_home"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n16_flag1
+          Type: 0
+          StringParam: chapter01.flag.returned_home
+          IntParam: 0
       choices:
-      - text: "Войти в Дом."
-        nextNodeId: ""
+      - text: "\u0412\u043E\u0439\u0442\u0438 \u0432 \u0414\u043E\u043C."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.16_exit"
+        choiceId: chapter01.node.16_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_17_council_of_the_house
-    title: "N17 — Совет Дома"
+    title: "N17 \u2014 \u0421\u043E\u0432\u0435\u0442 \u0414\u043E\u043C\u0430"
     category: 1
     status: 1
-    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
+      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
+      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
+      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
     startNodeId: chapter01.node.17
     tags:
-    - "глава01"
-    - "черновик"
+    - "\u0433\u043B\u0430\u0432\u043001"
+    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
     nodes:
     - id: chapter01.node.17
       speakerId: ostafiy
-      text: ""
+      text: 
       textBlocks:
-      - blockId: "chapter01.node.17_main"
+      - blockId: chapter01.node.17_main
         kind: 0
-        speakerIdOverride: ""
-        text: "Дом собирается на совет. Три пути лежат перед ним: вернуть старый общий порядок, договориться о новом — или оставить воду себе. Ни один не даётся бесплатно."
+        speakerIdOverride: 
+        text: "\u0414\u043E\u043C \u0441\u043E\u0431\u0438\u0440\u0430\u0435\u0442\u0441\u044F
+          \u043D\u0430 \u0441\u043E\u0432\u0435\u0442. \u0422\u0440\u0438 \u043F\u0443\u0442\u0438
+          \u043B\u0435\u0436\u0430\u0442 \u043F\u0435\u0440\u0435\u0434 \u043D\u0438\u043C:
+          \u0432\u0435\u0440\u043D\u0443\u0442\u044C \u0441\u0442\u0430\u0440\u044B\u0439
+          \u043E\u0431\u0449\u0438\u0439 \u043F\u043E\u0440\u044F\u0434\u043E\u043A,
+          \u0434\u043E\u0433\u043E\u0432\u043E\u0440\u0438\u0442\u044C\u0441\u044F
+          \u043E \u043D\u043E\u0432\u043E\u043C \u2014 \u0438\u043B\u0438 \u043E\u0441\u0442\u0430\u0432\u0438\u0442\u044C
+          \u0432\u043E\u0434\u0443 \u0441\u0435\u0431\u0435. \u041D\u0438 \u043E\u0434\u0438\u043D
+          \u043D\u0435 \u0434\u0430\u0451\u0442\u0441\u044F \u0431\u0435\u0441\u043F\u043B\u0430\u0442\u043D\u043E."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-          - EffectExecutionId: "chapter01.effect.n17_flag1"
-            Type: 0
-            StringParam: "chapter01.flag.council_completed"
-            IntParam: 0
-          - EffectExecutionId: "chapter01.effect.n17_flag2"
-            Type: 0
-            StringParam: "chapter01.flag.completed"
-            IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_flag1
+          Type: 0
+          StringParam: chapter01.flag.council_completed
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_flag2
+          Type: 0
+          StringParam: chapter01.flag.completed
+          IntParam: 0
       choices:
-      - text: "Огласить решение Дома."
-        nextNodeId: ""
+      - text: "\u041E\u0433\u043B\u0430\u0441\u0438\u0442\u044C \u0440\u0435\u0448\u0435\u043D\u0438\u0435
+          \u0414\u043E\u043C\u0430."
+        nextNodeId: 
         endsDialogue: 1
-        choiceId: "chapter01.node.17_exit"
+        choiceId: chapter01.node.17_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: ""
+          CheckId: 
           Kind: 0
           Quality: 0
-          CompetencyId: ""
+          CompetencyId: 
           Difficulty: 13
           ModifierRules: []
-        successNodeId: ""
-        failureNodeId: ""
+        successNodeId: 
+        failureNodeId: 
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}

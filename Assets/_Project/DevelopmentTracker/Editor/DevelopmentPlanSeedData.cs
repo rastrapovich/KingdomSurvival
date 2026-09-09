@@ -57,9 +57,11 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P00-T01", "DEC-03 — Устройство водной системы",
                     "Взять рабочую модель семи затворов, бокового русла и нижнего канала как основу для мельницы, брода, рыбы и людей ниже по течению.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 1,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 1,
                     acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в LORE.md" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-03)."),
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Пользователь принял рекомендацию инструкции без изменений. Модель (семь затворов, боковое русло, нижний канал) внесена в LORE.md §6.1.1 как [УТВЕРЖДЕНО]."),
 
                 Task("P00-T02", "DEC-04 — Два способа ремонта",
                     "Старый ремонт возвращает работу всех затворов и бокового сброса; новый перекрывает седьмое русло и стабилизирует мельницу.",
@@ -934,7 +936,10 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             string[] relatedFlagIds = null,
             string[] relatedKnowledgeIds = null,
             string blockerNote = null,
-            string optionalAutoCheckId = null)
+            string optionalAutoCheckId = null,
+            string completedAt = null,
+            string implementationNote = null,
+            bool acceptanceCriteriaDone = false)
         {
             DevelopmentTaskData task = new DevelopmentTaskData
             {
@@ -946,7 +951,9 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                 required = required,
                 order = order,
                 blockerNote = blockerNote ?? string.Empty,
-                optionalAutoCheckId = optionalAutoCheckId ?? string.Empty
+                optionalAutoCheckId = optionalAutoCheckId ?? string.Empty,
+                completedAt = completedAt ?? string.Empty,
+                implementationNote = implementationNote ?? string.Empty
             };
 
             if (dependencies != null)
@@ -965,7 +972,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             if (acceptanceCriteria != null)
             {
                 foreach (string criterionText in acceptanceCriteria)
-                    task.acceptanceCriteria.Add(new AcceptanceCriterionData { text = criterionText });
+                    task.acceptanceCriteria.Add(new AcceptanceCriterionData { text = criterionText, done = acceptanceCriteriaDone });
             }
 
             return task;

@@ -3,23 +3,43 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 // Единый Narrative Check Presentation Layer поверх NarrativeCheckPresentationData:
-// заголовок "КАЧЕСТВО [+ КОМПЕТЕНЦИЯ]   УСПЕХ/ПРОВАЛ" с подробным tooltip по
-// наведению/фокусу на слово результата. Используется и пассивными блоками,
-// и активными проверками (§12/§13/§14 инструкции по визуализации проверок).
+// строка "КАЧЕСТВО [+ КОМПЕТЕНЦИЯ]: УСПЕХ/ПРОВАЛ [— текст]" с подробным
+// tooltip по наведению/фокусу на слово результата. Используется и
+// checked-observation блоками (текст приклеен третьим элементом при
+// успехе), и обычными заголовками без текста, и активными проверками
+// (инструкция "новое отображение пассивных наблюдений и проверок").
 // Ничего здесь не пересчитывает проверку заново — только читает уже готовый
-// NarrativeCheckPresentationData (§15: "hover только читает готовый результат").
+// NarrativeCheckPresentationData ("hover только читает готовый результат").
 public partial class PrototypeUIController
 {
     private VisualElement narrativeCheckTooltip;
 
+    // Заголовок без прикреплённого текста — активные проверки и заголовок
+    // над обычной репликой (MainLine/CompanionLine) с пассивной проверкой,
+    // где текст по-прежнему показывается отдельной строкой ниже (§3/§17
+    // инструкции "новое отображение пассивных наблюдений и проверок").
     private VisualElement BuildNarrativeCheckHeaderElement(NarrativeCheckPresentationData data)
     {
-        VisualElement header = new VisualElement();
-        header.AddToClassList("narrative-check-header");
+        return BuildNarrativePassiveCheckLine(data, null);
+    }
 
-        Label source = new Label(NarrativeCheckPresentationBuilder.BuildSourceLabel(data).ToUpperInvariant());
+    // Единый инлайн-компонент "ИСТОЧНИК: РЕЗУЛЬТАТ [— текст]" (§7/§8
+    // инструкции). Используется и для checked-observation блоков
+    // (Observation/Memory/HeroThought/Narration с пассивной проверкой,
+    // revealedText — раскрытый текст или null/пусто при провале), и как
+    // обычный заголовок без текста (revealedText == null). Формат
+    // фиксирован: двоеточие после источника, тире перед текстом только при
+    // успехе — при провале третий элемент отсутствует вовсе (§18: провал
+    // показывает саму упущенную возможность, а не её содержание).
+    private VisualElement BuildNarrativePassiveCheckLine(NarrativeCheckPresentationData data, string revealedText)
+    {
+        VisualElement line = new VisualElement();
+        line.AddToClassList("narrative-check-header");
+        line.AddToClassList("narrative-check-inline");
+
+        Label source = new Label(NarrativeCheckPresentationBuilder.BuildSourceLabel(data).ToUpperInvariant() + ":");
         source.AddToClassList("narrative-check-source");
-        header.Add(source);
+        line.Add(source);
 
         Label result = new Label(data.Success ? "УСПЕХ" : "ПРОВАЛ") { focusable = true };
         result.AddToClassList("narrative-check-result");
@@ -29,9 +49,17 @@ public partial class PrototypeUIController
         result.RegisterCallback<PointerLeaveEvent>(_ => HideNarrativeCheckTooltip());
         result.RegisterCallback<FocusInEvent>(_ => ShowNarrativeCheckTooltip(result, data));
         result.RegisterCallback<FocusOutEvent>(_ => HideNarrativeCheckTooltip());
-        header.Add(result);
+        line.Add(result);
 
-        return header;
+        if (!string.IsNullOrEmpty(revealedText))
+        {
+            Label body = new Label("— " + revealedText);
+            body.AddToClassList("narrative-dialogue-history-text");
+            body.AddToClassList("narrative-check-inline-body");
+            line.Add(body);
+        }
+
+        return line;
     }
 
     private void EnsureNarrativeCheckTooltip()

@@ -54,9 +54,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private int previewWorldSeed = 12345;
         private NarrativeCheckForcedOutcome previewForcedOutcome = NarrativeCheckForcedOutcome.None;
 
-        // §17 инструкции по визуализации проверок: доступно только в Preview
-        // редактора, никогда в игровом runtime.
-        private bool previewShowFailedPassiveChecks;
+        // §16 инструкции "новое отображение пассивных наблюдений и проверок":
+        // авторский просмотр упущенного текста провалившихся пассивных
+        // проверок. По умолчанию OFF — Preview без этого переключателя
+        // показывает ровно то же, что видит игрок (§15). Доступно только в
+        // Preview редактора, никогда в игровом runtime.
+        private bool previewRevealHiddenTextForAuthor;
 
         [MenuItem("Kingdom Survival/База диалогов")]
         private static void Open()

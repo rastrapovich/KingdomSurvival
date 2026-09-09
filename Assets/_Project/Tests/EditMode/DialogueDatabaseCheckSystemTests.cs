@@ -137,15 +137,16 @@ public sealed class DialogueDatabaseCheckSystemTests
         Assert.IsFalse(block.CheckPresentation.HasDice);
         Assert.AreEqual(0, block.CheckPresentation.DieOne);
         Assert.AreEqual(0, block.CheckPresentation.DieTwo);
-        Assert.IsFalse(block.IsPassiveFailurePreviewOnly);
+        Assert.IsTrue(block.IsTextRevealed);
 
         Object.DestroyImmediate(asset);
     }
 
-    // §20, пункт 2: проваленная пассивная проверка отсутствует в
-    // production-view — игрок не видит, что там что-то было спрятано.
+    // Инструкция "новое отображение пассивных наблюдений и проверок", §4/§18:
+    // провалившийся пассивный блок остаётся в production-view — игрок видит
+    // сам факт проверки (ИСТОЧНИК: ПРОВАЛ), но не раскрытый текст.
     [Test]
-    public void Failed_Passive_Check_Block_Is_Absent_From_Production_View()
+    public void Failed_Passive_Check_Block_Is_Present_With_Hidden_Text_In_Production_View()
     {
         DialogueDatabaseAsset asset = BuildPassiveFailureDatabase();
         HeroProfileData hero = new HeroProfileData();
@@ -155,15 +156,23 @@ public sealed class DialogueDatabaseCheckSystemTests
         Assert.IsTrue(started, error);
 
         Assert.IsTrue(HasBlock(view.VisibleTextBlocks, "b_main"));
-        Assert.IsFalse(HasBlock(view.VisibleTextBlocks, "b_secret"));
+
+        NarrativeDialogueVisibleBlock secret = FindBlock(view.VisibleTextBlocks, "b_secret");
+        Assert.IsNotNull(secret, "Провалившийся пассивный блок теперь тоже присутствует в production view.");
+        Assert.IsNotNull(secret.CheckPresentation);
+        Assert.IsFalse(secret.CheckPresentation.Success);
+        Assert.IsFalse(secret.IsTextRevealed);
+        Assert.IsEmpty(secret.Text);
+        Assert.IsNull(secret.PreviewOnlyHiddenText);
 
         Object.DestroyImmediate(asset);
     }
 
-    // §20, пункт 14: Preview может явно запросить провалившийся пассивный
-    // блок, production-путь (BuildView()) — никогда.
+    // §16/§18 инструкции: Preview может явно запросить авторский просмотр
+    // упущенного текста, production-путь (BuildView()) — никогда, даже если
+    // тот же session.BuildViewPreview потом вызывается с revealHiddenTextForAuthor.
     [Test]
-    public void Preview_Can_Show_Failed_Passive_Block_Production_Cannot()
+    public void Preview_Can_Reveal_Hidden_Text_Production_Never_Does()
     {
         DialogueDatabaseAsset asset = BuildPassiveFailureDatabase();
         HeroProfileData hero = new HeroProfileData();
@@ -173,14 +182,84 @@ public sealed class DialogueDatabaseCheckSystemTests
         Assert.IsTrue(started, error);
 
         NarrativeDialogueView productionView = session.BuildView();
-        Assert.IsFalse(HasBlock(productionView.VisibleTextBlocks, "b_secret"));
+        NarrativeDialogueVisibleBlock productionBlock = FindBlock(productionView.VisibleTextBlocks, "b_secret");
+        Assert.IsNotNull(productionBlock);
+        Assert.IsFalse(productionBlock.IsTextRevealed);
+        Assert.IsEmpty(productionBlock.Text);
+        Assert.IsNull(productionBlock.PreviewOnlyHiddenText);
 
-        NarrativeDialogueView previewView = session.BuildViewPreview(includeFailedPassiveChecks: true);
-        NarrativeDialogueVisibleBlock failedBlock = FindBlock(previewView.VisibleTextBlocks, "b_secret");
-        Assert.IsNotNull(failedBlock);
-        Assert.IsTrue(failedBlock.IsPassiveFailurePreviewOnly);
-        Assert.IsNotNull(failedBlock.CheckPresentation);
-        Assert.IsFalse(failedBlock.CheckPresentation.Success);
+        NarrativeDialogueView previewView = session.BuildViewPreview(revealHiddenTextForAuthor: true);
+        NarrativeDialogueVisibleBlock previewBlock = FindBlock(previewView.VisibleTextBlocks, "b_secret");
+        Assert.IsNotNull(previewBlock);
+        Assert.IsFalse(previewBlock.IsTextRevealed);
+        Assert.IsEmpty(previewBlock.Text);
+        Assert.IsNotNull(previewBlock.CheckPresentation);
+        Assert.IsFalse(previewBlock.CheckPresentation.Success);
+        Assert.AreEqual("Скрытая деталь.", previewBlock.PreviewOnlyHiddenText);
+
+        Object.DestroyImmediate(asset);
+    }
+
+    // §19/§20 инструкции: провал не является раскрытием — OnRevealEffects не
+    // применяются, пока текст не раскрыт; успех раскрывает текст и эффекты.
+    [Test]
+    public void PassiveCheck_Failure_Does_Not_Apply_OnRevealEffects_And_Does_Not_Block_Choices()
+    {
+        DialogueDatabaseAsset asset = BuildPassiveEffectGatingDatabase();
+        HeroProfileData hero = new HeroProfileData { Instinct = HeroProfileData.MinQualityValue };
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(asset, "passive_gate_demo", hero, state, out NarrativeDialogueView view, out string error);
+        Assert.IsTrue(started, error);
+
+        NarrativeDialogueVisibleBlock block = FindBlock(view.VisibleTextBlocks, "b_secret");
+        Assert.IsNotNull(block);
+        Assert.IsFalse(block.CheckPresentation.Success);
+        Assert.IsFalse(block.IsTextRevealed);
+        Assert.IsEmpty(block.Text);
+        Assert.IsFalse(state.HasFlag("gate_flag"));
+        Assert.IsTrue(HasChoice(view.AvailableChoices, "c_exit"));
+
+        Object.DestroyImmediate(asset);
+    }
+
+    [Test]
+    public void PassiveCheck_Success_Reveals_Text_And_Applies_OnRevealEffects()
+    {
+        DialogueDatabaseAsset asset = BuildPassiveEffectGatingDatabase();
+        HeroProfileData hero = new HeroProfileData { Instinct = HeroProfileData.MaxQualityValue };
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(asset, "passive_gate_demo", hero, state, out NarrativeDialogueView view, out string error);
+        Assert.IsTrue(started, error);
+
+        NarrativeDialogueVisibleBlock block = FindBlock(view.VisibleTextBlocks, "b_secret");
+        Assert.IsNotNull(block);
+        Assert.IsTrue(block.CheckPresentation.Success);
+        Assert.IsTrue(block.IsTextRevealed);
+        Assert.AreEqual("Скрытая деталь.", block.Text);
+        Assert.IsTrue(state.HasFlag("gate_flag"));
+
+        Object.DestroyImmediate(asset);
+    }
+
+    // §20, пункт 9: повторный BuildView() не раскрывает скрытый текст задним числом.
+    [Test]
+    public void PassiveCheck_Repeated_BuildView_Does_Not_Reveal_Hidden_Text_Later()
+    {
+        DialogueDatabaseAsset asset = BuildPassiveEffectGatingDatabase();
+        HeroProfileData hero = new HeroProfileData { Instinct = HeroProfileData.MinQualityValue };
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(asset, "passive_gate_demo", hero, state, out _, out string error);
+        Assert.IsTrue(started, error);
+
+        NarrativeDialogueView second = session.BuildView();
+        NarrativeDialogueVisibleBlock block = FindBlock(second.VisibleTextBlocks, "b_secret");
+        Assert.IsNotNull(block);
+        Assert.IsFalse(block.IsTextRevealed);
+        Assert.IsEmpty(block.Text);
+        Assert.IsFalse(state.HasFlag("gate_flag"));
 
         Object.DestroyImmediate(asset);
     }
@@ -523,6 +602,51 @@ public sealed class DialogueDatabaseCheckSystemTests
             new List<DialogueChoiceData> { MakeExitChoice("c_exit", "Уйти.") });
 
         DialogueDefinitionData dialogue = MakeDialogue("passive_fail_demo", "start", new List<DialogueNodeData> { startNode });
+        SetField(asset, "dialogues", new List<DialogueDefinitionData> { dialogue });
+        return asset;
+    }
+
+    // Отдельная база с реальным OnRevealEffects на пассивно проверяемом
+    // блоке и достижимой в обе стороны сложностью (Instinct 1 → провал,
+    // Instinct 10 → успех) — специально для тестов §19/§20 "провал не
+    // раскрытие, успех раскрывает и применяет эффект".
+    private static DialogueDatabaseAsset BuildPassiveEffectGatingDatabase()
+    {
+        DialogueDatabaseAsset asset = ScriptableObject.CreateInstance<DialogueDatabaseAsset>();
+        SetField(asset, "speakers", new List<DialogueSpeakerData> { MakeSpeaker("narrator", "Рассказчик") });
+
+        NarrativeCheckSpec passiveCheck = new NarrativeCheckSpec
+        {
+            CheckId = "chk_passive_gate",
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Instinct,
+            Difficulty = NarrativeDifficulty.Ordinary
+        };
+
+        DialogueNodeData startNode = MakeNode(
+            "start",
+            "narrator",
+            new List<DialogueTextBlockData>
+            {
+                MakeTextBlock("b_main", DialogueTextBlockKind.MainLine, "Всё как обычно."),
+                MakeTextBlock(
+                    "b_secret",
+                    DialogueTextBlockKind.Observation,
+                    "Скрытая деталь.",
+                    passiveCheck: passiveCheck,
+                    onRevealEffects: new List<NarrativeEffect>
+                    {
+                        new NarrativeEffect
+                        {
+                            EffectExecutionId = "eff_gate_flag",
+                            Type = NarrativeEffectType.SetFlag,
+                            StringParam = "gate_flag"
+                        }
+                    })
+            },
+            new List<DialogueChoiceData> { MakeExitChoice("c_exit", "Уйти.") });
+
+        DialogueDefinitionData dialogue = MakeDialogue("passive_gate_demo", "start", new List<DialogueNodeData> { startNode });
         SetField(asset, "dialogues", new List<DialogueDefinitionData> { dialogue });
         return asset;
     }

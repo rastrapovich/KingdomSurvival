@@ -421,4 +421,40 @@ public sealed class NarrativeCheckSystemTests
         Assert.AreEqual(first.Total, second.Total);
         Assert.AreEqual(first.Success, second.Success);
     }
+
+    // Инструкция "новое отображение пассивных наблюдений и проверок", §2/§8:
+    // "СУЖДЕНИЕ" для проверки только качеством, "ЧУТЬЁ + СЛЕДОПЫТСТВО" —
+    // качество + компетенция. UI добавляет двоеточие и УСПЕХ/ПРОВАЛ поверх
+    // этой строки — сама BuildSourceLabel не должна меняться под это.
+    [Test]
+    public void BuildSourceLabel_QualityOnly_Vs_QualityPlusCompetency()
+    {
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+
+        NarrativeCheckSpec qualityOnly = new NarrativeCheckSpec
+        {
+            CheckId = "chk_quality_only",
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Judgment,
+            Difficulty = NarrativeDifficulty.Ordinary
+        };
+        NarrativeCheckResult qualityOnlyResult = NarrativeCheckResolver.ResolvePassive(qualityOnly, NewContext(hero, state));
+        string qualityOnlyLabel = NarrativeCheckPresentationBuilder.BuildSourceLabel(
+            NarrativeCheckPresentationBuilder.Build(qualityOnly, qualityOnlyResult));
+        Assert.AreEqual("Суждение", qualityOnlyLabel);
+
+        NarrativeCheckSpec qualityPlusCompetency = new NarrativeCheckSpec
+        {
+            CheckId = "chk_quality_plus_competency",
+            Kind = NarrativeCheckKind.Passive,
+            Quality = HeroQuality.Instinct,
+            CompetencyId = NarrativeCompetencyIds.Fieldcraft,
+            Difficulty = NarrativeDifficulty.Ordinary
+        };
+        NarrativeCheckResult combinedResult = NarrativeCheckResolver.ResolvePassive(qualityPlusCompetency, NewContext(hero, state));
+        string combinedLabel = NarrativeCheckPresentationBuilder.BuildSourceLabel(
+            NarrativeCheckPresentationBuilder.Build(qualityPlusCompetency, combinedResult));
+        Assert.AreEqual("Чутьё + Следопытство", combinedLabel);
+    }
 }

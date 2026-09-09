@@ -224,6 +224,22 @@
     opacity: 0.8;
 }
 
+/* Инлайн-строка "ИСТОЧНИК: РЕЗУЛЬТАТ — текст" для checked-observation
+   блоков (§7/§24 инструкции "новое отображение пассивных наблюдений и
+   проверок"). Переиспользует narrative-check-header/-source/-result и
+   narrative-dialogue-history-text — вторая независимая цветовая система
+   не создаётся. */
+.narrative-check-inline {
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.narrative-check-inline-body {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-left: 6px;
+}
+
 .narrative-check-tooltip {
     position: absolute;
     width: 320px;

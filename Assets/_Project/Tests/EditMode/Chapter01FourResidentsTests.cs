@@ -213,9 +213,22 @@ public sealed class Chapter01FourResidentsTests
         bool started = session.Start(database, D01, hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
 
-        // Суждение 1: пассивная проверка (сложность 11) провалена — блок
-        // наблюдения скрыт, но обязательная реплика остаётся, и путь не заблокирован.
-        Assert.AreEqual(1, view.VisibleTextBlocks.Count);
+        // Суждение 1: пассивная проверка (сложность 11) провалена. Новая
+        // presentation-семантика (инструкция "новое отображение пассивных
+        // наблюдений и проверок") — блок наблюдения остаётся видимым
+        // (СУЖДЕНИЕ: ПРОВАЛ), но текст не раскрыт и путь не заблокирован.
+        Assert.AreEqual(2, view.VisibleTextBlocks.Count);
+        NarrativeDialogueVisibleBlock observationBlock = null;
+        foreach (NarrativeDialogueVisibleBlock candidate in view.VisibleTextBlocks)
+        {
+            if (candidate.BlockId == "chapter01.node.01_observation")
+                observationBlock = candidate;
+        }
+        Assert.IsNotNull(observationBlock);
+        Assert.IsNotNull(observationBlock.CheckPresentation);
+        Assert.IsFalse(observationBlock.CheckPresentation.Success);
+        Assert.IsFalse(observationBlock.IsTextRevealed);
+        Assert.IsEmpty(observationBlock.Text);
         Assert.IsFalse(state.HasKnowledge("chapter01.knowledge.second_loaf_is_ration"));
 
         // P04-T04: baseline фиксируется на первом обязательном блоке
@@ -247,6 +260,16 @@ public sealed class Chapter01FourResidentsTests
         Assert.IsTrue(started, error);
 
         Assert.AreEqual(2, view.VisibleTextBlocks.Count);
+        NarrativeDialogueVisibleBlock observationBlock = null;
+        foreach (NarrativeDialogueVisibleBlock candidate in view.VisibleTextBlocks)
+        {
+            if (candidate.BlockId == "chapter01.node.01_observation")
+                observationBlock = candidate;
+        }
+        Assert.IsNotNull(observationBlock);
+        Assert.IsTrue(observationBlock.CheckPresentation.Success);
+        Assert.IsTrue(observationBlock.IsTextRevealed);
+        Assert.IsNotEmpty(observationBlock.Text);
         Assert.IsTrue(state.HasKnowledge("chapter01.knowledge.second_loaf_is_ration"));
 
         // P04-T04: тот же маркер фиксируется и при успехе проверки — не

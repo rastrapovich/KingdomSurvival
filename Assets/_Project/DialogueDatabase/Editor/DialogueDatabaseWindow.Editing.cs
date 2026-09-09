@@ -361,8 +361,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 return;
             }
 
-            if (previewShowFailedPassiveChecks)
-                view = session.BuildViewPreview(true);
+            // §15: Preview всегда строится тем же путём, что и production —
+            // revealHiddenTextForAuthor только добавляет авторский debug-текст,
+            // не меняет набор видимых блоков.
+            view = session.BuildViewPreview(previewRevealHiddenTextForAuthor);
 
             previewSession = session;
             previewView = view;

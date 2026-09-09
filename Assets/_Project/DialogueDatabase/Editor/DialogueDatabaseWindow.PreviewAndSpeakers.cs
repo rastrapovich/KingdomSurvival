@@ -114,11 +114,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 MessageType.None);
 
             GUILayout.Space(4f);
-            previewShowFailedPassiveChecks = EditorGUILayout.ToggleLeft(
-                "Показывать проваленные пассивные проверки [только Preview]",
-                previewShowFailedPassiveChecks);
+            previewRevealHiddenTextForAuthor = EditorGUILayout.ToggleLeft(
+                "Показать упущенный текст пассивных проверок [только Preview]",
+                previewRevealHiddenTextForAuthor);
             EditorGUILayout.HelpBox(
-                "Игрок никогда не видит провал пассивной проверки — это метагейм (§3). Переключатель существует только для настройки сложности здесь, в Preview.",
+                "Провал пассивной проверки всегда виден игроку (ИСТОЧНИК: ПРОВАЛ) — это не метагейм, а осознанная presentation-семантика. " +
+                "Сам упущенный текст в production невозможен ни при каких условиях; этот переключатель — только авторский просмотр здесь, в Preview.",
                 MessageType.None);
 
             EditorGUILayout.EndVertical();
@@ -143,9 +144,39 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             for (int i = 0; i < previewView.VisibleTextBlocks.Count; i++)
             {
                 NarrativeDialogueVisibleBlock block = previewView.VisibleTextBlocks[i];
+
+                // §15/§18 инструкции "новое отображение пассивных наблюдений и
+                // проверок": Preview по умолчанию показывает ровно то же, что
+                // видит игрок — checked-observation рисуется одной строкой
+                // "ИСТОЧНИК: РЕЗУЛЬТАТ [— текст]" без подписи говорящего,
+                // провал не раскрывает тело текста.
+                bool isCheckedObservation = block.CheckPresentation != null &&
+                    (block.Kind == DialogueTextBlockKind.Observation ||
+                     block.Kind == DialogueTextBlockKind.Memory ||
+                     block.Kind == DialogueTextBlockKind.HeroThought ||
+                     block.Kind == DialogueTextBlockKind.Narration);
+
+                if (isCheckedObservation)
+                {
+                    string source = NarrativeCheckPresentationBuilder.BuildSourceLabel(block.CheckPresentation).ToUpperInvariant() + ":";
+                    string result = block.CheckPresentation.Success ? "УСПЕХ" : "ПРОВАЛ";
+                    string line = block.IsTextRevealed ? source + " " + result + " — " + block.Text : source + " " + result;
+                    EditorGUILayout.LabelField(
+                        new GUIContent(line, NarrativeCheckPresentationText.BuildFullBreakdown(block.CheckPresentation)),
+                        EditorStyles.wordWrappedLabel);
+
+                    if (!block.IsTextRevealed && !string.IsNullOrEmpty(block.PreviewOnlyHiddenText))
+                    {
+                        EditorGUILayout.LabelField(
+                            "[ТОЛЬКО PREVIEW] " + block.PreviewOnlyHiddenText,
+                            EditorStyles.wordWrappedMiniLabel);
+                    }
+
+                    GUILayout.Space(6f);
+                    continue;
+                }
+
                 string headerLabel = block.SpeakerDisplayName + "  [" + block.Kind + "]";
-                if (block.IsPassiveFailurePreviewOnly)
-                    headerLabel += "  [ПРОВАЛ — ТОЛЬКО PREVIEW]";
                 EditorGUILayout.LabelField(headerLabel, EditorStyles.boldLabel);
                 if (!string.IsNullOrWhiteSpace(block.SpeakerRole))
                     EditorGUILayout.LabelField(block.SpeakerRole, EditorStyles.miniLabel);
@@ -153,10 +184,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 if (block.CheckPresentation != null)
                     DrawCheckPresentationSummary(block.CheckPresentation);
 
-                string bodyText = block.IsPassiveFailurePreviewOnly
-                    ? "[Текст этого блока в игре был бы скрыт]"
-                    : block.Text;
-                EditorGUILayout.LabelField(bodyText, EditorStyles.wordWrappedLabel);
+                EditorGUILayout.LabelField(block.Text, EditorStyles.wordWrappedLabel);
                 GUILayout.Space(6f);
             }
 
@@ -205,7 +233,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 }
                 else
                 {
-                    previewView = previewShowFailedPassiveChecks ? previewSession.BuildViewPreview(true) : result.View;
+                    // Preview всегда строится через BuildViewPreview — с
+                    // revealHiddenTextForAuthor=false он даёт ровно тот же
+                    // результат, что и production BuildView() (§15).
+                    previewView = previewSession.BuildViewPreview(previewRevealHiddenTextForAuthor);
                     previewMessage = BuildCheckResultMessage(result.CheckResult);
                     previewLastCheckPresentation = result.CheckPresentation;
                 }

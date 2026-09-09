@@ -29,11 +29,19 @@ public partial class PrototypeUIController
         // см. PrototypeUIController.NarrativeCheckPresentation.cs.
         public NarrativeCheckPresentationData CheckPresentation;
 
+        // Тип исходного текстового блока (§13 инструкции "новое отображение
+        // пассивных наблюдений и проверок") — history renderer различает
+        // checked-observation (Observation/Memory/HeroThought/Narration с
+        // CheckPresentation) от настоящих реплик (MainLine/CompanionLine) по
+        // этому полю, а не по имени говорящего или наличию текста.
+        public DialogueTextBlockKind BlockKind;
+
         public static NarrativeUiHistoryEntry ForBlock(
             string speakerDisplayName,
             string speakerRole,
             string text,
-            NarrativeCheckPresentationData checkPresentation)
+            NarrativeCheckPresentationData checkPresentation,
+            DialogueTextBlockKind blockKind)
         {
             return new NarrativeUiHistoryEntry
             {
@@ -41,7 +49,8 @@ public partial class PrototypeUIController
                 SpeakerDisplayName = speakerDisplayName,
                 SpeakerRole = speakerRole,
                 Text = text,
-                CheckPresentation = checkPresentation
+                CheckPresentation = checkPresentation,
+                BlockKind = blockKind
             };
         }
 
@@ -415,7 +424,7 @@ public partial class PrototypeUIController
         {
             NarrativeDialogueVisibleBlock block = view.VisibleTextBlocks[i];
             narrativeHistory.Add(NarrativeUiHistoryEntry.ForBlock(
-                block.SpeakerDisplayName, block.SpeakerRole, block.Text, block.CheckPresentation));
+                block.SpeakerDisplayName, block.SpeakerRole, block.Text, block.CheckPresentation, block.Kind));
         }
 
         NarrativeDialogueVisibleBlock latestBlock = view.VisibleTextBlocks.Count > 0
@@ -504,6 +513,28 @@ public partial class PrototypeUIController
 
             VisualElement block = new VisualElement();
             block.AddToClassList("narrative-dialogue-history-entry");
+
+            // Checked-observation (§3 инструкции "новое отображение пассивных
+            // наблюдений и проверок"): Observation/Memory/HeroThought/
+            // Narration с пассивной проверкой рисуются одной инлайн-строкой
+            // "ИСТОЧНИК: РЕЗУЛЬТАТ — текст" без подписи говорящего — это
+            // наблюдение героя, а не реплика NPC рядом с которым оно возникло.
+            // Настоящие реплики (MainLine/CompanionLine) сохраняют подпись
+            // говорящего и текст отдельной строкой даже если у них тоже есть
+            // проверка (заголовок тогда рисуется отдельно, без текста).
+            bool isCheckedObservation = entry.CheckPresentation != null &&
+                (entry.BlockKind == DialogueTextBlockKind.Observation ||
+                 entry.BlockKind == DialogueTextBlockKind.Memory ||
+                 entry.BlockKind == DialogueTextBlockKind.HeroThought ||
+                 entry.BlockKind == DialogueTextBlockKind.Narration);
+
+            if (isCheckedObservation)
+            {
+                block.Add(BuildNarrativePassiveCheckLine(entry.CheckPresentation, entry.Text));
+                narrativeHistoryContainer.Add(block);
+                lastEntry = block;
+                continue;
+            }
 
             if (entry.CheckPresentation != null)
                 block.Add(BuildNarrativeCheckHeaderElement(entry.CheckPresentation));

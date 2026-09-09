@@ -504,3 +504,50 @@ Unity Editor, C# compiler и Unity Test Runner здесь недоступны �
 **Практический вывод для пользователя:** этот класс потери правок происходит, когда Unity Editor открыт (или был открыт и не перезапущен) со старой версией `KingdomSurvivalDialogues.asset` в памяти в момент `git pull`. Перед тем как открывать/сохранять базу диалогов в Unity после `git pull`, надёжнее сначала закрыть и заново открыть проект (или как минимум окно «База диалогов»), чтобы редактор точно перечитал файл с диска, а не резервировал старую копию поверх новых правок.
 
 Unity Editor и Test Runner здесь по-прежнему недоступны — после Pull обязательно повторно прогнать все EditMode tests, включая три ранее красных, и заново проверить N01 в Preview/Play Mode.
+
+## 15. Новое presentation-правило пассивных проверок — 09.09.2026
+
+Реализована production-инструкция «новое отображение пассивных наблюдений и проверок»: осознанная смена старого правила «провал пассивной проверки от игрока полностью скрыт» на новое «провал виден (`ИСТОЧНИК: ПРОВАЛ`), но содержание упущенного текста — нет». Математика проверок (`NarrativeCheckResolver`, сложности, качества, компетенции, модификаторы) не менялась — меняется только presentation-семантика и UI-раскладка.
+
+### 15.1. Работает
+
+- `NarrativeDialogueRuntimeSession.BuildView()` больше не удаляет провалившийся пассивный блок из `VisibleTextBlocks` — блок всегда присутствует. Новое поле `NarrativeDialogueVisibleBlock.IsTextRevealed` (true — нет проверки или проверка пройдена; false — провалена) заменяет удалённое `IsPassiveFailurePreviewOnly`. При `IsTextRevealed == false` поле `Text` пусто — production UI физически не может показать скрытый текст, потому что его там просто нет;
+- `OnRevealEffects` применяются только когда `IsTextRevealed == true` — провал не является раскрытием знания сам по себе (проверено тестами: эффект не срабатывает при провале, срабатывает при успехе, повторный `BuildView()` не раскрывает текст задним числом);
+- новое поле `PreviewOnlyHiddenText` заполняется только `BuildViewPreview(revealHiddenTextForAuthor: true)` — авторский просмотр упущенного текста в редакторе; production `BuildView()` никогда его не трогает;
+- Единая строка `ИСТОЧНИК: РЕЗУЛЬТАТ [— текст]` (`PrototypeUIController.NarrativeCheckPresentation.cs`, новый `BuildNarrativePassiveCheckLine`) — двоеточие после источника (в т.ч. `СУЖДЕНИЕ + РЕМЕСЛО:`), тире с текстом только при успехе, при провале третий элемент отсутствует. Существующий `BuildNarrativeCheckHeaderElement` теперь просто вызывает этот метод с `revealedText = null` — активные проверки и заголовок над обычной репликой получили ту же пунктуацию без дублирования кода;
+- hover/focus-tooltip на слово УСПЕХ/ПРОВАЛ не менялся — использует тот же `NarrativeCheckPresentationData`, ничего не пересчитывает;
+- `RenderNarrativeDialogueHistory` (игровой UI) и `DrawPreview` (Editor Preview) теперь различают checked-observation (`Observation`/`Memory`/`HeroThought`/`Narration` с `CheckPresentation != null`) от настоящих реплик (`MainLine`/`CompanionLine`) по новому полю `NarrativeUiHistoryEntry.BlockKind`/`block.Kind`, а не по имени говорящего или наличию текста. Checked-observation рисуется одной инлайн-строкой без подписи `SpeakerDisplayName`; обычные реплики сохраняют подпись говорящего и текст отдельной строкой, даже если у них тоже есть проверка (редкий случай — заголовок тогда просто рисуется без прикреплённого текста);
+- портрет и подписи персонажа в фокусе сцены не менялись: поскольку у checked-observation блока без явного `speakerIdOverride` резолвится тот же говорящий, что и у соседней реплики в узле, портрет естественно остаётся портретом того, рядом с кем происходит наблюдение (§14 инструкции) — отдельного кода для этого не потребовалось;
+- Editor Preview приведён к production по умолчанию: старый переключатель «Показывать проваленные пассивные проверки» с описанием «игрок никогда не видит провал» заменён на «Показать упущенный текст пассивных проверок [только Preview]» (по умолчанию OFF) — при OFF Preview показывает ровно то, что видит игрок; при ON дополнительно показывает `[ТОЛЬКО PREVIEW] <текст>` под строкой `ПРОВАЛ`. `StartPreview`/`ApplyPreviewSelection` всегда строят представление через `BuildViewPreview`, что гарантирует идентичность Preview и production при выключенном переключателе;
+- USS: новые `.narrative-check-inline` (flex-wrap, выравнивание по верхнему краю) и `.narrative-check-inline-body` (только layout — растяжение/перенос), переиспользующие цвет и размер шрифта уже существующего `.narrative-dialogue-history-text`; вторая цветовая система не создавалась.
+
+### 15.2. Изменено
+
+- `Assets/_Project/DialogueDatabase/Runtime/NarrativeDialogueViewModel.cs` — `NarrativeDialogueVisibleBlock`: `IsPassiveFailurePreviewOnly` → `IsTextRevealed` + `PreviewOnlyHiddenText`;
+- `Assets/_Project/DialogueDatabase/Runtime/NarrativeDialogueRuntimeSession.cs` — `BuildViewCore` (провал больше не исключает блок из списка, эффекты гейтятся `textRevealed`), параметр `includeFailedPassiveChecks` → `revealHiddenTextForAuthor`;
+- `Assets/_Project/UI/PrototypeUIController.NarrativeCheckPresentation.cs` — новый `BuildNarrativePassiveCheckLine`, `BuildNarrativeCheckHeaderElement` делегирует в него;
+- `Assets/_Project/UI/PrototypeUIController.Narrative.cs` — `NarrativeUiHistoryEntry.BlockKind`, `ForBlock` принимает `DialogueTextBlockKind`, `RenderNarrativeDialogueHistory` различает checked-observation и обычную реплику;
+- `Assets/_Project/DialogueDatabase/Editor/DialogueDatabaseWindow.cs`/`.PreviewAndSpeakers.cs`/`.Editing.cs` — `previewShowFailedPassiveChecks` → `previewRevealHiddenTextForAuthor` (новый лейбл/описание), `DrawPreview` и `StartPreview`/`ApplyPreviewSelection` приведены к новой семантике;
+- `Assets/_Project/Resources/Prototype_Narrative.uss` — `.narrative-check-inline`, `.narrative-check-inline-body`;
+- `Assets/_Project/Tests/EditMode/DialogueDatabaseCheckSystemTests.cs` — обновлены 2 существующих теста под новую модель, добавлен `BuildPassiveEffectGatingDatabase` и 4 новых теста (провал не раскрывает/не применяет эффект и не блокирует выборы; успех раскрывает и применяет; повторный `BuildView()` не раскрывает текст задним числом; Preview vs production для скрытого текста);
+- `Assets/_Project/Tests/EditMode/NarrativeCheckSystemTests.cs` — тест формата `BuildSourceLabel` (качество-only vs качество+компетенция);
+- `Assets/_Project/Tests/EditMode/Chapter01FourResidentsTests.cs` — обновлены оба теста N01 про пассивное Суждение 11 под новую семантику (`VisibleTextBlocks.Count` теперь всегда 2, проверяется `IsTextRevealed`/`Text` конкретно у блока `chapter01.node.01_observation`).
+
+### 15.3. Проверено (без Unity)
+
+Unity Editor, C# compiler и Test Runner здесь недоступны. Вместо этого:
+
+- сверено побайтово, что во всех изменённых `.cs`-файлах количество открывающих и закрывающих фигурных скобок совпадает (грубый smoke-test отсутствия синтаксических обрывов);
+- вручную прослежены оба новых пути `BuildViewCore` (revealed/не revealed) на предмет корректности гейтинга `OnRevealEffects`;
+- проверено, что старые формулировки «провал пассивной проверки никогда не показывается игроку» полностью удалены из runtime/Editor-кода (grep по кодовой базе) — новые комментарии отражают текущее (верное) поведение.
+
+После Pull обязательна ручная проверка:
+
+1. дождаться чистой Unity-компиляции;
+2. прогнать EditMode tests — весь существующий набор должен остаться зелёным, включая обновлённые и новые тесты по пассивным проверкам;
+3. открыть `Kingdom Survival → База диалогов`, пройти N01 в Preview при Суждении = 10 (ожидается `СУЖДЕНИЕ: УСПЕХ — <текст>` без подписи «Ульяна» над этой строкой) и при Суждении = 1 (ожидается `СУЖДЕНИЕ: ПРОВАЛ` без текста), включить переключатель «Показать упущенный текст…» и убедиться, что при провале появляется `[ТОЛЬКО PREVIEW] <текст>`;
+4. пройти ту же сцену в реальном Play Mode игрового UI и убедиться, что Preview и игра показывают одинаковый результат;
+5. навести курсор на УСПЕХ/ПРОВАЛ и убедиться, что подробный tooltip (сложность, база, качество, компетенция, контекстные модификаторы, итог) по-прежнему работает в обоих случаях;
+6. проверить активную проверку (например, в `prototype_miller`) — заголовок теперь тоже с двоеточием (`СИЛА: УСПЕХ`), сама механика проверки не изменилась.
+
+Канон, `LORE.md`, `NARRATIVE.md`, формулы проверок (`NarrativeCheckResolver`) этой записью не менялись — изменение целиком в presentation-слое.

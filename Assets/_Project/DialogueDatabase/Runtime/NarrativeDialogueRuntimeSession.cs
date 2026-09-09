@@ -74,23 +74,27 @@ namespace KingdomSurvival.DialogueDatabase
         }
 
         // Единственный производственный путь построения представления узла.
-        // Провалившийся пассивный блок в него никогда не попадает — §3
-        // инструкции по визуализации проверок ("пассивный провал игроку не
-        // показывать вообще, иначе это метагейм").
+        // Провалившийся пассивный блок остаётся в представлении — игрок
+        // видит, что здесь была возможность что-то заметить, но не видит,
+        // что именно (см. класс-каммент NarrativeDialogueVisibleBlock и §4/§18
+        // инструкции "новое отображение пассивных наблюдений и проверок").
         public NarrativeDialogueView BuildView()
         {
-            return BuildViewCore(includeFailedPassiveChecks: false);
+            return BuildViewCore(revealHiddenTextForAuthor: false);
         }
 
-        // Только для авторского Preview в редакторе (§17: переключатель
-        // "Показывать проваленные пассивные проверки"). Игровой runtime
-        // обязан вызывать только BuildView() — см. класс-каммент.
-        public NarrativeDialogueView BuildViewPreview(bool includeFailedPassiveChecks)
+        // Только для авторского Preview в редакторе (§16: переключатель
+        // "Показать упущенный текст пассивных проверок"). Заполняет
+        // PreviewOnlyHiddenText фактическим текстом провалившегося блока —
+        // сам блок при этом остаётся нераскрытым (IsTextRevealed остаётся
+        // false, эффекты не применяются). Игровой runtime обязан вызывать
+        // только BuildView() — см. класс-каммент.
+        public NarrativeDialogueView BuildViewPreview(bool revealHiddenTextForAuthor)
         {
-            return BuildViewCore(includeFailedPassiveChecks);
+            return BuildViewCore(revealHiddenTextForAuthor);
         }
 
-        private NarrativeDialogueView BuildViewCore(bool includeFailedPassiveChecks)
+        private NarrativeDialogueView BuildViewCore(bool revealHiddenTextForAuthor)
         {
             RequireActiveSession();
             DialogueNodeData node = RequireNode(CurrentNodeId);
@@ -104,21 +108,17 @@ namespace KingdomSurvival.DialogueDatabase
                     continue;
 
                 NarrativeCheckResult passiveResult = null;
-                bool included = true;
+                bool textRevealed = true;
                 if (block.HasPassiveCheck)
                 {
                     passiveResult = NarrativeCheckResolver.ResolvePassive(block.PassiveCheck, context);
-                    included = passiveResult.Success;
+                    textRevealed = passiveResult.Success;
                 }
 
-                bool isPreviewOnlyFailure = block.HasPassiveCheck && !included;
-                if (!included && !(includeFailedPassiveChecks && isPreviewOnlyFailure))
-                    continue;
-
-                // Провалившийся пассивный блок в Preview не должен запускать
-                // игровые эффекты — в production-runtime он никогда не
-                // показывается (§3/§17).
-                if (!isPreviewOnlyFailure)
+                // Эффекты раскрытия срабатывают, только если текст реально
+                // раскрыт: провал пассивной проверки не является раскрытием
+                // знания сам по себе (§19 инструкции).
+                if (textRevealed)
                     NarrativeEffectApplier.ApplyAll(block.OnRevealEffects, context);
 
                 string speakerId = string.IsNullOrWhiteSpace(block.SpeakerIdOverride) ? node.SpeakerId : block.SpeakerIdOverride;
@@ -130,11 +130,12 @@ namespace KingdomSurvival.DialogueDatabase
                     SpeakerId = speakerId ?? string.Empty,
                     SpeakerDisplayName = speaker != null ? speaker.DisplayName : (speakerId ?? string.Empty),
                     SpeakerRole = speaker != null ? speaker.Role : string.Empty,
-                    Text = block.Text,
+                    Text = textRevealed ? block.Text : string.Empty,
                     CheckPresentation = passiveResult != null
                         ? NarrativeCheckPresentationBuilder.Build(block.PassiveCheck, passiveResult)
                         : null,
-                    IsPassiveFailurePreviewOnly = isPreviewOnlyFailure
+                    IsTextRevealed = textRevealed,
+                    PreviewOnlyHiddenText = (!textRevealed && revealHiddenTextForAuthor) ? block.Text : null
                 });
             }
 

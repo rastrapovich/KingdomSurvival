@@ -142,10 +142,12 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P00-T10", "DEC-11 — Финальный набор решений",
                     "Сохранить три направления развязки, но точные цены определить после DEC-03 и DEC-10.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 10,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 10,
                     dependencies: new[] { "P00-T01", "P00-T02", "P00-T03" },
                     acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в NARRATIVE.md" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-11)."),
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Пользователь принял предложенные цены без изменений: (1) старый порядок — постоянный труд/ресурсы, публичное признание зависимости; (2) новый порядок — новое явное обязательство взамен забытого; (3) вода Дому — нижние окончательно теряют сток, испорченные отношения, возможный долг/месть позже. Внесено в NARRATIVE.md §26.3 п.9."),
 
                 Task("P00-T11", "DEC-08 — Навык «Ремесло»",
                     "Пока не добавлять; использовать Суждение, Следопытство, знания и контекст. Вернуться, если появятся минимум три регулярных применения.",

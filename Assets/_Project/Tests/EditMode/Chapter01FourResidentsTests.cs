@@ -218,6 +218,11 @@ public sealed class Chapter01FourResidentsTests
         Assert.AreEqual(1, view.VisibleTextBlocks.Count);
         Assert.IsFalse(state.HasKnowledge("chapter01.knowledge.second_loaf_is_ration"));
 
+        // P04-T04: baseline фиксируется на первом обязательном блоке
+        // независимо от исхода пассивного Суждения (раздел 21 инструкции
+        // P04-T04 — "Passive check independence").
+        Assert.IsTrue(state.HasFlag("chapter01.flag.home_baseline_captured"));
+
         session.SelectChoice("chapter01.node.01_skip_choice");
         session.SelectChoice("chapter01.node.01_ostafiy_exit");
         session.SelectChoice("chapter01.node.01_lada_exit");
@@ -244,12 +249,38 @@ public sealed class Chapter01FourResidentsTests
         Assert.AreEqual(2, view.VisibleTextBlocks.Count);
         Assert.IsTrue(state.HasKnowledge("chapter01.knowledge.second_loaf_is_ration"));
 
+        // P04-T04: тот же маркер фиксируется и при успехе проверки — не
+        // зависит от исхода Суждения.
+        Assert.IsTrue(state.HasFlag("chapter01.flag.home_baseline_captured"));
+
         session.SelectChoice("chapter01.node.01_skip_choice");
         session.SelectChoice("chapter01.node.01_ostafiy_exit");
         session.SelectChoice("chapter01.node.01_lada_exit");
         NarrativeDialogueSelectionResult final = session.SelectChoice("chapter01.node.01_exit");
 
         Assert.IsTrue(final.DialogueEnded);
+    }
+
+    [Test]
+    public void N01_Opening_Captures_HomeBaseline_Marker()
+    {
+        DialogueDatabaseAsset database = Resources.Load<DialogueDatabaseAsset>(DialogueDatabaseAsset.ResourcesPath);
+        Assert.IsNotNull(database);
+
+        NarrativeStateData state = new NarrativeStateData();
+        Assert.IsFalse(state.HasFlag("chapter01.flag.home_baseline_captured"));
+
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(
+            database,
+            D01,
+            new HeroProfileData(),
+            state,
+            out NarrativeDialogueView view,
+            out string error);
+
+        Assert.IsTrue(started, error);
+        Assert.IsTrue(state.HasFlag("chapter01.flag.home_baseline_captured"));
     }
 
     [Test]

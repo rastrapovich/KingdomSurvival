@@ -442,3 +442,50 @@ Unity Editor, C# compiler и Unity Test Runner здесь недоступны �
 - `DialogueDatabaseAsset.cs`, `NarrativeDialogueRuntimeSession.cs`, Portrait UI (`PrototypeUIController.Narrative.cs`) — без изменений: существующая архитектура синхронизации портрета по `SpeakerId`/`speakerIdOverride` уже покрывает все требования раздела 11–13 инструкции, менять было нечего;
 - сами Sprite-портреты (арт) не создавались — это отдельная задача художника; до её выполнения Play Mode будет показывать placeholder для всех четырёх;
 - P04-T04 (визуальное состояние Дома для рифмы N16) не входила в этот проход.
+
+## 14. P04-T04 — Визуальная рифма Дома N01 → N16 — 09.09.2026
+
+Реализована техническая основа рифмы состояния Дома (`NARRATIVE.md §26.1.4`): типизированный resolver, вычисляющий текущее визуальное состояние из уже существующих сюжетных флагов, без второго независимого источника истины.
+
+### 14.1. Работает
+
+- типизированный `Chapter01HomeState.ResolveCurrent(NarrativeStateData)` возвращает `Chapter01HomeSnapshot` — пять полей (`Water`/`Mill`/`Livestock`/`Walkway`/`Sound`), интерпретирующих уже существующие `Chapter01Ids.Flags` (`FloodHappened`/`FloodLivestockLost`/`FloodMillDeckDestroyed`/`RepairOld`/`RepairNew`/`RepairCompleted`/`WaterWrongActive`) — новых persistent-полей, кроме одного маркера baseline, не добавлено;
+- `Chapter01HomeState.Baseline` — константный снимок нормы N01;
+- `CountChangedMotifs`/`GetChangedMotifs` сравнивают снимок с `Baseline` по пяти категориям для будущей N16;
+- маркер `chapter01.flag.home_baseline_captured` (`Chapter01Ids.Flags`) подтверждает, что игрок реально видел норму N01, прежде чем N16 сможет опираться на рифму.
+
+### 14.2. Изменено
+
+- новый файл `Assets/_Project/Chapter01/Runtime/Chapter01HomeState.cs` — enum'ы состояний, `Chapter01HomeSnapshot`, resolver;
+- `Assets/_Project/Chapter01/Runtime/Chapter01Ids.cs` — добавлен `Flags.HomeBaselineCaptured` и в `Flags.All`; `Chapter01StoryDirector`/`Chapter01OutcomeApplier`/`Chapter01ContextBuilder` не менялись;
+- `KingdomSurvivalDialogues.asset`, узел `chapter01.node.01` (N01): на первом обязательном блоке (`chapter01.node.01_main`) добавлен `onRevealEffect` `SetFlag(chapter01.flag.home_baseline_captured)` — срабатывает независимо от исхода пассивного Суждения 11; в узел `chapter01.node.01_mill` добавлен один короткий `Observation`-блок (`chapter01.node.01_mill_water`) про спокойный скот у водопоя и привычную воду. Драматургия Ульяны/Остафия/Лады/Мирона, второй хлеб и Суждение 11 не переписывались;
+- новый файл `Assets/_Project/Chapter01/Tests/EditMode/Chapter01HomeStateTests.cs` — 14 тестов на чистую логику resolver'а;
+- `Assets/_Project/Tests/EditMode/Chapter01FourResidentsTests.cs` — три новых/расширенных теста на фиксацию `home_baseline_captured` при открытии N01 независимо от исхода пассивной проверки;
+- `Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanSeedData.cs` — статусы P04-T04 и P04-T05 переведены в `NeedsUnityCheck` с `implementationNote`. Это меняет только `DevelopmentPlanSeedData` (начальные данные для ещё не созданного плана); уже существующий у пользователя `Data/KingdomSurvivalDevelopmentPlan.asset` этой правкой не перезаписывается — статусы там по-прежнему нужно проставить вручную после проверки в Unity, как и раньше.
+
+### 14.3. Проверено (без Unity)
+
+- Python/PyYAML-структура диалогов после правки N01 (уникальность `blockId`, `speakerIdOverride`, глобальная уникальность `EffectExecutionId`, достижимость всех узлов и EXIT) — без ошибок;
+- вручную прослежена логика resolver'а на бумаге для всех веток раздела 20 инструкции (см. тесты `Chapter01HomeStateTests`), включая приоритет `Wrong` над завершённым ремонтом и `Lost` над `AvoidingWater`;
+- обе ветви ремонта (`RepairOld`/`RepairNew`) дают различимые `Mill`/`Walkway`/`Water` и не совпадают с `RunningNormally`/`OldIntact` — тест `OldAndNewRepairBranches_ProduceDistinguishableSnapshots`;
+- реалистичный набор флагов первой главы (`FloodHappened`+`FloodMillDeckDestroyed`+`WaterWrongActive`+ремонт) даёт ≥3 изменённых мотива для обеих веток ремонта — тест `RealisticFirstChapterEvents_ProduceAtLeastThreeChangedMotifs_ForBothRepairBranches`;
+- `NarrativeStateData` переживает `JsonUtility`-сериализацию с идентичным результатом `ResolveCurrent` до и после — тест `NarrativeState_Survives_JsonRoundTrip_WithSameResolvedSnapshot`;
+- `Chapter01Ids.ValidateRegistry()` остаётся пустым после добавления `HomeBaselineCaptured`.
+
+Unity Editor, C# compiler и Unity Test Runner здесь недоступны — реальная компиляция и прогон тестов не выполнялись. После Pull обязательна ручная проверка:
+
+1. дождаться чистой Unity-компиляции (новые файлы `Chapter01HomeState.cs`/`Chapter01HomeStateTests.cs`, правка `Chapter01Ids.cs`/`KingdomSurvivalDialogues.asset`/`Chapter01FourResidentsTests.cs`);
+2. прогнать EditMode tests, включая новые 14 тестов `Chapter01HomeStateTests` и обновлённые тесты `Chapter01FourResidentsTests`, весь существующий набор должен остаться зелёным;
+3. открыть `Kingdom Survival → База диалогов`, проверить N01 в Графе/Preview — новый блок про воду и скот в узле у мельницы, валидация базы без ошибок;
+4. ручной Play Mode smoke-test N01: пройти при успехе и при провале Суждения 11, убедиться, что baseline фиксируется в обоих случаях (можно проверить через `NarrativeStateData.HasFlag` в отладке или последующим влиянием на N16, когда она появится);
+5. по факту проверки отметить P04-T04 и P04-T05 как «Выполнено» вручную в окне «Этапы разработки» — после этого **P04 = 5/5**.
+
+### 14.4. Осталось
+
+- финальное использование `Chapter01HomeSnapshot` при производстве N16 (сама N16 этим проходом не пишется — только подготовлен API и данные для неё);
+- реальная Unity-проверка (компиляция, тесты, Preview, Play Mode) и обновление статуса задач в живом `Data/KingdomSurvivalDevelopmentPlan.asset` пользователем.
+
+### 14.5. Что не менялось
+
+- `Chapter01StoryDirector.cs`, `Chapter01OutcomeApplier.cs`, `Chapter01ContextBuilder.cs`, `DialogueDatabaseAsset.cs`, `NarrativeDialogueRuntimeSession.cs` — не тронуты, никакой новой Dialogue Condition архитектуры и отдельной SaveSystem для Главы 01 не введено, никакой settlement simulation/погоды/индивидуальной симуляции животных не добавлено (раздел 24 инструкции P04-T04);
+- `LORE.md` не менялся — рифма состояния Дома не утверждает новых фактов мира.

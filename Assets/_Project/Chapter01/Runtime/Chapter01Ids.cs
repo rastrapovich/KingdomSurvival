@@ -116,6 +116,12 @@ namespace KingdomSurvival.Chapter01
             public const string LongRoadStarted = "chapter01.flag.long_road_started";
             public const string ReturnRoadTraveled = "chapter01.flag.return_road_traveled";
 
+            // P04-T04: маркер того, что игрок действительно увидел исходную
+            // норму Дома в N01 (Chapter01HomeState.Baseline) — не само
+            // состояние воды/мельницы/скота/настила, а подтверждение показа.
+            // N16 не должно строить рифму с состоянием, которого игрок не видел.
+            public const string HomeBaselineCaptured = "chapter01.flag.home_baseline_captured";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Started, HomeIntroSeen, FirstPressureSeen, FloodHappened, FloodWorkersSaved,
@@ -124,7 +130,7 @@ namespace KingdomSurvival.Chapter01
                 InvestigatedCattle, InvestigatedRiver, OldTraceFound, FarRouteUnlocked,
                 ExpeditionStarted, OldFordFound, DownstreamContact, AgreementRevealed,
                 ReturnStarted, ReturnedHome, CouncilCompleted, Completed,
-                HousePeopleMet, LongRoadStarted, ReturnRoadTraveled
+                HousePeopleMet, LongRoadStarted, ReturnRoadTraveled, HomeBaselineCaptured
             };
         }
 

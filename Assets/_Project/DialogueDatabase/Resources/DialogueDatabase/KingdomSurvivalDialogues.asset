@@ -860,6 +860,10 @@ MonoBehaviour:
             Type: 0
             StringParam: "chapter01.flag.home_intro_seen"
             IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n01_home_baseline"
+            Type: 0
+            StringParam: "chapter01.flag.home_baseline_captured"
+            IntParam: 0
       - blockId: "chapter01.node.01_observation"
         kind: 1
         speakerIdOverride: ""
@@ -1060,6 +1064,22 @@ MonoBehaviour:
         kind: 5
         speakerIdOverride: ""
         text: "У мельницы уже шумит колесо — ровно, как каждое утро. Мирон стоит в дверях, отряхивает мучную пыль с рукава и молча кивает проходящему герою: ему сейчас не до разговоров, мешок ждёт."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: "chapter01.node.01_mill_water"
+        kind: 1
+        speakerIdOverride: ""
+        text: "У водопоя скот пьёт спокойно, не поднимая головы. Вода идёт по руслу так привычно, что на неё никто уже и не смотрит — на неё вообще смотрят, только когда что-то не так."
         conditions:
           Combinator: 0
           Conditions: []

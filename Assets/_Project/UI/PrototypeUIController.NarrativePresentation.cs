@@ -43,7 +43,7 @@ public partial class PrototypeUIController
             entry.style.opacity = i == childCount - 1 ? 1f : NarrativeReadHistoryOpacity;
         }
 
-        ScheduleNarrativeScrollToBottom();
+        ScheduleNarrativeScrollToLatestGroup();
     }
 
     private void ApplyNarrativeLayoutPresentation()
@@ -87,9 +87,12 @@ public partial class PrototypeUIController
                     continue;
                 }
 
-                Label textLabel = entry.Q<Label>(className: "narrative-dialogue-history-text");
-                if (textLabel != null)
-                    UILayoutRuntimeApplier.ApplyTextStyle(textLabel, textDefinition, reference, actual);
+                // Одна группа (§ дополнения "новый текст всегда появляется
+                // цельным") может содержать несколько абзацев и несколько
+                // говорящих — стилизовать нужно каждый найденный текстовый
+                // Label, а не только первый.
+                entry.Query<Label>(className: "narrative-dialogue-history-text")
+                    .ForEach(textLabel => UILayoutRuntimeApplier.ApplyTextStyle(textLabel, textDefinition, reference, actual));
             }
         }
 
@@ -114,19 +117,34 @@ public partial class PrototypeUIController
         }
     }
 
-    private void ScheduleNarrativeScrollToBottom()
+    // Дополнение к инструкции "новое отображение пассивных наблюдений и
+    // проверок" — "новый текст всегда появляется цельным": каждый top-level
+    // child narrativeHistoryContainer теперь ровно одна группа истории
+    // (PrototypeUIController.Narrative.cs — RenderNarrativeDialogueHistory/
+    // BuildNarrativeHistoryGroupElement), поэтому последний child — это
+    // всегда целиком новая группа, а не последний абзац внутри неё.
+    //
+    // Раньше здесь принудительно выставлялся verticalScroller.value =
+    // highValue — то есть каждое обновление истории жёстко прокручивало в
+    // самый низ, независимо от того, помещается ли новая группа в область
+    // просмотра целиком. Это и было основной причиной того, что игрок видел
+    // конец только что появившегося текста раньше начала (§3/§10 дополнения
+    // к инструкции). ScrollTo сам по себе просто подводит видимую область к
+    // target: если группа помещается — она становится видна целиком; если
+    // не помещается — видна её верхняя граница, а не нижняя.
+    private void ScheduleNarrativeScrollToLatestGroup()
     {
         if (narrativeTextScroll == null || narrativeHistoryContainer == null)
             return;
 
         narrativeTextScroll.schedule.Execute(() =>
         {
-            ForceNarrativeScrollToBottom();
-            narrativeTextScroll.schedule.Execute(ForceNarrativeScrollToBottom).StartingIn(1);
+            ScrollNarrativeHistoryToLatestGroupStart();
+            narrativeTextScroll.schedule.Execute(ScrollNarrativeHistoryToLatestGroupStart).StartingIn(1);
         });
     }
 
-    private void ForceNarrativeScrollToBottom()
+    private void ScrollNarrativeHistoryToLatestGroupStart()
     {
         if (narrativeTextScroll == null ||
             narrativeHistoryContainer == null ||
@@ -136,12 +154,8 @@ public partial class PrototypeUIController
             return;
         }
 
-        VisualElement latestEntry = narrativeHistoryContainer.ElementAt(narrativeHistoryContainer.childCount - 1);
-        if (latestEntry != null && latestEntry.panel != null)
-            narrativeTextScroll.ScrollTo(latestEntry);
-
-        Scroller verticalScroller = narrativeTextScroll.verticalScroller;
-        if (verticalScroller != null)
-            verticalScroller.value = verticalScroller.highValue;
+        VisualElement latestGroup = narrativeHistoryContainer.ElementAt(narrativeHistoryContainer.childCount - 1);
+        if (latestGroup != null && latestGroup.panel != null)
+            narrativeTextScroll.ScrollTo(latestGroup);
     }
 }

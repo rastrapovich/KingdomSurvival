@@ -551,3 +551,39 @@ Unity Editor, C# compiler и Test Runner здесь недоступны. Вме
 6. проверить активную проверку (например, в `prototype_miller`) — заголовок теперь тоже с двоеточием (`СИЛА: УСПЕХ`), сама механика проверки не изменилась.
 
 Канон, `LORE.md`, `NARRATIVE.md`, формулы проверок (`NarrativeCheckResolver`) этой записью не менялись — изменение целиком в presentation-слое.
+
+## 16. «Новый текст всегда появляется цельным» — группировка UI-истории — 10.09.2026
+
+Реализовано дополнение к инструкции §15: один вызов `DisplayNarrativeView()` (один `NarrativeDialogueView` + опциональный результат активной проверки) — одна неделимая порция чтения. Раньше несколько `TextBlock` одного раскрытия визуально распадались на отдельные «сообщения», и автоматический scroll всегда прыгал в самый низ истории.
+
+### 16.1. Найденная реальная причина
+
+При разборе обнаружилось, что проблема была не только (и не столько) в порядке добавления записей в `RenderNarrativeDialogueHistory()`, сколько в отдельном, ранее не замеченном месте — `PrototypeUIController.NarrativePresentation.cs`, который каждый кадр (`RefreshNarrativePresentationFrame`, вызывается из `ContinuousTime.cs`) при изменении счётчика истории:
+
+- гасил все top-level дети `narrativeHistoryContainer`, кроме последнего, до 42% непрозрачности («прочитанные»/«текущие»);
+- принудительно выставлял `verticalScroller.value = verticalScroller.highValue` — то есть жёстко прокручивал в самый конец, независимо от того, помещается ли новый текст в область просмотра.
+
+Поскольку раньше каждый отдельный `TextBlock`/пассивная проверка/реплика были самостоятельным top-level child, эти два механизма вместе и создавали ровно описанный симптом: первый абзац «уезжал» вверх и гас, второй получал фокус.
+
+### 16.2. Решение
+
+- Новый файл `Assets/_Project/DialogueDatabase/Runtime/NarrativeUiHistoryGrouping.cs` (`KingdomSurvival.DialogueDatabase`, чистая логика без UI Toolkit) — `NarrativeUiHistoryGrouping.BuildSegments(leadingActiveCheck, blocks)` сливает подряд идущие блоки одного говорящего без своей проверки в один `SpeakerParagraphs`-сегмент (несколько абзацев под одним именем), держит checked-observation (`Observation`/`Memory`/`HeroThought`/`Narration` с `CheckPresentation`) и результат активной/присоединённой проверки отдельными сегментами — но все они получены одним вызовом, то есть принадлежат одной группе;
+- `PrototypeUIController.Narrative.cs`: `NarrativeUiHistoryEntry`/`NarrativeUiHistoryKind` заменены на `NarrativeUiHistoryItem`/`NarrativeUiHistoryItemKind` (`PlayerChoice`/`ResponseGroup`) — один `DisplayNarrativeView()` добавляет ровно один элемент `ResponseGroup`, хранящий исходные `Blocks`/`LeadingActiveCheck`, а не готовые записи. `RenderNarrativeDialogueHistory()`/`BuildNarrativeHistoryGroupElement` строят один `VisualElement`-контейнер на всю группу через `NarrativeUiHistoryGrouping.BuildSegments` — то есть один top-level child на группу, а не на блок;
+- `PrototypeUIController.NarrativePresentation.cs`: `ForceNarrativeScrollToBottom` → `ScrollNarrativeHistoryToLatestGroupStart` — убрана принудительная установка `verticalScroller.value = highValue`; остался только `ScrollTo(latestGroup)`, где `latestGroup` — последний top-level child (теперь всегда целая группа, а не последний абзац). Если группа помещается в видимую область — `ScrollTo` показывает её целиком; если нет — прокручивает к её началу, а не к концу. Заодно исправлена сопутствующая находка: `ApplyNarrativeLayoutPresentation` стилизовал только первый найденный `.narrative-dialogue-history-text` внутри записи (`Q<Label>`) — с несколькими абзацами/говорящими в одной группе это стилизовало бы только первый абзац; заменено на `Query<Label>(...).ForEach(...)`;
+- USS: `.narrative-dialogue-history-group` (обёртка группы), небольшой `margin-top` на `.narrative-dialogue-history-text` для видимого разделения абзацев одного говорящего;
+- новый файл `Assets/_Project/Tests/EditMode/NarrativeUiHistoryGroupingTests.cs` — 13 тестов на чистую логику `NarrativeUiHistoryGrouping` (слияние подряд идущих блоков одного говорящего; разные говорящие — разные сегменты одной группы; checked-observation и обычный блок в одной группе; провал даёт сегмент с пустым текстом; ведущий результат активной проверки — первый сегмент; смена говорящего прерывает и затем возобновляет слияние; пустой/`null` список блоков).
+
+### 16.3. Что не тестировалось в EditMode (по признанию самой инструкции, §12)
+
+Реальная геометрия `ScrollView`/`VisualElement` (помещается ли группа в viewport, где физически оказывается scrollbar) не проверяется в EditMode — `PrototypeUIController` компилируется в `Assembly-CSharp` без собственного asmdef, а `KingdomSurvival.Core.EditModeTests` на него не ссылается; кроме того, реальные размеры layout доступны только в запущенном Play Mode. Это осознанно оставлено на ручную/Play Mode проверку, как и предусмотрено самой инструкцией.
+
+После Pull обязательна ручная проверка:
+
+1. дождаться чистой Unity-компиляции;
+2. прогнать EditMode tests — весь существующий набор должен остаться зелёным, включая новые 13 тестов `NarrativeUiHistoryGroupingTests`;
+3. пройти N01 в реальном Play Mode: после «Вы: Пойти дальше, к мельнице.» должно сразу появиться **одно** сообщение «Рассказчик» с двумя абзацами подряд («У мельницы уже шумит колесо...» и «У водопоя скот пьёт спокойно...»), видимое с начала первого абзаца — без второго отдельного заголовка «Рассказчик» и без автофокуса на втором абзаце;
+4. проверить сцену N02 (несколько говорящих подряд в одном узле — Остафий/Лада/Мирон/Ульяна) — все реплики должны появиться одной группой одновременно, без прокрутки, обрывающей Остафия сверху за границей экрана;
+5. проверить большую порцию текста (превышающую высоту окна) — scrollbar должен остаться у начала новой группы, игрок прокручивает вниз сам;
+6. проверить, что «прочитанные» (затемнённые) записи истории — это НЕ отдельные абзацы, а целые предыдущие группы.
+
+Канон, диалоговые данные, механика проверок и `NarrativeDialogueRuntimeSession` не менялись — изменение целиком в presentation-слое UI-истории.

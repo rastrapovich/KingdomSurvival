@@ -8,70 +8,55 @@ using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
-    private enum NarrativeUiHistoryKind
+    private enum NarrativeUiHistoryItemKind
     {
-        Block,
         PlayerChoice,
-        CheckResult
+        ResponseGroup
     }
 
-    // Строится самим UI поверх NarrativeDialogueView — сама сессия v2
-    // истории не хранит (§12). Не влияет на игровое состояние.
-    private sealed class NarrativeUiHistoryEntry
+    // Один элемент UI-истории. "Новый текст всегда появляется цельным"
+    // (дополнение к инструкции presentation пассивных проверок): одна
+    // ResponseGroup соответствует ровно одному вызову DisplayNarrativeView()
+    // — то есть одному NarrativeDialogueView, целиком раскрывшемуся одним
+    // действием игрока. Несколько TextBlock/наблюдение/проверка внутри
+    // одной группы никогда не становятся отдельными "сообщениями" — сама
+    // сессия v2 истории не хранит (§12 инструкции по визуализации
+    // проверок), это чисто presentation-состояние UI.
+    private sealed class NarrativeUiHistoryItem
     {
-        public NarrativeUiHistoryKind Kind;
-        public string SpeakerDisplayName;
-        public string SpeakerRole;
-        public string Text;
+        public NarrativeUiHistoryItemKind Kind;
 
-        // Заполнено для Block (пассивная проверка блока) и для CheckResult
-        // (активная проверка) — единый Narrative Check Presentation Layer,
-        // см. PrototypeUIController.NarrativeCheckPresentation.cs.
-        public NarrativeCheckPresentationData CheckPresentation;
+        // Только для PlayerChoice.
+        public string PlayerChoiceText;
 
-        // Тип исходного текстового блока (§13 инструкции "новое отображение
-        // пассивных наблюдений и проверок") — history renderer различает
-        // checked-observation (Observation/Memory/HeroThought/Narration с
-        // CheckPresentation) от настоящих реплик (MainLine/CompanionLine) по
-        // этому полю, а не по имени говорящего или наличию текста.
-        public DialogueTextBlockKind BlockKind;
+        // Только для ResponseGroup — тот же набор данных, что вернула
+        // NarrativeDialogueRuntimeSession для одного view; сегменты строятся
+        // из них по требованию через NarrativeUiHistoryGrouping.BuildSegments,
+        // а не хранятся здесь заранее готовыми.
+        public NarrativeCheckPresentationData LeadingActiveCheck;
+        public IReadOnlyList<NarrativeDialogueVisibleBlock> Blocks;
 
-        public static NarrativeUiHistoryEntry ForBlock(
-            string speakerDisplayName,
-            string speakerRole,
-            string text,
-            NarrativeCheckPresentationData checkPresentation,
-            DialogueTextBlockKind blockKind)
+        public static NarrativeUiHistoryItem ForPlayerChoice(string text)
         {
-            return new NarrativeUiHistoryEntry
-            {
-                Kind = NarrativeUiHistoryKind.Block,
-                SpeakerDisplayName = speakerDisplayName,
-                SpeakerRole = speakerRole,
-                Text = text,
-                CheckPresentation = checkPresentation,
-                BlockKind = blockKind
-            };
+            return new NarrativeUiHistoryItem { Kind = NarrativeUiHistoryItemKind.PlayerChoice, PlayerChoiceText = text };
         }
 
-        public static NarrativeUiHistoryEntry ForPlayerChoice(string text)
+        public static NarrativeUiHistoryItem ForResponseGroup(
+            NarrativeCheckPresentationData leadingActiveCheck,
+            IReadOnlyList<NarrativeDialogueVisibleBlock> blocks)
         {
-            return new NarrativeUiHistoryEntry { Kind = NarrativeUiHistoryKind.PlayerChoice, Text = text };
-        }
-
-        public static NarrativeUiHistoryEntry ForCheckResult(NarrativeCheckPresentationData checkPresentation)
-        {
-            return new NarrativeUiHistoryEntry
+            return new NarrativeUiHistoryItem
             {
-                Kind = NarrativeUiHistoryKind.CheckResult,
-                CheckPresentation = checkPresentation
+                Kind = NarrativeUiHistoryItemKind.ResponseGroup,
+                LeadingActiveCheck = leadingActiveCheck,
+                Blocks = blocks
             };
         }
     }
 
     private NarrativeDialogueRuntimeSession narrativeDialogueSession;
     private DialogueDatabaseAsset narrativeDialogueDatabase;
-    private readonly List<NarrativeUiHistoryEntry> narrativeHistory = new List<NarrativeUiHistoryEntry>();
+    private readonly List<NarrativeUiHistoryItem> narrativeHistory = new List<NarrativeUiHistoryItem>();
     private VisualElement narrativeDialogueOverlay;
     private VisualElement narrativePortrait;
     private VisualElement narrativePanel;
@@ -412,20 +397,15 @@ public partial class PrototypeUIController
         UILayoutRuntimeApplier.ApplyBackground(target, definition);
     }
 
-    // Единая точка показа нового представления узла: сначала причинный
-    // результат проверки (если был), затем видимые блоки, затем варианты
-    // ответа — порядок из §14 ("сначала причинный текст, затем механика").
+    // Единая точка показа нового представления узла. Одно раскрытие view
+    // (причинный результат активной проверки + все видимые блоки) — одна
+    // неделимая группа истории (дополнение к инструкции "новое отображение
+    // пассивных наблюдений и проверок" — "новый текст всегда появляется
+    // цельным"). Порядок остаётся прежним: сначала причинный текст, затем
+    // механика (§14).
     private void DisplayNarrativeView(NarrativeDialogueView view, NarrativeCheckPresentationData checkPresentation)
     {
-        if (checkPresentation != null)
-            narrativeHistory.Add(NarrativeUiHistoryEntry.ForCheckResult(checkPresentation));
-
-        for (int i = 0; i < view.VisibleTextBlocks.Count; i++)
-        {
-            NarrativeDialogueVisibleBlock block = view.VisibleTextBlocks[i];
-            narrativeHistory.Add(NarrativeUiHistoryEntry.ForBlock(
-                block.SpeakerDisplayName, block.SpeakerRole, block.Text, block.CheckPresentation, block.Kind));
-        }
+        narrativeHistory.Add(NarrativeUiHistoryItem.ForResponseGroup(checkPresentation, view.VisibleTextBlocks));
 
         NarrativeDialogueVisibleBlock latestBlock = view.VisibleTextBlocks.Count > 0
             ? view.VisibleTextBlocks[view.VisibleTextBlocks.Count - 1]
@@ -481,85 +461,100 @@ public partial class PrototypeUIController
         }
     }
 
+    // Один top-level child на элемент истории: PlayerChoice — одна строка,
+    // ResponseGroup — один контейнер на всю группу. Это принципиально для
+    // дополнения к инструкции presentation пассивных проверок ("новый текст
+    // всегда появляется цельным") — PrototypeUIController.NarrativePresentation.cs
+    // гасит "прочитанные" записи и вычисляет scroll именно по top-level
+    // детям narrativeHistoryContainer, поэтому одна группа не может
+    // оказаться наполовину "историей", наполовину "текущей" (§2/§10), а
+    // scroll всегда целится в начало последней группы, а не в последний
+    // абзац внутри нее (§3/§4). Сам scroll здесь не планируется — им
+    // занимается NarrativePresentation.cs по изменению narrativeHistory.Count.
     private void RenderNarrativeDialogueHistory()
     {
         if (narrativeHistoryContainer == null)
             return;
 
         narrativeHistoryContainer.Clear();
-        VisualElement lastEntry = null;
         for (int i = 0; i < narrativeHistory.Count; i++)
         {
-            NarrativeUiHistoryEntry entry = narrativeHistory[i];
+            NarrativeUiHistoryItem item = narrativeHistory[i];
 
-            if (entry.Kind == NarrativeUiHistoryKind.PlayerChoice)
+            if (item.Kind == NarrativeUiHistoryItemKind.PlayerChoice)
             {
-                Label playerLine = new Label("Вы: " + entry.Text);
+                Label playerLine = new Label("Вы: " + item.PlayerChoiceText);
                 playerLine.AddToClassList("narrative-dialogue-history-player");
                 narrativeHistoryContainer.Add(playerLine);
-                lastEntry = playerLine;
                 continue;
             }
 
-            if (entry.Kind == NarrativeUiHistoryKind.CheckResult)
+            narrativeHistoryContainer.Add(BuildNarrativeHistoryGroupElement(item));
+        }
+    }
+
+    // Строит один визуальный контейнер для целой ResponseGroup — все
+    // сегменты одного view (§1/§7 дополнения к инструкции). Сегменты
+    // считает NarrativeUiHistoryGrouping (чистая, тестируемая логика, не
+    // зависящая от UI Toolkit); здесь только раскладка по VisualElement.
+    private VisualElement BuildNarrativeHistoryGroupElement(NarrativeUiHistoryItem item)
+    {
+        VisualElement group = new VisualElement();
+        group.AddToClassList("narrative-dialogue-history-group");
+
+        List<NarrativeUiHistorySegment> segments =
+            NarrativeUiHistoryGrouping.BuildSegments(item.LeadingActiveCheck, item.Blocks);
+
+        for (int i = 0; i < segments.Count; i++)
+        {
+            NarrativeUiHistorySegment segment = segments[i];
+
+            if (segment.Kind == NarrativeUiSegmentKind.CheckResult)
             {
                 VisualElement checkLine = new VisualElement();
                 checkLine.AddToClassList("narrative-dialogue-history-check-result");
-                checkLine.Add(BuildNarrativeCheckHeaderElement(entry.CheckPresentation));
-                narrativeHistoryContainer.Add(checkLine);
-                lastEntry = checkLine;
+                checkLine.Add(BuildNarrativeCheckHeaderElement(segment.CheckPresentation));
+                group.Add(checkLine);
                 continue;
             }
 
+            // Checked-observation (§3 инструкции "новое отображение
+            // пассивных наблюдений и проверок"): одна инлайн-строка
+            // "ИСТОЧНИК: РЕЗУЛЬТАТ — текст" без подписи говорящего — это
+            // наблюдение героя, а не реплика NPC рядом с которым оно возникло.
+            if (segment.Kind == NarrativeUiSegmentKind.CheckedObservation)
+            {
+                VisualElement observationBlock = new VisualElement();
+                observationBlock.AddToClassList("narrative-dialogue-history-entry");
+                string revealedText = segment.Paragraphs.Count > 0 ? segment.Paragraphs[0] : string.Empty;
+                observationBlock.Add(BuildNarrativePassiveCheckLine(segment.CheckPresentation, revealedText));
+                group.Add(observationBlock);
+                continue;
+            }
+
+            // Обычная реплика (MainLine/CompanionLine) — подпись говорящего
+            // один раз, затем все слитые подряд абзацы (§5/§6 дополнения).
             VisualElement block = new VisualElement();
             block.AddToClassList("narrative-dialogue-history-entry");
 
-            // Checked-observation (§3 инструкции "новое отображение пассивных
-            // наблюдений и проверок"): Observation/Memory/HeroThought/
-            // Narration с пассивной проверкой рисуются одной инлайн-строкой
-            // "ИСТОЧНИК: РЕЗУЛЬТАТ — текст" без подписи говорящего — это
-            // наблюдение героя, а не реплика NPC рядом с которым оно возникло.
-            // Настоящие реплики (MainLine/CompanionLine) сохраняют подпись
-            // говорящего и текст отдельной строкой даже если у них тоже есть
-            // проверка (заголовок тогда рисуется отдельно, без текста).
-            bool isCheckedObservation = entry.CheckPresentation != null &&
-                (entry.BlockKind == DialogueTextBlockKind.Observation ||
-                 entry.BlockKind == DialogueTextBlockKind.Memory ||
-                 entry.BlockKind == DialogueTextBlockKind.HeroThought ||
-                 entry.BlockKind == DialogueTextBlockKind.Narration);
+            if (segment.CheckPresentation != null)
+                block.Add(BuildNarrativeCheckHeaderElement(segment.CheckPresentation));
 
-            if (isCheckedObservation)
-            {
-                block.Add(BuildNarrativePassiveCheckLine(entry.CheckPresentation, entry.Text));
-                narrativeHistoryContainer.Add(block);
-                lastEntry = block;
-                continue;
-            }
-
-            if (entry.CheckPresentation != null)
-                block.Add(BuildNarrativeCheckHeaderElement(entry.CheckPresentation));
-
-            Label speaker = new Label(entry.SpeakerDisplayName);
+            Label speaker = new Label(segment.SpeakerDisplayName);
             speaker.AddToClassList("narrative-dialogue-history-speaker");
             block.Add(speaker);
 
-            Label text = new Label(entry.Text);
-            text.AddToClassList("narrative-dialogue-history-text");
-            block.Add(text);
-
-            narrativeHistoryContainer.Add(block);
-            lastEntry = block;
-        }
-
-        if (lastEntry != null && narrativeTextScroll != null)
-        {
-            VisualElement target = lastEntry;
-            narrativeTextScroll.schedule.Execute(() =>
+            for (int p = 0; p < segment.Paragraphs.Count; p++)
             {
-                if (target != null && target.panel != null)
-                    narrativeTextScroll.ScrollTo(target);
-            });
+                Label text = new Label(segment.Paragraphs[p]);
+                text.AddToClassList("narrative-dialogue-history-text");
+                block.Add(text);
+            }
+
+            group.Add(block);
         }
+
+        return group;
     }
 
     private void ApplyNarrativeSpeakerPortrait(string speakerId)
@@ -591,7 +586,7 @@ public partial class PrototypeUIController
         if (!IsNarrativeDialogueActive)
             return;
 
-        narrativeHistory.Add(NarrativeUiHistoryEntry.ForPlayerChoice(choiceText));
+        narrativeHistory.Add(NarrativeUiHistoryItem.ForPlayerChoice(choiceText));
 
         NarrativeDialogueSelectionResult result;
         try

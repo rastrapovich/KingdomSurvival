@@ -85,6 +85,15 @@
     padding-right: 8px;
 }
 
+/* Одна группа = один вызов DisplayNarrativeView (дополнение к инструкции
+   "новое отображение пассивных наблюдений и проверок" — "новый текст
+   всегда появляется цельным"). Сам отступ группы от следующей группы даёт
+   margin-bottom последнего .narrative-dialogue-history-entry/-check-result
+   внутри неё — отдельный отступ на .narrative-dialogue-history-group не нужен. */
+.narrative-dialogue-history-group {
+    flex-shrink: 0;
+}
+
 .narrative-dialogue-history-entry {
     margin-bottom: 18px;
 }
@@ -98,6 +107,7 @@
 }
 
 .narrative-dialogue-history-text {
+    margin-top: 4px;
     color: rgb(224, 219, 205);
     font-size: 17px;
     white-space: normal;

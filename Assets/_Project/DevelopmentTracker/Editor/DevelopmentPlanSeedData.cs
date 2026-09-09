@@ -65,10 +65,12 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P00-T02", "DEC-04 — Два способа ремонта",
                     "Старый ремонт возвращает работу всех затворов и бокового сброса; новый перекрывает седьмое русло и стабилизирует мельницу.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 2,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 2,
                     dependencies: new[] { "P00-T01" },
                     acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в LORE.md/NARRATIVE.md" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-04)."),
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Пользователь принял рекомендацию без изменений. Качественное направление внесено в NARRATIVE.md §26.3 (пп. 2–3) и в открытые списки §27/«Что намеренно остаётся открытым»; точные сценарные формулировки и сложности проверок остаются производственной работой P06."),
 
                 Task("P00-T03", "DEC-10 — Люди ниже по течению и условия соглашения",
                     "Утвердить, кто они, что именно поддерживали и какую цену платили обе стороны — человеческое ядро развязки.",

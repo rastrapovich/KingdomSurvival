@@ -94,11 +94,13 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P00-T05", "DEC-06 — Старый предмет",
                     "Утвердить семизубую железную пластину как измеритель/калибр затворов.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 5,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 5,
                     dependencies: new[] { "P00-T01" },
                     relatedKnowledgeIds: new[] { "chapter01.knowledge.seven_tooth_object" },
                     acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в LORE.md" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-06)."),
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Пользователь принял рекомендацию без изменений: семь зубцов = калибр семи затворов; к N01 предмет используется как гребень для собаки, назначение раскрывается расследованием. Внесено в LORE.md §6.1.3."),
 
                 Task("P00-T06", "DEC-07 — Утонувшая женщина",
                     "Имя «Мила» оставить рабочим до заполнения полного паспорта существа и биографии смерти по правилам BESTIARY.md.",

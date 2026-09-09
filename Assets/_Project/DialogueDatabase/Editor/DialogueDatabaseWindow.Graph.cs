@@ -7,13 +7,6 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 {
     public sealed partial class DialogueDatabaseWindow : EditorWindow
     {
-        private const float GraphNodeWidth = 320f;
-        private const float GraphHeaderHeight = 30f;
-        private const float GraphSpeakerHeight = 44f;
-        private const float GraphTextHeight = 72f;
-        private const float GraphChoiceTitleHeight = 20f;
-        private const float GraphChoiceHeight = 54f;
-        private const float GraphFooterHeight = 34f;
         private const float GraphPadding = 10f;
         private const float GraphGrid = 64f;
 
@@ -44,6 +37,14 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private Vector2 graphInspectorScroll;
         private int graphInspectorLastNodeIndex = -1;
 
+        // §3 инструкции по информативным нодам: единственный источник
+        // истины по геометрии узла для ЭТОГО кадра отрисовки. И отрисовка
+        // (DrawGraphNode/DrawGraphChoice), и hit-test/центры портов
+        // (GetNodeScreenRect/GetChoicePortCenter/FindNodeAt) читают эти же
+        // словари — раскладка не пересчитывается дважды по разным формулам.
+        private readonly Dictionary<int, GraphNodeInfo> graphNodeInfoByIndex = new Dictionary<int, GraphNodeInfo>();
+        private readonly Dictionary<int, GraphNodeLayoutMetrics> graphNodeMetricsByIndex = new Dictionary<int, GraphNodeLayoutMetrics>();
+
         private void ResetGraphViewState()
         {
             graphPan = new Vector2(40f, 40f);
@@ -62,6 +63,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private void DrawDialogueGraph(SerializedProperty dialogue)
         {
             SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
+
+            HashSet<string> reachable = CollectReachableNodeIds(dialogue);
+            RefreshGraphNodeMetrics(dialogue, nodes, reachable);
+
             EnsureGraphPositions(dialogue);
             DrawGraphToolbar(dialogue, nodes);
 
@@ -93,7 +98,6 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             DrawGraphGrid(localCanvas);
             HandleGraphInput(dialogue, nodes, localCanvas);
-            HashSet<string> reachable = CollectReachableNodeIds(dialogue);
             DrawGraphConnections(nodes);
             DrawGraphNodes(dialogue, nodes, reachable);
             DrawPendingConnection(nodes);
@@ -105,11 +109,54 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUILayout.EndHorizontal();
         }
 
-        // Панель свойств выбранного узла в режиме «Граф» (§18 доработки):
-        // текстовые блоки, условия, проверки, эффекты и переходы — тот же
-        // DrawNode/DrawChoice/DrawTextBlock, что и в режиме «Таблица», без
-        // дублирования логики. Холст остаётся местом для перетаскивания
-        // связей, точное редактирование полей — здесь.
+        // Раскладка/бейджи/предупреждения считаются один раз в начале кадра
+        // (DialogueDatabaseWindow.GraphPresentation.cs — чистая арифметика,
+        // без GUIStyle), и дальше и отрисовка, и геометрия портов/hit-test
+        // читают готовый результат по индексу узла.
+        private void RefreshGraphNodeMetrics(SerializedProperty dialogue, SerializedProperty nodes, HashSet<string> reachable)
+        {
+            graphNodeInfoByIndex.Clear();
+            graphNodeMetricsByIndex.Clear();
+
+            string startNodeId = dialogue.FindPropertyRelative("startNodeId").stringValue;
+            HashSet<string> allNodeIds = new HashSet<string>(BuildNodeIndexMap(nodes).Keys, StringComparer.Ordinal);
+
+            for (int i = 0; i < nodes.arraySize; i++)
+            {
+                SerializedProperty node = nodes.GetArrayElementAtIndex(i);
+                string nodeId = node.FindPropertyRelative("id").stringValue;
+                bool isStart = string.Equals(nodeId, startNodeId, StringComparison.Ordinal);
+                bool isNodeReachable = string.IsNullOrWhiteSpace(nodeId) || reachable.Contains(nodeId);
+
+                GraphNodeInfo info = BuildGraphNodeInfoFromProperty(node, isStart, isNodeReachable);
+                bool isSelected = graphSelectedNodeIndex == i;
+                GraphNodeLayoutMetrics metrics = ComputeNodeLayoutMetrics(info, allNodeIds, graphDetailMode, isSelected);
+
+                graphNodeInfoByIndex[i] = info;
+                graphNodeMetricsByIndex[i] = metrics;
+            }
+        }
+
+        private GraphNodeLayoutMetrics GetNodeMetrics(int nodeIndex)
+        {
+            if (graphNodeMetricsByIndex.TryGetValue(nodeIndex, out GraphNodeLayoutMetrics metrics))
+                return metrics;
+
+            // Рассинхронизация массива nodes и кэша в пределах одного кадра
+            // (например, узел только что удалён) — безопасный фолбэк вместо
+            // исключения.
+            return new GraphNodeLayoutMetrics
+            {
+                Width = GetGraphNodeWidth(graphDetailMode),
+                TotalHeight = 200f
+            };
+        }
+
+        // Панель свойств выбранного узла в режиме «Граф» (§18 доработки,
+        // §27 инструкции по информативным нодам): текстовые блоки, условия,
+        // проверки, эффекты и переходы редактируются ТОЛЬКО здесь — тот же
+        // DrawNode/DrawChoice/DrawTextBlock, что и в режиме «Таблица».
+        // Карточки на холсте — только чтение (см. DrawGraphNode/DrawGraphChoice).
         private void DrawGraphInspectorPanel(SerializedProperty dialogue, SerializedProperty nodes)
         {
             EditorGUILayout.BeginVertical(GUILayout.Width(GraphInspectorWidth), GUILayout.ExpandHeight(true));
@@ -161,6 +208,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 graphNeedsCenter = true;
 
             GUILayout.Space(8f);
+
+            DrawGraphDetailModeSelector();
+
+            GUILayout.Space(8f);
             GUILayout.Label(
                 "Перетаскивай ноды · тяни жёлтый порт ответа, зелёный порт успеха или красный порт провала на нужный нод · выбери узел, чтобы открыть его свойства справа · колесо = масштаб · Alt+ЛКМ/СКМ = поле",
                 EditorStyles.miniLabel);
@@ -174,6 +225,18 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 SetGraphZoom(graphZoom * 1.15f, graphCanvasSize * 0.5f);
 
             EditorGUILayout.EndHorizontal();
+        }
+
+        // §4/§36: три режима детализации, хранятся в EditorPrefs (не в
+        // ассете) — это личная настройка автора графа, а не данные диалога.
+        private static readonly string[] GraphDetailModeLabels = { "Компактно", "Стандарт", "Полно" };
+
+        private void DrawGraphDetailModeSelector()
+        {
+            int current = (int)graphDetailMode;
+            int next = GUILayout.Toolbar(current, GraphDetailModeLabels, EditorStyles.toolbarButton, GUILayout.Width(210f));
+            if (next != current)
+                SetGraphDetailMode((GraphDetailMode)next);
         }
 
         private void EnsureGraphPositions(SerializedProperty dialogue)
@@ -362,7 +425,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 SerializedProperty node = nodes.GetArrayElementAtIndex(nodeIndex);
                 SerializedProperty choices = node.FindPropertyRelative("choices");
-                Rect sourceRect = GetNodeScreenRect(node);
+                Rect sourceRect = GetNodeScreenRect(nodeIndex, node);
 
                 for (int choiceIndex = 0; choiceIndex < choices.arraySize; choiceIndex++)
                 {
@@ -375,17 +438,17 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     if (kind == DialogueChoiceKind.ActiveReturnable || kind == DialogueChoiceKind.ActiveDecisive)
                     {
                         DrawGraphChoiceEdge(
-                            nodes, indicesById, GetChoicePortCenter(sourceRect, choiceIndex, -12f * graphZoom),
+                            nodes, indicesById, GetChoicePortCenter(nodeIndex, sourceRect, choiceIndex, -12f * graphZoom),
                             choice.FindPropertyRelative("successNodeId").stringValue, GraphSuccessEdgeColor);
                         DrawGraphChoiceEdge(
-                            nodes, indicesById, GetChoicePortCenter(sourceRect, choiceIndex, 12f * graphZoom),
+                            nodes, indicesById, GetChoicePortCenter(nodeIndex, sourceRect, choiceIndex, 12f * graphZoom),
                             choice.FindPropertyRelative("failureNodeId").stringValue, GraphFailureEdgeColor);
                         continue;
                     }
 
                     Color normalColor = EditorGUIUtility.isProSkin ? GraphNormalEdgeColorDark : GraphNormalEdgeColorLight;
                     DrawGraphChoiceEdge(
-                        nodes, indicesById, GetChoicePortCenter(sourceRect, choiceIndex),
+                        nodes, indicesById, GetChoicePortCenter(nodeIndex, sourceRect, choiceIndex),
                         choice.FindPropertyRelative("nextNodeId").stringValue, normalColor);
                 }
             }
@@ -414,8 +477,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 return;
             }
 
-            Rect targetRect = GetNodeScreenRect(nodes.GetArrayElementAtIndex(targetIndex));
-            Vector2 to = GetInputPortCenter(targetRect);
+            Rect targetRect = GetNodeScreenRect(targetIndex, nodes.GetArrayElementAtIndex(targetIndex));
+            Vector2 to = GetInputPortCenter(targetIndex, targetRect);
             float tangent = Mathf.Max(45f, Mathf.Abs(to.x - from.x) * 0.35f);
 
             Handles.DrawBezier(
@@ -434,13 +497,13 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 graphConnectingNodeIndex >= nodes.arraySize)
                 return;
 
-            Rect sourceRect = GetNodeScreenRect(nodes.GetArrayElementAtIndex(graphConnectingNodeIndex));
+            Rect sourceRect = GetNodeScreenRect(graphConnectingNodeIndex, nodes.GetArrayElementAtIndex(graphConnectingNodeIndex));
             float portOffset = graphConnectingPortKind == GraphChoicePortKind.Success
                 ? -12f * graphZoom
                 : graphConnectingPortKind == GraphChoicePortKind.Failure
                     ? 12f * graphZoom
                     : 0f;
-            Vector2 from = GetChoicePortCenter(sourceRect, graphConnectingChoiceIndex, portOffset);
+            Vector2 from = GetChoicePortCenter(graphConnectingNodeIndex, sourceRect, graphConnectingChoiceIndex, portOffset);
             Vector2 to = Event.current.mousePosition;
             float tangent = Mathf.Max(40f, Mathf.Abs(to.x - from.x) * 0.35f);
 
@@ -479,6 +542,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
         }
 
+        // Карточка узла — только чтение (§27): весь ввод текста/спикера/
+        // целей переходов происходит в правом Inspector'е (DrawNode).
+        // Единственные интерактивные элементы холста — заголовок для
+        // перетаскивания, порты для связей и кнопка "+ Ответ"/"+ Узел"
+        // (структурное добавление, не редактирование содержимого).
         private void DrawGraphNode(
             SerializedProperty nodes,
             int nodeIndex,
@@ -486,7 +554,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             bool reachable)
         {
             SerializedProperty node = nodes.GetArrayElementAtIndex(nodeIndex);
-            Rect nodeRect = GetNodeScreenRect(node);
+            GraphNodeInfo info = graphNodeInfoByIndex.TryGetValue(nodeIndex, out GraphNodeInfo cachedInfo)
+                ? cachedInfo
+                : BuildGraphNodeInfoFromProperty(node, isStart, reachable);
+            GraphNodeLayoutMetrics metrics = GetNodeMetrics(nodeIndex);
+            Rect nodeRect = GetNodeScreenRect(nodeIndex, node);
 
             Rect viewport = new Rect(
                 -nodeRect.width,
@@ -514,14 +586,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUI.DrawRect(nodeRect, background);
             DrawGraphBorder(nodeRect, border, selected ? 3f : 1f);
 
-            Rect headerRect = new Rect(
-                nodeRect.x,
-                nodeRect.y,
-                nodeRect.width,
-                GraphHeaderHeight * graphZoom);
+            float titleRowHeight = GraphNodeLayoutConstants.HeaderBaseHeight * graphZoom;
+            Rect headerRect = new Rect(nodeRect.x, nodeRect.y, nodeRect.width, metrics.HeaderHeight * graphZoom);
             EditorGUI.DrawRect(headerRect, header);
 
-            Rect inputPort = RectAround(GetInputPortCenter(nodeRect), Mathf.Max(5f, 6f * graphZoom));
+            Rect inputPort = RectAround(GetInputPortCenter(nodeIndex, nodeRect), Mathf.Max(5f, 6f * graphZoom));
             EditorGUI.DrawRect(inputPort, new Color(0.70f, 0.82f, 0.95f, 1f));
 
             float margin = GraphPadding * graphZoom;
@@ -529,7 +598,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 headerRect.x + margin,
                 headerRect.y + 4f * graphZoom,
                 22f * graphZoom,
-                headerRect.height - 8f * graphZoom);
+                titleRowHeight - 8f * graphZoom);
             GUI.Label(dragRect, "⋮", ScaledStyle(EditorStyles.boldLabel, 12, TextAnchor.MiddleCenter));
 
             string nodeId = node.FindPropertyRelative("id").stringValue;
@@ -537,7 +606,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 dragRect.xMax + 3f * graphZoom,
                 headerRect.y + 4f * graphZoom,
                 headerRect.width - dragRect.width - margin * 2f - (isStart ? 58f : 8f) * graphZoom,
-                headerRect.height - 8f * graphZoom);
+                titleRowHeight - 8f * graphZoom);
             GUI.Label(
                 idRect,
                 string.IsNullOrWhiteSpace(nodeId) ? "<без ID узла>" : nodeId,
@@ -549,32 +618,59 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     headerRect.xMax - 54f * graphZoom,
                     headerRect.y + 5f * graphZoom,
                     48f * graphZoom,
-                    headerRect.height - 10f * graphZoom);
+                    titleRowHeight - 10f * graphZoom);
                 GUI.Label(startRect, "СТАРТ", ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleCenter));
             }
 
+            if (metrics.HeaderHeight * graphZoom > titleRowHeight + 0.5f)
+            {
+                Rect badgeRowRect = new Rect(
+                    headerRect.x + margin,
+                    headerRect.y + titleRowHeight,
+                    headerRect.width - margin * 2f,
+                    metrics.HeaderHeight * graphZoom - titleRowHeight);
+                DrawGraphBadgeRow(badgeRowRect, metrics);
+            }
+
             float y = headerRect.yMax + 6f * graphZoom;
-            DrawGraphSpeaker(node, nodeRect, ref y);
-            DrawGraphNodeText(node, nodeRect, ref y);
+            DrawGraphSpeaker(node, nodeRect, metrics, ref y);
+            DrawGraphNodeTextSection(nodeRect, info, metrics, ref y);
 
             Rect titleRect = new Rect(
                 nodeRect.x + margin,
                 y,
                 nodeRect.width - margin * 2f,
-                GraphChoiceTitleHeight * graphZoom);
+                metrics.ChoicesTitleHeight * graphZoom);
             GUI.Label(titleRect, "Ответы игрока", ScaledStyle(EditorStyles.miniBoldLabel, 10, TextAnchor.MiddleLeft));
-            y += GraphChoiceTitleHeight * graphZoom;
+            y += metrics.ChoicesTitleHeight * graphZoom;
 
             SerializedProperty choices = node.FindPropertyRelative("choices");
-            for (int choiceIndex = 0; choiceIndex < choices.arraySize; choiceIndex++)
+            if (choices.arraySize == 0)
             {
-                DrawGraphChoice(nodes, nodeIndex, choiceIndex, nodeRect, y, choices.GetArrayElementAtIndex(choiceIndex));
-                y += GraphChoiceHeight * graphZoom;
+                Rect emptyRect = new Rect(
+                    nodeRect.x + margin,
+                    y,
+                    nodeRect.width - margin * 2f,
+                    GraphNodeLayoutConstants.EmptySectionHeight * graphZoom);
+                GUI.Label(emptyRect, "Нет вариантов ответа", ScaledStyle(EditorStyles.miniLabel, 10, TextAnchor.MiddleLeft));
+                y += GraphNodeLayoutConstants.EmptySectionHeight * graphZoom;
+            }
+            else
+            {
+                for (int choiceIndex = 0; choiceIndex < choices.arraySize && choiceIndex < metrics.Choices.Count; choiceIndex++)
+                {
+                    float choiceHeight = metrics.Choices[choiceIndex].Height * graphZoom;
+                    GraphChoiceInfo choiceInfo = choiceIndex < info.Choices.Count ? info.Choices[choiceIndex] : null;
+                    DrawGraphChoice(
+                        nodeIndex, choiceIndex, nodeRect, y, choiceHeight,
+                        choiceInfo, metrics.EffectiveMode);
+                    y += choiceHeight;
+                }
             }
 
             Rect addChoiceRect = new Rect(
                 nodeRect.x + margin,
-                nodeRect.yMax - GraphFooterHeight * graphZoom + 5f * graphZoom,
+                nodeRect.yMax - metrics.FooterHeight * graphZoom + 5f * graphZoom,
                 nodeRect.width - margin * 2f,
                 24f * graphZoom);
             if (GUI.Button(addChoiceRect, "+ Ответ", ScaledStyle(GUI.skin.button, 10, TextAnchor.MiddleCenter)))
@@ -604,14 +700,50 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
         }
 
-        private void DrawGraphSpeaker(SerializedProperty node, Rect nodeRect, ref float y)
+        // §5/§24-25: бейджи узла (EXIT/CHECK/COND/FX/KNOW/FLAG/ITEM/
+        // UNREACHABLE/"!") плюс тултип со списком конкретных предупреждений
+        // на "!"/UNREACHABLE.
+        private void DrawGraphBadgeRow(Rect rect, GraphNodeLayoutMetrics metrics)
+        {
+            string tooltip = BuildGraphWarningsTooltip(metrics.Warnings);
+            GUIStyle badgeStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleCenter);
+            float x = rect.x;
+
+            foreach (string badge in metrics.Badges)
+            {
+                if (badge == "СТАРТ")
+                    continue;
+
+                bool isWarningBadge = badge == "!" || badge == "UNREACHABLE";
+                GUIContent content = new GUIContent(badge, isWarningBadge ? tooltip : null);
+                Vector2 size = badgeStyle.CalcSize(content);
+                float chipWidth = size.x + 8f * graphZoom;
+                if (x + chipWidth > rect.xMax)
+                    break;
+
+                Rect chipRect = new Rect(x, rect.y, chipWidth, rect.height);
+                Color chipColor = badge == "!"
+                    ? new Color(0.86f, 0.36f, 0.34f, 0.85f)
+                    : badge == "UNREACHABLE"
+                        ? new Color(0.95f, 0.48f, 0.14f, 0.85f)
+                        : new Color(0.5f, 0.5f, 0.5f, 0.28f);
+                EditorGUI.DrawRect(chipRect, chipColor);
+                GUI.Label(chipRect, content, badgeStyle);
+
+                x = chipRect.xMax + 4f * graphZoom;
+            }
+        }
+
+        private void DrawGraphSpeaker(SerializedProperty node, Rect nodeRect, GraphNodeLayoutMetrics metrics, ref float y)
         {
             float margin = GraphPadding * graphZoom;
+            float sectionHeight = metrics.SpeakerHeight * graphZoom;
+            float portraitSize = Mathf.Min(34f * graphZoom, sectionHeight - 8f * graphZoom);
             Rect portraitRect = new Rect(
                 nodeRect.x + margin,
                 y + 4f * graphZoom,
-                34f * graphZoom,
-                34f * graphZoom);
+                portraitSize,
+                portraitSize);
 
             SerializedProperty speakerId = node.FindPropertyRelative("speakerId");
             DialogueSpeakerData speaker = database.FindSpeaker(speakerId.stringValue);
@@ -635,62 +767,126 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 portraitRect.xMax + 6f * graphZoom,
                 y + 7f * graphZoom,
                 nodeRect.width - portraitRect.width - margin * 2f - 6f * graphZoom,
-                24f * graphZoom);
+                sectionHeight - 10f * graphZoom);
 
-            IReadOnlyList<DialogueSpeakerData> speakers = database.Speakers;
-            if (speakers.Count == 0)
-            {
-                speakerId.stringValue = EditorGUI.TextField(speakerRect, speakerId.stringValue);
-            }
+            string speakerLabel;
+            if (string.IsNullOrWhiteSpace(speakerId.stringValue))
+                speakerLabel = "<нет говорящего>";
+            else if (speaker != null)
+                speakerLabel = speaker.DisplayName + " [" + speaker.Id + "]";
             else
-            {
-                string[] labels = new string[speakers.Count];
-                int selected = 0;
-                for (int i = 0; i < speakers.Count; i++)
-                {
-                    labels[i] = speakers[i].DisplayName + " [" + speakers[i].Id + "]";
-                    if (string.Equals(speakers[i].Id, speakerId.stringValue, StringComparison.Ordinal))
-                        selected = i;
-                }
+                speakerLabel = "? " + speakerId.stringValue;
 
-                int next = EditorGUI.Popup(speakerRect, selected, labels);
-                if (next >= 0 && next < speakers.Count)
-                    speakerId.stringValue = speakers[next].Id;
-            }
+            GUI.Label(speakerRect, speakerLabel, ScaledStyle(EditorStyles.boldLabel, 11, TextAnchor.UpperLeft));
 
-            y += GraphSpeakerHeight * graphZoom;
+            y += sectionHeight;
         }
 
-        private void DrawGraphNodeText(SerializedProperty node, Rect nodeRect, ref float y)
+        // §7-8: текстовые блоки узла — вид блока (никогда числом enum),
+        // обрезанное превью, и (Standard/Full) сводки проверки/условий/
+        // эффектов. Данные берутся из того же GraphNodeInfo, что и раскладка
+        // высоты (metrics), поэтому расхождений между "что нарисовано" и
+        // "сколько места выделено" не возникает.
+        private void DrawGraphNodeTextSection(Rect nodeRect, GraphNodeInfo info, GraphNodeLayoutMetrics metrics, ref float y)
         {
             float margin = GraphPadding * graphZoom;
-            Rect textRect = new Rect(
-                nodeRect.x + margin,
-                y,
-                nodeRect.width - margin * 2f,
-                GraphTextHeight * graphZoom - 4f * graphZoom);
+            GraphDetailMode mode = metrics.EffectiveMode;
 
-            GUIStyle textStyle = ScaledStyle(EditorStyles.textArea, 11, TextAnchor.UpperLeft);
-            textStyle.wordWrap = true;
-            SerializedProperty text = node.FindPropertyRelative("text");
-            text.stringValue = EditorGUI.TextArea(textRect, text.stringValue, textStyle);
-            y += GraphTextHeight * graphZoom;
+            if (metrics.TextBlocksShown == 0)
+            {
+                Rect emptyRect = new Rect(nodeRect.x + margin, y, nodeRect.width - margin * 2f, GraphNodeLayoutConstants.EmptySectionHeight * graphZoom);
+                GUI.Label(emptyRect, "Нет текстовых блоков", ScaledStyle(EditorStyles.miniLabel, 10, TextAnchor.MiddleLeft));
+                y += GraphNodeLayoutConstants.EmptySectionHeight * graphZoom;
+                return;
+            }
+
+            int maxChars = GetTextPreviewMaxChars(mode);
+            List<string> detailLines = new List<string>();
+
+            for (int i = 0; i < metrics.TextBlocksShown; i++)
+            {
+                GraphTextBlockInfo block = info.TextBlocks[i];
+                float blockY = y;
+                float lineHeight = GraphNodeLayoutConstants.PreviewLineHeight * graphZoom;
+
+                Rect kindRect = new Rect(nodeRect.x + margin, blockY, nodeRect.width - margin * 2f, lineHeight);
+                GUI.Label(kindRect, TextBlockKindLabel(block.Kind), ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleLeft));
+                blockY += lineHeight;
+
+                int previewLines = mode == GraphDetailMode.Compact ? 1 : mode == GraphDetailMode.Full ? 3 : 2;
+                Rect previewRect = new Rect(nodeRect.x + margin, blockY, nodeRect.width - margin * 2f, lineHeight * previewLines);
+                GUIStyle previewStyle = ScaledStyle(EditorStyles.label, 10, TextAnchor.UpperLeft);
+                previewStyle.wordWrap = true;
+                string previewText = TruncateForGraphPreview(block.Text, maxChars);
+                GUI.Label(previewRect, string.IsNullOrEmpty(previewText) ? "<пусто>" : previewText, previewStyle);
+                blockY += lineHeight * previewLines;
+
+                if (mode != GraphDetailMode.Compact)
+                {
+                    if (block.PassiveCheck != null)
+                    {
+                        Rect checkRect = new Rect(nodeRect.x + margin, blockY, nodeRect.width - margin * 2f, GraphNodeLayoutConstants.DetailLineHeight * graphZoom);
+                        GUI.Label(checkRect, BuildGraphPassiveCheckSummary(block.PassiveCheck), ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                        blockY += GraphNodeLayoutConstants.DetailLineHeight * graphZoom;
+                    }
+
+                    int maxLines = GetMaxDetailLinesPerSection(mode);
+                    BuildGraphConditionLines(block.Conditions, maxLines, detailLines, out int condOverflow);
+                    blockY = DrawGraphDetailLines(nodeRect, margin, blockY, detailLines, condOverflow);
+
+                    BuildGraphEffectLines(block.OnRevealEffects, maxLines, detailLines, out int fxOverflow);
+                    blockY = DrawGraphDetailLines(nodeRect, margin, blockY, detailLines, fxOverflow);
+                }
+
+                y += metrics.TextBlocks[i].Height * graphZoom;
+            }
+
+            if (metrics.TextBlocksOverflow > 0)
+            {
+                Rect overflowRect = new Rect(nodeRect.x + margin, y, nodeRect.width - margin * 2f, GraphNodeLayoutConstants.PreviewLineHeight * graphZoom);
+                GUI.Label(overflowRect, BuildOverflowLabel(metrics.TextBlocksOverflow) + " блок(ов)", ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                y += GraphNodeLayoutConstants.PreviewLineHeight * graphZoom;
+            }
         }
 
+        private float DrawGraphDetailLines(Rect nodeRect, float margin, float y, List<string> lines, int overflowCount)
+        {
+            float lineHeight = GraphNodeLayoutConstants.DetailLineHeight * graphZoom;
+            foreach (string line in lines)
+            {
+                Rect lineRect = new Rect(nodeRect.x + margin, y, nodeRect.width - margin * 2f, lineHeight);
+                GUI.Label(lineRect, line, ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                y += lineHeight;
+            }
+
+            if (overflowCount > 0)
+            {
+                Rect overflowRect = new Rect(nodeRect.x + margin, y, nodeRect.width - margin * 2f, lineHeight);
+                GUI.Label(overflowRect, BuildOverflowLabel(overflowCount), ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                y += lineHeight;
+            }
+
+            return y;
+        }
+
+        // Карточка ответа — только чтение (§13-20, §27): тип, превью текста,
+        // цель(и) перехода, сводка проверки, условия/эффекты. Порты (кроме
+        // "+ Ответ") остаются интерактивными для перетаскивания связей.
         private void DrawGraphChoice(
-            SerializedProperty nodes,
             int nodeIndex,
             int choiceIndex,
             Rect nodeRect,
             float y,
-            SerializedProperty choice)
+            float choiceHeight,
+            GraphChoiceInfo choiceInfo,
+            GraphDetailMode mode)
         {
             float margin = GraphPadding * graphZoom;
             Rect rowRect = new Rect(
                 nodeRect.x + margin,
                 y + 2f * graphZoom,
                 nodeRect.width - margin * 2f,
-                GraphChoiceHeight * graphZoom - 4f * graphZoom);
+                choiceHeight - 4f * graphZoom);
 
             EditorGUI.DrawRect(
                 rowRect,
@@ -698,137 +894,130 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     ? new Color(1f, 1f, 1f, 0.035f)
                     : new Color(0f, 0f, 0f, 0.035f));
 
-            float targetWidth = 100f * graphZoom;
-            float gap = 5f * graphZoom;
-            Rect targetRect = new Rect(
-                rowRect.xMax - targetWidth - 4f * graphZoom,
-                rowRect.y + 5f * graphZoom,
-                targetWidth,
-                rowRect.height - 10f * graphZoom);
-            Rect textRect = new Rect(
-                rowRect.x + 5f * graphZoom,
-                rowRect.y + 4f * graphZoom,
-                targetRect.x - rowRect.x - gap - 5f * graphZoom,
-                rowRect.height - 8f * graphZoom);
+            if (choiceInfo == null)
+                return;
 
-            SerializedProperty text = choice.FindPropertyRelative("text");
-            GUIStyle textStyle = ScaledStyle(EditorStyles.textArea, 10, TextAnchor.UpperLeft);
-            textStyle.wordWrap = true;
-            text.stringValue = EditorGUI.TextArea(textRect, text.stringValue, textStyle);
+            float lineHeight = GraphNodeLayoutConstants.PreviewLineHeight * graphZoom;
+            float detailLineHeight = GraphNodeLayoutConstants.DetailLineHeight * graphZoom;
+            float cy = rowRect.y + 2f * graphZoom;
+            float contentWidth = rowRect.width - 6f * graphZoom;
 
-            DialogueChoiceKind kind = (DialogueChoiceKind)choice.FindPropertyRelative("kind").enumValueIndex;
+            Rect kindRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, lineHeight);
+            GUI.Label(kindRect, BuildGraphChoiceKindLabel(choiceInfo.Kind), ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleLeft));
+            cy += lineHeight;
 
-            if (kind == DialogueChoiceKind.ActiveReturnable || kind == DialogueChoiceKind.ActiveDecisive)
+            int previewLines = mode == GraphDetailMode.Full ? 2 : 1;
+            Rect textRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, lineHeight * previewLines);
+            GUIStyle previewStyle = ScaledStyle(EditorStyles.label, 10, TextAnchor.UpperLeft);
+            previewStyle.wordWrap = true;
+            string previewText = TruncateForGraphPreview(choiceInfo.Text, GetChoiceTextPreviewMaxChars(mode));
+            GUI.Label(textRect, string.IsNullOrEmpty(previewText) ? "<пусто>" : previewText, previewStyle);
+            cy += lineHeight * previewLines;
+
+            if (choiceInfo.IsExit)
             {
-                DrawGraphActiveChoicePorts(nodeIndex, choiceIndex, nodeRect, choice, targetRect);
+                Rect exitRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, detailLineHeight);
+                GUI.Label(exitRect, "ВЫХОД", ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
                 return;
             }
 
-            SerializedProperty nextNodeId = choice.FindPropertyRelative("nextNodeId");
-            SerializedProperty endsDialogue = choice.FindPropertyRelative("endsDialogue");
-            bool isExit = kind == DialogueChoiceKind.Exit || endsDialogue.boolValue;
-
-            if (kind == DialogueChoiceKind.Exit)
+            if (choiceInfo.IsActiveCheck)
             {
-                // Kind.Exit — явное завершение разговора; не путать с
-                // Table-режимом, где EndsDialogue тоже может быть true у
-                // обычного (не Exit) варианта — тот случай остаётся ниже.
-                GUI.Label(targetRect, "ВЫХОД", ScaledStyle(EditorStyles.miniLabel, 10, TextAnchor.MiddleCenter));
-                return;
-            }
-
-            List<string> labels = new List<string>();
-            labels.Add("ВЫХОД");
-            for (int i = 0; i < nodes.arraySize; i++)
-            {
-                string id = nodes.GetArrayElementAtIndex(i).FindPropertyRelative("id").stringValue;
-                labels.Add(string.IsNullOrWhiteSpace(id) ? "<без ID>" : id);
-            }
-
-            int selectedTarget = 0;
-            if (!isExit)
-            {
-                for (int i = 0; i < nodes.arraySize; i++)
+                if (mode != GraphDetailMode.Compact)
                 {
-                    string id = nodes.GetArrayElementAtIndex(i).FindPropertyRelative("id").stringValue;
-                    if (string.Equals(id, nextNodeId.stringValue, StringComparison.Ordinal))
+                    Rect mechRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, detailLineHeight);
+                    GUI.Label(mechRect, BuildGraphActiveCheckSummary(choiceInfo.Check), ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                    cy += detailLineHeight;
+                }
+
+                GUIStyle successStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft);
+                successStyle.normal.textColor = GraphSuccessEdgeColor;
+                GUIStyle failureStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft);
+                failureStyle.normal.textColor = GraphFailureEdgeColor;
+
+                Rect successRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, detailLineHeight);
+                GUI.Label(successRect, "✓ УСП → " + GraphShortNodeLabel(choiceInfo.SuccessNodeId), successStyle);
+                cy += detailLineHeight;
+
+                Rect failureRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, detailLineHeight);
+                GUI.Label(failureRect, "✕ ПРОВ → " + GraphShortNodeLabel(choiceInfo.FailureNodeId), failureStyle);
+                cy += detailLineHeight;
+
+                DrawGraphActiveChoicePorts(nodeIndex, choiceIndex, nodeRect);
+            }
+            else
+            {
+                string targetLabel = choiceInfo.EndsDialogue ? "→ ВЫХОД" : "→ " + GraphShortNodeLabel(choiceInfo.NextNodeId);
+                Rect targetRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, detailLineHeight);
+                GUI.Label(targetRect, targetLabel, ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                cy += detailLineHeight;
+
+                if (!choiceInfo.EndsDialogue)
+                {
+                    Vector2 portCenter = GetChoicePortCenter(nodeIndex, nodeRect, choiceIndex);
+                    Rect portRect = RectAround(portCenter, Mathf.Max(5f, 6f * graphZoom));
+                    EditorGUI.DrawRect(portRect, new Color(0.92f, 0.68f, 0.28f, 1f));
+
+                    Event current = Event.current;
+                    if (current.type == EventType.MouseDown &&
+                        current.button == 0 &&
+                        portRect.Contains(current.mousePosition))
                     {
-                        selectedTarget = i + 1;
-                        break;
+                        graphConnectingNodeIndex = nodeIndex;
+                        graphConnectingChoiceIndex = choiceIndex;
+                        graphConnectingPortKind = GraphChoicePortKind.Normal;
+                        graphSelectedNodeIndex = nodeIndex;
+                        GUI.FocusControl(null);
+                        current.Use();
                     }
                 }
             }
 
-            int nextTarget = EditorGUI.Popup(targetRect, selectedTarget, labels.ToArray());
-            if (nextTarget != selectedTarget)
+            if (mode != GraphDetailMode.Compact)
             {
-                Undo.RecordObject(database, "Change Dialogue Branch");
-                if (nextTarget <= 0)
-                {
-                    endsDialogue.boolValue = true;
-                    nextNodeId.stringValue = string.Empty;
-                }
-                else
-                {
-                    endsDialogue.boolValue = false;
-                    nextNodeId.stringValue = nodes.GetArrayElementAtIndex(nextTarget - 1)
-                        .FindPropertyRelative("id").stringValue;
-                }
+                int maxLines = GetMaxDetailLinesPerSection(mode);
+                List<string> lines = new List<string>();
 
-                EditorUtility.SetDirty(database);
-                ResetPreview();
-            }
+                BuildGraphConditionLines(choiceInfo.Conditions, maxLines, lines, out int condOverflow);
+                cy = DrawGraphChoiceDetailLines(rowRect, cy, lines, condOverflow);
 
-            if (!endsDialogue.boolValue)
-            {
-                Vector2 portCenter = GetChoicePortCenter(nodeRect, choiceIndex);
-                Rect portRect = RectAround(portCenter, Mathf.Max(5f, 6f * graphZoom));
-                EditorGUI.DrawRect(portRect, new Color(0.92f, 0.68f, 0.28f, 1f));
-
-                Event current = Event.current;
-                if (current.type == EventType.MouseDown &&
-                    current.button == 0 &&
-                    portRect.Contains(current.mousePosition))
-                {
-                    graphConnectingNodeIndex = nodeIndex;
-                    graphConnectingChoiceIndex = choiceIndex;
-                    graphConnectingPortKind = GraphChoicePortKind.Normal;
-                    graphSelectedNodeIndex = nodeIndex;
-                    GUI.FocusControl(null);
-                    current.Use();
-                }
+                List<NarrativeEffect> combinedEffects = new List<NarrativeEffect>();
+                if (choiceInfo.SuccessEffects != null) combinedEffects.AddRange(choiceInfo.SuccessEffects);
+                if (choiceInfo.FailureEffects != null) combinedEffects.AddRange(choiceInfo.FailureEffects);
+                BuildGraphEffectLines(combinedEffects, maxLines, lines, out int fxOverflow);
+                DrawGraphChoiceDetailLines(rowRect, cy, lines, fxOverflow);
             }
         }
 
-        // Активная проверка (§13): вместо одного жёлтого порта и выпадающего
-        // списка — два порта (зелёный успех / красный провал) и две
-        // подписи текущей цели. Точный выбор узла для success/failure
-        // делается в режиме «Таблица»: здесь можно только перетащить связь.
+        private float DrawGraphChoiceDetailLines(Rect rowRect, float y, List<string> lines, int overflowCount)
+        {
+            float lineHeight = GraphNodeLayoutConstants.DetailLineHeight * graphZoom;
+            foreach (string line in lines)
+            {
+                Rect lineRect = new Rect(rowRect.x + 3f * graphZoom, y, rowRect.width - 6f * graphZoom, lineHeight);
+                GUI.Label(lineRect, line, ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                y += lineHeight;
+            }
+
+            if (overflowCount > 0)
+            {
+                Rect overflowRect = new Rect(rowRect.x + 3f * graphZoom, y, rowRect.width - 6f * graphZoom, lineHeight);
+                GUI.Label(overflowRect, BuildOverflowLabel(overflowCount), ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                y += lineHeight;
+            }
+
+            return y;
+        }
+
+        // Активная проверка (§13,§15): вместо одного жёлтого порта — два
+        // (зелёный успех / красный провал). Точный выбор узла для
+        // success/failure делается в режиме «Таблица»/правом Inspector'е —
+        // здесь можно только перетащить связь.
         private void DrawGraphActiveChoicePorts(
             int nodeIndex,
             int choiceIndex,
-            Rect nodeRect,
-            SerializedProperty choice,
-            Rect targetRect)
+            Rect nodeRect)
         {
-            SerializedProperty successNodeId = choice.FindPropertyRelative("successNodeId");
-            SerializedProperty failureNodeId = choice.FindPropertyRelative("failureNodeId");
-
-            Rect successLabelRect = new Rect(targetRect.x, targetRect.y, targetRect.width, targetRect.height * 0.5f);
-            Rect failureLabelRect = new Rect(
-                targetRect.x,
-                targetRect.y + targetRect.height * 0.5f,
-                targetRect.width,
-                targetRect.height * 0.5f);
-
-            GUIStyle successStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleRight);
-            successStyle.normal.textColor = GraphSuccessEdgeColor;
-            GUIStyle failureStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleRight);
-            failureStyle.normal.textColor = GraphFailureEdgeColor;
-
-            GUI.Label(successLabelRect, "✓ " + GraphShortNodeLabel(successNodeId.stringValue), successStyle);
-            GUI.Label(failureLabelRect, "✗ " + GraphShortNodeLabel(failureNodeId.stringValue), failureStyle);
-
             DrawGraphChoicePort(nodeIndex, choiceIndex, nodeRect, -12f * graphZoom, GraphChoicePortKind.Success, GraphSuccessEdgeColor);
             DrawGraphChoicePort(nodeIndex, choiceIndex, nodeRect, 12f * graphZoom, GraphChoicePortKind.Failure, GraphFailureEdgeColor);
         }
@@ -841,7 +1030,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             GraphChoicePortKind portKind,
             Color color)
         {
-            Vector2 portCenter = GetChoicePortCenter(nodeRect, choiceIndex, verticalOffset);
+            Vector2 portCenter = GetChoicePortCenter(nodeIndex, nodeRect, choiceIndex, verticalOffset);
             Rect portRect = RectAround(portCenter, Mathf.Max(5f, 6f * graphZoom));
             EditorGUI.DrawRect(portRect, color);
 
@@ -930,7 +1119,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
                 SerializedProperty node = nodes.GetArrayElementAtIndex(i);
                 SetNodeEditorPosition(node, new Vector2(60f + depth * 430f, y));
-                y += GetNodeWorldHeight(node) + 60f;
+                y += GetNodeWorldHeight(i) + 60f;
                 nextYByDepth[depth] = y;
             }
 
@@ -943,9 +1132,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (nodes.arraySize == 0)
                 return;
 
-            Rect bounds = GetNodeWorldRect(nodes.GetArrayElementAtIndex(0));
+            Rect bounds = GetNodeWorldRect(0, nodes.GetArrayElementAtIndex(0));
             for (int i = 1; i < nodes.arraySize; i++)
-                bounds = Union(bounds, GetNodeWorldRect(nodes.GetArrayElementAtIndex(i)));
+                bounds = Union(bounds, GetNodeWorldRect(i, nodes.GetArrayElementAtIndex(i)));
 
             graphPan = canvas.center - bounds.center * graphZoom;
         }
@@ -967,54 +1156,59 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             return (screenPosition - graphPan) / Mathf.Max(0.01f, graphZoom);
         }
 
-        private Rect GetNodeScreenRect(SerializedProperty node)
+        // §3/§30-34: единственная формула экранного прямоугольника узла —
+        // позиция из SerializedProperty, размер из GraphNodeLayoutMetrics
+        // (посчитан в RefreshGraphNodeMetrics в начале кадра).
+        private Rect GetNodeScreenRect(int nodeIndex, SerializedProperty node)
         {
+            GraphNodeLayoutMetrics metrics = GetNodeMetrics(nodeIndex);
             Vector2 worldPosition = node.FindPropertyRelative("editorPosition").vector2Value;
             return new Rect(
                 graphPan.x + worldPosition.x * graphZoom,
                 graphPan.y + worldPosition.y * graphZoom,
-                GraphNodeWidth * graphZoom,
-                GetNodeWorldHeight(node) * graphZoom);
+                metrics.Width * graphZoom,
+                metrics.TotalHeight * graphZoom);
         }
 
-        private Rect GetNodeWorldRect(SerializedProperty node)
+        private Rect GetNodeWorldRect(int nodeIndex, SerializedProperty node)
         {
+            GraphNodeLayoutMetrics metrics = GetNodeMetrics(nodeIndex);
             Vector2 position = node.FindPropertyRelative("editorPosition").vector2Value;
-            return new Rect(position.x, position.y, GraphNodeWidth, GetNodeWorldHeight(node));
+            return new Rect(position.x, position.y, metrics.Width, metrics.TotalHeight);
         }
 
-        private static float GetNodeWorldHeight(SerializedProperty node)
+        private float GetNodeWorldHeight(int nodeIndex)
         {
-            SerializedProperty choices = node.FindPropertyRelative("choices");
-            int choiceCount = choices == null ? 0 : choices.arraySize;
-            return GraphHeaderHeight +
-                   GraphSpeakerHeight +
-                   GraphTextHeight +
-                   GraphChoiceTitleHeight +
-                   choiceCount * GraphChoiceHeight +
-                   GraphFooterHeight +
-                   16f;
+            return GetNodeMetrics(nodeIndex).TotalHeight;
         }
 
-        private Vector2 GetInputPortCenter(Rect nodeRect)
+        private Vector2 GetInputPortCenter(int nodeIndex, Rect nodeRect)
         {
+            GraphNodeLayoutMetrics metrics = GetNodeMetrics(nodeIndex);
             return new Vector2(
                 nodeRect.xMin,
-                nodeRect.yMin + GraphHeaderHeight * 0.5f * graphZoom);
+                nodeRect.yMin + metrics.HeaderHeight * 0.5f * graphZoom);
         }
 
-        private Vector2 GetChoicePortCenter(Rect nodeRect, int choiceIndex, float verticalOffset = 0f)
+        // Центр порта варианта ответа — читает Y/Height, посчитанные для
+        // ЭТОГО конкретного ответа в ComputeNodeLayoutMetrics, а не по
+        // единой формуле фиксированной высоты (§34): высота карточек
+        // ответов теперь разная (проверки/условия/эффекты занимают больше
+        // места), и порт обязан оставаться на реальном месте кнопки.
+        private Vector2 GetChoicePortCenter(int nodeIndex, Rect nodeRect, int choiceIndex, float verticalOffset = 0f)
         {
-            float y =
-                nodeRect.yMin +
-                (GraphHeaderHeight +
-                 GraphSpeakerHeight +
-                 GraphTextHeight +
-                 GraphChoiceTitleHeight +
-                 GraphChoiceHeight * choiceIndex +
-                 GraphChoiceHeight * 0.5f +
-                 6f) * graphZoom +
-                verticalOffset;
+            GraphNodeLayoutMetrics metrics = GetNodeMetrics(nodeIndex);
+            float y;
+            if (choiceIndex >= 0 && choiceIndex < metrics.Choices.Count)
+            {
+                GraphChoiceLayout layout = metrics.Choices[choiceIndex];
+                y = nodeRect.yMin + (layout.Y + layout.Height * 0.5f) * graphZoom + verticalOffset;
+            }
+            else
+            {
+                y = nodeRect.yMin + verticalOffset;
+            }
+
             return new Vector2(nodeRect.xMax, y);
         }
 
@@ -1022,7 +1216,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         {
             for (int i = nodes.arraySize - 1; i >= 0; i--)
             {
-                if (GetNodeScreenRect(nodes.GetArrayElementAtIndex(i)).Contains(mousePosition))
+                if (GetNodeScreenRect(i, nodes.GetArrayElementAtIndex(i)).Contains(mousePosition))
                     return i;
             }
 

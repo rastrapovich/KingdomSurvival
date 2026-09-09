@@ -71,6 +71,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         {
             if (database == null)
                 database = Resources.Load<DialogueDatabaseAsset>(DialogueDatabaseAsset.ResourcesPath);
+
+            LoadGraphDetailMode();
         }
 
         private void OnGUI()

@@ -104,11 +104,17 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P00-T06", "DEC-07 — Утонувшая женщина",
                     "Имя «Мила» оставить рабочим до заполнения полного паспорта существа и биографии смерти по правилам BESTIARY.md.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 6,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 6,
                     dependencies: new[] { "P00-T05" },
                     relatedKnowledgeIds: new[] { "chapter01.knowledge.drowned_woman_story" },
-                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесён паспорт существа в BESTIARY.md" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-07)."),
+                    acceptanceCriteria: new[]
+                    {
+                        "Зафиксирован явный ответ пользователя (согласие отложить)",
+                        "Решение об отсрочке зафиксировано; полный паспорт в BESTIARY.md — отдельная будущая задача (см. P10-T01/P13-T02), не блокирующая P00"
+                    },
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Пользователь согласился с рекомендацией процесса: имя «Мила» остаётся рабочим, полный паспорт существа (личность, привязка к месту, долг, последствия — по правилам BESTIARY.md) сознательно отложен до сцен P10/P13, где он реально понадобится. BESTIARY.md не менялся — фактов о существе пока не утверждено."),
 
                 Task("P00-T07", "DEC-12 — Доля сверхъестественного",
                     "Сохранить неоднозначность: практическая причина доказуема, проявление памяти воды допустимо, но не обязано иметь одно объяснение.",

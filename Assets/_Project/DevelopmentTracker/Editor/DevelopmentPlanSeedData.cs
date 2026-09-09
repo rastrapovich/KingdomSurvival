@@ -1,0 +1,974 @@
+using System;
+using System.Collections.Generic;
+
+namespace KingdomSurvival.DevelopmentTracker.Editor
+{
+    // Начальное содержимое плана — сводка инструкции «Kingdom Survival:
+    // единая инструкция по реализации Главы 01 и экрана «Этапы разработки»».
+    // Это рабочий каркас производственного контроля, а не нарративный канон:
+    // формулировки задач опираются на утверждённые разделы 1–25 инструкции,
+    // но сами по себе не утверждают факты мира (см. раздел 3 инструкции).
+    public static class DevelopmentPlanSeedData
+    {
+        public static void Populate(DevelopmentPlanAsset plan)
+        {
+            if (plan == null)
+                return;
+
+            plan.schemaVersion = DevelopmentPlanAsset.CurrentSchemaVersion;
+            plan.projectTitle = "Kingdom Survival — Глава 01 «Дом на чужой воде»";
+            plan.currentMilestoneId = "P01_TRACKER";
+            plan.planUpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd");
+            plan.projectNotes =
+                "План сгенерирован DevelopmentPlanSeedData по своду инструкции. " +
+                "ID этапов и задач стабильны и используются другими задачами как " +
+                "зависимости — не переименовывать их вручную без переноса ссылок.";
+
+            plan.phases = new List<DevelopmentPhaseData>
+            {
+                BuildP00Decisions(),
+                BuildP01Tracker(),
+                BuildP02Baseline(),
+                BuildP03Scaffold(),
+                BuildP04Morning(),
+                BuildP05Flood(),
+                BuildP06RepairChoice(),
+                BuildP07Investigation(),
+                BuildP08Departure(),
+                BuildP09Road(),
+                BuildP10Ford(),
+                BuildP11Agreement(),
+                BuildP12Return(),
+                BuildP13Council(),
+                BuildP14Encounters(),
+                BuildP15BattleBridge(),
+                BuildP16QaDocs()
+            };
+        }
+
+        private static DevelopmentPhaseData BuildP00Decisions()
+        {
+            return Phase(
+                "P00_DECISIONS", "Утверждение открытых решений",
+                "Зафиксировать ответы DEC-01…DEC-12 и внести утверждённое в LORE.md/NARRATIVE.md/BESTIARY.md, прежде чем рабочие имена и правила станут игровыми данными как окончательная истина.",
+                0, true,
+                "У каждого решения есть статус, формулировка ответа и ссылка на канонический документ; ни одно рабочее имя не попало в игровые данные как факт без решения.",
+                null,
+
+                Task("P00-T01", "DEC-03 — Устройство водной системы",
+                    "Взять рабочую модель семи затворов, бокового русла и нижнего канала как основу для мельницы, брода, рыбы и людей ниже по течению.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 1,
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в LORE.md" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-03)."),
+
+                Task("P00-T02", "DEC-04 — Два способа ремонта",
+                    "Старый ремонт возвращает работу всех затворов и бокового сброса; новый перекрывает седьмое русло и стабилизирует мельницу.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 2,
+                    dependencies: new[] { "P00-T01" },
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в LORE.md/NARRATIVE.md" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-04)."),
+
+                Task("P00-T03", "DEC-10 — Люди ниже по течению и условия соглашения",
+                    "Утвердить, кто они, что именно поддерживали и какую цену платили обе стороны — человеческое ядро развязки.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 3,
+                    dependencies: new[] { "P00-T01" },
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.downstream_people", "chapter01.knowledge.old_agreement" },
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в LORE.md" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-10)."),
+
+                Task("P00-T04", "DEC-05 — Второй хлеб",
+                    "Утвердить как рацион работнику нижней смены, позже искажённый до подношения.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 4,
+                    dependencies: new[] { "P00-T01" },
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.second_loaf_is_ration" },
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в LORE.md" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-05)."),
+
+                Task("P00-T05", "DEC-06 — Старый предмет",
+                    "Утвердить семизубую железную пластину как измеритель/калибр затворов.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 5,
+                    dependencies: new[] { "P00-T01" },
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.seven_tooth_object" },
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в LORE.md" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-06)."),
+
+                Task("P00-T06", "DEC-07 — Утонувшая женщина",
+                    "Имя «Мила» оставить рабочим до заполнения полного паспорта существа и биографии смерти по правилам BESTIARY.md.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 6,
+                    dependencies: new[] { "P00-T05" },
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.drowned_woman_story" },
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесён паспорт существа в BESTIARY.md" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-07)."),
+
+                Task("P00-T07", "DEC-12 — Доля сверхъестественного",
+                    "Сохранить неоднозначность: практическая причина доказуема, проявление памяти воды допустимо, но не обязано иметь одно объяснение.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 7,
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в NARRATIVE.md" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-12)."),
+
+                Task("P00-T08", "DEC-01 — Минимальная конкретика героя",
+                    "Утвердить роль, исходную позицию в Доме и голос героя до финального написания реплик.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 8,
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в NARRATIVE.md" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-01)."),
+
+                Task("P00-T09", "DEC-02 — Повторяющиеся жители Дома",
+                    "Сначала утвердить функции (хранитель старого порядка, молодой мастер, мельник, семейный голос), затем имена — Остафий/Лада/Мирон/Ульяна пока рабочие.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 9,
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в NARRATIVE.md" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-02)."),
+
+                Task("P00-T10", "DEC-11 — Финальный набор решений",
+                    "Сохранить три направления развязки, но точные цены определить после DEC-03 и DEC-10.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 10,
+                    dependencies: new[] { "P00-T01", "P00-T02", "P00-T03" },
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в NARRATIVE.md" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-11)."),
+
+                Task("P00-T11", "DEC-08 — Навык «Ремесло»",
+                    "Пока не добавлять; использовать Суждение, Следопытство, знания и контекст. Вернуться, если появятся минимум три регулярных применения.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 11,
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя (в т. ч. явное решение отложить)" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-08)."),
+
+                Task("P00-T12", "DEC-09 — Трейт «Читает воду»",
+                    "В первой главе сначала дать знание/вывод. Трейт выдавать только при подтверждённом применении в следующих главах.",
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 12,
+                    acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя (в т. ч. явное решение отложить)" },
+                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-09).")
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP01Tracker()
+        {
+            return Phase(
+                "P01_TRACKER", "Экран «Этапы разработки»",
+                "Дать личный производственный инструмент: список этапов, галочки, dropdown, поиск/фильтры, progress bar, карточка задачи, validator, переходы в другие окна.",
+                1, true,
+                "Критерии готовности раздела 4.11 выполнены и пользователь подтвердил работу окна в Unity.",
+                null,
+
+                Task("P01-T01", "Модель данных плана",
+                    "DevelopmentPlanAsset описывает DevelopmentPhaseData/DevelopmentTaskData/AcceptanceCriterionData, статусы и категории по разделу 4.3, миграцию schemaVersion.",
+                    DevelopmentTaskCategory.Data, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
+                    fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanAsset.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Сериализуются все поля раздела 4.3 (id/title/details/category/status/required/order/dependencies/acceptanceCriteria/manualChecks/fileReferences/relatedDialogueIds/relatedFlagIds/relatedKnowledgeIds/blockerNote/implementationNote/completedAt/completedCommit/optionalAutoCheckId)",
+                        "MigrateIfNeeded поднимает schemaVersion и не падает на null-полях"
+                    },
+                    manualChecks: new[] { "Открыть asset в инспекторе Unity и убедиться, что нет ошибок сериализации" },
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanAsset.cs"),
+
+                Task("P01-T02", "Расчёт прогресса",
+                    "DevelopmentPlanProgress считает обязательный прогресс отдельно от опционального и исключает Отложено (раздел 4.5).",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
+                    fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanProgress.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Обязательный прогресс считается только по required-задачам и не включает Отложено",
+                        "Опциональные задачи считаются отдельно и не уменьшают обязательный процент",
+                        "«Следующая рекомендуемая задача» учитывает зависимости"
+                    },
+                    manualChecks: new[] { "Прогнать DevelopmentTrackerProgressTests в Test Runner" },
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanProgress.cs"),
+
+                Task("P01-T03", "Validator плана",
+                    "DevelopmentPlanValidator проверяет структуру плана по 10 пунктам раздела 4.10.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
+                    fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanValidator.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Находит дубликаты ID, отсутствующую зависимость и цикл (прямой и косвенный)",
+                        "Требует blockerNote при статусе «Заблокировано»",
+                        "Требует критерий приёмки у обязательной задачи",
+                        "Предупреждает о выполненных задачах с незакрытыми критериями"
+                    },
+                    manualChecks: new[] { "Прогнать DevelopmentPlanValidatorTests в Test Runner" },
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanValidator.cs"),
+
+                Task("P01-T04", "Автоматические проверки",
+                    "DevelopmentPlanAutoChecks подтверждает только объективные факты: существование file:/asset: по optionalAutoCheckId (раздел 4.9).",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 4,
+                    fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanAutoChecks.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Автопроверка file: подтверждает существование файла/папки",
+                        "Автопроверка asset: подтверждает существование asset через AssetDatabase",
+                        "Результат показывается как доказательство рядом с задачей, но не заменяет ручную галочку"
+                    },
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanAutoChecks.cs"),
+
+                Task("P01-T05", "Окно: список этапов, поиск и фильтры",
+                    "DevelopmentTrackerWindow строит foldout на каждый этап со строками задач внутри, поиск, фильтр статуса/категории, переключатели «Только незавершённые/обязательные/заблокированные».",
+                    DevelopmentTaskCategory.UI, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 5,
+                    dependencies: new[] { "P01-T01", "P01-T02" },
+                    fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/DevelopmentTrackerWindow.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Foldout на каждый этап, строки задач внутри, раскрытие не меняет данные",
+                        "Поиск и оба фильтра сужают список без ошибок",
+                        "Progress bar и счётчики (заблокировано/нужна проверка/опционально) обновляются сразу"
+                    },
+                    manualChecks: new[] { "Открыть Kingdom Survival → Этапы разработки и вручную проверить фильтры" },
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentTrackerWindow.cs"),
+
+                Task("P01-T06", "Галочка, статус-dropdown и карточка задачи",
+                    "Галочка переключает Completed ⇄ InProgress по правилу 4.4; статус доступен отдельным dropdown; критерии приёмки — локальные чекбоксы; поля ссылок/blockerNote/implementationNote/коммита редактируемы.",
+                    DevelopmentTaskCategory.UI, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 6,
+                    dependencies: new[] { "P01-T05" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Установка галочки переводит задачу в «Выполнено», записывает дату и предлагает указать коммит",
+                        "Снятие галочки переводит задачу в «В работе», а не в «Не начато»",
+                        "Незавершённая обязательная зависимость при попытке завершить задачу показывает предупреждение"
+                    },
+                    manualChecks: new[] { "Вручную отметить и снять несколько задач, проверить сохранение после перезапуска Unity" }),
+
+                Task("P01-T07", "Диагностическая панель",
+                    "Нижняя панель окна показывает ошибки/предупреждения validator отдельно и список задач «Нужна проверка в Unity».",
+                    DevelopmentTaskCategory.UI, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 7,
+                    dependencies: new[] { "P01-T03" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Кнопка «Проверить план» запускает validator и показывает результат",
+                        "Отдельно виден список задач со статусом «Нужна проверка в Unity»"
+                    }),
+
+                Task("P01-T08", "Переходы в другие окна",
+                    "DevelopmentTrackerMenuCommands открывает «База диалогов», «База существ» и «UI Конструктор» через EditorApplication.ExecuteMenuItem без прямых asmdef-ссылок.",
+                    DevelopmentTaskCategory.Integration, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 8,
+                    fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/DevelopmentTrackerMenuCommands.cs" },
+                    acceptanceCriteria: new[] { "Каждая кнопка открывает целевое окно; DevelopmentTracker.Editor компилируется без ссылок на чужие Editor-сборки" },
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentTrackerMenuCommands.cs"),
+
+                Task("P01-T09", "Editor-only asmdef",
+                    "KingdomSurvival.DevelopmentTracker.Editor.asmdef ссылается только на UnityEditor/UI Toolkit; рантайм-билд не получает ссылку на модуль.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 9,
+                    fileReferences: new[] { "Assets/_Project/DevelopmentTracker/Editor/KingdomSurvival.DevelopmentTracker.Editor.asmdef" },
+                    acceptanceCriteria: new[] { "includePlatforms = [Editor]", "Нет циклической ссылки с Dialogue/Unit Database" },
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/KingdomSurvival.DevelopmentTracker.Editor.asmdef"),
+
+                Task("P01-T10", "Начальное заполнение плана",
+                    "DevelopmentPlanSeedData строит P00–P16 по инструкции; DevelopmentPlanBootstrap создаёт и заполняет asset при первом Unity-запуске после pull, если его ещё нет.",
+                    DevelopmentTaskCategory.Data, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 10,
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanSeedData.cs",
+                        "Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanBootstrap.cs"
+                    },
+                    acceptanceCriteria: new[]
+                    {
+                        "После первого успешного compile в Unity asset существует и содержит все этапы P00–P16",
+                        "Повторный запуск бутстрапа не перезаписывает существующий план",
+                        "Есть ручной пункт меню для осознанного пересоздания плана с подтверждением"
+                    },
+                    manualChecks: new[] { "Удалить asset, перезапустить Unity, убедиться что план создался автоматически" },
+                    optionalAutoCheckId: "file:Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanSeedData.cs"),
+
+                Task("P01-T11", "EditMode-тесты экрана",
+                    "Тесты сериализации, расчёта прогресса и validator по разделу 19.1.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 11,
+                    dependencies: new[] { "P01-T01", "P01-T02", "P01-T03" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Tests/EditMode/DevelopmentPlanAssetTests.cs",
+                        "Assets/_Project/Tests/EditMode/DevelopmentPlanValidatorTests.cs",
+                        "Assets/_Project/Tests/EditMode/DevelopmentTrackerProgressTests.cs"
+                    },
+                    acceptanceCriteria: new[] { "Все тесты раздела 19.1 присутствуют и зелёные в Test Runner" },
+                    manualChecks: new[] { "Запустить Window → General → Test Runner → EditMode" },
+                    optionalAutoCheckId: "file:Assets/_Project/Tests/EditMode/DevelopmentPlanAssetTests.cs"),
+
+                Task("P01-T12", "UI-настройки в EditorPrefs",
+                    "Раскрытые foldout, ширины колонок и активные фильтры хранятся в EditorPrefs, а не сериализуются в asset (раздел 4.8).",
+                    DevelopmentTaskCategory.UI, DevelopmentTaskStatus.NeedsUnityCheck, required: false, order: 12,
+                    dependencies: new[] { "P01-T05" },
+                    acceptanceCriteria: new[] { "Состояние foldout переживает перезапуск окна через EditorPrefs" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP02Baseline()
+        {
+            return Phase(
+                "P02_BASELINE", "Проверка текущего технического фундамента",
+                "После pull дождаться чистой компиляции, прогнать все EditMode tests и вручную проверить карту, время, экспедицию, Hero Screen, базы данных, prototype_miller и Road Predator, прежде чем строить Главу 01 поверх них.",
+                2, true,
+                "Нет ошибок компиляции; тесты зелёные; ручной smoke test записан в DEVELOPMENT_STATUS.md; все задачи P02 либо выполнены, либо имеют конкретный blockerNote.",
+                new[] { "P01_TRACKER" },
+
+                Task("P02-T01", "Чистая компиляция после pull",
+                    "Открыть проект в Unity 6000.5.10f1 и дождаться Domain Reload без ошибок в Console.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
+                    acceptanceCriteria: new[] { "Console не содержит ошибок компиляции" }),
+
+                Task("P02-T02", "Все EditMode tests зелёные",
+                    "Test Runner → EditMode должен пройти без красных тестов на текущем main.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
+                    fileReferences: new[] { "Assets/_Project/Tests/EditMode" },
+                    acceptanceCriteria: new[] { "Test Runner → EditMode: все тесты проходят" }),
+
+                Task("P02-T03", "Карта, время, экспедиция в Prototype_Main",
+                    "Открыть сцену, выйти в экспедицию и вернуться без ошибок и рассинхронизации состояния.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
+                    fileReferences: new[] { "Assets/_Project/Scenes/Prototype_Main.unity", "Assets/_Project/Scripts/Core/GameState.cs" },
+                    acceptanceCriteria: new[] { "Экспедиция запускается и завершается без ошибок консоли" }),
+
+                Task("P02-T04", "Экран героя, база существ, база диалогов",
+                    "Открыть все три редакторских/игровых экрана и убедиться, что они показывают текущие данные.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 4,
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/UI/PrototypeUIController.HeroScreen.cs",
+                        "Assets/_Project/UnitDatabase/Editor/UnitDatabaseWindow.cs",
+                        "Assets/_Project/DialogueDatabase/Editor/DialogueDatabaseWindow.cs"
+                    },
+                    acceptanceCriteria: new[] { "Все три окна открываются и работают без ошибок" }),
+
+                Task("P02-T05", "prototype_miller: пассивная/возвратимая/решающая проверки",
+                    "Пройти техническую витрину и убедиться, что все три типа проверки отрабатывают корректно.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 5,
+                    fileReferences: new[] { "Assets/_Project/DialogueDatabase/Runtime/DialogueDatabaseAsset.cs" },
+                    acceptanceCriteria: new[] { "Пассивная, активная возвратимая и активная решающая проверки проходят без ошибок" }),
+
+                Task("P02-T06", "Road Predator Encounter",
+                    "Проверить дорожную встречу-хищника через ExpeditionIncidentSystem.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 6,
+                    fileReferences: new[] { "Assets/_Project/Scripts/Core/ExpeditionIncidentSystem.cs" },
+                    acceptanceCriteria: new[] { "Encounter запускается и завершается без ошибок" }),
+
+                Task("P02-T07", "Записать smoke test в DEVELOPMENT_STATUS.md",
+                    "Зафиксировать дату и результат ручной проверки P02 в техническом журнале.",
+                    DevelopmentTaskCategory.Documentation, DevelopmentTaskStatus.NotStarted, required: true, order: 7,
+                    dependencies: new[] { "P02-T01", "P02-T02", "P02-T03", "P02-T04", "P02-T05", "P02-T06" },
+                    fileReferences: new[] { "ProjectDocs/DEVELOPMENT_STATUS.md" },
+                    acceptanceCriteria: new[] { "В журнале есть запись с датой и результатом ручной проверки P02" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP03Scaffold()
+        {
+            return Phase(
+                "P03_CHAPTER01_SCAFFOLD", "Каркас Главы 01 и реестр ID",
+                "Создать Chapter01Ids, узкий Chapter01StoryDirector (без универсального QuestManager), определить переходы N01–N17 и связать их с TryOpenNarrativeDialogueById, обеспечить идемпотентность.",
+                3, true,
+                "Пустые/черновые диалоги позволяют пройти весь граф от N01 до N17 в обеих ветках ремонта без тупика и без телепортации.",
+                new[] { "P02_BASELINE" },
+
+                Task("P03-T01", "Chapter01Ids — реестр стабильных ID",
+                    "Единый реестр ID по шаблонам раздела 7 (узел/диалог/флаг/знание/проверка/встреча/предмет/эффект) с валидатором пустых и дублирующихся ID.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01Ids.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Валидатор запрещает пустые и дублирующиеся ID",
+                        "Все шаблоны раздела 7 представлены константами/билдерами"
+                    },
+                    manualChecks: new[] { "Прогнать Chapter01StateTests в Unity" }),
+
+                Task("P03-T02", "Chapter01StoryDirector",
+                    "Узкий контроллер: читает NarrativeState/GameState, не хранит вторую копию прогресса, не телепортирует отряд, гарантирует идемпотентность узла.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P03-T01" },
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Повторный запуск не повторяет завершённый узел",
+                        "Определяет доступный следующий узел по флагам NarrativeState"
+                    },
+                    manualChecks: new[] { "Пройти граф вручную дважды подряд без перезапуска и без дублирования эффектов" }),
+
+                Task("P03-T03", "Chapter01OutcomeApplier",
+                    "Одноразовые внешние эффекты (ресурсы/время/повреждения/открытия карты) со стабильным execution ID.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    dependencies: new[] { "P03-T01" },
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01OutcomeApplier.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Каждый внешний эффект применяется не более одного раза по execution ID",
+                        "Повторный показ диалога не удваивает эффект"
+                    },
+                    manualChecks: new[] { "Сохраниться/загрузиться после применения эффекта и убедиться, что он не повторился" }),
+
+                Task("P03-T04", "Chapter01ContextBuilder",
+                    "Передаёт реальный состав экспедиции, предметы и контекстные модификаторы; отсутствие спутника не блокирует обязательный переход.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    dependencies: new[] { "P03-T01" },
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01ContextBuilder.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Передаёт реальный состав отряда и предметы из GameState",
+                        "Отсутствие конкретного спутника не блокирует обязательный переход"
+                    }),
+
+                Task("P03-T05", "Черновой граф N01–N17",
+                    "Черновые диалоги/переходы для всех 17 узлов, связанные через TryOpenNarrativeDialogueById.",
+                    DevelopmentTaskCategory.Data, DevelopmentTaskStatus.NotStarted, required: true, order: 5,
+                    dependencies: new[] { "P03-T02" },
+                    fileReferences: new[] { "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Черновой граф проходим от N01 до N17 в обеих ветках ремонта",
+                        "Нет тупиков и телепортации по физической карте"
+                    }),
+
+                Task("P03-T06", "Тесты переходов ремонта",
+                    "EditMode-тесты для инвариантов раздела 19.2: repair_old/repair_new не одновременно, обе ветки ведут к N07.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 6,
+                    dependencies: new[] { "P03-T02", "P03-T05" },
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Tests/EditMode/Chapter01StateTests.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Тест подтверждает взаимоисключение repair_old/repair_new",
+                        "Тест подтверждает, что обе ветки доходят до N07"
+                    })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP04Morning()
+        {
+            return Phase(
+                "P04_MORNING", "Обычное утро и люди Дома",
+                "Реализовать N01–N03: норму Дома, 3–4 повторяющихся жителя через дело и противоречие, малый выбор с локальным следом, посев мотива второго хлеба и воды без объясняющей лекции.",
+                4, true,
+                "Игрок понимает, что именно является нормой, кого он знает и что может потерять.",
+                new[] { "P03_CHAPTER01_SCAFFOLD" },
+
+                Task("P04-T01", "N01 «Обычное утро / Лишний хлеб»",
+                    "Intro, Narration, бытовой выбор; пассивное Суждение 11 может дать раннее знание о втором хлебе.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    relatedFlagIds: new[] { "chapter01.flag.started", "chapter01.flag.home_intro_seen" },
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.second_loaf_is_ration" },
+                    acceptanceCriteria: new[] { "Игрок узнаёт норму Дома и мотив второго хлеба без объясняющей лекции" }),
+
+                Task("P04-T02", "N02 «Люди Дома»",
+                    "Представить 3–4 повторяющихся человека через дела и противоречия, не через справку.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P00-T09" },
+                    acceptanceCriteria: new[] { "Каждый персонаж имеет функцию, желание и несогласие, а не только справку" }),
+
+                Task("P04-T03", "N03 «Первое давление»",
+                    "Малый сбой (уровень/шум/задержка воды/бытовой конфликт) как наблюдение и маленький выбор с поздним эхом.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    relatedFlagIds: new[] { "chapter01.flag.first_pressure_seen" },
+                    acceptanceCriteria: new[] { "Тревога нарастает из знакомой нормы, не из внешнего объявления" }),
+
+                Task("P04-T04", "Зафиксировать визуальное состояние Дома для рифмы N16",
+                    "Сохранить исходное состояние сцены (звук, вода, мельница, скот, настил), чтобы N16 могло показать минимум три изменения.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    manualChecks: new[] { "Сверить список зафиксированных мотивов со списком раздела 18" },
+                    acceptanceCriteria: new[] { "Состояние Дома на входе в N01 зафиксировано и доступно для сравнения в N16" }),
+
+                Task("P04-T05", "Функции жителей Дома в диалогах",
+                    "Хранитель старого порядка, молодой мастер, мельник и бытовой голос — у каждого выгода/страх/правда/слепое место (раздел 16.1).",
+                    DevelopmentTaskCategory.Narrative, DevelopmentTaskStatus.NotStarted, required: true, order: 5,
+                    dependencies: new[] { "P00-T09" },
+                    acceptanceCriteria: new[] { "У каждой функции описаны выгода от воды, страх после паводка, правда и слепое место" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP05Flood()
+        {
+            return Phase(
+                "P05_FLOOD", "Паводок",
+                "Реализовать N04 как срочную игровую сцену: решающая проверка Силы/Ловкости/Стойкости, гарантированный тяжёлый выбор после неё, одноразовые последствия, продолжение при любом провале.",
+                5, true,
+                "Минимум четыре различимых исхода видимо меняют ближайшие сцены, но каждый приводит к осмотру плотины (N05).",
+                new[] { "P04_MORNING" },
+
+                Task("P05-T01", "N04 «Синяя ставня» — решающее действие",
+                    "Сила, Ловкость или Стойкость определяют способ действия, сложность 13; все исходы ведут к N05.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    relatedFlagIds: new[] { "chapter01.flag.flood_happened" },
+                    acceptanceCriteria: new[] { "Проверка сложности 13 на Силу/Ловкость/Стойкость реализована", "Любой исход ведёт к N05" }),
+
+                Task("P05-T02", "Гарантированный тяжёлый выбор после проверки",
+                    "Успех проверки определяет доступную позицию, а не спасает всё; отдельный выбор приоритета (кого/что спасать).",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P05-T01" },
+                    acceptanceCriteria: new[] { "Успех проверки не отменяет цену катастрофы: есть отдельный обязательный выбор" }),
+
+                Task("P05-T03", "Применение последствий паводка",
+                    "Chapter01OutcomeApplier применяет ресурсы/состояние мельницы/скот/флаг травмы по итогам выбора.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    dependencies: new[] { "P03-T03", "P05-T02" },
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01OutcomeApplier.cs" },
+                    relatedFlagIds: new[]
+                    {
+                        "chapter01.flag.flood_workers_saved", "chapter01.flag.flood_livestock_lost",
+                        "chapter01.flag.flood_mill_deck_destroyed", "chapter01.flag.hero_injured_by_flood"
+                    },
+                    manualChecks: new[] { "Пройти все варианты исхода вручную и проверить, что ресурсы/флаги применяются один раз" },
+                    acceptanceCriteria: new[] { "Минимум четыре различимых исхода видимо меняют ближайшие сцены" }),
+
+                Task("P05-T04", "Failure-forward для всех провалов",
+                    "Проверить, что каждый вариант провала продолжает сюжет с ценой, а не блокирует его.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    dependencies: new[] { "P05-T03" },
+                    acceptanceCriteria: new[] { "Каждый вариант провала N04 всё равно приводит к N05" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP06RepairChoice()
+        {
+            return Phase(
+                "P06_REPAIR_CHOICE", "Осмотр плотины и выбор ремонта",
+                "Реализовать N05 «Мокрый чертёж» (выбор ремонта без проверки, ровно один взаимоисключающий флаг) и N06 (матрица первых симптомов по ветке).",
+                6, true,
+                "Оба ремонта действительно устраняют местную аварию, но создают разные наблюдаемые последствия.",
+                new[] { "P05_FLOOD", "P00_DECISIONS" },
+
+                Task("P06-T01", "N05 «Мокрый чертёж»",
+                    "Старое и новое решение показаны через позиции людей и физическую схему; выбор без проверки; ровно один флаг ремонта.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    dependencies: new[] { "P00-T01", "P00-T02" },
+                    relatedFlagIds: new[] { "chapter01.flag.dam_inspected", "chapter01.flag.repair_old", "chapter01.flag.repair_new" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Ровно один из repair_old/repair_new записывается",
+                        "Выбор не сопровождается броском проверки"
+                    }),
+
+                Task("P06-T02", "N06 — матрица первых симптомов",
+                    "Симптомы различаются по ветке ремонта согласно матрице раздела 11.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P06-T01" },
+                    relatedFlagIds: new[] { "chapter01.flag.water_wrong_active" },
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.water_flow_is_wrong" },
+                    acceptanceCriteria: new[] { "Обе ветки локально успешны, но дают наблюдаемо разные симптомы", "Обе ветки ведут к расследованию N07" }),
+
+                Task("P06-T03", "Тест взаимоисключения ремонта",
+                    "EditMode-тест: repair_old и repair_new не могут быть установлены одновременно.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    dependencies: new[] { "P06-T01" },
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Tests/EditMode/Chapter01StateTests.cs" },
+                    acceptanceCriteria: new[] { "Тест подтверждает взаимоисключение флагов ремонта" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP07Investigation()
+        {
+            return Phase(
+                "P07_INVESTIGATION", "Последствия ремонта и расследование",
+                "Реализовать N07A/N07B/N07C в свободном порядке и N08 как материальный след старой системы; каждый обязательный вывод — минимум два источника; без счётчика улик.",
+                7, true,
+                "Любой допустимый порядок расследования приводит к обоснованному решению идти дальше, дополнительные ветви меняют реплики и подготовку.",
+                new[] { "P06_REPAIR_CHOICE" },
+
+                Task("P07-T01", "N07A «Колесо, которое не спит»",
+                    "Мельница как человеческое свидетельство; пассивное наблюдение + возвратимый разговор; при провале — источник через ученика.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.mill_moves_at_wrong_time", "chapter01.knowledge.old_seventh_channel" },
+                    relatedFlagIds: new[] { "chapter01.flag.investigated_mill" },
+                    acceptanceCriteria: new[] { "Знание доступно минимум двумя путями (провал не закрывает знание навсегда)" }),
+
+                Task("P07-T02", "N07B — скот",
+                    "Поведение животных как физический индикатор старого русла; Naturalist/Fieldcraft или помощь NPC.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.cattle_avoid_old_branch" },
+                    relatedFlagIds: new[] { "chapter01.flag.investigated_cattle" },
+                    acceptanceCriteria: new[] { "Ветка даёт самостоятельный вывод, не дублирует мельницу" }),
+
+                Task("P07-T03", "N07C — река и рыба",
+                    "Изменившаяся гидрология и след ниже по течению через физическое исследование берега/рыбы/мусора.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.fish_pattern_changed", "chapter01.knowledge.old_ford" },
+                    relatedFlagIds: new[] { "chapter01.flag.investigated_river" },
+                    acceptanceCriteria: new[] { "Игрок получает направление без квестовой стрелки из воздуха" }),
+
+                Task("P07-T04", "N08 «Семь зубцов»",
+                    "Материальная связь нынешнего сбоя с прежней системой через предмет; Суждение/Следопытство/знания вместо нового навыка.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    dependencies: new[] { "P00-T05" },
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.seven_tooth_object", "chapter01.knowledge.old_custom" },
+                    relatedFlagIds: new[] { "chapter01.flag.old_trace_found" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Предмет имеет практическую функцию и допускает ошибочное толкование",
+                        "Позднее переосмысление не стирает раннюю реакцию"
+                    }),
+
+                Task("P07-T05", "Свободный порядок без счётчика улик",
+                    "Реализовать открытие N09 через смысловые комбинации знаний (варианты A/B/C раздела 14), а не подсчёт трёх любых улик.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 5,
+                    dependencies: new[] { "P07-T01", "P07-T02", "P07-T03" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Любой порядок N07A/B/C доступен и не создаёт тупик",
+                        "Нет видимого или скрытого универсального счётчика улик"
+                    })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP08Departure()
+        {
+            return Phase(
+                "P08_DEPARTURE", "Старый след и решение идти дальше",
+                "Реализовать N09 (совет: знания превращаются в цель, одна основная и максимум две опциональные дальние цели) и N10 (выбор 0–4 бойцов из существующего состава).",
+                8, true,
+                "Состав группы физически и текстово соответствует GameState; отсутствие конкретного спутника не блокирует обязательный сюжет.",
+                new[] { "P07_INVESTIGATION" },
+
+                Task("P08-T01", "N09 — совет: знания → цель",
+                    "Открыть ровно одну основную дальнюю цель и максимум одну-две дополнительные, не засоряя карту равноправными маркерами.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    relatedFlagIds: new[] { "chapter01.flag.far_route_unlocked" },
+                    acceptanceCriteria: new[] { "Открыта ровно одна основная дальняя цель и максимум 1–2 опциональные" }),
+
+                Task("P08-T02", "Осмысленные комбинации знаний открывают N09",
+                    "Реализовать варианты A/B/C раздела 14 как условия открытия узла.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P07-T05" },
+                    acceptanceCriteria: new[] { "Хотя бы одна из трёх причинных комбинаций знаний открывает переход к N09" }),
+
+                Task("P08-T03", "N10 — сбор отряда 0–4",
+                    "Выбор бойцов идёт из реального состава GameState; любой состав от 0 до 4 позволяет продолжить.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    relatedFlagIds: new[] { "chapter01.flag.expedition_started" },
+                    acceptanceCriteria: new[] { "Выбор бойцов физически совпадает с GameState", "0, 1 и 4 бойца — все допустимы" }),
+
+                Task("P08-T04", "Исправить тексты о «всегда четырёх бойцах»",
+                    "Найти и исправить любые реплики/описания, ошибочно утверждающие фиксированный состав из 4 бойцов.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    acceptanceCriteria: new[] { "Не осталось текста, утверждающего фиксированный состав из 4 бойцов" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP09Road()
+        {
+            return Phase(
+                "P09_ROAD", "Сбор отряда и первая дальняя дорога",
+                "Реализовать N11 на существующей физической карте: одна обязательная и одна необязательная дорожная сцена, пассивная проверка пути на Инстинкт+Следопытство, опциональная лагерная сцена.",
+                9, true,
+                "Дорога выполняет сюжетную функцию, цена пути сохраняется в GameState.",
+                new[] { "P08_DEPARTURE" },
+
+                Task("P09-T01", "N11 — дальняя дорога на физической карте",
+                    "Без телепортации, на текущей карте Prototype_Main.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    acceptanceCriteria: new[] { "Дорога проходится физически на существующей карте" }),
+
+                Task("P09-T02", "Обязательная дорожная встреча",
+                    "Ровно одна обязательная встреча по пути к броду.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P09-T01" },
+                    acceptanceCriteria: new[] { "Реализована ровно одна обязательная дорожная встреча" }),
+
+                Task("P09-T03", "Необязательная дорожная встреча",
+                    "Ровно одна опциональная встреча по пути.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    dependencies: new[] { "P09-T01" },
+                    acceptanceCriteria: new[] { "Реализована ровно одна необязательная дорожная встреча" }),
+
+                Task("P09-T04", "Пассивная проверка пути",
+                    "6 + Инстинкт + Следопытство + контекст, сложность 13; успех — подготовленность, провал — цена времени/припасов.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    dependencies: new[] { "P09-T01" },
+                    acceptanceCriteria: new[] { "Успех даёт подготовленность", "Провал тратит время/припасы, но не блокирует путь (failure-forward)" }),
+
+                Task("P09-T05", "Опциональная лагерная сцена синтеза гипотез",
+                    "Только если дорога достаточно длинная и есть что синтезировать; без отдельного Camp Manager.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: false, order: 5,
+                    dependencies: new[] { "P09-T01" },
+                    acceptanceCriteria: new[] { "Сцена собирает минимум две гипотезы и меняется от состава группы, иначе не добавляется" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP10Ford()
+        {
+            return Phase(
+                "P10_FORD", "Старый брод и люди ниже по течению",
+                "Реализовать N12 «Женщина у брода» и N13 «У всех есть дом» с учётом ремонта, предмета, знаний и состава отряда; решающая проверка Характера только там, где меняет цену отношений.",
+                10, true,
+                "Игрок впервые видит живых людей, которые несут цену решения Дома, и не может свести их к функции «выдать экспозицию».",
+                new[] { "P09_ROAD" },
+
+                Task("P10-T01", "N12 «Женщина у брода»",
+                    "Материальный факт брода (колья/метки) плюс человеческая история свидетеля; без окончательной лекции.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    dependencies: new[] { "P00-T06" },
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.old_ford", "chapter01.knowledge.drowned_woman_story" },
+                    relatedFlagIds: new[] { "chapter01.flag.old_ford_found" },
+                    acceptanceCriteria: new[] { "Есть материальный факт брода и человеческая история, но не единственная авторская трактовка" }),
+
+                Task("P10-T02", "N13 «У всех есть дом»",
+                    "Реакции учитывают ремонт, предмет, размер группы, оружие и предыдущую помощь; провал не скрывает обязательную истину навсегда.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P00-T03", "P10-T01" },
+                    relatedFlagIds: new[] { "chapter01.flag.downstream_contact" },
+                    acceptanceCriteria: new[]
+                    {
+                        "Реакции меняются от ремонта, предмета, состава и предыдущей помощи",
+                        "Провал приводит к долгу/напряжению/травме, но не блокирует обязательную истину"
+                    }),
+
+                Task("P10-T03", "Решающая проверка Характера (первый контакт)",
+                    "Сложность 13; успех улучшает форму контакта, провал не скрывает истину навсегда.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    dependencies: new[] { "P10-T02" },
+                    acceptanceCriteria: new[] { "Проверка сложности 13 на Характер реализована и влияет только на форму контакта" }),
+
+                Task("P10-T04", "PartySizeAtLeast/PartySizeAtMost",
+                    "Добавить целое PartySize и условия PartySizeAtLeast/PartySizeAtMost в контекст оценки (раздел 13.1) вместо постоянных флагов party_size_0…4.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    fileReferences: new[] { "Assets/_Project/Scripts/Core/NarrativeState.cs" },
+                    manualChecks: new[] { "Прогнать тесты условий размера группы в Unity" },
+                    acceptanceCriteria: new[] { "Условия читают текущий контекстный размер группы, а не сохранённый вечный флаг" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP11Agreement()
+        {
+            return Phase(
+                "P11_AGREEMENT", "Раскрытие соглашения и решение о возвращении",
+                "Реализовать N14 (сборка физического/человеческого/мифического свидетельства, гарантированное shared_water_system) и N14½ (идти дальше или возвращаться).",
+                11, true,
+                "Игрок понимает причинную истину достаточно для выбора, но мир остаётся шире единственного объяснения.",
+                new[] { "P10_FORD" },
+
+                Task("P11-T01", "N14 — сборка свидетельства",
+                    "Гарантированно выдать chapter01.knowledge.shared_water_system до необратимого решения; объяснить практическую функцию затворов/хлеба/предмета, если утверждено.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    dependencies: new[] { "P00-T03", "P00-T04", "P00-T05" },
+                    relatedKnowledgeIds: new[]
+                    {
+                        "chapter01.knowledge.shared_water_system", "chapter01.knowledge.home_was_not_self_sufficient",
+                        "chapter01.knowledge.old_agreement", "chapter01.knowledge.downstream_people"
+                    },
+                    relatedFlagIds: new[] { "chapter01.flag.agreement_revealed" },
+                    acceptanceCriteria: new[] { "chapter01.knowledge.shared_water_system гарантированно выдаётся до N17" }),
+
+                Task("P11-T02", "Сохранить сверхъестественную неоднозначность",
+                    "Практическая причина доказуема; проявление памяти воды остаётся неоднозначным, без единого закрывающего монолога.",
+                    DevelopmentTaskCategory.Narrative, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P00-T07", "P11-T01" },
+                    acceptanceCriteria: new[] { "Ни одна сцена не закрывает сверхъестественную неоднозначность единственным монологом" }),
+
+                Task("P11-T03", "N14½ — идти дальше или возвращаться",
+                    "Явный выбор с учётом расстояния, времени и припасов, влияющий на обратную дорогу.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    dependencies: new[] { "P11-T01" },
+                    relatedFlagIds: new[] { "chapter01.flag.return_started" },
+                    acceptanceCriteria: new[] { "Решение влияет на маршрут и состояние обратной дороги" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP12Return()
+        {
+            return Phase(
+                "P12_RETURN", "Изменившаяся обратная дорога и Дом",
+                "Реализовать N15 (изменённая обратная дорога) и N16 (серьёзное возвращение домой): Дом встречает игрока последствиями, а не только докладом.",
+                12, true,
+                "Возвращение доказывает память мира минимум тремя видимыми изменениями.",
+                new[] { "P11_AGREEMENT" },
+
+                Task("P12-T01", "N15 — изменившаяся обратная дорога",
+                    "Варианты по времени, ремонту, отношению и знаниям; возврат не повторяет исходную дорогу дословно.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    acceptanceCriteria: new[] { "Обратная дорога физически проходится и не является дословным повтором" }),
+
+                Task("P12-T02", "N16 — серьёзное возвращение домой",
+                    "Минимум три ранних мотива (раздел 18) возвращаются изменёнными.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P04-T04", "P12-T01" },
+                    relatedFlagIds: new[] { "chapter01.flag.returned_home" },
+                    acceptanceCriteria: new[] { "Минимум три ранних мотива возвращаются в видимо изменённом состоянии" }),
+
+                Task("P12-T03", "Таблица эха по флагам паводка и ремонта",
+                    "Каждый флаг паводка/ремонта проявляется минимум один раз до N10 и один раз в N16 (раздел 11).",
+                    DevelopmentTaskCategory.Data, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    dependencies: new[] { "P05-T03", "P06-T01", "P12-T02" },
+                    acceptanceCriteria: new[] { "Ни один флаг паводка/ремонта не остаётся нигде не увиденным" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP13Council()
+        {
+            return Phase(
+                "P13_COUNCIL", "Совет Дома и итог главы",
+                "Реализовать N17: три направления решения после гарантированного знания, устойчивые флаги результата и отношений, ни одного варианта без цены.",
+                13, true,
+                "Есть 2–3 устойчиво различимых состояния мира, понятные игроку и пригодные для будущего эха.",
+                new[] { "P12_RETURN" },
+
+                Task("P13-T01", "N17 — совет Дома, три направления",
+                    "Восстановить старый порядок / создать новый порядок / оставить воду Дому — все три с ценой.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    dependencies: new[] { "P00-T10", "P11-T01" },
+                    relatedFlagIds: new[] { "chapter01.flag.council_completed", "chapter01.flag.completed" },
+                    acceptanceCriteria: new[] { "Реализованы все три направления", "Ни один вариант не является бесплатно идеальным" }),
+
+                Task("P13-T02", "Решение о памяти Милы",
+                    "Назвать / скрыть / превратить в обряд / вернуть человеческую историю — только после утверждения DEC-07.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: false, order: 2,
+                    dependencies: new[] { "P00-T06" },
+                    acceptanceCriteria: new[] { "Реализовано только после утверждения DEC-07" }),
+
+                Task("P13-T03", "Устойчивые флаги результата",
+                    "Зафиксировать флаги результата, отношений и будущих долгов для эха в следующих главах.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    dependencies: new[] { "P13-T01" },
+                    acceptanceCriteria: new[] { "2–3 устойчиво различимых состояния мира зафиксированы флагами" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP14Encounters()
+        {
+            return Phase(
+                "P14_ENCOUNTERS", "Пул региональных встреч и эхо решений",
+                "Добавить 6–10 сильных региональных сцен вокруг готового позвоночника через существующий ExpeditionIncidentSystem; расширять к 50–70 только пакетами после плейтестов.",
+                14, true,
+                "Повторное прохождение показывает заметную вариативность без потери причинной линии.",
+                new[] { "P13_COUNCIL" },
+
+                Task("P14-T01", "Адаптер ExpeditionIncidentSystem → авторские сцены",
+                    "Использовать существующую систему встреч с небольшим адаптером к базе диалогов; отдельную Encounter Database не создавать раньше срока.",
+                    DevelopmentTaskCategory.Integration, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    fileReferences: new[] { "Assets/_Project/Scripts/Core/ExpeditionIncidentSystem.cs" },
+                    acceptanceCriteria: new[] { "Система выбирает только допустимые по условиям сцены" }),
+
+                Task("P14-T02", "6–10 региональных встреч",
+                    "Каждая встреча: stable ID, стадия, место/маршрут, условия, запреты, вес, repeat policy, dialogue ID, последствия, echo tags.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P14-T01" },
+                    acceptanceCriteria: new[] { "Минимум 6 встреч заполнены по минимальным полям раздела 17" }),
+
+                Task("P14-T03", "Критическое знание не только в редкой встрече",
+                    "Ни одно обязательное знание не имеет единственным источником неповторяемую случайную встречу.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    dependencies: new[] { "P14-T02" },
+                    acceptanceCriteria: new[] { "Валидация контента подтверждает наличие альтернативного источника у каждого обязательного знания" })
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP15BattleBridge()
+        {
+            return Phase(
+                "P15_BATTLE_BRIDGE", "Боевой мост",
+                "Условный этап: реализуется только если Глава 01 потребует обязательного боя. Если требуется — запускать исключительно существующий BattleSandbox, без второй боевой системы.",
+                15, false,
+                "Этап остаётся отложенным, пока глава не требует обязательного боя.",
+                null,
+
+                Task("P15-T01", "Мост к BattleSandbox",
+                    "Передавать состав экспедиции в BattleSandbox, возвращать результат в GameState/NarrativeState, обеспечивать продолжение при поражении, если это не сознательная финальная смерть.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.Deferred, required: false, order: 1,
+                    fileReferences: new[] { "Assets/_Project/BattleSandbox/Runtime" },
+                    acceptanceCriteria: new[] { "Запускается только существующий BattleSandbox, без второй боевой системы" },
+                    blockerNote: "Отложено: Глава 01 пока не требует обязательного боя (раздел 1.4, П15).")
+            );
+        }
+
+        private static DevelopmentPhaseData BuildP16QaDocs()
+        {
+            return Phase(
+                "P16_QA_DOCS", "QA, сохранение, регрессии и документация",
+                "Пройти обязательные ветки, попарное покрытие факторов (раздел 19.4), сохранение/загрузку вокруг необратимых выборов, все валидаторы и обновить документацию.",
+                16, true,
+                "Глава проходится от начала до совета во всех обязательных ветках без тупика, потери состояния и противоречий текста.",
+                new[] { "P13_COUNCIL" },
+
+                Task("P16-T01", "QA-матрица QA-01…QA-08",
+                    "Пройти восемь сценариев раздела 19.4 (ремонт × состав × провалы/успехи × порядок расследования × сохранение).",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    dependencies: new[] { "P14_ENCOUNTERS" },
+                    acceptanceCriteria: new[] { "Все восемь сценариев QA-01…QA-08 пройдены и запротоколированы" }),
+
+                Task("P16-T02", "Шесть комбинаций «ремонт × финал»",
+                    "Пройти все 6 комбинаций (2 ремонта × 3 финальных направления).",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    dependencies: new[] { "P13-T01" },
+                    acceptanceCriteria: new[] { "Все 6 комбинаций ремонт×финал пройдены" }),
+
+                Task("P16-T03", "Save/Load вокруг необратимых выборов",
+                    "Сохранение и загрузка перед/после N04, N05, N13, N17 не дублирует эффекты.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    acceptanceCriteria: new[] { "Нет повторного применения ресурсов/времени/эффектов после загрузки" }),
+
+                Task("P16-T04", "Validator баз диалогов/существ/плана/ID",
+                    "Запустить все валидаторы проекта и убедиться, что они проходят без ошибок.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    acceptanceCriteria: new[] { "Все валидаторы (диалоги, существа, план, Chapter01Ids) проходят без ошибок" }),
+
+                Task("P16-T05", "Обновить DEVELOPMENT_STATUS.md и нарративные документы",
+                    "Журнал отражает фактическое состояние Главы 01 после прохождения QA-матрицы.",
+                    DevelopmentTaskCategory.Documentation, DevelopmentTaskStatus.NotStarted, required: true, order: 5,
+                    dependencies: new[] { "P16-T01", "P16-T02", "P16-T03", "P16-T04" },
+                    fileReferences: new[] { "ProjectDocs/DEVELOPMENT_STATUS.md" },
+                    acceptanceCriteria: new[] { "DEVELOPMENT_STATUS.md обновлён по факту прохождения QA" })
+            );
+        }
+
+        private static DevelopmentPhaseData Phase(
+            string id, string title, string purpose, int order, bool required,
+            string acceptanceSummary, string[] dependencies,
+            params DevelopmentTaskData[] tasks)
+        {
+            DevelopmentPhaseData phase = new DevelopmentPhaseData
+            {
+                id = id,
+                title = title,
+                purpose = purpose ?? string.Empty,
+                order = order,
+                required = required,
+                acceptanceSummary = acceptanceSummary ?? string.Empty
+            };
+
+            if (dependencies != null)
+                phase.dependencies.AddRange(dependencies);
+            if (tasks != null)
+                phase.tasks.AddRange(tasks);
+
+            return phase;
+        }
+
+        private static DevelopmentTaskData Task(
+            string id, string title, string details,
+            DevelopmentTaskCategory category, DevelopmentTaskStatus status,
+            bool required, int order,
+            string[] dependencies = null,
+            string[] acceptanceCriteria = null,
+            string[] manualChecks = null,
+            string[] fileReferences = null,
+            string[] relatedDialogueIds = null,
+            string[] relatedFlagIds = null,
+            string[] relatedKnowledgeIds = null,
+            string blockerNote = null,
+            string optionalAutoCheckId = null)
+        {
+            DevelopmentTaskData task = new DevelopmentTaskData
+            {
+                id = id,
+                title = title,
+                details = details ?? string.Empty,
+                category = category,
+                status = status,
+                required = required,
+                order = order,
+                blockerNote = blockerNote ?? string.Empty,
+                optionalAutoCheckId = optionalAutoCheckId ?? string.Empty
+            };
+
+            if (dependencies != null)
+                task.dependencies.AddRange(dependencies);
+            if (fileReferences != null)
+                task.fileReferences.AddRange(fileReferences);
+            if (relatedDialogueIds != null)
+                task.relatedDialogueIds.AddRange(relatedDialogueIds);
+            if (relatedFlagIds != null)
+                task.relatedFlagIds.AddRange(relatedFlagIds);
+            if (relatedKnowledgeIds != null)
+                task.relatedKnowledgeIds.AddRange(relatedKnowledgeIds);
+            if (manualChecks != null)
+                task.manualChecks.AddRange(manualChecks);
+
+            if (acceptanceCriteria != null)
+            {
+                foreach (string criterionText in acceptanceCriteria)
+                    task.acceptanceCriteria.Add(new AcceptanceCriterionData { text = criterionText });
+            }
+
+            return task;
+        }
+    }
+}

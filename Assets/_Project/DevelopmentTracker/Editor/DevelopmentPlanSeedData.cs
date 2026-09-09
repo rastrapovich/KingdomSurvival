@@ -134,9 +134,11 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P00-T09", "DEC-02 — Повторяющиеся жители Дома",
                     "Сначала утвердить функции (хранитель старого порядка, молодой мастер, мельник, семейный голос), затем имена — Остафий/Лада/Мирон/Ульяна пока рабочие.",
-                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Blocked, required: true, order: 9,
+                    DevelopmentTaskCategory.Decision, DevelopmentTaskStatus.Completed, required: true, order: 9,
                     acceptanceCriteria: new[] { "Зафиксирован явный ответ пользователя", "При принятии — внесено в NARRATIVE.md" },
-                    blockerNote: "Ожидает решения пользователя. См. раздел 2 сводной инструкции (DEC-02)."),
+                    acceptanceCriteriaDone: true,
+                    completedAt: "2026-09-09",
+                    implementationNote: "Пользователь принял рекомендацию без изменений: 4 функции утверждены (хранитель старого порядка, молодой мастер, мельник, семейный голос). Имена Остафий/Лада/Мирон/Ульяна остаются рабочими для черновиков. Внесено в NARRATIVE.md §26.1.2."),
 
                 Task("P00-T10", "DEC-11 — Финальный набор решений",
                     "Сохранить три направления развязки, но точные цены определить после DEC-03 и DEC-10.",

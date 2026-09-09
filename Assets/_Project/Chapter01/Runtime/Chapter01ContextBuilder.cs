@@ -1,0 +1,53 @@
+using System;
+using System.Collections.Generic;
+
+namespace KingdomSurvival.Chapter01
+{
+    // Формирует контекст спутников, предметов и размера отряда для Главы 01
+    // (раздел 6.2 инструкции). Не блокирует обязательный путь отсутствием
+    // конкретного спутника или предмета — только сообщает, что присутствует.
+    public static class Chapter01ContextBuilder
+    {
+        public static NarrativeEvaluationContext Build(GameState gameState, HeroProfileData hero)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+            if (hero == null)
+                throw new ArgumentNullException(nameof(hero));
+            if (gameState.Narrative == null)
+                gameState.Narrative = new NarrativeStateData();
+
+            return new NarrativeEvaluationContext(
+                hero,
+                gameState.Narrative,
+                GetPresentCompanionIds(gameState),
+                GetPresentItemIds(gameState),
+                gameState.WorldSeed);
+        }
+
+        public static List<string> GetPresentCompanionIds(GameState gameState)
+        {
+            List<string> companions = new List<string>();
+            if (gameState != null && gameState.HasActiveExpedition && gameState.ActiveExpedition.FighterIds != null)
+                companions.AddRange(gameState.ActiveExpedition.FighterIds);
+            return companions;
+        }
+
+        public static List<string> GetPresentItemIds(GameState gameState)
+        {
+            List<string> items = new List<string>();
+            if (gameState?.Narrative?.Items != null)
+                items.AddRange(gameState.Narrative.Items);
+            return items;
+        }
+
+        // 0, если отряд не в походе — герой идёт один (раздел 13.1: контекстное
+        // значение, а не постоянный флаг party_size_N).
+        public static int GetPartySize(GameState gameState)
+        {
+            if (gameState == null || !gameState.HasActiveExpedition || gameState.ActiveExpedition.FighterIds == null)
+                return 0;
+            return gameState.ActiveExpedition.FighterIds.Count;
+        }
+    }
+}

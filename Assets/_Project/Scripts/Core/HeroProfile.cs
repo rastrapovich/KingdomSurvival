@@ -21,7 +21,13 @@ public static class NarrativeCompetencyIds
 {
     public const string Fieldcraft = "fieldcraft";
 
-    public static readonly IReadOnlyList<string> Known = new List<string> { Fieldcraft };
+    // Зарегистрирована по решению DEC-08 (см. ProjectDocs/DEVELOPMENT_STATUS.md §2):
+    // осознанное отступление от рекомендации сводной инструкции по Главе 01
+    // не добавлять новую компетенцию ради одной сцены. Используется впервые
+    // в N08 «Семь зубцов» (chapter01.node.08).
+    public const string Craft = "craft";
+
+    public static readonly IReadOnlyList<string> Known = new List<string> { Fieldcraft, Craft };
 
     public static bool IsKnown(string competencyId)
     {

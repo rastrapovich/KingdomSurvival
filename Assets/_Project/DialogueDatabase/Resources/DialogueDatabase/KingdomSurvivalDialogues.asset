@@ -17,6 +17,34 @@ MonoBehaviour:
     displayName: "Мельник"
     role: "Технический тест условий диалога"
     portrait: {fileID: 0}
+  - id: ostafiy
+    displayName: "Остафий"
+    role: "Хранитель старого порядка (рабочее имя, DEC-02)"
+    portrait: {fileID: 0}
+  - id: lada
+    displayName: "Лада"
+    role: "Молодой мастер (рабочее имя, DEC-02)"
+    portrait: {fileID: 0}
+  - id: miron
+    displayName: "Мирон"
+    role: "Мельник (рабочее имя, DEC-02)"
+    portrait: {fileID: 0}
+  - id: ulyana
+    displayName: "Ульяна"
+    role: "Семейный голос (рабочее имя, DEC-02)"
+    portrait: {fileID: 0}
+  - id: narrator
+    displayName: "Рассказчик"
+    role: "Голос сцены"
+    portrait: {fileID: 0}
+  - id: downstream_voice
+    displayName: "Человек с низовья"
+    role: "Житель нижнего поселения (имя не утверждено, DEC-10)"
+    portrait: {fileID: 0}
+  - id: ford_witness
+    displayName: "Свидетель у брода"
+    role: "Ребёнок Дома"
+    portrait: {fileID: 0}
   dialogues:
   - id: prototype_miller
     title: "Витрина условий ответа"
@@ -711,4 +739,1416 @@ MonoBehaviour:
         failureEffects: []
       editorPosition: {x: 1030, y: 300}
       hasEditorPosition: 1
+    schemaVersion: 1
+  - id: chapter01_dialogue_01_ordinary_morning
+    title: "N01 — Обычное утро / Лишний хлеб"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.01
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.01
+      speakerId: ulyana
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.01_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Ульяна вынимает из печи второй каравай — сверх обычной нормы — и заворачивает его в холстину. «Отнеси к седьмому затвору, как всегда», — говорит она, не поднимая глаз от теста."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n01_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.started"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n01_flag2"
+            Type: 0
+            StringParam: "chapter01.flag.home_intro_seen"
+            IntParam: 0
+      choices:
+      - text: "Отнести хлеб к затвору."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.01_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_02_people_of_the_house
+    title: "N02 — Люди Дома"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.02
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.02
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.02_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Дом просыпается обычным порядком: Остафий проверяет, не сдвинулся ли ночью засов на старом затворе; Лада спорит с ним о новой распорке для колеса; Мирон уже стоит у мельницы; Ульяна делит хлеб на утро."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n02_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.house_people_met"
+            IntParam: 0
+      choices:
+      - text: "Пройти мимо, поздоровавшись со всеми."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.02_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_03_first_pressure
+    title: "N03 — Первое давление"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.03
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.03
+      speakerId: ostafiy
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.03_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Остафий останавливает героя у берега: «Вода шумит не так, как вчера. Может, и ничего. А может — нет»."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n03_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.first_pressure_seen"
+            IntParam: 0
+      choices:
+      - text: "Прислушаться и пойти дальше."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.03_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_04_flood
+    title: "N04 — Паводок / Синяя ставня"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.04
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.04
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.04_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Ночью вода поднимается быстрее, чем кто-либо ожидал. Синяя ставня на плотине трещит под напором. Люди у мельницы кричат, зовут на помощь."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n04_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.flood_happened"
+            IntParam: 0
+      choices:
+      - text: "Бежать к плотине."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.04_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_05_wet_plan
+    title: "N05 — Осмотр плотины / Мокрый чертёж"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): ветвление без проверки (DEC-04), не полированный текст."
+    startNodeId: chapter01.node.05
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.05
+      speakerId: narrator
+      text: "Паводок сошёл, но плотина повреждена. Остафий настаивает на старом, проверенном ремонте всех семи затворов. Лада предлагает новое решение — перекрыть седьмое русло и стабилизировать поток через мельницу. Выбор — за героем."
+      textBlocks: []
+      choices:
+      - text: "Восстановить старый порядок."
+        nextNodeId: "chapter01.node.05.old"
+        endsDialogue: 0
+        choiceId: "chapter01.node.05_choice_old"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      - text: "Перейти на новую схему."
+        nextNodeId: "chapter01.node.05.new"
+        endsDialogue: 0
+        choiceId: "chapter01.node.05_choice_new"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.05.old
+      speakerId: ostafiy
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.05.old_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Остафий кивает: «Значит, всё, как было заведено». Работники берутся за все семь затворов и боковой сброс."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n05_old_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.dam_inspected"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n05_old_flag2"
+            Type: 0
+            StringParam: "chapter01.flag.repair_old"
+            IntParam: 0
+      choices:
+      - text: "Начать старый ремонт."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.05.old_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.05.new
+      speakerId: lada
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.05.new_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Лада довольна: «Наконец-то избавимся от старой бессмысленной схемы». Седьмое русло перекрывают, поток стабилизируют через мельницу."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n05_new_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.dam_inspected"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n05_new_flag2"
+            Type: 0
+            StringParam: "chapter01.flag.repair_new"
+            IntParam: 0
+      choices:
+      - text: "Начать новый ремонт."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.05.new_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_06_wrong_water
+    title: "N06 — Вода ведёт себя неправильно"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.06
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.06
+      speakerId: miron
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.06_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Ремонт завершён, вода как будто течёт правильно — но Мирон хмурится: что-то в её движении по-прежнему не так, как должно быть."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n06_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.water_wrong_active"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n06_knowledge1"
+            Type: 2
+            StringParam: "chapter01.knowledge.water_flow_is_wrong"
+            IntParam: 0
+      choices:
+      - text: "Обратить на это внимание."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.06_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_07a_mill
+    title: "N07A — Колесо, которое не спит"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.07a
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.07a
+      speakerId: miron
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.07a_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Мирон признаётся: этой ночью колесо мельницы крутилось само, хотя вода стояла почти неподвижно. Раньше седьмой затвор открывали по условным стукам — теперь этого не делает никто."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n07a_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.investigated_mill"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n07a_knowledge1"
+            Type: 2
+            StringParam: "chapter01.knowledge.mill_moves_at_wrong_time"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n07a_knowledge2"
+            Type: 2
+            StringParam: "chapter01.knowledge.old_seventh_channel"
+            IntParam: 0
+      choices:
+      - text: "Записать услышанное."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.07a_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_07b_cattle
+    title: "N07B — Скот"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.07b
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.07b
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.07b_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Две коровы упрямо не подходят к одному и тому же рукаву реки, хотя трава там гуще."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n07b_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.investigated_cattle"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n07b_knowledge1"
+            Type: 2
+            StringParam: "chapter01.knowledge.cattle_avoid_old_branch"
+            IntParam: 0
+      choices:
+      - text: "Присмотреться к скоту."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.07b_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_07c_river
+    title: "N07C — Река и рыба"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.07c
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.07c
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.07c_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Рыба выброшена на берег только выше плотины; ниже — как будто её никогда и не было."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n07c_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.investigated_river"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n07c_knowledge1"
+            Type: 2
+            StringParam: "chapter01.knowledge.fish_pattern_changed"
+            IntParam: 0
+      choices:
+      - text: "Осмотреть берег."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.07c_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_08_seven_teeth
+    title: "N08 — Семь зубцов"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.08
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.08
+      speakerId: ostafiy
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.08_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Ребёнок Дома играет со старой семизубой железной пластиной, используя её как гребень для собаки. Остафий узнаёт вещь — и хмурится: это не игрушка."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n08_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.old_trace_found"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n08_knowledge1"
+            Type: 2
+            StringParam: "chapter01.knowledge.seven_tooth_object"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n08_knowledge2"
+            Type: 2
+            StringParam: "chapter01.knowledge.old_custom"
+            IntParam: 0
+      choices:
+      - text: "Забрать и рассмотреть пластину."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.08_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_09_council_departure
+    title: "N09 — Решение идти дальше"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.09
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.09
+      speakerId: ostafiy
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.09_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Собранного достаточно, чтобы понять: причина не в самом ремонте, а в чём-то более старом. Пора идти туда, откуда течёт вода — за пределы привычных троп Дома."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n09_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.far_route_unlocked"
+            IntParam: 0
+      choices:
+      - text: "Решить идти дальше."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.09_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_10_gather_party
+    title: "N10 — Сбор отряда"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.10
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.10
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.10_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Герой собирает тех, кто пойдёт с ним — или решает, что пойдёт один."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n10_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.expedition_started"
+            IntParam: 0
+      choices:
+      - text: "Выступить в поход."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.10_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_11_first_long_road
+    title: "N11 — Первая дальняя дорога"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.11
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.11
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.11_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Дорога уводит дальше привычных маршрутов Дома — туда, где русло реки петляет через незнакомый лес."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n11_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.long_road_started"
+            IntParam: 0
+      choices:
+      - text: "Продолжить путь."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.11_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_12_old_ford
+    title: "N12 — Старый брод / Женщина у брода"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.12
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.12
+      speakerId: ford_witness
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.12_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "У старого брода из воды торчит ряд гнилых кольев. Ребёнок-свидетель уверяет: здесь у воды видели женщину, ещё до паводка."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n12_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.old_ford_found"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n12_knowledge1"
+            Type: 2
+            StringParam: "chapter01.knowledge.old_ford"
+            IntParam: 0
+      choices:
+      - text: "Осмотреть брод."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.12_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_13_other_people
+    title: "N13 — Другие люди / У всех есть дом"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.13
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.13
+      speakerId: downstream_voice
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.13_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "За бродом — человеческое поселение. Его житель встречает отряд не как гостей, а как сторону, от которой уже давно ничего не было слышно."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n13_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.downstream_contact"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n13_knowledge1"
+            Type: 2
+            StringParam: "chapter01.knowledge.downstream_people"
+            IntParam: 0
+      choices:
+      - text: "Заговорить с ним."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.13_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_14_agreement_revealed
+    title: "N14 — Раскрытие соглашения"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.14
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.14
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.14_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Вещественный след, слова мельника и людей за бродом складываются в одну причинную картину: водная система Дома никогда не была только его собственной — ей вместе владели и вместе за ней следили."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n14_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.agreement_revealed"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n14_knowledge1"
+            Type: 2
+            StringParam: "chapter01.knowledge.shared_water_system"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n14_knowledge2"
+            Type: 2
+            StringParam: "chapter01.knowledge.home_was_not_self_sufficient"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n14_knowledge3"
+            Type: 2
+            StringParam: "chapter01.knowledge.old_agreement"
+            IntParam: 0
+      choices:
+      - text: "Осознать услышанное."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.14_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_14b_continue_or_return
+    title: "N14½ — Продолжить или вернуться"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): ветвление без проверки (DEC-04), не полированный текст."
+    startNodeId: chapter01.node.14_5
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.14_5
+      speakerId: narrator
+      text: "Знание получено. Впереди — открытый вопрос: идти ли дальше, или уже пора возвращаться домой, пока не начался новый паводок."
+      textBlocks: []
+      choices:
+      - text: "Идти дальше."
+        nextNodeId: "chapter01.node.14_5.continue"
+        endsDialogue: 0
+        choiceId: "chapter01.node.14_5_choice_continue"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      - text: "Возвращаться."
+        nextNodeId: "chapter01.node.14_5.return"
+        endsDialogue: 0
+        choiceId: "chapter01.node.14_5_choice_return"
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.14_5.continue
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.14_5.continue_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Отряд решает не спешить домой — есть время осмотреться и убедиться в услышанном."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n14_5_continue_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.return_started"
+            IntParam: 0
+      choices:
+      - text: "Продолжить путь."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.14_5.continue_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.14_5.return
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.14_5.return_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Отряд решает не задерживаться: дома есть кому передать услышанное как можно скорее."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n14_5_return_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.return_started"
+            IntParam: 0
+      choices:
+      - text: "Повернуть к дому."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.14_5.return_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_15_changed_return_road
+    title: "N15 — Изменившаяся обратная дорога"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.15
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.15
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.15_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Обратная дорога не повторяет прежнюю: те же места выглядят иначе в свете того, что теперь известно."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n15_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.return_road_traveled"
+            IntParam: 0
+      choices:
+      - text: "Идти домой."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.15_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_16_home_again
+    title: "N16 — Серьёзное возвращение домой"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.16
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.16
+      speakerId: narrator
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.16_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Дом встречает героя не докладом, а переменами: звук мельницы, вода у брода, лица людей — всё немного другое, чем было в начале."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n16_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.returned_home"
+            IntParam: 0
+      choices:
+      - text: "Войти в Дом."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.16_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: chapter01_dialogue_17_council_of_the_house
+    title: "N17 — Совет Дома"
+    category: 1
+    status: 1
+    developerComment: "Черновой узел P03 (единая инструкция §8/§9): не полированный текст, только каркас переходов и флагов."
+    startNodeId: chapter01.node.17
+    tags:
+    - "глава01"
+    - "черновик"
+    nodes:
+    - id: chapter01.node.17
+      speakerId: ostafiy
+      text: ""
+      textBlocks:
+      - blockId: "chapter01.node.17_main"
+        kind: 0
+        speakerIdOverride: ""
+        text: "Дом собирается на совет. Три пути лежат перед ним: вернуть старый общий порядок, договориться о новом — или оставить воду себе. Ни один не даётся бесплатно."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+          - EffectExecutionId: "chapter01.effect.n17_flag1"
+            Type: 0
+            StringParam: "chapter01.flag.council_completed"
+            IntParam: 0
+          - EffectExecutionId: "chapter01.effect.n17_flag2"
+            Type: 0
+            StringParam: "chapter01.flag.completed"
+            IntParam: 0
+      choices:
+      - text: "Огласить решение Дома."
+        nextNodeId: ""
+        endsDialogue: 1
+        choiceId: "chapter01.node.17_exit"
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: ""
+          Kind: 0
+          Quality: 0
+          CompetencyId: ""
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: ""
+        failureNodeId: ""
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
     schemaVersion: 1

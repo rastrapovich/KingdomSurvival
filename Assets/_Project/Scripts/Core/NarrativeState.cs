@@ -92,6 +92,34 @@ public sealed class NarrativeStateData
     public List<NarrativeCheckHistoryEntry> CheckHistory = new List<NarrativeCheckHistoryEntry>();
     public List<string> AppliedEffectExecutionIds = new List<string>();
 
+    // Минимальный реестр сюжетных предметов героя (§6.4 инструкции по
+    // Главе 01): не инвентарная система, только присутствие/отсутствие
+    // для условия ItemPresent. Расширять до полной инвентарной системы
+    // только когда это докажет свою необходимость минимум в трёх сценах.
+    public List<string> Items = new List<string>();
+
+    public bool HasItem(string itemId)
+    {
+        return !string.IsNullOrWhiteSpace(itemId) && Items != null && Items.Contains(itemId);
+    }
+
+    public void GrantItem(string itemId)
+    {
+        if (string.IsNullOrWhiteSpace(itemId))
+            return;
+        if (Items == null)
+            Items = new List<string>();
+        if (!Items.Contains(itemId))
+            Items.Add(itemId);
+    }
+
+    public void RemoveItem(string itemId)
+    {
+        if (string.IsNullOrWhiteSpace(itemId) || Items == null)
+            return;
+        Items.Remove(itemId);
+    }
+
     public bool HasFlag(string flagId)
     {
         return !string.IsNullOrWhiteSpace(flagId) && Flags != null && Flags.Contains(flagId);

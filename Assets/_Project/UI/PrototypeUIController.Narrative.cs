@@ -225,6 +225,10 @@ public partial class PrototypeUIController
         if (gameState.HasActiveExpedition)
             presentCompanionIds.AddRange(gameState.ActiveExpedition.FighterIds);
 
+        List<string> presentItemIds = new List<string>();
+        if (gameState.Narrative.Items != null)
+            presentItemIds.AddRange(gameState.Narrative.Items);
+
         bool started = narrativeDialogueSession.Start(
             narrativeDialogueDatabase,
             dialogueId,
@@ -233,7 +237,7 @@ public partial class PrototypeUIController
             out NarrativeDialogueView view,
             out string error,
             presentCompanionIds,
-            null,
+            presentItemIds,
             gameState.WorldSeed);
 
         if (!started)

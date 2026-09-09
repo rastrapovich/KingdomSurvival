@@ -23,7 +23,8 @@ public static class NarrativeCompetencyLabels
 {
     private static readonly Dictionary<string, string> Labels = new Dictionary<string, string>
     {
-        { NarrativeCompetencyIds.Fieldcraft, "Следопытство" }
+        { NarrativeCompetencyIds.Fieldcraft, "Следопытство" },
+        { NarrativeCompetencyIds.Craft, "Ремесло" }
     };
 
     public static string GetLabel(string competencyId)

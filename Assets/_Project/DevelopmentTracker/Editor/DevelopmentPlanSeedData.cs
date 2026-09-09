@@ -17,7 +17,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
             plan.schemaVersion = DevelopmentPlanAsset.CurrentSchemaVersion;
             plan.projectTitle = "Kingdom Survival — Глава 01 «Дом на чужой воде»";
-            plan.currentMilestoneId = "P01_TRACKER";
+            plan.currentMilestoneId = "P02_BASELINE";
             plan.planUpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd");
             plan.projectNotes =
                 "План сгенерирован DevelopmentPlanSeedData по своду инструкции. " +
@@ -385,18 +385,19 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P03-T01", "Chapter01Ids — реестр стабильных ID",
                     "Единый реестр ID по шаблонам раздела 7 (узел/диалог/флаг/знание/проверка/встреча/предмет/эффект) с валидатором пустых и дублирующихся ID.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
                     fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01Ids.cs" },
                     acceptanceCriteria: new[]
                     {
                         "Валидатор запрещает пустые и дублирующиеся ID",
                         "Все шаблоны раздела 7 представлены константами/билдерами"
                     },
-                    manualChecks: new[] { "Прогнать Chapter01StateTests в Unity" }),
+                    manualChecks: new[] { "Прогнать Chapter01StateTests в Unity" },
+                    implementationNote: "Реализовано: Nodes/Dialogues/Flags/Knowledge/Checks/Items/Effects + ValidateRegistry(). Плюс 3 технических флага завершения узла сверх минимального списка (HousePeopleMet/LongRoadStarted/ReturnRoadTraveled — у N02/N11/N15 иначе нет отдельного флага для StoryDirector). Компиляция и тесты не запускались."),
 
                 Task("P03-T02", "Chapter01StoryDirector",
                     "Узкий контроллер: читает NarrativeState/GameState, не хранит вторую копию прогресса, не телепортирует отряд, гарантирует идемпотентность узла.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
                     dependencies: new[] { "P03-T01" },
                     fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs" },
                     acceptanceCriteria: new[]
@@ -404,11 +405,12 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                         "Повторный запуск не повторяет завершённый узел",
                         "Определяет доступный следующий узел по флагам NarrativeState"
                     },
-                    manualChecks: new[] { "Пройти граф вручную дважды подряд без перезапуска и без дублирования эффектов" }),
+                    manualChecks: new[] { "Пройти граф вручную дважды подряд без перезапуска и без дублирования эффектов" },
+                    implementationNote: "Реализовано как черновой линейный каркас (GetNextDialogueId/GetNextNodeId/GetRepairChoice/TryAdvance) поверх статической таблицы из 20 шагов; свободный порядок N07A/B/C и осмысленные комбинации знаний для N09 намеренно оставлены P07-T05/P08-T02, не меняя публичный контракт. TryAdvance принимает делегат-открыватель, не ссылается на PrototypeUIController напрямую — реальная точка вызова из живого UI ещё не подключена. Проверено симуляцией на Python (полный обход графа реальных диалогов N01→N17 в обеих ветках ремонта, без тупиков), но не реальными EditMode-тестами в Unity."),
 
                 Task("P03-T03", "Chapter01OutcomeApplier",
                     "Одноразовые внешние эффекты (ресурсы/время/повреждения/открытия карты) со стабильным execution ID.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
                     dependencies: new[] { "P03-T01" },
                     fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01OutcomeApplier.cs" },
                     acceptanceCriteria: new[]
@@ -416,44 +418,49 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                         "Каждый внешний эффект применяется не более одного раза по execution ID",
                         "Повторный показ диалога не удваивает эффект"
                     },
-                    manualChecks: new[] { "Сохраниться/загрузиться после применения эффекта и убедиться, что он не повторился" }),
+                    manualChecks: new[] { "Сохраниться/загрузиться после применения эффекта и убедиться, что он не повторился" },
+                    implementationNote: "Реализовано поверх уже существующего механизма NarrativeStateData.AppliedEffectExecutionIds (не отдельная система идемпотентности). ApplyResourceDelta/ApplyTimeAdvance/GrantItem/MarkHeroInjured — травма героя как флаг, без нового поля HP (раздел 6.4). Открытие карты/маршрута не реализовано — понадобится не раньше P09."),
 
                 Task("P03-T04", "Chapter01ContextBuilder",
                     "Передаёт реальный состав экспедиции, предметы и контекстные модификаторы; отсутствие спутника не блокирует обязательный переход.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 4,
                     dependencies: new[] { "P03-T01" },
                     fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01ContextBuilder.cs" },
                     acceptanceCriteria: new[]
                     {
                         "Передаёт реальный состав отряда и предметы из GameState",
                         "Отсутствие конкретного спутника не блокирует обязательный переход"
-                    }),
+                    },
+                    implementationNote: "Build/GetPresentCompanionIds/GetPresentItemIds/GetPartySize. Потребовалась точечная правка вне Chapter01: NarrativeStateData получил минимальный список Items (HasItem/GrantItem/RemoveItem), а TryOpenNarrativeDialogueById (PrototypeUIController.Narrative.cs) стал передавать его вместо жёстко зашитого null — раньше ItemPresent в реальной игре никогда не мог быть true."),
 
                 Task("P03-T05", "Черновой граф N01–N17",
                     "Черновые диалоги/переходы для всех 17 узлов, связанные через TryOpenNarrativeDialogueById.",
-                    DevelopmentTaskCategory.Data, DevelopmentTaskStatus.NotStarted, required: true, order: 5,
+                    DevelopmentTaskCategory.Data, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 5,
                     dependencies: new[] { "P03-T02" },
                     fileReferences: new[] { "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset" },
                     acceptanceCriteria: new[]
                     {
                         "Черновой граф проходим от N01 до N17 в обеих ветках ремонта",
                         "Нет тупиков и телепортации по физической карте"
-                    }),
+                    },
+                    manualChecks: new[] { "Открыть Kingdom Survival → База диалогов, проверить все 20 chapter01_dialogue_* в Графе/Preview, прогнать встроенную валидацию" },
+                    implementationNote: "20 диалогов (N01–N17, включая N07A/B/C и N14½) добавлены в KingdomSurvivalDialogues.asset вместе с 7 новыми говорящими (Остафий/Лада/Мирон/Ульяна/рассказчик/человек с низовья/свидетель у брода — рабочие имена DEC-02/DEC-10). Каждый узел — один textBlock с onRevealEffects (SetFlag/AddKnowledge) и один Exit-выбор; branch-диалоги N05 и N14½ — два дочерних узла с эффектами на конкретную ветку. Effects на самом выборе (successEffects), а не на textBlock, НЕ сработали бы для Normal/Exit choice — в runtime они применяются только для ActiveCheck choice (SelectChoiceInternal), это не сразу очевидно из схемы. Текст — короткий черновик, не полированная проза (раздел 22 инструкции: полировка позже). Полный обход N01→N17 в обеих ветках ремонта и гарантированная выдача shared_water_system на N14 подтверждены Python-симуляцией самого YAML (не Unity Preview)."),
 
                 Task("P03-T06", "Тесты переходов ремонта",
                     "EditMode-тесты для инвариантов раздела 19.2: repair_old/repair_new не одновременно, обе ветки ведут к N07.",
-                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 6,
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 6,
                     dependencies: new[] { "P03-T02", "P03-T05" },
                     fileReferences: new[] { "Assets/_Project/Chapter01/Tests/EditMode/Chapter01StateTests.cs" },
                     acceptanceCriteria: new[]
                     {
                         "Тест подтверждает взаимоисключение repair_old/repair_new",
                         "Тест подтверждает, что обе ветки доходят до N07"
-                    }),
+                    },
+                    implementationNote: "17 тестов: реестр ID, идемпотентность/продвижение GetNextDialogueId, обе ветки ремонта ведут к N07A, взаимоисключение repair_old/repair_new (GetRepairChoice бросает исключение при одновременной установке), TryAdvance, ContextBuilder без спутников, идемпотентность всех методов OutcomeApplier. Отдельный asmdef KingdomSurvival.Chapter01.EditModeTests рядом с модулем (доп. ссылка в общий Core.EditModeTests не добавлялась)."),
 
                 Task("P03-T07", "Зарегистрировать компетенцию «Ремесло»",
                     "По решению DEC-08 (отступление от рекомендации инструкции, зафиксировано в DEVELOPMENT_STATUS.md §2): зарегистрировать новую нарративную компетенцию «Ремесло» рядом с существующим Следопытством, без изменения других качеств/компетенций/трейтов.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 7,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 7,
                     dependencies: new[] { "P00-T11" },
                     fileReferences: new[] { "Assets/_Project/Scripts/Core/HeroProfile.cs" },
                     acceptanceCriteria: new[]
@@ -462,7 +469,8 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                         "Существующие качества, компетенции и трейты не изменены",
                         "N08 («Семь зубцов», P07-T04) может использовать «Ремесло» как одну из проверок толкования предмета"
                     },
-                    manualChecks: new[] { "Прогнать HeroCombatStatsBuilderTests и связанные EditMode-тесты в Unity" })
+                    manualChecks: new[] { "Прогнать HeroCombatStatsBuilderTests и связанные EditMode-тесты в Unity" },
+                    implementationNote: "NarrativeCompetencyIds.Craft = \"craft\" добавлена в HeroProfile.cs (Known-список), подпись «Ремесло» — в NarrativeDisplayLabels.cs. Диапазон 0–5 общий для всех компетенций (NarrativeCheckMath.ClampCompetency), отдельно не настраивается. N08 (P07-T04) обновлена: указывает «Ремесло» в тексте задачи и зависит от P03-T07.")
             );
         }
 

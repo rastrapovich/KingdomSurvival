@@ -503,4 +503,65 @@ public sealed class DialogueDatabaseGraphPresentationTests
 
         Assert.AreEqual(GraphDetailMode.Standard, metrics.EffectiveMode);
     }
+
+    // ---- "Читаемые ноды" (§12/§40-42): предупреждение ответа и высота ----
+
+    [Test]
+    public void ChoiceHasWarning_MatchesByPrefix()
+    {
+        List<string> warnings = new List<string> { "Ответ #2: нет цели перехода." };
+        Assert.IsTrue(ChoiceHasWarning(warnings, 1));
+    }
+
+    [Test]
+    public void ChoiceHasWarning_NoMatchingPrefix_ReturnsFalse()
+    {
+        List<string> warnings = new List<string> { "Ответ #2: нет цели перехода." };
+        Assert.IsFalse(ChoiceHasWarning(warnings, 0));
+    }
+
+    [Test]
+    public void ChoiceHasWarning_NullOrEmptyList_ReturnsFalse()
+    {
+        Assert.IsFalse(ChoiceHasWarning(null, 0));
+        Assert.IsFalse(ChoiceHasWarning(new List<string>(), 0));
+    }
+
+    [Test]
+    public void ComputeChoiceHeight_WithWarning_IsTallerThanWithoutWarning()
+    {
+        GraphChoiceInfo choice = new GraphChoiceInfo { Text = "Ответ", Kind = DialogueChoiceKind.Normal, NextNodeId = "n2" };
+
+        float withoutWarning = ComputeChoiceHeight(choice, GraphDetailMode.Standard, hasWarning: false);
+        float withWarning = ComputeChoiceHeight(choice, GraphDetailMode.Standard, hasWarning: true);
+
+        Assert.Greater(withWarning, withoutWarning);
+    }
+
+    [Test]
+    public void ComputeChoiceHeight_SeparateSuccessAndFailureEffects_BothCountTowardHeight()
+    {
+        GraphChoiceInfo successOnly = new GraphChoiceInfo
+        {
+            Text = "Проверить",
+            Kind = DialogueChoiceKind.ActiveDecisive,
+            SuccessNodeId = "n2",
+            FailureNodeId = "n1",
+            SuccessEffects = new List<NarrativeEffect> { new NarrativeEffect { EffectExecutionId = "e1", Type = NarrativeEffectType.SetFlag, StringParam = "x" } }
+        };
+        GraphChoiceInfo both = new GraphChoiceInfo
+        {
+            Text = "Проверить",
+            Kind = DialogueChoiceKind.ActiveDecisive,
+            SuccessNodeId = "n2",
+            FailureNodeId = "n1",
+            SuccessEffects = successOnly.SuccessEffects,
+            FailureEffects = new List<NarrativeEffect> { new NarrativeEffect { EffectExecutionId = "e2", Type = NarrativeEffectType.ClearFlag, StringParam = "y" } }
+        };
+
+        float successOnlyHeight = ComputeChoiceHeight(successOnly, GraphDetailMode.Standard, hasWarning: false);
+        float bothHeight = ComputeChoiceHeight(both, GraphDetailMode.Standard, hasWarning: false);
+
+        Assert.Greater(bothHeight, successOnlyHeight);
+    }
 }

@@ -646,3 +646,78 @@ InvalidOperationException: 'dialogues.Array.data[0].nodes.Array.data[0].textBloc
 Исправление в `DialogueDatabaseWindow.GraphPresentation.cs`: новый приватный `ReadEffectsList(SerializedProperty effectsArray)` — проходит массив через `arraySize`/`GetArrayElementAtIndex` и боксит `boxedValue` каждый элемент (`NarrativeEffect`, не-массив) по отдельности. `BuildGraphTextBlockInfoFromProperty`/`BuildGraphChoiceInfoFromProperty` теперь используют его вместо прямого `(List<NarrativeEffect>)...boxedValue`.
 
 Не проверено (нет доступа к Unity в этой сессии): реальная компиляция и повторное открытие окна «Граф» на `prototype_miller`/N01-N17 после исправления. После Pull — переоткрыть окно «База диалогов → Граф» и убедиться, что узлы с непустыми `onRevealEffects`/`successEffects`/`failureEffects` (например, `chapter01.node.01_main` с `home_baseline_captured`) отображаются без исключений и `Invalid GUILayout state` не появляется.
+
+## 18. Читаемые ноды и удобные «Свойства узла» — 10.09.2026
+
+Реализована производственная инструкция по визуальной иерархии узлов графа и по правому Inspector'у. Приоритет — как и было рекомендовано в самой инструкции: сначала Inspector (изменяемая ширина, без горизонтального scroll, вертикальные длинные ID), затем визуал карточек на холсте.
+
+### 18.1. Inspector — изменяемая ширина, без горизонтального scroll
+
+Новый файл `Assets/_Project/DialogueDatabase/Editor/DialogueDatabaseWindow.InspectorPresentation.cs`:
+
+- `DialogueEditorLayoutMode {Normal, NarrowInspector}` — общее состояние текущего прохода отрисовки (аналогично уже существующим `graphZoom`/`graphSelectedNodeIndex`), выставляется один раз в начале `DrawDialogueTable` (всегда `Normal` — «Таблица» не должна была сломаться, §41 инструкции) и в `DrawGraphInspectorPanel` (по ширине панели);
+- `ClampInspectorWidth(width, windowWidth)` — минимум 360px, максимум 60% ширины окна (чистая функция, тестируема);
+- `ResolveLayoutMode(availableWidth)` — порог 560px: ниже — `NarrowInspector`;
+- `ShouldStackLongField(mode)`, `ShouldShowActiveCheckFields(kind)`, `ShouldShowNormalTargetField(kind)` — чистые classification-функции (§28: последнее уже фактически было реализовано раньше через `switch` в `DrawChoice`/`if (hasPassiveCheck.boolValue)` в `DrawTextBlock` — новые функции формализуют то же правило для тестов, не меняя поведение);
+- `DrawLongIdField(property, label)` — в `NarrowInspector` рисует подпись сверху и `TextField` на всю ширину снизу; в `Normal` — прежний `EditorGUILayout.PropertyField` (значит, в «Таблице» поведение побайтово то же, что и раньше — регрессии там в принципе не может быть, так как это тот же вызов API).
+
+`DialogueDatabaseWindow.Graph.cs`:
+
+- `DrawGraphInspectorSplitter()` — вертикальная полоса-сплиттер между canvas и панелью, тянется мышью (курсор `ResizeHorizontal`), ширина хранится в `EditorPrefs` (`KingdomSurvival.DialogueDatabase.GraphInspectorWidth`), сохраняется по отпусканию;
+- `DrawGraphInspectorPanel` — фиксированный `GraphInspectorWidth = 360f` заменён на изменяемый `graphInspectorWidth` (по умолчанию 480px); заголовок панели дополнен ID узла и именем говорящего (§30); `BeginScrollView` теперь вызывается с `GUIStyle.none` для горизонтального скроллбара (§18 — горизонтальный scroll убран не «визуально», а действительно не может появиться), внутренний контент завёрнут в `BeginVertical(GUILayout.Width(graphInspectorWidth - padding))`, чтобы дочерние поля не запрашивали больше ширины, чем есть у панели (§39).
+
+`DialogueDatabaseWindow.cs` (общие для «Таблицы» и панели «Граф» `DrawNode`/`DrawTextBlock`/`DrawChoice`/`DrawConditionGroup`/`DrawCheckSpec`/`DrawModifierRule`/`DrawEffectsList`/`DrawEffect`):
+
+- методы, рисовавшие условия/проверки/эффекты, переведены из `static` в instance (чтобы читать `inspectorLayoutMode`);
+- все явно перечисленные в §19 длинные ID-поля (ID узла, ID блока, Speaker override, ID проверки, ID компетенции, EffectExecutionId, StringParam эффекта, StringParam условия — флаг/знание/спутник/предмет/особенность/проверка/отношение, SourceId модификатора) переведены на `DrawLongIdField`;
+- `DrawNode`: секции «ОСНОВНОЕ» / «ТЕКСТОВЫЕ БЛОКИ (N)» / «ОТВЕТЫ (N)» (§16, `DrawSectionHeader`); шесть кнопок добавления текстовых блоков и четыре кнопки добавления ответов заменены двумя dropdown-меню `＋ Добавить текстовый блок ▾` / `＋ Добавить ответ ▾` (`GenericMenu`, §29) — компактнее, не требует ширины ряда из 4-6 кнопок;
+- §28 («не показывать нерелевантные поля» — Success/Failure/Check у обычного ответа, target у EXIT, PassiveCheck-детали при выключенной проверке) была уже реализована раньше (через `switch` по `DialogueChoiceKind` в `DrawChoice` и `if (hasPassiveCheck.boolValue)` в `DrawTextBlock`) — изменений не потребовалось, только добавлены одноимённые тестируемые чистые функции для §43.
+
+### 18.2. Граф — визуальная иерархия карточек
+
+`DialogueDatabaseWindow.GraphPresentation.cs`:
+
+- `ComputeLabeledSectionHeight` — Conditions/Effects на карточках теперь считаются как подписанная мини-секция (заголовок + строки), а не голый список — используется и в `ComputeTextBlockHeight`, и в `ComputeChoiceHeight`;
+- `ComputeChoiceHeight` получил третий параметр `hasWarning` (добавляет высоту строки предупреждения) и считает высоту Success/Failure эффектов **раздельно** (было — общий список), в соответствии с §19/§27 — на карточке ответа теперь видно отдельно, что происходит при успехе и что при провале;
+- `GraphNodeLayoutConstants.CardPadding` — визуальный отступ карточки TextBlock/Choice сверх содержимого;
+- `GetGraphSpeakerSectionHeight(Full)` увеличена (50→62px) под более крупный портрет и вторую строку роли;
+- новый чистый `ChoiceHasWarning(warnings, choiceIndex)` — то же сопоставление по префиксу `"Ответ #N: "`, что и в тултипе бейджа «!», переиспользуется и раскладкой, и отрисовкой, чтобы не решать «есть ли ошибка у этого ответа» двумя разными способами.
+
+`DialogueDatabaseWindow.Graph.cs`:
+
+- **TextBlock-карточки** (§5): у каждого блока — собственный лёгкий фон; тип блока — КАПС мини-заголовком; пассивная проверка — отдельная строка с акцентным цветом и маркером `◈` (§7); Conditions/Effects — подписанные мини-секции «ПОКАЗАТЬ ЕСЛИ» / «ПОСЛЕ ПОКАЗА» (или «ПОСЛЕ УСПЕХА», если блок под пассивной проверкой) со своим приглушённым акцентным цветом (§8);
+- **Choice-карточки** (§10): фон + тонкая рамка на каждый ответ, увеличенный отступ между карточками; активная проверка помечена `◆`/линии успеха-провала цветные (уже было) и мельче; обычный/EXIT target — приглушённый мелкий стиль (§11); при реальной проблеме (по данным `CollectGraphNodeWarnings` — нет цели, цель не найдена, нет CheckId, EXIT с переходом) под целью появляется яркая жёлтая строка `⚠ <текст предупреждения>` с тултипом (§12); Conditions/Success-эффекты/Failure-эффекты — три отдельные подписанные секции;
+- **Badges** (§3): вместо ряда отдельных прямоугольников — одна приглушённая строка `CHECK · FX · KNOW · FLAG`; `!` и `UNREACHABLE` остаются отдельными яркими капсулами — им положено бросаться в глаза;
+- **Speaker-блок** (§4): портрет крупнее (28/38/46px по режиму), имя жирным и ярче, `[id]` — приглушённым цветом через rich text на той же строке (не второй `Label`), роль говорящего — второй мелкой строкой в Full;
+- **Add-кнопка** (§13): `+ Ответ` переименована в `＋ Добавить ответ`, стала компактнее (`miniButton`, высота 18px) и показывается только у выбранного узла — не отвлекает на остальных;
+- **Selected node** (§14): рамка не изменилась (жёлтая, как была), но фон секций выбранного узла стал чуть светлее — второй, более тонкий сигнал выбора.
+
+### 18.3. Тесты
+
+- `Assets/_Project/Tests/EditMode/DialogueDatabaseInspectorPresentationTests.cs` (новый, 10 тестов) — `ClampInspectorWidth` (ниже минимума/выше максимума/в диапазоне/узкое окно), `ResolveLayoutMode` (узко/широко), `ShouldStackLongField`, `ShouldShowActiveCheckFields`/`ShouldShowNormalTargetField` по всем видам ответа;
+- `DialogueDatabaseGraphPresentationTests.cs` — добавлено 6 тестов: `ChoiceHasWarning` (совпадение по префиксу/несовпадение/пустой-null список), `ComputeChoiceHeight` с предупреждением выше без него, раздельные Success/Success+Failure эффекты дают разную высоту.
+
+### 18.4. Что не проверено (честно, без Unity)
+
+Unity Editor и компилятор здесь недоступны — ни один из файлов этой правки не компилировался реально. В частности не проверено:
+
+- реальный визуальный результат (пиксельные размеры карточек, читаемость rich text `<b>`/`<color>` в `GUIStyle` с `richText=true`, работа `GUIStyle.none` для скрытия горизонтального скроллбара при реальном содержимом);
+- перетаскивание сплиттера мышью и сохранение ширины в `EditorPrefs` между перезапусками Editor'а;
+- `GenericMenu.ShowAsContext()` — вызывается вне `EditorGUILayout` группы по нажатию кнопки, должен открыться под курсором как обычно, но реального клика не было;
+- узкая (360px) и широкая (600-700px) ширина Inspector'а на реальных длинных ID (`chapter01.effect.n01_home_baseline` и т. п.) — визуально не подтверждено, что переносится без обрезки;
+- то, что `Table` режим действительно не изменился визуально (логически гарантировано тем, что `Normal`-режим вызывает те же `PropertyField`, что и раньше, но не проверено глазами).
+
+Не входило в этот проход (по объёму инструкции, 47 пунктов, и её же рекомендации не гнаться за всем сразу): sticky-заголовок Inspector'а при скролле (§31, помечено не блокирующим), кнопка «Копировать» у длинных ID-полей (§21, opcional), кнопки быстрых действий «Найти в графе»/«Проверить» в заголовке (§30, optional), реальная сворачиваемость трёх крупных секций Inspector'а как отдельных foldout с персистентным состоянием (сейчас это просто заголовки — сворачиваемость есть только у отдельных TextBlock/узлов через уже существующий `SerializedProperty.isExpanded`), monospace-шрифт для ID (оставлен `EditorStyles.miniLabel` — переключение шрифта не выполнялось), фильтр «Только проблемы» и двойной клик по узлу (перенесены ещё из прошлой инструкции, всё ещё не реализованы).
+
+После Pull обязательна ручная проверка:
+
+1. дождаться чистой Unity-компиляции;
+2. прогнать EditMode tests — весь набор должен остаться зелёным, включая 16 новых тестов (`DialogueDatabaseInspectorPresentationTests` + добавленные в `DialogueDatabaseGraphPresentationTests`);
+3. открыть «База диалогов → Граф» на N01/`chapter01.node.01_main` — узел должен читаться карточками (говорящий/текстовые блоки/эффекты раздельно), без сплошной колонки;
+4. потянуть сплиттер между canvas и Inspector мышью в обе стороны, перезапустить Editor и убедиться, что ширина восстановилась;
+5. сузить Inspector до минимума (360px) и убедиться, что горизонтального scrollbar нет вообще, а длинные ID (например, `EffectExecutionId`) читаются подписью сверху и полем на всю ширину;
+6. расширить Inspector до 600-700px и убедиться, что поля используют появившееся пространство (в частности длинные ID возвращаются к обычному `PropertyField`, если ширина перешла порог 560px);
+7. проверить режим «Таблица» — визуально и по поведению не должен был измениться;
+8. в тестовой копии ассета (не коммитить) намеренно сломать `successNodeId` — на карточке ответа должна появиться жёлтая строка `⚠ ...` с тултипом.
+
+Канон, `DialogueDatabaseAsset`, runtime-логика диалогов, формулы проверок и содержимое N01-N17 этой правкой не менялись — целиком Editor UX.

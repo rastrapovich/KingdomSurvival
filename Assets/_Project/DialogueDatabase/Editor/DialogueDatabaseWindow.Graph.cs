@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,8 +22,6 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             Success,
             Failure
         }
-
-        private const float GraphInspectorWidth = 360f;
 
         private Vector2 graphPan = new Vector2(40f, 40f);
         private Vector2 graphCanvasSize = new Vector2(700f, 500f);
@@ -104,6 +103,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             GUI.EndGroup();
 
+            DrawGraphInspectorSplitter();
             DrawGraphInspectorPanel(dialogue, nodes);
 
             EditorGUILayout.EndHorizontal();
@@ -153,13 +153,22 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         }
 
         // Панель свойств выбранного узла в режиме «Граф» (§18 доработки,
-        // §27 инструкции по информативным нодам): текстовые блоки, условия,
-        // проверки, эффекты и переходы редактируются ТОЛЬКО здесь — тот же
-        // DrawNode/DrawChoice/DrawTextBlock, что и в режиме «Таблица».
-        // Карточки на холсте — только чтение (см. DrawGraphNode/DrawGraphChoice).
+        // §27 инструкции по информативным нодам, §16-31 инструкции по
+        // читаемым нодам): текстовые блоки, условия, проверки, эффекты и
+        // переходы редактируются ТОЛЬКО здесь — тот же DrawNode/DrawChoice/
+        // DrawTextBlock, что и в режиме «Таблица». Карточки на холсте —
+        // только чтение (см. DrawGraphNode/DrawGraphChoice).
+        //
+        // Ширина панели — изменяемая (DrawGraphInspectorSplitter,
+        // graphInspectorWidth, EditorPrefs), горизонтального ScrollView нет
+        // вообще (GUIStyle.none для horizontalScrollbar, §18) — длинные поля
+        // адаптируются через inspectorLayoutMode/DrawLongIdField, а не через
+        // прокрутку вбок.
         private void DrawGraphInspectorPanel(SerializedProperty dialogue, SerializedProperty nodes)
         {
-            EditorGUILayout.BeginVertical(GUILayout.Width(GraphInspectorWidth), GUILayout.ExpandHeight(true));
+            inspectorLayoutMode = ResolveLayoutMode(graphInspectorWidth);
+
+            EditorGUILayout.BeginVertical(GUILayout.Width(graphInspectorWidth), GUILayout.ExpandHeight(true));
             EditorGUILayout.LabelField("СВОЙСТВА УЗЛА", EditorStyles.boldLabel);
 
             if (graphSelectedNodeIndex < 0 || graphSelectedNodeIndex >= nodes.arraySize)
@@ -172,14 +181,28 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
 
             SerializedProperty node = nodes.GetArrayElementAtIndex(graphSelectedNodeIndex);
+
+            // §30: заголовок панели дополнен ID узла и именем говорящего —
+            // видно, что именно редактируется, не открывая сам узел на холсте.
+            string nodeId = node.FindPropertyRelative("id").stringValue;
+            string speakerId = node.FindPropertyRelative("speakerId").stringValue;
+            DialogueSpeakerData speaker = database.FindSpeaker(speakerId);
+            string headerLine = string.IsNullOrWhiteSpace(nodeId) ? "<без ID>" : nodeId;
+            if (speaker != null)
+                headerLine += "  ·  " + speaker.DisplayName;
+            EditorGUILayout.LabelField(headerLine, EditorStyles.miniLabel);
+
             if (graphInspectorLastNodeIndex != graphSelectedNodeIndex)
             {
                 node.isExpanded = true;
                 graphInspectorLastNodeIndex = graphSelectedNodeIndex;
             }
 
-            graphInspectorScroll = EditorGUILayout.BeginScrollView(graphInspectorScroll);
+            graphInspectorScroll = EditorGUILayout.BeginScrollView(
+                graphInspectorScroll, GUIStyle.none, GUI.skin.verticalScrollbar);
+            EditorGUILayout.BeginVertical(GUILayout.Width(graphInspectorWidth - GraphInspectorContentPadding));
             DrawNode(dialogue, nodes, graphSelectedNodeIndex);
+            EditorGUILayout.EndVertical();
             EditorGUILayout.EndScrollView();
 
             EditorGUILayout.EndVertical();
@@ -415,6 +438,13 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private static readonly Color GraphNormalEdgeColorLight = new Color(0.12f, 0.35f, 0.62f, 0.9f);
         private static readonly Color GraphSuccessEdgeColor = new Color(0.42f, 0.78f, 0.42f, 0.95f);
         private static readonly Color GraphFailureEdgeColor = new Color(0.86f, 0.36f, 0.34f, 0.95f);
+        private static readonly Color GraphWarningColor = new Color(0.92f, 0.74f, 0.28f, 1f);
+
+        // §7/§32 инструкции "читаемые ноды": проверка — отдельный спокойный
+        // accent, не совпадающий ни с текстом, ни с эффектом/условием.
+        private static readonly Color GraphCheckAccentColor = new Color(0.62f, 0.66f, 0.95f, 1f);
+        private static readonly Color GraphConditionAccentColor = new Color(0.78f, 0.78f, 0.74f, 0.9f);
+        private static readonly Color GraphEffectAccentColor = new Color(0.7f, 0.86f, 0.78f, 0.95f);
 
         private void DrawGraphConnections(SerializedProperty nodes)
         {
@@ -569,9 +599,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 return;
 
             bool selected = graphSelectedNodeIndex == nodeIndex;
+            // §14: рамка остаётся главным индикатором выбора (не толще), но
+            // секции выбранного узла дополнительно чуть светлее — второй,
+            // более тонкий сигнал, полезный при беглом взгляде на весь граф.
             Color background = EditorGUIUtility.isProSkin
-                ? new Color(0.17f, 0.18f, 0.2f, 0.98f)
-                : new Color(0.96f, 0.96f, 0.96f, 0.98f);
+                ? (selected ? new Color(0.20f, 0.21f, 0.23f, 0.98f) : new Color(0.17f, 0.18f, 0.2f, 0.98f))
+                : (selected ? new Color(0.99f, 0.99f, 0.98f, 0.98f) : new Color(0.96f, 0.96f, 0.96f, 0.98f));
             Color header = isStart
                 ? new Color(0.22f, 0.42f, 0.28f, 1f)
                 : (EditorGUIUtility.isProSkin
@@ -663,21 +696,28 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     GraphChoiceInfo choiceInfo = choiceIndex < info.Choices.Count ? info.Choices[choiceIndex] : null;
                     DrawGraphChoice(
                         nodeIndex, choiceIndex, nodeRect, y, choiceHeight,
-                        choiceInfo, metrics.EffectiveMode);
+                        choiceInfo, metrics.EffectiveMode, metrics.Warnings);
                     y += choiceHeight;
                 }
             }
 
-            Rect addChoiceRect = new Rect(
-                nodeRect.x + margin,
-                nodeRect.yMax - metrics.FooterHeight * graphZoom + 5f * graphZoom,
-                nodeRect.width - margin * 2f,
-                24f * graphZoom);
-            if (GUI.Button(addChoiceRect, "+ Ответ", ScaledStyle(GUI.skin.button, 10, TextAnchor.MiddleCenter)))
+            // §13 инструкции "читаемые ноды": служебная кнопка добавления не
+            // должна выглядеть частью игрового содержания — компактнее и
+            // видна только у выбранного узла, а не постоянно у всех.
+            if (selected)
             {
-                Undo.RecordObject(database, "Add Dialogue Choice");
-                AddChoice(choices);
-                EditorUtility.SetDirty(database);
+                Rect addChoiceRect = new Rect(
+                    nodeRect.x + margin,
+                    nodeRect.yMax - metrics.FooterHeight * graphZoom + 8f * graphZoom,
+                    nodeRect.width - margin * 2f,
+                    18f * graphZoom);
+                GUIStyle addButtonStyle = ScaledStyle(EditorStyles.miniButton, 9, TextAnchor.MiddleCenter);
+                if (GUI.Button(addChoiceRect, "＋ Добавить ответ", addButtonStyle))
+                {
+                    Undo.RecordObject(database, "Add Dialogue Choice");
+                    AddChoice(choices);
+                    EditorUtility.SetDirty(database);
+                }
             }
 
             Event current = Event.current;
@@ -703,42 +743,73 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         // §5/§24-25: бейджи узла (EXIT/CHECK/COND/FX/KNOW/FLAG/ITEM/
         // UNREACHABLE/"!") плюс тултип со списком конкретных предупреждений
         // на "!"/UNREACHABLE.
+        // §3 инструкции "читаемые ноды": обычные бейджи (CHECK/FX/KNOW/FLAG/
+        // COND/EXIT/ITEM) — не отдельные крупные прямоугольники, а одна
+        // компактная строка "CHECK · FX · KNOW · FLAG". "!"/UNREACHABLE
+        // остаются отдельными яркими капсулами — им положено выделяться.
         private void DrawGraphBadgeRow(Rect rect, GraphNodeLayoutMetrics metrics)
         {
             string tooltip = BuildGraphWarningsTooltip(metrics.Warnings);
-            GUIStyle badgeStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleCenter);
-            float x = rect.x;
+            List<string> neutralBadges = new List<string>();
+            bool hasWarning = false;
+            bool hasUnreachable = false;
 
             foreach (string badge in metrics.Badges)
             {
-                if (badge == "СТАРТ")
-                    continue;
-
-                bool isWarningBadge = badge == "!" || badge == "UNREACHABLE";
-                GUIContent content = new GUIContent(badge, isWarningBadge ? tooltip : null);
-                Vector2 size = badgeStyle.CalcSize(content);
-                float chipWidth = size.x + 8f * graphZoom;
-                if (x + chipWidth > rect.xMax)
-                    break;
-
-                Rect chipRect = new Rect(x, rect.y, chipWidth, rect.height);
-                Color chipColor = badge == "!"
-                    ? new Color(0.86f, 0.36f, 0.34f, 0.85f)
-                    : badge == "UNREACHABLE"
-                        ? new Color(0.95f, 0.48f, 0.14f, 0.85f)
-                        : new Color(0.5f, 0.5f, 0.5f, 0.28f);
-                EditorGUI.DrawRect(chipRect, chipColor);
-                GUI.Label(chipRect, content, badgeStyle);
-
-                x = chipRect.xMax + 4f * graphZoom;
+                if (badge == "СТАРТ") continue;
+                if (badge == "!") { hasWarning = true; continue; }
+                if (badge == "UNREACHABLE") { hasUnreachable = true; continue; }
+                neutralBadges.Add(badge);
             }
+
+            float x = rect.x;
+
+            if (neutralBadges.Count > 0)
+            {
+                GUIStyle neutralStyle = ScaledStyle(EditorStyles.miniLabel, 8, TextAnchor.MiddleLeft);
+                neutralStyle.normal.textColor = EditorGUIUtility.isProSkin
+                    ? new Color(0.66f, 0.66f, 0.64f, 1f)
+                    : new Color(0.35f, 0.35f, 0.33f, 1f);
+                GUIContent content = new GUIContent(string.Join(" · ", neutralBadges));
+                Vector2 size = neutralStyle.CalcSize(content);
+                Rect textRect = new Rect(x, rect.y, Mathf.Min(size.x, Mathf.Max(0f, rect.xMax - x)), rect.height);
+                GUI.Label(textRect, content, neutralStyle);
+                x = textRect.xMax + 8f * graphZoom;
+            }
+
+            if (hasWarning)
+                x = DrawGraphBadgeChip(x, rect, "!", GraphWarningColor, tooltip);
+            if (hasUnreachable)
+                x = DrawGraphBadgeChip(x, rect, "UNREACHABLE", new Color(0.95f, 0.48f, 0.14f, 1f), tooltip);
         }
 
+        private float DrawGraphBadgeChip(float x, Rect rect, string label, Color color, string tooltip)
+        {
+            GUIStyle chipStyle = ScaledStyle(EditorStyles.miniBoldLabel, 8, TextAnchor.MiddleCenter);
+            GUIContent content = new GUIContent(label, tooltip);
+            Vector2 size = chipStyle.CalcSize(content);
+            float chipWidth = size.x + 8f * graphZoom;
+            if (x + chipWidth > rect.xMax)
+                return x;
+
+            Rect chipRect = new Rect(x, rect.y, chipWidth, rect.height);
+            EditorGUI.DrawRect(chipRect, new Color(color.r, color.g, color.b, 0.85f));
+            GUI.Label(chipRect, content, chipStyle);
+            return chipRect.xMax + 4f * graphZoom;
+        }
+
+        // §4 инструкции "читаемые ноды": крупнее портрет, имя ярче основного
+        // текста, технический [id] заметно слабее (rich text вместо второго
+        // Label — не нужно вручную мерить ширину имени), роль — маленькой
+        // второй строкой в Full.
         private void DrawGraphSpeaker(SerializedProperty node, Rect nodeRect, GraphNodeLayoutMetrics metrics, ref float y)
         {
             float margin = GraphPadding * graphZoom;
             float sectionHeight = metrics.SpeakerHeight * graphZoom;
-            float portraitSize = Mathf.Min(34f * graphZoom, sectionHeight - 8f * graphZoom);
+            float basePortraitSize = metrics.EffectiveMode == GraphDetailMode.Compact
+                ? 28f
+                : metrics.EffectiveMode == GraphDetailMode.Full ? 46f : 38f;
+            float portraitSize = Mathf.Min(basePortraitSize * graphZoom, sectionHeight - 8f * graphZoom);
             Rect portraitRect = new Rect(
                 nodeRect.x + margin,
                 y + 4f * graphZoom,
@@ -763,21 +834,34 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                         : new Color(0f, 0f, 0f, 0.08f));
             }
 
-            Rect speakerRect = new Rect(
-                portraitRect.xMax + 6f * graphZoom,
-                y + 7f * graphZoom,
-                nodeRect.width - portraitRect.width - margin * 2f - 6f * graphZoom,
-                sectionHeight - 10f * graphZoom);
+            float textX = portraitRect.xMax + 6f * graphZoom;
+            float textWidth = nodeRect.width - portraitRect.width - margin * 2f - 6f * graphZoom;
+            float nameLineHeight = 16f * graphZoom;
 
-            string speakerLabel;
+            Rect nameRect = new Rect(textX, y + 6f * graphZoom, textWidth, nameLineHeight);
+            string mutedHex = EditorGUIUtility.isProSkin ? "9a9a92" : "6b6b64";
+
+            string nameLabel;
             if (string.IsNullOrWhiteSpace(speakerId.stringValue))
-                speakerLabel = "<нет говорящего>";
+                nameLabel = "<нет говорящего>";
             else if (speaker != null)
-                speakerLabel = speaker.DisplayName + " [" + speaker.Id + "]";
+                nameLabel = "<b>" + speaker.DisplayName + "</b>  <color=#" + mutedHex + ">[" + speaker.Id + "]</color>";
             else
-                speakerLabel = "? " + speakerId.stringValue;
+                nameLabel = "<color=#" + mutedHex + ">? " + speakerId.stringValue + "</color>";
 
-            GUI.Label(speakerRect, speakerLabel, ScaledStyle(EditorStyles.boldLabel, 11, TextAnchor.UpperLeft));
+            GUIStyle nameStyle = ScaledStyle(EditorStyles.label, 12, TextAnchor.UpperLeft);
+            nameStyle.richText = true;
+            GUI.Label(nameRect, nameLabel, nameStyle);
+
+            if (metrics.EffectiveMode == GraphDetailMode.Full && speaker != null && !string.IsNullOrWhiteSpace(speaker.Role))
+            {
+                Rect roleRect = new Rect(textX, nameRect.yMax + 1f * graphZoom, textWidth, GraphNodeLayoutConstants.DetailLineHeight * graphZoom);
+                GUIStyle roleStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.UpperLeft);
+                roleStyle.normal.textColor = EditorGUIUtility.isProSkin
+                    ? new Color(0.6f, 0.6f, 0.58f, 1f)
+                    : new Color(0.42f, 0.42f, 0.4f, 1f);
+                GUI.Label(roleRect, speaker.Role, roleStyle);
+            }
 
             y += sectionHeight;
         }
@@ -802,21 +886,36 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             int maxChars = GetTextPreviewMaxChars(mode);
             List<string> detailLines = new List<string>();
+            float cardInset = 4f * graphZoom;
 
             for (int i = 0; i < metrics.TextBlocksShown; i++)
             {
                 GraphTextBlockInfo block = info.TextBlocks[i];
-                float blockY = y;
+                float cardHeight = metrics.TextBlocks[i].Height * graphZoom;
+
+                // §5: каждый TextBlock — собственная карточка (лёгкий фон),
+                // а не непрерывная простыня "заголовок/текст/эффекты".
+                Rect cardRect = new Rect(nodeRect.x + margin * 0.5f, y, nodeRect.width - margin, cardHeight - 3f * graphZoom);
+                EditorGUI.DrawRect(
+                    cardRect,
+                    EditorGUIUtility.isProSkin
+                        ? new Color(1f, 1f, 1f, 0.035f)
+                        : new Color(0f, 0f, 0f, 0.03f));
+
+                float blockY = y + cardInset;
+                float contentX = nodeRect.x + margin;
+                float contentWidth = nodeRect.width - margin * 2f;
                 float lineHeight = GraphNodeLayoutConstants.PreviewLineHeight * graphZoom;
 
-                Rect kindRect = new Rect(nodeRect.x + margin, blockY, nodeRect.width - margin * 2f, lineHeight);
-                GUI.Label(kindRect, TextBlockKindLabel(block.Kind), ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleLeft));
+                Rect kindRect = new Rect(contentX, blockY, contentWidth, lineHeight);
+                GUI.Label(kindRect, TextBlockKindLabel(block.Kind).ToUpperInvariant(), ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleLeft));
                 blockY += lineHeight;
 
                 int previewLines = mode == GraphDetailMode.Compact ? 1 : mode == GraphDetailMode.Full ? 3 : 2;
-                Rect previewRect = new Rect(nodeRect.x + margin, blockY, nodeRect.width - margin * 2f, lineHeight * previewLines);
+                Rect previewRect = new Rect(contentX, blockY, contentWidth, lineHeight * previewLines);
                 GUIStyle previewStyle = ScaledStyle(EditorStyles.label, 10, TextAnchor.UpperLeft);
                 previewStyle.wordWrap = true;
+                previewStyle.richText = false;
                 string previewText = TruncateForGraphPreview(block.Text, maxChars);
                 GUI.Label(previewRect, string.IsNullOrEmpty(previewText) ? "<пусто>" : previewText, previewStyle);
                 blockY += lineHeight * previewLines;
@@ -825,20 +924,26 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 {
                     if (block.PassiveCheck != null)
                     {
-                        Rect checkRect = new Rect(nodeRect.x + margin, blockY, nodeRect.width - margin * 2f, GraphNodeLayoutConstants.DetailLineHeight * graphZoom);
-                        GUI.Label(checkRect, BuildGraphPassiveCheckSummary(block.PassiveCheck), ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                        Rect checkRect = new Rect(contentX, blockY, contentWidth, GraphNodeLayoutConstants.DetailLineHeight * graphZoom);
+                        GUIStyle checkStyle = ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleLeft);
+                        checkStyle.normal.textColor = GraphCheckAccentColor;
+                        GUI.Label(checkRect, "◈ " + BuildGraphPassiveCheckSummary(block.PassiveCheck), checkStyle);
                         blockY += GraphNodeLayoutConstants.DetailLineHeight * graphZoom;
                     }
 
                     int maxLines = GetMaxDetailLinesPerSection(mode);
+
                     BuildGraphConditionLines(block.Conditions, maxLines, detailLines, out int condOverflow);
-                    blockY = DrawGraphDetailLines(nodeRect, margin, blockY, detailLines, condOverflow);
+                    blockY = DrawGraphLabeledDetailSection(
+                        contentX, contentWidth, blockY, "ПОКАЗАТЬ ЕСЛИ", detailLines, condOverflow, GraphConditionAccentColor);
 
                     BuildGraphEffectLines(block.OnRevealEffects, maxLines, detailLines, out int fxOverflow);
-                    blockY = DrawGraphDetailLines(nodeRect, margin, blockY, detailLines, fxOverflow);
+                    string effectsHeader = block.PassiveCheck != null ? "ПОСЛЕ УСПЕХА" : "ПОСЛЕ ПОКАЗА";
+                    blockY = DrawGraphLabeledDetailSection(
+                        contentX, contentWidth, blockY, effectsHeader, detailLines, fxOverflow, GraphEffectAccentColor);
                 }
 
-                y += metrics.TextBlocks[i].Height * graphZoom;
+                y += cardHeight;
             }
 
             if (metrics.TextBlocksOverflow > 0)
@@ -849,19 +954,36 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
         }
 
-        private float DrawGraphDetailLines(Rect nodeRect, float margin, float y, List<string> lines, int overflowCount)
+        // §8/§10 инструкции "читаемые ноды": Conditions ("ПОКАЗАТЬ ЕСЛИ") и
+        // Effects ("ПОСЛЕ ПОКАЗА"/"ПОСЛЕ УСПЕХА"/"ПОСЛЕ ВЫБОРА") — не общий
+        // список строк, а подписанная мини-секция со своим акцентным цветом,
+        // чтобы условие "до" и последствие "после" не путались друг с другом
+        // или с текстом. Ничего не рисует, если lines пуст (§12 — секция без
+        // содержимого просто не появляется, а не превращается в пустую рамку).
+        private float DrawGraphLabeledDetailSection(
+            float contentX, float contentWidth, float y, string header, List<string> lines, int overflowCount, Color accent)
         {
+            if (lines.Count == 0 && overflowCount <= 0)
+                return y;
+
+            float headerHeight = GraphNodeLayoutConstants.PreviewLineHeight * graphZoom;
+            Rect headerRect = new Rect(contentX, y, contentWidth, headerHeight);
+            GUIStyle headerStyle = ScaledStyle(EditorStyles.miniLabel, 8, TextAnchor.MiddleLeft);
+            headerStyle.normal.textColor = accent;
+            GUI.Label(headerRect, header, headerStyle);
+            y += headerHeight;
+
             float lineHeight = GraphNodeLayoutConstants.DetailLineHeight * graphZoom;
             foreach (string line in lines)
             {
-                Rect lineRect = new Rect(nodeRect.x + margin, y, nodeRect.width - margin * 2f, lineHeight);
+                Rect lineRect = new Rect(contentX, y, contentWidth, lineHeight);
                 GUI.Label(lineRect, line, ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
                 y += lineHeight;
             }
 
             if (overflowCount > 0)
             {
-                Rect overflowRect = new Rect(nodeRect.x + margin, y, nodeRect.width - margin * 2f, lineHeight);
+                Rect overflowRect = new Rect(contentX, y, contentWidth, lineHeight);
                 GUI.Label(overflowRect, BuildOverflowLabel(overflowCount), ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
                 y += lineHeight;
             }
@@ -869,8 +991,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             return y;
         }
 
-        // Карточка ответа — только чтение (§13-20, §27): тип, превью текста,
-        // цель(и) перехода, сводка проверки, условия/эффекты. Порты (кроме
+        // Карточка ответа — только чтение (§10 инструкции по читаемым нодам,
+        // §13-20/§27 инструкции по информативным нодам): тип, превью текста,
+        // цель(и) перехода (вторично, приглушённо — §11), сводка проверки,
+        // условия/эффекты отдельными подписанными секциями. Порты (кроме
         // "+ Ответ") остаются интерактивными для перетаскивания связей.
         private void DrawGraphChoice(
             int nodeIndex,
@@ -879,45 +1003,63 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             float y,
             float choiceHeight,
             GraphChoiceInfo choiceInfo,
-            GraphDetailMode mode)
+            GraphDetailMode mode,
+            List<string> nodeWarnings)
         {
             float margin = GraphPadding * graphZoom;
             Rect rowRect = new Rect(
                 nodeRect.x + margin,
-                y + 2f * graphZoom,
+                y + 3f * graphZoom,
                 nodeRect.width - margin * 2f,
-                choiceHeight - 4f * graphZoom);
+                choiceHeight - 6f * graphZoom);
 
+            // §10: каждый ответ — отдельная карточка (фон + тонкая рамка),
+            // а не продолжение общей колонки.
             EditorGUI.DrawRect(
                 rowRect,
                 EditorGUIUtility.isProSkin
-                    ? new Color(1f, 1f, 1f, 0.035f)
-                    : new Color(0f, 0f, 0f, 0.035f));
+                    ? new Color(1f, 1f, 1f, 0.045f)
+                    : new Color(0f, 0f, 0f, 0.045f));
+            DrawGraphBorder(
+                rowRect,
+                EditorGUIUtility.isProSkin ? new Color(1f, 1f, 1f, 0.07f) : new Color(0f, 0f, 0f, 0.09f),
+                1f);
 
             if (choiceInfo == null)
                 return;
 
+            string choiceWarningLabel = "Ответ #" + (choiceIndex + 1).ToString(CultureInfo.InvariantCulture);
+            bool hasWarning = ChoiceHasWarning(nodeWarnings, choiceIndex);
+
             float lineHeight = GraphNodeLayoutConstants.PreviewLineHeight * graphZoom;
             float detailLineHeight = GraphNodeLayoutConstants.DetailLineHeight * graphZoom;
-            float cy = rowRect.y + 2f * graphZoom;
-            float contentWidth = rowRect.width - 6f * graphZoom;
+            float cy = rowRect.y + 3f * graphZoom;
+            float contentX = rowRect.x + 5f * graphZoom;
+            float contentWidth = rowRect.width - 10f * graphZoom;
 
-            Rect kindRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, lineHeight);
+            Rect kindRect = new Rect(contentX, cy, contentWidth, lineHeight);
             GUI.Label(kindRect, BuildGraphChoiceKindLabel(choiceInfo.Kind), ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleLeft));
             cy += lineHeight;
 
             int previewLines = mode == GraphDetailMode.Full ? 2 : 1;
-            Rect textRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, lineHeight * previewLines);
+            Rect textRect = new Rect(contentX, cy, contentWidth, lineHeight * previewLines);
             GUIStyle previewStyle = ScaledStyle(EditorStyles.label, 10, TextAnchor.UpperLeft);
             previewStyle.wordWrap = true;
             string previewText = TruncateForGraphPreview(choiceInfo.Text, GetChoiceTextPreviewMaxChars(mode));
             GUI.Label(textRect, string.IsNullOrEmpty(previewText) ? "<пусто>" : previewText, previewStyle);
             cy += lineHeight * previewLines;
 
+            GUIStyle targetStyle = ScaledStyle(EditorStyles.miniLabel, 8, TextAnchor.MiddleLeft);
+            targetStyle.normal.textColor = EditorGUIUtility.isProSkin
+                ? new Color(0.62f, 0.62f, 0.6f, 1f)
+                : new Color(0.4f, 0.4f, 0.38f, 1f);
+
             if (choiceInfo.IsExit)
             {
-                Rect exitRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, detailLineHeight);
-                GUI.Label(exitRect, "ВЫХОД", ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                Rect exitRect = new Rect(contentX, cy, contentWidth, detailLineHeight);
+                GUI.Label(exitRect, "ВЫХОД", targetStyle);
+                if (hasWarning)
+                    cy = DrawGraphChoiceWarningLine(contentX, contentWidth, cy + detailLineHeight, nodeWarnings, choiceWarningLabel);
                 return;
             }
 
@@ -925,21 +1067,23 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 if (mode != GraphDetailMode.Compact)
                 {
-                    Rect mechRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, detailLineHeight);
-                    GUI.Label(mechRect, BuildGraphActiveCheckSummary(choiceInfo.Check), ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                    Rect mechRect = new Rect(contentX, cy, contentWidth, detailLineHeight);
+                    GUIStyle mechStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft);
+                    mechStyle.normal.textColor = GraphCheckAccentColor;
+                    GUI.Label(mechRect, "◆ " + BuildGraphActiveCheckSummary(choiceInfo.Check), mechStyle);
                     cy += detailLineHeight;
                 }
 
-                GUIStyle successStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft);
+                GUIStyle successStyle = ScaledStyle(EditorStyles.miniLabel, 8, TextAnchor.MiddleLeft);
                 successStyle.normal.textColor = GraphSuccessEdgeColor;
-                GUIStyle failureStyle = ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft);
+                GUIStyle failureStyle = ScaledStyle(EditorStyles.miniLabel, 8, TextAnchor.MiddleLeft);
                 failureStyle.normal.textColor = GraphFailureEdgeColor;
 
-                Rect successRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, detailLineHeight);
+                Rect successRect = new Rect(contentX, cy, contentWidth, detailLineHeight);
                 GUI.Label(successRect, "✓ УСП → " + GraphShortNodeLabel(choiceInfo.SuccessNodeId), successStyle);
                 cy += detailLineHeight;
 
-                Rect failureRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, detailLineHeight);
+                Rect failureRect = new Rect(contentX, cy, contentWidth, detailLineHeight);
                 GUI.Label(failureRect, "✕ ПРОВ → " + GraphShortNodeLabel(choiceInfo.FailureNodeId), failureStyle);
                 cy += detailLineHeight;
 
@@ -948,8 +1092,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             else
             {
                 string targetLabel = choiceInfo.EndsDialogue ? "→ ВЫХОД" : "→ " + GraphShortNodeLabel(choiceInfo.NextNodeId);
-                Rect targetRect = new Rect(rowRect.x + 3f * graphZoom, cy, contentWidth, detailLineHeight);
-                GUI.Label(targetRect, targetLabel, ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                Rect targetRect = new Rect(contentX, cy, contentWidth, detailLineHeight);
+                GUI.Label(targetRect, targetLabel, targetStyle);
                 cy += detailLineHeight;
 
                 if (!choiceInfo.EndsDialogue)
@@ -973,40 +1117,50 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 }
             }
 
+            // §12 инструкции по читаемым нодам: технический ID обычно
+            // вторичен, но при реальной ошибке (несуществующая цель, нет
+            // цели) становится ярким предупреждением — контраст важнее
+            // приглушённости.
+            if (hasWarning)
+                cy = DrawGraphChoiceWarningLine(contentX, contentWidth, cy, nodeWarnings, choiceWarningLabel);
+
             if (mode != GraphDetailMode.Compact)
             {
                 int maxLines = GetMaxDetailLinesPerSection(mode);
                 List<string> lines = new List<string>();
 
                 BuildGraphConditionLines(choiceInfo.Conditions, maxLines, lines, out int condOverflow);
-                cy = DrawGraphChoiceDetailLines(rowRect, cy, lines, condOverflow);
+                cy = DrawGraphLabeledDetailSection(contentX, contentWidth, cy, "УСЛОВИЯ ДОСТУПНОСТИ", lines, condOverflow, GraphConditionAccentColor);
 
-                List<NarrativeEffect> combinedEffects = new List<NarrativeEffect>();
-                if (choiceInfo.SuccessEffects != null) combinedEffects.AddRange(choiceInfo.SuccessEffects);
-                if (choiceInfo.FailureEffects != null) combinedEffects.AddRange(choiceInfo.FailureEffects);
-                BuildGraphEffectLines(combinedEffects, maxLines, lines, out int fxOverflow);
-                DrawGraphChoiceDetailLines(rowRect, cy, lines, fxOverflow);
+                List<string> successLines = new List<string>();
+                BuildGraphEffectLines(choiceInfo.SuccessEffects, maxLines, successLines, out int successOverflow);
+                cy = DrawGraphLabeledDetailSection(contentX, contentWidth, cy, "ПОСЛЕ УСПЕХА", successLines, successOverflow, GraphEffectAccentColor);
+
+                List<string> failureLines = new List<string>();
+                BuildGraphEffectLines(choiceInfo.FailureEffects, maxLines, failureLines, out int failureOverflow);
+                DrawGraphLabeledDetailSection(contentX, contentWidth, cy, "ПОСЛЕ ПРОВАЛА", failureLines, failureOverflow, GraphEffectAccentColor);
             }
         }
 
-        private float DrawGraphChoiceDetailLines(Rect rowRect, float y, List<string> lines, int overflowCount)
+        private float DrawGraphChoiceWarningLine(float contentX, float contentWidth, float y, List<string> nodeWarnings, string choiceWarningLabel)
         {
+            string message = choiceWarningLabel;
+            foreach (string warning in nodeWarnings)
+            {
+                if (warning.StartsWith(choiceWarningLabel, StringComparison.Ordinal))
+                {
+                    message = "⚠ " + warning;
+                    break;
+                }
+            }
+
             float lineHeight = GraphNodeLayoutConstants.DetailLineHeight * graphZoom;
-            foreach (string line in lines)
-            {
-                Rect lineRect = new Rect(rowRect.x + 3f * graphZoom, y, rowRect.width - 6f * graphZoom, lineHeight);
-                GUI.Label(lineRect, line, ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
-                y += lineHeight;
-            }
-
-            if (overflowCount > 0)
-            {
-                Rect overflowRect = new Rect(rowRect.x + 3f * graphZoom, y, rowRect.width - 6f * graphZoom, lineHeight);
-                GUI.Label(overflowRect, BuildOverflowLabel(overflowCount), ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
-                y += lineHeight;
-            }
-
-            return y;
+            Rect warningRect = new Rect(contentX, y, contentWidth, lineHeight);
+            GUIStyle warningStyle = ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleLeft);
+            warningStyle.normal.textColor = GraphWarningColor;
+            GUIContent content = new GUIContent(message, message);
+            GUI.Label(warningRect, content, warningStyle);
+            return y + lineHeight;
         }
 
         // Активная проверка (§13,§15): вместо одного жёлтого порта — два

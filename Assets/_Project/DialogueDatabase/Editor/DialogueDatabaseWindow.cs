@@ -73,6 +73,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 database = Resources.Load<DialogueDatabaseAsset>(DialogueDatabaseAsset.ResourcesPath);
 
             LoadGraphDetailMode();
+            LoadGraphInspectorWidth();
         }
 
         private void OnGUI()
@@ -279,6 +280,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
         private void DrawDialogueTable(SerializedProperty dialogue)
         {
+            // Таблица не переходит в NarrowInspector-режим: там всегда
+            // достаточно места для прежнего горизонтального PropertyField
+            // (§41 — режим «Таблица» не должен сломаться).
+            inspectorLayoutMode = DialogueEditorLayoutMode.Normal;
+
             SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
             centerScroll = EditorGUILayout.BeginScrollView(centerScroll);
 
@@ -322,52 +328,61 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             if (node.isExpanded)
             {
-                EditorGUILayout.PropertyField(node.FindPropertyRelative("id"), new GUIContent("ID узла"));
+                DrawSectionHeader("ОСНОВНОЕ");
+                DrawLongIdField(node.FindPropertyRelative("id"), "ID узла");
                 DrawSpeakerPopup(node.FindPropertyRelative("speakerId"));
                 EditorGUILayout.PropertyField(node.FindPropertyRelative("text"), new GUIContent("Реплика (legacy)"));
 
-                GUILayout.Space(5f);
                 SerializedProperty textBlocks = node.FindPropertyRelative("textBlocks");
-                EditorGUILayout.LabelField("Текстовые блоки", EditorStyles.boldLabel);
+                DrawSectionHeader("ТЕКСТОВЫЕ БЛОКИ (" + textBlocks.arraySize + ")");
                 for (int blockIndex = 0; blockIndex < textBlocks.arraySize; blockIndex++)
                     DrawTextBlock(textBlocks, blockIndex);
 
-                EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button("+ Основная реплика", EditorStyles.miniButton))
-                    AddTextBlock(textBlocks, DialogueTextBlockKind.MainLine);
-                if (GUILayout.Button("+ Наблюдение", EditorStyles.miniButton))
-                    AddTextBlock(textBlocks, DialogueTextBlockKind.Observation);
-                if (GUILayout.Button("+ Воспоминание", EditorStyles.miniButton))
-                    AddTextBlock(textBlocks, DialogueTextBlockKind.Memory);
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button("+ Мысль героя", EditorStyles.miniButton))
-                    AddTextBlock(textBlocks, DialogueTextBlockKind.HeroThought);
-                if (GUILayout.Button("+ Реплика спутника", EditorStyles.miniButton))
-                    AddTextBlock(textBlocks, DialogueTextBlockKind.CompanionLine);
-                if (GUILayout.Button("+ Повествование", EditorStyles.miniButton))
-                    AddTextBlock(textBlocks, DialogueTextBlockKind.Narration);
-                EditorGUILayout.EndHorizontal();
+                // §29: ряд из 6 кнопок неизбежно требует ширины — сжимаем в
+                // одно компактное dropdown-меню.
+                if (GUILayout.Button("＋ Добавить текстовый блок ▾", EditorStyles.miniButton))
+                    ShowAddTextBlockMenu(textBlocks);
 
-                GUILayout.Space(8f);
                 SerializedProperty choices = node.FindPropertyRelative("choices");
-                EditorGUILayout.LabelField("Ответы игрока", EditorStyles.boldLabel);
+                DrawSectionHeader("ОТВЕТЫ (" + choices.arraySize + ")");
                 for (int choiceIndex = 0; choiceIndex < choices.arraySize; choiceIndex++)
                     DrawChoice(nodes, choices, choiceIndex);
 
-                EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button("+ Обычный ответ", EditorStyles.miniButton))
-                    AddChoice(choices);
-                if (GUILayout.Button("+ Возвратная проверка", EditorStyles.miniButton))
-                    AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveReturnable);
-                if (GUILayout.Button("+ Решающая проверка", EditorStyles.miniButton))
-                    AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveDecisive);
-                if (GUILayout.Button("+ Завершить разговор", EditorStyles.miniButton))
-                    AddExitChoice(choices);
-                EditorGUILayout.EndHorizontal();
+                if (GUILayout.Button("＋ Добавить ответ ▾", EditorStyles.miniButton))
+                    ShowAddChoiceMenu(choices);
             }
 
             EditorGUILayout.EndVertical();
+        }
+
+        private void ShowAddTextBlockMenu(SerializedProperty textBlocks)
+        {
+            GenericMenu menu = new GenericMenu();
+            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.MainLine)), false,
+                () => AddTextBlock(textBlocks, DialogueTextBlockKind.MainLine));
+            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.Observation)), false,
+                () => AddTextBlock(textBlocks, DialogueTextBlockKind.Observation));
+            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.Memory)), false,
+                () => AddTextBlock(textBlocks, DialogueTextBlockKind.Memory));
+            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.HeroThought)), false,
+                () => AddTextBlock(textBlocks, DialogueTextBlockKind.HeroThought));
+            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.CompanionLine)), false,
+                () => AddTextBlock(textBlocks, DialogueTextBlockKind.CompanionLine));
+            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.Narration)), false,
+                () => AddTextBlock(textBlocks, DialogueTextBlockKind.Narration));
+            menu.ShowAsContext();
+        }
+
+        private void ShowAddChoiceMenu(SerializedProperty choices)
+        {
+            GenericMenu menu = new GenericMenu();
+            menu.AddItem(new GUIContent("Обычный"), false, () => AddChoice(choices));
+            menu.AddItem(new GUIContent("Возвратная проверка"), false,
+                () => AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveReturnable));
+            menu.AddItem(new GUIContent("Решающая проверка"), false,
+                () => AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveDecisive));
+            menu.AddItem(new GUIContent("Выход"), false, () => AddExitChoice(choices));
+            menu.ShowAsContext();
         }
 
         private void DrawTextBlock(SerializedProperty textBlocks, int blockIndex)
@@ -393,10 +408,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             if (block.isExpanded)
             {
-                EditorGUILayout.PropertyField(blockId, new GUIContent("ID блока"));
+                DrawLongIdField(blockId, "ID блока");
                 DrawTextBlockKindPopup(kind);
-                EditorGUILayout.PropertyField(block.FindPropertyRelative("speakerIdOverride"), new GUIContent("Говорящий (переопределение)"));
-                EditorGUILayout.PropertyField(block.FindPropertyRelative("text"), new GUIContent("Текст"));
+                DrawLongIdField(block.FindPropertyRelative("speakerIdOverride"), "Говорящий (переопределение)");
+                EditorGUILayout.PropertyField(block.FindPropertyRelative("text"), new GUIContent("Текст"), GUILayout.MinHeight(60f));
                 DrawConditionGroup(block.FindPropertyRelative("conditions"), "Условия показа");
 
                 SerializedProperty hasPassiveCheck = block.FindPropertyRelative("hasPassiveCheck");
@@ -404,7 +419,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 if (hasPassiveCheck.boolValue)
                     DrawCheckSpec(block.FindPropertyRelative("passiveCheck"), "Пассивная проверка");
 
-                DrawEffectsList(block.FindPropertyRelative("onRevealEffects"), "Эффекты при показе");
+                DrawEffectsList(block.FindPropertyRelative("onRevealEffects"), "Эффекты после показа");
             }
             EditorGUILayout.EndVertical();
         }
@@ -630,7 +645,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 qualityProperty.enumValueIndex = (int)HeroQualityValues[next];
         }
 
-        private static void DrawConditionGroup(SerializedProperty group, string label)
+        private void DrawConditionGroup(SerializedProperty group, string label)
         {
             EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
@@ -656,7 +671,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         // Возвращает true, если условие было удалено — тогда вызывающий
         // цикл должен остановиться в этом кадре (индексы после удаления
         // сместились).
-        private static bool DrawCondition(SerializedProperty conditions, int index)
+        private bool DrawCondition(SerializedProperty conditions, int index)
         {
             SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
             SerializedProperty type = condition.FindPropertyRelative("Type");
@@ -689,44 +704,44 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     break;
 
                 case NarrativeConditionType.CompetencyAtLeast:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Компетенция (ID)"));
+                    DrawLongIdField(stringParam, "Компетенция (ID)");
                     EditorGUILayout.PropertyField(intParam, new GUIContent("Минимум"));
                     break;
 
                 case NarrativeConditionType.RelationAtLeast:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("С кем считаем отношение (ID)"));
+                    DrawLongIdField(stringParam, "С кем считаем отношение (ID)");
                     EditorGUILayout.PropertyField(intParam, new GUIContent("Минимум"));
                     break;
 
                 case NarrativeConditionType.RelationAtMost:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("С кем считаем отношение (ID)"));
+                    DrawLongIdField(stringParam, "С кем считаем отношение (ID)");
                     EditorGUILayout.PropertyField(intParam, new GUIContent("Максимум"));
                     break;
 
                 case NarrativeConditionType.FlagSet:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Событие / решение (ID)"));
+                    DrawLongIdField(stringParam, "Событие / решение (ID)");
                     break;
 
                 case NarrativeConditionType.KnowledgeKnown:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Знание (ID)"));
+                    DrawLongIdField(stringParam, "Знание (ID)");
                     break;
 
                 case NarrativeConditionType.CompanionPresent:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Спутник (ID)"));
+                    DrawLongIdField(stringParam, "Спутник (ID)");
                     break;
 
                 case NarrativeConditionType.ItemPresent:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Предмет (ID)"));
+                    DrawLongIdField(stringParam, "Предмет (ID)");
                     break;
 
                 case NarrativeConditionType.CheckSucceeded:
                 case NarrativeConditionType.CheckFailed:
                 case NarrativeConditionType.CheckNotAttempted:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Проверка (ID)"));
+                    DrawLongIdField(stringParam, "Проверка (ID)");
                     break;
 
                 case NarrativeConditionType.TraitPresent:
-                    EditorGUILayout.PropertyField(stringParam, new GUIContent("Особенность (ID)"));
+                    DrawLongIdField(stringParam, "Особенность (ID)");
                     break;
             }
 
@@ -782,17 +797,15 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 kindProperty.enumValueIndex = (int)CheckKindValues[next];
         }
 
-        private static void DrawCheckSpec(SerializedProperty check, string label)
+        private void DrawCheckSpec(SerializedProperty check, string label)
         {
             EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
-            EditorGUILayout.PropertyField(check.FindPropertyRelative("CheckId"), new GUIContent("ID проверки"));
+            DrawLongIdField(check.FindPropertyRelative("CheckId"), "ID проверки");
             DrawCheckKindPopup(check.FindPropertyRelative("Kind"));
             DrawHeroQualityPopup(check.FindPropertyRelative("Quality"), "Качество");
-            EditorGUILayout.PropertyField(
-                check.FindPropertyRelative("CompetencyId"),
-                new GUIContent("ID компетенции (пусто — не участвует)"));
+            DrawLongIdField(check.FindPropertyRelative("CompetencyId"), "ID компетенции (пусто — не участвует)");
             SerializedProperty difficultyProperty = check.FindPropertyRelative("Difficulty");
             EditorGUILayout.PropertyField(difficultyProperty, new GUIContent("Сложность (9-23)"));
             EditorGUILayout.LabelField("→ " + NarrativeDifficultyLabels.Describe(difficultyProperty.intValue), EditorStyles.miniLabel);
@@ -814,7 +827,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUI.indentLevel--;
         }
 
-        private static bool DrawModifierRule(SerializedProperty rules, int index)
+        private bool DrawModifierRule(SerializedProperty rules, int index)
         {
             SerializedProperty rule = rules.GetArrayElementAtIndex(index);
 
@@ -831,7 +844,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.PropertyField(rule.FindPropertyRelative("SourceId"), new GUIContent("ID источника"));
+            DrawLongIdField(rule.FindPropertyRelative("SourceId"), "ID источника");
             EditorGUILayout.PropertyField(rule.FindPropertyRelative("Label"), new GUIContent("Подпись"));
             EditorGUILayout.PropertyField(rule.FindPropertyRelative("Value"), new GUIContent("Значение"));
             DrawConditionGroup(rule.FindPropertyRelative("Condition"), "Условие применения");
@@ -907,7 +920,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
         }
 
-        private static void DrawEffectsList(SerializedProperty effects, string label)
+        private void DrawEffectsList(SerializedProperty effects, string label)
         {
             EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
@@ -927,16 +940,17 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUI.indentLevel--;
         }
 
-        private static bool DrawEffect(SerializedProperty effects, int index)
+        private bool DrawEffect(SerializedProperty effects, int index)
         {
             SerializedProperty effect = effects.GetArrayElementAtIndex(index);
             SerializedProperty type = effect.FindPropertyRelative("Type");
             SerializedProperty stringParam = effect.FindPropertyRelative("StringParam");
             SerializedProperty intParam = effect.FindPropertyRelative("IntParam");
+            NarrativeEffectType kind = (NarrativeEffectType)type.enumValueIndex;
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Эффект " + (index + 1), EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("Эффект " + (index + 1) + " — " + EffectTypeLabel(kind), EditorStyles.miniBoldLabel);
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("×", GUILayout.Width(24f)))
             {
@@ -947,12 +961,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.PropertyField(
-                effect.FindPropertyRelative("EffectExecutionId"),
-                new GUIContent("ID применения (уникальный)"));
+            DrawLongIdField(effect.FindPropertyRelative("EffectExecutionId"), "ID применения (уникальный)");
             DrawEffectTypePopup(type);
-            NarrativeEffectType kind = (NarrativeEffectType)type.enumValueIndex;
-            EditorGUILayout.PropertyField(stringParam, new GUIContent(EffectStringParamLabel(kind)));
+            kind = (NarrativeEffectType)type.enumValueIndex;
+            DrawLongIdField(stringParam, EffectStringParamLabel(kind));
             if (kind == NarrativeEffectType.ChangeRelation)
                 EditorGUILayout.PropertyField(intParam, new GUIContent("Изменение (дельта)"));
 

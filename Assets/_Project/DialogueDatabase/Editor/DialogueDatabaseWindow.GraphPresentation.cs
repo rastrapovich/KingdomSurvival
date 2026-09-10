@@ -366,6 +366,24 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             return warnings;
         }
 
+        // Совпадение по префиксу "Ответ #N: " — те же строки, что и в
+        // тултипе бейджа "!", используются повторно, чтобы не считать
+        // релевантность предупреждения ответу дважды разными способами.
+        public static bool ChoiceHasWarning(List<string> warnings, int choiceIndex)
+        {
+            if (warnings == null || warnings.Count == 0)
+                return false;
+
+            string prefix = "Ответ #" + (choiceIndex + 1).ToString(CultureInfo.InvariantCulture);
+            foreach (string warning in warnings)
+            {
+                if (warning.StartsWith(prefix, StringComparison.Ordinal))
+                    return true;
+            }
+
+            return false;
+        }
+
         public static string BuildGraphWarningsTooltip(List<string> warnings)
         {
             if (warnings == null || warnings.Count == 0)
@@ -552,6 +570,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             public const float DetailLineHeight = 15f;
             public const float SectionGap = 4f;
             public const float EmptySectionHeight = PreviewLineHeight + SectionGap;
+
+            // §5/§10 инструкции "читаемые ноды": визуальный отступ карточки
+            // TextBlock/Choice (фон + рамка) сверх содержимого.
+            public const float CardPadding = 6f;
         }
 
         public static float GetGraphNodeWidth(GraphDetailMode mode)
@@ -569,7 +591,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             switch (mode)
             {
                 case GraphDetailMode.Compact: return 26f;
-                case GraphDetailMode.Full: return 50f;
+                // §4 инструкции "читаемые ноды": крупнее портрет (46px) +
+                // имя + вторая строка роли, если она задана у говорящего.
+                case GraphDetailMode.Full: return 62f;
                 default: return 44f;
             }
         }
@@ -641,8 +665,20 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             return height;
         }
 
+        // §8 инструкции "читаемые ноды": Conditions/Effects — не голый
+        // список строк, а подписанная мини-секция ("ПОКАЗАТЬ ЕСЛИ"/"ПОСЛЕ
+        // ПОКАЗА") — заголовок добавляет ровно одну строку высоты, когда
+        // сама секция не пуста.
+        private static float ComputeLabeledSectionHeight(int itemCount, int maxLines)
+        {
+            if (itemCount <= 0)
+                return 0f;
+            return GraphNodeLayoutConstants.PreviewLineHeight + ComputeDetailSectionHeight(itemCount, maxLines);
+        }
+
         // Kind-заголовок блока + превью текста + (Standard/Full) строка
-        // проверки/условий/эффектов, обрезанные по лимиту режима.
+        // проверки/условий/эффектов, обрезанные по лимиту режима, плюс
+        // отступы карточки блока (§5 инструкции "читаемые ноды").
         public static float ComputeTextBlockHeight(GraphTextBlockInfo block, GraphDetailMode mode)
         {
             float height = GraphNodeLayoutConstants.PreviewLineHeight; // заголовок вида блока
@@ -654,28 +690,31 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     height += GraphNodeLayoutConstants.DetailLineHeight;
 
                 int maxLines = GetMaxDetailLinesPerSection(mode);
-                height += ComputeDetailSectionHeight(block.Conditions?.Conditions?.Count ?? 0, maxLines);
-                height += ComputeDetailSectionHeight(block.OnRevealEffects?.Count ?? 0, maxLines);
+                height += ComputeLabeledSectionHeight(block.Conditions?.Conditions?.Count ?? 0, maxLines);
+                height += ComputeLabeledSectionHeight(block.OnRevealEffects?.Count ?? 0, maxLines);
             }
 
-            return height + GraphNodeLayoutConstants.SectionGap;
+            return height + GraphNodeLayoutConstants.SectionGap + GraphNodeLayoutConstants.CardPadding;
         }
 
         // Тип ответа + превью текста + строка(и) цели (обычный переход — 1,
         // активная проверка — 2: ✓ успех / ✕ провал) + (Standard/Full)
-        // условия/эффекты.
-        public static float ComputeChoiceHeight(GraphChoiceInfo choice, GraphDetailMode mode)
+        // условия/эффекты успеха/провала отдельными подписанными секциями
+        // + (если есть) строка ошибки (§12 инструкции по читаемым нодам).
+        public static float ComputeChoiceHeight(GraphChoiceInfo choice, GraphDetailMode mode, bool hasWarning)
         {
             float height = GraphNodeLayoutConstants.PreviewLineHeight; // тип ответа
             height += GraphNodeLayoutConstants.PreviewLineHeight * GetChoiceTextPreviewLineCount(mode);
 
             if (choice == null)
-                return height + GraphNodeLayoutConstants.SectionGap;
+                return height + GraphNodeLayoutConstants.SectionGap + GraphNodeLayoutConstants.CardPadding;
 
             if (choice.IsExit)
             {
                 height += GraphNodeLayoutConstants.DetailLineHeight; // "ВЫХОД"
-                return height + GraphNodeLayoutConstants.SectionGap;
+                if (hasWarning)
+                    height += GraphNodeLayoutConstants.DetailLineHeight;
+                return height + GraphNodeLayoutConstants.SectionGap + GraphNodeLayoutConstants.CardPadding;
             }
 
             if (choice.IsActiveCheck)
@@ -689,16 +728,18 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 height += GraphNodeLayoutConstants.DetailLineHeight; // цель перехода
             }
 
+            if (hasWarning)
+                height += GraphNodeLayoutConstants.DetailLineHeight;
+
             if (mode != GraphDetailMode.Compact)
             {
                 int maxLines = GetMaxDetailLinesPerSection(mode);
-                height += ComputeDetailSectionHeight(choice.Conditions?.Conditions?.Count ?? 0, maxLines);
-
-                int effectCount = (choice.SuccessEffects?.Count ?? 0) + (choice.FailureEffects?.Count ?? 0);
-                height += ComputeDetailSectionHeight(effectCount, maxLines);
+                height += ComputeLabeledSectionHeight(choice.Conditions?.Conditions?.Count ?? 0, maxLines);
+                height += ComputeLabeledSectionHeight(choice.SuccessEffects?.Count ?? 0, maxLines);
+                height += ComputeLabeledSectionHeight(choice.FailureEffects?.Count ?? 0, maxLines);
             }
 
-            return height + GraphNodeLayoutConstants.SectionGap;
+            return height + GraphNodeLayoutConstants.SectionGap + GraphNodeLayoutConstants.CardPadding;
         }
 
         public sealed class GraphTextBlockLayout
@@ -799,7 +840,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 for (int i = 0; i < choiceCount; i++)
                 {
-                    float choiceHeight = ComputeChoiceHeight(choices[i], effectiveMode);
+                    bool hasWarning = ChoiceHasWarning(warnings, i);
+                    float choiceHeight = ComputeChoiceHeight(choices[i], effectiveMode, hasWarning);
                     metrics.Choices.Add(new GraphChoiceLayout { Y = y, Height = choiceHeight });
                     y += choiceHeight;
                 }

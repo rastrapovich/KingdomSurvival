@@ -35,10 +35,14 @@ namespace KingdomSurvival.UnitDatabase.Editor
         private PopupField<string> tagFilterField;
         private ListView unitList;
         private VisualElement detailPane;
-        private Image portraitPreview;
+        private UnitPortraitElement portraitPreview;
         private Image battlefieldPreview;
         private Label selectionHint;
         private Label validationLabel;
+        private bool portraitDragging;
+        private int portraitDragPointerId = -1;
+        private Vector2 portraitDragStartPointer;
+        private Vector2 portraitDragStartOffset;
 
         [MenuItem("Kingdom Survival/База существ")]
         public static void OpenWindow()
@@ -68,6 +72,12 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 };
                 rootVisualElement.Add(selectFolder);
                 return;
+            }
+
+            if (database.MigrateIfNeeded())
+            {
+                EditorUtility.SetDirty(database);
+                AssetDatabase.SaveAssetIfDirty(database);
             }
 
             serializedDatabase = new SerializedObject(database);
@@ -233,17 +243,20 @@ namespace KingdomSurvival.UnitDatabase.Editor
             row.style.paddingRight = 5f;
 
             VisualElement thumbnailFrame = new VisualElement { name = "thumbnail-frame" };
-            thumbnailFrame.style.width = 39f;
-            thumbnailFrame.style.height = 52f;
+            PortraitSizeDefinition thumbnailPreset = PortraitSizeTable.Get(PortraitSize.XS);
+            const float thumbnailDisplayScale = 0.4f;
+            // XS 100x140 в масштабе 40%: даже миниатюра списка сохраняет
+            // каноническое отношение рамки 5:7, а не прежнее 3:4.
+            thumbnailFrame.style.width = thumbnailPreset.Width * thumbnailDisplayScale;
+            thumbnailFrame.style.height = thumbnailPreset.Height * thumbnailDisplayScale;
             thumbnailFrame.style.flexShrink = 0f;
             thumbnailFrame.style.marginRight = 8f;
             thumbnailFrame.style.backgroundColor = new Color(0.10f, 0.10f, 0.10f, 1f);
             thumbnailFrame.style.overflow = Overflow.Hidden;
 
-            Image thumbnail = new Image
+            UnitPortraitElement thumbnail = new UnitPortraitElement
             {
                 name = "thumbnail",
-                scaleMode = ScaleMode.ScaleAndCrop,
                 pickingMode = PickingMode.Ignore
             };
             thumbnail.style.position = Position.Absolute;
@@ -278,9 +291,8 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 : unit.DisplayLabel;
             element.Q<Label>("id").text = unit.Id + " · " + GetCategoryLabel(unit.Category);
 
-            Image thumbnail = element.Q<Image>("thumbnail");
-            thumbnail.sprite = unit.Portrait;
-            ApplyImageFraming(thumbnail, unit.PortraitScale, unit.PortraitOffset);
+            UnitPortraitElement thumbnail = element.Q<UnitPortraitElement>("thumbnail");
+            thumbnail.SetPortrait(unit);
         }
 
         private void RefreshUnitList()
@@ -371,6 +383,9 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
         private void ShowSelectedUnit()
         {
+            portraitDragging = false;
+            portraitDragPointerId = -1;
+
             if (selectedUnitIndex < 0 || selectedUnitIndex >= unitsProperty.arraySize)
             {
                 detailPane.style.display = DisplayStyle.None;
@@ -400,8 +415,10 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             AddHeader("ИЗОБРАЖЕНИЯ");
             AddField(unit, "portrait", "Портрет");
+            AddField(unit, "portraitFitMode", "Вписывание портрета");
             AddField(unit, "portraitScale", "Масштаб портрета");
-            AddField(unit, "portraitOffset", "Смещение портрета X / Y");
+            AddField(unit, "portraitOffsetNormalized", "Offset X / Y (доля рамки)");
+            AddField(unit, "portraitFlipX", "Отразить портрет по X");
 
             Button resetPortrait = new Button(ResetPortraitFraming)
             {
@@ -412,9 +429,10 @@ namespace KingdomSurvival.UnitDatabase.Editor
             detailPane.Add(resetPortrait);
 
             Label portraitHint = new Label(
-                "Портрет заполняет вертикальную рамку 3:4 через ScaleAndCrop. " +
-                "Рекомендуемый исходник — 900×1200 или 1200×1600. " +
-                "Квадратные изображения тоже поддерживаются и автоматически обрезаются по краям.");
+                "Портрет редактируется в рамке 5:7. Полный Sprite проходит через " +
+                "Cover/Contain → Scale → Offset → Flip X, после чего рамка обрезает лишнее. " +
+                "Перетаскивайте изображение мышью прямо в preview; движение не ограничено. " +
+                "Размер конкретного места показа (XS–XL) задаётся в UI Конструкторе.");
             portraitHint.style.whiteSpace = WhiteSpace.Normal;
             portraitHint.style.fontSize = 10f;
             portraitHint.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
@@ -432,14 +450,9 @@ namespace KingdomSurvival.UnitDatabase.Editor
             AddHeader("ПРЕДПРОСМОТР");
             VisualElement previews = new VisualElement();
             previews.style.flexDirection = FlexDirection.Row;
-            previews.style.height = 250f;
+            previews.style.height = 270f;
 
-            VisualElement portraitCard = CreatePreview(
-                "ПОРТРЕТ · 3:4",
-                150f,
-                200f,
-                ScaleMode.ScaleAndCrop,
-                out portraitPreview);
+            VisualElement portraitCard = CreatePortraitPreview(out portraitPreview);
             VisualElement battlefieldCard = CreatePreview(
                 "ПОЛЕВАЯ МИНИАТЮРА",
                 150f,
@@ -553,6 +566,45 @@ namespace KingdomSurvival.UnitDatabase.Editor
             return card;
         }
 
+        private VisualElement CreatePortraitPreview(out UnitPortraitElement image)
+        {
+            PortraitSizeDefinition preset = PortraitSizeTable.Get(PortraitSize.S);
+            VisualElement card = new VisualElement();
+            card.style.width = Mathf.Max(preset.Width + 24f, 190f);
+            card.style.height = preset.Height + 42f;
+            card.style.marginRight = 12f;
+            card.style.paddingLeft = 8f;
+            card.style.paddingRight = 8f;
+            card.style.paddingTop = 8f;
+            card.style.paddingBottom = 8f;
+            card.style.alignItems = Align.Center;
+            card.style.backgroundColor = new Color(0.10f, 0.11f, 0.13f, 1f);
+
+            Label title = new Label(
+                "ПОРТРЕТ · S " + preset.Width + "×" + preset.Height + " · 5:7");
+            title.style.fontSize = 10f;
+            title.style.unityTextAlign = TextAnchor.MiddleCenter;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            card.Add(title);
+
+            image = new UnitPortraitElement
+            {
+                name = "portrait-preview",
+                focusable = true,
+                tooltip = "ЛКМ + перетаскивание — свободное смещение портрета"
+            };
+            image.style.width = preset.Width;
+            image.style.height = preset.Height;
+            image.style.marginTop = 6f;
+            image.style.backgroundColor = new Color(0.055f, 0.06f, 0.07f, 1f);
+            image.RegisterCallback<PointerDownEvent>(BeginPortraitDrag);
+            image.RegisterCallback<PointerMoveEvent>(ContinuePortraitDrag);
+            image.RegisterCallback<PointerUpEvent>(EndPortraitDrag);
+            image.RegisterCallback<PointerCaptureOutEvent>(_ => CancelPortraitDrag());
+            card.Add(image);
+            return card;
+        }
+
         private void RefreshPreviews()
         {
             if (portraitPreview == null || battlefieldPreview == null ||
@@ -562,8 +614,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
             }
 
             UnitDefinitionData unit = database.Units[selectedUnitIndex];
-            portraitPreview.sprite = unit.Portrait;
-            ApplyImageFraming(portraitPreview, unit.PortraitScale, unit.PortraitOffset);
+            portraitPreview.SetPortrait(unit);
 
             battlefieldPreview.sprite = unit.BattlefieldSprite;
             ApplyImageFraming(
@@ -582,6 +633,72 @@ namespace KingdomSurvival.UnitDatabase.Editor
             image.transform.position = new Vector3(offset.x, offset.y, 0f);
         }
 
+        private void BeginPortraitDrag(PointerDownEvent evt)
+        {
+            if (evt.button != 0 || portraitPreview == null ||
+                selectedUnitIndex < 0 || selectedUnitIndex >= unitsProperty.arraySize)
+            {
+                return;
+            }
+
+            serializedDatabase.Update();
+            SerializedProperty unit = unitsProperty.GetArrayElementAtIndex(selectedUnitIndex);
+            portraitDragStartOffset = unit
+                .FindPropertyRelative("portraitOffsetNormalized")
+                .vector2Value;
+            portraitDragStartPointer = new Vector2(evt.position.x, evt.position.y);
+            portraitDragPointerId = evt.pointerId;
+            portraitDragging = true;
+
+            Undo.RecordObject(database, "Pan Unit Portrait");
+            portraitPreview.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        }
+
+        private void ContinuePortraitDrag(PointerMoveEvent evt)
+        {
+            if (!portraitDragging || portraitPreview == null ||
+                evt.pointerId != portraitDragPointerId ||
+                selectedUnitIndex < 0 || selectedUnitIndex >= unitsProperty.arraySize)
+            {
+                return;
+            }
+
+            float width = Mathf.Max(1f, portraitPreview.contentRect.width);
+            float height = Mathf.Max(1f, portraitPreview.contentRect.height);
+            Vector2 pointer = new Vector2(evt.position.x, evt.position.y);
+            Vector2 delta = pointer - portraitDragStartPointer;
+            Vector2 normalized = portraitDragStartOffset + new Vector2(
+                delta.x / width,
+                delta.y / height);
+
+            serializedDatabase.Update();
+            SerializedProperty unit = unitsProperty.GetArrayElementAtIndex(selectedUnitIndex);
+            unit.FindPropertyRelative("portraitOffsetNormalized").vector2Value = normalized;
+            serializedDatabase.ApplyModifiedProperties();
+            EditorUtility.SetDirty(database);
+            RefreshPreviews();
+            unitList.RefreshItems();
+            evt.StopPropagation();
+        }
+
+        private void EndPortraitDrag(PointerUpEvent evt)
+        {
+            if (!portraitDragging || evt.pointerId != portraitDragPointerId)
+                return;
+
+            if (portraitPreview != null && portraitPreview.HasPointerCapture(evt.pointerId))
+                portraitPreview.ReleasePointer(evt.pointerId);
+            CancelPortraitDrag();
+            evt.StopPropagation();
+        }
+
+        private void CancelPortraitDrag()
+        {
+            portraitDragging = false;
+            portraitDragPointerId = -1;
+        }
+
         private void ResetPortraitFraming()
         {
             if (selectedUnitIndex < 0 || selectedUnitIndex >= unitsProperty.arraySize)
@@ -589,7 +706,10 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             serializedDatabase.Update();
             SerializedProperty unit = unitsProperty.GetArrayElementAtIndex(selectedUnitIndex);
+            unit.FindPropertyRelative("portraitFitMode").enumValueIndex = (int)PortraitFitMode.Cover;
             unit.FindPropertyRelative("portraitScale").floatValue = 1f;
+            unit.FindPropertyRelative("portraitOffsetNormalized").vector2Value = Vector2.zero;
+            unit.FindPropertyRelative("portraitFlipX").boolValue = false;
             unit.FindPropertyRelative("portraitOffset").vector2Value = Vector2.zero;
             serializedDatabase.ApplyModifiedProperties();
             EditorUtility.SetDirty(database);
@@ -615,7 +735,10 @@ namespace KingdomSurvival.UnitDatabase.Editor
             unit.FindPropertyRelative("initiative").intValue = 1;
             unit.FindPropertyRelative("attackRange").intValue = 1;
             unit.FindPropertyRelative("portrait").objectReferenceValue = null;
+            unit.FindPropertyRelative("portraitFitMode").enumValueIndex = (int)PortraitFitMode.Cover;
             unit.FindPropertyRelative("portraitScale").floatValue = 1f;
+            unit.FindPropertyRelative("portraitOffsetNormalized").vector2Value = Vector2.zero;
+            unit.FindPropertyRelative("portraitFlipX").boolValue = false;
             unit.FindPropertyRelative("portraitOffset").vector2Value = Vector2.zero;
             unit.FindPropertyRelative("battlefieldSprite").objectReferenceValue = null;
             unit.FindPropertyRelative("battlefieldScale").floatValue = 1f;

@@ -228,7 +228,7 @@ public partial class PrototypeUIController
 
         VisualElement identity = CreateHeroScreenPanel("hero-screen-identity", "ГЕРОЙ");
 
-        heroScreenPortrait = new VisualElement { name = "hero-screen-portrait" };
+        heroScreenPortrait = new UnitPortraitElement { name = "hero-screen-portrait" };
         heroScreenPortrait.style.height = 240f;
         heroScreenPortrait.style.marginBottom = 8f;
         heroScreenPortrait.style.backgroundColor = HeroScreenPanelDeep;
@@ -1127,7 +1127,7 @@ public partial class PrototypeUIController
         card.style.backgroundColor = unit == null ? HeroScreenSlotEmpty : HeroScreenPanelDeep;
         SetHeroScreenBorder(card, isCommander ? 2f : 1f);
 
-        VisualElement portrait = new VisualElement { name = name + "-portrait" };
+        VisualElement portrait = new UnitPortraitElement { name = name + "-portrait" };
         portrait.style.height = 96f;
         portrait.style.marginBottom = 5f;
         portrait.style.backgroundColor = HeroScreenSlotEmpty;
@@ -1329,7 +1329,7 @@ public partial class PrototypeUIController
         body.style.flexDirection = FlexDirection.Row;
         body.style.marginTop = 10f;
 
-        VisualElement portrait = new VisualElement { name = "hero-screen-unit-card-portrait" };
+        VisualElement portrait = new UnitPortraitElement { name = "hero-screen-unit-card-portrait" };
         portrait.style.width = 210f;
         portrait.style.height = 390f;
         portrait.style.flexShrink = 0f;
@@ -1597,16 +1597,17 @@ public partial class PrototypeUIController
         if (target == null)
             return;
 
-        if (unit == null || unit.Portrait == null)
+        UnitPortraitElement portrait = target as UnitPortraitElement;
+        if (portrait != null)
         {
-            target.style.backgroundImage = StyleKeyword.None;
+            portrait.SetPortrait(unit);
             return;
         }
 
-        target.style.backgroundImage = new StyleBackground(unit.Portrait);
-        target.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop;
-        target.style.scale = new Scale(new Vector3(unit.PortraitScale, unit.PortraitScale, 1f));
-        target.style.translate = new Translate(unit.PortraitOffset.x, unit.PortraitOffset.y);
+        // Защитный fallback для старого внешнего элемента. Новые портретные
+        // рамки создаются как UnitPortraitElement и всегда используют полный
+        // Sprite; здесь не пытаемся вернуть legacy ScaleAndCrop.
+        target.style.backgroundImage = StyleKeyword.None;
     }
 
     private static string HeroScreenRoleLabel(UnitDefinitionData unit)

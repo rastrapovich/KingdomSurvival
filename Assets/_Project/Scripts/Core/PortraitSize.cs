@@ -14,6 +14,16 @@ public enum PortraitSize
     XL
 }
 
+/// <summary>
+/// Способ вписывания полного портретного Sprite в рамку. Stretch намеренно
+/// отсутствует: портрет всегда сохраняет исходные пропорции.
+/// </summary>
+public enum PortraitFitMode
+{
+    Cover = 0,
+    Contain = 1
+}
+
 public readonly struct PortraitSizeDefinition
 {
     public PortraitSizeDefinition(PortraitSize size, int width, int height)

@@ -1,17 +1,18 @@
 {
-  "name": "KingdomSurvival.BattleSandbox.UI",
-  "rootNamespace": "KingdomSurvival.BattleSandbox",
-  "references": [
-    "KingdomSurvival.BattleSandbox.Runtime",
-    "KingdomSurvival.UnitDatabase"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
+    "name": "KingdomSurvival.BattleSandbox.UI",
+    "rootNamespace": "KingdomSurvival.BattleSandbox",
+    "references": [
+        "KingdomSurvival.BattleSandbox.Runtime",
+        "KingdomSurvival.UnitDatabase",
+        "KingdomSurvival.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

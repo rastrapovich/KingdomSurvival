@@ -630,3 +630,19 @@ Unity Editor, C# compiler и Test Runner здесь недоступны — к�
 8. в тестовой копии ассета (не коммитить) намеренно сломать ссылку (например, `successNodeId` на несуществующий узел) и убедиться, что появляется бейдж «!» с тултипом, объясняющим проблему.
 
 Не входило в этот проход (по явной рекомендации самой инструкции — не в ущерб стабильности drag/портов/автораскладки): двойной клик по узлу для перехода к его свойствам в Inspector, фильтр «Только проблемы» в тулбаре. `DialogueDatabaseAsset`, runtime-логика диалогов, формулы проверок, `speakerId`/`choiceId`/`nodeId`, `NarrativeDialogueRuntimeSession`, система портретов, Preview и контент N01-N17 не менялись.
+
+### 17.4. Исправление: `SerializedProperty.boxedValue` на массиве — 10.09.2026
+
+При первом реальном открытии окна «База диалогов → Граф» после пуша обнаружена ошибка (честно: EditMode-тесты её не ловят, поскольку не строят `SerializedObject` над реальным ассетом с непустыми `onRevealEffects`/`successEffects`/`failureEffects`):
+
+```
+InvalidOperationException: 'dialogues.Array.data[0].nodes.Array.data[0].textBlocks.Array.data[0].onRevealEffects' is an array so it cannot be read with boxedValue.
+```
+
+плюс как следствие — `Invalid GUILayout state`, потому что исключение обрывало `OnGUI` посреди пары `BeginHorizontal`/`EndHorizontal`.
+
+Причина: `SerializedProperty.boxedValue` умеет читать одиночный сериализуемый объект целиком вместе с его вложенными полями (поэтому чтение `conditions`/`passiveCheck`/`check` — `NarrativeConditionGroup`/`NarrativeCheckSpec`, не-массивы — было и остаётся корректным), но не умеет читать САМ массив/`List<T>` одним вызовом. `onRevealEffects`, `successEffects`, `failureEffects` — это `List<NarrativeEffect>`, то есть сериализуются как array, и `boxedValue` на них сразу бросает исключение.
+
+Исправление в `DialogueDatabaseWindow.GraphPresentation.cs`: новый приватный `ReadEffectsList(SerializedProperty effectsArray)` — проходит массив через `arraySize`/`GetArrayElementAtIndex` и боксит `boxedValue` каждый элемент (`NarrativeEffect`, не-массив) по отдельности. `BuildGraphTextBlockInfoFromProperty`/`BuildGraphChoiceInfoFromProperty` теперь используют его вместо прямого `(List<NarrativeEffect>)...boxedValue`.
+
+Не проверено (нет доступа к Unity в этой сессии): реальная компиляция и повторное открытие окна «Граф» на `prototype_miller`/N01-N17 после исправления. После Pull — переоткрыть окно «База диалогов → Граф» и убедиться, что узлы с непустыми `onRevealEffects`/`successEffects`/`failureEffects` (например, `chapter01.node.01_main` с `home_baseline_captured`) отображаются без исключений и `Invalid GUILayout state` не появляется.

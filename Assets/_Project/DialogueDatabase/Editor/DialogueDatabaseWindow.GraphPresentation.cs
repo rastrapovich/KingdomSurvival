@@ -880,11 +880,31 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     info.PassiveCheck = (NarrativeCheckSpec)passiveCheck.boxedValue;
             }
 
-            SerializedProperty onRevealEffects = block.FindPropertyRelative("onRevealEffects");
-            if (onRevealEffects != null)
-                info.OnRevealEffects = (List<NarrativeEffect>)onRevealEffects.boxedValue ?? new List<NarrativeEffect>();
+            info.OnRevealEffects = ReadEffectsList(block.FindPropertyRelative("onRevealEffects"));
 
             return info;
+        }
+
+        // SerializedProperty.boxedValue не читается напрямую с массива
+        // ("... is an array so it cannot be read with boxedValue") — только
+        // поэлементно. List<NarrativeEffect> сериализуется как array, поэтому
+        // конкретно эти три поля (onRevealEffects/successEffects/
+        // failureEffects) нельзя боксить целиком, в отличие от одиночных
+        // объектов conditions/passiveCheck/check.
+        private static List<NarrativeEffect> ReadEffectsList(SerializedProperty effectsArray)
+        {
+            List<NarrativeEffect> result = new List<NarrativeEffect>();
+            if (effectsArray == null)
+                return result;
+
+            for (int i = 0; i < effectsArray.arraySize; i++)
+            {
+                SerializedProperty element = effectsArray.GetArrayElementAtIndex(i);
+                if (element != null)
+                    result.Add((NarrativeEffect)element.boxedValue);
+            }
+
+            return result;
         }
 
         private static GraphChoiceInfo BuildGraphChoiceInfoFromProperty(SerializedProperty choice)
@@ -908,13 +928,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (check != null)
                 info.Check = (NarrativeCheckSpec)check.boxedValue;
 
-            SerializedProperty successEffects = choice.FindPropertyRelative("successEffects");
-            if (successEffects != null)
-                info.SuccessEffects = (List<NarrativeEffect>)successEffects.boxedValue ?? new List<NarrativeEffect>();
-
-            SerializedProperty failureEffects = choice.FindPropertyRelative("failureEffects");
-            if (failureEffects != null)
-                info.FailureEffects = (List<NarrativeEffect>)failureEffects.boxedValue ?? new List<NarrativeEffect>();
+            info.SuccessEffects = ReadEffectsList(choice.FindPropertyRelative("successEffects"));
+            info.FailureEffects = ReadEffectsList(choice.FindPropertyRelative("failureEffects"));
 
             return info;
         }

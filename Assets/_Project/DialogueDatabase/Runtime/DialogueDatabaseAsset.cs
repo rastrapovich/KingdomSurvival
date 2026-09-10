@@ -56,10 +56,22 @@ namespace KingdomSurvival.DialogueDatabase
         [SerializeField] private string role = string.Empty;
         [SerializeField] private Sprite portrait;
 
+        // Индивидуальная кадрировка — второй слой поверх общего portrait
+        // из UI Конструктора. Геометрия рамки, режим изображения, общий zoom,
+        // общий pan, tint и opacity остаются собственностью UILayout.
+        [SerializeField] private bool overridePortraitFraming;
+        [SerializeField, Min(0.05f)] private float portraitScale = 1f;
+        [SerializeField] private Vector2 portraitOffsetNormalized = Vector2.zero;
+        [SerializeField] private bool portraitFlipX;
+
         public string Id => id;
         public string DisplayName => displayName;
         public string Role => role;
         public Sprite Portrait => portrait;
+        public bool OverridePortraitFraming => overridePortraitFraming;
+        public float PortraitScale => portraitScale > 0f ? Mathf.Max(0.05f, portraitScale) : 1f;
+        public Vector2 PortraitOffsetNormalized => portraitOffsetNormalized;
+        public bool PortraitFlipX => portraitFlipX;
     }
 
     // Один текстовый блок узла: основная реплика, наблюдение, память, мысль

@@ -325,13 +325,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 EditorGUILayout.PropertyField(speaker.FindPropertyRelative("displayName"), new GUIContent("Имя в игре"));
                 EditorGUILayout.PropertyField(speaker.FindPropertyRelative("role"), new GUIContent("Подпись / роль"));
                 EditorGUILayout.PropertyField(speaker.FindPropertyRelative("portrait"), new GUIContent("Портрет"));
-
-                Sprite portrait = speaker.FindPropertyRelative("portrait").objectReferenceValue as Sprite;
-                if (portrait != null)
-                {
-                    Rect rect = GUILayoutUtility.GetRect(180f, 260f, GUILayout.Width(180f), GUILayout.Height(260f));
-                    GUI.DrawTexture(rect, portrait.texture, ScaleMode.ScaleToFit, true);
-                }
+                DrawSpeakerPortraitFraming(speaker);
             }
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
@@ -485,6 +479,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             speaker.FindPropertyRelative("displayName").stringValue = "Новый персонаж";
             speaker.FindPropertyRelative("role").stringValue = string.Empty;
             speaker.FindPropertyRelative("portrait").objectReferenceValue = null;
+            speaker.FindPropertyRelative("overridePortraitFraming").boolValue = false;
+            speaker.FindPropertyRelative("portraitScale").floatValue = 1f;
+            speaker.FindPropertyRelative("portraitOffsetNormalized").vector2Value = Vector2.zero;
+            speaker.FindPropertyRelative("portraitFlipX").boolValue = false;
             serializedDatabase.ApplyModifiedProperties();
             selectedSpeakerIndex = index;
             EditorUtility.SetDirty(database);

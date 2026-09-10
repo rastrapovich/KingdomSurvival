@@ -572,34 +572,49 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P05-T01", "N04 «Синяя ставня» — решающее действие",
                     "Сила, Ловкость или Стойкость определяют способ действия, сложность 13; все исходы ведут к N05.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
                     relatedFlagIds: new[] { "chapter01.flag.flood_happened" },
-                    acceptanceCriteria: new[] { "Проверка сложности 13 на Силу/Ловкость/Стойкость реализована", "Любой исход ведёт к N05" }),
+                    relatedDialogueIds: new[] { "chapter01_dialogue_04_flood" },
+                    fileReferences: new[] { "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset" },
+                    manualChecks: new[] { "Открыть N04 в Preview/Debug Narrative, пройти Силу/Ловкость/Стойкость на успех и на провал" },
+                    acceptanceCriteria: new[] { "Проверка сложности 13 на Силу/Ловкость/Стойкость реализована", "Любой исход ведёт к N05" },
+                    implementationNote: "Стартовый узел N04 содержит три ActiveDecisive-проверки chapter01.check.flood_response (Сила/Ловкость/Стойкость, сложность 13), FloodHappened больше не ставится при открытии сцены — только в шести конечных узлах. Проверено локально Python-парсером структуры YAML (граф без orphan-узлов, все узлы достигают Exit) — настоящий Unity Test Runner в этой среде недоступен."),
 
                 Task("P05-T02", "Гарантированный тяжёлый выбор после проверки",
                     "Успех проверки определяет доступную позицию, а не спасает всё; отдельный выбор приоритета (кого/что спасать).",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
                     dependencies: new[] { "P05-T01" },
-                    acceptanceCriteria: new[] { "Успех проверки не отменяет цену катастрофы: есть отдельный обязательный выбор" }),
+                    manualChecks: new[] { "Убедиться, что после успеха и после провала виден один и тот же тяжёлый выбор (люди/скот/мельница)" },
+                    acceptanceCriteria: new[] { "Успех проверки не отменяет цену катастрофы: есть отдельный обязательный выбор" },
+                    implementationNote: "И успех, и провал каждой из трёх проверок ведут к отдельному узлу тяжёлого выбора (priority_success/priority_failure) с тремя одинаковыми по смыслу приоритетами — люди/скот/мельница; эффекты применяются только в конечных узлах через onRevealEffects, а не на самом выборе."),
 
                 Task("P05-T03", "Применение последствий паводка",
                     "Chapter01OutcomeApplier применяет ресурсы/состояние мельницы/скот/флаг травмы по итогам выбора.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
                     dependencies: new[] { "P03-T03", "P05-T02" },
-                    fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01OutcomeApplier.cs" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Chapter01/Runtime/Chapter01OutcomeApplier.cs",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs",
+                        "Assets/_Project/UI/PrototypeUIController.Narrative.cs"
+                    },
                     relatedFlagIds: new[]
                     {
                         "chapter01.flag.flood_workers_saved", "chapter01.flag.flood_livestock_lost",
                         "chapter01.flag.flood_mill_deck_destroyed", "chapter01.flag.hero_injured_by_flood"
                     },
-                    manualChecks: new[] { "Пройти все варианты исхода вручную и проверить, что ресурсы/флаги применяются один раз" },
-                    acceptanceCriteria: new[] { "Минимум четыре различимых исхода видимо меняют ближайшие сцены" }),
+                    manualChecks: new[] { "Пройти все шесть исходов вручную и проверить, что ресурсы/флаги применяются один раз" },
+                    acceptanceCriteria: new[] { "Минимум четыре различимых исхода видимо меняют ближайшие сцены" },
+                    implementationNote: "Chapter01OutcomeApplier.ApplyFloodConsequences читает FloodLivestockLost и списывает Food на 12 через существующий защищённый-от-повтора ApplyResourceDelta (chapter01.effect.flood_resource_loss). Травма героя и повреждение настила остаются нарративными флагами без отдельного системного эффекта. Chapter01StoryDirector.HandleDialogueCompleted(gameState, dialogueId) — узкий hook, вызывающий ApplyFloodConsequences только для D04; подключён в PrototypeUIController.Narrative.cs перед CloseNarrativeDialogue()."),
 
                 Task("P05-T04", "Failure-forward для всех провалов",
                     "Проверить, что каждый вариант провала продолжает сюжет с ценой, а не блокирует его.",
-                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 4,
                     dependencies: new[] { "P05-T03" },
-                    acceptanceCriteria: new[] { "Каждый вариант провала N04 всё равно приводит к N05" })
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Tests/EditMode/Chapter01FloodTests.cs" },
+                    manualChecks: new[] { "Запустить Test Runner → EditMode → Run All" },
+                    acceptanceCriteria: new[] { "Каждый вариант провала N04 всё равно приводит к N05" },
+                    implementationNote: "Chapter01FloodTests.cs добавлен: структура трёх решающих проверок, все шесть исходов (успех/провал × люди/скот/мельница) проверяют точную комбинацию флагов и то, что Chapter01StoryDirector.GetNextDialogueId после каждого исхода возвращает D05, плюс идемпотентность ApplyFloodConsequences и связь с Chapter01HomeState. Тесты написаны против настоящего KingdomSurvivalDialogues.asset (Resources.Load), не синтетической копии. Не запускались настоящим Unity Test Runner в этой среде — компиляция и Test Runner здесь недоступны.")
             );
         }
 

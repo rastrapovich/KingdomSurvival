@@ -3,7 +3,8 @@
   "rootNamespace": "",
   "references": [
     "KingdomSurvival.Core",
-    "KingdomSurvival.Chapter01"
+    "KingdomSurvival.Chapter01",
+    "KingdomSurvival.DialogueDatabase"
   ],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],

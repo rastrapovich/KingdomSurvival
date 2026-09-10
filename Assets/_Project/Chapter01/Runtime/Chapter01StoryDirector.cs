@@ -148,6 +148,21 @@ namespace KingdomSurvival.Chapter01
             return openDialogueById(nextDialogueId);
         }
 
+        // P05-T03 (раздел 17 инструкции): узкая точка завершения сцены,
+        // отдельная от TryAdvance/GetNextDialogueId. Читает завершившийся
+        // dialogueId и применяет внешние системные последствия конкретной
+        // главы, не расширяя универсальный NarrativeEffectType новыми
+        // типами ради одной сцены. UI вызывает это перед закрытием
+        // завершившегося диалога (PrototypeUIController.Narrative.cs).
+        public static void HandleDialogueCompleted(GameState gameState, string dialogueId)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+
+            if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D04, StringComparison.Ordinal))
+                Chapter01OutcomeApplier.ApplyFloodConsequences(gameState);
+        }
+
         private static bool IsStepCompleted(NarrativeStateData state, NodeStep step)
         {
             for (int i = 0; i < step.CompletionFlags.Length; i++)

@@ -52,6 +52,30 @@ namespace KingdomSurvival.Chapter01
             return Apply(gameState, executionId, state => state.SetFlag(injuryFlagId));
         }
 
+        // P05-T03: читает уже установленные флаги N04 «Синяя ставня» и
+        // применяет единственное внешнее системное последствие паводка —
+        // потерю части хозяйственного скота (раздел 15 инструкции). Не
+        // решает сюжет и не трогает флаги сама — только реагирует на то,
+        // что уже выставили onRevealEffects конечных узлов N04. Injury
+        // героя и повреждение настила остаются нарративными флагами без
+        // отдельного системного эффекта (раздел 12/16).
+        public static void ApplyFloodConsequences(GameState gameState)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+
+            if (gameState.Narrative == null)
+                gameState.Narrative = new NarrativeStateData();
+
+            if (gameState.Narrative.HasFlag(Chapter01Ids.Flags.FloodLivestockLost))
+            {
+                ApplyResourceDelta(
+                    gameState,
+                    Chapter01Ids.Effects.FloodResourceLoss,
+                    foodDelta: -12);
+            }
+        }
+
         private static bool Apply(GameState gameState, string executionId, Action<NarrativeStateData> mutation)
         {
             if (gameState == null)

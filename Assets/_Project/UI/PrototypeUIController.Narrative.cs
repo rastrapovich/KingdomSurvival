@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using KingdomSurvival.Chapter01;
 using KingdomSurvival.DialogueDatabase;
 using KingdomSurvival.UILayout;
 using UnityEngine;
@@ -631,6 +632,8 @@ public partial class PrototypeUIController
 
         if (result.DialogueEnded)
         {
+            string completedDialogueId = narrativeDialogueSession.DialogueId;
+            Chapter01StoryDirector.HandleDialogueCompleted(gameState, completedDialogueId);
             CloseNarrativeDialogue();
             return;
         }

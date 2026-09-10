@@ -1194,72 +1194,867 @@ MonoBehaviour:
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_04_flood
-    title: "N04 \u2014 \u041F\u0430\u0432\u043E\u0434\u043E\u043A / \u0421\u0438\u043D\u044F\u044F
-      \u0441\u0442\u0430\u0432\u043D\u044F"
+    title: "N04 \u2014 \u041F\u0430\u0432\u043E\u0434\u043E\u043A / \u0421\u0438\u043D\u044F\u044F \u0441\u0442\u0430\u0432\u043D\u044F"
     category: 1
     status: 1
-    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
-      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
-      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
-      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
-      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
+    developerComment: "P05 production-\u0441\u0446\u0435\u043D\u0430. \u041A\u0440\u0438\u0437\u0438\u0441 \u2192 \u0440\u0435\u0448\u0430\u044E\u0449\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 (\u0421\u0438\u043B\u0430/\u041B\u043E\u0432\u043A\u043E\u0441\u0442\u044C/\u0421\u0442\u043E\u0439\u043A\u043E\u0441\u0442\u044C, \u0441\u043B\u043E\u0436\u043D\u043E\u0441\u0442\u044C 13, chapter01.check.flood_response, ActiveDecisive) \u2192 \u0442\u044F\u0436\u0451\u043B\u044B\u0439 \u0432\u044B\u0431\u043E\u0440 \u043F\u0440\u0438\u043E\u0440\u0438\u0442\u0435\u0442\u0430 (\u043B\u044E\u0434\u0438/\u0441\u043A\u043E\u0442/\u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0430) \u0438 \u043F\u043E\u0441\u043B\u0435 \u0443\u0441\u043F\u0435\u0445\u0430, \u0438 \u043F\u043E\u0441\u043B\u0435 \u043F\u0440\u043E\u0432\u0430\u043B\u0430 \u2192 \u0448\u0435\u0441\u0442\u044C \u043A\u043E\u043D\u0435\u0447\u043D\u044B\u0445 \u0443\u0437\u043B\u043E\u0432, \u043A\u0430\u0436\u0434\u044B\u0439 \u0432\u044B\u0441\u0442\u0430\u0432\u043B\u044F\u0435\u0442 \u0441\u0432\u043E\u044E \u043A\u043E\u043C\u0431\u0438\u043D\u0430\u0446\u0438\u044E \u0444\u043B\u0430\u0433\u043E\u0432 \u043F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u0439 \u0438 chapter01.flag.flood_happened. FloodHappened \u0441\u0442\u0430\u0432\u0438\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0432 \u043A\u043E\u043D\u0435\u0447\u043D\u044B\u0445 \u0443\u0437\u043B\u0430\u0445, \u043D\u0435 \u043D\u0430 \u0441\u0442\u0430\u0440\u0442\u0435 \u2014 \u0438\u043D\u0430\u0447\u0435 Chapter01StoryDirector \u0441\u043E\u0447\u0442\u0451\u0442 N04 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043D\u043D\u044B\u043C \u0434\u043E \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438 \u0438 \u0432\u044B\u0431\u043E\u0440\u0430."
     startNodeId: chapter01.node.04
     tags:
     - "\u0433\u043B\u0430\u0432\u043001"
-    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
+    - production
     nodes:
     - id: chapter01.node.04
       speakerId: narrator
-      text: 
+      text:
       textBlocks:
-      - blockId: chapter01.node.04_main
+      - blockId: chapter01.node.04_intro1
         kind: 0
-        speakerIdOverride: 
-        text: "\u041D\u043E\u0447\u044C\u044E \u0432\u043E\u0434\u0430 \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u0435\u0442\u0441\u044F
-          \u0431\u044B\u0441\u0442\u0440\u0435\u0435, \u0447\u0435\u043C \u043A\u0442\u043E-\u043B\u0438\u0431\u043E
-          \u043E\u0436\u0438\u0434\u0430\u043B. \u0421\u0438\u043D\u044F\u044F \u0441\u0442\u0430\u0432\u043D\u044F
-          \u043D\u0430 \u043F\u043B\u043E\u0442\u0438\u043D\u0435 \u0442\u0440\u0435\u0449\u0438\u0442
-          \u043F\u043E\u0434 \u043D\u0430\u043F\u043E\u0440\u043E\u043C. \u041B\u044E\u0434\u0438
-          \u0443 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B \u043A\u0440\u0438\u0447\u0430\u0442,
-          \u0437\u043E\u0432\u0443\u0442 \u043D\u0430 \u043F\u043E\u043C\u043E\u0449\u044C."
+        speakerIdOverride:
+        text: "\u0421\u0440\u0435\u0434\u0438 \u043D\u043E\u0447\u0438 \u0437\u0432\u0443\u043A \u0432\u043E\u0434\u044B \u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F \u2014 \u043D\u0435 \u0442\u0435\u0447\u0451\u0442, \u0430 \u0431\u044C\u0451\u0442. \u0421\u0438\u043D\u044F\u044F \u0441\u0442\u0430\u0432\u043D\u044F \u043D\u0430 \u043F\u043B\u043E\u0442\u0438\u043D\u0435, \u0442\u0430, \u0447\u0442\u043E \u0432\u0441\u0435\u0433\u0434\u0430 \u0434\u0435\u0440\u0436\u0430\u043B\u0430 \u0431\u043E\u043A\u043E\u0432\u043E\u0439 \u0441\u0431\u0440\u043E\u0441, \u0434\u0440\u043E\u0436\u0438\u0442 \u0438 \u043D\u0435 \u043F\u043E\u0434\u0434\u0430\u0451\u0442\u0441\u044F. \u041C\u0435\u043B\u044C\u043D\u0438\u0446\u0430 \u041C\u0438\u0440\u043E\u043D\u0430 \u0433\u043B\u043E\u0442\u0430\u0435\u0442 \u0432\u043E\u0434\u0443 \u0440\u044B\u0432\u043A\u0430\u043C\u0438, \u0431\u0443\u0434\u0442\u043E \u0434\u0430\u0432\u0438\u0442\u0441\u044F."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: 
+          CheckId:
           Kind: 0
           Quality: 0
-          CompetencyId: 
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.04_intro2
+        kind: 0
+        speakerIdOverride:
+        text: "\u041C\u0438\u0440\u043E\u043D \u0432 \u043E\u0434\u043D\u043E\u0439 \u0440\u0443\u0431\u0430\u0445\u0435 \u0443\u0436\u0435 \u0443 \u043A\u043E\u043B\u0435\u0441\u0430 \u2014 \u043E\u043D\u043E \u0432\u043E\u0442-\u0432\u043E\u0442 \u0441\u043E\u0440\u0432\u0451\u0442. \u041B\u0430\u0434\u0430 \u043A\u0440\u0438\u0447\u0438\u0442, \u0447\u0442\u043E \u043D\u0430\u0441\u0442\u0438\u043B \u0442\u0440\u0435\u0449\u0438\u0442 \u043F\u043E\u0434 \u043D\u043E\u0433\u0430\u043C\u0438. \u0423\u043B\u044C\u044F\u043D\u0430 \u0442\u0430\u0449\u0438\u0442 \u043F\u0435\u0440\u0435\u043F\u0443\u0433\u0430\u043D\u043D\u0443\u044E \u0441\u043A\u043E\u0442\u0438\u043D\u0443 \u043F\u0440\u043E\u0447\u044C \u043E\u0442 \u0432\u043E\u0434\u044B, \u0430 \u0443 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B \u0432\u0441\u0451 \u0435\u0449\u0451 \u0441\u0442\u043E\u044F\u0442 \u0440\u0430\u0431\u043E\u0442\u043D\u0438\u043A\u0438. \u041E\u0441\u0442\u0430\u0444\u0438\u0439 \u0431\u0435\u0436\u0438\u0442 \u043A \u0437\u0430\u0442\u0432\u043E\u0440\u0443 \u043F\u0440\u0438\u0432\u044B\u0447\u043D\u044B\u043C \u0448\u0430\u0433\u043E\u043C \u2014 \u043D\u043E \u0432\u043E\u0434\u0430 \u0432 \u044D\u0442\u0443 \u043D\u043E\u0447\u044C \u043D\u0435 \u0441\u043B\u0443\u0448\u0430\u0435\u0442 \u043F\u0440\u0438\u0432\u044B\u0447\u043A\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041D\u0430\u0432\u0430\u043B\u0438\u0442\u044C\u0441\u044F \u043D\u0430 \u0441\u0442\u0432\u043E\u0440 \u0432\u0441\u0435\u043C \u0442\u0435\u043B\u043E\u043C \u2014 \u0441\u0434\u0432\u0438\u043D\u0443\u0442\u044C \u0435\u0433\u043E \u0441\u0438\u043B\u043E\u0439."
+        nextNodeId:
+        endsDialogue: 0
+        choiceId: chapter01.node.04_choice_strength
+        kind: 2
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: chapter01.check.flood_response
+          Kind: 2
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: chapter01.node.04.strength_success
+        failureNodeId: chapter01.node.04.strength_failure
+        successEffects: []
+        failureEffects: []
+      - text: "\u041F\u0435\u0440\u0435\u0431\u0440\u0430\u0442\u044C\u0441\u044F \u043F\u043E \u043C\u043E\u043A\u0440\u044B\u043C \u0431\u0430\u043B\u043A\u0430\u043C \u0442\u0443\u0434\u0430, \u0433\u0434\u0435 \u043C\u0435\u0445\u0430\u043D\u0438\u0437\u043C \u0435\u0449\u0451 \u043C\u043E\u0436\u043D\u043E \u0434\u043E\u0441\u0442\u0430\u0442\u044C."
+        nextNodeId:
+        endsDialogue: 0
+        choiceId: chapter01.node.04_choice_dexterity
+        kind: 2
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: chapter01.check.flood_response
+          Kind: 2
+          Quality: 1
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: chapter01.node.04.dexterity_success
+        failureNodeId: chapter01.node.04.dexterity_failure
+        successEffects: []
+        failureEffects: []
+      - text: "\u0412\u043E\u0439\u0442\u0438 \u0432 \u043B\u0435\u0434\u044F\u043D\u0443\u044E \u0432\u043E\u0434\u0443 \u0438 \u0434\u0435\u0440\u0436\u0430\u0442\u044C\u0441\u044F \u0442\u0430\u043C, \u0433\u0434\u0435 \u043E\u0441\u0442\u0430\u043B\u044C\u043D\u044B\u0435 \u0443\u0436\u0435 \u043D\u0435 \u043C\u043E\u0433\u0443\u0442."
+        nextNodeId:
+        endsDialogue: 0
+        choiceId: chapter01.node.04_choice_fortitude
+        kind: 2
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: chapter01.check.flood_response
+          Kind: 2
+          Quality: 2
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: chapter01.node.04.fortitude_success
+        failureNodeId: chapter01.node.04.fortitude_failure
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 60, y: 460}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.strength_success
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.strength_success_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0421\u0442\u0432\u043E\u0440 \u043F\u043E\u0434\u0434\u0430\u0451\u0442\u0441\u044F \u043D\u0435 \u0441\u0440\u0430\u0437\u0443 \u2014 \u043D\u043E \u043F\u043E\u0434\u0434\u0430\u0451\u0442\u0441\u044F. \u041E\u043D \u0441 \u0445\u0440\u0443\u0441\u0442\u043E\u043C \u0441\u0434\u0432\u0438\u0433\u0430\u0435\u0442\u0441\u044F \u043D\u0430 \u043F\u044F\u0434\u044C, \u0438 \u0447\u0430\u0441\u0442\u044C \u043F\u043E\u0442\u043E\u043A\u0430 \u0443\u0445\u043E\u0434\u0438\u0442 \u0432 \u0441\u0442\u0430\u0440\u043E\u0435 \u0440\u0443\u0441\u043B\u043E. \u0422\u044B \u0432\u044B\u0438\u0433\u0440\u0430\u043B \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u0438\u0439 \u2014 \u0438 \u0442\u0443\u0442 \u0436\u0435 \u043F\u043E\u043D\u0438\u043C\u0430\u0435\u0448\u044C: \u044D\u0442\u043E\u0433\u043E \u043C\u0430\u043B\u043E, \u0447\u0442\u043E\u0431\u044B \u0441\u043F\u0430\u0441\u0442\u0438 \u0432\u0441\u0451."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0420\u0435\u0448\u0438\u0442\u044C, \u0447\u0442\u043E \u0434\u0435\u043B\u0430\u0442\u044C \u0432 \u044D\u0442\u0438 \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u0438\u044F."
+        nextNodeId: chapter01.node.04.priority_success
+        endsDialogue: 0
+        choiceId: chapter01.node.04.strength_success_choice
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 560, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.strength_failure
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.strength_failure_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0421\u0442\u0432\u043E\u0440 \u043D\u0435 \u0434\u0432\u0438\u0433\u0430\u0435\u0442\u0441\u044F \u2014 \u0441\u0440\u044B\u0432\u0430\u044E\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0440\u0443\u043A\u0438, \u0430 \u0431\u0440\u0443\u0441, \u0437\u0430 \u043A\u043E\u0442\u043E\u0440\u044B\u0439 \u0442\u044B \u0434\u0435\u0440\u0436\u0430\u043B\u0441\u044F, \u043B\u043E\u043F\u0430\u0435\u0442\u0441\u044F \u043F\u043E\u043F\u043E\u043B\u0430\u043C. \u0422\u0435\u0431\u044F \u043E\u0442\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u0442 \u043D\u0430\u0437\u0430\u0434, \u0432 \u043B\u0435\u0434\u044F\u043D\u0443\u044E \u0432\u043E\u0434\u0443. \u0414\u0440\u0430\u0433\u043E\u0446\u0435\u043D\u043D\u044B\u0435 \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u0438\u044F \u0443\u0445\u043E\u0434\u044F\u0442 \u0432\u043F\u0443\u0441\u0442\u0443\u044E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u043E\u0434\u043D\u044F\u0442\u044C\u0441\u044F \u0438 \u0440\u0435\u0448\u0438\u0442\u044C, \u0447\u0442\u043E \u0434\u0435\u043B\u0430\u0442\u044C \u0442\u0435\u043F\u0435\u0440\u044C."
+        nextNodeId: chapter01.node.04.priority_failure
+        endsDialogue: 0
+        choiceId: chapter01.node.04.strength_failure_choice
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 560, y: 220}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.dexterity_success
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.dexterity_success_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0411\u0430\u043B\u043A\u0430 \u043F\u043E\u0434 \u043D\u043E\u0433\u043E\u0439 \u043F\u0440\u043E\u0433\u0438\u0431\u0430\u0435\u0442\u0441\u044F, \u043D\u043E \u0434\u0435\u0440\u0436\u0438\u0442. \u0422\u044B \u0443\u0441\u043F\u0435\u0432\u0430\u0435\u0448\u044C \u043F\u0435\u0440\u0435\u0431\u0440\u0430\u0442\u044C\u0441\u044F \u0442\u0443\u0434\u0430, \u0433\u0434\u0435 \u043F\u0440\u044F\u043C\u043E\u0433\u043E \u043F\u0443\u0442\u0438 \u0443\u0436\u0435 \u043D\u0435\u0442, \u0438 \u0432\u0431\u0438\u0432\u0430\u0435\u0448\u044C \u043A\u043B\u0438\u043D \u0432 \u0449\u0435\u043B\u044C \u0441\u0442\u0432\u043E\u0440\u0430, \u043D\u0430 \u043C\u0438\u0433 \u043E\u0442\u0432\u043E\u0434\u044F \u043F\u043E\u0442\u043E\u043A \u0432 \u0441\u0442\u043E\u0440\u043E\u043D\u0443. \u041D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u0438\u0439 \u0432\u044B\u0438\u0433\u0440\u0430\u043D\u043E \u2014 \u043D\u043E \u0432\u043E\u0434\u0430 \u0432\u0441\u0451 \u0440\u0430\u0432\u043D\u043E \u043F\u0440\u0438\u0431\u044B\u0432\u0430\u0435\u0442 \u0431\u044B\u0441\u0442\u0440\u0435\u0435, \u0447\u0435\u043C \u0442\u044B \u043C\u043E\u0436\u0435\u0448\u044C \u0432\u0435\u0437\u0434\u0435 \u0443\u0441\u043F\u0435\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0420\u0435\u0448\u0438\u0442\u044C, \u0447\u0442\u043E \u0434\u0435\u043B\u0430\u0442\u044C \u0432 \u044D\u0442\u0438 \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u0438\u044F."
+        nextNodeId: chapter01.node.04.priority_success
+        endsDialogue: 0
+        choiceId: chapter01.node.04.dexterity_success_choice
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 560, y: 440}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.dexterity_failure
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.dexterity_failure_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u041D\u043E\u0433\u0430 \u0441\u043E\u0441\u043A\u0430\u043B\u044C\u0437\u044B\u0432\u0430\u0435\u0442 \u0441 \u043C\u043E\u043A\u0440\u043E\u0433\u043E \u0434\u0435\u0440\u0435\u0432\u0430. \u0411\u0430\u043B\u043A\u0430 \u0443\u0445\u043E\u0434\u0438\u0442 \u0438\u0437-\u043F\u043E\u0434 \u0442\u0435\u0431\u044F, \u0438 \u0442\u0435\u0447\u0435\u043D\u0438\u0435 \u0443\u0442\u0430\u0441\u043A\u0438\u0432\u0430\u0435\u0442 \u0442\u0435\u0431\u044F \u0432 \u0441\u0442\u043E\u0440\u043E\u043D\u0443, \u043F\u0440\u0435\u0436\u0434\u0435 \u0447\u0435\u043C \u0442\u044B \u0443\u0441\u043F\u0435\u0432\u0430\u0435\u0448\u044C \u0443\u0445\u0432\u0430\u0442\u0438\u0442\u044C\u0441\u044F \u0437\u0430 \u0447\u0442\u043E-\u0442\u043E \u043D\u0430\u0434\u0451\u0436\u043D\u043E\u0435. \u041F\u043E\u043A\u0430 \u0442\u044B \u0432\u044B\u0431\u0438\u0440\u0430\u0435\u0448\u044C\u0441\u044F \u043D\u0430 \u0431\u0435\u0440\u0435\u0433, \u0432\u0440\u0435\u043C\u044F \u0443\u0436\u0435 \u043F\u043E\u0442\u0435\u0440\u044F\u043D\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u043E\u0434\u043D\u044F\u0442\u044C\u0441\u044F \u0438 \u0440\u0435\u0448\u0438\u0442\u044C, \u0447\u0442\u043E \u0434\u0435\u043B\u0430\u0442\u044C \u0442\u0435\u043F\u0435\u0440\u044C."
+        nextNodeId: chapter01.node.04.priority_failure
+        endsDialogue: 0
+        choiceId: chapter01.node.04.dexterity_failure_choice
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 560, y: 660}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.fortitude_success
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.fortitude_success_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0425\u043E\u043B\u043E\u0434 \u0441\u0431\u0438\u0432\u0430\u0435\u0442 \u0434\u044B\u0445\u0430\u043D\u0438\u0435, \u043D\u043E \u0442\u044B \u043E\u0441\u0442\u0430\u0451\u0448\u044C\u0441\u044F \u043D\u0430 \u043C\u0435\u0441\u0442\u0435 \u2014 \u0442\u0430\u043C, \u0433\u0434\u0435 \u0442\u0435\u0447\u0435\u043D\u0438\u0435 \u0441\u0438\u043B\u044C\u043D\u0435\u0435 \u0432\u0441\u0435\u0433\u043E \u2014 \u0438 \u0434\u0435\u0440\u0436\u0438\u0448\u044C \u0431\u0440\u0443\u0441 \u0441\u043E\u0431\u0441\u0442\u0432\u0435\u043D\u043D\u044B\u043C \u0432\u0435\u0441\u043E\u043C, \u043F\u043E\u043A\u0430 \u0432\u043E\u0434\u0430 \u0438\u0449\u0435\u0442 \u0434\u0440\u0443\u0433\u043E\u0439 \u043F\u0443\u0442\u044C. \u0422\u0435\u043B\u043E \u043D\u0430\u0447\u0438\u043D\u0430\u0435\u0442 \u0441\u0434\u0430\u0432\u0430\u0442\u044C, \u043D\u043E \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u0438\u0439 \u0443\u0436\u0435 \u0442\u0432\u043E\u0438. \u0421\u043F\u0430\u0441\u0442\u0438 \u0432\u0441\u0451 \u044D\u0442\u0438\u043C \u043D\u0435 \u0443\u0434\u0430\u0441\u0442\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0420\u0435\u0448\u0438\u0442\u044C, \u0447\u0442\u043E \u0434\u0435\u043B\u0430\u0442\u044C \u0432 \u044D\u0442\u0438 \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u0438\u044F."
+        nextNodeId: chapter01.node.04.priority_success
+        endsDialogue: 0
+        choiceId: chapter01.node.04.fortitude_success_choice
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 560, y: 880}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.fortitude_failure
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.fortitude_failure_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0412\u043E\u0434\u0430 \u0437\u0430\u0431\u0438\u0440\u0430\u0435\u0442 \u0442\u0435\u043F\u043B\u043E \u0431\u044B\u0441\u0442\u0440\u0435\u0435, \u0447\u0435\u043C \u0442\u044B \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u044B\u0432\u0430\u043B. \u0420\u0443\u043A\u0438 \u043F\u0435\u0440\u0435\u0441\u0442\u0430\u044E\u0442 \u0441\u043B\u0443\u0448\u0430\u0442\u044C\u0441\u044F, \u0445\u0432\u0430\u0442\u043A\u0430 \u0441\u0440\u044B\u0432\u0430\u0435\u0442\u0441\u044F, \u0438 \u0442\u0435\u0447\u0435\u043D\u0438\u0435 \u043E\u0442\u043D\u043E\u0441\u0438\u0442 \u0442\u0435\u0431\u044F \u043D\u0430 \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0448\u0430\u0433\u043E\u0432 \u0432\u043D\u0438\u0437, \u043F\u0440\u0435\u0436\u0434\u0435 \u0447\u0435\u043C \u0442\u044B \u043D\u0430\u0449\u0443\u043F\u044B\u0432\u0430\u0435\u0448\u044C \u0434\u043D\u043E. \u042D\u0442\u0438 \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u0438\u044F \u0443\u0436\u0435 \u043D\u0435 \u0432\u0435\u0440\u043D\u0443\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u043E\u0434\u043D\u044F\u0442\u044C\u0441\u044F \u0438 \u0440\u0435\u0448\u0438\u0442\u044C, \u0447\u0442\u043E \u0434\u0435\u043B\u0430\u0442\u044C \u0442\u0435\u043F\u0435\u0440\u044C."
+        nextNodeId: chapter01.node.04.priority_failure
+        endsDialogue: 0
+        choiceId: chapter01.node.04.fortitude_failure_choice
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 560, y: 1100}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.priority_success
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.priority_success_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0412\u044B\u0438\u0433\u0440\u0430\u043D\u043D\u044B\u0445 \u043C\u0433\u043D\u043E\u0432\u0435\u043D\u0438\u0439 \u0445\u0432\u0430\u0442\u0438\u0442 \u043D\u0430 \u0447\u0442\u043E-\u0442\u043E \u043E\u0434\u043D\u043E. \u0423 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B \u2014 \u0440\u0430\u0431\u043E\u0442\u043D\u0438\u043A\u0438, \u0447\u0442\u043E \u043D\u0435 \u0443\u0441\u043F\u0435\u043B\u0438 \u043E\u0442\u043E\u0439\u0442\u0438. \u0423 \u0432\u043E\u0434\u044B \u2014 \u043E\u0431\u0435\u0437\u0443\u043C\u0435\u0432\u0448\u0438\u0439 \u0441\u043A\u043E\u0442. \u041F\u043E\u0434 \u043D\u043E\u0433\u0430\u043C\u0438 \u2014 \u043D\u0430\u0441\u0442\u0438\u043B \u0438 \u043C\u0435\u0445\u0430\u043D\u0438\u0437\u043C, \u043A\u043E\u0442\u043E\u0440\u044B\u0435 \u0442\u044B \u0442\u043E\u043B\u044C\u043A\u043E \u0447\u0442\u043E \u043F\u0440\u0438\u0434\u0435\u0440\u0436\u0430\u043B \u0446\u0435\u043D\u043E\u0439 \u0441\u0438\u043B. \u0421\u043F\u0430\u0441\u0442\u0438 \u0432\u0441\u0451 \u0441\u0440\u0430\u0437\u0443 \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0438\u0442\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0421\u043F\u0430\u0441\u0430\u0442\u044C \u043B\u044E\u0434\u0435\u0439 \u0443 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B."
+        nextNodeId: chapter01.node.04.success_workers
+        endsDialogue: 0
+        choiceId: chapter01.node.04.priority_success_choice_workers
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      - text: "\u0421\u043F\u0430\u0441\u0430\u0442\u044C \u0441\u043A\u043E\u0442 \u043E\u0442 \u0432\u043E\u0434\u044B."
+        nextNodeId: chapter01.node.04.success_livestock
+        endsDialogue: 0
+        choiceId: chapter01.node.04.priority_success_choice_livestock
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      - text: "\u0421\u043F\u0430\u0441\u0430\u0442\u044C \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0443 \u0438 \u043D\u0430\u0441\u0442\u0438\u043B."
+        nextNodeId: chapter01.node.04.success_mill
+        endsDialogue: 0
+        choiceId: chapter01.node.04.priority_success_choice_mill
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1060, y: 330}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.priority_failure
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.priority_failure_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0412\u0440\u0435\u043C\u044F, \u043A\u043E\u0442\u043E\u0440\u043E\u0435 \u0442\u044B \u043F\u043E\u0442\u0435\u0440\u044F\u043B, \u043D\u0435 \u043E\u0442\u043C\u0435\u043D\u044F\u0435\u0442 \u0432\u044B\u0431\u043E\u0440\u0430 \u2014 \u043E\u043D\u043E \u0435\u0433\u043E \u0441\u0443\u0436\u0430\u0435\u0442. \u0423 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B \u2014 \u0440\u0430\u0431\u043E\u0442\u043D\u0438\u043A\u0438, \u0447\u0442\u043E \u043D\u0435 \u0443\u0441\u043F\u0435\u043B\u0438 \u043E\u0442\u043E\u0439\u0442\u0438. \u0423 \u0432\u043E\u0434\u044B \u2014 \u043E\u0431\u0435\u0437\u0443\u043C\u0435\u0432\u0448\u0438\u0439 \u0441\u043A\u043E\u0442. \u041F\u043E\u0434 \u043D\u043E\u0433\u0430\u043C\u0438 \u2014 \u0442\u043E \u043D\u0435\u043C\u043D\u043E\u0433\u043E\u0435, \u0447\u0442\u043E \u0435\u0449\u0451 \u0434\u0435\u0440\u0436\u0438\u0442\u0441\u044F \u043E\u0442 \u043D\u0430\u0441\u0442\u0438\u043B\u0430 \u0438 \u043C\u0435\u0445\u0430\u043D\u0438\u0437\u043C\u0430. \u0420\u0435\u0448\u0430\u0442\u044C \u043D\u0443\u0436\u043D\u043E \u043F\u0440\u044F\u043C\u043E \u0441\u0435\u0439\u0447\u0430\u0441."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0421\u043F\u0430\u0441\u0430\u0442\u044C \u043B\u044E\u0434\u0435\u0439 \u0443 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B."
+        nextNodeId: chapter01.node.04.failure_workers
+        endsDialogue: 0
+        choiceId: chapter01.node.04.priority_failure_choice_workers
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      - text: "\u0421\u043F\u0430\u0441\u0430\u0442\u044C \u0441\u043A\u043E\u0442 \u043E\u0442 \u0432\u043E\u0434\u044B."
+        nextNodeId: chapter01.node.04.failure_livestock
+        endsDialogue: 0
+        choiceId: chapter01.node.04.priority_failure_choice_livestock
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      - text: "\u0421\u043F\u0430\u0441\u0430\u0442\u044C \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0443 \u0438 \u043D\u0430\u0441\u0442\u0438\u043B."
+        nextNodeId: chapter01.node.04.failure_mill
+        endsDialogue: 0
+        choiceId: chapter01.node.04.priority_failure_choice_mill
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1060, y: 880}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.success_workers
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.success_workers_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0422\u044B \u0443\u0441\u043F\u0435\u0432\u0430\u0435\u0448\u044C \u0432\u044B\u0442\u0430\u0449\u0438\u0442\u044C \u0440\u0430\u0431\u043E\u0442\u043D\u0438\u043A\u043E\u0432 \u043D\u0430 \u0441\u0443\u0445\u043E\u0435 \u2014 \u0432\u0441\u0435 \u043D\u0430 \u043D\u043E\u0433\u0430\u0445, \u043F\u0435\u0440\u0435\u043F\u0443\u0433\u0430\u043D\u044B, \u043D\u043E \u0446\u0435\u043B\u044B. \u041F\u043E\u043A\u0430 \u0442\u044B \u0434\u0435\u0440\u0436\u0438\u0448\u044C \u0438\u0445 \u0437\u0430 \u0440\u0443\u043A\u0438 \u043D\u0430 \u0441\u043A\u043E\u043B\u044C\u0437\u043A\u0438\u0445 \u043C\u043E\u0441\u0442\u043A\u0430\u0445, \u043A\u043E\u0440\u043E\u0432\u0438\u0439 \u0440\u0451\u0432 \u0442\u043E\u043D\u0435\u0442 \u0432 \u0448\u0443\u043C\u0435 \u0432\u043E\u0434\u044B: \u0441\u043A\u043E\u0442\u0438\u043D\u0443 \u0443\u043D\u0435\u0441\u043B\u043E \u0442\u0435\u0447\u0435\u043D\u0438\u0435\u043C, \u0438 \u0435\u0451 \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435 \u0432\u0438\u0434\u043D\u043E. \u041C\u0438\u0440\u043E\u043D \u0441\u0442\u043E\u0438\u0442 \u0443 \u0441\u043F\u0430\u0441\u0451\u043D\u043D\u043E\u0433\u043E \u043C\u0435\u0445\u0430\u043D\u0438\u0437\u043C\u0430, \u0443 \u043D\u0435\u0433\u043E \u0434\u0440\u043E\u0436\u0430\u0442 \u0440\u0443\u043A\u0438 \u2014 \u043D\u0435 \u043E\u0442 \u0445\u043E\u043B\u043E\u0434\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-        - EffectExecutionId: chapter01.effect.n04_flag1
+        - EffectExecutionId: chapter01.effect.n04_success_workers_workers_saved
+          Type: 0
+          StringParam: chapter01.flag.flood_workers_saved
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_success_workers_livestock_lost
+          Type: 0
+          StringParam: chapter01.flag.flood_livestock_lost
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_success_workers_flood_happened
           Type: 0
           StringParam: chapter01.flag.flood_happened
           IntParam: 0
       choices:
-      - text: "\u0411\u0435\u0436\u0430\u0442\u044C \u043A \u043F\u043B\u043E\u0442\u0438\u043D\u0435."
-        nextNodeId: 
+      - text: "\u041F\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0434\u044B\u0445\u0430\u043D\u0438\u0435."
+        nextNodeId:
         endsDialogue: 1
-        choiceId: chapter01.node.04_exit
+        choiceId: chapter01.node.04.success_workers_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: 
+          CheckId:
           Kind: 0
           Quality: 0
-          CompetencyId: 
+          CompetencyId:
           Difficulty: 13
           ModifierRules: []
-        successNodeId: 
-        failureNodeId: 
+        successNodeId:
+        failureNodeId:
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 60, y: 60}
+      editorPosition: {x: 1560, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.success_livestock
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.success_livestock_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0422\u044B \u0433\u043E\u043D\u0438\u0448\u044C \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0445 \u043A\u043E\u0440\u043E\u0432 \u043F\u0440\u043E\u0447\u044C \u043E\u0442 \u0432\u043E\u0434\u044B, \u0438 \u043E\u043D\u0438, \u0442\u044F\u0436\u0435\u043B\u043E \u0434\u044B\u0448\u0430, \u0441\u0431\u0438\u0432\u0430\u044E\u0442\u0441\u044F \u0432 \u043A\u0443\u0447\u0443 \u043D\u0430 \u043F\u0440\u0438\u0433\u043E\u0440\u043A\u0435 \u2014 \u0432\u0441\u0435 \u0446\u0435\u043B\u044B. \u0420\u0430\u0431\u043E\u0442\u043D\u0438\u043A\u0438 \u0443\u0441\u043F\u0435\u0432\u0430\u044E\u0442 \u0443\u0439\u0442\u0438 \u0441\u0430\u043C\u0438, \u043F\u043E\u043A\u0430 \u0442\u044B \u0437\u0430\u043D\u044F\u0442 \u0441\u043A\u043E\u0442\u043E\u043C. \u0417\u0430 \u0441\u043F\u0438\u043D\u043E\u0439 \u0440\u0430\u0437\u0434\u0430\u0451\u0442\u0441\u044F \u0442\u0440\u0435\u0441\u043A: \u043D\u0430\u0441\u0442\u0438\u043B \u0443 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B \u043D\u0435 \u0432\u044B\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442 \u0438 \u043F\u0440\u043E\u0441\u0435\u0434\u0430\u0435\u0442 \u0432 \u043F\u043E\u0442\u043E\u043A. \u041C\u0438\u0440\u043E\u043D \u043C\u043E\u043B\u0447\u0430 \u0441\u043C\u043E\u0442\u0440\u0438\u0442 \u043D\u0430 \u0442\u043E, \u0447\u0442\u043E \u043E\u0441\u0442\u0430\u043B\u043E\u0441\u044C \u043E\u0442 \u0435\u0433\u043E \u043A\u043E\u043B\u0435\u0441\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n04_success_livestock_workers_saved
+          Type: 0
+          StringParam: chapter01.flag.flood_workers_saved
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_success_livestock_mill_destroyed
+          Type: 0
+          StringParam: chapter01.flag.flood_mill_deck_destroyed
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_success_livestock_flood_happened
+          Type: 0
+          StringParam: chapter01.flag.flood_happened
+          IntParam: 0
+      choices:
+      - text: "\u041F\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0434\u044B\u0445\u0430\u043D\u0438\u0435."
+        nextNodeId:
+        endsDialogue: 1
+        choiceId: chapter01.node.04.success_livestock_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1560, y: 220}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.success_mill
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.success_mill_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0422\u044B \u0434\u0435\u0440\u0436\u0438\u0448\u044C \u043C\u0435\u0445\u0430\u043D\u0438\u0437\u043C \u0438 \u043D\u0430\u0441\u0442\u0438\u043B, \u043F\u043E\u043A\u0430 \u0446\u0435\u043B\u0430 \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u044F\u044F \u043E\u043F\u043E\u0440\u0430 \u2014 \u0434\u0435\u0440\u0435\u0432\u043E \u0442\u0440\u0435\u0449\u0438\u0442, \u043D\u043E \u0432\u044B\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442. \u041C\u0438\u0440\u043E\u043D \u0443\u0436\u0435 \u0433\u043E\u043D\u0438\u0442 \u043F\u0435\u0440\u0435\u043F\u0443\u0433\u0430\u043D\u043D\u044B\u0439 \u0441\u043A\u043E\u0442 \u043F\u0440\u043E\u0447\u044C \u043E\u0442 \u0431\u0435\u0440\u0435\u0433\u0430, \u0438 \u0442\u043E\u0442, \u0445\u043E\u0442\u044C \u0438 \u043C\u0435\u0447\u0435\u0442\u0441\u044F, \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F \u0446\u0435\u043B. \u041E\u0442 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B, \u0433\u0434\u0435 \u0431\u044B\u043B\u0438 \u0440\u0430\u0431\u043E\u0442\u043D\u0438\u043A\u0438, \u0441\u043A\u0432\u043E\u0437\u044C \u0448\u0443\u043C \u0432\u043E\u0434\u044B \u0434\u043E\u043D\u043E\u0441\u044F\u0442\u0441\u044F \u043A\u0440\u0438\u043A\u0438 \u2014 \u043D\u043E \u0434\u043E\u0431\u0440\u0430\u0442\u044C\u0441\u044F \u0434\u043E \u043D\u0438\u0445 \u0442\u044B \u0443\u0436\u0435 \u043D\u0435 \u0443\u0441\u043F\u0435\u0432\u0430\u0435\u0448\u044C. \u0427\u0442\u043E \u0441 \u043D\u0438\u043C\u0438, \u0441\u0442\u0430\u043D\u0435\u0442 \u044F\u0441\u043D\u043E \u043D\u0435 \u0441\u0435\u0439\u0447\u0430\u0441."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n04_success_mill_flood_happened
+          Type: 0
+          StringParam: chapter01.flag.flood_happened
+          IntParam: 0
+      choices:
+      - text: "\u041F\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0434\u044B\u0445\u0430\u043D\u0438\u0435."
+        nextNodeId:
+        endsDialogue: 1
+        choiceId: chapter01.node.04.success_mill_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1560, y: 440}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.failure_workers
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.failure_workers_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u041D\u0435\u0441\u043C\u043E\u0442\u0440\u044F \u043D\u0430 \u0432\u0441\u0451, \u0447\u0442\u043E \u043F\u043E\u0448\u043B\u043E \u043D\u0435 \u0442\u0430\u043A, \u0442\u044B \u0443\u0441\u043F\u0435\u0432\u0430\u0435\u0448\u044C \u0432\u044B\u0442\u043E\u043B\u043A\u043D\u0443\u0442\u044C \u0440\u0430\u0431\u043E\u0442\u043D\u0438\u043A\u043E\u0432 \u043D\u0430 \u0441\u0443\u0445\u043E\u0435 \u2014 \u043E\u043D\u0438 \u0446\u0435\u043B\u044B, \u0445\u043E\u0442\u044C \u0438 \u043E\u0433\u043B\u0443\u0448\u0435\u043D\u044B. \u0422\u0435\u0431\u0435 \u044D\u0442\u043E \u0441\u0442\u043E\u0438\u0442 \u0434\u043E\u0440\u043E\u0433\u043E: \u0440\u0443\u043A\u0443 \u043F\u0440\u0438\u0436\u0430\u043B\u043E \u043E\u0431\u043B\u043E\u043C\u043A\u043E\u043C, \u0438 \u0431\u043E\u043B\u044C \u043D\u0435 \u043E\u0442\u043F\u0443\u0441\u043A\u0430\u0435\u0442. \u041F\u043E\u043A\u0430 \u0442\u044B \u0432\u043E\u0437\u0438\u0448\u044C\u0441\u044F \u0441 \u043B\u044E\u0434\u044C\u043C\u0438, \u0432\u043E\u0434\u0430 \u0443\u043D\u043E\u0441\u0438\u0442 \u0441\u043A\u043E\u0442\u0438\u043D\u0443, \u0430 \u043D\u0430\u0441\u0442\u0438\u043B \u0443 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B \u0441 \u0442\u0440\u0435\u0441\u043A\u043E\u043C \u043E\u0431\u0440\u0443\u0448\u0438\u0432\u0430\u0435\u0442\u0441\u044F \u0432 \u043F\u043E\u0442\u043E\u043A."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n04_failure_workers_workers_saved
+          Type: 0
+          StringParam: chapter01.flag.flood_workers_saved
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_failure_workers_livestock_lost
+          Type: 0
+          StringParam: chapter01.flag.flood_livestock_lost
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_failure_workers_mill_destroyed
+          Type: 0
+          StringParam: chapter01.flag.flood_mill_deck_destroyed
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_failure_workers_hero_injured
+          Type: 0
+          StringParam: chapter01.flag.hero_injured_by_flood
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_failure_workers_flood_happened
+          Type: 0
+          StringParam: chapter01.flag.flood_happened
+          IntParam: 0
+      choices:
+      - text: "\u041F\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0434\u044B\u0445\u0430\u043D\u0438\u0435."
+        nextNodeId:
+        endsDialogue: 1
+        choiceId: chapter01.node.04.failure_workers_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1560, y: 660}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.failure_livestock
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.failure_livestock_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0422\u044B \u0443\u0441\u043F\u0435\u0432\u0430\u0435\u0448\u044C \u0442\u043E\u043B\u044C\u043A\u043E \u0432\u044B\u0433\u043D\u0430\u0442\u044C \u0441\u043A\u043E\u0442\u0438\u043D\u0443 \u043D\u0430 \u043F\u0440\u0438\u0433\u043E\u0440\u043E\u043A, \u0441\u0440\u044B\u0432\u0430\u044F \u0433\u043E\u043B\u043E\u0441 \u0438 \u0446\u0435\u043F\u043B\u044F\u044F\u0441\u044C \u0437\u0430 \u0432\u0435\u0440\u0451\u0432\u043A\u0438 \u0440\u0430\u0437\u0431\u0438\u0442\u043E\u0439 \u0440\u0443\u043A\u043E\u0439. \u041A \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0435, \u0433\u0434\u0435 \u043E\u0441\u0442\u0430\u043B\u0438\u0441\u044C \u0440\u0430\u0431\u043E\u0442\u043D\u0438\u043A\u0438, \u043F\u0440\u043E\u0431\u0438\u0442\u044C\u0441\u044F \u0443\u0436\u0435 \u043D\u0435 \u0443\u0441\u043F\u0435\u0432\u0430\u0435\u0448\u044C \u2014 \u043A\u0440\u0438\u043A\u0438 \u0442\u043E\u043D\u0443\u0442 \u0432 \u0448\u0443\u043C\u0435 \u0432\u043E\u0434\u044B. \u041D\u0430\u0441\u0442\u0438\u043B \u0437\u0430 \u0441\u043F\u0438\u043D\u043E\u0439 \u0443\u0445\u043E\u0434\u0438\u0442 \u043F\u043E\u0434 \u0432\u043E\u0434\u0443 \u0432\u043C\u0435\u0441\u0442\u0435 \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043C\u0435\u0445\u0430\u043D\u0438\u0437\u043C\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n04_failure_livestock_mill_destroyed
+          Type: 0
+          StringParam: chapter01.flag.flood_mill_deck_destroyed
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_failure_livestock_hero_injured
+          Type: 0
+          StringParam: chapter01.flag.hero_injured_by_flood
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_failure_livestock_flood_happened
+          Type: 0
+          StringParam: chapter01.flag.flood_happened
+          IntParam: 0
+      choices:
+      - text: "\u041F\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0434\u044B\u0445\u0430\u043D\u0438\u0435."
+        nextNodeId:
+        endsDialogue: 1
+        choiceId: chapter01.node.04.failure_livestock_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1560, y: 880}
+      hasEditorPosition: 1
+    - id: chapter01.node.04.failure_mill
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.04.failure_mill_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0418\u0437 \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0445 \u0441\u0438\u043B \u0442\u044B \u0443\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0448\u044C \u043C\u0435\u0445\u0430\u043D\u0438\u0437\u043C \u2014 \u0438\u0441\u0446\u0430\u0440\u0430\u043F\u0430\u043D\u043D\u044B\u0435 \u0440\u0443\u043A\u0438 \u0435\u0434\u0432\u0430 \u0441\u043B\u0443\u0448\u0430\u044E\u0442\u0441\u044F, \u043D\u043E \u0441\u0442\u0432\u043E\u0440 \u0438 \u043D\u0430\u0441\u0442\u0438\u043B \u0434\u0435\u0440\u0436\u0430\u0442\u0441\u044F. \u041A \u043B\u044E\u0434\u044F\u043C \u0438 \u0441\u043A\u043E\u0442\u0438\u043D\u0435 \u043F\u0440\u043E\u0431\u0438\u0442\u044C\u0441\u044F \u0442\u044B \u0443\u0436\u0435 \u043D\u0435 \u043C\u043E\u0436\u0435\u0448\u044C: \u0432\u043E\u0434\u0430 \u043E\u0442\u0440\u0435\u0437\u0430\u043B\u0430 \u043E\u0431\u0430 \u043F\u0443\u0442\u0438. \u041A\u0440\u0438\u043A\u0438 \u0443 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B \u0438 \u0440\u0451\u0432 \u0441\u043A\u043E\u0442\u0438\u043D\u044B \u0432\u0434\u0430\u043B\u0435\u043A\u0435 \u0441\u043B\u0438\u0432\u0430\u044E\u0442\u0441\u044F \u0432 \u043E\u0434\u0438\u043D \u0448\u0443\u043C, \u043A\u043E\u0442\u043E\u0440\u044B\u0439 \u0442\u044B \u043D\u0435 \u0432 \u0441\u0438\u043B\u0430\u0445 \u043E\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n04_failure_mill_livestock_lost
+          Type: 0
+          StringParam: chapter01.flag.flood_livestock_lost
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_failure_mill_hero_injured
+          Type: 0
+          StringParam: chapter01.flag.hero_injured_by_flood
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n04_failure_mill_flood_happened
+          Type: 0
+          StringParam: chapter01.flag.flood_happened
+          IntParam: 0
+      choices:
+      - text: "\u041F\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0434\u044B\u0445\u0430\u043D\u0438\u0435."
+        nextNodeId:
+        endsDialogue: 1
+        choiceId: chapter01.node.04.failure_mill_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1560, y: 1100}
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_05_wet_plan

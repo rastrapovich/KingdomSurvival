@@ -93,7 +93,7 @@ namespace KingdomSurvival.UILayout
                 if (element.OverrideRect)
                     UILayoutRuntimeApplier.ApplyRect(target, element, screen, reference, actualResolution);
                 if (element.OverrideBackground)
-                    UILayoutRuntimeApplier.ApplyBackground(target, element);
+                    UILayoutRuntimeApplier.ApplyBackground(target, element, reference, actualResolution);
                 if (element.OverrideText && element.IsTextual)
                     UILayoutRuntimeApplier.ApplyTextStyle(target, element, reference, actualResolution);
             }

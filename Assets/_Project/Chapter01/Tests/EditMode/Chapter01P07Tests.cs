@@ -290,19 +290,23 @@ public sealed class Chapter01P07Tests
         Assert.That(available, Is.EquivalentTo(new[] { Chapter01Ids.Dialogues.D07A, Chapter01Ids.Dialogues.D07B, Chapter01Ids.Dialogues.D07C }));
     }
 
-    [TestCase(new[] { "A", "B", "C" })]
-    [TestCase(new[] { "C", "A", "B" })]
-    [TestCase(new[] { "B", "C", "A" })]
-    public void FreeOrder_AnyPermutation_ShrinksAvailabilityCorrectly_AndEndsEmpty(string[] order)
+    // NUnit/C#: массив нельзя передать как аргумент TestCase (CS0182 — он
+    // сам является params object[] у атрибута, вложенный array creation
+    // внутри него не считается константным выражением атрибута). Порядок
+    // прохождения передаём одной строкой вида "ABC" и индексируем по символу.
+    [TestCase("ABC")]
+    [TestCase("CAB")]
+    [TestCase("BCA")]
+    public void FreeOrder_AnyPermutation_ShrinksAvailabilityCorrectly_AndEndsEmpty(string order)
     {
         NarrativeStateData state = new NarrativeStateData();
         state.SetFlag(Chapter01Ids.Flags.WaterWrongActive);
 
-        Dictionary<string, string> flagByLetter = new Dictionary<string, string>
+        Dictionary<char, string> flagByLetter = new Dictionary<char, string>
         {
-            { "A", Chapter01Ids.Flags.InvestigatedMill },
-            { "B", Chapter01Ids.Flags.InvestigatedCattle },
-            { "C", Chapter01Ids.Flags.InvestigatedRiver },
+            { 'A', Chapter01Ids.Flags.InvestigatedMill },
+            { 'B', Chapter01Ids.Flags.InvestigatedCattle },
+            { 'C', Chapter01Ids.Flags.InvestigatedRiver },
         };
 
         Assert.AreEqual(3, Chapter01StoryDirector.GetAvailableInvestigationDialogueIds(state).Count);
@@ -312,7 +316,7 @@ public sealed class Chapter01P07Tests
             state.SetFlag(flagByLetter[order[i]]);
             int expectedRemaining = order.Length - (i + 1);
             Assert.AreEqual(expectedRemaining, Chapter01StoryDirector.GetAvailableInvestigationDialogueIds(state).Count,
-                "После прохождения " + (i + 1) + " из трёх (порядок " + string.Join("", order) + ")");
+                "После прохождения " + (i + 1) + " из трёх (порядок " + order + ")");
         }
 
         Assert.IsEmpty(Chapter01StoryDirector.GetAvailableInvestigationDialogueIds(state));

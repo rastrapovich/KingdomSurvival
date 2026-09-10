@@ -2,6 +2,7 @@
   "name": "KingdomSurvival.UILayout.Editor",
   "rootNamespace": "KingdomSurvival.UILayout.Editor",
   "references": [
+    "KingdomSurvival.Core",
     "KingdomSurvival.UILayout",
     "KingdomSurvival.DialogueDatabase"
   ],

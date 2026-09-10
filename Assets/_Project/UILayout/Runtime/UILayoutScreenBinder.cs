@@ -11,10 +11,10 @@ namespace KingdomSurvival.UILayout
     /// Экран диалога имеет собственный код применения в `PrototypeUIController`
     /// и через этот байндер не проходит: у него `autoApply = false`.
     ///
-    /// Ключевое правило безопасности: байндер меняет только то, что designer
-    /// явно включил флагами `overrideRect` / `overrideBackground` /
-    /// `overrideText`. Пока флаги выключены, экран сохраняет свою вёрстку из
-    /// USS, и добавление экрана в конструктор ничего не ломает.
+    /// Ключевое правило безопасности: обычный элемент меняется только по
+    /// явно включённым `overrideRect` / `overrideBackground` / `overrideText`.
+    /// Тип `Portrait` сам является явным выбором preset-геометрии и изображения,
+    /// поэтому применяет их без двух legacy-флагов.
     /// </summary>
     public static class UILayoutScreenBinder
     {
@@ -80,8 +80,10 @@ namespace KingdomSurvival.UILayout
                 if (element == null)
                     continue;
 
-                bool wantsAnything = element.OverrideRect ||
-                                     element.OverrideBackground ||
+                bool wantsRect = ShouldApplyRect(element);
+                bool wantsBackground = ShouldApplyBackground(element);
+                bool wantsAnything = wantsRect ||
+                                     wantsBackground ||
                                      element.OverrideText;
                 if (!wantsAnything)
                     continue;
@@ -90,13 +92,28 @@ namespace KingdomSurvival.UILayout
                 if (target == null)
                     continue;
 
-                if (element.OverrideRect)
+                if (wantsRect)
                     UILayoutRuntimeApplier.ApplyRect(target, element, screen, reference, actualResolution);
-                if (element.OverrideBackground)
+                if (wantsBackground)
                     UILayoutRuntimeApplier.ApplyBackground(target, element, reference, actualResolution);
                 if (element.OverrideText && element.IsTextual)
                     UILayoutRuntimeApplier.ApplyTextStyle(target, element, reference, actualResolution);
             }
+        }
+
+        /// <summary>
+        /// Выбор типа Portrait сам является явным включением канонической
+        /// геометрии и изображения. У такого элемента нет отдельного режима
+        /// свободного Rect, который мог бы вернуть произвольный размер.
+        /// </summary>
+        public static bool ShouldApplyRect(UILayoutElementDefinition element)
+        {
+            return element != null && (element.IsPortrait || element.OverrideRect);
+        }
+
+        public static bool ShouldApplyBackground(UILayoutElementDefinition element)
+        {
+            return element != null && (element.IsPortrait || element.OverrideBackground);
         }
 
         private static VisualElement ResolveScope(

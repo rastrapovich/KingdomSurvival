@@ -17,7 +17,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
         /// <summary>
         /// Редактор индивидуальной кадрировки говорящего. Общая рамка, режим
-        /// Cover/Contain/Stretch, общий scale/offset, tint и opacity всегда
+        /// Cover/Contain, общий scale/offset, tint и opacity всегда
         /// остаются в UI Конструкторе; здесь хранится только добавка конкретного NPC.
         /// </summary>
         private void DrawSpeakerPortraitFraming(SerializedProperty speaker)
@@ -58,13 +58,15 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 EditorGUILayout.PropertyField(
                     flipX,
                     new GUIContent("Отразить по X"));
+            }
 
-                if (GUILayout.Button("Сбросить индивидуальную кадрировку"))
-                {
-                    scale.floatValue = 1f;
-                    offset.vector2Value = Vector2.zero;
-                    flipX.boolValue = false;
-                }
+            if (GUILayout.Button("Сбросить индивидуальную кадрировку"))
+            {
+                overrideFraming.boolValue = false;
+                scale.floatValue = 1f;
+                offset.vector2Value = Vector2.zero;
+                flipX.boolValue = false;
+                speakerPortraitDragging = false;
             }
 
             Sprite sprite = portrait != null ? portrait.objectReferenceValue as Sprite : null;

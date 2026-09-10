@@ -99,7 +99,8 @@ MonoBehaviour:
     - id: portrait
       displayName: "\u041F\u043E\u0440\u0442\u0440\u0435\u0442"
       parentId: overlay
-      kind: 2
+      kind: 5
+      portraitSize: 3
       targetName: narrative-dialogue-portrait
       overrideRect: 0
       overrideBackground: 0
@@ -107,10 +108,10 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 272.86887
-        y: 195.0693
-        width: 441.35843
-        height: 237.2761
+        x: 343.5481
+        y: 103.70735
+        width: 300
+        height: 420
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0

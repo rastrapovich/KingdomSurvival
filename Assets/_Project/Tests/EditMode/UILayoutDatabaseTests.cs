@@ -6,12 +6,99 @@ using UnityEngine.UIElements;
 
 public sealed class UILayoutDatabaseTests
 {
+    [TestCase(PortraitSize.XS, 100, 140)]
+    [TestCase(PortraitSize.S, 150, 210)]
+    [TestCase(PortraitSize.M, 200, 280)]
+    [TestCase(PortraitSize.L, 300, 420)]
+    [TestCase(PortraitSize.XL, 400, 560)]
+    public void Portrait_Size_Table_Uses_Canonical_Five_By_Seven_Presets(
+        PortraitSize size,
+        int expectedWidth,
+        int expectedHeight)
+    {
+        PortraitSizeDefinition definition = PortraitSizeTable.Get(size);
+
+        Assert.AreEqual(size, definition.Size);
+        Assert.AreEqual(expectedWidth, definition.Width);
+        Assert.AreEqual(expectedHeight, definition.Height);
+        Assert.AreEqual(
+            definition.Width * PortraitSizeTable.AspectHeight,
+            definition.Height * PortraitSizeTable.AspectWidth);
+    }
+
+    [Test]
+    public void Portrait_Element_Rejects_Free_Resize_And_Preserves_Framing_When_Preset_Changes()
+    {
+        UILayoutElementDefinition element = new UILayoutElementDefinition();
+        Rect legacyRect = new Rect(272.86887f, 195.0693f, 441.35843f, 237.2761f);
+        Vector2 legacyCenter = legacyRect.center;
+        element.SetRect(legacyRect);
+        element.SetImageScale(1.35f);
+        element.SetImageOffset(new Vector2(27f, -43f));
+
+        element.SetKind(UILayoutElementKind.Portrait);
+
+        Assert.AreEqual(PortraitSize.L, element.PortraitSize);
+        Assert.AreEqual(legacyCenter.x, element.Rect.center.x, 0.001f);
+        Assert.AreEqual(legacyCenter.y, element.Rect.center.y, 0.001f);
+        Assert.AreEqual(300f, element.Rect.width, 0.001f);
+        Assert.AreEqual(420f, element.Rect.height, 0.001f);
+        Assert.IsFalse(element.SupportsFreeResize);
+
+        element.SetRect(new Rect(17f, 29f, 777f, 888f));
+        Assert.AreEqual(17f, element.Rect.x, 0.001f);
+        Assert.AreEqual(29f, element.Rect.y, 0.001f);
+        Assert.AreEqual(300f, element.Rect.width, 0.001f);
+        Assert.AreEqual(420f, element.Rect.height, 0.001f);
+
+        Vector2 centerBeforePresetChange = element.Rect.center;
+        element.SetPortraitSize(PortraitSize.XL);
+
+        Assert.AreEqual(centerBeforePresetChange.x, element.Rect.center.x, 0.001f);
+        Assert.AreEqual(centerBeforePresetChange.y, element.Rect.center.y, 0.001f);
+        Assert.AreEqual(400f, element.Rect.width, 0.001f);
+        Assert.AreEqual(560f, element.Rect.height, 0.001f);
+        Assert.AreEqual(1.35f, element.ImageScale, 0.001f);
+        Assert.AreEqual(new Vector2(27f, -43f), element.ImageOffset);
+    }
+
     [Test]
     public void Database_Loads_Default_And_Has_Narrative_Screen()
     {
         UILayoutDatabaseAsset database = Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
         Assert.IsNotNull(database);
         Assert.IsNotNull(database.FindScreen("narrative-dialogue"));
+    }
+
+    [Test]
+    public void Narrative_Portrait_Uses_L_Preset_And_Is_Always_Applied()
+    {
+        UILayoutDatabaseAsset database = Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
+        UILayoutElementDefinition portrait = database
+            .FindScreen(UILayoutDatabaseAsset.NarrativeDialogueScreenId)
+            .FindElement("portrait");
+
+        Assert.IsNotNull(portrait);
+        Assert.AreEqual(UILayoutElementKind.Portrait, portrait.Kind);
+        Assert.AreEqual(PortraitSize.L, portrait.PortraitSize);
+        Assert.AreEqual(300f, portrait.Rect.width, 0.001f);
+        Assert.AreEqual(420f, portrait.Rect.height, 0.001f);
+        Assert.IsTrue(UILayoutScreenBinder.ShouldApplyRect(portrait));
+        Assert.IsTrue(UILayoutScreenBinder.ShouldApplyBackground(portrait));
+    }
+
+    [Test]
+    public void Generic_Image_Keeps_Its_Free_Rect_And_Does_Not_Inherit_Portrait_Rules()
+    {
+        UILayoutElementDefinition image = new UILayoutElementDefinition();
+        image.SetKind(UILayoutElementKind.Image);
+        image.SetRect(new Rect(11f, 22f, 350f, 500f));
+
+        Assert.IsTrue(image.SupportsFreeResize);
+        Assert.AreEqual(350f, image.Rect.width, 0.001f);
+        Assert.AreEqual(500f, image.Rect.height, 0.001f);
+        Assert.IsFalse(UILayoutScreenBinder.ShouldApplyRect(image));
+        Assert.IsFalse(UILayoutScreenBinder.ShouldApplyBackground(image));
     }
 
     [Test]
@@ -125,11 +212,12 @@ public sealed class UILayoutDatabaseTests
     }
 
     /// <summary>
-    /// Пока дизайнер не включил переопределение, конструктор не должен
-    /// вмешиваться в вёрстку USS ни на одном экране.
+    /// У обычных элементов конструктор не должен вмешиваться в USS, пока
+    /// дизайнер не включил legacy override-флаги. Portrait имеет отдельный
+    /// явный контракт применения и проверяется отдельным тестом выше.
     /// </summary>
     [Test]
-    public void Default_Database_Does_Not_Override_Uss_Layout()
+    public void Default_Database_Does_Not_Enable_Legacy_Override_Flags()
     {
         UILayoutDatabaseAsset database = Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
         Assert.IsNotNull(database);

@@ -111,7 +111,10 @@ namespace KingdomSurvival.UILayout.Editor
                 {
                     UILayoutElementDefinition element = screen.Elements[i];
                     string indent = string.IsNullOrWhiteSpace(element.ParentId) ? string.Empty : "   ↳ ";
-                    string mark = element.OverrideRect || element.OverrideBackground || element.OverrideText
+                    string mark = element.IsPortrait ||
+                                  element.OverrideRect ||
+                                  element.OverrideBackground ||
+                                  element.OverrideText
                         ? " ●"
                         : string.Empty;
                     if (GUILayout.Toggle(elementIndex == i, indent + element.DisplayName + mark, "Button"))
@@ -469,27 +472,67 @@ namespace KingdomSurvival.UILayout.Editor
             float sx,
             float sy)
         {
-            Texture texture = element.Sprite != null
-                ? element.Sprite.texture
+            Sprite sprite = element.Sprite;
+            Texture texture = sprite != null
+                ? sprite.texture
                 : element.Texture;
             if (texture == null)
                 return;
 
-            GUI.BeginGroup(draw);
-            Vector2 center = new Vector2(draw.width * 0.5f, draw.height * 0.5f);
-            Vector2 size = new Vector2(draw.width, draw.height) * element.ImageScale;
+            if (!element.IsPortrait)
+            {
+                GUI.BeginGroup(draw);
+                Vector2 center = new Vector2(draw.width * 0.5f, draw.height * 0.5f);
+                Vector2 size = new Vector2(draw.width, draw.height) * element.ImageScale;
+                Vector2 legacyOffset = new Vector2(element.ImageOffset.x * sx, element.ImageOffset.y * sy);
+                Rect legacyRect = new Rect(
+                    center.x - size.x * 0.5f + legacyOffset.x,
+                    center.y - size.y * 0.5f + legacyOffset.y,
+                    size.x,
+                    size.y);
+                ScaleMode scaleMode = UILayoutRuntimeApplier.ResolveImageScaleMode(element.ImageMode);
+                Color legacyColor = GUI.color;
+                Color legacyTint = element.Tint;
+                legacyTint.a *= element.Opacity;
+                GUI.color = legacyTint;
+                GUI.DrawTexture(legacyRect, texture, scaleMode, true);
+                GUI.color = legacyColor;
+                GUI.EndGroup();
+                return;
+            }
+
+            Vector2 sourceSize = sprite != null
+                ? UILayoutRuntimeApplier.ResolveSpriteSize(sprite)
+                : new Vector2(texture.width, texture.height);
             Vector2 offset = new Vector2(element.ImageOffset.x * sx, element.ImageOffset.y * sy);
-            Rect imageRect = new Rect(
-                center.x - size.x * 0.5f + offset.x,
-                center.y - size.y * 0.5f + offset.y,
-                size.x,
-                size.y);
-            ScaleMode scaleMode = UILayoutRuntimeApplier.ResolveImageScaleMode(element.ImageMode);
+            Rect imageRect = UILayoutRuntimeApplier.ResolveImageRect(
+                sourceSize,
+                draw.size,
+                element.ImageMode,
+                element.ImageScale,
+                offset);
+
+            GUI.BeginGroup(draw);
             Color previous = GUI.color;
             Color tint = element.Tint;
             tint.a *= element.Opacity;
             GUI.color = tint;
-            GUI.DrawTexture(imageRect, texture, scaleMode, true);
+
+            if (sprite != null)
+            {
+                Rect spriteRect = sprite.rect;
+                Rect uv = new Rect(
+                    spriteRect.x / texture.width,
+                    spriteRect.y / texture.height,
+                    spriteRect.width / texture.width,
+                    spriteRect.height / texture.height);
+                GUI.DrawTextureWithTexCoords(imageRect, texture, uv, true);
+            }
+            else
+            {
+                GUI.DrawTexture(imageRect, texture, ScaleMode.StretchToFill, true);
+            }
+
             GUI.color = previous;
             GUI.EndGroup();
         }
@@ -500,13 +543,17 @@ namespace KingdomSurvival.UILayout.Editor
             float sy,
             UILayoutElementDefinition element)
         {
+            bool canResize = element != null && element.SupportsFreeResize;
             Rect handle = new Rect(draw.xMax - 10f, draw.yMax - 10f, 20f, 20f);
-            EditorGUI.DrawRect(handle, new Color(0.95f, 0.7f, 0.2f, 1f));
+            if (canResize)
+                EditorGUI.DrawRect(handle, new Color(0.95f, 0.7f, 0.2f, 1f));
+            else
+                resizing = false;
             Event e = Event.current;
 
             if (e.type == EventType.MouseDown && e.button == 0)
             {
-                if (handle.Contains(e.mousePosition))
+                if (canResize && handle.Contains(e.mousePosition))
                 {
                     resizing = true;
                     dragStart = e.mousePosition;
@@ -647,7 +694,14 @@ namespace KingdomSurvival.UILayout.Editor
             EditorGUILayout.LabelField("ЭЛЕМЕНТ — " + element.DisplayName, EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("id"), new GUIContent("ID"));
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("displayName"), new GUIContent("Название"));
-            DrawElementKindPopup(selected.FindPropertyRelative("kind"));
+            SerializedProperty kindProperty = selected.FindPropertyRelative("kind");
+            UILayoutElementKind kindBeforeEdit = element.Kind;
+            DrawElementKindPopup(kindProperty);
+            UILayoutElementKind editedKind = (UILayoutElementKind)kindProperty.enumValueIndex;
+            bool isPortrait = editedKind == UILayoutElementKind.Portrait;
+            bool isTextual = editedKind == UILayoutElementKind.Text || editedKind == UILayoutElementKind.Button;
+            if (kindBeforeEdit != UILayoutElementKind.Portrait && isPortrait)
+                ConvertFreeRectToPortrait(selected);
             DrawParentField(selected, element);
             EditorGUILayout.PropertyField(
                 selected.FindPropertyRelative("targetName"),
@@ -657,22 +711,36 @@ namespace KingdomSurvival.UILayout.Editor
 
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("ПРИМЕНЕНИЕ В ИГРЕ", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(
-                selected.FindPropertyRelative("overrideRect"),
-                new GUIContent("Переопределять прямоугольник"));
-            EditorGUILayout.PropertyField(
-                selected.FindPropertyRelative("overrideBackground"),
-                new GUIContent("Переопределять фон"));
-            using (new EditorGUI.DisabledScope(!element.IsTextual))
+            if (isPortrait)
+            {
+                EditorGUILayout.HelpBox(
+                    "Portrait всегда применяет preset-рамку и настройки изображения. " +
+                    "Свободный размер для этого типа отключён.",
+                    MessageType.None);
+            }
+            else
+            {
+                EditorGUILayout.PropertyField(
+                    selected.FindPropertyRelative("overrideRect"),
+                    new GUIContent("Переопределять прямоугольник"));
+                EditorGUILayout.PropertyField(
+                    selected.FindPropertyRelative("overrideBackground"),
+                    new GUIContent("Переопределять фон"));
+            }
+            using (new EditorGUI.DisabledScope(!isTextual))
             {
                 EditorGUILayout.PropertyField(
                     selected.FindPropertyRelative("overrideText"),
                     new GUIContent("Переопределять текст"));
             }
 
+            bool hasRuntimeOverride = isPortrait ||
+                                      selected.FindPropertyRelative("overrideRect").boolValue ||
+                                      selected.FindPropertyRelative("overrideBackground").boolValue ||
+                                      selected.FindPropertyRelative("overrideText").boolValue;
             if (!IsNarrativeDialogue(currentScreen) &&
                 !currentScreen.AutoApply &&
-                (element.OverrideRect || element.OverrideBackground || element.OverrideText))
+                hasRuntimeOverride)
             {
                 EditorGUILayout.HelpBox(
                     "Переопределения включены, но у экрана выключено «Применять в игре».",
@@ -681,9 +749,12 @@ namespace KingdomSurvival.UILayout.Editor
 
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("ГЕОМЕТРИЯ", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(selected.FindPropertyRelative("rect"), new GUIContent("Прямоугольник"));
+            if (isPortrait)
+                DrawPortraitGeometry(selected);
+            else
+                EditorGUILayout.PropertyField(selected.FindPropertyRelative("rect"), new GUIContent("Прямоугольник"));
 
-            if (element.IsTextual)
+            if (isTextual)
             {
                 EditorGUILayout.Space(8f);
                 EditorGUILayout.LabelField("ТЕКСТ", EditorStyles.boldLabel);
@@ -706,13 +777,16 @@ namespace KingdomSurvival.UILayout.Editor
             }
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("sprite"), new GUIContent("Спрайт"));
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("texture"), new GUIContent("Текстура"));
-            DrawImageModePopup(selected.FindPropertyRelative("imageMode"));
+            if (isPortrait)
+                DrawPortraitImageModePopup(selected.FindPropertyRelative("imageMode"));
+            else
+                DrawImageModePopup(selected.FindPropertyRelative("imageMode"));
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageScale"), new GUIContent("Масштаб"));
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("imageOffset"), new GUIContent("Смещение"));
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("tint"), new GUIContent("Оттенок"));
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("opacity"), new GUIContent("Непрозрачность"));
 
-            if (EditorGUI.EndChangeCheck())
+            if (EditorGUI.EndChangeCheck() || so.hasModifiedProperties)
                 ApplyChanges(so);
 
             GUILayout.Space(8f);
@@ -777,6 +851,7 @@ namespace KingdomSurvival.UILayout.Editor
                 case UILayoutElementKind.Image: return "Изображение";
                 case UILayoutElementKind.Button: return "Кнопка";
                 case UILayoutElementKind.Container: return "Контейнер";
+                case UILayoutElementKind.Portrait: return "Портрет";
                 default: return kind.ToString();
             }
         }
@@ -795,6 +870,83 @@ namespace KingdomSurvival.UILayout.Editor
             int next = EditorGUILayout.Popup("Тип", selected, labels);
             if (next >= 0 && next < ElementKindValues.Length)
                 kindProperty.enumValueIndex = (int)ElementKindValues[next];
+        }
+
+        private static readonly PortraitSize[] PortraitSizeValues =
+            (PortraitSize[])Enum.GetValues(typeof(PortraitSize));
+
+        private static void ConvertFreeRectToPortrait(SerializedProperty selected)
+        {
+            SerializedProperty rectProperty = selected.FindPropertyRelative("rect");
+            SerializedProperty sizeProperty = selected.FindPropertyRelative("portraitSize");
+            Rect current = rectProperty.rectValue;
+            PortraitSize nearest = PortraitSizeTable.FindNearest(current.width, current.height);
+            sizeProperty.enumValueIndex = (int)nearest;
+            rectProperty.rectValue = UILayoutPortraitRect.ResizeKeepingCenter(current, nearest);
+            selected.FindPropertyRelative("overrideRect").boolValue = false;
+            selected.FindPropertyRelative("overrideBackground").boolValue = false;
+            selected.FindPropertyRelative("overrideText").boolValue = false;
+
+            SerializedProperty imageMode = selected.FindPropertyRelative("imageMode");
+            if (imageMode.enumValueIndex == (int)UILayoutImageMode.Stretch)
+                imageMode.enumValueIndex = (int)UILayoutImageMode.Cover;
+        }
+
+        private static void DrawPortraitGeometry(SerializedProperty selected)
+        {
+            SerializedProperty rectProperty = selected.FindPropertyRelative("rect");
+            SerializedProperty sizeProperty = selected.FindPropertyRelative("portraitSize");
+            Rect current = rectProperty.rectValue;
+
+            int selectedIndex = Mathf.Clamp(sizeProperty.enumValueIndex, 0, PortraitSizeValues.Length - 1);
+            string[] labels = new string[PortraitSizeValues.Length];
+            for (int i = 0; i < PortraitSizeValues.Length; i++)
+            {
+                PortraitSizeDefinition definition = PortraitSizeTable.Get(PortraitSizeValues[i]);
+                labels[i] = definition.Size + " — " + definition.Width + " × " + definition.Height + " px";
+            }
+
+            int nextIndex = EditorGUILayout.Popup("Размер портрета", selectedIndex, labels);
+            PortraitSize nextSize = PortraitSizeValues[Mathf.Clamp(nextIndex, 0, PortraitSizeValues.Length - 1)];
+            if (nextIndex != selectedIndex)
+            {
+                sizeProperty.enumValueIndex = (int)nextSize;
+                current = UILayoutPortraitRect.ResizeKeepingCenter(current, nextSize);
+                rectProperty.rectValue = current;
+            }
+            else
+            {
+                Rect normalized = UILayoutPortraitRect.ResizeKeepingCenter(current, nextSize);
+                if (!RectsApproximatelyEqual(normalized, current))
+                {
+                    current = normalized;
+                    rectProperty.rectValue = current;
+                }
+            }
+
+            EditorGUI.BeginChangeCheck();
+            float x = EditorGUILayout.FloatField("X", current.x);
+            float y = EditorGUILayout.FloatField("Y", current.y);
+            if (EditorGUI.EndChangeCheck())
+            {
+                current.x = x;
+                current.y = y;
+                rectProperty.rectValue = current;
+            }
+
+            PortraitSizeDefinition resolved = PortraitSizeTable.Get(nextSize);
+            EditorGUILayout.LabelField("Размер рамки", resolved.Width + " × " + resolved.Height + " px (5:7)");
+            EditorGUILayout.HelpBox(
+                "Рамку можно перемещать по X/Y. Изменение Width/Height и resize мышью отключены.",
+                MessageType.None);
+        }
+
+        private static bool RectsApproximatelyEqual(Rect left, Rect right)
+        {
+            return Mathf.Approximately(left.x, right.x) &&
+                   Mathf.Approximately(left.y, right.y) &&
+                   Mathf.Approximately(left.width, right.width) &&
+                   Mathf.Approximately(left.height, right.height);
         }
 
         private static readonly FontStyle[] FontStyleValues =
@@ -856,6 +1008,33 @@ namespace KingdomSurvival.UILayout.Editor
             int next = EditorGUILayout.Popup("Режим изображения", selected, labels);
             if (next >= 0 && next < ImageModeValues.Length)
                 imageModeProperty.enumValueIndex = (int)ImageModeValues[next];
+        }
+
+        private static readonly UILayoutImageMode[] PortraitImageModeValues =
+        {
+            UILayoutImageMode.Cover,
+            UILayoutImageMode.Contain
+        };
+
+        private static void DrawPortraitImageModePopup(SerializedProperty imageModeProperty)
+        {
+            int selected = 0;
+            for (int i = 0; i < PortraitImageModeValues.Length; i++)
+            {
+                if (imageModeProperty.enumValueIndex == (int)PortraitImageModeValues[i])
+                    selected = i;
+            }
+
+            if (imageModeProperty.enumValueIndex == (int)UILayoutImageMode.Stretch)
+                imageModeProperty.enumValueIndex = (int)UILayoutImageMode.Cover;
+
+            string[] labels = new string[PortraitImageModeValues.Length];
+            for (int i = 0; i < PortraitImageModeValues.Length; i++)
+                labels[i] = ImageModeLabel(PortraitImageModeValues[i]);
+
+            int next = EditorGUILayout.Popup("Режим изображения", selected, labels);
+            if (next >= 0 && next < PortraitImageModeValues.Length)
+                imageModeProperty.enumValueIndex = (int)PortraitImageModeValues[next];
         }
 
         private static readonly UILayoutTextHorizontalAlignment[] HorizontalAlignmentValues =
@@ -923,6 +1102,7 @@ namespace KingdomSurvival.UILayout.Editor
             GUILayout.Space(8f);
             if (GUILayout.Button("Сохранить Asset"))
             {
+                database.NormalizePortraitFrames();
                 EditorUtility.SetDirty(database);
                 AssetDatabase.SaveAssets();
             }
@@ -941,6 +1121,7 @@ namespace KingdomSurvival.UILayout.Editor
         private void ApplyChanges(SerializedObject so)
         {
             so.ApplyModifiedProperties();
+            database.NormalizePortraitFrames();
             EditorUtility.SetDirty(database);
             Repaint();
         }
@@ -1028,12 +1209,14 @@ namespace KingdomSurvival.UILayout.Editor
             element.FindPropertyRelative("id").stringValue = "element-" + (index + 1);
             element.FindPropertyRelative("displayName").stringValue = "Новый элемент";
             element.FindPropertyRelative("parentId").stringValue = string.Empty;
+            element.FindPropertyRelative("kind").enumValueIndex = (int)UILayoutElementKind.Panel;
             element.FindPropertyRelative("targetName").stringValue = string.Empty;
             element.FindPropertyRelative("overrideRect").boolValue = false;
             element.FindPropertyRelative("overrideBackground").boolValue = false;
             element.FindPropertyRelative("overrideText").boolValue = false;
             element.FindPropertyRelative("previewText").stringValue = string.Empty;
             element.FindPropertyRelative("rect").rectValue = new Rect(80f, 80f, 320f, 180f);
+            element.FindPropertyRelative("portraitSize").enumValueIndex = (int)PortraitSize.M;
             ApplyChanges(so);
             elementIndex = index;
         }

@@ -102,18 +102,18 @@ MonoBehaviour:
       displayName: "\u041F\u043E\u0440\u0442\u0440\u0435\u0442"
       parentId: overlay
       kind: 5
-      portraitSize: 2
+      portraitSize: 3
       targetName: narrative-dialogue-portrait
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: 
+      previewText:
       rect:
         serializedVersion: 2
         x: 1053.375
         y: 113.50414
-        width: 200
-        height: 280
+        width: 300
+        height: 420
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0

@@ -245,6 +245,15 @@ public partial class PrototypeUIController
         RefreshJournalNotificationState();
         if (IsJournalOpen)
             RefreshJournal();
+
+        // P09 hotfix: Camp availability depends on transient blocking state.
+        // Refresh it together with the rest of the persistent UI after every
+        // state-changing action so the nav button cannot keep a stale disabled
+        // state after a dialogue/mandatory modal has already closed.
+        RefreshCampNavButtonState();
+        if (IsCampScreenOpen)
+            RefreshCampScreen();
+
         RefreshJourneySummaryFromState();
         RefreshIncidentNotifications();
         RefreshPersistentCommanderNavigationState();

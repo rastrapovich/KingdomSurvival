@@ -653,6 +653,11 @@ public partial class PrototypeUIController
             narrativeChoicesContainer.Clear();
         if (narrativeHistoryContainer != null)
             narrativeHistoryContainer.Clear();
+        // Chapter01StoryDirector.HandleDialogueCompleted (вызван выше, до
+        // закрытия) мог изменить ресурсы (например, Food -12 при потере
+        // скота в P05) — без перерисовки верхняя панель показывала бы
+        // старое число до следующего не связанного действия.
+        RefreshInterface();
         RefreshTimeControlAvailability();
         ResumeAfterBlockingModalIfReady();
     }

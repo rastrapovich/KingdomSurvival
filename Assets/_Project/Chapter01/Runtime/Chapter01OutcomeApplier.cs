@@ -256,14 +256,14 @@ namespace KingdomSurvival.Chapter01
             if (durationHours <= 0.0)
                 return;
 
-            Apply(gameState, Chapter01Ids.Effects.CartActivityStart, _ =>
+            Apply(gameState, Chapter01Ids.Effects.CartActivityStart, narrativeState =>
                 gameState.TryStartRoadActivity(
                     "cart_help",
                     activityDisplayName,
                     durationHours,
                     0,
                     0,
-                    out _));
+                    out string _));
         }
 
         private static bool Apply(GameState gameState, string executionId, Action<NarrativeStateData> mutation)

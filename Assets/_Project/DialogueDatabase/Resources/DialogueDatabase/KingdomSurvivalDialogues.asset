@@ -329,7 +329,7 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 505.86874, y: 494.7337}
+      editorPosition: {x: 1054.5365, y: 289.46976}
       hasEditorPosition: 1
     - id: chapter01.node.01_lada
       speakerId: lada
@@ -386,7 +386,7 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 1070.7528, y: 326.59497}
+      editorPosition: {x: 1722.1414, y: 630.239}
       hasEditorPosition: 1
     - id: chapter01.node.01_mill
       speakerId: narrator
@@ -465,7 +465,7 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 1748.3057, y: 339.28998}
+      editorPosition: {x: 2431.0015, y: 431.3746}
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_02_people_of_the_house

@@ -2,6 +2,7 @@ using KingdomSurvival.DialogueDatabase;
 using KingdomSurvival.UILayout;
 using NUnit.Framework;
 using UnityEngine;
+using static KingdomSurvival.DialogueDatabase.Editor.DialogueDatabaseWindow;
 
 public sealed class PortraitFramingTests
 {
@@ -256,6 +257,95 @@ public sealed class PortraitFramingTests
         // ни один из его углов больше не пересекает рамку.
         Assert.Greater(rect.x, frame.x);
         Assert.Greater(rect.y, frame.y);
+    }
+
+    // ---- "Редактор и runtime совпадают пиксель-в-пиксель" --------------
+    //
+    // Раньше preview Базы диалогов сам придумывал "actual" из отношения
+    // ТОЛЬКО ширины preview-панели к ширине layout-рамки, а высоту
+    // дополнительно клэмпил в [180, 430] — из-за этого соотношение сторон
+    // preview-рамки могло отличаться от настоящей рамки в игре, и
+    // Cover/Contain визуально кадрировали иначе, хотя ResolveImageRect сам
+    // по себе был верным. Тесты ниже проверяют ИМЕННО эту причину: что
+    // рамка, которую готовит редактор (через ResolvePreviewDisplaySize),
+    // всегда сохраняет соотношение сторон настоящей (true) рамки — старый
+    // клэмп по высоте этого не гарантировал.
+
+    [Test]
+    public void ResolvePreviewDisplaySize_PreservesAspectRatio_EvenForExtremelyTallFrame()
+    {
+        // При старой формуле (previewWidth=300, previewHeight =
+        // Clamp(300/aspect, 180, 430)) именно такая узкая и высокая рамка
+        // (aspect = 200/1000 = 0.2) требовала бы высоты 1500 — что клэмп
+        // обрезал бы до 430, исказив пропорции почти в 3.5 раза.
+        Vector2 trueFrameSize = new Vector2(200f, 1000f);
+
+        Vector2 previewSize = ResolvePreviewDisplaySize(trueFrameSize, 340f, 460f);
+
+        float expectedAspect = trueFrameSize.x / trueFrameSize.y;
+        float actualAspect = previewSize.x / previewSize.y;
+        Assert.That(actualAspect, Is.EqualTo(expectedAspect).Within(0.0001f));
+    }
+
+    [Test]
+    public void ResolvePreviewDisplaySize_PreservesAspectRatio_ForExtremelyWideFrame()
+    {
+        Vector2 trueFrameSize = new Vector2(1200f, 150f);
+
+        Vector2 previewSize = ResolvePreviewDisplaySize(trueFrameSize, 340f, 460f);
+
+        float expectedAspect = trueFrameSize.x / trueFrameSize.y;
+        float actualAspect = previewSize.x / previewSize.y;
+        Assert.That(actualAspect, Is.EqualTo(expectedAspect).Within(0.0001f));
+    }
+
+    [TestCase(400f, 600f)]
+    [TestCase(500f, 320f)]
+    [TestCase(340f, 460f)]
+    public void ResolvePreviewDisplaySize_FitsWithinMaxBounds(float frameWidth, float frameHeight)
+    {
+        Vector2 previewSize = ResolvePreviewDisplaySize(new Vector2(frameWidth, frameHeight), 340f, 460f);
+
+        Assert.LessOrEqual(previewSize.x, 340f + 0.01f);
+        Assert.LessOrEqual(previewSize.y, 460f + 0.01f);
+    }
+
+    [Test]
+    public void ResolvePreviewDisplaySize_DegenerateFrame_FallsBackToMaxBoundsWithoutDivideByZero()
+    {
+        Vector2 previewSize = ResolvePreviewDisplaySize(Vector2.zero, 340f, 460f);
+
+        Assert.That(previewSize.x, Is.EqualTo(340f));
+        Assert.That(previewSize.y, Is.EqualTo(460f));
+    }
+
+    [TestCase(1920f, 1080f)]
+    [TestCase(1280f, 720f)]
+    [TestCase(2560f, 1080f)]
+    public void ResolveImageFrameSize_PreservesFrameAspectRatio_AcrossGameViewResolutions(
+        float actualWidth, float actualHeight)
+    {
+        // Editor preview и runtime теперь ОБА вызывают этот метод напрямую
+        // (никакой отдельной "реконструированной" математики в preview
+        // больше нет) — поэтому единственное, что нужно доказать отдельно:
+        // сам ResolveImageFrameSize не искажает соотношение сторон layout
+        // Rect, когда экран имеет те же пропорции, что и referenceResolution
+        // (типичный случай: игра запущена в 1920×1080, что обычно и есть
+        // референсное разрешение). Разные пропорции экрана — отдельный,
+        // ожидаемый эффект "тянущегося" UI, общий для всех элементов, а не
+        // баг конкретно портретов.
+        UILayoutElementDefinition definition = new UILayoutElementDefinition();
+        definition.SetRect(new Rect(0f, 0f, 400f, 600f));
+
+        Vector2 reference = new Vector2(1920f, 1080f);
+        float uniformScale = actualWidth / reference.x;
+        Vector2 actual = reference * uniformScale;
+
+        Vector2 frameSize = UILayoutRuntimeApplier.ResolveImageFrameSize(definition, reference, actual);
+
+        float expectedAspect = definition.Rect.width / definition.Rect.height;
+        float actualAspect = frameSize.x / frameSize.y;
+        Assert.That(actualAspect, Is.EqualTo(expectedAspect).Within(0.0001f));
     }
 
     [Test]

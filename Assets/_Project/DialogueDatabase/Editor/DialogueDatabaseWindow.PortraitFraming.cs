@@ -10,6 +10,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private Vector2 speakerPortraitDragStartMouse;
         private Vector2 speakerPortraitDragStartOffset;
 
+        // Верхняя граница чисто визуального размера preview-панели — не
+        // участвует в расчёте кадрирования (см. ResolvePreviewDisplaySize).
+        private const float PreviewMaxWidth = 340f;
+        private const float PreviewMaxHeight = 460f;
+
         /// <summary>
         /// Редактор индивидуальной кадрировки говорящего. Общая рамка, режим
         /// Cover/Contain/Stretch, общий scale/offset, tint и opacity всегда
@@ -79,16 +84,29 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 return;
             }
 
-            float aspect = portraitDefinition.Rect.height > 0f
-                ? portraitDefinition.Rect.width / portraitDefinition.Rect.height
-                : 0.7f;
-            float previewWidth = 300f;
-            float previewHeight = Mathf.Clamp(previewWidth / Mathf.Max(0.1f, aspect), 180f, 430f);
+            // Инструкция "редактор и runtime должны совпадать пиксель-в-
+            // пиксель": раньше preview придумывал "actual" из отношения
+            // ТОЛЬКО ширины preview-панели к ширине layout-рамки, а высоту
+            // preview дополнительно клэмпил в диапазон [180, 430] — из-за
+            // этого рамка preview могла иметь ДРУГОЕ соотношение сторон,
+            // чем настоящая рамка в игре, и Cover/Contain кадрировали
+            // иначе. Теперь реальная (true) рамка считается ТЕМ ЖЕ
+            // UILayoutRuntimeApplier.ResolveImageFrameSize, что и runtime
+            // (§1-2), а под preview-панель она лишь равномерно уменьшается
+            // БЕЗ искажения пропорций (§3) — это чисто визуальный zoom,
+            // не участвующий в математике кадрирования.
+            Vector2 reference = layoutDatabase.ReferenceResolution;
+            Vector2 actual = ResolveEditorPreviewActualResolution(reference);
+            Vector2 trueFrameSize = UILayoutRuntimeApplier.ResolveImageFrameSize(portraitDefinition, reference, actual);
+            if (trueFrameSize.x <= 0f || trueFrameSize.y <= 0f)
+                trueFrameSize = portraitDefinition.Rect.size;
+
+            Vector2 previewSize = ResolvePreviewDisplaySize(trueFrameSize, PreviewMaxWidth, PreviewMaxHeight);
             Rect previewRect = GUILayoutUtility.GetRect(
-                previewWidth,
-                previewHeight,
-                GUILayout.Width(previewWidth),
-                GUILayout.Height(previewHeight));
+                previewSize.x,
+                previewSize.y,
+                GUILayout.Width(previewSize.x),
+                GUILayout.Height(previewSize.y));
 
             EditorGUI.DrawRect(previewRect, new Color(0.07f, 0.08f, 0.09f, 1f));
 
@@ -100,11 +118,6 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             if (texture != null)
             {
-                float previewScreenScale = portraitDefinition.Rect.width > 0f
-                    ? previewRect.width / portraitDefinition.Rect.width
-                    : 1f;
-                Vector2 reference = layoutDatabase.ReferenceResolution;
-                Vector2 actual = reference * previewScreenScale;
                 float individualScale = overrideFraming.boolValue
                     ? Mathf.Max(0.05f, scale.floatValue)
                     : 1f;
@@ -115,6 +128,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
                 DrawPortraitTexture(
                     previewRect,
+                    trueFrameSize,
                     hasSpeakerPortrait ? sprite : null,
                     fallbackTexture,
                     portraitDefinition,
@@ -191,16 +205,70 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
         }
 
-        // Инструкция "свободное кадрирование полного портрета": preview
-        // больше не обрезает Sprite заранее через ScaleAndCrop. Вместо
-        // этого считается прямоугольник ПОЛНОГО изображения (тем же
-        // UILayoutRuntimeApplier.ResolveImageRect, что и runtime/UI
-        // Конструктор), а рамка лишь визуально отсекает то, что оказалось
-        // за её пределами (GUI.BeginGroup + clip самой группой) — то, что
-        // раньше вырезал ScaleAndCrop, теперь просто не видно за краем
-        // frame, но физически остаётся в imageRect и доступно перетаскиванию.
+        // Реальное разрешение текущего Game View — то же самое разрешение,
+        // которое видит игрок, и по которому runtime считает актуальную
+        // рамку портрета (UILayoutRuntimeApplier.ResolveImageFrameSize).
+        // GetMainGameViewSize — стандартный (хоть и приватный) приём Unity
+        // Editor для этой задачи. Если отражение недоступно (другая версия
+        // редактора, batch mode), используем referenceResolution — тогда
+        // preview просто совпадает со случаем "игра запущена ровно в
+        // референсном разрешении", что почти всегда и есть основной
+        // проверяемый случай.
+        private static Vector2 ResolveEditorPreviewActualResolution(Vector2 referenceResolution)
+        {
+            try
+            {
+                System.Type gameViewType = System.Type.GetType("UnityEditor.GameView,UnityEditor");
+                if (gameViewType != null)
+                {
+                    System.Reflection.MethodInfo method = gameViewType.GetMethod(
+                        "GetSizeOfMainGameView",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                    if (method != null)
+                    {
+                        Vector2 size = (Vector2)method.Invoke(null, null);
+                        if (size.x > 0f && size.y > 0f)
+                            return size;
+                    }
+                }
+            }
+            catch
+            {
+                // Отражение во внутренний API Unity намеренно не должно
+                // ронять окно — просто используем запасное разрешение ниже.
+            }
+
+            return referenceResolution;
+        }
+
+        // Чисто визуальное вписывание реальной (true) рамки в разумный
+        // размер preview-панели редактора — БЕЗ искажения соотношения
+        // сторон (в отличие от старого Mathf.Clamp(180, 430) по высоте,
+        // который и приводил к расхождению с runtime). Величина здесь
+        // никогда не участвует в математике кадрирования — только в том,
+        // во сколько раз итоговый imageRect домножается перед отрисовкой.
+        public static Vector2 ResolvePreviewDisplaySize(Vector2 trueFrameSize, float maxWidth, float maxHeight)
+        {
+            if (trueFrameSize.x <= 0f || trueFrameSize.y <= 0f)
+                return new Vector2(maxWidth, maxHeight);
+
+            float scale = Mathf.Min(maxWidth / trueFrameSize.x, maxHeight / trueFrameSize.y);
+            return trueFrameSize * scale;
+        }
+
+        // Инструкция "свободное кадрирование полного портрета" +
+        // "редактор и runtime совпадают пиксель-в-пиксель": вся математика
+        // кадрирования (offset/scale/imageRect) считается в РЕАЛЬНОМ
+        // масштабе рамки (trueFrameSize, тот же, что использует runtime) —
+        // как и раньше, без ScaleAndCrop. Единственное, что здесь чисто
+        // визуальное, — displayScale, которым результат домножается перед
+        // отрисовкой, чтобы уместиться в preview-панель (previewRect); он
+        // выводится из уже готового previewRect.width/trueFrameSize.x, а не
+        // передаётся отдельным параметром, поэтому не может разойтись с
+        // ResolvePreviewDisplaySize, которым построен сам previewRect.
         private static void DrawPortraitTexture(
-            Rect frame,
+            Rect previewRect,
+            Vector2 trueFrameSize,
             Sprite sprite,
             Texture fallbackTexture,
             UILayoutElementDefinition definition,
@@ -236,14 +304,21 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             float magnitude = Mathf.Abs(resolvedScale.y);
             bool flip = resolvedScale.x < 0f;
 
-            Rect imageRect = UILayoutRuntimeApplier.ResolveImageRect(
+            Rect trueImageRect = UILayoutRuntimeApplier.ResolveImageRect(
                 sourceSize,
-                frame.size,
+                trueFrameSize,
                 definition.ImageMode,
                 magnitude,
                 offset);
 
-            GUI.BeginGroup(frame);
+            float displayScale = trueFrameSize.x > 0f ? previewRect.width / trueFrameSize.x : 1f;
+            Rect imageRect = new Rect(
+                trueImageRect.x * displayScale,
+                trueImageRect.y * displayScale,
+                trueImageRect.width * displayScale,
+                trueImageRect.height * displayScale);
+
+            GUI.BeginGroup(previewRect);
 
             Matrix4x4 previousMatrix = GUI.matrix;
             Color previousColor = GUI.color;

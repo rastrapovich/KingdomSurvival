@@ -190,21 +190,31 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             GUILayout.Space(4f);
 
-            for (int i = 0; i < previewView.AvailableChoices.Count; i++)
+            // ApplyPreviewSelection может внутри клика обнулить previewView
+            // (диалог завершился) или заменить его на представление другого
+            // узла — цикл ниже работает со снимком коллекции, взятым один
+            // раз до клика, и сразу прерывается после выбора, чтобы не
+            // обращаться к previewView повторно в этом же кадре (иначе на
+            // следующей итерации NullReferenceException на previewView == null).
+            IReadOnlyList<NarrativeDialogueChoiceView> availableChoices = previewView.AvailableChoices;
+            for (int i = 0; i < availableChoices.Count; i++)
             {
-                NarrativeDialogueChoiceView choiceView = previewView.AvailableChoices[i];
+                NarrativeDialogueChoiceView choiceView = availableChoices[i];
                 string label = choiceView.Text;
                 if (choiceView.Kind == DialogueChoiceKind.Exit)
                     label += "  [EXIT]";
 
                 if (GUILayout.Button(label, GUILayout.MinHeight(30f)))
+                {
                     ApplyPreviewSelection(choiceView.ChoiceId);
+                    break;
+                }
 
                 if (!string.IsNullOrWhiteSpace(choiceView.MechanicalSummary))
                     EditorGUILayout.LabelField(choiceView.MechanicalSummary, EditorStyles.miniLabel);
             }
 
-            if (previewView.DisabledChoices.Count > 0)
+            if (previewView != null && previewView.DisabledChoices.Count > 0)
             {
                 GUILayout.Space(4f);
                 for (int i = 0; i < previewView.DisabledChoices.Count; i++)

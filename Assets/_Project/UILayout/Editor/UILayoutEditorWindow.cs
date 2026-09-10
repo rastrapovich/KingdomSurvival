@@ -191,12 +191,20 @@ namespace KingdomSurvival.UILayout.Editor
                 bool narrativePreview = showPreviewContent &&
                                         IsNarrativeDialogue(screen) &&
                                         CurrentPreviewDialogue != null;
+                DialogueSpeakerData narrativePreviewSpeaker = narrativePreview
+                    ? FindPreviewSpeaker(CurrentPreviewDialogue)
+                    : null;
 
                 for (int i = 0; i < screen.Elements.Count; i++)
                 {
                     UILayoutElementDefinition element = screen.Elements[i];
                     Rect draw = ToCanvasRect(canvas, element.Rect, sx, sy);
-                    DrawElementImage(draw, element, sx, sy);
+                    bool dynamicPortraitWillRender = narrativePreview &&
+                                                     element.Id == "portrait" &&
+                                                     narrativePreviewSpeaker != null &&
+                                                     narrativePreviewSpeaker.Portrait != null;
+                    if (!dynamicPortraitWillRender)
+                        DrawElementImage(draw, element, sx, sy);
                     EditorGUI.DrawRect(
                         draw,
                         i == elementIndex
@@ -285,15 +293,18 @@ namespace KingdomSurvival.UILayout.Editor
             if (dialogue == null || node == null)
                 return;
 
-            DialogueSpeakerData speaker = dialogueDatabase != null
-                ? dialogueDatabase.FindSpeaker(node.SpeakerId)
-                : null;
+            DialogueSpeakerData speaker = FindPreviewSpeaker(dialogue);
 
             UILayoutElementDefinition portrait = screen.FindElement("portrait");
             if (portrait != null && speaker != null && speaker.Portrait != null)
             {
                 Rect portraitRect = ToCanvasRect(canvas, portrait.Rect, sx, sy);
-                GUI.DrawTexture(portraitRect, speaker.Portrait.texture, ScaleMode.ScaleAndCrop, true);
+                DrawNarrativePortraitImage(
+                    portraitRect,
+                    portrait,
+                    speaker,
+                    database != null ? (Vector2)database.ReferenceResolution : new Vector2(1920f, 1080f),
+                    new Vector2(canvas.width, canvas.height));
             }
 
             if (speaker != null)
@@ -313,6 +324,73 @@ namespace KingdomSurvival.UILayout.Editor
             }
 
             DrawPreviewText(canvas, screen.FindElement("choices"), choices, sx, sy);
+        }
+
+        private DialogueSpeakerData FindPreviewSpeaker(DialogueDefinitionData dialogue)
+        {
+            DialogueNodeData node = FindPreviewNode(dialogue);
+            if (node == null || dialogueDatabase == null)
+                return null;
+            return dialogueDatabase.FindSpeaker(node.SpeakerId);
+        }
+
+        /// <summary>
+        /// Narrative preview использует ту же математику, что runtime:
+        /// UILayout задаёт общий mode/scale/offset/tint/opacity, а Speaker
+        /// при включённой индивидуальной кадрировке добавляет zoom/pan/flip.
+        /// </summary>
+        private static void DrawNarrativePortraitImage(
+            Rect frame,
+            UILayoutElementDefinition definition,
+            DialogueSpeakerData speaker,
+            Vector2 reference,
+            Vector2 actual)
+        {
+            if (definition == null || speaker == null || speaker.Portrait == null)
+                return;
+
+            bool individual = speaker.OverridePortraitFraming;
+            float additionalScale = individual ? speaker.PortraitScale : 1f;
+            Vector2 normalizedOffset = individual ? speaker.PortraitOffsetNormalized : Vector2.zero;
+            bool flipX = individual && speaker.PortraitFlipX;
+
+            Vector2 offset = UILayoutRuntimeApplier.ResolveImageOffset(
+                definition,
+                reference,
+                actual,
+                normalizedOffset);
+            Vector3 resolvedScale = UILayoutRuntimeApplier.ResolveImageScale(
+                definition,
+                additionalScale,
+                flipX);
+
+            GUI.BeginGroup(frame);
+            Rect local = new Rect(0f, 0f, frame.width, frame.height);
+            float absoluteScale = Mathf.Abs(resolvedScale.y);
+            Vector2 size = local.size * absoluteScale;
+            Rect imageRect = new Rect(
+                local.center.x - size.x * 0.5f + offset.x,
+                local.center.y - size.y * 0.5f + offset.y,
+                size.x,
+                size.y);
+
+            Matrix4x4 previousMatrix = GUI.matrix;
+            Color previousColor = GUI.color;
+            Color tint = definition.Tint;
+            tint.a *= definition.Opacity;
+            GUI.color = tint;
+            if (flipX)
+                GUIUtility.ScaleAroundPivot(new Vector2(-1f, 1f), imageRect.center);
+
+            GUI.DrawTexture(
+                imageRect,
+                speaker.Portrait.texture,
+                UILayoutRuntimeApplier.ResolveImageScaleMode(definition.ImageMode),
+                true);
+
+            GUI.matrix = previousMatrix;
+            GUI.color = previousColor;
+            GUI.EndGroup();
         }
 
         private static void DrawPreviewText(
@@ -391,11 +469,7 @@ namespace KingdomSurvival.UILayout.Editor
                 center.y - size.y * 0.5f + offset.y,
                 size.x,
                 size.y);
-            ScaleMode scaleMode = element.ImageMode == UILayoutImageMode.Stretch
-                ? ScaleMode.StretchToFill
-                : element.ImageMode == UILayoutImageMode.Contain
-                    ? ScaleMode.ScaleToFit
-                    : ScaleMode.ScaleAndCrop;
+            ScaleMode scaleMode = UILayoutRuntimeApplier.ResolveImageScaleMode(element.ImageMode);
             Color previous = GUI.color;
             Color tint = element.Tint;
             tint.a *= element.Opacity;
@@ -609,6 +683,12 @@ namespace KingdomSurvival.UILayout.Editor
 
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("ИЗОБРАЖЕНИЕ", EditorStyles.boldLabel);
+            if (IsNarrativeDialogue(currentScreen) && element.Id == "portrait")
+            {
+                EditorGUILayout.HelpBox(
+                    "Для реального диалога Sprite берётся из Базы диалогов. Здесь задаются рамка, режим, общий масштаб/смещение, оттенок и fallback изображения.",
+                    MessageType.None);
+            }
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("sprite"), new GUIContent("Спрайт"));
             EditorGUILayout.PropertyField(selected.FindPropertyRelative("texture"), new GUIContent("Текстура"));
             DrawImageModePopup(selected.FindPropertyRelative("imageMode"));

@@ -394,7 +394,7 @@ public partial class PrototypeUIController
         if (target == null || definition == null)
             return;
         UILayoutRuntimeApplier.ApplyRect(target, definition, screen, reference, actual);
-        UILayoutRuntimeApplier.ApplyBackground(target, definition);
+        UILayoutRuntimeApplier.ApplyBackground(target, definition, reference, actual);
     }
 
     // Единая точка показа нового представления узла. Одно раскрытие view
@@ -566,19 +566,49 @@ public partial class PrototypeUIController
             ? narrativeDialogueDatabase.FindSpeaker(speakerId)
             : null;
         Sprite portrait = speaker != null ? speaker.Portrait : null;
-        if (portrait != null)
+        if (portrait == null)
         {
-            narrativePortrait.style.backgroundImage = new StyleBackground(portrait);
-            narrativePortrait.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop;
-            if (narrativePortraitPlaceholder != null)
-                narrativePortraitPlaceholder.style.display = DisplayStyle.None;
-        }
-        else
-        {
-            narrativePortrait.style.backgroundImage = default(StyleBackground);
+            UILayoutRuntimeApplier.ClearDynamicImage(narrativePortrait);
             if (narrativePortraitPlaceholder != null)
                 narrativePortraitPlaceholder.style.display = DisplayStyle.Flex;
+            return;
         }
+
+        UILayoutDatabaseAsset layoutDatabase = UILayoutRuntimeApplier.LoadDefaultDatabase();
+        UILayoutScreenDefinition dialogueLayout = layoutDatabase != null
+            ? layoutDatabase.FindScreen(UILayoutDatabaseAsset.NarrativeDialogueScreenId)
+            : null;
+        UILayoutElementDefinition portraitDefinition = dialogueLayout != null
+            ? dialogueLayout.FindElement("portrait")
+            : null;
+
+        Vector2 reference = layoutDatabase != null
+            ? (Vector2)layoutDatabase.ReferenceResolution
+            : new Vector2(1920f, 1080f);
+        Vector2 actual = reference;
+        VisualElement screen = interfaceRoot != null
+            ? interfaceRoot.Q<VisualElement>("screen")
+            : null;
+        if (screen != null && screen.resolvedStyle.width > 0f && screen.resolvedStyle.height > 0f)
+            actual = new Vector2(screen.resolvedStyle.width, screen.resolvedStyle.height);
+
+        bool useIndividualFraming = speaker != null && speaker.OverridePortraitFraming;
+        float speakerScale = useIndividualFraming ? speaker.PortraitScale : 1f;
+        Vector2 speakerOffset = useIndividualFraming ? speaker.PortraitOffsetNormalized : Vector2.zero;
+        bool flipX = useIndividualFraming && speaker.PortraitFlipX;
+
+        UILayoutRuntimeApplier.ApplyDynamicImage(
+            narrativePortrait,
+            portrait,
+            portraitDefinition,
+            reference,
+            actual,
+            speakerScale,
+            speakerOffset,
+            flipX);
+
+        if (narrativePortraitPlaceholder != null)
+            narrativePortraitPlaceholder.style.display = DisplayStyle.None;
     }
 
     private void OnNarrativeDialogueChoiceSelected(string choiceId, string choiceText)

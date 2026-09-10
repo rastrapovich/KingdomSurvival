@@ -629,29 +629,43 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P06-T01", "N05 «Мокрый чертёж»",
                     "Старое и новое решение показаны через позиции людей и физическую схему; выбор без проверки; ровно один флаг ремонта.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
                     dependencies: new[] { "P00-T01", "P00-T02" },
                     relatedFlagIds: new[] { "chapter01.flag.dam_inspected", "chapter01.flag.repair_old", "chapter01.flag.repair_new" },
+                    relatedDialogueIds: new[] { "chapter01_dialogue_05_wet_plan" },
+                    fileReferences: new[] { "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset" },
+                    manualChecks: new[] { "Открыть N05 в Preview, пройти старую и новую ветку, проверить, что нет проверок и ставится ровно один флаг ремонта" },
                     acceptanceCriteria: new[]
                     {
                         "Ровно один из repair_old/repair_new записывается",
                         "Выбор не сопровождается броском проверки"
-                    }),
+                    },
+                    implementationNote: "N05 переписан с P03-каркаса на production-текст: осмотр после паводка (DamInspected ставится на первом блоке — осмотр уже произошёл сам по себе), условные эхо-блоки P05 (FloodMillDeckDestroyed/FloodLivestockLost/HeroInjuredByFlood), позиции Мирона/Остафия/Лады/Ульяны, два обычных (не Active) выбора. RepairOld/RepairNew ставятся на первом блоке соответствующей итоговой ветки; RepairCompleted в N05 не ставится — это граница с N06."),
 
                 Task("P06-T02", "N06 — матрица первых симптомов",
-                    "Симптомы различаются по ветке ремонта согласно матрице раздела 11.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    "Симптомы различаются по ветке ремонта согласно матрице раздела 6 инструкции P06.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
                     dependencies: new[] { "P06-T01" },
-                    relatedFlagIds: new[] { "chapter01.flag.water_wrong_active" },
+                    relatedFlagIds: new[] { "chapter01.flag.water_wrong_active", "chapter01.flag.repair_completed" },
                     relatedKnowledgeIds: new[] { "chapter01.knowledge.water_flow_is_wrong" },
-                    acceptanceCriteria: new[] { "Обе ветки локально успешны, но дают наблюдаемо разные симптомы", "Обе ветки ведут к расследованию N07" }),
+                    relatedDialogueIds: new[] { "chapter01_dialogue_06_wrong_water" },
+                    fileReferences: new[] { "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset" },
+                    manualChecks: new[] { "В Preview N06 подготовить RepairOld и RepairNew по отдельности, убедиться, что видна только своя ветка симптомов" },
+                    acceptanceCriteria: new[] { "Обе ветки локально успешны, но дают наблюдаемо разные симптомы", "Обе ветки ведут к расследованию N07" },
+                    implementationNote: "Один диалог D06 (не два), одна общая вступительная реплика + два взаимоисключающих набора условных textBlocks (Conditions: RepairOld && !RepairNew / RepairNew && !RepairOld) — старая ветка: ночные толчки мельничного колеса без видимой причины; новая ветка: высохший седьмой рукав, встревоженный скот, рыба в лужах. RepairCompleted ставится на первом блоке выбранной ветки, WaterWrongActive и знание water_flow_is_wrong — на последнем. Знания расследования P07 (mill_moves_at_wrong_time и т.д.) сознательно не выдаются."),
 
                 Task("P06-T03", "Тест взаимоисключения ремонта",
                     "EditMode-тест: repair_old и repair_new не могут быть установлены одновременно.",
-                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
                     dependencies: new[] { "P06-T01" },
-                    fileReferences: new[] { "Assets/_Project/Chapter01/Tests/EditMode/Chapter01StateTests.cs" },
-                    acceptanceCriteria: new[] { "Тест подтверждает взаимоисключение флагов ремонта" })
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Chapter01/Tests/EditMode/Chapter01StateTests.cs",
+                        "Assets/_Project/Chapter01/Tests/EditMode/Chapter01P06Tests.cs"
+                    },
+                    manualChecks: new[] { "Запустить Test Runner → EditMode → Run All" },
+                    acceptanceCriteria: new[] { "Тест подтверждает взаимоисключение флагов ремонта" },
+                    implementationNote: "Chapter01P06Tests.cs добавлен: структура и валидация D05/D06, отсутствие активных проверок в D05, ровно один флаг ремонта на реальном пути через обе ветки D05, видимость только своей ветки симптомов в D06 (по BlockId), progression D05→D06→D07A через Chapter01StoryDirector, и GetRepairChoice на всех четырёх состояниях (Old/New/None/оба флага → InvalidOperationException). Не запускались настоящим Unity Test Runner в этой среде.")
             );
         }
 

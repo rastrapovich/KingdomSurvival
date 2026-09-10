@@ -102,7 +102,7 @@ MonoBehaviour:
       displayName: "\u041F\u043E\u0440\u0442\u0440\u0435\u0442"
       parentId: overlay
       kind: 5
-      portraitSize: 2
+      portraitSize: 3
       targetName: narrative-dialogue-portrait
       overrideRect: 0
       overrideBackground: 0
@@ -110,10 +110,10 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 460.97565
-        y: 154.44232
-        width: 200
-        height: 280
+        x: 396.52686
+        y: 72.40167
+        width: 300
+        height: 420
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -139,8 +139,8 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 277.4782
-        y: 77.888794
+        x: 287.11072
+        y: 482.45422
         width: 372.25385
         height: 55.579067
       sprite: {fileID: 0}
@@ -168,8 +168,8 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 188.33752
-        y: 113.243805
+        x: 197.97003
+        y: 515.4011
         width: 459.84024
         height: 57.28574
       sprite: {fileID: 0}

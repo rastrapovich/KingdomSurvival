@@ -1956,7 +1956,7 @@ MonoBehaviour:
         N16 \u043C\u043E\u0433\u043B\u043E \u043F\u043E\u043A\u0430\u0437\u0430\u0442\u044C
         \u043C\u0438\u043D\u0438\u043C\u0443\u043C \u0442\u0440\u0438 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F."
       category: 3
-      status: 1
+      status: 3
       required: 1
       order: 4
       priority: 1
@@ -1980,7 +1980,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
     - id: P04-T05
@@ -2050,7 +2050,7 @@ MonoBehaviour:
         13; \u0432\u0441\u0435 \u0438\u0441\u0445\u043E\u0434\u044B \u0432\u0435\u0434\u0443\u0442
         \u043A N05."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 1
       priority: 1
@@ -2061,10 +2061,10 @@ MonoBehaviour:
       - text: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0441\u043B\u043E\u0436\u043D\u043E\u0441\u0442\u0438
           13 \u043D\u0430 \u0421\u0438\u043B\u0443/\u041B\u043E\u0432\u043A\u043E\u0441\u0442\u044C/\u0421\u0442\u043E\u0439\u043A\u043E\u0441\u0442\u044C
           \u0440\u0435\u0430\u043B\u0438\u0437\u043E\u0432\u0430\u043D\u0430"
-        done: 0
+        done: 1
       - text: "\u041B\u044E\u0431\u043E\u0439 \u0438\u0441\u0445\u043E\u0434 \u0432\u0435\u0434\u0451\u0442
           \u043A N05"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -2073,7 +2073,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
     - id: P05-T02
@@ -2087,7 +2087,7 @@ MonoBehaviour:
         \u0432\u044B\u0431\u043E\u0440 \u043F\u0440\u0438\u043E\u0440\u0438\u0442\u0435\u0442\u0430
         (\u043A\u043E\u0433\u043E/\u0447\u0442\u043E \u0441\u043F\u0430\u0441\u0430\u0442\u044C)."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 2
       priority: 1
@@ -2101,7 +2101,7 @@ MonoBehaviour:
           \u043A\u0430\u0442\u0430\u0441\u0442\u0440\u043E\u0444\u044B: \u0435\u0441\u0442\u044C
           \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u044B\u0439 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u044B\u0439
           \u0432\u044B\u0431\u043E\u0440"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -2109,7 +2109,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
     - id: P05-T03
@@ -2121,7 +2121,7 @@ MonoBehaviour:
         \u0442\u0440\u0430\u0432\u043C\u044B \u043F\u043E \u0438\u0442\u043E\u0433\u0430\u043C
         \u0432\u044B\u0431\u043E\u0440\u0430."
       category: 3
-      status: 0
+      status: 3
       required: 1
       order: 3
       priority: 1
@@ -2135,7 +2135,7 @@ MonoBehaviour:
           \u0440\u0430\u0437\u043B\u0438\u0447\u0438\u043C\u044B\u0445 \u0438\u0441\u0445\u043E\u0434\u0430
           \u0432\u0438\u0434\u0438\u043C\u043E \u043C\u0435\u043D\u044F\u044E\u0442
           \u0431\u043B\u0438\u0436\u0430\u0439\u0448\u0438\u0435 \u0441\u0446\u0435\u043D\u044B"
-        done: 0
+        done: 1
       manualChecks:
       - "\u041F\u0440\u043E\u0439\u0442\u0438 \u0432\u0441\u0435 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u044B
         \u0438\u0441\u0445\u043E\u0434\u0430 \u0432\u0440\u0443\u0447\u043D\u0443\u044E
@@ -2154,7 +2154,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
     - id: P05-T04
@@ -2165,7 +2165,7 @@ MonoBehaviour:
         \u0441\u044E\u0436\u0435\u0442 \u0441 \u0446\u0435\u043D\u043E\u0439, \u0430
         \u043D\u0435 \u0431\u043B\u043E\u043A\u0438\u0440\u0443\u0435\u0442 \u0435\u0433\u043E."
       category: 8
-      status: 0
+      status: 3
       required: 1
       order: 4
       priority: 1
@@ -2177,7 +2177,7 @@ MonoBehaviour:
       - text: "\u041A\u0430\u0436\u0434\u044B\u0439 \u0432\u0430\u0440\u0438\u0430\u043D\u0442
           \u043F\u0440\u043E\u0432\u0430\u043B\u0430 N04 \u0432\u0441\u0451 \u0440\u0430\u0432\u043D\u043E
           \u043F\u0440\u0438\u0432\u043E\u0434\u0438\u0442 \u043A N05"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -2185,7 +2185,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
   - id: P06_REPAIR_CHOICE
@@ -2221,7 +2221,7 @@ MonoBehaviour:
         \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438; \u0440\u043E\u0432\u043D\u043E
         \u043E\u0434\u0438\u043D \u0444\u043B\u0430\u0433 \u0440\u0435\u043C\u043E\u043D\u0442\u0430."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 1
       priority: 1
@@ -2233,10 +2233,10 @@ MonoBehaviour:
       acceptanceCriteria:
       - text: "\u0420\u043E\u0432\u043D\u043E \u043E\u0434\u0438\u043D \u0438\u0437
           repair_old/repair_new \u0437\u0430\u043F\u0438\u0441\u044B\u0432\u0430\u0435\u0442\u0441\u044F"
-        done: 0
+        done: 1
       - text: "\u0412\u044B\u0431\u043E\u0440 \u043D\u0435 \u0441\u043E\u043F\u0440\u043E\u0432\u043E\u0436\u0434\u0430\u0435\u0442\u0441\u044F
           \u0431\u0440\u043E\u0441\u043A\u043E\u043C \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -2247,7 +2247,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
     - id: P06-T02
@@ -2258,7 +2258,7 @@ MonoBehaviour:
         \u0441\u043E\u0433\u043B\u0430\u0441\u043D\u043E \u043C\u0430\u0442\u0440\u0438\u0446\u0435
         \u0440\u0430\u0437\u0434\u0435\u043B\u0430 11."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 2
       priority: 1
@@ -2271,11 +2271,11 @@ MonoBehaviour:
           \u0443\u0441\u043F\u0435\u0448\u043D\u044B, \u043D\u043E \u0434\u0430\u044E\u0442
           \u043D\u0430\u0431\u043B\u044E\u0434\u0430\u0435\u043C\u043E \u0440\u0430\u0437\u043D\u044B\u0435
           \u0441\u0438\u043C\u043F\u0442\u043E\u043C\u044B"
-        done: 0
+        done: 1
       - text: "\u041E\u0431\u0435 \u0432\u0435\u0442\u043A\u0438 \u0432\u0435\u0434\u0443\u0442
           \u043A \u0440\u0430\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u044E
           N07"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -2285,7 +2285,7 @@ MonoBehaviour:
       - chapter01.knowledge.water_flow_is_wrong
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
     - id: P06-T03
@@ -2295,7 +2295,7 @@ MonoBehaviour:
         \u043C\u043E\u0433\u0443\u0442 \u0431\u044B\u0442\u044C \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u044B
         \u043E\u0434\u043D\u043E\u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E."
       category: 8
-      status: 0
+      status: 3
       required: 1
       order: 3
       priority: 1
@@ -2307,7 +2307,7 @@ MonoBehaviour:
       - text: "\u0422\u0435\u0441\u0442 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0430\u0435\u0442
           \u0432\u0437\u0430\u0438\u043C\u043E\u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435
           \u0444\u043B\u0430\u0433\u043E\u0432 \u0440\u0435\u043C\u043E\u043D\u0442\u0430"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences:
       - Assets/_Project/Chapter01/Tests/EditMode/Chapter01StateTests.cs
@@ -2316,7 +2316,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
   - id: P07_INVESTIGATION
@@ -2353,7 +2353,7 @@ MonoBehaviour:
         \u043F\u0440\u0438 \u043F\u0440\u043E\u0432\u0430\u043B\u0435 \u2014 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A
         \u0447\u0435\u0440\u0435\u0437 \u0443\u0447\u0435\u043D\u0438\u043A\u0430."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 1
       priority: 1
@@ -2366,7 +2366,7 @@ MonoBehaviour:
           \u043F\u0443\u0442\u044F\u043C\u0438 (\u043F\u0440\u043E\u0432\u0430\u043B
           \u043D\u0435 \u0437\u0430\u043A\u0440\u044B\u0432\u0430\u0435\u0442 \u0437\u043D\u0430\u043D\u0438\u0435
           \u043D\u0430\u0432\u0441\u0435\u0433\u0434\u0430)"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -2377,7 +2377,7 @@ MonoBehaviour:
       - chapter01.knowledge.old_seventh_channel
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
     - id: P07-T02
@@ -2388,7 +2388,7 @@ MonoBehaviour:
         \u0440\u0443\u0441\u043B\u0430; Naturalist/Fieldcraft \u0438\u043B\u0438
         \u043F\u043E\u043C\u043E\u0449\u044C NPC."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 2
       priority: 1
@@ -2399,7 +2399,7 @@ MonoBehaviour:
       - text: "\u0412\u0435\u0442\u043A\u0430 \u0434\u0430\u0451\u0442 \u0441\u0430\u043C\u043E\u0441\u0442\u043E\u044F\u0442\u0435\u043B\u044C\u043D\u044B\u0439
           \u0432\u044B\u0432\u043E\u0434, \u043D\u0435 \u0434\u0443\u0431\u043B\u0438\u0440\u0443\u0435\u0442
           \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0443"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -2409,7 +2409,7 @@ MonoBehaviour:
       - chapter01.knowledge.cattle_avoid_old_branch
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
     - id: P07-T03
@@ -2421,7 +2421,7 @@ MonoBehaviour:
         \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u0435
         \u0431\u0435\u0440\u0435\u0433\u0430/\u0440\u044B\u0431\u044B/\u043C\u0443\u0441\u043E\u0440\u0430."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 3
       priority: 1
@@ -2433,7 +2433,7 @@ MonoBehaviour:
           \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0431\u0435\u0437
           \u043A\u0432\u0435\u0441\u0442\u043E\u0432\u043E\u0439 \u0441\u0442\u0440\u0435\u043B\u043A\u0438
           \u0438\u0437 \u0432\u043E\u0437\u0434\u0443\u0445\u0430"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -2444,7 +2444,7 @@ MonoBehaviour:
       - chapter01.knowledge.old_ford
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
     - id: P07-T04
@@ -2456,7 +2456,7 @@ MonoBehaviour:
         \u043F\u0440\u0435\u0434\u043C\u0435\u0442; \u0421\u0443\u0436\u0434\u0435\u043D\u0438\u0435/\u0421\u043B\u0435\u0434\u043E\u043F\u044B\u0442\u0441\u0442\u0432\u043E/\u0437\u043D\u0430\u043D\u0438\u044F/\xAB\u0420\u0435\u043C\u0435\u0441\u043B\u043E\xBB
         (DEC-08, \u0441\u043C. P03-T07)."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 4
       priority: 1
@@ -2470,11 +2470,11 @@ MonoBehaviour:
           \u043F\u0440\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u0443\u044E
           \u0444\u0443\u043D\u043A\u0446\u0438\u044E \u0438 \u0434\u043E\u043F\u0443\u0441\u043A\u0430\u0435\u0442
           \u043E\u0448\u0438\u0431\u043E\u0447\u043D\u043E\u0435 \u0442\u043E\u043B\u043A\u043E\u0432\u0430\u043D\u0438\u0435"
-        done: 0
+        done: 1
       - text: "\u041F\u043E\u0437\u0434\u043D\u0435\u0435 \u043F\u0435\u0440\u0435\u043E\u0441\u043C\u044B\u0441\u043B\u0435\u043D\u0438\u0435
           \u043D\u0435 \u0441\u0442\u0438\u0440\u0430\u0435\u0442 \u0440\u0430\u043D\u043D\u044E\u044E
           \u0440\u0435\u0430\u043A\u0446\u0438\u044E"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -2485,7 +2485,7 @@ MonoBehaviour:
       - chapter01.knowledge.old_custom
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
     - id: P07-T05
@@ -2499,7 +2499,7 @@ MonoBehaviour:
         \u043F\u043E\u0434\u0441\u0447\u0451\u0442 \u0442\u0440\u0451\u0445 \u043B\u044E\u0431\u044B\u0445
         \u0443\u043B\u0438\u043A."
       category: 3
-      status: 0
+      status: 3
       required: 1
       order: 5
       priority: 1
@@ -2513,11 +2513,11 @@ MonoBehaviour:
       - text: "\u041B\u044E\u0431\u043E\u0439 \u043F\u043E\u0440\u044F\u0434\u043E\u043A
           N07A/B/C \u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0438 \u043D\u0435
           \u0441\u043E\u0437\u0434\u0430\u0451\u0442 \u0442\u0443\u043F\u0438\u043A"
-        done: 0
+        done: 1
       - text: "\u041D\u0435\u0442 \u0432\u0438\u0434\u0438\u043C\u043E\u0433\u043E
           \u0438\u043B\u0438 \u0441\u043A\u0440\u044B\u0442\u043E\u0433\u043E \u0443\u043D\u0438\u0432\u0435\u0440\u0441\u0430\u043B\u044C\u043D\u043E\u0433\u043E
           \u0441\u0447\u0451\u0442\u0447\u0438\u043A\u0430 \u0443\u043B\u0438\u043A"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -2525,7 +2525,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
   - id: P08_DEPARTURE

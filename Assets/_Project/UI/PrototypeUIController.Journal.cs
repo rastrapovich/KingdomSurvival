@@ -83,7 +83,9 @@ public partial class PrototypeUIController
 
         // Раздел 20 инструкции: Journal и Hero Screen не накладываются друг
         // на друга — один fullscreen overlay всегда закрывает другой.
+        // P09-T05 расширяет это правило на Camp — тот же принцип, третий слой.
         CloseHeroScreen();
+        CloseCampScreen();
 
         journalOverlay.style.display = DisplayStyle.Flex;
         journalOverlay.BringToFront();

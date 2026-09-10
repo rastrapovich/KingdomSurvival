@@ -823,3 +823,67 @@ Unity Editor, компилятор, Test Runner и Play Mode недоступн�
 4. пройти P08 N10 → Hero Screen → «ПОДТВЕРДИТЬ СОСТАВ» (герой остаётся у Дома) → клик по «Следу старого русла» на карте (только тут появляются `ActiveExpedition` и `expedition_started`);
 5. изменить маршрут во время движения и убедиться, что новый путь стартует от текущей позиции, а не от Дома или старой цели;
 6. Console без ошибок на всём сценарии.
+
+## 21. Первая дальняя дорога и лагерь (P09) — 10.09.2026
+
+Полная production-реализация первого физического похода после сбора отряда: обязательная встреча N11 «Дорога, которой нет» с пассивной проверкой RoadReading и реальным разветвлением маршрута, гарантированная (технически, не по ощущению) встреча «Трое под телегой» с четырьмя взаимоисключающими исходами, разблокирующая новый постоянный экран — Лагерь (Camp Screen v1), и первая лагерная сцена «После телеги» как отложенное эхо решения у телеги. `P09_ROAD` в `DevelopmentPlanSeedData.cs` переименована в «Первая дальняя дорога и лагерь» и расширена с 5 до 6 задач (P09-T01…T06) — оправданное расширение: Camp Screen стал обязательным, а не факультативным пунктом плана.
+
+### 21.1. Дорожные события триггерятся прогрессом маршрута, не кликом
+
+До этой доработки ни один сюжетный диалог Главы 01 не открывался автоматически в реальной игре — весь позвоночник N01-N17 доступен только через debug-панель (`TryOpenNarrativeDialogueById` вызывается production-кодом только для узкого случая D10→Hero Screen). N11 и D11B — первое намеренное исключение: `Chapter01StoryDirector.GetPendingRoadEventDialogueId(GameState)` — чистый метод, читающий долю пройденных клеток текущего маршрута (`(RouteLengthCells - RemainingRouteCells) / RouteLengthCells`) и возвращающий `D11`, когда `ExpeditionStarted` уже `true`, `LongRoadStarted` ещё нет, а прогресс ≥30%, либо `D11B`, когда `LongRoadStarted` уже есть, `CartResolved` ещё нет, а прогресс ≥60%. Вызывается каждый кадр из `PrototypeUIController.RefreshAutoTimeState()` (та же точка, что уже управляет автопаузой из P08M) — если диалог открылся, метод сразу возвращается, не давая коду ниже пересчитать паузу этим же кадром (иначе только что поставленная `TryOpenNarrativeDialogueById` пауза была бы немедленно снята).
+
+Рабочие пороги 30%/60% — константы места вызова (`RoadEventProgressThreshold`/`CartEventProgressThreshold`), намеренно не канонизированы (раздел "Что требует решения" инструкции).
+
+### 21.2. N11 — RoadReading и реальное разветвление маршрута
+
+Формула проверки (`chapter01.check.road_reading`, узел `chapter01.node.11.03`) — пассивная, `Kind: Passive`, `Quality: Instinct`, `CompetencyId: "fieldcraft"`, `Difficulty: 13`; ровно `6 + Инстинкт + Следопытство`, как требовала инструкция (компетенция `fieldcraft` уже подписана в `NarrativeDisplayLabels.cs` как «Следопытство» и уже используется в детекции Road Predator Encounter — тот же язык, не новая механика). Провал не блокирует путь: показывается отдельный conditioned-блок (`CheckFailed(road_reading)`) с правдоподобной неполной версией вместо «вы ничего не замечаете».
+
+Выбор маршрута — два `Normal`-choice на том же узле:
+
+- «Пойти старым путём» → `FollowedOldRoad` → `Chapter01OutcomeApplier.ApplyLongRoadRouteConsequences` строит РЕАЛЬНЫЙ крюк: вычисляет точку в стороне от прямой на герой→цель (перпендикулярный отступ от середины отрезка, `WorldMapNavigation.ClampMapX/Y`), вызывает `GameState.TryChangeExpeditionRoute` на эту временную точку (`locationId: null`, как обычный клик по произвольной точке карты) и ставит технический флаг `OldRoadDetourInProgress`. `Chapter01StoryDirector.TryContinueOldRoadDetourIfArrived` (тоже вызывается каждый кадр из `RefreshAutoTimeState`) при обнаружении `Phase == AtLocation` с этим флагом перенаправляет экспедицию к настоящей цели тем же публичным API и снимает флаг — никакого отдельного маршрутного движка, два обычных вызова `TryChangeExpeditionRoute` с автоматическим триггером между ними. Прибытие на временную точку не создаёт модального «ОТРЯД ПРИБЫЛ» (это уже существующее поведение `ResolveRouteArrival` для waypoint'ов), поэтому переадресация происходит на первом же кадре без видимой паузы.
+- «Срезать через низину» → `CrossedOldRoadBoundary` → без действия: маршрут и так уже идёт от текущей позиции к цели (тот же вывод, что раздел "Вариант Б" инструкции).
+
+`LongRoadStarted` (техническая метка завершения шага N11 в `Chapter01StoryDirector.Sequence`) ставится на терминальном узле каждой из двух веток, не на входе в сцену — иначе `GetPendingRoadEventDialogueId` мог бы посчитать N11 «пройденным» до того, как игрок реально сделал выбор.
+
+### 21.3. «Трое под телегой» — 4 исхода, PartySizeAtLeast, цена у телеги
+
+Реализована как один диалог (`D11B`) с обычными `Normal`/`Continue`/`Exit`-переходами — не через `ExpeditionDecisionOccurrence` (та система жёстко ограничена ровно двумя вариантами `OptionA`/`OptionB`, а здесь нужно 3-5 в зависимости от состава). Семь сцен-наблюдений (Continue-цепь) → узел решения с пятью потенциальными выборами:
+
+- «Сначала человека» / «Сначала зерно» — всегда доступны, безусловно;
+- «Разделить людей» — ДВА варианта с одинаковым `nextNodeId` (`saved_both`), различаются только условием и ценой в тексте: 1 боец → 3 часа, 2-4 бойца → 2 часа. При 0 бойцах ни одно условие не выполняется — варианта нет вообще (не задизейблен, а физически отсутствует в списке выборов);
+- «Не вмешиваться» — всегда доступен.
+
+Для условия «есть хотя бы N бойцов» добавлен новый **`NarrativeConditionType.PartySizeAtLeast`** (`NarrativeConditions.cs`, значение 12 — добавлено в конец enum, существующие числовые значения по всей базе диалогов не сдвинуты) — читает `context.PresentCompanionIds.Count >= IntParam`; вместе с уже существующим `Negate` этого достаточно и для «меньше N» без отдельного типа `AtMost`. Единственное расширение общей условной системы ради этой сцены — `CompanionPresent` (существующий тип) проверяет ОДНОГО конкретного спутника, для размера отряда не годится.
+
+Каждый из четырёх исходов сам диалог ставит SetFlag-эффектами: ровно один `CartOutcomeSavedBoth`/`SavedMan`/`SavedSeed`/`PassedBy`, плюс `CartResolved` и `CampUnlocked` — независимо от исхода (раздел "Не бесплатно/Разблокировка"). Цена в часах не умеет ставиться диалоговым `NarrativeEffect` (в `NarrativeEffectType` нет "запустить времязатратное действие") — её стартует `Chapter01OutcomeApplier.ApplyCartConsequences`, вызванный `Chapter01StoryDirector.HandleDialogueCompleted(D11B)`, через уже существующий `GameState.TryStartRoadActivity` (тот же примитив, каким Encounter-система уже стартует `RoadStop`-остановки). Никакой немедленной награды (золото/опыт) — состояние мира (флаги исхода) важнее одноразовых очков, как требовал раздел "Не давать немедленную награду".
+
+### 21.4. Camp Screen v1 — не CampManager
+
+`gameState.Narrative.HasFlag(Chapter01Ids.Flags.CampUnlocked)` — обычный `NarrativeStateData`-флаг (не отдельное поле `GameState`, не `chapter01.knowledge.*`): та же архитектура, что весь остальной прогресс Главы 01. `Chapter01CampSceneProvider.GetAvailableScene(GameState)` — read-only статический метод по образцу `Chapter01JournalProvider.Build`, сейчас возвращает ровно одну запись (`D11C` «После телеги»), пока `CartResolved && !CartCampEchoSeen`.
+
+`PrototypeUIController.Camp.cs` (новый файл) — программный fullscreen-слой по образцу `Journal.cs`/`HeroScreen.cs` (те же цвета/хелперы `CreateHeroScreenPanel`/`StyleHeroScreenButton`/`SetHeroScreenBorder`). Взаимоисключается с Journal/Hero Screen тем же способом, каким те уже взаимоисключаются друг с другом. Открытие: закрывает другие два слоя, ставит `isCampScreenOpen=true` + `PauseForBlockingModal()`, показывает отряд (`Hero + ActiveExpedition.FighterIds`, не первые четыре `FighterData`) и, если есть доступная сцена, сразу открывает её через `TryOpenNarrativeDialogueById` — поверх лагерного экрана, не второй рендерер диалогов. Закрытие («ПРОДОЛЖИТЬ ПУТЬ») не трогает `ActiveExpedition.Route`/`Phase` вообще — просто снимает `isCampScreenOpen` и вызывает `ResumeAfterBlockingModalIfReady()`; поскольку маршрут не менялся, движение (если было) продолжается с той же точки само, а если герой стоял — остаётся стоять.
+
+Технически интересный момент: `IsCampScreenOpen` добавлен как источник блокировки в `PrototypeUIController.ModalQueue.HasBlockingModalWork()` (останавливает время, пока лагерь открыт — раздел "Открытие лагеря не тратит время"), но НЕ в новом `HasBlockingModalWorkExceptCamp()`, которым теперь гейтится вход в `TryOpenNarrativeDialogueById` — без этого разделения D11C не смогла бы открыться поверх уже открытого (и потому "блокирующего") экрана лагеря.
+
+Кнопка «Лагерь» (`nav-camp-button`, `Prototype_Main.uxml`) скрыта до `CampUnlocked`, дальше видима всегда и `disabled`, пока `!CanOpenCampScreen()` (нет активной экспедиции) или пока экран уже заблокирован чем-то другим (`HasBlockingModalWorkExceptCamp()`), с поясняющим tooltip — раздел "Кнопка"/"Когда кнопку можно нажать".
+
+Явно НЕ реализовано (раздел "Что не строить сейчас"): сон/готовка/дозор/еда/лечение/костры разной силы/camp inventory/crafting — экран сейчас умеет ровно то, что нужно для v1: остановиться, увидеть отряд, получить доступную авторскую сцену, продолжить путь.
+
+### 21.5. Журнал: :travel → :search_area
+
+`Chapter01StoryDirector.RefreshRoadArrivalState` (часть общего `RefreshRoadState`, вызываемого каждый кадр) ставит `RoadDestinationReached` при физическом прибытии в `chapter01.location.old_water_search` (`Phase == AtLocation`, совпадающий `LocationId`) — не то же самое, что раскрытие точки на карте в P08 (`FarRouteUnlocked`/`ApplyDepartureConsequences`). `Chapter01JournalProvider.BuildOldWaterTrailGoal` получил третье состояние той же цели «Старый след» (`:prepare` → `:travel` → `:search_area`, тот же `Id`, не новая запись). P09 сознательно не ставит `OldFordFound` — брод ещё предстоит найти в P10 (раздел "Достижение OldWaterSearch").
+
+### 21.6. Тесты
+
+`Assets/_Project/Chapter01/Tests/EditMode/Chapter01P09Tests.cs` (новый файл, тот же подход, что `Chapter01P08Tests.cs` — `NarrativeDialogueRuntimeSession` напрямую против реального `KingdomSurvivalDialogues.asset`, без UI/сцены): структурная валидация D11/D11B/D11C; `GetPendingRoadEventDialogueId` на всех пороговых состояниях (нет экспедиции / до 30% / на 30% / после `LongRoadStarted` / на 60% / после `CartResolved`); RoadReading — провал у героя по умолчанию (Инстинкт 5, Следопытство 0 → 11 < 13) и гарантированный успех при усиленных качествах, с проверкой гранта знания; оба выбора маршрута N11 ставят ровно один из двух флагов; `ApplyLongRoadRouteConsequences`/`TryContinueOldRoadDetourIfArrived` — маршрут реально перестраивается и корректно возвращается к цели; доступность «Разделить людей» по составу (0/1/2 бойца — три отдельных теста через реальный `NarrativeDialogueRuntimeSession` с разными `presentCompanionIds`); ровно один `CartOutcome*` на каждый путь + `CampUnlocked` всегда; цена в часах по исходу/составу через `Chapter01OutcomeApplier.ApplyCartConsequences`; `Chapter01CampSceneProvider` на всех трёх состояниях; D11C показывает ровно одну ветку на каждый `CartOutcome*` (параметризованный `[TestCase]`) и не повторяется после `CartCampEchoSeen`; физическое прибытие ставит `RoadDestinationReached` и не ставит `OldFordFound`; `Chapter01JournalProvider` отражает `:search_area`.
+
+`RemainingRouteCells` для контроля конкретного процента маршрута задаётся напрямую полем `ExpeditionData` — тот же приём, что уже использует `ContinuousMovementTimeTests.cs` (P08M), а не реальные тики `Advance()`.
+
+### 21.7. Что не проверено (честно, без Unity)
+
+Unity Editor, C#-компилятор и Test Runner недоступны в этой среде — не запускались, только структурная проверка (Python-скрипты на баланс скобок по всем изменённым `.cs`-файлам и на структуру YAML — уникальность ID диалогов/узлов/`EffectExecutionId` по всей базе, достижимость каждого узла из стартового, отсутствие обрывов переходов). `PrototypeUIController.Camp.cs` — новый MonoBehaviour-код с реальным деревом UI Toolkit (клики, видимость, наложение оверлеев) — этого нельзя честно проверить без живого Play Mode. Waypoint-математика "крюка" в `StartOldRoadDetour` (перпендикулярный отступ + `WorldMapNavigation.FindPath`) теоретически может не найти путь на некоторых картах/сидах, если случайная offset-точка попадёт в непроходимую область — код на этот случай просто не ставит `OldRoadDetourInProgress` (маршрут остаётся как был, без явной ошибки), но визуально это не проверялось ни разу. После Pull обязательно:
+
+1. чистая Unity-компиляция и полный EditMode `Run All` (включая `Chapter01P09Tests`);
+2. ручной прогон сценария из раздела "22-шаговый сценарий" инструкции: Дом → карта → клик по «Следу старого русла» → движение → N11 на ~30% (проверить оба варианта маршрута отдельными прогонами) → движение продолжается → «Трое под телегой» на ~60% → все четыре исхода по отдельности (0/1/2-4 бойца) → появление кнопки «Лагерь» → открытие лагеря во время движения (пауза) и стоя на месте → авто-запуск D11C → «ПРОДОЛЖИТЬ ПУТЬ» → прибытие в область поиска → Журнал `:search_area`;
+3. отдельно проверить крюк «Пойти старым путём» визуально на карте — маршрут должен реально уводить в сторону и возвращаться, а не мгновенно телепортировать;
+4. Console без ошибок на всём сценарии.

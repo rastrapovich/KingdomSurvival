@@ -292,6 +292,137 @@ namespace KingdomSurvival.Chapter01
                 Chapter01OutcomeApplier.ApplySevenTeethInvestigationConsequences(gameState);
             else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D09, StringComparison.Ordinal))
                 Chapter01OutcomeApplier.ApplyDepartureConsequences(gameState);
+            else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D11, StringComparison.Ordinal))
+                Chapter01OutcomeApplier.ApplyLongRoadRouteConsequences(gameState);
+            else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D11B, StringComparison.Ordinal))
+                Chapter01OutcomeApplier.ApplyCartConsequences(gameState);
+        }
+
+        // P09-T02/T03: доля пройденных клеток текущего маршрута, [0..1].
+        // Единственная величина, по которой триггерятся дорожные встречи —
+        // не время суток и не случайный бросок (раздел "Обязательная
+        // дорожная встреча" инструкции: "не случайный RNG, гарантированное
+        // обучение"). RouteLengthCells == 0 (нет активного маршрута или
+        // герой уже стоит) считается 0, а не делением на ноль.
+        private static double GetRouteProgress(ExpeditionData expedition)
+        {
+            if (expedition == null || expedition.RouteLengthCells <= 0)
+                return 0.0;
+
+            int traveled = expedition.RouteLengthCells - expedition.RemainingRouteCells;
+            double progress = traveled / (double)expedition.RouteLengthCells;
+            if (progress < 0.0) return 0.0;
+            if (progress > 1.0) return 1.0;
+            return progress;
+        }
+
+        // Рабочие числа раздела "Что требует решения" производственной
+        // инструкции ("N11 ≈ 30% пути", «Трое под телегой» ≈ 60%) — намеренно
+        // не канонизированы, просто константы места вызова.
+        private const double RoadEventProgressThreshold = 0.30;
+        private const double CartEventProgressThreshold = 0.60;
+
+        // P09-T02/T03: единственное намеренное исключение из общего правила
+        // "сюжетный диалог открывается только по клику игрока/дебагу" —
+        // обязательная и необязательная дорожные встречи первого похода
+        // триггерятся физическим прогрессом ТЕКУЩЕГО маршрута во время
+        // движения, не добавляясь в линейный Sequence (у них нет своего
+        // NodeStep/ReadyGate). Вызывающая сторона (PrototypeUIController.
+        // RefreshAutoTimeState) обязана вызывать это КАЖДЫЙ кадр до расчёта
+        // паузы и, получив непустой ID, открыть диалог через
+        // TryOpenNarrativeDialogueById — тот уже сам ставит
+        // PauseForBlockingModal() и не даст открыть диалог повторно, пока
+        // предыдущий не закрыт (идемпотентно по построению, не по кэшу
+        // здесь). Гейты по LongRoadStarted/CartResolved делают срабатывание
+        // одноразовым без отдельного технического флага "уже показывали".
+        public static string GetPendingRoadEventDialogueId(GameState gameState)
+        {
+            if (gameState == null || !gameState.HasActiveExpedition)
+                return null;
+
+            NarrativeStateData state = gameState.Narrative;
+            if (state == null || !state.HasFlag(Chapter01Ids.Flags.ExpeditionStarted))
+                return null;
+
+            ExpeditionData expedition = gameState.ActiveExpedition;
+            if (expedition.Phase != CommanderState.TravellingToLocation)
+                return null;
+
+            double progress = GetRouteProgress(expedition);
+
+            if (!state.HasFlag(Chapter01Ids.Flags.LongRoadStarted) && progress >= RoadEventProgressThreshold)
+                return Chapter01Ids.Dialogues.D11;
+
+            if (state.HasFlag(Chapter01Ids.Flags.LongRoadStarted) &&
+                !state.HasFlag(Chapter01Ids.Flags.CartResolved) &&
+                progress >= CartEventProgressThreshold)
+            {
+                return Chapter01Ids.Dialogues.D11B;
+            }
+
+            return null;
+        }
+
+        // P09-T01: продолжение маршрута после временной точки крюка
+        // "Пойти старым путём" (раздел "Решение у старой дороги" —
+        // "отряд физически идёт к ней, затем продолжает к прежней цели").
+        // OldRoadDetourInProgress ставит Chapter01OutcomeApplier.
+        // ApplyLongRoadRouteConsequences в момент выбора; здесь только читаем
+        // факт прибытия к этой точке (Phase стал AtLocation) и перенаправляем
+        // экспедицию к настоящей цели тем же публичным API, каким игрок сам
+        // меняет маршрут кликом по карте — это не отдельный маршрутный
+        // движок, а обычный TryChangeExpeditionRoute. Возвращает true, если
+        // действительно перенаправила (вызывающая сторона может просто
+        // продолжить пересчёт паузы тем же кадром — маршрут уже валиден).
+        public static bool TryContinueOldRoadDetourIfArrived(GameState gameState)
+        {
+            if (gameState == null || gameState.Narrative == null || !gameState.HasActiveExpedition)
+                return false;
+
+            if (!gameState.Narrative.HasFlag(Chapter01Ids.Flags.OldRoadDetourInProgress))
+                return false;
+
+            if (gameState.ActiveExpedition.Phase != CommanderState.AtLocation)
+                return false;
+
+            LocationData target = gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch);
+            if (target == null)
+                return false;
+
+            gameState.Narrative.ClearFlag(Chapter01Ids.Flags.OldRoadDetourInProgress);
+            gameState.TryChangeExpeditionRoute(target.MapXPercent, target.MapYPercent, target.Id, out _);
+            return true;
+        }
+
+        // P09: физическое прибытие в область поиска (не открытие точки на
+        // карте в P08 — раскрытие места и приход туда разные события).
+        // Ставит только технический флаг; Журнал сам решает, как показать
+        // переход :travel -> :search_area (Chapter01JournalProvider), P10 —
+        // отдельная задача, OldFordFound здесь не выставляется (раздел
+        // "Достижение OldWaterSearch" инструкции: "брод ещё надо реально
+        // обнаружить").
+        private static void RefreshRoadArrivalState(GameState gameState)
+        {
+            if (gameState?.Narrative == null || !gameState.HasActiveExpedition)
+                return;
+
+            ExpeditionData expedition = gameState.ActiveExpedition;
+            if (expedition.Phase == CommanderState.AtLocation &&
+                string.Equals(expedition.LocationId, Chapter01Ids.Locations.OldWaterSearch, StringComparison.Ordinal) &&
+                !gameState.Narrative.HasFlag(Chapter01Ids.Flags.RoadDestinationReached))
+            {
+                gameState.Narrative.SetFlag(Chapter01Ids.Flags.RoadDestinationReached);
+            }
+        }
+
+        // Единая точка входа для PrototypeUIController.RefreshAutoTimeState:
+        // и продолжение крюка, и фиксацию прибытия нужно проверять каждый
+        // кадр наравне с GetPendingRoadEventDialogueId, чтобы не размазывать
+        // три отдельных вызова по UI-коду.
+        public static void RefreshRoadState(GameState gameState)
+        {
+            TryContinueOldRoadDetourIfArrived(gameState);
+            RefreshRoadArrivalState(gameState);
         }
 
         private static bool IsStepCompleted(NarrativeStateData state, NodeStep step)

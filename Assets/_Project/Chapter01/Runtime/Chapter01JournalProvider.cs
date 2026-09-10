@@ -90,15 +90,37 @@ namespace KingdomSurvival.Chapter01
         {
             bool expeditionStarted = state.HasFlag(Chapter01Ids.Flags.ExpeditionStarted);
 
+            // P09: третий шаг той же цели — физическое прибытие в область
+            // поиска (RoadDestinationReached), не открытие точки на карте в
+            // P08 (та же цель, ExpeditionStarted уже true к этому моменту).
+            // Раздел "Достижение OldWaterSearch": ":travel" -> ":search_area".
+            bool destinationReached = state.HasFlag(Chapter01Ids.Flags.RoadDestinationReached);
+
+            string currentStep;
+            string revisionSuffix;
+            if (destinationReached)
+            {
+                currentStep = "Осмотреть место, где старый путь снова выходит к воде.";
+                revisionSuffix = ":search_area";
+            }
+            else if (expeditionStarted)
+            {
+                currentStep = "Следовать по старому ходу воды за пределы знакомых дорог.";
+                revisionSuffix = ":travel";
+            }
+            else
+            {
+                currentStep = "Собрать отряд и подготовиться к выходу.";
+                revisionSuffix = ":prepare";
+            }
+
             return new JournalGoalViewData
             {
                 Id = Chapter01Ids.JournalGoals.OldWaterTrail,
                 Title = "Старый след",
                 Description = "Проследить старый ход воды и выяснить, куда продолжалась старая система.",
-                CurrentStep = expeditionStarted
-                    ? "Следовать по старому ходу воды за пределы знакомых дорог."
-                    : "Собрать отряд и подготовиться к выходу.",
-                RevisionId = Chapter01Ids.JournalGoals.OldWaterTrail + (expeditionStarted ? ":travel" : ":prepare"),
+                CurrentStep = currentStep,
+                RevisionId = Chapter01Ids.JournalGoals.OldWaterTrail + revisionSuffix,
                 Category = JournalGoalCategory.Main,
                 State = JournalGoalState.Active
             };

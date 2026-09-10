@@ -225,6 +225,26 @@ public partial class PrototypeUIController
         if (gameState == null || isGameOver || HasBlockingModalWork())
             return;
 
+        // P09-T01/T02/T03: продолжение "старого пути" после временного
+        // крюка и фиксация прибытия в область поиска — тоже читаются
+        // каждый кадр наравне с паузой, не отдельным колбэком по месту
+        // клика (раздел "Единый принцип" инструкции про карту/время).
+        Chapter01StoryDirector.RefreshRoadState(gameState);
+
+        // Обязательная/необязательная дорожная встреча первого похода —
+        // единственный производственный случай, когда сюжетный диалог
+        // открывается САМ, без клика игрока (раздел "Обязательная дорожная
+        // встреча": "не случайный RNG, гарантированное обучение"). Успешное
+        // открытие уже само ставит PauseForBlockingModal внутри
+        // TryOpenNarrativeDialogueById — выходим сразу, не давая коду ниже
+        // пересчитать паузу этим же кадром.
+        string pendingRoadEventDialogueId = Chapter01StoryDirector.GetPendingRoadEventDialogueId(gameState);
+        if (!string.IsNullOrEmpty(pendingRoadEventDialogueId) &&
+            TryOpenNarrativeDialogueById(pendingRoadEventDialogueId))
+        {
+            return;
+        }
+
         bool shouldRun = ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState);
         ContinuousSimulationSystem.SetPaused(gameState, !shouldRun);
 

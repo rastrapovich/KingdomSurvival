@@ -110,7 +110,9 @@ public partial class PrototypeUIController
 
         // P08J: Journal и Hero Screen — два независимых fullscreen-слоя,
         // одновременно открытыми быть не должны (раздел 20 инструкции P08J).
+        // P09-T05: Camp — третий такой слой, то же правило.
         CloseJournal();
+        CloseCampScreen();
 
         heroScreenOverlay.style.display = DisplayStyle.Flex;
         heroScreenOverlay.BringToFront();

@@ -217,7 +217,15 @@ public partial class PrototypeUIController
         MarkReportRead(reportIndex);
     }
 
-    private bool HasBlockingModalWork()
+    // P09-T05: экран Лагеря должен останавливать стратегическое время как
+    // любая другая блокирующая модалка (раздел "Открытие лагеря не тратит
+    // время"), но, в отличие от них, обязан пропускать поверх себя D11C
+    // ("Затем автоматически запускается D11C... поверх лагерного экрана") —
+    // поэтому вынесено отдельным условием, а не в общий список ниже:
+    // HasBlockingModalWork используется для паузы времени (включает Camp),
+    // HasBlockingModalWorkExceptCamp — только в TryOpenNarrativeDialogueById,
+    // чтобы диалог мог открыться, пока камп уже открыт.
+    private bool HasBlockingModalWorkExceptCamp()
     {
         return gameState != null &&
                (IsNarrativeDialogueActive ||
@@ -226,6 +234,11 @@ public partial class PrototypeUIController
                 openedDecision != null ||
                 activeQueuedModal != null ||
                 queuedModals.Count > 0);
+    }
+
+    private bool HasBlockingModalWork()
+    {
+        return HasBlockingModalWorkExceptCamp() || IsCampScreenOpen;
     }
 
     private void PauseForBlockingModal(bool autoPauseRequested = false)

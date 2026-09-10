@@ -152,6 +152,120 @@ namespace KingdomSurvival.Chapter01
             gameState.Locations.Add(location);
         }
 
+        // P09-T01: последствие выбора маршрута в N11, читает флаг, который
+        // уже поставил сам диалог (тот же паттерн, что ApplyFloodConsequences
+        // читает флаги N04). "Срезать через низину" (CrossedOldRoadBoundary)
+        // не требует никакого действия здесь — маршрут и так уже идёт от
+        // текущей позиции к прежней цели (раздел "Вариант Б": "Маршрут снова
+        // строится от текущей позиции напрямую" — это ОПИСАНИЕ уже
+        // действующего маршрута, а не новое действие). Только "Пойти старым
+        // путём" (FollowedOldRoad) требует реального крюка.
+        public static void ApplyLongRoadRouteConsequences(GameState gameState)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+            if (gameState.Narrative == null)
+                gameState.Narrative = new NarrativeStateData();
+
+            if (gameState.Narrative.HasFlag(Chapter01Ids.Flags.FollowedOldRoad))
+                Apply(gameState, Chapter01Ids.Effects.OldRoadDetourStart, _ => StartOldRoadDetour(gameState));
+        }
+
+        private static void StartOldRoadDetour(GameState gameState)
+        {
+            if (!gameState.HasActiveExpedition)
+                return;
+
+            ExpeditionData expedition = gameState.ActiveExpedition;
+            LocationData target = gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch);
+            if (target == null)
+                return;
+
+            float curX = expedition.CurrentMapXPercent;
+            float curY = expedition.CurrentMapYPercent;
+            float targetX = target.MapXPercent;
+            float targetY = target.MapYPercent;
+
+            float midX = (curX + targetX) / 2f;
+            float midY = (curY + targetY) / 2f;
+            float dx = targetX - curX;
+            float dy = targetY - curY;
+            double length = Math.Sqrt(dx * dx + dy * dy);
+
+            // Реальный крюк в стороне от прямой линии до цели (раздел
+            // "Решение у старой дороги": "отряд физически идёт к ней").
+            // Величина смещения не канонизирована (раздел "Что требует
+            // решения") — фиксированный отступ в процентах карты достаточен,
+            // чтобы гарантированно дать WorldMapNavigation.FindPath более
+            // длинный путь, даже на ровной местности.
+            const float DetourOffsetPercent = 10f;
+            float offsetX;
+            float offsetY;
+            if (length > 0.001)
+            {
+                offsetX = (float)(-dy / length) * DetourOffsetPercent;
+                offsetY = (float)(dx / length) * DetourOffsetPercent;
+            }
+            else
+            {
+                offsetX = DetourOffsetPercent;
+                offsetY = 0f;
+            }
+
+            float waypointX = WorldMapNavigation.ClampMapX(midX + offsetX);
+            float waypointY = WorldMapNavigation.ClampMapY(midY + offsetY);
+
+            // locationId=null — временная точка маршрута
+            // (GameState.GetOrCreateRouteWaypoint), не постоянная локация;
+            // Chapter01StoryDirector.TryContinueOldRoadDetourIfArrived
+            // перенаправит экспедицию к настоящей цели по прибытии сюда.
+            if (gameState.TryChangeExpeditionRoute(waypointX, waypointY, null, out _))
+                gameState.Narrative.SetFlag(Chapter01Ids.Flags.OldRoadDetourInProgress);
+        }
+
+        // P09-T03: единственное внешнее системное последствие "Троих под
+        // телегой" — запуск времязатратной остановки на дороге с ценой,
+        // зависящей от выбранного исхода (сам NarrativeEffect не умеет
+        // стартовать GameState.TryStartRoadActivity). CartOutcomePassedBy —
+        // 0 часов, ничего не стартуем: "Не вмешиваться" не должно стоить
+        // времени (раздел "Исход 1 — пройти мимо": "Время: +0").
+        public static void ApplyCartConsequences(GameState gameState)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+            if (gameState.Narrative == null)
+                gameState.Narrative = new NarrativeStateData();
+
+            NarrativeStateData state = gameState.Narrative;
+            double durationHours = 0.0;
+            string activityDisplayName = null;
+
+            if (state.HasFlag(Chapter01Ids.Flags.CartOutcomeSavedMan) ||
+                state.HasFlag(Chapter01Ids.Flags.CartOutcomeSavedSeed))
+            {
+                durationHours = 1.0;
+                activityDisplayName = "ПОМОЩЬ У ТЕЛЕГИ";
+            }
+            else if (state.HasFlag(Chapter01Ids.Flags.CartOutcomeSavedBoth))
+            {
+                int fighterCount = gameState.HasActiveExpedition ? gameState.ActiveExpedition.FighterIds.Count : 0;
+                durationHours = fighterCount <= 1 ? 3.0 : 2.0;
+                activityDisplayName = "СПАСЕНИЕ ЧЕЛОВЕКА И ЗЕРНА";
+            }
+
+            if (durationHours <= 0.0)
+                return;
+
+            Apply(gameState, Chapter01Ids.Effects.CartActivityStart, _ =>
+                gameState.TryStartRoadActivity(
+                    "cart_help",
+                    activityDisplayName,
+                    durationHours,
+                    0,
+                    0,
+                    out _));
+        }
+
         private static bool Apply(GameState gameState, string executionId, Action<NarrativeStateData> mutation)
         {
             if (gameState == null)

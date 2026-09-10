@@ -86,6 +86,22 @@ MonoBehaviour:
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
+  - id: cart_pinned_man
+    displayName: "Зажатый мужчина"
+    role: "Путник, зажатый под телегой (имя не названо)"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+  - id: cart_axle_man
+    displayName: "Мужчина у оси"
+    role: "Путник, удерживающий ось телеги (имя не названо)"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
   dialogues:
   - id: chapter01_dialogue_01_ordinary_morning
     title: "N01 \u2014 \u041E\u0431\u044B\u0447\u043D\u043E\u0435 \u0443\u0442\u0440\u043E
@@ -7930,19 +7946,14 @@ MonoBehaviour:
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_11_first_long_road
-    title: "N11 \u2014 \u041F\u0435\u0440\u0432\u0430\u044F \u0434\u0430\u043B\u044C\u043D\u044F\u044F
-      \u0434\u043E\u0440\u043E\u0433\u0430"
+    title: "N11 — Дорога, которой нет"
     category: 1
     status: 1
-    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
-      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
-      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
-      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
-      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
+    developerComment: "P09-T02 production-сцена. Триггерится не игроком и не следующим шагом Chapter01StoryDirector.Sequence, а физическим прогрессом маршрута во время движения (Chapter01StoryDirector.GetPendingRoadEventDialogueId, ~30% первого маршрута к OldWaterSearch) — раздел \"Обязательная встреча\": \"не случайный RNG, гарантированное обучение\". RoadReading — пассивная проверка 6+Инстинкт+Следопытство(fieldcraft) vs 13, провал не блокирует путь (failure-forward), только не даёт knowledge. Выбор маршрута — реальное разветвление, не косметика: \"Пойти старым путём\" ставит FollowedOldRoad и запускает физический крюк через Chapter01OutcomeApplier.ApplyLongRoadRouteConsequences (HandleDialogueCompleted), \"Срезать через низину\" (CrossedOldRoadBoundary) не требует действия — маршрут и так уже идёт от текущей позиции к цели."
     startNodeId: chapter01.node.11
     tags:
-    - "\u0433\u043B\u0430\u0432\u043001"
-    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
+    - "глава01"
+    - production
     nodes:
     - id: chapter01.node.11
       speakerId: narrator
@@ -7951,12 +7962,197 @@ MonoBehaviour:
       - blockId: chapter01.node.11_main
         kind: 0
         speakerIdOverride: 
-        text: "\u0414\u043E\u0440\u043E\u0433\u0430 \u0443\u0432\u043E\u0434\u0438\u0442
-          \u0434\u0430\u043B\u044C\u0448\u0435 \u043F\u0440\u0438\u0432\u044B\u0447\u043D\u044B\u0445
-          \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u043E\u0432 \u0414\u043E\u043C\u0430
-          \u2014 \u0442\u0443\u0434\u0430, \u0433\u0434\u0435 \u0440\u0443\u0441\u043B\u043E
-          \u0440\u0435\u043A\u0438 \u043F\u0435\u0442\u043B\u044F\u0435\u0442 \u0447\u0435\u0440\u0435\u0437
-          \u043D\u0435\u0437\u043D\u0430\u043A\u043E\u043C\u044B\u0439 \u043B\u0435\u0441."
+        text: "Старый путь находится неожиданно легко. Труднее понять, почему он идёт не туда."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11.02
+        endsDialogue: 0
+        choiceId: chapter01.node.11_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 60, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11.02
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11.02_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Дорога подходит к сухой низине и резко забирает влево, будто обходя то, чего здесь больше нет."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11.03
+        endsDialogue: 0
+        choiceId: chapter01.node.11.02_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 460, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11.03
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11.03_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Через низину можно пройти прямо. До другого края — меньше получаса. Старый путь делает крюк на несколько часов."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.11.03_check_success
+        kind: 0
+        speakerIdOverride: 
+        text: "Самая странная часть дороги — не крюк. Странно то, что старая колея несколько раз подходит к низине почти вплотную и каждый раз отворачивает.\n\nНа двух деревьях по разные стороны сохранился один и тот же старый знак. Не предупреждение об обрыве. Не метка брода. Похоже на границу."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 1
+        passiveCheck:
+          CheckId: chapter01.check.road_reading
+          Kind: 0
+          Quality: 3
+          CompetencyId: fieldcraft
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11_knowledge_road_avoided_lowland
+          Type: 2
+          StringParam: chapter01.knowledge.old_road_avoided_lowland
+          IntParam: 0
+      - blockId: chapter01.node.11.03_check_failure
+        kind: 0
+        speakerIdOverride: 
+        text: "Очевидное объяснение находится быстро: раньше здесь наверняка стояла вода. Болото ушло, а старая дорога осталась."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 9
+            StringParam: chapter01.check.road_reading
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Пойти старым путём."
+        nextNodeId: chapter01.node.11.old_road
+        endsDialogue: 0
+        choiceId: chapter01.node.11.03_choice_old_road
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "Срезать через низину."
+        nextNodeId: chapter01.node.11.shortcut
+        endsDialogue: 0
+        choiceId: chapter01.node.11.03_choice_shortcut
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 860, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11.old_road
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11.old_road_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Отряд сворачивает на старый путь — тот самый крюк, который старая дорога делает вокруг низины."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7969,15 +8165,19 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-        - EffectExecutionId: chapter01.effect.n11_flag1
+        - EffectExecutionId: chapter01.effect.n11_flag_followed_old_road
+          Type: 0
+          StringParam: chapter01.flag.followed_old_road
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11_flag_long_road_started_a
           Type: 0
           StringParam: chapter01.flag.long_road_started
           IntParam: 0
       choices:
-      - text: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u043F\u0443\u0442\u044C."
+      - text: "…"
         nextNodeId: 
         endsDialogue: 1
-        choiceId: chapter01.node.11_exit
+        choiceId: chapter01.node.11.old_road_exit
         kind: 3
         conditions:
           Combinator: 0
@@ -7994,8 +8194,1071 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 1260, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11.shortcut
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11.shortcut_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Отряд режет напрямую — через саму низину, а не в обход неё."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11_flag_crossed_old_road_boundary
+          Type: 0
+          StringParam: chapter01.flag.crossed_old_road_boundary
+          IntParam: 0
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11.shortcut.silence
+        endsDialogue: 0
+        choiceId: chapter01.node.11.shortcut_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1660, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11.shortcut.silence
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11.shortcut.silence_main
+        kind: 0
+        speakerIdOverride: 
+        text: "На середине низины исчезает звук воды. Не становится тише лес. Просто воды больше не слышно."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11.shortcut.return
+        endsDialogue: 0
+        choiceId: chapter01.node.11.shortcut.silence_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2060, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11.shortcut.return
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11.shortcut.return_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Потом шум возвращается — сразу, будто герой переступил невидимую черту."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11_flag_long_road_started_b
+          Type: 0
+          StringParam: chapter01.flag.long_road_started
+          IntParam: 0
+      choices:
+      - text: "…"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: chapter01.node.11.shortcut.return_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2460, y: 0}
+      hasEditorPosition: 1
+    schemaVersion: 1
+  - id: chapter01_dialogue_11b_three_under_cart
+    title: "Трое под телегой"
+    category: 1
+    status: 1
+    developerComment: "P09-T03 production-сцена. По ощущению — случайная дорожная встреча, технически в первом походе — гарантированный tutorial-encounter (раздел \"Как встреча появляется\": именно она разблокирует лагерь, чистый RNG рискует пропуском системы). Триггерится Chapter01StoryDirector.GetPendingRoadEventDialogueId на ~60% маршрута после N11. Ровно один из четырёх исходов (CartOutcomeSavedBoth/SavedMan/SavedSeed/PassedBy) + CartResolved + CampUnlocked ставятся самим диалогом (SetFlag); цена в часах не умеет ставиться диалоговым эффектом — её стартует Chapter01OutcomeApplier.ApplyCartConsequences через GameState.TryStartRoadActivity, вызванный Chapter01StoryDirector.HandleDialogueCompleted. \"Разделить людей\" — два взаимоисключающих Normal-выбора с одинаковым nextNodeId (saved_both), различаются только PartySizeAtLeast-условиями и ценой в тексте: 1 боец = 3ч, 2-4 бойца = 2ч; при 0 бойцах ни один из них не проходит условие — варианта нет вообще (раздел \"Решение C\")."
+    startNodeId: chapter01.node.11b
+    tags:
+    - "глава01"
+    - production
+    nodes:
+    - id: chapter01.node.11b
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b_main
+        kind: 0
+        speakerIdOverride: 
+        text: "У дороги перевёрнутая телега. Оттуда доносится размеренный стук по дереву."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Остановиться."
+        nextNodeId: chapter01.node.11b.scene1
+        endsDialogue: 0
+        choiceId: chapter01.node.11b_stop
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "Продолжить путь."
+        nextNodeId: chapter01.node.11b.passed_by
+        endsDialogue: 0
+        choiceId: chapter01.node.11b_pass
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 60, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.passed_by
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.passed_by_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Отряд проходит мимо, не останавливаясь. Стук по дереву стихает позади."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11b_a_flag_outcome
+          Type: 0
+          StringParam: chapter01.flag.cart_outcome_passed_by
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11b_a_flag_resolved
+          Type: 0
+          StringParam: chapter01.flag.cart_resolved
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11b_a_flag_camp_unlocked
+          Type: 0
+          StringParam: chapter01.flag.camp_unlocked
+          IntParam: 0
+      choices:
+      - text: "…"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: chapter01.node.11b.passed_by_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 460, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.scene1
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.scene1_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Телега лежит боком в придорожной канаве. Один мужчина зажат под бортом."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11b.scene2
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene1_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 860, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.scene2
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.scene2_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Второй упирается шестом под ось. Стоит ему отпустить — телега просядет ещё ниже."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11b.scene3
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene2_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1260, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.scene3
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.scene3_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Третий держит обезумевшую лошадь, которая при каждом рывке тянет телегу дальше к воде."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11b.scene4
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene3_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1660, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.scene4
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.scene4_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Из разбитой бочки между досками сыплется семенное зерно. Нижние мешки уже намокли."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11b.scene5
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene4_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2060, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.scene5
+      speakerId: cart_pinned_man
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.scene5_main
+        kind: 0
+        speakerIdOverride: 
+        text: "— Зерно сначала."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11b.scene6
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene5_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2460, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.scene6
+      speakerId: cart_axle_man
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.scene6_main
+        kind: 0
+        speakerIdOverride: 
+        text: "— Ты помолчи."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11b.scene7
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene6_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2860, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.scene7
+      speakerId: cart_pinned_man
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.scene7_main
+        kind: 0
+        speakerIdOverride: 
+        text: "— Я весной ходить не буду, если сейчас всё высыплется."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Сначала вытащить человека. Явная цена: час."
+        nextNodeId: chapter01.node.11b.saved_man
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene7_saved_man
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "Сначала вынести семенное зерно. Явная цена: час."
+        nextNodeId: chapter01.node.11b.saved_seed
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene7_saved_seed
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "Разделить людей: одновременно поднять телегу и вынести зерно. Явная цена: три часа."
+        nextNodeId: chapter01.node.11b.saved_both
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene7_saved_both_1
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 12
+            StringParam: 
+            QualityParam: 0
+            IntParam: 1
+            Negate: 0
+          - Type: 12
+            StringParam: 
+            QualityParam: 0
+            IntParam: 2
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "Разделить людей: одновременно поднять телегу и вынести зерно. Явная цена: два часа."
+        nextNodeId: chapter01.node.11b.saved_both
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene7_saved_both_2
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 12
+            StringParam: 
+            QualityParam: 0
+            IntParam: 2
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "Не вмешиваться. Продолжить путь."
+        nextNodeId: chapter01.node.11b.passed_by_after_scene
+        endsDialogue: 0
+        choiceId: chapter01.node.11b.scene7_pass
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 3260, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.saved_man
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.saved_man_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Отряд сначала вытаскивает зажатого человека. Пока телегу поднимают, часть семенного зерна успевает намокнуть окончательно."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11b_b_flag_outcome
+          Type: 0
+          StringParam: chapter01.flag.cart_outcome_saved_man
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11b_b_flag_resolved
+          Type: 0
+          StringParam: chapter01.flag.cart_resolved
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11b_b_flag_camp_unlocked
+          Type: 0
+          StringParam: chapter01.flag.camp_unlocked
+          IntParam: 0
+      choices:
+      - text: "…"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: chapter01.node.11b.saved_man_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 3660, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.saved_seed
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.saved_seed_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Отряд сначала выносит мешки с семенным зерном. Зажатого человека освобождают следом — но нога остаётся под тяжестью телеги дольше, чем должна была."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11b_c_flag_outcome
+          Type: 0
+          StringParam: chapter01.flag.cart_outcome_saved_seed
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11b_c_flag_resolved
+          Type: 0
+          StringParam: chapter01.flag.cart_resolved
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11b_c_flag_camp_unlocked
+          Type: 0
+          StringParam: chapter01.flag.camp_unlocked
+          IntParam: 0
+      choices:
+      - text: "…"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: chapter01.node.11b.saved_seed_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 4060, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.saved_both
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.saved_both_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Люди распределяются: одни поднимают телегу, другие выносят зерно. Спасено и то, и другое — ценой лишних часов на дороге."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11b_d_flag_outcome
+          Type: 0
+          StringParam: chapter01.flag.cart_outcome_saved_both
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11b_d_flag_resolved
+          Type: 0
+          StringParam: chapter01.flag.cart_resolved
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11b_d_flag_camp_unlocked
+          Type: 0
+          StringParam: chapter01.flag.camp_unlocked
+          IntParam: 0
+      choices:
+      - text: "…"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: chapter01.node.11b.saved_both_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 4460, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11b.passed_by_after_scene
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11b.passed_by_after_scene_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Отряд отступает от телеги. Стук по дереву продолжается — уже без вас."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11b_e_flag_outcome
+          Type: 0
+          StringParam: chapter01.flag.cart_outcome_passed_by
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11b_e_flag_resolved
+          Type: 0
+          StringParam: chapter01.flag.cart_resolved
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n11b_e_flag_camp_unlocked
+          Type: 0
+          StringParam: chapter01.flag.camp_unlocked
+          IntParam: 0
+      choices:
+      - text: "…"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: chapter01.node.11b.passed_by_after_scene_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 4860, y: 0}
+      hasEditorPosition: 1
+    schemaVersion: 1
+  - id: chapter01_dialogue_11c_camp_after_cart
+    title: "После телеги"
+    category: 1
+    status: 1
+    developerComment: "P09-T06 production-сцена. Одна сцена с четырьмя взаимоисключающими ветками по CartOutcome*-флагу (условие FlagSet на textBlock, тот же механизм, что уже использует D09 для опциональных целей похода), не четыре разных Dialogue. Запускается автоматически поверх экрана Лагеря (PrototypeUIController.Camp.cs.OpenCampScreen) через Chapter01CampSceneProvider, доступна пока CartResolved && !CartCampEchoSeen. Никакого нового морального выбора внутри — раздел \"Почему сцене не нужен новый выбор\": сцена показывает отложенное эхо уже сделанного решения, а не новое решение. Работает одинаково, идёт герой один или с отрядом — раздел \"Если герой идёт один\"."
+    startNodeId: chapter01.node.11c
+    tags:
+    - "глава01"
+    - production
+    nodes:
+    - id: chapter01.node.11c
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11c_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Огонь занимается не сразу. Дорожная грязь уже подсохла на сапогах, но запах сырой земли всё ещё тянется следом."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.11c.branch
+        endsDialogue: 0
+        choiceId: chapter01.node.11c_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 60, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.11c.branch
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: chapter01.node.11c.branch_saved_both
+        kind: 0
+        speakerIdOverride: 
+        text: "В складке рукава находятся три зерна. Наверное, попали туда, когда разгружали телегу.\n\nНа дороге хватило рук и на человека, и на мешки. Не бесплатно. Несколько часов пути остались там.\n\nУ костра это впервые становится заметно: Дом сегодня дальше, чем мог бы быть.\n\nЗато на дороге позади остались и человек, и его весна."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.cart_outcome_saved_both
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11c_echo_seen_a
+          Type: 0
+          StringParam: chapter01.flag.cart_camp_echo_seen
+          IntParam: 0
+      - blockId: chapter01.node.11c.branch_saved_man
+        kind: 0
+        speakerIdOverride: 
+        text: "Когда снимаешь сапог, из шва выпадает разбухшее зерно.\n\nНа дороге человека успели вытащить. Мешки — нет.\n\nОдно зерно можно бросить в огонь. Оно лопается почти сразу.\n\nОстальное кто-нибудь будет считать весной."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.cart_outcome_saved_man
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11c_echo_seen_b
+          Type: 0
+          StringParam: chapter01.flag.cart_camp_echo_seen
+          IntParam: 0
+      - blockId: chapter01.node.11c.branch_saved_seed
+        kind: 0
+        speakerIdOverride: 
+        text: "На верёвке осталась узкая тёмная полоска. У огня становится понятно, что это кровь.\n\nЗажатый мужчина сам сказал: «Зерно сначала».\n\nТам, у телеги, вокруг слишком много было крика, дерева и лошади.\n\nЗдесь эта фраза звучит гораздо отчётливее.\n\nОн остался жив. Что останется от его ноги — выяснится уже без тебя."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.cart_outcome_saved_seed
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11c_echo_seen_c
+          Type: 0
+          StringParam: chapter01.flag.cart_camp_echo_seen
+          IntParam: 0
+      - blockId: chapter01.node.11c.branch_passed_by
+        kind: 0
+        speakerIdOverride: 
+        text: "Когда огонь наконец берётся, со стороны пройденной дороги доносится глухой удар.\n\nПотом второй.\n\nДолгая пауза.\n\nЕщё два.\n\nПотом ничего.\n\nТы не знаешь, вытащили ли человека. Не знаешь, сколько зерна осталось.\n\nЗнаешь только одно: дорога за спиной не остановилась, когда ты ушёл."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.cart_outcome_passed_by
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n11c_echo_seen_d
+          Type: 0
+          StringParam: chapter01.flag.cart_camp_echo_seen
+          IntParam: 0
+      choices:
+      - text: "…"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: chapter01.node.11c.branch_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 460, y: 0}
+      hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_12_old_ford
     title: "N12 \u2014 \u0421\u0442\u0430\u0440\u044B\u0439 \u0431\u0440\u043E\u0434

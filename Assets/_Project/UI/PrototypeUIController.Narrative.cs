@@ -219,7 +219,10 @@ public partial class PrototypeUIController
             return false;
         }
 
-        if (gameState == null || isGameOver || IsNarrativeDialogueActive || HasBlockingModalWork())
+        // P09-T05: HasBlockingModalWorkExceptCamp, а не HasBlockingModalWork —
+        // экран Лагеря обязан пропускать D11C поверх себя (см. комментарий
+        // над HasBlockingModalWork в ModalQueue.cs).
+        if (gameState == null || isGameOver || IsNarrativeDialogueActive || HasBlockingModalWorkExceptCamp())
             return false;
 
         CommanderData commander = gameState.GetSelectedCommander();

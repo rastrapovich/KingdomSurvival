@@ -62,6 +62,15 @@ namespace KingdomSurvival.Chapter01
             public const string D09 = "chapter01_dialogue_09_council_departure";
             public const string D10 = "chapter01_dialogue_10_gather_party";
             public const string D11 = "chapter01_dialogue_11_first_long_road";
+
+            // P09-T02/T03: две дорожные встречи первого дальнего похода —
+            // не часть линейной N01-N17 последовательности
+            // Chapter01StoryDirector.Sequence (у них нет своего NodeStep),
+            // а side-контент, триггеруемый физическим прогрессом маршрута
+            // (см. Chapter01StoryDirector.GetPendingRoadEventDialogueId).
+            public const string D11B = "chapter01_dialogue_11b_three_under_cart";
+            public const string D11C = "chapter01_dialogue_11c_camp_after_cart";
+
             public const string D12 = "chapter01_dialogue_12_old_ford";
             public const string D13 = "chapter01_dialogue_13_other_people";
             public const string D14 = "chapter01_dialogue_14_agreement_revealed";
@@ -73,7 +82,7 @@ namespace KingdomSurvival.Chapter01
             public static readonly IReadOnlyList<string> All = new[]
             {
                 D01, D02, D03, D04, D05, D06, D07A, D07B, D07C, D08,
-                D09, D10, D11, D12, D13, D14, D14Half, D15, D16, D17
+                D09, D10, D11, D11B, D11C, D12, D13, D14, D14Half, D15, D16, D17
             };
         }
 
@@ -116,6 +125,35 @@ namespace KingdomSurvival.Chapter01
             public const string LongRoadStarted = "chapter01.flag.long_road_started";
             public const string ReturnRoadTraveled = "chapter01.flag.return_road_traveled";
 
+            // P09-T01/T02/T03: первая дальняя дорога и лагерь ("движение =
+            // течение времени" + "Трое под телегой" производственная
+            // инструкция). RoadDestinationReached — физическое прибытие в
+            // OldWaterSearch (не то же самое, что открытие области поиска в
+            // P08 — там раскрывается только точка на карте, здесь — реальный
+            // приход туда). FollowedOldRoad/CrossedOldRoadBoundary —
+            // взаимоисключающий выбор маршрута в N11, не может быть оба
+            // сразу. OldRoadDetourInProgress — чисто технический маркер
+            // "герой физически идёт к временной точке крюка, после которой
+            // нужно самостоятельно продолжить к настоящей цели" (см.
+            // Chapter01StoryDirector.TryContinueOldRoadDetourIfArrived), не
+            // часть производственного содержания. CartOutcome* — ровно один
+            // из четырёх взаимоисключающих исходов "Троих под телегой".
+            public const string RoadDestinationReached = "chapter01.flag.road_destination_reached";
+            public const string FollowedOldRoad = "chapter01.flag.followed_old_road";
+            public const string CrossedOldRoadBoundary = "chapter01.flag.crossed_old_road_boundary";
+            public const string OldRoadDetourInProgress = "chapter01.flag.old_road_detour_in_progress";
+            public const string CartResolved = "chapter01.flag.cart_resolved";
+            public const string CartOutcomeSavedBoth = "chapter01.flag.cart_outcome_saved_both";
+            public const string CartOutcomeSavedMan = "chapter01.flag.cart_outcome_saved_man";
+            public const string CartOutcomeSavedSeed = "chapter01.flag.cart_outcome_saved_seed";
+            public const string CartOutcomePassedBy = "chapter01.flag.cart_outcome_passed_by";
+            public const string CartCampEchoSeen = "chapter01.flag.cart_camp_echo_seen";
+
+            // Лагерь — постоянная игровая возможность интерфейса, а не
+            // сюжетный факт мира (раздел "Где хранить разблокировку" P09M-
+            // инструкции про лагерь): намеренно не chapter01.knowledge.*.
+            public const string CampUnlocked = "chapter01.flag.camp_unlocked";
+
             // P04-T04: маркер того, что игрок действительно увидел исходную
             // норму Дома в N01 (Chapter01HomeState.Baseline) — не само
             // состояние воды/мельницы/скота/настила, а подтверждение показа.
@@ -130,7 +168,11 @@ namespace KingdomSurvival.Chapter01
                 InvestigatedCattle, InvestigatedRiver, OldTraceFound, FarRouteUnlocked,
                 ExpeditionStarted, OldFordFound, DownstreamContact, AgreementRevealed,
                 ReturnStarted, ReturnedHome, CouncilCompleted, Completed,
-                HousePeopleMet, LongRoadStarted, ReturnRoadTraveled, HomeBaselineCaptured
+                HousePeopleMet, LongRoadStarted, ReturnRoadTraveled, HomeBaselineCaptured,
+                RoadDestinationReached, FollowedOldRoad, CrossedOldRoadBoundary,
+                OldRoadDetourInProgress, CartResolved, CartOutcomeSavedBoth,
+                CartOutcomeSavedMan, CartOutcomeSavedSeed, CartOutcomePassedBy,
+                CartCampEchoSeen, CampUnlocked
             };
         }
 
@@ -151,12 +193,17 @@ namespace KingdomSurvival.Chapter01
             public const string SharedWaterSystem = "chapter01.knowledge.shared_water_system";
             public const string HomeWasNotSelfSufficient = "chapter01.knowledge.home_was_not_self_sufficient";
 
+            // P09-T04: успех пассивной проверки RoadReading в N11 — правдоподобная
+            // неполная версия провала не даёт знания (раздел "При провале"
+            // производственной инструкции про дорогу).
+            public const string OldRoadAvoidedLowland = "chapter01.knowledge.old_road_avoided_lowland";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 SecondLoafIsRation, WaterFlowIsWrong, MillMovesAtWrongTime, CattleAvoidOldBranch,
                 FishPatternChanged, OldSeventhChannel, OldFord, OldCustom, DrownedWomanStory,
                 SevenToothObject, DownstreamPeople, OldAgreement, SharedWaterSystem,
-                HomeWasNotSelfSufficient
+                HomeWasNotSelfSufficient, OldRoadAvoidedLowland
             };
         }
 
@@ -220,10 +267,21 @@ namespace KingdomSurvival.Chapter01
             public const string SevenToothGaugeGrant = "chapter01.effect.seven_tooth_gauge_grant";
             public const string DepartureLocationReveal = "chapter01.effect.departure_location_reveal";
 
+            // P09-T01/T03: OldRoadDetourStart строит реальный waypoint-крюк
+            // (не просто списывает часы — раздел "Решение у старой дороги"
+            // инструкции про дорогу). CartActivityStart запускает
+            // GameState.TryStartRoadActivity с ценой в часах, зависящей от
+            // выбранного исхода "Троих под телегой" — сам NarrativeEffect не
+            // умеет стартовать времязатратные действия, поэтому это внешний
+            // системный эффект, как и остальные в этом классе.
+            public const string OldRoadDetourStart = "chapter01.effect.old_road_detour_start";
+            public const string CartActivityStart = "chapter01.effect.cart_activity_start";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 FloodResourceLoss, FloodTimeAdvance, FloodMillRepairCost,
-                LongRoadTimeAdvance, SevenToothGaugeGrant, DepartureLocationReveal
+                LongRoadTimeAdvance, SevenToothGaugeGrant, DepartureLocationReveal,
+                OldRoadDetourStart, CartActivityStart
             };
         }
 

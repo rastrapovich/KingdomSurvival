@@ -977,40 +977,119 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
         private static DevelopmentPhaseData BuildP09Road()
         {
             return Phase(
-                "P09_ROAD", "Сбор отряда и первая дальняя дорога",
-                "Реализовать N11 на существующей физической карте: одна обязательная и одна необязательная дорожная сцена, пассивная проверка пути на Инстинкт+Следопытство, опциональная лагерная сцена.",
+                "P09_ROAD", "Первая дальняя дорога и лагерь",
+                "Физическое самостоятельное путешествие по новому правилу времени (P08M), обязательная встреча N11 «Дорога, которой нет» с пассивной проверкой RoadReading и реальным разветвлением маршрута, гарантированная (не чисто случайная) встреча «Трое под телегой», которая разблокирует Лагерь — новый постоянный, но не survival-симуляторный экран, и первая лагерная сцена «После телеги» как отложенное эхо решения у телеги.",
                 11, true,
-                "Дорога выполняет сюжетную функцию, цена пути сохраняется в GameState.",
+                "Обе дорожные встречи триггерятся физическим прогрессом маршрута, а не диалогом по клику; выбор маршрута в N11 и решение у телеги дают реальные, а не косметические последствия (цена времени, состояние мира); Camp Screen v1 существует и открывается только во время похода; P09 проходим без единого визита в лагерь.",
                 new[] { "P08M_MAP_TIME" },
 
-                Task("P09-T01", "N11 — дальняя дорога на физической карте",
-                    "Без телепортации, на текущей карте Prototype_Main.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
-                    acceptanceCriteria: new[] { "Дорога проходится физически на существующей карте" }),
+                Task("P09-T01", "Физическое путешествие и правило времени",
+                    "После N10 герой не получает автоматический маршрут — стоит у Дома, пока игрок сам не кликнет цель на карте; после клика время и движение идут синхронно (уже реализовано в P08M), это же правило распространяется на явные времязатратные действия на дороге.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Scripts/Core/GameState.cs",
+                        "Assets/_Project/UI/PrototypeUIController.ContinuousTime.cs"
+                    },
+                    acceptanceCriteria: new[] { "Клик по «Следу старого русла» сразу запускает движение от текущей позиции", "Явное действие (остановка у телеги) продвигает тот же WorldClock, что и движение" },
+                    implementationNote: "Ничего нового сверх P08M не потребовалось — GameState.TryStartRoadActivity (уже существующий примитив для RoadStop) переиспользован для цены времени у телеги через Chapter01OutcomeApplier.ApplyCartConsequences."),
 
-                Task("P09-T02", "Обязательная дорожная встреча",
-                    "Ровно одна обязательная встреча по пути к броду.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                Task("P09-T02", "Обязательная встреча N11 — «Дорога, которой нет»",
+                    "Триггерится не кликом игрока и не следующим шагом Chapter01StoryDirector.Sequence, а физическим прогрессом текущего маршрута (~30%) во время движения — единственное намеренное исключение из общего правила ручного открытия диалогов.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
                     dependencies: new[] { "P09-T01" },
-                    acceptanceCriteria: new[] { "Реализована ровно одна обязательная дорожная встреча" }),
+                    relatedFlagIds: new[]
+                    {
+                        "chapter01.flag.long_road_started",
+                        "chapter01.flag.followed_old_road",
+                        "chapter01.flag.crossed_old_road_boundary",
+                        "chapter01.flag.old_road_detour_in_progress"
+                    },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01OutcomeApplier.cs",
+                        "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset"
+                    },
+                    manualChecks: new[]
+                    {
+                        "Отправить отряд к «Следу старого русла», дождаться ~30% пути — N11 должен открыться сам, без клика",
+                        "Выбрать «Пойти старым путём» — маршрут должен физически удлиниться (виден крюк на карте), затем сам вернуться к цели",
+                        "Выбрать «Срезать через низину» — маршрут не должен измениться"
+                    },
+                    acceptanceCriteria: new[] { "N11 открывается ровно один раз, автоматически, на физическом маршруте", "RoadReading (6+Инстинкт+Следопытство vs 13) не блокирует путь при провале", "Выбор маршрута — реальное разветвление, не косметика" },
+                    implementationNote: "Chapter01StoryDirector.GetPendingRoadEventDialogueId вызывается каждый кадр из PrototypeUIController.RefreshAutoTimeState (до расчёта паузы) и открывает диалог через уже существующий TryOpenNarrativeDialogueById. «Пойти старым путём» строит реальный waypoint-крюк (Chapter01OutcomeApplier.ApplyLongRoadRouteConsequences → TryChangeExpeditionRoute на временную точку + флаг OldRoadDetourInProgress), автопродолжение к настоящей цели — Chapter01StoryDirector.TryContinueOldRoadDetourIfArrived, тоже per-frame. «Срезать через низину» не требует действия — маршрут и так уже идёт от текущей позиции."),
 
-                Task("P09-T03", "Необязательная дорожная встреча",
-                    "Ровно одна опциональная встреча по пути.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
-                    dependencies: new[] { "P09-T01" },
-                    acceptanceCriteria: new[] { "Реализована ровно одна необязательная дорожная встреча" }),
+                Task("P09-T03", "Гарантированная встреча «Трое под телегой» + разблокировка Лагеря",
+                    "По ощущению случайная дорожная встреча, технически — гарантированный tutorial-encounter (иначе часть игроков не увидит систему лагеря). Ровно один из четырёх взаимоисключающих исходов, цена в часах зависит от исхода и состава отряда.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
+                    dependencies: new[] { "P09-T02" },
+                    relatedFlagIds: new[]
+                    {
+                        "chapter01.flag.cart_resolved",
+                        "chapter01.flag.cart_outcome_saved_both",
+                        "chapter01.flag.cart_outcome_saved_man",
+                        "chapter01.flag.cart_outcome_saved_seed",
+                        "chapter01.flag.cart_outcome_passed_by",
+                        "chapter01.flag.camp_unlocked"
+                    },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01OutcomeApplier.cs",
+                        "Assets/_Project/Scripts/Core/NarrativeConditions.cs",
+                        "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset"
+                    },
+                    manualChecks: new[]
+                    {
+                        "Пройти мимо телеги сразу — CampUnlocked становится true, кнопка «Лагерь» появляется в nav-баре",
+                        "Остановиться, с 0 бойцами — вариант «Разделить людей» не должен быть виден вообще",
+                        "Остановиться, с 1 бойцом — доступен только вариант за 3 часа; с 2-4 бойцами — только за 2 часа",
+                        "Любой выбранный исход должен продвинуть часы ровно на заявленную цену"
+                    },
+                    acceptanceCriteria: new[] { "Ровно один CartOutcome* флаг после разрешения встречи", "CampUnlocked=true после ЛЮБОГО из четырёх исходов", "0 бойцов делает «Разделить людей» недоступным, а не задизейбленным с подсказкой" },
+                    implementationNote: "Новый NarrativeConditionType.PartySizeAtLeast (читает context.PresentCompanionIds.Count) — единственное расширение общей условной системы, нужное для ветвления по размеру отряда; вместе с Negate даёт и \"меньше N\" без отдельного AtMost-типа. Цена в часах не умеет ставиться диалоговым эффектом — её стартует Chapter01OutcomeApplier.ApplyCartConsequences (GameState.TryStartRoadActivity) через Chapter01StoryDirector.HandleDialogueCompleted(D11B). Никакой немедленной награды (голда/опыта) — раздел \"Не давать немедленную награду\": состояние мира важнее одноразовых очков."),
 
-                Task("P09-T04", "Пассивная проверка пути",
-                    "6 + Инстинкт + Следопытство + контекст, сложность 13; успех — подготовленность, провал — цена времени/припасов.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
-                    dependencies: new[] { "P09-T01" },
-                    acceptanceCriteria: new[] { "Успех даёт подготовленность", "Провал тратит время/припасы, но не блокирует путь (failure-forward)" }),
+                Task("P09-T04", "Camp Screen v1",
+                    "Не отдельный CampManager — маленький программный fullscreen-слой по образцу Journal/Hero Screen поверх Chapter01CampSceneProvider (read-only). Открытие/закрытие не двигает маршрут и не тратит время само по себе.",
+                    DevelopmentTaskCategory.UI, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 4,
+                    dependencies: new[] { "P09-T03" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/UI/PrototypeUIController.Camp.cs",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01CampSceneProvider.cs",
+                        "Assets/_Project/UI/PrototypeUIController.ModalQueue.cs",
+                        "Assets/_Project/UI/PrototypeUIController.Narrative.cs",
+                        "Assets/_Project/UI/Prototype/Prototype_Main.uxml"
+                    },
+                    manualChecks: new[]
+                    {
+                        "До разблокировки кнопки «Лагерь» в nav-баре нет вообще",
+                        "После разблокировки — видима всегда, disabled вне похода, с поясняющим tooltip",
+                        "Открыть лагерь во время движения — маркер и часы должны замереть, маршрут не сбрасывается; ПРОДОЛЖИТЬ ПУТЬ возвращает движение с той же точки",
+                        "Открыть лагерь стоя на месте — после ПРОДОЛЖИТЬ ПУТЬ герой должен остаться стоять, а не начать двигаться"
+                    },
+                    acceptanceCriteria: new[] { "Открытие/чтение лагеря не продвигает WorldClock", "Экран лагеря взаимоисключающий с Journal/Hero Screen, как они друг с другом" },
+                    implementationNote: "IsCampScreenOpen — новый источник блокировки в PrototypeUIController.ModalQueue.HasBlockingModalWork (останавливает RefreshAutoTimeState), но НЕ в новом HasBlockingModalWorkExceptCamp, которым теперь гейтится TryOpenNarrativeDialogueById — иначе D11C не смог бы открыться поверх уже открытого лагеря. RefreshCampScreen/RefreshCampNavButtonState вызываются из того же общего RefreshInterface, что уже обновляет Journal (P08J)."),
 
-                Task("P09-T05", "Опциональная лагерная сцена синтеза гипотез",
-                    "Только если дорога достаточно длинная и есть что синтезировать; без отдельного Camp Manager.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: false, order: 5,
-                    dependencies: new[] { "P09-T01" },
-                    acceptanceCriteria: new[] { "Сцена собирает минимум две гипотезы и меняется от состава группы, иначе не добавляется" })
+                Task("P09-T05", "Первая лагерная сцена «После телеги»",
+                    "Одна сцена (D11C) с четырьмя взаимоисключающими ветками по CartOutcome*-флагу, запускается автоматически поверх Camp Screen при первом входе. Без нового морального выбора — только отложенное эхо уже сделанного решения.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 5,
+                    dependencies: new[] { "P09-T04" },
+                    relatedFlagIds: new[] { "chapter01.flag.cart_camp_echo_seen" },
+                    fileReferences: new[] { "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset" },
+                    manualChecks: new[] { "Первый вход в лагерь после разрешения телеги должен автоматически показать сцену, соответствующую реальному исходу", "Повторный вход в лагерь не должен показывать сцену снова" },
+                    acceptanceCriteria: new[] { "Показывается ровно одна ветка, соответствующая реальному CartOutcome", "CartCampEchoSeen ставится по завершении и сцена не повторяется", "Сцена работает одинаково с бойцами и без них" },
+                    implementationNote: "Ветвление — четыре textBlock с Conditions.FlagSet на одном узле (тот же механизм, что D09 уже использует для опциональных целей похода), не четыре разных Dialogue."),
+
+                Task("P09-T06", "Тесты",
+                    "Chapter01P09Tests.cs: триггер по прогрессу маршрута, RoadReading, разветвление N11, доступность «Разделить людей» по составу, ровно один CartOutcome, цена в часах по исходу/составу, Chapter01CampSceneProvider, ветвление D11C, физическое прибытие в область поиска, Journal :travel -> :search_area.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 6,
+                    dependencies: new[] { "P09-T05" },
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Tests/EditMode/Chapter01P09Tests.cs" },
+                    manualChecks: new[] { "EditMode Run All" },
+                    acceptanceCriteria: new[] { "EditMode Run All зелёный" },
+                    implementationNote: "Через NarrativeDialogueRuntimeSession напрямую (без UI/MonoBehaviour) — тот же подход, что Chapter01P08Tests.cs; RemainingRouteCells задаётся напрямую полем ExpeditionData для контроля процента маршрута, как в ContinuousMovementTimeTests.cs.")
             );
         }
 

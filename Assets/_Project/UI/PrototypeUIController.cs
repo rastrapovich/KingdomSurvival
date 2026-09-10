@@ -110,6 +110,7 @@ public partial class PrototypeUIController : MonoBehaviour
         StartNewGame();
         InitializeHeroScreenUi();
         InitializeJournalUi();
+        InitializeCampUi();
         InitializeUILayoutScreens();
     }
 
@@ -518,6 +519,13 @@ public partial class PrototypeUIController : MonoBehaviour
         RefreshJournalNotificationState();
         if (IsJournalOpen)
             RefreshJournal();
+
+        // P09-T05: та же логика, что у кнопки «Журнал •» выше — кнопка
+        // «Лагерь» и содержимое открытого экрана лагеря обязаны отражать
+        // состояние сразу, а не только при следующем несвязанном клике.
+        RefreshCampNavButtonState();
+        if (IsCampScreenOpen)
+            RefreshCampScreen();
     }
 
     private void RefreshResourceTestButtons()

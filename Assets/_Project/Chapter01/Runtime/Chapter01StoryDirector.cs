@@ -126,6 +126,35 @@ namespace KingdomSurvival.Chapter01
             return Chapter01RepairChoice.None;
         }
 
+        // P07-T05: свободный порядок N07A/N07B/N07C без счётчика улик —
+        // возвращает конкретные ещё не пройденные расследования, а не
+        // число. Пустой список означает либо "фаза расследования ещё не
+        // началась" (WaterWrongActive == false), либо "все три уже
+        // завершены" (пора в N08) — вызывающая сторона различает эти
+        // случаи через сами InvestigatedMill/Cattle/River, если нужно.
+        // GetNextDialogueId ниже продолжает возвращать один линейный ID
+        // (первый ещё не пройденный, в фиксированном порядке A/B/C) —
+        // этого достаточно для TryAdvance и не меняет его публичный
+        // контракт; реальный свободный выбор получает список отсюда.
+        public static IReadOnlyList<string> GetAvailableInvestigationDialogueIds(NarrativeStateData state)
+        {
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
+
+            List<string> available = new List<string>();
+            if (!state.HasFlag(Chapter01Ids.Flags.WaterWrongActive))
+                return available;
+
+            if (!state.HasFlag(Chapter01Ids.Flags.InvestigatedMill))
+                available.Add(Chapter01Ids.Dialogues.D07A);
+            if (!state.HasFlag(Chapter01Ids.Flags.InvestigatedCattle))
+                available.Add(Chapter01Ids.Dialogues.D07B);
+            if (!state.HasFlag(Chapter01Ids.Flags.InvestigatedRiver))
+                available.Add(Chapter01Ids.Dialogues.D07C);
+
+            return available;
+        }
+
         // Тонкая точка интеграции с UI (раздел 6.2: "запускает диалог через
         // существующий TryOpenNarrativeDialogueById"), без прямой ссылки на
         // PrototypeUIController — вызывающий код передаёт открыватель
@@ -161,6 +190,8 @@ namespace KingdomSurvival.Chapter01
 
             if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D04, StringComparison.Ordinal))
                 Chapter01OutcomeApplier.ApplyFloodConsequences(gameState);
+            else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D08, StringComparison.Ordinal))
+                Chapter01OutcomeApplier.ApplySevenTeethInvestigationConsequences(gameState);
         }
 
         private static bool IsStepCompleted(NarrativeStateData state, NodeStep step)

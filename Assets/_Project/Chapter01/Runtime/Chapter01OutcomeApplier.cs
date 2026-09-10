@@ -76,6 +76,25 @@ namespace KingdomSurvival.Chapter01
             }
         }
 
+        // P07-T04: находка планки в N08 (chapter01.flag.old_trace_found) —
+        // физический предмет, найденный независимо от исхода проверки
+        // chapter01.check.seven_tooth_object. Провал проверки не отменяет
+        // находку — он только не даёт knowledge.seven_tooth_object
+        // (это ставит сам диалог через onRevealEffects на успешной ветке).
+        public static void ApplySevenTeethInvestigationConsequences(GameState gameState)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+
+            if (gameState.Narrative == null)
+                gameState.Narrative = new NarrativeStateData();
+
+            if (gameState.Narrative.HasFlag(Chapter01Ids.Flags.OldTraceFound))
+            {
+                GrantItem(gameState, Chapter01Ids.Effects.SevenToothGaugeGrant, Chapter01Ids.Items.SevenToothGauge);
+            }
+        }
+
         private static bool Apply(GameState gameState, string executionId, Action<NarrativeStateData> mutation)
         {
             if (gameState == null)

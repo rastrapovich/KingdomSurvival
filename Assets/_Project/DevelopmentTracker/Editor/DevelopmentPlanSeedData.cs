@@ -679,47 +679,71 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                 new[] { "P06_REPAIR_CHOICE" },
 
                 Task("P07-T01", "N07A «Колесо, которое не спит»",
-                    "Мельница как человеческое свидетельство; пассивное наблюдение + возвратимый разговор; при провале — источник через ученика.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    "Мельница как человеческое свидетельство наблюдения Мирона — материальный факт (колесо движется без причины), не пассивная проверка.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
                     relatedKnowledgeIds: new[] { "chapter01.knowledge.mill_moves_at_wrong_time", "chapter01.knowledge.old_seventh_channel" },
                     relatedFlagIds: new[] { "chapter01.flag.investigated_mill" },
-                    acceptanceCriteria: new[] { "Знание доступно минимум двумя путями (провал не закрывает знание навсегда)" }),
+                    relatedDialogueIds: new[] { "chapter01_dialogue_07a_mill" },
+                    fileReferences: new[] { "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset" },
+                    manualChecks: new[] { "Открыть N07A в Preview, пройти цепочку Continue до конца" },
+                    acceptanceCriteria: new[] { "Знание доступно однозначно — сцена сама показывает факт, без проверки на провал" },
+                    implementationNote: "N07A переписан с P03-каркаса на 8 узлов по правилу «одна реплика = один шаг» (DialogueChoiceKind.Continue). InvestigatedMill ставится на наблюдении за колесом, OldSeventhChannel и MillMovesAtWrongTime — на двух отдельных финальных репликах Мирона. Без passive-проверки и без «ученика» — реализовано как прямое материальное наблюдение, не как риск провала."),
 
                 Task("P07-T02", "N07B — скот",
-                    "Поведение животных как физический индикатор старого русла; Naturalist/Fieldcraft или помощь NPC.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    "Поведение животных как физический индикатор старого русла; Ульяна ведёт сцену как голос бытовой цены.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
                     relatedKnowledgeIds: new[] { "chapter01.knowledge.cattle_avoid_old_branch" },
                     relatedFlagIds: new[] { "chapter01.flag.investigated_cattle" },
-                    acceptanceCriteria: new[] { "Ветка даёт самостоятельный вывод, не дублирует мельницу" }),
+                    relatedDialogueIds: new[] { "chapter01_dialogue_07b_cattle" },
+                    fileReferences: new[] { "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset" },
+                    manualChecks: new[] { "Открыть N07B в Preview, пройти цепочку Continue до конца" },
+                    acceptanceCriteria: new[] { "Ветка даёт самостоятельный вывод, не дублирует мельницу" },
+                    implementationNote: "N07B переписан на 8 узлов по правилу «одна реплика = один шаг». InvestigatedCattle ставится на наблюдении за поведением скота у старого водопоя, CattleAvoidOldBranch — на финальной реплике Ульяны."),
 
                 Task("P07-T03", "N07C — река и рыба",
-                    "Изменившаяся гидрология и след ниже по течению через физическое исследование берега/рыбы/мусора.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
-                    relatedKnowledgeIds: new[] { "chapter01.knowledge.fish_pattern_changed", "chapter01.knowledge.old_ford" },
+                    "Изменившаяся гидрология и след ниже по течению; реактивные варианты реплик по ветке ремонта (старый/новый), без отдельного диалога на ветку.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
+                    relatedKnowledgeIds: new[] { "chapter01.knowledge.fish_pattern_changed" },
                     relatedFlagIds: new[] { "chapter01.flag.investigated_river" },
-                    acceptanceCriteria: new[] { "Игрок получает направление без квестовой стрелки из воздуха" }),
+                    relatedDialogueIds: new[] { "chapter01_dialogue_07c_river" },
+                    fileReferences: new[] { "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset" },
+                    manualChecks: new[] { "В Preview подготовить RepairOld и RepairNew по отдельности, убедиться, что видна только своя ветка реплик" },
+                    acceptanceCriteria: new[] { "Игрок получает направление без квестовой стрелки из воздуха" },
+                    implementationNote: "N07C — 7 узлов; единственное осознанное исключение из правила «одна реплика = один шаг» в P07: три узла (branch/fish/lada) несут по два взаимоисключающих textBlock для старой/новой ветки ремонта вместо отдельных Continue-узлов на ветку — сохраняет один диалог вместо двух. InvestigatedRiver ставится на отдельном узле до ветвления, чтобы не задваивать EffectExecutionId между old/new. chapter01.knowledge.old_ford сюда не относится (используется позже, не в river-расследовании) — убран из связанных знаний как устаревшая ссылка исходного планирования."),
 
                 Task("P07-T04", "N08 «Семь зубцов»",
-                    "Материальная связь нынешнего сбоя с прежней системой через предмет; Суждение/Следопытство/знания/«Ремесло» (DEC-08, см. P03-T07).",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
+                    "Материальная связь нынешнего сбоя с прежней системой через найденный предмет; Суждение + «Ремесло» (DEC-08).",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 4,
                     dependencies: new[] { "P00-T05", "P03-T07" },
                     relatedKnowledgeIds: new[] { "chapter01.knowledge.seven_tooth_object", "chapter01.knowledge.old_custom" },
                     relatedFlagIds: new[] { "chapter01.flag.old_trace_found" },
+                    relatedDialogueIds: new[] { "chapter01_dialogue_08_seven_teeth" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01OutcomeApplier.cs",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs"
+                    },
+                    manualChecks: new[] { "В Preview пройти успех и провал проверки chapter01.check.seven_tooth_object, оба обязательных вывода" },
                     acceptanceCriteria: new[]
                     {
                         "Предмет имеет практическую функцию и допускает ошибочное толкование",
                         "Позднее переосмысление не стирает раннюю реакцию"
-                    }),
+                    },
+                    implementationNote: "N08 переписан на 18 узлов. Первая в игре настоящая активная проверка Craft (chapter01.check.seven_tooth_object, ActiveDecisive, Суждение+Ремесло, сложность 13): успех даёт knowledge.seven_tooth_object, провал не блокирует историю и не отменяет находку — сам gauge (chapter01.item.seven_tooth_gauge) выдаётся отдельно через Chapter01OutcomeApplier.ApplySevenTeethInvestigationConsequences по chapter01.flag.old_trace_found, независимо от исхода проверки. Два обязательных вывода — обычные Normal choice с Conditions на двух независимых источниках каждый (не счётчик улик): вывод A требует OldSeventhChannel+OldTraceFound, вывод B — CattleAvoidOldBranch+FishPatternChanged. Открытие N08 после всех трёх расследований обеспечивает Chapter01StoryDirector (P07-T05), не сам диалог."),
 
                 Task("P07-T05", "Свободный порядок без счётчика улик",
-                    "Реализовать открытие N09 через смысловые комбинации знаний (варианты A/B/C раздела 14), а не подсчёт трёх любых улик.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 5,
+                    "N07A/B/C доступны в любом порядке; N08 открывается только когда все три завершены — через конкретные флаги, не через число.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 5,
                     dependencies: new[] { "P07-T01", "P07-T02", "P07-T03" },
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs" },
+                    manualChecks: new[] { "Пройти все допустимые порядки A→B→C/B→C→A/C→A→B и убедиться, что D08 открывается только после всех трёх" },
                     acceptanceCriteria: new[]
                     {
                         "Любой порядок N07A/B/C доступен и не создаёт тупик",
                         "Нет видимого или скрытого универсального счётчика улик"
-                    })
+                    },
+                    implementationNote: "Chapter01StoryDirector.GetAvailableInvestigationDialogueIds(state) возвращает конкретные ещё не пройденные D07A/B/C по InvestigatedMill/Cattle/River (пустой список — либо фаза ещё не началась, либо все три завершены). NarrativeStateData не получил числового поля-счётчика. GetNextDialogueId не менялся: существующая линейная последовательность N01-N17 уже корректно пропускает завершённые шаги независимо от порядка их прохождения — этого достаточно для TryAdvance как разумной единственной подсказки; настоящий свободный выбор получает список через новый метод. Готовый launcher-экран для игрока пока не построен — открытый вопрос, явно вынесенный отдельно, не блокирует сами сцены.")
             );
         }
 

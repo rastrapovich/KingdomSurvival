@@ -122,6 +122,26 @@ public static partial class ContinuousSimulationSystem
                 : FastSpeedMultiplier;
     }
 
+    // Единый источник истины "герой физически движется или занят явным
+    // времязатратным действием прямо сейчас" — модель "движение = течение
+    // времени": стратегическое время должно идти ровно тогда, когда это
+    // возвращает true (и не заблокировано модальным окном/решением на
+    // уровне UI), и стоять во всех остальных случаях. Не читает и не
+    // меняет паузу сама — только сообщает факт, вызывающая сторона решает,
+    // что с ним делать (см. PrototypeUIController.ContinuousTime.cs).
+    public static bool HasMovementOrActivityInProgress(GameState state)
+    {
+        if (state == null || !state.HasActiveExpedition)
+            return false;
+
+        ExpeditionData expedition = state.ActiveExpedition;
+        if (expedition.HasTimedActivity)
+            return true;
+
+        return expedition.Phase == CommanderState.TravellingToLocation ||
+               expedition.Phase == CommanderState.ReturningToCastle;
+    }
+
     public static bool HasExpeditionStartedMoving(GameState state)
     {
         if (state == null || !state.HasActiveExpedition)

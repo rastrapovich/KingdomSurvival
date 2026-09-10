@@ -493,4 +493,36 @@ public sealed class Chapter01P08Tests
         Assert.AreEqual(Chapter01Ids.Dialogues.D11, Chapter01StoryDirector.GetNextDialogueId(state));
         Assert.AreEqual(Chapter01Ids.Nodes.N11, Chapter01StoryDirector.GetNextNodeId(state));
     }
+
+    // --- Карта/время: подтверждение состава больше не двигает героя ---
+
+    // "Движение = течение времени" (производственная инструкция про карту и
+    // время): подтверждение состава в Hero Screen больше не создаёт
+    // ActiveExpedition — герой остаётся у Дома до клика по карте, поэтому
+    // здесь не может быть никакого движения/времязатратного действия.
+    [Test]
+    public void PartyConfirmed_WithoutRealExpedition_NoMovementOrActivityInProgress()
+    {
+        GameState gameState = NewGameStateReadyForExpedition();
+
+        Assert.IsFalse(ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState));
+        Assert.IsFalse(gameState.Narrative.HasFlag(Chapter01Ids.Flags.ExpeditionStarted));
+    }
+
+    // Клик по карте (GameState.TryStartExpedition) сразу переводит Phase в
+    // TravellingToLocation — ровно этот факт PrototypeUIController.
+    // RefreshAutoTimeState использует как триггер для
+    // Chapter01StoryDirector.HandleStoryExpeditionStarted, без ожидания
+    // первого фактического смещения маркера по карте.
+    [Test]
+    public void FirstRealMovement_MakesHasMovementOrActivityInProgress_TrueImmediately()
+    {
+        GameState gameState = NewGameStateReadyForExpedition();
+        List<string> selected = new List<string> { gameState.Fighters[0].Id };
+
+        bool started = gameState.TryStartExpedition(Chapter01Ids.Locations.OldWaterSearch, selected, out string message);
+
+        Assert.IsTrue(started, message);
+        Assert.IsTrue(ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState));
+    }
 }

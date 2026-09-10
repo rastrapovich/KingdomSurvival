@@ -771,6 +771,55 @@ Unity Editor, компилятор и Test Runner недоступны — не 
 3. пройти N09 (через Debug Narrative) → кнопка получает «•», «Старый след» видна с меткой НОВОЕ, 0–2 опциональные цели по реальным знаниям;
 4. кликнуть «Старый след» — деталь справа заполняется, метка НОВОЕ исчезает именно у неё;
 5. закрыть Journal, открыть Hero Screen — Journal не должен быть виден одновременно;
-6. пройти N10, подтвердить реальный состав — Journal снова получает «•», «Старый след» тот же `Id`, но `CurrentStep` уже про путешествие;
+6. пройти N10, подтвердить состав и кликнуть «След старого русла» на карте (после §20 подтверждение само по себе больше не двигает героя) — Journal снова получает «•», «Старый след» тот же `Id`, но `CurrentStep` уже про путешествие;
 7. переход Столица/Экспедиция закрывает открытый Journal;
 8. Console без ошибок на всём сценарии.
+
+## 20. Глобальная карта: движение = течение времени (P08M) — 10.09.2026
+
+Новая модель стратегического времени: оно идёт ровно тогда, когда герой физически движется по карте или занят явным времязатратным действием, и стоит во всех остальных случаях (герой стоит, игрок думает, открыл Журнал/Героя/карту). Игрок больше не запускает время отдельной кнопкой — маршрут выбирается кликом по карте и движение начинается сразу; сюжет открывает точки/области поиска, но никогда не назначает маршрут сам.
+
+Технический фундамент для этого — `ContinuousSimulationSystem`/«Continuous Time» — уже существовал почти полностью (единый тик, авто-пауза на прибытии/находках/обязательных решениях через `RequestAutoPause`, авто-пауза/резюме на модальных окнах через `PauseForBlockingModal`/`ResumeAfterBlockingModalIfReady`, `TryChangeExpeditionRoute` уже строил маршрут от текущей позиции отряда). Не хватало одного: сам запуск/остановка тика был ручным (`IsPaused` менялся только кнопкой «Пуск/Пауза», по умолчанию `true`). Это и заменено.
+
+### 20.1. Единый предикат и автопривод паузы
+
+`ContinuousSimulationSystem.HasMovementOrActivityInProgress(GameState)` (новый чистый метод в `ContinuousSimulationClock.cs`) — единственный источник истины «герой физически движется или занят явным времязатратным действием прямо сейчас»: `true`, если есть активная экспедиция и (`HasTimedActivity`, либо `Phase` — `TravellingToLocation`/`ReturningToCastle`).
+
+`PrototypeUIController.RefreshAutoTimeState()` (новый метод в `ContinuousTime.cs`, вызывается в начале каждого `Update()` до `Advance()`): пока не заблокировано модальным окном/обязательным решением (`HasBlockingModalWork()`), пересчитывает предикат и вызывает `SetPaused`. Модель самокорректирующаяся: не нужно расставлять `SetPaused` по местам, где экспедиция стартует/останавливается — как только `Phase`/`ActiveActivity` меняются (клик по карте, начало/конец исследования, приказ возвращаться), следующий же кадр это отражает. Существующие `PauseForBlockingModal`/`ResumeAfterBlockingModalIfReady` не переопределяются — пока модальная работа есть, `RefreshAutoTimeState` не трогает паузу; если их эвристика «возобновить как было» на миг ошибётся (например обязательное событие сбросило маршрут), следующий кадр исправляет это сам, без дополнительного кода.
+
+### 20.2. Что убрано из интерфейса
+
+Кнопка «Пуск/Пауза» (`timeToggleButton`) не удалена из UXML (чтобы не ломать `AllRequiredElementsExist` и другие запросы по имени по всему `PrototypeUIController`), но скрыта (`display: None`) и больше не кликабельна — `OnContinuousPauseClicked` удалён. Ряд ускорения ×1/×3/×5/×10 (`continuousSpeedButton` и вся связанная инфраструктура — `EnsureExtendedSpeedButtons`/`CreateExtendedSpeedButton`/`OnContinuousExplicitSpeedClicked`/`RefreshExtendedSpeedButtons`/`ApplyExtendedSpeedButtonState`) удалён вместе со spacebar-хоткеем `OnContinuousGlobalKeyDown`. `interfaceRoot.focusable`/`.Focus()` оставлены как есть — от них зависит не связанный с паузой Escape-хендлер в `PrototypeUIController.WorldMapLocationActions.cs` (закрытие карточки локации).
+
+Core-методы `ContinuousSimulationSystem.TogglePause`/`SetPaused`/`IsPaused`/`ToggleSpeed`/`SetSpeedMultiplier`/`GetSpeedMultiplier` не тронуты — ими пользуются существующие тесты (`ContinuousSimulationTests.cs`, `ContinuousTimePolishTests.cs`, `BuildingSystemTests.cs`) и системная логика; при необходимости вернуть скорость как QoL — это отдельное решение поверх уже сохранённого фундамента.
+
+### 20.3. P08: состав похода ≠ поход начался
+
+`OnHeroScreenRosterConfirmClicked` (`PrototypeUIController.HeroScreen.cs`) переписан: кнопка «ПОДТВЕРДИТЬ СОСТАВ» больше не вызывает `GameState.TryStartExpedition`/`Chapter01StoryDirector.HandleStoryExpeditionStarted` — только отчёт о подтверждённом составе и закрытие Экрана героя. `selectedFighterIds` не очищается: тот же набор читает уже существующий общий поток клика по карте (`GetSelectedFighterIdsInArmyOrder` в `IssueContinuousMapOrder`), который и создаёт настоящую `ActiveExpedition`.
+
+`chapter01.flag.expedition_started` теперь ставит `RefreshAutoTimeState`, когда `FarRouteUnlocked` уже `true`, `ExpeditionStarted` ещё `false`, а `HasMovementOrActivityInProgress` стало `true` — то есть сразу после того, как клик по карте перевёл `Phase` в `TravellingToLocation`, не дожидаясь фактического смещения маркера. Раньше флаг ошибочно ставился прямо в обработчике кнопки, до какого-либо реального движения — теперь он буквально означает «отряд физически тронулся». `developerComment` узла D10 и `implementationNote` задачи `P08-T03` обновлены под эту модель.
+
+Общий (не Chapter01) поток отправки экспедиции кликом по карте не менялся — `GameState.TryStartExpeditionToMapPoint`/`TryChangeExpeditionRoute` уже переводили `Phase` немедленно; не хватало только автоматического привода часов, который теперь это подхватывает сам.
+
+### 20.4. Тесты
+
+`Assets/_Project/Tests/EditMode/ContinuousMovementTimeTests.cs` (новый файл, тот же стиль, что `TimedExpeditionActivityTests.cs`/`ContinuousSimulationTests.cs` — `GameState`/`ContinuousSimulationSystem` напрямую, без сцены):
+
+- `HasMovementOrActivityInProgress` — нет экспедиции/`AtLocation` без действия → `false`; `TravellingToLocation`/`ReturningToCastle`/явное времязатратное действие на месте → `true`;
+- герой стоит — предиктор даёт `false`, после `SetPaused` по нему часы не идут при `Advance`;
+- герой движется — часы и позиция/индекс маршрута продвигаются за один и тот же `Advance()` (синхронность);
+- прибытие останавливает и то, и другое — предиктор становится `false`, дальнейший `Advance()` не меняет часы;
+- смена маршрута на ходу стартует ближе к текущей позиции отряда, чем к Дому.
+
+`Chapter01P08Tests.cs` дополнен двумя тестами: подтверждённый состав без реального `ActiveExpedition` не даёт `HasMovementOrActivityInProgress`; `TryStartExpedition` делает предикат `true` немедленно, без единого тика `Advance()` — ровно на этом основана логика привязки `ExpeditionStarted`.
+
+### 20.5. Что не проверено (честно, без Unity)
+
+Unity Editor, компилятор, Test Runner и Play Mode недоступны — не запускались. Это изменение живёт в `MonoBehaviour.Update()` и реальном UI Toolkit дереве (видимость/кликабельность кнопок, `PointerDownEvent` на карте) — ни то, ни другое нельзя честно проверить без живого проекта; корректность оценена только чтением кода и структурными EditMode-тестами на уровне `GameState`/`ContinuousSimulationSystem`. После Pull обязательно:
+
+1. чистая Unity-компиляция и полный EditMode `Run All` (включая `ContinuousMovementTimeTests`);
+2. ручной сценарий раздела 23 исходной инструкции: новая игра, герой у Дома — часы стоят; открыть Журнал/Героя/карту — часы по-прежнему стоят; кликнуть далёкую точку — часы и маркер идут синхронно; дорожное событие останавливает оба; после закрытия события — оба продолжаются; прибытие останавливает оба;
+3. убедиться, что кнопки «Пуск/Пауза» и ×1/×3/×5/×10 нигде не видны и не реагируют на пробел;
+4. пройти P08 N10 → Hero Screen → «ПОДТВЕРДИТЬ СОСТАВ» (герой остаётся у Дома) → клик по «Следу старого русла» на карте (только тут появляются `ActiveExpedition` и `expedition_started`);
+5. изменить маршрут во время движения и убедиться, что новый путь стартует от текущей позиции, а не от Дома или старой цели;
+6. Console без ошибок на всём сценарии.

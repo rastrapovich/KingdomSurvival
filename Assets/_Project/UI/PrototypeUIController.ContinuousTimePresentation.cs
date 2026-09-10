@@ -28,26 +28,15 @@ public partial class PrototypeUIController
             "День " + gameState.Day + " · " +
             ContinuousSimulationSystem.FormatClock(clock.HourOfDay);
 
+        // timeToggleButton скрыт (раздел 1/19 инструкции про карту и время —
+        // ручной Пуск/Пауза больше не часть интерфейса), но текст/tooltip
+        // по-прежнему обновляются на случай отладки через код/инспектор.
         timeToggleButton.text = clock.IsPaused ? "ПУСК" : "ПАУЗА";
         timeToggleButton.tooltip = HasBlockingModalWork()
             ? "Сначала закройте обязательное событие"
             : clock.IsPaused
-                ? "Продолжить течение времени"
-                : "Поставить время на паузу";
-
-        if (continuousSpeedButton != null)
-        {
-            bool fast = clock.SpeedMultiplier ==
-                ContinuousSimulationSystem.FastSpeedMultiplier;
-            continuousSpeedButton.text = fast ? "×3 ✓" : "×3";
-            continuousSpeedButton.tooltip = fast
-                ? "Ускорение ×3 включено. Нажмите для обычной скорости."
-                : "Ускорить течение времени и движение армии в 3 раза.";
-            continuousSpeedButton.style.backgroundColor = fast
-                ? (Color)new Color32(101, 77, 35, 255)
-                : (Color)new Color32(61, 55, 40, 255);
-            continuousSpeedButton.SetEnabled(!isGameOver);
-        }
+                ? "Герой стоит — время стоит"
+                : "Идёт движение или времязатратное действие";
 
         if (openedDecision != null)
         {

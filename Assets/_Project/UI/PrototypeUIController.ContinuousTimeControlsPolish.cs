@@ -1,14 +1,9 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
     private bool continuousControlsPolishInitialized;
-    private Button continuousSpeed1Button;
-    private Button continuousSpeed3Button;
-    private Button continuousSpeed5Button;
-    private Button continuousSpeed10Button;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InitializeContinuousControlsPolishRuntime()
@@ -37,21 +32,21 @@ public partial class PrototypeUIController
             interfaceRoot == null ||
             gameState == null ||
             timeToggleButton == null ||
-            dayLabel == null ||
-            continuousSpeedButton == null)
+            dayLabel == null)
         {
             ScheduleContinuousControlsPolishRetry();
             return;
         }
 
         RebindContinuousTimeButtons();
-        EnsureExtendedSpeedButtons();
         RepositionContinuousDayBox();
 
+        // focusable/Focus() здесь исторически включает клавиатурный ввод
+        // для interfaceRoot вообще — сама пауза по пробелу убрана (раздел
+        // 1/19 инструкции про карту и время), но OnWorldMapLocationCardKeyDown
+        // (PrototypeUIController.WorldMapLocationActions.cs, Escape) всё ещё
+        // полагается на то, что interfaceRoot фокусируем и в фокусе.
         interfaceRoot.focusable = true;
-        interfaceRoot.RegisterCallback<KeyDownEvent>(
-            OnContinuousGlobalKeyDown,
-            TrickleDown.TrickleDown);
         interfaceRoot.Focus();
 
         interfaceRoot.schedule
@@ -73,139 +68,17 @@ public partial class PrototypeUIController
             .ExecuteLater(60);
     }
 
+    // Раздел 20 инструкции про карту и время: ×1/×3/×5/×10 убраны вместе с
+    // ручным Пуском — это QoL для более позднего прохода, не обязательная
+    // часть первой версии "движение = течение времени". Сами Core-методы
+    // (ToggleSpeed/SetSpeedMultiplier/GetSpeedMultiplier) не тронуты — ими
+    // пользуются существующие тесты и, при необходимости, внутренняя логика.
     private void RefreshContinuousControlsPolish()
     {
         if (gameState == null || isGameOver)
-        {
-            RefreshExtendedSpeedButtons();
             return;
-        }
 
-        RefreshExtendedSpeedButtons();
         RepositionContinuousDayBox();
-    }
-
-    private void OnContinuousGlobalKeyDown(KeyDownEvent evt)
-    {
-        if (evt.keyCode != KeyCode.Space)
-            return;
-
-        evt.StopImmediatePropagation();
-
-        if (isGameOver || HasBlockingModalWork())
-            return;
-
-        OnContinuousPauseClicked();
-    }
-
-    private void EnsureExtendedSpeedButtons()
-    {
-        if (continuousSpeed1Button != null ||
-            continuousSpeedButton == null ||
-            continuousSpeedButton.parent == null)
-        {
-            return;
-        }
-
-        VisualElement host = continuousSpeedButton.parent;
-
-        continuousSpeed1Button = CreateExtendedSpeedButton(
-            ContinuousSimulationSystem.NormalSpeedMultiplier);
-        continuousSpeed3Button = CreateExtendedSpeedButton(
-            ContinuousSimulationSystem.FastSpeedMultiplier);
-        continuousSpeed5Button = CreateExtendedSpeedButton(
-            ContinuousSimulationSystem.VeryFastSpeedMultiplier);
-        continuousSpeed10Button = CreateExtendedSpeedButton(
-            ContinuousSimulationSystem.MaximumSpeedMultiplier);
-
-        // Старую toggle-кнопку ×3 скрываем: у неё логика «×1 ↔ ×3», а новый
-        // ряд скоростей должен состоять из четырёх явных переключателей.
-        continuousSpeedButton.style.display = DisplayStyle.None;
-
-        host.Add(continuousSpeed1Button);
-        host.Add(continuousSpeed3Button);
-        host.Add(continuousSpeed5Button);
-        host.Add(continuousSpeed10Button);
-    }
-
-    private Button CreateExtendedSpeedButton(int multiplier)
-    {
-        Button button = new Button(
-            () => OnContinuousExplicitSpeedClicked(multiplier))
-        {
-            text = "×" + multiplier,
-            tooltip = "Скорость стратегического времени ×" + multiplier
-        };
-
-        button.style.width = 52f;
-        button.style.height = 34f;
-        button.style.marginRight = 4f;
-        button.style.color = (Color)new Color32(231, 192, 101, 255);
-        button.style.borderLeftWidth = 1f;
-        button.style.borderRightWidth = 1f;
-        button.style.borderTopWidth = 1f;
-        button.style.borderBottomWidth = 1f;
-        button.style.borderLeftColor = (Color)new Color32(132, 102, 48, 255);
-        button.style.borderRightColor = (Color)new Color32(132, 102, 48, 255);
-        button.style.borderTopColor = (Color)new Color32(132, 102, 48, 255);
-        button.style.borderBottomColor = (Color)new Color32(132, 102, 48, 255);
-        button.style.unityFontStyleAndWeight = FontStyle.Bold;
-        return button;
-    }
-
-    private void OnContinuousExplicitSpeedClicked(int multiplier)
-    {
-        if (isGameOver)
-            return;
-
-        ContinuousSimulationSystem.SetSpeedMultiplier(gameState, multiplier);
-        RefreshContinuousClockOnly();
-        RefreshExtendedSpeedButtons();
-    }
-
-    private void RefreshExtendedSpeedButtons()
-    {
-        if (gameState == null)
-            return;
-
-        int current =
-            ContinuousSimulationSystem.GetSpeedMultiplier(gameState);
-
-        ApplyExtendedSpeedButtonState(
-            continuousSpeed1Button,
-            ContinuousSimulationSystem.NormalSpeedMultiplier,
-            current);
-        ApplyExtendedSpeedButtonState(
-            continuousSpeed3Button,
-            ContinuousSimulationSystem.FastSpeedMultiplier,
-            current);
-        ApplyExtendedSpeedButtonState(
-            continuousSpeed5Button,
-            ContinuousSimulationSystem.VeryFastSpeedMultiplier,
-            current);
-        ApplyExtendedSpeedButtonState(
-            continuousSpeed10Button,
-            ContinuousSimulationSystem.MaximumSpeedMultiplier,
-            current);
-    }
-
-    private void ApplyExtendedSpeedButtonState(
-        Button button,
-        int multiplier,
-        int current)
-    {
-        if (button == null)
-            return;
-
-        bool active = current == multiplier;
-        button.text = "×" + multiplier + (active ? " ✓" : string.Empty);
-        button.tooltip = active
-            ? "Выбрана скорость ×" + multiplier + "."
-            : "Переключить стратегическое время на ×" + multiplier + ".";
-        button.style.backgroundColor = active
-            ? (Color)new Color32(101, 77, 35, 255)
-            : (Color)new Color32(61, 55, 40, 255);
-        button.SetEnabled(!isGameOver);
     }
 
     private void RepositionContinuousDayBox()

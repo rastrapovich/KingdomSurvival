@@ -1,4 +1,5 @@
 using System;
+using KingdomSurvival.Chapter01;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -6,7 +7,6 @@ public partial class PrototypeUIController
 {
     private bool continuousTimeInitialized;
     private GameState continuousBoundGameState;
-    private Button continuousSpeedButton;
     private float continuousDetailsRefreshTimer;
     private bool continuousDebugAutopauseRegistered;
 
@@ -45,9 +45,15 @@ public partial class PrototypeUIController
             return;
         }
 
+        // Модель "движение = течение времени" (раздел 1/19 инструкции):
+        // ручной Пуск/Пауза больше не часть обычного интерфейса — кнопка
+        // остаётся в дереве (не ломает AllRequiredElementsExist и прочие
+        // запросы), но скрыта и не кликабельна. Течение времени полностью
+        // выводится из состояния экспедиции в RefreshAutoTimeState().
+        timeToggleButton.style.display = DisplayStyle.None;
+
         RebindContinuousTimeButtons();
         RegisterContinuousMapInput();
-        EnsureContinuousSpeedButton();
         RegisterContinuousDebugAutopause();
 
         ContinuousSimulationSystem.Reset(gameState);
@@ -69,9 +75,6 @@ public partial class PrototypeUIController
 
     private void RebindContinuousTimeButtons()
     {
-        timeToggleButton.clicked -= OnContinuousPauseClicked;
-        timeToggleButton.clicked += OnContinuousPauseClicked;
-
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
         returnExpeditionButton.clicked -= OnStableExpeditionActionClicked;
         returnExpeditionButton.clicked -= OnContinuousExpeditionActionClicked;
@@ -92,47 +95,6 @@ public partial class PrototypeUIController
         worldMap.RegisterCallback<PointerDownEvent>(
             OnContinuousMapPointerDown,
             TrickleDown.TrickleDown);
-    }
-
-    private void EnsureContinuousSpeedButton()
-    {
-        if (continuousSpeedButton != null)
-            return;
-
-        VisualElement topBar =
-            interfaceRoot.Q<VisualElement>(className: "top-bar");
-
-        if (topBar == null)
-            return;
-
-        continuousSpeedButton = new Button(OnContinuousSpeedClicked)
-        {
-            text = "×3",
-            tooltip = "Ускорить течение времени в 3 раза"
-        };
-
-        continuousSpeedButton.style.width = 58f;
-        continuousSpeedButton.style.height = 34f;
-        continuousSpeedButton.style.marginRight = 6f;
-        continuousSpeedButton.style.backgroundColor =
-            (Color)new Color32(61, 55, 40, 255);
-        continuousSpeedButton.style.color =
-            (Color)new Color32(231, 192, 101, 255);
-        continuousSpeedButton.style.borderLeftWidth = 1f;
-        continuousSpeedButton.style.borderRightWidth = 1f;
-        continuousSpeedButton.style.borderTopWidth = 1f;
-        continuousSpeedButton.style.borderBottomWidth = 1f;
-        continuousSpeedButton.style.borderLeftColor =
-            (Color)new Color32(132, 102, 48, 255);
-        continuousSpeedButton.style.borderRightColor =
-            (Color)new Color32(132, 102, 48, 255);
-        continuousSpeedButton.style.borderTopColor =
-            (Color)new Color32(132, 102, 48, 255);
-        continuousSpeedButton.style.borderBottomColor =
-            (Color)new Color32(132, 102, 48, 255);
-        continuousSpeedButton.style.unityFontStyleAndWeight = FontStyle.Bold;
-
-        topBar.Add(continuousSpeedButton);
     }
 
     private void RegisterContinuousDebugAutopause()
@@ -179,6 +141,8 @@ public partial class PrototypeUIController
 
         if (!isGameOver)
         {
+            RefreshAutoTimeState();
+
             ContinuousSimulationBatch batch =
                 ContinuousSimulationSystem.Advance(
                     gameState,
@@ -249,22 +213,33 @@ public partial class PrototypeUIController
         CheckForDefeat();
     }
 
-    private void OnContinuousPauseClicked()
+    // Единственное место, где решается, идёт ли стратегическое время —
+    // модель "движение = течение времени" (раздел 1/6/7 инструкции).
+    // Вызывается каждый кадр до Advance(), поэтому не нужно расставлять
+    // SetPaused по местам, где экспедиция стартует/останавливается: как
+    // только Phase/ActiveActivity меняются, следующий же кадр это отразит.
+    // Модальные окна и обязательные решения по-прежнему управляют паузой
+    // через PauseForBlockingModal — здесь их работа не переопределяется.
+    private void RefreshAutoTimeState()
     {
-        if (isGameOver || HasBlockingModalWork())
+        if (gameState == null || isGameOver || HasBlockingModalWork())
             return;
 
-        ContinuousSimulationSystem.TogglePause(gameState);
-        RefreshContinuousClockOnly();
-    }
+        bool shouldRun = ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState);
+        ContinuousSimulationSystem.SetPaused(gameState, !shouldRun);
 
-    private void OnContinuousSpeedClicked()
-    {
-        if (isGameOver)
-            return;
-
-        ContinuousSimulationSystem.ToggleSpeed(gameState);
-        RefreshContinuousClockOnly();
+        // P08+: ExpeditionStarted должен означать физическое начало
+        // движения, а не подтверждение состава в Hero Screen/N10 (раздел
+        // 3/18 инструкции про карту и время) — ставится здесь, по факту
+        // того, что отряд действительно тронулся, а не откуда-то из UI
+        // выбора бойцов.
+        if (shouldRun &&
+            gameState.Narrative != null &&
+            gameState.Narrative.HasFlag(Chapter01Ids.Flags.FarRouteUnlocked) &&
+            !gameState.Narrative.HasFlag(Chapter01Ids.Flags.ExpeditionStarted))
+        {
+            Chapter01StoryDirector.HandleStoryExpeditionStarted(gameState);
+        }
     }
 
     private void OnContinuousResearchClicked()

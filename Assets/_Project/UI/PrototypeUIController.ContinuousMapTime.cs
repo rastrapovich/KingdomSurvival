@@ -101,7 +101,7 @@ public partial class PrototypeUIController
                 AddReport(
                     "Приказ на экспедицию отдан. Прямой маршрут: " +
                     distance.ToString("0.0") + " кл. · расчётное время с учётом рельефа: " +
-                    travelTime + ". Армия начнёт движение после снятия паузы.");
+                    travelTime + ". Армия начала движение.");
             }
             else
             {

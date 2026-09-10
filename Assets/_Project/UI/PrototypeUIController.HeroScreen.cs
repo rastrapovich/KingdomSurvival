@@ -1041,33 +1041,28 @@ public partial class PrototypeUIController
         return chip;
     }
 
-    // P08-T03: единственная точка, где реальный состав становится
-    // ActiveExpedition — до этого ExpeditionStarted не выставлен нигде.
-    // Цель — production-координата раскрытой Chapter01OutcomeApplier области
-    // поиска (chapter01.location.old_water_search), не выбор игрока.
+    // Карта = единственный запуск похода (раздел 2/3/4 инструкции про карту
+    // и время): подтверждение состава здесь только фиксирует выбор игрока
+    // и не создаёт ActiveExpedition само по себе — герой остаётся у Дома,
+    // стратегическое время остаётся на месте (RefreshAutoTimeState читает
+    // HasActiveExpedition/Phase, которых тут ещё нет). selectedFighterIds
+    // намеренно не очищается: тот же набор читает клик по карте
+    // (GetSelectedFighterIdsInArmyOrder в IssueContinuousMapOrder), который
+    // и создаёт настоящую экспедицию. ExpeditionStarted ставится не отсюда,
+    // а в PrototypeUIController.ContinuousTime.cs по факту реального
+    // движения — раньше этот флаг ошибочно стоял здесь, сразу по клику.
     private void OnHeroScreenRosterConfirmClicked()
     {
         if (isGameOver || gameState == null)
             return;
 
         List<string> selected = GetSelectedFighterIdsInArmyOrder();
-        bool started = gameState.TryStartExpedition(
-            Chapter01Ids.Locations.OldWaterSearch,
-            selected,
-            out string resultMessage);
+        AddReport(
+            "Состав похода подтверждён: " +
+            (selected.Count > 0 ? "командир и " + GetFighterNames(selected) : "командир один") +
+            ". Выберите цель на карте — отряд начнёт движение сразу после выбора.");
 
-        if (started)
-        {
-            Chapter01StoryDirector.HandleStoryExpeditionStarted(gameState);
-            selectedFighterIds.Clear();
-
-            CommanderData commander = gameState.FindCommander(gameState.ActiveExpedition.CommanderId);
-            if (commander != null)
-                commander.State = CommanderState.InCastle;
-        }
-
-        AddReport(resultMessage);
-        RefreshHeroScreen();
+        CloseHeroScreen();
         RefreshStableUiAfterStateChange();
     }
 

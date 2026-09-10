@@ -36,6 +36,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                 BuildP07Investigation(),
                 BuildP08Departure(),
                 BuildP08Journal(),
+                BuildP08MMapTime(),
                 BuildP09Road(),
                 BuildP10Ford(),
                 BuildP11Agreement(),
@@ -801,11 +802,12 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                     manualChecks: new[]
                     {
                         "Пройти D10 до конца, убедиться, что Экран героя открывается автоматически",
-                        "В picker'е «СОСТАВ ПОХОДА» набрать 0, 1 и 4 бойцов, нажать «ПОДТВЕРДИТЬ СОСТАВ», проверить ActiveExpedition.FighterIds",
+                        "В picker'е «СОСТАВ ПОХОДА» набрать 0, 1 и 4 бойцов, нажать «ПОДТВЕРДИТЬ СОСТАВ» — герой должен остаться у Дома, ActiveExpedition ещё не создан",
+                        "Кликнуть «След старого русла» на карте — только тогда должны появиться ActiveExpedition.FighterIds и chapter01.flag.expedition_started",
                         "Убедиться, что кнопка «ПОДТВЕРДИТЬ СОСТАВ» скрыта вне контекста Главы 01 и после старта похода"
                     },
                     acceptanceCriteria: new[] { "Выбор бойцов физически совпадает с GameState", "0, 1 и 4 бойца — все допустимы" },
-                    implementationNote: "N10 переписан на 5 узлов, заканчивается действием «Выбрать состав похода» без единого эффекта — реальный набор 0–4 бойцов происходит в Экране героя, не в диалоге. Панель «СОСТАВ ПОХОДА» перестала быть презентацией (раньше GetHeroScreenParty() жёстко брала первые 4 из GameState.Fighters, а пустые слоты заполняла существами из UnitDatabase как заглушки) — теперь это реальный picker: слоты читают selectedFighterIds, левый клик по занятому слоту убирает бойца, левый клик по строке «ДОСТУПНЫ В ДОМЕ» (тоже из GameState.Fighters) добавляет, кнопка «ПОДТВЕРДИТЬ СОСТАВ» видна только когда FarRouteUnlocked уже true и ExpeditionStarted ещё false. Подтверждение вызывает GameState.TryStartExpedition к раскрытой P08-T01 области поиска (chapter01.location.old_water_search) и, только при успехе, Chapter01StoryDirector.HandleStoryExpeditionStarted — флаг expedition_started убран из onRevealEffects узла открытия сцены (раньше ставился при простом просмотре текста, до какого-либо реального выбора)."),
+                    implementationNote: "N10 переписан на 5 узлов, заканчивается действием «Выбрать состав похода» без единого эффекта — реальный набор 0–4 бойцов происходит в Экране героя, не в диалоге. Панель «СОСТАВ ПОХОДА» перестала быть презентацией (раньше GetHeroScreenParty() жёстко брала первые 4 из GameState.Fighters, а пустые слоты заполняла существами из UnitDatabase как заглушки) — теперь это реальный picker: слоты читают selectedFighterIds, левый клик по занятому слоту убирает бойца, левый клик по строке «ДОСТУПНЫ В ДОМЕ» (тоже из GameState.Fighters) добавляет, кнопка «ПОДТВЕРДИТЬ СОСТАВ» видна только когда FarRouteUnlocked уже true и ExpeditionStarted ещё false. ОБНОВЛЕНО архитектурной правкой «движение = течение времени»: подтверждение состава больше НЕ вызывает GameState.TryStartExpedition само по себе — оно только фиксирует выбор (отчёт + закрытие Экрана героя), герой остаётся у Дома. Настоящую ActiveExpedition создаёт клик по карте (существующий общий поток, GetSelectedFighterIdsInArmyOrder уже используется там), а expedition_started ставит PrototypeUIController.RefreshAutoTimeState по факту первого реального движения — не Hero Screen и не диалог."),
 
                 Task("P08-T04", "Исправить тексты о «всегда четырёх бойцах»",
                     "Найти и исправить любые реплики/описания, ошибочно утверждающие фиксированный состав из 4 бойцов.",
@@ -894,14 +896,92 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             );
         }
 
+        private static DevelopmentPhaseData BuildP08MMapTime()
+        {
+            return Phase(
+                "P08M_MAP_TIME", "Глобальная карта: движение = течение времени",
+                "Заменить ручной Пуск/Пауза автоматическим приводом: стратегическое время идёт ровно тогда, когда герой физически движется по карте или занят явным времязатратным действием, и стоит во всех остальных случаях. Сюжет открывает возможности (locations/области поиска), маршрут всегда выбирает игрок кликом по карте.",
+                10, true,
+                "Клик по доступной точке сразу начинает движение без отдельных кнопок ПУСК/ОТПРАВИТЬ; часы и позиция отряда синхронно идут только пока он физически движется или занят явным действием; P08 больше не назначает маршрут автоматически.",
+                new[] { "P08J_JOURNAL" },
+
+                Task("P08M-T01", "Убрать ручное управление временем из интерфейса",
+                    "Скрыть кнопку Пуск/Пауза и убрать ×1/×3/×5/×10 — внутренние Pause/Resume/Speed методы Core остаются для системного и тестового использования.",
+                    DevelopmentTaskCategory.UI, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/UI/PrototypeUIController.ContinuousTime.cs",
+                        "Assets/_Project/UI/PrototypeUIController.ContinuousTimeControlsPolish.cs",
+                        "Assets/_Project/UI/PrototypeUIController.ContinuousTimePresentation.cs"
+                    },
+                    manualChecks: new[] { "Убедиться, что кнопка Пуск/Пауза и ряд ×1/×3/×5/×10 не видны нигде в обычном интерфейсе; пробел ничего не переключает" },
+                    acceptanceCriteria: new[] { "Игрок не может вручную запустить/остановить или ускорить стратегическое время" },
+                    implementationNote: "timeToggleButton не удалён из UXML (остаётся в дереве, чтобы не ломать AllRequiredElementsExist и другие запросы по имени), но скрыт (display:none) и больше не кликабелен — OnContinuousPauseClicked удалён. continuousSpeedButton и весь ряд ×1/×3/×5/×10 (EnsureExtendedSpeedButtons/CreateExtendedSpeedButton/OnContinuousExplicitSpeedClicked/RefreshExtendedSpeedButtons/ApplyExtendedSpeedButtonState) удалены вместе со spacebar-хоткеем OnContinuousGlobalKeyDown. interfaceRoot.focusable/Focus() оставлены — от них зависит отдельный несвязанный Escape-хендлер в PrototypeUIController.WorldMapLocationActions.cs. Core-методы ContinuousSimulationSystem.TogglePause/SetPaused/IsPaused/ToggleSpeed/SetSpeedMultiplier/GetSpeedMultiplier не тронуты — ими пользуются существующие тесты (ContinuousSimulationTests.cs, ContinuousTimePolishTests.cs, BuildingSystemTests.cs) и системная логика."),
+
+                Task("P08M-T02", "Единый автоматический привод паузы",
+                    "ContinuousSimulationSystem.HasMovementOrActivityInProgress + PrototypeUIController.RefreshAutoTimeState, вызываемый каждый кадр до Advance().",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
+                    dependencies: new[] { "P08M-T01" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Scripts/Core/ContinuousSimulationClock.cs",
+                        "Assets/_Project/UI/PrototypeUIController.ContinuousTime.cs"
+                    },
+                    manualChecks: new[]
+                    {
+                        "Кликнуть точку на карте — движение и часы должны пойти немедленно, без дополнительных кнопок",
+                        "Дождаться прибытия — часы должны замереть автоматически",
+                        "Во время движения открыть обязательное событие — движение и часы должны остановиться, а после закрытия (если маршрут не сброшен) продолжиться"
+                    },
+                    acceptanceCriteria: new[]
+                    {
+                        "Время идёт синхронно с движением/явным действием и стоит во всех остальных случаях",
+                        "Модальные окна и обязательные решения по-прежнему останавливают и то, и другое"
+                    },
+                    implementationNote: "HasMovementOrActivityInProgress(GameState) — чистый предикат в Core: true при активной экспедиции с HasTimedActivity или Phase in {TravellingToLocation, ReturningToCastle}. RefreshAutoTimeState (ContinuousTime.cs, вызывается в начале Update() до Advance()) пересчитывает его каждый кадр и вызывает SetPaused, но не трогает паузу, пока HasBlockingModalWork() — существующие PauseForBlockingModal/ResumeAfterBlockingModalIfReady (диалоги, обязательные решения) продолжают работать как раньше и не переопределяются: если после их работы состояние движения не соответствует истине, следующий же кадр RefreshAutoTimeState это исправляет (самокорректирующаяся модель, не нужно расставлять SetPaused по местам старта/остановки движения). GameState.TryChangeExpeditionRoute уже строил маршрут от ActiveExpedition.CurrentMapXPercent/YPercent — смена цели на ходу не потребовала изменений."),
+
+                Task("P08M-T03", "P08: состав ≠ поход, ExpeditionStarted по факту движения",
+                    "N10/Hero Screen подтверждают состав похода, но не создают ActiveExpedition — герой остаётся у Дома до клика по карте.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
+                    dependencies: new[] { "P08M-T02" },
+                    relatedFlagIds: new[] { "chapter01.flag.expedition_started" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/UI/PrototypeUIController.HeroScreen.cs",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs",
+                        "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset"
+                    },
+                    manualChecks: new[]
+                    {
+                        "После N10 нажать «ПОДТВЕРДИТЬ СОСТАВ» — герой должен остаться у Дома, ActiveExpedition отсутствует",
+                        "Кликнуть «След старого русла» на карте — только тогда появляются ActiveExpedition и chapter01.flag.expedition_started"
+                    },
+                    acceptanceCriteria: new[] { "Сюжет открывает точку на карте, но никогда не назначает маршрут сам", "expedition_started ставится только по факту реального движения" },
+                    implementationNote: "OnHeroScreenRosterConfirmClicked (HeroScreen.cs) переписан: больше не вызывает GameState.TryStartExpedition/Chapter01StoryDirector.HandleStoryExpeditionStarted — только отчёт о подтверждённом составе и закрытие Экрана героя; selectedFighterIds не очищается, его читает клик по карте через уже существующий общий поток (GetSelectedFighterIdsInArmyOrder в IssueContinuousMapOrder). Chapter01StoryDirector.HandleStoryExpeditionStarted теперь вызывается из PrototypeUIController.RefreshAutoTimeState (P08M-T02), когда FarRouteUnlocked уже true, ExpeditionStarted ещё false и HasMovementOrActivityInProgress уже true — это сразу после того, как клик по карте перевёл Phase в TravellingToLocation, не дожидаясь фактического смещения маркера. developerComment D10 и implementationNote P08-T03 обновлены под новую модель."),
+
+                Task("P08M-T04", "Тесты и Unity-проверка",
+                    "EditMode-тесты на предикат движения/времени и синхронизацию с P08 + ручной прогон в живом UI.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 4,
+                    dependencies: new[] { "P08M-T02", "P08M-T03" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Tests/EditMode/ContinuousMovementTimeTests.cs",
+                        "Assets/_Project/Chapter01/Tests/EditMode/Chapter01P08Tests.cs"
+                    },
+                    manualChecks: new[] { "EditMode Run All", "Ручной сценарий раздела 23 инструкции (Дом → клик по цели → дорожное событие → прибытие) без ошибок Console" },
+                    acceptanceCriteria: new[] { "EditMode Run All зелёный", "Ручной сценарий пройден, часы и маркер визуально синхронны" },
+                    implementationNote: "ContinuousMovementTimeTests.cs (новый файл): матрица HasMovementOrActivityInProgress (нет экспедиции/AtLocation/Travelling/Returning/явное действие), герой стоит → WorldTime не меняется, герой движется → часы и позиция/маршрут растут синхронно за один и тот же Advance(), прибытие останавливает и то, и другое, смена маршрута на ходу стартует ближе к текущей позиции, чем к Дому. Chapter01P08Tests.cs дополнен двумя тестами: подтверждённый состав без реальной экспедиции не даёт HasMovementOrActivityInProgress; TryStartExpedition сразу (без Advance) делает предикат true — ровно на этом основана логика P08M-T03.")
+            );
+        }
+
         private static DevelopmentPhaseData BuildP09Road()
         {
             return Phase(
                 "P09_ROAD", "Сбор отряда и первая дальняя дорога",
                 "Реализовать N11 на существующей физической карте: одна обязательная и одна необязательная дорожная сцена, пассивная проверка пути на Инстинкт+Следопытство, опциональная лагерная сцена.",
-                10, true,
+                11, true,
                 "Дорога выполняет сюжетную функцию, цена пути сохраняется в GameState.",
-                new[] { "P08J_JOURNAL" },
+                new[] { "P08M_MAP_TIME" },
 
                 Task("P09-T01", "N11 — дальняя дорога на физической карте",
                     "Без телепортации, на текущей карте Prototype_Main.",
@@ -939,7 +1019,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P10_FORD", "Старый брод и люди ниже по течению",
                 "Реализовать N12 «Женщина у брода» и N13 «У всех есть дом» с учётом ремонта, предмета, знаний и состава отряда; решающая проверка Характера только там, где меняет цену отношений.",
-                11, true,
+                12, true,
                 "Игрок впервые видит живых людей, которые несут цену решения Дома, и не может свести их к функции «выдать экспозицию».",
                 new[] { "P09_ROAD" },
 
@@ -982,7 +1062,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P11_AGREEMENT", "Раскрытие соглашения и решение о возвращении",
                 "Реализовать N14 (сборка физического/человеческого/мифического свидетельства, гарантированное shared_water_system) и N14½ (идти дальше или возвращаться).",
-                12, true,
+                13, true,
                 "Игрок понимает причинную истину достаточно для выбора, но мир остаётся шире единственного объяснения.",
                 new[] { "P10_FORD" },
 
@@ -1018,7 +1098,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P12_RETURN", "Изменившаяся обратная дорога и Дом",
                 "Реализовать N15 (изменённая обратная дорога) и N16 (серьёзное возвращение домой): Дом встречает игрока последствиями, а не только докладом.",
-                13, true,
+                14, true,
                 "Возвращение доказывает память мира минимум тремя видимыми изменениями.",
                 new[] { "P11_AGREEMENT" },
 
@@ -1047,7 +1127,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P13_COUNCIL", "Совет Дома и итог главы",
                 "Реализовать N17: три направления решения после гарантированного знания, устойчивые флаги результата и отношений, ни одного варианта без цены.",
-                14, true,
+                15, true,
                 "Есть 2–3 устойчиво различимых состояния мира, понятные игроку и пригодные для будущего эха.",
                 new[] { "P12_RETURN" },
 
@@ -1077,7 +1157,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P14_ENCOUNTERS", "Пул региональных встреч и эхо решений",
                 "Добавить 6–10 сильных региональных сцен вокруг готового позвоночника через существующий ExpeditionIncidentSystem; расширять к 50–70 только пакетами после плейтестов.",
-                15, true,
+                16, true,
                 "Повторное прохождение показывает заметную вариативность без потери причинной линии.",
                 new[] { "P13_COUNCIL" },
 
@@ -1106,7 +1186,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P15_BATTLE_BRIDGE", "Боевой мост",
                 "Условный этап: реализуется только если Глава 01 потребует обязательного боя. Если требуется — запускать исключительно существующий BattleSandbox, без второй боевой системы.",
-                16, false,
+                17, false,
                 "Этап остаётся отложенным, пока глава не требует обязательного боя.",
                 null,
 
@@ -1124,7 +1204,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P16_QA_DOCS", "QA, сохранение, регрессии и документация",
                 "Пройти обязательные ветки, попарное покрытие факторов (раздел 19.4), сохранение/загрузку вокруг необратимых выборов, все валидаторы и обновить документацию.",
-                17, true,
+                18, true,
                 "Глава проходится от начала до совета во всех обязательных ветках без тупика, потери состояния и противоречий текста.",
                 new[] { "P13_COUNCIL" },
 

@@ -114,7 +114,7 @@ namespace KingdomSurvival.UILayout
 
             if (background == null)
             {
-                background = CreateImageLayer(BackgroundLayerName);
+                background = CreateSizedImageLayer(BackgroundLayerName);
                 target.Insert(0, background);
             }
 
@@ -124,14 +124,45 @@ namespace KingdomSurvival.UILayout
             else
                 background.style.backgroundImage = new StyleBackground(definition.Texture);
 
-            ApplyImagePresentation(
-                background,
-                definition,
-                referenceResolution,
-                actualResolution,
-                1f,
-                Vector2.zero,
-                false);
+            if (definition.IsPortrait)
+            {
+                background.style.unityBackgroundScaleMode = ScaleMode.StretchToFill;
+
+                Vector2 sourceSize = definition.Sprite != null
+                    ? ResolveSpriteSize(definition.Sprite)
+                    : new Vector2(definition.Texture.width, definition.Texture.height);
+                Vector2 frameSize = ResolveImageFrameSize(
+                    definition,
+                    referenceResolution,
+                    actualResolution);
+                Vector2 offset = ResolveImageOffset(
+                    definition,
+                    referenceResolution,
+                    actualResolution,
+                    Vector2.zero);
+                Vector3 resolvedScale = ResolveImageScale(definition, 1f, false);
+                Rect imageRect = ResolveImageRect(
+                    sourceSize,
+                    frameSize,
+                    definition.ImageMode,
+                    Mathf.Abs(resolvedScale.y),
+                    offset);
+
+                ApplyResolvedImageLayout(
+                    background,
+                    imageRect,
+                    false,
+                    definition.Tint,
+                    definition.Opacity);
+            }
+            else
+            {
+                ApplyLegacyBackgroundLayout(
+                    background,
+                    definition,
+                    referenceResolution,
+                    actualResolution);
+            }
 
             VisualElement dynamicImage = target.Q<VisualElement>(DynamicImageLayerName);
             background.style.display = dynamicImage != null ? DisplayStyle.None : DisplayStyle.Flex;
@@ -202,19 +233,9 @@ namespace KingdomSurvival.UILayout
 
             Rect imageRect = ResolveImageRect(ResolveSpriteSize(sprite), frameSize, mode, magnitude, offset);
 
-            dynamicImage.style.left = imageRect.x;
-            dynamicImage.style.top = imageRect.y;
-            dynamicImage.style.right = StyleKeyword.Auto;
-            dynamicImage.style.bottom = StyleKeyword.Auto;
-            dynamicImage.style.width = imageRect.width;
-            dynamicImage.style.height = imageRect.height;
-            dynamicImage.style.translate = new Translate(0f, 0f);
-            dynamicImage.style.scale = new Scale(new Vector3(flip ? -1f : 1f, 1f, 1f));
-
             Color tint = definition != null ? definition.Tint : Color.white;
             float opacity = definition != null ? definition.Opacity : 1f;
-            tint.a *= opacity;
-            dynamicImage.style.unityBackgroundImageTintColor = tint;
+            ApplyResolvedImageLayout(dynamicImage, imageRect, flip, tint, opacity);
 
             VisualElement background = target.Q<VisualElement>(BackgroundLayerName);
             if (background != null)
@@ -445,21 +466,6 @@ namespace KingdomSurvival.UILayout
             return TextAnchor.UpperLeft;
         }
 
-        private static VisualElement CreateImageLayer(string name)
-        {
-            VisualElement layer = new VisualElement
-            {
-                name = name,
-                pickingMode = PickingMode.Ignore
-            };
-            layer.style.position = Position.Absolute;
-            layer.style.left = 0f;
-            layer.style.right = 0f;
-            layer.style.top = 0f;
-            layer.style.bottom = 0f;
-            return layer;
-        }
-
         /// <summary>
         /// UILayout Rect имеет приоритет над legacy USS-ограничениями размера.
         /// Точные width/height задаются сразу после этого метода; здесь снимаются
@@ -476,10 +482,8 @@ namespace KingdomSurvival.UILayout
         }
 
         /// <summary>
-        /// В отличие от <see cref="CreateImageLayer"/> (растянут на 100%
-        /// рамки — годится для статического фона со ScaleAndCrop), этот слой
-        /// НЕ имеет собственного стартового размера: left/top/width/height
-        /// выставляются каждый раз в <see cref="ApplyDynamicImage"/> по
+        /// Слой не имеет собственного стартового размера: left/top/width/height
+        /// выставляются в <see cref="ApplyBackground"/> или <see cref="ApplyDynamicImage"/> по
         /// <see cref="ResolveImageRect"/> и обычно не совпадают с рамкой —
         /// именно потому, что изображение не обрезано заранее.
         /// </summary>
@@ -494,15 +498,45 @@ namespace KingdomSurvival.UILayout
             return layer;
         }
 
-        private static void ApplyImagePresentation(
+        private static void ApplyResolvedImageLayout(
+            VisualElement imageLayer,
+            Rect imageRect,
+            bool flipX,
+            Color tint,
+            float opacity)
+        {
+            imageLayer.style.left = imageRect.x;
+            imageLayer.style.top = imageRect.y;
+            imageLayer.style.right = StyleKeyword.Auto;
+            imageLayer.style.bottom = StyleKeyword.Auto;
+            imageLayer.style.width = imageRect.width;
+            imageLayer.style.height = imageRect.height;
+            imageLayer.style.translate = new Translate(0f, 0f);
+            imageLayer.style.scale = new Scale(new Vector3(flipX ? -1f : 1f, 1f, 1f));
+
+            tint.a *= Mathf.Clamp01(opacity);
+            imageLayer.style.unityBackgroundImageTintColor = tint;
+        }
+
+        /// <summary>
+        /// Обычный Image может переопределять только фон, не владея Rect.
+        /// Для него сохраняется прежняя привязка слоя к фактическим границам
+        /// USS-элемента. Полный imageRect обязателен именно для Portrait,
+        /// который всегда владеет своей preset-рамкой.
+        /// </summary>
+        private static void ApplyLegacyBackgroundLayout(
             VisualElement imageLayer,
             UILayoutElementDefinition definition,
             Vector2 referenceResolution,
-            Vector2 actualResolution,
-            float additionalScale,
-            Vector2 normalizedFrameOffset,
-            bool flipX)
+            Vector2 actualResolution)
         {
+            imageLayer.style.left = 0f;
+            imageLayer.style.right = 0f;
+            imageLayer.style.top = 0f;
+            imageLayer.style.bottom = 0f;
+            imageLayer.style.width = StyleKeyword.Auto;
+            imageLayer.style.height = StyleKeyword.Auto;
+
             Color tint = definition.Tint;
             tint.a *= definition.Opacity;
             imageLayer.style.unityBackgroundImageTintColor = tint;
@@ -512,9 +546,9 @@ namespace KingdomSurvival.UILayout
                 definition,
                 referenceResolution,
                 actualResolution,
-                normalizedFrameOffset);
+                Vector2.zero);
             imageLayer.style.translate = new Translate(offset.x, offset.y);
-            imageLayer.style.scale = new Scale(ResolveImageScale(definition, additionalScale, flipX));
+            imageLayer.style.scale = new Scale(ResolveImageScale(definition, 1f, false));
         }
 
         private static void ResolveResolutionScale(

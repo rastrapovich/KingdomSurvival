@@ -1,7 +1,9 @@
 {
   "name": "KingdomSurvival.UILayout",
   "rootNamespace": "KingdomSurvival.UILayout",
-  "references": [],
+  "references": [
+    "KingdomSurvival.Core"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

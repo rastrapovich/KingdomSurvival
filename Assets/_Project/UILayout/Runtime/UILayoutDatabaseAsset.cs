@@ -36,7 +36,22 @@ namespace KingdomSurvival.UILayout
         Text,
         Image,
         Button,
-        Container
+        Container,
+        Portrait
+    }
+
+    public static class UILayoutPortraitRect
+    {
+        public static Rect ResizeKeepingCenter(Rect source, PortraitSize size)
+        {
+            PortraitSizeDefinition definition = PortraitSizeTable.Get(size);
+            Vector2 center = source.center;
+            return new Rect(
+                center.x - definition.Width * 0.5f,
+                center.y - definition.Height * 0.5f,
+                definition.Width,
+                definition.Height);
+        }
     }
 
     [Serializable]
@@ -56,6 +71,7 @@ namespace KingdomSurvival.UILayout
         [SerializeField] private string displayName = string.Empty;
         [SerializeField] private string parentId = string.Empty;
         [SerializeField] private UILayoutElementKind kind = UILayoutElementKind.Panel;
+        [SerializeField] private PortraitSize portraitSize = PortraitSize.M;
         [SerializeField] private string targetName = string.Empty;
         [SerializeField] private bool overrideRect;
         [SerializeField] private bool overrideBackground;
@@ -80,6 +96,7 @@ namespace KingdomSurvival.UILayout
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? id : displayName;
         public string ParentId => parentId ?? string.Empty;
         public UILayoutElementKind Kind => kind;
+        public PortraitSize PortraitSize => portraitSize;
 
         /// <summary>
         /// Имя элемента в UXML, к которому привязывается запись. Если не задано,
@@ -91,7 +108,9 @@ namespace KingdomSurvival.UILayout
         public bool OverrideBackground => overrideBackground;
         public bool OverrideText => overrideText;
         public string PreviewText => previewText ?? string.Empty;
-        public Rect Rect => rect;
+        public Rect Rect => IsPortrait
+            ? UILayoutPortraitRect.ResizeKeepingCenter(rect, portraitSize)
+            : rect;
         public Sprite Sprite => sprite;
         public Texture2D Texture => texture;
         public UILayoutImageMode ImageMode => imageMode;
@@ -112,10 +131,91 @@ namespace KingdomSurvival.UILayout
         /// Текстовые свойства применимы к элементу.
         /// </summary>
         public bool IsTextual => kind == UILayoutElementKind.Text || kind == UILayoutElementKind.Button;
+        public bool IsPortrait => kind == UILayoutElementKind.Portrait;
+        public bool SupportsFreeResize => !IsPortrait;
 
-        public void SetRect(Rect value) => rect = value;
+        public void SetKind(UILayoutElementKind value)
+        {
+            if (kind == value)
+                return;
+
+            if (value == UILayoutElementKind.Portrait)
+            {
+                portraitSize = PortraitSizeTable.FindNearest(rect.width, rect.height);
+                overrideRect = false;
+                overrideBackground = false;
+                overrideText = false;
+            }
+
+            kind = value;
+            NormalizePortraitFrame();
+        }
+
+        public void SetRect(Rect value)
+        {
+            if (IsPortrait)
+            {
+                PortraitSizeDefinition definition = PortraitSizeTable.Get(portraitSize);
+                value.width = definition.Width;
+                value.height = definition.Height;
+            }
+
+            rect = value;
+        }
+
+        public void SetPortraitSize(PortraitSize value)
+        {
+            Rect current = Rect;
+            portraitSize = PortraitSizeTable.Get(value).Size;
+            rect = UILayoutPortraitRect.ResizeKeepingCenter(current, portraitSize);
+        }
+
         public void SetImageScale(float value) => imageScale = Mathf.Max(0.05f, value);
         public void SetImageOffset(Vector2 value) => imageOffset = value;
+
+        public bool HasCanonicalPortraitFrame()
+        {
+            if (!IsPortrait)
+                return true;
+
+            PortraitSizeDefinition definition = PortraitSizeTable.Get(portraitSize);
+            return portraitSize == definition.Size &&
+                   Mathf.Approximately(rect.width, definition.Width) &&
+                   Mathf.Approximately(rect.height, definition.Height) &&
+                   imageMode != UILayoutImageMode.Stretch;
+        }
+
+        public bool NormalizePortraitFrame()
+        {
+            if (!IsPortrait)
+                return false;
+
+            PortraitSize normalizedSize = PortraitSizeTable.Get(portraitSize).Size;
+            Rect normalized = UILayoutPortraitRect.ResizeKeepingCenter(rect, normalizedSize);
+            bool changed = portraitSize != normalizedSize ||
+                           !Mathf.Approximately(rect.x, normalized.x) ||
+                           !Mathf.Approximately(rect.y, normalized.y) ||
+                           !Mathf.Approximately(rect.width, normalized.width) ||
+                           !Mathf.Approximately(rect.height, normalized.height);
+            portraitSize = normalizedSize;
+            rect = normalized;
+
+            if (imageMode == UILayoutImageMode.Stretch)
+            {
+                imageMode = UILayoutImageMode.Cover;
+                changed = true;
+            }
+
+            if (overrideRect || overrideBackground || overrideText)
+            {
+                overrideRect = false;
+                overrideBackground = false;
+                overrideText = false;
+                changed = true;
+            }
+
+            return changed;
+        }
 
         public void ResetImageTransform()
         {
@@ -209,6 +309,36 @@ namespace KingdomSurvival.UILayout
             return null;
         }
 
+        /// <summary>
+        /// Миграция и защитная нормализация: любой элемент типа Portrait
+        /// хранит только канонический preset 5:7. Центр рамки и настройки
+        /// изображения при этом не меняются.
+        /// </summary>
+        public int NormalizePortraitFrames()
+        {
+            int changed = 0;
+            for (int screenIndex = 0; screenIndex < Screens.Count; screenIndex++)
+            {
+                UILayoutScreenDefinition screen = Screens[screenIndex];
+                if (screen == null)
+                    continue;
+
+                for (int elementIndex = 0; elementIndex < screen.Elements.Count; elementIndex++)
+                {
+                    UILayoutElementDefinition element = screen.Elements[elementIndex];
+                    if (element != null && element.NormalizePortraitFrame())
+                        changed++;
+                }
+            }
+
+            return changed;
+        }
+
+        private void OnValidate()
+        {
+            NormalizePortraitFrames();
+        }
+
         public void CollectValidationIssues(List<string> issues)
         {
             if (issues == null)
@@ -252,6 +382,12 @@ namespace KingdomSurvival.UILayout
                     issues.Add(screen.Id + ": повторяющийся ID элемента " + element.Id + ".");
                 if (element.Rect.width <= 0f || element.Rect.height <= 0f)
                     issues.Add(screen.Id + "/" + element.Id + ": ширина и высота должны быть больше нуля.");
+                if (!element.HasCanonicalPortraitFrame())
+                {
+                    issues.Add(
+                        screen.Id + "/" + element.Id +
+                        ": Portrait должен использовать канонический preset 5:7 и режим Cover/Contain.");
+                }
                 if (element.FontSize <= 0)
                     issues.Add(screen.Id + "/" + element.Id + ": размер шрифта должен быть больше нуля.");
                 if (element.OverrideText && !element.IsTextual)

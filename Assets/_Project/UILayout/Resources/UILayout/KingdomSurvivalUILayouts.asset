@@ -81,7 +81,7 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 651.7008
+        x: 1215.2026
         y: -11.890398
         width: 647.15784
         height: 1106.7888
@@ -102,7 +102,7 @@ MonoBehaviour:
       displayName: "\u041F\u043E\u0440\u0442\u0440\u0435\u0442"
       parentId: overlay
       kind: 5
-      portraitSize: 3
+      portraitSize: 2
       targetName: narrative-dialogue-portrait
       overrideRect: 0
       overrideBackground: 0
@@ -110,10 +110,10 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 396.52686
-        y: 72.40167
-        width: 300
-        height: 420
+        x: 1053.375
+        y: 113.50414
+        width: 200
+        height: 280
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -139,8 +139,8 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 287.11072
-        y: 482.45422
+        x: 840.98004
+        y: 395.76163
         width: 372.25385
         height: 55.579067
       sprite: {fileID: 0}
@@ -168,8 +168,8 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 197.97003
-        y: 515.4011
+        x: 751.83936
+        y: 440.74918
         width: 459.84024
         height: 57.28574
       sprite: {fileID: 0}
@@ -197,10 +197,10 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 732.73346
-        y: 55.29597
-        width: 483.34863
-        height: 470.67197
+        x: 1310.6841
+        y: 74.56099
+        width: 521.87866
+        height: 482.71262
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -226,10 +226,10 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 733.6755
-        y: 532.57043
-        width: 483.34866
-        height: 514.3319
+        x: 1311.6261
+        y: 559.0598
+        width: 521.8787
+        height: 509.51566
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0

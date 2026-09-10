@@ -35,6 +35,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                 BuildP06RepairChoice(),
                 BuildP07Investigation(),
                 BuildP08Departure(),
+                BuildP08Journal(),
                 BuildP09Road(),
                 BuildP10Ford(),
                 BuildP11Agreement(),
@@ -815,14 +816,92 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             );
         }
 
+        private static DevelopmentPhaseData BuildP08Journal()
+        {
+            return Phase(
+                "P08J_JOURNAL", "Журнал целей — v1",
+                "Read-only слой поверх GameState/NarrativeState: кнопка «Журнал» показывает основную и опциональные цели P08 понятным игроку текстом, ничего не решает и не хранит о сюжетном прогрессе. Не QuestManager, не QuestDatabase, не второй источник истины.",
+                9, true,
+                "Игрок видит, зачем он идёт; неузнанные дополнительные цели не спойлерятся; цель меняется вслед за настоящим состоянием мира без AddQuest; журнал не создаёт второй источник сюжетной истины.",
+                new[] { "P08_DEPARTURE" },
+
+                Task("P08J-T01", "Модель отображения целей",
+                    "JournalGoalCategory/JournalGoalState/JournalGoalViewData — маленькая read-only модель, без сохранения прогресса.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Chapter01/Runtime/Chapter01JournalProvider.cs",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01Ids.cs"
+                    },
+                    acceptanceCriteria: new[] { "Модель не хранит состояние — только переносит уже существующее" },
+                    implementationNote: "JournalGoalCategory (Main/Optional), JournalGoalState (Hidden/Active/Completed/Failed), JournalGoalViewData (Id/Title/Description/CurrentStep/RevisionId/Category/State) — все поля read-only-проекции, ни одного сохраняемого. Chapter01Ids.JournalGoals — отдельная секция стабильных ID (OldWaterTrail/SecondLoaf/SevenToothGauge), намеренно НЕ переиспользует Knowledge ID (chapter01.knowledge.seven_tooth_object и chapter01.journal.goal.seven_tooth_gauge — разные сущности, раздел 2 инструкции)."),
+
+                Task("P08J-T02", "Экран и кнопка «Журнал»",
+                    "Отдельный partial-контроллер по образцу Hero Screen, программный fullscreen overlay, вкладки Цели/Хроника (Хроника задизейблена в v1).",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
+                    dependencies: new[] { "P08J-T01" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/UI/PrototypeUIController.Journal.cs",
+                        "Assets/_Project/UI/PrototypeUIController.cs",
+                        "Assets/_Project/UI/PrototypeUIController.HeroScreen.cs",
+                        "Assets/_Project/UI/PrototypeUIController.StableUI.cs",
+                        "Assets/_Project/UI/Prototype/Prototype_Main.uxml",
+                        "Assets/_Project/UI/Prototype/Prototype_Shell.uss"
+                    },
+                    manualChecks: new[]
+                    {
+                        "Открыть Journal при закрытом Hero Screen и наоборот — второй overlay должен закрывать первый",
+                        "Переход Столица/Экспедиция должен закрывать открытый Journal"
+                    },
+                    acceptanceCriteria: new[] { "Journal и Hero Screen не накладываются друг на друга", "Столица/Экспедиция закрывают Journal" },
+                    implementationNote: "PrototypeUIController.Journal.cs полностью программный (без UXML/USS под сам экран), по образцу HeroScreen.cs — у Hero Screen тоже нет отдельного .uss-файла, поэтому решено не заводить Prototype_Journal.uss отдельно, а переиспользовать существующие приватные хелперы HeroScreen.cs (CreateHeroScreenPanel/SetHeroScreenBorder/StyleHeroScreenButton/цвета) — доступны напрямую, т.к. это один и тот же partial class. nav-journal-button добавлена в Prototype_Main.uxml после nav-hero-button, .nav-journal — в Prototype_Shell.uss рядом с .nav-capital/.nav-expedition/.nav-hero. Взаимное закрытие: OpenHeroScreen()/OpenJournal() каждый закрывает другой overlay первым; OnStableNavigationChanged (Столица/Экспедиция) дополнительно закрывает Journal. Хроника — Button с SetEnabled(false) и tooltip, KOРОЛЕВСКИЕ ДОНЕСЕНИЯ не тронуты."),
+
+                Task("P08J-T03", "Основная и дополнительные цели P08",
+                    "Chapter01JournalProvider.Build(gameState) реализует «Старый след» (Main, revision :prepare/:travel) и опциональные «Второй хлеб»/«Семь зубцов» через существующий GetDepartureOptionalGoals.",
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
+                    dependencies: new[] { "P08J-T01" },
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01JournalProvider.cs" },
+                    acceptanceCriteria: new[]
+                    {
+                        "До FarRouteUnlocked записей P08 в журнале нет вообще, даже при искусственно выставленных optional-знаниях",
+                        "Опциональные цели точно соответствуют Chapter01StoryDirector.GetDepartureOptionalGoals"
+                    },
+                    implementationNote: "Build(gameState) возвращает пустой список до HasFlag(FarRouteUnlocked). «Старый след» — единственная Main-цель, RevisionId переключается между :prepare/:travel по ExpeditionStarted при том же Id (раздел 6/7/34 инструкции: тот же Goal ID, меняется Revision и CurrentStep, а не создаётся вторая запись). Опциональные цели построены строго через Chapter01StoryDirector.GetDepartureOptionalGoals(state) — условие SecondLoafIsRation+OldCustom/SevenToothObject не продублировано вручную. Завершение (Completed) сознательно не реализовано — P10/P11 ещё не существуют (раздел 11/36 инструкции)."),
+
+                Task("P08J-T04", "Новые/обновлённые записи",
+                    "Индикатор НОВОЕ/ОБНОВЛЕНО по RevisionId, session-only seenJournalRevisionIds, точка «•» на кнопке Journal.",
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 4,
+                    dependencies: new[] { "P08J-T02", "P08J-T03" },
+                    fileReferences: new[] { "Assets/_Project/UI/PrototypeUIController.Journal.cs" },
+                    manualChecks: new[]
+                    {
+                        "Пройти N09 в живом UI, убедиться, что кнопка получает «•», а «Старый след» помечена НОВОЕ",
+                        "Кликнуть цель — метка должна исчезнуть только у неё",
+                        "Пройти N10/подтвердить состав — кнопка должна снова получить «•»"
+                    },
+                    acceptanceCriteria: new[] { "Запись помечается прочитанной только после клика по ней, не при простом открытии журнала" },
+                    implementationNote: "seenJournalRevisionIds (HashSet<string>, session-only) хранит увиденные RevisionId, не Id целей и не сюжетный прогресс — очищается в StartNewGame() вместе с остальным сеансовым UI-состоянием. v1 использует один badge «НОВОЕ» и для впервые появившихся, и для обновлённых записей (раздел 26 инструкции: различение НОВОЕ/ОБНОВЛЕНО явно разрешено упростить). Отметка «просмотрено» ставится только в SelectJournalGoal (клик по строке), не при открытии Journal. Кнопка «Журнал •»/RefreshJournalNotificationState подключена и к RefreshStableUiAfterStateChange, и к RefreshInterface — второе обязательно, т.к. завершение N09/N10 идёт через PrototypeUIController.Narrative.cs → RefreshInterface, не через StableUI-цикл."),
+
+                Task("P08J-T05", "Тесты и Unity-проверка",
+                    "Chapter01JournalTests.cs по матрице из инструкции + ручной прогон в живом UI.",
+                    DevelopmentTaskCategory.Test, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 5,
+                    dependencies: new[] { "P08J-T03", "P08J-T04" },
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Tests/EditMode/Chapter01JournalTests.cs" },
+                    manualChecks: new[] { "EditMode Run All", "Полный ручной сценарий раздела 42 инструкции от новой игры до Journal после N10" },
+                    acceptanceCriteria: new[] { "EditMode Run All зелёный", "Ручной сценарий из инструкции пройден без ошибок Console" },
+                    implementationNote: "Chapter01JournalTests.cs: null-guard (gameState/Narrative), пусто до FarRouteUnlocked даже с искусственными optional-знаниями, только основная цель, только хлеб, только калибр, все три, opционал точно совпадает с GetDepartureOptionalGoals на всех 4 комбинациях, обновление CurrentStep/RevisionId при ExpeditionStarted с тем же Id, отсутствие дублей Id, Build не мутирует Flags/Knowledge (сравнение снимков до/после).")
+            );
+        }
+
         private static DevelopmentPhaseData BuildP09Road()
         {
             return Phase(
                 "P09_ROAD", "Сбор отряда и первая дальняя дорога",
                 "Реализовать N11 на существующей физической карте: одна обязательная и одна необязательная дорожная сцена, пассивная проверка пути на Инстинкт+Следопытство, опциональная лагерная сцена.",
-                9, true,
+                10, true,
                 "Дорога выполняет сюжетную функцию, цена пути сохраняется в GameState.",
-                new[] { "P08_DEPARTURE" },
+                new[] { "P08J_JOURNAL" },
 
                 Task("P09-T01", "N11 — дальняя дорога на физической карте",
                     "Без телепортации, на текущей карте Prototype_Main.",
@@ -860,7 +939,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P10_FORD", "Старый брод и люди ниже по течению",
                 "Реализовать N12 «Женщина у брода» и N13 «У всех есть дом» с учётом ремонта, предмета, знаний и состава отряда; решающая проверка Характера только там, где меняет цену отношений.",
-                10, true,
+                11, true,
                 "Игрок впервые видит живых людей, которые несут цену решения Дома, и не может свести их к функции «выдать экспозицию».",
                 new[] { "P09_ROAD" },
 
@@ -903,7 +982,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P11_AGREEMENT", "Раскрытие соглашения и решение о возвращении",
                 "Реализовать N14 (сборка физического/человеческого/мифического свидетельства, гарантированное shared_water_system) и N14½ (идти дальше или возвращаться).",
-                11, true,
+                12, true,
                 "Игрок понимает причинную истину достаточно для выбора, но мир остаётся шире единственного объяснения.",
                 new[] { "P10_FORD" },
 
@@ -939,7 +1018,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P12_RETURN", "Изменившаяся обратная дорога и Дом",
                 "Реализовать N15 (изменённая обратная дорога) и N16 (серьёзное возвращение домой): Дом встречает игрока последствиями, а не только докладом.",
-                12, true,
+                13, true,
                 "Возвращение доказывает память мира минимум тремя видимыми изменениями.",
                 new[] { "P11_AGREEMENT" },
 
@@ -968,7 +1047,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P13_COUNCIL", "Совет Дома и итог главы",
                 "Реализовать N17: три направления решения после гарантированного знания, устойчивые флаги результата и отношений, ни одного варианта без цены.",
-                13, true,
+                14, true,
                 "Есть 2–3 устойчиво различимых состояния мира, понятные игроку и пригодные для будущего эха.",
                 new[] { "P12_RETURN" },
 
@@ -998,7 +1077,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P14_ENCOUNTERS", "Пул региональных встреч и эхо решений",
                 "Добавить 6–10 сильных региональных сцен вокруг готового позвоночника через существующий ExpeditionIncidentSystem; расширять к 50–70 только пакетами после плейтестов.",
-                14, true,
+                15, true,
                 "Повторное прохождение показывает заметную вариативность без потери причинной линии.",
                 new[] { "P13_COUNCIL" },
 
@@ -1027,7 +1106,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P15_BATTLE_BRIDGE", "Боевой мост",
                 "Условный этап: реализуется только если Глава 01 потребует обязательного боя. Если требуется — запускать исключительно существующий BattleSandbox, без второй боевой системы.",
-                15, false,
+                16, false,
                 "Этап остаётся отложенным, пока глава не требует обязательного боя.",
                 null,
 
@@ -1045,7 +1124,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             return Phase(
                 "P16_QA_DOCS", "QA, сохранение, регрессии и документация",
                 "Пройти обязательные ветки, попарное покрытие факторов (раздел 19.4), сохранение/загрузку вокруг необратимых выборов, все валидаторы и обновить документацию.",
-                16, true,
+                17, true,
                 "Глава проходится от начала до совета во всех обязательных ветках без тупика, потери состояния и противоречий текста.",
                 new[] { "P13_COUNCIL" },
 

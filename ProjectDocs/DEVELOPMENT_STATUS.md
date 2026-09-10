@@ -712,3 +712,65 @@ Unity Editor, компилятор и Test Runner недоступны — не 
 3. **N10 → живой UI**: пройти диалог до конца, убедиться, что Экран героя открывается сам; набрать 0, затем 4 бойцов, нажать «ПОДТВЕРДИТЬ СОСТАВ», проверить `ActiveExpedition.FighterIds` и что кнопка исчезает после старта похода;
 4. убедиться, что кнопка «ПОДТВЕРДИТЬ СОСТАВ» не видна вне контекста Главы 01 (обычный поход не сломан, по-прежнему отправляется кликом по карте);
 5. на карте увидеть «След старого русла» сразу после решения в N09 без ошибок Console.
+
+## 19. P08J «Журнал целей — v1» — 10.09.2026
+
+Read-only слой поверх `GameState`/`NarrativeState`: кнопка «Журнал» показывает основную и опциональные цели P08 понятным игроку текстом. Никакого `QuestManager`/`QuestDatabase`/quest-флагов/счётчика улик/второго save — журнал полностью пересобирается из уже существующего состояния при каждом открытии, ровно тем же способом, каким `Chapter01StoryDirector` уже читает `NarrativeState` вместо хранения второй копии прогресса.
+
+### 19.1. Модель и `Chapter01JournalProvider`
+
+`JournalGoalCategory` (Main/Optional), `JournalGoalState` (Hidden/Active/Completed/Failed), `JournalGoalViewData` (Id/Title/Description/CurrentStep/RevisionId/Category/State) — новый файл `Assets/_Project/Chapter01/Runtime/Chapter01JournalProvider.cs`. `Chapter01Ids.JournalGoals` — отдельная секция стабильных ID (`chapter01.journal.goal.old_water_trail`/`second_loaf`/`seven_tooth_gauge`), намеренно **не** переиспользует Knowledge ID: `chapter01.knowledge.seven_tooth_object` (факт, который герой узнал) и `chapter01.journal.goal.seven_tooth_gauge` (запись журнала про поход) — разные сущности, пусть сейчас и связаны условием.
+
+`Chapter01JournalProvider.Build(gameState)`:
+
+- пустой список, если `gameState == null` или `gameState.Narrative == null`;
+- пустой список до `HasFlag(FarRouteUnlocked)` — **даже** если optional-знания уже выставлены (например Debug-способом): сначала решение N09, потом Journal-цели (раздел 9 инструкции);
+- «Старый след» (Main) — единственная обязательная цель. `RevisionId`/`CurrentStep` переключаются между `:prepare` («Собрать отряд и подготовиться к выходу.») и `:travel` («Следовать по старому ходу воды за пределы знакомых дорог.») по `HasFlag(ExpeditionStarted)` — **тот же** `Id` в обоих состояниях, не вторая запись;
+- «Второй хлеб»/«Семь зубцов» (Optional) — добавляются строго через уже существующий `Chapter01StoryDirector.GetDepartureOptionalGoals(state)`, условие не продублировано вручную;
+- завершение (`Completed`) сознательно не реализовано — P10/P11 ещё не существуют, значит некому дать журналу реальный ответ (раздел 11/36 инструкции: не придумывать заранее `SecondLoafQuestCompleted`/`SevenTeethQuestCompleted`).
+
+### 19.2. Экран «Журнал»
+
+Новый `Assets/_Project/UI/PrototypeUIController.Journal.cs` — программный fullscreen overlay по архитектурному образцу Hero Screen (у него тоже нет отдельного `.uss`-файла под сам экран, поэтому `Prototype_Journal.uss` решено не заводить — стили инлайновые, поверх уже существующих приватных хелперов `HeroScreen.cs`: `CreateHeroScreenPanel`/`SetHeroScreenBorder`/`StyleHeroScreenButton`/цвета — доступны напрямую, потому что `PrototypeUIController` один и тот же partial class). Две колонки: слева список целей (секции ОСНОВНАЯ ЦЕЛЬ / ДОПОЛНИТЕЛЬНЫЕ / ЗАВЕРШЁННЫЕ, каждая скрывается при `display: None`, если пуста), справа — деталь выбранной цели (Category/Title/Description/ТЕКУЩИЙ ШАГ). Вкладка «ХРОНИКА» существует, но `SetEnabled(false)` с tooltip «Хроника событий будет подключена позже» — «КОРОЛЕВСКИЕ ДОНЕСЕНИЯ» не тронуты и не подменяют её.
+
+`nav-journal-button` добавлена в `Prototype_Main.uxml` после `nav-hero-button` (Столица | Экспедиция | Герой | Журнал), `.nav-journal` — в `Prototype_Shell.uss` рядом с остальными nav-кнопками.
+
+Взаимное исключение overlay (раздел 20 инструкции): `OpenJournal()` вызывает `CloseHeroScreen()`, `OpenHeroScreen()` вызывает `CloseJournal()`; `OnStableNavigationChanged()` (Столица/Экспедиция) дополнительно закрывает Journal. Никакой новой паузы или Update-цикла — `RefreshJournal()` вызывается только при открытии и из уже существующих точек централизованного refresh.
+
+### 19.3. НОВОЕ / индикатор на кнопке
+
+`seenJournalRevisionIds` (`HashSet<string>`, поле `PrototypeUIController`) хранит просмотренные `RevisionId` — **не** сюжетный прогресс, чисто UI-пометка текущей игровой сессии; очищается в `StartNewGame()` вместе с остальным сеансовым состоянием интерфейса (`selectedFighterIds` и т. п.), при перезапуске игры записи могут снова показаться непрочитанными — это принятая временная граница (раздел 29 инструкции), в `SaveSystem` ради неё не полезли.
+
+v1 использует один badge «НОВОЕ» и для впервые появившихся, и для обновлённых записей — раздел 26 инструкции явно разрешил это упрощение вместо различения НОВОЕ/ОБНОВЛЕНО. Запись помечается просмотренной только по клику на неё (`SelectJournalGoal`), не при простом открытии журнала. Кнопка получает «Журнал •», если среди видимых целей есть хотя бы одна с непросмотренным `RevisionId`.
+
+`RefreshJournalNotificationState()`/условный `RefreshJournal()` подключены в **двух** местах: в `RefreshStableUiAfterStateChange()` (как и просил раздел 32 инструкции) и дополнительно в `RefreshInterface()` — потому что завершение N09/N10 идёт через `PrototypeUIController.Narrative.cs` → `CloseNarrativeDialogue()` → `RefreshInterface()`, а не через `RefreshStableUiAfterStateChange()`; без второй точки подключения индикатор на кнопке отставал бы до следующего несвязанного действия игрока.
+
+### 19.4. Производственный трекер
+
+`DevelopmentPlanSeedData.cs`: новая фаза `P08J_JOURNAL` (order 9) между `P08_DEPARTURE` и `P09_ROAD`, зависимость `P08J_JOURNAL → P08_DEPARTURE`; `P09_ROAD` переключен с зависимости `P08_DEPARTURE` на `P08J_JOURNAL`. Порядок фаз `P09`…`P16` сдвинут на +1 (10…17). Пять задач P08J-T01…T05.
+
+### 19.5. Тесты
+
+`Chapter01JournalTests.cs` добавлен:
+
+- `Build(null)`/`Build(gameState с Narrative == null)` — пустой список;
+- пусто до `FarRouteUnlocked`, даже с искусственно выставленными всеми тремя optional-знаниями;
+- только `FarRouteUnlocked` → ровно одна цель (`OldWaterTrail`, Main, Active);
+- только хлеб / только калибр / оба — точный состав опциональных целей;
+- `OptionalGoals_MatchStoryDirectorApi` на всех 4 комбинациях знаний — число и состав опциональных Journal-целей совпадает с `Chapter01StoryDirector.GetDepartureOptionalGoals`, защита от рассинхронизации D09/Journal;
+- обновление основной цели: `CurrentStep`/`RevisionId` меняются на `:travel` при `ExpeditionStarted`, `Id` остаётся тем же;
+- отсутствие дублирующихся `JournalGoalViewData.Id`;
+- `Build` не мутирует `NarrativeState.Flags`/`Knowledge` (сравнение снимков до/после).
+
+### 19.6. Что не проверено (честно, без Unity)
+
+Unity Editor, компилятор и Test Runner недоступны — не запускались. Новые `.cs`-файлы (`Chapter01JournalProvider.cs`, `PrototypeUIController.Journal.cs`, `Chapter01JournalTests.cs`) не получили `.meta`-файлов — они появятся при следующем открытии проекта в Unity, как и раньше в этой сессии (ни у одного файла, созданного без Unity, `.meta` пока нет). UI Journal визуально не проверялся вовсе — не было возможности запустить Play Mode; расположение колонок (33%/67%), поведение `ScrollView` при переполнении и реальный вид badge «НОВОЕ» нужно увидеть глазами. После Pull обязательно:
+
+1. чистая Unity-компиляция и полный EditMode `Run All` (включая `Chapter01JournalTests`);
+2. новая игра/состояние до N09 — кнопка «Журнал» существует, открытие показывает пустой список без заголовков секций;
+3. пройти N09 (через Debug Narrative) → кнопка получает «•», «Старый след» видна с меткой НОВОЕ, 0–2 опциональные цели по реальным знаниям;
+4. кликнуть «Старый след» — деталь справа заполняется, метка НОВОЕ исчезает именно у неё;
+5. закрыть Journal, открыть Hero Screen — Journal не должен быть виден одновременно;
+6. пройти N10, подтвердить реальный состав — Journal снова получает «•», «Старый след» тот же `Id`, но `CurrentStep` уже про путешествие;
+7. переход Столица/Экспедиция закрывает открытый Journal;
+8. Console без ошибок на всём сценарии.

@@ -121,6 +121,7 @@
                 <ui:Button name="nav-capital-button" text="Столица" tooltip="Столица" class="nav-button shell-nav-button nav-capital" />
                 <ui:Button name="nav-expeditions-button" text="Экспедиция" tooltip="Экспедиции" class="nav-button shell-nav-button nav-expedition" />
                 <ui:Button name="nav-hero-button" text="Герой" tooltip="Экран героя: состав похода, характеристики, снаряжение" class="nav-button shell-nav-button nav-hero" />
+                <ui:Button name="nav-journal-button" text="Журнал" tooltip="Цели и хроника" class="nav-button shell-nav-button nav-journal" />
             </ui:VisualElement>
             <ui:VisualElement class="shell-resource-bar">
                 <ui:VisualElement class="resource-strip shell-resource-strip">

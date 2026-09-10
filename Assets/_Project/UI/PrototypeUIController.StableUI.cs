@@ -116,6 +116,10 @@ public partial class PrototypeUIController
     private void OnStableNavigationChanged()
     {
         HideQuickExpeditionPopup();
+        // Раздел 20 инструкции P08J: переход на Столицу/Экспедицию тоже
+        // закрывает Journal — как и другие fullscreen-слои, он не должен
+        // оставаться открытым поверх основной навигации.
+        CloseJournal();
         RefreshPersistentCommanderNavigationState();
     }
 
@@ -238,6 +242,9 @@ public partial class PrototypeUIController
         RefreshHeroScreenSupplyPanel();
         RefreshExpeditionPanel();
         RefreshExpeditionViewState();
+        RefreshJournalNotificationState();
+        if (IsJournalOpen)
+            RefreshJournal();
         RefreshJourneySummaryFromState();
         RefreshIncidentNotifications();
         RefreshPersistentCommanderNavigationState();

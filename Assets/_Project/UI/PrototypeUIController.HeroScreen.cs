@@ -108,6 +108,10 @@ public partial class PrototypeUIController
         if (heroScreenOverlay == null)
             return;
 
+        // P08J: Journal и Hero Screen — два независимых fullscreen-слоя,
+        // одновременно открытыми быть не должны (раздел 20 инструкции P08J).
+        CloseJournal();
+
         heroScreenOverlay.style.display = DisplayStyle.Flex;
         heroScreenOverlay.BringToFront();
         RefreshHeroScreen();

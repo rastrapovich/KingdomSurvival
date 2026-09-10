@@ -109,6 +109,7 @@ public partial class PrototypeUIController : MonoBehaviour
         RegisterCallbacks();
         StartNewGame();
         InitializeHeroScreenUi();
+        InitializeJournalUi();
         InitializeUILayoutScreens();
     }
 
@@ -245,6 +246,11 @@ public partial class PrototypeUIController : MonoBehaviour
         reportRequiresAcknowledgement.Clear();
         reportReadStates.Clear();
         selectedFighterIds.Clear();
+        // P08J: «НОВОЕ» — session-only UI-пометка, не сюжетный прогресс
+        // (раздел 29 инструкции) — на новой игре сбрасывается вместе с
+        // остальным сеансовым состоянием интерфейса.
+        seenJournalRevisionIds.Clear();
+        selectedJournalGoalId = null;
         ClearQueuedModals();
         ResetWorldMapSelection();
         reportHistoryLabel.text = string.Empty;
@@ -504,6 +510,14 @@ public partial class PrototypeUIController : MonoBehaviour
         RefreshHeroScreenSupplyPanel();
         RefreshExpeditionPanel();
         RefreshIncidentNotifications();
+
+        // P08J: Narrative-поток (завершение N09/N10) обновляет интерфейс
+        // через этот метод, не через RefreshStableUiAfterStateChange — без
+        // этого кнопка «Журнал •» отставала бы до следующего несвязанного
+        // действия игрока.
+        RefreshJournalNotificationState();
+        if (IsJournalOpen)
+            RefreshJournal();
     }
 
     private void RefreshResourceTestButtons()

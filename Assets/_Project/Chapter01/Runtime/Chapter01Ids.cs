@@ -195,6 +195,20 @@ namespace KingdomSurvival.Chapter01
             public static readonly IReadOnlyList<string> All = new[] { OldWaterSearch };
         }
 
+        // P08J-T01: стабильные ID записей Журнала целей — отдельная сущность
+        // от Knowledge/Flags. chapter01.knowledge.seven_tooth_object (факт,
+        // который герой узнал) и chapter01.journal.goal.seven_tooth_gauge
+        // (запись в журнале про поход) не одно и то же и не должны совпадать
+        // по ID, даже если сейчас связаны условием в Chapter01JournalProvider.
+        public static class JournalGoals
+        {
+            public const string OldWaterTrail = "chapter01.journal.goal.old_water_trail";
+            public const string SecondLoaf = "chapter01.journal.goal.second_loaf";
+            public const string SevenToothGauge = "chapter01.journal.goal.seven_tooth_gauge";
+
+            public static readonly IReadOnlyList<string> All = new[] { OldWaterTrail, SecondLoaf, SevenToothGauge };
+        }
+
         // Стабильные execution ID для Chapter01OutcomeApplier (раздел 6.4).
         // Каждый применяется не более одного раза за прохождение.
         public static class Effects
@@ -244,6 +258,7 @@ namespace KingdomSurvival.Chapter01
             Check("Items", Items.All);
             Check("Effects", Effects.All);
             Check("Locations", Locations.All);
+            Check("JournalGoals", JournalGoals.All);
 
             foreach (KeyValuePair<string, int> entry in occurrences)
             {

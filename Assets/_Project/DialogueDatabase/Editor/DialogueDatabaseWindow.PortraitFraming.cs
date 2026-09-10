@@ -115,7 +115,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
                 DrawPortraitTexture(
                     previewRect,
-                    texture,
+                    hasSpeakerPortrait ? sprite : null,
+                    fallbackTexture,
                     portraitDefinition,
                     reference,
                     actual,
@@ -190,9 +191,18 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
         }
 
+        // Инструкция "свободное кадрирование полного портрета": preview
+        // больше не обрезает Sprite заранее через ScaleAndCrop. Вместо
+        // этого считается прямоугольник ПОЛНОГО изображения (тем же
+        // UILayoutRuntimeApplier.ResolveImageRect, что и runtime/UI
+        // Конструктор), а рамка лишь визуально отсекает то, что оказалось
+        // за её пределами (GUI.BeginGroup + clip самой группой) — то, что
+        // раньше вырезал ScaleAndCrop, теперь просто не видно за краем
+        // frame, но физически остаётся в imageRect и доступно перетаскиванию.
         private static void DrawPortraitTexture(
             Rect frame,
-            Texture texture,
+            Sprite sprite,
+            Texture fallbackTexture,
             UILayoutElementDefinition definition,
             Vector2 reference,
             Vector2 actual,
@@ -200,8 +210,19 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             Vector2 normalizedOffset,
             bool flipX)
         {
-            if (texture == null || definition == null)
+            if (definition == null)
                 return;
+
+            Texture texture = sprite != null ? sprite.texture : fallbackTexture;
+            if (texture == null)
+                return;
+
+            // §7: пропорции считаются по sprite.rect, а не по всей Texture —
+            // иначе портрет из Sprite Atlas измерялся бы по размеру всего
+            // атласа, а не своей области.
+            Vector2 sourceSize = sprite != null
+                ? UILayoutRuntimeApplier.ResolveSpriteSize(sprite)
+                : new Vector2(texture.width, texture.height);
 
             Vector2 offset = UILayoutRuntimeApplier.ResolveImageOffset(
                 definition,
@@ -212,16 +233,17 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 definition,
                 additionalScale,
                 flipX);
+            float magnitude = Mathf.Abs(resolvedScale.y);
+            bool flip = resolvedScale.x < 0f;
+
+            Rect imageRect = UILayoutRuntimeApplier.ResolveImageRect(
+                sourceSize,
+                frame.size,
+                definition.ImageMode,
+                magnitude,
+                offset);
 
             GUI.BeginGroup(frame);
-            Rect local = new Rect(0f, 0f, frame.width, frame.height);
-            float absoluteScale = Mathf.Abs(resolvedScale.y);
-            Vector2 size = local.size * absoluteScale;
-            Rect imageRect = new Rect(
-                local.center.x - size.x * 0.5f + offset.x,
-                local.center.y - size.y * 0.5f + offset.y,
-                size.x,
-                size.y);
 
             Matrix4x4 previousMatrix = GUI.matrix;
             Color previousColor = GUI.color;
@@ -229,14 +251,26 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             tint.a *= definition.Opacity;
             GUI.color = tint;
 
-            if (flipX)
+            if (flip)
                 GUIUtility.ScaleAroundPivot(new Vector2(-1f, 1f), imageRect.center);
 
-            GUI.DrawTexture(
-                imageRect,
-                texture,
-                UILayoutRuntimeApplier.ResolveImageScaleMode(definition.ImageMode),
-                true);
+            if (sprite != null)
+            {
+                // Область конкретного Sprite внутри (возможно, атласной)
+                // Texture, в UV-координатах — рисуем именно её, растянутую
+                // на уже правильно вычисленный imageRect, а не всю Texture.
+                Rect spriteRect = sprite.rect;
+                Rect uv = new Rect(
+                    spriteRect.x / texture.width,
+                    spriteRect.y / texture.height,
+                    spriteRect.width / texture.width,
+                    spriteRect.height / texture.height);
+                GUI.DrawTextureWithTexCoords(imageRect, texture, uv, true);
+            }
+            else
+            {
+                GUI.DrawTexture(imageRect, texture, ScaleMode.StretchToFill, true);
+            }
 
             GUI.matrix = previousMatrix;
             GUI.color = previousColor;

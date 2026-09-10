@@ -339,6 +339,13 @@ namespace KingdomSurvival.UILayout.Editor
         /// UILayout задаёт общий mode/scale/offset/tint/opacity, а Speaker
         /// при включённой индивидуальной кадрировке добавляет zoom/pan/flip.
         /// </summary>
+        // Инструкция "свободное кадрирование полного портрета": та же
+        // математика, что и preview Базы диалогов и runtime
+        // (UILayoutRuntimeApplier.ResolveImageRect) — полный прямоугольник
+        // изображения, а не заранее обрезанный ScaleAndCrop. Рамка (frame)
+        // только отсекает то, что физически оказалось за её пределами
+        // через GUI.BeginGroup, поэтому три места (это превью, превью Базы
+        // диалогов, Play Mode) больше не могут разойтись по кадрированию.
         private static void DrawNarrativePortraitImage(
             Rect frame,
             UILayoutElementDefinition definition,
@@ -348,6 +355,9 @@ namespace KingdomSurvival.UILayout.Editor
         {
             if (definition == null || speaker == null || speaker.Portrait == null)
                 return;
+
+            Sprite sprite = speaker.Portrait;
+            Texture texture = sprite.texture;
 
             bool individual = speaker.OverridePortraitFraming;
             float additionalScale = individual ? speaker.PortraitScale : 1f;
@@ -363,30 +373,35 @@ namespace KingdomSurvival.UILayout.Editor
                 definition,
                 additionalScale,
                 flipX);
+            float magnitude = Mathf.Abs(resolvedScale.y);
+            bool flip = resolvedScale.x < 0f;
+
+            // §7: пропорции — по sprite.rect, а не по всей Texture (Sprite
+            // Atlas: Texture тогда — весь атлас, а не конкретный портрет).
+            Rect imageRect = UILayoutRuntimeApplier.ResolveImageRect(
+                UILayoutRuntimeApplier.ResolveSpriteSize(sprite),
+                frame.size,
+                definition.ImageMode,
+                magnitude,
+                offset);
 
             GUI.BeginGroup(frame);
-            Rect local = new Rect(0f, 0f, frame.width, frame.height);
-            float absoluteScale = Mathf.Abs(resolvedScale.y);
-            Vector2 size = local.size * absoluteScale;
-            Rect imageRect = new Rect(
-                local.center.x - size.x * 0.5f + offset.x,
-                local.center.y - size.y * 0.5f + offset.y,
-                size.x,
-                size.y);
 
             Matrix4x4 previousMatrix = GUI.matrix;
             Color previousColor = GUI.color;
             Color tint = definition.Tint;
             tint.a *= definition.Opacity;
             GUI.color = tint;
-            if (flipX)
+            if (flip)
                 GUIUtility.ScaleAroundPivot(new Vector2(-1f, 1f), imageRect.center);
 
-            GUI.DrawTexture(
-                imageRect,
-                speaker.Portrait.texture,
-                UILayoutRuntimeApplier.ResolveImageScaleMode(definition.ImageMode),
-                true);
+            Rect spriteRect = sprite.rect;
+            Rect uv = new Rect(
+                spriteRect.x / texture.width,
+                spriteRect.y / texture.height,
+                spriteRect.width / texture.width,
+                spriteRect.height / texture.height);
+            GUI.DrawTextureWithTexCoords(imageRect, texture, uv, true);
 
             GUI.matrix = previousMatrix;
             GUI.color = previousColor;

@@ -134,6 +134,15 @@ namespace KingdomSurvival.UILayout
         /// использует UI Конструктор. Это основной путь для портретов из базы
         /// диалогов: layout задаёт рамку/режим/общий zoom/pan, а говорящий может
         /// добавить свой zoom, нормализованное смещение и отражение по X.
+        ///
+        /// Рамка (<paramref name="target"/>) и изображение — два разных
+        /// элемента. Рамка только обрезает (overflow:hidden) то, что
+        /// оказалось за её границей; сам динамический слой всегда получает
+        /// СВОЙ размер и позицию, вычисленные <see cref="ResolveImageRect"/>
+        /// по полному (необрезанному) Sprite, и рисуется StretchToFill —
+        /// пропорции уже заложены в размер прямоугольника, повторно обрезать
+        /// через ScaleAndCrop не нужно и вредно (обрезанные пиксели заранее
+        /// исключались бы из перетаскивания).
         /// </summary>
         public static void ApplyDynamicImage(
             VisualElement target,
@@ -157,36 +166,47 @@ namespace KingdomSurvival.UILayout
             VisualElement dynamicImage = target.Q<VisualElement>(DynamicImageLayerName);
             if (dynamicImage == null)
             {
-                dynamicImage = CreateImageLayer(DynamicImageLayerName);
+                dynamicImage = CreateSizedImageLayer(DynamicImageLayerName);
                 target.Add(dynamicImage);
             }
 
             target.style.overflow = Overflow.Hidden;
             dynamicImage.style.display = DisplayStyle.Flex;
             dynamicImage.style.backgroundImage = new StyleBackground(sprite);
+            dynamicImage.style.unityBackgroundScaleMode = ScaleMode.StretchToFill;
 
-            if (definition != null)
-            {
-                ApplyImagePresentation(
-                    dynamicImage,
-                    definition,
-                    referenceResolution,
-                    actualResolution,
-                    additionalScale,
-                    normalizedFrameOffset,
-                    flipX);
-            }
-            else
-            {
-                dynamicImage.style.unityBackgroundImageTintColor = Color.white;
-                dynamicImage.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop;
-                dynamicImage.style.translate = new Translate(0f, 0f);
-                float safeScale = Mathf.Max(0.05f, additionalScale);
-                dynamicImage.style.scale = new Scale(new Vector3(
-                    flipX ? -safeScale : safeScale,
-                    safeScale,
-                    1f));
-            }
+            UILayoutImageMode mode = definition != null ? definition.ImageMode : UILayoutImageMode.Cover;
+            Vector2 frameSize = definition != null
+                ? ResolveImageFrameSize(definition, referenceResolution, actualResolution)
+                : new Vector2(target.resolvedStyle.width, target.resolvedStyle.height);
+            Vector2 offset = definition != null
+                ? ResolveImageOffset(definition, referenceResolution, actualResolution, normalizedFrameOffset)
+                : new Vector2(normalizedFrameOffset.x * frameSize.x, normalizedFrameOffset.y * frameSize.y);
+
+            // ResolveImageScale уже умеет корректно объединять общий и
+            // индивидуальный zoom и кодировать отражение знаком X —
+            // переиспользуем его: величина идёт в ResolveImageRect (реальный
+            // размер прямоугольника), а знак — в CSS-flip вокруг центра уже
+            // готового элемента (Flip не должен влиять на Offset — §10).
+            Vector3 resolvedScale = ResolveImageScale(definition, additionalScale, flipX);
+            float magnitude = Mathf.Abs(resolvedScale.y);
+            bool flip = resolvedScale.x < 0f;
+
+            Rect imageRect = ResolveImageRect(ResolveSpriteSize(sprite), frameSize, mode, magnitude, offset);
+
+            dynamicImage.style.left = imageRect.x;
+            dynamicImage.style.top = imageRect.y;
+            dynamicImage.style.right = StyleKeyword.Auto;
+            dynamicImage.style.bottom = StyleKeyword.Auto;
+            dynamicImage.style.width = imageRect.width;
+            dynamicImage.style.height = imageRect.height;
+            dynamicImage.style.translate = new Translate(0f, 0f);
+            dynamicImage.style.scale = new Scale(new Vector3(flip ? -1f : 1f, 1f, 1f));
+
+            Color tint = definition != null ? definition.Tint : Color.white;
+            float opacity = definition != null ? definition.Opacity : 1f;
+            tint.a *= opacity;
+            dynamicImage.style.unityBackgroundImageTintColor = tint;
 
             VisualElement background = target.Q<VisualElement>(BackgroundLayerName);
             if (background != null)
@@ -210,6 +230,78 @@ namespace KingdomSurvival.UILayout
             VisualElement background = target.Q<VisualElement>(BackgroundLayerName);
             if (background != null)
                 background.style.display = DisplayStyle.Flex;
+        }
+
+        /// <summary>
+        /// Единая точка расчёта прямоугольника ПОЛНОГО изображения (без
+        /// предварительной обрезки) относительно рамки. Cover/Contain задают
+        /// только базовый размер по пропорциям исходника — сама обрезка
+        /// возникает исключительно потому, что часть этого прямоугольника
+        /// оказывается за пределами рамки (overflow:hidden/clip у вызывающей
+        /// стороны), а не потому, что мы заранее вписали и обрезали Sprite
+        /// через ScaleAndCrop. Тот же расчёт обязаны использовать preview
+        /// Базы диалогов, preview UI Конструктора и runtime — иначе
+        /// кадрирование в трёх местах неизбежно разойдётся.
+        /// </summary>
+        public static Rect ResolveImageRect(
+            Vector2 sourceSize,
+            Vector2 frameSize,
+            UILayoutImageMode mode,
+            float scale,
+            Vector2 offset)
+        {
+            Vector2 baseSize = ResolveBaseDisplaySize(sourceSize, frameSize, mode);
+            float safeScale = Mathf.Max(0.05f, scale);
+            Vector2 displaySize = baseSize * safeScale;
+
+            return new Rect(
+                (frameSize.x - displaySize.x) * 0.5f + offset.x,
+                (frameSize.y - displaySize.y) * 0.5f + offset.y,
+                displaySize.x,
+                displaySize.y);
+        }
+
+        /// <summary>
+        /// Базовый (до индивидуального zoom) размер полного изображения по
+        /// правилам Cover/Contain/Stretch. Cover/Contain сохраняют
+        /// пропорции исходника и МОГУТ выйти за пределы рамки (Cover) или
+        /// оставить пустое поле внутри неё (Contain) — обрезка/пустое поле
+        /// не встроены сюда, это отдельный эффект clip'а рамкой.
+        /// </summary>
+        private static Vector2 ResolveBaseDisplaySize(Vector2 sourceSize, Vector2 frameSize, UILayoutImageMode mode)
+        {
+            if (sourceSize.x <= 0f || sourceSize.y <= 0f)
+                return frameSize;
+
+            switch (mode)
+            {
+                case UILayoutImageMode.Contain:
+                    {
+                        float s = Mathf.Min(frameSize.x / sourceSize.x, frameSize.y / sourceSize.y);
+                        return sourceSize * s;
+                    }
+                case UILayoutImageMode.Stretch:
+                    return frameSize;
+                default: // Cover
+                    {
+                        float s = Mathf.Max(frameSize.x / sourceSize.x, frameSize.y / sourceSize.y);
+                        return sourceSize * s;
+                    }
+            }
+        }
+
+        /// <summary>
+        /// Размер исходного изображения для расчёта пропорций. Намеренно
+        /// читает <see cref="Sprite.rect"/>, а не размер всей Texture — это
+        /// единственный правильный источник, когда портрет позже окажется
+        /// внутри Sprite Atlas (Texture тогда — весь атлас, а не конкретный
+        /// портрет).
+        /// </summary>
+        public static Vector2 ResolveSpriteSize(Sprite sprite)
+        {
+            return sprite != null
+                ? new Vector2(sprite.rect.width, sprite.rect.height)
+                : Vector2.zero;
         }
 
         public static ScaleMode ResolveImageScaleMode(UILayoutImageMode mode)
@@ -357,6 +449,25 @@ namespace KingdomSurvival.UILayout
             layer.style.right = 0f;
             layer.style.top = 0f;
             layer.style.bottom = 0f;
+            return layer;
+        }
+
+        /// <summary>
+        /// В отличие от <see cref="CreateImageLayer"/> (растянут на 100%
+        /// рамки — годится для статического фона со ScaleAndCrop), этот слой
+        /// НЕ имеет собственного стартового размера: left/top/width/height
+        /// выставляются каждый раз в <see cref="ApplyDynamicImage"/> по
+        /// <see cref="ResolveImageRect"/> и обычно не совпадают с рамкой —
+        /// именно потому, что изображение не обрезано заранее.
+        /// </summary>
+        private static VisualElement CreateSizedImageLayer(string name)
+        {
+            VisualElement layer = new VisualElement
+            {
+                name = name,
+                pickingMode = PickingMode.Ignore
+            };
+            layer.style.position = Position.Absolute;
             return layer;
         }
 

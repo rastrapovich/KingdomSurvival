@@ -4,8 +4,8 @@ using UnityEngine;
 namespace KingdomSurvival.DevelopmentTracker.Editor
 {
     // Создаёт и заполняет план автоматически при первом открытии проекта в
-    // Unity после pull, если asset ещё не существует. Никогда не
-    // перезаписывает существующий план — это чисто "создать, если пусто".
+    // Unity после pull. Существующий план не пересобирается разрушительно:
+    // MigrateIfNeeded добавляет новые определения схемы с сохранением прогресса.
     [InitializeOnLoad]
     public static class DevelopmentPlanBootstrap
     {
@@ -19,10 +19,23 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
         private static void EnsurePlanExists()
         {
-            if (AssetDatabase.LoadAssetAtPath<DevelopmentPlanAsset>(AssetPath) != null)
+            DevelopmentPlanAsset plan = AssetDatabase.LoadAssetAtPath<DevelopmentPlanAsset>(AssetPath);
+            if (plan == null)
+            {
+                CreateAndSeedPlan();
+                return;
+            }
+
+            bool migrated = plan.MigrateIfNeeded();
+            if (!migrated && !EditorUtility.IsDirty(plan))
                 return;
 
-            CreateAndSeedPlan();
+            AssetDatabase.SaveAssets();
+            if (migrated)
+            {
+                Debug.Log("Kingdom Survival: план разработки безопасно обновлён до схемы v" +
+                          DevelopmentPlanAsset.CurrentSchemaVersion + " (прогресс сохранён).");
+            }
         }
 
         public static DevelopmentPlanAsset CreateAndSeedPlan()

@@ -721,3 +721,11 @@ Unity Editor и компилятор здесь недоступны — ни о
 8. в тестовой копии ассета (не коммитить) намеренно сломать `successNodeId` — на карточке ответа должна появиться жёлтая строка `⚠ ...` с тултипом.
 
 Канон, `DialogueDatabaseAsset`, runtime-логика диалогов, формулы проверок и содержимое N01-N17 этой правкой не менялись — целиком Editor UX.
+
+## 19. Удаление демо-диалога prototype_miller — 10.09.2026
+
+Пользователь удалил технический демо-диалог `prototype_miller` (наглядная проверка всех `NarrativeConditionType`, групп All/Any и Negate — не сюжетный канон) из `KingdomSurvivalDialogues.asset` через Unity Editor как более не нужный. Из `Assets/_Project/Tests/EditMode/DialogueDatabaseTests.cs` убраны 4 теста, жёстко завязанных на его ID/содержимое (`DefaultDatabase_Loads_PrototypeDialogue`, `RuntimeSession_Starts_Prototype_And_Preserves_Speaker`, `DefaultPrototype_Demonstrates_Every_Condition_Type_And_Group_Logic`, `DefaultPrototype_Has_Saved_Graph_Positions`) — они падали с «Диалог не найден: prototype_miller» после удаления. Остался только общий `DefaultDatabase_Has_No_Validation_Issues`.
+
+Смысловая нагрузка удалённых тестов не потеряна: перебор `NarrativeConditionType`/групп/Negate по-прежнему проверяется — `NarrativeCheckSystemTests.cs` и программно собранный демо-граф в `DialogueDatabaseCheckSystemTests.cs` (не хранится в общем ассете, строится через reflection); прохождение runtime-сессии с сохранением говорящего — `Chapter01FourResidentsTests.cs` на реальном N01. Обновлён и устаревший комментарий в `DialogueDatabaseCheckSystemTests.cs`, ссылавшийся на уже удалённый `prototype_miller`.
+
+Сам ассет `KingdomSurvivalDialogues.asset` в этом коммите не трогался — удаление уже сделано пользователем в Unity и придёт отдельным пушем с его стороны; здесь только тесты, которые от этого удаления зависели.

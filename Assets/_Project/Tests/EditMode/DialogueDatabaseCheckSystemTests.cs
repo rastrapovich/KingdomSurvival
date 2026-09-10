@@ -12,7 +12,8 @@ using UnityEngine;
 // в удалённой среде нет Unity Editor, чтобы вручную собрать и один раз
 // провизуально проверить новый ScriptableObject-граф, а рискованная ручная
 // правка YAML без компилятора могла бы незаметно повредить общий ассет.
-// prototype_miller и его тесты (DialogueDatabaseTests.cs) не затронуты.
+// Не связано с прежним демо-диалогом prototype_miller (удалён из
+// KingdomSurvivalDialogues.asset, см. комментарий в DialogueDatabaseTests.cs).
 public sealed class DialogueDatabaseCheckSystemTests
 {
     [Test]

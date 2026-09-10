@@ -48,12 +48,17 @@ public sealed class Chapter01P09Tests
 
     // Прогресс маршрута задаётся напрямую полями ExpeditionData (тот же
     // приём, что ContinuousMovementTimeTests.cs — не гонять реальные тики
-    // Advance ради конкретного процента).
+    // Advance ради конкретного процента). CeilToInt, а не усечение: маршрут
+    // до OldWaterSearch короткий (единицы клеток — раздел 21.1), и при
+    // truncation "пройдено 35% от 4 клеток" округляется вниз до 1 клетки
+    // (25%), что оказывается ниже проверяемого порога. Округление вверх
+    // гарантирует "пройдено НЕ МЕНЬШЕ фракции", что и требуется в тестах
+    // "на/после порога".
     private static void SetRouteProgress(GameState gameState, double fraction)
     {
         ExpeditionData expedition = gameState.ActiveExpedition;
         int total = expedition.RouteLengthCells;
-        int traveled = (int)(total * fraction);
+        int traveled = Mathf.CeilToInt((float)(total * fraction));
         expedition.RemainingRouteCells = Mathf.Max(0, total - traveled);
     }
 
@@ -313,6 +318,20 @@ public sealed class Chapter01P09Tests
 
     // --- CART: доступность "Разделить людей" по составу отряда ---
 
+    // Каждый терминальный выбор D11B (у решения или сразу на входном узле)
+    // ведёт на узел-исход с собственным текстом и единственным Exit-
+    // выбором "…" — сам диалог заканчивается ИМ, не выбором, который на
+    // этот узел привёл.
+    private static void SelectThroughToExit(NarrativeDialogueRuntimeSession session, NarrativeDialogueChoiceView choice)
+    {
+        NarrativeDialogueSelectionResult result = session.SelectChoice(choice.ChoiceId);
+        Assert.IsFalse(result.DialogueEnded);
+        NarrativeDialogueChoiceView exit = FindChoice(result.View, DialogueChoiceKind.Exit);
+        Assert.IsNotNull(exit);
+        result = session.SelectChoice(exit.ChoiceId);
+        Assert.IsTrue(result.DialogueEnded);
+    }
+
     private static NarrativeDialogueRuntimeSession StartD11BAtScene7(GameState gameState, List<string> companionIds, out NarrativeDialogueView view)
     {
         DialogueDatabaseAsset database = LoadDatabase();
@@ -326,11 +345,12 @@ public sealed class Chapter01P09Tests
             out view, out string error, companionIds, new List<string>(), gameState.WorldSeed);
         Assert.IsTrue(started, error);
 
-        // "Остановиться." -> scene1 -> ... -> scene7 (шесть Continue-шагов).
+        // "Остановиться." -> scene1, затем scene1->2->3->4->5->6->7 —
+        // ровно шесть Continue-переходов до узла с реальным решением.
         NarrativeDialogueChoiceView stop = FindChoiceById(view, "chapter01.node.11b_stop");
         Assert.IsNotNull(stop);
         NarrativeDialogueSelectionResult result = session.SelectChoice(stop.ChoiceId);
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 6; i++)
         {
             Assert.IsFalse(result.DialogueEnded);
             NarrativeDialogueChoiceView step = FindChoice(result.View, DialogueChoiceKind.Continue);
@@ -391,8 +411,7 @@ public sealed class Chapter01P09Tests
 
         NarrativeDialogueChoiceView pass = FindChoiceById(view, "chapter01.node.11b_pass");
         Assert.IsNotNull(pass);
-        NarrativeDialogueSelectionResult result = session.SelectChoice(pass.ChoiceId);
-        Assert.IsTrue(result.DialogueEnded);
+        SelectThroughToExit(session, pass);
 
         AssertExactlyOneCartOutcome(gameState.Narrative, Chapter01Ids.Flags.CartOutcomePassedBy);
         Assert.IsTrue(gameState.Narrative.HasFlag(Chapter01Ids.Flags.CartResolved));
@@ -407,8 +426,7 @@ public sealed class Chapter01P09Tests
 
         NarrativeDialogueChoiceView savedMan = FindChoiceById(view, "chapter01.node.11b.scene7_saved_man");
         Assert.IsNotNull(savedMan);
-        NarrativeDialogueSelectionResult result = session.SelectChoice(savedMan.ChoiceId);
-        Assert.IsTrue(result.DialogueEnded);
+        SelectThroughToExit(session, savedMan);
 
         AssertExactlyOneCartOutcome(gameState.Narrative, Chapter01Ids.Flags.CartOutcomeSavedMan);
 
@@ -426,7 +444,7 @@ public sealed class Chapter01P09Tests
 
         NarrativeDialogueChoiceView savedBoth = FindChoiceById(view, "chapter01.node.11b.scene7_saved_both_1");
         Assert.IsNotNull(savedBoth);
-        session.SelectChoice(savedBoth.ChoiceId);
+        SelectThroughToExit(session, savedBoth);
 
         AssertExactlyOneCartOutcome(gameState.Narrative, Chapter01Ids.Flags.CartOutcomeSavedBoth);
 
@@ -443,7 +461,7 @@ public sealed class Chapter01P09Tests
 
         NarrativeDialogueChoiceView savedBoth = FindChoiceById(view, "chapter01.node.11b.scene7_saved_both_2");
         Assert.IsNotNull(savedBoth);
-        session.SelectChoice(savedBoth.ChoiceId);
+        SelectThroughToExit(session, savedBoth);
 
         Chapter01OutcomeApplier.ApplyCartConsequences(gameState);
         Assert.AreEqual(2.0, gameState.ActiveExpedition.ActiveActivity.TotalHours, 0.001);
@@ -457,7 +475,7 @@ public sealed class Chapter01P09Tests
 
         NarrativeDialogueChoiceView pass = FindChoiceById(view, "chapter01.node.11b.scene7_pass");
         Assert.IsNotNull(pass);
-        session.SelectChoice(pass.ChoiceId);
+        SelectThroughToExit(session, pass);
 
         AssertExactlyOneCartOutcome(gameState.Narrative, Chapter01Ids.Flags.CartOutcomePassedBy);
 

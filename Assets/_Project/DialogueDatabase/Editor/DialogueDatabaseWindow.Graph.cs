@@ -167,6 +167,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private void DrawGraphInspectorPanel(SerializedProperty dialogue, SerializedProperty nodes)
         {
             inspectorLayoutMode = ResolveLayoutMode(graphInspectorWidth);
+            inspectorContentWidth = graphInspectorWidth - GraphInspectorContentPadding - 24f;
 
             EditorGUILayout.BeginVertical(GUILayout.Width(graphInspectorWidth), GUILayout.ExpandHeight(true));
             EditorGUILayout.LabelField("СВОЙСТВА УЗЛА", EditorStyles.boldLabel);
@@ -177,27 +178,33 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     "Выберите узел на холсте, чтобы отредактировать его текстовые блоки, ответы, условия, проверки и эффекты — так же, как в «Таблице».",
                     MessageType.Info);
                 EditorGUILayout.EndVertical();
+                // §26/§29-30: колесо мыши над панелью — её собственный
+                // scroll, никогда не зум canvas. Rect берём тем же приёмом,
+                // что и стандартный GUILayoutUtility.GetLastRect() после
+                // EndVertical() — гарантированно рабочий способ узнать
+                // прямоугольник только что завершённой layout-группы.
+                HandleGraphInspectorScrollWheel(GUILayoutUtility.GetLastRect());
                 return;
             }
 
             SerializedProperty node = nodes.GetArrayElementAtIndex(graphSelectedNodeIndex);
 
-            // §30: заголовок панели дополнен ID узла и именем говорящего —
-            // видно, что именно редактируется, не открывая сам узел на холсте.
-            string nodeId = node.FindPropertyRelative("id").stringValue;
-            string speakerId = node.FindPropertyRelative("speakerId").stringValue;
-            DialogueSpeakerData speaker = database.FindSpeaker(speakerId);
-            string headerLine = string.IsNullOrWhiteSpace(nodeId) ? "<без ID>" : nodeId;
-            if (speaker != null)
-                headerLine += "  ·  " + speaker.DisplayName;
-            EditorGUILayout.LabelField(headerLine, EditorStyles.miniLabel);
-
+            // §26 п.A: смена выбранного узла — scroll всегда на самый верх и
+            // снят клавиатурный фокус (иначе старый TextArea мог продолжать
+            // удерживать control и "есть" колесо/клавиши).
             if (graphInspectorLastNodeIndex != graphSelectedNodeIndex)
             {
                 node.isExpanded = true;
                 graphInspectorLastNodeIndex = graphSelectedNodeIndex;
+                graphInspectorScroll = Vector2.zero;
+                GUI.FocusControl(null);
             }
 
+            // §15-16: портретная карточка вместо голой строки "ID · Имя".
+            DrawGraphInspectorPortraitHeader(node);
+
+            // §27: единственный ScrollView на всю панель — ни у TextArea, ни
+            // у карточек ниже своего вертикального scrollbar быть не должно.
             graphInspectorScroll = EditorGUILayout.BeginScrollView(
                 graphInspectorScroll, GUIStyle.none, GUI.skin.verticalScrollbar);
             EditorGUILayout.BeginVertical(GUILayout.Width(graphInspectorWidth - GraphInspectorContentPadding));
@@ -206,6 +213,16 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUILayout.EndScrollView();
 
             EditorGUILayout.EndVertical();
+
+            // §26/§29-30: колесо мыши над всей панелью (портрет + scroll)
+            // прокручивает Inspector и никогда не долетает до зума canvas —
+            // проверяется здесь, а не заранее, потому что реальный
+            // прямоугольник панели известен только после её отрисовки
+            // (GUILayoutUtility.GetLastRect() сразу после EndVertical()).
+            // Порядок безопасен: HandleGraphInput для canvas уже отработал
+            // раньше в этом же кадре (см. DrawDialogueGraph) и не получает
+            // событие повторно, если оно не адресовано canvas.
+            HandleGraphInspectorScrollWheel(GUILayoutUtility.GetLastRect());
         }
 
         private void DrawGraphToolbar(SerializedProperty dialogue, SerializedProperty nodes)
@@ -667,7 +684,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             float y = headerRect.yMax + 6f * graphZoom;
             DrawGraphSpeaker(node, nodeRect, metrics, ref y);
-            DrawGraphNodeTextSection(nodeRect, info, metrics, ref y);
+            DrawGraphNodeTextSection(node, nodeRect, info, metrics, selected, ref y);
 
             Rect titleRect = new Rect(
                 nodeRect.x + margin,
@@ -696,7 +713,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     GraphChoiceInfo choiceInfo = choiceIndex < info.Choices.Count ? info.Choices[choiceIndex] : null;
                     DrawGraphChoice(
                         nodeIndex, choiceIndex, nodeRect, y, choiceHeight,
-                        choiceInfo, metrics.EffectiveMode, metrics.Warnings);
+                        choices.GetArrayElementAtIndex(choiceIndex), choiceInfo, metrics.EffectiveMode, metrics.Warnings, selected);
                     y += choiceHeight;
                 }
             }
@@ -871,7 +888,14 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         // эффектов. Данные берутся из того же GraphNodeInfo, что и раскладка
         // высоты (metrics), поэтому расхождений между "что нарисовано" и
         // "сколько места выделено" не возникает.
-        private void DrawGraphNodeTextSection(Rect nodeRect, GraphNodeInfo info, GraphNodeLayoutMetrics metrics, ref float y)
+        // §7-9 инструкции "полноценное редактирование нод": для выбранного
+        // узла литературный текст (TextBlock.Text либо legacy node.Text,
+        // если textBlocks пуст) редактируется прямо здесь — EditorGUI.TextArea
+        // поверх реального SerializedProperty, без второй копии текста.
+        // Для невыбранных узлов — тот же ПОЛНЫЙ текст, но read-only Label:
+        // весь граф читаем, но сотни живых TextArea не создаются одновременно.
+        private void DrawGraphNodeTextSection(
+            SerializedProperty node, Rect nodeRect, GraphNodeInfo info, GraphNodeLayoutMetrics metrics, bool selected, ref float y)
         {
             float margin = GraphPadding * graphZoom;
             GraphDetailMode mode = metrics.EffectiveMode;
@@ -887,6 +911,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             int maxChars = GetTextPreviewMaxChars(mode);
             List<string> detailLines = new List<string>();
             float cardInset = 4f * graphZoom;
+            SerializedProperty textBlocksProp = node.FindPropertyRelative("textBlocks");
+            bool isLegacySingleBlock = textBlocksProp.arraySize == 0 && info.TextBlocks.Count == 1;
 
             for (int i = 0; i < metrics.TextBlocksShown; i++)
             {
@@ -911,14 +937,26 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 GUI.Label(kindRect, TextBlockKindLabel(block.Kind).ToUpperInvariant(), ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleLeft));
                 blockY += lineHeight;
 
-                int previewLines = mode == GraphDetailMode.Compact ? 1 : mode == GraphDetailMode.Full ? 3 : 2;
-                Rect previewRect = new Rect(contentX, blockY, contentWidth, lineHeight * previewLines);
-                GUIStyle previewStyle = ScaledStyle(EditorStyles.label, 10, TextAnchor.UpperLeft);
-                previewStyle.wordWrap = true;
-                previewStyle.richText = false;
-                string previewText = TruncateForGraphPreview(block.Text, maxChars);
-                GUI.Label(previewRect, string.IsNullOrEmpty(previewText) ? "<пусто>" : previewText, previewStyle);
-                blockY += lineHeight * previewLines;
+                string displayText = ResolveGraphTextForDisplay(block.Text, mode, maxChars);
+                float textWorldHeight = ComputeNarrativeTextHeight(displayText, GetGraphTextContentWidth(mode));
+                float textHeight = textWorldHeight * graphZoom;
+                Rect previewRect = new Rect(contentX, blockY, contentWidth, textHeight);
+
+                if (selected)
+                {
+                    SerializedProperty textProp = isLegacySingleBlock
+                        ? node.FindPropertyRelative("text")
+                        : textBlocksProp.GetArrayElementAtIndex(i).FindPropertyRelative("text");
+                    DrawGraphEditableNarrativeText(previewRect, textProp);
+                }
+                else
+                {
+                    GUIStyle previewStyle = ScaledStyle(EditorStyles.label, (int)GraphNodeLayoutConstants.NarrativeTextFontSize, TextAnchor.UpperLeft);
+                    previewStyle.wordWrap = true;
+                    previewStyle.richText = false;
+                    GUI.Label(previewRect, string.IsNullOrEmpty(displayText) ? "<пусто>" : displayText, previewStyle);
+                }
+                blockY += textHeight;
 
                 if (mode != GraphDetailMode.Compact)
                 {
@@ -951,6 +989,28 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 Rect overflowRect = new Rect(nodeRect.x + margin, y, nodeRect.width - margin * 2f, GraphNodeLayoutConstants.PreviewLineHeight * graphZoom);
                 GUI.Label(overflowRect, BuildOverflowLabel(metrics.TextBlocksOverflow) + " блок(ов)", ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
                 y += GraphNodeLayoutConstants.PreviewLineHeight * graphZoom;
+            }
+        }
+
+        // §2/§7 инструкции "полноценное редактирование нод": текст правится
+        // прямо на холсте через живой SerializedProperty — второй копии в
+        // GraphNodeInfo не заводим, Undo даёт штатный
+        // SerializedObject.ApplyModifiedProperties() (тот же механизм, что и
+        // у любого другого PropertyField в этом окне, включая правый
+        // Inspector), явный Undo.RecordObject на каждый кадр набора текста
+        // не нужен и создал бы избыточные шаги отмены.
+        private void DrawGraphEditableNarrativeText(Rect rect, SerializedProperty textProperty)
+        {
+            GUIStyle style = ScaledStyle(EditorStyles.textArea, (int)GraphNodeLayoutConstants.NarrativeTextFontSize, TextAnchor.UpperLeft);
+            style.wordWrap = true;
+
+            EditorGUI.BeginChangeCheck();
+            string newValue = EditorGUI.TextArea(rect, textProperty.stringValue, style);
+            if (EditorGUI.EndChangeCheck())
+            {
+                textProperty.stringValue = newValue;
+                EditorUtility.SetDirty(database);
+                Repaint();
             }
         }
 
@@ -1002,9 +1062,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             Rect nodeRect,
             float y,
             float choiceHeight,
+            SerializedProperty choice,
             GraphChoiceInfo choiceInfo,
             GraphDetailMode mode,
-            List<string> nodeWarnings)
+            List<string> nodeWarnings,
+            bool selected)
         {
             float margin = GraphPadding * graphZoom;
             Rect rowRect = new Rect(
@@ -1041,13 +1103,22 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             GUI.Label(kindRect, BuildGraphChoiceKindLabel(choiceInfo.Kind), ScaledStyle(EditorStyles.miniBoldLabel, 9, TextAnchor.MiddleLeft));
             cy += lineHeight;
 
-            int previewLines = mode == GraphDetailMode.Full ? 2 : 1;
-            Rect textRect = new Rect(contentX, cy, contentWidth, lineHeight * previewLines);
-            GUIStyle previewStyle = ScaledStyle(EditorStyles.label, 10, TextAnchor.UpperLeft);
-            previewStyle.wordWrap = true;
-            string previewText = TruncateForGraphPreview(choiceInfo.Text, GetChoiceTextPreviewMaxChars(mode));
-            GUI.Label(textRect, string.IsNullOrEmpty(previewText) ? "<пусто>" : previewText, previewStyle);
-            cy += lineHeight * previewLines;
+            string displayText = ResolveGraphTextForDisplay(choiceInfo.Text, mode, GetChoiceTextPreviewMaxChars(mode));
+            float textWorldHeight = ComputeNarrativeTextHeight(displayText, GetGraphChoiceContentWidth(mode));
+            float textHeight = textWorldHeight * graphZoom;
+            Rect textRect = new Rect(contentX, cy, contentWidth, textHeight);
+
+            if (selected)
+            {
+                DrawGraphEditableNarrativeText(textRect, choice.FindPropertyRelative("text"));
+            }
+            else
+            {
+                GUIStyle previewStyle = ScaledStyle(EditorStyles.label, (int)GraphNodeLayoutConstants.NarrativeTextFontSize, TextAnchor.UpperLeft);
+                previewStyle.wordWrap = true;
+                GUI.Label(textRect, string.IsNullOrEmpty(displayText) ? "<пусто>" : displayText, previewStyle);
+            }
+            cy += textHeight;
 
             GUIStyle targetStyle = ScaledStyle(EditorStyles.miniLabel, 8, TextAnchor.MiddleLeft);
             targetStyle.normal.textColor = EditorGUIUtility.isProSkin

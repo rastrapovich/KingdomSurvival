@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEditor;
+using UnityEngine;
 
 namespace KingdomSurvival.DialogueDatabase.Editor
 {
@@ -265,7 +266,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         }
 
         // Обрезка превью текста по границе слова, без разрыва посреди слова
-        // там, где это возможно (§8).
+        // там, где это возможно (§8 инструкции по информативным нодам).
+        // Используется только в Compact (§3 инструкции "полноценное
+        // редактирование нод") — обзорном режиме карты, а не режиме чтения.
         public static string TruncateForGraphPreview(string text, int maxChars)
         {
             if (string.IsNullOrEmpty(text))
@@ -281,6 +284,45 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 cut = lastSpace;
 
             return trimmed.Substring(0, cut).TrimEnd() + "…";
+        }
+
+        // §3 инструкции "полноценное редактирование нод": в Standard/Full
+        // литературный текст показывается ПОЛНОСТЬЮ — Compact по-прежнему
+        // обрезает (карта дерева, не режим чтения). Один источник истины
+        // для того, что реально измеряется (CalcHeight) и что реально
+        // рисуется (Label/TextArea) — они обязаны получать одну и ту же
+        // строку, иначе высота карточки разойдётся с содержимым.
+        public static string ResolveGraphTextForDisplay(string text, GraphDetailMode mode, int compactMaxChars)
+        {
+            if (mode == GraphDetailMode.Compact)
+                return TruncateForGraphPreview(text, compactMaxChars);
+            return string.IsNullOrEmpty(text) ? string.Empty : text.Trim();
+        }
+
+        private const string EmptyGraphTextPlaceholder = "<пусто>";
+        private static GUIStyle narrativeMeasuringStyle;
+
+        // §4 инструкции "полноценное редактирование нод": реальная высота
+        // через GUIStyle.CalcHeight (не оценка по числу символов/строк).
+        // Стиль-основа — EditorStyles.textArea: и read-only Label
+        // невыбранной ноды, и живой TextArea выбранной должны укладываться
+        // в один и тот же прямоугольник, посчитанный здесь один раз.
+        // Ширина/шрифт передаются в "мировых" (не отмасштабированных
+        // graphZoom) единицах — при отрисовке и ширина, и размер шрифта
+        // масштабируются на один и тот же graphZoom, поэтому перенос строк
+        // не меняется и высоту можно один раз посчитать здесь, а на холсте
+        // просто домножить на zoom (тот же приём, что и для остальных
+        // размеров в GraphNodeLayoutMetrics).
+        public static float ComputeNarrativeTextHeight(string text, float width)
+        {
+            if (narrativeMeasuringStyle == null)
+            {
+                narrativeMeasuringStyle = new GUIStyle(EditorStyles.textArea) { wordWrap = true };
+            }
+            narrativeMeasuringStyle.fontSize = Mathf.RoundToInt(GraphNodeLayoutConstants.NarrativeTextFontSize);
+
+            string content = string.IsNullOrEmpty(text) ? EmptyGraphTextPlaceholder : text;
+            return narrativeMeasuringStyle.CalcHeight(new GUIContent(content), Mathf.Max(20f, width));
         }
 
         // ------------------------------------------------------------------
@@ -551,13 +593,14 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         }
 
         // ------------------------------------------------------------------
-        // Раскладка (§3, §30-34): единственный источник истины для отрисовки
-        // И hit-test/портов — без него класс багов "порты не совпадают с
-        // нарисованным содержимым" возвращается снова. Высота считается
-        // чистой арифметикой на основе снимка данных и режима детализации,
-        // без обращения к GUIStyle/CalcHeight — превью текста и так обрезаны
-        // до фиксированного бюджета символов (§8), поэтому число строк
-        // предсказуемо и не требует измерения реального шрифта.
+        // Раскладка (§3-5, §30-34 инструкции по информативным нодам; §3-6
+        // инструкции "полноценное редактирование нод"): единственный
+        // источник истины для отрисовки И hit-test/портов. Высота
+        // литературного текста больше не обрезается до фиксированного
+        // бюджета символов/строк в Standard/Full — считается реальным
+        // GUIStyle.CalcHeight по фактическому тексту, поэтому нода растёт
+        // ровно настолько, насколько того требует содержимое. Compact
+        // по-прежнему обрезает — это режим обзора дерева, а не чтения сцены.
         // ------------------------------------------------------------------
 
         public static class GraphNodeLayoutConstants
@@ -574,16 +617,46 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             // §5/§10 инструкции "читаемые ноды": визуальный отступ карточки
             // TextBlock/Choice (фон + рамка) сверх содержимого.
             public const float CardPadding = 6f;
+
+            // §6 инструкции "полноценное редактирование нод": горизонтальный
+            // отступ содержимого от края ноды — тот же margin, что и
+            // GraphPadding в Graph.cs (держится равным явно, а не через
+            // общую константу, чтобы не тянуть Graph.cs в этот файл).
+            public const float ContentMargin = 10f;
+
+            // Внутренний отступ карточки ответа (rowRect → contentX/Width в
+            // Graph.cs: по 5px с каждой стороны) — карточка ответа у́же
+            // карточки текстового блока на эту величину.
+            public const float ChoiceCardInnerPadding = 10f;
+
+            // Базовый (нескейленный, при graphZoom=1) размер шрифта
+            // литературного текста — должен совпадать с тем, что реально
+            // использует ScaledStyle(...) при отрисовке в Graph.cs, иначе
+            // измеренная здесь высота разойдётся с фактически нарисованной.
+            public const float NarrativeTextFontSize = 10f;
         }
 
         public static float GetGraphNodeWidth(GraphDetailMode mode)
         {
+            // §6 инструкции "полноценное редактирование нод": заметно шире,
+            // чем раньше — узкие ноды делали русский текст нечитаемым и
+            // раздували высоту сильнее необходимого.
             switch (mode)
             {
-                case GraphDetailMode.Compact: return 290f;
-                case GraphDetailMode.Full: return 400f;
-                default: return 320f;
+                case GraphDetailMode.Compact: return 310f;
+                case GraphDetailMode.Full: return 500f;
+                default: return 430f;
             }
+        }
+
+        public static float GetGraphTextContentWidth(GraphDetailMode mode)
+        {
+            return GetGraphNodeWidth(mode) - 2f * GraphNodeLayoutConstants.ContentMargin;
+        }
+
+        public static float GetGraphChoiceContentWidth(GraphDetailMode mode)
+        {
+            return GetGraphTextContentWidth(mode) - GraphNodeLayoutConstants.ChoiceCardInnerPadding;
         }
 
         public static float GetGraphSpeakerSectionHeight(GraphDetailMode mode)
@@ -638,21 +711,6 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
         }
 
-        private static int GetTextPreviewLineCount(GraphDetailMode mode)
-        {
-            switch (mode)
-            {
-                case GraphDetailMode.Compact: return 1;
-                case GraphDetailMode.Full: return 3;
-                default: return 2;
-            }
-        }
-
-        private static int GetChoiceTextPreviewLineCount(GraphDetailMode mode)
-        {
-            return mode == GraphDetailMode.Full ? 2 : 1;
-        }
-
         private static float ComputeDetailSectionHeight(int itemCount, int maxLines)
         {
             if (itemCount <= 0)
@@ -676,13 +734,15 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             return GraphNodeLayoutConstants.PreviewLineHeight + ComputeDetailSectionHeight(itemCount, maxLines);
         }
 
-        // Kind-заголовок блока + превью текста + (Standard/Full) строка
-        // проверки/условий/эффектов, обрезанные по лимиту режима, плюс
+        // Kind-заголовок блока + ПОЛНЫЙ литературный текст (реальная высота
+        // через CalcHeight, §3-4 инструкции "полноценное редактирование
+        // нод") + (Standard/Full) строка проверки/условий/эффектов, плюс
         // отступы карточки блока (§5 инструкции "читаемые ноды").
         public static float ComputeTextBlockHeight(GraphTextBlockInfo block, GraphDetailMode mode)
         {
             float height = GraphNodeLayoutConstants.PreviewLineHeight; // заголовок вида блока
-            height += GraphNodeLayoutConstants.PreviewLineHeight * GetTextPreviewLineCount(mode);
+            string displayText = ResolveGraphTextForDisplay(block?.Text, mode, GetTextPreviewMaxChars(mode));
+            height += ComputeNarrativeTextHeight(displayText, GetGraphTextContentWidth(mode));
 
             if (mode != GraphDetailMode.Compact && block != null)
             {
@@ -697,14 +757,18 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             return height + GraphNodeLayoutConstants.SectionGap + GraphNodeLayoutConstants.CardPadding;
         }
 
-        // Тип ответа + превью текста + строка(и) цели (обычный переход — 1,
-        // активная проверка — 2: ✓ успех / ✕ провал) + (Standard/Full)
-        // условия/эффекты успеха/провала отдельными подписанными секциями
-        // + (если есть) строка ошибки (§12 инструкции по читаемым нодам).
+        // Тип ответа + ПОЛНЫЙ текст ответа (реальная высота через CalcHeight)
+        // + строка(и) цели (обычный переход — 1, активная проверка — 2:
+        // ✓ успех / ✕ провал) + (Standard/Full) условия/эффекты успеха-
+        // провала отдельными подписанными секциями + (если есть) строка
+        // ошибки (§12 инструкции по читаемым нодам).
         public static float ComputeChoiceHeight(GraphChoiceInfo choice, GraphDetailMode mode, bool hasWarning)
         {
             float height = GraphNodeLayoutConstants.PreviewLineHeight; // тип ответа
-            height += GraphNodeLayoutConstants.PreviewLineHeight * GetChoiceTextPreviewLineCount(mode);
+            string displayText = choice != null
+                ? ResolveGraphTextForDisplay(choice.Text, mode, GetChoiceTextPreviewMaxChars(mode))
+                : string.Empty;
+            height += ComputeNarrativeTextHeight(displayText, GetGraphChoiceContentWidth(mode));
 
             if (choice == null)
                 return height + GraphNodeLayoutConstants.SectionGap + GraphNodeLayoutConstants.CardPadding;

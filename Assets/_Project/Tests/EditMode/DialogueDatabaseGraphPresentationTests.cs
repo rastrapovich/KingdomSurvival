@@ -564,4 +564,114 @@ public sealed class DialogueDatabaseGraphPresentationTests
 
         Assert.Greater(bothHeight, successOnlyHeight);
     }
+
+    // ---- "Полноценное редактирование нод" (§3-5, §44): полный текст без
+    // обрезания в Standard/Full, реальная высота через CalcHeight ---------
+
+    private const string LongParagraph =
+        "Ульяна вынимает из печи второй каравай — сверх обычной нормы — и заворачивает его в холстину. " +
+        "«Отнеси к седьмому затвору, как всегда», — говорит она, не поднимая глаз от теста. " +
+        "Дело, а не дар: этот хлеб давно и без спора считается чужим.";
+
+    [Test]
+    public void ResolveGraphTextForDisplay_Compact_StillTruncates()
+    {
+        string result = ResolveGraphTextForDisplay(LongParagraph, GraphDetailMode.Compact, 50);
+
+        Assert.LessOrEqual(result.Length, 51);
+        Assert.IsTrue(result.EndsWith("…"));
+    }
+
+    [Test]
+    public void ResolveGraphTextForDisplay_Standard_ReturnsFullTextUntruncated()
+    {
+        string result = ResolveGraphTextForDisplay(LongParagraph, GraphDetailMode.Standard, 50);
+
+        Assert.AreEqual(LongParagraph, result);
+        Assert.IsFalse(result.EndsWith("…"));
+    }
+
+    [Test]
+    public void ResolveGraphTextForDisplay_Full_ReturnsFullTextUntruncated()
+    {
+        string result = ResolveGraphTextForDisplay(LongParagraph, GraphDetailMode.Full, 220);
+
+        Assert.AreEqual(LongParagraph, result);
+    }
+
+    [Test]
+    public void ComputeNarrativeTextHeight_LongerTextIsTaller()
+    {
+        float shortHeight = ComputeNarrativeTextHeight("Коротко.", 300f);
+        float longHeight = ComputeNarrativeTextHeight(LongParagraph, 300f);
+
+        Assert.Greater(longHeight, shortHeight);
+    }
+
+    [Test]
+    public void ComputeNarrativeTextHeight_NarrowerWidthIsTallerOrEqual()
+    {
+        // Тот же текст в более узкой ширине переносится на больше строк
+        // (или на столько же, если текст короче строки) — никогда меньше.
+        float wideHeight = ComputeNarrativeTextHeight(LongParagraph, 480f);
+        float narrowHeight = ComputeNarrativeTextHeight(LongParagraph, 200f);
+
+        Assert.GreaterOrEqual(narrowHeight, wideHeight);
+    }
+
+    [Test]
+    public void ComputeNarrativeTextHeight_EmptyTextStillMeasuresPlaceholder()
+    {
+        float height = ComputeNarrativeTextHeight(string.Empty, 300f);
+
+        Assert.Greater(height, 0f);
+    }
+
+    [Test]
+    public void ComputeTextBlockHeight_Standard_GrowsWithLongerText()
+    {
+        GraphTextBlockInfo shortBlock = new GraphTextBlockInfo { Kind = DialogueTextBlockKind.MainLine, Text = "Коротко." };
+        GraphTextBlockInfo longBlock = new GraphTextBlockInfo { Kind = DialogueTextBlockKind.MainLine, Text = LongParagraph };
+
+        float shortHeight = ComputeTextBlockHeight(shortBlock, GraphDetailMode.Standard);
+        float longHeight = ComputeTextBlockHeight(longBlock, GraphDetailMode.Standard);
+
+        Assert.Greater(longHeight, shortHeight);
+    }
+
+    [Test]
+    public void ComputeChoiceHeight_Standard_GrowsWithLongerText()
+    {
+        GraphChoiceInfo shortChoice = new GraphChoiceInfo { Text = "Да.", Kind = DialogueChoiceKind.Normal, NextNodeId = "n2" };
+        GraphChoiceInfo longChoice = new GraphChoiceInfo { Text = LongParagraph, Kind = DialogueChoiceKind.Normal, NextNodeId = "n2" };
+
+        float shortHeight = ComputeChoiceHeight(shortChoice, GraphDetailMode.Standard, hasWarning: false);
+        float longHeight = ComputeChoiceHeight(longChoice, GraphDetailMode.Standard, hasWarning: false);
+
+        Assert.Greater(longHeight, shortHeight);
+    }
+
+    // §6: ноды заметно шире, чем в предыдущей инструкции (280-320 →
+    // 310-500), чтобы русский литературный текст не раздувал высоту.
+    [Test]
+    public void GetGraphNodeWidth_MatchesWidenedRanges()
+    {
+        Assert.AreEqual(310f, GetGraphNodeWidth(GraphDetailMode.Compact));
+        Assert.AreEqual(430f, GetGraphNodeWidth(GraphDetailMode.Standard));
+        Assert.AreEqual(500f, GetGraphNodeWidth(GraphDetailMode.Full));
+    }
+
+    [Test]
+    public void GetGraphTextContentWidth_NarrowerThanNodeWidth()
+    {
+        Assert.Less(GetGraphTextContentWidth(GraphDetailMode.Standard), GetGraphNodeWidth(GraphDetailMode.Standard));
+    }
+
+    [Test]
+    public void GetGraphChoiceContentWidth_NarrowerThanTextContentWidth()
+    {
+        // Карточка ответа имеет собственный внутренний отступ поверх
+        // общего margin ноды — уже, чем ширина текстового блока.
+        Assert.Less(GetGraphChoiceContentWidth(GraphDetailMode.Standard), GetGraphTextContentWidth(GraphDetailMode.Standard));
+    }
 }

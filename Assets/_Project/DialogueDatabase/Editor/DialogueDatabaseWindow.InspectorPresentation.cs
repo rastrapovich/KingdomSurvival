@@ -42,6 +42,22 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         // используемых и «Таблицей», и панелью «Граф».
         private DialogueEditorLayoutMode inspectorLayoutMode = DialogueEditorLayoutMode.Normal;
 
+        // §28 инструкции "полноценное редактирование нод": приблизительная
+        // доступная ширина содержимого — нужна, чтобы посчитать
+        // CalcHeight авто-высокого TextArea. В узком Inspector'е известна
+        // точно (graphInspectorWidth); в «Таблице» — консервативная
+        // константа (там нет горизонтальной проблемы, точность не критична).
+        private float inspectorContentWidth = 700f;
+
+        // Свёрнутость технической секции "УСТАРЕВШИЕ ДАННЫЕ" — сессионное
+        // состояние окна, не часть Dialogue asset (§34).
+        private bool legacyTextFoldout;
+
+        // §26 инструкции "полноценное редактирование нод": колесо мыши над
+        // Inspector-панелью прокручивает eё независимо от того, какая нода
+        // выбрана и что происходит на canvas.
+        private const float GraphInspectorScrollWheelSpeed = 20f;
+
         private void LoadGraphInspectorWidth()
         {
             graphInspectorWidth = EditorPrefs.GetFloat(GraphInspectorWidthPrefKey, GraphInspectorDefaultWidth);
@@ -147,6 +163,118 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 EditorGUILayout.PropertyField(stringProperty, new GUIContent(label));
             }
+        }
+
+        // §28: полноценный авто-высокий TextArea вместо PropertyField с
+        // атрибутом TextArea(min,max) — тот атрибут ограничивает видимую
+        // высоту и заводит СОБСТВЕННЫЙ внутренний scrollbar при превышении
+        // (именно это и мешало прокрутке всей панели колёсиком). Здесь
+        // высота считается по факту содержимого (CalcHeight) и всегда
+        // вмещает весь текст — прокручивается сама панель, а не поле.
+        private void DrawAutoHeightNarrativeText(SerializedProperty textProperty, string label, float minHeight = 40f)
+        {
+            if (!string.IsNullOrEmpty(label))
+                EditorGUILayout.LabelField(label, EditorStyles.miniBoldLabel);
+
+            GUIStyle style = new GUIStyle(EditorStyles.textArea) { wordWrap = true };
+            string content = textProperty.stringValue;
+            float measuredWidth = Mathf.Max(60f, inspectorContentWidth);
+            float height = Mathf.Max(
+                minHeight,
+                style.CalcHeight(new GUIContent(string.IsNullOrEmpty(content) ? " " : content), measuredWidth));
+
+            EditorGUI.BeginChangeCheck();
+            string newValue = EditorGUILayout.TextArea(content, style, GUILayout.Height(height));
+            if (EditorGUI.EndChangeCheck())
+            {
+                textProperty.stringValue = newValue;
+                EditorUtility.SetDirty(database);
+            }
+        }
+
+        // §15-16: крупная карточка выбранного узла — портрет говорящего
+        // (тот же источник, что и у игрового диалога: FindSpeaker →
+        // Portrait) слева, имя/роль/ID справа. Если у говорящего нет
+        // портрета — аккуратный текстовый placeholder вместо пустого поля.
+        private void DrawGraphInspectorPortraitHeader(SerializedProperty node)
+        {
+            string speakerId = node.FindPropertyRelative("speakerId").stringValue;
+            DialogueSpeakerData speaker = database.FindSpeaker(speakerId);
+            string nodeId = node.FindPropertyRelative("id").stringValue;
+
+            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+
+            const float portraitSize = 64f;
+            Rect portraitRect = GUILayoutUtility.GetRect(
+                portraitSize, portraitSize, GUILayout.Width(portraitSize), GUILayout.Height(portraitSize));
+
+            if (speaker != null && speaker.Portrait != null)
+            {
+                Texture2D preview = AssetPreview.GetAssetPreview(speaker.Portrait);
+                if (preview == null)
+                    preview = speaker.Portrait.texture;
+                GUI.DrawTexture(portraitRect, preview, ScaleMode.ScaleToFit, true);
+            }
+            else
+            {
+                EditorGUI.DrawRect(
+                    portraitRect,
+                    EditorGUIUtility.isProSkin ? new Color(1f, 1f, 1f, 0.08f) : new Color(0f, 0f, 0f, 0.08f));
+                string placeholder = speaker != null ? speaker.DisplayName.ToUpperInvariant() : "?";
+                GUIStyle placeholderStyle = new GUIStyle(EditorStyles.miniBoldLabel)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    wordWrap = true
+                };
+                GUI.Label(portraitRect, placeholder, placeholderStyle);
+            }
+
+            GUILayout.Space(8f);
+            EditorGUILayout.BeginVertical();
+            GUILayout.FlexibleSpace();
+
+            GUIStyle mutedStyle = new GUIStyle(EditorStyles.miniLabel);
+            mutedStyle.normal.textColor = EditorGUIUtility.isProSkin
+                ? new Color(0.6f, 0.6f, 0.58f, 1f)
+                : new Color(0.42f, 0.42f, 0.4f, 1f);
+
+            if (speaker != null)
+            {
+                EditorGUILayout.LabelField(speaker.DisplayName, EditorStyles.boldLabel);
+                if (!string.IsNullOrWhiteSpace(speaker.Role))
+                    EditorGUILayout.LabelField(speaker.Role, EditorStyles.miniLabel);
+                EditorGUILayout.LabelField(speaker.Id, mutedStyle);
+            }
+            else
+            {
+                EditorGUILayout.LabelField(
+                    string.IsNullOrWhiteSpace(speakerId) ? "<нет говорящего>" : "? " + speakerId,
+                    EditorStyles.boldLabel);
+            }
+
+            EditorGUILayout.LabelField(string.IsNullOrWhiteSpace(nodeId) ? "<без ID>" : nodeId, mutedStyle);
+
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.EndHorizontal();
+        }
+
+        // §26/§29-30: явная маршрутизация ScrollWheel — Inspector всегда
+        // забирает колесо мыши над своим прямоугольником, независимо от
+        // выбранного узла и от того, что показывает graph.HandleGraphInput
+        // для canvas. panelRect передаётся вызывающей стороной (результат
+        // EditorGUILayout.BeginVertical(GUIStyle, ...) для всей панели).
+        private void HandleGraphInspectorScrollWheel(Rect panelRect)
+        {
+            Event current = Event.current;
+            if (current.type != EventType.ScrollWheel)
+                return;
+            if (!panelRect.Contains(current.mousePosition))
+                return;
+
+            graphInspectorScroll.y = Mathf.Max(0f, graphInspectorScroll.y + current.delta.y * GraphInspectorScrollWheelSpeed);
+            current.Use();
+            Repaint();
         }
     }
 }

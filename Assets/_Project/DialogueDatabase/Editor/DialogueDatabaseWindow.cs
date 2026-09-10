@@ -284,6 +284,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             // достаточно места для прежнего горизонтального PropertyField
             // (§41 — режим «Таблица» не должен сломаться).
             inspectorLayoutMode = DialogueEditorLayoutMode.Normal;
+            inspectorContentWidth = 700f;
 
             SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
             centerScroll = EditorGUILayout.BeginScrollView(centerScroll);
@@ -331,9 +332,31 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 DrawSectionHeader("ОСНОВНОЕ");
                 DrawLongIdField(node.FindPropertyRelative("id"), "ID узла");
                 DrawSpeakerPopup(node.FindPropertyRelative("speakerId"));
-                EditorGUILayout.PropertyField(node.FindPropertyRelative("text"), new GUIContent("Реплика (legacy)"));
 
                 SerializedProperty textBlocks = node.FindPropertyRelative("textBlocks");
+                SerializedProperty legacyText = node.FindPropertyRelative("text");
+
+                // §18 инструкции "полноценное редактирование нод": legacy
+                // node.Text редактируется в основной части Inspector'а
+                // только для действительно legacy-узла (без textBlocks).
+                // Если textBlocks уже есть, legacy-поле игроку не
+                // показывается вообще — не нужно занимать им место; если
+                // оно всё же непусто, прячем его в сворачиваемую секцию
+                // с явным предупреждением, а не молча.
+                if (textBlocks.arraySize == 0)
+                {
+                    DrawAutoHeightNarrativeText(legacyText, "Реплика (legacy)");
+                }
+                else if (!string.IsNullOrEmpty(legacyText.stringValue))
+                {
+                    EditorGUILayout.HelpBox(
+                        "⚠ Узел содержит legacy-текст, но использует textBlocks — это поле игроку не показывается.",
+                        MessageType.Warning);
+                    legacyTextFoldout = EditorGUILayout.Foldout(legacyTextFoldout, "УСТАРЕВШИЕ ДАННЫЕ", true);
+                    if (legacyTextFoldout)
+                        DrawAutoHeightNarrativeText(legacyText, "Реплика (legacy)");
+                }
+
                 DrawSectionHeader("ТЕКСТОВЫЕ БЛОКИ (" + textBlocks.arraySize + ")");
                 for (int blockIndex = 0; blockIndex < textBlocks.arraySize; blockIndex++)
                     DrawTextBlock(textBlocks, blockIndex);
@@ -411,7 +434,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 DrawLongIdField(blockId, "ID блока");
                 DrawTextBlockKindPopup(kind);
                 DrawLongIdField(block.FindPropertyRelative("speakerIdOverride"), "Говорящий (переопределение)");
-                EditorGUILayout.PropertyField(block.FindPropertyRelative("text"), new GUIContent("Текст"), GUILayout.MinHeight(60f));
+                DrawAutoHeightNarrativeText(block.FindPropertyRelative("text"), "Текст");
                 DrawConditionGroup(block.FindPropertyRelative("conditions"), "Условия показа");
 
                 SerializedProperty hasPassiveCheck = block.FindPropertyRelative("hasPassiveCheck");
@@ -435,8 +458,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PropertyField(text, GUIContent.none);
-            if (GUILayout.Button("×", GUILayout.Width(28f)))
+            EditorGUILayout.LabelField("ОТВЕТ " + (choiceIndex + 1) + " · " + ChoiceKindLabel(choiceKind).ToUpperInvariant(), EditorStyles.miniBoldLabel);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button(new GUIContent("×", "Удалить ответ"), GUILayout.Width(28f)))
             {
                 choices.DeleteArrayElementAtIndex(choiceIndex);
                 EditorGUILayout.EndHorizontal();
@@ -445,7 +469,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.LabelField("Вид: " + ChoiceKindLabel(choiceKind), EditorStyles.miniLabel);
+            DrawAutoHeightNarrativeText(text, null, 32f);
             DrawConditionGroup(choice.FindPropertyRelative("conditions"), "Условия показа");
             if (choiceKind != DialogueChoiceKind.Normal || choice.FindPropertyRelative("conditions").FindPropertyRelative("Conditions").arraySize > 0)
                 DrawUnavailablePresentationPopup(choice.FindPropertyRelative("unavailablePresentation"));

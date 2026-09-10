@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using KingdomSurvival.UILayout;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public sealed class UILayoutDatabaseTests
 {
@@ -157,5 +158,37 @@ public sealed class UILayoutDatabaseTests
             UILayoutRuntimeApplier.ResolveTextAnchor(
                 UILayoutTextHorizontalAlignment.Right,
                 UILayoutTextVerticalAlignment.Bottom));
+    }
+
+    /// <summary>
+    /// Regression: точный Rect из UI Конструктора должен иметь приоритет над
+    /// legacy min/max из USS. Именно `.narrative-dialogue-portrait` раньше
+    /// оставлял `min-height: 360px`, поэтому runtime-рамка 253x131 физически
+    /// становилась примерно 253x360 и кадрировала портрет иначе, чем preview.
+    /// </summary>
+    [Test]
+    public void ApplyRect_Clears_Legacy_MinMax_Size_Constraints()
+    {
+        VisualElement target = new VisualElement();
+        target.style.minWidth = 500f;
+        target.style.minHeight = 360f;
+        target.style.maxWidth = 430f;
+        target.style.maxHeight = 900f;
+
+        UILayoutElementDefinition definition = new UILayoutElementDefinition();
+        definition.SetRect(new Rect(10f, 20f, 253.5f, 131.3f));
+
+        UILayoutRuntimeApplier.ApplyRect(
+            target,
+            definition,
+            new Vector2(1920f, 1080f),
+            new Vector2(1920f, 1080f));
+
+        Assert.That(target.style.width.value.value, Is.EqualTo(253.5f).Within(0.001f));
+        Assert.That(target.style.height.value.value, Is.EqualTo(131.3f).Within(0.001f));
+        Assert.That(target.style.minWidth.value.value, Is.EqualTo(0f).Within(0.001f));
+        Assert.That(target.style.minHeight.value.value, Is.EqualTo(0f).Within(0.001f));
+        Assert.AreEqual(StyleKeyword.None, target.style.maxWidth.keyword);
+        Assert.AreEqual(StyleKeyword.None, target.style.maxHeight.keyword);
     }
 }

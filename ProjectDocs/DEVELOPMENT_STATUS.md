@@ -377,3 +377,31 @@ Unity Editor и компилятор здесь недоступны — ни о
 После Pull обязательна ручная проверка: открыть говорящего с уже настроенной индивидуальной кадрировкой (Остафий/Лада/Ульяна), сравнить preview Базы диалогов и реальный вид в Play Mode при Game View, выставленном на разрешение, близкое к `ReferenceResolution` UI Layout — кадрирование обязано совпадать визуально, включая ту же степень зума и то же положение.
 
 Канон, `DialogueDatabaseAsset`, runtime-логика диалогов, боевые формулы и SaveSystem этой правкой не менялись.
+
+## 12. UILayout имеет окончательный приоритет над legacy min/max — 10.09.2026
+
+После повторной ручной проверки выяснилась следующая независимая причина расхождения: editor preview уже считал правильную рамку из `UILayout`, но реальный `VisualElement` в Play Mode продолжал получать ограничения размера из старого `Prototype_Narrative.uss` после применения точного `Rect`.
+
+Конкретно `.narrative-dialogue-portrait` всё ещё содержит legacy `max-width: 430px` и `min-height: 360px`. В текущем layout рамка `portrait` выставлена примерно в `253.5 × 131.3` reference-px. `ApplyRect` задавал эти `width/height`, но не нейтрализовал `min/max`, поэтому UI Toolkit имел право растянуть фактическую runtime-высоту минимум до 360 px. `ApplyDynamicImage` при этом продолжал рассчитывать кадрирование по размеру из `UILayout`, то есть маска и image math фактически работали с разными frame size.
+
+Исправление сделано в одном общем месте — `UILayoutRuntimeApplier.ApplyRect`:
+
+- перед установкой точного `left/top/width/height` вызывается `ClearLegacySizeConstraints`;
+- `minWidth/minHeight` сбрасываются в `0`;
+- `maxWidth/maxHeight` сбрасываются в `none`;
+- визуальные свойства USS (цвет, border, alignment и т. п.) не трогаются;
+- для generic auto-layout это влияет только на элементы с `overrideRect=true`, потому что `UILayoutScreenBinder` вызывает `ApplyRect` только при явном override; экран диалога по-прежнему применяет свой Rect собственным кодом `PrototypeUIController`.
+
+Таким образом, когда геометрия элемента передана UI Конструктору, его Rect становится окончательным и старые USS size constraints больше не могут молча изменить runtime-рамку после cascade/layout.
+
+### 12.1. Regression-тест
+
+В `UILayoutDatabaseTests.cs` добавлен `ApplyRect_Clears_Legacy_MinMax_Size_Constraints`: тест создаёт `VisualElement` с legacy `minHeight=360`, `minWidth=500`, `maxWidth=430`, `maxHeight=900`, затем применяет UILayout Rect `253.5 × 131.3` и проверяет, что точные width/height сохранены, min-size обнулены, а max-size переведены в `StyleKeyword.None`.
+
+### 12.2. Что проверено / что осталось
+
+Статически проверено, что изменение ограничено общим `ApplyRect` и одним EditMode regression-тестом; база диалогов, сохранённые индивидуальные `Scale/Offset/Flip`, `KingdomSurvivalUILayouts.asset`, `Prototype_Narrative.uss`, Graph/Inspector и нарративный контент не менялись.
+
+Unity Editor/компилятор в подключённой среде недоступны, поэтому новый тест здесь не запускался. После Pull нужно: дождаться чистой компиляции, прогнать EditMode `Run All`, затем открыть тот же диалог и сравнить фактическую форму рамки в Game View с UI Конструктором. Если причина устранена, runtime-портрет должен иметь тот же crop/zoom/pan, потому что и маска, и `ApplyDynamicImage` наконец используют геометрию одного размера.
+
+Канон этой правкой не изменён.

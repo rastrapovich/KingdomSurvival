@@ -61,6 +61,14 @@ namespace KingdomSurvival.UILayout
             if (!TryGetLocalReferenceRect(screen, definition, out r))
                 r = definition.Rect;
 
+            // Когда геометрия элемента передана UILayout, она должна быть
+            // окончательной. Старые USS min/max ограничения иначе продолжают
+            // участвовать в layout после того, как мы выставили точный Rect.
+            // Например, legacy `.narrative-dialogue-portrait { min-height: 360px; }`
+            // растягивал рамку 253x131 из UI Конструктора обратно до 253x360,
+            // из-за чего runtime кадрировал портрет иначе, чем оба editor preview.
+            ClearLegacySizeConstraints(target);
+
             target.style.position = Position.Absolute;
             target.style.left = r.x * sx;
             target.style.top = r.y * sy;
@@ -450,6 +458,21 @@ namespace KingdomSurvival.UILayout
             layer.style.top = 0f;
             layer.style.bottom = 0f;
             return layer;
+        }
+
+        /// <summary>
+        /// UILayout Rect имеет приоритет над legacy USS-ограничениями размера.
+        /// Точные width/height задаются сразу после этого метода; здесь снимаются
+        /// только ограничения, способные их переопределить после cascade/layout.
+        /// Остальные визуальные свойства USS (цвет, border, alignment и т. п.)
+        /// сохраняются.
+        /// </summary>
+        private static void ClearLegacySizeConstraints(VisualElement target)
+        {
+            target.style.minWidth = 0f;
+            target.style.minHeight = 0f;
+            target.style.maxWidth = StyleKeyword.None;
+            target.style.maxHeight = StyleKeyword.None;
         }
 
         /// <summary>

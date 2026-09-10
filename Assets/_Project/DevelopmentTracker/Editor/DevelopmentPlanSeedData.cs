@@ -640,7 +640,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                         "Ровно один из repair_old/repair_new записывается",
                         "Выбор не сопровождается броском проверки"
                     },
-                    implementationNote: "N05 переписан с P03-каркаса на production-текст: осмотр после паводка (DamInspected ставится на первом блоке — осмотр уже произошёл сам по себе), условные эхо-блоки P05 (FloodMillDeckDestroyed/FloodLivestockLost/HeroInjuredByFlood), позиции Мирона/Остафия/Лады/Ульяны, два обычных (не Active) выбора. RepairOld/RepairNew ставятся на первом блоке соответствующей итоговой ветки; RepairCompleted в N05 не ставится — это граница с N06."),
+                    implementationNote: "N05 переписан с P03-каркаса на production-текст: осмотр после паводка (DamInspected ставится на первом блоке — осмотр уже произошёл сам по себе), условные эхо-блоки P05 (FloodMillDeckDestroyed/FloodLivestockLost/HeroInjuredByFlood), позиции Мирона/Остафия/Лады/Ульяны, два обычных (не Active) выбора. RepairOld/RepairNew ставятся на первом блоке соответствующей итоговой ветки; RepairCompleted в N05 не ставится — это граница с N06. Позже переструктурирован на presentation-правило «одна реплика = один шаг» (30 узлов, новый DialogueChoiceKind.Continue между ними) — раздел 16 DEVELOPMENT_STATUS.md."),
 
                 Task("P06-T02", "N06 — матрица первых симптомов",
                     "Симптомы различаются по ветке ремонта согласно матрице раздела 6 инструкции P06.",
@@ -652,7 +652,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                     fileReferences: new[] { "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset" },
                     manualChecks: new[] { "В Preview N06 подготовить RepairOld и RepairNew по отдельности, убедиться, что видна только своя ветка симптомов" },
                     acceptanceCriteria: new[] { "Обе ветки локально успешны, но дают наблюдаемо разные симптомы", "Обе ветки ведут к расследованию N07" },
-                    implementationNote: "Один диалог D06 (не два), одна общая вступительная реплика + два взаимоисключающих набора условных textBlocks (Conditions: RepairOld && !RepairNew / RepairNew && !RepairOld) — старая ветка: ночные толчки мельничного колеса без видимой причины; новая ветка: высохший седьмой рукав, встревоженный скот, рыба в лужах. RepairCompleted ставится на первом блоке выбранной ветки, WaterWrongActive и знание water_flow_is_wrong — на последнем. Знания расследования P07 (mill_moves_at_wrong_time и т.д.) сознательно не выдаются."),
+                    implementationNote: "Один диалог D06 (не два), одна общая вступительная реплика — старая ветка: ночные толчки мельничного колеса без видимой причины; новая ветка: высохший седьмой рукав, встревоженный скот, рыба в лужах. RepairCompleted ставится на первом узле выбранной ветки, WaterWrongActive и знание water_flow_is_wrong — на последнем. Знания расследования P07 (mill_moves_at_wrong_time и т.д.) сознательно не выдаются. Переструктурирован на presentation-правило «одна реплика = один шаг» (23 узла): ветвление RepairOld/RepairNew решается двумя условными DialogueChoiceKind.Continue-выборами на стартовом узле (Negate противоположного флага защищает от конфликтного состояния), а не условными textBlocks внутри одного узла — раздел 16 DEVELOPMENT_STATUS.md."),
 
                 Task("P06-T03", "Тест взаимоисключения ремонта",
                     "EditMode-тест: repair_old и repair_new не могут быть установлены одновременно.",

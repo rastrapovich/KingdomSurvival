@@ -92,6 +92,17 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             choice.FindPropertyRelative("kind").enumValueIndex = (int)DialogueChoiceKind.Exit;
         }
 
+        private static void AddContinueChoice(SerializedProperty choices)
+        {
+            int index = choices.arraySize;
+            choices.arraySize++;
+            SerializedProperty choice = choices.GetArrayElementAtIndex(index);
+            ResetChoiceToDefaults(choice);
+            choice.FindPropertyRelative("text").stringValue = "…";
+            choice.FindPropertyRelative("endsDialogue").boolValue = false;
+            choice.FindPropertyRelative("kind").enumValueIndex = (int)DialogueChoiceKind.Continue;
+        }
+
         private static void AddActiveCheckChoice(SerializedProperty choices, DialogueChoiceKind kind)
         {
             int index = choices.arraySize;

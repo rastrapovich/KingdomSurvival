@@ -400,6 +400,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         {
             GenericMenu menu = new GenericMenu();
             menu.AddItem(new GUIContent("Обычный"), false, () => AddChoice(choices));
+            menu.AddItem(new GUIContent("Продолжение (…)"), false, () => AddContinueChoice(choices));
             menu.AddItem(new GUIContent("Возвратная проверка"), false,
                 () => AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveReturnable));
             menu.AddItem(new GUIContent("Решающая проверка"), false,
@@ -480,6 +481,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     EditorGUILayout.LabelField("Завершает разговор (ВЫХОД).", EditorStyles.miniLabel);
                     break;
 
+                case DialogueChoiceKind.Continue:
+                    EditorGUILayout.LabelField("Кнопка «читать дальше» — не реплика героя, в игре всегда просто «…».", EditorStyles.miniLabel);
+                    DrawNodeTargetPopup(nextNodeId, nodes, "Следующий шаг");
+                    break;
+
                 case DialogueChoiceKind.ActiveReturnable:
                 case DialogueChoiceKind.ActiveDecisive:
                     DrawCheckSpec(choice.FindPropertyRelative("check"), "Проверка");
@@ -509,6 +515,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             switch (kind)
             {
                 case DialogueChoiceKind.Normal: return "обычный";
+                case DialogueChoiceKind.Continue: return "продолжение";
                 case DialogueChoiceKind.ActiveReturnable: return "возвратная проверка";
                 case DialogueChoiceKind.ActiveDecisive: return "решающая проверка";
                 case DialogueChoiceKind.Exit: return "завершение";

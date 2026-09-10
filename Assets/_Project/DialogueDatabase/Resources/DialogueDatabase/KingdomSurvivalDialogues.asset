@@ -2061,7 +2061,7 @@ MonoBehaviour:
     title: "N05 — Осмотр плотины / Мокрый чертёж"
     category: 1
     status: 1
-    developerComment: "P06 production-сцена. Осмотр последствий паводка → эхо-реакции P05 (условные блоки по FloodMillDeckDestroyed/FloodLivestockLost/HeroInjuredByFlood) → спор Мирон/Остафий/Лада/Ульяна → выбор ремонта без проверки. DamInspected ставится на первом обязательном блоке старта (осмотр уже произошёл сам по себе). RepairOld/RepairNew ставятся на первом блоке соответствующей ветки и взаимоисключающи по построению графа. RepairCompleted здесь не ставится — это уже N06 (граница: N05 = решение, N06 = реализованное решение и первый симптом)."
+    developerComment: "P06 production-сцена, presentation-правило «одна реплика = один шаг» (см. отдельную инструкцию по DialogueChoiceKind.Continue): каждый node содержит ровно один текстовый блок одного говорящего (кроме трёх опциональных check_*-узлов подряд, где условный блок либо показывается, либо узел проходит пустым шагом — они уже однослойные, не смешение спикеров). Переходы между шагами — DialogueChoiceKind.Continue («…»), не читается как реплика героя и не попадает в историю как «Вы: …». Настоящий выбор только один — ulyana_cost2 (старый/новый ремонт), обычные DialogueChoiceKind.Normal, без проверки. DamInspected ставится на первом блоке старта. RepairOld/RepairNew — на первом блоке своей стабильной итоговой ветки (chapter01.node.05.old / .new), взаимоисключающи по построению графа. RepairCompleted здесь не ставится — граница с N06."
     startNodeId: chapter01.node.05
     tags:
     - "глава01"
@@ -2071,10 +2071,10 @@ MonoBehaviour:
       speakerId: narrator
       text:
       textBlocks:
-      - blockId: chapter01.node.05_aftermath
+      - blockId: chapter01.node.05_main
         kind: 0
-        speakerIdOverride:
-        text: "Вода ушла с настила, но оставила после себя ил, сорванные крепления и тёмную полосу на брёвнах выше человеческого колена. Лада сидит прямо на мокрой доске и ножом счищает размокшее дерево вокруг треснувшего паза. Остафий стоит над ней с длинным шестом и по очереди касается семи затворов."
+        speakerIdOverride: 
+        text: "Вода ушла с настила, но оставила после себя ил, сорванные крепления и тёмную полосу на брёвнах выше человеческого колена."
         conditions:
           Combinator: 0
           Conditions: []
@@ -2091,9 +2091,79 @@ MonoBehaviour:
           Type: 0
           StringParam: chapter01.flag.dam_inspected
           IntParam: 0
-      - blockId: chapter01.node.05_walkway_destroyed
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.opening_02
+        endsDialogue: 0
+        choiceId: chapter01.node.05_choice_continue1
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 60, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.opening_02
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.opening_02_main
         kind: 0
-        speakerIdOverride:
+        speakerIdOverride: 
+        text: "Лада сидит прямо на мокрой доске и ножом счищает размокшее дерево вокруг треснувшего паза. Остафий стоит над ней с длинным шестом и по очереди касается семи затворов."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.check_walkway
+        endsDialogue: 0
+        choiceId: chapter01.node.05.opening_02_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 460, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.check_walkway
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.check_walkway_main
+        kind: 0
+        speakerIdOverride: 
         text: "Там, где ночью был настил, теперь торчат только два косых бруса. Между ними вода тащит щепу вниз по течению."
         conditions:
           Combinator: 0
@@ -2112,7 +2182,34 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05_livestock_lost
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.check_livestock
+        endsDialogue: 0
+        choiceId: chapter01.node.05.check_walkway_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 860, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.check_livestock
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.check_livestock_main
         kind: 0
         speakerIdOverride: ulyana
         text: "— До вечера загон пересчитаю ещё раз. Потом скажу, сколько мы потеряли. Сейчас мне важнее знать, сколько людей вы заберёте на плотину."
@@ -2133,7 +2230,34 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05_hero_injured
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.check_injured
+        endsDialogue: 0
+        choiceId: chapter01.node.05.check_livestock_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1260, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.check_injured
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.check_injured_main
         kind: 0
         speakerIdOverride: ulyana
         text: "Ульяна смотрит на твою перевязанную руку. — И тебя я за рабочего не считаю. Хотя ты, конечно, сейчас начнёшь спорить."
@@ -2154,9 +2278,36 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05_miron_position
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.miron
+        endsDialogue: 0
+        choiceId: chapter01.node.05.check_injured_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1660, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.miron
+      speakerId: miron
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.miron_main
         kind: 0
-        speakerIdOverride: miron
+        speakerIdOverride: 
         text: "Мирон проводит ладонью по мокрому ободу колеса. — Мне всё равно, чей способ красивее. Скажите только одно: сколько мельница простоит и будет ли завтра вода идти так же, как сегодня."
         conditions:
           Combinator: 0
@@ -2170,10 +2321,37 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05_ostafiy_old
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.ostafiy_old_1
+        endsDialogue: 0
+        choiceId: chapter01.node.05.miron_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2060, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.ostafiy_old_1
+      speakerId: ostafiy
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.ostafiy_old_1_main
         kind: 0
-        speakerIdOverride: ostafiy
-        text: "Остафий постукивает шестом по первому затвору, потом по второму и так до последнего. — Снимаем покоробившееся. Меняем крепления. Выставляем все семь заново. И боковой сброс тоже. Он задерживает шест на седьмом. — Дольше. Леса уйдёт больше. Зато мы знаем, как эта плотина жила."
+        speakerIdOverride: 
+        text: "Остафий постукивает шестом по первому затвору, потом по второму и так до последнего. — Снимаем покоробившееся. Меняем крепления. Выставляем все семь заново. И боковой сброс тоже."
         conditions:
           Combinator: 0
           Conditions: []
@@ -2186,10 +2364,37 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05_lada_new
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.ostafiy_old_2
+        endsDialogue: 0
+        choiceId: chapter01.node.05.ostafiy_old_1_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2460, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.ostafiy_old_2
+      speakerId: ostafiy
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.ostafiy_old_2_main
         kind: 0
-        speakerIdOverride: lada
-        text: "Лада переворачивает мокрую доску и кончиком ножа проводит по ней две линии. — А можно не собирать обратно всё, что здесь когда-то придумали. Она перечёркивает короткую линию сбоку. — Седьмой рукав глушим. Основной поток держим здесь, на мельнице. Креплений меньше, дерева меньше. И закончить можно раньше."
+        speakerIdOverride: 
+        text: "Он задерживает шест на седьмом. — Дольше. Леса уйдёт больше. Зато мы знаем, как эта плотина жила."
         conditions:
           Combinator: 0
           Conditions: []
@@ -2202,9 +2407,208 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05_ostafiy_reply
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.lada_intro
+        endsDialogue: 0
+        choiceId: chapter01.node.05.ostafiy_old_2_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2860, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.lada_intro
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.lada_intro_main
         kind: 0
-        speakerIdOverride: ostafiy
+        speakerIdOverride: 
+        text: "Лада переворачивает мокрую доску и кончиком ножа проводит по ней две линии."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.lada_new_1
+        endsDialogue: 0
+        choiceId: chapter01.node.05.lada_intro_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 3260, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.lada_new_1
+      speakerId: lada
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.lada_new_1_main
+        kind: 0
+        speakerIdOverride: 
+        text: "— А можно не собирать обратно всё, что здесь когда-то придумали."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.lada_action2
+        endsDialogue: 0
+        choiceId: chapter01.node.05.lada_new_1_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 3660, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.lada_action2
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.lada_action2_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Она перечёркивает короткую линию сбоку."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.lada_new_2
+        endsDialogue: 0
+        choiceId: chapter01.node.05.lada_action2_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 4060, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.lada_new_2
+      speakerId: lada
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.lada_new_2_main
+        kind: 0
+        speakerIdOverride: 
+        text: "— Седьмой рукав глушим. Основной поток держим здесь, на мельнице. Креплений меньше, дерева меньше. И закончить можно раньше."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.ostafiy_reply
+        endsDialogue: 0
+        choiceId: chapter01.node.05.lada_new_2_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 4460, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.ostafiy_reply
+      speakerId: ostafiy
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.ostafiy_reply_main
+        kind: 0
+        speakerIdOverride: 
         text: "— Седьмой делали не от скуки."
         conditions:
           Combinator: 0
@@ -2218,9 +2622,36 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05_lada_reply
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.lada_reply
+        endsDialogue: 0
+        choiceId: chapter01.node.05.ostafiy_reply_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 4860, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.lada_reply
+      speakerId: lada
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.lada_reply_main
         kind: 0
-        speakerIdOverride: lada
+        speakerIdOverride: 
         text: "— Тогда жаль, что никто не оставил нам зачем."
         conditions:
           Combinator: 0
@@ -2234,10 +2665,80 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05_ulyana_cost
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.ulyana_cost1
+        endsDialogue: 0
+        choiceId: chapter01.node.05.lada_reply_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 5260, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.ulyana_cost1
+      speakerId: ulyana
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.ulyana_cost1_main
         kind: 0
-        speakerIdOverride: ulyana
-        text: "— Вы оба сейчас спасаете плотину, — говорит Ульяна. — А мне потом кормить тех, кто будет её спасать. Она смотрит сначала на старую схему, потом на новую. — Так сколько мы можем себе позволить?"
+        speakerIdOverride: 
+        text: "— Вы оба сейчас спасаете плотину, — говорит Ульяна. — А мне потом кормить тех, кто будет её спасать."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.ulyana_cost2
+        endsDialogue: 0
+        choiceId: chapter01.node.05.ulyana_cost1_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 5660, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.ulyana_cost2
+      speakerId: ulyana
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.ulyana_cost2_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Она смотрит сначала на старую схему, потом на новую. — Так сколько мы можем себе позволить?"
         conditions:
           Combinator: 0
           Conditions: []
@@ -2291,15 +2792,15 @@ MonoBehaviour:
         failureNodeId:
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 60, y: 460}
+      editorPosition: {x: 6060, y: 0}
       hasEditorPosition: 1
     - id: chapter01.node.05.old
-      speakerId: narrator
+      speakerId: ostafiy
       text:
       textBlocks:
-      - blockId: chapter01.node.05.old_ostafiy
+      - blockId: chapter01.node.05.old_main
         kind: 0
-        speakerIdOverride: ostafiy
+        speakerIdOverride: 
         text: "Остафий не улыбается и не кивает с видом победителя. — Тогда не латать. Разбирать кривое до целого дерева и ставить заново."
         conditions:
           Combinator: 0
@@ -2317,10 +2818,37 @@ MonoBehaviour:
           Type: 0
           StringParam: chapter01.flag.repair_old
           IntParam: 0
-      - blockId: chapter01.node.05.old_lada
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.old_lada1
+        endsDialogue: 0
+        choiceId: chapter01.node.05.old_continue1
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 6460, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.old_lada1
+      speakerId: lada
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.old_lada1_main
         kind: 0
-        speakerIdOverride: lada
-        text: "Лада убирает нож за пояс. — Сделаю. Она ещё раз смотрит на семь затворов. — Только потом посчитаем, сколько раз мы ремонтировали то, чего уже никто не умеет объяснить."
+        speakerIdOverride: 
+        text: "Лада убирает нож за пояс. — Сделаю."
         conditions:
           Combinator: 0
           Conditions: []
@@ -2333,9 +2861,122 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05.old_miron
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.old_lada2
+        endsDialogue: 0
+        choiceId: chapter01.node.05.old_lada1_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 6860, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.old_lada2
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.old_lada2_main
         kind: 0
-        speakerIdOverride: miron
+        speakerIdOverride: 
+        text: "Она ещё раз смотрит на семь затворов."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.old_lada3
+        endsDialogue: 0
+        choiceId: chapter01.node.05.old_lada2_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 7260, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.old_lada3
+      speakerId: lada
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.old_lada3_main
+        kind: 0
+        speakerIdOverride: 
+        text: "— Только потом посчитаем, сколько раз мы ремонтировали то, чего уже никто не умеет объяснить."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.old_miron
+        endsDialogue: 0
+        choiceId: chapter01.node.05.old_lada3_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 7660, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.old_miron
+      speakerId: miron
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.old_miron_main
+        kind: 0
+        speakerIdOverride: 
         text: "— Считать будете после. Сначала верните мне воду."
         conditions:
           Combinator: 0
@@ -2349,9 +2990,36 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05.old_narrator
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.old_narrator
+        endsDialogue: 0
+        choiceId: chapter01.node.05.old_miron_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 8060, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.old_narrator
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.old_narrator_main
         kind: 0
-        speakerIdOverride:
+        speakerIdOverride: 
         text: "Работу начинают со старой схемы: все семь затворов должны снова работать вместе."
         conditions:
           Combinator: 0
@@ -2386,16 +3054,16 @@ MonoBehaviour:
         failureNodeId:
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 560, y: 220}
+      editorPosition: {x: 8460, y: -300}
       hasEditorPosition: 1
     - id: chapter01.node.05.new
-      speakerId: narrator
+      speakerId: lada
       text:
       textBlocks:
-      - blockId: chapter01.node.05.new_lada
+      - blockId: chapter01.node.05.new_main
         kind: 0
-        speakerIdOverride: lada
-        text: "— Седьмой глушим. Здесь ставим новую перемычку. Основной поток оставляем мельнице. Она уже размечает дерево, будто решение существовало раньше самого разговора."
+        speakerIdOverride: 
+        text: "— Седьмой глушим. Здесь ставим новую перемычку. Основной поток оставляем мельнице."
         conditions:
           Combinator: 0
           Conditions: []
@@ -2412,9 +3080,79 @@ MonoBehaviour:
           Type: 0
           StringParam: chapter01.flag.repair_new
           IntParam: 0
-      - blockId: chapter01.node.05.new_ostafiy
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.new_lada2
+        endsDialogue: 0
+        choiceId: chapter01.node.05.new_continue1
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 6460, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.new_lada2
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.new_lada2_main
         kind: 0
-        speakerIdOverride: ostafiy
+        speakerIdOverride: 
+        text: "Она уже размечает дерево, будто решение существовало раньше самого разговора."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.new_ostafiy
+        endsDialogue: 0
+        choiceId: chapter01.node.05.new_lada2_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 6860, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.new_ostafiy
+      speakerId: ostafiy
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.new_ostafiy_main
+        kind: 0
+        speakerIdOverride: 
         text: "— Когда не знаешь, зачем сделана лишняя дверь, разумный человек сначала ищет, куда она вела."
         conditions:
           Combinator: 0
@@ -2428,9 +3166,36 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05.new_lada2
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.new_lada3
+        endsDialogue: 0
+        choiceId: chapter01.node.05.new_ostafiy_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 7260, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.new_lada3
+      speakerId: lada
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.new_lada3_main
         kind: 0
-        speakerIdOverride: lada
+        speakerIdOverride: 
         text: "— А если весь Дом будет ждать, пока мы найдём человека, который помнит?"
         conditions:
           Combinator: 0
@@ -2444,9 +3209,36 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05.new_miron
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.new_miron
+        endsDialogue: 0
+        choiceId: chapter01.node.05.new_lada3_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 7660, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.new_miron
+      speakerId: miron
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.new_miron_main
         kind: 0
-        speakerIdOverride: miron
+        speakerIdOverride: 
         text: "— Если после этого колесо будет получать ровную воду — я спорить не стану. Если не будет — первым приду к тебе."
         conditions:
           Combinator: 0
@@ -2460,9 +3252,36 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05.new_ulyana
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.new_ulyana
+        endsDialogue: 0
+        choiceId: chapter01.node.05.new_miron_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 8060, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.new_ulyana
+      speakerId: ulyana
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.new_ulyana_main
         kind: 0
-        speakerIdOverride: ulyana
+        speakerIdOverride: 
         text: "— А скот?"
         conditions:
           Combinator: 0
@@ -2476,9 +3295,36 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05.new_lada3
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.new_lada4
+        endsDialogue: 0
+        choiceId: chapter01.node.05.new_ulyana_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 8460, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.new_lada4
+      speakerId: lada
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.new_lada4_main
         kind: 0
-        speakerIdOverride: lada
+        speakerIdOverride: 
         text: "— В главном русле воды меньше не станет."
         conditions:
           Combinator: 0
@@ -2492,9 +3338,36 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.05.new_narrator
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.05.new_narrator
+        endsDialogue: 0
+        choiceId: chapter01.node.05.new_lada4_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 8860, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.05.new_narrator
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.05.new_narrator_main
         kind: 0
-        speakerIdOverride:
+        speakerIdOverride: 
         text: "Работу начинают с нового решения. Старое боковое русло должно быть перекрыто."
         conditions:
           Combinator: 0
@@ -2529,14 +3402,14 @@ MonoBehaviour:
         failureNodeId:
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 560, y: 660}
+      editorPosition: {x: 9260, y: 300}
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_06_wrong_water
     title: "N06 — Вода ведёт себя неправильно"
     category: 1
     status: 1
-    developerComment: "P06 production-сцена. Один узел с общим вступлением и двумя взаимоисключающими условными ветками textBlocks (RepairOld/RepairNew), а не отдельные диалоги — Conditions уже умеют фильтровать блоки по флагам. RepairCompleted ставится на первом блоке выбранной ветки, WaterWrongActive и знание water_flow_is_wrong — на последнем. Только следствие показано, причина сознательно не объясняется (раздел 22 инструкции P06) — знания расследования P07 (mill_moves_at_wrong_time, old_seventh_channel, cattle_avoid_old_branch, fish_pattern_changed, old_ford) здесь не выдаются."
+    developerComment: "P06 production-сцена, presentation-правило «одна реплика = один шаг»: каждый node — один блок одного говорящего, переходы — DialogueChoiceKind.Continue («…»). Ветвление RepairOld/RepairNew решается не условными textBlocks внутри одного узла, а условными Continue-выборами на стартовом узле (по одному на ветку, второй флаг с Negate для защиты от конфликтного состояния) — дальше это две независимые линейные цепочки узлов chapter01.node.06.old_01..old_10 и chapter01.node.06.new_01..new_12. RepairCompleted ставится на первом узле своей ветки, WaterWrongActive и знание water_flow_is_wrong — на последнем перед общим Exit (chapter01.node.06_exit — стабильный ChoiceId переиспользован на обоих финальных узлах, это допустимо: уникальность ChoiceId проверяется только в пределах одного узла). Причина не объясняется; знания расследования P07 не выдаются."
     startNodeId: chapter01.node.06
     tags:
     - "глава01"
@@ -2546,9 +3419,9 @@ MonoBehaviour:
       speakerId: narrator
       text:
       textBlocks:
-      - blockId: chapter01.node.06_common_opening
+      - blockId: chapter01.node.06_main
         kind: 0
-        speakerIdOverride:
+        speakerIdOverride: 
         text: "Плотина снова держит воду. Пробитые места закрыты, свежие клинья разбухли в пазах, и возле мельницы впервые после паводка можно разговаривать, не перекрикивая рабочих."
         conditions:
           Combinator: 0
@@ -2562,10 +3435,12 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_old_repaired
-        kind: 0
-        speakerIdOverride:
-        text: "Все семь затворов снова стоят на своих местах. Боковой сброс открыт. Днём вода идёт почти так же, как до паводка."
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.old_01
+        endsDialogue: 0
+        choiceId: chapter01.node.06_choice_old_branch
+        kind: 4
         conditions:
           Combinator: 0
           Conditions:
@@ -2579,6 +3454,61 @@ MonoBehaviour:
             QualityParam: 0
             IntParam: 0
             Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_01
+        endsDialogue: 0
+        choiceId: chapter01.node.06_choice_new_branch
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_new
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+          - Type: 0
+            StringParam: chapter01.flag.repair_old
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 60, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.old_01
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.old_01_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Все семь затворов снова стоят на своих местах. Боковой сброс открыт. Днём вода идёт почти так же, как до паводка."
+        conditions:
+          Combinator: 0
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2592,23 +3522,40 @@ MonoBehaviour:
           Type: 0
           StringParam: chapter01.flag.repair_completed
           IntParam: 0
-      - blockId: chapter01.node.06_old_night
-        kind: 0
-        speakerIdOverride:
-        text: "Ночью тебя будит не крик, а один тяжёлый удар со стороны мельницы. Потом второй. Потом тишина."
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.old_02
+        endsDialogue: 0
+        choiceId: chapter01.node.06.old_01_continue
+        kind: 4
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 460, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.old_02
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.old_02_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Ночью тебя будит не крик, а один тяжёлый удар со стороны мельницы."
+        conditions:
+          Combinator: 0
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2618,23 +3565,83 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_old_miron
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.old_03
+        endsDialogue: 0
+        choiceId: chapter01.node.06.old_02_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 860, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.old_03
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.old_03_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Потом второй. Потом тишина."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.old_04
+        endsDialogue: 0
+        choiceId: chapter01.node.06.old_03_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1260, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.old_04
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.old_04_main
         kind: 0
         speakerIdOverride: miron
         text: "Мирон уже стоит у колеса, когда ты приходишь. — Я ничего не открывал."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2644,23 +3651,40 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_old_wheel
-        kind: 0
-        speakerIdOverride:
-        text: "Колесо медленно делает половину оборота. Останавливается. Через несколько мгновений вода под ним вздрагивает, будто вниз по руслу прошёл короткий толчок, и колесо снова сдвигается. Выше по течению никто не работает у затворов."
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.old_05
+        endsDialogue: 0
+        choiceId: chapter01.node.06.old_04_continue
+        kind: 4
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1660, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.old_05
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.old_05_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Колесо медленно делает половину оборота."
+        conditions:
+          Combinator: 0
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2670,23 +3694,126 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_old_ostafiy
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.old_06
+        endsDialogue: 0
+        choiceId: chapter01.node.06.old_05_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2060, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.old_06
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.old_06_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Останавливается."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.old_07
+        endsDialogue: 0
+        choiceId: chapter01.node.06.old_06_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2460, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.old_07
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.old_07_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Через несколько мгновений вода под ним вздрагивает, будто вниз по руслу прошёл короткий толчок, и колесо снова сдвигается. Выше по течению никто не работает у затворов."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.old_08
+        endsDialogue: 0
+        choiceId: chapter01.node.06.old_07_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2860, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.old_08
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.old_08_main
         kind: 0
         speakerIdOverride: ostafiy
         text: "— После такой воды дерево ещё неделю будет садиться."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2696,23 +3823,40 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_old_lada
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.old_09
+        endsDialogue: 0
+        choiceId: chapter01.node.06.old_08_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 3260, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.old_09
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.old_09_main
         kind: 0
         speakerIdOverride: lada
         text: "— Дерево может скрипеть. Оно не может толкать реку."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2722,23 +3866,40 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_old_conclusion
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.old_10
+        endsDialogue: 0
+        choiceId: chapter01.node.06.old_09_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 3660, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.old_10
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.old_10_main
         kind: 0
         speakerIdOverride: miron
         text: "Мирон смотрит не на них, а на колесо. — Вчера я знал, когда оно пойдёт. Сегодня — нет."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2756,23 +3917,40 @@ MonoBehaviour:
           Type: 2
           StringParam: chapter01.knowledge.water_flow_is_wrong
           IntParam: 0
-      - blockId: chapter01.node.06_new_repaired
+      choices:
+      - text: "Разобраться, что происходит с водой."
+        nextNodeId:
+        endsDialogue: 1
+        choiceId: chapter01.node.06_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 4060, y: -300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_01
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_01_main
         kind: 0
-        speakerIdOverride:
+        speakerIdOverride: 
         text: "Новый затвор держит. Седьмой рукав почти перестал принимать воду, зато основной поток идёт на мельницу ровно, без прежнего разброса."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2786,23 +3964,40 @@ MonoBehaviour:
           Type: 0
           StringParam: chapter01.flag.repair_completed
           IntParam: 0
-      - blockId: chapter01.node.06_new_miron
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_02
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_01_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 460, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_02
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_02_main
         kind: 0
         speakerIdOverride: miron
         text: "Мирон несколько раз смотрит с колеса на воду. — Для мельницы лучше."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2812,23 +4007,40 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_new_ulyana_arrives
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_03
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_02_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 860, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_03
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_03_main
         kind: 0
-        speakerIdOverride:
+        speakerIdOverride: 
         text: "Первой приходит Ульяна. Не с плотины — со стороны старого рукава."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2838,23 +4050,40 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_new_ulyana
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_04
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_03_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1260, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_04
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_04_main
         kind: 0
         speakerIdOverride: ulyana
         text: "— Пойдём."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2864,23 +4093,40 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_new_channel
-        kind: 0
-        speakerIdOverride:
-        text: "Там, где раньше вода расходилась в сторону от главного русла, теперь осталась тёмная полоса сырого ила и несколько неглубоких луж. В одной из них рыба бьёт хвостом по грязи. Скот останавливается выше берега и не идёт к привычному месту водопоя."
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_05
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_04_continue
+        kind: 4
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1660, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_05
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_05_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Там, где раньше вода расходилась в сторону от главного русла, теперь осталась тёмная полоса сырого ила и несколько неглубоких луж."
+        conditions:
+          Combinator: 0
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2890,23 +4136,126 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_new_ulyana2
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_06
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_05_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2060, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_06
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_06_main
+        kind: 0
+        speakerIdOverride: 
+        text: "В одной из них рыба бьёт хвостом по грязи."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_07
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_06_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2460, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_07
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_07_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Скот останавливается выше берега и не идёт к привычному месту водопоя."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_08
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_07_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 2860, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_08
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_08_main
         kind: 0
         speakerIdOverride: ulyana
-        text: "— Они здесь пили вчера. Она дёргает верёвку. Животное упирается. — Вчера мне не приходилось их уговаривать."
+        text: "— Они здесь пили вчера."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2916,23 +4265,126 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_new_lada
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_09
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_08_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 3260, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_09
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_09_main
+        kind: 0
+        speakerIdOverride: 
+        text: "Она дёргает верёвку. Животное упирается."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_10
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_09_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 3660, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_10
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_10_main
+        kind: 0
+        speakerIdOverride: ulyana
+        text: "— Вчера мне не приходилось их уговаривать."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_11
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_10_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 4060, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_11
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_11_main
         kind: 0
         speakerIdOverride: lada
         text: "Лада приседает возле высыхающего рукава и мнёт пальцами ил. — Главное русло полное. Воды меньше не стало."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2942,23 +4394,40 @@ MonoBehaviour:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects: []
-      - blockId: chapter01.node.06_new_conclusion
+      choices:
+      - text: "…"
+        nextNodeId: chapter01.node.06.new_12
+        endsDialogue: 0
+        choiceId: chapter01.node.06.new_11_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 4460, y: 300}
+      hasEditorPosition: 1
+    - id: chapter01.node.06.new_12
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.06.new_12_main
         kind: 0
         speakerIdOverride: miron
         text: "— Для мельницы — нет."
         conditions:
           Combinator: 0
-          Conditions:
-          - Type: 0
-            StringParam: chapter01.flag.repair_new
-            QualityParam: 0
-            IntParam: 0
-            Negate: 0
-          - Type: 0
-            StringParam: chapter01.flag.repair_old
-            QualityParam: 0
-            IntParam: 0
-            Negate: 1
+          Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
           CheckId:
@@ -2997,7 +4466,7 @@ MonoBehaviour:
         failureNodeId:
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 60, y: 460}
+      editorPosition: {x: 4860, y: 300}
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_07a_mill

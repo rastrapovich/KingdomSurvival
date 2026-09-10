@@ -5,13 +5,19 @@ using NUnit.Framework;
 using UnityEngine;
 
 // P06 — N05 «Мокрый чертёж» (осмотр + выбор ремонта без проверки) и N06
-// («первые симптомы» — одна ветка на условных textBlocks вместо двух
-// диалогов). Против настоящего KingdomSurvivalDialogues.asset через
-// Resources.Load — тот же подход, что Chapter01FloodTests.cs.
+// («первые симптомы»). Оба диалога построены по production-правилу "одна
+// реплика = один шаг": каждый node несёт не больше одного textBlock,
+// шаги соединены DialogueChoiceKind.Continue ("…"), настоящий выбор —
+// только там, где герой решает (ulyana_cost2 в N05). Ветвление N06 по
+// RepairOld/RepairNew решается условными Continue-выборами на стартовом
+// узле, а не условными textBlocks внутри одного узла. Против настоящего
+// KingdomSurvivalDialogues.asset через Resources.Load — тот же подход,
+// что Chapter01FloodTests.cs.
 public sealed class Chapter01P06Tests
 {
     private const string ChoiceOld = "chapter01.node.05_choice_old";
     private const string ChoiceNew = "chapter01.node.05_choice_new";
+    private const string D05DecisionNodeId = "chapter01.node.05.ulyana_cost2";
 
     private static DialogueDatabaseAsset LoadDatabase()
     {
@@ -42,20 +48,48 @@ public sealed class Chapter01P06Tests
         return state;
     }
 
-    private static NarrativeStateData RunD05(string choiceId, out NarrativeDialogueSelectionResult finalResult)
+    // Кликает единственный доступный Continue, пока не дойдёт до узла с
+    // настоящим выбором (>1 варианта) или до узла, чей единственный
+    // вариант — не Continue (например, Exit). Список посещённых NodeId
+    // собирается по пути — нужен, чтобы доказать, что ветка N06 показывает
+    // только свой контент и никогда чужой.
+    private static NarrativeDialogueView AdvanceThroughContinues(
+        NarrativeDialogueRuntimeSession session, NarrativeDialogueView view, List<string> visitedNodeIds = null)
+    {
+        visitedNodeIds?.Add(view.NodeId);
+
+        while (view.AvailableChoices.Count == 1 && view.AvailableChoices[0].Kind == DialogueChoiceKind.Continue)
+        {
+            NarrativeDialogueSelectionResult result = session.SelectChoice(view.AvailableChoices[0].ChoiceId);
+            Assert.IsFalse(result.DialogueEnded, "Continue не должен завершать диалог напрямую.");
+            view = result.View;
+            visitedNodeIds?.Add(view.NodeId);
+        }
+
+        return view;
+    }
+
+    private static NarrativeStateData RunD05(string repairChoiceId, out NarrativeDialogueSelectionResult finalResult)
     {
         DialogueDatabaseAsset database = LoadDatabase();
         NarrativeStateData state = NewStateAtRepairPlan();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
 
-        bool started = session.Start(database, Chapter01Ids.Dialogues.D05, new HeroProfileData(), state, out _, out string error);
+        bool started = session.Start(database, Chapter01Ids.Dialogues.D05, new HeroProfileData(), state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
 
-        NarrativeDialogueSelectionResult afterChoice = session.SelectChoice(choiceId);
-        Assert.IsFalse(afterChoice.DialogueEnded, "Выбор ремонта должен вести в итоговый узел ветки, а не завершать сцену.");
-        Assert.AreEqual(1, afterChoice.View.AvailableChoices.Count);
+        view = AdvanceThroughContinues(session, view);
+        Assert.AreEqual(D05DecisionNodeId, view.NodeId, "Цепочка Continue должна довести ровно до узла настоящего решения.");
+        Assert.AreEqual(2, view.AvailableChoices.Count, "У решения о ремонте должно быть ровно два варианта.");
 
-        finalResult = session.SelectChoice(afterChoice.View.AvailableChoices[0].ChoiceId);
+        NarrativeDialogueSelectionResult afterChoice = session.SelectChoice(repairChoiceId);
+        Assert.IsFalse(afterChoice.DialogueEnded, "Выбор ремонта должен вести в итоговую цепочку ветки, а не завершать сцену.");
+
+        NarrativeDialogueView outcomeView = AdvanceThroughContinues(session, afterChoice.View);
+        Assert.AreEqual(1, outcomeView.AvailableChoices.Count);
+        Assert.AreEqual(DialogueChoiceKind.Exit, outcomeView.AvailableChoices[0].Kind);
+
+        finalResult = session.SelectChoice(outcomeView.AvailableChoices[0].ChoiceId);
         Assert.IsTrue(finalResult.DialogueEnded);
         return state;
     }
@@ -70,7 +104,9 @@ public sealed class Chapter01P06Tests
         return state;
     }
 
-    private static NarrativeDialogueView RunD06(NarrativeStateData state, out NarrativeDialogueSelectionResult finalResult)
+    // Проходит N06 целиком, возвращая список посещённых NodeId (ровно один
+    // textBlock на узел, так что NodeId однозначно определяет показанный контент).
+    private static List<string> RunD06(NarrativeStateData state, out NarrativeDialogueSelectionResult finalResult)
     {
         DialogueDatabaseAsset database = LoadDatabase();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
@@ -78,19 +114,15 @@ public sealed class Chapter01P06Tests
         bool started = session.Start(database, Chapter01Ids.Dialogues.D06, new HeroProfileData(), state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
 
-        finalResult = session.SelectChoice(view.AvailableChoices[0].ChoiceId);
-        Assert.IsTrue(finalResult.DialogueEnded);
-        return view;
-    }
+        List<string> visitedNodeIds = new List<string>();
+        NarrativeDialogueView finalView = AdvanceThroughContinues(session, view, visitedNodeIds);
 
-    private static bool HasBlock(NarrativeDialogueView view, string blockId)
-    {
-        foreach (NarrativeDialogueVisibleBlock block in view.VisibleTextBlocks)
-        {
-            if (block.BlockId == blockId)
-                return true;
-        }
-        return false;
+        Assert.AreEqual(1, finalView.AvailableChoices.Count);
+        Assert.AreEqual(DialogueChoiceKind.Exit, finalView.AvailableChoices[0].Kind);
+
+        finalResult = session.SelectChoice(finalView.AvailableChoices[0].ChoiceId);
+        Assert.IsTrue(finalResult.DialogueEnded);
+        return visitedNodeIds;
     }
 
     // --- P06-T01: N05 «Мокрый чертёж» ---
@@ -117,8 +149,8 @@ public sealed class Chapter01P06Tests
     [Test]
     public void D05_HasNoActiveChecks()
     {
-        // Раздел 4 инструкции P06: это вопрос "какой путь выбрать", а не
-        // "может ли герой так сделать" — оба варианта обычные.
+        // Это вопрос "какой путь выбрать", а не "может ли герой так
+        // сделать" — оба настоящих варианта обычные, промежуточные — Continue.
         DialogueDatabaseAsset database = LoadDatabase();
         DialogueDefinitionData dialogue = database.FindDialogue(Chapter01Ids.Dialogues.D05);
 
@@ -128,6 +160,25 @@ public sealed class Chapter01P06Tests
             {
                 Assert.IsFalse(choice.IsActiveCheck, dialogue.Id + "/" + node.Id + ": " + choice.Text);
             }
+        }
+    }
+
+    [Test]
+    public void D05_RealDecisionNode_HasNoContinueChoices()
+    {
+        // Перед настоящим решением героя дополнительный Continue не нужен
+        // (инструкция по DialogueChoiceKind.Continue, §8): либо это шаг
+        // подачи текста, либо решение игрока — не одновременно.
+        DialogueDatabaseAsset database = LoadDatabase();
+        DialogueDefinitionData dialogue = database.FindDialogue(Chapter01Ids.Dialogues.D05);
+        DialogueNodeData decisionNode = FindNode(dialogue, D05DecisionNodeId);
+        Assert.IsNotNull(decisionNode);
+        Assert.AreEqual(2, decisionNode.Choices.Count);
+
+        foreach (DialogueChoiceData choice in decisionNode.Choices)
+        {
+            Assert.AreNotEqual(DialogueChoiceKind.Continue, choice.Kind);
+            Assert.AreEqual(DialogueChoiceKind.Normal, choice.Kind);
         }
     }
 
@@ -185,23 +236,21 @@ public sealed class Chapter01P06Tests
     }
 
     [Test]
-    public void D06_OldBranch_ShowsOnlyOldSymptoms_AndSetsExpectedFlags()
+    public void D06_OldBranch_VisitsOnlyOldNodes_AndSetsExpectedFlags()
     {
         NarrativeStateData state = NewStateAfterRepairDecision(repairOld: true);
 
-        NarrativeDialogueView view = RunD06(state, out NarrativeDialogueSelectionResult finalResult);
+        List<string> visited = RunD06(state, out NarrativeDialogueSelectionResult finalResult);
 
-        Assert.IsTrue(HasBlock(view, "chapter01.node.06_common_opening"));
-        Assert.IsTrue(HasBlock(view, "chapter01.node.06_old_repaired"));
-        Assert.IsTrue(HasBlock(view, "chapter01.node.06_old_night"));
-        Assert.IsTrue(HasBlock(view, "chapter01.node.06_old_wheel"));
-        Assert.IsTrue(HasBlock(view, "chapter01.node.06_old_conclusion"));
+        Assert.Contains("chapter01.node.06", visited);
+        Assert.Contains("chapter01.node.06.old_01", visited);
+        Assert.Contains("chapter01.node.06.old_05", visited);
+        Assert.Contains("chapter01.node.06.old_10", visited);
 
-        // Old-ветка не должна показывать симптомы new-ветки (высохший
-        // седьмой рукав / нервный скот) — раздел 19 инструкции P06.
-        Assert.IsFalse(HasBlock(view, "chapter01.node.06_new_repaired"));
-        Assert.IsFalse(HasBlock(view, "chapter01.node.06_new_channel"));
-        Assert.IsFalse(HasBlock(view, "chapter01.node.06_new_conclusion"));
+        // Old-ветка не должна показывать ни одного узла new-ветки —
+        // высохший седьмой рукав / нервный скот (§19 инструкции P06).
+        foreach (string nodeId in visited)
+            Assert.IsFalse(nodeId.StartsWith("chapter01.node.06.new_"), "Old-ветка зашла на узел new-ветки: " + nodeId);
 
         Assert.IsTrue(state.HasFlag(Chapter01Ids.Flags.RepairCompleted));
         Assert.IsTrue(state.HasFlag(Chapter01Ids.Flags.WaterWrongActive));
@@ -210,23 +259,21 @@ public sealed class Chapter01P06Tests
     }
 
     [Test]
-    public void D06_NewBranch_ShowsOnlyNewSymptoms_AndSetsExpectedFlags()
+    public void D06_NewBranch_VisitsOnlyNewNodes_AndSetsExpectedFlags()
     {
         NarrativeStateData state = NewStateAfterRepairDecision(repairOld: false);
 
-        NarrativeDialogueView view = RunD06(state, out NarrativeDialogueSelectionResult finalResult);
+        List<string> visited = RunD06(state, out NarrativeDialogueSelectionResult finalResult);
 
-        Assert.IsTrue(HasBlock(view, "chapter01.node.06_common_opening"));
-        Assert.IsTrue(HasBlock(view, "chapter01.node.06_new_repaired"));
-        Assert.IsTrue(HasBlock(view, "chapter01.node.06_new_channel"));
-        Assert.IsTrue(HasBlock(view, "chapter01.node.06_new_conclusion"));
+        Assert.Contains("chapter01.node.06", visited);
+        Assert.Contains("chapter01.node.06.new_01", visited);
+        Assert.Contains("chapter01.node.06.new_06", visited);
+        Assert.Contains("chapter01.node.06.new_12", visited);
 
-        // New-ветка не должна показывать симптомы old-ветки (ночные толчки
-        // мельничного колеса) — раздел 19 инструкции P06.
-        Assert.IsFalse(HasBlock(view, "chapter01.node.06_old_repaired"));
-        Assert.IsFalse(HasBlock(view, "chapter01.node.06_old_night"));
-        Assert.IsFalse(HasBlock(view, "chapter01.node.06_old_wheel"));
-        Assert.IsFalse(HasBlock(view, "chapter01.node.06_old_conclusion"));
+        // New-ветка не должна показывать ни одного узла old-ветки —
+        // ночные толчки мельничного колеса (§19 инструкции P06).
+        foreach (string nodeId in visited)
+            Assert.IsFalse(nodeId.StartsWith("chapter01.node.06.old_"), "New-ветка зашла на узел old-ветки: " + nodeId);
 
         Assert.IsTrue(state.HasFlag(Chapter01Ids.Flags.RepairCompleted));
         Assert.IsTrue(state.HasFlag(Chapter01Ids.Flags.WaterWrongActive));
@@ -237,8 +284,8 @@ public sealed class Chapter01P06Tests
     [Test]
     public void D06_DoesNotGrant_InvestigationKnowledge_Ahead_Of_P07()
     {
-        // Раздел 21 инструкции: N06 даёт только "есть проблема"
-        // (water_flow_is_wrong), а не улики расследования P07.
+        // N06 даёт только "есть проблема" (water_flow_is_wrong), а не
+        // улики расследования P07.
         NarrativeStateData oldState = NewStateAfterRepairDecision(repairOld: true);
         RunD06(oldState, out _);
         AssertNoInvestigationKnowledge(oldState);
@@ -266,6 +313,48 @@ public sealed class Chapter01P06Tests
 
         Assert.IsTrue(finalResult.DialogueEnded);
         Assert.AreEqual(Chapter01Ids.Dialogues.D07A, Chapter01StoryDirector.GetNextDialogueId(state));
+    }
+
+    // --- Presentation-структура: правило "одна реплика = один шаг" ---
+
+    [TestCase(Chapter01Ids.Dialogues.D05)]
+    [TestCase(Chapter01Ids.Dialogues.D06)]
+    public void EveryNode_HasAtMostOneTextBlock(string dialogueId)
+    {
+        DialogueDatabaseAsset database = LoadDatabase();
+        DialogueDefinitionData dialogue = database.FindDialogue(dialogueId);
+
+        foreach (DialogueNodeData node in dialogue.Nodes)
+            Assert.LessOrEqual(node.TextBlocks.Count, 1, dialogueId + "/" + node.Id);
+    }
+
+    [TestCase(Chapter01Ids.Dialogues.D05)]
+    [TestCase(Chapter01Ids.Dialogues.D06)]
+    public void ContinueChoices_AreStructurallySound(string dialogueId)
+    {
+        DialogueDatabaseAsset database = LoadDatabase();
+        DialogueDefinitionData dialogue = database.FindDialogue(dialogueId);
+
+        HashSet<string> nodeIds = new HashSet<string>();
+        foreach (DialogueNodeData n in dialogue.Nodes)
+            nodeIds.Add(n.Id);
+
+        foreach (DialogueNodeData node in dialogue.Nodes)
+        {
+            foreach (DialogueChoiceData choice in node.Choices)
+            {
+                if (choice.Kind != DialogueChoiceKind.Continue)
+                    continue;
+
+                string where = dialogueId + "/" + node.Id;
+                Assert.IsFalse(choice.IsActiveCheck, where);
+                Assert.IsFalse(choice.IsExit, where);
+                Assert.IsFalse(choice.EndsDialogue, where);
+                Assert.AreEqual(0, choice.SuccessEffects.Count, where + ": Continue не должен нести эффекты успеха.");
+                Assert.AreEqual(0, choice.FailureEffects.Count, where + ": Continue не должен нести эффекты провала.");
+                Assert.IsTrue(nodeIds.Contains(choice.NextNodeId), where + " -> отсутствующий узел '" + choice.NextNodeId + "'.");
+            }
+        }
     }
 
     // --- P06-T03: взаимоисключение ремонта ---
@@ -298,5 +387,24 @@ public sealed class Chapter01P06Tests
         conflictState.SetFlag(Chapter01Ids.Flags.RepairOld);
         conflictState.SetFlag(Chapter01Ids.Flags.RepairNew);
         Assert.Throws<System.InvalidOperationException>(() => Chapter01StoryDirector.GetRepairChoice(conflictState));
+    }
+
+    [Test]
+    public void D06_ConflictingRepairFlags_HasNoAvailableContinue()
+    {
+        // §9 инструкции P06-T03: конфликтное состояние не должно нормально
+        // запускаться — оба Continue на стартовом узле гейтятся Negate
+        // противоположного флага, поэтому ни один не станет доступен.
+        DialogueDatabaseAsset database = LoadDatabase();
+        NarrativeStateData state = NewStateAtRepairPlan();
+        state.SetFlag(Chapter01Ids.Flags.DamInspected);
+        state.SetFlag(Chapter01Ids.Flags.RepairOld);
+        state.SetFlag(Chapter01Ids.Flags.RepairNew);
+
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(database, Chapter01Ids.Dialogues.D06, new HeroProfileData(), state, out NarrativeDialogueView view, out string error);
+        Assert.IsTrue(started, error);
+
+        Assert.IsEmpty(view.AvailableChoices, "Конфликтное состояние не должно давать доступный Continue.");
     }
 }

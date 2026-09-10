@@ -59,6 +59,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
         Assert.AreEqual("ВОЗВРАТНАЯ ПРОВЕРКА", BuildGraphChoiceKindLabel(DialogueChoiceKind.ActiveReturnable));
         Assert.AreEqual("РЕШАЮЩАЯ ПРОВЕРКА", BuildGraphChoiceKindLabel(DialogueChoiceKind.ActiveDecisive));
         Assert.AreEqual("EXIT", BuildGraphChoiceKindLabel(DialogueChoiceKind.Exit));
+        Assert.AreEqual("…", BuildGraphChoiceKindLabel(DialogueChoiceKind.Continue));
     }
 
     // ---- Сводки условий/эффектов (§10-11) ------------------------------

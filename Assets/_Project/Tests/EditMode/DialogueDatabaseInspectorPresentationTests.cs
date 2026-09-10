@@ -66,6 +66,7 @@ public sealed class DialogueDatabaseInspectorPresentationTests
     [TestCase(DialogueChoiceKind.ActiveDecisive, true)]
     [TestCase(DialogueChoiceKind.Normal, false)]
     [TestCase(DialogueChoiceKind.Exit, false)]
+    [TestCase(DialogueChoiceKind.Continue, false)]
     public void ShouldShowActiveCheckFields_OnlyForActiveKinds(DialogueChoiceKind kind, bool expected)
     {
         Assert.AreEqual(expected, ShouldShowActiveCheckFields(kind));
@@ -75,6 +76,7 @@ public sealed class DialogueDatabaseInspectorPresentationTests
     [TestCase(DialogueChoiceKind.Exit, false)]
     [TestCase(DialogueChoiceKind.ActiveReturnable, false)]
     [TestCase(DialogueChoiceKind.ActiveDecisive, false)]
+    [TestCase(DialogueChoiceKind.Continue, true)]
     public void ShouldShowNormalTargetField_OnlyForNormalKind(DialogueChoiceKind kind, bool expected)
     {
         Assert.AreEqual(expected, ShouldShowNormalTargetField(kind));

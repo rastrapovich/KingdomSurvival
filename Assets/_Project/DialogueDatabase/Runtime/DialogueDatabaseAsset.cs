@@ -33,13 +33,18 @@ namespace KingdomSurvival.DialogueDatabase
         Narration
     }
 
-    // Виды варианта ответа — §11 инструкции.
+    // Виды варианта ответа — §11 инструкции. Continue добавлен production-
+    // правилом "одна реплика = один шаг" (см. §15 инструкции по P06): это
+    // кнопка "читать дальше", а не действие героя — обязательно в конце
+    // enum, значения существующих видов уже сериализованы как числа по
+    // всей базе диалогов и не должны сдвигаться.
     public enum DialogueChoiceKind
     {
         Normal,
         ActiveReturnable,
         ActiveDecisive,
-        Exit
+        Exit,
+        Continue
     }
 
     public enum DialogueChoiceUnavailablePresentation
@@ -165,6 +170,13 @@ namespace KingdomSurvival.DialogueDatabase
         // обычные с endsDialogue как единственным признаком выхода. Новый
         // Kind.Exit — то же самое явно поименованное намерение.
         public bool IsExit => kind == DialogueChoiceKind.Exit || endsDialogue;
+
+        // Кнопка "читать дальше" между шагами одной сцены — не действие
+        // героя и не реплика. Runtime ведёт её как обычный переход
+        // (TransitionTo), presentation обязана не записывать её как
+        // "Вы: …" и не показывать механику/вероятность (см. §15 инструкции
+        // P06 и класс-каммент DialogueChoiceKind).
+        public bool IsContinue => kind == DialogueChoiceKind.Continue;
 
         // Стабильный ChoiceId для выбора по значению, а не по позиции
         // (§12). У старых данных ChoiceId не сериализован — синтезируем
@@ -569,6 +581,12 @@ namespace KingdomSurvival.DialogueDatabase
 
                     ValidateChoiceTransitions(choice, choicePrefix, nodesById, issues);
                     CollectRequiredKnowledge(choice.Conditions, requiredKnowledgeIds);
+
+                    if (choice.IsContinue && (choice.SuccessEffects.Count > 0 || choice.FailureEffects.Count > 0))
+                    {
+                        issues.Add(
+                            choicePrefix + ": Continue-переход не должен нести эффекты — они никогда не применяются.");
+                    }
 
                     bool isDecisiveGrant = choice.Kind == DialogueChoiceKind.ActiveDecisive;
                     string returnableCheckIdForGrant = choice.Kind == DialogueChoiceKind.ActiveReturnable

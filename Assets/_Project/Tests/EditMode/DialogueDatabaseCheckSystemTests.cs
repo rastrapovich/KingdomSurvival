@@ -25,6 +25,90 @@ public sealed class DialogueDatabaseCheckSystemTests
         Assert.That(issues, Is.Empty, string.Join("\n", issues));
     }
 
+    // DialogueChoiceKind.Continue ("одна реплика = один шаг", production-
+    // правило для сюжетной части, введено для P06): кнопка "читать
+    // дальше" между шагами одной сцены, не действие героя — ведёт себя
+    // как обычный переход, но не должна нести эффекты (они никогда не
+    // применяются) и не должна попадать в историю как "Вы: …" (UI-часть
+    // проверяется вручную — PrototypeUIController не покрыт EditMode-тестами).
+    [Test]
+    public void ContinueChoice_WithEffects_IsFlaggedByValidation()
+    {
+        DialogueDatabaseAsset asset = ScriptableObject.CreateInstance<DialogueDatabaseAsset>();
+        SetField(asset, "speakers", new List<DialogueSpeakerData> { MakeSpeaker("narrator", "Рассказчик") });
+
+        DialogueChoiceData continueChoice = MakeNormalChoice("c_continue", "…", "next");
+        SetField(continueChoice, "kind", DialogueChoiceKind.Continue);
+        SetField(continueChoice, "successEffects", new List<NarrativeEffect>
+        {
+            new NarrativeEffect { EffectExecutionId = "eff_bad", Type = NarrativeEffectType.SetFlag, StringParam = "should_not_apply" }
+        });
+
+        DialogueNodeData startNode = MakeNode(
+            "start", "narrator",
+            new List<DialogueTextBlockData> { MakeTextBlock("b_main", DialogueTextBlockKind.MainLine, "Начало.") },
+            new List<DialogueChoiceData> { continueChoice });
+
+        DialogueNodeData nextNode = MakeNode(
+            "next", "narrator",
+            new List<DialogueTextBlockData> { MakeTextBlock("b_next", DialogueTextBlockKind.MainLine, "Дальше.") },
+            new List<DialogueChoiceData> { MakeExitChoice("exit_next", "Уйти.") });
+
+        DialogueDefinitionData dialogue = MakeDialogue("continue_effects_demo", "start", new List<DialogueNodeData> { startNode, nextNode });
+        SetField(asset, "dialogues", new List<DialogueDefinitionData> { dialogue });
+
+        List<string> issues = new List<string>();
+        asset.CollectValidationIssuesForDialogue("continue_effects_demo", issues);
+
+        Assert.IsTrue(issues.Exists(issue => issue.Contains("Continue")), string.Join("\n", issues));
+
+        Object.DestroyImmediate(asset);
+    }
+
+    [Test]
+    public void ContinueChoice_TransitionsLikeNormal_AndIsNotFlaggedAsActiveOrExit()
+    {
+        DialogueDatabaseAsset asset = ScriptableObject.CreateInstance<DialogueDatabaseAsset>();
+        SetField(asset, "speakers", new List<DialogueSpeakerData> { MakeSpeaker("narrator", "Рассказчик") });
+
+        DialogueChoiceData continueChoice = MakeNormalChoice("c_continue", "…", "next");
+        SetField(continueChoice, "kind", DialogueChoiceKind.Continue);
+        Assert.IsFalse(continueChoice.IsActiveCheck);
+        Assert.IsFalse(continueChoice.IsExit);
+        Assert.IsTrue(continueChoice.IsContinue);
+
+        DialogueNodeData startNode = MakeNode(
+            "start", "narrator",
+            new List<DialogueTextBlockData> { MakeTextBlock("b_main", DialogueTextBlockKind.MainLine, "Начало.") },
+            new List<DialogueChoiceData> { continueChoice });
+
+        DialogueNodeData nextNode = MakeNode(
+            "next", "narrator",
+            new List<DialogueTextBlockData> { MakeTextBlock("b_next", DialogueTextBlockKind.MainLine, "Дальше.") },
+            new List<DialogueChoiceData> { MakeExitChoice("exit_next", "Уйти.") });
+
+        DialogueDefinitionData dialogue = MakeDialogue("continue_transition_demo", "start", new List<DialogueNodeData> { startNode, nextNode });
+        SetField(asset, "dialogues", new List<DialogueDefinitionData> { dialogue });
+
+        List<string> issues = new List<string>();
+        asset.CollectValidationIssuesForDialogue("continue_transition_demo", issues);
+        Assert.That(issues, Is.Empty, string.Join("\n", issues));
+
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(asset, "continue_transition_demo", new HeroProfileData(), new NarrativeStateData(), out NarrativeDialogueView view, out string error);
+        Assert.IsTrue(started, error);
+
+        Assert.AreEqual(1, view.AvailableChoices.Count);
+        Assert.AreEqual(DialogueChoiceKind.Continue, view.AvailableChoices[0].Kind);
+        Assert.IsTrue(string.IsNullOrEmpty(view.AvailableChoices[0].MechanicalSummary));
+
+        NarrativeDialogueSelectionResult result = session.SelectChoice(view.AvailableChoices[0].ChoiceId);
+        Assert.IsFalse(result.DialogueEnded);
+        Assert.AreEqual("next", result.View.NodeId);
+
+        Object.DestroyImmediate(asset);
+    }
+
     [Test]
     public void BuildView_Shows_Passive_Block_And_Respects_Choice_Visibility()
     {

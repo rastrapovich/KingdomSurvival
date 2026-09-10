@@ -137,6 +137,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 case DialogueChoiceKind.ActiveReturnable: return "ВОЗВРАТНАЯ ПРОВЕРКА";
                 case DialogueChoiceKind.ActiveDecisive: return "РЕШАЮЩАЯ ПРОВЕРКА";
                 case DialogueChoiceKind.Exit: return "EXIT";
+                case DialogueChoiceKind.Continue: return "…";
                 default: return "ОТВЕТ";
             }
         }

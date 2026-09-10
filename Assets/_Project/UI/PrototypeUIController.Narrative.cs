@@ -427,15 +427,21 @@ public partial class PrototypeUIController
         {
             NarrativeDialogueChoiceView choiceView = view.AvailableChoices[i];
             string choiceId = choiceView.ChoiceId;
-            string choiceText = choiceView.Text;
+            DialogueChoiceKind choiceKind = choiceView.Kind;
+            // Continue — кнопка "читать дальше" между шагами одной сцены,
+            // не реплика героя (§15 инструкции P06): всегда "…", независимо
+            // от авторского Text, без вероятности/tooltip/механики.
+            string choiceText = choiceKind == DialogueChoiceKind.Continue ? "…" : choiceView.Text;
 
-            Button button = new Button(() => OnNarrativeDialogueChoiceSelected(choiceId, choiceText)) { text = choiceText };
+            Button button = new Button(() => OnNarrativeDialogueChoiceSelected(choiceId, choiceText, choiceKind)) { text = choiceText };
             button.AddToClassList("narrative-dialogue-choice");
-            if (choiceView.Kind == DialogueChoiceKind.Exit)
+            if (choiceKind == DialogueChoiceKind.Exit)
                 button.AddToClassList("narrative-dialogue-choice-exit");
+            else if (choiceKind == DialogueChoiceKind.Continue)
+                button.AddToClassList("narrative-dialogue-choice-continue");
             narrativeChoicesContainer.Add(button);
 
-            if (!string.IsNullOrWhiteSpace(choiceView.MechanicalSummary))
+            if (choiceKind != DialogueChoiceKind.Continue && !string.IsNullOrWhiteSpace(choiceView.MechanicalSummary))
             {
                 Label mechanic = new Label(choiceView.MechanicalSummary);
                 mechanic.AddToClassList("narrative-dialogue-choice-mechanic");
@@ -612,12 +618,15 @@ public partial class PrototypeUIController
             narrativePortraitPlaceholder.style.display = DisplayStyle.None;
     }
 
-    private void OnNarrativeDialogueChoiceSelected(string choiceId, string choiceText)
+    private void OnNarrativeDialogueChoiceSelected(string choiceId, string choiceText, DialogueChoiceKind choiceKind)
     {
         if (!IsNarrativeDialogueActive)
             return;
 
-        narrativeHistory.Add(NarrativeUiHistoryItem.ForPlayerChoice(choiceText));
+        // Continue — управляющий элемент ("читать дальше"), а не реплика
+        // героя: не должен попадать в историю как "Вы: …" (§15 инструкции P06).
+        if (choiceKind != DialogueChoiceKind.Continue)
+            narrativeHistory.Add(NarrativeUiHistoryItem.ForPlayerChoice(choiceText));
 
         NarrativeDialogueSelectionResult result;
         try

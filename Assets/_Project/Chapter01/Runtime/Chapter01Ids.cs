@@ -183,6 +183,18 @@ namespace KingdomSurvival.Chapter01
             public static readonly IReadOnlyList<string> All = new[] { SevenToothGauge };
         }
 
+        // P08-T03: единственная production-координата первой дальней цели —
+        // "область поиска", не точная локация (раздел про N09/карту: точный
+        // "Старый брод" игрок должен найти позже, в P09). GameState.Locations
+        // не знает о главах — эту запись создаёт/раскрывает
+        // Chapter01OutcomeApplier по решению идти дальше (N09), не лор.
+        public static class Locations
+        {
+            public const string OldWaterSearch = "chapter01.location.old_water_search";
+
+            public static readonly IReadOnlyList<string> All = new[] { OldWaterSearch };
+        }
+
         // Стабильные execution ID для Chapter01OutcomeApplier (раздел 6.4).
         // Каждый применяется не более одного раза за прохождение.
         public static class Effects
@@ -192,11 +204,12 @@ namespace KingdomSurvival.Chapter01
             public const string FloodMillRepairCost = "chapter01.effect.flood_mill_repair_cost";
             public const string LongRoadTimeAdvance = "chapter01.effect.long_road_time_advance";
             public const string SevenToothGaugeGrant = "chapter01.effect.seven_tooth_gauge_grant";
+            public const string DepartureLocationReveal = "chapter01.effect.departure_location_reveal";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
                 FloodResourceLoss, FloodTimeAdvance, FloodMillRepairCost,
-                LongRoadTimeAdvance, SevenToothGaugeGrant
+                LongRoadTimeAdvance, SevenToothGaugeGrant, DepartureLocationReveal
             };
         }
 
@@ -230,6 +243,7 @@ namespace KingdomSurvival.Chapter01
             Check("Checks", Checks.All);
             Check("Items", Items.All);
             Check("Effects", Effects.All);
+            Check("Locations", Locations.All);
 
             foreach (KeyValuePair<string, int> entry in occurrences)
             {

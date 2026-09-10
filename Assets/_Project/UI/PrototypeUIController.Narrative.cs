@@ -644,6 +644,13 @@ public partial class PrototypeUIController
             string completedDialogueId = narrativeDialogueSession.DialogueId;
             Chapter01StoryDirector.HandleDialogueCompleted(gameState, completedDialogueId);
             CloseNarrativeDialogue();
+
+            // P08-T03: N10 заканчивается действием «Выбрать состав похода» без
+            // эффектов — реальный набор 0-4 бойцов происходит в picker'е Экрана
+            // героя (панель «СОСТАВ ПОХОДА»), не в самом диалоге.
+            if (string.Equals(completedDialogueId, Chapter01Ids.Dialogues.D10, StringComparison.Ordinal))
+                OpenHeroScreen();
+
             return;
         }
 

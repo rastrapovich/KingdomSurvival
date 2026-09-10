@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KingdomSurvival.Chapter01;
 using KingdomSurvival.UnitDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -30,6 +31,9 @@ public partial class PrototypeUIController
 
     private VisualElement heroScreenOverlay;
     private VisualElement heroScreenRosterRow;
+    private VisualElement heroScreenRosterAvailableRow;
+    private Label heroScreenRosterSelectedLabel;
+    private Button heroScreenRosterConfirmButton;
     private VisualElement heroScreenRetinueRow;
     private VisualElement heroScreenTagsRow;
     private VisualElement heroScreenStatsGrid;
@@ -497,6 +501,45 @@ public partial class PrototypeUIController
         heroScreenRosterRow = new VisualElement { name = "hero-screen-roster-row" };
         heroScreenRosterRow.style.flexDirection = FlexDirection.Row;
         roster.Add(heroScreenRosterRow);
+
+        // P08-T03: реальный picker — "ДОСТУПНЫ В ДОМЕ" читает gameState.Fighters
+        // напрямую (не фиксированный список имён), клик добавляет/убирает бойца
+        // из selectedFighterIds. "ПОДТВЕРДИТЬ СОСТАВ" виден только когда сюжет
+        // Главы 01 реально ждёт сбора отряда (N09 решение принято, поход ещё
+        // не создан) — иначе состав уходит на карту обычным кликом по цели.
+        Label availableLabel = new Label("ДОСТУПНЫ В ДОМЕ");
+        availableLabel.style.color = HeroScreenMuted;
+        availableLabel.style.fontSize = 9f;
+        availableLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+        availableLabel.style.marginTop = 8f;
+        availableLabel.style.marginBottom = 4f;
+        roster.Add(availableLabel);
+
+        heroScreenRosterAvailableRow = new VisualElement { name = "hero-screen-roster-available-row" };
+        heroScreenRosterAvailableRow.style.flexDirection = FlexDirection.Row;
+        heroScreenRosterAvailableRow.style.flexWrap = Wrap.Wrap;
+        roster.Add(heroScreenRosterAvailableRow);
+
+        VisualElement confirmRow = new VisualElement();
+        confirmRow.style.flexDirection = FlexDirection.Row;
+        confirmRow.style.alignItems = Align.Center;
+        confirmRow.style.justifyContent = Justify.SpaceBetween;
+        confirmRow.style.marginTop = 8f;
+
+        heroScreenRosterSelectedLabel = new Label("Выбрано: 0 / " + HeroScreenFighterSlots);
+        heroScreenRosterSelectedLabel.style.color = HeroScreenMuted;
+        heroScreenRosterSelectedLabel.style.fontSize = 10f;
+        confirmRow.Add(heroScreenRosterSelectedLabel);
+
+        heroScreenRosterConfirmButton = new Button(OnHeroScreenRosterConfirmClicked)
+        {
+            name = "hero-screen-roster-confirm-button",
+            text = "ПОДТВЕРДИТЬ СОСТАВ"
+        };
+        StyleHeroScreenButton(heroScreenRosterConfirmButton, 190f, 30f);
+        confirmRow.Add(heroScreenRosterConfirmButton);
+        roster.Add(confirmRow);
+
         bar.Add(roster);
 
         VisualElement retinue = CreateHeroScreenPanel("hero-screen-retinue", "СВИТА");
@@ -829,6 +872,11 @@ public partial class PrototypeUIController
         }
     }
 
+    // P08-T03: реальный picker состава похода вместо презентации. Источник
+    // истины — GameState.Fighters + selectedFighterIds (тот же набор, что
+    // уже использует общий поток "выбрать бойцов -> кликнуть цель на
+    // карте"), а во время активного похода — ActiveExpedition.FighterIds.
+    // Никаких зашитых имён: список полностью пересобирается из состояния.
     private void RefreshHeroScreenRoster(CommanderData commander, UnitDefinitionData heroUnit)
     {
         heroScreenRosterRow.Clear();
@@ -840,38 +888,183 @@ public partial class PrototypeUIController
             heroUnit,
             true));
 
-        List<FighterData> party = GetHeroScreenParty();
-        List<UnitDefinitionData> creatures = GetHeroScreenCreatures();
+        bool expeditionActive = gameState.HasActiveExpedition;
+        List<FighterData> slotFighters = new List<FighterData>();
+        if (expeditionActive)
+        {
+            foreach (string fighterId in gameState.ActiveExpedition.FighterIds)
+            {
+                FighterData fighter = gameState.FindFighter(fighterId);
+                if (fighter != null)
+                    slotFighters.Add(fighter);
+            }
+        }
+        else
+        {
+            foreach (FighterData fighter in gameState.Fighters)
+            {
+                if (selectedFighterIds.Contains(fighter.Id))
+                    slotFighters.Add(fighter);
+            }
+        }
 
         for (int i = 0; i < HeroScreenFighterSlots; i++)
         {
-            if (i < party.Count)
+            if (i < slotFighters.Count)
             {
-                FighterData fighter = party[i];
-                heroScreenRosterRow.Add(CreateHeroScreenRosterCard(
+                FighterData fighter = slotFighters[i];
+                VisualElement card = CreateHeroScreenRosterCard(
                     "hero-screen-roster-fighter-" + (i + 1),
                     fighter.Name,
                     fighter.Role,
                     fighter.Level,
                     ResolveHeroScreenUnit(fighter),
-                    false));
+                    false);
+
+                if (!expeditionActive)
+                    RegisterHeroScreenRosterSlotToggle(card, fighter.Id);
+
+                heroScreenRosterRow.Add(card);
                 continue;
             }
 
-            // Пустые места занимают существа из базы как рабочие заглушки:
-            // правая кнопка открывает их карточку.
-            int creatureIndex = i - party.Count;
-            UnitDefinitionData creature = creatureIndex < creatures.Count
-                ? creatures[creatureIndex]
-                : null;
             heroScreenRosterRow.Add(CreateHeroScreenRosterCard(
                 "hero-screen-roster-slot-" + (i + 1),
-                creature != null ? creature.DisplayLabel : "Пусто",
-                creature != null ? "заглушка из базы существ" : "место свободно",
+                "Пусто",
+                expeditionActive ? "герой ушёл без него" : "место свободно",
                 0,
-                creature,
+                null,
                 false));
         }
+
+        RefreshHeroScreenRosterAvailable(slotFighters, expeditionActive);
+    }
+
+    private void RefreshHeroScreenRosterAvailable(List<FighterData> slotFighters, bool expeditionActive)
+    {
+        heroScreenRosterAvailableRow.Clear();
+
+        bool canPick = !expeditionActive && !isGameOver;
+        bool full = slotFighters.Count >= HeroScreenFighterSlots;
+
+        if (!expeditionActive)
+        {
+            int shown = 0;
+            foreach (FighterData fighter in gameState.Fighters)
+            {
+                if (selectedFighterIds.Contains(fighter.Id))
+                    continue;
+
+                heroScreenRosterAvailableRow.Add(CreateHeroScreenAvailableFighterChip(fighter, canPick && !full));
+                shown++;
+            }
+
+            if (shown == 0)
+                heroScreenRosterAvailableRow.Add(CreateHeroScreenHint("Все бойцы уже в составе."));
+        }
+        else
+        {
+            heroScreenRosterAvailableRow.Add(CreateHeroScreenHint("Отряд уже в походе."));
+        }
+
+        heroScreenRosterSelectedLabel.text = "Выбрано: " + slotFighters.Count + " / " + HeroScreenFighterSlots;
+
+        // Кнопка нужна только пока сюжет Главы 01 реально ждёт сбора отряда
+        // (N09 решение принято, но экспедиция ещё не создана) — обычный
+        // поход по-прежнему отправляется кликом по цели на карте.
+        bool chapter01AwaitingDeparture =
+            !expeditionActive &&
+            gameState.Narrative != null &&
+            gameState.Narrative.HasFlag(Chapter01Ids.Flags.FarRouteUnlocked) &&
+            !gameState.Narrative.HasFlag(Chapter01Ids.Flags.ExpeditionStarted);
+
+        heroScreenRosterConfirmButton.style.display =
+            chapter01AwaitingDeparture ? DisplayStyle.Flex : DisplayStyle.None;
+        heroScreenRosterConfirmButton.SetEnabled(chapter01AwaitingDeparture && !isGameOver);
+    }
+
+    private void RegisterHeroScreenRosterSlotToggle(VisualElement card, string fighterId)
+    {
+        card.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (evt.button != 0 || isGameOver)
+                return;
+
+            selectedFighterIds.Remove(fighterId);
+            RefreshHeroScreen();
+            RefreshStableUiAfterStateChange();
+            evt.StopPropagation();
+        });
+    }
+
+    private VisualElement CreateHeroScreenAvailableFighterChip(FighterData fighter, bool canAdd)
+    {
+        VisualElement chip = new VisualElement { name = "hero-screen-roster-available-" + fighter.Id };
+        chip.style.flexDirection = FlexDirection.Row;
+        chip.style.alignItems = Align.Center;
+        chip.style.paddingLeft = 8f;
+        chip.style.paddingRight = 8f;
+        chip.style.paddingTop = 4f;
+        chip.style.paddingBottom = 4f;
+        chip.style.marginRight = 6f;
+        chip.style.marginBottom = 6f;
+        chip.style.backgroundColor = HeroScreenPanelDeep;
+        SetHeroScreenBorder(chip, canAdd ? HeroScreenBorder : new Color(0.24f, 0.24f, 0.24f, 1f), 1f);
+        SetHeroScreenRadius(chip, 3f);
+
+        Label label = new Label(fighter.Name + " — " + fighter.Role);
+        label.style.fontSize = 10f;
+        label.style.color = canAdd ? HeroScreenText : HeroScreenMuted;
+        label.pickingMode = PickingMode.Ignore;
+        chip.Add(label);
+
+        if (canAdd)
+        {
+            chip.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (evt.button != 0 || isGameOver)
+                    return;
+
+                if (selectedFighterIds.Count < HeroScreenFighterSlots)
+                    selectedFighterIds.Add(fighter.Id);
+
+                RefreshHeroScreen();
+                RefreshStableUiAfterStateChange();
+                evt.StopPropagation();
+            });
+        }
+
+        return chip;
+    }
+
+    // P08-T03: единственная точка, где реальный состав становится
+    // ActiveExpedition — до этого ExpeditionStarted не выставлен нигде.
+    // Цель — production-координата раскрытой Chapter01OutcomeApplier области
+    // поиска (chapter01.location.old_water_search), не выбор игрока.
+    private void OnHeroScreenRosterConfirmClicked()
+    {
+        if (isGameOver || gameState == null)
+            return;
+
+        List<string> selected = GetSelectedFighterIdsInArmyOrder();
+        bool started = gameState.TryStartExpedition(
+            Chapter01Ids.Locations.OldWaterSearch,
+            selected,
+            out string resultMessage);
+
+        if (started)
+        {
+            Chapter01StoryDirector.HandleStoryExpeditionStarted(gameState);
+            selectedFighterIds.Clear();
+
+            CommanderData commander = gameState.FindCommander(gameState.ActiveExpedition.CommanderId);
+            if (commander != null)
+                commander.State = CommanderState.InCastle;
+        }
+
+        AddReport(resultMessage);
+        RefreshHeroScreen();
+        RefreshStableUiAfterStateChange();
     }
 
     private void RefreshHeroScreenRetinue()
@@ -1396,39 +1589,6 @@ public partial class PrototypeUIController
         }
 
         return null;
-    }
-
-    private List<FighterData> GetHeroScreenParty()
-    {
-        List<FighterData> party = new List<FighterData>();
-        if (gameState == null || gameState.Fighters == null)
-            return party;
-
-        for (int i = 0; i < gameState.Fighters.Count && party.Count < HeroScreenFighterSlots; i++)
-        {
-            FighterData fighter = gameState.Fighters[i];
-            if (fighter != null)
-                party.Add(fighter);
-        }
-
-        return party;
-    }
-
-    private List<UnitDefinitionData> GetHeroScreenCreatures()
-    {
-        List<UnitDefinitionData> creatures = new List<UnitDefinitionData>();
-        if (heroScreenUnits == null)
-            return creatures;
-
-        IReadOnlyList<UnitDefinitionData> units = heroScreenUnits.Units;
-        for (int i = 0; i < units.Count; i++)
-        {
-            UnitDefinitionData unit = units[i];
-            if (unit != null && unit.Category == UnitCategory.Creature)
-                creatures.Add(unit);
-        }
-
-        return creatures;
     }
 
     private static void ApplyHeroScreenPortrait(VisualElement target, UnitDefinitionData unit)

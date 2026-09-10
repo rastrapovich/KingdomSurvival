@@ -716,9 +716,17 @@ public class GameState
             ? "выбранную точку"
             : "локацию «" + location.Name + "»";
 
+        // Канонический состав похода — 0-4 бойца, не всегда четыре
+        // (KINGDOM_SURVIVAL_GAME_CONCEPT_CANON v1.25): формулировка не
+        // должна называть конкретное число, которого может и не быть.
+        int fighterCount = expedition.FighterIds.Count;
+        string partyText = fighterCount > 0
+            ? commander.Name + " и " + fighterCount + " " + GetFighterCountWord(fighterCount) +
+              " получили приказ двигаться в " + destinationText
+            : commander.Name + " получил приказ двигаться в " + destinationText + " один";
+
         resultMessage =
-            commander.Name + " и четыре выбранных бойца получили приказ двигаться в " +
-            destinationText + ". Остальные бойцы остаются в поселении. " +
+            partyText + ". Остальные бойцы остаются в поселении. " +
             "До начала фактического движения приказ можно отменить или изменить.";
         return true;
     }
@@ -1296,6 +1304,25 @@ public class GameState
 
         resultMessage = string.Empty;
         return true;
+    }
+
+    private static string GetFighterCountWord(int count)
+    {
+        int lastTwoDigits = count % 100;
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 14)
+            return "бойцов";
+
+        switch (count % 10)
+        {
+            case 1:
+                return "боец";
+            case 2:
+            case 3:
+            case 4:
+                return "бойца";
+            default:
+                return "бойцов";
+        }
     }
 
     private LocationData GetOrCreateRouteWaypoint(

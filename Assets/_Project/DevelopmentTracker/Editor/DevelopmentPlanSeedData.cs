@@ -758,26 +758,60 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P08-T01", "N09 — совет: знания → цель",
                     "Открыть ровно одну основную дальнюю цель и максимум одну-две дополнительные, не засоряя карту равноправными маркерами.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
+                    relatedKnowledgeIds: new[]
+                    {
+                        "chapter01.knowledge.second_loaf_is_ration", "chapter01.knowledge.old_custom",
+                        "chapter01.knowledge.seven_tooth_object"
+                    },
                     relatedFlagIds: new[] { "chapter01.flag.far_route_unlocked" },
-                    acceptanceCriteria: new[] { "Открыта ровно одна основная дальняя цель и максимум 1–2 опциональные" }),
+                    relatedDialogueIds: new[] { "chapter01_dialogue_09_council_departure" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01OutcomeApplier.cs"
+                    },
+                    manualChecks: new[] { "В Preview пройти D09 без опциональных знаний и с обеими — убедиться, что видно 0/1/2 доп. реплики" },
+                    acceptanceCriteria: new[] { "Открыта ровно одна основная дальняя цель и максимум 1–2 опциональные" },
+                    implementationNote: "N09 переписан на 9 узлов по правилу «одна реплика = один шаг». FarRouteUnlocked ставится не на входе в сцену, а на узле departure_decided — после единственного Normal-выбора «Проследить старый ход воды» (синтез в узле synthesis). Две опциональные цели — не map marker и не счётчик, а два блока (goal_loaf/goal_tooth) с Conditions по уже существующим знаниям P07 (SecondLoafIsRation+OldCustom; SevenToothObject): если знание не получено, блок не виден и Continue ведёт дальше без него. Раскрытие области поиска на карте (chapter01.location.old_water_search, «След старого русла») — Chapter01OutcomeApplier.ApplyDepartureConsequences, вызванный Chapter01StoryDirector.HandleDialogueCompleted по факту завершения D09, а не эффект самого диалога."),
 
                 Task("P08-T02", "Осмысленные комбинации знаний открывают N09",
                     "Реализовать варианты A/B/C раздела 14 как условия открытия узла.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 2,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 2,
                     dependencies: new[] { "P07-T05" },
-                    acceptanceCriteria: new[] { "Хотя бы одна из трёх причинных комбинаций знаний открывает переход к N09" }),
+                    fileReferences: new[] { "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs" },
+                    manualChecks: new[] { "Проверить, что при OldTraceFound без ни одной комбинации GetNextDialogueId не открывает D09 и не перескакивает на D10" },
+                    acceptanceCriteria: new[] { "Хотя бы одна из трёх причинных комбинаций знаний открывает переход к N09" },
+                    implementationNote: "Chapter01StoryDirector.CanOpenDepartureCouncil(state) = OldTraceFound && (A || B || C), где A = OldSeventhChannel+OldCustom, B = CattleAvoidOldBranch+FishPatternChanged, C = OldSeventhChannel+SevenToothObject — буквальный текст исходного раздела 14 в репозитории не сохранился, три комбинации формализованы производственным решением P08 поверх уже реализованных знаний P07 (не новые сущности). NodeStep получил необязательный ReadyGate (Func<NarrativeStateData,bool>), задан только для N09: GetNextDialogueId/GetNextNodeId при OldTraceFound без выполненной комбинации возвращают null, а не пропускают шаг и не открывают D10 — заблокированный N09 не обходится."),
 
                 Task("P08-T03", "N10 — сбор отряда 0–4",
                     "Выбор бойцов идёт из реального состава GameState; любой состав от 0 до 4 позволяет продолжить.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
                     relatedFlagIds: new[] { "chapter01.flag.expedition_started" },
-                    acceptanceCriteria: new[] { "Выбор бойцов физически совпадает с GameState", "0, 1 и 4 бойца — все допустимы" }),
+                    relatedDialogueIds: new[] { "chapter01_dialogue_10_gather_party" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs",
+                        "Assets/_Project/UI/PrototypeUIController.HeroScreen.cs",
+                        "Assets/_Project/UI/PrototypeUIController.Narrative.cs",
+                        "Assets/_Project/Scripts/Core/GameState.cs"
+                    },
+                    manualChecks: new[]
+                    {
+                        "Пройти D10 до конца, убедиться, что Экран героя открывается автоматически",
+                        "В picker'е «СОСТАВ ПОХОДА» набрать 0, 1 и 4 бойцов, нажать «ПОДТВЕРДИТЬ СОСТАВ», проверить ActiveExpedition.FighterIds",
+                        "Убедиться, что кнопка «ПОДТВЕРДИТЬ СОСТАВ» скрыта вне контекста Главы 01 и после старта похода"
+                    },
+                    acceptanceCriteria: new[] { "Выбор бойцов физически совпадает с GameState", "0, 1 и 4 бойца — все допустимы" },
+                    implementationNote: "N10 переписан на 5 узлов, заканчивается действием «Выбрать состав похода» без единого эффекта — реальный набор 0–4 бойцов происходит в Экране героя, не в диалоге. Панель «СОСТАВ ПОХОДА» перестала быть презентацией (раньше GetHeroScreenParty() жёстко брала первые 4 из GameState.Fighters, а пустые слоты заполняла существами из UnitDatabase как заглушки) — теперь это реальный picker: слоты читают selectedFighterIds, левый клик по занятому слоту убирает бойца, левый клик по строке «ДОСТУПНЫ В ДОМЕ» (тоже из GameState.Fighters) добавляет, кнопка «ПОДТВЕРДИТЬ СОСТАВ» видна только когда FarRouteUnlocked уже true и ExpeditionStarted ещё false. Подтверждение вызывает GameState.TryStartExpedition к раскрытой P08-T01 области поиска (chapter01.location.old_water_search) и, только при успехе, Chapter01StoryDirector.HandleStoryExpeditionStarted — флаг expedition_started убран из onRevealEffects узла открытия сцены (раньше ставился при простом просмотре текста, до какого-либо реального выбора)."),
 
                 Task("P08-T04", "Исправить тексты о «всегда четырёх бойцах»",
                     "Найти и исправить любые реплики/описания, ошибочно утверждающие фиксированный состав из 4 бойцов.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
-                    acceptanceCriteria: new[] { "Не осталось текста, утверждающего фиксированный состав из 4 бойцов" })
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 4,
+                    fileReferences: new[] { "Assets/_Project/Scripts/Core/GameState.cs" },
+                    acceptanceCriteria: new[] { "Не осталось текста, утверждающего фиксированный состав из 4 бойцов" },
+                    implementationNote: "Единственное найденное реальное нарушение — GameState.TryStartExpeditionToMapPoint формировал resultMessage с жёстко зашитым «и четыре выбранных бойца» независимо от фактического состава. Заменено на формулировку по настоящему expedition.FighterIds.Count (с корректным русским склонением боец/бойца/бойцов, отдельная ветка для похода героя в одиночку). Поиск по остальному коду (.cs) и активным (не ProjectDocs/Archive) документам ничего больше не нашёл — оставшиеся упоминания «четыре» либо про допустимые 0–4/четыре слота (корректно), либо не про состав похода вовсе.")
             );
         }
 

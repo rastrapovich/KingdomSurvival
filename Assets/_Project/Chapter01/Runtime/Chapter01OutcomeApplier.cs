@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace KingdomSurvival.Chapter01
 {
@@ -93,6 +94,62 @@ namespace KingdomSurvival.Chapter01
             {
                 GrantItem(gameState, Chapter01Ids.Effects.SevenToothGaugeGrant, Chapter01Ids.Items.SevenToothGauge);
             }
+        }
+
+        // P08-T01/T03: единственное внешнее системное последствие решения
+        // "идти дальше" в N09 — раскрытие ОДНОЙ области поиска на карте
+        // (раздел про N09/карту инструкции: "область поиска", не точная
+        // локация — точный брод игрок находит позже, в P09). Координаты на
+        // карте ниже — production-деталь размещения, не лор; сама Locality
+        // не знает о главах и не должна: раскрывает её здесь, реагируя на
+        // уже выставленный FarRouteUnlocked, а не сама решает сюжет.
+        public static void ApplyDepartureConsequences(GameState gameState)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+
+            Apply(gameState, Chapter01Ids.Effects.DepartureLocationReveal, state => RevealDepartureSearchLocation(gameState));
+        }
+
+        private static void RevealDepartureSearchLocation(GameState gameState)
+        {
+            if (gameState.Locations == null)
+                gameState.Locations = new List<LocationData>();
+
+            if (gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch) != null)
+                return;
+
+            float candidateX = WorldMapNavigation.CapitalXPercent;
+            float candidateY = WorldMapNavigation.CapitalYPercent - 26f;
+
+            List<MapPointData> route = WorldMapNavigation.FindPath(
+                WorldMapNavigation.CapitalXPercent,
+                WorldMapNavigation.CapitalYPercent,
+                candidateX,
+                candidateY);
+
+            float finalX = candidateX;
+            float finalY = candidateY;
+            if (route.Count > 0)
+            {
+                finalX = route[route.Count - 1].XPercent;
+                finalY = route[route.Count - 1].YPercent;
+            }
+
+            LocationData location = new LocationData(
+                Chapter01Ids.Locations.OldWaterSearch,
+                "След старого русла",
+                ContinuousSimulationSystem.CalculateTravelHours(route),
+                "неизвестна")
+            {
+                RegionId = "chapter01-old-water-search",
+                RegionName = GameState.GetRegionName(finalX, finalY),
+                MapSlotIndex = gameState.Locations.Count,
+                MapXPercent = finalX,
+                MapYPercent = finalY
+            };
+
+            gameState.Locations.Add(location);
         }
 
         private static bool Apply(GameState gameState, string executionId, Action<NarrativeStateData> mutation)

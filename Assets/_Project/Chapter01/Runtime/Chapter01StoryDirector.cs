@@ -29,11 +29,26 @@ namespace KingdomSurvival.Chapter01
             public readonly string DialogueId;
             public readonly string[] CompletionFlags;
 
-            public NodeStep(string nodeId, string dialogueId, params string[] completionFlags)
+            // P08-T02: узкий необязательный "готов ли шаг к открытию" сверх
+            // завершённости предыдущих узлов — нужен только N09 (см.
+            // CanOpenDepartureCouncil). Null для всех остальных шагов.
+            public readonly Func<NarrativeStateData, bool> ReadyGate;
+
+            public NodeStep(
+                string nodeId,
+                string dialogueId,
+                Func<NarrativeStateData, bool> readyGate,
+                params string[] completionFlags)
             {
                 NodeId = nodeId;
                 DialogueId = dialogueId;
+                ReadyGate = readyGate;
                 CompletionFlags = completionFlags ?? Array.Empty<string>();
+            }
+
+            public NodeStep(string nodeId, string dialogueId, params string[] completionFlags)
+                : this(nodeId, dialogueId, null, completionFlags)
+            {
             }
         }
 
@@ -49,7 +64,7 @@ namespace KingdomSurvival.Chapter01
             new NodeStep(Chapter01Ids.Nodes.N07B, Chapter01Ids.Dialogues.D07B, Chapter01Ids.Flags.InvestigatedCattle),
             new NodeStep(Chapter01Ids.Nodes.N07C, Chapter01Ids.Dialogues.D07C, Chapter01Ids.Flags.InvestigatedRiver),
             new NodeStep(Chapter01Ids.Nodes.N08, Chapter01Ids.Dialogues.D08, Chapter01Ids.Flags.OldTraceFound),
-            new NodeStep(Chapter01Ids.Nodes.N09, Chapter01Ids.Dialogues.D09, Chapter01Ids.Flags.FarRouteUnlocked),
+            new NodeStep(Chapter01Ids.Nodes.N09, Chapter01Ids.Dialogues.D09, CanOpenDepartureCouncil, Chapter01Ids.Flags.FarRouteUnlocked),
             new NodeStep(Chapter01Ids.Nodes.N10, Chapter01Ids.Dialogues.D10, Chapter01Ids.Flags.ExpeditionStarted),
             new NodeStep(Chapter01Ids.Nodes.N11, Chapter01Ids.Dialogues.D11, Chapter01Ids.Flags.LongRoadStarted),
             new NodeStep(Chapter01Ids.Nodes.N12, Chapter01Ids.Dialogues.D12, Chapter01Ids.Flags.OldFordFound),
@@ -77,8 +92,12 @@ namespace KingdomSurvival.Chapter01
 
             for (int i = 0; i < Sequence.Length; i++)
             {
-                if (!IsStepCompleted(state, Sequence[i]))
-                    return Sequence[i].DialogueId;
+                NodeStep step = Sequence[i];
+                if (IsStepCompleted(state, step))
+                    continue;
+                if (step.ReadyGate != null && !step.ReadyGate(state))
+                    return null;
+                return step.DialogueId;
             }
 
             return null;
@@ -94,8 +113,12 @@ namespace KingdomSurvival.Chapter01
 
             for (int i = 0; i < Sequence.Length; i++)
             {
-                if (!IsStepCompleted(state, Sequence[i]))
-                    return Sequence[i].NodeId;
+                NodeStep step = Sequence[i];
+                if (IsStepCompleted(state, step))
+                    continue;
+                if (step.ReadyGate != null && !step.ReadyGate(state))
+                    return null;
+                return step.NodeId;
             }
 
             return null;
@@ -155,6 +178,81 @@ namespace KingdomSurvival.Chapter01
             return available;
         }
 
+        // P08-T02: N09 открывается не по факту прохождения N08 самого по
+        // себе, а по осмысленному сочетанию конкретных знаний — раздел
+        // "P08-T02" инструкции ("имеет значение сочетание конкретных
+        // фактов, а не количество очков расследования"). Три допустимых
+        // комбинации привязаны к реально реализованным в P07 знаниям (в
+        // репозитории от исходного раздела 14 остался только словесный
+        // принцип "варианты A/B/C", буквальный текст утерян):
+        //   A = память Мирона о седьмом рукаве + подтверждённый старый обычай (N08);
+        //   B = два независимых природных свидетеля — скот и рыба;
+        //   C = память о седьмом рукаве + понятый материальный предмет (N08).
+        // OldTraceFound (сама находка N08) обязателен во всех случаях.
+        public static bool CanOpenDepartureCouncil(NarrativeStateData state)
+        {
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
+
+            if (!state.HasFlag(Chapter01Ids.Flags.OldTraceFound))
+                return false;
+
+            bool combinationA =
+                state.HasKnowledge(Chapter01Ids.Knowledge.OldSeventhChannel) &&
+                state.HasKnowledge(Chapter01Ids.Knowledge.OldCustom);
+            bool combinationB =
+                state.HasKnowledge(Chapter01Ids.Knowledge.CattleAvoidOldBranch) &&
+                state.HasKnowledge(Chapter01Ids.Knowledge.FishPatternChanged);
+            bool combinationC =
+                state.HasKnowledge(Chapter01Ids.Knowledge.OldSeventhChannel) &&
+                state.HasKnowledge(Chapter01Ids.Knowledge.SevenToothObject);
+
+            return combinationA || combinationB || combinationC;
+        }
+
+        // P08-T01: N09 открывает ровно одну обязательную дальнюю цель и до
+        // двух дополнительных — каждая появляется, только если игрок
+        // действительно получил соответствующие сведения раньше (не
+        // отдельный счётчик, а прямая проверка тех же знаний P07). Список
+        // читает сам диалог D09 через свои Conditions; этот метод — только
+        // для внешних потребителей (тесты, будущий UI похода), не для
+        // ветвления самого диалога.
+        public static IReadOnlyList<string> GetDepartureOptionalGoals(NarrativeStateData state)
+        {
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
+
+            List<string> goals = new List<string>();
+
+            if (state.HasKnowledge(Chapter01Ids.Knowledge.SecondLoafIsRation) &&
+                state.HasKnowledge(Chapter01Ids.Knowledge.OldCustom))
+            {
+                goals.Add(Chapter01Ids.Knowledge.SecondLoafIsRation);
+            }
+
+            if (state.HasKnowledge(Chapter01Ids.Knowledge.SevenToothObject))
+                goals.Add(Chapter01Ids.Knowledge.SevenToothObject);
+
+            return goals;
+        }
+
+        // P08-T03: узкая точка завершения сбора отряда — вызывается только
+        // ПОСЛЕ того, как реальная экспедиция уже создана
+        // (GameState.TryStartExpedition/TryStartExpeditionToMapPoint
+        // вернули успех), никогда из текста диалога N10 самого по себе.
+        // ExpeditionStarted должен означать совершившееся действие, а не
+        // просмотр сцены сбора.
+        public static void HandleStoryExpeditionStarted(GameState gameState)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+
+            if (gameState.Narrative == null)
+                gameState.Narrative = new NarrativeStateData();
+
+            gameState.Narrative.SetFlag(Chapter01Ids.Flags.ExpeditionStarted);
+        }
+
         // Тонкая точка интеграции с UI (раздел 6.2: "запускает диалог через
         // существующий TryOpenNarrativeDialogueById"), без прямой ссылки на
         // PrototypeUIController — вызывающий код передаёт открыватель
@@ -192,6 +290,8 @@ namespace KingdomSurvival.Chapter01
                 Chapter01OutcomeApplier.ApplyFloodConsequences(gameState);
             else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D08, StringComparison.Ordinal))
                 Chapter01OutcomeApplier.ApplySevenTeethInvestigationConsequences(gameState);
+            else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D09, StringComparison.Ordinal))
+                Chapter01OutcomeApplier.ApplyDepartureConsequences(gameState);
         }
 
         private static bool IsStepCompleted(NarrativeStateData state, NodeStep step)

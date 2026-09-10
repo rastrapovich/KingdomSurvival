@@ -19,8 +19,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         }
 
         private const string GraphInspectorWidthPrefKey = "KingdomSurvival.DialogueDatabase.GraphInspectorWidth";
-        private const float GraphInspectorMinWidth = 360f;
-        private const float GraphInspectorDefaultWidth = 480f;
+        // §38 инструкции "свободный граф": семантические карточки (заголовок
+        // + акцентная полоса + текст условий/эффектов) требуют больше места,
+        // чем голый PropertyField — подняли минимум и ширину по умолчанию,
+        // чтобы они не переносились через строку на типичном окне.
+        private const float GraphInspectorMinWidth = 420f;
+        private const float GraphInspectorDefaultWidth = 520f;
         private const float GraphInspectorMaxWidthFraction = 0.6f;
         private const float GraphInspectorSplitterWidth = 6f;
         private const float GraphInspectorContentPadding = 18f;
@@ -140,11 +144,94 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
         }
 
+        // §18-25 инструкции "свободный граф": семь смысловых категорий
+        // Inspector'а, каждая — свой акцентный цвет. Это не фон карточки
+        // (полная заливка резала бы читаемость длинного текста), а тонкая
+        // полоса слева (см. EndSemanticCard) и цвет заголовка секции —
+        // "акцентная линия, а не сплошная заливка".
+        public enum SemanticCategory
+        {
+            Character,
+            Text,
+            Check,
+            Condition,
+            Effect,
+            Choice,
+            Error
+        }
+
+        // Тема-зависимая палитра (§18): на тёмной теме цвета чуть светлее и
+        // менее насыщенные, чтобы не резать глаз на тёмном фоне карточки; на
+        // светлой — темнее и насыщеннее, чтобы не терялись на белом.
+        // Condition (охра) и Effect (зелёный) — сознательно "визуально
+        // противоположные" категории (§25: условия — то, что ПРОВЕРЯЕТСЯ,
+        // эффекты — то, что МЕНЯЕТСЯ).
+        public static Color GetSemanticAccentColor(SemanticCategory category)
+        {
+            bool dark = EditorGUIUtility.isProSkin;
+            switch (category)
+            {
+                case SemanticCategory.Character:
+                    return dark ? new Color(0.55f, 0.68f, 0.92f) : new Color(0.20f, 0.36f, 0.68f);
+                case SemanticCategory.Text:
+                    return dark ? new Color(0.80f, 0.80f, 0.78f) : new Color(0.30f, 0.30f, 0.28f);
+                case SemanticCategory.Check:
+                    return dark ? new Color(0.78f, 0.62f, 0.92f) : new Color(0.46f, 0.28f, 0.62f);
+                case SemanticCategory.Condition:
+                    return dark ? new Color(0.85f, 0.72f, 0.30f) : new Color(0.62f, 0.48f, 0.06f);
+                case SemanticCategory.Effect:
+                    return dark ? new Color(0.52f, 0.82f, 0.52f) : new Color(0.18f, 0.52f, 0.20f);
+                case SemanticCategory.Choice:
+                    return dark ? new Color(0.48f, 0.70f, 0.90f) : new Color(0.14f, 0.42f, 0.68f);
+                case SemanticCategory.Error:
+                    return dark ? new Color(0.92f, 0.55f, 0.40f) : new Color(0.70f, 0.24f, 0.10f);
+                default:
+                    return dark ? Color.white : Color.black;
+            }
+        }
+
         private static void DrawSectionHeader(string title)
         {
             GUILayout.Space(10f);
             EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
             GUILayout.Space(2f);
+        }
+
+        // Цветной вариант — для секций с явной смысловой категорией (условия,
+        // эффекты, проверки, ответы), а не для общих технических блоков.
+        private static void DrawSectionHeader(string title, SemanticCategory category)
+        {
+            GUILayout.Space(10f);
+            GUIStyle style = new GUIStyle(EditorStyles.boldLabel);
+            style.normal.textColor = GetSemanticAccentColor(category);
+            EditorGUILayout.LabelField(title, style);
+            GUILayout.Space(2f);
+        }
+
+        // §18-19: карточка с акцентной полосой слева вместо сплошной
+        // заливки фона. Полоса рисуется ПОСЛЕ EndVertical — тот же
+        // проверенный приём "GetLastRect() сразу после EndVertical",
+        // которым уже пользуется ScrollWheel-роутинг Inspector'а — без
+        // риска положиться на непроверенный Rect-возвращающий overload
+        // BeginVertical(GUIStyle, ...).
+        private static void BeginSemanticCard(string title, SemanticCategory category)
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            GUILayout.Space(1f);
+            if (!string.IsNullOrEmpty(title))
+            {
+                GUIStyle headerStyle = new GUIStyle(EditorStyles.miniBoldLabel);
+                headerStyle.normal.textColor = GetSemanticAccentColor(category);
+                EditorGUILayout.LabelField(title, headerStyle);
+            }
+        }
+
+        private static void EndSemanticCard(SemanticCategory category)
+        {
+            EditorGUILayout.EndVertical();
+            Rect cardRect = GUILayoutUtility.GetLastRect();
+            Rect accentRect = new Rect(cardRect.x, cardRect.y, 3f, cardRect.height);
+            EditorGUI.DrawRect(accentRect, GetSemanticAccentColor(category));
         }
 
         // §19-21: длинный ID — в узком Inspector'е подпись сверху и поле на

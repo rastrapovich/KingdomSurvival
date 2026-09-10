@@ -11,6 +11,24 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private const float GraphPadding = 10f;
         private const float GraphGrid = 64f;
 
+        // §2 инструкции "свободный граф": зазоры между реальными
+        // прямоугольниками узлов, а не между условными "слотами" сетки.
+        // Горизонтальный зазор — между правым краем одной колонки и левым
+        // краем следующей; вертикальный — между низом одной карточки и
+        // верхом следующей в той же колонке. public — чтобы EditMode-тесты
+        // могли проверить, что формула укладывается в согласованный диапазон
+        // (180-240 / 100-140), не дублируя число в тесте.
+        public const float AutoLayoutHorizontalGap = 220f;
+        public const float AutoLayoutVerticalGap = 120f;
+
+        // Чистая часть формулы X-колонки автораскладки — вынесена отдельно,
+        // чтобы EditMode-тест мог проверить рост X по колонкам без
+        // SerializedProperty/ScriptableObject.
+        public static float ComputeAutoLayoutColumnX(int depth, float nodeWidth)
+        {
+            return 60f + depth * (nodeWidth + AutoLayoutHorizontalGap);
+        }
+
         // Активная проверка имеет два порта вместо одного (§13): зелёный
         // успех и красный провал. graphConnectingPortKind запоминает, какой
         // порт сейчас перетаскивается, чтобы завершение перетаскивания
@@ -242,6 +260,14 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 AutoLayoutDialogue(dialogue, true);
                 graphNeedsCenter = true;
+            }
+
+            if (GUILayout.Button(
+                new GUIContent("Раздвинуть", "Раздвинуть слишком тесные узлы по вертикали, не меняя их X и порядок"),
+                EditorStyles.toolbarButton,
+                GUILayout.Width(90f)))
+            {
+                SpreadOutDialogueNodes(dialogue, true);
             }
 
             if (GUILayout.Button("Центр", EditorStyles.toolbarButton, GUILayout.Width(60f)))
@@ -644,18 +670,26 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUI.DrawRect(inputPort, new Color(0.70f, 0.82f, 0.95f, 1f));
 
             float margin = GraphPadding * graphZoom;
-            Rect dragRect = new Rect(
+            // §8-9 инструкции "свободный граф": перетаскивать узел можно за
+            // всю строку заголовка (не только за маленькую иконку ⋮) — так
+            // проще попасть курсором на масштабе меньше 100%. Иконка остаётся
+            // визуальной подсказкой "тут можно тащить", но зона захвата —
+            // весь titleRowHeight по всей ширине заголовка.
+            Rect headerDragRect = new Rect(headerRect.x, headerRect.y, headerRect.width, titleRowHeight);
+            EditorGUIUtility.AddCursorRect(headerDragRect, MouseCursor.MoveArrow);
+
+            Rect dragIconRect = new Rect(
                 headerRect.x + margin,
                 headerRect.y + 4f * graphZoom,
                 22f * graphZoom,
                 titleRowHeight - 8f * graphZoom);
-            GUI.Label(dragRect, "⋮", ScaledStyle(EditorStyles.boldLabel, 12, TextAnchor.MiddleCenter));
+            GUI.Label(dragIconRect, "⋮", ScaledStyle(EditorStyles.boldLabel, 12, TextAnchor.MiddleCenter));
 
             string nodeId = node.FindPropertyRelative("id").stringValue;
             Rect idRect = new Rect(
-                dragRect.xMax + 3f * graphZoom,
+                dragIconRect.xMax + 3f * graphZoom,
                 headerRect.y + 4f * graphZoom,
-                headerRect.width - dragRect.width - margin * 2f - (isStart ? 58f : 8f) * graphZoom,
+                headerRect.width - dragIconRect.width - margin * 2f - (isStart ? 58f : 8f) * graphZoom,
                 titleRowHeight - 8f * graphZoom);
             GUI.Label(
                 idRect,
@@ -747,7 +781,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             if (current.type == EventType.MouseDown &&
                 current.button == 0 &&
-                dragRect.Contains(current.mousePosition))
+                headerDragRect.Contains(current.mousePosition))
             {
                 Undo.RecordObject(database, "Move Dialogue Node");
                 graphSelectedNodeIndex = nodeIndex;
@@ -1298,6 +1332,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (!indicesById.TryGetValue(startId, out startIndex))
                 startIndex = 0;
 
+            // Глубина колонки — по-прежнему кратчайшее расстояние от старта
+            // (BFS): так ветки, которые сходятся обратно, не растягивают
+            // раскладку лишними колонками.
             depthByIndex[startIndex] = 0;
             queue.Enqueue(startIndex);
 
@@ -1334,21 +1371,152 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     depthByIndex[i] = orphanDepth;
             }
 
-            Dictionary<int, float> nextYByDepth = new Dictionary<int, float>();
+            // §5-7 инструкции "свободный граф": вертикальный порядок внутри
+            // колонки должен совпадать с порядком вариантов ответа у
+            // родителя (первый ответ — верхний ребёнок), а активная проверка
+            // держит успех выше провала. Обход в порядке массива Choices
+            // (GetGraphChoiceTargets уже отдаёт successNodeId раньше
+            // failureNodeId) даёт ровно такой порядок посещения.
+            List<int> visitOrder = new List<int>(nodes.arraySize);
+            HashSet<int> visited = new HashSet<int>();
+            VisitChoiceOrderDfs(startIndex, nodes, indicesById, visited, visitOrder);
             for (int i = 0; i < nodes.arraySize; i++)
             {
-                int depth = depthByIndex[i];
-                float y;
-                if (!nextYByDepth.TryGetValue(depth, out y))
-                    y = 60f;
+                if (visited.Add(i))
+                    visitOrder.Add(i);
+            }
 
-                SerializedProperty node = nodes.GetArrayElementAtIndex(i);
-                SetNodeEditorPosition(node, new Vector2(60f + depth * 430f, y));
-                y += GetNodeWorldHeight(i) + 60f;
-                nextYByDepth[depth] = y;
+            Dictionary<int, List<int>> orderedByDepth = new Dictionary<int, List<int>>();
+            foreach (int index in visitOrder)
+            {
+                int depth = depthByIndex[index];
+                List<int> column;
+                if (!orderedByDepth.TryGetValue(depth, out column))
+                {
+                    column = new List<int>();
+                    orderedByDepth[depth] = column;
+                }
+                column.Add(index);
+            }
+
+            float columnWidth = GetGraphNodeWidth(graphDetailMode);
+            for (int depth = 0; depth <= orphanDepth; depth++)
+            {
+                List<int> column;
+                if (!orderedByDepth.TryGetValue(depth, out column))
+                    continue;
+
+                float x = ComputeAutoLayoutColumnX(depth, columnWidth);
+                float y = 60f;
+                foreach (int index in column)
+                {
+                    SerializedProperty node = nodes.GetArrayElementAtIndex(index);
+                    SetNodeEditorPosition(node, new Vector2(x, y));
+                    y += GetNodeWorldHeight(index) + AutoLayoutVerticalGap;
+                }
             }
 
             EditorUtility.SetDirty(database);
+        }
+
+        // Порядок посещения узлов "как в дереве вариантов ответа" — не для
+        // определения глубины (это делает BFS выше), а только для того,
+        // чтобы внутри одной колонки узлы легли в том же порядке, в котором
+        // родитель предлагает к ним варианты (первый вариант — выше).
+        private static void VisitChoiceOrderDfs(
+            int nodeIndex,
+            SerializedProperty nodes,
+            Dictionary<string, int> indicesById,
+            HashSet<int> visited,
+            List<int> order)
+        {
+            if (!visited.Add(nodeIndex))
+                return;
+
+            order.Add(nodeIndex);
+            SerializedProperty choices = nodes.GetArrayElementAtIndex(nodeIndex).FindPropertyRelative("choices");
+            for (int choiceIndex = 0; choiceIndex < choices.arraySize; choiceIndex++)
+            {
+                SerializedProperty choice = choices.GetArrayElementAtIndex(choiceIndex);
+                foreach (string targetId in GetGraphChoiceTargets(choice))
+                {
+                    int targetIndex;
+                    if (indicesById.TryGetValue(targetId, out targetIndex))
+                        VisitChoiceOrderDfs(targetIndex, nodes, indicesById, visited, order);
+                }
+            }
+        }
+
+        // §12/§41 инструкции "свободный граф": "Раздвинуть" — не
+        // Автораскладка. Он не трогает X и не переупорядочивает узлы —
+        // только раздвигает по вертикали те, что в одной колонке (по
+        // пересечению X-диапазонов) стоят теснее ExtraVerticalGap.
+        private void SpreadOutDialogueNodes(SerializedProperty dialogue, bool recordUndo)
+        {
+            SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
+            if (nodes.arraySize == 0)
+                return;
+
+            if (recordUndo)
+                Undo.RecordObject(database, "Spread Out Dialogue Nodes");
+
+            List<Rect> worldRects = new List<Rect>(nodes.arraySize);
+            for (int i = 0; i < nodes.arraySize; i++)
+                worldRects.Add(GetNodeWorldRect(i, nodes.GetArrayElementAtIndex(i)));
+
+            List<int> byX = new List<int>(nodes.arraySize);
+            for (int i = 0; i < nodes.arraySize; i++)
+                byX.Add(i);
+            byX.Sort((a, b) => worldRects[a].xMin.CompareTo(worldRects[b].xMin));
+
+            List<List<int>> columns = new List<List<int>>();
+            foreach (int index in byX)
+            {
+                List<int> match = null;
+                foreach (List<int> column in columns)
+                {
+                    Rect representative = worldRects[column[0]];
+                    if (RangesOverlap(worldRects[index].xMin, worldRects[index].xMax, representative.xMin, representative.xMax))
+                    {
+                        match = column;
+                        break;
+                    }
+                }
+
+                if (match == null)
+                {
+                    match = new List<int>();
+                    columns.Add(match);
+                }
+
+                match.Add(index);
+            }
+
+            foreach (List<int> column in columns)
+            {
+                column.Sort((a, b) => worldRects[a].yMin.CompareTo(worldRects[b].yMin));
+                float minNextY = float.NegativeInfinity;
+                foreach (int index in column)
+                {
+                    Rect rect = worldRects[index];
+                    float y = minNextY <= float.NegativeInfinity ? rect.yMin : Mathf.Max(rect.yMin, minNextY);
+                    if (!Mathf.Approximately(y, rect.yMin))
+                    {
+                        SerializedProperty node = nodes.GetArrayElementAtIndex(index);
+                        Vector2 position = node.FindPropertyRelative("editorPosition").vector2Value;
+                        SetNodeEditorPosition(node, new Vector2(position.x, y));
+                    }
+
+                    minNextY = y + rect.height + AutoLayoutVerticalGap;
+                }
+            }
+
+            EditorUtility.SetDirty(database);
+        }
+
+        public static bool RangesOverlap(float minA, float maxA, float minB, float maxB)
+        {
+            return minA < maxB && minB < maxA;
         }
 
         private void CenterGraph(SerializedProperty dialogue, Rect canvas)

@@ -674,4 +674,79 @@ public sealed class DialogueDatabaseGraphPresentationTests
         // общего margin ноды — уже, чем ширина текстового блока.
         Assert.Less(GetGraphChoiceContentWidth(GraphDetailMode.Standard), GetGraphTextContentWidth(GraphDetailMode.Standard));
     }
+
+    // ---- Автораскладка ("свободный граф" §2-7) -------------------------
+
+    [Test]
+    public void AutoLayoutHorizontalGap_WithinInstructedRange()
+    {
+        Assert.GreaterOrEqual(AutoLayoutHorizontalGap, 180f);
+        Assert.LessOrEqual(AutoLayoutHorizontalGap, 240f);
+    }
+
+    [Test]
+    public void AutoLayoutVerticalGap_WithinInstructedRange()
+    {
+        Assert.GreaterOrEqual(AutoLayoutVerticalGap, 100f);
+        Assert.LessOrEqual(AutoLayoutVerticalGap, 140f);
+    }
+
+    [Test]
+    public void ComputeAutoLayoutColumnX_FirstColumnStartsAtMargin()
+    {
+        Assert.AreEqual(60f, ComputeAutoLayoutColumnX(0, GetGraphNodeWidth(GraphDetailMode.Standard)));
+    }
+
+    [Test]
+    public void ComputeAutoLayoutColumnX_NextColumnClearsPreviousNodeWidthPlusGap()
+    {
+        float nodeWidth = GetGraphNodeWidth(GraphDetailMode.Standard);
+        float column0 = ComputeAutoLayoutColumnX(0, nodeWidth);
+        float column1 = ComputeAutoLayoutColumnX(1, nodeWidth);
+
+        // Следующая колонка должна начинаться не раньше, чем правый край
+        // предыдущей карточки плюс горизонтальный зазор — иначе колонки
+        // перекрывались бы при любой ширине карточки.
+        Assert.GreaterOrEqual(column1, column0 + nodeWidth + AutoLayoutHorizontalGap);
+    }
+
+    [Test]
+    public void ComputeAutoLayoutColumnX_WiderModeStillGrowsMonotonically()
+    {
+        float compactWidth = GetGraphNodeWidth(GraphDetailMode.Compact);
+        float fullWidth = GetGraphNodeWidth(GraphDetailMode.Full);
+
+        float compactColumn3 = ComputeAutoLayoutColumnX(3, compactWidth);
+        float fullColumn3 = ComputeAutoLayoutColumnX(3, fullWidth);
+
+        Assert.Greater(fullColumn3, compactColumn3);
+    }
+
+    // ---- "Раздвинуть" — определение колонок по X-пересечению -----------
+
+    [Test]
+    public void RangesOverlap_IdenticalRangesOverlap()
+    {
+        Assert.IsTrue(RangesOverlap(0f, 100f, 0f, 100f));
+    }
+
+    [Test]
+    public void RangesOverlap_PartiallyOverlappingRangesOverlap()
+    {
+        Assert.IsTrue(RangesOverlap(0f, 100f, 50f, 150f));
+    }
+
+    [Test]
+    public void RangesOverlap_TouchingEdgesDoNotOverlap()
+    {
+        // Строгое неравенство: соседние колонки, стоящие впритык (без
+        // зазора), не должны считаться одной колонкой.
+        Assert.IsFalse(RangesOverlap(0f, 100f, 100f, 200f));
+    }
+
+    [Test]
+    public void RangesOverlap_FarApartRangesDoNotOverlap()
+    {
+        Assert.IsFalse(RangesOverlap(0f, 100f, 500f, 600f));
+    }
 }

@@ -357,7 +357,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                         DrawAutoHeightNarrativeText(legacyText, "Реплика (legacy)");
                 }
 
-                DrawSectionHeader("ТЕКСТОВЫЕ БЛОКИ (" + textBlocks.arraySize + ")");
+                DrawSectionHeader("ТЕКСТОВЫЕ БЛОКИ (" + textBlocks.arraySize + ")", SemanticCategory.Text);
                 for (int blockIndex = 0; blockIndex < textBlocks.arraySize; blockIndex++)
                     DrawTextBlock(textBlocks, blockIndex);
 
@@ -367,7 +367,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     ShowAddTextBlockMenu(textBlocks);
 
                 SerializedProperty choices = node.FindPropertyRelative("choices");
-                DrawSectionHeader("ОТВЕТЫ (" + choices.arraySize + ")");
+                DrawSectionHeader("ОТВЕТЫ (" + choices.arraySize + ")", SemanticCategory.Choice);
                 for (int choiceIndex = 0; choiceIndex < choices.arraySize; choiceIndex++)
                     DrawChoice(nodes, choices, choiceIndex);
 
@@ -416,7 +416,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             string label = "[" + TextBlockKindLabel((DialogueTextBlockKind)kind.enumValueIndex) + "] " +
                             (string.IsNullOrWhiteSpace(blockId.stringValue) ? "<без ID>" : blockId.stringValue);
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            BeginSemanticCard(null, SemanticCategory.Text);
             EditorGUILayout.BeginHorizontal();
             block.isExpanded = EditorGUILayout.Foldout(block.isExpanded, label, true);
             GUILayout.FlexibleSpace();
@@ -424,7 +424,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 textBlocks.DeleteArrayElementAtIndex(blockIndex);
                 EditorGUILayout.EndHorizontal();
-                EditorGUILayout.EndVertical();
+                EndSemanticCard(SemanticCategory.Text);
                 return;
             }
             EditorGUILayout.EndHorizontal();
@@ -444,7 +444,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
                 DrawEffectsList(block.FindPropertyRelative("onRevealEffects"), "Эффекты после показа");
             }
-            EditorGUILayout.EndVertical();
+            EndSemanticCard(SemanticCategory.Text);
         }
 
         private void DrawChoice(SerializedProperty nodes, SerializedProperty choices, int choiceIndex)
@@ -456,7 +456,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             SerializedProperty endsDialogue = choice.FindPropertyRelative("endsDialogue");
             DialogueChoiceKind choiceKind = (DialogueChoiceKind)kind.enumValueIndex;
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            BeginSemanticCard(null, SemanticCategory.Choice);
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("ОТВЕТ " + (choiceIndex + 1) + " · " + ChoiceKindLabel(choiceKind).ToUpperInvariant(), EditorStyles.miniBoldLabel);
             GUILayout.FlexibleSpace();
@@ -464,7 +464,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 choices.DeleteArrayElementAtIndex(choiceIndex);
                 EditorGUILayout.EndHorizontal();
-                EditorGUILayout.EndVertical();
+                EndSemanticCard(SemanticCategory.Choice);
                 return;
             }
             EditorGUILayout.EndHorizontal();
@@ -485,8 +485,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     DrawCheckSpec(choice.FindPropertyRelative("check"), "Проверка");
                     DrawNodeTargetPopup(choice.FindPropertyRelative("successNodeId"), nodes, "Узел при успехе");
                     DrawNodeTargetPopup(choice.FindPropertyRelative("failureNodeId"), nodes, "Узел при провале");
-                    DrawEffectsList(choice.FindPropertyRelative("successEffects"), "Эффекты успеха");
-                    DrawEffectsList(choice.FindPropertyRelative("failureEffects"), "Эффекты провала");
+                    // §25: "зелёный/красный успех-провал" — те же категории,
+                    // что и у обычных эффектов (Effect) и ошибок (Error), а не
+                    // отдельная восьмая категория ради двух вызовов.
+                    DrawEffectsList(choice.FindPropertyRelative("successEffects"), "Эффекты успеха", SemanticCategory.Effect);
+                    DrawEffectsList(choice.FindPropertyRelative("failureEffects"), "Эффекты провала", SemanticCategory.Error);
                     break;
 
                 default:
@@ -498,7 +501,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     break;
             }
 
-            EditorGUILayout.EndVertical();
+            EndSemanticCard(SemanticCategory.Choice);
         }
 
         private static string ChoiceKindLabel(DialogueChoiceKind kind)
@@ -671,7 +674,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
         private void DrawConditionGroup(SerializedProperty group, string label)
         {
-            EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+            DrawSectionHeader(label, SemanticCategory.Condition);
             EditorGUI.indentLevel++;
 
             DrawConditionCombinatorPopup(group.FindPropertyRelative("Combinator"));
@@ -704,7 +707,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             SerializedProperty intParam = condition.FindPropertyRelative("IntParam");
             SerializedProperty negate = condition.FindPropertyRelative("Negate");
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            BeginSemanticCard(null, SemanticCategory.Condition);
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Условие " + (index + 1), EditorStyles.miniBoldLabel);
             GUILayout.FlexibleSpace();
@@ -712,7 +715,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 conditions.DeleteArrayElementAtIndex(index);
                 EditorGUILayout.EndHorizontal();
-                EditorGUILayout.EndVertical();
+                EndSemanticCard(SemanticCategory.Condition);
                 return true;
             }
             EditorGUILayout.EndHorizontal();
@@ -771,7 +774,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             EditorGUILayout.PropertyField(negate, new GUIContent("Обратить условие"));
 
-            EditorGUILayout.EndVertical();
+            EndSemanticCard(SemanticCategory.Condition);
             return false;
         }
 
@@ -823,7 +826,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
         private void DrawCheckSpec(SerializedProperty check, string label)
         {
-            EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+            BeginSemanticCard(label, SemanticCategory.Check);
             EditorGUI.indentLevel++;
 
             DrawLongIdField(check.FindPropertyRelative("CheckId"), "ID проверки");
@@ -849,6 +852,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUILayout.EndHorizontal();
 
             EditorGUI.indentLevel--;
+            EndSemanticCard(SemanticCategory.Check);
         }
 
         private bool DrawModifierRule(SerializedProperty rules, int index)
@@ -944,14 +948,23 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
         }
 
+        // §25: обычные эффекты (после показа/после разговора) — зелёная
+        // категория Effect; эффекты провала внутри ответа с активной
+        // проверкой красят вызывающий код в Error (см. DrawChoice) — та же
+        // отрисовка, другая акцентная полоса.
         private void DrawEffectsList(SerializedProperty effects, string label)
         {
-            EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+            DrawEffectsList(effects, label, SemanticCategory.Effect);
+        }
+
+        private void DrawEffectsList(SerializedProperty effects, string label, SemanticCategory category)
+        {
+            DrawSectionHeader(label, category);
             EditorGUI.indentLevel++;
 
             for (int i = 0; i < effects.arraySize; i++)
             {
-                if (DrawEffect(effects, i))
+                if (DrawEffect(effects, i, category))
                     break;
             }
 
@@ -964,7 +977,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUI.indentLevel--;
         }
 
-        private bool DrawEffect(SerializedProperty effects, int index)
+        private bool DrawEffect(SerializedProperty effects, int index, SemanticCategory category)
         {
             SerializedProperty effect = effects.GetArrayElementAtIndex(index);
             SerializedProperty type = effect.FindPropertyRelative("Type");
@@ -972,7 +985,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             SerializedProperty intParam = effect.FindPropertyRelative("IntParam");
             NarrativeEffectType kind = (NarrativeEffectType)type.enumValueIndex;
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            BeginSemanticCard(null, category);
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Эффект " + (index + 1) + " — " + EffectTypeLabel(kind), EditorStyles.miniBoldLabel);
             GUILayout.FlexibleSpace();
@@ -980,7 +993,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 effects.DeleteArrayElementAtIndex(index);
                 EditorGUILayout.EndHorizontal();
-                EditorGUILayout.EndVertical();
+                EndSemanticCard(category);
                 return true;
             }
             EditorGUILayout.EndHorizontal();
@@ -992,7 +1005,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (kind == NarrativeEffectType.ChangeRelation)
                 EditorGUILayout.PropertyField(intParam, new GUIContent("Изменение (дельта)"));
 
-            EditorGUILayout.EndVertical();
+            EndSemanticCard(category);
             return false;
         }
 

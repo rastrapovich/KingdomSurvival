@@ -328,6 +328,11 @@ public partial class PrototypeUIController
         narrativeHistory.Clear();
         PauseForBlockingModal();
         narrativeDialogueOverlay.style.display = DisplayStyle.Flex;
+        // Narrative Dialogue — верхний блокирующий gameplay-слой. Любой
+        // fullscreen-экран (Camp/Hero/Journal и будущие аналоги) может
+        // вызвать диалог после собственного BringToFront(), поэтому при
+        // каждом открытии возвращаем overlay на вершину sibling stack.
+        narrativeDialogueOverlay.BringToFront();
         DisplayNarrativeView(view, null);
         if (timeToggleButton != null)
         {

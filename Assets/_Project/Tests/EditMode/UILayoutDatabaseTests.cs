@@ -9,6 +9,7 @@ public sealed class UILayoutDatabaseTests
     [TestCase(PortraitSize.XS, 100, 140)]
     [TestCase(PortraitSize.S, 150, 210)]
     [TestCase(PortraitSize.M, 200, 280)]
+    [TestCase(PortraitSize.ML, 250, 350)]
     [TestCase(PortraitSize.L, 300, 420)]
     [TestCase(PortraitSize.XL, 400, 560)]
     public void Portrait_Size_Table_Uses_Canonical_Five_By_Seven_Presets(
@@ -27,6 +28,28 @@ public sealed class UILayoutDatabaseTests
     }
 
     [Test]
+    public void Portrait_Size_Enum_Preserves_Legacy_Serialized_Values()
+    {
+        Assert.AreEqual(0, (int)PortraitSize.XS);
+        Assert.AreEqual(1, (int)PortraitSize.S);
+        Assert.AreEqual(2, (int)PortraitSize.M);
+        Assert.AreEqual(3, (int)PortraitSize.L);
+        Assert.AreEqual(4, (int)PortraitSize.XL);
+        Assert.AreEqual(5, (int)PortraitSize.ML);
+    }
+
+    [Test]
+    public void Portrait_Size_Table_Uses_Logical_Display_Order()
+    {
+        Assert.AreEqual(PortraitSize.XS, PortraitSizeTable.All[0].Size);
+        Assert.AreEqual(PortraitSize.S, PortraitSizeTable.All[1].Size);
+        Assert.AreEqual(PortraitSize.M, PortraitSizeTable.All[2].Size);
+        Assert.AreEqual(PortraitSize.ML, PortraitSizeTable.All[3].Size);
+        Assert.AreEqual(PortraitSize.L, PortraitSizeTable.All[4].Size);
+        Assert.AreEqual(PortraitSize.XL, PortraitSizeTable.All[5].Size);
+    }
+
+    [Test]
     public void Portrait_Element_Rejects_Free_Resize_And_Preserves_Framing_When_Preset_Changes()
     {
         UILayoutElementDefinition element = new UILayoutElementDefinition();
@@ -38,18 +61,18 @@ public sealed class UILayoutDatabaseTests
 
         element.SetKind(UILayoutElementKind.Portrait);
 
-        Assert.AreEqual(PortraitSize.L, element.PortraitSize);
+        Assert.AreEqual(PortraitSize.ML, element.PortraitSize);
         Assert.AreEqual(legacyCenter.x, element.Rect.center.x, 0.001f);
         Assert.AreEqual(legacyCenter.y, element.Rect.center.y, 0.001f);
-        Assert.AreEqual(300f, element.Rect.width, 0.001f);
-        Assert.AreEqual(420f, element.Rect.height, 0.001f);
+        Assert.AreEqual(250f, element.Rect.width, 0.001f);
+        Assert.AreEqual(350f, element.Rect.height, 0.001f);
         Assert.IsFalse(element.SupportsFreeResize);
 
         element.SetRect(new Rect(17f, 29f, 777f, 888f));
         Assert.AreEqual(17f, element.Rect.x, 0.001f);
         Assert.AreEqual(29f, element.Rect.y, 0.001f);
-        Assert.AreEqual(300f, element.Rect.width, 0.001f);
-        Assert.AreEqual(420f, element.Rect.height, 0.001f);
+        Assert.AreEqual(250f, element.Rect.width, 0.001f);
+        Assert.AreEqual(350f, element.Rect.height, 0.001f);
 
         Vector2 centerBeforePresetChange = element.Rect.center;
         element.SetPortraitSize(PortraitSize.XL);
@@ -72,7 +95,7 @@ public sealed class UILayoutDatabaseTests
 
     // Раньше портрет диалога был жёстко зафиксирован на пресете L. Правило
     // ослаблено по решению автора: допустим любой канонический пресет
-    // (XS/S/M/L/XL) — важно только то, что это действительно Portrait с
+    // (XS/S/M/ML/L/XL) — важно только то, что это действительно Portrait с
     // размером из PortraitSizeTable (5:7), а не свободный Rect и не
     // рассинхронизированные width/height.
     [Test]
@@ -85,6 +108,7 @@ public sealed class UILayoutDatabaseTests
 
         Assert.IsNotNull(portrait);
         Assert.AreEqual(UILayoutElementKind.Portrait, portrait.Kind);
+        Assert.IsTrue(PortraitSizeTable.IsDefined(portrait.PortraitSize));
 
         PortraitSizeDefinition definition = PortraitSizeTable.Get(portrait.PortraitSize);
         Assert.AreEqual(definition.Width, portrait.Rect.width, 0.001f);

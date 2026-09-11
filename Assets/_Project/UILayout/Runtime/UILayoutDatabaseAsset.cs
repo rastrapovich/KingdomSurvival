@@ -279,11 +279,13 @@ namespace KingdomSurvival.UILayout
     public sealed class UILayoutDatabaseAsset : ScriptableObject
     {
         public const string ResourcesPath = "UILayout/KingdomSurvivalUILayouts";
-
         public const string NarrativeDialogueScreenId = "narrative-dialogue";
+
+        private const int CurrentPortraitPresetSchemaVersion = 1;
 
         [SerializeField] private Vector2Int referenceResolution = new Vector2Int(1920, 1080);
         [SerializeField] private List<UILayoutScreenDefinition> screens = new List<UILayoutScreenDefinition>();
+        [SerializeField, HideInInspector] private int portraitPresetSchemaVersion;
 
         public Vector2Int ReferenceResolution => referenceResolution;
         public IReadOnlyList<UILayoutScreenDefinition> Screens =>
@@ -302,6 +304,31 @@ namespace KingdomSurvival.UILayout
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Одноразовая миграция старого default диалогового портрета M 200x280
+        /// в новый промежуточный preset ML 250x350. После повышения версии
+        /// дизайнер снова может выбрать любой канонический preset — миграция
+        /// не фиксирует диалог на ML и повторно не переписывает выбор.
+        /// </summary>
+        private void MigratePortraitPresetSchema()
+        {
+            if (portraitPresetSchemaVersion >= CurrentPortraitPresetSchemaVersion)
+                return;
+
+            UILayoutScreenDefinition narrative = FindScreen(NarrativeDialogueScreenId);
+            UILayoutElementDefinition portrait = narrative?.FindElement("portrait");
+            if (portrait != null &&
+                portrait.Kind == UILayoutElementKind.Portrait &&
+                portrait.PortraitSize == PortraitSize.M &&
+                Mathf.Approximately(portrait.Rect.width, 200f) &&
+                Mathf.Approximately(portrait.Rect.height, 280f))
+            {
+                portrait.SetPortraitSize(PortraitSize.ML);
+            }
+
+            portraitPresetSchemaVersion = CurrentPortraitPresetSchemaVersion;
         }
 
         /// <summary>
@@ -329,8 +356,15 @@ namespace KingdomSurvival.UILayout
             return changed;
         }
 
+        private void OnEnable()
+        {
+            MigratePortraitPresetSchema();
+            NormalizePortraitFrames();
+        }
+
         private void OnValidate()
         {
+            MigratePortraitPresetSchema();
             NormalizePortraitFrames();
         }
 

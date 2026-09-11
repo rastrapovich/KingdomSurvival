@@ -7,11 +7,15 @@ using System.Collections.Generic;
 /// </summary>
 public enum PortraitSize
 {
-    XS,
-    S,
-    M,
-    L,
-    XL
+    // Значения XS–XL уже сериализованы в Unity assets. Не менять их номера:
+    // новый preset добавляется отдельным значением, а логический порядок
+    // задаётся PortraitSizeTable.
+    XS = 0,
+    S = 1,
+    M = 2,
+    L = 3,
+    XL = 4,
+    ML = 5
 }
 
 /// <summary>
@@ -47,11 +51,15 @@ public static class PortraitSizeTable
     public const int AspectWidth = 5;
     public const int AspectHeight = 7;
 
+    // Логический UI-порядок намеренно отличается от числового порядка enum:
+    // ML добавлен после уже сериализованных XS–XL, но визуально находится
+    // между M и L.
     private static readonly PortraitSizeDefinition[] Definitions =
     {
         new PortraitSizeDefinition(PortraitSize.XS, 100, 140),
         new PortraitSizeDefinition(PortraitSize.S, 150, 210),
         new PortraitSizeDefinition(PortraitSize.M, 200, 280),
+        new PortraitSizeDefinition(PortraitSize.ML, 250, 350),
         new PortraitSizeDefinition(PortraitSize.L, 300, 420),
         new PortraitSizeDefinition(PortraitSize.XL, 400, 560)
     };
@@ -63,10 +71,24 @@ public static class PortraitSizeTable
 
     public static PortraitSizeDefinition Get(PortraitSize size)
     {
-        int index = (int)size;
-        if (index < 0 || index >= Definitions.Length)
-            return Definitions[(int)PortraitSize.M];
-        return Definitions[index];
+        for (int i = 0; i < Definitions.Length; i++)
+        {
+            if (Definitions[i].Size == size)
+                return Definitions[i];
+        }
+
+        return Definitions[2]; // M — безопасный fallback для неизвестного значения.
+    }
+
+    public static bool IsDefined(PortraitSize size)
+    {
+        for (int i = 0; i < Definitions.Length; i++)
+        {
+            if (Definitions[i].Size == size)
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>

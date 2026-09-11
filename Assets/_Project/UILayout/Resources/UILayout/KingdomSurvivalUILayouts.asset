@@ -2211,7 +2211,17 @@ MonoBehaviour:
     dimmingOpacity: 0.72
     autoApply: 1
     rootName: incident-modal-overlay
-    requiredElements: []
+    requiredElements:
+    - elementId: overlay
+      expectedParentId:
+    - elementId: incident-modal-title
+      expectedParentId: overlay
+    - elementId: incident-modal-description
+      expectedParentId: overlay
+    - elementId: incident-modal-consequence
+      expectedParentId: overlay
+    - elementId: incident-understood-button
+      expectedParentId: overlay
     elements:
     - id: overlay
       displayName: "\u0417\u0430\u0442\u0435\u043C\u043D\u0435\u043D\u0438\u0435
@@ -2367,7 +2377,13 @@ MonoBehaviour:
     dimmingOpacity: 0.85
     autoApply: 1
     rootName: game-over-overlay
-    requiredElements: []
+    requiredElements:
+    - elementId: overlay
+      expectedParentId:
+    - elementId: game-over-days-label
+      expectedParentId: overlay
+    - elementId: restart-game-button
+      expectedParentId: overlay
     elements:
     - id: overlay
       displayName: "\u0417\u0430\u0442\u0435\u043C\u043D\u0435\u043D\u0438\u0435
@@ -5972,6 +5988,826 @@ MonoBehaviour:
       opacity: 1
       font: {fileID: 0}
       fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+  - id: journal
+    displayName: "Журнал"
+    description: "Fullscreen-слой журнала целей (UI-M02): читает Chapter01JournalProvider.Build. Структура — Prototype_Main.uxml, Controller в PrototypeUIController.Journal только находит элементы и наполняет их данными."
+    usesDimming: 0
+    dimmingOpacity: 0.68
+    autoApply: 1
+    rootName: journal-overlay
+    requiredElements:
+    - elementId: journal-overlay
+      expectedParentId: 
+    - elementId: journal-close-button
+      expectedParentId: journal-header
+    - elementId: journal-tab-goals
+      expectedParentId: journal-tabs
+    - elementId: journal-tab-chronicle
+      expectedParentId: journal-tabs
+    - elementId: journal-main-section
+      expectedParentId: journal-goals-scroll
+    - elementId: journal-optional-section
+      expectedParentId: journal-goals-scroll
+    - elementId: journal-completed-section
+      expectedParentId: journal-goals-scroll
+    - elementId: journal-main-section-list
+      expectedParentId: journal-main-section
+    - elementId: journal-optional-section-list
+      expectedParentId: journal-optional-section
+    - elementId: journal-completed-section-list
+      expectedParentId: journal-completed-section
+    - elementId: journal-detail-panel-title
+      expectedParentId: journal-detail-panel
+    - elementId: journal-detail-title
+      expectedParentId: journal-detail-panel
+    - elementId: journal-detail-description
+      expectedParentId: journal-detail-panel
+    - elementId: journal-detail-current-step
+      expectedParentId: journal-detail-panel
+    elements:
+    - id: journal-overlay
+      displayName: "Экран (фон)"
+      parentId: 
+      kind: 0
+      portraitSize: 2
+      targetName: journal-overlay
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1920
+        height: 1080
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-header
+      displayName: "Шапка"
+      parentId: journal-overlay
+      kind: 4
+      portraitSize: 2
+      targetName: journal-header
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 12
+        width: 1884
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-title
+      displayName: "Заголовок"
+      parentId: journal-header
+      kind: 1
+      portraitSize: 2
+      targetName: journal-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: ЖУРНАЛ
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 12
+        width: 300
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 20
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-close-button
+      displayName: "Кнопка «Закрыть»"
+      parentId: journal-header
+      kind: 3
+      portraitSize: 2
+      targetName: journal-close-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: ЗАКРЫТЬ
+      rect:
+        serializedVersion: 2
+        x: 1782
+        y: 18
+        width: 120
+        height: 32
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: journal-tabs
+      displayName: "Вкладки"
+      parentId: journal-overlay
+      kind: 4
+      portraitSize: 2
+      targetName: journal-tabs
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 66
+        width: 1884
+        height: 32
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-tab-goals
+      displayName: "Вкладка «Цели»"
+      parentId: journal-tabs
+      kind: 3
+      portraitSize: 2
+      targetName: journal-tab-goals
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: ЦЕЛИ
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 66
+        width: 140
+        height: 32
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: journal-tab-chronicle
+      displayName: "Вкладка «Хроника»"
+      parentId: journal-tabs
+      kind: 3
+      portraitSize: 2
+      targetName: journal-tab-chronicle
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: ХРОНИКА
+      rect:
+        serializedVersion: 2
+        x: 166
+        y: 66
+        width: 140
+        height: 32
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 1
+      verticalAlignment: 0
+    - id: journal-columns
+      displayName: "Колонки"
+      parentId: journal-overlay
+      kind: 4
+      portraitSize: 2
+      targetName: journal-columns
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 108
+        width: 1884
+        height: 948
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-goals-column
+      displayName: "Колонка целей"
+      parentId: journal-columns
+      kind: 4
+      portraitSize: 2
+      targetName: journal-goals-column
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 108
+        width: 622
+        height: 948
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-goals-scroll
+      displayName: "Прокрутка целей"
+      parentId: journal-goals-column
+      kind: 4
+      portraitSize: 2
+      targetName: journal-goals-scroll
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 108
+        width: 622
+        height: 948
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-main-section
+      displayName: "Секция «Основная цель»"
+      parentId: journal-goals-scroll
+      kind: 0
+      portraitSize: 2
+      targetName: journal-main-section
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 118
+        width: 602
+        height: 300
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-main-section-title
+      displayName: "Заголовок секции"
+      parentId: journal-main-section
+      kind: 1
+      portraitSize: 2
+      targetName: journal-main-section-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: ОСНОВНАЯ ЦЕЛЬ
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 126
+        width: 300
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-main-section-list
+      displayName: "Список основных целей"
+      parentId: journal-main-section
+      kind: 4
+      portraitSize: 2
+      targetName: journal-main-section-list
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 150
+        width: 582
+        height: 260
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-optional-section
+      displayName: "Секция «Дополнительные»"
+      parentId: journal-goals-scroll
+      kind: 0
+      portraitSize: 2
+      targetName: journal-optional-section
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 430
+        width: 602
+        height: 260
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-optional-section-title
+      displayName: "Заголовок секции"
+      parentId: journal-optional-section
+      kind: 1
+      portraitSize: 2
+      targetName: journal-optional-section-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: ДОПОЛНИТЕЛЬНЫЕ
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 438
+        width: 300
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-optional-section-list
+      displayName: "Список доп. целей"
+      parentId: journal-optional-section
+      kind: 4
+      portraitSize: 2
+      targetName: journal-optional-section-list
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 462
+        width: 582
+        height: 220
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-completed-section
+      displayName: "Секция «Завершённые»"
+      parentId: journal-goals-scroll
+      kind: 0
+      portraitSize: 2
+      targetName: journal-completed-section
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 700
+        width: 602
+        height: 260
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-completed-section-title
+      displayName: "Заголовок секции"
+      parentId: journal-completed-section
+      kind: 1
+      portraitSize: 2
+      targetName: journal-completed-section-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: ЗАВЕРШЁННЫЕ
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 708
+        width: 300
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-completed-section-list
+      displayName: "Список завершённых целей"
+      parentId: journal-completed-section
+      kind: 4
+      portraitSize: 2
+      targetName: journal-completed-section-list
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 732
+        width: 582
+        height: 220
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-detail-column
+      displayName: "Колонка деталей"
+      parentId: journal-columns
+      kind: 4
+      portraitSize: 2
+      targetName: journal-detail-column
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 652
+        y: 108
+        width: 1250
+        height: 948
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-detail-scroll
+      displayName: "Прокрутка деталей"
+      parentId: journal-detail-column
+      kind: 4
+      portraitSize: 2
+      targetName: journal-detail-scroll
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 652
+        y: 108
+        width: 1250
+        height: 948
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-detail-panel
+      displayName: "Панель деталей"
+      parentId: journal-detail-scroll
+      kind: 0
+      portraitSize: 2
+      targetName: journal-detail-panel
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 662
+        y: 118
+        width: 1230
+        height: 908
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-detail-panel-title
+      displayName: "Категория цели"
+      parentId: journal-detail-panel
+      kind: 1
+      portraitSize: 2
+      targetName: journal-detail-panel-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: ВЫБЕРИТЕ ЦЕЛЬ
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 126
+        width: 400
+        height: 24
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-detail-title
+      displayName: "Название цели"
+      parentId: journal-detail-panel
+      kind: 1
+      portraitSize: 2
+      targetName: journal-detail-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 154
+        width: 1210
+        height: 30
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 17
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-detail-description
+      displayName: "Описание цели"
+      parentId: journal-detail-panel
+      kind: 1
+      portraitSize: 2
+      targetName: journal-detail-description
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 190
+        width: 1210
+        height: 120
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-detail-step-caption
+      displayName: "Подпись «Текущий шаг»"
+      parentId: journal-detail-panel
+      kind: 1
+      portraitSize: 2
+      targetName: journal-detail-step-caption
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: ТЕКУЩИЙ ШАГ
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 320
+        width: 300
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: journal-detail-current-step
+      displayName: "Текущий шаг"
+      parentId: journal-detail-panel
+      kind: 1
+      portraitSize: 2
+      targetName: journal-detail-current-step
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 344
+        width: 1210
+        height: 100
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
       textColor: {r: 1, g: 1, b: 1, a: 1}
       fontStyle: 0
       horizontalAlignment: 0

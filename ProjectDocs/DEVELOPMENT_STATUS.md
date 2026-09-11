@@ -151,3 +151,51 @@ Unity Editor, компилятор, Test Runner и Play Mode недоступн�
 5. визуальные состояния кнопки «Лагерь» (скрыта/disabled/enabled/активна) вживую.
 
 После Pull обязательно: чистая компиляция, полный EditMode `Run All` (включая `CampScreenLayoutTests`), затем ручной проход по пп. 1–5 выше.
+
+## 10. UI-M07 — Incident + Game Over: закрыт проверочный проход по ProjectDocs/UI_ARCHITECTURE.md
+
+По плану миграции runtime-экранов (`ProjectDocs/UI_ARCHITECTURE.md` §9, порядок UI-M01…UI-M09) Incident и Game Over были ближе всего к целевой модели ещё до этого прохода: структура уже в `Prototype_Main.uxml`, `PrototypeUIController.cs` только биндит `Q<T>(name)`, ни одного `Build*`/`Ensure*` метода для этих экранов не было (проверено вручную). Поэтому это не миграция, а проверка + закрытие пробела в покрытии тестами:
+
+- в `KingdomSurvivalUILayouts.asset` у экранов `incident-modal` и `game-over` `requiredElements` были пустыми (`[]`) — заполнены явной схемой (для `incident-modal`: `overlay`/`incident-modal-title`/`incident-modal-description`/`incident-modal-consequence`/`incident-understood-button`; для `game-over`: `overlay`/`game-over-days-label`/`restart-game-button`), все с корректным `expectedParentId`, аналогично `narrative-dialogue`/`camp`;
+- добавлен `Assets/_Project/Tests/EditMode/IncidentAndGameOverScreenLayoutTests.cs` (по образцу `CampScreenLayoutTests.cs`): регистрация+`autoApply`, `requiredElements` резолвятся с ожидаемым родителем, полная `CollectValidationIssues` пуста, каждый `targetName` встречается в `Prototype_Main.uxml`.
+- Изменений в `PrototypeUIController.cs` и `Prototype_Main.uxml` не потребовалось — оба экрана уже соответствовали модели.
+
+Компиляция и Test Runner в этой сессии недоступны — новый тест не запускался; проверить вместе со следующим полным `Run All`.
+
+Следующий шаг по плану — **UI-M02 Journal**: первый экран, где заводятся `BindRequiredElement<T>` и первый UXML-template.
+
+## 11. UI-M02 — Journal переехал на UXML + UI Конструктор
+
+По тому же плану (`ProjectDocs/UI_ARCHITECTURE.md` §9) — второй экран после Camp, и первый, где вводится инфраструктура, которой у Camp нет: явный helper обязательной привязки и настоящий UXML-template для повторяемого контента.
+
+### 11.1. Что изменилось архитектурно
+
+- **`PrototypeUIController.UIBinding.cs`** (новый файл) — `BindRequiredElement<T>(root, screenName, elementName)`: явный `Debug.LogError` вместо `NullReferenceException`, если элемента нет в UXML (§5 доктрины). Journal — первый потребитель.
+- **`Prototype_SharedPanels.uss`** (новый файл) — общие классы `.ks-panel-backdrop/.ks-panel/.ks-panel-title/.ks-panel-deep/.ks-border/.ks-gold-text/.ks-text/.ks-muted-text/.ks-slot-empty/.ks-button`, 1:1 копирующие цвета и поведение приватных констант/хелперов `PrototypeUIController.HeroScreen.cs` (`HeroScreenGold` и т. д., `CreateHeroScreenPanel`, `StyleHeroScreenButton`). Journal — первый экран на этих классах; раньше он напрямую дёргал приватные хелперы Hero Screen, теперь зависит только от USS. Hero Screen (UI-M03) при своей миграции перейдёт на эти же классы и удалит исходные C#-хелперы.
+- **`Journal.uss`** (новый файл) — вся раскладка `journal-overlay`: паддинги/ширины/flex колонок и секций, шрифты detail-панели, стиль строки цели (`.journal-goal-row*`).
+- **`Prototype_Main.uxml`** — добавлен постоянный `journal-overlay` (сиблинг `camp-screen`/`incident-modal-overlay`/`game-over-overlay`, скрыт по умолчанию): шапка, вкладки (Цели активна, Хроника — задизейблена прямо в UXML вместе с tooltip), две колонки — список целей (3 фиксированные секции main/optional/completed, каждая со своим пустым списком-контейнером) и панель деталей.
+- **`Assets/_Project/UI/Templates/Resources/Templates/JournalGoalRow.uxml`** (новый шаблон, первый в проекте) — строка цели: заголовок, бейдж «НОВОЕ» (скрывается через `style.display`, не пересоздаётся), подзаголовок. Клонируется через `VisualTreeAsset.Instantiate()`, загружается `Resources.Load<VisualTreeAsset>("Templates/JournalGoalRow")` — путь без ручной привязки в Inspector, специально выбран для сред без Unity Editor (см. §11.4).
+- **`KingdomSurvivalUILayouts.asset`** — новый экран `id: journal` (`autoApply: 1`, `rootName: journal-overlay`, 27 элементов, 14 `requiredElements` — ровно те узлы, которые `InitializeJournalUi()` реально биндит через `BindRequiredElement`, а не все узлы подряд). Override-флаги выключены по умолчанию, как и везде в базе.
+- **`PrototypeUIController.Journal.cs`** — переписан на bind-only: `InitializeJournalUi()` только находит узлы и один раз подписывает обработчики; `RefreshJournal()`/`RefreshJournalDetailPanel()`/`RefreshJournalNotificationState()` только текст/видимость/классы; `CreateJournalGoalRow` клонирует шаблон вместо `new VisualElement`/`new Label`. `seenJournalRevisionIds` (сессионная пометка «НОВОЕ») не изменилась — это не данные Provider.
+
+### 11.2. Что не изменилось (сознательно)
+
+`Chapter01JournalProvider.Build(gameState)` не трогался — единственная точка входа данных та же. Правило «Journal/Hero Screen/Camp — взаимоисключающие fullscreen-слои» (`CloseHeroScreen()`/`CloseCampScreen()` при открытии) осталось как есть. Отметка «прочитано» по-прежнему только по клику на конкретную запись, не при открытии журнала.
+
+### 11.3. Тесты
+
+- `Assets/_Project/Tests/EditMode/JournalScreenLayoutTests.cs` (по образцу `CampScreenLayoutTests.cs`): регистрация+`autoApply`, `requiredElements` резолвятся с ожидаемым родителем, полная `CollectValidationIssues` пуста, каждый `targetName` встречается в `Prototype_Main.uxml`, шаблон `JournalGoalRow.uxml` содержит ожидаемые именованные узлы.
+- `Assets/_Project/Tests/EditMode/JournalScreenStructureRegressionTests.cs` (ключевой regression-тест §11/§30 доктрины, приём как в `CampUiRefreshTests.cs`): в `PrototypeUIController.Journal.cs` нет ни одного из прежних `Build*`-методов, нет `new VisualElement(...)`/`new Label(...)`, есть хотя бы один `Instantiate()`, и — отдельная проверка — нет больше ссылок на приватные хелперы/цвета Hero Screen (страховка на будущее удаление этих хелперов в UI-M03).
+
+### 11.4. Что не проверено (честно, без Unity)
+
+Unity Editor, компилятор, Test Runner и Play Mode недоступны в этой сессии. Структурная корректность (YAML базы, XML UXML/шаблона, парность скобок C#, отсутствие текстовых коллизий имён) проверена вручную Python-скриптами. Не проверено ни разу вживую:
+
+1. что `Resources.Load<VisualTreeAsset>("Templates/JournalGoalRow")` реально находит и клонирует шаблон в Play Mode (сам путь и структура папок `Assets/_Project/UI/Templates/Resources/Templates/` проверены только текстово);
+2. что `UILayoutScreenBinder.ApplyAutoScreens` накладывается на `journal-overlay` без ошибок при старте;
+3. открытие Kingdom Survival → UI Конструктор → «Журнал» показывает все элементы и позволяет их двигать;
+4. визуально: бейдж «НОВОЕ», выделение выбранной строки, задизейбленная вкладка «Хроника» с tooltip, скролл списка целей и панели деталей.
+
+После Pull обязательно: чистая компиляция, полный EditMode `Run All` (включая `JournalScreenLayoutTests`/`JournalScreenStructureRegressionTests`), затем ручной проход по пп. 1–4 выше.
+
+Следующий шаг по плану — **UI-M03 Hero Screen**: самый большой оставшийся экран, зависит от `.ks-*` классов из этого прохода (см. `/root/.claude/plans/precious-wiggling-bumblebee.md`).

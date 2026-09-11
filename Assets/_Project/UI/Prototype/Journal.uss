@@ -1,0 +1,135 @@
+/* Журнал целей (P08J, UI-M02) — статическая раскладка в Prototype_Main.uxml,
+   цвета/панели/кнопки — из Prototype_SharedPanels.uss (.ks-*), здесь только
+   то, что специфично для Journal: паддинги/ширины/flex/шрифты. */
+
+.journal-overlay {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding-left: 18px;
+    padding-right: 18px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.journal-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    flex-shrink: 0;
+    margin-bottom: 10px;
+}
+
+.journal-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
+.journal-close-button {
+    width: 120px;
+    height: 32px;
+}
+
+.journal-tabs {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin-bottom: 10px;
+}
+
+.journal-tab {
+    width: 140px;
+    height: 32px;
+    margin-right: 8px;
+}
+
+.journal-columns {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.journal-goals-column {
+    width: 33%;
+    margin-right: 12px;
+    min-width: 0;
+}
+
+.journal-goals-scroll {
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.journal-detail-column {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.journal-detail-scroll {
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.journal-detail-panel {
+    flex-grow: 1;
+}
+
+.journal-detail-title {
+    font-size: 17px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 8px;
+}
+
+.journal-detail-description {
+    font-size: 12px;
+    white-space: normal;
+    margin-bottom: 14px;
+}
+
+.journal-detail-step-caption {
+    font-size: 10px;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.journal-detail-current-step {
+    font-size: 12px;
+    white-space: normal;
+}
+
+.journal-goal-row {
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+    border-radius: 3px;
+}
+
+.journal-goal-row-selected {
+    background-color: rgb(27, 31, 37);
+}
+
+.journal-goal-row-title-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.journal-goal-row-title {
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.journal-goal-row-badge {
+    font-size: 9px;
+    -unity-font-style: bold;
+}
+
+.journal-goal-row-subtitle {
+    font-size: 9px;
+}

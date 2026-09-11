@@ -10,6 +10,8 @@
     <Style src="Prototype_Exploration.uss" />
     <Style src="Prototype_Shell.uss" />
     <Style src="Prototype_Camp.uss" />
+    <Style src="Prototype_SharedPanels.uss" />
+    <Style src="Journal.uss" />
 
     <ui:VisualElement name="screen" class="screen shell-screen">
 
@@ -223,6 +225,64 @@
                     <ui:Label name="camp-actions-placeholder" text="Пока нет доступных действий." class="camp-placeholder-text" />
                 </ui:VisualElement>
                 <ui:Button name="camp-continue-button" text="ПРОДОЛЖИТЬ ПУТЬ" class="camp-continue-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- UI-M02: Журнал — постоянный, скрытый по умолчанию экран (та же
+             роль верхнего уровня, что camp-screen/incident-modal-overlay/
+             game-over-overlay выше). Цвета/панели/кнопки — из общих классов
+             Prototype_SharedPanels.uss (.ks-*), раскладка — из Journal.uss,
+             позиция/размеры — из Kingdom Survival -> UI Конструктор
+             (KingdomSurvivalUILayouts.asset, экран "journal"). C# только
+             ищет эти узлы по имени и наполняет данными из
+             Chapter01JournalProvider. -->
+        <ui:VisualElement name="journal-overlay" class="journal-overlay ks-panel-backdrop">
+            <ui:VisualElement name="journal-header" class="journal-header">
+                <ui:Label name="journal-title" text="ЖУРНАЛ" class="journal-title ks-gold-text" />
+                <ui:Button name="journal-close-button" text="ЗАКРЫТЬ" class="ks-button journal-close-button" />
+            </ui:VisualElement>
+            <ui:VisualElement name="journal-tabs" class="journal-tabs">
+                <ui:Button name="journal-tab-goals" text="ЦЕЛИ" class="ks-button journal-tab nav-button-active" />
+                <ui:Button
+                    name="journal-tab-chronicle"
+                    text="ХРОНИКА"
+                    tooltip="Хроника событий будет подключена позже."
+                    class="ks-button journal-tab" />
+            </ui:VisualElement>
+            <ui:VisualElement name="journal-columns" class="journal-columns">
+                <ui:VisualElement name="journal-goals-column" class="journal-goals-column">
+                    <ui:ScrollView
+                        name="journal-goals-scroll"
+                        class="journal-goals-scroll"
+                        horizontal-scroller-visibility="Hidden">
+                        <ui:VisualElement name="journal-main-section" class="ks-panel journal-goal-section">
+                            <ui:Label name="journal-main-section-title" text="ОСНОВНАЯ ЦЕЛЬ" class="ks-panel-title" />
+                            <ui:VisualElement name="journal-main-section-list" class="journal-goal-list" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="journal-optional-section" class="ks-panel journal-goal-section">
+                            <ui:Label name="journal-optional-section-title" text="ДОПОЛНИТЕЛЬНЫЕ" class="ks-panel-title" />
+                            <ui:VisualElement name="journal-optional-section-list" class="journal-goal-list" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="journal-completed-section" class="ks-panel journal-goal-section">
+                            <ui:Label name="journal-completed-section-title" text="ЗАВЕРШЁННЫЕ" class="ks-panel-title" />
+                            <ui:VisualElement name="journal-completed-section-list" class="journal-goal-list" />
+                        </ui:VisualElement>
+                    </ui:ScrollView>
+                </ui:VisualElement>
+                <ui:VisualElement name="journal-detail-column" class="journal-detail-column">
+                    <ui:ScrollView
+                        name="journal-detail-scroll"
+                        class="journal-detail-scroll"
+                        horizontal-scroller-visibility="Hidden">
+                        <ui:VisualElement name="journal-detail-panel" class="ks-panel journal-detail-panel">
+                            <ui:Label name="journal-detail-panel-title" text="ВЫБЕРИТЕ ЦЕЛЬ" class="ks-panel-title" />
+                            <ui:Label name="journal-detail-title" text="" class="journal-detail-title ks-text" />
+                            <ui:Label name="journal-detail-description" text="" class="journal-detail-description ks-text" />
+                            <ui:Label name="journal-detail-step-caption" text="ТЕКУЩИЙ ШАГ" class="journal-detail-step-caption ks-muted-text" />
+                            <ui:Label name="journal-detail-current-step" text="" class="journal-detail-current-step ks-text" />
+                        </ui:VisualElement>
+                    </ui:ScrollView>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

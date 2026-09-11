@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ui:UXML
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    editor-extension-mode="False">
+
+    <ui:VisualElement name="journal-goal-row" class="journal-goal-row">
+        <ui:VisualElement name="journal-goal-row-title-row" class="journal-goal-row-title-row">
+            <ui:Label name="journal-goal-row-title" class="journal-goal-row-title ks-text" />
+            <ui:Label name="journal-goal-row-badge" text="НОВОЕ" class="journal-goal-row-badge ks-gold-text" />
+        </ui:VisualElement>
+        <ui:Label name="journal-goal-row-subtitle" class="journal-goal-row-subtitle ks-muted-text" />
+    </ui:VisualElement>
+</ui:UXML>

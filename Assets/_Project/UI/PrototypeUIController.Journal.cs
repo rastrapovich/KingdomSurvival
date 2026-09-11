@@ -5,10 +5,15 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Журнал целей (P08J) — read-only fullscreen-слой поверх
-/// Chapter01JournalProvider.Build, по архитектурному образцу Hero Screen
-/// (программный VisualElement, отдельный partial-файл, повторно использует
-/// его визуальный язык — CreateHeroScreenPanel/SetHeroScreenBorder/цвета).
+/// Журнал целей (P08J, UI-M02) — read-only fullscreen-слой поверх
+/// Chapter01JournalProvider.Build. Первый экран, мигрированный на
+/// ProjectDocs/UI_ARCHITECTURE.md после Camp: постоянная структура —
+/// Prototype_Main.uxml (journal-overlay), общий стиль — Prototype_
+/// SharedPanels.uss (.ks-*) + Journal.uss, повторяемая строка цели —
+/// Assets/_Project/UI/Templates/Resources/Templates/JournalGoalRow.uxml.
+/// Controller здесь только находит уже существующие элементы через
+/// BindRequiredElement и наполняет их данными — не создаёт постоянное
+/// дерево через `new VisualElement`.
 ///
 /// Журнал ничего не решает и не хранит о сюжетном прогрессе: он полностью
 /// пересобирается из GameState/NarrativeState при каждом RefreshJournal.
@@ -18,6 +23,8 @@ using UnityEngine.UIElements;
 /// </summary>
 public partial class PrototypeUIController
 {
+    private const string JournalScreenName = "Журнал";
+
     private VisualElement journalOverlay;
 
     private Button journalNavButton;
@@ -38,6 +45,9 @@ public partial class PrototypeUIController
     private Label journalDetailDescription;
     private Label journalDetailCurrentStep;
 
+    private VisualTreeAsset journalGoalRowTemplate;
+
+    private bool journalUiBound;
     private string selectedJournalGoalId;
 
     // Session-only: сбрасывается при перезапуске игры (раздел 29
@@ -49,19 +59,57 @@ public partial class PrototypeUIController
         journalOverlay != null && journalOverlay.style.display == DisplayStyle.Flex;
 
     // ------------------------------------------------------------------
-    // Инициализация
+    // Инициализация — только поиск элементов и подписка на события.
     // ------------------------------------------------------------------
 
     private void InitializeJournalUi()
     {
-        if (interfaceRoot == null || journalOverlay != null)
+        if (interfaceRoot == null || journalUiBound)
             return;
 
-        VisualElement screen = interfaceRoot.Q<VisualElement>("screen");
-        if (screen == null)
+        journalOverlay = BindRequiredElement<VisualElement>(interfaceRoot, JournalScreenName, "journal-overlay");
+        journalCloseButton = BindRequiredElement<Button>(interfaceRoot, JournalScreenName, "journal-close-button");
+        journalGoalsTabButton = BindRequiredElement<Button>(interfaceRoot, JournalScreenName, "journal-tab-goals");
+        journalChronicleTabButton = BindRequiredElement<Button>(interfaceRoot, JournalScreenName, "journal-tab-chronicle");
+
+        journalMainSection = BindRequiredElement<VisualElement>(interfaceRoot, JournalScreenName, "journal-main-section");
+        journalOptionalSection = BindRequiredElement<VisualElement>(interfaceRoot, JournalScreenName, "journal-optional-section");
+        journalCompletedSection = BindRequiredElement<VisualElement>(interfaceRoot, JournalScreenName, "journal-completed-section");
+
+        journalMainList = BindRequiredElement<VisualElement>(interfaceRoot, JournalScreenName, "journal-main-section-list");
+        journalOptionalList = BindRequiredElement<VisualElement>(interfaceRoot, JournalScreenName, "journal-optional-section-list");
+        journalCompletedList = BindRequiredElement<VisualElement>(interfaceRoot, JournalScreenName, "journal-completed-section-list");
+
+        journalDetailCategory = BindRequiredElement<Label>(interfaceRoot, JournalScreenName, "journal-detail-panel-title");
+        journalDetailTitle = BindRequiredElement<Label>(interfaceRoot, JournalScreenName, "journal-detail-title");
+        journalDetailDescription = BindRequiredElement<Label>(interfaceRoot, JournalScreenName, "journal-detail-description");
+        journalDetailCurrentStep = BindRequiredElement<Label>(interfaceRoot, JournalScreenName, "journal-detail-current-step");
+
+        if (journalOverlay == null ||
+            journalCloseButton == null ||
+            journalGoalsTabButton == null ||
+            journalChronicleTabButton == null ||
+            journalMainSection == null ||
+            journalOptionalSection == null ||
+            journalCompletedSection == null ||
+            journalMainList == null ||
+            journalOptionalList == null ||
+            journalCompletedList == null ||
+            journalDetailCategory == null ||
+            journalDetailTitle == null ||
+            journalDetailDescription == null ||
+            journalDetailCurrentStep == null)
             return;
 
-        BuildJournalScreen(screen);
+        journalUiBound = true;
+
+        journalCloseButton.clicked += CloseJournal;
+        // Хроника — отдельный будущий раздел (раздел 18 инструкции): вкладка
+        // существует в UXML и задизейблена (SetEnabled(false) + tooltip уже
+        // заданы там же), а не подменяется «КОРОЛЕВСКИМИ ДОНЕСЕНИЯМИ» (другая,
+        // исторически накопившаяся система UI). У неё нет обработчика клика —
+        // она никогда не будет доступна для нажатия, пока не включена явно.
+        journalChronicleTabButton.SetEnabled(false);
 
         journalNavButton = interfaceRoot.Q<Button>("nav-journal-button");
         if (journalNavButton != null)
@@ -101,173 +149,6 @@ public partial class PrototypeUIController
     }
 
     // ------------------------------------------------------------------
-    // Построение
-    // ------------------------------------------------------------------
-
-    private void BuildJournalScreen(VisualElement screen)
-    {
-        journalOverlay = new VisualElement { name = "journal-overlay" };
-        journalOverlay.style.position = Position.Absolute;
-        journalOverlay.style.left = 0f;
-        journalOverlay.style.right = 0f;
-        journalOverlay.style.top = 0f;
-        journalOverlay.style.bottom = 0f;
-        journalOverlay.style.backgroundColor = HeroScreenBackdrop;
-        journalOverlay.style.display = DisplayStyle.None;
-        journalOverlay.style.paddingLeft = 18f;
-        journalOverlay.style.paddingRight = 18f;
-        journalOverlay.style.paddingTop = 12f;
-        journalOverlay.style.paddingBottom = 12f;
-        screen.Add(journalOverlay);
-
-        journalOverlay.Add(BuildJournalHeader());
-        journalOverlay.Add(BuildJournalTabs());
-
-        VisualElement columns = new VisualElement { name = "journal-columns" };
-        columns.style.flexDirection = FlexDirection.Row;
-        columns.style.flexGrow = 1f;
-        columns.style.minHeight = 0f;
-        journalOverlay.Add(columns);
-
-        columns.Add(BuildJournalGoalsColumn());
-        columns.Add(BuildJournalDetailColumn());
-    }
-
-    private VisualElement BuildJournalHeader()
-    {
-        VisualElement header = new VisualElement { name = "journal-header" };
-        header.style.flexDirection = FlexDirection.Row;
-        header.style.alignItems = Align.Center;
-        header.style.justifyContent = Justify.SpaceBetween;
-        header.style.height = 44f;
-        header.style.flexShrink = 0f;
-        header.style.marginBottom = 10f;
-
-        Label title = new Label("ЖУРНАЛ") { name = "journal-title" };
-        title.style.color = HeroScreenGold;
-        title.style.fontSize = 20f;
-        title.style.unityFontStyleAndWeight = FontStyle.Bold;
-        header.Add(title);
-
-        journalCloseButton = new Button(CloseJournal)
-        {
-            name = "journal-close-button",
-            text = "ЗАКРЫТЬ"
-        };
-        StyleHeroScreenButton(journalCloseButton, 120f, 32f);
-        header.Add(journalCloseButton);
-        return header;
-    }
-
-    // Хроника — отдельный будущий раздел (раздел 18 инструкции): вкладка
-    // существует, но задизейблена в v1, а не подменяется «КОРОЛЕВСКИМИ
-    // ДОНЕСЕНИЯМИ» (другая, исторически накопившаяся система UI).
-    private VisualElement BuildJournalTabs()
-    {
-        VisualElement tabs = new VisualElement { name = "journal-tabs" };
-        tabs.style.flexDirection = FlexDirection.Row;
-        tabs.style.flexShrink = 0f;
-        tabs.style.marginBottom = 10f;
-
-        journalGoalsTabButton = new Button { name = "journal-tab-goals", text = "ЦЕЛИ" };
-        StyleHeroScreenButton(journalGoalsTabButton, 140f, 32f);
-        journalGoalsTabButton.style.marginRight = 8f;
-        journalGoalsTabButton.AddToClassList("nav-button-active");
-        tabs.Add(journalGoalsTabButton);
-
-        journalChronicleTabButton = new Button { name = "journal-tab-chronicle", text = "ХРОНИКА" };
-        StyleHeroScreenButton(journalChronicleTabButton, 140f, 32f);
-        journalChronicleTabButton.SetEnabled(false);
-        journalChronicleTabButton.tooltip = "Хроника событий будет подключена позже.";
-        tabs.Add(journalChronicleTabButton);
-
-        return tabs;
-    }
-
-    private VisualElement BuildJournalGoalsColumn()
-    {
-        VisualElement column = new VisualElement { name = "journal-goals-column" };
-        column.style.width = new Length(33f, LengthUnit.Percent);
-        column.style.marginRight = 12f;
-        column.style.minWidth = 0f;
-
-        ScrollView scroll = new ScrollView(ScrollViewMode.Vertical) { name = "journal-goals-scroll" };
-        scroll.style.flexGrow = 1f;
-        scroll.style.minHeight = 0f;
-        scroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
-        column.Add(scroll);
-        VisualElement content = scroll.contentContainer;
-
-        journalMainSection = BuildJournalGoalSection("journal-main-section", "ОСНОВНАЯ ЦЕЛЬ", out journalMainList);
-        content.Add(journalMainSection);
-
-        journalOptionalSection = BuildJournalGoalSection("journal-optional-section", "ДОПОЛНИТЕЛЬНЫЕ", out journalOptionalList);
-        content.Add(journalOptionalSection);
-
-        journalCompletedSection = BuildJournalGoalSection("journal-completed-section", "ЗАВЕРШЁННЫЕ", out journalCompletedList);
-        content.Add(journalCompletedSection);
-
-        return column;
-    }
-
-    private VisualElement BuildJournalGoalSection(string name, string title, out VisualElement list)
-    {
-        VisualElement panel = CreateHeroScreenPanel(name, title);
-        list = new VisualElement { name = name + "-list" };
-        panel.Add(list);
-        return panel;
-    }
-
-    private VisualElement BuildJournalDetailColumn()
-    {
-        VisualElement column = new VisualElement { name = "journal-detail-column" };
-        column.style.flexGrow = 1f;
-        column.style.minWidth = 0f;
-
-        ScrollView scroll = new ScrollView(ScrollViewMode.Vertical) { name = "journal-detail-scroll" };
-        scroll.style.flexGrow = 1f;
-        scroll.style.minHeight = 0f;
-        scroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
-        column.Add(scroll);
-        VisualElement content = scroll.contentContainer;
-
-        VisualElement panel = CreateHeroScreenPanel("journal-detail-panel", "ВЫБЕРИТЕ ЦЕЛЬ");
-        panel.style.flexGrow = 1f;
-        journalDetailCategory = panel.Q<Label>("journal-detail-panel-title");
-
-        journalDetailTitle = new Label(string.Empty) { name = "journal-detail-title" };
-        journalDetailTitle.style.color = HeroScreenText;
-        journalDetailTitle.style.fontSize = 17f;
-        journalDetailTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
-        journalDetailTitle.style.whiteSpace = WhiteSpace.Normal;
-        journalDetailTitle.style.marginBottom = 8f;
-        panel.Add(journalDetailTitle);
-
-        journalDetailDescription = new Label(string.Empty) { name = "journal-detail-description" };
-        journalDetailDescription.style.color = HeroScreenText;
-        journalDetailDescription.style.fontSize = 12f;
-        journalDetailDescription.style.whiteSpace = WhiteSpace.Normal;
-        journalDetailDescription.style.marginBottom = 14f;
-        panel.Add(journalDetailDescription);
-
-        Label stepCaption = new Label("ТЕКУЩИЙ ШАГ") { name = "journal-detail-step-caption" };
-        stepCaption.style.color = HeroScreenMuted;
-        stepCaption.style.fontSize = 10f;
-        stepCaption.style.unityFontStyleAndWeight = FontStyle.Bold;
-        stepCaption.style.marginBottom = 4f;
-        panel.Add(stepCaption);
-
-        journalDetailCurrentStep = new Label(string.Empty) { name = "journal-detail-current-step" };
-        journalDetailCurrentStep.style.color = HeroScreenText;
-        journalDetailCurrentStep.style.fontSize = 12f;
-        journalDetailCurrentStep.style.whiteSpace = WhiteSpace.Normal;
-        panel.Add(journalDetailCurrentStep);
-
-        content.Add(panel);
-        return column;
-    }
-
-    // ------------------------------------------------------------------
     // Наполнение данными
     // ------------------------------------------------------------------
 
@@ -277,7 +158,7 @@ public partial class PrototypeUIController
     // RefreshInterface). Никакого собственного Update-цикла.
     private void RefreshJournal()
     {
-        if (journalOverlay == null || gameState == null)
+        if (!journalUiBound || gameState == null)
             return;
 
         IReadOnlyList<JournalGoalViewData> goals = Chapter01JournalProvider.Build(gameState);
@@ -296,6 +177,8 @@ public partial class PrototypeUIController
                 continue;
 
             VisualElement row = CreateJournalGoalRow(goal);
+            if (row == null)
+                continue;
 
             if (goal.State == JournalGoalState.Completed || goal.State == JournalGoalState.Failed)
             {
@@ -368,54 +251,36 @@ public partial class PrototypeUIController
 
     private VisualElement CreateJournalGoalRow(JournalGoalViewData goal)
     {
+        VisualTreeAsset template = LoadJournalGoalRowTemplate();
+        if (template == null)
+            return null;
+
         bool isSelected = string.Equals(goal.Id, selectedJournalGoalId, StringComparison.Ordinal);
+        bool isUnseen = !seenJournalRevisionIds.Contains(goal.RevisionId);
 
-        VisualElement row = new VisualElement { name = "journal-goal-row-" + goal.Id };
-        row.style.paddingLeft = 6f;
-        row.style.paddingRight = 6f;
-        row.style.paddingTop = 6f;
-        row.style.paddingBottom = 6f;
-        row.style.marginBottom = 4f;
-        row.style.backgroundColor = isSelected ? HeroScreenPanelDeep : Color.clear;
-        SetHeroScreenRadius(row, 3f);
+        TemplateContainer instance = template.Instantiate();
 
-        VisualElement titleRow = new VisualElement();
-        titleRow.style.flexDirection = FlexDirection.Row;
-        titleRow.style.justifyContent = Justify.SpaceBetween;
-        titleRow.style.alignItems = Align.Center;
-        row.Add(titleRow);
+        VisualElement row = instance.Q<VisualElement>("journal-goal-row");
+        if (row != null)
+            row.EnableInClassList("journal-goal-row-selected", isSelected);
 
-        Label title = new Label((isSelected ? "▶ " : "") + goal.Title) { name = "journal-goal-row-title" };
-        title.style.color = HeroScreenText;
-        title.style.fontSize = 12f;
-        title.style.unityFontStyleAndWeight = FontStyle.Bold;
-        title.pickingMode = PickingMode.Ignore;
-        titleRow.Add(title);
+        Label title = instance.Q<Label>("journal-goal-row-title");
+        if (title != null)
+            title.text = (isSelected ? "▶ " : "") + goal.Title;
 
         // v1 использует один badge «НОВОЕ» и для впервые появившихся, и для
         // обновлённых записей (раздел 26 инструкции: различать было бы
         // точнее, но это сознательно упрощено — RevisionId уже достаточно,
         // чтобы не пропустить ни один смысловой шаг цели).
-        if (!seenJournalRevisionIds.Contains(goal.RevisionId))
-        {
-            Label badge = new Label("НОВОЕ") { name = "journal-goal-row-badge" };
-            badge.style.color = HeroScreenGold;
-            badge.style.fontSize = 9f;
-            badge.style.unityFontStyleAndWeight = FontStyle.Bold;
-            badge.pickingMode = PickingMode.Ignore;
-            titleRow.Add(badge);
-        }
+        Label badge = instance.Q<Label>("journal-goal-row-badge");
+        if (badge != null)
+            badge.style.display = isUnseen ? DisplayStyle.Flex : DisplayStyle.None;
 
-        Label subtitle = new Label(goal.Category == JournalGoalCategory.Main ? "Основная" : "Дополнительная")
-        {
-            name = "journal-goal-row-subtitle"
-        };
-        subtitle.style.color = HeroScreenMuted;
-        subtitle.style.fontSize = 9f;
-        subtitle.pickingMode = PickingMode.Ignore;
-        row.Add(subtitle);
+        Label subtitle = instance.Q<Label>("journal-goal-row-subtitle");
+        if (subtitle != null)
+            subtitle.text = goal.Category == JournalGoalCategory.Main ? "Основная" : "Дополнительная";
 
-        row.RegisterCallback<PointerDownEvent>(evt =>
+        instance.RegisterCallback<PointerDownEvent>(evt =>
         {
             if (evt.button != 0)
                 return;
@@ -424,7 +289,7 @@ public partial class PrototypeUIController
             evt.StopPropagation();
         });
 
-        return row;
+        return instance;
     }
 
     // Отметка «прочитано» — только по явному клику на конкретную запись
@@ -449,5 +314,16 @@ public partial class PrototypeUIController
                 return goal;
         }
         return null;
+    }
+
+    // ------------------------------------------------------------------
+    // Шаблоны (Assets/_Project/UI/Templates) — раздел 19 UI_ARCHITECTURE.md.
+    // ------------------------------------------------------------------
+
+    private VisualTreeAsset LoadJournalGoalRowTemplate()
+    {
+        if (journalGoalRowTemplate == null)
+            journalGoalRowTemplate = Resources.Load<VisualTreeAsset>("Templates/JournalGoalRow");
+        return journalGoalRowTemplate;
     }
 }

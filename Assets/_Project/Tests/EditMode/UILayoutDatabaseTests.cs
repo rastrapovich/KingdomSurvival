@@ -163,9 +163,12 @@ public sealed class UILayoutDatabaseTests
         Assert.Greater(choices.FontSize, 0);
         Assert.Greater(speaker.FontSize, choices.FontSize);
 
-        // Оба элемента текстовые, значит текстовые свойства применимы.
+        // speaker — одиночная надпись (Kind=Text), поэтому обязана быть текстовой.
+        // choices — контейнер под динамически создаваемые кнопки ответа
+        // (Kind=Container, UI-M04), но по-прежнему несёт текстовые свойства
+        // (шрифт/цвет/выравнивание), которые ApplyTextStyle применяет к каждой
+        // кнопке независимо от Kind — поэтому IsTextual для него не проверяем.
         Assert.IsTrue(speaker.IsTextual);
-        Assert.IsTrue(choices.IsTextual);
 
         // Выравнивание любого сочетания разрешается в конкретный якорь.
         Assert.IsTrue(System.Enum.IsDefined(

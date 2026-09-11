@@ -15,6 +15,7 @@
     <Style src="HeroScreen.uss" />
     <Style src="Narrative.uss" />
     <Style src="BuildingCards.uss" />
+    <Style src="Expedition.uss" />
 
     <ui:VisualElement name="screen" class="screen shell-screen">
 
@@ -47,7 +48,7 @@
                                 <ui:Button text="" class="persistent-commander-button persistent-commander-empty" />
                             </ui:VisualElement>
                             <ui:VisualElement class="persistent-commander-button-row">
-                                <ui:Button name="persistent-commander-expedition-button" text="ЭКСПЕДИЦИЯ" class="persistent-commander-button persistent-commander-expedition-button" />
+                                <ui:Button name="persistent-commander-expedition-button" text="ЛОКАЦИИ" tooltip="Открытые локации" class="persistent-commander-button persistent-commander-expedition-button" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -76,7 +77,7 @@
                     <ui:VisualElement name="expeditions-screen" class="game-screen shell-content-screen">
                         <ui:ScrollView class="shell-screen-scroll military-expedition-column">
                             <ui:VisualElement class="panel expedition-panel shell-content-panel shell-expedition-panel">
-                                <ui:Label text="ЭКСПЕДИЦИИ" class="panel-title" />
+                                <ui:Label text="КАРТА" class="panel-title" />
                                 <ui:Label name="expedition-status-label" text="Активная экспедиция: нет" class="status-label" />
                                 <ui:VisualElement name="active-expedition-card" class="active-expedition-card">
                                     <ui:Label name="active-expedition-title" text="АКТИВНАЯ ЭКСПЕДИЦИЯ" class="active-expedition-title" />
@@ -125,7 +126,7 @@
         <ui:VisualElement class="shell-bottom-bar">
             <ui:VisualElement class="navigation-bar shell-navigation-bar">
                 <ui:Button name="nav-capital-button" text="Столица" tooltip="Столица" class="nav-button shell-nav-button nav-capital" />
-                <ui:Button name="nav-expeditions-button" text="Экспедиция" tooltip="Экспедиции" class="nav-button shell-nav-button nav-expedition" />
+                <ui:Button name="nav-expeditions-button" text="Карта" tooltip="Глобальная карта" class="nav-button shell-nav-button nav-expedition" />
                 <ui:Button name="nav-hero-button" text="Герой" tooltip="Экран героя: состав похода, характеристики, снаряжение" class="nav-button shell-nav-button nav-hero" />
                 <ui:Button name="nav-journal-button" text="Журнал" tooltip="Цели и хроника" class="nav-button shell-nav-button nav-journal" />
                 <ui:Button name="nav-camp-button" text="Лагерь" tooltip="Лагерь доступен во время похода." class="nav-button shell-nav-button nav-camp" />
@@ -667,6 +668,20 @@
             <ui:Label name="narrative-dialogue-speaker" class="narrative-dialogue-speaker" />
             <ui:Label name="narrative-dialogue-role" class="narrative-dialogue-role" />
             <ui:VisualElement name="narrative-check-tooltip" picking-mode="Ignore" class="narrative-check-tooltip" />
+        </ui:VisualElement>
+
+        <!-- UI-M06: Быстрый попап "Открытые локации" — постоянный, скрытый
+             по умолчанию узел (display:none в .quick-expedition-popup,
+             Prototype_Shell.uss). Позиция (left/top) считается по границам
+             persistent-commander-expedition-button во время выполнения
+             (PositionQuickExpeditionPopup) — это зависит от текущей раскладки
+             панели командира, а не от статичных данных, поэтому остаётся в
+             коде. Карточки локаций добавляются в конец этого узла кодом
+             (BindQuickExpeditionPopup) — по одной на LocationData, из
+             Templates/ExpeditionLocationCard.uxml. -->
+        <ui:VisualElement name="quick-expedition-popup" class="quick-expedition-popup">
+            <ui:Label name="quick-expedition-popup-title" text="ОТКРЫТЫЕ ЛОКАЦИИ" class="quick-expedition-popup-title" />
+            <ui:Label name="quick-expedition-order-label" text="ПРИКАЗ НА СЕГОДНЯ: нет" class="quick-expedition-order-label" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ui:UXML
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    editor-extension-mode="False">
+
+    <ui:VisualElement name="quick-expedition-card" class="quick-expedition-card">
+        <ui:Label name="quick-expedition-card-name" class="quick-expedition-card-name" />
+        <ui:VisualElement name="quick-expedition-card-row" class="quick-expedition-card-row">
+            <ui:VisualElement name="quick-expedition-card-image" picking-mode="Ignore" class="quick-expedition-card-image">
+                <ui:Label name="quick-expedition-card-image-label" picking-mode="Ignore" class="quick-expedition-card-image-label" />
+            </ui:VisualElement>
+            <ui:VisualElement name="quick-expedition-card-info" class="quick-expedition-card-info">
+                <ui:Label name="quick-expedition-card-distance" class="quick-expedition-card-distance" />
+                <ui:Label name="quick-expedition-card-threat" class="quick-expedition-card-threat" />
+                <ui:Button name="quick-expedition-card-action" class="quick-expedition-card-action" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

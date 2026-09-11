@@ -4,30 +4,27 @@ using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
+    private sealed class QuickExpeditionCardView
+    {
+        public LocationData Location;
+        public VisualElement Card;
+        public Label NameLabel;
+        public VisualElement ImageBox;
+        public Label ImageLabel;
+        public Label DistanceLabel;
+        public Label ThreatLabel;
+        public Button ActionButton;
+    }
+
     private VisualElement quickExpeditionPopup;
     private Label quickExpeditionOrderLabel;
-
-    private readonly Dictionary<string, Button> quickExpeditionImageButtons =
-        new Dictionary<string, Button>();
-    private readonly Dictionary<string, VisualElement> quickExpeditionCards =
-        new Dictionary<string, VisualElement>();
-    private readonly Dictionary<string, Label> quickExpeditionImageLabels =
-        new Dictionary<string, Label>();
-    private readonly Dictionary<string, Label> quickExpeditionNameLabels =
-        new Dictionary<string, Label>();
-    private readonly Dictionary<string, Label> quickExpeditionDistanceLabels =
-        new Dictionary<string, Label>();
-    private readonly Dictionary<string, Label> quickExpeditionThreatLabels =
-        new Dictionary<string, Label>();
-    private readonly Dictionary<string, VisualElement> bigExpeditionImages =
-        new Dictionary<string, VisualElement>();
-    private readonly Dictionary<string, Label> bigExpeditionImageLabels =
-        new Dictionary<string, Label>();
+    private readonly Dictionary<string, QuickExpeditionCardView> quickExpeditionCards =
+        new Dictionary<string, QuickExpeditionCardView>();
+    private VisualTreeAsset expeditionLocationCardTemplate;
 
     private void InitializeExpeditionViewsUi()
     {
-        CreateQuickExpeditionPopup();
-        BindLargeExpeditionImages();
+        BindQuickExpeditionPopup();
 
         VisualElement screen = interfaceRoot.Q<VisualElement>("screen");
         if (screen != null)
@@ -46,171 +43,61 @@ public partial class PrototypeUIController
         RefreshExpeditionViewState();
     }
 
-    private void CreateQuickExpeditionPopup()
+    private void BindQuickExpeditionPopup()
     {
         VisualElement screen = interfaceRoot.Q<VisualElement>("screen");
         if (screen == null)
             return;
 
         quickExpeditionPopup = screen.Q<VisualElement>("quick-expedition-popup");
-        if (quickExpeditionPopup != null)
+        quickExpeditionOrderLabel = screen.Q<Label>("quick-expedition-order-label");
+        if (quickExpeditionPopup == null || quickExpeditionOrderLabel == null)
             return;
 
-        quickExpeditionPopup = new VisualElement();
-        quickExpeditionPopup.name = "quick-expedition-popup";
-        quickExpeditionPopup.AddToClassList("quick-expedition-popup");
-        quickExpeditionPopup.style.display = DisplayStyle.None;
-
-        Label title = new Label("ЭКСПЕДИЦИИ");
-        title.style.height = 19;
-        title.style.marginBottom = 4;
-        title.style.fontSize = 12;
-        title.style.unityFontStyleAndWeight = FontStyle.Bold;
-        title.style.color = ExpeditionRgb(222, 184, 107);
-        quickExpeditionPopup.Add(title);
-
-        quickExpeditionOrderLabel = new Label("ПРИКАЗ НА СЕГОДНЯ: нет");
-        quickExpeditionOrderLabel.style.height = 17;
-        quickExpeditionOrderLabel.style.marginBottom = 5;
-        quickExpeditionOrderLabel.style.fontSize = 9;
-        quickExpeditionOrderLabel.style.color = ExpeditionRgb(187, 186, 178);
-        quickExpeditionPopup.Add(quickExpeditionOrderLabel);
+        VisualTreeAsset template = LoadExpeditionLocationCardTemplate();
+        if (template == null)
+            return;
 
         foreach (LocationData location in gameState.Locations)
-            quickExpeditionPopup.Add(CreateQuickLocationCard(location));
-
-        screen.Add(quickExpeditionPopup);
-        quickExpeditionPopup.BringToFront();
-    }
-
-    private VisualElement CreateQuickLocationCard(LocationData location)
-    {
-        VisualElement card = new VisualElement();
-        quickExpeditionCards[location.Id] = card;
-        card.style.display = location.IsVisibleOnMap
-            ? DisplayStyle.Flex
-            : DisplayStyle.None;
-        card.style.width = Length.Percent(100);
-        card.style.height = 82;
-        card.style.minHeight = 82;
-        card.style.maxHeight = 82;
-        card.style.marginBottom = 5;
-        card.style.paddingLeft = 7;
-        card.style.paddingRight = 7;
-        card.style.paddingTop = 5;
-        card.style.paddingBottom = 5;
-        card.style.backgroundColor = ExpeditionRgb(35, 40, 47);
-        SetExpeditionBorder(card, 1, ExpeditionRgb(65, 72, 82));
-        SetExpeditionRadius(card, 4);
-
-        Label name = new Label(location.TravelTargetName);
-        name.style.height = 16;
-        name.style.fontSize = 10;
-        name.style.unityFontStyleAndWeight = FontStyle.Bold;
-        name.style.color = ExpeditionRgb(215, 210, 197);
-        card.Add(name);
-        quickExpeditionNameLabels[location.Id] = name;
-
-        VisualElement row = new VisualElement();
-        row.style.flexGrow = 1;
-        row.style.minHeight = 0;
-        row.style.flexDirection = FlexDirection.Row;
-        row.style.alignItems = Align.Stretch;
-        card.Add(row);
-
-        Button image =
-            new Button(() => OnExpeditionLocationImageClicked(location.Id));
-        image.style.width = 142;
-        image.style.minWidth = 142;
-        image.style.maxWidth = 142;
-        image.style.height = Length.Percent(100);
-        image.style.marginRight = 8;
-        image.style.paddingLeft = 4;
-        image.style.paddingRight = 4;
-        image.style.paddingTop = 4;
-        image.style.paddingBottom = 4;
-        image.style.backgroundColor = ExpeditionRgb(27, 31, 37);
-        SetExpeditionBorder(image, 1, ExpeditionRgb(69, 77, 87));
-        SetExpeditionRadius(image, 3);
-
-        Label imageLabel = new Label("ИЗОБРАЖЕНИЕ\nНАЖАТЬ: ОТПРАВИТЬ");
-        imageLabel.style.fontSize = 8;
-        imageLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-        imageLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-        imageLabel.style.whiteSpace = WhiteSpace.Normal;
-        imageLabel.style.color = ExpeditionRgb(129, 136, 146);
-        image.Add(imageLabel);
-
-        quickExpeditionImageButtons[location.Id] = image;
-        quickExpeditionImageLabels[location.Id] = imageLabel;
-        row.Add(image);
-
-        VisualElement info = new VisualElement();
-        info.style.flexGrow = 1;
-        info.style.minWidth = 0;
-        info.style.justifyContent = Justify.Center;
-
-        Label distance = new Label(
-            ContinuousExpeditionCommands.FormatHours(
-                location.TravelHoursFromCapital));
-        distance.style.height = 16;
-        distance.style.fontSize = 9;
-        distance.style.color = ExpeditionRgb(180, 178, 169);
-        info.Add(distance);
-        quickExpeditionDistanceLabels[location.Id] = distance;
-
-        Label threat = new Label(
-            location.IsDiscovered
-                ? "Угроза: " + location.Threat
-                : "Угроза: неизвестна");
-        threat.style.height = 16;
-        threat.style.fontSize = 9;
-        threat.style.color = location.IsDiscovered
-            ? ThreatColor(location.Threat)
-            : ExpeditionRgb(129, 136, 146);
-        info.Add(threat);
-        quickExpeditionThreatLabels[location.Id] = threat;
-        row.Add(info);
-        return card;
-    }
-
-    private void BindLargeExpeditionImages()
-    {
-        bigExpeditionImages.Clear();
-        bigExpeditionImageLabels.Clear();
-        List<VisualElement> cards = new List<VisualElement>();
-        expeditionsScreen.Query<VisualElement>(className: "location-card")
-            .ForEach(card => cards.Add(card));
-
-        foreach (VisualElement card in cards)
         {
-            Label nameLabel = card.Q<Label>(className: "location-name");
-            if (nameLabel == null)
-                continue;
+            TemplateContainer instance = template.Instantiate();
 
-            LocationData location = FindLocationByName(nameLabel.text);
-            if (location == null)
-                continue;
-
-            VisualElement image =
-                card.Q<VisualElement>(className: "location-image-placeholder");
-            Label imageLabel =
-                card.Q<Label>(className: "location-image-placeholder-text");
-            if (image == null || imageLabel == null)
-                continue;
+            VisualElement card = instance.Q<VisualElement>("quick-expedition-card");
+            Label name = instance.Q<Label>("quick-expedition-card-name");
+            VisualElement image = instance.Q<VisualElement>("quick-expedition-card-image");
+            Label imageLabel = instance.Q<Label>("quick-expedition-card-image-label");
+            Label distance = instance.Q<Label>("quick-expedition-card-distance");
+            Label threat = instance.Q<Label>("quick-expedition-card-threat");
+            Button action = instance.Q<Button>("quick-expedition-card-action");
 
             string capturedId = location.Id;
-            image.RegisterCallback<PointerUpEvent>(evt =>
-            {
-                if (evt.button != 0)
-                    return;
-                OnExpeditionLocationImageClicked(capturedId);
-                evt.StopPropagation();
-            });
+            if (action != null)
+                action.clicked += () => OnQuickLocationActionClicked(capturedId);
 
-            bigExpeditionImages[location.Id] = image;
-            bigExpeditionImageLabels[location.Id] = imageLabel;
+            quickExpeditionPopup.Add(instance);
+            quickExpeditionCards[location.Id] = new QuickExpeditionCardView
+            {
+                Location = location,
+                Card = card,
+                NameLabel = name,
+                ImageBox = image,
+                ImageLabel = imageLabel,
+                DistanceLabel = distance,
+                ThreatLabel = threat,
+                ActionButton = action
+            };
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Шаблоны (Assets/_Project/UI/Templates) — раздел 19 UI_ARCHITECTURE.md.
+    // ------------------------------------------------------------------
+
+    private VisualTreeAsset LoadExpeditionLocationCardTemplate()
+    {
+        if (expeditionLocationCardTemplate == null)
+            expeditionLocationCardTemplate = Resources.Load<VisualTreeAsset>("Templates/ExpeditionLocationCard");
+        return expeditionLocationCardTemplate;
     }
 
     private void ToggleQuickExpeditionPopup()
@@ -294,32 +181,12 @@ public partial class PrototypeUIController
         return false;
     }
 
-    private void OnExpeditionLocationImageClicked(string locationId)
-    {
-        if (isGameOver || gameState == null)
-            return;
-
-        if (!gameState.HasActiveExpedition)
-        {
-            TrySendExpeditionFromStableUi(locationId);
-            return;
-        }
-
-        bool sameTarget =
-            gameState.ActiveExpedition != null &&
-            gameState.ActiveExpedition.LocationId == locationId;
-
-        if (sameTarget && gameState.CanCancelPreparedExpedition)
-            OnStableExpeditionActionClicked();
-    }
-
     private void RefreshExpeditionViewState()
     {
         if (gameState == null)
             return;
         RefreshPersistentCommanderExpeditionStatus();
         RefreshQuickExpeditionStatus();
-        RefreshLargeExpeditionImages();
     }
 
     private void RefreshPersistentCommanderExpeditionStatus()
@@ -395,122 +262,177 @@ public partial class PrototypeUIController
                 : "ЭКСПЕДИЦИЯ: " + GetShortExpeditionState() + " → " + locationName;
         }
 
+        bool hasExpedition = gameState.HasActiveExpedition;
+        bool blockedByDecision = gameState.HasPendingExpeditionDecision;
+        bool blockedByResearch =
+            hasExpedition && gameState.ActiveExpedition.IsLocationResearchInProgress;
+
         foreach (LocationData location in gameState.Locations)
         {
-            Button button;
-            Label label;
-            Label name;
-            Label distance;
-            Label threat;
-            VisualElement card;
+            QuickExpeditionCardView view;
+            if (!quickExpeditionCards.TryGetValue(location.Id, out view))
+                continue;
 
-            if (quickExpeditionCards.TryGetValue(location.Id, out card))
-                card.style.display = location.IsVisibleOnMap
+            if (view.Card != null)
+                view.Card.style.display = location.IsVisibleOnMap
                     ? DisplayStyle.Flex
                     : DisplayStyle.None;
 
-            if (quickExpeditionNameLabels.TryGetValue(location.Id, out name))
-                name.text = location.TravelTargetName;
+            if (view.NameLabel != null)
+                view.NameLabel.text = location.TravelTargetName;
 
-            if (quickExpeditionDistanceLabels.TryGetValue(
-                    location.Id,
-                    out distance))
-            {
-                distance.text = ContinuousExpeditionCommands.FormatHours(
+            if (view.DistanceLabel != null)
+                view.DistanceLabel.text = ContinuousExpeditionCommands.FormatHours(
                     location.TravelHoursFromCapital);
-            }
 
-            if (quickExpeditionThreatLabels.TryGetValue(
-                    location.Id,
-                    out threat))
+            if (view.ThreatLabel != null)
             {
-                threat.text = location.IsDiscovered
+                view.ThreatLabel.text = location.IsDiscovered
                     ? "Угроза: " + location.Threat
                     : "Угроза: неизвестна";
-                threat.style.color = location.IsDiscovered
+                view.ThreatLabel.style.color = location.IsDiscovered
                     ? ThreatColor(location.Threat)
                     : ExpeditionRgb(129, 136, 146);
             }
 
-            if (quickExpeditionImageButtons.TryGetValue(location.Id, out button) &&
-                quickExpeditionImageLabels.TryGetValue(location.Id, out label))
-                ApplyExpeditionImageState(location, button, label);
+            ApplyExpeditionImageState(view);
+            ApplyQuickLocationActionButtonState(
+                view, hasExpedition, blockedByDecision, blockedByResearch);
         }
     }
 
-    private void RefreshLargeExpeditionImages()
+    // Раньше 4 состояния картинки (доступно/выбрано-отменяемо/цель/
+    // недоступно) выражались прямыми style.* поверх Button — теперь это
+    // модификаторы класса из Expedition.uss на некликабельном VisualElement
+    // (UI-M06: клик по картинке заменён отдельной кнопкой-действием, см.
+    // ApplyQuickLocationActionButtonState). "Доступно" — базовый вид
+    // .quick-expedition-card-image, отдельного модификатора не требует.
+    private void ApplyExpeditionImageState(QuickExpeditionCardView view)
     {
-        foreach (LocationData location in gameState.Locations)
-        {
-            VisualElement image;
-            Label label;
-            if (bigExpeditionImages.TryGetValue(location.Id, out image) &&
-                bigExpeditionImageLabels.TryGetValue(location.Id, out label))
-                ApplyExpeditionImageState(location, image, label);
-        }
-    }
+        if (view.ImageBox == null)
+            return;
 
-    private void ApplyExpeditionImageState(
-        LocationData location,
-        VisualElement image,
-        Label label)
-    {
-        string locationId = location.Id;
+        LocationData location = view.Location;
         bool hasExpedition = gameState.HasActiveExpedition;
         bool isTarget = hasExpedition &&
-            gameState.ActiveExpedition.LocationId == locationId;
+            gameState.ActiveExpedition.LocationId == location.Id;
         bool cancellable = isTarget && gameState.CanCancelPreparedExpedition;
+
+        view.ImageBox.RemoveFromClassList("quick-expedition-card-image--selected-cancellable");
+        view.ImageBox.RemoveFromClassList("quick-expedition-card-image--active-target");
+        view.ImageBox.RemoveFromClassList("quick-expedition-card-image--unavailable");
+
+        if (hasExpedition)
+        {
+            if (cancellable)
+                view.ImageBox.AddToClassList("quick-expedition-card-image--selected-cancellable");
+            else if (isTarget)
+                view.ImageBox.AddToClassList("quick-expedition-card-image--active-target");
+            else
+                view.ImageBox.AddToClassList("quick-expedition-card-image--unavailable");
+        }
+
+        if (view.ImageLabel != null)
+        {
+            view.ImageLabel.text = location.IsDiscovered
+                ? "ИЗОБРАЖЕНИЕ\nЛОКАЦИИ"
+                : "НЕИЗВЕДАННАЯ\nОБЛАСТЬ";
+        }
+    }
+
+    private void ApplyQuickLocationActionButtonState(
+        QuickExpeditionCardView view,
+        bool hasExpedition,
+        bool blockedByDecision,
+        bool blockedByResearch)
+    {
+        Button button = view.ActionButton;
+        if (button == null)
+            return;
+
+        if (isGameOver)
+        {
+            button.text = "НЕДОСТУПНО";
+            button.SetEnabled(false);
+            return;
+        }
 
         if (!hasExpedition)
         {
-            image.SetEnabled(true);
-            image.style.backgroundColor = ExpeditionRgb(28, 32, 38);
-            SetExpeditionBorder(image, 1, ExpeditionRgb(73, 81, 91));
-            label.text = location.IsDiscovered
-                ? "ИЗОБРАЖЕНИЕ ЛОКАЦИИ\nНАЖАТЬ: ОТПРАВИТЬ"
-                : "НЕИЗВЕДАННАЯ ОБЛАСТЬ\nНАЖАТЬ: ОТПРАВИТЬ";
-            label.style.color = ExpeditionRgb(134, 141, 151);
+            button.text = "ОТПРАВИТЬ";
+            button.tooltip = "Отправить героя (и выбранных бойцов) к этой локации.";
+            button.SetEnabled(true);
             return;
         }
 
-        if (cancellable)
+        if (blockedByDecision || blockedByResearch)
         {
-            image.SetEnabled(true);
-            image.style.backgroundColor = ExpeditionRgb(58, 50, 36);
-            SetExpeditionBorder(image, 2, ExpeditionRgb(205, 163, 83));
-            label.text = "ВЫБРАНО\nНАЖАТЬ ЕЩЁ РАЗ: ОТМЕНИТЬ";
-            label.style.color = ExpeditionRgb(230, 194, 120);
+            button.text = "НЕДОСТУПНО";
+            button.tooltip = blockedByDecision
+                ? "Сначала примите обязательное решение."
+                : "Нельзя менять маршрут во время исследования.";
+            button.SetEnabled(false);
             return;
         }
 
-        if (isTarget)
+        ExpeditionData expedition = gameState.ActiveExpedition;
+        bool locationIsCurrentTarget =
+            expedition.Phase != CommanderState.ReturningToCastle &&
+            !expedition.IsScoutingTarget &&
+            expedition.LocationId == view.Location.Id;
+
+        if (locationIsCurrentTarget)
         {
-            image.SetEnabled(false);
-            image.style.backgroundColor = ExpeditionRgb(38, 55, 47);
-            SetExpeditionBorder(image, 2, ExpeditionRgb(92, 137, 108));
-            label.text = GetTargetImageStateText();
-            label.style.color = ExpeditionRgb(171, 205, 181);
+            button.text = "ТЕКУЩАЯ ЦЕЛЬ";
+            button.tooltip = "Армия уже направляется сюда или находится здесь.";
+            button.SetEnabled(false);
             return;
         }
 
-        image.SetEnabled(false);
-        image.style.backgroundColor = ExpeditionRgb(31, 34, 39);
-        SetExpeditionBorder(image, 1, ExpeditionRgb(55, 60, 68));
-        label.text = "НЕДОСТУПНО\nИДЁТ ДРУГАЯ ЭКСПЕДИЦИЯ";
-        label.style.color = ExpeditionRgb(102, 107, 114);
+        button.text = gameState.CanCancelPreparedExpedition
+            ? "ИЗМЕНИТЬ ЦЕЛЬ"
+            : "ИЗМЕНИТЬ МАРШРУТ";
+        button.tooltip = "Построить новый прямой маршрут от текущей позиции армии.";
+        button.SetEnabled(true);
     }
 
-    private string GetTargetImageStateText()
+    private void OnQuickLocationActionClicked(string locationId)
     {
-        if (!gameState.HasActiveExpedition)
-            return "ИЗОБРАЖЕНИЕ ЛОКАЦИИ";
-        switch (gameState.ActiveExpedition.Phase)
+        if (isGameOver || gameState == null)
+            return;
+
+        LocationData location = gameState.FindLocation(locationId);
+        if (location == null || !location.IsVisibleOnMap || location.IsWaypoint)
+            return;
+
+        if (gameState.HasActiveExpedition)
         {
-            case CommanderState.TravellingToLocation: return "В ПУТИ";
-            case CommanderState.AtLocation: return "В ЛОКАЦИИ";
-            case CommanderState.ReturningToCastle: return "ВОЗВРАЩАЕТСЯ";
-            default: return "ЭКСПЕДИЦИЯ";
+            if (gameState.HasPendingExpeditionDecision)
+            {
+                AddReport("Сначала требуется принять обязательное решение.");
+                return;
+            }
+
+            if (gameState.ActiveExpedition.IsLocationResearchInProgress)
+            {
+                AddReport("Нельзя менять маршрут во время исследования локации.");
+                return;
+            }
+
+            bool alreadyTarget =
+                gameState.ActiveExpedition.Phase != CommanderState.ReturningToCastle &&
+                !gameState.ActiveExpedition.IsScoutingTarget &&
+                gameState.ActiveExpedition.LocationId == location.Id;
+            if (alreadyTarget)
+                return;
         }
+
+        IssueImmediateMapOrder(
+            location.MapXPercent,
+            location.MapYPercent,
+            location.Id);
+        HideQuickExpeditionPopup();
+        RefreshQuickExpeditionStatus();
     }
 
     private string GetShortExpeditionState()
@@ -526,18 +448,6 @@ public partial class PrototypeUIController
         }
     }
 
-    private LocationData FindLocationByName(string locationName)
-    {
-        if (gameState == null || string.IsNullOrEmpty(locationName))
-            return null;
-        foreach (LocationData location in gameState.Locations)
-        {
-            if (location.Name == locationName)
-                return location;
-        }
-        return null;
-    }
-
     private static Color ThreatColor(string threat)
     {
         if (threat == "низкая") return ExpeditionRgb(133, 185, 147);
@@ -549,34 +459,5 @@ public partial class PrototypeUIController
     private static Color ExpeditionRgb(byte r, byte g, byte b)
     {
         return new Color32(r, g, b, 255);
-    }
-
-    private static void SetExpeditionBorder(
-        VisualElement element,
-        float width,
-        Color color)
-    {
-        if (element == null)
-            return;
-        element.style.borderLeftWidth = width;
-        element.style.borderRightWidth = width;
-        element.style.borderTopWidth = width;
-        element.style.borderBottomWidth = width;
-        element.style.borderLeftColor = color;
-        element.style.borderRightColor = color;
-        element.style.borderTopColor = color;
-        element.style.borderBottomColor = color;
-    }
-
-    private static void SetExpeditionRadius(
-        VisualElement element,
-        float radius)
-    {
-        if (element == null)
-            return;
-        element.style.borderTopLeftRadius = radius;
-        element.style.borderTopRightRadius = radius;
-        element.style.borderBottomLeftRadius = radius;
-        element.style.borderBottomRightRadius = radius;
     }
 }

@@ -133,30 +133,6 @@ public partial class PrototypeUIController
             .ExecuteLater(1);
     }
 
-    private void TrySendExpeditionFromStableUi(string locationId)
-    {
-        if (isGameOver)
-            return;
-
-        string resultMessage;
-        List<string> selectedIds = GetSelectedFighterIdsInArmyOrder();
-        bool started =
-            gameState.TryStartExpedition(locationId, selectedIds, out resultMessage);
-
-        if (started)
-        {
-            CommanderData commander =
-                gameState.FindCommander(gameState.ActiveExpedition.CommanderId);
-
-            // Приказ уже существует, но мир ещё не продвинулся.
-            if (commander != null)
-                commander.State = CommanderState.InCastle;
-        }
-
-        AddReport(resultMessage);
-        RefreshStableUiAfterStateChange();
-    }
-
     private void OnStableResearchExpeditionClicked()
     {
         if (isGameOver)

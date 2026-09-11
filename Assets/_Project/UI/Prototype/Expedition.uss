@@ -1,0 +1,168 @@
+/* ================================================================
+   БЫСТРЫЙ ПОПАП ЭКСПЕДИЦИЙ (UI-M06) — quick-expedition-popup
+   Коробка попапа (.quick-expedition-popup) — Prototype_Shell.uss.
+   ================================================================ */
+
+.quick-expedition-popup-title {
+    height: 19px;
+    margin-bottom: 4px;
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(222, 184, 107);
+}
+
+.quick-expedition-order-label {
+    height: 17px;
+    margin-bottom: 5px;
+    font-size: 9px;
+    color: rgb(187, 186, 178);
+}
+
+.quick-expedition-card {
+    width: 100%;
+    height: 82px;
+    min-height: 82px;
+    max-height: 82px;
+    margin-bottom: 5px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: rgb(35, 40, 47);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(65, 72, 82);
+    border-right-color: rgb(65, 72, 82);
+    border-top-color: rgb(65, 72, 82);
+    border-bottom-color: rgb(65, 72, 82);
+    border-radius: 4px;
+}
+
+.quick-expedition-card-name {
+    height: 16px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: rgb(215, 210, 197);
+}
+
+.quick-expedition-card-row {
+    flex-grow: 1;
+    min-height: 0;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+/* Состояние "доступно" (нет активной экспедиции) — базовый вид ниже,
+   отдельного модификатора не требует. */
+.quick-expedition-card-image {
+    width: 142px;
+    min-width: 142px;
+    max-width: 142px;
+    height: 100%;
+    margin-right: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(28, 32, 38);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(73, 81, 91);
+    border-right-color: rgb(73, 81, 91);
+    border-top-color: rgb(73, 81, 91);
+    border-bottom-color: rgb(73, 81, 91);
+    border-radius: 3px;
+}
+
+/* Эта локация выбрана целью и приказ ещё можно отменить. */
+.quick-expedition-card-image--selected-cancellable {
+    background-color: rgb(58, 50, 36);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(205, 163, 83);
+    border-right-color: rgb(205, 163, 83);
+    border-top-color: rgb(205, 163, 83);
+    border-bottom-color: rgb(205, 163, 83);
+}
+
+/* Эта локация — цель экспедиции, уже в пути/на месте/возвращается. */
+.quick-expedition-card-image--active-target {
+    background-color: rgb(38, 55, 47);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(92, 137, 108);
+    border-right-color: rgb(92, 137, 108);
+    border-top-color: rgb(92, 137, 108);
+    border-bottom-color: rgb(92, 137, 108);
+}
+
+/* Экспедиция активна, но идёт не сюда. */
+.quick-expedition-card-image--unavailable {
+    background-color: rgb(31, 34, 39);
+    border-left-color: rgb(55, 60, 68);
+    border-right-color: rgb(55, 60, 68);
+    border-top-color: rgb(55, 60, 68);
+    border-bottom-color: rgb(55, 60, 68);
+}
+
+.quick-expedition-card-image-label {
+    font-size: 8px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    color: rgb(129, 136, 146);
+}
+
+.quick-expedition-card-info {
+    flex-grow: 1;
+    min-width: 0;
+    justify-content: center;
+}
+
+.quick-expedition-card-distance {
+    height: 16px;
+    font-size: 9px;
+    color: rgb(180, 178, 169);
+}
+
+.quick-expedition-card-threat {
+    height: 16px;
+    font-size: 9px;
+    color: rgb(180, 178, 169);
+}
+
+.quick-expedition-card-action {
+    height: 22px;
+    min-height: 22px;
+    margin-top: 2px;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+    font-size: 8px;
+    -unity-font-style: bold;
+    background-color: rgb(57, 50, 38);
+    color: rgb(229, 193, 116);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(112, 91, 56);
+    border-right-color: rgb(112, 91, 56);
+    border-top-color: rgb(112, 91, 56);
+    border-bottom-color: rgb(112, 91, 56);
+    border-radius: 3px;
+}

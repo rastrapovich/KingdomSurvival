@@ -48,8 +48,6 @@ public partial class PrototypeUIController
             return;
         }
 
-        EnsureWorldMapLocationCard();
-
         if (worldMapLocationCard == null ||
             worldMapLocationCardCloseButton == null)
         {
@@ -57,7 +55,7 @@ public partial class PrototypeUIController
             return;
         }
 
-        EnsureWorldMapLocationActionElements();
+        BindWorldMapLocationActionElements();
 
         markers.RegisterCallback<PointerUpEvent>(
             OnWorldMapLocationActionPointerUp,
@@ -86,45 +84,18 @@ public partial class PrototypeUIController
             .ExecuteLater(40);
     }
 
-    private void EnsureWorldMapLocationActionElements()
+    private void BindWorldMapLocationActionElements()
     {
-        if (worldMapLocationCardPresenceLabel != null ||
-            worldMapLocationCard == null)
-        {
+        if (worldMapLocationCard == null)
             return;
-        }
 
-        worldMapLocationCardPresenceLabel = new Label
-        {
-            text = "АРМИЯ НАХОДИТСЯ ЗДЕСЬ"
-        };
-        worldMapLocationCardPresenceLabel.style.color =
-            (Color)new Color32(155, 207, 155, 255);
-        worldMapLocationCardPresenceLabel.style.fontSize = 11f;
-        worldMapLocationCardPresenceLabel.style.unityFontStyleAndWeight =
-            FontStyle.Bold;
-        worldMapLocationCardPresenceLabel.style.marginBottom = 8f;
-        worldMapLocationCardPresenceLabel.style.display = DisplayStyle.None;
-
+        worldMapLocationCardPresenceLabel =
+            worldMapLocationCard.Q<Label>("world-map-location-inspection-presence");
         worldMapLocationCardResearchButton =
-            new Button(OnWorldMapLocationCardResearchClicked)
-            {
-                text = "ИССЛЕДОВАТЬ"
-            };
-        worldMapLocationCardResearchButton.style.height = 34f;
-        worldMapLocationCardResearchButton.style.marginBottom = 6f;
-        worldMapLocationCardResearchButton.style.unityFontStyleAndWeight =
-            FontStyle.Bold;
+            worldMapLocationCard.Q<Button>("world-map-location-inspection-research-button");
 
-        worldMapLocationCardCloseButton.RemoveFromHierarchy();
-        worldMapLocationCard.Add(worldMapLocationCardPresenceLabel);
-        worldMapLocationCard.Add(worldMapLocationCardResearchButton);
-        worldMapLocationCard.Add(worldMapLocationCardCloseButton);
-
-        worldMapLocationCard.style.right =
-            new StyleLength(StyleKeyword.Auto);
-        worldMapLocationCard.style.bottom =
-            new StyleLength(StyleKeyword.Auto);
+        if (worldMapLocationCardResearchButton != null)
+            worldMapLocationCardResearchButton.clicked += OnWorldMapLocationCardResearchClicked;
     }
 
     private void OnWorldMapLocationActionPointerUp(PointerUpEvent evt)

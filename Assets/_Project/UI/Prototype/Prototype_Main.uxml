@@ -108,6 +108,23 @@
                                         <ui:Label text="ОТРЯД" class="world-map-army-badge" />
                                         <ui:Label name="world-map-army-marker-label" text="" class="world-map-army-label" />
                                     </ui:VisualElement>
+                                    <!-- UI-M08: карточка осмотра локации по ПКМ на маркере — постоянный,
+                                         скрытый по умолчанию узел (display:none в
+                                         .world-map-location-inspection-card, Prototype_Exploration.uss).
+                                         Раньше её собирали по частям два разных файла:
+                                         WorldMapInteractionPolish.cs (EnsureWorldMapLocationCard —
+                                         заголовок/детали/кнопка закрытия) и WorldMapLocationActions.cs
+                                         (EnsureWorldMapLocationActionElements — метка присутствия армии/
+                                         кнопка "ИССЛЕДОВАТЬ", вставлявшиеся между ними через
+                                         RemoveFromHierarchy+Add). Оба файла теперь только биндят
+                                         Q<T>(name), порядок частей — из разметки, а не из кода. -->
+                                    <ui:VisualElement name="world-map-location-inspection-card" class="world-map-location-inspection-card">
+                                        <ui:Label name="world-map-location-inspection-title" class="world-map-location-inspection-title" />
+                                        <ui:Label name="world-map-location-inspection-details" class="world-map-location-inspection-details" />
+                                        <ui:Label name="world-map-location-inspection-presence" text="АРМИЯ НАХОДИТСЯ ЗДЕСЬ" class="world-map-location-inspection-presence" />
+                                        <ui:Button name="world-map-location-inspection-research-button" text="ИССЛЕДОВАТЬ" class="world-map-location-inspection-research-button" />
+                                        <ui:Button name="world-map-location-inspection-close-button" text="ЗАКРЫТЬ" class="world-map-location-inspection-close-button" />
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
 
                                 <ui:VisualElement name="map-selection-card" class="map-selection-card">

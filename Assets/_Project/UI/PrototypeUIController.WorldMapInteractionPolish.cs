@@ -58,7 +58,7 @@ public partial class PrototypeUIController
         RegisterMapLayoutRefreshButton("nav-expeditions-button");
         RegisterMapLayoutRefreshButton("persistent-commander-expedition-button");
 
-        EnsureWorldMapLocationCard();
+        BindWorldMapLocationCard();
         worldMapInteractionPolishInitialized = true;
         RefreshWorldMapPresentation();
     }
@@ -138,77 +138,28 @@ public partial class PrototypeUIController
         return null;
     }
 
-    private void EnsureWorldMapLocationCard()
+    private void BindWorldMapLocationCard()
     {
-        if (worldMapLocationCard != null || worldMap == null)
+        if (worldMap == null)
             return;
 
-        worldMapLocationCard = new VisualElement
-        {
-            name = "world-map-location-inspection-card"
-        };
-        worldMapLocationCard.style.position = Position.Absolute;
-        worldMapLocationCard.style.right = 14f;
-        worldMapLocationCard.style.bottom = 14f;
-        worldMapLocationCard.style.width = 300f;
-        worldMapLocationCard.style.paddingLeft = 14f;
-        worldMapLocationCard.style.paddingRight = 14f;
-        worldMapLocationCard.style.paddingTop = 12f;
-        worldMapLocationCard.style.paddingBottom = 12f;
-        worldMapLocationCard.style.backgroundColor =
-            (Color)new Color32(35, 39, 46, 248);
-        worldMapLocationCard.style.borderLeftWidth = 1f;
-        worldMapLocationCard.style.borderRightWidth = 1f;
-        worldMapLocationCard.style.borderTopWidth = 1f;
-        worldMapLocationCard.style.borderBottomWidth = 1f;
-        worldMapLocationCard.style.borderLeftColor =
-            (Color)new Color32(177, 139, 73, 255);
-        worldMapLocationCard.style.borderRightColor =
-            (Color)new Color32(93, 79, 56, 255);
-        worldMapLocationCard.style.borderTopColor =
-            (Color)new Color32(177, 139, 73, 255);
-        worldMapLocationCard.style.borderBottomColor =
-            (Color)new Color32(93, 79, 56, 255);
-        worldMapLocationCard.style.borderTopLeftRadius = 5f;
-        worldMapLocationCard.style.borderTopRightRadius = 5f;
-        worldMapLocationCard.style.borderBottomLeftRadius = 5f;
-        worldMapLocationCard.style.borderBottomRightRadius = 5f;
+        worldMapLocationCard = worldMap.Q<VisualElement>("world-map-location-inspection-card");
+        worldMapLocationCardTitle = worldMap.Q<Label>("world-map-location-inspection-title");
+        worldMapLocationCardDetails = worldMap.Q<Label>("world-map-location-inspection-details");
+        worldMapLocationCardCloseButton = worldMap.Q<Button>("world-map-location-inspection-close-button");
 
-        worldMapLocationCardTitle = new Label();
-        worldMapLocationCardTitle.style.color =
-            (Color)new Color32(235, 194, 104, 255);
-        worldMapLocationCardTitle.style.fontSize = 14f;
-        worldMapLocationCardTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
-        worldMapLocationCardTitle.style.whiteSpace = WhiteSpace.Normal;
-        worldMapLocationCardTitle.style.marginBottom = 7f;
-
-        worldMapLocationCardDetails = new Label();
-        worldMapLocationCardDetails.style.color =
-            (Color)new Color32(207, 201, 184, 255);
-        worldMapLocationCardDetails.style.fontSize = 11f;
-        worldMapLocationCardDetails.style.whiteSpace = WhiteSpace.Normal;
-        worldMapLocationCardDetails.style.marginBottom = 10f;
-
-        worldMapLocationCardCloseButton = new Button(HideWorldMapLocationCard)
-        {
-            text = "ЗАКРЫТЬ"
-        };
-        worldMapLocationCardCloseButton.style.height = 32f;
-        worldMapLocationCardCloseButton.style.unityFontStyleAndWeight =
-            FontStyle.Bold;
-
-        worldMapLocationCard.Add(worldMapLocationCardTitle);
-        worldMapLocationCard.Add(worldMapLocationCardDetails);
-        worldMapLocationCard.Add(worldMapLocationCardCloseButton);
-        worldMap.Add(worldMapLocationCard);
-        HideWorldMapLocationCard();
+        if (worldMapLocationCardCloseButton != null)
+            worldMapLocationCardCloseButton.clicked += HideWorldMapLocationCard;
     }
 
     private void ShowWorldMapLocationCard(LocationData location)
     {
-        EnsureWorldMapLocationCard();
-        if (worldMapLocationCard == null)
+        if (worldMapLocationCard == null ||
+            worldMapLocationCardTitle == null ||
+            worldMapLocationCardDetails == null)
+        {
             return;
+        }
 
         string researchText = location.ExplorationHours > 0
             ? "Исследование: " +

@@ -460,3 +460,61 @@
 .map-send-button:disabled {
     opacity: 0.48;
 }
+
+/* UI-M08: карточка осмотра локации по ПКМ на маркере мира. */
+
+.world-map-location-inspection-card {
+    display: none;
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    width: 300px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background-color: rgba(35, 39, 46, 0.97);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(177, 139, 73);
+    border-right-color: rgb(93, 79, 56);
+    border-top-color: rgb(177, 139, 73);
+    border-bottom-color: rgb(93, 79, 56);
+    border-radius: 5px;
+}
+
+.world-map-location-inspection-title {
+    margin-bottom: 7px;
+    color: rgb(235, 194, 104);
+    font-size: 14px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.world-map-location-inspection-details {
+    margin-bottom: 10px;
+    color: rgb(207, 201, 184);
+    font-size: 11px;
+    white-space: normal;
+}
+
+.world-map-location-inspection-presence {
+    display: none;
+    margin-bottom: 8px;
+    color: rgb(155, 207, 155);
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+.world-map-location-inspection-research-button {
+    height: 34px;
+    margin-bottom: 6px;
+    -unity-font-style: bold;
+}
+
+.world-map-location-inspection-close-button {
+    height: 32px;
+    -unity-font-style: bold;
+}

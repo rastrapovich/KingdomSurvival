@@ -78,9 +78,9 @@ MonoBehaviour:
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
-  - id: ford_witness
-    displayName: "\u0421\u0432\u0438\u0434\u0435\u0442\u0435\u043B\u044C \u0443 \u0431\u0440\u043E\u0434\u0430"
-    role: "\u0420\u0435\u0431\u0451\u043D\u043E\u043A \u0414\u043E\u043C\u0430"
+  - id: ford_woman
+    displayName: "\u0416\u0435\u043D\u0449\u0438\u043D\u0430 \u0443 \u0431\u0440\u043E\u0434\u0430"
+    role: "\u0421\u043C\u043E\u0442\u0440\u0438\u0442 \u0437\u0430 \u043D\u0438\u0436\u043D\u0438\u043C \u0431\u0440\u043E\u0434\u043E\u043C"
     portrait: {fileID: 0}
     overridePortraitFraming: 0
     portraitScale: 1
@@ -9093,15 +9093,15 @@ MonoBehaviour:
           Combinator: 0
           Conditions:
           - Type: 12
-            StringParam: 
-            QualityParam: 0
-            IntParam: 1
-            Negate: 0
-          - Type: 12
-            StringParam: 
+            StringParam:
             QualityParam: 0
             IntParam: 2
-            Negate: 1
+            Negate: 0
+          - Type: 13
+            StringParam:
+            QualityParam: 0
+            IntParam: 2
+            Negate: 0
         unavailablePresentation: 0
         check:
           CheckId: 
@@ -9128,9 +9128,9 @@ MonoBehaviour:
           Combinator: 0
           Conditions:
           - Type: 12
-            StringParam: 
+            StringParam:
             QualityParam: 0
-            IntParam: 2
+            IntParam: 3
             Negate: 0
         unavailablePresentation: 0
         check:
@@ -9682,57 +9682,486 @@ MonoBehaviour:
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_12_old_ford
-    title: "N12 \u2014 \u0421\u0442\u0430\u0440\u044B\u0439 \u0431\u0440\u043E\u0434
-      / \u0416\u0435\u043D\u0449\u0438\u043D\u0430 \u0443 \u0431\u0440\u043E\u0434\u0430"
+    title: "N12 \u2014 \u0421\u0442\u0430\u0440\u044B\u0439 \u0431\u0440\u043E\u0434 / \u0416\u0435\u043D\u0449\u0438\u043D\u0430 \u0443 \u0431\u0440\u043E\u0434\u0430"
     category: 1
     status: 1
-    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
-      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
-      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
-      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
-      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
+    developerComment: "P10-T01 production-\u0441\u0446\u0435\u043D\u0430. \u041C\u0430\u0442\u0435\u0440\u0438\u0430\u043B\u044C\u043D\u044B\u0439 \u0444\u0430\u043A\u0442 \u0431\u0440\u043E\u0434\u0430 \u043D\u0435
+      \u0437\u0430\u0432\u0438\u0441\u0438\u0442 \u043E\u0442 \u0443\u0441\u043B\u043E\u0432\u0438\u0439 (chapter01.node.12_main). \u0420\u0435\u0430\u043A\u0442\u0438\u0432\u043D\u044B\u0435 \u0431\u043B\u043E\u043A\u0438 \u0447\u0438\u0442\u0430\u044E\u0442
+      RepairOld/RepairNew/ItemPresent(SevenToothGauge)/KnowledgeKnown(OldCustom,
+      OldSeventhChannel, WaterFlowIsWrong)/PartySizeAtMost(2)/PartySizeAtLeast(4)
+      \u043D\u0430\u043F\u0440\u044F\u043C\u0443\u044E \u0438\u0437 \u043C\u0438\u0440\u0430 \u2014 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u044B\u0445 n12_* \u0444\u043B\u0430\u0433\u043E\u0432 \u043F\u043E\u0434 \u043D\u0438\u0445 \u043D\u0435 \u0441\u043E\u0437\u0434\u0430\u043D\u043E.
+      DrownedWomanStory \u0434\u0430\u0451\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0435\u0441\u043B\u0438 \u0438\u0433\u0440\u043E\u043A \u0440\u0435\u0430\u043B\u044C\u043D\u043E \u0434\u043E\u0448\u0451\u043B \u0434\u043E \u0438\u0441\u0442\u043E\u0440\u0438\u0438
+      (chapter01.node.12.talk_story). \u0421\u0432\u0435\u0440\u0445\u044A\u0435\u0441\u0442\u0435\u0441\u0442\u0432\u0435\u043D\u043D\u0430\u044F \u043F\u0440\u0438\u0440\u043E\u0434\u0430 \u0438\u0441\u0442\u043E\u0440\u0438\u0438 \u043D\u0435
+      \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0430\u0435\u0442\u0441\u044F: \u0442\u043E\u043B\u044C\u043A\u043E \u0447\u0435\u043B\u043E\u0432\u0435\u0447\u0435\u0441\u043A\u043E\u0435 \u0441\u0432\u0438\u0434\u0435\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u043E. FordWomanHelped \u2014
+      \u0435\u0434\u0438\u043D\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0435 \u044D\u0445\u043E \u044D\u0442\u043E\u0439 \u0441\u0446\u0435\u043D\u044B \u0432 N13."
     startNodeId: chapter01.node.12
     tags:
     - "\u0433\u043B\u0430\u0432\u043001"
-    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
+    - "production"
     nodes:
     - id: chapter01.node.12
-      speakerId: ford_witness
-      text: 
+      speakerId: narrator
+      text:
       textBlocks:
       - blockId: chapter01.node.12_main
         kind: 0
-        speakerIdOverride: 
-        text: "\u0423 \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u0431\u0440\u043E\u0434\u0430
-          \u0438\u0437 \u0432\u043E\u0434\u044B \u0442\u043E\u0440\u0447\u0438\u0442
-          \u0440\u044F\u0434 \u0433\u043D\u0438\u043B\u044B\u0445 \u043A\u043E\u043B\u044C\u0435\u0432.
-          \u0420\u0435\u0431\u0451\u043D\u043E\u043A-\u0441\u0432\u0438\u0434\u0435\u0442\u0435\u043B\u044C
-          \u0443\u0432\u0435\u0440\u044F\u0435\u0442: \u0437\u0434\u0435\u0441\u044C
-          \u0443 \u0432\u043E\u0434\u044B \u0432\u0438\u0434\u0435\u043B\u0438 \u0436\u0435\u043D\u0449\u0438\u043D\u0443,
-          \u0435\u0449\u0451 \u0434\u043E \u043F\u0430\u0432\u043E\u0434\u043A\u0430."
+        speakerIdOverride:
+        text: "\u0421\u0442\u0430\u0440\u044B\u0439 \u0431\u0440\u043E\u0434 \u043D\u0435 \u0440\u0430\u0437\u0440\u0443\u0448\u0435\u043D \u043F\u0430\u0432\u043E\u0434\u043A\u043E\u043C \u2014 \u043E\u043D \u0438 \u0440\u0430\u043D\u044C\u0448\u0435 \u043D\u0435 \u0431\u044B\u043B \u043F\u043E\u0445\u043E\u0436
+          \u043D\u0430 \u043E\u0431\u044B\u0447\u043D\u044B\u0439 \u0431\u0435\u0440\u0435\u0433. \u0420\u044F\u0434 \u043F\u043E\u0434\u0433\u043D\u0438\u0432\u0448\u0438\u0445 \u043A\u043E\u043B\u044C\u0435\u0432 \u0443\u0445\u043E\u0434\u0438\u0442 \u0432 \u0432\u043E\u0434\u0443 \u0434\u0432\u0443\u043C\u044F
+          \u0440\u043E\u0432\u043D\u044B\u043C\u0438 \u043B\u0438\u043D\u0438\u044F\u043C\u0438, \u0430 \u043C\u0435\u0436\u0434\u0443 \u043D\u0438\u043C\u0438 \u0434\u043E \u0441\u0438\u0445 \u043F\u043E\u0440 \u0434\u0435\u0440\u0436\u0438\u0442\u0441\u044F \u0434\u0435\u0440\u0435\u0432\u044F\u043D\u043D\u044B\u0439
+          \u0449\u0438\u0442, \u0432\u043A\u043E\u043F\u0430\u043D\u043D\u044B\u0439 \u043D\u0430\u043F\u0435\u0440\u0435\u043A\u043E\u0441 \u0442\u0435\u0447\u0435\u043D\u0438\u044E. \u042D\u0442\u043E \u043D\u0435 \u043F\u0440\u0438\u0440\u043E\u0434\u0430. \u0417\u0434\u0435\u0441\u044C \u0440\u0430\u0431\u043E\u0442\u0430\u043B\u0438
+          \u0440\u0443\u043A\u0430\u043C\u0438, \u0438 \u0440\u0430\u0431\u043E\u0442\u0430\u043B\u0438 \u043D\u0435 \u043E\u0434\u0438\u043D \u0433\u043E\u0434."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: 
+          CheckId:
           Kind: 0
           Quality: 0
-          CompetencyId: 
+          CompetencyId:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-        - EffectExecutionId: chapter01.effect.n12_flag1
+        - EffectExecutionId: chapter01.effect.n12_flag_old_ford
           Type: 0
           StringParam: chapter01.flag.old_ford_found
           IntParam: 0
-        - EffectExecutionId: chapter01.effect.n12_knowledge1
+        - EffectExecutionId: chapter01.effect.n12_knowledge_old_ford
           Type: 2
           StringParam: chapter01.knowledge.old_ford
           IntParam: 0
+      - blockId: chapter01.node.12_water_wrong
+        kind: 1
+        speakerIdOverride:
+        text: "\u0422\u0430\u043C, \u0433\u0434\u0435 \u0449\u0438\u0442 \u0434\u0435\u0440\u0436\u0438\u0442 \u0432\u043E\u0434\u0443, \u0442\u0435\u0447\u0435\u043D\u0438\u0435 \u0432\u0435\u0434\u0451\u0442 \u0441\u0435\u0431\u044F \u0442\u0438\u0448\u0435, \u0447\u0435\u043C
+          \u0434\u043E\u043B\u0436\u043D\u043E \u043F\u0440\u0438 \u0442\u0430\u043A\u043E\u043C \u0443\u0440\u043E\u0432\u043D\u0435 \u2014 \u0442\u0430\u043A \u0436\u0435 \u043D\u0435\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E, \u043A\u0430\u043A \u0438 \u0432\u0441\u044E\u0434\u0443
+          \u0432 \u044D\u0442\u0438 \u0434\u043D\u0438, \u0442\u043E\u043B\u044C\u043A\u043E \u0437\u0434\u0435\u0441\u044C \u0437\u0430\u043C\u0435\u0442\u043D\u0435\u0435."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 1
+            StringParam: chapter01.knowledge.water_flow_is_wrong
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
       choices:
-      - text: "\u041E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u0431\u0440\u043E\u0434."
-        nextNodeId: 
+      - text: "\u041F\u043E\u0434\u043E\u0439\u0442\u0438 \u0431\u043B\u0438\u0436\u0435."
+        nextNodeId: chapter01.node.12.woman
+        endsDialogue: 0
+        choiceId: chapter01.node.12_to_woman
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.12.woman
+      speakerId: ford_woman
+      text:
+      textBlocks:
+      - blockId: chapter01.node.12.woman_arrival
+        kind: 5
+        speakerIdOverride:
+        text: "\u0423 \u0432\u043E\u0434\u044B, \u043F\u043E \u043A\u043E\u043B\u0435\u043D\u043E \u0432 \u0438\u043B\u0435, \u0436\u0435\u043D\u0449\u0438\u043D\u0430 \u0447\u0438\u043D\u0438\u0442 \u0441\u0442\u0430\u0440\u0443\u044E \u0441\u0435\u0442\u044C \u2014
+          \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u044F \u0431\u044B\u0441\u0442\u0440\u044B\u0435, \u043F\u0440\u0438\u0432\u044B\u0447\u043D\u044B\u0435, \u043D\u0435 \u0434\u043B\u044F \u0433\u043E\u0441\u0442\u0435\u0439. \u0413\u043E\u043B\u043E\u0432\u0443 \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u0435\u0442
+          \u043D\u0435 \u0441\u0440\u0430\u0437\u0443: \u043F\u043E\u0445\u043E\u0436\u0435, \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u044B\u0432\u0430\u0435\u0442, \u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0435\u0449\u0451 \u043C\u043E\u0436\u043D\u043E \u043D\u0435 \u0437\u0430\u043C\u0435\u0447\u0430\u0442\u044C
+          \u0447\u0443\u0436\u0438\u0445."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.12.woman_line
+        kind: 0
+        speakerIdOverride:
+        text: "\u2014 \u0411\u0440\u043E\u0434 \u043D\u0435 \u0432\u0430\u0448, \u2014 \u0433\u043E\u0432\u043E\u0440\u0438\u0442 \u043E\u043D\u0430, \u043D\u0435 \u0433\u043B\u044F\u0434\u044F \u0432\u0432\u0435\u0440\u0445. \u2014 \u0418\u0434\u0438\u0442\u0435,
+          \u043E\u0442\u043A\u0443\u0434\u0430 \u043F\u0440\u0438\u0448\u043B\u0438, \u0435\u0441\u043B\u0438 \u043F\u0440\u0438\u0448\u043B\u0438 \u043D\u0435 \u0437\u0430 \u044D\u0442\u0438\u043C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.12.woman_small_party
+        kind: 0
+        speakerIdOverride:
+        text: "\u041E\u043D\u0430 \u0443\u0441\u043C\u0435\u0445\u0430\u0435\u0442\u0441\u044F \u043E\u0434\u043D\u0438\u043C \u0443\u0433\u043E\u043B\u043A\u043E\u043C \u0440\u0442\u0430. \u2014 \u0414\u0432\u043E\u0435 \u2014 \u044D\u0442\u043E \u0435\u0449\u0451 \u043D\u0435
+          \u043E\u0442\u0440\u044F\u0434. \u0425\u043E\u0442\u044C \u043D\u0435 \u043F\u0443\u0433\u0430\u0435\u0442."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 13
+            StringParam:
+            QualityParam: 0
+            IntParam: 2
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.12.woman_large_party
+        kind: 0
+        speakerIdOverride:
+        text: "\u041E\u043D\u0430 \u043E\u0442\u043A\u043B\u0430\u0434\u044B\u0432\u0430\u0435\u0442 \u0441\u0435\u0442\u044C \u0432 \u0441\u0442\u043E\u0440\u043E\u043D\u0443, \u043D\u0435 \u0441\u043F\u0443\u0441\u043A\u0430\u044F \u0433\u043B\u0430\u0437 \u0441 \u0431\u043E\u0439\u0446\u043E\u0432
+          \u043F\u043E\u0437\u0430\u0434\u0438 \u0433\u0435\u0440\u043E\u044F. \u2014 \u0420\u0430\u043D\u044C\u0448\u0435 \u0441\u044E\u0434\u0430 \u0441 \u043E\u0440\u0443\u0436\u0438\u0435\u043C \u043D\u0435 \u0445\u043E\u0434\u0438\u043B\u0438."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 12
+            StringParam:
+            QualityParam: 0
+            IntParam: 4
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0417\u0430\u0433\u043E\u0432\u043E\u0440\u0438\u0442\u044C \u0441 \u043D\u0435\u0439 \u043E \u0431\u0440\u043E\u0434\u0435."
+        nextNodeId: chapter01.node.12.talk
+        endsDialogue: 0
+        choiceId: chapter01.node.12.woman_to_talk
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.12.talk
+      speakerId: ford_woman
+      text:
+      textBlocks:
+      - blockId: chapter01.node.12.talk_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u2014 \u041C\u0435\u043D\u044F \u0437\u0434\u0435\u0441\u044C \u043D\u0438\u043A\u0442\u043E \u043D\u0435 \u0441\u043F\u0440\u0430\u0448\u0438\u0432\u0430\u043B \u0440\u0430\u043D\u044C\u0448\u0435, \u0438 \u043F\u043E\u0442\u043E\u043C \u043D\u0435
+          \u0441\u043F\u0440\u0430\u0448\u0438\u0432\u0430\u043B \u0442\u043E\u0436\u0435, \u2014 \u043E\u043D\u0430 \u043D\u0430\u043A\u043E\u043D\u0435\u0446 \u0441\u0430\u0434\u0438\u0442\u0441\u044F \u043D\u0430 \u043A\u0430\u043C\u0435\u043D\u044C, \u0432\u044B\u0442\u0438\u0440\u0430\u044F \u0440\u0443\u043A\u0438
+          \u043E \u043F\u043E\u0434\u043E\u043B. \u2014 \u0411\u0440\u043E\u0434 \u0434\u0435\u0440\u0436\u0430\u043B\u0438. \u0422\u0435\u043F\u0435\u0440\u044C \u043D\u0438\u043A\u0442\u043E \u043D\u0435 \u0434\u0435\u0440\u0436\u0438\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.12.talk_story
+        kind: 2
+        speakerIdOverride:
+        text: "\u041E\u043D\u0430 \u043A\u0438\u0432\u0430\u0435\u0442 \u0432 \u0441\u0442\u043E\u0440\u043E\u043D\u0443 \u043A\u043E\u043B\u044C\u0435\u0432. \u2014 \u0417\u0434\u0435\u0441\u044C \u0436\u0435\u043D\u0449\u0438\u043D\u0430 \u0443\u0442\u043E\u043D\u0443\u043B\u0430, \u0435\u0449\u0451
+          \u0434\u043E \u043F\u043E\u0442\u043E\u043F\u0430, \u0434\u043E \u0442\u043E\u0433\u043E, \u043A\u0430\u043A \u044F \u0441\u044E\u0434\u0430 \u043F\u0440\u0438\u0448\u043B\u0430. \u041B\u044E\u0434\u0438 \u043F\u043E\u043C\u043D\u044F\u0442 \u043F\u043E-\u0440\u0430\u0437\u043D\u043E\u043C\u0443:
+          \u043A\u0442\u043E \u0433\u043E\u0432\u043E\u0440\u0438\u0442 \u2014 \u0441\u0430\u043C\u0430 \u0437\u0430\u0448\u043B\u0430 \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0434\u0430\u043B\u0435\u043A\u043E, \u043A\u0442\u043E \u2014 \u0447\u0442\u043E \u0435\u0451
+          \u0441\u0442\u043E\u043B\u043A\u043D\u0443\u043B\u0438 \u0437\u0430\u0431\u043E\u0442\u044B, \u0430 \u043D\u0435 \u0447\u0435\u043B\u043E\u0432\u0435\u043A. \u0421 \u0442\u0435\u0445 \u043F\u043E\u0440 \u0443 \u0431\u0440\u043E\u0434\u0430 \u043D\u0435 \u043A\u0443\u043F\u0430\u044E\u0442\u0441\u044F
+          \u043D\u043E\u0447\u044C\u044E \u2014 \u043D\u0435 \u0441\u043E \u0441\u0442\u0440\u0430\u0445\u0443 \u043F\u0435\u0440\u0435\u0434 \u0434\u0443\u0445\u0430\u043C\u0438, \u0430 \u043F\u043E \u043F\u0440\u0438\u0432\u044B\u0447\u043A\u0435, \u0447\u0442\u043E \u0442\u0430\u043A
+          \u0434\u0435\u043B\u0430\u044E\u0442 \u0432\u0441\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n12_knowledge_drowned_woman
+          Type: 2
+          StringParam: chapter01.knowledge.drowned_woman_story
+          IntParam: 0
+      - blockId: chapter01.node.12.talk_old_custom
+        kind: 1
+        speakerIdOverride:
+        text: "\u2014 \u0420\u0430\u0437 \u0437\u043D\u0430\u0435\u0448\u044C, \u0447\u0442\u043E \u0437\u0434\u0435\u0441\u044C \u0440\u0430\u043D\u044C\u0448\u0435 \u0432\u0435\u043B\u0438 \u0441\u0447\u0451\u0442, \u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0434\u043D\u0435\u0439
+          \u0434\u0435\u0440\u0436\u0430\u0442\u044C \u0441\u0442\u043E\u043A \u043E\u0442\u043A\u0440\u044B\u0442\u044B\u043C, \u2014 \u0431\u0440\u043E\u0434 \u0434\u043B\u044F \u0442\u0435\u0431\u044F \u043D\u0435 \u0437\u0430\u0433\u0430\u0434\u043A\u0430, \u0430 \u0437\u0430\u0431\u044B\u0442\u0430\u044F
+          \u0440\u0430\u0431\u043E\u0442\u0430."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 1
+            StringParam: chapter01.knowledge.old_custom
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.12.talk_seventh_channel
+        kind: 1
+        speakerIdOverride:
+        text: "\u041E\u043D\u0430 \u0447\u0443\u0442\u044C \u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F \u0432 \u043B\u0438\u0446\u0435. \u2014 \u041F\u0440\u043E \u0441\u0435\u0434\u044C\u043C\u043E\u0439 \u0440\u0443\u043A\u0430\u0432 \u043C\u0430\u043B\u043E \u043A\u0442\u043E
+          \u0432\u0441\u043F\u043E\u043C\u0438\u043D\u0430\u0435\u0442. \u0414\u0430\u0436\u0435 \u0437\u0434\u0435\u0441\u044C."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 1
+            StringParam: chapter01.knowledge.old_seventh_channel
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.12.talk_gauge
+        kind: 1
+        speakerIdOverride:
+        text: "\u041E\u043D\u0430 \u0441\u043C\u043E\u0442\u0440\u0438\u0442 \u043D\u0430 \u043F\u043B\u0430\u0441\u0442\u0438\u043D\u0443 \u0443 \u043F\u043E\u044F\u0441\u0430 \u0433\u0435\u0440\u043E\u044F \u0434\u043E\u043B\u044C\u0448\u0435, \u0447\u0435\u043C \u043D\u0430
+          \u043B\u0438\u0446\u043E. \u2014 \u0422\u0430\u043A\u0443\u044E \u0432\u0435\u0449\u044C \u0443 \u043D\u0430\u0441 \u043D\u0430\u0437\u044B\u0432\u0430\u043B\u0438 \u043C\u0435\u0440\u043E\u0439. \u0415\u0439 \u043C\u0435\u0440\u0438\u043B\u0438, \u0441\u043A\u043E\u043B\u044C\u043A\u043E
+          \u0432\u043E\u0434\u044B \u043E\u0442\u043F\u0443\u0441\u0442\u0438\u0442\u044C, \u0430 \u043D\u0435 \u0432\u0437\u044F\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 5
+            StringParam: chapter01.item.seven_tooth_gauge
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.12.talk_repair_old
+        kind: 0
+        speakerIdOverride:
+        text: "\u2014 \u0420\u0430\u0437 \u0414\u043E\u043C \u0434\u0435\u0440\u0436\u0438\u0442\u0441\u044F \u0441\u0442\u0430\u0440\u043E\u0433\u043E, \u2014 \u0433\u043E\u0432\u043E\u0440\u0438\u0442 \u043E\u043D\u0430, \u2014 \u043C\u043E\u0436\u0435\u0442, \u0438
+          \u0431\u0440\u043E\u0434 \u0441\u0442\u043E\u0438\u0442 \u043F\u043E\u0447\u0438\u043D\u0438\u0442\u044C \u043F\u043E-\u0441\u0442\u0430\u0440\u043E\u043C\u0443, \u0430 \u043D\u0435 \u0431\u0440\u043E\u0441\u0430\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_old
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.12.talk_repair_new
+        kind: 0
+        speakerIdOverride:
+        text: "\u2014 \u0417\u043D\u0430\u0447\u0438\u0442, \u0414\u043E\u043C \u0440\u0435\u0448\u0438\u043B, \u0447\u0442\u043E \u0441\u0442\u0430\u0440\u043E\u0435 \u043C\u043E\u0436\u043D\u043E \u0431\u0440\u043E\u0441\u0438\u0442\u044C, \u2014 \u043E\u043D\u0430
+          \u043F\u043E\u0436\u0438\u043C\u0430\u0435\u0442 \u043F\u043B\u0435\u0447\u0430\u043C\u0438, \u0431\u0435\u0437 \u043E\u0441\u043E\u0431\u043E\u0439 \u0437\u043B\u043E\u0441\u0442\u0438. \u2014 \u041D\u0435 \u0432 \u043F\u0435\u0440\u0432\u044B\u0439 \u0440\u0430\u0437 \u0441\u043B\u044B\u0448\u0443
+          \u0442\u0430\u043A\u043E\u0435 \u043E\u0442 \u0432\u0430\u0448\u0438\u0445."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_new
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u043E\u043C\u043E\u0447\u044C \u0435\u0439 \u0441 \u0431\u0440\u043E\u0434\u043E\u043C."
+        nextNodeId: chapter01.node.12.help
+        endsDialogue: 0
+        choiceId: chapter01.node.12.talk_help
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      - text: "\u0421\u043F\u0440\u043E\u0441\u0438\u0442\u044C, \u043A\u0443\u0434\u0430 \u0432\u0435\u0434\u0451\u0442 \u0431\u0440\u043E\u0434 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: chapter01.node.12.direction
+        endsDialogue: 0
+        choiceId: chapter01.node.12.talk_direction
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.12.help
+      speakerId: ford_woman
+      text:
+      textBlocks:
+      - blockId: chapter01.node.12.help_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0420\u0430\u0431\u043E\u0442\u0430 \u043F\u0440\u043E\u0441\u0442\u0430\u044F: \u043F\u0435\u0440\u0435\u0445\u0432\u0430\u0442\u0438\u0442\u044C \u043A\u0440\u0430\u0439 \u0441\u0435\u0442\u0438, \u043F\u043E\u0434\u0435\u0440\u0436\u0430\u0442\u044C \u0448\u0435\u0441\u0442
+          \u043F\u0440\u043E\u0442\u0438\u0432 \u0442\u0435\u0447\u0435\u043D\u0438\u044F, \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0442\u0438 \u0432\u044F\u0437\u0430\u043D\u043A\u0443 \u043D\u0430 \u0441\u0443\u0445\u043E\u0435. \u041D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u043C\u0438\u043D\u0443\u0442 \u2014
+          \u0438 \u0434\u0435\u043B\u043E \u0441\u0434\u0435\u043B\u0430\u043D\u043E. \u0416\u0435\u043D\u0449\u0438\u043D\u0430 \u043D\u0435 \u0431\u043B\u0430\u0433\u043E\u0434\u0430\u0440\u0438\u0442 \u0434\u043E\u043B\u0433\u043E, \u043D\u043E \u0438 \u043D\u0435
+          \u043E\u0442\u0432\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0435\u0442\u0441\u044F, \u043A\u0430\u043A \u0440\u0430\u043D\u044C\u0448\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n12_flag_helped
+          Type: 0
+          StringParam: chapter01.flag.ford_woman_helped
+          IntParam: 0
+      choices:
+      - text: "\u041F\u043E\u0439\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: chapter01.node.12.direction
+        endsDialogue: 0
+        choiceId: chapter01.node.12.help_continue
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.12.direction
+      speakerId: ford_woman
+      text:
+      textBlocks:
+      - blockId: chapter01.node.12.direction_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u2014 \u0414\u0430\u043B\u044C\u0448\u0435 \u043F\u043E \u0442\u0435\u0447\u0435\u043D\u0438\u044E \u2014 \u043B\u044E\u0434\u0438, \u2014 \u043E\u043D\u0430 \u0432\u044B\u0442\u0438\u0440\u0430\u0435\u0442 \u0440\u0443\u043A\u0438 \u0438 \u0441\u043C\u043E\u0442\u0440\u0438\u0442
+          \u0432\u043D\u0438\u0437 \u043F\u043E \u0432\u043E\u0434\u0435. \u2014 \u041D\u0435 \u043C\u043E\u0438, \u043D\u043E \u0432\u043E\u0434\u0443 \u0434\u0435\u043B\u044F\u0442 \u0442\u0443 \u0436\u0435. \u0421\u043A\u0430\u0436\u0438, \u0447\u0442\u043E \u0448\u0451\u043B
+          \u043C\u0438\u043C\u043E, \u0430 \u043D\u0435 \u0447\u0442\u043E \u0448\u0451\u043B \u043A \u043D\u0438\u043C \u2014 \u0442\u0430\u043A \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u0435\u0435 \u0434\u043B\u044F \u0432\u0441\u0435\u0445."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0418\u0434\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId:
         endsDialogue: 1
         choiceId: chapter01.node.12_exit
         kind: 3
@@ -9741,89 +10170,529 @@ MonoBehaviour:
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: 
+          CheckId:
           Kind: 0
           Quality: 0
-          CompetencyId: 
+          CompetencyId:
           Difficulty: 13
           ModifierRules: []
-        successNodeId: 
-        failureNodeId: 
+        successNodeId:
+        failureNodeId:
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_13_other_people
-    title: "N13 \u2014 \u0414\u0440\u0443\u0433\u0438\u0435 \u043B\u044E\u0434\u0438
-      / \u0423 \u0432\u0441\u0435\u0445 \u0435\u0441\u0442\u044C \u0434\u043E\u043C"
+    title: "N13 \u2014 \u0414\u0440\u0443\u0433\u0438\u0435 \u043B\u044E\u0434\u0438 / \u0423 \u0432\u0441\u0435\u0445 \u0435\u0441\u0442\u044C \u0434\u043E\u043C"
     category: 1
     status: 1
-    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
-      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
-      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
-      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
-      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
+    developerComment: "P10-T02/T03 production-\u0441\u0446\u0435\u043D\u0430. \u041F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u0435 \u0432\u0438\u0434\u043D\u043E
+      \u0440\u0430\u043D\u044C\u0448\u0435 \u043E\u0431\u044A\u044F\u0441\u043D\u0435\u043D\u0438\u044F (chapter01.node.13_main). \u041F\u043E\u0432\u0435\u0434\u0435\u043D\u0447\u0435\u0441\u043A\u0438\u0439 \u0432\u044B\u0431\u043E\u0440
+      chapter01.node.13.approach_calm/tense \u2014 \u0442\u043E\u043B\u044C\u043A\u043E presentation
+      (\u00AB\u0434\u0430\u0442\u044C \u043F\u043E\u043D\u044F\u0442\u044C, \u0447\u0442\u043E \u043F\u0440\u0438\u0448\u043B\u0438 \u0433\u043E\u0432\u043E\u0440\u0438\u0442\u044C\u00BB / \u00AB\u043F\u043E\u0434\u043E\u0439\u0442\u0438 \u043A\u0430\u043A \u0435\u0441\u0442\u044C\u00BB), \u0431\u0435\u0437
+      \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0433\u043E WeaponCondition \u0438 \u0431\u0435\u0437 \u0447\u0438\u0441\u043B\u043E\u0432\u043E\u0433\u043E \u0432\u043B\u0438\u044F\u043D\u0438\u044F \u043D\u0430 FirstContact.
+      chapter01.check.first_contact \u2014 ActiveDecisive, Character,
+      \u0441\u043B\u043E\u0436\u043D\u043E\u0441\u0442\u044C 13, \u043C\u043E\u0434\u0438\u0444\u0438\u043A\u0430\u0442\u043E\u0440\u044B: KnowledgeKnown(OldCustom) +1,
+      PartySizeAtLeast(4) -1. RepairOld/RepairNew \u043D\u0435 \u0434\u0430\u044E\u0442 \u0447\u0438\u0441\u043B\u043E\u0432\u043E\u0433\u043E
+      \u0431\u043E\u043D\u0443\u0441\u0430 \u2014 \u0442\u043E\u043B\u044C\u043A\u043E \u043C\u0435\u043D\u044F\u044E\u0442 \u0441\u043E\u0434\u0435\u0440\u0436\u0430\u043D\u0438\u0435 \u043F\u0440\u0435\u0442\u0435\u043D\u0437\u0438\u0439. DownstreamPeople/
+      DownstreamContact \u0432\u044B\u0434\u0430\u044E\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u043F\u043E\u0441\u043B\u0435 \u0440\u0435\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F
+      FirstContact (\u0443\u0441\u043F\u0435\u0445 \u0438\u043B\u0438 \u043F\u0440\u043E\u0432\u0430\u043B), \u043D\u0435 \u043F\u0440\u0438 \u0441\u0430\u043C\u043E\u043C \u043F\u0440\u0438\u0445\u043E\u0434\u0435 \u2014 \u0440\u0430\u043D\u044C\u0448\u0435
+      \u043E\u043D\u0438 \u0431\u044B\u043B\u0438 \u0432 \u044D\u0442\u043E\u043C \u0443\u0437\u043B\u0435, \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u044B \u0432 N13-T02 \u0432 success/failure."
     startNodeId: chapter01.node.13
     tags:
     - "\u0433\u043B\u0430\u0432\u043001"
-    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
+    - "production"
     nodes:
     - id: chapter01.node.13
-      speakerId: downstream_voice
-      text: 
+      speakerId: narrator
+      text:
       textBlocks:
       - blockId: chapter01.node.13_main
         kind: 0
-        speakerIdOverride: 
-        text: "\u0417\u0430 \u0431\u0440\u043E\u0434\u043E\u043C \u2014 \u0447\u0435\u043B\u043E\u0432\u0435\u0447\u0435\u0441\u043A\u043E\u0435
-          \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u0435. \u0415\u0433\u043E
-          \u0436\u0438\u0442\u0435\u043B\u044C \u0432\u0441\u0442\u0440\u0435\u0447\u0430\u0435\u0442
-          \u043E\u0442\u0440\u044F\u0434 \u043D\u0435 \u043A\u0430\u043A \u0433\u043E\u0441\u0442\u0435\u0439,
-          \u0430 \u043A\u0430\u043A \u0441\u0442\u043E\u0440\u043E\u043D\u0443, \u043E\u0442
-          \u043A\u043E\u0442\u043E\u0440\u043E\u0439 \u0443\u0436\u0435 \u0434\u0430\u0432\u043D\u043E
-          \u043D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u0431\u044B\u043B\u043E
-          \u0441\u043B\u044B\u0448\u043D\u043E."
+        speakerIdOverride:
+        text: "\u0417\u0430 \u0431\u0440\u043E\u0434\u043E\u043C \u2014 \u043D\u0438\u0437\u043A\u0438\u0439 \u0431\u0435\u0440\u0435\u0433, \u0440\u0430\u0437\u0431\u0438\u0442\u044B\u0439 \u043D\u0430 \u0443\u0437\u043A\u0438\u0435 \u043D\u0430\u0434\u0435\u043B\u044B.
+          \u041F\u043E\u043B\u043E\u0432\u0438\u043D\u0430 \u0438\u0437 \u043D\u0438\u0445 \u0441\u0442\u043E\u0438\u0442 \u0441\u0443\u0445\u0430\u044F \u0442\u0430\u043C, \u0433\u0434\u0435 \u0434\u043E\u043B\u0436\u043D\u0430 \u0431\u044B\u0442\u044C \u0432\u043E\u0434\u0430, \u0430
+          \u0434\u0440\u0443\u0433\u0430\u044F \u0442\u043E\u043D\u0435\u0442 \u0442\u0430\u043C, \u0433\u0434\u0435 \u043D\u0435 \u0434\u043E\u043B\u0436\u043D\u0430. \u0423 \u043A\u0440\u043E\u043C\u043A\u0438 \u2014 \u0431\u0440\u043E\u0448\u0435\u043D\u043D\u044B\u0435 \u0441\u0435\u0442\u0438,
+          \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0434\u0430\u043B\u0435\u043A\u043E \u043E\u0442 \u043D\u044B\u043D\u0435\u0448\u043D\u0435\u0439 \u0432\u043E\u0434\u044B, \u0447\u0442\u043E\u0431\u044B \u044D\u0442\u043E \u0431\u044B\u043B\u043E \u0447\u044C\u0435\u0439-\u0442\u043E
+          \u043B\u0435\u043D\u044C\u044E."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: 
+          CheckId:
           Kind: 0
           Quality: 0
-          CompetencyId: 
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.13_repair_old
+        kind: 1
+        speakerIdOverride:
+        text: "\u0422\u0430\u043C, \u0433\u0434\u0435 \u0432\u043E\u0434\u0430 \u0441\u0442\u043E\u0438\u0442 \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u0432\u044B\u0441\u043E\u043A\u043E, \u0431\u043E\u0440\u043E\u0437\u0434\u044B \u043D\u0430 \u0437\u0435\u043C\u043B\u0435
+          \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u044E\u0442 \u0444\u043E\u0440\u043C\u0443 \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u0441\u0442\u043E\u043A\u0430 \u2014 \u0431\u0443\u0434\u0442\u043E \u0437\u0434\u0435\u0441\u044C \u0434\u0430\u0432\u043D\u043E \u0436\u0434\u0430\u043B\u0438
+          \u0438\u043C\u0435\u043D\u043D\u043E \u0442\u0430\u043A\u043E\u0433\u043E \u0440\u0435\u0448\u0435\u043D\u0438\u044F, \u0430 \u043D\u0435 \u0431\u043E\u044F\u043B\u0438\u0441\u044C \u0435\u0433\u043E."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_old
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.13_repair_new
+        kind: 1
+        speakerIdOverride:
+        text: "\u0422\u0430\u043C, \u0433\u0434\u0435 \u0437\u0435\u043C\u043B\u044F \u0441\u0442\u043E\u0438\u0442 \u0441\u0443\u0445\u0430\u044F, \u0432\u0438\u0434\u043D\u043E, \u0447\u0442\u043E \u0441\u0442\u043E\u043A \u0432 \u044D\u0442\u043E \u043B\u0435\u0442\u043E
+          \u043F\u0440\u043E\u0441\u0442\u043E \u043D\u0435 \u043F\u0440\u0438\u0448\u0451\u043B \u2014 \u043A\u0430\u043A \u0431\u0443\u0434\u0442\u043E \u043D\u0430\u0432\u0435\u0440\u0445\u0443 \u0440\u0435\u0448\u0438\u043B\u0438 \u0438\u043D\u0430\u0447\u0435, \u043D\u0435
+          \u0441\u043F\u0440\u0430\u0448\u0438\u0432\u0430\u044F, \u043A\u043E\u043C\u0443 \u0432\u043E\u0434\u0430 \u043D\u0443\u0436\u043D\u0430 \u0437\u0434\u0435\u0441\u044C."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_new
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.13_large_party
+        kind: 1
+        speakerIdOverride:
+        text: "\u041A\u0442\u043E-\u0442\u043E \u043D\u0430 \u0434\u0430\u043B\u044C\u043D\u0435\u043C \u043D\u0430\u0434\u0435\u043B\u0435 \u0432\u044B\u043F\u0440\u044F\u043C\u043B\u044F\u0435\u0442\u0441\u044F, \u043A\u043E\u0440\u043E\u0442\u043A\u043E \u0441\u043C\u043E\u0442\u0440\u0438\u0442
+          \u0432 \u0441\u0442\u043E\u0440\u043E\u043D\u0443 \u043E\u0442\u0440\u044F\u0434\u0430 \u0438 \u0431\u0435\u0437 \u0441\u043F\u0435\u0448\u043A\u0438 \u0443\u0445\u043E\u0434\u0438\u0442 \u043A \u0436\u0438\u043B\u044C\u044E \u2014 \u043D\u0435 \u0443\u0431\u0435\u0433\u0430\u0435\u0442,
+          \u043D\u043E \u0438 \u043D\u0435 \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F \u0436\u0434\u0430\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 12
+            StringParam:
+            QualityParam: 0
+            IntParam: 4
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u043E\u0434\u043E\u0439\u0442\u0438 \u043A \u043B\u044E\u0434\u044F\u043C."
+        nextNodeId: chapter01.node.13.approach
+        endsDialogue: 0
+        choiceId: chapter01.node.13_to_approach
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.13.approach
+      speakerId: downstream_voice
+      text:
+      textBlocks:
+      - blockId: chapter01.node.13.approach_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u041D\u0430\u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0432\u044B\u0445\u043E\u0434\u0438\u0442 \u043D\u0435\u0432\u044B\u0441\u043E\u043A\u0438\u0439 \u043C\u0443\u0436\u0447\u0438\u043D\u0430 \u0432 \u0440\u0430\u0431\u043E\u0447\u0435\u0439 \u043E\u0434\u0435\u0436\u0434\u0435 \u2014
+          \u043D\u0435 \u0441\u0442\u0430\u0440\u0435\u0439\u0448\u0438\u043D\u0430, \u0441\u0443\u0434\u044F \u043F\u043E \u0432\u0438\u0434\u0443, \u043F\u0440\u043E\u0441\u0442\u043E \u0442\u043E\u0442, \u043A\u0442\u043E \u043E\u043A\u0430\u0437\u0430\u043B\u0441\u044F \u0431\u043B\u0438\u0436\u0435.
+          \u041E\u043D \u043E\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0435\u0442\u0441\u044F \u043D\u0430 \u0442\u0430\u043A\u043E\u043C \u0440\u0430\u0441\u0441\u0442\u043E\u044F\u043D\u0438\u0438, \u0447\u0442\u043E\u0431\u044B \u0443\u0441\u043F\u0435\u0442\u044C \u0443\u0439\u0442\u0438,
+          \u0435\u0441\u043B\u0438 \u043F\u0440\u0438\u0434\u0451\u0442\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.13.approach_helped
+        kind: 1
+        speakerIdOverride:
+        text: "\u041E\u043D \u0441\u043C\u043E\u0442\u0440\u0438\u0442 \u043C\u0438\u043C\u043E \u0433\u0435\u0440\u043E\u044F \u2014 \u0442\u0443\u0434\u0430, \u0433\u0434\u0435 \u0443 \u0431\u0440\u043E\u0434\u0430 \u0432\u0438\u0434\u043D\u0430 \u0436\u0435\u043D\u0449\u0438\u043D\u0430,
+          \u2014 \u0438 \u0447\u0442\u043E-\u0442\u043E \u0432 \u0435\u0433\u043E \u043F\u043E\u0437\u0435 \u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F, \u0447\u0443\u0442\u044C \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u0435\u0435 \u043F\u0440\u0435\u0436\u043D\u0435\u0433\u043E."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.ford_woman_helped
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.13.approach_gauge
+        kind: 1
+        speakerIdOverride:
+        text: "\u0412\u0437\u0433\u043B\u044F\u0434 \u043C\u0443\u0436\u0447\u0438\u043D\u044B \u043D\u0430 \u0441\u0435\u043A\u0443\u043D\u0434\u0443 \u0437\u0430\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442\u0441\u044F \u043D\u0430 \u043F\u043B\u0430\u0441\u0442\u0438\u043D\u0435 \u0443
+          \u043F\u043E\u044F\u0441\u0430 \u0433\u0435\u0440\u043E\u044F \u0434\u043E\u043B\u044C\u0448\u0435, \u0447\u0435\u043C \u043D\u0430 \u043B\u0438\u0446\u0435 \u2014 \u043E\u043D \u044F\u0432\u043D\u043E \u0443\u0437\u043D\u0430\u0451\u0442 \u0444\u043E\u0440\u043C\u0443, \u043D\u043E
+          \u043D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u0433\u043E\u0432\u043E\u0440\u0438\u0442 \u0432\u0441\u043B\u0443\u0445."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 5
+            StringParam: chapter01.item.seven_tooth_gauge
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0414\u0430\u0442\u044C \u043B\u044E\u0434\u044F\u043C \u043F\u043E\u043D\u044F\u0442\u044C, \u0447\u0442\u043E \u043E\u0442\u0440\u044F\u0434 \u043F\u0440\u0438\u0448\u0451\u043B \u0433\u043E\u0432\u043E\u0440\u0438\u0442\u044C."
+        nextNodeId: chapter01.node.13.approach_calm
+        endsDialogue: 0
+        choiceId: chapter01.node.13.approach_choice_calm
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      - text: "\u041D\u0435 \u0437\u0430\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0442\u044C\u0441\u044F, \u043F\u043E\u0434\u043E\u0439\u0442\u0438 \u043A\u0430\u043A \u0435\u0441\u0442\u044C."
+        nextNodeId: chapter01.node.13.approach_tense
+        endsDialogue: 0
+        choiceId: chapter01.node.13.approach_choice_tense
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.13.approach_calm
+      speakerId: downstream_voice
+      text:
+      textBlocks:
+      - blockId: chapter01.node.13.approach_calm_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u0411\u043E\u0439\u0446\u044B \u0437\u0430 \u0441\u043F\u0438\u043D\u043E\u0439 \u0433\u0435\u0440\u043E\u044F \u043E\u043F\u0443\u0441\u043A\u0430\u044E\u0442 \u0440\u0443\u043A\u0438 \u043E\u0442 \u043E\u0440\u0443\u0436\u0438\u044F, \u043A\u0442\u043E-\u0442\u043E
+          \u043E\u0442\u0441\u0442\u0443\u043F\u0430\u0435\u0442 \u043D\u0430 \u043F\u043E\u043B\u0448\u0430\u0433\u0430 \u043D\u0430\u0437\u0430\u0434. \u041C\u0443\u0436\u0447\u0438\u043D\u0430 \u0441\u043C\u043E\u0442\u0440\u0438\u0442 \u043D\u0430 \u044D\u0442\u043E \u0434\u043E\u043B\u044C\u0448\u0435,
+          \u0447\u0435\u043C \u043D\u0430 \u043B\u0438\u0446\u043E \u0433\u0435\u0440\u043E\u044F, \u0438 \u0447\u0443\u0442\u044C \u0440\u0430\u0441\u0441\u043B\u0430\u0431\u043B\u044F\u0435\u0442 \u043F\u043B\u0435\u0447\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440."
+        nextNodeId: chapter01.node.13.tension
+        endsDialogue: 0
+        choiceId: chapter01.node.13.approach_calm_continue
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.13.approach_tense
+      speakerId: downstream_voice
+      text:
+      textBlocks:
+      - blockId: chapter01.node.13.approach_tense_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u041E\u0442\u0440\u044F\u0434 \u043D\u0435 \u043C\u0435\u043D\u044F\u0435\u0442 \u0448\u0430\u0433\u0430 \u0438 \u043D\u0435 \u0443\u0431\u0438\u0440\u0430\u0435\u0442 \u043E\u0440\u0443\u0436\u0438\u0435 \u2014 \u043F\u0440\u043E\u0441\u0442\u043E \u0438\u0434\u0451\u0442,
+          \u043A\u0430\u043A \u0448\u0451\u043B. \u041C\u0443\u0436\u0447\u0438\u043D\u0430 \u043D\u0435 \u043E\u0442\u0441\u0442\u0443\u043F\u0430\u0435\u0442, \u043D\u043E \u0438 \u043D\u0435 \u043F\u043E\u0434\u0445\u043E\u0434\u0438\u0442 \u0431\u043B\u0438\u0436\u0435;
+          \u043B\u0430\u0434\u043E\u043D\u044C \u0443 \u043D\u0435\u0433\u043E \u0442\u0430\u043A \u0438 \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F \u043D\u0430 \u043F\u043E\u044F\u0441\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440."
+        nextNodeId: chapter01.node.13.tension
+        endsDialogue: 0
+        choiceId: chapter01.node.13.approach_tense_continue
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.13.tension
+      speakerId: downstream_voice
+      text:
+      textBlocks:
+      - blockId: chapter01.node.13.tension_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u2014 \u0414\u043E\u043B\u0433\u043E \u0436\u0435 \u0432\u044B \u0448\u043B\u0438, \u2014 \u0433\u043E\u0432\u043E\u0440\u0438\u0442 \u043E\u043D, \u043D\u0435 \u043A\u0430\u043A \u0432\u043E\u043F\u0440\u043E\u0441. \u2014 \u0423 \u043D\u0430\u0441
+          \u043D\u0435 \u043F\u0435\u0440\u0432\u044B\u0439 \u0433\u043E\u0434 \u0433\u043E\u0432\u043E\u0440\u044F\u0442, \u0447\u0442\u043E \u0441\u0432\u0435\u0440\u0445\u0443 \u0440\u0430\u043D\u043E \u0438\u043B\u0438 \u043F\u043E\u0437\u0434\u043D\u043E \u0432\u0441\u043F\u043E\u043C\u043D\u044F\u0442
+          \u043F\u0440\u043E \u043D\u0438\u0436\u043D\u0438\u0439 \u043A\u0430\u043D\u0430\u043B. \u0412\u043E\u0442 \u0438 \u0432\u0441\u043F\u043E\u043C\u043D\u0438\u043B\u0438, \u0433\u043B\u044F\u0436\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "[\u041F\u0420\u041E\u0412\u0415\u0420\u041A\u0410 \u0425\u0410\u0420\u0410\u041A\u0422\u0415\u0420\u0410] \u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C, \u0447\u0442\u043E \u043E\u0442\u0440\u044F\u0434 \u043F\u0440\u0438\u0448\u0451\u043B \u0433\u043E\u0432\u043E\u0440\u0438\u0442\u044C,
+          \u0430 \u043D\u0435 \u043E\u043F\u0438\u0441\u044B\u0432\u0430\u0442\u044C \u0447\u0443\u0436\u043E\u0435 \u0438\u043C\u0443\u0449\u0435\u0441\u0442\u0432\u043E."
+        nextNodeId:
+        endsDialogue: 0
+        choiceId: chapter01.node.13.tension_first_contact
+        kind: 2
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: chapter01.check.first_contact
+          Kind: 2
+          Quality: 5
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules:
+          - SourceId: chapter01.modifier.first_contact_old_custom
+            Label: "\u0417\u043D\u0430\u0435\u0442 \u0441\u0442\u0430\u0440\u044B\u0439 \u043E\u0431\u044B\u0447\u0430\u0439"
+            Value: 1
+            Condition:
+              Combinator: 0
+              Conditions:
+              - Type: 1
+                StringParam: chapter01.knowledge.old_custom
+                QualityParam: 0
+                IntParam: 0
+                Negate: 0
+          - SourceId: chapter01.modifier.first_contact_large_party
+            Label: "\u0411\u043E\u043B\u044C\u0448\u043E\u0439 \u043E\u0442\u0440\u044F\u0434 \u0443 \u0447\u0443\u0436\u043E\u0433\u043E \u0434\u043E\u043C\u0430"
+            Value: -1
+            Condition:
+              Combinator: 0
+              Conditions:
+              - Type: 12
+                StringParam:
+                QualityParam: 0
+                IntParam: 4
+                Negate: 0
+        successNodeId: chapter01.node.13.success
+        failureNodeId: chapter01.node.13.failure
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.13.success
+      speakerId: downstream_voice
+      text:
+      textBlocks:
+      - blockId: chapter01.node.13.success_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u041E\u043D \u0432\u044B\u0434\u044B\u0445\u0430\u0435\u0442 \u0438 \u0441\u0430\u0434\u0438\u0442\u0441\u044F \u043D\u0430 \u043F\u0435\u0440\u0435\u0432\u0451\u0440\u043D\u0443\u0442\u0443\u044E \u0431\u043E\u0447\u043A\u0443 \u2014 \u0432\u043F\u0435\u0440\u0432\u044B\u0435 \u043D\u0435
+          \u043A\u0430\u043A \u043F\u0435\u0440\u0435\u0434 \u0447\u0443\u0436\u0430\u043A\u043E\u043C. \u2014 \u0417\u043D\u0430\u0447\u0438\u0442, \u0432\u0441\u0451-\u0442\u0430\u043A\u0438 \u043D\u0435 \u0437\u0430 \u0442\u0435\u043C, \u0447\u0442\u043E\u0431\u044B
+          \u043F\u043E\u0441\u0447\u0438\u0442\u0430\u0442\u044C, \u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0441 \u043D\u0430\u0441 \u0432\u0437\u044F\u0442\u044C. \u041B\u0430\u0434\u043D\u043E. \u0421\u043F\u0440\u0430\u0448\u0438\u0432\u0430\u0439 \u043F\u0440\u044F\u043C\u043E, \u044F
+          \u043E\u0442\u0432\u0435\u0447\u0443 \u043F\u0440\u044F\u043C\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-        - EffectExecutionId: chapter01.effect.n13_flag1
-          Type: 0
-          StringParam: chapter01.flag.downstream_contact
-          IntParam: 0
-        - EffectExecutionId: chapter01.effect.n13_knowledge1
+        - EffectExecutionId: chapter01.effect.n13_knowledge_downstream_people_success
           Type: 2
           StringParam: chapter01.knowledge.downstream_people
           IntParam: 0
+        - EffectExecutionId: chapter01.effect.n13_flag_downstream_contact_success
+          Type: 0
+          StringParam: chapter01.flag.downstream_contact
+          IntParam: 0
       choices:
-      - text: "\u0417\u0430\u0433\u043E\u0432\u043E\u0440\u0438\u0442\u044C \u0441
-          \u043D\u0438\u043C."
-        nextNodeId: 
+      - text: "\u0418\u0434\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId:
         endsDialogue: 1
-        choiceId: chapter01.node.13_exit
+        choiceId: chapter01.node.13_exit_success
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: 
+          CheckId:
           Kind: 0
           Quality: 0
-          CompetencyId: 
+          CompetencyId:
           Difficulty: 13
           ModifierRules: []
-        successNodeId: 
-        failureNodeId: 
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: chapter01.node.13.failure
+      speakerId: downstream_voice
+      text:
+      textBlocks:
+      - blockId: chapter01.node.13.failure_main
+        kind: 0
+        speakerIdOverride:
+        text: "\u041E\u043D \u043D\u0435 \u043E\u0442\u0441\u0442\u0443\u043F\u0430\u0435\u0442, \u043D\u043E \u0438 \u043D\u0435 \u043F\u043E\u0434\u0445\u043E\u0434\u0438\u0442 \u0431\u043B\u0438\u0436\u0435. \u2014 \u0420\u0430\u0437 \u043F\u0440\u0438\u0448\u043B\u0438 \u2014
+          \u0437\u043D\u0430\u0447\u0438\u0442, \u0447\u0442\u043E-\u0442\u043E \u043D\u0443\u0436\u043D\u043E. \u0421\u043F\u0435\u0440\u0432\u0430 \u0434\u043E\u043A\u0430\u0436\u0438\u0442\u0435, \u0447\u0442\u043E \u043F\u0440\u0438\u0448\u043B\u0438 \u043D\u0435 \u0432
+          \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u0440\u0430\u0437 \u0437\u0430\u0431\u0440\u0430\u0442\u044C, \u0430 \u0445\u043E\u0442\u044C \u0440\u0430\u0437 \u2014 \u0432\u0435\u0440\u043D\u0443\u0442\u044C. \u2014 \u0411\u043E\u043B\u044C\u0448\u0435 \u043E\u043D \u0432
+          \u044D\u0442\u043E\u0442 \u0434\u0435\u043D\u044C \u043D\u0435 \u0441\u043A\u0430\u0436\u0435\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n13_knowledge_downstream_people_failure
+          Type: 2
+          StringParam: chapter01.knowledge.downstream_people
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n13_flag_downstream_contact_failure
+          Type: 0
+          StringParam: chapter01.flag.downstream_contact
+          IntParam: 0
+      choices:
+      - text: "\u0418\u0434\u0442\u0438 \u0434\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId:
+        endsDialogue: 1
+        choiceId: chapter01.node.13_exit_failure
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
         successEffects: []
         failureEffects: []
       editorPosition: {x: 0, y: 0}

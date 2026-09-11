@@ -29,7 +29,8 @@ namespace KingdomSurvival.DialogueDatabase
             out string error,
             IReadOnlyCollection<string> presentCompanionIds = null,
             IReadOnlyCollection<string> presentItemIds = null,
-            int worldSeedValue = 0)
+            int worldSeedValue = 0,
+            int? partySize = null)
         {
             view = null;
             error = string.Empty;
@@ -55,7 +56,7 @@ namespace KingdomSurvival.DialogueDatabase
 
             database = dialogueDatabase;
             dialogue = dialogueData;
-            context = new NarrativeEvaluationContext(hero, state, presentCompanionIds, presentItemIds, worldSeedValue);
+            context = new NarrativeEvaluationContext(hero, state, presentCompanionIds, presentItemIds, worldSeedValue, partySize);
             worldSeed = worldSeedValue;
             CurrentNodeId = dialogueData.StartNodeId;
             IsActive = true;

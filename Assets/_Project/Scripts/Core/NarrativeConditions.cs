@@ -21,11 +21,15 @@ public enum NarrativeConditionType
     // P09-T03 ("Трое под телегой"): нужно ветвить по РАЗМЕРУ отряда, а не
     // по присутствию конкретного спутника — CompanionPresent для этого не
     // подходит (проверяет один заданный ID). IntParam — минимальный
-    // требуемый размер; вместе с Negate этого достаточно и для "меньше N"
-    // (не(PartySizeAtLeast(N))), отдельный тип AtMost не нужен. Добавлено
-    // в конец enum — существующие числовые значения уже сериализованы по
-    // всей базе диалогов и не должны сдвигаться.
-    PartySizeAtLeast
+    // требуемый размер. Добавлено в конец enum — существующие числовые
+    // значения уже сериализованы по всей базе диалогов и не должны
+    // сдвигаться.
+    PartySizeAtLeast,
+
+    // P10-T04: читает то же context.PartySize (герой + бойцы, 1..5), что и
+    // PartySizeAtLeast, только в обратную сторону. Добавлено строго в конец
+    // enum по той же причине сериализации.
+    PartySizeAtMost
 }
 
 [Serializable]
@@ -85,7 +89,9 @@ public sealed class NarrativeCondition
             case NarrativeConditionType.TraitPresent:
                 return context.Hero.HasTrait(StringParam);
             case NarrativeConditionType.PartySizeAtLeast:
-                return context.PresentCompanionIds.Count >= IntParam;
+                return context.PartySize >= IntParam;
+            case NarrativeConditionType.PartySizeAtMost:
+                return context.PartySize <= IntParam;
             default:
                 throw new ArgumentOutOfRangeException(nameof(Type), Type, null);
         }

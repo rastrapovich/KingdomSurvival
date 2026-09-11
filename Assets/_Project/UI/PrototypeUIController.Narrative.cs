@@ -317,7 +317,8 @@ public partial class PrototypeUIController
             out string error,
             presentCompanionIds,
             presentItemIds,
-            gameState.WorldSeed);
+            gameState.WorldSeed,
+            Chapter01ContextBuilder.GetPartySize(gameState));
 
         if (!started)
         {

@@ -307,18 +307,27 @@ public sealed class NarrativeEvaluationContext
     public IReadOnlyCollection<string> PresentItemIds { get; }
     public int WorldSeed { get; }
 
+    // Размер боевой экспедиции (герой + бойцы), 1..5. Отдельное понятие от
+    // PresentCompanionIds: тот перечисляет конкретных спутников/бойцов,
+    // а PartySize — их число как контекстное значение (P10-T04). Параметр
+    // добавлен в конец конструктора с безопасным default, вычисленным из
+    // PresentCompanionIds, чтобы не менять существующие вызовы.
+    public int PartySize { get; }
+
     public NarrativeEvaluationContext(
         HeroProfileData hero,
         NarrativeStateData state,
         IReadOnlyCollection<string> presentCompanionIds = null,
         IReadOnlyCollection<string> presentItemIds = null,
-        int worldSeed = 0)
+        int worldSeed = 0,
+        int? partySize = null)
     {
         Hero = hero ?? throw new ArgumentNullException(nameof(hero));
         State = state ?? throw new ArgumentNullException(nameof(state));
         PresentCompanionIds = presentCompanionIds ?? Array.Empty<string>();
         PresentItemIds = presentItemIds ?? Array.Empty<string>();
         WorldSeed = worldSeed;
+        PartySize = partySize ?? (PresentCompanionIds.Count + 1);
     }
 
     public bool IsCompanionPresent(string companionId)

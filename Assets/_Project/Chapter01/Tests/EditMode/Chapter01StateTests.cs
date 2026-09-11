@@ -126,12 +126,13 @@ public sealed class Chapter01StateTests
     }
 
     [Test]
-    public void ContextBuilder_NoActiveExpedition_ReturnsEmptyCompanionsAndZeroPartySize()
+    public void ContextBuilder_NoActiveExpedition_ReturnsEmptyCompanionsAndSoloPartySize()
     {
+        // P10-T04: PartySize = герой + бойцы, поэтому герой один = 1, а не 0.
         GameState gameState = new GameState { Narrative = NewState() };
 
         Assert.IsEmpty(Chapter01ContextBuilder.GetPresentCompanionIds(gameState));
-        Assert.AreEqual(0, Chapter01ContextBuilder.GetPartySize(gameState));
+        Assert.AreEqual(1, Chapter01ContextBuilder.GetPartySize(gameState));
     }
 
     [Test]

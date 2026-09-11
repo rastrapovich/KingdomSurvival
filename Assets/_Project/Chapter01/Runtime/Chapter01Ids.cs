@@ -160,6 +160,12 @@ namespace KingdomSurvival.Chapter01
             // N16 не должно строить рифму с состоянием, которого игрок не видел.
             public const string HomeBaselineCaptured = "chapter01.flag.home_baseline_captured";
 
+            // P10-T01/T02: герой помог женщине у брода с конкретной бытовой
+            // проблемой (переход/груз/берег), не связанной с починкой воды —
+            // единственное эхо N12, которое читает N13 (первая реакция
+            // нижних людей). Оправдан ровно этим одним использованием.
+            public const string FordWomanHelped = "chapter01.flag.ford_woman_helped";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Started, HomeIntroSeen, FirstPressureSeen, FloodHappened, FloodWorkersSaved,
@@ -172,7 +178,7 @@ namespace KingdomSurvival.Chapter01
                 RoadDestinationReached, FollowedOldRoad, CrossedOldRoadBoundary,
                 OldRoadDetourInProgress, CartResolved, CartOutcomeSavedBoth,
                 CartOutcomeSavedMan, CartOutcomeSavedSeed, CartOutcomePassedBy,
-                CartCampEchoSeen, CampUnlocked
+                CartCampEchoSeen, CampUnlocked, FordWomanHelped
             };
         }
 

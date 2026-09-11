@@ -22,7 +22,8 @@ namespace KingdomSurvival.Chapter01
                 gameState.Narrative,
                 GetPresentCompanionIds(gameState),
                 GetPresentItemIds(gameState),
-                gameState.WorldSeed);
+                gameState.WorldSeed,
+                GetPartySize(gameState));
         }
 
         public static List<string> GetPresentCompanionIds(GameState gameState)
@@ -41,13 +42,15 @@ namespace KingdomSurvival.Chapter01
             return items;
         }
 
-        // 0, если отряд не в походе — герой идёт один (раздел 13.1: контекстное
-        // значение, а не постоянный флаг party_size_N).
+        // Размер экспедиции = герой + бойцы, 1..5 (P10-T04: PartySize —
+        // отдельное понятие от списка спутников PresentCompanionIds; герой
+        // всегда входит в отряд, даже когда идёт один). Не постоянный флаг
+        // party_size_N — контекстное значение, пересчитываемое каждый раз.
         public static int GetPartySize(GameState gameState)
         {
             if (gameState == null || !gameState.HasActiveExpedition || gameState.ActiveExpedition.FighterIds == null)
-                return 0;
-            return gameState.ActiveExpedition.FighterIds.Count;
+                return 1;
+            return gameState.ActiveExpedition.FighterIds.Count + 1;
         }
     }
 }

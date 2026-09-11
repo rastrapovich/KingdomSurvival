@@ -640,6 +640,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 case NarrativeConditionType.CheckFailed: return "Проверка была провалена";
                 case NarrativeConditionType.CheckNotAttempted: return "Проверка ещё не выполнялась";
                 case NarrativeConditionType.TraitPresent: return "У героя есть особенность";
+                case NarrativeConditionType.PartySizeAtLeast: return "Размер отряда не меньше";
+                case NarrativeConditionType.PartySizeAtMost: return "Размер отряда не больше";
                 default: return type.ToString();
             }
         }
@@ -776,6 +778,14 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
                 case NarrativeConditionType.TraitPresent:
                     DrawLongIdField(stringParam, "Особенность (ID)");
+                    break;
+
+                case NarrativeConditionType.PartySizeAtLeast:
+                    EditorGUILayout.PropertyField(intParam, new GUIContent("Минимум (герой + бойцы)"));
+                    break;
+
+                case NarrativeConditionType.PartySizeAtMost:
+                    EditorGUILayout.PropertyField(intParam, new GUIContent("Максимум (герой + бойцы)"));
                     break;
             }
 

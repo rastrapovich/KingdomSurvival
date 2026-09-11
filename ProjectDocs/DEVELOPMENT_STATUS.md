@@ -158,3 +158,33 @@ Camp `BringToFront()` сохранён. Fullscreen coordinator не добавл
 Сначала подтвердить текущий P09 hotfix в Unity по §8.
 
 После зелёной проверки продолжить production-проход первой главы с P10, не расширяя Camp Screen в отдельную survival-систему раньше сюжетной необходимости.
+
+## 10. P10 — «Старый брод и люди ниже по течению» (реализовано, не проверено)
+
+Код и данные для P10-T01…T04 написаны в этой сессии в удалённой среде без
+Unity Editor/C# compiler/Test Runner — **компиляция и `Run All` не
+запускались**. Перед тем как отмечать P10-T01…T04 выполненными в
+DevelopmentPlanSeedData, обязательно пройти §11 ниже.
+
+**P10-T04 (PartySize = герой + бойцы, 1..5):**
+- `NarrativeEvaluationContext` (`Assets/_Project/Scripts/Core/NarrativeState.cs`) получил свойство `PartySize` — новый опциональный параметр конструктора `int? partySize`, по умолчанию `PresentCompanionIds.Count + 1`.
+- `Chapter01ContextBuilder.GetPartySize()` (`Assets/_Project/Chapter01/Runtime/Chapter01ContextBuilder.cs`) теперь возвращает `FighterIds.Count + 1` (было `FighterIds.Count`, включая 0 без экспедиции); `Build()` передаёт это значение в контекст явно.
+- `NarrativeConditionType.PartySizeAtMost` добавлен в конец enum (индекс 13); `PartySizeAtLeast`/`PartySizeAtMost` в `NarrativeConditions.cs` теперь читают `context.PartySize`, а не `PresentCompanionIds.Count`.
+- Мигрированы два условия `PartySizeAtLeast` в D11B («Трое под телегой», `KingdomSurvivalDialogues.asset`): старое `>=1 боец` → `PartySize>=2 AND PartySize<=2`, старое `>=2 бойца` → `PartySize>=3`. Все существующие P09-тесты по составу отряда (`Chapter01P09Tests.cs`) проверены вручную построчно на новую семантику — поведение не меняется, но `Run All` не запускался.
+- `DialogueDatabaseWindow.cs` — добавлены русские подписи и поля инспектора для `PartySizeAtLeast`/`PartySizeAtMost` (раньше `PartySizeAtLeast` не имел ни подписи, ни собственного поля).
+- `NarrativeDialogueRuntimeSession.Start()` и `PrototypeUIController.Narrative.cs` получили опциональный/явный параметр `partySize`, использующий `Chapter01ContextBuilder.GetPartySize()`.
+
+**P10-T01/T02 (N12/N13):** оба диалога переведены из scaffold (`"черновик"`) в production (`status: 1`, тег `"production"`) в `KingdomSurvivalDialogues.asset`. N12 — линейный ствол (прибытие → материальный факт брода, независимый от характеристик → женщина → бытовой контакт → история утопленницы как человеческое свидетельство, без утверждения сверхъестественной природы → реактивные блоки на RepairOld/RepairNew/SevenToothGauge/OldCustom/OldSeventhChannel/WaterFlowIsWrong/PartySizeAtMost(2)/PartySizeAtLeast(4) → опциональная бытовая помощь женщине → направление дальше). Новый спикер `ford_woman` заменил старый scaffold-спикер `ford_witness` («Ребёнок Дома»). Новый флаг `Chapter01Ids.Flags.FordWomanHelped` — единственное эхо N12 в N13. N13 показывает последствие раньше объяснения, поведенческий выбор «дать понять, что пришли говорить» / «подойти как есть» — только presentation, без отдельного WeaponCondition и без влияния на бросок.
+
+**P10-T03 (FirstContact):** `chapter01.check.first_contact` — `ActiveDecisive`, `Quality: Character`, `CompetencyId: ""`, `Difficulty: 13`, модификаторы `KnowledgeKnown(OldCustom) +1` и `PartySizeAtLeast(4) -1`. Успех/провал ведут в разные узлы (`chapter01.node.13.success`/`.failure`), оба выдают `DownstreamPeople`/`DownstreamContact` — обязательный путь не блокируется провалом. `OldAgreement`/`SharedWaterSystem`/`HomeWasNotSelfSufficient` в P10 не выдаются (материал N14).
+
+**Тесты:** новый `Assets/_Project/Chapter01/Tests/EditMode/Chapter01P10Tests.cs` — структура/валидация D12/D13, реестр ID, PartySize (1..5 по числу бойцов), условия `PartySizeAtLeast`/`PartySizeAtMost`, регрессия D11B, N12 (флаг/знания/помощь/реактивные блоки), N13 (реактивные блоки, FirstContact spec, успех/провал, модификатор OldCustom, невозможность повторного броска, сохранение через `JsonUtility` round-trip). Файл написан, но **не скомпилирован и не запущен** в этой сессии.
+
+## 11. Что проверить после Pull (P10)
+
+1. Дождаться чистой Unity-компиляции, Console без C# errors (особенно из-за сдвинутой сигнатуры `NarrativeEvaluationContext`/`NarrativeDialogueRuntimeSession.Start`/`Chapter01ContextBuilder.GetPartySize`).
+2. Запустить полный EditMode `Run All`, включая новый `Chapter01P10Tests.cs` и уже существующий `Chapter01P09Tests.cs` (регрессия D11B).
+3. Открыть Dialogue Database Editor, убедиться, что D12/D13 проходят Validation без ошибок, а `PartySizeAtLeast`/`PartySizeAtMost` корректно отображаются в инспекторе условий.
+4. Пройти N12/N13 вручную: герой один, герой + 1 боец, герой + 3-4 бойца; с/без семизубой пластины; со старым/новым ремонтом; с помощью женщине и без; с успехом и провалом FirstContact. Проверить, что UI проверки показывает Характер/13/модификаторы и что повторный диалог не предлагает бросок снова.
+
+Только после этого отмечать P10-T01…T04 выполненными в `DevelopmentPlanSeedData.cs`/`KingdomSurvivalDevelopmentPlan.asset` и переходить к P11.

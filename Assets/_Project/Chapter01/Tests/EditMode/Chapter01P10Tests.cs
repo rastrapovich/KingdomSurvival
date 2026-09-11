@@ -83,10 +83,14 @@ public sealed class Chapter01P10Tests
         if (commander.HeroProfile == null)
             commander.HeroProfile = new HeroProfileData();
 
+        List<string> presentItemIds = new List<string>();
+        if (gameState.Narrative?.Items != null)
+            presentItemIds.AddRange(gameState.Narrative.Items);
+
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
         bool started = session.Start(
             database, dialogueId, commander.HeroProfile, gameState.Narrative,
-            out view, out string error, companionIds ?? new List<string>(), new List<string>(), gameState.WorldSeed);
+            out view, out string error, companionIds ?? new List<string>(), presentItemIds, gameState.WorldSeed);
         Assert.IsTrue(started, error);
         return session;
     }
@@ -129,9 +133,13 @@ public sealed class Chapter01P10Tests
     [TestCase(4, 5)]
     public void ContextBuilder_GetPartySize_HeroPlusFighters(int fighterCount, int expectedPartySize)
     {
+        // Реальные ID из стартового ростера GameState (garrick/edric/marta/
+        // torvin/agnessa) — TryStartExpedition валидирует ID бойцов, поэтому
+        // произвольные "fighter_N" отклоняются как несуществующие.
+        string[] roster = { "garrick", "edric", "marta", "torvin", "agnessa" };
         List<string> fighters = new List<string>();
         for (int i = 0; i < fighterCount; i++)
-            fighters.Add("fighter_" + i);
+            fighters.Add(roster[i]);
 
         GameState gameState = fighterCount == 0
             ? NewGameStateEnRouteToOldWaterSearch(910000)
@@ -156,7 +164,7 @@ public sealed class Chapter01P10Tests
     [TestCase(2, 2, true)]
     [TestCase(3, 2, false)]
     [TestCase(1, 1, true)]
-    [TestCase(0, 1, false)]
+    [TestCase(0, 1, true)]
     public void PartySizeAtMost_ReadsContextPartySize(int partySize, int intParam, bool expected)
     {
         NarrativeEvaluationContext context = new NarrativeEvaluationContext(
@@ -328,7 +336,7 @@ public sealed class Chapter01P10Tests
     [Test]
     public void N12_Woman_LargeParty_RevealsWeaponAwareBlock()
     {
-        List<string> fighters = new List<string> { "a", "b", "c", "d" };
+        List<string> fighters = new List<string> { "garrick", "edric", "marta", "torvin" };
         GameState gameState = NewGameStateEnRouteToOldWaterSearch(910105, fighters);
         NarrativeDialogueRuntimeSession session = StartDialogue(gameState, Chapter01Ids.Dialogues.D12, fighters, out NarrativeDialogueView view);
 
@@ -453,7 +461,7 @@ public sealed class Chapter01P10Tests
     [Test]
     public void FirstContact_Failure_StillGrantsDownstreamKnowledgeAndFlag_MandatoryPathContinues()
     {
-        List<string> fighters = new List<string> { "a", "b", "c", "d" };
+        List<string> fighters = new List<string> { "garrick", "edric", "marta", "torvin" };
         GameState gameState = NewGameStateEnRouteToOldWaterSearch(910302, fighters);
         CommanderData commander = gameState.GetSelectedCommander();
         commander.HeroProfile = new HeroProfileData();

@@ -16,7 +16,19 @@ MonoBehaviour:
   screens:
   - id: narrative-dialogue
     displayName: "\u0414\u0438\u0430\u043B\u043E\u0433"
-    description: "UI-M04: \u043F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u0430\u044F \u0441\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u0430 \u2014 Prototype_Main.uxml (narrative-dialogue-overlay) + Narrative.uss; \u043F\u0440\u0438\u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F \u043E\u0431\u0449\u0438\u043C UILayoutScreenBinder. portrait \u2014 \u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 (Kind.Portrait \u0432\u0441\u0435\u0433\u0434\u0430 \u043F\u043E\u043B\u0443\u0447\u0430\u0435\u0442 Rect/Background \u043E\u0442 \u0431\u0430\u0439\u043D\u0434\u0435\u0440\u0430); \u043F\u043E\u0437\u0438\u0446\u0438\u0438 \u043E\u0441\u0442\u0430\u043B\u044C\u043D\u044B\u0445 \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u043E\u0432 \u0434\u0435\u0440\u0436\u0438\u0442 CSS, override-\u0444\u043B\u0430\u0433\u0438 \u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D\u044B. \u041F\u043E\u0440\u0442\u0440\u0435\u0442 \u0433\u043E\u0432\u043E\u0440\u044F\u0449\u0435\u0433\u043E \u043F\u043E-\u043F\u0440\u0435\u0436\u043D\u0435\u043C\u0443 \u0441\u0442\u0430\u0432\u0438\u0442 \u0437\u0430\u0449\u0438\u0449\u0451\u043D\u043D\u044B\u0439 \u043A\u043E\u0434 PrototypeUIController.ApplyNarrativeSpeakerPortrait."
+    description: "UI-M04: \u043F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u0430\u044F
+      \u0441\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u0430 \u2014 Prototype_Main.uxml
+      (narrative-dialogue-overlay) + Narrative.uss; \u043F\u0440\u0438\u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F
+      \u043E\u0431\u0449\u0438\u043C UILayoutScreenBinder. portrait \u2014 \u0438\u0441\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435
+      (Kind.Portrait \u0432\u0441\u0435\u0433\u0434\u0430 \u043F\u043E\u043B\u0443\u0447\u0430\u0435\u0442
+      Rect/Background \u043E\u0442 \u0431\u0430\u0439\u043D\u0434\u0435\u0440\u0430);
+      \u043F\u043E\u0437\u0438\u0446\u0438\u0438 \u043E\u0441\u0442\u0430\u043B\u044C\u043D\u044B\u0445
+      \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u043E\u0432 \u0434\u0435\u0440\u0436\u0438\u0442
+      CSS, override-\u0444\u043B\u0430\u0433\u0438 \u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D\u044B.
+      \u041F\u043E\u0440\u0442\u0440\u0435\u0442 \u0433\u043E\u0432\u043E\u0440\u044F\u0449\u0435\u0433\u043E
+      \u043F\u043E-\u043F\u0440\u0435\u0436\u043D\u0435\u043C\u0443 \u0441\u0442\u0430\u0432\u0438\u0442
+      \u0437\u0430\u0449\u0438\u0449\u0451\u043D\u043D\u044B\u0439 \u043A\u043E\u0434
+      PrototypeUIController.ApplyNarrativeSpeakerPortrait."
     usesDimming: 1
     dimmingOpacity: 0.91
     autoApply: 1
@@ -100,7 +112,7 @@ MonoBehaviour:
       displayName: "\u041F\u043E\u0440\u0442\u0440\u0435\u0442"
       parentId: overlay
       kind: 5
-      portraitSize: 2
+      portraitSize: 5
       targetName: narrative-dialogue-portrait
       overrideRect: 0
       overrideBackground: 0
@@ -108,10 +120,10 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 1190.0675
-        y: 118.48474
-        width: 200
-        height: 280
+        x: 1148.2106
+        y: 95.52539
+        width: 250
+        height: 350
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -137,8 +149,8 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 975.83514
-        y: 402.98602
+        x: 980.6514
+        y: 443.9242
         width: 372.25385
         height: 55.579067
       sprite: {fileID: 0}
@@ -166,8 +178,8 @@ MonoBehaviour:
       previewText: 
       rect:
         serializedVersion: 2
-        x: 889.1026
-        y: 455.19797
+        x: 896.32697
+        y: 491.3199
         width: 459.84024
         height: 57.28574
       sprite: {fileID: 0}
@@ -893,7 +905,7 @@ MonoBehaviour:
     rootName: incident-modal-overlay
     requiredElements:
     - elementId: overlay
-      expectedParentId:
+      expectedParentId: 
     - elementId: incident-modal-title
       expectedParentId: overlay
     - elementId: incident-modal-description
@@ -1059,7 +1071,7 @@ MonoBehaviour:
     rootName: game-over-overlay
     requiredElements:
     - elementId: overlay
-      expectedParentId:
+      expectedParentId: 
     - elementId: game-over-days-label
       expectedParentId: overlay
     - elementId: restart-game-button
@@ -2010,8 +2022,16 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
   - id: hero-screen
-    displayName: "Экран героя"
-    description: "Полноэкранный слой героя (UI-M03): состав похода, характеристики, теги, снаряжение и инвентарь. Структура - Prototype_Main.uxml, Controller в PrototypeUIController.HeroScreen только находит элементы и наполняет их данными."
+    displayName: "\u042D\u043A\u0440\u0430\u043D \u0433\u0435\u0440\u043E\u044F"
+    description: "\u041F\u043E\u043B\u043D\u043E\u044D\u043A\u0440\u0430\u043D\u043D\u044B\u0439
+      \u0441\u043B\u043E\u0439 \u0433\u0435\u0440\u043E\u044F (UI-M03): \u0441\u043E\u0441\u0442\u0430\u0432
+      \u043F\u043E\u0445\u043E\u0434\u0430, \u0445\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A\u0438,
+      \u0442\u0435\u0433\u0438, \u0441\u043D\u0430\u0440\u044F\u0436\u0435\u043D\u0438\u0435
+      \u0438 \u0438\u043D\u0432\u0435\u043D\u0442\u0430\u0440\u044C. \u0421\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u0430
+      - Prototype_Main.uxml, Controller \u0432 PrototypeUIController.HeroScreen \u0442\u043E\u043B\u044C\u043A\u043E
+      \u043D\u0430\u0445\u043E\u0434\u0438\u0442 \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u044B
+      \u0438 \u043D\u0430\u043F\u043E\u043B\u043D\u044F\u0435\u0442 \u0438\u0445
+      \u0434\u0430\u043D\u043D\u044B\u043C\u0438."
     usesDimming: 0
     dimmingOpacity: 0.68
     autoApply: 1
@@ -2259,7 +2279,7 @@ MonoBehaviour:
       expectedParentId: hero-screen-unit-card
     elements:
     - id: hero-screen-overlay
-      displayName: "overlay"
+      displayName: overlay
       parentId: 
       kind: 4
       portraitSize: 2
@@ -2288,7 +2308,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-header
-      displayName: "header"
+      displayName: header
       parentId: hero-screen-overlay
       kind: 4
       portraitSize: 2
@@ -2317,7 +2337,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-title
-      displayName: "title"
+      displayName: title
       parentId: hero-screen-header
       kind: 1
       portraitSize: 2
@@ -2325,7 +2345,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ГЕРОЙ"
+      previewText: "\u0413\u0415\u0420\u041E\u0419"
       rect:
         serializedVersion: 2
         x: 50
@@ -2346,7 +2366,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-close-button
-      displayName: "close button"
+      displayName: close button
       parentId: hero-screen-header
       kind: 3
       portraitSize: 2
@@ -2354,7 +2374,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ЗАКРЫТЬ"
+      previewText: "\u0417\u0410\u041A\u0420\u042B\u0422\u042C"
       rect:
         serializedVersion: 2
         x: 50
@@ -2375,7 +2395,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-columns
-      displayName: "columns"
+      displayName: columns
       parentId: hero-screen-overlay
       kind: 4
       portraitSize: 2
@@ -2404,7 +2424,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-left-column
-      displayName: "left column"
+      displayName: left column
       parentId: hero-screen-columns
       kind: 4
       portraitSize: 2
@@ -2433,7 +2453,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-left-column-scroll
-      displayName: "left column scroll"
+      displayName: left column scroll
       parentId: hero-screen-left-column
       kind: 4
       portraitSize: 2
@@ -2462,7 +2482,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-identity
-      displayName: "identity"
+      displayName: identity
       parentId: hero-screen-left-column-scroll
       kind: 0
       portraitSize: 2
@@ -2491,7 +2511,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-identity-title
-      displayName: "identity title"
+      displayName: identity title
       parentId: hero-screen-identity
       kind: 1
       portraitSize: 2
@@ -2499,7 +2519,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ГЕРОЙ"
+      previewText: "\u0413\u0415\u0420\u041E\u0419"
       rect:
         serializedVersion: 2
         x: 98
@@ -2520,7 +2540,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-portrait
-      displayName: "portrait"
+      displayName: portrait
       parentId: hero-screen-identity
       kind: 0
       portraitSize: 2
@@ -2549,7 +2569,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-name
-      displayName: "name"
+      displayName: name
       parentId: hero-screen-identity
       kind: 1
       portraitSize: 2
@@ -2557,7 +2577,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Командир"
+      previewText: "\u041A\u043E\u043C\u0430\u043D\u0434\u0438\u0440"
       rect:
         serializedVersion: 2
         x: 98
@@ -2578,7 +2598,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-role
-      displayName: "role"
+      displayName: role
       parentId: hero-screen-identity
       kind: 1
       portraitSize: 2
@@ -2586,7 +2606,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Командир поселения"
+      previewText: "\u041A\u043E\u043C\u0430\u043D\u0434\u0438\u0440 \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F"
       rect:
         serializedVersion: 2
         x: 98
@@ -2607,7 +2627,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-experience
-      displayName: "experience"
+      displayName: experience
       parentId: hero-screen-identity
       kind: 4
       portraitSize: 2
@@ -2636,7 +2656,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-level
-      displayName: "level"
+      displayName: level
       parentId: hero-screen-experience
       kind: 1
       portraitSize: 2
@@ -2644,7 +2664,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Уровень 1"
+      previewText: "\u0423\u0440\u043E\u0432\u0435\u043D\u044C 1"
       rect:
         serializedVersion: 2
         x: 114
@@ -2665,7 +2685,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-experience-label
-      displayName: "experience label"
+      displayName: experience label
       parentId: hero-screen-experience
       kind: 1
       portraitSize: 2
@@ -2673,7 +2693,8 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "система опыта не продумана"
+      previewText: "\u0441\u0438\u0441\u0442\u0435\u043C\u0430 \u043E\u043F\u044B\u0442\u0430
+        \u043D\u0435 \u043F\u0440\u043E\u0434\u0443\u043C\u0430\u043D\u0430"
       rect:
         serializedVersion: 2
         x: 114
@@ -2694,7 +2715,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-experience-track
-      displayName: "experience track"
+      displayName: experience track
       parentId: hero-screen-experience
       kind: 0
       portraitSize: 2
@@ -2723,7 +2744,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-experience-fill
-      displayName: "experience fill"
+      displayName: experience fill
       parentId: hero-screen-experience-track
       kind: 4
       portraitSize: 2
@@ -2752,7 +2773,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-states
-      displayName: "states"
+      displayName: states
       parentId: hero-screen-left-column-scroll
       kind: 0
       portraitSize: 2
@@ -2781,7 +2802,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-states-title
-      displayName: "states title"
+      displayName: states title
       parentId: hero-screen-states
       kind: 1
       portraitSize: 2
@@ -2789,7 +2810,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "СОСТОЯНИЯ"
+      previewText: "\u0421\u041E\u0421\u0422\u041E\u042F\u041D\u0418\u042F"
       rect:
         serializedVersion: 2
         x: 98
@@ -2810,7 +2831,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-states-row
-      displayName: "states row"
+      displayName: states row
       parentId: hero-screen-states
       kind: 4
       portraitSize: 2
@@ -2839,7 +2860,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-state-phase-chip
-      displayName: "state phase chip"
+      displayName: state phase chip
       parentId: hero-screen-states-row
       kind: 1
       portraitSize: 2
@@ -2868,7 +2889,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-states-hint
-      displayName: "states hint"
+      displayName: states hint
       parentId: hero-screen-states-row
       kind: 1
       portraitSize: 2
@@ -2876,7 +2897,9 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Система состояний будет реализована позже."
+      previewText: "\u0421\u0438\u0441\u0442\u0435\u043C\u0430 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0439
+        \u0431\u0443\u0434\u0435\u0442 \u0440\u0435\u0430\u043B\u0438\u0437\u043E\u0432\u0430\u043D\u0430
+        \u043F\u043E\u0437\u0436\u0435."
       rect:
         serializedVersion: 2
         x: 114
@@ -2897,7 +2920,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-supply
-      displayName: "supply"
+      displayName: supply
       parentId: hero-screen-left-column-scroll
       kind: 0
       portraitSize: 2
@@ -2926,7 +2949,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-supply-title
-      displayName: "supply title"
+      displayName: supply title
       parentId: hero-screen-supply
       kind: 1
       portraitSize: 2
@@ -2934,7 +2957,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ЗАПАСЫ ОТРЯДА"
+      previewText: "\u0417\u0410\u041F\u0410\u0421\u042B \u041E\u0422\u0420\u042F\u0414\u0410"
       rect:
         serializedVersion: 2
         x: 98
@@ -2955,7 +2978,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-army-gold-minus-button
-      displayName: "army gold minus button"
+      displayName: army gold minus button
       parentId: hero-screen-supply
       kind: 3
       portraitSize: 2
@@ -2963,7 +2986,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "−"
+      previewText: "\u2212"
       rect:
         serializedVersion: 2
         x: 98
@@ -2984,7 +3007,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-army-gold-label
-      displayName: "army gold label"
+      displayName: army gold label
       parentId: hero-screen-supply
       kind: 1
       portraitSize: 2
@@ -2992,7 +3015,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "0"
+      previewText: 0
       rect:
         serializedVersion: 2
         x: 98
@@ -3013,7 +3036,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-army-gold-plus-button
-      displayName: "army gold plus button"
+      displayName: army gold plus button
       parentId: hero-screen-supply
       kind: 3
       portraitSize: 2
@@ -3021,7 +3044,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "+"
+      previewText: +
       rect:
         serializedVersion: 2
         x: 98
@@ -3042,7 +3065,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-supply-minus-button
-      displayName: "supply minus button"
+      displayName: supply minus button
       parentId: hero-screen-supply
       kind: 3
       portraitSize: 2
@@ -3050,7 +3073,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "−"
+      previewText: "\u2212"
       rect:
         serializedVersion: 2
         x: 98
@@ -3071,7 +3094,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-supply-value-label
-      displayName: "supply value label"
+      displayName: supply value label
       parentId: hero-screen-supply
       kind: 1
       portraitSize: 2
@@ -3079,7 +3102,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "0"
+      previewText: 0
       rect:
         serializedVersion: 2
         x: 98
@@ -3100,7 +3123,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-supply-plus-button
-      displayName: "supply plus button"
+      displayName: supply plus button
       parentId: hero-screen-supply
       kind: 3
       portraitSize: 2
@@ -3108,7 +3131,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "+"
+      previewText: +
       rect:
         serializedVersion: 2
         x: 98
@@ -3129,7 +3152,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-supply-consumption-label
-      displayName: "supply consumption label"
+      displayName: supply consumption label
       parentId: hero-screen-supply
       kind: 1
       portraitSize: 2
@@ -3137,7 +3160,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Расход: —"
+      previewText: "\u0420\u0430\u0441\u0445\u043E\u0434: \u2014"
       rect:
         serializedVersion: 2
         x: 98
@@ -3158,7 +3181,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-supply-days-label
-      displayName: "supply days label"
+      displayName: supply days label
       parentId: hero-screen-supply
       kind: 1
       portraitSize: 2
@@ -3166,7 +3189,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Хватит на: —"
+      previewText: "\u0425\u0432\u0430\u0442\u0438\u0442 \u043D\u0430: \u2014"
       rect:
         serializedVersion: 2
         x: 98
@@ -3187,7 +3210,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-center-column
-      displayName: "center column"
+      displayName: center column
       parentId: hero-screen-columns
       kind: 4
       portraitSize: 2
@@ -3216,7 +3239,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-center-column-scroll
-      displayName: "center column scroll"
+      displayName: center column scroll
       parentId: hero-screen-center-column
       kind: 4
       portraitSize: 2
@@ -3245,7 +3268,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-qualities
-      displayName: "qualities"
+      displayName: qualities
       parentId: hero-screen-center-column-scroll
       kind: 0
       portraitSize: 2
@@ -3274,7 +3297,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-qualities-title
-      displayName: "qualities title"
+      displayName: qualities title
       parentId: hero-screen-qualities
       kind: 1
       portraitSize: 2
@@ -3282,7 +3305,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "КАЧЕСТВА"
+      previewText: "\u041A\u0410\u0427\u0415\u0421\u0422\u0412\u0410"
       rect:
         serializedVersion: 2
         x: 98
@@ -3303,7 +3326,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-qualities-grid
-      displayName: "qualities grid"
+      displayName: qualities grid
       parentId: hero-screen-qualities
       kind: 4
       portraitSize: 2
@@ -3332,7 +3355,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-strength
-      displayName: "quality strength"
+      displayName: quality strength
       parentId: hero-screen-qualities-grid
       kind: 0
       portraitSize: 2
@@ -3361,7 +3384,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-strength-value
-      displayName: "quality strength value"
+      displayName: quality strength value
       parentId: hero-screen-quality-strength
       kind: 1
       portraitSize: 2
@@ -3390,7 +3413,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-dexterity
-      displayName: "quality dexterity"
+      displayName: quality dexterity
       parentId: hero-screen-qualities-grid
       kind: 0
       portraitSize: 2
@@ -3419,7 +3442,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-dexterity-value
-      displayName: "quality dexterity value"
+      displayName: quality dexterity value
       parentId: hero-screen-quality-dexterity
       kind: 1
       portraitSize: 2
@@ -3448,7 +3471,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-fortitude
-      displayName: "quality fortitude"
+      displayName: quality fortitude
       parentId: hero-screen-qualities-grid
       kind: 0
       portraitSize: 2
@@ -3477,7 +3500,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-fortitude-value
-      displayName: "quality fortitude value"
+      displayName: quality fortitude value
       parentId: hero-screen-quality-fortitude
       kind: 1
       portraitSize: 2
@@ -3506,7 +3529,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-instinct
-      displayName: "quality instinct"
+      displayName: quality instinct
       parentId: hero-screen-qualities-grid
       kind: 0
       portraitSize: 2
@@ -3535,7 +3558,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-instinct-value
-      displayName: "quality instinct value"
+      displayName: quality instinct value
       parentId: hero-screen-quality-instinct
       kind: 1
       portraitSize: 2
@@ -3564,7 +3587,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-judgment
-      displayName: "quality judgment"
+      displayName: quality judgment
       parentId: hero-screen-qualities-grid
       kind: 0
       portraitSize: 2
@@ -3593,7 +3616,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-judgment-value
-      displayName: "quality judgment value"
+      displayName: quality judgment value
       parentId: hero-screen-quality-judgment
       kind: 1
       portraitSize: 2
@@ -3622,7 +3645,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-character
-      displayName: "quality character"
+      displayName: quality character
       parentId: hero-screen-qualities-grid
       kind: 0
       portraitSize: 2
@@ -3651,7 +3674,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-quality-character-value
-      displayName: "quality character value"
+      displayName: quality character value
       parentId: hero-screen-quality-character
       kind: 1
       portraitSize: 2
@@ -3680,7 +3703,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-competencies
-      displayName: "competencies"
+      displayName: competencies
       parentId: hero-screen-center-column-scroll
       kind: 0
       portraitSize: 2
@@ -3709,7 +3732,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-competencies-title
-      displayName: "competencies title"
+      displayName: competencies title
       parentId: hero-screen-competencies
       kind: 1
       portraitSize: 2
@@ -3717,7 +3740,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "КОМПЕТЕНЦИИ"
+      previewText: "\u041A\u041E\u041C\u041F\u0415\u0422\u0415\u041D\u0426\u0418\u0418"
       rect:
         serializedVersion: 2
         x: 98
@@ -3738,7 +3761,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-competencies-row
-      displayName: "competencies row"
+      displayName: competencies row
       parentId: hero-screen-competencies
       kind: 4
       portraitSize: 2
@@ -3767,7 +3790,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-traits
-      displayName: "traits"
+      displayName: traits
       parentId: hero-screen-center-column-scroll
       kind: 0
       portraitSize: 2
@@ -3796,7 +3819,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-traits-title
-      displayName: "traits title"
+      displayName: traits title
       parentId: hero-screen-traits
       kind: 1
       portraitSize: 2
@@ -3804,7 +3827,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ОСОБЕННОСТИ"
+      previewText: "\u041E\u0421\u041E\u0411\u0415\u041D\u041D\u041E\u0421\u0422\u0418"
       rect:
         serializedVersion: 2
         x: 98
@@ -3825,7 +3848,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-traits-row
-      displayName: "traits row"
+      displayName: traits row
       parentId: hero-screen-traits
       kind: 4
       portraitSize: 2
@@ -3854,7 +3877,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stats
-      displayName: "stats"
+      displayName: stats
       parentId: hero-screen-center-column-scroll
       kind: 0
       portraitSize: 2
@@ -3883,7 +3906,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stats-title
-      displayName: "stats title"
+      displayName: stats title
       parentId: hero-screen-stats
       kind: 1
       portraitSize: 2
@@ -3891,7 +3914,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "БОЕВЫЕ ХАРАКТЕРИСТИКИ"
+      previewText: "\u0411\u041E\u0415\u0412\u042B\u0415 \u0425\u0410\u0420\u0410\u041A\u0422\u0415\u0420\u0418\u0421\u0422\u0418\u041A\u0418"
       rect:
         serializedVersion: 2
         x: 98
@@ -3912,7 +3935,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stats-grid
-      displayName: "stats grid"
+      displayName: stats grid
       parentId: hero-screen-stats
       kind: 4
       portraitSize: 2
@@ -3941,7 +3964,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-health
-      displayName: "stat health"
+      displayName: stat health
       parentId: hero-screen-stats-grid
       kind: 0
       portraitSize: 2
@@ -3970,7 +3993,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-health-value
-      displayName: "stat health value"
+      displayName: stat health value
       parentId: hero-screen-stat-health
       kind: 1
       portraitSize: 2
@@ -3999,7 +4022,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-attack
-      displayName: "stat attack"
+      displayName: stat attack
       parentId: hero-screen-stats-grid
       kind: 0
       portraitSize: 2
@@ -4028,7 +4051,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-attack-value
-      displayName: "stat attack value"
+      displayName: stat attack value
       parentId: hero-screen-stat-attack
       kind: 1
       portraitSize: 2
@@ -4057,7 +4080,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-defense
-      displayName: "stat defense"
+      displayName: stat defense
       parentId: hero-screen-stats-grid
       kind: 0
       portraitSize: 2
@@ -4086,7 +4109,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-defense-value
-      displayName: "stat defense value"
+      displayName: stat defense value
       parentId: hero-screen-stat-defense
       kind: 1
       portraitSize: 2
@@ -4115,7 +4138,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-damage
-      displayName: "stat damage"
+      displayName: stat damage
       parentId: hero-screen-stats-grid
       kind: 0
       portraitSize: 2
@@ -4144,7 +4167,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-damage-value
-      displayName: "stat damage value"
+      displayName: stat damage value
       parentId: hero-screen-stat-damage
       kind: 1
       portraitSize: 2
@@ -4173,7 +4196,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-movement
-      displayName: "stat movement"
+      displayName: stat movement
       parentId: hero-screen-stats-grid
       kind: 0
       portraitSize: 2
@@ -4202,7 +4225,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-movement-value
-      displayName: "stat movement value"
+      displayName: stat movement value
       parentId: hero-screen-stat-movement
       kind: 1
       portraitSize: 2
@@ -4231,7 +4254,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-initiative
-      displayName: "stat initiative"
+      displayName: stat initiative
       parentId: hero-screen-stats-grid
       kind: 0
       portraitSize: 2
@@ -4260,7 +4283,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-initiative-value
-      displayName: "stat initiative value"
+      displayName: stat initiative value
       parentId: hero-screen-stat-initiative
       kind: 1
       portraitSize: 2
@@ -4289,7 +4312,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-attack-range
-      displayName: "stat attack range"
+      displayName: stat attack range
       parentId: hero-screen-stats-grid
       kind: 0
       portraitSize: 2
@@ -4318,7 +4341,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-attack-range-value
-      displayName: "stat attack range value"
+      displayName: stat attack range value
       parentId: hero-screen-stat-attack-range
       kind: 1
       portraitSize: 2
@@ -4347,7 +4370,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-tags
-      displayName: "tags"
+      displayName: tags
       parentId: hero-screen-center-column-scroll
       kind: 0
       portraitSize: 2
@@ -4376,7 +4399,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-tags-title
-      displayName: "tags title"
+      displayName: tags title
       parentId: hero-screen-tags
       kind: 1
       portraitSize: 2
@@ -4384,7 +4407,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ТЕГИ"
+      previewText: "\u0422\u0415\u0413\u0418"
       rect:
         serializedVersion: 2
         x: 98
@@ -4405,7 +4428,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-tags-row
-      displayName: "tags row"
+      displayName: tags row
       parentId: hero-screen-tags
       kind: 4
       portraitSize: 2
@@ -4434,7 +4457,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-abilities
-      displayName: "abilities"
+      displayName: abilities
       parentId: hero-screen-center-column-scroll
       kind: 0
       portraitSize: 2
@@ -4463,7 +4486,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-abilities-title
-      displayName: "abilities title"
+      displayName: abilities title
       parentId: hero-screen-abilities
       kind: 1
       portraitSize: 2
@@ -4471,7 +4494,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "СПОСОБНОСТИ"
+      previewText: "\u0421\u041F\u041E\u0421\u041E\u0411\u041D\u041E\u0421\u0422\u0418"
       rect:
         serializedVersion: 2
         x: 98
@@ -4492,7 +4515,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-abilities-row
-      displayName: "abilities row"
+      displayName: abilities row
       parentId: hero-screen-abilities
       kind: 4
       portraitSize: 2
@@ -4521,7 +4544,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-ability-slot-1
-      displayName: "ability slot 1"
+      displayName: ability slot 1
       parentId: hero-screen-abilities-row
       kind: 0
       portraitSize: 2
@@ -4550,7 +4573,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-ability-slot-2
-      displayName: "ability slot 2"
+      displayName: ability slot 2
       parentId: hero-screen-abilities-row
       kind: 0
       portraitSize: 2
@@ -4579,7 +4602,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-ability-slot-3
-      displayName: "ability slot 3"
+      displayName: ability slot 3
       parentId: hero-screen-abilities-row
       kind: 0
       portraitSize: 2
@@ -4608,7 +4631,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-abilities-hint
-      displayName: "abilities hint"
+      displayName: abilities hint
       parentId: hero-screen-abilities-row
       kind: 1
       portraitSize: 2
@@ -4616,7 +4639,8 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Умения героя ещё не спроектированы."
+      previewText: "\u0423\u043C\u0435\u043D\u0438\u044F \u0433\u0435\u0440\u043E\u044F
+        \u0435\u0449\u0451 \u043D\u0435 \u0441\u043F\u0440\u043E\u0435\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u044B."
       rect:
         serializedVersion: 2
         x: 114
@@ -4637,7 +4661,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-right-column
-      displayName: "right column"
+      displayName: right column
       parentId: hero-screen-columns
       kind: 4
       portraitSize: 2
@@ -4666,7 +4690,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-right-column-scroll
-      displayName: "right column scroll"
+      displayName: right column scroll
       parentId: hero-screen-right-column
       kind: 4
       portraitSize: 2
@@ -4695,7 +4719,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-equipment
-      displayName: "equipment"
+      displayName: equipment
       parentId: hero-screen-right-column-scroll
       kind: 0
       portraitSize: 2
@@ -4724,7 +4748,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-equipment-title
-      displayName: "equipment title"
+      displayName: equipment title
       parentId: hero-screen-equipment
       kind: 1
       portraitSize: 2
@@ -4732,7 +4756,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "СНАРЯЖЕНИЕ"
+      previewText: "\u0421\u041D\u0410\u0420\u042F\u0416\u0415\u041D\u0418\u0415"
       rect:
         serializedVersion: 2
         x: 98
@@ -4753,7 +4777,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-equipment-grid
-      displayName: "equipment grid"
+      displayName: equipment grid
       parentId: hero-screen-equipment
       kind: 4
       portraitSize: 2
@@ -4782,7 +4806,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-equipment-slot-1
-      displayName: "equipment slot 1"
+      displayName: equipment slot 1
       parentId: hero-screen-equipment-grid
       kind: 0
       portraitSize: 2
@@ -4811,7 +4835,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-equipment-slot-2
-      displayName: "equipment slot 2"
+      displayName: equipment slot 2
       parentId: hero-screen-equipment-grid
       kind: 0
       portraitSize: 2
@@ -4840,7 +4864,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-equipment-slot-3
-      displayName: "equipment slot 3"
+      displayName: equipment slot 3
       parentId: hero-screen-equipment-grid
       kind: 0
       portraitSize: 2
@@ -4869,7 +4893,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-equipment-slot-4
-      displayName: "equipment slot 4"
+      displayName: equipment slot 4
       parentId: hero-screen-equipment-grid
       kind: 0
       portraitSize: 2
@@ -4898,7 +4922,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-equipment-slot-5
-      displayName: "equipment slot 5"
+      displayName: equipment slot 5
       parentId: hero-screen-equipment-grid
       kind: 0
       portraitSize: 2
@@ -4927,7 +4951,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-equipment-slot-6
-      displayName: "equipment slot 6"
+      displayName: equipment slot 6
       parentId: hero-screen-equipment-grid
       kind: 0
       portraitSize: 2
@@ -4956,7 +4980,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory
-      displayName: "inventory"
+      displayName: inventory
       parentId: hero-screen-right-column-scroll
       kind: 0
       portraitSize: 2
@@ -4985,7 +5009,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-title
-      displayName: "inventory title"
+      displayName: inventory title
       parentId: hero-screen-inventory
       kind: 1
       portraitSize: 2
@@ -4993,7 +5017,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ИНВЕНТАРЬ"
+      previewText: "\u0418\u041D\u0412\u0415\u041D\u0422\u0410\u0420\u042C"
       rect:
         serializedVersion: 2
         x: 98
@@ -5014,7 +5038,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-grid
-      displayName: "inventory grid"
+      displayName: inventory grid
       parentId: hero-screen-inventory
       kind: 4
       portraitSize: 2
@@ -5043,7 +5067,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-1
-      displayName: "inventory slot 1"
+      displayName: inventory slot 1
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5072,7 +5096,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-2
-      displayName: "inventory slot 2"
+      displayName: inventory slot 2
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5101,7 +5125,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-3
-      displayName: "inventory slot 3"
+      displayName: inventory slot 3
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5130,7 +5154,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-4
-      displayName: "inventory slot 4"
+      displayName: inventory slot 4
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5159,7 +5183,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-5
-      displayName: "inventory slot 5"
+      displayName: inventory slot 5
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5188,7 +5212,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-6
-      displayName: "inventory slot 6"
+      displayName: inventory slot 6
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5217,7 +5241,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-7
-      displayName: "inventory slot 7"
+      displayName: inventory slot 7
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5246,7 +5270,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-8
-      displayName: "inventory slot 8"
+      displayName: inventory slot 8
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5275,7 +5299,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-9
-      displayName: "inventory slot 9"
+      displayName: inventory slot 9
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5304,7 +5328,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-10
-      displayName: "inventory slot 10"
+      displayName: inventory slot 10
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5333,7 +5357,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-11
-      displayName: "inventory slot 11"
+      displayName: inventory slot 11
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5362,7 +5386,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-inventory-slot-12
-      displayName: "inventory slot 12"
+      displayName: inventory slot 12
       parentId: hero-screen-inventory-grid
       kind: 0
       portraitSize: 2
@@ -5391,7 +5415,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-bar
-      displayName: "roster bar"
+      displayName: roster bar
       parentId: hero-screen-overlay
       kind: 4
       portraitSize: 2
@@ -5420,7 +5444,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster
-      displayName: "roster"
+      displayName: roster
       parentId: hero-screen-roster-bar
       kind: 0
       portraitSize: 2
@@ -5449,7 +5473,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-title
-      displayName: "roster title"
+      displayName: roster title
       parentId: hero-screen-roster
       kind: 1
       portraitSize: 2
@@ -5457,7 +5481,9 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "СОСТАВ ПОХОДА — командир и до четырёх бойцов"
+      previewText: "\u0421\u041E\u0421\u0422\u0410\u0412 \u041F\u041E\u0425\u041E\u0414\u0410
+        \u2014 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440 \u0438 \u0434\u043E
+        \u0447\u0435\u0442\u044B\u0440\u0451\u0445 \u0431\u043E\u0439\u0446\u043E\u0432"
       rect:
         serializedVersion: 2
         x: 66
@@ -5478,7 +5504,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-row
-      displayName: "roster row"
+      displayName: roster row
       parentId: hero-screen-roster
       kind: 4
       portraitSize: 2
@@ -5507,7 +5533,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander
-      displayName: "roster commander"
+      displayName: roster commander
       parentId: hero-screen-roster-row
       kind: 0
       portraitSize: 2
@@ -5536,7 +5562,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-portrait
-      displayName: "roster commander portrait"
+      displayName: roster commander portrait
       parentId: hero-screen-roster-commander
       kind: 0
       portraitSize: 2
@@ -5565,7 +5591,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-name
-      displayName: "roster commander name"
+      displayName: roster commander name
       parentId: hero-screen-roster-commander
       kind: 1
       portraitSize: 2
@@ -5594,7 +5620,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-role
-      displayName: "roster commander role"
+      displayName: roster commander role
       parentId: hero-screen-roster-commander
       kind: 1
       portraitSize: 2
@@ -5623,7 +5649,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-status
-      displayName: "roster commander status"
+      displayName: roster commander status
       parentId: hero-screen-roster-commander
       kind: 4
       portraitSize: 2
@@ -5652,7 +5678,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-hp
-      displayName: "roster commander hp"
+      displayName: roster commander hp
       parentId: hero-screen-roster-commander-status
       kind: 1
       portraitSize: 2
@@ -5681,7 +5707,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-condition
-      displayName: "roster commander condition"
+      displayName: roster commander condition
       parentId: hero-screen-roster-commander-status
       kind: 1
       portraitSize: 2
@@ -5710,7 +5736,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-level
-      displayName: "roster commander level"
+      displayName: roster commander level
       parentId: hero-screen-roster-commander-status
       kind: 1
       portraitSize: 2
@@ -5739,7 +5765,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-healthbar
-      displayName: "roster commander healthbar"
+      displayName: roster commander healthbar
       parentId: hero-screen-roster-commander
       kind: 0
       portraitSize: 2
@@ -5768,7 +5794,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-healthbar-fill
-      displayName: "roster commander healthbar fill"
+      displayName: roster commander healthbar fill
       parentId: hero-screen-roster-commander-healthbar
       kind: 4
       portraitSize: 2
@@ -5797,7 +5823,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-role-chip
-      displayName: "roster commander role chip"
+      displayName: roster commander role chip
       parentId: hero-screen-roster-commander
       kind: 1
       portraitSize: 2
@@ -5826,7 +5852,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-commander-hint
-      displayName: "roster commander hint"
+      displayName: roster commander hint
       parentId: hero-screen-roster-commander
       kind: 1
       portraitSize: 2
@@ -5834,7 +5860,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ПКМ: сведения"
+      previewText: "\u041F\u041A\u041C: \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F"
       rect:
         serializedVersion: 2
         x: 98
@@ -5855,7 +5881,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1
-      displayName: "roster fighter 1"
+      displayName: roster fighter 1
       parentId: hero-screen-roster-row
       kind: 0
       portraitSize: 2
@@ -5884,7 +5910,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-portrait
-      displayName: "roster fighter 1 portrait"
+      displayName: roster fighter 1 portrait
       parentId: hero-screen-roster-fighter-1
       kind: 0
       portraitSize: 2
@@ -5913,7 +5939,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-name
-      displayName: "roster fighter 1 name"
+      displayName: roster fighter 1 name
       parentId: hero-screen-roster-fighter-1
       kind: 1
       portraitSize: 2
@@ -5942,7 +5968,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-role
-      displayName: "roster fighter 1 role"
+      displayName: roster fighter 1 role
       parentId: hero-screen-roster-fighter-1
       kind: 1
       portraitSize: 2
@@ -5971,7 +5997,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-status
-      displayName: "roster fighter 1 status"
+      displayName: roster fighter 1 status
       parentId: hero-screen-roster-fighter-1
       kind: 4
       portraitSize: 2
@@ -6000,7 +6026,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-hp
-      displayName: "roster fighter 1 hp"
+      displayName: roster fighter 1 hp
       parentId: hero-screen-roster-fighter-1-status
       kind: 1
       portraitSize: 2
@@ -6029,7 +6055,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-condition
-      displayName: "roster fighter 1 condition"
+      displayName: roster fighter 1 condition
       parentId: hero-screen-roster-fighter-1-status
       kind: 1
       portraitSize: 2
@@ -6058,7 +6084,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-level
-      displayName: "roster fighter 1 level"
+      displayName: roster fighter 1 level
       parentId: hero-screen-roster-fighter-1-status
       kind: 1
       portraitSize: 2
@@ -6087,7 +6113,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-healthbar
-      displayName: "roster fighter 1 healthbar"
+      displayName: roster fighter 1 healthbar
       parentId: hero-screen-roster-fighter-1
       kind: 0
       portraitSize: 2
@@ -6116,7 +6142,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-healthbar-fill
-      displayName: "roster fighter 1 healthbar fill"
+      displayName: roster fighter 1 healthbar fill
       parentId: hero-screen-roster-fighter-1-healthbar
       kind: 4
       portraitSize: 2
@@ -6145,7 +6171,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-role-chip
-      displayName: "roster fighter 1 role chip"
+      displayName: roster fighter 1 role chip
       parentId: hero-screen-roster-fighter-1
       kind: 1
       portraitSize: 2
@@ -6174,7 +6200,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-1-hint
-      displayName: "roster fighter 1 hint"
+      displayName: roster fighter 1 hint
       parentId: hero-screen-roster-fighter-1
       kind: 1
       portraitSize: 2
@@ -6182,7 +6208,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ПКМ: сведения"
+      previewText: "\u041F\u041A\u041C: \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F"
       rect:
         serializedVersion: 2
         x: 98
@@ -6203,7 +6229,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2
-      displayName: "roster fighter 2"
+      displayName: roster fighter 2
       parentId: hero-screen-roster-row
       kind: 0
       portraitSize: 2
@@ -6232,7 +6258,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-portrait
-      displayName: "roster fighter 2 portrait"
+      displayName: roster fighter 2 portrait
       parentId: hero-screen-roster-fighter-2
       kind: 0
       portraitSize: 2
@@ -6261,7 +6287,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-name
-      displayName: "roster fighter 2 name"
+      displayName: roster fighter 2 name
       parentId: hero-screen-roster-fighter-2
       kind: 1
       portraitSize: 2
@@ -6290,7 +6316,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-role
-      displayName: "roster fighter 2 role"
+      displayName: roster fighter 2 role
       parentId: hero-screen-roster-fighter-2
       kind: 1
       portraitSize: 2
@@ -6319,7 +6345,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-status
-      displayName: "roster fighter 2 status"
+      displayName: roster fighter 2 status
       parentId: hero-screen-roster-fighter-2
       kind: 4
       portraitSize: 2
@@ -6348,7 +6374,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-hp
-      displayName: "roster fighter 2 hp"
+      displayName: roster fighter 2 hp
       parentId: hero-screen-roster-fighter-2-status
       kind: 1
       portraitSize: 2
@@ -6377,7 +6403,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-condition
-      displayName: "roster fighter 2 condition"
+      displayName: roster fighter 2 condition
       parentId: hero-screen-roster-fighter-2-status
       kind: 1
       portraitSize: 2
@@ -6406,7 +6432,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-level
-      displayName: "roster fighter 2 level"
+      displayName: roster fighter 2 level
       parentId: hero-screen-roster-fighter-2-status
       kind: 1
       portraitSize: 2
@@ -6435,7 +6461,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-healthbar
-      displayName: "roster fighter 2 healthbar"
+      displayName: roster fighter 2 healthbar
       parentId: hero-screen-roster-fighter-2
       kind: 0
       portraitSize: 2
@@ -6464,7 +6490,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-healthbar-fill
-      displayName: "roster fighter 2 healthbar fill"
+      displayName: roster fighter 2 healthbar fill
       parentId: hero-screen-roster-fighter-2-healthbar
       kind: 4
       portraitSize: 2
@@ -6493,7 +6519,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-role-chip
-      displayName: "roster fighter 2 role chip"
+      displayName: roster fighter 2 role chip
       parentId: hero-screen-roster-fighter-2
       kind: 1
       portraitSize: 2
@@ -6522,7 +6548,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-2-hint
-      displayName: "roster fighter 2 hint"
+      displayName: roster fighter 2 hint
       parentId: hero-screen-roster-fighter-2
       kind: 1
       portraitSize: 2
@@ -6530,7 +6556,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ПКМ: сведения"
+      previewText: "\u041F\u041A\u041C: \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F"
       rect:
         serializedVersion: 2
         x: 98
@@ -6551,7 +6577,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3
-      displayName: "roster fighter 3"
+      displayName: roster fighter 3
       parentId: hero-screen-roster-row
       kind: 0
       portraitSize: 2
@@ -6580,7 +6606,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-portrait
-      displayName: "roster fighter 3 portrait"
+      displayName: roster fighter 3 portrait
       parentId: hero-screen-roster-fighter-3
       kind: 0
       portraitSize: 2
@@ -6609,7 +6635,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-name
-      displayName: "roster fighter 3 name"
+      displayName: roster fighter 3 name
       parentId: hero-screen-roster-fighter-3
       kind: 1
       portraitSize: 2
@@ -6638,7 +6664,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-role
-      displayName: "roster fighter 3 role"
+      displayName: roster fighter 3 role
       parentId: hero-screen-roster-fighter-3
       kind: 1
       portraitSize: 2
@@ -6667,7 +6693,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-status
-      displayName: "roster fighter 3 status"
+      displayName: roster fighter 3 status
       parentId: hero-screen-roster-fighter-3
       kind: 4
       portraitSize: 2
@@ -6696,7 +6722,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-hp
-      displayName: "roster fighter 3 hp"
+      displayName: roster fighter 3 hp
       parentId: hero-screen-roster-fighter-3-status
       kind: 1
       portraitSize: 2
@@ -6725,7 +6751,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-condition
-      displayName: "roster fighter 3 condition"
+      displayName: roster fighter 3 condition
       parentId: hero-screen-roster-fighter-3-status
       kind: 1
       portraitSize: 2
@@ -6754,7 +6780,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-level
-      displayName: "roster fighter 3 level"
+      displayName: roster fighter 3 level
       parentId: hero-screen-roster-fighter-3-status
       kind: 1
       portraitSize: 2
@@ -6783,7 +6809,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-healthbar
-      displayName: "roster fighter 3 healthbar"
+      displayName: roster fighter 3 healthbar
       parentId: hero-screen-roster-fighter-3
       kind: 0
       portraitSize: 2
@@ -6812,7 +6838,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-healthbar-fill
-      displayName: "roster fighter 3 healthbar fill"
+      displayName: roster fighter 3 healthbar fill
       parentId: hero-screen-roster-fighter-3-healthbar
       kind: 4
       portraitSize: 2
@@ -6841,7 +6867,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-role-chip
-      displayName: "roster fighter 3 role chip"
+      displayName: roster fighter 3 role chip
       parentId: hero-screen-roster-fighter-3
       kind: 1
       portraitSize: 2
@@ -6870,7 +6896,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-3-hint
-      displayName: "roster fighter 3 hint"
+      displayName: roster fighter 3 hint
       parentId: hero-screen-roster-fighter-3
       kind: 1
       portraitSize: 2
@@ -6878,7 +6904,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ПКМ: сведения"
+      previewText: "\u041F\u041A\u041C: \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F"
       rect:
         serializedVersion: 2
         x: 98
@@ -6899,7 +6925,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4
-      displayName: "roster fighter 4"
+      displayName: roster fighter 4
       parentId: hero-screen-roster-row
       kind: 0
       portraitSize: 2
@@ -6928,7 +6954,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-portrait
-      displayName: "roster fighter 4 portrait"
+      displayName: roster fighter 4 portrait
       parentId: hero-screen-roster-fighter-4
       kind: 0
       portraitSize: 2
@@ -6957,7 +6983,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-name
-      displayName: "roster fighter 4 name"
+      displayName: roster fighter 4 name
       parentId: hero-screen-roster-fighter-4
       kind: 1
       portraitSize: 2
@@ -6986,7 +7012,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-role
-      displayName: "roster fighter 4 role"
+      displayName: roster fighter 4 role
       parentId: hero-screen-roster-fighter-4
       kind: 1
       portraitSize: 2
@@ -7015,7 +7041,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-status
-      displayName: "roster fighter 4 status"
+      displayName: roster fighter 4 status
       parentId: hero-screen-roster-fighter-4
       kind: 4
       portraitSize: 2
@@ -7044,7 +7070,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-hp
-      displayName: "roster fighter 4 hp"
+      displayName: roster fighter 4 hp
       parentId: hero-screen-roster-fighter-4-status
       kind: 1
       portraitSize: 2
@@ -7073,7 +7099,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-condition
-      displayName: "roster fighter 4 condition"
+      displayName: roster fighter 4 condition
       parentId: hero-screen-roster-fighter-4-status
       kind: 1
       portraitSize: 2
@@ -7102,7 +7128,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-level
-      displayName: "roster fighter 4 level"
+      displayName: roster fighter 4 level
       parentId: hero-screen-roster-fighter-4-status
       kind: 1
       portraitSize: 2
@@ -7131,7 +7157,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-healthbar
-      displayName: "roster fighter 4 healthbar"
+      displayName: roster fighter 4 healthbar
       parentId: hero-screen-roster-fighter-4
       kind: 0
       portraitSize: 2
@@ -7160,7 +7186,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-healthbar-fill
-      displayName: "roster fighter 4 healthbar fill"
+      displayName: roster fighter 4 healthbar fill
       parentId: hero-screen-roster-fighter-4-healthbar
       kind: 4
       portraitSize: 2
@@ -7189,7 +7215,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-role-chip
-      displayName: "roster fighter 4 role chip"
+      displayName: roster fighter 4 role chip
       parentId: hero-screen-roster-fighter-4
       kind: 1
       portraitSize: 2
@@ -7218,7 +7244,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-fighter-4-hint
-      displayName: "roster fighter 4 hint"
+      displayName: roster fighter 4 hint
       parentId: hero-screen-roster-fighter-4
       kind: 1
       portraitSize: 2
@@ -7226,7 +7252,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ПКМ: сведения"
+      previewText: "\u041F\u041A\u041C: \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F"
       rect:
         serializedVersion: 2
         x: 98
@@ -7247,7 +7273,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-available-row
-      displayName: "roster available row"
+      displayName: roster available row
       parentId: hero-screen-roster
       kind: 4
       portraitSize: 2
@@ -7276,7 +7302,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-selected-label
-      displayName: "roster selected label"
+      displayName: roster selected label
       parentId: hero-screen-roster
       kind: 1
       portraitSize: 2
@@ -7305,7 +7331,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-roster-confirm-button
-      displayName: "roster confirm button"
+      displayName: roster confirm button
       parentId: hero-screen-roster
       kind: 3
       portraitSize: 2
@@ -7313,7 +7339,8 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ПОДТВЕРДИТЬ СОСТАВ"
+      previewText: "\u041F\u041E\u0414\u0422\u0412\u0415\u0420\u0414\u0418\u0422\u042C
+        \u0421\u041E\u0421\u0422\u0410\u0412"
       rect:
         serializedVersion: 2
         x: 66
@@ -7334,7 +7361,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-retinue
-      displayName: "retinue"
+      displayName: retinue
       parentId: hero-screen-roster-bar
       kind: 0
       portraitSize: 2
@@ -7363,7 +7390,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-retinue-title
-      displayName: "retinue title"
+      displayName: retinue title
       parentId: hero-screen-retinue
       kind: 1
       portraitSize: 2
@@ -7371,7 +7398,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "СВИТА"
+      previewText: "\u0421\u0412\u0418\u0422\u0410"
       rect:
         serializedVersion: 2
         x: 66
@@ -7392,7 +7419,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-retinue-row
-      displayName: "retinue row"
+      displayName: retinue row
       parentId: hero-screen-retinue
       kind: 4
       portraitSize: 2
@@ -7421,7 +7448,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-retinue-1
-      displayName: "retinue 1"
+      displayName: retinue 1
       parentId: hero-screen-retinue-row
       kind: 4
       portraitSize: 2
@@ -7450,7 +7477,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-retinue-2
-      displayName: "retinue 2"
+      displayName: retinue 2
       parentId: hero-screen-retinue-row
       kind: 4
       portraitSize: 2
@@ -7479,7 +7506,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-retinue-3
-      displayName: "retinue 3"
+      displayName: retinue 3
       parentId: hero-screen-retinue-row
       kind: 4
       portraitSize: 2
@@ -7508,7 +7535,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journey-summary-block
-      displayName: "block"
+      displayName: block
       parentId: hero-screen-overlay
       kind: 0
       portraitSize: 2
@@ -7537,7 +7564,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journey-summary-block-title
-      displayName: "block title"
+      displayName: block title
       parentId: journey-summary-block
       kind: 1
       portraitSize: 2
@@ -7545,7 +7572,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "СВОДКА ПОХОДА"
+      previewText: "\u0421\u0412\u041E\u0414\u041A\u0410 \u041F\u041E\u0425\u041E\u0414\u0410"
       rect:
         serializedVersion: 2
         x: 50
@@ -7566,7 +7593,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journey-summary-scroll
-      displayName: "scroll"
+      displayName: scroll
       parentId: journey-summary-block
       kind: 4
       portraitSize: 2
@@ -7595,7 +7622,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journey-summary-list
-      displayName: "list"
+      displayName: list
       parentId: journey-summary-scroll
       kind: 4
       portraitSize: 2
@@ -7624,7 +7651,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-dimmer
-      displayName: "unit card dimmer"
+      displayName: unit card dimmer
       parentId: hero-screen-overlay
       kind: 0
       portraitSize: 2
@@ -7653,7 +7680,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card
-      displayName: "unit card"
+      displayName: unit card
       parentId: hero-screen-overlay
       kind: 0
       portraitSize: 2
@@ -7682,7 +7709,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-title
-      displayName: "unit card title"
+      displayName: unit card title
       parentId: hero-screen-unit-card
       kind: 1
       portraitSize: 2
@@ -7711,7 +7738,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-close-button
-      displayName: "unit card close button"
+      displayName: unit card close button
       parentId: hero-screen-unit-card
       kind: 3
       portraitSize: 2
@@ -7719,7 +7746,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "×"
+      previewText: "\xD7"
       rect:
         serializedVersion: 2
         x: 50
@@ -7740,7 +7767,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-portrait
-      displayName: "unit card portrait"
+      displayName: unit card portrait
       parentId: hero-screen-unit-card
       kind: 0
       portraitSize: 2
@@ -7769,7 +7796,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-portrait-healthbar
-      displayName: "unit card portrait healthbar"
+      displayName: unit card portrait healthbar
       parentId: hero-screen-unit-card-portrait
       kind: 0
       portraitSize: 2
@@ -7798,7 +7825,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-portrait-healthbar-fill
-      displayName: "unit card portrait healthbar fill"
+      displayName: unit card portrait healthbar fill
       parentId: hero-screen-unit-card-portrait-healthbar
       kind: 4
       portraitSize: 2
@@ -7827,7 +7854,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-health
-      displayName: "unit card stat health"
+      displayName: unit card stat health
       parentId: hero-screen-unit-card
       kind: 4
       portraitSize: 2
@@ -7856,7 +7883,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-health-value
-      displayName: "unit card stat health value"
+      displayName: unit card stat health value
       parentId: hero-screen-unit-card-stat-health
       kind: 1
       portraitSize: 2
@@ -7885,7 +7912,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-attack
-      displayName: "unit card stat attack"
+      displayName: unit card stat attack
       parentId: hero-screen-unit-card
       kind: 4
       portraitSize: 2
@@ -7914,7 +7941,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-attack-value
-      displayName: "unit card stat attack value"
+      displayName: unit card stat attack value
       parentId: hero-screen-unit-card-stat-attack
       kind: 1
       portraitSize: 2
@@ -7943,7 +7970,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-defense
-      displayName: "unit card stat defense"
+      displayName: unit card stat defense
       parentId: hero-screen-unit-card
       kind: 4
       portraitSize: 2
@@ -7972,7 +7999,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-defense-value
-      displayName: "unit card stat defense value"
+      displayName: unit card stat defense value
       parentId: hero-screen-unit-card-stat-defense
       kind: 1
       portraitSize: 2
@@ -8001,7 +8028,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-damage
-      displayName: "unit card stat damage"
+      displayName: unit card stat damage
       parentId: hero-screen-unit-card
       kind: 4
       portraitSize: 2
@@ -8030,7 +8057,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-damage-value
-      displayName: "unit card stat damage value"
+      displayName: unit card stat damage value
       parentId: hero-screen-unit-card-stat-damage
       kind: 1
       portraitSize: 2
@@ -8059,7 +8086,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-movement
-      displayName: "unit card stat movement"
+      displayName: unit card stat movement
       parentId: hero-screen-unit-card
       kind: 4
       portraitSize: 2
@@ -8088,7 +8115,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-movement-value
-      displayName: "unit card stat movement value"
+      displayName: unit card stat movement value
       parentId: hero-screen-unit-card-stat-movement
       kind: 1
       portraitSize: 2
@@ -8117,7 +8144,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-initiative
-      displayName: "unit card stat initiative"
+      displayName: unit card stat initiative
       parentId: hero-screen-unit-card
       kind: 4
       portraitSize: 2
@@ -8146,7 +8173,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-initiative-value
-      displayName: "unit card stat initiative value"
+      displayName: unit card stat initiative value
       parentId: hero-screen-unit-card-stat-initiative
       kind: 1
       portraitSize: 2
@@ -8175,7 +8202,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-attack-range
-      displayName: "unit card stat attack range"
+      displayName: unit card stat attack range
       parentId: hero-screen-unit-card
       kind: 4
       portraitSize: 2
@@ -8204,7 +8231,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-stat-attack-range-value
-      displayName: "unit card stat attack range value"
+      displayName: unit card stat attack range value
       parentId: hero-screen-unit-card-stat-attack-range
       kind: 1
       portraitSize: 2
@@ -8233,7 +8260,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-unit-card-tags
-      displayName: "unit card tags"
+      displayName: unit card tags
       parentId: hero-screen-unit-card
       kind: 4
       portraitSize: 2
@@ -8262,7 +8289,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-tooltip
-      displayName: "stat tooltip"
+      displayName: stat tooltip
       parentId: hero-screen-overlay
       kind: 0
       portraitSize: 2
@@ -8291,7 +8318,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-tooltip-title
-      displayName: "stat tooltip title"
+      displayName: stat tooltip title
       parentId: hero-screen-stat-tooltip
       kind: 1
       portraitSize: 2
@@ -8320,7 +8347,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-stat-tooltip-text
-      displayName: "stat tooltip text"
+      displayName: stat tooltip text
       parentId: hero-screen-stat-tooltip
       kind: 1
       portraitSize: 2
@@ -8349,7 +8376,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-tag-tooltip
-      displayName: "tag tooltip"
+      displayName: tag tooltip
       parentId: hero-screen-overlay
       kind: 0
       portraitSize: 2
@@ -8378,7 +8405,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-tag-tooltip-title
-      displayName: "tag tooltip title"
+      displayName: tag tooltip title
       parentId: hero-screen-tag-tooltip
       kind: 1
       portraitSize: 2
@@ -8407,7 +8434,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: hero-screen-tag-tooltip-text
-      displayName: "tag tooltip text"
+      displayName: tag tooltip text
       parentId: hero-screen-tag-tooltip
       kind: 1
       portraitSize: 2
@@ -8436,8 +8463,17 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
   - id: camp
-    displayName: "Лагерь"
-    description: "Постоянный fullscreen-экран похода: отряд, иллюстрация места, доступная авторская сцена и место для будущих действий. Не CampManager и не survival-система — только показ состояния и запуск Dialogue System через Chapter01CampSceneProvider."
+    displayName: "\u041B\u0430\u0433\u0435\u0440\u044C"
+    description: "\u041F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u044B\u0439 fullscreen-\u044D\u043A\u0440\u0430\u043D
+      \u043F\u043E\u0445\u043E\u0434\u0430: \u043E\u0442\u0440\u044F\u0434, \u0438\u043B\u043B\u044E\u0441\u0442\u0440\u0430\u0446\u0438\u044F
+      \u043C\u0435\u0441\u0442\u0430, \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430\u044F
+      \u0430\u0432\u0442\u043E\u0440\u0441\u043A\u0430\u044F \u0441\u0446\u0435\u043D\u0430
+      \u0438 \u043C\u0435\u0441\u0442\u043E \u0434\u043B\u044F \u0431\u0443\u0434\u0443\u0449\u0438\u0445
+      \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0439. \u041D\u0435 CampManager
+      \u0438 \u043D\u0435 survival-\u0441\u0438\u0441\u0442\u0435\u043C\u0430 \u2014
+      \u0442\u043E\u043B\u044C\u043A\u043E \u043F\u043E\u043A\u0430\u0437 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F
+      \u0438 \u0437\u0430\u043F\u0443\u0441\u043A Dialogue System \u0447\u0435\u0440\u0435\u0437
+      Chapter01CampSceneProvider."
     usesDimming: 1
     dimmingOpacity: 0.68
     autoApply: 1
@@ -8463,7 +8499,7 @@ MonoBehaviour:
       expectedParentId: camp-header
     elements:
     - id: camp-screen
-      displayName: "Экран лагеря"
+      displayName: "\u042D\u043A\u0440\u0430\u043D \u043B\u0430\u0433\u0435\u0440\u044F"
       parentId: 
       kind: 4
       portraitSize: 2
@@ -8492,7 +8528,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-header
-      displayName: "Заголовок лагеря"
+      displayName: "\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A \u043B\u0430\u0433\u0435\u0440\u044F"
       parentId: camp-screen
       kind: 4
       portraitSize: 2
@@ -8521,7 +8557,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-title
-      displayName: "Заголовок «ЛАГЕРЬ»"
+      displayName: "\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A \xAB\u041B\u0410\u0413\u0415\u0420\u042C\xBB"
       parentId: camp-header
       kind: 1
       portraitSize: 2
@@ -8529,7 +8565,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "ЛАГЕРЬ"
+      previewText: "\u041B\u0410\u0413\u0415\u0420\u042C"
       rect:
         serializedVersion: 2
         x: 18
@@ -8550,7 +8586,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-time-label
-      displayName: "День и время"
+      displayName: "\u0414\u0435\u043D\u044C \u0438 \u0432\u0440\u0435\u043C\u044F"
       parentId: camp-header
       kind: 1
       portraitSize: 2
@@ -8558,7 +8594,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "День 3 · 21:40"
+      previewText: "\u0414\u0435\u043D\u044C 3 \xB7 21:40"
       rect:
         serializedVersion: 2
         x: 230
@@ -8579,7 +8615,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-location-label
-      displayName: "Текущее место"
+      displayName: "\u0422\u0435\u043A\u0443\u0449\u0435\u0435 \u043C\u0435\u0441\u0442\u043E"
       parentId: camp-header
       kind: 1
       portraitSize: 2
@@ -8587,7 +8623,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "У старого русла"
+      previewText: "\u0423 \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u0440\u0443\u0441\u043B\u0430"
       rect:
         serializedVersion: 2
         x: 1500
@@ -8608,7 +8644,7 @@ MonoBehaviour:
       horizontalAlignment: 2
       verticalAlignment: 0
     - id: camp-close-button
-      displayName: "Кнопка «ЗАКРЫТЬ»"
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \xAB\u0417\u0410\u041A\u0420\u042B\u0422\u042C\xBB"
       parentId: camp-header
       kind: 3
       portraitSize: 2
@@ -8637,7 +8673,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-body
-      displayName: "Три колонки лагеря"
+      displayName: "\u0422\u0440\u0438 \u043A\u043E\u043B\u043E\u043D\u043A\u0438
+        \u043B\u0430\u0433\u0435\u0440\u044F"
       parentId: camp-screen
       kind: 4
       portraitSize: 2
@@ -8666,7 +8703,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-party-panel
-      displayName: "Панель отряда"
+      displayName: "\u041F\u0430\u043D\u0435\u043B\u044C \u043E\u0442\u0440\u044F\u0434\u0430"
       parentId: camp-body
       kind: 0
       portraitSize: 2
@@ -8695,7 +8732,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-commander-slot
-      displayName: "Слот командира"
+      displayName: "\u0421\u043B\u043E\u0442 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430"
       parentId: camp-party-panel
       kind: 4
       portraitSize: 2
@@ -8724,7 +8761,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-commander-name
-      displayName: "Имя командира"
+      displayName: "\u0418\u043C\u044F \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430"
       parentId: camp-commander-slot
       kind: 1
       portraitSize: 2
@@ -8732,7 +8769,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Командир"
+      previewText: "\u041A\u043E\u043C\u0430\u043D\u0434\u0438\u0440"
       rect:
         serializedVersion: 2
         x: 34
@@ -8753,7 +8790,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-commander-status
-      displayName: "Состояние командира"
+      displayName: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430"
       parentId: camp-commander-slot
       kind: 1
       portraitSize: 2
@@ -8761,7 +8798,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "—"
+      previewText: "\u2014"
       rect:
         serializedVersion: 2
         x: 34
@@ -8782,7 +8819,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-slot-1
-      displayName: "Слот бойца 1"
+      displayName: "\u0421\u043B\u043E\u0442 \u0431\u043E\u0439\u0446\u0430 1"
       parentId: camp-party-panel
       kind: 4
       portraitSize: 2
@@ -8811,7 +8848,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-name-1
-      displayName: "Имя бойца 1"
+      displayName: "\u0418\u043C\u044F \u0431\u043E\u0439\u0446\u0430 1"
       parentId: camp-fighter-slot-1
       kind: 1
       portraitSize: 2
@@ -8819,7 +8856,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Боец 1"
+      previewText: "\u0411\u043E\u0435\u0446 1"
       rect:
         serializedVersion: 2
         x: 34
@@ -8840,7 +8877,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-status-1
-      displayName: "Состояние бойца 1"
+      displayName: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0431\u043E\u0439\u0446\u0430
+        1"
       parentId: camp-fighter-slot-1
       kind: 1
       portraitSize: 2
@@ -8848,7 +8886,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "—"
+      previewText: "\u2014"
       rect:
         serializedVersion: 2
         x: 34
@@ -8869,7 +8907,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-slot-2
-      displayName: "Слот бойца 2"
+      displayName: "\u0421\u043B\u043E\u0442 \u0431\u043E\u0439\u0446\u0430 2"
       parentId: camp-party-panel
       kind: 4
       portraitSize: 2
@@ -8898,7 +8936,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-name-2
-      displayName: "Имя бойца 2"
+      displayName: "\u0418\u043C\u044F \u0431\u043E\u0439\u0446\u0430 2"
       parentId: camp-fighter-slot-2
       kind: 1
       portraitSize: 2
@@ -8906,7 +8944,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Боец 2"
+      previewText: "\u0411\u043E\u0435\u0446 2"
       rect:
         serializedVersion: 2
         x: 34
@@ -8927,7 +8965,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-status-2
-      displayName: "Состояние бойца 2"
+      displayName: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0431\u043E\u0439\u0446\u0430
+        2"
       parentId: camp-fighter-slot-2
       kind: 1
       portraitSize: 2
@@ -8935,7 +8974,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "—"
+      previewText: "\u2014"
       rect:
         serializedVersion: 2
         x: 34
@@ -8956,7 +8995,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-slot-3
-      displayName: "Слот бойца 3"
+      displayName: "\u0421\u043B\u043E\u0442 \u0431\u043E\u0439\u0446\u0430 3"
       parentId: camp-party-panel
       kind: 4
       portraitSize: 2
@@ -8985,7 +9024,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-name-3
-      displayName: "Имя бойца 3"
+      displayName: "\u0418\u043C\u044F \u0431\u043E\u0439\u0446\u0430 3"
       parentId: camp-fighter-slot-3
       kind: 1
       portraitSize: 2
@@ -8993,7 +9032,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Боец 3"
+      previewText: "\u0411\u043E\u0435\u0446 3"
       rect:
         serializedVersion: 2
         x: 34
@@ -9014,7 +9053,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-status-3
-      displayName: "Состояние бойца 3"
+      displayName: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0431\u043E\u0439\u0446\u0430
+        3"
       parentId: camp-fighter-slot-3
       kind: 1
       portraitSize: 2
@@ -9022,7 +9062,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "—"
+      previewText: "\u2014"
       rect:
         serializedVersion: 2
         x: 34
@@ -9043,7 +9083,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-slot-4
-      displayName: "Слот бойца 4"
+      displayName: "\u0421\u043B\u043E\u0442 \u0431\u043E\u0439\u0446\u0430 4"
       parentId: camp-party-panel
       kind: 4
       portraitSize: 2
@@ -9072,7 +9112,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-name-4
-      displayName: "Имя бойца 4"
+      displayName: "\u0418\u043C\u044F \u0431\u043E\u0439\u0446\u0430 4"
       parentId: camp-fighter-slot-4
       kind: 1
       portraitSize: 2
@@ -9080,7 +9120,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Боец 4"
+      previewText: "\u0411\u043E\u0435\u0446 4"
       rect:
         serializedVersion: 2
         x: 34
@@ -9101,7 +9141,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-fighter-status-4
-      displayName: "Состояние бойца 4"
+      displayName: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0431\u043E\u0439\u0446\u0430
+        4"
       parentId: camp-fighter-slot-4
       kind: 1
       portraitSize: 2
@@ -9109,7 +9150,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "—"
+      previewText: "\u2014"
       rect:
         serializedVersion: 2
         x: 34
@@ -9130,7 +9171,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-art
-      displayName: "Иллюстрация лагеря"
+      displayName: "\u0418\u043B\u043B\u044E\u0441\u0442\u0440\u0430\u0446\u0438\u044F
+        \u043B\u0430\u0433\u0435\u0440\u044F"
       parentId: camp-body
       kind: 2
       portraitSize: 2
@@ -9159,7 +9201,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-scenes-panel
-      displayName: "Панель сюжетных сцен"
+      displayName: "\u041F\u0430\u043D\u0435\u043B\u044C \u0441\u044E\u0436\u0435\u0442\u043D\u044B\u0445
+        \u0441\u0446\u0435\u043D"
       parentId: camp-body
       kind: 0
       portraitSize: 2
@@ -9188,7 +9231,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-scene-list
-      displayName: "Список доступных сцен"
+      displayName: "\u0421\u043F\u0438\u0441\u043E\u043A \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0445
+        \u0441\u0446\u0435\u043D"
       parentId: camp-scenes-panel
       kind: 4
       portraitSize: 2
@@ -9217,7 +9261,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-footer
-      displayName: "Нижняя панель лагеря"
+      displayName: "\u041D\u0438\u0436\u043D\u044F\u044F \u043F\u0430\u043D\u0435\u043B\u044C
+        \u043B\u0430\u0433\u0435\u0440\u044F"
       parentId: camp-screen
       kind: 4
       portraitSize: 2
@@ -9246,7 +9291,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-status-panel
-      displayName: "Состояние похода"
+      displayName: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043F\u043E\u0445\u043E\u0434\u0430"
       parentId: camp-footer
       kind: 0
       portraitSize: 2
@@ -9275,7 +9320,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-status-text
-      displayName: "Текст состояния похода"
+      displayName: "\u0422\u0435\u043A\u0441\u0442 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F
+        \u043F\u043E\u0445\u043E\u0434\u0430"
       parentId: camp-status-panel
       kind: 1
       portraitSize: 2
@@ -9283,8 +9329,9 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Цель: Старый брод
-В пути · Бойцов: 2 · Снабжение: 40"
+      previewText: "\u0426\u0435\u043B\u044C: \u0421\u0442\u0430\u0440\u044B\u0439
+        \u0431\u0440\u043E\u0434 \u0412 \u043F\u0443\u0442\u0438 \xB7 \u0411\u043E\u0439\u0446\u043E\u0432:
+        2 \xB7 \u0421\u043D\u0430\u0431\u0436\u0435\u043D\u0438\u0435: 40"
       rect:
         serializedVersion: 2
         x: 28
@@ -9305,7 +9352,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-actions-panel
-      displayName: "Будущие действия"
+      displayName: "\u0411\u0443\u0434\u0443\u0449\u0438\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F"
       parentId: camp-footer
       kind: 0
       portraitSize: 2
@@ -9334,7 +9381,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-actions-placeholder
-      displayName: "Заглушка будущих действий"
+      displayName: "\u0417\u0430\u0433\u043B\u0443\u0448\u043A\u0430 \u0431\u0443\u0434\u0443\u0449\u0438\u0445
+        \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0439"
       parentId: camp-actions-panel
       kind: 1
       portraitSize: 2
@@ -9342,7 +9390,8 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: "Пока нет доступных действий."
+      previewText: "\u041F\u043E\u043A\u0430 \u043D\u0435\u0442 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0445
+        \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0439."
       rect:
         serializedVersion: 2
         x: 680
@@ -9363,7 +9412,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: camp-continue-button
-      displayName: "Кнопка «ПРОДОЛЖИТЬ ПУТЬ»"
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \xAB\u041F\u0420\u041E\u0414\u041E\u041B\u0416\u0418\u0422\u042C
+        \u041F\u0423\u0422\u042C\xBB"
       parentId: camp-footer
       kind: 3
       portraitSize: 2
@@ -9392,8 +9442,14 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
   - id: journal
-    displayName: "Журнал"
-    description: "Fullscreen-слой журнала целей (UI-M02): читает Chapter01JournalProvider.Build. Структура — Prototype_Main.uxml, Controller в PrototypeUIController.Journal только находит элементы и наполняет их данными."
+    displayName: "\u0416\u0443\u0440\u043D\u0430\u043B"
+    description: "Fullscreen-\u0441\u043B\u043E\u0439 \u0436\u0443\u0440\u043D\u0430\u043B\u0430
+      \u0446\u0435\u043B\u0435\u0439 (UI-M02): \u0447\u0438\u0442\u0430\u0435\u0442
+      Chapter01JournalProvider.Build. \u0421\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u0430
+      \u2014 Prototype_Main.uxml, Controller \u0432 PrototypeUIController.Journal
+      \u0442\u043E\u043B\u044C\u043A\u043E \u043D\u0430\u0445\u043E\u0434\u0438\u0442
+      \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u044B \u0438 \u043D\u0430\u043F\u043E\u043B\u043D\u044F\u0435\u0442
+      \u0438\u0445 \u0434\u0430\u043D\u043D\u044B\u043C\u0438."
     usesDimming: 0
     dimmingOpacity: 0.68
     autoApply: 1
@@ -9429,7 +9485,7 @@ MonoBehaviour:
       expectedParentId: journal-detail-panel
     elements:
     - id: journal-overlay
-      displayName: "Экран (фон)"
+      displayName: "\u042D\u043A\u0440\u0430\u043D (\u0444\u043E\u043D)"
       parentId: 
       kind: 0
       portraitSize: 2
@@ -9458,7 +9514,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-header
-      displayName: "Шапка"
+      displayName: "\u0428\u0430\u043F\u043A\u0430"
       parentId: journal-overlay
       kind: 4
       portraitSize: 2
@@ -9487,7 +9543,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-title
-      displayName: "Заголовок"
+      displayName: "\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A"
       parentId: journal-header
       kind: 1
       portraitSize: 2
@@ -9495,7 +9551,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: ЖУРНАЛ
+      previewText: "\u0416\u0423\u0420\u041D\u0410\u041B"
       rect:
         serializedVersion: 2
         x: 18
@@ -9516,7 +9572,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-close-button
-      displayName: "Кнопка «Закрыть»"
+      displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \xAB\u0417\u0430\u043A\u0440\u044B\u0442\u044C\xBB"
       parentId: journal-header
       kind: 3
       portraitSize: 2
@@ -9524,7 +9580,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: ЗАКРЫТЬ
+      previewText: "\u0417\u0410\u041A\u0420\u042B\u0422\u042C"
       rect:
         serializedVersion: 2
         x: 1782
@@ -9545,7 +9601,7 @@ MonoBehaviour:
       horizontalAlignment: 1
       verticalAlignment: 0
     - id: journal-tabs
-      displayName: "Вкладки"
+      displayName: "\u0412\u043A\u043B\u0430\u0434\u043A\u0438"
       parentId: journal-overlay
       kind: 4
       portraitSize: 2
@@ -9574,7 +9630,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-tab-goals
-      displayName: "Вкладка «Цели»"
+      displayName: "\u0412\u043A\u043B\u0430\u0434\u043A\u0430 \xAB\u0426\u0435\u043B\u0438\xBB"
       parentId: journal-tabs
       kind: 3
       portraitSize: 2
@@ -9582,7 +9638,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: ЦЕЛИ
+      previewText: "\u0426\u0415\u041B\u0418"
       rect:
         serializedVersion: 2
         x: 18
@@ -9603,7 +9659,7 @@ MonoBehaviour:
       horizontalAlignment: 1
       verticalAlignment: 0
     - id: journal-tab-chronicle
-      displayName: "Вкладка «Хроника»"
+      displayName: "\u0412\u043A\u043B\u0430\u0434\u043A\u0430 \xAB\u0425\u0440\u043E\u043D\u0438\u043A\u0430\xBB"
       parentId: journal-tabs
       kind: 3
       portraitSize: 2
@@ -9611,7 +9667,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: ХРОНИКА
+      previewText: "\u0425\u0420\u041E\u041D\u0418\u041A\u0410"
       rect:
         serializedVersion: 2
         x: 166
@@ -9632,7 +9688,7 @@ MonoBehaviour:
       horizontalAlignment: 1
       verticalAlignment: 0
     - id: journal-columns
-      displayName: "Колонки"
+      displayName: "\u041A\u043E\u043B\u043E\u043D\u043A\u0438"
       parentId: journal-overlay
       kind: 4
       portraitSize: 2
@@ -9661,7 +9717,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-goals-column
-      displayName: "Колонка целей"
+      displayName: "\u041A\u043E\u043B\u043E\u043D\u043A\u0430 \u0446\u0435\u043B\u0435\u0439"
       parentId: journal-columns
       kind: 4
       portraitSize: 2
@@ -9690,7 +9746,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-goals-scroll
-      displayName: "Прокрутка целей"
+      displayName: "\u041F\u0440\u043E\u043A\u0440\u0443\u0442\u043A\u0430 \u0446\u0435\u043B\u0435\u0439"
       parentId: journal-goals-column
       kind: 4
       portraitSize: 2
@@ -9719,7 +9775,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-main-section
-      displayName: "Секция «Основная цель»"
+      displayName: "\u0421\u0435\u043A\u0446\u0438\u044F \xAB\u041E\u0441\u043D\u043E\u0432\u043D\u0430\u044F
+        \u0446\u0435\u043B\u044C\xBB"
       parentId: journal-goals-scroll
       kind: 0
       portraitSize: 2
@@ -9748,7 +9805,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-main-section-title
-      displayName: "Заголовок секции"
+      displayName: "\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A \u0441\u0435\u043A\u0446\u0438\u0438"
       parentId: journal-main-section
       kind: 1
       portraitSize: 2
@@ -9756,7 +9813,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: ОСНОВНАЯ ЦЕЛЬ
+      previewText: "\u041E\u0421\u041D\u041E\u0412\u041D\u0410\u042F \u0426\u0415\u041B\u042C"
       rect:
         serializedVersion: 2
         x: 38
@@ -9777,7 +9834,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-main-section-list
-      displayName: "Список основных целей"
+      displayName: "\u0421\u043F\u0438\u0441\u043E\u043A \u043E\u0441\u043D\u043E\u0432\u043D\u044B\u0445
+        \u0446\u0435\u043B\u0435\u0439"
       parentId: journal-main-section
       kind: 4
       portraitSize: 2
@@ -9806,7 +9864,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-optional-section
-      displayName: "Секция «Дополнительные»"
+      displayName: "\u0421\u0435\u043A\u0446\u0438\u044F \xAB\u0414\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0435\xBB"
       parentId: journal-goals-scroll
       kind: 0
       portraitSize: 2
@@ -9835,7 +9893,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-optional-section-title
-      displayName: "Заголовок секции"
+      displayName: "\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A \u0441\u0435\u043A\u0446\u0438\u0438"
       parentId: journal-optional-section
       kind: 1
       portraitSize: 2
@@ -9843,7 +9901,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: ДОПОЛНИТЕЛЬНЫЕ
+      previewText: "\u0414\u041E\u041F\u041E\u041B\u041D\u0418\u0422\u0415\u041B\u042C\u041D\u042B\u0415"
       rect:
         serializedVersion: 2
         x: 38
@@ -9864,7 +9922,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-optional-section-list
-      displayName: "Список доп. целей"
+      displayName: "\u0421\u043F\u0438\u0441\u043E\u043A \u0434\u043E\u043F. \u0446\u0435\u043B\u0435\u0439"
       parentId: journal-optional-section
       kind: 4
       portraitSize: 2
@@ -9893,7 +9951,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-completed-section
-      displayName: "Секция «Завершённые»"
+      displayName: "\u0421\u0435\u043A\u0446\u0438\u044F \xAB\u0417\u0430\u0432\u0435\u0440\u0448\u0451\u043D\u043D\u044B\u0435\xBB"
       parentId: journal-goals-scroll
       kind: 0
       portraitSize: 2
@@ -9922,7 +9980,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-completed-section-title
-      displayName: "Заголовок секции"
+      displayName: "\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A \u0441\u0435\u043A\u0446\u0438\u0438"
       parentId: journal-completed-section
       kind: 1
       portraitSize: 2
@@ -9930,7 +9988,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: ЗАВЕРШЁННЫЕ
+      previewText: "\u0417\u0410\u0412\u0415\u0420\u0428\u0401\u041D\u041D\u042B\u0415"
       rect:
         serializedVersion: 2
         x: 38
@@ -9951,7 +10009,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-completed-section-list
-      displayName: "Список завершённых целей"
+      displayName: "\u0421\u043F\u0438\u0441\u043E\u043A \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043D\u043D\u044B\u0445
+        \u0446\u0435\u043B\u0435\u0439"
       parentId: journal-completed-section
       kind: 4
       portraitSize: 2
@@ -9980,7 +10039,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-detail-column
-      displayName: "Колонка деталей"
+      displayName: "\u041A\u043E\u043B\u043E\u043D\u043A\u0430 \u0434\u0435\u0442\u0430\u043B\u0435\u0439"
       parentId: journal-columns
       kind: 4
       portraitSize: 2
@@ -10009,7 +10068,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-detail-scroll
-      displayName: "Прокрутка деталей"
+      displayName: "\u041F\u0440\u043E\u043A\u0440\u0443\u0442\u043A\u0430 \u0434\u0435\u0442\u0430\u043B\u0435\u0439"
       parentId: journal-detail-column
       kind: 4
       portraitSize: 2
@@ -10038,7 +10097,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-detail-panel
-      displayName: "Панель деталей"
+      displayName: "\u041F\u0430\u043D\u0435\u043B\u044C \u0434\u0435\u0442\u0430\u043B\u0435\u0439"
       parentId: journal-detail-scroll
       kind: 0
       portraitSize: 2
@@ -10067,7 +10126,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-detail-panel-title
-      displayName: "Категория цели"
+      displayName: "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F \u0446\u0435\u043B\u0438"
       parentId: journal-detail-panel
       kind: 1
       portraitSize: 2
@@ -10075,7 +10134,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: ВЫБЕРИТЕ ЦЕЛЬ
+      previewText: "\u0412\u042B\u0411\u0415\u0420\u0418\u0422\u0415 \u0426\u0415\u041B\u042C"
       rect:
         serializedVersion: 2
         x: 672
@@ -10096,7 +10155,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-detail-title
-      displayName: "Название цели"
+      displayName: "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0446\u0435\u043B\u0438"
       parentId: journal-detail-panel
       kind: 1
       portraitSize: 2
@@ -10125,7 +10184,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-detail-description
-      displayName: "Описание цели"
+      displayName: "\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435 \u0446\u0435\u043B\u0438"
       parentId: journal-detail-panel
       kind: 1
       portraitSize: 2
@@ -10154,7 +10213,8 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-detail-step-caption
-      displayName: "Подпись «Текущий шаг»"
+      displayName: "\u041F\u043E\u0434\u043F\u0438\u0441\u044C \xAB\u0422\u0435\u043A\u0443\u0449\u0438\u0439
+        \u0448\u0430\u0433\xBB"
       parentId: journal-detail-panel
       kind: 1
       portraitSize: 2
@@ -10162,7 +10222,7 @@ MonoBehaviour:
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
-      previewText: ТЕКУЩИЙ ШАГ
+      previewText: "\u0422\u0415\u041A\u0423\u0429\u0418\u0419 \u0428\u0410\u0413"
       rect:
         serializedVersion: 2
         x: 672
@@ -10183,7 +10243,7 @@ MonoBehaviour:
       horizontalAlignment: 0
       verticalAlignment: 0
     - id: journal-detail-current-step
-      displayName: "Текущий шаг"
+      displayName: "\u0422\u0435\u043A\u0443\u0449\u0438\u0439 \u0448\u0430\u0433"
       parentId: journal-detail-panel
       kind: 1
       portraitSize: 2
@@ -10211,3 +10271,4 @@ MonoBehaviour:
       fontStyle: 0
       horizontalAlignment: 0
       verticalAlignment: 0
+  portraitPresetSchemaVersion: 1

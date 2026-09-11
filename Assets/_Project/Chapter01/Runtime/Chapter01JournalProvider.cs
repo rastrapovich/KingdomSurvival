@@ -17,47 +17,28 @@ namespace KingdomSurvival.Chapter01
         Failed
     }
 
-    // Read-only проекция цели похода для UI Журнала (P08J-T01). Не хранится
-    // нигде — Chapter01JournalProvider.Build создаёт новый список при каждом
-    // вызове из текущего GameState/NarrativeState.
     public sealed class JournalGoalViewData
     {
         public string Id;
         public string Title;
         public string Description;
         public string CurrentStep;
-
-        // Меняется вместе с CurrentStep, когда та же цель переходит к
-        // следующему смысловому шагу (например ":prepare" -> ":travel") —
-        // UI сравнивает это с уже увиденными ревизиями, чтобы показать
-        // НОВОЕ/ОБНОВЛЕНО, не создавая вторую запись под тем же Id.
         public string RevisionId;
-
         public JournalGoalCategory Category;
         public JournalGoalState State;
     }
 
-    // P08J: журнал ничего не решает и не хранит о сюжетном прогрессе — он
-    // только переводит GameState + NarrativeState (Knowledge/Flags) в
-    // понятный игроку текст, ровно тем же способом, каким Chapter01StoryDirector
-    // уже читает NarrativeState вместо хранения второй копии прогресса. Нет
-    // QuestManager/QuestDatabase/quest-флагов/счётчика улик — только чтение.
+    // Read-only проекция Хроники. Сюжетное состояние остаётся только в
+    // GameState/NarrativeState; отдельной Quest Database здесь нет.
     public static class Chapter01JournalProvider
     {
         public static IReadOnlyList<JournalGoalViewData> Build(GameState gameState)
         {
             List<JournalGoalViewData> goals = new List<JournalGoalViewData>();
-
             if (gameState == null || gameState.Narrative == null)
                 return goals;
 
             NarrativeStateData state = gameState.Narrative;
-
-            // Общее правило P08-записей (раздел 9 инструкции): сначала
-            // FarRouteUnlocked, потом Journal goals — игрок сначала решает
-            // идти дальше в N09, только после этого поход получает
-            // формализованные цели. До этого запись не появляется, даже
-            // если optional-знания уже выставлены (например через Debug).
             if (!state.HasFlag(Chapter01Ids.Flags.FarRouteUnlocked))
                 return goals;
 
@@ -75,32 +56,57 @@ namespace KingdomSurvival.Chapter01
             }
 
             if (hasSecondLoaf)
-                goals.Add(BuildSecondLoafGoal());
+                goals.Add(BuildSecondLoafGoal(state));
             if (hasSevenTooth)
-                goals.Add(BuildSevenToothGaugeGoal());
+                goals.Add(BuildSevenToothGaugeGoal(state));
 
             return goals;
         }
 
-        // Одна и та же цель на весь P08/P09 — меняется CurrentStep и
-        // RevisionId вслед за ExpeditionStarted, а не создаётся вторая
-        // запись "собрать отряд" / "выйти в путь" под другим Id (раздел 6/34
-        // инструкции: Goal ID остаётся тем же, Revision и CurrentStep меняются).
         private static JournalGoalViewData BuildOldWaterTrailGoal(NarrativeStateData state)
         {
             bool expeditionStarted = state.HasFlag(Chapter01Ids.Flags.ExpeditionStarted);
-
-            // P09: третий шаг той же цели — физическое прибытие в область
-            // поиска (RoadDestinationReached), не открытие точки на карте в
-            // P08 (та же цель, ExpeditionStarted уже true к этому моменту).
-            // Раздел "Достижение OldWaterSearch": ":travel" -> ":search_area".
             bool destinationReached = state.HasFlag(Chapter01Ids.Flags.RoadDestinationReached);
             bool oldFordFound = state.HasFlag(Chapter01Ids.Flags.OldFordFound);
             bool downstreamContact = state.HasFlag(Chapter01Ids.Flags.DownstreamContact);
+            bool agreementRevealed = state.HasFlag(Chapter01Ids.Flags.AgreementRevealed);
+            bool returnStarted = state.HasFlag(Chapter01Ids.Flags.ReturnStarted);
+            bool returnRoadTraveled = state.HasFlag(Chapter01Ids.Flags.ReturnRoadTraveled);
+            bool returnedHome = state.HasFlag(Chapter01Ids.Flags.ReturnedHome);
 
             string currentStep;
             string revisionSuffix;
-            if (oldFordFound && !downstreamContact)
+            JournalGoalState goalState = JournalGoalState.Active;
+
+            if (returnedHome)
+            {
+                currentStep = "Вернуться с найденной правдой в Дом.";
+                revisionSuffix = ":home";
+                goalState = JournalGoalState.Completed;
+            }
+            else if (returnRoadTraveled)
+            {
+                currentStep = "Дойти до Дома и увидеть, что изменилось за время похода.";
+                revisionSuffix = ":homeward";
+            }
+            else if (returnStarted)
+            {
+                currentStep = Chapter01ReturnFlow.GetBranch(state) == Chapter01ReturnBranch.FollowFreshTrace
+                    ? "Закончить проверку свежего следа и возвращаться физическим маршрутом к Дому."
+                    : "Возвращаться физическим маршрутом к Дому.";
+                revisionSuffix = ":returning";
+            }
+            else if (agreementRevealed)
+            {
+                currentStep = "Решить: искать дальше, пока след свежий, или вернуться к людям, которые платят за отсутствие героя.";
+                revisionSuffix = ":return_decision";
+            }
+            else if (downstreamContact)
+            {
+                currentStep = "Сопоставить следы старой системы со словами людей ниже по течению.";
+                revisionSuffix = ":agreement";
+            }
+            else if (oldFordFound)
             {
                 currentStep = "Добраться до людей ниже по течению.";
                 revisionSuffix = ":downstream_people";
@@ -125,43 +131,47 @@ namespace KingdomSurvival.Chapter01
             {
                 Id = Chapter01Ids.JournalGoals.OldWaterTrail,
                 Title = "Старый след",
-                Description = "Проследить старый ход воды и выяснить, куда продолжалась старая система.",
+                Description = "Проследить старый ход воды, понять, с кем Дом делил эту систему, и вернуться с последствиями найденного.",
                 CurrentStep = currentStep,
                 RevisionId = Chapter01Ids.JournalGoals.OldWaterTrail + revisionSuffix,
                 Category = JournalGoalCategory.Main,
-                State = JournalGoalState.Active
+                State = goalState
             };
         }
 
-        // P10/P11 пока не реализованы — завершение этой цели сознательно не
-        // придумывается заранее (раздел 11/36 инструкции). Когда P10/P11
-        // дадут игроку реальный ответ, здесь появится Completed-условие по
-        // уже существующему знанию/флагу, не по новому quest-completion-флагу.
-        private static JournalGoalViewData BuildSecondLoafGoal()
+        private static JournalGoalViewData BuildSecondLoafGoal(NarrativeStateData state)
         {
+            bool resolved = state.HasKnowledge(Chapter01Ids.Knowledge.OldAgreement) &&
+                            state.HasKnowledge(Chapter01Ids.Knowledge.SharedWaterSystem);
             return new JournalGoalViewData
             {
                 Id = Chapter01Ids.JournalGoals.SecondLoaf,
                 Title = "Второй хлеб",
                 Description = "Выяснить, кому раньше предназначался второй хлеб и почему его несли к воде.",
-                CurrentStep = "Спросить об этом у тех, кто связан со старой водной системой.",
-                RevisionId = Chapter01Ids.JournalGoals.SecondLoaf + ":discovered",
+                CurrentStep = resolved
+                    ? "Смысл старого обычая восстановлен: хлеб был частью общего порядка людей у воды."
+                    : "Спросить об этом у тех, кто связан со старой водной системой.",
+                RevisionId = Chapter01Ids.JournalGoals.SecondLoaf + (resolved ? ":resolved" : ":discovered"),
                 Category = JournalGoalCategory.Optional,
-                State = JournalGoalState.Active
+                State = resolved ? JournalGoalState.Completed : JournalGoalState.Active
             };
         }
 
-        private static JournalGoalViewData BuildSevenToothGaugeGoal()
+        private static JournalGoalViewData BuildSevenToothGaugeGoal(NarrativeStateData state)
         {
+            bool resolved = state.HasKnowledge(Chapter01Ids.Knowledge.SharedWaterSystem) &&
+                            state.HasKnowledge(Chapter01Ids.Knowledge.OldAgreement);
             return new JournalGoalViewData
             {
                 Id = Chapter01Ids.JournalGoals.SevenToothGauge,
                 Title = "Семь зубцов",
                 Description = "Найти другие следы использования семизубого калибра.",
-                CurrentStep = "Искать похожие пазы, отметки или устройства вдоль старого водного пути.",
-                RevisionId = Chapter01Ids.JournalGoals.SevenToothGauge + ":discovered",
+                CurrentStep = resolved
+                    ? "Следы предмета связаны с общей водной системой и её старым порядком обслуживания."
+                    : "Искать похожие пазы, отметки или устройства вдоль старого водного пути.",
+                RevisionId = Chapter01Ids.JournalGoals.SevenToothGauge + (resolved ? ":resolved" : ":discovered"),
                 Category = JournalGoalCategory.Optional,
-                State = JournalGoalState.Active
+                State = resolved ? JournalGoalState.Completed : JournalGoalState.Active
             };
         }
     }

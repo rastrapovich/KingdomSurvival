@@ -70,8 +70,13 @@ public sealed class UILayoutDatabaseTests
         Assert.IsNotNull(database.FindScreen("narrative-dialogue"));
     }
 
+    // Раньше портрет диалога был жёстко зафиксирован на пресете L. Правило
+    // ослаблено по решению автора: допустим любой канонический пресет
+    // (XS/S/M/L/XL) — важно только то, что это действительно Portrait с
+    // размером из PortraitSizeTable (5:7), а не свободный Rect и не
+    // рассинхронизированные width/height.
     [Test]
-    public void Narrative_Portrait_Uses_L_Preset_And_Is_Always_Applied()
+    public void Narrative_Portrait_UsesCanonicalPreset_And_Is_Always_Applied()
     {
         UILayoutDatabaseAsset database = Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
         UILayoutElementDefinition portrait = database
@@ -80,9 +85,10 @@ public sealed class UILayoutDatabaseTests
 
         Assert.IsNotNull(portrait);
         Assert.AreEqual(UILayoutElementKind.Portrait, portrait.Kind);
-        Assert.AreEqual(PortraitSize.L, portrait.PortraitSize);
-        Assert.AreEqual(300f, portrait.Rect.width, 0.001f);
-        Assert.AreEqual(420f, portrait.Rect.height, 0.001f);
+
+        PortraitSizeDefinition definition = PortraitSizeTable.Get(portrait.PortraitSize);
+        Assert.AreEqual(definition.Width, portrait.Rect.width, 0.001f);
+        Assert.AreEqual(definition.Height, portrait.Rect.height, 0.001f);
         Assert.IsTrue(UILayoutScreenBinder.ShouldApplyRect(portrait));
         Assert.IsTrue(UILayoutScreenBinder.ShouldApplyBackground(portrait));
     }

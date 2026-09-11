@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ui:UXML
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    editor-extension-mode="False">
+
+    <ui:VisualElement name="hero-screen-stat-row" class="hero-screen-stat-row">
+        <ui:Label name="hero-screen-stat-row-title" class="hero-screen-stat-row-title" />
+        <ui:Label name="hero-screen-stat-row-value" class="hero-screen-stat-row-value" />
+    </ui:VisualElement>
+</ui:UXML>

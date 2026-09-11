@@ -299,13 +299,13 @@ public partial class PrototypeUIController
 
         if (journeySummaryEntries.Count == 0)
         {
-            journeySummaryEmptyLabel = new Label();
-            journeySummaryEmptyLabel.style.color =
-                new Color(0.62f, 0.64f, 0.67f);
-            journeySummaryEmptyLabel.style.fontSize = 10;
-            journeySummaryEmptyLabel.style.whiteSpace = WhiteSpace.Normal;
-            journeySummaryEmptyLabel.style.marginTop = 4;
-            journeySummaryList.Add(journeySummaryEmptyLabel);
+            VisualTreeAsset hintTemplate = LoadJourneySummaryHintTemplate();
+            if (hintTemplate == null)
+                return;
+
+            TemplateContainer hintInstance = hintTemplate.Instantiate();
+            journeySummaryEmptyLabel = hintInstance.Q<Label>("hero-screen-hint");
+            journeySummaryList.Add(hintInstance);
             RefreshJourneyEmptyState();
             return;
         }
@@ -313,46 +313,64 @@ public partial class PrototypeUIController
         journeySummaryEmptyLabel = null;
 
         foreach (JourneySummaryEntry entry in journeySummaryEntries)
-            journeySummaryList.Add(CreateJourneySummaryEntryView(entry));
+        {
+            VisualElement view = CreateJourneySummaryEntryView(entry);
+            if (view != null)
+                journeySummaryList.Add(view);
+        }
     }
 
-    private VisualElement CreateJourneySummaryEntryView(
-        JourneySummaryEntry entry)
+    private VisualTreeAsset journeySummaryEntryTemplate;
+    private VisualTreeAsset journeySummaryHintTemplate;
+
+    // Динамическая карточка похода (число записей заранее не известно) —
+    // клонируется из шаблона вместо new VisualElement/new Label
+    // (ProjectDocs/UI_ARCHITECTURE.md, раздел 19).
+    private VisualElement CreateJourneySummaryEntryView(JourneySummaryEntry entry)
     {
-        VisualElement card = new VisualElement();
-        card.style.marginBottom = 8;
-        card.style.paddingLeft = 7;
-        card.style.paddingRight = 7;
-        card.style.paddingTop = 6;
-        card.style.paddingBottom = 7;
-        card.style.backgroundColor = new Color(0.13f, 0.15f, 0.18f);
-        card.style.borderLeftWidth = 2;
-        card.style.borderLeftColor = GetJourneyToneColor(entry.Tone);
+        VisualTreeAsset template = LoadJourneySummaryEntryTemplate();
+        if (template == null)
+            return null;
 
-        Label header =
-            new Label("ДЕНЬ " + entry.Day + " · " + entry.Title.ToUpper());
-        header.style.color = new Color(0.82f, 0.78f, 0.68f);
-        header.style.fontSize = 10;
-        header.style.unityFontStyleAndWeight = FontStyle.Bold;
-        header.style.whiteSpace = WhiteSpace.Normal;
-        header.style.marginBottom = 4;
-        card.Add(header);
+        TemplateContainer instance = template.Instantiate();
 
-        Label description = new Label(entry.Description);
-        description.style.color = new Color(0.72f, 0.73f, 0.72f);
-        description.style.fontSize = 9;
-        description.style.whiteSpace = WhiteSpace.Normal;
-        description.style.marginBottom = 5;
-        card.Add(description);
+        VisualElement card = instance.Q<VisualElement>("journey-summary-entry");
+        if (card != null)
+            card.style.borderLeftColor = GetJourneyToneColor(entry.Tone);
 
-        Label result = new Label("Результат: " + entry.Result);
-        result.style.color = GetJourneyToneColor(entry.Tone);
-        result.style.fontSize = 9;
-        result.style.unityFontStyleAndWeight = FontStyle.Bold;
-        result.style.whiteSpace = WhiteSpace.Normal;
-        card.Add(result);
+        Label header = instance.Q<Label>("journey-summary-entry-header");
+        if (header != null)
+            header.text = "ДЕНЬ " + entry.Day + " · " + entry.Title.ToUpper();
 
-        return card;
+        Label description = instance.Q<Label>("journey-summary-entry-description");
+        if (description != null)
+            description.text = entry.Description;
+
+        Label result = instance.Q<Label>("journey-summary-entry-result");
+        if (result != null)
+        {
+            result.text = "Результат: " + entry.Result;
+            result.style.color = GetJourneyToneColor(entry.Tone);
+        }
+
+        return instance;
+    }
+
+    private VisualTreeAsset LoadJourneySummaryEntryTemplate()
+    {
+        if (journeySummaryEntryTemplate == null)
+            journeySummaryEntryTemplate = Resources.Load<VisualTreeAsset>("Templates/JourneySummaryEntry");
+        return journeySummaryEntryTemplate;
+    }
+
+    // Пустое состояние переиспользует общий шаблон подсказки Hero Screen
+    // (тот же визуальный язык §hero-screen-hint) — отдельного шаблона не
+    // заводим ради одной строки.
+    private VisualTreeAsset LoadJourneySummaryHintTemplate()
+    {
+        if (journeySummaryHintTemplate == null)
+            journeySummaryHintTemplate = Resources.Load<VisualTreeAsset>("Templates/HeroHint");
+        return journeySummaryHintTemplate;
     }
 
     private Color GetJourneyToneColor(ExpeditionIncidentTone tone)

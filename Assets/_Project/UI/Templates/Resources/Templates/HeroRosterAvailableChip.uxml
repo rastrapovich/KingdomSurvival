@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ui:UXML
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    editor-extension-mode="False">
+
+    <ui:VisualElement name="hero-screen-roster-available-chip" class="hero-screen-roster-available-chip">
+        <ui:Label name="hero-screen-roster-available-chip-label" class="hero-screen-roster-available-chip-label" />
+    </ui:VisualElement>
+</ui:UXML>

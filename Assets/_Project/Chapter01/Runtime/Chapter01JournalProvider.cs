@@ -95,10 +95,17 @@ namespace KingdomSurvival.Chapter01
             // P08 (та же цель, ExpeditionStarted уже true к этому моменту).
             // Раздел "Достижение OldWaterSearch": ":travel" -> ":search_area".
             bool destinationReached = state.HasFlag(Chapter01Ids.Flags.RoadDestinationReached);
+            bool oldFordFound = state.HasFlag(Chapter01Ids.Flags.OldFordFound);
+            bool downstreamContact = state.HasFlag(Chapter01Ids.Flags.DownstreamContact);
 
             string currentStep;
             string revisionSuffix;
-            if (destinationReached)
+            if (oldFordFound && !downstreamContact)
+            {
+                currentStep = "Добраться до людей ниже по течению.";
+                revisionSuffix = ":downstream_people";
+            }
+            else if (destinationReached)
             {
                 currentStep = "Осмотреть место, где старый путь снова выходит к воде.";
                 revisionSuffix = ":search_area";

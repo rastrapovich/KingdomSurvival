@@ -161,6 +161,100 @@ namespace KingdomSurvival.Chapter01
             gameState.Locations.Add(location);
         }
 
+        // P10-T05: завершение N12 раскрывает следующую сюжетную точку, но не
+        // отдаёт приказ на движение и не меняет положение экспедиции. Само
+        // наличие LocationData — состояние разблокировки; отдельный флаг для
+        // карты не нужен. Если старой области поиска ещё нет, эффект не
+        // помечается выполненным, чтобы корректное состояние можно было
+        // восстановить позднее, не потеряв раскрытие навсегда.
+        public static bool ApplyDownstreamLocationReveal(GameState gameState)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+
+            bool alreadyExists =
+                gameState.FindLocation(Chapter01Ids.Locations.DownstreamSettlement) != null;
+            if (!alreadyExists &&
+                gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch) == null)
+            {
+                return false;
+            }
+
+            return Apply(
+                gameState,
+                Chapter01Ids.Effects.DownstreamLocationReveal,
+                _ => RevealDownstreamLocation(gameState));
+        }
+
+        private static void RevealDownstreamLocation(GameState gameState)
+        {
+            if (gameState.Locations == null)
+                gameState.Locations = new List<LocationData>();
+
+            if (gameState.FindLocation(Chapter01Ids.Locations.DownstreamSettlement) != null)
+                return;
+
+            LocationData oldWaterSearch =
+                gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch);
+            if (oldWaterSearch == null)
+                return;
+
+            float directionX = oldWaterSearch.MapXPercent - WorldMapNavigation.CapitalXPercent;
+            float directionY = oldWaterSearch.MapYPercent - WorldMapNavigation.CapitalYPercent;
+            double directionLength = Math.Sqrt(
+                directionX * directionX + directionY * directionY);
+
+            if (directionLength <= 0.001)
+            {
+                directionX = 0f;
+                directionY = -1f;
+                directionLength = 1.0;
+            }
+
+            // 12% карты — рабочая production-дистанция внутри утверждённого
+            // диапазона 10–15%, а не новый лорный факт.
+            const float DownstreamDistancePercent = 12f;
+            float candidateX = WorldMapNavigation.ClampMapX(
+                oldWaterSearch.MapXPercent +
+                (float)(directionX / directionLength) * DownstreamDistancePercent);
+            float candidateY = WorldMapNavigation.ClampMapY(
+                oldWaterSearch.MapYPercent +
+                (float)(directionY / directionLength) * DownstreamDistancePercent);
+
+            List<MapPointData> route = WorldMapNavigation.FindPath(
+                WorldMapNavigation.CapitalXPercent,
+                WorldMapNavigation.CapitalYPercent,
+                candidateX,
+                candidateY);
+
+            float finalX = candidateX;
+            float finalY = candidateY;
+            if (route.Count > 0)
+            {
+                finalX = route[route.Count - 1].XPercent;
+                finalY = route[route.Count - 1].YPercent;
+            }
+
+            LocationData location = new LocationData(
+                Chapter01Ids.Locations.DownstreamSettlement,
+                "Люди ниже по течению",
+                ContinuousSimulationSystem.CalculateTravelHours(route),
+                "неизвестна",
+                explorationHours: 0.0)
+            {
+                RegionId = "chapter01-downstream-settlement",
+                RegionName = GameState.GetRegionName(finalX, finalY),
+                MapSlotIndex = gameState.Locations.Count,
+                MapXPercent = finalX,
+                MapYPercent = finalY,
+                InteractionDescription =
+                    "Ниже по течению видны крыши, лодки у размытого берега и люди, " +
+                    "которые уже заметили приближающийся отряд."
+            };
+
+            gameState.Locations.Add(location);
+        }
+
         // P09-T01: последствие выбора маршрута в N11, читает флаг, который
         // уже поставил сам диалог (тот же паттерн, что ApplyFloodConsequences
         // читает флаги N04). "Срезать через низину" (CrossedOldRoadBoundary)

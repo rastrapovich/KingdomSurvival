@@ -1118,7 +1118,8 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                     acceptanceCriteria: new[]
                     {
                         "Реакции меняются от ремонта, предмета, состава и предыдущей помощи",
-                        "Провал приводит к долгу/напряжению/травме, но не блокирует обязательную истину"
+                        "Провал приводит к долгу/напряжению/травме, но не блокирует обязательную истину",
+                        "N13 доступен игровым путём только после физического перехода и действия P10-T05"
                     }),
 
                 Task("P10-T03", "Решающая проверка Характера (первый контакт)",
@@ -1132,7 +1133,49 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                     DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 4,
                     fileReferences: new[] { "Assets/_Project/Scripts/Core/NarrativeState.cs" },
                     manualChecks: new[] { "Прогнать тесты условий размера группы в Unity" },
-                    acceptanceCriteria: new[] { "Условия читают текущий контекстный размер группы, а не сохранённый вечный флаг" })
+                    acceptanceCriteria: new[] { "Условия читают текущий контекстный размер группы, а не сохранённый вечный флаг" }),
+
+                Task("P10-T05", "N12 → нижнее поселение → N13",
+                    "После завершения N12 раскрыть на глобальной карте сюжетную локацию людей ниже по течению, обновить цель в Хронике, позволить герою физически добраться туда из текущей позиции и запускать N13 только через действие «ПОДОЙТИ К ЛЮДЯМ» в Location Interaction. Не телепортировать экспедицию и не запускать N13 автоматически при прибытии.",
+                    DevelopmentTaskCategory.Integration, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 5,
+                    dependencies: new[] { "P10-T01", "P10-T02" },
+                    relatedDialogueIds: new[] { "chapter01_dialogue_12_old_ford", "chapter01_dialogue_13_other_people" },
+                    relatedFlagIds: new[] { "chapter01.flag.old_ford_found", "chapter01.flag.downstream_contact" },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Chapter01/Runtime/Chapter01OutcomeApplier.cs",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01JournalProvider.cs",
+                        "Assets/_Project/UI/PrototypeUIController.LocationInteraction.cs"
+                    },
+                    manualChecks: new[]
+                    {
+                        "Пройти связку N12 → карта → маршрут → Location Interaction → N13 в Play Mode",
+                        "Проверить ОТМЕНИТЬ и повторный вход в локацию",
+                        "Проверить Save/Load до прибытия и после N13",
+                        "Запустить полный EditMode Run All"
+                    },
+                    acceptanceCriteria: new[]
+                    {
+                        "Завершил N12 → новая точка появилась на карте",
+                        "Точка не существует до N12",
+                        "Повторное открытие/завершение N12 не создаёт дубль",
+                        "Хроника меняется на «Добраться до людей ниже по течению»",
+                        "Герой остаётся у старого брода — телепортации нет",
+                        "Игрок сам кликает новую точку и прокладывает маршрут",
+                        "Поход расходует обычное игровое время",
+                        "По прибытии появляется Location Interaction",
+                        "N13 ещё не запущена",
+                        "Есть «ПОДОЙТИ К ЛЮДЯМ» и «ОТМЕНИТЬ»",
+                        "ОТМЕНИТЬ оставляет отряд на месте; повторный вход доступен",
+                        "ПОДОЙТИ К ЛЮДЯМ запускает N13",
+                        "FirstContact работает с текущим составом отряда",
+                        "После DownstreamContact N13 больше не предлагается как первая встреча",
+                        "Save/Load между N12 и прибытием сохраняет открытую точку и текущую цель",
+                        "Save/Load после N13 не позволяет повторить FirstContact",
+                        "Полный EditMode Run All не ломает P09/P10"
+                    },
+                    implementationNote: "Location Interaction реализован отдельным общим UI-слоем; P10-T05 связывает его с готовыми N12/N13. Статус NeedsUnityCheck сохраняется до ручной проверки UI и полного EditMode Run All.")
             );
         }
 

@@ -296,6 +296,8 @@ namespace KingdomSurvival.Chapter01
                 Chapter01OutcomeApplier.ApplyLongRoadRouteConsequences(gameState);
             else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D11B, StringComparison.Ordinal))
                 Chapter01OutcomeApplier.ApplyCartConsequences(gameState);
+            else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D12, StringComparison.Ordinal))
+                Chapter01OutcomeApplier.ApplyDownstreamLocationReveal(gameState);
         }
 
         // P09-T02/T03: доля пройденных клеток текущего маршрута, [0..1].
@@ -398,6 +400,47 @@ namespace KingdomSurvival.Chapter01
                 return null;
 
             return Chapter01Ids.Dialogues.D12;
+        }
+
+        // P10-T05: сюжетное действие при осознанном входе игрока в уже
+        // достигнутую локацию. В отличие от GetPendingLocationNarrativeDialogueId
+        // этот gate не опрашивается для автозапуска: UI Location Interaction
+        // использует возвращённый ID только после нажатия основной кнопки.
+        public static string GetLocationEntryDialogueId(GameState gameState, string locationId)
+        {
+            if (gameState == null ||
+                gameState.Narrative == null ||
+                !gameState.HasActiveExpedition ||
+                string.IsNullOrEmpty(locationId))
+            {
+                return null;
+            }
+
+            if (!string.Equals(
+                    locationId,
+                    Chapter01Ids.Locations.DownstreamSettlement,
+                    StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            ExpeditionData expedition = gameState.ActiveExpedition;
+            if (expedition.Phase != CommanderState.AtLocation ||
+                !string.Equals(expedition.LocationId, locationId, StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            NarrativeStateData state = gameState.Narrative;
+            if (!state.HasFlag(Chapter01Ids.Flags.OldFordFound) ||
+                state.HasFlag(Chapter01Ids.Flags.DownstreamContact))
+            {
+                return null;
+            }
+
+            return gameState.FindLocation(locationId) != null
+                ? Chapter01Ids.Dialogues.D13
+                : null;
         }
 
         // P09-T01: продолжение маршрута после временной точки крюка

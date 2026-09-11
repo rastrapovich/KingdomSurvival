@@ -167,7 +167,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
     public sealed class DevelopmentPlanAsset : ScriptableObject
     {
-        public const int CurrentSchemaVersion = 2;
+        public const int CurrentSchemaVersion = 3;
 
         private static readonly HashSet<string> Version2SeedOwnedPhaseIds = new HashSet<string>
         {
@@ -226,6 +226,8 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
         // прогресс сохраняется только для задач, у которых совпадают и ID,
         // и название. Это защищает от переноса старого статуса на новую задачу,
         // если стабильный ID был переиспользован после переработки P09.
+        // v3 тем же безопасным способом синхронизирует P10, добавляя P10-T05
+        // и новый критерий P10-T02 без потери существующих отметок.
         public bool MigrateIfNeeded()
         {
             bool changed = EnsureCollections();
@@ -234,6 +236,13 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             {
                 changed |= MigrateToVersion2();
                 schemaVersion = 2;
+                changed = true;
+            }
+
+            if (schemaVersion < 3)
+            {
+                changed |= MigrateToVersion3();
+                schemaVersion = 3;
                 changed = true;
             }
 
@@ -344,6 +353,40 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
                 }
 
                 return changed;
+            }
+            finally
+            {
+                Object.DestroyImmediate(seed);
+            }
+        }
+
+        private bool MigrateToVersion3()
+        {
+            DevelopmentPlanAsset seed = ScriptableObject.CreateInstance<DevelopmentPlanAsset>();
+            try
+            {
+                DevelopmentPlanSeedData.Populate(seed);
+                DevelopmentPhaseData seedPhase = seed.FindPhase("P10_FORD");
+                if (seedPhase == null)
+                    return false;
+
+                DevelopmentPhaseData existing = FindPhase(seedPhase.id);
+                if (existing == null)
+                {
+                    phases.Add(ClonePhase(seedPhase));
+                }
+                else
+                {
+                    DevelopmentPhaseData replacement = ClonePhase(seedPhase);
+                    PreserveMatchingTaskProgress(existing, replacement);
+                    int existingIndex = phases.IndexOf(existing);
+                    phases[existingIndex] = replacement;
+                }
+
+                if (planUpdatedAt != seed.planUpdatedAt)
+                    planUpdatedAt = seed.planUpdatedAt;
+
+                return true;
             }
             finally
             {

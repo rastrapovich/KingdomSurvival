@@ -1,3 +1,4 @@
+using KingdomSurvival.Chapter01;
 using UnityEngine.UIElements;
 
 // Location Interaction — системное окно "мы вошли в локацию", которое
@@ -112,23 +113,43 @@ public partial class PrototypeUIController
 
         narrativeChoicesContainer.Clear();
 
-        Button researchButton = InstantiateFlatTemplate<Button>(LoadNarrativeChoiceButtonTemplate(), "narrative-dialogue-choice");
-        if (researchButton != null)
-        {
-            string researchButtonText;
-            string researchHint;
-            bool researchEnabled = GetLocationResearchAvailability(location, out researchButtonText, out researchHint);
-            researchButton.text = researchButtonText;
-            researchButton.SetEnabled(researchEnabled);
-            researchButton.clicked += OnLocationInteractionResearchClicked;
-            narrativeChoicesContainer.Add(researchButton);
+        string entryDialogueId =
+            Chapter01StoryDirector.GetLocationEntryDialogueId(gameState, location.Id);
 
-            if (!string.IsNullOrWhiteSpace(researchHint))
+        Button primaryButton = InstantiateFlatTemplate<Button>(LoadNarrativeChoiceButtonTemplate(), "narrative-dialogue-choice");
+        if (primaryButton != null)
+        {
+            string primaryButtonText;
+            string primaryHint;
+            bool primaryEnabled;
+
+            if (!string.IsNullOrEmpty(entryDialogueId))
+            {
+                primaryButtonText = "ПОДОЙТИ К ЛЮДЯМ";
+                primaryHint = "Поговорить с людьми, живущими ниже по течению.";
+                primaryEnabled = true;
+                primaryButton.clicked += () =>
+                    OnLocationInteractionNarrativeEntryClicked(entryDialogueId);
+            }
+            else
+            {
+                primaryEnabled = GetLocationResearchAvailability(
+                    location,
+                    out primaryButtonText,
+                    out primaryHint);
+                primaryButton.clicked += OnLocationInteractionResearchClicked;
+            }
+
+            primaryButton.text = primaryButtonText;
+            primaryButton.SetEnabled(primaryEnabled);
+            narrativeChoicesContainer.Add(primaryButton);
+
+            if (!string.IsNullOrWhiteSpace(primaryHint))
             {
                 Label hint = InstantiateFlatTemplate<Label>(LoadNarrativeChoiceSecondaryTemplate(), "narrative-dialogue-choice-secondary");
                 if (hint != null)
                 {
-                    hint.text = researchHint;
+                    hint.text = primaryHint;
                     hint.AddToClassList("narrative-dialogue-choice-hint");
                     narrativeChoicesContainer.Add(hint);
                 }
@@ -149,6 +170,35 @@ public partial class PrototypeUIController
                 hint.AddToClassList("narrative-dialogue-choice-hint");
                 narrativeChoicesContainer.Add(hint);
             }
+        }
+    }
+
+    private void OnLocationInteractionNarrativeEntryClicked(string dialogueId)
+    {
+        if (!IsLocationInteractionActive || gameState == null || isGameOver)
+            return;
+
+        string locationId = locationInteractionLocationId;
+        string availableDialogueId =
+            Chapter01StoryDirector.GetLocationEntryDialogueId(gameState, locationId);
+        if (!string.Equals(
+                availableDialogueId,
+                dialogueId,
+                System.StringComparison.Ordinal))
+        {
+            LocationData location = gameState.FindLocation(locationId);
+            if (location != null)
+                RenderLocationInteractionChoices(location);
+            return;
+        }
+
+        // Закрываем только presentation-состояние Location Interaction;
+        // ExpeditionData остаётся AtLocation. Диалог открывается строго
+        // через единственную существующую runtime-точку входа.
+        CloseLocationInteraction();
+        if (!TryOpenNarrativeDialogueById(dialogueId))
+        {
+            AddReport("Не удалось начать встречу. Войдите в локацию ещё раз.");
         }
     }
 

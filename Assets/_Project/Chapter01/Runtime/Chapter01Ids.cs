@@ -244,8 +244,9 @@ namespace KingdomSurvival.Chapter01
         public static class Locations
         {
             public const string OldWaterSearch = "chapter01.location.old_water_search";
+            public const string DownstreamSettlement = "chapter01.location.downstream_settlement";
 
-            public static readonly IReadOnlyList<string> All = new[] { OldWaterSearch };
+            public static readonly IReadOnlyList<string> All = new[] { OldWaterSearch, DownstreamSettlement };
         }
 
         // P08J-T01: стабильные ID записей Журнала целей — отдельная сущность
@@ -272,6 +273,7 @@ namespace KingdomSurvival.Chapter01
             public const string LongRoadTimeAdvance = "chapter01.effect.long_road_time_advance";
             public const string SevenToothGaugeGrant = "chapter01.effect.seven_tooth_gauge_grant";
             public const string DepartureLocationReveal = "chapter01.effect.departure_location_reveal";
+            public const string DownstreamLocationReveal = "chapter01.effect.downstream_location_reveal";
 
             // P09-T01/T03: OldRoadDetourStart строит реальный waypoint-крюк
             // (не просто списывает часы — раздел "Решение у старой дороги"
@@ -287,7 +289,7 @@ namespace KingdomSurvival.Chapter01
             {
                 FloodResourceLoss, FloodTimeAdvance, FloodMillRepairCost,
                 LongRoadTimeAdvance, SevenToothGaugeGrant, DepartureLocationReveal,
-                OldRoadDetourStart, CartActivityStart
+                DownstreamLocationReveal, OldRoadDetourStart, CartActivityStart
             };
         }
 

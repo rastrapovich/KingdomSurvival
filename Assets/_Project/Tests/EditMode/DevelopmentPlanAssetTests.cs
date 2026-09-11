@@ -253,6 +253,62 @@ public sealed class DevelopmentPlanAssetTests
     }
 
     [Test]
+    public void MigrateIfNeeded_V3_AddsP10Integration_AndPreservesMatchingProgress()
+    {
+        DevelopmentPlanAsset plan = ScriptableObject.CreateInstance<DevelopmentPlanAsset>();
+        try
+        {
+            const string PreservedCriterion =
+                "Есть материальный факт брода и человеческая история, но не единственная авторская трактовка";
+
+            plan.schemaVersion = 2;
+            plan.phases.Add(new DevelopmentPhaseData
+            {
+                id = "P10_FORD",
+                title = "Старый брод и люди ниже по течению",
+                tasks = new List<DevelopmentTaskData>
+                {
+                    new DevelopmentTaskData
+                    {
+                        id = "P10-T01",
+                        title = "N12 «Женщина у брода»",
+                        status = DevelopmentTaskStatus.Completed,
+                        required = true,
+                        completedAt = "2026-09-11",
+                        blockerNote = "сохранить заметку",
+                        acceptanceCriteria = new List<AcceptanceCriterionData>
+                        {
+                            new AcceptanceCriterionData { text = PreservedCriterion, done = true }
+                        }
+                    }
+                }
+            });
+
+            bool changed = plan.MigrateIfNeeded();
+
+            Assert.IsTrue(changed);
+            Assert.AreEqual(DevelopmentPlanAsset.CurrentSchemaVersion, plan.schemaVersion);
+
+            DevelopmentTaskData preserved = plan.FindTask("P10-T01", out _);
+            Assert.AreEqual(DevelopmentTaskStatus.Completed, preserved.status);
+            Assert.AreEqual("2026-09-11", preserved.completedAt);
+            Assert.AreEqual("сохранить заметку", preserved.blockerNote);
+            Assert.IsTrue(preserved.acceptanceCriteria[0].done);
+
+            DevelopmentTaskData integration = plan.FindTask("P10-T05", out DevelopmentPhaseData owner);
+            Assert.IsNotNull(integration);
+            Assert.AreEqual("P10_FORD", owner.id);
+            Assert.AreEqual(DevelopmentTaskCategory.Integration, integration.category);
+            Assert.AreEqual(DevelopmentTaskStatus.NeedsUnityCheck, integration.status);
+            Assert.AreEqual(17, integration.acceptanceCriteria.Count);
+        }
+        finally
+        {
+            Object.DestroyImmediate(plan);
+        }
+    }
+
+    [Test]
     public void MigrateIfNeeded_CurrentVersion_IsIdempotent()
     {
         DevelopmentPlanAsset plan = ScriptableObject.CreateInstance<DevelopmentPlanAsset>();

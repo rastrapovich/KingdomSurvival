@@ -5,8 +5,9 @@ using NUnit.Framework;
 using UnityEngine;
 
 // P10 — «Старый брод и люди ниже по течению». N12 «Женщина у брода» и
-// N13 «У всех есть дом» + нормализация PartySize (P10-T04) и решающая
-// проверка Характера FirstContact (P10-T03). Против настоящего
+// N13 «У всех есть дом» + нормализация PartySize (P10-T04), решающая
+// проверка Характера FirstContact (P10-T03) и физическая связка между
+// сценами через нижнее поселение (P10-T05). Против настоящего
 // KingdomSurvivalDialogues.asset через Resources.Load — тот же подход, что
 // Chapter01P09Tests.cs.
 public sealed class Chapter01P10Tests
@@ -593,9 +594,61 @@ public sealed class Chapter01P10Tests
 
     private static void ArriveAtOldWaterSearch(GameState gameState)
     {
-        gameState.ActiveExpedition.Phase = CommanderState.AtLocation;
-        gameState.ActiveExpedition.RemainingRouteCells = 0;
+        PlaceExpeditionAtLocation(gameState, Chapter01Ids.Locations.OldWaterSearch);
         Chapter01StoryDirector.RefreshRoadState(gameState);
+    }
+
+    private static void PlaceExpeditionAtLocation(GameState gameState, string locationId)
+    {
+        LocationData location = gameState.FindLocation(locationId);
+        Assert.IsNotNull(location);
+        Assert.IsTrue(gameState.HasActiveExpedition);
+
+        ExpeditionData expedition = gameState.ActiveExpedition;
+        expedition.LocationId = locationId;
+        expedition.Phase = CommanderState.AtLocation;
+        expedition.RemainingRouteCells = 0;
+        expedition.RouteLengthCells = 0;
+        expedition.RouteIndex = 0;
+        expedition.RouteDelayHoursRemaining = 0.0;
+        expedition.CurrentMapXPercent = location.MapXPercent;
+        expedition.CurrentMapYPercent = location.MapYPercent;
+        expedition.TargetMapXPercent = location.MapXPercent;
+        expedition.TargetMapYPercent = location.MapYPercent;
+        expedition.Route = new List<MapPointData>
+        {
+            new MapPointData(location.MapXPercent, location.MapYPercent)
+        };
+        expedition.LastTravelPoints = new List<MapPointData>();
+        expedition.ActiveActivity = null;
+        expedition.PendingDecision = null;
+
+        CommanderData commander = gameState.FindCommander(expedition.CommanderId);
+        Assert.IsNotNull(commander);
+        commander.State = CommanderState.AtLocation;
+    }
+
+    private static GameState NewGameStateAfterN12(int seed)
+    {
+        GameState gameState = NewGameStateEnRouteToOldWaterSearch(seed);
+        ArriveAtOldWaterSearch(gameState);
+        gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch).IsExplored = true;
+        gameState.Narrative.SetFlag(Chapter01Ids.Flags.OldFordFound);
+        Chapter01StoryDirector.HandleDialogueCompleted(gameState, Chapter01Ids.Dialogues.D12);
+        return gameState;
+    }
+
+    private static JournalGoalViewData FindJournalGoal(
+        IReadOnlyList<JournalGoalViewData> goals,
+        string goalId)
+    {
+        for (int i = 0; i < goals.Count; i++)
+        {
+            if (goals[i].Id == goalId)
+                return goals[i];
+        }
+
+        return null;
     }
 
     [Test]
@@ -675,5 +728,171 @@ public sealed class Chapter01P10Tests
         // после этого story-gate не должен снова предлагать D12.
         gameState.Narrative.SetFlag(Chapter01Ids.Flags.OldFordFound);
         Assert.IsNull(Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState));
+    }
+
+    // --- P10-T05: N12 → физический путь к людям → ручной вход в N13 ---
+
+    [Test]
+    public void DownstreamSettlement_DoesNotExistBeforeN12Completes()
+    {
+        GameState gameState = NewGameStateEnRouteToOldWaterSearch(910500);
+        ArriveAtOldWaterSearch(gameState);
+        gameState.Narrative.SetFlag(Chapter01Ids.Flags.OldFordFound);
+
+        Assert.IsNull(gameState.FindLocation(Chapter01Ids.Locations.DownstreamSettlement));
+        Assert.IsFalse(gameState.Narrative.HasEffectApplied(
+            Chapter01Ids.Effects.DownstreamLocationReveal));
+    }
+
+    [Test]
+    public void D12Completion_RevealsDownstreamSettlementOnce_WithoutTeleportOrContact()
+    {
+        GameState gameState = NewGameStateEnRouteToOldWaterSearch(910501);
+        ArriveAtOldWaterSearch(gameState);
+        gameState.Narrative.SetFlag(Chapter01Ids.Flags.OldFordFound);
+
+        ExpeditionData expedition = gameState.ActiveExpedition;
+        string locationBefore = expedition.LocationId;
+        CommanderState phaseBefore = expedition.Phase;
+        float xBefore = expedition.CurrentMapXPercent;
+        float yBefore = expedition.CurrentMapYPercent;
+
+        Chapter01StoryDirector.HandleDialogueCompleted(gameState, Chapter01Ids.Dialogues.D12);
+        Chapter01StoryDirector.HandleDialogueCompleted(gameState, Chapter01Ids.Dialogues.D12);
+
+        int revealCount = gameState.Locations.FindAll(location =>
+            location.Id == Chapter01Ids.Locations.DownstreamSettlement).Count;
+        Assert.AreEqual(1, revealCount);
+        Assert.IsTrue(gameState.Narrative.HasEffectApplied(
+            Chapter01Ids.Effects.DownstreamLocationReveal));
+        Assert.IsFalse(gameState.Narrative.HasFlag(Chapter01Ids.Flags.DownstreamContact));
+        Assert.AreEqual(locationBefore, expedition.LocationId);
+        Assert.AreEqual(phaseBefore, expedition.Phase);
+        Assert.AreEqual(xBefore, expedition.CurrentMapXPercent);
+        Assert.AreEqual(yBefore, expedition.CurrentMapYPercent);
+    }
+
+    [Test]
+    public void DownstreamSettlement_ContinuesCapitalToFordVector_ByTwelvePercent()
+    {
+        GameState gameState = NewGameStateAfterN12(910502);
+        LocationData oldWater = gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch);
+        LocationData downstream = gameState.FindLocation(Chapter01Ids.Locations.DownstreamSettlement);
+
+        Assert.IsNotNull(downstream);
+        Assert.AreEqual("Люди ниже по течению", downstream.Name);
+        Assert.AreEqual(0.0, downstream.ExplorationHours);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(downstream.InteractionDescription));
+        Assert.That(downstream.MapXPercent, Is.InRange(0f, 100f));
+        Assert.That(downstream.MapYPercent, Is.InRange(0f, 100f));
+
+        Vector2 capitalToFord = new Vector2(
+            oldWater.MapXPercent - WorldMapNavigation.CapitalXPercent,
+            oldWater.MapYPercent - WorldMapNavigation.CapitalYPercent);
+        Vector2 fordToDownstream = new Vector2(
+            downstream.MapXPercent - oldWater.MapXPercent,
+            downstream.MapYPercent - oldWater.MapYPercent);
+
+        Assert.That(fordToDownstream.magnitude, Is.InRange(10f, 15f));
+        Assert.Greater(Vector2.Dot(capitalToFord.normalized, fordToDownstream.normalized), 0.999f);
+    }
+
+    [Test]
+    public void DownstreamRoute_UsesOrdinaryTime_AndN13WaitsForExplicitLocationAction()
+    {
+        GameState gameState = NewGameStateAfterN12(910503);
+        LocationData downstream = gameState.FindLocation(Chapter01Ids.Locations.DownstreamSettlement);
+
+        Assert.IsNull(Chapter01StoryDirector.GetLocationEntryDialogueId(
+            gameState, Chapter01Ids.Locations.DownstreamSettlement));
+
+        string message;
+        Assert.IsTrue(gameState.TryChangeExpeditionRoute(
+            downstream.MapXPercent,
+            downstream.MapYPercent,
+            downstream.Id,
+            out message), message);
+        Assert.AreEqual(CommanderState.TravellingToLocation, gameState.ActiveExpedition.Phase);
+
+        float startX = gameState.ActiveExpedition.CurrentMapXPercent;
+        float startY = gameState.ActiveExpedition.CurrentMapYPercent;
+        ContinuousClockSnapshot clockBefore = ContinuousSimulationSystem.GetClock(gameState);
+        ContinuousSimulationSystem.SetPaused(gameState, false);
+        ContinuousSimulationSystem.Advance(gameState, 1f, false);
+        ContinuousClockSnapshot clockAfter = ContinuousSimulationSystem.GetClock(gameState);
+
+        Assert.Greater(clockAfter.HourOfDay, clockBefore.HourOfDay);
+        Assert.Greater(Vector2.Distance(
+            new Vector2(startX, startY),
+            new Vector2(
+                gameState.ActiveExpedition.CurrentMapXPercent,
+                gameState.ActiveExpedition.CurrentMapYPercent)), 0f);
+        Assert.IsNull(Chapter01StoryDirector.GetLocationEntryDialogueId(
+            gameState, downstream.Id));
+
+        ContinuousSimulationBatch arrival =
+            ContinuousSimulationSystem.Advance(gameState, 60f, false);
+
+        Assert.AreEqual(CommanderState.AtLocation, gameState.ActiveExpedition.Phase);
+        Assert.AreEqual(downstream.Id, gameState.ActiveExpedition.LocationId);
+        Assert.IsNotNull(arrival.MandatoryNotice);
+        Assert.IsFalse(gameState.Narrative.HasFlag(Chapter01Ids.Flags.DownstreamContact));
+        Assert.IsNull(Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState),
+            "N13 нельзя добавлять в автоматический story-gate прибытия.");
+        Assert.AreEqual(Chapter01Ids.Dialogues.D13,
+            Chapter01StoryDirector.GetLocationEntryDialogueId(gameState, downstream.Id));
+
+        gameState.Narrative.SetFlag(Chapter01Ids.Flags.DownstreamContact);
+        Assert.IsNull(Chapter01StoryDirector.GetLocationEntryDialogueId(gameState, downstream.Id));
+    }
+
+    [Test]
+    public void N12Completion_UpdatesExistingJournalGoal_ToDownstreamPeopleStep()
+    {
+        GameState gameState = NewGameStateAfterN12(910504);
+
+        JournalGoalViewData trail = FindJournalGoal(
+            Chapter01JournalProvider.Build(gameState),
+            Chapter01Ids.JournalGoals.OldWaterTrail);
+
+        Assert.IsNotNull(trail);
+        Assert.AreEqual("Добраться до людей ниже по течению.", trail.CurrentStep);
+        Assert.AreEqual(
+            Chapter01Ids.JournalGoals.OldWaterTrail + ":downstream_people",
+            trail.RevisionId);
+    }
+
+    [Test]
+    public void SaveLoad_DuringDownstreamTravel_PreservesLocationRouteAndJournalStep()
+    {
+        GameState gameState = NewGameStateAfterN12(910505);
+        LocationData downstream = gameState.FindLocation(Chapter01Ids.Locations.DownstreamSettlement);
+        Assert.IsTrue(gameState.TryChangeExpeditionRoute(
+            downstream.MapXPercent,
+            downstream.MapYPercent,
+            downstream.Id,
+            out string message), message);
+
+        ContinuousSimulationSystem.SetPaused(gameState, false);
+        ContinuousSimulationSystem.Advance(gameState, 1f, false);
+        string json = JsonUtility.ToJson(gameState);
+        GameState restored = JsonUtility.FromJson<GameState>(json);
+
+        LocationData restoredDownstream =
+            restored.FindLocation(Chapter01Ids.Locations.DownstreamSettlement);
+        Assert.IsNotNull(restoredDownstream);
+        Assert.AreEqual(CommanderState.TravellingToLocation, restored.ActiveExpedition.Phase);
+        Assert.AreEqual(Chapter01Ids.Locations.DownstreamSettlement,
+            restored.ActiveExpedition.LocationId);
+        Assert.Greater(restored.ActiveExpedition.RemainingRouteCells, 0);
+
+        JournalGoalViewData trail = FindJournalGoal(
+            Chapter01JournalProvider.Build(restored),
+            Chapter01Ids.JournalGoals.OldWaterTrail);
+        Assert.IsNotNull(trail);
+        Assert.AreEqual("Добраться до людей ниже по течению.", trail.CurrentStep);
+        Assert.AreEqual(
+            Chapter01Ids.JournalGoals.OldWaterTrail + ":downstream_people",
+            trail.RevisionId);
     }
 }

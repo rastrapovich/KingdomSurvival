@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ui:UXML
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    editor-extension-mode="False">
+
+    <ui:VisualElement name="building-card" class="building-card">
+        <ui:VisualElement name="building-card-header" class="building-card-header">
+            <ui:Label name="building-card-title" class="building-card-title" />
+            <ui:Label name="building-card-status" class="building-card-status" />
+        </ui:VisualElement>
+        <ui:Label name="building-card-image" text="ИЗОБРАЖЕНИЕ ПОСТРОЙКИ" class="building-card-image" />
+        <ui:Label name="building-card-description" class="building-card-description" />
+        <ui:Label name="building-card-effect" class="building-card-effect" />
+        <ui:Label name="building-card-meta" class="building-card-meta" />
+        <ui:ProgressBar name="building-card-progress" low-value="0" high-value="1" class="building-card-progress" />
+        <ui:Button name="building-card-action" class="building-card-action" />
+    </ui:VisualElement>
+</ui:UXML>

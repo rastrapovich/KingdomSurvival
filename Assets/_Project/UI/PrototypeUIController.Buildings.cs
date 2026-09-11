@@ -16,23 +16,11 @@ public partial class PrototypeUIController
         public Button ActionButton;
     }
 
-    /// <summary>
-    /// Имя сетки построек в дереве UI. Сетка ищется по классу, но получает имя,
-    /// чтобы к ней могли привязываться экраны `UI Конструктора`.
-    /// </summary>
-    private const string BuildingGridName = "building-grid";
-
-    /// <summary>
-    /// Префикс имён карточек построек: `building-card-{id постройки}`.
-    /// Части карточки получают суффиксы `-header`, `-title`, `-status`,
-    /// `-image`, `-description`, `-effect`, `-meta`, `-progress`, `-action`.
-    /// </summary>
-    private const string BuildingCardNamePrefix = "building-card-";
-
     private VisualElement buildingGrid;
     private readonly Dictionary<string, BuildingCardView> buildingCards =
         new Dictionary<string, BuildingCardView>();
     private IVisualElementScheduledItem buildingUiSchedule;
+    private VisualTreeAsset buildingCardTemplate;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InstallBuildingUiAfterSceneLoad()
@@ -68,7 +56,7 @@ public partial class PrototypeUIController
             return;
 
         VisualElement root = uiDocument.rootVisualElement;
-        buildingGrid = root.Q<VisualElement>(className: "building-grid");
+        buildingGrid = root.Q<VisualElement>("building-grid");
         if (buildingGrid == null)
             return;
 
@@ -86,94 +74,36 @@ public partial class PrototypeUIController
     {
         buildingGrid.Clear();
         buildingCards.Clear();
-        buildingGrid.name = BuildingGridName;
-        buildingGrid.style.flexDirection = FlexDirection.Row;
-        buildingGrid.style.flexWrap = Wrap.Wrap;
-        buildingGrid.style.alignItems = Align.Stretch;
+
+        VisualTreeAsset template = LoadBuildingCardTemplate();
+        if (template == null)
+            return;
 
         foreach (BuildingDefinition definition in BuildingSystem.GetDefinitions())
         {
-            // Сетка построек пересоздаётся кодом, поэтому имена назначаются
-            // здесь, а не в UXML: без них `UI Конструктор` не может привязаться
-            // к карточкам и их частям.
-            string cardName = BuildingCardNamePrefix + definition.Id;
+            TemplateContainer instance = template.Instantiate();
 
-            VisualElement card = new VisualElement { name = cardName };
-            card.AddToClassList("building-card");
-            card.style.width = new Length(31.5f, LengthUnit.Percent);
-            card.style.minWidth = 230;
-            card.style.marginRight = 8;
-            card.style.marginBottom = 8;
-            card.style.paddingLeft = 12;
-            card.style.paddingRight = 12;
-            card.style.paddingTop = 10;
-            card.style.paddingBottom = 10;
+            VisualElement card = instance.Q<VisualElement>("building-card");
+            Label title = instance.Q<Label>("building-card-title");
+            Label status = instance.Q<Label>("building-card-status");
+            Label description = instance.Q<Label>("building-card-description");
+            Label effect = instance.Q<Label>("building-card-effect");
+            Label meta = instance.Q<Label>("building-card-meta");
+            ProgressBar progress = instance.Q<ProgressBar>("building-card-progress");
+            Button action = instance.Q<Button>("building-card-action");
 
-            VisualElement header = new VisualElement { name = cardName + "-header" };
-            header.style.flexDirection = FlexDirection.Row;
-            header.style.justifyContent = Justify.SpaceBetween;
-            header.style.alignItems = Align.Center;
+            if (title != null)
+                title.text = definition.DisplayName.ToUpperInvariant();
+            if (description != null)
+                description.text = definition.Description;
+            if (effect != null)
+                effect.text = definition.EffectText;
 
-            Label title = new Label(definition.DisplayName.ToUpperInvariant()) { name = cardName + "-title" };
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            title.style.fontSize = 15;
-            title.style.whiteSpace = WhiteSpace.Normal;
-            title.style.flexGrow = 1;
-
-            Label status = new Label { name = cardName + "-status" };
-            status.style.fontSize = 10;
-            status.style.marginLeft = 8;
-            status.style.unityTextAlign = TextAnchor.MiddleRight;
-
-            header.Add(title);
-            header.Add(status);
-            card.Add(header);
-
-            Label image = new Label("ИЗОБРАЖЕНИЕ ПОСТРОЙКИ") { name = cardName + "-image" };
-            image.style.height = 72;
-            image.style.marginTop = 8;
-            image.style.marginBottom = 8;
-            image.style.unityTextAlign = TextAnchor.MiddleCenter;
-            image.style.fontSize = 10;
-            image.style.opacity = 0.55f;
-            card.Add(image);
-
-            Label description = new Label(definition.Description) { name = cardName + "-description" };
-            description.style.whiteSpace = WhiteSpace.Normal;
-            description.style.fontSize = 11;
-            description.style.marginBottom = 6;
-            card.Add(description);
-
-            Label effect = new Label(definition.EffectText) { name = cardName + "-effect" };
-            effect.style.whiteSpace = WhiteSpace.Normal;
-            effect.style.fontSize = 11;
-            effect.style.unityFontStyleAndWeight = FontStyle.Bold;
-            effect.style.marginBottom = 7;
-            card.Add(effect);
-
-            Label meta = new Label { name = cardName + "-meta" };
-            meta.style.whiteSpace = WhiteSpace.Normal;
-            meta.style.fontSize = 10;
-            meta.style.marginBottom = 6;
-            card.Add(meta);
-
-            ProgressBar progress = new ProgressBar
-            {
-                name = cardName + "-progress",
-                lowValue = 0f,
-                highValue = 1f
-            };
-            progress.style.height = 18;
-            progress.style.marginBottom = 7;
-            card.Add(progress);
-
-            Button action = new Button { name = cardName + "-action" };
-            action.style.height = 34;
             string capturedId = definition.Id;
-            action.clicked += () => OnBuildingActionClicked(capturedId);
-            card.Add(action);
+            if (action != null)
+                action.clicked += () => OnBuildingActionClicked(capturedId);
 
-            buildingGrid.Add(card);
+            buildingGrid.Add(instance);
             buildingCards[definition.Id] = new BuildingCardView
             {
                 Definition = definition,
@@ -185,6 +115,17 @@ public partial class PrototypeUIController
                 ActionButton = action
             };
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Шаблоны (Assets/_Project/UI/Templates) — раздел 19 UI_ARCHITECTURE.md.
+    // ------------------------------------------------------------------
+
+    private VisualTreeAsset LoadBuildingCardTemplate()
+    {
+        if (buildingCardTemplate == null)
+            buildingCardTemplate = Resources.Load<VisualTreeAsset>("Templates/BuildingCard");
+        return buildingCardTemplate;
     }
 
     private void RefreshBuildingUi()

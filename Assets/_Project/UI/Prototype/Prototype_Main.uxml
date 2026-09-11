@@ -14,6 +14,7 @@
     <Style src="Journal.uss" />
     <Style src="HeroScreen.uss" />
     <Style src="Narrative.uss" />
+    <Style src="BuildingCards.uss" />
 
     <ui:VisualElement name="screen" class="screen shell-screen">
 
@@ -60,7 +61,7 @@
                             <ui:VisualElement class="panel shell-content-panel">
                                 <ui:Label text="СТОЛИЦА" class="panel-title" />
                                 <ui:Label text="Здания и основные городские действия" class="panel-description" />
-                                <ui:VisualElement class="building-grid">
+                                <ui:VisualElement name="building-grid" class="building-grid">
                                     <ui:Button text="Тронный зал" class="building-card" />
                                     <ui:Button text="Амбар" class="building-card" />
                                     <ui:Button text="Казармы" class="building-card" />

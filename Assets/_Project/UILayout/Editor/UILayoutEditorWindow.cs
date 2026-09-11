@@ -656,19 +656,9 @@ namespace KingdomSurvival.UILayout.Editor
                     new GUIContent("Сила затемнения"));
             }
 
-            if (IsNarrativeDialogue(currentScreen))
-            {
-                EditorGUILayout.HelpBox(
-                    "Экран диалога применяется собственным кодом PrototypeUIController. " +
-                    "Флаг автоприменения для него намеренно выключен.",
-                    MessageType.Info);
-            }
-            else
-            {
-                EditorGUILayout.PropertyField(
-                    screen.FindPropertyRelative("autoApply"),
-                    new GUIContent("Применять в игре"));
-            }
+            EditorGUILayout.PropertyField(
+                screen.FindPropertyRelative("autoApply"),
+                new GUIContent("Применять в игре"));
 
             EditorGUILayout.PropertyField(
                 screen.FindPropertyRelative("requiredElements"),
@@ -738,9 +728,7 @@ namespace KingdomSurvival.UILayout.Editor
                                       selected.FindPropertyRelative("overrideRect").boolValue ||
                                       selected.FindPropertyRelative("overrideBackground").boolValue ||
                                       selected.FindPropertyRelative("overrideText").boolValue;
-            if (!IsNarrativeDialogue(currentScreen) &&
-                !currentScreen.AutoApply &&
-                hasRuntimeOverride)
+            if (!currentScreen.AutoApply && hasRuntimeOverride)
             {
                 EditorGUILayout.HelpBox(
                     "Переопределения включены, но у экрана выключено «Применять в игре».",

@@ -262,9 +262,9 @@ Debug Panel, `UI Конструктор` как инструмент, база �
 | Capital | ✅ | ✅ | карточки построек | частично |
 | Expeditions | ✅ | ✅ | popup/cards/dynamic map | частично |
 | Camp | ✅ | ✅ | — | мигрирован первым (UI-M01) |
-| Hero | ❌ runtime root создаёт C# | ✅ | много | нужно мигрировать (UI-M03) |
-| Journal | ❌ | ❌ | почти всё | нужно мигрировать (UI-M02) |
-| Narrative | ❌ runtime root создаёт C# | ✅ (special mode, `autoApply=0`) | почти весь shell | нужно мигрировать (UI-M04) |
+| Hero | ✅ | ✅ | — | мигрирован (UI-M03) |
+| Journal | ✅ | ✅ | — | мигрирован (UI-M02) |
+| Narrative | ✅ | ✅ (`autoApply=1`) | сегменты истории (легитимно, §2) | мигрирован (UI-M04) |
 | Incident | ✅ | ✅ | данные | почти правильно |
 | Game Over | ✅ | ✅ | данные | почти правильно |
 

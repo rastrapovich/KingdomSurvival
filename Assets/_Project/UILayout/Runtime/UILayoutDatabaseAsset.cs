@@ -233,8 +233,7 @@ namespace KingdomSurvival.UILayout
         [SerializeField] private bool usesDimming = true;
         [SerializeField, Range(0f, 1f)] private float dimmingOpacity = 0.68f;
 
-        [Tooltip("Применять экран generic-байндером по именам элементов UXML. " +
-                 "Экраны с собственным кодом применения (narrative-dialogue) держат флаг выключенным.")]
+        [Tooltip("Применять экран generic-байндером по именам элементов UXML.")]
         [SerializeField] private bool autoApply;
 
         [SerializeField] private string rootName = string.Empty;
@@ -281,10 +280,6 @@ namespace KingdomSurvival.UILayout
     {
         public const string ResourcesPath = "UILayout/KingdomSurvivalUILayouts";
 
-        /// <summary>
-        /// Экран диалога применяется собственным кодом `PrototypeUIController` и
-        /// не проходит через generic-байндер.
-        /// </summary>
         public const string NarrativeDialogueScreenId = "narrative-dialogue";
 
         [SerializeField] private Vector2Int referenceResolution = new Vector2Int(1920, 1080);

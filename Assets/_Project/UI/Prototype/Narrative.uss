@@ -1,3 +1,20 @@
+/* Диалог (UI-M04) — статическая раскладка narrative-dialogue-overlay в
+   Prototype_Main.uxml. Позиции panel/speaker/role/text/choices здесь —
+   пиксельные значения, посчитанные из текущих (уже настроенных дизайнером)
+   Rect в KingdomSurvivalUILayouts.asset (экран narrative-dialogue), потому
+   что раньше их применял собственный код (ApplyLayoutElement) в обход
+   override-флагов; после перехода на общий UILayoutScreenBinder эти флаги
+   остаются выключенными (как и везде в базе), поэтому позицию должен
+   держать CSS. portrait — исключение: Kind.Portrait всегда получает Rect
+   от UI Конструктора (см. UILayoutScreenBinder.ShouldApplyRect), поэтому
+   здесь у него нет фиксированной позиции — её всегда ставит байндер.
+
+   Текстовые стили (цвет/шрифт/кегль) и dimming-цвет overlay продолжает
+   пересчитывать PrototypeUIController.NarrativePresentation.cs
+   (ApplyNarrativeLayoutPresentation) из тех же Rect/DimmingOpacity на
+   каждое обновление истории — их не трогать, значения здесь только
+   fallback до первого такого прохода. */
+
 .narrative-dialogue-overlay {
     display: none;
     position: absolute;
@@ -5,20 +22,15 @@
     right: 0;
     top: 0;
     bottom: 0;
-    background-color: rgba(5, 7, 8, 0.68);
+    background-color: rgba(5, 7, 8, 0.91);
 }
 
 .narrative-dialogue-panel {
     position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 38%;
-    min-width: 500px;
-    padding-left: 44px;
-    padding-right: 42px;
-    padding-top: 58px;
-    padding-bottom: 48px;
+    left: 1360px;
+    top: -14px;
+    width: 510px;
+    height: 1119px;
     background-color: rgba(12, 14, 15, 0.98);
     border-left-width: 1px;
     border-left-color: rgb(94, 87, 70);
@@ -26,12 +38,6 @@
 
 .narrative-dialogue-portrait {
     position: absolute;
-    right: 34%;
-    top: 18%;
-    width: 23%;
-    max-width: 430px;
-    height: 58%;
-    min-height: 360px;
     justify-content: center;
     align-items: center;
     background-color: rgb(31, 34, 34);
@@ -54,30 +60,36 @@
 }
 
 .narrative-dialogue-speaker {
-    margin-bottom: 5px;
+    position: absolute;
+    left: 976px;
+    top: 405px;
+    width: 372px;
+    height: 56px;
     color: rgb(218, 182, 111);
     font-size: 27px;
     -unity-font-style: bold;
+    -unity-text-align: middle-right;
     white-space: normal;
 }
 
 .narrative-dialogue-role {
-    margin-bottom: 15px;
+    position: absolute;
+    left: 889px;
+    top: 458px;
+    width: 460px;
+    height: 57px;
     color: rgb(133, 130, 120);
-    font-size: 11px;
+    font-size: 17px;
+    -unity-text-align: middle-right;
     white-space: normal;
 }
 
-.narrative-dialogue-divider {
-    height: 1px;
-    margin-bottom: 22px;
-    background-color: rgb(89, 77, 56);
-}
-
 .narrative-dialogue-text-scroll {
-    flex-grow: 1;
-    min-height: 120px;
-    margin-bottom: 24px;
+    position: absolute;
+    left: 50px;
+    top: 60px;
+    width: 445px;
+    height: 593px;
 }
 
 .narrative-dialogue-history {
@@ -126,7 +138,11 @@
 }
 
 .narrative-dialogue-choices {
-    flex-shrink: 0;
+    position: absolute;
+    left: 51px;
+    top: 667px;
+    width: 447px;
+    height: 425px;
 }
 
 .narrative-dialogue-choice {
@@ -221,7 +237,11 @@
 }
 
 /* Narrative Check Presentation Layer — единый компонент для пассивных
-   блоков и активных проверок (§13 инструкции по визуализации проверок). */
+   блоков и активных проверок (§13 инструкции по визуализации проверок).
+   Сам билдер (PrototypeUIController.NarrativeCheckPresentation.cs) этим
+   проходом не переносился на шаблоны — отдельная, самостоятельная
+   диагностическая подсистема (плавающий tooltip), не часть постоянной
+   структуры экрана; см. ProjectDocs/DEVELOPMENT_STATUS.md. */
 
 .narrative-check-header {
     flex-direction: row;
@@ -274,6 +294,7 @@
 }
 
 .narrative-check-tooltip {
+    display: none;
     position: absolute;
     width: 320px;
     padding-left: 14px;

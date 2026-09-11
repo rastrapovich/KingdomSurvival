@@ -111,6 +111,7 @@ public partial class PrototypeUIController : MonoBehaviour
         InitializeHeroScreenUi();
         InitializeJournalUi();
         InitializeCampUi();
+        InitializeNarrativeDialogueUi();
         InitializeUILayoutScreens();
     }
 

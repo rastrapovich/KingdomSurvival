@@ -203,18 +203,22 @@ public sealed class UILayoutDatabaseTests
     }
 
     /// <summary>
-    /// Диалог применяется собственным кодом `PrototypeUIController`, поэтому
-    /// не должен попадать в generic-применение и получать двойную вёрстку.
+    /// UI-M04 (ProjectDocs/UI_ARCHITECTURE.md §9): постоянная структура
+    /// диалога переехала в Prototype_Main.uxml, поэтому экран теперь
+    /// применяется общим UILayoutScreenBinder наравне с остальными —
+    /// собственного кода построения дерева (EnsureNarrativeDialogueUi и
+    /// т.п.) больше нет.
     /// </summary>
     [Test]
-    public void Narrative_Screen_Is_Excluded_From_Generic_Auto_Apply()
+    public void Narrative_Screen_Is_AutoApplied_By_Generic_Binder()
     {
         UILayoutDatabaseAsset database = Resources.Load<UILayoutDatabaseAsset>(UILayoutDatabaseAsset.ResourcesPath);
         UILayoutScreenDefinition screen = database.FindScreen(
             UILayoutDatabaseAsset.NarrativeDialogueScreenId);
 
         Assert.IsNotNull(screen);
-        Assert.IsFalse(screen.AutoApply);
+        Assert.IsTrue(screen.AutoApply);
+        Assert.AreEqual("narrative-dialogue-overlay", screen.RootName);
     }
 
     /// <summary>

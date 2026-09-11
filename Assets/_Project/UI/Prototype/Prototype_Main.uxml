@@ -13,6 +13,7 @@
     <Style src="Prototype_SharedPanels.uss" />
     <Style src="Journal.uss" />
     <Style src="HeroScreen.uss" />
+    <Style src="Narrative.uss" />
 
     <ui:VisualElement name="screen" class="screen shell-screen">
 
@@ -638,6 +639,33 @@
                 <ui:Label name="hero-screen-tag-tooltip-title" class="hero-screen-tag-tooltip-title" />
                 <ui:Label name="hero-screen-tag-tooltip-text" class="hero-screen-tooltip-text hero-screen-tag-tooltip-text" />
             </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- UI-M04: Диалог — постоянный, скрытый по умолчанию экран (та же
+             роль верхнего уровня, что camp-screen/journal-overlay/
+             hero-screen-overlay выше). Позиция/размеры/оформление — из
+             Narrative.uss и Kingdom Survival -> UI Конструктор
+             (KingdomSurvivalUILayouts.asset, экран "narrative-dialogue").
+             Родительство speaker/role — дети overlay, а не panel (совпадает
+             с requiredElements базы): так они позиционируются рядом с
+             портретом, а не внутри текстовой панели. portrait — исключение
+             по §8 доктрины: изображение и точную кадрировку всегда ставит
+             защищённый портретный конвейер
+             (PrototypeUIController.Narrative.cs — ApplyNarrativeSpeakerPortrait),
+             сюда не переносится и не трогается. -->
+        <ui:VisualElement name="narrative-dialogue-overlay" class="narrative-dialogue-overlay">
+            <ui:VisualElement name="narrative-dialogue-panel" class="narrative-dialogue-panel">
+                <ui:ScrollView name="narrative-dialogue-text" class="narrative-dialogue-text-scroll">
+                    <ui:VisualElement name="narrative-dialogue-history" class="narrative-dialogue-history" />
+                </ui:ScrollView>
+                <ui:VisualElement name="narrative-dialogue-choices" class="narrative-dialogue-choices" />
+            </ui:VisualElement>
+            <ui:VisualElement name="narrative-dialogue-portrait" class="narrative-dialogue-portrait">
+                <ui:Label name="narrative-dialogue-portrait-placeholder" text="ПОРТРЕТ&#10;ПЕРСОНАЖА" class="narrative-dialogue-portrait-placeholder" />
+            </ui:VisualElement>
+            <ui:Label name="narrative-dialogue-speaker" class="narrative-dialogue-speaker" />
+            <ui:Label name="narrative-dialogue-role" class="narrative-dialogue-role" />
+            <ui:VisualElement name="narrative-check-tooltip" picking-mode="Ignore" class="narrative-check-tooltip" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

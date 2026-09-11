@@ -8,9 +8,6 @@ namespace KingdomSurvival.UILayout
     /// Универсальное применение экрана из `UILayoutDatabaseAsset` к дереву
     /// UI Toolkit по именам элементов UXML.
     ///
-    /// Экран диалога имеет собственный код применения в `PrototypeUIController`
-    /// и через этот байндер не проходит: у него `autoApply = false`.
-    ///
     /// Ключевое правило безопасности: обычный элемент меняется только по
     /// явно включённым `overrideRect` / `overrideBackground` / `overrideText`.
     /// Тип `Portrait` сам является явным выбором preset-геометрии и изображения,

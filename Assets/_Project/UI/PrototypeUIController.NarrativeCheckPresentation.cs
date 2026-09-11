@@ -62,26 +62,16 @@ public partial class PrototypeUIController
         return line;
     }
 
-    private void EnsureNarrativeCheckTooltip()
-    {
-        if (narrativeCheckTooltip != null && narrativeCheckTooltip.parent != null)
-            return;
-
-        narrativeCheckTooltip = new VisualElement { name = "narrative-check-tooltip", pickingMode = PickingMode.Ignore };
-        narrativeCheckTooltip.AddToClassList("narrative-check-tooltip");
-        narrativeCheckTooltip.style.display = DisplayStyle.None;
-
-        // Поверх narrative overlay, а не внутри ScrollView текста — иначе
-        // tooltip будет обрезан скроллом (§14).
-        narrativeDialogueOverlay.Add(narrativeCheckTooltip);
-    }
-
     private void ShowNarrativeCheckTooltip(VisualElement anchor, NarrativeCheckPresentationData data)
     {
-        if (narrativeDialogueOverlay == null || data == null)
+        // UI-M04: narrative-check-tooltip — постоянный узел
+        // Prototype_Main.uxml (поверх narrative-dialogue-overlay, а не
+        // внутри ScrollView текста — иначе будет обрезан скроллом, §14),
+        // привязывается в InitializeNarrativeDialogueUi. Здесь он только
+        // наполняется и показывается.
+        if (narrativeCheckTooltip == null || data == null)
             return;
 
-        EnsureNarrativeCheckTooltip();
         narrativeCheckTooltip.Clear();
         BuildNarrativeCheckTooltipContent(narrativeCheckTooltip, data);
         narrativeCheckTooltip.style.display = DisplayStyle.Flex;

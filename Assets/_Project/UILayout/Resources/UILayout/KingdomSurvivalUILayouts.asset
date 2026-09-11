@@ -5020,3 +5020,959 @@ MonoBehaviour:
       fontStyle: 0
       horizontalAlignment: 0
       verticalAlignment: 0
+  - id: camp
+    displayName: "Лагерь"
+    description: "Постоянный fullscreen-экран похода: отряд, иллюстрация места, доступная авторская сцена и место для будущих действий. Не CampManager и не survival-система — только показ состояния и запуск Dialogue System через Chapter01CampSceneProvider."
+    usesDimming: 1
+    dimmingOpacity: 0.68
+    autoApply: 1
+    rootName: camp-screen
+    requiredElements:
+    - elementId: camp-screen
+      expectedParentId: 
+    - elementId: camp-art
+      expectedParentId: camp-body
+    - elementId: camp-title
+      expectedParentId: camp-header
+    - elementId: camp-time-label
+      expectedParentId: camp-header
+    - elementId: camp-party-panel
+      expectedParentId: camp-body
+    - elementId: camp-scenes-panel
+      expectedParentId: camp-body
+    - elementId: camp-actions-panel
+      expectedParentId: camp-footer
+    - elementId: camp-continue-button
+      expectedParentId: camp-footer
+    - elementId: camp-close-button
+      expectedParentId: camp-header
+    elements:
+    - id: camp-screen
+      displayName: "Экран лагеря"
+      parentId: 
+      kind: 4
+      portraitSize: 2
+      targetName: camp-screen
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1920
+        height: 1080
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-header
+      displayName: "Заголовок лагеря"
+      parentId: camp-screen
+      kind: 4
+      portraitSize: 2
+      targetName: camp-header
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 12
+        width: 1884
+        height: 44
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-title
+      displayName: "Заголовок «ЛАГЕРЬ»"
+      parentId: camp-header
+      kind: 1
+      portraitSize: 2
+      targetName: camp-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "ЛАГЕРЬ"
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 12
+        width: 200
+        height: 32
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 20
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-time-label
+      displayName: "День и время"
+      parentId: camp-header
+      kind: 1
+      portraitSize: 2
+      targetName: camp-time-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "День 3 · 21:40"
+      rect:
+        serializedVersion: 2
+        x: 230
+        y: 16
+        width: 400
+        height: 24
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-location-label
+      displayName: "Текущее место"
+      parentId: camp-header
+      kind: 1
+      portraitSize: 2
+      targetName: camp-location-label
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "У старого русла"
+      rect:
+        serializedVersion: 2
+        x: 1500
+        y: 16
+        width: 280
+        height: 24
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 2
+      verticalAlignment: 0
+    - id: camp-close-button
+      displayName: "Кнопка «ЗАКРЫТЬ»"
+      parentId: camp-header
+      kind: 3
+      portraitSize: 2
+      targetName: camp-close-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1782
+        y: 6
+        width: 120
+        height: 32
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-body
+      displayName: "Три колонки лагеря"
+      parentId: camp-screen
+      kind: 4
+      portraitSize: 2
+      targetName: camp-body
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 66
+        width: 1884
+        height: 896
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-party-panel
+      displayName: "Панель отряда"
+      parentId: camp-body
+      kind: 0
+      portraitSize: 2
+      targetName: camp-party-panel
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 66
+        width: 490
+        height: 896
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-commander-slot
+      displayName: "Слот командира"
+      parentId: camp-party-panel
+      kind: 4
+      portraitSize: 2
+      targetName: camp-commander-slot
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 96
+        width: 470
+        height: 50
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-commander-name
+      displayName: "Имя командира"
+      parentId: camp-commander-slot
+      kind: 1
+      portraitSize: 2
+      targetName: camp-commander-name
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "Командир"
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 100
+        width: 300
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-commander-status
+      displayName: "Состояние командира"
+      parentId: camp-commander-slot
+      kind: 1
+      portraitSize: 2
+      targetName: camp-commander-status
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "—"
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 122
+        width: 300
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-slot-1
+      displayName: "Слот бойца 1"
+      parentId: camp-party-panel
+      kind: 4
+      portraitSize: 2
+      targetName: camp-fighter-slot-1
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 154
+        width: 470
+        height: 50
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-name-1
+      displayName: "Имя бойца 1"
+      parentId: camp-fighter-slot-1
+      kind: 1
+      portraitSize: 2
+      targetName: camp-fighter-name-1
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "Боец 1"
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 158
+        width: 300
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-status-1
+      displayName: "Состояние бойца 1"
+      parentId: camp-fighter-slot-1
+      kind: 1
+      portraitSize: 2
+      targetName: camp-fighter-status-1
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "—"
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 180
+        width: 300
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-slot-2
+      displayName: "Слот бойца 2"
+      parentId: camp-party-panel
+      kind: 4
+      portraitSize: 2
+      targetName: camp-fighter-slot-2
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 212
+        width: 470
+        height: 50
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-name-2
+      displayName: "Имя бойца 2"
+      parentId: camp-fighter-slot-2
+      kind: 1
+      portraitSize: 2
+      targetName: camp-fighter-name-2
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "Боец 2"
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 216
+        width: 300
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-status-2
+      displayName: "Состояние бойца 2"
+      parentId: camp-fighter-slot-2
+      kind: 1
+      portraitSize: 2
+      targetName: camp-fighter-status-2
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "—"
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 238
+        width: 300
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-slot-3
+      displayName: "Слот бойца 3"
+      parentId: camp-party-panel
+      kind: 4
+      portraitSize: 2
+      targetName: camp-fighter-slot-3
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 270
+        width: 470
+        height: 50
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-name-3
+      displayName: "Имя бойца 3"
+      parentId: camp-fighter-slot-3
+      kind: 1
+      portraitSize: 2
+      targetName: camp-fighter-name-3
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "Боец 3"
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 274
+        width: 300
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-status-3
+      displayName: "Состояние бойца 3"
+      parentId: camp-fighter-slot-3
+      kind: 1
+      portraitSize: 2
+      targetName: camp-fighter-status-3
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "—"
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 296
+        width: 300
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-slot-4
+      displayName: "Слот бойца 4"
+      parentId: camp-party-panel
+      kind: 4
+      portraitSize: 2
+      targetName: camp-fighter-slot-4
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 328
+        width: 470
+        height: 50
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-name-4
+      displayName: "Имя бойца 4"
+      parentId: camp-fighter-slot-4
+      kind: 1
+      portraitSize: 2
+      targetName: camp-fighter-name-4
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "Боец 4"
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 332
+        width: 300
+        height: 20
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-fighter-status-4
+      displayName: "Состояние бойца 4"
+      parentId: camp-fighter-slot-4
+      kind: 1
+      portraitSize: 2
+      targetName: camp-fighter-status-4
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "—"
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 354
+        width: 300
+        height: 18
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 10
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-art
+      displayName: "Иллюстрация лагеря"
+      parentId: camp-body
+      kind: 2
+      portraitSize: 2
+      targetName: camp-art
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 66
+        width: 880
+        height: 896
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-scenes-panel
+      displayName: "Панель сюжетных сцен"
+      parentId: camp-body
+      kind: 0
+      portraitSize: 2
+      targetName: camp-scenes-panel
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1412
+        y: 66
+        width: 490
+        height: 896
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-scene-list
+      displayName: "Список доступных сцен"
+      parentId: camp-scenes-panel
+      kind: 4
+      portraitSize: 2
+      targetName: camp-scene-list
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1422
+        y: 96
+        width: 470
+        height: 856
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-footer
+      displayName: "Нижняя панель лагеря"
+      parentId: camp-screen
+      kind: 4
+      portraitSize: 2
+      targetName: camp-footer
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 972
+        width: 1884
+        height: 96
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-status-panel
+      displayName: "Состояние похода"
+      parentId: camp-footer
+      kind: 0
+      portraitSize: 2
+      targetName: camp-status-panel
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 972
+        width: 640
+        height: 96
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-status-text
+      displayName: "Текст состояния похода"
+      parentId: camp-status-panel
+      kind: 1
+      portraitSize: 2
+      targetName: camp-status-text
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "Цель: Старый брод
+В пути · Бойцов: 2 · Снабжение: 40"
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 1002
+        width: 620
+        height: 60
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-actions-panel
+      displayName: "Будущие действия"
+      parentId: camp-footer
+      kind: 0
+      portraitSize: 2
+      targetName: camp-actions-panel
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 670
+        y: 972
+        width: 1000
+        height: 96
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-actions-placeholder
+      displayName: "Заглушка будущих действий"
+      parentId: camp-actions-panel
+      kind: 1
+      portraitSize: 2
+      targetName: camp-actions-placeholder
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: "Пока нет доступных действий."
+      rect:
+        serializedVersion: 2
+        x: 680
+        y: 1002
+        width: 980
+        height: 40
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 11
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: camp-continue-button
+      displayName: "Кнопка «ПРОДОЛЖИТЬ ПУТЬ»"
+      parentId: camp-footer
+      kind: 3
+      portraitSize: 2
+      targetName: camp-continue-button
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 1682
+        y: 990
+        width: 220
+        height: 36
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 16
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0

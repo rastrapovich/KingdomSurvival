@@ -501,6 +501,13 @@ public sealed class Chapter01P09Tests
         }
 
         Assert.AreEqual(1, setCount, "Ровно один исход телеги должен быть выставлен.");
+
+        // Раздел 29 инструкции про Лагерь: CampUnlocked обязан стать true
+        // после ЛЮБОГО из четырёх исходов, не только после одного — это
+        // разблокировка интерфейса, а не признание конкретного решения.
+        Assert.IsTrue(
+            state.HasFlag(Chapter01Ids.Flags.CampUnlocked),
+            "CampUnlocked должен быть true после любого исхода телеги.");
         Assert.IsTrue(state.HasFlag(expectedFlag));
     }
 

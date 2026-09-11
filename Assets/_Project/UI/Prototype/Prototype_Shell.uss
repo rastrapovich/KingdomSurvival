@@ -61,13 +61,19 @@
 .legacy-send-button { display: none; }
 
 .shell-bottom-bar { height: 82px; min-height: 82px; max-height: 82px; flex-shrink: 0; flex-direction: row; background-color: rgb(33, 37, 44); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(78, 69, 55); border-right-color: rgb(78, 69, 55); border-top-color: rgb(78, 69, 55); border-bottom-color: rgb(78, 69, 55); border-radius: 4px; }
-.shell-navigation-bar { width: 396px; min-width: 396px; max-width: 396px; height: 100%; margin-top: 0px; padding-left: 4px; padding-right: 4px; flex-shrink: 0; flex-direction: row; align-items: stretch; }
+.shell-navigation-bar { width: 500px; min-width: 500px; max-width: 500px; height: 100%; margin-top: 0px; padding-left: 4px; padding-right: 4px; flex-shrink: 0; flex-direction: row; align-items: stretch; }
 .shell-nav-button { height: 100%; min-height: 0px; flex-grow: 1; min-width: 0px; margin-right: 3px; padding-left: 5px; padding-right: 5px; border-radius: 3px; color: rgb(235, 226, 205); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; }
 .shell-nav-button.nav-capital { width: 94px; max-width: 94px; background-color: rgb(96, 82, 53); }
 .shell-nav-button.nav-expedition { width: 98px; max-width: 98px; background-color: rgb(55, 82, 70); font-size: 11px; }
 .shell-nav-button.nav-hero { width: 94px; max-width: 94px; background-color: rgb(74, 63, 92); }
 .shell-nav-button.nav-journal { width: 94px; max-width: 94px; background-color: rgb(63, 76, 92); }
+.shell-nav-button.nav-camp { width: 94px; max-width: 94px; background-color: rgb(107, 70, 40); }
 .shell-nav-button.nav-button-active { color: rgb(255, 242, 207); -unity-font-style: bold; border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; }
+/* Disabled — отдельный явный сигнал (раздел 2 инструкции про Camp): цвет
+   кнопки не должен быть единственным различием между "видима+disabled" и
+   "видима+enabled" — заметно ниже непрозрачность и текст без изменения
+   фонового цвета самой кнопки (он остаётся опознавательным per-screen). */
+.shell-nav-button:disabled { opacity: 0.4; }
 .shell-resource-bar { flex-grow: 1; flex-shrink: 1; min-width: 0px; height: 100%; flex-direction: row; align-items: center; justify-content: flex-end; padding-left: 12px; padding-right: 10px; }
 .shell-resource-strip { flex-grow: 0; flex-shrink: 0; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: flex-end; }
 .shell-resource-box { width: 100px; min-width: 100px; height: 54px; min-height: 54px; max-height: 54px; flex-grow: 0; flex-shrink: 0; margin-right: 6px; margin-bottom: 0px; padding-left: 9px; padding-right: 9px; padding-top: 7px; padding-bottom: 6px; justify-content: center; background-color: rgb(45, 49, 57); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(59, 64, 73); border-right-color: rgb(59, 64, 73); border-top-color: rgb(59, 64, 73); border-bottom-color: rgb(59, 64, 73); border-radius: 4px; }

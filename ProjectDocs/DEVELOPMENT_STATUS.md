@@ -118,3 +118,36 @@
 Сначала подтвердить hotfix в Unity по §7. Если кнопка после этого всё ещё disabled, следующий диагностический шаг — посмотреть live-состояние `HasActiveExpedition` и конкретный источник `HasBlockingModalWorkExceptCamp`; ослаблять правило Лагеря без такого подтверждения нельзя.
 
 После зелёной проверки продолжить production-проход первой главы с P10, не расширяя Camp Screen в survival-систему раньше сюжетной необходимости.
+
+## 9. Camp Screen переехал на UXML + UI Конструктор — 11.09.2026
+
+По production-инструкции пользователя: Camp Screen v1 (§4) держал всю визуальную структуру в C# (`PrototypeUIController.Camp.cs` вручную создавал overlay/колонки/панели/кнопки rect-ами и цветом) — визуально править его через Kingdom Survival → UI Конструктор было невозможно. Переработано так же, как уже устроен `expeditions-screen` (единственный до этого прецедент "экран целиком в UXML, C# только ищет по имени").
+
+### 9.1. Что изменилось архитектурно
+
+- **`Prototype_Main.uxml`** — добавлен постоянный `camp-screen` (сиблинг `incident-modal-overlay`/`game-over-overlay`, скрыт по умолчанию через `.camp-screen { display: none; }`), с именованными узлами по production-таблице: `camp-header`/`camp-title`/`camp-time-label`/`camp-location-label`/`camp-close-button`, `camp-body` → `camp-party-panel` (`camp-commander-slot` + `camp-fighter-slot-1..4`, каждый с именованными name/status-лейблами), `camp-art`, `camp-scenes-panel`/`camp-scene-list`, `camp-footer` → `camp-status-panel`/`camp-status-text`, `camp-actions-panel`/`camp-actions-placeholder` (статичная заглушка "Пока нет доступных действий."), `camp-continue-button`.
+- **`Prototype_Camp.uss`** (новый файл, подключён в `Prototype_Main.uxml`) — вся геометрия/цвет/отступы палитры Hero Screen (rgb-эквиваленты `HeroScreenBackdrop/Panel/PanelDeep/Border/Gold/Text/Muted`), а не инлайн-стили в C#.
+- **`KingdomSurvivalUILayouts.asset`** — новый экран `id: camp` (`autoApply: 1`, `rootName: camp-screen`, `requiredElements` — все 9 узлов из раздела 25 инструкции, `elements` — все 32 узла экрана с `targetName`, совпадающим с именами в UXML). Override-флаги везде выключены по умолчанию (как и во всей остальной базе — `camp-art` уже `Kind: Image`, дизайнеру достаточно включить `overrideBackground` и назначить Sprite, без единой правки C#).
+- **`PrototypeUIController.Camp.cs`** — переписан на query-only: `InitializeCampUi()` только ищет узлы через `campScreen.Q<T>(name)`, `RefreshCampScreen()` подставляет только текст/видимость (день/время, место, состав отряда по слотам, статус похода, список доступных сцен). Ни одного `.style.width/height/left/top/backgroundColor` для основной компоновки не осталось.
+- **Nav-бар** — `.shell-navigation-bar` расширена с 396px до 500px под пять кнопок, добавлен `.shell-nav-button.nav-camp`, добавлен общий `.shell-nav-button:disabled { opacity: 0.4; }` (раздел 2: цвет не должен быть единственным признаком disabled). Кнопка «Лагерь» теперь также получает `nav-button-active` через уже существующий `SetNavigationButtonActive` (тот же класс, каким подсвечиваются Столица/Экспедиции), пока открыта.
+- Более конкретные tooltip на кнопке «Лагерь» вместо одной общей фразы (раздел 18): "Сначала завершите разговор." / "Сначала примите обязательное решение." / "Лагерь доступен только во время похода." / "Остановиться лагерем." / "Лагерь открыт."
+
+### 9.2. Что не изменилось (сознательно)
+
+`CanOpenCampScreen`/`HasBlockingModalWorkExceptCamp`/пауза времени/`Chapter01CampSceneProvider`/порядок "сначала экран, потом сцена" (раздел 14) — вся логика раздела §5 (hotfix кнопки) осталась как есть; RoadStop-остановка на дороге по-прежнему не блокирует Лагерь (раздел 19 — это уже было верно, `HasBlockingModalWorkExceptCamp` никогда не учитывал `ActiveActivity`). Никакого CampManager, никакой survival-механики (сон/готовка/дозор/крафт) не добавлено — `camp-actions-panel` остаётся статичной заглушкой.
+
+### 9.3. Тесты
+
+`Assets/_Project/Tests/EditMode/CampScreenLayoutTests.cs` (новый файл): экран `camp` зарегистрирован и `autoApply`; все `requiredElements` резолвятся с ожидаемым родителем; `camp-art` — `Kind.Image` с валидным `TargetName`; полная `CollectValidationIssues` базы по-прежнему пуста; **каждый `targetName` экрана camp реально встречается как `name="..."` в `Prototype_Main.uxml`** (текстовый скан файла — тот же приём, что уже использует `CampUiRefreshTests.cs` для проверки интеграции без Play Mode). `Chapter01P09Tests.AssertExactlyOneCartOutcome` усилен: теперь для ЛЮБОГО из четырёх исходов телеги отдельно проверяется `CampUnlocked == true` (раздел 29), а не только для одного из пяти существующих тестов-путей.
+
+### 9.4. Что не проверено (честно, без Unity)
+
+Unity Editor, компилятор, Test Runner и Play Mode недоступны — не запускались. Структурная корректность (уникальность/связность узлов UILayout, соответствие `targetName` ↔ `name` в UXML, баланс скобок C#) проверена Python-скриптами вручную. Не проверено ни разу вживую:
+
+1. что `UILayoutScreenBinder.ApplyAutoScreens` реально накладывает geometry на `camp-screen` без ошибок при старте (override-флаги сейчас везде выключены, поэтому визуально ничего двигаться не должно — но это предположение, не наблюдение);
+2. что открытие Kingdom Survival → UI Конструктор → «Лагерь» показывает все элементы и позволяет их двигать/масштабировать так же, как уже работает для «Экспедиции»;
+3. что назначение тестового Sprite в `camp-art` (`overrideBackground` + Sprite) реально показывает картинку в Play Mode;
+4. фактический внешний вид nav-бара на 500px и видимость всех пяти кнопок без схлопывания;
+5. визуальные состояния кнопки «Лагерь» (скрыта/disabled/enabled/активна) вживую.
+
+После Pull обязательно: чистая компиляция, полный EditMode `Run All` (включая `CampScreenLayoutTests`), затем ручной проход по пп. 1–5 выше.

@@ -1,0 +1,92 @@
+/* Лагерь (P09-T04/T05) — статическая раскладка экрана, редактируемая через
+   Kingdom Survival -> UI Конструктор (KingdomSurvivalUILayouts.asset, экран
+   "camp"). C# (PrototypeUIController.Camp.cs) только читает/пишет text и
+   display отдельных узлов — позицию/размер/цвет/арт держит либо этот
+   файл, либо UI Конструктор (override-флаги в базе). */
+
+.camp-screen {
+    position: absolute;
+    left: 0px; right: 0px; top: 0px; bottom: 0px;
+    display: none;
+    flex-direction: column;
+    padding-left: 18px; padding-right: 18px; padding-top: 12px; padding-bottom: 12px;
+    background-color: rgba(14, 16, 20, 0.97);
+}
+
+.camp-header {
+    height: 44px; min-height: 44px; flex-shrink: 0;
+    flex-direction: row; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+}
+.camp-title { color: rgb(221, 181, 99); font-size: 20px; -unity-font-style: bold; }
+.camp-time-label { color: rgb(156, 154, 148); font-size: 12px; margin-left: 12px; flex-grow: 1; }
+.camp-location-label { color: rgb(156, 154, 148); font-size: 12px; -unity-text-align: middle-right; margin-right: 12px; }
+.camp-close-button {
+    width: 120px; height: 32px; border-radius: 3px;
+    background-color: rgb(27, 31, 37); color: rgb(226, 219, 204);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62); border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+}
+
+.camp-body { flex-grow: 1; min-height: 0px; flex-direction: row; }
+
+.camp-panel {
+    padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;
+    margin-right: 12px;
+    background-color: rgb(42, 46, 54);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62); border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+    border-radius: 4px;
+}
+.camp-panel-title { color: rgb(221, 181, 99); font-size: 12px; -unity-font-style: bold; margin-bottom: 8px; }
+
+.camp-party-panel { width: 26%; min-width: 0px; }
+
+.camp-roster-slot {
+    padding-left: 6px; padding-right: 6px; padding-top: 6px; padding-bottom: 6px;
+    margin-bottom: 4px;
+    background-color: rgb(27, 31, 37);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62); border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+    border-radius: 3px;
+}
+.camp-commander-slot { border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; }
+.camp-roster-name { color: rgb(226, 219, 204); font-size: 12px; }
+.camp-commander-slot .camp-roster-name { color: rgb(221, 181, 99); -unity-font-style: bold; }
+.camp-roster-status { color: rgb(156, 154, 148); font-size: 10px; margin-top: 2px; }
+
+.camp-art {
+    flex-grow: 1; min-width: 0px;
+    background-color: rgb(27, 31, 37);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62); border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.camp-scenes-panel { width: 26%; min-width: 0px; margin-right: 0px; }
+.camp-scene-row {
+    padding-left: 6px; padding-right: 6px; padding-top: 6px; padding-bottom: 6px;
+    margin-bottom: 4px;
+    background-color: rgb(27, 31, 37);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62); border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+    border-radius: 3px;
+}
+.camp-scene-row-title { color: rgb(226, 219, 204); font-size: 12px; }
+
+.camp-placeholder-text { color: rgb(156, 154, 148); font-size: 11px; white-space: normal; }
+
+.camp-footer {
+    flex-shrink: 0; flex-direction: row; align-items: stretch; margin-top: 10px; height: 96px; min-height: 96px; max-height: 96px;
+}
+.camp-status-panel { width: 34%; min-width: 0px; }
+.camp-status-text { color: rgb(226, 219, 204); font-size: 11px; white-space: normal; }
+.camp-actions-panel { flex-grow: 1; min-width: 0px; }
+
+.camp-continue-button {
+    width: 220px; height: 36px; margin-left: 12px; align-self: flex-end;
+    border-radius: 3px; background-color: rgb(27, 31, 37); color: rgb(226, 219, 204);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62); border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+}

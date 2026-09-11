@@ -9,6 +9,7 @@
     <Style src="Prototype_DebugAndGameOver.uss" />
     <Style src="Prototype_Exploration.uss" />
     <Style src="Prototype_Shell.uss" />
+    <Style src="Prototype_Camp.uss" />
 
     <ui:VisualElement name="screen" class="screen shell-screen">
 
@@ -165,6 +166,63 @@
                 <ui:Label text="Подданные наконец достигли редкого политического согласия: король им больше не нужен." class="game-over-description" />
                 <ui:Label name="game-over-days-label" text="Вы удерживали трон: 0 дней" class="game-over-days" />
                 <ui:Button name="restart-game-button" text="НАЧАТЬ ЗАНОВО" class="game-over-restart-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- P09: Лагерь — постоянный, скрытый по умолчанию экран (та же
+             роль верхнего уровня, что incident-modal-overlay/game-over-
+             overlay выше). Позиция/размеры/арт/цвет читаются из
+             Prototype_Camp.uss и Kingdom Survival -> UI Конструктор
+             (KingdomSurvivalUILayouts.asset, экран "camp"), а не из C# —
+             PrototypeUIController.Camp.cs только ищет эти узлы по имени и
+             подставляет текст/видимость. -->
+        <ui:VisualElement name="camp-screen" class="camp-screen">
+            <ui:VisualElement name="camp-header" class="camp-header">
+                <ui:Label name="camp-title" text="ЛАГЕРЬ" class="camp-title" />
+                <ui:Label name="camp-time-label" text="" class="camp-time-label" />
+                <ui:Label name="camp-location-label" text="" class="camp-location-label" />
+                <ui:Button name="camp-close-button" text="ЗАКРЫТЬ" class="camp-close-button" />
+            </ui:VisualElement>
+            <ui:VisualElement name="camp-body" class="camp-body">
+                <ui:VisualElement name="camp-party-panel" class="camp-panel camp-party-panel">
+                    <ui:Label text="ОТРЯД" class="camp-panel-title" />
+                    <ui:VisualElement name="camp-commander-slot" class="camp-roster-slot camp-commander-slot">
+                        <ui:Label name="camp-commander-name" text="" class="camp-roster-name" />
+                        <ui:Label name="camp-commander-status" text="—" class="camp-roster-status" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="camp-fighter-slot-1" class="camp-roster-slot">
+                        <ui:Label name="camp-fighter-name-1" text="" class="camp-roster-name" />
+                        <ui:Label name="camp-fighter-status-1" text="—" class="camp-roster-status" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="camp-fighter-slot-2" class="camp-roster-slot">
+                        <ui:Label name="camp-fighter-name-2" text="" class="camp-roster-name" />
+                        <ui:Label name="camp-fighter-status-2" text="—" class="camp-roster-status" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="camp-fighter-slot-3" class="camp-roster-slot">
+                        <ui:Label name="camp-fighter-name-3" text="" class="camp-roster-name" />
+                        <ui:Label name="camp-fighter-status-3" text="—" class="camp-roster-status" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="camp-fighter-slot-4" class="camp-roster-slot">
+                        <ui:Label name="camp-fighter-name-4" text="" class="camp-roster-name" />
+                        <ui:Label name="camp-fighter-status-4" text="—" class="camp-roster-status" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="camp-art" class="camp-art" />
+                <ui:VisualElement name="camp-scenes-panel" class="camp-panel camp-scenes-panel">
+                    <ui:Label text="СЦЕНЫ" class="camp-panel-title" />
+                    <ui:VisualElement name="camp-scene-list" class="camp-scene-list" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="camp-footer" class="camp-footer">
+                <ui:VisualElement name="camp-status-panel" class="camp-panel camp-status-panel">
+                    <ui:Label text="СОСТОЯНИЕ ПОХОДА" class="camp-panel-title" />
+                    <ui:Label name="camp-status-text" text="" class="camp-status-text" />
+                </ui:VisualElement>
+                <ui:VisualElement name="camp-actions-panel" class="camp-panel camp-actions-panel">
+                    <ui:Label text="ДЕЙСТВИЯ" class="camp-panel-title" />
+                    <ui:Label name="camp-actions-placeholder" text="Пока нет доступных действий." class="camp-placeholder-text" />
+                </ui:VisualElement>
+                <ui:Button name="camp-continue-button" text="ПРОДОЛЖИТЬ ПУТЬ" class="camp-continue-button" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

@@ -38,7 +38,7 @@ namespace KingdomSurvival.BattleSandbox
         private Label tagTooltipTitle;
         private Label tagTooltipText;
         private Label titleLabel;
-        private Image portraitImage;
+        private UnitPortraitElement portraitImage;
         private VisualElement statTooltip;
         private Label statTooltipTitle;
         private Label statTooltipText;
@@ -115,7 +115,7 @@ namespace KingdomSurvival.BattleSandbox
                     VisualElement viewport = portraitPanel.hierarchy.ElementAt(0);
                     viewport.style.bottom = 36f;
                     if (viewport.hierarchy.childCount > 0)
-                        portraitImage = viewport.hierarchy.ElementAt(0) as Image;
+                        portraitImage = viewport.hierarchy.ElementAt(0) as UnitPortraitElement;
                 }
             }
 
@@ -392,7 +392,7 @@ namespace KingdomSurvival.BattleSandbox
 
             string normalized = (titleLabel.text ?? string.Empty).Trim();
             UnitDefinitionData labelFallback = null;
-            Sprite currentPortrait = portraitImage != null ? portraitImage.sprite : null;
+            Sprite currentPortrait = portraitImage != null ? portraitImage.Portrait : null;
 
             for (int i = 0; i < database.Units.Count; i++)
             {

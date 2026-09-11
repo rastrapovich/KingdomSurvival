@@ -112,21 +112,19 @@ namespace KingdomSurvival.BattleSandbox
             Sprite resolvedPortrait = ResolvePortrait(unit.TypeId, portraitSprite);
             if (resolvedPortrait != null)
             {
-                Image image = new Image
+                UnitPortraitElement image = new UnitPortraitElement
                 {
-                    sprite = resolvedPortrait,
-                    scaleMode = ScaleMode.ScaleAndCrop,
-                    pickingMode = PickingMode.Ignore,
-                    tintColor = damaged
-                        ? new Color(1f, 0.62f, 0.62f, 0.82f)
-                        : Color.white
+                    pickingMode = PickingMode.Ignore
                 };
                 image.style.position = Position.Absolute;
                 image.style.left = 0f;
                 image.style.right = 0f;
                 image.style.top = 0f;
                 image.style.bottom = 0f;
-                ApplyPortraitFraming(image, unit.TypeId);
+                ApplyPortraitFraming(image, unit.TypeId, resolvedPortrait);
+                image.TintColor = damaged
+                    ? new Color(1f, 0.62f, 0.62f, 0.82f)
+                    : Color.white;
                 portrait.Add(image);
             }
             else
@@ -230,10 +228,8 @@ namespace KingdomSurvival.BattleSandbox
             Sprite resolvedPortrait = ResolvePortrait(definition.Id, portraitSprite);
             if (resolvedPortrait != null)
             {
-                Image image = new Image
+                UnitPortraitElement image = new UnitPortraitElement
                 {
-                    sprite = resolvedPortrait,
-                    scaleMode = ScaleMode.ScaleAndCrop,
                     pickingMode = PickingMode.Ignore
                 };
                 image.style.position = Position.Absolute;
@@ -241,7 +237,7 @@ namespace KingdomSurvival.BattleSandbox
                 image.style.right = 0f;
                 image.style.top = 0f;
                 image.style.bottom = 0f;
-                ApplyPortraitFraming(image, definition.Id);
+                ApplyPortraitFraming(image, definition.Id, resolvedPortrait);
                 portrait.Add(image);
             }
             else
@@ -327,14 +323,13 @@ namespace KingdomSurvival.BattleSandbox
             return data != null ? data.Portrait : null;
         }
 
-        internal static void ApplyPortraitFraming(Image image, string typeId)
+        internal static void ApplyPortraitFraming(
+            UnitPortraitElement image,
+            string typeId,
+            Sprite preferred = null)
         {
             if (image == null)
                 return;
-
-            image.scaleMode = ScaleMode.ScaleAndCrop;
-            float scale = 1f;
-            Vector2 offset = Vector2.zero;
 
             if (portraitDatabase == null)
             {
@@ -347,13 +342,21 @@ namespace KingdomSurvival.BattleSandbox
                 : null;
             if (data != null)
             {
-                scale = data.PortraitScale;
-                offset = data.PortraitOffset;
+                image.SetPortrait(
+                    preferred != null ? preferred : data.Portrait,
+                    data.PortraitFitMode,
+                    data.PortraitScale,
+                    data.PortraitOffsetNormalized,
+                    data.PortraitFlipX);
+                return;
             }
 
-            float safeScale = Mathf.Max(0.1f, scale);
-            image.style.scale = new Scale(new Vector3(safeScale, safeScale, 1f));
-            image.transform.position = new Vector3(offset.x, offset.y, 0f);
+            image.SetPortrait(
+                preferred,
+                PortraitFitMode.Cover,
+                1f,
+                Vector2.zero,
+                false);
         }
 
         private static VisualElement CreateHealthBar(int hitPoints, int maxHitPoints, float height)
@@ -554,7 +557,7 @@ namespace KingdomSurvival.BattleSandbox
         private readonly Label damageBadge;
         private readonly Label fighterRole;
         private readonly VisualElement portraitPanel;
-        private readonly Image portraitImage;
+        private readonly UnitPortraitElement portraitImage;
         private readonly Label portraitLabel;
         private readonly Label teamLabel;
         private readonly VisualElement healthFill;
@@ -693,9 +696,8 @@ namespace KingdomSurvival.BattleSandbox
             portraitViewport.pickingMode = PickingMode.Ignore;
             portraitPanel.Add(portraitViewport);
 
-            portraitImage = new Image
+            portraitImage = new UnitPortraitElement
             {
-                scaleMode = ScaleMode.ScaleAndCrop,
                 pickingMode = PickingMode.Ignore
             };
             portraitImage.style.position = Position.Absolute;
@@ -862,7 +864,7 @@ namespace KingdomSurvival.BattleSandbox
                     openedDefinition.Id,
                     openedPortrait);
                 RefreshValues();
-                portraitImage.MarkDirtyRepaint();
+                portraitImage.RefreshGeometry();
             }).ExecuteLater(1);
 
             dimmer.Focus();
@@ -885,7 +887,7 @@ namespace KingdomSurvival.BattleSandbox
             openedState = null;
             openedInstanceId = null;
             openedPortrait = null;
-            portraitImage.sprite = null;
+            portraitImage.ClearPortrait();
             HideTooltip();
             window.style.display = DisplayStyle.None;
             dimmer.style.display = DisplayStyle.None;
@@ -956,14 +958,14 @@ namespace KingdomSurvival.BattleSandbox
 
             fighterTitle.text = openedDefinition.RoleLabel.ToUpper();
             fighterRole.text = openedDefinition.RoleLabel.ToUpper();
-            portraitImage.sprite = openedPortrait;
             SandboxFighterCardFactory.ApplyPortraitFraming(
                 portraitImage,
-                openedDefinition.Id);
+                openedDefinition.Id,
+                openedPortrait);
             portraitImage.style.display = openedPortrait != null
                 ? DisplayStyle.Flex
                 : DisplayStyle.None;
-            portraitImage.tintColor = damaged
+            portraitImage.TintColor = damaged
                 ? new Color(1f, 0.64f, 0.64f, 0.88f)
                 : Color.white;
             portraitImage.MarkDirtyRepaint();

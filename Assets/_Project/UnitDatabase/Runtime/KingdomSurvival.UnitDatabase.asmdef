@@ -2,7 +2,8 @@
   "name": "KingdomSurvival.UnitDatabase",
   "rootNamespace": "KingdomSurvival.UnitDatabase",
   "references": [
-    "KingdomSurvival.Core"
+    "KingdomSurvival.Core",
+    "KingdomSurvival.UILayout"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

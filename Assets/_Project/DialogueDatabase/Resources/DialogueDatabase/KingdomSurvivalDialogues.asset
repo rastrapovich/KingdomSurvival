@@ -19,8 +19,8 @@ MonoBehaviour:
       \u0443\u0441\u043B\u043E\u0432\u0438\u0439 \u0434\u0438\u0430\u043B\u043E\u0433\u0430"
     portrait: {fileID: 21300000, guid: 1f019ee22e3a0a24baad01bf29008baa, type: 3}
     overridePortraitFraming: 1
-    portraitScale: 1.409
-    portraitOffsetNormalized: {x: 0.060272798, y: 0.17780402}
+    portraitScale: 1.707
+    portraitOffsetNormalized: {x: 0.032881495, y: 0.353891}
     portraitFlipX: 0
   - id: ostafiy
     displayName: "\u041E\u0441\u0442\u0430\u0444\u0438\u0439"
@@ -29,8 +29,8 @@ MonoBehaviour:
       \u0438\u043C\u044F, DEC-02)"
     portrait: {fileID: 21300000, guid: 846fcebf0aeda4d4cbf7fc153ecbbb8a, type: 3}
     overridePortraitFraming: 1
-    portraitScale: 1.195
-    portraitOffsetNormalized: {x: 0.08706735, y: 0.096889056}
+    portraitScale: 1.84
+    portraitOffsetNormalized: {x: 0.18445866, y: 0.4186282}
     portraitFlipX: 0
   - id: lada
     displayName: "\u041B\u0430\u0434\u0430"
@@ -38,8 +38,8 @@ MonoBehaviour:
       (\u0440\u0430\u0431\u043E\u0447\u0435\u0435 \u0438\u043C\u044F, DEC-02)"
     portrait: {fileID: 21300000, guid: 64eb54fc6c18bcf47a465228b4dda272, type: 3}
     overridePortraitFraming: 1
-    portraitScale: 1.1
-    portraitOffsetNormalized: {x: -0.009130436, y: 0.027195102}
+    portraitScale: 1.463
+    portraitOffsetNormalized: {x: 0.07913044, y: 0.21197768}
     portraitFlipX: 0
   - id: miron
     displayName: "\u041C\u0438\u0440\u043E\u043D"
@@ -47,8 +47,8 @@ MonoBehaviour:
       \u0438\u043C\u044F, DEC-02)"
     portrait: {fileID: 21300000, guid: 979bff78a9aa27745bf8760c4823368b, type: 3}
     overridePortraitFraming: 1
-    portraitScale: 1.294
-    portraitOffsetNormalized: {x: 0.027391307, y: 0.15}
+    portraitScale: 1.764
+    portraitOffsetNormalized: {x: 0.018260874, y: 0.37608695}
     portraitFlipX: 0
   - id: ulyana
     displayName: "\u0423\u043B\u044C\u044F\u043D\u0430"
@@ -56,8 +56,8 @@ MonoBehaviour:
       (\u0440\u0430\u0431\u043E\u0447\u0435\u0435 \u0438\u043C\u044F, DEC-02)"
     portrait: {fileID: 21300000, guid: 1d9f4582f5660074b8d75a9fbeb85d3e, type: 3}
     overridePortraitFraming: 1
-    portraitScale: 1.102
-    portraitOffsetNormalized: {x: 0.054416027, y: 0.045553572}
+    portraitScale: 1.966
+    portraitOffsetNormalized: {x: -0.07036658, y: 0.47598836}
     portraitFlipX: 0
   - id: narrator
     displayName: "\u0420\u0430\u0441\u0441\u043A\u0430\u0437\u0447\u0438\u043A"
@@ -87,16 +87,20 @@ MonoBehaviour:
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
   - id: cart_pinned_man
-    displayName: "Зажатый мужчина"
-    role: "Путник, зажатый под телегой (имя не названо)"
+    displayName: "\u0417\u0430\u0436\u0430\u0442\u044B\u0439 \u043C\u0443\u0436\u0447\u0438\u043D\u0430"
+    role: "\u041F\u0443\u0442\u043D\u0438\u043A, \u0437\u0430\u0436\u0430\u0442\u044B\u0439
+      \u043F\u043E\u0434 \u0442\u0435\u043B\u0435\u0433\u043E\u0439 (\u0438\u043C\u044F
+      \u043D\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u043E)"
     portrait: {fileID: 0}
     overridePortraitFraming: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
   - id: cart_axle_man
-    displayName: "Мужчина у оси"
-    role: "Путник, удерживающий ось телеги (имя не названо)"
+    displayName: "\u041C\u0443\u0436\u0447\u0438\u043D\u0430 \u0443 \u043E\u0441\u0438"
+    role: "\u041F\u0443\u0442\u043D\u0438\u043A, \u0443\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u044E\u0449\u0438\u0439
+      \u043E\u0441\u044C \u0442\u0435\u043B\u0435\u0433\u0438 (\u0438\u043C\u044F
+      \u043D\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u043E)"
     portrait: {fileID: 0}
     overridePortraitFraming: 0
     portraitScale: 1
@@ -7303,13 +7307,51 @@ MonoBehaviour:
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_09_council_departure
-    title: "N09 — Решение идти дальше"
+    title: "N09 \u2014 \u0420\u0435\u0448\u0435\u043D\u0438\u0435 \u0438\u0434\u0442\u0438
+      \u0434\u0430\u043B\u044C\u0448\u0435"
     category: 1
     status: 1
-    developerComment: "P08-T01 production-сцена. Открывается не по факту прохождения N08, а по Chapter01StoryDirector.CanOpenDepartureCouncil (P08-T02: OldTraceFound + одна из комбинаций знаний A/B/C) — сам диалог об этом не знает и не проверяет. Presentation-правило «одна реплика = один шаг»: DialogueChoiceKind.Continue между узлами. FarRouteUnlocked ставится не на входе в сцену, а на узле departure_decided — ПОСЛЕ настоящего решения героя (единственный Normal choice в синтезе), а не при открытии диалога. Две опциональные цели похода (второй хлеб, семизубый калибр) — не отдельные map marker и не счётчик, а два блока с Conditions по уже существующим знаниям P07: если знание не получено, блок просто не виден и сцена сразу продолжается дальше (см. EveryNode_HasAtMostOneTextBlock — ноль блоков такой же законный случай, как один). Раскрытие области поиска на карте — не эффект диалога, а Chapter01OutcomeApplier.ApplyDepartureConsequences, вызванный Chapter01StoryDirector.HandleDialogueCompleted по факту завершения D09."
+    developerComment: "P08-T01 production-\u0441\u0446\u0435\u043D\u0430. \u041E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442\u0441\u044F
+      \u043D\u0435 \u043F\u043E \u0444\u0430\u043A\u0442\u0443 \u043F\u0440\u043E\u0445\u043E\u0436\u0434\u0435\u043D\u0438\u044F
+      N08, \u0430 \u043F\u043E Chapter01StoryDirector.CanOpenDepartureCouncil (P08-T02:
+      OldTraceFound + \u043E\u0434\u043D\u0430 \u0438\u0437 \u043A\u043E\u043C\u0431\u0438\u043D\u0430\u0446\u0438\u0439
+      \u0437\u043D\u0430\u043D\u0438\u0439 A/B/C) \u2014 \u0441\u0430\u043C \u0434\u0438\u0430\u043B\u043E\u0433
+      \u043E\u0431 \u044D\u0442\u043E\u043C \u043D\u0435 \u0437\u043D\u0430\u0435\u0442
+      \u0438 \u043D\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u0442.
+      Presentation-\u043F\u0440\u0430\u0432\u0438\u043B\u043E \xAB\u043E\u0434\u043D\u0430
+      \u0440\u0435\u043F\u043B\u0438\u043A\u0430 = \u043E\u0434\u0438\u043D \u0448\u0430\u0433\xBB:
+      DialogueChoiceKind.Continue \u043C\u0435\u0436\u0434\u0443 \u0443\u0437\u043B\u0430\u043C\u0438.
+      FarRouteUnlocked \u0441\u0442\u0430\u0432\u0438\u0442\u0441\u044F \u043D\u0435
+      \u043D\u0430 \u0432\u0445\u043E\u0434\u0435 \u0432 \u0441\u0446\u0435\u043D\u0443,
+      \u0430 \u043D\u0430 \u0443\u0437\u043B\u0435 departure_decided \u2014 \u041F\u041E\u0421\u041B\u0415
+      \u043D\u0430\u0441\u0442\u043E\u044F\u0449\u0435\u0433\u043E \u0440\u0435\u0448\u0435\u043D\u0438\u044F
+      \u0433\u0435\u0440\u043E\u044F (\u0435\u0434\u0438\u043D\u0441\u0442\u0432\u0435\u043D\u043D\u044B\u0439
+      Normal choice \u0432 \u0441\u0438\u043D\u0442\u0435\u0437\u0435), \u0430 \u043D\u0435
+      \u043F\u0440\u0438 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u0438 \u0434\u0438\u0430\u043B\u043E\u0433\u0430.
+      \u0414\u0432\u0435 \u043E\u043F\u0446\u0438\u043E\u043D\u0430\u043B\u044C\u043D\u044B\u0435
+      \u0446\u0435\u043B\u0438 \u043F\u043E\u0445\u043E\u0434\u0430 (\u0432\u0442\u043E\u0440\u043E\u0439
+      \u0445\u043B\u0435\u0431, \u0441\u0435\u043C\u0438\u0437\u0443\u0431\u044B\u0439
+      \u043A\u0430\u043B\u0438\u0431\u0440) \u2014 \u043D\u0435 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u044B\u0435
+      map marker \u0438 \u043D\u0435 \u0441\u0447\u0451\u0442\u0447\u0438\u043A,
+      \u0430 \u0434\u0432\u0430 \u0431\u043B\u043E\u043A\u0430 \u0441 Conditions
+      \u043F\u043E \u0443\u0436\u0435 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u044E\u0449\u0438\u043C
+      \u0437\u043D\u0430\u043D\u0438\u044F\u043C P07: \u0435\u0441\u043B\u0438 \u0437\u043D\u0430\u043D\u0438\u0435
+      \u043D\u0435 \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u043E, \u0431\u043B\u043E\u043A
+      \u043F\u0440\u043E\u0441\u0442\u043E \u043D\u0435 \u0432\u0438\u0434\u0435\u043D
+      \u0438 \u0441\u0446\u0435\u043D\u0430 \u0441\u0440\u0430\u0437\u0443 \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0430\u0435\u0442\u0441\u044F
+      \u0434\u0430\u043B\u044C\u0448\u0435 (\u0441\u043C. EveryNode_HasAtMostOneTextBlock
+      \u2014 \u043D\u043E\u043B\u044C \u0431\u043B\u043E\u043A\u043E\u0432 \u0442\u0430\u043A\u043E\u0439
+      \u0436\u0435 \u0437\u0430\u043A\u043E\u043D\u043D\u044B\u0439 \u0441\u043B\u0443\u0447\u0430\u0439,
+      \u043A\u0430\u043A \u043E\u0434\u0438\u043D). \u0420\u0430\u0441\u043A\u0440\u044B\u0442\u0438\u0435
+      \u043E\u0431\u043B\u0430\u0441\u0442\u0438 \u043F\u043E\u0438\u0441\u043A\u0430
+      \u043D\u0430 \u043A\u0430\u0440\u0442\u0435 \u2014 \u043D\u0435 \u044D\u0444\u0444\u0435\u043A\u0442
+      \u0434\u0438\u0430\u043B\u043E\u0433\u0430, \u0430 Chapter01OutcomeApplier.ApplyDepartureConsequences,
+      \u0432\u044B\u0437\u0432\u0430\u043D\u043D\u044B\u0439 Chapter01StoryDirector.HandleDialogueCompleted
+      \u043F\u043E \u0444\u0430\u043A\u0442\u0443 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u0438\u044F
+      D09."
     startNodeId: chapter01.node.09
     tags:
-    - "глава01"
+    - "\u0433\u043B\u0430\u0432\u043001"
     - production
     nodes:
     - id: chapter01.node.09
@@ -7319,7 +7361,15 @@ MonoBehaviour:
       - blockId: chapter01.node.09_main
         kind: 0
         speakerIdOverride: 
-        text: "К вечеру всё найденное оказывается в одном месте. Старый рукав, странное движение мельницы, скот у воды, рыба и семизубый калибр больше не выглядят отдельными неприятностями."
+        text: "\u041A \u0432\u0435\u0447\u0435\u0440\u0443 \u0432\u0441\u0451 \u043D\u0430\u0439\u0434\u0435\u043D\u043D\u043E\u0435
+          \u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F \u0432
+          \u043E\u0434\u043D\u043E\u043C \u043C\u0435\u0441\u0442\u0435. \u0421\u0442\u0430\u0440\u044B\u0439
+          \u0440\u0443\u043A\u0430\u0432, \u0441\u0442\u0440\u0430\u043D\u043D\u043E\u0435
+          \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B,
+          \u0441\u043A\u043E\u0442 \u0443 \u0432\u043E\u0434\u044B, \u0440\u044B\u0431\u0430
+          \u0438 \u0441\u0435\u043C\u0438\u0437\u0443\u0431\u044B\u0439 \u043A\u0430\u043B\u0438\u0431\u0440
+          \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435 \u0432\u044B\u0433\u043B\u044F\u0434\u044F\u0442
+          \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u044B\u043C\u0438 \u043D\u0435\u043F\u0440\u0438\u044F\u0442\u043D\u043E\u0441\u0442\u044F\u043C\u0438."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7333,7 +7383,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.09.miron
         endsDialogue: 0
         choiceId: chapter01.node.09_continue
@@ -7362,7 +7412,13 @@ MonoBehaviour:
       - blockId: chapter01.node.09.miron_main
         kind: 0
         speakerIdOverride: 
-        text: "— Если бы дело было только в мельнице, я бы уже разобрал её до последнего клина. Но колесо лишь повторяет то, что делает вода."
+        text: "\u2014 \u0415\u0441\u043B\u0438 \u0431\u044B \u0434\u0435\u043B\u043E
+          \u0431\u044B\u043B\u043E \u0442\u043E\u043B\u044C\u043A\u043E \u0432 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0435,
+          \u044F \u0431\u044B \u0443\u0436\u0435 \u0440\u0430\u0437\u043E\u0431\u0440\u0430\u043B
+          \u0435\u0451 \u0434\u043E \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0435\u0433\u043E
+          \u043A\u043B\u0438\u043D\u0430. \u041D\u043E \u043A\u043E\u043B\u0435\u0441\u043E
+          \u043B\u0438\u0448\u044C \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u0442
+          \u0442\u043E, \u0447\u0442\u043E \u0434\u0435\u043B\u0430\u0435\u0442 \u0432\u043E\u0434\u0430."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7376,7 +7432,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.09.ulyana
         endsDialogue: 0
         choiceId: chapter01.node.09.miron_continue
@@ -7405,7 +7461,9 @@ MonoBehaviour:
       - blockId: chapter01.node.09.ulyana_main
         kind: 0
         speakerIdOverride: 
-        text: "— И скот тоже? Он к мельнице отношения не имеет."
+        text: "\u2014 \u0418 \u0441\u043A\u043E\u0442 \u0442\u043E\u0436\u0435? \u041E\u043D
+          \u043A \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0435 \u043E\u0442\u043D\u043E\u0448\u0435\u043D\u0438\u044F
+          \u043D\u0435 \u0438\u043C\u0435\u0435\u0442."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7419,7 +7477,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.09.lada
         endsDialogue: 0
         choiceId: chapter01.node.09.ulyana_continue
@@ -7448,7 +7506,12 @@ MonoBehaviour:
       - blockId: chapter01.node.09.lada_main
         kind: 0
         speakerIdOverride: 
-        text: "— И рыба. Она проводит пальцем вдоль старого хода воды. — Значит, мы чинили один узел, а изменили что-то большее."
+        text: "\u2014 \u0418 \u0440\u044B\u0431\u0430. \u041E\u043D\u0430 \u043F\u0440\u043E\u0432\u043E\u0434\u0438\u0442
+          \u043F\u0430\u043B\u044C\u0446\u0435\u043C \u0432\u0434\u043E\u043B\u044C
+          \u0441\u0442\u0430\u0440\u043E\u0433\u043E \u0445\u043E\u0434\u0430 \u0432\u043E\u0434\u044B.
+          \u2014 \u0417\u043D\u0430\u0447\u0438\u0442, \u043C\u044B \u0447\u0438\u043D\u0438\u043B\u0438
+          \u043E\u0434\u0438\u043D \u0443\u0437\u0435\u043B, \u0430 \u0438\u0437\u043C\u0435\u043D\u0438\u043B\u0438
+          \u0447\u0442\u043E-\u0442\u043E \u0431\u043E\u043B\u044C\u0448\u0435\u0435."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7462,7 +7525,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.09.ostafiy
         endsDialogue: 0
         choiceId: chapter01.node.09.lada_continue
@@ -7491,7 +7554,16 @@ MonoBehaviour:
       - blockId: chapter01.node.09.ostafiy_main
         kind: 0
         speakerIdOverride: 
-        text: "— Седьмой рукав держали не от хорошей памяти и не от суеверия. Его открывали, закрывали, мерили. Он смотрит на калибр. — А куда весь этот порядок продолжался дальше — вот этого мы уже не помним."
+        text: "\u2014 \u0421\u0435\u0434\u044C\u043C\u043E\u0439 \u0440\u0443\u043A\u0430\u0432
+          \u0434\u0435\u0440\u0436\u0430\u043B\u0438 \u043D\u0435 \u043E\u0442 \u0445\u043E\u0440\u043E\u0448\u0435\u0439
+          \u043F\u0430\u043C\u044F\u0442\u0438 \u0438 \u043D\u0435 \u043E\u0442 \u0441\u0443\u0435\u0432\u0435\u0440\u0438\u044F.
+          \u0415\u0433\u043E \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u043B\u0438,
+          \u0437\u0430\u043A\u0440\u044B\u0432\u0430\u043B\u0438, \u043C\u0435\u0440\u0438\u043B\u0438.
+          \u041E\u043D \u0441\u043C\u043E\u0442\u0440\u0438\u0442 \u043D\u0430 \u043A\u0430\u043B\u0438\u0431\u0440.
+          \u2014 \u0410 \u043A\u0443\u0434\u0430 \u0432\u0435\u0441\u044C \u044D\u0442\u043E\u0442
+          \u043F\u043E\u0440\u044F\u0434\u043E\u043A \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0430\u043B\u0441\u044F
+          \u0434\u0430\u043B\u044C\u0448\u0435 \u2014 \u0432\u043E\u0442 \u044D\u0442\u043E\u0433\u043E
+          \u043C\u044B \u0443\u0436\u0435 \u043D\u0435 \u043F\u043E\u043C\u043D\u0438\u043C."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7505,7 +7577,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.09.synthesis
         endsDialogue: 0
         choiceId: chapter01.node.09.ostafiy_continue
@@ -7534,7 +7606,16 @@ MonoBehaviour:
       - blockId: chapter01.node.09.synthesis_main
         kind: 0
         speakerIdOverride: 
-        text: "Здесь, возле Дома, больше нечего проверять. След продолжается вместе с водой — дальше привычных работ, знакомых троп и людей, которые ещё помнят хоть что-то наверняка."
+        text: "\u0417\u0434\u0435\u0441\u044C, \u0432\u043E\u0437\u043B\u0435 \u0414\u043E\u043C\u0430,
+          \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435\u0447\u0435\u0433\u043E
+          \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u0442\u044C. \u0421\u043B\u0435\u0434
+          \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0430\u0435\u0442\u0441\u044F
+          \u0432\u043C\u0435\u0441\u0442\u0435 \u0441 \u0432\u043E\u0434\u043E\u0439
+          \u2014 \u0434\u0430\u043B\u044C\u0448\u0435 \u043F\u0440\u0438\u0432\u044B\u0447\u043D\u044B\u0445
+          \u0440\u0430\u0431\u043E\u0442, \u0437\u043D\u0430\u043A\u043E\u043C\u044B\u0445
+          \u0442\u0440\u043E\u043F \u0438 \u043B\u044E\u0434\u0435\u0439, \u043A\u043E\u0442\u043E\u0440\u044B\u0435
+          \u0435\u0449\u0451 \u043F\u043E\u043C\u043D\u044F\u0442 \u0445\u043E\u0442\u044C
+          \u0447\u0442\u043E-\u0442\u043E \u043D\u0430\u0432\u0435\u0440\u043D\u044F\u043A\u0430."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7548,7 +7629,10 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Проследить старый ход воды. Найти, куда продолжалась эта система."
+      - text: "\u041F\u0440\u043E\u0441\u043B\u0435\u0434\u0438\u0442\u044C \u0441\u0442\u0430\u0440\u044B\u0439
+          \u0445\u043E\u0434 \u0432\u043E\u0434\u044B. \u041D\u0430\u0439\u0442\u0438,
+          \u043A\u0443\u0434\u0430 \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0430\u043B\u0430\u0441\u044C
+          \u044D\u0442\u0430 \u0441\u0438\u0441\u0442\u0435\u043C\u0430."
         nextNodeId: chapter01.node.09.departure_decided
         endsDialogue: 0
         choiceId: chapter01.node.09.synthesis_choice
@@ -7577,7 +7661,13 @@ MonoBehaviour:
       - blockId: chapter01.node.09.departure_decided_main
         kind: 0
         speakerIdOverride: 
-        text: "Цель определена: пройти по старому водному следу за пределы знакомых дорог и найти следующий сохранившийся след системы."
+        text: "\u0426\u0435\u043B\u044C \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0430:
+          \u043F\u0440\u043E\u0439\u0442\u0438 \u043F\u043E \u0441\u0442\u0430\u0440\u043E\u043C\u0443
+          \u0432\u043E\u0434\u043D\u043E\u043C\u0443 \u0441\u043B\u0435\u0434\u0443
+          \u0437\u0430 \u043F\u0440\u0435\u0434\u0435\u043B\u044B \u0437\u043D\u0430\u043A\u043E\u043C\u044B\u0445
+          \u0434\u043E\u0440\u043E\u0433 \u0438 \u043D\u0430\u0439\u0442\u0438 \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0439
+          \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0432\u0448\u0438\u0439\u0441\u044F
+          \u0441\u043B\u0435\u0434 \u0441\u0438\u0441\u0442\u0435\u043C\u044B."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7595,7 +7685,7 @@ MonoBehaviour:
           StringParam: chapter01.flag.far_route_unlocked
           IntParam: 0
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.09.goal_loaf
         endsDialogue: 0
         choiceId: chapter01.node.09.departure_decided_continue
@@ -7624,7 +7714,16 @@ MonoBehaviour:
       - blockId: chapter01.node.09.goal_loaf_main
         kind: 0
         speakerIdOverride: 
-        text: "— И ещё одно. Она задерживает тебя у двери. — Если встретишь кого-нибудь, кто знает старые работы у воды, спроси про второй хлеб. Мы помним, что его несли. Кому — уже нет."
+        text: "\u2014 \u0418 \u0435\u0449\u0451 \u043E\u0434\u043D\u043E. \u041E\u043D\u0430
+          \u0437\u0430\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442 \u0442\u0435\u0431\u044F
+          \u0443 \u0434\u0432\u0435\u0440\u0438. \u2014 \u0415\u0441\u043B\u0438
+          \u0432\u0441\u0442\u0440\u0435\u0442\u0438\u0448\u044C \u043A\u043E\u0433\u043E-\u043D\u0438\u0431\u0443\u0434\u044C,
+          \u043A\u0442\u043E \u0437\u043D\u0430\u0435\u0442 \u0441\u0442\u0430\u0440\u044B\u0435
+          \u0440\u0430\u0431\u043E\u0442\u044B \u0443 \u0432\u043E\u0434\u044B, \u0441\u043F\u0440\u043E\u0441\u0438
+          \u043F\u0440\u043E \u0432\u0442\u043E\u0440\u043E\u0439 \u0445\u043B\u0435\u0431.
+          \u041C\u044B \u043F\u043E\u043C\u043D\u0438\u043C, \u0447\u0442\u043E \u0435\u0433\u043E
+          \u043D\u0435\u0441\u043B\u0438. \u041A\u043E\u043C\u0443 \u2014 \u0443\u0436\u0435
+          \u043D\u0435\u0442."
         conditions:
           Combinator: 0
           Conditions:
@@ -7648,7 +7747,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.09.goal_tooth
         endsDialogue: 0
         choiceId: chapter01.node.09.goal_loaf_continue
@@ -7677,7 +7776,13 @@ MonoBehaviour:
       - blockId: chapter01.node.09.goal_tooth_main
         kind: 0
         speakerIdOverride: 
-        text: "— Калибр возьми с собой. Если ниже по воде найдёшь такой же паз или такую же разметку, мы хотя бы поймём, где им ещё пользовались."
+        text: "\u2014 \u041A\u0430\u043B\u0438\u0431\u0440 \u0432\u043E\u0437\u044C\u043C\u0438
+          \u0441 \u0441\u043E\u0431\u043E\u0439. \u0415\u0441\u043B\u0438 \u043D\u0438\u0436\u0435
+          \u043F\u043E \u0432\u043E\u0434\u0435 \u043D\u0430\u0439\u0434\u0451\u0448\u044C
+          \u0442\u0430\u043A\u043E\u0439 \u0436\u0435 \u043F\u0430\u0437 \u0438\u043B\u0438
+          \u0442\u0430\u043A\u0443\u044E \u0436\u0435 \u0440\u0430\u0437\u043C\u0435\u0442\u043A\u0443,
+          \u043C\u044B \u0445\u043E\u0442\u044F \u0431\u044B \u043F\u043E\u0439\u043C\u0451\u043C,
+          \u0433\u0434\u0435 \u0438\u043C \u0435\u0449\u0451 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043B\u0438\u0441\u044C."
         conditions:
           Combinator: 0
           Conditions:
@@ -7696,7 +7801,8 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Готовиться к выходу."
+      - text: "\u0413\u043E\u0442\u043E\u0432\u0438\u0442\u044C\u0441\u044F \u043A
+          \u0432\u044B\u0445\u043E\u0434\u0443."
         nextNodeId: 
         endsDialogue: 1
         choiceId: chapter01.node.09.exit
@@ -7720,13 +7826,48 @@ MonoBehaviour:
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_10_gather_party
-    title: "N10 — Сбор отряда"
+    title: "N10 \u2014 \u0421\u0431\u043E\u0440 \u043E\u0442\u0440\u044F\u0434\u0430"
     category: 1
     status: 1
-    developerComment: "P08-T03 production-сцена, обновлена под модель «движение = течение времени» (карта/время, раздел 2/3/18). Presentation-правило «одна реплика = один шаг»: DialogueChoiceKind.Continue между узлами. Заканчивается ОДНИМ действием героя («Выбрать состав похода») без эффектов — сцена не создаёт состав сама и не ставит ExpeditionStarted; выбор конкретных 0–4 бойцов происходит в реальном UI Экрана героя (панель «СОСТАВ ПОХОДА»), читающем GameState.Fighters, а не список из четырёх заранее написанных имён. Кнопка «ПОДТВЕРДИТЬ СОСТАВ» на Экране героя только фиксирует выбор — герой остаётся у Дома, ActiveExpedition ещё не создан. ExpeditionStarted ставится PrototypeUIController.RefreshAutoTimeState по факту первого реального движения (клик по карте создаёт ActiveExpedition и сразу переводит его в TravellingToLocation) — не самим диалогом и не подтверждением состава."
+    developerComment: "P08-T03 production-\u0441\u0446\u0435\u043D\u0430, \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0430
+      \u043F\u043E\u0434 \u043C\u043E\u0434\u0435\u043B\u044C \xAB\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435
+      = \u0442\u0435\u0447\u0435\u043D\u0438\u0435 \u0432\u0440\u0435\u043C\u0435\u043D\u0438\xBB
+      (\u043A\u0430\u0440\u0442\u0430/\u0432\u0440\u0435\u043C\u044F, \u0440\u0430\u0437\u0434\u0435\u043B
+      2/3/18). Presentation-\u043F\u0440\u0430\u0432\u0438\u043B\u043E \xAB\u043E\u0434\u043D\u0430
+      \u0440\u0435\u043F\u043B\u0438\u043A\u0430 = \u043E\u0434\u0438\u043D \u0448\u0430\u0433\xBB:
+      DialogueChoiceKind.Continue \u043C\u0435\u0436\u0434\u0443 \u0443\u0437\u043B\u0430\u043C\u0438.
+      \u0417\u0430\u043A\u0430\u043D\u0447\u0438\u0432\u0430\u0435\u0442\u0441\u044F
+      \u041E\u0414\u041D\u0418\u041C \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435\u043C
+      \u0433\u0435\u0440\u043E\u044F (\xAB\u0412\u044B\u0431\u0440\u0430\u0442\u044C
+      \u0441\u043E\u0441\u0442\u0430\u0432 \u043F\u043E\u0445\u043E\u0434\u0430\xBB)
+      \u0431\u0435\u0437 \u044D\u0444\u0444\u0435\u043A\u0442\u043E\u0432 \u2014
+      \u0441\u0446\u0435\u043D\u0430 \u043D\u0435 \u0441\u043E\u0437\u0434\u0430\u0451\u0442
+      \u0441\u043E\u0441\u0442\u0430\u0432 \u0441\u0430\u043C\u0430 \u0438 \u043D\u0435
+      \u0441\u0442\u0430\u0432\u0438\u0442 ExpeditionStarted; \u0432\u044B\u0431\u043E\u0440
+      \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u044B\u0445 0\u20134 \u0431\u043E\u0439\u0446\u043E\u0432
+      \u043F\u0440\u043E\u0438\u0441\u0445\u043E\u0434\u0438\u0442 \u0432 \u0440\u0435\u0430\u043B\u044C\u043D\u043E\u043C
+      UI \u042D\u043A\u0440\u0430\u043D\u0430 \u0433\u0435\u0440\u043E\u044F (\u043F\u0430\u043D\u0435\u043B\u044C
+      \xAB\u0421\u041E\u0421\u0422\u0410\u0412 \u041F\u041E\u0425\u041E\u0414\u0410\xBB),
+      \u0447\u0438\u0442\u0430\u044E\u0449\u0435\u043C GameState.Fighters, \u0430
+      \u043D\u0435 \u0441\u043F\u0438\u0441\u043E\u043A \u0438\u0437 \u0447\u0435\u0442\u044B\u0440\u0451\u0445
+      \u0437\u0430\u0440\u0430\u043D\u0435\u0435 \u043D\u0430\u043F\u0438\u0441\u0430\u043D\u043D\u044B\u0445
+      \u0438\u043C\u0451\u043D. \u041A\u043D\u043E\u043F\u043A\u0430 \xAB\u041F\u041E\u0414\u0422\u0412\u0415\u0420\u0414\u0418\u0422\u042C
+      \u0421\u041E\u0421\u0422\u0410\u0412\xBB \u043D\u0430 \u042D\u043A\u0440\u0430\u043D\u0435
+      \u0433\u0435\u0440\u043E\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0444\u0438\u043A\u0441\u0438\u0440\u0443\u0435\u0442
+      \u0432\u044B\u0431\u043E\u0440 \u2014 \u0433\u0435\u0440\u043E\u0439 \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F
+      \u0443 \u0414\u043E\u043C\u0430, ActiveExpedition \u0435\u0449\u0451 \u043D\u0435
+      \u0441\u043E\u0437\u0434\u0430\u043D. ExpeditionStarted \u0441\u0442\u0430\u0432\u0438\u0442\u0441\u044F
+      PrototypeUIController.RefreshAutoTimeState \u043F\u043E \u0444\u0430\u043A\u0442\u0443
+      \u043F\u0435\u0440\u0432\u043E\u0433\u043E \u0440\u0435\u0430\u043B\u044C\u043D\u043E\u0433\u043E
+      \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u044F (\u043A\u043B\u0438\u043A
+      \u043F\u043E \u043A\u0430\u0440\u0442\u0435 \u0441\u043E\u0437\u0434\u0430\u0451\u0442
+      ActiveExpedition \u0438 \u0441\u0440\u0430\u0437\u0443 \u043F\u0435\u0440\u0435\u0432\u043E\u0434\u0438\u0442
+      \u0435\u0433\u043E \u0432 TravellingToLocation) \u2014 \u043D\u0435 \u0441\u0430\u043C\u0438\u043C
+      \u0434\u0438\u0430\u043B\u043E\u0433\u043E\u043C \u0438 \u043D\u0435 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u0435\u043C
+      \u0441\u043E\u0441\u0442\u0430\u0432\u0430."
     startNodeId: chapter01.node.10
     tags:
-    - "глава01"
+    - "\u0433\u043B\u0430\u0432\u043001"
     - production
     nodes:
     - id: chapter01.node.10
@@ -7736,7 +7877,14 @@ MonoBehaviour:
       - blockId: chapter01.node.10_main
         kind: 0
         speakerIdOverride: 
-        text: "Перед выходом вещи собираются быстрее людей. Верёвка, сухая еда, оружие, запасная одежда — всё можно пересчитать. Людей приходится выбирать."
+        text: "\u041F\u0435\u0440\u0435\u0434 \u0432\u044B\u0445\u043E\u0434\u043E\u043C
+          \u0432\u0435\u0449\u0438 \u0441\u043E\u0431\u0438\u0440\u0430\u044E\u0442\u0441\u044F
+          \u0431\u044B\u0441\u0442\u0440\u0435\u0435 \u043B\u044E\u0434\u0435\u0439.
+          \u0412\u0435\u0440\u0451\u0432\u043A\u0430, \u0441\u0443\u0445\u0430\u044F
+          \u0435\u0434\u0430, \u043E\u0440\u0443\u0436\u0438\u0435, \u0437\u0430\u043F\u0430\u0441\u043D\u0430\u044F
+          \u043E\u0434\u0435\u0436\u0434\u0430 \u2014 \u0432\u0441\u0451 \u043C\u043E\u0436\u043D\u043E
+          \u043F\u0435\u0440\u0435\u0441\u0447\u0438\u0442\u0430\u0442\u044C. \u041B\u044E\u0434\u0435\u0439
+          \u043F\u0440\u0438\u0445\u043E\u0434\u0438\u0442\u0441\u044F \u0432\u044B\u0431\u0438\u0440\u0430\u0442\u044C."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7750,7 +7898,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.10.ostafiy
         endsDialogue: 0
         choiceId: chapter01.node.10_continue
@@ -7779,7 +7927,8 @@ MonoBehaviour:
       - blockId: chapter01.node.10.ostafiy_main
         kind: 0
         speakerIdOverride: 
-        text: "— Кого уведёшь, того здесь не будет."
+        text: "\u2014 \u041A\u043E\u0433\u043E \u0443\u0432\u0435\u0434\u0451\u0448\u044C,
+          \u0442\u043E\u0433\u043E \u0437\u0434\u0435\u0441\u044C \u043D\u0435 \u0431\u0443\u0434\u0435\u0442."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7793,7 +7942,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.10.ulyana
         endsDialogue: 0
         choiceId: chapter01.node.10.ostafiy_continue
@@ -7822,7 +7971,8 @@ MonoBehaviour:
       - blockId: chapter01.node.10.ulyana_main
         kind: 0
         speakerIdOverride: 
-        text: "— И работа за ним тоже не уйдёт."
+        text: "\u2014 \u0418 \u0440\u0430\u0431\u043E\u0442\u0430 \u0437\u0430 \u043D\u0438\u043C
+          \u0442\u043E\u0436\u0435 \u043D\u0435 \u0443\u0439\u0434\u0451\u0442."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7836,7 +7986,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.10.commander_alone
         endsDialogue: 0
         choiceId: chapter01.node.10.ulyana_continue
@@ -7865,7 +8015,11 @@ MonoBehaviour:
       - blockId: chapter01.node.10.commander_alone_main
         kind: 0
         speakerIdOverride: 
-        text: "Командир идёт сам. Остальных ты выбираешь из тех, кто сейчас находится в Доме."
+        text: "\u041A\u043E\u043C\u0430\u043D\u0434\u0438\u0440 \u0438\u0434\u0451\u0442
+          \u0441\u0430\u043C. \u041E\u0441\u0442\u0430\u043B\u044C\u043D\u044B\u0445
+          \u0442\u044B \u0432\u044B\u0431\u0438\u0440\u0430\u0435\u0448\u044C \u0438\u0437
+          \u0442\u0435\u0445, \u043A\u0442\u043E \u0441\u0435\u0439\u0447\u0430\u0441
+          \u043D\u0430\u0445\u043E\u0434\u0438\u0442\u0441\u044F \u0432 \u0414\u043E\u043C\u0435."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7879,7 +8033,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.10.party_choice
         endsDialogue: 0
         choiceId: chapter01.node.10.commander_alone_continue
@@ -7908,7 +8062,9 @@ MonoBehaviour:
       - blockId: chapter01.node.10.party_choice_main
         kind: 0
         speakerIdOverride: 
-        text: "Можно выйти одному или взять с собой до четырёх бойцов."
+        text: "\u041C\u043E\u0436\u043D\u043E \u0432\u044B\u0439\u0442\u0438 \u043E\u0434\u043D\u043E\u043C\u0443
+          \u0438\u043B\u0438 \u0432\u0437\u044F\u0442\u044C \u0441 \u0441\u043E\u0431\u043E\u0439
+          \u0434\u043E \u0447\u0435\u0442\u044B\u0440\u0451\u0445 \u0431\u043E\u0439\u0446\u043E\u0432."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7922,7 +8078,8 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Выбрать состав похода."
+      - text: "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u0441\u043E\u0441\u0442\u0430\u0432
+          \u043F\u043E\u0445\u043E\u0434\u0430."
         nextNodeId: 
         endsDialogue: 1
         choiceId: chapter01.node.10.party_choice_confirm
@@ -7946,13 +8103,42 @@ MonoBehaviour:
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_11_first_long_road
-    title: "N11 — Дорога, которой нет"
+    title: "N11 \u2014 \u0414\u043E\u0440\u043E\u0433\u0430, \u043A\u043E\u0442\u043E\u0440\u043E\u0439
+      \u043D\u0435\u0442"
     category: 1
     status: 1
-    developerComment: "P09-T02 production-сцена. Триггерится не игроком и не следующим шагом Chapter01StoryDirector.Sequence, а физическим прогрессом маршрута во время движения (Chapter01StoryDirector.GetPendingRoadEventDialogueId, ~30% первого маршрута к OldWaterSearch) — раздел \"Обязательная встреча\": \"не случайный RNG, гарантированное обучение\". RoadReading — пассивная проверка 6+Инстинкт+Следопытство(fieldcraft) vs 13, провал не блокирует путь (failure-forward), только не даёт knowledge. Выбор маршрута — реальное разветвление, не косметика: \"Пойти старым путём\" ставит FollowedOldRoad и запускает физический крюк через Chapter01OutcomeApplier.ApplyLongRoadRouteConsequences (HandleDialogueCompleted), \"Срезать через низину\" (CrossedOldRoadBoundary) не требует действия — маршрут и так уже идёт от текущей позиции к цели."
+    developerComment: "P09-T02 production-\u0441\u0446\u0435\u043D\u0430. \u0422\u0440\u0438\u0433\u0433\u0435\u0440\u0438\u0442\u0441\u044F
+      \u043D\u0435 \u0438\u0433\u0440\u043E\u043A\u043E\u043C \u0438 \u043D\u0435
+      \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u043C \u0448\u0430\u0433\u043E\u043C
+      Chapter01StoryDirector.Sequence, \u0430 \u0444\u0438\u0437\u0438\u0447\u0435\u0441\u043A\u0438\u043C
+      \u043F\u0440\u043E\u0433\u0440\u0435\u0441\u0441\u043E\u043C \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u0430
+      \u0432\u043E \u0432\u0440\u0435\u043C\u044F \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u044F
+      (Chapter01StoryDirector.GetPendingRoadEventDialogueId, ~30% \u043F\u0435\u0440\u0432\u043E\u0433\u043E
+      \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u0430 \u043A OldWaterSearch) \u2014
+      \u0440\u0430\u0437\u0434\u0435\u043B \"\u041E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u0430\u044F
+      \u0432\u0441\u0442\u0440\u0435\u0447\u0430\": \"\u043D\u0435 \u0441\u043B\u0443\u0447\u0430\u0439\u043D\u044B\u0439
+      RNG, \u0433\u0430\u0440\u0430\u043D\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u0435
+      \u043E\u0431\u0443\u0447\u0435\u043D\u0438\u0435\". RoadReading \u2014 \u043F\u0430\u0441\u0441\u0438\u0432\u043D\u0430\u044F
+      \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 6+\u0418\u043D\u0441\u0442\u0438\u043D\u043A\u0442+\u0421\u043B\u0435\u0434\u043E\u043F\u044B\u0442\u0441\u0442\u0432\u043E(fieldcraft)
+      vs 13, \u043F\u0440\u043E\u0432\u0430\u043B \u043D\u0435 \u0431\u043B\u043E\u043A\u0438\u0440\u0443\u0435\u0442
+      \u043F\u0443\u0442\u044C (failure-forward), \u0442\u043E\u043B\u044C\u043A\u043E
+      \u043D\u0435 \u0434\u0430\u0451\u0442 knowledge. \u0412\u044B\u0431\u043E\u0440
+      \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u0430 \u2014 \u0440\u0435\u0430\u043B\u044C\u043D\u043E\u0435
+      \u0440\u0430\u0437\u0432\u0435\u0442\u0432\u043B\u0435\u043D\u0438\u0435, \u043D\u0435
+      \u043A\u043E\u0441\u043C\u0435\u0442\u0438\u043A\u0430: \"\u041F\u043E\u0439\u0442\u0438
+      \u0441\u0442\u0430\u0440\u044B\u043C \u043F\u0443\u0442\u0451\u043C\" \u0441\u0442\u0430\u0432\u0438\u0442
+      FollowedOldRoad \u0438 \u0437\u0430\u043F\u0443\u0441\u043A\u0430\u0435\u0442
+      \u0444\u0438\u0437\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u043A\u0440\u044E\u043A
+      \u0447\u0435\u0440\u0435\u0437 Chapter01OutcomeApplier.ApplyLongRoadRouteConsequences
+      (HandleDialogueCompleted), \"\u0421\u0440\u0435\u0437\u0430\u0442\u044C \u0447\u0435\u0440\u0435\u0437
+      \u043D\u0438\u0437\u0438\u043D\u0443\" (CrossedOldRoadBoundary) \u043D\u0435
+      \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F
+      \u2014 \u043C\u0430\u0440\u0448\u0440\u0443\u0442 \u0438 \u0442\u0430\u043A
+      \u0443\u0436\u0435 \u0438\u0434\u0451\u0442 \u043E\u0442 \u0442\u0435\u043A\u0443\u0449\u0435\u0439
+      \u043F\u043E\u0437\u0438\u0446\u0438\u0438 \u043A \u0446\u0435\u043B\u0438."
     startNodeId: chapter01.node.11
     tags:
-    - "глава01"
+    - "\u0433\u043B\u0430\u0432\u043001"
     - production
     nodes:
     - id: chapter01.node.11
@@ -7962,7 +8148,11 @@ MonoBehaviour:
       - blockId: chapter01.node.11_main
         kind: 0
         speakerIdOverride: 
-        text: "Старый путь находится неожиданно легко. Труднее понять, почему он идёт не туда."
+        text: "\u0421\u0442\u0430\u0440\u044B\u0439 \u043F\u0443\u0442\u044C \u043D\u0430\u0445\u043E\u0434\u0438\u0442\u0441\u044F
+          \u043D\u0435\u043E\u0436\u0438\u0434\u0430\u043D\u043D\u043E \u043B\u0435\u0433\u043A\u043E.
+          \u0422\u0440\u0443\u0434\u043D\u0435\u0435 \u043F\u043E\u043D\u044F\u0442\u044C,
+          \u043F\u043E\u0447\u0435\u043C\u0443 \u043E\u043D \u0438\u0434\u0451\u0442
+          \u043D\u0435 \u0442\u0443\u0434\u0430."
         conditions:
           Combinator: 0
           Conditions: []
@@ -7976,7 +8166,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11.02
         endsDialogue: 0
         choiceId: chapter01.node.11_continue
@@ -8005,7 +8195,12 @@ MonoBehaviour:
       - blockId: chapter01.node.11.02_main
         kind: 0
         speakerIdOverride: 
-        text: "Дорога подходит к сухой низине и резко забирает влево, будто обходя то, чего здесь больше нет."
+        text: "\u0414\u043E\u0440\u043E\u0433\u0430 \u043F\u043E\u0434\u0445\u043E\u0434\u0438\u0442
+          \u043A \u0441\u0443\u0445\u043E\u0439 \u043D\u0438\u0437\u0438\u043D\u0435
+          \u0438 \u0440\u0435\u0437\u043A\u043E \u0437\u0430\u0431\u0438\u0440\u0430\u0435\u0442
+          \u0432\u043B\u0435\u0432\u043E, \u0431\u0443\u0434\u0442\u043E \u043E\u0431\u0445\u043E\u0434\u044F
+          \u0442\u043E, \u0447\u0435\u0433\u043E \u0437\u0434\u0435\u0441\u044C \u0431\u043E\u043B\u044C\u0448\u0435
+          \u043D\u0435\u0442."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8019,7 +8214,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11.03
         endsDialogue: 0
         choiceId: chapter01.node.11.02_continue
@@ -8048,7 +8243,13 @@ MonoBehaviour:
       - blockId: chapter01.node.11.03_main
         kind: 0
         speakerIdOverride: 
-        text: "Через низину можно пройти прямо. До другого края — меньше получаса. Старый путь делает крюк на несколько часов."
+        text: "\u0427\u0435\u0440\u0435\u0437 \u043D\u0438\u0437\u0438\u043D\u0443
+          \u043C\u043E\u0436\u043D\u043E \u043F\u0440\u043E\u0439\u0442\u0438 \u043F\u0440\u044F\u043C\u043E.
+          \u0414\u043E \u0434\u0440\u0443\u0433\u043E\u0433\u043E \u043A\u0440\u0430\u044F
+          \u2014 \u043C\u0435\u043D\u044C\u0448\u0435 \u043F\u043E\u043B\u0443\u0447\u0430\u0441\u0430.
+          \u0421\u0442\u0430\u0440\u044B\u0439 \u043F\u0443\u0442\u044C \u0434\u0435\u043B\u0430\u0435\u0442
+          \u043A\u0440\u044E\u043A \u043D\u0430 \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E
+          \u0447\u0430\u0441\u043E\u0432."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8064,7 +8265,22 @@ MonoBehaviour:
       - blockId: chapter01.node.11.03_check_success
         kind: 0
         speakerIdOverride: 
-        text: "Самая странная часть дороги — не крюк. Странно то, что старая колея несколько раз подходит к низине почти вплотную и каждый раз отворачивает.\n\nНа двух деревьях по разные стороны сохранился один и тот же старый знак. Не предупреждение об обрыве. Не метка брода. Похоже на границу."
+        text: "\u0421\u0430\u043C\u0430\u044F \u0441\u0442\u0440\u0430\u043D\u043D\u0430\u044F
+          \u0447\u0430\u0441\u0442\u044C \u0434\u043E\u0440\u043E\u0433\u0438 \u2014
+          \u043D\u0435 \u043A\u0440\u044E\u043A. \u0421\u0442\u0440\u0430\u043D\u043D\u043E
+          \u0442\u043E, \u0447\u0442\u043E \u0441\u0442\u0430\u0440\u0430\u044F \u043A\u043E\u043B\u0435\u044F
+          \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0440\u0430\u0437
+          \u043F\u043E\u0434\u0445\u043E\u0434\u0438\u0442 \u043A \u043D\u0438\u0437\u0438\u043D\u0435
+          \u043F\u043E\u0447\u0442\u0438 \u0432\u043F\u043B\u043E\u0442\u043D\u0443\u044E
+          \u0438 \u043A\u0430\u0436\u0434\u044B\u0439 \u0440\u0430\u0437 \u043E\u0442\u0432\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0435\u0442.\n\n\u041D\u0430
+          \u0434\u0432\u0443\u0445 \u0434\u0435\u0440\u0435\u0432\u044C\u044F\u0445
+          \u043F\u043E \u0440\u0430\u0437\u043D\u044B\u0435 \u0441\u0442\u043E\u0440\u043E\u043D\u044B
+          \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u043B\u0441\u044F \u043E\u0434\u0438\u043D
+          \u0438 \u0442\u043E\u0442 \u0436\u0435 \u0441\u0442\u0430\u0440\u044B\u0439
+          \u0437\u043D\u0430\u043A. \u041D\u0435 \u043F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0435\u043D\u0438\u0435
+          \u043E\u0431 \u043E\u0431\u0440\u044B\u0432\u0435. \u041D\u0435 \u043C\u0435\u0442\u043A\u0430
+          \u0431\u0440\u043E\u0434\u0430. \u041F\u043E\u0445\u043E\u0436\u0435 \u043D\u0430
+          \u0433\u0440\u0430\u043D\u0438\u0446\u0443."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8084,7 +8300,12 @@ MonoBehaviour:
       - blockId: chapter01.node.11.03_check_failure
         kind: 0
         speakerIdOverride: 
-        text: "Очевидное объяснение находится быстро: раньше здесь наверняка стояла вода. Болото ушло, а старая дорога осталась."
+        text: "\u041E\u0447\u0435\u0432\u0438\u0434\u043D\u043E\u0435 \u043E\u0431\u044A\u044F\u0441\u043D\u0435\u043D\u0438\u0435
+          \u043D\u0430\u0445\u043E\u0434\u0438\u0442\u0441\u044F \u0431\u044B\u0441\u0442\u0440\u043E:
+          \u0440\u0430\u043D\u044C\u0448\u0435 \u0437\u0434\u0435\u0441\u044C \u043D\u0430\u0432\u0435\u0440\u043D\u044F\u043A\u0430
+          \u0441\u0442\u043E\u044F\u043B\u0430 \u0432\u043E\u0434\u0430. \u0411\u043E\u043B\u043E\u0442\u043E
+          \u0443\u0448\u043B\u043E, \u0430 \u0441\u0442\u0430\u0440\u0430\u044F \u0434\u043E\u0440\u043E\u0433\u0430
+          \u043E\u0441\u0442\u0430\u043B\u0430\u0441\u044C."
         conditions:
           Combinator: 0
           Conditions:
@@ -8103,7 +8324,8 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Пойти старым путём."
+      - text: "\u041F\u043E\u0439\u0442\u0438 \u0441\u0442\u0430\u0440\u044B\u043C
+          \u043F\u0443\u0442\u0451\u043C."
         nextNodeId: chapter01.node.11.old_road
         endsDialogue: 0
         choiceId: chapter01.node.11.03_choice_old_road
@@ -8123,7 +8345,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Срезать через низину."
+      - text: "\u0421\u0440\u0435\u0437\u0430\u0442\u044C \u0447\u0435\u0440\u0435\u0437
+          \u043D\u0438\u0437\u0438\u043D\u0443."
         nextNodeId: chapter01.node.11.shortcut
         endsDialogue: 0
         choiceId: chapter01.node.11.03_choice_shortcut
@@ -8152,7 +8375,12 @@ MonoBehaviour:
       - blockId: chapter01.node.11.old_road_main
         kind: 0
         speakerIdOverride: 
-        text: "Отряд сворачивает на старый путь — тот самый крюк, который старая дорога делает вокруг низины."
+        text: "\u041E\u0442\u0440\u044F\u0434 \u0441\u0432\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0435\u0442
+          \u043D\u0430 \u0441\u0442\u0430\u0440\u044B\u0439 \u043F\u0443\u0442\u044C
+          \u2014 \u0442\u043E\u0442 \u0441\u0430\u043C\u044B\u0439 \u043A\u0440\u044E\u043A,
+          \u043A\u043E\u0442\u043E\u0440\u044B\u0439 \u0441\u0442\u0430\u0440\u0430\u044F
+          \u0434\u043E\u0440\u043E\u0433\u0430 \u0434\u0435\u043B\u0430\u0435\u0442
+          \u0432\u043E\u043A\u0440\u0443\u0433 \u043D\u0438\u0437\u0438\u043D\u044B."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8174,7 +8402,7 @@ MonoBehaviour:
           StringParam: chapter01.flag.long_road_started
           IntParam: 0
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: 
         endsDialogue: 1
         choiceId: chapter01.node.11.old_road_exit
@@ -8203,7 +8431,9 @@ MonoBehaviour:
       - blockId: chapter01.node.11.shortcut_main
         kind: 0
         speakerIdOverride: 
-        text: "Отряд режет напрямую — через саму низину, а не в обход неё."
+        text: "\u041E\u0442\u0440\u044F\u0434 \u0440\u0435\u0436\u0435\u0442 \u043D\u0430\u043F\u0440\u044F\u043C\u0443\u044E
+          \u2014 \u0447\u0435\u0440\u0435\u0437 \u0441\u0430\u043C\u0443 \u043D\u0438\u0437\u0438\u043D\u0443,
+          \u0430 \u043D\u0435 \u0432 \u043E\u0431\u0445\u043E\u0434 \u043D\u0435\u0451."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8221,7 +8451,7 @@ MonoBehaviour:
           StringParam: chapter01.flag.crossed_old_road_boundary
           IntParam: 0
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11.shortcut.silence
         endsDialogue: 0
         choiceId: chapter01.node.11.shortcut_continue
@@ -8250,7 +8480,12 @@ MonoBehaviour:
       - blockId: chapter01.node.11.shortcut.silence_main
         kind: 0
         speakerIdOverride: 
-        text: "На середине низины исчезает звук воды. Не становится тише лес. Просто воды больше не слышно."
+        text: "\u041D\u0430 \u0441\u0435\u0440\u0435\u0434\u0438\u043D\u0435 \u043D\u0438\u0437\u0438\u043D\u044B
+          \u0438\u0441\u0447\u0435\u0437\u0430\u0435\u0442 \u0437\u0432\u0443\u043A
+          \u0432\u043E\u0434\u044B. \u041D\u0435 \u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u0441\u044F
+          \u0442\u0438\u0448\u0435 \u043B\u0435\u0441. \u041F\u0440\u043E\u0441\u0442\u043E
+          \u0432\u043E\u0434\u044B \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435
+          \u0441\u043B\u044B\u0448\u043D\u043E."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8264,7 +8499,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11.shortcut.return
         endsDialogue: 0
         choiceId: chapter01.node.11.shortcut.silence_continue
@@ -8293,7 +8528,10 @@ MonoBehaviour:
       - blockId: chapter01.node.11.shortcut.return_main
         kind: 0
         speakerIdOverride: 
-        text: "Потом шум возвращается — сразу, будто герой переступил невидимую черту."
+        text: "\u041F\u043E\u0442\u043E\u043C \u0448\u0443\u043C \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442\u0441\u044F
+          \u2014 \u0441\u0440\u0430\u0437\u0443, \u0431\u0443\u0434\u0442\u043E \u0433\u0435\u0440\u043E\u0439
+          \u043F\u0435\u0440\u0435\u0441\u0442\u0443\u043F\u0438\u043B \u043D\u0435\u0432\u0438\u0434\u0438\u043C\u0443\u044E
+          \u0447\u0435\u0440\u0442\u0443."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8311,7 +8549,7 @@ MonoBehaviour:
           StringParam: chapter01.flag.long_road_started
           IntParam: 0
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: 
         endsDialogue: 1
         choiceId: chapter01.node.11.shortcut.return_exit
@@ -8335,13 +8573,46 @@ MonoBehaviour:
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_11b_three_under_cart
-    title: "Трое под телегой"
+    title: "\u0422\u0440\u043E\u0435 \u043F\u043E\u0434 \u0442\u0435\u043B\u0435\u0433\u043E\u0439"
     category: 1
     status: 1
-    developerComment: "P09-T03 production-сцена. По ощущению — случайная дорожная встреча, технически в первом походе — гарантированный tutorial-encounter (раздел \"Как встреча появляется\": именно она разблокирует лагерь, чистый RNG рискует пропуском системы). Триггерится Chapter01StoryDirector.GetPendingRoadEventDialogueId на ~60% маршрута после N11. Ровно один из четырёх исходов (CartOutcomeSavedBoth/SavedMan/SavedSeed/PassedBy) + CartResolved + CampUnlocked ставятся самим диалогом (SetFlag); цена в часах не умеет ставиться диалоговым эффектом — её стартует Chapter01OutcomeApplier.ApplyCartConsequences через GameState.TryStartRoadActivity, вызванный Chapter01StoryDirector.HandleDialogueCompleted. \"Разделить людей\" — два взаимоисключающих Normal-выбора с одинаковым nextNodeId (saved_both), различаются только PartySizeAtLeast-условиями и ценой в тексте: 1 боец = 3ч, 2-4 бойца = 2ч; при 0 бойцах ни один из них не проходит условие — варианта нет вообще (раздел \"Решение C\")."
+    developerComment: "P09-T03 production-\u0441\u0446\u0435\u043D\u0430. \u041F\u043E
+      \u043E\u0449\u0443\u0449\u0435\u043D\u0438\u044E \u2014 \u0441\u043B\u0443\u0447\u0430\u0439\u043D\u0430\u044F
+      \u0434\u043E\u0440\u043E\u0436\u043D\u0430\u044F \u0432\u0441\u0442\u0440\u0435\u0447\u0430,
+      \u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438 \u0432 \u043F\u0435\u0440\u0432\u043E\u043C
+      \u043F\u043E\u0445\u043E\u0434\u0435 \u2014 \u0433\u0430\u0440\u0430\u043D\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+      tutorial-encounter (\u0440\u0430\u0437\u0434\u0435\u043B \"\u041A\u0430\u043A
+      \u0432\u0441\u0442\u0440\u0435\u0447\u0430 \u043F\u043E\u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F\":
+      \u0438\u043C\u0435\u043D\u043D\u043E \u043E\u043D\u0430 \u0440\u0430\u0437\u0431\u043B\u043E\u043A\u0438\u0440\u0443\u0435\u0442
+      \u043B\u0430\u0433\u0435\u0440\u044C, \u0447\u0438\u0441\u0442\u044B\u0439
+      RNG \u0440\u0438\u0441\u043A\u0443\u0435\u0442 \u043F\u0440\u043E\u043F\u0443\u0441\u043A\u043E\u043C
+      \u0441\u0438\u0441\u0442\u0435\u043C\u044B). \u0422\u0440\u0438\u0433\u0433\u0435\u0440\u0438\u0442\u0441\u044F
+      Chapter01StoryDirector.GetPendingRoadEventDialogueId \u043D\u0430 ~60% \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u0430
+      \u043F\u043E\u0441\u043B\u0435 N11. \u0420\u043E\u0432\u043D\u043E \u043E\u0434\u0438\u043D
+      \u0438\u0437 \u0447\u0435\u0442\u044B\u0440\u0451\u0445 \u0438\u0441\u0445\u043E\u0434\u043E\u0432
+      (CartOutcomeSavedBoth/SavedMan/SavedSeed/PassedBy) + CartResolved + CampUnlocked
+      \u0441\u0442\u0430\u0432\u044F\u0442\u0441\u044F \u0441\u0430\u043C\u0438\u043C
+      \u0434\u0438\u0430\u043B\u043E\u0433\u043E\u043C (SetFlag); \u0446\u0435\u043D\u0430
+      \u0432 \u0447\u0430\u0441\u0430\u0445 \u043D\u0435 \u0443\u043C\u0435\u0435\u0442
+      \u0441\u0442\u0430\u0432\u0438\u0442\u044C\u0441\u044F \u0434\u0438\u0430\u043B\u043E\u0433\u043E\u0432\u044B\u043C
+      \u044D\u0444\u0444\u0435\u043A\u0442\u043E\u043C \u2014 \u0435\u0451 \u0441\u0442\u0430\u0440\u0442\u0443\u0435\u0442
+      Chapter01OutcomeApplier.ApplyCartConsequences \u0447\u0435\u0440\u0435\u0437
+      GameState.TryStartRoadActivity, \u0432\u044B\u0437\u0432\u0430\u043D\u043D\u044B\u0439
+      Chapter01StoryDirector.HandleDialogueCompleted. \"\u0420\u0430\u0437\u0434\u0435\u043B\u0438\u0442\u044C
+      \u043B\u044E\u0434\u0435\u0439\" \u2014 \u0434\u0432\u0430 \u0432\u0437\u0430\u0438\u043C\u043E\u0438\u0441\u043A\u043B\u044E\u0447\u0430\u044E\u0449\u0438\u0445
+      Normal-\u0432\u044B\u0431\u043E\u0440\u0430 \u0441 \u043E\u0434\u0438\u043D\u0430\u043A\u043E\u0432\u044B\u043C
+      nextNodeId (saved_both), \u0440\u0430\u0437\u043B\u0438\u0447\u0430\u044E\u0442\u0441\u044F
+      \u0442\u043E\u043B\u044C\u043A\u043E PartySizeAtLeast-\u0443\u0441\u043B\u043E\u0432\u0438\u044F\u043C\u0438
+      \u0438 \u0446\u0435\u043D\u043E\u0439 \u0432 \u0442\u0435\u043A\u0441\u0442\u0435:
+      1 \u0431\u043E\u0435\u0446 = 3\u0447, 2-4 \u0431\u043E\u0439\u0446\u0430 =
+      2\u0447; \u043F\u0440\u0438 0 \u0431\u043E\u0439\u0446\u0430\u0445 \u043D\u0438
+      \u043E\u0434\u0438\u043D \u0438\u0437 \u043D\u0438\u0445 \u043D\u0435 \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u0442
+      \u0443\u0441\u043B\u043E\u0432\u0438\u0435 \u2014 \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u0430
+      \u043D\u0435\u0442 \u0432\u043E\u043E\u0431\u0449\u0435 (\u0440\u0430\u0437\u0434\u0435\u043B
+      \"\u0420\u0435\u0448\u0435\u043D\u0438\u0435 C\")."
     startNodeId: chapter01.node.11b
     tags:
-    - "глава01"
+    - "\u0433\u043B\u0430\u0432\u043001"
     - production
     nodes:
     - id: chapter01.node.11b
@@ -8351,7 +8622,10 @@ MonoBehaviour:
       - blockId: chapter01.node.11b_main
         kind: 0
         speakerIdOverride: 
-        text: "У дороги перевёрнутая телега. Оттуда доносится размеренный стук по дереву."
+        text: "\u0423 \u0434\u043E\u0440\u043E\u0433\u0438 \u043F\u0435\u0440\u0435\u0432\u0451\u0440\u043D\u0443\u0442\u0430\u044F
+          \u0442\u0435\u043B\u0435\u0433\u0430. \u041E\u0442\u0442\u0443\u0434\u0430
+          \u0434\u043E\u043D\u043E\u0441\u0438\u0442\u0441\u044F \u0440\u0430\u0437\u043C\u0435\u0440\u0435\u043D\u043D\u044B\u0439
+          \u0441\u0442\u0443\u043A \u043F\u043E \u0434\u0435\u0440\u0435\u0432\u0443."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8365,7 +8639,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Остановиться."
+      - text: "\u041E\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C\u0441\u044F."
         nextNodeId: chapter01.node.11b.scene1
         endsDialogue: 0
         choiceId: chapter01.node.11b_stop
@@ -8385,7 +8659,7 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Продолжить путь."
+      - text: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u043F\u0443\u0442\u044C."
         nextNodeId: chapter01.node.11b.passed_by
         endsDialogue: 0
         choiceId: chapter01.node.11b_pass
@@ -8414,7 +8688,10 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.passed_by_main
         kind: 0
         speakerIdOverride: 
-        text: "Отряд проходит мимо, не останавливаясь. Стук по дереву стихает позади."
+        text: "\u041E\u0442\u0440\u044F\u0434 \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u0442
+          \u043C\u0438\u043C\u043E, \u043D\u0435 \u043E\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u044F\u0441\u044C.
+          \u0421\u0442\u0443\u043A \u043F\u043E \u0434\u0435\u0440\u0435\u0432\u0443
+          \u0441\u0442\u0438\u0445\u0430\u0435\u0442 \u043F\u043E\u0437\u0430\u0434\u0438."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8440,7 +8717,7 @@ MonoBehaviour:
           StringParam: chapter01.flag.camp_unlocked
           IntParam: 0
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: 
         endsDialogue: 1
         choiceId: chapter01.node.11b.passed_by_exit
@@ -8469,7 +8746,10 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.scene1_main
         kind: 0
         speakerIdOverride: 
-        text: "Телега лежит боком в придорожной канаве. Один мужчина зажат под бортом."
+        text: "\u0422\u0435\u043B\u0435\u0433\u0430 \u043B\u0435\u0436\u0438\u0442
+          \u0431\u043E\u043A\u043E\u043C \u0432 \u043F\u0440\u0438\u0434\u043E\u0440\u043E\u0436\u043D\u043E\u0439
+          \u043A\u0430\u043D\u0430\u0432\u0435. \u041E\u0434\u0438\u043D \u043C\u0443\u0436\u0447\u0438\u043D\u0430
+          \u0437\u0430\u0436\u0430\u0442 \u043F\u043E\u0434 \u0431\u043E\u0440\u0442\u043E\u043C."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8483,7 +8763,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11b.scene2
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene1_continue
@@ -8512,7 +8792,11 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.scene2_main
         kind: 0
         speakerIdOverride: 
-        text: "Второй упирается шестом под ось. Стоит ему отпустить — телега просядет ещё ниже."
+        text: "\u0412\u0442\u043E\u0440\u043E\u0439 \u0443\u043F\u0438\u0440\u0430\u0435\u0442\u0441\u044F
+          \u0448\u0435\u0441\u0442\u043E\u043C \u043F\u043E\u0434 \u043E\u0441\u044C.
+          \u0421\u0442\u043E\u0438\u0442 \u0435\u043C\u0443 \u043E\u0442\u043F\u0443\u0441\u0442\u0438\u0442\u044C
+          \u2014 \u0442\u0435\u043B\u0435\u0433\u0430 \u043F\u0440\u043E\u0441\u044F\u0434\u0435\u0442
+          \u0435\u0449\u0451 \u043D\u0438\u0436\u0435."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8526,7 +8810,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11b.scene3
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene2_continue
@@ -8555,7 +8839,11 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.scene3_main
         kind: 0
         speakerIdOverride: 
-        text: "Третий держит обезумевшую лошадь, которая при каждом рывке тянет телегу дальше к воде."
+        text: "\u0422\u0440\u0435\u0442\u0438\u0439 \u0434\u0435\u0440\u0436\u0438\u0442
+          \u043E\u0431\u0435\u0437\u0443\u043C\u0435\u0432\u0448\u0443\u044E \u043B\u043E\u0448\u0430\u0434\u044C,
+          \u043A\u043E\u0442\u043E\u0440\u0430\u044F \u043F\u0440\u0438 \u043A\u0430\u0436\u0434\u043E\u043C
+          \u0440\u044B\u0432\u043A\u0435 \u0442\u044F\u043D\u0435\u0442 \u0442\u0435\u043B\u0435\u0433\u0443
+          \u0434\u0430\u043B\u044C\u0448\u0435 \u043A \u0432\u043E\u0434\u0435."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8569,7 +8857,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11b.scene4
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene3_continue
@@ -8598,7 +8886,11 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.scene4_main
         kind: 0
         speakerIdOverride: 
-        text: "Из разбитой бочки между досками сыплется семенное зерно. Нижние мешки уже намокли."
+        text: "\u0418\u0437 \u0440\u0430\u0437\u0431\u0438\u0442\u043E\u0439 \u0431\u043E\u0447\u043A\u0438
+          \u043C\u0435\u0436\u0434\u0443 \u0434\u043E\u0441\u043A\u0430\u043C\u0438
+          \u0441\u044B\u043F\u043B\u0435\u0442\u0441\u044F \u0441\u0435\u043C\u0435\u043D\u043D\u043E\u0435
+          \u0437\u0435\u0440\u043D\u043E. \u041D\u0438\u0436\u043D\u0438\u0435 \u043C\u0435\u0448\u043A\u0438
+          \u0443\u0436\u0435 \u043D\u0430\u043C\u043E\u043A\u043B\u0438."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8612,7 +8904,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11b.scene5
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene4_continue
@@ -8641,7 +8933,7 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.scene5_main
         kind: 0
         speakerIdOverride: 
-        text: "— Зерно сначала."
+        text: "\u2014 \u0417\u0435\u0440\u043D\u043E \u0441\u043D\u0430\u0447\u0430\u043B\u0430."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8655,7 +8947,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11b.scene6
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene5_continue
@@ -8684,7 +8976,7 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.scene6_main
         kind: 0
         speakerIdOverride: 
-        text: "— Ты помолчи."
+        text: "\u2014 \u0422\u044B \u043F\u043E\u043C\u043E\u043B\u0447\u0438."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8698,7 +8990,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11b.scene7
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene6_continue
@@ -8727,7 +9019,9 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.scene7_main
         kind: 0
         speakerIdOverride: 
-        text: "— Я весной ходить не буду, если сейчас всё высыплется."
+        text: "\u2014 \u042F \u0432\u0435\u0441\u043D\u043E\u0439 \u0445\u043E\u0434\u0438\u0442\u044C
+          \u043D\u0435 \u0431\u0443\u0434\u0443, \u0435\u0441\u043B\u0438 \u0441\u0435\u0439\u0447\u0430\u0441
+          \u0432\u0441\u0451 \u0432\u044B\u0441\u044B\u043F\u043B\u0435\u0442\u0441\u044F."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8741,7 +9035,9 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "Сначала вытащить человека. Явная цена: час."
+      - text: "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0432\u044B\u0442\u0430\u0449\u0438\u0442\u044C
+          \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430. \u042F\u0432\u043D\u0430\u044F
+          \u0446\u0435\u043D\u0430: \u0447\u0430\u0441."
         nextNodeId: chapter01.node.11b.saved_man
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene7_saved_man
@@ -8761,7 +9057,9 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Сначала вынести семенное зерно. Явная цена: час."
+      - text: "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0432\u044B\u043D\u0435\u0441\u0442\u0438
+          \u0441\u0435\u043C\u0435\u043D\u043D\u043E\u0435 \u0437\u0435\u0440\u043D\u043E.
+          \u042F\u0432\u043D\u0430\u044F \u0446\u0435\u043D\u0430: \u0447\u0430\u0441."
         nextNodeId: chapter01.node.11b.saved_seed
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene7_saved_seed
@@ -8781,7 +9079,12 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Разделить людей: одновременно поднять телегу и вынести зерно. Явная цена: три часа."
+      - text: "\u0420\u0430\u0437\u0434\u0435\u043B\u0438\u0442\u044C \u043B\u044E\u0434\u0435\u0439:
+          \u043E\u0434\u043D\u043E\u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E
+          \u043F\u043E\u0434\u043D\u044F\u0442\u044C \u0442\u0435\u043B\u0435\u0433\u0443
+          \u0438 \u0432\u044B\u043D\u0435\u0441\u0442\u0438 \u0437\u0435\u0440\u043D\u043E.
+          \u042F\u0432\u043D\u0430\u044F \u0446\u0435\u043D\u0430: \u0442\u0440\u0438
+          \u0447\u0430\u0441\u0430."
         nextNodeId: chapter01.node.11b.saved_both
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene7_saved_both_1
@@ -8811,7 +9114,12 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Разделить людей: одновременно поднять телегу и вынести зерно. Явная цена: два часа."
+      - text: "\u0420\u0430\u0437\u0434\u0435\u043B\u0438\u0442\u044C \u043B\u044E\u0434\u0435\u0439:
+          \u043E\u0434\u043D\u043E\u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E
+          \u043F\u043E\u0434\u043D\u044F\u0442\u044C \u0442\u0435\u043B\u0435\u0433\u0443
+          \u0438 \u0432\u044B\u043D\u0435\u0441\u0442\u0438 \u0437\u0435\u0440\u043D\u043E.
+          \u042F\u0432\u043D\u0430\u044F \u0446\u0435\u043D\u0430: \u0434\u0432\u0430
+          \u0447\u0430\u0441\u0430."
         nextNodeId: chapter01.node.11b.saved_both
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene7_saved_both_2
@@ -8836,7 +9144,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      - text: "Не вмешиваться. Продолжить путь."
+      - text: "\u041D\u0435 \u0432\u043C\u0435\u0448\u0438\u0432\u0430\u0442\u044C\u0441\u044F.
+          \u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u043F\u0443\u0442\u044C."
         nextNodeId: chapter01.node.11b.passed_by_after_scene
         endsDialogue: 0
         choiceId: chapter01.node.11b.scene7_pass
@@ -8865,7 +9174,13 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.saved_man_main
         kind: 0
         speakerIdOverride: 
-        text: "Отряд сначала вытаскивает зажатого человека. Пока телегу поднимают, часть семенного зерна успевает намокнуть окончательно."
+        text: "\u041E\u0442\u0440\u044F\u0434 \u0441\u043D\u0430\u0447\u0430\u043B\u0430
+          \u0432\u044B\u0442\u0430\u0441\u043A\u0438\u0432\u0430\u0435\u0442 \u0437\u0430\u0436\u0430\u0442\u043E\u0433\u043E
+          \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430. \u041F\u043E\u043A\u0430
+          \u0442\u0435\u043B\u0435\u0433\u0443 \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u044E\u0442,
+          \u0447\u0430\u0441\u0442\u044C \u0441\u0435\u043C\u0435\u043D\u043D\u043E\u0433\u043E
+          \u0437\u0435\u0440\u043D\u0430 \u0443\u0441\u043F\u0435\u0432\u0430\u0435\u0442
+          \u043D\u0430\u043C\u043E\u043A\u043D\u0443\u0442\u044C \u043E\u043A\u043E\u043D\u0447\u0430\u0442\u0435\u043B\u044C\u043D\u043E."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8891,7 +9206,7 @@ MonoBehaviour:
           StringParam: chapter01.flag.camp_unlocked
           IntParam: 0
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: 
         endsDialogue: 1
         choiceId: chapter01.node.11b.saved_man_exit
@@ -8920,7 +9235,15 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.saved_seed_main
         kind: 0
         speakerIdOverride: 
-        text: "Отряд сначала выносит мешки с семенным зерном. Зажатого человека освобождают следом — но нога остаётся под тяжестью телеги дольше, чем должна была."
+        text: "\u041E\u0442\u0440\u044F\u0434 \u0441\u043D\u0430\u0447\u0430\u043B\u0430
+          \u0432\u044B\u043D\u043E\u0441\u0438\u0442 \u043C\u0435\u0448\u043A\u0438
+          \u0441 \u0441\u0435\u043C\u0435\u043D\u043D\u044B\u043C \u0437\u0435\u0440\u043D\u043E\u043C.
+          \u0417\u0430\u0436\u0430\u0442\u043E\u0433\u043E \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430
+          \u043E\u0441\u0432\u043E\u0431\u043E\u0436\u0434\u0430\u044E\u0442 \u0441\u043B\u0435\u0434\u043E\u043C
+          \u2014 \u043D\u043E \u043D\u043E\u0433\u0430 \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F
+          \u043F\u043E\u0434 \u0442\u044F\u0436\u0435\u0441\u0442\u044C\u044E \u0442\u0435\u043B\u0435\u0433\u0438
+          \u0434\u043E\u043B\u044C\u0448\u0435, \u0447\u0435\u043C \u0434\u043E\u043B\u0436\u043D\u0430
+          \u0431\u044B\u043B\u0430."
         conditions:
           Combinator: 0
           Conditions: []
@@ -8946,7 +9269,7 @@ MonoBehaviour:
           StringParam: chapter01.flag.camp_unlocked
           IntParam: 0
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: 
         endsDialogue: 1
         choiceId: chapter01.node.11b.saved_seed_exit
@@ -8975,7 +9298,14 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.saved_both_main
         kind: 0
         speakerIdOverride: 
-        text: "Люди распределяются: одни поднимают телегу, другие выносят зерно. Спасено и то, и другое — ценой лишних часов на дороге."
+        text: "\u041B\u044E\u0434\u0438 \u0440\u0430\u0441\u043F\u0440\u0435\u0434\u0435\u043B\u044F\u044E\u0442\u0441\u044F:
+          \u043E\u0434\u043D\u0438 \u043F\u043E\u0434\u043D\u0438\u043C\u0430\u044E\u0442
+          \u0442\u0435\u043B\u0435\u0433\u0443, \u0434\u0440\u0443\u0433\u0438\u0435
+          \u0432\u044B\u043D\u043E\u0441\u044F\u0442 \u0437\u0435\u0440\u043D\u043E.
+          \u0421\u043F\u0430\u0441\u0435\u043D\u043E \u0438 \u0442\u043E, \u0438
+          \u0434\u0440\u0443\u0433\u043E\u0435 \u2014 \u0446\u0435\u043D\u043E\u0439
+          \u043B\u0438\u0448\u043D\u0438\u0445 \u0447\u0430\u0441\u043E\u0432 \u043D\u0430
+          \u0434\u043E\u0440\u043E\u0433\u0435."
         conditions:
           Combinator: 0
           Conditions: []
@@ -9001,7 +9331,7 @@ MonoBehaviour:
           StringParam: chapter01.flag.camp_unlocked
           IntParam: 0
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: 
         endsDialogue: 1
         choiceId: chapter01.node.11b.saved_both_exit
@@ -9030,7 +9360,10 @@ MonoBehaviour:
       - blockId: chapter01.node.11b.passed_by_after_scene_main
         kind: 0
         speakerIdOverride: 
-        text: "Отряд отступает от телеги. Стук по дереву продолжается — уже без вас."
+        text: "\u041E\u0442\u0440\u044F\u0434 \u043E\u0442\u0441\u0442\u0443\u043F\u0430\u0435\u0442
+          \u043E\u0442 \u0442\u0435\u043B\u0435\u0433\u0438. \u0421\u0442\u0443\u043A
+          \u043F\u043E \u0434\u0435\u0440\u0435\u0432\u0443 \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0430\u0435\u0442\u0441\u044F
+          \u2014 \u0443\u0436\u0435 \u0431\u0435\u0437 \u0432\u0430\u0441."
         conditions:
           Combinator: 0
           Conditions: []
@@ -9056,7 +9389,7 @@ MonoBehaviour:
           StringParam: chapter01.flag.camp_unlocked
           IntParam: 0
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: 
         endsDialogue: 1
         choiceId: chapter01.node.11b.passed_by_after_scene_exit
@@ -9080,13 +9413,41 @@ MonoBehaviour:
       hasEditorPosition: 1
     schemaVersion: 1
   - id: chapter01_dialogue_11c_camp_after_cart
-    title: "После телеги"
+    title: "\u041F\u043E\u0441\u043B\u0435 \u0442\u0435\u043B\u0435\u0433\u0438"
     category: 1
     status: 1
-    developerComment: "P09-T06 production-сцена. Одна сцена с четырьмя взаимоисключающими ветками по CartOutcome*-флагу (условие FlagSet на textBlock, тот же механизм, что уже использует D09 для опциональных целей похода), не четыре разных Dialogue. Запускается автоматически поверх экрана Лагеря (PrototypeUIController.Camp.cs.OpenCampScreen) через Chapter01CampSceneProvider, доступна пока CartResolved && !CartCampEchoSeen. Никакого нового морального выбора внутри — раздел \"Почему сцене не нужен новый выбор\": сцена показывает отложенное эхо уже сделанного решения, а не новое решение. Работает одинаково, идёт герой один или с отрядом — раздел \"Если герой идёт один\"."
+    developerComment: "P09-T06 production-\u0441\u0446\u0435\u043D\u0430. \u041E\u0434\u043D\u0430
+      \u0441\u0446\u0435\u043D\u0430 \u0441 \u0447\u0435\u0442\u044B\u0440\u044C\u043C\u044F
+      \u0432\u0437\u0430\u0438\u043C\u043E\u0438\u0441\u043A\u043B\u044E\u0447\u0430\u044E\u0449\u0438\u043C\u0438
+      \u0432\u0435\u0442\u043A\u0430\u043C\u0438 \u043F\u043E CartOutcome*-\u0444\u043B\u0430\u0433\u0443
+      (\u0443\u0441\u043B\u043E\u0432\u0438\u0435 FlagSet \u043D\u0430 textBlock,
+      \u0442\u043E\u0442 \u0436\u0435 \u043C\u0435\u0445\u0430\u043D\u0438\u0437\u043C,
+      \u0447\u0442\u043E \u0443\u0436\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442
+      D09 \u0434\u043B\u044F \u043E\u043F\u0446\u0438\u043E\u043D\u0430\u043B\u044C\u043D\u044B\u0445
+      \u0446\u0435\u043B\u0435\u0439 \u043F\u043E\u0445\u043E\u0434\u0430), \u043D\u0435
+      \u0447\u0435\u0442\u044B\u0440\u0435 \u0440\u0430\u0437\u043D\u044B\u0445 Dialogue.
+      \u0417\u0430\u043F\u0443\u0441\u043A\u0430\u0435\u0442\u0441\u044F \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438
+      \u043F\u043E\u0432\u0435\u0440\u0445 \u044D\u043A\u0440\u0430\u043D\u0430 \u041B\u0430\u0433\u0435\u0440\u044F
+      (PrototypeUIController.Camp.cs.OpenCampScreen) \u0447\u0435\u0440\u0435\u0437
+      Chapter01CampSceneProvider, \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0430
+      \u043F\u043E\u043A\u0430 CartResolved && !CartCampEchoSeen. \u041D\u0438\u043A\u0430\u043A\u043E\u0433\u043E
+      \u043D\u043E\u0432\u043E\u0433\u043E \u043C\u043E\u0440\u0430\u043B\u044C\u043D\u043E\u0433\u043E
+      \u0432\u044B\u0431\u043E\u0440\u0430 \u0432\u043D\u0443\u0442\u0440\u0438 \u2014
+      \u0440\u0430\u0437\u0434\u0435\u043B \"\u041F\u043E\u0447\u0435\u043C\u0443
+      \u0441\u0446\u0435\u043D\u0435 \u043D\u0435 \u043D\u0443\u0436\u0435\u043D
+      \u043D\u043E\u0432\u044B\u0439 \u0432\u044B\u0431\u043E\u0440\": \u0441\u0446\u0435\u043D\u0430
+      \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442 \u043E\u0442\u043B\u043E\u0436\u0435\u043D\u043D\u043E\u0435
+      \u044D\u0445\u043E \u0443\u0436\u0435 \u0441\u0434\u0435\u043B\u0430\u043D\u043D\u043E\u0433\u043E
+      \u0440\u0435\u0448\u0435\u043D\u0438\u044F, \u0430 \u043D\u0435 \u043D\u043E\u0432\u043E\u0435
+      \u0440\u0435\u0448\u0435\u043D\u0438\u0435. \u0420\u0430\u0431\u043E\u0442\u0430\u0435\u0442
+      \u043E\u0434\u0438\u043D\u0430\u043A\u043E\u0432\u043E, \u0438\u0434\u0451\u0442
+      \u0433\u0435\u0440\u043E\u0439 \u043E\u0434\u0438\u043D \u0438\u043B\u0438
+      \u0441 \u043E\u0442\u0440\u044F\u0434\u043E\u043C \u2014 \u0440\u0430\u0437\u0434\u0435\u043B
+      \"\u0415\u0441\u043B\u0438 \u0433\u0435\u0440\u043E\u0439 \u0438\u0434\u0451\u0442
+      \u043E\u0434\u0438\u043D\"."
     startNodeId: chapter01.node.11c
     tags:
-    - "глава01"
+    - "\u0433\u043B\u0430\u0432\u043001"
     - production
     nodes:
     - id: chapter01.node.11c
@@ -9096,7 +9457,12 @@ MonoBehaviour:
       - blockId: chapter01.node.11c_main
         kind: 0
         speakerIdOverride: 
-        text: "Огонь занимается не сразу. Дорожная грязь уже подсохла на сапогах, но запах сырой земли всё ещё тянется следом."
+        text: "\u041E\u0433\u043E\u043D\u044C \u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0441\u044F
+          \u043D\u0435 \u0441\u0440\u0430\u0437\u0443. \u0414\u043E\u0440\u043E\u0436\u043D\u0430\u044F
+          \u0433\u0440\u044F\u0437\u044C \u0443\u0436\u0435 \u043F\u043E\u0434\u0441\u043E\u0445\u043B\u0430
+          \u043D\u0430 \u0441\u0430\u043F\u043E\u0433\u0430\u0445, \u043D\u043E \u0437\u0430\u043F\u0430\u0445
+          \u0441\u044B\u0440\u043E\u0439 \u0437\u0435\u043C\u043B\u0438 \u0432\u0441\u0451
+          \u0435\u0449\u0451 \u0442\u044F\u043D\u0435\u0442\u0441\u044F \u0441\u043B\u0435\u0434\u043E\u043C."
         conditions:
           Combinator: 0
           Conditions: []
@@ -9110,7 +9476,7 @@ MonoBehaviour:
           ModifierRules: []
         onRevealEffects: []
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: chapter01.node.11c.branch
         endsDialogue: 0
         choiceId: chapter01.node.11c_continue
@@ -9139,7 +9505,24 @@ MonoBehaviour:
       - blockId: chapter01.node.11c.branch_saved_both
         kind: 0
         speakerIdOverride: 
-        text: "В складке рукава находятся три зерна. Наверное, попали туда, когда разгружали телегу.\n\nНа дороге хватило рук и на человека, и на мешки. Не бесплатно. Несколько часов пути остались там.\n\nУ костра это впервые становится заметно: Дом сегодня дальше, чем мог бы быть.\n\nЗато на дороге позади остались и человек, и его весна."
+        text: "\u0412 \u0441\u043A\u043B\u0430\u0434\u043A\u0435 \u0440\u0443\u043A\u0430\u0432\u0430
+          \u043D\u0430\u0445\u043E\u0434\u044F\u0442\u0441\u044F \u0442\u0440\u0438
+          \u0437\u0435\u0440\u043D\u0430. \u041D\u0430\u0432\u0435\u0440\u043D\u043E\u0435,
+          \u043F\u043E\u043F\u0430\u043B\u0438 \u0442\u0443\u0434\u0430, \u043A\u043E\u0433\u0434\u0430
+          \u0440\u0430\u0437\u0433\u0440\u0443\u0436\u0430\u043B\u0438 \u0442\u0435\u043B\u0435\u0433\u0443.\n\n\u041D\u0430
+          \u0434\u043E\u0440\u043E\u0433\u0435 \u0445\u0432\u0430\u0442\u0438\u043B\u043E
+          \u0440\u0443\u043A \u0438 \u043D\u0430 \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430,
+          \u0438 \u043D\u0430 \u043C\u0435\u0448\u043A\u0438. \u041D\u0435 \u0431\u0435\u0441\u043F\u043B\u0430\u0442\u043D\u043E.
+          \u041D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0447\u0430\u0441\u043E\u0432
+          \u043F\u0443\u0442\u0438 \u043E\u0441\u0442\u0430\u043B\u0438\u0441\u044C
+          \u0442\u0430\u043C.\n\n\u0423 \u043A\u043E\u0441\u0442\u0440\u0430 \u044D\u0442\u043E
+          \u0432\u043F\u0435\u0440\u0432\u044B\u0435 \u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u0441\u044F
+          \u0437\u0430\u043C\u0435\u0442\u043D\u043E: \u0414\u043E\u043C \u0441\u0435\u0433\u043E\u0434\u043D\u044F
+          \u0434\u0430\u043B\u044C\u0448\u0435, \u0447\u0435\u043C \u043C\u043E\u0433
+          \u0431\u044B \u0431\u044B\u0442\u044C.\n\n\u0417\u0430\u0442\u043E \u043D\u0430
+          \u0434\u043E\u0440\u043E\u0433\u0435 \u043F\u043E\u0437\u0430\u0434\u0438
+          \u043E\u0441\u0442\u0430\u043B\u0438\u0441\u044C \u0438 \u0447\u0435\u043B\u043E\u0432\u0435\u043A,
+          \u0438 \u0435\u0433\u043E \u0432\u0435\u0441\u043D\u0430."
         conditions:
           Combinator: 0
           Conditions:
@@ -9164,7 +9547,17 @@ MonoBehaviour:
       - blockId: chapter01.node.11c.branch_saved_man
         kind: 0
         speakerIdOverride: 
-        text: "Когда снимаешь сапог, из шва выпадает разбухшее зерно.\n\nНа дороге человека успели вытащить. Мешки — нет.\n\nОдно зерно можно бросить в огонь. Оно лопается почти сразу.\n\nОстальное кто-нибудь будет считать весной."
+        text: "\u041A\u043E\u0433\u0434\u0430 \u0441\u043D\u0438\u043C\u0430\u0435\u0448\u044C
+          \u0441\u0430\u043F\u043E\u0433, \u0438\u0437 \u0448\u0432\u0430 \u0432\u044B\u043F\u0430\u0434\u0430\u0435\u0442
+          \u0440\u0430\u0437\u0431\u0443\u0445\u0448\u0435\u0435 \u0437\u0435\u0440\u043D\u043E.\n\n\u041D\u0430
+          \u0434\u043E\u0440\u043E\u0433\u0435 \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430
+          \u0443\u0441\u043F\u0435\u043B\u0438 \u0432\u044B\u0442\u0430\u0449\u0438\u0442\u044C.
+          \u041C\u0435\u0448\u043A\u0438 \u2014 \u043D\u0435\u0442.\n\n\u041E\u0434\u043D\u043E
+          \u0437\u0435\u0440\u043D\u043E \u043C\u043E\u0436\u043D\u043E \u0431\u0440\u043E\u0441\u0438\u0442\u044C
+          \u0432 \u043E\u0433\u043E\u043D\u044C. \u041E\u043D\u043E \u043B\u043E\u043F\u0430\u0435\u0442\u0441\u044F
+          \u043F\u043E\u0447\u0442\u0438 \u0441\u0440\u0430\u0437\u0443.\n\n\u041E\u0441\u0442\u0430\u043B\u044C\u043D\u043E\u0435
+          \u043A\u0442\u043E-\u043D\u0438\u0431\u0443\u0434\u044C \u0431\u0443\u0434\u0435\u0442
+          \u0441\u0447\u0438\u0442\u0430\u0442\u044C \u0432\u0435\u0441\u043D\u043E\u0439."
         conditions:
           Combinator: 0
           Conditions:
@@ -9189,7 +9582,23 @@ MonoBehaviour:
       - blockId: chapter01.node.11c.branch_saved_seed
         kind: 0
         speakerIdOverride: 
-        text: "На верёвке осталась узкая тёмная полоска. У огня становится понятно, что это кровь.\n\nЗажатый мужчина сам сказал: «Зерно сначала».\n\nТам, у телеги, вокруг слишком много было крика, дерева и лошади.\n\nЗдесь эта фраза звучит гораздо отчётливее.\n\nОн остался жив. Что останется от его ноги — выяснится уже без тебя."
+        text: "\u041D\u0430 \u0432\u0435\u0440\u0451\u0432\u043A\u0435 \u043E\u0441\u0442\u0430\u043B\u0430\u0441\u044C
+          \u0443\u0437\u043A\u0430\u044F \u0442\u0451\u043C\u043D\u0430\u044F \u043F\u043E\u043B\u043E\u0441\u043A\u0430.
+          \u0423 \u043E\u0433\u043D\u044F \u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u0441\u044F
+          \u043F\u043E\u043D\u044F\u0442\u043D\u043E, \u0447\u0442\u043E \u044D\u0442\u043E
+          \u043A\u0440\u043E\u0432\u044C.\n\n\u0417\u0430\u0436\u0430\u0442\u044B\u0439
+          \u043C\u0443\u0436\u0447\u0438\u043D\u0430 \u0441\u0430\u043C \u0441\u043A\u0430\u0437\u0430\u043B:
+          \xAB\u0417\u0435\u0440\u043D\u043E \u0441\u043D\u0430\u0447\u0430\u043B\u0430\xBB.\n\n\u0422\u0430\u043C,
+          \u0443 \u0442\u0435\u043B\u0435\u0433\u0438, \u0432\u043E\u043A\u0440\u0443\u0433
+          \u0441\u043B\u0438\u0448\u043A\u043E\u043C \u043C\u043D\u043E\u0433\u043E
+          \u0431\u044B\u043B\u043E \u043A\u0440\u0438\u043A\u0430, \u0434\u0435\u0440\u0435\u0432\u0430
+          \u0438 \u043B\u043E\u0448\u0430\u0434\u0438.\n\n\u0417\u0434\u0435\u0441\u044C
+          \u044D\u0442\u0430 \u0444\u0440\u0430\u0437\u0430 \u0437\u0432\u0443\u0447\u0438\u0442
+          \u0433\u043E\u0440\u0430\u0437\u0434\u043E \u043E\u0442\u0447\u0451\u0442\u043B\u0438\u0432\u0435\u0435.\n\n\u041E\u043D
+          \u043E\u0441\u0442\u0430\u043B\u0441\u044F \u0436\u0438\u0432. \u0427\u0442\u043E
+          \u043E\u0441\u0442\u0430\u043D\u0435\u0442\u0441\u044F \u043E\u0442 \u0435\u0433\u043E
+          \u043D\u043E\u0433\u0438 \u2014 \u0432\u044B\u044F\u0441\u043D\u0438\u0442\u0441\u044F
+          \u0443\u0436\u0435 \u0431\u0435\u0437 \u0442\u0435\u0431\u044F."
         conditions:
           Combinator: 0
           Conditions:
@@ -9214,7 +9623,19 @@ MonoBehaviour:
       - blockId: chapter01.node.11c.branch_passed_by
         kind: 0
         speakerIdOverride: 
-        text: "Когда огонь наконец берётся, со стороны пройденной дороги доносится глухой удар.\n\nПотом второй.\n\nДолгая пауза.\n\nЕщё два.\n\nПотом ничего.\n\nТы не знаешь, вытащили ли человека. Не знаешь, сколько зерна осталось.\n\nЗнаешь только одно: дорога за спиной не остановилась, когда ты ушёл."
+        text: "\u041A\u043E\u0433\u0434\u0430 \u043E\u0433\u043E\u043D\u044C \u043D\u0430\u043A\u043E\u043D\u0435\u0446
+          \u0431\u0435\u0440\u0451\u0442\u0441\u044F, \u0441\u043E \u0441\u0442\u043E\u0440\u043E\u043D\u044B
+          \u043F\u0440\u043E\u0439\u0434\u0435\u043D\u043D\u043E\u0439 \u0434\u043E\u0440\u043E\u0433\u0438
+          \u0434\u043E\u043D\u043E\u0441\u0438\u0442\u0441\u044F \u0433\u043B\u0443\u0445\u043E\u0439
+          \u0443\u0434\u0430\u0440.\n\n\u041F\u043E\u0442\u043E\u043C \u0432\u0442\u043E\u0440\u043E\u0439.\n\n\u0414\u043E\u043B\u0433\u0430\u044F
+          \u043F\u0430\u0443\u0437\u0430.\n\n\u0415\u0449\u0451 \u0434\u0432\u0430.\n\n\u041F\u043E\u0442\u043E\u043C
+          \u043D\u0438\u0447\u0435\u0433\u043E.\n\n\u0422\u044B \u043D\u0435 \u0437\u043D\u0430\u0435\u0448\u044C,
+          \u0432\u044B\u0442\u0430\u0449\u0438\u043B\u0438 \u043B\u0438 \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430.
+          \u041D\u0435 \u0437\u043D\u0430\u0435\u0448\u044C, \u0441\u043A\u043E\u043B\u044C\u043A\u043E
+          \u0437\u0435\u0440\u043D\u0430 \u043E\u0441\u0442\u0430\u043B\u043E\u0441\u044C.\n\n\u0417\u043D\u0430\u0435\u0448\u044C
+          \u0442\u043E\u043B\u044C\u043A\u043E \u043E\u0434\u043D\u043E: \u0434\u043E\u0440\u043E\u0433\u0430
+          \u0437\u0430 \u0441\u043F\u0438\u043D\u043E\u0439 \u043D\u0435 \u043E\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u043B\u0430\u0441\u044C,
+          \u043A\u043E\u0433\u0434\u0430 \u0442\u044B \u0443\u0448\u0451\u043B."
         conditions:
           Combinator: 0
           Conditions:
@@ -9237,7 +9658,7 @@ MonoBehaviour:
           StringParam: chapter01.flag.cart_camp_echo_seen
           IntParam: 0
       choices:
-      - text: "…"
+      - text: "\u2026"
         nextNodeId: 
         endsDialogue: 1
         choiceId: chapter01.node.11c.branch_exit

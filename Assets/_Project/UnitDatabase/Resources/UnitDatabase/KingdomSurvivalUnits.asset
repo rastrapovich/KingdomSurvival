@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f6a8d629e1644bd8b451c1cf11db201, type: 3}
   m_Name: KingdomSurvivalUnits
   m_EditorClassIdentifier: 
+  schemaVersion: 1
   tags:
   - id: species.human
     displayLabel: "\u0427\u0435\u043B\u043E\u0432\u0435\u043A"
@@ -88,7 +89,10 @@ MonoBehaviour:
     initiative: 3
     attackRange: 1
     portrait: {fileID: 21300000, guid: 79af6e7e03e2f6942a5fe938089b24c9, type: 3}
+    portraitFitMode: 0
     portraitScale: 1
+    portraitOffsetNormalized: {x: -0.026666671, y: 0.0047619063}
+    portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: 32b48566879ff6c4d8063745b56ed1dc, type: 3}
     battlefieldScale: 1.2
@@ -110,7 +114,10 @@ MonoBehaviour:
     initiative: 5
     attackRange: 4
     portrait: {fileID: 21300000, guid: 12eeb18031f28d04aa287d3e74c811fa, type: 3}
+    portraitFitMode: 0
     portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: d1a6f2b01ae79bf469142894f97132c3, type: 3}
     battlefieldScale: 1.2
@@ -131,7 +138,10 @@ MonoBehaviour:
     initiative: 3
     attackRange: 1
     portrait: {fileID: 21300000, guid: 5aef72efb74b347469238bdf7cf72043, type: 3}
+    portraitFitMode: 0
     portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: 1eccaf5e038a4cf429a22efb7329b9e0, type: 3}
     battlefieldScale: 1.2
@@ -151,7 +161,10 @@ MonoBehaviour:
     initiative: 4
     attackRange: 1
     portrait: {fileID: 21300000, guid: 7e8977c8e23779b448743ce1a2c8a826, type: 3}
+    portraitFitMode: 0
     portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: 33d59b9f2ab812144bb12006abf93d57, type: 3}
     battlefieldScale: 1.2
@@ -172,7 +185,10 @@ MonoBehaviour:
     initiative: 6
     attackRange: 1
     portrait: {fileID: 21300000, guid: a8549f6d1f7aab643ba8864ac16027e2, type: 3}
+    portraitFitMode: 0
     portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: 01305b5437ca7594d852d81c84fbda8c, type: 3}
     battlefieldScale: 1.2
@@ -192,7 +208,10 @@ MonoBehaviour:
     initiative: 2
     attackRange: 1
     portrait: {fileID: 21300000, guid: 6e6b1183fa308e64e8773ce8b59a02c9, type: 3}
+    portraitFitMode: 0
     portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: a3f58b9cc469b1448bc71da24f86c310, type: 3}
     battlefieldScale: 1.2
@@ -212,7 +231,10 @@ MonoBehaviour:
     initiative: 5
     attackRange: 1
     portrait: {fileID: 21300000, guid: 4bf98c43e23bb7d4ebc699a7047c2885, type: 3}
+    portraitFitMode: 0
     portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: 0b2ce88e830b4a641a116a7f2440dd6b, type: 3}
     battlefieldScale: 1.1
@@ -232,7 +254,10 @@ MonoBehaviour:
     initiative: 4
     attackRange: 1
     portrait: {fileID: 21300000, guid: c86db8b3513d1414aa505ccca893339d, type: 3}
+    portraitFitMode: 0
     portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: 3fb5f8e2f73bcb541ac5618e33045b14, type: 3}
     battlefieldScale: 1
@@ -252,7 +277,10 @@ MonoBehaviour:
     initiative: 2
     attackRange: 1
     portrait: {fileID: 21300000, guid: 83fa1a0ca6eee6d49bd02a9b5a3da1c8, type: 3}
+    portraitFitMode: 0
     portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: f307f18609cf733428ea3cf99fca80e4, type: 3}
     battlefieldScale: 1

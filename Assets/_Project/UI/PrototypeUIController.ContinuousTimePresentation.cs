@@ -13,6 +13,16 @@ public partial class PrototypeUIController
         {
             RefreshContinuousExpeditionTexts();
             RefreshPersistentCommanderNavigationState();
+
+            // P09 hotfix: the Camp nav state depends not only on persistent
+            // story flags but also on transient modal blockers. The continuous
+            // presentation pass is the final safety net: once a blocker goes
+            // away, the button is recomputed from live state within the normal
+            // 0.20 s UI refresh instead of remaining disabled until some
+            // unrelated action happens to call RefreshInterface().
+            RefreshCampNavButtonState();
+            if (IsCampScreenOpen)
+                RefreshCampScreen();
         }
     }
 

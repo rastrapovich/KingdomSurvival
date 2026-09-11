@@ -59,8 +59,16 @@ namespace KingdomSurvival.UnitDatabase
 
         [Header("Изображения")]
         [SerializeField] private Sprite portrait;
-        [SerializeField, Min(0.1f)] private float portraitScale = 1f;
-        [SerializeField] private Vector2 portraitOffset = Vector2.zero;
+        [SerializeField] private PortraitFitMode portraitFitMode = PortraitFitMode.Cover;
+        [SerializeField, Min(0.05f)] private float portraitScale = 1f;
+        [SerializeField] private Vector2 portraitOffsetNormalized = Vector2.zero;
+        [SerializeField] private bool portraitFlipX;
+
+        // Legacy-поле Базы существ до schemaVersion 1. Тогда Offset хранился
+        // в пикселях preview 150x200. Оставляем его сериализованным, чтобы
+        // MigrateIfNeeded мог безопасно перенести старую индивидуальную
+        // кадрировку в нормализованный формат, не теряя правки пользователя.
+        [SerializeField, HideInInspector] private Vector2 portraitOffset = Vector2.zero;
         [SerializeField] private Sprite battlefieldSprite;
         [SerializeField, Min(0.1f)] private float battlefieldScale = 1f;
         [SerializeField] private Vector2 battlefieldOffset = Vector2.zero;
@@ -83,13 +91,29 @@ namespace KingdomSurvival.UnitDatabase
         public int Initiative => initiative;
         public int AttackRange => attackRange;
         public Sprite Portrait => portrait;
-        public float PortraitScale => Mathf.Max(0.1f, portraitScale);
-        public Vector2 PortraitOffset => portraitOffset;
+        public PortraitFitMode PortraitFitMode => portraitFitMode;
+        public float PortraitScale => portraitScale > 0f
+            ? Mathf.Max(0.05f, portraitScale)
+            : 1f;
+        public Vector2 PortraitOffsetNormalized => portraitOffsetNormalized;
+        public bool PortraitFlipX => portraitFlipX;
         public Sprite BattlefieldSprite => battlefieldSprite;
         public float BattlefieldScale => Mathf.Max(0.1f, battlefieldScale);
         public Vector2 BattlefieldOffset => battlefieldOffset;
         public int SandboxEncounterCount => Mathf.Max(0, sandboxEncounterCount);
         public IReadOnlyList<string> TagIds => tagIds;
+
+        internal void MigrateLegacyPortraitFraming()
+        {
+            portraitScale = portraitScale > 0f
+                ? Mathf.Max(0.05f, portraitScale)
+                : 1f;
+            portraitFitMode = PortraitFitMode.Cover;
+            portraitOffsetNormalized = UnitPortraitFraming.LegacyPixelsToNormalized(
+                portraitOffset);
+            portraitFlipX = false;
+            portraitOffset = Vector2.zero;
+        }
 
         public bool HasTag(string tagId)
         {
@@ -112,12 +136,34 @@ namespace KingdomSurvival.UnitDatabase
     public sealed class UnitDatabaseAsset : ScriptableObject
     {
         public const string ResourcesPath = "UnitDatabase/KingdomSurvivalUnits";
+        public const int CurrentSchemaVersion = 1;
 
+        [SerializeField, HideInInspector] private int schemaVersion;
         [SerializeField] private List<UnitTagDefinition> tags = new List<UnitTagDefinition>();
         [SerializeField] private List<UnitDefinitionData> units = new List<UnitDefinitionData>();
 
+        public int SchemaVersion => schemaVersion;
         public IReadOnlyList<UnitTagDefinition> Tags => tags;
         public IReadOnlyList<UnitDefinitionData> Units => units;
+
+        /// <summary>
+        /// Переносит старое пиксельное кадрирование портретов в доли рамки.
+        /// Метод идемпотентен и не изменяет уже обновлённую базу.
+        /// </summary>
+        public bool MigrateIfNeeded()
+        {
+            if (schemaVersion >= CurrentSchemaVersion)
+                return false;
+
+            if (units != null)
+            {
+                for (int i = 0; i < units.Count; i++)
+                    units[i]?.MigrateLegacyPortraitFraming();
+            }
+
+            schemaVersion = CurrentSchemaVersion;
+            return true;
+        }
 
         public UnitDefinitionData FindById(string typeId)
         {

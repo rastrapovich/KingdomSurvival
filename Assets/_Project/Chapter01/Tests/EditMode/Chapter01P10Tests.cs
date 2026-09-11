@@ -651,6 +651,26 @@ public sealed class Chapter01P10Tests
         return null;
     }
 
+    private static void CompleteOldWaterSearchResearch(GameState gameState)
+    {
+        LocationData location =
+            gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch);
+        Assert.IsNotNull(location);
+
+        // Advance принимает реальные секунды, а ExplorationHours хранится
+        // в игровых часах. 4f давало лишь 0,8 игрового часа и потому три
+        // теста ниже проверяли состояние до завершения исследования.
+        float realSecondsToComplete = (float)(
+            location.ExplorationHours /
+            ContinuousSimulationSystem.GameHoursPerRealSecond + 1.0);
+
+        ContinuousSimulationSystem.SetPaused(gameState, false);
+        ContinuousSimulationSystem.Advance(
+            gameState,
+            realSecondsToComplete,
+            false);
+    }
+
     [Test]
     public void OldWaterSearch_HasNonZeroExplorationHours_AndInteractionDescription()
     {
@@ -688,8 +708,7 @@ public sealed class Chapter01P10Tests
 
         string message;
         Assert.IsTrue(gameState.TryStartLocationResearch(out message), message);
-        ContinuousSimulationSystem.SetPaused(gameState, false);
-        ContinuousSimulationSystem.Advance(gameState, 4f, false);
+        CompleteOldWaterSearchResearch(gameState);
 
         LocationData location = gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch);
         Assert.IsTrue(location.IsExplored);
@@ -705,8 +724,7 @@ public sealed class Chapter01P10Tests
 
         string message;
         Assert.IsTrue(gameState.TryStartLocationResearch(out message), message);
-        ContinuousSimulationSystem.SetPaused(gameState, false);
-        ContinuousSimulationSystem.Advance(gameState, 4f, false);
+        CompleteOldWaterSearchResearch(gameState);
 
         Assert.AreEqual(Chapter01Ids.Dialogues.D12, Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState));
     }
@@ -720,8 +738,7 @@ public sealed class Chapter01P10Tests
 
         string message;
         Assert.IsTrue(gameState.TryStartLocationResearch(out message), message);
-        ContinuousSimulationSystem.SetPaused(gameState, false);
-        ContinuousSimulationSystem.Advance(gameState, 4f, false);
+        CompleteOldWaterSearchResearch(gameState);
         Assert.AreEqual(Chapter01Ids.Dialogues.D12, Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState));
 
         // N12 сам выставляет OldFordFound (не завершение исследования) —

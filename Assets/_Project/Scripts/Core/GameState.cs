@@ -106,6 +106,12 @@ public class LocationData
     public bool IsVisibleOnMap;
     public bool IsWaypoint;
 
+    // Литературный текст для Location Interaction (presentation-слой, не
+    // Dialogue Database — локация не NPC). Пусто по умолчанию: старые/
+    // технические локации без описания получают нейтральный fallback-текст
+    // в UI, а не пустой экран.
+    public string InteractionDescription = string.Empty;
+
     public string TravelTargetName =>
         IsWaypoint ? "точка маршрута" :
         IsDiscovered ? Name : RegionName;

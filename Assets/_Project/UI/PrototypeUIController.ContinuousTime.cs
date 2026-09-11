@@ -245,6 +245,17 @@ public partial class PrototypeUIController
             return;
         }
 
+        // P10-LocInt: завершённое сюжетное Location Research (N12) — тот же
+        // приоритет и тот же принцип, что дорожная встреча выше: физический
+        // факт (место осмотрено), не клик игрока, поэтому опрашивается
+        // каждый кадр отдельно от общего диспетчера автоматических диалогов.
+        string pendingLocationNarrativeDialogueId = Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState);
+        if (!string.IsNullOrEmpty(pendingLocationNarrativeDialogueId) &&
+            TryOpenNarrativeDialogueById(pendingLocationNarrativeDialogueId))
+        {
+            return;
+        }
+
         bool shouldRun = ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState);
         ContinuousSimulationSystem.SetPaused(gameState, !shouldRun);
 

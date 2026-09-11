@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KingdomSurvival.Chapter01;
 using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
@@ -56,18 +57,44 @@ public partial class PrototypeUIController
         if (notice == null)
             return;
 
-        // Прибытие в известную локацию является обязательным выбором.
-        // Старый PendingBattle удалён; фабрика всегда создаёт обычное
-        // сюжетно-исследовательское решение, пока не появится мост BattleSandbox.
+        // P10-LocInt: обычное прибытие в известную локацию больше не создаёт
+        // decision-модал через LocationArrivalDecisionFactory/PendingDecision
+        // — вместо него сразу открывается Location Interaction (тот же
+        // блокирующий оверлей, что Narrative Dialogue). LocationArrivalDecisionFactory.cs
+        // не удалён и не изменён: он остаётся для похожей, но другой
+        // механики (находка локации прямо по дороге), которую эта правка
+        // не трогает. Если открыть Location Interaction не удалось (гонка
+        // с другим блокирующим окном), уведомление проваливается в обычную
+        // очередь ниже — игрок всё равно узнает о прибытии и сможет войти
+        // в локацию позже кнопкой "ВОЙТИ В ЛОКАЦИЮ".
         if (notice.Title == "АРМИЯ ПРИБЫЛА" || notice.Title == "ОТРЯД ПРИБЫЛ")
         {
-            ExpeditionDecisionOccurrence arrivalDecision;
-            if (LocationArrivalDecisionFactory.TryCreate(
-                    gameState,
-                    out arrivalDecision))
+            if (gameState != null &&
+                gameState.HasActiveExpedition &&
+                gameState.ActiveExpedition.Phase == CommanderState.AtLocation)
             {
-                return;
+                string arrivedLocationId = gameState.ActiveExpedition.LocationId;
+                LocationData arrivedLocation = gameState.FindLocation(arrivedLocationId);
+                if (arrivedLocation != null &&
+                    !arrivedLocation.IsWaypoint &&
+                    TryOpenLocationInteraction(arrivedLocationId))
+                {
+                    return;
+                }
             }
+        }
+
+        // P10-LocInt: если сюжетное Location Research для этой локации уже
+        // завершилось и Chapter01StoryDirector готов открыть N12, техническое
+        // "ИССЛЕДОВАНИЕ ЗАВЕРШЕНО" не показываем — сюжетная сцена сама
+        // является результатом исследования (раздел "Приоритет N12 над
+        // техническим окном" инструкции). Для обычных локаций без сюжетного
+        // продолжения GetPendingLocationNarrativeDialogueId вернёт null, и
+        // уведомление показывается как раньше.
+        if (notice.Title == "ИССЛЕДОВАНИЕ ЗАВЕРШЕНО" &&
+            !string.IsNullOrEmpty(Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState)))
+        {
+            return;
         }
 
         queuedModals.Enqueue(new QueuedModal
@@ -229,6 +256,7 @@ public partial class PrototypeUIController
     {
         return gameState != null &&
                (IsNarrativeDialogueActive ||
+                IsLocationInteractionActive ||
                 gameState.HasPendingExpeditionDecision ||
                 openedIncident != null ||
                 openedDecision != null ||
@@ -280,7 +308,9 @@ public partial class PrototypeUIController
         timeToggleButton.tooltip = blocked
             ? IsNarrativeDialogueActive
                 ? "Сначала завершите разговор"
-                : "Сначала примите обязательное решение или закройте важное донесение"
+                : IsLocationInteractionActive
+                    ? "Сначала закройте окно локации"
+                    : "Сначала примите обязательное решение или закройте важное донесение"
             : ContinuousSimulationSystem.IsPaused(gameState)
                 ? "Продолжить течение времени"
                 : "Поставить время на паузу";

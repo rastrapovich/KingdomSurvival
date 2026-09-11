@@ -122,7 +122,7 @@
                                         <ui:Label name="world-map-location-inspection-title" class="world-map-location-inspection-title" />
                                         <ui:Label name="world-map-location-inspection-details" class="world-map-location-inspection-details" />
                                         <ui:Label name="world-map-location-inspection-presence" text="АРМИЯ НАХОДИТСЯ ЗДЕСЬ" class="world-map-location-inspection-presence" />
-                                        <ui:Button name="world-map-location-inspection-research-button" text="ИССЛЕДОВАТЬ" class="world-map-location-inspection-research-button" />
+                                        <ui:Button name="world-map-location-inspection-research-button" text="ВОЙТИ В ЛОКАЦИЮ" class="world-map-location-inspection-research-button" />
                                         <ui:Button name="world-map-location-inspection-close-button" text="ЗАКРЫТЬ" class="world-map-location-inspection-close-button" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>

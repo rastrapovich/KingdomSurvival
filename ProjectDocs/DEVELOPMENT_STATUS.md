@@ -188,3 +188,25 @@ DevelopmentPlanSeedData, обязательно пройти §11 ниже.
 4. Пройти N12/N13 вручную: герой один, герой + 1 боец, герой + 3-4 бойца; с/без семизубой пластины; со старым/новым ремонтом; с помощью женщине и без; с успехом и провалом FirstContact. Проверить, что UI проверки показывает Характер/13/модификаторы и что повторный диалог не предлагает бросок снова.
 
 Только после этого отмечать P10-T01…T04 выполненными в `DevelopmentPlanSeedData.cs`/`KingdomSurvivalDevelopmentPlan.asset` и переходить к P11.
+
+## 12. Location Interaction — замена старого decision-модала прибытия (реализовано, не проверено)
+
+Presentation + wiring: старое окно прибытия («АРМИЯ ПРИБЫЛА»/«ОТРЯД ПРИБЫЛ» → `LocationArrivalDecisionFactory` → `expedition.PendingDecision` → decision-модал «Исследовать/Отменить») заменено на общее системное окно **Location Interaction**, встроенное в тот же VisualElement-оверлей, что Narrative Dialogue (не третий тип fullscreen UI). Формулы исследования, Dialogue Database, P10 `FirstContact`/`PartySize`, Camp/Hero/Journal, маршруты и бой не тронуты.
+
+- Новый файл `Assets/_Project/UI/PrototypeUIController.LocationInteraction.cs`: `TryOpenLocationInteraction(locationId)` — единая точка входа и для автоматического открытия при прибытии, и для ручного входа кнопкой; переиспользует `narrativeDialogueOverlay`/`speaker`/`role`/`portrait`/`history`/`choices`, но не трогает `NarrativeDialogueRuntimeSession`. `ИССЛЕДОВАТЬ` вызывает уже существующий `GameState.TryStartLocationResearch()`; `ОТМЕНИТЬ` только закрывает окно, не создавая Activity.
+- `PrototypeUIController.ModalQueue.cs`: `QueueNotice` для «АРМИЯ ПРИБЫЛА»/«ОТРЯД ПРИБЫЛ» теперь вызывает `TryOpenLocationInteraction` вместо `LocationArrivalDecisionFactory.TryCreate` (файл фабрики не изменён и не удалён — оставлен для похожей, но другой механики находки локации по дороге, которую эта правка не трогает). `HasBlockingModalWorkExceptCamp()` включает `IsLocationInteractionActive`. Технический попап «ИССЛЕДОВАНИЕ ЗАВЕРШЕНО» подавляется, если `Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId` готов открыть N12.
+- `Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState)` — новый узкий story-gate (та же роль, что `GetPendingRoadEventDialogueId`): возвращает D12, когда `OldWaterSearch` физически достигнут, исследован (`IsExplored`) и `OldFordFound` ещё не выставлен. Опрашивается в `PrototypeUIController.ContinuousTime.cs` (`RefreshAutoTimeState`) тем же кадровым циклом, что дорожные встречи.
+- `LocationData.InteractionDescription` (новое поле) + `OldWaterSearch.ExplorationHours = 3.0` (рабочее значение, не канон) заданы в `Chapter01OutcomeApplier.RevealDepartureSearchLocation`.
+- Карточка локации на карте: кнопка `world-map-location-inspection-research-button` переиспользована как «ВОЙТИ В ЛОКАЦИЮ» (`WorldMapLocationActions.cs`, `OnWorldMapLocationCardEnterClicked` → `TryOpenLocationInteraction`); прямой запуск исследования из карточки убран.
+- Тесты: `Chapter01P10Tests.cs` дополнен блоком про `OldWaterSearch`/`GetPendingLocationNarrativeDialogueId` (Core-уровень, без UI). **UI-обвязка (Location Interaction overlay, ModalQueue, кнопка «ВОЙТИ В ЛОКАЦИЮ») не имеет и не может иметь EditMode-покрытия в этом проекте** — `PrototypeUIController` требует живого `UIDocument`, и в кодовой базе нет прецедента инстанцирования контроллера в EditMode-тестах; проверяется только вручную в Play Mode (см. §13).
+- Компиляция/тесты в этой сессии **не запускались** (нет подключённого Unity Editor через Pipeline на момент правки).
+
+## 13. Что проверить после Pull (Location Interaction)
+
+1. Чистая компиляция, Console без ошибок (новый файл `PrototypeUIController.LocationInteraction.cs`, изменённые сигнатуры в `ModalQueue.cs`/`WorldMapLocationActions.cs`/`ContinuousTime.cs`).
+2. `Chapter01P10Tests.cs` — новые тесты про `OldWaterSearch`/`GetPendingLocationNarrativeDialogueId` зелёные, полный `Run All` без регрессий (особенно `ContinuousTimePolishTests.cs`, напрямую тестирующий саму `LocationArrivalDecisionFactory`, и `WorldMapLocationCardLayoutTests.cs`/`WorldMapLocationCardStructureRegressionTests.cs`).
+3. Play Mode: приехать в обычную локацию (не `OldWaterSearch`) — должно открыться Location Interaction поверх Camp/Hero/Journal, время стоит; `ОТМЕНИТЬ` → окно закрывается, отряд остаётся `AtLocation`, время не идёт, автоматом окно не возвращается; ПКМ по локации → «ВОЙТИ В ЛОКАЦИЮ» → то же окно снова.
+4. Play Mode: `ИССЛЕДОВАТЬ` в Location Interaction → окно закрывается, время идёт, исследование доходит до конца обычным способом (награда/лог), повторно начать нельзя.
+5. Play Mode: путь `OldWaterSearch` целиком — прибытие → Location Interaction → `ИССЛЕДОВАТЬ` (3 ч) → без промежуточного «ИССЛЕДОВАНИЕ ЗАВЕРШЕНО» сразу открывается N12 → после N12 `OldFordFound` стоит и повторно D12 не предлагается.
+
+Только после этого считать Location Interaction завершённым.

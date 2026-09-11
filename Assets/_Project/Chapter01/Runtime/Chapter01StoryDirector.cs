@@ -363,6 +363,43 @@ namespace KingdomSurvival.Chapter01
             return null;
         }
 
+        // P10-LocInt: узкий story-gate для автоматического открытия N12 после
+        // завершения сюжетного Location Research в OldWaterSearch (раздел
+        // "Связка с N12" инструкции про Location Interaction). Завершение
+        // исследования ("мы осмотрели область") и OldFordFound ("мы поняли
+        // конкретный старый брод") — разные состояния: последний по-прежнему
+        // выставляется только внутри самого N12. Вызывающая сторона
+        // (PrototypeUIController.RefreshAutoTimeState) обязана опрашивать
+        // это каждый кадр наравне с GetPendingRoadEventDialogueId и открывать
+        // через TryOpenNarrativeDialogueById — идемпотентно за счёт условия
+        // "!OldFordFound", без отдельного технического флага.
+        public static string GetPendingLocationNarrativeDialogueId(GameState gameState)
+        {
+            if (gameState == null || gameState.Narrative == null || !gameState.HasActiveExpedition)
+                return null;
+
+            NarrativeStateData state = gameState.Narrative;
+            ExpeditionData expedition = gameState.ActiveExpedition;
+
+            if (expedition.Phase != CommanderState.AtLocation ||
+                !string.Equals(expedition.LocationId, Chapter01Ids.Locations.OldWaterSearch, StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            if (!state.HasFlag(Chapter01Ids.Flags.RoadDestinationReached) ||
+                state.HasFlag(Chapter01Ids.Flags.OldFordFound))
+            {
+                return null;
+            }
+
+            LocationData location = gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch);
+            if (location == null || !location.IsExplored)
+                return null;
+
+            return Chapter01Ids.Dialogues.D12;
+        }
+
         // P09-T01: продолжение маршрута после временной точки крюка
         // "Пойти старым путём" (раздел "Решение у старой дороги" —
         // "отряд физически идёт к ней, затем продолжает к прежней цели").

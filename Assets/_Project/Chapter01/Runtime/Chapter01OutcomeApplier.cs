@@ -136,17 +136,26 @@ namespace KingdomSurvival.Chapter01
                 finalY = route[route.Count - 1].YPercent;
             }
 
+            // P10-LocInt: 3 часа — рабочее производственное значение, не
+            // зафиксированный канон (можно поменять одной записью данных).
+            // Без ненулевого ExplorationHours Location Interaction всегда
+            // показывал бы "Исследование этой локации пока не реализовано".
             LocationData location = new LocationData(
                 Chapter01Ids.Locations.OldWaterSearch,
                 "След старого русла",
                 ContinuousSimulationSystem.CalculateTravelHours(route),
-                "неизвестна")
+                "неизвестна",
+                explorationHours: 3.0)
             {
                 RegionId = "chapter01-old-water-search",
                 RegionName = GameState.GetRegionName(finalX, finalY),
                 MapSlotIndex = gameState.Locations.Count,
                 MapXPercent = finalX,
-                MapYPercent = finalY
+                MapYPercent = finalY,
+                InteractionDescription =
+                    "Отряд достиг участка, где старое русло почти исчезает под травой и наносами. " +
+                    "Берег изрезан старыми промоинами, а кое-где из земли торчат остатки вкопанных " +
+                    "кольев — след человеческой работы, а не капризов воды."
             };
 
             gameState.Locations.Add(location);

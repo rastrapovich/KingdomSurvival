@@ -8,7 +8,14 @@ public partial class PrototypeUIController
     private string worldMapLocationCardLocationId;
     private VisualElement worldMapLocationCardAnchorNode;
     private Label worldMapLocationCardPresenceLabel;
-    private Button worldMapLocationCardResearchButton;
+
+    // P10-LocInt: старая кнопка "ИССЛЕДОВАТЬ" карточки карты переиспользована
+    // как "ВОЙТИ В ЛОКАЦИЮ" (раздел "Новая кнопка ВОЙТИ В ЛОКАЦИЮ" инструкции)
+    // — прямой запуск исследования из карточки убран, чтобы не оставлять два
+    // разных интерфейсных пути для одной и той же механики. Element name в
+    // UXML не переименован (world-map-location-inspection-research-button),
+    // чтобы не задевать существующие UI-тесты, проверяющие его наличие.
+    private Button worldMapLocationCardEnterButton;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InitializeWorldMapLocationActionsRuntime()
@@ -91,11 +98,14 @@ public partial class PrototypeUIController
 
         worldMapLocationCardPresenceLabel =
             worldMapLocationCard.Q<Label>("world-map-location-inspection-presence");
-        worldMapLocationCardResearchButton =
+        worldMapLocationCardEnterButton =
             worldMapLocationCard.Q<Button>("world-map-location-inspection-research-button");
 
-        if (worldMapLocationCardResearchButton != null)
-            worldMapLocationCardResearchButton.clicked += OnWorldMapLocationCardResearchClicked;
+        if (worldMapLocationCardEnterButton != null)
+        {
+            worldMapLocationCardEnterButton.text = "ВОЙТИ В ЛОКАЦИЮ";
+            worldMapLocationCardEnterButton.clicked += OnWorldMapLocationCardEnterClicked;
+        }
     }
 
     private void OnWorldMapLocationActionPointerUp(PointerUpEvent evt)
@@ -214,7 +224,7 @@ public partial class PrototypeUIController
     private void RefreshWorldMapLocationCardActionState(
         LocationData location)
     {
-        if (worldMapLocationCardResearchButton == null ||
+        if (worldMapLocationCardEnterButton == null ||
             worldMapLocationCardPresenceLabel == null)
         {
             return;
@@ -225,69 +235,44 @@ public partial class PrototypeUIController
         worldMapLocationCardPresenceLabel.style.display =
             armyHere ? DisplayStyle.Flex : DisplayStyle.None;
 
+        worldMapLocationCardEnterButton.text = "ВОЙТИ В ЛОКАЦИЮ";
+
         if (!armyHere)
         {
-            worldMapLocationCardResearchButton.text = "ИССЛЕДОВАТЬ";
-            worldMapLocationCardResearchButton.SetEnabled(false);
-            worldMapLocationCardResearchButton.tooltip =
-                "Армия должна находиться внутри этой локации.";
+            worldMapLocationCardEnterButton.SetEnabled(false);
+            worldMapLocationCardEnterButton.tooltip =
+                "Отряд должен находиться внутри этой локации.";
+            return;
+        }
+
+        if (IsNarrativeDialogueActive || IsLocationInteractionActive)
+        {
+            worldMapLocationCardEnterButton.SetEnabled(false);
+            worldMapLocationCardEnterButton.tooltip =
+                "Окно уже открыто.";
             return;
         }
 
         ExpeditionData expedition = gameState.ActiveExpedition;
-
-        if (location.IsExplored)
+        if (expedition.HasTimedActivity)
         {
-            worldMapLocationCardResearchButton.text = "ИССЛЕДОВАНО";
-            worldMapLocationCardResearchButton.SetEnabled(false);
-            worldMapLocationCardResearchButton.tooltip =
-                "Локация уже исследована.";
-            return;
-        }
-
-        if (expedition.IsLocationResearchInProgress)
-        {
-            worldMapLocationCardResearchButton.text = "ИССЛЕДОВАНИЕ...";
-            worldMapLocationCardResearchButton.SetEnabled(false);
-            worldMapLocationCardResearchButton.tooltip =
-                "Исследование уже идёт.";
-            return;
-        }
-
-        if (location.ExplorationHours <= 0)
-        {
-            worldMapLocationCardResearchButton.text = "ИССЛЕДОВАТЬ";
-            worldMapLocationCardResearchButton.SetEnabled(false);
-            worldMapLocationCardResearchButton.tooltip =
-                "Исследование этой локации пока не реализовано.";
+            worldMapLocationCardEnterButton.SetEnabled(false);
+            worldMapLocationCardEnterButton.tooltip =
+                "Сначала завершите текущее исследование.";
             return;
         }
 
         if (gameState.HasPendingExpeditionDecision)
         {
-            worldMapLocationCardResearchButton.text = "ИССЛЕДОВАТЬ";
-            worldMapLocationCardResearchButton.SetEnabled(false);
-            worldMapLocationCardResearchButton.tooltip =
+            worldMapLocationCardEnterButton.SetEnabled(false);
+            worldMapLocationCardEnterButton.tooltip =
                 "Сначала примите обязательное решение.";
             return;
         }
 
-        if (gameState.ArmySupply < gameState.ExpeditionSupplyConsumption)
-        {
-            worldMapLocationCardResearchButton.text = "ИССЛЕДОВАТЬ";
-            worldMapLocationCardResearchButton.SetEnabled(false);
-            worldMapLocationCardResearchButton.tooltip =
-                "Не хватает снабжения для начала исследования.";
-            return;
-        }
-
-        worldMapLocationCardResearchButton.text = "ИССЛЕДОВАТЬ";
-        worldMapLocationCardResearchButton.SetEnabled(
-            gameState.CanResearchActiveLocation);
-        worldMapLocationCardResearchButton.tooltip =
-            gameState.CanResearchActiveLocation
-                ? "Начать исследование этой локации."
-                : "Исследование сейчас недоступно.";
+        worldMapLocationCardEnterButton.SetEnabled(true);
+        worldMapLocationCardEnterButton.tooltip =
+            "Открыть окно локации.";
     }
 
     private bool IsArmyInsideWorldMapLocation(LocationData location)
@@ -300,7 +285,7 @@ public partial class PrototypeUIController
             gameState.ActiveExpedition.LocationId == location.Id;
     }
 
-    private void OnWorldMapLocationCardResearchClicked()
+    private void OnWorldMapLocationCardEnterClicked()
     {
         if (gameState == null ||
             string.IsNullOrEmpty(worldMapLocationCardLocationId))
@@ -311,16 +296,17 @@ public partial class PrototypeUIController
         LocationData location =
             gameState.FindLocation(worldMapLocationCardLocationId);
 
-        if (location == null ||
-            !IsArmyInsideWorldMapLocation(location) ||
-            !gameState.CanResearchActiveLocation)
+        if (location == null || !IsArmyInsideWorldMapLocation(location))
         {
             RefreshOpenWorldMapLocationCard();
             return;
         }
 
-        OnContinuousResearchClicked();
-        RefreshOpenWorldMapLocationCard();
+        // Тонкий обработчик: вся содержательная логика открытия — в
+        // TryOpenLocationInteraction (PrototypeUIController.LocationInteraction.cs),
+        // тот же метод, что и автоматическое открытие при прибытии.
+        HideAnchoredWorldMapLocationCard();
+        TryOpenLocationInteraction(location.Id);
     }
 
     private void PositionWorldMapLocationCardAboveAnchor()

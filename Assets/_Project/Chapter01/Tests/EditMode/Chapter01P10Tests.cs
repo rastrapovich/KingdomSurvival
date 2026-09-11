@@ -583,4 +583,97 @@ public sealed class Chapter01P10Tests
         Assert.IsTrue(restored.HasFlag(Chapter01Ids.Flags.DownstreamContact));
         Assert.IsTrue(restored.HasKnowledge(Chapter01Ids.Knowledge.DownstreamPeople));
     }
+
+    // --- P10-LocInt: OldWaterSearch как реальное Location Research +
+    // story-gate для автоматического N12. UI-обвязка (Location Interaction
+    // overlay, ModalQueue, кнопка "ВОЙТИ В ЛОКАЦИЮ") в этом проекте не имеет
+    // EditMode-покрытия — PrototypeUIController требует живого UIDocument и
+    // проверяется только вручную в Play Mode (см. DEVELOPMENT_STATUS.md);
+    // здесь проверяется вся Core/Chapter01-логика, от которой она зависит.
+
+    private static void ArriveAtOldWaterSearch(GameState gameState)
+    {
+        gameState.ActiveExpedition.Phase = CommanderState.AtLocation;
+        gameState.ActiveExpedition.RemainingRouteCells = 0;
+        Chapter01StoryDirector.RefreshRoadState(gameState);
+    }
+
+    [Test]
+    public void OldWaterSearch_HasNonZeroExplorationHours_AndInteractionDescription()
+    {
+        GameState gameState = NewGameStateEnRouteToOldWaterSearch(910400);
+        LocationData location = gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch);
+
+        Assert.IsNotNull(location);
+        Assert.Greater(location.ExplorationHours, 0.0);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(location.InteractionDescription));
+    }
+
+    [Test]
+    public void GetPendingLocationNarrativeDialogueId_Null_BeforeArrival()
+    {
+        GameState gameState = NewGameStateEnRouteToOldWaterSearch(910401);
+        Assert.IsNull(Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState));
+    }
+
+    [Test]
+    public void GetPendingLocationNarrativeDialogueId_Null_ArrivedButNotExploredYet()
+    {
+        GameState gameState = NewGameStateEnRouteToOldWaterSearch(910402);
+        ArriveAtOldWaterSearch(gameState);
+
+        Assert.IsTrue(gameState.Narrative.HasFlag(Chapter01Ids.Flags.RoadDestinationReached));
+        Assert.IsNull(Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState));
+    }
+
+    [Test]
+    public void LocationResearch_Completion_SetsIsExplored_ButNotOldFordFound()
+    {
+        GameState gameState = NewGameStateEnRouteToOldWaterSearch(910403);
+        ArriveAtOldWaterSearch(gameState);
+        gameState.ArmySupply = 100;
+
+        string message;
+        Assert.IsTrue(gameState.TryStartLocationResearch(out message), message);
+        ContinuousSimulationSystem.SetPaused(gameState, false);
+        ContinuousSimulationSystem.Advance(gameState, 4f, false);
+
+        LocationData location = gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch);
+        Assert.IsTrue(location.IsExplored);
+        Assert.IsFalse(gameState.Narrative.HasFlag(Chapter01Ids.Flags.OldFordFound));
+    }
+
+    [Test]
+    public void GetPendingLocationNarrativeDialogueId_ReturnsD12_AfterResearchCompletes()
+    {
+        GameState gameState = NewGameStateEnRouteToOldWaterSearch(910404);
+        ArriveAtOldWaterSearch(gameState);
+        gameState.ArmySupply = 100;
+
+        string message;
+        Assert.IsTrue(gameState.TryStartLocationResearch(out message), message);
+        ContinuousSimulationSystem.SetPaused(gameState, false);
+        ContinuousSimulationSystem.Advance(gameState, 4f, false);
+
+        Assert.AreEqual(Chapter01Ids.Dialogues.D12, Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState));
+    }
+
+    [Test]
+    public void GetPendingLocationNarrativeDialogueId_Null_AfterOldFordFound()
+    {
+        GameState gameState = NewGameStateEnRouteToOldWaterSearch(910405);
+        ArriveAtOldWaterSearch(gameState);
+        gameState.ArmySupply = 100;
+
+        string message;
+        Assert.IsTrue(gameState.TryStartLocationResearch(out message), message);
+        ContinuousSimulationSystem.SetPaused(gameState, false);
+        ContinuousSimulationSystem.Advance(gameState, 4f, false);
+        Assert.AreEqual(Chapter01Ids.Dialogues.D12, Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState));
+
+        // N12 сам выставляет OldFordFound (не завершение исследования) —
+        // после этого story-gate не должен снова предлагать D12.
+        gameState.Narrative.SetFlag(Chapter01Ids.Flags.OldFordFound);
+        Assert.IsNull(Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState));
+    }
 }

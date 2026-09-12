@@ -15,8 +15,8 @@ MonoBehaviour:
   schemaVersion: 3
   projectTitle: "Kingdom Survival \u2014 \u0413\u043B\u0430\u0432\u0430 01 \xAB\u0414\u043E\u043C
     \u043D\u0430 \u0447\u0443\u0436\u043E\u0439 \u0432\u043E\u0434\u0435\xBB"
-  currentMilestoneId: P02_BASELINE
-  planUpdatedAt: 2026-09-11
+  currentMilestoneId: P13_COUNCIL
+  planUpdatedAt: 2026-09-12
   phases:
   - id: P00_DECISIONS
     title: "\u0423\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u0435 \u043E\u0442\u043A\u0440\u044B\u0442\u044B\u0445
@@ -3236,7 +3236,7 @@ MonoBehaviour:
         \u043D\u0435 \u0441\u043A\u0440\u044B\u0432\u0430\u0435\u0442 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u0443\u044E
         \u0438\u0441\u0442\u0438\u043D\u0443 \u043D\u0430\u0432\u0441\u0435\u0433\u0434\u0430."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 2
       priority: 1
@@ -3250,18 +3250,18 @@ MonoBehaviour:
           \u043E\u0442 \u0440\u0435\u043C\u043E\u043D\u0442\u0430, \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u0430,
           \u0441\u043E\u0441\u0442\u0430\u0432\u0430 \u0438 \u043F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0435\u0439
           \u043F\u043E\u043C\u043E\u0449\u0438"
-        done: 0
+        done: 1
       - text: "\u041F\u0440\u043E\u0432\u0430\u043B \u043F\u0440\u0438\u0432\u043E\u0434\u0438\u0442
           \u043A \u0434\u043E\u043B\u0433\u0443/\u043D\u0430\u043F\u0440\u044F\u0436\u0435\u043D\u0438\u044E/\u0442\u0440\u0430\u0432\u043C\u0435,
           \u043D\u043E \u043D\u0435 \u0431\u043B\u043E\u043A\u0438\u0440\u0443\u0435\u0442
           \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u0443\u044E
           \u0438\u0441\u0442\u0438\u043D\u0443"
-        done: 0
+        done: 1
       - text: "N13 \u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u0438\u0433\u0440\u043E\u0432\u044B\u043C
           \u043F\u0443\u0442\u0451\u043C \u0442\u043E\u043B\u044C\u043A\u043E \u043F\u043E\u0441\u043B\u0435
           \u0444\u0438\u0437\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u0430
           \u0438 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F P10-T05"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -3270,7 +3270,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
     - id: P10-T03
@@ -3283,7 +3283,7 @@ MonoBehaviour:
         \u043D\u0435 \u0441\u043A\u0440\u044B\u0432\u0430\u0435\u0442 \u0438\u0441\u0442\u0438\u043D\u0443
         \u043D\u0430\u0432\u0441\u0435\u0433\u0434\u0430."
       category: 3
-      status: 0
+      status: 3
       required: 1
       order: 3
       priority: 1
@@ -3304,7 +3304,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
     - id: P10-T04
@@ -3316,7 +3316,7 @@ MonoBehaviour:
         \u043F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u044B\u0445 \u0444\u043B\u0430\u0433\u043E\u0432
         party_size_0\u20264."
       category: 3
-      status: 0
+      status: 3
       required: 1
       order: 4
       priority: 1
@@ -3341,7 +3341,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
     - id: P10-T05
@@ -3365,7 +3365,7 @@ MonoBehaviour:
         \u0437\u0430\u043F\u0443\u0441\u043A\u0430\u0442\u044C N13 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438
         \u043F\u0440\u0438 \u043F\u0440\u0438\u0431\u044B\u0442\u0438\u0438."
       category: 7
-      status: 2
+      status: 3
       required: 1
       order: 5
       priority: 1
@@ -3470,7 +3470,7 @@ MonoBehaviour:
         N12/N13. \u0421\u0442\u0430\u0442\u0443\u0441 NeedsUnityCheck \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442\u0441\u044F
         \u0434\u043E \u0440\u0443\u0447\u043D\u043E\u0439 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438
         UI \u0438 \u043F\u043E\u043B\u043D\u043E\u0433\u043E EditMode Run All."
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
   - id: P11_AGREEMENT
@@ -3503,7 +3503,7 @@ MonoBehaviour:
         \u0444\u0443\u043D\u043A\u0446\u0438\u044E \u0437\u0430\u0442\u0432\u043E\u0440\u043E\u0432/\u0445\u043B\u0435\u0431\u0430/\u043F\u0440\u0435\u0434\u043C\u0435\u0442\u0430,
         \u0435\u0441\u043B\u0438 \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u043E."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 1
       priority: 1
@@ -3529,7 +3529,7 @@ MonoBehaviour:
       - chapter01.knowledge.downstream_people
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
     - id: P11-T02
@@ -3543,7 +3543,7 @@ MonoBehaviour:
         \u0431\u0435\u0437 \u0435\u0434\u0438\u043D\u043E\u0433\u043E \u0437\u0430\u043A\u0440\u044B\u0432\u0430\u044E\u0449\u0435\u0433\u043E
         \u043C\u043E\u043D\u043E\u043B\u043E\u0433\u0430."
       category: 1
-      status: 0
+      status: 3
       required: 1
       order: 2
       priority: 1
@@ -3566,7 +3566,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
     - id: P11-T03
@@ -3578,7 +3578,7 @@ MonoBehaviour:
         \u0432\u043B\u0438\u044F\u044E\u0449\u0438\u0439 \u043D\u0430 \u043E\u0431\u0440\u0430\u0442\u043D\u0443\u044E
         \u0434\u043E\u0440\u043E\u0433\u0443."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 3
       priority: 1
@@ -3590,7 +3590,7 @@ MonoBehaviour:
       - text: "\u0420\u0435\u0448\u0435\u043D\u0438\u0435 \u0432\u043B\u0438\u044F\u0435\u0442
           \u043D\u0430 \u043C\u0430\u0440\u0448\u0440\u0443\u0442 \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435
           \u043E\u0431\u0440\u0430\u0442\u043D\u043E\u0439 \u0434\u043E\u0440\u043E\u0433\u0438"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -3599,7 +3599,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
   - id: P12_RETURN
@@ -3631,7 +3631,7 @@ MonoBehaviour:
         \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u0442 \u0438\u0441\u0445\u043E\u0434\u043D\u0443\u044E
         \u0434\u043E\u0440\u043E\u0433\u0443 \u0434\u043E\u0441\u043B\u043E\u0432\u043D\u043E."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 1
       priority: 1
@@ -3643,7 +3643,7 @@ MonoBehaviour:
           \u0444\u0438\u0437\u0438\u0447\u0435\u0441\u043A\u0438 \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u0442\u0441\u044F
           \u0438 \u043D\u0435 \u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0434\u043E\u0441\u043B\u043E\u0432\u043D\u044B\u043C
           \u043F\u043E\u0432\u0442\u043E\u0440\u043E\u043C"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -3651,7 +3651,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
     - id: P12-T02
@@ -3662,7 +3662,7 @@ MonoBehaviour:
         18) \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u044E\u0442\u0441\u044F
         \u0438\u0437\u043C\u0435\u043D\u0451\u043D\u043D\u044B\u043C\u0438."
       category: 2
-      status: 0
+      status: 3
       required: 1
       order: 2
       priority: 1
@@ -3676,7 +3676,7 @@ MonoBehaviour:
           \u043C\u043E\u0442\u0438\u0432\u0430 \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u044E\u0442\u0441\u044F
           \u0432 \u0432\u0438\u0434\u0438\u043C\u043E \u0438\u0437\u043C\u0435\u043D\u0451\u043D\u043D\u043E\u043C
           \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0438"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -3685,7 +3685,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
     - id: P12-T03
@@ -3697,7 +3697,7 @@ MonoBehaviour:
         \u043E\u0434\u0438\u043D \u0440\u0430\u0437 \u0434\u043E N10 \u0438 \u043E\u0434\u0438\u043D
         \u0440\u0430\u0437 \u0432 N16 (\u0440\u0430\u0437\u0434\u0435\u043B 11)."
       category: 4
-      status: 0
+      status: 3
       required: 1
       order: 3
       priority: 1
@@ -3711,7 +3711,7 @@ MonoBehaviour:
       - text: "\u041D\u0438 \u043E\u0434\u0438\u043D \u0444\u043B\u0430\u0433 \u043F\u0430\u0432\u043E\u0434\u043A\u0430/\u0440\u0435\u043C\u043E\u043D\u0442\u0430
           \u043D\u0435 \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F \u043D\u0438\u0433\u0434\u0435
           \u043D\u0435 \u0443\u0432\u0438\u0434\u0435\u043D\u043D\u044B\u043C"
-        done: 0
+        done: 1
       manualChecks: []
       fileReferences: []
       relatedDialogueIds: []
@@ -3719,7 +3719,7 @@ MonoBehaviour:
       relatedKnowledgeIds: []
       blockerNote: 
       implementationNote: 
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
   - id: P13_COUNCIL
@@ -3753,7 +3753,7 @@ MonoBehaviour:
         \u0432\u043E\u0434\u0443 \u0414\u043E\u043C\u0443 \u2014 \u0432\u0441\u0435
         \u0442\u0440\u0438 \u0441 \u0446\u0435\u043D\u043E\u0439."
       category: 2
-      status: 0
+      status: 2
       required: 1
       order: 1
       priority: 1
@@ -3770,15 +3770,31 @@ MonoBehaviour:
           \u043D\u0435 \u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0431\u0435\u0441\u043F\u043B\u0430\u0442\u043D\u043E
           \u0438\u0434\u0435\u0430\u043B\u044C\u043D\u044B\u043C"
         done: 0
-      manualChecks: []
-      fileReferences: []
-      relatedDialogueIds: []
+      manualChecks:
+      - "\u041F\u043E\u0441\u043B\u0435 N16 \u0448\u0442\u0430\u0442\u043D\u043E
+        \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442\u0441\u044F N17"
+      - "\u0414\u043E \u0432\u044B\u0431\u043E\u0440\u0430 CouncilCompleted/Completed
+        \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u044B"
+      - "\u0423 \u043A\u0430\u0436\u0434\u043E\u0433\u043E \u0438\u0437 \u0442\u0440\u0451\u0445
+        \u0432\u0430\u0440\u0438\u0430\u043D\u0442\u043E\u0432 \u0446\u0435\u043D\u0430
+        \u0432\u0438\u0434\u043D\u0430 \u0434\u043E \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F"
+      fileReferences:
+      - Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset
+      - Assets/_Project/UI/PrototypeUIController.Chapter01ReturnFlow.cs
+      relatedDialogueIds:
+      - chapter01_dialogue_17_council_of_the_house
       relatedFlagIds:
       - chapter01.flag.council_completed
       - chapter01.flag.completed
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: 
+      implementationNote: "D17 \u0437\u0430\u043C\u0435\u043D\u0451\u043D \u0441
+        placeholder \u043D\u0430 \u0442\u0440\u0451\u0445\u0432\u0435\u0442\u0432\u0435\u0432\u043E\u0439
+        \u0421\u043E\u0432\u0435\u0442. CouncilCompleted/Completed \u0432\u044B\u0434\u0430\u044E\u0442\u0441\u044F
+        \u0442\u043E\u043B\u044C\u043A\u043E \u043F\u043E\u0441\u043B\u0435 \u0444\u0438\u043D\u0430\u043B\u044C\u043D\u043E\u0433\u043E
+        \u0440\u0435\u0448\u0435\u043D\u0438\u044F. \u0422\u0440\u0438 \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F
+        \u0438\u043C\u0435\u044E\u0442 \u0432\u0438\u0434\u0438\u043C\u0443\u044E
+        \u0446\u0435\u043D\u0443."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
@@ -3792,7 +3808,7 @@ MonoBehaviour:
         \u043F\u043E\u0441\u043B\u0435 \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F
         DEC-07."
       category: 2
-      status: 0
+      status: 5
       required: 0
       order: 2
       priority: 1
@@ -3810,7 +3826,16 @@ MonoBehaviour:
       relatedDialogueIds: []
       relatedFlagIds: []
       relatedKnowledgeIds: []
-      blockerNote: 
+      blockerNote: "\u041E\u0442\u043B\u043E\u0436\u0435\u043D\u043E \u0434\u043E
+        \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0433\u043E \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u044F
+        DEC-07: \u043B\u0438\u0447\u043D\u043E\u0441\u0442\u044C \u041C\u0438\u043B\u044B,
+        \u043E\u0431\u0441\u0442\u043E\u044F\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u0430
+        \u0441\u043C\u0435\u0440\u0442\u0438, \u043E\u0442\u043D\u043E\u0448\u0435\u043D\u0438\u0435
+        \u043A \u0432\u043E\u0434\u0435 \u0438 \u0433\u0440\u0430\u043D\u0438\u0446\u044B
+        \u0441\u0432\u0435\u0440\u0445\u044A\u0435\u0441\u0442\u0435\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0433\u043E
+        \u043D\u0435 \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u044B.
+        \u041D\u0435 \u0431\u043B\u043E\u043A\u0438\u0440\u0443\u0435\u0442 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u044B\u0439
+        P13."
       implementationNote: 
       completedAt: 
       completedCommit: 
@@ -3824,7 +3849,7 @@ MonoBehaviour:
         \u0434\u043E\u043B\u0433\u043E\u0432 \u0434\u043B\u044F \u044D\u0445\u0430
         \u0432 \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0445 \u0433\u043B\u0430\u0432\u0430\u0445."
       category: 3
-      status: 0
+      status: 2
       required: 1
       order: 3
       priority: 1
@@ -3838,13 +3863,31 @@ MonoBehaviour:
           \u0437\u0430\u0444\u0438\u043A\u0441\u0438\u0440\u043E\u0432\u0430\u043D\u044B
           \u0444\u043B\u0430\u0433\u0430\u043C\u0438"
         done: 0
-      manualChecks: []
-      fileReferences: []
+      manualChecks:
+      - "Save/Load \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u044B\u0439
+        \u0438\u0441\u0445\u043E\u0434"
+      - "\u0421\u043E\u0432\u0435\u0442 \u043D\u0435\u043B\u044C\u0437\u044F \u043E\u0442\u043A\u0440\u044B\u0442\u044C
+        \u043F\u043E\u0432\u0442\u043E\u0440\u043D\u043E"
+      - "\u0425\u0440\u043E\u043D\u0438\u043A\u0430 \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442
+        \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u044B\u0439 \u0438\u0442\u043E\u0433"
+      fileReferences:
+      - Assets/_Project/Chapter01/Runtime/Chapter01CouncilOutcome.cs
+      - Assets/_Project/Chapter01/Runtime/Chapter01JournalProvider.cs
+      - Assets/_Project/Chapter01/Tests/EditMode/Chapter01P13Tests.cs
       relatedDialogueIds: []
-      relatedFlagIds: []
+      relatedFlagIds:
+      - chapter01.flag.council_old_order_restored
+      - chapter01.flag.council_new_order_created
+      - chapter01.flag.council_water_kept_for_home
+      - chapter01.flag.downstream_debt_open
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: 
+      implementationNote: "\u0414\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u044B
+        \u0442\u0440\u0438 \u0432\u0437\u0430\u0438\u043C\u043E\u0438\u0441\u043A\u043B\u044E\u0447\u0430\u044E\u0449\u0438\u0445
+        outcome-\u0444\u043B\u0430\u0433\u0430, future-debt flag \u0434\u043B\u044F
+        \u0432\u0435\u0442\u043A\u0438 \u0432\u043E\u0434\u044B \u0414\u043E\u043C\u0443,
+        resolver \u0438\u0441\u0445\u043E\u0434\u0430, \u0425\u0440\u043E\u043D\u0438\u043A\u0430
+        \u0438 regression tests."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
@@ -4881,4 +4924,4 @@ MonoBehaviour:
     \u043A\u0430\u043A \u0437\u0430\u0432\u0438\u0441\u0438\u043C\u043E\u0441\u0442\u0438
     \u2014 \u043D\u0435 \u043F\u0435\u0440\u0435\u0438\u043C\u0435\u043D\u043E\u0432\u044B\u0432\u0430\u0442\u044C
     \u0438\u0445 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0431\u0435\u0437 \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0430
-    \u0441\u0441\u044B\u043B\u043E\u043A."
+    \u0441\u0441\u044B\u043B\u043E\u043A.\n[P13_COUNCIL_V1_SYNCED]"

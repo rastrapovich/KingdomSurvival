@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -145,10 +144,14 @@ public partial class PrototypeUIController
         worldMapScreenHeroMarker.AddToClassList("world-map-army-marker");
         worldMapScreenHeroMarker.style.width = WorldMapScreenHeroDiameter;
         worldMapScreenHeroMarker.style.height = WorldMapScreenHeroDiameter;
-        worldMapScreenHeroMarker.style.minWidth = 0f;
-        worldMapScreenHeroMarker.style.minHeight = 0f;
-        worldMapScreenHeroMarker.style.marginLeft = -WorldMapScreenHeroDiameter * 0.5f;
-        worldMapScreenHeroMarker.style.marginTop = -WorldMapScreenHeroDiameter * 0.5f;
+        worldMapScreenHeroMarker.style.minWidth =
+            new Length(0f, LengthUnit.Pixel);
+        worldMapScreenHeroMarker.style.minHeight =
+            new Length(0f, LengthUnit.Pixel);
+        worldMapScreenHeroMarker.style.marginLeft =
+            -WorldMapScreenHeroDiameter * 0.5f;
+        worldMapScreenHeroMarker.style.marginTop =
+            -WorldMapScreenHeroDiameter * 0.5f;
         worldMapScreenHeroMarker.style.display = DisplayStyle.None;
 
         worldMapViewport.Add(worldMapScreenHeroMarker);
@@ -270,8 +273,10 @@ public partial class PrototypeUIController
         worldMapScreenHeroMarker.style.top = Mathf.Round(screenPosition.y);
         worldMapScreenHeroMarker.style.width = WorldMapScreenHeroDiameter;
         worldMapScreenHeroMarker.style.height = WorldMapScreenHeroDiameter;
-        worldMapScreenHeroMarker.style.marginLeft = -WorldMapScreenHeroDiameter * 0.5f;
-        worldMapScreenHeroMarker.style.marginTop = -WorldMapScreenHeroDiameter * 0.5f;
+        worldMapScreenHeroMarker.style.marginLeft =
+            -WorldMapScreenHeroDiameter * 0.5f;
+        worldMapScreenHeroMarker.style.marginTop =
+            -WorldMapScreenHeroDiameter * 0.5f;
         worldMapScreenHeroMarker.style.display = DisplayStyle.Flex;
     }
 

@@ -64,7 +64,7 @@ namespace KingdomSurvival.Encounters
                     encounter, narrativeContext, runtimeState,
                     opportunity.RegionId, opportunity.LocationTags, opportunity.WorldHour);
 
-                if (eligibility.Eligible)
+                if (eligibility.Eligible && !IsReactivePacingBlocked(pool, encounter, opportunity, runtimeState))
                     eligible.Add(encounter);
                 else
                     skipped.Add(encounter.EncounterId);
@@ -108,6 +108,36 @@ namespace KingdomSurvival.Encounters
                 PoolId = pool.PoolId,
                 SkippedEncounterIds = skipped
             };
+        }
+
+        // Event spam pacing (§125-127): применяется ТОЛЬКО к Reaction/Micro —
+        // Standard/Complex/Short/QuestSeed используют общий MinimumHoursBetweenEncounters
+        // пула (уже проверен раньше в Select) и в эти лимиты не попадают.
+        private static bool IsReactivePacingBlocked(
+            EncounterPoolDefinition pool,
+            EncounterDefinition encounter,
+            EncounterOpportunity opportunity,
+            EncounterRuntimeStateData runtimeState)
+        {
+            if (encounter.DurationClass != EncounterDurationClass.Reaction &&
+                encounter.DurationClass != EncounterDurationClass.Micro)
+                return false;
+
+            if (pool.MinimumHoursBetweenReactiveEncounters > 0)
+            {
+                double lastReactive = runtimeState.GetPoolLastReactiveTriggeredWorldHour(pool.PoolId);
+                if (lastReactive >= 0 && opportunity.WorldHour - lastReactive < pool.MinimumHoursBetweenReactiveEncounters)
+                    return true;
+            }
+
+            if (pool.MaxReactiveEncountersPerTravelDay > 0)
+            {
+                int day = (int)(opportunity.WorldHour / 24.0);
+                if (runtimeState.GetReactiveCountForDay(pool.PoolId, day) >= pool.MaxReactiveEncountersPerTravelDay)
+                    return true;
+            }
+
+            return false;
         }
 
         private static EncounterSelectionResult SelectDirect(

@@ -92,7 +92,7 @@
     white-space: normal;
 }
 
-.world-map {
+.world-map-viewport {
     position: relative;
     width: 100%;
     height: 350px;
@@ -109,6 +109,19 @@
     border-top-color: rgb(112, 96, 67);
     border-bottom-color: rgb(72, 65, 52);
     border-radius: 5px;
+}
+
+.world-map {
+    /* WM-03: карта (canvas) теперь живёт внутри .world-map-viewport — рамка
+       фиксированного размера с overflow:hidden. Сама .world-map заполняет
+       viewport на 100% при zoom=1 и панорамируется/зумируется через
+       style.left/top/scale в WorldMapViewportController, а не через layout. */
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    transform-origin: 0% 0%;
 }
 
 .world-map-land {
@@ -198,6 +211,19 @@
     height: 6.8%;
     border-radius: 3px;
     opacity: 0.72;
+}
+
+.world-map-terrain-mass {
+    /* WM-04: базовый размер "массы" ~2.5 клетки сетки (26x16), центрируется
+       на точке через отрицательные margin. Художник управляет тем, что внутри
+       этого прямоугольника, через сами спрайты в WorldMapTerrainVisualProfile —
+       размер здесь только задаёт масштаб размещения, не финальный визуал. */
+    position: absolute;
+    width: 10%;
+    height: 16%;
+    margin-left: -5%;
+    margin-top: -8%;
+    transform-origin: 50% 50%;
 }
 
 .world-map-destination-marker {

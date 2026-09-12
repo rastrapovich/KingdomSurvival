@@ -19,6 +19,8 @@ MonoBehaviour:
     Enabled: 1
     GlobalTriggerChancePercent: 45
     MinimumHoursBetweenEncounters: 24
+    MinimumHoursBetweenReactiveEncounters: 0
+    MaxReactiveEncountersPerTravelDay: 0
     DesignerNotes: "MVP-\u043F\u0443\u043B: \u043F\u043E\u043A\u0430 \u0432 \u043D\u0451\u043C
       \u043E\u0434\u0438\u043D Production Encounter (ROAD_WARM_SHEEP_01)."
   encounters:
@@ -37,6 +39,9 @@ MonoBehaviour:
     - mundane
     - ambiguous
     - forest-edge
+    DurationClass: 3
+    MemoryClass: 2
+    Functions: 060000000300000007000000
     DialogueId: road_warm_sheep_01
     ResolutionMode: 0
     SelectionMode: 0
@@ -78,3 +83,580 @@ MonoBehaviour:
       \u044D\u0442\u043E\u043C \u0441\u0440\u0435\u0437\u0435; \u0447\u0438\u0442\u0430\u0435\u0442
       \u0444\u043B\u0430\u0433\u0438 *_MAN_*, *_MEAT_TAKEN_*, ROAD_WARM_SHEEP_DIRECTION_KNOWN,
       ROAD_WARM_SHEEP_LEFT_UNTOUCHED."
+  - EncounterId: ROAD_RATS_01
+    DisplayName: "\u041A\u0440\u044B\u0441\u044B \u0432 \u043F\u0440\u0438\u043F\u0430\u0441\u0430\u0445"
+    Description: "\u041D\u043E\u0447\u044C\u044E \u0447\u0430\u0441\u043E\u0432\u043E\u0439
+      \u0441\u043B\u044B\u0448\u0430\u043B \u0432\u043E\u0437\u043D\u044E \u0432\u043E\u0437\u043B\u0435
+      \u043C\u0435\u0448\u043A\u043E\u0432. \u041E\u043D \u0440\u0435\u0448\u0438\u043B,
+      \u0447\u0442\u043E \u044D\u0442\u043E \u0432\u0435\u0442\u0435\u0440. \u0412\u0435\u0442\u0435\u0440
+      \u043E\u043A\u0430\u0437\u0430\u043B\u0441\u044F \u043E\u0447\u0435\u043D\u044C
+      \u0445\u043E\u0440\u043E\u0448\u043E \u043E\u0442\u043A\u043E\u0440\u043C\u043B\u0435\u043D\u043D\u044B\u043C."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - mundane
+    DurationClass: 0
+    MemoryClass: 0
+    Functions: 0100000002000000
+    DialogueId: road_rats_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 70
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionIncidentSystem.Definitions (legacy id \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u043B
+      \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043D\u043E\u0432\u043E\u0433\u043E:
+      \u0441\u043C. \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u043A\u043E\u043C\u043C\u0438\u0442\u043E\u0432)."
+    FutureHooksNotes: 
+  - EncounterId: ROAD_HUNT_01
+    DisplayName: "\u0423\u0434\u0430\u0447\u043D\u0430\u044F \u043E\u0445\u043E\u0442\u0430"
+    Description: "\u041E\u0445\u043E\u0442\u043D\u0438\u043A\u0438 \u0432\u0435\u0440\u043D\u0443\u043B\u0438\u0441\u044C
+      \u0432 \u043B\u0430\u0433\u0435\u0440\u044C \u043D\u0435 \u0441 \u0440\u0430\u0441\u0441\u043A\u0430\u0437\u043E\u043C
+      \u043E \u0434\u043E\u0431\u044B\u0447\u0435, \u0430 \u0441 \u0441\u0430\u043C\u043E\u0439
+      \u0434\u043E\u0431\u044B\u0447\u0435\u0439. \u0421\u0435\u0433\u043E\u0434\u043D\u044F
+      \u044D\u0442\u043E \u0440\u0435\u0434\u043A\u0430\u044F \u0440\u043E\u0441\u043A\u043E\u0448\u044C."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - mundane
+    DurationClass: 0
+    MemoryClass: 0
+    Functions: 0100000002000000
+    DialogueId: road_hunt_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 70
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionIncidentSystem.Definitions (legacy id \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u043B
+      \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043D\u043E\u0432\u043E\u0433\u043E:
+      \u0441\u043C. \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u043A\u043E\u043C\u043C\u0438\u0442\u043E\u0432)."
+    FutureHooksNotes: 
+  - EncounterId: ROAD_BAD_WATER_01
+    DisplayName: "\u0418\u0441\u043F\u043E\u0440\u0447\u0435\u043D\u043D\u0430\u044F
+      \u0432\u043E\u0434\u0430"
+    Description: "\u041D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0431\u0443\u0440\u0434\u044E\u043A\u043E\u0432
+      \u043F\u0430\u0445\u043B\u0438 \u0442\u0430\u043A, \u0431\u0443\u0434\u0442\u043E
+      \u0432\u043D\u0443\u0442\u0440\u0438 \u0443\u0436\u0435 \u0443\u0441\u043F\u0435\u043B\u0430
+      \u0432\u043E\u0437\u043D\u0438\u043A\u043D\u0443\u0442\u044C \u0438 \u043F\u043E\u0433\u0438\u0431\u043D\u0443\u0442\u044C
+      \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u0430\u044F \u0446\u0438\u0432\u0438\u043B\u0438\u0437\u0430\u0446\u0438\u044F.
+      \u0412\u043E\u0434\u0443 \u043F\u0440\u0438\u0448\u043B\u043E\u0441\u044C \u0432\u044B\u043B\u0438\u0442\u044C."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - mundane
+    DurationClass: 0
+    MemoryClass: 0
+    Functions: 0100000002000000
+    DialogueId: road_bad_water_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 70
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionIncidentSystem.Definitions (legacy id \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u043B
+      \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043D\u043E\u0432\u043E\u0433\u043E:
+      \u0441\u043C. \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u043A\u043E\u043C\u043C\u0438\u0442\u043E\u0432)."
+    FutureHooksNotes: 
+  - EncounterId: ROAD_CACHE_01
+    DisplayName: "\u0417\u0430\u0431\u0440\u043E\u0448\u0435\u043D\u043D\u044B\u0439
+      \u0441\u0445\u0440\u043E\u043D"
+    Description: "\u041F\u043E\u0434 \u0441\u0442\u0430\u0440\u044B\u043C \u043D\u0430\u0432\u0435\u0441\u043E\u043C
+      \u043D\u0430\u0448\u043B\u0438 \u0445\u043E\u0440\u043E\u0448\u043E \u0443\u043A\u0440\u044B\u0442\u044B\u0439
+      \u0437\u0430\u043F\u0430\u0441 \u0435\u0434\u044B. \u0425\u043E\u0437\u044F\u0438\u043D
+      \u0442\u0430\u043A \u0438 \u043D\u0435 \u0432\u0435\u0440\u043D\u0443\u043B\u0441\u044F
+      \u0437\u0430 \u043D\u0438\u043C, \u0438 \u043E\u0442\u0440\u044F\u0434 \u0440\u0435\u0448\u0438\u043B
+      \u043D\u0435 \u0441\u043F\u043E\u0440\u0438\u0442\u044C \u0441 \u0441\u0443\u0434\u044C\u0431\u043E\u0439."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - mundane
+    DurationClass: 0
+    MemoryClass: 0
+    Functions: 0100000002000000
+    DialogueId: road_cache_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 70
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionIncidentSystem.Definitions (legacy id \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u043B
+      \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043D\u043E\u0432\u043E\u0433\u043E:
+      \u0441\u043C. \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u043A\u043E\u043C\u043C\u0438\u0442\u043E\u0432)."
+    FutureHooksNotes: 
+  - EncounterId: ROAD_TORN_BAGS_01
+    DisplayName: "\u041F\u043E\u0440\u0432\u0430\u043D\u043D\u044B\u0435 \u043C\u0435\u0448\u043A\u0438"
+    Description: "\u041A\u043E\u0433\u0434\u0430 \u043F\u0440\u043E\u043F\u0430\u0436\u0443
+      \u0437\u0430\u043C\u0435\u0442\u0438\u043B\u0438, \u0434\u043E\u0440\u043E\u0436\u043A\u0430
+      \u0438\u0437 \u043A\u0440\u0443\u043F\u044B \u0443\u0436\u0435 \u0442\u044F\u043D\u0443\u043B\u0430\u0441\u044C
+      \u0434\u0430\u043B\u0435\u043A\u043E \u043D\u0430\u0437\u0430\u0434. \u0412\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u0442\u044C\u0441\u044F
+      \u0437\u0430 \u043D\u0435\u0439 \u043D\u0438\u043A\u0442\u043E \u043D\u0435
+      \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0438\u043B."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - mundane
+    DurationClass: 0
+    MemoryClass: 0
+    Functions: 0100000002000000
+    DialogueId: road_torn_bags_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 70
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionIncidentSystem.Definitions (legacy id \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u043B
+      \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043D\u043E\u0432\u043E\u0433\u043E:
+      \u0441\u043C. \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u043A\u043E\u043C\u043C\u0438\u0442\u043E\u0432)."
+    FutureHooksNotes: 
+  - EncounterId: ROAD_FISHING_01
+    DisplayName: "\u0420\u044B\u0431\u043D\u043E\u0435 \u043C\u0435\u0441\u0442\u043E"
+    Description: "\u0421\u0442\u043E\u044F\u043D\u043A\u0430 \u0443 \u0440\u0435\u043A\u0438
+      \u043D\u0435\u043E\u0436\u0438\u0434\u0430\u043D\u043D\u043E \u043E\u043A\u0430\u0437\u0430\u043B\u0430\u0441\u044C
+      \u043F\u043E\u043B\u0435\u0437\u043D\u0435\u0435 \u0437\u0430\u043F\u043B\u0430\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u043E\u0433\u043E.
+      \u0412\u0435\u0447\u0435\u0440\u043E\u043C \u043A\u043E\u0442\u043B\u044B \u0431\u044B\u043B\u0438
+      \u043F\u043E\u043B\u043D\u0435\u0435 \u043E\u0431\u044B\u0447\u043D\u043E\u0433\u043E."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - mundane
+    DurationClass: 0
+    MemoryClass: 0
+    Functions: 0100000002000000
+    DialogueId: road_fishing_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 70
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionIncidentSystem.Definitions (legacy id \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u043B
+      \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043D\u043E\u0432\u043E\u0433\u043E:
+      \u0441\u043C. \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u043A\u043E\u043C\u043C\u0438\u0442\u043E\u0432)."
+    FutureHooksNotes: 
+  - EncounterId: ROAD_WASHED_ROAD_01
+    DisplayName: "\u0420\u0430\u0437\u043C\u044B\u0442\u0430\u044F \u0434\u043E\u0440\u043E\u0433\u0430"
+    Description: "\u0414\u043E\u0440\u043E\u0433\u0430 \u0432\u043F\u0435\u0440\u0435\u0434\u0438
+      \u043F\u0440\u0435\u0432\u0440\u0430\u0442\u0438\u043B\u0430\u0441\u044C \u0432
+      \u0432\u044F\u0437\u043A\u043E\u0435 \u043C\u0435\u0441\u0438\u0432\u043E.
+      \u041F\u0440\u0438\u0448\u043B\u043E\u0441\u044C \u0438\u0441\u043A\u0430\u0442\u044C
+      \u043E\u0431\u0445\u043E\u0434, \u0438 \u043E\u0442\u0440\u044F\u0434 \u043F\u043E\u0442\u0435\u0440\u044F\u043B
+      \u0447\u0430\u0441\u0442\u044C \u0432\u0440\u0435\u043C\u0435\u043D\u0438."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - mundane
+    DurationClass: 0
+    MemoryClass: 0
+    Functions: 0100000003000000
+    DialogueId: road_washed_road_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 70
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionIncidentSystem.Definitions (legacy id \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u043B
+      \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043D\u043E\u0432\u043E\u0433\u043E:
+      \u0441\u043C. \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u043A\u043E\u043C\u043C\u0438\u0442\u043E\u0432)."
+    FutureHooksNotes: "\u041B\u0435\u0433\u0430\u0441\u0438-\u0432\u0435\u0440\u0441\u0438\u044F
+      \u0442\u0430\u043A\u0436\u0435 \u0437\u0430\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u043B\u0430
+      \u043C\u0430\u0440\u0448\u0440\u0443\u0442 (Road Stop activity, \u0447\u0430\u0441\u044B)
+      \u2014 \u044D\u0442\u043E\u0442 \u043A\u043E\u043C\u043F\u043E\u043D\u0435\u043D\u0442
+      \u043F\u043E\u043A\u0430 \u043D\u0435 \u0432\u043E\u0441\u043F\u0440\u043E\u0438\u0437\u0432\u0435\u0434\u0451\u043D
+      \u043C\u0435\u0445\u0430\u043D\u0438\u0447\u0435\u0441\u043A\u0438: ExpeditionData.ActiveActivity
+      \u043F\u0435\u0440\u0435\u0441\u0435\u043A\u0430\u0435\u0442\u0441\u044F \u0441
+      \u043F\u0430\u0443\u0437\u043E\u0439/\u043C\u043E\u0434\u0430\u043B\u044C\u043D\u043E\u0439
+      \u043E\u0447\u0435\u0440\u0435\u0434\u044C\u044E, \u0434\u043E\u0431\u0430\u0432\u043B\u044F\u0442\u044C
+      \u043A\u0430\u043A \u043E\u0431\u0449\u0438\u0439 Gameplay Effect \u0440\u0438\u0441\u043A\u043E\u0432\u0430\u043D\u043D\u043E
+      \u0431\u0435\u0437 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0439 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438."
+  - EncounterId: ROAD_SHORT_PATH_01
+    DisplayName: "\u041A\u043E\u0440\u043E\u0442\u043A\u0430\u044F \u0442\u0440\u043E\u043F\u0430"
+    Description: "\u0420\u0430\u0437\u0432\u0435\u0434\u0447\u0438\u043A \u0437\u0430\u043C\u0435\u0442\u0438\u043B
+      \u0441\u0442\u0430\u0440\u0443\u044E \u0442\u0440\u043E\u043F\u0443 \u043C\u0435\u0436\u0434\u0443
+      \u0445\u043E\u043B\u043C\u0430\u043C\u0438. \u041E\u043D\u0430 \u0432\u044B\u0433\u043B\u044F\u0434\u0438\u0442
+      \u043D\u0435\u043F\u0440\u0438\u044F\u0442\u043D\u043E, \u0437\u0430\u0442\u043E
+      \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E
+      \u0441\u043E\u043A\u0440\u0430\u0449\u0430\u0435\u0442 \u043F\u0443\u0442\u044C."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - mundane
+    DurationClass: 0
+    MemoryClass: 0
+    Functions: 010000000a000000
+    DialogueId: road_short_path_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 70
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionIncidentSystem.Definitions (legacy id \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u043B
+      \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043D\u043E\u0432\u043E\u0433\u043E:
+      \u0441\u043C. \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u043A\u043E\u043C\u043C\u0438\u0442\u043E\u0432)."
+    FutureHooksNotes: 
+  - EncounterId: ROAD_COLD_RAIN_01
+    DisplayName: "\u0425\u043E\u043B\u043E\u0434\u043D\u044B\u0439 \u043B\u0438\u0432\u0435\u043D\u044C"
+    Description: "\u041B\u0438\u0432\u0435\u043D\u044C \u043F\u0440\u043E\u043C\u043E\u0447\u0438\u043B
+      \u0447\u0430\u0441\u0442\u044C \u0437\u0430\u043F\u0430\u0441\u043E\u0432 \u0438
+      \u0437\u0430\u0441\u0442\u0430\u0432\u0438\u043B \u043E\u0442\u0440\u044F\u0434
+      \u0438\u0441\u043A\u0430\u0442\u044C \u0431\u043E\u043B\u0435\u0435 \u0434\u043B\u0438\u043D\u043D\u044B\u0439,
+      \u043D\u043E \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u044B\u0439 \u043F\u0440\u043E\u0445\u043E\u0434."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - mundane
+    DurationClass: 0
+    MemoryClass: 0
+    Functions: 0100000003000000
+    DialogueId: road_cold_rain_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 70
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionIncidentSystem.Definitions (legacy id \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u043B
+      \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043D\u043E\u0432\u043E\u0433\u043E:
+      \u0441\u043C. \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u043A\u043E\u043C\u043C\u0438\u0442\u043E\u0432)."
+    FutureHooksNotes: "\u041B\u0435\u0433\u0430\u0441\u0438-\u0432\u0435\u0440\u0441\u0438\u044F
+      \u0442\u0430\u043A\u0436\u0435 \u0437\u0430\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u043B\u0430
+      \u043C\u0430\u0440\u0448\u0440\u0443\u0442 (Road Stop activity, \u0447\u0430\u0441\u044B)
+      \u2014 \u044D\u0442\u043E\u0442 \u043A\u043E\u043C\u043F\u043E\u043D\u0435\u043D\u0442
+      \u043F\u043E\u043A\u0430 \u043D\u0435 \u0432\u043E\u0441\u043F\u0440\u043E\u0438\u0437\u0432\u0435\u0434\u0451\u043D
+      \u043C\u0435\u0445\u0430\u043D\u0438\u0447\u0435\u0441\u043A\u0438: ExpeditionData.ActiveActivity
+      \u043F\u0435\u0440\u0435\u0441\u0435\u043A\u0430\u0435\u0442\u0441\u044F \u0441
+      \u043F\u0430\u0443\u0437\u043E\u0439/\u043C\u043E\u0434\u0430\u043B\u044C\u043D\u043E\u0439
+      \u043E\u0447\u0435\u0440\u0435\u0434\u044C\u044E, \u0434\u043E\u0431\u0430\u0432\u043B\u044F\u0442\u044C
+      \u043A\u0430\u043A \u043E\u0431\u0449\u0438\u0439 Gameplay Effect \u0440\u0438\u0441\u043A\u043E\u0432\u0430\u043D\u043D\u043E
+      \u0431\u0435\u0437 \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0439 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0438."
+  - EncounterId: ROAD_GOOD_CROSSING_01
+    DisplayName: "\u0423\u0434\u0430\u0447\u043D\u044B\u0439 \u043F\u0435\u0440\u0435\u0445\u043E\u0434"
+    Description: "\u041C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u044C \u0432\u043F\u0435\u0440\u0435\u0434\u0438
+      \u043E\u043A\u0430\u0437\u0430\u043B\u0430\u0441\u044C \u043F\u0440\u043E\u0449\u0435,
+      \u0447\u0435\u043C \u043E\u0431\u0435\u0449\u0430\u043B\u0438 \u0441\u0442\u0430\u0440\u044B\u0435
+      \u043A\u0430\u0440\u0442\u044B. \u041E\u0442\u0440\u044F\u0434 \u043F\u0440\u043E\u0448\u0451\u043B
+      \u0437\u0430\u043C\u0435\u0442\u043D\u043E \u0434\u0430\u043B\u044C\u0448\u0435
+      \u043E\u0431\u044B\u0447\u043D\u043E\u0433\u043E."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - mundane
+    DurationClass: 0
+    MemoryClass: 0
+    Functions: 010000000a000000
+    DialogueId: road_good_crossing_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 70
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionIncidentSystem.Definitions (legacy id \u0441\u043E\u0432\u043F\u0430\u0434\u0430\u043B
+      \u0441 \u0447\u0430\u0441\u0442\u044C\u044E \u043D\u043E\u0432\u043E\u0433\u043E:
+      \u0441\u043C. \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u043A\u043E\u043C\u043C\u0438\u0442\u043E\u0432)."
+    FutureHooksNotes: 
+  - EncounterId: ROAD_UNMAPPED_FORK_01
+    DisplayName: "\u0420\u0430\u0437\u0432\u0438\u043B\u043A\u0430 \u0431\u0435\u0437
+      \u043A\u0430\u0440\u0442\u044B"
+    Description: "\u0421\u0442\u0430\u0440\u0430\u044F \u0434\u043E\u0440\u043E\u0433\u0430
+      \u0440\u0430\u0437\u0434\u0432\u0430\u0438\u0432\u0430\u0435\u0442\u0441\u044F.
+      \u041E\u0434\u0438\u043D \u043F\u0443\u0442\u044C \u0443\u0445\u043E\u0434\u0438\u0442
+      \u0432 \u0434\u043B\u0438\u043D\u043D\u044B\u0439 \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u044B\u0439
+      \u043E\u0431\u0445\u043E\u0434, \u0432\u0442\u043E\u0440\u043E\u0439 \u0440\u0435\u0436\u0435\u0442
+      \u043F\u0443\u0442\u044C \u0447\u0435\u0440\u0435\u0437 \u043E\u0432\u0440\u0430\u0433.
+      \u0420\u0430\u0437\u0432\u0435\u0434\u0447\u0438\u043A \u0443\u0432\u0435\u0440\u0435\u043D,
+      \u0447\u0442\u043E \u043F\u0440\u043E\u0439\u0442\u0438 \u043C\u043E\u0436\u043D\u043E,
+      \u043D\u043E \u0431\u044B\u0441\u0442\u0440\u043E\u0435 \u043F\u0440\u043E\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435
+      \u043F\u043E\u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0445
+      \u043F\u0440\u0438\u043F\u0430\u0441\u043E\u0432."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - choice
+    DurationClass: 1
+    MemoryClass: 0
+    Functions: 0100000003000000
+    DialogueId: road_unmapped_fork_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 60
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionDecisionSystem.Definitions."
+    FutureHooksNotes: "\u041B\u0435\u0433\u0430\u0441\u0438-\u0432\u0435\u0440\u0441\u0438\u044F
+      \u0437\u0434\u0435\u0441\u044C \u0437\u0430\u043F\u0443\u0441\u043A\u0430\u043B\u0430
+      \u0447\u0430\u0441\u043E\u0432\u0443\u044E \u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0443
+      (\xAB\u0411\u0415\u0417\u041E\u041F\u0410\u0421\u041D\u042B\u0419 \u041E\u0411\u0425\u041E\u0414\xBB)
+      \u2014 \u043D\u0435 \u0432\u043E\u0441\u043F\u0440\u043E\u0438\u0437\u0432\u0435\u0434\u0435\u043D\u043E,
+      \u0441\u043C. \u043A\u043B\u0430\u0441\u0441-\u043A\u0430\u043C\u043C\u0435\u043D\u0442."
+  - EncounterId: ROAD_BERRY_BUSHES_01
+    DisplayName: "\u042F\u0433\u043E\u0434\u043D\u044B\u0435 \u0437\u0430\u0440\u043E\u0441\u043B\u0438"
+    Description: "\u0423 \u0434\u043E\u0440\u043E\u0433\u0438 \u043E\u0431\u043D\u0430\u0440\u0443\u0436\u0438\u043B\u0438\u0441\u044C
+      \u0433\u0443\u0441\u0442\u044B\u0435 \u0437\u0430\u0440\u043E\u0441\u043B\u0438
+      \u0441\u043F\u0435\u043B\u044B\u0445 \u044F\u0433\u043E\u0434. \u0418\u0445
+      \u0434\u043E\u0441\u0442\u0430\u0442\u043E\u0447\u043D\u043E, \u0447\u0442\u043E\u0431\u044B
+      \u043F\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u043F\u043E\u0445\u043E\u0434\u043D\u044B\u0439
+      \u0437\u0430\u043F\u0430\u0441, \u043D\u043E \u0441\u0431\u043E\u0440 \u0437\u0430\u0439\u043C\u0451\u0442
+      \u0432\u0440\u0435\u043C\u044F \u0438 \u0437\u0430\u0434\u0435\u0440\u0436\u0438\u0442
+      \u043E\u0442\u0440\u044F\u0434."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - choice
+    DurationClass: 1
+    MemoryClass: 0
+    Functions: 0100000002000000
+    DialogueId: road_berry_bushes_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 60
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionDecisionSystem.Definitions."
+    FutureHooksNotes: "\u041B\u0435\u0433\u0430\u0441\u0438-\u0432\u0435\u0440\u0441\u0438\u044F
+      \u0437\u0434\u0435\u0441\u044C \u0437\u0430\u043D\u0438\u043C\u0430\u043B\u0430
+      3 \u0447\u0430\u0441\u0430 (\xAB\u0421\u0411\u041E\u0420 \u042F\u0413\u041E\u0414\xBB)
+      \u2014 \u043D\u0435 \u0432\u043E\u0441\u043F\u0440\u043E\u0438\u0437\u0432\u0435\u0434\u0435\u043D\u043E,
+      \u0441\u043C. \u043A\u043B\u0430\u0441\u0441-\u043A\u0430\u043C\u043C\u0435\u043D\u0442."
+  - EncounterId: ROAD_HUNGRY_TRAVELERS_01
+    DisplayName: "\u0413\u043E\u043B\u043E\u0434\u043D\u044B\u0435 \u043F\u0443\u0442\u043D\u0438\u043A\u0438"
+    Description: "\u041D\u0430 \u0434\u043E\u0440\u043E\u0433\u0435 \u043E\u0442\u0440\u044F\u0434
+      \u0432\u0441\u0442\u0440\u0435\u0442\u0438\u043B \u0438\u0437\u043C\u043E\u0436\u0434\u0451\u043D\u043D\u044B\u0445
+      \u043F\u0443\u0442\u043D\u0438\u043A\u043E\u0432. \u041E\u043D\u0438 \u043F\u0440\u043E\u0441\u044F\u0442
+      \u0435\u0434\u044B \u0438 \u043E\u0431\u0435\u0449\u0430\u044E\u0442 \u0432\u0437\u0430\u043C\u0435\u043D
+      \u043F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0441\u0442\u0430\u0440\u0443\u044E
+      \u0442\u0440\u043E\u043F\u0443, \u043A\u043E\u0442\u043E\u0440\u043E\u0439
+      \u043D\u0435\u0442 \u043D\u0430 \u043A\u0430\u0440\u0442\u0430\u0445."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - choice
+    DurationClass: 1
+    MemoryClass: 0
+    Functions: 0100000005000000
+    DialogueId: road_hungry_travelers_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 60
+    SelectionWeight: 10
+    UnlimitedOccurrences: 1
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 12
+    AllowedRegionIds: []
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags: []
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u043E
+      \u0438\u0437 ExpeditionDecisionSystem.Definitions."
+    FutureHooksNotes: 

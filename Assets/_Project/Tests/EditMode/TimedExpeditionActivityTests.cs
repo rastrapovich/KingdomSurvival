@@ -48,18 +48,19 @@ public class TimedExpeditionActivityTests
         ContinuousSimulationSystem.Reset(state);
         ContinuousSimulationSystem.NotifyRouteChanged(state);
 
-        state.ActiveExpedition.PendingDecision =
-            new ExpeditionDecisionOccurrence
-            {
-                DefinitionId = "berry_bushes",
-                Title = "Ягодные заросли"
-            };
-
+        // ROAD_BERRY_BUSHES_01 перенесён в Encounter Database (§92-93 —
+        // Encounters/Editor/EncounterLegacyRoadEventsSeedData.cs) и удалён из
+        // ExpeditionDecisionSystem.Definitions. Этот тест — про генерик-
+        // механику Road Stop activity, а не про конкретный контент, поэтому
+        // запускает её напрямую тем же путём, что раньше делал TryApplyChoice.
         string message;
         Assert.That(
-            ExpeditionDecisionSystem.TryApplyChoice(
-                state,
-                "gather_berries",
+            state.TryStartRoadActivity(
+                "berry_bushes:gather_berries",
+                "СБОР ЯГОД",
+                3.0,
+                0,
+                3,
                 out message),
             Is.True,
             message);
@@ -96,18 +97,17 @@ public class TimedExpeditionActivityTests
         MakeEveryLocationVisible(state);
         ContinuousSimulationSystem.Reset(state);
         ContinuousSimulationSystem.NotifyRouteChanged(state);
-        state.ActiveExpedition.PendingDecision =
-            new ExpeditionDecisionOccurrence
-            {
-                DefinitionId = "unmapped_fork",
-                Title = "Развилка без карты"
-            };
-
+        // ROAD_UNMAPPED_FORK_01 перенесён в Encounter Database (§92-93) и
+        // удалён из ExpeditionDecisionSystem.Definitions — см. комментарий в
+        // GatherBerries_... выше.
         string message;
         Assert.That(
-            ExpeditionDecisionSystem.TryApplyChoice(
-                state,
-                "safe_road",
+            state.TryStartRoadActivity(
+                "unmapped_fork:safe_road",
+                "БЕЗОПАСНЫЙ ОБХОД",
+                1.0,
+                0,
+                0,
                 out message),
             Is.True,
             message);

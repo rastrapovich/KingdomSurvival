@@ -20,6 +20,14 @@ namespace KingdomSurvival.Encounters
         public EncounterCategory Category = EncounterCategory.Road;
         public List<string> Tags = new List<string>();
 
+        // Reactive Encounter Layer (§94, §111, §115) — классификация,
+        // presentation всегда одна и та же (Narrative Dialogue). Не каждый
+        // Encounter обязан оставлять Future Hook (§113) или иметь несколько
+        // Function — одна простая причина достаточна (§112).
+        public EncounterDurationClass DurationClass = EncounterDurationClass.Standard;
+        public EncounterMemoryClass MemoryClass = EncounterMemoryClass.None;
+        public List<EncounterFunction> Functions = new List<EncounterFunction>();
+
         // Content
         public string DialogueId = string.Empty;
         public EncounterResolutionMode ResolutionMode = EncounterResolutionMode.DialogueDriven;

@@ -87,68 +87,14 @@ public static class ExpeditionDecisionSystem
     // Временная вероятность для тестового прототипа.
     private const double DecisionChancePerScheduledCheck = 0.5;
 
+    // §92-93 переноса в Encounter-систему: 3 обычных дорожных решения
+    // (unmapped_fork/berry_bushes/hungry_travelers) перенесены в общую
+    // Encounter Database как ROAD_*_01 (см. Encounters/Editor/
+    // EncounterLegacyRoadEventsSeedData.cs) и удалены отсюда. location_discovered
+    // сюда не входит — это структурный игровой узел, обрабатывается отдельно
+    // в TryCreateLocationDiscoveryDecision, не через этот список.
     private static readonly List<DecisionDefinition> Definitions =
-        new List<DecisionDefinition>
-        {
-            new DecisionDefinition(
-                "unmapped_fork",
-                "Развилка без карты",
-                "Старая дорога раздваивается. Один путь уходит в длинный безопасный обход, второй режет путь через овраг. Разведчик уверен, что пройти можно, но быстрое продвижение потребует дополнительных припасов.",
-                new DecisionOptionDefinition(
-                    "shortcut",
-                    "Срезать через овраг",
-                    -2,
-                    0.0,
-                    1,
-                    2),
-                new DecisionOptionDefinition(
-                    "safe_road",
-                    "Идти безопасной дорогой",
-                    0,
-                    1.0,
-                    0,
-                    0,
-                    "БЕЗОПАСНЫЙ ОБХОД")),
-
-            new DecisionDefinition(
-                "berry_bushes",
-                "Ягодные заросли",
-                "У дороги обнаружились густые заросли спелых ягод. Их достаточно, чтобы пополнить походный запас, но сбор займёт время и задержит отряд.",
-                new DecisionOptionDefinition(
-                    "gather_berries",
-                    "Остановиться и собрать ягоды",
-                    3,
-                    3.0,
-                    0,
-                    0,
-                    "СБОР ЯГОД"),
-                new DecisionOptionDefinition(
-                    "keep_moving",
-                    "Не задерживаться",
-                    0,
-                    0.0,
-                    0,
-                    0)),
-
-            new DecisionDefinition(
-                "hungry_travelers",
-                "Голодные путники",
-                "На дороге отряд встретил измождённых путников. Они просят еды и обещают взамен показать старую тропу, которой нет на картах. Командир ждёт приказа короля.",
-                new DecisionOptionDefinition(
-                    "share",
-                    "Поделиться припасами",
-                    -4,
-                    0.0,
-                    1,
-                    4),
-                new DecisionOptionDefinition(
-                    "refuse",
-                    "Отказать и продолжить путь",
-                    0,
-                    0.0,
-                    0,
-                    0))
-        };
+        new List<DecisionDefinition>();
 
     public static void ResolveAtScheduledCheck(
         GameState state,

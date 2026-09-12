@@ -91,22 +91,35 @@
                                     text="Выберите неизведанную область. Маршрут армия пройдёт автоматически."
                                     class="world-map-hint" />
 
-                                <ui:VisualElement name="world-map" class="world-map">
-                                    <ui:VisualElement class="world-map-land world-map-land-west" />
-                                    <ui:VisualElement class="world-map-land world-map-land-north" />
-                                    <ui:VisualElement class="world-map-land world-map-land-east" />
-                                    <ui:Label text="С&#10;↑" class="world-map-compass" />
-                                    <ui:VisualElement name="world-map-terrain" class="world-map-layer world-map-terrain" />
-                                    <ui:VisualElement name="world-map-routes" class="world-map-layer world-map-routes" />
-                                    <ui:VisualElement name="world-map-markers" class="world-map-layer world-map-markers" />
-                                    <ui:Button
-                                        name="world-map-capital-button"
-                                        text="СТОЛИЦА"
-                                        tooltip="Во время похода нажмите, чтобы приказать армии возвращаться"
-                                        class="world-map-capital" />
-                                    <ui:VisualElement name="world-map-army-marker" class="world-map-army-marker">
-                                        <ui:Label text="ОТРЯД" class="world-map-army-badge" />
-                                        <ui:Label name="world-map-army-marker-label" text="" class="world-map-army-label" />
+                                <!-- WM-03: world-map-viewport — рамка фиксированного размера с
+                                     overflow:hidden; сама карта (.world-map) панорамируется/зумируется
+                                     внутри неё (WorldMapViewportController), не меняя размер рамки. -->
+                                <ui:VisualElement name="world-map-viewport" class="world-map-viewport">
+                                    <ui:VisualElement name="world-map" class="world-map">
+                                        <ui:VisualElement class="world-map-land world-map-land-west" />
+                                        <ui:VisualElement class="world-map-land world-map-land-north" />
+                                        <ui:VisualElement class="world-map-land world-map-land-east" />
+                                        <ui:Label text="С&#10;↑" class="world-map-compass" />
+                                        <!-- WM-02: явные слои рендера (пока пустые заготовки под WM-03/WM-09 —
+                                             фон, вода и дороги появятся вместе с Sprite Shape-реками и art-темой;
+                                             сейчас они существуют только как места в порядке отрисовки). -->
+                                        <ui:VisualElement name="world-map-background" class="world-map-layer world-map-background" />
+                                        <ui:VisualElement name="world-map-water" class="world-map-layer world-map-water" />
+                                        <ui:VisualElement name="world-map-terrain" class="world-map-layer world-map-terrain" />
+                                        <ui:VisualElement name="world-map-roads" class="world-map-layer world-map-roads" />
+                                        <ui:VisualElement name="world-map-decoration" class="world-map-layer world-map-decoration" />
+                                        <ui:VisualElement name="world-map-routes" class="world-map-layer world-map-routes" />
+                                        <ui:VisualElement name="world-map-markers" class="world-map-layer world-map-markers" />
+                                        <ui:VisualElement name="world-map-fog" class="world-map-layer world-map-fog" />
+                                        <ui:Button
+                                            name="world-map-capital-button"
+                                            text="СТОЛИЦА"
+                                            tooltip="Во время похода нажмите, чтобы приказать армии возвращаться"
+                                            class="world-map-capital" />
+                                        <ui:VisualElement name="world-map-army-marker" class="world-map-army-marker">
+                                            <ui:Label text="ОТРЯД" class="world-map-army-badge" />
+                                            <ui:Label name="world-map-army-marker-label" text="" class="world-map-army-label" />
+                                        </ui:VisualElement>
                                     </ui:VisualElement>
                                     <!-- UI-M08: карточка осмотра локации по ПКМ на маркере — постоянный,
                                          скрытый по умолчанию узел (display:none в
@@ -117,7 +130,10 @@
                                          (EnsureWorldMapLocationActionElements — метка присутствия армии/
                                          кнопка "ИССЛЕДОВАТЬ", вставлявшиеся между ними через
                                          RemoveFromHierarchy+Add). Оба файла теперь только биндят
-                                         Q<T>(name), порядок частей — из разметки, а не из кода. -->
+                                         Q<T>(name), порядок частей — из разметки, а не из кода.
+                                         WM-03: вынесена из .world-map в .world-map-viewport — это HUD-панель,
+                                         закреплённая за углом экрана (right/bottom), она не должна
+                                         панорамироваться/зумироваться вместе с картой. -->
                                     <ui:VisualElement name="world-map-location-inspection-card" class="world-map-location-inspection-card">
                                         <ui:Label name="world-map-location-inspection-title" class="world-map-location-inspection-title" />
                                         <ui:Label name="world-map-location-inspection-details" class="world-map-location-inspection-details" />

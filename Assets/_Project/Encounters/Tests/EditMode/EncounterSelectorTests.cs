@@ -150,4 +150,91 @@ public sealed class EncounterSelectorTests
         // преобладание тяжёлого веса.
         Assert.That(heavyCount, Is.GreaterThan(lightCount));
     }
+
+    [Test]
+    public void Reactive_Pacing_Cooldown_Blocks_Repeated_Reaction_Encounter_Even_When_Pool_Has_No_General_Cooldown()
+    {
+        EncounterDefinition reaction = MakeEncounter("REACT", 100, 1);
+        reaction.DurationClass = EncounterDurationClass.Reaction;
+
+        EncounterDatabaseAsset database = CreateDatabase(
+            new List<EncounterPoolDefinition>
+            {
+                new EncounterPoolDefinition
+                {
+                    PoolId = "POOL_01", Enabled = true, GlobalTriggerChancePercent = 100,
+                    MinimumHoursBetweenReactiveEncounters = 24
+                }
+            },
+            new List<EncounterDefinition> { reaction });
+
+        EncounterRuntimeStateData runtime = new EncounterRuntimeStateData();
+        runtime.MarkReactiveTriggered("POOL_01", 0, day: 0);
+
+        EncounterOpportunity soonAfter = MakeOpportunity();
+        soonAfter.WorldHour = 5;
+        Assert.That(EncounterSelector.Select(soonAfter, database, MakeContext(), runtime).HasSelection, Is.False);
+
+        EncounterOpportunity later = MakeOpportunity("OP_2");
+        later.WorldHour = 30;
+        Assert.That(EncounterSelector.Select(later, database, MakeContext(), runtime).HasSelection, Is.True);
+    }
+
+    [Test]
+    public void MaxReactiveEncountersPerTravelDay_Blocks_After_Limit_Reached_And_Resets_Next_Day()
+    {
+        EncounterDefinition reaction = MakeEncounter("REACT", 100, 1);
+        reaction.DurationClass = EncounterDurationClass.Micro;
+
+        EncounterDatabaseAsset database = CreateDatabase(
+            new List<EncounterPoolDefinition>
+            {
+                new EncounterPoolDefinition
+                {
+                    PoolId = "POOL_01", Enabled = true, GlobalTriggerChancePercent = 100,
+                    MaxReactiveEncountersPerTravelDay = 2
+                }
+            },
+            new List<EncounterDefinition> { reaction });
+
+        EncounterRuntimeStateData runtime = new EncounterRuntimeStateData();
+        runtime.MarkReactiveTriggered("POOL_01", 1, day: 0);
+        runtime.MarkReactiveTriggered("POOL_01", 2, day: 0);
+
+        EncounterOpportunity sameDay = MakeOpportunity();
+        sameDay.WorldHour = 10;
+        Assert.That(EncounterSelector.Select(sameDay, database, MakeContext(), runtime).HasSelection, Is.False,
+            "Дневной лимит исчерпан (2/2) — третий Reactive Encounter в те же сутки не должен пройти.");
+
+        EncounterOpportunity nextDay = MakeOpportunity("OP_2");
+        nextDay.WorldHour = 26;
+        Assert.That(EncounterSelector.Select(nextDay, database, MakeContext(), runtime).HasSelection, Is.True,
+            "На следующие сутки счётчик должен обнулиться.");
+    }
+
+    [Test]
+    public void Reactive_Pacing_Does_Not_Apply_To_Standard_Duration_Class()
+    {
+        EncounterDefinition standard = MakeEncounter("STD", 100, 1);
+        standard.DurationClass = EncounterDurationClass.Standard;
+
+        EncounterDatabaseAsset database = CreateDatabase(
+            new List<EncounterPoolDefinition>
+            {
+                new EncounterPoolDefinition
+                {
+                    PoolId = "POOL_01", Enabled = true, GlobalTriggerChancePercent = 100,
+                    MinimumHoursBetweenReactiveEncounters = 999, MaxReactiveEncountersPerTravelDay = 0
+                }
+            },
+            new List<EncounterDefinition> { standard });
+
+        EncounterRuntimeStateData runtime = new EncounterRuntimeStateData();
+        runtime.MarkReactiveTriggered("POOL_01", 0, day: 0);
+
+        EncounterOpportunity opportunity = MakeOpportunity();
+        opportunity.WorldHour = 1;
+        Assert.That(EncounterSelector.Select(opportunity, database, MakeContext(), runtime).HasSelection, Is.True,
+            "Reactive-лимиты пула не должны блокировать Standard/Complex/Short/QuestSeed энкаунтеры.");
+    }
 }

@@ -88,12 +88,11 @@ public partial class PrototypeUIController
 
         if (expeditionMapOpen)
         {
+            // WM-03: world-map теперь position:absolute внутри world-map-viewport
+            // и всегда заполняет его на 100% через статический USS — отдельная
+            // подгонка flexGrow/width/height самого world-map здесь больше не
+            // нужна, ConfigureWorldMapFullscreenLayout уже отвечает за viewport.
             ConfigureWorldMapFullscreenLayout();
-            worldMap.style.flexGrow = 1f;
-            worldMap.style.flexShrink = 1f;
-            worldMap.style.width = Length.Percent(100);
-            worldMap.style.height = Length.Percent(100);
-            worldMap.style.marginBottom = 0f;
         }
         else
         {

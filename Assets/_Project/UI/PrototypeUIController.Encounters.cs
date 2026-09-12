@@ -67,6 +67,8 @@ public partial class PrototypeUIController
         if (!selection.HasSelection)
             return;
 
+        EncounterRuntimeService.RecordSelectionPacing(gameState, selection, opportunity);
+
         if (TryOpenNarrativeDialogueById(selection.SelectedEncounter.DialogueId))
             EncounterRuntimeService.RecordEncounterStarted(gameState, selection.SelectedEncounter, opportunity.WorldHour);
     }

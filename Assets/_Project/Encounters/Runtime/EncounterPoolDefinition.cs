@@ -13,6 +13,15 @@ namespace KingdomSurvival.Encounters
         public bool Enabled = true;
         public int GlobalTriggerChancePercent = 100;
         public int MinimumHoursBetweenEncounters;
+
+        // Event spam pacing для коротких Reactive Encounter (§125-127):
+        // применяются Selector'ом ТОЛЬКО когда выбранный кандидат имеет
+        // DurationClass.Reaction или .Micro — Complex/Standard/Short/QuestSeed
+        // используют общий MinimumHoursBetweenEncounters выше и не считаются
+        // в дневной лимит. 0 = не ограничено.
+        public int MinimumHoursBetweenReactiveEncounters;
+        public int MaxReactiveEncountersPerTravelDay;
+
         public string DesignerNotes = string.Empty;
     }
 }

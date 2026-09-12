@@ -25,7 +25,8 @@ namespace KingdomSurvival.Encounters
                 GetPresentCompanionIds(gameState),
                 GetPresentItemIds(gameState),
                 gameState.WorldSeed,
-                GetPartySize(gameState));
+                GetPartySize(gameState),
+                gameState);
         }
 
         public static List<string> GetPresentCompanionIds(GameState gameState)

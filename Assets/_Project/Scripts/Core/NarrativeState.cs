@@ -314,13 +314,23 @@ public sealed class NarrativeEvaluationContext
     // PresentCompanionIds, чтобы не менять существующие вызовы.
     public int PartySize { get; }
 
+    // Ссылка на стратегическое состояние (Food/ArmySupply и т.д.) для
+    // Gameplay Effects (ChangeFood/ChangeSupplies) — Encounter-система,
+    // §106/§63 инструкции. Может быть null (старые вызовы диалога, не
+    // передающие GameState) — тогда эффекты, требующие GameState, молча
+    // не применяются, а не падают с NullReferenceException. Параметр
+    // добавлен в конец конструктора с безопасным default, чтобы не менять
+    // существующие вызовы (тот же принцип, что и PartySize выше).
+    public GameState GameState { get; }
+
     public NarrativeEvaluationContext(
         HeroProfileData hero,
         NarrativeStateData state,
         IReadOnlyCollection<string> presentCompanionIds = null,
         IReadOnlyCollection<string> presentItemIds = null,
         int worldSeed = 0,
-        int? partySize = null)
+        int? partySize = null,
+        GameState gameState = null)
     {
         Hero = hero ?? throw new ArgumentNullException(nameof(hero));
         State = state ?? throw new ArgumentNullException(nameof(state));
@@ -328,6 +338,7 @@ public sealed class NarrativeEvaluationContext
         PresentItemIds = presentItemIds ?? Array.Empty<string>();
         WorldSeed = worldSeed;
         PartySize = partySize ?? (PresentCompanionIds.Count + 1);
+        GameState = gameState;
     }
 
     public bool IsCompanionPresent(string companionId)

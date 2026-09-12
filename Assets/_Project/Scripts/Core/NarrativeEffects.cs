@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
 
-// Первая версия эффектов из §10 инструкции. Изменение снабжения,
-// времени пути, предметов, локаций и состояния места подключается позже
-// отдельными обработчиками — здесь их сознательно нет.
+// Первая версия эффектов из §10 инструкции, расширенная минимальным
+// Gameplay Effects слоем для Encounter-системы (§63/§106): предметы и
+// ресурсы. AdvanceTime сознательно не добавлен — игровые часы живут во
+// внутреннем RuntimeState ContinuousSimulationSystem, а не в GameState,
+// и трогать этот приватный рантайм-класс вслепую отсюда рискованно;
+// изменение локаций/карты/временных состояний по-прежнему подключается
+// позже отдельными обработчиками. Новые значения — строго в конец enum,
+// существующие уже сериализованы по всей базе диалогов.
 public enum NarrativeEffectType
 {
     SetFlag,
@@ -12,7 +17,21 @@ public enum NarrativeEffectType
     ChangeRelation,
     UnlockCheck,
     GrantTrait,
-    RemoveTrait
+    RemoveTrait,
+    GrantItem,
+    RemoveItem,
+    ChangeFood,
+    ChangeSupplies,
+
+    // Продвигает ExpeditionData.RouteIndex на N клеток вперёд (та же
+    // WorldMapNavigation.AdvanceRouteByCells, которой legacy
+    // ExpeditionIncidentSystem/ExpeditionDecisionSystem уже пользуются
+    // напрямую) — чистая мутация GameState.ActiveExpedition, не трогает
+    // внутренний RuntimeState симуляции. Только сокращение пути (IntParam >
+    // 0 клеток вперёд); задержка/остановка (Road Stop activity) сюда
+    // сознательно не добавлена — это отдельный, более рискованный путь
+    // (ActiveActivity пересекается с паузой/модальной очередью).
+    ShortcutRouteCells
 }
 
 [Serializable]
@@ -63,6 +82,24 @@ public sealed class NarrativeEffect
                 break;
             case NarrativeEffectType.RemoveTrait:
                 context.Hero.RemoveTrait(StringParam);
+                break;
+            case NarrativeEffectType.GrantItem:
+                context.State.GrantItem(StringParam);
+                break;
+            case NarrativeEffectType.RemoveItem:
+                context.State.RemoveItem(StringParam);
+                break;
+            case NarrativeEffectType.ChangeFood:
+                if (context.GameState != null)
+                    context.GameState.Food = Math.Max(0, context.GameState.Food + IntParam);
+                break;
+            case NarrativeEffectType.ChangeSupplies:
+                if (context.GameState != null)
+                    context.GameState.ArmySupply = Math.Max(0, context.GameState.ArmySupply + IntParam);
+                break;
+            case NarrativeEffectType.ShortcutRouteCells:
+                if (context.GameState?.ActiveExpedition != null && IntParam > 0)
+                    WorldMapNavigation.AdvanceRouteByCells(context.GameState.ActiveExpedition, IntParam);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(Type), Type, null);

@@ -312,7 +312,8 @@ public partial class PrototypeUIController
             presentCompanionIds,
             presentItemIds,
             gameState.WorldSeed,
-            Chapter01ContextBuilder.GetPartySize(gameState));
+            Chapter01ContextBuilder.GetPartySize(gameState),
+            gameState);
 
         if (!started)
         {

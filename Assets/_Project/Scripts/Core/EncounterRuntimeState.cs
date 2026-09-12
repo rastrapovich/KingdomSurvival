@@ -26,6 +26,21 @@ public sealed class EncounterPoolCooldownEntry
     public double LastTriggeredWorldHour;
 }
 
+// Event spam pacing для Reaction/Micro энкаунтеров (§125-127), отдельно от
+// общего EncounterPoolCooldownEntry: короткие события должны иметь
+// собственный, более частый ритм, независимый от Standard/Complex сцен того
+// же пула. ReactiveCountDay — "сутки" (WorldHour / 24, целиком), к которым
+// относится ReactiveCountThisDay; при переходе на новые сутки счётчик
+// начинается заново.
+[Serializable]
+public sealed class EncounterPoolReactiveState
+{
+    public string PoolId = string.Empty;
+    public double LastReactiveTriggeredWorldHour = -1;
+    public int ReactiveCountDay = -1;
+    public int ReactiveCountThisDay;
+}
+
 [Serializable]
 public sealed class EncounterRuntimeStateData
 {
@@ -41,6 +56,8 @@ public sealed class EncounterRuntimeStateData
     // типов, не сериализуемых стандартным Unity JsonUtility.
     public List<EncounterPoolCooldownEntry> PoolCooldowns = new List<EncounterPoolCooldownEntry>();
 
+    public List<EncounterPoolReactiveState> PoolReactiveStates = new List<EncounterPoolReactiveState>();
+
     // Защита совместимости старых сохранений (§65, §66): после десериализации
     // старого save без этого поля коллекции будут null.
     public void EnsureInitialized()
@@ -51,6 +68,8 @@ public sealed class EncounterRuntimeStateData
             ProcessedOpportunities = new List<string>();
         if (PoolCooldowns == null)
             PoolCooldowns = new List<EncounterPoolCooldownEntry>();
+        if (PoolReactiveStates == null)
+            PoolReactiveStates = new List<EncounterPoolReactiveState>();
     }
 
     public EncounterRuntimeEntry FindEntry(string encounterId)
@@ -135,5 +154,60 @@ public sealed class EncounterRuntimeStateData
         }
 
         PoolCooldowns.Add(new EncounterPoolCooldownEntry { PoolId = poolId, LastTriggeredWorldHour = worldHour });
+    }
+
+    private EncounterPoolReactiveState FindReactiveState(string poolId)
+    {
+        if (string.IsNullOrWhiteSpace(poolId) || PoolReactiveStates == null)
+            return null;
+
+        for (int i = 0; i < PoolReactiveStates.Count; i++)
+        {
+            EncounterPoolReactiveState entry = PoolReactiveStates[i];
+            if (entry != null && string.Equals(entry.PoolId, poolId, StringComparison.Ordinal))
+                return entry;
+        }
+
+        return null;
+    }
+
+    public double GetPoolLastReactiveTriggeredWorldHour(string poolId)
+    {
+        EncounterPoolReactiveState entry = FindReactiveState(poolId);
+        return entry?.LastReactiveTriggeredWorldHour ?? -1;
+    }
+
+    public int GetReactiveCountForDay(string poolId, int day)
+    {
+        EncounterPoolReactiveState entry = FindReactiveState(poolId);
+        if (entry == null || entry.ReactiveCountDay != day)
+            return 0;
+        return entry.ReactiveCountThisDay;
+    }
+
+    public void MarkReactiveTriggered(string poolId, double worldHour, int day)
+    {
+        if (string.IsNullOrWhiteSpace(poolId))
+            return;
+        if (PoolReactiveStates == null)
+            PoolReactiveStates = new List<EncounterPoolReactiveState>();
+
+        EncounterPoolReactiveState entry = FindReactiveState(poolId);
+        if (entry == null)
+        {
+            entry = new EncounterPoolReactiveState { PoolId = poolId };
+            PoolReactiveStates.Add(entry);
+        }
+
+        entry.LastReactiveTriggeredWorldHour = worldHour;
+        if (entry.ReactiveCountDay != day)
+        {
+            entry.ReactiveCountDay = day;
+            entry.ReactiveCountThisDay = 1;
+        }
+        else
+        {
+            entry.ReactiveCountThisDay++;
+        }
     }
 }

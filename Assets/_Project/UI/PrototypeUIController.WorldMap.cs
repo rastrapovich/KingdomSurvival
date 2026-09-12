@@ -6,10 +6,16 @@ using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
+    private VisualElement worldMapViewport;
     private VisualElement worldMap;
+    private VisualElement worldMapBackground;
+    private VisualElement worldMapWater;
     private VisualElement worldMapTerrain;
+    private VisualElement worldMapRoads;
+    private VisualElement worldMapDecoration;
     private VisualElement worldMapRoutes;
     private VisualElement worldMapMarkers;
+    private VisualElement worldMapFog;
     private Button worldMapCapitalButton;
     private VisualElement worldMapArmyMarker;
     private Label worldMapArmyMarkerLabel;
@@ -38,10 +44,16 @@ public partial class PrototypeUIController
 
     private void FindWorldMapElements(VisualElement root)
     {
+        worldMapViewport = root.Q<VisualElement>("world-map-viewport");
         worldMap = root.Q<VisualElement>("world-map");
+        worldMapBackground = root.Q<VisualElement>("world-map-background");
+        worldMapWater = root.Q<VisualElement>("world-map-water");
         worldMapTerrain = root.Q<VisualElement>("world-map-terrain");
+        worldMapRoads = root.Q<VisualElement>("world-map-roads");
+        worldMapDecoration = root.Q<VisualElement>("world-map-decoration");
         worldMapRoutes = root.Q<VisualElement>("world-map-routes");
         worldMapMarkers = root.Q<VisualElement>("world-map-markers");
+        worldMapFog = root.Q<VisualElement>("world-map-fog");
         worldMapCapitalButton = root.Q<Button>("world-map-capital-button");
         worldMapArmyMarker = root.Q<VisualElement>("world-map-army-marker");
         worldMapArmyMarkerLabel =
@@ -52,21 +64,39 @@ public partial class PrototypeUIController
         mapSelectionDetails = root.Q<Label>("map-selection-details");
         mapSendButton = root.Q<Button>("map-send-button");
 
+        // Слои-заготовки (WM-02) пока ничего не рисуют, но не должны перехватывать
+        // клики по карте — как и остальные декоративные/маршрутные слои.
+        if (worldMapBackground != null)
+            worldMapBackground.pickingMode = PickingMode.Ignore;
+
+        if (worldMapWater != null)
+            worldMapWater.pickingMode = PickingMode.Ignore;
+
         if (worldMapTerrain != null)
             worldMapTerrain.pickingMode = PickingMode.Ignore;
 
+        if (worldMapRoads != null)
+            worldMapRoads.pickingMode = PickingMode.Ignore;
+
+        if (worldMapDecoration != null)
+            worldMapDecoration.pickingMode = PickingMode.Ignore;
+
         if (worldMapRoutes != null)
             worldMapRoutes.pickingMode = PickingMode.Ignore;
+
+        if (worldMapFog != null)
+            worldMapFog.pickingMode = PickingMode.Ignore;
 
         if (worldMapArmyMarker != null)
             worldMapArmyMarker.pickingMode = PickingMode.Ignore;
 
         ConfigureWorldMapFullscreenLayout();
+        InitializeWorldMapViewport();
     }
 
     private void ConfigureWorldMapFullscreenLayout()
     {
-        if (worldMap == null || expeditionsScreen == null)
+        if (worldMapViewport == null || expeditionsScreen == null)
             return;
 
         // Старый ScrollView содержал заголовки, статус, подсказку и карточку
@@ -77,8 +107,8 @@ public partial class PrototypeUIController
         if (legacyScroll != null)
             legacyScroll.style.display = DisplayStyle.None;
 
-        worldMap.RemoveFromHierarchy();
-        expeditionsScreen.Add(worldMap);
+        worldMapViewport.RemoveFromHierarchy();
+        expeditionsScreen.Add(worldMapViewport);
 
         expeditionsScreen.style.flexGrow = 1f;
         expeditionsScreen.style.minHeight = 0f;
@@ -87,15 +117,15 @@ public partial class PrototypeUIController
         expeditionsScreen.style.paddingTop = 0f;
         expeditionsScreen.style.paddingBottom = 0f;
 
-        worldMap.style.flexGrow = 1f;
-        worldMap.style.flexShrink = 1f;
-        worldMap.style.width = Length.Percent(100);
-        worldMap.style.height = StyleKeyword.Auto;
-        worldMap.style.minHeight = 0f;
-        worldMap.style.marginLeft = 0f;
-        worldMap.style.marginRight = 0f;
-        worldMap.style.marginTop = 0f;
-        worldMap.style.marginBottom = 0f;
+        worldMapViewport.style.flexGrow = 1f;
+        worldMapViewport.style.flexShrink = 1f;
+        worldMapViewport.style.width = Length.Percent(100);
+        worldMapViewport.style.height = StyleKeyword.Auto;
+        worldMapViewport.style.minHeight = 0f;
+        worldMapViewport.style.marginLeft = 0f;
+        worldMapViewport.style.marginRight = 0f;
+        worldMapViewport.style.marginTop = 0f;
+        worldMapViewport.style.marginBottom = 0f;
 
         if (worldMapHintLabel != null)
             worldMapHintLabel.style.display = DisplayStyle.None;
@@ -105,6 +135,7 @@ public partial class PrototypeUIController
     }
 
     private bool WorldMapElementsExist() =>
+        worldMapViewport != null &&
         worldMap != null &&
         worldMapTerrain != null &&
         worldMapRoutes != null &&
@@ -119,6 +150,7 @@ public partial class PrototypeUIController
             OnWorldMapPointerDown);
         worldMapCapitalButton.clicked +=
             OnWorldMapCapitalClicked;
+        RegisterWorldMapViewportCallbacks();
     }
 
     private void UnregisterWorldMapCallbacks()
@@ -127,6 +159,7 @@ public partial class PrototypeUIController
             OnWorldMapPointerDown);
         worldMapCapitalButton.clicked -=
             OnWorldMapCapitalClicked;
+        UnregisterWorldMapViewportCallbacks();
     }
 
     private void ResetWorldMapSelection()
@@ -289,9 +322,14 @@ public partial class PrototypeUIController
 
         ConfigureWorldMapFullscreenLayout();
 
+        worldMapBackground?.Clear();
+        worldMapWater?.Clear();
         worldMapTerrain.Clear();
+        worldMapRoads?.Clear();
+        worldMapDecoration?.Clear();
         worldMapRoutes.Clear();
         worldMapMarkers.Clear();
+        worldMapFog?.Clear();
         renderedWorldMapRoute = null;
         renderedWorldMapRouteIndex = -1;
 
@@ -332,6 +370,38 @@ public partial class PrototypeUIController
         if (theme == null)
             return;
 
+        DrawTerrainForType(theme, WorldMapTerrainType.Hills);
+        DrawTerrainForType(theme, WorldMapTerrainType.Mountains);
+    }
+
+    private void DrawTerrainForType(
+        WorldMapVisualTheme theme,
+        WorldMapTerrainType terrain)
+    {
+        WorldMapTerrainVisualProfile profile =
+            theme.FindTerrainProfile(terrain);
+
+        if (profile == null)
+            return;
+
+        // WM-04: если художник уже дал варианты-массы для этого типа
+        // местности — рисуем органичные пятна по кластерам клеток вместо
+        // сетки квадратов. Пока вариантов нет (как сейчас, арта ещё нет),
+        // используем прежнюю плоскую заливку по клетке — деградация без
+        // регрессии, поведение как в WM-01.
+        if (profile.MassVariants.Count > 0)
+            DrawTerrainMassClusters(profile, terrain);
+        else
+            DrawTerrainFlatCells(profile, terrain);
+    }
+
+    private void DrawTerrainFlatCells(
+        WorldMapTerrainVisualProfile profile,
+        WorldMapTerrainType terrain)
+    {
+        if (profile.CellColor.a <= 0f)
+            return;
+
         // Равнина не рисуется отдельными клетками — она фон карты. Клетки
         // добавляются только там, где местность реально отличается, чтобы
         // не создавать сотни VisualElement на пустом месте.
@@ -343,24 +413,8 @@ public partial class PrototypeUIController
                  x < WorldMapNavigation.GridWidth;
                  x++)
             {
-                WorldMapTerrainType terrain =
-                    WorldMapNavigation.GetTerrainAtGridCell(x, y);
-
-                if (terrain == WorldMapTerrainType.Plains)
+                if (WorldMapNavigation.GetTerrainAtGridCell(x, y) != terrain)
                     continue;
-
-                WorldMapTerrainVisualProfile profile =
-                    theme.FindTerrainProfile(terrain);
-
-                if (profile == null || profile.CellColor.a <= 0f)
-                    continue;
-
-                float px =
-                    x * 100f /
-                    (WorldMapNavigation.GridWidth - 1);
-                float py =
-                    y * 100f /
-                    (WorldMapNavigation.GridHeight - 1);
 
                 VisualElement cell =
                     new VisualElement();
@@ -372,17 +426,23 @@ public partial class PrototypeUIController
 
                 cell.style.left =
                     new Length(
-                        px,
+                        GridXToPercent(x),
                         LengthUnit.Percent);
                 cell.style.top =
                     new Length(
-                        py,
+                        GridYToPercent(y),
                         LengthUnit.Percent);
 
                 worldMapTerrain.Add(cell);
             }
         }
     }
+
+    private static float GridXToPercent(int x) =>
+        x * 100f / (WorldMapNavigation.GridWidth - 1);
+
+    private static float GridYToPercent(int y) =>
+        y * 100f / (WorldMapNavigation.GridHeight - 1);
 
     private void DrawRoute(
         List<MapPointData> route,

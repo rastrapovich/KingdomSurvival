@@ -77,4 +77,25 @@ public sealed class EncounterRuntimeStateTests
         Assert.That(data.GetPoolLastTriggeredWorldHour("POOL_01"), Is.EqualTo(72.0));
         Assert.That(data.PoolCooldowns, Has.Count.EqualTo(1));
     }
+
+    [Test]
+    public void ReactiveTrigger_Roundtrip_And_DayReset()
+    {
+        EncounterRuntimeStateData data = new EncounterRuntimeStateData();
+
+        Assert.That(data.GetPoolLastReactiveTriggeredWorldHour("POOL_01"), Is.EqualTo(-1));
+        Assert.That(data.GetReactiveCountForDay("POOL_01", 0), Is.EqualTo(0));
+
+        data.MarkReactiveTriggered("POOL_01", 5, day: 0);
+        Assert.That(data.GetPoolLastReactiveTriggeredWorldHour("POOL_01"), Is.EqualTo(5));
+        Assert.That(data.GetReactiveCountForDay("POOL_01", 0), Is.EqualTo(1));
+
+        data.MarkReactiveTriggered("POOL_01", 10, day: 0);
+        Assert.That(data.GetReactiveCountForDay("POOL_01", 0), Is.EqualTo(2));
+
+        // Новые сутки — счётчик за старый день не переносится.
+        data.MarkReactiveTriggered("POOL_01", 26, day: 1);
+        Assert.That(data.GetReactiveCountForDay("POOL_01", 1), Is.EqualTo(1));
+        Assert.That(data.GetReactiveCountForDay("POOL_01", 0), Is.EqualTo(0));
+    }
 }

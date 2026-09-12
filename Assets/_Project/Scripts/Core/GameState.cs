@@ -1266,16 +1266,8 @@ public class GameState
         return nearest;
     }
 
-    public static string GetRegionName(float xPercent, float yPercent)
-    {
-        if (xPercent < 34f)
-            return "Западные земли";
-        if (xPercent > 66f)
-            return "Восточные земли";
-        if (yPercent < 40f)
-            return "Северные земли";
-        return "Центральные земли";
-    }
+    public static string GetRegionName(float xPercent, float yPercent) =>
+        WorldMapRegionRegistry.FindRegion(xPercent, yPercent).Name;
 
     // Канонический состав похода — командир и от 0 до 4 бойцов
     // (KINGDOM_SURVIVAL_GAME_CONCEPT_CANON v1.25): герой может уйти один.

@@ -62,99 +62,15 @@ public static class ExpeditionIncidentSystem
     private static readonly Random Random = new Random();
     private static int nextOccurrenceId = 1;
 
+    // §92-93 переноса в Encounter-систему: 10 обычных происшествий
+    // (rats/hunt/bad_water/cache/washed_road/short_path/cold_rain/
+    // torn_bags/fishing/good_crossing) перенесены в общую Encounter Database
+    // как ROAD_*_01 (см. Encounters/Editor/EncounterLegacyRoadEventsSeedData.cs)
+    // и удалены отсюда, чтобы не дублироваться с новой системой. road_predator
+    // остаётся здесь — он завязан на NarrativeCheckResolver и не переносился.
     private static readonly List<IncidentDefinition> Definitions =
         new List<IncidentDefinition>
         {
-            new IncidentDefinition(
-                "rats",
-                "Крысы в припасах",
-                "Ночью часовой слышал возню возле мешков. Он решил, что это ветер. Ветер оказался очень хорошо откормленным.",
-                ExpeditionIncidentTone.Negative,
-                IncidentEffectKind.Supply,
-                -2,
-                0),
-
-            new IncidentDefinition(
-                "hunt",
-                "Удачная охота",
-                "Охотники вернулись в лагерь не с рассказом о добыче, а с самой добычей. Сегодня это редкая роскошь.",
-                ExpeditionIncidentTone.Positive,
-                IncidentEffectKind.Supply,
-                3,
-                0),
-
-            new IncidentDefinition(
-                "bad_water",
-                "Испорченная вода",
-                "Несколько бурдюков пахли так, будто внутри уже успела возникнуть и погибнуть отдельная цивилизация. Воду пришлось вылить.",
-                ExpeditionIncidentTone.Negative,
-                IncidentEffectKind.Supply,
-                -2,
-                0),
-
-            new IncidentDefinition(
-                "cache",
-                "Заброшенный схрон",
-                "Под старым навесом нашли хорошо укрытый запас еды. Хозяин так и не вернулся за ним, и отряд решил не спорить с судьбой.",
-                ExpeditionIncidentTone.Positive,
-                IncidentEffectKind.Supply,
-                4,
-                0),
-
-            new IncidentDefinition(
-                "washed_road",
-                "Размытая дорога",
-                "Дорога впереди превратилась в вязкое месиво. Пришлось искать обход, и отряд потерял часть времени.",
-                ExpeditionIncidentTone.Negative,
-                IncidentEffectKind.Route,
-                0,
-                1),
-
-            new IncidentDefinition(
-                "short_path",
-                "Короткая тропа",
-                "Разведчик заметил старую тропу между холмами. Она выглядит неприятно, зато действительно сокращает путь.",
-                ExpeditionIncidentTone.Positive,
-                IncidentEffectKind.Route,
-                0,
-                -1),
-
-            new IncidentDefinition(
-                "cold_rain",
-                "Холодный ливень",
-                "Ливень промочил часть запасов и заставил отряд искать более длинный, но безопасный проход.",
-                ExpeditionIncidentTone.Mixed,
-                IncidentEffectKind.SupplyAndRoute,
-                -1,
-                1),
-
-            new IncidentDefinition(
-                "torn_bags",
-                "Порванные мешки",
-                "Когда пропажу заметили, дорожка из крупы уже тянулась далеко назад. Возвращаться за ней никто не предложил.",
-                ExpeditionIncidentTone.Negative,
-                IncidentEffectKind.Supply,
-                -3,
-                0),
-
-            new IncidentDefinition(
-                "fishing",
-                "Рыбное место",
-                "Стоянка у реки неожиданно оказалась полезнее запланированного. Вечером котлы были полнее обычного.",
-                ExpeditionIncidentTone.Positive,
-                IncidentEffectKind.Supply,
-                2,
-                0),
-
-            new IncidentDefinition(
-                "good_crossing",
-                "Удачный переход",
-                "Местность впереди оказалась проще, чем обещали старые карты. Отряд прошёл заметно дальше обычного.",
-                ExpeditionIncidentTone.Positive,
-                IncidentEffectKind.Route,
-                0,
-                -1),
-
             // Единственный дорожный Encounter, подключённый к общему
             // NarrativeCheckResolver (§15, §21 инструкции по качествам и
             // проверкам) — вертикальный тест связки. Остальные происшествия

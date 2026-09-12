@@ -326,6 +326,65 @@ Seed переведён на milestone `P13_COUNCIL`: P13-T01 и P13-T03 име�
 - `CreateWorldMapNode` получил `ApplyWorldMapNodeIcon`: если в `WorldMapIconLibrary` для `location.Id` есть спрайт, поверх кнопки добавляется `Image` (класс `world-map-node-icon`) и текстовый глиф (`✓`/`●`) очищается; без темы/иконки — прежнее поведение (только глиф).
 - `PrototypeUIController.WorldMapInteractionPolish.cs` и `...WorldMapLocationActions.cs` не тронуты (эти два файла проверяются regression-тестом на отсутствие `new VisualElement/Label/Button`).
 
-**Важное ограничение реализации:** сами ассеты-экземпляры (`KingdomSurvivalWorldMapTheme.asset`, `KingdomSurvivalWorldMapIcons.asset`, `KingdomSurvivalWorldMapDatabase.asset`) не созданы в этом проходе — они требуют Unity Editor (создание через новые пункты `Kingdom Survival/Карта/...` в меню Assets → Create, с ручным сохранением в `Assets/_Project/WorldMapVisual/Resources/WorldMapVisual/`), поскольку в удалённой среде нет возможности сгенерировать корректный `.asset`/`.meta` YAML с правильными GUID. До создания этих ассетов `WorldMapVisualRuntime.LoadActiveTheme()` возвращает `null`, и карта выглядит так же, как до WM-01 (без цвета местности и иконок) — регрессии нет.
+Три ассета-экземпляра (`KingdomSurvivalWorldMapIcons.asset`, `KingdomSurvivalWorldMapTheme.asset` с профилями `Hills`/`Mountains`, `KingdomSurvivalWorldMapDatabase.asset`) собраны вручную как Unity YAML (не через Editor `Create Asset Menu`) по образцу уже существующего `KingdomSurvivalBattlefields.asset`, с GUID script-ссылок из `.meta` скриптов и самостоятельно сгенерированными GUID самих ассетов. Лежат в `Assets/_Project/WorldMapVisual/Resources/WorldMapVisual/`.
 
-**Компиляция и тесты не запускались** (Unity Editor/C# compiler/Test Runner недоступны в этой среде). Перед использованием нужно: открыть проект в Unity, дождаться импорта новых скриптов и генерации `.meta`, убедиться в отсутствии ошибок компиляции, затем создать три ассета выше через контекстное меню и запустить `WorldMapNavigationTests`/`WorldMapLocationCardLayoutTests`/`WorldMapLocationCardStructureRegressionTests`.
+**Статус проверки:** пользователь подтвердил в своём Unity Editor — компиляция чистая (остались только три предсуществующих предупреждения, не связанных с WM-01: устаревший `FindFirstObjectByType` в `Buildings.cs` и два неиспользуемых поля в `WorldMap.cs`, оставленные ещё до этой сессии), ассеты импортировались корректно, `Icon Library`/`Terrain Profiles` в Inspector не пустые, в Play Mode клетки Hills/Mountains закрашиваются цветом из темы. WM-01 подтверждён рабочим. EditMode `Run All` (`WorldMapNavigationTests` и др.) отдельно не запускался.
+
+## 16. World Map 2.0 — WM-02 (слои рендера) — 12.09.2026
+
+Второй этап из раздела 9.9 канона. Цель WM-02 — явная структура слоёв поверх карты, без изменения текущего поведения.
+
+`Prototype_Main.uxml`: внутри `world-map` добавлены пять новых пустых `VisualElement`-слоёв (класс `world-map-layer` + собственный класс) в порядке отрисовки между существующими `world-map-terrain`/`world-map-routes`/`world-map-markers`:
+
+`world-map-background → world-map-water → world-map-terrain → world-map-roads → world-map-decoration → world-map-routes → world-map-markers → world-map-fog`.
+
+Пока это только заготовки под будущие этапы — `Background`/`Water`/`Roads` наполнятся вместе с WM-09 (Sprite Shape-реки/дороги), `Decoration` — вместе с WM-04 (`massVariants` из терраин-профилей, уже подготовленные в WM-01), `Fog` — с будущей визуализацией состояний знания (§9.1 канона: Неизвестно/Слух/Обнаружено/Исследовано/Изменено). Сейчас слои пустые, `pickingMode = Ignore`, не перехватывают клики и не влияют на `OnWorldMapPointerDown` (тот по-прежнему сверяет цель клика с `worldMap`/`worldMapTerrain`/`worldMapRoutes`/`worldMapMarkers` — остальные слои в клик-таргет физически попасть не могут).
+
+`PrototypeUIController.WorldMap.cs`: добавлены поля `worldMapBackground/Water/Roads/Decoration/Fog`, находятся в `FindWorldMapElements`, очищаются в `RefreshWorldMapPanel` через `?.Clear()` (нет детей — нет эффекта). Рендер-логика (`DrawTerrainCells`, `CreateWorldMapNode`, `DrawRoute`) не менялась.
+
+**Сознательно не делали в этом проходе:** вынос отрисовки в отдельный класс `WorldMapRenderer` (по архитектуре из канона) — отложен до WM-03, где всё равно понадобится `WorldMapCoordinateTransform`/`WorldMapViewportController` и переработка структуры рендера ради pan/zoom; делать это дважды нет смысла. Сейчас риск регрессии в уже работающей и покрытой тестами карте важнее архитектурной чистоты на пустом месте.
+
+Компиляция/тесты не запускались с моей стороны — ждёт проверки в Unity, как WM-01.
+
+**Статус проверки:** пользователь подтвердил в своём Unity Editor — компиляция без ошибок.
+
+## 17. World Map 2.0 — WM-03 (большая карта + pan/zoom) — 12.09.2026
+
+Третий этап из раздела 9.9 канона. Карта остаётся единым UI Toolkit-полотном (без перехода на Camera/world-space — решение зафиксировано в переписке до WM-01), pan/zoom реализован вручную поверх существующей percent-модели координат.
+
+**Структура:** `Prototype_Main.uxml` — `world-map` (сама карта, все WM-02 слои, капитан, армия) теперь вложена в новый `world-map-viewport` (рамка фиксированного размера, `overflow: hidden`). `world-map-location-inspection-card` вынесена из `world-map` в `world-map-viewport` — это HUD-панель, закреплённая за углом экрана (`right/bottom`), она не должна панорамироваться/зумироваться вместе с картой, в отличие от кнопки столицы и маркера армии (те остаются percent-позиционированы внутри `world-map` и корректно едут вместе с картой).
+
+`Prototype_Exploration.uss`: `.world-map-viewport` получила прежние размеры/рамку/фон `.world-map` (350px по умолчанию, растягивается в fullscreen через C#, как раньше). `.world-map` стала `position: absolute; left:0; top:0; width:100%; height:100%; transform-origin: 0% 0%;` — заполняет viewport при zoom=1, паном/зумом управляет код, а не layout.
+
+**Новый файл `PrototypeUIController.WorldMapViewport.cs`:**
+
+- Зум — колесо мыши, шаг 0.15, диапазон `[0.75; 2.5]`, привязан к точке под курсором (формула: конвертировать точку курсора в локальные координаты канваса до смены масштаба, затем пересчитать `panOffset` так, чтобы та же точка канваса осталась под курсором после смены).
+- Панорама — **средняя кнопка мыши** (не левая — там мгновенный приказ похода; не правая — та занята осмотром локации по ПКМ, UI-M08), через `PointerDown/Move/Up` + `CapturePointer`.
+- `ClampWorldMapPan()` не даёt карте уехать за рамку viewport; при zoom ≤ 1 карта центрируется.
+- Технически зум/пан реализованы как `worldMap.style.scale` + `worldMap.style.left/top` (не Camera) — `WorldToLocal`, используемый в `OnWorldMapPointerDown` для перевода клика в проценты карты, уже учитывает полную трансформацию сам, поэтому клик-навигация не потребовала отдельной математики (`WorldMapCoordinateTransform` как отдельный класс не понадобился — UI Toolkit уже даёт это через `WorldToLocal`).
+
+**Правки существующих файлов:** `PrototypeUIController.WorldMap.cs` — `ConfigureWorldMapFullscreenLayout()` теперь переставляет/растягивает `worldMapViewport` вместо `worldMap`; `WorldMapElementsExist()` и `Register/UnregisterWorldMapCallbacks()` учитывают viewport. `PrototypeUIController.WorldMapInteractionPolish.cs` — удалена задублированная подгонка `flexGrow/width/height` самого `world-map` в `RefreshWorldMapPresentation()` (стала бессмысленной, раз `world-map` теперь `position: absolute` со статичными 100% в USS; сама функция и её вызов `ConfigureWorldMapFullscreenLayout()` не убирались, файл по-прежнему не содержит `new VisualElement/Label/Button`/`RemoveFromHierarchy`, что требует regression-тест).
+
+**Не менялось:** `DrawTerrainCells`, `CreateWorldMapNode`, `DrawRoute`, вся percent-модель координат (`XPercent/YPercent`), `WorldMapNavigation`, `GameState`. При zoom=1 без панорамирования (состояние по умолчанию при открытии экрана) карта выглядит и ведёт себя как до WM-03.
+
+**Статус проверки:** пользователь подтвердил в Unity — колесо мыши зумит, средняя кнопка тащит карту в границах рамки, левый клик по-прежнему сразу отдаёт приказ похода.
+
+## 18. World Map 2.0 — WM-04 (массы вместо клеток) и WM-06 (регионы как данные) — 12.09.2026
+
+### WM-04 — местность массами, не сеткой
+
+`DrawTerrainCells()` в `PrototypeUIController.WorldMap.cs` разделена на диспетчер `DrawTerrainForType` + два режима: `DrawTerrainFlatCells` (старое поведение WM-01 — плоская заливка по клетке) и новый `DrawTerrainMassClusters` в **`PrototypeUIController.WorldMapTerrainMasses.cs`**.
+
+Логика: связные (4-directional flood fill) кластеры клеток одного типа местности → на каждый кластер 1–6 крупных спрайтов-"масс" (`cluster.Count / 4`, clamp 1..6), выбранных из `WorldMapTerrainVisualProfile.MassVariants`, со случайным (в пределах bounding box кластера) положением/масштабом (0.85–1.2)/поворотом (±8°). Сид детерминирован от `gameState.WorldSeed` + тип местности + индекс кластера — расстановка не "дрожит" между вызовами `RefreshWorldMapPanel` в течение одной партии.
+
+**Включается автоматически, когда художник заполнит `MassVariants` в `KingdomSurvivalWorldMapTheme.asset`** (Editor, drag&drop, без кода) — пока список пуст (как сейчас), `DrawTerrainForType` использует старый `DrawTerrainFlatCells`, поведение идентично WM-01/WM-03. Новый USS-класс `world-map-terrain-mass` (`Prototype_Exploration.uss`) — размер ~2.5 клетки сетки, центрируется через отрицательные margin.
+
+### WM-06 — регионы как данные
+
+Новый файл **`Assets/_Project/Scripts/Core/WorldMapRegionDefinition.cs`** (чистый C#, без UnityEngine — `KingdomSurvival.Core` собран с `noEngineReferences: true`, так что визуальные ScriptableObject-типы туда пойти не могут): `WorldMapRegionDefinition` (Id/Name/прямоугольная зона в процентах) + статический `WorldMapRegionRegistry.Regions` — те же 4 региона с теми же именами и порядком проверки, что были захардкожены в `GameState.GetRegionName` (`x<34 → Запад; x>66 → Восток; y<40 → Север; иначе Центр`).
+
+`GameState.GetRegionName(x, y)` теперь однострочник, делегирующий в `WorldMapRegionRegistry.FindRegion(x, y).Name` — **поведение не изменилось** для всех практических координат (единственная теоретическая разница — восточная граница здесь `x >= 66` вместо строгого `x > 66f`; сгенерированные позиции никогда не попадают ровно в 66.0, так что для реального EditMode-теста `RegionName_UsesFourExpectedMapAreas` разницы нет — прогнал все 4 тест-кейса вручную по новой логике, совпадают).
+
+Сознательно не делали в этом проходе: не формализовал слоты появления (WM-07) и не менял `GameState.CreateNewGame`/размещение стартовых локаций — это более рискованная правка (затрагивает `GameState`, которую используют минимум 7 EditMode test-файлов, включая travel-time и reward-логику), и её стоит делать отдельным проходом после проверки WM-04/WM-06 в Unity, а не наслаивать непроверенные изменения.
+
+Компиляция/тесты не запускались с моей стороны.

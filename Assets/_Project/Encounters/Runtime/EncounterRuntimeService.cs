@@ -58,10 +58,33 @@ namespace KingdomSurvival.Encounters
             if (!selection.HasSelection)
                 return EncounterRunResult.Failed("no_selection:" + selection.NoSelectionReason);
 
-            if (!string.IsNullOrWhiteSpace(selection.PoolId))
-                state.Encounters.MarkPoolTriggered(selection.PoolId, opportunity.WorldHour);
+            RecordSelectionPacing(state, selection, opportunity);
 
             return StartEncounter(state, hero, selection.SelectedEncounter, opportunity, dialogueDatabase, out session);
+        }
+
+        // Пер-пуловый кулдаун + event-spam-лимиты Reaction/Micro (§125-127)
+        // отмечаются здесь, а не внутри pure EncounterSelector (§23) — вызывается
+        // ОБОИМИ путями запуска: TryResolveOpportunity (headless/тесты) и
+        // PrototypeUIController.Encounters.cs (реальный игровой путь, который
+        // не может использовать TryResolveOpportunity целиком, т.к. сам
+        // владеет NarrativeDialogueRuntimeSession — см. StartEncounter ниже).
+        public static void RecordSelectionPacing(GameState state, EncounterSelectionResult selection, EncounterOpportunity opportunity)
+        {
+            if (state == null || selection == null || opportunity == null || !selection.HasSelection)
+                return;
+            if (string.IsNullOrWhiteSpace(selection.PoolId))
+                return;
+
+            EnsureState(state);
+            state.Encounters.MarkPoolTriggered(selection.PoolId, opportunity.WorldHour);
+
+            EncounterDurationClass durationClass = selection.SelectedEncounter.DurationClass;
+            if (durationClass == EncounterDurationClass.Reaction || durationClass == EncounterDurationClass.Micro)
+            {
+                int day = (int)(opportunity.WorldHour / 24.0);
+                state.Encounters.MarkReactiveTriggered(selection.PoolId, opportunity.WorldHour, day);
+            }
         }
 
         public static EncounterRunResult StartEncounter(
@@ -92,7 +115,8 @@ namespace KingdomSurvival.Encounters
                 EncounterEvaluationContextBuilder.GetPresentCompanionIds(state),
                 EncounterEvaluationContextBuilder.GetPresentItemIds(state),
                 state.WorldSeed,
-                EncounterEvaluationContextBuilder.GetPartySize(state));
+                EncounterEvaluationContextBuilder.GetPartySize(state),
+                state);
 
             if (!started)
                 return EncounterRunResult.Failed(error);

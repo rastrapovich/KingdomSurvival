@@ -266,9 +266,9 @@ public partial class PrototypeUIController
         }
     }
 
-    // Route-маркеры остаются внутри world-map и потому продолжают получать
-    // компенсацию zoom. Сетка вынесена в screen-space overlay и обновляется
-    // отдельно через RefreshWorldMapGridOverlay().
+    // Route-маркеры и точка героя остаются внутри world-map, поэтому их
+    // физический размер компенсируется обратно пропорционально zoom. Сетка
+    // вынесена в screen-space overlay и обновляется отдельно.
     private void RefreshWorldMapZoomCompensatedVisuals()
     {
         RefreshWorldMapGridOverlay();
@@ -288,6 +288,8 @@ public partial class PrototypeUIController
                 }
             });
         }
+
+        RefreshWorldMapArmyMarkerScreenSize();
     }
 
     private void RegisterCancelledRosterPreservation(

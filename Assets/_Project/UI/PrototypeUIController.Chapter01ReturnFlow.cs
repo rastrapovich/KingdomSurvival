@@ -5,13 +5,8 @@ public partial class PrototypeUIController
     // P11/P12: отдельный узкий poller первого возвращения. Он намеренно не
     // расширяет общий dispatcher сюжетных сцен: N14-N16 нужны только этой
     // главе и опираются на уже существующие Dialogue Database, карту и время.
-    // LateUpdate выбран, чтобы увидеть физическое завершение возвращения,
-    // которое ContinuousSimulationSystem мог совершить в Update этого кадра.
-    private void LateUpdate()
-    {
-        RefreshChapter01ReturnFlow();
-    }
-
+    // Вызывается из единственного PrototypeUIController.LateUpdate() после
+    // Update(), чтобы увидеть физическое завершение возвращения в тот же кадр.
     private void RefreshChapter01ReturnFlow()
     {
         if (gameState == null || isGameOver || gameState.Narrative == null)

@@ -261,3 +261,16 @@ Dialogue Database N14/N14½/N15/N16 в этом commit не переписыва
 Это **не новая Unity-архитектура**. Не создавать заранее универсальные `PendingConsequenceManager`, `ProblemPressureSystem`, `MicroReactionSystem`, `LocationStateMachine`, `HumanEchoManager` или глобальный Event Engine. Сначала инструменты проверяются реальными сценами `«Дома на чужой воде»`, первой дальней дороги и первого региона; код закрепляет только повторяющиеся доказанные требования.
 
 `NARRATIVE.md` уже содержит канонические родительские правила Narrative State, изменяемых локаций, failure-forward, эха, жизни мира без героя и границы технической реализации; новый документ расширяет **утверждённый инструментарий и словарь**, но не меняет сюжетные факты, `LORE.md` или общий канон v1.30.
+
+## 13. Hotfix — дублированный `LateUpdate` после P11/P12
+
+После Pull Unity обнаружил `CS0111` в `PrototypeUIController.Debug.cs`: partial-класс `PrototypeUIController` содержал два метода `LateUpdate()` с одинаковой сигнатурой — существующий debug lifecycle и добавленный P11/P12 poller.
+
+Исправление локальное:
+
+- отдельный `LateUpdate()` удалён из `PrototypeUIController.Chapter01ReturnFlow.cs`;
+- `RefreshChapter01ReturnFlow()` вызывается из уже существующего единственного `PrototypeUIController.LateUpdate()` в `PrototypeUIController.Debug.cs`;
+- вызов стоит до раннего выхода `!debugMenuInitialized`, поэтому return-flow работает и когда debug-меню недоступно/не инициализировано;
+- порядок остаётся прежним: `Update()` выполняет непрерывную симуляцию, затем `LateUpdate()` видит итог кадра и может открыть N14/N14½/N15/N16.
+
+Канон, Dialogue Database, карта, время, таблица эха и логика P11/P12 не менялись. Unity-компиляцию после hotfix необходимо повторить; затем запустить полный EditMode `Run All`.

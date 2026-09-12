@@ -52,6 +52,11 @@ public partial class PrototypeUIController
 
     private void LateUpdate()
     {
+        // P11/P12: единый LateUpdate всей partial-класса. Return flow должен
+        // видеть результат ContinuousSimulationSystem.Update этого же кадра,
+        // а отдельный LateUpdate в другом partial-файле создаёт CS0111.
+        RefreshChapter01ReturnFlow();
+
         if (!debugMenuInitialized)
             return;
 

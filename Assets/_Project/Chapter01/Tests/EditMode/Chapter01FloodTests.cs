@@ -51,6 +51,23 @@ public sealed class Chapter01FloodTests
         return state;
     }
 
+    private static NarrativeDialogueView AdvanceCurrentNodeText(
+        NarrativeDialogueRuntimeSession session,
+        NarrativeDialogueView view)
+    {
+        int guard = 0;
+        while (view.AvailableChoices.Count == 1 &&
+               view.AvailableChoices[0].ChoiceId == NarrativeDialogueRuntimeSession.SequentialContinueChoiceId)
+        {
+            Assert.LessOrEqual(view.VisibleTextBlocks.Count, 1, "Один шаг показал несколько реплик.");
+            Assert.Less(guard++, 64, "Зациклен runtime-переход между репликами.");
+            view = session.SelectChoice(NarrativeDialogueRuntimeSession.SequentialContinueChoiceId).View;
+        }
+
+        Assert.LessOrEqual(view.VisibleTextBlocks.Count, 1, "Один шаг показал несколько реплик.");
+        return view;
+    }
+
     // Проходит N04 целиком: решающая проверка → тяжёлый выбор приоритета →
     // конечный узел → Exit. Возвращает состояние, в котором осел итог.
     private static NarrativeStateData RunFullFloodScenario(
@@ -63,8 +80,11 @@ public sealed class Chapter01FloodTests
         NarrativeStateData state = NewStateAtFlood();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
 
-        bool started = session.Start(database, Chapter01Ids.Dialogues.D04, new HeroProfileData(), state, out _, out string error);
+        bool started = session.Start(
+            database, Chapter01Ids.Dialogues.D04, new HeroProfileData(), state,
+            out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueSelectionResult afterCheck = session.SelectChoicePreview(startChoiceId, forcedOutcome);
         Assert.IsFalse(afterCheck.DialogueEnded, "Результат проверки не должен завершать сцену.");
@@ -166,8 +186,11 @@ public sealed class Chapter01FloodTests
         NarrativeStateData state = NewStateAtFlood();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
 
-        bool started = session.Start(database, Chapter01Ids.Dialogues.D04, new HeroProfileData(), state, out _, out string error);
+        bool started = session.Start(
+            database, Chapter01Ids.Dialogues.D04, new HeroProfileData(), state,
+            out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueSelectionResult afterCheck = session.SelectChoicePreview(startChoiceId, outcome);
 

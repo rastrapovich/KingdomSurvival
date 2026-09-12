@@ -34,10 +34,11 @@ namespace KingdomSurvival.DialogueDatabase
     }
 
     // Виды варианта ответа — §11 инструкции. Continue добавлен production-
-    // правилом "одна реплика = один шаг" (см. §15 инструкции по P06): это
-    // кнопка "читать дальше", а не действие героя — обязательно в конце
-    // enum, значения существующих видов уже сериализованы как числа по
-    // всей базе диалогов и не должны сдвигаться.
+    // правилом "одна реплика = один шаг" (см. канон диалогов): это кнопка
+    // "читать дальше", а не действие героя. Continue бывает авторским
+    // переходом между узлами и синтетическим runtime-переходом между
+    // TextBlock одного узла. Обязательно в конце enum: значения прежних
+    // видов уже сериализованы как числа и не должны сдвигаться.
     public enum DialogueChoiceKind
     {
         Normal,
@@ -79,10 +80,11 @@ namespace KingdomSurvival.DialogueDatabase
         public bool PortraitFlipX => portraitFlipX;
     }
 
-    // Один текстовый блок узла: основная реплика, наблюдение, память, мысль
-    // героя, реплика спутника либо повествование. Показывается только если
-    // Conditions выполнены; необязательная пассивная проверка добавляет
-    // ещё один слой видимости поверх условий. См. §11.
+    // Один авторский текстовый блок: основная реплика, наблюдение, память,
+    // мысль героя, реплика спутника либо повествование. Узел может хранить
+    // несколько модульных блоков, но runtime показывает их строго по одному
+    // в авторском порядке. Conditions определяют участие блока в очереди;
+    // пассивная проверка определяет раскрытие его текста.
     [Serializable]
     public sealed class DialogueTextBlockData
     {
@@ -575,6 +577,15 @@ namespace KingdomSurvival.DialogueDatabase
 
                     if (!string.IsNullOrWhiteSpace(choice.ChoiceId) && !choiceIdsInNode.Add(choice.ChoiceId))
                         issues.Add(choicePrefix + ": повторяющийся ChoiceId '" + choice.ChoiceId + "' в узле.");
+
+                    if (string.Equals(
+                        choice.GetStableChoiceId(node.Id, choiceIndex),
+                        NarrativeDialogueRuntimeSession.SequentialContinueChoiceId,
+                        StringComparison.Ordinal))
+                    {
+                        issues.Add(
+                            choicePrefix + ": ChoiceId зарезервирован для runtime-перехода между репликами.");
+                    }
 
                     if (string.IsNullOrWhiteSpace(choice.Text))
                         issues.Add(choicePrefix + ": пустой текст ответа.");

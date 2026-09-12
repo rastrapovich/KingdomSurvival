@@ -177,9 +177,35 @@ public sealed class Chapter01P09Tests
         return null;
     }
 
+    private static NarrativeDialogueView AdvanceCurrentNodeText(
+        NarrativeDialogueRuntimeSession session,
+        NarrativeDialogueView view,
+        List<NarrativeDialogueVisibleBlock> observedBlocks = null)
+    {
+        int guard = 0;
+        while (true)
+        {
+            Assert.LessOrEqual(view.VisibleTextBlocks.Count, 1, "Один шаг показал несколько реплик.");
+            if (view.VisibleTextBlocks.Count == 1)
+                observedBlocks?.Add(view.VisibleTextBlocks[0]);
+
+            if (view.AvailableChoices.Count != 1 ||
+                view.AvailableChoices[0].ChoiceId != NarrativeDialogueRuntimeSession.SequentialContinueChoiceId)
+            {
+                return view;
+            }
+
+            Assert.Less(guard++, 64, "Зациклен runtime-переход между репликами.");
+            view = session.SelectChoice(NarrativeDialogueRuntimeSession.SequentialContinueChoiceId).View;
+        }
+    }
+
     // Проводит сессию через две линейные Continue-реплики N11 до узла с
     // пассивной проверкой/реальным выбором маршрута, возвращает итоговый view.
-    private static NarrativeDialogueView AdvanceD11ToRoadChoice(NarrativeDialogueRuntimeSession session, NarrativeDialogueView view)
+    private static NarrativeDialogueView AdvanceD11ToRoadChoice(
+        NarrativeDialogueRuntimeSession session,
+        NarrativeDialogueView view,
+        List<NarrativeDialogueVisibleBlock> roadChoiceBlocks = null)
     {
         NarrativeDialogueChoiceView step1 = FindChoice(view, DialogueChoiceKind.Continue);
         Assert.IsNotNull(step1);
@@ -191,7 +217,7 @@ public sealed class Chapter01P09Tests
         NarrativeDialogueSelectionResult r2 = session.SelectChoice(step2.ChoiceId);
         Assert.IsFalse(r2.DialogueEnded);
 
-        return r2.View;
+        return AdvanceCurrentNodeText(session, r2.View, roadChoiceBlocks);
     }
 
     [Test]
@@ -199,10 +225,11 @@ public sealed class Chapter01P09Tests
     {
         GameState gameState = NewGameStateEnRouteToOldWaterSearch(900010);
         NarrativeDialogueRuntimeSession session = StartD11(gameState);
-        NarrativeDialogueView view = AdvanceD11ToRoadChoice(session, session.BuildView());
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceD11ToRoadChoice(session, session.BuildView(), observed);
 
         bool anyRevealed = false;
-        foreach (NarrativeDialogueVisibleBlock block in view.VisibleTextBlocks)
+        foreach (NarrativeDialogueVisibleBlock block in observed)
         {
             if (block.BlockId == "chapter01.node.11.03_check_success" && block.IsTextRevealed)
                 anyRevealed = true;
@@ -222,10 +249,11 @@ public sealed class Chapter01P09Tests
         commander.HeroProfile.SetCompetency(NarrativeCompetencyIds.Fieldcraft, 5);
 
         NarrativeDialogueRuntimeSession session = StartD11(gameState);
-        NarrativeDialogueView view = AdvanceD11ToRoadChoice(session, session.BuildView());
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceD11ToRoadChoice(session, session.BuildView(), observed);
 
         bool revealed = false;
-        foreach (NarrativeDialogueVisibleBlock block in view.VisibleTextBlocks)
+        foreach (NarrativeDialogueVisibleBlock block in observed)
         {
             if (block.BlockId == "chapter01.node.11.03_check_success" && block.IsTextRevealed)
                 revealed = true;

@@ -19,6 +19,32 @@ public sealed class Chapter01FourResidentsTests
 
     private static readonly string[] HouseResidentDialogueIds = { D01, D02, D03 };
 
+    private static NarrativeDialogueView AdvanceCurrentNodeText(
+        NarrativeDialogueRuntimeSession session,
+        NarrativeDialogueView view,
+        List<NarrativeDialogueVisibleBlock> observedBlocks = null)
+    {
+        int guard = 0;
+        while (true)
+        {
+            Assert.LessOrEqual(view.VisibleTextBlocks.Count, 1, "Один шаг показал несколько реплик.");
+            if (view.VisibleTextBlocks.Count == 1)
+                observedBlocks?.Add(view.VisibleTextBlocks[0]);
+
+            if (view.AvailableChoices.Count != 1 ||
+                view.AvailableChoices[0].ChoiceId != NarrativeDialogueRuntimeSession.SequentialContinueChoiceId)
+            {
+                return view;
+            }
+
+            Assert.Less(guard++, 64, "Зациклен runtime-переход между репликами.");
+            NarrativeDialogueSelectionResult result = session.SelectChoice(
+                NarrativeDialogueRuntimeSession.SequentialContinueChoiceId);
+            Assert.IsFalse(result.DialogueEnded);
+            view = result.View;
+        }
+    }
+
     [Test]
     public void FourResidentSpeakers_Exist_With_StableIds_And_DisplayNames()
     {
@@ -153,18 +179,20 @@ public sealed class Chapter01FourResidentsTests
 
         Assert.IsTrue(started, error);
 
-        string[] expectedSpeakerSequence = { "narrator", "ostafiy", "lada", "miron", "ulyana", "ostafiy", "lada" };
-        Assert.AreEqual(expectedSpeakerSequence.Length, view.VisibleTextBlocks.Count);
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceCurrentNodeText(session, view, observed);
 
+        string[] expectedSpeakerSequence = { "narrator", "ostafiy", "lada", "miron", "ulyana", "ostafiy", "lada" };
+        Assert.AreEqual(expectedSpeakerSequence.Length, observed.Count);
         for (int i = 0; i < expectedSpeakerSequence.Length; i++)
         {
-            Assert.AreEqual(expectedSpeakerSequence[i], view.VisibleTextBlocks[i].SpeakerId, "block #" + i);
+            Assert.AreEqual(expectedSpeakerSequence[i], observed[i].SpeakerId, "block #" + i);
         }
 
-        Assert.AreEqual("Остафий", view.VisibleTextBlocks[1].SpeakerDisplayName);
-        Assert.AreEqual("Лада", view.VisibleTextBlocks[2].SpeakerDisplayName);
-        Assert.AreEqual("Мирон", view.VisibleTextBlocks[3].SpeakerDisplayName);
-        Assert.AreEqual("Ульяна", view.VisibleTextBlocks[4].SpeakerDisplayName);
+        Assert.AreEqual("Остафий", observed[1].SpeakerDisplayName);
+        Assert.AreEqual("Лада", observed[2].SpeakerDisplayName);
+        Assert.AreEqual("Мирон", observed[3].SpeakerDisplayName);
+        Assert.AreEqual("Ульяна", observed[4].SpeakerDisplayName);
     }
 
     [Test]
@@ -184,6 +212,7 @@ public sealed class Chapter01FourResidentsTests
 
         Assert.IsTrue(started, error);
         Assert.AreEqual("ulyana", view.VisibleTextBlocks[0].SpeakerId);
+        view = AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueSelectionResult toOstafiy = session.SelectChoice("chapter01.node.01_skip_choice");
         Assert.IsFalse(toOstafiy.DialogueEnded);
@@ -212,12 +241,12 @@ public sealed class Chapter01FourResidentsTests
 
         bool started = session.Start(database, D01, hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        view = AdvanceCurrentNodeText(session, view);
 
         // Суждение 1: пассивная проверка (сложность 11) провалена. Новая
         // presentation-семантика (инструкция "новое отображение пассивных
         // наблюдений и проверок") — блок наблюдения остаётся видимым
         // (СУЖДЕНИЕ: ПРОВАЛ), но текст не раскрыт и путь не заблокирован.
-        Assert.AreEqual(2, view.VisibleTextBlocks.Count);
         NarrativeDialogueVisibleBlock observationBlock = null;
         foreach (NarrativeDialogueVisibleBlock candidate in view.VisibleTextBlocks)
         {
@@ -236,9 +265,12 @@ public sealed class Chapter01FourResidentsTests
         // P04-T04 — "Passive check independence").
         Assert.IsTrue(state.HasFlag("chapter01.flag.home_baseline_captured"));
 
-        session.SelectChoice("chapter01.node.01_skip_choice");
-        session.SelectChoice("chapter01.node.01_ostafiy_exit");
-        session.SelectChoice("chapter01.node.01_lada_exit");
+        view = session.SelectChoice("chapter01.node.01_skip_choice").View;
+        view = AdvanceCurrentNodeText(session, view);
+        view = session.SelectChoice("chapter01.node.01_ostafiy_exit").View;
+        view = AdvanceCurrentNodeText(session, view);
+        view = session.SelectChoice("chapter01.node.01_lada_exit").View;
+        view = AdvanceCurrentNodeText(session, view);
         NarrativeDialogueSelectionResult final = session.SelectChoice("chapter01.node.01_exit");
 
         Assert.IsTrue(final.DialogueEnded);
@@ -258,8 +290,8 @@ public sealed class Chapter01FourResidentsTests
 
         bool started = session.Start(database, D01, hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        view = AdvanceCurrentNodeText(session, view);
 
-        Assert.AreEqual(2, view.VisibleTextBlocks.Count);
         NarrativeDialogueVisibleBlock observationBlock = null;
         foreach (NarrativeDialogueVisibleBlock candidate in view.VisibleTextBlocks)
         {
@@ -276,9 +308,12 @@ public sealed class Chapter01FourResidentsTests
         // зависит от исхода Суждения.
         Assert.IsTrue(state.HasFlag("chapter01.flag.home_baseline_captured"));
 
-        session.SelectChoice("chapter01.node.01_skip_choice");
-        session.SelectChoice("chapter01.node.01_ostafiy_exit");
-        session.SelectChoice("chapter01.node.01_lada_exit");
+        view = session.SelectChoice("chapter01.node.01_skip_choice").View;
+        view = AdvanceCurrentNodeText(session, view);
+        view = session.SelectChoice("chapter01.node.01_ostafiy_exit").View;
+        view = AdvanceCurrentNodeText(session, view);
+        view = session.SelectChoice("chapter01.node.01_lada_exit").View;
+        view = AdvanceCurrentNodeText(session, view);
         NarrativeDialogueSelectionResult final = session.SelectChoice("chapter01.node.01_exit");
 
         Assert.IsTrue(final.DialogueEnded);
@@ -323,8 +358,10 @@ public sealed class Chapter01FourResidentsTests
 
         Assert.IsTrue(started, error);
 
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceCurrentNodeText(session, view, observed);
         HashSet<string> speakerIds = new HashSet<string>();
-        foreach (NarrativeDialogueVisibleBlock block in view.VisibleTextBlocks)
+        foreach (NarrativeDialogueVisibleBlock block in observed)
             speakerIds.Add(block.SpeakerId);
 
         Assert.That(speakerIds, Is.EquivalentTo(new[] { "narrator", "miron", "lada", "ostafiy", "ulyana" }));

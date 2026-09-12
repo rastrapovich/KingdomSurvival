@@ -110,6 +110,102 @@ public sealed class DialogueDatabaseCheckSystemTests
     }
 
     [Test]
+    public void MultipleTextBlocks_ArePresentedOneAtATime_BeforeAuthoredChoices()
+    {
+        DialogueDatabaseAsset asset = ScriptableObject.CreateInstance<DialogueDatabaseAsset>();
+        SetField(asset, "speakers", new List<DialogueSpeakerData>
+        {
+            MakeSpeaker("narrator", "Рассказчик"),
+            MakeSpeaker("lada", "Лада")
+        });
+
+        DialogueTextBlockData first = MakeTextBlock(
+            "b_first", DialogueTextBlockKind.MainLine, "Первая реплика.");
+        DialogueTextBlockData second = MakeTextBlock(
+            "b_second", DialogueTextBlockKind.MainLine, "Вторая реплика.",
+            onRevealEffects: new List<NarrativeEffect>
+            {
+                new NarrativeEffect
+                {
+                    EffectExecutionId = "eff_second_revealed",
+                    Type = NarrativeEffectType.SetFlag,
+                    StringParam = "second_revealed"
+                }
+            });
+        SetField(second, "speakerIdOverride", "lada");
+
+        DialogueNodeData startNode = MakeNode(
+            "start",
+            "narrator",
+            new List<DialogueTextBlockData> { first, second },
+            new List<DialogueChoiceData> { MakeExitChoice("c_exit", "Уйти.") });
+        DialogueDefinitionData dialogue = MakeDialogue(
+            "sequential_blocks_demo", "start", new List<DialogueNodeData> { startNode });
+        SetField(asset, "dialogues", new List<DialogueDefinitionData> { dialogue });
+
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        bool started = session.Start(
+            asset, "sequential_blocks_demo", new HeroProfileData(), state,
+            out NarrativeDialogueView firstView, out string error);
+        Assert.IsTrue(started, error);
+
+        Assert.AreEqual(1, firstView.VisibleTextBlocks.Count);
+        Assert.AreEqual("b_first", firstView.VisibleTextBlocks[0].BlockId);
+        Assert.AreEqual("narrator", firstView.VisibleTextBlocks[0].SpeakerId);
+        Assert.AreEqual(1, firstView.AvailableChoices.Count);
+        Assert.AreEqual(
+            NarrativeDialogueRuntimeSession.SequentialContinueChoiceId,
+            firstView.AvailableChoices[0].ChoiceId);
+        Assert.AreEqual(DialogueChoiceKind.Continue, firstView.AvailableChoices[0].Kind);
+        Assert.IsFalse(state.HasFlag("second_revealed"));
+        Assert.Throws<System.InvalidOperationException>(() => session.SelectChoice("c_exit"));
+
+        NarrativeDialogueSelectionResult next = session.SelectChoice(
+            NarrativeDialogueRuntimeSession.SequentialContinueChoiceId);
+
+        Assert.AreEqual("start", next.View.NodeId);
+        Assert.AreEqual(1, next.View.VisibleTextBlocks.Count);
+        Assert.AreEqual("b_second", next.View.VisibleTextBlocks[0].BlockId);
+        Assert.AreEqual("lada", next.View.VisibleTextBlocks[0].SpeakerId);
+        Assert.IsTrue(state.HasFlag("second_revealed"));
+        Assert.IsTrue(HasChoice(next.View.AvailableChoices, "c_exit"));
+        Assert.IsFalse(HasChoice(
+            next.View.AvailableChoices,
+            NarrativeDialogueRuntimeSession.SequentialContinueChoiceId));
+
+        Object.DestroyImmediate(asset);
+    }
+
+    [Test]
+    public void AuthoredChoice_CannotUseReservedSequentialContinueId()
+    {
+        DialogueDatabaseAsset asset = ScriptableObject.CreateInstance<DialogueDatabaseAsset>();
+        SetField(asset, "speakers", new List<DialogueSpeakerData> { MakeSpeaker("narrator", "Рассказчик") });
+
+        DialogueNodeData startNode = MakeNode(
+            "start",
+            "narrator",
+            new List<DialogueTextBlockData>
+            {
+                MakeTextBlock("b_main", DialogueTextBlockKind.MainLine, "Реплика.")
+            },
+            new List<DialogueChoiceData>
+            {
+                MakeExitChoice(NarrativeDialogueRuntimeSession.SequentialContinueChoiceId, "Уйти.")
+            });
+        DialogueDefinitionData dialogue = MakeDialogue(
+            "reserved_choice_demo", "start", new List<DialogueNodeData> { startNode });
+        SetField(asset, "dialogues", new List<DialogueDefinitionData> { dialogue });
+
+        List<string> issues = new List<string>();
+        asset.CollectValidationIssuesForDialogue("reserved_choice_demo", issues);
+
+        Assert.IsTrue(issues.Exists(issue => issue.Contains("зарезервирован")), string.Join("\n", issues));
+        Object.DestroyImmediate(asset);
+    }
+
+    [Test]
     public void BuildView_Shows_Passive_Block_And_Respects_Choice_Visibility()
     {
         DialogueDatabaseAsset asset = BuildDemoDatabase();
@@ -120,7 +216,13 @@ public sealed class DialogueDatabaseCheckSystemTests
         bool started = session.Start(asset, "demo_checks", hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
 
-        Assert.AreEqual(2, view.VisibleTextBlocks.Count);
+        Assert.AreEqual(1, view.VisibleTextBlocks.Count);
+        Assert.AreEqual("b_main", view.VisibleTextBlocks[0].BlockId);
+        Assert.AreEqual(NarrativeDialogueRuntimeSession.SequentialContinueChoiceId, view.AvailableChoices[0].ChoiceId);
+        view = AdvanceCurrentNodeText(session, view);
+
+        Assert.AreEqual(1, view.VisibleTextBlocks.Count);
+        Assert.AreEqual("b_obs", view.VisibleTextBlocks[0].BlockId);
         Assert.IsTrue(HasChoice(view.AvailableChoices, "c_decisive"));
         Assert.IsTrue(HasChoice(view.AvailableChoices, "c_returnable"));
         Assert.IsTrue(HasChoice(view.AvailableChoices, "c_exit"));
@@ -140,8 +242,9 @@ public sealed class DialogueDatabaseCheckSystemTests
         HeroProfileData hero = new HeroProfileData();
         NarrativeStateData state = new NarrativeStateData();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
-        bool started = session.Start(asset, "demo_checks", hero, state, out _, out string error);
+        bool started = session.Start(asset, "demo_checks", hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueSelectionResult first = session.SelectChoicePreview("c_decisive", NarrativeCheckForcedOutcome.ForceSuccess);
         Assert.IsTrue(first.CheckResult.Success);
@@ -149,6 +252,8 @@ public sealed class DialogueDatabaseCheckSystemTests
 
         session.SelectChoice("back1");
         Assert.AreEqual("start", session.CurrentNodeId);
+
+        AdvanceCurrentNodeText(session, session.BuildView());
 
         NarrativeDialogueSelectionResult second = session.SelectChoicePreview("c_decisive", NarrativeCheckForcedOutcome.ForceFailure);
         Assert.AreEqual("decisive_success", second.View.NodeId);
@@ -162,8 +267,9 @@ public sealed class DialogueDatabaseCheckSystemTests
         HeroProfileData hero = new HeroProfileData();
         NarrativeStateData state = new NarrativeStateData();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
-        bool started = session.Start(asset, "demo_checks", hero, state, out _, out string error);
+        bool started = session.Start(asset, "demo_checks", hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueSelectionResult failed = session.SelectChoicePreview("c_returnable", NarrativeCheckForcedOutcome.ForceFailure);
         Assert.IsFalse(failed.CheckResult.Success);
@@ -179,7 +285,7 @@ public sealed class DialogueDatabaseCheckSystemTests
         Assert.AreEqual(1, state.AppliedEffectExecutionIds.FindAll(id => id == "eff_unlock_returnable").Count);
 
         session.SelectChoice("back3");
-        NarrativeDialogueView backAtStart = session.BuildView();
+        NarrativeDialogueView backAtStart = AdvanceCurrentNodeText(session, session.BuildView());
         Assert.IsTrue(HasChoice(backAtStart.AvailableChoices, "c_returnable"));
     }
 
@@ -190,8 +296,9 @@ public sealed class DialogueDatabaseCheckSystemTests
         HeroProfileData hero = new HeroProfileData();
         NarrativeStateData state = new NarrativeStateData();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
-        bool started = session.Start(asset, "demo_checks", hero, state, out _, out string error, worldSeedValue: 777);
+        bool started = session.Start(asset, "demo_checks", hero, state, out NarrativeDialogueView view, out string error, worldSeedValue: 777);
         Assert.IsTrue(started, error);
+        AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueSelectionResult result = session.SelectChoice("c_returnable");
         Assert.IsNotNull(result.CheckResult);
@@ -212,6 +319,7 @@ public sealed class DialogueDatabaseCheckSystemTests
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
         bool started = session.Start(asset, "demo_checks", hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        view = AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueVisibleBlock block = FindBlock(view.VisibleTextBlocks, "b_obs");
         Assert.IsNotNull(block);
@@ -241,6 +349,7 @@ public sealed class DialogueDatabaseCheckSystemTests
         Assert.IsTrue(started, error);
 
         Assert.IsTrue(HasBlock(view.VisibleTextBlocks, "b_main"));
+        view = AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueVisibleBlock secret = FindBlock(view.VisibleTextBlocks, "b_secret");
         Assert.IsNotNull(secret, "Провалившийся пассивный блок теперь тоже присутствует в production view.");
@@ -263,8 +372,9 @@ public sealed class DialogueDatabaseCheckSystemTests
         HeroProfileData hero = new HeroProfileData();
         NarrativeStateData state = new NarrativeStateData();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
-        bool started = session.Start(asset, "passive_fail_demo", hero, state, out _, out string error);
+        bool started = session.Start(asset, "passive_fail_demo", hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueView productionView = session.BuildView();
         NarrativeDialogueVisibleBlock productionBlock = FindBlock(productionView.VisibleTextBlocks, "b_secret");
@@ -296,6 +406,8 @@ public sealed class DialogueDatabaseCheckSystemTests
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
         bool started = session.Start(asset, "passive_gate_demo", hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        Assert.IsFalse(state.HasFlag("gate_flag"));
+        view = AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueVisibleBlock block = FindBlock(view.VisibleTextBlocks, "b_secret");
         Assert.IsNotNull(block);
@@ -317,6 +429,8 @@ public sealed class DialogueDatabaseCheckSystemTests
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
         bool started = session.Start(asset, "passive_gate_demo", hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        Assert.IsFalse(state.HasFlag("gate_flag"));
+        view = AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueVisibleBlock block = FindBlock(view.VisibleTextBlocks, "b_secret");
         Assert.IsNotNull(block);
@@ -336,8 +450,9 @@ public sealed class DialogueDatabaseCheckSystemTests
         HeroProfileData hero = new HeroProfileData { Instinct = HeroProfileData.MinQualityValue };
         NarrativeStateData state = new NarrativeStateData();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
-        bool started = session.Start(asset, "passive_gate_demo", hero, state, out _, out string error);
+        bool started = session.Start(asset, "passive_gate_demo", hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueView second = session.BuildView();
         NarrativeDialogueVisibleBlock block = FindBlock(second.VisibleTextBlocks, "b_secret");
@@ -358,8 +473,9 @@ public sealed class DialogueDatabaseCheckSystemTests
         HeroProfileData hero = new HeroProfileData();
         NarrativeStateData state = new NarrativeStateData();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
-        bool started = session.Start(asset, "demo_checks", hero, state, out _, out string error);
+        bool started = session.Start(asset, "demo_checks", hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueSelectionResult result = session.SelectChoicePreview("c_decisive", NarrativeCheckForcedOutcome.ForceSuccess);
 
@@ -378,8 +494,9 @@ public sealed class DialogueDatabaseCheckSystemTests
         HeroProfileData hero = new HeroProfileData();
         NarrativeStateData state = new NarrativeStateData();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
-        bool started = session.Start(asset, "demo_checks", hero, state, out _, out string error);
+        bool started = session.Start(asset, "demo_checks", hero, state, out NarrativeDialogueView view, out string error);
         Assert.IsTrue(started, error);
+        AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueSelectionResult result = session.SelectChoicePreview("c_returnable", NarrativeCheckForcedOutcome.ForceFailure);
 
@@ -400,8 +517,9 @@ public sealed class DialogueDatabaseCheckSystemTests
         HeroProfileData hero = new HeroProfileData();
         NarrativeStateData state = new NarrativeStateData();
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
-        bool started = session.Start(asset, "demo_checks", hero, state, out _, out string error, worldSeedValue: 555);
+        bool started = session.Start(asset, "demo_checks", hero, state, out NarrativeDialogueView view, out string error, worldSeedValue: 555);
         Assert.IsTrue(started, error);
+        AdvanceCurrentNodeText(session, view);
 
         NarrativeDialogueSelectionResult result = session.SelectChoice("c_returnable");
 
@@ -640,6 +758,24 @@ public sealed class DialogueDatabaseCheckSystemTests
                 return true;
         }
         return false;
+    }
+
+    private static NarrativeDialogueView AdvanceCurrentNodeText(
+        NarrativeDialogueRuntimeSession session,
+        NarrativeDialogueView view)
+    {
+        int guard = 0;
+        while (view.AvailableChoices.Count == 1 &&
+               view.AvailableChoices[0].ChoiceId == NarrativeDialogueRuntimeSession.SequentialContinueChoiceId)
+        {
+            Assert.Less(guard++, 64, "Зациклен runtime-переход между репликами.");
+            NarrativeDialogueSelectionResult result = session.SelectChoice(
+                NarrativeDialogueRuntimeSession.SequentialContinueChoiceId);
+            Assert.IsFalse(result.DialogueEnded);
+            view = result.View;
+        }
+
+        return view;
     }
 
     private static bool HasBlock(IReadOnlyList<NarrativeDialogueVisibleBlock> list, string blockId)

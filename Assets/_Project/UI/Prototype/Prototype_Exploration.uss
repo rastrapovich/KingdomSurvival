@@ -181,36 +181,51 @@
 }
 
 .world-map-route-dot {
+    /* WM-12: базовые px уменьшены — при старом максимуме зума (2.5×) 5-7px
+       были уместны, при новом (10×) те же px превращались в точки размером
+       почти в целую клетку. Как и everything внутри .world-map, px здесь
+       визуально умножаются на текущий zoom (WorldMapViewport). */
     position: absolute;
-    width: 5px;
-    height: 5px;
+    width: 2px;
+    height: 2px;
     background-color: rgb(103, 99, 84);
-    border-radius: 3px;
+    border-radius: 1px;
     opacity: 0.54;
 }
 
 .world-map-route-dot-active {
-    width: 7px;
-    height: 7px;
+    width: 3px;
+    height: 3px;
     background-color: rgb(226, 187, 99);
-    border-radius: 4px;
+    border-radius: 2px;
     opacity: 0.96;
 }
 
 .world-map-route-dot-preview {
-    width: 6px;
-    height: 6px;
+    width: 2.5px;
+    height: 2.5px;
     background-color: rgb(190, 164, 104);
-    border-radius: 3px;
+    border-radius: 1px;
     opacity: 0.82;
 }
 
 .world-map-terrain-cell {
+    /* Размер (width/height) задаётся кодом (PrototypeUIController.WorldMap.cs,
+       AddTerrainRunElement) из реального GridWidth/GridHeight — раньше был
+       захардкожен под старую сетку 26×16, ломался при смене размера сетки. */
     position: absolute;
-    width: 4.5%;
-    height: 6.8%;
     border-radius: 3px;
     opacity: 0.72;
+}
+
+.world-map-river-segment {
+    /* WM-09: позиция left/top — начало сегмента, поворот вокруг левого
+       края по вертикальному центру (transform-origin), ширина в процентах
+       (длина реального отрезка карты), высота в пикселях (толщина реки,
+       масштабируется вместе с zoom карты, как и всё остальное внутри
+       .world-map). */
+    position: absolute;
+    transform-origin: 0% 50%;
 }
 
 .world-map-terrain-mass {
@@ -330,11 +345,12 @@
 }
 
 .world-map-capital {
+    /* WM-12: left/top/width/height задаются кодом (PrototypeUIController.
+       WorldMap.cs, RefreshWorldMapCapital) из реального разрешения сетки —
+       раньше были захардкожены (37%/74%, 26%/48px) и не совпадали с
+       WorldMapNavigation.CapitalXPercent/YPercent (50/81), которые реально
+       использует путь и центрирование камеры. */
     position: absolute;
-    left: 37%;
-    top: 74%;
-    width: 26%;
-    height: 48px;
     color: rgb(226, 225, 214);
     background-color: rgb(47, 54, 61);
     border-left-width: 2px;
@@ -345,10 +361,19 @@
     border-right-color: rgb(96, 105, 113);
     border-top-color: rgb(96, 105, 113);
     border-bottom-color: rgb(96, 105, 113);
-    border-radius: 5px;
-    font-size: 10px;
-    -unity-font-style: bold;
-    white-space: normal;
+    /* Круглая точка (не прямоугольник с текстом — при ½ клетки текст
+       "СТОЛИЦА" физически не поместится; название теперь в tooltip). */
+    border-radius: 50%;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    /* Без этого встроенный min-height/min-width темы Button (Unity USS
+       unity-button) побеждает наш маленький height/width из кода — в CSS-
+       подобном каскаде min-height всегда сильнее явного меньшего height.
+       Это и было причиной гигантской "точки" столицы на скриншоте. */
+    min-width: 0;
+    min-height: 0;
 }
 
 .world-map-capital:hover {
@@ -369,14 +394,28 @@
 }
 
 .world-map-army-marker {
+    /* WM-12: width/height задаются кодом (RefreshWorldMapArmyMarker) — та же
+       ½ клетки, что и у столицы. min-width/min-height: 0 обязательны — без
+       них встроенный min-size темы и/или интринсик-размер дочерних Label
+       побеждают наш маленький height/width (та же причина, что и у гигантской
+       "точки" столицы — см. .world-map-capital). Текст ("ОТРЯД"/часы) в
+       такой маленький кружок физически не помещается, поэтому дети скрыты
+       (display:none, ставится кодом) и вынесены в tooltip самого маркера. */
     display: none;
     position: absolute;
-    width: 74px;
-    min-height: 38px;
     align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+    background-color: rgb(232, 192, 98);
+    border-radius: 50%;
 }
 
 .world-map-army-badge {
+    /* WM-12: маркер армии теперь ½ клетки — текст физически не помещается,
+       перенесён в tooltip .world-map-army-marker (RefreshWorldMapArmyMarker). */
+    display: none;
     padding-left: 5px;
     padding-right: 5px;
     padding-top: 3px;
@@ -390,6 +429,7 @@
 }
 
 .world-map-army-label {
+    display: none;
     margin-top: 2px;
     color: rgb(243, 218, 162);
     font-size: 8px;

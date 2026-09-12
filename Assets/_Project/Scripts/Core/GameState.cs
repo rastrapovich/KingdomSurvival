@@ -432,18 +432,25 @@ public class GameState
             new LocationData("forest", "Чёрный лес", 5, "высокая")
         };
 
-        Random worldRandom = new Random(WorldSeed);
-        ShuffleLocations(locationPool, worldRandom);
+        // WM-08: отдельный поток случайности для расстановки локаций,
+        // производный от WorldSeed, но не сам WorldSeed напрямую — будущие
+        // источники случайности (декорации и т.п.) не будут случайно сдвигать
+        // результат размещения локаций, потребляя из той же последовательности.
+        Random locationRandom = new Random(DeriveStreamSeed(WorldSeed, "location"));
+        ShuffleLocations(locationPool, locationRandom);
 
-        float[,] candidatePositions =
-        {
-            { 13f, 20f }, { 48f, 12f }, { 80f, 25f }
-        };
+        // WM-07: точка каждой локации выбирается внутри авторской зоны-слота
+        // (WorldMapSpawnSlotRegistry), а не вокруг одной жёсткой координаты
+        // с небольшим джиттером — та же локация может оказаться в любом месте
+        // зоны, а не в узком пятачке.
+        IReadOnlyList<WorldMapSpawnSlotDefinition> slots =
+            WorldMapSpawnSlotRegistry.StartingLocationSlots;
 
         for (int i = 0; i < locationPool.Count; i++)
         {
-            float x = candidatePositions[i, 0] + worldRandom.Next(-4, 5);
-            float y = candidatePositions[i, 1] + worldRandom.Next(-3, 4);
+            WorldMapSpawnSlotDefinition slot = slots[i % slots.Count];
+            float x = slot.PickXPercent(locationRandom);
+            float y = slot.PickYPercent(locationRandom);
             List<MapPointData> candidateRoute = WorldMapNavigation.FindPath(
                 WorldMapNavigation.CapitalXPercent,
                 WorldMapNavigation.CapitalYPercent,
@@ -481,6 +488,23 @@ public class GameState
             LocationData temporary = locations[i];
             locations[i] = locations[swapIndex];
             locations[swapIndex] = temporary;
+        }
+    }
+
+    // WM-08: детерминированно производит отдельный сид под конкретный поток
+    // случайности (локации/декорации/...) от общего WorldSeed, чтобы потоки
+    // не делили одну последовательность System.Random и не влияли друг на друга.
+    private static int DeriveStreamSeed(int worldSeed, string streamTag)
+    {
+        unchecked
+        {
+            int hash = 17;
+            hash = hash * 31 + worldSeed;
+
+            foreach (char character in streamTag)
+                hash = hash * 31 + character;
+
+            return hash;
         }
     }
 

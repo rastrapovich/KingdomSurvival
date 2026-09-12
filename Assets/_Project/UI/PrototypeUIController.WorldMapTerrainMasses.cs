@@ -11,7 +11,10 @@ public partial class PrototypeUIController
     // только когда WorldMapTerrainVisualProfile.MassVariants непусто (см.
     // DrawTerrainForType в PrototypeUIController.WorldMap.cs).
     private const int MinMassesPerCluster = 1;
-    private const int MaxMassesPerCluster = 6;
+    // Потолок увеличен ×4 вместе с сеткой (WorldMapNavigation.GridWidth/Height
+    // 26×16 → 104×64) — иначе крупные кластеры на большей сетке упирались бы
+    // в старый потолок 6 и выглядели бы реже на единицу площади, чем раньше.
+    private const int MaxMassesPerCluster = 24;
     private const int CellsPerMass = 4;
 
     private void DrawTerrainMassClusters(

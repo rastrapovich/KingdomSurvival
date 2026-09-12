@@ -190,13 +190,19 @@ public sealed class ContinuousMovementTimeTests
         ContinuousSimulationSystem.NotifyRouteChanged(state);
         ContinuousSimulationSystem.SetPaused(state, false);
 
-        for (int i = 0;
-             i < 500 && state.HasActiveExpedition &&
-             state.ActiveExpedition.Phase == CommanderState.TravellingToLocation;
-             i++)
-        {
-            ContinuousSimulationSystem.Advance(state, 5f, false);
-        }
+        // WM-12: "1 клетка = 1 сутки" — реальный маршрут до стартовой
+        // локации теперь может занимать много игровых суток; вместо
+        // ограниченного 500-итерационного поллинга по 5 сек считаем нужное
+        // реальное время из самого маршрута (с запасом) и продвигаем разом.
+        // Запас снабжения — иначе многодневный переход легитимно обрывается
+        // автоматическим возвращением по нехватке снабжения (раздел 9.7
+        // канона), а тест здесь про остановку часов на прибытии, не про голод.
+        state.ArmySupply = 1000;
+        double remainingHours =
+            ContinuousSimulationSystem.GetTravelHoursRemaining(state);
+        float arrivalAdvanceSeconds = (float)(
+            (remainingHours + 1.0) / ContinuousSimulationSystem.GameHoursPerRealSecond);
+        ContinuousSimulationSystem.Advance(state, arrivalAdvanceSeconds, false);
 
         Assert.IsTrue(state.HasActiveExpedition);
         Assert.AreEqual(CommanderState.AtLocation, state.ActiveExpedition.Phase);

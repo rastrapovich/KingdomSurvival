@@ -23,19 +23,24 @@ public enum WorldMapTerrainType
 
 public static class WorldMapNavigation
 {
-    public const int GridWidth = 26;
-    public const int GridHeight = 16;
+    public const int GridWidth = 104;
+    public const int GridHeight = 64;
     public const int DiscoveryRadiusCells = 1;
     public const float CapitalXPercent = 50f;
     public const float CapitalYPercent = 81f;
 
-    private const int ProtectedCapitalRadiusCells = 2;
-    private const int HillClusterCount = 8;
-    private const int MountainClusterCount = 5;
+    // Масштабированы ×4 (линейно) вместе с GridWidth/GridHeight, чтобы
+    // плотность/размер кластеров местности на бо́льшей сетке выглядели так же,
+    // как на прежней 26×16, а не поредели.
+    private const int ProtectedCapitalRadiusCells = 8;
+    private const int HillClusterCount = 32;
+    private const int MountainClusterCount = 20;
 
     private static int configuredTerrainSeed;
     private static bool terrainConfigured;
     private static WorldMapTerrainType[,] terrainGrid;
+    private static List<(int X, int Y)> riverPath;
+    private static HashSet<(int X, int Y)> riverCellLookup;
 
     public static void ConfigureTerrain(int worldSeed)
     {
@@ -45,6 +50,12 @@ public static class WorldMapNavigation
         configuredTerrainSeed = worldSeed;
         terrainConfigured = true;
         terrainGrid = GenerateTerrain(worldSeed);
+
+        // WM-09: река — отдельная от Plains/Hills/Mountains визуальная
+        // геометрия (не влияет на GetTerrainTravelCost/скорость — геймплейный
+        // эффект реки утверждается отдельно, см. раздел 9.9 канона).
+        riverPath = GenerateRiver(worldSeed);
+        riverCellLookup = new HashSet<(int X, int Y)>(riverPath);
     }
 
     public static List<MapPointData> FindPath(
@@ -175,6 +186,20 @@ public static class WorldMapNavigation
         return terrainGrid[x, y];
     }
 
+    // WM-09: упорядоченная цепочка клеток от одного края карты до другого —
+    // только география для рендера, не геймплейная преграда.
+    public static IReadOnlyList<(int X, int Y)> GetRiverPath()
+    {
+        EnsureTerrainConfigured();
+        return riverPath;
+    }
+
+    public static bool IsRiverAtGridCell(int x, int y)
+    {
+        EnsureTerrainConfigured();
+        return riverCellLookup != null && riverCellLookup.Contains((x, y));
+    }
+
     // Оставлены для совместимости со старым UI/тестами. Непроходимых клеток
     // больше нет: холмы и горы замедляют, но не блокируют движение.
     public static bool IsBlockedPercent(float xPercent, float yPercent) => false;
@@ -263,16 +288,16 @@ public static class WorldMapNavigation
             random,
             WorldMapTerrainType.Hills,
             HillClusterCount,
-            4,
-            8,
+            16,
+            32,
             true);
         PaintClusters(
             result,
             random,
             WorldMapTerrainType.Mountains,
             MountainClusterCount,
-            3,
-            6,
+            12,
+            24,
             false);
 
         int capitalX = PercentToGridX(CapitalXPercent);
@@ -290,6 +315,88 @@ public static class WorldMapNavigation
         }
 
         return result;
+    }
+
+    // WM-09: река — случайное блуждание от точки на одном краю сетки до
+    // любого края, с общим сносом к центру (чтобы не выходила сразу за
+    // соседнюю клетку) и лёгким уклонением от защищённой зоны столицы.
+    // Независимый сид от GenerateTerrain (другой XOR-тег), чтобы не делить
+    // последовательность случайных чисел с холмами/горами.
+    private static List<(int X, int Y)> GenerateRiver(int worldSeed)
+    {
+        Random random = new Random(unchecked(worldSeed ^ 0x5249564D));
+
+        int capitalX = PercentToGridX(CapitalXPercent);
+        int capitalY = PercentToGridY(CapitalYPercent);
+
+        int startX;
+        int startY;
+
+        switch (random.Next(4))
+        {
+            case 0:
+                startX = 0;
+                startY = random.Next(1, GridHeight - 1);
+                break;
+            case 1:
+                startX = GridWidth - 1;
+                startY = random.Next(1, GridHeight - 1);
+                break;
+            case 2:
+                startX = random.Next(1, GridWidth - 1);
+                startY = 0;
+                break;
+            default:
+                startX = random.Next(1, GridWidth - 1);
+                startY = GridHeight - 1;
+                break;
+        }
+
+        float driftX = GridWidth / 2f - startX;
+        float driftY = GridHeight / 2f - startY;
+        float driftLength = (float)Math.Sqrt(driftX * driftX + driftY * driftY);
+        if (driftLength > 0.01f)
+        {
+            driftX /= driftLength;
+            driftY /= driftLength;
+        }
+
+        List<(int X, int Y)> path = new List<(int X, int Y)> { (startX, startY) };
+        int x = startX;
+        int y = startY;
+        int maxSteps = GridWidth + GridHeight;
+
+        for (int step = 0; step < maxSteps; step++)
+        {
+            float wobbleX = driftX + (float)(random.NextDouble() - 0.5) * 0.9f;
+            float wobbleY = driftY + (float)(random.NextDouble() - 0.5) * 0.9f;
+
+            int stepX = wobbleX > 0.2f ? 1 : wobbleX < -0.2f ? -1 : 0;
+            int stepY = wobbleY > 0.2f ? 1 : wobbleY < -0.2f ? -1 : 0;
+
+            if (stepX == 0 && stepY == 0)
+                stepX = random.Next(0, 2) == 0 ? -1 : 1;
+
+            int nextX = Math.Max(0, Math.Min(GridWidth - 1, x + stepX));
+            int nextY = Math.Max(0, Math.Min(GridHeight - 1, y + stepY));
+
+            if (Math.Max(Math.Abs(nextX - capitalX), Math.Abs(nextY - capitalY)) <=
+                ProtectedCapitalRadiusCells)
+            {
+                continue;
+            }
+
+            x = nextX;
+            y = nextY;
+
+            if (path[path.Count - 1] != (x, y))
+                path.Add((x, y));
+
+            if (x == 0 || x == GridWidth - 1 || y == 0 || y == GridHeight - 1)
+                break;
+        }
+
+        return path;
     }
 
     private static void PaintClusters(

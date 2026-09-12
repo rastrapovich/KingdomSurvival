@@ -6,6 +6,13 @@ using NUnit.Framework;
 
 public class StabilityRegressionTests
 {
+    // WM-12: "1 клетка = 1 сутки" — на обычной скорости клетка проходится за
+    // RealSecondsPerGameDay реальных секунд. Запас ×1.5, чтобы гарантированно
+    // пересечь ровно одну клетку маршрута независимо от гранулярности шагов
+    // внутри ContinuousSimulationSystem.Advance.
+    private static readonly float OneCellAdvanceSeconds =
+        (float)(ContinuousSimulationSystem.RealSecondsPerGameDay * 1.5);
+
     [Test]
     public void CreateNewGame_ConfiguresRequestedTerrainSeedBeforeRoutes()
     {
@@ -52,13 +59,18 @@ public class StabilityRegressionTests
 
         ContinuousSimulationBatch batch = ContinuousSimulationSystem.Advance(
             state,
-            10f,
+            OneCellAdvanceSeconds,
             false);
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
 
+        // WM-12: "1 клетка = 1 сутки" — 1.0/CellsPerGameHour теперь ровно 24ч,
+        // то есть прибытие приходится на полночь/следующие сутки — часы суток
+        // при этом обёртываются по модулю 24 (ResolveMidnight), поэтому
+        // ожидание тоже нужно свернуть, иначе сравниваем с "32.0", которого
+        // HourOfDay физически не может показывать.
         double expectedArrivalHour =
-            ContinuousSimulationSystem.StartHour +
-            1.0 / ContinuousSimulationSystem.CellsPerGameHour;
+            (ContinuousSimulationSystem.StartHour +
+             1.0 / ContinuousSimulationSystem.CellsPerGameHour) % 24.0;
         Assert.That(batch.RequestAutoPause, Is.True);
         Assert.That(clock.IsPaused, Is.True);
         Assert.That(clock.HourOfDay, Is.EqualTo(expectedArrivalHour).Within(0.001));
@@ -112,13 +124,14 @@ public class StabilityRegressionTests
 
         ContinuousSimulationBatch batch = ContinuousSimulationSystem.Advance(
             state,
-            10f,
+            OneCellAdvanceSeconds,
             false);
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
 
+        // WM-12: см. комментарий в ContinuousMovement_ArrivalStopsClockAtExactArrivalTime.
         double expectedDiscoveryHour =
-            ContinuousSimulationSystem.StartHour +
-            1.0 / ContinuousSimulationSystem.CellsPerGameHour;
+            (ContinuousSimulationSystem.StartHour +
+             1.0 / ContinuousSimulationSystem.CellsPerGameHour) % 24.0;
         Assert.That(batch.RequestAutoPause, Is.True);
         Assert.That(clock.IsPaused, Is.True);
         Assert.That(clock.HourOfDay, Is.EqualTo(expectedDiscoveryHour).Within(0.001));

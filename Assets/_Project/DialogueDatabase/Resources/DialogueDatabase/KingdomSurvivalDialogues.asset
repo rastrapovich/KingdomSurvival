@@ -14912,8 +14912,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 60, y: 60}
+      hasEditorPosition: 1
     - id: option_a
       speakerId: narrator
       text: 
@@ -14959,8 +14959,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 710, y: 60}
+      hasEditorPosition: 1
     - id: option_b
       speakerId: narrator
       text: 
@@ -15003,8 +15003,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 710, y: 448.1875}
+      hasEditorPosition: 1
     schemaVersion: 1
   - id: road_hungry_travelers_01
     title: "\u0413\u043E\u043B\u043E\u0434\u043D\u044B\u0435 \u043F\u0443\u0442\u043D\u0438\u043A\u0438"

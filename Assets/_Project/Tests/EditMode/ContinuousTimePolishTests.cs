@@ -113,7 +113,13 @@ public class ContinuousTimePolishTests
         ContinuousSimulationSystem.NotifyRouteChanged(state);
         ContinuousSimulationSystem.SetPaused(state, false);
 
-        ContinuousSimulationSystem.Advance(state, 0.25f, false);
+        // WM-12: "1 клетка = 1 сутки" — HasExpeditionStartedMoving сверяет
+        // фактический сдвиг позиции с порогом (dx²+dy² > 0.0001); при новом,
+        // гораздо более медленном темпе 0.25 реальной секунды сдвигает армию
+        // на пренебрежимо малую долю клетки, ниже порога. Берём значение с
+        // запасом, но всё ещё много меньше RealSecondsPerGameDay — движение
+        // должно быть замечено раньше, чем закончится хотя бы одна клетка.
+        ContinuousSimulationSystem.Advance(state, 15f, false);
 
         Assert.That(
             ContinuousSimulationSystem.HasExpeditionStartedMoving(state),

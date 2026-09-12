@@ -38,9 +38,8 @@ public partial class PrototypeUIController
         EncounterDatabaseAsset database = LoadEncounterDatabase();
         if (database == null)
         {
-            // База ещё не засеяна (Kingdom Survival → Seed → Тёплая овца) —
-            // не ошибка выполнения, просто в проекте пока нет ни одного
-            // Production Encounter. Помечаем Opportunity обработанной, чтобы
+            // В проекте пока нет ни одного Production Encounter в базе —
+            // не ошибка выполнения. Помечаем Opportunity обработанной, чтобы
             // не проверять Resources.Load каждый вызов впустую.
             gameState.Encounters.MarkOpportunityProcessed(result.RoadEncounterOpportunityId);
             return;
@@ -71,5 +70,69 @@ public partial class PrototypeUIController
 
         if (TryOpenNarrativeDialogueById(selection.SelectedEncounter.DialogueId))
             EncounterRuntimeService.RecordEncounterStarted(gameState, selection.SelectedEncounter, opportunity.WorldHour);
+    }
+
+    // Принудительный запуск для тестирования (P14-T01, "Принудительный запуск
+    // для тестирования"): та же цепочка вызовов, что и реальный игровой путь
+    // выше (SelectEncounter → RecordSelectionPacing → TryOpenNarrativeDialogueById →
+    // RecordEncounterStarted) — единственное отличие от TryResolveRoadEncounterOpportunity
+    // в том, что Opportunity здесь синтетическая (свежий GUID на каждую попытку,
+    // не завязанная на "день"), чтобы можно было форсировать без ожидания
+    // реального scheduled-check и без блокировки "эта Opportunity уже
+    // обработана". Discovery Roll/Eligibility всё равно настоящие — при
+    // низком шансе или отсутствии доступных Encounter метод честно вернёт
+    // false после нескольких попыток, а не подменит логику отбора.
+    private bool TryDebugForceRoadEncounter(out string message)
+    {
+        EncounterRuntimeService.EnsureState(gameState);
+
+        EncounterDatabaseAsset database = LoadEncounterDatabase();
+        if (database == null)
+        {
+            message = "база энкаунтеров не найдена (Resources/" + EncounterDatabaseAsset.ResourcesPath + ").";
+            return false;
+        }
+
+        CommanderData commander = gameState.GetSelectedCommander();
+        if (commander == null)
+        {
+            message = "нет выбранного командира.";
+            return false;
+        }
+        if (commander.HeroProfile == null)
+            commander.HeroProfile = new HeroProfileData();
+
+        const int maxAttempts = 50;
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            EncounterOpportunity opportunity = new EncounterOpportunity
+            {
+                OpportunityId = "debug_force_" + System.Guid.NewGuid().ToString("N"),
+                PoolId = RoadEncounterIds.FirstRegionPoolId,
+                WorldHour = gameState.Day * 24.0,
+                RegionId = RoadEncounterIds.FirstRegionId
+            };
+
+            EncounterSelectionResult selection = EncounterRuntimeService.SelectEncounter(
+                gameState, commander.HeroProfile, opportunity, database);
+
+            if (!selection.HasSelection)
+                continue;
+
+            EncounterRuntimeService.RecordSelectionPacing(gameState, selection, opportunity);
+
+            if (!TryOpenNarrativeDialogueById(selection.SelectedEncounter.DialogueId))
+                continue;
+
+            EncounterRuntimeService.RecordEncounterStarted(gameState, selection.SelectedEncounter, opportunity.WorldHour);
+            message = "энкаунтер вызван вручную: " + selection.SelectedEncounter.DisplayName +
+                       " (" + selection.SelectedEncounter.EncounterId + ").";
+            return true;
+        }
+
+        message = "не удалось вызвать энкаунтер за " + maxAttempts +
+                   " попыток — все доступные Encounter либо исчерпаны (MaxOccurrences), " +
+                   "либо не прошли Discovery Roll.";
+        return false;
     }
 }

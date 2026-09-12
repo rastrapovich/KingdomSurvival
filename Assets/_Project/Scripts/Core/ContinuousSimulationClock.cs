@@ -32,7 +32,14 @@ public static partial class ContinuousSimulationSystem
 {
     public const double RealSecondsPerGameDay = 120.0;
     public const double GameHoursPerRealSecond = 24.0 / RealSecondsPerGameDay;
-    public const double ArmyCellsPerRealSecond = 0.5;
+    // Прямое определение темпа: 1 клетка маршрута (CalculateRouteCells/FindPath,
+    // WorldMapNavigation) = 1 игровые сутки на обычной скорости, а не подобранный
+    // коэффициент компенсации под размер сетки. RealSecondsPerGameDay реальных
+    // секунд как раз и составляют одни игровые сутки, поэтому клетка проходится
+    // ровно за них. Холмы/горы автоматически становятся 2/3 суток на клетку —
+    // это уже даёт WorldMapNavigation.GetTerrainTravelCost через удвоение/
+    // утроение под-точек маршрута в FindPath, отдельно трогать не нужно.
+    public const double ArmyCellsPerRealSecond = 1.0 / RealSecondsPerGameDay;
     public const int NormalSpeedMultiplier = 1;
     public const int FastSpeedMultiplier = 3;
     public const double StartHour = 8.0;

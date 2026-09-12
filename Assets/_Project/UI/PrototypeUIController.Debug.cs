@@ -24,6 +24,7 @@ public partial class PrototypeUIController
     private Button debugCapitalCrisisButton;
     private Button debugBackgroundIncidentButton;
     private Button debugSignificantDecisionButton;
+    private Button debugForceEncounterButton;
     private Button debugResetGameButton;
 
     private bool debugMenuInitialized;
@@ -184,6 +185,16 @@ public partial class PrototypeUIController
             DebugTriggerSignificantDecision);
         scroll.Add(debugSignificantDecisionButton);
 
+        // P14-T01 «Принудительный запуск для тестирования»: гоняет тот же
+        // runtime-путь, что и настоящий дорожный Encounter
+        // (EncounterRuntimeService.SelectEncounter → TryOpenNarrativeDialogueById →
+        // RecordEncounterStarted), а не открывает Narrative UI напрямую в обход
+        // системы. См. PrototypeUIController.Encounters.cs.
+        debugForceEncounterButton = CreateDebugActionButton(
+            "ВЫЗВАТЬ ДОРОЖНЫЙ ENCOUNTER",
+            DebugTriggerAuthoredEncounter);
+        scroll.Add(debugForceEncounterButton);
+
         AddDebugSectionTitle(scroll, "ПАРТИЯ");
 
         debugResetGameButton = CreateDebugActionButton(
@@ -309,6 +320,8 @@ public partial class PrototypeUIController
         }
 
         debugSignificantDecisionButton.SetEnabled(available && canCreateDecision);
+        debugForceEncounterButton.SetEnabled(
+            available && hasExpedition && !hasDecision && !hasTimedActivity && !IsNarrativeDialogueActive);
         debugResetGameButton.SetEnabled(true);
         debugExpeditionStateLabel.text = BuildDebugExpeditionStateText();
     }
@@ -461,6 +474,28 @@ public partial class PrototypeUIController
         }
 
         ApplyDebugResolutionResult(resolved, "Значимое событие вызвано вручную.");
+    }
+
+    // Принудительный запуск дорожного Encounter для тестирования (P14-T01).
+    // Обёртка вокруг TryDebugForceRoadEncounter (PrototypeUIController.Encounters.cs) —
+    // сама логика "найти кандидата → выбрать → открыть диалог → записать
+    // occurrence" не дублируется здесь, а вызывает те же
+    // EncounterRuntimeService.SelectEncounter/RecordSelectionPacing/RecordEncounterStarted
+    // и тот же TryOpenNarrativeDialogueById, что и настоящий игровой путь.
+    private void DebugTriggerAuthoredEncounter()
+    {
+        if (isGameOver ||
+            !gameState.HasActiveExpedition ||
+            gameState.HasPendingExpeditionDecision ||
+            gameState.ActiveExpedition.HasTimedActivity ||
+            IsNarrativeDialogueActive)
+        {
+            AddReport("[DEBUG] Дорожный Encounter сейчас недоступен.");
+            return;
+        }
+
+        TryDebugForceRoadEncounter(out string message);
+        AddReport("[DEBUG] " + message);
     }
 
     private void ApplyDebugResolutionResult(

@@ -16,9 +16,11 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private List<WorldMapTerrainVisualProfile> terrainProfiles =
             new List<WorldMapTerrainVisualProfile>();
         [SerializeField] private WorldMapIconLibrary iconLibrary;
+        [SerializeField] private WorldMapWaterVisualProfile water = new WorldMapWaterVisualProfile();
 
         public IReadOnlyList<WorldMapTerrainVisualProfile> TerrainProfiles => terrainProfiles;
         public WorldMapIconLibrary IconLibrary => iconLibrary;
+        public WorldMapWaterVisualProfile Water => water;
 
         public WorldMapTerrainVisualProfile FindTerrainProfile(WorldMapTerrainType terrain)
         {

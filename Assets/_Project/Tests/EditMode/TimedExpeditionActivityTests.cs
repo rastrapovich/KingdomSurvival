@@ -78,11 +78,25 @@ public class TimedExpeditionActivityTests
         Assert.That(state.ArmySupply, Is.EqualTo(10));
         Assert.That(state.ActiveExpedition.RouteIndex, Is.EqualTo(startRouteIndex));
 
+        // WM-12: "1 клетка = 1 сутки" — после оставшегося часа активности
+        // нужно ещё почти сутки движения, чтобы пройти клетку маршрута.
+        // Остаток активности (1ч) + запас на полную клетку (36ч, с хвостом
+        // во вторую клетку, чтобы не зависеть от округления).
+        float secondAdvanceSeconds = (float)(
+            37.0 / ContinuousSimulationSystem.GameHoursPerRealSecond);
         ContinuousSimulationBatch completed =
-            ContinuousSimulationSystem.Advance(state, 7f, false);
+            ContinuousSimulationSystem.Advance(state, secondAdvanceSeconds, false);
 
         Assert.That(state.ActiveExpedition.ActiveActivity, Is.Null);
-        Assert.That(state.ArmySupply, Is.EqualTo(13));
+        // WM-12: 10 + 3 (награда сбора ягод) - 5 (дневной расход снабжения
+        // похода из 4 бойцов+командир, GameState.ExpeditionSupplyConsumption)
+        // = 8. Раньше в это же окно теста ни разу не пересекалась полночь
+        // (весь тест укладывался в доли секунды игрового времени), поэтому
+        // дневной расход не успевал сработать — при "1 клетка = 1 сутки"
+        // прохождение хотя бы одной клетки маршрута обязательно пересекает
+        // хотя бы одну полночь, и расход снабжения — законное следствие
+        // новой шкалы, а не регрессия.
+        Assert.That(state.ArmySupply, Is.EqualTo(8));
         Assert.That(
             state.ActiveExpedition.RouteIndex,
             Is.EqualTo(startRouteIndex + 1));
@@ -127,8 +141,12 @@ public class TimedExpeditionActivityTests
         Assert.That(activity.Progress01, Is.EqualTo(0.5).Within(0.01));
         Assert.That(state.ActiveExpedition.RouteIndex, Is.Zero);
 
+        // WM-12: "1 клетка = 1 сутки" — после оставшихся 0.5ч активности
+        // нужно ещё почти сутки движения, чтобы продвинуть маршрут.
+        float secondAdvanceSeconds = (float)(
+            30.0 / ContinuousSimulationSystem.GameHoursPerRealSecond);
         ContinuousSimulationBatch completed =
-            ContinuousSimulationSystem.Advance(state, 7f, false);
+            ContinuousSimulationSystem.Advance(state, secondAdvanceSeconds, false);
 
         Assert.That(state.ActiveExpedition.ActiveActivity, Is.Null);
         Assert.That(state.ActiveExpedition.RouteIndex, Is.GreaterThan(0));
@@ -228,6 +246,12 @@ public class TimedExpeditionActivityTests
     {
         GameState state = new GameState();
         state.CreateNewGame(603);
+        // WM-12: "1 клетка = 1 сутки" — даже короткий переход теперь
+        // пересекает минимум одну полночь; ArmySupply=0 (дефолт
+        // CreateNewGame) сразу же обрывает поход автоматическим
+        // возвращением (раздел 9.7 канона). Тест — про остановку без
+        // модалки/автопаузы на прибытии, не про голод.
+        state.ArmySupply = 1000;
 
         string message;
         Assert.That(
@@ -245,8 +269,18 @@ public class TimedExpeditionActivityTests
         ContinuousSimulationSystem.NotifyRouteChanged(state);
         ContinuousSimulationSystem.SetPaused(state, false);
 
+        // WM-12: "1 клетка = 1 сутки" — точная цель может быть в 1-2 клетках
+        // от столицы в зависимости от геометрии, а этот вид прибытия не
+        // ставит RequestAutoPause (проверяется ниже), значит Advance не
+        // остановится сам точно на прибытии — важно не взять времени больше,
+        // чем нужно, иначе симуляция проедет дальше. Считаем точно из
+        // маршрута, с небольшим (не множительным) запасом.
+        double remainingHours =
+            ContinuousSimulationSystem.GetTravelHoursRemaining(state);
+        float advanceSeconds = (float)(
+            (remainingHours + 0.5) / ContinuousSimulationSystem.GameHoursPerRealSecond);
         ContinuousSimulationBatch arrival =
-            ContinuousSimulationSystem.Advance(state, 2.1f, false);
+            ContinuousSimulationSystem.Advance(state, advanceSeconds, false);
 
         Assert.That(
             state.ActiveExpedition.Phase,
@@ -269,12 +303,14 @@ public class TimedExpeditionActivityTests
             new MapPointData(5f, 0f)
         };
 
+        // WM-12: "1 клетка = 1 сутки" — CellsPerGameHour = 1/24, маршрут из
+        // 5 клеток занимает ровно 5 суток (120 часов).
         Assert.That(
             ContinuousSimulationSystem.CellsPerGameHour,
-            Is.EqualTo(2.5).Within(0.001));
+            Is.EqualTo(1.0 / 24.0).Within(0.0001));
         Assert.That(
             ContinuousSimulationSystem.CalculateTravelHours(route),
-            Is.EqualTo(2.0).Within(0.001));
+            Is.EqualTo(120.0).Within(0.001));
     }
 
     private static GameState CreateTravellingState()

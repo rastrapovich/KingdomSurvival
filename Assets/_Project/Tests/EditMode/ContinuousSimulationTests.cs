@@ -34,7 +34,7 @@ public class ContinuousSimulationTests
     }
 
     [Test]
-    public void Expedition_MovesHalfCellPerRealSecondAtNormalSpeed()
+    public void Expedition_MovesOneCellPerGameDayAtNormalSpeed()
     {
         GameState state = CreateTravellingState();
         ContinuousSimulationSystem.Reset(state);
@@ -43,10 +43,17 @@ public class ContinuousSimulationTests
 
         ExpeditionData expedition = state.ActiveExpedition;
         int startIndex = expedition.RouteIndex;
+        int startDay = state.Day;
 
-        ContinuousSimulationSystem.Advance(state, 2f, false);
+        // WM-12: "1 клетка = 1 сутки" — RealSecondsPerGameDay реальных секунд
+        // на обычной скорости продвигают маршрут ровно на одну клетку.
+        ContinuousSimulationSystem.Advance(
+            state,
+            (float)ContinuousSimulationSystem.RealSecondsPerGameDay,
+            false);
 
         Assert.That(expedition.RouteIndex, Is.EqualTo(startIndex + 1));
+        Assert.That(state.Day, Is.EqualTo(startDay + 1));
     }
 
     [Test]
@@ -69,7 +76,7 @@ public class ContinuousSimulationTests
     }
 
     [Test]
-    public void FastSpeed_TriplesClockAndArmyMovement()
+    public void FastSpeed_TriplesClockAndMovesOneCellPerGameDay()
     {
         GameState state = CreateTravellingState();
         ContinuousSimulationSystem.Reset(state);
@@ -79,13 +86,28 @@ public class ContinuousSimulationTests
 
         ExpeditionData expedition = state.ActiveExpedition;
         int startIndex = expedition.RouteIndex;
+        int startDay = state.Day;
         double startHour = ContinuousSimulationSystem.GetClock(state).HourOfDay;
 
         ContinuousSimulationSystem.Advance(state, 2f, false);
 
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
         Assert.That(clock.HourOfDay - startHour, Is.EqualTo(1.2).Within(0.02));
-        Assert.That(expedition.RouteIndex, Is.EqualTo(startIndex + 3));
+        Assert.That(
+            expedition.RouteIndex,
+            Is.EqualTo(startIndex),
+            "при новом темпе ('1 клетка = 1 сутки') 2 реальные секунды ещё не завершают клетку");
+
+        // WM-12: при Fast (×3) та же клетка (1 сутки) проходится за
+        // RealSecondsPerGameDay/FastSpeedMultiplier реальных секунд —
+        // догоняем остаток времени до полной клетки.
+        float remainingSeconds = (float)(
+            ContinuousSimulationSystem.RealSecondsPerGameDay /
+            ContinuousSimulationSystem.FastSpeedMultiplier) - 2f;
+        ContinuousSimulationSystem.Advance(state, remainingSeconds, false);
+
+        Assert.That(expedition.RouteIndex, Is.EqualTo(startIndex + 1));
+        Assert.That(state.Day, Is.EqualTo(startDay + 1));
     }
 
     [Test]

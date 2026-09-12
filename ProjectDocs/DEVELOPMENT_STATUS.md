@@ -4,7 +4,7 @@
 
 > Технический журнал фактически реализованного состояния Unity-проекта и зафиксированных проектных решений.
 >
-> Актуальный общий канон: `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_31.md`.
+> Актуальный общий канон: `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_32.md`.
 >
 > Единая энциклопедия мира: `ProjectDocs/LORE.md`.
 >
@@ -34,9 +34,11 @@
 
 ## 2. Ограничения проверки
 
-В подключённой среде Unity Editor, C# compiler, Test Runner и Play Mode недоступны. Поэтому код P11/P12/P13 подготовлен и снабжён EditMode regression-тестами, но **компиляция, `Run All` и фактический Play Mode не запускались**. Для P13 выполнены доступные статические проверки Unity YAML, связности D17, уникальности ID/эффектов, completion-инвариантов и чистоты diff.
+Код P11/P12/P13 подготовлен и снабжён EditMode regression-тестами, но на момент их написания компиляция/`Run All`/Play Mode не запускались напрямую — для P13 использовались доступные статические проверки Unity YAML, связности D17, уникальности ID/эффектов, completion-инвариантов и чистоты diff.
 
-Последний ранее зафиксированный большой прогон: **330 тестов: 328 passed / 2 failed**; оба прежних падения относились к ошибочной ссылке N01, которая затем была исправлена. После последующих P09/P10/UI/P11/P12 изменений нужен новый полный `Run All`.
+Последний зафиксированный большой прогон на тот момент: **330 тестов: 328 passed / 2 failed**; оба падения относились к ошибочной ссылке N01, которая затем была исправлена.
+
+**С 12.09.2026 подключён MCP-мост к живому Unity Editor пользователя** (`unity-editor-mcp`) — компиляция, `console`, `recompile` и `run_tests` (EditMode/PlayMode) доступны напрямую в рамках сессий, где мост подключён. Полный `Run All` EditMode после WM-04/WM-06 (см. §18): **783 теста: 783 passed / 0 failed**. Это не отменяет ограничение для сессий/участков работы без моста — там по-прежнему нужно честно писать, что компиляция и тесты не запускались.
 
 ## 3. P09/P10 baseline
 
@@ -385,6 +387,205 @@ Seed переведён на milestone `P13_COUNCIL`: P13-T01 и P13-T03 име�
 
 `GameState.GetRegionName(x, y)` теперь однострочник, делегирующий в `WorldMapRegionRegistry.FindRegion(x, y).Name` — **поведение не изменилось** для всех практических координат (единственная теоретическая разница — восточная граница здесь `x >= 66` вместо строгого `x > 66f`; сгенерированные позиции никогда не попадают ровно в 66.0, так что для реального EditMode-теста `RegionName_UsesFourExpectedMapAreas` разницы нет — прогнал все 4 тест-кейса вручную по новой логике, совпадают).
 
-Сознательно не делали в этом проходе: не формализовал слоты появления (WM-07) и не менял `GameState.CreateNewGame`/размещение стартовых локаций — это более рискованная правка (затрагивает `GameState`, которую используют минимум 7 EditMode test-файлов, включая travel-time и reward-логику), и её стоит делать отдельным проходом после проверки WM-04/WM-06 в Unity, а не наслаивать непроверенные изменения.
+Сознательно не делали в этом проходе: не формализовал слоты появления (WM-07) и не менял `GameState.CreateNewGame`/размещение стартовых локаций.
 
-Компиляция/тесты не запускались с моей стороны.
+**Статус проверки (задним числом, после подключения `unity-editor-mcp`):** полный `Run All` EditMode — **783/783 passed**, включая все 17 тестов по карте (`WorldMapNavigationTests`, `WorldMapLocationCardLayoutTests`, `WorldMapLocationCardStructureRegressionTests`) и все 4 кейса `RegionName_UsesFourExpectedMapAreas`. WM-04/WM-06 подтверждены рабочими без регрессии.
+
+## 19. World Map 2.0 — WM-07 (Spawn Slots) и WM-08 (раздельные потоки WorldSeed) — 12.09.2026
+
+С этого прохода доступен MCP-мост к живому Unity Editor пользователя (`unity-editor-mcp`) — компиляция, `Run All` и произвольный C# через `eval` проверялись напрямую, не "на честном слове" как раньше.
+
+### WM-07 — Spawn Slots
+
+Новый файл **`Assets/_Project/Scripts/Core/WorldMapSpawnSlotDefinition.cs`** (чистый C#, без UnityEngine — как и `WorldMapRegionDefinition`): `WorldMapSpawnSlotDefinition` (прямоугольная зона в процентах + `PickXPercent/PickYPercent`) и `WorldMapSpawnSlotRegistry.StartingLocationSlots` — три зоны (`slot-west/-north/-east`), примерно там же, где раньше были точки `candidatePositions`, но теперь это область, а не точка ± джиттер `±4/±3`.
+
+`GameState.CreateNewGame`: вместо `candidatePositions[i] + Random.Next(-4,5)/(-3,4)` каждая локация получает случайную точку внутри своего слота (`slot.PickXPercent/PickYPercent`), затем снэпится к концу пути от столицы — снэп-логика не менялась.
+
+### WM-08 — раздельные потоки WorldSeed
+
+Добавлен `GameState.DeriveStreamSeed(worldSeed, tag)` — детерминированно производит сид под конкретный поток случайности. `ShuffleLocations` и выбор точки в слоте теперь используют `new Random(DeriveStreamSeed(WorldSeed, "location"))` вместо `new Random(WorldSeed)` напрямую — будущие источники случайности (декорации и т.п.) не будут делить последовательность с размещением локаций и случайно сдвигать его. Сохранение фактических координат в `Save` отдельно решать не пришлось: `LocationData.MapXPercent/MapYPercent` и так обычные сериализуемые поля, вычисляются один раз в `CreateNewGame` и хранятся как значения, а не пересчитываются из seed при загрузке — будущие изменения алгоритма генерации старые сохранения не тронут.
+
+**Важно:** сид `WorldSeed` тот же самый, но конкретные координаты локаций для заданного `WorldSeed` теперь ОТЛИЧАЮТСЯ от значений до WM-07/08 (другой генератор случайности для того же входного числа) — это не регрессия (ни один тест/код не полагается на конкретные числа, см. разведку перед реализацией), но стоит знать, если кто-то сравнивал сохранения/логи до и после этого коммита.
+
+### Проверено напрямую в Unity (не только `Run All`)
+
+```
+seed=1 ruins  x=13.72 y=24.05 (Западные земли) travelH=7.20
+seed=1 mine   x=84.16 y=23.92 (Восточные земли) travelH=7.60
+seed=1 forest x=48.53 y=6.58  (Северные земли)  travelH=5.20
+seed=2 ruins  x=6.41  y=31.12 (Западные земли)
+seed=2 mine   x=42.11 y=19.64 (Северные земли)
+seed=2 forest x=89.84 y=18.55 (Восточные земли)
+seed=3 ruins  x=20.98 y=12.22 (Западные земли)
+seed=3 mine   x=53.79 y=5.85  (Северные земли)
+seed=3 forest x=71.61 y=29.51 (Восточные земли)
+```
+
+Подтверждено через `eval`: (1) один и тот же seed даёт идентичный результат при повторном `CreateNewGame` — детерминированность есть; (2) координаты реально расходятся по всей площади слота между разными seed (например `ruins` по X — от 6.4 до 21.0 в пределах `slot-west` `[6,22]`), а не крутятся вокруг одной точки, как раньше; (3) `RegionName` (WM-06) корректно считается по новым координатам.
+
+Полный `Run All` после WM-07/08: **783/783 passed, 0 failed**. Console: 0 errors, только уже известные предсуществующие warnings (obsolete API в BattleSandbox/UILayout, два CS0414-поля в WorldMap.cs) — ничего нового.
+
+## 20. World Map 2.0 — WM-09 (река через ленту UI Toolkit-сегментов) — 12.09.2026
+
+### Архитектурное отклонение от раздела 9.9 — согласовано с пользователем
+
+Раздел 9.9 канона называл `Sprite Shape` способом рисовать реки. При реализации выяснилось: `SpriteShapeController`/`SpriteShapeRenderer` — GameObject-компоненты, рендерятся Camera; карта же целиком на UI Toolkit (`VisualElement`), решение WM-03. Настоящий `Sprite Shape` внутри `VisualElement`-дерева напрямую не работает. Пользователю предложены два варианта (лента из спрайтов в UI Toolkit vs `Sprite Shape` в offscreen-сцене → текстура для UI); выбран первый — карта остаётся полностью в одном технологическом стеке. **Канон обновлён**: `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_32.md` (было v1.31 → архивирован в `ProjectDocs/Archive/`), пункт 9.9 переформулирован под реальную реализацию.
+
+### Генерация — `Assets/_Project/Scripts/Core/WorldMapNavigation.cs`
+
+Река — не влияющая на `GetTerrainTravelCost`/проходимость отдельная геометрия (геймплейный эффект — отдельное решение, не входит в WM-09). `GenerateRiver(worldSeed)`: случайное блуждание от точки на одном краю сетки 26×16 к противоположному, с общим сносом к центру и уклонением от защищённой зоны столицы (пропуск шага, не обрыв пути). Независимый XOR-сид от местности (`worldSeed ^ 0x5249564D`), кэшируется вместе с `terrainGrid` в `ConfigureTerrain`. Публично: `GetRiverPath()` (упорядоченная цепочка `(X,Y)`), `IsRiverAtGridCell(x,y)`.
+
+### Визуал — новый модуль + новый файл контроллера
+
+- `WorldMapWaterVisualProfile.cs` (`WorldMapVisual`, чистые данные: `SegmentSprite`, `FallbackColor`, `WidthPixels`) + поле `Water` в `WorldMapVisualTheme`. Без спрайта — заливка `FallbackColor` (та же деградация без арта, что и everywhere в WM-01/04).
+- `PrototypeUIController.WorldMapRiver.cs`: `DrawRiver()` — на каждую пару соседних точек пути один повёрнутый `VisualElement` в `world-map-water` (слой из WM-02). Вызывается из `RefreshWorldMapPanel` после `DrawTerrainCells()`.
+
+### Два реальных бага, найденных и исправленных живым Unity-мостом (не в отчёте "не проверено")
+
+1. **Неверный угол/разрыв в стыках сегментов.** Первая версия считала угол/длину сегмента через `sqrt(dx%²+dy%²)`/`atan2(dy%,dx%)` напрямую в процентах. Проценты X и Y считаются от разных осей контейнера (ширина/высота) — на не квадратном viewport это даёт геометрически неверный угол. Обнаружено визуально (скриншот показал реку как два параллельных обрывка с разрывом ~35px вместо одной линии), подтверждено разбором конкретных чисел сегментов через `eval`. **Исправление**: разница переводится в реальные пиксели контейнера (`resolvedStyle.width/height`) перед `atan2`/`sqrt`, сегмент получил ширину в пикселях вместо процентов.
+2. **NaN на первом кадре.** `resolvedStyle.width/height` до первого layout-прохода — не `0`, а `NaN`; `Mathf.Max(1f, NaN)` не защищает (сравнение с `NaN` всегда `false`, `Mathf.Max` возвращает именно `NaN`). Результат — сегменты нулевой длины с `rotate=NaN`, невидимая река. **Исправление**: явная проверка `float.IsNaN`, при неготовой геометрии — тихий выход и одноразовая подписка на `GeometryChangedEvent`, который очищает `world-map-water` и перерисовывает реку, как только реальный размер станет известен.
+
+### Как проверялось (в этой сессии впервые доступен `unity-editor-mcp` — реальный Unity Editor, не "черновая честность")
+
+- `GetRiverPath()` через `eval`: путь связный (все шаги соседние), детерминированный по seed, разной длины на разных seed (10–16 клеток в выборке).
+- После обоих исправлений — `editor_play` → драйв контроллера через reflection (`OpenScreen(Expeditions)`) → `capture_game_view(source:"screen")`: река видна как один непрерывный отрезок с реалистичным изгибом, без разрывов и NaN.
+- Полный `Run All` после каждого из трёх проходов (генерация / первая версия рендера / фикс геометрии) — **783/783 passed, 0 failed** каждый раз.
+- Побочная находка (не баг, а особенность автоматизации): при вызове публичных методов контроллера через reflection сразу после `editor_play`, `OnEnable` иногда успевает отработать раньше, чем `UIDocument` заполнит `rootVisualElement` из `visualTreeAsset`, из-за чего закэшированные ссылки на элементы оказываются `null`. В реальной игре (без ручного driving через `eval`) это не проявляется — `OnEnable` и заполнение дерева синхронны в обычном порядке инициализации.
+
+## 21. World Map 2.0 — WM-10 (минимальный редактор Database) — 12.09.2026
+
+Последний пункт исходного плана WM-01…WM-10. Сознательно **не** делал: редактор полигонов/масок регионов, редактор Spawn Slots, интеграцию с Rule Tile — ни одно из этого не доказано нужным ("не нужен сложный редактор... на первом этапе", решение зафиксировано ещё при обсуждении архитектуры). Сделан минимум, который реально экономит время художника: посмотреть результат без Play Mode и поймать явные ошибки конфигурации до того, как они всплывут в игре.
+
+Новый модуль `Assets/_Project/WorldMapVisual/Editor/` (`KingdomSurvival.WorldMapVisual.Editor`, платформа `Editor`, ссылается на `KingdomSurvival.Core` и `KingdomSurvival.WorldMapVisual`):
+
+- **`WorldMapDatabaseWindow.cs`** — `Kingdom Survival → Карта → World Map Database`. Два раздела:
+  - **Validate** — `CollectIssues(database)`: нет темы/иконотеки, дублирующийся профиль местности, у Hills/Mountains нет ни `MassVariants`, ни видимого `CellColor` (значит не отобразятся), у воды нет ни спрайта, ни видимого `FallbackColor`, в Icon Library — пустой/дублирующийся `LocationId` или запись без спрайта.
+  - **Preview** — поле Seed + `WorldMapNavigation.ConfigureTerrain(seed)` + схематичный IMGUI-грид 26×16: цвет клетки берётся из назначенной темы (или дефолтный, если темы нет), река — поверх тем же способом, что и `FallbackColor` в рантайме. Не финальный визуал (это не UI Toolkit рендер игры, а быстрый инструмент подбора цветов/seed), но не требует Play Mode.
+
+**Проверено напрямую в Editor** (`unity-editor-mcp`): открыл окно через `menu` (`Kingdom Survival/Карта/World Map Database`) — 0 новых ошибок в консоли (проверил `groundTruth.consoleErrors` до/после — старые ошибки в буфере от более раннего reflection-driven Play Mode тестирования WM-09, не от этого окна). Вызвал `CollectIssues` напрямую через `eval`: на нашем реальном `KingdomSurvivalWorldMapDatabase.asset` (из WM-01) — `0 issues` (конфигурация чистая); на `null` — корректно возвращает `"Не выбран World Map Database."`. Финальный `Run All`: **783/783 passed, 0 failed**.
+
+### Итог World Map 2.0 (WM-01…WM-10)
+
+Все десять этапов из раздела 9.9 канона реализованы и проверены живым Unity Editor в этой сессии: Visual Database (WM-01), слои рендера (WM-02), pan/zoom (WM-03), местность массами (WM-04), полный арт — на стороне художника, не код (WM-05), регионы как данные (WM-06), Spawn Slots (WM-07), раздельные потоки WorldSeed (WM-08), река через UI Toolkit-ленту (WM-09), минимальный Database-редактор (WM-10). Карта всё ещё не имеет реального арта (WM-05 не начат) — визуально она выглядит так же, как до этой серии проходов, пока в тему не добавят текстуры/спрайты; вся инфраструктура под них готова и не требует правок кода при подключении арта.
+
+## 22. World Map 2.0 — WM-11 (карта ×16 по площади, старт с макс. зумом, редактируемая тема) — 12.09.2026
+
+По запросу пользователя поверх готовой WM-01…WM-10: карта в 4 раза больше (по каждой оси, т.е. ×16 по площади), старт с максимальным зумом у столицы, редактирование спрайтов темы прямо в `World Map Database` вместо Inspector.
+
+### Сетка ×4 по каждой оси — `WorldMapNavigation.cs`
+
+`GridWidth 26→104`, `GridHeight 16→64`. Пропорционально (×4 линейно) масштабированы константы генерации, чтобы плотность местности не поредела: `HillClusterCount 8→32`, `MountainClusterCount 5→20`, длины кластеров холмов `4-8→16-32`, гор `3-6→12-24`, `ProtectedCapitalRadiusCells 2→8`. `WorldMapRegionDefinition`/`WorldMapSpawnSlotDefinition` не тронуты — они в процентах, от сетки не зависят.
+
+**Найдена и исправлена системная проблема, не замеченная на этапе планирования:** время экспедиции в пути считается как `CalculateRouteCells(route) / CellsPerGameHour` (`ContinuousSimulationClock.cs`), а `CalculateRouteCells` — это количество точек маршрута, которое линейно зависит от разрешения сетки (`WorldMapNavigation.FindPath` строит точку на каждую клетку дистанции). Без компенсации то же процентное расстояние на карте стало бы отнимать в ~4 раза больше игрового времени на путешествие — тихая порча баланса, не только визуальный эффект. Исправлено масштабированием `ContinuousSimulationSystem.ArmyCellsPerRealSecond: 0.5 → 2.0` (×4, компенсирует ×4 клеток на тот же маршрут). Из-за этого 4 существующих EditMode-теста, буквально проверявших старое числовое значение константы (`ContinuousSimulationTests.Expedition_MovesHalfCellPerRealSecondAtNormalSpeed` → переименован в `...MovesTwoCellsPerRealSecondAtNormalSpeed`, `FastSpeed_TriplesClockAndArmyMovement`, `TimedExpeditionActivityTests.GatherBerries_...`, `TravelEstimate_UsesContinuousArmySpeed`), обновлены на новые ожидаемые числа (все ×4 от старых) — это ожидаемое сопровождение задокументированной смены константы, не сокрытие регрессии.
+
+**Вторая найденная и исправленная проблема — производительность.** `DrawTerrainFlatCells` (fallback без арта, WM-01) создавала один `VisualElement` на каждую не-Plains клетку. На старой сетке — до ~416 клеток, на новой — уже 1768 клеток за один `RefreshWorldMapPanel`. Переписано на объединение клеток в строке в один прямоугольник (run-length по X) — `AddTerrainRunElement` в `PrototypeUIController.WorldMap.cs`. Заодно убран захардкоженный размер клетки в CSS (`4.5%/6.8%`, подобранный под старую сетку 26×16) — размер теперь считается из реального `GridWidth/GridHeight` в коде.
+
+`PrototypeUIController.WorldMapTerrainMasses.cs`: `MaxMassesPerCluster 6→24` (×4) — кластеры на большей сетке крупнее в клетках, без этого потолок масс на кластер срабатывал бы значительно раньше и плотность казалась бы ниже (актуально только когда появится арт с `MassVariants`).
+
+### Старт с максимальным зумом — `PrototypeUIController.WorldMapViewport.cs`
+
+`worldMapZoom` по умолчанию — `WorldMapMaxZoom` (2.5) вместо `1f`.
+
+**Найдена и исправлена ещё одна проблема, не покрытая изначальным планом:** при zoom > 1 канвас крупнее viewport, а `panOffset` по умолчанию `(0,0)` (левый верхний угол) — `ClampWorldMapPan` только не даёт краю уехать за рамку, но не центрирует ни на чём. Столица находится у (50%, 81%) — почти внизу карты, вне видимой при zoom=2.5 области по умолчанию. Результат без фикса: игрок при старте видит пустой угол карты, а не окрестности столицы. Добавлен `CenterWorldMapOn(CapitalXPercent, CapitalYPercent)`, вызывается один раз (`worldMapInitialFocusApplied`) при первом известном реальном размере viewport (`OnWorldMapViewportGeometryChanged`), до `ClampWorldMapPan`.
+
+### Редактирование темы прямо в окне — `WorldMapDatabaseWindow.cs`
+
+Окно WM-10 (было: только Validate + Preview) переведено на вкладки (`WindowTab.Theme/Validate/Preview`, тот же паттерн, что в `DialogueDatabaseWindow`). Новая вкладка **Тема**, через `SerializedObject`/`SerializedProperty` (Undo + корректная пометка ассета dirty — не прямая мутация полей):
+
+- **Местность** — по секции на каждый `WorldMapTerrainVisualProfile`: `CellColor`, список `MassVariants` (добавить/удалить спрайт), кнопка "Удалить профиль", кнопки "+ Добавить профиль {Plains/Hills/Mountains}" для отсутствующих типов, поясняющий текст под секцией (CellColor — fallback, MassVariants — органичные массы WM-04).
+- **Вода** — `SegmentSprite`, `FallbackColor`, `WidthPixels` + поясняющий текст.
+- **Иконки локаций** — редактирует отдельный ассет `WorldMapIconLibrary` (своя `SerializedObject`, т.к. это отдельный ScriptableObject, не встроенное поле темы): `DefaultLocationIcon`, список записей (`LocationId` + `Sprite`, добавить/удалить), кнопка "Добавить недостающие id" по известному сейчас списку id локаций (`ruins/mine/forest`, из `GameState.CreateNewGame` — если состав локаций изменится, список в окне устареет и нужно поправить вручную).
+
+Validate/Preview — без изменений логики, кроме динамического текста размера сетки в Preview (был захардкожен "26×16").
+
+### Как проверялось
+
+- Полный `Run All` после каждого шага (константы сетки/масс → 1 фейл в `TimedExpeditionActivityTests`; после компенсации скорости → 4 фейла с точным множителем ×4 у всех; после обновления тестов → **783/783 passed** — три чистых прогона, показывающих причинно-следственную цепь, а не один финальный "зелёный" без истории).
+- `eval`: сетка `104×64`, река связная/детерминированная на новом размере (тот же метод проверки, что и в WM-09), `worldMap.style.scale=2.5` подтверждён напрямую из `resolvedStyle` в живой сессии Play Mode, `RefreshWorldMapPanel` — 10мс (не тормозит после run-length фикса).
+- `SerializedObject`-редактирование через вкладку "Тема" проверено по-настоящему: добавил тестовый спрайт в `MassVariants` через тот же код, что использует окно, сохранил (`AssetDatabase.SaveAssets`), перечитал ассет **заново с диска** (не из кэша) — подтвердил, что сохранилось; откатил обратно, реальный ассет остался чистым.
+- Console: 0 errors на всех этапах (кроме одного независимого от этой задачи эпизода зависания Play Mode из-за потока исключений в `RefreshDebugMenu` — известный артефакт reflection-driven автоматизации, уже отмеченный в §20 WM-09, не связан с этими изменениями).
+- Визуальный Play Mode-скриншот карты целиком (с новой сеткой и стартовым зумом) не удалось получить в конце сессии — Play Mode переставал продвигать кадры при автоматизированном/расфокусированном запуске в этой конкретной сессии (воспроизводилось независимо от моих правок, включая уже наблюдавшееся ранее в WM-09 поведение). Логика подтверждена всеми методами выше; рекомендуется визуально проверить самостоятельно в Unity.
+
+## 23. Encounter System — E01 (MVP + Phase 2) и P14-T01 (принудительный запуск) — 12.09.2026
+
+Новый модуль `Assets/_Project/Encounters/` (Runtime/Editor/Tests, свой asmdef, не тянет Unity-зависимости в `KingdomSurvival.Core`) — данные, чистый Selector, Runtime Service, Editor Database Window, минимальный Gameplay Effects слой поверх существующего `NarrativeEffect`.
+
+### E01 — фундамент
+
+`EncounterDefinition` (Identity/Selection/Location/Conditions/Memory, плюс `DurationClass`/`MemoryClass`/`Functions` из Reactive Encounter Layer), `EncounterPoolDefinition`, `EncounterFlagDefinition`/`EncounterFlagRegistryAsset` (Active/Reserved/Deprecated), `EncounterRuntimeStateData` (встроено полем в `GameState.Encounters` — Scripts/Core, т.к. Core ни на что не реферит и не может ссылаться на модуль Encounters). `EncounterEligibilityEvaluator` переиспользует существующий `NarrativeConditionGroup`, вторая система условий не создавалась. `EncounterSelector` — pure (pool trigger → eligibility → discovery roll → weighted pick), детерминированный seed через `EncounterDeterministicRandom` (FNV-1a, не `UnityEngine.Random` и не `string.GetHashCode()` — оба нестабильны между процессами/сборками). `EncounterRuntimeService` — единственное место побочных эффектов; occurrence и `FlagsSetOnStart` применяются строго после успешного открытия диалога, не на этапе выбора.
+
+### Gameplay Effects слой
+
+`NarrativeEffectType` расширен: `GrantItem`/`RemoveItem` (готовые методы `NarrativeStateData`), `ChangeFood`/`ChangeSupplies` (мутируют `GameState`, клампятся на 0), `ShortcutRouteCells` (тот же `WorldMapNavigation.AdvanceRouteByCells`, которым уже пользовался legacy-код напрямую). Потребовало добавить `GameState GameState { get; }` в `NarrativeEvaluationContext` — опциональный параметр в конец конструктора (тот же приём, что уже был у `PartySize`), прокинут через `NarrativeDialogueRuntimeSession.Start` → `PrototypeUIController.TryOpenNarrativeDialogueById`. `AdvanceTime` сознательно не добавлен — игровые часы живут в приватном `RuntimeState` `ContinuousSimulationSystem`, трогать вслепую не стали.
+
+### Editor Database Window
+
+`Kingdom Survival → Энкаунтеры` — две вкладки (Энкаунтеры/Флаги), список+инспектор+диагностика по образцу `BattlefieldDatabaseWindow` (UI Toolkit, `SerializedObject`/`PropertyField`, не IMGUI). Diagnostics: Eligibility Preview без Play Mode (ручной Preview Context) и Monte Carlo Simulator (N прогонов `EncounterSelector` с одним контекстом, только `OpportunityId` варьируется). Flag Registry: dependency viewer (Created by/Read by/Cleared by) + кросс-валидация «Active-флаг без потребителя» / «флаг используется, но не зарегистрирован». Весь текст интерфейса — на русском.
+
+### Контент
+
+`ROAD_WARM_SHEEP_01` — production vertical slice (18 узлов диалога, 2 активные проверки, 12 флагов, ветвящаяся структура по авторской версии пользователя от 12.09.2026). Плюс перенесены 10 происшествий и 3 решения, ранее захардкоженных в `ExpeditionIncidentSystem`/`ExpeditionDecisionSystem` (`rats/hunt/bad_water/cache/washed_road/short_path/cold_rain/torn_bags/fishing/good_crossing/unmapped_fork/berry_bushes/hungry_travelers` → `ROAD_*_01`) — это перенос, не копия: старые записи удалены из `Definitions` обеих legacy-систем, чтобы контент не дублировался между системами. `road_predator` и `location_discovered` не тронуты — первый завязан на `NarrativeCheckResolver`, второй структурный игровой узел, не декоративная сцена. Положительная задержка маршрута (Road Stop activity с часами — была у `washed_road`/`cold_rain`/`safe_road`/`gather_berries`) не воспроизведена механически: `ExpeditionData.ActiveActivity` пересекается с паузой/модальной очередью, добавлять как общий Gameplay Effect не стали без отдельной проверки — зафиксировано в `FutureHooksNotes` соответствующих Encounter.
+
+**Найденная и исправленная регрессия:** `TimedExpeditionActivityTests.GatherBerries_...`/`SafeRoadDecision_...` полагались на удалённые decision-записи `berry_bushes`/`unmapped_fork`. Тесты по факту проверяли generic-механику Road Stop activity, а не контент — переписаны на прямой вызов `GameState.TryStartRoadActivity` (то же самое, что делал старый код внутри `TryApplyChoice`), тестовое покрытие сохранено.
+
+### P14-T01 — принудительный запуск для тестирования
+
+Добавлена кнопка **«ВЫЗВАТЬ ДОРОЖНЫЙ ENCOUNTER»** в debug-панель (`PrototypeUIController.Debug.cs`) рядом с уже существующими «ВЫЗВАТЬ ФОНОВОЕ ПРОИСШЕСТВИЕ»/«ВЫЗВАТЬ ЗНАЧИМОЕ СОБЫТИЕ». `TryDebugForceRoadEncounter` (`PrototypeUIController.Encounters.cs`) гоняет тот же runtime-путь, что и реальная игра (`EncounterRuntimeService.SelectEncounter → RecordSelectionPacing → TryOpenNarrativeDialogueById → RecordEncounterStarted`), не открывает Narrative UI в обход системы — единственное отличие от настоящего пути в том, что `OpportunityId` синтетический (свежий GUID на попытку), чтобы не упираться в дедупликацию «эта Opportunity уже обработана» при повторных нажатиях в рамках одного дня.
+
+**Важное архитектурное решение, принятое в этой сессии:** production-инструкция для P14-T01 (полученная от пользователя) описывала `AuthoredEncounterDefinition`/`AuthoredEncounterRunner` как новую систему поверх `ExpeditionIncidentSystem`. Реализация этой инструкции буквально создала бы вторую параллельную систему событий — ровно то, что сама инструкция запрещает в своём каноне, — потому что `EncounterDefinition`/`EncounterRuntimeService`/`EncounterSelector` уже реализуют весь описанный контракт (стабильный ID, region binding, eligibility до выбора, once/repeatable, one line at a time, идемпотентные эффекты, persisted outcome через флаги). Из всей инструкции реализован только реально отсутствовавший кусок — Force-кнопка; остальное признано уже существующим, не продублировано.
+
+Save/Load-критерии инструкции (persisted completion/outcome переживает Save→Load) физически не проверялись — **в проекте на данный момент нет системы сохранений вообще** (ни `JsonUtility`, ни `BinaryFormatter`, ни `SaveGame`-подобного кода не найдено). Это не пробел Encounter-системы — это общий пробел всей игры, не закрывался молча в рамках этой задачи.
+
+### Как проверялось
+
+Впервые в этом проекте — **живой MCP-мост к Unity Editor пользователя, настроенный в этой же сессии** (`unity pipeline install` + `unity mcp configure claude-code`), а не только статический анализ. Полный `Run All` EditMode через `unity command run_tests` дважды подряд после всех правок Encounter-системы (включая force-кнопку): **783/783 passed, 0 failed** — оба прогона зафиксированы, между ними Editor на короткое время переставал отвечать на `eval`/`test_status` (зависание главного потока, не связанное с код-изменениями — отошло само, второй прогон подтвердил чистое состояние). Компиляция проверена напрямую (`UnityEditor.EditorUtility.scriptCompilationFailed == false`) после каждого пакета правок, а не только по факту отсутствия ошибок в тестах. `EncounterDatabaseAsset.CollectValidationIssues` прогнан на реальном ассете через `eval` — 0 проблем. Состояние ассетов подтверждено напрямую из живого Editor: 14 энкаунтеров, 1 пул, 13 флагов, 36 диалогов (общая база, не только Encounters) — не голословно, а фактическим `db.Encounters.Count` и т.д. в момент проверки.
+
+## 24. World Map 2.0 — WM-12 (масштаб «1 клетка = 1 сутки», столица/армия ½ клетки, зум до 10×) — 12.09.2026
+
+По запросу пользователя поверх WM-11: скорректирован темп движения, размер маркеров столицы/армии, максимальный зум — всё выведено из единого правила «1 клетка маршрута = 1 сутки игрового времени».
+
+### Темп — `Assets/_Project/Scripts/Core/ContinuousSimulationClock.cs`
+
+`ArmyCellsPerRealSecond` заменён с подобранной компенсации (`2.0`) на прямое определение: `1.0 / RealSecondsPerGameDay` (≈0.008333) — `RealSecondsPerGameDay` (120) реальных секунд как раз и составляют одни игровые сутки, так что клетка проходится ровно за них на обычной скорости. Даёт `CellsPerGameHour ≈ 0.041667` (1/24 — клетка = 24 часа на Plains). Холмы/горы автоматически становятся 2/3 суток на клетку через уже существующий `WorldMapNavigation.GetTerrainTravelCost` (под-точки маршрута в `FindPath`) — не трогался.
+
+**Побочные эффекты, найденные и осознанно принятые (не баги):**
+- Любой переход длиной ≥1 клетки теперь обязательно пересекает минимум одну полночь — раньше (при старом на порядки более быстром темпе) это было физически невозможно в пределах теста/короткой игровой сессии. Дневной расход снабжения похода (`GameState.ExpeditionSupplyConsumption` — бойцы+1) и автоматическое принудительное возвращение при нехватке снабжения (раздел 9.7 канона, "Экспедиционный риск без level scaling") теперь реально срабатывают там, где раньше не успевали.
+- Дальние маршруты (например до `ruins` или до `downstream_settlement`, ~10-15% карты) на новой шкале занимают недели игрового времени — тесты, которые доходят до таких точек, теперь должны явно выдавать экспедиции запас снабжения (`state.ArmySupply = 1000`), иначе легитимно обрывают поход раньше времени.
+
+### Тесты — 11 упавших после смены константы, разобраны по одному, не скопом
+
+Полный список (все находятся и чинятся по отдельности через `unity-editor-mcp`, не угадыванием чисел): `ContinuousSimulationTests.Expedition_Moves...`/`FastSpeed_...` (длительность `Advance` пересчитана на "сутки", а не старые секунды; вторая — с сохранением исходной проверки утроения тика часов), `TimedExpeditionActivityTests.GatherBerries_.../SafeRoadDecision_.../TravelEstimate_.../WaypointArrival_...`, `StabilityRegressionTests.ContinuousMovement_ArrivalStops.../Discovery...` (обёртка ожидаемого часа по модулю 24 — прежняя формула `StartHour + 1.0/CellsPerGameHour` при новом значении даёт `32.0`, чего `HourOfDay` физически не может показать после `ResolveMidnight`), `Chapter01P10Tests.DownstreamRoute_...`, `ContinuousMovementTimeTests.ArrivalStopsMovement_...`, `ContinuousTimePolishTests.PreparedRoster_...` (порог `HasExpeditionStartedMoving` — `dx²+dy²>0.0001` — требует чуть больше реального времени при новом медленном темпе).
+
+Особенно показательный случай — `GatherBerries_...`: после исправления длительности `Advance` тест всё ещё падал (`ArmySupply` ожидалось `13`, получилось `8`). Разведка через `eval` показала: `10 (старт) + 3 (награда сбора ягод) - 5 (дневной расход снабжения похода из 4 бойцов+командир) = 8` — легитимное следствие пересечения полуночи, которое раньше физически не происходило в окне теста. Ожидание переписано на `8` с объяснением, а не подогнано вслепую.
+
+### Столица и армия — ½ клетки, позиция из реальной константы
+
+Найден и попутно исправлен баг, не связанный напрямую с запросом: CSS-позиция кнопки столицы была захардкожена (`left:37%; top:74%`), а реальная точка столицы для пути и центрирования камеры (WM-11) — `WorldMapNavigation.CapitalXPercent/YPercent = 50/81`. Не совпадали.
+
+`Prototype_Exploration.uss`: `.world-map-capital` и `.world-map-army-marker` лишились статичных `left/top/width/height` (были `26%×48px` и `74px×38px` соответственно — на сетке 104×64 в разы больше клетки-суток); `border-radius: 50%` у столицы (круглая точка, не прямоугольник — текст "СТОЛИЦА" в ½ клетки физически не помещается, перенесён в `tooltip`).
+
+`PrototypeUIController.WorldMap.cs`, `RefreshWorldMapCapital`/`RefreshWorldMapArmyMarker`: размер (`½ × 100/(GridWidth-1)` по ширине, `½ × 100/(GridHeight-1)` по высоте) и позиция (центрирование на `WorldMapNavigation.CapitalXPercent/YPercent` для столицы, на `expedition.CurrentMapXPercent/YPercent` для армии) считаются в коде из реального разрешения сетки, не хардкодятся — тем же приёмом, что местность/река/маски в предыдущих WM-этапах.
+
+### Зум — до 10×, мультипликативный шаг
+
+`PrototypeUIController.WorldMapViewport.cs`: `WorldMapMaxZoom: 2.5 → 10`. Формула шага колеса мыши сменена с аддитивной (`zoom ± 0.15`) на мультипликативную (`zoom *= 1.15^±1`) — на диапазоне `[0.75;10]` (почти в 13 раз шире прежнего `[0.75;2.5]`) аддитивный шаг потребовал бы ~62 нотча колеса до максимума; мультипликативный даёт равномерное ощущение на любом уровне приближения. `WorldMapMinZoom` не менялся.
+
+### Как проверялось
+
+- Полный `Run All` на каждом контрольном шаге (11 упавших → 6 → 3 → 0), а не один финальный прогон — история фактически отражает, что каждая правка была осмысленной, а не подгонкой чисел до зелёного.
+- `eval` в живом Editor: `ArmyCellsPerRealSecond`/`CellsPerGameHour` совпадают с расчётными (0.008333/0.041667), 1 клетка = ровно 120 реальных секунд на обычной скорости.
+- `eval` (Play Mode): `worldMapCapitalButton` — `width=0.4854369%`, `height=0.7936508%` (ровно половина клетки), `left=49.75728`, `top=80.60317` (ровно центрировано на `CapitalXPercent=50/CapitalYPercent=81`) — не предположение, а фактическое значение `style` у живого элемента. `worldMapArmyMarker` — тот же размер. `worldMapZoom`/`WorldMapMaxZoom` — оба `10`.
+- Причину `GatherBerries_...`/`SafeRoadDecision_...`/`WaypointArrival_...`/`Chapter01P10Tests`/`ContinuousMovementTimeTests`-падений (переход в `ReturningToCastle` вместо ожидаемого состояния) нашёл не угадыванием, а прямым воспроизведением сценария через `eval` — увидел, что `GetTravelHoursRemaining` после "прибытия" не ноль, а фаза `ReturningToCastle`: экспедиция реально повернула домой по нехватке снабжения.
+- Финальный Play Mode-скриншот снова не удалось снять (та же особенность продвижения кадров при автоматизации, что и в конце WM-11/WM-09-сессии, воспроизводится независимо от кода) — вся проверка выше сделана через `eval`-инспекцию реального состояния живых UI-элементов, а не скриншотом.
+
+### Пост-релизная правка — реальный визуальный баг, найденный пользователем
+
+Проверка через `style.width/left` (см. выше) оказалась недостаточной: она подтверждала, какое значение **запрошено**, а не какое реально **вычислено layout'ом** (`resolvedStyle`). Пользователь прислал скриншот с гигантским кругом столицы (~4 клетки) — `eval`-проверка `resolvedStyle.minWidth` в его живой сессии показала `Auto`, а не `0`: встроенный `min-height`/`min-width` темы Unity `unity-button` побеждал наш маленький `height` из-за порядка применения стилшитов (не специфичности) — USS-правило `min-width: 0` в `.world-map-capital`/`.world-map-army-marker` не срабатывало. Исправлено переносом `min-width`/`min-height: 0` в **inline-стиль в коде** (`RefreshWorldMapCapital`/`RefreshWorldMapArmyMarker`) — inline-стили в UI Toolkit гарантированно старше любого USS-правила независимо от порядка загрузки стилшитов.
+
+Также нашлась и исправлена вторая, независимая проблема: `.world-map-route-dot(-active/-preview)` остались на старых `5-7px`, подобранных под прежний максимум зума `2.5×` — при новом `10×` те же px превращались в точки размером с клетку. Уменьшены до `2-3px`.
+
+После этого пользователь всё ещё видел точки крупнее ожидаемого — по прямому пользовательскому указанию ("нужно в 10 раз меньше") доля клетки для столицы/армии уменьшена **ещё в 10 раз**: `0.5 → 0.05` от клетки, вынесено в единую именованную константу `MapMarkerCellFraction` (`PrototypeUIController.WorldMap.cs`) вместо повторяющегося магического числа в двух местах — дальнейшая подстройка теперь одним числом.
+
+Отдельно проверено через `eval` (не на глаз): `expedition.Route[0]` после `TryStartExpeditionToMapPoint` **точно равен** `WorldMapNavigation.CapitalXPercent/YPercent` — старт похода из столицы подтверждён на уровне данных; жалоба "герой начинает не в столице" на момент проверки не воспроизвелась как баг данных, вероятно относится к уже прошедшему времени пути на скриншоте (при "1 клетка = 1 сутки" смещение от столицы за прошедшее время заметно) либо к кадрированию скриншота.
+
+`Run All` после каждого шага этой правки — стабильно 783/783. Итоговый визуальный результат (после уменьшения ещё в 10 раз) пользователем на момент записи ещё не подтверждён.

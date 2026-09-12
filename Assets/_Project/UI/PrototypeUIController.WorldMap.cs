@@ -6,6 +6,13 @@ using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
+    // WM-12: столица/армия занимали ½ клетки — по отзыву пользователя после
+    // проверки в живой сессии это всё ещё выглядит слишком крупным
+    // ("нужно в 10 раз меньше"), поэтому доля клетки уменьшена в 10 раз
+    // (0.5 → 0.05). Единая константа — один параметр для подстройки, а не
+    // магическое число в каждом месте.
+    private const float MapMarkerCellFraction = 0.05f;
+
     private VisualElement worldMapViewport;
     private VisualElement worldMap;
     private VisualElement worldMapBackground;
@@ -334,6 +341,7 @@ public partial class PrototypeUIController
         renderedWorldMapRouteIndex = -1;
 
         DrawTerrainCells();
+        DrawRiver();
 
         foreach (LocationData location in gameState.Locations)
         {
@@ -403,39 +411,76 @@ public partial class PrototypeUIController
             return;
 
         // Равнина не рисуется отдельными клетками — она фон карты. Клетки
-        // добавляются только там, где местность реально отличается, чтобы
-        // не создавать сотни VisualElement на пустом месте.
+        // объединяются в строке в один прямоугольник (run-length по X),
+        // а не один VisualElement на клетку: на большой сетке (после
+        // увеличения GridWidth/GridHeight ×4) поклеточная отрисовка создавала
+        // тысячи элементов за один RefreshWorldMapPanel. Размер клетки считаем
+        // из реального разрешения сетки, а не хардкодим — раньше было
+        // 4.5%/6.8%, подобранные под старую сетку 26×16.
+        float cellWidthPercent =
+            100f / (WorldMapNavigation.GridWidth - 1) * 1.1f;
+        float cellHeightPercent =
+            100f / (WorldMapNavigation.GridHeight - 1) * 1.1f;
+
         for (int y = 0;
              y < WorldMapNavigation.GridHeight;
              y++)
         {
+            int runStartX = -1;
+
             for (int x = 0;
-                 x < WorldMapNavigation.GridWidth;
+                 x <= WorldMapNavigation.GridWidth;
                  x++)
             {
-                if (WorldMapNavigation.GetTerrainAtGridCell(x, y) != terrain)
-                    continue;
+                bool matches =
+                    x < WorldMapNavigation.GridWidth &&
+                    WorldMapNavigation.GetTerrainAtGridCell(x, y) == terrain;
 
-                VisualElement cell =
-                    new VisualElement();
-
-                cell.AddToClassList(
-                    "world-map-terrain-cell");
-                cell.style.backgroundColor =
-                    profile.CellColor;
-
-                cell.style.left =
-                    new Length(
-                        GridXToPercent(x),
-                        LengthUnit.Percent);
-                cell.style.top =
-                    new Length(
-                        GridYToPercent(y),
-                        LengthUnit.Percent);
-
-                worldMapTerrain.Add(cell);
+                if (matches && runStartX < 0)
+                {
+                    runStartX = x;
+                }
+                else if (!matches && runStartX >= 0)
+                {
+                    AddTerrainRunElement(
+                        profile,
+                        runStartX,
+                        x - 1,
+                        y,
+                        cellWidthPercent,
+                        cellHeightPercent);
+                    runStartX = -1;
+                }
             }
         }
+    }
+
+    private void AddTerrainRunElement(
+        WorldMapTerrainVisualProfile profile,
+        int startX,
+        int endX,
+        int y,
+        float cellWidthPercent,
+        float cellHeightPercent)
+    {
+        int runLength = endX - startX + 1;
+
+        VisualElement cell = new VisualElement();
+
+        cell.AddToClassList("world-map-terrain-cell");
+        cell.style.backgroundColor = profile.CellColor;
+
+        cell.style.width =
+            new Length(cellWidthPercent * runLength, LengthUnit.Percent);
+        cell.style.height =
+            new Length(cellHeightPercent, LengthUnit.Percent);
+
+        cell.style.left =
+            new Length(GridXToPercent(startX), LengthUnit.Percent);
+        cell.style.top =
+            new Length(GridYToPercent(y), LengthUnit.Percent);
+
+        worldMapTerrain.Add(cell);
     }
 
     private static float GridXToPercent(int x) =>
@@ -651,10 +696,39 @@ public partial class PrototypeUIController
                 "world-map-capital-return");
         }
 
-        worldMapCapitalButton.text =
+        // WM-12: столицу можно пройти за полдня при правиле "1 клетка = 1
+        // сутки". Размер и позиция считаются из реального разрешения сетки
+        // и WorldMapNavigation.CapitalXPercent/YPercent — той же точки,
+        // что используется путём и центрированием камеры при старте
+        // (раньше CSS-позиция 37%/74% с ней не совпадала).
+        float markerWidthPercent =
+            100f / (WorldMapNavigation.GridWidth - 1) * MapMarkerCellFraction;
+        float markerHeightPercent =
+            100f / (WorldMapNavigation.GridHeight - 1) * MapMarkerCellFraction;
+
+        worldMapCapitalButton.style.width =
+            new Length(markerWidthPercent, LengthUnit.Percent);
+        worldMapCapitalButton.style.height =
+            new Length(markerHeightPercent, LengthUnit.Percent);
+        // USS min-width/min-height:0 не побеждал встроенный min-size темы
+        // Button (порядок применения стилшитов, не специфичность) — задаём
+        // inline-стилем в коде, он гарантированно выше любого USS-правила.
+        worldMapCapitalButton.style.minWidth = new Length(0, LengthUnit.Pixel);
+        worldMapCapitalButton.style.minHeight = new Length(0, LengthUnit.Pixel);
+        worldMapCapitalButton.style.left = new Length(
+            WorldMapNavigation.CapitalXPercent - markerWidthPercent * 0.5f,
+            LengthUnit.Percent);
+        worldMapCapitalButton.style.top = new Length(
+            WorldMapNavigation.CapitalYPercent - markerHeightPercent * 0.5f,
+            LengthUnit.Percent);
+
+        // При таком маленьком размере текст "СТОЛИЦА" физически не
+        // поместится — название и статус уходят в tooltip.
+        worldMapCapitalButton.text = string.Empty;
+        worldMapCapitalButton.tooltip =
             active
-                ? "СТОЛИЦА"
-                : "СТОЛИЦА";
+                ? "Столица — нажмите, чтобы приказать армии возвращаться"
+                : "Столица";
 
         bool canUseCapital =
             active &&
@@ -680,22 +754,41 @@ public partial class PrototypeUIController
         ExpeditionData expedition =
             gameState.ActiveExpedition;
 
+        // WM-12: та же доля клетки, что и у столицы (MapMarkerCellFraction).
+        float markerWidthPercent =
+            100f / (WorldMapNavigation.GridWidth - 1) * MapMarkerCellFraction;
+        float markerHeightPercent =
+            100f / (WorldMapNavigation.GridHeight - 1) * MapMarkerCellFraction;
+
+        worldMapArmyMarker.style.width =
+            new Length(markerWidthPercent, LengthUnit.Percent);
+        worldMapArmyMarker.style.height =
+            new Length(markerHeightPercent, LengthUnit.Percent);
+        // См. комментарий в RefreshWorldMapCapital — inline min-width/
+        // min-height:0 гарантированно побеждает встроенный min-size темы.
+        worldMapArmyMarker.style.minWidth = new Length(0, LengthUnit.Pixel);
+        worldMapArmyMarker.style.minHeight = new Length(0, LengthUnit.Pixel);
+
         worldMapArmyMarker.style.display =
             DisplayStyle.Flex;
-        worldMapArmyMarker.style.left =
-            new Length(
-                expedition.CurrentMapXPercent,
-                LengthUnit.Percent);
-        worldMapArmyMarker.style.top =
-            new Length(
-                expedition.CurrentMapYPercent,
-                LengthUnit.Percent);
+        worldMapArmyMarker.style.left = new Length(
+            expedition.CurrentMapXPercent - markerWidthPercent * 0.5f,
+            LengthUnit.Percent);
+        worldMapArmyMarker.style.top = new Length(
+            expedition.CurrentMapYPercent - markerHeightPercent * 0.5f,
+            LengthUnit.Percent);
 
-        worldMapArmyMarkerLabel.text =
+        string armyStatusText =
             expedition.RemainingRouteCells > 0
                 ? ContinuousExpeditionCommands.FormatHours(
                     ContinuousSimulationSystem.GetTravelHoursRemaining(gameState))
                 : "на месте";
+
+        // Бейдж/подпись-Label скрыты статически в USS (текст физически не
+        // помещается в маркер размером ½ клетки) — информация уходит в
+        // tooltip самого маркера.
+        worldMapArmyMarkerLabel.text = armyStatusText;
+        worldMapArmyMarker.tooltip = "Отряд — " + armyStatusText;
 
         RefreshWorldMapActivityProgress(expedition);
     }

@@ -895,8 +895,29 @@ public sealed class Chapter01P10Tests
         Assert.IsNull(Chapter01StoryDirector.GetLocationEntryDialogueId(
             gameState, downstream.Id));
 
+        // WM-12: "1 клетка = 1 сутки" — путь до downstream (~10-15% карты,
+        // см. DownstreamSettlement_ContinuesCapitalToFordVector_ByTwelvePercent)
+        // занимает больше недели игрового времени. Без запаса снабжения
+        // экспедиция с ArmySupply=0 (дефолт CreateNewGame) по дороге
+        // автоматически поворачивает домой (легитимный игровой механизм
+        // "Экспедиционный риск" — раздел 9.7 канона), что и произошло при
+        // первой проверке через eval. Тест — про нарративный гейтинг во
+        // время обычного перехода, а не про голод, поэтому даём запас
+        // снабжения, как это уже делают другие тесты в проекте (например
+        // LocationResearch_TakesConfiguredHoursAndRewardsOnCompletion).
+        gameState.ArmySupply = 1000;
+
+        // 60 реальных секунд больше не гарантируют прибытие на новой (гораздо
+        // более медленной) шкале. Считаем реальное время до прибытия из
+        // самого маршрута, с небольшим (не множительным) запасом — Advance
+        // должен сам остановиться точно на прибытии (RequestAutoPause),
+        // большой запас рискует "проскочить" мимо него в последующую логику.
+        double remainingHours =
+            ContinuousSimulationSystem.GetTravelHoursRemaining(gameState);
+        float arrivalAdvanceSeconds = (float)(
+            (remainingHours + 1.0) / ContinuousSimulationSystem.GameHoursPerRealSecond);
         ContinuousSimulationBatch arrival =
-            ContinuousSimulationSystem.Advance(gameState, 60f, false);
+            ContinuousSimulationSystem.Advance(gameState, arrivalAdvanceSeconds, false);
 
         Assert.AreEqual(CommanderState.AtLocation, gameState.ActiveExpedition.Phase);
         Assert.AreEqual(downstream.Id, gameState.ActiveExpedition.LocationId);

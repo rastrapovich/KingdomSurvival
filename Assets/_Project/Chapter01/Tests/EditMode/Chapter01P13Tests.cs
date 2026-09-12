@@ -68,40 +68,31 @@ public sealed class Chapter01P13Tests
         return null;
     }
 
-    private static bool HasRevealedBlock(NarrativeDialogueView view, string blockId)
-    {
-        for (int i = 0; i < view.VisibleTextBlocks.Count; i++)
-        {
-            NarrativeDialogueVisibleBlock block = view.VisibleTextBlocks[i];
-            if (block.BlockId == blockId && block.IsTextRevealed)
-                return true;
-        }
-
-        return false;
-    }
-
     private static NarrativeDialogueView AdvanceToDecision(
         NarrativeDialogueRuntimeSession session,
-        NarrativeDialogueView view)
+        NarrativeDialogueView view,
+        List<NarrativeDialogueVisibleBlock> observedBlocks = null)
     {
-        string[] continueIds =
+        int guard = 0;
+        while (true)
         {
-            "chapter01.node.17_continue_opening",
-            "chapter01.node.17_opening_continue",
-            "chapter01.node.17_positions_continue"
-        };
+            Assert.LessOrEqual(view.VisibleTextBlocks.Count, 1, "Один шаг Совета показал несколько реплик.");
+            if (view.VisibleTextBlocks.Count == 1)
+                observedBlocks?.Add(view.VisibleTextBlocks[0]);
 
-        for (int i = 0; i < continueIds.Length; i++)
-        {
-            NarrativeDialogueChoiceView choice = FindChoice(view, continueIds[i]);
-            Assert.IsNotNull(choice, "Не найден переход " + continueIds[i]);
-            NarrativeDialogueSelectionResult result = session.SelectChoice(choice.ChoiceId);
+            if (view.NodeId == DecisionNodeId &&
+                (view.AvailableChoices.Count != 1 || view.AvailableChoices[0].Kind != DialogueChoiceKind.Continue))
+            {
+                return view;
+            }
+
+            Assert.Less(guard++, 64, "Цепочка реплик Совета зациклилась.");
+            Assert.AreEqual(1, view.AvailableChoices.Count, "До решения должен быть ровно один Continue.");
+            Assert.AreEqual(DialogueChoiceKind.Continue, view.AvailableChoices[0].Kind);
+            NarrativeDialogueSelectionResult result = session.SelectChoice(view.AvailableChoices[0].ChoiceId);
             Assert.IsFalse(result.DialogueEnded);
             view = result.View;
         }
-
-        Assert.AreEqual(DecisionNodeId, view.NodeId);
-        return view;
     }
 
     private static NarrativeDialogueView SelectOutcome(
@@ -201,6 +192,21 @@ public sealed class Chapter01P13Tests
         LoadDatabase().CollectValidationIssuesForDialogue(Chapter01Ids.Dialogues.D17, issues);
 
         Assert.That(issues, Is.Empty, string.Join("\n", issues));
+    }
+
+    [Test]
+    public void Council_PresentsEveryPhraseAsSeparateStep()
+    {
+        NarrativeStateData state = new NarrativeStateData();
+        MakeCouncilReady(state);
+        NarrativeDialogueRuntimeSession session = StartCouncil(state, out NarrativeDialogueView view);
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+
+        NarrativeDialogueView decision = AdvanceToDecision(session, view, observed);
+
+        Assert.Greater(observed.Count, 4, "Совет должен пройти через последовательность отдельных реплик.");
+        Assert.AreEqual(3, decision.AvailableChoices.Count);
+        Assert.IsFalse(observed.Exists(block => string.IsNullOrWhiteSpace(block.SpeakerId)));
     }
 
     [Test]
@@ -334,13 +340,11 @@ public sealed class Chapter01P13Tests
         state.MarkEffectApplied(effectId);
 
         NarrativeDialogueRuntimeSession session = StartCouncil(state, out NarrativeDialogueView view);
-        NarrativeDialogueChoiceView first = FindChoice(view, "chapter01.node.17_continue_opening");
-        view = session.SelectChoice(first.ChoiceId).View;
-        NarrativeDialogueChoiceView second = FindChoice(view, "chapter01.node.17_opening_continue");
-        view = session.SelectChoice(second.ChoiceId).View;
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceToDecision(session, view, observed);
 
-        Assert.IsTrue(HasRevealedBlock(view, expectedBlockId));
-        Assert.IsFalse(HasRevealedBlock(view, unexpectedBlockId));
+        Assert.IsTrue(observed.Exists(block => block.BlockId == expectedBlockId && block.IsTextRevealed));
+        Assert.IsFalse(observed.Exists(block => block.BlockId == unexpectedBlockId && block.IsTextRevealed));
     }
 
     [Test]

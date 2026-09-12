@@ -40,14 +40,10 @@ public partial class PrototypeUIController
         ResponseGroup
     }
 
-    // Один элемент UI-истории. "Новый текст всегда появляется цельным"
-    // (дополнение к инструкции presentation пассивных проверок): одна
-    // ResponseGroup соответствует ровно одному вызову DisplayNarrativeView()
-    // — то есть одному NarrativeDialogueView, целиком раскрывшемуся одним
-    // действием игрока. Несколько TextBlock/наблюдение/проверка внутри
-    // одной группы никогда не становятся отдельными "сообщениями" — сама
-    // сессия v2 истории не хранит (§12 инструкции по визуализации
-    // проверок), это чисто presentation-состояние UI.
+    // Один элемент UI-истории. ResponseGroup соответствует одному вызову
+    // DisplayNarrativeView(), а runtime-контракт гарантирует в нём максимум
+    // одну реплику. Поэтому разные фразы и разные говорящие всегда создают
+    // отдельные последовательные элементы истории.
     private sealed class NarrativeUiHistoryItem
     {
         public NarrativeUiHistoryItemKind Kind;
@@ -55,10 +51,8 @@ public partial class PrototypeUIController
         // Только для PlayerChoice.
         public string PlayerChoiceText;
 
-        // Только для ResponseGroup — тот же набор данных, что вернула
-        // NarrativeDialogueRuntimeSession для одного view; сегменты строятся
-        // из них по требованию через NarrativeUiHistoryGrouping.BuildSegments,
-        // а не хранятся здесь заранее готовыми.
+        // Только для ResponseGroup — список совместим с прежней моделью,
+        // но канонически содержит не больше одного блока.
         public NarrativeCheckPresentationData LeadingActiveCheck;
         public IReadOnlyList<NarrativeDialogueVisibleBlock> Blocks;
 
@@ -343,12 +337,9 @@ public partial class PrototypeUIController
         return true;
     }
 
-    // Единая точка показа нового представления узла. Одно раскрытие view
-    // (причинный результат активной проверки + все видимые блоки) — одна
-    // неделимая группа истории (дополнение к инструкции "новое отображение
-    // пассивных наблюдений и проверок" — "новый текст всегда появляется
-    // цельным"). Порядок остаётся прежним: сначала причинный текст, затем
-    // механика (§14).
+    // Единая точка показа нового presentation-шага. В view находится ровно
+    // одна текущая реплика (или ни одной в техническом узле); следующие
+    // TextBlock выдаются runtime по одному через нейтральный Continue.
     private void DisplayNarrativeView(NarrativeDialogueView view, NarrativeCheckPresentationData checkPresentation)
     {
         narrativeHistory.Add(NarrativeUiHistoryItem.ForResponseGroup(checkPresentation, view.VisibleTextBlocks));
@@ -433,15 +424,9 @@ public partial class PrototypeUIController
     }
 
     // Один top-level child на элемент истории: PlayerChoice — одна строка,
-    // ResponseGroup — один контейнер на всю группу. Это принципиально для
-    // дополнения к инструкции presentation пассивных проверок ("новый текст
-    // всегда появляется цельным") — PrototypeUIController.NarrativePresentation.cs
-    // гасит "прочитанные" записи и вычисляет scroll именно по top-level
-    // детям narrativeHistoryContainer, поэтому одна группа не может
-    // оказаться наполовину "историей", наполовину "текущей" (§2/§10), а
-    // scroll всегда целится в начало последней группы, а не в последний
-    // абзац внутри нее (§3/§4). Сам scroll здесь не планируется — им
-    // занимается NarrativePresentation.cs по изменению narrativeHistory.Count.
+    // ResponseGroup — одна текущая реплика (и, при наличии, результат
+    // активной проверки). NarrativePresentation.cs гасит прочитанные шаги
+    // и прокручивает историю именно по этим границам.
     private void RenderNarrativeDialogueHistory()
     {
         if (narrativeHistoryContainer == null)
@@ -467,12 +452,9 @@ public partial class PrototypeUIController
         }
     }
 
-    // Строит один визуальный контейнер для целой ResponseGroup — все
-    // сегменты одного view (§1/§7 дополнения к инструкции). Сегменты
-    // считает NarrativeUiHistoryGrouping (чистая, тестируемая логика, не
-    // зависящая от UI Toolkit); здесь только раскладка по VisualElement.
-    // Форма сегмента отличается от кейса к кейсу (см. комментарий над
-    // классом) — намеренно не шаблонизировано этим переносом.
+    // Строит визуальный контейнер одного presentation-шага. Сегменты
+    // считает NarrativeUiHistoryGrouping (чистая, тестируемая логика без
+    // UI Toolkit); здесь остаётся только раскладка по VisualElement.
     private VisualElement BuildNarrativeHistoryGroupElement(NarrativeUiHistoryItem item)
     {
         VisualElement group = new VisualElement();

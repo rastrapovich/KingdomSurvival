@@ -62,14 +62,39 @@ public sealed class Chapter01P10Tests
         return null;
     }
 
-    private static bool IsBlockRevealed(NarrativeDialogueView view, string blockId)
+    private static bool WasBlockRevealed(
+        IReadOnlyList<NarrativeDialogueVisibleBlock> blocks,
+        string blockId)
     {
-        foreach (NarrativeDialogueVisibleBlock block in view.VisibleTextBlocks)
+        foreach (NarrativeDialogueVisibleBlock block in blocks)
         {
             if (block.BlockId == blockId && block.IsTextRevealed)
                 return true;
         }
         return false;
+    }
+
+    private static NarrativeDialogueView AdvanceCurrentNodeText(
+        NarrativeDialogueRuntimeSession session,
+        NarrativeDialogueView view,
+        List<NarrativeDialogueVisibleBlock> observedBlocks = null)
+    {
+        int guard = 0;
+        while (true)
+        {
+            Assert.LessOrEqual(view.VisibleTextBlocks.Count, 1, "Один шаг показал несколько реплик.");
+            if (view.VisibleTextBlocks.Count == 1)
+                observedBlocks?.Add(view.VisibleTextBlocks[0]);
+
+            if (view.AvailableChoices.Count != 1 ||
+                view.AvailableChoices[0].ChoiceId != NarrativeDialogueRuntimeSession.SequentialContinueChoiceId)
+            {
+                return view;
+            }
+
+            Assert.Less(guard++, 64, "Зациклен runtime-переход между репликами.");
+            view = session.SelectChoice(NarrativeDialogueRuntimeSession.SequentialContinueChoiceId).View;
+        }
     }
 
     private static NarrativeDialogueRuntimeSession StartDialogue(
@@ -262,18 +287,23 @@ public sealed class Chapter01P10Tests
         Assert.IsFalse(gameState.Narrative.HasKnowledge(Chapter01Ids.Knowledge.DrownedWomanStory));
     }
 
-    private static NarrativeDialogueView AdvanceN12ToTalk(NarrativeDialogueRuntimeSession session, NarrativeDialogueView view)
+    private static NarrativeDialogueView AdvanceN12ToTalk(
+        NarrativeDialogueRuntimeSession session,
+        NarrativeDialogueView view,
+        List<NarrativeDialogueVisibleBlock> talkBlocks = null)
     {
+        view = AdvanceCurrentNodeText(session, view);
         NarrativeDialogueChoiceView toWoman = FindChoiceById(view, "chapter01.node.12_to_woman");
         Assert.IsNotNull(toWoman);
         NarrativeDialogueSelectionResult r1 = session.SelectChoice(toWoman.ChoiceId);
         Assert.IsFalse(r1.DialogueEnded);
 
-        NarrativeDialogueChoiceView toTalk = FindChoiceById(r1.View, "chapter01.node.12.woman_to_talk");
+        NarrativeDialogueView womanView = AdvanceCurrentNodeText(session, r1.View);
+        NarrativeDialogueChoiceView toTalk = FindChoiceById(womanView, "chapter01.node.12.woman_to_talk");
         Assert.IsNotNull(toTalk);
         NarrativeDialogueSelectionResult r2 = session.SelectChoice(toTalk.ChoiceId);
         Assert.IsFalse(r2.DialogueEnded);
-        return r2.View;
+        return AdvanceCurrentNodeText(session, r2.View, talkBlocks);
     }
 
     [Test]
@@ -284,9 +314,10 @@ public sealed class Chapter01P10Tests
 
         Assert.IsFalse(gameState.Narrative.HasKnowledge(Chapter01Ids.Knowledge.DrownedWomanStory));
 
-        NarrativeDialogueView talkView = AdvanceN12ToTalk(session, view);
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceN12ToTalk(session, view, observed);
 
-        Assert.IsTrue(IsBlockRevealed(talkView, "chapter01.node.12.talk_story"));
+        Assert.IsTrue(WasBlockRevealed(observed, "chapter01.node.12.talk_story"));
         Assert.IsTrue(gameState.Narrative.HasKnowledge(Chapter01Ids.Knowledge.DrownedWomanStory));
         // N12 не выдаёт полную разгадку соглашения — это материал N14.
         Assert.IsFalse(gameState.Narrative.HasKnowledge(Chapter01Ids.Knowledge.OldAgreement));
@@ -329,9 +360,10 @@ public sealed class Chapter01P10Tests
         GameState gameState = NewGameStateEnRouteToOldWaterSearch(910104);
         gameState.Narrative.GrantItem(Chapter01Ids.Items.SevenToothGauge);
         NarrativeDialogueRuntimeSession session = StartDialogue(gameState, Chapter01Ids.Dialogues.D12, new List<string>(), out NarrativeDialogueView view);
-        NarrativeDialogueView talkView = AdvanceN12ToTalk(session, view);
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceN12ToTalk(session, view, observed);
 
-        Assert.IsTrue(IsBlockRevealed(talkView, "chapter01.node.12.talk_gauge"));
+        Assert.IsTrue(WasBlockRevealed(observed, "chapter01.node.12.talk_gauge"));
     }
 
     [Test]
@@ -341,35 +373,42 @@ public sealed class Chapter01P10Tests
         GameState gameState = NewGameStateEnRouteToOldWaterSearch(910105, fighters);
         NarrativeDialogueRuntimeSession session = StartDialogue(gameState, Chapter01Ids.Dialogues.D12, fighters, out NarrativeDialogueView view);
 
+        view = AdvanceCurrentNodeText(session, view);
         NarrativeDialogueChoiceView toWoman = FindChoiceById(view, "chapter01.node.12_to_woman");
         NarrativeDialogueSelectionResult result = session.SelectChoice(toWoman.ChoiceId);
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceCurrentNodeText(session, result.View, observed);
 
-        Assert.IsTrue(IsBlockRevealed(result.View, "chapter01.node.12.woman_large_party"));
-        Assert.IsFalse(IsBlockRevealed(result.View, "chapter01.node.12.woman_small_party"));
+        Assert.IsTrue(WasBlockRevealed(observed, "chapter01.node.12.woman_large_party"));
+        Assert.IsFalse(WasBlockRevealed(observed, "chapter01.node.12.woman_small_party"));
     }
 
     // --- N13: «У всех есть дом» ---
 
     private static NarrativeDialogueView AdvanceN13ToTensionNode(NarrativeDialogueRuntimeSession session, NarrativeDialogueView view, bool calmApproach)
     {
+        view = AdvanceCurrentNodeText(session, view);
         NarrativeDialogueChoiceView toApproach = FindChoiceById(view, "chapter01.node.13_to_approach");
         Assert.IsNotNull(toApproach);
         NarrativeDialogueSelectionResult r1 = session.SelectChoice(toApproach.ChoiceId);
         Assert.IsFalse(r1.DialogueEnded);
 
+        NarrativeDialogueView approachView = AdvanceCurrentNodeText(session, r1.View);
+
         string choiceId = calmApproach
             ? "chapter01.node.13.approach_choice_calm"
             : "chapter01.node.13.approach_choice_tense";
-        NarrativeDialogueChoiceView approachChoice = FindChoiceById(r1.View, choiceId);
+        NarrativeDialogueChoiceView approachChoice = FindChoiceById(approachView, choiceId);
         Assert.IsNotNull(approachChoice);
         NarrativeDialogueSelectionResult r2 = session.SelectChoice(approachChoice.ChoiceId);
         Assert.IsFalse(r2.DialogueEnded);
 
-        NarrativeDialogueChoiceView continue1 = FindChoice(r2.View, DialogueChoiceKind.Normal);
+        NarrativeDialogueView responseView = AdvanceCurrentNodeText(session, r2.View);
+        NarrativeDialogueChoiceView continue1 = FindChoice(responseView, DialogueChoiceKind.Normal);
         Assert.IsNotNull(continue1);
         NarrativeDialogueSelectionResult r3 = session.SelectChoice(continue1.ChoiceId);
         Assert.IsFalse(r3.DialogueEnded);
-        return r3.View;
+        return AdvanceCurrentNodeText(session, r3.View);
     }
 
     [Test]
@@ -387,10 +426,13 @@ public sealed class Chapter01P10Tests
     {
         GameState gameState = NewGameStateEnRouteToOldWaterSearch(910201);
         gameState.Narrative.SetFlag(Chapter01Ids.Flags.RepairOld);
-        StartDialogue(gameState, Chapter01Ids.Dialogues.D13, new List<string>(), out NarrativeDialogueView view);
+        NarrativeDialogueRuntimeSession session = StartDialogue(
+            gameState, Chapter01Ids.Dialogues.D13, new List<string>(), out NarrativeDialogueView view);
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceCurrentNodeText(session, view, observed);
 
-        Assert.IsTrue(IsBlockRevealed(view, "chapter01.node.13_repair_old"));
-        Assert.IsFalse(IsBlockRevealed(view, "chapter01.node.13_repair_new"));
+        Assert.IsTrue(WasBlockRevealed(observed, "chapter01.node.13_repair_old"));
+        Assert.IsFalse(WasBlockRevealed(observed, "chapter01.node.13_repair_new"));
     }
 
     [Test]
@@ -398,10 +440,13 @@ public sealed class Chapter01P10Tests
     {
         GameState gameState = NewGameStateEnRouteToOldWaterSearch(910202);
         gameState.Narrative.SetFlag(Chapter01Ids.Flags.RepairNew);
-        StartDialogue(gameState, Chapter01Ids.Dialogues.D13, new List<string>(), out NarrativeDialogueView view);
+        NarrativeDialogueRuntimeSession session = StartDialogue(
+            gameState, Chapter01Ids.Dialogues.D13, new List<string>(), out NarrativeDialogueView view);
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceCurrentNodeText(session, view, observed);
 
-        Assert.IsTrue(IsBlockRevealed(view, "chapter01.node.13_repair_new"));
-        Assert.IsFalse(IsBlockRevealed(view, "chapter01.node.13_repair_old"));
+        Assert.IsTrue(WasBlockRevealed(observed, "chapter01.node.13_repair_new"));
+        Assert.IsFalse(WasBlockRevealed(observed, "chapter01.node.13_repair_old"));
     }
 
     [Test]
@@ -411,10 +456,13 @@ public sealed class Chapter01P10Tests
         gameState.Narrative.SetFlag(Chapter01Ids.Flags.FordWomanHelped);
         NarrativeDialogueRuntimeSession session = StartDialogue(gameState, Chapter01Ids.Dialogues.D13, new List<string>(), out NarrativeDialogueView view);
 
+        view = AdvanceCurrentNodeText(session, view);
         NarrativeDialogueChoiceView toApproach = FindChoiceById(view, "chapter01.node.13_to_approach");
         NarrativeDialogueSelectionResult result = session.SelectChoice(toApproach.ChoiceId);
+        List<NarrativeDialogueVisibleBlock> observed = new List<NarrativeDialogueVisibleBlock>();
+        AdvanceCurrentNodeText(session, result.View, observed);
 
-        Assert.IsTrue(IsBlockRevealed(result.View, "chapter01.node.13.approach_helped"));
+        Assert.IsTrue(WasBlockRevealed(observed, "chapter01.node.13.approach_helped"));
     }
 
     [Test]

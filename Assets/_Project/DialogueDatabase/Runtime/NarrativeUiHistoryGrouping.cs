@@ -1,11 +1,12 @@
+using System;
 using System.Collections.Generic;
 
 namespace KingdomSurvival.DialogueDatabase
 {
-    // Дополнение к инструкции "новое отображение пассивных наблюдений и
-    // проверок" — "новый текст всегда появляется цельным": один вызов
-    // DisplayNarrativeView() (один NarrativeDialogueView + опциональный
-    // результат активной проверки) есть одна неделимая порция чтения.
+    // Каноническая presentation-граница: один NarrativeDialogueView — одна
+    // реплика (не больше одного VisibleTextBlock) плюс опциональный результат
+    // активной проверки, который к ней привёл. Несколько говорящих или
+    // несколько фраз в одном view считаются ошибкой runtime-контракта.
     //
     // Эта группировка — чистая презентационная логика без зависимости от
     // UI Toolkit, поэтому она вынесена сюда (не в PrototypeUIController) и
@@ -15,18 +16,15 @@ namespace KingdomSurvival.DialogueDatabase
     // или opacity — только что с чем логически слито.
     public enum NarrativeUiSegmentKind
     {
-        // Один говорящий, один или несколько абзацев подряд без пассивной
-        // проверки (обычные MainLine/CompanionLine реплики).
+        // Одна реплика без пассивной проверки (MainLine/CompanionLine).
         SpeakerParagraphs,
 
         // Observation/Memory/HeroThought/Narration с пассивной проверкой —
         // отображается инлайн-строкой без подписи говорящего.
         CheckedObservation,
 
-        // Результат активной проверки (ведёт группу, если проверка была
-        // разрешена выбором игрока) либо MainLine/CompanionLine с
-        // прикреплённой пассивной проверкой — заголовок проверки без
-        // склеенного текста.
+        // Результат активной проверки, который ведёт шаг после выбора
+        // игрока. Пассивная проверка остаётся частью собственной реплики.
         CheckResult
     }
 
@@ -49,14 +47,11 @@ namespace KingdomSurvival.DialogueDatabase
                    kind == DialogueTextBlockKind.Narration;
         }
 
-        // Строит сегменты одной группы. leadingActiveCheck — результат
-        // активной проверки, которая привела к этому view (null, если
-        // переход был обычным); он всегда идёт первым отдельным сегментом,
-        // если задан. blocks — NarrativeDialogueView.VisibleTextBlocks
-        // одного и того же view: все они принадлежат одной группе по
-        // определению (§1 инструкции), поэтому у BuildSegments нет
-        // параметра "новая группа" — вызывающий код сам решает, когда
-        // начинать новый вызов (один раз на DisplayNarrativeView).
+        // Строит сегменты одного шага. leadingActiveCheck — результат
+        // активной проверки, которая привела к этому view (null при обычном
+        // переходе); он всегда идёт первым отдельным сегментом. blocks —
+        // NarrativeDialogueView.VisibleTextBlocks, где канонически допустим
+        // максимум один элемент.
         public static List<NarrativeUiHistorySegment> BuildSegments(
             NarrativeCheckPresentationData leadingActiveCheck,
             IReadOnlyList<NarrativeDialogueVisibleBlock> blocks)
@@ -75,82 +70,28 @@ namespace KingdomSurvival.DialogueDatabase
             if (blocks == null)
                 return segments;
 
-            int i = 0;
-            while (i < blocks.Count)
+            if (blocks.Count > 1)
             {
-                NarrativeDialogueVisibleBlock block = blocks[i];
-                if (block == null)
-                {
-                    i++;
-                    continue;
-                }
-
-                bool isCheckedObservation = block.CheckPresentation != null && IsObservationLikeKind(block.Kind);
-                if (isCheckedObservation)
-                {
-                    NarrativeUiHistorySegment observation = new NarrativeUiHistorySegment
-                    {
-                        Kind = NarrativeUiSegmentKind.CheckedObservation,
-                        SpeakerDisplayName = block.SpeakerDisplayName,
-                        SpeakerRole = block.SpeakerRole,
-                        CheckPresentation = block.CheckPresentation
-                    };
-                    observation.Paragraphs.Add(block.Text);
-                    segments.Add(observation);
-                    i++;
-                    continue;
-                }
-
-                // Обычная реплика — либо самостоятельный CheckResult-заголовок
-                // (редкий случай MainLine/CompanionLine с пассивной проверкой,
-                // текст которой по-прежнему показывается отдельно — §3/§17
-                // инструкции presentation пассивных проверок), либо начало
-                // серии абзацев одного говорящего без проверки.
-                if (block.CheckPresentation != null)
-                {
-                    NarrativeUiHistorySegment checkedMainLine = new NarrativeUiHistorySegment
-                    {
-                        Kind = NarrativeUiSegmentKind.SpeakerParagraphs,
-                        SpeakerDisplayName = block.SpeakerDisplayName,
-                        SpeakerRole = block.SpeakerRole,
-                        CheckPresentation = block.CheckPresentation
-                    };
-                    checkedMainLine.Paragraphs.Add(block.Text);
-                    segments.Add(checkedMainLine);
-                    i++;
-                    continue;
-                }
-
-                NarrativeUiHistorySegment segment = new NarrativeUiHistorySegment
-                {
-                    Kind = NarrativeUiSegmentKind.SpeakerParagraphs,
-                    SpeakerDisplayName = block.SpeakerDisplayName,
-                    SpeakerRole = block.SpeakerRole
-                };
-                segment.Paragraphs.Add(block.Text);
-                i++;
-
-                // Сливаем подряд идущие блоки того же говорящего без своей
-                // проверки в один сегмент — один заголовок, несколько
-                // абзацев (§5 дополнения к инструкции).
-                while (i < blocks.Count)
-                {
-                    NarrativeDialogueVisibleBlock next = blocks[i];
-                    if (next == null)
-                        break;
-
-                    bool nextIsCheckedObservation = next.CheckPresentation != null && IsObservationLikeKind(next.Kind);
-                    if (nextIsCheckedObservation || next.CheckPresentation != null)
-                        break;
-                    if (next.SpeakerDisplayName != segment.SpeakerDisplayName || next.SpeakerRole != segment.SpeakerRole)
-                        break;
-
-                    segment.Paragraphs.Add(next.Text);
-                    i++;
-                }
-
-                segments.Add(segment);
+                throw new InvalidOperationException(
+                    "Канонический шаг диалога не может содержать больше одной реплики.");
             }
+
+            if (blocks.Count == 0 || blocks[0] == null)
+                return segments;
+
+            NarrativeDialogueVisibleBlock block = blocks[0];
+            bool isCheckedObservation = block.CheckPresentation != null && IsObservationLikeKind(block.Kind);
+            NarrativeUiHistorySegment segment = new NarrativeUiHistorySegment
+            {
+                Kind = isCheckedObservation
+                    ? NarrativeUiSegmentKind.CheckedObservation
+                    : NarrativeUiSegmentKind.SpeakerParagraphs,
+                SpeakerDisplayName = block.SpeakerDisplayName,
+                SpeakerRole = block.SpeakerRole,
+                CheckPresentation = block.CheckPresentation
+            };
+            segment.Paragraphs.Add(block.Text);
+            segments.Add(segment);
 
             return segments;
         }

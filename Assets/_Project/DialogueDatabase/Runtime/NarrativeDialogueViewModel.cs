@@ -2,8 +2,8 @@ using System.Collections.Generic;
 
 namespace KingdomSurvival.DialogueDatabase
 {
-    // Один видимый текстовый блок узла, уже прошедший условия. См. §12
-    // инструкции: "NarrativeDialogueView.VisibleTextBlocks".
+    // Одна видимая реплика узла, уже прошедшая условия. Runtime выдаёт
+    // такие блоки строго по одному presentation-шагу.
     //
     // Presentation-правило пассивных проверок (инструкция "новое отображение
     // пассивных наблюдений и проверок", §4/§18): провал пассивной проверки
@@ -63,8 +63,10 @@ namespace KingdomSurvival.DialogueDatabase
         public string MechanicalSummary;
     }
 
-    // Вычисленное представление текущего узла: что видно игроку и какие
-    // ответы доступны/заблокированы. См. §12.
+    // Вычисленное представление текущего шага узла: максимум одна реплика.
+    // Если в авторском узле есть следующая подходящая реплика, список
+    // AvailableChoices содержит только синтетический Continue; настоящие
+    // ответы появляются после последней реплики.
     public sealed class NarrativeDialogueView
     {
         public string DialogueId;

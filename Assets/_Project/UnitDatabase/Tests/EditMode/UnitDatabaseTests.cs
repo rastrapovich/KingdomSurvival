@@ -65,19 +65,28 @@ namespace KingdomSurvival.UnitDatabase.Tests
         }
 
         [Test]
-        public void DefaultUnitPortraitsUseNewCanonicalFramingData()
+        public void DefaultUnitPortraitsUseValidCanonicalFramingData()
         {
             UnitDatabaseAsset database = Resources.Load<UnitDatabaseAsset>(
                 UnitDatabaseAsset.ResourcesPath);
 
             Assert.That(database.SchemaVersion, Is.EqualTo(UnitDatabaseAsset.CurrentSchemaVersion));
+
+            // Кадрирование управляется автором отдельно для каждого существа:
+            // Cover/Contain, масштаб, смещение и отражение не обязаны иметь
+            // одинаковые значения по умолчанию. Здесь проверяется только то,
+            // что сохранённые параметры принадлежат допустимой новой модели.
             Assert.That(database.Units.All(unit =>
-                unit.PortraitFitMode == PortraitFitMode.Cover), Is.True);
+                System.Enum.IsDefined(typeof(PortraitFitMode), unit.PortraitFitMode)), Is.True);
             Assert.That(database.Units.All(unit =>
-                Mathf.Approximately(unit.PortraitScale, 1f)), Is.True);
+                unit.PortraitScale >= 0.05f &&
+                !float.IsNaN(unit.PortraitScale) &&
+                !float.IsInfinity(unit.PortraitScale)), Is.True);
             Assert.That(database.Units.All(unit =>
-                unit.PortraitOffsetNormalized == Vector2.zero), Is.True);
-            Assert.That(database.Units.All(unit => !unit.PortraitFlipX), Is.True);
+                !float.IsNaN(unit.PortraitOffsetNormalized.x) &&
+                !float.IsInfinity(unit.PortraitOffsetNormalized.x) &&
+                !float.IsNaN(unit.PortraitOffsetNormalized.y) &&
+                !float.IsInfinity(unit.PortraitOffsetNormalized.y)), Is.True);
         }
 
         [Test]

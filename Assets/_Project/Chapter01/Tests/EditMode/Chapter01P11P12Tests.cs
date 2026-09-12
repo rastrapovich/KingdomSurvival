@@ -136,7 +136,7 @@ public sealed class Chapter01P11P12Tests
     }
 
     [Test]
-    public void Journal_AdvancesFromAgreementToReturnAndHome()
+    public void Journal_AdvancesFromAgreementThroughCouncilOutcome()
     {
         GameState gameState = NewState();
         NarrativeStateData state = gameState.Narrative;
@@ -160,6 +160,14 @@ public sealed class Chapter01P11P12Tests
 
         state.SetFlag(Chapter01Ids.Flags.ReturnedHome);
         goals = Chapter01JournalProvider.Build(gameState);
+        Assert.AreEqual(JournalGoalState.Active, goals[0].State);
+        Assert.AreEqual(Chapter01Ids.JournalGoals.OldWaterTrail + ":final_council", goals[0].RevisionId);
+
+        state.SetFlag(Chapter01Ids.Flags.CouncilOldOrderRestored);
+        state.SetFlag(Chapter01Ids.Flags.CouncilCompleted);
+        state.SetFlag(Chapter01Ids.Flags.Completed);
+        goals = Chapter01JournalProvider.Build(gameState);
         Assert.AreEqual(JournalGoalState.Completed, goals[0].State);
+        Assert.AreEqual(Chapter01Ids.JournalGoals.OldWaterTrail + ":old_order", goals[0].RevisionId);
     }
 }

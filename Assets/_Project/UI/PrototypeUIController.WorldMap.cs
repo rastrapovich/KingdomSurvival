@@ -6,12 +6,11 @@ using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
-    // WM-12: столица/армия занимали ½ клетки — по отзыву пользователя после
-    // проверки в живой сессии это всё ещё выглядит слишком крупным
-    // ("нужно в 10 раз меньше"), поэтому доля клетки уменьшена в 10 раз
-    // (0.5 → 0.05). Единая константа — один параметр для подстройки, а не
-    // магическое число в каждом месте.
-    private const float MapMarkerCellFraction = 0.05f;
+    // WM-16: поселение читается как объект карты и занимает примерно четверть
+    // клетки. Маркер героя отделён от размера поселения: он имеет постоянный
+    // экранный диаметр и не меняет форму/размер во время движения и zoom.
+    private const float CapitalMarkerCellFraction = 0.25f;
+    private const float ArmyMarkerScreenDiameter = 8f;
 
     private VisualElement worldMapViewport;
     private VisualElement worldMap;
@@ -489,68 +488,51 @@ public partial class PrototypeUIController
     private static float GridYToPercent(int y) =>
         y * 100f / (WorldMapNavigation.GridHeight - 1);
 
-    // WM-13: желаемый экранный размер узла маршрута и декоративных штрихов
-    // между узлами — герой (MapMarkerCellFraction) остаётся заметно крупнее.
-    // Фактический px на каждом элементе выставляет
-    // RefreshWorldMapZoomCompensatedVisuals (WorldMapPolish.cs) как
-    // screenDiameter / zoom, чтобы размер не менялся визуально при zoom.
-    private const float RouteNodeScreenDiameter = 5f;
-    private const float RouteDashScreenDiameter = 2f;
-    // WM-14: штрихов на один полный grid-cell длины сегмента — плотность
-    // пунктира остаётся стабильной независимо от того, короткий это шаг
-    // (обычная клетка) или длиннее (диагональ, под-точки холмов/гор в
-    // FindPath). Считается от РЕАЛЬНОЙ длины сегмента (AddRouteDashes), а
-    // не как фиксированное число штрихов на любой сегмент.
-    private const float RouteDashesPerCell = 5f;
+    // WM-16: маршрут — только очень мелкий частый пунктир. Крупные узловые
+    // точки маршрута больше не рисуются: логические route[i] остаются в данных,
+    // но визуально игрок видит непрерывную пунктирную траекторию.
+    private const float RouteDashScreenDiameter = 1.5f;
+    private const float RouteDashesPerCell = 7f;
     private const int RouteDashesMinPerSegment = 1;
-    private const int RouteDashesMaxPerSegment = 20;
+    private const int RouteDashesMaxPerSegment = 28;
 
     private void DrawRoute(
         List<MapPointData> route,
         string extraClass)
     {
-        if (route == null)
+        if (route == null || route.Count < 2)
             return;
 
-        int firstVisibleIndex = 1;
+        int firstSegmentIndex = 0;
 
         if (gameState.HasActiveExpedition &&
             route == gameState.ActiveExpedition.Route)
         {
-            firstVisibleIndex =
-                Math.Max(
-                    1,
-                    gameState.ActiveExpedition.RouteIndex + 1);
+            firstSegmentIndex = Mathf.Clamp(
+                gameState.ActiveExpedition.RouteIndex,
+                0,
+                route.Count - 2);
         }
 
-        for (int i = firstVisibleIndex;
-             i < route.Count;
+        for (int i = firstSegmentIndex;
+             i < route.Count - 1;
              i++)
         {
-            AddRouteMarker(
-                route[i].XPercent,
-                route[i].YPercent,
-                extraClass,
-                RouteNodeScreenDiameter);
-
-            if (i + 1 < route.Count)
-            {
-                AddRouteDashes(
-                    route[i],
-                    route[i + 1]);
-            }
+            AddRouteDashes(
+                route[i],
+                route[i + 1],
+                extraClass);
         }
     }
 
     private void AddRouteDashes(
         MapPointData from,
-        MapPointData to)
+        MapPointData to,
+        string extraClass)
     {
-        // WM-14: расстояние считаем в единицах grid-клетки (а не в процентах
-        // от карты напрямую) — после введения единого квадратного размера
-        // клетки (WorldMapViewport.ConfigureWorldMapCanvasSize) один шаг по X
-        // и один шаг по Y физически равны, поэтому такое расстояние честно
-        // отражает реальную длину сегмента на экране.
+        // WM-14/16: расстояние считаем в единицах grid-клетки. После введения
+        // квадратного canvas один шаг по X и Y физически равны, поэтому
+        // плотность пунктира одинакова для прямых и диагональных сегментов.
         float fromCellX = from.XPercent / 100f * (WorldMapNavigation.GridWidth - 1);
         float fromCellY = from.YPercent / 100f * (WorldMapNavigation.GridHeight - 1);
         float toCellX = to.XPercent / 100f * (WorldMapNavigation.GridWidth - 1);
@@ -572,7 +554,7 @@ public partial class PrototypeUIController
             AddRouteMarker(
                 Mathf.Lerp(from.XPercent, to.XPercent, t),
                 Mathf.Lerp(from.YPercent, to.YPercent, t),
-                "world-map-route-dash",
+                extraClass,
                 RouteDashScreenDiameter);
         }
     }
@@ -588,6 +570,7 @@ public partial class PrototypeUIController
 
         dot.AddToClassList("world-map-route-dot");
         dot.AddToClassList(WorldMapRouteMarkerClass);
+        dot.AddToClassList("world-map-route-dash");
         dot.AddToClassList(extraClass);
         // Читается в RefreshWorldMapZoomCompensatedVisuals, чтобы пересчитать
         // px при изменении zoom — сам этот вызов уже выставляет актуальный
@@ -771,15 +754,12 @@ public partial class PrototypeUIController
                 "world-map-capital-return");
         }
 
-        // WM-12: столицу можно пройти за полдня при правиле "1 клетка = 1
-        // сутки". Размер и позиция считаются из реального разрешения сетки
-        // и WorldMapNavigation.CapitalXPercent/YPercent — той же точки,
-        // что используется путём и центрированием камеры при старте
-        // (раньше CSS-позиция 37%/74% с ней не совпадала).
+        // WM-16: поселение — примерно четверть клетки. Размер и позиция
+        // считаются из реального разрешения сетки и канонической точки столицы.
         float markerWidthPercent =
-            100f / (WorldMapNavigation.GridWidth - 1) * MapMarkerCellFraction;
+            100f / (WorldMapNavigation.GridWidth - 1) * CapitalMarkerCellFraction;
         float markerHeightPercent =
-            100f / (WorldMapNavigation.GridHeight - 1) * MapMarkerCellFraction;
+            100f / (WorldMapNavigation.GridHeight - 1) * CapitalMarkerCellFraction;
 
         worldMapCapitalButton.style.width =
             new Length(markerWidthPercent, LengthUnit.Percent);
@@ -797,8 +777,6 @@ public partial class PrototypeUIController
             WorldMapNavigation.CapitalYPercent - markerHeightPercent * 0.5f,
             LengthUnit.Percent);
 
-        // При таком маленьком размере текст "СТОЛИЦА" физически не
-        // поместится — название и статус уходят в tooltip.
         worldMapCapitalButton.text = string.Empty;
         worldMapCapitalButton.tooltip =
             active
@@ -829,28 +807,21 @@ public partial class PrototypeUIController
         ExpeditionData expedition =
             gameState.ActiveExpedition;
 
-        // WM-12: та же доля клетки, что и у столицы (MapMarkerCellFraction).
-        float markerWidthPercent =
-            100f / (WorldMapNavigation.GridWidth - 1) * MapMarkerCellFraction;
-        float markerHeightPercent =
-            100f / (WorldMapNavigation.GridHeight - 1) * MapMarkerCellFraction;
-
-        worldMapArmyMarker.style.width =
-            new Length(markerWidthPercent, LengthUnit.Percent);
-        worldMapArmyMarker.style.height =
-            new Length(markerHeightPercent, LengthUnit.Percent);
-        // См. комментарий в RefreshWorldMapCapital — inline min-width/
-        // min-height:0 гарантированно побеждает встроенный min-size темы.
+        // WM-16: позиция остаётся в процентах мира, а физический размер героя
+        // задаётся в px с обратной компенсацией zoom. Поэтому точка остаётся
+        // настоящим кругом одного экранного диаметра и не растягивается во
+        // время движения между клетками.
+        RefreshWorldMapArmyMarkerScreenSize();
         worldMapArmyMarker.style.minWidth = new Length(0, LengthUnit.Pixel);
         worldMapArmyMarker.style.minHeight = new Length(0, LengthUnit.Pixel);
 
         worldMapArmyMarker.style.display =
             DisplayStyle.Flex;
         worldMapArmyMarker.style.left = new Length(
-            expedition.CurrentMapXPercent - markerWidthPercent * 0.5f,
+            expedition.CurrentMapXPercent,
             LengthUnit.Percent);
         worldMapArmyMarker.style.top = new Length(
-            expedition.CurrentMapYPercent - markerHeightPercent * 0.5f,
+            expedition.CurrentMapYPercent,
             LengthUnit.Percent);
 
         string armyStatusText =
@@ -859,13 +830,25 @@ public partial class PrototypeUIController
                     ContinuousSimulationSystem.GetTravelHoursRemaining(gameState))
                 : "на месте";
 
-        // Бейдж/подпись-Label скрыты статически в USS (текст физически не
-        // помещается в маркер размером ½ клетки) — информация уходит в
-        // tooltip самого маркера.
         worldMapArmyMarkerLabel.text = armyStatusText;
         worldMapArmyMarker.tooltip = "Отряд — " + armyStatusText;
 
         RefreshWorldMapActivityProgress(expedition);
+    }
+
+    private void RefreshWorldMapArmyMarkerScreenSize()
+    {
+        if (worldMapArmyMarker == null)
+            return;
+
+        float zoom = Mathf.Max(0.0001f, worldMapZoom);
+        float size = ArmyMarkerScreenDiameter / zoom;
+        float halfSize = size * 0.5f;
+
+        worldMapArmyMarker.style.width = size;
+        worldMapArmyMarker.style.height = size;
+        worldMapArmyMarker.style.marginLeft = -halfSize;
+        worldMapArmyMarker.style.marginTop = -halfSize;
     }
 
     private void RefreshWorldMapActivityProgress(ExpeditionData expedition)

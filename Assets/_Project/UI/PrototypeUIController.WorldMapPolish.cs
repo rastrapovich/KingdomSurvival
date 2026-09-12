@@ -7,9 +7,11 @@ public partial class PrototypeUIController
     private bool worldMapPolishInitialized;
     private List<string> cancelledExpeditionRosterSnapshot;
     private VisualElement worldMapGridOverlay;
+    private readonly List<VisualElement> worldMapGridVerticalLines =
+        new List<VisualElement>();
+    private readonly List<VisualElement> worldMapGridHorizontalLines =
+        new List<VisualElement>();
 
-    private const string WorldMapGridLineVerticalClass = "world-map-grid-line-vertical";
-    private const string WorldMapGridLineHorizontalClass = "world-map-grid-line-horizontal";
     // Общий класс для ЛЮБОЙ точки/штриха маршрута (узел или декоративный
     // штрих между узлами) — по нему RefreshWorldMapZoomCompensatedVisuals
     // находит все элементы, которым нужна компенсация zoom, независимо от
@@ -53,14 +55,17 @@ public partial class PrototypeUIController
         Button cancelButton =
             interfaceRoot.Q<Button>("return-expedition-button");
 
-        if (map == null || capitalButton == null || cancelButton == null)
+        if (map == null ||
+            worldMapViewport == null ||
+            capitalButton == null ||
+            cancelButton == null)
         {
             ScheduleWorldMapPolishRetry();
             return;
         }
 
         HideLegacyWorldMapDecoration(map);
-        EnsureWorldMapGrid(map);
+        EnsureWorldMapGrid();
         RegisterCancelledRosterPreservation(cancelButton, capitalButton);
 
         worldMapPolishInitialized = true;
@@ -91,15 +96,27 @@ public partial class PrototypeUIController
             compass.style.display = DisplayStyle.None;
     }
 
-    private void EnsureWorldMapGrid(VisualElement map)
+    private void EnsureWorldMapGrid()
     {
-        VisualElement existing = map.Q<VisualElement>("world-map-grid-overlay");
+        if (worldMapViewport == null)
+            return;
+
+        // WM-15: старая сетка была дочерним элементом масштабируемого
+        // world-map. На больших zoom её толщина компенсировалась как 1/zoom,
+        // из-за чего UI Toolkit получал линии 0.5/0.2/0.1 px и на части
+        // масштабов растрировал их нестабильно: исчезала одна ось или вся
+        // сетка. Удаляем возможный старый экземпляр и создаём сетку как
+        // screen-space overlay непосредственно внутри viewport.
+        VisualElement existing =
+            interfaceRoot != null
+                ? interfaceRoot.Q<VisualElement>("world-map-grid-overlay")
+                : null;
 
         if (existing != null)
-        {
-            worldMapGridOverlay = existing;
-            return;
-        }
+            existing.RemoveFromHierarchy();
+
+        worldMapGridVerticalLines.Clear();
+        worldMapGridHorizontalLines.Clear();
 
         VisualElement overlay = new VisualElement
         {
@@ -115,12 +132,6 @@ public partial class PrototypeUIController
 
         Color gridColor = new Color32(95, 99, 92, 72);
 
-        // WM-13: линии — дочерние элементы .world-map, того же контейнера,
-        // к которому WorldMapViewport применяет style.scale = zoom. Заданная
-        // здесь толщина в px визуально умножается на zoom, поэтому реальная
-        // толщина на экране пересчитывается в RefreshWorldMapZoomCompensatedVisuals
-        // (1px / zoom) при каждом изменении масштаба — так линия остаётся
-        // примерно 1 экранным пикселем на любом уровне приближения.
         for (int x = 0; x < WorldMapNavigation.GridWidth; x++)
         {
             VisualElement line = new VisualElement
@@ -128,15 +139,13 @@ public partial class PrototypeUIController
                 pickingMode = PickingMode.Ignore
             };
 
-            line.AddToClassList(WorldMapGridLineVerticalClass);
             line.style.position = Position.Absolute;
-            line.style.left = new Length(
-                x * 100f / (WorldMapNavigation.GridWidth - 1),
-                LengthUnit.Percent);
-            line.style.top = 0f;
-            line.style.bottom = 0f;
+            line.style.width = 1f;
             line.style.backgroundColor = gridColor;
+            line.style.display = DisplayStyle.None;
+
             overlay.Add(line);
+            worldMapGridVerticalLines.Add(line);
         }
 
         for (int y = 0; y < WorldMapNavigation.GridHeight; y++)
@@ -146,45 +155,125 @@ public partial class PrototypeUIController
                 pickingMode = PickingMode.Ignore
             };
 
-            line.AddToClassList(WorldMapGridLineHorizontalClass);
             line.style.position = Position.Absolute;
-            line.style.left = 0f;
-            line.style.right = 0f;
-            line.style.top = new Length(
-                y * 100f / (WorldMapNavigation.GridHeight - 1),
-                LengthUnit.Percent);
+            line.style.height = 1f;
             line.style.backgroundColor = gridColor;
+            line.style.display = DisplayStyle.None;
+
             overlay.Add(line);
+            worldMapGridHorizontalLines.Add(line);
         }
 
-        map.Add(overlay);
+        worldMapViewport.Add(overlay);
+        // Сетка остаётся под содержимым карты: terrain/route/markers рисуются
+        // поверх неё, но сама сетка уже не наследует scale world-map.
         overlay.SendToBack();
         worldMapGridOverlay = overlay;
+
+        RefreshWorldMapGridOverlay();
     }
 
-    // WM-13: и линии сетки, и точки/штрихи маршрута заданы в px внутри
-    // .world-map — контейнера, который WorldMapViewport масштабирует целиком
-    // через style.scale. Чтобы их экранный размер не рос вместе с zoom,
-    // здесь при каждом изменении zoom (см. вызов из
-    // ApplyWorldMapViewportTransform) пересчитываем px как
-    // "желаемый экранный размер / zoom" — после применения scale родителя
-    // на экране снова получается желаемый размер.
+    // WM-15: сетка рисуется в координатах viewport и всегда имеет настоящую
+    // толщину 1px. Позиция каждой линии вычисляется из pan + zoom карты, а не
+    // через масштабирование самих line-элементов. Поэтому линии не становятся
+    // субпиксельными и не исчезают на отдельных уровнях zoom.
+    private void RefreshWorldMapGridOverlay()
+    {
+        if (worldMapGridOverlay == null ||
+            worldMapViewport == null ||
+            worldMapCanvasWidth <= 0f ||
+            worldMapCanvasHeight <= 0f)
+        {
+            return;
+        }
+
+        float viewportWidth = worldMapViewport.resolvedStyle.width;
+        float viewportHeight = worldMapViewport.resolvedStyle.height;
+
+        if (float.IsNaN(viewportWidth) ||
+            float.IsNaN(viewportHeight) ||
+            viewportWidth <= 0f ||
+            viewportHeight <= 0f)
+        {
+            return;
+        }
+
+        float zoom = Mathf.Max(0.0001f, worldMapZoom);
+        float cellScreenSize = WorldMapBaseCellSizePx * zoom;
+        float mapLeft = worldMapPanOffsetX;
+        float mapTop = worldMapPanOffsetY;
+        float mapRight = mapLeft + worldMapCanvasWidth * zoom;
+        float mapBottom = mapTop + worldMapCanvasHeight * zoom;
+
+        float visibleLeft = Mathf.Max(0f, mapLeft);
+        float visibleTop = Mathf.Max(0f, mapTop);
+        float visibleRight = Mathf.Min(viewportWidth, mapRight);
+        float visibleBottom = Mathf.Min(viewportHeight, mapBottom);
+
+        if (visibleRight <= visibleLeft || visibleBottom <= visibleTop)
+        {
+            worldMapGridOverlay.style.display = DisplayStyle.None;
+            return;
+        }
+
+        worldMapGridOverlay.style.display = DisplayStyle.Flex;
+
+        float snappedLeft = Mathf.Round(visibleLeft);
+        float snappedTop = Mathf.Round(visibleTop);
+        float snappedRight = Mathf.Round(visibleRight);
+        float snappedBottom = Mathf.Round(visibleBottom);
+        float verticalHeight = Mathf.Max(1f, snappedBottom - snappedTop);
+        float horizontalWidth = Mathf.Max(1f, snappedRight - snappedLeft);
+        float maxVisibleX = Mathf.Max(0f, viewportWidth - 1f);
+        float maxVisibleY = Mathf.Max(0f, viewportHeight - 1f);
+
+        for (int x = 0; x < worldMapGridVerticalLines.Count; x++)
+        {
+            VisualElement line = worldMapGridVerticalLines[x];
+            float screenX = mapLeft + x * cellScreenSize;
+
+            if (screenX < visibleLeft - 0.5f ||
+                screenX > visibleRight + 0.5f)
+            {
+                line.style.display = DisplayStyle.None;
+                continue;
+            }
+
+            line.style.display = DisplayStyle.Flex;
+            line.style.left = Mathf.Clamp(Mathf.Round(screenX), 0f, maxVisibleX);
+            line.style.top = snappedTop;
+            line.style.width = 1f;
+            line.style.height = verticalHeight;
+        }
+
+        for (int y = 0; y < worldMapGridHorizontalLines.Count; y++)
+        {
+            VisualElement line = worldMapGridHorizontalLines[y];
+            float screenY = mapTop + y * cellScreenSize;
+
+            if (screenY < visibleTop - 0.5f ||
+                screenY > visibleBottom + 0.5f)
+            {
+                line.style.display = DisplayStyle.None;
+                continue;
+            }
+
+            line.style.display = DisplayStyle.Flex;
+            line.style.left = snappedLeft;
+            line.style.top = Mathf.Clamp(Mathf.Round(screenY), 0f, maxVisibleY);
+            line.style.width = horizontalWidth;
+            line.style.height = 1f;
+        }
+    }
+
+    // Route-маркеры остаются внутри world-map и потому продолжают получать
+    // компенсацию zoom. Сетка вынесена в screen-space overlay и обновляется
+    // отдельно через RefreshWorldMapGridOverlay().
     private void RefreshWorldMapZoomCompensatedVisuals()
     {
+        RefreshWorldMapGridOverlay();
+
         float zoom = Mathf.Max(0.0001f, worldMapZoom);
-
-        if (worldMapGridOverlay != null)
-        {
-            float lineThickness = 1f / zoom;
-
-            worldMapGridOverlay
-                .Query<VisualElement>(className: WorldMapGridLineVerticalClass)
-                .ForEach(line => line.style.width = lineThickness);
-
-            worldMapGridOverlay
-                .Query<VisualElement>(className: WorldMapGridLineHorizontalClass)
-                .ForEach(line => line.style.height = lineThickness);
-        }
 
         if (worldMapRoutes != null)
         {

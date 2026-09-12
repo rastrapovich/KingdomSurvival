@@ -112,10 +112,16 @@
 }
 
 .world-map {
-    /* WM-03: карта (canvas) теперь живёт внутри .world-map-viewport — рамка
-       фиксированного размера с overflow:hidden. Сама .world-map заполняет
-       viewport на 100% при zoom=1 и панорамируется/зумируется через
-       style.left/top/scale в WorldMapViewportController, а не через layout. */
+    /* WM-03/WM-14: карта (canvas) живёт внутри .world-map-viewport — рамка
+       фиксированного размера с overflow:hidden. WM-14: width/height больше
+       НЕ 100% viewport — сетка 104×64 почти никогда не имеет тех же
+       пропорций, что и viewport, и растяжение на 100%×100% делало клетки
+       прямоугольными, а не квадратными. Реальные width/height задаются
+       кодом (WorldMapViewport.cs, ConfigureWorldMapCanvasSize) как
+       (GridWidth-1)/(GridHeight-1) × единый WorldMapBaseCellSizePx —
+       100%/100% ниже лишь запасное значение на случай, если код почему-то
+       не успел выставить inline-стиль. Панорама/зум — через
+       style.left/top/scale в WorldMapViewport.cs, а не через layout. */
     position: absolute;
     left: 0;
     top: 0;

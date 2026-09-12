@@ -18,28 +18,31 @@ public class ContinuousSimulationTests
         Assert.That(clock.SpeedMultiplier, Is.EqualTo(1));
     }
 
+    // WM-13: явный контрактный тест — число здесь НАМЕРЕННО захардкожено, а
+    // не выведено из RealSecondsPerGameDay. Если темп мира когда-нибудь
+    // изменится, этот тест должен сломаться и заставить осознанно обновить
+    // число здесь, а не молча продолжать проходить вместе с константой.
     [Test]
-    public void Clock_OneRealGameDayAdvancesOneFullGameDayAtNormalSpeed()
+    public void Clock_SixtyRealSecondsEqualTwentyFourGameHoursAtNormalSpeed()
     {
         GameState state = new GameState();
         state.CreateNewGame(4321);
         ContinuousSimulationSystem.Reset(state);
         ContinuousSimulationSystem.SetPaused(state, false);
 
-        // WM-13: было захардкожено 120f под старое RealSecondsPerGameDay —
-        // ссылаемся на константу, чтобы ускорение времени не ломало тест.
-        ContinuousSimulationSystem.Advance(
-            state,
-            (float)ContinuousSimulationSystem.RealSecondsPerGameDay,
-            false);
+        ContinuousSimulationSystem.Advance(state, 60f, false);
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
 
+        // 08:00 + 24 часа = снова 08:00 следующих суток.
         Assert.That(state.Day, Is.EqualTo(2));
         Assert.That(clock.HourOfDay, Is.EqualTo(8.0).Within(0.01));
     }
 
+    // WM-13: явный контрактный тест — та же намеренная захардкоженная
+    // константа (60 секунд), проверяющая независимо второй канонический
+    // факт: "1 клетка маршрута = 24 игровых часа" на обычной скорости.
     [Test]
-    public void Expedition_MovesOneCellPerGameDayAtNormalSpeed()
+    public void Expedition_OneCellAdvancesExactlyTwentyFourGameHoursAtNormalSpeed()
     {
         GameState state = CreateTravellingState();
         ContinuousSimulationSystem.Reset(state);
@@ -49,16 +52,16 @@ public class ContinuousSimulationTests
         ExpeditionData expedition = state.ActiveExpedition;
         int startIndex = expedition.RouteIndex;
         int startDay = state.Day;
+        double startHour = ContinuousSimulationSystem.GetClock(state).HourOfDay;
 
-        // WM-12: "1 клетка = 1 сутки" — RealSecondsPerGameDay реальных секунд
-        // на обычной скорости продвигают маршрут ровно на одну клетку.
-        ContinuousSimulationSystem.Advance(
-            state,
-            (float)ContinuousSimulationSystem.RealSecondsPerGameDay,
-            false);
+        ContinuousSimulationSystem.Advance(state, 60f, false);
 
         Assert.That(expedition.RouteIndex, Is.EqualTo(startIndex + 1));
         Assert.That(state.Day, Is.EqualTo(startDay + 1));
+        Assert.That(
+            ContinuousSimulationSystem.GetClock(state).HourOfDay,
+            Is.EqualTo(startHour).Within(0.01),
+            "1 клетка маршрута должна занимать ровно 24 часа — часы суток должны вернуться к тому же значению на следующий день.");
     }
 
     [Test]

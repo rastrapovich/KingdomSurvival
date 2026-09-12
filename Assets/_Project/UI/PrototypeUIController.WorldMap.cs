@@ -496,9 +496,14 @@ public partial class PrototypeUIController
     // screenDiameter / zoom, чтобы размер не менялся визуально при zoom.
     private const float RouteNodeScreenDiameter = 5f;
     private const float RouteDashScreenDiameter = 2f;
-    // Штрихов между соседними узлами маршрута — превращает редкие точки по
-    // клеткам в частый мелкий пунктир, не трогая логические узлы пути.
-    private const int RouteDashesPerSegment = 5;
+    // WM-14: штрихов на один полный grid-cell длины сегмента — плотность
+    // пунктира остаётся стабильной независимо от того, короткий это шаг
+    // (обычная клетка) или длиннее (диагональ, под-точки холмов/гор в
+    // FindPath). Считается от РЕАЛЬНОЙ длины сегмента (AddRouteDashes), а
+    // не как фиксированное число штрихов на любой сегмент.
+    private const float RouteDashesPerCell = 5f;
+    private const int RouteDashesMinPerSegment = 1;
+    private const int RouteDashesMaxPerSegment = 20;
 
     private void DrawRoute(
         List<MapPointData> route,
@@ -541,9 +546,28 @@ public partial class PrototypeUIController
         MapPointData from,
         MapPointData to)
     {
-        for (int d = 1; d <= RouteDashesPerSegment; d++)
+        // WM-14: расстояние считаем в единицах grid-клетки (а не в процентах
+        // от карты напрямую) — после введения единого квадратного размера
+        // клетки (WorldMapViewport.ConfigureWorldMapCanvasSize) один шаг по X
+        // и один шаг по Y физически равны, поэтому такое расстояние честно
+        // отражает реальную длину сегмента на экране.
+        float fromCellX = from.XPercent / 100f * (WorldMapNavigation.GridWidth - 1);
+        float fromCellY = from.YPercent / 100f * (WorldMapNavigation.GridHeight - 1);
+        float toCellX = to.XPercent / 100f * (WorldMapNavigation.GridWidth - 1);
+        float toCellY = to.YPercent / 100f * (WorldMapNavigation.GridHeight - 1);
+
+        float segmentLengthCells = Mathf.Sqrt(
+            (toCellX - fromCellX) * (toCellX - fromCellX) +
+            (toCellY - fromCellY) * (toCellY - fromCellY));
+
+        int dashCount = Mathf.Clamp(
+            Mathf.RoundToInt(segmentLengthCells * RouteDashesPerCell),
+            RouteDashesMinPerSegment,
+            RouteDashesMaxPerSegment);
+
+        for (int d = 1; d <= dashCount; d++)
         {
-            float t = d / (float)(RouteDashesPerSegment + 1);
+            float t = d / (float)(dashCount + 1);
 
             AddRouteMarker(
                 Mathf.Lerp(from.XPercent, to.XPercent, t),

@@ -11090,77 +11090,997 @@ MonoBehaviour:
       hasEditorPosition: 0
     schemaVersion: 1
   - id: chapter01_dialogue_17_council_of_the_house
-    title: "N17 \u2014 \u0421\u043E\u0432\u0435\u0442 \u0414\u043E\u043C\u0430"
+    title: "N17 — Совет Дома"
     category: 1
     status: 1
-    developerComment: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u0443\u0437\u0435\u043B
-      P03 (\u0435\u0434\u0438\u043D\u0430\u044F \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u044F
-      \xA78/\xA79): \u043D\u0435 \u043F\u043E\u043B\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
-      \u0442\u0435\u043A\u0441\u0442, \u0442\u043E\u043B\u044C\u043A\u043E \u043A\u0430\u0440\u043A\u0430\u0441
-      \u043F\u0435\u0440\u0435\u0445\u043E\u0434\u043E\u0432 \u0438 \u0444\u043B\u0430\u0433\u043E\u0432."
+    developerComment: "P13 production-сцена: семь узлов, три равноправных решения без проверки навыка и отдельные aftermath. Старт не завершает главу. Условные блоки читают ремонт, паводок, N14½, первый контакт и ключевые знания; completion/outcome-флаги ставятся только после решения."
     startNodeId: chapter01.node.17
     tags:
-    - "\u0433\u043B\u0430\u0432\u043001"
-    - "\u0447\u0435\u0440\u043D\u043E\u0432\u0438\u043A"
+    - "глава01"
+    - production
+    - p13
     nodes:
     - id: chapter01.node.17
-      speakerId: ostafiy
-      text: 
+      speakerId: narrator
+      text:
       textBlocks:
       - blockId: chapter01.node.17_main
         kind: 0
-        speakerIdOverride: 
-        text: "\u0414\u043E\u043C \u0441\u043E\u0431\u0438\u0440\u0430\u0435\u0442\u0441\u044F
-          \u043D\u0430 \u0441\u043E\u0432\u0435\u0442. \u0422\u0440\u0438 \u043F\u0443\u0442\u0438
-          \u043B\u0435\u0436\u0430\u0442 \u043F\u0435\u0440\u0435\u0434 \u043D\u0438\u043C:
-          \u0432\u0435\u0440\u043D\u0443\u0442\u044C \u0441\u0442\u0430\u0440\u044B\u0439
-          \u043E\u0431\u0449\u0438\u0439 \u043F\u043E\u0440\u044F\u0434\u043E\u043A,
-          \u0434\u043E\u0433\u043E\u0432\u043E\u0440\u0438\u0442\u044C\u0441\u044F
-          \u043E \u043D\u043E\u0432\u043E\u043C \u2014 \u0438\u043B\u0438 \u043E\u0441\u0442\u0430\u0432\u0438\u0442\u044C
-          \u0432\u043E\u0434\u0443 \u0441\u0435\u0431\u0435. \u041D\u0438 \u043E\u0434\u0438\u043D
-          \u043D\u0435 \u0434\u0430\u0451\u0442\u0441\u044F \u0431\u0435\u0441\u043F\u043B\u0430\u0442\u043D\u043E."
+        speakerIdOverride:
+        text: "К вечеру в большом доме ставят длинный стол. За ним обычно считают мешки, делят работу и спорят, чья коза опять добралась до капусты. Сегодня на столе лежат зарубки старого водного порядка, а за дверью ждут люди, которым завтра понадобится ответ."
         conditions:
           Combinator: 0
           Conditions: []
         hasPassiveCheck: 0
         passiveCheck:
-          CheckId: 
+          CheckId:
           Kind: 0
           Quality: 0
-          CompetencyId: 
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_seven_tooth
+        kind: 1
+        speakerIdOverride: narrator
+        text: "Рядом с зарубками лежит семизубая железная пластина. Ещё недавно ею чесали собаку; теперь каждый зубец совпадает с одним из затворов, будто старая вещь всё это время терпеливо ждала, пока люди снова научатся ею пользоваться."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 1
+            StringParam: chapter01.knowledge.seven_tooth_object
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_second_loaf
+        kind: 1
+        speakerIdOverride: narrator
+        text: "Ульяна кладёт рядом второй хлеб — не как подношение воде, а как старый паёк людям, о которых Дом сумел забыть, не перестав пользоваться их трудом."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 1
+            StringParam: chapter01.knowledge.second_loaf_is_ration
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Начать Совет."
+        nextNodeId: chapter01.node.17_opening
+        endsDialogue: 0
+        choiceId: chapter01.node.17_continue_opening
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.17_opening
+      speakerId: ostafiy
+      text:
+      textBlocks:
+      - blockId: chapter01.node.17_opening_main
+        kind: 0
+        speakerIdOverride:
+        text: "— Раньше я сказал бы: верните всё как было, и нечего тут сидеть до ночи, — начинает Остафий. — Теперь знаем: «как было» — это не только наши руки и не только наша вода."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_opening_repair_old
+        kind: 1
+        speakerIdOverride: lada
+        text: "— Старый ремонт сохранил все семь ходов, — говорит Лада. — Вернуть общий ритм можно. Только это снова будут постоянные работы, дерево, железо и люди с обоих концов канала."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_old
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_opening_repair_new
+        kind: 1
+        speakerIdOverride: lada
+        text: "— Новый ремонт держит Дом и не требует притворяться, будто гнилое крепление хорошее только потому, что старое, — говорит Лада. — Но седьмой ход мы перекрыли сами. Нижних об этом никто не спрашивал."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_new
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_opening_workers_saved
+        kind: 1
+        speakerIdOverride: ulyana
+        text: "— Людей из воды тогда вытащили, — напоминает Ульяна. — Они уже снова работают. Это не значит, что теперь им по плечу ещё и чужая доля работы."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.flood_workers_saved
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_opening_livestock_lost
+        kind: 1
+        speakerIdOverride: ulyana
+        text: "— После паводка у нас меньше скота. Значит, меньше молока и меньше запаса к зиме. Любое обещание нижним придётся выполнять не из лишнего. Лишнего у нас нет."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.flood_livestock_lost
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_opening_mill_deck_lost
+        kind: 1
+        speakerIdOverride: miron
+        text: "— Настил у мельницы вода забрала, новый ещё сырой, — говорит Мирон. — Если снова менять ход, помол встанет. Если не менять — внизу встанет чужое поле. Вот и весь удобный выбор."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.flood_mill_deck_destroyed
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Выслушать, чего требует каждый путь."
+        nextNodeId: chapter01.node.17_positions
+        endsDialogue: 0
+        choiceId: chapter01.node.17_opening_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 430, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.17_positions
+      speakerId: ostafiy
+      text:
+      textBlocks:
+      - blockId: chapter01.node.17_positions_ostafiy
+        kind: 0
+        speakerIdOverride: ostafiy
+        text: "— Вернуть старый порядок — не значит снова забыть его смысл, — говорит Остафий. — Но если вернём, отвечать придётся за все семь затворов, а не только за те, что видны из нашего окна."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_positions_lada
+        kind: 0
+        speakerIdOverride: lada
+        text: "— Новый порядок можно сделать честнее старого, — отвечает Лада. — Оставить рабочую схему, назвать, что мы забрали у нижних, и договориться о возмещении. Только этот долг уже не спишешь на обычай, которого никто не помнит."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_positions_miron
+        kind: 0
+        speakerIdOverride: miron
+        text: "— Мне не нужно старое или новое, — говорит Мирон. — Мне нужно знать, когда пойдёт вода. И нижним нужно то же самое. Какой порядок выберем, такой и держать придётся, даже когда станет неудобно."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_positions_ulyana
+        kind: 0
+        speakerIdOverride: ulyana
+        text: "— Назовите не только воду, — говорит Ульяна. — Назовите, кто каждую весну понесёт брёвна вниз, кто отдаст часть запаса и кто посмотрит нижним в лицо, если мы оставим всё себе."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_positions_return_now
+        kind: 1
+        speakerIdOverride: ulyana
+        text: "Ульяна кивает тебе: — Ты повернул домой, пока след ещё не успел стать важнее людей, которые ждали здесь. Это тоже надо положить на весы."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 14
+            StringParam: chapter01.effect.n14_5_return_flag1
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_positions_follow_trace
+        kind: 1
+        speakerIdOverride: ostafiy
+        text: "Остафий проводит пальцем по свежим отметкам: — Ты пошёл за следом дальше и принёс больше уверенности. Дом за эти часы тоже заплатил ожиданием. Не вычёркивай ни одно из двух."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 14
+            StringParam: chapter01.effect.n14_5_continue_flag1
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_positions_ford_helped
+        kind: 1
+        speakerIdOverride: ulyana
+        text: "— Женщина у брода приняла помощь прежде, чем услышала наши объяснения, — добавляет Ульяна. — Внизу запомнят и это, не только затворы."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.ford_woman_helped
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_positions_contact_success
+        kind: 1
+        speakerIdOverride: miron
+        text: "— С тобой внизу всё-таки сели говорить, — напоминает Мирон. — Значит, новый разговор возможен. Не значит, что он будет дешёвым."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 8
+            StringParam: chapter01.check.first_contact
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_positions_contact_failure
+        kind: 1
+        speakerIdOverride: miron
+        text: "— Внизу тебе не поверили с первого слова, — говорит Мирон. — Любой договор начнётся не с воды, а с доказательства, что мы опять не забудем о них."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 9
+            StringParam: chapter01.check.first_contact
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Назвать решение."
+        nextNodeId: chapter01.node.17_decision
+        endsDialogue: 0
+        choiceId: chapter01.node.17_positions_continue
+        kind: 4
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 860, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.17_decision
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.17_decision_main
+        kind: 0
+        speakerIdOverride:
+        text: "Совет затихает. Здесь уже нечего доказывать удачным броском или красивой речью: Дом знает достаточно. Осталось решить, какую цену он согласен нести — и какую переложит на других."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Вернуть старый ритм всех семи затворов — и принять постоянный общий труд с нижними."
+        nextNodeId: chapter01.node.17_old_order
+        endsDialogue: 0
+        choiceId: chapter01.node.17_decision_old_order
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      - text: "Создать новый общий порядок — закрепить новую схему и принять явное обязательство перед нижними."
+        nextNodeId: chapter01.node.17_new_order
+        endsDialogue: 0
+        choiceId: chapter01.node.17_decision_new_order
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      - text: "Вода останется Дому — нижние лишатся прежнего стока, а их счёт останется открытым."
+        nextNodeId: chapter01.node.17_water_for_home
+        endsDialogue: 0
+        choiceId: chapter01.node.17_decision_water_for_home
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1290, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.17_old_order
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.17_old_order_main
+        kind: 0
+        speakerIdOverride:
+        text: "Дом возвращает общий ритм всех семи затворов. Нижний канал снова станет общей работой: нижняя смена будет держать его и берега брода, а Дом — вовремя давать сток, людей, материалы и паёк. Старый порядок вернётся уже без удобной сказки о полной самодостаточности."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
           Difficulty: 13
           ModifierRules: []
         onRevealEffects:
-        - EffectExecutionId: chapter01.effect.n17_flag1
+        - EffectExecutionId: chapter01.effect.n17_old_order_outcome
+          Type: 0
+          StringParam: chapter01.flag.council_old_order_restored
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_old_order_clear_new
+          Type: 1
+          StringParam: chapter01.flag.council_new_order_created
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_old_order_clear_home
+          Type: 1
+          StringParam: chapter01.flag.council_water_kept_for_home
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_old_order_clear_debt
+          Type: 1
+          StringParam: chapter01.flag.downstream_debt_open
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_old_order_council_completed
           Type: 0
           StringParam: chapter01.flag.council_completed
           IntParam: 0
-        - EffectExecutionId: chapter01.effect.n17_flag2
+        - EffectExecutionId: chapter01.effect.n17_old_order_chapter_completed
           Type: 0
           StringParam: chapter01.flag.completed
           IntParam: 0
+      - blockId: chapter01.node.17_old_order_from_old_repair
+        kind: 1
+        speakerIdOverride: narrator
+        text: "Сделанный после паводка старый ремонт станет основой работ: его не придётся ломать, но временные крепления нужно будет довести до порядка, рассчитанного на постоянный общий ритм."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_old
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_old_order_from_new_repair
+        kind: 1
+        speakerIdOverride: narrator
+        text: "Новый ремонт придётся переделать: снова открыть седьмой ход и вернуть боковой сброс. Это дополнительная работа и материалы сейчас — до того, как начнётся постоянное общее обслуживание."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_new
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_old_order_ostafiy
+        kind: 0
+        speakerIdOverride: ostafiy
+        text: "— Значит, будем учиться помнить не только что делали, но и с кем, — говорит Остафий. Слова даются ему тяжелее, чем вся прежняя защита старого порядка."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_old_order_lada
+        kind: 0
+        speakerIdOverride: lada
+        text: "— Я переделаю крепления, — говорит Лада. — Старый порядок не обязан снова стать гнилым только ради сходства с прошлым."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_old_order_ulyana
+        kind: 0
+        speakerIdOverride: ulyana
+        text: "— Хлеб посчитаю как паёк, — отвечает Ульяна. — Только больше не называйте плату за чужую работу подарком воде."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
       choices:
-      - text: "\u041E\u0433\u043B\u0430\u0441\u0438\u0442\u044C \u0440\u0435\u0448\u0435\u043D\u0438\u0435
-          \u0414\u043E\u043C\u0430."
-        nextNodeId: 
+      - text: "Закончить Совет."
+        nextNodeId:
         endsDialogue: 1
-        choiceId: chapter01.node.17_exit
+        choiceId: chapter01.node.17_old_order_exit
         kind: 3
         conditions:
           Combinator: 0
           Conditions: []
         unavailablePresentation: 0
         check:
-          CheckId: 
+          CheckId:
           Kind: 0
           Quality: 0
-          CompetencyId: 
+          CompetencyId:
           Difficulty: 13
           ModifierRules: []
-        successNodeId: 
-        failureNodeId: 
+        successNodeId:
+        failureNodeId:
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 1720, y: -360}
+      hasEditorPosition: 1
+    - id: chapter01.node.17_new_order
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.17_new_order_main
+        kind: 0
+        speakerIdOverride:
+        text: "Дом выбирает новый общий порядок и перестаёт считать последствия ниже по течению чужой бедой. С нижними предстоит открыто назвать потерянный сток, договориться о возмещении и закрепить обязанности так, чтобы их уже нельзя было превратить в забытый обычай."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n17_new_order_outcome
+          Type: 0
+          StringParam: chapter01.flag.council_new_order_created
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_new_order_clear_old
+          Type: 1
+          StringParam: chapter01.flag.council_old_order_restored
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_new_order_clear_home
+          Type: 1
+          StringParam: chapter01.flag.council_water_kept_for_home
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_new_order_clear_debt
+          Type: 1
+          StringParam: chapter01.flag.downstream_debt_open
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_new_order_council_completed
+          Type: 0
+          StringParam: chapter01.flag.council_completed
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_new_order_chapter_completed
+          Type: 0
+          StringParam: chapter01.flag.completed
+          IntParam: 0
+      - blockId: chapter01.node.17_new_order_from_old_repair
+        kind: 1
+        speakerIdOverride: narrator
+        text: "Старый экстренный ремонт не останется финальной схемой: седьмой ход снова перекроют по плану Лады. Дом заплатит за вторую переделку, прежде чем сможет предложить нижним новый порядок."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_old
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_new_order_from_new_repair
+        kind: 1
+        speakerIdOverride: narrator
+        text: "Новый ремонт сохранят, но его хозяйственную выгоду больше не будут считать бесплатной: потерянный нижними сток станет предметом явного обязательства Дома."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_new
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_new_order_lada
+        kind: 0
+        speakerIdOverride: lada
+        text: "— Схема останется рабочей, — говорит Лада. — Но теперь в неё придётся вписать людей, которых раньше не было видно с нашей стороны плотины. Это сложнее дерева."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_new_order_miron
+        kind: 0
+        speakerIdOverride: miron
+        text: "— Запишите ритм так, чтобы его понимали у мельницы и на обоих берегах, — говорит Мирон. — Иначе новое соглашение состарится быстрее старого."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_new_order_ulyana
+        kind: 0
+        speakerIdOverride: ulyana
+        text: "— Новый долг хотя бы назван вслух, — говорит Ульяна. — Теперь осталось не сделать его опять чьей-нибудь молчаливой работой."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Закончить Совет."
+        nextNodeId:
+        endsDialogue: 1
+        choiceId: chapter01.node.17_new_order_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1720, y: 0}
+      hasEditorPosition: 1
+    - id: chapter01.node.17_water_for_home
+      speakerId: narrator
+      text:
+      textBlocks:
+      - blockId: chapter01.node.17_water_for_home_main
+        kind: 0
+        speakerIdOverride:
+        text: "Дом оставляет воду себе. Седьмой ход будет закрыт, чтобы сохранить запас и устойчивую работу мельницы здесь, наверху. Боковой сток не вернётся; нижние потеряют воду для поля и свой прежний ритм. Совет выбирает безопасность Дома вместе с долгом, который это решение открывает."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: chapter01.effect.n17_water_for_home_outcome
+          Type: 0
+          StringParam: chapter01.flag.council_water_kept_for_home
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_water_for_home_clear_old
+          Type: 1
+          StringParam: chapter01.flag.council_old_order_restored
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_water_for_home_clear_new
+          Type: 1
+          StringParam: chapter01.flag.council_new_order_created
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_water_for_home_debt
+          Type: 0
+          StringParam: chapter01.flag.downstream_debt_open
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_water_for_home_council_completed
+          Type: 0
+          StringParam: chapter01.flag.council_completed
+          IntParam: 0
+        - EffectExecutionId: chapter01.effect.n17_water_for_home_chapter_completed
+          Type: 0
+          StringParam: chapter01.flag.completed
+          IntParam: 0
+      - blockId: chapter01.node.17_water_for_home_from_old_repair
+        kind: 1
+        speakerIdOverride: narrator
+        text: "Сделанный после паводка старый ремонт придётся переделать ещё раз и перекрыть седьмой ход. Дом тратится сейчас, чтобы впредь не делиться водой."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_old
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_water_for_home_from_new_repair
+        kind: 1
+        speakerIdOverride: narrator
+        text: "Новый ремонт оставят без переделки. Его немедленная выгода для Дома сохранится — вместе с уже видимой ценой ниже по течению."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: chapter01.flag.repair_new
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_water_for_home_miron
+        kind: 0
+        speakerIdOverride: miron
+        text: "— Колесо будет крутиться, — говорит Мирон. Не с облегчением — как человек, который получил требуемую определённость и увидел её полную цену."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_water_for_home_lada
+        kind: 0
+        speakerIdOverride: lada
+        text: "— Плотина выдержит, — говорит Лада. — Только не называйте это единственным возможным решением. Механизм сделал то, что мы ему приказали."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: chapter01.node.17_water_for_home_ulyana
+        kind: 0
+        speakerIdOverride: ulyana
+        text: "— Тогда, когда нижние придут за ответом, отвечать будешь ты, — говорит Ульяна. — Не вода и не старики, которые забыли."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "Закончить Совет."
+        nextNodeId:
+        endsDialogue: 1
+        choiceId: chapter01.node.17_water_for_home_exit
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId:
+          Kind: 0
+          Quality: 0
+          CompetencyId:
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId:
+        failureNodeId:
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 1720, y: 360}
+      hasEditorPosition: 1
     schemaVersion: 1

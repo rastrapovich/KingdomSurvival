@@ -73,7 +73,7 @@ namespace KingdomSurvival.Chapter01
             new NodeStep(Chapter01Ids.Nodes.N14Half, Chapter01Ids.Dialogues.D14Half, Chapter01Ids.Flags.ReturnStarted),
             new NodeStep(Chapter01Ids.Nodes.N15, Chapter01Ids.Dialogues.D15, Chapter01Ids.Flags.ReturnRoadTraveled),
             new NodeStep(Chapter01Ids.Nodes.N16, Chapter01Ids.Dialogues.D16, Chapter01Ids.Flags.ReturnedHome),
-            new NodeStep(Chapter01Ids.Nodes.N17, Chapter01Ids.Dialogues.D17, Chapter01Ids.Flags.CouncilCompleted)
+            new NodeStep(Chapter01Ids.Nodes.N17, Chapter01Ids.Dialogues.D17, CanOpenFinalCouncil, Chapter01Ids.Flags.CouncilCompleted)
         };
 
         // Первый незавершённый узел последовательности, либо null, если
@@ -208,6 +208,22 @@ namespace KingdomSurvival.Chapter01
                 state.HasKnowledge(Chapter01Ids.Knowledge.SevenToothObject);
 
             return combinationA || combinationB || combinationC;
+        }
+
+        // P13: финальный Совет является следствием физического возвращения
+        // и доказанного человеческого соглашения, а не просто последним
+        // диалогом линейной таблицы. Completed проверяется отдельно от
+        // CouncilCompleted ради безопасного поведения старых/debug-save.
+        public static bool CanOpenFinalCouncil(NarrativeStateData state)
+        {
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
+
+            return state.HasFlag(Chapter01Ids.Flags.ReturnedHome) &&
+                   state.HasKnowledge(Chapter01Ids.Knowledge.SharedWaterSystem) &&
+                   state.HasKnowledge(Chapter01Ids.Knowledge.OldAgreement) &&
+                   !state.HasFlag(Chapter01Ids.Flags.CouncilCompleted) &&
+                   !state.HasFlag(Chapter01Ids.Flags.Completed);
         }
 
         // P08-T01: N09 открывает ровно одну обязательную дальнюю цель и до

@@ -180,6 +180,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     return not + "ПРОВЕРКА '" + condition.StringParam + "' НЕ БЫЛА";
                 case NarrativeConditionType.TraitPresent:
                     return not + "ЧЕРТА: " + condition.StringParam;
+                case NarrativeConditionType.EffectApplied:
+                    return not + "ЭФФЕКТ: " + condition.StringParam;
                 default:
                     return condition.Type.ToString();
             }

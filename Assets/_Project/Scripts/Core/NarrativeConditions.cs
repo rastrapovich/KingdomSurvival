@@ -29,7 +29,13 @@ public enum NarrativeConditionType
     // P10-T04: читает то же context.PartySize (герой + бойцы, 1..5), что и
     // PartySizeAtLeast, только в обратную сторону. Добавлено строго в конец
     // enum по той же причине сериализации.
-    PartySizeAtMost
+    PartySizeAtMost,
+
+    // P13: условный текст Совета должен читать уже сохранённый выбор N14½.
+    // Эта ветка намеренно хранится стабильным EffectExecutionId, без второго
+    // дублирующего флага. Добавлено строго в конец enum, чтобы не сдвинуть
+    // числовые значения существующих условий в Dialogue Database.
+    EffectApplied
 }
 
 [Serializable]
@@ -38,13 +44,14 @@ public sealed class NarrativeCondition
     public NarrativeConditionType Type;
 
     // Смысл зависит от Type: ID флага/знания/спутника/предмета/компетенции/
-    // проверки/особенности либо ID субъекта отношения.
+    // проверки/особенности/применённого эффекта либо ID субъекта отношения.
     public string StringParam = string.Empty;
 
     // Используется только для QualityAtLeast.
     public HeroQuality QualityParam;
 
-    // Используется для RelationAtLeast/RelationAtMost/QualityAtLeast/CompetencyAtLeast.
+    // Используется для RelationAtLeast/RelationAtMost/QualityAtLeast/
+    // CompetencyAtLeast и условий размера отряда.
     public int IntParam;
 
     // Инвертирует результат — так поддерживается "отсутствует флаг",
@@ -92,6 +99,8 @@ public sealed class NarrativeCondition
                 return context.PartySize >= IntParam;
             case NarrativeConditionType.PartySizeAtMost:
                 return context.PartySize <= IntParam;
+            case NarrativeConditionType.EffectApplied:
+                return context.State.HasEffectApplied(StringParam);
             default:
                 throw new ArgumentOutOfRangeException(nameof(Type), Type, null);
         }

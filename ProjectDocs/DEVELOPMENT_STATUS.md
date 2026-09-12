@@ -28,13 +28,13 @@
 
 `герой → нормальная жизнь Дома → паводок/ремонт → причинные симптомы → расследование → дальняя дорога → нижние люди и старое соглашение → возвращение → последствия → главная тайна → антагонистическая сила → первый регион → первый большой квест`.
 
-Текущая активная задача — **P11/P12: раскрытие соглашения → решение о цене дальнейшего поиска → физическое возвращение → изменившаяся дорога → серьёзное возвращение в Дом**.
+Текущая активная задача — **P13_COUNCIL: серьёзное возвращение в Дом → финальный Совет → одно из трёх устойчивых состояний мира → запись результата в Хронике**.
 
 Новые крупные универсальные системы до доказательства первого региона не являются приоритетом.
 
 ## 2. Ограничения проверки
 
-В подключённой среде Unity Editor, C# compiler, Test Runner и Play Mode недоступны. Поэтому код P11/P12 подготовлен и снабжён EditMode regression-тестами, но **компиляция, `Run All` и фактический Play Mode не запускались**.
+В подключённой среде Unity Editor, C# compiler, Test Runner и Play Mode недоступны. Поэтому код P11/P12/P13 подготовлен и снабжён EditMode regression-тестами, но **компиляция, `Run All` и фактический Play Mode не запускались**. Для P13 выполнены доступные статические проверки Unity YAML, связности D17, уникальности ID/эффектов, completion-инвариантов и чистоты diff.
 
 Последний ранее зафиксированный большой прогон: **330 тестов: 328 passed / 2 failed**; оба прежних падения относились к ошибочной ссылке N01, которая затем была исправлена. После последующих P09/P10/UI/P11/P12 изменений нужен новый полный `Run All`.
 
@@ -139,75 +139,90 @@ N16 разрешается только после фактического за
 - текстовое эхо возвращения в текущем отчёте/Хронике;
 - безопасный fallback для старых/неполных сохранений.
 
-`Chapter01JournalProvider` теперь проводит одну цель `Старый след` через стадии `:agreement → :return_decision → :returning → :homeward → :home`, а после `ReturnedHome` завершает её. Опциональные записи про второй хлеб и семизубый калибр закрываются только после знания общего соглашения/системы.
+`Chapter01JournalProvider` проводит одну цель `Старый след` через стадии `:agreement → :return_decision → :returning → :homeward → :final_council`. После `ReturnedHome` цель остаётся активной до решения Совета, а затем завершается одной из ревизий `:old_order`, `:new_order`, `:water_for_home`. Опциональные записи про второй хлеб и семизубый калибр закрываются только после знания общего соглашения/системы.
 
-## 6. Development Tracker
+## 6. P13 — Совет Дома и итог главы
 
-Добавлен одноразовый безопасный sync `DevelopmentPlanP11P12ProgressSync` для существующего `KingdomSurvivalDevelopmentPlan.asset`.
+### 6.1. P13-T01 — production D17
 
-При первом открытии Unity он:
+D17 заменён с одноузловой заглушки на сцену из семи узлов:
 
-- переводит P11-T01…T03 и P12-T01…T03 из `NotStarted/InProgress` в `NeedsUnityCheck`;
-- не трогает уже `Completed`, `Blocked` или `Deferred`;
-- добавляет фактические implementation notes;
-- ставит текущий milestone `P11_AGREEMENT`;
-- оставляет acceptance-галочки непроверенными до реального Unity/Play Mode прогона;
-- записывает marker, чтобы не перетирать последующие ручные статусы при каждом domain reload.
+`возвращение к быту Дома → открытие Совета → пересекающиеся позиции жителей → решение → отдельный aftermath`.
 
-## 7. Regression-тесты
+Совет открывается существующим first-chapter poller после N16, без нового lifecycle-метода и без отдельной council-системы. `CanOpenFinalCouncil()` требует `ReturnedHome`, знания `SharedWaterSystem` и `OldAgreement`, а также отсутствие `CouncilCompleted/Completed`.
 
-Добавлен `Assets/_Project/Chapter01/Tests/EditMode/Chapter01P11P12Tests.cs`.
+Старт D17 больше не завершает главу. Решающий узел содержит ровно три обычных выбора без skill check:
 
-Покрывается:
+- восстановить старый общий порядок — постоянный труд, ресурсы и признанная зависимость от нижних людей;
+- создать новый общий порядок — явная компенсация и новое постоянное обязательство;
+- оставить воду Дому — потеря прежнего стока нижними и открытый будущий долг.
 
-- гарантированное `SharedWaterSystem/OldAgreement/HomeWasNotSelfSufficient` после N14;
-- восстановление ветки N14½ из сохранённого effect execution ID;
-- запрет N15 до физического прогресса обратного маршрута;
-- одноразовая временная цена N15;
-- запрет N16 до физического прибытия домой;
-- таблица эха ремонт × паводок × ветка N14½;
-- переходы Хроники до завершённого возвращения.
+Каждый выбор ведёт в отдельный aftermath с человеческими реакциями и только там ставит completion-флаги. Conditional text читает обе ветки ремонта, последствия паводка, сохранённый выбор N14½, помощь у брода, FirstContact, семизубую пластину и смысл второго хлеба. Эти сведения меняют реплики, но не доступность трёх решений.
+
+Для чтения N14½ добавлен `NarrativeConditionType.EffectApplied`: он использует уже сохранённый `EffectExecutionId`, поэтому второй branch-флаг не создаётся. Значение добавлено строго в конец enum; редактор Dialogue Database умеет его показывать и редактировать.
+
+### 6.2. P13-T02 — память Милы
+
+Задача оставлена `Deferred` до отдельного утверждения DEC-07. Личность Милы, обстоятельства смерти, отношение к воде и границы сверхъестественного не придуманы и не добавлены в D17. Это не блокирует обязательную часть P13.
+
+### 6.3. P13-T03 — устойчивый результат
+
+Добавлены взаимоисключающие stable flags:
+
+- `chapter01.flag.council_old_order_restored`;
+- `chapter01.flag.council_new_order_created`;
+- `chapter01.flag.council_water_kept_for_home`.
+
+Ветка «вода Дому» дополнительно ставит `chapter01.flag.downstream_debt_open`; две общие ветки явно очищают его. Узкий `Chapter01CouncilOutcomeResolver` централизованно читает и проверяет итог без нового manager. Все значения сохраняются штатным `NarrativeStateData`; JSON round-trip покрыт тестом.
+
+## 7. Development Tracker
+
+Seed переведён на milestone `P13_COUNCIL`: P13-T01 и P13-T03 имеют статус `NeedsUnityCheck`, P13-T02 — `Deferred` с причиной DEC-07.
+
+Одноразовый `DevelopmentPlanP13ProgressSync` обновляет уже существующий plan asset через его фактический `DevelopmentPlanBootstrap.AssetPath`, добавляет ID, файлы, implementation notes и ручные проверки, но не стирает acceptance-галочки и не откатывает `Completed/Blocked/Deferred`. Marker не позволяет повторять миграцию при каждом domain reload.
+
+## 8. Regression-тесты
+
+Добавлен `Assets/_Project/Chapter01/Tests/EditMode/Chapter01P13Tests.cs`. Покрываются gate Совета, отсутствие раннего completion, Unity-валидация D17, ровно три решения, все outcome/debt-флаги, взаимоисключаемость, обе ветки ремонта, запрет повторного открытия, состояния Хроники, чтение сохранённого выбора N14½ и Save/Load результата.
 
 Файл написан, но в текущей среде не скомпилирован и не запущен.
 
-## 8. Изменённые файлы P11/P12
+## 9. Изменённые файлы P13
 
-- `Assets/_Project/Chapter01/Runtime/Chapter01ReturnFlow.cs`;
-- `Assets/_Project/Chapter01/Runtime/Chapter01ReturnFlow.cs.meta`;
-- `Assets/_Project/UI/PrototypeUIController.Chapter01ReturnFlow.cs`;
-- `Assets/_Project/UI/PrototypeUIController.Chapter01ReturnFlow.cs.meta`;
+- `Assets/_Project/Chapter01/Runtime/Chapter01Ids.cs`;
+- `Assets/_Project/Chapter01/Runtime/Chapter01StoryDirector.cs`;
+- `Assets/_Project/Chapter01/Runtime/Chapter01CouncilOutcome.cs` и `.meta`;
 - `Assets/_Project/Chapter01/Runtime/Chapter01JournalProvider.cs`;
-- `Assets/_Project/Chapter01/Tests/EditMode/Chapter01P11P12Tests.cs`;
-- `Assets/_Project/Chapter01/Tests/EditMode/Chapter01P11P12Tests.cs.meta`;
-- `Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanP11P12ProgressSync.cs`;
-- `Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanP11P12ProgressSync.cs.meta`;
-- `ProjectDocs/DEVELOPMENT_STATUS.md`;
-- `ProjectDocs/Archive/DEVELOPMENT_STATUS_2026-09-12_before_p11_p12.md` — точный снимок журнала до этой реализации.
+- `Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset`;
+- `Assets/_Project/UI/PrototypeUIController.Chapter01ReturnFlow.cs`;
+- `Assets/_Project/Scripts/Core/NarrativeConditions.cs`;
+- `Assets/_Project/DialogueDatabase/Editor/DialogueDatabaseWindow.cs`;
+- `Assets/_Project/DialogueDatabase/Editor/DialogueDatabaseWindow.GraphPresentation.cs`;
+- `Assets/_Project/Chapter01/Tests/EditMode/Chapter01P13Tests.cs` и `.meta`;
+- `Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanSeedData.cs`;
+- `Assets/_Project/DevelopmentTracker/Editor/DevelopmentPlanP13ProgressSync.cs` и `.meta`;
+- `ProjectDocs/DEVELOPMENT_STATUS.md`.
 
-Dialogue Database N14/N14½/N15/N16 в этом commit не переписывалась: их существующие stable ID, выборы и флаги переиспользованы. Канон также не менялся.
+Общий канон, `LORE.md`, `NARRATIVE.md` и bestiary-файлы не менялись.
 
-## 9. Что проверить после Pull
+## 10. Что проверить после Pull
 
 1. Дождаться чистой Unity-компиляции; Console без C# errors.
-2. Убедиться, что Development Tracker показывает P11/P12 как `Нужна проверка в Unity`, а прежние ручные отметки не потерялись.
-3. Запустить полный EditMode `Run All`, особенно `Chapter01P11P12Tests`, `Chapter01P10Tests`, P09 и DevelopmentPlan tests.
-4. Пройти N13 обычным игровым путём. После завершения должна открыться N14, затем N14½.
-5. В N14 проверить наличие обязательного знания общей водной системы; ни одна реплика не должна объявлять мистическую причину доказанной.
-6. Выбрать «возвращаться»: отряд должен физически перейти в `ReturningToCastle` без дополнительной 4-часовой остановки.
-7. В другом прогоне выбрать «идти дальше»: перед обратным движением должна появиться 4-часовая `ПРОВЕРКА СВЕЖЕГО СЛЕДА`, затем тот же физический возврат.
-8. На обратном маршруте N15 должна открыться только после движения, а после неё время должно получить одноразовую дополнительную цену; Save/Load не должен дублировать её.
-9. Дождаться реального прибытия. Технический попап «ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ» не должен заслонить N16; первой сюжетной подачей возвращения должна быть N16/видимые последствия Дома.
-10. Проверить минимум четыре комбинации: старый/новый ремонт × возврат сразу/идти дальше; отдельно прогон с потерей скота или настила мельницы.
-11. Проверить Хронику на стадиях соглашения, решения, обратной дороги и после N16.
-12. Save/Load: перед N14½, во время 4-часового следа, после N15 и сразу после физического прибытия.
+2. Убедиться, что Development Tracker показывает milestone P13, P13-T01/T03 как `NeedsUnityCheck`, P13-T02 как `Deferred`, а прежние ручные отметки сохранены.
+3. Запустить полный EditMode `Run All`, особенно `Chapter01P13Tests`, `Chapter01P11P12Tests`, `Chapter01P10Tests` и DevelopmentPlan tests.
+4. После физического завершения N16 проверить штатное автоматическое открытие N17; при первом показе `CouncilCompleted/Completed` ещё не должны быть установлены.
+5. Пройти минимум четыре сценария: старый ремонт → старый порядок; старый ремонт → новый порядок; новый ремонт → новый порядок; новый ремонт → вода Дому.
+6. Отдельно пройти Совет после `FloodLivestockLost` или `FloodMillDeckDestroyed` и убедиться, что последствие звучит в репликах.
+7. На каждом пути проверить ровно три немаркированных «добро/зло» решения, видимую цену до подтверждения и отдельную человеческую реакцию после выбора.
+8. Проверить соответствующий итог в Хронике, Save/Load outcome/debt-флагов и невозможность повторно открыть Совет.
 
-До зелёного `Run All` и ручного прохода P11/P12 остаются `NeedsUnityCheck`, а не `Completed`.
+До зелёного `Run All` и ручного Play Mode обязательные P13-T01/P13-T03 остаются `NeedsUnityCheck`, а не `Completed`.
 
-## 10. Следующий шаг
+## 11. Следующий шаг
 
-После зелёной проверки P11/P12 переходить к P13 — Совету Дома и устойчивым итогам главы. Не расширять return-flow resolver в универсальную систему последствий, пока это не потребуется нескольким главам/регионам.
+После Unity-проверки обязательная часть P13 должна стать 2/2. Опциональный P13-T02 остаётся отложенным до отдельного решения по Миле; дальнейшую работу вести от устойчивого результата главы к первому региону, не превращая локальный resolver в универсальную систему последствий заранее.
 
-## 11. Нарративные reference-документы — 12.09.2026
+## 12. Нарративные reference-документы — 12.09.2026
 
 Добавлен `ProjectDocs/THIS_WAR_OF_MINE_ADAPTATION.md` как `REFERENCE ONLY + утверждённый инструментарий`.
 
@@ -235,7 +250,7 @@ Dialogue Database N14/N14½/N15/N16 в этом commit не переписыва
 
 Это **не реализация новой Unity-системы** и не основание сейчас расширять `Chapter01ReturnFlow` в универсальный consequence engine. Конкретные адаптированные события остаются будущей производственной работой; сначала исследуются партиями и проверяются реальными сценами первого региона/Дома.
 
-## 12. Reactive World / расширенная Encounter Grammar — 12.09.2026
+## 13. Reactive World / расширенная Encounter Grammar — 12.09.2026
 
 Добавлен `ProjectDocs/REACTIVE_WORLD_ENCOUNTER_ADAPTATION.md` как подробный `REFERENCE ONLY + утверждённый инструментарий`.
 
@@ -262,7 +277,7 @@ Dialogue Database N14/N14½/N15/N16 в этом commit не переписыва
 
 `NARRATIVE.md` уже содержит канонические родительские правила Narrative State, изменяемых локаций, failure-forward, эха, жизни мира без героя и границы технической реализации; новый документ расширяет **утверждённый инструментарий и словарь**, но не меняет сюжетные факты, `LORE.md` или общий канон v1.30.
 
-## 13. Hotfix — дублированный `LateUpdate` после P11/P12
+## 14. Hotfix — дублированный `LateUpdate` после P11/P12
 
 После Pull Unity обнаружил `CS0111` в `PrototypeUIController.Debug.cs`: partial-класс `PrototypeUIController` содержал два метода `LateUpdate()` с одинаковой сигнатурой — существующий debug lifecycle и добавленный P11/P12 poller.
 

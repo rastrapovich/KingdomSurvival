@@ -17,7 +17,7 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
             plan.schemaVersion = DevelopmentPlanAsset.CurrentSchemaVersion;
             plan.projectTitle = "Kingdom Survival — Глава 01 «Дом на чужой воде»";
-            plan.currentMilestoneId = "P02_BASELINE";
+            plan.currentMilestoneId = "P13_COUNCIL";
             plan.planUpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd");
             plan.projectNotes =
                 "План сгенерирован DevelopmentPlanSeedData по своду инструкции. " +
@@ -1255,22 +1255,56 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
 
                 Task("P13-T01", "N17 — совет Дома, три направления",
                     "Восстановить старый порядок / создать новый порядок / оставить воду Дому — все три с ценой.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: true, order: 1,
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 1,
                     dependencies: new[] { "P00-T10", "P11-T01" },
+                    relatedDialogueIds: new[] { "chapter01_dialogue_17_council_of_the_house" },
                     relatedFlagIds: new[] { "chapter01.flag.council_completed", "chapter01.flag.completed" },
-                    acceptanceCriteria: new[] { "Реализованы все три направления", "Ни один вариант не является бесплатно идеальным" }),
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset",
+                        "Assets/_Project/UI/PrototypeUIController.Chapter01ReturnFlow.cs"
+                    },
+                    manualChecks: new[]
+                    {
+                        "После N16 штатно открывается N17",
+                        "До выбора CouncilCompleted/Completed не установлены",
+                        "У каждого из трёх вариантов цена видна до подтверждения"
+                    },
+                    acceptanceCriteria: new[] { "Реализованы все три направления", "Ни один вариант не является бесплатно идеальным" },
+                    implementationNote: "D17 заменён с placeholder на трёхветвевой Совет. CouncilCompleted/Completed выдаются только после финального решения. Три направления имеют видимую цену."),
 
                 Task("P13-T02", "Решение о памяти Милы",
                     "Назвать / скрыть / превратить в обряд / вернуть человеческую историю — только после утверждения DEC-07.",
-                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.NotStarted, required: false, order: 2,
+                    DevelopmentTaskCategory.Content, DevelopmentTaskStatus.Deferred, required: false, order: 2,
                     dependencies: new[] { "P00-T06" },
-                    acceptanceCriteria: new[] { "Реализовано только после утверждения DEC-07" }),
+                    acceptanceCriteria: new[] { "Реализовано только после утверждения DEC-07" },
+                    blockerNote: "Отложено до отдельного утверждения DEC-07: личность Милы, обстоятельства смерти, отношение к воде и границы сверхъестественного не утверждены. Не блокирует обязательный P13."),
 
                 Task("P13-T03", "Устойчивые флаги результата",
                     "Зафиксировать флаги результата, отношений и будущих долгов для эха в следующих главах.",
-                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NotStarted, required: true, order: 3,
+                    DevelopmentTaskCategory.Code, DevelopmentTaskStatus.NeedsUnityCheck, required: true, order: 3,
                     dependencies: new[] { "P13-T01" },
-                    acceptanceCriteria: new[] { "2–3 устойчиво различимых состояния мира зафиксированы флагами" })
+                    relatedFlagIds: new[]
+                    {
+                        "chapter01.flag.council_old_order_restored",
+                        "chapter01.flag.council_new_order_created",
+                        "chapter01.flag.council_water_kept_for_home",
+                        "chapter01.flag.downstream_debt_open"
+                    },
+                    fileReferences: new[]
+                    {
+                        "Assets/_Project/Chapter01/Runtime/Chapter01CouncilOutcome.cs",
+                        "Assets/_Project/Chapter01/Runtime/Chapter01JournalProvider.cs",
+                        "Assets/_Project/Chapter01/Tests/EditMode/Chapter01P13Tests.cs"
+                    },
+                    manualChecks: new[]
+                    {
+                        "Save/Load сохраняет выбранный исход",
+                        "Совет нельзя открыть повторно",
+                        "Хроника показывает выбранный итог"
+                    },
+                    acceptanceCriteria: new[] { "2–3 устойчиво различимых состояния мира зафиксированы флагами" },
+                    implementationNote: "Добавлены три взаимоисключающих outcome-флага, future-debt flag для ветки воды Дому, resolver исхода, Хроника и regression tests.")
             );
         }
 

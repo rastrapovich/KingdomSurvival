@@ -73,16 +73,22 @@ namespace KingdomSurvival.Chapter01
             bool returnStarted = state.HasFlag(Chapter01Ids.Flags.ReturnStarted);
             bool returnRoadTraveled = state.HasFlag(Chapter01Ids.Flags.ReturnRoadTraveled);
             bool returnedHome = state.HasFlag(Chapter01Ids.Flags.ReturnedHome);
+            bool councilCompleted = state.HasFlag(Chapter01Ids.Flags.CouncilCompleted);
+            Chapter01CouncilOutcome councilOutcome = Chapter01CouncilOutcomeResolver.GetOutcome(state);
 
             string currentStep;
             string revisionSuffix;
             JournalGoalState goalState = JournalGoalState.Active;
 
-            if (returnedHome)
+            if (councilCompleted && councilOutcome != Chapter01CouncilOutcome.None)
             {
-                currentStep = "Вернуться с найденной правдой в Дом.";
-                revisionSuffix = ":home";
+                ResolveCouncilJournalOutcome(councilOutcome, out currentStep, out revisionSuffix);
                 goalState = JournalGoalState.Completed;
+            }
+            else if (returnedHome)
+            {
+                currentStep = "Решить на Совете, что Дом сделает с общей водой.";
+                revisionSuffix = ":final_council";
             }
             else if (returnRoadTraveled)
             {
@@ -137,6 +143,32 @@ namespace KingdomSurvival.Chapter01
                 Category = JournalGoalCategory.Main,
                 State = goalState
             };
+        }
+
+        private static void ResolveCouncilJournalOutcome(
+            Chapter01CouncilOutcome outcome,
+            out string currentStep,
+            out string revisionSuffix)
+        {
+            switch (outcome)
+            {
+                case Chapter01CouncilOutcome.OldOrderRestored:
+                    currentStep = "Дом решил восстановить общий порядок воды и снова поддерживать его вместе с нижними.";
+                    revisionSuffix = ":old_order";
+                    return;
+                case Chapter01CouncilOutcome.NewOrderCreated:
+                    currentStep = "Дом решил создать новый порядок и принять новое обязательство перед нижними людьми.";
+                    revisionSuffix = ":new_order";
+                    return;
+                case Chapter01CouncilOutcome.WaterKeptForHome:
+                    currentStep = "Дом оставил воду себе. Нижние потеряли прежний сток, и этот долг ещё не закрыт.";
+                    revisionSuffix = ":water_for_home";
+                    return;
+                default:
+                    currentStep = "Решить на Совете, что Дом сделает с общей водой.";
+                    revisionSuffix = ":final_council";
+                    return;
+            }
         }
 
         private static JournalGoalViewData BuildSecondLoafGoal(NarrativeStateData state)

@@ -29,6 +29,15 @@ public partial class PrototypeUIController
         if (IsNarrativeDialogueActive || HasBlockingModalWorkExceptCamp())
             return;
 
+        // P13: после закрытия N16 следующий кадр открывает обязательный
+        // Совет через тот же poller и тот же Dialogue Database runtime.
+        // Отдельный Update/LateUpdate и отдельная council-система не нужны.
+        if (Chapter01StoryDirector.CanOpenFinalCouncil(state))
+        {
+            TryOpenNarrativeDialogueById(Chapter01Ids.Dialogues.D17);
+            return;
+        }
+
         // N13 -> N14: причинная сборка фактов происходит там же, у людей
         // ниже по течению. Это не телепорт и не новый маршрутный шаг.
         if (state.HasFlag(Chapter01Ids.Flags.DownstreamContact) &&

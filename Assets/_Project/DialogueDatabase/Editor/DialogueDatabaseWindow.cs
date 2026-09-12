@@ -642,6 +642,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 case NarrativeConditionType.TraitPresent: return "У героя есть особенность";
                 case NarrativeConditionType.PartySizeAtLeast: return "Размер отряда не меньше";
                 case NarrativeConditionType.PartySizeAtMost: return "Размер отряда не больше";
+                case NarrativeConditionType.EffectApplied: return "Эффект уже применён";
                 default: return type.ToString();
             }
         }
@@ -786,6 +787,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
                 case NarrativeConditionType.PartySizeAtMost:
                     EditorGUILayout.PropertyField(intParam, new GUIContent("Максимум (герой + бойцы)"));
+                    break;
+
+                case NarrativeConditionType.EffectApplied:
+                    DrawLongIdField(stringParam, "Применённый эффект (ID)");
                     break;
             }
 

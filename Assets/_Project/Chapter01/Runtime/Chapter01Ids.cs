@@ -114,6 +114,10 @@ namespace KingdomSurvival.Chapter01
             public const string ReturnStarted = "chapter01.flag.return_started";
             public const string ReturnedHome = "chapter01.flag.returned_home";
             public const string CouncilCompleted = "chapter01.flag.council_completed";
+            public const string CouncilOldOrderRestored = "chapter01.flag.council_old_order_restored";
+            public const string CouncilNewOrderCreated = "chapter01.flag.council_new_order_created";
+            public const string CouncilWaterKeptForHome = "chapter01.flag.council_water_kept_for_home";
+            public const string DownstreamDebtOpen = "chapter01.flag.downstream_debt_open";
             public const string Completed = "chapter01.flag.completed";
 
             // --- Дополнительные технические флаги завершения узла ---
@@ -173,7 +177,8 @@ namespace KingdomSurvival.Chapter01
                 RepairOld, RepairNew, RepairCompleted, WaterWrongActive, InvestigatedMill,
                 InvestigatedCattle, InvestigatedRiver, OldTraceFound, FarRouteUnlocked,
                 ExpeditionStarted, OldFordFound, DownstreamContact, AgreementRevealed,
-                ReturnStarted, ReturnedHome, CouncilCompleted, Completed,
+                ReturnStarted, ReturnedHome, CouncilCompleted, CouncilOldOrderRestored,
+                CouncilNewOrderCreated, CouncilWaterKeptForHome, DownstreamDebtOpen, Completed,
                 HousePeopleMet, LongRoadStarted, ReturnRoadTraveled, HomeBaselineCaptured,
                 RoadDestinationReached, FollowedOldRoad, CrossedOldRoadBoundary,
                 OldRoadDetourInProgress, CartResolved, CartOutcomeSavedBoth,

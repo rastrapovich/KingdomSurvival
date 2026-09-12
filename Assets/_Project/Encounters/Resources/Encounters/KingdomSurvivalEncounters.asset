@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d025a678580f825449d7c3babf63ac8a, type: 3}
+  m_Name: KingdomSurvivalEncounters
+  m_EditorClassIdentifier: KingdomSurvival.Encounters::KingdomSurvival.Encounters.EncounterDatabaseAsset
+  pools:
+  - PoolId: ROAD_POOL_01
+    DisplayName: "\u0414\u043E\u0440\u043E\u0436\u043D\u044B\u0435 \u0432\u0441\u0442\u0440\u0435\u0447\u0438
+      (\u043F\u0435\u0440\u0432\u044B\u0439 \u0440\u0435\u0433\u0438\u043E\u043D)"
+    Enabled: 1
+    GlobalTriggerChancePercent: 45
+    MinimumHoursBetweenEncounters: 24
+    DesignerNotes: "MVP-\u043F\u0443\u043B: \u043F\u043E\u043A\u0430 \u0432 \u043D\u0451\u043C
+      \u043E\u0434\u0438\u043D Production Encounter (ROAD_WARM_SHEEP_01)."
+  encounters:
+  - EncounterId: ROAD_WARM_SHEEP_01
+    DisplayName: "\u0422\u0451\u043F\u043B\u0430\u044F \u043E\u0432\u0446\u0430"
+    Description: "\u041E\u0432\u0446\u0430 \u043B\u0435\u0436\u0438\u0442 \u043F\u043E\u0447\u0442\u0438
+      \u043F\u043E\u0441\u0440\u0435\u0434\u0438 \u0434\u043E\u0440\u043E\u0433\u0438,
+      \u0435\u0449\u0451 \u0442\u0451\u043F\u043B\u0430\u044F. \u0413\u043E\u0440\u043B\u043E
+      \u0446\u0435\u043B\u043E, \u0437\u0430\u0434\u043D\u044F\u044F \u043D\u043E\u0433\u0430
+      \u043E\u0431\u043E\u0434\u0440\u0430\u043D\u0430 \u0434\u043E \u043A\u043E\u0441\u0442\u0438."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - animal
+    - mundane
+    - ambiguous
+    - forest-edge
+    DialogueId: road_warm_sheep_01
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 40
+    SelectionWeight: 20
+    UnlimitedOccurrences: 0
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 0
+    AllowedRegionIds:
+    - road
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll: []
+    RequiredFlagsAny: []
+    ForbiddenFlags:
+    - ROAD_WARM_SHEEP_SEEN
+    FlagsSetOnStart:
+    - ROAD_WARM_SHEEP_SEEN
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "[\u0420\u0410\u0411\u041E\u0427\u0415\u0415] \u0420\u0430\u0431\u043E\u0447\u0438\u0439
+      \u044D\u0442\u0430\u043B\u043E\u043D Encounter, \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D
+      \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C
+      2026-09-12 (\u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0438: [ELDRITCH
+      HORROR], [\u0413\u041E\u0413\u041E\u041B\u042C], [D&D / TRAVEL REFERENCES],
+      [KINGDOM SURVIVAL])."
+    FutureHooksNotes: "\u041F\u0440\u0438\u0447\u0438\u043D\u0430 \u0441\u043C\u0435\u0440\u0442\u0438
+      \u043E\u0432\u0446\u044B \u0438 \u0441\u0432\u044F\u0437\u044C \u0441 \u043F\u0440\u043E\u043F\u0430\u0432\u0448\u0438\u043C
+      \u0441\u043A\u043E\u0442\u043E\u043C \u2014 [\u041E\u0422\u041A\u0420\u042B\u0422\u041E].
+      Echo-\u044D\u043D\u043A\u0430\u0443\u043D\u0442\u0435\u0440 \xAB\u0427\u044C\u044F
+      \u043E\u0432\u0446\u0430?\xBB (\u0432\u043B\u0430\u0434\u0435\u043B\u0435\u0446
+      \u0438\u0449\u0435\u0442 \u0434\u0432\u0443\u0445 \u0434\u0440\u0443\u0433\u0438\u0445
+      \u043F\u0440\u043E\u043F\u0430\u0432\u0448\u0438\u0445 \u043E\u0432\u0435\u0446)
+      \u041D\u0415 \u0440\u0435\u0430\u043B\u0438\u0437\u043E\u0432\u0430\u043D \u0432
+      \u044D\u0442\u043E\u043C \u0441\u0440\u0435\u0437\u0435; \u0447\u0438\u0442\u0430\u0435\u0442
+      \u0444\u043B\u0430\u0433\u0438 *_MAN_*, *_MEAT_TAKEN_*, ROAD_WARM_SHEEP_DIRECTION_KNOWN,
+      ROAD_WARM_SHEEP_LEFT_UNTOUCHED."

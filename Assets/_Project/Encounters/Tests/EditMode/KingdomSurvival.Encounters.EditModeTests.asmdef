@@ -1,0 +1,19 @@
+{
+  "name": "KingdomSurvival.Encounters.EditModeTests",
+  "rootNamespace": "",
+  "references": [
+    "KingdomSurvival.Core",
+    "KingdomSurvival.DialogueDatabase",
+    "KingdomSurvival.Encounters"
+  ],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": ["TestAssemblies"]
+}

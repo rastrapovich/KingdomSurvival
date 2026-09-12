@@ -3753,7 +3753,7 @@ MonoBehaviour:
         \u0432\u043E\u0434\u0443 \u0414\u043E\u043C\u0443 \u2014 \u0432\u0441\u0435
         \u0442\u0440\u0438 \u0441 \u0446\u0435\u043D\u043E\u0439."
       category: 2
-      status: 2
+      status: 3
       required: 1
       order: 1
       priority: 1
@@ -3765,11 +3765,11 @@ MonoBehaviour:
       acceptanceCriteria:
       - text: "\u0420\u0435\u0430\u043B\u0438\u0437\u043E\u0432\u0430\u043D\u044B
           \u0432\u0441\u0435 \u0442\u0440\u0438 \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F"
-        done: 0
+        done: 1
       - text: "\u041D\u0438 \u043E\u0434\u0438\u043D \u0432\u0430\u0440\u0438\u0430\u043D\u0442
           \u043D\u0435 \u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0431\u0435\u0441\u043F\u043B\u0430\u0442\u043D\u043E
           \u0438\u0434\u0435\u0430\u043B\u044C\u043D\u044B\u043C"
-        done: 0
+        done: 1
       manualChecks:
       - "\u041F\u043E\u0441\u043B\u0435 N16 \u0448\u0442\u0430\u0442\u043D\u043E
         \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442\u0441\u044F N17"
@@ -3795,7 +3795,7 @@ MonoBehaviour:
         \u0440\u0435\u0448\u0435\u043D\u0438\u044F. \u0422\u0440\u0438 \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F
         \u0438\u043C\u0435\u044E\u0442 \u0432\u0438\u0434\u0438\u043C\u0443\u044E
         \u0446\u0435\u043D\u0443."
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
     - id: P13-T02
@@ -3849,7 +3849,7 @@ MonoBehaviour:
         \u0434\u043E\u043B\u0433\u043E\u0432 \u0434\u043B\u044F \u044D\u0445\u0430
         \u0432 \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0445 \u0433\u043B\u0430\u0432\u0430\u0445."
       category: 3
-      status: 2
+      status: 3
       required: 1
       order: 3
       priority: 1
@@ -3862,7 +3862,7 @@ MonoBehaviour:
           \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F \u043C\u0438\u0440\u0430
           \u0437\u0430\u0444\u0438\u043A\u0441\u0438\u0440\u043E\u0432\u0430\u043D\u044B
           \u0444\u043B\u0430\u0433\u0430\u043C\u0438"
-        done: 0
+        done: 1
       manualChecks:
       - "Save/Load \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u044B\u0439
         \u0438\u0441\u0445\u043E\u0434"
@@ -3888,7 +3888,7 @@ MonoBehaviour:
         \u0432\u0435\u0442\u043A\u0438 \u0432\u043E\u0434\u044B \u0414\u043E\u043C\u0443,
         resolver \u0438\u0441\u0445\u043E\u0434\u0430, \u0425\u0440\u043E\u043D\u0438\u043A\u0430
         \u0438 regression tests."
-      completedAt: 
+      completedAt: 2026-09-12
       completedCommit: 
       optionalAutoCheckId: 
   - id: P14_ENCOUNTERS

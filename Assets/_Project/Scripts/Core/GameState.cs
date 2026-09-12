@@ -237,6 +237,11 @@ public class GameState
     // см. §8, §18 производственной инструкции по качествам и проверкам.
     public NarrativeStateData Narrative;
 
+    // Сколько раз каждый Encounter стартовал/завершился и когда — отдельно
+    // от Narrative.Flags: это счётчики появления сцены, а не состояние мира.
+    // См. EncounterRuntimeState.cs, §18, §64 инструкции по Encounter-системе.
+    public EncounterRuntimeStateData Encounters;
+
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
     public int DailyFoodConsumption => Population;
@@ -463,6 +468,7 @@ public class GameState
         Locations = locationPool;
         ActiveExpedition = null;
         Narrative = new NarrativeStateData();
+        Encounters = new EncounterRuntimeStateData();
     }
 
     private static void ShuffleLocations(

@@ -86,6 +86,7 @@ public sealed class EncounterRuntimeServiceTests
             SelectionMode = EncounterSelectionMode.Pool,
             PoolId = "POOL_01",
             DialogueId = dialogueId,
+            DiscoveryChancePercent = 100,
             SelectionWeight = 1,
             MaxOccurrencesPerGame = 1,
             FlagsSetOnStart = new List<string> { "TEST_ENC_SEEN" },

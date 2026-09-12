@@ -4,7 +4,7 @@
 
 > Технический журнал фактически реализованного состояния Unity-проекта и зафиксированных проектных решений.
 >
-> Актуальный общий канон: `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_30.md`.
+> Актуальный общий канон: `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_31.md`.
 >
 > Единая энциклопедия мира: `ProjectDocs/LORE.md`.
 >
@@ -289,3 +289,26 @@ Seed переведён на milestone `P13_COUNCIL`: P13-T01 и P13-T03 име�
 - порядок остаётся прежним: `Update()` выполняет непрерывную симуляцию, затем `LateUpdate()` видит итог кадра и может открыть N14/N14½/N15/N16.
 
 Канон, Dialogue Database, карта, время, таблица эха и логика P11/P12 не менялись. Unity-компиляцию после hotfix необходимо повторить; затем запустить полный EditMode `Run All`.
+
+## 15. World Map 2.0 — WM-01 (Visual Database) — 12.09.2026
+
+Первый этап технической архитектуры карты из раздела 9.9 канона (`KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_31.md`). Цель WM-01 — отделить визуал карты от кода: местность и иконки локаций теперь читаются из ScriptableObject-темы, а не из захардкоженных USS-цветов/глифов. Логика движения (`WorldMapNavigation`, `GameState`) не менялась.
+
+Новый модуль `Assets/_Project/WorldMapVisual/Runtime/` (asmdef `KingdomSurvival.WorldMapVisual`, ссылается на `KingdomSurvival.Core`, автора-подключаемый):
+
+- `WorldMapTerrainVisualProfile` — цвет клетки + список спрайтов-вариантов (`massVariants`, пока не используются рендером — задел под WM-04) для одного `WorldMapTerrainType`.
+- `WorldMapLocationIconEntry` — связь `LocationData.Id` → `Sprite`.
+- `WorldMapIconLibrary` (`[CreateAssetMenu]`) — переиспользуемый набор иконок локаций + `DefaultLocationIcon`.
+- `WorldMapVisualTheme` (`[CreateAssetMenu]`) — список терраин-профилей + ссылка на `WorldMapIconLibrary`.
+- `WorldMapDatabaseAsset` (`[CreateAssetMenu]`) — фасад, хранит `ActiveTheme`; читается из `Resources` по пути `WorldMapVisual/KingdomSurvivalWorldMapDatabase`.
+- `WorldMapVisualRuntime` — кэширующий статический загрузчик (`Resources.Load`), по образцу `DialogueDatabaseRuntime`.
+
+Изменения в `Assets/_Project/UI/PrototypeUIController.WorldMap.cs`:
+
+- `DrawBlockedTerrain()` (мёртвый код — `IsBlockedPercent` всегда `false`, местность никогда не рисовалась) заменён на `DrawTerrainCells()`: перебирает внутреннюю сетку 26×16, для клеток с `WorldMapTerrainType != Plains` берёт `CellColor` из активной темы и красит `VisualElement` (класс `world-map-terrain-cell` в `Prototype_Exploration.uss`, цвет больше не хардкожен в USS). Без назначенной темы (Resources-ассет ещё не создан) слой остаётся пустым — поведение как раньше.
+- `CreateWorldMapNode` получил `ApplyWorldMapNodeIcon`: если в `WorldMapIconLibrary` для `location.Id` есть спрайт, поверх кнопки добавляется `Image` (класс `world-map-node-icon`) и текстовый глиф (`✓`/`●`) очищается; без темы/иконки — прежнее поведение (только глиф).
+- `PrototypeUIController.WorldMapInteractionPolish.cs` и `...WorldMapLocationActions.cs` не тронуты (эти два файла проверяются regression-тестом на отсутствие `new VisualElement/Label/Button`).
+
+**Важное ограничение реализации:** сами ассеты-экземпляры (`KingdomSurvivalWorldMapTheme.asset`, `KingdomSurvivalWorldMapIcons.asset`, `KingdomSurvivalWorldMapDatabase.asset`) не созданы в этом проходе — они требуют Unity Editor (создание через новые пункты `Kingdom Survival/Карта/...` в меню Assets → Create, с ручным сохранением в `Assets/_Project/WorldMapVisual/Resources/WorldMapVisual/`), поскольку в удалённой среде нет возможности сгенерировать корректный `.asset`/`.meta` YAML с правильными GUID. До создания этих ассетов `WorldMapVisualRuntime.LoadActiveTheme()` возвращает `null`, и карта выглядит так же, как до WM-01 (без цвета местности и иконок) — регрессии нет.
+
+**Компиляция и тесты не запускались** (Unity Editor/C# compiler/Test Runner недоступны в этой среде). Перед использованием нужно: открыть проект в Unity, дождаться импорта новых скриптов и генерации `.meta`, убедиться в отсутствии ошибок компиляции, затем создать три ассета выше через контекстное меню и запустить `WorldMapNavigationTests`/`WorldMapLocationCardLayoutTests`/`WorldMapLocationCardStructureRegressionTests`.

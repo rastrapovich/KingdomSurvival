@@ -192,11 +192,10 @@
     opacity: 0.82;
 }
 
-.world-map-blocked-cell {
+.world-map-terrain-cell {
     position: absolute;
     width: 4.5%;
     height: 6.8%;
-    background-color: rgb(69, 65, 60);
     border-radius: 3px;
     opacity: 0.72;
 }
@@ -245,6 +244,15 @@
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     white-space: normal;
+}
+
+.world-map-node-icon {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    left: 3px;
+    top: 3px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .world-map-node:hover {

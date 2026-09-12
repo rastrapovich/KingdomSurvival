@@ -29,7 +29,7 @@ namespace KingdomSurvival.Encounters.Editor
         private const string FlagsAssetPath = EncountersFolder + "/KingdomSurvivalEncounterFlags.asset";
         private const string DialogueAssetPath = "Assets/_Project/DialogueDatabase/Resources/DialogueDatabase/KingdomSurvivalDialogues.asset";
 
-        private const string PoolId = "ROAD_POOL_01";
+        private const string PoolId = RoadEncounterIds.FirstRegionPoolId;
         private const string EncounterId = "ROAD_WARM_SHEEP_01";
         private const string DialogueId = "road_warm_sheep_01";
 
@@ -232,7 +232,7 @@ namespace KingdomSurvival.Encounters.Editor
                 UnlimitedOccurrences = false,
                 MaxOccurrencesPerGame = 1,
                 CooldownHours = 0,
-                AllowedRegionIds = new List<string> { "road" },
+                AllowedRegionIds = new List<string> { RoadEncounterIds.FirstRegionId },
                 RequiredLocationTags = new List<string>(),
                 ForbiddenLocationTags = new List<string>(),
                 RequiredConditions = new NarrativeConditionGroup(),
@@ -413,7 +413,7 @@ namespace KingdomSurvival.Encounters.Editor
 
             List<DialogueChoiceData> choices = new List<DialogueChoiceData>
             {
-                MakeContinueChoice("c_go_on", "Подойти ближе.", "man_found")
+                MakeNormalChoice("c_go_on", "Подойти ближе.", "man_found")
             };
 
             return MakeNode("follow_tracks", "narrator", blocks, choices);
@@ -436,7 +436,7 @@ namespace KingdomSurvival.Encounters.Editor
 
             List<DialogueChoiceData> choices = new List<DialogueChoiceData>
             {
-                MakeContinueChoice("c_ask", "«Что значит «почти»?»", "man_pochti")
+                MakeNormalChoice("c_ask", "«Что значит «почти»?»", "man_pochti")
             };
 
             return MakeNode("man_found", "narrator", blocks, choices);
@@ -454,7 +454,7 @@ namespace KingdomSurvival.Encounters.Editor
 
             List<DialogueChoiceData> choices = new List<DialogueChoiceData>
             {
-                MakeContinueChoice("c_ask_why", "«Почему ты здесь?»", "man_noga")
+                MakeNormalChoice("c_ask_why", "«Почему ты здесь?»", "man_noga")
             };
 
             return MakeNode("man_pochti", "narrator", blocks, choices);
@@ -472,7 +472,7 @@ namespace KingdomSurvival.Encounters.Editor
 
             List<DialogueChoiceData> choices = new List<DialogueChoiceData>
             {
-                MakeContinueChoice("c_ask_where", "«Откуда овца?»", "man_otkuda")
+                MakeNormalChoice("c_ask_where", "«Откуда овца?»", "man_otkuda")
             };
 
             return MakeNode("man_noga", "narrator", blocks, choices);

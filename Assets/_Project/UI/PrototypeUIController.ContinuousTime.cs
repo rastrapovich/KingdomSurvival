@@ -204,6 +204,15 @@ public partial class PrototypeUIController
 
         QueueStrategicResultModals(batch.Result, reportIndex);
 
+        // Дорожный Encounter (PrototypeUIController.Encounters.cs) пробует
+        // открыться только когда этот же пакет не претендует ни на
+        // MandatoryNotice, ни на паузу от чего-то другого (прибытие,
+        // находка, решение) — TryOpenNarrativeDialogueById дополнительно
+        // сам проверяет HasBlockingModalWorkExceptCamp и просто ничего не
+        // делает, если что-то всё же блокирует.
+        if (!batch.RequestAutoPause && batch.MandatoryNotice == null)
+            TryResolveRoadEncounterOpportunity(batch.Result);
+
         RefreshInterface();
         if (stableUiInitialized)
             RefreshStableUiAfterStateChange();

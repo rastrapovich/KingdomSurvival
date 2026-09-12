@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -294,7 +295,7 @@ public partial class PrototypeUIController
         renderedWorldMapRoute = null;
         renderedWorldMapRouteIndex = -1;
 
-        DrawBlockedTerrain();
+        DrawTerrainCells();
 
         foreach (LocationData location in gameState.Locations)
         {
@@ -320,8 +321,20 @@ public partial class PrototypeUIController
         RefreshWorldMapArmyMarker();
     }
 
-    private void DrawBlockedTerrain()
+    private void DrawTerrainCells()
     {
+        // Местность рисуется из WorldMapVisualTheme (World Map Database),
+        // а не из захардкоженных цветов. Пока тема не назначена в Resources
+        // (WorldMapDatabaseAsset.ResourcesPath), слой остаётся пустым — как
+        // и раньше, до WM-01 карта не показывала местность вовсе.
+        WorldMapVisualTheme theme = WorldMapVisualRuntime.LoadActiveTheme();
+
+        if (theme == null)
+            return;
+
+        // Равнина не рисуется отдельными клетками — она фон карты. Клетки
+        // добавляются только там, где местность реально отличается, чтобы
+        // не создавать сотни VisualElement на пустом месте.
         for (int y = 0;
              y < WorldMapNavigation.GridHeight;
              y++)
@@ -330,6 +343,18 @@ public partial class PrototypeUIController
                  x < WorldMapNavigation.GridWidth;
                  x++)
             {
+                WorldMapTerrainType terrain =
+                    WorldMapNavigation.GetTerrainAtGridCell(x, y);
+
+                if (terrain == WorldMapTerrainType.Plains)
+                    continue;
+
+                WorldMapTerrainVisualProfile profile =
+                    theme.FindTerrainProfile(terrain);
+
+                if (profile == null || profile.CellColor.a <= 0f)
+                    continue;
+
                 float px =
                     x * 100f /
                     (WorldMapNavigation.GridWidth - 1);
@@ -337,14 +362,13 @@ public partial class PrototypeUIController
                     y * 100f /
                     (WorldMapNavigation.GridHeight - 1);
 
-                if (!WorldMapNavigation.IsBlockedPercent(px, py))
-                    continue;
-
                 VisualElement cell =
                     new VisualElement();
 
                 cell.AddToClassList(
-                    "world-map-blocked-cell");
+                    "world-map-terrain-cell");
+                cell.style.backgroundColor =
+                    profile.CellColor;
 
                 cell.style.left =
                     new Length(
@@ -507,6 +531,8 @@ public partial class PrototypeUIController
                 "world-map-node-active");
         }
 
+        ApplyWorldMapNodeIcon(node, location);
+
         bool canChangeRoute =
             !isGameOver &&
             (!gameState.HasActiveExpedition ||
@@ -515,6 +541,30 @@ public partial class PrototypeUIController
 
         node.SetEnabled(canChangeRoute);
         worldMapMarkers.Add(node);
+    }
+
+    private static void ApplyWorldMapNodeIcon(
+        Button node,
+        LocationData location)
+    {
+        // Иконка берётся из WorldMapIconLibrary по LocationData.Id, а не из
+        // самих игровых данных — художник меняет спрайт в теме, код не трогаем.
+        WorldMapVisualTheme theme = WorldMapVisualRuntime.LoadActiveTheme();
+        Sprite icon =
+            theme != null && theme.IconLibrary != null
+                ? theme.IconLibrary.FindIconForLocation(location.Id)
+                : null;
+
+        if (icon == null)
+            return;
+
+        Image iconImage = new Image();
+        iconImage.AddToClassList("world-map-node-icon");
+        iconImage.sprite = icon;
+        iconImage.pickingMode = PickingMode.Ignore;
+
+        node.text = string.Empty;
+        node.Add(iconImage);
     }
 
     private void CreateDestinationMarker()

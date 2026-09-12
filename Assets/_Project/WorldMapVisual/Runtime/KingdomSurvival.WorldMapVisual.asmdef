@@ -1,0 +1,16 @@
+{
+  "name": "KingdomSurvival.WorldMapVisual",
+  "rootNamespace": "KingdomSurvival.WorldMapVisual",
+  "references": [
+    "KingdomSurvival.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

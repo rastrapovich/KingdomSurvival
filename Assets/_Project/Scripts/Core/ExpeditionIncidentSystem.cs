@@ -183,7 +183,10 @@ public static class ExpeditionIncidentSystem
         int requestedIncidentCount = Random.Next(0, 3);
 
         if (requestedIncidentCount == 0)
+        {
+            SurfaceRoadEncounterOpportunity(state, finishedDay, result);
             return;
+        }
 
         List<string> usedDefinitionIds = new List<string>();
         List<ExpeditionIncidentOccurrence> created =
@@ -217,7 +220,10 @@ public static class ExpeditionIncidentSystem
         }
 
         if (created.Count == 0)
+        {
+            SurfaceRoadEncounterOpportunity(state, finishedDay, result);
             return;
+        }
 
         List<string> summaryLines = new List<string>();
 
@@ -232,6 +238,35 @@ public static class ExpeditionIncidentSystem
             GetIncidentWord(created.Count) +
             "\n" +
             string.Join("\n", summaryLines));
+    }
+
+    // Сигнализирует UI-слою, что сейчас теоретически может произойти
+    // Encounter из общей базы (Encounters/Runtime) — только когда этот же
+    // scheduled-check не занял экспедицию классическим происшествием выше
+    // (§56: одна проверка не должна одновременно претендовать на внимание
+    // игрока двумя системами). Сам выбор и открытие диалога Core не делает —
+    // StrategicSimulationResult не может ссылаться на типы модуля Encounters
+    // (Core ни на что не реферит). См. PrototypeUIController.Encounters.cs.
+    private static void SurfaceRoadEncounterOpportunity(
+        GameState state,
+        int finishedDay,
+        StrategicSimulationResult result)
+    {
+        if (!state.HasActiveExpedition || state.ActiveExpedition.HasTimedActivity)
+            return;
+
+        string commanderId = state.ActiveExpedition.CommanderId;
+        if (string.IsNullOrWhiteSpace(commanderId))
+            return;
+
+        result.HasRoadEncounterOpportunity = true;
+        result.RoadEncounterOpportunityId = "road_" + commanderId + "_day" + finishedDay;
+        result.RoadEncounterWorldHour = finishedDay * 24.0;
+
+        // "road" зеркалит KingdomSurvival.Encounters.RoadEncounterIds.FirstRegionId —
+        // Core не может реферить Encounters (у Core нет зависимостей), поэтому
+        // строка продублирована намеренно. Изменять оба места одновременно.
+        result.RoadEncounterRegionId = "road";
     }
 
     private static List<IncidentDefinition> GetEligibleDefinitions(

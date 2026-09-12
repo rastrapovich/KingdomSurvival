@@ -181,31 +181,33 @@
 }
 
 .world-map-route-dot {
-    /* WM-12: базовые px уменьшены — при старом максимуме зума (2.5×) 5-7px
-       были уместны, при новом (10×) те же px превращались в точки размером
-       почти в целую клетку. Как и everything внутри .world-map, px здесь
-       визуально умножаются на текущий zoom (WorldMapViewport). */
+    /* WM-13: width/height задаются кодом (PrototypeUIController.WorldMap.cs,
+       AddRouteMarker) как "желаемый экранный размер / zoom" и пересчитываются
+       при смене zoom (WorldMapPolish.cs, RefreshWorldMapZoomCompensatedVisuals) —
+       поэтому маршрут визуально не раздувается при приближении. border-radius
+       в процентах, а не px, чтобы точка/штрих любого размера оставалась
+       кругом, а не квадратом со скруглёнными углами. */
     position: absolute;
-    width: 2px;
-    height: 2px;
     background-color: rgb(103, 99, 84);
-    border-radius: 1px;
+    border-radius: 50%;
     opacity: 0.54;
 }
 
 .world-map-route-dot-active {
-    width: 3px;
-    height: 3px;
     background-color: rgb(226, 187, 99);
-    border-radius: 2px;
     opacity: 0.96;
 }
 
-.world-map-route-dot-preview {
-    width: 2.5px;
-    height: 2.5px;
+.world-map-route-dash {
+    /* Декоративные штрихи между узлами маршрута (AddRouteDashes) — мельче и
+       бледнее самих узлов, чтобы читаться как пунктир, а не как цепочка
+       локаций. Не участвуют в FadeNextRoutePoint. */
     background-color: rgb(190, 164, 104);
-    border-radius: 1px;
+    opacity: 0.7;
+}
+
+.world-map-route-dot-preview {
+    background-color: rgb(190, 164, 104);
     opacity: 0.82;
 }
 
@@ -353,7 +355,7 @@
     position: absolute;
     color: rgb(226, 225, 214);
     background-color: rgb(47, 54, 61);
-    border-left-width: 2px;
+    border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;

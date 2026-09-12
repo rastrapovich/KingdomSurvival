@@ -19,14 +19,19 @@ public class ContinuousSimulationTests
     }
 
     [Test]
-    public void Clock_TwoRealMinutesAdvanceOneFullGameDayAtNormalSpeed()
+    public void Clock_OneRealGameDayAdvancesOneFullGameDayAtNormalSpeed()
     {
         GameState state = new GameState();
         state.CreateNewGame(4321);
         ContinuousSimulationSystem.Reset(state);
         ContinuousSimulationSystem.SetPaused(state, false);
 
-        ContinuousSimulationSystem.Advance(state, 120f, false);
+        // WM-13: было захардкожено 120f под старое RealSecondsPerGameDay —
+        // ссылаемся на константу, чтобы ускорение времени не ломало тест.
+        ContinuousSimulationSystem.Advance(
+            state,
+            (float)ContinuousSimulationSystem.RealSecondsPerGameDay,
+            false);
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
 
         Assert.That(state.Day, Is.EqualTo(2));
@@ -91,8 +96,14 @@ public class ContinuousSimulationTests
 
         ContinuousSimulationSystem.Advance(state, 2f, false);
 
+        // WM-13: было захардкожено 1.2 под старое RealSecondsPerGameDay —
+        // считаем ожидание из констант, чтобы ускорение времени не ломало тест.
+        double expectedHours =
+            2.0 *
+            ContinuousSimulationSystem.FastSpeedMultiplier *
+            ContinuousSimulationSystem.GameHoursPerRealSecond;
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
-        Assert.That(clock.HourOfDay - startHour, Is.EqualTo(1.2).Within(0.02));
+        Assert.That(clock.HourOfDay - startHour, Is.EqualTo(expectedHours).Within(0.02));
         Assert.That(
             expedition.RouteIndex,
             Is.EqualTo(startIndex),
@@ -161,8 +172,13 @@ public class ContinuousSimulationTests
         int expectedFood =
             startFood + state.DailyFoodIncome - state.DailyFoodConsumption;
 
-        // С 08:00 до первой полуночи — 16 игровых часов = 80 реальных секунд.
-        ContinuousSimulationSystem.Advance(state, 80f, false);
+        // WM-13: было захардкожено 80f (16 игровых часов при старом
+        // GameHoursPerRealSecond) — считаем из константы, чтобы ускорение
+        // времени не заставляло тест случайно пересекать вторую полночь.
+        double hoursToMidnight = 24.0 - ContinuousSimulationSystem.StartHour;
+        float advanceSeconds = (float)(
+            hoursToMidnight / ContinuousSimulationSystem.GameHoursPerRealSecond);
+        ContinuousSimulationSystem.Advance(state, advanceSeconds, false);
 
         Assert.That(state.Day, Is.EqualTo(2));
         Assert.That(state.Gold, Is.EqualTo(startGold + state.DailyGoldIncome));

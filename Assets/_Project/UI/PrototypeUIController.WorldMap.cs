@@ -489,6 +489,17 @@ public partial class PrototypeUIController
     private static float GridYToPercent(int y) =>
         y * 100f / (WorldMapNavigation.GridHeight - 1);
 
+    // WM-13: желаемый экранный размер узла маршрута и декоративных штрихов
+    // между узлами — герой (MapMarkerCellFraction) остаётся заметно крупнее.
+    // Фактический px на каждом элементе выставляет
+    // RefreshWorldMapZoomCompensatedVisuals (WorldMapPolish.cs) как
+    // screenDiameter / zoom, чтобы размер не менялся визуально при zoom.
+    private const float RouteNodeScreenDiameter = 5f;
+    private const float RouteDashScreenDiameter = 2f;
+    // Штрихов между соседними узлами маршрута — превращает редкие точки по
+    // клеткам в частый мелкий пунктир, не трогая логические узлы пути.
+    private const int RouteDashesPerSegment = 5;
+
     private void DrawRoute(
         List<MapPointData> route,
         string extraClass)
@@ -511,24 +522,64 @@ public partial class PrototypeUIController
              i < route.Count;
              i++)
         {
-            VisualElement dot =
-                new VisualElement();
+            AddRouteMarker(
+                route[i].XPercent,
+                route[i].YPercent,
+                extraClass,
+                RouteNodeScreenDiameter);
 
-            dot.AddToClassList(
-                "world-map-route-dot");
-            dot.AddToClassList(extraClass);
-
-            dot.style.left =
-                new Length(
-                    route[i].XPercent,
-                    LengthUnit.Percent);
-            dot.style.top =
-                new Length(
-                    route[i].YPercent,
-                    LengthUnit.Percent);
-
-            worldMapRoutes.Add(dot);
+            if (i + 1 < route.Count)
+            {
+                AddRouteDashes(
+                    route[i],
+                    route[i + 1]);
+            }
         }
+    }
+
+    private void AddRouteDashes(
+        MapPointData from,
+        MapPointData to)
+    {
+        for (int d = 1; d <= RouteDashesPerSegment; d++)
+        {
+            float t = d / (float)(RouteDashesPerSegment + 1);
+
+            AddRouteMarker(
+                Mathf.Lerp(from.XPercent, to.XPercent, t),
+                Mathf.Lerp(from.YPercent, to.YPercent, t),
+                "world-map-route-dash",
+                RouteDashScreenDiameter);
+        }
+    }
+
+    private void AddRouteMarker(
+        float xPercent,
+        float yPercent,
+        string extraClass,
+        float screenDiameter)
+    {
+        VisualElement dot =
+            new VisualElement();
+
+        dot.AddToClassList("world-map-route-dot");
+        dot.AddToClassList(WorldMapRouteMarkerClass);
+        dot.AddToClassList(extraClass);
+        // Читается в RefreshWorldMapZoomCompensatedVisuals, чтобы пересчитать
+        // px при изменении zoom — сам этот вызов уже выставляет актуальный
+        // размер для текущего zoom (см. конец метода).
+        dot.userData = screenDiameter;
+
+        dot.style.left =
+            new Length(xPercent, LengthUnit.Percent);
+        dot.style.top =
+            new Length(yPercent, LengthUnit.Percent);
+
+        worldMapRoutes.Add(dot);
+
+        float size = screenDiameter / Mathf.Max(0.0001f, worldMapZoom);
+        dot.style.width = size;
+        dot.style.height = size;
     }
 
     private void RefreshWorldMapRouteProgress()

@@ -24,11 +24,9 @@ public class ContinuousTimePolishTests
         Assert.That(after.IsPaused, Is.EqualTo(before.IsPaused));
     }
 
-    [TestCase(5, 1.0)]
-    [TestCase(10, 2.0)]
-    public void ExtendedSpeed_ScalesStrategicClock(
-        int multiplier,
-        double expectedGameHours)
+    [TestCase(5)]
+    [TestCase(10)]
+    public void ExtendedSpeed_ScalesStrategicClock(int multiplier)
     {
         GameState state = new GameState();
         state.CreateNewGame(502 + multiplier);
@@ -47,6 +45,11 @@ public class ContinuousTimePolishTests
         double actualHours =
             ContinuousSimulationSystem.GetClock(state).HourOfDay - startHour;
 
+        // WM-13: раньше 1.0/2.0 были захардкожены под старое
+        // GameHoursPerRealSecond — считаем ожидание из константы, чтобы
+        // ускорение времени не ломало тест.
+        double expectedGameHours =
+            multiplier * ContinuousSimulationSystem.GameHoursPerRealSecond;
         Assert.That(actualHours, Is.EqualTo(expectedGameHours).Within(0.01));
         Assert.That(
             ContinuousSimulationSystem.GetSpeedMultiplier(state),

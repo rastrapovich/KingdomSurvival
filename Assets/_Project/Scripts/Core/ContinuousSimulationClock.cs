@@ -30,7 +30,10 @@ public struct ContinuousClockSnapshot
 
 public static partial class ContinuousSimulationSystem
 {
-    public const double RealSecondsPerGameDay = 120.0;
+    // Ускорение ×2 (запрос пользователя, WM-13): было 120.0. Часы и скорость
+    // армии выведены из этой константы ниже, поэтому "1 клетка = 24 часа"
+    // остаётся верным на любой скорости — трогать нужно только это число.
+    public const double RealSecondsPerGameDay = 60.0;
     public const double GameHoursPerRealSecond = 24.0 / RealSecondsPerGameDay;
     // Прямое определение темпа: 1 клетка маршрута (CalculateRouteCells/FindPath,
     // WorldMapNavigation) = 1 игровые сутки на обычной скорости, а не подобранный

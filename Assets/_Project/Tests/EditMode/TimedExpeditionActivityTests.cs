@@ -18,8 +18,14 @@ public class TimedExpeditionActivityTests
             message);
         Assert.That(ruins.ExplorationHours, Is.EqualTo(2.0));
 
+        // WM-13: было захардкожено 5f (1 час активности при старом
+        // GameHoursPerRealSecond) — считаем из константы, чтобы ускорение
+        // времени не сдвигало момент "прошёл ровно 1 час из 2".
+        float oneActivityHourSeconds = (float)(
+            1.0 / ContinuousSimulationSystem.GameHoursPerRealSecond);
+
         ContinuousSimulationSystem.SetPaused(state, false);
-        ContinuousSimulationSystem.Advance(state, 5f, false);
+        ContinuousSimulationSystem.Advance(state, oneActivityHourSeconds, false);
 
         Assert.That(ruins.IsExplored, Is.False);
         Assert.That(state.ArmyGold, Is.EqualTo(0));
@@ -29,7 +35,7 @@ public class TimedExpeditionActivityTests
             Is.EqualTo(1.0).Within(0.01));
 
         ContinuousSimulationBatch completed =
-            ContinuousSimulationSystem.Advance(state, 5f, false);
+            ContinuousSimulationSystem.Advance(state, oneActivityHourSeconds, false);
 
         Assert.That(ruins.IsExplored, Is.True);
         Assert.That(state.ActiveExpedition.ActiveActivity, Is.Null);
@@ -72,8 +78,14 @@ public class TimedExpeditionActivityTests
             state.ActiveExpedition.ActiveActivity.TotalHours,
             Is.EqualTo(3.0));
 
+        // WM-13: было захардкожено 10f (2 часа активности при старом
+        // GameHoursPerRealSecond) — считаем из константы, чтобы ускорение
+        // времени не завершало активность (3ч) уже на этом Advance.
+        float twoActivityHoursSeconds = (float)(
+            2.0 / ContinuousSimulationSystem.GameHoursPerRealSecond);
+
         ContinuousSimulationSystem.SetPaused(state, false);
-        ContinuousSimulationSystem.Advance(state, 10f, false);
+        ContinuousSimulationSystem.Advance(state, twoActivityHoursSeconds, false);
 
         Assert.That(state.ArmySupply, Is.EqualTo(10));
         Assert.That(state.ActiveExpedition.RouteIndex, Is.EqualTo(startRouteIndex));
@@ -135,8 +147,13 @@ public class TimedExpeditionActivityTests
         Assert.That(activity.Progress01, Is.EqualTo(0.0).Within(0.001));
         Assert.That(state.ActiveExpedition.RouteDelayHoursRemaining, Is.Zero);
 
+        // WM-13: было захардкожено 2.5f (0.5 часа активности при старом
+        // GameHoursPerRealSecond) — считаем из константы.
+        float halfActivityHourSeconds = (float)(
+            0.5 / ContinuousSimulationSystem.GameHoursPerRealSecond);
+
         ContinuousSimulationSystem.SetPaused(state, false);
-        ContinuousSimulationSystem.Advance(state, 2.5f, false);
+        ContinuousSimulationSystem.Advance(state, halfActivityHourSeconds, false);
 
         Assert.That(activity.Progress01, Is.EqualTo(0.5).Within(0.01));
         Assert.That(state.ActiveExpedition.RouteIndex, Is.Zero);

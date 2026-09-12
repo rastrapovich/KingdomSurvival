@@ -9,19 +9,25 @@ public partial class PrototypeUIController
     // не меняются, координатное преобразование делает сам UI Toolkit через
     // worldMap.style.scale/left/top + WorldToLocal при клике.
     private const float WorldMapMinZoom = 0.75f;
-    // WM-12: поднят с 2.5× — на ½-клетки маркерах (столица/армия) и сетке
-    // 104×64 нужен запас приближения, чтобы их можно было разглядеть и точно
-    // кликнуть.
-    private const float WorldMapMaxZoom = 10f;
-    // Мультипликативный шаг (±15% за нотч), а не аддитивный: диапазон
-    // [0.75; 10] почти в 13 раз шире, чем был [0.75; 2.5] — аддитивный шаг
-    // старого размера потребовал бы ~62 нотча колеса до максимума.
-    // Мультипликативный шаг даёт равномерное ощущение на любом уровне.
+    // WM-13: раньше фиксированное число (10×), подобранное на глаз под одно
+    // разрешение окна. Теперь maxZoom считается от реального размера
+    // viewport в RecalculateWorldMapMaxZoom — критерий "одна клетка занимает
+    // ~85-90% меньшей стороны экрана" не зависит от того, каким было окно
+    // при подборе константы. Это значение — только запасной вариант до
+    // первого GeometryChangedEvent.
+    private const float WorldMapMaxZoomFallback = 10f;
+    // Доля меньшей стороны viewport, которую должна занимать одна клетка на
+    // максимальном приближении — середина требуемого диапазона 85-90%.
+    private const float WorldMapMaxZoomCellFraction = 0.875f;
+    // Мультипликативный шаг (±15% за нотч), а не аддитивный — даёт
+    // равномерное ощущение зума независимо от того, насколько широк
+    // фактический диапазон [WorldMapMinZoom; worldMapMaxZoom].
     private const float WorldMapZoomStepFactor = 1.15f;
 
+    private float worldMapMaxZoom = WorldMapMaxZoomFallback;
     // Старт с максимальным приближением (у столицы) — игрок видит только
     // ближайшую часть большой карты и раскрывает остальное через pan/zoom-out.
-    private float worldMapZoom = WorldMapMaxZoom;
+    private float worldMapZoom = WorldMapMaxZoomFallback;
     private float worldMapPanOffsetX;
     private float worldMapPanOffsetY;
     private bool isPanningWorldMap;
@@ -42,6 +48,8 @@ public partial class PrototypeUIController
 
     private void OnWorldMapViewportGeometryChanged(GeometryChangedEvent evt)
     {
+        RecalculateWorldMapMaxZoom();
+
         // При zoom > 1 канвас крупнее viewport, и panOffset=(0,0) по
         // умолчанию показывает левый верхний угол карты, а не столицу
         // (50%, 81% — почти внизу). Один раз, как только реальный размер
@@ -49,10 +57,18 @@ public partial class PrototypeUIController
         // максимальным зумом игрок видит пустой угол карты.
         if (!worldMapInitialFocusApplied)
         {
+            worldMapZoom = worldMapMaxZoom;
             CenterWorldMapOn(
                 WorldMapNavigation.CapitalXPercent,
                 WorldMapNavigation.CapitalYPercent);
             worldMapInitialFocusApplied = true;
+        }
+        else
+        {
+            // Окно могло измениться (например, изменение размера панели) —
+            // maxZoom мог уменьшиться, не даём текущему zoom остаться выше
+            // нового предела.
+            worldMapZoom = Mathf.Min(worldMapZoom, worldMapMaxZoom);
         }
 
         // WM-12: на самом первом layout-проходе (до этого события) Button
@@ -70,6 +86,29 @@ public partial class PrototypeUIController
 
         ClampWorldMapPan();
         ApplyWorldMapViewportTransform();
+    }
+
+    // WM-13: цель — одна клетка занимает ~85-90% МЕНЬШЕЙ стороны viewport на
+    // максимальном приближении. Берём ту ось сетки (X по GridWidth, Y по
+    // GridHeight), которая соответствует меньшей стороне текущего viewport,
+    // и считаем zoom, при котором её процент клетки даёт нужную долю экрана.
+    // Не зависит от абсолютного размера viewport — только от того, какая
+    // сторона меньше и сколько клеток вдоль неё.
+    private void RecalculateWorldMapMaxZoom()
+    {
+        if (worldMapViewport == null)
+            return;
+
+        float viewportWidth = Mathf.Max(1f, worldMapViewport.resolvedStyle.width);
+        float viewportHeight = Mathf.Max(1f, worldMapViewport.resolvedStyle.height);
+
+        float cellPercentOnSmallerSide = viewportHeight <= viewportWidth
+            ? 100f / (WorldMapNavigation.GridHeight - 1)
+            : 100f / (WorldMapNavigation.GridWidth - 1);
+
+        worldMapMaxZoom = Mathf.Max(
+            WorldMapMinZoom,
+            WorldMapMaxZoomCellFraction * 100f / cellPercentOnSmallerSide);
     }
 
     private void CenterWorldMapOn(float xPercent, float yPercent)
@@ -126,7 +165,7 @@ public partial class PrototypeUIController
         float newZoom = Mathf.Clamp(
             worldMapZoom * factor,
             WorldMapMinZoom,
-            WorldMapMaxZoom);
+            worldMapMaxZoom);
 
         if (Mathf.Approximately(newZoom, worldMapZoom))
         {
@@ -222,5 +261,7 @@ public partial class PrototypeUIController
         worldMap.style.scale = new Scale(new Vector3(worldMapZoom, worldMapZoom, 1f));
         worldMap.style.left = new Length(worldMapPanOffsetX, LengthUnit.Pixel);
         worldMap.style.top = new Length(worldMapPanOffsetY, LengthUnit.Pixel);
+
+        RefreshWorldMapZoomCompensatedVisuals();
     }
 }

@@ -29,6 +29,7 @@ public partial class PrototypeUIController
     private VisualElement worldMapViewport;
     private VisualElement worldMap;
     private VisualElement worldMapBackground;
+    private VisualElement worldMapArtLayers;
     private VisualElement worldMapWater;
     private VisualElement worldMapTerrain;
     private VisualElement worldMapRoads;
@@ -77,6 +78,7 @@ public partial class PrototypeUIController
         worldMapViewport = root.Q<VisualElement>("world-map-viewport");
         worldMap = root.Q<VisualElement>("world-map");
         worldMapBackground = root.Q<VisualElement>("world-map-background");
+        worldMapArtLayers = root.Q<VisualElement>("world-map-art-layers");
         worldMapWater = root.Q<VisualElement>("world-map-water");
         worldMapTerrain = root.Q<VisualElement>("world-map-terrain");
         worldMapRoads = root.Q<VisualElement>("world-map-roads");
@@ -105,6 +107,9 @@ public partial class PrototypeUIController
         // клики по карте — как и остальные декоративные/маршрутные слои.
         if (worldMapBackground != null)
             worldMapBackground.pickingMode = PickingMode.Ignore;
+
+        if (worldMapArtLayers != null)
+            worldMapArtLayers.pickingMode = PickingMode.Ignore;
 
         if (worldMapWater != null)
             worldMapWater.pickingMode = PickingMode.Ignore;
@@ -394,6 +399,7 @@ public partial class PrototypeUIController
         ConfigureWorldMapFullscreenLayout();
 
         worldMapBackground?.Clear();
+        worldMapArtLayers?.Clear();
         worldMapWater?.Clear();
         worldMapTerrain.Clear();
         worldMapRoads?.Clear();
@@ -405,6 +411,7 @@ public partial class PrototypeUIController
         renderedWorldMapRouteIndex = -1;
 
         ApplyWorldMapBackground();
+        ApplyWorldMapArtLayers();
 
         foreach (LocationData location in gameState.Locations)
         {
@@ -445,6 +452,46 @@ public partial class PrototypeUIController
             worldMapBackground.style.backgroundImage = new StyleBackground(theme.BaseMapSprite);
         else
             worldMapBackground.style.backgroundImage = StyleKeyword.None;
+    }
+
+    // Задача "Map Art Layers": каждый Art Layer занимает только свой Bounds
+    // внутри world-map (0..100%, та же система координат, что у Roads/
+    // Locations/героя). Проценты style.left/top/width/height относительно
+    // world-map — это ровно тот же линейный перевод координат, что и
+    // WorldMapPreviewMath в Editor Preview (OnWorldMapPointerDown уже делает
+    // обратное преобразование той же формулой: local/resolvedStyle*100).
+    // Порядок/фильтрация — через общий WorldMapArtLayerUtility, чтобы Preview
+    // и runtime никогда не разошлись.
+    private void ApplyWorldMapArtLayers()
+    {
+        if (worldMapArtLayers == null)
+            return;
+
+        WorldMapVisualTheme theme = WorldMapVisualRuntime.LoadActiveTheme();
+        if (theme == null)
+            return;
+
+        List<WorldMapArtLayerEntry> ordered =
+            WorldMapArtLayerUtility.GetOrderedEnabledLayers(theme.ArtLayers);
+
+        foreach (WorldMapArtLayerEntry layer in ordered)
+        {
+            VisualElement element = new VisualElement();
+            element.pickingMode = PickingMode.Ignore;
+            element.style.position = Position.Absolute;
+            element.style.left = Length.Percent(layer.MinXPercent);
+            element.style.top = Length.Percent(layer.MinYPercent);
+            element.style.width = Length.Percent(layer.MaxXPercent - layer.MinXPercent);
+            element.style.height = Length.Percent(layer.MaxYPercent - layer.MinYPercent);
+            element.style.opacity = Mathf.Clamp01(layer.Opacity);
+            element.style.backgroundImage = new StyleBackground(layer.Sprite);
+            element.style.unityBackgroundScaleMode =
+                layer.FitMode == WorldMapArtLayerFitMode.PreserveAspect
+                    ? ScaleMode.ScaleToFit
+                    : ScaleMode.StretchToFill;
+
+            worldMapArtLayers.Add(element);
+        }
     }
 
     // AM-07.5 (канон v1.35, §9.9): рельеф (холмы/горы/лес/поля) больше не

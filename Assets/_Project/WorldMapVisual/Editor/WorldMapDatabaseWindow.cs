@@ -50,11 +50,25 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private const string PrefShowLocations = "KingdomSurvival.WorldMapPreview.ShowLocations";
         private const string PrefShowSpawnSlots = "KingdomSurvival.WorldMapPreview.ShowSpawnSlots";
 
+        // Задача "Map Art Layers": отдельный тумблер видимости слоёв и
+        // отдельный тумблер debug-рамок их Bounds (раздел 13 задачи) — рамки
+        // полезны только при размещении PNG, поэтому не завязаны на основной
+        // тумблер видимости самих слоёв.
+        private const string PrefShowArtLayers = "KingdomSurvival.WorldMapPreview.ShowArtLayers";
+        private const string PrefShowArtLayerBounds = "KingdomSurvival.WorldMapPreview.ShowArtLayerBounds";
+
         private bool previewShowArt = true;
         private bool previewShowRoads = true;
         private bool previewShowTerrainAreas = true;
         private bool previewShowLocations = true;
         private bool previewShowSpawnSlots = true;
+        private bool previewShowArtLayers = true;
+        private bool previewShowArtLayerBounds;
+
+        // Индекс Art Layer, выбранного на вкладке «Текстуры» — Preview
+        // выделяет его тонкой рамкой (раздел 14 задачи), не влияет на
+        // рендер/сохранение.
+        private int selectedArtLayerIndex = -1;
 
         [MenuItem("Kingdom Survival/Карта/World Map Database")]
         private static void Open()
@@ -75,6 +89,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             previewShowTerrainAreas = EditorPrefs.GetBool(PrefShowTerrainAreas, true);
             previewShowLocations = EditorPrefs.GetBool(PrefShowLocations, true);
             previewShowSpawnSlots = EditorPrefs.GetBool(PrefShowSpawnSlots, true);
+            previewShowArtLayers = EditorPrefs.GetBool(PrefShowArtLayers, true);
+            previewShowArtLayerBounds = EditorPrefs.GetBool(PrefShowArtLayerBounds, false);
         }
 
         private void OnGUI()
@@ -611,6 +627,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             DrawBaseMapSection(themeSO);
             EditorGUILayout.Space(14f);
+            DrawArtLayersSection(themeSO);
+            EditorGUILayout.Space(14f);
             DrawDefaultIconSection(themeSO);
 
             EditorGUILayout.EndScrollView();
@@ -638,6 +656,105 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 "Вкладка «География» задаёт только невидимую gameplay-разметку поверх этого арта.",
                 MessageType.None);
             EditorGUILayout.EndVertical();
+        }
+
+        // Задача "Map Art Layers": отдельные PNG-фрагменты глобальной карты
+        // поверх (необязательного) Base Map — каждый занимает только свой
+        // Bounds в координатах карты (0..100%), не растягивается на всю
+        // карту. Тот же UI-паттерн, что DrawRoadsSection (список через
+        // SerializedProperty, добавление/удаление кнопками).
+        private void DrawArtLayersSection(SerializedObject themeSO)
+        {
+            EditorGUILayout.LabelField("Map Art Layers", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "Отдельные PNG-фрагменты глобальной карты (0..100% по обеим осям, та же система " +
+                "координат, что у Roads/Locations/Spawn Slots/героя) — позволяют дорисовывать карту " +
+                "постепенно, регион за регионом, не растягивая один спрайт на всю площадь. Base Map " +
+                "выше (если назначен) — необязательный фон под всеми слоями.",
+                MessageType.None);
+
+            SerializedProperty layersProp = themeSO.FindProperty("artLayers");
+
+            for (int i = 0; i < layersProp.arraySize; i++)
+            {
+                SerializedProperty layer = layersProp.GetArrayElementAtIndex(i);
+                SerializedProperty idProp = layer.FindPropertyRelative("Id");
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.BeginHorizontal();
+                bool isSelected = selectedArtLayerIndex == i;
+                EditorGUILayout.LabelField(
+                    (string.IsNullOrWhiteSpace(idProp.stringValue) ? $"Layer {i + 1}" : idProp.stringValue) +
+                    (isSelected ? "  [показан в Preview]" : ""),
+                    EditorStyles.boldLabel);
+                if (GUILayout.Button(isSelected ? "Скрыть в Preview" : "Показать в Preview", GUILayout.Width(150f)))
+                    selectedArtLayerIndex = isSelected ? -1 : i;
+                if (GUILayout.Button("Удалить", GUILayout.Width(80f)))
+                {
+                    layersProp.DeleteArrayElementAtIndex(i);
+                    if (selectedArtLayerIndex == i)
+                        selectedArtLayerIndex = -1;
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndVertical();
+                    break;
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.PropertyField(idProp, new GUIContent("ID"));
+                EditorGUILayout.PropertyField(
+                    layer.FindPropertyRelative("DisplayName"), new GUIContent("Название"));
+                EditorGUILayout.PropertyField(
+                    layer.FindPropertyRelative("Sprite"), new GUIContent("Sprite"));
+                EditorGUILayout.PropertyField(
+                    layer.FindPropertyRelative("Enabled"), new GUIContent("Активен"));
+
+                EditorGUILayout.LabelField("Bounds (проценты карты, 0..100)");
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PropertyField(
+                    layer.FindPropertyRelative("MinXPercent"), new GUIContent("Min X"));
+                EditorGUILayout.PropertyField(
+                    layer.FindPropertyRelative("MaxXPercent"), new GUIContent("Max X"));
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PropertyField(
+                    layer.FindPropertyRelative("MinYPercent"), new GUIContent("Min Y"));
+                EditorGUILayout.PropertyField(
+                    layer.FindPropertyRelative("MaxYPercent"), new GUIContent("Max Y"));
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.PropertyField(
+                    layer.FindPropertyRelative("Order"),
+                    new GUIContent("Order", "Меньший Order — ниже. Base Map всегда ниже всех Art Layers."));
+                EditorGUILayout.PropertyField(
+                    layer.FindPropertyRelative("Opacity"), new GUIContent("Opacity"));
+                EditorGUILayout.PropertyField(
+                    layer.FindPropertyRelative("FitMode"),
+                    new GUIContent(
+                        "Fit Mode",
+                        "Preserve Aspect — вписать с сохранением пропорций (letterbox внутри Bounds). " +
+                        "Stretch — растянуть на весь Bounds, искажая пропорции."));
+
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space(4f);
+            }
+
+            if (GUILayout.Button("+ ДОБАВИТЬ СЛОЙ", GUILayout.Height(26f)))
+            {
+                int index = layersProp.arraySize;
+                layersProp.InsertArrayElementAtIndex(index);
+                SerializedProperty layer = layersProp.GetArrayElementAtIndex(index);
+                layer.FindPropertyRelative("Id").stringValue = "art-layer-" + (index + 1);
+                layer.FindPropertyRelative("DisplayName").stringValue = "Новый слой";
+                layer.FindPropertyRelative("Sprite").objectReferenceValue = null;
+                layer.FindPropertyRelative("Enabled").boolValue = true;
+                layer.FindPropertyRelative("MinXPercent").floatValue = 0f;
+                layer.FindPropertyRelative("MaxXPercent").floatValue = 100f;
+                layer.FindPropertyRelative("MinYPercent").floatValue = 0f;
+                layer.FindPropertyRelative("MaxYPercent").floatValue = 100f;
+                layer.FindPropertyRelative("Order").intValue = 0;
+                layer.FindPropertyRelative("Opacity").floatValue = 1f;
+                layer.FindPropertyRelative("FitMode").enumValueIndex = 0;
+            }
         }
 
         private static void DrawDefaultIconSection(SerializedObject themeSO)
@@ -963,7 +1080,67 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 }
             }
 
+            CollectArtLayerIssues(theme?.ArtLayers, result);
+
             return result;
+        }
+
+        // Задача "Map Art Layers", раздел 16. Публичный static, принимает
+        // список напрямую (не ScriptableObject) — используется и здесь, и
+        // напрямую из EditMode-тестов без создания ассета.
+        public static void CollectArtLayerIssues(
+            IReadOnlyList<WorldMapArtLayerEntry> layers, List<string> result)
+        {
+            if (layers == null)
+                return;
+
+            HashSet<string> seenIds = new HashSet<string>();
+            HashSet<int> seenOrders = new HashSet<int>();
+            HashSet<int> ambiguousOrders = new HashSet<int>();
+
+            foreach (WorldMapArtLayerEntry layer in layers)
+            {
+                if (layer == null)
+                {
+                    result.Add("В Map Art Layers есть пустая запись.");
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(layer.Id))
+                    result.Add("У Art Layer не заполнен ID.");
+                else if (!seenIds.Add(layer.Id))
+                    result.Add($"Дублирующийся ID Art Layer: '{layer.Id}'.");
+
+                if (layer.Enabled && layer.Sprite == null)
+                    result.Add($"Активный Art Layer '{layer.Id}' без Sprite.");
+
+                if (layer.MinXPercent >= layer.MaxXPercent)
+                    result.Add($"У Art Layer '{layer.Id}' Min X >= Max X.");
+                if (layer.MinYPercent >= layer.MaxYPercent)
+                    result.Add($"У Art Layer '{layer.Id}' Min Y >= Max Y.");
+
+                bool fullyOutside =
+                    layer.MaxXPercent <= 0f || layer.MinXPercent >= 100f ||
+                    layer.MaxYPercent <= 0f || layer.MinYPercent >= 100f;
+                if (fullyOutside)
+                    result.Add($"Art Layer '{layer.Id}' полностью вне карты (0..100%).");
+
+                if (layer.Opacity <= 0f)
+                    result.Add($"У Art Layer '{layer.Id}' Opacity <= 0 — слой невидим.");
+
+                const float minReasonableSizePercent = 0.5f;
+                if (layer.MaxXPercent - layer.MinXPercent < minReasonableSizePercent ||
+                    layer.MaxYPercent - layer.MinYPercent < minReasonableSizePercent)
+                {
+                    result.Add($"Art Layer '{layer.Id}' имеет очень маленький Bounds (< 0.5%).");
+                }
+
+                if (layer.Enabled && !seenOrders.Add(layer.Order))
+                    ambiguousOrders.Add(layer.Order);
+            }
+
+            foreach (int order in ambiguousOrders)
+                result.Add($"Несколько активных Art Layers имеют одинаковый Order ({order}) — порядок среди них зависит от позиции в списке.");
         }
 
         private static void CollectWorldIssues(
@@ -1194,6 +1371,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             else
                 EditorGUI.DrawRect(mapRect, new Color(0.08f, 0.08f, 0.08f));
 
+            if (previewShowArtLayers && database != null && database.ActiveTheme != null)
+                DrawPreviewArtLayers(mapRect, database.ActiveTheme.ArtLayers);
+
             if (previewShowTerrainAreas)
                 DrawPreviewTerrainGrid(mapRect, showArtNow);
 
@@ -1213,11 +1393,15 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             EditorGUILayout.LabelField("Отображение", EditorStyles.miniBoldLabel);
             EditorGUILayout.BeginHorizontal();
-            DrawLayerToggle(ref previewShowArt, "Арт карты", PrefShowArt);
+            DrawLayerToggle(ref previewShowArt, "Base Map", PrefShowArt);
+            DrawLayerToggle(ref previewShowArtLayers, "Map Art Layers", PrefShowArtLayers);
             DrawLayerToggle(ref previewShowRoads, "Дороги", PrefShowRoads);
             DrawLayerToggle(ref previewShowTerrainAreas, "Terrain Areas", PrefShowTerrainAreas);
             DrawLayerToggle(ref previewShowLocations, "Locations", PrefShowLocations);
             DrawLayerToggle(ref previewShowSpawnSlots, "Spawn Slots", PrefShowSpawnSlots);
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            DrawLayerToggle(ref previewShowArtLayerBounds, "Art Layer Bounds", PrefShowArtLayerBounds);
             EditorGUILayout.EndHorizontal();
         }
 
@@ -1281,6 +1465,80 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 spriteRect.height / texture.height);
 
             GUI.DrawTextureWithTexCoords(mapRect, texture, uv, true);
+        }
+
+        // Задача "Map Art Layers": каждый слой рисуется ТОЛЬКО в своём
+        // Bounds (через WorldMapPreviewMath.MapBoundsToRect — та же точка
+        // перевода координат, что и everything else в Preview), не на всю
+        // карту. Порядок и фильтрация Enabled/Sprite — через
+        // WorldMapArtLayerUtility, единственный источник правды, общий с
+        // runtime-рендером (PrototypeUIController.ApplyWorldMapArtLayers).
+        private void DrawPreviewArtLayers(Rect mapRect, IReadOnlyList<WorldMapArtLayerEntry> layers)
+        {
+            List<WorldMapArtLayerEntry> ordered = WorldMapArtLayerUtility.GetOrderedEnabledLayers(layers);
+
+            foreach (WorldMapArtLayerEntry layer in ordered)
+            {
+                Rect layerRect = WorldMapPreviewMath.MapBoundsToRect(
+                    mapRect, layer.MinXPercent, layer.MinYPercent, layer.MaxXPercent, layer.MaxYPercent);
+
+                DrawArtLayerSprite(layerRect, layer);
+            }
+
+            if (previewShowArtLayerBounds)
+            {
+                for (int i = 0; i < layers.Count; i++)
+                {
+                    WorldMapArtLayerEntry layer = layers[i];
+                    if (layer == null)
+                        continue;
+
+                    Rect layerRect = WorldMapPreviewMath.MapBoundsToRect(
+                        mapRect, layer.MinXPercent, layer.MinYPercent, layer.MaxXPercent, layer.MaxYPercent);
+                    bool isSelected = i == selectedArtLayerIndex;
+                    Color outline = isSelected
+                        ? Color.white
+                        : new Color(0.5f, 0.85f, 0.95f, 0.7f);
+                    DrawRectOutline(layerRect, outline);
+
+                    if (isSelected)
+                    {
+                        GUI.Label(
+                            new Rect(layerRect.x + 2f, layerRect.y + 2f, 200f, 16f),
+                            string.IsNullOrWhiteSpace(layer.Id) ? "(без ID)" : layer.Id,
+                            EditorStyles.whiteMiniLabel);
+                    }
+                }
+            }
+        }
+
+        private static void DrawArtLayerSprite(Rect layerRect, WorldMapArtLayerEntry layer)
+        {
+            if (layer.Sprite == null || layer.Sprite.texture == null || layer.Opacity <= 0f)
+                return;
+
+            Texture2D texture = layer.Sprite.texture;
+            Rect spriteRect = layer.Sprite.rect;
+            Rect uv = new Rect(
+                spriteRect.x / texture.width,
+                spriteRect.y / texture.height,
+                spriteRect.width / texture.width,
+                spriteRect.height / texture.height);
+
+            Rect drawRect = layerRect;
+            if (layer.FitMode == WorldMapArtLayerFitMode.PreserveAspect &&
+                spriteRect.height > 0f && layerRect.height > 0f)
+            {
+                float spriteAspect = spriteRect.width / spriteRect.height;
+                drawRect = WorldMapPreviewMath.ComputeMapRect(layerRect, spriteAspect, true);
+            }
+
+            Color previous = GUI.color;
+            Color tint = GUI.color;
+            tint.a *= Mathf.Clamp01(layer.Opacity);
+            GUI.color = tint;
+            GUI.DrawTextureWithTexCoords(drawRect, texture, uv, true);
+            GUI.color = previous;
         }
 
         // Раздел 15 задачи: полупрозрачно, чтобы арт оставался виден.

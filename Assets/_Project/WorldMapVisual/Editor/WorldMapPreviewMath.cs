@@ -65,5 +65,20 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 Mathf.Clamp(point.x, 0f, 100f),
                 Mathf.Clamp(point.y, 0f, 100f));
         }
+
+        // Задача "Map Art Layers": прямоугольник, который в Preview занимает
+        // один авторский Art Layer с данным Bounds (проценты карты) —
+        // строится через те же две точки, что и MapToPreview, поэтому не
+        // может разойтись с остальной математикой Preview. Не зависит от
+        // порядка min/max — оба угла нормализуются в Rect.MinMaxRect.
+        public static Rect MapBoundsToRect(
+            Rect mapRect, float minXPercent, float minYPercent, float maxXPercent, float maxYPercent)
+        {
+            Vector2 a = MapToPreview(mapRect, minXPercent, minYPercent);
+            Vector2 b = MapToPreview(mapRect, maxXPercent, maxYPercent);
+            return Rect.MinMaxRect(
+                Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y),
+                Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
+        }
     }
 }

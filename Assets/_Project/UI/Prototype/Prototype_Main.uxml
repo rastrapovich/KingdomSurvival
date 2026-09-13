@@ -100,6 +100,11 @@
                                              фон, вода и дороги появятся вместе с Sprite Shape-реками и art-темой;
                                              сейчас они существуют только как места в порядке отрисовки). -->
                                         <ui:VisualElement name="world-map-background" class="world-map-layer world-map-background" />
+                                        <!-- Задача "Map Art Layers": отдельные PNG-фрагменты глобальной карты,
+                                             каждый занимает свой Bounds — дети создаются кодом
+                                             (ApplyWorldMapArtLayers), сам контейнер — просто место в порядке
+                                             отрисовки, между Base Map и остальной gameplay-геометрией. -->
+                                        <ui:VisualElement name="world-map-art-layers" class="world-map-layer world-map-art-layers" />
                                         <ui:VisualElement name="world-map-water" class="world-map-layer world-map-water" />
                                         <ui:VisualElement name="world-map-terrain" class="world-map-layer world-map-terrain" />
                                         <ui:VisualElement name="world-map-roads" class="world-map-layer world-map-roads" />

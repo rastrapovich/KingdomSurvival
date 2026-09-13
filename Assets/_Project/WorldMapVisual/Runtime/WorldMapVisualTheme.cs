@@ -19,14 +19,12 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private Color baseMapColor = new Color(0.16f, 0.17f, 0.15f, 1f);
         [SerializeField] private Color baseMapTint = Color.white;
         [SerializeField] private WorldMapIconLibrary iconLibrary;
-        [SerializeField] private WorldMapWaterVisualProfile water = new WorldMapWaterVisualProfile();
 
         public IReadOnlyList<WorldMapTerrainVisualProfile> TerrainProfiles => terrainProfiles;
         public Sprite BaseMapSprite => baseMapSprite;
         public Color BaseMapColor => baseMapColor;
         public Color BaseMapTint => baseMapTint;
         public WorldMapIconLibrary IconLibrary => iconLibrary;
-        public WorldMapWaterVisualProfile Water => water;
 
         public WorldMapTerrainVisualProfile FindTerrainProfile(WorldMapTerrainType terrain)
         {

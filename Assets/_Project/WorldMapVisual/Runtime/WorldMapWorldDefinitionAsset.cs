@@ -21,14 +21,12 @@ namespace KingdomSurvival.WorldMapVisual
 
         [SerializeField] private List<TerrainAreaEntry> terrainAreas =
             new List<TerrainAreaEntry>();
-        [SerializeField] private List<Vector2> riverPathPercent = new List<Vector2>();
 
         public string WorldDefinitionId => worldDefinitionId;
         public int GeographyVersion => geographyVersion;
         public float HomeXPercent => homeXPercent;
         public float HomeYPercent => homeYPercent;
         public IReadOnlyList<TerrainAreaEntry> TerrainAreas => terrainAreas;
-        public IReadOnlyList<Vector2> RiverPathPercent => riverPathPercent;
 
         public WorldMapDefinitionData ToData()
         {
@@ -61,12 +59,6 @@ namespace KingdomSurvival.WorldMapVisual
                 }
             }
 
-            if (riverPathPercent != null)
-            {
-                foreach (Vector2 point in riverPathPercent)
-                    data.RiverPath.Add(new MapPointData(point.x, point.y));
-            }
-
             return data;
         }
 
@@ -92,13 +84,6 @@ namespace KingdomSurvival.WorldMapVisual
         }
 
         public void EditorClearTerrainAreas() => terrainAreas.Clear();
-
-        public void EditorAddRiverPoint(Vector2 percentPoint)
-        {
-            riverPathPercent.Add(percentPoint);
-        }
-
-        public void EditorClearRiverPath() => riverPathPercent.Clear();
 
         [System.Serializable]
         public sealed class TerrainAreaEntry

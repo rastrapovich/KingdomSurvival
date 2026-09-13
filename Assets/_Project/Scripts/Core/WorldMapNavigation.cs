@@ -39,8 +39,6 @@ public static class WorldMapNavigation
     private static int configuredTerrainSeed;
     private static bool terrainConfigured;
     private static WorldMapTerrainType[,] terrainGrid;
-    private static List<(int X, int Y)> riverPath;
-    private static HashSet<(int X, int Y)> riverCellLookup;
     private static WorldMapDefinitionData activeDefinition;
 
     public static void ConfigureTerrain(int worldSeed)
@@ -53,12 +51,6 @@ public static class WorldMapNavigation
         configuredTerrainSeed = worldSeed;
         terrainConfigured = true;
         terrainGrid = GenerateTerrain(worldSeed);
-
-        // WM-09: река — отдельная от Plains/Hills/Mountains визуальная
-        // геометрия (не влияет на GetTerrainTravelCost/скорость — геймплейный
-        // эффект реки утверждается отдельно, см. раздел 9.9 канона).
-        riverPath = GenerateRiver(worldSeed);
-        riverCellLookup = new HashSet<(int X, int Y)>(riverPath);
     }
 
     // AM-01 (канон v1.33, §9.9): авторская постоянная география вместо
@@ -83,8 +75,6 @@ public static class WorldMapNavigation
         configuredTerrainSeed = 0;
         terrainConfigured = true;
         terrainGrid = BuildAuthoredTerrain(definition);
-        riverPath = BuildAuthoredRiver(definition);
-        riverCellLookup = new HashSet<(int X, int Y)>(riverPath);
     }
 
     public static bool HasActiveDefinition => activeDefinition != null;
@@ -217,20 +207,6 @@ public static class WorldMapNavigation
         return terrainGrid[x, y];
     }
 
-    // WM-09: упорядоченная цепочка клеток от одного края карты до другого —
-    // только география для рендера, не геймплейная преграда.
-    public static IReadOnlyList<(int X, int Y)> GetRiverPath()
-    {
-        EnsureTerrainConfigured();
-        return riverPath;
-    }
-
-    public static bool IsRiverAtGridCell(int x, int y)
-    {
-        EnsureTerrainConfigured();
-        return riverCellLookup != null && riverCellLookup.Contains((x, y));
-    }
-
     // Оставлены для совместимости со старым UI/тестами. Непроходимых клеток
     // больше нет: холмы и горы замедляют, но не блокируют движение.
     public static bool IsBlockedPercent(float xPercent, float yPercent) => false;
@@ -346,94 +322,6 @@ public static class WorldMapNavigation
         }
 
         return result;
-    }
-
-    // Река всегда связывает два противоположных края и проходит через
-    // окрестность стартового поселения (не дальше двух клеток). Это делает
-    // воду частью географии Дома для любого WorldSeed, а не случайностью.
-    // Независимый сид от GenerateTerrain (другой XOR-тег) сохраняется.
-    private static List<(int X, int Y)> GenerateRiver(int worldSeed)
-    {
-        Random random = new Random(unchecked(worldSeed ^ 0x5249564D));
-
-        int capitalX = PercentToGridX(CapitalXPercent);
-        int capitalY = PercentToGridY(CapitalYPercent);
-
-        bool horizontal = random.Next(0, 2) == 0;
-        int startX;
-        int startY;
-        int endX;
-        int endY;
-
-        if (horizontal)
-        {
-            bool leftToRight = random.Next(0, 2) == 0;
-            startX = leftToRight ? 0 : GridWidth - 1;
-            endX = leftToRight ? GridWidth - 1 : 0;
-            startY = random.Next(1, GridHeight - 1);
-            endY = random.Next(1, GridHeight - 1);
-        }
-        else
-        {
-            bool topToBottom = random.Next(0, 2) == 0;
-            startY = topToBottom ? 0 : GridHeight - 1;
-            endY = topToBottom ? GridHeight - 1 : 0;
-            startX = random.Next(1, GridWidth - 1);
-            endX = random.Next(1, GridWidth - 1);
-        }
-
-        int nearCapitalX = Math.Max(
-            0,
-            Math.Min(GridWidth - 1, capitalX + random.Next(-2, 3)));
-        int nearCapitalY = Math.Max(
-            0,
-            Math.Min(GridHeight - 1, capitalY + random.Next(-2, 3)));
-
-        List<(int X, int Y)> path = new List<(int X, int Y)>
-        {
-            (startX, startY)
-        };
-
-        AppendRiverLeg(path, nearCapitalX, nearCapitalY, random);
-        AppendRiverLeg(path, endX, endY, random);
-        return path;
-    }
-
-    private static void AppendRiverLeg(
-        List<(int X, int Y)> path,
-        int targetX,
-        int targetY,
-        Random random)
-    {
-        int x = path[path.Count - 1].X;
-        int y = path[path.Count - 1].Y;
-
-        while (x != targetX || y != targetY)
-        {
-            int remainingX = targetX - x;
-            int remainingY = targetY - y;
-            int stepX = 0;
-            int stepY = 0;
-
-            if (remainingX != 0 && remainingY != 0 && random.NextDouble() < 0.62)
-            {
-                stepX = Math.Sign(remainingX);
-                stepY = Math.Sign(remainingY);
-            }
-            else if (remainingX != 0 &&
-                     (remainingY == 0 || random.Next(Math.Abs(remainingX) + Math.Abs(remainingY)) < Math.Abs(remainingX)))
-            {
-                stepX = Math.Sign(remainingX);
-            }
-            else
-            {
-                stepY = Math.Sign(remainingY);
-            }
-
-            x += stepX;
-            y += stepY;
-            path.Add((x, y));
-        }
     }
 
     private static void PaintClusters(
@@ -555,35 +443,5 @@ public static class WorldMapNavigation
         }
 
         return result;
-    }
-
-    // AM-01: река — авторская ломаная (опорные точки в процентах карты),
-    // а не случайный путь между краями. Опорные точки соединяются той же
-    // диагонально-приоритетной прогулкой по клеткам, что и раньше в
-    // AppendRiverLeg — так соседние клетки пути всегда связаны (без
-    // диагональных разрывов), только источник точек теперь авторский.
-    private static List<(int X, int Y)> BuildAuthoredRiver(WorldMapDefinitionData definition)
-    {
-        List<(int X, int Y)> path = new List<(int X, int Y)>();
-
-        if (definition.RiverPath == null || definition.RiverPath.Count == 0)
-            return path;
-
-        Random random = new Random(unchecked(definition.WorldDefinitionId.GetHashCode() ^ 0x5249564D));
-
-        MapPointData first = definition.RiverPath[0];
-        path.Add((PercentToGridX(first.XPercent), PercentToGridY(first.YPercent)));
-
-        for (int i = 1; i < definition.RiverPath.Count; i++)
-        {
-            MapPointData point = definition.RiverPath[i];
-            AppendRiverLeg(
-                path,
-                PercentToGridX(point.XPercent),
-                PercentToGridY(point.YPercent),
-                random);
-        }
-
-        return path;
     }
 }

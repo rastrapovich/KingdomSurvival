@@ -1,9 +1,10 @@
-using System.Collections.Generic;
 using NUnit.Framework;
 
 // AM-01 (канон v1.33, §9.9): контракт авторского постоянного мира —
-// ConfigureFromDefinition должен давать одинаковый рельеф/реку независимо от
+// ConfigureFromDefinition должен давать одинаковый рельеф независимо от
 // того, какой WorldSeed использовался раньше, и не зависеть от seed вовсе.
+// Река больше не часть этого контракта — карта переходит на вручную
+// нарисованное полотно, где вода уже присутствует как арт.
 public class WorldMapDefinitionDataTests
 {
     [Test]
@@ -36,24 +37,6 @@ public class WorldMapDefinitionDataTests
             Is.EqualTo(WorldMapTerrainType.Plains));
     }
 
-    [Test]
-    public void ConfigureFromDefinition_BuildsRiverConnectingAuthoredPoints()
-    {
-        WorldMapDefinitionData definition = BuildTestDefinition();
-        WorldMapNavigation.ConfigureFromDefinition(definition);
-
-        IReadOnlyList<(int X, int Y)> path = WorldMapNavigation.GetRiverPath();
-        Assert.That(path.Count, Is.GreaterThan(1));
-
-        for (int i = 1; i < path.Count; i++)
-        {
-            int dx = System.Math.Abs(path[i].X - path[i - 1].X);
-            int dy = System.Math.Abs(path[i].Y - path[i - 1].Y);
-            Assert.That(dx, Is.LessThanOrEqualTo(1));
-            Assert.That(dy, Is.LessThanOrEqualTo(1));
-        }
-    }
-
     [TearDown]
     public void ResetToDefaultProcedure()
     {
@@ -79,10 +62,6 @@ public class WorldMapDefinitionDataTests
             MaxYPercent = 20f,
             Priority = 0
         });
-
-        definition.RiverPath.Add(new MapPointData(0f, 50f));
-        definition.RiverPath.Add(new MapPointData(50f, 50f));
-        definition.RiverPath.Add(new MapPointData(100f, 60f));
 
         return definition;
     }

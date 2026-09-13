@@ -4,7 +4,7 @@
 
 > Технический журнал фактически реализованного состояния Unity-проекта и зафиксированных проектных решений.
 >
-> Актуальный общий канон: `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_33.md`.
+> Актуальный общий канон: `KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_34.md`.
 >
 > Единая энциклопедия мира: `ProjectDocs/LORE.md`.
 >
@@ -803,6 +803,28 @@ Save/Load-критерии инструкции (persisted completion/outcome п
 - Раскрытие вдоль реально пройденного отрезка (не всего маршрута) — требует того же слоя.
 - UI-рендер активных стадий поиска на карте (`world-map-fog`, пустой слой-заготовка с WM-02) — не подключал, так как ни одна реальная локация ещё не имеет авторского `WorldMapSearchAreaDefinition` (нет контента для показа, только тестовые данные в юнит-тестах) — рисовать рендер под несуществующий контент означало бы непроверяемый мёртвый код.
 - Редактор для художника (вкладка «Знание и слухи» в `WorldMapDatabaseWindow`) — тот же принцип: нет данных, которые в нём заполнять.
+
+### Отключение процедурной/авторской реки — 13.09.2026
+
+По прямому указанию пользователя: карта переходит на принцип «нарисованная карта — единственный источник географии». Река, озёра, берега перестают быть кодом (ни процедурная генерация WM-09, ни авторская ломаная точек AM-01) — они будут частью художественного полотна `Background Map Art`, которое нарисует художник. До появления этого арта река в системе вообще не учитывается — ни визуально, ни как gameplay-данные.
+
+**Канон поднят до v1.34** (`KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_34.md`, v1.33 → `ProjectDocs/Archive/`): §9.9 уточнён — река/озёра/берега больше не описываются как «авторская геометрия, реализуемая средствами UI Toolkit» (формулировка v1.33), а как часть вручную нарисованного полотна карты; будущее геймплейное распознавание воды — через невидимую ручную разметку клеток, а не порождаемую кодом геометрию.
+
+**Удалено из runtime:**
+- `WorldMapNavigation`: `GenerateRiver`, `AppendRiverLeg`, `BuildAuthoredRiver`, поля `riverPath`/`riverCellLookup`, методы `GetRiverPath()`/`IsRiverAtGridCell()`, вызовы генерации реки из `ConfigureTerrain`/`ConfigureFromDefinition`.
+- `WorldMapDefinitionData.RiverPath` — река больше не часть контракта авторского мира.
+- `WorldMapWorldDefinitionAsset`: `riverPathPercent`/`RiverPathPercent`, `EditorAddRiverPoint`/`EditorClearRiverPath`, соответствующий кусок `ToData()`.
+- `PrototypeUIController.WorldMapRiver.cs` — файл целиком удалён (`DrawRiver()` был единственным содержимым, вызов убран из `RefreshWorldMapPanel`).
+- `WorldMapWaterVisualProfile.cs` — файл целиком удалён (использовался только процедурной рекой); поле `WorldMapVisualTheme.water` убрано.
+- Редактор (`WorldMapDatabaseWindow.cs`): секция «Вода (река)» на вкладке «Текстуры», раздел «Река — опорные точки» на вкладке «География», рендер реки и `GetPreviewWaterColor()` в Preview, Validate-проверки `theme.Water`/`RiverPathPercent.Count == 1`.
+- USS-класс `.world-map-river-segment` (использовался только удалённым `DrawRiver`).
+- Тесты, существовавшие только для проверки реки: `WorldMapNavigationTests.River_AlwaysPassesWithinTwoCellsOfStartingSettlement`, `River_ConnectsOppositeEdgesAndRemainsContinuous`, `WorldMapDefinitionDataTests.ConfigureFromDefinition_BuildsRiverConnectingAuthoredPoints`.
+
+**Сознательно НЕ трогали:** движение героя, клетки карты, время перемещения (`GetTerrainTravelCost`/`GetTerrainSpeedMultiplier`), регионы (`WorldMapRegionRegistry`), расположение локаций (`WorldMapPopulationService`), Spawn Slots, pan/zoom, маршрут (`FindPath`/`CalculateRouteCells`), систему координат (`WorldMapCoordinates`) — ничего из этого не читало и не зависело от реки, кроме самого рендера. Слой `world-map-water` (VisualElement, WM-02) оставлен в UXML как пустой контейнер — часть 5-слойной модели канона, годится для будущей невидимой разметки, но сейчас ничего в него не пишется.
+
+**Задел на будущее (по инструкции — не реализовывать сейчас):** после готового арта карты вкладка «Разметка → Вода» в `World Map Database` должна дать возможность вручную отметить клетки как River (не рисуя их), и `IsRiverAtGridCell(x, y)` должен читать эту ручную разметку вместо (не существующего более) генератора. Явно не строил эту систему сейчас — по признанию самой инструкции, это увеличило бы объём задачи без данных, на которых её проверять.
+
+**Проверено:** полный `Run All` EditMode — **807/807 passed, 0 failed** (810 − 3 удалённых теста реки = 807, сходится). Компиляция чистая. Сквозной прогон через `eval`: `CreateNewGame` с реальной базой (`KingdomSurvivalTestWorldDefinition`) по-прежнему создаёт 3 локации, местность в авторских зонах (`Hills`) и координаты Дома (50/81) — без единой ссылки на реку в рантайме.
 
 ### AM-08…AM-10 — статус
 

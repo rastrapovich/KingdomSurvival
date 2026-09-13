@@ -198,8 +198,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             geographyScroll = EditorGUILayout.BeginScrollView(geographyScroll);
 
             DrawTerrainAreasSection(worldSO);
-            EditorGUILayout.Space(14f);
-            DrawRiverPathSection(worldSO);
 
             EditorGUILayout.EndScrollView();
             worldSO.ApplyModifiedProperties();
@@ -275,41 +273,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             }
         }
 
-        private static void DrawRiverPathSection(SerializedObject worldSO)
-        {
-            EditorGUILayout.LabelField("Река — опорные точки", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox(
-                "Точки в процентах карты (0..100), соединяются по порядку. Минимум 2 точки, " +
-                "первая обычно у одного края карты, последняя — у другого.",
-                MessageType.None);
-
-            SerializedProperty pathProp = worldSO.FindProperty("riverPathPercent");
-
-            for (int i = 0; i < pathProp.arraySize; i++)
-            {
-                SerializedProperty point = pathProp.GetArrayElementAtIndex(i);
-
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField($"#{i + 1}", GUILayout.Width(28f));
-                EditorGUILayout.PropertyField(point, GUIContent.none);
-                if (GUILayout.Button("✕", GUILayout.Width(22f)))
-                {
-                    pathProp.DeleteArrayElementAtIndex(i);
-                    EditorGUILayout.EndHorizontal();
-                    break;
-                }
-                EditorGUILayout.EndHorizontal();
-            }
-
-            if (GUILayout.Button("+ Добавить точку реки"))
-            {
-                int index = pathProp.arraySize;
-                pathProp.InsertArrayElementAtIndex(index);
-                pathProp.GetArrayElementAtIndex(index).vector2Value =
-                    index == 0 ? new Vector2(0f, 50f) : new Vector2(100f, 50f);
-            }
-        }
-
         // ------------------------------------------------------------------
         // Тема — редактирование спрайтов/цветов прямо в окне, без прыжков
         // в Inspector ассета. Через SerializedObject/SerializedProperty —
@@ -343,8 +306,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             EditorGUILayout.Space(14f);
             DrawTerrainProfilesSection(themeSO);
             EditorGUILayout.Space(14f);
-            DrawWaterSection(themeSO);
-            EditorGUILayout.Space(14f);
             DrawDefaultIconSection(themeSO);
 
             EditorGUILayout.EndScrollView();
@@ -366,7 +327,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 themeSO.FindProperty("baseMapTint"),
                 new GUIContent("Оттенок текстуры"));
             EditorGUILayout.HelpBox(
-                "Фоновая текстура заполняет слой под местностью, рекой, маршрутами и маркерами.",
+                "Фоновая текстура заполняет слой под местностью, маршрутами и маркерами. Река, " +
+                "озёра, берега и прочая постоянная география рисуются прямо в этой текстуре " +
+                "художником — код больше не генерирует и не рисует реку поверх карты.",
                 MessageType.None);
             EditorGUILayout.EndVertical();
         }
@@ -448,26 +411,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 newProfile.FindPropertyRelative("massVariants").ClearArray();
             }
             EditorGUILayout.EndHorizontal();
-        }
-
-        private static void DrawWaterSection(SerializedObject themeSO)
-        {
-            EditorGUILayout.LabelField("Вода (река)", EditorStyles.boldLabel);
-
-            SerializedProperty waterProp = themeSO.FindProperty("water");
-
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.PropertyField(
-                waterProp.FindPropertyRelative("segmentSprite"), new GUIContent("Segment Sprite"));
-            EditorGUILayout.PropertyField(
-                waterProp.FindPropertyRelative("fallbackColor"), new GUIContent("Fallback Color"));
-            EditorGUILayout.PropertyField(
-                waterProp.FindPropertyRelative("widthPixels"), new GUIContent("Width (px)"));
-
-            EditorGUILayout.HelpBox(
-                "Лента сегментов вдоль реки (WM-09). Без Segment Sprite — заливка Fallback Color.",
-                MessageType.None);
-            EditorGUILayout.EndVertical();
         }
 
         private static void DrawDefaultIconSection(SerializedObject themeSO)
@@ -817,16 +760,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 }
             }
 
-            if (theme.Water == null)
-            {
-                result.Add("У темы не задан профиль воды.");
-            }
-            else if (theme.Water.SegmentSprite == null &&
-                     theme.Water.FallbackColor.a <= 0f)
-            {
-                result.Add("У воды нет ни SegmentSprite, ни видимого FallbackColor — река не отобразится.");
-            }
-
             if (theme.IconLibrary != null)
             {
                 HashSet<string> seenIds = new HashSet<string>();
@@ -915,9 +848,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                     }
                 }
             }
-
-            if (world.RiverPathPercent.Count == 1)
-                result.Add("У реки Active World задана только одна точка — нужно минимум две.");
         }
 
         // ------------------------------------------------------------------
@@ -997,18 +927,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
                     EditorGUI.DrawRect(cellRect, color);
                 }
-            }
-
-            Color riverColor = GetPreviewWaterColor();
-            foreach ((int X, int Y) cell in WorldMapNavigation.GetRiverPath())
-            {
-                Rect cellRect = new Rect(
-                    area.x + cell.X * cellWidth,
-                    area.y + cell.Y * cellHeight,
-                    cellWidth + 1f,
-                    cellHeight + 1f);
-
-                EditorGUI.DrawRect(cellRect, riverColor);
             }
 
             DrawPreviewLocations(area);
@@ -1108,17 +1026,5 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             }
         }
 
-        private Color GetPreviewWaterColor()
-        {
-            if (database != null &&
-                database.ActiveTheme != null &&
-                database.ActiveTheme.Water != null &&
-                database.ActiveTheme.Water.FallbackColor.a > 0f)
-            {
-                return database.ActiveTheme.Water.FallbackColor;
-            }
-
-            return new Color(0.30f, 0.42f, 0.52f, 0.9f);
-        }
     }
 }

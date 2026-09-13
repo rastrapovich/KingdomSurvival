@@ -24,9 +24,13 @@ public sealed class WorldMapDefinitionData
     public float HomeXPercent = WorldMapNavigation.CapitalXPercent;
     public float HomeYPercent = WorldMapNavigation.CapitalYPercent;
 
+    // Река/озёра/берега больше не часть этого контракта: карта переходит на
+    // вручную нарисованное полотно, где вода уже присутствует как арт, а не
+    // как процедурная/авторская геометрия пути (см. решение "нарисованная
+    // карта — источник истины"). Будущая невидимая ручная разметка River
+    // Cells (после готового арта) — отдельная задача, не путь точек.
     public List<WorldMapRegionDefinition> Regions = new List<WorldMapRegionDefinition>();
     public List<WorldMapTerrainAreaData> TerrainAreas = new List<WorldMapTerrainAreaData>();
-    public List<MapPointData> RiverPath = new List<MapPointData>();
     public List<WorldMapSpawnSlotDefinition> SpawnSlots = new List<WorldMapSpawnSlotDefinition>();
 
     public bool IsValid =>

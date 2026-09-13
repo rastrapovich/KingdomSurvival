@@ -392,7 +392,6 @@ public partial class PrototypeUIController
 
         ApplyWorldMapBackground();
         DrawTerrainCells();
-        DrawRiver();
 
         foreach (LocationData location in gameState.Locations)
         {

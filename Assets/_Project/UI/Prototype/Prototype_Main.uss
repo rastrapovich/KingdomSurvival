@@ -53,6 +53,30 @@
     flex-wrap: wrap;
 }
 
+.capital-resource-panel {
+    margin-top: 12px;
+    margin-bottom: 18px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: rgb(34, 38, 45);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(79, 72, 63);
+    border-right-color: rgb(79, 72, 63);
+    border-top-color: rgb(79, 72, 63);
+    border-bottom-color: rgb(79, 72, 63);
+    border-radius: 4px;
+}
+
+.capital-resource-title { margin-bottom: 8px; }
+.capital-resource-strip { flex-grow: 0; flex-wrap: wrap; }
+.capital-resource-strip .capital-resource-box { min-width: 160px; flex-grow: 1; margin-bottom: 6px; }
+.capital-resource-strip .capital-mood-box { min-width: 190px; }
+
 .resource-box {
     min-width: 112px;
     margin-right: 8px;
@@ -395,7 +419,7 @@
 .return-expedition-button:disabled { opacity: 0.55; }
 
 /* ================================================================
-   КОРОЛЕВСКИЕ ДОНЕСЕНИЯ
+   ДОНЕСЕНИЯ
    ================================================================ */
 
 .reports-dock {

@@ -9,6 +9,7 @@
         <ui:Label name="quick-expedition-card-name" class="quick-expedition-card-name" />
         <ui:VisualElement name="quick-expedition-card-row" class="quick-expedition-card-row">
             <ui:VisualElement name="quick-expedition-card-image" picking-mode="Ignore" class="quick-expedition-card-image">
+                <ui:Image name="quick-expedition-card-icon" picking-mode="Ignore" class="quick-expedition-card-icon" />
                 <ui:Label name="quick-expedition-card-image-label" picking-mode="Ignore" class="quick-expedition-card-image-label" />
             </ui:VisualElement>
             <ui:VisualElement name="quick-expedition-card-info" class="quick-expedition-card-info">

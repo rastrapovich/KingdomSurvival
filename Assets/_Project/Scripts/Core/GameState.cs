@@ -374,7 +374,9 @@ public class GameState
         }
     }
 
-    public void CreateNewGame(int? worldSeed = null)
+    public void CreateNewGame(
+        int? worldSeed = null,
+        IReadOnlyList<WorldMapLocationTemplateData> locationTemplates = null)
     {
         WorldSeed = worldSeed ?? Guid.NewGuid().GetHashCode();
         WorldMapNavigation.ConfigureTerrain(WorldSeed);
@@ -411,26 +413,26 @@ public class GameState
             new FighterData("agnessa", "Агнесса", "Разведчик", 1, 2, "scout")
         };
 
-        List<LocationData> locationPool = new List<LocationData>
+        IReadOnlyList<WorldMapLocationTemplateData> sourceTemplates =
+            locationTemplates != null && locationTemplates.Count > 0
+                ? locationTemplates
+                : WorldMapLocationDefaults.Create();
+
+        List<LocationData> locationPool = new List<LocationData>();
+        Dictionary<string, string> preferredSpawnSlots =
+            new Dictionary<string, string>();
+
+        foreach (WorldMapLocationTemplateData template in sourceTemplates)
         {
-            new LocationData(
-                "ruins",
-                "Затопленные руины",
-                2,
-                "низкая",
-                2.0,
-                100,
-                200),
-            new LocationData(
-                "mine",
-                "Старая шахта",
-                3,
-                "средняя",
-                5.0,
-                300,
-                0),
-            new LocationData("forest", "Чёрный лес", 5, "высокая")
-        };
+            if (template == null || string.IsNullOrWhiteSpace(template.Id))
+                continue;
+
+            LocationData location = template.CreateRuntimeLocation();
+            locationPool.Add(location);
+
+            if (!string.IsNullOrWhiteSpace(template.SpawnSlotId))
+                preferredSpawnSlots[location.Id] = template.SpawnSlotId;
+        }
 
         // WM-08: отдельный поток случайности для расстановки локаций,
         // производный от WorldSeed, но не сам WorldSeed напрямую — будущие
@@ -448,7 +450,14 @@ public class GameState
 
         for (int i = 0; i < locationPool.Count; i++)
         {
-            WorldMapSpawnSlotDefinition slot = slots[i % slots.Count];
+            string preferredSlotId;
+            WorldMapSpawnSlotDefinition slot =
+                preferredSpawnSlots.TryGetValue(locationPool[i].Id, out preferredSlotId)
+                    ? WorldMapSpawnSlotRegistry.Find(preferredSlotId)
+                    : null;
+
+            if (slot == null)
+                slot = slots[i % slots.Count];
             float x = slot.PickXPercent(locationRandom);
             float y = slot.PickYPercent(locationRandom);
             List<MapPointData> candidateRoute = WorldMapNavigation.FindPath(
@@ -470,6 +479,23 @@ public class GameState
                 x,
                 y,
                 ContinuousSimulationSystem.CalculateTravelHours(candidateRoute));
+
+            WorldMapLocationTemplateData sourceTemplate = null;
+            for (int templateIndex = 0; templateIndex < sourceTemplates.Count; templateIndex++)
+            {
+                WorldMapLocationTemplateData candidate = sourceTemplates[templateIndex];
+                if (candidate != null && candidate.Id == locationPool[i].Id)
+                {
+                    sourceTemplate = candidate;
+                    break;
+                }
+            }
+
+            if (sourceTemplate != null)
+            {
+                locationPool[i].IsDiscovered = sourceTemplate.InitiallyDiscovered;
+                locationPool[i].IsVisibleOnMap = sourceTemplate.InitiallyVisibleOnMap;
+            }
         }
 
         Locations = locationPool;

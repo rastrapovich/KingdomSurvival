@@ -497,6 +497,7 @@ public partial class PrototypeUIController
         CloseJournal();
         CloseCampScreen();
 
+        PauseForBlockingModal();
         heroScreenOverlay.style.display = DisplayStyle.Flex;
         heroScreenOverlay.BringToFront();
         RefreshHeroScreen();
@@ -507,8 +508,12 @@ public partial class PrototypeUIController
         if (heroScreenOverlay == null)
             return;
 
+        bool wasOpen = IsHeroScreenOpen;
         HideHeroScreenUnitCard();
         heroScreenOverlay.style.display = DisplayStyle.None;
+
+        if (wasOpen)
+            ResumeAfterBlockingModalIfReady();
     }
 
     // ------------------------------------------------------------------

@@ -6,6 +6,7 @@
     "KingdomSurvival.DialogueDatabase",
     "KingdomSurvival.DialogueDatabase.Editor",
     "KingdomSurvival.UILayout",
+    "KingdomSurvival.WorldMapVisual",
     "KingdomSurvival.DevelopmentTracker.Editor"
   ],
   "includePlatforms": ["Editor"],

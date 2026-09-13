@@ -19,6 +19,9 @@ MonoBehaviour:
   - terrain: 2
     cellColor: {r: 0.32, g: 0.3, b: 0.29, a: 0.65}
     massVariants: []
+  baseMapSprite: {fileID: 0}
+  baseMapColor: {r: 0.16, g: 0.17, b: 0.15, a: 1}
+  baseMapTint: {r: 1, g: 1, b: 1, a: 1}
   iconLibrary: {fileID: 11400000, guid: 01e0823d4c3cb4d3eb132498f99c1edb, type: 2}
   water:
     segmentSprite: {fileID: 0}

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -239,7 +240,15 @@ public partial class PrototypeUIController : MonoBehaviour
     private void StartNewGame()
     {
         gameState = new GameState();
-        gameState.CreateNewGame();
+        WorldMapDatabaseAsset mapDatabase = WorldMapVisualRuntime.LoadDatabase();
+        gameState.CreateNewGame(
+            null,
+            mapDatabase != null
+                ? mapDatabase.BuildRuntimeLocationTemplates()
+                : null);
+
+        if (quickExpeditionPopup != null)
+            BindQuickExpeditionPopup();
 
         isGameOver = false;
         lastNavigationClickTime = -NavigationClickCooldownSeconds;

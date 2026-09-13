@@ -17,36 +17,16 @@
 .shell-main-row { flex-grow: 1; flex-shrink: 1; min-height: 0px; flex-direction: row; margin-bottom: 10px; }
 .shell-sidebar {
     width: 300px; min-width: 300px; max-width: 300px; min-height: 0px; flex-shrink: 0; flex-direction: column; margin-right: 12px;
+    justify-content: flex-end;
     padding-left: 8px; padding-right: 8px; padding-top: 10px; padding-bottom: 8px; background-color: rgb(30, 33, 39);
     border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
     border-left-color: rgb(79, 72, 63); border-right-color: rgb(79, 72, 63); border-top-color: rgb(79, 72, 63); border-bottom-color: rgb(79, 72, 63); border-radius: 5px;
 }
-.shell-game-title { height: 48px; min-height: 48px; flex-shrink: 0; color: rgb(221, 181, 99); font-size: 18px; -unity-font-style: bold; -unity-text-align: middle-center; }
-.shell-reports-dock { position: relative; left: 0px; right: 0px; top: 0px; bottom: 0px; width: 100%; height: 0px; min-height: 120px; flex-grow: 1; flex-shrink: 1; }
+.shell-reports-dock { position: relative; left: 0px; right: 0px; top: 0px; bottom: 0px; width: 100%; height: 231px; min-height: 231px; max-height: 231px; flex-grow: 0; flex-shrink: 0; }
 .shell-reports-panel { flex-grow: 1; flex-shrink: 1; min-height: 0px; margin-bottom: 0px; padding-left: 12px; padding-right: 12px; padding-top: 12px; padding-bottom: 12px; background-color: rgb(34, 38, 45); border-left-color: rgb(70, 75, 84); border-right-color: rgb(70, 75, 84); border-top-color: rgb(70, 75, 84); border-bottom-color: rgb(70, 75, 84); }
 .shell-reports-title { margin-bottom: 10px; color: rgb(221, 181, 99); font-size: 15px; }
 .shell-report-scroll { flex-grow: 1; flex-shrink: 1; min-height: 0px; max-height: 10000px; }
 .shell-report-text { color: rgb(205, 200, 188); font-size: 12px; white-space: normal; }
-
-.persistent-commander-panel {
-    width: 100%; height: 231px; min-height: 231px; max-height: 231px; flex-grow: 0; flex-shrink: 0; margin-top: 7px;
-    padding-left: 10px; padding-right: 10px; padding-top: 9px; padding-bottom: 9px; background-color: rgb(31, 35, 41);
-    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
-    border-left-color: rgb(104, 84, 57); border-right-color: rgb(104, 84, 57); border-top-color: rgb(104, 84, 57); border-bottom-color: rgb(104, 84, 57); border-radius: 4px;
-}
-.persistent-commander-title { height: 18px; min-height: 18px; margin-bottom: 6px; color: rgb(220, 181, 103); font-size: 12px; -unity-font-style: bold; }
-.persistent-commander-status { width: 100%; height: 38px; min-height: 38px; max-height: 38px; flex-shrink: 0; margin-bottom: 6px; padding-left: 7px; padding-right: 7px; padding-top: 3px; padding-bottom: 3px; background-color: rgb(27, 31, 37); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(62, 69, 78); border-right-color: rgb(62, 69, 78); border-top-color: rgb(62, 69, 78); border-bottom-color: rgb(62, 69, 78); border-radius: 3px; }
-.persistent-commander-state { height: 15px; font-size: 10px; color: rgb(163, 197, 174); -unity-font-style: bold; }
-.persistent-commander-target { height: 15px; font-size: 9px; color: rgb(177, 178, 174); white-space: nowrap; }
-.persistent-commander-content { width: 100%; flex-grow: 1; min-height: 0px; flex-direction: row; align-items: stretch; }
-.persistent-commander-portrait { width: 44%; min-width: 0px; height: 100%; margin-right: 8px; align-items: center; justify-content: center; background-color: rgb(27, 31, 37); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(69, 75, 85); border-right-color: rgb(69, 75, 85); border-top-color: rgb(69, 75, 85); border-bottom-color: rgb(69, 75, 85); border-radius: 3px; }
-.persistent-commander-portrait-text { color: rgb(112, 118, 128); font-size: 9px; -unity-font-style: bold; -unity-text-align: middle-center; white-space: normal; }
-.persistent-commander-buttons { flex-grow: 1; min-width: 0px; height: 100%; flex-direction: column; }
-.persistent-commander-button-row { width: 100%; height: 50%; flex-grow: 1; min-height: 0px; flex-direction: row; align-items: stretch; }
-.persistent-commander-button { width: 50%; height: 100%; flex-grow: 1; min-width: 0px; min-height: 0px; margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px; padding-left: 3px; padding-right: 3px; padding-top: 2px; padding-bottom: 2px; border-radius: 3px; color: rgb(226, 219, 204); font-size: 9px; -unity-font-style: bold; }
-.persistent-commander-empty { background-color: rgb(41, 46, 53); opacity: 0.65; }
-.persistent-commander-expedition-button { background-color: rgb(49, 76, 61); }
-.persistent-commander-expedition-button.persistent-nav-active { background-color: rgb(66, 104, 81); }
 
 .shell-workspace { flex-grow: 1; flex-shrink: 1; min-width: 0px; min-height: 0px; flex-direction: column; align-items: stretch; background-color: rgb(18, 21, 26); }
 .shell-workspace-content { flex-grow: 1; flex-shrink: 1; min-width: 0px; min-height: 0px; margin-top: 0px; margin-bottom: 0px; }
@@ -74,14 +54,8 @@
    "видима+enabled" — заметно ниже непрозрачность и текст без изменения
    фонового цвета самой кнопки (он остаётся опознавательным per-screen). */
 .shell-nav-button:disabled { opacity: 0.4; }
-.shell-resource-bar { flex-grow: 1; flex-shrink: 1; min-width: 0px; height: 100%; flex-direction: row; align-items: center; justify-content: flex-end; padding-left: 12px; padding-right: 10px; }
-.shell-resource-strip { flex-grow: 0; flex-shrink: 0; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: flex-end; }
-.shell-resource-box { width: 100px; min-width: 100px; height: 54px; min-height: 54px; max-height: 54px; flex-grow: 0; flex-shrink: 0; margin-right: 6px; margin-bottom: 0px; padding-left: 9px; padding-right: 9px; padding-top: 7px; padding-bottom: 6px; justify-content: center; background-color: rgb(45, 49, 57); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(59, 64, 73); border-right-color: rgb(59, 64, 73); border-top-color: rgb(59, 64, 73); border-bottom-color: rgb(59, 64, 73); border-radius: 4px; }
-.shell-resource-box.food-box { width: 108px; min-width: 108px; position: relative; overflow: visible; }
-.shell-mood-box { width: 142px; min-width: 142px; }
-.shell-resource-box .resource-value { color: rgb(224, 219, 207); font-size: 12px; }
-.shell-resource-box .resource-income { margin-top: 2px; color: rgb(126, 172, 125); font-size: 9px; }
-.shell-resource-box .food-expense-popup { left: 0px; top: auto; bottom: 58px; min-width: 160px; }
+.shell-time-bar { flex-grow: 1; flex-shrink: 1; min-width: 0px; height: 100%; flex-direction: row; align-items: center; justify-content: flex-end; padding-left: 12px; padding-right: 14px; }
+.shell-time-label { min-width: 160px; color: rgb(232, 218, 183); font-size: 15px; -unity-font-style: bold; -unity-text-align: middle-right; }
 .shell-time-toggle-button { position: relative; right: 0px; bottom: 0px; width: 92px; min-width: 92px; max-width: 92px; height: 54px; margin-left: 8px; background-color: rgb(188, 136, 39); color: rgb(28, 24, 17); border-radius: 8px; font-size: 15px; -unity-font-style: bold; }
 .shell-debug-host { position: absolute; right: 14px; top: 14px; width: 84px; min-width: 84px; max-width: 84px; height: 38px; min-height: 38px; max-height: 38px; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; background-color: rgba(0, 0, 0, 0); border-left-width: 0px; border-right-width: 0px; border-top-width: 0px; border-bottom-width: 0px; align-items: center; justify-content: flex-end; }
 .incident-notification-stack { right: 30px; bottom: 108px; }

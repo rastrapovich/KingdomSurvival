@@ -11,7 +11,7 @@ namespace KingdomSurvival.WorldMapVisual
         private static WorldMapDatabaseAsset cachedDatabase;
         private static bool attemptedLoad;
 
-        public static WorldMapVisualTheme LoadActiveTheme()
+        public static WorldMapDatabaseAsset LoadDatabase()
         {
             if (!attemptedLoad)
             {
@@ -20,7 +20,19 @@ namespace KingdomSurvival.WorldMapVisual
                 attemptedLoad = true;
             }
 
-            return cachedDatabase != null ? cachedDatabase.ActiveTheme : null;
+            return cachedDatabase;
+        }
+
+        public static WorldMapVisualTheme LoadActiveTheme()
+        {
+            WorldMapDatabaseAsset database = LoadDatabase();
+            return database != null ? database.ActiveTheme : null;
+        }
+
+        public static WorldMapLocationDefinition FindLocation(string locationId)
+        {
+            WorldMapDatabaseAsset database = LoadDatabase();
+            return database != null ? database.FindLocation(locationId) : null;
         }
 
         // Для EditMode-тестов/Editor-превью, где кэш между сценариями мешает.

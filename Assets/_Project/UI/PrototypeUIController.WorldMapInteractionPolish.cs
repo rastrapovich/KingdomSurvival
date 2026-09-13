@@ -56,7 +56,7 @@ public partial class PrototypeUIController
 
         RegisterMapLayoutRefreshButton("nav-capital-button");
         RegisterMapLayoutRefreshButton("nav-expeditions-button");
-        RegisterMapLayoutRefreshButton("persistent-commander-expedition-button");
+        RegisterMapLayoutRefreshButton("world-map-locations-button");
 
         BindWorldMapLocationCard();
         worldMapInteractionPolishInitialized = true;

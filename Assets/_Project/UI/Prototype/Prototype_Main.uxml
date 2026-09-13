@@ -21,36 +21,12 @@
 
         <ui:VisualElement class="shell-main-row">
             <ui:VisualElement class="shell-sidebar">
-                <ui:Label text="KINGDOM SURVIVAL" class="shell-game-title" />
-
                 <ui:VisualElement class="reports-dock shell-reports-dock">
                     <ui:VisualElement class="panel reports-panel shell-reports-panel">
-                        <ui:Label text="КОРОЛЕВСКИЕ ДОНЕСЕНИЯ" class="panel-title shell-reports-title" />
+                        <ui:Label text="ДОНЕСЕНИЯ" class="panel-title shell-reports-title" />
                         <ui:ScrollView name="report-history-scroll" class="report-history-scroll shell-report-scroll">
                             <ui:Label name="report-history-label" text="Донесений пока нет." class="report-text shell-report-text" />
                         </ui:ScrollView>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
-                <ui:VisualElement name="persistent-commander-panel" class="persistent-commander-panel">
-                    <ui:Label text="КОМАНДИР" class="persistent-commander-title" />
-                    <ui:VisualElement name="persistent-commander-status" class="persistent-commander-status">
-                        <ui:Label name="persistent-commander-state" text="В ЗАМКЕ" class="persistent-commander-state" />
-                        <ui:Label name="persistent-commander-target" text="Цель: —" class="persistent-commander-target" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="persistent-commander-content">
-                        <ui:VisualElement class="persistent-commander-portrait">
-                            <ui:Label text="ИЗОБРАЖЕНИЕ&#10;КОМАНДИРА" class="persistent-commander-portrait-text" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="persistent-commander-buttons">
-                            <ui:VisualElement class="persistent-commander-button-row">
-                                <ui:Button text="" class="persistent-commander-button persistent-commander-empty" />
-                                <ui:Button text="" class="persistent-commander-button persistent-commander-empty" />
-                            </ui:VisualElement>
-                            <ui:VisualElement class="persistent-commander-button-row">
-                                <ui:Button name="persistent-commander-expedition-button" text="ЛОКАЦИИ" tooltip="Открытые локации" class="persistent-commander-button persistent-commander-expedition-button" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -62,6 +38,26 @@
                             <ui:VisualElement class="panel shell-content-panel">
                                 <ui:Label text="СТОЛИЦА" class="panel-title" />
                                 <ui:Label text="Здания и основные городские действия" class="panel-description" />
+                                <ui:VisualElement name="capital-resource-panel" class="capital-resource-panel">
+                                    <ui:Label text="СОСТОЯНИЕ ПОСЕЛЕНИЯ" class="section-title capital-resource-title" />
+                                    <ui:VisualElement class="resource-strip capital-resource-strip">
+                                        <ui:VisualElement class="resource-box capital-resource-box">
+                                            <ui:Label name="gold-label" text="Золото: 120" class="resource-value" /><ui:Label name="gold-income-label" text="+3" class="resource-income" />
+                                            <ui:VisualElement class="resource-test-controls"><ui:Button name="gold-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="gold-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement class="resource-box food-box capital-resource-box">
+                                            <ui:Label name="food-label" text="Пища: 72" class="resource-value" /><ui:Label name="food-income-label" text="+7" class="resource-income" />
+                                            <ui:VisualElement class="resource-test-controls"><ui:Button name="food-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="food-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
+                                            <ui:VisualElement class="food-expense-popup"><ui:Label name="food-consumption-label" text="Расход: 24 в день" class="food-expense-text" /></ui:VisualElement>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement class="resource-box capital-resource-box">
+                                            <ui:Label name="population-label" text="Население: 24" class="resource-value" /><ui:VisualElement class="resource-test-controls"><ui:Button name="population-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="population-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement class="resource-box capital-resource-box capital-mood-box">
+                                            <ui:Label name="mood-label" text="Настроение: 64/100" class="resource-value" /><ui:VisualElement class="resource-test-controls"><ui:Button name="mood-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="mood-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
                                 <ui:VisualElement name="building-grid" class="building-grid">
                                     <ui:Button text="Тронный зал" class="building-card" />
                                     <ui:Button text="Амбар" class="building-card" />
@@ -141,6 +137,7 @@
                                         <ui:Button name="world-map-location-inspection-research-button" text="ВОЙТИ В ЛОКАЦИЮ" class="world-map-location-inspection-research-button" />
                                         <ui:Button name="world-map-location-inspection-close-button" text="ЗАКРЫТЬ" class="world-map-location-inspection-close-button" />
                                     </ui:VisualElement>
+                                    <ui:Button name="world-map-locations-button" text="ЛОКАЦИИ" tooltip="Открытые локации" class="world-map-locations-button" />
                                 </ui:VisualElement>
 
                                 <ui:VisualElement name="map-selection-card" class="map-selection-card">
@@ -164,25 +161,8 @@
                 <ui:Button name="nav-journal-button" text="Журнал" tooltip="Цели и хроника" class="nav-button shell-nav-button nav-journal" />
                 <ui:Button name="nav-camp-button" text="Лагерь" tooltip="Лагерь доступен во время похода." class="nav-button shell-nav-button nav-camp" />
             </ui:VisualElement>
-            <ui:VisualElement class="shell-resource-bar">
-                <ui:VisualElement class="resource-strip shell-resource-strip">
-                    <ui:VisualElement class="resource-box shell-resource-box"><ui:Label name="day-label" text="День: 1" class="resource-value" /></ui:VisualElement>
-                    <ui:VisualElement class="resource-box shell-resource-box">
-                        <ui:Label name="gold-label" text="Золото: 120" class="resource-value" /><ui:Label name="gold-income-label" text="+3" class="resource-income" />
-                        <ui:VisualElement class="resource-test-controls"><ui:Button name="gold-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="gold-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="resource-box food-box shell-resource-box">
-                        <ui:Label name="food-label" text="Пища: 72" class="resource-value" /><ui:Label name="food-income-label" text="+7" class="resource-income" />
-                        <ui:VisualElement class="resource-test-controls"><ui:Button name="food-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="food-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
-                        <ui:VisualElement class="food-expense-popup"><ui:Label name="food-consumption-label" text="Расход: 24 в день" class="food-expense-text" /></ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="resource-box shell-resource-box">
-                        <ui:Label name="population-label" text="Население: 24" class="resource-value" /><ui:VisualElement class="resource-test-controls"><ui:Button name="population-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="population-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="resource-box shell-resource-box shell-mood-box">
-                        <ui:Label name="mood-label" text="Настроение: 64/100" class="resource-value" /><ui:VisualElement class="resource-test-controls"><ui:Button name="mood-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="mood-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
-                    </ui:VisualElement>
-                </ui:VisualElement>
+            <ui:VisualElement class="shell-time-bar">
+                <ui:Label name="day-label" text="День 1 · 08:00" class="shell-time-label" />
                 <ui:Button name="time-toggle-button" text="ПУСК" tooltip="Продолжить течение времени" class="time-toggle-button shell-time-toggle-button" />
             </ui:VisualElement>
         </ui:VisualElement>
@@ -706,9 +686,9 @@
         <!-- UI-M06: Быстрый попап "Открытые локации" — постоянный, скрытый
              по умолчанию узел (display:none в .quick-expedition-popup,
              Prototype_Shell.uss). Позиция (left/top) считается по границам
-             persistent-commander-expedition-button во время выполнения
+             world-map-locations-button во время выполнения
              (PositionQuickExpeditionPopup) — это зависит от текущей раскладки
-             панели командира, а не от статичных данных, поэтому остаётся в
+             карты, а не от статичных данных, поэтому остаётся в
              коде. Карточки локаций добавляются в конец этого узла кодом
              (BindQuickExpeditionPopup) — по одной на LocationData, из
              Templates/ExpeditionLocationCard.uxml. -->

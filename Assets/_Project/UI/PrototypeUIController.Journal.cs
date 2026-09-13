@@ -135,6 +135,7 @@ public partial class PrototypeUIController
         CloseHeroScreen();
         CloseCampScreen();
 
+        PauseForBlockingModal();
         journalOverlay.style.display = DisplayStyle.Flex;
         journalOverlay.BringToFront();
         RefreshJournal();
@@ -145,7 +146,11 @@ public partial class PrototypeUIController
         if (journalOverlay == null)
             return;
 
+        bool wasOpen = IsJournalOpen;
         journalOverlay.style.display = DisplayStyle.None;
+
+        if (wasOpen)
+            ResumeAfterBlockingModalIfReady();
     }
 
     // ------------------------------------------------------------------

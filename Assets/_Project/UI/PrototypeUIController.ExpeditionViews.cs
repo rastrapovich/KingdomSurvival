@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -7,9 +8,11 @@ public partial class PrototypeUIController
     private sealed class QuickExpeditionCardView
     {
         public LocationData Location;
+        public TemplateContainer Root;
         public VisualElement Card;
         public Label NameLabel;
         public VisualElement ImageBox;
+        public Image IconImage;
         public Label ImageLabel;
         public Label DistanceLabel;
         public Label ThreatLabel;
@@ -17,6 +20,7 @@ public partial class PrototypeUIController
     }
 
     private VisualElement quickExpeditionPopup;
+    private Button worldMapLocationsButton;
     private Label quickExpeditionOrderLabel;
     private readonly Dictionary<string, QuickExpeditionCardView> quickExpeditionCards =
         new Dictionary<string, QuickExpeditionCardView>();
@@ -24,6 +28,13 @@ public partial class PrototypeUIController
 
     private void InitializeExpeditionViewsUi()
     {
+        worldMapLocationsButton =
+            interfaceRoot.Q<Button>("world-map-locations-button");
+        if (worldMapLocationsButton == null)
+            Debug.LogError("Карта: не найдена кнопка 'world-map-locations-button'.");
+        else
+            worldMapLocationsButton.clicked += ToggleQuickExpeditionPopup;
+
         BindQuickExpeditionPopup();
 
         VisualElement screen = interfaceRoot.Q<VisualElement>("screen");
@@ -54,6 +65,10 @@ public partial class PrototypeUIController
         if (quickExpeditionPopup == null || quickExpeditionOrderLabel == null)
             return;
 
+        foreach (QuickExpeditionCardView existing in quickExpeditionCards.Values)
+            existing.Root?.RemoveFromHierarchy();
+        quickExpeditionCards.Clear();
+
         VisualTreeAsset template = LoadExpeditionLocationCardTemplate();
         if (template == null)
             return;
@@ -65,6 +80,7 @@ public partial class PrototypeUIController
             VisualElement card = instance.Q<VisualElement>("quick-expedition-card");
             Label name = instance.Q<Label>("quick-expedition-card-name");
             VisualElement image = instance.Q<VisualElement>("quick-expedition-card-image");
+            Image icon = instance.Q<Image>("quick-expedition-card-icon");
             Label imageLabel = instance.Q<Label>("quick-expedition-card-image-label");
             Label distance = instance.Q<Label>("quick-expedition-card-distance");
             Label threat = instance.Q<Label>("quick-expedition-card-threat");
@@ -78,9 +94,11 @@ public partial class PrototypeUIController
             quickExpeditionCards[location.Id] = new QuickExpeditionCardView
             {
                 Location = location,
+                Root = instance,
                 Card = card,
                 NameLabel = name,
                 ImageBox = image,
+                IconImage = icon,
                 ImageLabel = imageLabel,
                 DistanceLabel = distance,
                 ThreatLabel = threat,
@@ -130,7 +148,7 @@ public partial class PrototypeUIController
     private void PositionQuickExpeditionPopup()
     {
         if (quickExpeditionPopup == null ||
-            persistentCommanderExpeditionButton == null ||
+            worldMapLocationsButton == null ||
             interfaceRoot == null)
             return;
 
@@ -139,8 +157,9 @@ public partial class PrototypeUIController
             return;
 
         Rect screenBounds = screen.worldBound;
-        Rect buttonBounds = persistentCommanderExpeditionButton.worldBound;
-        float left = buttonBounds.xMax - screenBounds.x + 10f;
+        Rect buttonBounds = worldMapLocationsButton.worldBound;
+        float popupWidth = 330f;
+        float left = buttonBounds.xMax - screenBounds.x - popupWidth;
         float popupHeight = 322f;
         float bottomLimit = screenBounds.height - 90f;
 
@@ -161,7 +180,7 @@ public partial class PrototypeUIController
 
         VisualElement target = evt.target as VisualElement;
         if (IsInsideElement(target, quickExpeditionPopup) ||
-            IsInsideElement(target, persistentCommanderExpeditionButton))
+            IsInsideElement(target, worldMapLocationsButton))
             return;
 
         HideQuickExpeditionPopup();
@@ -185,60 +204,7 @@ public partial class PrototypeUIController
     {
         if (gameState == null)
             return;
-        RefreshPersistentCommanderExpeditionStatus();
         RefreshQuickExpeditionStatus();
-    }
-
-    private void RefreshPersistentCommanderExpeditionStatus()
-    {
-        if (persistentCommanderStateLabel == null ||
-            persistentCommanderTargetLabel == null)
-            return;
-
-        if (!gameState.HasActiveExpedition)
-        {
-            persistentCommanderStateLabel.text = "В ЗАМКЕ";
-            persistentCommanderStateLabel.style.color = ExpeditionRgb(163, 197, 174);
-            persistentCommanderTargetLabel.text = "Цель: —";
-            return;
-        }
-
-        ExpeditionData expedition = gameState.ActiveExpedition;
-        LocationData location = gameState.FindLocation(expedition.LocationId);
-        string locationName = location != null
-            ? location.TravelTargetName
-            : expedition.IsScoutingTarget ? "точка разведки" : "—";
-
-        if (gameState.CanCancelPreparedExpedition)
-        {
-            persistentCommanderStateLabel.text = "В ЗАМКЕ";
-            persistentCommanderStateLabel.style.color = ExpeditionRgb(221, 181, 103);
-            persistentCommanderTargetLabel.text = "Приказ: " + locationName;
-            return;
-        }
-
-        switch (expedition.Phase)
-        {
-            case CommanderState.TravellingToLocation:
-                persistentCommanderStateLabel.text = "В ПУТИ";
-                persistentCommanderStateLabel.style.color = ExpeditionRgb(205, 184, 117);
-                persistentCommanderTargetLabel.text = "Цель: " + locationName;
-                break;
-            case CommanderState.AtLocation:
-                persistentCommanderStateLabel.text = "ДЕЙСТВУЕТ В ЛОКАЦИИ";
-                persistentCommanderStateLabel.style.color = ExpeditionRgb(150, 193, 164);
-                persistentCommanderTargetLabel.text = "Цель: " + locationName;
-                break;
-            case CommanderState.ReturningToCastle:
-                persistentCommanderStateLabel.text = "ВОЗВРАЩАЕТСЯ";
-                persistentCommanderStateLabel.style.color = ExpeditionRgb(185, 178, 149);
-                persistentCommanderTargetLabel.text = "Цель: столица";
-                break;
-            default:
-                persistentCommanderStateLabel.text = "В ЗАМКЕ";
-                persistentCommanderTargetLabel.text = "Цель: —";
-                break;
-        }
     }
 
     private void RefreshQuickExpeditionStatus()
@@ -334,9 +300,36 @@ public partial class PrototypeUIController
 
         if (view.ImageLabel != null)
         {
+            WorldMapLocationDefinition definition =
+                WorldMapVisualRuntime.FindLocation(location.Id);
+            WorldMapVisualTheme theme =
+                WorldMapVisualRuntime.LoadActiveTheme();
+            Sprite icon = definition != null && definition.Icon != null
+                ? definition.Icon
+                : theme != null && theme.IconLibrary != null
+                    ? theme.IconLibrary.FindIconForLocation(location.Id)
+                    : null;
+
+            bool showIcon = location.IsDiscovered && icon != null;
             view.ImageLabel.text = location.IsDiscovered
-                ? "ИЗОБРАЖЕНИЕ\nЛОКАЦИИ"
+                ? showIcon ? string.Empty : "ИЗОБРАЖЕНИЕ\nЛОКАЦИИ"
                 : "НЕИЗВЕДАННАЯ\nОБЛАСТЬ";
+
+            if (view.IconImage != null)
+            {
+                view.IconImage.style.display = showIcon
+                    ? DisplayStyle.Flex
+                    : DisplayStyle.None;
+                view.IconImage.sprite = showIcon ? icon : null;
+                view.IconImage.tintColor = definition != null
+                    ? definition.IconTint
+                    : Color.white;
+                float scale = definition != null
+                    ? Mathf.Clamp(definition.IconScale, 0.25f, 3f)
+                    : 1f;
+                view.IconImage.style.scale = new Scale(
+                    new Vector3(scale, scale, 1f));
+            }
         }
     }
 

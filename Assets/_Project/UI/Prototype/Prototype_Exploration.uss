@@ -352,6 +352,28 @@
     color: rgb(250, 222, 159);
 }
 
+.world-map-locations-button {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    width: 126px;
+    min-width: 126px;
+    height: 38px;
+    min-height: 38px;
+    background-color: rgb(49, 76, 61);
+    color: rgb(235, 226, 205);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(105, 126, 108);
+    border-right-color: rgb(105, 126, 108);
+    border-top-color: rgb(105, 126, 108);
+    border-bottom-color: rgb(105, 126, 108);
+    border-radius: 4px;
+    -unity-font-style: bold;
+}
+
 .world-map-capital {
     /* WM-12: left/top/width/height задаются кодом (PrototypeUIController.
        WorldMap.cs, RefreshWorldMapCapital) из реального разрешения сетки —

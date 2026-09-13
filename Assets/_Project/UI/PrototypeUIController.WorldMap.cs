@@ -339,6 +339,7 @@ public partial class PrototypeUIController
         renderedWorldMapRoute = null;
         renderedWorldMapRouteIndex = -1;
 
+        ApplyWorldMapBackground();
         DrawTerrainCells();
         DrawRiver();
 
@@ -364,6 +365,23 @@ public partial class PrototypeUIController
 
         RefreshWorldMapCapital();
         RefreshWorldMapArmyMarker();
+    }
+
+    private void ApplyWorldMapBackground()
+    {
+        if (worldMapBackground == null)
+            return;
+
+        WorldMapVisualTheme theme = WorldMapVisualRuntime.LoadActiveTheme();
+        if (theme == null)
+            return;
+
+        worldMapBackground.style.backgroundColor = theme.BaseMapColor;
+        worldMapBackground.style.unityBackgroundImageTintColor = theme.BaseMapTint;
+        if (theme.BaseMapSprite != null)
+            worldMapBackground.style.backgroundImage = new StyleBackground(theme.BaseMapSprite);
+        else
+            worldMapBackground.style.backgroundImage = StyleKeyword.None;
     }
 
     private void DrawTerrainCells()
@@ -710,11 +728,15 @@ public partial class PrototypeUIController
         Button node,
         LocationData location)
     {
-        // Иконка берётся из WorldMapIconLibrary по LocationData.Id, а не из
-        // самих игровых данных — художник меняет спрайт в теме, код не трогаем.
+        // Персональная иконка/оттенок/масштаб берутся из записи
+        // локации в World Map Database. Старая Icon Library остаётся
+        // совместимым fallback для уже настроенных ассетов.
         WorldMapVisualTheme theme = WorldMapVisualRuntime.LoadActiveTheme();
-        Sprite icon =
-            theme != null && theme.IconLibrary != null
+        WorldMapLocationDefinition definition =
+            WorldMapVisualRuntime.FindLocation(location.Id);
+        Sprite icon = definition != null && definition.Icon != null
+            ? definition.Icon
+            : theme != null && theme.IconLibrary != null
                 ? theme.IconLibrary.FindIconForLocation(location.Id)
                 : null;
 
@@ -724,6 +746,14 @@ public partial class PrototypeUIController
         Image iconImage = new Image();
         iconImage.AddToClassList("world-map-node-icon");
         iconImage.sprite = icon;
+        iconImage.tintColor = definition != null
+            ? definition.IconTint
+            : Color.white;
+        float iconScale = definition != null
+            ? Mathf.Clamp(definition.IconScale, 0.25f, 3f)
+            : 1f;
+        iconImage.style.scale = new Scale(
+            new Vector3(iconScale, iconScale, 1f));
         iconImage.pickingMode = PickingMode.Ignore;
 
         node.text = string.Empty;

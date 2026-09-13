@@ -112,6 +112,15 @@ public sealed class HeroScreenStructureRegressionTests
         StringAssert.DoesNotContain("RefreshHeroScreenRetinue", source);
     }
 
+    [Test]
+    public void HeroScreen_Open_And_Close_Use_Shared_Blocking_Time_Policy()
+    {
+        string source = ReadUiFile("PrototypeUIController.HeroScreen.cs");
+
+        StringAssert.Contains("PauseForBlockingModal();", source);
+        StringAssert.Contains("ResumeAfterBlockingModalIfReady();", source);
+    }
+
     private static string ReadUiFile(string fileName)
     {
         string path = Path.Combine(Application.dataPath, "_Project", "UI", fileName);

@@ -80,6 +80,15 @@
     border-radius: 3px;
 }
 
+.quick-expedition-card-icon {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    bottom: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
 /* Эта локация выбрана целью и приказ ещё можно отменить. */
 .quick-expedition-card-image--selected-cancellable {
     background-color: rgb(58, 50, 36);

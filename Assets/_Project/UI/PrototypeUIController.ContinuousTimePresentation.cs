@@ -12,7 +12,6 @@ public partial class PrototypeUIController
         if (refreshPanels)
         {
             RefreshContinuousExpeditionTexts();
-            RefreshPersistentCommanderNavigationState();
 
             // P09 hotfix: the Camp nav state depends not only on persistent
             // story flags but also on transient modal blockers. The continuous

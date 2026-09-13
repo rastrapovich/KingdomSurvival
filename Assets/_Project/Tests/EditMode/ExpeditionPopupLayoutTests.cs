@@ -41,7 +41,7 @@ public sealed class ExpeditionPopupLayoutTests
             "name=\"nav-expeditions-button\" text=\"Карта\" tooltip=\"Глобальная карта\"",
             uxml);
         StringAssert.Contains(
-            "name=\"persistent-commander-expedition-button\" text=\"ЛОКАЦИИ\" tooltip=\"Открытые локации\"",
+            "name=\"world-map-locations-button\" text=\"ЛОКАЦИИ\" tooltip=\"Открытые локации\"",
             uxml);
     }
 
@@ -56,6 +56,7 @@ public sealed class ExpeditionPopupLayoutTests
         Assert.IsNotNull(instance.Q<VisualElement>("quick-expedition-card"));
         Assert.IsNotNull(instance.Q<Label>("quick-expedition-card-name"));
         Assert.IsNotNull(instance.Q<VisualElement>("quick-expedition-card-image"));
+        Assert.IsNotNull(instance.Q<Image>("quick-expedition-card-icon"));
         Assert.IsNotNull(instance.Q<Label>("quick-expedition-card-image-label"));
         Assert.IsNotNull(instance.Q<Label>("quick-expedition-card-distance"));
         Assert.IsNotNull(instance.Q<Label>("quick-expedition-card-threat"));

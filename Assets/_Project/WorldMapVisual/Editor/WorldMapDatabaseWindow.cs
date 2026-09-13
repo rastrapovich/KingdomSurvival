@@ -4,31 +4,25 @@ using UnityEngine;
 
 namespace KingdomSurvival.WorldMapVisual.Editor
 {
-    // WM-10/WM-11: редактор поверх World Map Database — Тема (правка спрайтов
-    // прямо в окне), Validate (список проблем) и Preview (без захода в Play
-    // Mode). Сознательно не редактор полигонов/слотов и не интеграция с Rule
-    // Tile — ни то ни другое не доказано нужным на этом этапе.
+    // Редактор World Map Database: текстуры, реальные стартовые локации,
+    // проверка конфигурации и быстрый preview без Play Mode. Полигональный
+    // редактор регионов и Rule Tile по-прежнему не вводятся.
     public sealed class WorldMapDatabaseWindow : EditorWindow
     {
         private enum WindowTab
         {
-            Theme,
+            Textures,
+            Locations,
             Validate,
             Preview
         }
-
-        // Известные сейчас в игре id локаций — GameState.CreateNewGame создаёт
-        // ровно эти три ("ruins"/"mine"/"forest"). Используется только для
-        // кнопки-подсказки "добавить недостающие id" в Icon Library, не как
-        // источник истины — если состав локаций изменится, список тут
-        // устареет и его надо будет поправить вручную.
-        private static readonly string[] KnownLocationIds = { "ruins", "mine", "forest" };
 
         private WorldMapDatabaseAsset database;
         private WindowTab tab;
         private int previewSeed = 1;
         private Vector2 issuesScroll;
         private Vector2 themeScroll;
+        private Vector2 locationsScroll;
         private List<string> issues = new List<string>();
         private bool validated;
 
@@ -37,7 +31,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             WorldMapDatabaseWindow window = GetWindow<WorldMapDatabaseWindow>();
             window.titleContent = new GUIContent("World Map Database");
-            window.minSize = new Vector2(420f, 420f);
+            window.minSize = new Vector2(640f, 520f);
             window.Show();
         }
 
@@ -54,13 +48,18 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 "World Map Database", database, typeof(WorldMapDatabaseAsset), false);
 
             EditorGUILayout.Space(6f);
-            tab = (WindowTab)GUILayout.Toolbar((int)tab, new[] { "Тема", "Validate", "Preview" });
+            tab = (WindowTab)GUILayout.Toolbar(
+                (int)tab,
+                new[] { "Текстуры", "Локации", "Проверка", "Предпросмотр" });
             EditorGUILayout.Space(8f);
 
             switch (tab)
             {
-                case WindowTab.Theme:
-                    DrawThemeSection();
+                case WindowTab.Textures:
+                    DrawTexturesSection();
+                    break;
+                case WindowTab.Locations:
+                    DrawLocationsSection();
                     break;
                 case WindowTab.Validate:
                     DrawValidateSection();
@@ -78,7 +77,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         // поддержкой Undo и корректной пометкой ассета как изменённого.
         // ------------------------------------------------------------------
 
-        private void DrawThemeSection()
+        private void DrawTexturesSection()
         {
             if (database == null)
             {
@@ -100,15 +99,36 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             themeScroll = EditorGUILayout.BeginScrollView(themeScroll);
 
+            DrawBaseMapSection(themeSO);
+            EditorGUILayout.Space(14f);
             DrawTerrainProfilesSection(themeSO);
             EditorGUILayout.Space(14f);
             DrawWaterSection(themeSO);
             EditorGUILayout.Space(14f);
-            DrawIconLibrarySection(themeSO);
+            DrawDefaultIconSection(themeSO);
 
             EditorGUILayout.EndScrollView();
 
             themeSO.ApplyModifiedProperties();
+        }
+
+        private static void DrawBaseMapSection(SerializedObject themeSO)
+        {
+            EditorGUILayout.LabelField("Основа карты", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.PropertyField(
+                themeSO.FindProperty("baseMapSprite"),
+                new GUIContent("Текстура фона"));
+            EditorGUILayout.PropertyField(
+                themeSO.FindProperty("baseMapColor"),
+                new GUIContent("Цвет без текстуры"));
+            EditorGUILayout.PropertyField(
+                themeSO.FindProperty("baseMapTint"),
+                new GUIContent("Оттенок текстуры"));
+            EditorGUILayout.HelpBox(
+                "Фоновая текстура заполняет слой под местностью, рекой, маршрутами и маркерами.",
+                MessageType.None);
+            EditorGUILayout.EndVertical();
         }
 
         private static void DrawTerrainProfilesSection(SerializedObject themeSO)
@@ -210,9 +230,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             EditorGUILayout.EndVertical();
         }
 
-        private static void DrawIconLibrarySection(SerializedObject themeSO)
+        private static void DrawDefaultIconSection(SerializedObject themeSO)
         {
-            EditorGUILayout.LabelField("Иконки локаций", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Резервная иконка", EditorStyles.boldLabel);
 
             SerializedProperty iconLibraryProp = themeSO.FindProperty("iconLibrary");
             WorldMapIconLibrary iconLibrary = iconLibraryProp.objectReferenceValue as WorldMapIconLibrary;
@@ -230,79 +250,150 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             SerializedObject iconSO = new SerializedObject(iconLibrary);
             iconSO.Update();
-
-            SerializedProperty defaultIconProp = iconSO.FindProperty("defaultLocationIcon");
-            SerializedProperty entriesProp = iconSO.FindProperty("locationIcons");
-
-            EditorGUILayout.PropertyField(defaultIconProp, new GUIContent("Default Location Icon"));
-
-            for (int i = 0; i < entriesProp.arraySize; i++)
-            {
-                SerializedProperty entryProp = entriesProp.GetArrayElementAtIndex(i);
-                SerializedProperty idProp = entryProp.FindPropertyRelative("locationId");
-                SerializedProperty iconProp = entryProp.FindPropertyRelative("icon");
-
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PropertyField(idProp, GUIContent.none, GUILayout.Width(120f));
-                EditorGUILayout.PropertyField(iconProp, GUIContent.none);
-                if (GUILayout.Button("✕", GUILayout.Width(22f)))
-                {
-                    entriesProp.DeleteArrayElementAtIndex(i);
-                    break;
-                }
-                EditorGUILayout.EndHorizontal();
-            }
-
-            if (GUILayout.Button("+ Добавить запись"))
-            {
-                int newIndex = entriesProp.arraySize;
-                entriesProp.InsertArrayElementAtIndex(newIndex);
-                SerializedProperty newEntry = entriesProp.GetArrayElementAtIndex(newIndex);
-                newEntry.FindPropertyRelative("locationId").stringValue = string.Empty;
-                newEntry.FindPropertyRelative("icon").objectReferenceValue = null;
-            }
-
-            DrawAddMissingLocationIdsButton(entriesProp);
-
+            EditorGUILayout.PropertyField(
+                iconSO.FindProperty("defaultLocationIcon"),
+                new GUIContent("Иконка по умолчанию"));
             EditorGUILayout.HelpBox(
-                "Иконка ищется по LocationData.Id. Известные сейчас в игре id: " +
-                string.Join(", ", KnownLocationIds) + " (см. GameState.CreateNewGame).",
+                "Используется, если у конкретной локации во вкладке «Локации» не назначена своя иконка.",
                 MessageType.None);
-
             iconSO.ApplyModifiedProperties();
         }
 
-        private static void DrawAddMissingLocationIdsButton(SerializedProperty entriesProp)
+        private void DrawLocationsSection()
         {
-            HashSet<string> present = new HashSet<string>();
-            for (int i = 0; i < entriesProp.arraySize; i++)
+            if (database == null)
             {
-                string id = entriesProp.GetArrayElementAtIndex(i).FindPropertyRelative("locationId").stringValue;
-                if (!string.IsNullOrEmpty(id))
-                    present.Add(id);
-            }
-
-            List<string> missing = new List<string>();
-            foreach (string id in KnownLocationIds)
-            {
-                if (!present.Contains(id))
-                    missing.Add(id);
-            }
-
-            if (missing.Count == 0)
+                EditorGUILayout.HelpBox("Выберите World Map Database сверху.", MessageType.Info);
                 return;
-
-            if (!GUILayout.Button($"+ Добавить недостающие id ({string.Join(", ", missing)})"))
-                return;
-
-            foreach (string id in missing)
-            {
-                int newIndex = entriesProp.arraySize;
-                entriesProp.InsertArrayElementAtIndex(newIndex);
-                SerializedProperty newEntry = entriesProp.GetArrayElementAtIndex(newIndex);
-                newEntry.FindPropertyRelative("locationId").stringValue = id;
-                newEntry.FindPropertyRelative("icon").objectReferenceValue = null;
             }
+
+            SerializedObject databaseSO = new SerializedObject(database);
+            databaseSO.Update();
+            SerializedProperty locationsProp = databaseSO.FindProperty("locations");
+
+            EditorGUILayout.LabelField(
+                $"Локации новой игры ({locationsProp.arraySize})",
+                EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "Записи отсюда создают реальные LocationData при старте новой партии. " +
+                "Пустой слот означает случайную авторскую зону; конкретный слот фиксирует регион появления.",
+                MessageType.None);
+
+            locationsScroll = EditorGUILayout.BeginScrollView(locationsScroll);
+
+            for (int i = 0; i < locationsProp.arraySize; i++)
+            {
+                SerializedProperty location = locationsProp.GetArrayElementAtIndex(i);
+                SerializedProperty id = location.FindPropertyRelative("id");
+                SerializedProperty displayName = location.FindPropertyRelative("displayName");
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(
+                    string.IsNullOrWhiteSpace(displayName.stringValue)
+                        ? $"Локация {i + 1}"
+                        : displayName.stringValue,
+                    EditorStyles.boldLabel);
+                if (GUILayout.Button("Удалить", GUILayout.Width(80f)))
+                {
+                    locationsProp.DeleteArrayElementAtIndex(i);
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndVertical();
+                    break;
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.PropertyField(id, new GUIContent("ID"));
+                EditorGUILayout.PropertyField(displayName, new GUIContent("Название"));
+                EditorGUILayout.PropertyField(
+                    location.FindPropertyRelative("interactionDescription"),
+                    new GUIContent("Описание"));
+                EditorGUILayout.PropertyField(
+                    location.FindPropertyRelative("threat"),
+                    new GUIContent("Угроза"));
+                EditorGUILayout.PropertyField(
+                    location.FindPropertyRelative("explorationHours"),
+                    new GUIContent("Исследование, часов"));
+
+                EditorGUILayout.Space(4f);
+                EditorGUILayout.LabelField("Награда", EditorStyles.miniBoldLabel);
+                EditorGUILayout.PropertyField(
+                    location.FindPropertyRelative("rewardArmyGold"),
+                    new GUIContent("Золото отряда"));
+                EditorGUILayout.PropertyField(
+                    location.FindPropertyRelative("rewardArmySupply"),
+                    new GUIContent("Снабжение отряда"));
+
+                EditorGUILayout.Space(4f);
+                EditorGUILayout.LabelField("Появление", EditorStyles.miniBoldLabel);
+                EditorGUILayout.PropertyField(
+                    location.FindPropertyRelative("initiallyVisibleOnMap"),
+                    new GUIContent("Видима на карте"));
+                EditorGUILayout.PropertyField(
+                    location.FindPropertyRelative("initiallyDiscovered"),
+                    new GUIContent("Сразу обнаружена"));
+                DrawSpawnSlotField(location.FindPropertyRelative("spawnSlotId"));
+
+                EditorGUILayout.Space(4f);
+                EditorGUILayout.LabelField("Иконка", EditorStyles.miniBoldLabel);
+                EditorGUILayout.PropertyField(
+                    location.FindPropertyRelative("icon"),
+                    new GUIContent("Спрайт"));
+                EditorGUILayout.PropertyField(
+                    location.FindPropertyRelative("iconTint"),
+                    new GUIContent("Оттенок"));
+                SerializedProperty iconScale =
+                    location.FindPropertyRelative("iconScale");
+                iconScale.floatValue = EditorGUILayout.Slider(
+                    "Масштаб",
+                    Mathf.Clamp(iconScale.floatValue, 0.25f, 3f),
+                    0.25f,
+                    3f);
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space(6f);
+            }
+
+            if (GUILayout.Button("+ ДОБАВИТЬ ЛОКАЦИЮ", GUILayout.Height(28f)))
+                AddLocation(locationsProp);
+
+            EditorGUILayout.EndScrollView();
+            databaseSO.ApplyModifiedProperties();
+        }
+
+        private static void DrawSpawnSlotField(SerializedProperty slotIdProp)
+        {
+            List<string> ids = new List<string> { string.Empty };
+            List<string> labels = new List<string> { "Случайный слот" };
+
+            foreach (WorldMapSpawnSlotDefinition slot in WorldMapSpawnSlotRegistry.StartingLocationSlots)
+            {
+                ids.Add(slot.Id);
+                labels.Add(slot.Id);
+            }
+
+            int selected = Mathf.Max(0, ids.IndexOf(slotIdProp.stringValue));
+            int next = EditorGUILayout.Popup("Зона появления", selected, labels.ToArray());
+            slotIdProp.stringValue = ids[next];
+        }
+
+        private static void AddLocation(SerializedProperty locationsProp)
+        {
+            int index = locationsProp.arraySize;
+            locationsProp.InsertArrayElementAtIndex(index);
+            SerializedProperty location = locationsProp.GetArrayElementAtIndex(index);
+            location.FindPropertyRelative("id").stringValue = "location-" + (index + 1);
+            location.FindPropertyRelative("displayName").stringValue = "Новая локация";
+            location.FindPropertyRelative("interactionDescription").stringValue = string.Empty;
+            location.FindPropertyRelative("threat").stringValue = "неизвестна";
+            location.FindPropertyRelative("explorationHours").doubleValue = 0.0;
+            location.FindPropertyRelative("rewardArmyGold").intValue = 0;
+            location.FindPropertyRelative("rewardArmySupply").intValue = 0;
+            location.FindPropertyRelative("initiallyDiscovered").boolValue = false;
+            location.FindPropertyRelative("initiallyVisibleOnMap").boolValue = true;
+            location.FindPropertyRelative("spawnSlotId").stringValue = string.Empty;
+            location.FindPropertyRelative("icon").objectReferenceValue = null;
+            location.FindPropertyRelative("iconTint").colorValue = Color.white;
+            location.FindPropertyRelative("iconScale").floatValue = 1f;
         }
 
         private static void DrawSpriteList(SerializedProperty listProp, string label)
@@ -338,7 +429,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             EditorGUILayout.LabelField("Validate", EditorStyles.boldLabel);
 
-            if (GUILayout.Button("VALIDATE DATABASE"))
+            if (GUILayout.Button("ПРОВЕРИТЬ БАЗУ"))
             {
                 issues = CollectIssues(database);
                 validated = true;
@@ -371,13 +462,50 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             WorldMapVisualTheme theme = database.ActiveTheme;
             if (theme == null)
-            {
                 result.Add("У базы не назначена Active Theme.");
-                return result;
+            else if (theme.IconLibrary == null)
+                result.Add("У темы не назначена Icon Library.");
+
+            HashSet<string> locationIds = new HashSet<string>();
+            foreach (WorldMapLocationDefinition location in database.Locations)
+            {
+                if (location == null)
+                {
+                    result.Add("В списке локаций есть пустая запись.");
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(location.Id))
+                    result.Add("У локации не заполнен ID.");
+                else if (!locationIds.Add(location.Id))
+                    result.Add($"Дублирующийся ID локации: '{location.Id}'.");
+
+                if (string.IsNullOrWhiteSpace(location.DisplayName))
+                    result.Add($"У локации '{location.Id}' не заполнено название.");
+
+                if (location.ExplorationHours < 0.0)
+                    result.Add($"У локации '{location.Id}' отрицательное время исследования.");
+
+                if (location.RewardArmyGold < 0 || location.RewardArmySupply < 0)
+                    result.Add($"У локации '{location.Id}' отрицательная награда.");
+
+                if (!string.IsNullOrWhiteSpace(location.SpawnSlotId) &&
+                    WorldMapSpawnSlotRegistry.Find(location.SpawnSlotId) == null)
+                {
+                    result.Add(
+                        $"Локация '{location.Id}' ссылается на неизвестный Spawn Slot " +
+                        $"'{location.SpawnSlotId}'.");
+                }
+
+                if (location.IconScale < 0.25f || location.IconScale > 3f)
+                    result.Add($"Масштаб иконки '{location.Id}' должен быть в диапазоне 0,25–3.");
             }
 
-            if (theme.IconLibrary == null)
-                result.Add("У темы не назначена Icon Library.");
+            if (database.Locations.Count == 0)
+                result.Add("В базе нет ни одной локации — будет использован Core fallback.");
+
+            if (theme == null)
+                return result;
 
             HashSet<WorldMapTerrainType> seenTerrains = new HashSet<WorldMapTerrainType>();
             foreach (WorldMapTerrainVisualProfile profile in theme.TerrainProfiles)
@@ -408,9 +536,12 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 }
             }
 
-            if (theme.Water != null &&
-                theme.Water.SegmentSprite == null &&
-                theme.Water.FallbackColor.a <= 0f)
+            if (theme.Water == null)
+            {
+                result.Add("У темы не задан профиль воды.");
+            }
+            else if (theme.Water.SegmentSprite == null &&
+                     theme.Water.FallbackColor.a <= 0f)
             {
                 result.Add("У воды нет ни SegmentSprite, ни видимого FallbackColor — река не отобразится.");
             }
@@ -500,6 +631,71 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                     cellHeight + 1f);
 
                 EditorGUI.DrawRect(cellRect, riverColor);
+            }
+
+            DrawPreviewLocations(area);
+        }
+
+        private void DrawPreviewLocations(Rect area)
+        {
+            if (database == null)
+                return;
+
+            GameState previewState = new GameState();
+            previewState.CreateNewGame(
+                previewSeed,
+                database.BuildRuntimeLocationTemplates());
+
+            Rect capitalRect = new Rect(
+                area.x + area.width * WorldMapNavigation.CapitalXPercent / 100f - 3f,
+                area.y + area.height * WorldMapNavigation.CapitalYPercent / 100f - 3f,
+                6f,
+                6f);
+            EditorGUI.DrawRect(capitalRect, new Color(0.95f, 0.72f, 0.24f, 1f));
+
+            foreach (LocationData location in previewState.Locations)
+            {
+                if (location == null)
+                    continue;
+
+                WorldMapLocationDefinition definition =
+                    database.FindLocation(location.Id);
+                float scale = definition != null
+                    ? Mathf.Clamp(definition.IconScale, 0.25f, 3f)
+                    : 1f;
+                float size = 8f * scale;
+                Rect markerRect = new Rect(
+                    area.x + area.width * location.MapXPercent / 100f - size * 0.5f,
+                    area.y + area.height * location.MapYPercent / 100f - size * 0.5f,
+                    size,
+                    size);
+
+                if (definition != null && definition.Icon != null)
+                {
+                    Texture preview = AssetPreview.GetAssetPreview(definition.Icon);
+                    if (preview == null)
+                        preview = AssetPreview.GetMiniThumbnail(definition.Icon);
+
+                    Color previous = GUI.color;
+                    Color tint = definition.IconTint;
+                    if (!location.IsVisibleOnMap)
+                        tint.a *= 0.35f;
+                    GUI.color = tint;
+
+                    if (preview != null)
+                        GUI.DrawTexture(markerRect, preview, ScaleMode.ScaleToFit, true);
+                    else
+                        EditorGUI.DrawRect(markerRect, tint);
+
+                    GUI.color = previous;
+                }
+                else
+                {
+                    Color fallback = new Color(0.90f, 0.82f, 0.62f, 1f);
+                    if (!location.IsVisibleOnMap)
+                        fallback.a = 0.35f;
+                    EditorGUI.DrawRect(markerRect, fallback);
+                }
             }
         }
 

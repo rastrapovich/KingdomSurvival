@@ -73,6 +73,61 @@ public class WorldMapNavigationTests
     }
 
     [Test]
+    public void River_AlwaysPassesWithinTwoCellsOfStartingSettlement()
+    {
+        int capitalX = WorldMapNavigation.GridXFromPercent(
+            WorldMapNavigation.CapitalXPercent);
+        int capitalY = WorldMapNavigation.GridYFromPercent(
+            WorldMapNavigation.CapitalYPercent);
+
+        for (int seed = -40; seed <= 40; seed++)
+        {
+            WorldMapNavigation.ConfigureTerrain(seed);
+            int nearest = int.MaxValue;
+
+            foreach ((int X, int Y) point in WorldMapNavigation.GetRiverPath())
+            {
+                nearest = Math.Min(
+                    nearest,
+                    Math.Max(
+                        Math.Abs(point.X - capitalX),
+                        Math.Abs(point.Y - capitalY)));
+            }
+
+            Assert.That(
+                nearest,
+                Is.LessThanOrEqualTo(2),
+                "Seed " + seed + ": река должна проходить через поселение или рядом с ним.");
+        }
+    }
+
+    [Test]
+    public void River_ConnectsOppositeEdgesAndRemainsContinuous()
+    {
+        WorldMapNavigation.ConfigureTerrain(20260913);
+        IReadOnlyList<(int X, int Y)> path = WorldMapNavigation.GetRiverPath();
+
+        Assert.That(path.Count, Is.GreaterThan(2));
+        (int X, int Y) first = path[0];
+        (int X, int Y) last = path[path.Count - 1];
+
+        bool oppositeHorizontal =
+            (first.X == 0 && last.X == WorldMapNavigation.GridWidth - 1) ||
+            (last.X == 0 && first.X == WorldMapNavigation.GridWidth - 1);
+        bool oppositeVertical =
+            (first.Y == 0 && last.Y == WorldMapNavigation.GridHeight - 1) ||
+            (last.Y == 0 && first.Y == WorldMapNavigation.GridHeight - 1);
+        Assert.That(oppositeHorizontal || oppositeVertical, Is.True);
+
+        for (int i = 1; i < path.Count; i++)
+        {
+            Assert.That(Math.Abs(path[i].X - path[i - 1].X), Is.LessThanOrEqualTo(1));
+            Assert.That(Math.Abs(path[i].Y - path[i - 1].Y), Is.LessThanOrEqualTo(1));
+            Assert.That(path[i], Is.Not.EqualTo(path[i - 1]));
+        }
+    }
+
+    [Test]
     public void TerrainTravelCost_MatchesApprovedMultipliers()
     {
         Assert.That(

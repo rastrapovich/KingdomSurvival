@@ -8,11 +8,6 @@ public partial class PrototypeUIController
     private bool stableUiInitializing;
     private int renderedReportHash = int.MinValue;
 
-    private VisualElement persistentCommanderPanel;
-    private Button persistentCommanderExpeditionButton;
-    private Label persistentCommanderStateLabel;
-    private Label persistentCommanderTargetLabel;
-
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InitializeStableUiRuntime()
     {
@@ -54,25 +49,6 @@ public partial class PrototypeUIController
             return;
         }
 
-        persistentCommanderPanel =
-            interfaceRoot.Q<VisualElement>("persistent-commander-panel");
-        persistentCommanderExpeditionButton =
-            interfaceRoot.Q<Button>("persistent-commander-expedition-button");
-        persistentCommanderStateLabel =
-            interfaceRoot.Q<Label>("persistent-commander-state");
-        persistentCommanderTargetLabel =
-            interfaceRoot.Q<Label>("persistent-commander-target");
-
-        if (persistentCommanderPanel == null ||
-            persistentCommanderExpeditionButton == null ||
-            persistentCommanderStateLabel == null ||
-            persistentCommanderTargetLabel == null)
-        {
-            Debug.LogError("Stable UI: не найдена статическая плашка командира в Prototype_Main.uxml.");
-            stableUiInitializing = false;
-            return;
-        }
-
         RebindStableUiCallbacks();
         RegisterRoyalReportRefresh();
         InitializeJourneySummaryUi();
@@ -89,8 +65,6 @@ public partial class PrototypeUIController
         returnExpeditionButton.clicked += OnStableExpeditionActionClicked;
         researchExpeditionButton.clicked -= OnResearchExpeditionClicked;
         researchExpeditionButton.clicked += OnStableResearchExpeditionClicked;
-
-        persistentCommanderExpeditionButton.clicked += ToggleQuickExpeditionPopup;
 
         navCapitalButton.clicked += OnStableNavigationChanged;
         navExpeditionsButton.clicked += OnStableNavigationChanged;
@@ -120,7 +94,6 @@ public partial class PrototypeUIController
         // закрывает Journal — как и другие fullscreen-слои, он не должен
         // оставаться открытым поверх основной навигации.
         CloseJournal();
-        RefreshPersistentCommanderNavigationState();
     }
 
     private void OnStablePostActionRefresh()
@@ -232,27 +205,8 @@ public partial class PrototypeUIController
 
         RefreshJourneySummaryFromState();
         RefreshIncidentNotifications();
-        RefreshPersistentCommanderNavigationState();
         RefreshTimeControlAvailability();
         ScheduleRoyalReportsRefresh();
-    }
-
-    private void RefreshPersistentCommanderNavigationState()
-    {
-        if (persistentCommanderExpeditionButton == null)
-            return;
-
-        bool expeditionActive =
-            openedScreen.HasValue && openedScreen.Value == MainScreen.Expeditions;
-        SetPersistentNavActive(persistentCommanderExpeditionButton, expeditionActive);
-    }
-
-    private static void SetPersistentNavActive(Button button, bool active)
-    {
-        if (active)
-            button.AddToClassList("persistent-nav-active");
-        else
-            button.RemoveFromClassList("persistent-nav-active");
     }
 
     private void RegisterRoyalReportRefresh()

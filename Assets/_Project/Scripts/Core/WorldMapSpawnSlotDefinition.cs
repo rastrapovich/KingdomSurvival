@@ -59,4 +59,18 @@ public static class WorldMapSpawnSlotRegistry
                 MaxYPercent = 36f
             }
         };
+
+    public static WorldMapSpawnSlotDefinition Find(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+            return null;
+
+        foreach (WorldMapSpawnSlotDefinition slot in StartingLocationSlots)
+        {
+            if (slot.Id == id)
+                return slot;
+        }
+
+        return null;
+    }
 }

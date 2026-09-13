@@ -244,9 +244,9 @@ public partial class PrototypeUIController
         MarkReportRead(reportIndex);
     }
 
-    // P09-T05: экран Лагеря должен останавливать стратегическое время как
-    // любая другая блокирующая модалка (раздел "Открытие лагеря не тратит
-    // время"), но, в отличие от них, обязан пропускать поверх себя D11C
+    // Fullscreen-экраны Journal/Hero/Camp останавливают стратегическое время
+    // так же, как блокирующая модалка. Camp, в отличие от остальных, обязан
+    // пропускать поверх себя D11C
     // ("Затем автоматически запускается D11C... поверх лагерного экрана") —
     // поэтому вынесено отдельным условием, а не в общий список ниже:
     // HasBlockingModalWork используется для паузы времени (включает Camp),
@@ -257,6 +257,8 @@ public partial class PrototypeUIController
         return gameState != null &&
                (IsNarrativeDialogueActive ||
                 IsLocationInteractionActive ||
+                IsJournalOpen ||
+                IsHeroScreenOpen ||
                 gameState.HasPendingExpeditionDecision ||
                 openedIncident != null ||
                 openedDecision != null ||

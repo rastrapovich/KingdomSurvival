@@ -65,7 +65,7 @@ public partial class PrototypeUIController
         if (gameState == null || isGameOver)
             return;
 
-        WorldMapNavigation.ConfigureTerrain(gameState.WorldSeed);
+        EnsureWorldMapGeographyConfigured();
 
         float startX = gameState.HasActiveExpedition
             ? gameState.ActiveExpedition.CurrentMapXPercent

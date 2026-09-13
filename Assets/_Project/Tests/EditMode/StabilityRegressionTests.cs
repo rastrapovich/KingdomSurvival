@@ -14,32 +14,16 @@ public class StabilityRegressionTests
         (float)(ContinuousSimulationSystem.RealSecondsPerGameDay * 1.5);
 
     [Test]
-    public void CreateNewGame_ConfiguresRequestedTerrainSeedBeforeRoutes()
-    {
-        const int requestedSeed = 24680;
-        const int staleSeed = 13579;
-
-        WorldMapNavigation.ConfigureTerrain(requestedSeed);
-        string expectedTerrain = BuildTerrainSignature();
-        WorldMapNavigation.ConfigureTerrain(staleSeed);
-
-        GameState state = new GameState();
-        state.CreateNewGame(requestedSeed);
-
-        Assert.That(BuildTerrainSignature(), Is.EqualTo(expectedTerrain));
-    }
-
-    [Test]
     public void CreateNewGame_SameSeedIsIndependentOfPreviouslyConfiguredTerrain()
     {
         const int requestedSeed = 424242;
 
-        WorldMapNavigation.ConfigureTerrain(11);
+        WorldMapNavigation.ConfigureDefaultTerrain();
         GameState first = new GameState();
         first.CreateNewGame(requestedSeed);
         string firstSignature = BuildLocationSignature(first);
 
-        WorldMapNavigation.ConfigureTerrain(999999);
+        WorldMapNavigation.ConfigureDefaultTerrain();
         GameState second = new GameState();
         second.CreateNewGame(requestedSeed);
 
@@ -180,17 +164,6 @@ public class StabilityRegressionTests
             }
         };
         commander.State = CommanderState.TravellingToLocation;
-    }
-
-    private static string BuildTerrainSignature()
-    {
-        StringBuilder builder = new StringBuilder();
-        for (int y = 0; y < WorldMapNavigation.GridHeight; y++)
-        {
-            for (int x = 0; x < WorldMapNavigation.GridWidth; x++)
-                builder.Append((int)WorldMapNavigation.GetTerrainAtGridCell(x, y));
-        }
-        return builder.ToString();
     }
 
     private static string BuildLocationSignature(GameState state)

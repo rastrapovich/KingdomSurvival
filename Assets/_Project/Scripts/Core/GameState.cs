@@ -381,15 +381,16 @@ public class GameState
     {
         WorldSeed = worldSeed ?? Guid.NewGuid().GetHashCode();
 
-        // AM-02 (канон v1.33, §9.9): если авторский мир подключён (через
-        // WorldMapDatabaseAsset.ActiveWorld на стороне UI), география больше
-        // не зависит от WorldSeed — WorldSeed остаётся только для наполнения
+        // AM-02/AM-07.5 (канон v1.35, §9.9): если авторский мир подключён
+        // (через WorldMapDatabaseAsset.ActiveWorld на стороне UI), география
+        // берётся из него — WorldSeed остаётся только для наполнения
         // (расстановка допустимых малых локаций по слотам). Без авторского
-        // мира — прежнее процедурное поведение (переходный fallback, AM-01).
+        // мира — безопасная сплошная Plains, а не скрытая процедурная
+        // генерация (см. WorldMapNavigation.ConfigureDefaultTerrain).
         if (worldDefinition != null && worldDefinition.IsValid)
             WorldMapNavigation.ConfigureFromDefinition(worldDefinition);
         else
-            WorldMapNavigation.ConfigureTerrain(WorldSeed);
+            WorldMapNavigation.ConfigureDefaultTerrain();
         Day = 1;
         Gold = 120;
         Food = 72;
@@ -431,7 +432,10 @@ public class GameState
         // AM-04 (канон v1.33, §9.9): расстановка вынесена в отдельный чистый
         // сервис — GameState создаёт кампанию и вызывает его, но больше не
         // отвечает за то, как выбираются точки Fixed/Anchored локаций.
-        Locations = WorldMapPopulationService.Populate(WorldSeed, sourceTemplates);
+        Locations = WorldMapPopulationService.Populate(
+            WorldSeed,
+            sourceTemplates,
+            worldDefinition != null ? worldDefinition.SpawnSlots : null);
         ActiveExpedition = null;
         Narrative = new NarrativeStateData();
         Encounters = new EncounterRuntimeStateData();

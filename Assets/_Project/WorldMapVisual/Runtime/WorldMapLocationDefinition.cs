@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KingdomSurvival.WorldMapVisual
@@ -20,6 +21,13 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private bool initiallyDiscovered;
         [SerializeField] private bool initiallyVisibleOnMap = true;
         [SerializeField] private string spawnSlotId = string.Empty;
+
+        // AM-07.5: набор тегов, которым должен обладать слот появления
+        // (WorldMapWorldDefinitionAsset.SpawnSlotEntry.Tags), чтобы Anchored-
+        // локация могла в него попасть. Пусто — старое поведение (любой слот
+        // по round-robin), без изменений.
+        [SerializeField] private List<string> requiredSlotTags = new List<string>();
+
         [SerializeField] private WorldMapPlacementMode mode = WorldMapPlacementMode.Anchored;
         [SerializeField] private float fixedXPercent = 50f;
         [SerializeField] private float fixedYPercent = 50f;
@@ -37,6 +45,7 @@ namespace KingdomSurvival.WorldMapVisual
         public bool InitiallyDiscovered => initiallyDiscovered;
         public bool InitiallyVisibleOnMap => initiallyVisibleOnMap;
         public string SpawnSlotId => spawnSlotId;
+        public IReadOnlyList<string> RequiredSlotTags => requiredSlotTags;
         public WorldMapPlacementMode Mode => mode;
         public float FixedXPercent => fixedXPercent;
         public float FixedYPercent => fixedYPercent;
@@ -58,6 +67,7 @@ namespace KingdomSurvival.WorldMapVisual
                 InitiallyDiscovered = initiallyDiscovered,
                 InitiallyVisibleOnMap = initiallyVisibleOnMap,
                 SpawnSlotId = spawnSlotId,
+                RequiredSlotTags = new List<string>(requiredSlotTags ?? new List<string>()),
                 Mode = mode,
                 FixedXPercent = fixedXPercent,
                 FixedYPercent = fixedYPercent

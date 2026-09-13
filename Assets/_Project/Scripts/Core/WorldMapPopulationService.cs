@@ -13,11 +13,20 @@ public static class WorldMapPopulationService
 {
     public static List<LocationData> Populate(
         int worldSeed,
-        IReadOnlyList<WorldMapLocationTemplateData> templates)
+        IReadOnlyList<WorldMapLocationTemplateData> templates,
+        IReadOnlyList<WorldMapSpawnSlotDefinition> slots = null)
     {
         List<LocationData> result = new List<LocationData>();
         if (templates == null)
             return result;
+
+        // AM-07.5: авторские слоты мира (когда художник их задаст) вместо
+        // захардкоженного WorldMapSpawnSlotRegistry — тот остаётся только
+        // запасным вариантом для миров без собственных слотов.
+        IReadOnlyList<WorldMapSpawnSlotDefinition> effectiveSlots =
+            slots != null && slots.Count > 0
+                ? slots
+                : WorldMapSpawnSlotRegistry.StartingLocationSlots;
 
         List<WorldMapLocationTemplateData> fixedTemplates = new List<WorldMapLocationTemplateData>();
         List<WorldMapLocationTemplateData> anchoredTemplates = new List<WorldMapLocationTemplateData>();
@@ -55,25 +64,74 @@ public static class WorldMapPopulationService
         foreach (WorldMapLocationTemplateData template in fixedTemplates)
             result.Add(PlaceFixed(template));
 
-        IReadOnlyList<WorldMapSpawnSlotDefinition> slots =
-            WorldMapSpawnSlotRegistry.StartingLocationSlots;
-
         for (int i = 0; i < anchoredTemplates.Count; i++)
         {
             WorldMapLocationTemplateData template = anchoredTemplates[i];
-
             WorldMapSpawnSlotDefinition slot =
-                !string.IsNullOrWhiteSpace(template.SpawnSlotId)
-                    ? WorldMapSpawnSlotRegistry.Find(template.SpawnSlotId)
-                    : null;
-
-            if (slot == null && slots.Count > 0)
-                slot = slots[i % slots.Count];
+                ResolveSlotForTemplate(template, effectiveSlots, i, locationRandom);
 
             result.Add(PlaceAnchored(template, slot, i, locationRandom));
         }
 
         return result;
+    }
+
+    // AM-07.5: конкретный именованный слот побеждает; иначе, если локация
+    // требует теги — случайный выбор среди слотов, содержащих ВСЕ требуемые
+    // теги (не round-robin по индексу — у разных локаций разные по размеру
+    // совместимые множества); иначе — прежнее поведение round-robin по всем
+    // слотам без изменений (обратная совместимость).
+    private static WorldMapSpawnSlotDefinition ResolveSlotForTemplate(
+        WorldMapLocationTemplateData template,
+        IReadOnlyList<WorldMapSpawnSlotDefinition> slots,
+        int index,
+        Random random)
+    {
+        if (!string.IsNullOrWhiteSpace(template.SpawnSlotId))
+        {
+            WorldMapSpawnSlotDefinition named = FindSlotById(slots, template.SpawnSlotId);
+            if (named != null)
+                return named;
+        }
+
+        if (template.RequiredSlotTags != null && template.RequiredSlotTags.Count > 0)
+        {
+            List<WorldMapSpawnSlotDefinition> matches = new List<WorldMapSpawnSlotDefinition>();
+            if (slots != null)
+            {
+                foreach (WorldMapSpawnSlotDefinition slot in slots)
+                {
+                    if (slot != null && slot.HasAllTags(template.RequiredSlotTags))
+                        matches.Add(slot);
+                }
+            }
+
+            // Нет ни одного совместимого слота — не подменяем требование
+            // случайным несовместимым слотом молча; PlaceAnchored отправит
+            // локацию к Дому как честный, заметный запасной вариант.
+            return matches.Count > 0 ? matches[random.Next(matches.Count)] : null;
+        }
+
+        if (slots == null || slots.Count == 0)
+            return null;
+
+        return slots[index % slots.Count];
+    }
+
+    private static WorldMapSpawnSlotDefinition FindSlotById(
+        IReadOnlyList<WorldMapSpawnSlotDefinition> slots,
+        string id)
+    {
+        if (slots == null)
+            return null;
+
+        foreach (WorldMapSpawnSlotDefinition slot in slots)
+        {
+            if (slot != null && slot.Id == id)
+                return slot;
+        }
+
+        return null;
     }
 
     private static LocationData PlaceFixed(WorldMapLocationTemplateData template)

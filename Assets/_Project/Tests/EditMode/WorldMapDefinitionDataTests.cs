@@ -8,20 +8,20 @@ using NUnit.Framework;
 public class WorldMapDefinitionDataTests
 {
     [Test]
-    public void ConfigureFromDefinition_ProducesIdenticalTerrainRegardlessOfPriorSeed()
+    public void ConfigureFromDefinition_ProducesIdenticalTerrainRegardlessOfPriorState()
     {
         WorldMapDefinitionData definition = BuildTestDefinition();
 
-        WorldMapNavigation.ConfigureTerrain(1);
+        WorldMapNavigation.ConfigureDefaultTerrain();
         WorldMapNavigation.ConfigureFromDefinition(definition);
-        WorldMapTerrainType afterSeedOne = WorldMapNavigation.GetTerrainAtGridCell(5, 5);
+        WorldMapTerrainType afterFirst = WorldMapNavigation.GetTerrainAtGridCell(5, 5);
 
-        WorldMapNavigation.ConfigureTerrain(999999);
+        WorldMapNavigation.ConfigureDefaultTerrain();
         WorldMapNavigation.ConfigureFromDefinition(definition);
-        WorldMapTerrainType afterSeedTwo = WorldMapNavigation.GetTerrainAtGridCell(5, 5);
+        WorldMapTerrainType afterSecond = WorldMapNavigation.GetTerrainAtGridCell(5, 5);
 
-        Assert.That(afterSeedTwo, Is.EqualTo(afterSeedOne));
-        Assert.That(afterSeedOne, Is.EqualTo(WorldMapTerrainType.Mountains));
+        Assert.That(afterSecond, Is.EqualTo(afterFirst));
+        Assert.That(afterFirst, Is.EqualTo(WorldMapTerrainType.Mountains));
     }
 
     [Test]
@@ -42,7 +42,7 @@ public class WorldMapDefinitionDataTests
     {
         // Не оставлять авторский мир активным для тестов, идущих следом в
         // том же прогоне (WorldMapNavigation хранит состояние статически).
-        WorldMapNavigation.ConfigureTerrain(0);
+        WorldMapNavigation.ConfigureDefaultTerrain();
     }
 
     private static WorldMapDefinitionData BuildTestDefinition()

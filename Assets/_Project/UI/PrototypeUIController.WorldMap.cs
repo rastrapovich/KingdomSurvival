@@ -12,6 +12,20 @@ public partial class PrototypeUIController
     private const float CapitalMarkerCellFraction = 0.25f;
     private const float ArmyMarkerScreenDiameter = 8f;
 
+    // AM-07.5 (канон v1.35, §9.9): единственное место в UI-слое, где решается,
+    // какая география активна — авторский мир (если подключён) или безопасная
+    // сплошная Plains. Никогда не вызывает старую процедурную генерацию (её
+    // больше не существует) — заменяет разрозненные ConfigureTerrain(seed)
+    // по всему UI, каждый из которых был потенциальным скрытым откатом к ней.
+    private static void EnsureWorldMapGeographyConfigured()
+    {
+        WorldMapDatabaseAsset database = WorldMapVisualRuntime.LoadDatabase();
+        if (database != null && database.ActiveWorld != null)
+            WorldMapNavigation.ConfigureFromDefinition(database.ActiveWorld.ToData());
+        else
+            WorldMapNavigation.ConfigureDefaultTerrain();
+    }
+
     private VisualElement worldMapViewport;
     private VisualElement worldMap;
     private VisualElement worldMapBackground;
@@ -391,7 +405,6 @@ public partial class PrototypeUIController
         renderedWorldMapRouteIndex = -1;
 
         ApplyWorldMapBackground();
-        DrawTerrainCells();
 
         foreach (LocationData location in gameState.Locations)
         {
@@ -434,127 +447,11 @@ public partial class PrototypeUIController
             worldMapBackground.style.backgroundImage = StyleKeyword.None;
     }
 
-    private void DrawTerrainCells()
-    {
-        // Местность рисуется из WorldMapVisualTheme (World Map Database),
-        // а не из захардкоженных цветов. Пока тема не назначена в Resources
-        // (WorldMapDatabaseAsset.ResourcesPath), слой остаётся пустым — как
-        // и раньше, до WM-01 карта не показывала местность вовсе.
-        WorldMapVisualTheme theme = WorldMapVisualRuntime.LoadActiveTheme();
-
-        if (theme == null)
-            return;
-
-        DrawTerrainForType(theme, WorldMapTerrainType.Hills);
-        DrawTerrainForType(theme, WorldMapTerrainType.Mountains);
-    }
-
-    private void DrawTerrainForType(
-        WorldMapVisualTheme theme,
-        WorldMapTerrainType terrain)
-    {
-        WorldMapTerrainVisualProfile profile =
-            theme.FindTerrainProfile(terrain);
-
-        if (profile == null)
-            return;
-
-        // WM-04: если художник уже дал варианты-массы для этого типа
-        // местности — рисуем органичные пятна по кластерам клеток вместо
-        // сетки квадратов. Пока вариантов нет (как сейчас, арта ещё нет),
-        // используем прежнюю плоскую заливку по клетке — деградация без
-        // регрессии, поведение как в WM-01.
-        if (profile.MassVariants.Count > 0)
-            DrawTerrainMassClusters(profile, terrain);
-        else
-            DrawTerrainFlatCells(profile, terrain);
-    }
-
-    private void DrawTerrainFlatCells(
-        WorldMapTerrainVisualProfile profile,
-        WorldMapTerrainType terrain)
-    {
-        if (profile.CellColor.a <= 0f)
-            return;
-
-        // Равнина не рисуется отдельными клетками — она фон карты. Клетки
-        // объединяются в строке в один прямоугольник (run-length по X),
-        // а не один VisualElement на клетку: на большой сетке (после
-        // увеличения GridWidth/GridHeight ×4) поклеточная отрисовка создавала
-        // тысячи элементов за один RefreshWorldMapPanel. Размер клетки считаем
-        // из реального разрешения сетки, а не хардкодим — раньше было
-        // 4.5%/6.8%, подобранные под старую сетку 26×16.
-        float cellWidthPercent =
-            100f / (WorldMapNavigation.GridWidth - 1) * 1.1f;
-        float cellHeightPercent =
-            100f / (WorldMapNavigation.GridHeight - 1) * 1.1f;
-
-        for (int y = 0;
-             y < WorldMapNavigation.GridHeight;
-             y++)
-        {
-            int runStartX = -1;
-
-            for (int x = 0;
-                 x <= WorldMapNavigation.GridWidth;
-                 x++)
-            {
-                bool matches =
-                    x < WorldMapNavigation.GridWidth &&
-                    WorldMapNavigation.GetTerrainAtGridCell(x, y) == terrain;
-
-                if (matches && runStartX < 0)
-                {
-                    runStartX = x;
-                }
-                else if (!matches && runStartX >= 0)
-                {
-                    AddTerrainRunElement(
-                        profile,
-                        runStartX,
-                        x - 1,
-                        y,
-                        cellWidthPercent,
-                        cellHeightPercent);
-                    runStartX = -1;
-                }
-            }
-        }
-    }
-
-    private void AddTerrainRunElement(
-        WorldMapTerrainVisualProfile profile,
-        int startX,
-        int endX,
-        int y,
-        float cellWidthPercent,
-        float cellHeightPercent)
-    {
-        int runLength = endX - startX + 1;
-
-        VisualElement cell = new VisualElement();
-
-        cell.AddToClassList("world-map-terrain-cell");
-        cell.style.backgroundColor = profile.CellColor;
-
-        cell.style.width =
-            new Length(cellWidthPercent * runLength, LengthUnit.Percent);
-        cell.style.height =
-            new Length(cellHeightPercent, LengthUnit.Percent);
-
-        cell.style.left =
-            new Length(GridXToPercent(startX), LengthUnit.Percent);
-        cell.style.top =
-            new Length(GridYToPercent(y), LengthUnit.Percent);
-
-        worldMapTerrain.Add(cell);
-    }
-
-    private static float GridXToPercent(int x) =>
-        x * 100f / (WorldMapNavigation.GridWidth - 1);
-
-    private static float GridYToPercent(int y) =>
-        y * 100f / (WorldMapNavigation.GridHeight - 1);
+    // AM-07.5 (канон v1.35, §9.9): рельеф (холмы/горы/лес/поля) больше не
+    // рисуется кодом — ни плоскими клетками, ни рассыпанными по кластерам
+    // спрайтами-"массами". Художественный источник истины — baseMapSprite
+    // (ApplyWorldMapBackground выше); логическая сетка WorldMapNavigation
+    // используется только для стоимости/скорости пути, невидимо.
 
     // WM-16: маршрут — только очень мелкий частый пунктир. Крупные узловые
     // точки маршрута больше не рисуются: логические route[i] остаются в данных,

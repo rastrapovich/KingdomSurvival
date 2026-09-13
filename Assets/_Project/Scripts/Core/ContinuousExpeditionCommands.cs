@@ -40,7 +40,6 @@ public static class ContinuousExpeditionCommands
             return false;
         }
 
-        WorldMapNavigation.ConfigureTerrain(state.WorldSeed);
         float exactStartX = expedition.CurrentMapXPercent;
         float exactStartY = expedition.CurrentMapYPercent;
         List<MapPointData> route = WorldMapNavigation.FindPath(

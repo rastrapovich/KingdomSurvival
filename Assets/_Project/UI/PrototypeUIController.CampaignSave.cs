@@ -121,11 +121,8 @@ public partial class PrototypeUIController
 
         // Авторская география не хранится в файле сохранения (это
         // статический WorldMapNavigation, не поле GameState) — переприменяем
-        // тот же мир/seed до того, как экраны прочитают рельеф/реку/маршрут.
-        if (mapDatabase != null && mapDatabase.ActiveWorld != null)
-            WorldMapNavigation.ConfigureFromDefinition(mapDatabase.ActiveWorld.ToData());
-        else
-            WorldMapNavigation.ConfigureTerrain(restored.WorldSeed);
+        // тот же мир до того, как экраны прочитают рельеф/маршрут.
+        EnsureWorldMapGeographyConfigured();
 
         gameState = restored;
         isGameOver = false;

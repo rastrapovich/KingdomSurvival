@@ -2,12 +2,18 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 
+// AM-07.5 (канон v1.35, §9.9): процедурная генерация рельефа удалена —
+// тесты, проверявшие её конкретное поведение (стабильность по seed, защита
+// окрестности столицы, кластеризация Hills/Mountains), больше не имеют
+// объекта проверки и удалены вместе с самой генерацией. Оставшиеся тесты
+// используют ConfigureDefaultTerrain() — безопасную сплошную Plains, а не
+// (не существующий более) процедурный генератор.
 public class WorldMapNavigationTests
 {
     [Test]
     public void FindPath_UsesStraightLineAndPreservesExactEndpoints()
     {
-        WorldMapNavigation.ConfigureTerrain(12345);
+        WorldMapNavigation.ConfigureDefaultTerrain();
         const float startX = 22f;
         const float startY = 18f;
         const float targetX = 83f;
@@ -34,42 +40,21 @@ public class WorldMapNavigationTests
     }
 
     [Test]
-    public void TerrainGeneration_IsStableForSameSeedAndChangesAcrossSeeds()
+    public void ConfigureDefaultTerrain_IsEntirelyPlainsEverywhere()
     {
-        int[] first = CaptureTerrain(777);
-        int[] same = CaptureTerrain(777);
-        int[] other = CaptureTerrain(778);
+        WorldMapNavigation.ConfigureDefaultTerrain();
 
-        CollectionAssert.AreEqual(first, same);
-        CollectionAssert.AreNotEqual(first, other);
-    }
-
-    [Test]
-    public void TerrainGeneration_KeepsCapitalNeighborhoodClear()
-    {
-        WorldMapNavigation.ConfigureTerrain(999);
-        int capitalX = WorldMapNavigation.GridXFromPercent(
-            WorldMapNavigation.CapitalXPercent);
-        int capitalY = WorldMapNavigation.GridYFromPercent(
-            WorldMapNavigation.CapitalYPercent);
-
-        for (int y = capitalY - 2; y <= capitalY + 2; y++)
+        for (int y = 0; y < WorldMapNavigation.GridHeight; y += 7)
         {
-            for (int x = capitalX - 2; x <= capitalX + 2; x++)
+            for (int x = 0; x < WorldMapNavigation.GridWidth; x += 7)
             {
                 Assert.That(
                     WorldMapNavigation.GetTerrainAtGridCell(x, y),
-                    Is.EqualTo(WorldMapTerrainType.Plains));
+                    Is.EqualTo(WorldMapTerrainType.Plains),
+                    $"Без авторского мира география должна быть безопасной сплошной Plains, " +
+                    "а не скрытым остатком процедурной генерации.");
             }
         }
-    }
-
-    [Test]
-    public void TerrainGeneration_CreatesClusteredHillsAndMountains()
-    {
-        WorldMapNavigation.ConfigureTerrain(424242);
-        Assert.That(HasAdjacentPair(WorldMapTerrainType.Hills), Is.True);
-        Assert.That(HasAdjacentPair(WorldMapTerrainType.Mountains), Is.True);
     }
 
     [Test]
@@ -163,44 +148,11 @@ public class WorldMapNavigationTests
         Assert.That(GameState.GetRegionName(x, y), Is.EqualTo(expected));
     }
 
-    private static int[] CaptureTerrain(int seed)
-    {
-        WorldMapNavigation.ConfigureTerrain(seed);
-        int[] values = new int[
-            WorldMapNavigation.GridWidth * WorldMapNavigation.GridHeight];
-        int index = 0;
-        for (int y = 0; y < WorldMapNavigation.GridHeight; y++)
-        {
-            for (int x = 0; x < WorldMapNavigation.GridWidth; x++)
-                values[index++] = (int)WorldMapNavigation.GetTerrainAtGridCell(x, y);
-        }
-        return values;
-    }
-
-    private static bool HasAdjacentPair(WorldMapTerrainType terrain)
-    {
-        for (int y = 0; y < WorldMapNavigation.GridHeight; y++)
-        {
-            for (int x = 0; x < WorldMapNavigation.GridWidth; x++)
-            {
-                if (WorldMapNavigation.GetTerrainAtGridCell(x, y) != terrain)
-                    continue;
-                if (x + 1 < WorldMapNavigation.GridWidth &&
-                    WorldMapNavigation.GetTerrainAtGridCell(x + 1, y) == terrain)
-                    return true;
-                if (y + 1 < WorldMapNavigation.GridHeight &&
-                    WorldMapNavigation.GetTerrainAtGridCell(x, y + 1) == terrain)
-                    return true;
-            }
-        }
-        return false;
-    }
-
     private static GameState CreateTravellingState(int seed)
     {
         GameState state = new GameState();
         state.CreateNewGame(seed);
-        WorldMapNavigation.ConfigureTerrain(seed);
+        WorldMapNavigation.ConfigureDefaultTerrain();
 
         string message;
         bool started = state.TryStartExpeditionToMapPoint(

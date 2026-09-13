@@ -33,24 +33,45 @@ public sealed class WorldMapDefinitionData
     public List<WorldMapTerrainAreaData> TerrainAreas = new List<WorldMapTerrainAreaData>();
     public List<WorldMapSpawnSlotDefinition> SpawnSlots = new List<WorldMapSpawnSlotDefinition>();
 
+    // WM-T01/T02 (задача "gameplay-география дорог"): независимый слой от
+    // TerrainAreas/WorldMapTerrainType выше — тот отвечает только за
+    // стоимость пути в WorldMapNavigation.FindPath и не трогается. Пустые
+    // списки — безопасное поведение по умолчанию (раздел 18 задачи):
+    // Roads.Count == 0 → вся карта OpenGround, множитель 1.0, движение как
+    // до этой задачи.
+    public List<WorldMapGameplayTerrainSettings> GameplayTerrainSettings =
+        new List<WorldMapGameplayTerrainSettings>();
+    public List<WorldMapRoadDefinition> Roads = new List<WorldMapRoadDefinition>();
+
     public bool IsValid =>
         !string.IsNullOrWhiteSpace(WorldDefinitionId) &&
         GridWidth == WorldMapNavigation.GridWidth &&
         GridHeight == WorldMapNavigation.GridHeight;
 }
 
-// Прямоугольная авторская область расчётной местности — заменяет случайную
-// GenerateTerrain для конкретного WorldMapDefinitionData. Как и
-// WorldMapRegionDefinition/WorldMapSpawnSlotDefinition, простой прямоугольник
-// в процентах карты; полигоны/маски не нужны на этом этапе (см. §2 и §4
-// инструкции по миграции). При равном Priority побеждает последняя область
+// Прямоугольная авторская область над уже нарисованной художником картой —
+// невидимая gameplay-разметка, а не источник визуала (AM-07.5, канон v1.35,
+// §9.9). Простой прямоугольник в процентах карты, как и
+// WorldMapRegionDefinition/WorldMapSpawnSlotDefinition; полигоны/маски не
+// нужны на этом этапе. При равном Priority побеждает последняя область
 // в списке — точная проверка конфликтов равных приоритетов относится к
 // редактору (AM-03), не к рантайму.
 [Serializable]
 public sealed class WorldMapTerrainAreaData
 {
     public string Id;
+
+    // Terrain — единственное, что влияет на стоимость/скорость пути
+    // (GetTerrainTravelCost/GetTerrainSpeedMultiplier). Ровно три класса —
+    // Plains/Hills/Mountains, без изменений.
     public WorldMapTerrainType Terrain;
+
+    // Контекстные теги — чисто описательные ("здесь на арте нарисован лес/
+    // поле/берег/дорога"), НЕ создают новую стоимость движения и не
+    // participate в GetTerrainTravelCost. Используются для подбора
+    // совместимых Spawn Slot'ов (AM-07.5) и зон Encounter (AM-08).
+    public List<string> Tags = new List<string>();
+
     public float MinXPercent;
     public float MaxXPercent;
     public float MinYPercent;

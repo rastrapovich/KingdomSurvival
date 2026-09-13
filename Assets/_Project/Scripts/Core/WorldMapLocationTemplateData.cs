@@ -32,6 +32,16 @@ public sealed class WorldMapLocationTemplateData
     public bool InitiallyDiscovered;
     public bool InitiallyVisibleOnMap;
     public string SpawnSlotId;
+
+    // AM-07.5: вместо (или в дополнение к) конкретному SpawnSlotId, Anchored-
+    // локация может потребовать набор тегов ("Forest", "NearRoad" — см.
+    // WorldMapSpawnSlotDefinition.Tags). Population-сервис выбирает случайный
+    // слот только среди тех, что содержат ВСЕ перечисленные теги — локация
+    // никогда не окажется в реке/на вершине/в поселении, если автор не
+    // разрешил там слот с такими тегами. Пусто — старое поведение (round-robin
+    // по всем слотам) без изменений.
+    public List<string> RequiredSlotTags = new List<string>();
+
     public WorldMapPlacementMode Mode = WorldMapPlacementMode.Anchored;
     public float FixedXPercent;
     public float FixedYPercent;

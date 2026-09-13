@@ -217,28 +217,6 @@
     opacity: 0.82;
 }
 
-.world-map-terrain-cell {
-    /* Размер (width/height) задаётся кодом (PrototypeUIController.WorldMap.cs,
-       AddTerrainRunElement) из реального GridWidth/GridHeight — раньше был
-       захардкожен под старую сетку 26×16, ломался при смене размера сетки. */
-    position: absolute;
-    border-radius: 3px;
-    opacity: 0.72;
-}
-
-.world-map-terrain-mass {
-    /* WM-04: базовый размер "массы" ~2.5 клетки сетки (26x16), центрируется
-       на точке через отрицательные margin. Художник управляет тем, что внутри
-       этого прямоугольника, через сами спрайты в WorldMapTerrainVisualProfile —
-       размер здесь только задаёт масштаб размещения, не финальный визуал. */
-    position: absolute;
-    width: 10%;
-    height: 16%;
-    margin-left: -5%;
-    margin-top: -8%;
-    transform-origin: 50% 50%;
-}
-
 .world-map-destination-marker {
     position: absolute;
     width: 18px;

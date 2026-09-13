@@ -29,42 +29,37 @@ public static class WorldMapNavigation
     public const float CapitalXPercent = 50f;
     public const float CapitalYPercent = 81f;
 
-    // Масштабированы ×4 (линейно) вместе с GridWidth/GridHeight, чтобы
-    // плотность/размер кластеров местности на бо́льшей сетке выглядели так же,
-    // как на прежней 26×16, а не поредели.
-    private const int ProtectedCapitalRadiusCells = 8;
-    private const int HillClusterCount = 32;
-    private const int MountainClusterCount = 20;
-
-    private static int configuredTerrainSeed;
     private static bool terrainConfigured;
     private static WorldMapTerrainType[,] terrainGrid;
     private static WorldMapDefinitionData activeDefinition;
 
-    public static void ConfigureTerrain(int worldSeed)
+    // AM-07.5 (канон v1.35, §9.9): постоянная география (рельеф, лес, поля,
+    // река — всё) больше не порождается кодом ни в каком виде — ни
+    // процедурно по WorldSeed, ни авторской геометрией, которую код
+    // отрисовывает. Без подключённого авторского мира сетка — сплошная
+    // Plains: безопасное пустое значение, а не скрытый откат к старому
+    // генератору. Единственный официальный вход конфигурации теперь
+    // ConfigureFromDefinition; ConfigureDefaultTerrain существует только
+    // как явный, честный запасной вариант для кода/тестов без мира.
+    public static void ConfigureDefaultTerrain()
     {
-        if (terrainConfigured && activeDefinition == null &&
-            configuredTerrainSeed == worldSeed && terrainGrid != null)
+        if (terrainConfigured && activeDefinition == null && terrainGrid != null)
             return;
 
         activeDefinition = null;
-        configuredTerrainSeed = worldSeed;
         terrainConfigured = true;
-        terrainGrid = GenerateTerrain(worldSeed);
+        terrainGrid = new WorldMapTerrainType[GridWidth, GridHeight];
     }
 
-    // AM-01 (канон v1.33, §9.9): авторская постоянная география вместо
-    // процедурной генерации по WorldSeed. Переходный статический адаптер —
+    // AM-01/AM-07.5 (канон v1.35, §9.9): авторская постоянная география —
+    // единственный источник рельефа. Переходный статический адаптер —
     // допустим до переноса всех потребителей на явный контекст кампании
-    // (см. раздел 16 инструкции по миграции), затем должен быть удалён.
-    // Пока ни одна авторская WorldMapDefinitionData не подключена к новой
-    // игре (это AM-04), вызов не выполняется автоматически — только через
-    // явный ConfigureFromDefinition.
+    // (раздел 16 исходной инструкции по миграции), затем должен быть удалён.
     public static void ConfigureFromDefinition(WorldMapDefinitionData definition)
     {
         if (definition == null || !definition.IsValid)
         {
-            ConfigureTerrain(0);
+            ConfigureDefaultTerrain();
             return;
         }
 
@@ -72,12 +67,18 @@ public static class WorldMapNavigation
             return;
 
         activeDefinition = definition;
-        configuredTerrainSeed = 0;
         terrainConfigured = true;
         terrainGrid = BuildAuthoredTerrain(definition);
     }
 
     public static bool HasActiveDefinition => activeDefinition != null;
+
+    // Задача "gameplay-география дорог" (WM-T04): единственная точка, откуда
+    // ContinuousSimulationSystem может прочитать активные Roads/настройки
+    // gameplay-местности для живого запроса скорости, не проходя через
+    // Unity-слой. Null, если авторский мир не подключён — запрос множителя
+    // тогда безопасно даёт OpenGround/1.0 (WorldMapGameplayTerrainQuery).
+    public static WorldMapDefinitionData ActiveDefinition => activeDefinition;
 
     public static List<MapPointData> FindPath(
         float startXPercent,
@@ -281,124 +282,7 @@ public static class WorldMapNavigation
     private static void EnsureTerrainConfigured()
     {
         if (!terrainConfigured || terrainGrid == null)
-            ConfigureTerrain(0);
-    }
-
-    private static WorldMapTerrainType[,] GenerateTerrain(int worldSeed)
-    {
-        WorldMapTerrainType[,] result =
-            new WorldMapTerrainType[GridWidth, GridHeight];
-        Random random = new Random(unchecked(worldSeed ^ 0x4B53544E));
-
-        PaintClusters(
-            result,
-            random,
-            WorldMapTerrainType.Hills,
-            HillClusterCount,
-            16,
-            32,
-            true);
-        PaintClusters(
-            result,
-            random,
-            WorldMapTerrainType.Mountains,
-            MountainClusterCount,
-            12,
-            24,
-            false);
-
-        int capitalX = PercentToGridX(CapitalXPercent);
-        int capitalY = PercentToGridY(CapitalYPercent);
-        for (int y = 0; y < GridHeight; y++)
-        {
-            for (int x = 0; x < GridWidth; x++)
-            {
-                if (Math.Max(Math.Abs(x - capitalX), Math.Abs(y - capitalY)) <=
-                    ProtectedCapitalRadiusCells)
-                {
-                    result[x, y] = WorldMapTerrainType.Plains;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    private static void PaintClusters(
-        WorldMapTerrainType[,] grid,
-        Random random,
-        WorldMapTerrainType terrain,
-        int clusterCount,
-        int minLength,
-        int maxLength,
-        bool broad)
-    {
-        for (int cluster = 0; cluster < clusterCount; cluster++)
-        {
-            int x = random.Next(1, GridWidth - 1);
-            int y = random.Next(1, GridHeight - 1);
-            int length = random.Next(minLength, maxLength + 1);
-            int directionX = random.Next(-1, 2);
-            int directionY = random.Next(-1, 2);
-            if (directionX == 0 && directionY == 0)
-                directionX = 1;
-
-            for (int step = 0; step < length; step++)
-            {
-                PaintCell(grid, x, y, terrain);
-
-                if (broad)
-                {
-                    if (random.NextDouble() < 0.75)
-                        PaintCell(grid, x + 1, y, terrain);
-                    if (random.NextDouble() < 0.75)
-                        PaintCell(grid, x - 1, y, terrain);
-                    if (random.NextDouble() < 0.60)
-                        PaintCell(grid, x, y + 1, terrain);
-                    if (random.NextDouble() < 0.60)
-                        PaintCell(grid, x, y - 1, terrain);
-                }
-                else if (random.NextDouble() < 0.45)
-                {
-                    PaintCell(grid, x + directionY, y - directionX, terrain);
-                }
-
-                if (random.NextDouble() < 0.35)
-                {
-                    directionX = Math.Max(-1, Math.Min(1, directionX + random.Next(-1, 2)));
-                    directionY = Math.Max(-1, Math.Min(1, directionY + random.Next(-1, 2)));
-                    if (directionX == 0 && directionY == 0)
-                        directionX = random.Next(0, 2) == 0 ? -1 : 1;
-                }
-
-                x = Math.Max(1, Math.Min(GridWidth - 2, x + directionX));
-                y = Math.Max(1, Math.Min(GridHeight - 2, y + directionY));
-            }
-        }
-    }
-
-    private static void PaintCell(
-        WorldMapTerrainType[,] grid,
-        int x,
-        int y,
-        WorldMapTerrainType terrain)
-    {
-        if (!IsInside(x, y) || IsProtectedCapitalCell(x, y))
-            return;
-
-        if (terrain == WorldMapTerrainType.Mountains ||
-            grid[x, y] == WorldMapTerrainType.Plains)
-        {
-            grid[x, y] = terrain;
-        }
-    }
-
-    private static bool IsProtectedCapitalCell(int x, int y)
-    {
-        int capitalX = PercentToGridX(CapitalXPercent);
-        int capitalY = PercentToGridY(CapitalYPercent);
-        return Math.Max(Math.Abs(x - capitalX), Math.Abs(y - capitalY)) <=
-            ProtectedCapitalRadiusCells;
+            ConfigureDefaultTerrain();
     }
 
     private static bool IsInside(int x, int y) =>

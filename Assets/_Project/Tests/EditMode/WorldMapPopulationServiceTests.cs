@@ -9,7 +9,7 @@ public class WorldMapPopulationServiceTests
     [Test]
     public void Populate_PlacesFixedLocationAtExactCoordinatesRegardlessOfSeed()
     {
-        WorldMapNavigation.ConfigureTerrain(0);
+        WorldMapNavigation.ConfigureDefaultTerrain();
         List<WorldMapLocationTemplateData> templates = new List<WorldMapLocationTemplateData>
         {
             new WorldMapLocationTemplateData
@@ -35,7 +35,7 @@ public class WorldMapPopulationServiceTests
     [Test]
     public void Populate_AssignsRegionIdMatchingRegistryNotSectorIndex()
     {
-        WorldMapNavigation.ConfigureTerrain(0);
+        WorldMapNavigation.ConfigureDefaultTerrain();
         List<WorldMapLocationTemplateData> templates = new List<WorldMapLocationTemplateData>
         {
             new WorldMapLocationTemplateData
@@ -103,5 +103,81 @@ public class WorldMapPopulationServiceTests
 
         Assert.That(aFromReversed.MapXPercent, Is.EqualTo(aFromForward.MapXPercent).Within(0.001f));
         Assert.That(aFromReversed.MapYPercent, Is.EqualTo(aFromForward.MapYPercent).Within(0.001f));
+    }
+
+    [Test]
+    public void Populate_AnchoredLocationWithRequiredTagsOnlyUsesCompatibleSlots()
+    {
+        List<WorldMapSpawnSlotDefinition> slots = new List<WorldMapSpawnSlotDefinition>
+        {
+            new WorldMapSpawnSlotDefinition
+            {
+                Id = "slot-plain",
+                Tags = new List<string>(),
+                MinXPercent = 0f, MaxXPercent = 20f, MinYPercent = 0f, MaxYPercent = 20f
+            },
+            new WorldMapSpawnSlotDefinition
+            {
+                Id = "slot-forest",
+                Tags = new List<string> { "Forest" },
+                MinXPercent = 80f, MaxXPercent = 100f, MinYPercent = 80f, MaxYPercent = 100f
+            }
+        };
+
+        List<WorldMapLocationTemplateData> templates = new List<WorldMapLocationTemplateData>
+        {
+            new WorldMapLocationTemplateData
+            {
+                Id = "hermit-camp",
+                Name = "Стоянка отшельника",
+                RequiredSlotTags = new List<string> { "Forest" }
+            }
+        };
+
+        for (int seed = 0; seed < 20; seed++)
+        {
+            LocationData location =
+                WorldMapPopulationService.Populate(seed, templates, slots).Single();
+
+            Assert.That(location.MapXPercent, Is.InRange(80f, 100f),
+                "Локация с требованием тега 'Forest' никогда не должна оказаться в слоте без него.");
+            Assert.That(location.MapYPercent, Is.InRange(80f, 100f));
+        }
+    }
+
+    [Test]
+    public void Populate_NamedSpawnSlotIdWinsOverRequiredTags()
+    {
+        List<WorldMapSpawnSlotDefinition> slots = new List<WorldMapSpawnSlotDefinition>
+        {
+            new WorldMapSpawnSlotDefinition
+            {
+                Id = "slot-named",
+                Tags = new List<string>(),
+                MinXPercent = 30f, MaxXPercent = 40f, MinYPercent = 30f, MaxYPercent = 40f
+            },
+            new WorldMapSpawnSlotDefinition
+            {
+                Id = "slot-forest",
+                Tags = new List<string> { "Forest" },
+                MinXPercent = 80f, MaxXPercent = 100f, MinYPercent = 80f, MaxYPercent = 100f
+            }
+        };
+
+        List<WorldMapLocationTemplateData> templates = new List<WorldMapLocationTemplateData>
+        {
+            new WorldMapLocationTemplateData
+            {
+                Id = "named",
+                Name = "Named",
+                SpawnSlotId = "slot-named",
+                RequiredSlotTags = new List<string> { "Forest" }
+            }
+        };
+
+        LocationData location = WorldMapPopulationService.Populate(1, templates, slots).Single();
+
+        Assert.That(location.MapXPercent, Is.InRange(30f, 40f));
+        Assert.That(location.MapYPercent, Is.InRange(30f, 40f));
     }
 }

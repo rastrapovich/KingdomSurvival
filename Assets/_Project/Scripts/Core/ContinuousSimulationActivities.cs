@@ -249,10 +249,18 @@ public static partial class ContinuousSimulationSystem
             return gameHours;
         }
 
-        double initialCellsToMove = movementHours * CellsPerGameHour;
-        double cellsToMove = initialCellsToMove;
+        // WM-T04 (задача "gameplay-география дорог"): бюджет ведётся в
+        // игровых часах, а не в клетках, как раньше — скорость (клеток на
+        // час) больше не постоянна на весь вызов, а зависит от того, где
+        // герой находится ПРЯМО СЕЙЧАС (живой запрос, не связан с плотностью
+        // маршрута, посчитанной один раз в WorldMapNavigation.FindPath для
+        // Hills/Mountains — тот механизм не тронут). При множителе 1.0
+        // (везде, где нет дороги) арифметика идентична прежней константе
+        // CellsPerGameHour.
+        double hoursRemaining = movementHours;
+        double hoursUsedByMovement = 0.0;
 
-        while (cellsToMove > Epsilon && state.HasActiveExpedition)
+        while (hoursRemaining > Epsilon && state.HasActiveExpedition)
         {
             EnsureRouteTracking(state, runtime);
 
@@ -272,10 +280,20 @@ public static partial class ContinuousSimulationSystem
                 expedition.LastTravelTargetYPercent = expedition.TargetMapYPercent;
             }
 
+            float speedMultiplier = GetLiveMovementSpeedMultiplier(
+                expedition.CurrentMapXPercent,
+                expedition.CurrentMapYPercent);
+            double effectiveCellsPerGameHour =
+                CellsPerGameHour * Math.Max(0.0001, speedMultiplier);
+
             double segmentRemaining = 1.0 - runtime.SegmentProgress;
-            double usedCells = Math.Min(cellsToMove, segmentRemaining);
+            double maxCellsThisStep = hoursRemaining * effectiveCellsPerGameHour;
+            double usedCells = Math.Min(maxCellsThisStep, segmentRemaining);
+            double usedHours = usedCells / effectiveCellsPerGameHour;
+
             runtime.SegmentProgress += usedCells;
-            cellsToMove -= usedCells;
+            hoursRemaining -= usedHours;
+            hoursUsedByMovement += usedHours;
 
             MapPointData from = expedition.Route[expedition.RouteIndex];
             MapPointData to = expedition.Route[expedition.RouteIndex + 1];
@@ -310,13 +328,22 @@ public static partial class ContinuousSimulationSystem
             UpdateRemainingRouteCells(state.ActiveExpedition, runtime);
 
         if (batch.RequestAutoPause)
-        {
-            double cellsUsed = Math.Max(0.0, initialCellsToMove - cellsToMove);
-            double movementHoursUsed = cellsUsed / CellsPerGameHour;
-            return Math.Min(gameHours, delayHoursUsed + movementHoursUsed);
-        }
+            return Math.Min(gameHours, delayHoursUsed + hoursUsedByMovement);
 
         return gameHours;
+    }
+
+    // WM-T04: единственное место, где живой запрос местности превращается в
+    // множитель скорости для движения экспедиции. Не размазано по UI/другим
+    // системам — раздел 11 задачи.
+    private static float GetLiveMovementSpeedMultiplier(
+        float xPercent,
+        float yPercent)
+    {
+        return WorldMapGameplayTerrainQuery.GetMovementMultiplier(
+            WorldMapNavigation.ActiveDefinition,
+            xPercent,
+            yPercent);
     }
 
     private static double ConsumeTravelDelay(

@@ -15,6 +15,30 @@ public sealed class WorldMapSpawnSlotDefinition
     public float MinYPercent;
     public float MaxYPercent;
 
+    // AM-07.5: контекстные теги слота ("Forest", "Shore", "NearRoad" и т.п.),
+    // взятые с уже нарисованной карты — по ним Anchored-локация выбирает
+    // только совместимые слоты (WorldMapPopulationService), а не любую
+    // случайную точку региона. Пустой список — слот совместим с любым
+    // требованием (обратная совместимость со старыми слотами без тегов).
+    public List<string> Tags = new List<string>();
+
+    public bool HasAllTags(IReadOnlyList<string> requiredTags)
+    {
+        if (requiredTags == null || requiredTags.Count == 0)
+            return true;
+
+        if (Tags == null)
+            return false;
+
+        foreach (string required in requiredTags)
+        {
+            if (!Tags.Contains(required))
+                return false;
+        }
+
+        return true;
+    }
+
     public float PickXPercent(Random random) =>
         Lerp(MinXPercent, MaxXPercent, (float)random.NextDouble());
 

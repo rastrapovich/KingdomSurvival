@@ -28,11 +28,43 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private WorldMapIconLibrary iconLibrary;
         [SerializeField] private List<WorldMapArtLayerEntry> artLayers = new List<WorldMapArtLayerEntry>();
 
+        // Задача "регулируемый визуальный размер героя и Дома": ЧИСТО
+        // презентационные параметры маркеров глобальной карты — не влияют на
+        // скорость, расстояние, координаты, discovery radius, Road Width,
+        // Terrain или маршрут (те остаются в WorldMapDefinitionData/gameplay
+        // коде, не здесь). Единица — доли ЛОГИЧЕСКОЙ клетки карты (1.0 =
+        // визуальный размер одной клетки), а не экранные пиксели — так
+        // маркер масштабируется вместе с zoom/pan карты, а не остаётся
+        // константного экранного размера (сознательный отказ от прежней
+        // WM-16 модели "герой — фиксированная точка независимо от zoom" —
+        // явное требование этой задачи). Default подобран так, чтобы
+        // воспроизвести прежний внешний вид: раньше герой был диаметром
+        // ArmyMarkerScreenDiameter(8px)/WorldMapBaseCellSizePx(32px)=0.25
+        // клетки, а Дом — CapitalMarkerCellFraction=0.25 клетки (то же
+        // число, разными путями подобранное раньше).
+        public const float DefaultHeroMarkerSizeCells = 0.25f;
+        public const float DefaultHomeMarkerSizeCells = 0.25f;
+
+        [SerializeField] private float heroMarkerSizeCells = DefaultHeroMarkerSizeCells;
+        [SerializeField] private float homeMarkerSizeCells = DefaultHomeMarkerSizeCells;
+
         public Sprite BaseMapSprite => baseMapSprite;
         public Color BaseMapColor => baseMapColor;
         public Color BaseMapTint => baseMapTint;
         public WorldMapIconLibrary IconLibrary => iconLibrary;
         public IReadOnlyList<WorldMapArtLayerEntry> ArtLayers => artLayers;
+
+        // Защита от 0/отрицательных/NaN/Infinity — невидимый маркер из-за
+        // невалидных данных недопустим (раздел 13/14 задачи), откатывается
+        // на визуально-эквивалентный прежнему виду default.
+        public float HeroMarkerSizeCells =>
+            IsValidMarkerSize(heroMarkerSizeCells) ? heroMarkerSizeCells : DefaultHeroMarkerSizeCells;
+
+        public float HomeMarkerSizeCells =>
+            IsValidMarkerSize(homeMarkerSizeCells) ? homeMarkerSizeCells : DefaultHomeMarkerSizeCells;
+
+        private static bool IsValidMarkerSize(float value) =>
+            value > 0f && !float.IsNaN(value) && !float.IsInfinity(value);
     }
 
     public enum WorldMapArtLayerFitMode

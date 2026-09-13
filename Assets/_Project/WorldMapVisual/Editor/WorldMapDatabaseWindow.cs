@@ -833,6 +833,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             DrawBaseMapSection(themeSO);
             EditorGUILayout.Space(14f);
+            DrawMarkerScaleSection(themeSO);
+            EditorGUILayout.Space(14f);
             DrawArtLayersSection(themeSO);
             EditorGUILayout.Space(14f);
             DrawDefaultIconSection(themeSO);
@@ -860,6 +862,58 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 "лес, поля), река, озёра, берега и прочая постоянная география рисуются прямо в " +
                 "этой текстуре художником — код не генерирует и не рисует их поверх карты. " +
                 "Вкладка «География» задаёт только невидимую gameplay-разметку поверх этого арта.",
+                MessageType.None);
+            EditorGUILayout.EndVertical();
+        }
+
+        // Задача "регулируемый визуальный размер героя и Дома": ЧИСТО
+        // презентационная настройка — не влияет на скорость, расстояние,
+        // координаты, discovery radius, Road Width, Terrain или маршрут.
+        // Единица — доли логической клетки карты (1.0 = размер одной
+        // клетки), не пиксели, поэтому маркер масштабируется вместе с zoom.
+        // Preview использует то же значение (WorldMapVisualTheme —
+        // единственный источник истины и для runtime, и для Preview).
+        private static void DrawMarkerScaleSection(SerializedObject themeSO)
+        {
+            EditorGUILayout.LabelField("Визуальный масштаб маркеров", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+            SerializedProperty heroProp = themeSO.FindProperty("heroMarkerSizeCells");
+            SerializedProperty homeProp = themeSO.FindProperty("homeMarkerSizeCells");
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Размер героя", GUILayout.Width(110f));
+            heroProp.floatValue = EditorGUILayout.Slider(heroProp.floatValue, 0.2f, 2.0f);
+            EditorGUILayout.LabelField("клетки", GUILayout.Width(45f));
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Размер Дома", GUILayout.Width(110f));
+            homeProp.floatValue = EditorGUILayout.Slider(homeProp.floatValue, 0.1f, 4.0f);
+            EditorGUILayout.LabelField("клетки", GUILayout.Width(45f));
+            EditorGUILayout.EndHorizontal();
+
+            if (heroProp.floatValue <= 0f || float.IsNaN(heroProp.floatValue) || float.IsInfinity(heroProp.floatValue))
+            {
+                EditorGUILayout.HelpBox(
+                    "Размер героя невалиден (0/NaN/Infinity) — в игре будет использован " +
+                    $"безопасный fallback {WorldMapVisualTheme.DefaultHeroMarkerSizeCells:0.##} клетки.",
+                    MessageType.Warning);
+            }
+
+            if (homeProp.floatValue <= 0f || float.IsNaN(homeProp.floatValue) || float.IsInfinity(homeProp.floatValue))
+            {
+                EditorGUILayout.HelpBox(
+                    "Размер Дома невалиден (0/NaN/Infinity) — в игре будет использован " +
+                    $"безопасный fallback {WorldMapVisualTheme.DefaultHomeMarkerSizeCells:0.##} клетки.",
+                    MessageType.Warning);
+            }
+
+            EditorGUILayout.HelpBox(
+                "1.0 = визуальный размер одной логической клетки карты (104×64). Маркер — только " +
+                "изображение: не меняет скорость движения, расстояние, координаты, discovery radius, " +
+                "Road Width, Terrain или маршрут. Масштабируется вместе с zoom/pan карты и в Preview, " +
+                "и в игре — фиксированный экранный размер здесь сознательно не используется.",
                 MessageType.None);
             EditorGUILayout.EndVertical();
         }
@@ -2580,8 +2634,18 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 ? previewWorldData.HomeYPercent
                 : WorldMapNavigation.CapitalYPercent;
 
+            // Задача "регулируемый визуальный размер героя и Дома": тот же
+            // WorldMapVisualTheme.HomeMarkerSizeCells, что и runtime — единый
+            // источник истины, не отдельный фиксированный 6px квадрат.
+            float homeMarkerSizeCells = database.ActiveTheme != null
+                ? database.ActiveTheme.HomeMarkerSizeCells
+                : WorldMapVisualTheme.DefaultHomeMarkerSizeCells;
+            float homeWidth = mapRect.width / (WorldMapNavigation.GridWidth - 1) * homeMarkerSizeCells;
+            float homeHeight = mapRect.height / (WorldMapNavigation.GridHeight - 1) * homeMarkerSizeCells;
+
             Vector2 homePoint = WorldMapPreviewMath.MapToPreview(mapRect, homeXPercent, homeYPercent);
-            Rect capitalRect = new Rect(homePoint.x - 3f, homePoint.y - 3f, 6f, 6f);
+            Rect capitalRect = new Rect(
+                homePoint.x - homeWidth * 0.5f, homePoint.y - homeHeight * 0.5f, homeWidth, homeHeight);
             EditorGUI.DrawRect(capitalRect, new Color(0.95f, 0.72f, 0.24f, 1f));
 
             foreach (LocationData location in previewState.Locations)

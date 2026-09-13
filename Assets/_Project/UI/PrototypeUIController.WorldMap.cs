@@ -6,11 +6,13 @@ using UnityEngine.UIElements;
 
 public partial class PrototypeUIController
 {
-    // WM-16: поселение читается как объект карты и занимает примерно четверть
-    // клетки. Маркер героя отделён от размера поселения: он имеет постоянный
-    // экранный диаметр и не меняет форму/размер во время движения и zoom.
-    private const float CapitalMarkerCellFraction = 0.25f;
-    private const float ArmyMarkerScreenDiameter = 8f;
+    // Задача "регулируемый визуальный размер героя и Дома": размеры теперь
+    // читаются из WorldMapVisualTheme.HeroMarkerSizeCells/HomeMarkerSizeCells
+    // (доли логической клетки, единый источник истины с Preview) — заменяет
+    // прежние захардкоженные CapitalMarkerCellFraction/ArmyMarkerScreenDiameter.
+    // Сознательный отказ от прежней WM-16 модели "герой — постоянный
+    // экранный диаметр, не зависит от zoom": по явному требованию этой
+    // задачи маркер героя теперь масштабируется вместе с картой, как и Дом.
 
     // AM-07.5 (канон v1.35, §9.9): единственное место в UI-слое, где решается,
     // какая география активна — авторский мир (если подключён) или безопасная
@@ -778,12 +780,14 @@ public partial class PrototypeUIController
                 "world-map-capital-return");
         }
 
-        // WM-16: поселение — примерно четверть клетки. Размер и позиция
-        // считаются из реального разрешения сетки и канонической точки столицы.
-        float markerWidthPercent =
-            100f / (WorldMapNavigation.GridWidth - 1) * CapitalMarkerCellFraction;
-        float markerHeightPercent =
-            100f / (WorldMapNavigation.GridHeight - 1) * CapitalMarkerCellFraction;
+        // Размер и позиция считаются из реального разрешения сетки,
+        // WorldMapVisualTheme.HomeMarkerSizeCells (доли клетки) и
+        // канонической точки столицы.
+        float homeMarkerSizeCells = GetActiveMarkerTheme()?.HomeMarkerSizeCells
+            ?? WorldMapVisualTheme.DefaultHomeMarkerSizeCells;
+        Vector2 markerSizePercent = GetMarkerSizePercent(homeMarkerSizeCells);
+        float markerWidthPercent = markerSizePercent.x;
+        float markerHeightPercent = markerSizePercent.y;
 
         worldMapCapitalButton.style.width =
             new Length(markerWidthPercent, LengthUnit.Percent);
@@ -831,21 +835,26 @@ public partial class PrototypeUIController
         ExpeditionData expedition =
             gameState.ActiveExpedition;
 
-        // WM-16: позиция остаётся в процентах мира, а физический размер героя
-        // задаётся в px с обратной компенсацией zoom. Поэтому точка остаётся
-        // настоящим кругом одного экранного диаметра и не растягивается во
-        // время движения между клетками.
-        RefreshWorldMapArmyMarkerScreenSize();
+        // Позиция и размер оба в процентах мира — маркер героя теперь
+        // масштабируется вместе с картой при zoom (child элемента world-map,
+        // который сам получает transform:scale, поэтому процентный размер
+        // автоматически масштабируется вместе с ним без ручной компенсации).
+        RefreshWorldMapArmyMarkerSize();
         worldMapArmyMarker.style.minWidth = new Length(0, LengthUnit.Pixel);
         worldMapArmyMarker.style.minHeight = new Length(0, LengthUnit.Pixel);
 
         worldMapArmyMarker.style.display =
             DisplayStyle.Flex;
+
+        float heroMarkerSizeCells = GetActiveMarkerTheme()?.HeroMarkerSizeCells
+            ?? WorldMapVisualTheme.DefaultHeroMarkerSizeCells;
+        Vector2 heroMarkerSizePercent = GetMarkerSizePercent(heroMarkerSizeCells);
+
         worldMapArmyMarker.style.left = new Length(
-            expedition.CurrentMapXPercent,
+            expedition.CurrentMapXPercent - heroMarkerSizePercent.x * 0.5f,
             LengthUnit.Percent);
         worldMapArmyMarker.style.top = new Length(
-            expedition.CurrentMapYPercent,
+            expedition.CurrentMapYPercent - heroMarkerSizePercent.y * 0.5f,
             LengthUnit.Percent);
 
         string armyStatusText =
@@ -860,20 +869,38 @@ public partial class PrototypeUIController
         RefreshWorldMapActivityProgress(expedition);
     }
 
-    private void RefreshWorldMapArmyMarkerScreenSize()
+    private void RefreshWorldMapArmyMarkerSize()
     {
         if (worldMapArmyMarker == null)
             return;
 
-        float zoom = Mathf.Max(0.0001f, worldMapZoom);
-        float size = ArmyMarkerScreenDiameter / zoom;
-        float halfSize = size * 0.5f;
+        float heroMarkerSizeCells = GetActiveMarkerTheme()?.HeroMarkerSizeCells
+            ?? WorldMapVisualTheme.DefaultHeroMarkerSizeCells;
+        Vector2 sizePercent = GetMarkerSizePercent(heroMarkerSizeCells);
 
-        worldMapArmyMarker.style.width = size;
-        worldMapArmyMarker.style.height = size;
-        worldMapArmyMarker.style.marginLeft = -halfSize;
-        worldMapArmyMarker.style.marginTop = -halfSize;
+        // Процентный размер, не px — маркер масштабируется вместе с картой
+        // при zoom (см. комментарий в RefreshWorldMapArmyMarker). margin
+        // больше не нужен для центрирования — left/top уже сдвинуты на
+        // половину ширины/высоты в RefreshWorldMapArmyMarker.
+        worldMapArmyMarker.style.width = new Length(sizePercent.x, LengthUnit.Percent);
+        worldMapArmyMarker.style.height = new Length(sizePercent.y, LengthUnit.Percent);
+        worldMapArmyMarker.style.marginLeft = 0;
+        worldMapArmyMarker.style.marginTop = 0;
     }
+
+    // Задача "регулируемый визуальный размер героя и Дома": единый перевод
+    // "доли логической клетки" → "проценты карты" для обеих осей —
+    // используется и Домом, и героем, чтобы не разойтись в двух местах.
+    // GridWidth/GridHeight отдельные — сетка не обязана быть квадратной.
+    private static Vector2 GetMarkerSizePercent(float sizeCells)
+    {
+        return new Vector2(
+            100f / (WorldMapNavigation.GridWidth - 1) * sizeCells,
+            100f / (WorldMapNavigation.GridHeight - 1) * sizeCells);
+    }
+
+    private static WorldMapVisualTheme GetActiveMarkerTheme() =>
+        WorldMapVisualRuntime.LoadActiveTheme();
 
     private void RefreshWorldMapActivityProgress(ExpeditionData expedition)
     {

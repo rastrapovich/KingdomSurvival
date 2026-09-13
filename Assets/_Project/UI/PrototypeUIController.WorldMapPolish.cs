@@ -282,9 +282,13 @@ public partial class PrototypeUIController
         }
     }
 
-    // Route-маркеры и точка героя остаются внутри world-map, поэтому их
-    // физический размер компенсируется обратно пропорционально zoom. Сетка
-    // вынесена в screen-space overlay и обновляется отдельно.
+    // Route-маркеры остаются внутри world-map, поэтому их физический размер
+    // компенсируется обратно пропорционально zoom. Сетка вынесена в
+    // screen-space overlay и обновляется отдельно. Маркер героя сюда больше
+    // не входит: задача "регулируемый визуальный размер героя и Дома"
+    // сознательно отказалась от компенсации zoom для героя — его процентный
+    // размер (RefreshWorldMapArmyMarkerSize) масштабируется вместе с картой
+    // автоматически через transform:scale на world-map, без ручного пересчёта.
     private void RefreshWorldMapZoomCompensatedVisuals()
     {
         RefreshWorldMapGridOverlay();
@@ -304,8 +308,6 @@ public partial class PrototypeUIController
                 }
             });
         }
-
-        RefreshWorldMapArmyMarkerScreenSize();
     }
 
     private void RegisterCancelledRosterPreservation(

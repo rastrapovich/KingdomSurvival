@@ -90,25 +90,24 @@ public class TimedExpeditionActivityTests
         Assert.That(state.ArmySupply, Is.EqualTo(10));
         Assert.That(state.ActiveExpedition.RouteIndex, Is.EqualTo(startRouteIndex));
 
-        // WM-12: "1 клетка = 1 сутки" — после оставшегося часа активности
-        // нужно ещё почти сутки движения, чтобы пройти клетку маршрута.
-        // Остаток активности (1ч) + запас на полную клетку (36ч, с хвостом
-        // во вторую клетку, чтобы не зависеть от округления).
+        // Задача "пересобрать масштаб путешествия": клетка маршрута теперь
+        // BaseTravelHoursPerCell игровых часов (по умолчанию 4, не 24) —
+        // остаток активности (1ч) + запас в 1.5 клетки движения гарантированно
+        // завершает РОВНО одну клетку (больше 1×, меньше 2× клетки), не
+        // зависит от округления и не переползает на клетку дальше.
+        double oneCellHours = 1.0 / ContinuousSimulationSystem.CellsPerGameHour;
         float secondAdvanceSeconds = (float)(
-            37.0 / ContinuousSimulationSystem.GameHoursPerRealSecond);
+            (1.0 + oneCellHours * 1.5) / ContinuousSimulationSystem.GameHoursPerRealSecond);
         ContinuousSimulationBatch completed =
             ContinuousSimulationSystem.Advance(state, secondAdvanceSeconds, false);
 
         Assert.That(state.ActiveExpedition.ActiveActivity, Is.Null);
-        // WM-12: 10 + 3 (награда сбора ягод) - 5 (дневной расход снабжения
-        // похода из 4 бойцов+командир, GameState.ExpeditionSupplyConsumption)
-        // = 8. Раньше в это же окно теста ни разу не пересекалась полночь
-        // (весь тест укладывался в доли секунды игрового времени), поэтому
-        // дневной расход не успевал сработать — при "1 клетка = 1 сутки"
-        // прохождение хотя бы одной клетки маршрута обязательно пересекает
-        // хотя бы одну полночь, и расход снабжения — законное следствие
-        // новой шкалы, а не регрессия.
-        Assert.That(state.ArmySupply, Is.EqualTo(8));
+        // При базовом эталоне (4ч/клетку) это окно теста больше не обязано
+        // пересекать полночь (в отличие от прежнего "1 клетка = 1 сутки",
+        // где прохождение клетки гарантированно задевало хотя бы одну
+        // полночь) — дневной расход снабжения здесь не срабатывает, снабжение
+        // отражает только награду за сбор ягод: 10 + 3 = 13.
+        Assert.That(state.ArmySupply, Is.EqualTo(13));
         Assert.That(
             state.ActiveExpedition.RouteIndex,
             Is.EqualTo(startRouteIndex + 1));
@@ -320,14 +319,17 @@ public class TimedExpeditionActivityTests
             new MapPointData(5f, 0f)
         };
 
-        // WM-12: "1 клетка = 1 сутки" — CellsPerGameHour = 1/24, маршрут из
-        // 5 клеток занимает ровно 5 суток (120 часов).
+        // Задача "пересобрать масштаб путешествия": без активного авторского
+        // мира (или с невалидным BaseTravelHoursPerCell) действует безопасный
+        // fallback — 4 игровых часа на клетку, CellsPerGameHour = 1/4.
+        // Явный сброс географии делает тест независимым от порядка запуска.
+        WorldMapNavigation.ConfigureDefaultTerrain();
         Assert.That(
             ContinuousSimulationSystem.CellsPerGameHour,
-            Is.EqualTo(1.0 / 24.0).Within(0.0001));
+            Is.EqualTo(1.0 / 4.0).Within(0.0001));
         Assert.That(
             ContinuousSimulationSystem.CalculateTravelHours(route),
-            Is.EqualTo(120.0).Within(0.001));
+            Is.EqualTo(20.0).Within(0.001));
     }
 
     private static GameState CreateTravellingState()

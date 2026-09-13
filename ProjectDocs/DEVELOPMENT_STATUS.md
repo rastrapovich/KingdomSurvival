@@ -1044,6 +1044,40 @@ Rect mapRect = WorldMapPreviewMath.ComputeMapRect(previewArea, spriteAspect, sho
 
 **Требует ручной проверки в живом Unity** (полный workflow разделов 41-48 задачи): реальное колесо мыши над конкретной точкой Art Layer — визуальное подтверждение, что точка остаётся под курсором; MMB pan при zoom > fit; кнопки «Вписать карту»/«1×»; выбор/move/resize Art Layer, Terrain Area (включая create протягиванием) и Road Point после zoom/pan — что клик действительно попадает в ожидаемую map-точку; Terrain Area opacity 20% при включённом Art Layer — арт остаётся читаемым (эта часть логики не менялась в WM-T04.9, но стоит перепроверить визуально после смены canvas).
 
+## Пересборка масштаба путешествия — базово 1 клетка = 4 игровых часа — 14.09.2026
+
+Отдельная задача от пользователя: сетка глобальной карты `104×64` и максимальный zoom Preview позволяют приблизиться примерно до одной клетки на экран, но симуляция фактически считала «1 клетка маршрута = 24 игровых часа», из-за чего на обычной скорости пересечение одной клетки занимало ~1 минуту, а на ускорении всё равно ощущалось слишком медленно. Канон и `NARRATIVE.md` проверены — утверждённого правила «1 клетка = 1 сутки» там нет, это было только техническое решение кода (комментарий `WM-12`), поэтому менять его вместе с реализацией не требовало отдельного согласования канона.
+
+### Причина старого правила
+
+`ContinuousSimulationSystem.CellsPerGameHour = ArmyCellsPerRealSecond / GameHoursPerRealSecond`, где `ArmyCellsPerRealSecond = 1/RealSecondsPerGameDay` и `GameHoursPerRealSecond = 24/RealSecondsPerGameDay` — `RealSecondsPerGameDay` сокращался в числителе и знаменателе, давая ровно `1/24` НЕЗАВИСИМО от темпа мира. Скорость армии была случайно, но жёстко привязана к длительности игровых суток.
+
+### Что сделано
+
+- **`WorldMapDefinitionData.BaseTravelHoursPerCell`** (новое поле Core, default `4f`) — сколько игровых часов занимает пересечение одной обычной (OpenGround) клетки на обычной скорости. Балансировочная настройка мира, не константа кода.
+- **`WorldMapWorldDefinitionAsset`**: сериализуемое поле `baseTravelHoursPerCell` + safe-fallback свойство `BaseTravelHoursPerCell` (тот же паттерн, что уже есть у `GlobalMapAspect` из WM-T04.9 — невалидное/нулевое/отрицательное значение откатывается на default `4`, без деления на 0), проброшено в `ToData()`. Старые ассеты без этого поля получают default через инициализатор при десериализации — подтверждено живым `eval` на реальном `KingdomSurvivalWorldDefinition` (`BaseTravelHoursPerCell=4` сразу после загрузки, без миграции).
+- **Новая формула**: `ContinuousSimulationSystem.CellsPerGameHour = 1.0 / hoursPerCell`, где `hoursPerCell` читается из `WorldMapNavigation.ActiveDefinition.BaseTravelHoursPerCell` (fallback `4` без активного мира или при `<=0`). `RealSecondsPerGameDay`/`GameHoursPerRealSecond` (темп течения МИРОВОГО времени) и `NormalSpeedMultiplier`/`FastSpeedMultiplier` — не тронуты; удалён только промежуточный `ArmyCellsPerRealSecond` (был нужен исключительно для старой, теперь несуществующей, формулы).
+- **Вкладка «Мир»**: новый блок «Путешествие» — поле «Базовое время на клетку, ч», read-only «Действующее значение, ч» (после fallback), HelpBox с точным текстом из задачи.
+- **Terrain cost (Hills/Mountains) и живой множитель дорог не тронуты и не задвоены**: `WorldMapNavigation.FindPath` по-прежнему добавляет 2/3 под-точки маршрута для Hills/Mountains (независимый слой), `WorldMapGameplayTerrainQuery`/`ContinuousSimulationActivities.AdvanceExpeditionMovement` по-прежнему применяют живой множитель местности (дороги) поверх базовой скорости — это ДВА независимых, не пересекающихся механизма, перемножаются один раз. Проверено тестами и вручную: обычная клетка = 4ч, Hills = 8ч, Mountains = 12ч, дорога (×1.3) сокращает время в пути.
+- **`GetTravelHoursRemaining`** автоматически использует новую базу (через тот же `CellsPerGameHour`) — отдельно ничего чинить не пришлось. Известное ограничение сохраняется как есть (не расширялось): ETA не учитывает дороги, которые встретятся ВПЕРЕДИ по маршруту — только текущую позицию.
+- **Save/Load не затронут**: `BaseTravelHoursPerCell` — данные World Definition (не runtime-состояние), `ExportSnapshot`/`RestoreSnapshot` (`SegmentProgress`/`RouteIndex`/время) продолжают работать без изменений — подтверждено новым тестом.
+- **Не тронуто**: `GridWidth=104`/`GridHeight=64`, размер canvas/zoom/арт/координаты локаций, Road/A*/pathfinding архитектура, UI Toolkit карта.
+
+### Обновлены тесты со старым правилом «1 клетка = 24 часа»
+
+- `ContinuousSimulationTests.cs`: `Expedition_OneCellAdvancesExactlyTwentyFourGameHoursAtNormalSpeed` → `Expedition_OneCellAdvancesExactlyBaseTravelHoursAtNormalSpeed` (10 реальных секунд = 4ч по умолчанию, не пересекает полночь); `FastSpeed_TriplesClockAndMovesOneCellPerGameDay` → `FastSpeed_TriplesClockAndMovesOneCellPerBaseTravelHours` (расчёт остатка времени — от новой клетки, не от `RealSecondsPerGameDay`).
+- `StabilityRegressionTests.cs`: `OneCellAdvanceSeconds` пересчитан через `CellsPerGameHour`/`GameHoursPerRealSecond` (генерик-формула, а не жёстко от `RealSecondsPerGameDay`), явный сброс географии в статическом конструкторе — иначе значение зависело бы от порядка запуска тестов.
+- `TimedExpeditionActivityTests.cs`: `TravelEstimate_UsesContinuousArmySpeed` — жёсткая проверка `1/24`/`120ч` заменена на `1/4`/`20ч` (для 5 клеток); `GatherBerries_StopsForThreeHoursThenRewardsAndResumesRoute` — буфер движения после активности пересчитан под новую (кратно меньшую) длительность клетки (иначе маршрут проскакивал на 9 клеток вместо одной); ArmySupply-ожидание скорректировано — при 4ч/клетку окно теста больше не обязано пересекать полночь, дневной расход снабжения не срабатывает (13, не 8) — это не регрессия, а следствие новой шкалы.
+- `WorldMapRoadMovementTests.cs`: `Advance` уменьшен со 150 до 20 секунд в двух тестах — при 6-кратном ускорении базового движения старая длительность заставляла экспедицию доехать до цели раньше, чем нужно было измерить (оба сценария упирались в один и тот же clamp дистанции).
+
+### Новые тесты (`WorldMapTravelScaleTests.cs`, 9 тестов)
+
+OpenGround = 4ч за клетку (fallback без мира); 10 клеток = 40ч; Hills (×2) = 8ч; Mountains (×3) = 12ч (важная деталь при построении: `WorldMapNavigation.ClampMapX/Y` клампит координаты к `[2..98]`, тестовые координаты должны лежать строго внутри); дорога с множителем 1.3 реально сокращает время в пути (не только увеличивает дистанцию — та же связь с другой стороны); смена `BaseTravelHoursPerCell` меняет движение, `RealSecondsPerGameDay` при этом не меняется (структурно не может — не поле World Definition); `BaseTravelHoursPerCell = 0` и `< 0` безопасно откатываются на fallback `4` (без `Infinity`/`NaN`); Save/Load посреди сегмента маршрута сохраняет позицию/прогресс под новым масштабом.
+
+**Проверено:** компиляция чистая; полный `Run All` EditMode — **917/917 passed, 0 failed** (908 + 9 новых, 5 старых тестов обновлены под новую шкалу, остальные не менялись). Живой `eval`: реальный `KingdomSurvivalWorldDefinition` без миграции даёт `BaseTravelHoursPerCell=4`, `CellsPerGameHour=0.25`; вкладка «Мир» с новым блоком «Путешествие» отрепейнчена в живом Editor-цикле — 0 новых ошибок в консоли; `git status` подтвердил отсутствие изменений в `.asset`-файлах на диске.
+
+**Требует ручной проверки в живом Unity (Play Mode):** обычная клетка на normal speed должна проходиться примерно за 10 реальных секунд (4 игровых часа при текущем темпе мира ≈ 1/6 суток), на ×3 — примерно за 3.3с; маршрут в 5–10 клеток должен визуально идти заметно быстрее прежнего, но плавно (не телепортируется) — герой по-прежнему интерполируется через `SegmentProgress`.
+
 ### AM-08…AM-10 — статус
 
 Не реализованы. Дальнейшие этапы (зональные Encounter — теперь получают Region/Zone/context tags из авторской географии AM-07.5, а не из procedural terrain, как и просил пользователь, — состояния рисунков последствий, LOD/фильтры AM-06 в полном объёме, память/бюджет текстур) по-прежнему требуют либо реальных арт-ассетов, либо длительной ручной Unity-проверки по §19, либо того и другого.

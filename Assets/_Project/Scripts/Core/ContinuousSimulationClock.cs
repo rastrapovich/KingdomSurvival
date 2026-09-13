@@ -59,19 +59,13 @@ public sealed class ContinuousSimulationSnapshotData
 
 public static partial class ContinuousSimulationSystem
 {
-    // Ускорение ×2 (запрос пользователя, WM-13): было 120.0. Часы и скорость
-    // армии выведены из этой константы ниже, поэтому "1 клетка = 24 часа"
-    // остаётся верным на любой скорости — трогать нужно только это число.
+    // Ускорение ×2 (запрос пользователя, WM-13): было 120.0. Это темп течения
+    // МИРОВОГО времени (сколько реальных секунд занимают игровые сутки) —
+    // отдельная система от того, какое расстояние герой проходит за игровой
+    // час (см. CellsPerGameHour ниже). Менять эту константу можно свободно,
+    // не трогая масштаб путешествия по карте.
     public const double RealSecondsPerGameDay = 60.0;
     public const double GameHoursPerRealSecond = 24.0 / RealSecondsPerGameDay;
-    // Прямое определение темпа: 1 клетка маршрута (CalculateRouteCells/FindPath,
-    // WorldMapNavigation) = 1 игровые сутки на обычной скорости, а не подобранный
-    // коэффициент компенсации под размер сетки. RealSecondsPerGameDay реальных
-    // секунд как раз и составляют одни игровые сутки, поэтому клетка проходится
-    // ровно за них. Холмы/горы автоматически становятся 2/3 суток на клетку —
-    // это уже даёт WorldMapNavigation.GetTerrainTravelCost через удвоение/
-    // утроение под-точек маршрута в FindPath, отдельно трогать не нужно.
-    public const double ArmyCellsPerRealSecond = 1.0 / RealSecondsPerGameDay;
     public const int NormalSpeedMultiplier = 1;
     public const int FastSpeedMultiplier = 3;
     public const double StartHour = 8.0;
@@ -354,8 +348,32 @@ public static partial class ContinuousSimulationSystem
         return hours.ToString("00") + ":" + minutes.ToString("00");
     }
 
-    public static double CellsPerGameHour =>
-        ArmyCellsPerRealSecond / GameHoursPerRealSecond;
+    // Задача "пересобрать масштаб путешествия": скорость армии больше не
+    // выведена из длительности игровых суток (RealSecondsPerGameDay/
+    // GameHoursPerRealSecond — темп течения МИРОВОГО времени, отдельная
+    // система). База — редактируемая настройка активного мира
+    // (WorldMapDefinitionData.BaseTravelHoursPerCell, World Map Database →
+    // «Мир» → «Путешествие»); без активного мира или при невалидном
+    // (<=0) значении — безопасный fallback 4ч/клетку, без деления на 0.
+    // Хиллы/горы автоматически становятся ×2/×3 от этой базы — это уже
+    // даёт WorldMapNavigation.GetTerrainTravelCost через удвоение/утроение
+    // под-точек маршрута в FindPath (независимый слой, не трогается);
+    // живой множитель дорог/местности (WorldMapGameplayTerrainQuery)
+    // применяется поверх в ContinuousSimulationActivities — тоже не трогается.
+    public static double CellsPerGameHour
+    {
+        get
+        {
+            float hoursPerCell = WorldMapNavigation.ActiveDefinition != null
+                ? WorldMapNavigation.ActiveDefinition.BaseTravelHoursPerCell
+                : DefaultBaseTravelHoursPerCell;
+            if (hoursPerCell <= 0f)
+                hoursPerCell = DefaultBaseTravelHoursPerCell;
+            return 1.0 / hoursPerCell;
+        }
+    }
+
+    public const float DefaultBaseTravelHoursPerCell = 4f;
 
     public static double CalculateTravelHours(
         List<MapPointData> route,

@@ -38,12 +38,17 @@ public class ContinuousSimulationTests
         Assert.That(clock.HourOfDay, Is.EqualTo(8.0).Within(0.01));
     }
 
-    // WM-13: явный контрактный тест — та же намеренная захардкоженная
-    // константа (60 секунд), проверяющая независимо второй канонический
-    // факт: "1 клетка маршрута = 24 игровых часа" на обычной скорости.
+    // Задача "пересобрать масштаб путешествия" — явный контрактный тест
+    // (число НАМЕРЕННО захардкожено, не выведено из BaseTravelHoursPerCell/
+    // GameHoursPerRealSecond): без активного авторского мира действует
+    // безопасный fallback 4 игровых часа на клетку — 10 реальных секунд на
+    // обычной скорости (4ч × 60с/24ч). Если рабочий эталон масштаба
+    // путешествия когда-нибудь изменится, тест должен сломаться и заставить
+    // осознанно обновить число здесь, а не молча продолжать проходить.
     [Test]
-    public void Expedition_OneCellAdvancesExactlyTwentyFourGameHoursAtNormalSpeed()
+    public void Expedition_OneCellAdvancesExactlyBaseTravelHoursAtNormalSpeed()
     {
+        WorldMapNavigation.ConfigureDefaultTerrain();
         GameState state = CreateTravellingState();
         ContinuousSimulationSystem.Reset(state);
         ContinuousSimulationSystem.NotifyRouteChanged(state);
@@ -54,14 +59,14 @@ public class ContinuousSimulationTests
         int startDay = state.Day;
         double startHour = ContinuousSimulationSystem.GetClock(state).HourOfDay;
 
-        ContinuousSimulationSystem.Advance(state, 60f, false);
+        ContinuousSimulationSystem.Advance(state, 10f, false);
 
         Assert.That(expedition.RouteIndex, Is.EqualTo(startIndex + 1));
-        Assert.That(state.Day, Is.EqualTo(startDay + 1));
+        Assert.That(state.Day, Is.EqualTo(startDay), "4 часа от 08:00 не пересекают полночь.");
         Assert.That(
             ContinuousSimulationSystem.GetClock(state).HourOfDay,
-            Is.EqualTo(startHour).Within(0.01),
-            "1 клетка маршрута должна занимать ровно 24 часа — часы суток должны вернуться к тому же значению на следующий день.");
+            Is.EqualTo(startHour + 4.0).Within(0.01),
+            "1 клетка маршрута должна занимать ровно 4 игровых часа (BaseTravelHoursPerCell по умолчанию).");
     }
 
     [Test]
@@ -84,8 +89,9 @@ public class ContinuousSimulationTests
     }
 
     [Test]
-    public void FastSpeed_TriplesClockAndMovesOneCellPerGameDay()
+    public void FastSpeed_TriplesClockAndMovesOneCellPerBaseTravelHours()
     {
+        WorldMapNavigation.ConfigureDefaultTerrain();
         GameState state = CreateTravellingState();
         ContinuousSimulationSystem.Reset(state);
         ContinuousSimulationSystem.NotifyRouteChanged(state);
@@ -110,18 +116,21 @@ public class ContinuousSimulationTests
         Assert.That(
             expedition.RouteIndex,
             Is.EqualTo(startIndex),
-            "при новом темпе ('1 клетка = 1 сутки') 2 реальные секунды ещё не завершают клетку");
+            "при базовом эталоне (4ч/клетку) 2 реальные секунды на Fast (2.4 игровых часа) ещё не завершают клетку");
 
-        // WM-12: при Fast (×3) та же клетка (1 сутки) проходится за
-        // RealSecondsPerGameDay/FastSpeedMultiplier реальных секунд —
-        // догоняем остаток времени до полной клетки.
-        float remainingSeconds = (float)(
-            ContinuousSimulationSystem.RealSecondsPerGameDay /
-            ContinuousSimulationSystem.FastSpeedMultiplier) - 2f;
+        // Задача "пересобрать масштаб путешествия": та же клетка
+        // (BaseTravelHoursPerCell, по умолчанию 4ч) на Fast (×3) проходится
+        // за (4ч/GameHoursPerRealSecond)/3 реальных секунд — догоняем
+        // остаток времени до полной клетки.
+        double oneCellHours = 1.0 / ContinuousSimulationSystem.CellsPerGameHour;
+        float totalSecondsForOneCellAtFastSpeed = (float)(
+            (oneCellHours / ContinuousSimulationSystem.GameHoursPerRealSecond) /
+            ContinuousSimulationSystem.FastSpeedMultiplier);
+        float remainingSeconds = totalSecondsForOneCellAtFastSpeed - 2f;
         ContinuousSimulationSystem.Advance(state, remainingSeconds, false);
 
         Assert.That(expedition.RouteIndex, Is.EqualTo(startIndex + 1));
-        Assert.That(state.Day, Is.EqualTo(startDay + 1));
+        Assert.That(state.Day, Is.EqualTo(startDay), "4 часа от 08:00 не пересекают полночь.");
     }
 
     [Test]

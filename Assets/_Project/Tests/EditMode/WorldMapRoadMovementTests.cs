@@ -87,15 +87,19 @@ public class WorldMapRoadMovementTests
     public void Expedition_TravelsFartherOnRoadThanOnOpenGroundInSameTime()
     {
         // Дорога покрывает весь путь: за одинаковое игровое время экспедиция
-        // на дороге должна пройти в ~1.30 раза больше расстояния.
+        // на дороге должна пройти в ~1.30 раза больше расстояния. Задача
+        // "пересобрать масштаб путешествия" ускорила базовое движение в
+        // 6 раз (4ч/клетку вместо 24ч) — advance уменьшен со 150 до 20с,
+        // чтобы ни один сценарий не успевал доехать до цели раньше времени
+        // (иначе оба измерения упёрлись бы в один и тот же clamp дистанции).
         GameState onRoad = CreateStateTravellingStraightLine(
             BuildDefinitionWithRoad("road-everywhere", 0f, 100f));
-        ContinuousSimulationSystem.Advance(onRoad, 150f, false);
+        ContinuousSimulationSystem.Advance(onRoad, 20f, false);
         double onRoadDistance = onRoad.ActiveExpedition.CurrentMapXPercent - StartX;
 
         GameState openGround = CreateStateTravellingStraightLine(
             BuildDefinitionWithRoad("no-road", 0f, 0f));
-        ContinuousSimulationSystem.Advance(openGround, 150f, false);
+        ContinuousSimulationSystem.Advance(openGround, 20f, false);
         double openGroundDistance = openGround.ActiveExpedition.CurrentMapXPercent - StartX;
 
         Assert.That(onRoadDistance, Is.GreaterThan(openGroundDistance),
@@ -131,10 +135,12 @@ public class WorldMapRoadMovementTests
         GameState state = CreateStateTravellingStraightLine(
             BuildDefinitionWithRoad("no-road-baseline", 0f, 0f));
 
-        ContinuousSimulationSystem.Advance(state, 150f, false);
+        // См. комментарий в Expedition_TravelsFartherOnRoadThanOnOpenGroundInSameTime
+        // про уменьшение advance после ускорения базового движения в 6 раз.
+        ContinuousSimulationSystem.Advance(state, 20f, false);
 
         double expectedCells =
-            150f * ContinuousSimulationSystem.MaximumSpeedMultiplier *
+            20f * ContinuousSimulationSystem.MaximumSpeedMultiplier *
             ContinuousSimulationSystem.GameHoursPerRealSecond *
             ContinuousSimulationSystem.CellsPerGameHour;
         double expectedPercent =

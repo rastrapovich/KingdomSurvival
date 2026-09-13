@@ -332,8 +332,35 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             EditorGUILayout.Space(10f);
             DrawGlobalMapCanvasSection(worldSO, world);
 
+            EditorGUILayout.Space(10f);
+            DrawTravelScaleSection(worldSO, world);
+
             EditorGUILayout.EndScrollView();
             worldSO.ApplyModifiedProperties();
+        }
+
+        // Задача "пересобрать масштаб путешествия": балансировочная
+        // настройка мира, не константа кода — можно менять без пересборки.
+        // Дороги и Hills/Mountains изменяют итоговое время поверх этого
+        // базового значения, сама настройка не заменяется ими.
+        private static void DrawTravelScaleSection(SerializedObject worldSO, WorldMapWorldDefinitionAsset world)
+        {
+            EditorGUILayout.LabelField("Путешествие", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.PropertyField(
+                worldSO.FindProperty("baseTravelHoursPerCell"),
+                new GUIContent("Базовое время на клетку, ч"));
+
+            using (new EditorGUI.DisabledScope(true))
+                EditorGUILayout.FloatField("Действующее значение, ч", world.BaseTravelHoursPerCell);
+
+            EditorGUILayout.HelpBox(
+                "Сколько игровых часов занимает пересечение одной обычной клетки. Дороги и тип " +
+                "местности изменяют это значение (Hills/Mountains — во столько же раз больше, " +
+                "дорога — по своему множителю скорости). 0 или отрицательное значение безопасно " +
+                "откатывается на 4ч, деление на ноль исключено.",
+                MessageType.None);
+            EditorGUILayout.EndVertical();
         }
 
         // Задача "Global Map Aspect" (WM-T04.9, раздел 7): reference canvas,

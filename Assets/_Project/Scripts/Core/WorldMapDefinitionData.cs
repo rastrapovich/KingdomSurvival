@@ -24,6 +24,17 @@ public sealed class WorldMapDefinitionData
     public float HomeXPercent = WorldMapNavigation.CapitalXPercent;
     public float HomeYPercent = WorldMapNavigation.CapitalYPercent;
 
+    // Задача "пересобрать масштаб путешествия": сколько игровых часов
+    // занимает пересечение одной обычной (OpenGround) клетки маршрута на
+    // обычной скорости — балансировочное значение мира, а не константа кода
+    // (раньше было жёстко зашито как "1 клетка = 24 часа" через
+    // RealSecondsPerGameDay/GameHoursPerRealSecond, что не позволяло менять
+    // масштаб путешествия без переписывания симуляции). Дороги и Hills/
+    // Mountains изменяют итоговое время поверх этого базового значения — не
+    // заменяют его. 4f — рабочий эталон, безопасный fallback для старых/
+    // невалидных (<=0) значений см. ContinuousSimulationSystem.CellsPerGameHour.
+    public float BaseTravelHoursPerCell = 4f;
+
     // Река/озёра/берега больше не часть этого контракта: карта переходит на
     // вручную нарисованное полотно, где вода уже присутствует как арт, а не
     // как процедурная/авторская геометрия пути (см. решение "нарисованная

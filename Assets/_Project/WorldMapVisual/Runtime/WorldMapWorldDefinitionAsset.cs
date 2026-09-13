@@ -31,6 +31,16 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private float mapCanvasWidth = DefaultMapCanvasWidth;
         [SerializeField] private float mapCanvasHeight = DefaultMapCanvasHeight;
 
+        // Задача "пересобрать масштаб путешествия": сколько игровых часов
+        // занимает пересечение одной обычной клетки на обычной скорости —
+        // балансировочная настройка мира (не константа кода). Дороги/
+        // Hills/Mountains изменяют итоговое время поверх неё, саму
+        // настройку не заменяют. Старые ассеты без этого поля получают
+        // default через инициализатор при десериализации.
+        public const float DefaultBaseTravelHoursPerCell = 4f;
+
+        [SerializeField] private float baseTravelHoursPerCell = DefaultBaseTravelHoursPerCell;
+
         [SerializeField] private List<TerrainAreaEntry> terrainAreas =
             new List<TerrainAreaEntry>();
         [SerializeField] private List<SpawnSlotEntry> spawnSlots =
@@ -64,6 +74,12 @@ namespace KingdomSurvival.WorldMapVisual
                 return width / height;
             }
         }
+
+        // Тот же принцип защиты, что у GlobalMapAspect выше — невалидное/
+        // нулевое/отрицательное значение откатывается на default, а не даёт
+        // деление на ноль/бесконечную скорость в ContinuousSimulationSystem.
+        public float BaseTravelHoursPerCell =>
+            baseTravelHoursPerCell > 0f ? baseTravelHoursPerCell : DefaultBaseTravelHoursPerCell;
         public IReadOnlyList<TerrainAreaEntry> TerrainAreas => terrainAreas;
         public IReadOnlyList<SpawnSlotEntry> SpawnSlots => spawnSlots;
         public IReadOnlyList<GameplayTerrainSettingsEntry> GameplayTerrainSettings => gameplayTerrainSettings;
@@ -77,7 +93,8 @@ namespace KingdomSurvival.WorldMapVisual
                 GeographyVersion = geographyVersion,
                 HomeLocationId = homeLocationId,
                 HomeXPercent = homeXPercent,
-                HomeYPercent = homeYPercent
+                HomeYPercent = homeYPercent,
+                BaseTravelHoursPerCell = BaseTravelHoursPerCell
             };
 
             if (terrainAreas != null)

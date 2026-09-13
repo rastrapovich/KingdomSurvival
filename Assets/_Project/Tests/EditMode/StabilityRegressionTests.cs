@@ -6,12 +6,26 @@ using NUnit.Framework;
 
 public class StabilityRegressionTests
 {
-    // WM-12: "1 клетка = 1 сутки" — на обычной скорости клетка проходится за
-    // RealSecondsPerGameDay реальных секунд. Запас ×1.5, чтобы гарантированно
+    // Задача "пересобрать масштаб путешествия": одна клетка теперь занимает
+    // 1.0/CellsPerGameHour игровых часов (балансировочная настройка мира, по
+    // умолчанию 4ч — не жёстко "1 сутки"), а не фиксированную долю
+    // RealSecondsPerGameDay. Считаем нужные реальные секунды из этих же
+    // констант, а не из старого предположения — формула остаётся верной при
+    // любом BaseTravelHoursPerCell. Запас ×1.5, чтобы гарантированно
     // пересечь ровно одну клетку маршрута независимо от гранулярности шагов
-    // внутри ContinuousSimulationSystem.Advance.
-    private static readonly float OneCellAdvanceSeconds =
-        (float)(ContinuousSimulationSystem.RealSecondsPerGameDay * 1.5);
+    // внутри ContinuousSimulationSystem.Advance. Явно сбрасываем географию
+    // до default ПЕРЕД вычислением — CellsPerGameHour читает
+    // WorldMapNavigation.ActiveDefinition, а это static readonly поле
+    // вычисляется один раз при первом обращении к классу, до TearDown любого
+    // теста; без явного сброса значение зависело бы от порядка запуска тестов.
+    private static readonly float OneCellAdvanceSeconds;
+
+    static StabilityRegressionTests()
+    {
+        WorldMapNavigation.ConfigureDefaultTerrain();
+        OneCellAdvanceSeconds = (float)((1.0 / ContinuousSimulationSystem.CellsPerGameHour) /
+            ContinuousSimulationSystem.GameHoursPerRealSecond * 1.5);
+    }
 
     [Test]
     public void CreateNewGame_SameSeedIsIndependentOfPreviouslyConfiguredTerrain()
@@ -47,11 +61,9 @@ public class StabilityRegressionTests
             false);
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
 
-        // WM-12: "1 клетка = 1 сутки" — 1.0/CellsPerGameHour теперь ровно 24ч,
-        // то есть прибытие приходится на полночь/следующие сутки — часы суток
-        // при этом обёртываются по модулю 24 (ResolveMidnight), поэтому
-        // ожидание тоже нужно свернуть, иначе сравниваем с "32.0", которого
-        // HourOfDay физически не может показывать.
+        // 1.0/CellsPerGameHour часов после старта (StartHour) — если это
+        // пересекает полночь, часы суток оборачиваются по модулю 24
+        // (ResolveMidnight), поэтому ожидание тоже нужно свернуть.
         double expectedArrivalHour =
             (ContinuousSimulationSystem.StartHour +
              1.0 / ContinuousSimulationSystem.CellsPerGameHour) % 24.0;

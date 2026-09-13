@@ -81,4 +81,112 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
         }
     }
+
+    // Задача "Map Art Layers" — Bounds одного слоя в координатах карты
+    // (0..100%). Отдельная от Rect структура — Rect.x/y/width/height легко
+    // спутать с min/max при работе с Bounds карты, а не экрана.
+    public struct MapBounds
+    {
+        public float MinX;
+        public float MinY;
+        public float MaxX;
+        public float MaxY;
+
+        public MapBounds(float minX, float minY, float maxX, float maxY)
+        {
+            MinX = minX;
+            MinY = minY;
+            MaxX = maxX;
+            MaxY = maxY;
+        }
+
+        public float Width => MaxX - MinX;
+        public float Height => MaxY - MinY;
+    }
+
+    public enum ArtLayerCorner
+    {
+        TopLeft,
+        TopRight,
+        BottomLeft,
+        BottomRight
+    }
+
+    // Задача "Map Art Layers" (WM-T04.7): прямое перетаскивание/resize слоя
+    // в Preview. Чистая математика, без UnityEditor-типов — тестируется
+    // напрямую. Используется только Editor-стороной; runtime не меняется
+    // (raздел 21 задачи) — после drag меняются только сериализованные
+    // Bounds в ассете, существующий runtime-рендерер их просто читает.
+    public static class WorldMapArtLayerBoundsMath
+    {
+        // Сдвигает прямоугольник целиком так, чтобы он остался внутри
+        // 0..100 по обеим осям, не меняя Width/Height (раздел 8 задачи —
+        // "не обрезать размер, а сдвинуть"). Если Width/Height сам больше
+        // 100 (патологический случай), финальный Clamp может слегка урезать
+        // размер — это единственный путь остаться в пределах карты.
+        public static MapBounds ClampBoundsToMap(MapBounds bounds, float mapMin = 0f, float mapMax = 100f)
+        {
+            float minX = bounds.MinX, maxX = bounds.MaxX;
+            if (maxX > mapMax) { minX -= maxX - mapMax; maxX = mapMax; }
+            if (minX < mapMin) { maxX -= minX - mapMin; minX = mapMin; }
+            minX = Mathf.Max(mapMin, minX);
+            maxX = Mathf.Min(mapMax, maxX);
+
+            float minY = bounds.MinY, maxY = bounds.MaxY;
+            if (maxY > mapMax) { minY -= maxY - mapMax; maxY = mapMax; }
+            if (minY < mapMin) { maxY -= minY - mapMin; minY = mapMin; }
+            minY = Mathf.Max(mapMin, minY);
+            maxY = Mathf.Min(mapMax, maxY);
+
+            return new MapBounds(minX, minY, maxX, maxY);
+        }
+
+        // Раздел 6/7 задачи: считает от НЕИЗМЕННОГО originalBounds + суммарной
+        // дельты от точки MouseDown, а не добавляет маленькую дельту каждый
+        // кадр — исключает накопление плавающей ошибки за долгий drag.
+        public static MapBounds MoveBounds(MapBounds originalBounds, float deltaX, float deltaY)
+        {
+            MapBounds moved = new MapBounds(
+                originalBounds.MinX + deltaX, originalBounds.MinY + deltaY,
+                originalBounds.MaxX + deltaX, originalBounds.MaxY + deltaY);
+            return ClampBoundsToMap(moved);
+        }
+
+        // Раздел 9/10/12 задачи: тянем один угол, противоположный — anchor,
+        // неподвижен. Ведущая ось — X (ширина, посчитанная из перемещения
+        // угла); высота при preserveAspect выводится из ширины через
+        // aspectRatio спрайта (Sprite.rect, не вся Texture — раздел 25).
+        // newCornerMapPoint — АБСОЛЮТНАЯ map-точка курсора (originalCorner +
+        // суммарная дельта от MouseDown), не дельта за кадр — та же защита
+        // от дрифта, что и у MoveBounds.
+        public static MapBounds ResizeBoundsFromCorner(
+            MapBounds originalBounds,
+            ArtLayerCorner corner,
+            Vector2 newCornerMapPoint,
+            bool preserveAspect,
+            float aspectRatio,
+            float minSizePercent)
+        {
+            float cornerX = Mathf.Clamp(newCornerMapPoint.x, 0f, 100f);
+            float cornerY = Mathf.Clamp(newCornerMapPoint.y, 0f, 100f);
+
+            bool movingIsLeft = corner == ArtLayerCorner.TopLeft || corner == ArtLayerCorner.BottomLeft;
+            bool movingIsTop = corner == ArtLayerCorner.TopLeft || corner == ArtLayerCorner.TopRight;
+
+            float anchorX = movingIsLeft ? originalBounds.MaxX : originalBounds.MinX;
+            float anchorY = movingIsTop ? originalBounds.MaxY : originalBounds.MinY;
+
+            float width = Mathf.Max(minSizePercent, Mathf.Abs(cornerX - anchorX));
+            float height = preserveAspect && aspectRatio > 0f
+                ? Mathf.Max(minSizePercent, width / aspectRatio)
+                : Mathf.Max(minSizePercent, Mathf.Abs(cornerY - anchorY));
+
+            float minX = movingIsLeft ? anchorX - width : anchorX;
+            float maxX = movingIsLeft ? anchorX : anchorX + width;
+            float minY = movingIsTop ? anchorY - height : anchorY;
+            float maxY = movingIsTop ? anchorY : anchorY + height;
+
+            return ClampBoundsToMap(new MapBounds(minX, minY, maxX, maxY));
+        }
+    }
 }

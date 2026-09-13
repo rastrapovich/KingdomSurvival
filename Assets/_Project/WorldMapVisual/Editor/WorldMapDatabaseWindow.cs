@@ -65,10 +65,30 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private bool previewShowArtLayers = true;
         private bool previewShowArtLayerBounds;
 
-        // Индекс Art Layer, выбранного на вкладке «Текстуры» — Preview
-        // выделяет его тонкой рамкой (раздел 14 задачи), не влияет на
-        // рендер/сохранение.
+        // Индекс Art Layer, выбранного на вкладке «Текстуры» или кликом в
+        // Preview — Preview выделяет его рамкой + resize handles (раздел
+        // WM-T04.7), не сериализуется в игровой asset.
         private int selectedArtLayerIndex = -1;
+        private WorldMapVisualTheme lastSeenArtLayerTheme;
+
+        // Задача "Map Art Layers — direct manipulation" (WM-T04.7): drag/
+        // resize выбранного Art Layer в Preview. Один drag = одна Undo-
+        // операция (Undo.RecordObject на MouseDown, не на каждый MouseDrag).
+        // originalArtLayerBounds/artLayerDragStartMapPoint — снимок на
+        // момент MouseDown; move/resize считаются от НЕГО + суммарной
+        // дельты, а не накопительно кадр за кадром (раздел 7 задачи —
+        // исключает плавающий дрифт координат за долгий drag).
+        private bool isDraggingArtLayer;
+        private bool isResizingArtLayer;
+        private ArtLayerCorner resizingArtLayerCorner;
+        private MapBounds originalArtLayerBounds;
+        private Vector2 artLayerDragStartMapPoint;
+
+        // Минимальный размер Art Layer в map-space при resize (раздел 12
+        // задачи) — меньше уже неудобно тянуть handle'ом; для точных мелких
+        // фрагментов остаются числовые поля на вкладке «Текстуры», их этот
+        // порог не ограничивает.
+        private const float MinArtLayerSizePercent = 1f;
 
         [MenuItem("Kingdom Survival/Карта/World Map Database")]
         private static void Open()
@@ -98,6 +118,16 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             EditorGUILayout.Space(4f);
             database = (WorldMapDatabaseAsset)EditorGUILayout.ObjectField(
                 "World Map Database", database, typeof(WorldMapDatabaseAsset), false);
+
+            // Раздел 4 задачи "Direct Art Layer Manipulation": при смене
+            // базы/темы индекс выбранного Art Layer может указывать на
+            // совсем другой слой — сбрасываем, не пересчитываем вслепую.
+            WorldMapVisualTheme activeTheme = database != null ? database.ActiveTheme : null;
+            if (activeTheme != lastSeenArtLayerTheme)
+            {
+                selectedArtLayerIndex = -1;
+                lastSeenArtLayerTheme = activeTheme;
+            }
 
             EditorGUILayout.Space(6f);
             tab = (WindowTab)GUILayout.Toolbar(
@@ -670,7 +700,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 "Отдельные PNG-фрагменты глобальной карты (0..100% по обеим осям, та же система " +
                 "координат, что у Roads/Locations/Spawn Slots/героя) — позволяют дорисовывать карту " +
                 "постепенно, регион за регионом, не растягивая один спрайт на всю площадь. Base Map " +
-                "выше (если назначен) — необязательный фон под всеми слоями.",
+                "выше (если назначен) — необязательный фон под всеми слоями. Основной способ " +
+                "позиционирования — drag/resize на вкладке «Предпросмотр» (кнопка «Показать в " +
+                "Preview» ниже); числа под «Точное положение» — точный ручной ввод, не основной способ.",
                 MessageType.None);
 
             SerializedProperty layersProp = themeSO.FindProperty("artLayers");
@@ -688,12 +720,22 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                     (isSelected ? "  [показан в Preview]" : ""),
                     EditorStyles.boldLabel);
                 if (GUILayout.Button(isSelected ? "Скрыть в Preview" : "Показать в Preview", GUILayout.Width(150f)))
+                {
                     selectedArtLayerIndex = isSelected ? -1 : i;
+                    if (!isSelected)
+                        tab = WindowTab.Preview; // раздел 17 задачи — сразу переходим на вкладку
+                }
                 if (GUILayout.Button("Удалить", GUILayout.Width(80f)))
                 {
                     layersProp.DeleteArrayElementAtIndex(i);
+                    // Раздел 4 задачи "Direct Art Layer Manipulation":
+                    // удаление выбранного слоя сбрасывает selection; удаление
+                    // слоя ПЕРЕД выбранным сдвигает индекс, чтобы selection
+                    // не "перепрыгнул" на другой слой.
                     if (selectedArtLayerIndex == i)
                         selectedArtLayerIndex = -1;
+                    else if (selectedArtLayerIndex > i)
+                        selectedArtLayerIndex--;
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.EndVertical();
                     break;
@@ -708,18 +750,23 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 EditorGUILayout.PropertyField(
                     layer.FindPropertyRelative("Enabled"), new GUIContent("Активен"));
 
-                EditorGUILayout.LabelField("Bounds (проценты карты, 0..100)");
+                // Раздел 1/16 задачи "Direct Art Layer Manipulation": теперь
+                // это ТОЧНЫЙ, а не основной способ позиционирования — основной
+                // — drag/resize во вкладке «Предпросмотр» (кнопка ниже).
+                // Внутренние имена полей (MinXPercent и т.д.) не менялись —
+                // переименован только заголовок для художника.
+                EditorGUILayout.LabelField("Точное положение (проценты карты, 0..100)");
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PropertyField(
-                    layer.FindPropertyRelative("MinXPercent"), new GUIContent("Min X"));
+                    layer.FindPropertyRelative("MinXPercent"), new GUIContent("Левая граница X"));
                 EditorGUILayout.PropertyField(
-                    layer.FindPropertyRelative("MaxXPercent"), new GUIContent("Max X"));
+                    layer.FindPropertyRelative("MaxXPercent"), new GUIContent("Правая граница X"));
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PropertyField(
-                    layer.FindPropertyRelative("MinYPercent"), new GUIContent("Min Y"));
+                    layer.FindPropertyRelative("MinYPercent"), new GUIContent("Верхняя граница Y"));
                 EditorGUILayout.PropertyField(
-                    layer.FindPropertyRelative("MaxYPercent"), new GUIContent("Max Y"));
+                    layer.FindPropertyRelative("MaxYPercent"), new GUIContent("Нижняя граница Y"));
                 EditorGUILayout.EndHorizontal();
 
                 EditorGUILayout.PropertyField(
@@ -1386,7 +1433,14 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (previewShowRoads && hasAuthoredWorld)
                 DrawPreviewRoads(mapRect);
 
-            HandleRoadPathEditingInput(mapRect);
+            // Раздел 13/14 задачи "Direct Art Layer Manipulation": режимы
+            // взаимно исключены на уровне вызова, а не порядком current.Use()
+            // — Road edit mode имеет приоритет и Art Layer вообще не
+            // получает событий мыши, пока редактируется дорога.
+            if (editingRoadIndex >= 0)
+                HandleRoadPathEditingInput(mapRect);
+            else if (previewShowArtLayers && database != null && database.ActiveTheme != null)
+                HandleArtLayerEditingInput(mapRect, database.ActiveTheme.ArtLayers);
         }
 
         private void DrawPreviewLayerToggles()
@@ -1489,25 +1543,68 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             {
                 for (int i = 0; i < layers.Count; i++)
                 {
+                    if (i == selectedArtLayerIndex)
+                        continue; // рамка выбранного слоя рисуется отдельно ниже, всегда.
+
                     WorldMapArtLayerEntry layer = layers[i];
                     if (layer == null)
                         continue;
 
                     Rect layerRect = WorldMapPreviewMath.MapBoundsToRect(
                         mapRect, layer.MinXPercent, layer.MinYPercent, layer.MaxXPercent, layer.MaxYPercent);
-                    bool isSelected = i == selectedArtLayerIndex;
-                    Color outline = isSelected
-                        ? Color.white
-                        : new Color(0.5f, 0.85f, 0.95f, 0.7f);
-                    DrawRectOutline(layerRect, outline);
+                    DrawRectOutline(layerRect, new Color(0.5f, 0.85f, 0.95f, 0.7f));
+                }
+            }
 
-                    if (isSelected)
-                    {
-                        GUI.Label(
-                            new Rect(layerRect.x + 2f, layerRect.y + 2f, 200f, 16f),
-                            string.IsNullOrWhiteSpace(layer.Id) ? "(без ID)" : layer.Id,
-                            EditorStyles.whiteMiniLabel);
-                    }
+            // Раздел 5 задачи "Direct Art Layer Manipulation": рамка +
+            // resize handles выбранного слоя видны ВСЕГДА (не только при
+            // включённом debug-тумблере "Art Layer Bounds") — иначе нечем
+            // управлять drag/resize. Не рисуем и не даём тянуть Disabled/
+            // без-Sprite слой — раздел 23 задачи.
+            if (selectedArtLayerIndex >= 0 && selectedArtLayerIndex < layers.Count)
+            {
+                WorldMapArtLayerEntry selected = layers[selectedArtLayerIndex];
+                if (selected != null && selected.Enabled && selected.Sprite != null)
+                {
+                    Rect layerRect = WorldMapPreviewMath.MapBoundsToRect(
+                        mapRect, selected.MinXPercent, selected.MinYPercent,
+                        selected.MaxXPercent, selected.MaxYPercent);
+                    DrawRectOutline(layerRect, Color.white);
+                    GUI.Label(
+                        new Rect(layerRect.x + 2f, layerRect.y + 2f, 200f, 16f),
+                        string.IsNullOrWhiteSpace(selected.Id) ? "(без ID)" : selected.Id,
+                        EditorStyles.whiteMiniLabel);
+                    DrawArtLayerResizeHandles(layerRect);
+                }
+            }
+        }
+
+        // Раздел 5 задачи: маленькие квадраты по углам — фиксированный
+        // экранный размер (не зависит от масштаба PNG/Bounds).
+        private const float ArtLayerHandleScreenSize = 10f;
+
+        private static void DrawArtLayerResizeHandles(Rect layerRect)
+        {
+            Color handleColor = Color.white;
+            float half = ArtLayerHandleScreenSize * 0.5f;
+
+            Vector2[] corners =
+            {
+                new Vector2(layerRect.xMin, layerRect.yMin),
+                new Vector2(layerRect.xMax, layerRect.yMin),
+                new Vector2(layerRect.xMin, layerRect.yMax),
+                new Vector2(layerRect.xMax, layerRect.yMax)
+            };
+
+            foreach (Vector2 corner in corners)
+            {
+                Rect handleRect = new Rect(corner.x - half, corner.y - half, ArtLayerHandleScreenSize, ArtLayerHandleScreenSize);
+                EditorGUI.DrawRect(handleRect, handleColor);
+                DrawRectOutline(handleRect, Color.black);
+
+                if (Event.current != null && Event.current.type == EventType.Repaint)
+                {
+                    EditorGUIUtility.AddCursorRect(handleRect, MouseCursor.ScaleArrow);
                 }
             }
         }
@@ -1539,6 +1636,188 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             GUI.color = tint;
             GUI.DrawTextureWithTexCoords(drawRect, texture, uv, true);
             GUI.color = previous;
+        }
+
+        // Задача "Map Art Layers — Direct Manipulation" (WM-T04.7), разделы
+        // 3/6/9/13/19: единственный обработчик мыши для выбора/drag/resize
+        // Art Layer в Preview. Вызывается ТОЛЬКО когда Road edit mode
+        // выключен (см. DrawPreviewSection) — конфликт с добавлением Road
+        // Point исключён структурно, не порядком current.Use().
+        private void HandleArtLayerEditingInput(Rect mapRect, IReadOnlyList<WorldMapArtLayerEntry> layers)
+        {
+            Event current = Event.current;
+            if (current == null || database == null || database.ActiveTheme == null)
+                return;
+
+            if (current.type == EventType.MouseDown && current.button == 0)
+            {
+                if (!mapRect.Contains(current.mousePosition))
+                    return;
+
+                // 1) Ручки resize — только у уже выбранного слоя.
+                if (selectedArtLayerIndex >= 0 && selectedArtLayerIndex < layers.Count)
+                {
+                    WorldMapArtLayerEntry selected = layers[selectedArtLayerIndex];
+                    if (selected != null && selected.Enabled && selected.Sprite != null)
+                    {
+                        Rect layerRect = WorldMapPreviewMath.MapBoundsToRect(
+                            mapRect, selected.MinXPercent, selected.MinYPercent,
+                            selected.MaxXPercent, selected.MaxYPercent);
+
+                        if (TryFindArtLayerCorner(layerRect, current.mousePosition, out ArtLayerCorner corner))
+                        {
+                            Undo.RecordObject(database.ActiveTheme, "Resize Art Layer");
+                            originalArtLayerBounds = new MapBounds(
+                                selected.MinXPercent, selected.MinYPercent,
+                                selected.MaxXPercent, selected.MaxYPercent);
+                            resizingArtLayerCorner = corner;
+                            isResizingArtLayer = true;
+                            isDraggingArtLayer = false;
+                            current.Use();
+                            Repaint();
+                            return;
+                        }
+                    }
+                }
+
+                // 2) Тело слоя — среди пересекающихся выбираем самый верхний
+                // по Order (раздел 3/L задачи): GetOrderedEnabledLayers уже
+                // отсортирован по возрастанию Order, значит верхний — в
+                // конце списка, перебираем в обратном порядке.
+                int hitIndex = FindArtLayerIndexAtPoint(mapRect, layers, current.mousePosition);
+                if (hitIndex >= 0)
+                {
+                    selectedArtLayerIndex = hitIndex;
+                    WorldMapArtLayerEntry layer = layers[hitIndex];
+
+                    Undo.RecordObject(database.ActiveTheme, "Move Art Layer");
+                    originalArtLayerBounds = new MapBounds(
+                        layer.MinXPercent, layer.MinYPercent, layer.MaxXPercent, layer.MaxYPercent);
+                    artLayerDragStartMapPoint = WorldMapPreviewMath.PreviewToMap(mapRect, current.mousePosition);
+                    isDraggingArtLayer = true;
+                    isResizingArtLayer = false;
+                    current.Use();
+                    Repaint();
+                    return;
+                }
+
+                // 3) Пустое место — снять выделение, ничего не создавать.
+                selectedArtLayerIndex = -1;
+                Repaint();
+            }
+            else if (current.type == EventType.MouseDrag && (isDraggingArtLayer || isResizingArtLayer))
+            {
+                if (selectedArtLayerIndex < 0 || selectedArtLayerIndex >= layers.Count)
+                {
+                    isDraggingArtLayer = false;
+                    isResizingArtLayer = false;
+                    return;
+                }
+
+                WorldMapArtLayerEntry layer = layers[selectedArtLayerIndex];
+                Vector2 currentMapPoint = WorldMapPreviewMath.PreviewToMap(mapRect, current.mousePosition);
+
+                MapBounds newBounds;
+                if (isResizingArtLayer)
+                {
+                    float aspectRatio = layer.Sprite != null && layer.Sprite.rect.height > 0f
+                        ? layer.Sprite.rect.width / layer.Sprite.rect.height
+                        : 0f;
+                    bool preserveAspect = layer.FitMode == WorldMapArtLayerFitMode.PreserveAspect;
+
+                    // artLayerDragStartMapPoint не используется здесь (он
+                    // нужен только для move) — resize считает абсолютную
+                    // новую позицию угла напрямую от текущей мыши;
+                    // ResizeBoundsFromCorner сам работает от НЕИЗМЕННОГО
+                    // originalArtLayerBounds (раздел 7/9 задачи), поэтому
+                    // накопления дрифта за долгий drag не возникает.
+                    newBounds = WorldMapArtLayerBoundsMath.ResizeBoundsFromCorner(
+                        originalArtLayerBounds, resizingArtLayerCorner, currentMapPoint,
+                        preserveAspect, aspectRatio, MinArtLayerSizePercent);
+                }
+                else
+                {
+                    Vector2 totalDelta = currentMapPoint - artLayerDragStartMapPoint;
+                    newBounds = WorldMapArtLayerBoundsMath.MoveBounds(
+                        originalArtLayerBounds, totalDelta.x, totalDelta.y);
+                }
+
+                layer.MinXPercent = newBounds.MinX;
+                layer.MinYPercent = newBounds.MinY;
+                layer.MaxXPercent = newBounds.MaxX;
+                layer.MaxYPercent = newBounds.MaxY;
+
+                EditorUtility.SetDirty(database.ActiveTheme);
+                current.Use();
+                Repaint();
+            }
+            else if (current.type == EventType.MouseUp && current.button == 0 &&
+                     (isDraggingArtLayer || isResizingArtLayer))
+            {
+                isDraggingArtLayer = false;
+                isResizingArtLayer = false;
+                current.Use();
+            }
+        }
+
+        private static bool TryFindArtLayerCorner(Rect layerRect, Vector2 screenPoint, out ArtLayerCorner corner)
+        {
+            float hitRadius = ArtLayerHandleScreenSize;
+            (ArtLayerCorner Corner, Vector2 Point)[] corners =
+            {
+                (ArtLayerCorner.TopLeft, new Vector2(layerRect.xMin, layerRect.yMin)),
+                (ArtLayerCorner.TopRight, new Vector2(layerRect.xMax, layerRect.yMin)),
+                (ArtLayerCorner.BottomLeft, new Vector2(layerRect.xMin, layerRect.yMax)),
+                (ArtLayerCorner.BottomRight, new Vector2(layerRect.xMax, layerRect.yMax))
+            };
+
+            float bestDistance = hitRadius;
+            corner = ArtLayerCorner.BottomRight;
+            bool found = false;
+
+            foreach ((ArtLayerCorner Corner, Vector2 Point) candidate in corners)
+            {
+                float distance = Vector2.Distance(candidate.Point, screenPoint);
+                if (distance <= bestDistance)
+                {
+                    bestDistance = distance;
+                    corner = candidate.Corner;
+                    found = true;
+                }
+            }
+
+            return found;
+        }
+
+        // Раздел 3/L задачи: при перекрытии слоёв выбирается верхний по
+        // Order (при равном Order — стабильный порядок из
+        // GetOrderedEnabledLayers, тот же, что рисует runtime). Возвращает
+        // индекс в ИСХОДНОМ (несортированном) списке — том же, которым
+        // адресуется selectedArtLayerIndex и вкладка «Текстуры».
+        // Публичный static — используется напрямую из EditMode-тестов
+        // (раздел 27, пункты L/M), как и CollectArtLayerIssues.
+        public static int FindArtLayerIndexAtPoint(
+            Rect mapRect, IReadOnlyList<WorldMapArtLayerEntry> layers, Vector2 screenPoint)
+        {
+            List<WorldMapArtLayerEntry> ordered = WorldMapArtLayerUtility.GetOrderedEnabledLayers(layers);
+
+            for (int i = ordered.Count - 1; i >= 0; i--)
+            {
+                WorldMapArtLayerEntry layer = ordered[i];
+                Rect layerRect = WorldMapPreviewMath.MapBoundsToRect(
+                    mapRect, layer.MinXPercent, layer.MinYPercent, layer.MaxXPercent, layer.MaxYPercent);
+
+                if (layerRect.Contains(screenPoint))
+                {
+                    for (int j = 0; j < layers.Count; j++)
+                    {
+                        if (ReferenceEquals(layers[j], layer))
+                            return j;
+                    }
+                }
+            }
+
+            return -1;
         }
 
         // Раздел 15 задачи: полупрозрачно, чтобы арт оставался виден.

@@ -19,6 +19,18 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private float homeXPercent = WorldMapNavigation.CapitalXPercent;
         [SerializeField] private float homeYPercent = WorldMapNavigation.CapitalYPercent;
 
+        // Задача "Global Map Aspect" (WM-T04.9): reference canvas, который
+        // определяет ТОЛЬКО геометрические пропорции глобальной карты — не
+        // требование к разрешению какой-либо Texture (раздел 2/49 задачи).
+        // Gameplay-координаты остаются 0..100 независимо от этих чисел.
+        // Старые ассеты без этих полей получают default через инициализатор
+        // при десериализации — пересоздавать вручную не нужно (раздел 4).
+        public const float DefaultMapCanvasWidth = 4160f;
+        public const float DefaultMapCanvasHeight = 2560f;
+
+        [SerializeField] private float mapCanvasWidth = DefaultMapCanvasWidth;
+        [SerializeField] private float mapCanvasHeight = DefaultMapCanvasHeight;
+
         [SerializeField] private List<TerrainAreaEntry> terrainAreas =
             new List<TerrainAreaEntry>();
         [SerializeField] private List<SpawnSlotEntry> spawnSlots =
@@ -36,6 +48,22 @@ namespace KingdomSurvival.WorldMapVisual
         public int GeographyVersion => geographyVersion;
         public float HomeXPercent => homeXPercent;
         public float HomeYPercent => homeYPercent;
+
+        public float MapCanvasWidth => mapCanvasWidth;
+        public float MapCanvasHeight => mapCanvasHeight;
+
+        // Раздел 4/50 задачи: защита от divide-by-zero и невалидных значений —
+        // невалидный/нулевой/отрицательный размер откатывается на default,
+        // а не роняет Preview или производит Infinity/NaN дальше по цепочке.
+        public float GlobalMapAspect
+        {
+            get
+            {
+                float width = mapCanvasWidth > 0f ? mapCanvasWidth : DefaultMapCanvasWidth;
+                float height = mapCanvasHeight > 0f ? mapCanvasHeight : DefaultMapCanvasHeight;
+                return width / height;
+            }
+        }
         public IReadOnlyList<TerrainAreaEntry> TerrainAreas => terrainAreas;
         public IReadOnlyList<SpawnSlotEntry> SpawnSlots => spawnSlots;
         public IReadOnlyList<GameplayTerrainSettingsEntry> GameplayTerrainSettings => gameplayTerrainSettings;

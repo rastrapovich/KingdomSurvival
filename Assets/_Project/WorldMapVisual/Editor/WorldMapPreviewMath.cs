@@ -80,6 +80,51 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y),
                 Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
         }
+
+        // Задача "Global Map Aspect + Preview Canvas Navigation" (WM-T04.9):
+        // масштабирует rect вокруг ЭКРАННОЙ точки-якоря так, что она остаётся
+        // на том же относительном месте внутри rect — используется и для
+        // zoom вокруг курсора (wheel), и для zoom вокруг центра canvas
+        // (кнопка "1×"), разница только в переданной anchorScreenPoint.
+        // Генеральная rect-математика, не завязана на map-space вообще.
+        public static Rect ZoomRectAroundPoint(Rect rect, float zoomFactor, Vector2 anchorScreenPoint)
+        {
+            float newWidth = rect.width * zoomFactor;
+            float newHeight = rect.height * zoomFactor;
+            float newX = anchorScreenPoint.x - (anchorScreenPoint.x - rect.x) * zoomFactor;
+            float newY = anchorScreenPoint.y - (anchorScreenPoint.y - rect.y) * zoomFactor;
+            return new Rect(newX, newY, newWidth, newHeight);
+        }
+
+        // Раздел 11/14 задачи: цепочка Canvas → AspectFit → FitRect → Zoom →
+        // Pan → displayRect. zoom — масштаб ОТНОСИТЕЛЬНО fitRect (1 = ровно
+        // "вписать карту"); panFraction — смещение в долях РАЗМЕРА fitRect
+        // (не абсолютные экранные пиксели), поэтому переживает resize окна
+        // без искажений: fitRect каждый кадр пересчитывается заново из
+        // актуального canvasRect, а zoom/panFraction остаются осмысленными
+        // относительными величинами.
+        public static Rect ApplyZoomPan(Rect fitRect, float zoom, Vector2 panFraction)
+        {
+            return new Rect(
+                fitRect.x + panFraction.x * fitRect.width,
+                fitRect.y + panFraction.y * fitRect.height,
+                fitRect.width * zoom,
+                fitRect.height * zoom);
+        }
+
+        // Обратное преобразование ApplyZoomPan — нужно после
+        // ZoomRectAroundPoint/панорамирования, чтобы новый displayRect
+        // сохранился именно как (zoom, panFraction) относительно ТЕКУЩЕГО
+        // fitRect, а не как абсолютный пиксельный прямоугольник (который
+        // рассинхронизировался бы при следующем resize).
+        public static void ExtractZoomPan(
+            Rect fitRect, Rect displayRect, out float zoom, out Vector2 panFraction)
+        {
+            zoom = fitRect.width > 0f ? displayRect.width / fitRect.width : 1f;
+            panFraction = new Vector2(
+                fitRect.width > 0f ? (displayRect.x - fitRect.x) / fitRect.width : 0f,
+                fitRect.height > 0f ? (displayRect.y - fitRect.y) / fitRect.height : 0f);
+        }
     }
 
     // Задача "Map Art Layers" — Bounds одного слоя в координатах карты

@@ -136,6 +136,29 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private const float TerrainAreaCreateDragThresholdPixels = 5f;
         private const float MinTerrainAreaSizePercent = 0.5f;
 
+        // Задача "Global Map Aspect + Preview Canvas Navigation" (WM-T04.9):
+        // zoom/pan — editor-only viewport state, НЕ gameplay-данные (раздел
+        // 23 задачи). zoom=1, pan=(0,0) — это ровно "Вписать карту" (fitRect
+        // без изменений); persisted через EditorPrefs, чтобы не сбрасываться
+        // при закрытии/открытии окна, если это просто (раздел 23).
+        private const string PrefPreviewZoom = "KingdomSurvival.WorldMapPreview.Zoom";
+        private const string PrefPreviewPanX = "KingdomSurvival.WorldMapPreview.PanX";
+        private const string PrefPreviewPanY = "KingdomSurvival.WorldMapPreview.PanY";
+        private const float MinPreviewZoom = 0.1f;
+        private const float MaxPreviewZoom = 8f;
+        private const float MinPreviewCanvasHeight = 320f;
+
+        private float previewZoom = 1f;
+        private Vector2 previewPanFraction = Vector2.zero;
+        private bool isPanningPreview;
+
+        // Кэш последнего вычисленного за кадр fitRect/canvasRect/reference-
+        // ширины — нужен кнопке "1×" (она рисуется ДО canvas в этом же
+        // OnGUI-проходе, поэтому берёт значения предыдущего кадра).
+        private Rect lastPreviewFitRect;
+        private Rect lastPreviewCanvasRect;
+        private float lastPreviewReferenceWidth = WorldMapWorldDefinitionAsset.DefaultMapCanvasWidth;
+
         [MenuItem("Kingdom Survival/Карта/World Map Database")]
         private static void Open()
         {
@@ -163,6 +186,18 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             previewShowArtLayers = EditorPrefs.GetBool(PrefShowArtLayers, true);
             previewShowArtLayerBounds = EditorPrefs.GetBool(PrefShowArtLayerBounds, false);
             previewTerrainAreaOpacity = EditorPrefs.GetFloat(PrefTerrainAreaOpacity, 0.2f);
+
+            previewZoom = Mathf.Clamp(EditorPrefs.GetFloat(PrefPreviewZoom, 1f), MinPreviewZoom, MaxPreviewZoom);
+            previewPanFraction = new Vector2(
+                EditorPrefs.GetFloat(PrefPreviewPanX, 0f),
+                EditorPrefs.GetFloat(PrefPreviewPanY, 0f));
+        }
+
+        private void SavePreviewViewportPrefs()
+        {
+            EditorPrefs.SetFloat(PrefPreviewZoom, previewZoom);
+            EditorPrefs.SetFloat(PrefPreviewPanX, previewPanFraction.x);
+            EditorPrefs.SetFloat(PrefPreviewPanY, previewPanFraction.y);
         }
 
         private void OnGUI()
@@ -287,8 +322,36 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 worldSO.FindProperty("homeYPercent"), new GUIContent("Y, %"));
             EditorGUILayout.EndVertical();
 
+            EditorGUILayout.Space(10f);
+            DrawGlobalMapCanvasSection(worldSO, world);
+
             EditorGUILayout.EndScrollView();
             worldSO.ApplyModifiedProperties();
+        }
+
+        // Задача "Global Map Aspect" (WM-T04.9, раздел 7): reference canvas,
+        // определяющий ТОЛЬКО геометрические пропорции глобальной карты —
+        // не разрешение какой-либо реальной Texture (Base Map/Art Layer
+        // остаются любого разрешения). Preview больше не берёт aspect из
+        // BaseMapSprite — только отсюда.
+        private static void DrawGlobalMapCanvasSection(SerializedObject worldSO, WorldMapWorldDefinitionAsset world)
+        {
+            EditorGUILayout.LabelField("Глобальная карта", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.PropertyField(
+                worldSO.FindProperty("mapCanvasWidth"), new GUIContent("Reference Width"));
+            EditorGUILayout.PropertyField(
+                worldSO.FindProperty("mapCanvasHeight"), new GUIContent("Reference Height"));
+
+            using (new EditorGUI.DisabledScope(true))
+                EditorGUILayout.FloatField("Aspect", world.GlobalMapAspect);
+
+            EditorGUILayout.HelpBox(
+                "Reference размер определяет только пропорции глобального map-space (0..100×0..100 " +
+                "gameplay-координат) — это НЕ обязательное разрешение PNG. Base Map и Map Art Layers " +
+                "остаются любого разрешения и не влияют на эти пропорции.",
+                MessageType.None);
+            EditorGUILayout.EndVertical();
         }
 
         private void CreateWorldDefinitionAsset(
@@ -1469,6 +1532,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             DrawPreviewLayerToggles();
             DrawPreviewModeToolbar();
+            DrawPreviewViewportControls();
 
             Sprite backgroundSprite = database != null && database.ActiveTheme != null
                 ? database.ActiveTheme.BaseMapSprite
@@ -1485,20 +1549,42 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             ApplyPreviewGeography();
 
-            Rect previewArea = GUILayoutUtility.GetRect(
-                position.width - 24f, 320f, GUILayout.ExpandWidth(false));
+            // Задача "Global Map Aspect + Preview Canvas Navigation"
+            // (WM-T04.9, раздел 8/9): canvas занимает всё оставшееся место
+            // окна — GUILayout.ExpandHeight(true) вместо жёсткой высоты;
+            // минимум подстрахован на случай вырожденного layout-прохода.
+            Rect canvasArea = GUILayoutUtility.GetRect(
+                0f, 0f, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            if (canvasArea.height < MinPreviewCanvasHeight)
+                canvasArea.height = MinPreviewCanvasHeight;
+
+            // Раздел 1/5 задачи: аспект глобальной карты — ТОЛЬКО из World
+            // Definition, никогда из BaseMapSprite/размера окна. Без
+            // авторского мира используется тот же default, что и у нового
+            // World Definition (4160×2560) — не 0/1, чтобы Preview не
+            // деформировался и без Active World.
+            float globalAspect = hasAuthoredWorld
+                ? database.ActiveWorld.GlobalMapAspect
+                : WorldMapWorldDefinitionAsset.DefaultMapCanvasWidth / WorldMapWorldDefinitionAsset.DefaultMapCanvasHeight;
+
+            // Раздел 17/22 задачи: GUI.BeginGroup даёт И clip (карту при
+            // zoom/pan не видно поверх тулбара выше), И бесплатный перевод
+            // Event.current.mousePosition в локальные координаты канваса —
+            // ни один из существующих Draw*/Handle*EditingInput методов не
+            // меняется, они как и раньше получают один Rect mapRect.
+            GUI.BeginGroup(canvasArea);
+            Rect localCanvasRect = new Rect(0f, 0f, canvasArea.width, canvasArea.height);
+            EditorGUI.DrawRect(localCanvasRect, new Color(0.03f, 0.03f, 0.03f));
+
+            Rect fitRect = WorldMapPreviewMath.ComputeMapRect(localCanvasRect, globalAspect, true);
+            Rect mapRect = WorldMapPreviewMath.ApplyZoomPan(fitRect, previewZoom, previewPanFraction);
+            lastPreviewFitRect = fitRect;
+            lastPreviewCanvasRect = localCanvasRect;
+            lastPreviewReferenceWidth = hasAuthoredWorld
+                ? database.ActiveWorld.MapCanvasWidth
+                : WorldMapWorldDefinitionAsset.DefaultMapCanvasWidth;
 
             bool showArtNow = previewShowArt && backgroundSprite != null;
-            float spriteAspect = showArtNow && backgroundSprite.rect.height > 0f
-                ? backgroundSprite.rect.width / backgroundSprite.rect.height
-                : 0f;
-            Rect mapRect = WorldMapPreviewMath.ComputeMapRect(previewArea, spriteAspect, showArtNow);
-
-            // Раздел 5 задачи: единый mapRect для абсолютно всего — letterbox
-            // (если он есть) закрашивается отдельно и клики по нему не
-            // обрабатываются нигде ниже.
-            EditorGUI.DrawRect(previewArea, new Color(0.03f, 0.03f, 0.03f));
-
             if (showArtNow)
                 DrawPreviewBackgroundSprite(mapRect, backgroundSprite);
             else
@@ -1518,6 +1604,13 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             if (previewShowRoads && hasAuthoredWorld)
                 DrawPreviewRoads(mapRect);
+
+            // Раздел 17/26 задачи: zoom (wheel) и pan (MMB) работают
+            // независимо от PreviewEditMode — button==2/ScrollWheel никогда
+            // не пересекаются с button==0, которым пользуются все три
+            // режима авторинга ниже, поэтому конфликтов нет структурно, без
+            // явного gate.
+            HandlePreviewViewportInput(localCanvasRect, fitRect);
 
             // Задача "Terrain Area Preview Authoring" (WM-T04.8, раздел 2):
             // единственный активный режим редактирования на уровне вызова —
@@ -1539,6 +1632,109 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 case PreviewEditMode.View:
                 default:
                     break; // чистый просмотр — никакого взаимодействия мышью
+            }
+
+            GUI.EndGroup();
+        }
+
+        private void DrawPreviewViewportControls()
+        {
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Вписать карту", GUILayout.Width(130f)))
+            {
+                previewZoom = 1f;
+                previewPanFraction = Vector2.zero;
+                SavePreviewViewportPrefs();
+                Repaint();
+            }
+            if (GUILayout.Button("1×", GUILayout.Width(40f)))
+                SetPreviewOneToOneZoom();
+            GUILayout.Label("Zoom: " + Mathf.RoundToInt(previewZoom * 100f) + "%", GUILayout.Width(90f));
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.LabelField(
+                "Колесо мыши — zoom вокруг курсора. Средняя кнопка мыши — pan.",
+                EditorStyles.miniLabel);
+            EditorGUILayout.EndHorizontal();
+        }
+
+        // Раздел 20 задачи: "1×" — один reference-пиксель Map Canvas
+        // (World Definition → Reference Width/Height) соответствует одному
+        // экранному пикселю. Использует fitRect/canvasRect ПРЕДЫДУЩЕГО
+        // кадра (последний известный на момент клика — сам canvas ещё не
+        // пересчитан в этом вызове OnGUI) — стандартный IMGUI паттерн,
+        // расхождение с текущим кадром практически никогда не заметно и
+        // самокорректируется следующим Repaint.
+        private void SetPreviewOneToOneZoom()
+        {
+            if (lastPreviewFitRect.width <= 0f)
+                return;
+
+            float referenceWidth = lastPreviewReferenceWidth > 0f
+                ? lastPreviewReferenceWidth
+                : WorldMapWorldDefinitionAsset.DefaultMapCanvasWidth;
+
+            float newZoom = referenceWidth / lastPreviewFitRect.width;
+            ApplyZoomKeepingPointFixed(lastPreviewFitRect, newZoom, lastPreviewCanvasRect.center);
+            SavePreviewViewportPrefs();
+            Repaint();
+        }
+
+        private void ApplyZoomKeepingPointFixed(Rect fitRect, float newZoom, Vector2 anchorLocalPoint)
+        {
+            if (fitRect.width <= 0f || fitRect.height <= 0f)
+                return;
+
+            float clampedNewZoom = Mathf.Clamp(newZoom, MinPreviewZoom, MaxPreviewZoom);
+            Rect currentDisplayRect = WorldMapPreviewMath.ApplyZoomPan(fitRect, previewZoom, previewPanFraction);
+            float factor = clampedNewZoom / Mathf.Max(0.0001f, previewZoom);
+            Rect zoomedRect = WorldMapPreviewMath.ZoomRectAroundPoint(currentDisplayRect, factor, anchorLocalPoint);
+            WorldMapPreviewMath.ExtractZoomPan(fitRect, zoomedRect, out previewZoom, out previewPanFraction);
+            previewZoom = Mathf.Clamp(previewZoom, MinPreviewZoom, MaxPreviewZoom);
+        }
+
+        // Раздел 15/17 задачи: zoom только когда курсор над canvas; pan
+        // (MMB) не проверяет границы на продолжении drag — как и остальные
+        // drag-инструменты в этом окне, "отпустить за пределами" — нормально.
+        private void HandlePreviewViewportInput(Rect localCanvasRect, Rect fitRect)
+        {
+            Event current = Event.current;
+            if (current == null)
+                return;
+
+            if (current.type == EventType.ScrollWheel && localCanvasRect.Contains(current.mousePosition))
+            {
+                float zoomFactor = Mathf.Pow(1.1f, -current.delta.y);
+                float newZoom = previewZoom * zoomFactor;
+                ApplyZoomKeepingPointFixed(fitRect, newZoom, current.mousePosition);
+                SavePreviewViewportPrefs();
+                current.Use();
+                Repaint();
+                return;
+            }
+
+            if (current.type == EventType.MouseDown && current.button == 2 &&
+                localCanvasRect.Contains(current.mousePosition))
+            {
+                isPanningPreview = true;
+                current.Use();
+                return;
+            }
+
+            if (current.type == EventType.MouseDrag && current.button == 2 && isPanningPreview)
+            {
+                if (fitRect.width > 0f && fitRect.height > 0f)
+                {
+                    previewPanFraction += new Vector2(
+                        current.delta.x / fitRect.width, current.delta.y / fitRect.height);
+                }
+                current.Use();
+                Repaint();
+            }
+            else if (current.type == EventType.MouseUp && current.button == 2 && isPanningPreview)
+            {
+                isPanningPreview = false;
+                SavePreviewViewportPrefs();
+                current.Use();
             }
         }
 

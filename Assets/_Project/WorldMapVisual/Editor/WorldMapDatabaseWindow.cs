@@ -145,7 +145,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private const string PrefPreviewPanX = "KingdomSurvival.WorldMapPreview.PanX";
         private const string PrefPreviewPanY = "KingdomSurvival.WorldMapPreview.PanY";
         private const float MinPreviewZoom = 0.1f;
-        private const float MaxPreviewZoom = 15f;
+        private const float MaxPreviewZoom = 30f;
         private const float MinPreviewCanvasHeight = 320f;
 
         // Единственное место, где считается допустимый диапазон zoom —

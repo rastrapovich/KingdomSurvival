@@ -253,29 +253,30 @@ namespace KingdomSurvival.Tests.EditMode
             Assert.IsTrue(canvas.Contains(new Vector2(400f, 300f)));
         }
 
-        // Раздел "увеличить максимальный zoom до 15×": ClampPreviewZoom —
+        // Раздел "увеличить максимальный zoom до 30×": ClampPreviewZoom —
         // единственное место, где считается допустимый диапазон zoom (wheel,
         // "1×"/"Вписать карту" и загрузка из EditorPrefs проходят через
         // одну и ту же функцию, раздельных лимитов в разных местах нет).
         [Test]
-        public void ClampPreviewZoom_ExactlyFifteen_IsAllowed()
+        public void ClampPreviewZoom_ExactlyThirty_IsAllowed()
         {
-            Assert.AreEqual(15f, WorldMapDatabaseWindow.ClampPreviewZoom(15f), 0.0001f);
+            Assert.AreEqual(30f, WorldMapDatabaseWindow.ClampPreviewZoom(30f), 0.0001f);
         }
 
         [Test]
-        public void ClampPreviewZoom_AboveFifteen_ClampsToFifteen()
+        public void ClampPreviewZoom_AboveThirty_ClampsToThirty()
         {
-            Assert.AreEqual(15f, WorldMapDatabaseWindow.ClampPreviewZoom(50f), 0.0001f);
+            Assert.AreEqual(30f, WorldMapDatabaseWindow.ClampPreviewZoom(100f), 0.0001f);
         }
 
         [Test]
-        public void ClampPreviewZoom_OldEightCap_IsNoLongerALimit()
+        public void ClampPreviewZoom_OldEightAndFifteenCaps_AreNoLongerLimits()
         {
-            // Старый максимум (8×) в диапазоне 8 < zoom <= 15 больше не
-            // считается пределом — раньше это значение было бы обрезано.
+            // Старые максимумы (8×, затем 15×) в диапазоне до 30× больше не
+            // считаются пределом — раньше эти значения были бы обрезаны.
             Assert.AreEqual(8f, WorldMapDatabaseWindow.ClampPreviewZoom(8f), 0.0001f);
-            Assert.AreEqual(12f, WorldMapDatabaseWindow.ClampPreviewZoom(12f), 0.0001f);
+            Assert.AreEqual(15f, WorldMapDatabaseWindow.ClampPreviewZoom(15f), 0.0001f);
+            Assert.AreEqual(22f, WorldMapDatabaseWindow.ClampPreviewZoom(22f), 0.0001f);
         }
 
         [Test]

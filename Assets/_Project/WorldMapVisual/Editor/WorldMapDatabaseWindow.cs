@@ -11,7 +11,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
     {
         private enum WindowTab
         {
+            World,
             Textures,
+            Geography,
             Locations,
             Validate,
             Preview
@@ -23,6 +25,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private Vector2 issuesScroll;
         private Vector2 themeScroll;
         private Vector2 locationsScroll;
+        private Vector2 worldScroll;
+        private Vector2 geographyScroll;
         private List<string> issues = new List<string>();
         private bool validated;
 
@@ -50,13 +54,19 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             EditorGUILayout.Space(6f);
             tab = (WindowTab)GUILayout.Toolbar(
                 (int)tab,
-                new[] { "Текстуры", "Локации", "Проверка", "Предпросмотр" });
+                new[] { "Мир", "Текстуры", "География", "Локации", "Проверка", "Предпросмотр" });
             EditorGUILayout.Space(8f);
 
             switch (tab)
             {
+                case WindowTab.World:
+                    DrawWorldSection();
+                    break;
                 case WindowTab.Textures:
                     DrawTexturesSection();
+                    break;
+                case WindowTab.Geography:
+                    DrawGeographySection();
                     break;
                 case WindowTab.Locations:
                     DrawLocationsSection();
@@ -67,6 +77,236 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 case WindowTab.Preview:
                     DrawPreviewSection();
                     break;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Мир (AM-01/AM-03) — авторский постоянный мир: id/версия, Дом.
+        // Заменяет заполнение WorldMapWorldDefinitionAsset через eval/скрипты.
+        // ------------------------------------------------------------------
+
+        private void DrawWorldSection()
+        {
+            if (database == null)
+            {
+                EditorGUILayout.HelpBox("Выберите или назначьте World Map Database сверху.", MessageType.Info);
+                return;
+            }
+
+            SerializedObject databaseSO = new SerializedObject(database);
+            databaseSO.Update();
+            SerializedProperty activeWorldProp = databaseSO.FindProperty("activeWorld");
+
+            EditorGUILayout.PropertyField(activeWorldProp, new GUIContent("Active World"));
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("+ Создать новый World Definition"))
+                CreateWorldDefinitionAsset(databaseSO, activeWorldProp);
+            EditorGUILayout.EndHorizontal();
+
+            databaseSO.ApplyModifiedProperties();
+
+            WorldMapWorldDefinitionAsset world =
+                activeWorldProp.objectReferenceValue as WorldMapWorldDefinitionAsset;
+
+            if (world == null)
+            {
+                EditorGUILayout.HelpBox(
+                    "Без Active World география процедурная (переходное поведение AM-01) — " +
+                    "рельеф и река генерируются заново из WorldSeed при каждой новой партии.",
+                    MessageType.Info);
+                return;
+            }
+
+            SerializedObject worldSO = new SerializedObject(world);
+            worldSO.Update();
+
+            worldScroll = EditorGUILayout.BeginScrollView(worldScroll);
+
+            EditorGUILayout.LabelField("Идентификация", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.PropertyField(
+                worldSO.FindProperty("worldDefinitionId"), new GUIContent("World Definition Id"));
+            EditorGUILayout.PropertyField(
+                worldSO.FindProperty("geographyVersion"), new GUIContent("Geography Version"));
+            EditorGUILayout.HelpBox(
+                "Geography Version увеличивать только при изменении рельефа/реки/фиксированных " +
+                "объектов — замена спрайта/цвета версию не меняет (версия арта отдельная, хранится в теме).",
+                MessageType.None);
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.Space(10f);
+            EditorGUILayout.LabelField("Дом", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.PropertyField(
+                worldSO.FindProperty("homeLocationId"), new GUIContent("Home Location Id"));
+            EditorGUILayout.PropertyField(
+                worldSO.FindProperty("homeXPercent"), new GUIContent("X, %"));
+            EditorGUILayout.PropertyField(
+                worldSO.FindProperty("homeYPercent"), new GUIContent("Y, %"));
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.EndScrollView();
+            worldSO.ApplyModifiedProperties();
+        }
+
+        private void CreateWorldDefinitionAsset(
+            SerializedObject databaseSO,
+            SerializedProperty activeWorldProp)
+        {
+            string path = EditorUtility.SaveFilePanelInProject(
+                "Новый World Definition",
+                "KingdomSurvivalWorldDefinition",
+                "asset",
+                "Выберите, где сохранить новый авторский мир.");
+
+            if (string.IsNullOrEmpty(path))
+                return;
+
+            WorldMapWorldDefinitionAsset asset =
+                ScriptableObject.CreateInstance<WorldMapWorldDefinitionAsset>();
+            asset.EditorSetWorldId("new-world", 1);
+            asset.EditorSetHome(
+                "home", WorldMapNavigation.CapitalXPercent, WorldMapNavigation.CapitalYPercent);
+
+            AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.SaveAssets();
+
+            activeWorldProp.objectReferenceValue = asset;
+            databaseSO.ApplyModifiedProperties();
+        }
+
+        // ------------------------------------------------------------------
+        // География (AM-03) — авторские зоны местности и опорные точки реки
+        // активного World Definition. Прямоугольники в процентах карты, без
+        // полигонов/маски — по решению инструкции по миграции.
+        // ------------------------------------------------------------------
+
+        private void DrawGeographySection()
+        {
+            if (database == null || database.ActiveWorld == null)
+            {
+                EditorGUILayout.HelpBox(
+                    "Назначьте Active World на вкладке «Мир», чтобы редактировать географию.",
+                    MessageType.Info);
+                return;
+            }
+
+            SerializedObject worldSO = new SerializedObject(database.ActiveWorld);
+            worldSO.Update();
+
+            geographyScroll = EditorGUILayout.BeginScrollView(geographyScroll);
+
+            DrawTerrainAreasSection(worldSO);
+            EditorGUILayout.Space(14f);
+            DrawRiverPathSection(worldSO);
+
+            EditorGUILayout.EndScrollView();
+            worldSO.ApplyModifiedProperties();
+        }
+
+        private static void DrawTerrainAreasSection(SerializedObject worldSO)
+        {
+            EditorGUILayout.LabelField("Авторские зоны местности", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "Прямоугольник в процентах карты (0..100) с типом местности и приоритетом. " +
+                "При равном Priority побеждает последняя область в списке — вкладка «Проверка» " +
+                "предупредит о таком конфликте.",
+                MessageType.None);
+
+            SerializedProperty areasProp = worldSO.FindProperty("terrainAreas");
+
+            for (int i = 0; i < areasProp.arraySize; i++)
+            {
+                SerializedProperty area = areasProp.GetArrayElementAtIndex(i);
+                SerializedProperty idProp = area.FindPropertyRelative("Id");
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(
+                    string.IsNullOrWhiteSpace(idProp.stringValue)
+                        ? $"Зона {i + 1}"
+                        : idProp.stringValue,
+                    EditorStyles.boldLabel);
+                if (GUILayout.Button("Удалить", GUILayout.Width(80f)))
+                {
+                    areasProp.DeleteArrayElementAtIndex(i);
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndVertical();
+                    break;
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.PropertyField(idProp, new GUIContent("ID"));
+                EditorGUILayout.PropertyField(
+                    area.FindPropertyRelative("Terrain"), new GUIContent("Местность"));
+                EditorGUILayout.PropertyField(
+                    area.FindPropertyRelative("Priority"), new GUIContent("Priority"));
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PropertyField(
+                    area.FindPropertyRelative("MinXPercent"), new GUIContent("Min X, %"));
+                EditorGUILayout.PropertyField(
+                    area.FindPropertyRelative("MaxXPercent"), new GUIContent("Max X, %"));
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PropertyField(
+                    area.FindPropertyRelative("MinYPercent"), new GUIContent("Min Y, %"));
+                EditorGUILayout.PropertyField(
+                    area.FindPropertyRelative("MaxYPercent"), new GUIContent("Max Y, %"));
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space(4f);
+            }
+
+            if (GUILayout.Button("+ ДОБАВИТЬ ЗОНУ МЕСТНОСТИ", GUILayout.Height(26f)))
+            {
+                int index = areasProp.arraySize;
+                areasProp.InsertArrayElementAtIndex(index);
+                SerializedProperty area = areasProp.GetArrayElementAtIndex(index);
+                area.FindPropertyRelative("Id").stringValue = "area-" + (index + 1);
+                area.FindPropertyRelative("Terrain").enumValueIndex = (int)WorldMapTerrainType.Hills;
+                area.FindPropertyRelative("MinXPercent").floatValue = 40f;
+                area.FindPropertyRelative("MaxXPercent").floatValue = 60f;
+                area.FindPropertyRelative("MinYPercent").floatValue = 40f;
+                area.FindPropertyRelative("MaxYPercent").floatValue = 60f;
+                area.FindPropertyRelative("Priority").intValue = 0;
+            }
+        }
+
+        private static void DrawRiverPathSection(SerializedObject worldSO)
+        {
+            EditorGUILayout.LabelField("Река — опорные точки", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "Точки в процентах карты (0..100), соединяются по порядку. Минимум 2 точки, " +
+                "первая обычно у одного края карты, последняя — у другого.",
+                MessageType.None);
+
+            SerializedProperty pathProp = worldSO.FindProperty("riverPathPercent");
+
+            for (int i = 0; i < pathProp.arraySize; i++)
+            {
+                SerializedProperty point = pathProp.GetArrayElementAtIndex(i);
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField($"#{i + 1}", GUILayout.Width(28f));
+                EditorGUILayout.PropertyField(point, GUIContent.none);
+                if (GUILayout.Button("✕", GUILayout.Width(22f)))
+                {
+                    pathProp.DeleteArrayElementAtIndex(i);
+                    EditorGUILayout.EndHorizontal();
+                    break;
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+
+            if (GUILayout.Button("+ Добавить точку реки"))
+            {
+                int index = pathProp.arraySize;
+                pathProp.InsertArrayElementAtIndex(index);
+                pathProp.GetArrayElementAtIndex(index).vector2Value =
+                    index == 0 ? new Vector2(0f, 50f) : new Vector2(100f, 50f);
             }
         }
 
@@ -332,7 +572,36 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 EditorGUILayout.PropertyField(
                     location.FindPropertyRelative("initiallyDiscovered"),
                     new GUIContent("Сразу обнаружена"));
-                DrawSpawnSlotField(location.FindPropertyRelative("spawnSlotId"));
+
+                SerializedProperty modeProp = location.FindPropertyRelative("mode");
+                EditorGUILayout.PropertyField(modeProp, new GUIContent("Placement Mode"));
+
+                WorldMapPlacementMode mode = (WorldMapPlacementMode)modeProp.enumValueIndex;
+                if (mode == WorldMapPlacementMode.Fixed)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.PropertyField(
+                        location.FindPropertyRelative("fixedXPercent"), new GUIContent("X, %"));
+                    EditorGUILayout.PropertyField(
+                        location.FindPropertyRelative("fixedYPercent"), new GUIContent("Y, %"));
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.HelpBox(
+                        "Fixed — точные координаты, не зависят от WorldSeed. Использовать для " +
+                        "сюжетно важных мест (мельница, брод завязки), которые нельзя случайно " +
+                        "унести в другой регион.",
+                        MessageType.None);
+                }
+                else if (mode == WorldMapPlacementMode.Anchored)
+                {
+                    DrawSpawnSlotField(location.FindPropertyRelative("spawnSlotId"));
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox(
+                        "Temporary — появляется по условиям мира (зоны Encounter, AM-08, ещё не " +
+                        "реализовано). В стартовое наполнение партии эта локация не попадёт.",
+                        MessageType.Warning);
+                }
 
                 EditorGUILayout.Space(4f);
                 EditorGUILayout.LabelField("Иконка", EditorStyles.miniBoldLabel);
@@ -391,6 +660,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             location.FindPropertyRelative("initiallyDiscovered").boolValue = false;
             location.FindPropertyRelative("initiallyVisibleOnMap").boolValue = true;
             location.FindPropertyRelative("spawnSlotId").stringValue = string.Empty;
+            location.FindPropertyRelative("mode").enumValueIndex = (int)WorldMapPlacementMode.Anchored;
+            location.FindPropertyRelative("fixedXPercent").floatValue = 50f;
+            location.FindPropertyRelative("fixedYPercent").floatValue = 50f;
             location.FindPropertyRelative("icon").objectReferenceValue = null;
             location.FindPropertyRelative("iconTint").colorValue = Color.white;
             location.FindPropertyRelative("iconScale").floatValue = 1f;
@@ -499,10 +771,19 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
                 if (location.IconScale < 0.25f || location.IconScale > 3f)
                     result.Add($"Масштаб иконки '{location.Id}' должен быть в диапазоне 0,25–3.");
+
+                if (location.Mode == WorldMapPlacementMode.Fixed &&
+                    (location.FixedXPercent < 0f || location.FixedXPercent > 100f ||
+                     location.FixedYPercent < 0f || location.FixedYPercent > 100f))
+                {
+                    result.Add($"У Fixed-локации '{location.Id}' координаты вне диапазона 0..100%.");
+                }
             }
 
             if (database.Locations.Count == 0)
                 result.Add("В базе нет ни одной локации — будет использован Core fallback.");
+
+            CollectWorldIssues(database.ActiveWorld, result);
 
             if (theme == null)
                 return result;
@@ -570,6 +851,75 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             return result;
         }
 
+        private static void CollectWorldIssues(
+            WorldMapWorldDefinitionAsset world,
+            List<string> result)
+        {
+            if (world == null)
+                return;
+
+            if (string.IsNullOrWhiteSpace(world.WorldDefinitionId))
+                result.Add("У Active World не заполнен World Definition Id.");
+
+            if (world.HomeXPercent < 0f || world.HomeXPercent > 100f ||
+                world.HomeYPercent < 0f || world.HomeYPercent > 100f)
+            {
+                result.Add("Координаты Дома в Active World должны быть в диапазоне 0..100%.");
+            }
+
+            HashSet<string> areaIds = new HashSet<string>();
+            List<WorldMapWorldDefinitionAsset.TerrainAreaEntry> areas =
+                new List<WorldMapWorldDefinitionAsset.TerrainAreaEntry>(world.TerrainAreas);
+
+            foreach (WorldMapWorldDefinitionAsset.TerrainAreaEntry area in areas)
+            {
+                if (area == null)
+                {
+                    result.Add("В географии Active World есть пустая зона местности.");
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(area.Id))
+                    result.Add("У зоны местности не заполнен ID.");
+                else if (!areaIds.Add(area.Id))
+                    result.Add($"Дублирующийся ID зоны местности: '{area.Id}'.");
+
+                if (area.MinXPercent >= area.MaxXPercent || area.MinYPercent >= area.MaxYPercent)
+                {
+                    result.Add(
+                        $"Зона местности '{area.Id}': Min должен быть строго меньше Max по обеим осям.");
+                }
+            }
+
+            // Конфликт равных приоритетов — не зависит от порядка объектов в
+            // списке, поэтому выявляется явной проверкой пересечений здесь,
+            // а не оставляется на "последняя побеждает" в рантайме.
+            for (int i = 0; i < areas.Count; i++)
+            {
+                for (int j = i + 1; j < areas.Count; j++)
+                {
+                    WorldMapWorldDefinitionAsset.TerrainAreaEntry a = areas[i];
+                    WorldMapWorldDefinitionAsset.TerrainAreaEntry b = areas[j];
+                    if (a == null || b == null || a.Priority != b.Priority)
+                        continue;
+
+                    bool overlaps =
+                        a.MinXPercent < b.MaxXPercent && b.MinXPercent < a.MaxXPercent &&
+                        a.MinYPercent < b.MaxYPercent && b.MinYPercent < a.MaxYPercent;
+
+                    if (overlaps)
+                    {
+                        result.Add(
+                            $"Зоны местности '{a.Id}' и '{b.Id}' пересекаются при одинаковом " +
+                            $"Priority ({a.Priority}) — результат недетерминирован, задайте разный приоритет.");
+                    }
+                }
+            }
+
+            if (world.RiverPathPercent.Count == 1)
+                result.Add("У реки Active World задана только одна точка — нужно минимум две.");
+        }
+
         // ------------------------------------------------------------------
         // Preview
         // ------------------------------------------------------------------
@@ -578,23 +928,51 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
 
+            bool hasAuthoredWorld = database != null && database.ActiveWorld != null;
+
             EditorGUILayout.BeginHorizontal();
-            previewSeed = EditorGUILayout.IntField("Seed", previewSeed);
+            using (new EditorGUI.DisabledScope(hasAuthoredWorld))
+                previewSeed = EditorGUILayout.IntField("Seed наполнения", previewSeed);
             if (GUILayout.Button("REGENERATE", GUILayout.Width(120f)))
-                WorldMapNavigation.ConfigureTerrain(previewSeed);
+                ApplyPreviewGeography();
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.HelpBox(
-                $"Схематичный превью-грид ({WorldMapNavigation.GridWidth}×{WorldMapNavigation.GridHeight}), не финальный визуал. " +
-                "Показывает местность и реку по текущему Seed без захода в Play Mode.",
-                MessageType.None);
+            if (hasAuthoredWorld)
+            {
+                EditorGUILayout.HelpBox(
+                    $"Активен авторский мир '{database.ActiveWorld.WorldDefinitionId}' — рельеф и река " +
+                    "постоянны и не зависят от Seed; Seed здесь бы влиял только на будущее наполнение " +
+                    "малых локаций (AM-04, ещё не подключено).",
+                    MessageType.None);
+            }
+            else
+            {
+                EditorGUILayout.HelpBox(
+                    $"Схематичный превью-грид ({WorldMapNavigation.GridWidth}×{WorldMapNavigation.GridHeight}), не финальный визуал. " +
+                    "Без Active World местность процедурная и меняется по Seed (переходное поведение AM-01).",
+                    MessageType.None);
+            }
 
-            WorldMapNavigation.ConfigureTerrain(previewSeed);
+            EditorGUILayout.HelpBox(
+                "Предпросмотр использует общий статический WorldMapNavigation — держите это окно " +
+                "закрытым или на другой вкладке во время Play Mode с работающей партией, иначе Preview " +
+                "временно подменит географию живой игры (известное ограничение, снимается в AM-10).",
+                MessageType.Warning);
+
+            ApplyPreviewGeography();
 
             Rect area = GUILayoutUtility.GetRect(
                 position.width - 24f, 220f, GUILayout.ExpandWidth(false));
 
             DrawPreviewGrid(area);
+        }
+
+        private void ApplyPreviewGeography()
+        {
+            if (database != null && database.ActiveWorld != null)
+                WorldMapNavigation.ConfigureFromDefinition(database.ActiveWorld.ToData());
+            else
+                WorldMapNavigation.ConfigureTerrain(previewSeed);
         }
 
         private void DrawPreviewGrid(Rect area)
@@ -642,13 +1020,23 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 return;
 
             GameState previewState = new GameState();
+            WorldMapDefinitionData previewWorldData =
+                database.ActiveWorld != null ? database.ActiveWorld.ToData() : null;
             previewState.CreateNewGame(
                 previewSeed,
-                database.BuildRuntimeLocationTemplates());
+                database.BuildRuntimeLocationTemplates(),
+                previewWorldData);
+
+            float homeXPercent = previewWorldData != null
+                ? previewWorldData.HomeXPercent
+                : WorldMapNavigation.CapitalXPercent;
+            float homeYPercent = previewWorldData != null
+                ? previewWorldData.HomeYPercent
+                : WorldMapNavigation.CapitalYPercent;
 
             Rect capitalRect = new Rect(
-                area.x + area.width * WorldMapNavigation.CapitalXPercent / 100f - 3f,
-                area.y + area.height * WorldMapNavigation.CapitalYPercent / 100f - 3f,
+                area.x + area.width * homeXPercent / 100f - 3f,
+                area.y + area.height * homeYPercent / 100f - 3f,
                 6f,
                 6f);
             EditorGUI.DrawRect(capitalRect, new Color(0.95f, 0.72f, 0.24f, 1f));

@@ -1,0 +1,66 @@
+using System;
+
+// AM-05: сборка/восстановление CampaignSaveData — чистая C#-логика без
+// файлового I/O и без JsonUtility (это Unity-зависимость, не допускается в
+// KingdomSurvival.Core). Фактическое чтение/запись файла — в Unity-слое
+// (см. PrototypeUIController.CampaignSave.cs), который вызывает эти методы
+// до/после сериализации в JSON.
+public static class CampaignSaveService
+{
+    public const int CurrentSaveFormatVersion = 1;
+
+    public static CampaignSaveData ExportCampaign(
+        GameState state,
+        string worldDefinitionId = null,
+        int geographyVersion = 0)
+    {
+        if (state == null)
+            throw new ArgumentNullException(nameof(state));
+
+        bool hasExpedition = state.ActiveExpedition != null;
+        return new CampaignSaveData
+        {
+            SaveFormatVersion = CurrentSaveFormatVersion,
+            WorldDefinitionId = worldDefinitionId ?? string.Empty,
+            GeographyVersion = geographyVersion,
+            State = state,
+            HasActiveExpedition = hasExpedition,
+            HasActiveActivity = hasExpedition && state.ActiveExpedition.ActiveActivity != null,
+            HasPendingDecision = hasExpedition && state.ActiveExpedition.PendingDecision != null,
+            ClockSnapshot = ContinuousSimulationSystem.ExportSnapshot(state),
+            BuildingSnapshot = BuildingSystem.ExportSnapshot(state)
+        };
+    }
+
+    // Возвращает State из data после исправления null-ности и восстановления
+    // скрытых RuntimeState часов/построек. Не создаёт новую партию и не
+    // вызывает WorldMapPopulationService — Populate запускается только при
+    // CreateNewGame (раздел 15 инструкции: "CreateNewGame и PopulationService
+    // при этом не вызываются").
+    public static GameState RestoreCampaign(CampaignSaveData data)
+    {
+        if (data == null)
+            throw new ArgumentNullException(nameof(data));
+        if (data.State == null)
+            throw new ArgumentException("В сохранении отсутствует State.", nameof(data));
+
+        GameState state = data.State;
+
+        if (!data.HasActiveExpedition)
+        {
+            state.ActiveExpedition = null;
+        }
+        else if (state.ActiveExpedition != null)
+        {
+            if (!data.HasActiveActivity)
+                state.ActiveExpedition.ActiveActivity = null;
+            if (!data.HasPendingDecision)
+                state.ActiveExpedition.PendingDecision = null;
+        }
+
+        ContinuousSimulationSystem.RestoreSnapshot(state, data.ClockSnapshot);
+        BuildingSystem.RestoreSnapshot(state, data.BuildingSnapshot);
+
+        return state;
+    }
+}

@@ -41,12 +41,15 @@ public static class WorldMapNavigation
     private static WorldMapTerrainType[,] terrainGrid;
     private static List<(int X, int Y)> riverPath;
     private static HashSet<(int X, int Y)> riverCellLookup;
+    private static WorldMapDefinitionData activeDefinition;
 
     public static void ConfigureTerrain(int worldSeed)
     {
-        if (terrainConfigured && configuredTerrainSeed == worldSeed && terrainGrid != null)
+        if (terrainConfigured && activeDefinition == null &&
+            configuredTerrainSeed == worldSeed && terrainGrid != null)
             return;
 
+        activeDefinition = null;
         configuredTerrainSeed = worldSeed;
         terrainConfigured = true;
         terrainGrid = GenerateTerrain(worldSeed);
@@ -57,6 +60,34 @@ public static class WorldMapNavigation
         riverPath = GenerateRiver(worldSeed);
         riverCellLookup = new HashSet<(int X, int Y)>(riverPath);
     }
+
+    // AM-01 (канон v1.33, §9.9): авторская постоянная география вместо
+    // процедурной генерации по WorldSeed. Переходный статический адаптер —
+    // допустим до переноса всех потребителей на явный контекст кампании
+    // (см. раздел 16 инструкции по миграции), затем должен быть удалён.
+    // Пока ни одна авторская WorldMapDefinitionData не подключена к новой
+    // игре (это AM-04), вызов не выполняется автоматически — только через
+    // явный ConfigureFromDefinition.
+    public static void ConfigureFromDefinition(WorldMapDefinitionData definition)
+    {
+        if (definition == null || !definition.IsValid)
+        {
+            ConfigureTerrain(0);
+            return;
+        }
+
+        if (terrainConfigured && ReferenceEquals(activeDefinition, definition))
+            return;
+
+        activeDefinition = definition;
+        configuredTerrainSeed = 0;
+        terrainConfigured = true;
+        terrainGrid = BuildAuthoredTerrain(definition);
+        riverPath = BuildAuthoredRiver(definition);
+        riverCellLookup = new HashSet<(int X, int Y)>(riverPath);
+    }
+
+    public static bool HasActiveDefinition => activeDefinition != null;
 
     public static List<MapPointData> FindPath(
         float startXPercent,
@@ -486,15 +517,73 @@ public static class WorldMapNavigation
         x >= 0 && x < GridWidth && y >= 0 && y < GridHeight;
 
     private static int PercentToGridX(float value) =>
-        Math.Max(0, Math.Min(
-            GridWidth - 1,
-            (int)Math.Round(value * (GridWidth - 1) / 100f)));
+        WorldMapCoordinates.PercentToGridX(value, GridWidth);
 
     private static int PercentToGridY(float value) =>
-        Math.Max(0, Math.Min(
-            GridHeight - 1,
-            (int)Math.Round(value * (GridHeight - 1) / 100f)));
+        WorldMapCoordinates.PercentToGridY(value, GridHeight);
 
     private static float Lerp(float a, float b, float t) =>
         a + (b - a) * t;
+
+    // AM-01: рельеф из авторских прямоугольных областей вместо случайных
+    // кластеров. Области применяются по возрастанию Priority — совпадающие
+    // по приоритету решает порядок в списке (последняя побеждает); строгая
+    // проверка конфликтов равных приоритетов — задача редактора (AM-03).
+    private static WorldMapTerrainType[,] BuildAuthoredTerrain(WorldMapDefinitionData definition)
+    {
+        WorldMapTerrainType[,] result = new WorldMapTerrainType[GridWidth, GridHeight];
+
+        if (definition.TerrainAreas == null || definition.TerrainAreas.Count == 0)
+            return result;
+
+        List<WorldMapTerrainAreaData> ordered =
+            new List<WorldMapTerrainAreaData>(definition.TerrainAreas);
+        ordered.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+
+        for (int y = 0; y < GridHeight; y++)
+        {
+            float yPercent = WorldMapCoordinates.GridYToPercent(y, GridHeight);
+            for (int x = 0; x < GridWidth; x++)
+            {
+                float xPercent = WorldMapCoordinates.GridXToPercent(x, GridWidth);
+                foreach (WorldMapTerrainAreaData area in ordered)
+                {
+                    if (area != null && area.Contains(xPercent, yPercent))
+                        result[x, y] = area.Terrain;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    // AM-01: река — авторская ломаная (опорные точки в процентах карты),
+    // а не случайный путь между краями. Опорные точки соединяются той же
+    // диагонально-приоритетной прогулкой по клеткам, что и раньше в
+    // AppendRiverLeg — так соседние клетки пути всегда связаны (без
+    // диагональных разрывов), только источник точек теперь авторский.
+    private static List<(int X, int Y)> BuildAuthoredRiver(WorldMapDefinitionData definition)
+    {
+        List<(int X, int Y)> path = new List<(int X, int Y)>();
+
+        if (definition.RiverPath == null || definition.RiverPath.Count == 0)
+            return path;
+
+        Random random = new Random(unchecked(definition.WorldDefinitionId.GetHashCode() ^ 0x5249564D));
+
+        MapPointData first = definition.RiverPath[0];
+        path.Add((PercentToGridX(first.XPercent), PercentToGridY(first.YPercent)));
+
+        for (int i = 1; i < definition.RiverPath.Count; i++)
+        {
+            MapPointData point = definition.RiverPath[i];
+            AppendRiverLeg(
+                path,
+                PercentToGridX(point.XPercent),
+                PercentToGridY(point.YPercent),
+                random);
+        }
+
+        return path;
+    }
 }

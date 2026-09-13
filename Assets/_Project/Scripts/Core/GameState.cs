@@ -376,10 +376,20 @@ public class GameState
 
     public void CreateNewGame(
         int? worldSeed = null,
-        IReadOnlyList<WorldMapLocationTemplateData> locationTemplates = null)
+        IReadOnlyList<WorldMapLocationTemplateData> locationTemplates = null,
+        WorldMapDefinitionData worldDefinition = null)
     {
         WorldSeed = worldSeed ?? Guid.NewGuid().GetHashCode();
-        WorldMapNavigation.ConfigureTerrain(WorldSeed);
+
+        // AM-02 (канон v1.33, §9.9): если авторский мир подключён (через
+        // WorldMapDatabaseAsset.ActiveWorld на стороне UI), география больше
+        // не зависит от WorldSeed — WorldSeed остаётся только для наполнения
+        // (расстановка допустимых малых локаций по слотам). Без авторского
+        // мира — прежнее процедурное поведение (переходный fallback, AM-01).
+        if (worldDefinition != null && worldDefinition.IsValid)
+            WorldMapNavigation.ConfigureFromDefinition(worldDefinition);
+        else
+            WorldMapNavigation.ConfigureTerrain(WorldSeed);
         Day = 1;
         Gold = 120;
         Food = 72;
@@ -418,120 +428,13 @@ public class GameState
                 ? locationTemplates
                 : WorldMapLocationDefaults.Create();
 
-        List<LocationData> locationPool = new List<LocationData>();
-        Dictionary<string, string> preferredSpawnSlots =
-            new Dictionary<string, string>();
-
-        foreach (WorldMapLocationTemplateData template in sourceTemplates)
-        {
-            if (template == null || string.IsNullOrWhiteSpace(template.Id))
-                continue;
-
-            LocationData location = template.CreateRuntimeLocation();
-            locationPool.Add(location);
-
-            if (!string.IsNullOrWhiteSpace(template.SpawnSlotId))
-                preferredSpawnSlots[location.Id] = template.SpawnSlotId;
-        }
-
-        // WM-08: отдельный поток случайности для расстановки локаций,
-        // производный от WorldSeed, но не сам WorldSeed напрямую — будущие
-        // источники случайности (декорации и т.п.) не будут случайно сдвигать
-        // результат размещения локаций, потребляя из той же последовательности.
-        Random locationRandom = new Random(DeriveStreamSeed(WorldSeed, "location"));
-        ShuffleLocations(locationPool, locationRandom);
-
-        // WM-07: точка каждой локации выбирается внутри авторской зоны-слота
-        // (WorldMapSpawnSlotRegistry), а не вокруг одной жёсткой координаты
-        // с небольшим джиттером — та же локация может оказаться в любом месте
-        // зоны, а не в узком пятачке.
-        IReadOnlyList<WorldMapSpawnSlotDefinition> slots =
-            WorldMapSpawnSlotRegistry.StartingLocationSlots;
-
-        for (int i = 0; i < locationPool.Count; i++)
-        {
-            string preferredSlotId;
-            WorldMapSpawnSlotDefinition slot =
-                preferredSpawnSlots.TryGetValue(locationPool[i].Id, out preferredSlotId)
-                    ? WorldMapSpawnSlotRegistry.Find(preferredSlotId)
-                    : null;
-
-            if (slot == null)
-                slot = slots[i % slots.Count];
-            float x = slot.PickXPercent(locationRandom);
-            float y = slot.PickYPercent(locationRandom);
-            List<MapPointData> candidateRoute = WorldMapNavigation.FindPath(
-                WorldMapNavigation.CapitalXPercent,
-                WorldMapNavigation.CapitalYPercent,
-                x,
-                y);
-
-            if (candidateRoute.Count > 0)
-            {
-                x = candidateRoute[candidateRoute.Count - 1].XPercent;
-                y = candidateRoute[candidateRoute.Count - 1].YPercent;
-            }
-
-            locationPool[i].AssignToRegion(
-                "sector-" + i,
-                GetRegionName(x, y),
-                i,
-                x,
-                y,
-                ContinuousSimulationSystem.CalculateTravelHours(candidateRoute));
-
-            WorldMapLocationTemplateData sourceTemplate = null;
-            for (int templateIndex = 0; templateIndex < sourceTemplates.Count; templateIndex++)
-            {
-                WorldMapLocationTemplateData candidate = sourceTemplates[templateIndex];
-                if (candidate != null && candidate.Id == locationPool[i].Id)
-                {
-                    sourceTemplate = candidate;
-                    break;
-                }
-            }
-
-            if (sourceTemplate != null)
-            {
-                locationPool[i].IsDiscovered = sourceTemplate.InitiallyDiscovered;
-                locationPool[i].IsVisibleOnMap = sourceTemplate.InitiallyVisibleOnMap;
-            }
-        }
-
-        Locations = locationPool;
+        // AM-04 (канон v1.33, §9.9): расстановка вынесена в отдельный чистый
+        // сервис — GameState создаёт кампанию и вызывает его, но больше не
+        // отвечает за то, как выбираются точки Fixed/Anchored локаций.
+        Locations = WorldMapPopulationService.Populate(WorldSeed, sourceTemplates);
         ActiveExpedition = null;
         Narrative = new NarrativeStateData();
         Encounters = new EncounterRuntimeStateData();
-    }
-
-    private static void ShuffleLocations(
-        List<LocationData> locations,
-        Random random)
-    {
-        for (int i = locations.Count - 1; i > 0; i--)
-        {
-            int swapIndex = random.Next(i + 1);
-            LocationData temporary = locations[i];
-            locations[i] = locations[swapIndex];
-            locations[swapIndex] = temporary;
-        }
-    }
-
-    // WM-08: детерминированно производит отдельный сид под конкретный поток
-    // случайности (локации/декорации/...) от общего WorldSeed, чтобы потоки
-    // не делили одну последовательность System.Random и не влияли друг на друга.
-    private static int DeriveStreamSeed(int worldSeed, string streamTag)
-    {
-        unchecked
-        {
-            int hash = 17;
-            hash = hash * 31 + worldSeed;
-
-            foreach (char character in streamTag)
-                hash = hash * 31 + character;
-
-            return hash;
-        }
     }
 
     public CommanderData GetSelectedCommander()

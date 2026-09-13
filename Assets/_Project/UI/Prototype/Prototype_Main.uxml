@@ -138,6 +138,22 @@
                                         <ui:Button name="world-map-location-inspection-close-button" text="ЗАКРЫТЬ" class="world-map-location-inspection-close-button" />
                                     </ui:VisualElement>
                                     <ui:Button name="world-map-locations-button" text="ЛОКАЦИИ" tooltip="Открытые локации" class="world-map-locations-button" />
+                                    <!-- AM-06 (раздел 7 инструкции по миграции): навигация/зум карты —
+                                         "К герою"/"К Дому"/"Вся карта", +/- зум, компактный индикатор
+                                         масштаба, переключатель сетки (по умолчанию выключена). HUD-панель
+                                         внутри world-map-viewport — не панорамируется/зумируется вместе с
+                                         картой, как и world-map-locations-button. -->
+                                    <ui:VisualElement name="world-map-nav-controls" class="world-map-nav-controls">
+                                        <ui:Button name="world-map-focus-hero-button" text="К герою" tooltip="Центрировать на герое" class="world-map-nav-button" />
+                                        <ui:Button name="world-map-focus-home-button" text="К Дому" tooltip="Центрировать на Доме" class="world-map-nav-button" />
+                                        <ui:Button name="world-map-fit-button" text="Вся карта" tooltip="Показать всю карту целиком" class="world-map-nav-button" />
+                                        <ui:VisualElement name="world-map-zoom-row" class="world-map-zoom-row">
+                                            <ui:Button name="world-map-zoom-out-button" text="−" tooltip="Уменьшить" class="world-map-zoom-step-button" />
+                                            <ui:Label name="world-map-zoom-indicator" text="100%" class="world-map-zoom-indicator" />
+                                            <ui:Button name="world-map-zoom-in-button" text="+" tooltip="Увеличить" class="world-map-zoom-step-button" />
+                                        </ui:VisualElement>
+                                        <ui:Toggle name="world-map-grid-toggle" label="Сетка" tooltip="Вспомогательная сетка на близком масштабе" class="world-map-grid-toggle" />
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
 
                                 <ui:VisualElement name="map-selection-card" class="map-selection-card">

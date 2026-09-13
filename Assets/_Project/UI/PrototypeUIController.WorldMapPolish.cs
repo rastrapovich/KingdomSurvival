@@ -7,6 +7,10 @@ public partial class PrototypeUIController
     private bool worldMapPolishInitialized;
     private List<string> cancelledExpeditionRosterSnapshot;
     private VisualElement worldMapGridOverlay;
+    // AM-06 (раздел 9 инструкции): "на обычном игровом масштабе сетка
+    // выключена" — по умолчанию false, включается явно переключателем
+    // world-map-grid-toggle, а не всегда рисуется при видимости оверлея.
+    private bool worldMapGridEnabled;
     private readonly List<VisualElement> worldMapGridVerticalLines =
         new List<VisualElement>();
     private readonly List<VisualElement> worldMapGridHorizontalLines =
@@ -177,6 +181,12 @@ public partial class PrototypeUIController
     // толщину 1px. Позиция каждой линии вычисляется из pan + zoom карты, а не
     // через масштабирование самих line-элементов. Поэтому линии не становятся
     // субпиксельными и не исчезают на отдельных уровнях zoom.
+    private void OnWorldMapGridToggleChanged(ChangeEvent<bool> evt)
+    {
+        worldMapGridEnabled = evt.newValue;
+        RefreshWorldMapGridOverlay();
+    }
+
     private void RefreshWorldMapGridOverlay()
     {
         if (worldMapGridOverlay == null ||
@@ -184,6 +194,12 @@ public partial class PrototypeUIController
             worldMapCanvasWidth <= 0f ||
             worldMapCanvasHeight <= 0f)
         {
+            return;
+        }
+
+        if (!worldMapGridEnabled)
+        {
+            worldMapGridOverlay.style.display = DisplayStyle.None;
             return;
         }
 

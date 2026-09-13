@@ -1,3 +1,4 @@
+using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,7 +9,13 @@ public partial class PrototypeUIController
     // все проценто-позиционированные дети (местность, локации, маршрут, армия)
     // не меняются, координатное преобразование делает сам UI Toolkit через
     // worldMap.style.scale/left/top + WorldToLocal при клике.
-    private const float WorldMapMinZoom = 0.75f;
+    //
+    // AM-06 (раздел 9 инструкции по миграции): нижняя граница зума раньше была
+    // фиксированной константой 0.75, которая не гарантирует, что вся карта
+    // помещается в viewport на большом полотне — RecalculateWorldMapMinZoom
+    // считает её от реального размера viewport ("вся карта помещается").
+    // Запасное значение до первого GeometryChangedEvent.
+    private const float WorldMapMinZoomFallback = 0.75f;
     // WM-13: раньше фиксированное число (10×), подобранное на глаз под одно
     // разрешение окна. Теперь maxZoom считается от реального размера
     // viewport в RecalculateWorldMapMaxZoom — критерий "одна клетка занимает
@@ -30,10 +37,17 @@ public partial class PrototypeUIController
     // сетки всегда квадратная независимо от формы viewport.
     private const float WorldMapBaseCellSizePx = 32f;
 
+    private float worldMapMinZoom = WorldMapMinZoomFallback;
     private float worldMapMaxZoom = WorldMapMaxZoomFallback;
-    // Старт с максимальным приближением (у столицы) — игрок видит только
-    // ближайшую часть большой карты и раскрывает остальное через pan/zoom-out.
-    private float worldMapZoom = WorldMapMaxZoomFallback;
+    // AM-06: старт со средним масштабом вокруг Дома, а не с максимальным
+    // приближением — игрок сразу видит географическое окружение Дома, а не
+    // только его саму клетку (раздел 9 инструкции: "Нынешний принудительный
+    // старт на максимальном приближении заменить"). Настоящее значение
+    // считается в RecalculateWorldMapMinMaxZoom как среднее геометрическое
+    // между min и max — до первого GeometryChangedEvent используется
+    // запасной уровень между запасными min/max.
+    private float worldMapZoom =
+        (WorldMapMinZoomFallback + WorldMapMaxZoomFallback) * 0.5f;
     private float worldMapPanOffsetX;
     private float worldMapPanOffsetY;
     private bool isPanningWorldMap;
@@ -80,32 +94,32 @@ public partial class PrototypeUIController
 
     private void OnWorldMapViewportGeometryChanged(GeometryChangedEvent evt)
     {
-        // WM-14: порядок принципиален — сначала пересчитать maxZoom от
+        // WM-14/AM-06: порядок принципиален — сначала пересчитать min/max от
         // актуального размера viewport, и только потом (при первом входе)
-        // ставить стартовый zoom и центрировать на нём. Центрирование до
-        // пересчёта maxZoom центрировало бы на устаревшем/запасном zoom.
+        // ставить стартовый zoom и центрировать на нём.
+        RecalculateWorldMapMinZoom();
         RecalculateWorldMapMaxZoom();
 
-        // При zoom > 1 канвас крупнее viewport, и panOffset=(0,0) по
-        // умолчанию показывает левый верхний угол карты, а не столицу
-        // (50%, 81% — почти внизу). Один раз, как только реальный размер
-        // viewport известен, центрируем на столице — иначе при старте с
-        // максимальным зумом игрок видит пустой угол карты.
+        // AM-06: старт со средним масштабом (геометрическое среднее min/max)
+        // вокруг Дома — игрок сразу видит географическое окружение, а не
+        // только клетку Дома (раздел 9 инструкции). При zoom > 1 канвас
+        // крупнее viewport, и panOffset=(0,0) по умолчанию показывает левый
+        // верхний угол карты — центрируем явно.
         if (!worldMapInitialFocusApplied)
         {
-            worldMapZoom = worldMapMaxZoom;
-            CenterWorldMapOn(
-                WorldMapNavigation.CapitalXPercent,
-                WorldMapNavigation.CapitalYPercent);
+            worldMapZoom = Mathf.Sqrt(worldMapMinZoom * worldMapMaxZoom);
+            CenterWorldMapOn(GetWorldMapHomeXPercent(), GetWorldMapHomeYPercent());
             worldMapInitialFocusApplied = true;
         }
         else
         {
             // Окно могло измениться (например, изменение размера панели) —
-            // maxZoom мог уменьшиться, не даём текущему zoom остаться выше
-            // нового предела.
-            worldMapZoom = Mathf.Min(worldMapZoom, worldMapMaxZoom);
+            // min/max могли сместиться, не даём текущему zoom выйти за
+            // новые пределы.
+            worldMapZoom = Mathf.Clamp(worldMapZoom, worldMapMinZoom, worldMapMaxZoom);
         }
+
+        RefreshWorldMapZoomIndicator();
 
         // WM-12: на самом первом layout-проходе (до этого события) Button
         // измеряет свой текст/минимальный контент по исходной UXML-разметке
@@ -122,6 +136,43 @@ public partial class PrototypeUIController
 
         ClampWorldMapPan();
         ApplyWorldMapViewportTransform();
+    }
+
+    // AM-06 (раздел 9 инструкции): "вся карта помещается в viewport" —
+    // computed вместо фиксированной константы 0.75, которая на большом
+    // полотне (WM-11: карта в 16 раз больше по площади) не гарантирует
+    // видимость всей карты целиком по кнопке "Вся карта".
+    private void RecalculateWorldMapMinZoom()
+    {
+        if (worldMapViewport == null || worldMapCanvasWidth <= 0f || worldMapCanvasHeight <= 0f)
+            return;
+
+        float viewportWidth = Mathf.Max(1f, worldMapViewport.resolvedStyle.width);
+        float viewportHeight = Mathf.Max(1f, worldMapViewport.resolvedStyle.height);
+
+        worldMapMinZoom = Mathf.Min(
+            viewportWidth / worldMapCanvasWidth,
+            viewportHeight / worldMapCanvasHeight);
+    }
+
+    // AM-06: единственный источник координат Дома для новых элементов
+    // управления камерой ("К Дому", стартовый фокус). Не заменяет
+    // WorldMapNavigation.CapitalXPercent/YPercent там, где эти константы уже
+    // читают существующие 16 файлов (см. AM-01) — только новый код здесь.
+    private float GetWorldMapHomeXPercent()
+    {
+        WorldMapDatabaseAsset database = WorldMapVisualRuntime.LoadDatabase();
+        return database != null && database.ActiveWorld != null
+            ? database.ActiveWorld.HomeXPercent
+            : WorldMapNavigation.CapitalXPercent;
+    }
+
+    private float GetWorldMapHomeYPercent()
+    {
+        WorldMapDatabaseAsset database = WorldMapVisualRuntime.LoadDatabase();
+        return database != null && database.ActiveWorld != null
+            ? database.ActiveWorld.HomeYPercent
+            : WorldMapNavigation.CapitalYPercent;
     }
 
     // WM-14: цель — одна (теперь всегда квадратная) клетка занимает
@@ -144,7 +195,7 @@ public partial class PrototypeUIController
             WorldMapMaxZoomCellFraction * Mathf.Min(viewportWidth, viewportHeight);
 
         worldMapMaxZoom = Mathf.Max(
-            WorldMapMinZoom,
+            worldMapMinZoom,
             targetVisibleCellPx / baseCellSizePx);
     }
 
@@ -204,28 +255,105 @@ public partial class PrototypeUIController
         float factor = evt.delta.y > 0f
             ? 1f / WorldMapZoomStepFactor
             : WorldMapZoomStepFactor;
+
+        Vector2 localPoint = worldMapViewport.WorldToLocal(evt.mousePosition);
+        if (ZoomWorldMapAroundScreenPoint(factor, localPoint))
+            evt.StopPropagation();
+    }
+
+    // AM-06: общая точка входа для колеса мыши и кнопок +/- ("Зум — до 10×,
+    // мультипликативный шаг" остаётся неизменным правилом). pivotScreenPoint
+    // — точка (в координатах viewport), которая должна остаться на месте на
+    // экране; кнопки передают центр viewport.
+    private bool ZoomWorldMapAroundScreenPoint(float factor, Vector2 pivotScreenPoint)
+    {
+        if (worldMapViewport == null || worldMap == null)
+            return false;
+
         float newZoom = Mathf.Clamp(
             worldMapZoom * factor,
-            WorldMapMinZoom,
+            worldMapMinZoom,
             worldMapMaxZoom);
 
         if (Mathf.Approximately(newZoom, worldMapZoom))
-        {
-            evt.StopPropagation();
-            return;
-        }
+            return false;
 
-        Vector2 localPoint = worldMapViewport.WorldToLocal(evt.mousePosition);
-        float canvasPointX = (localPoint.x - worldMapPanOffsetX) / worldMapZoom;
-        float canvasPointY = (localPoint.y - worldMapPanOffsetY) / worldMapZoom;
+        float canvasPointX = (pivotScreenPoint.x - worldMapPanOffsetX) / worldMapZoom;
+        float canvasPointY = (pivotScreenPoint.y - worldMapPanOffsetY) / worldMapZoom;
 
         worldMapZoom = newZoom;
-        worldMapPanOffsetX = localPoint.x - canvasPointX * worldMapZoom;
-        worldMapPanOffsetY = localPoint.y - canvasPointY * worldMapZoom;
+        worldMapPanOffsetX = pivotScreenPoint.x - canvasPointX * worldMapZoom;
+        worldMapPanOffsetY = pivotScreenPoint.y - canvasPointY * worldMapZoom;
 
         ClampWorldMapPan();
         ApplyWorldMapViewportTransform();
-        evt.StopPropagation();
+        RefreshWorldMapZoomIndicator();
+        return true;
+    }
+
+    private void OnWorldMapZoomInButtonClicked() => ZoomWorldMapAroundViewportCenter(WorldMapZoomStepFactor);
+
+    private void OnWorldMapZoomOutButtonClicked() =>
+        ZoomWorldMapAroundViewportCenter(1f / WorldMapZoomStepFactor);
+
+    private void ZoomWorldMapAroundViewportCenter(float factor)
+    {
+        if (worldMapViewport == null)
+            return;
+
+        Vector2 center = new Vector2(
+            worldMapViewport.resolvedStyle.width * 0.5f,
+            worldMapViewport.resolvedStyle.height * 0.5f);
+        ZoomWorldMapAroundScreenPoint(factor, center);
+    }
+
+    // "Вся карта" — раздел 7 инструкции: минимальный зум, при котором вся
+    // карта помещается в viewport, с центрированием.
+    private void OnWorldMapFitButtonClicked()
+    {
+        worldMapZoom = worldMapMinZoom;
+        CenterWorldMapOn(50f, 50f);
+        ClampWorldMapPan();
+        ApplyWorldMapViewportTransform();
+        RefreshWorldMapZoomIndicator();
+    }
+
+    private void OnWorldMapFocusHomeButtonClicked()
+    {
+        CenterWorldMapOn(GetWorldMapHomeXPercent(), GetWorldMapHomeYPercent());
+        ClampWorldMapPan();
+        ApplyWorldMapViewportTransform();
+    }
+
+    private void OnWorldMapFocusHeroButtonClicked()
+    {
+        if (gameState == null)
+            return;
+
+        float heroX = GetWorldMapHomeXPercent();
+        float heroY = GetWorldMapHomeYPercent();
+
+        if (gameState.HasActiveExpedition)
+        {
+            heroX = gameState.ActiveExpedition.CurrentMapXPercent;
+            heroY = gameState.ActiveExpedition.CurrentMapYPercent;
+        }
+
+        CenterWorldMapOn(heroX, heroY);
+        ClampWorldMapPan();
+        ApplyWorldMapViewportTransform();
+    }
+
+    private void RefreshWorldMapZoomIndicator()
+    {
+        if (worldMapZoomIndicatorLabel == null || worldMapMaxZoom <= 0f)
+            return;
+
+        // Компактный индикатор — доля от максимального приближения, не
+        // "голое" число zoom (которое само по себе ничего не говорит
+        // игроку, см. §6 инструкции: "компактный индикатор масштаба").
+        float percent = Mathf.Clamp01(worldMapZoom / worldMapMaxZoom) * 100f;
+        worldMapZoomIndicatorLabel.text = Mathf.RoundToInt(percent) + "%";
     }
 
     // Панорамирование — средней кнопкой мыши, чтобы не конфликтовать с левым

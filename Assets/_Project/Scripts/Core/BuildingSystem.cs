@@ -64,6 +64,22 @@ public sealed class RecruitmentStateData
     public int RecruitNumber;
 }
 
+// AM-05: как и часы в ContinuousSimulationClock, состояние построек живёт в
+// приватном RuntimeState внутри ConditionalWeakTable, а не в GameState —
+// нужен явный снимок для Save/Load. Dictionary<string, BuildingStateData>
+// превращается в List — Unity JsonUtility не умеет сериализовать Dictionary,
+// а BuildingStateData уже содержит BuildingId, так что список не теряет
+// ключ. Notices (Queue) сознательно не сохраняются — это одноразовые
+// UI-уведомления о уже показанных событиях, не игровые данные; после
+// загрузки один пропущенный тост не искажает состояние партии.
+[Serializable]
+public sealed class BuildingSystemSnapshotData
+{
+    public List<BuildingStateData> Buildings = new List<BuildingStateData>();
+    public RecruitmentStateData Recruitment = new RecruitmentStateData();
+    public int NextRecruitNumber = 1;
+}
+
 public static class BuildingSystem
 {
     public const string FieldsAndGranariesId = "fields_granaries";
@@ -526,5 +542,61 @@ public static class BuildingSystem
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
         int day = Math.Max(1, state.Day);
         return (day - 1) * 24.0 + clock.HourOfDay;
+    }
+
+    // AM-05: явный снимок/восстановление скрытого RuntimeState построек —
+    // тот же приём, что и ContinuousSimulationSystem.ExportSnapshot/
+    // RestoreSnapshot, для того же класса проблемы (состояние вне GameState).
+    public static BuildingSystemSnapshotData ExportSnapshot(GameState state)
+    {
+        RuntimeState runtime = GetRuntime(state);
+        return new BuildingSystemSnapshotData
+        {
+            Buildings = new List<BuildingStateData>(runtime.Buildings.Values),
+            Recruitment = runtime.Recruitment,
+            NextRecruitNumber = runtime.NextRecruitNumber
+        };
+    }
+
+    public static void RestoreSnapshot(GameState state, BuildingSystemSnapshotData snapshot)
+    {
+        if (state == null)
+            return;
+
+        RuntimeState runtime = new RuntimeState();
+
+        if (snapshot != null && snapshot.Buildings != null)
+        {
+            foreach (BuildingStateData building in snapshot.Buildings)
+            {
+                if (building != null && !string.IsNullOrWhiteSpace(building.BuildingId))
+                    runtime.Buildings[building.BuildingId] = building;
+            }
+        }
+
+        // Защита совместимости: если сохранение сделано до появления нового
+        // BuildingDefinition (например будущий Mine), у него должна быть
+        // корректная запись по умолчанию, а не отсутствие записи вовсе.
+        foreach (BuildingDefinition definition in Definitions)
+        {
+            if (!runtime.Buildings.ContainsKey(definition.Id))
+            {
+                runtime.Buildings[definition.Id] = new BuildingStateData
+                {
+                    BuildingId = definition.Id,
+                    Status = definition.Id == MineId
+                        ? BuildingStatus.Locked
+                        : BuildingStatus.Available
+                };
+            }
+        }
+
+        runtime.Recruitment = snapshot != null && snapshot.Recruitment != null
+            ? snapshot.Recruitment
+            : new RecruitmentStateData();
+        runtime.NextRecruitNumber = snapshot != null ? snapshot.NextRecruitNumber : 1;
+
+        RuntimeStates.Remove(state);
+        RuntimeStates.Add(state, runtime);
     }
 }

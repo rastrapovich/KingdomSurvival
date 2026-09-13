@@ -28,6 +28,35 @@ public struct ContinuousClockSnapshot
     public int SpeedMultiplier;
 }
 
+// AM-05 (канон v1.33, §9.9 / раздел 15 инструкции по миграции): часть
+// непрерывного времени живёт не в GameState, а в приватном RuntimeState
+// внутри ConditionalWeakTable<GameState, RuntimeState> — простая
+// сериализация GameState это не сохраняет. Явный снимок/восстановление
+// (ExportSnapshot/RestoreSnapshot) — единственный контракт, которым
+// внешний код (Save/Load) может честно перенести это состояние через save-файл.
+[Serializable]
+public sealed class ContinuousSimulationSnapshotData
+{
+    public double HourOfDay;
+    public bool IsPaused;
+    public int SpeedMultiplier;
+
+    // System.Random нельзя считать восстановленным только по seed после
+    // нескольких использований — сохраняем количество уже сделанных "шагов"
+    // потока (см. ExportSnapshot/RestoreSnapshot) и на восстановлении
+    // прокручиваем свежий Random на столько же шагов вперёд.
+    public int RandomDrawCount;
+
+    public int ScheduledDay;
+    public double ExpeditionIncidentCheckHour;
+    public double ExpeditionDecisionCheckHour;
+    public bool ExpeditionIncidentChecked;
+    public bool ExpeditionDecisionChecked;
+
+    public int TrackedRouteIndex;
+    public double SegmentProgress;
+}
+
 public static partial class ContinuousSimulationSystem
 {
     // Ускорение ×2 (запрос пользователя, WM-13): было 120.0. Часы и скорость
@@ -58,6 +87,7 @@ public static partial class ContinuousSimulationSystem
         public bool IsPaused;
         public int SpeedMultiplier;
         public Random Random;
+        public int RandomDrawCount;
 
         public int ScheduledDay;
         public double ExpeditionIncidentCheckHour;
@@ -372,10 +402,20 @@ public static partial class ContinuousSimulationSystem
         runtime.ScheduledDay = state.Day;
         double from = Math.Max(0.0, Math.Min(23.95, earliestHour));
         double span = Math.Max(0.04, 23.95 - from);
-        runtime.ExpeditionIncidentCheckHour = from + runtime.Random.NextDouble() * span;
-        runtime.ExpeditionDecisionCheckHour = from + runtime.Random.NextDouble() * span;
+        runtime.ExpeditionIncidentCheckHour = from + DrawRandom(runtime) * span;
+        runtime.ExpeditionDecisionCheckHour = from + DrawRandom(runtime) * span;
         runtime.ExpeditionIncidentChecked = false;
         runtime.ExpeditionDecisionChecked = false;
+    }
+
+    // AM-05: единственная точка чтения runtime.Random — считает количество
+    // сделанных "шагов" потока, чтобы Save/Load мог честно прокрутить свежий
+    // Random на то же место после восстановления по seed (см.
+    // ContinuousSimulationSnapshotData.RandomDrawCount).
+    private static double DrawRandom(RuntimeState runtime)
+    {
+        runtime.RandomDrawCount++;
+        return runtime.Random.NextDouble();
     }
 
     private static double HoursUntilNextCheck(RuntimeState runtime)
@@ -388,5 +428,65 @@ public static partial class ContinuousSimulationSystem
             next = Math.Min(next, runtime.ExpeditionDecisionCheckHour - runtime.HourOfDay);
 
         return Math.Max(0.0, next);
+    }
+
+    // AM-05: явный снимок/восстановление скрытого RuntimeState — единственный
+    // способ для Save/Load честно перенести часы/паузу/скорость/прогресс
+    // текущего сегмента маршрута и позицию потока случайности через save-файл.
+    public static ContinuousSimulationSnapshotData ExportSnapshot(GameState state)
+    {
+        RuntimeState runtime = GetRuntime(state);
+        return new ContinuousSimulationSnapshotData
+        {
+            HourOfDay = runtime.HourOfDay,
+            IsPaused = runtime.IsPaused,
+            SpeedMultiplier = runtime.SpeedMultiplier,
+            RandomDrawCount = runtime.RandomDrawCount,
+            ScheduledDay = runtime.ScheduledDay,
+            ExpeditionIncidentCheckHour = runtime.ExpeditionIncidentCheckHour,
+            ExpeditionDecisionCheckHour = runtime.ExpeditionDecisionCheckHour,
+            ExpeditionIncidentChecked = runtime.ExpeditionIncidentChecked,
+            ExpeditionDecisionChecked = runtime.ExpeditionDecisionChecked,
+            TrackedRouteIndex = runtime.TrackedRouteIndex,
+            SegmentProgress = runtime.SegmentProgress
+        };
+    }
+
+    public static void RestoreSnapshot(GameState state, ContinuousSimulationSnapshotData snapshot)
+    {
+        if (state == null || snapshot == null)
+            return;
+
+        RuntimeState runtime = new RuntimeState
+        {
+            HourOfDay = snapshot.HourOfDay,
+            IsPaused = snapshot.IsPaused,
+            SpeedMultiplier = snapshot.SpeedMultiplier,
+            Random = new Random(state.WorldSeed ^ 0x4B534354),
+            ScheduledDay = snapshot.ScheduledDay,
+            ExpeditionIncidentCheckHour = snapshot.ExpeditionIncidentCheckHour,
+            ExpeditionDecisionCheckHour = snapshot.ExpeditionDecisionCheckHour,
+            ExpeditionIncidentChecked = snapshot.ExpeditionIncidentChecked,
+            ExpeditionDecisionChecked = snapshot.ExpeditionDecisionChecked
+        };
+
+        // Явный seed в конструкторе Random гарантированно использует
+        // алгоритм с воспроизводимой последовательностью (совместимый со
+        // старым .NET Framework), а не Xoshiro — поэтому "прокрутка" через
+        // повторные вызовы NextDouble() детерминированно возвращает
+        // генератор в то же состояние, в котором он был на момент сохранения.
+        // Прокрутка идёт мимо DrawRandom(), поэтому счётчик выставляется
+        // явно — иначе новый RuntimeState считал бы, что ещё не сделал ни
+        // одного "шага", и следующий реальный DrawRandom() сбился бы со счёта.
+        for (int i = 0; i < snapshot.RandomDrawCount; i++)
+            runtime.Random.NextDouble();
+        runtime.RandomDrawCount = snapshot.RandomDrawCount;
+
+        RuntimeStates.Remove(state);
+        RuntimeStates.Add(state, runtime);
+
+        ResetRouteTracking(runtime, state.ActiveExpedition);
+        runtime.TrackedRouteIndex = snapshot.TrackedRouteIndex;
+        runtime.SegmentProgress = snapshot.SegmentProgress;
     }
 }

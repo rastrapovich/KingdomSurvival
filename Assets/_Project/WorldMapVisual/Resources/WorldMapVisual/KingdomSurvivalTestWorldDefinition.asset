@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 756026038ba335d4689d6146668ba3c0, type: 3}
+  m_Name: KingdomSurvivalTestWorldDefinition
+  m_EditorClassIdentifier: KingdomSurvival.WorldMapVisual::KingdomSurvival.WorldMapVisual.WorldMapWorldDefinitionAsset
+  worldDefinitionId: am02-test-world
+  geographyVersion: 1
+  homeLocationId: home
+  homeXPercent: 50
+  homeYPercent: 81
+  terrainAreas:
+  - Id: test-hills-west
+    Terrain: 1
+    MinXPercent: 8
+    MaxXPercent: 30
+    MinYPercent: 40
+    MaxYPercent: 72
+    Priority: 0
+  - Id: test-mountains-north
+    Terrain: 2
+    MinXPercent: 35
+    MaxXPercent: 58
+    MinYPercent: 4
+    MaxYPercent: 24
+    Priority: 1
+  riverPathPercent:
+  - {x: 0, y: 50}
+  - {x: 48, y: 79}
+  - {x: 100, y: 85}

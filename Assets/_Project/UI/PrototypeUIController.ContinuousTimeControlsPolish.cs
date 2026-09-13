@@ -94,6 +94,22 @@ public partial class PrototypeUIController
         VisualElement dayBox = dayLabel.parent;
         VisualElement timeControlHost = timeToggleButton.parent;
 
+        // WM-18: после упрощения shell (Prototype_Main.uxml, .shell-time-bar)
+        // dayLabel и timeToggleButton — прямые соседи в одном общем
+        // контейнере, то есть dayBox и timeControlHost — один и тот же
+        // элемент, а .shell-time-bar/.shell-time-label/.shell-time-toggle-
+        // button в USS уже задают нужную раскладку сами. Раньше это были
+        // разные вложенные боксы, которые этот метод сводил вместе руками —
+        // тот путь ниже остаётся как совместимый fallback для такой
+        // раскладки, но должен пропускаться, когда бокс уже общий: иначе
+        // timeControlHost.Add(dayBox) пытается вставить элемент сам в себя
+        // (ArgumentException: Cannot insert element as its own child) на
+        // каждый тик RefreshContinuousControlsPolish, а принудительные
+        // width/minWidth=158 ниже сжали бы весь .shell-time-bar (у него уже
+        // есть flex-grow:1 в USS) вместе с кнопкой "ПУСК".
+        if (dayBox == timeControlHost)
+            return;
+
         if (dayBox.parent != timeControlHost)
         {
             dayBox.RemoveFromHierarchy();

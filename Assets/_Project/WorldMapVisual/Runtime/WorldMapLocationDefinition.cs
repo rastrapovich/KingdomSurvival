@@ -20,6 +20,9 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private bool initiallyDiscovered;
         [SerializeField] private bool initiallyVisibleOnMap = true;
         [SerializeField] private string spawnSlotId = string.Empty;
+        [SerializeField] private WorldMapPlacementMode mode = WorldMapPlacementMode.Anchored;
+        [SerializeField] private float fixedXPercent = 50f;
+        [SerializeField] private float fixedYPercent = 50f;
         [SerializeField] private Sprite icon;
         [SerializeField] private Color iconTint = Color.white;
         [SerializeField, Range(0.25f, 3f)] private float iconScale = 1f;
@@ -34,6 +37,9 @@ namespace KingdomSurvival.WorldMapVisual
         public bool InitiallyDiscovered => initiallyDiscovered;
         public bool InitiallyVisibleOnMap => initiallyVisibleOnMap;
         public string SpawnSlotId => spawnSlotId;
+        public WorldMapPlacementMode Mode => mode;
+        public float FixedXPercent => fixedXPercent;
+        public float FixedYPercent => fixedYPercent;
         public Sprite Icon => icon;
         public Color IconTint => iconTint;
         public float IconScale => iconScale;
@@ -51,7 +57,10 @@ namespace KingdomSurvival.WorldMapVisual
                 RewardArmySupply = rewardArmySupply,
                 InitiallyDiscovered = initiallyDiscovered,
                 InitiallyVisibleOnMap = initiallyVisibleOnMap,
-                SpawnSlotId = spawnSlotId
+                SpawnSlotId = spawnSlotId,
+                Mode = mode,
+                FixedXPercent = fixedXPercent,
+                FixedYPercent = fixedYPercent
             };
         }
     }

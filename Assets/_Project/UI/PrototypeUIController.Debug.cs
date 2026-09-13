@@ -26,6 +26,8 @@ public partial class PrototypeUIController
     private Button debugSignificantDecisionButton;
     private Button debugForceEncounterButton;
     private Button debugResetGameButton;
+    private Button debugSaveCampaignButton;
+    private Button debugLoadCampaignButton;
 
     private bool debugMenuInitialized;
 
@@ -197,6 +199,20 @@ public partial class PrototypeUIController
 
         AddDebugSectionTitle(scroll, "ПАРТИЯ");
 
+        // AM-05: минимальный действующий вход Save/Load — единственный слот.
+        // Постоянное место в меню паузы ещё не введено (в проекте пока нет
+        // отдельного экрана паузы/настроек), поэтому первая рабочая версия
+        // временно живёт здесь же, рядом со сбросом партии.
+        debugSaveCampaignButton = CreateDebugActionButton(
+            "СОХРАНИТЬ ПАРТИЮ",
+            SaveCampaign);
+        scroll.Add(debugSaveCampaignButton);
+
+        debugLoadCampaignButton = CreateDebugActionButton(
+            "ЗАГРУЗИТЬ ПАРТИЮ",
+            LoadCampaign);
+        scroll.Add(debugLoadCampaignButton);
+
         debugResetGameButton = CreateDebugActionButton(
             "СБРОСИТЬ ПАРТИЮ",
             DebugResetGame);
@@ -323,6 +339,8 @@ public partial class PrototypeUIController
         debugForceEncounterButton.SetEnabled(
             available && hasExpedition && !hasDecision && !hasTimedActivity && !IsNarrativeDialogueActive);
         debugResetGameButton.SetEnabled(true);
+        debugSaveCampaignButton.SetEnabled(true);
+        debugLoadCampaignButton.SetEnabled(HasSavedCampaign);
         debugExpeditionStateLabel.text = BuildDebugExpeditionStateText();
     }
 

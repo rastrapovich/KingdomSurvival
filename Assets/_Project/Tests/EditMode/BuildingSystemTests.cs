@@ -59,7 +59,15 @@ public class BuildingSystemTests
         ContinuousSimulationSystem.SetSpeedMultiplier(
             state,
             ContinuousSimulationSystem.MaximumSpeedMultiplier);
-        ContinuousSimulationSystem.Advance(state, 10f, false);
+        // Казармы строятся 20 игровых часов (старт в 08:00 -> завершение в
+        // 04:00 следующих суток, одна полночь). 7 реальных секунд на
+        // максимальной скорости (×10) при текущем темпе (WM-13:
+        // RealSecondsPerGameDay=60 -> 0.4 игрового часа/реальную секунду)
+        // дают 28 игровых часов — достаточно для завершения стройки и ровно
+        // одна пересечённая полночь, без второй (та наступила бы после 40
+        // часов). 10f (как было до WM-13 ускорения ×2) пересекал уже две
+        // полночи и завышал ожидаемое золото.
+        ContinuousSimulationSystem.Advance(state, 7f, false);
         Assert.IsTrue(BuildingSystem.IsCompleted(state, BuildingSystem.BarracksId));
 
         int before = state.Fighters.Count;

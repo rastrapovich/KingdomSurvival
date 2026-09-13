@@ -39,6 +39,16 @@ public partial class PrototypeUIController
     private Label mapSelectionDetails;
     private Button mapSendButton;
 
+    // AM-06: навигация/зум карты — "К герою"/"К Дому"/"Вся карта", +/-,
+    // компактный индикатор масштаба, переключатель вспомогательной сетки.
+    private Button worldMapFocusHeroButton;
+    private Button worldMapFocusHomeButton;
+    private Button worldMapFitButton;
+    private Button worldMapZoomInButton;
+    private Button worldMapZoomOutButton;
+    private Label worldMapZoomIndicatorLabel;
+    private Toggle worldMapGridToggle;
+
     // Эти поля оставлены для совместимости со старым прототипным UI.
     // Подтверждение цели больше не используется: клик сразу отдаёт приказ.
     private string selectedMapLocationId;
@@ -69,6 +79,13 @@ public partial class PrototypeUIController
         mapSelectionTitle = root.Q<Label>("map-selection-title");
         mapSelectionDetails = root.Q<Label>("map-selection-details");
         mapSendButton = root.Q<Button>("map-send-button");
+        worldMapFocusHeroButton = root.Q<Button>("world-map-focus-hero-button");
+        worldMapFocusHomeButton = root.Q<Button>("world-map-focus-home-button");
+        worldMapFitButton = root.Q<Button>("world-map-fit-button");
+        worldMapZoomInButton = root.Q<Button>("world-map-zoom-in-button");
+        worldMapZoomOutButton = root.Q<Button>("world-map-zoom-out-button");
+        worldMapZoomIndicatorLabel = root.Q<Label>("world-map-zoom-indicator");
+        worldMapGridToggle = root.Q<Toggle>("world-map-grid-toggle");
 
         // Слои-заготовки (WM-02) пока ничего не рисуют, но не должны перехватывать
         // клики по карте — как и остальные декоративные/маршрутные слои.
@@ -157,6 +174,7 @@ public partial class PrototypeUIController
         worldMapCapitalButton.clicked +=
             OnWorldMapCapitalClicked;
         RegisterWorldMapViewportCallbacks();
+        RegisterWorldMapNavControlCallbacks();
     }
 
     private void UnregisterWorldMapCallbacks()
@@ -166,6 +184,39 @@ public partial class PrototypeUIController
         worldMapCapitalButton.clicked -=
             OnWorldMapCapitalClicked;
         UnregisterWorldMapViewportCallbacks();
+        UnregisterWorldMapNavControlCallbacks();
+    }
+
+    private void RegisterWorldMapNavControlCallbacks()
+    {
+        if (worldMapFocusHeroButton != null)
+            worldMapFocusHeroButton.clicked += OnWorldMapFocusHeroButtonClicked;
+        if (worldMapFocusHomeButton != null)
+            worldMapFocusHomeButton.clicked += OnWorldMapFocusHomeButtonClicked;
+        if (worldMapFitButton != null)
+            worldMapFitButton.clicked += OnWorldMapFitButtonClicked;
+        if (worldMapZoomInButton != null)
+            worldMapZoomInButton.clicked += OnWorldMapZoomInButtonClicked;
+        if (worldMapZoomOutButton != null)
+            worldMapZoomOutButton.clicked += OnWorldMapZoomOutButtonClicked;
+        if (worldMapGridToggle != null)
+            worldMapGridToggle.RegisterValueChangedCallback(OnWorldMapGridToggleChanged);
+    }
+
+    private void UnregisterWorldMapNavControlCallbacks()
+    {
+        if (worldMapFocusHeroButton != null)
+            worldMapFocusHeroButton.clicked -= OnWorldMapFocusHeroButtonClicked;
+        if (worldMapFocusHomeButton != null)
+            worldMapFocusHomeButton.clicked -= OnWorldMapFocusHomeButtonClicked;
+        if (worldMapFitButton != null)
+            worldMapFitButton.clicked -= OnWorldMapFitButtonClicked;
+        if (worldMapZoomInButton != null)
+            worldMapZoomInButton.clicked -= OnWorldMapZoomInButtonClicked;
+        if (worldMapZoomOutButton != null)
+            worldMapZoomOutButton.clicked -= OnWorldMapZoomOutButtonClicked;
+        if (worldMapGridToggle != null)
+            worldMapGridToggle.UnregisterValueChangedCallback(OnWorldMapGridToggleChanged);
     }
 
     private void ResetWorldMapSelection()

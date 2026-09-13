@@ -15,10 +15,16 @@ namespace KingdomSurvival.WorldMapVisual
         public const string ResourcesPath = "WorldMapVisual/KingdomSurvivalWorldMapDatabase";
 
         [SerializeField] private WorldMapVisualTheme activeTheme;
+        [SerializeField] private WorldMapWorldDefinitionAsset activeWorld;
         [SerializeField] private List<WorldMapLocationDefinition> locations =
             new List<WorldMapLocationDefinition>();
 
         public WorldMapVisualTheme ActiveTheme => activeTheme;
+        // AM-01 (канон v1.33, §9.9): авторская постоянная география. Может
+        // быть null до AM-04 (пока GameState.CreateNewGame не подключён к
+        // WorldMapPopulationService) — потребители обязаны переживать
+        // отсутствие мира откатом на прежнее процедурное поведение.
+        public WorldMapWorldDefinitionAsset ActiveWorld => activeWorld;
         public IReadOnlyList<WorldMapLocationDefinition> Locations => locations;
 
         public IReadOnlyList<WorldMapLocationTemplateData> BuildRuntimeLocationTemplates()

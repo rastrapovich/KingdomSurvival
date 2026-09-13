@@ -1,6 +1,20 @@
 using System;
 using System.Collections.Generic;
 
+// AM-04 (канон v1.33, §9.9): режим размещения локации. Fixed — точные
+// координаты, не зависящие от WorldSeed (мельница/брод завязки не должны
+// уплыть в другой регион). Anchored — прежнее поведение WM-07: точка
+// выбирается случайно внутри авторской зоны-слота. Temporary — появляется/
+// исчезает по условиям мира (зоны Encounter, AM-08) — такие локации пока не
+// участвуют в начальном наполнении партии, это не регрессия, а честная
+// граница текущего этапа.
+public enum WorldMapPlacementMode
+{
+    Anchored,
+    Fixed,
+    Temporary
+}
+
 // Редактируемое описание локации до начала партии. Класс остаётся чистым
 // C#-контрактом без UnityEngine, чтобы KingdomSurvival.Core по-прежнему
 // собирался с noEngineReferences=true. WorldMapDatabaseAsset преобразует
@@ -18,6 +32,9 @@ public sealed class WorldMapLocationTemplateData
     public bool InitiallyDiscovered;
     public bool InitiallyVisibleOnMap;
     public string SpawnSlotId;
+    public WorldMapPlacementMode Mode = WorldMapPlacementMode.Anchored;
+    public float FixedXPercent;
+    public float FixedYPercent;
 
     public LocationData CreateRuntimeLocation()
     {

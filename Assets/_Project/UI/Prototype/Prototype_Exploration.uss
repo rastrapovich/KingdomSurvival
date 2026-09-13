@@ -374,6 +374,74 @@
     -unity-font-style: bold;
 }
 
+.world-map-nav-controls {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.world-map-nav-button {
+    width: 110px;
+    min-width: 110px;
+    height: 30px;
+    min-height: 30px;
+    margin-bottom: 4px;
+    background-color: rgb(49, 76, 61);
+    color: rgb(235, 226, 205);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(105, 126, 108);
+    border-right-color: rgb(105, 126, 108);
+    border-top-color: rgb(105, 126, 108);
+    border-bottom-color: rgb(105, 126, 108);
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.world-map-zoom-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.world-map-zoom-step-button {
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    min-height: 30px;
+    margin-right: 4px;
+    background-color: rgb(49, 76, 61);
+    color: rgb(235, 226, 205);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(105, 126, 108);
+    border-right-color: rgb(105, 126, 108);
+    border-top-color: rgb(105, 126, 108);
+    border-bottom-color: rgb(105, 126, 108);
+    border-radius: 4px;
+    font-size: 16px;
+    -unity-text-align: middle-center;
+}
+
+.world-map-zoom-indicator {
+    width: 46px;
+    margin-right: 4px;
+    -unity-text-align: middle-center;
+    color: rgb(235, 226, 205);
+    font-size: 12px;
+}
+
+.world-map-grid-toggle {
+    color: rgb(235, 226, 205);
+    font-size: 12px;
+}
+
 .world-map-capital {
     /* WM-12: left/top/width/height задаются кодом (PrototypeUIController.
        WorldMap.cs, RefreshWorldMapCapital) из реального разрешения сетки —

@@ -245,6 +245,9 @@ public partial class PrototypeUIController : MonoBehaviour
             null,
             mapDatabase != null
                 ? mapDatabase.BuildRuntimeLocationTemplates()
+                : null,
+            mapDatabase != null && mapDatabase.ActiveWorld != null
+                ? mapDatabase.ActiveWorld.ToData()
                 : null);
 
         if (quickExpeditionPopup != null)

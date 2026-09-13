@@ -253,6 +253,37 @@ namespace KingdomSurvival.Tests.EditMode
             Assert.IsTrue(canvas.Contains(new Vector2(400f, 300f)));
         }
 
+        // Раздел "увеличить максимальный zoom до 15×": ClampPreviewZoom —
+        // единственное место, где считается допустимый диапазон zoom (wheel,
+        // "1×"/"Вписать карту" и загрузка из EditorPrefs проходят через
+        // одну и ту же функцию, раздельных лимитов в разных местах нет).
+        [Test]
+        public void ClampPreviewZoom_ExactlyFifteen_IsAllowed()
+        {
+            Assert.AreEqual(15f, WorldMapDatabaseWindow.ClampPreviewZoom(15f), 0.0001f);
+        }
+
+        [Test]
+        public void ClampPreviewZoom_AboveFifteen_ClampsToFifteen()
+        {
+            Assert.AreEqual(15f, WorldMapDatabaseWindow.ClampPreviewZoom(50f), 0.0001f);
+        }
+
+        [Test]
+        public void ClampPreviewZoom_OldEightCap_IsNoLongerALimit()
+        {
+            // Старый максимум (8×) в диапазоне 8 < zoom <= 15 больше не
+            // считается пределом — раньше это значение было бы обрезано.
+            Assert.AreEqual(8f, WorldMapDatabaseWindow.ClampPreviewZoom(8f), 0.0001f);
+            Assert.AreEqual(12f, WorldMapDatabaseWindow.ClampPreviewZoom(12f), 0.0001f);
+        }
+
+        [Test]
+        public void ClampPreviewZoom_BelowMinimum_ClampsToMinimum()
+        {
+            Assert.AreEqual(0.1f, WorldMapDatabaseWindow.ClampPreviewZoom(0.01f), 0.0001f);
+        }
+
         // Регрессия существующих инструментов (раздел 39): MapBoundsToRect
         // после zoom/pan (т.е. когда переданный mapRect уже сам является
         // displayRect) продолжает работать той же формулой — Art Layer/

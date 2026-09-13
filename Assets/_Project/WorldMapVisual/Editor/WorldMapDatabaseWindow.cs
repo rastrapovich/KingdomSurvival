@@ -145,8 +145,15 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private const string PrefPreviewPanX = "KingdomSurvival.WorldMapPreview.PanX";
         private const string PrefPreviewPanY = "KingdomSurvival.WorldMapPreview.PanY";
         private const float MinPreviewZoom = 0.1f;
-        private const float MaxPreviewZoom = 8f;
+        private const float MaxPreviewZoom = 15f;
         private const float MinPreviewCanvasHeight = 320f;
+
+        // Единственное место, где считается допустимый диапазон zoom —
+        // wheel, "1×"/"Вписать карту" и загрузка из EditorPrefs проходят
+        // через эту функцию, а не через отдельные Mathf.Clamp с
+        // продублированными границами. Публичный static — используется
+        // напрямую из EditMode-тестов.
+        public static float ClampPreviewZoom(float zoom) => Mathf.Clamp(zoom, MinPreviewZoom, MaxPreviewZoom);
 
         private float previewZoom = 1f;
         private Vector2 previewPanFraction = Vector2.zero;
@@ -187,7 +194,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             previewShowArtLayerBounds = EditorPrefs.GetBool(PrefShowArtLayerBounds, false);
             previewTerrainAreaOpacity = EditorPrefs.GetFloat(PrefTerrainAreaOpacity, 0.2f);
 
-            previewZoom = Mathf.Clamp(EditorPrefs.GetFloat(PrefPreviewZoom, 1f), MinPreviewZoom, MaxPreviewZoom);
+            previewZoom = ClampPreviewZoom(EditorPrefs.GetFloat(PrefPreviewZoom, 1f));
             previewPanFraction = new Vector2(
                 EditorPrefs.GetFloat(PrefPreviewPanX, 0f),
                 EditorPrefs.GetFloat(PrefPreviewPanY, 0f));
@@ -1684,12 +1691,12 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (fitRect.width <= 0f || fitRect.height <= 0f)
                 return;
 
-            float clampedNewZoom = Mathf.Clamp(newZoom, MinPreviewZoom, MaxPreviewZoom);
+            float clampedNewZoom = ClampPreviewZoom(newZoom);
             Rect currentDisplayRect = WorldMapPreviewMath.ApplyZoomPan(fitRect, previewZoom, previewPanFraction);
             float factor = clampedNewZoom / Mathf.Max(0.0001f, previewZoom);
             Rect zoomedRect = WorldMapPreviewMath.ZoomRectAroundPoint(currentDisplayRect, factor, anchorLocalPoint);
             WorldMapPreviewMath.ExtractZoomPan(fitRect, zoomedRect, out previewZoom, out previewPanFraction);
-            previewZoom = Mathf.Clamp(previewZoom, MinPreviewZoom, MaxPreviewZoom);
+            previewZoom = ClampPreviewZoom(previewZoom);
         }
 
         // Раздел 15/17 задачи: zoom только когда курсор над canvas; pan

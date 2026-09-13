@@ -34,6 +34,28 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         // на вкладке «Предпросмотр» (-1 — ни одна не выбрана).
         private int editingRoadIndex = -1;
 
+        // Задача "Preview + редактирование дорог поверх арта": выбранная
+        // точка редактируемой дороги (-1 — ничего не выбрано) и флаг
+        // активного перетаскивания. Один drag = одна операция Undo —
+        // Undo.RecordObject вызывается один раз при MouseDown, не на
+        // каждый MouseDrag.
+        private int selectedRoadPointIndex = -1;
+        private bool isDraggingRoadPoint;
+
+        // Editor-only переключатели слоёв Preview — не сериализуются в
+        // игровой asset (раздел 13 задачи), хранятся в EditorPrefs.
+        private const string PrefShowArt = "KingdomSurvival.WorldMapPreview.ShowArt";
+        private const string PrefShowRoads = "KingdomSurvival.WorldMapPreview.ShowRoads";
+        private const string PrefShowTerrainAreas = "KingdomSurvival.WorldMapPreview.ShowTerrainAreas";
+        private const string PrefShowLocations = "KingdomSurvival.WorldMapPreview.ShowLocations";
+        private const string PrefShowSpawnSlots = "KingdomSurvival.WorldMapPreview.ShowSpawnSlots";
+
+        private bool previewShowArt = true;
+        private bool previewShowRoads = true;
+        private bool previewShowTerrainAreas = true;
+        private bool previewShowLocations = true;
+        private bool previewShowSpawnSlots = true;
+
         [MenuItem("Kingdom Survival/Карта/World Map Database")]
         private static void Open()
         {
@@ -47,6 +69,12 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             if (database == null)
                 database = Resources.Load<WorldMapDatabaseAsset>(WorldMapDatabaseAsset.ResourcesPath);
+
+            previewShowArt = EditorPrefs.GetBool(PrefShowArt, true);
+            previewShowRoads = EditorPrefs.GetBool(PrefShowRoads, true);
+            previewShowTerrainAreas = EditorPrefs.GetBool(PrefShowTerrainAreas, true);
+            previewShowLocations = EditorPrefs.GetBool(PrefShowLocations, true);
+            previewShowSpawnSlots = EditorPrefs.GetBool(PrefShowSpawnSlots, true);
         }
 
         private void OnGUI()
@@ -1133,14 +1161,98 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 "временно подменит географию живой игры (известное ограничение, снимается в AM-10).",
                 MessageType.Warning);
 
+            DrawPreviewLayerToggles();
+
+            Sprite backgroundSprite = database != null && database.ActiveTheme != null
+                ? database.ActiveTheme.BaseMapSprite
+                : null;
+
+            if (editingRoadIndex >= 0 && hasAuthoredWorld &&
+                editingRoadIndex < database.ActiveWorld.Roads.Count)
+            {
+                DrawEditingRoadBanner();
+            }
+
             ApplyPreviewGeography();
 
-            Rect area = GUILayoutUtility.GetRect(
-                position.width - 24f, 220f, GUILayout.ExpandWidth(false));
+            Rect previewArea = GUILayoutUtility.GetRect(
+                position.width - 24f, 320f, GUILayout.ExpandWidth(false));
 
-            DrawPreviewGrid(area);
-            DrawPreviewRoads(area);
-            HandlePreviewRoadEditingClick(area);
+            bool showArtNow = previewShowArt && backgroundSprite != null;
+            float spriteAspect = showArtNow && backgroundSprite.rect.height > 0f
+                ? backgroundSprite.rect.width / backgroundSprite.rect.height
+                : 0f;
+            Rect mapRect = WorldMapPreviewMath.ComputeMapRect(previewArea, spriteAspect, showArtNow);
+
+            // Раздел 5 задачи: единый mapRect для абсолютно всего — letterbox
+            // (если он есть) закрашивается отдельно и клики по нему не
+            // обрабатываются нигде ниже.
+            EditorGUI.DrawRect(previewArea, new Color(0.03f, 0.03f, 0.03f));
+
+            if (showArtNow)
+                DrawPreviewBackgroundSprite(mapRect, backgroundSprite);
+            else
+                EditorGUI.DrawRect(mapRect, new Color(0.08f, 0.08f, 0.08f));
+
+            if (previewShowTerrainAreas)
+                DrawPreviewTerrainGrid(mapRect, showArtNow);
+
+            if (previewShowSpawnSlots && hasAuthoredWorld)
+                DrawPreviewSpawnSlots(mapRect, database.ActiveWorld);
+
+            if (previewShowLocations)
+                DrawPreviewLocations(mapRect);
+
+            if (previewShowRoads && hasAuthoredWorld)
+                DrawPreviewRoads(mapRect);
+
+            HandleRoadPathEditingInput(mapRect);
+        }
+
+        private void DrawPreviewLayerToggles()
+        {
+            EditorGUILayout.LabelField("Отображение", EditorStyles.miniBoldLabel);
+            EditorGUILayout.BeginHorizontal();
+            DrawLayerToggle(ref previewShowArt, "Арт карты", PrefShowArt);
+            DrawLayerToggle(ref previewShowRoads, "Дороги", PrefShowRoads);
+            DrawLayerToggle(ref previewShowTerrainAreas, "Terrain Areas", PrefShowTerrainAreas);
+            DrawLayerToggle(ref previewShowLocations, "Locations", PrefShowLocations);
+            DrawLayerToggle(ref previewShowSpawnSlots, "Spawn Slots", PrefShowSpawnSlots);
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private static void DrawLayerToggle(ref bool value, string label, string prefKey)
+        {
+            bool newValue = EditorGUILayout.ToggleLeft(label, value, GUILayout.Width(120f));
+            if (newValue != value)
+                EditorPrefs.SetBool(prefKey, newValue);
+            value = newValue;
+        }
+
+        private void DrawEditingRoadBanner()
+        {
+            WorldMapWorldDefinitionAsset.RoadEntry road =
+                database.ActiveWorld.Roads[editingRoadIndex];
+
+            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+            EditorGUILayout.LabelField(
+                "Режим редактирования: " +
+                (string.IsNullOrWhiteSpace(road.Id) ? "(без ID)" : road.Id),
+                EditorStyles.boldLabel);
+
+            using (new EditorGUI.DisabledScope(
+                       selectedRoadPointIndex < 0 || selectedRoadPointIndex >= road.Points.Count))
+            {
+                if (GUILayout.Button("Удалить выбранную точку", GUILayout.Width(190f)))
+                    DeleteSelectedRoadPoint();
+            }
+
+            if (GUILayout.Button("Завершить редактирование", GUILayout.Width(190f)))
+            {
+                editingRoadIndex = -1;
+                selectedRoadPointIndex = -1;
+            }
+            EditorGUILayout.EndHorizontal();
         }
 
         private void ApplyPreviewGeography()
@@ -1151,34 +1263,91 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 WorldMapNavigation.ConfigureDefaultTerrain();
         }
 
-        private void DrawPreviewGrid(Rect area)
+        // Раздел 3/20/21 задачи: источник — уже существующая тема
+        // (WorldMapVisualTheme.BaseMapSprite), не отдельное поле. Sprite.rect
+        // используется явно (не вся Texture) — корректно работает с
+        // атласами/паддингом любого разрешения PNG.
+        private static void DrawPreviewBackgroundSprite(Rect mapRect, Sprite sprite)
         {
-            EditorGUI.DrawRect(area, new Color(0.08f, 0.08f, 0.08f));
+            Texture2D texture = sprite.texture;
+            if (texture == null)
+                return;
 
-            float cellWidth = area.width / WorldMapNavigation.GridWidth;
-            float cellHeight = area.height / WorldMapNavigation.GridHeight;
+            Rect spriteRect = sprite.rect;
+            Rect uv = new Rect(
+                spriteRect.x / texture.width,
+                spriteRect.y / texture.height,
+                spriteRect.width / texture.width,
+                spriteRect.height / texture.height);
+
+            GUI.DrawTextureWithTexCoords(mapRect, texture, uv, true);
+        }
+
+        // Раздел 15 задачи: полупрозрачно, чтобы арт оставался виден.
+        // Plains пропускается целиком, когда арт включён — это "нет
+        // авторской зоны", а не собственный цвет, который нужно рисовать
+        // поверх фона.
+        private void DrawPreviewTerrainGrid(Rect mapRect, bool overArt)
+        {
+            float cellWidth = mapRect.width / WorldMapNavigation.GridWidth;
+            float cellHeight = mapRect.height / WorldMapNavigation.GridHeight;
 
             for (int y = 0; y < WorldMapNavigation.GridHeight; y++)
             {
                 for (int x = 0; x < WorldMapNavigation.GridWidth; x++)
                 {
                     WorldMapTerrainType terrain = WorldMapNavigation.GetTerrainAtGridCell(x, y);
+                    if (overArt && terrain == WorldMapTerrainType.Plains)
+                        continue;
+
                     Color color = GetPreviewTerrainColor(terrain);
+                    if (overArt)
+                        color.a *= 0.28f;
 
                     Rect cellRect = new Rect(
-                        area.x + x * cellWidth,
-                        area.y + y * cellHeight,
+                        mapRect.x + x * cellWidth,
+                        mapRect.y + y * cellHeight,
                         cellWidth + 1f,
                         cellHeight + 1f);
 
                     EditorGUI.DrawRect(cellRect, color);
                 }
             }
-
-            DrawPreviewLocations(area);
         }
 
-        private void DrawPreviewLocations(Rect area)
+        private static void DrawPreviewSpawnSlots(Rect mapRect, WorldMapWorldDefinitionAsset world)
+        {
+            Color fill = new Color(0.32f, 0.55f, 0.92f, 0.16f);
+            Color outline = new Color(0.45f, 0.68f, 1f, 0.85f);
+
+            foreach (WorldMapWorldDefinitionAsset.SpawnSlotEntry slot in world.SpawnSlots)
+            {
+                if (slot == null)
+                    continue;
+
+                Vector2 min = WorldMapPreviewMath.MapToPreview(mapRect, slot.MinXPercent, slot.MinYPercent);
+                Vector2 max = WorldMapPreviewMath.MapToPreview(mapRect, slot.MaxXPercent, slot.MaxYPercent);
+                Rect rect = Rect.MinMaxRect(
+                    Mathf.Min(min.x, max.x), Mathf.Min(min.y, max.y),
+                    Mathf.Max(min.x, max.x), Mathf.Max(min.y, max.y));
+
+                EditorGUI.DrawRect(rect, fill);
+                DrawRectOutline(rect, outline);
+            }
+        }
+
+        private static void DrawRectOutline(Rect rect, Color color)
+        {
+            Handles.BeginGUI();
+            Handles.color = color;
+            Handles.DrawLine(new Vector3(rect.xMin, rect.yMin), new Vector3(rect.xMax, rect.yMin));
+            Handles.DrawLine(new Vector3(rect.xMax, rect.yMin), new Vector3(rect.xMax, rect.yMax));
+            Handles.DrawLine(new Vector3(rect.xMax, rect.yMax), new Vector3(rect.xMin, rect.yMax));
+            Handles.DrawLine(new Vector3(rect.xMin, rect.yMax), new Vector3(rect.xMin, rect.yMin));
+            Handles.EndGUI();
+        }
+
+        private void DrawPreviewLocations(Rect mapRect)
         {
             if (database == null)
                 return;
@@ -1198,11 +1367,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 ? previewWorldData.HomeYPercent
                 : WorldMapNavigation.CapitalYPercent;
 
-            Rect capitalRect = new Rect(
-                area.x + area.width * homeXPercent / 100f - 3f,
-                area.y + area.height * homeYPercent / 100f - 3f,
-                6f,
-                6f);
+            Vector2 homePoint = WorldMapPreviewMath.MapToPreview(mapRect, homeXPercent, homeYPercent);
+            Rect capitalRect = new Rect(homePoint.x - 3f, homePoint.y - 3f, 6f, 6f);
             EditorGUI.DrawRect(capitalRect, new Color(0.95f, 0.72f, 0.24f, 1f));
 
             foreach (LocationData location in previewState.Locations)
@@ -1216,11 +1382,10 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                     ? Mathf.Clamp(definition.IconScale, 0.25f, 3f)
                     : 1f;
                 float size = 8f * scale;
+                Vector2 point = WorldMapPreviewMath.MapToPreview(
+                    mapRect, location.MapXPercent, location.MapYPercent);
                 Rect markerRect = new Rect(
-                    area.x + area.width * location.MapXPercent / 100f - size * 0.5f,
-                    area.y + area.height * location.MapYPercent / 100f - size * 0.5f,
-                    size,
-                    size);
+                    point.x - size * 0.5f, point.y - size * 0.5f, size, size);
 
                 if (definition != null && definition.Icon != null)
                 {
@@ -1252,45 +1417,51 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         }
 
         // WM-T02/T03 (задача "gameplay-география дорог"): debug-визуализация
-        // дорог — только в редакторе (раздел 9 задачи), не попадает в
-        // обычный игровой экран карты. Показывает саму gameplay-ширину
-        // (полупрозрачная полоса), не только центральную линию, чтобы было
-        // видно, где именно герой физически считается "на дороге".
-        private void DrawPreviewRoads(Rect area)
+        // дорог — только в редакторе, не попадает в обычный игровой экран
+        // карты. Показывает саму gameplay-ширину (полупрозрачная полоса), не
+        // только центральную линию.
+        private void DrawPreviewRoads(Rect mapRect)
         {
-            if (database == null || database.ActiveWorld == null)
-                return;
-
-            int index = 0;
-            foreach (WorldMapWorldDefinitionAsset.RoadEntry road in database.ActiveWorld.Roads)
+            IReadOnlyList<WorldMapWorldDefinitionAsset.RoadEntry> roads = database.ActiveWorld.Roads;
+            for (int index = 0; index < roads.Count; index++)
             {
+                WorldMapWorldDefinitionAsset.RoadEntry road = roads[index];
                 if (road?.Points != null && road.Points.Count >= 2)
-                    DrawPreviewRoad(area, road, index == editingRoadIndex);
-                index++;
+                    DrawPreviewRoad(mapRect, road, index == editingRoadIndex);
             }
         }
 
-        private static void DrawPreviewRoad(
-            Rect area,
+        private void DrawPreviewRoad(
+            Rect mapRect,
             WorldMapWorldDefinitionAsset.RoadEntry road,
             bool isBeingEdited)
         {
+            // Раздел 23 задачи: редактируемая дорога — полная яркость,
+            // остальные — тусклее, чтобы точка случайно не добавилась не в
+            // ту дорогу (HandleRoadPathEditingInput и так работает только с
+            // editingRoadIndex, это чисто визуальная подсказка).
+            float dim = isBeingEdited || editingRoadIndex < 0 ? 1f : 0.4f;
+
             Color lineColor = road.Enabled
                 ? new Color(0.85f, 0.72f, 0.35f, 0.95f)
                 : new Color(0.5f, 0.5f, 0.5f, 0.6f);
+            lineColor.a *= dim;
             Color zoneColor = road.Enabled
-                ? new Color(0.85f, 0.72f, 0.35f, 0.18f)
-                : new Color(0.5f, 0.5f, 0.5f, 0.10f);
+                ? new Color(0.85f, 0.72f, 0.35f, 0.22f)
+                : new Color(0.5f, 0.5f, 0.5f, 0.12f);
+            zoneColor.a *= dim;
 
-            float halfWidthX = road.Width * 0.5f / 100f * area.width;
-            float halfWidthY = road.Width * 0.5f / 100f * area.height;
+            float halfWidthPercent = road.Width * 0.5f;
 
             for (int i = 1; i < road.Points.Count; i++)
             {
-                Vector2 a = PercentToPreviewPoint(area, road.Points[i - 1]);
-                Vector2 b = PercentToPreviewPoint(area, road.Points[i]);
+                Vector2 aPercent = road.Points[i - 1];
+                Vector2 bPercent = road.Points[i];
 
-                DrawThickSegment(a, b, (halfWidthX + halfWidthY), zoneColor);
+                DrawRoadSegmentZone(mapRect, aPercent, bPercent, halfWidthPercent, zoneColor);
+
+                Vector2 a = WorldMapPreviewMath.MapToPreview(mapRect, aPercent.x, aPercent.y);
+                Vector2 b = WorldMapPreviewMath.MapToPreview(mapRect, bPercent.x, bPercent.y);
                 Handles.BeginGUI();
                 Handles.color = lineColor;
                 Handles.DrawLine(a, b);
@@ -1299,50 +1470,63 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             for (int i = 0; i < road.Points.Count; i++)
             {
-                Vector2 p = PercentToPreviewPoint(area, road.Points[i]);
-                Rect pointRect = new Rect(p.x - 3f, p.y - 3f, 6f, 6f);
-                EditorGUI.DrawRect(pointRect, isBeingEdited ? Color.white : lineColor);
-                GUI.Label(new Rect(p.x + 5f, p.y - 7f, 24f, 14f), i.ToString(), EditorStyles.miniLabel);
+                Vector2 p = WorldMapPreviewMath.MapToPreview(mapRect, road.Points[i].x, road.Points[i].y);
+                bool isSelected = isBeingEdited && i == selectedRoadPointIndex;
+                float size = isSelected ? 10f : 6f;
+                Rect pointRect = new Rect(p.x - size * 0.5f, p.y - size * 0.5f, size, size);
+                EditorGUI.DrawRect(pointRect, isSelected ? Color.white : lineColor);
+                if (isSelected)
+                {
+                    DrawRectOutline(
+                        new Rect(pointRect.x - 2f, pointRect.y - 2f, pointRect.width + 4f, pointRect.height + 4f),
+                        Color.white);
+                }
+                GUI.Label(new Rect(p.x + 6f, p.y - 7f, 24f, 14f), i.ToString(), EditorStyles.miniLabel);
             }
         }
 
-        private static Vector2 PercentToPreviewPoint(Rect area, Vector2 percentPoint)
+        // Раздел 12 задачи: смещение на половину ширины считается В
+        // ПРОЦЕНТАХ (map-space, та же метрика, что использует runtime
+        // WorldMapGameplayTerrainQuery.DistancePointToSegment), и только
+        // потом получившиеся 4 угла переводятся в экран той же функцией,
+        // что и всё остальное. При не квадратном mapRect это даёт ровно ту
+        // область, которую считает "дорогой" runtime — не декоративную
+        // толщину в экранных пикселях.
+        private static void DrawRoadSegmentZone(
+            Rect mapRect,
+            Vector2 aPercent,
+            Vector2 bPercent,
+            float halfWidthPercent,
+            Color color)
         {
-            return new Vector2(
-                area.x + area.width * percentPoint.x / 100f,
-                area.y + area.height * percentPoint.y / 100f);
-        }
-
-        private static Vector2 PercentToPreviewPoint(Rect area, MapPointData point)
-        {
-            return PercentToPreviewPoint(area, new Vector2(point.XPercent, point.YPercent));
-        }
-
-        private static void DrawThickSegment(Vector2 a, Vector2 b, float thickness, Color color)
-        {
-            if (thickness <= 0.01f)
+            if (halfWidthPercent <= 0.001f)
                 return;
 
-            Vector2 direction = (b - a).normalized;
-            Vector2 normal = new Vector2(-direction.y, direction.x) * (thickness * 0.5f);
+            Vector2 direction = bPercent - aPercent;
+            if (direction.sqrMagnitude < 0.0001f)
+                direction = new Vector2(1f, 0f);
+            direction.Normalize();
+            Vector2 normal = new Vector2(-direction.y, direction.x) * halfWidthPercent;
+
+            Vector2 a1 = WorldMapPreviewMath.MapToPreview(mapRect, aPercent.x + normal.x, aPercent.y + normal.y);
+            Vector2 a2 = WorldMapPreviewMath.MapToPreview(mapRect, aPercent.x - normal.x, aPercent.y - normal.y);
+            Vector2 b1 = WorldMapPreviewMath.MapToPreview(mapRect, bPercent.x + normal.x, bPercent.y + normal.y);
+            Vector2 b2 = WorldMapPreviewMath.MapToPreview(mapRect, bPercent.x - normal.x, bPercent.y - normal.y);
 
             Handles.BeginGUI();
             Handles.color = color;
-            Handles.DrawAAConvexPolygon(
-                new Vector3(a.x + normal.x, a.y + normal.y),
-                new Vector3(b.x + normal.x, b.y + normal.y),
-                new Vector3(b.x - normal.x, b.y - normal.y),
-                new Vector3(a.x - normal.x, a.y - normal.y));
+            Handles.DrawAAConvexPolygon(a1, b1, b2, a2);
             Handles.EndGUI();
         }
 
-        // WM-T02 (раздел 8 задачи): дешёвая первая версия редактирования
-        // пути — клик по Preview добавляет точку в конец пути редактируемой
-        // дороги. Полноценный drag существующих точек мышью сознательно не
-        // реализован в этом проходе (см. отчёт перед реализацией) — числовые
-        // поля на вкладке «География» уже позволяют скорректировать любую
-        // точку точно.
-        private void HandlePreviewRoadEditingClick(Rect area)
+        // Раздел 9/24/25 задачи: ЛКМ по пустому месту карты — добавить точку
+        // в конец; ЛКМ рядом с существующей точкой (hitRadiusPixels в
+        // экранных пикселях, не связано с gameplay Width) — выбрать её и
+        // начать drag; отпускание кнопки — конец drag. Один Undo.RecordObject
+        // на MouseDown (не на каждый MouseDrag) — весь drag одной операцией.
+        // Клик на letterbox/тулбаре не долетает сюда: летербокс не входит в
+        // mapRect.Contains, тулбар/тогглы уже потребили событие раньше.
+        private void HandleRoadPathEditingInput(Rect mapRect)
         {
             if (editingRoadIndex < 0 ||
                 database == null ||
@@ -1352,29 +1536,101 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 return;
             }
 
+            WorldMapWorldDefinitionAsset.RoadEntry road = database.ActiveWorld.Roads[editingRoadIndex];
             Event current = Event.current;
-            if (current == null ||
-                current.type != EventType.MouseDown ||
-                current.button != 0 ||
-                !area.Contains(current.mousePosition))
-            {
+            if (current == null)
                 return;
+
+            const float hitRadiusPixels = 8f;
+
+            if (current.type == EventType.MouseDown && current.button == 0)
+            {
+                if (!mapRect.Contains(current.mousePosition))
+                    return;
+
+                int hitIndex = FindNearestRoadPoint(mapRect, road, current.mousePosition, hitRadiusPixels);
+
+                if (hitIndex >= 0)
+                {
+                    Undo.RecordObject(database.ActiveWorld, "Move Road Point");
+                    selectedRoadPointIndex = hitIndex;
+                    isDraggingRoadPoint = true;
+                }
+                else
+                {
+                    Undo.RecordObject(database.ActiveWorld, "Add Road Point");
+                    Vector2 newPoint = WorldMapPreviewMath.PreviewToMapClamped(mapRect, current.mousePosition);
+                    road.Points.Add(newPoint);
+                    selectedRoadPointIndex = road.Points.Count - 1;
+                    isDraggingRoadPoint = false;
+                }
+
+                EditorUtility.SetDirty(database.ActiveWorld);
+                current.Use();
+                Repaint();
+            }
+            else if (current.type == EventType.MouseDrag && isDraggingRoadPoint)
+            {
+                if (selectedRoadPointIndex < 0 || selectedRoadPointIndex >= road.Points.Count)
+                {
+                    isDraggingRoadPoint = false;
+                    return;
+                }
+
+                road.Points[selectedRoadPointIndex] =
+                    WorldMapPreviewMath.PreviewToMapClamped(mapRect, current.mousePosition);
+                EditorUtility.SetDirty(database.ActiveWorld);
+                current.Use();
+                Repaint();
+            }
+            else if (current.type == EventType.MouseUp && current.button == 0 && isDraggingRoadPoint)
+            {
+                isDraggingRoadPoint = false;
+                current.Use();
+            }
+        }
+
+        private static int FindNearestRoadPoint(
+            Rect mapRect,
+            WorldMapWorldDefinitionAsset.RoadEntry road,
+            Vector2 screenPosition,
+            float hitRadiusPixels)
+        {
+            int best = -1;
+            float bestDistance = hitRadiusPixels;
+
+            for (int i = 0; i < road.Points.Count; i++)
+            {
+                Vector2 screenPoint = WorldMapPreviewMath.MapToPreview(
+                    mapRect, road.Points[i].x, road.Points[i].y);
+                float distance = Vector2.Distance(screenPoint, screenPosition);
+                if (distance <= bestDistance)
+                {
+                    bestDistance = distance;
+                    best = i;
+                }
             }
 
-            float xPercent = Mathf.Clamp01((current.mousePosition.x - area.x) / area.width) * 100f;
-            float yPercent = Mathf.Clamp01((current.mousePosition.y - area.y) / area.height) * 100f;
+            return best;
+        }
 
-            SerializedObject worldSO = new SerializedObject(database.ActiveWorld);
-            worldSO.Update();
-            SerializedProperty road = worldSO.FindProperty("roads")
-                .GetArrayElementAtIndex(editingRoadIndex);
-            SerializedProperty points = road.FindPropertyRelative("Points");
-            int index = points.arraySize;
-            points.InsertArrayElementAtIndex(index);
-            points.GetArrayElementAtIndex(index).vector2Value = new Vector2(xPercent, yPercent);
-            worldSO.ApplyModifiedProperties();
+        private void DeleteSelectedRoadPoint()
+        {
+            if (editingRoadIndex < 0 || database == null || database.ActiveWorld == null)
+                return;
 
-            current.Use();
+            IReadOnlyList<WorldMapWorldDefinitionAsset.RoadEntry> roads = database.ActiveWorld.Roads;
+            if (editingRoadIndex >= roads.Count)
+                return;
+
+            WorldMapWorldDefinitionAsset.RoadEntry road = roads[editingRoadIndex];
+            if (selectedRoadPointIndex < 0 || selectedRoadPointIndex >= road.Points.Count)
+                return;
+
+            Undo.RecordObject(database.ActiveWorld, "Delete Road Point");
+            road.Points.RemoveAt(selectedRoadPointIndex);
+            selectedRoadPointIndex = -1;
+            EditorUtility.SetDirty(database.ActiveWorld);
             Repaint();
         }
 

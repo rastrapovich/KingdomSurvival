@@ -159,6 +159,16 @@ namespace KingdomSurvival.WorldMapVisual
 
         public void EditorClearTerrainAreas() => terrainAreas.Clear();
 
+        // Задача "Terrain Area Preview Authoring" (WM-T04.8): точечное
+        // удаление одной зоны (создание/перемещение/resize/удаление мышью
+        // в Preview) — в отличие от EditorClearTerrainAreas, которая
+        // очищает всё сразу.
+        public void EditorRemoveTerrainAreaAt(int index)
+        {
+            if (index >= 0 && index < terrainAreas.Count)
+                terrainAreas.RemoveAt(index);
+        }
+
         public void EditorAddSpawnSlot(SpawnSlotEntry slot)
         {
             spawnSlots.Add(slot);

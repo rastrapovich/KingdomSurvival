@@ -112,13 +112,29 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         BottomRight
     }
 
-    // Задача "Map Art Layers" (WM-T04.7): прямое перетаскивание/resize слоя
-    // в Preview. Чистая математика, без UnityEditor-типов — тестируется
-    // напрямую. Используется только Editor-стороной; runtime не меняется
-    // (raздел 21 задачи) — после drag меняются только сериализованные
-    // Bounds в ассете, существующий runtime-рендерер их просто читает.
+    // Задача "Map Art Layers" (WM-T04.7), расширено в WM-T04.8 для Terrain
+    // Areas: прямое перетаскивание/resize/создание прямоугольника в Preview.
+    // Чистая математика, без UnityEditor-типов — тестируется напрямую.
+    // Используется только Editor-стороной; runtime не меняется — после
+    // drag меняются только сериализованные Bounds в ассете, существующий
+    // рендерер их просто читает. Общая для Art Layers И Terrain Areas —
+    // раздел 26 задачи WM-T04.8 явно требует переиспользовать, а не
+    // дублировать эту математику.
     public static class WorldMapArtLayerBoundsMath
     {
+        // Задача "Terrain Area Authoring" (WM-T04.8, раздел 7): создание
+        // новой зоны протягиванием — две map-space точки (в любом порядке,
+        // drag может идти в любую сторону) нормализуются в валидный
+        // MapBounds. Не клампит и не проверяет минимальный размер сама —
+        // это отдельная ответственность вызывающего кода (drag-threshold,
+        // ClampBoundsToMap).
+        public static MapBounds NormalizeBoundsFromTwoPoints(Vector2 pointA, Vector2 pointB)
+        {
+            return new MapBounds(
+                Mathf.Min(pointA.x, pointB.x), Mathf.Min(pointA.y, pointB.y),
+                Mathf.Max(pointA.x, pointB.x), Mathf.Max(pointA.y, pointB.y));
+        }
+
         // Сдвигает прямоугольник целиком так, чтобы он остался внутри
         // 0..100 по обеим осям, не меняя Width/Height (раздел 8 задачи —
         // "не обрезать размер, а сдвинуть"). Если Width/Height сам больше

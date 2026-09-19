@@ -232,7 +232,7 @@ public partial class PrototypeUIController
         if (gameState.ArmySupply < gameState.ExpeditionSupplyConsumption)
         {
             buttonText = "ИССЛЕДОВАТЬ";
-            hint = "Недостаточно снабжения.";
+            hint = "Недостаточно припасов.";
             return false;
         }
 

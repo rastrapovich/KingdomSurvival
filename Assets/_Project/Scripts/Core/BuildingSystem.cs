@@ -88,8 +88,16 @@ public static class BuildingSystem
     public const string CityWallsId = "city_walls";
     public const string MineId = "mine";
 
+    // Временный технический слой (канон v1.38 §10): целевая экономика Дома —
+    // деньги, Запасы Дома и конкретные люди. Ежедневные доходы/содержание
+    // не являются целевой глубиной и подлежат упрощению или замене там,
+    // где не создают сюжетного решения.
     public const int BaseDailyGoldIncome = 3;
     public const int BaseDailyFoodIncome = 7;
+
+    // Временный технический слой (канон v1.38 §10.1): бойцы должны приходить
+    // из мира и отношений, а не производиться очередью. Заменить после
+    // приоритизации первого региона.
     public const int RecruitGoldCost = 35;
     public const double RecruitHours = 8.0;
     public const int PrototypeMaxFighters = 6;

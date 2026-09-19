@@ -220,7 +220,7 @@ public static class ExpeditionDecisionSystem
         if (state.ArmySupply < option.RequiredSupply)
         {
             resultMessage =
-                "Для этого приказа не хватает снабжения. Требуется: " +
+                "Для этого приказа не хватает припасов. Требуется: " +
                 option.RequiredSupply + ".";
             return false;
         }
@@ -427,7 +427,7 @@ public static class ExpeditionDecisionSystem
             state.ArmySupply < state.ExpeditionSupplyConsumption)
         {
             resultMessage =
-                "Для исследования нужен достаточный запас снабжения. Требуется: " +
+                "Для исследования нужен достаточный запас припасов. Требуется: " +
                 state.ExpeditionSupplyConsumption + ".";
             return false;
         }
@@ -521,9 +521,9 @@ public static class ExpeditionDecisionSystem
         List<string> parts = new List<string>();
 
         if (option.SupplyDelta > 0)
-            parts.Add("снабжение +" + option.SupplyDelta);
+            parts.Add("припасы +" + option.SupplyDelta);
         else if (option.SupplyDelta < 0)
-            parts.Add("снабжение " + option.SupplyDelta);
+            parts.Add("припасы " + option.SupplyDelta);
 
         if (option.RouteShortcutCells > 0)
             parts.Add("маршрут -" + option.RouteShortcutCells + " клетка");
@@ -660,12 +660,12 @@ public static class ExpeditionDecisionSystem
     private static string FormatSupplyConsequence(int delta)
     {
         if (delta > 0)
-            return "Снабжение +" + delta + ".";
+            return "Припасы +" + delta + ".";
 
         if (delta < 0)
-            return "Снабжение " + delta + ".";
+            return "Припасы " + delta + ".";
 
-        return "Снабжение не изменилось.";
+        return "Припасы не изменились.";
     }
 
     private static string GetActivityDisplayName(

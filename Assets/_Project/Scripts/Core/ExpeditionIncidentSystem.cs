@@ -468,12 +468,12 @@ public static class ExpeditionIncidentSystem
     private static string FormatSupplyConsequence(int delta)
     {
         if (delta > 0)
-            return "Снабжение +" + delta + ".";
+            return "Припасы +" + delta + ".";
 
         if (delta < 0)
-            return "Снабжение " + delta + ".";
+            return "Припасы " + delta + ".";
 
-        return "Снабжение не изменилось: запас уже пуст.";
+        return "Припасы не изменились: запас уже пуст.";
     }
 
     private static string FormatRouteConsequence(int adjustment)

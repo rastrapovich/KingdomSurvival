@@ -226,7 +226,7 @@ public partial class PrototypeUIController
             campStatusText.text =
                 "Цель: " + placeText + "\n" +
                 phaseText + " · Бойцов: " + expedition.FighterIds.Count +
-                " · Снабжение: " + gameState.ArmySupply;
+                " · Припасы: " + gameState.ArmySupply;
         }
     }
 

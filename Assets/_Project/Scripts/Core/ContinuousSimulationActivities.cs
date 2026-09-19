@@ -203,7 +203,7 @@ public static partial class ContinuousSimulationSystem
         if (activity.RewardArmyGold > 0)
             rewards.Add("золото +" + activity.RewardArmyGold);
         if (activity.RewardArmySupply > 0)
-            rewards.Add("снабжение +" + activity.RewardArmySupply);
+            rewards.Add("припасы +" + activity.RewardArmySupply);
 
         return rewards;
     }

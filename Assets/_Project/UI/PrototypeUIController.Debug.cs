@@ -160,7 +160,7 @@ public partial class PrototypeUIController
         debugArmySupplyPlus10Button = CreateDebugStepButton("+10", () => AdjustDebugArmySupply(10));
         debugArmySupplyValueLabel = CreateDebugValueLabel();
         scroll.Add(CreateDebugResourceRow(
-            "Снабжение",
+            "Припасы",
             debugArmySupplyMinus10Button,
             debugArmySupplyValueLabel,
             debugArmySupplyPlus10Button));

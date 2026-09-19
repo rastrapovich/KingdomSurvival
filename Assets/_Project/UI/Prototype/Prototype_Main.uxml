@@ -361,7 +361,7 @@
                                 <ui:Label name="hero-screen-army-gold-label" text="0" class="hero-screen-supply-value ks-text" />
                                 <ui:Button name="hero-screen-army-gold-plus-button" text="+" class="ks-button hero-screen-supply-button" />
                             </ui:VisualElement>
-                            <ui:Label text="СНАБЖЕНИЕ" class="hero-screen-supply-subtitle ks-muted-text" />
+                            <ui:Label text="ПРИПАСЫ" class="hero-screen-supply-subtitle ks-muted-text" />
                             <ui:VisualElement class="hero-screen-supply-row">
                                 <ui:Button name="hero-screen-supply-minus-button" text="−" class="ks-button hero-screen-supply-button" />
                                 <ui:Label name="hero-screen-supply-value-label" text="0" class="hero-screen-supply-value ks-text" />

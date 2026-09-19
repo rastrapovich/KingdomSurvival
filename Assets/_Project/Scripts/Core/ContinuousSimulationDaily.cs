@@ -102,7 +102,7 @@ public static partial class ContinuousSimulationSystem
             state.ArmySupply -= requiredSupply;
             state.ConsecutiveExpeditionSupplyShortageDays = 0;
             result.Messages.Add(
-                "Экспедиция израсходовала суточное снабжение: " +
+                "Экспедиция израсходовала суточные припасы: " +
                 requiredSupply + ". Осталось: " + state.ArmySupply + ".");
             return;
         }
@@ -116,7 +116,7 @@ public static partial class ContinuousSimulationSystem
         {
             result.Messages.Add(
                 "Армии не хватило " + shortage +
-                " снабжения на суточный расход. Следующая такая полночь " +
+                " припасов на суточный расход. Следующая такая полночь " +
                 "сорвёт поход.");
             return;
         }
@@ -142,7 +142,7 @@ public static partial class ContinuousSimulationSystem
         else
         {
             result.Messages.Add(
-                "Снабжение снова закончилось, но путь вынужденного возврата " +
+                "Припасы снова закончились, но путь вынужденного возврата " +
                 "не удалось построить.");
         }
     }

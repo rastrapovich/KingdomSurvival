@@ -1129,7 +1129,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                     new GUIContent("Золото отряда"));
                 EditorGUILayout.PropertyField(
                     location.FindPropertyRelative("rewardArmySupply"),
-                    new GUIContent("Снабжение отряда"));
+                    new GUIContent("Припасы отряда"));
 
                 EditorGUILayout.Space(4f);
                 EditorGUILayout.LabelField("Появление", EditorStyles.miniBoldLabel);

@@ -276,11 +276,14 @@ public class GameState
         HasActiveExpedition &&
         ActiveExpedition.PendingDecision != null;
 
-    // Ниже сохранены совместимые прототипные агрегаты старого UI. Они НЕ
-    // являются утверждённой системой защиты поселения. Значение по каждому
-    // бойцу берётся из UnitStatsProvider (реальные данные UnitDatabase), если
-    // у бойца задан UnitTypeId и провайдер назначен; иначе — из legacy
-    // FighterData.DefensePower.
+    // Ниже сохранены совместимые прототипные агрегаты старого UI. Временный
+    // технический слой (канон v1.38 §13.1): защита Дома выводится не из
+    // суммарного числа силы, а из причинных факторов — кто остался дома, в
+    // каком состоянии эти люди, какие есть укрепления, было ли предупреждение
+    // и какие прошлые решения изменили ситуацию. Точная формула и UI
+    // уточняются после первого региона. Значение по каждому бойцу берётся из
+    // UnitStatsProvider (реальные данные UnitDatabase), если у бойца задан
+    // UnitTypeId и провайдер назначен; иначе — из legacy FighterData.DefensePower.
     public int TotalArmyDefensePower
     {
         get
@@ -820,7 +823,7 @@ public class GameState
         if (ArmySupply < requiredSupply)
         {
             resultMessage =
-                "Для исследования нужен достаточный запас снабжения. Требуется: " +
+                "Для исследования нужен достаточный запас припасов. Требуется: " +
                 requiredSupply + ".";
             return false;
         }
@@ -998,7 +1001,7 @@ public class GameState
         commander.State = CommanderState.ReturningToCastle;
 
         resultMessage =
-            "Поход сорван: из-за второй подряд нехватки снабжения отряд вынужденно возвращается. " +
+            "Поход сорван: из-за второй подряд нехватки припасов отряд вынужденно возвращается. " +
             "Расчётное время пути: " +
             ContinuousSimulationSystem.FormatTravelTime(returnRoute) + ".";
         return true;

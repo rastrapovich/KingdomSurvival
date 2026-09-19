@@ -107,6 +107,8 @@ namespace KingdomSurvival.BattleSandbox
             {
                 ClearPointerPreview(false);
                 ClearUnitImages();
+                movementAnimationItem?.Pause();
+                attackAnimationItem?.Pause();
             });
             RegisterCallback<GeometryChangedEvent>(_ =>
             {

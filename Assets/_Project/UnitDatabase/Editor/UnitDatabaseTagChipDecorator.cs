@@ -18,6 +18,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
         static UnitDatabaseTagChipDecorator()
         {
+            EditorApplication.update -= RefreshOpenWindows;
             EditorApplication.update += RefreshOpenWindows;
         }
 

@@ -205,6 +205,12 @@ public static partial class ContinuousSimulationSystem
         ResetRouteTracking(runtime, expedition);
     }
 
+    // WM-T05 (раздел 20 задачи): раньше делилось на плоский CellsPerGameHour
+    // и НЕ учитывало живой gameplay-multiplier дорог впереди по маршруту —
+    // теперь идёт через единый WorldMapRoutePlanner.EstimateRouteTravelHours
+    // (тот же helper, что CalculateTravelHours ниже), который считает
+    // multiplier по каждому оставшемуся сегменту отдельно. RouteDelayHours
+    // по-прежнему складывается отдельно, как и раньше.
     public static double GetTravelHoursRemaining(GameState state)
     {
         if (state == null || !state.HasActiveExpedition)
@@ -220,8 +226,8 @@ public static partial class ContinuousSimulationSystem
             return 0.0;
         }
 
-        double remainingCells = GetRemainingCells(expedition, runtime);
-        double movementHours = remainingCells / CellsPerGameHour;
+        double movementHours = WorldMapRoutePlanner.EstimateRouteTravelHours(
+            expedition.Route, expedition.RouteIndex, runtime.SegmentProgress, WorldMapNavigation.ActiveDefinition);
         double delayHours = Math.Max(0.0, expedition.RouteDelayHoursRemaining);
         return movementHours + delayHours;
     }
@@ -375,12 +381,17 @@ public static partial class ContinuousSimulationSystem
 
     public const float DefaultBaseTravelHoursPerCell = 4f;
 
+    // WM-T05 (раздел 20 задачи): единый принцип с GetTravelHoursRemaining —
+    // теперь честно учитывает gameplay-multiplier (дороги и т.д.) вдоль
+    // всего route, а не только плоскую базовую ставку. Для маршрута без
+    // прогресса (segmentProgress=0) — как раз случай "оценка для ещё не
+    // начатой поездки" (TravelHoursFromCapital, превью перед стартом и т.п.).
     public static double CalculateTravelHours(
         List<MapPointData> route,
         int routeIndex = 0)
     {
-        int cells = WorldMapNavigation.CalculateRouteCells(route, routeIndex);
-        return cells / CellsPerGameHour;
+        return WorldMapRoutePlanner.EstimateRouteTravelHours(
+            route, routeIndex, 0.0, WorldMapNavigation.ActiveDefinition);
     }
 
     public static string FormatTravelTime(

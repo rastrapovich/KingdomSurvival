@@ -80,6 +80,15 @@ public static class WorldMapNavigation
     // тогда безопасно даёт OpenGround/1.0 (WorldMapGameplayTerrainQuery).
     public static WorldMapDefinitionData ActiveDefinition => activeDefinition;
 
+    // WM-T05 ("автоматический выбор быстрейшего маршрута"): единственная
+    // точка входа для игры не изменилась, но теперь делегирует в
+    // WorldMapRoutePlanner — тот сравнивает прямой путь с путём через
+    // авторскую дорожную сеть по игровому времени и возвращает лучший,
+    // уже ресэмплированный в нормальный movement route (Hills/Mountains
+    // под-точки сохранены). Старая прямая логика не удалена — она живёт в
+    // WorldMapRoutePlanner.BuildDirectPath (fallback без дорог и off-road
+    // участки) и WorldMapRoutePlanner.BuildMovementRouteAlongPolyline
+    // (ресэмплинг, идентичный прежнему циклу FindPath).
     public static List<MapPointData> FindPath(
         float startXPercent,
         float startYPercent,
@@ -87,53 +96,8 @@ public static class WorldMapNavigation
         float targetYPercent)
     {
         EnsureTerrainConfigured();
-
-        float startX = ClampMapX(startXPercent);
-        float startY = ClampMapY(startYPercent);
-        float targetX = ClampMapX(targetXPercent);
-        float targetY = ClampMapY(targetYPercent);
-
-        double dxCells = (targetX - startX) * (GridWidth - 1) / 100.0;
-        double dyCells = (targetY - startY) * (GridHeight - 1) / 100.0;
-        double distanceCells = Math.Sqrt(dxCells * dxCells + dyCells * dyCells);
-
-        List<MapPointData> route = new List<MapPointData>
-        {
-            new MapPointData(startX, startY)
-        };
-
-        if (distanceCells <= 0.0001)
-            return route;
-
-        int baseSegments = Math.Max(1, (int)Math.Ceiling(distanceCells));
-
-        for (int segment = 1; segment <= baseSegments; segment++)
-        {
-            float fromT = (segment - 1f) / baseSegments;
-            float toT = segment / (float)baseSegments;
-            float midpointT = (fromT + toT) * 0.5f;
-            float midpointX = Lerp(startX, targetX, midpointT);
-            float midpointY = Lerp(startY, targetY, midpointT);
-            int terrainCost = GetTerrainTravelCost(
-                GetTerrainAtPercent(midpointX, midpointY));
-
-            // Точки остаются на прямой. Дополнительные подточки лишь растягивают
-            // время прохождения трудной местности для существующей симуляции.
-            for (int part = 1; part <= terrainCost; part++)
-            {
-                float localT = part / (float)terrainCost;
-                float t = fromT + (toT - fromT) * localT;
-                route.Add(new MapPointData(
-                    Lerp(startX, targetX, t),
-                    Lerp(startY, targetY, t)));
-            }
-        }
-
-        route[0].XPercent = startXPercent;
-        route[0].YPercent = startYPercent;
-        route[route.Count - 1].XPercent = targetXPercent;
-        route[route.Count - 1].YPercent = targetYPercent;
-        return route;
+        return WorldMapRoutePlanner.FindFastestRoute(
+            startXPercent, startYPercent, targetXPercent, targetYPercent, activeDefinition);
     }
 
     // В существующей симуляции один сегмент маршрута занимает одну базовую
@@ -146,6 +110,9 @@ public static class WorldMapNavigation
         return Math.Max(0, path.Count - 1 - routeIndex);
     }
 
+    // Раздел 9 задачи "автоматический выбор быстрейшего маршрута": один
+    // общий helper (WorldMapRoutePlanner.DistanceCellsBetween) для метрики
+    // расстояния — раньше эта формула была продублирована здесь и в FindPath.
     public static double CalculateGeometricDistanceCells(List<MapPointData> path)
     {
         if (path == null || path.Count <= 1)
@@ -154,11 +121,9 @@ public static class WorldMapNavigation
         double total = 0.0;
         for (int i = 1; i < path.Count; i++)
         {
-            double dx = (path[i].XPercent - path[i - 1].XPercent) *
-                (GridWidth - 1) / 100.0;
-            double dy = (path[i].YPercent - path[i - 1].YPercent) *
-                (GridHeight - 1) / 100.0;
-            total += Math.Sqrt(dx * dx + dy * dy);
+            total += WorldMapRoutePlanner.DistanceCellsBetween(
+                path[i - 1].XPercent, path[i - 1].YPercent,
+                path[i].XPercent, path[i].YPercent);
         }
 
         return total;
@@ -293,9 +258,6 @@ public static class WorldMapNavigation
 
     private static int PercentToGridY(float value) =>
         WorldMapCoordinates.PercentToGridY(value, GridHeight);
-
-    private static float Lerp(float a, float b, float t) =>
-        a + (b - a) * t;
 
     // AM-01: рельеф из авторских прямоугольных областей вместо случайных
     // кластеров. Области применяются по возрастанию Priority — совпадающие

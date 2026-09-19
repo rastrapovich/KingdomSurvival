@@ -17,6 +17,9 @@ MonoBehaviour:
   homeLocationId: home
   homeXPercent: 50
   homeYPercent: 81
+  mapCanvasWidth: 4160
+  mapCanvasHeight: 2560
+  baseTravelHoursPerCell: 2
   terrainAreas:
   - Id: test-hills-west
     Terrain: 1
@@ -41,7 +44,7 @@ MonoBehaviour:
     MovementMultiplier: 1
   - Terrain: 1
     Traversable: 1
-    MovementMultiplier: 1.3
+    MovementMultiplier: 3
   - Terrain: 2
     Traversable: 1
     MovementMultiplier: 0.9
@@ -52,11 +55,52 @@ MonoBehaviour:
     Traversable: 0
     MovementMultiplier: 1
   roads:
-  - Id: road_test_01
-    DisplayName: "\u0422\u0435\u0441\u0442\u043E\u0432\u0430\u044F \u0434\u043E\u0440\u043E\u0433\u0430"
+  - Id: road-1
+    DisplayName: "\u041D\u043E\u0432\u0430\u044F \u0434\u043E\u0440\u043E\u0433\u0430"
     Enabled: 1
-    Width: 6
+    Width: 0.1
     Points:
-    - {x: 10, y: 80}
-    - {x: 50, y: 81}
-    - {x: 90, y: 30}
+    - {x: 49.92922, y: 81.03188}
+    - {x: 49.13374, y: 81.11189}
+    - {x: 48.783184, y: 81.3126}
+    - {x: 48.441902, y: 81.30575}
+    - {x: 48.210167, y: 81.15512}
+    - {x: 48.020565, y: 80.97026}
+    - {x: 47.780403, y: 80.94972}
+    - {x: 46.764984, y: 80.91549}
+    - {x: 46.050346, y: 81.01481}
+    - {x: 44.813972, y: 81.392204}
+  - Id: road-2
+    DisplayName: "\u041D\u043E\u0432\u0430\u044F \u0434\u043E\u0440\u043E\u0433\u0430"
+    Enabled: 1
+    Width: 0.1
+    Points:
+    - {x: 49.54878, y: 81.0733}
+    - {x: 49.821037, y: 81.72147}
+    - {x: 49.89701, y: 82.00954}
+    - {x: 49.86219, y: 82.29246}
+    - {x: 49.741875, y: 82.54964}
+    - {x: 49.64374, y: 82.84799}
+    - {x: 49.65957, y: 83.05375}
+    - {x: 49.859, y: 83.578445}
+    - {x: 50.020443, y: 84.0054}
+  - Id: road-3
+    DisplayName: "\u041D\u043E\u0432\u0430\u044F \u0434\u043E\u0440\u043E\u0433\u0430"
+    Enabled: 1
+    Width: 0.1
+    Points:
+    - {x: 49.7412, y: 81.434845}
+    - {x: 50.295174, y: 81.29595}
+    - {x: 50.437622, y: 81.10563}
+    - {x: 50.573742, y: 80.992455}
+    - {x: 50.82699, y: 80.94102}
+    - {x: 51.05491, y: 81.01817}
+    - {x: 51.22901, y: 81.03361}
+    - {x: 51.434772, y: 80.930725}
+    - {x: 51.646866, y: 80.85871}
+    - {x: 52.00774, y: 80.86385}
+    - {x: 52.36229, y: 80.76103}
+    - {x: 52.606037, y: 80.647865}
+    - {x: 52.802303, y: 80.53469}
+    - {x: 52.96691, y: 80.49869}
+    - {x: 53.21699, y: 80.174614}

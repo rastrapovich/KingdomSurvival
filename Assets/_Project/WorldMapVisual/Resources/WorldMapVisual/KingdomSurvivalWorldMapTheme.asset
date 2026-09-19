@@ -12,18 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc55d27eee11d6e418c63e36062eab5c, type: 3}
   m_Name: KingdomSurvivalWorldMapTheme
   m_EditorClassIdentifier: 
-  terrainProfiles:
-  - terrain: 1
-    cellColor: {r: 0.34, g: 0.4, b: 0.3, a: 0.55}
-    massVariants: []
-  - terrain: 2
-    cellColor: {r: 0.32, g: 0.3, b: 0.29, a: 0.65}
-    massVariants: []
   baseMapSprite: {fileID: 0}
   baseMapColor: {r: 0.16, g: 0.17, b: 0.15, a: 1}
   baseMapTint: {r: 1, g: 1, b: 1, a: 1}
   iconLibrary: {fileID: 11400000, guid: 01e0823d4c3cb4d3eb132498f99c1edb, type: 2}
-  water:
-    segmentSprite: {fileID: 0}
-    fallbackColor: {r: 0.3, g: 0.42, b: 0.52, a: 0.75}
-    widthPixels: 6
+  artLayers:
+  - Id: art-layer-1
+    DisplayName: "\u041D\u043E\u0432\u044B\u0439 \u0441\u043B\u043E\u0439"
+    Enabled: 1
+    Sprite: {fileID: 21300000, guid: 373d2b21c19059545a08a7168b21953e, type: 3}
+    MinXPercent: 46.444004
+    MaxXPercent: 54.520744
+    MinYPercent: 78.38598
+    MaxYPercent: 83.355064
+    Order: 0
+    Opacity: 1
+    FitMode: 0
+  heroMarkerSizeCells: 0.3
+  homeMarkerSizeCells: 0.5

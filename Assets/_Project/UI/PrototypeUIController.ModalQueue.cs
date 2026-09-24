@@ -152,6 +152,7 @@ public partial class PrototypeUIController
             return;
 
         activeQueuedModal = queuedModals.Dequeue();
+        CloseJournalForMandatoryEvent();
         PauseForBlockingModal();
 
         if (activeQueuedModal.Decision != null)
@@ -258,7 +259,6 @@ public partial class PrototypeUIController
                (IsGameMenuOpen ||
                 IsNarrativeDialogueActive ||
                 IsLocationInteractionActive ||
-                IsJournalOpen ||
                 IsHeroScreenOpen ||
                 gameState.HasPendingExpeditionDecision ||
                 openedIncident != null ||

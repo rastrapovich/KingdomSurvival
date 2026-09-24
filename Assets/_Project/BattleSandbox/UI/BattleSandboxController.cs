@@ -69,8 +69,109 @@ namespace KingdomSurvival.BattleSandbox
             root.style.flexGrow = 1f;
             root.style.backgroundColor = new Color(0.035f, 0.043f, 0.050f, 1f);
             root.style.color = new Color(0.88f, 0.84f, 0.76f, 1f);
+
+            // ПР-03: кампания пришла в бой со своим отрядом — полигонный
+            // выбор состава пропускается.
+            campaignBattle = CampaignSession.PendingBattle;
+            if (campaignBattle != null && StartCampaignBattle())
+                return;
+
+            campaignBattle = null;
             BuildSetupScreen();
         }
+
+        // ------------------------------------------------------------------
+        // ПР-03: бой кампании. Юнит i — участник запроса i (герой и бойцы
+        // похода) со своим именем и боевой основой из UnitDatabase по
+        // UnitTypeId. По итогу — «Вернуться в кампанию» с павшими по ID.
+        // ------------------------------------------------------------------
+
+        private CampaignBattleRequest campaignBattle;
+        private readonly List<CampaignBattleParticipant> campaignParticipants = new List<CampaignBattleParticipant>();
+        private readonly List<string> campaignUnitIds = new List<string>();
+
+        private bool StartCampaignBattle()
+        {
+            campaignParticipants.Clear();
+            List<SandboxUnitDefinition> fighters = new List<SandboxUnitDefinition>();
+            foreach (CampaignBattleParticipant participant in campaignBattle.Participants)
+            {
+                SandboxUnitDefinition baseDefinition = unitContent.PlayerRoster
+                    .FirstOrDefault(definition => definition.Id == participant.UnitTypeId);
+                if (baseDefinition == null)
+                {
+                    Debug.LogWarning("Бой кампании: нет боевой основы '" + participant.UnitTypeId +
+                                     "' для " + participant.DisplayName + " — участник пропущен.");
+                    continue;
+                }
+
+                fighters.Add(new SandboxUnitDefinition(
+                    baseDefinition.Id,
+                    participant.DisplayName,
+                    baseDefinition.Role,
+                    baseDefinition.MaxHitPoints,
+                    baseDefinition.Attack,
+                    baseDefinition.Defense,
+                    baseDefinition.Damage,
+                    baseDefinition.Movement,
+                    baseDefinition.Initiative,
+                    baseDefinition.AttackRange,
+                    baseDefinition.TagIds));
+                campaignParticipants.Add(participant);
+            }
+
+            if (fighters.Count == 0)
+            {
+                Debug.LogError("Бой кампании: в запросе нет ни одного участника с боевой основой.");
+                return false;
+            }
+
+            // Тот же формат ID, что задаёт SandboxRoster.CreateBattle.
+            campaignUnitIds.Clear();
+            for (int i = 0; i < fighters.Count; i++)
+                campaignUnitIds.Add("player:" + fighters[i].Id + ":" + (i + 1));
+
+            battle = SandboxRoster.CreateBattle(fighters, unitContent.EnemyEncounter);
+            battleLog.Clear();
+            battleLog.Add("Бой начался. Отряд встречает засаду.");
+            selectedTargetId = null;
+            BuildBattleScreen();
+            RefreshBattleScreen();
+            return true;
+        }
+
+        private CampaignBattleResult BuildCampaignBattleResult()
+        {
+            CampaignBattleResult result = new CampaignBattleResult
+            {
+                BattleId = campaignBattle.BattleId,
+                Outcome = battle.Phase == SandboxBattlePhase.PlayerVictory
+                    ? CampaignBattleOutcome.Victory
+                    : CampaignBattleOutcome.Defeat
+            };
+
+            for (int i = 0; i < campaignParticipants.Count; i++)
+            {
+                string unitId = campaignUnitIds[i];
+                SandboxUnitState unit = battle.Units.FirstOrDefault(candidate => candidate.Id == unitId);
+                if (unit != null && unit.IsDefeated)
+                    result.FallenPersonIds.Add(campaignParticipants[i].PersonId);
+            }
+
+            return result;
+        }
+
+        private void ReturnToCampaign()
+        {
+            if (campaignBattle == null || battle == null || battle.Phase == SandboxBattlePhase.InProgress)
+                return;
+
+            CampaignSession.CompleteBattle(BuildCampaignBattleResult());
+            campaignBattle = null;
+            UnityEngine.SceneManagement.SceneManager.LoadScene(CampaignSceneName);
+        }
+
+        private const string CampaignSceneName = "Prototype_Main";
 
         private void BuildSetupScreen()
         {
@@ -327,10 +428,24 @@ namespace KingdomSurvival.BattleSandbox
             resultLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             resultBanner.Add(resultLabel);
 
-            Button repeatButton = new Button(StartBattle) { text = "ПОВТОРИТЬ БОЙ" };
-            StylePrimaryButton(repeatButton);
-            repeatButton.style.marginTop = 9f;
-            resultBanner.Add(repeatButton);
+            if (campaignBattle != null)
+            {
+                // Бой кампании нельзя переиграть или пересобрать: итог
+                // возвращается в ту же кампанию.
+                returnToSetupButton.style.display = DisplayStyle.None;
+                Button returnButton = new Button(ReturnToCampaign) { text = "ВЕРНУТЬСЯ В КАМПАНИЮ" };
+                returnButton.name = "campaign-return-button";
+                StylePrimaryButton(returnButton);
+                returnButton.style.marginTop = 9f;
+                resultBanner.Add(returnButton);
+            }
+            else
+            {
+                Button repeatButton = new Button(StartBattle) { text = "ПОВТОРИТЬ БОЙ" };
+                StylePrimaryButton(repeatButton);
+                repeatButton.style.marginTop = 9f;
+                resultBanner.Add(repeatButton);
+            }
             sidebar.Add(resultBanner);
 
             body.Add(sidebar);
@@ -677,7 +792,9 @@ namespace KingdomSurvival.BattleSandbox
                 ? "Синие гексы — оставшееся движение. Меч выбирает грань удара; выжившая цель может ответить один раз за раунд. Выстрел ответ не вызывает. ПКМ открывает карточку."
                 : battle.Phase == SandboxBattlePhase.InProgress
                     ? "Противник выполняет свою активацию…"
-                    : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";
+                    : campaignBattle != null
+                        ? "Бой окончен. Вернитесь в кампанию — итог боя перейдёт в отряд."
+                        : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";
 
             logLabel.text = string.Join("\n", battleLog.Skip(Math.Max(0, battleLog.Count - 9)));
             RefreshResultBanner();

@@ -68,6 +68,22 @@ namespace KingdomSurvival.BattleSandbox
             List<SandboxUnitDefinition> fighters = playerRoster
                 .Where(definition => definition != null && selected.Contains(definition.Id))
                 .ToList();
+            return CreateBattle(fighters, enemyEncounter, terrainSeed);
+        }
+
+        // ПР-03: бой из готового упорядоченного состава — у кампании это
+        // конкретные люди (герой и бойцы похода), в том числе несколько
+        // бойцов одного типа. Юнит i получает ID "player:<тип>:<i+1>".
+        public static SandboxBattle CreateBattle(
+            IReadOnlyList<SandboxUnitDefinition> fighters,
+            IEnumerable<SandboxUnitDefinition> enemyEncounter,
+            int? terrainSeed = null)
+        {
+            if (fighters == null)
+                throw new ArgumentNullException(nameof(fighters));
+            if (enemyEncounter == null)
+                throw new ArgumentNullException(nameof(enemyEncounter));
+
             List<SandboxUnitDefinition> enemies = enemyEncounter
                 .Where(definition => definition != null)
                 .ToList();

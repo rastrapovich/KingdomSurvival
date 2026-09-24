@@ -242,6 +242,12 @@ public class GameState
     // См. EncounterRuntimeState.cs, §18, §64 инструкции по Encounter-системе.
     public EncounterRuntimeStateData Encounters;
 
+    // ПР-05: что выбрано при старте (кризис, командир, начальное состояние,
+    // версия контента, seed). Фиксируется CampaignSetup и сохраняется вместе
+    // с кампанией. У партий старше ПР-05 и у тестов, создающих GameState
+    // напрямую, пусто — они считаются кампанией единственного кризиса.
+    public CampaignConfiguration Configuration;
+
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
     public int DailyFoodConsumption => Population;

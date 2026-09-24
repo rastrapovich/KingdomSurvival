@@ -321,6 +321,7 @@ public partial class PrototypeUIController
             return false;
         }
 
+        CloseJournalForMandatoryEvent();
         narrativeHistory.Clear();
         PauseForBlockingModal();
         narrativeDialogueOverlay.style.display = DisplayStyle.Flex;
@@ -600,6 +601,10 @@ public partial class PrototypeUIController
             // P08-T03: N10 заканчивается действием «Выбрать состав похода» без
             // эффектов — реальный набор 0-4 бойцов происходит в picker'е Экрана
             // героя (панель «СОСТАВ ПОХОДА»), не в самом диалоге.
+            // ПР-04: сцена завершена и её последствия применены — устойчивая
+            // точка для автосохранения (не посреди реплик и выбора).
+            Autosave();
+
             if (string.Equals(completedDialogueId, Chapter01Ids.Dialogues.D10, StringComparison.Ordinal))
             {
                 gameState.Narrative?.SetFlag(Chapter01Ids.Flags.PartyGatheringSeen);

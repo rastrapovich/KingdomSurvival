@@ -191,19 +191,21 @@ namespace KingdomSurvival.Chapter01
 
         public static IReadOnlyList<Chapter01HomeActivity> GetAvailable(GameState gameState)
         {
-            return GetAvailable(gameState?.Narrative, gameState != null && !gameState.HasActiveExpedition);
+            if (!Chapter01Crisis.IsActive(gameState))
+                return new List<Chapter01HomeActivity>();
+            return GetAvailable(gameState.Narrative, !gameState.HasActiveExpedition);
         }
 
         public static string GetAutoScene(GameState gameState)
         {
-            if (gameState == null)
+            if (!Chapter01Crisis.IsActive(gameState))
                 return null;
             return GetAutoScene(gameState.Narrative, !gameState.HasActiveExpedition, HourOf(gameState));
         }
 
         public static bool IsWaitingForNight(GameState gameState)
         {
-            if (gameState == null)
+            if (!Chapter01Crisis.IsActive(gameState))
                 return false;
             return IsWaitingForNight(gameState.Narrative, !gameState.HasActiveExpedition, HourOf(gameState));
         }

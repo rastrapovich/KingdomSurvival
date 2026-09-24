@@ -764,6 +764,38 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- ПР-05: итог перед стартом новой кампании. Тексты берутся из
+             CampaignStartOptions; выбор вариантов появится в ПР-12. -->
+        <ui:VisualElement name="new-game-overlay" class="game-menu-overlay new-game-overlay">
+            <ui:VisualElement class="game-menu-panel new-game-panel">
+                <ui:Label text="НОВАЯ ИГРА" class="game-menu-title" />
+                <ui:Label text="КРИЗИС" class="new-game-section" />
+                <ui:Label name="new-game-crisis-title" class="new-game-option-title" />
+                <ui:Label name="new-game-crisis-summary" class="new-game-option-summary" />
+                <ui:Label text="КОМАНДИР" class="new-game-section" />
+                <ui:Label name="new-game-commander-title" class="new-game-option-title" />
+                <ui:Label name="new-game-commander-summary" class="new-game-option-summary" />
+                <ui:Label text="НАЧАЛЬНЫЕ УСЛОВИЯ" class="new-game-section" />
+                <ui:Label name="new-game-start-title" class="new-game-option-title" />
+                <ui:Label name="new-game-start-summary" class="new-game-option-summary" />
+                <ui:Label text="Решения и потери сохраняются внутри кампании." class="game-menu-hint new-game-reminder" />
+                <ui:Button name="new-game-start-button" text="Начать" class="game-menu-button" />
+                <ui:Button name="new-game-back-button" text="Назад" class="game-menu-button" />
+                <ui:Label name="new-game-message" class="game-menu-message" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ПР-04: выбор слота сохранения/загрузки. Строки — шаблон
+             Templates/SaveSlotRow.uxml. -->
+        <ui:VisualElement name="saves-overlay" class="game-menu-overlay saves-overlay">
+            <ui:VisualElement class="game-menu-panel">
+                <ui:Label name="saves-title" text="ЗАГРУЗИТЬ" class="game-menu-title" />
+                <ui:VisualElement name="saves-list" class="saves-list" />
+                <ui:Label name="saves-message" class="game-menu-message" />
+                <ui:Button name="saves-close-button" text="Назад" class="game-menu-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
         <ui:VisualElement name="settings-overlay" class="game-menu-overlay settings-overlay">
             <ui:VisualElement class="game-menu-panel">
                 <ui:Label text="НАСТРОЙКИ" class="game-menu-title" />

@@ -200,6 +200,12 @@ public partial class PrototypeUIController
             DebugTriggerAuthoredEncounter);
         scroll.Add(debugForceEncounterButton);
 
+        // ПР-03: черновой вход в бой реальным отрядом похода. Сюжетного боя
+        // в главе пока нет — настоящий вход появится в ПР-10.
+        scroll.Add(CreateDebugActionButton(
+            "БОЙ ЗДЕСЬ (ЧЕРНОВИК ПР-03)",
+            DebugStartCampaignBattle));
+
         AddDebugSectionTitle(scroll, "ГЛАВА 1");
 
         // Инструмент разработки: открыть следующую сцену домашней части
@@ -216,12 +222,12 @@ public partial class PrototypeUIController
         // временно живёт здесь же, рядом со сбросом партии.
         debugSaveCampaignButton = CreateDebugActionButton(
             "СОХРАНИТЬ ПАРТИЮ",
-            SaveCampaign);
+            () => SaveCampaign(CampaignSaveStore.ManualSlotIds[0]));
         scroll.Add(debugSaveCampaignButton);
 
         debugLoadCampaignButton = CreateDebugActionButton(
             "ЗАГРУЗИТЬ ПАРТИЮ",
-            () => LoadCampaign());
+            () => LoadMostRecentCampaign());
         scroll.Add(debugLoadCampaignButton);
 
         debugResetGameButton = CreateDebugActionButton(
@@ -351,7 +357,7 @@ public partial class PrototypeUIController
             available && hasExpedition && !hasDecision && !hasTimedActivity && !IsNarrativeDialogueActive);
         debugResetGameButton.SetEnabled(true);
         debugSaveCampaignButton.SetEnabled(true);
-        debugLoadCampaignButton.SetEnabled(HasSavedCampaign);
+        debugLoadCampaignButton.SetEnabled(true);
         debugExpeditionStateLabel.text = BuildDebugExpeditionStateText();
     }
 
@@ -525,6 +531,12 @@ public partial class PrototypeUIController
 
         TryDebugForceRoadEncounter(out string message);
         AddReport("[DEBUG] " + message);
+    }
+
+    private void DebugStartCampaignBattle()
+    {
+        if (!TryStartCampaignBattle("debug." + Guid.NewGuid().ToString("N"), out string message))
+            AddReport("[DEBUG] " + message);
     }
 
     // Для ручной проверки домашней части: открывает сцену, которая сейчас

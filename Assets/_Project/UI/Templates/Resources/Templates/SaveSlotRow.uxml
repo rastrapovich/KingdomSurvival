@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ui:UXML
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    editor-extension-mode="False">
+
+    <ui:Button name="save-slot-row" class="save-slot-row">
+        <ui:Label name="save-slot-title" class="save-slot-title" />
+        <ui:Label name="save-slot-description" class="save-slot-description" />
+    </ui:Button>
+</ui:UXML>

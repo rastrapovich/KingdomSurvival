@@ -242,7 +242,10 @@ public partial class PrototypeUIController
         // крюка и фиксация прибытия в область поиска — тоже читаются
         // каждый кадр наравне с паузой, не отдельным колбэком по месту
         // клика (раздел "Единый принцип" инструкции про карту/время).
-        Chapter01StoryDirector.RefreshRoadState(gameState);
+        // ПР-05: дорожные и местные сцены главы — только в кампании её кризиса.
+        bool chapterActive = Chapter01Crisis.IsActive(gameState);
+        if (chapterActive)
+            Chapter01StoryDirector.RefreshRoadState(gameState);
 
         // Обязательная/необязательная дорожная встреча первого похода —
         // единственный производственный случай, когда сюжетный диалог
@@ -251,7 +254,9 @@ public partial class PrototypeUIController
         // открытие уже само ставит PauseForBlockingModal внутри
         // TryOpenNarrativeDialogueById — выходим сразу, не давая коду ниже
         // пересчитать паузу этим же кадром.
-        string pendingRoadEventDialogueId = Chapter01StoryDirector.GetPendingRoadEventDialogueId(gameState);
+        string pendingRoadEventDialogueId = chapterActive
+            ? Chapter01StoryDirector.GetPendingRoadEventDialogueId(gameState)
+            : null;
         if (!string.IsNullOrEmpty(pendingRoadEventDialogueId) &&
             TryOpenNarrativeDialogueById(pendingRoadEventDialogueId))
         {
@@ -262,7 +267,9 @@ public partial class PrototypeUIController
         // приоритет и тот же принцип, что дорожная встреча выше: физический
         // факт (место осмотрено), не клик игрока, поэтому опрашивается
         // каждый кадр отдельно от общего диспетчера автоматических диалогов.
-        string pendingLocationNarrativeDialogueId = Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState);
+        string pendingLocationNarrativeDialogueId = chapterActive
+            ? Chapter01StoryDirector.GetPendingLocationNarrativeDialogueId(gameState)
+            : null;
         if (!string.IsNullOrEmpty(pendingLocationNarrativeDialogueId) &&
             TryOpenNarrativeDialogueById(pendingLocationNarrativeDialogueId))
         {

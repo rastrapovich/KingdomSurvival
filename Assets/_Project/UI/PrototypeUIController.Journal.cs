@@ -135,7 +135,8 @@ public partial class PrototypeUIController
         CloseHeroScreen();
         CloseCampScreen();
 
-        PauseForBlockingModal();
+        // ПР-04: Хроника не останавливает время — мир живёт, пока игрок
+        // читает. Обязательное событие закрывает её само (CloseJournalForMandatoryEvent).
         journalOverlay.style.display = DisplayStyle.Flex;
         journalOverlay.BringToFront();
         RefreshJournal();
@@ -146,11 +147,15 @@ public partial class PrototypeUIController
         if (journalOverlay == null)
             return;
 
-        bool wasOpen = IsJournalOpen;
         journalOverlay.style.display = DisplayStyle.None;
+    }
 
-        if (wasOpen)
-            ResumeAfterBlockingModalIfReady();
+    // Обязательное событие (сюжетная сцена, донесение, решение) пришло,
+    // пока открыта Хроника: она закрывается, событие показывается одно.
+    private void CloseJournalForMandatoryEvent()
+    {
+        if (IsJournalOpen)
+            CloseJournal();
     }
 
     // ------------------------------------------------------------------

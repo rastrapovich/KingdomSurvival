@@ -32,6 +32,47 @@ public static class CampaignSaveService
         };
     }
 
+    // ПР-04: можно ли загрузить сохранение в текущую сборку. Несовместимое
+    // не «чинится» — файл остаётся нетронутым, игрок видит причину.
+    // Сохранение без авторского мира (WorldDefinitionId пуст) и версия
+    // географии 0 (неизвестна) не проверяются — так было до авторской карты.
+    public static bool IsLoadable(
+        CampaignSaveData data,
+        string activeWorldDefinitionId,
+        int activeGeographyVersion,
+        out string reason)
+    {
+        reason = string.Empty;
+        if (data == null || data.State == null)
+        {
+            reason = "файл повреждён";
+            return false;
+        }
+
+        if (data.SaveFormatVersion != CurrentSaveFormatVersion)
+        {
+            reason = "формат сохранения " + data.SaveFormatVersion + ", нужен " + CurrentSaveFormatVersion;
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(data.WorldDefinitionId) &&
+            data.WorldDefinitionId != (activeWorldDefinitionId ?? string.Empty))
+        {
+            reason = "другая авторская карта ('" + data.WorldDefinitionId + "')";
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(data.WorldDefinitionId) &&
+            data.GeographyVersion > 0 && activeGeographyVersion > 0 &&
+            data.GeographyVersion != activeGeographyVersion)
+        {
+            reason = "карта изменилась (география " + data.GeographyVersion + ", сейчас " + activeGeographyVersion + ")";
+            return false;
+        }
+
+        return true;
+    }
+
     // Возвращает State из data после исправления null-ности и восстановления
     // скрытых RuntimeState часов/построек. Не создаёт новую партию и не
     // вызывает WorldMapPopulationService — Populate запускается только при

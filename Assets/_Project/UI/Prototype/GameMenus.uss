@@ -117,3 +117,111 @@
     margin-top: 8px;
     margin-bottom: 8px;
 }
+
+/* ПР-04: выбор слота сохранения */
+
+.saves-list {
+    margin-bottom: 4px;
+}
+
+.save-slot-row {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 6px;
+    margin-bottom: 0;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    align-items: flex-start;
+}
+
+.save-slot-title {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: rgb(226, 214, 186);
+}
+
+.save-slot-description {
+    font-size: 12px;
+    margin-top: 2px;
+    color: rgb(193, 183, 158);
+    white-space: normal;
+}
+
+/* Кнопки меню и строки слотов: тёмная подложка в тон панели вместо
+   светлой стандартной — светлый текст читается. */
+
+.game-menu-button,
+.save-slot-row {
+    background-color: rgb(44, 40, 34);
+    color: rgb(226, 214, 186);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(96, 84, 64);
+    border-right-color: rgb(96, 84, 64);
+    border-top-color: rgb(96, 84, 64);
+    border-bottom-color: rgb(96, 84, 64);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.game-menu-button:hover,
+.save-slot-row:hover {
+    background-color: rgb(66, 57, 42);
+    border-left-color: rgb(176, 146, 92);
+    border-right-color: rgb(176, 146, 92);
+    border-top-color: rgb(176, 146, 92);
+    border-bottom-color: rgb(176, 146, 92);
+}
+
+.game-menu-button:active,
+.save-slot-row:active {
+    background-color: rgb(84, 70, 48);
+}
+
+.game-menu-button:disabled,
+.save-slot-row:disabled {
+    background-color: rgb(34, 33, 31);
+    color: rgb(110, 104, 94);
+    border-left-color: rgb(58, 54, 48);
+    border-right-color: rgb(58, 54, 48);
+    border-top-color: rgb(58, 54, 48);
+    border-bottom-color: rgb(58, 54, 48);
+}
+
+/* ПР-05: итог перед стартом новой кампании */
+
+.new-game-panel {
+    width: 520px;
+}
+
+.new-game-section {
+    margin-top: 12px;
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(150, 143, 126);
+}
+
+.new-game-option-title {
+    margin-top: 2px;
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: rgb(226, 214, 186);
+}
+
+.new-game-option-summary {
+    margin-top: 2px;
+    font-size: 13px;
+    white-space: normal;
+    color: rgb(193, 183, 158);
+}
+
+.new-game-reminder {
+    margin-top: 14px;
+    margin-bottom: 4px;
+}

@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -36,7 +35,7 @@ public partial class PrototypeUIController
     private bool IsMainMenuOpen => IsOverlayOpen(mainMenuOverlay);
     private bool IsPauseMenuOpen => IsOverlayOpen(pauseMenuOverlay);
     private bool IsSettingsOpen => IsOverlayOpen(settingsOverlay);
-    private bool IsGameMenuOpen => IsMainMenuOpen || IsPauseMenuOpen || IsSettingsOpen;
+    private bool IsGameMenuOpen => IsMainMenuOpen || IsPauseMenuOpen || IsSettingsOpen || IsSavesPickerOpen || IsNewGameSummaryOpen;
 
     // Статическое состояние кампании не должно пережить выход из Play Mode
     // при выключенной перезагрузке домена.
@@ -84,7 +83,7 @@ public partial class PrototypeUIController
         mainMenuContinueButton.clicked += OnMainMenuContinueClicked;
         mainMenuNewGameButton.clicked += OnMainMenuNewGameClicked;
         mainMenuLoadButton.clicked += OnMainMenuLoadClicked;
-        BindMenuButton("main-menu-new-game-yes-button", StartNewGameFromMenu);
+        BindMenuButton("main-menu-new-game-yes-button", OnNewGameConfirmed);
         BindMenuButton("main-menu-new-game-no-button", () => SetNewGameConfirmOpen(false));
         BindMenuButton("main-menu-settings-button", OpenSettings);
         BindMenuButton("main-menu-quit-button", QuitGame);
@@ -101,6 +100,8 @@ public partial class PrototypeUIController
         settingsVolumeSlider.RegisterValueChangedCallback(evt => ApplyVolume(evt.newValue, true));
         ApplyVolume(LoadSavedVolume(), false);
 
+        BindSavesPicker();
+        BindNewGameSummary();
         gameMenusBound = true;
     }
 
@@ -120,6 +121,8 @@ public partial class PrototypeUIController
         if (CampaignSession.HasActive)
         {
             AdoptCampaign(CampaignSession.Current);
+            // ПР-03: кампания могла вернуться из боя — применить итог.
+            ApplyReturnedCampaignBattle();
             return;
         }
 
@@ -176,7 +179,10 @@ public partial class PrototypeUIController
 
     private void RefreshMainMenuButtons()
     {
-        SaveSummary save = ReadSaveSummary();
+        SaveSlotSummary? recent = FindMostRecentLoadableSlot();
+        bool anySave = false;
+        foreach (string slotId in CampaignSaveStore.AllSlotIds)
+            anySave |= ReadSlotSummary(slotId).Exists;
         bool hasSession = CampaignSession.HasActive && gameState != null;
 
         if (hasSession)
@@ -184,23 +190,23 @@ public partial class PrototypeUIController
             mainMenuContinueButton.SetEnabled(true);
             mainMenuContinueHint.text = "Вернуться в текущую партию · день " + gameState.Day;
         }
-        else if (save.IsLoadable)
+        else if (recent.HasValue)
         {
             mainMenuContinueButton.SetEnabled(true);
-            mainMenuContinueHint.text = "Последнее сохранение · " + save.Description;
+            mainMenuContinueHint.text = "Последнее сохранение · " +
+                                        CampaignSaveStore.GetSlotTitle(recent.Value.SlotId) + " · " +
+                                        recent.Value.Description;
         }
         else
         {
             mainMenuContinueButton.SetEnabled(false);
-            mainMenuContinueHint.text = save.Exists
-                ? "Сохранение нельзя загрузить: " + save.Description
+            mainMenuContinueHint.text = anySave
+                ? "Ни одно сохранение нельзя загрузить — подробности в «Загрузить»."
                 : "Нет начатой партии и сохранений.";
         }
 
-        mainMenuLoadButton.SetEnabled(save.IsLoadable);
-        mainMenuLoadHint.text = save.Exists
-            ? (save.IsLoadable ? "Сохранение · " : "Сохранение нельзя загрузить: ") + save.Description
-            : "Сохранений пока нет.";
+        mainMenuLoadButton.SetEnabled(anySave);
+        mainMenuLoadHint.text = anySave ? string.Empty : "Сохранений пока нет.";
     }
 
     private void OnMainMenuContinueClicked()
@@ -211,7 +217,7 @@ public partial class PrototypeUIController
             return;
         }
 
-        if (LoadCampaign())
+        if (LoadMostRecentCampaign())
             HideMainMenu();
         else
             mainMenuMessage.text = lastCampaignIoMessage;
@@ -225,22 +231,96 @@ public partial class PrototypeUIController
             return;
         }
 
-        StartNewGameFromMenu();
+        OpenNewGameSummary();
     }
 
+    // Подтверждение «начать заново» ведёт на тот же экран итога.
+    private void OnNewGameConfirmed()
+    {
+        SetNewGameConfirmOpen(false);
+        OpenNewGameSummary();
+    }
+
+    // Старт без экрана итога — для тестов и сценариев, где выбор уже сделан.
     private void StartNewGameFromMenu()
     {
         SetNewGameConfirmOpen(false);
-        StartNewGame();
+        StartNewGame(new CampaignSetup());
+        CloseMenuOverlay(newGameOverlay);
         HideMainMenu();
+    }
+
+    // ------------------------------------------------------------------
+    // ПР-05: итог перед стартом. Кампания создаётся один раз — по «Начать».
+    // «Назад» ничего не создаёт, не сохраняет и не тратит время.
+    // ------------------------------------------------------------------
+
+    private VisualElement newGameOverlay;
+    private Button newGameStartButton;
+    private Label newGameMessage;
+    private CampaignSetup pendingSetup;
+
+    private bool IsNewGameSummaryOpen => IsOverlayOpen(newGameOverlay);
+
+    private void BindNewGameSummary()
+    {
+        newGameOverlay = BindRequiredElement<VisualElement>(interfaceRoot, GameMenusScreenName, "new-game-overlay");
+        newGameStartButton = BindRequiredElement<Button>(interfaceRoot, GameMenusScreenName, "new-game-start-button");
+        newGameMessage = BindRequiredElement<Label>(interfaceRoot, GameMenusScreenName, "new-game-message");
+        if (newGameStartButton != null)
+            newGameStartButton.clicked += OnNewGameStartClicked;
+        BindMenuButton("new-game-back-button", CloseNewGameSummary);
+    }
+
+    private void OpenNewGameSummary()
+    {
+        if (newGameOverlay == null)
+            return;
+
+        pendingSetup = new CampaignSetup();
+        FillOption("new-game-crisis", CampaignStartOptions.Find(CampaignStartOptions.Crises, pendingSetup.CrisisId));
+        FillOption("new-game-commander", CampaignStartOptions.Find(CampaignStartOptions.Commanders, pendingSetup.CommanderProfileId));
+        FillOption("new-game-start", CampaignStartOptions.Find(CampaignStartOptions.StartingConditions, pendingSetup.StartingConditionId));
+
+        bool valid = pendingSetup.Validate(out string reason);
+        newGameMessage.text = valid ? string.Empty : "Нельзя начать: " + reason + ".";
+        newGameStartButton.SetEnabled(valid);
+        OpenMenuOverlay(newGameOverlay);
+    }
+
+    private void FillOption(string prefix, CampaignOptionDefinition option)
+    {
+        Label title = interfaceRoot.Q<Label>(prefix + "-title");
+        Label summary = interfaceRoot.Q<Label>(prefix + "-summary");
+        if (title != null)
+            title.text = option != null ? option.Title : "—";
+        if (summary != null)
+            summary.text = option != null ? option.Summary : string.Empty;
+    }
+
+    private void OnNewGameStartClicked()
+    {
+        // Повторный клик не создаёт вторую кампанию: выбор расходуется сразу.
+        CampaignSetup setup = pendingSetup;
+        pendingSetup = null;
+        if (setup == null)
+            return;
+
+        newGameStartButton.SetEnabled(false);
+        StartNewGame(setup);
+        CloseMenuOverlay(newGameOverlay);
+        HideMainMenu();
+    }
+
+    private void CloseNewGameSummary()
+    {
+        pendingSetup = null;
+        CloseMenuOverlay(newGameOverlay);
     }
 
     private void OnMainMenuLoadClicked()
     {
-        if (LoadCampaign())
-            HideMainMenu();
-        else
-            mainMenuMessage.text = lastCampaignIoMessage;
+        OpenSavesPicker(savingMode: false);
     }
 
     private void SetNewGameConfirmOpen(bool open)
@@ -261,6 +341,18 @@ public partial class PrototypeUIController
         if (IsSettingsOpen)
         {
             CloseSettings();
+            return;
+        }
+
+        if (IsNewGameSummaryOpen)
+        {
+            CloseNewGameSummary();
+            return;
+        }
+
+        if (IsSavesPickerOpen)
+        {
+            CloseSavesPicker();
             return;
         }
 
@@ -294,7 +386,6 @@ public partial class PrototypeUIController
     private void OpenPauseMenu()
     {
         pauseMenuMessage.text = string.Empty;
-        pauseMenuLoadButton.SetEnabled(ReadSaveSummary().IsLoadable);
         OpenMenuOverlay(pauseMenuOverlay);
     }
 
@@ -305,17 +396,102 @@ public partial class PrototypeUIController
 
     private void OnPauseMenuSaveClicked()
     {
-        SaveCampaign();
-        pauseMenuMessage.text = lastCampaignIoMessage;
-        pauseMenuLoadButton.SetEnabled(ReadSaveSummary().IsLoadable);
+        OpenSavesPicker(savingMode: true);
     }
 
     private void OnPauseMenuLoadClicked()
     {
-        if (LoadCampaign())
-            ClosePauseMenu();
-        else
-            pauseMenuMessage.text = lastCampaignIoMessage;
+        OpenSavesPicker(savingMode: false);
+    }
+
+    // ------------------------------------------------------------------
+    // Выбор слота: сохранение — только в ручные слоты, загрузка — из любого.
+    // ------------------------------------------------------------------
+
+    private VisualElement savesOverlay;
+    private Label savesTitle;
+    private VisualElement savesList;
+    private Label savesMessage;
+    private VisualTreeAsset saveSlotRowTemplate;
+    private bool savesPickerSaving;
+
+    private bool IsSavesPickerOpen => IsOverlayOpen(savesOverlay);
+
+    private void BindSavesPicker()
+    {
+        savesOverlay = BindRequiredElement<VisualElement>(interfaceRoot, GameMenusScreenName, "saves-overlay");
+        savesTitle = BindRequiredElement<Label>(interfaceRoot, GameMenusScreenName, "saves-title");
+        savesList = BindRequiredElement<VisualElement>(interfaceRoot, GameMenusScreenName, "saves-list");
+        savesMessage = BindRequiredElement<Label>(interfaceRoot, GameMenusScreenName, "saves-message");
+        BindMenuButton("saves-close-button", CloseSavesPicker);
+    }
+
+    private void OpenSavesPicker(bool savingMode)
+    {
+        if (savesOverlay == null)
+            return;
+
+        savesPickerSaving = savingMode;
+        savesTitle.text = savingMode ? "СОХРАНИТЬ" : "ЗАГРУЗИТЬ";
+        savesMessage.text = string.Empty;
+        RebuildSavesList();
+        OpenMenuOverlay(savesOverlay);
+    }
+
+    private void CloseSavesPicker()
+    {
+        CloseMenuOverlay(savesOverlay);
+        if (IsMainMenuOpen)
+            RefreshMainMenuButtons();
+    }
+
+    private void RebuildSavesList()
+    {
+        savesList.Clear();
+        if (saveSlotRowTemplate == null)
+            saveSlotRowTemplate = Resources.Load<VisualTreeAsset>("Templates/SaveSlotRow");
+        if (saveSlotRowTemplate == null)
+            return;
+
+        foreach (string slotId in CampaignSaveStore.AllSlotIds)
+        {
+            // Автосохранение пишет только игра.
+            if (savesPickerSaving && slotId == CampaignSaveStore.AutosaveSlotId)
+                continue;
+
+            SaveSlotSummary summary = ReadSlotSummary(slotId);
+            TemplateContainer instance = saveSlotRowTemplate.Instantiate();
+            Button row = instance.Q<Button>("save-slot-row");
+            row.Q<Label>("save-slot-title").text = CampaignSaveStore.GetSlotTitle(slotId);
+            row.Q<Label>("save-slot-description").text = summary.Description;
+            row.SetEnabled(savesPickerSaving || summary.IsLoadable);
+
+            string captured = slotId;
+            row.clicked += () => OnSaveSlotClicked(captured);
+            savesList.Add(instance);
+        }
+    }
+
+    private void OnSaveSlotClicked(string slotId)
+    {
+        if (savesPickerSaving)
+        {
+            SaveCampaign(slotId);
+            savesMessage.text = lastCampaignIoMessage;
+            RebuildSavesList();
+            return;
+        }
+
+        if (!LoadCampaign(slotId))
+        {
+            savesMessage.text = lastCampaignIoMessage;
+            return;
+        }
+
+        // Загрузка — сразу в игру, все меню закрываются.
+        CloseMenuOverlay(savesOverlay);
+        CloseMenuOverlay(pauseMenuOverlay);
+        CloseMenuOverlay(mainMenuOverlay);
     }
 
     // Кампания остаётся в памяти: «Продолжить» в главном меню вернёт в неё.
@@ -398,44 +574,5 @@ public partial class PrototypeUIController
         lastCampaignIoMessage = message;
         if (gameState != null)
             AddReport(message);
-    }
-
-    private readonly struct SaveSummary
-    {
-        public readonly bool Exists;
-        public readonly bool IsLoadable;
-        public readonly string Description;
-
-        public SaveSummary(bool exists, bool isLoadable, string description)
-        {
-            Exists = exists;
-            IsLoadable = isLoadable;
-            Description = description;
-        }
-    }
-
-    // Лёгкая проверка файла для меню: повреждённое или несовместимое
-    // сохранение видно сразу, а не после попытки загрузки.
-    private SaveSummary ReadSaveSummary()
-    {
-        string path = CampaignSavePath;
-        if (!File.Exists(path))
-            return new SaveSummary(false, false, string.Empty);
-
-        try
-        {
-            CampaignSaveData data = JsonUtility.FromJson<CampaignSaveData>(File.ReadAllText(path));
-            if (data == null || data.State == null)
-                return new SaveSummary(true, false, "файл повреждён");
-            if (data.SaveFormatVersion != CampaignSaveService.CurrentSaveFormatVersion)
-                return new SaveSummary(true, false, "старый формат сохранения");
-
-            string when = File.GetLastWriteTime(path).ToString("dd.MM HH:mm");
-            return new SaveSummary(true, true, "день " + data.State.Day + " · " + when);
-        }
-        catch (Exception)
-        {
-            return new SaveSummary(true, false, "файл повреждён");
-        }
     }
 }

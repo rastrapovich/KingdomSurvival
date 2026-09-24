@@ -242,10 +242,15 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private void StartNewGame()
     {
-        GameState created = new GameState();
+        StartNewGame(new CampaignSetup());
+    }
+
+    // ПР-05: кампания создаётся из проверенного выбора (CampaignSetup) и
+    // фиксирует свою конфигурацию в GameState.Configuration.
+    private void StartNewGame(CampaignSetup setup)
+    {
         WorldMapDatabaseAsset mapDatabase = WorldMapVisualRuntime.LoadDatabase();
-        created.CreateNewGame(
-            null,
+        GameState created = setup.CreateCampaign(
             mapDatabase != null
                 ? mapDatabase.BuildRuntimeLocationTemplates()
                 : null,

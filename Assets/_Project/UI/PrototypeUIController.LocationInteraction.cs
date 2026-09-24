@@ -50,6 +50,7 @@ public partial class PrototypeUIController
         locationInteractionActive = true;
         locationInteractionLocationId = location.Id;
 
+        CloseJournalForMandatoryEvent();
         PauseForBlockingModal();
 
         // Локация — не говорящий персонаж: портретный конвейер 5:7 здесь не

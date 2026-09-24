@@ -1,116 +1,162 @@
 using System;
-using System.IO;
 using KingdomSurvival.WorldMapVisual;
 using UnityEngine;
 
-// AM-05 (канон v1.33, §9.9 / раздел 15 инструкции по миграции): минимальный
-// действующий вход Save/Load. Единственный слот (без менеджера профилей —
-// "не нужен для первого рабочего результата"). Фактический JsonUtility и
-// File I/O живут здесь (Unity-слой), а не в KingdomSurvival.Core — Core
-// собирает/восстанавливает CampaignSaveData чистым C#, эта часть только
-// сериализует его в файл и обратно.
+// Сохранения кампании в Unity-слое. Файлы и слоты — CampaignSaveStore (Core,
+// чистый C#), проверка совместимости — CampaignSaveService.IsLoadable; здесь
+// только persistentDataPath, JsonUtility и применение загруженной кампании.
 //
-// Известное ограничение первой версии: сохранение во время активного
-// обязательного модального окна (диалог/происшествие/решение) не
-// запрещается явно — если это окажется проблемой на практике, следующий шаг
-// (раздел 15 инструкции допускает такое ограничение как временное) —
-// заблокировать SaveCampaign, пока queuedModals непусто.
+// ПР-04: один автосейв и три ручных слота (первый — прежний единственный
+// файл, старые партии на месте). Автосохранение тихое: перед боем, после
+// применения итога боя и после завершения сюжетной сцены — в устойчивых
+// точках, не посреди сцены или обязательного выбора. Ручное сохранение
+// доступно из меню паузы, которое не открывается поверх диалога, решения
+// или боя.
 public partial class PrototypeUIController
 {
-    private const string CampaignSaveFileName = "campaign.save.json";
+    private CampaignSaveStore campaignSaveStore;
 
-    private static string CampaignSavePath =>
-        Path.Combine(Application.persistentDataPath, CampaignSaveFileName);
+    private CampaignSaveStore SaveStore
+    {
+        get
+        {
+            if (campaignSaveStore == null)
+            {
+                campaignSaveStore = new CampaignSaveStore(
+                    CampaignSaveStore.DirectoryOverride ?? Application.persistentDataPath,
+                    data => JsonUtility.ToJson(data, true),
+                    json => JsonUtility.FromJson<CampaignSaveData>(json));
+            }
+            return campaignSaveStore;
+        }
+    }
 
-    public bool HasSavedCampaign => File.Exists(CampaignSavePath);
+    private static void GetActiveWorld(out string worldId, out int geographyVersion)
+    {
+        WorldMapDatabaseAsset mapDatabase = WorldMapVisualRuntime.LoadDatabase();
+        bool hasWorld = mapDatabase != null && mapDatabase.ActiveWorld != null;
+        worldId = hasWorld ? mapDatabase.ActiveWorld.WorldDefinitionId : string.Empty;
+        geographyVersion = hasWorld ? mapDatabase.ActiveWorld.GeographyVersion : 0;
+    }
 
-    private void SaveCampaign()
+    // Сводка слота для меню: есть ли, можно ли загрузить, что показать.
+    private readonly struct SaveSlotSummary
+    {
+        public readonly string SlotId;
+        public readonly bool Exists;
+        public readonly bool IsLoadable;
+        public readonly string Description;
+        public readonly DateTime WrittenAt;
+
+        public SaveSlotSummary(string slotId, bool exists, bool isLoadable, string description, DateTime writtenAt)
+        {
+            SlotId = slotId;
+            Exists = exists;
+            IsLoadable = isLoadable;
+            Description = description;
+            WrittenAt = writtenAt;
+        }
+    }
+
+    private SaveSlotSummary ReadSlotSummary(string slotId)
+    {
+        CampaignSaveReadResult read = SaveStore.Read(slotId);
+        if (!read.Exists)
+            return new SaveSlotSummary(slotId, false, false, "пусто", DateTime.MinValue);
+        if (!read.IsReadable)
+            return new SaveSlotSummary(slotId, true, false, "файл повреждён", read.WrittenAt);
+
+        GetActiveWorld(out string worldId, out int geographyVersion);
+        string when = read.WrittenAt.ToString("dd.MM HH:mm");
+        if (!CampaignSaveService.IsLoadable(read.Data, worldId, geographyVersion, out string reason))
+            return new SaveSlotSummary(slotId, true, false, "нельзя загрузить: " + reason, read.WrittenAt);
+
+        string description = "день " + read.Data.State.Day + " · " + when;
+        if (read.FromBackup)
+            description += " · из резервной копии";
+        return new SaveSlotSummary(slotId, true, true, description, read.WrittenAt);
+    }
+
+    // Самое свежее загружаемое сохранение — для «Продолжить».
+    private SaveSlotSummary? FindMostRecentLoadableSlot()
+    {
+        SaveSlotSummary? best = null;
+        foreach (string slotId in CampaignSaveStore.AllSlotIds)
+        {
+            SaveSlotSummary summary = ReadSlotSummary(slotId);
+            if (summary.IsLoadable && (!best.HasValue || summary.WrittenAt > best.Value.WrittenAt))
+                best = summary;
+        }
+        return best;
+    }
+
+    private bool SaveCampaign(string slotId)
     {
         if (gameState == null)
         {
             ReportCampaignIo("[Сохранение] Нет активной партии.");
-            return;
+            return false;
         }
 
         try
         {
-            WorldMapDatabaseAsset mapDatabase = WorldMapVisualRuntime.LoadDatabase();
-            string worldId = mapDatabase != null && mapDatabase.ActiveWorld != null
-                ? mapDatabase.ActiveWorld.WorldDefinitionId
-                : string.Empty;
-            int geographyVersion = mapDatabase != null && mapDatabase.ActiveWorld != null
-                ? mapDatabase.ActiveWorld.GeographyVersion
-                : 0;
-
-            CampaignSaveData data =
-                CampaignSaveService.ExportCampaign(gameState, worldId, geographyVersion);
-            string json = JsonUtility.ToJson(data, true);
-
-            WriteFileAtomically(CampaignSavePath, json);
-            ReportCampaignIo("[Сохранение] Партия сохранена.");
+            GetActiveWorld(out string worldId, out int geographyVersion);
+            SaveStore.Write(slotId, CampaignSaveService.ExportCampaign(gameState, worldId, geographyVersion));
+            ReportCampaignIo("[Сохранение] Партия сохранена: " + CampaignSaveStore.GetSlotTitle(slotId) + ".");
+            return true;
         }
         catch (Exception exception)
         {
             Debug.LogError("Kingdom Survival: не удалось сохранить партию — " + exception);
             ReportCampaignIo("[Сохранение] Не удалось сохранить партию: " + exception.Message);
+            return false;
         }
     }
 
-    private bool LoadCampaign()
+    // Тихое автосохранение в устойчивой точке. Ошибка не прерывает игру.
+    private void Autosave()
     {
-        string path = CampaignSavePath;
-        if (!File.Exists(path))
-        {
-            ReportCampaignIo("[Загрузка] Файл сохранения не найден.");
-            return false;
-        }
+        if (gameState == null || isGameOver || !CampaignSession.HasActive)
+            return;
 
-        CampaignSaveData data;
         try
         {
-            string json = File.ReadAllText(path);
-            data = JsonUtility.FromJson<CampaignSaveData>(json);
+            GetActiveWorld(out string worldId, out int geographyVersion);
+            SaveStore.Write(CampaignSaveStore.AutosaveSlotId,
+                CampaignSaveService.ExportCampaign(gameState, worldId, geographyVersion));
         }
         catch (Exception exception)
         {
-            Debug.LogError("Kingdom Survival: не удалось прочитать сохранение — " + exception);
-            ReportCampaignIo("[Загрузка] Файл сохранения повреждён, партия не тронута.");
+            Debug.LogError("Kingdom Survival: автосохранение не удалось — " + exception);
+        }
+    }
+
+    private bool LoadCampaign(string slotId)
+    {
+        CampaignSaveReadResult read = SaveStore.Read(slotId);
+        if (!read.Exists)
+        {
+            ReportCampaignIo("[Загрузка] " + CampaignSaveStore.GetSlotTitle(slotId) + ": сохранения нет.");
             return false;
         }
 
-        if (data == null || data.State == null)
+        if (!read.IsReadable)
         {
             ReportCampaignIo("[Загрузка] Файл сохранения повреждён, партия не тронута.");
             return false;
         }
 
-        if (data.SaveFormatVersion != CampaignSaveService.CurrentSaveFormatVersion)
+        GetActiveWorld(out string worldId, out int geographyVersion);
+        if (!CampaignSaveService.IsLoadable(read.Data, worldId, geographyVersion, out string reason))
         {
-            ReportCampaignIo(
-                "[Загрузка] Формат сохранения (" + data.SaveFormatVersion +
-                ") не совпадает с текущим (" + CampaignSaveService.CurrentSaveFormatVersion +
-                ") — загрузка отменена, партия не тронута.");
-            return false;
-        }
-
-        WorldMapDatabaseAsset mapDatabase = WorldMapVisualRuntime.LoadDatabase();
-        string activeWorldId = mapDatabase != null && mapDatabase.ActiveWorld != null
-            ? mapDatabase.ActiveWorld.WorldDefinitionId
-            : string.Empty;
-
-        if (!string.IsNullOrEmpty(data.WorldDefinitionId) && data.WorldDefinitionId != activeWorldId)
-        {
-            ReportCampaignIo(
-                "[Загрузка] Это сохранение использует другую авторскую карту ('" +
-                data.WorldDefinitionId + "'), а сейчас активна '" + activeWorldId +
-                "' — загрузка отменена, чтобы не перенести героя на чужую географию.");
+            ReportCampaignIo("[Загрузка] Сохранение нельзя загрузить: " + reason + ". Файл не тронут.");
             return false;
         }
 
         GameState restored;
         try
         {
-            restored = CampaignSaveService.RestoreCampaign(data);
+            restored = CampaignSaveService.RestoreCampaign(read.Data);
         }
         catch (Exception exception)
         {
@@ -141,26 +187,22 @@ public partial class PrototypeUIController
         HideGameOver();
         CloseMainScreen();
 
-        ReportCampaignIo("[Загрузка] Партия загружена.");
+        ReportCampaignIo(read.FromBackup
+            ? "[Загрузка] Основной файл повреждён — партия загружена из резервной копии."
+            : "[Загрузка] Партия загружена: " + CampaignSaveStore.GetSlotTitle(slotId) + ".");
         RefreshInterface();
         return true;
     }
 
-    // Запись во временный файл с последующей заменой (раздел 15 инструкции):
-    // ошибка посреди записи не должна повредить уже существующее сохранение.
-    private static void WriteFileAtomically(string path, string content)
+    private bool LoadMostRecentCampaign()
     {
-        string tempPath = path + ".tmp";
-        File.WriteAllText(tempPath, content);
+        SaveSlotSummary? recent = FindMostRecentLoadableSlot();
+        if (!recent.HasValue)
+        {
+            ReportCampaignIo("[Загрузка] Нет сохранений, которые можно загрузить.");
+            return false;
+        }
 
-        if (File.Exists(path))
-        {
-            string backupPath = path + ".bak";
-            File.Replace(tempPath, path, backupPath);
-        }
-        else
-        {
-            File.Move(tempPath, path);
-        }
+        return LoadCampaign(recent.Value.SlotId);
     }
 }

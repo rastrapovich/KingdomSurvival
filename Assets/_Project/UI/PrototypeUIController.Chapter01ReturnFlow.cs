@@ -9,7 +9,7 @@ public partial class PrototypeUIController
     // Update(), чтобы увидеть физическое завершение возвращения в тот же кадр.
     private void RefreshChapter01ReturnFlow()
     {
-        if (gameState == null || isGameOver || gameState.Narrative == null)
+        if (gameState == null || isGameOver || gameState.Narrative == null || !Chapter01Crisis.IsActive(gameState))
             return;
 
         NarrativeStateData state = gameState.Narrative;

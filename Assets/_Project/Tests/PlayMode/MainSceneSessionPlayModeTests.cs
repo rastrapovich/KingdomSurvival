@@ -21,12 +21,14 @@ public sealed class MainSceneSessionPlayModeTests
     public void SetUp()
     {
         CampaignSession.Reset();
+        PlayModeSaveIsolation.Begin();
     }
 
     [TearDown]
     public void TearDown()
     {
         CampaignSession.Reset();
+        PlayModeSaveIsolation.End();
     }
 
     private static IEnumerator LoadMainScene()
@@ -100,6 +102,36 @@ public sealed class MainSceneSessionPlayModeTests
         Assert.AreEqual(generation, CampaignSession.Generation, "Возврат в сцену не должен начинать новую кампанию.");
         Assert.AreEqual(day, CampaignSession.Current.Day);
         Assert.IsFalse(IsOverlayOpen(reloaded, "main-menu-overlay"), "Идущая кампания подхватывается без главного меню.");
+    }
+
+    [UnityTest]
+    public IEnumerator NewGameSummary_BackCreatesNothing_DoubleStartCreatesOneCampaign()
+    {
+        yield return LoadMainScene();
+        MonoBehaviour controller = FindController();
+
+        Invoke(controller, "OnMainMenuNewGameClicked");
+        yield return null;
+        Assert.IsTrue(IsOverlayOpen(controller, "new-game-overlay"), "«Новая игра» ведёт на экран итога.");
+        Assert.IsFalse(CampaignSession.HasActive, "Экран итога ещё ничего не создал.");
+
+        Invoke(controller, "CloseNewGameSummary");
+        yield return null;
+        Assert.IsFalse(IsOverlayOpen(controller, "new-game-overlay"));
+        Assert.IsFalse(CampaignSession.HasActive, "«Назад» не создаёт кампанию.");
+
+        Invoke(controller, "OnMainMenuNewGameClicked");
+        yield return null;
+        int generationBefore = CampaignSession.Generation;
+        Invoke(controller, "OnNewGameStartClicked");
+        Invoke(controller, "OnNewGameStartClicked");
+        yield return null;
+
+        Assert.IsTrue(CampaignSession.HasActive);
+        Assert.AreEqual(generationBefore + 1, CampaignSession.Generation, "Двойной клик «Начать» — одна кампания.");
+        Assert.IsNotNull(CampaignSession.Current.Configuration, "Кампания фиксирует свою конфигурацию.");
+        Assert.IsFalse(IsOverlayOpen(controller, "new-game-overlay"));
+        Assert.IsFalse(IsOverlayOpen(controller, "main-menu-overlay"));
     }
 
     [UnityTest]

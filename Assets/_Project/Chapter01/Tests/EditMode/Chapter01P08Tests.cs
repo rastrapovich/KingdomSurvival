@@ -147,8 +147,20 @@ public sealed class Chapter01P08Tests
         DialogueDatabaseAsset database = LoadDatabase();
         DialogueDefinitionData dialogue = database.FindDialogue(dialogueId);
 
+        // NARRATIVE §4.10: «условные альтернативы могут жить в одном узле».
+        // Несколько блоков допустимы, только если каждый из них условный
+        // (ПР-02: варианты N09 под набор проведённых расследований).
         foreach (DialogueNodeData node in dialogue.Nodes)
-            Assert.LessOrEqual(node.TextBlocks.Count, 1, dialogueId + "/" + node.Id);
+        {
+            if (node.TextBlocks.Count <= 1)
+                continue;
+
+            foreach (DialogueTextBlockData block in node.TextBlocks)
+            {
+                Assert.IsNotEmpty(block.Conditions.Conditions,
+                    dialogueId + "/" + node.Id + "/" + block.BlockId + ": в узле с несколькими репликами каждая должна быть условной альтернативой.");
+            }
+        }
     }
 
     [TestCase(Chapter01Ids.Dialogues.D09)]

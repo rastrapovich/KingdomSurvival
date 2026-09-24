@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ui:UXML
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    editor-extension-mode="False">
+
+    <ui:Button name="home-activity-card" class="home-activity-card">
+        <ui:Label name="home-activity-urgent" text="СРОЧНО" class="home-activity-urgent" />
+        <ui:Label name="home-activity-title" class="home-activity-title" />
+        <ui:Label name="home-activity-where" class="home-activity-where" />
+    </ui:Button>
+</ui:UXML>

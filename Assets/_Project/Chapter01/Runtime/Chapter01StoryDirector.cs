@@ -252,30 +252,12 @@ namespace KingdomSurvival.Chapter01
             return goals;
         }
 
-        // ПР-02 (простой вариант): домашняя часть главы N01–N10 идёт подряд —
-        // после закрытия сцены UI сам открывает следующую. Только пока отряд
-        // дома и поход главы ещё не начат: с N11 глава продвигается дорогой,
-        // местом и возвращением. D10 не открывается повторно, пока игрок
-        // собирает отряд. Null — открывать нечего (глава завершена, гейт N09
-        // закрыт, идёт поход). Вариант «узлы через Дом, людей и место»
-        // заменит этот метод, не меняя остальной контракт.
+        // ПР-02: сцена домашней части, которая откроется сама (N01, ночные
+        // N04/N06, N10 после N09). Остальные узлы N01–N10 игрок открывает
+        // сам делами в Доме — см. Chapter01HomeActivities.
         public static string GetAutoOpenHomeDialogueId(GameState gameState)
         {
-            if (gameState == null || gameState.Narrative == null || gameState.HasActiveExpedition)
-                return null;
-
-            NarrativeStateData state = gameState.Narrative;
-            if (state.HasFlag(Chapter01Ids.Flags.ExpeditionStarted))
-                return null;
-
-            string dialogueId = GetNextDialogueId(state);
-            if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D10, StringComparison.Ordinal) &&
-                state.HasFlag(Chapter01Ids.Flags.PartyGatheringSeen))
-            {
-                return null;
-            }
-
-            return dialogueId;
+            return Chapter01HomeActivities.GetAutoScene(gameState);
         }
 
         // P08-T03: узкая точка завершения сбора отряда — вызывается только

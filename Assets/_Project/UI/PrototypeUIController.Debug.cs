@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -200,9 +201,8 @@ public partial class PrototypeUIController
 
         AddDebugSectionTitle(scroll, "ГЛАВА 1");
 
-        // ПР-00: штатного входа в N01–N10 ещё нет (задача ПР-02), поэтому
-        // для ручного прохода — одна кнопка, открывающая следующий узел
-        // по Chapter01StoryDirector вместо выбора каждого диалога вручную.
+        // Инструмент разработки: открыть следующую сцену домашней части
+        // без ожидания ночи и без выбора карточки (см. DebugContinueChapter01).
         scroll.Add(CreateDebugActionButton(
             "ПРОДОЛЖИТЬ ГЛАВУ 1",
             DebugContinueChapter01));
@@ -526,9 +526,10 @@ public partial class PrototypeUIController
         AddReport("[DEBUG] " + message);
     }
 
-    // Открывает первый незавершённый узел главы (фиксированный порядок
-    // N07A → B → C). С N11 глава продвигается сама — через маршрут, место
-    // и возвращение, — поэтому кнопка там только объясняет, чего ждать.
+    // Для ручной проверки домашней части: открывает сцену, которая сейчас
+    // открылась бы сама, иначе — первое дело в Доме; ночное событие —
+    // сразу, не дожидаясь ночи. С N11 глава продвигается сама — через
+    // маршрут, место и возвращение, — поэтому кнопка там только объясняет.
     private void DebugContinueChapter01()
     {
         if (isGameOver || IsNarrativeDialogueActive)
@@ -541,26 +542,35 @@ public partial class PrototypeUIController
             gameState.Narrative = new NarrativeStateData();
 
         NarrativeStateData state = gameState.Narrative;
-        string nodeId = KingdomSurvival.Chapter01.Chapter01StoryDirector.GetNextNodeId(state);
-        string dialogueId = KingdomSurvival.Chapter01.Chapter01StoryDirector.GetNextDialogueId(state);
-
-        if (string.IsNullOrEmpty(dialogueId))
+        if (KingdomSurvival.Chapter01.Chapter01StoryDirector.IsChapterComplete(state))
         {
-            if (KingdomSurvival.Chapter01.Chapter01StoryDirector.IsChapterComplete(state))
-                AddReport("[DEBUG] Глава 1 уже завершена.");
-            else if (state.HasFlag(KingdomSurvival.Chapter01.Chapter01Ids.Flags.OldTraceFound) &&
-                     !state.HasFlag(KingdomSurvival.Chapter01.Chapter01Ids.Flags.FarRouteUnlocked))
-                AddReport("[DEBUG] N09 закрыт: не собрана ни одна комбинация знаний для Совета перед уходом.");
-            else
-                AddReport("[DEBUG] Следующий узел главы сейчас недоступен.");
+            AddReport("[DEBUG] Глава 1 уже завершена.");
             return;
         }
 
-        // После N10 узел завершается только реальным выходом отряда
-        // (HandleStoryExpeditionStarted); всё дальнейшее — не по кнопке.
         if (state.HasFlag(KingdomSurvival.Chapter01.Chapter01Ids.Flags.ExpeditionStarted))
         {
-            AddReport("[DEBUG] Узел " + nodeId + " открывается сам: по ходу маршрута, в месте или при возвращении.");
+            AddReport("[DEBUG] Дальше глава открывается сама: по ходу маршрута, в месте или при возвращении.");
+            return;
+        }
+
+        bool heroAtHome = !gameState.HasActiveExpedition;
+        string dialogueId = KingdomSurvival.Chapter01.Chapter01StoryDirector.GetAutoOpenHomeDialogueId(gameState);
+        if (string.IsNullOrEmpty(dialogueId))
+            dialogueId = KingdomSurvival.Chapter01.Chapter01HomeActivities.GetPendingNightScene(state, heroAtHome);
+        if (string.IsNullOrEmpty(dialogueId))
+        {
+            IReadOnlyList<KingdomSurvival.Chapter01.Chapter01HomeActivity> activities =
+                KingdomSurvival.Chapter01.Chapter01HomeActivities.GetAvailable(gameState);
+            if (activities.Count > 0)
+                dialogueId = activities[0].DialogueId;
+        }
+
+        if (string.IsNullOrEmpty(dialogueId))
+        {
+            AddReport(state.HasFlag(KingdomSurvival.Chapter01.Chapter01Ids.Flags.PartyGatheringSeen)
+                ? "[DEBUG] Отряд собран — выходите в поход с экрана героя."
+                : "[DEBUG] Следующий узел главы сейчас недоступен.");
             return;
         }
 
@@ -568,7 +578,7 @@ public partial class PrototypeUIController
             debugPanel.style.display = DisplayStyle.None;
 
         if (!TryOpenNarrativeDialogueById(dialogueId))
-            AddReport("[DEBUG] Узел " + nodeId + " сейчас нельзя открыть.");
+            AddReport("[DEBUG] Сцену '" + dialogueId + "' сейчас нельзя открыть.");
     }
 
     private void ApplyDebugResolutionResult(

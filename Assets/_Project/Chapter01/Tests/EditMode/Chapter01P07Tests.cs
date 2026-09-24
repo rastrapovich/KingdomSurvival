@@ -410,8 +410,13 @@ public sealed class Chapter01P07Tests
         DialogueDefinitionData dialogue = database.FindDialogue(Chapter01Ids.Dialogues.D08);
         DialogueNodeData node = FindNode(dialogue, "chapter01.node.08.conclusion_a");
         Assert.IsNotNull(node);
-        Assert.AreEqual(1, node.Choices.Count);
+        // ПР-02 (б): вторым идёт альтернатива для пути без мельницы
+        // (скот и река) — её условия отрицают седьмой рукав.
+        Assert.AreEqual(2, node.Choices.Count);
+        Assert.AreEqual("chapter01.node.08.conclusion_a_choice", node.Choices[0].ChoiceId);
         Assert.AreEqual(2, node.Choices[0].Conditions.Conditions.Count);
+        Assert.AreEqual("chapter01.node.08.conclusion_a_nature_choice", node.Choices[1].ChoiceId);
+        Assert.IsTrue(node.Choices[1].Conditions.Conditions[0].Negate);
     }
 
     [Test]
@@ -421,8 +426,13 @@ public sealed class Chapter01P07Tests
         DialogueDefinitionData dialogue = database.FindDialogue(Chapter01Ids.Dialogues.D08);
         DialogueNodeData node = FindNode(dialogue, "chapter01.node.08.conclusion_b");
         Assert.IsNotNull(node);
-        Assert.AreEqual(1, node.Choices.Count);
+        // ПР-02 (б): вторым идёт альтернатива для пути «только мельница» —
+        // доступна, когда хотя бы одного природного признака нет.
+        Assert.AreEqual(2, node.Choices.Count);
+        Assert.AreEqual("chapter01.node.08.conclusion_b_choice", node.Choices[0].ChoiceId);
         Assert.AreEqual(2, node.Choices[0].Conditions.Conditions.Count);
+        Assert.AreEqual("chapter01.node.08.conclusion_b_upstream_choice", node.Choices[1].ChoiceId);
+        Assert.AreEqual(NarrativeConditionCombinator.Any, node.Choices[1].Conditions.Combinator);
     }
 
     // Без реальных независимых источников вывод не должен быть достижим —

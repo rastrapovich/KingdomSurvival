@@ -265,7 +265,10 @@ public partial class PrototypeUIController
             return;
         }
 
-        bool shouldRun = ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState);
+        // ПР-02: паводок (N04) и ночной удар на мельнице (N06) случаются
+        // ночью — пока глава их ждёт, время в Доме идёт само.
+        bool shouldRun = ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState) ||
+                         Chapter01HomeActivities.IsWaitingForNight(gameState);
         ContinuousSimulationSystem.SetPaused(gameState, !shouldRun);
 
         // P08+: ExpeditionStarted должен означать физическое начало

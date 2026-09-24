@@ -56,7 +56,10 @@ public partial class PrototypeUIController
         RegisterContinuousMapInput();
         RegisterContinuousDebugAutopause();
 
-        ContinuousSimulationSystem.Reset(gameState);
+        // ПР-01: часы сбрасываются только у кампании без своего хода времени —
+        // загруженная и вернувшаяся в сцену сохраняют время суток и маршрут.
+        if (!ContinuousSimulationSystem.HasRuntimeState(gameState))
+            ContinuousSimulationSystem.Reset(gameState);
         continuousBoundGameState = gameState;
         continuousTimeInitialized = true;
         RefreshContinuousTimeUi(true);
@@ -133,7 +136,8 @@ public partial class PrototypeUIController
 
         if (continuousBoundGameState != gameState)
         {
-            ContinuousSimulationSystem.Reset(gameState);
+            if (!ContinuousSimulationSystem.HasRuntimeState(gameState))
+                ContinuousSimulationSystem.Reset(gameState);
             continuousBoundGameState = gameState;
             RebindContinuousTimeButtons();
             RefreshContinuousTimeUi(true);

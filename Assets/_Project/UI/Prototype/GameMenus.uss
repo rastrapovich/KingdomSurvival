@@ -1,0 +1,119 @@
+/* ================================================================
+   ГЛАВНОЕ МЕНЮ, ПАУЗА, НАСТРОЙКИ (ПР-01)
+   Полноэкранные слои поверх всего интерфейса. Показ — через класс
+   game-menu-overlay--open (PrototypeUIController.GameMenus.cs).
+   ================================================================ */
+
+.game-menu-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(8, 10, 13, 0.82);
+}
+
+.game-menu-overlay--open {
+    display: flex;
+}
+
+.main-menu-overlay {
+    background-color: rgb(12, 14, 18);
+}
+
+.game-menu-panel {
+    width: 420px;
+    padding-left: 28px;
+    padding-right: 28px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    background-color: rgb(28, 31, 37);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(79, 72, 63);
+    border-right-color: rgb(79, 72, 63);
+    border-top-color: rgb(79, 72, 63);
+    border-bottom-color: rgb(79, 72, 63);
+}
+
+.main-menu-title {
+    font-size: 34px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: rgb(226, 214, 186);
+}
+
+.main-menu-subtitle {
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    color: rgb(193, 183, 158);
+    margin-bottom: 20px;
+}
+
+.game-menu-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: rgb(226, 214, 186);
+    margin-bottom: 16px;
+}
+
+.game-menu-button {
+    height: 40px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 6px;
+    margin-bottom: 0;
+    font-size: 15px;
+}
+
+.game-menu-button-small {
+    flex-grow: 1;
+    height: 32px;
+    font-size: 13px;
+    margin-right: 6px;
+}
+
+.game-menu-hint {
+    font-size: 11px;
+    white-space: normal;
+    color: rgb(150, 143, 126);
+    margin-top: 2px;
+}
+
+.game-menu-message {
+    font-size: 12px;
+    white-space: normal;
+    color: rgb(214, 128, 92);
+    margin-top: 12px;
+    -unity-text-align: middle-center;
+}
+
+.game-menu-confirm {
+    display: none;
+    margin-top: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 6px;
+    padding-bottom: 8px;
+    background-color: rgb(40, 34, 30);
+}
+
+.game-menu-confirm--open {
+    display: flex;
+}
+
+.game-menu-confirm-row {
+    flex-direction: row;
+    margin-top: 4px;
+}
+
+.game-menu-setting {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}

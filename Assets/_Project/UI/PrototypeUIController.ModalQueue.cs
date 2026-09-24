@@ -255,7 +255,8 @@ public partial class PrototypeUIController
     private bool HasBlockingModalWorkExceptCamp()
     {
         return gameState != null &&
-               (IsNarrativeDialogueActive ||
+               (IsGameMenuOpen ||
+                IsNarrativeDialogueActive ||
                 IsLocationInteractionActive ||
                 IsJournalOpen ||
                 IsHeroScreenOpen ||

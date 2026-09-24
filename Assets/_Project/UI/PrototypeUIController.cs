@@ -108,7 +108,10 @@ public partial class PrototypeUIController : MonoBehaviour
 
         CreateDecisionChoiceButtons();
         RegisterCallbacks();
-        StartNewGame();
+        InitializeGameMenus();
+        // ПР-01: показ интерфейса больше не создаёт кампанию. Уже идущая
+        // кампания (возврат в сцену) подхватывается, иначе — главное меню.
+        StartOrResumeSession();
         InitializeHeroScreenUi();
         InitializeJournalUi();
         InitializeCampUi();
@@ -239,9 +242,9 @@ public partial class PrototypeUIController : MonoBehaviour
 
     private void StartNewGame()
     {
-        gameState = new GameState();
+        GameState created = new GameState();
         WorldMapDatabaseAsset mapDatabase = WorldMapVisualRuntime.LoadDatabase();
-        gameState.CreateNewGame(
+        created.CreateNewGame(
             null,
             mapDatabase != null
                 ? mapDatabase.BuildRuntimeLocationTemplates()
@@ -249,6 +252,9 @@ public partial class PrototypeUIController : MonoBehaviour
             mapDatabase != null && mapDatabase.ActiveWorld != null
                 ? mapDatabase.ActiveWorld.ToData()
                 : null);
+
+        CampaignSession.Begin(created);
+        gameState = created;
 
         if (quickExpeditionPopup != null)
             BindQuickExpeditionPopup();

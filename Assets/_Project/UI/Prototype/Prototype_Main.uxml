@@ -16,6 +16,7 @@
     <Style src="Narrative.uss" />
     <Style src="BuildingCards.uss" />
     <Style src="HomeActivities.uss" />
+    <Style src="GameMenus.uss" />
     <Style src="Expedition.uss" />
 
     <ui:VisualElement name="screen" class="screen shell-screen">
@@ -722,6 +723,54 @@
         <ui:VisualElement name="quick-expedition-popup" class="quick-expedition-popup">
             <ui:Label name="quick-expedition-popup-title" text="ОТКРЫТЫЕ ЛОКАЦИИ" class="quick-expedition-popup-title" />
             <ui:Label name="quick-expedition-order-label" text="ПРИКАЗ НА СЕГОДНЯ: нет" class="quick-expedition-order-label" />
+        </ui:VisualElement>
+
+        <!-- ПР-01: главное меню и меню паузы (Esc). Кампания живёт в
+             CampaignSession, а не в сцене: меню не создаёт её само, только
+             по «Новой игре» или загрузке. Код —
+             PrototypeUIController.GameMenus.cs, стили — GameMenus.uss. -->
+        <ui:VisualElement name="main-menu-overlay" class="game-menu-overlay main-menu-overlay">
+            <ui:VisualElement class="game-menu-panel">
+                <ui:Label text="Kingdom Survival" class="main-menu-title" />
+                <ui:Label text="Дом на чужой воде" class="main-menu-subtitle" />
+                <ui:Button name="main-menu-continue-button" text="Продолжить" class="game-menu-button" />
+                <ui:Label name="main-menu-continue-hint" class="game-menu-hint" />
+                <ui:Button name="main-menu-new-game-button" text="Новая игра" class="game-menu-button" />
+                <ui:VisualElement name="main-menu-new-game-confirm" class="game-menu-confirm">
+                    <ui:Label text="Текущая партия без сохранения будет потеряна. Начать заново?" class="game-menu-hint" />
+                    <ui:VisualElement class="game-menu-confirm-row">
+                        <ui:Button name="main-menu-new-game-yes-button" text="Начать заново" class="game-menu-button game-menu-button-small" />
+                        <ui:Button name="main-menu-new-game-no-button" text="Отмена" class="game-menu-button game-menu-button-small" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Button name="main-menu-load-button" text="Загрузить" class="game-menu-button" />
+                <ui:Label name="main-menu-load-hint" class="game-menu-hint" />
+                <ui:Button name="main-menu-settings-button" text="Настройки" class="game-menu-button" />
+                <ui:Button name="main-menu-quit-button" text="Выход" class="game-menu-button" />
+                <ui:Label name="main-menu-message" class="game-menu-message" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="pause-menu-overlay" class="game-menu-overlay pause-menu-overlay">
+            <ui:VisualElement class="game-menu-panel">
+                <ui:Label text="ПАУЗА" class="game-menu-title" />
+                <ui:Button name="pause-menu-resume-button" text="Продолжить" class="game-menu-button" />
+                <ui:Button name="pause-menu-save-button" text="Сохранить" class="game-menu-button" />
+                <ui:Button name="pause-menu-load-button" text="Загрузить" class="game-menu-button" />
+                <ui:Button name="pause-menu-settings-button" text="Настройки" class="game-menu-button" />
+                <ui:Button name="pause-menu-main-menu-button" text="В главное меню" class="game-menu-button" />
+                <ui:Button name="pause-menu-quit-button" text="Выход из игры" class="game-menu-button" />
+                <ui:Label name="pause-menu-message" class="game-menu-message" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="settings-overlay" class="game-menu-overlay settings-overlay">
+            <ui:VisualElement class="game-menu-panel">
+                <ui:Label text="НАСТРОЙКИ" class="game-menu-title" />
+                <ui:Toggle name="settings-fullscreen-toggle" label="Полноэкранный режим" class="game-menu-setting" />
+                <ui:Slider name="settings-volume-slider" label="Громкость" low-value="0" high-value="1" class="game-menu-setting" />
+                <ui:Button name="settings-close-button" text="Готово" class="game-menu-button" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

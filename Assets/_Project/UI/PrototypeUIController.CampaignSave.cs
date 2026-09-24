@@ -28,7 +28,7 @@ public partial class PrototypeUIController
     {
         if (gameState == null)
         {
-            AddReport("[Сохранение] Нет активной партии.");
+            ReportCampaignIo("[Сохранение] Нет активной партии.");
             return;
         }
 
@@ -47,22 +47,22 @@ public partial class PrototypeUIController
             string json = JsonUtility.ToJson(data, true);
 
             WriteFileAtomically(CampaignSavePath, json);
-            AddReport("[Сохранение] Партия сохранена.");
+            ReportCampaignIo("[Сохранение] Партия сохранена.");
         }
         catch (Exception exception)
         {
             Debug.LogError("Kingdom Survival: не удалось сохранить партию — " + exception);
-            AddReport("[Сохранение] Не удалось сохранить партию: " + exception.Message);
+            ReportCampaignIo("[Сохранение] Не удалось сохранить партию: " + exception.Message);
         }
     }
 
-    private void LoadCampaign()
+    private bool LoadCampaign()
     {
         string path = CampaignSavePath;
         if (!File.Exists(path))
         {
-            AddReport("[Загрузка] Файл сохранения не найден.");
-            return;
+            ReportCampaignIo("[Загрузка] Файл сохранения не найден.");
+            return false;
         }
 
         CampaignSaveData data;
@@ -74,23 +74,23 @@ public partial class PrototypeUIController
         catch (Exception exception)
         {
             Debug.LogError("Kingdom Survival: не удалось прочитать сохранение — " + exception);
-            AddReport("[Загрузка] Файл сохранения повреждён, партия не тронута.");
-            return;
+            ReportCampaignIo("[Загрузка] Файл сохранения повреждён, партия не тронута.");
+            return false;
         }
 
         if (data == null || data.State == null)
         {
-            AddReport("[Загрузка] Файл сохранения повреждён, партия не тронута.");
-            return;
+            ReportCampaignIo("[Загрузка] Файл сохранения повреждён, партия не тронута.");
+            return false;
         }
 
         if (data.SaveFormatVersion != CampaignSaveService.CurrentSaveFormatVersion)
         {
-            AddReport(
+            ReportCampaignIo(
                 "[Загрузка] Формат сохранения (" + data.SaveFormatVersion +
                 ") не совпадает с текущим (" + CampaignSaveService.CurrentSaveFormatVersion +
                 ") — загрузка отменена, партия не тронута.");
-            return;
+            return false;
         }
 
         WorldMapDatabaseAsset mapDatabase = WorldMapVisualRuntime.LoadDatabase();
@@ -100,11 +100,11 @@ public partial class PrototypeUIController
 
         if (!string.IsNullOrEmpty(data.WorldDefinitionId) && data.WorldDefinitionId != activeWorldId)
         {
-            AddReport(
+            ReportCampaignIo(
                 "[Загрузка] Это сохранение использует другую авторскую карту ('" +
                 data.WorldDefinitionId + "'), а сейчас активна '" + activeWorldId +
                 "' — загрузка отменена, чтобы не перенести героя на чужую географию.");
-            return;
+            return false;
         }
 
         GameState restored;
@@ -115,14 +115,16 @@ public partial class PrototypeUIController
         catch (Exception exception)
         {
             Debug.LogError("Kingdom Survival: не удалось восстановить партию — " + exception);
-            AddReport("[Загрузка] Не удалось восстановить партию: " + exception.Message);
-            return;
+            ReportCampaignIo("[Загрузка] Не удалось восстановить партию: " + exception.Message);
+            return false;
         }
 
         // Авторская география не хранится в файле сохранения (это
         // статический WorldMapNavigation, не поле GameState) — переприменяем
         // тот же мир до того, как экраны прочитают рельеф/маршрут.
         EnsureWorldMapGeographyConfigured();
+
+        CampaignSession.Begin(restored);
 
         gameState = restored;
         isGameOver = false;
@@ -139,8 +141,9 @@ public partial class PrototypeUIController
         HideGameOver();
         CloseMainScreen();
 
-        AddReport("[Загрузка] Партия загружена.");
+        ReportCampaignIo("[Загрузка] Партия загружена.");
         RefreshInterface();
+        return true;
     }
 
     // Запись во временный файл с последующей заменой (раздел 15 инструкции):

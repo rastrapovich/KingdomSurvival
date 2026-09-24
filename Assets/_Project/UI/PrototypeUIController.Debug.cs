@@ -59,6 +59,7 @@ public partial class PrototypeUIController
         // P11/P12: единый LateUpdate всей partial-класса. Return flow должен
         // видеть результат ContinuousSimulationSystem.Update этого же кадра,
         // а отдельный LateUpdate в другом partial-файле создаёт CS0111.
+        HandleGameMenuHotkeys();
         RefreshChapter01ReturnFlow();
         RefreshChapter01HomeFlow();
 
@@ -220,7 +221,7 @@ public partial class PrototypeUIController
 
         debugLoadCampaignButton = CreateDebugActionButton(
             "ЗАГРУЗИТЬ ПАРТИЮ",
-            LoadCampaign);
+            () => LoadCampaign());
         scroll.Add(debugLoadCampaignButton);
 
         debugResetGameButton = CreateDebugActionButton(

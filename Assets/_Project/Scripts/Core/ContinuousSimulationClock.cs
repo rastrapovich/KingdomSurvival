@@ -119,6 +119,15 @@ public static partial class ContinuousSimulationSystem
         ResetRouteTracking(runtime, state.ActiveExpedition);
     }
 
+    // Есть ли у кампании уже свой ход времени (новая через Reset, загруженная
+    // через RestoreSnapshot, или та же кампания, вернувшаяся в сцену).
+    // UI сбрасывает часы только когда его ещё нет — иначе загрузка и смена
+    // сцены теряли бы время суток и положение на маршруте.
+    public static bool HasRuntimeState(GameState state)
+    {
+        return state != null && RuntimeStates.TryGetValue(state, out _);
+    }
+
     public static ContinuousClockSnapshot GetClock(GameState state)
     {
         RuntimeState runtime = GetRuntime(state);

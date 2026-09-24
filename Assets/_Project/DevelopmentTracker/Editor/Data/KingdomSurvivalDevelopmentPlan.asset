@@ -15,8 +15,8 @@ MonoBehaviour:
   schemaVersion: 3
   projectTitle: "Kingdom Survival \u2014 \u0413\u043B\u0430\u0432\u0430 01 \xAB\u0414\u043E\u043C
     \u043D\u0430 \u0447\u0443\u0436\u043E\u0439 \u0432\u043E\u0434\u0435\xBB"
-  currentMilestoneId: P13_COUNCIL
-  planUpdatedAt: 2026-09-12
+  currentMilestoneId: PR02_CHAPTER_THROUGH
+  planUpdatedAt: 2026-09-24
   phases:
   - id: P00_DECISIONS
     title: "\u0423\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0438\u0435 \u043E\u0442\u043A\u0440\u044B\u0442\u044B\u0445
@@ -4916,6 +4916,1448 @@ MonoBehaviour:
       completedAt: 2026-09-10
       completedCommit: 
       optionalAutoCheckId: 
+  - id: PR00_BASELINE
+    title: "\u041F\u0420-00. \u0422\u043E\u0447\u043A\u0430 \u043E\u0442\u0441\u0447\u0451\u0442\u0430"
+    purpose: "\u041E\u0442\u043B\u0438\u0447\u0438\u0442\u044C \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u044E\u0449\u0438\u0435
+      \u043E\u0448\u0438\u0431\u043A\u0438 \u043E\u0442 \u0431\u0443\u0434\u0443\u0449\u0438\u0445
+      \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0439; \u0437\u0430\u0444\u0438\u043A\u0441\u0438\u0440\u043E\u0432\u0430\u0442\u044C
+      \u0433\u0440\u0430\u043D\u0438\u0446\u0443 \u0441\u0440\u0435\u0437\u0430."
+    order: 100
+    required: 1
+    dependencies: []
+    acceptanceSummary: "\u041F\u0440\u043E\u0435\u043A\u0442 \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442\u0441\u044F,
+      \u0442\u0435\u0441\u0442\u044B \u043F\u0440\u043E\u0433\u043D\u0430\u043D\u044B,
+      \u043F\u0430\u0434\u0435\u043D\u0438\u044F \u0437\u0430\u043F\u0438\u0441\u0430\u043D\u044B,
+      N01\u2013N17 \u043F\u0440\u043E\u0439\u0434\u0435\u043D\u044B \u0432\u0440\u0443\u0447\u043D\u0443\u044E
+      \u0445\u043E\u0442\u044F \u0431\u044B \u043F\u043E \u043E\u0434\u043D\u043E\u0439
+      \u0432\u0435\u0442\u043A\u0435."
+    tasks:
+    - id: PR00-T01
+      title: "\u041A\u043E\u043C\u043F\u0438\u043B\u044F\u0446\u0438\u044F \u0438
+        \u043F\u0440\u043E\u0433\u043E\u043D EditMode-\u0442\u0435\u0441\u0442\u043E\u0432"
+      details: "Batchmode, Unity 6000.5.10f1: 956 \u0442\u0435\u0441\u0442\u043E\u0432
+        \u2014 942 passed / 0 failed / 14 skipped (\u043D\u0443\u0436\u0435\u043D
+        GUI-\u0441\u043A\u0438\u043D \u0440\u0435\u0434\u0430\u043A\u0442\u043E\u0440\u0430)."
+      category: 8
+      status: 3
+      required: 1
+      order: 0
+      priority: 0
+      verificationType: 1
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041A\u043E\u043C\u043F\u0438\u043B\u044F\u0446\u0438\u044F \u0431\u0435\u0437
+          \u043E\u0448\u0438\u0431\u043E\u043A"
+        done: 1
+      - text: "\u0420\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u043F\u0440\u043E\u0433\u043E\u043D\u0430
+          \u0437\u0430\u043F\u0438\u0441\u0430\u043D \u0432 DEVELOPMENT_STATUS"
+        done: 1
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/DEVELOPMENT_STATUS.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 2026-09-24
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR00-T02
+      title: "\u0420\u0435\u0432\u0438\u0437\u0438\u044F \u0441\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u043D\u044B\u0445
+        \u0442\u0435\u0441\u0442\u043E\u0432"
+      details: "\u041F\u043E\u043C\u0435\u0447\u0435\u043D\u044B \u0442\u0435\u0441\u0442\u044B,
+        \u0437\u0430\u043A\u0440\u0435\u043F\u043B\u044F\u044E\u0449\u0438\u0435
+        \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u0435, \u043A\u043E\u0442\u043E\u0440\u043E\u0435
+        \u043C\u0435\u043D\u044F\u0435\u0442 \u043F\u043B\u0430\u043D (\u043F\u0430\u0443\u0437\u0430
+        \u0436\u0443\u0440\u043D\u0430\u043B\u0430 \u2014 \u041F\u0420-04, \u043F\u043B\u0430\u0442\u043D\u044B\u0439
+        \u043D\u0430\u0439\u043C \u2014 \u041F\u0420-06)."
+      category: 8
+      status: 3
+      required: 1
+      order: 1
+      priority: 0
+      verificationType: 0
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0422\u0430\u0431\u043B\u0438\u0446\u0430 \u0440\u0435\u0432\u0438\u0437\u0438\u0438
+          \u0437\u0430\u043F\u0438\u0441\u0430\u043D\u0430 \u0432 DEVELOPMENT_STATUS"
+        done: 1
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/DEVELOPMENT_STATUS.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 2026-09-24
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR00-T03
+      title: "\u0422\u0430\u0431\u043B\u0438\u0446\u0430 N01\u2013N17"
+      details: "\u0412\u0445\u043E\u0434, \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u0438\u0435,
+        \u043F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u044F, \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0435\u043D\u0438\u0435.
+        \u041D\u0430\u0439\u0434\u0435\u043D \u0431\u043B\u043E\u043A\u0435\u0440:
+        N01\u2013N10 \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u044E\u0442\u0441\u044F
+        \u0442\u043E\u043B\u044C\u043A\u043E \u0447\u0435\u0440\u0435\u0437 Debug."
+      category: 9
+      status: 3
+      required: 1
+      order: 2
+      priority: 0
+      verificationType: 0
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0422\u0430\u0431\u043B\u0438\u0446\u0430 \u0437\u0430\u043F\u0438\u0441\u0430\u043D\u0430
+          \u0432 DEVELOPMENT_STATUS"
+        done: 1
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/DEVELOPMENT_STATUS.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 2026-09-24
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR00-T04
+      title: "\u0420\u0443\u0447\u043D\u043E\u0439 \u043F\u0440\u043E\u0445\u043E\u0434
+        \u0433\u043B\u0430\u0432\u044B \u0432 \u0440\u0435\u0434\u0430\u043A\u0442\u043E\u0440\u0435"
+      details: "Debug \u2192 \xAB\u041F\u0420\u041E\u0414\u041E\u041B\u0416\u0418\u0422\u042C
+        \u0413\u041B\u0410\u0412\u0423 1\xBB \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442
+        \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0439 \u0443\u0437\u0435\u043B
+        \u0434\u043E N10; \u0434\u0430\u043B\u044C\u0448\u0435 \u0433\u043B\u0430\u0432\u0430
+        \u0438\u0434\u0451\u0442 \u0441\u0430\u043C\u0430."
+      category: 8
+      status: 3
+      required: 1
+      order: 3
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041F\u0440\u043E\u0439\u0434\u0435\u043D\u0430 \u0445\u043E\u0442\u044F
+          \u0431\u044B \u043E\u0434\u043D\u0430 \u0432\u0435\u0442\u043A\u0430 \u0440\u0435\u043C\u043E\u043D\u0442\u0430
+          \u0434\u043E \u0421\u043E\u0432\u0435\u0442\u0430"
+        done: 1
+      - text: "\u041D\u0430\u0439\u0434\u0435\u043D\u043D\u044B\u0435 \u0431\u043B\u043E\u043A\u0435\u0440\u044B
+          \u0437\u0430\u043F\u0438\u0441\u0430\u043D\u044B"
+        done: 1
+      manualChecks:
+      - "\u041F\u0440\u043E\u0439\u0442\u0438 \u0433\u043B\u0430\u0432\u0443 \u0447\u0435\u0440\u0435\u0437
+        \u043A\u043D\u043E\u043F\u043A\u0443 \xAB\u041F\u0420\u041E\u0414\u041E\u041B\u0416\u0418\u0422\u042C
+        \u0413\u041B\u0410\u0412\u0423 1\xBB"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 2026-09-24
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR00-T05
+      title: "\u0420\u0435\u0448\u0435\u043D\u0438\u0435: \u0433\u0434\u0435 \u0432\u0435\u0441\u0442\u0438
+        \u043F\u0440\u043E\u0433\u0440\u0435\u0441\u0441 \u043F\u043B\u0430\u043D\u0430"
+      details: "\u0420\u0435\u0448\u0435\u043D\u043E: \u0432 \u044D\u0442\u043E\u0439
+        \u043F\u0430\u043D\u0435\u043B\u0438 \xAB\u042D\u0442\u0430\u043F\u044B \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u043A\u0438\xBB."
+      category: 0
+      status: 3
+      required: 1
+      order: 4
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0420\u0435\u0448\u0435\u043D\u0438\u0435 \u043F\u0440\u0438\u043D\u044F\u0442\u043E
+          \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C"
+        done: 1
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      - ProjectDocs/DEVELOPMENT_STATUS.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 2026-09-24
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR00-T06
+      title: "\u0413\u0440\u0430\u043D\u0438\u0446\u0430 \u0432\u044B\u043F\u0443\u0441\u043A\u0430
+        \u043F\u0440\u043E\u0442\u043E\u0442\u0438\u043F\u0430"
+      details: "\u0417\u0430\u043A\u043E\u043D\u0447\u0435\u043D\u043D\u0430\u044F
+        \u043F\u0435\u0440\u0432\u0430\u044F \u0433\u043B\u0430\u0432\u0430 \u0441
+        \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u043C \u0438\u0442\u043E\u0433\u043E\u043C;
+        \u0438\u0442\u043E\u0433\u043E\u0432\u044B\u0439 \u043E\u0431\u044A\u0451\u043C
+        2 \u0433\u0435\u0440\u043E\u044F \xD7 1 \u043A\u0440\u0438\u0437\u0438\u0441
+        \xD7 2 \u0441\u0442\u0430\u0440\u0442\u0430."
+      category: 0
+      status: 3
+      required: 1
+      order: 5
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0413\u0440\u0430\u043D\u0438\u0446\u0430 \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u0430
+          \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C"
+        done: 1
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 2026-09-24
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR01_MENU_SESSION
+    title: "\u041F\u0420-01. \u0413\u043B\u0430\u0432\u043D\u043E\u0435 \u043C\u0435\u043D\u044E,
+      \u0432\u043B\u0430\u0434\u0435\u043B\u0435\u0446 \u0441\u0435\u0441\u0441\u0438\u0438
+      \u0438 \u0436\u0438\u0437\u043D\u0435\u043D\u043D\u044B\u0439 \u0446\u0438\u043A\u043B"
+    purpose: "\u041A\u0430\u043C\u043F\u0430\u043D\u0438\u044F \u043F\u0435\u0440\u0435\u0436\u0438\u0432\u0430\u0435\u0442
+      \u0441\u043C\u0435\u043D\u0443 \u0441\u0446\u0435\u043D; \u0438\u0433\u0440\u0430
+      \u043D\u0430\u0447\u0438\u043D\u0430\u0435\u0442\u0441\u044F \u0441 \u043C\u0435\u043D\u044E,
+      \u0430 \u043D\u0435 \u0441 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E
+      StartNewGame."
+    order: 101
+    required: 1
+    dependencies:
+    - PR00_BASELINE
+    acceptanceSummary: "Executable \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442
+      \u043C\u0435\u043D\u044E; \u043D\u0430\u0447\u0430\u0442\u044C, \u0432\u044B\u0439\u0442\u0438
+      \u0432 \u043C\u0435\u043D\u044E \u0438 \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C
+      \u0431\u0435\u0437 \u0432\u0442\u043E\u0440\u043E\u0439 \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u0438
+      \u0438 \u0434\u0432\u043E\u0439\u043D\u043E\u0439 \u043F\u043E\u0434\u043F\u0438\u0441\u043A\u0438
+      \u0447\u0430\u0441\u043E\u0432."
+    tasks:
+    - id: PR01-T01
+      title: "\u0412\u043B\u0430\u0434\u0435\u043B\u0435\u0446 \u0441\u0435\u0441\u0441\u0438\u0438
+        \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u0438"
+      details: "\u041E\u0431\u044A\u0435\u043A\u0442, \u0434\u0435\u0440\u0436\u0430\u0449\u0438\u0439
+        GameState \u0447\u0435\u0440\u0435\u0437 \u0441\u043C\u0435\u043D\u0443 \u0441\u0446\u0435\u043D
+        (\u0438\u043B\u0438 \u0430\u0434\u0434\u0438\u0442\u0438\u0432\u043D\u0430\u044F
+        \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0430). \u041E\u0434\u043D\u043E
+        \u0440\u0435\u0448\u0435\u043D\u0438\u0435 \u043D\u0430 \u043C\u0435\u043D\u044E
+        \u0438 \u0431\u043E\u0439."
+      category: 3
+      status: 0
+      required: 1
+      order: 0
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "GameState \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435 \u0436\u0438\u0432\u0451\u0442
+          \u0442\u043E\u043B\u044C\u043A\u043E \u0432 \u043A\u043E\u043C\u043F\u043E\u043D\u0435\u043D\u0442\u0435
+          \u0441\u0446\u0435\u043D\u044B Prototype_Main"
+        done: 0
+      - text: "\u041F\u0435\u0440\u0435\u0445\u043E\u0434 \u043C\u0435\u043D\u044E
+          \u2194 \u0438\u0433\u0440\u0430 \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442
+          \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u044E"
+        done: 0
+      manualChecks:
+      - "\u0412\u044B\u0439\u0442\u0438 \u0432 \u043C\u0435\u043D\u044E \u0438 \u0432\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F:
+        \u0432\u0440\u0435\u043C\u044F, \u043C\u0435\u0441\u0442\u043E \u0438 \u0440\u0435\u0441\u0443\u0440\u0441\u044B
+        \u043F\u0440\u0435\u0436\u043D\u0438\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR01-T02
+      title: "\u041E\u0442\u0434\u0435\u043B\u0438\u0442\u044C \u043F\u043E\u043A\u0430\u0437
+        UI \u043E\u0442 StartNewGame"
+      details: "OnEnable \u043A\u043E\u043D\u0442\u0440\u043E\u043B\u043B\u0435\u0440\u0430
+        \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435 \u0441\u043E\u0437\u0434\u0430\u0451\u0442
+        \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u044E."
+      category: 3
+      status: 0
+      required: 1
+      order: 1
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041A\u0430\u043C\u043F\u0430\u043D\u0438\u044F \u0441\u043E\u0437\u0434\u0430\u0451\u0442\u0441\u044F
+          \u0442\u043E\u043B\u044C\u043A\u043E \u043F\u043E \u043A\u043E\u043C\u0430\u043D\u0434\u0435
+          \xAB\u041D\u043E\u0432\u0430\u044F \u0438\u0433\u0440\u0430\xBB"
+        done: 0
+      manualChecks:
+      - "\u041F\u043E\u0432\u0442\u043E\u0440\u043D\u044B\u0439 \u0432\u0445\u043E\u0434
+        \u0432 \u0438\u0433\u0440\u0443 \u043D\u0435 \u0441\u043E\u0437\u0434\u0430\u0451\u0442
+        \u0432\u0442\u043E\u0440\u0443\u044E \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u044E"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR01-T03
+      title: "\u0413\u043B\u0430\u0432\u043D\u043E\u0435 \u043C\u0435\u043D\u044E
+        \u0438 \u043C\u0435\u043D\u044E \u043F\u0430\u0443\u0437\u044B"
+      details: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C, \u041D\u043E\u0432\u0430\u044F
+        \u0438\u0433\u0440\u0430, \u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C,
+        \u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438, \u0412\u044B\u0445\u043E\u0434;
+        Esc \u2014 \u043F\u0430\u0443\u0437\u0430."
+      category: 5
+      status: 0
+      required: 1
+      order: 2
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0412\u0441\u0435 \u043F\u0443\u043D\u043A\u0442\u044B \u0440\u0430\u0431\u043E\u0442\u0430\u044E\u0442
+          \u0438\u043B\u0438 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B
+          \u0441 \u043F\u043E\u043D\u044F\u0442\u043D\u043E\u0439 \u043F\u0440\u0438\u0447\u0438\u043D\u043E\u0439"
+        done: 0
+      - text: "\u041F\u043E\u0432\u0440\u0435\u0436\u0434\u0451\u043D\u043D\u044B\u0439
+          save \u043D\u0435 \u0437\u0430\u043F\u0443\u0441\u043A\u0430\u0435\u0442
+          \u043F\u0443\u0441\u0442\u043E\u0439 \u043C\u0438\u0440 \u043C\u043E\u043B\u0447\u0430"
+        done: 0
+      manualChecks:
+      - "\u0417\u0430\u043F\u0443\u0441\u043A \u0441\u0431\u043E\u0440\u043A\u0438
+        \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442 \u043C\u0435\u043D\u044E"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR02_CHAPTER_THROUGH
+    title: "\u041F\u0420-02. \u0421\u043A\u0432\u043E\u0437\u043D\u043E\u0435 \u043F\u0440\u043E\u0445\u043E\u0436\u0434\u0435\u043D\u0438\u0435
+      \u043F\u0435\u0440\u0432\u043E\u0439 \u0433\u043B\u0430\u0432\u044B"
+    purpose: "\u0413\u043B\u0430\u0432\u0443 \u043C\u043E\u0436\u043D\u043E \u043F\u0440\u043E\u0439\u0442\u0438
+      \u043E\u0442 \u043C\u0435\u043D\u044E \u0434\u043E \u0421\u043E\u0432\u0435\u0442\u0430
+      \u0431\u0435\u0437 Debug \u0438 \u0440\u0443\u0447\u043D\u043E\u0439 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438
+      \u0444\u043B\u0430\u0433\u043E\u0432."
+    order: 102
+    required: 1
+    dependencies:
+    - PR01_MENU_SESSION
+    acceptanceSummary: "\u041E\u0431\u0435 \u0432\u0435\u0442\u043A\u0438 \u0440\u0435\u043C\u043E\u043D\u0442\u0430
+      \u0434\u043E\u0445\u043E\u0434\u044F\u0442 \u0434\u043E \u0442\u0440\u0451\u0445
+      \u0438\u0441\u0445\u043E\u0434\u043E\u0432 \u0421\u043E\u0432\u0435\u0442\u0430;
+      \u0441\u043A\u0440\u0438\u043F\u0442\u043E\u0432\u044B\u0439 \u043F\u0440\u043E\u0433\u043E\u043D
+      \u0437\u0435\u043B\u0451\u043D\u044B\u0439."
+    tasks:
+    - id: PR02-T01
+      title: "\u0428\u0442\u0430\u0442\u043D\u044B\u0439 \u0432\u0445\u043E\u0434
+        \u0432 N01\u2013N10"
+      details: "\u0421\u0435\u0439\u0447\u0430\u0441 \u0443\u0437\u043B\u044B \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u044E\u0442\u0441\u044F
+        \u0442\u043E\u043B\u044C\u043A\u043E \u0438\u0437 Debug-\u043F\u0430\u043D\u0435\u043B\u0438.
+        \u041D\u0443\u0436\u0435\u043D \u0438\u0433\u0440\u043E\u0432\u043E\u0439
+        \u0441\u043F\u043E\u0441\u043E\u0431 \u0447\u0435\u0440\u0435\u0437 \u0414\u043E\u043C,
+        \u043B\u044E\u0434\u0435\u0439 \u0438 \u043C\u0435\u0441\u0442\u043E."
+      category: 7
+      status: 1
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0423\u0437\u043B\u044B N01\u2013N10 \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u044E\u0442\u0441\u044F
+          \u0431\u0435\u0437 Debug-\u043F\u0430\u043D\u0435\u043B\u0438"
+        done: 1
+      - text: "\u0420\u0435\u0448\u0435\u043D\u043E, \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u044B
+          \u043B\u0438 \u0432\u0441\u0435 \u0442\u0440\u0438 \u0440\u0430\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u044F
+          N07"
+        done: 0
+      manualChecks:
+      - "\u0412 development-\u0441\u0431\u043E\u0440\u043A\u0435 \u0431\u0435\u0437
+        Debug \u0434\u043E\u0439\u0442\u0438 \u043E\u0442 N01 \u0434\u043E \u0432\u044B\u0445\u043E\u0434\u0430
+        \u0432 \u043F\u043E\u0445\u043E\u0434"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR02-T02
+      title: "\u0421\u043A\u0440\u0438\u043F\u0442\u043E\u0432\u044B\u0439 \u043F\u0440\u043E\u0433\u043E\u043D
+        \u0433\u043B\u0430\u0432\u044B"
+      details: "EditMode-\u0442\u0435\u0441\u0442 \u0431\u0435\u0437 UI: N01 \u2192
+        \u0421\u043E\u0432\u0435\u0442 \u043F\u043E \u043E\u0431\u0435\u0438\u043C
+        \u0432\u0435\u0442\u043A\u0430\u043C \u0440\u0435\u043C\u043E\u043D\u0442\u0430
+        \u0438 \u0442\u0440\u0451\u043C \u0438\u0441\u0445\u043E\u0434\u0430\u043C."
+      category: 8
+      status: 1
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 1
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0422\u0435\u0441\u0442 \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u0442
+          \u043F\u043E \u043E\u0431\u0435\u0438\u043C \u0432\u0435\u0442\u043A\u0430\u043C
+          \u0440\u0435\u043C\u043E\u043D\u0442\u0430"
+        done: 0
+      - text: "\u041A\u0430\u0436\u0434\u044B\u0439 \u0438\u0437 \u0442\u0440\u0451\u0445
+          \u0438\u0441\u0445\u043E\u0434\u043E\u0432 \u0421\u043E\u0432\u0435\u0442\u0430
+          \u0434\u043E\u0441\u0442\u0438\u0436\u0438\u043C"
+        done: 0
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR02-T03
+      title: "\u0422\u0435\u043C\u043F \u043D\u0430\u0447\u0430\u043B\u0430 \u0433\u043B\u0430\u0432\u044B"
+      details: "\u041F\u0435\u0440\u0432\u043E\u0435 \u0441\u043E\u0434\u0435\u0440\u0436\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435
+        \u0440\u0435\u0448\u0435\u043D\u0438\u0435 \u2014 \u0432 \u043F\u0440\u0435\u0434\u0435\u043B\u0430\u0445
+        ~10 \u043C\u0438\u043D\u0443\u0442."
+      category: 1
+      status: 0
+      required: 1
+      order: 2
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0417\u0430\u043C\u0435\u0440\u0435\u043D\u043E \u0432\u0440\u0435\u043C\u044F
+          \u0434\u043E \u043F\u0435\u0440\u0432\u043E\u0433\u043E \u0440\u0435\u0448\u0435\u043D\u0438\u044F;
+          \u0437\u0430\u0442\u044F\u0436\u043A\u0438 \u0437\u0430\u043F\u0438\u0441\u0430\u043D\u044B"
+        done: 0
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR03_BATTLE_SPIKE
+    title: "\u041F\u0420-03. \u0420\u0430\u043D\u043D\u044F\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430
+      \u0431\u043E\u044F"
+    purpose: "\u0427\u0435\u0440\u043D\u043E\u0432\u043E\u0439 \u043C\u043E\u0441\u0442
+      \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u044F \u2192 BattleSandbox \u2192
+      \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u044F \u0434\u043E \u043C\u043E\u0434\u0435\u043B\u0438
+      \u043B\u044E\u0434\u0435\u0439 \u0438 \u0432\u0435\u0449\u0435\u0439."
+    order: 103
+    required: 1
+    dependencies:
+    - PR01_MENU_SESSION
+    - PR02_CHAPTER_THROUGH
+    acceptanceSummary: "\u0411\u043E\u0439 \u0440\u0435\u0430\u043B\u044C\u043D\u044B\u043C
+      \u0441\u043E\u0441\u0442\u0430\u0432\u043E\u043C, \u043F\u043E\u0431\u0435\u0434\u0430
+      \u0438\u043B\u0438 \u043F\u043E\u0440\u0430\u0436\u0435\u043D\u0438\u0435,
+      \u0432\u043E\u0437\u0432\u0440\u0430\u0442 \u0432 \u0442\u0443 \u0436\u0435
+      \u0442\u043E\u0447\u043A\u0443 \u0431\u0435\u0437 \u0437\u0430\u0432\u0438\u0441\u0448\u0435\u0439
+      \u043F\u0430\u0443\u0437\u044B \u0438 \u0434\u0443\u0431\u043B\u044F \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u0430."
+    tasks:
+    - id: PR03-T01
+      title: "\u0427\u0435\u0440\u043D\u043E\u0432\u044B\u0435 BattleRequest / BattleResult"
+      details: "\u0422\u0435\u043A\u0443\u0449\u0438\u0439 \u0433\u0435\u0440\u043E\u0439
+        \u0438 FighterData, \u043E\u0434\u043D\u043E \u043F\u043E\u043B\u0435, \u043E\u0434\u0438\u043D
+        \u043D\u0430\u0431\u043E\u0440 \u0432\u0440\u0430\u0433\u043E\u0432; \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442
+        \u043F\u0440\u0438\u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F \u043E\u0434\u0438\u043D
+        \u0440\u0430\u0437."
+      category: 3
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0412\u0445\u043E\u0434 \u0432 \u0431\u043E\u0439 \u0438\u0437 \u043F\u0440\u043E\u0445\u043E\u0436\u0434\u0435\u043D\u0438\u044F"
+        done: 0
+      - text: "\u0412\u043E\u0437\u0432\u0440\u0430\u0442 \u0432 \u0442\u0443 \u0436\u0435
+          \u0442\u043E\u0447\u043A\u0443 \u043A\u0430\u0440\u0442\u044B"
+        done: 0
+      - text: "\u041F\u043E\u0432\u0442\u043E\u0440\u043D\u043E\u0435 \u043F\u0440\u0438\u043C\u0435\u043D\u0435\u043D\u0438\u0435
+          \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u0430 \u043E\u0442\u0432\u0435\u0440\u0433\u0430\u0435\u0442\u0441\u044F"
+        done: 0
+      manualChecks:
+      - "\u0412\u044B\u0438\u0433\u0440\u0430\u0442\u044C \u0438 \u043F\u0440\u043E\u0438\u0433\u0440\u0430\u0442\u044C
+        \u0431\u043E\u0439, \u0432\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F
+        \u0432 \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u044E"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR03-T02
+      title: "\u0412\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0435 \u043F\u0440\u0430\u0432\u0438\u043B\u043E
+        \u043F\u0430\u0434\u0435\u043D\u0438\u044F \u0433\u0435\u0440\u043E\u044F"
+      details: "\u042D\u043A\u0440\u0430\u043D \u043F\u043E\u0440\u0430\u0436\u0435\u043D\u0438\u044F
+        \u0438 \u0432\u043E\u0437\u0432\u0440\u0430\u0442 \u043A \u043C\u0435\u043D\u044E
+        \u0438\u043B\u0438 \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0435\u043C\u0443
+        \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044E."
+      category: 0
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041F\u0440\u0430\u0432\u0438\u043B\u043E \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u043E
+          \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C"
+        done: 0
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR04_SAVES_TIME
+    title: "\u041F\u0420-04. \u041D\u0430\u0434\u0451\u0436\u043D\u044B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F,
+      \u0432\u0440\u0435\u043C\u044F \u0438 \u043D\u0430\u0432\u0438\u0433\u0430\u0446\u0438\u044F"
+    purpose: "Save/Load \u0438\u0437 \u043C\u0435\u043D\u044E, \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u044B\u0435
+      \u0442\u043E\u0447\u043A\u0438, \u0432\u0435\u0440\u0441\u0438\u0438, \u0435\u0434\u0438\u043D\u044B\u0439
+      \u043A\u043E\u043D\u0442\u0440\u0430\u043A\u0442 \u043F\u0430\u0443\u0437\u044B."
+    order: 104
+    required: 1
+    dependencies:
+    - PR03_BATTLE_SPIKE
+    acceptanceSummary: "\u0412\u044B\u0445\u043E\u0434 \u0432 \u043F\u0443\u0442\u0438
+      \u0438 \u0432\u043E\u0437\u0432\u0440\u0430\u0442 \u0441 \u0442\u0435\u043C
+      \u0436\u0435 \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u043E\u043C, \u0432\u0440\u0435\u043C\u0435\u043D\u0435\u043C
+      \u0438 \u0437\u043D\u0430\u043D\u0438\u044F\u043C\u0438; \u0425\u0440\u043E\u043D\u0438\u043A\u0430
+      \u043D\u0435 \u043E\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0435\u0442
+      \u0432\u0440\u0435\u043C\u044F."
+    tasks:
+    - id: PR04-T01
+      title: "Save/Load \u0432 \u043C\u0435\u043D\u044E, autosave, \u0440\u0443\u0447\u043D\u044B\u0435
+        \u0441\u043B\u043E\u0442\u044B"
+      details: "\u0412\u044B\u0432\u0435\u0441\u0442\u0438 \u0438\u0437 Debug; autosave
+        \u0434\u043E \u0431\u043E\u044F \u0438 \u043F\u043E\u0441\u043B\u0435 \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u0430."
+      category: 3
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0438
+          \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0430 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B
+          \u0438\u0437 \u043C\u0435\u043D\u044E"
+        done: 0
+      - text: "\u041D\u0435\u0442 \u0434\u0443\u0431\u043B\u044F \u043D\u0430\u0433\u0440\u0430\u0434\u044B/\u0432\u0441\u0442\u0440\u0435\u0447\u0438
+          \u043F\u043E\u0441\u043B\u0435 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0438"
+        done: 0
+      manualChecks:
+      - "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C\u0441\u044F \u0432
+        \u043F\u0443\u0442\u0438, \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u044C,
+        \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR04-T02
+      title: "\u0412\u0435\u0440\u0441\u0438\u0438 \u0444\u043E\u0440\u043C\u0430\u0442\u0430,
+        \u043A\u043E\u043D\u0442\u0435\u043D\u0442\u0430 \u0438 \u0433\u0435\u043E\u0433\u0440\u0430\u0444\u0438\u0438"
+      details: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 GeographyVersion
+        \u043F\u0440\u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0435; \u0440\u0435\u0448\u0435\u043D\u0438\u0435
+        \u043F\u043E \u0441\u0442\u0430\u0440\u044B\u043C save \u0432\u0435\u0440\u0441\u0438\u0438
+        1."
+      category: 3
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041D\u0435\u0441\u043E\u0432\u043C\u0435\u0441\u0442\u0438\u043C\u044B\u0439
+          save \u043E\u0442\u043A\u043B\u043E\u043D\u044F\u0435\u0442\u0441\u044F
+          \u0431\u0435\u0437 \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F \u0444\u0430\u0439\u043B\u0430"
+        done: 0
+      manualChecks:
+      - "\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C save \u0441 \u0434\u0440\u0443\u0433\u043E\u0439
+        \u0432\u0435\u0440\u0441\u0438\u0435\u0439 \u0433\u0435\u043E\u0433\u0440\u0430\u0444\u0438\u0438"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR04-T03
+      title: "\u0415\u0434\u0438\u043D\u044B\u0439 \u043A\u043E\u043D\u0442\u0440\u0430\u043A\u0442
+        \u043F\u0430\u0443\u0437\u044B"
+      details: "\u041C\u0435\u043D\u044E, \u0431\u043E\u0439 \u0438 \u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u044B\u0439
+        \u0432\u044B\u0431\u043E\u0440 \u0431\u043B\u043E\u043A\u0438\u0440\u0443\u044E\u0442
+        \u0432\u0440\u0435\u043C\u044F; \u0425\u0440\u043E\u043D\u0438\u043A\u0430
+        \u2014 \u043D\u0435\u0442. \u0417\u0430\u043C\u0435\u043D\u0438\u0442\u044C
+        \u0441\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u043D\u044B\u0439 \u0442\u0435\u0441\u0442
+        \u043F\u0430\u0443\u0437\u044B \u0436\u0443\u0440\u043D\u0430\u043B\u0430
+        \u043F\u043E\u0432\u0435\u0434\u0435\u043D\u0447\u0435\u0441\u043A\u0438\u043C."
+      category: 3
+      status: 0
+      required: 1
+      order: 2
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0425\u0440\u043E\u043D\u0438\u043A\u0430 \u043E\u0442\u043A\u0440\u044B\u0442\u0430
+          \u043F\u0440\u0438 \u0438\u0434\u0443\u0449\u0438\u0445 \u0447\u0430\u0441\u0430\u0445"
+        done: 0
+      - text: "\u041E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435
+          \u0441\u043E\u0431\u044B\u0442\u0438\u0435 \u043F\u043E\u0432\u0435\u0440\u0445
+          \u0425\u0440\u043E\u043D\u0438\u043A\u0438 \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F
+          \u043A\u043E\u0440\u0440\u0435\u043A\u0442\u043D\u043E"
+        done: 0
+      manualChecks:
+      - "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0425\u0440\u043E\u043D\u0438\u043A\u0443
+        \u0432 \u043F\u0443\u0442\u0438 \u0438 \u0434\u043E\u0436\u0434\u0430\u0442\u044C\u0441\u044F
+        \u0441\u043E\u0431\u044B\u0442\u0438\u044F"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR05_CAMPAIGN_CONFIG
+    title: "\u041F\u0420-05. \u041A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F
+      \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u0438 \u0438 \u044D\u043A\u0440\u0430\u043D
+      \u0441\u0442\u0430\u0440\u0442\u0430"
+    purpose: "CampaignSetup \u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u043C\u0430\u044F
+      \u043A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F; \u043C\u0430\u0441\u0442\u0435\u0440
+      \u0438 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0438 \u2014 \u0432 \u041F\u0420-12."
+    order: 105
+    required: 1
+    dependencies:
+    - PR04_SAVES_TIME
+    acceptanceSummary: "\u041A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F
+      \u0444\u0438\u043A\u0441\u0438\u0440\u0443\u0435\u0442\u0441\u044F \u043F\u0440\u0438
+      \u0441\u0442\u0430\u0440\u0442\u0435, \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442\u0441\u044F
+      \u0438 \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0435\u0442\u0441\u044F;
+      \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0430 \u043D\u0435 \u043F\u0435\u0440\u0435\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u0442
+      \u043C\u0438\u0440."
+    tasks:
+    - id: PR05-T01
+      title: "CampaignSetup \u0438 \u043A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F
+        \u0432 save"
+      details: "CampaignId, ID \u043A\u0440\u0438\u0437\u0438\u0441\u0430/\u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u0430/\u0441\u0442\u0430\u0440\u0442\u0430,
+        \u0432\u0435\u0440\u0441\u0438\u0438 \u043A\u043E\u043D\u0442\u0435\u043D\u0442\u0430,
+        seed."
+      category: 3
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F
+          \u043F\u0435\u0440\u0435\u0436\u0438\u0432\u0430\u0435\u0442 save/load"
+        done: 0
+      - text: "\u0414\u0432\u043E\u0439\u043D\u043E\u0439 \u043A\u043B\u0438\u043A
+          \xAB\u041D\u0430\u0447\u0430\u0442\u044C\xBB \u043D\u0435 \u0441\u043E\u0437\u0434\u0430\u0451\u0442
+          \u0434\u0432\u0435 \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u0438"
+        done: 0
+      manualChecks:
+      - "\u041D\u0430\u0447\u0430\u0442\u044C, \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C,
+        \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u2014 \u043A\u043E\u043D\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044F
+        \u0442\u0430 \u0436\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR05-T02
+      title: "\u042D\u043A\u0440\u0430\u043D \u0438\u0442\u043E\u0433\u0430 \u043F\u0435\u0440\u0435\u0434
+        \u0441\u0442\u0430\u0440\u0442\u043E\u043C"
+      details: "\u0413\u0435\u0440\u043E\u0439, \u0437\u0430\u0432\u044F\u0437\u043A\u0430
+        \u0431\u0435\u0437 \u0441\u043F\u043E\u0439\u043B\u0435\u0440\u043E\u0432,
+        \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0414\u043E\u043C\u0430;
+        \xAB\u041D\u0430\u0447\u0430\u0442\u044C\xBB / \xAB\u041D\u0430\u0437\u0430\u0434\xBB."
+      category: 5
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041E\u0442\u043C\u0435\u043D\u0430 \u043D\u0435 \u0441\u043E\u0437\u0434\u0430\u0451\u0442
+          \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0438 \u043D\u0435
+          \u0442\u0440\u0430\u0442\u0438\u0442 \u0432\u0440\u0435\u043C\u044F"
+        done: 0
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR06_PEOPLE
+    title: "\u041F\u0420-06. \u041B\u044E\u0434\u0438, \u0441\u0435\u043C\u044C\u0438
+      \u0438 \u0444\u0443\u043D\u043A\u0446\u0438\u0438 \u0414\u043E\u043C\u0430"
+    purpose: "\u041E\u0434\u0438\u043D \u0447\u0435\u043B\u043E\u0432\u0435\u043A
+      \u2014 \u043E\u0434\u043D\u0430 \u0437\u0430\u043F\u0438\u0441\u044C \u0434\u043B\u044F
+      \u0431\u043E\u0435\u0432\u043E\u0439, \u0431\u044B\u0442\u043E\u0432\u043E\u0439
+      \u0438 \u0441\u044E\u0436\u0435\u0442\u043D\u043E\u0439 \u0440\u043E\u043B\u0438."
+    order: 106
+    required: 1
+    dependencies:
+    - PR05_CAMPAIGN_CONFIG
+    acceptanceSummary: "\u0421\u043F\u0435\u0446\u0438\u0430\u043B\u0438\u0441\u0442
+      \u043C\u0435\u043D\u044F\u0435\u0442 \u0438 \u043F\u043E\u0445\u043E\u0434,
+      \u0438 \u0414\u043E\u043C; \u0441\u0435\u043C\u044C\u044F \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u0435\u0442
+      \u043F\u043E\u0441\u043B\u0435 save/load; \u043F\u0435\u0440\u0435\u043C\u0435\u0449\u0435\u043D\u0438\u0435
+      \u043D\u0435 \u043A\u043E\u043F\u0438\u0440\u0443\u0435\u0442 \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430."
+    tasks:
+    - id: PR06-T01
+      title: "Resident / Household \u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F
+        \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430"
+      details: "\u0414\u043E\u043C\u0430/\u0432 \u043F\u043E\u0445\u043E\u0434\u0435/\u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D;
+        \u0436\u0438\u0432/\u0440\u0430\u043D\u0435\u043D/\u043F\u043E\u0433\u0438\u0431/\u0443\u0448\u0451\u043B;
+        HP \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E \u043E\u0442 \u0448\u0430\u0431\u043B\u043E\u043D\u0430
+        UnitDatabase."
+      category: 3
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430
+          \u043F\u0435\u0440\u0435\u0436\u0438\u0432\u0430\u0435\u0442 save/load"
+        done: 0
+      - text: "\u041F\u043E\u0433\u0438\u0431\u0448\u0435\u0433\u043E \u043D\u0435\u043B\u044C\u0437\u044F
+          \u0432\u044B\u0431\u0440\u0430\u0442\u044C \u0432 \u043F\u043E\u0445\u043E\u0434"
+        done: 0
+      manualChecks:
+      - "\u0412\u0437\u044F\u0442\u044C \u0436\u0438\u0442\u0435\u043B\u044F \u0432
+        \u043F\u043E\u0445\u043E\u0434 \u0438 \u0443\u0431\u0435\u0434\u0438\u0442\u044C\u0441\u044F,
+        \u0447\u0442\u043E \u0435\u0433\u043E \u0444\u0443\u043D\u043A\u0446\u0438\u044F
+        \u0432 \u0414\u043E\u043C\u0435 \u043E\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u043B\u0430\u0441\u044C"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR06-T02
+      title: "\u0421\u044E\u0436\u0435\u0442\u043D\u044B\u0439 \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A
+        \u043B\u044E\u0434\u0435\u0439 \u0432\u043C\u0435\u0441\u0442\u043E \u043F\u043B\u0430\u0442\u043D\u043E\u0433\u043E
+        \u043D\u0430\u0439\u043C\u0430"
+      details: "\u0423\u0431\u0440\u0430\u0442\u044C \u043E\u0447\u0435\u0440\u0435\u0434\u044C
+        \u043D\u0430\u0439\u043C\u0430 \u043F\u043E\u0441\u043B\u0435 \u043F\u043E\u044F\u0432\u043B\u0435\u043D\u0438\u044F
+        \u0438\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0430 \u0438\u0437 \u043C\u0438\u0440\u0430;
+        \u0437\u0430\u043C\u0435\u043D\u0438\u0442\u044C \u0442\u0435\u0441\u0442
+        \u043D\u0430\u0439\u043C\u0430."
+      category: 3
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041D\u043E\u0432\u044B\u0439 \u0431\u043E\u0435\u0446 \u043F\u043E\u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F
+          \u0438\u0437 \u043C\u0438\u0440\u0430, \u0430 \u043D\u0435 \u0438\u0437
+          \u0442\u0430\u0439\u043C\u0435\u0440\u0430"
+        done: 0
+      manualChecks:
+      - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C, \u0447\u0442\u043E
+        \u043F\u043B\u0430\u0442\u043D\u043E\u0439 \u043E\u0447\u0435\u0440\u0435\u0434\u0438
+        \u043D\u0430\u0439\u043C\u0430 \u0431\u043E\u043B\u044C\u0448\u0435 \u043D\u0435\u0442"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR07_HOME
+    title: "\u041F\u0420-07. \u041F\u043E\u043B\u043D\u043E\u0446\u0435\u043D\u043D\u044B\u0439
+      \u044D\u043A\u0440\u0430\u043D \u0414\u043E\u043C\u0430"
+    purpose: "\u041F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u0435, \u043B\u044E\u0434\u0438,
+      \u0444\u0443\u043D\u043A\u0446\u0438\u0438 \u0438 \u0437\u0430\u0431\u043E\u0442\u044B
+      \u0432\u043C\u0435\u0441\u0442\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0439
+      \u044D\u043A\u043E\u043D\u043E\u043C\u0438\u043A\u0438."
+    order: 107
+    required: 1
+    dependencies:
+    - PR06_PEOPLE
+    acceptanceSummary: "\u0414\u043E \u043F\u043E\u0445\u043E\u0434\u0430 \u0414\u043E\u043C
+      \u043F\u043E\u043D\u044F\u0442\u0435\u043D; \u043F\u043E\u0441\u043B\u0435
+      \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0435\u043D\u0438\u044F \u0432\u0438\u0434\u0438\u043C\u043E
+      \u043E\u0442\u043B\u0438\u0447\u0430\u0435\u0442\u0441\u044F."
+    tasks:
+    - id: PR07-T01
+      title: "\u042D\u043A\u0440\u0430\u043D \u0414\u043E\u043C\u0430"
+      details: "\u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435
+        \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u044F, \u043B\u044E\u0434\u0438,
+        \u0444\u0443\u043D\u043A\u0446\u0438\u0438, \u0414\u0435\u043D\u044C\u0433\u0438/\u0417\u0430\u043F\u0430\u0441\u044B
+        \u0414\u043E\u043C\u0430, \u043A\u0430\u0447\u0435\u0441\u0442\u0432\u0435\u043D\u043D\u0430\u044F
+        \u0437\u0430\u0449\u0438\u0442\u0430."
+      category: 5
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B
+          \u0438 \u0432\u043E\u0434\u044B \u0431\u0435\u0440\u0451\u0442\u0441\u044F
+          \u0438\u0437 Chapter01HomeState"
+        done: 0
+      - text: "\u041D\u0435\u0442 \xAB\u0441\u0442\u043E\u043B\u0438\u0446\u044B\xBB
+          \u0438 \xAB\u043A\u043E\u0440\u043E\u043B\u0435\u0432\u0441\u043A\u0438\u0445\xBB
+          \u0444\u043E\u0440\u043C\u0443\u043B\u0438\u0440\u043E\u0432\u043E\u043A"
+        done: 0
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR07-T02
+      title: "\u0424\u0443\u043D\u043A\u0446\u0438\u044F \u0414\u043E\u043C\u0430
+        \u0447\u0435\u0440\u0435\u0437 \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430
+        \u0438\u043B\u0438 \u0440\u0435\u0448\u0435\u043D\u0438\u0435"
+      details: "\u041C\u0438\u043D\u0438\u043C\u0443\u043C \u043E\u0434\u043D\u0430
+        \u0444\u0443\u043D\u043A\u0446\u0438\u044F \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442\u0441\u044F
+        \u0447\u0435\u0440\u0435\u0437 \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0430,
+        \u0437\u043D\u0430\u043D\u0438\u0435 \u0438\u043B\u0438 \u0440\u0435\u0448\u0435\u043D\u0438\u0435
+        \u0432 \u043C\u0438\u0440\u0435."
+      category: 3
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0424\u0443\u043D\u043A\u0446\u0438\u044F \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442\u0441\u044F
+          \u043F\u0440\u0438\u0447\u0438\u043D\u043D\u043E \u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442\u0441\u044F"
+        done: 0
+      manualChecks:
+      - "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0444\u0443\u043D\u043A\u0446\u0438\u044E
+        \u0447\u0435\u0440\u0435\u0437 \u0441\u044E\u0436\u0435\u0442\u043D\u043E\u0435
+        \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR08_HERO_ITEMS
+    title: "\u041F\u0420-08. \u042D\u043A\u0440\u0430\u043D \u0433\u0435\u0440\u043E\u044F,
+      \u0432\u0435\u0449\u0438, \u0440\u0430\u043D\u0435\u043D\u0438\u044F \u0438
+      \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043A\u0430"
+    purpose: "\u0420\u0435\u0430\u043B\u044C\u043D\u043E\u0435 \u0432\u043B\u0430\u0434\u0435\u043D\u0438\u0435
+      \u0432\u0435\u0449\u0430\u043C\u0438 \u0438 \u0435\u0434\u0438\u043D\u044B\u0439
+      \u0440\u0430\u0441\u0447\u0451\u0442 \u0431\u043E\u0435\u0432\u044B\u0445 \u0445\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A."
+    order: 108
+    required: 1
+    dependencies:
+    - PR06_PEOPLE
+    acceptanceSummary: "\u041D\u0430\u0439\u0434\u0435\u043D\u043D\u0430\u044F \u0432\u0435\u0449\u044C
+      \u043F\u0440\u0438\u043C\u0435\u043D\u044F\u0435\u0442\u0441\u044F, \u0435\u0451
+      \u044D\u0444\u0444\u0435\u043A\u0442 \u0432\u0438\u0434\u0435\u043D \u0432
+      \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0435/\u0431\u043E\u044E/\u0441\u0446\u0435\u043D\u0435
+      \u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442\u0441\u044F."
+    tasks:
+    - id: PR08-T01
+      title: "\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u043E\u0432
+        \u0438 \u044D\u043A\u0437\u0435\u043C\u043F\u043B\u044F\u0440\u044B"
+      details: "\u041D\u0430\u0434\u0435\u0442\u044C / \u0441\u043D\u044F\u0442\u044C
+        / \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C
+        / \u043F\u0435\u0440\u0435\u0434\u0430\u0442\u044C; \u043A\u0432\u0435\u0441\u0442\u043E\u0432\u044B\u0435
+        \u0432\u0435\u0449\u0438 \u043D\u0435 \u0442\u0435\u0440\u044F\u044E\u0442\u0441\u044F."
+      category: 3
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u042D\u0444\u0444\u0435\u043A\u0442 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u0430
+          \u043E\u0434\u0438\u043D\u0430\u043A\u043E\u0432 \u043D\u0430 \u044D\u043A\u0440\u0430\u043D\u0435
+          \u0438 \u0432 BattleSandbox"
+        done: 0
+      - text: "\u0412\u0435\u0449\u0438 \u043F\u0435\u0440\u0435\u0436\u0438\u0432\u0430\u044E\u0442
+          save/load"
+        done: 0
+      manualChecks:
+      - "\u041D\u0430\u0434\u0435\u0442\u044C, \u0441\u043D\u044F\u0442\u044C \u0438
+        \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C
+        \u043F\u0440\u0435\u0434\u043C\u0435\u0442"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR08-T02
+      title: "HP, \u0440\u0430\u043D\u0435\u043D\u0438\u044F, \u0438\u0437\u043D\u0435\u043C\u043E\u0436\u0435\u043D\u0438\u0435,
+        \u0441\u0432\u0438\u0442\u0430"
+      details: "\u041A\u0430\u0440\u0442\u043E\u0447\u043A\u0438 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0439;
+        \u0432\u044B\u0431\u043E\u0440 \u0441\u0432\u0438\u0442\u044B \u0441 \u043F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0435\u043D\u0438\u0435\u043C
+        \u043E \u0434\u043E\u043C\u0430\u0448\u043D\u0435\u0439 \u0444\u0443\u043D\u043A\u0446\u0438\u0438."
+      category: 3
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0421\u043E\u0441\u0442\u0430\u0432 \u0437\u0430\u043A\u0440\u0435\u043F\u043B\u044F\u0435\u0442\u0441\u044F
+          \u043F\u043E\u0441\u043B\u0435 \u0432\u044B\u0445\u043E\u0434\u0430"
+        done: 0
+      manualChecks:
+      - "\u0423\u0439\u0442\u0438 \u0441 \u0440\u0430\u043D\u0435\u043D\u0438\u0435\u043C
+        \u0438 \u043F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043E\u0442\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR09_MAP_CAMP
+    title: "\u041F\u0420-09. \u041A\u0430\u0440\u0442\u0430, \u0434\u043E\u0440\u043E\u0433\u0430,
+      \u0438\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u0435 \u0438
+      \u043B\u0430\u0433\u0435\u0440\u044C"
+    purpose: "\u041F\u043E\u0435\u0437\u0434\u043A\u0430 \u0441 \u043D\u0430\u0431\u043B\u044E\u0434\u0435\u043D\u0438\u0435\u043C
+      \u0438 \u0432\u044B\u0431\u043E\u0440\u043E\u043C; \u043B\u0430\u0433\u0435\u0440\u044C
+      \u043F\u043E \u043C\u0435\u0441\u0442\u0443 \u0441\u0442\u043E\u044F\u043D\u043A\u0438."
+    order: 109
+    required: 1
+    dependencies:
+    - PR02_CHAPTER_THROUGH
+    - PR06_PEOPLE
+    - PR07_HOME
+    - PR08_HERO_ITEMS
+    acceptanceSummary: "\u0418\u0433\u0440\u043E\u043A \u043E\u0441\u043C\u044B\u0441\u043B\u0435\u043D\u043D\u043E
+      \u0440\u0435\u0448\u0430\u0435\u0442 \xAB\u0435\u0449\u0451 \u0440\u0430\u0437\u0432\u0435\u0434\u0430\u0442\u044C
+      \u0438\u043B\u0438 \u0434\u043E\u043C\u043E\u0439\xBB; \u043E\u0431\u0440\u0430\u0442\u043D\u044B\u0439
+      \u043F\u0443\u0442\u044C \u0438\u0434\u0451\u0442 \u0441 \u0442\u0435\u043A\u0443\u0449\u0435\u0439
+      \u043F\u043E\u0437\u0438\u0446\u0438\u0438."
+    tasks:
+    - id: PR09-T01
+      title: "\xAB\u0418\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u0442\u044C
+        \u043E\u0431\u043B\u0430\u0441\u0442\u044C\xBB \u043A\u0430\u043A \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0435
+        \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435"
+      details: "\u0412\u0440\u0435\u043C\u044F \u0438 \u043F\u043E\u043D\u044F\u0442\u043D\u044B\u0439
+        \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442; \u0441\u043B\u0443\u0445
+        \u0432\u0435\u0434\u0451\u0442 \u043A \u043E\u0431\u043B\u0430\u0441\u0442\u0438,
+        \u043D\u0430\u0445\u043E\u0434\u043A\u0430 \u2014 \u043F\u043E \u0444\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u043E\u043C\u0443
+        \u043F\u0443\u0442\u0438."
+      category: 3
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0418\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u043D\u0438\u0435
+          \u0442\u0440\u0430\u0442\u0438\u0442 \u0432\u0440\u0435\u043C\u044F \u043E\u0434\u0438\u043D
+          \u0440\u0430\u0437 \u0438 \u0434\u0430\u0451\u0442 \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442"
+        done: 0
+      manualChecks:
+      - "\u0418\u0441\u0441\u043B\u0435\u0434\u043E\u0432\u0430\u0442\u044C \u043E\u0431\u043B\u0430\u0441\u0442\u044C
+        \u0438 \u043F\u043E\u043B\u0443\u0447\u0438\u0442\u044C \u043D\u0430\u0445\u043E\u0434\u043A\u0443"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR09-T02
+      title: "\u041B\u0430\u0433\u0435\u0440\u044C \u043F\u043E \u043A\u043E\u043D\u0442\u0435\u043A\u0441\u0442\u0443
+        \u0441\u0442\u043E\u044F\u043D\u043A\u0438"
+      details: "\u0414\u043E \u0434\u0432\u0443\u0445 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0439
+        \u0432 \u0441\u043E\u0434\u0435\u0440\u0436\u0430\u0442\u0435\u043B\u044C\u043D\u0443\u044E
+        \u043D\u043E\u0447\u044C; \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u0430\u044F
+        \u2014 \u0431\u044B\u0441\u0442\u0440\u043E."
+      category: 3
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041E\u0442\u0434\u044B\u0445 \u043D\u0435 \u0434\u0443\u0431\u043B\u0438\u0440\u0443\u0435\u0442
+          \u0441\u0443\u0442\u043E\u0447\u043D\u044B\u0439 \u0440\u0430\u0441\u0445\u043E\u0434
+          \u041F\u0440\u0438\u043F\u0430\u0441\u043E\u0432"
+        done: 0
+      - text: "\u042D\u043A\u0440\u0430\u043D \u043B\u0430\u0433\u0435\u0440\u044F
+          \u043D\u0435 \u0442\u0435\u043B\u0435\u043F\u043E\u0440\u0442\u0438\u0440\u0443\u0435\u0442
+          \u0438 \u043D\u0435 \u0442\u0440\u0430\u0442\u0438\u0442 \u043D\u043E\u0447\u044C"
+        done: 0
+      manualChecks:
+      - "\u0412\u0441\u0442\u0430\u0442\u044C \u043B\u0430\u0433\u0435\u0440\u0435\u043C
+        \u0432 \u0434\u0432\u0443\u0445 \u0440\u0430\u0437\u043D\u044B\u0445 \u043C\u0435\u0441\u0442\u0430\u0445"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR10_BATTLE
+    title: "\u041F\u0420-10. \u041F\u043E\u043B\u043D\u043E\u0446\u0435\u043D\u043D\u044B\u0439
+      \u0431\u043E\u0439 \u0432 \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u0438"
+    purpose: "\u041D\u0430\u0440\u0430\u0449\u0438\u0432\u0430\u043D\u0438\u0435
+      \u0447\u0435\u0440\u043D\u043E\u0432\u043E\u0433\u043E \u043C\u043E\u0441\u0442\u0430
+      \u041F\u0420-03: \u043B\u044E\u0434\u0438, HP, \u0441\u043D\u0430\u0440\u044F\u0436\u0435\u043D\u0438\u0435,
+      \u043F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u044F."
+    order: 110
+    required: 1
+    dependencies:
+    - PR03_BATTLE_SPIKE
+    - PR04_SAVES_TIME
+    - PR06_PEOPLE
+    - PR08_HERO_ITEMS
+    acceptanceSummary: "\u0411\u043E\u0439 \u0440\u0435\u0430\u043B\u044C\u043D\u044B\u043C
+      \u043E\u0442\u0440\u044F\u0434\u043E\u043C \u0438 \u0432\u043E\u0437\u0432\u0440\u0430\u0442
+      \u0441 \u0442\u0435\u043C\u0438 \u0436\u0435 \u043B\u044E\u0434\u044C\u043C\u0438
+      \u0438 \u0438\u0437\u043C\u0435\u043D\u0451\u043D\u043D\u044B\u043C \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435\u043C;
+      \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u044B\u0439 \u0438\u0441\u0445\u043E\u0434
+      \u043F\u043E\u0440\u0430\u0436\u0435\u043D\u0438\u044F."
+    tasks:
+    - id: PR10-T01
+      title: "\u041F\u043E\u043B\u043D\u044B\u0439 BattleRequest / BattleResult"
+      details: "\u041F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u044B\u0435 \u043B\u044E\u0434\u0438,
+        HP, \u0441\u043D\u0430\u0440\u044F\u0436\u0435\u043D\u0438\u0435, \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F;
+        \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u043F\u043E \u0441\u0442\u0430\u0431\u0438\u043B\u044C\u043D\u044B\u043C
+        ID."
+      category: 3
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "HP \u0438 \u043F\u043E\u0442\u0435\u0440\u0438 \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u044F\u0442\u0441\u044F
+          \u0432 \u043A\u0430\u043C\u043F\u0430\u043D\u0438\u044E"
+        done: 0
+      - text: "\u041D\u0430\u0433\u0440\u0430\u0434\u0430 \u043D\u0435 \u0432\u044B\u0434\u0430\u0451\u0442\u0441\u044F
+          \u043F\u043E\u0432\u0442\u043E\u0440\u043D\u043E"
+        done: 0
+      manualChecks:
+      - "\u041F\u043E\u0442\u0435\u0440\u044F\u0442\u044C \u0431\u043E\u0439\u0446\u0430
+        \u0432 \u0431\u043E\u044E \u0438 \u0443\u0432\u0438\u0434\u0435\u0442\u044C
+        \u044D\u0442\u043E \u0432 \u0414\u043E\u043C\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR10-T02
+      title: "\u041E\u043A\u043E\u043D\u0447\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0435
+        \u043F\u0440\u0430\u0432\u0438\u043B\u043E \u043F\u043E\u0442\u0435\u0440\u044C
+        \u0438 \u043F\u0430\u0434\u0435\u043D\u0438\u044F \u0433\u0435\u0440\u043E\u044F"
+      details: "\u041E\u0431\u044B\u0447\u043D\u044B\u0435 \u0431\u043E\u0439\u0446\u044B
+        \u043C\u043E\u0433\u0443\u0442 \u043F\u043E\u0433\u0438\u0431\u0430\u0442\u044C;
+        \u0433\u0435\u0440\u043E\u0439 \u0431\u0435\u0437 \u0441\u043A\u0440\u044B\u0442\u043E\u0433\u043E
+        \u0431\u0435\u0441\u0441\u043C\u0435\u0440\u0442\u0438\u044F."
+      category: 0
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041F\u0440\u0430\u0432\u0438\u043B\u043E \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u043E
+          \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C"
+        done: 0
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR11_CHRONICLE
+    title: "\u041F\u0420-11. \u0425\u0440\u043E\u043D\u0438\u043A\u0430, \u0441\u0432\u0435\u0434\u0435\u043D\u0438\u044F
+      \u0438 \u043F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u044F"
+    purpose: "\u0414\u0435\u043B\u0430, \u0421\u0432\u0435\u0434\u0435\u043D\u0438\u044F,
+      \u0418\u0441\u0442\u043E\u0440\u0438\u044F \u0438\u0437 \u043E\u0434\u043D\u043E\u0433\u043E
+      \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F."
+    order: 111
+    required: 1
+    dependencies:
+    - PR10_BATTLE
+    - PR09_MAP_CAMP
+    acceptanceSummary: "\u041F\u043E\u0441\u043B\u0435 \u043F\u0435\u0440\u0435\u0440\u044B\u0432\u0430
+      \u0438\u0433\u0440\u043E\u043A \u0437\u0430 \u043C\u0438\u043D\u0443\u0442\u0443
+      \u043F\u043E\u043D\u0438\u043C\u0430\u0435\u0442, \u0447\u0442\u043E \u043F\u0440\u043E\u0438\u0441\u0445\u043E\u0434\u0438\u0442
+      \u0438 \u043A\u0443\u0434\u0430 \u0438\u0434\u0442\u0438."
+    tasks:
+    - id: PR11-T01
+      title: "\u0412\u043A\u043B\u0430\u0434\u043A\u0430 \u0438\u0441\u0442\u043E\u0440\u0438\u0438
+        \u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0425\u0440\u043E\u043D\u0438\u043A\u0438"
+      details: "\u041F\u0435\u0440\u0435\u0441\u0442\u0430\u0442\u044C \u0445\u0440\u0430\u043D\u0438\u0442\u044C
+        \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u0432 UI-\u0441\u043F\u0438\u0441\u043A\u0435
+        \u0434\u043E\u043D\u0435\u0441\u0435\u043D\u0438\u0439."
+      category: 3
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0418\u0441\u0442\u043E\u0440\u0438\u044F \u043F\u0435\u0440\u0435\u0436\u0438\u0432\u0430\u0435\u0442
+          save/load"
+        done: 0
+      - text: "\u0421\u043B\u0443\u0445, \u043D\u0430\u0431\u043B\u044E\u0434\u0435\u043D\u0438\u0435
+          \u0438 \u0444\u0430\u043A\u0442 \u0440\u0430\u0437\u043B\u0438\u0447\u0430\u044E\u0442\u0441\u044F"
+        done: 0
+      manualChecks:
+      - "\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0438\u0433\u0440\u0443
+        \u0438 \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u0438\u0441\u0442\u043E\u0440\u0438\u044E"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR11-T02
+      title: "\u0426\u0435\u043F\u044C \xAB\u0440\u0435\u0448\u0435\u043D\u0438\u0435
+        \u2192 \u0437\u0430\u0434\u0435\u0440\u0436\u0430\u043D\u043D\u043E\u0435
+        \u043F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u0435\xBB"
+      details: "\u0425\u043E\u0442\u044F \u0431\u044B \u043E\u0434\u043D\u0430 \u043F\u043E\u043B\u043D\u0430\u044F
+        \u0446\u0435\u043F\u044C \u0434\u043E \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u0433\u043E
+        \u0440\u0435\u0448\u0435\u043D\u0438\u044F."
+      category: 2
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0426\u0435\u043F\u044C \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u0442
+          \u0432 \u0438\u0433\u0440\u0435 \u0438 \u0432\u0438\u0434\u043D\u0430 \u0432
+          \u0425\u0440\u043E\u043D\u0438\u043A\u0435"
+        done: 0
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR12_REPLAY
+    title: "\u041F\u0420-12. \u0412\u0442\u043E\u0440\u043E\u0439 \u0433\u0435\u0440\u043E\u0439,
+      \u0432\u0442\u043E\u0440\u043E\u0439 \u0441\u0442\u0430\u0440\u0442, \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0438
+      \u0438 \u043C\u0430\u0441\u0442\u0435\u0440"
+    purpose: "\u041A\u0430\u0442\u0430\u043B\u043E\u0433\u0438 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440\u043E\u0432
+      \u0438 \u0441\u0442\u0430\u0440\u0442\u043E\u0432, \u043C\u0430\u0441\u0442\u0435\u0440
+      \u0438\u0437 \u0442\u0440\u0451\u0445 \u0448\u0430\u0433\u043E\u0432, 2 \xD7
+      2 \u0441\u043E\u0447\u0435\u0442\u0430\u043D\u0438\u044F."
+    order: 112
+    required: 1
+    dependencies:
+    - PR11_CHRONICLE
+    acceptanceSummary: "\u0412\u0441\u0435 \u0447\u0435\u0442\u044B\u0440\u0435 \u0441\u043E\u0447\u0435\u0442\u0430\u043D\u0438\u044F
+      \u0437\u0430\u0432\u0435\u0440\u0448\u0430\u044E\u0442 \u0433\u043B\u0430\u0432\u0443;
+      \u043F\u043E\u0432\u0442\u043E\u0440 \u0434\u0430\u0451\u0442 \u0434\u0440\u0443\u0433\u043E\u0439
+      \u0441\u043F\u043E\u0441\u043E\u0431 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F."
+    tasks:
+    - id: PR12-T01
+      title: "\u041A\u0430\u0442\u0430\u043B\u043E\u0433\u0438 CommanderDefinition
+        / StartingConditionDefinition \u0438 \u043C\u0430\u0441\u0442\u0435\u0440"
+      details: "\u041F\u0435\u0440\u0432\u044B\u0439 \u0433\u0435\u0440\u043E\u0439
+        \u0438 \u0431\u0430\u0437\u043E\u0432\u044B\u0439 \u0441\u0442\u0430\u0440\u0442
+        \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u044F\u0442\u0441\u044F \u043F\u043E
+        \u0443\u0436\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u043C
+        ID."
+      category: 3
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041D\u043E\u0432\u0430\u044F \u043A\u0430\u0440\u0442\u043E\u0447\u043A\u0430
+          \u043F\u043E\u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0438\u0437
+          \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0430 \u0431\u0435\u0437 \u043F\u0440\u0430\u0432\u043A\u0438
+          \u043C\u0430\u043A\u0435\u0442\u0430"
+        done: 0
+      - text: "\u0421\u0442\u0430\u0440\u044B\u0435 save \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u044E\u0442\u0441\u044F"
+        done: 0
+      manualChecks:
+      - "\u041F\u0440\u043E\u0439\u0442\u0438 \u043C\u0430\u0441\u0442\u0435\u0440
+        \u0432\u043F\u0435\u0440\u0451\u0434-\u043D\u0430\u0437\u0430\u0434 \u0438
+        \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u044C"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12-T02
+      title: "\u0412\u0442\u043E\u0440\u043E\u0439 \u043A\u043E\u043C\u0430\u043D\u0434\u0438\u0440
+        \u0438 \u0432\u0442\u043E\u0440\u043E\u0439 \u0441\u0442\u0430\u0440\u0442"
+      details: "\u0423\u0442\u0432\u0435\u0440\u0436\u0434\u0430\u044E\u0442\u0441\u044F
+        \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C
+        \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E."
+      category: 0
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041E\u0431\u0430 \u043F\u0440\u043E\u0444\u0438\u043B\u044F \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043D\u044B"
+        done: 0
+      - text: "\u0421\u043A\u0440\u0438\u043F\u0442\u043E\u0432\u044B\u0439 \u043F\u0440\u043E\u0433\u043E\u043D
+          \u043F\u043E\u043A\u0440\u044B\u0432\u0430\u0435\u0442 \u0447\u0435\u0442\u044B\u0440\u0435
+          \u0441\u043E\u0447\u0435\u0442\u0430\u043D\u0438\u044F"
+        done: 0
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+  - id: PR13_RELEASE
+    title: "\u041F\u0420-13. \u0422\u0435\u043C\u043F, \u0432\u0438\u0437\u0443\u0430\u043B\u044C\u043D\u044B\u0439
+      \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u0438 \u0433\u043E\u0442\u043E\u0432\u0430\u044F
+      \u0441\u0431\u043E\u0440\u043A\u0430"
+    purpose: "\u0421\u0431\u043E\u0440\u043A\u0443 \u043C\u043E\u0436\u043D\u043E
+      \u0434\u0430\u0442\u044C \u0447\u0435\u043B\u043E\u0432\u0435\u043A\u0443 \u0431\u0435\u0437
+      \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u0438 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0430."
+    order: 113
+    required: 1
+    dependencies:
+    - PR12_REPLAY
+    acceptanceSummary: "Windows-\u0441\u0431\u043E\u0440\u043A\u0430 \u0432\u043D\u0435
+      Editor \u0434\u043E\u0445\u043E\u0434\u0438\u0442 \u0434\u043E \u043E\u0441\u043C\u044B\u0441\u043B\u0435\u043D\u043D\u043E\u0433\u043E
+      \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u0430 \u0431\u0435\u0437
+      \u0431\u043B\u043E\u043A\u0438\u0440\u0443\u044E\u0449\u0438\u0445 \u0437\u0430\u0433\u043B\u0443\u0448\u0435\u043A."
+    tasks:
+    - id: PR13-T01
+      title: "\u041D\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043C\u0430\u044F
+        Windows-\u0441\u0431\u043E\u0440\u043A\u0430"
+      details: "\u0417\u0430\u043F\u0443\u0441\u043A \u0432\u043D\u0435 Editor, \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F
+        \u043F\u043E\u0441\u043B\u0435 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0443\u0441\u043A\u0430,
+        \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438, \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435
+        \u043F\u043E\u0442\u0435\u0440\u044F\u043D\u043D\u044B\u0445 \u0430\u0441\u0441\u0435\u0442\u043E\u0432."
+      category: 7
+      status: 0
+      required: 1
+      order: 0
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u0421\u0431\u043E\u0440\u043A\u0430 \u0437\u0430\u043F\u0443\u0441\u043A\u0430\u0435\u0442\u0441\u044F
+          \u043D\u0430 \u0447\u0438\u0441\u0442\u043E\u0439 \u043C\u0430\u0448\u0438\u043D\u0435"
+        done: 0
+      manualChecks:
+      - "\u041F\u0440\u043E\u0439\u0442\u0438 \u0433\u043B\u0430\u0432\u0443 \u0432
+        \u0441\u0431\u043E\u0440\u043A\u0435"
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR13-T02
+      title: "\u0422\u0435\u0441\u0442 \u043D\u0430 \u0438\u0433\u0440\u043E\u043A\u0430\u0445"
+      details: "3\u20135 \u0447\u0435\u043B\u043E\u0432\u0435\u043A, \u043D\u0435
+        \u0437\u043D\u0430\u044E\u0449\u0438\u0445 \u043F\u0440\u043E\u0435\u043A\u0442;
+        \u0432\u043E\u043F\u0440\u043E\u0441\u044B \u0438\u0437 \xA79 \u043F\u043B\u0430\u043D\u0430."
+      category: 8
+      status: 0
+      required: 1
+      order: 1
+      priority: 1
+      verificationType: 3
+      blockerReason: 4
+      dependencies: []
+      acceptanceCriteria:
+      - text: "\u041F\u0440\u043E\u0432\u0435\u0434\u0435\u043D\u043E \u0438 \u0437\u0430\u043F\u0438\u0441\u0430\u043D\u043E"
+        done: 0
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/PROTOTYPE_DEVELOPMENT_PLAN.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
   projectNotes: "\u041F\u043B\u0430\u043D \u0441\u0433\u0435\u043D\u0435\u0440\u0438\u0440\u043E\u0432\u0430\u043D
     DevelopmentPlanSeedData \u043F\u043E \u0441\u0432\u043E\u0434\u0443 \u0438\u043D\u0441\u0442\u0440\u0443\u043A\u0446\u0438\u0438.
     ID \u044D\u0442\u0430\u043F\u043E\u0432 \u0438 \u0437\u0430\u0434\u0430\u0447
@@ -4924,4 +6366,4 @@ MonoBehaviour:
     \u043A\u0430\u043A \u0437\u0430\u0432\u0438\u0441\u0438\u043C\u043E\u0441\u0442\u0438
     \u2014 \u043D\u0435 \u043F\u0435\u0440\u0435\u0438\u043C\u0435\u043D\u043E\u0432\u044B\u0432\u0430\u0442\u044C
     \u0438\u0445 \u0432\u0440\u0443\u0447\u043D\u0443\u044E \u0431\u0435\u0437 \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0430
-    \u0441\u0441\u044B\u043B\u043E\u043A.\n[P13_COUNCIL_V1_SYNCED]"
+    \u0441\u0441\u044B\u043B\u043E\u043A.\n[P13_COUNCIL_V1_SYNCED]\n[PROTOTYPE_ROADMAP_V1_SYNCED]"

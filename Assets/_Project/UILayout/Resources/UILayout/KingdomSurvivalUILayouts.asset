@@ -56,8 +56,8 @@ MonoBehaviour:
       kind: 0
       portraitSize: 2
       targetName: narrative-dialogue-overlay
-      overrideRect: 0
-      overrideBackground: 0
+      overrideRect: 1
+      overrideBackground: 1
       overrideText: 0
       previewText: 
       rect:
@@ -85,7 +85,7 @@ MonoBehaviour:
       kind: 0
       portraitSize: 2
       targetName: narrative-dialogue-panel
-      overrideRect: 0
+      overrideRect: 1
       overrideBackground: 0
       overrideText: 0
       previewText: 
@@ -143,7 +143,7 @@ MonoBehaviour:
       kind: 1
       portraitSize: 2
       targetName: narrative-dialogue-speaker
-      overrideRect: 0
+      overrideRect: 1
       overrideBackground: 0
       overrideText: 0
       previewText: 
@@ -172,7 +172,7 @@ MonoBehaviour:
       kind: 1
       portraitSize: 2
       targetName: narrative-dialogue-role
-      overrideRect: 0
+      overrideRect: 1
       overrideBackground: 0
       overrideText: 0
       previewText: 
@@ -201,7 +201,7 @@ MonoBehaviour:
       kind: 4
       portraitSize: 2
       targetName: narrative-dialogue-text
-      overrideRect: 0
+      overrideRect: 1
       overrideBackground: 0
       overrideText: 0
       previewText: 
@@ -230,7 +230,7 @@ MonoBehaviour:
       kind: 4
       portraitSize: 2
       targetName: narrative-dialogue-choices
-      overrideRect: 0
+      overrideRect: 1
       overrideBackground: 0
       overrideText: 0
       previewText: 

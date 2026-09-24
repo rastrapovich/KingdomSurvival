@@ -55,6 +55,28 @@ public sealed class NarrativeDialogueScreenLayoutTests
         }
     }
 
+    // Binder применяет Rect обычного элемента только при включённом
+    // «Переопределять прямоугольник». У диалога флаг был выключен у всех
+    // блоков, кроме портрета (Portrait применяется всегда), — в игре панель,
+    // имя, роль, текст и ответы стояли по USS, а не как в UI Конструкторе.
+    [TestCase("panel")]
+    [TestCase("speaker")]
+    [TestCase("role")]
+    [TestCase("text")]
+    [TestCase("choices")]
+    [TestCase("portrait")]
+    public void Narrative_PositionedElements_ApplyConstructorRectInGame(string elementId)
+    {
+        UILayoutDatabaseAsset database = LoadDatabase();
+        UILayoutScreenDefinition screen = database.FindScreen(NarrativeDialogueScreenId);
+        Assert.IsNotNull(screen);
+
+        UILayoutElementDefinition element = screen.FindElement(elementId);
+        Assert.IsNotNull(element, elementId);
+        Assert.IsTrue(UILayoutScreenBinder.ShouldApplyRect(element),
+            "'" + elementId + "' не получит геометрию из UI Конструктора: включите «Переопределять прямоугольник».");
+    }
+
     // Speaker/role — дети overlay (не panel): позиционируются рядом с
     // портретом. Text/choices — дети panel. Portrait — тоже ребёнок overlay.
     // Это критично сверить явно: до UI-M04 родительство расставлял

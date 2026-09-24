@@ -10,6 +10,16 @@ using static KingdomSurvival.DialogueDatabase.Editor.DialogueDatabaseWindow;
 // см. DEVELOPMENT_STATUS.md).
 public sealed class DialogueDatabaseGraphPresentationTests
 {
+    // Замеры высоты текста идут через EditorStyles.textArea, а в batchmode
+    // (запуск тестов из командной строки) GUI-скин редактора не создаётся
+    // и EditorStyles падает с NullReferenceException. Это ограничение
+    // окружения, а не раскладки: в открытом редакторе тесты выполняются.
+    private static void RequireEditorGuiSkin()
+    {
+        if (UnityEngine.Application.isBatchMode)
+            Assert.Ignore("Нужен GUI-скин редактора: EditorStyles недоступен в batchmode.");
+    }
+
     // ---- Сводки проверок (§9, §17) ------------------------------------
 
     [Test]
@@ -406,6 +416,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeNodeLayoutMetrics_FullWidthAtLeastStandardAtLeastCompact()
     {
+        RequireEditorGuiSkin();
         GraphNodeInfo node = MakeMinimalNode();
         HashSet<string> allIds = new HashSet<string> { "n1", "n2" };
 
@@ -420,6 +431,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeNodeLayoutMetrics_FullHeightAtLeastStandardAtLeastCompact()
     {
+        RequireEditorGuiSkin();
         GraphNodeInfo node = MakeMinimalNode();
         node.TextBlocks[0].Conditions = new NarrativeConditionGroup
         {
@@ -439,6 +451,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeNodeLayoutMetrics_MoreTextBlocksWithinCap_IncreasesHeight()
     {
+        RequireEditorGuiSkin();
         GraphNodeInfo oneBlock = MakeMinimalNode();
         GraphNodeInfo twoBlocks = MakeMinimalNode();
         twoBlocks.TextBlocks.Add(new GraphTextBlockInfo { Kind = DialogueTextBlockKind.Observation, Text = "Ещё один блок." });
@@ -453,6 +466,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeNodeLayoutMetrics_MoreChoices_IncreasesHeight()
     {
+        RequireEditorGuiSkin();
         GraphNodeInfo oneChoice = MakeMinimalNode();
         GraphNodeInfo twoChoices = MakeMinimalNode();
         twoChoices.Choices.Add(new GraphChoiceInfo { Text = "Второй ответ", Kind = DialogueChoiceKind.Normal, NextNodeId = "n2" });
@@ -467,6 +481,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeNodeLayoutMetrics_ChoicePortStaysWithinChoiceRect()
     {
+        RequireEditorGuiSkin();
         GraphNodeInfo node = MakeMinimalNode();
         node.Choices.Add(new GraphChoiceInfo { Text = "Второй ответ", Kind = DialogueChoiceKind.Normal, NextNodeId = "n2" });
         HashSet<string> allIds = new HashSet<string> { "n1", "n2" };
@@ -484,6 +499,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeNodeLayoutMetrics_TotalHeightContainsChoicesAndFooter()
     {
+        RequireEditorGuiSkin();
         GraphNodeInfo node = MakeMinimalNode();
         HashSet<string> allIds = new HashSet<string> { "n1", "n2" };
 
@@ -497,6 +513,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeNodeLayoutMetrics_SelectedCompactNodeUsesStandardEffectiveMode()
     {
+        RequireEditorGuiSkin();
         GraphNodeInfo node = MakeMinimalNode();
         HashSet<string> allIds = new HashSet<string> { "n1", "n2" };
 
@@ -531,6 +548,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeChoiceHeight_WithWarning_IsTallerThanWithoutWarning()
     {
+        RequireEditorGuiSkin();
         GraphChoiceInfo choice = new GraphChoiceInfo { Text = "Ответ", Kind = DialogueChoiceKind.Normal, NextNodeId = "n2" };
 
         float withoutWarning = ComputeChoiceHeight(choice, GraphDetailMode.Standard, hasWarning: false);
@@ -542,6 +560,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeChoiceHeight_SeparateSuccessAndFailureEffects_BothCountTowardHeight()
     {
+        RequireEditorGuiSkin();
         GraphChoiceInfo successOnly = new GraphChoiceInfo
         {
             Text = "Проверить",
@@ -603,6 +622,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeNarrativeTextHeight_LongerTextIsTaller()
     {
+        RequireEditorGuiSkin();
         float shortHeight = ComputeNarrativeTextHeight("Коротко.", 300f);
         float longHeight = ComputeNarrativeTextHeight(LongParagraph, 300f);
 
@@ -612,6 +632,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeNarrativeTextHeight_NarrowerWidthIsTallerOrEqual()
     {
+        RequireEditorGuiSkin();
         // Тот же текст в более узкой ширине переносится на больше строк
         // (или на столько же, если текст короче строки) — никогда меньше.
         float wideHeight = ComputeNarrativeTextHeight(LongParagraph, 480f);
@@ -623,6 +644,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeNarrativeTextHeight_EmptyTextStillMeasuresPlaceholder()
     {
+        RequireEditorGuiSkin();
         float height = ComputeNarrativeTextHeight(string.Empty, 300f);
 
         Assert.Greater(height, 0f);
@@ -631,6 +653,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeTextBlockHeight_Standard_GrowsWithLongerText()
     {
+        RequireEditorGuiSkin();
         GraphTextBlockInfo shortBlock = new GraphTextBlockInfo { Kind = DialogueTextBlockKind.MainLine, Text = "Коротко." };
         GraphTextBlockInfo longBlock = new GraphTextBlockInfo { Kind = DialogueTextBlockKind.MainLine, Text = LongParagraph };
 
@@ -643,6 +666,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     [Test]
     public void ComputeChoiceHeight_Standard_GrowsWithLongerText()
     {
+        RequireEditorGuiSkin();
         GraphChoiceInfo shortChoice = new GraphChoiceInfo { Text = "Да.", Kind = DialogueChoiceKind.Normal, NextNodeId = "n2" };
         GraphChoiceInfo longChoice = new GraphChoiceInfo { Text = LongParagraph, Kind = DialogueChoiceKind.Normal, NextNodeId = "n2" };
 

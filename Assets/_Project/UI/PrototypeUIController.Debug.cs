@@ -59,6 +59,7 @@ public partial class PrototypeUIController
         // видеть результат ContinuousSimulationSystem.Update этого же кадра,
         // а отдельный LateUpdate в другом partial-файле создаёт CS0111.
         RefreshChapter01ReturnFlow();
+        RefreshChapter01HomeFlow();
 
         if (!debugMenuInitialized)
             return;
@@ -196,6 +197,15 @@ public partial class PrototypeUIController
             "ВЫЗВАТЬ ДОРОЖНЫЙ ENCOUNTER",
             DebugTriggerAuthoredEncounter);
         scroll.Add(debugForceEncounterButton);
+
+        AddDebugSectionTitle(scroll, "ГЛАВА 1");
+
+        // ПР-00: штатного входа в N01–N10 ещё нет (задача ПР-02), поэтому
+        // для ручного прохода — одна кнопка, открывающая следующий узел
+        // по Chapter01StoryDirector вместо выбора каждого диалога вручную.
+        scroll.Add(CreateDebugActionButton(
+            "ПРОДОЛЖИТЬ ГЛАВУ 1",
+            DebugContinueChapter01));
 
         AddDebugSectionTitle(scroll, "ПАРТИЯ");
 
@@ -514,6 +524,51 @@ public partial class PrototypeUIController
 
         TryDebugForceRoadEncounter(out string message);
         AddReport("[DEBUG] " + message);
+    }
+
+    // Открывает первый незавершённый узел главы (фиксированный порядок
+    // N07A → B → C). С N11 глава продвигается сама — через маршрут, место
+    // и возвращение, — поэтому кнопка там только объясняет, чего ждать.
+    private void DebugContinueChapter01()
+    {
+        if (isGameOver || IsNarrativeDialogueActive)
+        {
+            AddReport("[DEBUG] Сейчас нельзя открыть узел главы: идёт другой диалог или игра окончена.");
+            return;
+        }
+
+        if (gameState.Narrative == null)
+            gameState.Narrative = new NarrativeStateData();
+
+        NarrativeStateData state = gameState.Narrative;
+        string nodeId = KingdomSurvival.Chapter01.Chapter01StoryDirector.GetNextNodeId(state);
+        string dialogueId = KingdomSurvival.Chapter01.Chapter01StoryDirector.GetNextDialogueId(state);
+
+        if (string.IsNullOrEmpty(dialogueId))
+        {
+            if (KingdomSurvival.Chapter01.Chapter01StoryDirector.IsChapterComplete(state))
+                AddReport("[DEBUG] Глава 1 уже завершена.");
+            else if (state.HasFlag(KingdomSurvival.Chapter01.Chapter01Ids.Flags.OldTraceFound) &&
+                     !state.HasFlag(KingdomSurvival.Chapter01.Chapter01Ids.Flags.FarRouteUnlocked))
+                AddReport("[DEBUG] N09 закрыт: не собрана ни одна комбинация знаний для Совета перед уходом.");
+            else
+                AddReport("[DEBUG] Следующий узел главы сейчас недоступен.");
+            return;
+        }
+
+        // После N10 узел завершается только реальным выходом отряда
+        // (HandleStoryExpeditionStarted); всё дальнейшее — не по кнопке.
+        if (state.HasFlag(KingdomSurvival.Chapter01.Chapter01Ids.Flags.ExpeditionStarted))
+        {
+            AddReport("[DEBUG] Узел " + nodeId + " открывается сам: по ходу маршрута, в месте или при возвращении.");
+            return;
+        }
+
+        if (debugPanel != null)
+            debugPanel.style.display = DisplayStyle.None;
+
+        if (!TryOpenNarrativeDialogueById(dialogueId))
+            AddReport("[DEBUG] Узел " + nodeId + " сейчас нельзя открыть.");
     }
 
     private void ApplyDebugResolutionResult(

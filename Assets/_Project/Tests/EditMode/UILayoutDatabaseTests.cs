@@ -252,6 +252,8 @@ public sealed class UILayoutDatabaseTests
     /// У обычных элементов конструктор не должен вмешиваться в USS, пока
     /// дизайнер не включил legacy override-флаги. Portrait имеет отдельный
     /// явный контракт применения и проверяется отдельным тестом выше.
+    /// Исключение — диалог: его геометрия намеренно задаётся конструктором
+    /// (флаги включены 24.09.2026, см. NarrativeDialogueScreenLayoutTests).
     /// </summary>
     [Test]
     public void Default_Database_Does_Not_Enable_Legacy_Override_Flags()
@@ -261,6 +263,9 @@ public sealed class UILayoutDatabaseTests
 
         foreach (UILayoutScreenDefinition screen in database.Screens)
         {
+            if (screen.Id == UILayoutDatabaseAsset.NarrativeDialogueScreenId)
+                continue;
+
             foreach (UILayoutElementDefinition element in screen.Elements)
             {
                 Assert.IsFalse(

@@ -170,6 +170,12 @@ namespace KingdomSurvival.Chapter01
             // нижних людей). Оправдан ровно этим одним использованием.
             public const string FordWomanHelped = "chapter01.flag.ford_woman_helped";
 
+            // ПР-02: N10 завершается только реальным выходом отряда
+            // (ExpeditionStarted), поэтому без отдельной отметки «сцена сбора
+            // уже показана» автозапуск открывал бы D10 снова, пока игрок
+            // выбирает состав. Технический флаг, не сюжетный факт.
+            public const string PartyGatheringSeen = "chapter01.flag.party_gathering_seen";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Started, HomeIntroSeen, FirstPressureSeen, FloodHappened, FloodWorkersSaved,
@@ -183,7 +189,7 @@ namespace KingdomSurvival.Chapter01
                 RoadDestinationReached, FollowedOldRoad, CrossedOldRoadBoundary,
                 OldRoadDetourInProgress, CartResolved, CartOutcomeSavedBoth,
                 CartOutcomeSavedMan, CartOutcomeSavedSeed, CartOutcomePassedBy,
-                CartCampEchoSeen, CampUnlocked, FordWomanHelped
+                CartCampEchoSeen, CampUnlocked, FordWomanHelped, PartyGatheringSeen
             };
         }
 

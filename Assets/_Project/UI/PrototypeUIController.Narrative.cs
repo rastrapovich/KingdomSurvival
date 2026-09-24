@@ -601,7 +601,10 @@ public partial class PrototypeUIController
             // эффектов — реальный набор 0-4 бойцов происходит в picker'е Экрана
             // героя (панель «СОСТАВ ПОХОДА»), не в самом диалоге.
             if (string.Equals(completedDialogueId, Chapter01Ids.Dialogues.D10, StringComparison.Ordinal))
+            {
+                gameState.Narrative?.SetFlag(Chapter01Ids.Flags.PartyGatheringSeen);
                 OpenHeroScreen();
+            }
 
             return;
         }

@@ -97,6 +97,7 @@ public partial class PrototypeUIController
 
             if (changed)
             {
+                ApplySelectedRetinueToExpedition();
                 ContinuousSimulationSystem.NotifyRouteChanged(gameState);
                 AddReport(
                     "Приказ на экспедицию отдан. Прямой маршрут: " +

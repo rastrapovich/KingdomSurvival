@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ui:UXML
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    editor-extension-mode="False">
+
+    <ui:Button name="person-row" class="person-row">
+        <ui:Label name="person-row-name" class="person-row-name" />
+        <ui:Label name="person-row-role" class="person-row-role" />
+        <ui:Label name="person-row-status" class="person-row-status" />
+    </ui:Button>
+</ui:UXML>

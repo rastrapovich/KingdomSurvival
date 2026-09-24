@@ -45,7 +45,7 @@ public class BuildingSystemTests
     }
 
     [Test]
-    public void BarracksRecruitOneReplacementFighterOverTime()
+    public void BarracksDoNotRecruitFightersForMoney()
     {
         GameState state = CreateState();
         state.Gold = 500;
@@ -70,16 +70,19 @@ public class BuildingSystemTests
         ContinuousSimulationSystem.Advance(state, 7f, false);
         Assert.IsTrue(BuildingSystem.IsCompleted(state, BuildingSystem.BarracksId));
 
+        // ПР-06Б: платного найма нет — казармы стоят, но бойцов за золото
+        // не производят; золото не списывается, людей не прибавляется.
         int before = state.Fighters.Count;
-        Assert.IsTrue(BuildingSystem.TryStartRecruitment(state, out message));
-        Assert.AreEqual(500 - 100 - BuildingSystem.RecruitGoldCost + 3, state.Gold);
+        int goldBefore = state.Gold;
+        Assert.IsFalse(BuildingSystem.CanRecruit(state));
+        Assert.IsFalse(BuildingSystem.TryStartRecruitment(state, out message));
+        StringAssert.Contains("новые люди приходят в Дом из мира", message);
+        Assert.AreEqual(goldBefore, state.Gold);
+        Assert.IsFalse(BuildingSystem.IsRecruitmentActive(state));
 
         ContinuousSimulationSystem.Advance(state, 4f, false);
         BuildingSystem.Synchronize(state);
-
-        Assert.AreEqual(before + 1, state.Fighters.Count);
-        Assert.AreEqual(BuildingSystem.PrototypeMaxFighters, state.Fighters.Count);
-        Assert.AreEqual("Ополченец", state.Fighters[state.Fighters.Count - 1].Role);
+        Assert.AreEqual(before, state.Fighters.Count);
     }
 
     private static GameState CreateState()

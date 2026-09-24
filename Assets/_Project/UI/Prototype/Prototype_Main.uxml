@@ -65,6 +65,20 @@
                                     <ui:Label name="home-activities-empty" text="Сейчас никто не ждёт тебя." class="home-activities-empty" />
                                     <ui:VisualElement name="home-activities-list" class="home-activities-list" />
                                 </ui:VisualElement>
+                                <!-- ПР-06А: люди Дома — одна личность во всех системах.
+                                     Код — PrototypeUIController.HomePeople.cs, строки — Templates/PersonRow.uxml. -->
+                                <ui:VisualElement name="home-people-panel" class="home-activities-panel home-people-panel">
+                                    <ui:Label text="ЛЮДИ ДОМА" class="section-title" />
+                                    <ui:Label name="home-people-summary" class="home-people-summary" />
+                                    <ui:Label name="home-people-maintenance" class="home-people-function" />
+                                    <ui:Label name="home-people-care" class="home-people-function" />
+                                    <ui:VisualElement name="home-people-work-row" class="home-people-work-row">
+                                        <ui:Label name="home-people-work-label" class="home-people-function" />
+                                        <ui:Button name="home-people-work-button" class="game-menu-button home-people-work-button" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement name="home-people-list" class="home-people-list" />
+                                    <ui:Label name="home-people-detail" class="home-people-detail" />
+                                </ui:VisualElement>
                                 <ui:VisualElement name="building-grid" class="building-grid">
                                     <ui:Button text="Тронный зал" class="building-card" />
                                     <ui:Button text="Амбар" class="building-card" />
@@ -605,21 +619,16 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="hero-screen-retinue" class="ks-panel hero-screen-retinue-panel">
-                    <ui:Label name="hero-screen-retinue-title" text="СВИТА" class="ks-panel-title" />
+                    <!-- ПР-06А: свита — 0–1 небоевой специалист (Остафий или Лада).
+                         Код — PrototypeUIController.HomePeople.cs. -->
+                    <ui:Label name="hero-screen-retinue-title" text="СВИТА — один специалист, не боец" class="ks-panel-title" />
                     <ui:VisualElement name="hero-screen-retinue-row" class="hero-screen-wrap-row">
-                        <ui:VisualElement name="hero-screen-retinue-1" class="hero-screen-retinue-slot">
-                            <ui:VisualElement class="hero-screen-retinue-circle" />
-                            <ui:Label text="Квартирмейстер" class="hero-screen-retinue-caption ks-muted-text" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="hero-screen-retinue-2" class="hero-screen-retinue-slot">
-                            <ui:VisualElement class="hero-screen-retinue-circle" />
-                            <ui:Label text="Разведчик" class="hero-screen-retinue-caption ks-muted-text" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="hero-screen-retinue-3" class="hero-screen-retinue-slot">
-                            <ui:VisualElement class="hero-screen-retinue-circle" />
-                            <ui:Label text="Полевой лекарь" class="hero-screen-retinue-caption ks-muted-text" />
-                        </ui:VisualElement>
+                        <ui:Button name="hero-screen-retinue-none" text="Без специалиста" class="ks-button hero-screen-retinue-option" />
+                        <ui:Button name="hero-screen-retinue-ostafiy" text="Остафий" class="ks-button hero-screen-retinue-option" />
+                        <ui:Button name="hero-screen-retinue-lada" text="Лада" class="ks-button hero-screen-retinue-option" />
                     </ui:VisualElement>
+                    <ui:Label name="hero-screen-retinue-description" class="hero-screen-retinue-caption ks-muted-text" />
+                    <ui:Label name="hero-screen-retinue-forecast" class="hero-screen-retinue-caption ks-text" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="journey-summary-block" class="ks-panel hero-screen-journey-summary-block">

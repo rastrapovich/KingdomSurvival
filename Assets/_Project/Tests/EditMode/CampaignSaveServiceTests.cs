@@ -122,8 +122,10 @@ public class CampaignSaveServiceTests
     }
 
     [Test]
-    public void SaveLoad_PreservesBuildingConstructionAndRecruitmentProgress()
+    public void SaveLoad_PreservesCompletedBarracksWithoutPaidRecruitment()
     {
+        // ПР-06Б: платного найма нет — после сохранения казармы построены,
+        // очередь бойцов не появляется.
         GameState state = new GameState();
         state.CreateNewGame(1);
         state.Gold = 1000;
@@ -133,9 +135,7 @@ public class CampaignSaveServiceTests
         ContinuousSimulationSystem.SetSpeedMultiplier(
             state, ContinuousSimulationSystem.MaximumSpeedMultiplier);
         ContinuousSimulationSystem.Advance(state, 7f, false);
-        BuildingSystem.TryStartRecruitment(state, out message);
-
-        double hoursRemainingBefore = BuildingSystem.GetRecruitmentHoursRemaining(state);
+        Assert.That(BuildingSystem.TryStartRecruitment(state, out message), Is.False);
 
         CampaignSaveData data = CampaignSaveService.ExportCampaign(state);
         string json = JsonUtility.ToJson(data);
@@ -143,9 +143,7 @@ public class CampaignSaveServiceTests
         GameState restored = CampaignSaveService.RestoreCampaign(loaded);
 
         Assert.That(BuildingSystem.IsCompleted(restored, BuildingSystem.BarracksId), Is.True);
-        Assert.That(BuildingSystem.IsRecruitmentActive(restored), Is.True);
-        Assert.That(
-            BuildingSystem.GetRecruitmentHoursRemaining(restored),
-            Is.EqualTo(hoursRemainingBefore).Within(0.01));
+        Assert.That(BuildingSystem.IsRecruitmentActive(restored), Is.False);
+        Assert.That(restored.Fighters.Count, Is.EqualTo(state.Fighters.Count));
     }
 }

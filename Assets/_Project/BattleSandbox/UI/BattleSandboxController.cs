@@ -132,6 +132,18 @@ namespace KingdomSurvival.BattleSandbox
                 campaignUnitIds.Add("player:" + fighters[i].Id + ":" + (i + 1));
 
             battle = SandboxRoster.CreateBattle(fighters, unitContent.EnemyEncounter);
+
+            // ПР-06А: текущие HP человека из кампании.
+            for (int i = 0; i < campaignParticipants.Count; i++)
+            {
+                int hitPoints = campaignParticipants[i].CurrentHitPoints;
+                if (hitPoints <= 0)
+                    continue;
+                string unitId = campaignUnitIds[i];
+                SandboxUnitState unit = battle.Units.FirstOrDefault(candidate => candidate.Id == unitId);
+                unit?.SetStartingHitPoints(hitPoints);
+            }
+
             battleLog.Clear();
             battleLog.Add("Бой начался. Отряд встречает засаду.");
             selectedTargetId = null;
@@ -156,6 +168,14 @@ namespace KingdomSurvival.BattleSandbox
                 SandboxUnitState unit = battle.Units.FirstOrDefault(candidate => candidate.Id == unitId);
                 if (unit != null && unit.IsDefeated)
                     result.FallenPersonIds.Add(campaignParticipants[i].PersonId);
+                else if (unit != null)
+                {
+                    result.Survivors.Add(new CampaignBattleSurvivor
+                    {
+                        PersonId = campaignParticipants[i].PersonId,
+                        HitPoints = unit.HitPoints
+                    });
+                }
             }
 
             return result;

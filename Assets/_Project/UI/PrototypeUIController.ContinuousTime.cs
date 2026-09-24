@@ -276,10 +276,23 @@ public partial class PrototypeUIController
             return;
         }
 
+        // ПР-06Б: выход на берег у старого брода — по дороге от брода к
+        // нижним людям, тот же принцип физического факта.
+        string pendingFordAccessDialogueId = chapterActive
+            ? Chapter01StoryDirector.GetPendingFordAccessDialogueId(gameState)
+            : null;
+        if (!string.IsNullOrEmpty(pendingFordAccessDialogueId) &&
+            TryOpenNarrativeDialogueById(pendingFordAccessDialogueId))
+        {
+            return;
+        }
+
         // ПР-02: паводок (N04) и ночной удар на мельнице (N06) случаются
         // ночью — пока глава их ждёт, время в Доме идёт само.
+        // ПР-06А: пока в Доме идёт работа или уход, время тоже идёт само.
         bool shouldRun = ContinuousSimulationSystem.HasMovementOrActivityInProgress(gameState) ||
-                         Chapter01HomeActivities.IsWaitingForNight(gameState);
+                         Chapter01HomeActivities.IsWaitingForNight(gameState) ||
+                         HomeLife.HasPendingProgress(gameState);
         ContinuousSimulationSystem.SetPaused(gameState, !shouldRun);
 
         // P08+: ExpeditionStarted должен означать физическое начало

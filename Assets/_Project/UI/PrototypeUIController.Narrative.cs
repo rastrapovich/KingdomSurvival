@@ -294,9 +294,8 @@ public partial class PrototypeUIController
         if (gameState.Narrative == null)
             gameState.Narrative = new NarrativeStateData();
 
-        List<string> presentCompanionIds = new List<string>();
-        if (gameState.HasActiveExpedition)
-            presentCompanionIds.AddRange(gameState.ActiveExpedition.FighterIds);
+        // ПР-06А: те же спутники, что в Chapter01ContextBuilder — бойцы и свита.
+        List<string> presentCompanionIds = Chapter01ContextBuilder.GetPresentCompanionIds(gameState);
 
         List<string> presentItemIds = new List<string>();
         if (gameState.Narrative.Items != null)

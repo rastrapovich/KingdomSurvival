@@ -54,8 +54,8 @@ public static partial class ContinuousSimulationSystem
 
             state.ConsecutiveFoodShortageDays = 0;
             result.Messages.Add(
-                "Город израсходовал " + requiredFood +
-                " пищи для " + state.Population + " жителей.");
+                "Дом израсходовал " + requiredFood +
+                " пищи — по одной на каждого, кто сейчас дома.");
             return;
         }
 
@@ -76,13 +76,11 @@ public static partial class ContinuousSimulationSystem
         }
         else
         {
-            int before = state.Population;
-            state.Population = Math.Max(
-                0,
-                state.Population - PopulationLossPerStarvationDay);
+            // ПР-06А: голод больше не стирает безымянных жителей — у Дома
+            // конкретные люди. Затяжная нехватка останавливает уход
+            // (HomeFunctionResolver); смерть — только авторским событием.
             result.Messages.Add(
-                "Голод затянулся: население уменьшилось на " +
-                (before - state.Population) + ".");
+                "Голод затянулся: люди слабеют, уход за ранеными остановлен до появления еды.");
         }
     }
 

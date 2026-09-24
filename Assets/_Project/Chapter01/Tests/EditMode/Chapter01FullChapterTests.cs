@@ -20,7 +20,9 @@ public sealed class Chapter01FullChapterTests
         Chapter01Ids.Dialogues.D11, Chapter01Ids.Dialogues.D11B, Chapter01Ids.Dialogues.D11C,
         Chapter01Ids.Dialogues.D12, Chapter01Ids.Dialogues.D13, Chapter01Ids.Dialogues.D14,
         Chapter01Ids.Dialogues.D14Half, Chapter01Ids.Dialogues.D15, Chapter01Ids.Dialogues.D16,
-        Chapter01Ids.Dialogues.D17
+        Chapter01Ids.Dialogues.D17,
+        // ПР-06Б: семья у ворот (дело в Доме после N05) и выход на берег у брода.
+        Chapter01Ids.Dialogues.GateFamily, Chapter01Ids.Dialogues.D12B
     };
 
     private static readonly string[] InvestigationScenes =

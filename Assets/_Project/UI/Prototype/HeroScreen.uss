@@ -515,35 +515,26 @@
     margin-bottom: 0;
 }
 
-.hero-screen-retinue-slot {
-    width: 92px;
-    align-items: center;
+/* ПР-06А: выбор свиты — кнопки вариантов, описание и прогноз для Дома. */
+.hero-screen-retinue-option {
     margin-right: 6px;
+    margin-bottom: 6px;
+    height: 30px;
+    font-size: 12px;
 }
 
-.hero-screen-retinue-circle {
-    width: 62px;
-    height: 62px;
-    background-color: rgb(27, 31, 37);
-    border-top-left-radius: 31px;
-    border-top-right-radius: 31px;
-    border-bottom-left-radius: 31px;
-    border-bottom-right-radius: 31px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: rgb(91, 80, 62);
-    border-right-color: rgb(91, 80, 62);
-    border-top-color: rgb(91, 80, 62);
-    border-bottom-color: rgb(91, 80, 62);
+.hero-screen-retinue-option--selected {
+    border-left-color: rgb(176, 146, 92);
+    border-right-color: rgb(176, 146, 92);
+    border-top-color: rgb(176, 146, 92);
+    border-bottom-color: rgb(176, 146, 92);
+    color: rgb(226, 214, 186);
 }
 
 .hero-screen-retinue-caption {
-    font-size: 9px;
+    font-size: 11px;
     white-space: normal;
-    -unity-text-align: middle-center;
-    margin-top: 3px;
+    margin-top: 4px;
 }
 
 /* Сводка похода (перенесено с удалённого экрана «Армия») */

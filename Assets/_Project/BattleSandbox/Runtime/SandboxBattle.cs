@@ -128,6 +128,13 @@ namespace KingdomSurvival.BattleSandbox
         public bool IsDamaged => DamageTaken > 0;
         public bool CanRetaliate => !IsDefeated && !HasRetaliatedThisRound;
 
+        // ПР-06А: человек кампании входит в бой с тем здоровьем, что у него
+        // есть (1..максимум шаблона), а не всегда полным.
+        public void SetStartingHitPoints(int hitPoints)
+        {
+            HitPoints = Math.Max(1, Math.Min(MaxHitPoints, hitPoints));
+        }
+
         public bool HasTag(string tagId)
         {
             return Definition.HasTag(tagId);

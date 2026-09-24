@@ -79,10 +79,17 @@ namespace KingdomSurvival.Chapter01
             public const string D16 = "chapter01_dialogue_16_home_again";
             public const string D17 = "chapter01_dialogue_17_council_of_the_house";
 
+            // ПР-06Б [РАБОЧЕЕ]: необязательные сцены вне линейной
+            // последовательности — семья Тихона у ворот (домашнее дело) и
+            // выход на берег у старого брода (по дороге к нижним людям).
+            public const string GateFamily = "chapter01_dialogue_gate_family";
+            public const string D12B = "chapter01_dialogue_12b_ford_access";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 D01, D02, D03, D04, D05, D06, D07A, D07B, D07C, D08,
-                D09, D10, D11, D11B, D11C, D12, D13, D14, D14Half, D15, D16, D17
+                D09, D10, D11, D11B, D11C, D12, D13, D14, D14Half, D15, D16, D17,
+                GateFamily, D12B
             };
         }
 
@@ -176,6 +183,18 @@ namespace KingdomSurvival.Chapter01
             // выбирает состав. Технический флаг, не сюжетный факт.
             public const string PartyGatheringSeen = "chapter01.flag.party_gathering_seen";
 
+            // ПР-06Б: взаимоисключающие исходы предложения семьи Тихона.
+            public const string FisherFamilyAccepted = "chapter01.flag.fisher_family_accepted";
+            public const string FisherFamilyDeclined = "chapter01.flag.fisher_family_declined";
+
+            // ПР-06Б: выход на берег у старого брода — один устойчивый итог и
+            // способ, которым отряд его добился.
+            public const string FordAccessResolved = "chapter01.flag.ford_access_resolved";
+            public const string FordAccessBypass = "chapter01.flag.ford_access_bypass";
+            public const string FordAccessBracedSupport = "chapter01.flag.ford_access_braced_support";
+            public const string FordAccessOldDescent = "chapter01.flag.ford_access_old_descent";
+            public const string FordAccessShallowLine = "chapter01.flag.ford_access_shallow_line";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Started, HomeIntroSeen, FirstPressureSeen, FloodHappened, FloodWorkersSaved,
@@ -189,7 +208,9 @@ namespace KingdomSurvival.Chapter01
                 RoadDestinationReached, FollowedOldRoad, CrossedOldRoadBoundary,
                 OldRoadDetourInProgress, CartResolved, CartOutcomeSavedBoth,
                 CartOutcomeSavedMan, CartOutcomeSavedSeed, CartOutcomePassedBy,
-                CartCampEchoSeen, CampUnlocked, FordWomanHelped, PartyGatheringSeen
+                CartCampEchoSeen, CampUnlocked, FordWomanHelped, PartyGatheringSeen,
+                FisherFamilyAccepted, FisherFamilyDeclined, FordAccessResolved, FordAccessBypass,
+                FordAccessBracedSupport, FordAccessOldDescent, FordAccessShallowLine
             };
         }
 
@@ -296,11 +317,16 @@ namespace KingdomSurvival.Chapter01
             public const string OldRoadDetourStart = "chapter01.effect.old_road_detour_start";
             public const string CartActivityStart = "chapter01.effect.cart_activity_start";
 
+            // ПР-06Б: приём семьи Тихона целиком и цена выхода на берег у брода.
+            public const string FisherFamilyJoin = "pr06.join.household.fisher_tikhon";
+            public const string FordAccessActivityStart = "chapter01.effect.ford_access_activity_start";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 FloodResourceLoss, FloodTimeAdvance, FloodMillRepairCost,
                 LongRoadTimeAdvance, SevenToothGaugeGrant, DepartureLocationReveal,
-                DownstreamLocationReveal, OldRoadDetourStart, CartActivityStart
+                DownstreamLocationReveal, OldRoadDetourStart, CartActivityStart,
+                FisherFamilyJoin, FordAccessActivityStart
             };
         }
 

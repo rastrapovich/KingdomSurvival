@@ -83,6 +83,8 @@ public static class CampaignStartOptions
 // полусозданной кампании.
 public sealed class CampaignSetup
 {
+    public const int BaseHomeDailyFoodIncome = 24;
+
     public string CrisisId = CampaignStartOptions.HomeOnForeignWaterCrisisId;
     public string CommanderProfileId = CampaignStartOptions.PlaceholderCommanderId;
     public string StartingConditionId = CampaignStartOptions.BaseHomeStartId;
@@ -119,6 +121,12 @@ public sealed class CampaignSetup
 
         GameState state = new GameState();
         state.CreateNewGame(WorldSeed, locationTemplates, worldDefinition);
+
+        // ПР-06А: «Обычная жизнь» — Дом кормит себя. Приток 24 при 24
+        // жителях — фиксированная настройка пресета, не подгонка под
+        // текущее население: новые люди действительно увеличивают расход.
+        if (StartingConditionId == CampaignStartOptions.BaseHomeStartId)
+            state.BaseDailyFoodIncome = BaseHomeDailyFoodIncome;
         state.Configuration = new CampaignConfiguration
         {
             CampaignId = Guid.NewGuid().ToString("N"),

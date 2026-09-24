@@ -140,6 +140,13 @@ public sealed class CampaignBattlePlayModeTests
         Assert.IsTrue(campaign.HasActiveExpedition, "Поход продолжается.");
         Assert.AreEqual(fightersBefore - 1, campaign.Fighters.Count);
         Assert.IsFalse(campaign.Fighters.Any(f => f.Id == fallenId), "Павший погибает насовсем.");
+        // ПР-06А: павший остаётся в реестре людей — погибшим, не удалённым.
+        ResidentState fallen = HomePeopleService.Find(campaign, fallenId);
+        Assert.IsNotNull(fallen);
+        Assert.AreEqual(ResidentLifeStatus.Dead, fallen.LifeStatus);
+        Assert.AreEqual(23, campaign.Population);
+        ResidentState hero = HomePeopleService.Find(campaign, campaign.GetSelectedCommander().Id);
+        Assert.IsTrue(hero.HasCombatState && hero.CurrentHitPoints > 0, "HP героя вернулись из боя в его запись.");
         Assert.IsNull(CampaignSession.TakeCompletedBattle(), "Итог уже применён.");
         Assert.IsTrue(CampaignBattleBridge.IsApplied(campaign, "test.battle"));
     }

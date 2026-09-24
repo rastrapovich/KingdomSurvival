@@ -72,7 +72,6 @@ public static partial class ContinuousSimulationSystem
 
     private const double Epsilon = 0.00001;
     private const int MoodLossPerShortageDay = 1;
-    private const int PopulationLossPerStarvationDay = 1;
     private const int MoodOnlyShortageDays = 3;
 
     private sealed class RuntimeState
@@ -329,6 +328,9 @@ public static partial class ContinuousSimulationSystem
                 runtime,
                 stepHours,
                 batch);
+
+            // ПР-06А: домашняя работа и уход идут ровно на прошедшие часы.
+            HomeLife.Advance(state, advancedHours, batch.Result.Messages);
 
             runtime.HourOfDay += advancedHours;
             remainingGameHours -= advancedHours;

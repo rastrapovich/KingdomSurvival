@@ -31,6 +31,10 @@ namespace KingdomSurvival.Chapter01
             List<string> companions = new List<string>();
             if (gameState != null && gameState.HasActiveExpedition && gameState.ActiveExpedition.FighterIds != null)
                 companions.AddRange(gameState.ActiveExpedition.FighterIds);
+            // ПР-06А: специалист свиты тоже физически рядом (CompanionPresent);
+            // в PartySize он не входит — это число бойцов с героем.
+            if (gameState != null && gameState.HasActiveExpedition && gameState.ActiveExpedition.RetinueIds != null)
+                companions.AddRange(gameState.ActiveExpedition.RetinueIds);
             return companions;
         }
 

@@ -7,7 +7,10 @@ using System;
 // до/после сериализации в JSON.
 public static class CampaignSaveService
 {
-    public const int CurrentSaveFormatVersion = 1;
+    // 2 — ПР-06А: люди Дома, домохозяйства, работы, свита, HP. Формат 1 не
+    // мигрируется (решение пользователя 24.09.2026): такие сохранения честно
+    // отклоняются, файл не удаляется.
+    public const int CurrentSaveFormatVersion = 2;
 
     public static CampaignSaveData ExportCampaign(
         GameState state,
@@ -51,7 +54,15 @@ public static class CampaignSaveService
 
         if (data.SaveFormatVersion != CurrentSaveFormatVersion)
         {
-            reason = "формат сохранения " + data.SaveFormatVersion + ", нужен " + CurrentSaveFormatVersion;
+            reason = data.SaveFormatVersion < CurrentSaveFormatVersion
+                ? "сохранение сделано до появления людей Дома (формат " + data.SaveFormatVersion + ") — начните новую игру"
+                : "формат сохранения " + data.SaveFormatVersion + " новее этой версии игры";
+            return false;
+        }
+
+        if (data.State.People == null)
+        {
+            reason = "в сохранении нет людей Дома";
             return false;
         }
 
@@ -101,6 +112,9 @@ public static class CampaignSaveService
 
         ContinuousSimulationSystem.RestoreSnapshot(state, data.ClockSnapshot);
         BuildingSystem.RestoreSnapshot(state, data.BuildingSnapshot);
+
+        // ПР-06А: население — производное, пересчитывается из людей.
+        HomePeopleService.RecountPopulation(state);
 
         return state;
     }

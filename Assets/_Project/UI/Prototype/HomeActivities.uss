@@ -77,3 +77,102 @@
     white-space: normal;
     color: rgb(193, 183, 158);
 }
+
+/* ПР-06А: люди Дома */
+
+.home-people-summary {
+    font-size: 13px;
+    color: rgb(226, 214, 186);
+    margin-bottom: 6px;
+}
+
+.home-people-function {
+    font-size: 12px;
+    white-space: normal;
+    color: rgb(193, 183, 158);
+    margin-bottom: 2px;
+}
+
+.home-people-work-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4px;
+    margin-bottom: 6px;
+}
+
+.home-people-work-row .home-people-function {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.home-people-work-button {
+    width: 220px;
+    height: 32px;
+    margin-top: 0;
+    margin-left: 8px;
+    font-size: 13px;
+}
+
+.home-people-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.person-row {
+    width: 23.5%;
+    min-width: 170px;
+    margin-left: 0;
+    margin-right: 6px;
+    margin-top: 0;
+    margin-bottom: 6px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    align-items: flex-start;
+    background-color: rgb(44, 40, 34);
+    border-left-color: rgb(96, 84, 64);
+    border-right-color: rgb(96, 84, 64);
+    border-top-color: rgb(96, 84, 64);
+    border-bottom-color: rgb(96, 84, 64);
+}
+
+.person-row:hover {
+    border-left-color: rgb(176, 146, 92);
+    border-right-color: rgb(176, 146, 92);
+    border-top-color: rgb(176, 146, 92);
+    border-bottom-color: rgb(176, 146, 92);
+}
+
+.person-row--away {
+    opacity: 0.7;
+}
+
+.person-row--dead {
+    opacity: 0.45;
+}
+
+.person-row-name {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(226, 214, 186);
+}
+
+.person-row-role {
+    font-size: 11px;
+    color: rgb(193, 183, 158);
+}
+
+.person-row-status {
+    font-size: 11px;
+    color: rgb(214, 180, 120);
+    white-space: normal;
+}
+
+.home-people-detail {
+    font-size: 12px;
+    white-space: normal;
+    color: rgb(193, 183, 158);
+    margin-top: 4px;
+}

@@ -180,8 +180,7 @@ public partial class PrototypeUIController
                 {
                     view.MetaLabel.text =
                         "Постоянные бойцы: " + gameState.Fighters.Count +
-                        "/" + BuildingSystem.PrototypeMaxFighters +
-                        " · организация защиты поселения ещё не утверждена";
+                        " · новые люди приходят в Дом из мира, а не за плату";
 
                     if (recruiting)
                     {
@@ -194,9 +193,9 @@ public partial class PrototypeUIController
                     }
                     else
                     {
-                        view.ActionButton.text =
-                            "НАНЯТЬ БОЙЦА · " + BuildingSystem.RecruitGoldCost + " ЗОЛОТА";
-                        view.ActionButton.SetEnabled(BuildingSystem.CanRecruit(gameState));
+                        // ПР-06Б: платного найма нет.
+                        view.ActionButton.text = "ПОСТРОЕНО";
+                        view.ActionButton.SetEnabled(false);
                     }
                 }
                 else

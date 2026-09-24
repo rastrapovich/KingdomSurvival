@@ -62,6 +62,7 @@ public partial class PrototypeUIController
         HandleGameMenuHotkeys();
         RefreshChapter01ReturnFlow();
         RefreshChapter01HomeFlow();
+        RefreshHomePeopleUi();
 
         if (!debugMenuInitialized)
             return;

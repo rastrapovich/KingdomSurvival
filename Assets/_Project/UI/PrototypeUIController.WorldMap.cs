@@ -328,6 +328,8 @@ public partial class PrototypeUIController
 
             if (changed)
             {
+                ApplySelectedRetinueToExpedition();
+
                 CommanderData commander =
                     gameState.FindCommander(
                         gameState.ActiveExpedition.CommanderId);

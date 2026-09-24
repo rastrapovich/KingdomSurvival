@@ -183,6 +183,18 @@ namespace KingdomSurvival.Chapter01
             return null;
         }
 
+        // ПР-06А: необязательная домашняя работа — восстановить хозяйственный
+        // настил во дворе, повреждённый паводком. Появляется после решения о
+        // ремонте плотины (N05) и не является вторым выбором ремонта.
+        public static bool IsYardDeckOffered(GameState gameState)
+        {
+            if (!Chapter01Crisis.IsActive(gameState) || gameState.Narrative == null)
+                return false;
+
+            return gameState.Narrative.HasFlag(Chapter01Ids.Flags.FloodHappened) &&
+                   Chapter01StoryDirector.GetRepairChoice(gameState.Narrative) != Chapter01RepairChoice.None;
+        }
+
         // Глава ждёт ночи: время в Доме должно идти, даже если никто не в пути.
         public static bool IsWaitingForNight(NarrativeStateData state, bool heroAtHome, double hourOfDay)
         {
@@ -193,7 +205,20 @@ namespace KingdomSurvival.Chapter01
         {
             if (!Chapter01Crisis.IsActive(gameState))
                 return new List<Chapter01HomeActivity>();
-            return GetAvailable(gameState.Narrative, !gameState.HasActiveExpedition);
+
+            List<Chapter01HomeActivity> activities =
+                new List<Chapter01HomeActivity>(GetAvailable(gameState.Narrative, !gameState.HasActiveExpedition));
+
+            // ПР-06Б: предложение семьи Тихона — отдельный провайдер вне
+            // IsHomePhase: ждёт дома и после похода главы, без срока.
+            if (Chapter01FisherFamily.IsOffered(gameState))
+            {
+                activities.Add(new Chapter01HomeActivity(
+                    Chapter01Ids.Dialogues.GateFamily, null,
+                    "Люди у ворот", "Тихон и его семья · ворота"));
+            }
+
+            return activities;
         }
 
         public static string GetAutoScene(GameState gameState)

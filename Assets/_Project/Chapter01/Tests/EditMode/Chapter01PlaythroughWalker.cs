@@ -50,6 +50,8 @@ public static class Chapter01PlaythroughWalker
         public bool PreferLastAnswer;
         public int CouncilChoice;
         public CardStrategy Cards = CardStrategy.First;
+        // ПР-06Б: ответ семье у ворот (по умолчанию — принять всех).
+        public bool DeclineFamily;
     }
 
     public static GameState NewGame(int seed)
@@ -162,6 +164,10 @@ public static class Chapter01PlaythroughWalker
         if (!string.IsNullOrEmpty(scene))
             return scene;
 
+        scene = Chapter01StoryDirector.GetPendingFordAccessDialogueId(gameState);
+        if (!string.IsNullOrEmpty(scene))
+            return scene;
+
         CampSceneViewData? camp = Chapter01CampSceneProvider.GetAvailableScene(gameState);
         if (camp.HasValue)
             return camp.Value.DialogueId;
@@ -264,9 +270,7 @@ public static class Chapter01PlaythroughWalker
         walk.SceneHours.Add(ContinuousSimulationSystem.GetClock(gameState).HourOfDay);
 
         // Те же аргументы, что в PrototypeUIController.TryOpenNarrativeDialogueById.
-        List<string> companions = new List<string>();
-        if (gameState.HasActiveExpedition)
-            companions.AddRange(gameState.ActiveExpedition.FighterIds);
+        List<string> companions = Chapter01ContextBuilder.GetPresentCompanionIds(gameState);
         List<string> items = new List<string>();
         if (gameState.Narrative.Items != null)
             items.AddRange(gameState.Narrative.Items);
@@ -310,6 +314,10 @@ public static class Chapter01PlaythroughWalker
             return 0;
         if (dialogueId == Chapter01Ids.Dialogues.D17)
             return Mathf.Min(options.CouncilChoice, choices.Count - 1);
+        // Семья у ворот: «Потом поговорим»/«Дайте подумать» оставили бы
+        // предложение открытым — «игрок» отвечает по существу.
+        if (dialogueId == Chapter01Ids.Dialogues.GateFamily)
+            return options.DeclineFamily && choices.Count == 3 ? 1 : 0;
         return options.PreferLastAnswer ? choices.Count - 1 : 0;
     }
 }

@@ -165,6 +165,9 @@ public class ExpeditionData
     public string CommanderId;
     public string LocationId;
     public List<string> FighterIds = new List<string>();
+    // ПР-06А: свита — 0–1 небоевой специалист; в бой не идёт, ест из
+    // припасов похода, дома его функции на время похода выключаются.
+    public List<string> RetinueIds = new List<string>();
     public CommanderState Phase;
     public int RemainingRouteCells;
     public int RouteLengthCells;
@@ -248,9 +251,21 @@ public class GameState
     // напрямую, пусто — они считаются кампанией единственного кризиса.
     public CampaignConfiguration Configuration;
 
+    // ПР-06А: люди Дома (HomePeopleService). Population ниже — производное
+    // число живых членов Дома, пересчитывается из реестра.
+    public HomePeopleState People;
+
+    // ПР-06А: базовый суточный приток Запасов Дома из пресета старта.
+    // 0 — старое прототипное значение BuildingSystem.BaseDailyFoodIncome.
+    public int BaseDailyFoodIncome;
+
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
-    public int DailyFoodConsumption => Population;
+
+    // Дома едят те, кто физически дома; ушедшие в поход едят из его
+    // припасов (спецификация §11) — без двойного расхода.
+    public int DailyFoodConsumption =>
+        People != null ? HomePeopleService.CountHomePresent(this) : Population;
 
     // Канонический поход: командир + от 0 до ExpeditionFighterSlots бойцов.
     // Без активной экспедиции возвращается расход на максимальный состав —
@@ -260,7 +275,10 @@ public class GameState
         get
         {
             if (HasActiveExpedition)
-                return ActiveExpedition.FighterIds.Count + 1;
+            {
+                int retinue = ActiveExpedition.RetinueIds != null ? ActiveExpedition.RetinueIds.Count : 0;
+                return ActiveExpedition.FighterIds.Count + retinue + 1;
+            }
 
             return ExpeditionFighterSlots + 1;
         }
@@ -448,6 +466,10 @@ public class GameState
         ActiveExpedition = null;
         Narrative = new NarrativeStateData();
         Encounters = new EncounterRuntimeStateData();
+
+        // ПР-06А: 24 конкретных человека вместо безличного счётчика.
+        People = HomePeopleService.CreateDefaults(this);
+        HomePeopleService.RecountPopulation(this);
     }
 
     public CommanderData GetSelectedCommander()
@@ -1268,6 +1290,14 @@ public class GameState
             {
                 resultMessage =
                     "В составе экспедиции найден неизвестный боец: " + fighterId + ".";
+                return false;
+            }
+
+            // ПР-06А: длительно раненый не начинает новый поход.
+            ResidentState resident = HomePeopleService.Find(this, fighterId);
+            if (resident != null && resident.Injury == ResidentInjury.Recovering)
+            {
+                resultMessage = resident.DisplayName + " ранен(а) и восстанавливается — в поход не пойдёт.";
                 return false;
             }
         }

@@ -4,8 +4,9 @@ using System.Collections.Generic;
 // ПР-03: черновой мост кампания → BattleSandbox → кампания. Запрос несёт
 // тех же постоянных людей (герой и бойцы текущего похода) по их ID; итог
 // возвращает исход и павших по тем же ID и применяется к кампании ровно
-// один раз (ID операции в NarrativeState). Ранений, HP между боями, вещей и
-// наград здесь намеренно нет — это ПР-10.
+// один раз (ID операции в NarrativeState). ПР-06А: HP человека переносятся
+// в бой и обратно по PersonId, павший помечается погибшим в реестре. Ранений,
+// вещей и наград здесь намеренно нет — это ПР-10.
 //
 // Временное правило исхода (утверждено пользователем 24.09.2026, до ПР-10):
 // павшие бойцы погибают насовсем и уходят из отряда; если пал герой —
@@ -18,6 +19,18 @@ public sealed class CampaignBattleParticipant
     public string DisplayName;
     public string UnitTypeId;
     public bool IsHero;
+
+    // ПР-06А: текущие HP человека; 0 — боевое состояние ещё не заведено,
+    // сцена боя берёт полный запас из шаблона.
+    public int CurrentHitPoints;
+    public int MaxHitPoints;
+}
+
+[Serializable]
+public sealed class CampaignBattleSurvivor
+{
+    public string PersonId;
+    public int HitPoints;
 }
 
 [Serializable]
@@ -40,6 +53,8 @@ public sealed class CampaignBattleResult
     public string BattleId;
     public CampaignBattleOutcome Outcome;
     public List<string> FallenPersonIds = new List<string>();
+    // ПР-06А: HP выживших по PersonId — возвращаются в запись человека.
+    public List<CampaignBattleSurvivor> Survivors = new List<CampaignBattleSurvivor>();
 }
 
 public enum CampaignBattleApplyStatus
@@ -83,6 +98,9 @@ public static class CampaignBattleBridge
             });
         }
 
+        foreach (CampaignBattleParticipant participant in request.Participants)
+            FillHitPoints(state, participant);
+
         if (state.HasActiveExpedition && state.ActiveExpedition.FighterIds != null)
         {
             foreach (string fighterId in state.ActiveExpedition.FighterIds)
@@ -98,10 +116,26 @@ public static class CampaignBattleBridge
                     UnitTypeId = fighter.UnitTypeId,
                     IsHero = false
                 });
+                FillHitPoints(state, request.Participants[request.Participants.Count - 1]);
             }
         }
 
         return request;
+    }
+
+    // ПР-06А: текущие HP берутся из записи человека, а не из шаблона.
+    private static void FillHitPoints(GameState state, CampaignBattleParticipant participant)
+    {
+        ResidentState resident = HomePeopleService.Find(state, participant.PersonId);
+        if (resident == null)
+            return;
+
+        HomePeopleService.EnsureCombatState(resident);
+        if (!resident.HasCombatState)
+            return;
+
+        participant.CurrentHitPoints = resident.CurrentHitPoints;
+        participant.MaxHitPoints = resident.MaxHitPoints;
     }
 
     public static bool IsApplied(GameState state, string battleId)
@@ -144,9 +178,29 @@ public static class CampaignBattleBridge
                 continue;
 
             fallenNames?.Add(fighter.Name);
-            state.Fighters.Remove(fighter);
-            if (state.HasActiveExpedition && state.ActiveExpedition.FighterIds != null)
-                state.ActiveExpedition.FighterIds.Remove(personId);
+            if (HomePeopleService.Find(state, personId) != null)
+            {
+                // ПР-06А: погибший остаётся в реестре и семье, уходит из состава.
+                HomePeopleService.MarkDead(state, personId, "battle." + result.BattleId);
+            }
+            else
+            {
+                state.Fighters.Remove(fighter);
+                if (state.HasActiveExpedition && state.ActiveExpedition.FighterIds != null)
+                    state.ActiveExpedition.FighterIds.Remove(personId);
+            }
+        }
+
+        // ПР-06А: HP выживших возвращаются в запись человека; шаблон
+        // UnitDatabase не меняется. Потерянное здоровье лечит уход дома.
+        foreach (CampaignBattleSurvivor survivor in result.Survivors ?? new List<CampaignBattleSurvivor>())
+        {
+            ResidentState resident = HomePeopleService.Find(state, survivor.PersonId);
+            if (resident == null || !resident.IsAlive)
+                continue;
+
+            HomePeopleService.EnsureCombatState(resident);
+            HomePeopleService.SetHitPoints(resident, survivor.HitPoints);
         }
 
         return heroFell ? CampaignBattleApplyStatus.HeroFell : CampaignBattleApplyStatus.SquadSurvived;

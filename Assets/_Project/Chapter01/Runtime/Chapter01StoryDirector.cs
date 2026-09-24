@@ -322,6 +322,43 @@ namespace KingdomSurvival.Chapter01
                 Chapter01OutcomeApplier.ApplyCartConsequences(gameState);
             else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D12, StringComparison.Ordinal))
                 Chapter01OutcomeApplier.ApplyDownstreamLocationReveal(gameState);
+            else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D12B, StringComparison.Ordinal))
+                Chapter01OutcomeApplier.ApplyFordAccessConsequences(gameState);
+            else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.GateFamily, StringComparison.Ordinal) &&
+                     gameState.Narrative != null &&
+                     gameState.Narrative.HasFlag(Chapter01Ids.Flags.FisherFamilyAccepted))
+            {
+                Chapter01FisherFamily.TryAccept(gameState, out string _);
+            }
+        }
+
+        // ПР-06Б: выход на берег у старого брода. Открывается сам, когда отряд
+        // после N12 тронулся от брода к нижнему поселению: проблема локальна
+        // (повреждён выход на берег), обязательных знаний не несёт. Цена во
+        // времени — дорожная остановка, поэтому только в движении.
+        // Идемпотентно по FordAccessResolved.
+        public static string GetPendingFordAccessDialogueId(GameState gameState)
+        {
+            if (gameState?.Narrative == null || !gameState.HasActiveExpedition)
+                return null;
+
+            NarrativeStateData state = gameState.Narrative;
+            if (!state.HasFlag(Chapter01Ids.Flags.OldFordFound) ||
+                state.HasFlag(Chapter01Ids.Flags.FordAccessResolved) ||
+                state.HasFlag(Chapter01Ids.Flags.ReturnStarted))
+            {
+                return null;
+            }
+
+            ExpeditionData expedition = gameState.ActiveExpedition;
+            if (expedition.Phase != CommanderState.TravellingToLocation ||
+                expedition.HasTimedActivity ||
+                !string.Equals(expedition.LocationId, Chapter01Ids.Locations.DownstreamSettlement, StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            return Chapter01Ids.Dialogues.D12B;
         }
 
         // P09-T02/T03: доля пройденных клеток текущего маршрута, [0..1].

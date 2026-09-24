@@ -144,6 +144,8 @@ public partial class PrototypeUIController
         reportRequiresAcknowledgement.Clear();
         reportReadStates.Clear();
         selectedFighterIds.Clear();
+        selectedRetinueId = null;
+        homePeopleSignature = null;
         selectedJournalGoalId = null;
         ClearQueuedModals();
         ResetWorldMapSelection();

@@ -138,8 +138,8 @@ public static class BuildingSystem
             new BuildingDefinition(
                 BarracksId,
                 "Казармы",
-                "Открывают подготовку новых постоянных бойцов.",
-                "Открывают найм бойцов. Содержание: 2 золота в сутки.",
+                "Место для оружия и сборов отряда.",
+                "Бойцов здесь не нанимают: новые люди приходят в Дом из мира. Содержание: 2 золота в сутки.",
                 100,
                 20.0,
                 dailyGoldUpkeep: 2),
@@ -321,7 +321,8 @@ public static class BuildingSystem
     public static int GetDailyFoodIncome(GameState state)
     {
         Synchronize(state);
-        int total = BaseDailyFoodIncome;
+        // ПР-06А: базовый приток задаёт пресет старта (GameState.BaseDailyFoodIncome).
+        int total = state.BaseDailyFoodIncome > 0 ? state.BaseDailyFoodIncome : BaseDailyFoodIncome;
         foreach (BuildingDefinition definition in Definitions)
         {
             if (definition.DailyFoodIncome > 0 && IsCompleted(state, definition.Id))
@@ -347,9 +348,13 @@ public static class BuildingSystem
         return GetDailyGoldIncome(state) - GetDailyGoldUpkeep(state);
     }
 
+    // ПР-06Б: платной очереди бойцов больше нет — новые люди приходят в Дом
+    // из мира (семья Тихона). Код очереди оставлен выключенным до ПР-07.
+    public static readonly bool PaidRecruitmentEnabled = false;
+
     public static bool CanRecruit(GameState state)
     {
-        if (state == null)
+        if (state == null || !PaidRecruitmentEnabled)
             return false;
 
         Synchronize(state);
@@ -363,8 +368,8 @@ public static class BuildingSystem
 
     public static bool TryStartRecruitment(GameState state, out string resultMessage)
     {
-        resultMessage = "Найм сейчас недоступен.";
-        if (state == null)
+        resultMessage = "Бойцов за деньги не нанимают: новые люди приходят в Дом из мира.";
+        if (state == null || !PaidRecruitmentEnabled)
             return false;
 
         Synchronize(state);

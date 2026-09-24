@@ -271,6 +271,8 @@ public partial class PrototypeUIController : MonoBehaviour
         reportRequiresAcknowledgement.Clear();
         reportReadStates.Clear();
         selectedFighterIds.Clear();
+        selectedRetinueId = null;
+        homePeopleSignature = null;
         // P08J: «НОВОЕ» — session-only UI-пометка, не сюжетный прогресс
         // (раздел 29 инструкции) — на новой игре сбрасывается вместе с
         // остальным сеансовым состоянием интерфейса.
@@ -463,7 +465,8 @@ public partial class PrototypeUIController : MonoBehaviour
 
         string resultMessage;
         List<string> selectedIds = GetSelectedFighterIdsInArmyOrder();
-        gameState.TryStartExpedition(locationId, selectedIds, out resultMessage);
+        if (gameState.TryStartExpedition(locationId, selectedIds, out resultMessage))
+            ApplySelectedRetinueToExpedition();
         AddReport(resultMessage);
         RefreshInterface();
     }

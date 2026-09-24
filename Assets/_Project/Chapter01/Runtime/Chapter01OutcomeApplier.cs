@@ -369,6 +369,56 @@ namespace KingdomSurvival.Chapter01
                     out string _));
         }
 
+        // ПР-06Б: цена выхода на берег у брода. Обход всегда стоит 2 часа;
+        // способ через человека — 1 час, но только если он действительно в
+        // отряде. Если выбранный помощник стал недоступен до применения,
+        // час не списывается за него: остаётся обход. Время снимается один
+        // раз (execution ID), загрузка его не повторяет.
+        public static void ApplyFordAccessConsequences(GameState gameState)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+            if (gameState.Narrative == null)
+                gameState.Narrative = new NarrativeStateData();
+
+            NarrativeStateData state = gameState.Narrative;
+            if (!state.HasFlag(Chapter01Ids.Flags.FordAccessResolved))
+                return;
+
+            List<string> present = Chapter01ContextBuilder.GetPresentCompanionIds(gameState);
+            double durationHours = 2.0;
+            string activityDisplayName = "ОБХОД К ПОЛОГОМУ БЕРЕГУ";
+
+            if (state.HasFlag(Chapter01Ids.Flags.FordAccessBracedSupport) && present.Contains(HomePeopleService.LadaId))
+            {
+                durationHours = 1.0;
+                activityDisplayName = "ЛАДА УКРЕПЛЯЕТ ОПОРУ";
+            }
+            else if (state.HasFlag(Chapter01Ids.Flags.FordAccessOldDescent) && present.Contains(HomePeopleService.OstafiyId))
+            {
+                durationHours = 1.0;
+                activityDisplayName = "СТАРЫЙ БОКОВОЙ СХОД";
+            }
+            else if (state.HasFlag(Chapter01Ids.Flags.FordAccessShallowLine) && present.Contains(Chapter01FisherFamily.TikhonId))
+            {
+                durationHours = 1.0;
+                activityDisplayName = "КАМЕННЫЙ ПЕРЕХОД ТИХОНА";
+            }
+            else if (!state.HasFlag(Chapter01Ids.Flags.FordAccessBypass))
+            {
+                state.SetFlag(Chapter01Ids.Flags.FordAccessBypass);
+            }
+
+            Apply(gameState, Chapter01Ids.Effects.FordAccessActivityStart, narrativeState =>
+                gameState.TryStartRoadActivity(
+                    "ford_access",
+                    activityDisplayName,
+                    durationHours,
+                    0,
+                    0,
+                    out string _));
+        }
+
         private static bool Apply(GameState gameState, string executionId, Action<NarrativeStateData> mutation)
         {
             if (gameState == null)

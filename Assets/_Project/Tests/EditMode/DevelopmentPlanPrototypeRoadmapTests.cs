@@ -56,6 +56,30 @@ public sealed class DevelopmentPlanPrototypeRoadmapTests
     }
 
     [Test]
+    public void Pr06Split_ReplacesTasksWith06AAnd06B_WithoutValidatorErrors()
+    {
+        DevelopmentPlanAsset plan = NewSeededPlan();
+        try
+        {
+            DevelopmentPlanPrototypeRoadmapSync.Apply(plan);
+            Assert.IsTrue(DevelopmentPlanPr06SplitSync.Apply(plan));
+
+            DevelopmentPhaseData phase = plan.FindPhase("PR06_PEOPLE");
+            Assert.AreEqual(7, phase.tasks.Count(t => t.id.StartsWith("PR06A-")));
+            Assert.AreEqual(3, phase.tasks.Count(t => t.id.StartsWith("PR06B-")));
+
+            List<ValidationIssue> errors = DevelopmentPlanValidator.Validate(plan)
+                .Where(i => i.Severity == ValidationSeverity.Error)
+                .ToList();
+            Assert.IsEmpty(errors, string.Join("\n", errors.Select(e => e.EntityId + ": " + e.Message)));
+        }
+        finally
+        {
+            Object.DestroyImmediate(plan);
+        }
+    }
+
+    [Test]
     public void Roadmap_PhaseOrdersDoNotCollideWithChapterPhases()
     {
         DevelopmentPlanAsset plan = NewSeededPlan();

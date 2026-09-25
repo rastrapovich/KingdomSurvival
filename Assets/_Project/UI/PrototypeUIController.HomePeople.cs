@@ -4,10 +4,11 @@ using KingdomSurvival.Chapter01;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-// ПР-06А: люди Дома в интерфейсе — блок «Люди Дома» на экране Дома
-// (сводка, функции, работа по настилу, жители) и выбор свиты при
-// подготовке похода с прогнозом, что потеряет Дом. Данные — только из
-// реестра (HomePeopleService / HomeFunctionResolver / HomeLife).
+// ПР-06А / ПР-07А-2: люди Дома в интерфейсе — блок «Люди Дома» на экране
+// Дома (сводка, строки ремонта и ухода в «Заботах», жители, семьи) и выбор
+// свиты на экране героя. Данные — только из реестра (HomePeopleService /
+// HomeFunctionResolver / HomeLife). Ремонт настила — карточка «Заботы»
+// (PrototypeUIController.HomeScreen.cs).
 public partial class PrototypeUIController
 {
     private const string HomePeopleScreenName = "Люди Дома";
@@ -16,9 +17,6 @@ public partial class PrototypeUIController
     private Label homePeopleSummary;
     private Label homePeopleMaintenance;
     private Label homePeopleCare;
-    private VisualElement homePeopleWorkRow;
-    private Label homePeopleWorkLabel;
-    private Button homePeopleWorkButton;
     private VisualElement homePeopleList;
     private Label homePeopleDetail;
     private VisualTreeAsset personRowTemplate;
@@ -45,6 +43,7 @@ public partial class PrototypeUIController
             RefreshHomePeopleIfChanged();
         if (retinueBound)
             RefreshRetinueIfChanged();
+        RefreshHomeScreenIfChanged();
     }
 
     // ------------------------------------------------------------------
@@ -60,22 +59,17 @@ public partial class PrototypeUIController
         homePeopleSummary = BindRequiredElement<Label>(interfaceRoot, HomePeopleScreenName, "home-people-summary");
         homePeopleMaintenance = BindRequiredElement<Label>(interfaceRoot, HomePeopleScreenName, "home-people-maintenance");
         homePeopleCare = BindRequiredElement<Label>(interfaceRoot, HomePeopleScreenName, "home-people-care");
-        homePeopleWorkRow = BindRequiredElement<VisualElement>(interfaceRoot, HomePeopleScreenName, "home-people-work-row");
-        homePeopleWorkLabel = BindRequiredElement<Label>(interfaceRoot, HomePeopleScreenName, "home-people-work-label");
-        homePeopleWorkButton = BindRequiredElement<Button>(interfaceRoot, HomePeopleScreenName, "home-people-work-button");
         homePeopleList = BindRequiredElement<VisualElement>(interfaceRoot, HomePeopleScreenName, "home-people-list");
         homePeopleDetail = BindRequiredElement<Label>(interfaceRoot, HomePeopleScreenName, "home-people-detail");
 
         homePeopleBound = homePeopleSummary != null && homePeopleMaintenance != null && homePeopleCare != null &&
-                          homePeopleWorkRow != null && homePeopleWorkLabel != null && homePeopleWorkButton != null &&
                           homePeopleList != null && homePeopleDetail != null;
-        if (homePeopleBound)
-            homePeopleWorkButton.clicked += OnYardDeckClicked;
     }
 
-    // Пересборка только при изменении: подпись — состояния людей, функции,
-    // работа (с точностью до часа).
-    private void RefreshHomePeopleIfChanged()
+    // Подпись состояния людей, функций и подготовки: карточки пересобираются
+    // только при её изменении — идущие часы не сбрасывают прокрутку и
+    // раскрытия (§13.2).
+    private string BuildHomePeopleSignature()
     {
         HomeFunctionReport maintenance = HomeFunctionResolver.Resolve(gameState, HomeFunctionResolver.MaintenanceId);
         HomeFunctionReport care = HomeFunctionResolver.Resolve(gameState, HomeFunctionResolver.CareId);
@@ -92,20 +86,27 @@ public partial class PrototypeUIController
         signature.Append(deck == null ? "-" : deck.Completed ? "done" : ((int)HomeLife.RemainingWork(deck)).ToString());
         signature.Append(Chapter01HomeActivities.IsYardDeckOffered(gameState)).Append(gameState.Gold >= HomeLife.YardDeckGoldCost);
         signature.Append(Chapter01FisherFamily.IsOffered(gameState));
+        signature.Append('|').Append(string.Join(",", ExpeditionPreparation.GetFighterIds(gameState)))
+            .Append('|').Append(ExpeditionPreparation.GetRetinueId(gameState));
+        return signature.ToString();
+    }
 
-        string current = signature.ToString();
+    private void RefreshHomePeopleIfChanged()
+    {
+        string current = BuildHomePeopleSignature();
         if (current == homePeopleSignature)
             return;
         homePeopleSignature = current;
 
+        HomeFunctionReport maintenance = HomeFunctionResolver.Resolve(gameState, HomeFunctionResolver.MaintenanceId);
+        HomeFunctionReport care = HomeFunctionResolver.Resolve(gameState, HomeFunctionResolver.CareId);
+
         int members = HomePeopleService.CountHomeMembers(gameState);
         int present = HomePeopleService.CountHomePresent(gameState);
-        homePeopleSummary.text = members + " жителей · дома " + present + " · в походе " + (members - present) +
-                                 "\n" + HomeOverview.DescribeDefense(gameState);
+        homePeopleSummary.text = members + " жителей · дома " + present + " · в походе " + (members - present);
         homePeopleMaintenance.text = FunctionLine("Ремонт", maintenance);
         homePeopleCare.text = FunctionLine("Уход за ранеными", care);
 
-        RefreshYardDeckRow(deck, maintenance);
         RebuildPeopleList();
     }
 
@@ -116,54 +117,10 @@ public partial class PrototypeUIController
             case HomeFunctionStatus.Working:
                 return title + ": работает — " + report.ExecutorName + ".";
             case HomeFunctionStatus.Limited:
-                return title + ": ограничено — " + report.Reason + ".";
+                return title + ": медленнее — " + report.Reason + ".";
             default:
                 return title + ": остановлено — " + report.Reason + ".";
         }
-    }
-
-    private void RefreshYardDeckRow(HomeWorkState deck, HomeFunctionReport maintenance)
-    {
-        bool offered = Chapter01HomeActivities.IsYardDeckOffered(gameState);
-        if (deck == null && !offered)
-        {
-            homePeopleWorkRow.style.display = DisplayStyle.None;
-            return;
-        }
-
-        homePeopleWorkRow.style.display = DisplayStyle.Flex;
-        if (deck == null)
-        {
-            homePeopleWorkLabel.text = "Хозяйственный настил во дворе разбит паводком. По нему обходят лужи.";
-            homePeopleWorkButton.style.display = DisplayStyle.Flex;
-            homePeopleWorkButton.text = "Восстановить · " + HomeLife.YardDeckGoldCost + " золота";
-            homePeopleWorkButton.SetEnabled(gameState.Gold >= HomeLife.YardDeckGoldCost);
-            return;
-        }
-
-        homePeopleWorkButton.style.display = DisplayStyle.None;
-        if (deck.Completed)
-        {
-            homePeopleWorkLabel.text = "Хозяйственный настил восстановлен.";
-            return;
-        }
-
-        double remaining = HomeLife.RemainingWork(deck);
-        double rate = maintenance.Rate;
-        homePeopleWorkLabel.text = rate > 0.0
-            ? "Ремонт настила идёт: осталось около " + Mathf.CeilToInt((float)(remaining / rate)) + " ч."
-            : "Ремонт настила приостановлен: " + maintenance.Reason + ".";
-    }
-
-    private void OnYardDeckClicked()
-    {
-        if (gameState == null)
-            return;
-
-        Chapter01HomeActivities.TryStartYardDeck(gameState, out string message);
-        AddReport(message);
-        homePeopleSignature = null;
-        RefreshInterface();
     }
 
     private void RebuildPeopleList()
@@ -185,10 +142,12 @@ public partial class PrototypeUIController
             offerRow.Q<Label>("person-row-role").text = "у ворот · " + Chapter01FisherFamily.MemberCount + " человека";
             offerRow.Q<Label>("person-row-status").text = "ждёт ответа";
             offerRow.clicked += () => homePeopleDetail.text = Chapter01FisherFamily.BuildOfferSummary(gameState) +
-                                                              " Ответить — в делах Дома: «Люди у ворот».";
+                                                              " Ответить — в делах главы: «Люди у ворот».";
             homePeopleList.Add(offer);
         }
 
+        // Стабильный порядок (§4): Командир, бойцы, сюжетные жители, принятые
+        // семьи — так, как они лежат в реестре; фоновые семьи — одной строкой.
         int background = 0;
         foreach (ResidentState resident in HomePeopleService.All(gameState))
         {
@@ -206,25 +165,35 @@ public partial class PrototypeUIController
             row.Q<Label>("person-row-status").text = PersonStatus(resident);
             row.EnableInClassList("person-row--away", HomePeopleService.IsInExpedition(gameState, resident.PersonId));
             row.EnableInClassList("person-row--dead", !resident.IsAlive);
+            row.EnableInClassList("person-row--prepared",
+                ExpeditionPreparation.IsPrepared(gameState, resident.PersonId) &&
+                !HomePeopleService.IsInExpedition(gameState, resident.PersonId));
 
             ResidentState captured = resident;
             row.clicked += () => ShowPersonDetail(captured);
             homePeopleList.Add(instance);
         }
 
-        homePeopleDetail.text = "Другие семьи — " + background + " жителей.";
+        homePeopleDetail.text = "Другие семьи — " + background + " жителей: взрослые, дети и старики четырёх домов.";
     }
 
     private string PersonStatus(ResidentState resident)
     {
         if (!resident.IsAlive)
-            return "погиб(ла)";
+            return "нет в живых";
         if (resident.Membership != ResidentMembership.HomeMember)
-            return "ушёл(ла) из Дома";
+            return "больше не живёт в Доме";
 
-        string place = HomePeopleService.IsInExpedition(gameState, resident.PersonId) ? "в походе" : "дома";
+        string place;
+        if (HomePeopleService.IsInExpedition(gameState, resident.PersonId))
+            place = "в походе";
+        else if (ExpeditionPreparation.IsPrepared(gameState, resident.PersonId))
+            place = "собирается в поход";
+        else
+            place = "дома";
+
         if (resident.Injury == ResidentInjury.Recovering)
-            place += " · ранен(а)";
+            place += " · тяжёлая рана";
         if (resident.HasCombatState && resident.CurrentHitPoints < resident.MaxHitPoints)
             place += " · " + resident.CurrentHitPoints + "/" + resident.MaxHitPoints + " HP";
         return place;
@@ -232,7 +201,39 @@ public partial class PrototypeUIController
 
     private void ShowPersonDetail(ResidentState resident)
     {
-        homePeopleDetail.text = resident.DisplayName + " — " + resident.RoleLabel + ". " + resident.ShortDescription;
+        homePeopleDetail.text = PersonCardText(resident);
+    }
+
+    // Карточка человека (§7.2): имя, роль, описание, семья, место и
+    // состояние, настоящее HP, домашняя функция, походная роль.
+    private string PersonCardText(ResidentState resident)
+    {
+        StringBuilder text = new StringBuilder();
+        text.Append(resident.DisplayName).Append(" — ").Append(resident.RoleLabel).Append(". ");
+        if (!string.IsNullOrEmpty(resident.ShortDescription))
+            text.Append(resident.ShortDescription).Append(' ');
+        if (resident.HouseholdId == Chapter01FisherFamily.HouseholdId)
+            text.Append("Семья Тихона. ");
+        text.Append("Сейчас: ").Append(PersonStatus(resident)).Append('.');
+        if (resident.HasCombatState)
+            text.Append(" HP ").Append(resident.CurrentHitPoints).Append('/').Append(resident.MaxHitPoints).Append('.');
+
+        switch (resident.TravelRole)
+        {
+            case ResidentTravelRole.Commander:
+                text.Append(" Ведёт поход.");
+                break;
+            case ResidentTravelRole.Combatant:
+                text.Append(" В походе — боец.");
+                break;
+            case ResidentTravelRole.Retinue:
+                text.Append(" В походе — специалист свиты, в бой не идёт.");
+                break;
+            default:
+                text.Append(resident.AgeGroup == ResidentAgeGroup.Child ? " Ребёнок, остаётся дома." : " Остаётся дома.");
+                break;
+        }
+        return text.ToString();
     }
 
     // ------------------------------------------------------------------

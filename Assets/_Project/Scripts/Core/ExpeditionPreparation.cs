@@ -201,6 +201,13 @@ public static class ExpeditionPreparation
         if (string.IsNullOrEmpty(personId))
             return Commit(state, fighters, null, out message);
 
+        ResidentState candidate = HomePeopleService.Find(state, personId);
+        if (candidate != null && candidate.TravelRole == ResidentTravelRole.Combatant)
+        {
+            message = "Это место для специалиста.";
+            return false;
+        }
+
         if (fighters.Contains(personId))
         {
             message = "Один человек не может быть и бойцом, и специалистом.";

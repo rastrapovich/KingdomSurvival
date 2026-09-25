@@ -4,17 +4,13 @@ using KingdomSurvival.UILayout;
 using NUnit.Framework;
 using UnityEngine;
 
-// UI-M07 (ProjectDocs/UI_ARCHITECTURE.md §9): Incident и Game Over уже были
-// близки к целевой модели — структура в Prototype_Main.uxml, Controller
-// только биндит Q<T>(...), никаких Build*/Ensure* методов. Этого файла не
-// хватало: раньше оба экрана были покрыты только обобщёнными проверками
-// в UILayoutDatabaseTests.cs. Этот тест фиксирует то же самое явно, по
-// образцу CampScreenLayoutTests.cs, и закрывает §11 доктрины ("для каждого
-// мигрированного экрана — Structure/UILayout test").
+// UI-M07 (ProjectDocs/UI_ARCHITECTURE.md §9): Incident — структура в
+// Prototype_Main.uxml, Controller только биндит Q<T>(...). ПР-07А-2: экран
+// поражения по настроению удалён вместе с настроением (PR07_HOME_SPEC §9.1),
+// его записи в UI-конструкторе и проверки убраны; имя класса сохранено.
 public sealed class IncidentAndGameOverScreenLayoutTests
 {
     private const string IncidentScreenId = "incident-modal";
-    private const string GameOverScreenId = "game-over";
 
     private static UILayoutDatabaseAsset LoadDatabase()
     {
@@ -24,7 +20,6 @@ public sealed class IncidentAndGameOverScreenLayoutTests
     }
 
     [TestCase(IncidentScreenId, "incident-modal-overlay")]
-    [TestCase(GameOverScreenId, "game-over-overlay")]
     public void Screen_Is_Registered_And_AutoApplied(string screenId, string expectedRootName)
     {
         UILayoutDatabaseAsset database = LoadDatabase();
@@ -36,7 +31,6 @@ public sealed class IncidentAndGameOverScreenLayoutTests
     }
 
     [TestCase(IncidentScreenId)]
-    [TestCase(GameOverScreenId)]
     public void RequiredElements_AreAllResolvable_WithCorrectParents(string screenId)
     {
         UILayoutDatabaseAsset database = LoadDatabase();
@@ -68,7 +62,6 @@ public sealed class IncidentAndGameOverScreenLayoutTests
     // Prototype_Main.uxml — иначе UI Конструктор ссылается в никуда
     // (см. UILayoutScreenBinder.ResolveTarget: Q<VisualElement>(targetName)).
     [TestCase(IncidentScreenId)]
-    [TestCase(GameOverScreenId)]
     public void Element_TargetNames_Exist_In_Uxml(string screenId)
     {
         UILayoutDatabaseAsset database = LoadDatabase();

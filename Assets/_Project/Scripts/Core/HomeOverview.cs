@@ -148,6 +148,104 @@ public static class HomeOverview
         return "Есть кому держать защиту: " + defenders.Count + " — " + string.Join(", ", names) + ".";
     }
 
+    // ------------------------------------------------------------------
+    // ПР-07А-2 (§8.5): прогноз «После выхода» по подготовленному составу.
+    // Условно отсутствуют все уходящие, включая Командира. Ничего не меняет.
+    // Сначала — то, что изменится; затем — что останется как есть.
+    // ------------------------------------------------------------------
+
+    public static List<string> GetLeavingIds(GameState state)
+    {
+        List<string> leaving = new List<string>();
+        CommanderData commander = state.GetSelectedCommander();
+        if (commander != null)
+            leaving.Add(commander.Id);
+        leaving.AddRange(ExpeditionPreparation.GetFighterIds(state));
+        string retinue = ExpeditionPreparation.GetRetinueId(state);
+        if (!string.IsNullOrEmpty(retinue))
+            leaving.Add(retinue);
+        return leaving;
+    }
+
+    public static List<string> DescribeDeparture(GameState state)
+    {
+        List<string> changed = new List<string>();
+        List<string> same = new List<string>();
+        List<string> leaving = GetLeavingIds(state);
+
+        int homeNow = HomePeopleService.CountHomePresent(state);
+        int leavingFromHome = 0;
+        foreach (string id in leaving)
+        {
+            ResidentState resident = HomePeopleService.Find(state, id);
+            if (resident != null && HomePeopleService.IsHomePresent(state, resident))
+                leavingFromHome++;
+        }
+        int homeAfter = homeNow - leavingFromHome;
+        changed.Add("Уйдут " + leaving.Count + ", дома останется " + homeAfter + ".");
+
+        List<string> defenders = new List<string>();
+        foreach (ResidentState defender in GetHomeDefenders(state))
+        {
+            if (!leaving.Contains(defender.PersonId))
+                defenders.Add(defender.DisplayName);
+        }
+        changed.Add(defenders.Count == 0
+            ? "Защищать Дом будет некому."
+            : defenders.Count <= 2
+                ? "Защищать Дом останутся: " + string.Join(", ", defenders) + " — мало."
+                : "Защищать Дом останутся " + defenders.Count + ": " + string.Join(", ", defenders) + ".");
+
+        DescribeFunction(state, HomeFunctionResolver.MaintenanceId, "Ремонт", leaving, changed, same);
+        DescribeFunction(state, HomeFunctionResolver.CareId, "Уход за ранеными", leaving, changed, same);
+
+        int consumptionAfter = Math.Max(0, state.DailyFoodConsumption - leavingFromHome);
+        HomeFoodForecast food = ForecastFood(state.Food, BuildingSystem.GetDailyFoodIncome(state), consumptionAfter,
+            state.ConsecutiveFoodShortageDays > 0);
+        same.Add("Запасы Дома после выхода: расход " + consumptionAfter + " в сутки. " + DescribeFood(food));
+
+        int supplyPerDay = leaving.Count;
+        same.Add("Припасы похода: " + supplyPerDay + " в сутки, есть " + state.ArmySupply +
+                 (supplyPerDay > 0 ? " — на " + state.ArmySupply / supplyPerDay + " сут." : "."));
+
+        changed.AddRange(same);
+        return changed;
+    }
+
+    private static void DescribeFunction(GameState state, string functionId, string title, List<string> leaving,
+        List<string> changed, List<string> same)
+    {
+        HomeFunctionReport now = HomeFunctionResolver.Resolve(state, functionId);
+        HomeFunctionReport after = HomeFunctionResolver.Forecast(state, functionId, leaving);
+
+        if (now.Status == after.Status && now.ExecutorId == after.ExecutorId)
+        {
+            same.Add(title + ": без изменений" +
+                     (string.IsNullOrEmpty(after.ExecutorName) ? "." : " — " + after.ExecutorName + "."));
+            return;
+        }
+
+        string text;
+        switch (after.Status)
+        {
+            case HomeFunctionStatus.Working:
+                text = title + " продолжит " + after.ExecutorName + ".";
+                break;
+            case HomeFunctionStatus.Limited:
+                string why = after.Reason ?? string.Empty;
+                int cut = why.IndexOf(" — продолжает ", StringComparison.Ordinal);
+                if (cut > 0)
+                    why = why.Substring(0, cut);
+                text = (why.Length > 0 ? char.ToUpperInvariant(why[0]) + why.Substring(1) + ". " : string.Empty) +
+                       title + " продолжит " + after.ExecutorName + " — медленнее.";
+                break;
+            default:
+                text = title + " остановится: " + after.Reason + ".";
+                break;
+        }
+        changed.Add(text);
+    }
+
     private static string DayWord(int count)
     {
         int lastTwo = count % 100;

@@ -69,7 +69,6 @@ public partial class PrototypeUIController
         navCapitalButton.clicked += OnStableNavigationChanged;
         navExpeditionsButton.clicked += OnStableNavigationChanged;
 
-        restartGameButton.clicked += OnStablePostActionRefresh;
         incidentUnderstoodButton.clicked += OnStablePostActionRefresh;
 
         if (decisionOptionAButton != null)

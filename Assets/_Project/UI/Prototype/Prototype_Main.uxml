@@ -14,8 +14,8 @@
     <Style src="Journal.uss" />
     <Style src="HeroScreen.uss" />
     <Style src="Narrative.uss" />
-    <Style src="BuildingCards.uss" />
     <Style src="HomeActivities.uss" />
+    <Style src="HomeScreen.uss" />
     <Style src="GameMenus.uss" />
     <Style src="Expedition.uss" />
 
@@ -35,58 +35,80 @@
 
             <ui:VisualElement class="shell-workspace">
                 <ui:VisualElement name="main-screen-scroll" class="main-screen-scroll shell-workspace-content">
-                    <ui:VisualElement name="capital-screen" class="game-screen shell-content-screen">
-                        <ui:ScrollView class="shell-screen-scroll">
-                            <ui:VisualElement class="panel shell-content-panel">
-                                <ui:Label text="ДОМ" class="panel-title" />
-                                <ui:Label text="Люди, запасы и дела Дома" class="panel-description" />
-                                <ui:VisualElement name="capital-resource-panel" class="capital-resource-panel">
-                                    <ui:Label text="СОСТОЯНИЕ ДОМА" class="section-title capital-resource-title" />
-                                    <ui:VisualElement class="resource-strip capital-resource-strip">
-                                        <ui:VisualElement class="resource-box capital-resource-box">
-                                            <ui:Label name="gold-label" text="Золото: 120" class="resource-value" /><ui:Label name="gold-income-label" text="+3" class="resource-income" />
-                                            
+                    <!-- ПР-07А-2: экран Дома (PR07_HOME_SPEC §4). Сводка, образ Дома и объекты, заботы и дела главы,
+                         люди; закреплённая панель подготовки похода внизу. Код: PrototypeUIController.HomeScreen.cs
+                         и PrototypeUIController.HomePrep.cs; модель: Chapter01HomeView, HomeOverview, ExpeditionPreparation. -->
+                    <ui:VisualElement name="capital-screen" class="game-screen shell-content-screen home-screen">
+                        <ui:ScrollView name="home-screen-scroll" class="shell-screen-scroll home-screen-scroll">
+                            <ui:VisualElement class="panel shell-content-panel home-screen-panel">
+                                <ui:VisualElement class="home-header">
+                                    <ui:Label text="ДОМ" class="panel-title home-title" />
+                                    <ui:VisualElement name="capital-resource-panel" class="capital-resource-panel home-summary">
+                                        <ui:VisualElement class="resource-strip capital-resource-strip home-summary-strip">
+                                            <ui:Button name="home-summary-gold" class="resource-box capital-resource-box home-summary-box">
+                                                <ui:Label name="gold-label" text="Деньги: 0" class="resource-value" /><ui:Label name="gold-income-label" text="+3" class="resource-income" />
+                                            </ui:Button>
+                                            <ui:Button name="home-summary-food" class="resource-box food-box capital-resource-box home-summary-box">
+                                                <ui:Label name="food-label" text="Запасы: 0" class="resource-value" /><ui:Label name="food-income-label" text="+24" class="resource-income" />
+                                                <ui:Label name="food-consumption-label" text="" class="home-summary-hint" />
+                                            </ui:Button>
+                                            <ui:Button name="home-summary-people" class="resource-box capital-resource-box home-summary-box">
+                                                <ui:Label name="population-label" text="Люди" class="resource-value" />
+                                            </ui:Button>
+                                            <ui:Button name="home-summary-defense" class="resource-box capital-resource-box home-summary-box">
+                                                <ui:Label name="home-defense-label" text="Защита" class="resource-value" />
+                                            </ui:Button>
                                         </ui:VisualElement>
-                                        <ui:VisualElement class="resource-box food-box capital-resource-box">
-                                            <ui:Label name="food-label" text="Пища: 72" class="resource-value" /><ui:Label name="food-income-label" text="+7" class="resource-income" />
-                                            
-                                            <ui:VisualElement class="food-expense-popup"><ui:Label name="food-consumption-label" text="Расход: 24 в день" class="food-expense-text" /></ui:VisualElement>
+                                        <ui:Label name="home-summary-detail" class="home-summary-detail" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Label name="home-away-notice" text="Отряд в походе. Подробные сведения о Доме будут доступны после возвращения." class="home-away-notice" />
+                                <ui:VisualElement name="home-main-row" class="home-main-row">
+                                    <ui:VisualElement class="home-scene-column">
+                                        <ui:VisualElement name="home-scene" class="home-scene">
+                                            <ui:Button name="home-scene-yard" class="home-scene-layer home-scene-yard"><ui:Label name="home-scene-yard-caption" class="home-scene-caption" /></ui:Button>
+                                            <ui:Button name="home-scene-livestock" class="home-scene-layer home-scene-livestock"><ui:Label name="home-scene-livestock-caption" class="home-scene-caption" /></ui:Button>
+                                            <ui:Button name="home-scene-mill" class="home-scene-layer home-scene-mill"><ui:Label name="home-scene-mill-caption" class="home-scene-caption" /></ui:Button>
+                                            <ui:Button name="home-scene-walkway" class="home-scene-layer home-scene-walkway"><ui:Label name="home-scene-walkway-caption" class="home-scene-caption" /></ui:Button>
+                                            <ui:Button name="home-scene-dam" class="home-scene-layer home-scene-dam"><ui:Label name="home-scene-dam-caption" class="home-scene-caption" /></ui:Button>
+                                            <ui:Button name="home-scene-water" class="home-scene-layer home-scene-water"><ui:Label name="home-scene-water-caption" class="home-scene-caption" /></ui:Button>
                                         </ui:VisualElement>
-                                        <ui:VisualElement class="resource-box capital-resource-box">
-                                            <ui:Label name="population-label" text="Население: 24" class="resource-value" />
+                                        <ui:VisualElement name="home-objects-list" class="home-objects-list" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="home-side-column">
+                                        <ui:VisualElement name="home-cares-panel" class="home-activities-panel home-cares-panel">
+                                            <ui:Label text="ЗАБОТЫ" class="section-title" />
+                                            <ui:Label name="home-people-maintenance" class="home-people-function" />
+                                            <ui:Label name="home-people-care" class="home-people-function" />
+                                            <ui:VisualElement name="home-cares-list" class="home-cares-list" />
+                                        </ui:VisualElement>
+                                        <ui:VisualElement name="home-activities-panel" class="home-activities-panel">
+                                            <ui:Label text="ДЕЛА ГЛАВЫ" class="section-title" />
+                                            <ui:Label name="home-activities-empty" text="Сейчас никто не ждёт тебя." class="home-activities-empty" />
+                                            <ui:VisualElement name="home-activities-list" class="home-activities-list" />
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="home-activities-panel" class="home-activities-panel">
-                                    <ui:Label text="ДЕЛА В ДОМЕ" class="section-title" />
-                                    <ui:Label name="home-activities-empty" text="Сейчас никто не ждёт тебя." class="home-activities-empty" />
-                                    <ui:VisualElement name="home-activities-list" class="home-activities-list" />
-                                </ui:VisualElement>
-                                <!-- ПР-06А: люди Дома — одна личность во всех системах.
-                                     Код — PrototypeUIController.HomePeople.cs, строки — Templates/PersonRow.uxml. -->
                                 <ui:VisualElement name="home-people-panel" class="home-activities-panel home-people-panel">
                                     <ui:Label text="ЛЮДИ ДОМА" class="section-title" />
                                     <ui:Label name="home-people-summary" class="home-people-summary" />
-                                    <ui:Label name="home-people-maintenance" class="home-people-function" />
-                                    <ui:Label name="home-people-care" class="home-people-function" />
-                                    <ui:VisualElement name="home-people-work-row" class="home-people-work-row">
-                                        <ui:Label name="home-people-work-label" class="home-people-function" />
-                                        <ui:Button name="home-people-work-button" class="game-menu-button home-people-work-button" />
-                                    </ui:VisualElement>
                                     <ui:VisualElement name="home-people-list" class="home-people-list" />
                                     <ui:Label name="home-people-detail" class="home-people-detail" />
                                 </ui:VisualElement>
-                                <!-- ПР-07А-1: каталог построек выключен (PR07_HOME_SPEC §9.2); сетка скрыта до пересборки экрана в 07А-2. -->
-                                <ui:VisualElement name="building-grid" class="building-grid" style="display: none;">
-                                    <ui:Button text="Двор" class="building-card" />
-                                    <ui:Button text="Амбар" class="building-card" />
-                                    <ui:Button text="Казармы" class="building-card" />
-                                    <ui:Button text="Рынок" class="building-card" />
-                                    <ui:Button text="Шахта" class="building-card" />
-                                    <ui:Button text="Дела Дома" class="building-card" />
-                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:ScrollView>
+                        <ui:VisualElement name="home-prep-panel" class="home-prep-panel">
+                            <ui:VisualElement class="home-prep-header">
+                                <ui:Label name="home-prep-title" text="ПОДГОТОВКА ПОХОДА" class="section-title home-prep-title" />
+                                <ui:Label name="home-prep-message" class="home-prep-message" />
+                                <ui:Button name="home-prep-route-button" text="Выбрать путь" class="game-menu-button home-prep-route-button" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="home-prep-body">
+                                <ui:VisualElement name="home-prep-slots" class="home-prep-slots" />
+                                <ui:VisualElement name="home-prep-candidates" class="home-prep-candidates" />
+                            </ui:VisualElement>
+                            <ui:Label name="home-prep-forecast" class="home-prep-forecast" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                     <ui:VisualElement name="expeditions-screen" class="game-screen shell-content-screen">
@@ -217,14 +239,6 @@
                     <ui:VisualElement class="incident-modal-text-column"><ui:Label name="incident-modal-description" text="Описание происшествия" class="incident-modal-description" /><ui:Label name="incident-modal-consequence" text="Последствие" class="incident-modal-consequence" /></ui:VisualElement>
                 </ui:VisualElement>
                 <ui:Button name="incident-understood-button" text="ПОНЯТНО" class="incident-understood-button" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-        <ui:VisualElement name="game-over-overlay" class="game-over-overlay">
-            <ui:VisualElement class="game-over-window">
-                <ui:Label text="КАМПАНИЯ ОКОНЧЕНА" class="game-over-title" />
-                <ui:Label text="Дом остался без того, кто вёл его людей." class="game-over-description" />
-                <ui:Label name="game-over-days-label" text="Дней с начала: 0" class="game-over-days" />
-                <ui:Button name="restart-game-button" text="НАЧАТЬ ЗАНОВО" class="game-over-restart-button" />
             </ui:VisualElement>
         </ui:VisualElement>
 

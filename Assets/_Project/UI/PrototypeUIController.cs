@@ -128,9 +128,6 @@ public partial class PrototypeUIController : MonoBehaviour
     private Button decisionOptionAButton;
     private Button decisionOptionBButton;
 
-    private VisualElement gameOverOverlay;
-    private Label gameOverDaysLabel;
-    private Button restartGameButton;
 
     private readonly List<ExpeditionIncidentOccurrence> unreadIncidents =
         new List<ExpeditionIncidentOccurrence>();
@@ -215,9 +212,6 @@ public partial class PrototypeUIController : MonoBehaviour
         incidentModalTextColumn =
             root.Q<VisualElement>(className: "incident-modal-text-column");
 
-        gameOverOverlay = root.Q<VisualElement>("game-over-overlay");
-        gameOverDaysLabel = root.Q<Label>("game-over-days-label");
-        restartGameButton = root.Q<Button>("restart-game-button");
     }
 
     private bool AllRequiredElementsExist()
@@ -250,10 +244,7 @@ public partial class PrototypeUIController : MonoBehaviour
             incidentModalDescription != null &&
             incidentModalConsequence != null &&
             incidentUnderstoodButton != null &&
-            incidentModalTextColumn != null &&
-            gameOverOverlay != null &&
-            gameOverDaysLabel != null &&
-            restartGameButton != null;
+            incidentModalTextColumn != null;
     }
 
     private void CreateDecisionChoiceButtons()
@@ -401,7 +392,6 @@ public partial class PrototypeUIController : MonoBehaviour
         researchExpeditionButton.clicked += OnResearchExpeditionClicked;
         returnExpeditionButton.clicked += OnExpeditionActionClicked;
         incidentUnderstoodButton.clicked += OnIncidentUnderstoodClicked;
-        restartGameButton.clicked += OnRestartGameClicked;
 
         callbacksRegistered = true;
     }
@@ -418,14 +408,8 @@ public partial class PrototypeUIController : MonoBehaviour
         researchExpeditionButton.clicked -= OnResearchExpeditionClicked;
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
         incidentUnderstoodButton.clicked -= OnIncidentUnderstoodClicked;
-        restartGameButton.clicked -= OnRestartGameClicked;
 
         callbacksRegistered = false;
-    }
-
-    private void OnRestartGameClicked()
-    {
-        StartNewGame();
     }
 
     private void TrySendExpedition(string locationId)
@@ -490,9 +474,9 @@ public partial class PrototypeUIController : MonoBehaviour
     private void RefreshInterface()
     {
         dayLabel.text = "День: " + gameState.Day;
-        goldLabel.text = "Золото: " + gameState.Gold;
+        goldLabel.text = "Деньги: " + gameState.Gold;
         goldIncomeLabel.text = "+" + BuildingSystem.GetNetDailyGoldIncome(gameState);
-        foodLabel.text = "Пища: " + gameState.Food;
+        foodLabel.text = "Запасы: " + gameState.Food;
         foodIncomeLabel.text = "+" + BuildingSystem.GetDailyFoodIncome(gameState);
         populationLabel.text = "Люди: дома " + HomePeopleService.CountHomePresent(gameState) +
                                " · в походе " + HomePeopleService.CountExpeditionPresent(gameState);
@@ -1010,7 +994,6 @@ public partial class PrototypeUIController : MonoBehaviour
     {
         isGameOver = false;
         timeToggleButton.SetEnabled(true);
-        gameOverOverlay.style.display = DisplayStyle.None;
     }
 
     private string GetDayWord(int value)

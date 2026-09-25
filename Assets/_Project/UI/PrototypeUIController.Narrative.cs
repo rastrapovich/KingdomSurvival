@@ -16,11 +16,10 @@ using UnityEngine.UIElements;
 // через BindRequiredElement и наполняет их данными/шаблонами — не создаёт
 // постоянное дерево через `new VisualElement`.
 //
-// Портретный конвейер (ApplyNarrativeSpeakerPortrait ниже) этим переносом
-// не тронут вообще (§8 доктрины): Sprite из DialogueDatabase + рамка из
-// UXML + геометрия из UI Конструктора + индивидуальная кадрировка
-// (OverridePortraitFraming/PortraitScale/PortraitOffsetNormalized/
-// PortraitFlipX) на говорящего — защищённая связка.
+// Иллюстрация события при наличии заменяет портрет на всю сцену; без неё
+// сохраняется портретный конвейер: Sprite говорящего из DialogueDatabase,
+// рамка UXML, геометрия UI Конструктора и индивидуальная кадрировка
+// (OverridePortraitFraming/PortraitScale/PortraitOffsetNormalized/PortraitFlipX).
 //
 // Сборка ResponseGroup (BuildNarrativeHistoryGroupElement и построение
 // заголовков проверки в PrototypeUIController.NarrativeCheckPresentation.cs)
@@ -356,7 +355,8 @@ public partial class PrototypeUIController
             : null;
         narrativeSpeakerLabel.text = latestBlock != null ? latestBlock.SpeakerDisplayName : string.Empty;
         narrativeRoleLabel.text = latestBlock != null ? latestBlock.SpeakerRole : string.Empty;
-        ApplyNarrativeSpeakerPortrait(latestBlock != null ? latestBlock.SpeakerId : string.Empty);
+        ApplyNarrativeSpeakerPortrait(view.DialogueId,
+            latestBlock != null ? latestBlock.SpeakerId : string.Empty);
 
         RenderNarrativeDialogueHistory();
         RenderNarrativeDialogueChoices(view);
@@ -522,15 +522,20 @@ public partial class PrototypeUIController
         return group;
     }
 
-    private void ApplyNarrativeSpeakerPortrait(string speakerId)
+    private void ApplyNarrativeSpeakerPortrait(string dialogueId, string speakerId)
     {
         if (narrativePortrait == null)
             return;
 
-        DialogueSpeakerData speaker = narrativeDialogueDatabase != null
+        DialogueDefinitionData dialogue = narrativeDialogueDatabase != null
+            ? narrativeDialogueDatabase.FindDialogue(dialogueId)
+            : null;
+        bool showSceneIllustration = dialogue != null && dialogue.SceneIllustration != null;
+        DialogueSpeakerData speaker = !showSceneIllustration && narrativeDialogueDatabase != null
             ? narrativeDialogueDatabase.FindSpeaker(speakerId)
             : null;
-        Sprite portrait = speaker != null ? speaker.Portrait : null;
+        Sprite portrait = showSceneIllustration ? dialogue.SceneIllustration
+            : speaker != null ? speaker.Portrait : null;
         if (portrait == null)
         {
             UILayoutRuntimeApplier.ClearDynamicImage(narrativePortrait);
@@ -558,9 +563,14 @@ public partial class PrototypeUIController
             actual = new Vector2(screen.resolvedStyle.width, screen.resolvedStyle.height);
 
         bool useIndividualFraming = speaker != null && speaker.OverridePortraitFraming;
-        float speakerScale = useIndividualFraming ? speaker.PortraitScale : 1f;
-        Vector2 speakerOffset = useIndividualFraming ? speaker.PortraitOffsetNormalized : Vector2.zero;
-        bool flipX = useIndividualFraming && speaker.PortraitFlipX;
+        float imageScale = showSceneIllustration ? dialogue.SceneIllustrationScale
+            : useIndividualFraming ? speaker.PortraitScale : 1f;
+        Vector2 imageOffset = showSceneIllustration ? dialogue.SceneIllustrationOffsetNormalized
+            : useIndividualFraming ? speaker.PortraitOffsetNormalized : Vector2.zero;
+        bool flipX = !showSceneIllustration && useIndividualFraming && speaker.PortraitFlipX;
+        UILayoutImageMode? illustrationMode = showSceneIllustration
+            ? (dialogue.SceneIllustrationFillFrame ? UILayoutImageMode.Cover : UILayoutImageMode.Contain)
+            : (UILayoutImageMode?)null;
 
         UILayoutRuntimeApplier.ApplyDynamicImage(
             narrativePortrait,
@@ -568,9 +578,10 @@ public partial class PrototypeUIController
             portraitDefinition,
             reference,
             actual,
-            speakerScale,
-            speakerOffset,
-            flipX);
+            imageScale,
+            imageOffset,
+            flipX,
+            illustrationMode);
 
         if (narrativePortraitPlaceholder != null)
             narrativePortraitPlaceholder.style.display = DisplayStyle.None;

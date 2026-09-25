@@ -321,4 +321,34 @@ public sealed class UILayoutDatabaseTests
         Assert.AreEqual(StyleKeyword.None, target.style.maxWidth.keyword);
         Assert.AreEqual(StyleKeyword.None, target.style.maxHeight.keyword);
     }
+
+    [Test]
+    public void DynamicImage_IllustrationMode_CanFitOrFillPortraitFrame()
+    {
+        Texture2D texture = new Texture2D(200, 100);
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 200, 100), new Vector2(0.5f, 0.5f));
+        try
+        {
+            VisualElement frame = new VisualElement();
+            UILayoutElementDefinition definition = new UILayoutElementDefinition();
+            definition.SetRect(new Rect(0f, 0f, 100f, 200f));
+            Vector2 resolution = new Vector2(1920f, 1080f);
+
+            UILayoutRuntimeApplier.ApplyDynamicImage(frame, sprite, definition,
+                resolution, resolution, imageModeOverride: UILayoutImageMode.Contain);
+            VisualElement image = frame.ElementAt(0);
+            Assert.That(image.style.width.value.value, Is.EqualTo(100f).Within(0.001f));
+            Assert.That(image.style.height.value.value, Is.EqualTo(50f).Within(0.001f));
+
+            UILayoutRuntimeApplier.ApplyDynamicImage(frame, sprite, definition,
+                resolution, resolution, imageModeOverride: UILayoutImageMode.Cover);
+            Assert.That(image.style.width.value.value, Is.EqualTo(400f).Within(0.001f));
+            Assert.That(image.style.height.value.value, Is.EqualTo(200f).Within(0.001f));
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(sprite);
+            UnityEngine.Object.DestroyImmediate(texture);
+        }
+    }
 }

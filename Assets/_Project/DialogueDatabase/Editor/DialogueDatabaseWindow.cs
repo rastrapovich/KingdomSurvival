@@ -251,6 +251,21 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("status"), new GUIContent("Статус"));
                 EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("developerComment"), new GUIContent("Комментарий разработчика"));
                 EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("tags"), new GUIContent("Теги"), true);
+                EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("sceneIllustration"),
+                    new GUIContent("Иллюстрация события"));
+                if (dialogue.FindPropertyRelative("sceneIllustration").objectReferenceValue != null)
+                {
+                    EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("sceneIllustrationFillFrame"),
+                        new GUIContent("Заполнить рамку (обрезать края)"));
+                    SerializedProperty illustrationScale = dialogue.FindPropertyRelative("sceneIllustrationScale");
+                    if (illustrationScale.floatValue <= 0f)
+                        illustrationScale.floatValue = 1f;
+                    EditorGUILayout.PropertyField(illustrationScale,
+                        new GUIContent("Масштаб иллюстрации"));
+                    EditorGUILayout.PropertyField(dialogue.FindPropertyRelative("sceneIllustrationOffsetNormalized"),
+                        new GUIContent("Смещение в рамке"));
+                    EditorGUILayout.HelpBox("Иллюстрация заменяет портрет на протяжении всего диалога. Очистите поле, чтобы вернуть портреты говорящих.", MessageType.None);
+                }
 
                 SerializedProperty nodes = dialogue.FindPropertyRelative("nodes");
                 DrawStartNodePopup(dialogue.FindPropertyRelative("startNodeId"), nodes);

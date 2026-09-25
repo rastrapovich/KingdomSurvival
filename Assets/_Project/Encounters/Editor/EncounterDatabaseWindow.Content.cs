@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using KingdomSurvival.DialogueDatabase;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -39,6 +40,16 @@ namespace KingdomSurvival.Encounters.Editor
             AddHeader(parent, "СЦЕНА: " + dialogue.Title);
             parent.Add(MakeMutedLabel(
                 dialogue.Nodes.Count + " узлов · " + checks + " проверок · " + dialogue.Status));
+            ObjectField illustrationField = new ObjectField("Иллюстрация события")
+            {
+                objectType = typeof(Sprite),
+                allowSceneObjects = false,
+                value = dialogue.SceneIllustration
+            };
+            illustrationField.RegisterValueChangedCallback(evt =>
+                SetDialogueIllustration(dialogueDatabase, dialogueId, evt.newValue as Sprite));
+            parent.Add(illustrationField);
+            parent.Add(MakeMutedLabel("Пустое поле: портрет говорящего. Кадрирование — в редакторе диалога."));
             DialogueNodeData start = null;
             foreach (DialogueNodeData node in dialogue.Nodes)
                 if (node.Id == dialogue.StartNodeId) { start = node; break; }
@@ -61,6 +72,28 @@ namespace KingdomSurvival.Encounters.Editor
                 KingdomSurvival.DialogueDatabase.Editor.DialogueDatabaseWindow.OpenAt(dialogueId);
             }) { text = "Открыть связанный диалог" });
         }
+        private static void SetDialogueIllustration(DialogueDatabaseAsset dialogueDatabase,
+            string dialogueId, Sprite illustration)
+        {
+            if (dialogueDatabase == null) return;
+            SerializedObject serialized = new SerializedObject(dialogueDatabase);
+            serialized.Update();
+            SerializedProperty dialogues = serialized.FindProperty("dialogues");
+            for (int i = 0; i < dialogues.arraySize; i++)
+            {
+                SerializedProperty dialogue = dialogues.GetArrayElementAtIndex(i);
+                if (dialogue.FindPropertyRelative("id").stringValue != dialogueId) continue;
+                Undo.RecordObject(dialogueDatabase, "Change Encounter Illustration");
+                dialogue.FindPropertyRelative("sceneIllustration").objectReferenceValue = illustration;
+                SerializedProperty scale = dialogue.FindPropertyRelative("sceneIllustrationScale");
+                if (illustration != null && scale.floatValue <= 0f)
+                    scale.floatValue = 1f;
+                serialized.ApplyModifiedProperties();
+                EditorUtility.SetDirty(dialogueDatabase);
+                return;
+            }
+        }
+
         private static List<string> FindExternalReferences(string id)
         {
             List<string> paths = new List<string>();

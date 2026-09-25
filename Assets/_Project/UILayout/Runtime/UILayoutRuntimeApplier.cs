@@ -191,7 +191,8 @@ namespace KingdomSurvival.UILayout
             Vector2 actualResolution,
             float additionalScale = 1f,
             Vector2 normalizedFrameOffset = default(Vector2),
-            bool flipX = false)
+            bool flipX = false,
+            UILayoutImageMode? imageModeOverride = null)
         {
             if (target == null)
                 return;
@@ -214,7 +215,8 @@ namespace KingdomSurvival.UILayout
             dynamicImage.style.backgroundImage = new StyleBackground(sprite);
             dynamicImage.style.unityBackgroundScaleMode = ScaleMode.StretchToFill;
 
-            UILayoutImageMode mode = definition != null ? definition.ImageMode : UILayoutImageMode.Cover;
+            UILayoutImageMode mode = imageModeOverride ??
+                (definition != null ? definition.ImageMode : UILayoutImageMode.Cover);
             Vector2 frameSize = definition != null
                 ? ResolveImageFrameSize(definition, referenceResolution, actualResolution)
                 : new Vector2(target.resolvedStyle.width, target.resolvedStyle.height);

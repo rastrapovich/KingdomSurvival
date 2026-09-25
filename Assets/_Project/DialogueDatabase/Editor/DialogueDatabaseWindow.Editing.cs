@@ -175,6 +175,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             dialogue.FindPropertyRelative("category").enumValueIndex = (int)DialogueCategory.Test;
             dialogue.FindPropertyRelative("status").enumValueIndex = (int)DialogueProductionStatus.Working;
             dialogue.FindPropertyRelative("developerComment").stringValue = string.Empty;
+            dialogue.FindPropertyRelative("sceneIllustration").objectReferenceValue = null;
+            dialogue.FindPropertyRelative("sceneIllustrationFillFrame").boolValue = false;
+            dialogue.FindPropertyRelative("sceneIllustrationScale").floatValue = 1f;
+            dialogue.FindPropertyRelative("sceneIllustrationOffsetNormalized").vector2Value = Vector2.zero;
             dialogue.FindPropertyRelative("startNodeId").stringValue = "start";
             dialogue.FindPropertyRelative("tags").arraySize = 0;
             dialogue.FindPropertyRelative("schemaVersion").intValue = DialogueDefinitionData.CurrentSchemaVersion;

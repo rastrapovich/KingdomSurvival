@@ -237,6 +237,10 @@ namespace KingdomSurvival.DialogueDatabase
         [SerializeField] private DialogueCategory category = DialogueCategory.Test;
         [SerializeField] private DialogueProductionStatus status = DialogueProductionStatus.Working;
         [SerializeField, TextArea(2, 5)] private string developerComment = string.Empty;
+        [SerializeField] private Sprite sceneIllustration;
+        [SerializeField] private bool sceneIllustrationFillFrame;
+        [SerializeField, Min(0.05f)] private float sceneIllustrationScale = 1f;
+        [SerializeField] private Vector2 sceneIllustrationOffsetNormalized = Vector2.zero;
         [SerializeField] private string startNodeId = string.Empty;
         [SerializeField] private List<string> tags = new List<string>();
         [SerializeField] private List<DialogueNodeData> nodes = new List<DialogueNodeData>();
@@ -247,6 +251,10 @@ namespace KingdomSurvival.DialogueDatabase
         public DialogueCategory Category => category;
         public DialogueProductionStatus Status => status;
         public string DeveloperComment => developerComment;
+        public Sprite SceneIllustration => sceneIllustration;
+        public bool SceneIllustrationFillFrame => sceneIllustrationFillFrame;
+        public float SceneIllustrationScale => sceneIllustrationScale > 0f ? Mathf.Max(0.05f, sceneIllustrationScale) : 1f;
+        public Vector2 SceneIllustrationOffsetNormalized => sceneIllustrationOffsetNormalized;
         public string StartNodeId => startNodeId;
         public IReadOnlyList<string> Tags => tags ?? (IReadOnlyList<string>)Array.Empty<string>();
         public IReadOnlyList<DialogueNodeData> Nodes => nodes ?? (IReadOnlyList<DialogueNodeData>)Array.Empty<DialogueNodeData>();

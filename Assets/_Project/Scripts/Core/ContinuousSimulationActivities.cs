@@ -25,9 +25,6 @@ public static partial class ContinuousSimulationSystem
                 return processed;
 
             bool hadExpedition = state.HasActiveExpedition;
-            ExpeditionReturnSnapshotData returnSnapshot =
-                CaptureReturnSnapshot(state);
-
             ExpeditionIncidentSystem.ResolveAtScheduledCheck(
                 state,
                 state.Day,
@@ -37,12 +34,6 @@ public static partial class ContinuousSimulationSystem
 
             if (ConsumeQueuedTravelPoints(state, runtime, batch))
                 batch.RequestAutoPause = true;
-
-            AddReturnNoticeIfNeeded(
-                state,
-                hadExpedition,
-                returnSnapshot,
-                batch);
 
             if (!batch.RequestAutoPause &&
                 hadExpedition &&
@@ -455,26 +446,15 @@ public static partial class ContinuousSimulationSystem
         if (expedition.Phase == CommanderState.ReturningToCastle)
         {
             int fighterCount = expedition.FighterIds.Count;
-            int deliveredGold = Math.Max(0, state.ArmyGold);
-            int deliveredFood = Math.Max(0, state.ArmySupply);
             string commanderName = commander.Name;
             string delivered = state.CompleteExpeditionReturn();
 
+            // ПР-08: отдельной сводки «Экспедиция вернулась» больше нет —
+            // только строка в донесениях.
             batch.Result.Messages.Add(
                 commanderName + " и " + fighterCount +
-                " бойцов вернулись в поселение. " + delivered);
-            batch.Result.ExpeditionReturnNotice = new StrategicModalNotice
-            {
-                Title = "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ",
-                Description =
-                    commanderName + " и " + fighterCount +
-                    " бойцов прибыли в поселение.",
-                Consequence =
-                    "В поселение передано: золото +" + deliveredGold +
-                    ", пища +" + deliveredFood + "."
-            };
+                " бойцов вернулись в Дом. " + delivered);
             batch.Result.HadNotableOccurrence = true;
-            batch.RequestAutoPause = true;
             ResetRouteTracking(runtime, null);
             return;
         }

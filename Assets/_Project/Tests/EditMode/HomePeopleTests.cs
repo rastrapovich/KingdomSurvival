@@ -237,9 +237,11 @@ public sealed class HomePeopleTests
         HomeLife.Advance(state, 20.0, messages);
 
         Assert.IsTrue(HomeLife.FindWork(state, HomeLife.YardDeckWorkId).Completed);
-        Assert.AreEqual(1, messages.Count(m => m.Contains("настил")));
+        Assert.AreEqual(1, messages.Count(m => m.StartsWith("Хозяйственный настил восстановлен")));
+        Assert.AreEqual(1, messages.Count(m => m.Contains("верёвку с крючьями")), "ПР-08: Лада плетёт верёвку из остатков настила.");
         HomeLife.Advance(state, 5.0, messages);
-        Assert.AreEqual(1, messages.Count(m => m.Contains("настил")), "Завершение не повторяется.");
+        Assert.AreEqual(1, messages.Count(m => m.StartsWith("Хозяйственный настил восстановлен")), "Завершение не повторяется.");
+        Assert.AreEqual(1, messages.Count(m => m.Contains("верёвку с крючьями")), "Верёвка выдаётся один раз.");
     }
 
     [Test]

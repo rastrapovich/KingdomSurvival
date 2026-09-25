@@ -126,6 +126,19 @@ public sealed class CampaignBattlePlayModeTests
             "В бою герой и два бойца похода.");
 
         MonoBehaviour sandbox = FindBehaviour("BattleSandboxController");
+
+        // ПР-08: в бою те же собранные числа (шаблон + вещи + качества), что на экране героя.
+        string firstFighterId = campaign.ActiveExpedition.FighterIds[0];
+        UnitCombatStats expected = CombatStatsAssembler.Compute(campaign, firstFighterId).Final;
+        object battleState = GetField(sandbox, "battle");
+        object fighterUnit = ((IEnumerable)battleState.GetType().GetProperty("Units").GetValue(battleState))
+            .Cast<object>()
+            .First(unit => ((string)unit.GetType().GetProperty("Id").GetValue(unit)).EndsWith(":2"));
+        object definition = fighterUnit.GetType().GetProperty("Definition").GetValue(fighterUnit);
+        Assert.AreEqual(expected.Defense, (int)definition.GetType().GetProperty("Defense").GetValue(definition), "Защита в бою = на экране героя.");
+        Assert.AreEqual(expected.Attack, (int)definition.GetType().GetProperty("Attack").GetValue(definition));
+        Assert.AreEqual(expected.MaxHitPoints, (int)definition.GetType().GetProperty("MaxHitPoints").GetValue(definition));
+
         // Юнит 3 — второй боец похода (порядок запроса: герой, бойцы).
         ForceOutcome(sandbox, killEnemies: true, killPlayerUnit: id => id.EndsWith(":3"));
         Invoke(sandbox, "ReturnToCampaign");

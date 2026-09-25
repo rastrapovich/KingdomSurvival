@@ -376,6 +376,8 @@ public static class HomePeopleService
         resident.LifeStatus = ResidentLifeStatus.Dead;
         resident.DeathReasonId = reasonId ?? string.Empty;
         resident.CurrentHitPoints = 0;
+        resident.Exhausted = false;
+        ItemService.OnPersonDied(state, personId);
 
         if (state.Fighters != null)
             state.Fighters.RemoveAll(fighter => fighter.Id == personId);

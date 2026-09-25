@@ -40,10 +40,8 @@ namespace KingdomSurvival.Chapter01
 
         public static List<string> GetPresentItemIds(GameState gameState)
         {
-            List<string> items = new List<string>();
-            if (gameState?.Narrative?.Items != null)
-                items.AddRange(gameState.Narrative.Items);
-            return items;
+            // ПР-08: вещи рядом — у отряда в пути, дома у жителей и в кладовой.
+            return gameState != null ? ItemService.GetPresentItemIds(gameState) : new List<string>();
         }
 
         // Размер экспедиции = герой + бойцы, 1..5 (P10-T04: PartySize —

@@ -85,11 +85,14 @@ namespace KingdomSurvival.Chapter01
             public const string GateFamily = "chapter01_dialogue_gate_family";
             public const string D12B = "chapter01_dialogue_12b_ford_access";
 
+            // ПР-08 [РАБОЧЕЕ]: один выбор развития героя после возвращения (N16), до Совета (N17).
+            public const string D16B = "chapter01_dialogue_16b_what_the_road_gave";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 D01, D02, D03, D04, D05, D06, D07A, D07B, D07C, D08,
                 D09, D10, D11, D11B, D11C, D12, D13, D14, D14Half, D15, D16, D17,
-                GateFamily, D12B
+                GateFamily, D12B, D16B
             };
         }
 
@@ -195,6 +198,12 @@ namespace KingdomSurvival.Chapter01
             public const string FordAccessOldDescent = "chapter01.flag.ford_access_old_descent";
             public const string FordAccessShallowLine = "chapter01.flag.ford_access_shallow_line";
 
+            // ПР-08: выбор развития героя — один раз за главу.
+            public const string RoadGrowthChosen = "chapter01.flag.road_growth_chosen";
+            public const string RoadGrowthFortitude = "chapter01.flag.road_growth_fortitude";
+            public const string RoadGrowthFieldcraft = "chapter01.flag.road_growth_fieldcraft";
+            public const string RoadGrowthJudgment = "chapter01.flag.road_growth_judgment";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Started, HomeIntroSeen, FirstPressureSeen, FloodHappened, FloodWorkersSaved,
@@ -210,7 +219,8 @@ namespace KingdomSurvival.Chapter01
                 CartOutcomeSavedMan, CartOutcomeSavedSeed, CartOutcomePassedBy,
                 CartCampEchoSeen, CampUnlocked, FordWomanHelped, PartyGatheringSeen,
                 FisherFamilyAccepted, FisherFamilyDeclined, FordAccessResolved, FordAccessBypass,
-                FordAccessBracedSupport, FordAccessOldDescent, FordAccessShallowLine
+                FordAccessBracedSupport, FordAccessOldDescent, FordAccessShallowLine,
+                RoadGrowthChosen, RoadGrowthFortitude, RoadGrowthFieldcraft, RoadGrowthJudgment
             };
         }
 
@@ -320,13 +330,14 @@ namespace KingdomSurvival.Chapter01
             // ПР-06Б: приём семьи Тихона целиком и цена выхода на берег у брода.
             public const string FisherFamilyJoin = "pr06.join.household.fisher_tikhon";
             public const string FordAccessActivityStart = "chapter01.effect.ford_access_activity_start";
+            public const string RoadGrowthApply = "chapter01.effect.road_growth_apply";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
                 FloodResourceLoss, FloodTimeAdvance, FloodMillRepairCost,
                 LongRoadTimeAdvance, SevenToothGaugeGrant, DepartureLocationReveal,
                 DownstreamLocationReveal, OldRoadDetourStart, CartActivityStart,
-                FisherFamilyJoin, FordAccessActivityStart
+                FisherFamilyJoin, FordAccessActivityStart, RoadGrowthApply
             };
         }
 

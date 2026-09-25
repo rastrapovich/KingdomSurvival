@@ -266,6 +266,9 @@ public class GameState
     // ПР-07Б: что известно о Доме из похода и отложенные домашние новости.
     public HomeKnowledgeData HomeKnowledge = new HomeKnowledgeData();
 
+    // ПР-08: вещи с владельцем (ItemService).
+    public InventoryData Inventory = new InventoryData();
+
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
 
@@ -477,6 +480,10 @@ public class GameState
         // ПР-06А: 24 конкретных человека вместо безличного счётчика.
         People = HomePeopleService.CreateDefaults(this);
         HomePeopleService.RecountPopulation(this);
+
+        // ПР-08: стартовое снаряжение и кладовая Дома.
+        Inventory = new InventoryData();
+        ItemService.EnsureInventory(this);
     }
 
     public CommanderData GetSelectedCommander()
@@ -1052,14 +1059,10 @@ public class GameState
         if (ActiveExpedition == null)
             return "Походные запасы не переданы: данные экспедиции отсутствуют.";
 
+        // ПР-08 (решение пользователя 25.09.2026): припасы и золото похода
+        // при возвращении не передаются в Дом — остаются у отряда до
+        // следующего выхода.
         CommanderData commander = FindCommander(ActiveExpedition.CommanderId);
-        int deliveredGold = Math.Max(0, ArmyGold);
-        int deliveredFood = Math.Max(0, ArmySupply);
-
-        Gold += deliveredGold;
-        Food += deliveredFood;
-        ArmyGold = 0;
-        ArmySupply = 0;
         ConsecutiveExpeditionSupplyShortageDays = 0;
 
         if (commander != null)
@@ -1072,9 +1075,7 @@ public class GameState
         ExpeditionPreparation.RememberExpeditionRoster(this);
         ActiveExpedition.IsActive = false;
 
-        return
-            "В Дом передано: золото +" + deliveredGold +
-            ", пища +" + deliveredFood + ".";
+        return "Припасы похода остаются у отряда: " + ArmySupply + ".";
     }
 
     public LocationData FindFirstHiddenLocationAlongLastTravel()

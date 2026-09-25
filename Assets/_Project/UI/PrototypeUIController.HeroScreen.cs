@@ -53,7 +53,7 @@ public partial class PrototypeUIController
         "Сила личности, влияние и сопротивление давлению."
     };
 
-    // Порядок совпадает с RefreshHeroScreenStats/ShowHeroScreenUnitCard —
+    // Порядок совпадает с RefreshHeroItemsStats/ShowHeroScreenUnitCard —
     // индекс 5 (initiative) единственный с производным значением/подсказкой.
     private static readonly string[] HeroScreenStatSuffixes =
     {
@@ -193,6 +193,7 @@ public partial class PrototypeUIController
         ok &= BindHeroScreenRoster();
         ok &= BindHeroScreenUnitCard();
         ok &= BindHeroScreenTooltips();
+        ok &= BindHeroItems();
 
         if (!ok)
             return;
@@ -534,20 +535,19 @@ public partial class PrototypeUIController
             heroScreenRoleLabel.text = string.IsNullOrWhiteSpace(commander.Role)
                 ? "Командир поселения"
                 : commander.Role;
-            heroScreenLevelLabel.text = "Уровень " + commander.Level;
         }
 
         ApplyHeroScreenPortrait(heroScreenPortrait, heroUnit);
-        heroScreenExperienceFill.style.width = Length.Percent(0f);
 
         HeroProfileData heroProfile = commander != null ? commander.HeroProfile : null;
         RefreshHeroScreenQualities(heroProfile);
         RefreshHeroScreenCompetencies(heroProfile);
         RefreshHeroScreenTraits(heroProfile);
-        RefreshHeroScreenStats(heroUnit, heroProfile);
         RefreshHeroScreenTags(heroUnit);
         RefreshHeroScreenStates(commander);
         RefreshHeroScreenRoster(commander, heroUnit);
+        // ПР-08: вещи, собранные боевые числа, состояние и «Путь».
+        RefreshHeroItems();
     }
 
     // Как в старом RefreshSupplyBlock/ApplyCompactSupplyText экрана «Армия»,
@@ -676,37 +676,6 @@ public partial class PrototypeUIController
             AddHeroScreenHint(heroScreenTraitsRow, "У героя пока нет особенностей.");
     }
 
-    // Семь боевых характеристик — фиксированное количество, слоты статичны
-    // в UXML (как и качества выше).
-    private void RefreshHeroScreenStats(UnitDefinitionData unit, HeroProfileData hero)
-    {
-        heroScreenStatValues[0].text = (unit != null ? unit.MaxHitPoints : 0).ToString();
-        heroScreenStatValues[1].text = (unit != null ? unit.Attack : 0).ToString();
-        heroScreenStatValues[2].text = (unit != null ? unit.Defense : 0).ToString();
-        heroScreenStatValues[3].text = (unit != null ? unit.Damage : 0).ToString();
-        heroScreenStatValues[4].text = (unit != null ? unit.Movement : 0).ToString();
-        RefreshHeroScreenInitiativeStat(unit, hero);
-        heroScreenStatValues[6].text = (unit != null ? unit.AttackRange : 0).ToString();
-    }
-
-    // Единственная боевая характеристика командира, куда сейчас подключено
-    // качество (§16: Сноровка -> Инициатива). Подсказка показывает
-    // происхождение производного значения, как того требует §17.
-    private void RefreshHeroScreenInitiativeStat(UnitDefinitionData unit, HeroProfileData hero)
-    {
-        int baseInitiative = unit != null ? unit.Initiative : 0;
-        int dexterity = hero != null ? hero.GetQuality(HeroQuality.Dexterity) : HeroProfileData.DefaultQualityValue;
-        int modifier = HeroCombatStatsBuilder.GetCombatModifier(dexterity);
-        int finalInitiative = Mathf.Max(0, baseInitiative + modifier);
-
-        string explanation = "База: " + baseInitiative;
-        if (modifier != 0)
-            explanation += "\nСноровка " + dexterity + ": " + (modifier > 0 ? "+" + modifier : modifier.ToString());
-
-        heroScreenStatValues[5].text = finalInitiative.ToString();
-        heroScreenInitiativeExplanation = explanation;
-    }
-
     // Количество варьируется по unit.TagIds — динамический список (шаблон
     // HeroChip.uxml).
     private void RefreshHeroScreenTags(UnitDefinitionData unit)
@@ -752,7 +721,8 @@ public partial class PrototypeUIController
             "Командир",
             commander != null ? commander.Level : 1,
             heroUnit,
-            true);
+            true,
+            commander != null ? commander.Id : null);
         heroScreenRosterCards[0].ToggleFighterId = null;
 
         bool expeditionActive = gameState.HasActiveExpedition;
@@ -783,7 +753,7 @@ public partial class PrototypeUIController
             if (i < slotFighters.Count)
             {
                 FighterData fighter = slotFighters[i];
-                FillHeroScreenRosterCard(refs, fighter.Name, fighter.Role, fighter.Level, ResolveHeroScreenUnit(fighter), false);
+                FillHeroScreenRosterCard(refs, fighter.Name, fighter.Role, fighter.Level, ResolveHeroScreenUnit(fighter), false, fighter.Id);
                 refs.ToggleFighterId = expeditionActive ? null : fighter.Id;
             }
             else
@@ -808,7 +778,8 @@ public partial class PrototypeUIController
         string role,
         int level,
         UnitDefinitionData unit,
-        bool isCommander)
+        bool isCommander,
+        string personId = null)
     {
         refs.CurrentUnit = unit;
 
@@ -821,8 +792,20 @@ public partial class PrototypeUIController
         refs.Name.EnableInClassList("hero-screen-roster-card-name-commander", isCommander);
         refs.Role.text = role;
 
-        refs.Hp.text = unit != null ? "HP " + unit.MaxHitPoints : "HP —";
-        refs.Condition.text = unit != null ? "цел" : "—";
+        // ПР-08: HP и состояние конкретного человека, а не шаблон.
+        ResidentState resident = HomePeopleService.Find(gameState, personId);
+        if (unit != null && resident != null && resident.HasCombatState)
+        {
+            refs.Hp.text = "HP " + resident.CurrentHitPoints + "/" + resident.MaxHitPoints;
+            refs.Condition.text = resident.Injury == ResidentInjury.Recovering ? "тяжёлая рана"
+                : resident.Exhausted ? "изнеможён"
+                : resident.CurrentHitPoints < resident.MaxHitPoints ? "ранен" : "цел";
+        }
+        else
+        {
+            refs.Hp.text = unit != null ? "HP " + unit.MaxHitPoints : "HP —";
+            refs.Condition.text = unit != null ? "цел" : "—";
+        }
         refs.Level.text = level > 0 ? "ур. " + level : "—";
 
         // HP всегда MaxHitPoints/MaxHitPoints (см. HeroScreen.uss) — полоса

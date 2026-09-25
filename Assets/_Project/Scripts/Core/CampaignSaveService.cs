@@ -116,6 +116,9 @@ public static class CampaignSaveService
         // стройка отменяется с возвратом до того, как часы её «достроят».
         BuildingSystem.RetireLegacyCatalog(state);
 
+        // ПР-08: вещи — у старых сохранений выдаётся стартовый набор один раз.
+        ItemService.EnsureInventory(state);
+
         // ПР-07А-1: у сохранений до подготовки состава её нет.
         if (state.Preparation == null)
             state.Preparation = new ExpeditionPreparationData();

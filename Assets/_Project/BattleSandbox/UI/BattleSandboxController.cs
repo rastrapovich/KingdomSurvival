@@ -105,17 +105,20 @@ namespace KingdomSurvival.BattleSandbox
                     continue;
                 }
 
+                // ПР-08: числа, собранные кампанией (шаблон + качества + вещи +
+                // состояния), — те же, что на экране героя.
+                bool assembled = participant.HasAssembledStats;
                 fighters.Add(new SandboxUnitDefinition(
                     baseDefinition.Id,
                     participant.DisplayName,
                     baseDefinition.Role,
-                    baseDefinition.MaxHitPoints,
-                    baseDefinition.Attack,
-                    baseDefinition.Defense,
-                    baseDefinition.Damage,
-                    baseDefinition.Movement,
-                    baseDefinition.Initiative,
-                    baseDefinition.AttackRange,
+                    assembled ? participant.MaxHitPoints : baseDefinition.MaxHitPoints,
+                    assembled ? participant.Attack : baseDefinition.Attack,
+                    assembled ? participant.Defense : baseDefinition.Defense,
+                    assembled ? participant.Damage : baseDefinition.Damage,
+                    assembled ? participant.Movement : baseDefinition.Movement,
+                    assembled ? participant.Initiative : baseDefinition.Initiative,
+                    assembled ? participant.AttackRange : baseDefinition.AttackRange,
                     baseDefinition.TagIds));
                 campaignParticipants.Add(participant);
             }

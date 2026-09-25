@@ -214,6 +214,20 @@ namespace KingdomSurvival.Chapter01
         // и доказанного человеческого соглашения, а не просто последним
         // диалогом линейной таблицы. Completed проверяется отдельно от
         // CouncilCompleted ради безопасного поведения старых/debug-save.
+        // ПР-08: выбор развития героя — после возвращения (N16), до Совета.
+        // Порядок задаёт опрос возвращения (UI и прогон главы): сначала этот
+        // выбор, затем Совет.
+        public static bool CanOpenRoadGrowth(NarrativeStateData state)
+        {
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
+
+            return state.HasFlag(Chapter01Ids.Flags.ReturnedHome) &&
+                   !state.HasFlag(Chapter01Ids.Flags.RoadGrowthChosen) &&
+                   !state.HasFlag(Chapter01Ids.Flags.CouncilCompleted) &&
+                   !state.HasFlag(Chapter01Ids.Flags.Completed);
+        }
+
         public static bool CanOpenFinalCouncil(NarrativeStateData state)
         {
             if (state == null)
@@ -275,6 +289,23 @@ namespace KingdomSurvival.Chapter01
                 gameState.Narrative = new NarrativeStateData();
 
             gameState.Narrative.SetFlag(Chapter01Ids.Flags.ExpeditionStarted);
+
+            // ПР-08 (§8.1 ТЗ): Ульяна собирает травы в дорогу, если уход дома
+            // не останавливался от голода.
+            if (gameState.ConsecutiveFoodShortageDays < HomeFunctionResolver.CareStopsAfterShortageDays &&
+                gameState.People != null)
+            {
+                CommanderData hero = gameState.GetSelectedCommander();
+                string owner = hero != null && ItemService.HeroPackCount(gameState) < ItemService.HeroPackSize
+                    ? hero.Id
+                    : string.Empty;
+                if (ItemService.GrantOnce(gameState, "pr08.grant.ulyana_herbs", ItemCatalog.UlyanaHerbs, owner) != null)
+                {
+                    HomeKnowledge.Report(gameState, null, owner.Length > 0
+                        ? "Ульяна сунула в сумку травы: отвар снимает изнеможение."
+                        : "Ульяна оставила травы в кладовой — сумка героя полна.");
+                }
+            }
         }
 
         // Тонкая точка интеграции с UI (раздел 6.2: "запускает диалог через
@@ -324,6 +355,8 @@ namespace KingdomSurvival.Chapter01
                 Chapter01OutcomeApplier.ApplyDownstreamLocationReveal(gameState);
             else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D12B, StringComparison.Ordinal))
                 Chapter01OutcomeApplier.ApplyFordAccessConsequences(gameState);
+            else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.D16B, StringComparison.Ordinal))
+                Chapter01OutcomeApplier.ApplyRoadGrowth(gameState);
             else if (string.Equals(dialogueId, Chapter01Ids.Dialogues.GateFamily, StringComparison.Ordinal) &&
                      gameState.Narrative != null &&
                      gameState.Narrative.HasFlag(Chapter01Ids.Flags.FisherFamilyAccepted))

@@ -24,6 +24,16 @@ public sealed class CampaignBattleParticipant
     // сцена боя берёт полный запас из шаблона.
     public int CurrentHitPoints;
     public int MaxHitPoints;
+
+    // ПР-08: боевые числа уже собраны (шаблон + качества героя + вещи +
+    // состояния, CombatStatsAssembler) — экран героя и бой показывают одно.
+    public bool HasAssembledStats;
+    public int Attack;
+    public int Defense;
+    public int Damage;
+    public int Movement;
+    public int Initiative;
+    public int AttackRange;
 }
 
 [Serializable]
@@ -133,9 +143,23 @@ public static class CampaignBattleBridge
         HomePeopleService.EnsureCombatState(resident);
         if (!resident.HasCombatState)
             return;
+        ItemService.RefreshMaxHitPoints(state, resident.PersonId);
 
         participant.CurrentHitPoints = resident.CurrentHitPoints;
         participant.MaxHitPoints = resident.MaxHitPoints;
+
+        AssembledCombatStats assembled = CombatStatsAssembler.Compute(state, participant.PersonId);
+        if (!assembled.HasTemplate)
+            return;
+        participant.HasAssembledStats = true;
+        participant.MaxHitPoints = assembled.Final.MaxHitPoints;
+        participant.CurrentHitPoints = Math.Min(resident.CurrentHitPoints, assembled.Final.MaxHitPoints);
+        participant.Attack = assembled.Final.Attack;
+        participant.Defense = assembled.Final.Defense;
+        participant.Damage = assembled.Final.Damage;
+        participant.Movement = assembled.Final.Movement;
+        participant.Initiative = assembled.Final.Initiative;
+        participant.AttackRange = assembled.Final.AttackRange;
     }
 
     public static bool IsApplied(GameState state, string battleId)

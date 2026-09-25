@@ -942,7 +942,6 @@ public partial class PrototypeUIController : MonoBehaviour
     private void ResolveOpenedDecisionChoice(string optionId)
     {
         string resultMessage;
-        ExpeditionReturnSnapshot returnSnapshot = CaptureExpeditionReturnSnapshot();
 
         if (!ExpeditionDecisionSystem.TryApplyChoice(
                 gameState,
@@ -955,7 +954,6 @@ public partial class PrototypeUIController : MonoBehaviour
 
         int resultReportIndex = AddReport(resultMessage);
         StrategicSimulationResult decisionResult = new StrategicSimulationResult();
-        AddReturnNoticeIfCompleted(decisionResult, returnSnapshot);
 
         if (decisionResult.ExpeditionReturnNotice != null)
         {

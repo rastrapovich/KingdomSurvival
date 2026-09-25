@@ -15,23 +15,19 @@ public partial class PrototypeUIController
         NarrativeStateData state = gameState.Narrative;
         Chapter01ReturnFlow.EnsureAgreementKnowledge(state);
 
-        // Техническое окно «ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ» не должно подменять N16:
-        // в первой главе игрок сначала видит последствия в Доме, а не отчёт
-        // системы. Сам отчёт остаётся в Хронике/логах и для других походов
-        // поведение ModalQueue не меняется.
-        if (Chapter01ReturnFlow.IsHomecomingReady(gameState) &&
-            activeQueuedModal != null &&
-            activeQueuedModal.Title == "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ")
-        {
-            FinishActiveQueuedModal();
-        }
-
         if (IsNarrativeDialogueActive || HasBlockingModalWorkExceptCamp())
             return;
 
         // P13: после закрытия N16 следующий кадр открывает обязательный
         // Совет через тот же poller и тот же Dialogue Database runtime.
         // Отдельный Update/LateUpdate и отдельная council-система не нужны.
+        // ПР-08: выбор развития героя — раньше Совета.
+        if (Chapter01StoryDirector.CanOpenRoadGrowth(state))
+        {
+            TryOpenNarrativeDialogueById(Chapter01Ids.Dialogues.D16B);
+            return;
+        }
+
         if (Chapter01StoryDirector.CanOpenFinalCouncil(state))
         {
             TryOpenNarrativeDialogueById(Chapter01Ids.Dialogues.D17);

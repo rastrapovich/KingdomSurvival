@@ -116,6 +116,8 @@ public static class Chapter01PlaythroughWalker
         NarrativeStateData state = gameState.Narrative;
         Chapter01ReturnFlow.EnsureAgreementKnowledge(state);
 
+        if (Chapter01StoryDirector.CanOpenRoadGrowth(state))
+            return Chapter01Ids.Dialogues.D16B;
         if (Chapter01StoryDirector.CanOpenFinalCouncil(state))
             return Chapter01Ids.Dialogues.D17;
         if (state.HasFlag(Chapter01Ids.Flags.DownstreamContact) &&
@@ -271,9 +273,7 @@ public static class Chapter01PlaythroughWalker
 
         // Те же аргументы, что в PrototypeUIController.TryOpenNarrativeDialogueById.
         List<string> companions = Chapter01ContextBuilder.GetPresentCompanionIds(gameState);
-        List<string> items = new List<string>();
-        if (gameState.Narrative.Items != null)
-            items.AddRange(gameState.Narrative.Items);
+        List<string> items = Chapter01ContextBuilder.GetPresentItemIds(gameState);
 
         NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
         bool started = session.Start(

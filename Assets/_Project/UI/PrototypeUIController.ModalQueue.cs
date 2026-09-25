@@ -13,14 +13,6 @@ public partial class PrototypeUIController
         public int ReportIndex = -1;
     }
 
-    private sealed class ExpeditionReturnSnapshot
-    {
-        public string CommanderName;
-        public int FighterCount;
-        public int ArmyGold;
-        public int ArmySupply;
-    }
-
     private readonly Queue<QueuedModal> queuedModals = new Queue<QueuedModal>();
     private readonly Dictionary<int, int> incidentReportIndexes =
         new Dictionary<int, int>();
@@ -104,46 +96,6 @@ public partial class PrototypeUIController
             Consequence = notice.Consequence,
             ReportIndex = reportIndex
         });
-    }
-
-    private ExpeditionReturnSnapshot CaptureExpeditionReturnSnapshot()
-    {
-        if (gameState == null || !gameState.HasActiveExpedition)
-            return null;
-
-        CommanderData commander =
-            gameState.FindCommander(gameState.ActiveExpedition.CommanderId);
-
-        return new ExpeditionReturnSnapshot
-        {
-            CommanderName = commander != null ? commander.Name : "Командир",
-            FighterCount = gameState.ActiveExpedition.FighterIds.Count,
-            ArmyGold = gameState.ArmyGold,
-            ArmySupply = gameState.ArmySupply
-        };
-    }
-
-    private void AddReturnNoticeIfCompleted(
-        StrategicSimulationResult result,
-        ExpeditionReturnSnapshot snapshot)
-    {
-        if (result == null || snapshot == null ||
-            gameState.HasActiveExpedition ||
-            result.ExpeditionReturnNotice != null)
-        {
-            return;
-        }
-
-        result.ExpeditionReturnNotice = new StrategicModalNotice
-        {
-            Title = "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ",
-            Description =
-                snapshot.CommanderName + " и " + snapshot.FighterCount +
-                " бойцов прибыли в поселение.",
-            Consequence =
-                "В поселение передано: золото +" + snapshot.ArmyGold +
-                ", пища +" + snapshot.ArmySupply + "."
-        };
     }
 
     private void TryShowNextQueuedModal()

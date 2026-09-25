@@ -318,6 +318,9 @@ public static class HomeLife
             deck.DoneWork = deck.RequiredWork;
             deck.Completed = true;
             HomeKnowledge.Report(state, messages, "Хозяйственный настил восстановлен: по двору снова ходят напрямую, а не в обход луж.");
+            // ПР-08 (§8.1 ТЗ): из остатков настила Лада плетёт верёвку с крючьями.
+            if (ItemService.GrantOnce(state, "pr08.grant.rope", ItemCatalog.RopeWithHooks, string.Empty) != null)
+                HomeKnowledge.Report(state, messages, "Лада сплела из остатков настила верёвку с крючьями — она в кладовой.");
         }
     }
 

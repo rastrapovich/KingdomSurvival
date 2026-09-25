@@ -388,6 +388,12 @@ namespace KingdomSurvival.Chapter01
             List<string> present = Chapter01ContextBuilder.GetPresentCompanionIds(gameState);
             double durationHours = 2.0;
             string activityDisplayName = "ОБХОД К ПОЛОГОМУ БЕРЕГУ";
+            // ПР-08 (§8.1 ТЗ): верёвка с крючьями снимает час с обхода.
+            if (ItemService.IsPresent(gameState, ItemCatalog.RopeWithHooks))
+            {
+                durationHours = 1.0;
+                activityDisplayName = "ПОДЪЁМ ПО ВЕРЁВКЕ";
+            }
 
             if (state.HasFlag(Chapter01Ids.Flags.FordAccessBracedSupport) && present.Contains(HomePeopleService.LadaId))
             {
@@ -417,6 +423,48 @@ namespace KingdomSurvival.Chapter01
                     0,
                     0,
                     out string _));
+        }
+
+        // ПР-08 (ТЗ §8.2): один выбор развития героя, применяется один раз.
+        public static void ApplyRoadGrowth(GameState gameState)
+        {
+            if (gameState == null)
+                throw new ArgumentNullException(nameof(gameState));
+            CommanderData hero = gameState.GetSelectedCommander();
+            if (hero == null || gameState.Narrative == null)
+                return;
+            if (hero.HeroProfile == null)
+                hero.HeroProfile = new HeroProfileData();
+
+            NarrativeStateData state = gameState.Narrative;
+            HeroProfileData profile = hero.HeroProfile;
+            bool applied = Apply(gameState, Chapter01Ids.Effects.RoadGrowthApply, _ =>
+            {
+                if (state.HasFlag(Chapter01Ids.Flags.RoadGrowthFortitude))
+                    profile.SetQuality(HeroQuality.Fortitude, profile.GetQuality(HeroQuality.Fortitude) + 1);
+                else if (state.HasFlag(Chapter01Ids.Flags.RoadGrowthFieldcraft))
+                    profile.SetCompetency(NarrativeCompetencyIds.Fieldcraft, profile.GetCompetency(NarrativeCompetencyIds.Fieldcraft) + 1);
+                else if (state.HasFlag(Chapter01Ids.Flags.RoadGrowthJudgment))
+                    profile.SetQuality(HeroQuality.Judgment, profile.GetQuality(HeroQuality.Judgment) + 1);
+            });
+
+            // Стойкость меняет максимум HP героя (CombatStatsAssembler).
+            if (applied)
+                ItemService.RefreshMaxHitPoints(gameState, hero.Id);
+        }
+
+        // Строка «Путь» на экране героя: сделанный выбор развития или null.
+        public static string DescribeRoadGrowth(NarrativeStateData state)
+        {
+            if (state == null || !state.HasFlag(Chapter01Ids.Flags.RoadGrowthChosen))
+                return null;
+            if (state.HasFlag(Chapter01Ids.Flags.RoadGrowthFortitude))
+                return "Дорога закалила: Стойкость +1.";
+            if (state.HasFlag(Chapter01Ids.Flags.RoadGrowthFieldcraft))
+                return "Научился читать землю и воду: Полевое дело +1.";
+            if (state.HasFlag(Chapter01Ids.Flags.RoadGrowthJudgment))
+                return "Научился сомневаться в себе: Суждение +1.";
+            return null;
         }
 
         private static bool Apply(GameState gameState, string executionId, Action<NarrativeStateData> mutation)

@@ -18,6 +18,7 @@ public static partial class ContinuousSimulationSystem
         int dailyGoldUpkeep = BuildingSystem.GetDailyGoldUpkeep(state);
         // ПР-07Б: заработанный за сутки улов — ровно один раз, до расхода.
         int fishingCatch = HomeLife.TakeFishingCatch(state);
+        GrantDriedFish(state, fishingCatch, batch.Result);
 
         state.Gold = Math.Max(
             0,
@@ -36,6 +37,7 @@ public static partial class ContinuousSimulationSystem
         }
 
         ResolveCityFoodAtMidnight(state, batch.Result);
+        ResolveRestAtHome(state, batch.Result);
         ResolveExpeditionSupplyAtMidnight(state, runtime, batch.Result);
 
         state.Day++;
@@ -91,6 +93,61 @@ public static partial class ContinuousSimulationSystem
         }
     }
 
+    // ПР-08 (§8.1 ТЗ): связка сушёной рыбы на каждые 24 пищи улова, если
+    // прежняя ещё не съедена.
+    private const int DriedFishPerCatch = 24;
+
+    private static void GrantDriedFish(GameState state, int fishingCatch, StrategicSimulationResult result)
+    {
+        if (fishingCatch <= 0 || state.People == null)
+            return;
+
+        int before = state.People.FishingPaidTotal / DriedFishPerCatch;
+        state.People.FishingPaidTotal += fishingCatch;
+        int after = state.People.FishingPaidTotal / DriedFishPerCatch;
+        if (after <= before || ItemService.FindFirst(state, ItemCatalog.DriedFish) != null)
+            return;
+
+        if (ItemService.GrantOnce(state, "pr08.grant.dried_fish." + after, ItemCatalog.DriedFish, string.Empty) != null)
+            HomeKnowledge.Report(state, result.Messages, "Варвара насушила рыбы из улова — связка в дорогу лежит в кладовой.");
+    }
+
+    // ПР-08: ночь дома снимает изнеможение.
+    private static void ResolveRestAtHome(GameState state, StrategicSimulationResult result)
+    {
+        foreach (ResidentState resident in HomePeopleService.All(state))
+        {
+            if (!resident.Exhausted || !HomePeopleService.IsHomePresent(state, resident))
+                continue;
+            resident.Exhausted = false;
+            HomeKnowledge.Report(state, result.Messages, resident.DisplayName + ": после ночи дома силы вернулись.");
+        }
+    }
+
+    private static void ExhaustExpedition(GameState state, StrategicSimulationResult result)
+    {
+        List<string> names = new List<string>();
+        CommanderData commander = state.GetSelectedCommander();
+        List<string> party = new List<string>();
+        if (commander != null)
+            party.Add(commander.Id);
+        party.AddRange(state.ActiveExpedition.FighterIds);
+        if (state.ActiveExpedition.RetinueIds != null)
+            party.AddRange(state.ActiveExpedition.RetinueIds);
+
+        foreach (string personId in party)
+        {
+            ResidentState resident = HomePeopleService.Find(state, personId);
+            if (resident == null || !resident.IsAlive || resident.Exhausted)
+                continue;
+            resident.Exhausted = true;
+            names.Add(resident.DisplayName);
+        }
+
+        if (names.Count > 0)
+            result.Messages.Add("Без еды люди выбились из сил: изнеможены " + string.Join(", ", names) + ".");
+    }
+
     private static void ResolveExpeditionSupplyAtMidnight(
         GameState state,
         RuntimeState runtime,
@@ -125,6 +182,9 @@ public static partial class ContinuousSimulationSystem
                 "сорвёт поход.");
             return;
         }
+
+        // ПР-08: вторая голодная полночь в пути выматывает весь отряд.
+        ExhaustExpedition(state, result);
 
         float exactStartX = state.ActiveExpedition.CurrentMapXPercent;
         float exactStartY = state.ActiveExpedition.CurrentMapYPercent;
@@ -212,50 +272,4 @@ public static partial class ContinuousSimulationSystem
             runtime.IsPaused = true;
     }
 
-    private sealed class ExpeditionReturnSnapshotData
-    {
-        public string CommanderName;
-        public int FighterCount;
-        public int ArmyGold;
-        public int ArmySupply;
-    }
-
-    private static ExpeditionReturnSnapshotData CaptureReturnSnapshot(GameState state)
-    {
-        if (state == null || !state.HasActiveExpedition)
-            return null;
-
-        ExpeditionData expedition = state.ActiveExpedition;
-        CommanderData commander = state.FindCommander(expedition.CommanderId);
-        return new ExpeditionReturnSnapshotData
-        {
-            CommanderName = commander != null ? commander.Name : "Командир",
-            FighterCount = expedition.FighterIds.Count,
-            ArmyGold = state.ArmyGold,
-            ArmySupply = state.ArmySupply
-        };
-    }
-
-    private static void AddReturnNoticeIfNeeded(
-        GameState state,
-        bool hadExpedition,
-        ExpeditionReturnSnapshotData snapshot,
-        ContinuousSimulationBatch batch)
-    {
-        if (!hadExpedition || snapshot == null || state.HasActiveExpedition)
-            return;
-
-        batch.Result.ExpeditionReturnNotice = new StrategicModalNotice
-        {
-            Title = "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ",
-            Description =
-                snapshot.CommanderName + " и " + snapshot.FighterCount +
-                " воинов вернулись в Дом.",
-            Consequence =
-                "В Дом передано: золото +" + snapshot.ArmyGold +
-                ", пища +" + snapshot.ArmySupply + "."
-        };
-        batch.RequestAutoPause = true;
-        batch.Result.HadNotableOccurrence = true;
-    }
 }

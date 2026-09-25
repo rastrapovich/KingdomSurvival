@@ -114,6 +114,8 @@ namespace KingdomSurvival.Chapter01
                 gameState, Chapter01Ids.Effects.FisherFamilyJoin, household, members, out message);
             if (admitted)
             {
+                // ПР-08: у Тихона свой топор и кожух.
+                ItemService.EnsureInventory(gameState);
                 // ПР-07Б: принятие открывает ловлю — одно короткое сообщение.
                 HomeKnowledge.Report(gameState, null,
                     "Семья Тихона теперь живёт в Доме. Открыта рыбная ловля: пока Тихон дома и здоров — до " +

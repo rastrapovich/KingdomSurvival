@@ -73,6 +73,10 @@ public sealed class ResidentState
     public double RecoveryProgress;
     public int RecoveryBaseHitPoints;
 
+    // ПР-08: изнеможение — дискретное состояние (−1 атака, −1 инициатива),
+    // снимается ночью дома или отваром трав.
+    public bool Exhausted;
+
     public string DeathReasonId = string.Empty;
     public string DepartureReasonId = string.Empty;
 
@@ -115,4 +119,7 @@ public sealed class HomePeopleState
     // ПР-07Б: заработанный, но ещё не выплаченный улов (с дробной частью);
     // выплачивается целыми в полночь, остаток переходит дальше.
     public double FishingEarned;
+
+    // ПР-08: сколько улова уже поступило в запасы — для сушёной рыбы в дорогу.
+    public int FishingPaidTotal;
 }

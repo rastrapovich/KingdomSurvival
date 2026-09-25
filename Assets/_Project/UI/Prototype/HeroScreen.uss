@@ -764,3 +764,86 @@
 .hero-screen-tag-tooltip-text {
     font-size: 13px;
 }
+
+/* ПР-08: вещи на экране героя — три слота выбранного человека, сумка героя,
+   сюжетные вещи и кладовая Дома. Кнопки действий внутри карточек. */
+
+.hero-item-people {
+    margin-bottom: 6px;
+}
+
+.hero-item-person {
+    height: 26px;
+    font-size: 12px;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+.hero-item-person--selected {
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(221, 181, 99);
+    -unity-font-style: bold;
+}
+
+.hero-item-slot {
+    width: 168px;
+    min-height: 92px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.hero-item-slot-name {
+    font-size: 13px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.hero-item-slot-effect {
+    font-size: 11px;
+    white-space: normal;
+}
+
+.hero-item-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.hero-item-button {
+    height: 22px;
+    font-size: 11px;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-top: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.hero-item-subtitle {
+    margin-top: 10px;
+}
+
+.hero-item-list {
+    flex-direction: column;
+}
+
+.hero-item-row {
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+    background-color: rgb(33, 37, 44);
+    border-left-width: 2px;
+    border-left-color: rgb(91, 80, 62);
+}
+
+.hero-item-message {
+    margin-top: 6px;
+    white-space: normal;
+}

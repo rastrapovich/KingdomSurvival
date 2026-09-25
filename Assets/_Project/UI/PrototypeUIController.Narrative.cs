@@ -297,9 +297,7 @@ public partial class PrototypeUIController
         // ПР-06А: те же спутники, что в Chapter01ContextBuilder — бойцы и свита.
         List<string> presentCompanionIds = Chapter01ContextBuilder.GetPresentCompanionIds(gameState);
 
-        List<string> presentItemIds = new List<string>();
-        if (gameState.Narrative.Items != null)
-            presentItemIds.AddRange(gameState.Narrative.Items);
+        List<string> presentItemIds = Chapter01ContextBuilder.GetPresentItemIds(gameState);
 
         bool started = narrativeDialogueSession.Start(
             narrativeDialogueDatabase,

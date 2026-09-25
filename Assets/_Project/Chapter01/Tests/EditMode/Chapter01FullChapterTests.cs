@@ -22,7 +22,9 @@ public sealed class Chapter01FullChapterTests
         Chapter01Ids.Dialogues.D14Half, Chapter01Ids.Dialogues.D15, Chapter01Ids.Dialogues.D16,
         Chapter01Ids.Dialogues.D17,
         // ПР-06Б: семья у ворот (дело в Доме после N05) и выход на берег у брода.
-        Chapter01Ids.Dialogues.GateFamily, Chapter01Ids.Dialogues.D12B
+        Chapter01Ids.Dialogues.GateFamily, Chapter01Ids.Dialogues.D12B,
+        // ПР-08: выбор развития героя после возвращения, до Совета.
+        Chapter01Ids.Dialogues.D16B
     };
 
     private static readonly string[] InvestigationScenes =

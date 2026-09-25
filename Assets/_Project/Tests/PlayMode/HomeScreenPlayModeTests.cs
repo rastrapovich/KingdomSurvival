@@ -71,6 +71,44 @@ public sealed class HomeScreenPlayModeTests
         return button;
     }
 
+    // ПР-08: экран героя — слоты выбранного человека и «Надеть» из кладовой.
+    [UnityTest]
+    public IEnumerator HeroScreen_ShowsEquipment_AndEquipsFromStoreroom()
+    {
+        AsyncOperation load = SceneManager.LoadSceneAsync(MainScene, LoadSceneMode.Single);
+        while (!load.isDone)
+            yield return null;
+        yield return Frames(20);
+
+        MonoBehaviour controller = FindController();
+        Invoke(controller, "StartNewGameFromMenu");
+        yield return Frames(20);
+        Invoke(controller, "OpenHeroScreen");
+        yield return Frames(5);
+
+        GameState campaign = CampaignSession.Current;
+        VisualElement root = controller.GetComponent<UIDocument>().rootVisualElement;
+        Assert.AreEqual("Меч", root.Q<Label>("hero-screen-equipment-slot-1-name").text);
+        StringAssert.DoesNotContain("позже", root.Q<Label>("hero-screen-states-hint").text);
+
+        string garrick = campaign.FindFighter("garrick").Name;
+        Button garrickChip = root.Q<VisualElement>("hero-screen-equipment-people").Query<Button>().ToList()
+            .First(b => b.text == garrick);
+        Click(garrickChip);
+        yield return Frames(3);
+        Assert.AreEqual("Кольчуга", root.Q<Label>("hero-screen-equipment-slot-2-name").text);
+
+        Button equip = root.Q<VisualElement>("hero-screen-inventory-storage").Query<Button>().ToList()
+            .First(b => b.text == "Надеть: " + garrick && b.parent.parent.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"));
+        Click(equip);
+        yield return Frames(3);
+
+        Assert.AreEqual(ItemCatalog.StoreroomMail, ItemService.Equipped(campaign, "garrick", ItemSlot.Protection).ItemId);
+        Assert.AreEqual("Кольчуга из клети", root.Q<Label>("hero-screen-equipment-slot-2-name").text);
+        Assert.AreEqual(CombatStatsAssembler.Compute(campaign, "garrick").Final.Defense.ToString(),
+            root.Q<Label>("hero-screen-stat-defense-value").text, "Экран показывает собранные числа.");
+    }
+
     [UnityTest]
     public IEnumerator PrepPanel_Buttons_ChangeSharedRoster_AndForecast_PeopleStayHome()
     {

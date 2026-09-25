@@ -650,7 +650,7 @@ public static class ExpeditionDecisionSystem
             string deliveredResources =
                 state.CompleteExpeditionReturn();
             return
-                "Армия вернулась в столицу. " +
+                "Отряд вернулся в Дом. " +
                 deliveredResources;
         }
 

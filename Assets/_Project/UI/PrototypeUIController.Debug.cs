@@ -10,8 +10,6 @@ public partial class PrototypeUIController
 
     private Label debugGoldValueLabel;
     private Label debugFoodValueLabel;
-    private Label debugPopulationValueLabel;
-    private Label debugMoodValueLabel;
     private Label debugArmyGoldValueLabel;
     private Label debugArmySupplyValueLabel;
     private Label debugExpeditionStateLabel;
@@ -119,35 +117,23 @@ public partial class PrototypeUIController
         scroll.AddToClassList("debug-scroll");
         debugPanel.Add(scroll);
 
-        AddDebugSectionTitle(scroll, "ПОСЕЛЕНИЕ");
+        AddDebugSectionTitle(scroll, "ДОМ");
 
+        // ПР-07А-1: отладочные кнопки ресурсов живут только здесь; население
+        // выводится из людей, настроения больше нет.
         debugGoldValueLabel = CreateDebugValueLabel();
         scroll.Add(CreateDebugResourceRow(
             "Золото",
-            goldMinus10Button,
+            CreateDebugStepButton("−10", () => AdjustDebugGold(-10)),
             debugGoldValueLabel,
-            goldPlus10Button));
+            CreateDebugStepButton("+10", () => AdjustDebugGold(10))));
 
         debugFoodValueLabel = CreateDebugValueLabel();
         scroll.Add(CreateDebugResourceRow(
             "Пища",
-            foodMinus10Button,
+            CreateDebugStepButton("−10", () => AdjustDebugFood(-10)),
             debugFoodValueLabel,
-            foodPlus10Button));
-
-        debugPopulationValueLabel = CreateDebugValueLabel();
-        scroll.Add(CreateDebugResourceRow(
-            "Население",
-            populationMinus10Button,
-            debugPopulationValueLabel,
-            populationPlus10Button));
-
-        debugMoodValueLabel = CreateDebugValueLabel();
-        scroll.Add(CreateDebugResourceRow(
-            "Настроение",
-            moodMinus10Button,
-            debugMoodValueLabel,
-            moodPlus10Button));
+            CreateDebugStepButton("+10", () => AdjustDebugFood(10))));
 
         AddDebugSectionTitle(scroll, "ОТРЯД");
 
@@ -324,8 +310,6 @@ public partial class PrototypeUIController
         debugToggleButton.SetEnabled(!isGameOver);
         debugGoldValueLabel.text = gameState.Gold.ToString();
         debugFoodValueLabel.text = gameState.Food.ToString();
-        debugPopulationValueLabel.text = gameState.Population.ToString();
-        debugMoodValueLabel.text = gameState.Mood.ToString();
         debugArmyGoldValueLabel.text = gameState.ArmyGold.ToString();
         debugArmySupplyValueLabel.text = gameState.ArmySupply.ToString();
 
@@ -428,6 +412,18 @@ public partial class PrototypeUIController
                 (location.IsDiscovered ? " [открыта]" : " [скрыта]");
         }
         return result;
+    }
+
+    private void AdjustDebugGold(int delta)
+    {
+        gameState.Gold = Math.Max(0, gameState.Gold + delta);
+        RefreshInterface();
+    }
+
+    private void AdjustDebugFood(int delta)
+    {
+        gameState.Food = Math.Max(0, gameState.Food + delta);
+        RefreshInterface();
     }
 
     private void AdjustDebugArmyGold(int delta)
@@ -608,7 +604,6 @@ public partial class PrototypeUIController
 
         AddReport("[DEBUG]\n" + resultMessage);
         RefreshInterface();
-        CheckForDefeat();
     }
 
     private void DebugResetGame()

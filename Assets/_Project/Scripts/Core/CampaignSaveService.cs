@@ -112,6 +112,13 @@ public static class CampaignSaveService
 
         ContinuousSimulationSystem.RestoreSnapshot(state, data.ClockSnapshot);
         BuildingSystem.RestoreSnapshot(state, data.BuildingSnapshot);
+        // ПР-07А-1: прежний каталог построек выключен — незавершённая
+        // стройка отменяется с возвратом до того, как часы её «достроят».
+        BuildingSystem.RetireLegacyCatalog(state);
+
+        // ПР-07А-1: у сохранений до подготовки состава её нет.
+        if (state.Preparation == null)
+            state.Preparation = new ExpeditionPreparationData();
 
         // ПР-06А: население — производное, пересчитывается из людей.
         HomePeopleService.RecountPopulation(state);

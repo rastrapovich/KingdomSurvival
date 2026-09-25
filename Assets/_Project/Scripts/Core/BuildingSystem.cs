@@ -99,6 +99,15 @@ public static class BuildingSystem
     // из мира и отношений, а не производиться очередью. Заменить после
     // приоритизации первого региона.
     public const int RecruitGoldCost = 35;
+
+    // ПР-07А-1 (PR07_HOME_SPEC §9.2): каталог построек выключен. Старые
+    // здания не дают доходов, не требуют содержания, новые стройки не
+    // начинаются; данные остаются в сохранении для совместимости. Суточный
+    // приток — только базовое хозяйство (BaseDailyGoldIncome и приток пищи
+    // пресета старта).
+    public static readonly bool LegacyCatalogEnabled = false;
+    public const string CatalogDisabledMessage =
+        "Строительства из каталога больше нет: Дом меняется через людей и их дела.";
     public const double RecruitHours = 8.0;
     public const int PrototypeMaxFighters = 6;
 
@@ -180,6 +189,9 @@ public static class BuildingSystem
             return;
 
         RuntimeState runtime = GetRuntime(state);
+        if (!LegacyCatalogEnabled)
+            return;
+
         double now = GetAbsoluteGameHour(state);
 
         foreach (BuildingStateData building in runtime.Buildings.Values)
@@ -241,6 +253,12 @@ public static class BuildingSystem
         resultMessage = "Строительство сейчас недоступно.";
         if (state == null)
             return false;
+
+        if (!LegacyCatalogEnabled)
+        {
+            resultMessage = CatalogDisabledMessage;
+            return false;
+        }
 
         Synchronize(state);
         BuildingDefinition definition = FindDefinition(buildingId);
@@ -310,6 +328,8 @@ public static class BuildingSystem
     {
         Synchronize(state);
         int total = BaseDailyGoldIncome;
+        if (!LegacyCatalogEnabled)
+            return total;
         foreach (BuildingDefinition definition in Definitions)
         {
             if (definition.DailyGoldIncome > 0 && IsCompleted(state, definition.Id))
@@ -323,6 +343,8 @@ public static class BuildingSystem
         Synchronize(state);
         // ПР-06А: базовый приток задаёт пресет старта (GameState.BaseDailyFoodIncome).
         int total = state.BaseDailyFoodIncome > 0 ? state.BaseDailyFoodIncome : BaseDailyFoodIncome;
+        if (!LegacyCatalogEnabled)
+            return total;
         foreach (BuildingDefinition definition in Definitions)
         {
             if (definition.DailyFoodIncome > 0 && IsCompleted(state, definition.Id))
@@ -335,6 +357,8 @@ public static class BuildingSystem
     {
         Synchronize(state);
         int total = 0;
+        if (!LegacyCatalogEnabled)
+            return total;
         foreach (BuildingDefinition definition in Definitions)
         {
             if (definition.DailyGoldUpkeep > 0 && IsCompleted(state, definition.Id))
@@ -451,6 +475,49 @@ public static class BuildingSystem
         return recruitment.IsActive
             ? Math.Max(0.0, recruitment.CompletesAtGameHour - GetAbsoluteGameHour(state))
             : 0.0;
+    }
+
+    // ПР-07А-1: однократное преобразование сохранения с прежней экономикой.
+    // Незавершённая стройка и платный найм прекращаются, уплаченное
+    // возвращается (цена — из описания постройки); завершённые здания
+    // остаются записями без эффекта. Идемпотентно по построению: после
+    // преобразования незавершённого не остаётся, повторный вызов ничего не
+    // начисляет. Возвращает сумму возврата.
+    public static int RetireLegacyCatalog(GameState state)
+    {
+        if (state == null || LegacyCatalogEnabled)
+            return 0;
+
+        RuntimeState runtime = GetRuntime(state);
+        int refund = 0;
+        foreach (BuildingStateData building in runtime.Buildings.Values)
+        {
+            if (building.Status != BuildingStatus.Constructing)
+                continue;
+
+            BuildingDefinition definition = FindDefinition(building.BuildingId);
+            if (definition != null && definition.Id != MineId)
+                refund += definition.GoldCost;
+            building.Status = BuildingStatus.Available;
+            building.StartedAtGameHour = 0.0;
+            building.CompletesAtGameHour = 0.0;
+        }
+
+        if (runtime.Recruitment.IsActive)
+        {
+            refund += RecruitGoldCost;
+            runtime.Recruitment = new RecruitmentStateData();
+        }
+
+        if (refund > 0)
+        {
+            state.Gold += refund;
+            runtime.Notices.Enqueue(
+                "Экран Дома обновлён. Прежняя стройка отменена, возвращено " + refund +
+                " золота; прежние бонусы и содержание построек больше не действуют.");
+        }
+
+        return refund;
     }
 
     public static List<string> ConsumeNotices(GameState state)

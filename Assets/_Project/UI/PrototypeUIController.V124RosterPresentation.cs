@@ -70,7 +70,7 @@ public partial class PrototypeUIController
         foreach (string line in lines)
         {
             if (line.StartsWith("Сила отряда:") ||
-                line.StartsWith("Гарнизон столицы:"))
+                line.StartsWith("Гарнизон Дома:"))
             {
                 continue;
             }
@@ -87,11 +87,11 @@ public partial class PrototypeUIController
         element.text = element.text
             .Replace("Ожидает приказа короля", "Ожидает решения")
             .Replace("ожидает приказа короля", "ожидает решения")
-            .Replace("столицу", "поселение")
-            .Replace("столицы", "поселения")
-            .Replace("столице", "поселении")
-            .Replace("Столицу", "Поселение")
-            .Replace("Столицы", "Поселения")
-            .Replace("Столице", "Поселении");
+            .Replace("столицу", "Дом")
+            .Replace("столицы", "Дома")
+            .Replace("столице", "Доме")
+            .Replace("Столицу", "Дом")
+            .Replace("Столицы", "Дома")
+            .Replace("Столице", "Доме");
     }
 }

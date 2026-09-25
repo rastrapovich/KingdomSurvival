@@ -143,7 +143,7 @@ public partial class PrototypeUIController
         {
             stateText = "возвращается";
             timingText =
-                "Расчётное время до столицы: " +
+                "Расчётное время до Дома: " +
                 ContinuousExpeditionCommands.FormatHours(
                     ContinuousSimulationSystem.GetTravelHoursRemaining(gameState));
         }

@@ -34,9 +34,6 @@ public partial class PrototypeUIController
     private bool retinueBound;
     private string retinueSignature;
 
-    // Выбор свиты в подготовке (как selectedFighterIds для бойцов).
-    private string selectedRetinueId;
-
     private void RefreshHomePeopleUi()
     {
         if (gameState == null || interfaceRoot == null)
@@ -103,7 +100,8 @@ public partial class PrototypeUIController
 
         int members = HomePeopleService.CountHomeMembers(gameState);
         int present = HomePeopleService.CountHomePresent(gameState);
-        homePeopleSummary.text = members + " жителей · дома " + present + " · в походе " + (members - present);
+        homePeopleSummary.text = members + " жителей · дома " + present + " · в походе " + (members - present) +
+                                 "\n" + HomeOverview.DescribeDefense(gameState);
         homePeopleMaintenance.text = FunctionLine("Ремонт", maintenance);
         homePeopleCare.text = FunctionLine("Уход за ранеными", care);
 
@@ -162,7 +160,7 @@ public partial class PrototypeUIController
         if (gameState == null)
             return;
 
-        HomeLife.TryStartYardDeck(gameState, out string message);
+        Chapter01HomeActivities.TryStartYardDeck(gameState, out string message);
         AddReport(message);
         homePeopleSignature = null;
         RefreshInterface();
@@ -261,59 +259,43 @@ public partial class PrototypeUIController
         retinueBound = true;
     }
 
+    // ПР-07А-1: свита — часть общего подготовленного состава
+    // (ExpeditionPreparation); проверки — в команде.
     private void SelectRetinue(string personId)
     {
-        if (!string.IsNullOrEmpty(personId) && !HomePeopleService.CanJoinAsRetinue(gameState, personId, out string reason))
-        {
-            AddReport("Нельзя взять в свиту: " + reason + ".");
-            return;
-        }
-
-        selectedRetinueId = personId;
-        // Если поход уже подготовлен и ещё не тронулся — меняем его свиту.
-        if (gameState.HasActiveExpedition && ContinuousPreparationCommands.CanEditPreparedRoster(gameState))
-            ContinuousPreparationCommands.TrySetPreparedRetinue(gameState, personId, out _);
-        retinueSignature = null;
-    }
-
-    private void ApplySelectedRetinueToExpedition()
-    {
-        if (gameState == null || !gameState.HasActiveExpedition)
-            return;
-
-        if (!ContinuousPreparationCommands.TrySetPreparedRetinue(gameState, selectedRetinueId, out string message) &&
-            !string.IsNullOrEmpty(selectedRetinueId))
-        {
+        if (!ExpeditionPreparation.TrySetRetinue(gameState, personId, out string message))
             AddReport(message);
-        }
+        retinueSignature = null;
+        RefreshStableUiAfterStateChange();
     }
+
+    private string SelectedRetinueId => gameState != null ? ExpeditionPreparation.GetRetinueId(gameState) : null;
 
     private void RefreshRetinueIfChanged()
     {
-        // Недоступного больше специалиста (погиб, ранен) из выбора убираем.
-        if (!string.IsNullOrEmpty(selectedRetinueId) &&
-            !HomePeopleService.CanJoinAsRetinue(gameState, selectedRetinueId, out _) &&
-            !HomePeopleService.IsInExpedition(gameState, selectedRetinueId))
-        {
-            selectedRetinueId = null;
-        }
+        string retinueId = SelectedRetinueId;
+        List<string> leaving = new List<string>(ExpeditionPreparation.GetFighterIds(gameState));
+        if (!string.IsNullOrEmpty(retinueId))
+            leaving.Add(retinueId);
+        // Прогноз учитывает всех уходящих, включая Командира (§8.5).
+        CommanderData commander = gameState.GetSelectedCommander();
+        if (commander != null)
+            leaving.Add(commander.Id);
 
-        List<string> leaving = new List<string>(selectedFighterIds);
-        if (!string.IsNullOrEmpty(selectedRetinueId))
-            leaving.Add(selectedRetinueId);
-
-        string current = (selectedRetinueId ?? "-") + "|" + string.Join(",", leaving) + "|" + homePeopleSignature;
+        string current = (retinueId ?? "-") + "|" + string.Join(",", leaving) + "|" + homePeopleSignature;
         if (current == retinueSignature)
             return;
         retinueSignature = current;
 
-        retinueNoneButton.EnableInClassList(RetinueSelectedClass, string.IsNullOrEmpty(selectedRetinueId));
-        retinueOstafiyButton.EnableInClassList(RetinueSelectedClass, selectedRetinueId == HomePeopleService.OstafiyId);
-        retinueLadaButton.EnableInClassList(RetinueSelectedClass, selectedRetinueId == HomePeopleService.LadaId);
-        retinueOstafiyButton.SetEnabled(HomePeopleService.CanJoinAsRetinue(gameState, HomePeopleService.OstafiyId, out _));
-        retinueLadaButton.SetEnabled(HomePeopleService.CanJoinAsRetinue(gameState, HomePeopleService.LadaId, out _));
+        retinueNoneButton.EnableInClassList(RetinueSelectedClass, string.IsNullOrEmpty(retinueId));
+        retinueOstafiyButton.EnableInClassList(RetinueSelectedClass, retinueId == HomePeopleService.OstafiyId);
+        retinueLadaButton.EnableInClassList(RetinueSelectedClass, retinueId == HomePeopleService.LadaId);
+        bool editable = ExpeditionPreparation.CanEdit(gameState);
+        retinueNoneButton.SetEnabled(editable);
+        retinueOstafiyButton.SetEnabled(editable && HomePeopleService.CanJoinAsRetinue(gameState, HomePeopleService.OstafiyId, out _));
+        retinueLadaButton.SetEnabled(editable && HomePeopleService.CanJoinAsRetinue(gameState, HomePeopleService.LadaId, out _));
 
-        ResidentState chosen = HomePeopleService.Find(gameState, selectedRetinueId);
+        ResidentState chosen = HomePeopleService.Find(gameState, retinueId);
         retinueDescription.text = chosen != null
             ? chosen.DisplayName + ": " + chosen.ShortDescription
             : "Отряд уйдёт без специалиста. Свита не идёт в бой, но ест из припасов похода.";
@@ -321,7 +303,6 @@ public partial class PrototypeUIController
         HomeFunctionReport maintenance = HomeFunctionResolver.Forecast(gameState, HomeFunctionResolver.MaintenanceId, leaving);
         HomeFunctionReport care = HomeFunctionResolver.Forecast(gameState, HomeFunctionResolver.CareId, leaving);
         retinueForecast.text = "Дома после выхода: " + FunctionLine("ремонт", maintenance) + " " +
-                               FunctionLine("уход", care) + " Припасы похода: " +
-                               (1 + selectedFighterIds.Count + (chosen != null ? 1 : 0)) + " в сутки.";
+                               FunctionLine("уход", care) + " Припасы похода: " + leaving.Count + " в сутки.";
     }
 }

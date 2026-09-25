@@ -169,6 +169,13 @@ public static class HomeLife
             return false;
         }
 
+        // ПР-07А-1: домашние работы начинает только тот, кто дома.
+        if (HomePeopleService.HasDeparted(state))
+        {
+            message = "Нужно вернуться в Дом.";
+            return false;
+        }
+
         HomeWorkState existing = FindWork(state, YardDeckWorkId);
         if (existing != null)
         {

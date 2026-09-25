@@ -122,28 +122,23 @@ public class CampaignSaveServiceTests
     }
 
     [Test]
-    public void SaveLoad_PreservesCompletedBarracksWithoutPaidRecruitment()
+    public void SaveLoad_PreservesPreparedRoster_OrderAndRetinue()
     {
-        // ПР-06Б: платного найма нет — после сохранения казармы построены,
-        // очередь бойцов не появляется.
+        // ПР-07А-1: подготовленный состав переживает save/load, люди не
+        // перемещаются (все дома).
         GameState state = new GameState();
         state.CreateNewGame(1);
-        state.Gold = 1000;
-        string message;
-        BuildingSystem.TryStartConstruction(state, BuildingSystem.BarracksId, out message);
-        ContinuousSimulationSystem.SetPaused(state, false);
-        ContinuousSimulationSystem.SetSpeedMultiplier(
-            state, ContinuousSimulationSystem.MaximumSpeedMultiplier);
-        ContinuousSimulationSystem.Advance(state, 7f, false);
-        Assert.That(BuildingSystem.TryStartRecruitment(state, out message), Is.False);
+        Assert.That(ExpeditionPreparation.TryAddFighter(state, "torvin", out string message), Is.True, message);
+        Assert.That(ExpeditionPreparation.TryAddFighter(state, "garrick", out message), Is.True, message);
+        Assert.That(ExpeditionPreparation.TrySetRetinue(state, "lada", out message), Is.True, message);
 
         CampaignSaveData data = CampaignSaveService.ExportCampaign(state);
-        string json = JsonUtility.ToJson(data);
-        CampaignSaveData loaded = JsonUtility.FromJson<CampaignSaveData>(json);
-        GameState restored = CampaignSaveService.RestoreCampaign(loaded);
+        GameState restored = CampaignSaveService.RestoreCampaign(
+            JsonUtility.FromJson<CampaignSaveData>(JsonUtility.ToJson(data)));
 
-        Assert.That(BuildingSystem.IsCompleted(restored, BuildingSystem.BarracksId), Is.True);
-        Assert.That(BuildingSystem.IsRecruitmentActive(restored), Is.False);
-        Assert.That(restored.Fighters.Count, Is.EqualTo(state.Fighters.Count));
+        Assert.That(ExpeditionPreparation.GetFighterIds(restored), Is.EqualTo(new[] { "torvin", "garrick" }));
+        Assert.That(ExpeditionPreparation.GetRetinueId(restored), Is.EqualTo("lada"));
+        Assert.That(restored.HasActiveExpedition, Is.False);
+        Assert.That(restored.DailyFoodConsumption, Is.EqualTo(state.DailyFoodConsumption), "Подготовка не уводит людей из Дома.");
     }
 }

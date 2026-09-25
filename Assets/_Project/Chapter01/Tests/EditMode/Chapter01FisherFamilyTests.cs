@@ -281,4 +281,20 @@ public sealed class Chapter01FisherFamilyTests
         Assert.AreEqual(2.0, gameState.ActiveExpedition.ActiveActivity.TotalHours, 1e-9, "Остафия в отряде нет — час за него не списывается.");
         Assert.IsTrue(gameState.Narrative.HasFlag(Chapter01Ids.Flags.FordAccessBypass));
     }
+
+    // --- ПР-07А-1: команда домашней работы проверяет условие главы ---
+
+    [Test]
+    public void YardDeckCommand_RejectedBeforeFlood_AcceptedAfterRepairDecision()
+    {
+        GameState before = NewGame(20260925);
+        before.Gold = 100;
+        Assert.IsFalse(Chapter01HomeActivities.TryStartYardDeck(before, out string message));
+        Assert.AreEqual(100, before.Gold, message);
+
+        GameState after = GameAfterRepairDecision();
+        after.Gold = 100;
+        Assert.IsTrue(Chapter01HomeActivities.TryStartYardDeck(after, out message), message);
+        Assert.AreEqual(100 - HomeLife.YardDeckGoldCost, after.Gold);
+    }
 }

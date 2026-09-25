@@ -76,15 +76,6 @@ public partial class PrototypeUIController
             decisionOptionAButton.clicked += OnStablePostActionRefresh;
         if (decisionOptionBButton != null)
             decisionOptionBButton.clicked += OnStablePostActionRefresh;
-
-        goldMinus10Button.clicked += OnStablePostActionRefresh;
-        goldPlus10Button.clicked += OnStablePostActionRefresh;
-        foodMinus10Button.clicked += OnStablePostActionRefresh;
-        foodPlus10Button.clicked += OnStablePostActionRefresh;
-        populationMinus10Button.clicked += OnStablePostActionRefresh;
-        populationPlus10Button.clicked += OnStablePostActionRefresh;
-        moodMinus10Button.clicked += OnStablePostActionRefresh;
-        moodPlus10Button.clicked += OnStablePostActionRefresh;
     }
 
     private void OnStableNavigationChanged()
@@ -129,9 +120,6 @@ public partial class PrototypeUIController
         {
             cancelled =
                 gameState.TryCancelPreparedExpedition(out resultMessage);
-
-            if (cancelled)
-                selectedFighterIds.Clear();
         }
         else
         {

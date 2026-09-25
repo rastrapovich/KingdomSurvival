@@ -768,9 +768,11 @@ public partial class PrototypeUIController
         }
         else
         {
-            foreach (FighterData fighter in gameState.Fighters)
+            // ПР-07А-1: места в порядке общей подготовки.
+            foreach (string fighterId in ExpeditionPreparation.GetFighterIds(gameState))
             {
-                if (selectedFighterIds.Contains(fighter.Id))
+                FighterData fighter = gameState.FindFighter(fighterId);
+                if (fighter != null)
                     slotFighters.Add(fighter);
             }
         }

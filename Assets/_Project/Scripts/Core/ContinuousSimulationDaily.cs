@@ -22,9 +22,9 @@ public static partial class ContinuousSimulationSystem
             state.Gold + dailyGoldIncome - dailyGoldUpkeep);
         state.Food += dailyFoodIncome;
         batch.Result.Messages.Add(
-            "Полночь. Казна получила " + dailyGoldIncome +
-            " золота, содержание построек: " + dailyGoldUpkeep +
-            ". Город получил " + dailyFoodIncome + " пищи.");
+            "Полночь. В казну Дома поступило " + dailyGoldIncome + " золота" +
+            (dailyGoldUpkeep > 0 ? ", на содержание ушло " + dailyGoldUpkeep : "") +
+            ". В запасы Дома поступило " + dailyFoodIncome + " пищи.");
 
         ResolveCityFoodAtMidnight(state, batch.Result);
         ResolveExpeditionSupplyAtMidnight(state, runtime, batch.Result);
@@ -48,7 +48,7 @@ public static partial class ContinuousSimulationSystem
 
             if (state.ConsecutiveFoodShortageDays > 0)
             {
-                result.Messages.Add("Нехватка городской пищи прекратилась.");
+                result.Messages.Add("Нехватка еды в Доме прекратилась.");
                 result.HadNotableOccurrence = true;
             }
 
@@ -64,21 +64,16 @@ public static partial class ContinuousSimulationSystem
         state.ConsecutiveFoodShortageDays++;
         result.HadNotableOccurrence = true;
         result.Messages.Add(
-            "Городу не хватило " + shortage +
+            "Дому не хватило " + shortage +
             " пищи. Нехватка подряд: " +
             state.ConsecutiveFoodShortageDays + " сут." );
 
-        if (state.ConsecutiveFoodShortageDays <= MoodOnlyShortageDays)
+        // ПР-06А: голод не стирает безымянных жителей — у Дома конкретные
+        // люди; смерть — только авторским событием. ПР-07А-1: настроения
+        // больше нет — голод означает нехватку и остановку ухода
+        // (HomeFunctionResolver) с той же полуночи, что и в сообщении.
+        if (state.ConsecutiveFoodShortageDays >= HomeFunctionResolver.CareStopsAfterShortageDays)
         {
-            state.Mood = Math.Max(0, state.Mood - MoodLossPerShortageDay);
-            result.Messages.Add(
-                "Настроение снизилось на " + MoodLossPerShortageDay + ".");
-        }
-        else
-        {
-            // ПР-06А: голод больше не стирает безымянных жителей — у Дома
-            // конкретные люди. Затяжная нехватка останавливает уход
-            // (HomeFunctionResolver); смерть — только авторским событием.
             result.Messages.Add(
                 "Голод затянулся: люди слабеют, уход за ранеными остановлен до появления еды.");
         }
@@ -243,9 +238,9 @@ public static partial class ContinuousSimulationSystem
             Title = "ЭКСПЕДИЦИЯ ВЕРНУЛАСЬ",
             Description =
                 snapshot.CommanderName + " и " + snapshot.FighterCount +
-                " воинов прибыли в столицу.",
+                " воинов вернулись в Дом.",
             Consequence =
-                "В столицу передано: золото +" + snapshot.ArmyGold +
+                "В Дом передано: золото +" + snapshot.ArmyGold +
                 ", пища +" + snapshot.ArmySupply + "."
         };
         batch.RequestAutoPause = true;

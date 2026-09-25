@@ -83,6 +83,7 @@ public static class ContinuousPreparationCommands
         ExpeditionData expedition = state.ActiveExpedition;
         expedition.FighterIds.Clear();
         expedition.FighterIds.AddRange(orderedIds);
+        ExpeditionPreparation.RememberExpeditionRoster(state);
 
         resultMessage =
             "Состав подготовленного похода изменён: командир + " +
@@ -109,6 +110,7 @@ public static class ContinuousPreparationCommands
         if (string.IsNullOrEmpty(personId))
         {
             expedition.RetinueIds.Clear();
+            ExpeditionPreparation.RememberExpeditionRoster(state);
             resultMessage = "Поход без специалиста.";
             return true;
         }
@@ -127,6 +129,7 @@ public static class ContinuousPreparationCommands
 
         expedition.RetinueIds.Clear();
         expedition.RetinueIds.Add(personId);
+        ExpeditionPreparation.RememberExpeditionRoster(state);
         resultMessage = "Специалист в походе: " + HomePeopleService.Find(state, personId).DisplayName + ".";
         return true;
     }

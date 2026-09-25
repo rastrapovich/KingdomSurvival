@@ -393,7 +393,7 @@ public partial class PrototypeUIController
 
         journeySummaryEmptyLabel.text = gameState.HasActiveExpedition
             ? "Новых происшествий пока нет."
-            : "Армия находится в столице. Новых происшествий нет.";
+            : "Отряд в Доме. Новых происшествий нет.";
     }
 
 }

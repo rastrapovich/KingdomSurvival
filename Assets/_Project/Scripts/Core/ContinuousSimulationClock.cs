@@ -71,8 +71,6 @@ public static partial class ContinuousSimulationSystem
     public const double StartHour = 8.0;
 
     private const double Epsilon = 0.00001;
-    private const int MoodLossPerShortageDay = 1;
-    private const int MoodOnlyShortageDays = 3;
 
     private sealed class RuntimeState
     {

@@ -38,25 +38,22 @@
                     <ui:VisualElement name="capital-screen" class="game-screen shell-content-screen">
                         <ui:ScrollView class="shell-screen-scroll">
                             <ui:VisualElement class="panel shell-content-panel">
-                                <ui:Label text="СТОЛИЦА" class="panel-title" />
-                                <ui:Label text="Здания и основные городские действия" class="panel-description" />
+                                <ui:Label text="ДОМ" class="panel-title" />
+                                <ui:Label text="Люди, запасы и дела Дома" class="panel-description" />
                                 <ui:VisualElement name="capital-resource-panel" class="capital-resource-panel">
-                                    <ui:Label text="СОСТОЯНИЕ ПОСЕЛЕНИЯ" class="section-title capital-resource-title" />
+                                    <ui:Label text="СОСТОЯНИЕ ДОМА" class="section-title capital-resource-title" />
                                     <ui:VisualElement class="resource-strip capital-resource-strip">
                                         <ui:VisualElement class="resource-box capital-resource-box">
                                             <ui:Label name="gold-label" text="Золото: 120" class="resource-value" /><ui:Label name="gold-income-label" text="+3" class="resource-income" />
-                                            <ui:VisualElement class="resource-test-controls"><ui:Button name="gold-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="gold-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
+                                            
                                         </ui:VisualElement>
                                         <ui:VisualElement class="resource-box food-box capital-resource-box">
                                             <ui:Label name="food-label" text="Пища: 72" class="resource-value" /><ui:Label name="food-income-label" text="+7" class="resource-income" />
-                                            <ui:VisualElement class="resource-test-controls"><ui:Button name="food-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="food-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
+                                            
                                             <ui:VisualElement class="food-expense-popup"><ui:Label name="food-consumption-label" text="Расход: 24 в день" class="food-expense-text" /></ui:VisualElement>
                                         </ui:VisualElement>
                                         <ui:VisualElement class="resource-box capital-resource-box">
-                                            <ui:Label name="population-label" text="Население: 24" class="resource-value" /><ui:VisualElement class="resource-test-controls"><ui:Button name="population-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="population-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
-                                        </ui:VisualElement>
-                                        <ui:VisualElement class="resource-box capital-resource-box capital-mood-box">
-                                            <ui:Label name="mood-label" text="Настроение: 64/100" class="resource-value" /><ui:VisualElement class="resource-test-controls"><ui:Button name="mood-minus10-button" text="−10" class="resource-test-button" /><ui:Button name="mood-plus10-button" text="+10" class="resource-test-button" /></ui:VisualElement>
+                                            <ui:Label name="population-label" text="Население: 24" class="resource-value" />
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
@@ -79,13 +76,14 @@
                                     <ui:VisualElement name="home-people-list" class="home-people-list" />
                                     <ui:Label name="home-people-detail" class="home-people-detail" />
                                 </ui:VisualElement>
-                                <ui:VisualElement name="building-grid" class="building-grid">
-                                    <ui:Button text="Тронный зал" class="building-card" />
+                                <!-- ПР-07А-1: каталог построек выключен (PR07_HOME_SPEC §9.2); сетка скрыта до пересборки экрана в 07А-2. -->
+                                <ui:VisualElement name="building-grid" class="building-grid" style="display: none;">
+                                    <ui:Button text="Двор" class="building-card" />
                                     <ui:Button text="Амбар" class="building-card" />
                                     <ui:Button text="Казармы" class="building-card" />
                                     <ui:Button text="Рынок" class="building-card" />
                                     <ui:Button text="Шахта" class="building-card" />
-                                    <ui:Button text="Городские проекты" class="building-card" />
+                                    <ui:Button text="Дела Дома" class="building-card" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:ScrollView>
@@ -135,7 +133,7 @@
                                         <ui:VisualElement name="world-map-fog" class="world-map-layer world-map-fog" />
                                         <ui:Button
                                             name="world-map-capital-button"
-                                            text="СТОЛИЦА"
+                                            text="ДОМ"
                                             tooltip="Во время похода нажмите, чтобы приказать армии возвращаться"
                                             class="world-map-capital" />
                                         <ui:VisualElement name="world-map-army-marker" class="world-map-army-marker">
@@ -197,7 +195,7 @@
 
         <ui:VisualElement class="shell-bottom-bar">
             <ui:VisualElement class="navigation-bar shell-navigation-bar">
-                <ui:Button name="nav-capital-button" text="Столица" tooltip="Столица" class="nav-button shell-nav-button nav-capital" />
+                <ui:Button name="nav-capital-button" text="Дом" tooltip="Дом" class="nav-button shell-nav-button nav-capital" />
                 <ui:Button name="nav-expeditions-button" text="Карта" tooltip="Глобальная карта" class="nav-button shell-nav-button nav-expedition" />
                 <ui:Button name="nav-hero-button" text="Герой" tooltip="Экран героя: состав похода, характеристики, снаряжение" class="nav-button shell-nav-button nav-hero" />
                 <ui:Button name="nav-journal-button" text="Журнал" tooltip="Цели и хроника" class="nav-button shell-nav-button nav-journal" />
@@ -223,9 +221,9 @@
         </ui:VisualElement>
         <ui:VisualElement name="game-over-overlay" class="game-over-overlay">
             <ui:VisualElement class="game-over-window">
-                <ui:Label text="ВАС СВЕРГЛИ" class="game-over-title" />
-                <ui:Label text="Подданные наконец достигли редкого политического согласия: король им больше не нужен." class="game-over-description" />
-                <ui:Label name="game-over-days-label" text="Вы удерживали трон: 0 дней" class="game-over-days" />
+                <ui:Label text="КАМПАНИЯ ОКОНЧЕНА" class="game-over-title" />
+                <ui:Label text="Дом остался без того, кто вёл его людей." class="game-over-description" />
+                <ui:Label name="game-over-days-label" text="Дней с начала: 0" class="game-over-days" />
                 <ui:Button name="restart-game-button" text="НАЧАТЬ ЗАНОВО" class="game-over-restart-button" />
             </ui:VisualElement>
         </ui:VisualElement>

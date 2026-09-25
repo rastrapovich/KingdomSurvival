@@ -324,12 +324,11 @@ public partial class PrototypeUIController
                     locationId,
                     false,
                     new List<string>(selectedFighterIds),
-                    out resultMessage);
+                    out resultMessage,
+                    ExpeditionPreparation.GetRetinueId(gameState));
 
             if (changed)
             {
-                ApplySelectedRetinueToExpedition();
-
                 CommanderData commander =
                     gameState.FindCommander(
                         gameState.ActiveExpedition.CommanderId);
@@ -375,12 +374,8 @@ public partial class PrototypeUIController
 
         if (gameState.CanCancelPreparedExpedition)
         {
-            bool cancelled =
-                gameState.TryCancelPreparedExpedition(
-                    out resultMessage);
-
-            if (cancelled)
-                selectedFighterIds.Clear();
+            gameState.TryCancelPreparedExpedition(
+                out resultMessage);
         }
         else
         {
@@ -810,8 +805,8 @@ public partial class PrototypeUIController
         worldMapCapitalButton.text = string.Empty;
         worldMapCapitalButton.tooltip =
             active
-                ? "Столица — нажмите, чтобы приказать армии возвращаться"
-                : "Столица";
+                ? "Дом — нажмите, чтобы приказать отряду возвращаться"
+                : "Дом";
 
         bool canUseCapital =
             active &&

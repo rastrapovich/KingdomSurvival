@@ -80,6 +80,31 @@ public sealed class DevelopmentPlanPrototypeRoadmapTests
     }
 
     [Test]
+    public void Pr07Split_ReplacesTasksWithThreeDeliveries_WithoutValidatorErrors()
+    {
+        DevelopmentPlanAsset plan = NewSeededPlan();
+        try
+        {
+            DevelopmentPlanPrototypeRoadmapSync.Apply(plan);
+            Assert.IsTrue(DevelopmentPlanPr07SplitSync.Apply(plan));
+
+            DevelopmentPhaseData phase = plan.FindPhase("PR07_HOME");
+            Assert.AreEqual(6, phase.tasks.Count(t => t.id.StartsWith("PR07A1-")));
+            Assert.AreEqual(5, phase.tasks.Count(t => t.id.StartsWith("PR07A2-")));
+            Assert.AreEqual(4, phase.tasks.Count(t => t.id.StartsWith("PR07B-")));
+
+            List<ValidationIssue> errors = DevelopmentPlanValidator.Validate(plan)
+                .Where(i => i.Severity == ValidationSeverity.Error)
+                .ToList();
+            Assert.IsEmpty(errors, string.Join("\n", errors.Select(e => e.EntityId + ": " + e.Message)));
+        }
+        finally
+        {
+            Object.DestroyImmediate(plan);
+        }
+    }
+
+    [Test]
     public void Roadmap_PhaseOrdersDoNotCollideWithChapterPhases()
     {
         DevelopmentPlanAsset plan = NewSeededPlan();

@@ -34,21 +34,76 @@ public partial class PrototypeUIController : MonoBehaviour
     private Label foodLabel;
     private Label foodIncomeLabel;
     private Label populationLabel;
-    private Label moodLabel;
     private Label foodConsumptionLabel;
     private Button timeToggleButton;
 
-    private Button goldMinus10Button;
-    private Button goldPlus10Button;
-    private Button foodMinus10Button;
-    private Button foodPlus10Button;
-    private Button populationMinus10Button;
-    private Button populationPlus10Button;
-    private Button moodMinus10Button;
-    private Button moodPlus10Button;
+    // ПР-07А-1: выбор бойцов — не отдельное поле UI, а общий подготовленный
+    // состав кампании (ExpeditionPreparation). Обёртка сохраняет прежний
+    // вид обращений (Contains/Count/Add/Remove), но каждое изменение идёт
+    // через атомарную команду с проверками.
+    private PreparedFighterSelection selectedFighterIds => new PreparedFighterSelection(this);
 
-    private readonly HashSet<string> selectedFighterIds =
-        new HashSet<string>();
+    private sealed class PreparedFighterSelection : IEnumerable<string>
+    {
+        private readonly PrototypeUIController owner;
+
+        public PreparedFighterSelection(PrototypeUIController owner)
+        {
+            this.owner = owner;
+        }
+
+        private IReadOnlyList<string> Ids => owner.gameState != null
+            ? ExpeditionPreparation.GetFighterIds(owner.gameState)
+            : new List<string>();
+
+        public int Count => Ids.Count;
+
+        public bool Contains(string personId)
+        {
+            foreach (string id in Ids)
+            {
+                if (id == personId)
+                    return true;
+            }
+            return false;
+        }
+
+        public void Add(string personId)
+        {
+            if (owner.gameState != null &&
+                !ExpeditionPreparation.TryAddFighter(owner.gameState, personId, out string message) &&
+                !string.IsNullOrEmpty(message))
+            {
+                owner.AddReport(message);
+            }
+        }
+
+        public void Remove(string personId)
+        {
+            if (owner.gameState != null &&
+                !ExpeditionPreparation.TryRemove(owner.gameState, personId, out string message) &&
+                !string.IsNullOrEmpty(message))
+            {
+                owner.AddReport(message);
+            }
+        }
+
+        public void Clear()
+        {
+            if (owner.gameState != null && ExpeditionPreparation.CanEdit(owner.gameState))
+                ExpeditionPreparation.Clear(owner.gameState);
+        }
+
+        public IEnumerator<string> GetEnumerator()
+        {
+            return new List<string>(Ids).GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+    }
 
     private Label expeditionStatusLabel;
     private VisualElement activeExpeditionCard;
@@ -134,18 +189,8 @@ public partial class PrototypeUIController : MonoBehaviour
         foodLabel = root.Q<Label>("food-label");
         foodIncomeLabel = root.Q<Label>("food-income-label");
         populationLabel = root.Q<Label>("population-label");
-        moodLabel = root.Q<Label>("mood-label");
         foodConsumptionLabel = root.Q<Label>("food-consumption-label");
         timeToggleButton = root.Q<Button>("time-toggle-button");
-
-        goldMinus10Button = root.Q<Button>("gold-minus10-button");
-        goldPlus10Button = root.Q<Button>("gold-plus10-button");
-        foodMinus10Button = root.Q<Button>("food-minus10-button");
-        foodPlus10Button = root.Q<Button>("food-plus10-button");
-        populationMinus10Button = root.Q<Button>("population-minus10-button");
-        populationPlus10Button = root.Q<Button>("population-plus10-button");
-        moodMinus10Button = root.Q<Button>("mood-minus10-button");
-        moodPlus10Button = root.Q<Button>("mood-plus10-button");
 
         expeditionStatusLabel = root.Q<Label>("expedition-status-label");
         FindWorldMapElements(root);
@@ -188,17 +233,8 @@ public partial class PrototypeUIController : MonoBehaviour
             foodLabel != null &&
             foodIncomeLabel != null &&
             populationLabel != null &&
-            moodLabel != null &&
             foodConsumptionLabel != null &&
             timeToggleButton != null &&
-            goldMinus10Button != null &&
-            goldPlus10Button != null &&
-            foodMinus10Button != null &&
-            foodPlus10Button != null &&
-            populationMinus10Button != null &&
-            populationPlus10Button != null &&
-            moodMinus10Button != null &&
-            moodPlus10Button != null &&
             expeditionStatusLabel != null &&
             WorldMapElementsExist() &&
             activeExpeditionCard != null &&
@@ -270,8 +306,6 @@ public partial class PrototypeUIController : MonoBehaviour
         reportHistory.Clear();
         reportRequiresAcknowledgement.Clear();
         reportReadStates.Clear();
-        selectedFighterIds.Clear();
-        selectedRetinueId = null;
         homePeopleSignature = null;
         // P08J: «НОВОЕ» — session-only UI-пометка, не сюжетный прогресс
         // (раздел 29 инструкции) — на новой игре сбрасывается вместе с
@@ -363,15 +397,6 @@ public partial class PrototypeUIController : MonoBehaviour
         navCapitalButton.clicked += OnCapitalNavigationClicked;
         navExpeditionsButton.clicked += OnExpeditionsNavigationClicked;
 
-        goldMinus10Button.clicked += OnGoldMinus10Clicked;
-        goldPlus10Button.clicked += OnGoldPlus10Clicked;
-        foodMinus10Button.clicked += OnFoodMinus10Clicked;
-        foodPlus10Button.clicked += OnFoodPlus10Clicked;
-        populationMinus10Button.clicked += OnPopulationMinus10Clicked;
-        populationPlus10Button.clicked += OnPopulationPlus10Clicked;
-        moodMinus10Button.clicked += OnMoodMinus10Clicked;
-        moodPlus10Button.clicked += OnMoodPlus10Clicked;
-
         RegisterWorldMapCallbacks();
         researchExpeditionButton.clicked += OnResearchExpeditionClicked;
         returnExpeditionButton.clicked += OnExpeditionActionClicked;
@@ -389,15 +414,6 @@ public partial class PrototypeUIController : MonoBehaviour
         navCapitalButton.clicked -= OnCapitalNavigationClicked;
         navExpeditionsButton.clicked -= OnExpeditionsNavigationClicked;
 
-        goldMinus10Button.clicked -= OnGoldMinus10Clicked;
-        goldPlus10Button.clicked -= OnGoldPlus10Clicked;
-        foodMinus10Button.clicked -= OnFoodMinus10Clicked;
-        foodPlus10Button.clicked -= OnFoodPlus10Clicked;
-        populationMinus10Button.clicked -= OnPopulationMinus10Clicked;
-        populationPlus10Button.clicked -= OnPopulationPlus10Clicked;
-        moodMinus10Button.clicked -= OnMoodMinus10Clicked;
-        moodPlus10Button.clicked -= OnMoodPlus10Clicked;
-
         UnregisterWorldMapCallbacks();
         researchExpeditionButton.clicked -= OnResearchExpeditionClicked;
         returnExpeditionButton.clicked -= OnExpeditionActionClicked;
@@ -405,52 +421,6 @@ public partial class PrototypeUIController : MonoBehaviour
         restartGameButton.clicked -= OnRestartGameClicked;
 
         callbacksRegistered = false;
-    }
-
-    private void OnGoldMinus10Clicked() => AdjustGold(-10);
-    private void OnGoldPlus10Clicked() => AdjustGold(10);
-    private void OnFoodMinus10Clicked() => AdjustFood(-10);
-    private void OnFoodPlus10Clicked() => AdjustFood(10);
-    private void OnPopulationMinus10Clicked() => AdjustPopulation(-10);
-    private void OnPopulationPlus10Clicked() => AdjustPopulation(10);
-    private void OnMoodMinus10Clicked() => AdjustMood(-10);
-    private void OnMoodPlus10Clicked() => AdjustMood(10);
-
-    private void AdjustGold(int delta)
-    {
-        if (isGameOver)
-            return;
-
-        gameState.Gold = Math.Max(0, gameState.Gold + delta);
-        RefreshInterface();
-    }
-
-    private void AdjustFood(int delta)
-    {
-        if (isGameOver)
-            return;
-
-        gameState.Food = Math.Max(0, gameState.Food + delta);
-        RefreshInterface();
-    }
-
-    private void AdjustPopulation(int delta)
-    {
-        if (isGameOver)
-            return;
-
-        gameState.Population = Math.Max(0, gameState.Population + delta);
-        RefreshInterface();
-    }
-
-    private void AdjustMood(int delta)
-    {
-        if (isGameOver)
-            return;
-
-        gameState.Mood = Math.Max(0, Math.Min(100, gameState.Mood + delta));
-        RefreshInterface();
-        CheckForDefeat();
     }
 
     private void OnRestartGameClicked()
@@ -465,8 +435,8 @@ public partial class PrototypeUIController : MonoBehaviour
 
         string resultMessage;
         List<string> selectedIds = GetSelectedFighterIdsInArmyOrder();
-        if (gameState.TryStartExpedition(locationId, selectedIds, out resultMessage))
-            ApplySelectedRetinueToExpedition();
+        gameState.TryStartExpedition(locationId, selectedIds, out resultMessage,
+            ExpeditionPreparation.GetRetinueId(gameState));
         AddReport(resultMessage);
         RefreshInterface();
     }
@@ -485,18 +455,13 @@ public partial class PrototypeUIController : MonoBehaviour
     private void OnExpeditionActionClicked()
     {
         string resultMessage;
-        bool cancelledBeforeMovement = false;
 
         if (gameState.CanCancelPreparedExpedition)
         {
-            cancelledBeforeMovement =
-                gameState.TryCancelPreparedExpedition(out resultMessage);
+            gameState.TryCancelPreparedExpedition(out resultMessage);
         }
         else
             gameState.TryOrderReturn(out resultMessage);
-
-        if (cancelledBeforeMovement)
-            selectedFighterIds.Clear();
 
         AddReport(resultMessage);
         RefreshInterface();
@@ -526,15 +491,14 @@ public partial class PrototypeUIController : MonoBehaviour
     {
         dayLabel.text = "День: " + gameState.Day;
         goldLabel.text = "Золото: " + gameState.Gold;
-        goldIncomeLabel.text = "+" + gameState.DailyGoldIncome;
+        goldIncomeLabel.text = "+" + BuildingSystem.GetNetDailyGoldIncome(gameState);
         foodLabel.text = "Пища: " + gameState.Food;
-        foodIncomeLabel.text = "+" + gameState.DailyFoodIncome;
-        populationLabel.text = "Население: " + gameState.Population;
-        moodLabel.text = "Настроение: " + gameState.Mood + "/100";
+        foodIncomeLabel.text = "+" + BuildingSystem.GetDailyFoodIncome(gameState);
+        populationLabel.text = "Люди: дома " + HomePeopleService.CountHomePresent(gameState) +
+                               " · в походе " + HomePeopleService.CountExpeditionPresent(gameState);
         foodConsumptionLabel.text =
-            "Расход: " + gameState.DailyFoodConsumption + " в день";
+            "Расход дома: " + gameState.DailyFoodConsumption + " в сутки. " + HomeOverview.DescribeFood(gameState);
 
-        RefreshResourceTestButtons();
         RefreshHeroScreenSupplyPanel();
         RefreshExpeditionPanel();
         RefreshIncidentNotifications();
@@ -555,31 +519,10 @@ public partial class PrototypeUIController : MonoBehaviour
             RefreshCampScreen();
     }
 
-    private void RefreshResourceTestButtons()
-    {
-        bool available = !isGameOver;
-
-        goldMinus10Button.SetEnabled(available && gameState.Gold > 0);
-        goldPlus10Button.SetEnabled(available);
-        foodMinus10Button.SetEnabled(available && gameState.Food > 0);
-        foodPlus10Button.SetEnabled(available);
-        populationMinus10Button.SetEnabled(available && gameState.Population > 0);
-        populationPlus10Button.SetEnabled(available);
-        moodMinus10Button.SetEnabled(available && gameState.Mood > 0);
-        moodPlus10Button.SetEnabled(available && gameState.Mood < 100);
-    }
-
     private List<string> GetSelectedFighterIdsInArmyOrder()
     {
-        List<string> result = new List<string>();
-
-        foreach (FighterData fighter in gameState.Fighters)
-        {
-            if (selectedFighterIds.Contains(fighter.Id))
-                result.Add(fighter.Id);
-        }
-
-        return result;
+        // Порядок мест задаёт игрок (ПР-07А-1), а не порядок списка бойцов.
+        return new List<string>(ExpeditionPreparation.GetFighterIds(gameState));
     }
 
     private string GetFighterNames(List<string> fighterIds)
@@ -699,8 +642,8 @@ public partial class PrototypeUIController : MonoBehaviour
         }
         else if (expedition.Phase == CommanderState.ReturningToCastle)
         {
-            currentTask = "Вернуться в столицу";
-            timingInformation = "До столицы: " +
+            currentTask = "Вернуться в Дом";
+            timingInformation = "До Дома: " +
                 ContinuousExpeditionCommands.FormatHours(
                     ContinuousSimulationSystem.GetTravelHoursRemaining(gameState));
         }
@@ -708,7 +651,7 @@ public partial class PrototypeUIController : MonoBehaviour
         {
             currentTask = "Локация исследована";
             timingInformation =
-                "Расстояние до столицы: " +
+                "Расстояние до Дома: " +
                 ContinuousExpeditionCommands.FormatHours(
                     location.TravelHoursFromCapital);
         }
@@ -724,7 +667,7 @@ public partial class PrototypeUIController : MonoBehaviour
         {
             currentTask = "Исследование этой локации пока не реализовано";
             timingInformation =
-                "Расстояние до столицы: " +
+                "Расстояние до Дома: " +
                 ContinuousExpeditionCommands.FormatHours(
                     location.TravelHoursFromCapital);
         }
@@ -738,7 +681,7 @@ public partial class PrototypeUIController : MonoBehaviour
             "Командир: " + commander.Name + "\n" +
             "Бойцы: " + GetFighterNames(expedition.FighterIds) + "\n" +
             "Сила отряда: " + gameState.ExpeditionDefensePower + "\n" +
-            "Гарнизон столицы: " + gameState.GarrisonFighterCount +
+            "Гарнизон Дома: " + gameState.GarrisonFighterCount +
             " " + GetFighterWord(gameState.GarrisonFighterCount) +
             " · оборона " + gameState.GarrisonDefensePower +
             "/" + gameState.TotalArmyDefensePower + "\n" +
@@ -1061,26 +1004,6 @@ public partial class PrototypeUIController : MonoBehaviour
             incidentUnderstoodButton.style.display = DisplayStyle.Flex;
 
         incidentModalOverlay.style.display = DisplayStyle.None;
-    }
-
-    private void CheckForDefeat()
-    {
-        if (isGameOver || gameState.Mood > 0)
-            return;
-
-        isGameOver = true;
-        int survivedDays = Math.Max(0, gameState.Day - 1);
-
-        HideIncidentModal();
-        ClearQueuedModals();
-        timeToggleButton.SetEnabled(false);
-        gameOverDaysLabel.text =
-            "Вы удерживали трон: " + survivedDays + " " + GetDayWord(survivedDays);
-        gameOverOverlay.style.display = DisplayStyle.Flex;
-
-        RefreshResourceTestButtons();
-        RefreshExpeditionPanel();
-        RefreshIncidentNotifications();
     }
 
     private void HideGameOver()

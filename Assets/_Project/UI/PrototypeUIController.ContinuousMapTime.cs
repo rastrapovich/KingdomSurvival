@@ -93,11 +93,11 @@ public partial class PrototypeUIController
                 locationId,
                 false,
                 GetSelectedFighterIdsInArmyOrder(),
-                out ignoredMessage);
+                out ignoredMessage,
+                ExpeditionPreparation.GetRetinueId(gameState));
 
             if (changed)
             {
-                ApplySelectedRetinueToExpedition();
                 ContinuousSimulationSystem.NotifyRouteChanged(gameState);
                 AddReport(
                     "Приказ на экспедицию отдан. Прямой маршрут: " +

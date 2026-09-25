@@ -195,6 +195,19 @@ namespace KingdomSurvival.Chapter01
                    Chapter01StoryDirector.GetRepairChoice(gameState.Narrative) != Chapter01RepairChoice.None;
         }
 
+        // ПР-07А-1: команда начала работы проверяет и условие главы, а не
+        // только доступность кнопки (PR07_HOME_SPEC §7.1).
+        public static bool TryStartYardDeck(GameState gameState, out string message)
+        {
+            if (!IsYardDeckOffered(gameState))
+            {
+                message = "Сейчас эту работу не начать: настил ещё не разбит паводком.";
+                return false;
+            }
+
+            return HomeLife.TryStartYardDeck(gameState, out message);
+        }
+
         // Глава ждёт ночи: время в Доме должно идти, даже если никто не в пути.
         public static bool IsWaitingForNight(NarrativeStateData state, bool heroAtHome, double hourOfDay)
         {

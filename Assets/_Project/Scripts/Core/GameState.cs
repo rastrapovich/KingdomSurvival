@@ -259,6 +259,10 @@ public class GameState
     // 0 — старое прототипное значение BuildingSystem.BaseDailyFoodIncome.
     public int BaseDailyFoodIncome;
 
+    // ПР-07А-1: подготовленный состав похода (ExpeditionPreparation) —
+    // один выбор для Дома, экрана героя и карты; переживает save/load.
+    public ExpeditionPreparationData Preparation = new ExpeditionPreparationData();
+
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
 
@@ -612,7 +616,8 @@ public class GameState
     public bool TryStartExpedition(
         string locationId,
         List<string> selectedFighterIds,
-        out string resultMessage)
+        out string resultMessage,
+        string retinueId = null)
     {
         if (HasActiveExpedition)
         {
@@ -633,7 +638,8 @@ public class GameState
             location.Id,
             false,
             selectedFighterIds,
-            out resultMessage);
+            out resultMessage,
+            retinueId);
     }
 
     public bool TryStartExpeditionToMapPoint(
@@ -642,7 +648,8 @@ public class GameState
         string locationId,
         bool isScoutingTarget,
         List<string> selectedFighterIds,
-        out string resultMessage)
+        out string resultMessage,
+        string retinueId = null)
     {
         if (HasActiveExpedition)
         {
@@ -650,7 +657,10 @@ public class GameState
             return false;
         }
 
-        if (!ValidateExpeditionFighters(selectedFighterIds, out resultMessage))
+        // ПР-07А-1: бойцы и свита проверяются вместе, до любых изменений —
+        // ошибка свиты не отправляет бойцов без неё.
+        if (!ValidateExpeditionFighters(selectedFighterIds, out resultMessage) ||
+            !ExpeditionPreparation.Validate(this, selectedFighterIds, retinueId, out resultMessage))
             return false;
 
         CommanderData commander = GetSelectedCommander();
@@ -701,15 +711,14 @@ public class GameState
             HasInterruptedRoute = false
         };
 
-        HashSet<string> selectedIds = new HashSet<string>(selectedFighterIds);
-        foreach (FighterData fighter in Fighters)
-        {
-            if (selectedIds.Contains(fighter.Id))
-                expedition.FighterIds.Add(fighter.Id);
-        }
+        // Порядок мест задаёт игрок (подготовка), а не порядок списка бойцов.
+        expedition.FighterIds.AddRange(selectedFighterIds);
+        if (!string.IsNullOrEmpty(retinueId))
+            expedition.RetinueIds.Add(retinueId);
 
         ConsecutiveExpeditionSupplyShortageDays = 0;
         ActiveExpedition = expedition;
+        ExpeditionPreparation.RememberExpeditionRoster(this);
         commander.State = CommanderState.TravellingToLocation;
 
         string destinationText = location.IsWaypoint
@@ -1056,10 +1065,12 @@ public class GameState
         ActiveExpedition.ActiveActivity = null;
         ActiveExpedition.PendingDecision = null;
         ActiveExpedition.HasInterruptedRoute = false;
+        // ПР-07А-1: вернувшийся состав — основа следующей подготовки.
+        ExpeditionPreparation.RememberExpeditionRoster(this);
         ActiveExpedition.IsActive = false;
 
         return
-            "В поселение передано: золото +" + deliveredGold +
+            "В Дом передано: золото +" + deliveredGold +
             ", пища +" + deliveredFood + ".";
     }
 

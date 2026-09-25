@@ -1440,35 +1440,6 @@ MonoBehaviour:
       fontStyle: 0
       horizontalAlignment: 0
       verticalAlignment: 0
-    - id: mood-label
-      displayName: "\u041D\u0430\u0441\u0442\u0440\u043E\u0435\u043D\u0438\u0435"
-      parentId: 
-      kind: 1
-      portraitSize: 2
-      targetName: mood-label
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: "\u0421\u043F\u043E\u043A\u043E\u0439\u043D\u043E"
-      rect:
-        serializedVersion: 2
-        x: 1566
-        y: 1012
-        width: 142
-        height: 22
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
     - id: time-toggle-button
       displayName: "\u041A\u043D\u043E\u043F\u043A\u0430 \u0432\u0440\u0435\u043C\u0435\u043D\u0438"
       parentId: 

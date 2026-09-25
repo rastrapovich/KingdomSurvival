@@ -143,8 +143,6 @@ public partial class PrototypeUIController
         unreadIncidents.Clear();
         reportRequiresAcknowledgement.Clear();
         reportReadStates.Clear();
-        selectedFighterIds.Clear();
-        selectedRetinueId = null;
         homePeopleSignature = null;
         selectedJournalGoalId = null;
         ClearQueuedModals();

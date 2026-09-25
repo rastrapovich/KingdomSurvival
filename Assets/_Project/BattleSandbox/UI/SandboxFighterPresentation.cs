@@ -974,7 +974,7 @@ namespace KingdomSurvival.BattleSandbox
                 : DisplayStyle.None;
             portraitLabel.text = openedDefinition.RoleLabel.ToUpper() + "\n\nИЗОБРАЖЕНИЕ\nБОЙЦА";
             teamLabel.text = openedState == null || openedState.Team == SandboxTeam.Player
-                ? "ОТРЯД КОРОЛЕВСТВА"
+                ? "ОТРЯД ДОМА"
                 : "ПРОТИВНИК";
             healthText.text = hitPoints + " / " + openedDefinition.MaxHitPoints;
             attackValue.text = openedDefinition.Attack.ToString();

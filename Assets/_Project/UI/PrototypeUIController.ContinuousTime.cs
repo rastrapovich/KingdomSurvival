@@ -223,7 +223,6 @@ public partial class PrototypeUIController
 
         RefreshContinuousTimeUi(true);
         TryShowNextQueuedModal();
-        CheckForDefeat();
     }
 
     // Единственное место, где решается, идёт ли стратегическое время —

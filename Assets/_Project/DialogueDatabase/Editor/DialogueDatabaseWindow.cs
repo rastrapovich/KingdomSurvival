@@ -67,6 +67,26 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             GetWindow<DialogueDatabaseWindow>("База диалогов");
         }
 
+        public static void OpenAt(string dialogueId)
+        {
+            DialogueDatabaseWindow window = GetWindow<DialogueDatabaseWindow>("База диалогов");
+            if (window.database == null)
+                window.database = Resources.Load<DialogueDatabaseAsset>(DialogueDatabaseAsset.ResourcesPath);
+            window.tab = WindowTab.Dialogues;
+            window.categoryFilter = 0;
+            window.search = dialogueId ?? string.Empty;
+            if (window.database != null)
+                for (int i = 0; i < window.database.Dialogues.Count; i++)
+                    if (window.database.Dialogues[i].Id == dialogueId)
+                    {
+                        window.selectedDialogueIndex = i;
+                        break;
+                    }
+            window.ResetPreview();
+            window.Focus();
+            window.Repaint();
+        }
+
         private void OnEnable()
         {
             if (database == null)

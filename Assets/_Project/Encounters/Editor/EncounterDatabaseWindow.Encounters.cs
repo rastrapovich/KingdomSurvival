@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using KingdomSurvival.DialogueDatabase;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -17,11 +18,15 @@ namespace KingdomSurvival.Encounters.Editor
         // "только Micro" по отдельности, что строже и полезнее одной общей
         // группы.
         private enum DurationFilter { All, Reaction, Micro, Short, Standard, Complex, QuestSeed }
+        private enum CategoryFilter { All, Road, Camp, Location }
 
         private readonly List<int> visibleEncounterIndices = new List<int>();
         private TextField encounterSearch;
         private EnumField encounterStatusFilter;
         private EnumField encounterDurationFilter;
+        private EnumField encounterCategoryFilter;
+        private TextField encounterPoolFilter;
+        private TextField encounterTagFilter;
         private ListView encounterList;
         private ScrollView encounterDetails;
         private ScrollView diagnosticsPane;
@@ -47,6 +52,7 @@ namespace KingdomSurvival.Encounters.Editor
             AddToolbarButton(toolbar, "+ НОВЫЙ", AddEncounter);
             AddToolbarButton(toolbar, "ДУБЛИРОВАТЬ", DuplicateEncounter);
             AddToolbarButton(toolbar, "СПИСАТЬ", DeprecateEncounter);
+            AddToolbarButton(toolbar, "УДАЛИТЬ ИЗ БАЗЫ", DeleteEncounterPermanently);
             AddToolbarButton(toolbar, "ПРОВЕРИТЬ БАЗУ", ValidateEncounterDatabase);
             validationLabel = new Label();
             validationLabel.style.flexGrow = 1f;
@@ -93,6 +99,16 @@ namespace KingdomSurvival.Encounters.Editor
             encounterDurationFilter.RegisterValueChangedCallback(_ => RefreshEncounterList());
             pane.Add(encounterDurationFilter);
 
+            encounterCategoryFilter = new EnumField("Место", CategoryFilter.All);
+            encounterCategoryFilter.RegisterValueChangedCallback(_ => RefreshEncounterList());
+            pane.Add(encounterCategoryFilter);
+            encounterPoolFilter = new TextField("Пул");
+            encounterPoolFilter.RegisterValueChangedCallback(_ => RefreshEncounterList());
+            pane.Add(encounterPoolFilter);
+            encounterTagFilter = new TextField("Тег");
+            encounterTagFilter.RegisterValueChangedCallback(_ => RefreshEncounterList());
+            pane.Add(encounterTagFilter);
+
             Foldout poolsFoldout = new Foldout { text = "ПУЛЫ" };
             poolsFoldout.value = false;
             poolsFoldout.Add(new PropertyField(poolsProperty, string.Empty));
@@ -102,7 +118,7 @@ namespace KingdomSurvival.Encounters.Editor
             encounterList = new ListView();
             encounterList.style.flexGrow = 1f;
             encounterList.style.marginTop = 8f;
-            encounterList.fixedItemHeight = 56f;
+            encounterList.fixedItemHeight = 62f;
             encounterList.selectionType = SelectionType.Single;
             encounterList.makeItem = MakeEncounterListItem;
             encounterList.bindItem = BindEncounterListItem;
@@ -151,7 +167,7 @@ namespace KingdomSurvival.Encounters.Editor
                 : "Прямой";
             string occurrences = encounter.UnlimitedOccurrences ? "∞" : "0/" + encounter.MaxOccurrencesPerGame;
             row.Q<Label>("meta").text =
-                "[" + DurationBadge(encounter.DurationClass) + "] " +
+                "[" + encounter.DurationClass + "] " +
                 poolLabel + "  ·  " + encounter.DiscoveryChancePercent + "%  ·  W" +
                 encounter.SelectionWeight + "  ·  " + occurrences;
         }
@@ -223,6 +239,11 @@ namespace KingdomSurvival.Encounters.Editor
             DurationFilter durationFilter = encounterDurationFilter != null
                 ? (DurationFilter)encounterDurationFilter.value
                 : DurationFilter.All;
+            CategoryFilter categoryFilter = encounterCategoryFilter != null
+                ? (CategoryFilter)encounterCategoryFilter.value
+                : CategoryFilter.All;
+            string poolQuery = encounterPoolFilter != null ? encounterPoolFilter.value.Trim() : string.Empty;
+            string tagQuery = encounterTagFilter != null ? encounterTagFilter.value.Trim() : string.Empty;
 
             for (int i = 0; i < database.Encounters.Count; i++)
             {
@@ -234,6 +255,14 @@ namespace KingdomSurvival.Encounters.Editor
                     continue;
 
                 if (durationFilter != DurationFilter.All && !MatchesDurationFilter(encounter.DurationClass, durationFilter))
+                    continue;
+                if (categoryFilter != CategoryFilter.All && (int)encounter.Category != (int)categoryFilter - 1)
+                    continue;
+                if (!string.IsNullOrEmpty(poolQuery) &&
+                    (encounter.PoolId == null || encounter.PoolId.IndexOf(poolQuery, StringComparison.OrdinalIgnoreCase) < 0))
+                    continue;
+                if (!string.IsNullOrEmpty(tagQuery) &&
+                    (encounter.Tags == null || !encounter.Tags.Exists(t => t != null && t.IndexOf(tagQuery, StringComparison.OrdinalIgnoreCase) >= 0)))
                     continue;
 
                 if (!string.IsNullOrEmpty(query) &&
@@ -328,6 +357,7 @@ namespace KingdomSurvival.Encounters.Editor
             AddHeader(encounterDetails, "КОНТЕНТ");
             encounterDetails.Add(new PropertyField(e.FindPropertyRelative("DialogueId"), "ID диалога"));
             encounterDetails.Add(new PropertyField(e.FindPropertyRelative("ResolutionMode"), "Режим разрешения"));
+            AddDialoguePreview(encounterDetails, e.FindPropertyRelative("DialogueId").stringValue);
 
             AddHeader(encounterDetails, "ВЫБОР");
             encounterDetails.Add(new PropertyField(e.FindPropertyRelative("SelectionMode"), "Режим выбора"));
@@ -553,15 +583,11 @@ namespace KingdomSurvival.Encounters.Editor
 
             if (status == EncounterStatus.Draft)
             {
-                if (!EditorUtility.DisplayDialog("Удалить Encounter", "Удалить черновик «" + id + "»?", "Удалить", "Отмена"))
-                    return;
-                encountersProperty.DeleteArrayElementAtIndex(selectedEncounterIndex);
-                selectedEncounterIndex = Mathf.Clamp(selectedEncounterIndex - 1, -1, database.Encounters.Count - 1);
+                DeleteEncounterPermanently();
+                return;
             }
-            else
-            {
-                e.FindPropertyRelative("Status").enumValueIndex = (int)EncounterStatus.Deprecated;
-            }
+
+            e.FindPropertyRelative("Status").enumValueIndex = (int)EncounterStatus.Deprecated;
 
             serializedDatabase.ApplyModifiedProperties();
             EditorUtility.SetDirty(database);
@@ -574,7 +600,51 @@ namespace KingdomSurvival.Encounters.Editor
             serializedDatabase.ApplyModifiedProperties();
             List<string> issues = new List<string>();
             database.CollectValidationIssues(issues);
-            validationLabel.text = issues.Count == 0 ? "Ошибок не найдено" : "Ошибок: " + issues.Count;
+            DialogueDatabaseAsset dialogueDatabase = LoadDialogueDatabase();
+            foreach (EncounterDefinition encounter in database.Encounters)
+            {
+                if (encounter == null || encounter.Status != EncounterStatus.Production ||
+                    encounter.ResolutionMode != EncounterResolutionMode.DialogueDriven ||
+                    string.IsNullOrWhiteSpace(encounter.DialogueId))
+                    continue;
+                DialogueDefinitionData dialogue = dialogueDatabase != null
+                    ? dialogueDatabase.FindDialogue(encounter.DialogueId) : null;
+                if (dialogue == null)
+                {
+                    issues.Add(encounter.EncounterId + ": диалог " + encounter.DialogueId + " не найден.");
+                    continue;
+                }
+                if (dialogue.Status == DialogueProductionStatus.Disabled)
+                    issues.Add(encounter.EncounterId + ": связанный диалог отключён.");
+                List<string> dialogueIssues = new List<string>();
+                dialogueDatabase.CollectValidationIssuesForDialogue(encounter.DialogueId, dialogueIssues);
+                foreach (string issue in dialogueIssues)
+                    issues.Add(encounter.EncounterId + ": " + issue);
+                if (dialogue.Nodes.Count == 1)
+                {
+                    DialogueNodeData node = dialogue.Nodes[0];
+                    if (node != null && node.Choices.Count == 1 && node.Choices[0] != null && node.Choices[0].IsExit)
+                        foreach (DialogueTextBlockData block in node.GetEffectiveTextBlocks())
+                            if (block.OnRevealEffects.Count > 0)
+                            {
+                                issues.Add(encounter.EncounterId +
+                                    ": ресурс меняется при показе текста, у игрока только выход.");
+                                break;
+                            }
+                }
+            }
+            if (dialogueDatabase != null)
+            {
+                HashSet<string> linked = new HashSet<string>(StringComparer.Ordinal);
+                foreach (EncounterDefinition encounter in database.Encounters)
+                    if (encounter != null) linked.Add(encounter.DialogueId);
+                foreach (DialogueDefinitionData dialogue in dialogueDatabase.Dialogues)
+                    if (dialogue != null && dialogue.Category == DialogueCategory.RandomEncounter &&
+                        dialogue.Id.StartsWith("road_", StringComparison.Ordinal) &&
+                        !linked.Contains(dialogue.Id))
+                        issues.Add("Осиротевший дорожный диалог: " + dialogue.Id + ".");
+            }
+            validationLabel.text = issues.Count == 0 ? "Замечаний нет" : "Замечаний: " + issues.Count;
             validationLabel.style.color = issues.Count == 0 ? GoodColor : BadColor;
             if (issues.Count > 0)
                 Debug.LogWarning("База энкаунтеров:\n- " + string.Join("\n- ", issues));

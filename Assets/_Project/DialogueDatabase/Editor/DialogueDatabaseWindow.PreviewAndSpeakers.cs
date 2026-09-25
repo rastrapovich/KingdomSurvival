@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
+using KingdomSurvival.Encounters;
 using UnityEngine;
 
 namespace KingdomSurvival.DialogueDatabase.Editor
@@ -467,7 +469,47 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 return;
 
             selectedDialogueIndex = Mathf.Clamp(selectedDialogueIndex, 0, dialogues.arraySize - 1);
-            if (!EditorUtility.DisplayDialog("Удалить диалог?", "Диалог будет удалён из базы.", "Удалить", "Отмена"))
+            string id = dialogues.GetArrayElementAtIndex(selectedDialogueIndex).FindPropertyRelative("id").stringValue;
+            EncounterDatabaseAsset encounters = AssetDatabase.LoadAssetAtPath<EncounterDatabaseAsset>(
+                "Assets/_Project/Encounters/Resources/Encounters/KingdomSurvivalEncounters.asset");
+            if (encounters != null)
+            {
+                List<string> owners = new List<string>();
+                foreach (EncounterDefinition encounter in encounters.Encounters)
+                    if (encounter != null && encounter.DialogueId == id)
+                        owners.Add(encounter.EncounterId);
+                if (owners.Count > 0)
+                {
+                    EditorUtility.DisplayDialog("Диалог используется",
+                        "Сначала удалите или перепривяжите энкаунтеры: " +
+                        string.Join(", ", owners) + ".", "Понятно");
+                    return;
+                }
+            }
+            List<string> external = new List<string>();
+            string dialoguePath = AssetDatabase.GetAssetPath(database);
+            foreach (string path in AssetDatabase.GetAllAssetPaths())
+            {
+                if (!path.StartsWith("Assets/_Project/", StringComparison.Ordinal) ||
+                    path == dialoguePath || path ==
+                    "Assets/_Project/Encounters/Resources/Encounters/KingdomSurvivalEncounters.asset")
+                    continue;
+                string ext = Path.GetExtension(path);
+                if (ext != ".asset" && ext != ".prefab" && ext != ".unity" &&
+                    ext != ".cs" && ext != ".uxml" && ext != ".json")
+                    continue;
+                if (File.Exists(path) && File.ReadAllText(path).IndexOf(id, StringComparison.Ordinal) >= 0)
+                    external.Add(path);
+            }
+            if (external.Count > 0)
+            {
+                EditorUtility.DisplayDialog("Диалог используется",
+                    "ID найден в других файлах:\n" + string.Join("\n", external) +
+                    "\nСначала уберите ссылки.", "Понятно");
+                return;
+            }
+            if (!EditorUtility.DisplayDialog("Удалить диалог?", "Диалог «" + id +
+                "» будет удалён из базы.", "Удалить", "Отмена"))
                 return;
 
             Undo.RecordObject(database, "Delete Dialogue");

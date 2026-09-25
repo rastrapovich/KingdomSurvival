@@ -33,6 +33,10 @@ namespace KingdomSurvival.Encounters.Editor
             simulateButton.style.marginTop = 6f;
             simulateButton.style.marginBottom = 8f;
             parent.Add(simulateButton);
+            parent.Add(MakeMutedLabel("Путешествие: дни идут последовательно, учитываются одноразовость и кулдауны."));
+            Button journeyButton = new Button(RunJourneySimulation) { text = "100 ПУТЕШЕСТВИЙ ПО 30 ДНЕЙ" };
+            journeyButton.style.marginBottom = 8f;
+            parent.Add(journeyButton);
 
             simulationResult = new VisualElement();
             parent.Add(simulationResult);

@@ -148,7 +148,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
                 GraphNodeInfo info = BuildGraphNodeInfoFromProperty(node, isStart, isNodeReachable);
                 bool isSelected = graphSelectedNodeIndex == i;
-                GraphNodeLayoutMetrics metrics = ComputeNodeLayoutMetrics(info, allNodeIds, graphDetailMode, isSelected);
+                GraphNodeLayoutMetrics metrics = ComputeNodeLayoutMetrics(info, allNodeIds, graphDetailMode, isSelected, showProduction);
 
                 graphNodeInfoByIndex[i] = info;
                 graphNodeMetricsByIndex[i] = metrics;
@@ -188,12 +188,17 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             inspectorContentWidth = graphInspectorWidth - GraphInspectorContentPadding - 24f;
 
             EditorGUILayout.BeginVertical(GUILayout.Width(graphInspectorWidth), GUILayout.ExpandHeight(true));
-            EditorGUILayout.LabelField("СВОЙСТВА УЗЛА", EditorStyles.boldLabel);
+            bool hasSelection = graphSelectedNodeIndex >= 0 && graphSelectedNodeIndex < nodes.arraySize;
+            EditorGUILayout.LabelField(
+                hasSelection
+                    ? NodeLabel(nodes.GetArrayElementAtIndex(graphSelectedNodeIndex).FindPropertyRelative("id").stringValue).ToUpperInvariant()
+                    : "УЗЕЛ",
+                EditorStyles.boldLabel);
 
-            if (graphSelectedNodeIndex < 0 || graphSelectedNodeIndex >= nodes.arraySize)
+            if (!hasSelection)
             {
                 EditorGUILayout.HelpBox(
-                    "Выберите узел на холсте, чтобы отредактировать его текстовые блоки, ответы, условия, проверки и эффекты — так же, как в «Таблице».",
+                    "Выберите узел на схеме, чтобы править его реплики и ответы.",
                     MessageType.Info);
                 EditorGUILayout.EndVertical();
                 // §26/§29-30: колесо мыши над панелью — её собственный
@@ -256,31 +261,31 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 EditorUtility.SetDirty(database);
             }
 
-            if (GUILayout.Button("Автораскладка", EditorStyles.toolbarButton, GUILayout.Width(105f)))
+            if (GUILayout.Button(new GUIContent("Разложить", "Расставить узлы по порядку разговора"), EditorStyles.toolbarButton, GUILayout.Width(74f)))
             {
                 AutoLayoutDialogue(dialogue, true);
                 graphNeedsCenter = true;
             }
 
-            if (GUILayout.Button(
+            if (showProduction && GUILayout.Button(
                 new GUIContent("Раздвинуть", "Раздвинуть слишком тесные узлы по вертикали, не меняя их X и порядок"),
                 EditorStyles.toolbarButton,
-                GUILayout.Width(90f)))
+                GUILayout.Width(80f)))
             {
                 SpreadOutDialogueNodes(dialogue, true);
             }
 
-            if (GUILayout.Button("Центр", EditorStyles.toolbarButton, GUILayout.Width(60f)))
+            if (GUILayout.Button(new GUIContent("Центр", "Показать всю схему"), EditorStyles.toolbarButton, GUILayout.Width(50f)))
                 graphNeedsCenter = true;
 
-            GUILayout.Space(8f);
+            GUILayout.Space(6f);
 
             DrawGraphDetailModeSelector();
 
-            GUILayout.Space(8f);
+            GUILayout.Space(6f);
             GUILayout.Label(
-                "Перетаскивай ноды · тяни жёлтый порт ответа, зелёный порт успеха или красный порт провала на нужный нод · выбери узел, чтобы открыть его свойства справа · колесо = масштаб · Alt+ЛКМ/СКМ = поле",
-                EditorStyles.miniLabel);
+                new GUIContent("ⓘ", "Узел тянется за заголовок · цветной квадрат ответа тянется к нужному узлу (жёлтый — переход, зелёный — успех, красный — провал) · колесо — масштаб · Alt+ЛКМ или средняя кнопка — двигать поле"),
+                EditorStyles.miniLabel, GUILayout.Width(16f));
 
             GUILayout.FlexibleSpace();
 
@@ -295,12 +300,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
         // §4/§36: три режима детализации, хранятся в EditorPrefs (не в
         // ассете) — это личная настройка автора графа, а не данные диалога.
-        private static readonly string[] GraphDetailModeLabels = { "Компактно", "Стандарт", "Полно" };
+        private static readonly string[] GraphDetailModeLabels = { "Кратко", "Обычно", "Подробно" };
 
         private void DrawGraphDetailModeSelector()
         {
             int current = (int)graphDetailMode;
-            int next = GUILayout.Toolbar(current, GraphDetailModeLabels, EditorStyles.toolbarButton, GUILayout.Width(210f));
+            int next = GUILayout.Toolbar(current, GraphDetailModeLabels, EditorStyles.toolbarButton, GUILayout.Width(190f));
             if (next != current)
                 SetGraphDetailMode((GraphDetailMode)next);
         }
@@ -693,7 +698,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 titleRowHeight - 8f * graphZoom);
             GUI.Label(
                 idRect,
-                string.IsNullOrWhiteSpace(nodeId) ? "<без ID узла>" : nodeId,
+                string.IsNullOrWhiteSpace(nodeId) ? "<без ID узла>" : NodeLabel(nodeId),
                 ScaledStyle(EditorStyles.boldLabel, 11, TextAnchor.MiddleLeft));
 
             if (isStart)
@@ -809,7 +814,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 if (badge == "СТАРТ") continue;
                 if (badge == "!") { hasWarning = true; continue; }
-                if (badge == "UNREACHABLE") { hasUnreachable = true; continue; }
+                if (badge == GraphNodeBadge.Unreachable) { hasUnreachable = true; continue; }
                 neutralBadges.Add(badge);
             }
 
@@ -831,7 +836,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (hasWarning)
                 x = DrawGraphBadgeChip(x, rect, "!", GraphWarningColor, tooltip);
             if (hasUnreachable)
-                x = DrawGraphBadgeChip(x, rect, "UNREACHABLE", new Color(0.95f, 0.48f, 0.14f, 1f), tooltip);
+                x = DrawGraphBadgeChip(x, rect, GraphNodeBadge.Unreachable, new Color(0.95f, 0.48f, 0.14f, 1f), tooltip);
         }
 
         private float DrawGraphBadgeChip(float x, Rect rect, string label, Color color, string tooltip)
@@ -896,7 +901,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (string.IsNullOrWhiteSpace(speakerId.stringValue))
                 nameLabel = "<нет говорящего>";
             else if (speaker != null)
-                nameLabel = "<b>" + speaker.DisplayName + "</b>  <color=#" + mutedHex + ">[" + speaker.Id + "]</color>";
+                nameLabel = showProduction
+                    ? "<b>" + speaker.DisplayName + "</b>  <color=#" + mutedHex + ">[" + speaker.Id + "]</color>"
+                    : "<b>" + speaker.DisplayName + "</b>";
             else
                 nameLabel = "<color=#" + mutedHex + ">? " + speakerId.stringValue + "</color>";
 
@@ -937,7 +944,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (metrics.TextBlocksShown == 0)
             {
                 Rect emptyRect = new Rect(nodeRect.x + margin, y, nodeRect.width - margin * 2f, GraphNodeLayoutConstants.EmptySectionHeight * graphZoom);
-                GUI.Label(emptyRect, "Нет текстовых блоков", ScaledStyle(EditorStyles.miniLabel, 10, TextAnchor.MiddleLeft));
+                GUI.Label(emptyRect, "Нет реплик", ScaledStyle(EditorStyles.miniLabel, 10, TextAnchor.MiddleLeft));
                 y += GraphNodeLayoutConstants.EmptySectionHeight * graphZoom;
                 return;
             }
@@ -1003,13 +1010,17 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                         blockY += GraphNodeLayoutConstants.DetailLineHeight * graphZoom;
                     }
 
-                    int maxLines = GetMaxDetailLinesPerSection(mode);
+                    int maxLines = showProduction ? GetMaxDetailLinesPerSection(mode) : 0;
 
                     BuildGraphConditionLines(block.Conditions, maxLines, detailLines, out int condOverflow);
+                    if (!showProduction)
+                        condOverflow = 0;
                     blockY = DrawGraphLabeledDetailSection(
                         contentX, contentWidth, blockY, "ПОКАЗАТЬ ЕСЛИ", detailLines, condOverflow, GraphConditionAccentColor);
 
                     BuildGraphEffectLines(block.OnRevealEffects, maxLines, detailLines, out int fxOverflow);
+                    if (!showProduction)
+                        fxOverflow = 0;
                     string effectsHeader = block.PassiveCheck != null ? "ПОСЛЕ УСПЕХА" : "ПОСЛЕ ПОКАЗА";
                     blockY = DrawGraphLabeledDetailSection(
                         contentX, contentWidth, blockY, effectsHeader, detailLines, fxOverflow, GraphEffectAccentColor);
@@ -1021,7 +1032,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (metrics.TextBlocksOverflow > 0)
             {
                 Rect overflowRect = new Rect(nodeRect.x + margin, y, nodeRect.width - margin * 2f, GraphNodeLayoutConstants.PreviewLineHeight * graphZoom);
-                GUI.Label(overflowRect, BuildOverflowLabel(metrics.TextBlocksOverflow) + " блок(ов)", ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
+                GUI.Label(overflowRect, BuildOverflowLabel(metrics.TextBlocksOverflow) + " реплик(и)", ScaledStyle(EditorStyles.miniLabel, 9, TextAnchor.MiddleLeft));
                 y += GraphNodeLayoutConstants.PreviewLineHeight * graphZoom;
             }
         }
@@ -1185,18 +1196,18 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 failureStyle.normal.textColor = GraphFailureEdgeColor;
 
                 Rect successRect = new Rect(contentX, cy, contentWidth, detailLineHeight);
-                GUI.Label(successRect, "✓ УСП → " + GraphShortNodeLabel(choiceInfo.SuccessNodeId), successStyle);
+                GUI.Label(successRect, "✓ успех → " + GraphTargetLabel(choiceInfo.SuccessNodeId), successStyle);
                 cy += detailLineHeight;
 
                 Rect failureRect = new Rect(contentX, cy, contentWidth, detailLineHeight);
-                GUI.Label(failureRect, "✕ ПРОВ → " + GraphShortNodeLabel(choiceInfo.FailureNodeId), failureStyle);
+                GUI.Label(failureRect, "✕ провал → " + GraphTargetLabel(choiceInfo.FailureNodeId), failureStyle);
                 cy += detailLineHeight;
 
                 DrawGraphActiveChoicePorts(nodeIndex, choiceIndex, nodeRect);
             }
             else
             {
-                string targetLabel = choiceInfo.EndsDialogue ? "→ ВЫХОД" : "→ " + GraphShortNodeLabel(choiceInfo.NextNodeId);
+                string targetLabel = choiceInfo.EndsDialogue ? "→ ВЫХОД" : "→ " + GraphTargetLabel(choiceInfo.NextNodeId);
                 Rect targetRect = new Rect(contentX, cy, contentWidth, detailLineHeight);
                 GUI.Label(targetRect, targetLabel, targetStyle);
                 cy += detailLineHeight;
@@ -1229,7 +1240,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (hasWarning)
                 cy = DrawGraphChoiceWarningLine(contentX, contentWidth, cy, nodeWarnings, choiceWarningLabel);
 
-            if (mode != GraphDetailMode.Compact)
+            if (mode != GraphDetailMode.Compact && showProduction)
             {
                 int maxLines = GetMaxDetailLinesPerSection(mode);
                 List<string> lines = new List<string>();
@@ -1305,6 +1316,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 GUI.FocusControl(null);
                 current.Use();
             }
+        }
+
+        private string GraphTargetLabel(string nodeId)
+        {
+            return showProduction ? GraphShortNodeLabel(nodeId) : NodeLabel(nodeId);
         }
 
         private static string GraphShortNodeLabel(string nodeId)

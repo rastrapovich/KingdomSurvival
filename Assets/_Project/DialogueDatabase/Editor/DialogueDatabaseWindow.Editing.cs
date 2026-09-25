@@ -346,123 +346,29 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
         }
 
-        private void StartPreview(string dialogueId)
-        {
-            validationIssues.Clear();
-
-            NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
-            BuildPreviewContext(out HeroProfileData hero, out NarrativeStateData state, out List<string> companions, out List<string> items);
-
-            bool started = session.Start(
-                database,
-                dialogueId,
-                hero,
-                state,
-                out NarrativeDialogueView view,
-                out string error,
-                companions,
-                items,
-                previewWorldSeed);
-
-            if (!started)
-            {
-                previewSession = null;
-                previewView = null;
-                previewDialogueId = string.Empty;
-                previewMessage = error;
-                previewLastCheckPresentation = null;
-                if (!string.IsNullOrWhiteSpace(error))
-                    validationIssues.Add(error);
-                return;
-            }
-
-            // §15: Preview всегда строится тем же путём, что и production —
-            // revealHiddenTextForAuthor только добавляет авторский debug-текст,
-            // не меняет набор видимых блоков.
-            view = session.BuildViewPreview(previewRevealHiddenTextForAuthor);
-
-            previewSession = session;
-            previewView = view;
-            previewDialogueId = dialogueId;
-            previewMessage = string.Empty;
-            previewLastCheckPresentation = null;
-        }
-
-        private void BuildPreviewContext(
-            out HeroProfileData hero,
-            out NarrativeStateData state,
-            out List<string> companions,
-            out List<string> items)
-        {
-            hero = previewHero;
-            state = previewState;
-
-            // "Запустить / с начала" обязан давать чистый прогресс: история
-            // проверок и применённых эффектов не хранится в CSV-полях автора,
-            // поэтому обнуляется явно при каждом запуске.
-            state.CheckHistory.Clear();
-            state.AppliedEffectExecutionIds.Clear();
-
-            state.Flags.Clear();
-            foreach (string flag in SplitCsv(previewFlagsCsv))
-                state.SetFlag(flag);
-
-            state.Knowledge.Clear();
-            foreach (string knowledge in SplitCsv(previewKnowledgeCsv))
-                state.AddKnowledge(knowledge);
-
-            state.Relations.Clear();
-            foreach (string pair in SplitCsv(previewRelationsCsv))
-            {
-                string[] parts = pair.Split(':');
-                if (parts.Length == 2 && int.TryParse(parts[1].Trim(), out int value))
-                    state.ChangeRelation(parts[0].Trim(), value);
-            }
-
-            companions = SplitCsv(previewCompanionsCsv);
-            items = SplitCsv(previewItemsCsv);
-        }
-
-        private static List<string> SplitCsv(string csv)
-        {
-            List<string> result = new List<string>();
-            if (string.IsNullOrWhiteSpace(csv))
-                return result;
-
-            string[] parts = csv.Split(',');
-            for (int i = 0; i < parts.Length; i++)
-            {
-                string trimmed = parts[i].Trim();
-                if (!string.IsNullOrEmpty(trimmed))
-                    result.Add(trimmed);
-            }
-            return result;
-        }
-
         private void ValidateSelected(string dialogueId)
         {
+            validationIssues.Clear();
             database.CollectValidationIssuesForDialogue(dialogueId, validationIssues);
-            if (validationIssues.Count == 0)
-                previewMessage = "Выбранный диалог прошёл проверку.";
+            validationMessage = validationIssues.Count == 0
+                ? "Диалог прошёл проверку."
+                : "Найдено ошибок: " + validationIssues.Count + ".";
         }
 
         private void ValidateAll()
         {
+            validationIssues.Clear();
             database.CollectValidationIssues(validationIssues);
-            previewMessage = validationIssues.Count == 0
+            validationMessage = validationIssues.Count == 0
                 ? "База диалогов прошла проверку: ошибок не найдено."
                 : "Найдено ошибок: " + validationIssues.Count + ".";
         }
 
+        // Смена диалога сбрасывает показанные результаты проверки. Само превью
+        // живёт в отдельном окне и перезапускается кнопкой «▶ Играть».
         private void ResetPreview()
         {
-            if (previewSession != null && previewSession.IsActive)
-                previewSession.End();
-            previewSession = null;
-            previewView = null;
-            previewDialogueId = string.Empty;
-            previewMessage = string.Empty;
-            previewLastCheckPresentation = null;
+            validationMessage = string.Empty;
             validationIssues.Clear();
         }
 

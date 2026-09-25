@@ -68,7 +68,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
     {
         Assert.AreEqual("ВОЗВРАТНАЯ ПРОВЕРКА", BuildGraphChoiceKindLabel(DialogueChoiceKind.ActiveReturnable));
         Assert.AreEqual("РЕШАЮЩАЯ ПРОВЕРКА", BuildGraphChoiceKindLabel(DialogueChoiceKind.ActiveDecisive));
-        Assert.AreEqual("EXIT", BuildGraphChoiceKindLabel(DialogueChoiceKind.Exit));
+        Assert.AreEqual("ВЫХОД", BuildGraphChoiceKindLabel(DialogueChoiceKind.Exit));
         Assert.AreEqual("…", BuildGraphChoiceKindLabel(DialogueChoiceKind.Continue));
     }
 
@@ -80,8 +80,8 @@ public sealed class DialogueDatabaseGraphPresentationTests
         NarrativeCondition positive = new NarrativeCondition { Type = NarrativeConditionType.FlagSet, StringParam = "repair_new" };
         NarrativeCondition negated = new NarrativeCondition { Type = NarrativeConditionType.FlagSet, StringParam = "repair_new", Negate = true };
 
-        Assert.AreEqual("FLAG: repair_new", BuildGraphConditionSummary(positive));
-        Assert.AreEqual("NOT FLAG: repair_new", BuildGraphConditionSummary(negated));
+        Assert.AreEqual("ФЛАГ: repair_new", BuildGraphConditionSummary(positive));
+        Assert.AreEqual("НЕ ФЛАГ: repair_new", BuildGraphConditionSummary(negated));
     }
 
     [Test]
@@ -90,8 +90,8 @@ public sealed class DialogueDatabaseGraphPresentationTests
         NarrativeCondition atLeast = new NarrativeCondition { Type = NarrativeConditionType.RelationAtLeast, StringParam = "miron", IntParam = 2 };
         NarrativeCondition atMost = new NarrativeCondition { Type = NarrativeConditionType.RelationAtMost, StringParam = "miron", IntParam = -1 };
 
-        Assert.AreEqual("REL miron ≥ 2", BuildGraphConditionSummary(atLeast));
-        Assert.AreEqual("REL miron ≤ -1", BuildGraphConditionSummary(atMost));
+        Assert.AreEqual("ОТН miron ≥ 2", BuildGraphConditionSummary(atLeast));
+        Assert.AreEqual("ОТН miron ≤ -1", BuildGraphConditionSummary(atMost));
     }
 
     [Test]
@@ -101,9 +101,9 @@ public sealed class DialogueDatabaseGraphPresentationTests
         NarrativeEffect clearFlag = new NarrativeEffect { EffectExecutionId = "e2", Type = NarrativeEffectType.ClearFlag, StringParam = "x" };
         NarrativeEffect knowledge = new NarrativeEffect { EffectExecutionId = "e3", Type = NarrativeEffectType.AddKnowledge, StringParam = "second_loaf" };
 
-        Assert.AreEqual("+ FLAG home_baseline_captured", BuildGraphEffectSummary(setFlag));
-        Assert.AreEqual("− FLAG x", BuildGraphEffectSummary(clearFlag));
-        Assert.AreEqual("+ KNOW second_loaf", BuildGraphEffectSummary(knowledge));
+        Assert.AreEqual("+ ФЛАГ home_baseline_captured", BuildGraphEffectSummary(setFlag));
+        Assert.AreEqual("− ФЛАГ x", BuildGraphEffectSummary(clearFlag));
+        Assert.AreEqual("+ ЗНАНИЕ second_loaf", BuildGraphEffectSummary(knowledge));
     }
 
     [Test]
@@ -164,7 +164,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
 
         List<string> warnings = CollectGraphNodeWarnings(node, new HashSet<string> { "n1", "n2" });
 
-        AssertAnyContains(warnings, "текстовых блоков");
+        AssertAnyContains(warnings, "реплик");
     }
 
     [Test]
@@ -190,7 +190,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
 
         List<string> warnings = CollectGraphNodeWarnings(node, new HashSet<string> { "n1", "n2" });
 
-        AssertAnyContains(warnings, "ChoiceId");
+        AssertAnyContains(warnings, "ID ответа");
     }
 
     [Test]
@@ -209,7 +209,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
 
         List<string> warnings = CollectGraphNodeWarnings(node, new HashSet<string> { "n1" });
 
-        AssertAnyContains(warnings, "CheckId");
+        AssertAnyContains(warnings, "ID проверки");
         AssertAnyContains(warnings, "успеха");
         AssertAnyContains(warnings, "провала");
     }
@@ -260,7 +260,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
 
         List<string> warnings = CollectGraphNodeWarnings(node, new HashSet<string> { "n1", "n2" });
 
-        AssertAnyContains(warnings, "EXIT");
+        AssertAnyContains(warnings, "выход");
     }
 
     [Test]
@@ -328,12 +328,12 @@ public sealed class DialogueDatabaseGraphPresentationTests
 
         List<string> badges = BuildGraphNodeBadges(node, 0);
 
-        Assert.Contains("CHECK", badges);
-        Assert.Contains("COND", badges);
-        Assert.Contains("FX", badges);
-        Assert.Contains("KNOW", badges);
-        Assert.Contains("FLAG", badges);
-        Assert.Contains("ITEM", badges);
+        Assert.Contains("ПРОВЕРКА", badges);
+        Assert.Contains("УСЛОВИЕ", badges);
+        Assert.Contains("ПОСЛЕДСТВИЯ", badges);
+        Assert.Contains("ЗНАНИЕ", badges);
+        Assert.Contains("ФЛАГ", badges);
+        Assert.Contains("ПРЕДМЕТ", badges);
     }
 
     [Test]
@@ -357,7 +357,7 @@ public sealed class DialogueDatabaseGraphPresentationTests
 
         List<string> badges = BuildGraphNodeBadges(node, 0);
 
-        Assert.Contains("UNREACHABLE", badges);
+        Assert.Contains("НЕДОСТИЖИМ", badges);
     }
 
     // ---- Режим детализации (§4, §29) -------------------------------------

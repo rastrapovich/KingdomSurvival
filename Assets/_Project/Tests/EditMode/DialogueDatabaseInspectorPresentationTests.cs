@@ -12,9 +12,9 @@ public sealed class DialogueDatabaseInspectorPresentationTests
     [Test]
     public void ClampInspectorWidth_BelowMinimum_ClampsToMinimum()
     {
-        // §38 инструкции "свободный граф": минимум поднят с 360 до 420 —
-        // семантическим карточкам нужно больше места, чем голому полю.
-        Assert.AreEqual(420f, ClampInspectorWidth(100f, 1200f));
+        // Компактная база диалогов: минимум 320 — в режиме повествования
+        // у инспектора только реплики и ответы.
+        Assert.AreEqual(320f, ClampInspectorWidth(100f, 1200f));
     }
 
     [Test]
@@ -33,8 +33,8 @@ public sealed class DialogueDatabaseInspectorPresentationTests
     [Test]
     public void ClampInspectorWidth_NarrowWindow_MinimumWins()
     {
-        // Окно 500px: 500*0.6=300 < минимума 420 — минимум главнее.
-        Assert.AreEqual(420f, ClampInspectorWidth(500f, 500f));
+        // Окно 500px: 500*0.6=300 < минимума 320 — минимум главнее.
+        Assert.AreEqual(320f, ClampInspectorWidth(500f, 500f));
     }
 
     [Test]

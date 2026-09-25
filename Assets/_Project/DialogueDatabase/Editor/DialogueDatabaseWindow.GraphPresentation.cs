@@ -136,7 +136,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             {
                 case DialogueChoiceKind.ActiveReturnable: return "ВОЗВРАТНАЯ ПРОВЕРКА";
                 case DialogueChoiceKind.ActiveDecisive: return "РЕШАЮЩАЯ ПРОВЕРКА";
-                case DialogueChoiceKind.Exit: return "EXIT";
+                case DialogueChoiceKind.Exit: return "ВЫХОД";
                 case DialogueChoiceKind.Continue: return "…";
                 default: return "ОТВЕТ";
             }
@@ -149,19 +149,23 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (condition == null)
                 return string.Empty;
 
-            string not = condition.Negate ? "NOT " : string.Empty;
+            string not = condition.Negate ? "НЕ " : string.Empty;
             switch (condition.Type)
             {
                 case NarrativeConditionType.FlagSet:
-                    return not + "FLAG: " + condition.StringParam;
+                    return not + "ФЛАГ: " + condition.StringParam;
                 case NarrativeConditionType.KnowledgeKnown:
-                    return not + "KNOW: " + condition.StringParam;
+                    return not + "ЗНАНИЕ: " + condition.StringParam;
                 case NarrativeConditionType.RelationAtLeast:
-                    return "REL " + condition.StringParam + (condition.Negate ? " < " : " ≥ ") +
+                    return "ОТН " + condition.StringParam + (condition.Negate ? " < " : " ≥ ") +
                            condition.IntParam.ToString(CultureInfo.InvariantCulture);
                 case NarrativeConditionType.RelationAtMost:
-                    return "REL " + condition.StringParam + (condition.Negate ? " > " : " ≤ ") +
+                    return "ОТН " + condition.StringParam + (condition.Negate ? " > " : " ≤ ") +
                            condition.IntParam.ToString(CultureInfo.InvariantCulture);
+                case NarrativeConditionType.PartySizeAtLeast:
+                    return "ОТРЯД" + (condition.Negate ? " < " : " ≥ ") + condition.IntParam.ToString(CultureInfo.InvariantCulture);
+                case NarrativeConditionType.PartySizeAtMost:
+                    return "ОТРЯД" + (condition.Negate ? " > " : " ≤ ") + condition.IntParam.ToString(CultureInfo.InvariantCulture);
                 case NarrativeConditionType.CompanionPresent:
                     return not + "СПУТНИК: " + condition.StringParam;
                 case NarrativeConditionType.ItemPresent:
@@ -196,11 +200,21 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             switch (effect.Type)
             {
                 case NarrativeEffectType.SetFlag:
-                    return "+ FLAG " + effect.StringParam;
+                    return "+ ФЛАГ " + effect.StringParam;
                 case NarrativeEffectType.ClearFlag:
-                    return "− FLAG " + effect.StringParam;
+                    return "− ФЛАГ " + effect.StringParam;
                 case NarrativeEffectType.AddKnowledge:
-                    return "+ KNOW " + effect.StringParam;
+                    return "+ ЗНАНИЕ " + effect.StringParam;
+                case NarrativeEffectType.GrantItem:
+                    return "+ ПРЕДМЕТ " + effect.StringParam;
+                case NarrativeEffectType.RemoveItem:
+                    return "− ПРЕДМЕТ " + effect.StringParam;
+                case NarrativeEffectType.ChangeFood:
+                    return "ЕДА ДОМА " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam.ToString(CultureInfo.InvariantCulture);
+                case NarrativeEffectType.ChangeSupplies:
+                    return "ПРИПАСЫ " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam.ToString(CultureInfo.InvariantCulture);
+                case NarrativeEffectType.ShortcutRouteCells:
+                    return "ПУТЬ КОРОЧЕ НА " + effect.IntParam.ToString(CultureInfo.InvariantCulture);
                 case NarrativeEffectType.ChangeRelation:
                     return "ОТН " + effect.StringParam + " " +
                            (effect.IntParam >= 0 ? "+" : string.Empty) +
@@ -347,7 +361,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 warnings.Add("Неизвестный говорящий '" + node.SpeakerId + "'.");
 
             if (node.TextBlocks == null || node.TextBlocks.Count == 0)
-                warnings.Add("Нет текстовых блоков.");
+                warnings.Add("Нет реплик.");
 
             if (node.Choices == null || node.Choices.Count == 0)
                 warnings.Add("Нет вариантов ответа.");
@@ -364,7 +378,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     string label = "Ответ #" + (i + 1).ToString(CultureInfo.InvariantCulture);
 
                     if (!string.IsNullOrWhiteSpace(choice.ChoiceId) && !choiceIds.Add(choice.ChoiceId))
-                        warnings.Add(label + ": повторяющийся ChoiceId '" + choice.ChoiceId + "'.");
+                        warnings.Add(label + ": повторяющийся ID ответа '" + choice.ChoiceId + "'.");
 
                     if (choice.IsExit)
                     {
@@ -372,7 +386,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                             !string.IsNullOrWhiteSpace(choice.SuccessNodeId) ||
                             !string.IsNullOrWhiteSpace(choice.FailureNodeId))
                         {
-                            warnings.Add(label + ": EXIT не должен одновременно содержать переход.");
+                            warnings.Add(label + ": выход не должен одновременно вести в другой узел.");
                         }
                         continue;
                     }
@@ -380,7 +394,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     if (choice.IsActiveCheck)
                     {
                         if (choice.Check == null || string.IsNullOrWhiteSpace(choice.Check.CheckId))
-                            warnings.Add(label + ": не задан CheckId проверки.");
+                            warnings.Add(label + ": не задан ID проверки.");
 
                         if (string.IsNullOrWhiteSpace(choice.SuccessNodeId))
                             warnings.Add(label + ": нет ветки успеха.");
@@ -445,15 +459,15 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         private static class GraphNodeBadge
         {
             public const string Start = "СТАРТ";
-            public const string Exit = "EXIT";
-            public const string Check = "CHECK";
-            public const string Cond = "COND";
-            public const string Fx = "FX";
-            public const string Know = "KNOW";
-            public const string Flag = "FLAG";
-            public const string Item = "ITEM";
+            public const string Exit = "ВЫХОД";
+            public const string Check = "ПРОВЕРКА";
+            public const string Cond = "УСЛОВИЕ";
+            public const string Fx = "ПОСЛЕДСТВИЯ";
+            public const string Know = "ЗНАНИЕ";
+            public const string Flag = "ФЛАГ";
+            public const string Item = "ПРЕДМЕТ";
             public const string Warning = "!";
-            public const string Unreachable = "UNREACHABLE";
+            public const string Unreachable = "НЕДОСТИЖИМ";
         }
 
         public static List<string> BuildGraphNodeBadges(GraphNodeInfo node, int warningCount)
@@ -590,9 +604,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 }
             }
 
-            return "CHECK " + checkCount.ToString(CultureInfo.InvariantCulture) +
-                   " | COND " + condCount.ToString(CultureInfo.InvariantCulture) +
-                   " | FX " + fxCount.ToString(CultureInfo.InvariantCulture);
+            return "ПРОВЕРКИ " + checkCount.ToString(CultureInfo.InvariantCulture) +
+                   " | УСЛОВИЯ " + condCount.ToString(CultureInfo.InvariantCulture) +
+                   " | ПОСЛЕДСТВИЯ " + fxCount.ToString(CultureInfo.InvariantCulture);
         }
 
         // ------------------------------------------------------------------
@@ -741,7 +755,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         // через CalcHeight, §3-4 инструкции "полноценное редактирование
         // нод") + (Standard/Full) строка проверки/условий/эффектов, плюс
         // отступы карточки блока (§5 инструкции "читаемые ноды").
-        public static float ComputeTextBlockHeight(GraphTextBlockInfo block, GraphDetailMode mode)
+        public static float ComputeTextBlockHeight(GraphTextBlockInfo block, GraphDetailMode mode, bool showProductionDetails = true)
         {
             float height = GraphNodeLayoutConstants.PreviewLineHeight; // заголовок вида блока
             string displayText = ResolveGraphTextForDisplay(block?.Text, mode, GetTextPreviewMaxChars(mode));
@@ -752,9 +766,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 if (block.PassiveCheck != null)
                     height += GraphNodeLayoutConstants.DetailLineHeight;
 
-                int maxLines = GetMaxDetailLinesPerSection(mode);
-                height += ComputeLabeledSectionHeight(block.Conditions?.Conditions?.Count ?? 0, maxLines);
-                height += ComputeLabeledSectionHeight(block.OnRevealEffects?.Count ?? 0, maxLines);
+                if (showProductionDetails)
+                {
+                    int maxLines = GetMaxDetailLinesPerSection(mode);
+                    height += ComputeLabeledSectionHeight(block.Conditions?.Conditions?.Count ?? 0, maxLines);
+                    height += ComputeLabeledSectionHeight(block.OnRevealEffects?.Count ?? 0, maxLines);
+                }
             }
 
             return height + GraphNodeLayoutConstants.SectionGap + GraphNodeLayoutConstants.CardPadding;
@@ -765,7 +782,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         // ✓ успех / ✕ провал) + (Standard/Full) условия/эффекты успеха-
         // провала отдельными подписанными секциями + (если есть) строка
         // ошибки (§12 инструкции по читаемым нодам).
-        public static float ComputeChoiceHeight(GraphChoiceInfo choice, GraphDetailMode mode, bool hasWarning)
+        public static float ComputeChoiceHeight(GraphChoiceInfo choice, GraphDetailMode mode, bool hasWarning, bool showProductionDetails = true)
         {
             float height = GraphNodeLayoutConstants.PreviewLineHeight; // тип ответа
             string displayText = choice != null
@@ -798,7 +815,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             if (hasWarning)
                 height += GraphNodeLayoutConstants.DetailLineHeight;
 
-            if (mode != GraphDetailMode.Compact)
+            if (mode != GraphDetailMode.Compact && showProductionDetails)
             {
                 int maxLines = GetMaxDetailLinesPerSection(mode);
                 height += ComputeLabeledSectionHeight(choice.Conditions?.Conditions?.Count ?? 0, maxLines);
@@ -849,13 +866,17 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             GraphNodeInfo node,
             HashSet<string> allNodeIds,
             GraphDetailMode mode,
-            bool isSelected)
+            bool isSelected,
+            bool showProductionDetails = true)
         {
             GraphDetailMode effectiveMode = ResolveEffectiveGraphDetailMode(mode, isSelected);
             GraphNodeLayoutMetrics metrics = new GraphNodeLayoutMetrics { EffectiveMode = effectiveMode };
 
             List<string> warnings = CollectGraphNodeWarnings(node, allNodeIds);
             List<string> badges = BuildGraphNodeBadges(node, warnings.Count);
+            // Автору в заголовке узла видны только тревожные метки.
+            if (!showProductionDetails)
+                badges.RemoveAll(badge => badge != GraphNodeBadge.Warning && badge != GraphNodeBadge.Unreachable);
             metrics.Warnings = warnings;
             metrics.Badges = badges;
             metrics.Width = GetGraphNodeWidth(effectiveMode);
@@ -879,7 +900,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 float sectionHeight = 0f;
                 for (int i = 0; i < shown; i++)
                 {
-                    float blockHeight = ComputeTextBlockHeight(blocks[i], effectiveMode);
+                    float blockHeight = ComputeTextBlockHeight(blocks[i], effectiveMode, showProductionDetails);
                     metrics.TextBlocks.Add(new GraphTextBlockLayout { Y = y + sectionHeight, Height = blockHeight });
                     sectionHeight += blockHeight;
                 }
@@ -908,7 +929,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 for (int i = 0; i < choiceCount; i++)
                 {
                     bool hasWarning = ChoiceHasWarning(warnings, i);
-                    float choiceHeight = ComputeChoiceHeight(choices[i], effectiveMode, hasWarning);
+                    float choiceHeight = ComputeChoiceHeight(choices[i], effectiveMode, hasWarning, showProductionDetails);
                     metrics.Choices.Add(new GraphChoiceLayout { Y = y, Height = choiceHeight });
                     y += choiceHeight;
                 }

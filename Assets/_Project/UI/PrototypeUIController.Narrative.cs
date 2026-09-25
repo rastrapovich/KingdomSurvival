@@ -459,132 +459,28 @@ public partial class PrototypeUIController
         }
     }
 
-    // Строит визуальный контейнер одного presentation-шага. Сегменты
-    // считает NarrativeUiHistoryGrouping (чистая, тестируемая логика без
-    // UI Toolkit); здесь остаётся только раскладка по VisualElement.
+    // Строит визуальный контейнер одного presentation-шага — общая отрисовка
+    // с превью редактора (NarrativeDialogueRendering.BuildHistoryGroup).
     private VisualElement BuildNarrativeHistoryGroupElement(NarrativeUiHistoryItem item)
     {
-        VisualElement group = new VisualElement();
-        group.AddToClassList("narrative-dialogue-history-group");
-
-        List<NarrativeUiHistorySegment> segments =
-            NarrativeUiHistoryGrouping.BuildSegments(item.LeadingActiveCheck, item.Blocks);
-
-        for (int i = 0; i < segments.Count; i++)
-        {
-            NarrativeUiHistorySegment segment = segments[i];
-
-            if (segment.Kind == NarrativeUiSegmentKind.CheckResult)
-            {
-                VisualElement checkLine = new VisualElement();
-                checkLine.AddToClassList("narrative-dialogue-history-check-result");
-                checkLine.Add(BuildNarrativeCheckHeaderElement(segment.CheckPresentation));
-                group.Add(checkLine);
-                continue;
-            }
-
-            // Checked-observation (§3 инструкции "новое отображение
-            // пассивных наблюдений и проверок"): одна инлайн-строка
-            // "ИСТОЧНИК: РЕЗУЛЬТАТ — текст" без подписи говорящего — это
-            // наблюдение героя, а не реплика NPC рядом с которым оно возникло.
-            if (segment.Kind == NarrativeUiSegmentKind.CheckedObservation)
-            {
-                VisualElement observationBlock = new VisualElement();
-                observationBlock.AddToClassList("narrative-dialogue-history-entry");
-                string revealedText = segment.Paragraphs.Count > 0 ? segment.Paragraphs[0] : string.Empty;
-                observationBlock.Add(BuildNarrativePassiveCheckLine(segment.CheckPresentation, revealedText));
-                group.Add(observationBlock);
-                continue;
-            }
-
-            // Обычная реплика (MainLine/CompanionLine) — подпись говорящего
-            // один раз, затем все слитые подряд абзацы (§5/§6 дополнения).
-            VisualElement block = new VisualElement();
-            block.AddToClassList("narrative-dialogue-history-entry");
-
-            if (segment.CheckPresentation != null)
-                block.Add(BuildNarrativeCheckHeaderElement(segment.CheckPresentation));
-
-            Label speaker = new Label(segment.SpeakerDisplayName);
-            speaker.AddToClassList("narrative-dialogue-history-speaker");
-            block.Add(speaker);
-
-            for (int p = 0; p < segment.Paragraphs.Count; p++)
-            {
-                Label text = new Label(segment.Paragraphs[p]);
-                text.AddToClassList("narrative-dialogue-history-text");
-                block.Add(text);
-            }
-
-            group.Add(block);
-        }
-
-        return group;
+        return NarrativeDialogueRendering.BuildHistoryGroup(item.LeadingActiveCheck, item.Blocks, NarrativeCheckTooltipHost);
     }
 
+    // Иллюстрация события при наличии заменяет портрет на всю сцену; без неё —
+    // портрет говорящего с его кадрировкой (NarrativeDialogueRendering).
     private void ApplyNarrativeSpeakerPortrait(string dialogueId, string speakerId)
     {
-        if (narrativePortrait == null)
-            return;
+        NarrativeDialogueRendering.ApplySpeakerPortrait(
+            narrativePortrait, narrativePortraitPlaceholder, narrativeDialogueDatabase,
+            dialogueId, speakerId, GetNarrativeScreenSize());
+    }
 
-        DialogueDefinitionData dialogue = narrativeDialogueDatabase != null
-            ? narrativeDialogueDatabase.FindDialogue(dialogueId)
-            : null;
-        bool showSceneIllustration = dialogue != null && dialogue.SceneIllustration != null;
-        DialogueSpeakerData speaker = !showSceneIllustration && narrativeDialogueDatabase != null
-            ? narrativeDialogueDatabase.FindSpeaker(speakerId)
-            : null;
-        Sprite portrait = showSceneIllustration ? dialogue.SceneIllustration
-            : speaker != null ? speaker.Portrait : null;
-        if (portrait == null)
-        {
-            UILayoutRuntimeApplier.ClearDynamicImage(narrativePortrait);
-            if (narrativePortraitPlaceholder != null)
-                narrativePortraitPlaceholder.style.display = DisplayStyle.Flex;
-            return;
-        }
-
-        UILayoutDatabaseAsset layoutDatabase = UILayoutRuntimeApplier.LoadDefaultDatabase();
-        UILayoutScreenDefinition dialogueLayout = layoutDatabase != null
-            ? layoutDatabase.FindScreen(UILayoutDatabaseAsset.NarrativeDialogueScreenId)
-            : null;
-        UILayoutElementDefinition portraitDefinition = dialogueLayout != null
-            ? dialogueLayout.FindElement("portrait")
-            : null;
-
-        Vector2 reference = layoutDatabase != null
-            ? (Vector2)layoutDatabase.ReferenceResolution
-            : new Vector2(1920f, 1080f);
-        Vector2 actual = reference;
-        VisualElement screen = interfaceRoot != null
-            ? interfaceRoot.Q<VisualElement>("screen")
-            : null;
-        if (screen != null && screen.resolvedStyle.width > 0f && screen.resolvedStyle.height > 0f)
-            actual = new Vector2(screen.resolvedStyle.width, screen.resolvedStyle.height);
-
-        bool useIndividualFraming = speaker != null && speaker.OverridePortraitFraming;
-        float imageScale = showSceneIllustration ? dialogue.SceneIllustrationScale
-            : useIndividualFraming ? speaker.PortraitScale : 1f;
-        Vector2 imageOffset = showSceneIllustration ? dialogue.SceneIllustrationOffsetNormalized
-            : useIndividualFraming ? speaker.PortraitOffsetNormalized : Vector2.zero;
-        bool flipX = !showSceneIllustration && useIndividualFraming && speaker.PortraitFlipX;
-        UILayoutImageMode? illustrationMode = showSceneIllustration
-            ? (dialogue.SceneIllustrationFillFrame ? UILayoutImageMode.Cover : UILayoutImageMode.Contain)
-            : (UILayoutImageMode?)null;
-
-        UILayoutRuntimeApplier.ApplyDynamicImage(
-            narrativePortrait,
-            portrait,
-            portraitDefinition,
-            reference,
-            actual,
-            imageScale,
-            imageOffset,
-            flipX,
-            illustrationMode);
-
-        if (narrativePortraitPlaceholder != null)
-            narrativePortraitPlaceholder.style.display = DisplayStyle.None;
+    private Vector2 GetNarrativeScreenSize()
+    {
+        VisualElement screen = interfaceRoot != null ? interfaceRoot.Q<VisualElement>("screen") : null;
+        return screen != null && screen.resolvedStyle.width > 0f && screen.resolvedStyle.height > 0f
+            ? new Vector2(screen.resolvedStyle.width, screen.resolvedStyle.height)
+            : Vector2.zero;
     }
 
     private void OnNarrativeDialogueChoiceSelected(string choiceId, string choiceText, DialogueChoiceKind choiceKind)

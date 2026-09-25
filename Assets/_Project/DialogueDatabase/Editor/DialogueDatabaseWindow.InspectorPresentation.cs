@@ -23,8 +23,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         // + акцентная полоса + текст условий/эффектов) требуют больше места,
         // чем голый PropertyField — подняли минимум и ширину по умолчанию,
         // чтобы они не переносились через строку на типичном окне.
-        private const float GraphInspectorMinWidth = 420f;
-        private const float GraphInspectorDefaultWidth = 520f;
+        private const float GraphInspectorMinWidth = 320f;
+        private const float GraphInspectorDefaultWidth = 400f;
         private const float GraphInspectorMaxWidthFraction = 0.6f;
         private const float GraphInspectorSplitterWidth = 6f;
         private const float GraphInspectorContentPadding = 18f;
@@ -34,7 +34,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         // (много места) остаётся прежний горизонтальный PropertyField —
         // регрессии там не будет, так как Normal-режим просто вызывает
         // тот же API, что и раньше.
-        private const float NarrowInspectorWidthThreshold = 560f;
+        private const float NarrowInspectorWidthThreshold = 480f;
 
         private float graphInspectorWidth = GraphInspectorDefaultWidth;
         private bool graphInspectorResizing;
@@ -291,7 +291,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
 
-            const float portraitSize = 64f;
+            const float portraitSize = 48f;
             Rect portraitRect = GUILayoutUtility.GetRect(
                 portraitSize, portraitSize, GUILayout.Width(portraitSize), GUILayout.Height(portraitSize));
 
@@ -330,7 +330,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 EditorGUILayout.LabelField(speaker.DisplayName, EditorStyles.boldLabel);
                 if (!string.IsNullOrWhiteSpace(speaker.Role))
                     EditorGUILayout.LabelField(speaker.Role, EditorStyles.miniLabel);
-                EditorGUILayout.LabelField(speaker.Id, mutedStyle);
+                if (showProduction)
+                    EditorGUILayout.LabelField(speaker.Id, mutedStyle);
             }
             else
             {
@@ -339,7 +340,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     EditorStyles.boldLabel);
             }
 
-            EditorGUILayout.LabelField(string.IsNullOrWhiteSpace(nodeId) ? "<без ID>" : nodeId, mutedStyle);
+            if (showProduction)
+                EditorGUILayout.LabelField(string.IsNullOrWhiteSpace(nodeId) ? "<без ID>" : nodeId, mutedStyle);
 
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndVertical();

@@ -6,24 +6,21 @@ namespace KingdomSurvival.Encounters.Editor
 {
     public sealed partial class EncounterDatabaseWindow
     {
+        // 100 путешествий по 30 дней: дни идут подряд, учитываются
+        // одноразовость, перерывы и флаги, которые встречи ставят и снимают.
         private void RunJourneySimulation()
         {
             simulationResult.Clear();
-            if (selectedEncounterIndex < 0 || selectedEncounterIndex >= database.Encounters.Count)
-                return;
             serializedDatabase.ApplyModifiedProperties();
-            EncounterDefinition selected = database.Encounters[selectedEncounterIndex];
-            EncounterPoolDefinition pool = database.FindPool(selected.PoolId);
+            EncounterPoolDefinition pool = database.FindPool(selectedPoolId);
             if (pool == null)
             {
-                simulationResult.Add(MakeMutedLabel("Выберите событие из существующего пула."));
+                simulationResult.Add(MakeMutedLabel("Выберите пул."));
                 return;
             }
-            HeroProfileData hero = new HeroProfileData();
-            foreach (KeyValuePair<HeroQuality, IntegerField> pair in previewQualities)
-                hero.SetQuality(pair.Key, pair.Value.value);
-            List<string> tags = SplitCsv(previewLocationTags.value);
-            List<string> flags = SplitLines(previewFlags.value);
+
+            List<string> tags = SplitCsv(previewContext.LocationTags);
+            List<string> flags = SplitLines(previewContext.Flags);
             Dictionary<string, int> counts = new Dictionary<string, int>();
             int eventDays = 0, silentDays = 0, longestSilence = 0, allUnique = 0;
             const int journeys = 100, days = 30;
@@ -36,20 +33,17 @@ namespace KingdomSurvival.Encounters.Editor
                 int silence = 0;
                 for (int day = 0; day < days; day++)
                 {
-                    double hour = previewWorldHour.value + day * 24.0;
-                    NarrativeEvaluationContext context = new NarrativeEvaluationContext(
-                        hero, state, partySize: Mathf.Max(1, previewPartySize.value),
-                        worldSeed: 32100 + journey);
+                    double hour = previewContext.WorldHour + day * 24.0;
                     EncounterOpportunity opportunity = new EncounterOpportunity
                     {
                         OpportunityId = "J_" + journey + "_" + day,
                         PoolId = pool.PoolId,
                         WorldHour = hour,
-                        RegionId = previewRegion.value,
+                        RegionId = previewContext.Region,
                         LocationTags = tags
                     };
                     EncounterSelectionResult result = EncounterSelector.Select(
-                        opportunity, database, context, history);
+                        opportunity, database, BuildEvaluationContext(state, 32100 + journey), history);
                     if (!result.HasSelection)
                     {
                         silentDays++;
@@ -78,17 +72,15 @@ namespace KingdomSurvival.Encounters.Editor
                 longestSilence = Mathf.Max(longestSilence, silence);
                 allUnique += seen.Count;
             }
-            AddHeader(simulationResult, "100 ПУТЕШЕСТВИЙ · 30 ДНЕЙ · " + pool.PoolId);
-            simulationResult.Add(new Label("Дни с событием: " + eventDays + "/" +
-                (journeys * days) + " (" + (100f * eventDays / (journeys * days)).ToString("0.0") + "%)"));
-            simulationResult.Add(new Label("Тихие дни: " + silentDays +
-                " · максимальная пауза: " + longestSilence + " дней"));
-            simulationResult.Add(new Label("Разных событий за путешествие: " +
-                (allUnique / (float)journeys).ToString("0.0") + " в среднем"));
+
+            AddHeader(simulationResult, "100 ПУТЕШЕСТВИЙ ПО 30 ДНЕЙ");
+            simulationResult.Add(new Label("Дни со встречей: " + (100f * eventDays / (journeys * days)).ToString("0.0") + "%"));
+            simulationResult.Add(new Label("Тихие дни: " + silentDays + " · самая длинная тишина: " + longestSilence + " дн."));
+            simulationResult.Add(new Label("Разных встреч за путешествие: " + (allUnique / (float)journeys).ToString("0.0") + " в среднем"));
             List<KeyValuePair<string, int>> sorted = new List<KeyValuePair<string, int>>(counts);
             sorted.Sort((a, b) => b.Value.CompareTo(a.Value));
             foreach (KeyValuePair<string, int> pair in sorted)
-                simulationResult.Add(new Label(pair.Key + " — " + pair.Value + "/" + journeys));
+                simulationResult.Add(new Label(DisplayNameOf(pair.Key) + " — выпадала " + pair.Value + " раз за " + journeys + " путешествий"));
         }
     }
 }

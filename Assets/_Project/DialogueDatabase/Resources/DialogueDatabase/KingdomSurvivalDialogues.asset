@@ -13270,8 +13270,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 60, y: 60}
+      hasEditorPosition: 1
     - id: inspect_success
       speakerId: narrator
       text: 
@@ -13371,8 +13371,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 60}
+      hasEditorPosition: 1
     - id: inspect_failure
       speakerId: narrator
       text: 
@@ -13469,8 +13469,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 2100.375}
+      hasEditorPosition: 1
     - id: follow_tracks
       speakerId: narrator
       text: 
@@ -13575,8 +13575,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 606.7374}
+      hasEditorPosition: 1
     - id: man_found
       speakerId: narrator
       text: 
@@ -13653,8 +13653,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 1500, y: 60}
+      hasEditorPosition: 1
     - id: man_pochti
       speakerId: narrator
       text: 
@@ -13701,8 +13701,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 2220, y: 60}
+      hasEditorPosition: 1
     - id: man_noga
       speakerId: narrator
       text: 
@@ -13748,8 +13748,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 2940, y: 60}
+      hasEditorPosition: 1
     - id: man_otkuda
       speakerId: narrator
       text: 
@@ -13815,8 +13815,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 3660, y: 60}
+      hasEditorPosition: 1
     - id: second_approach
       speakerId: narrator
       text: 
@@ -13880,8 +13880,8 @@ MonoBehaviour:
         failureNodeId: confession_partial
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 4380, y: 60}
+      hasEditorPosition: 1
     - id: confession
       speakerId: narrator
       text: 
@@ -13955,8 +13955,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 5100, y: 60}
+      hasEditorPosition: 1
     - id: confession_partial
       speakerId: narrator
       text: 
@@ -14027,8 +14027,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 5100, y: 608.35}
+      hasEditorPosition: 1
     - id: final_choices
       speakerId: narrator
       text: 
@@ -14139,8 +14139,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 5820, y: 60}
+      hasEditorPosition: 1
     - id: ending_helped
       speakerId: narrator
       text: 
@@ -14193,8 +14193,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 6540, y: 60}
+      hasEditorPosition: 1
     - id: ending_supplied
       speakerId: narrator
       text: 
@@ -14247,8 +14247,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 6540, y: 500.0625}
+      hasEditorPosition: 1
     - id: ending_meat_taken_from_man
       speakerId: narrator
       text: 
@@ -14301,8 +14301,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 6540, y: 916.9}
+      hasEditorPosition: 1
     - id: ending_left_man
       speakerId: narrator
       text: 
@@ -14354,8 +14354,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 6540, y: 1333.7375}
+      hasEditorPosition: 1
     - id: take_meat_now
       speakerId: narrator
       text: 
@@ -14419,8 +14419,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 1193.6375}
+      hasEditorPosition: 1
     - id: leave_now
       speakerId: narrator
       text: 
@@ -14470,8 +14470,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 1671.9249}
+      hasEditorPosition: 1
     schemaVersion: 1
   - id: road_rats_01
     title: "\u041D\u043E\u0447\u043D\u0430\u044F \u0432\u043E\u0437\u043D\u044F"

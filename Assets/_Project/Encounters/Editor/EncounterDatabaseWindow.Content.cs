@@ -19,59 +19,97 @@ namespace KingdomSurvival.Encounters.Editor
             return AssetDatabase.LoadAssetAtPath<DialogueDatabaseAsset>(DialogueAssetPath);
         }
 
-        private void AddDialoguePreview(VisualElement parent, string dialogueId)
+        // Сцена встречи: выбор диалога по названию, его начало, «▶ Играть»,
+        // переход в базу диалогов и иллюстрация события.
+        private void AddDialogueSection(VisualElement parent, SerializedProperty dialogueIdProperty)
         {
             DialogueDatabaseAsset dialogueDatabase = LoadDialogueDatabase();
-            DialogueDefinitionData dialogue = dialogueDatabase != null
-                ? dialogueDatabase.FindDialogue(dialogueId) : null;
+            string dialogueId = dialogueIdProperty.stringValue;
+
+            if (dialogueDatabase != null)
+            {
+                List<string> ids = new List<string>();
+                Dictionary<string, string> titles = new Dictionary<string, string>();
+                foreach (DialogueDefinitionData candidate in dialogueDatabase.Dialogues)
+                {
+                    if (candidate == null || (candidate.Category != DialogueCategory.RandomEncounter && candidate.Id != dialogueId))
+                        continue;
+                    ids.Add(candidate.Id);
+                    titles[candidate.Id] = string.IsNullOrWhiteSpace(candidate.Title) ? candidate.Id : candidate.Title;
+                }
+                if (!ids.Contains(dialogueId))
+                    ids.Insert(0, dialogueId);
+                string Label(string id) => string.IsNullOrEmpty(id) ? "— диалог не выбран —"
+                    : titles.TryGetValue(id, out string title) ? (showProduction ? title + "  [" + id + "]" : title)
+                    : "? " + id;
+                PopupField<string> picker = new PopupField<string>("Диалог", ids, dialogueId, Label, Label);
+                picker.tooltip = "Сцена, которую увидит игрок (диалоги категории «Случайные встречи»)";
+                picker.RegisterValueChangedCallback(evt =>
+                {
+                    dialogueIdProperty.stringValue = evt.newValue;
+                    CommitAndRebuild();
+                });
+                parent.Add(picker);
+            }
+            if (showProduction)
+                parent.Add(MakeText(dialogueIdProperty, "ID диалога"));
+
+            DialogueDefinitionData dialogue = dialogueDatabase != null ? dialogueDatabase.FindDialogue(dialogueId) : null;
             if (dialogue == null)
             {
-                parent.Add(MakeMutedLabel("Связанный диалог не найден. Проверьте ID и базу."));
+                parent.Add(MakeMutedLabel(string.IsNullOrEmpty(dialogueId)
+                    ? "Выберите диалог или создайте его в базе диалогов."
+                    : "Диалог «" + dialogueId + "» не найден в базе."));
                 return;
             }
-            int checks = 0;
-            foreach (DialogueNodeData node in dialogue.Nodes)
-            {
-                foreach (DialogueTextBlockData block in node.GetEffectiveTextBlocks())
-                    if (block.HasPassiveCheck) checks++;
-                foreach (DialogueChoiceData choice in node.Choices)
-                    if (choice.IsActiveCheck) checks++;
-            }
-            AddHeader(parent, "СЦЕНА: " + dialogue.Title);
-            parent.Add(MakeMutedLabel(
-                dialogue.Nodes.Count + " узлов · " + checks + " проверок · " + dialogue.Status));
-            ObjectField illustrationField = new ObjectField("Иллюстрация события")
-            {
-                objectType = typeof(Sprite),
-                allowSceneObjects = false,
-                value = dialogue.SceneIllustration
-            };
-            illustrationField.RegisterValueChangedCallback(evt =>
-                SetDialogueIllustration(dialogueDatabase, dialogueId, evt.newValue as Sprite));
-            parent.Add(illustrationField);
-            parent.Add(MakeMutedLabel("Пустое поле: портрет говорящего. Кадрирование — в редакторе диалога."));
+
             DialogueNodeData start = null;
             foreach (DialogueNodeData node in dialogue.Nodes)
                 if (node.Id == dialogue.StartNodeId) { start = node; break; }
+
+            VisualElement preview = new VisualElement();
+            preview.style.marginTop = 4f;
+            preview.style.paddingLeft = 8f;
+            preview.style.borderLeftWidth = 2f;
+            preview.style.borderLeftColor = new Color(1f, 1f, 1f, 0.15f);
             if (start != null)
             {
                 foreach (DialogueTextBlockData block in start.GetEffectiveTextBlocks())
                 {
-                    if (!string.IsNullOrWhiteSpace(block.Text))
-                    {
-                        parent.Add(MakeMutedLabel(block.Text));
-                        break;
-                    }
+                    if (string.IsNullOrWhiteSpace(block.Text))
+                        continue;
+                    Label text = new Label("«" + block.Text + "»");
+                    text.style.whiteSpace = WhiteSpace.Normal;
+                    text.style.unityFontStyleAndWeight = FontStyle.Italic;
+                    preview.Add(text);
+                    break;
                 }
                 foreach (DialogueChoiceData choice in start.Choices)
-                    parent.Add(MakeMutedLabel("• " + choice.Text +
-                        (choice.IsActiveCheck ? " [проверка]" : string.Empty)));
+                    preview.Add(MakeMutedLabel("• " + choice.Text + (choice.IsActiveCheck ? "  [проверка]" : string.Empty)));
             }
-            parent.Add(new Button(() =>
+            parent.Add(preview);
+
+            VisualElement buttons = Row();
+            buttons.style.marginTop = 4f;
+            Button play = new Button(() => KingdomSurvival.DialogueDatabase.Editor.DialogueGamePreview.Open(dialogueId))
+                { text = "▶ Играть", tooltip = "Пройти сцену в окне как в игре" };
+            buttons.Add(play);
+            buttons.Add(new Button(() => KingdomSurvival.DialogueDatabase.Editor.DialogueDatabaseWindow.OpenAt(dialogueId))
+                { text = "Открыть в базе диалогов" });
+            parent.Add(buttons);
+
+            ObjectField illustrationField = new ObjectField("Иллюстрация")
             {
-                KingdomSurvival.DialogueDatabase.Editor.DialogueDatabaseWindow.OpenAt(dialogueId);
-            }) { text = "Открыть связанный диалог" });
+                objectType = typeof(Sprite),
+                allowSceneObjects = false,
+                value = dialogue.SceneIllustration,
+                tooltip = "Картинка на всю сцену вместо портрета говорящего. Пусто — портреты. Кадрирование — в базе диалогов."
+            };
+            illustrationField.RegisterValueChangedCallback(evt =>
+                SetDialogueIllustration(dialogueDatabase, dialogueId, evt.newValue as Sprite));
+            parent.Add(illustrationField);
         }
+
         private static void SetDialogueIllustration(DialogueDatabaseAsset dialogueDatabase,
             string dialogueId, Sprite illustration)
         {

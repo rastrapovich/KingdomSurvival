@@ -4,7 +4,8 @@
   "references": [
     "KingdomSurvival.Core",
     "KingdomSurvival.DialogueDatabase",
-    "KingdomSurvival.Encounters"
+    "KingdomSurvival.Encounters",
+    "KingdomSurvival.Encounters.Editor"
   ],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],

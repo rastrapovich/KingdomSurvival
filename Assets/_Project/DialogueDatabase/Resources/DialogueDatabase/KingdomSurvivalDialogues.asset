@@ -14609,7 +14609,7 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 710, y: 60}
+      editorPosition: {x: 780, y: 60}
       hasEditorPosition: 1
     - id: failure
       speakerId: narrator
@@ -14660,7 +14660,7 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 710, y: 429.83752}
+      editorPosition: {x: 780, y: 429.83752}
       hasEditorPosition: 1
     - id: leave
       speakerId: narrator
@@ -14712,7 +14712,7 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 710, y: 828.67505}
+      editorPosition: {x: 780, y: 788.0625}
       hasEditorPosition: 1
     schemaVersion: 1
   - id: road_hunt_01

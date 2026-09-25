@@ -189,12 +189,6 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             EditorGUILayout.BeginVertical(GUILayout.Width(graphInspectorWidth), GUILayout.ExpandHeight(true));
             bool hasSelection = graphSelectedNodeIndex >= 0 && graphSelectedNodeIndex < nodes.arraySize;
-            EditorGUILayout.LabelField(
-                hasSelection
-                    ? NodeLabel(nodes.GetArrayElementAtIndex(graphSelectedNodeIndex).FindPropertyRelative("id").stringValue).ToUpperInvariant()
-                    : "УЗЕЛ",
-                EditorStyles.boldLabel);
-
             if (!hasSelection)
             {
                 EditorGUILayout.HelpBox(
@@ -223,15 +217,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 GUI.FocusControl(null);
             }
 
-            // §15-16: портретная карточка вместо голой строки "ID · Имя".
-            DrawGraphInspectorPortraitHeader(node);
-
             // §27: единственный ScrollView на всю панель — ни у TextArea, ни
             // у карточек ниже своего вертикального scrollbar быть не должно.
             graphInspectorScroll = EditorGUILayout.BeginScrollView(
                 graphInspectorScroll, GUIStyle.none, GUI.skin.verticalScrollbar);
             EditorGUILayout.BeginVertical(GUILayout.Width(graphInspectorWidth - GraphInspectorContentPadding));
-            DrawNode(dialogue, nodes, graphSelectedNodeIndex);
+            DrawNode(dialogue, nodes, graphSelectedNodeIndex, true);
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndScrollView();
 

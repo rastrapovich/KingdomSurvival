@@ -163,10 +163,15 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUILayout.EndHorizontal();
         }
 
+        // Текущий SerializedObject кадра — для команд из выпадающих меню,
+        // которые выполняются после отрисовки (ApplyEdit).
+        private SerializedObject currentSerializedDatabase;
+
         private void DrawDialoguesTab()
         {
             SerializedObject serializedDatabase = new SerializedObject(database);
             serializedDatabase.Update();
+            currentSerializedDatabase = serializedDatabase;
 
             EditorGUILayout.BeginHorizontal();
             if (!listCollapsed)
@@ -430,36 +435,40 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             EditorGUILayout.EndScrollView();
         }
 
-        private void DrawNode(SerializedProperty dialogue, SerializedProperty nodes, int nodeIndex)
+        // Узел в панели схемы (inInspector) или в режиме «Текстом» (со сворачиванием).
+        // Карточки реплик и ответов показывают главное; подробные настройки —
+        // по «⚙» у карточки или везде сразу при «⚙ Производство».
+        private void DrawNode(SerializedProperty dialogue, SerializedProperty nodes, int nodeIndex, bool inInspector = false)
         {
             SerializedProperty node = nodes.GetArrayElementAtIndex(nodeIndex);
             string nodeId = node.FindPropertyRelative("id").stringValue;
 
-            EditorGUILayout.BeginVertical("box");
-            EditorGUILayout.BeginHorizontal();
-            node.isExpanded = EditorGUILayout.Foldout(
-                node.isExpanded,
-                string.IsNullOrWhiteSpace(nodeId) ? "Узел без ID" : NodeLabel(nodeId),
-                true);
-            GUILayout.FlexibleSpace();
-            GUI.enabled = nodes.arraySize > 1;
-            if (GUILayout.Button(new GUIContent("×", "Удалить узел"), GUILayout.Width(28f)))
+            EditorGUILayout.BeginVertical(inInspector ? GUIStyle.none : "box");
+            if (!inInspector)
             {
+                EditorGUILayout.BeginHorizontal();
+                node.isExpanded = EditorGUILayout.Foldout(
+                    node.isExpanded,
+                    string.IsNullOrWhiteSpace(nodeId) ? "Узел без ID" : NodeLabel(nodeId),
+                    true);
+                GUILayout.FlexibleSpace();
+                GUI.enabled = nodes.arraySize > 1;
+                if (GUILayout.Button(new GUIContent("×", "Удалить узел"), EditorStyles.miniButton, GUILayout.Width(22f)))
+                {
+                    GUI.enabled = true;
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndVertical();
+                    if (TryDeleteDialogueNode(dialogue, nodeIndex))
+                        GUIUtility.ExitGUI();
+                    return;
+                }
                 GUI.enabled = true;
                 EditorGUILayout.EndHorizontal();
-                EditorGUILayout.EndVertical();
-                if (TryDeleteDialogueNode(dialogue, nodeIndex))
-                    GUIUtility.ExitGUI();
-                return;
             }
-            GUI.enabled = true;
-            EditorGUILayout.EndHorizontal();
 
-            if (node.isExpanded)
+            if (inInspector || node.isExpanded)
             {
-                if (showProduction)
-                    DrawLongIdField(node.FindPropertyRelative("id"), "ID узла");
-                DrawSpeakerPopup(node.FindPropertyRelative("speakerId"));
+                DrawNodeHeaderRow(node, inInspector);
 
                 SerializedProperty textBlocks = node.FindPropertyRelative("textBlocks");
                 SerializedProperty legacyText = node.FindPropertyRelative("text");
@@ -480,210 +489,669 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                         DrawAutoHeightNarrativeText(legacyText, "Реплика (старый формат)");
                 }
 
-                DrawSectionHeader("РЕПЛИКИ (" + textBlocks.arraySize + ")", SemanticCategory.Text);
+                DrawCompactSectionTitle("Реплики", textBlocks.arraySize, SemanticCategory.Text,
+                    () => ShowAddTextBlockMenu(textBlocks), "＋ реплика ▾");
+                string nodeSpeakerId = node.FindPropertyRelative("speakerId").stringValue;
                 for (int blockIndex = 0; blockIndex < textBlocks.arraySize; blockIndex++)
-                    DrawTextBlock(textBlocks, blockIndex, node.FindPropertyRelative("speakerId").stringValue);
-
-                if (GUILayout.Button("＋ Реплика ▾", EditorStyles.miniButton))
-                    ShowAddTextBlockMenu(textBlocks);
+                {
+                    if (DrawTextBlock(textBlocks, blockIndex, nodeSpeakerId))
+                        break;
+                }
 
                 SerializedProperty choices = node.FindPropertyRelative("choices");
-                DrawSectionHeader("ОТВЕТЫ ИГРОКА (" + choices.arraySize + ")", SemanticCategory.Choice);
+                DrawCompactSectionTitle("Ответы игрока", choices.arraySize, SemanticCategory.Choice,
+                    () => ShowAddChoiceMenu(choices), "＋ ответ ▾");
                 for (int choiceIndex = 0; choiceIndex < choices.arraySize; choiceIndex++)
-                    DrawChoice(nodes, choices, choiceIndex);
-
-                if (GUILayout.Button("＋ Ответ ▾", EditorStyles.miniButton))
-                    ShowAddChoiceMenu(choices);
+                {
+                    if (DrawChoice(nodes, choices, choiceIndex))
+                        break;
+                }
             }
 
             EditorGUILayout.EndVertical();
         }
 
+        // Одна строка шапки: портрет, кто говорит, подпись узла (и ID при «⚙ Производство»).
+        private void DrawNodeHeaderRow(SerializedProperty node, bool withPortrait)
+        {
+            SerializedProperty speakerId = node.FindPropertyRelative("speakerId");
+            DialogueSpeakerData speaker = database.FindSpeaker(speakerId.stringValue);
+
+            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+            if (withPortrait)
+            {
+                const float portraitSize = 30f;
+                Rect portraitRect = GUILayoutUtility.GetRect(portraitSize, portraitSize,
+                    GUILayout.Width(portraitSize), GUILayout.Height(portraitSize));
+                if (speaker != null && speaker.Portrait != null)
+                {
+                    Texture2D preview = AssetPreview.GetAssetPreview(speaker.Portrait);
+                    if (preview == null)
+                        preview = speaker.Portrait.texture;
+                    GUI.DrawTexture(portraitRect, preview, ScaleMode.ScaleToFit, true);
+                }
+                else
+                {
+                    EditorGUI.DrawRect(portraitRect,
+                        EditorGUIUtility.isProSkin ? new Color(1f, 1f, 1f, 0.08f) : new Color(0f, 0f, 0f, 0.08f));
+                    GUI.Label(portraitRect, speaker != null && speaker.DisplayName.Length > 0 ? speaker.DisplayName.Substring(0, 1) : "?",
+                        new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter });
+                }
+                GUILayout.Space(4f);
+            }
+
+            EditorGUILayout.BeginVertical();
+            GUILayout.Space(withPortrait ? 5f : 0f);
+            EditorGUILayout.BeginHorizontal();
+            DrawSpeakerPopup(speakerId, false);
+            string nodeId = node.FindPropertyRelative("id").stringValue;
+            if (showProduction)
+            {
+                SerializedProperty id = node.FindPropertyRelative("id");
+                id.stringValue = EditorGUILayout.TextField(new GUIContent(string.Empty, "ID узла"), id.stringValue, GUILayout.Width(120f));
+            }
+            else if (withPortrait)
+            {
+                GUILayout.Label(NodeLabel(nodeId), EditorStyles.miniBoldLabel, GUILayout.ExpandWidth(false));
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private static void DrawCompactSectionTitle(string title, int count, SemanticCategory category, Action onAdd, string addLabel)
+        {
+            GUILayout.Space(6f);
+            EditorGUILayout.BeginHorizontal();
+            GUIStyle style = new GUIStyle(EditorStyles.boldLabel);
+            style.normal.textColor = GetSemanticAccentColor(category);
+            GUILayout.Label(title + (count > 0 ? " · " + count : string.Empty), style);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button(addLabel, EditorStyles.miniButton, GUILayout.Width(86f)))
+                onAdd();
+            EditorGUILayout.EndHorizontal();
+        }
+
         private void ShowAddTextBlockMenu(SerializedProperty textBlocks)
         {
             GenericMenu menu = new GenericMenu();
-            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.MainLine)), false,
-                () => AddTextBlock(textBlocks, DialogueTextBlockKind.MainLine));
-            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.Observation)), false,
-                () => AddTextBlock(textBlocks, DialogueTextBlockKind.Observation));
-            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.Memory)), false,
-                () => AddTextBlock(textBlocks, DialogueTextBlockKind.Memory));
-            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.HeroThought)), false,
-                () => AddTextBlock(textBlocks, DialogueTextBlockKind.HeroThought));
-            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.CompanionLine)), false,
-                () => AddTextBlock(textBlocks, DialogueTextBlockKind.CompanionLine));
-            menu.AddItem(new GUIContent(TextBlockKindLabel(DialogueTextBlockKind.Narration)), false,
-                () => AddTextBlock(textBlocks, DialogueTextBlockKind.Narration));
+            foreach (DialogueTextBlockKind kind in new[]
+                     {
+                         DialogueTextBlockKind.MainLine, DialogueTextBlockKind.Narration, DialogueTextBlockKind.HeroThought,
+                         DialogueTextBlockKind.CompanionLine, DialogueTextBlockKind.Observation, DialogueTextBlockKind.Memory
+                     })
+            {
+                DialogueTextBlockKind captured = kind;
+                menu.AddItem(new GUIContent(TextBlockKindLabel(kind)), false, () => ApplyEdit(() => AddTextBlock(textBlocks, captured)));
+            }
             menu.ShowAsContext();
         }
 
         private void ShowAddChoiceMenu(SerializedProperty choices)
         {
             GenericMenu menu = new GenericMenu();
-            menu.AddItem(new GUIContent("Обычный ответ"), false, () => AddChoice(choices));
-            menu.AddItem(new GUIContent("«…» — читать дальше"), false, () => AddContinueChoice(choices));
+            menu.AddItem(new GUIContent("Обычный ответ"), false, () => ApplyEdit(() => AddChoice(choices)));
+            menu.AddItem(new GUIContent("«…» — читать дальше"), false, () => ApplyEdit(() => AddContinueChoice(choices)));
             menu.AddItem(new GUIContent("Проверка (можно повторить)"), false,
-                () => AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveReturnable));
+                () => ApplyEdit(() => AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveReturnable)));
             menu.AddItem(new GUIContent("Проверка (решающая, один раз)"), false,
-                () => AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveDecisive));
-            menu.AddItem(new GUIContent("Выход из разговора"), false, () => AddExitChoice(choices));
+                () => ApplyEdit(() => AddActiveCheckChoice(choices, DialogueChoiceKind.ActiveDecisive)));
+            menu.AddItem(new GUIContent("Выход из разговора"), false, () => ApplyEdit(() => AddExitChoice(choices)));
             menu.ShowAsContext();
         }
 
-        private void DrawTextBlock(SerializedProperty textBlocks, int blockIndex, string nodeSpeakerId)
+        // Команды из меню выполняются после кадра — изменения нужно применить явно.
+        private void ApplyEdit(Action edit)
+        {
+            Undo.RecordObject(database, "Dialogue Edit");
+            edit();
+            if (currentSerializedDatabase != null)
+                currentSerializedDatabase.ApplyModifiedProperties();
+            EditorUtility.SetDirty(database);
+            Repaint();
+        }
+
+        // ------------------------------------------------------------------
+        // Реплика
+        // ------------------------------------------------------------------
+
+        // Возвращает true, если реплика удалена (индексы сдвинулись).
+        private bool DrawTextBlock(SerializedProperty textBlocks, int blockIndex, string nodeSpeakerId)
         {
             SerializedProperty block = textBlocks.GetArrayElementAtIndex(blockIndex);
             SerializedProperty kind = block.FindPropertyRelative("kind");
+            bool expanded = IsCardExpanded(block);
 
             BeginSemanticCard(null, SemanticCategory.Text);
 
-            // Строка реплики: вид, кто говорит (если не говорящий узла), удалить.
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField((blockIndex + 1) + ".", EditorStyles.miniBoldLabel, GUILayout.Width(18f));
-            DrawTextBlockKindPopup(kind, GUILayout.Width(150f));
+            DrawTextBlockKindPopup(kind, GUILayout.MinWidth(90f));
             DrawSpeakerOverridePopup(block.FindPropertyRelative("speakerIdOverride"), nodeSpeakerId);
-            if (GUILayout.Button(new GUIContent("×", "Удалить реплику"), GUILayout.Width(24f)))
+            DrawCardGear(block);
+            if (GUILayout.Button(new GUIContent("×", "Удалить реплику"), EditorStyles.miniButton, GUILayout.Width(22f)))
             {
                 textBlocks.DeleteArrayElementAtIndex(blockIndex);
                 EditorGUILayout.EndHorizontal();
                 EndSemanticCard(SemanticCategory.Text);
-                return;
+                return true;
             }
             EditorGUILayout.EndHorizontal();
 
             DrawAutoHeightNarrativeText(block.FindPropertyRelative("text"), null);
 
+            SerializedProperty conditionGroup = block.FindPropertyRelative("conditions");
+            SerializedProperty conditions = conditionGroup.FindPropertyRelative("Conditions");
             SerializedProperty hasPassiveCheck = block.FindPropertyRelative("hasPassiveCheck");
-            if (!showProduction)
+            SerializedProperty passiveCheck = block.FindPropertyRelative("passiveCheck");
+            SerializedProperty effects = block.FindPropertyRelative("onRevealEffects");
+
+            if (expanded && showProduction)
+                DrawLongIdField(block.FindPropertyRelative("blockId"), "ID реплики");
+
+            if (conditions.arraySize > 0)
             {
-                // Для автора — одна строка о том, при чём эта реплика видна;
-                // подробности правятся в «⚙ Производство».
-                List<string> notes = new List<string>();
-                if (hasPassiveCheck.boolValue)
-                    notes.Add("◈ видна при пассивной проверке: " + DescribeCheck(block.FindPropertyRelative("passiveCheck")));
-                int conditionCount = block.FindPropertyRelative("conditions").FindPropertyRelative("Conditions").arraySize;
-                if (conditionCount > 0)
-                    notes.Add("показ с условием (" + conditionCount + ")");
-                int effectCount = block.FindPropertyRelative("onRevealEffects").arraySize;
-                if (effectCount > 0)
-                    notes.Add("последствий: " + effectCount);
-                DrawMutedNote(notes);
-                EndSemanticCard(SemanticCategory.Text);
-                return;
+                if (expanded)
+                    DrawConditionsEditor(conditionGroup, "Показывается, если");
+                else
+                    DrawSummaryLine("Показывается, если: " + DescribeConditions(conditionGroup));
             }
 
-            DrawLongIdField(block.FindPropertyRelative("blockId"), "ID реплики");
-            DrawConditionGroup(block.FindPropertyRelative("conditions"), "Условия показа");
-            EditorGUILayout.PropertyField(hasPassiveCheck, new GUIContent("Есть пассивная проверка"));
             if (hasPassiveCheck.boolValue)
-                DrawCheckSpec(block.FindPropertyRelative("passiveCheck"), "Пассивная проверка");
-            DrawEffectsList(block.FindPropertyRelative("onRevealEffects"), "Последствия после показа");
+            {
+                if (DrawInlineCheck(passiveCheck, "◈ видна при проверке", null, true))
+                    hasPassiveCheck.boolValue = false;
+                else if (expanded)
+                    DrawCheckExtras(passiveCheck);
+            }
+
+            if (effects.arraySize > 0)
+            {
+                if (expanded)
+                    DrawEffectsEditor(effects, "После показа", SemanticCategory.Effect);
+                else
+                    DrawSummaryLine("↳ после показа: " + DescribeEffects(effects));
+            }
+
+            DrawAddRow(block,
+                ("+ условие", "Показывать реплику только при условии", () => AddCondition(conditions)),
+                hasPassiveCheck.boolValue ? default : ("+ проверка", "Реплика видна только при успехе пассивной проверки",
+                    (Action)(() => EnablePassiveCheck(hasPassiveCheck, passiveCheck))),
+                ("+ последствие", "Что меняется в мире после этой реплики", () => AddEffect(effects)));
+
             EndSemanticCard(SemanticCategory.Text);
+            return false;
         }
 
-        private void DrawChoice(SerializedProperty nodes, SerializedProperty choices, int choiceIndex)
+        private static void EnablePassiveCheck(SerializedProperty hasPassiveCheck, SerializedProperty passiveCheck)
+        {
+            hasPassiveCheck.boolValue = true;
+            passiveCheck.FindPropertyRelative("Kind").enumValueIndex = (int)NarrativeCheckKind.Passive;
+            if (string.IsNullOrWhiteSpace(passiveCheck.FindPropertyRelative("CheckId").stringValue))
+                passiveCheck.FindPropertyRelative("CheckId").stringValue = Guid.NewGuid().ToString("N");
+            if (passiveCheck.FindPropertyRelative("Difficulty").intValue <= 0)
+                passiveCheck.FindPropertyRelative("Difficulty").intValue = NarrativeDifficulty.Ordinary;
+        }
+
+        // ------------------------------------------------------------------
+        // Ответ
+        // ------------------------------------------------------------------
+
+        private static readonly DialogueChoiceKind[] ChoiceKindOrder =
+        {
+            DialogueChoiceKind.Normal, DialogueChoiceKind.Continue, DialogueChoiceKind.ActiveReturnable,
+            DialogueChoiceKind.ActiveDecisive, DialogueChoiceKind.Exit
+        };
+
+        // Возвращает true, если ответ удалён.
+        private bool DrawChoice(SerializedProperty nodes, SerializedProperty choices, int choiceIndex)
         {
             SerializedProperty choice = choices.GetArrayElementAtIndex(choiceIndex);
-            SerializedProperty text = choice.FindPropertyRelative("text");
             SerializedProperty kind = choice.FindPropertyRelative("kind");
             SerializedProperty nextNodeId = choice.FindPropertyRelative("nextNodeId");
             SerializedProperty endsDialogue = choice.FindPropertyRelative("endsDialogue");
+            SerializedProperty check = choice.FindPropertyRelative("check");
             DialogueChoiceKind choiceKind = (DialogueChoiceKind)kind.enumValueIndex;
+            bool expanded = IsCardExpanded(choice);
 
             BeginSemanticCard(null, SemanticCategory.Choice);
+
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("ОТВЕТ " + (choiceIndex + 1) + " · " + ChoiceKindLabel(choiceKind).ToUpperInvariant(), EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField((choiceIndex + 1) + ".", EditorStyles.miniBoldLabel, GUILayout.Width(18f));
+            DialogueChoiceKind nextKind = DrawChoiceKindPopup(choiceKind);
+            if (nextKind != choiceKind)
+            {
+                ChangeChoiceKind(choice, nextKind);
+                choiceKind = nextKind;
+            }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button(new GUIContent("×", "Удалить ответ"), GUILayout.Width(28f)))
+            DrawCardGear(choice);
+            if (GUILayout.Button(new GUIContent("×", "Удалить ответ"), EditorStyles.miniButton, GUILayout.Width(22f)))
             {
                 choices.DeleteArrayElementAtIndex(choiceIndex);
                 EditorGUILayout.EndHorizontal();
                 EndSemanticCard(SemanticCategory.Choice);
-                return;
+                return true;
             }
             EditorGUILayout.EndHorizontal();
 
             if (choiceKind == DialogueChoiceKind.Continue)
-                EditorGUILayout.LabelField("В игре — кнопка «…»: читать дальше, не слова героя.", EditorStyles.miniLabel);
+                DrawSummaryLine("В игре — кнопка «…»: читать дальше, не слова героя.");
             else
-                DrawAutoHeightNarrativeText(text, null, 32f);
+                DrawAutoHeightNarrativeText(choice.FindPropertyRelative("text"), null, 20f);
 
-            if (showProduction)
+            if (expanded && showProduction)
+                DrawLongIdField(choice.FindPropertyRelative("choiceId"), "ID ответа");
+
+            SerializedProperty conditionGroup = choice.FindPropertyRelative("conditions");
+            SerializedProperty conditions = conditionGroup.FindPropertyRelative("Conditions");
+            if (conditions.arraySize > 0)
             {
-                DrawConditionGroup(choice.FindPropertyRelative("conditions"), "Условия показа");
-                if (choiceKind != DialogueChoiceKind.Normal || choice.FindPropertyRelative("conditions").FindPropertyRelative("Conditions").arraySize > 0)
+                if (expanded)
+                {
+                    DrawConditionsEditor(conditionGroup, "Доступен, если");
                     DrawUnavailablePresentationPopup(choice.FindPropertyRelative("unavailablePresentation"));
+                }
+                else
+                {
+                    DrawSummaryLine("Доступен, если: " + DescribeConditions(conditionGroup) +
+                                    (choice.FindPropertyRelative("unavailablePresentation").enumValueIndex ==
+                                     (int)DialogueChoiceUnavailablePresentation.Hidden ? " (иначе скрыт)" : " (иначе неактивен)"));
+                }
             }
+
+            SerializedProperty successEffects = choice.FindPropertyRelative("successEffects");
+            SerializedProperty failureEffects = choice.FindPropertyRelative("failureEffects");
+            bool isCheck = choiceKind == DialogueChoiceKind.ActiveReturnable || choiceKind == DialogueChoiceKind.ActiveDecisive;
 
             switch (choiceKind)
             {
                 case DialogueChoiceKind.Exit:
-                    EditorGUILayout.LabelField("Завершает разговор.", EditorStyles.miniLabel);
+                    DrawSummaryLine("→ конец разговора");
                     break;
 
                 case DialogueChoiceKind.Continue:
-                    DrawNodeTargetPopup(nextNodeId, nodes, "Дальше");
+                    DrawTargetRow("→", nextNodeId, nodes, false, null);
                     break;
 
                 case DialogueChoiceKind.ActiveReturnable:
                 case DialogueChoiceKind.ActiveDecisive:
-                    if (showProduction)
-                        DrawCheckSpec(choice.FindPropertyRelative("check"), "Проверка");
-                    else
-                        EditorGUILayout.LabelField("◆ Проверка: " + DescribeCheck(choice.FindPropertyRelative("check")), EditorStyles.miniLabel);
-                    DrawNodeTargetPopup(choice.FindPropertyRelative("successNodeId"), nodes, "Если успех");
-                    DrawNodeTargetPopup(choice.FindPropertyRelative("failureNodeId"), nodes, "Если провал");
-                    if (showProduction)
-                    {
-                        DrawEffectsList(choice.FindPropertyRelative("successEffects"), "Последствия успеха", SemanticCategory.Effect);
-                        DrawEffectsList(choice.FindPropertyRelative("failureEffects"), "Последствия провала", SemanticCategory.Error);
-                    }
+                    DrawInlineCheck(check, "◆", null, false);
+                    if (expanded)
+                        DrawCheckExtras(check);
+                    EditorGUILayout.BeginHorizontal();
+                    DrawTargetRow("✓ успех", choice.FindPropertyRelative("successNodeId"), nodes, false, null, true);
+                    DrawTargetRow("✕ провал", choice.FindPropertyRelative("failureNodeId"), nodes, false, null, true);
+                    EditorGUILayout.EndHorizontal();
                     break;
 
                 default:
-                    endsDialogue.boolValue = EditorGUILayout.ToggleLeft("Завершает разговор", endsDialogue.boolValue);
-                    if (endsDialogue.boolValue)
-                        nextNodeId.stringValue = string.Empty;
-                    else
-                        DrawNodeTargetPopup(nextNodeId, nodes, "Ведёт к");
+                    DrawTargetRow("→", nextNodeId, nodes, true, endsDialogue);
                     break;
             }
 
-            if (!showProduction)
+            if (successEffects.arraySize > 0)
             {
-                List<string> notes = new List<string>();
-                int conditionCount = choice.FindPropertyRelative("conditions").FindPropertyRelative("Conditions").arraySize;
-                if (conditionCount > 0)
-                    notes.Add("доступен при условии (" + conditionCount + ")");
-                int effectCount = choice.FindPropertyRelative("successEffects").arraySize + choice.FindPropertyRelative("failureEffects").arraySize;
-                if (effectCount > 0)
-                    notes.Add("последствий: " + effectCount);
-                DrawMutedNote(notes);
+                string title = isCheck ? "После успеха" : "После выбора";
+                if (expanded)
+                    DrawEffectsEditor(successEffects, title, SemanticCategory.Effect);
+                else
+                    DrawSummaryLine("↳ " + title.ToLowerInvariant() + ": " + DescribeEffects(successEffects));
+            }
+            if (failureEffects.arraySize > 0)
+            {
+                if (expanded)
+                    DrawEffectsEditor(failureEffects, "После провала", SemanticCategory.Error);
+                else
+                    DrawSummaryLine("↳ после провала: " + DescribeEffects(failureEffects));
+            }
+
+            if (isCheck)
+            {
+                DrawAddRow(choice,
+                    ("+ условие", "Ответ доступен только при условии", () => AddCondition(conditions)),
+                    ("+ после успеха", "Что меняется при успехе", () => AddEffect(successEffects)),
+                    ("+ после провала", "Что меняется при провале", () => AddEffect(failureEffects)));
+            }
+            else if (choiceKind != DialogueChoiceKind.Continue)
+            {
+                DrawAddRow(choice,
+                    ("+ условие", "Ответ доступен только при условии", () => AddCondition(conditions)),
+                    default,
+                    ("+ последствие", "Что меняется после этого ответа", () => AddEffect(successEffects)));
             }
 
             EndSemanticCard(SemanticCategory.Choice);
+            return false;
         }
 
-        // «ЧУТЬЁ + СЛЕДОПЫТСТВО · 13 (непросто)» — параметры проверки одной строкой.
-        private static string DescribeCheck(SerializedProperty check)
+        private static DialogueChoiceKind DrawChoiceKindPopup(DialogueChoiceKind current)
         {
-            if (check == null)
-                return "—";
-            NarrativeCheckSpec spec = (NarrativeCheckSpec)check.boxedValue;
-            if (spec == null)
-                return "—";
-            return BuildGraphActiveCheckSummary(spec) + " (" + NarrativeDifficultyLabels.Describe(spec.Difficulty) + ")";
+            string[] labels = new string[ChoiceKindOrder.Length];
+            int selected = 0;
+            for (int i = 0; i < ChoiceKindOrder.Length; i++)
+            {
+                labels[i] = ChoiceKindLabel(ChoiceKindOrder[i]);
+                if (ChoiceKindOrder[i] == current)
+                    selected = i;
+            }
+            int next = EditorGUILayout.Popup(selected, labels, EditorStyles.miniPullDown, GUILayout.Width(170f));
+            return ChoiceKindOrder[Mathf.Clamp(next, 0, ChoiceKindOrder.Length - 1)];
         }
 
-        private static void DrawMutedNote(List<string> notes)
+        private static void ChangeChoiceKind(SerializedProperty choice, DialogueChoiceKind kind)
         {
-            if (notes == null || notes.Count == 0)
+            choice.FindPropertyRelative("kind").enumValueIndex = (int)kind;
+            SerializedProperty endsDialogue = choice.FindPropertyRelative("endsDialogue");
+            switch (kind)
+            {
+                case DialogueChoiceKind.Exit:
+                    endsDialogue.boolValue = true;
+                    choice.FindPropertyRelative("nextNodeId").stringValue = string.Empty;
+                    break;
+                case DialogueChoiceKind.Continue:
+                    endsDialogue.boolValue = false;
+                    break;
+                case DialogueChoiceKind.ActiveReturnable:
+                case DialogueChoiceKind.ActiveDecisive:
+                    endsDialogue.boolValue = false;
+                    SerializedProperty check = choice.FindPropertyRelative("check");
+                    check.FindPropertyRelative("Kind").enumValueIndex = (int)kind; // номера совпадают с NarrativeCheckKind
+                    if (string.IsNullOrWhiteSpace(check.FindPropertyRelative("CheckId").stringValue))
+                        check.FindPropertyRelative("CheckId").stringValue = Guid.NewGuid().ToString("N");
+                    if (check.FindPropertyRelative("Difficulty").intValue <= 0)
+                        check.FindPropertyRelative("Difficulty").intValue = NarrativeDifficulty.Ordinary;
+                    if (string.IsNullOrWhiteSpace(choice.FindPropertyRelative("choiceId").stringValue))
+                        choice.FindPropertyRelative("choiceId").stringValue = Guid.NewGuid().ToString("N");
+                    break;
+            }
+        }
+
+        // «→ [Узел 2 · «…» ▾]». У обычного ответа первый пункт — конец разговора.
+        private void DrawTargetRow(string prefix, SerializedProperty target, SerializedProperty nodes,
+            bool allowEnd, SerializedProperty endsDialogue, bool inline = false)
+        {
+            string[] ids = GetNodeIds(nodes);
+            string[] nodeLabels = BuildNodeLabels(ids, nodes);
+            int offset = allowEnd ? 1 : 0;
+            string[] labels = new string[ids.Length + offset];
+            if (allowEnd)
+                labels[0] = "■ конец разговора";
+            Array.Copy(nodeLabels, 0, labels, offset, nodeLabels.Length);
+
+            int selected;
+            if (allowEnd && endsDialogue != null && endsDialogue.boolValue)
+                selected = 0;
+            else
+            {
+                selected = Array.IndexOf(ids, target.stringValue);
+                selected = selected < 0 ? (allowEnd ? 0 : -1) : selected + offset;
+            }
+
+            if (!inline)
+                EditorGUILayout.BeginHorizontal();
+            GUILayout.Label(prefix, EditorStyles.miniBoldLabel, GUILayout.ExpandWidth(false));
+            if (selected < 0)
+            {
+                labels = new[] { "<не выбран>" };
+                Array.Resize(ref labels, ids.Length + 1);
+                Array.Copy(nodeLabels, 0, labels, 1, nodeLabels.Length);
+                int picked = EditorGUILayout.Popup(0, labels, EditorStyles.miniPullDown);
+                if (picked > 0)
+                    target.stringValue = ids[picked - 1];
+            }
+            else
+            {
+                int next = EditorGUILayout.Popup(selected, labels, EditorStyles.miniPullDown);
+                if (next != selected)
+                {
+                    if (allowEnd && next == 0)
+                    {
+                        if (endsDialogue != null)
+                            endsDialogue.boolValue = true;
+                        target.stringValue = string.Empty;
+                    }
+                    else
+                    {
+                        if (endsDialogue != null)
+                            endsDialogue.boolValue = false;
+                        target.stringValue = ids[next - offset];
+                    }
+                }
+            }
+            if (!inline)
+                EditorGUILayout.EndHorizontal();
+        }
+
+        // ------------------------------------------------------------------
+        // Проверка одной строкой: [вид] [качество] [+ компетенция] сложность [13]
+        // ------------------------------------------------------------------
+
+        private static readonly HeroQuality[] QualityValues = (HeroQuality[])Enum.GetValues(typeof(HeroQuality));
+
+        // Возвращает true, если нажато «убрать проверку» (только для пассивной).
+        private bool DrawInlineCheck(SerializedProperty check, string prefix, string unused, bool removable)
+        {
+            bool remove = false;
+            EditorGUILayout.BeginHorizontal();
+            GUIStyle prefixStyle = new GUIStyle(EditorStyles.miniBoldLabel);
+            prefixStyle.normal.textColor = GetSemanticAccentColor(SemanticCategory.Check);
+            GUILayout.Label(prefix, prefixStyle, GUILayout.ExpandWidth(false));
+
+            SerializedProperty quality = check.FindPropertyRelative("Quality");
+            string[] qualityLabels = new string[QualityValues.Length];
+            int qualitySelected = 0;
+            for (int i = 0; i < QualityValues.Length; i++)
+            {
+                qualityLabels[i] = NarrativeQualityLabels.GetLabel(QualityValues[i]);
+                if (quality.enumValueIndex == (int)QualityValues[i])
+                    qualitySelected = i;
+            }
+            int nextQuality = EditorGUILayout.Popup(qualitySelected, qualityLabels, EditorStyles.miniPullDown, GUILayout.MinWidth(70f));
+            quality.enumValueIndex = (int)QualityValues[Mathf.Clamp(nextQuality, 0, QualityValues.Length - 1)];
+
+            SerializedProperty competency = check.FindPropertyRelative("CompetencyId");
+            IReadOnlyList<string> known = NarrativeCompetencyIds.Known;
+            string[] competencyLabels = new string[known.Count + 1];
+            competencyLabels[0] = "без навыка";
+            int competencySelected = 0;
+            for (int i = 0; i < known.Count; i++)
+            {
+                competencyLabels[i + 1] = "+ " + NarrativeCompetencyLabels.GetLabel(known[i]);
+                if (string.Equals(known[i], competency.stringValue, StringComparison.Ordinal))
+                    competencySelected = i + 1;
+            }
+            int nextCompetency = EditorGUILayout.Popup(competencySelected, competencyLabels, EditorStyles.miniPullDown, GUILayout.MinWidth(80f));
+            if (nextCompetency != competencySelected)
+                competency.stringValue = nextCompetency == 0 ? string.Empty : known[nextCompetency - 1];
+
+            SerializedProperty difficulty = check.FindPropertyRelative("Difficulty");
+            GUILayout.Label(new GUIContent("слож.", "Сложность проверки (9–23)"), EditorStyles.miniLabel, GUILayout.ExpandWidth(false));
+            difficulty.intValue = Mathf.Clamp(EditorGUILayout.IntField(difficulty.intValue, GUILayout.Width(28f)), 1, 40);
+
+            if (removable && GUILayout.Button(new GUIContent("×", "Убрать проверку"), EditorStyles.miniButton, GUILayout.Width(22f)))
+                remove = true;
+            EditorGUILayout.EndHorizontal();
+
+            DrawSummaryLine(NarrativeDifficultyLabels.Describe(difficulty.intValue));
+            return remove;
+        }
+
+        // Подробности проверки (при «⚙»): ID и контекстные модификаторы.
+        private void DrawCheckExtras(SerializedProperty check)
+        {
+            EditorGUI.indentLevel++;
+            if (showProduction)
+                DrawLongIdField(check.FindPropertyRelative("CheckId"), "ID проверки");
+            SerializedProperty modifierRules = check.FindPropertyRelative("ModifierRules");
+            for (int i = 0; i < modifierRules.arraySize; i++)
+            {
+                if (DrawModifierRule(modifierRules, i))
+                    break;
+            }
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button(new GUIContent("+ модификатор", "Бонус или штраф к проверке при условии"), EditorStyles.miniButton, GUILayout.Width(110f)))
+                AddModifierRule(modifierRules);
+            EditorGUILayout.EndHorizontal();
+            EditorGUI.indentLevel--;
+        }
+
+        // ------------------------------------------------------------------
+        // Условия и последствия: строка-сводка или редактор
+        // ------------------------------------------------------------------
+
+        private void DrawConditionsEditor(SerializedProperty group, string title)
+        {
+            DrawSummaryLine(title + ":", GetSemanticAccentColor(SemanticCategory.Condition));
+            EditorGUI.indentLevel++;
+            SerializedProperty conditions = group.FindPropertyRelative("Conditions");
+            if (conditions.arraySize > 1)
+                DrawConditionCombinatorPopup(group.FindPropertyRelative("Combinator"));
+            for (int i = 0; i < conditions.arraySize; i++)
+            {
+                if (DrawCondition(conditions, i))
+                    break;
+            }
+            EditorGUI.indentLevel--;
+        }
+
+        private void DrawEffectsEditor(SerializedProperty effects, string title, SemanticCategory category)
+        {
+            DrawSummaryLine(title + ":", GetSemanticAccentColor(category));
+            EditorGUI.indentLevel++;
+            for (int i = 0; i < effects.arraySize; i++)
+            {
+                if (DrawEffect(effects, i, category))
+                    break;
+            }
+            EditorGUI.indentLevel--;
+        }
+
+        private static string DescribeConditions(SerializedProperty group)
+        {
+            NarrativeConditionGroup value = (NarrativeConditionGroup)group.boxedValue;
+            if (value?.Conditions == null || value.Conditions.Count == 0)
+                return "—";
+            List<string> parts = new List<string>();
+            foreach (NarrativeCondition condition in value.Conditions)
+            {
+                if (condition != null)
+                    parts.Add(DescribeCondition(condition));
+            }
+            string joiner = value.Combinator == NarrativeConditionCombinator.Any ? " или " : " и ";
+            return string.Join(joiner, parts);
+        }
+
+        private static string DescribeCondition(NarrativeCondition condition)
+        {
+            string not = condition.Negate ? "НЕ " : string.Empty;
+            switch (condition.Type)
+            {
+                case NarrativeConditionType.QualityAtLeast:
+                    return not + NarrativeQualityLabels.GetLabel(condition.QualityParam) + " ≥ " + condition.IntParam;
+                case NarrativeConditionType.CompetencyAtLeast:
+                    return not + NarrativeCompetencyLabels.GetLabel(condition.StringParam) + " ≥ " + condition.IntParam;
+                case NarrativeConditionType.RelationAtLeast:
+                    return not + "отношение «" + condition.StringParam + "» ≥ " + condition.IntParam;
+                case NarrativeConditionType.RelationAtMost:
+                    return not + "отношение «" + condition.StringParam + "» ≤ " + condition.IntParam;
+                case NarrativeConditionType.PartySizeAtLeast:
+                    return not + "в отряде ≥ " + condition.IntParam;
+                case NarrativeConditionType.PartySizeAtMost:
+                    return not + "в отряде ≤ " + condition.IntParam;
+                case NarrativeConditionType.CompanionPresent:
+                    return not + "рядом «" + condition.StringParam + "»";
+                default:
+                    return not + ConditionTypeLabel(condition.Type).ToLowerInvariant() + " «" + condition.StringParam + "»";
+            }
+        }
+
+        private static string DescribeEffects(SerializedProperty effects)
+        {
+            List<string> parts = new List<string>();
+            for (int i = 0; i < effects.arraySize; i++)
+            {
+                NarrativeEffect effect = (NarrativeEffect)effects.GetArrayElementAtIndex(i).boxedValue;
+                if (effect == null)
+                    continue;
+                string text = EffectTypeLabel(effect.Type).ToLowerInvariant();
+                switch (effect.Type)
+                {
+                    case NarrativeEffectType.ChangeFood:
+                    case NarrativeEffectType.ChangeSupplies:
+                    case NarrativeEffectType.ChangeRelation:
+                        text += (string.IsNullOrEmpty(effect.StringParam) ? string.Empty : " «" + effect.StringParam + "»") +
+                                " " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam;
+                        break;
+                    case NarrativeEffectType.ShortcutRouteCells:
+                        text += " " + effect.IntParam;
+                        break;
+                    default:
+                        text += " «" + effect.StringParam + "»";
+                        break;
+                }
+                parts.Add(text);
+            }
+            return string.Join("; ", parts);
+        }
+
+        // ------------------------------------------------------------------
+        // Мелкие элементы карточки
+        // ------------------------------------------------------------------
+
+        private readonly HashSet<string> expandedCards = new HashSet<string>(StringComparer.Ordinal);
+
+        private bool IsCardExpanded(SerializedProperty card)
+        {
+            return showProduction || expandedCards.Contains(card.propertyPath);
+        }
+
+        private void DrawCardGear(SerializedProperty card)
+        {
+            if (showProduction)
                 return;
+            bool open = expandedCards.Contains(card.propertyPath);
+            bool next = GUILayout.Toggle(open, new GUIContent("⚙", open ? "Скрыть подробные настройки" : "Подробные настройки: условия, последствия, модификаторы"),
+                EditorStyles.miniButton, GUILayout.Width(24f));
+            if (next == open)
+                return;
+            if (next)
+                expandedCards.Add(card.propertyPath);
+            else
+                expandedCards.Remove(card.propertyPath);
+            GUI.FocusControl(null);
+        }
+
+        // «+ условие · + проверка · + последствие» — пустые секции не рисуются.
+        private void DrawAddRow(SerializedProperty card,
+            (string label, string tooltip, Action add) first,
+            (string label, string tooltip, Action add) second,
+            (string label, string tooltip, Action add) third)
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            foreach ((string label, string tooltip, Action add) item in new[] { first, second, third })
+            {
+                if (item.add == null)
+                    continue;
+                if (GUILayout.Button(new GUIContent(item.label, item.tooltip), EditorStyles.miniButton, GUILayout.ExpandWidth(false)))
+                {
+                    item.add();
+                    expandedCards.Add(card.propertyPath);
+                    GUI.FocusControl(null);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private static void DrawSummaryLine(string text, Color? color = null)
+        {
             GUIStyle style = new GUIStyle(EditorStyles.miniLabel) { wordWrap = true };
-            style.normal.textColor = EditorGUIUtility.isProSkin
-                ? new Color(0.62f, 0.62f, 0.6f, 1f)
-                : new Color(0.4f, 0.4f, 0.38f, 1f);
-            EditorGUILayout.LabelField(string.Join(" · ", notes), style);
+            style.normal.textColor = color ?? (EditorGUIUtility.isProSkin
+                ? new Color(0.66f, 0.66f, 0.63f, 1f)
+                : new Color(0.38f, 0.38f, 0.36f, 1f));
+            EditorGUILayout.LabelField(text, style);
         }
 
         // Говорящий отдельной реплики: по умолчанию — говорящий узла.
@@ -692,17 +1160,17 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             IReadOnlyList<DialogueSpeakerData> speakers = database.Speakers;
             DialogueSpeakerData nodeSpeaker = database.FindSpeaker(nodeSpeakerId);
             string[] labels = new string[speakers.Count + 1];
-            labels[0] = "говорит: " + (nodeSpeaker != null ? nodeSpeaker.DisplayName : "как в узле");
+            labels[0] = nodeSpeaker != null ? nodeSpeaker.DisplayName : "как в узле";
             int selected = 0;
             for (int i = 0; i < speakers.Count; i++)
             {
-                labels[i + 1] = "говорит: " + speakers[i].DisplayName + (showProduction ? "  [" + speakers[i].Id + "]" : string.Empty);
+                labels[i + 1] = speakers[i].DisplayName + (showProduction ? "  [" + speakers[i].Id + "]" : string.Empty);
                 if (!string.IsNullOrEmpty(speakerIdOverride.stringValue) &&
                     string.Equals(speakers[i].Id, speakerIdOverride.stringValue, StringComparison.Ordinal))
                     selected = i + 1;
             }
 
-            int next = EditorGUILayout.Popup(selected, labels);
+            int next = EditorGUILayout.Popup(selected, labels, GUILayout.MinWidth(90f));
             if (next != selected)
                 speakerIdOverride.stringValue = next == 0 ? string.Empty : speakers[next - 1].Id;
         }
@@ -1225,7 +1693,8 @@ namespace KingdomSurvival.DialogueDatabase.Editor
             }
             EditorGUILayout.EndHorizontal();
 
-            DrawLongIdField(effect.FindPropertyRelative("EffectExecutionId"), "ID применения (уникальный)");
+            if (showProduction)
+                DrawLongIdField(effect.FindPropertyRelative("EffectExecutionId"), "ID применения (уникальный)");
             DrawEffectTypePopup(type);
             kind = (NarrativeEffectType)type.enumValueIndex;
             DrawLongIdField(stringParam, EffectStringParamLabel(kind));
@@ -1243,7 +1712,7 @@ namespace KingdomSurvival.DialogueDatabase.Editor
         {
             effects.arraySize++;
             SerializedProperty added = effects.GetArrayElementAtIndex(effects.arraySize - 1);
-            added.FindPropertyRelative("EffectExecutionId").stringValue = string.Empty;
+            added.FindPropertyRelative("EffectExecutionId").stringValue = Guid.NewGuid().ToString("N");
             added.FindPropertyRelative("Type").enumValueIndex = 0;
             added.FindPropertyRelative("StringParam").stringValue = string.Empty;
             added.FindPropertyRelative("IntParam").intValue = 0;
@@ -1315,6 +1784,11 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
         private void DrawSpeakerPopup(SerializedProperty speakerId)
         {
+            DrawSpeakerPopup(speakerId, true);
+        }
+
+        private void DrawSpeakerPopup(SerializedProperty speakerId, bool withLabel)
+        {
             IReadOnlyList<DialogueSpeakerData> speakers = database.Speakers;
             if (speakers.Count == 0)
             {
@@ -1333,7 +1807,10 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     selected = i;
             }
 
-            int next = EditorGUILayout.Popup("Говорящий", selected, labels);
+            int next = withLabel
+                ? EditorGUILayout.Popup("Говорит", selected, labels)
+                : EditorGUILayout.Popup(new GUIContent(string.Empty, "Кто говорит в этом узле"), selected,
+                    Array.ConvertAll(labels, label => new GUIContent(label)));
             if (next >= 0 && next < speakers.Count)
                 speakerId.stringValue = speakers[next].Id;
         }

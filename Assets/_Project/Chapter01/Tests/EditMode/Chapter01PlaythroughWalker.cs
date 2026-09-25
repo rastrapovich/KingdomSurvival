@@ -73,6 +73,7 @@ public static class Chapter01PlaythroughWalker
 
         for (int i = 0; i < MaxIterations; i++)
         {
+            Chapter01Chronicle.Refresh(gameState);
             if (stop(gameState))
                 return walk;
 
@@ -158,6 +159,7 @@ public static class Chapter01PlaythroughWalker
             return scene;
 
         Chapter01StoryDirector.RefreshRoadState(gameState);
+        Chapter01StoryDirector.TryApplyFordReturnCrossing(gameState);
         scene = Chapter01StoryDirector.GetPendingRoadEventDialogueId(gameState);
         if (!string.IsNullOrEmpty(scene))
             return scene;

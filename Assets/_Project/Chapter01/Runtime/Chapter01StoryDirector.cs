@@ -597,6 +597,94 @@ namespace KingdomSurvival.Chapter01
         {
             TryContinueOldRoadDetourIfArrived(gameState);
             RefreshRoadArrivalState(gameState);
+            RefreshFordCampContext(gameState);
+        }
+
+        // ПР-09 (ТЗ §7): старый брод — место, чьё состояние меняет возможности.
+        // Переход «известен», если у брода укрепили край (Лада), нашли старый
+        // сход (Остафий), с отрядом Тихон, знающий каменный переход, или есть
+        // верёвка с крючьями.
+        public static bool IsFordCrossingKnown(GameState gameState)
+        {
+            NarrativeStateData state = gameState?.Narrative;
+            if (state == null || !state.HasFlag(Chapter01Ids.Flags.FordAccessResolved))
+                return false;
+            if (state.HasFlag(Chapter01Ids.Flags.FordAccessBracedSupport) ||
+                state.HasFlag(Chapter01Ids.Flags.FordAccessOldDescent) ||
+                ItemService.IsPresent(gameState, ItemCatalog.RopeWithHooks))
+                return true;
+            return state.HasFlag(Chapter01Ids.Flags.FordAccessShallowLine) &&
+                   Chapter01ContextBuilder.GetPresentCompanionIds(gameState).Contains(Chapter01FisherFamily.TikhonId);
+        }
+
+        public const double FordReturnProgressThreshold = 0.25;
+        public const int FordCampRadiusCells = 3;
+
+        // Обратный путь снова идёт через брод. Известный переход — без
+        // остановки; иначе — снова обход (2 ч), один раз. Возвращает строку
+        // донесения или null.
+        public static string TryApplyFordReturnCrossing(GameState gameState)
+        {
+            if (gameState?.Narrative == null || !gameState.HasActiveExpedition)
+                return null;
+
+            NarrativeStateData state = gameState.Narrative;
+            ExpeditionData expedition = gameState.ActiveExpedition;
+            if (!state.HasFlag(Chapter01Ids.Flags.ReturnStarted) ||
+                !state.HasFlag(Chapter01Ids.Flags.FordAccessResolved) ||
+                state.HasFlag(Chapter01Ids.Flags.FordReturnHandled) ||
+                expedition.Phase != CommanderState.ReturningToCastle ||
+                expedition.HasTimedActivity ||
+                gameState.HasPendingExpeditionDecision ||
+                GetRouteProgress(expedition) < FordReturnProgressThreshold)
+            {
+                return null;
+            }
+
+            if (IsFordCrossingKnown(gameState))
+            {
+                state.SetFlag(Chapter01Ids.Flags.FordReturnHandled);
+                return "У старого брода переходят знакомым путём — без остановки.";
+            }
+
+            bool started = gameState.TryStartRoadActivity(
+                "ford_return_bypass", "ОБХОД У БРОДА", 2.0, 0, 0, out string _);
+            state.SetFlag(Chapter01Ids.Flags.FordReturnHandled);
+            return started
+                ? "У старого брода снова обход к пологому берегу: край никто не укреплял."
+                : null;
+        }
+
+        // Стоянка у брода с известным переходом — контекст «у воды».
+        private static void RefreshFordCampContext(GameState gameState)
+        {
+            if (gameState == null || !gameState.HasActiveExpedition)
+                return;
+            CampNightData night = CampRest.GetNight(gameState);
+            night.NearWater = IsNearFord(gameState) && IsFordCrossingKnown(gameState);
+        }
+
+        public static bool IsNearFord(GameState gameState)
+        {
+            if (gameState == null || !gameState.HasActiveExpedition)
+                return false;
+            LocationData ford = gameState.FindLocation(Chapter01Ids.Locations.OldWaterSearch);
+            if (ford == null)
+                return false;
+            ExpeditionData expedition = gameState.ActiveExpedition;
+            int dx = Math.Abs(WorldMapNavigation.GridXFromPercent(expedition.CurrentMapXPercent) -
+                              WorldMapNavigation.GridXFromPercent(ford.MapXPercent));
+            int dy = Math.Abs(WorldMapNavigation.GridYFromPercent(expedition.CurrentMapYPercent) -
+                              WorldMapNavigation.GridYFromPercent(ford.MapYPercent));
+            return Math.Max(dx, dy) <= FordCampRadiusCells;
+        }
+
+        // Название стоянки для лагеря: у брода — своё.
+        public static string DescribeCampPlace(GameState gameState)
+        {
+            if (IsNearFord(gameState) && IsFordCrossingKnown(gameState))
+                return "Стоянка: у старого брода — берег, знакомый переход";
+            return CampRest.DescribePlace(gameState);
         }
 
         private static bool IsStepCompleted(NarrativeStateData state, NodeStep step)

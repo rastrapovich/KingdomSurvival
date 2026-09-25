@@ -134,7 +134,15 @@ namespace KingdomSurvival.BattleSandbox
             for (int i = 0; i < fighters.Count; i++)
                 campaignUnitIds.Add("player:" + fighters[i].Id + ":" + (i + 1));
 
-            battle = SandboxRoster.CreateBattle(fighters, unitContent.EnemyEncounter);
+            battle = SandboxRoster.CreateBattle(fighters, BuildCampaignEnemies(), campaignBattle.Seed);
+
+            // ПР-10: пал герой — бой проигран.
+            for (int i = 0; i < campaignParticipants.Count; i++)
+            {
+                if (campaignParticipants[i].IsHero)
+                    battle.LeaderUnitId = campaignUnitIds[i];
+            }
+            campaignRetreated = false;
 
             // ПР-06А: текущие HP человека из кампании.
             for (int i = 0; i < campaignParticipants.Count; i++)
@@ -155,14 +163,55 @@ namespace KingdomSurvival.BattleSandbox
             return true;
         }
 
+        // ПР-10: враги из запроса (шаблоны UnitDatabase × количество); без
+        // списка — стандартная засада. Не больше четырёх существ.
+        private List<SandboxUnitDefinition> BuildCampaignEnemies()
+        {
+            List<SandboxUnitDefinition> enemies = new List<SandboxUnitDefinition>();
+            if (campaignBattle.Enemies != null)
+            {
+                foreach (CampaignBattleEnemy enemy in campaignBattle.Enemies)
+                {
+                    if (enemy == null || string.IsNullOrWhiteSpace(enemy.UnitTypeId) ||
+                        !unitContent.CreaturesById.TryGetValue(enemy.UnitTypeId, out SandboxUnitDefinition definition))
+                    {
+                        Debug.LogWarning("Бой кампании: нет существа '" + (enemy != null ? enemy.UnitTypeId : "?") + "'.");
+                        continue;
+                    }
+                    for (int i = 0; i < Mathf.Max(1, enemy.Count) && enemies.Count < 4; i++)
+                        enemies.Add(definition);
+                }
+            }
+            if (enemies.Count == 0)
+                enemies.AddRange(unitContent.EnemyEncounter);
+            return enemies;
+        }
+
+        private bool campaignRetreated;
+
+        // ПР-10: отход — только в написанных боях, где он разрешён.
+        private void RetreatFromCampaignBattle()
+        {
+            if (campaignBattle == null || battle == null || !campaignBattle.AllowRetreat ||
+                battle.Phase != SandboxBattlePhase.InProgress)
+                return;
+            campaignRetreated = true;
+            CampaignSession.CompleteBattle(BuildCampaignBattleResult());
+            campaignBattle = null;
+            UnityEngine.SceneManagement.SceneManager.LoadScene(CampaignSceneName);
+        }
+
         private CampaignBattleResult BuildCampaignBattleResult()
         {
             CampaignBattleResult result = new CampaignBattleResult
             {
                 BattleId = campaignBattle.BattleId,
-                Outcome = battle.Phase == SandboxBattlePhase.PlayerVictory
-                    ? CampaignBattleOutcome.Victory
-                    : CampaignBattleOutcome.Defeat
+                Outcome = campaignRetreated
+                    ? CampaignBattleOutcome.Retreat
+                    : battle.Phase == SandboxBattlePhase.PlayerVictory
+                        ? CampaignBattleOutcome.Victory
+                        : CampaignBattleOutcome.Defeat,
+                Rounds = battle.Round
             };
 
             for (int i = 0; i < campaignParticipants.Count; i++)
@@ -461,6 +510,15 @@ namespace KingdomSurvival.BattleSandbox
                 StylePrimaryButton(returnButton);
                 returnButton.style.marginTop = 9f;
                 resultBanner.Add(returnButton);
+
+                if (campaignBattle.AllowRetreat)
+                {
+                    Button retreatButton = new Button(RetreatFromCampaignBattle) { text = "ОТСТУПИТЬ" };
+                    retreatButton.name = "campaign-retreat-button";
+                    StylePrimaryButton(retreatButton);
+                    retreatButton.style.marginTop = 12f;
+                    sidebar.Add(retreatButton);
+                }
             }
             else
             {

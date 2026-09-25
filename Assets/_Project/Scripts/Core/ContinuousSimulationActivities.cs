@@ -137,6 +137,15 @@ public static partial class ContinuousSimulationSystem
 
         expedition.ActiveActivity = null;
 
+        // ПР-09: утро после ночлега — итог стоянки вместо отчёта о добыче.
+        if (activity.Id == CampRest.RestActivityId)
+        {
+            CampRest.CompleteRest(state, batch.Result.Messages);
+            batch.Result.HadNotableOccurrence = true;
+            batch.ReportDay = state.Day;
+            return Math.Max(0.0, gameHours - usedHours);
+        }
+
         if (activity.Kind == ExpeditionActivityKind.RoadStop)
         {
             state.ArmyGold += Math.Max(0, activity.RewardArmyGold);
@@ -171,13 +180,14 @@ public static partial class ContinuousSimulationSystem
         batch.Result.Messages.Add(
             "Локация «" + location.Name +
             "» исследована. Добыча отряда: " + rewardText + ".");
+        // ПР-09 (ТЗ §6): карточка итога — что увидели и что получили.
         batch.Result.ResearchNotice = new StrategicModalNotice
         {
             Title = "ИССЛЕДОВАНИЕ ЗАВЕРШЕНО",
-            Description = "Локация «" + location.Name + "» полностью исследована.",
-            Consequence =
-                "Добыча отряда: " + rewardText + ".\n" +
-                "Ресурсы остаются у отряда до возвращения в поселение."
+            Description = string.IsNullOrWhiteSpace(location.ResearchResultText)
+                ? "Место «" + location.Name + "» осмотрено."
+                : location.ResearchResultText,
+            Consequence = "Получено: " + rewardText + ". Добытое остаётся у отряда."
         };
         batch.Result.HadNotableOccurrence = true;
         batch.RequestAutoPause = true;

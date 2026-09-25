@@ -379,6 +379,10 @@ public static class HomePeopleService
         resident.Exhausted = false;
         ItemService.OnPersonDied(state, personId);
 
+        // ПР-11: гибель вне боя — отдельная запись истории (бой пишет свою).
+        if (reasonId == null || !reasonId.StartsWith("battle.", StringComparison.Ordinal))
+            Chronicle.Record(state, "death." + personId, "Потеря", resident.DisplayName + " больше нет с нами.");
+
         if (state.Fighters != null)
             state.Fighters.RemoveAll(fighter => fighter.Id == personId);
         if (state.HasActiveExpedition)

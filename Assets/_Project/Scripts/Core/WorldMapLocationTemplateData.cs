@@ -25,6 +25,7 @@ public sealed class WorldMapLocationTemplateData
     public string Id;
     public string Name;
     public string InteractionDescription;
+    public string ResearchResultText;
     public string Threat;
     public double ExplorationHours;
     public int RewardArmyGold;
@@ -58,6 +59,7 @@ public sealed class WorldMapLocationTemplateData
             RewardArmySupply);
 
         location.InteractionDescription = InteractionDescription ?? string.Empty;
+        location.ResearchResultText = ResearchResultText ?? string.Empty;
         location.IsDiscovered = InitiallyDiscovered;
         location.IsVisibleOnMap = InitiallyVisibleOnMap;
         return location;
@@ -70,6 +72,12 @@ public sealed class WorldMapLocationTemplateData
 // новой игре без правки GameState.
 public static class WorldMapLocationDefaults
 {
+    // ПР-09 (ТЗ §6) [РАБОЧЕЕ]: итог исследования — наблюдение, а не только числа.
+    public const string RuinsResult =
+        "Под илом — каменная кладка и черепки. Кто-то жил здесь до того, как пришла вода.";
+    public const string MineResult =
+        "Старые штольни сухие, в отвалах — ржавый инструмент. Здесь давно никто не работал.";
+
     public static IReadOnlyList<WorldMapLocationTemplateData> Create()
     {
         return new List<WorldMapLocationTemplateData>
@@ -80,8 +88,9 @@ public static class WorldMapLocationDefaults
                 Name = "Затопленные руины",
                 Threat = "низкая",
                 ExplorationHours = 2.0,
-                RewardArmyGold = 100,
-                RewardArmySupply = 200,
+                RewardArmyGold = 20,
+                RewardArmySupply = 6,
+                ResearchResultText = RuinsResult,
                 InitiallyDiscovered = false,
                 InitiallyVisibleOnMap = false
             },
@@ -91,7 +100,8 @@ public static class WorldMapLocationDefaults
                 Name = "Старая шахта",
                 Threat = "средняя",
                 ExplorationHours = 5.0,
-                RewardArmyGold = 300,
+                RewardArmyGold = 40,
+                ResearchResultText = MineResult,
                 InitiallyDiscovered = false,
                 InitiallyVisibleOnMap = false
             },

@@ -14,6 +14,7 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private string id = string.Empty;
         [SerializeField] private string displayName = "Новая локация";
         [SerializeField, TextArea(2, 5)] private string interactionDescription = string.Empty;
+        [SerializeField, TextArea(2, 5)] private string researchResultText = string.Empty;
         [SerializeField] private string threat = "неизвестна";
         [SerializeField, Min(0f)] private double explorationHours;
         [SerializeField, Min(0)] private int rewardArmyGold;
@@ -60,6 +61,7 @@ namespace KingdomSurvival.WorldMapVisual
                 Id = id,
                 Name = displayName,
                 InteractionDescription = interactionDescription,
+                ResearchResultText = researchResultText,
                 Threat = threat,
                 ExplorationHours = explorationHours,
                 RewardArmyGold = rewardArmyGold,

@@ -88,11 +88,14 @@ namespace KingdomSurvival.Chapter01
             // ПР-08 [РАБОЧЕЕ]: один выбор развития героя после возвращения (N16), до Совета (N17).
             public const string D16B = "chapter01_dialogue_16b_what_the_road_gave";
 
+            // ПР-10 [РАБОЧЕЕ]: «Звери у стоянки» — вступление к сюжетному бою главы.
+            public const string CampBeasts = "chapter01_dialogue_camp_beasts";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 D01, D02, D03, D04, D05, D06, D07A, D07B, D07C, D08,
                 D09, D10, D11, D11B, D11C, D12, D13, D14, D14Half, D15, D16, D17,
-                GateFamily, D12B, D16B
+                GateFamily, D12B, D16B, CampBeasts
             };
         }
 
@@ -204,6 +207,13 @@ namespace KingdomSurvival.Chapter01
             public const string RoadGrowthFieldcraft = "chapter01.flag.road_growth_fieldcraft";
             public const string RoadGrowthJudgment = "chapter01.flag.road_growth_judgment";
 
+            // ПР-09: обратный путь через старый брод пройден (один раз).
+            public const string FordReturnHandled = "chapter01.flag.ford_return_handled";
+
+            // ПР-10: бой «Звери у стоянки» начат (один раз за главу) и исход применён.
+            public const string CampBeastsTriggered = "chapter01.flag.camp_beasts_triggered";
+            public const string CampBeastsResolved = "chapter01.flag.camp_beasts_resolved";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Started, HomeIntroSeen, FirstPressureSeen, FloodHappened, FloodWorkersSaved,
@@ -220,7 +230,8 @@ namespace KingdomSurvival.Chapter01
                 CartCampEchoSeen, CampUnlocked, FordWomanHelped, PartyGatheringSeen,
                 FisherFamilyAccepted, FisherFamilyDeclined, FordAccessResolved, FordAccessBypass,
                 FordAccessBracedSupport, FordAccessOldDescent, FordAccessShallowLine,
-                RoadGrowthChosen, RoadGrowthFortitude, RoadGrowthFieldcraft, RoadGrowthJudgment
+                RoadGrowthChosen, RoadGrowthFortitude, RoadGrowthFieldcraft, RoadGrowthJudgment,
+                FordReturnHandled, CampBeastsTriggered, CampBeastsResolved
             };
         }
 
@@ -331,13 +342,14 @@ namespace KingdomSurvival.Chapter01
             public const string FisherFamilyJoin = "pr06.join.household.fisher_tikhon";
             public const string FordAccessActivityStart = "chapter01.effect.ford_access_activity_start";
             public const string RoadGrowthApply = "chapter01.effect.road_growth_apply";
+            public const string FordReturnActivity = "chapter01.effect.ford_return_activity";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
                 FloodResourceLoss, FloodTimeAdvance, FloodMillRepairCost,
                 LongRoadTimeAdvance, SevenToothGaugeGrant, DepartureLocationReveal,
                 DownstreamLocationReveal, OldRoadDetourStart, CartActivityStart,
-                FisherFamilyJoin, FordAccessActivityStart, RoadGrowthApply
+                FisherFamilyJoin, FordAccessActivityStart, RoadGrowthApply, FordReturnActivity
             };
         }
 

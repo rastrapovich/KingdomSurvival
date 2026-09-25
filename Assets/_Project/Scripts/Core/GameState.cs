@@ -112,6 +112,9 @@ public class LocationData
     // в UI, а не пустой экран.
     public string InteractionDescription = string.Empty;
 
+    // ПР-09: что увидели при исследовании — строка карточки итога.
+    public string ResearchResultText = string.Empty;
+
     public string TravelTargetName =>
         IsWaypoint ? "точка маршрута" :
         IsDiscovered ? Name : RegionName;
@@ -180,6 +183,9 @@ public class ExpeditionData
     public double RouteDelayHoursRemaining;
     public List<MapPointData> Route = new List<MapPointData>();
     public ExpeditionActivityData ActiveActivity;
+
+    // ПР-09: выбранные на эту ночь действия стоянки (CampRest).
+    public CampNightData CampNight = new CampNightData();
 
     public bool HasTimedActivity => ActiveActivity != null;
     public bool IsLocationResearchInProgress =>
@@ -268,6 +274,9 @@ public class GameState
 
     // ПР-08: вещи с владельцем (ItemService).
     public InventoryData Inventory = new InventoryData();
+
+    // ПР-11: история значимых событий (Chronicle).
+    public ChronicleData Chronicle = new ChronicleData();
 
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;

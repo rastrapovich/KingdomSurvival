@@ -101,15 +101,13 @@ public partial class PrototypeUIController
             journalDetailCurrentStep == null)
             return;
 
+        // ПР-11: вкладки «Сведения» и «История» (PrototypeUIController.JournalKnowledge.cs).
+        if (!BindJournalKnowledgeUi())
+            return;
+
         journalUiBound = true;
 
         journalCloseButton.clicked += CloseJournal;
-        // Хроника — отдельный будущий раздел (раздел 18 инструкции): вкладка
-        // существует в UXML и задизейблена (SetEnabled(false) + tooltip уже
-        // заданы там же), а не подменяется «КОРОЛЕВСКИМИ ДОНЕСЕНИЯМИ» (другая,
-        // исторически накопившаяся система UI). У неё нет обработчика клика —
-        // она никогда не будет доступна для нажатия, пока не включена явно.
-        journalChronicleTabButton.SetEnabled(false);
 
         journalNavButton = interfaceRoot.Q<Button>("nav-journal-button");
         if (journalNavButton != null)
@@ -171,7 +169,19 @@ public partial class PrototypeUIController
         if (!journalUiBound || gameState == null)
             return;
 
-        IReadOnlyList<JournalGoalViewData> goals = Chapter01JournalProvider.Build(gameState);
+        if (journalTab != JournalTab.Goals)
+        {
+            RefreshJournalEntriesTab();
+            return;
+        }
+
+        journalEntriesSection.style.display = DisplayStyle.None;
+        journalDetailStepCaption.text = "ТЕКУЩИЙ ШАГ";
+        journalDetailStepCaption.style.display = DisplayStyle.Flex;
+        journalDetailMapButton.style.display = DisplayStyle.None;
+
+        // ПР-11: «Дела» — через единый вход провайдеров кризиса.
+        IReadOnlyList<JournalGoalViewData> goals = CrisisJournal.BuildGoals(gameState);
 
         journalMainList.Clear();
         journalOptionalList.Clear();
@@ -242,8 +252,8 @@ public partial class PrototypeUIController
         if (journalNavButton == null || gameState == null)
             return;
 
-        IReadOnlyList<JournalGoalViewData> goals = Chapter01JournalProvider.Build(gameState);
-        bool hasUnseen = false;
+        IReadOnlyList<JournalGoalViewData> goals = CrisisJournal.BuildGoals(gameState);
+        bool hasUnseen = HasUnseenKnowledgeOrHistory();
 
         foreach (JournalGoalViewData goal in goals)
         {

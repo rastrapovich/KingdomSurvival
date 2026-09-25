@@ -39,8 +39,8 @@ public class TimedExpeditionActivityTests
 
         Assert.That(ruins.IsExplored, Is.True);
         Assert.That(state.ActiveExpedition.ActiveActivity, Is.Null);
-        Assert.That(state.ArmyGold, Is.EqualTo(100));
-        Assert.That(state.ArmySupply, Is.EqualTo(300));
+        Assert.That(state.ArmyGold, Is.EqualTo(20));
+        Assert.That(state.ArmySupply, Is.EqualTo(106));
         Assert.That(completed.RequestAutoPause, Is.True);
         Assert.That(ContinuousSimulationSystem.IsPaused(state), Is.True);
     }

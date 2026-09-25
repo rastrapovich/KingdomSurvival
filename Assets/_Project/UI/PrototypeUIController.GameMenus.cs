@@ -168,6 +168,7 @@ public partial class PrototypeUIController
 
         SetNewGameConfirmOpen(false);
         mainMenuMessage.text = string.Empty;
+        ShowPreBattleLoadButton(false);
         RefreshMainMenuButtons();
         OpenMenuOverlay(mainMenuOverlay);
     }

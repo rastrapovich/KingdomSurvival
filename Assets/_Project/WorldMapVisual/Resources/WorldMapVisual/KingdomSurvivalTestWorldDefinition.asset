@@ -19,7 +19,7 @@ MonoBehaviour:
   homeYPercent: 81
   mapCanvasWidth: 4160
   mapCanvasHeight: 2560
-  baseTravelHoursPerCell: 2
+  baseTravelHoursPerCell: 1.5
   terrainAreas:
   - Id: test-hills-west
     Terrain: 1

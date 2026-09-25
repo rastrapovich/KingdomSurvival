@@ -39,6 +39,10 @@ namespace KingdomSurvival.BattleSandbox
         public IReadOnlyList<SandboxUnitDefinition> EnemyEncounter { get; }
         public bool UsesDatabaseAsset { get; }
 
+        // ПР-10: существа по ID — враги из запроса боя кампании.
+        public Dictionary<string, SandboxUnitDefinition> CreaturesById { get; } =
+            new Dictionary<string, SandboxUnitDefinition>(StringComparer.Ordinal);
+
         public SandboxUnitContent(
             IReadOnlyList<SandboxUnitDefinition> playerRoster,
             IReadOnlyList<SandboxUnitDefinition> enemyEncounter,
@@ -49,6 +53,11 @@ namespace KingdomSurvival.BattleSandbox
             EnemyEncounter = enemyEncounter ?? throw new ArgumentNullException(nameof(enemyEncounter));
             this.visuals = visuals ?? new Dictionary<string, SandboxUnitVisual>();
             UsesDatabaseAsset = usesDatabaseAsset;
+            foreach (SandboxUnitDefinition enemy in enemyEncounter)
+            {
+                if (enemy != null && !CreaturesById.ContainsKey(enemy.Id))
+                    CreaturesById[enemy.Id] = enemy;
+            }
         }
 
         public SandboxUnitVisual GetVisual(string typeId)
@@ -76,6 +85,8 @@ namespace KingdomSurvival.BattleSandbox
             Dictionary<string, SandboxUnitVisual> visuals =
                 new Dictionary<string, SandboxUnitVisual>(StringComparer.Ordinal);
             HashSet<string> acceptedIds = new HashSet<string>(StringComparer.Ordinal);
+            Dictionary<string, SandboxUnitDefinition> creatures =
+                new Dictionary<string, SandboxUnitDefinition>(StringComparer.Ordinal);
 
             for (int i = 0; i < database.Units.Count; i++)
             {
@@ -114,6 +125,7 @@ namespace KingdomSurvival.BattleSandbox
 
                 if (source.Category != UnitCategory.Creature)
                     continue;
+                creatures[source.Id] = definition;
 
                 for (int count = 0; count < source.SandboxEncounterCount; count++)
                     enemies.Add(definition);
@@ -122,7 +134,10 @@ namespace KingdomSurvival.BattleSandbox
             if (fighters.Count == 0 || enemies.Count == 0)
                 return CreateFallback();
 
-            return new SandboxUnitContent(fighters, enemies, visuals, true);
+            SandboxUnitContent content = new SandboxUnitContent(fighters, enemies, visuals, true);
+            foreach (KeyValuePair<string, SandboxUnitDefinition> creature in creatures)
+                content.CreaturesById[creature.Key] = creature.Value;
+            return content;
         }
 
         private static SandboxUnitContent CreateFallback()

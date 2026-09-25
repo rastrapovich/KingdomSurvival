@@ -244,7 +244,13 @@ public partial class PrototypeUIController
         // ПР-05: дорожные и местные сцены главы — только в кампании её кризиса.
         bool chapterActive = Chapter01Crisis.IsActive(gameState);
         if (chapterActive)
+        {
             Chapter01StoryDirector.RefreshRoadState(gameState);
+            // ПР-09: обратный путь через старый брод (ТЗ §7).
+            string fordReport = Chapter01StoryDirector.TryApplyFordReturnCrossing(gameState);
+            if (!string.IsNullOrEmpty(fordReport))
+                AddReport(fordReport);
+        }
 
         // Обязательная/необязательная дорожная встреча первого похода —
         // единственный производственный случай, когда сюжетный диалог

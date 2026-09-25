@@ -875,12 +875,20 @@ namespace KingdomSurvival.BattleSandbox
             }
         }
 
+        // ПР-10: бой кампании — пал вождь (герой), бой проигран, даже если
+        // другие ещё стоят.
+        public string LeaderUnitId { get; set; }
+
         private void EvaluateBattleOutcome()
         {
             bool playersAlive = units.Any(unit => unit.Team == SandboxTeam.Player && !unit.IsDefeated);
             bool enemiesAlive = units.Any(unit => unit.Team == SandboxTeam.Enemy && !unit.IsDefeated);
+            bool leaderFell = !string.IsNullOrEmpty(LeaderUnitId) &&
+                              units.Any(unit => unit.Id == LeaderUnitId && unit.IsDefeated);
 
-            if (!enemiesAlive)
+            if (leaderFell)
+                Phase = SandboxBattlePhase.EnemyVictory;
+            else if (!enemiesAlive)
                 Phase = SandboxBattlePhase.PlayerVictory;
             else if (!playersAlive)
                 Phase = SandboxBattlePhase.EnemyVictory;

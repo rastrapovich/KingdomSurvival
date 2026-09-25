@@ -101,6 +101,12 @@
     white-space: normal;
 }
 
+.journal-detail-map-button {
+    display: none;
+    align-self: flex-start;
+    margin-top: 10px;
+}
+
 .journal-goal-row {
     padding-left: 6px;
     padding-right: 6px;

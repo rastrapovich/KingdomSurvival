@@ -61,6 +61,9 @@ public partial class PrototypeUIController
         RefreshChapter01ReturnFlow();
         RefreshChapter01HomeFlow();
         RefreshHomePeopleUi();
+        RefreshStoryBattle();
+        if (gameState != null)
+            KingdomSurvival.Chapter01.Chapter01Chronicle.Refresh(gameState);
 
         if (!debugMenuInitialized)
             return;

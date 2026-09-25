@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
@@ -69,6 +70,41 @@ public sealed class HomeScreenPlayModeTests
         Button button = card.Query<Button>().ToList().FirstOrDefault(b => b.text == buttonText);
         Assert.IsNotNull(button, "Нет кнопки «" + buttonText + "» у " + personName);
         return button;
+    }
+
+    // ПР-09: лагерь в пути — «Встать на ночлег» запускает остановку на 8 ч и закрывает экран.
+    [UnityTest]
+    public IEnumerator Camp_RestButton_StartsNightStop()
+    {
+        AsyncOperation load = SceneManager.LoadSceneAsync(MainScene, LoadSceneMode.Single);
+        while (!load.isDone)
+            yield return null;
+        yield return Frames(20);
+
+        MonoBehaviour controller = FindController();
+        Invoke(controller, "StartNewGameFromMenu");
+        yield return Frames(20);
+
+        GameState campaign = CampaignSession.Current;
+        campaign.ArmySupply = 50;
+        LocationData target = campaign.Locations.First(location => !location.IsWaypoint);
+        Assert.IsTrue(campaign.TryStartExpedition(target.Id, new List<string> { "garrick" }, out string message), message);
+        campaign.ActiveExpedition.RouteIndex = 1;
+        yield return Frames(3);
+
+        // В главе лагерь открывается после сцены «После телеги».
+        campaign.Narrative.SetFlag("chapter01.flag.camp_unlocked");
+        Invoke(controller, "OpenCampScreen");
+        yield return Frames(3);
+        VisualElement root = controller.GetComponent<UIDocument>().rootVisualElement;
+        Button rest = root.Q<Button>("camp-rest-button");
+        Assert.IsTrue(rest.enabledSelf, root.Q<Label>("camp-actions-placeholder").text);
+        StringAssert.Contains("Стоянка:", root.Q<Label>("camp-location-label").text);
+
+        Click(rest);
+        yield return Frames(3);
+        Assert.IsTrue(CampRest.IsResting(campaign), "Отряд встал на ночлег.");
+        Assert.AreEqual(DisplayStyle.None, root.Q<VisualElement>("camp-screen").style.display.value);
     }
 
     // ПР-08: экран героя — слоты выбранного человека и «Надеть» из кладовой.

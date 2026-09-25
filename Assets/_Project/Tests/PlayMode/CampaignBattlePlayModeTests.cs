@@ -164,6 +164,53 @@ public sealed class CampaignBattlePlayModeTests
         Assert.IsTrue(CampaignBattleBridge.IsApplied(campaign, "test.battle"));
     }
 
+    private static bool GetBool(object target, string property)
+    {
+        PropertyInfo info = target.GetType().GetProperty(property, AnyInstance);
+        Assert.IsNotNull(info, "Нет свойства " + property);
+        return (bool)info.GetValue(target);
+    }
+
+    // ПР-10: сюжетный бой главы из обычного прохождения — ночлег, вступление,
+    // бой с тремя зверями, отход и последствия в той же кампании.
+    [UnityTest]
+    public IEnumerator StoryBattle_BeastsAtCamp_RetreatAppliesAftermath()
+    {
+        yield return StartCampaignInExpedition(1);
+        GameState campaign = CampaignSession.Current;
+        campaign.ActiveExpedition.RouteIndex = 1;
+        campaign.Narrative.SetFlag("chapter01.flag.expedition_started");
+        Assert.IsTrue(CampRest.TryStartRest(campaign, out string message), message);
+        campaign.ActiveExpedition.ActiveActivity.RemainingHours = 6.0;
+        int supply = campaign.ArmySupply;
+
+        MonoBehaviour main = FindBehaviour("PrototypeUIController");
+        for (int i = 0; i < 60 && !GetBool(main, "IsNarrativeDialogueActive"); i++)
+            yield return null;
+        Assert.IsTrue(GetBool(main, "IsNarrativeDialogueActive"), "Вступление «Звери у стоянки» открылось само.");
+
+        Invoke(main, "OnStoryDialogueCompleted", "chapter01_dialogue_camp_beasts");
+        Invoke(main, "CloseNarrativeDialogue");
+        yield return WaitForScene(BattleScene);
+
+        MonoBehaviour sandbox = FindBehaviour("BattleSandboxController");
+        for (int i = 0; i < 60 && GetField(sandbox, "battle") == null; i++)
+            yield return null;
+        object battle = GetField(sandbox, "battle");
+        int enemies = ((IEnumerable)battle.GetType().GetProperty("Units").GetValue(battle)).Cast<object>()
+            .Count(unit => unit.GetType().GetProperty("Team").GetValue(unit).ToString() == "Enemy");
+        Assert.AreEqual(3, enemies, "Два зверя и вожак.");
+
+        Invoke(sandbox, "RetreatFromCampaignBattle");
+        yield return WaitForScene(MainScene);
+
+        Assert.AreSame(campaign, CampaignSession.Current);
+        Assert.IsTrue(campaign.Narrative.HasFlag("chapter01.flag.camp_beasts_resolved"));
+        Assert.AreEqual(supply - CampaignBattleBridge.RetreatSupplyLoss, campaign.ArmySupply);
+        Assert.IsFalse(CampRest.IsResting(campaign), "Ночлег прерван отходом.");
+        Assert.IsTrue(HomePeopleService.Find(campaign, campaign.GetSelectedCommander().Id).Exhausted);
+    }
+
     [UnityTest]
     public IEnumerator HeroFalls_SquadBroken_CampaignEnds_MainMenuOpen()
     {
@@ -181,5 +228,13 @@ public sealed class CampaignBattlePlayModeTests
         VisualElement root = main.GetComponent<UIDocument>().rootVisualElement;
         Assert.IsTrue(root.Q<VisualElement>("main-menu-overlay").ClassListContains("game-menu-overlay--open"));
         StringAssert.Contains("Отряд разбит", root.Q<Label>("main-menu-message").text);
+
+        // ПР-10: поражение — загрузка сохранения перед боем.
+        Assert.AreEqual(DisplayStyle.Flex, root.Q<Button>("main-menu-load-prebattle-button").style.display.value);
+        Invoke(main, "OnLoadPreBattleClicked");
+        for (int i = 0; i < 20; i++)
+            yield return null;
+        Assert.IsTrue(CampaignSession.HasActive, "Кампания загружена из предбоевого сохранения.");
+        Assert.IsTrue(CampaignSession.Current.HasActiveExpedition, "Отряд снова в походе, как перед боем.");
     }
 }

@@ -294,7 +294,9 @@
                 </ui:VisualElement>
                 <ui:VisualElement name="camp-actions-panel" class="camp-panel camp-actions-panel">
                     <ui:Label text="ДЕЙСТВИЯ" class="camp-panel-title" />
-                    <ui:Label name="camp-actions-placeholder" text="Пока нет доступных действий." class="camp-placeholder-text" />
+                    <ui:Label name="camp-actions-placeholder" text="" class="camp-placeholder-text" />
+                    <ui:VisualElement name="camp-action-list" class="camp-action-list" />
+                    <ui:Button name="camp-rest-button" text="ВСТАТЬ НА НОЧЛЕГ" class="camp-rest-button" />
                 </ui:VisualElement>
                 <ui:Button name="camp-continue-button" text="ПРОДОЛЖИТЬ ПУТЬ" class="camp-continue-button" />
             </ui:VisualElement>
@@ -314,12 +316,9 @@
                 <ui:Button name="journal-close-button" text="ЗАКРЫТЬ" class="ks-button journal-close-button" />
             </ui:VisualElement>
             <ui:VisualElement name="journal-tabs" class="journal-tabs">
-                <ui:Button name="journal-tab-goals" text="ЦЕЛИ" class="ks-button journal-tab nav-button-active" />
-                <ui:Button
-                    name="journal-tab-chronicle"
-                    text="ХРОНИКА"
-                    tooltip="Хроника событий будет подключена позже."
-                    class="ks-button journal-tab" />
+                <ui:Button name="journal-tab-goals" text="ДЕЛА" class="ks-button journal-tab nav-button-active" />
+                <ui:Button name="journal-tab-knowledge" text="СВЕДЕНИЯ" class="ks-button journal-tab" />
+                <ui:Button name="journal-tab-chronicle" text="ИСТОРИЯ" class="ks-button journal-tab" />
             </ui:VisualElement>
             <ui:VisualElement name="journal-columns" class="journal-columns">
                 <ui:VisualElement name="journal-goals-column" class="journal-goals-column">
@@ -339,6 +338,10 @@
                             <ui:Label name="journal-completed-section-title" text="ЗАВЕРШЁННЫЕ" class="ks-panel-title" />
                             <ui:VisualElement name="journal-completed-section-list" class="journal-goal-list" />
                         </ui:VisualElement>
+                        <ui:VisualElement name="journal-entries-section" class="ks-panel journal-goal-section">
+                            <ui:Label name="journal-entries-section-title" text="" class="ks-panel-title" />
+                            <ui:VisualElement name="journal-entries-list" class="journal-goal-list" />
+                        </ui:VisualElement>
                     </ui:ScrollView>
                 </ui:VisualElement>
                 <ui:VisualElement name="journal-detail-column" class="journal-detail-column">
@@ -352,6 +355,7 @@
                             <ui:Label name="journal-detail-description" text="" class="journal-detail-description ks-text" />
                             <ui:Label name="journal-detail-step-caption" text="ТЕКУЩИЙ ШАГ" class="journal-detail-step-caption ks-muted-text" />
                             <ui:Label name="journal-detail-current-step" text="" class="journal-detail-current-step ks-text" />
+                            <ui:Button name="journal-detail-map-button" text="Показать на карте" class="ks-button journal-detail-map-button" />
                         </ui:VisualElement>
                     </ui:ScrollView>
                 </ui:VisualElement>
@@ -753,6 +757,7 @@
                 <ui:Button name="main-menu-settings-button" text="Настройки" class="game-menu-button" />
                 <ui:Button name="main-menu-quit-button" text="Выход" class="game-menu-button" />
                 <ui:Label name="main-menu-message" class="game-menu-message" />
+                <ui:Button name="main-menu-load-prebattle-button" text="Загрузить сохранение перед боем" class="game-menu-button" style="display: none;" />
             </ui:VisualElement>
         </ui:VisualElement>
 

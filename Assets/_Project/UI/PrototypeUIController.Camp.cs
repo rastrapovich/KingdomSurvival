@@ -31,6 +31,10 @@ public partial class PrototypeUIController
     private Label campCommanderStatus;
     private VisualElement campSceneList;
     private Label campStatusText;
+    // ПР-09: действия ночи и ночлег.
+    private Label campActionsHint;
+    private VisualElement campActionList;
+    private Button campRestButton;
 
     private readonly VisualElement[] campFighterSlots = new VisualElement[CampFighterSlotCount];
     private readonly Label[] campFighterNameLabels = new Label[CampFighterSlotCount];
@@ -62,6 +66,11 @@ public partial class PrototypeUIController
         campCommanderStatus = campScreen.Q<Label>("camp-commander-status");
         campSceneList = campScreen.Q<VisualElement>("camp-scene-list");
         campStatusText = campScreen.Q<Label>("camp-status-text");
+        campActionsHint = campScreen.Q<Label>("camp-actions-placeholder");
+        campActionList = campScreen.Q<VisualElement>("camp-action-list");
+        campRestButton = campScreen.Q<Button>("camp-rest-button");
+        if (campRestButton != null)
+            campRestButton.clicked += OnCampRestClicked;
 
         for (int i = 0; i < CampFighterSlotCount; i++)
         {
@@ -183,6 +192,66 @@ public partial class PrototypeUIController
         RefreshCampLocationAndStatus();
         RefreshCampRoster();
         RefreshCampSceneList();
+        RefreshCampActions();
+    }
+
+    // ПР-09 (ТЗ §3, §5): до двух дел на ночь и «Встать на ночлег».
+    private string campActionMessage = string.Empty;
+
+    private void RefreshCampActions()
+    {
+        if (campActionList == null || campRestButton == null)
+            return;
+
+        campActionList.Clear();
+        bool canRest = CampRest.CanRest(gameState, out string reason);
+        foreach (CampActionOption option in CampRest.GetActions(gameState))
+        {
+            bool chosen = CampRest.IsChosen(gameState, option.Kind);
+            CampActionKind kind = option.Kind;
+            Button button = new Button(() =>
+            {
+                CampRest.TryToggleAction(gameState, kind, out string message);
+                campActionMessage = message;
+                RefreshCampScreen();
+            })
+            { text = (chosen ? "✓ " : "") + option.Title };
+            button.AddToClassList("camp-action-button");
+            button.EnableInClassList("camp-action-button--chosen", chosen);
+            button.SetEnabled(canRest && (option.Available || chosen));
+            campActionList.Add(button);
+
+            Label hint = new Label(option.Available ? option.Hint : option.UnavailableReason);
+            hint.AddToClassList("camp-placeholder-text");
+            campActionList.Add(hint);
+        }
+
+        campRestButton.SetEnabled(canRest);
+        if (campActionsHint != null)
+        {
+            campActionsHint.text = !canRest
+                ? reason
+                : !string.IsNullOrEmpty(campActionMessage)
+                    ? campActionMessage
+                    : "Можно выбрать до двух дел на ночь — или просто лечь спать. Ночлег: 8 часов, припасы — обычным порядком.";
+        }
+    }
+
+    private void OnCampRestClicked()
+    {
+        if (gameState == null)
+            return;
+        if (!CampRest.TryStartRest(gameState, out string message))
+        {
+            campActionMessage = message;
+            RefreshCampScreen();
+            return;
+        }
+
+        campActionMessage = string.Empty;
+        AddReport(message);
+        CloseCampScreen();
+        RefreshInterface();
     }
 
     // Раздел 15 инструкции — только информационно, ничего не придумывается
@@ -219,7 +288,7 @@ public partial class PrototypeUIController
         }
 
         if (campLocationLabel != null)
-            campLocationLabel.text = placeText;
+            campLocationLabel.text = placeText + " · " + Chapter01StoryDirector.DescribeCampPlace(gameState);
 
         if (campStatusText != null)
         {
@@ -239,7 +308,7 @@ public partial class PrototypeUIController
         if (campCommanderName != null)
             campCommanderName.text = commander != null ? commander.Name : "Командир";
         if (campCommanderStatus != null)
-            campCommanderStatus.text = "—";
+            campCommanderStatus.text = CampPersonStatus(commander != null ? commander.Id : null);
 
         List<string> fighterIds = gameState.HasActiveExpedition
             ? gameState.ActiveExpedition.FighterIds
@@ -260,13 +329,25 @@ public partial class PrototypeUIController
                 // будущее, пока отсутствующая механика — нейтральная
                 // заглушка "—", не фальшивые данные.
                 if (campFighterStatusLabels[i] != null)
-                    campFighterStatusLabels[i].text = "—";
+                    campFighterStatusLabels[i].text = CampPersonStatus(fighterIds[i]);
             }
             else
             {
                 campFighterSlots[i].style.display = DisplayStyle.None;
             }
         }
+    }
+
+    // ПР-09: у костра видно, кто ранен и кто вымотан.
+    private string CampPersonStatus(string personId)
+    {
+        ResidentState resident = HomePeopleService.Find(gameState, personId);
+        if (resident == null || !resident.HasCombatState)
+            return "—";
+        string text = "HP " + resident.CurrentHitPoints + "/" + resident.MaxHitPoints;
+        if (resident.Exhausted)
+            text += " · изнеможён";
+        return text;
     }
 
     // Раздел 12/20 инструкции: единственный источник — Chapter01CampSceneProvider

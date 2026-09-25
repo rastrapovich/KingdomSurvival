@@ -593,6 +593,7 @@ public partial class PrototypeUIController
         {
             string completedDialogueId = narrativeDialogueSession.DialogueId;
             Chapter01StoryDirector.HandleDialogueCompleted(gameState, completedDialogueId);
+            OnStoryDialogueCompleted(completedDialogueId);
             CloseNarrativeDialogue();
 
             // P08-T03: N10 заканчивается действием «Выбрать состав похода» без

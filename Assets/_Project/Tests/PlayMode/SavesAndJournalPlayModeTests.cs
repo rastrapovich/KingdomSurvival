@@ -7,6 +7,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 
 // ПР-04 на настоящей сцене: Хроника не останавливает время, обязательное
 // событие закрывает её и показывается одно; сохранение и загрузка по слотам;
@@ -98,6 +99,75 @@ public sealed class SavesAndJournalPlayModeTests
         Assert.IsFalse(ContinuousSimulationSystem.IsPaused(campaign), "Открытая Хроника не останавливает время.");
         double hourAfter = ContinuousSimulationSystem.GetClock(campaign).HourOfDay;
         Assert.IsTrue(campaign.Day > dayBefore || hourAfter > hourBefore, "Время шло, пока Хроника была открыта.");
+    }
+
+    private static void Click(Button button)
+    {
+        using (NavigationSubmitEvent submit = NavigationSubmitEvent.GetPooled())
+        {
+            submit.target = button;
+            button.SendEvent(submit);
+        }
+    }
+
+    private static void PointerDown(VisualElement element)
+    {
+        Event systemEvent = new Event { type = EventType.MouseDown, button = 0, mousePosition = element.worldBound.center };
+        using (PointerDownEvent down = PointerDownEvent.GetPooled(systemEvent))
+        {
+            down.target = element;
+            element.SendEvent(down);
+        }
+    }
+
+    private static List<string> RowTitles(VisualElement root) =>
+        root.Q<VisualElement>("journal-entries-list").Query<Label>("journal-goal-row-title").ToList().Select(l => l.text).ToList();
+
+    // ПР-11: журнал — «Дела / Сведения / История». Сведение несёт степень
+    // уверенности и текст реплики-источника; запись истории — время; «НОВОЕ»
+    // снимается кликом и сохраняется в кампании.
+    [UnityTest]
+    public IEnumerator Journal_KnowledgeAndHistoryTabs_ShowEntries_AndMarkSeen()
+    {
+        yield return NewGame();
+        GameState campaign = CampaignSession.Current;
+        StartExpedition(campaign, 1);
+        campaign.Narrative.AddKnowledge("chapter01.knowledge.second_loaf_is_ration");
+        Chronicle.Record(campaign, "test.history", "Проверка истории", "Запись для проверки.");
+        yield return Frames(5);
+
+        MonoBehaviour controller = Controller();
+        VisualElement root = controller.GetComponent<UIDocument>().rootVisualElement;
+        Invoke(controller, "OpenJournal");
+
+        Click(root.Q<Button>("journal-tab-knowledge"));
+        yield return null;
+        Assert.AreEqual(DisplayStyle.Flex, root.Q<VisualElement>("journal-entries-section").resolvedStyle.display);
+        Assert.AreEqual(DisplayStyle.None, root.Q<VisualElement>("journal-main-section").resolvedStyle.display);
+        CollectionAssert.Contains(RowTitles(root), "Второй хлеб — это паёк");
+
+        VisualElement knowledgeRow = root.Q<VisualElement>("journal-entries-list").Q<VisualElement>("journal-goal-row");
+        PointerDown(knowledgeRow);
+        yield return null;
+        StringAssert.Contains("СЛУХ", root.Q<Label>("journal-detail-panel-title").text);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(root.Q<Label>("journal-detail-description").text), "Текст сведения из реплики.");
+        Assert.IsTrue(Chronicle.IsSeen(campaign, "knowledge:chapter01.knowledge.second_loaf_is_ration"));
+
+        Click(root.Q<Button>("journal-tab-chronicle"));
+        yield return null;
+        CollectionAssert.Contains(RowTitles(root), "Проверка истории");
+        VisualElement historyRow = root.Q<VisualElement>("journal-entries-list").Query<VisualElement>("journal-goal-row").ToList()
+            .First(row => row.Q<Label>("journal-goal-row-title").text == "Проверка истории");
+        Assert.AreEqual(DisplayStyle.Flex, historyRow.Q<Label>("journal-goal-row-badge").resolvedStyle.display, "Непрочитанная — «НОВОЕ».");
+        PointerDown(historyRow);
+        yield return null;
+        Assert.AreEqual("Запись для проверки.", root.Q<Label>("journal-detail-description").text);
+        Assert.IsTrue(Chronicle.IsSeen(campaign, "test.history"));
+        Assert.AreEqual(DisplayStyle.None, root.Q<Button>("journal-detail-map-button").resolvedStyle.display, "Места у записи нет.");
+
+        Click(root.Q<Button>("journal-tab-goals"));
+        yield return null;
+        Assert.AreEqual(DisplayStyle.None, root.Q<VisualElement>("journal-entries-section").resolvedStyle.display);
     }
 
     [UnityTest]

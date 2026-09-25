@@ -26,6 +26,9 @@ namespace KingdomSurvival.Chapter01
     {
         public static CampSceneViewData? GetAvailableScene(GameState gameState)
         {
+            // ПР-12А: только в кампании «Дома на чужой воде».
+            if (!Chapter01Crisis.IsActive(gameState))
+                return null;
             NarrativeStateData state = gameState?.Narrative;
             if (state == null)
                 return null;

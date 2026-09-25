@@ -39,12 +39,21 @@ public sealed class CampaignOptionDefinition
 public static class CampaignStartOptions
 {
     public const string HomeOnForeignWaterCrisisId = "crisis.home_on_foreign_water";
+    // ПР-12А (канон v1.45 §6.0): «Свободная игра» — базовый режим без кризиса.
+    // Хранится в том же поле CrisisId, но в интерфейсе кризисом не называется.
+    public const string FreePlayId = "freeplay.home_region";
     public const string PlaceholderCommanderId = "commander.placeholder";
     public const string BaseHomeStartId = "start.base_home";
 
     // Без разгадки: только исходная беда и тон (план ПР-05, §4).
+    // ПР-12А: первая запись — свободная игра, основа игры (канон v1.45).
     public static readonly IReadOnlyList<CampaignOptionDefinition> Crises = new[]
     {
+        new CampaignOptionDefinition(
+            FreePlayId,
+            "Свободная игра",
+            "Дом живёт обычной жизнью, большой беды по расписанию нет. Вокруг — округа, люди и места, о которых пока известно мало. " +
+            "Куда идти, кого брать с собой и кого оставить дома — решаете вы."),
         new CampaignOptionDefinition(
             HomeOnForeignWaterCrisisId,
             "Дом на чужой воде",
@@ -136,6 +145,9 @@ public sealed class CampaignSetup
             ContentVersion = CampaignConfiguration.CurrentContentVersion,
             WorldSeed = state.WorldSeed
         };
+
+        // ПР-12А: однократная настройка режима (его модуль зарегистрирован в CampaignContent).
+        CampaignContent.InitializeNewCampaign(state);
         return state;
     }
 }

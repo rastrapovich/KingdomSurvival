@@ -205,9 +205,9 @@ public partial class PrototypeUIController
     private static IList<string> DescribeHomeForSnapshot(GameState state)
     {
         List<string> lines = new List<string>();
-        foreach (HomeObjectView view in Chapter01HomeView.DescribeObjects(state))
+        foreach (HomeObjectView view in CampaignContent.DescribeHomeObjects(state))
             lines.Add(view.Title + ": " + view.Short + ".");
-        foreach (HomeCareView care in Chapter01HomeView.DescribeCares(state))
+        foreach (HomeCareView care in CampaignContent.DescribeHomeCares(state))
             lines.Add("Забота — " + care.Title + ": " + care.Status);
         string fishing = Chapter01HomeView.FishingLine(state);
         if (fishing != null)

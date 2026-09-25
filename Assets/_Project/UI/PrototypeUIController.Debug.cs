@@ -63,7 +63,10 @@ public partial class PrototypeUIController
         RefreshHomePeopleUi();
         RefreshStoryBattle();
         if (gameState != null)
+        {
             KingdomSurvival.Chapter01.Chapter01Chronicle.Refresh(gameState);
+            KingdomSurvival.FreePlay.FreePlayContent.Refresh(gameState);
+        }
 
         if (!debugMenuInitialized)
             return;

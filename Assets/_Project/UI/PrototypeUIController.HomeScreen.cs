@@ -120,8 +120,8 @@ public partial class PrototypeUIController
         RefreshHomePrepIfChanged();
 
         bool away = HomePeopleService.HasDeparted(gameState);
-        IReadOnlyList<HomeObjectView> objects = away ? new List<HomeObjectView>() : Chapter01HomeView.DescribeObjects(gameState);
-        IReadOnlyList<HomeCareView> cares = away ? new List<HomeCareView>() : Chapter01HomeView.DescribeCares(gameState);
+        IReadOnlyList<HomeObjectView> objects = away ? new List<HomeObjectView>() : CampaignContent.DescribeHomeObjects(gameState);
+        IReadOnlyList<HomeCareView> cares = away ? new List<HomeCareView>() : CampaignContent.DescribeHomeCares(gameState);
 
         StringBuilder signature = new StringBuilder(away ? "away|" : "home|");
         signature.Append(HomeKnowledge.Get(gameState).HasSnapshot).Append('|');

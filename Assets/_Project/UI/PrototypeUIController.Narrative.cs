@@ -102,6 +102,14 @@ public partial class PrototypeUIController
 
     private bool IsNarrativeDialogueActive => narrativeDialogueSession != null && narrativeDialogueSession.IsActive;
 
+    // ПР-12А: содержание режимов кампании регистрируется до создания
+    // любой партии — UI читает только CampaignContent.
+    static PrototypeUIController()
+    {
+        KingdomSurvival.Chapter01.Chapter01Content.Register();
+        KingdomSurvival.FreePlay.FreePlayContent.Register();
+    }
+
     private void Awake()
     {
         narrativeDialogueSession = new NarrativeDialogueRuntimeSession();

@@ -372,6 +372,9 @@ namespace KingdomSurvival.Chapter01
         // Идемпотентно по FordAccessResolved.
         public static string GetPendingFordAccessDialogueId(GameState gameState)
         {
+            // ПР-12А: только в кампании «Дома на чужой воде».
+            if (!Chapter01Crisis.IsActive(gameState))
+                return null;
             if (gameState?.Narrative == null || !gameState.HasActiveExpedition)
                 return null;
 
@@ -433,6 +436,9 @@ namespace KingdomSurvival.Chapter01
         // одноразовым без отдельного технического флага "уже показывали".
         public static string GetPendingRoadEventDialogueId(GameState gameState)
         {
+            // ПР-12А: только в кампании «Дома на чужой воде».
+            if (!Chapter01Crisis.IsActive(gameState))
+                return null;
             if (gameState == null || !gameState.HasActiveExpedition)
                 return null;
 
@@ -471,6 +477,9 @@ namespace KingdomSurvival.Chapter01
         // "!OldFordFound", без отдельного технического флага.
         public static string GetPendingLocationNarrativeDialogueId(GameState gameState)
         {
+            // ПР-12А: только в кампании «Дома на чужой воде».
+            if (!Chapter01Crisis.IsActive(gameState))
+                return null;
             if (gameState == null || gameState.Narrative == null || !gameState.HasActiveExpedition)
                 return null;
 
@@ -502,6 +511,9 @@ namespace KingdomSurvival.Chapter01
         // использует возвращённый ID только после нажатия основной кнопки.
         public static string GetLocationEntryDialogueId(GameState gameState, string locationId)
         {
+            // ПР-12А: только в кампании «Дома на чужой воде».
+            if (!Chapter01Crisis.IsActive(gameState))
+                return null;
             if (gameState == null ||
                 gameState.Narrative == null ||
                 !gameState.HasActiveExpedition ||
@@ -682,7 +694,7 @@ namespace KingdomSurvival.Chapter01
         // Название стоянки для лагеря: у брода — своё.
         public static string DescribeCampPlace(GameState gameState)
         {
-            if (IsNearFord(gameState) && IsFordCrossingKnown(gameState))
+            if (Chapter01Crisis.IsActive(gameState) && IsNearFord(gameState) && IsFordCrossingKnown(gameState))
                 return "Стоянка: у старого брода — берег, знакомый переход";
             return CampRest.DescribePlace(gameState);
         }

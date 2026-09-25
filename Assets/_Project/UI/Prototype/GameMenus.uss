@@ -225,3 +225,21 @@
     margin-top: 14px;
     margin-bottom: 4px;
 }
+
+/* ПР-12А: выбор режима новой кампании. */
+.new-game-mode-row {
+    flex-direction: row;
+    margin-bottom: 6px;
+}
+
+.new-game-mode-button {
+    flex-grow: 1;
+    margin-right: 6px;
+    opacity: 0.6;
+}
+
+.new-game-mode-selected {
+    opacity: 1;
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(214, 178, 110);
+}

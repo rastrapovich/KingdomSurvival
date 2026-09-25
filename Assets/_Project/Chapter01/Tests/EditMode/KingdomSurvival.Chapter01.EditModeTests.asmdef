@@ -4,7 +4,8 @@
   "references": [
     "KingdomSurvival.Core",
     "KingdomSurvival.Chapter01",
-    "KingdomSurvival.DialogueDatabase"
+    "KingdomSurvival.DialogueDatabase",
+    "KingdomSurvival.FreePlay"
   ],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],

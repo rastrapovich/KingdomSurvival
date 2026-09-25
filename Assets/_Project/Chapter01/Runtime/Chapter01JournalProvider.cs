@@ -3,30 +3,7 @@ using System.Collections.Generic;
 
 namespace KingdomSurvival.Chapter01
 {
-    public enum JournalGoalCategory
-    {
-        Main,
-        Optional
-    }
-
-    public enum JournalGoalState
-    {
-        Hidden,
-        Active,
-        Completed,
-        Failed
-    }
-
-    public sealed class JournalGoalViewData
-    {
-        public string Id;
-        public string Title;
-        public string Description;
-        public string CurrentStep;
-        public string RevisionId;
-        public JournalGoalCategory Category;
-        public JournalGoalState State;
-    }
+    // ПР-12А: JournalGoalViewData и перечисления — общие модели Core (CampaignContent.cs).
 
     // Read-only проекция Хроники. Сюжетное состояние остаётся только в
     // GameState/NarrativeState; отдельной Quest Database здесь нет.

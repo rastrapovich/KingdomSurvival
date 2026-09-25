@@ -3,44 +3,7 @@ using System.Collections.Generic;
 
 namespace KingdomSurvival.Chapter01
 {
-    // Объект Дома на экране: что видим → почему это известно → что можно
-    // сделать (PR07_HOME_SPEC §5). StateKey — стабильный ключ состояния для
-    // слоя образа Дома (класс USS и имя рисунка художника).
-    public sealed class HomeObjectView
-    {
-        public string Id;
-        public string Title;
-        public string StateKey;
-        // Короткая подпись слоя образа Дома: «мутная», «стоит», «цела».
-        public string Short;
-        public string State;
-        public string Source;
-        public string ActionLabel;
-        public string ActionDialogueId;
-    }
-
-    public enum HomeCareAction
-    {
-        None,
-        StartYardDeck,
-        OpenDialogue
-    }
-
-    // Забота: одна проблема — одна карточка (§7.1).
-    public sealed class HomeCareView
-    {
-        public string Id;
-        public string Title;
-        public string Cause;
-        public string Status;
-        public string Detail;
-        public int Priority;
-        public bool Urgent;
-        public string ActionLabel;
-        public HomeCareAction Action;
-        public string DialogueId;
-        public bool ActionEnabled;
-    }
+    // ПР-12А: HomeObjectView / HomeCareView — общие модели Core (CampaignContent.cs).
 
     // ПР-07А-2: модель экрана Дома — переводит существующие флаги главы,
     // Chapter01HomeState и функции Дома в текст. Ничего не меняет.
@@ -55,10 +18,10 @@ namespace KingdomSurvival.Chapter01
 
         // Порядок забот (§7.1): сюжетное решение → нехватка/остановленная
         // необходимая функция → доступные работы → идущие работы.
-        public const int PriorityStory = 0;
-        public const int PriorityNeed = 1;
-        public const int PriorityOptional = 2;
-        public const int PriorityRunning = 3;
+        public const int PriorityStory = HomeCares.PriorityStory;
+        public const int PriorityNeed = HomeCares.PriorityNeed;
+        public const int PriorityOptional = HomeCares.PriorityOptional;
+        public const int PriorityRunning = HomeCares.PriorityRunning;
 
         public static IReadOnlyList<HomeObjectView> DescribeObjects(GameState gameState)
         {
@@ -307,75 +270,18 @@ namespace KingdomSurvival.Chapter01
 
         public static IReadOnlyList<HomeCareView> DescribeCares(GameState gameState)
         {
-            List<HomeCareView> cares = new List<HomeCareView>();
             if (gameState == null)
-                return cares;
+                return new List<HomeCareView>();
 
+            // ПР-12А: еда и раненые — общие заботы любого Дома (Core, HomeCares).
+            List<HomeCareView> cares = HomeCares.DescribeCommon(gameState);
             bool atHome = !HomePeopleService.HasDeparted(gameState);
 
-            HomeFoodForecast food = HomeOverview.ForecastFood(gameState);
-            if (food.HasCurrentShortage || food.Outlook == HomeFoodOutlook.ShortageAtNextMidnight)
-            {
-                cares.Add(new HomeCareView
-                {
-                    Id = "home.care.food",
-                    Title = "Нехватка еды",
-                    Cause = "Дома едят " + food.DailyConsumption + " в сутки, поступает " + food.DailyIncome + ".",
-                    Status = HomeOverview.DescribeFood(food),
-                    Priority = PriorityNeed,
-                    Urgent = true
-                });
-            }
-
-            AddCare(gameState, cares);
             AddMaintenance(gameState, cares, atHome);
             AddFishing(gameState, cares);
 
             cares.Sort((a, b) => a.Priority.CompareTo(b.Priority));
             return cares;
-        }
-
-        private static void AddCare(GameState gameState, List<HomeCareView> cares)
-        {
-            List<ResidentState> patients = new List<ResidentState>();
-            foreach (ResidentState resident in HomePeopleService.All(gameState))
-            {
-                if (resident.NeedsCare && HomePeopleService.IsHomePresent(gameState, resident))
-                    patients.Add(resident);
-            }
-
-            HomeFunctionReport care = HomeFunctionResolver.Resolve(gameState, HomeFunctionResolver.CareId);
-            if (patients.Count == 0)
-                return;
-
-            List<string> lines = new List<string>();
-            foreach (ResidentState patient in patients)
-            {
-                string line = patient.DisplayName;
-                if (patient.HasCombatState)
-                    line += " — " + patient.CurrentHitPoints + "/" + patient.MaxHitPoints + " HP";
-                if (care.Rate > 0.0)
-                {
-                    double hours = (1.0 - patient.RecoveryProgress) * HomeLife.FullCareCycleHours / care.Rate;
-                    line += ", около " + Math.Max(1, (int)Math.Ceiling(hours)) + " ч.";
-                }
-                else
-                {
-                    line += ", уход остановлен";
-                }
-                lines.Add(line);
-            }
-
-            cares.Add(new HomeCareView
-            {
-                Id = "home.care.patients",
-                Title = "Уход за ранеными",
-                Cause = patients.Count == 1 ? "Один человек ранен." : "Раненых: " + patients.Count + ".",
-                Status = StatusLine(care),
-                Detail = string.Join("\n", lines),
-                Priority = care.Status == HomeFunctionStatus.Stopped ? PriorityNeed : PriorityRunning,
-                Urgent = care.Status == HomeFunctionStatus.Stopped
-            });
         }
 
         private static void AddMaintenance(GameState gameState, List<HomeCareView> cares, bool atHome)
@@ -480,15 +386,7 @@ namespace KingdomSurvival.Chapter01
 
         public static string StatusLine(HomeFunctionReport report)
         {
-            switch (report.Status)
-            {
-                case HomeFunctionStatus.Working:
-                    return "Работает — " + report.ExecutorName + ".";
-                case HomeFunctionStatus.Limited:
-                    return "Медленнее: " + report.Reason + ".";
-                default:
-                    return "Остановлено: " + report.Reason + ".";
-            }
+            return HomeCares.StatusLine(report);
         }
     }
 }

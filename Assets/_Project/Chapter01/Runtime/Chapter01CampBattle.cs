@@ -16,6 +16,9 @@ namespace KingdomSurvival.Chapter01
         // (не у места, не на обратном пути) идёт уже два часа.
         public static string GetPendingDialogueId(GameState gameState)
         {
+            // ПР-12А: только в кампании «Дома на чужой воде».
+            if (!Chapter01Crisis.IsActive(gameState))
+                return null;
             if (gameState?.Narrative == null || !gameState.HasActiveExpedition)
                 return null;
 

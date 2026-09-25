@@ -114,9 +114,17 @@ public partial class PrototypeUIController
     {
         return gameState != null &&
                !isGameOver &&
-               gameState.Narrative != null &&
-               gameState.Narrative.HasFlag(Chapter01Ids.Flags.CampUnlocked) &&
+               IsCampUnlocked() &&
                gameState.HasActiveExpedition;
+    }
+
+    // ПР-12А: в свободной игре лагерь доступен сразу; в главе — после встречи,
+    // которая его открывает (CampUnlocked).
+    private bool IsCampUnlocked()
+    {
+        return gameState != null &&
+               (CampaignContent.IsFreePlay(gameState) ||
+                gameState.Narrative != null && gameState.Narrative.HasFlag(Chapter01Ids.Flags.CampUnlocked));
     }
 
     private void OpenCampScreen()
@@ -391,7 +399,7 @@ public partial class PrototypeUIController
         if (campNavButton == null || gameState == null)
             return;
 
-        bool unlocked = gameState.Narrative != null && gameState.Narrative.HasFlag(Chapter01Ids.Flags.CampUnlocked);
+        bool unlocked = IsCampUnlocked();
         campNavButton.style.display = unlocked ? DisplayStyle.Flex : DisplayStyle.None;
         if (!unlocked)
             return;

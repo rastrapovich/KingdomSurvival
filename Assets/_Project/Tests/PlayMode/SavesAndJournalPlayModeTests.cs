@@ -170,6 +170,41 @@ public sealed class SavesAndJournalPlayModeTests
         Assert.AreEqual(DisplayStyle.None, root.Q<VisualElement>("journal-entries-section").resolvedStyle.display);
     }
 
+    // ПР-12А: свободная партия из меню — сцена N01 не открывается, «Дела» не
+    // пусты, Дом не пуст, режим переживает сохранение и загрузку.
+    [UnityTest]
+    public IEnumerator FreePlay_FromMenu_NoChapterScene_GoalsAndHome_SurvivesSaveLoad()
+    {
+        AsyncOperation load = SceneManager.LoadSceneAsync(MainScene);
+        while (!load.isDone)
+            yield return null;
+        yield return Frames(20);
+        MonoBehaviour controller = Controller();
+        Invoke(controller, "StartNewFreePlayFromMenu");
+        GameState campaign = CampaignSession.Current;
+        Assert.AreEqual(CampaignStartOptions.FreePlayId, campaign.Configuration.CrisisId);
+
+        // В сюжетной кампании N01 открывается через секунду — здесь ждём дольше.
+        float deadline = Time.unscaledTime + 3f;
+        while (Time.unscaledTime < deadline)
+        {
+            Assert.IsFalse(Flag(controller, "IsNarrativeDialogueActive"), "Сцена главы не открывается в свободной игре.");
+            yield return null;
+        }
+
+        VisualElement root = controller.GetComponent<UIDocument>().rootVisualElement;
+        Invoke(controller, "OpenJournal");
+        yield return null;
+        Assert.Greater(root.Q<VisualElement>("journal-main-section-list").childCount, 0, "«Дела» свободной игры не пусты.");
+        Invoke(controller, "CloseJournal");
+
+        Assert.IsTrue((bool)Invoke(controller, "SaveCampaign", "slot3"));
+        Assert.IsTrue((bool)Invoke(controller, "LoadCampaign", "slot3"));
+        yield return null;
+        Assert.AreEqual(CampaignStartOptions.FreePlayId, CampaignSession.Current.Configuration.CrisisId, "Загрузка восстанавливает режим.");
+        Assert.IsFalse(CampaignSession.Current.Narrative.Flags.Any(f => f.StartsWith("chapter01.")));
+    }
+
     [UnityTest]
     public IEnumerator MandatoryScene_ClosesJournal_AndShowsAlone()
     {

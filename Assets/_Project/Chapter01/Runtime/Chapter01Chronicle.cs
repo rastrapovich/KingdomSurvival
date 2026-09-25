@@ -213,33 +213,19 @@ namespace KingdomSurvival.Chapter01
 
 namespace KingdomSurvival.Chapter01
 {
-    // ПР-11: единый вход «Дел» журнала — провайдер выбирается по кризису
-    // кампании. Первая глава — первый зарегистрированный провайдер; другой
-    // кризис регистрирует свой, UI журнала не меняется.
-    public static class CrisisJournal
+    // ПР-12А: содержание кампании «Дом на чужой воде» в общем реестре Core —
+    // «Дела», объекты и заботы Дома. UI читает CampaignContent и не знает,
+    // какой режим у партии.
+    public static class Chapter01Content
     {
-        private static readonly System.Collections.Generic.Dictionary<string, System.Func<GameState, IReadOnlyList<JournalGoalViewData>>> Providers =
-            new System.Collections.Generic.Dictionary<string, System.Func<GameState, IReadOnlyList<JournalGoalViewData>>>
+        public static void Register()
+        {
+            CampaignContent.Register(Chapter01Crisis.CrisisId, new CampaignContentProvider
             {
-                { Chapter01Crisis.CrisisId, Chapter01JournalProvider.Build }
-            };
-
-        public static void Register(string crisisId, System.Func<GameState, IReadOnlyList<JournalGoalViewData>> provider)
-        {
-            if (!string.IsNullOrEmpty(crisisId) && provider != null)
-                Providers[crisisId] = provider;
-        }
-
-        public static IReadOnlyList<JournalGoalViewData> BuildGoals(GameState gameState)
-        {
-            if (gameState == null)
-                return new List<JournalGoalViewData>();
-            string crisisId = gameState.Configuration != null && !string.IsNullOrEmpty(gameState.Configuration.CrisisId)
-                ? gameState.Configuration.CrisisId
-                : Chapter01Crisis.CrisisId;
-            return Providers.TryGetValue(crisisId, out System.Func<GameState, IReadOnlyList<JournalGoalViewData>> provider)
-                ? provider(gameState)
-                : new List<JournalGoalViewData>();
+                Goals = Chapter01JournalProvider.Build,
+                HomeObjects = Chapter01HomeView.DescribeObjects,
+                HomeCares = Chapter01HomeView.DescribeCares
+            });
         }
     }
 }

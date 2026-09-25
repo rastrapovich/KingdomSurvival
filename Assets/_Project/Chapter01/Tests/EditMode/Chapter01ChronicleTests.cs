@@ -111,9 +111,10 @@ public sealed class Chapter01ChronicleTests
     }
 
     [Test]
-    public void CrisisJournal_BuildsChapterGoals()
+    public void CampaignContent_BuildsChapterGoals()
     {
+        Chapter01Content.Register();
         GameState gameState = NewGame(20260925);
-        Assert.AreEqual(Chapter01JournalProvider.Build(gameState).Count, CrisisJournal.BuildGoals(gameState).Count);
+        Assert.AreEqual(Chapter01JournalProvider.Build(gameState).Count, CampaignContent.BuildGoals(gameState).Count);
     }
 }

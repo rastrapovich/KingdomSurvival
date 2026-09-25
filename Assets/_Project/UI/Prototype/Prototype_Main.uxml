@@ -775,11 +775,16 @@
         </ui:VisualElement>
 
         <!-- ПР-05: итог перед стартом новой кампании. Тексты берутся из
-             CampaignStartOptions; выбор вариантов появится в ПР-12. -->
+             CampaignStartOptions. ПР-12А: выбор режима — свободная игра или
+             кампания «Дом на чужой воде». -->
         <ui:VisualElement name="new-game-overlay" class="game-menu-overlay new-game-overlay">
             <ui:VisualElement class="game-menu-panel new-game-panel">
                 <ui:Label text="НОВАЯ ИГРА" class="game-menu-title" />
-                <ui:Label text="КРИЗИС" class="new-game-section" />
+                <ui:Label text="КАМПАНИЯ" class="new-game-section" />
+                <ui:VisualElement name="new-game-mode-row" class="new-game-mode-row">
+                    <ui:Button name="new-game-mode-free" text="Свободная игра" class="game-menu-button new-game-mode-button" />
+                    <ui:Button name="new-game-mode-story" text="Дом на чужой воде" class="game-menu-button new-game-mode-button" />
+                </ui:VisualElement>
                 <ui:Label name="new-game-crisis-title" class="new-game-option-title" />
                 <ui:Label name="new-game-crisis-summary" class="new-game-option-summary" />
                 <ui:Label text="КОМАНДИР" class="new-game-section" />

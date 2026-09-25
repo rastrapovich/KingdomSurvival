@@ -180,8 +180,8 @@ public partial class PrototypeUIController
         journalDetailStepCaption.style.display = DisplayStyle.Flex;
         journalDetailMapButton.style.display = DisplayStyle.None;
 
-        // ПР-11: «Дела» — через единый вход провайдеров кризиса.
-        IReadOnlyList<JournalGoalViewData> goals = CrisisJournal.BuildGoals(gameState);
+        // ПР-11/12А: «Дела» — через общий вход содержания режима кампании.
+        IReadOnlyList<JournalGoalViewData> goals = CampaignContent.BuildGoals(gameState);
 
         journalMainList.Clear();
         journalOptionalList.Clear();
@@ -252,7 +252,7 @@ public partial class PrototypeUIController
         if (journalNavButton == null || gameState == null)
             return;
 
-        IReadOnlyList<JournalGoalViewData> goals = CrisisJournal.BuildGoals(gameState);
+        IReadOnlyList<JournalGoalViewData> goals = CampaignContent.BuildGoals(gameState);
         bool hasUnseen = HasUnseenKnowledgeOrHistory();
 
         foreach (JournalGoalViewData goal in goals)

@@ -72,6 +72,12 @@ public static partial class ContinuousSimulationSystem
 
     private const double Epsilon = 0.00001;
 
+    // ПР-07Б (PR07_HOME_SPEC §0.3): длинный шаг проходит кусками не
+    // длиннее четверти часа — выход, возвращение или выздоровление внутри
+    // шага не засчитывают домашней работы (ловли, ремонта, ухода) больше
+    // одного подшага.
+    public const double MaxHomeSubstepHours = 0.25;
+
     private sealed class RuntimeState
     {
         public double HourOfDay;
@@ -298,7 +304,7 @@ public static partial class ContinuousSimulationSystem
                 ? HoursUntilNextCheck(runtime)
                 : double.MaxValue;
             double stepHours = Math.Min(
-                remainingGameHours,
+                Math.Min(remainingGameHours, MaxHomeSubstepHours),
                 Math.Min(hoursToMidnight, hoursToCheck));
 
             if (stepHours <= Epsilon)

@@ -17,6 +17,7 @@ public partial class PrototypeUIController
     private Label homePeopleSummary;
     private Label homePeopleMaintenance;
     private Label homePeopleCare;
+    private Label homePeopleFishing;
     private VisualElement homePeopleList;
     private Label homePeopleDetail;
     private VisualTreeAsset personRowTemplate;
@@ -37,6 +38,7 @@ public partial class PrototypeUIController
         if (gameState == null || interfaceRoot == null)
             return;
 
+        DeliverHomeNews();
         BindHomePeople();
         BindRetinue();
         if (homePeopleBound)
@@ -59,10 +61,12 @@ public partial class PrototypeUIController
         homePeopleSummary = BindRequiredElement<Label>(interfaceRoot, HomePeopleScreenName, "home-people-summary");
         homePeopleMaintenance = BindRequiredElement<Label>(interfaceRoot, HomePeopleScreenName, "home-people-maintenance");
         homePeopleCare = BindRequiredElement<Label>(interfaceRoot, HomePeopleScreenName, "home-people-care");
+        homePeopleFishing = BindRequiredElement<Label>(interfaceRoot, HomePeopleScreenName, "home-people-fishing");
         homePeopleList = BindRequiredElement<VisualElement>(interfaceRoot, HomePeopleScreenName, "home-people-list");
         homePeopleDetail = BindRequiredElement<Label>(interfaceRoot, HomePeopleScreenName, "home-people-detail");
 
         homePeopleBound = homePeopleSummary != null && homePeopleMaintenance != null && homePeopleCare != null &&
+                          homePeopleFishing != null &&
                           homePeopleList != null && homePeopleDetail != null;
     }
 
@@ -86,6 +90,9 @@ public partial class PrototypeUIController
         signature.Append(deck == null ? "-" : deck.Completed ? "done" : ((int)HomeLife.RemainingWork(deck)).ToString());
         signature.Append(Chapter01HomeActivities.IsYardDeckOffered(gameState)).Append(gameState.Gold >= HomeLife.YardDeckGoldCost);
         signature.Append(Chapter01FisherFamily.IsOffered(gameState));
+        HomeFunctionReport fishing = HomeFunctionResolver.Resolve(gameState, HomeFunctionResolver.FishingId);
+        signature.Append('|').Append(fishing.Status).Append(HomeFunctionResolver.IsFishingOpen(gameState))
+            .Append((int)((gameState.People != null ? gameState.People.FishingEarned : 0.0) * 10.0));
         signature.Append('|').Append(string.Join(",", ExpeditionPreparation.GetFighterIds(gameState)))
             .Append('|').Append(ExpeditionPreparation.GetRetinueId(gameState));
         return signature.ToString();
@@ -106,6 +113,9 @@ public partial class PrototypeUIController
         homePeopleSummary.text = members + " жителей · дома " + present + " · в походе " + (members - present);
         homePeopleMaintenance.text = FunctionLine("Ремонт", maintenance);
         homePeopleCare.text = FunctionLine("Уход за ранеными", care);
+        string fishingLine = Chapter01HomeView.FishingLine(gameState);
+        homePeopleFishing.text = fishingLine ?? string.Empty;
+        homePeopleFishing.style.display = fishingLine != null ? DisplayStyle.Flex : DisplayStyle.None;
 
         RebuildPeopleList();
     }
@@ -175,6 +185,34 @@ public partial class PrototypeUIController
         }
 
         homePeopleDetail.text = "Другие семьи — " + background + " жителей: взрослые, дети и старики четырёх домов.";
+    }
+
+    // ПР-07Б: сведения о Доме. Дома — новости выдаются сразу; в пути —
+    // один раз запоминается известное на момент выхода; по возвращении
+    // отложенные новости приходят одной записью «Пока вас не было…».
+    private void DeliverHomeNews()
+    {
+        string returnSummary = HomeKnowledge.Refresh(gameState, DescribeHomeForSnapshot);
+        if (!string.IsNullOrEmpty(returnSummary))
+            AddReport(returnSummary);
+
+        if (HomePeopleService.HasDeparted(gameState))
+            return;
+        foreach (string news in HomeKnowledge.TakePendingNews(gameState))
+            AddReport(news);
+    }
+
+    private static IList<string> DescribeHomeForSnapshot(GameState state)
+    {
+        List<string> lines = new List<string>();
+        foreach (HomeObjectView view in Chapter01HomeView.DescribeObjects(state))
+            lines.Add(view.Title + ": " + view.Short + ".");
+        foreach (HomeCareView care in Chapter01HomeView.DescribeCares(state))
+            lines.Add("Забота — " + care.Title + ": " + care.Status);
+        string fishing = Chapter01HomeView.FishingLine(state);
+        if (fishing != null)
+            lines.Add(fishing);
+        return lines;
     }
 
     private string PersonStatus(ResidentState resident)

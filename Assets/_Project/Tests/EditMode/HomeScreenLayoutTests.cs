@@ -20,7 +20,7 @@ public sealed class HomeScreenLayoutTests
         "home-summary-detail", "home-away-notice", "home-main-row", "home-scene",
         "home-scene-water", "home-scene-mill", "home-scene-dam", "home-scene-walkway", "home-scene-yard",
         "home-scene-livestock", "home-objects-list", "home-cares-list", "home-people-maintenance",
-        "home-people-care", "home-activities-panel", "home-activities-list", "home-activities-empty",
+        "home-people-care", "home-people-fishing", "home-activities-panel", "home-activities-list", "home-activities-empty",
         "home-people-panel", "home-people-summary", "home-people-list", "home-people-detail",
         "home-prep-panel", "home-prep-title", "home-prep-message", "home-prep-route-button",
         "home-prep-slots", "home-prep-candidates", "home-prep-forecast"

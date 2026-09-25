@@ -329,6 +329,7 @@ namespace KingdomSurvival.Chapter01
 
             AddCare(gameState, cares);
             AddMaintenance(gameState, cares, atHome);
+            AddFishing(gameState, cares);
 
             cares.Sort((a, b) => a.Priority.CompareTo(b.Priority));
             return cares;
@@ -422,6 +423,59 @@ namespace KingdomSurvival.Chapter01
                 Priority = maintenance.Rate > 0.0 ? PriorityRunning : PriorityNeed,
                 Urgent = maintenance.Rate <= 0.0
             });
+        }
+
+        // ПР-07Б: ловля в заботах — только когда остановлена.
+        private static void AddFishing(GameState gameState, List<HomeCareView> cares)
+        {
+            if (!HomeFunctionResolver.IsFishingOpen(gameState))
+                return;
+
+            HomeFunctionReport fishing = HomeFunctionResolver.Resolve(gameState, HomeFunctionResolver.FishingId);
+            if (fishing.Status == HomeFunctionStatus.Working)
+                return;
+
+            cares.Add(new HomeCareView
+            {
+                Id = "home.care.fishing",
+                Title = "Рыбная ловля остановлена",
+                Cause = Capitalize(fishing.Reason) + ".",
+                Status = "Новых поступлений от ловли нет.",
+                Detail = EarnedLine(gameState),
+                Priority = PriorityRunning
+            });
+        }
+
+        // Строка функции ловли для «Заботы» (null — ловля ещё не открыта).
+        public static string FishingLine(GameState gameState)
+        {
+            if (gameState == null || !HomeFunctionResolver.IsFishingOpen(gameState))
+                return null;
+
+            HomeFunctionReport fishing = HomeFunctionResolver.Resolve(gameState, HomeFunctionResolver.FishingId);
+            string earned = EarnedLine(gameState);
+            if (fishing.Status == HomeFunctionStatus.Working)
+            {
+                return "Рыбная ловля — Тихон дома. До " + HomeLife.FishingFoodPerFullDay +
+                       " пищи за полные сутки работы." + (earned != null ? " " + earned : string.Empty);
+            }
+
+            return "Рыбная ловля остановлена: " + fishing.Reason + " — новых поступлений нет." +
+                   (earned != null ? " " + earned : string.Empty);
+        }
+
+        private static string EarnedLine(GameState gameState)
+        {
+            double earned = gameState.People != null ? gameState.People.FishingEarned : 0.0;
+            if (earned < 0.05)
+                return null;
+            return "Заработано за сегодня: " + earned.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture).Replace('.', ',') +
+                   "; поступит в ближайшую полночь.";
+        }
+
+        private static string Capitalize(string text)
+        {
+            return string.IsNullOrEmpty(text) ? text : char.ToUpperInvariant(text[0]) + text.Substring(1);
         }
 
         public static string StatusLine(HomeFunctionReport report)

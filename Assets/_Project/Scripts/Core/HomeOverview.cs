@@ -44,39 +44,74 @@ public static class HomeOverview
 
     public static HomeFoodForecast ForecastFood(GameState state)
     {
-        int income = BuildingSystem.GetDailyFoodIncome(state);
-        int consumption = state.DailyFoodConsumption;
-        return ForecastFood(state.Food, income, consumption, state.ConsecutiveFoodShortageDays > 0);
+        return ForecastFood(state, fishingWorks: IsFishingWorking(state), consumption: state.DailyFoodConsumption);
+    }
+
+    // Прогноз при заданных условиях (текущих или «после выхода»).
+    // ПР-07Б: до первой полуночи учитывается уже заработанный улов и
+    // оставшиеся рабочие часы; дальше — полные сутки ловли.
+    public static HomeFoodForecast ForecastFood(GameState state, bool fishingWorks, int consumption)
+    {
+        double rate = fishingWorks ? HomeLife.FishingFoodPerHour : 0.0;
+        double hoursToMidnight = Math.Max(0.0, 24.0 - ContinuousSimulationSystem.GetClock(state).HourOfDay);
+        double earned = state.People != null ? state.People.FishingEarned : 0.0;
+        return ForecastFood(state.Food, BuildingSystem.GetDailyFoodIncome(state), consumption,
+            state.ConsecutiveFoodShortageDays > 0, earned, rate, hoursToMidnight);
+    }
+
+    public static bool IsFishingWorking(GameState state)
+    {
+        return HomeFunctionResolver.IsFishingOpen(state) &&
+               HomeFunctionResolver.Resolve(state, HomeFunctionResolver.FishingId).Status == HomeFunctionStatus.Working;
     }
 
     public static HomeFoodForecast ForecastFood(int food, int income, int consumption, bool currentShortage)
     {
+        return ForecastFood(food, income, consumption, currentShortage, 0.0, 0.0, 24.0);
+    }
+
+    // Тот же порядок, что у полуночи: поступление (база + целый улов), затем
+    // расход; дробный остаток улова переходит дальше.
+    public static HomeFoodForecast ForecastFood(
+        int food, int income, int consumption, bool currentShortage,
+        double fishingEarned, double fishingPerHour, double hoursToFirstMidnight)
+    {
+        int fullDayIncome = income + (int)Math.Floor(fishingPerHour * 24.0 + 0.000001);
         if (consumption <= 0)
-            return new HomeFoodForecast(HomeFoodOutlook.NoConsumption, 0, 0, income, consumption, currentShortage);
+            return new HomeFoodForecast(HomeFoodOutlook.NoConsumption, 0, 0, fullDayIncome, consumption, currentShortage);
 
         int stock = Math.Max(0, food);
-        if (stock + income < consumption)
-        {
-            return new HomeFoodForecast(HomeFoodOutlook.ShortageAtNextMidnight, 0,
-                consumption - (stock + income), income, consumption, currentShortage);
-        }
-
-        if (income >= consumption)
-            return new HomeFoodForecast(HomeFoodOutlook.IncomeCovers, 0, 0, income, consumption, currentShortage);
-
-        // Постоянный суточный дефицит: полночь d обеспечена, пока
-        // stock + income - (d-1)·deficit ≥ consumption.
+        double earned = Math.Max(0.0, fishingEarned);
         int covered = 0;
         for (int day = 0; day < ForecastHorizonDays; day++)
         {
-            stock += income;
-            if (stock < consumption)
+            earned += fishingPerHour * (day == 0 ? hoursToFirstMidnight : 24.0);
+            int caught = (int)Math.Floor(earned + 0.000001);
+            earned = Math.Max(0.0, earned - caught);
+
+            int available = stock + income + caught;
+            if (available < consumption)
+            {
+                if (day == 0)
+                {
+                    return new HomeFoodForecast(HomeFoodOutlook.ShortageAtNextMidnight, 0,
+                        consumption - available, fullDayIncome, consumption, currentShortage);
+                }
                 break;
-            stock -= consumption;
+            }
+
+            stock = available - consumption;
             covered++;
+
+            // Со второй полуночи условия постоянны: если полные сутки
+            // покрывают расход, запасы больше не убывают.
+            if (day >= 1 && fullDayIncome >= consumption)
+                return new HomeFoodForecast(HomeFoodOutlook.IncomeCovers, 0, 0, fullDayIncome, consumption, currentShortage);
+            if (day == 0 && fullDayIncome >= consumption && income + caught >= consumption)
+                return new HomeFoodForecast(HomeFoodOutlook.IncomeCovers, 0, 0, fullDayIncome, consumption, currentShortage);
         }
 
-        return new HomeFoodForecast(HomeFoodOutlook.DaysCovered, covered, 0, income, consumption, currentShortage);
+        return new HomeFoodForecast(HomeFoodOutlook.DaysCovered, covered, 0, fullDayIncome, consumption, currentShortage);
     }
 
     public static string DescribeFood(GameState state)
@@ -199,9 +234,16 @@ public static class HomeOverview
         DescribeFunction(state, HomeFunctionResolver.MaintenanceId, "Ремонт", leaving, changed, same);
         DescribeFunction(state, HomeFunctionResolver.CareId, "Уход за ранеными", leaving, changed, same);
 
+        // ПР-07Б: ловля Тихона.
+        bool fishingNow = IsFishingWorking(state);
+        bool fishingAfter = fishingNow && !leaving.Contains(HomePeopleService.TikhonId);
+        if (fishingNow && !fishingAfter)
+            changed.Add("Ловля остановится. Полный суточный приток уменьшится на " + HomeLife.FishingFoodPerFullDay + ".");
+        else if (fishingAfter)
+            same.Add("Ловля: без изменений — Тихон остаётся дома.");
+
         int consumptionAfter = Math.Max(0, state.DailyFoodConsumption - leavingFromHome);
-        HomeFoodForecast food = ForecastFood(state.Food, BuildingSystem.GetDailyFoodIncome(state), consumptionAfter,
-            state.ConsecutiveFoodShortageDays > 0);
+        HomeFoodForecast food = ForecastFood(state, fishingAfter, consumptionAfter);
         same.Add("Запасы Дома после выхода: расход " + consumptionAfter + " в сутки. " + DescribeFood(food));
 
         int supplyPerDay = leaving.Count;

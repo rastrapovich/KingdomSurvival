@@ -72,10 +72,12 @@ public sealed class Chapter01FisherFamilyTests
     {
         GameState gameState = GameAfterRepairDecision();
         string summary = Chapter01FisherFamily.BuildOfferSummary(gameState);
-        StringAssert.Contains("4 человека", summary);
-        StringAssert.Contains("Тихон", summary);
-        StringAssert.Contains("Варвара", summary);
-        StringAssert.Contains("24 → 28", summary);
+        // ПР-07Б: польза и расход видны до решения (PR07_HOME_SPEC §11).
+        StringAssert.Contains("четыре новых жителя", summary);
+        StringAssert.Contains("до 8 пищи за сутки работы", summary);
+        StringAssert.Contains("расходует 4 пищи", summary);
+        StringAssert.Contains("ловля остановится", summary);
+        StringAssert.Contains("дома едят 28", summary);
     }
 
     // --- Принятие ---

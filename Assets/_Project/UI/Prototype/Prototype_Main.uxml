@@ -80,6 +80,7 @@
                                             <ui:Label text="ЗАБОТЫ" class="section-title" />
                                             <ui:Label name="home-people-maintenance" class="home-people-function" />
                                             <ui:Label name="home-people-care" class="home-people-function" />
+                                            <ui:Label name="home-people-fishing" class="home-people-function" />
                                             <ui:VisualElement name="home-cares-list" class="home-cares-list" />
                                         </ui:VisualElement>
                                         <ui:VisualElement name="home-activities-panel" class="home-activities-panel">

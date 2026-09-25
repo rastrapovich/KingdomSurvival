@@ -263,6 +263,9 @@ public class GameState
     // один выбор для Дома, экрана героя и карты; переживает save/load.
     public ExpeditionPreparationData Preparation = new ExpeditionPreparationData();
 
+    // ПР-07Б: что известно о Доме из похода и отложенные домашние новости.
+    public HomeKnowledgeData HomeKnowledge = new HomeKnowledgeData();
+
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
 

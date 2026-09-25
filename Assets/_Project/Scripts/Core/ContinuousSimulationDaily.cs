@@ -16,15 +16,24 @@ public static partial class ContinuousSimulationSystem
         int dailyGoldIncome = BuildingSystem.GetDailyGoldIncome(state);
         int dailyFoodIncome = BuildingSystem.GetDailyFoodIncome(state);
         int dailyGoldUpkeep = BuildingSystem.GetDailyGoldUpkeep(state);
+        // ПР-07Б: заработанный за сутки улов — ровно один раз, до расхода.
+        int fishingCatch = HomeLife.TakeFishingCatch(state);
 
         state.Gold = Math.Max(
             0,
             state.Gold + dailyGoldIncome - dailyGoldUpkeep);
-        state.Food += dailyFoodIncome;
-        batch.Result.Messages.Add(
-            "Полночь. В казну Дома поступило " + dailyGoldIncome + " золота" +
-            (dailyGoldUpkeep > 0 ? ", на содержание ушло " + dailyGoldUpkeep : "") +
-            ". В запасы Дома поступило " + dailyFoodIncome + " пищи.");
+        state.Food += dailyFoodIncome + fishingCatch;
+
+        // ПР-07Б: пока отряд в пути, будничный отчёт Дома не приходит —
+        // это не сведения, которые герой может знать.
+        if (!HomePeopleService.HasDeparted(state))
+        {
+            batch.Result.Messages.Add(
+                "Полночь. В казну Дома поступило " + dailyGoldIncome + " золота" +
+                (dailyGoldUpkeep > 0 ? ", на содержание ушло " + dailyGoldUpkeep : "") +
+                ". В запасы Дома поступило " + dailyFoodIncome + " пищи" +
+                (fishingCatch > 0 ? " и " + fishingCatch + " — улов Тихона" : "") + ".");
+        }
 
         ResolveCityFoodAtMidnight(state, batch.Result);
         ResolveExpeditionSupplyAtMidnight(state, runtime, batch.Result);
@@ -48,25 +57,28 @@ public static partial class ContinuousSimulationSystem
 
             if (state.ConsecutiveFoodShortageDays > 0)
             {
-                result.Messages.Add("Нехватка еды в Доме прекратилась.");
-                result.HadNotableOccurrence = true;
+                HomeKnowledge.Report(state, result.Messages, "Нехватка еды в Доме прекратилась.");
+                result.HadNotableOccurrence |= !HomePeopleService.HasDeparted(state);
             }
 
             state.ConsecutiveFoodShortageDays = 0;
-            result.Messages.Add(
-                "Дом израсходовал " + requiredFood +
-                " пищи — по одной на каждого, кто сейчас дома.");
+            if (!HomePeopleService.HasDeparted(state))
+            {
+                result.Messages.Add(
+                    "Дом израсходовал " + requiredFood +
+                    " пищи — по одной на каждого, кто сейчас дома.");
+            }
             return;
         }
 
         int shortage = requiredFood - availableFood;
         state.Food = 0;
         state.ConsecutiveFoodShortageDays++;
-        result.HadNotableOccurrence = true;
-        result.Messages.Add(
+        result.HadNotableOccurrence |= !HomePeopleService.HasDeparted(state);
+        HomeKnowledge.Report(state, result.Messages,
             "Дому не хватило " + shortage +
             " пищи. Нехватка подряд: " +
-            state.ConsecutiveFoodShortageDays + " сут." );
+            state.ConsecutiveFoodShortageDays + " сут.");
 
         // ПР-06А: голод не стирает безымянных жителей — у Дома конкретные
         // люди; смерть — только авторским событием. ПР-07А-1: настроения
@@ -74,7 +86,7 @@ public static partial class ContinuousSimulationSystem
         // (HomeFunctionResolver) с той же полуночи, что и в сообщении.
         if (state.ConsecutiveFoodShortageDays >= HomeFunctionResolver.CareStopsAfterShortageDays)
         {
-            result.Messages.Add(
+            HomeKnowledge.Report(state, result.Messages,
                 "Голод затянулся: люди слабеют, уход за ранеными остановлен до появления еды.");
         }
     }

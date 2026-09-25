@@ -13,6 +13,8 @@ public static class HomePeopleService
     public const string UlyanaId = "ulyana";
     public const string MartaId = "marta";
     public const string TorvinId = "torvin";
+    // ПР-07Б: рыбак семьи Тихона (Chapter01FisherFamily) — исполнитель ловли.
+    public const string TikhonId = "newcomer.fisher.tikhon";
 
     public const int RetinueSlots = 1;
 

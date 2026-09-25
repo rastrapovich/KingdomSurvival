@@ -10,7 +10,7 @@ namespace KingdomSurvival.Chapter01
     public static class Chapter01FisherFamily
     {
         public const string HouseholdId = "household.fisher_tikhon";
-        public const string TikhonId = "newcomer.fisher.tikhon";
+        public const string TikhonId = HomePeopleService.TikhonId;
         public const string VarvaraId = "newcomer.fisher.varvara";
         public const string AnyaId = "newcomer.fisher.anya";
         public const string FedyaId = "newcomer.fisher.fedya";
@@ -37,26 +37,22 @@ namespace KingdomSurvival.Chapter01
                    !IsResolved(state);
         }
 
-        // Что видно до принятия (§10.3).
+        // Что видно до принятия (§10.3, PR07_HOME_SPEC §11): польза и
+        // расход — до решения, а не после.
         public static string BuildOfferSummary(GameState gameState)
         {
-            int presentNow = gameState != null ? HomePeopleService.CountHomePresent(gameState) : 0;
             string summary =
-                "Семья Тихона — 4 человека: Тихон (рыбак, может идти с отрядом), его жена Варвара и дети Аня и Федя. " +
-                "Дома станет на четыре жителя больше; расход запасов при всех дома вырастет на 4 в сутки (" +
-                presentNow + " → " + (presentNow + MemberCount) + ").";
+                "Тихон, Варвара и двое детей — четыре новых жителя. Пока Тихон дома и здоров, ловля приносит до " +
+                HomeLife.FishingFoodPerFullDay + " пищи за сутки работы. Семья расходует " + MemberCount +
+                " пищи в сутки, когда все дома. Тихона можно взять бойцом; тогда ловля остановится, а трое его домочадцев останутся дома.";
 
             if (gameState != null)
             {
-                int food = gameState.Food;
-                int dailyAfter = presentNow + MemberCount;
-                int income = BuildingSystem.GetDailyFoodIncome(gameState);
-                if (dailyAfter > income)
-                {
-                    int shortfall = dailyAfter - income;
-                    summary += " Сейчас доход пищи " + income + " в сутки: запасов (" + food + ") хватит примерно на " +
-                               (food / shortfall) + " сут. нехватки по " + shortfall + ".";
-                }
+                int consumptionAfter = gameState.DailyFoodConsumption + MemberCount;
+                HomeFoodForecast forecast = HomeOverview.ForecastFood(
+                    gameState.Food, BuildingSystem.GetDailyFoodIncome(gameState), consumptionAfter,
+                    gameState.ConsecutiveFoodShortageDays > 0, 0.0, HomeLife.FishingFoodPerHour, 24.0);
+                summary += " Если принять: дома едят " + consumptionAfter + " в сутки. " + HomeOverview.DescribeFood(forecast);
             }
 
             return summary;
@@ -114,8 +110,16 @@ namespace KingdomSurvival.Chapter01
                 }
             };
 
-            return HomePeopleService.AdmitHousehold(
+            bool admitted = HomePeopleService.AdmitHousehold(
                 gameState, Chapter01Ids.Effects.FisherFamilyJoin, household, members, out message);
+            if (admitted)
+            {
+                // ПР-07Б: принятие открывает ловлю — одно короткое сообщение.
+                HomeKnowledge.Report(gameState, null,
+                    "Семья Тихона теперь живёт в Доме. Открыта рыбная ловля: пока Тихон дома и здоров — до " +
+                    HomeLife.FishingFoodPerFullDay + " пищи за полные сутки работы.");
+            }
+            return admitted;
         }
     }
 }

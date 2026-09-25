@@ -6518,7 +6518,7 @@ MonoBehaviour:
         \u0432 \u043F\u043E\u043B\u043D\u043E\u0447\u044C \u043E\u0434\u0438\u043D
         \u0440\u0430\u0437."
       category: 3
-      status: 0
+      status: 2
       required: 1
       order: 11
       priority: 1
@@ -6529,10 +6529,10 @@ MonoBehaviour:
       - text: "24 \u0447\u0430\u0441\u0430 \u043E\u0434\u043D\u0438\u043C \u0448\u0430\u0433\u043E\u043C
           \u0438 \u043C\u043D\u043E\u0433\u0438\u043C\u0438 \u2014 \u043E\u0434\u0438\u043D\u0430\u043A\u043E\u0432\u043E
           8"
-        done: 0
+        done: 1
       - text: "\u041D\u0435\u0442 \u0443\u043B\u043E\u0432\u0430 \u0437\u0430 \u0434\u043E\u0440\u043E\u0433\u0443
           \u0438 \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u0435"
-        done: 0
+        done: 1
       manualChecks:
       - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435
         \u043F\u043E \u0441\u0446\u0435\u043D\u0430\u0440\u0438\u044F\u043C \xA714
@@ -6557,7 +6557,7 @@ MonoBehaviour:
         \u0432\u0437\u044F\u0442\u044C \u0422\u0438\u0445\u043E\u043D\u0430 \u0432
         \u043F\u043E\u0445\u043E\u0434."
       category: 3
-      status: 0
+      status: 2
       required: 1
       order: 12
       priority: 1
@@ -6567,7 +6567,7 @@ MonoBehaviour:
       acceptanceCriteria:
       - text: "\u041F\u043E\u043B\u044C\u0437\u0430 \u0438 \u0440\u0430\u0441\u0445\u043E\u0434
           \u0432\u0438\u0434\u043D\u044B \u0434\u043E \u043E\u0442\u0432\u0435\u0442\u0430"
-        done: 0
+        done: 1
       manualChecks:
       - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435
         \u043F\u043E \u0441\u0446\u0435\u043D\u0430\u0440\u0438\u044F\u043C \xA714
@@ -6592,7 +6592,7 @@ MonoBehaviour:
         \u0434\u043E\u043C\u0430\u0448\u043D\u0438\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F
         \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B."
       category: 3
-      status: 0
+      status: 2
       required: 1
       order: 13
       priority: 1
@@ -6602,12 +6602,12 @@ MonoBehaviour:
       acceptanceCriteria:
       - text: "\u0421\u043D\u0438\u043C\u043E\u043A \u043F\u0435\u0440\u0435\u0436\u0438\u0432\u0430\u0435\u0442
           save/load"
-        done: 0
+        done: 1
       - text: "\u0421\u0442\u0430\u0440\u043E\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435
           \u0432 \u043F\u0443\u0442\u0438 \u0431\u0435\u0437 \u0441\u043D\u0438\u043C\u043A\u0430
           \u043D\u0435 \u0432\u044B\u0434\u0443\u043C\u044B\u0432\u0430\u0435\u0442
           \u0434\u0430\u043D\u043D\u044B\u0445"
-        done: 0
+        done: 1
       manualChecks:
       - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435
         \u043F\u043E \u0441\u0446\u0435\u043D\u0430\u0440\u0438\u044F\u043C \xA714
@@ -6632,7 +6632,7 @@ MonoBehaviour:
         \u043F\u0440\u0438 \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0435\u043D\u0438\u0438
         \u043E\u0434\u0438\u043D \u0440\u0430\u0437."
       category: 3
-      status: 0
+      status: 2
       required: 1
       order: 14
       priority: 1
@@ -6642,10 +6642,10 @@ MonoBehaviour:
       acceptanceCriteria:
       - text: "\u0412 \u043F\u043E\u0445\u043E\u0434\u0435 \u0434\u043E\u043C\u0430\u0448\u043D\u0438\u0435
           \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u043D\u0435 \u0432\u0438\u0434\u043D\u044B"
-        done: 0
+        done: 1
       - text: "\u041E\u0447\u0435\u0440\u0435\u0434\u044C \u0432\u044B\u0434\u0430\u0451\u0442\u0441\u044F
           \u0440\u043E\u0432\u043D\u043E \u043E\u0434\u0438\u043D \u0440\u0430\u0437"
-        done: 0
+        done: 1
       manualChecks:
       - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435
         \u043F\u043E \u0441\u0446\u0435\u043D\u0430\u0440\u0438\u044F\u043C \xA714

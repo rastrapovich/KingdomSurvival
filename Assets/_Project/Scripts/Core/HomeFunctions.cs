@@ -43,6 +43,9 @@ public static class HomeFunctionResolver
 {
     public const string MaintenanceId = "home.maintenance";
     public const string CareId = "home.care";
+    // ПР-07Б: рыбная ловля Тихона — только «работает» или «остановлена»;
+    // частичных заместителей нет.
+    public const string FishingId = "home.fishing";
 
     // С какой полуночи подряд без полного дневного расхода уход встаёт.
     public const int CareStopsAfterShortageDays = 2;
@@ -81,6 +84,8 @@ public static class HomeFunctionResolver
             case MaintenanceId:
                 return ResolveBy(state, functionId, HomePeopleService.LadaId, MaintenancePartial,
                     "в Доме не осталось человека, способного вести ремонт");
+            case FishingId:
+                return ResolveFishing(state, functionId);
             case CareId:
                 if (state != null && state.ConsecutiveFoodShortageDays >= CareStopsAfterShortageDays)
                 {
@@ -92,6 +97,28 @@ public static class HomeFunctionResolver
             default:
                 throw new ArgumentException("Неизвестная функция Дома: " + functionId, nameof(functionId));
         }
+    }
+
+    // Ловля открыта, когда семья Тихона действительно принята в Дом.
+    public static bool IsFishingOpen(GameState state)
+    {
+        ResidentState fisher = HomePeopleService.Find(state, HomePeopleService.TikhonId);
+        return fisher != null && !string.IsNullOrEmpty(fisher.HouseholdId);
+    }
+
+    private static HomeFunctionReport ResolveFishing(GameState state, string functionId)
+    {
+        ResidentState fisher = HomePeopleService.Find(state, HomePeopleService.TikhonId);
+        if (fisher == null)
+            return new HomeFunctionReport(functionId, HomeFunctionStatus.Stopped, string.Empty, string.Empty, "рыбака в Доме нет");
+
+        if (CanWork(state, fisher) && (!fisher.HasCombatState || fisher.CurrentHitPoints > 0))
+            return new HomeFunctionReport(functionId, HomeFunctionStatus.Working, fisher.PersonId, fisher.DisplayName, string.Empty);
+
+        string reason = AbsenceReason(state, fisher);
+        if (string.IsNullOrEmpty(reason))
+            reason = fisher.DisplayName + " не может работать";
+        return new HomeFunctionReport(functionId, HomeFunctionStatus.Stopped, string.Empty, string.Empty, reason);
     }
 
     private static HomeFunctionReport ResolveBy(GameState state, string functionId, string masterId, string[] partialIds, string stoppedReason)
@@ -141,6 +168,11 @@ public static class HomeLife
     public const double YardDeckRequiredWork = 12.0;
 
     public const double FullCareCycleHours = 24.0;
+
+    // ПР-07Б (PR07_HOME_SPEC §10): 8 пищи за 24 часа фактической работы.
+    public const int FishingFoodPerFullDay = 8;
+    public const double FishingFoodPerHour = FishingFoodPerFullDay / 24.0;
+    private const double CatchEpsilon = 0.000001;
 
     public static HomeWorkState FindWork(GameState state, string workId)
     {
@@ -240,6 +272,34 @@ public static class HomeLife
 
         AdvanceWork(state, hours, messages);
         AdvanceCare(state, hours, messages);
+        AdvanceFishing(state, hours);
+    }
+
+    // Улов копится за фактически отработанные часы, а не за присутствие
+    // рыбака в точке полуночи. Ловля не держит время запущенным
+    // (не входит в HasPendingProgress): она идёт вместе с уже идущим временем.
+    private static void AdvanceFishing(GameState state, double hours)
+    {
+        if (!HomeFunctionResolver.IsFishingOpen(state))
+            return;
+        if (HomeFunctionResolver.Resolve(state, HomeFunctionResolver.FishingId).Status != HomeFunctionStatus.Working)
+            return;
+        state.People.FishingEarned += hours * FishingFoodPerHour;
+    }
+
+    // Полночь: целая часть заработанного улова переходит в запасы Дома,
+    // дробный остаток остаётся. Уже заработанное принадлежит Дому, даже если
+    // рыбак ушёл или погиб.
+    public static int TakeFishingCatch(GameState state)
+    {
+        if (state?.People == null || state.People.FishingEarned <= 0.0)
+            return 0;
+
+        int whole = (int)Math.Floor(state.People.FishingEarned + CatchEpsilon);
+        state.People.FishingEarned = Math.Max(0.0, state.People.FishingEarned - whole);
+        if (state.People.FishingEarned < CatchEpsilon)
+            state.People.FishingEarned = 0.0;
+        return whole;
     }
 
     private static void AdvanceWork(GameState state, double hours, List<string> messages)
@@ -257,7 +317,7 @@ public static class HomeLife
         {
             deck.DoneWork = deck.RequiredWork;
             deck.Completed = true;
-            messages?.Add("Хозяйственный настил восстановлен: по двору снова ходят напрямую, а не в обход луж.");
+            HomeKnowledge.Report(state, messages, "Хозяйственный настил восстановлен: по двору снова ходят напрямую, а не в обход луж.");
         }
     }
 
@@ -289,7 +349,7 @@ public static class HomeLife
                 resident.RecoveryProgress = 0.0;
                 bool wasRecovering = resident.Injury == ResidentInjury.Recovering;
                 resident.Injury = ResidentInjury.None;
-                messages?.Add(resident.DisplayName + (wasRecovering ? " поправился(ась) и снова может работать." : " полностью восстановил(а) силы."));
+                HomeKnowledge.Report(state, messages, resident.DisplayName + (wasRecovering ? ": рана зажила, снова может работать." : ": силы восстановлены."));
             }
         }
     }

@@ -124,6 +124,7 @@ public partial class PrototypeUIController
         IReadOnlyList<HomeCareView> cares = away ? new List<HomeCareView>() : Chapter01HomeView.DescribeCares(gameState);
 
         StringBuilder signature = new StringBuilder(away ? "away|" : "home|");
+        signature.Append(HomeKnowledge.Get(gameState).HasSnapshot).Append('|');
         signature.Append(homePeopleSignature).Append('|').Append(selectedHomeObjectId).Append('|');
         foreach (HomeObjectView view in objects)
             signature.Append(view.Id).Append(view.StateKey).Append(view.ActionDialogueId).Append(';');
@@ -136,6 +137,9 @@ public partial class PrototypeUIController
         homeScreenSignature = current;
 
         homeAwayNotice.style.display = away ? DisplayStyle.Flex : DisplayStyle.None;
+        // ПР-07Б: «Дом — последние сведения» — известное на момент выхода, не прямой эфир.
+        if (away)
+            homeAwayNotice.text = "ДОМ — ПОСЛЕДНИЕ СВЕДЕНИЯ\n" + HomeKnowledge.DescribeLastKnown(gameState);
         homeMainRow.style.display = away ? DisplayStyle.None : DisplayStyle.Flex;
         homePeoplePanel.style.display = away ? DisplayStyle.None : DisplayStyle.Flex;
         if (homeSummaryStrip != null)

@@ -111,4 +111,8 @@ public sealed class HomePeopleState
     public List<ResidentState> Residents = new List<ResidentState>();
     public List<HouseholdState> Households = new List<HouseholdState>();
     public List<HomeWorkState> Works = new List<HomeWorkState>();
+
+    // ПР-07Б: заработанный, но ещё не выплаченный улов (с дробной частью);
+    // выплачивается целыми в полночь, остаток переходит дальше.
+    public double FishingEarned;
 }

@@ -45,11 +45,11 @@ public sealed class HomeScreenPlayModeTests
         return controller;
     }
 
-    private static void Invoke(MonoBehaviour controller, string method)
+    private static void Invoke(MonoBehaviour controller, string method, params object[] arguments)
     {
         MethodInfo info = controller.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
         Assert.IsNotNull(info, "Нет метода " + method);
-        info.Invoke(controller, null);
+        info.Invoke(controller, arguments.Length > 0 ? arguments : null);
     }
 
     private static void Click(Button button)
@@ -107,9 +107,10 @@ public sealed class HomeScreenPlayModeTests
         Assert.AreEqual(DisplayStyle.None, root.Q<VisualElement>("camp-screen").style.display.value);
     }
 
-    // ПР-08: экран героя — слоты выбранного человека и «Надеть» из кладовой.
+    // ПР-08 + карточка человека: экран героя — про весь отряд; слоты,
+    // «Надеть» из кладовой и собранные числа — в карточке человека.
     [UnityTest]
-    public IEnumerator HeroScreen_ShowsEquipment_AndEquipsFromStoreroom()
+    public IEnumerator HeroScreen_PersonCard_ShowsEquipment_AndEquipsFromStoreroom()
     {
         AsyncOperation load = SceneManager.LoadSceneAsync(MainScene, LoadSceneMode.Single);
         while (!load.isDone)
@@ -124,25 +125,32 @@ public sealed class HomeScreenPlayModeTests
 
         GameState campaign = CampaignSession.Current;
         VisualElement root = controller.GetComponent<UIDocument>().rootVisualElement;
-        Assert.AreEqual("Меч", root.Q<Label>("hero-screen-equipment-slot-1-name").text);
         StringAssert.DoesNotContain("позже", root.Q<Label>("hero-screen-states-hint").text);
+        Assert.Greater(root.Q<VisualElement>("hero-screen-squad-list").childCount, 1, "Список отряда: Командир и бойцы.");
+        Assert.AreEqual(DisplayStyle.None, root.Q<VisualElement>("hero-screen-unit-card").resolvedStyle.display, "Карточка закрыта, пока её не открыли.");
+
+        Invoke(controller, "ShowHeroPersonCard", campaign.GetSelectedCommander().Id);
+        yield return Frames(3);
+        Assert.AreEqual(DisplayStyle.Flex, root.Q<VisualElement>("hero-screen-unit-card").style.display.value);
+        Assert.AreEqual("Меч", root.Q<Label>("hero-screen-equipment-slot-1-name").text);
+        StringAssert.StartsWith("УР. ", root.Q<Label>("hero-screen-unit-card-level").text);
 
         string garrick = campaign.FindFighter("garrick").Name;
-        Button garrickChip = root.Q<VisualElement>("hero-screen-equipment-people").Query<Button>().ToList()
-            .First(b => b.text == garrick);
-        Click(garrickChip);
+        Invoke(controller, "ShowHeroPersonCard", "garrick");
         yield return Frames(3);
+        Assert.AreEqual(garrick.ToUpperInvariant(), root.Q<Label>("hero-screen-unit-card-title").text);
         Assert.AreEqual("Кольчуга", root.Q<Label>("hero-screen-equipment-slot-2-name").text);
+        Assert.Greater(root.Q<VisualElement>("hero-screen-unit-card-competencies").childCount, 0, "Компетенции бойца в карточке.");
 
-        Button equip = root.Q<VisualElement>("hero-screen-inventory-storage").Query<Button>().ToList()
-            .First(b => b.text == "Надеть: " + garrick && b.parent.parent.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"));
+        Button equip = root.Q<VisualElement>("hero-screen-unit-card-available").Query<Button>().ToList()
+            .First(b => b.text == "Надеть" && b.parent.parent.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"));
         Click(equip);
         yield return Frames(3);
 
         Assert.AreEqual(ItemCatalog.StoreroomMail, ItemService.Equipped(campaign, "garrick", ItemSlot.Protection).ItemId);
         Assert.AreEqual("Кольчуга из клети", root.Q<Label>("hero-screen-equipment-slot-2-name").text);
         Assert.AreEqual(CombatStatsAssembler.Compute(campaign, "garrick").Final.Defense.ToString(),
-            root.Q<Label>("hero-screen-stat-defense-value").text, "Экран показывает собранные числа.");
+            root.Q<Label>("hero-screen-unit-card-stat-defense-value").text, "Карточка показывает собранные числа.");
     }
 
     [UnityTest]

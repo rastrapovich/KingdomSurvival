@@ -23,8 +23,10 @@ using UnityEngine.UIElements;
 /// прототипа хранит только имя, роль и уровень, поэтому характеристики
 /// разрешаются по роли бойца.
 ///
-/// Блоки «Состояния», «Способности», «Снаряжение», «Инвентарь» и шкала опыта
-/// собраны как рабочие заглушки: соответствующие системы ещё не утверждены.
+/// Экран относится ко всему отряду: слева — Командир (качества и особенности
+/// есть только у него), в центре — люди отряда и запасы, справа — вещи.
+/// Характеристики, теги, снаряжение и развитие каждого человека — в его
+/// карточке (PrototypeUIController.HeroCard.cs).
 /// </summary>
 public partial class PrototypeUIController
 {
@@ -53,8 +55,7 @@ public partial class PrototypeUIController
         "Сила личности, влияние и сопротивление давлению."
     };
 
-    // Порядок совпадает с RefreshHeroItemsStats/ShowHeroScreenUnitCard —
-    // индекс 5 (initiative) единственный с производным значением/подсказкой.
+    // Порядок совпадает с FillHeroCardStats (карточка человека).
     private static readonly string[] HeroScreenStatSuffixes =
     {
         "health", "attack", "defense", "damage", "movement", "initiative", "attack-range"
@@ -99,6 +100,7 @@ public partial class PrototypeUIController
         public Label RoleChip;
         public Label Hint;
         public UnitDefinitionData CurrentUnit;
+        public string PersonId;
         public string ToggleFighterId;
     }
 
@@ -128,13 +130,8 @@ public partial class PrototypeUIController
     private Label[] heroScreenQualityValues;
     private string[] heroScreenQualityExplanations;
 
-    private VisualElement heroScreenCompetenciesRow;
     private VisualElement heroScreenTraitsRow;
-    private VisualElement heroScreenTagsRow;
-
-    private Label[] heroScreenStatValues;
-    private VisualElement heroScreenStatInitiativeBox;
-    private string heroScreenInitiativeExplanation = string.Empty;
+    private VisualElement heroScreenSquadList;
 
     private VisualElement heroScreenRosterAvailableRow;
     private Label heroScreenRosterSelectedLabel;
@@ -188,12 +185,13 @@ public partial class PrototypeUIController
         ok &= BindHeroScreenChrome();
         ok &= BindHeroScreenIdentity();
         ok &= BindHeroScreenStatesAndSupply();
-        ok &= BindHeroScreenQualitiesAndStats();
+        ok &= BindHeroScreenQualities();
         ok &= BindHeroScreenDynamicPanels();
         ok &= BindHeroScreenRoster();
         ok &= BindHeroScreenUnitCard();
         ok &= BindHeroScreenTooltips();
         ok &= BindHeroItems();
+        ok &= BindHeroCard();
 
         if (!ok)
             return;
@@ -249,7 +247,7 @@ public partial class PrototypeUIController
                heroScreenSupplyConsumptionLabel != null && heroScreenSupplyDaysLabel != null;
     }
 
-    private bool BindHeroScreenQualitiesAndStats()
+    private bool BindHeroScreenQualities()
     {
         heroScreenQualityBoxes = new VisualElement[HeroScreenQualitySuffixes.Length];
         heroScreenQualityValues = new Label[HeroScreenQualitySuffixes.Length];
@@ -262,25 +260,14 @@ public partial class PrototypeUIController
             ok &= heroScreenQualityBoxes[i] != null && heroScreenQualityValues[i] != null;
         }
 
-        heroScreenStatValues = new Label[HeroScreenStatSuffixes.Length];
-        for (int i = 0; i < HeroScreenStatSuffixes.Length; i++)
-        {
-            heroScreenStatValues[i] = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-stat-" + HeroScreenStatSuffixes[i] + "-value");
-            ok &= heroScreenStatValues[i] != null;
-        }
-
-        heroScreenStatInitiativeBox = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-stat-initiative");
-        ok &= heroScreenStatInitiativeBox != null;
-
         return ok;
     }
 
     private bool BindHeroScreenDynamicPanels()
     {
-        heroScreenCompetenciesRow = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-competencies-row");
         heroScreenTraitsRow = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-traits-row");
-        heroScreenTagsRow = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-tags-row");
-        return heroScreenCompetenciesRow != null && heroScreenTraitsRow != null && heroScreenTagsRow != null;
+        heroScreenSquadList = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-squad-list");
+        return heroScreenTraitsRow != null && heroScreenSquadList != null;
     }
 
     private bool BindHeroScreenRoster()
@@ -396,7 +383,7 @@ public partial class PrototypeUIController
         heroScreenUnitCardCloseButton.clicked += HideHeroScreenUnitCard;
 
         heroScreenStatePhaseChip.RegisterCallback<PointerEnterEvent>(_ =>
-            ShowHeroScreenTagTooltip(heroScreenStatePhaseChip, heroScreenStatePhaseChip.text, "Текущее положение командира."));
+            ShowHeroScreenTagTooltip(heroScreenStatePhaseChip, heroScreenStatePhaseChip.text, "Где сейчас отряд."));
         heroScreenStatePhaseChip.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenTagTooltip());
 
         for (int i = 0; i < heroScreenQualityBoxes.Length; i++)
@@ -408,19 +395,18 @@ public partial class PrototypeUIController
             box.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenStatTooltip());
         }
 
-        heroScreenStatInitiativeBox.RegisterCallback<PointerEnterEvent>(_ =>
-            ShowHeroScreenStatTooltip(heroScreenStatInitiativeBox, "ИНИЦИАТИВА", heroScreenInitiativeExplanation));
-        heroScreenStatInitiativeBox.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenStatTooltip());
-
         for (int i = 0; i < heroScreenRosterCards.Length; i++)
             WireHeroScreenRosterCardInteractions(heroScreenRosterCards[i]);
 
+        // Подсказка боевой характеристики в карточке — из чего сложилось число
+        // именно у этого человека (заполняет FillHeroCardStats).
         for (int i = 0; i < heroScreenUnitCardStatRows.Length; i++)
         {
             VisualElement row = heroScreenUnitCardStatRows[i];
+            int index = i;
             string title = HeroScreenUnitCardStatTitles[i];
-            string explanation = HeroScreenUnitCardStatExplanations[i];
-            row.RegisterCallback<PointerEnterEvent>(_ => ShowHeroScreenStatTooltip(row, title, explanation));
+            row.RegisterCallback<PointerEnterEvent>(_ => ShowHeroScreenStatTooltip(row, title,
+                heroCardStatExplanations[index] ?? HeroScreenUnitCardStatExplanations[index]));
             row.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenStatTooltip());
         }
 
@@ -441,7 +427,7 @@ public partial class PrototypeUIController
         });
     }
 
-    // ПКМ на карточке — карточка существа/бойца (как в BattleSandbox). ЛКМ —
+    // ПКМ на карточке — карточка человека (HeroCard.cs). ЛКМ —
     // убрать бойца из состава, но только пока refs.ToggleFighterId задан
     // (RefreshHeroScreenRoster выставляет его только для реально убираемых
     // бойцов вне похода — не для командира и не во время активной
@@ -457,9 +443,9 @@ public partial class PrototypeUIController
 
             if (evt.button == 1)
             {
-                if (refs.CurrentUnit != null)
+                if (!string.IsNullOrEmpty(refs.PersonId))
                 {
-                    ShowHeroScreenUnitCard(refs.CurrentUnit);
+                    ShowHeroPersonCard(refs.PersonId);
                     evt.StopPropagation();
                 }
                 return;
@@ -541,13 +527,13 @@ public partial class PrototypeUIController
 
         HeroProfileData heroProfile = commander != null ? commander.HeroProfile : null;
         RefreshHeroScreenQualities(heroProfile);
-        RefreshHeroScreenCompetencies();
         RefreshHeroScreenTraits(heroProfile);
-        RefreshHeroScreenTags(heroUnit);
         RefreshHeroScreenStates(commander);
+        RefreshHeroScreenSquad();
         RefreshHeroScreenRoster(commander, heroUnit);
-        // ПР-08: вещи, собранные боевые числа, состояние и «Путь».
+        // ПР-08: сумка героя, сюжетные вещи, кладовая и опыт Командира.
         RefreshHeroItems();
+        RefreshHeroPersonCard();
     }
 
     // Как в старом RefreshSupplyBlock/ApplyCompactSupplyText экрана «Армия»,
@@ -608,87 +594,11 @@ public partial class PrototypeUIController
         return "исключительное качество";
     }
 
-    // Канон v1.48 §27: уровень, опыт, компетенции и выбор развития человека,
-    // выбранного в ряду снаряжения (герой или постоянный боец). Динамический
-    // список (шаблон HeroStatRow.uxml): показываются освоенные и
-    // практикуемые компетенции каталога v1.49 §27.11.
-    private void RefreshHeroScreenCompetencies()
-    {
-        heroScreenCompetenciesRow.Clear();
-        string personId = HeroItemsPersonId();
-        PersonProgressionData record = CharacterProgressionService.Get(gameState, personId);
-        string personName = CharacterProgressionService.DisplayName(gameState, personId);
-        Label title = interfaceRoot.Q<Label>("hero-screen-competencies-title");
-        if (title != null)
-            title.text = "РАЗВИТИЕ — " + (personName ?? string.Empty).ToUpperInvariant();
-        if (record == null)
-        {
-            AddHeroScreenHint(heroScreenCompetenciesRow, "Этот человек не развивается как боец.");
-            return;
-        }
-
-        CharacterProgressionService.GetLevelProgress(record, out int current, out int required);
-        AddHeroScreenStatRow(
-            heroScreenCompetenciesRow,
-            "УРОВЕНЬ",
-            record.Level + (required > 0 ? "  ·  " + current + " / " + required : "  ·  предел"),
-            "Общий опыт: уникально пережитое — новые бои, места, встречи, важные решения. " +
-            "Повтор одного и того же почти ничему не учит. Уровень сам не прибавляет силы; " +
-            "каждые " + CharacterProgression.ChoiceEveryLevels + " уровня — значимый выбор развития. " +
-            "Всего опыта: " + record.Experience + ".");
-
-        RefreshHeroDevelopmentChoice(personId);
-
-        List<string> known = CharacterProgressionService.KnownCompetencies(gameState, personId);
-        foreach (string competencyId in known)
-        {
-            int rank = CharacterProgressionService.GetCompetencyRank(gameState, personId, competencyId);
-            CompetencyProgressData entry = record.FindCompetency(competencyId);
-            int ceiling = entry != null ? Mathf.Max(CharacterProgression.PracticeCeiling, entry.Ceiling) : CharacterProgression.PracticeCeiling;
-            string practice = rank >= CharacterProgression.MaxCompetencyRank
-                ? "Высшая ступень."
-                : rank >= ceiling
-                    ? "Собственной практикой дальше не вырасти: нужен наставник или новое знание."
-                    : "Практика: " + (entry != null ? entry.Practice : 0) + " / " +
-                      CharacterProgression.PracticeToNextRank(rank) + " до ступени " + (rank + 1) + ".";
-            AddHeroScreenStatRow(
-                heroScreenCompetenciesRow,
-                NarrativeCompetencyLabels.GetLabel(competencyId).ToUpperInvariant(),
-                rank + " / " + CharacterProgression.MaxCompetencyRank,
-                NarrativeCompetencyLabels.GetDescription(competencyId) + "\n" +
-                "Растёт от реального применения и учителей. " + practice);
-        }
-
-        if (known.Count == 0)
-            AddHeroScreenHint(heroScreenCompetenciesRow, "Пока ничего не освоено: компетенции растут от применения.");
-    }
-
-    // Значимый выбор каждые 3 уровня (§27.1.1): персональные варианты из
-    // пережитого и полезные нейтральные.
-    private void RefreshHeroDevelopmentChoice(string personId)
-    {
-        int pending = CharacterProgressionService.PendingChoices(gameState, personId);
-        if (pending <= 0)
-            return;
-
-        AddHeroScreenHint(heroScreenCompetenciesRow,
-            "Выбор развития" + (pending > 1 ? " (" + pending + ")" : string.Empty) + ": кем становится человек.");
-        foreach (DevelopmentOption option in CharacterProgressionService.GetChoiceOptions(gameState, personId))
-        {
-            string optionId = option.Id;
-            string description = (option.IsPersonal ? "Из пережитого. " : "Нейтральный вариант. ") + option.Description;
-            Button button = AddHeroItemButton(heroScreenCompetenciesRow, option.Title, () =>
-                RunHeroItemCommand(CharacterProgressionService.TryApplyChoice(gameState, personId, optionId, out string message), message));
-            button.RegisterCallback<PointerEnterEvent>(_ => ShowHeroScreenTagTooltip(button, option.Title, description));
-            button.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenTagTooltip());
-        }
-    }
-
-    private void AddHeroScreenStatRow(VisualElement parent, string title, string value, string explanation)
+    private VisualElement AddHeroScreenStatRow(VisualElement parent, string title, string value, string explanation)
     {
         VisualTreeAsset template = LoadHeroStatRowTemplate();
         if (template == null)
-            return;
+            return null;
 
         TemplateContainer instance = template.Instantiate();
         VisualElement row = instance.Q<VisualElement>("hero-screen-stat-row");
@@ -707,6 +617,7 @@ public partial class PrototypeUIController
         }
 
         parent.Add(instance);
+        return row;
     }
 
     // Особенности героя (§4): стабильные строковые ID, показываются как
@@ -743,36 +654,73 @@ public partial class PrototypeUIController
             AddHeroScreenHint(heroScreenTraitsRow, "У героя пока нет особенностей.");
     }
 
-    // Количество варьируется по unit.TagIds — динамический список (шаблон
-    // HeroChip.uxml).
-    private void RefreshHeroScreenTags(UnitDefinitionData unit)
-    {
-        heroScreenTagsRow.Clear();
-        if (heroScreenUnits == null || unit == null)
-        {
-            AddHeroScreenHint(heroScreenTagsRow, "База существ недоступна.");
-            return;
-        }
-
-        int shown = 0;
-        for (int i = 0; i < unit.TagIds.Count; i++)
-        {
-            UnitTagDefinition tag = heroScreenUnits.FindTag(unit.TagIds[i]);
-            if (tag == null)
-                continue;
-            AddHeroScreenChip(heroScreenTagsRow, tag.DisplayLabel, tag.Color, tag.Description);
-            shown++;
-        }
-
-        if (shown == 0)
-            AddHeroScreenHint(heroScreenTagsRow, "У героя пока нет тегов.");
-    }
-
     private void RefreshHeroScreenStates(CommanderData commander)
     {
         heroScreenStatePhaseChip.text = commander != null && commander.State == CommanderState.InCastle
             ? "Дома"
             : "В пути";
+    }
+
+    // Люди отряда (Командир и бойцы, которые сейчас рядом): уровень, здоровье
+    // и отметка ожидающего выбора развития. Клик — карточка человека.
+    private void RefreshHeroScreenSquad()
+    {
+        heroScreenSquadList.Clear();
+        int hurt = 0;
+        int waiting = 0;
+        foreach (ResidentState resident in HomePeopleService.All(gameState))
+        {
+            if (!resident.IsAlive || !IsHeroItemsCandidate(resident))
+                continue;
+
+            string personId = resident.PersonId;
+            PersonProgressionData record = CharacterProgressionService.Get(gameState, personId);
+            bool choice = CharacterProgressionService.PendingChoices(gameState, personId) > 0;
+            bool isHurt = resident.Injury == ResidentInjury.Recovering || resident.Exhausted ||
+                          (resident.HasCombatState && resident.CurrentHitPoints < resident.MaxHitPoints);
+            if (isHurt)
+                hurt++;
+            if (choice)
+                waiting++;
+
+            FighterData data = gameState.FindFighter(personId);
+            CommanderData commander = gameState.GetSelectedCommander();
+            string role = commander != null && commander.Id == personId ? "командир"
+                : data != null ? data.Role.ToLowerInvariant() : resident.RoleLabel;
+            string value = (record != null ? "ур. " + record.Level : string.Empty) +
+                           (resident.HasCombatState ? "  ·  " + resident.CurrentHitPoints + "/" + resident.MaxHitPoints + " HP" : string.Empty) +
+                           (choice ? "  ·  выбор" : string.Empty);
+            string progress = string.Empty;
+            if (record != null)
+            {
+                CharacterProgressionService.GetLevelProgress(record, out int current, out int required);
+                progress = required > 0 ? "\nОпыт: " + current + " / " + required + " до уровня " + (record.Level + 1) + "." : string.Empty;
+            }
+
+            VisualElement row = AddHeroScreenStatRow(
+                heroScreenSquadList,
+                resident.DisplayName.ToUpperInvariant() + " — " + role,
+                value,
+                DescribeCondition(resident) + progress +
+                (choice ? "\nЖдёт выбор развития." : string.Empty) + "\nКлик — карточка: снаряжение, характеристики, развитие.");
+            if (row == null)
+                continue;
+            row.EnableInClassList("hero-screen-stat-row--attention", choice);
+            row.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (evt.button > 1 || isGameOver)
+                    return;
+                HideHeroScreenStatTooltip();
+                ShowHeroPersonCard(personId);
+                evt.StopPropagation();
+            });
+        }
+
+        List<string> summary = new List<string>();
+        summary.Add(hurt == 0 ? "Все целы." : "Нужен уход: " + hurt + ".");
+        if (waiting > 0)
+            summary.Add("Выбор развития ждёт: " + waiting + ".");
+        heroStatesHint.text = string.Join(" ", summary);
     }
 
     // P08-T03: реальный picker состава похода. Источник истины —
@@ -849,8 +797,11 @@ public partial class PrototypeUIController
         string personId = null)
     {
         refs.CurrentUnit = unit;
+        ResidentState resident = HomePeopleService.Find(gameState, personId);
+        refs.PersonId = resident != null && resident.IsAlive ? personId : null;
+        bool filled = unit != null || refs.PersonId != null;
 
-        refs.Card.EnableInClassList("hero-screen-roster-card-filled", unit != null);
+        refs.Card.EnableInClassList("hero-screen-roster-card-filled", filled);
         refs.Card.EnableInClassList("hero-screen-roster-card-commander", isCommander);
 
         ApplyHeroScreenPortrait(refs.Portrait, unit);
@@ -860,8 +811,7 @@ public partial class PrototypeUIController
         refs.Role.text = role;
 
         // ПР-08: HP и состояние конкретного человека, а не шаблон.
-        ResidentState resident = HomePeopleService.Find(gameState, personId);
-        if (unit != null && resident != null && resident.HasCombatState)
+        if (refs.PersonId != null && resident.HasCombatState)
         {
             refs.Hp.text = "HP " + resident.CurrentHitPoints + "/" + resident.MaxHitPoints;
             refs.Condition.text = resident.Injury == ResidentInjury.Recovering ? "тяжёлая рана"
@@ -883,7 +833,11 @@ public partial class PrototypeUIController
         if (unit != null)
             refs.RoleChip.text = HeroScreenRoleLabel(unit);
 
-        refs.Hint.style.display = unit != null ? DisplayStyle.Flex : DisplayStyle.None;
+        // ПКМ открывает карточку человека; ждущий выбор развития виден сразу.
+        bool choice = refs.PersonId != null && CharacterProgressionService.PendingChoices(gameState, refs.PersonId) > 0;
+        refs.Hint.text = choice ? "ПКМ: выбор развития" : "ПКМ: карточка";
+        refs.Hint.EnableInClassList("hero-screen-roster-card-hint--attention", choice);
+        refs.Hint.style.display = filled ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
     // Количество доступных бойцов варьируется — динамический список (шаблон
@@ -950,22 +904,30 @@ public partial class PrototypeUIController
         if (chip != null)
             chip.EnableInClassList("hero-screen-roster-available-chip-disabled", !canAdd);
 
-        if (canAdd)
+        string fighterId = fighter.Id;
+        instance.RegisterCallback<PointerDownEvent>(evt =>
         {
-            string fighterId = fighter.Id;
-            instance.RegisterCallback<PointerDownEvent>(evt =>
+            if (isGameOver)
+                return;
+
+            // ПКМ — карточка человека и у того, кто пока не в составе.
+            if (evt.button == 1)
             {
-                if (evt.button != 0 || isGameOver)
-                    return;
-
-                if (selectedFighterIds.Count < HeroScreenFighterSlots)
-                    selectedFighterIds.Add(fighterId);
-
-                RefreshHeroScreen();
-                RefreshStableUiAfterStateChange();
+                ShowHeroPersonCard(fighterId);
                 evt.StopPropagation();
-            });
-        }
+                return;
+            }
+
+            if (evt.button != 0 || !canAdd)
+                return;
+
+            if (selectedFighterIds.Count < HeroScreenFighterSlots)
+                selectedFighterIds.Add(fighterId);
+
+            RefreshHeroScreen();
+            RefreshStableUiAfterStateChange();
+            evt.StopPropagation();
+        });
 
         heroScreenRosterAvailableRow.Add(instance);
     }
@@ -996,50 +958,13 @@ public partial class PrototypeUIController
     }
 
     // ------------------------------------------------------------------
-    // Подробная карточка существа/бойца — модальное окно с затемнением,
-    // боксы характеристик и теги с настоящими всплывающими подсказками по
-    // наведению. UI Toolkit в Player (не в редакторе) НЕ показывает
+    // Карточка человека — модальное окно с затемнением (наполнение —
+    // PrototypeUIController.HeroCard.cs), боксы характеристик и теги с
+    // настоящими всплывающими подсказками по наведению. UI Toolkit в Player (не в редакторе) НЕ показывает
     // встроенный VisualElement.tooltip — поэтому, как и в BattleSandbox,
     // подсказки рисуются вручную отдельными плавающими панелями (легитимное
     // исключение §2 доктрины — поведение/позиционирование, не структура).
     // ------------------------------------------------------------------
-
-    private void ShowHeroScreenUnitCard(UnitDefinitionData unit)
-    {
-        if (!heroScreenUiBound || unit == null)
-            return;
-
-        heroScreenUnitCardTitle.text = unit.DisplayLabel.ToUpperInvariant();
-        ApplyHeroScreenPortrait(heroScreenUnitCardPortrait, unit);
-
-        for (int i = 0; i < heroScreenUnitCardStatValues.Length; i++)
-            heroScreenUnitCardStatValues[i].text = string.Empty;
-
-        heroScreenUnitCardStatValues[0].text = unit.MaxHitPoints.ToString();
-        heroScreenUnitCardStatValues[1].text = unit.Attack.ToString();
-        heroScreenUnitCardStatValues[2].text = unit.Defense.ToString();
-        heroScreenUnitCardStatValues[3].text = unit.Damage.ToString();
-        heroScreenUnitCardStatValues[4].text = unit.Movement.ToString();
-        heroScreenUnitCardStatValues[5].text = unit.Initiative.ToString();
-        heroScreenUnitCardStatValues[6].text = unit.AttackRange.ToString();
-
-        heroScreenUnitCardTagsRow.Clear();
-        if (heroScreenUnits != null)
-        {
-            for (int i = 0; i < unit.TagIds.Count; i++)
-            {
-                UnitTagDefinition tag = heroScreenUnits.FindTag(unit.TagIds[i]);
-                if (tag != null)
-                    AddHeroScreenChip(heroScreenUnitCardTagsRow, tag.DisplayLabel, tag.Color, tag.Description);
-            }
-        }
-
-        heroScreenUnitCardDimmer.style.display = DisplayStyle.Flex;
-        heroScreenUnitCard.style.display = DisplayStyle.Flex;
-        heroScreenUnitCardDimmer.BringToFront();
-        heroScreenUnitCard.BringToFront();
-        heroScreenUnitCardDimmer.Focus();
-    }
 
     private void HideHeroScreenUnitCard()
     {

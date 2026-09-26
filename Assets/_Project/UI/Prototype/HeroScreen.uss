@@ -602,10 +602,10 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    margin-left: -325px;
-    margin-top: -250px;
-    width: 650px;
-    height: 500px;
+    margin-left: -630px;
+    margin-top: -335px;
+    width: 1260px;
+    height: 670px;
     padding-left: 18px;
     padding-right: 18px;
     padding-top: 15px;
@@ -627,7 +627,7 @@
 }
 
 .hero-screen-unit-card-header {
-    height: 40px;
+    height: 48px;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
@@ -650,10 +650,9 @@
 }
 
 .hero-screen-unit-card-portrait {
-    width: 210px;
-    height: 390px;
+    width: 220px;
+    height: 308px;
     flex-shrink: 0;
-    margin-right: 20px;
     position: relative;
     background-color: rgb(19, 22, 27);
     border-left-width: 1px;
@@ -697,8 +696,99 @@
     border-bottom-right-radius: 2px;
 }
 
+/* Карточка человека — четыре колонки: профиль | боевые характеристики и
+   теги | снаряжение | развитие. Две правые прокручиваются независимо. */
+.hero-screen-unit-card-heading {
+    flex-direction: column;
+}
+
+.hero-screen-unit-card-subtitle {
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.hero-screen-unit-card-profile {
+    width: 220px;
+    flex-shrink: 0;
+    margin-right: 18px;
+}
+
+.hero-screen-unit-card-level-row {
+    margin-top: 10px;
+    align-items: flex-end;
+}
+
+.hero-screen-unit-card-condition {
+    font-size: 11px;
+    margin-top: 10px;
+}
+
 .hero-screen-unit-card-stats {
+    width: 270px;
+    flex-shrink: 0;
+    margin-right: 18px;
+}
+
+.hero-screen-unit-card-column {
     flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    margin-left: 0;
+    margin-right: 14px;
+}
+
+/* Командир на экране отряда: портрет слева, имя и опыт справа — чтобы
+   качества и особенности помещались без прокрутки. */
+.hero-screen-identity-body {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.hero-screen-identity-body .hero-screen-portrait-slot {
+    width: 100px;
+    height: 140px;
+    flex-shrink: 0;
+    margin-right: 12px;
+    margin-bottom: 0;
+}
+
+.hero-screen-identity-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.hero-item-slot.hero-screen-unit-card-slot {
+    width: auto;
+    min-height: 64px;
+    margin-right: 0;
+    margin-bottom: 6px;
+    background-color: rgb(33, 37, 44);
+    border-left-width: 2px;
+    border-left-color: rgb(91, 80, 62);
+}
+
+.hero-screen-unit-card-subsection {
+    margin-top: 12px;
+}
+
+.hero-screen-squad-list {
+    margin-top: 8px;
+}
+
+.hero-screen-inventory-hint {
+    margin-top: 0;
+    margin-bottom: 6px;
+}
+
+/* Человек ждёт выбор развития: строка отряда и подсказка карточки состава. */
+.hero-screen-stat-row--attention {
+    border-left-width: 3px;
+    border-left-color: rgb(221, 181, 99);
+}
+
+.hero-screen-roster-card-hint--attention {
+    color: rgb(232, 201, 138);
+    -unity-font-style: bold;
 }
 
 .hero-screen-unit-card-section-title {

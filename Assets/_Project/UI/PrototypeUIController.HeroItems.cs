@@ -1,22 +1,19 @@
 using System.Collections.Generic;
-using System.Text;
-using KingdomSurvival.Chapter01;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-// ПР-08 (ProjectDocs/PR08_HERO_ITEMS_SPEC.md): вещи и состояния на экране
-// героя. Выбранный человек (герой или боец) — его три слота, собранные
-// боевые числа и состояние; сумка героя, сюжетные вещи, кладовая Дома (только
-// дома). Все изменения — командами ItemService; кнопки, без перетаскивания.
+// ПР-08 (ProjectDocs/PR08_HERO_ITEMS_SPEC.md): вещи на экране героя. Экран
+// показывает общее для отряда — сумку героя, сюжетные вещи и кладовую Дома
+// (только дома); три слота снаряжения человека и то, что ему можно надеть, —
+// в его карточке (PrototypeUIController.HeroCard.cs). Все изменения —
+// командами ItemService; кнопки, без перетаскивания.
 public partial class PrototypeUIController
 {
     private static readonly ItemSlot[] HeroItemSlots = { ItemSlot.Weapon, ItemSlot.Protection, ItemSlot.Special };
 
     private bool heroItemsBound;
-    private string heroItemsSelectedPersonId;
     private string heroItemsMessage = string.Empty;
 
-    private VisualElement heroItemsPeopleRow;
     private readonly Label[] heroItemSlotNames = new Label[3];
     private readonly Label[] heroItemSlotEffects = new Label[3];
     private readonly VisualElement[] heroItemSlotActions = new VisualElement[3];
@@ -27,28 +24,22 @@ public partial class PrototypeUIController
     private Label heroStorageTitle;
     private VisualElement heroStorageList;
     private Label heroItemsMessageLabel;
-    private Label heroEquipmentTitle;
-    private Label heroStatsTitle;
     private Label heroStatesHint;
     private VisualElement heroExperienceTrack;
-    private readonly string[] heroStatExplanations = new string[7];
 
     private bool BindHeroItems()
     {
-        heroItemsPeopleRow = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-equipment-people");
         heroStoryList = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-inventory-story");
         heroStorageTitle = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-inventory-storage-title");
         heroStorageList = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-inventory-storage");
         heroItemsMessageLabel = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-inventory-message");
-        heroEquipmentTitle = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-equipment-title");
-        heroStatsTitle = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-stats-title");
         heroStatesHint = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-states-hint");
         heroExperienceTrack = interfaceRoot.Q<VisualElement>("hero-screen-experience-track");
 
-        bool ok = heroItemsPeopleRow != null && heroStoryList != null && heroStorageTitle != null &&
-                  heroStorageList != null && heroItemsMessageLabel != null && heroEquipmentTitle != null &&
-                  heroStatsTitle != null && heroStatesHint != null;
+        bool ok = heroStoryList != null && heroStorageTitle != null && heroStorageList != null &&
+                  heroItemsMessageLabel != null && heroStatesHint != null;
 
+        // Слоты снаряжения живут в карточке человека.
         for (int i = 0; i < 3; i++)
         {
             heroItemSlotNames[i] = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-equipment-slot-" + (i + 1) + "-name");
@@ -68,34 +59,12 @@ public partial class PrototypeUIController
         if (!ok)
             return false;
 
-        // Всплывающее «из чего сложилось» для всех боевых чисел.
-        for (int i = 0; i < HeroScreenStatSuffixes.Length; i++)
-        {
-            if (HeroScreenStatSuffixes[i] == "initiative")
-                continue;
-            VisualElement box = interfaceRoot.Q<VisualElement>("hero-screen-stat-" + HeroScreenStatSuffixes[i]);
-            if (box == null)
-                continue;
-            int index = i;
-            string title = HeroScreenUnitCardStatTitles[i];
-            box.RegisterCallback<PointerEnterEvent>(_ => ShowHeroScreenStatTooltip(box, title, heroStatExplanations[index]));
-            box.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenStatTooltip());
-        }
-
         heroItemsBound = true;
         return true;
     }
 
-    // Кого показывает экран: герой по умолчанию; можно выбрать бойца рядом.
-    private string HeroItemsPersonId()
-    {
-        CommanderData commander = gameState.GetSelectedCommander();
-        ResidentState selected = HomePeopleService.Find(gameState, heroItemsSelectedPersonId);
-        if (selected == null || !selected.IsAlive || !IsHeroItemsCandidate(selected))
-            heroItemsSelectedPersonId = commander != null ? commander.Id : null;
-        return heroItemsSelectedPersonId;
-    }
-
+    // Кто в отряде сейчас: дома — все живые Командир и бойцы Дома, в пути —
+    // Командир и те, кто ушёл с ним.
     private bool IsHeroItemsCandidate(ResidentState resident)
     {
         if (resident.TravelRole != ResidentTravelRole.Commander && resident.TravelRole != ResidentTravelRole.Combatant)
@@ -113,44 +82,11 @@ public partial class PrototypeUIController
             return;
 
         ItemService.EnsureInventory(gameState);
-        string personId = HeroItemsPersonId();
-        ResidentState person = HomePeopleService.Find(gameState, personId);
-        string personName = person != null ? person.DisplayName : "Командир";
-
-        RebuildHeroItemsPeople(personId);
-        heroEquipmentTitle.text = "СНАРЯЖЕНИЕ — " + personName.ToUpperInvariant();
-        heroStatsTitle.text = "БОЕВЫЕ ХАРАКТЕРИСТИКИ — " + personName.ToUpperInvariant();
-
-        for (int i = 0; i < HeroItemSlots.Length; i++)
-            FillHeroItemSlot(i, personId, HeroItemSlots[i]);
-
-        FillHeroPack(personId, personName);
+        FillHeroPack();
         RebuildHeroStory();
-        RebuildHeroStorage(personId, personName);
-        RefreshHeroItemsStats(personId);
-        RefreshHeroItemsState(person);
+        RebuildHeroStorage();
         RefreshHeroPath();
         heroItemsMessageLabel.text = heroItemsMessage;
-    }
-
-    private void RebuildHeroItemsPeople(string selectedId)
-    {
-        heroItemsPeopleRow.Clear();
-        foreach (ResidentState resident in HomePeopleService.All(gameState))
-        {
-            if (!resident.IsAlive || !IsHeroItemsCandidate(resident))
-                continue;
-            string id = resident.PersonId;
-            Button chip = new Button(() =>
-            {
-                heroItemsSelectedPersonId = id;
-                heroItemsMessage = string.Empty;
-                RefreshHeroScreen();
-            }) { text = resident.DisplayName };
-            chip.AddToClassList("hero-item-person");
-            chip.EnableInClassList("hero-item-person--selected", id == selectedId);
-            heroItemsPeopleRow.Add(chip);
-        }
     }
 
     private void FillHeroItemSlot(int index, string personId, ItemSlot slot)
@@ -170,10 +106,10 @@ public partial class PrototypeUIController
         heroItemSlotEffects[index].text = EffectText(definition);
         string instanceId = item.InstanceId;
         AddHeroItemButton(heroItemSlotActions[index], "Снять", () =>
-            RunHeroItemCommand(ItemService.TryUnequip(gameState, instanceId, out string message), message));
+            RunHeroCardCommand(ItemService.TryUnequip(gameState, instanceId, out string message), message));
     }
 
-    private void FillHeroPack(string personId, string personName)
+    private void FillHeroPack()
     {
         CommanderData commander = gameState.GetSelectedCommander();
         List<ItemInstanceData> pack = new List<ItemInstanceData>();
@@ -201,7 +137,7 @@ public partial class PrototypeUIController
             ItemDefinition definition = ItemCatalog.Find(item.ItemId);
             heroPackNames[i].text = definition.Name + (definition.IsConsumable ? " ×" + item.UsesLeft : string.Empty);
             heroPackEffects[i].text = EffectText(definition);
-            AddItemActions(heroPackActions[i], item, definition, personId, personName, true);
+            AddItemActions(heroPackActions[i], item, definition, true);
         }
     }
 
@@ -226,7 +162,7 @@ public partial class PrototypeUIController
             heroStoryList.Add(CreateHeroItemRow("Нет", "Важные для истории вещи будут лежать здесь — их нельзя потерять."));
     }
 
-    private void RebuildHeroStorage(string personId, string personName)
+    private void RebuildHeroStorage()
     {
         heroStorageList.Clear();
         if (HomePeopleService.HasDeparted(gameState))
@@ -254,28 +190,23 @@ public partial class PrototypeUIController
                 definition.Description + (EffectText(definition).Length > 0 ? " " + EffectText(definition) : string.Empty));
             VisualElement actions = new VisualElement();
             actions.AddToClassList("hero-item-actions");
-            AddItemActions(actions, item, definition, personId, personName, false);
+            AddItemActions(actions, item, definition, false);
             row.Add(actions);
             heroStorageList.Add(row);
         }
     }
 
-    private void AddItemActions(VisualElement parent, ItemInstanceData item, ItemDefinition definition,
-        string personId, string personName, bool inPack)
+    // Общие для отряда действия с вещью: переложить и использовать то, что
+    // не требует выбрать человека. Надеть и дать отвар — в карточке человека.
+    private void AddItemActions(VisualElement parent, ItemInstanceData item, ItemDefinition definition, bool inPack)
     {
         string instanceId = item.InstanceId;
-        if (definition.Slot != ItemSlot.None)
+        if (definition.IsConsumable && item.ItemId != ItemCatalog.UlyanaHerbs)
         {
-            bool canUse = ItemService.CanUseSlotItem(gameState, personId, definition, out _);
-            Button equip = AddHeroItemButton(parent, "Надеть: " + personName, () =>
-                RunHeroItemCommand(ItemService.TryEquip(gameState, instanceId, personId, out string message), message));
-            equip.SetEnabled(canUse);
-        }
-
-        if (definition.IsConsumable)
-        {
-            AddHeroItemButton(parent, item.ItemId == ItemCatalog.UlyanaHerbs ? "Дать отвар: " + personName : "Использовать", () =>
-                RunHeroItemCommand(ItemService.TryUse(gameState, instanceId, personId, out string message), message));
+            CommanderData commander = gameState.GetSelectedCommander();
+            string commanderId = commander != null ? commander.Id : null;
+            AddHeroItemButton(parent, "Использовать", () =>
+                RunHeroItemCommand(ItemService.TryUse(gameState, instanceId, commanderId, out string message), message));
         }
 
         bool home = !HomePeopleService.HasDeparted(gameState);
@@ -294,6 +225,7 @@ public partial class PrototypeUIController
     private Button AddHeroItemButton(VisualElement parent, string text, System.Action action)
     {
         Button button = new Button(action) { text = text };
+        button.AddToClassList("ks-button");
         button.AddToClassList("hero-item-button");
         parent.Add(button);
         return button;
@@ -336,38 +268,6 @@ public partial class PrototypeUIController
         homePrepSignature = null;
         RefreshInterface();
         RefreshHeroScreen();
-    }
-
-    // Боевые числа выбранного человека — из той же сборки, что уходит в бой.
-    private void RefreshHeroItemsStats(string personId)
-    {
-        AssembledCombatStats stats = CombatStatsAssembler.Compute(gameState, personId);
-        if (!stats.HasTemplate)
-            return;
-
-        ResidentState resident = HomePeopleService.Find(gameState, personId);
-        UnitCombatStats final = stats.Final;
-        heroScreenStatValues[0].text = resident != null && resident.HasCombatState
-            ? resident.CurrentHitPoints + "/" + final.MaxHitPoints
-            : final.MaxHitPoints.ToString();
-        heroScreenStatValues[1].text = final.Attack.ToString();
-        heroScreenStatValues[2].text = final.Defense.ToString();
-        heroScreenStatValues[3].text = final.Damage.ToString();
-        heroScreenStatValues[4].text = final.Movement.ToString();
-        heroScreenStatValues[5].text = final.Initiative.ToString();
-        heroScreenStatValues[6].text = final.AttackRange.ToString();
-
-        UnitCombatStats template = stats.Template;
-        int[] baseValues = { template.MaxHitPoints, template.Attack, template.Defense, template.Damage, template.Movement, template.Initiative, template.AttackRange };
-        string sources = stats.Sources.Count > 0 ? "\n" + string.Join("\n", stats.Sources) : string.Empty;
-        for (int i = 0; i < heroStatExplanations.Length; i++)
-            heroStatExplanations[i] = HeroScreenUnitCardStatExplanations[i] + "\nОснова: " + baseValues[i] + sources;
-        heroScreenInitiativeExplanation = heroStatExplanations[5];
-    }
-
-    private void RefreshHeroItemsState(ResidentState person)
-    {
-        heroStatesHint.text = person != null ? DescribeCondition(person) : string.Empty;
     }
 
     // Состояние словами и последствием (§5 ТЗ).

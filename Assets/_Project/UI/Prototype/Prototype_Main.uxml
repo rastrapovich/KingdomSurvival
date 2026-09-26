@@ -366,52 +366,33 @@
                 <ui:Label name="hero-screen-title" text="ГЕРОЙ" class="hero-screen-title ks-gold-text" />
                 <ui:Button name="hero-screen-close-button" text="ЗАКРЫТЬ" class="ks-button hero-screen-close-button" />
             </ui:VisualElement>
+            <!-- Экран героя относится ко всему отряду: слева — Командир (качества и
+                 особенности есть только у него), в центре — люди отряда и запасы,
+                 справа — вещи. Характеристики, теги, снаряжение и развитие каждого
+                 человека — в его карточке (hero-screen-unit-card: ПКМ по карточке
+                 состава или клик по строке отряда). -->
             <ui:VisualElement name="hero-screen-columns" class="hero-screen-columns">
                 <ui:VisualElement name="hero-screen-left-column" class="hero-screen-left-column">
                     <ui:ScrollView name="hero-screen-left-column-scroll" class="hero-screen-column-scroll" horizontal-scroller-visibility="Hidden">
                         <ui:VisualElement name="hero-screen-identity" class="ks-panel">
-                            <ui:Label name="hero-screen-identity-title" text="ГЕРОЙ" class="ks-panel-title" />
-                            <ui:VisualElement name="hero-screen-portrait" class="hero-screen-portrait-slot" />
-                            <ui:Label name="hero-screen-name" text="Командир" class="hero-screen-name ks-text" />
-                            <ui:Label name="hero-screen-role" text="Командир поселения" class="hero-screen-role ks-muted-text" />
-                            <ui:VisualElement name="hero-screen-experience" class="hero-screen-experience">
-                                <ui:VisualElement class="hero-screen-experience-row">
-                                    <ui:Label name="hero-screen-level" text="ПУТЬ" class="hero-screen-level ks-gold-text" />
-                                    <ui:Label name="hero-screen-experience-label" text="" class="hero-screen-experience-label ks-muted-text" />
+                            <ui:Label name="hero-screen-identity-title" text="КОМАНДИР" class="ks-panel-title" />
+                            <ui:VisualElement class="hero-screen-identity-body">
+                                <ui:VisualElement name="hero-screen-portrait" class="hero-screen-portrait-slot" />
+                                <ui:VisualElement class="hero-screen-identity-info">
+                                    <ui:Label name="hero-screen-name" text="Командир" class="hero-screen-name ks-text" />
+                                    <ui:Label name="hero-screen-role" text="Командир поселения" class="hero-screen-role ks-muted-text" />
+                                    <ui:VisualElement name="hero-screen-experience" class="hero-screen-experience">
+                                        <ui:VisualElement class="hero-screen-experience-row">
+                                            <ui:Label name="hero-screen-level" text="ПУТЬ" class="hero-screen-level ks-gold-text" />
+                                            <ui:Label name="hero-screen-experience-label" text="" class="hero-screen-experience-label ks-muted-text" />
+                                        </ui:VisualElement>
+                                        <ui:VisualElement name="hero-screen-experience-track" class="hero-screen-experience-track">
+                                            <ui:VisualElement name="hero-screen-experience-fill" class="hero-screen-experience-fill" />
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="hero-screen-experience-track" class="hero-screen-experience-track">
-                                    <ui:VisualElement name="hero-screen-experience-fill" class="hero-screen-experience-fill" />
-                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement name="hero-screen-states" class="ks-panel">
-                            <ui:Label name="hero-screen-states-title" text="СОСТОЯНИЯ" class="ks-panel-title" />
-                            <ui:VisualElement name="hero-screen-states-row" class="hero-screen-wrap-row">
-                                <ui:Label name="hero-screen-state-phase-chip" class="hero-screen-chip" />
-                                <ui:Label name="hero-screen-states-hint" text="" class="hero-screen-hint hero-screen-states-hint ks-muted-text" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                        <ui:VisualElement name="hero-screen-supply" class="ks-panel">
-                            <ui:Label name="hero-screen-supply-title" text="ЗАПАСЫ ОТРЯДА" class="ks-panel-title" />
-                            <ui:Label text="ЗОЛОТО" class="hero-screen-supply-subtitle ks-muted-text" />
-                            <ui:VisualElement class="hero-screen-supply-row">
-                                <ui:Button name="hero-screen-army-gold-minus-button" text="−" class="ks-button hero-screen-supply-button" />
-                                <ui:Label name="hero-screen-army-gold-label" text="0" class="hero-screen-supply-value ks-text" />
-                                <ui:Button name="hero-screen-army-gold-plus-button" text="+" class="ks-button hero-screen-supply-button" />
-                            </ui:VisualElement>
-                            <ui:Label text="ПРИПАСЫ" class="hero-screen-supply-subtitle ks-muted-text" />
-                            <ui:VisualElement class="hero-screen-supply-row">
-                                <ui:Button name="hero-screen-supply-minus-button" text="−" class="ks-button hero-screen-supply-button" />
-                                <ui:Label name="hero-screen-supply-value-label" text="0" class="hero-screen-supply-value ks-text" />
-                                <ui:Button name="hero-screen-supply-plus-button" text="+" class="ks-button hero-screen-supply-button" />
-                            </ui:VisualElement>
-                            <ui:Label name="hero-screen-supply-consumption-label" text="Расход: —" class="hero-screen-hint ks-muted-text" />
-                            <ui:Label name="hero-screen-supply-days-label" text="Хватит на: —" class="hero-screen-hint ks-muted-text" />
-                        </ui:VisualElement>
-                    </ui:ScrollView>
-                </ui:VisualElement>
-                <ui:VisualElement name="hero-screen-center-column" class="hero-screen-center-column">
-                    <ui:ScrollView name="hero-screen-center-column-scroll" class="hero-screen-column-scroll" horizontal-scroller-visibility="Hidden">
                         <ui:VisualElement name="hero-screen-qualities" class="ks-panel">
                             <ui:Label name="hero-screen-qualities-title" text="КАЧЕСТВА" class="ks-panel-title" />
                             <ui:VisualElement name="hero-screen-qualities-grid" class="hero-screen-stat-wrap-grid">
@@ -441,81 +422,46 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement name="hero-screen-competencies" class="ks-panel">
-                            <ui:Label name="hero-screen-competencies-title" text="КОМПЕТЕНЦИИ" class="ks-panel-title" />
-                            <ui:VisualElement name="hero-screen-competencies-row" />
-                        </ui:VisualElement>
                         <ui:VisualElement name="hero-screen-traits" class="ks-panel">
                             <ui:Label name="hero-screen-traits-title" text="ОСОБЕННОСТИ" class="ks-panel-title" />
                             <ui:VisualElement name="hero-screen-traits-row" class="hero-screen-wrap-row" />
                         </ui:VisualElement>
-                        <ui:VisualElement name="hero-screen-stats" class="ks-panel">
-                            <ui:Label name="hero-screen-stats-title" text="БОЕВЫЕ ХАРАКТЕРИСТИКИ" class="ks-panel-title" />
-                            <ui:VisualElement name="hero-screen-stats-grid" class="hero-screen-stat-wrap-grid">
-                                <ui:VisualElement name="hero-screen-stat-health" class="hero-screen-stat-box">
-                                    <ui:Label text="Здоровье" class="hero-screen-stat-box-caption ks-muted-text" />
-                                    <ui:Label name="hero-screen-stat-health-value" class="hero-screen-stat-box-value ks-text" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="hero-screen-stat-attack" class="hero-screen-stat-box">
-                                    <ui:Label text="Атака" class="hero-screen-stat-box-caption ks-muted-text" />
-                                    <ui:Label name="hero-screen-stat-attack-value" class="hero-screen-stat-box-value ks-text" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="hero-screen-stat-defense" class="hero-screen-stat-box">
-                                    <ui:Label text="Защита" class="hero-screen-stat-box-caption ks-muted-text" />
-                                    <ui:Label name="hero-screen-stat-defense-value" class="hero-screen-stat-box-value ks-text" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="hero-screen-stat-damage" class="hero-screen-stat-box">
-                                    <ui:Label text="Урон" class="hero-screen-stat-box-caption ks-muted-text" />
-                                    <ui:Label name="hero-screen-stat-damage-value" class="hero-screen-stat-box-value ks-text" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="hero-screen-stat-movement" class="hero-screen-stat-box">
-                                    <ui:Label text="Движение" class="hero-screen-stat-box-caption ks-muted-text" />
-                                    <ui:Label name="hero-screen-stat-movement-value" class="hero-screen-stat-box-value ks-text" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="hero-screen-stat-initiative" class="hero-screen-stat-box">
-                                    <ui:Label text="Инициатива" class="hero-screen-stat-box-caption ks-muted-text" />
-                                    <ui:Label name="hero-screen-stat-initiative-value" class="hero-screen-stat-box-value ks-text" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="hero-screen-stat-attack-range" class="hero-screen-stat-box">
-                                    <ui:Label text="Дальность атаки" class="hero-screen-stat-box-caption ks-muted-text" />
-                                    <ui:Label name="hero-screen-stat-attack-range-value" class="hero-screen-stat-box-value ks-text" />
-                                </ui:VisualElement>
+                    </ui:ScrollView>
+                </ui:VisualElement>
+                <ui:VisualElement name="hero-screen-center-column" class="hero-screen-center-column">
+                    <ui:ScrollView name="hero-screen-center-column-scroll" class="hero-screen-column-scroll" horizontal-scroller-visibility="Hidden">
+                        <ui:VisualElement name="hero-screen-states" class="ks-panel">
+                            <ui:Label name="hero-screen-states-title" text="ОТРЯД" class="ks-panel-title" />
+                            <ui:VisualElement name="hero-screen-states-row" class="hero-screen-wrap-row">
+                                <ui:Label name="hero-screen-state-phase-chip" class="hero-screen-chip" />
+                                <ui:Label name="hero-screen-states-hint" text="" class="hero-screen-hint hero-screen-states-hint ks-muted-text" />
                             </ui:VisualElement>
+                            <ui:VisualElement name="hero-screen-squad-list" class="hero-screen-squad-list" />
                         </ui:VisualElement>
-                        <ui:VisualElement name="hero-screen-tags" class="ks-panel">
-                            <ui:Label name="hero-screen-tags-title" text="ТЕГИ" class="ks-panel-title" />
-                            <ui:VisualElement name="hero-screen-tags-row" class="hero-screen-wrap-row" />
+                        <ui:VisualElement name="hero-screen-supply" class="ks-panel">
+                            <ui:Label name="hero-screen-supply-title" text="ЗАПАСЫ ОТРЯДА" class="ks-panel-title" />
+                            <ui:Label text="ЗОЛОТО" class="hero-screen-supply-subtitle ks-muted-text" />
+                            <ui:VisualElement class="hero-screen-supply-row">
+                                <ui:Button name="hero-screen-army-gold-minus-button" text="−" class="ks-button hero-screen-supply-button" />
+                                <ui:Label name="hero-screen-army-gold-label" text="0" class="hero-screen-supply-value ks-text" />
+                                <ui:Button name="hero-screen-army-gold-plus-button" text="+" class="ks-button hero-screen-supply-button" />
+                            </ui:VisualElement>
+                            <ui:Label text="ПРИПАСЫ" class="hero-screen-supply-subtitle ks-muted-text" />
+                            <ui:VisualElement class="hero-screen-supply-row">
+                                <ui:Button name="hero-screen-supply-minus-button" text="−" class="ks-button hero-screen-supply-button" />
+                                <ui:Label name="hero-screen-supply-value-label" text="0" class="hero-screen-supply-value ks-text" />
+                                <ui:Button name="hero-screen-supply-plus-button" text="+" class="ks-button hero-screen-supply-button" />
+                            </ui:VisualElement>
+                            <ui:Label name="hero-screen-supply-consumption-label" text="Расход: —" class="hero-screen-hint ks-muted-text" />
+                            <ui:Label name="hero-screen-supply-days-label" text="Хватит на: —" class="hero-screen-hint ks-muted-text" />
                         </ui:VisualElement>
                     </ui:ScrollView>
                 </ui:VisualElement>
                 <ui:VisualElement name="hero-screen-right-column" class="hero-screen-right-column">
                     <ui:ScrollView name="hero-screen-right-column-scroll" class="hero-screen-column-scroll" horizontal-scroller-visibility="Hidden">
-                        <ui:VisualElement name="hero-screen-equipment" class="ks-panel">
-                            <ui:Label name="hero-screen-equipment-title" text="СНАРЯЖЕНИЕ" class="ks-panel-title" />
-                            <ui:VisualElement name="hero-screen-equipment-people" class="hero-screen-wrap-row hero-item-people" />
-                            <ui:VisualElement name="hero-screen-equipment-grid" class="hero-screen-stat-wrap-grid">
-                                <ui:VisualElement name="hero-screen-equipment-slot-1" class="hero-screen-slot hero-item-slot">
-                                    <ui:Label text="Оружие" class="hero-screen-slot-caption ks-muted-text" />
-                                    <ui:Label name="hero-screen-equipment-slot-1-name" class="hero-item-slot-name ks-text" />
-                                    <ui:Label name="hero-screen-equipment-slot-1-effect" class="hero-item-slot-effect ks-muted-text" />
-                                    <ui:VisualElement name="hero-screen-equipment-slot-1-actions" class="hero-item-actions" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="hero-screen-equipment-slot-2" class="hero-screen-slot hero-item-slot">
-                                    <ui:Label text="Защита" class="hero-screen-slot-caption ks-muted-text" />
-                                    <ui:Label name="hero-screen-equipment-slot-2-name" class="hero-item-slot-name ks-text" />
-                                    <ui:Label name="hero-screen-equipment-slot-2-effect" class="hero-item-slot-effect ks-muted-text" />
-                                    <ui:VisualElement name="hero-screen-equipment-slot-2-actions" class="hero-item-actions" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="hero-screen-equipment-slot-3" class="hero-screen-slot hero-item-slot">
-                                    <ui:Label text="Особый предмет" class="hero-screen-slot-caption ks-muted-text" />
-                                    <ui:Label name="hero-screen-equipment-slot-3-name" class="hero-item-slot-name ks-text" />
-                                    <ui:Label name="hero-screen-equipment-slot-3-effect" class="hero-item-slot-effect ks-muted-text" />
-                                    <ui:VisualElement name="hero-screen-equipment-slot-3-actions" class="hero-item-actions" />
-                                </ui:VisualElement>
-                            </ui:VisualElement>
-                        </ui:VisualElement>
                         <ui:VisualElement name="hero-screen-inventory" class="ks-panel">
                             <ui:Label name="hero-screen-inventory-title" text="СУМКА ГЕРОЯ" class="ks-panel-title" />
+                            <ui:Label name="hero-screen-inventory-hint" text="Надеть вещь или дать отвар — в карточке человека: клик по нему в списке отряда или ПКМ по карточке состава." class="hero-screen-hint ks-muted-text hero-screen-inventory-hint" />
                             <ui:VisualElement name="hero-screen-inventory-grid" class="hero-screen-stat-wrap-grid">
                                 <ui:VisualElement name="hero-screen-inventory-slot-1" class="hero-screen-slot hero-item-slot"><ui:Label name="hero-screen-inventory-slot-1-name" class="hero-item-slot-name ks-text" /><ui:Label name="hero-screen-inventory-slot-1-effect" class="hero-item-slot-effect ks-muted-text" /><ui:VisualElement name="hero-screen-inventory-slot-1-actions" class="hero-item-actions" /></ui:VisualElement>
                                 <ui:VisualElement name="hero-screen-inventory-slot-2" class="hero-screen-slot hero-item-slot"><ui:Label name="hero-screen-inventory-slot-2-name" class="hero-item-slot-name ks-text" /><ui:Label name="hero-screen-inventory-slot-2-effect" class="hero-item-slot-effect ks-muted-text" /><ui:VisualElement name="hero-screen-inventory-slot-2-actions" class="hero-item-actions" /></ui:VisualElement>
@@ -638,16 +584,32 @@
                 </ui:ScrollView>
             </ui:VisualElement>
             <ui:VisualElement name="hero-screen-unit-card-dimmer" class="hero-screen-unit-card-dimmer" focusable="true" />
+            <!-- Карточка человека: портрет, уровень, опыт и состояние | боевые
+                 характеристики и теги | снаряжение и что можно надеть | развитие и
+                 компетенции. Код — PrototypeUIController.HeroCard.cs. -->
             <ui:VisualElement name="hero-screen-unit-card" class="hero-screen-unit-card">
                 <ui:VisualElement class="hero-screen-unit-card-header">
-                    <ui:Label name="hero-screen-unit-card-title" class="hero-screen-unit-card-title ks-gold-text" />
+                    <ui:VisualElement class="hero-screen-unit-card-heading">
+                        <ui:Label name="hero-screen-unit-card-title" class="hero-screen-unit-card-title ks-gold-text" />
+                        <ui:Label name="hero-screen-unit-card-subtitle" class="hero-screen-unit-card-subtitle ks-muted-text" />
+                    </ui:VisualElement>
                     <ui:Button name="hero-screen-unit-card-close-button" text="×" class="ks-button hero-screen-unit-card-close-button" />
                 </ui:VisualElement>
                 <ui:VisualElement class="hero-screen-unit-card-body">
-                    <ui:VisualElement name="hero-screen-unit-card-portrait" class="hero-screen-unit-card-portrait">
-                        <ui:VisualElement name="hero-screen-unit-card-portrait-healthbar" class="hero-screen-unit-card-portrait-healthbar">
-                            <ui:VisualElement name="hero-screen-unit-card-portrait-healthbar-fill" class="hero-screen-unit-card-portrait-healthbar-fill" />
+                    <ui:VisualElement name="hero-screen-unit-card-profile" class="hero-screen-unit-card-profile">
+                        <ui:VisualElement name="hero-screen-unit-card-portrait" class="hero-screen-unit-card-portrait">
+                            <ui:VisualElement name="hero-screen-unit-card-portrait-healthbar" class="hero-screen-unit-card-portrait-healthbar">
+                                <ui:VisualElement name="hero-screen-unit-card-portrait-healthbar-fill" class="hero-screen-unit-card-portrait-healthbar-fill" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
+                        <ui:VisualElement class="hero-screen-experience-row hero-screen-unit-card-level-row">
+                            <ui:Label name="hero-screen-unit-card-level" class="hero-screen-level ks-gold-text" />
+                            <ui:Label name="hero-screen-unit-card-experience-label" class="hero-screen-experience-label ks-muted-text" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="hero-screen-unit-card-experience-track" class="hero-screen-experience-track">
+                            <ui:VisualElement name="hero-screen-unit-card-experience-fill" class="hero-screen-experience-fill" />
+                        </ui:VisualElement>
+                        <ui:Label name="hero-screen-unit-card-condition" class="hero-screen-hint ks-muted-text hero-screen-unit-card-condition" />
                     </ui:VisualElement>
                     <ui:VisualElement class="hero-screen-unit-card-stats">
                         <ui:Label text="БОЕВЫЕ ХАРАКТЕРИСТИКИ" class="hero-screen-unit-card-section-title" />
@@ -681,6 +643,36 @@
                         </ui:VisualElement>
                         <ui:VisualElement name="hero-screen-unit-card-tags" class="hero-screen-wrap-row hero-screen-unit-card-tags" />
                     </ui:VisualElement>
+                    <ui:ScrollView name="hero-screen-unit-card-equipment" class="hero-screen-unit-card-column" horizontal-scroller-visibility="Hidden">
+                        <ui:Label text="СНАРЯЖЕНИЕ" class="hero-screen-unit-card-section-title" />
+                        <ui:VisualElement name="hero-screen-equipment-slot-1" class="hero-item-slot hero-screen-unit-card-slot">
+                            <ui:Label text="Оружие" class="hero-screen-slot-caption ks-muted-text" />
+                            <ui:Label name="hero-screen-equipment-slot-1-name" class="hero-item-slot-name ks-text" />
+                            <ui:Label name="hero-screen-equipment-slot-1-effect" class="hero-item-slot-effect ks-muted-text" />
+                            <ui:VisualElement name="hero-screen-equipment-slot-1-actions" class="hero-item-actions" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="hero-screen-equipment-slot-2" class="hero-item-slot hero-screen-unit-card-slot">
+                            <ui:Label text="Защита" class="hero-screen-slot-caption ks-muted-text" />
+                            <ui:Label name="hero-screen-equipment-slot-2-name" class="hero-item-slot-name ks-text" />
+                            <ui:Label name="hero-screen-equipment-slot-2-effect" class="hero-item-slot-effect ks-muted-text" />
+                            <ui:VisualElement name="hero-screen-equipment-slot-2-actions" class="hero-item-actions" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="hero-screen-equipment-slot-3" class="hero-item-slot hero-screen-unit-card-slot">
+                            <ui:Label text="Особый предмет" class="hero-screen-slot-caption ks-muted-text" />
+                            <ui:Label name="hero-screen-equipment-slot-3-name" class="hero-item-slot-name ks-text" />
+                            <ui:Label name="hero-screen-equipment-slot-3-effect" class="hero-item-slot-effect ks-muted-text" />
+                            <ui:VisualElement name="hero-screen-equipment-slot-3-actions" class="hero-item-actions" />
+                        </ui:VisualElement>
+                        <ui:Label name="hero-screen-unit-card-available-title" text="МОЖНО НАДЕТЬ" class="hero-screen-unit-card-section-title hero-screen-unit-card-subsection" />
+                        <ui:VisualElement name="hero-screen-unit-card-available" class="hero-item-list" />
+                        <ui:Label name="hero-screen-unit-card-message" class="hero-screen-hint ks-muted-text hero-item-message" />
+                    </ui:ScrollView>
+                    <ui:ScrollView name="hero-screen-unit-card-development" class="hero-screen-unit-card-column" horizontal-scroller-visibility="Hidden">
+                        <ui:Label text="РАЗВИТИЕ" class="hero-screen-unit-card-section-title" />
+                        <ui:VisualElement name="hero-screen-unit-card-choice" class="hero-item-list" />
+                        <ui:Label text="КОМПЕТЕНЦИИ" class="hero-screen-unit-card-section-title hero-screen-unit-card-subsection" />
+                        <ui:VisualElement name="hero-screen-unit-card-competencies" />
+                    </ui:ScrollView>
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="hero-screen-stat-tooltip" picking-mode="Ignore" class="hero-screen-tooltip">

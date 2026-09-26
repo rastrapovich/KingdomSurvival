@@ -114,8 +114,42 @@ public sealed class HeroScreenLayoutTests
         }
     }
 
-    // Шесть качеств и семь боевых характеристик — фиксированные слоты,
-    // каждый должен иметь бокс и лейбл значения.
+    // Экран относится ко всему отряду: качества — у Командира в левой
+    // колонке; снаряжение, развитие, характеристики и теги человека — в его
+    // карточке (открывается ПКМ или кликом по строке отряда).
+    [TestCase("hero-screen-qualities", "hero-screen-left-column-scroll")]
+    [TestCase("hero-screen-traits", "hero-screen-left-column-scroll")]
+    [TestCase("hero-screen-squad-list", "hero-screen-states")]
+    [TestCase("hero-screen-inventory", "hero-screen-right-column-scroll")]
+    [TestCase("hero-screen-unit-card-profile", "hero-screen-unit-card")]
+    [TestCase("hero-screen-unit-card-stat-attack", "hero-screen-unit-card")]
+    [TestCase("hero-screen-unit-card-tags", "hero-screen-unit-card")]
+    [TestCase("hero-screen-equipment-slot-1", "hero-screen-unit-card-equipment")]
+    [TestCase("hero-screen-unit-card-available", "hero-screen-unit-card-equipment")]
+    [TestCase("hero-screen-unit-card-choice", "hero-screen-unit-card-development")]
+    [TestCase("hero-screen-unit-card-competencies", "hero-screen-unit-card-development")]
+    public void HeroScreen_PersonDetails_LiveInPersonCard(string elementId, string expectedParentId)
+    {
+        UILayoutScreenDefinition screen = LoadDatabase().FindScreen(HeroScreenId);
+        Assert.IsNotNull(screen);
+        UILayoutElementDefinition element = screen.FindElement(elementId);
+        Assert.IsNotNull(element, elementId);
+        Assert.AreEqual(expectedParentId, element.ParentId, elementId);
+    }
+
+    [TestCase("hero-screen-equipment")]
+    [TestCase("hero-screen-stats")]
+    [TestCase("hero-screen-tags")]
+    [TestCase("hero-screen-competencies")]
+    public void HeroScreen_HasNoPerPersonPanels(string elementId)
+    {
+        UILayoutScreenDefinition screen = LoadDatabase().FindScreen(HeroScreenId);
+        Assert.IsNull(screen.FindElement(elementId), elementId + " — в карточке человека, а не на экране отряда.");
+    }
+
+    // Шесть качеств Командира на экране и семь боевых характеристик в
+    // карточке человека — фиксированные слоты, у каждого есть бокс и лейбл
+    // значения. Отдельной панели характеристик на самом экране больше нет.
     [Test]
     public void HeroScreen_Qualities_And_Stats_Have_Fixed_Value_Slots()
     {
@@ -133,7 +167,7 @@ public sealed class HeroScreenLayoutTests
         string[] statSuffixes = { "health", "attack", "defense", "damage", "movement", "initiative", "attack-range" };
         foreach (string suffix in statSuffixes)
         {
-            Assert.IsNotNull(screen.FindElement("hero-screen-stat-" + suffix + "-value"));
+            Assert.IsNull(screen.FindElement("hero-screen-stat-" + suffix + "-value"), "Характеристики человека — только в его карточке.");
             Assert.IsNotNull(screen.FindElement("hero-screen-unit-card-stat-" + suffix));
             Assert.IsNotNull(screen.FindElement("hero-screen-unit-card-stat-" + suffix + "-value"));
         }

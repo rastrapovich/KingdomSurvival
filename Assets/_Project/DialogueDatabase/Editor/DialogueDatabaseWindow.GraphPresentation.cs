@@ -215,6 +215,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                     return "ПРИПАСЫ " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam.ToString(CultureInfo.InvariantCulture);
                 case NarrativeEffectType.ShortcutRouteCells:
                     return "ПУТЬ КОРОЧЕ НА " + effect.IntParam.ToString(CultureInfo.InvariantCulture);
+                case NarrativeEffectType.GrantExperience:
+                    return "+ ОПЫТ " + effect.IntParam.ToString(CultureInfo.InvariantCulture);
+                case NarrativeEffectType.GrantCompetencyPractice:
+                    return "+ ПРАКТИКА " + effect.StringParam + " " + effect.IntParam.ToString(CultureInfo.InvariantCulture);
+                case NarrativeEffectType.TeachCompetency:
+                    return "НАСТАВНИК " + effect.StringParam + " ≤ " + effect.IntParam.ToString(CultureInfo.InvariantCulture);
                 case NarrativeEffectType.ChangeRelation:
                     return "ОТН " + effect.StringParam + " " +
                            (effect.IntParam >= 0 ? "+" : string.Empty) +

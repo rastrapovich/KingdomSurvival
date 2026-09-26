@@ -180,6 +180,14 @@ public static partial class ContinuousSimulationSystem
         batch.Result.Messages.Add(
             "Локация «" + location.Name +
             "» исследована. Добыча отряда: " + rewardText + ".");
+
+        // Канон v1.48 §27.4: впервые исследованное место — пережитое заново.
+        string experience = CharacterProgressionService.DescribeShared(
+            "Опыт исследования",
+            CharacterProgressionService.AwardShared(state, "explore." + location.Id,
+                CharacterProgression.ExplorationExperience, CharacterProgressionService.PartyPersonIds(state)));
+        if (experience.Length > 0)
+            batch.Result.Messages.Add(experience);
         // ПР-09 (ТЗ §6): карточка итога — что увидели и что получили.
         batch.Result.ResearchNotice = new StrategicModalNotice
         {

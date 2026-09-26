@@ -45,6 +45,8 @@ public static class CombatStatsAssembler
         if (commander != null && commander.Id == personId && commander.HeroProfile != null)
             ApplyQualities(commander.HeroProfile, ref stats, result.Sources);
 
+        ApplyProgression(state, personId, unitTypeId, ref stats, result.Sources);
+
         foreach (ItemInstanceData item in ItemService.OwnedBy(state, personId))
         {
             if (item.Slot == ItemSlot.None)
@@ -100,6 +102,45 @@ public static class CombatStatsAssembler
             stats.Initiative += 1;
             sources.Add("Сноровка " + dexterity + ": +1 инициатива");
         }
+    }
+
+    // Канон v1.48 §27.5: точность растёт от владения своим оружием, защита —
+    // от защитной практики, здоровье — очень ограниченно (крепость тела).
+    // Уровень сам по себе боевые числа не меняет.
+    private static void ApplyProgression(GameState state, string personId, string unitTypeId,
+        ref UnitCombatStats stats, List<string> sources)
+    {
+        if (!CharacterProgressionService.IsProgressing(state, personId))
+            return;
+
+        string weapon = CharacterProgressionService.WeaponCompetencyFor(unitTypeId, stats.AttackRange > 1);
+        int attackBonus = CompetencyBonus(CharacterProgressionService.GetCompetencyRank(state, personId, weapon));
+        if (attackBonus > 0)
+        {
+            stats.Attack += attackBonus;
+            sources.Add(NarrativeCompetencyLabels.GetLabel(weapon) + ": +" + attackBonus + " атака");
+        }
+
+        int defenseBonus = CompetencyBonus(CharacterProgressionService.GetCompetencyRank(state, personId, NarrativeCompetencyIds.ShieldAndLine));
+        if (defenseBonus > 0)
+        {
+            stats.Defense += defenseBonus;
+            sources.Add(NarrativeCompetencyLabels.GetLabel(NarrativeCompetencyIds.ShieldAndLine) + ": +" + defenseBonus + " защита");
+        }
+
+        int hitPoints = CharacterProgressionService.BonusMaxHitPoints(state, personId);
+        if (hitPoints > 0)
+        {
+            stats.MaxHitPoints += hitPoints;
+            sources.Add("Крепость тела: +" + hitPoints + " HP");
+        }
+    }
+
+    private static int CompetencyBonus(int rank)
+    {
+        if (rank >= CharacterProgression.CombatBonusSecondRank)
+            return 2;
+        return rank >= CharacterProgression.CombatBonusFirstRank ? 1 : 0;
     }
 
     private static void Apply(ref UnitCombatStats stats, StatModifier modifier)

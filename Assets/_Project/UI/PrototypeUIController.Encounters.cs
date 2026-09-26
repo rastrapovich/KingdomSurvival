@@ -18,6 +18,19 @@ public partial class PrototypeUIController
         return encounterDatabase;
     }
 
+    // Канон v1.48 §27.4: встреча дошла до конца — опыт тем, кто её пережил.
+    private void AwardEncounterExperience(string dialogueId)
+    {
+        if (gameState == null)
+            return;
+        EncounterDefinition encounter = EncounterExperience.FindByDialogueId(LoadEncounterDatabase(), dialogueId);
+        if (encounter == null)
+            return;
+        string text = CharacterProgressionService.DescribeShared("Опыт встречи", EncounterExperience.Award(gameState, encounter));
+        if (text.Length > 0)
+            AddReport(text);
+    }
+
     // Вызывается из ProcessContinuousSimulationBatch только когда ни один
     // более приоритетный модальный интерфейс не претендует на внимание в
     // этом же пакете (см. вызов в PrototypeUIController.ContinuousTime.cs).

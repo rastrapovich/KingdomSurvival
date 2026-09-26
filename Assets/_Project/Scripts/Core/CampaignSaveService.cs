@@ -123,6 +123,10 @@ public static class CampaignSaveService
         if (state.Preparation == null)
             state.Preparation = new ExpeditionPreparationData();
 
+        // Канон v1.48 §27: у сохранений до прогрессии она заводится с нуля —
+        // уровни берутся из прежних записей бойцов.
+        CharacterProgressionService.EnsureState(state);
+
         // ПР-06А: население — производное, пересчитывается из людей.
         HomePeopleService.RecountPopulation(state);
 

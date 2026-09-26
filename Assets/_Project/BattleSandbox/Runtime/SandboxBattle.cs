@@ -112,6 +112,14 @@ namespace KingdomSurvival.BattleSandbox
         public bool IsGuarding { get; internal set; }
         public bool HasRetaliatedThisRound { get; internal set; }
 
+        // Реальный вклад в бой (канон v1.48 §27.3): урон, действительно
+        // снятый с противников, и урон, не пропущенный защитной стойкой.
+        // Полученный урон вкладом не считается.
+        public int DamageDealt { get; internal set; }
+        public int DamagePrevented { get; internal set; }
+        public bool UsedRangedAttack { get; internal set; }
+        public bool UsedMeleeAttack { get; internal set; }
+
         public string Id => instanceId;
         public string TypeId => Definition.Id;
         public string DisplayLabel => Definition.RoleLabel;
@@ -589,6 +597,11 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState attacker = GetUnit(attackerId);
             SandboxUnitState target = GetUnit(targetId);
             ClearPendingRetaliation();
+            RecordHit(attacker, target, preview.Damage, attacker.Position);
+            if (attacker.Position.DistanceTo(target.Position) > 1)
+                attacker.UsedRangedAttack = true;
+            else
+                attacker.UsedMeleeAttack = true;
             target.ReceiveDamage(preview.Damage);
             attacker.ActionPoints--;
             attacker.RemainingMovement = 0;
@@ -650,6 +663,8 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState defender = GetUnit(pendingRetaliationDefenderId);
             SandboxUnitState attacker = GetUnit(pendingRetaliationAttackerId);
             defender.HasRetaliatedThisRound = true;
+            RecordHit(defender, attacker, preview.Damage, defender.Position);
+            defender.UsedMeleeAttack = true;
             attacker.ReceiveDamage(preview.Damage);
             ClearPendingRetaliation();
 
@@ -908,6 +923,23 @@ namespace KingdomSurvival.BattleSandbox
         {
             pendingRetaliationDefenderId = null;
             pendingRetaliationAttackerId = null;
+        }
+
+        // Учёт вклада до нанесения удара: сколько HP реально снято и сколько
+        // урона не пропустила защитная стойка цели.
+        private static void RecordHit(SandboxUnitState striker, SandboxUnitState target, int damage, HexCoord attackPosition)
+        {
+            int before = target.HitPoints;
+            striker.DamageDealt += Math.Min(Math.Max(0, damage), before);
+            if (!target.IsGuarding)
+                return;
+
+            target.IsGuarding = false;
+            int unguarded = BuildAttackPreview(striker, target, attackPosition).Damage;
+            target.IsGuarding = true;
+            int prevented = Math.Min(unguarded, before) - Math.Min(damage, before);
+            if (prevented > 0)
+                target.DamagePrevented += prevented;
         }
 
         private static SandboxAttackPreview BuildAttackPreview(

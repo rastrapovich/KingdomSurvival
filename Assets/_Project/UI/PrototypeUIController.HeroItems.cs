@@ -383,13 +383,29 @@ public partial class PrototypeUIController
         return parts.Count == 0 ? person.DisplayName + ": цел." : person.DisplayName + ": " + string.Join(" ", parts);
     }
 
-    // «Путь» — сделанный выбор развития героя (§8.2 ТЗ).
+    // Канон v1.48 §27: уровень и опыт Командира в карточке героя.
     private void RefreshHeroPath()
     {
+        CommanderData commander = gameState.GetSelectedCommander();
+        PersonProgressionData record = commander != null ? CharacterProgressionService.Get(gameState, commander.Id) : null;
+        if (record == null)
+        {
+            if (heroExperienceTrack != null)
+                heroExperienceTrack.style.display = DisplayStyle.None;
+            heroScreenLevelLabel.text = string.Empty;
+            heroScreenExperienceLabel.text = string.Empty;
+            return;
+        }
+
+        CharacterProgressionService.GetLevelProgress(record, out int current, out int required);
+        heroScreenLevelLabel.text = "УР. " + record.Level;
+        string progress = required > 0 ? current + " / " + required + " опыта" : "предел пути";
+        if (CharacterProgressionService.PendingChoices(gameState, commander.Id) > 0)
+            progress += " · ждёт выбор развития";
+        heroScreenExperienceLabel.text = progress;
         if (heroExperienceTrack != null)
-            heroExperienceTrack.style.display = DisplayStyle.None;
-        heroScreenLevelLabel.text = "ПУТЬ";
-        string growth = Chapter01OutcomeApplier.DescribeRoadGrowth(gameState.Narrative);
-        heroScreenExperienceLabel.text = growth ?? "Первый выбор пути — по возвращении домой.";
+            heroExperienceTrack.style.display = DisplayStyle.Flex;
+        float percent = required > 0 ? Mathf.Clamp01((float)current / required) * 100f : 100f;
+        heroScreenExperienceFill.style.width = Length.Percent(percent);
     }
 }

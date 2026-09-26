@@ -228,6 +228,33 @@ namespace KingdomSurvival.BattleSandbox
                         HitPoints = unit.HitPoints
                     });
                 }
+
+                // Канон v1.48 §27.3: реальный вклад участника в банк опыта.
+                if (unit != null)
+                {
+                    result.Contributions.Add(new CampaignBattleContribution
+                    {
+                        PersonId = campaignParticipants[i].PersonId,
+                        DamageDealt = unit.DamageDealt,
+                        DamagePrevented = unit.DamagePrevented,
+                        UsedRangedAttack = unit.UsedRangedAttack,
+                        UsedMeleeAttack = unit.UsedMeleeAttack
+                    });
+                }
+            }
+
+            // Противники боя — их «цена» составляет банк опыта (§27.2).
+            foreach (SandboxUnitState enemy in battle.Units.Where(candidate => candidate.Team == SandboxTeam.Enemy))
+            {
+                result.Enemies.Add(new CampaignBattleEnemyRecord
+                {
+                    UnitTypeId = enemy.TypeId,
+                    MaxHitPoints = enemy.MaxHitPoints,
+                    Attack = enemy.Attack,
+                    Defense = enemy.Defense,
+                    Damage = enemy.Damage,
+                    Defeated = enemy.IsDefeated
+                });
             }
 
             return result;

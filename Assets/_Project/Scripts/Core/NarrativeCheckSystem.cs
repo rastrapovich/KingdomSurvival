@@ -438,6 +438,18 @@ public static class NarrativeCheckResolver
         }
 
         context.State.RecordCheckResult(spec.Kind, result);
+
+        // Канон v1.47 §26.1 / v1.48 §27.6: содержательное применение
+        // компетенции даёт практику — и при неудаче. Повторная попытка той
+        // же проверки новой практики не даёт.
+        if (forcedOutcome == NarrativeCheckForcedOutcome.None && attemptNumber == 1 &&
+            !string.IsNullOrWhiteSpace(spec.CompetencyId) && context.GameState != null)
+        {
+            CommanderData hero = context.GameState.GetSelectedCommander();
+            if (hero != null && ReferenceEquals(hero.HeroProfile, context.Hero))
+                CharacterProgressionService.AddPractice(context.GameState, hero.Id, spec.CompetencyId, CharacterProgression.PracticePerUse);
+        }
+
         return new NarrativeCheckAttempt { Outcome = NarrativeCheckAttemptOutcome.Resolved, Result = result };
     }
 

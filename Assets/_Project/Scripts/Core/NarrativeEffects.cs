@@ -31,7 +31,18 @@ public enum NarrativeEffectType
     // 0 клеток вперёд); задержка/остановка (Road Stop activity) сюда
     // сознательно не добавлена — это отдельный, более рискованный путь
     // (ActiveActivity пересекается с паузой/модальной очередью).
-    ShortcutRouteCells
+    ShortcutRouteCells,
+
+    // Канон v1.48 §27.4: общий опыт за уникально пережитое — IntParam
+    // каждому, кто был рядом (герой и бойцы похода). Источник — ID эффекта.
+    GrantExperience,
+
+    // §27.6: практика компетенции героя (StringParam) на IntParam очков.
+    GrantCompetencyPractice,
+
+    // §27.6: наставник/новое знание — потолок практики компетенции героя
+    // (StringParam) поднимается до IntParam (4–5).
+    TeachCompetency
 }
 
 [Serializable]
@@ -100,6 +111,21 @@ public sealed class NarrativeEffect
             case NarrativeEffectType.ShortcutRouteCells:
                 if (context.GameState?.ActiveExpedition != null && IntParam > 0)
                     WorldMapNavigation.AdvanceRouteByCells(context.GameState.ActiveExpedition, IntParam);
+                break;
+            case NarrativeEffectType.GrantExperience:
+                if (context.GameState != null)
+                {
+                    CharacterProgressionService.AwardShared(context.GameState, EffectExecutionId, IntParam,
+                        CharacterProgressionService.PartyPersonIds(context.GameState));
+                }
+                break;
+            case NarrativeEffectType.GrantCompetencyPractice:
+                if (context.GameState?.GetSelectedCommander() != null)
+                    CharacterProgressionService.AddPractice(context.GameState, context.GameState.GetSelectedCommander().Id, StringParam, IntParam);
+                break;
+            case NarrativeEffectType.TeachCompetency:
+                if (context.GameState?.GetSelectedCommander() != null)
+                    CharacterProgressionService.Teach(context.GameState, context.GameState.GetSelectedCommander().Id, StringParam, IntParam);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(Type), Type, null);

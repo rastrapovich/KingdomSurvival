@@ -541,7 +541,7 @@ public partial class PrototypeUIController
 
         HeroProfileData heroProfile = commander != null ? commander.HeroProfile : null;
         RefreshHeroScreenQualities(heroProfile);
-        RefreshHeroScreenCompetencies(heroProfile);
+        RefreshHeroScreenCompetencies();
         RefreshHeroScreenTraits(heroProfile);
         RefreshHeroScreenTags(heroUnit);
         RefreshHeroScreenStates(commander);
@@ -608,18 +608,80 @@ public partial class PrototypeUIController
         return "исключительное качество";
     }
 
-    // Следопытство — первая полностью реализованная компетенция (§3).
-    // Список остаётся динамическим (шаблон HeroStatRow.uxml): архитектура
-    // допускает другие компетенции позже без переделки экрана.
-    private void RefreshHeroScreenCompetencies(HeroProfileData hero)
+    // Канон v1.48 §27: уровень, опыт, компетенции и выбор развития человека,
+    // выбранного в ряду снаряжения (герой или постоянный боец). Динамический
+    // список (шаблон HeroStatRow.uxml): показываются освоенные и
+    // практикуемые компетенции каталога v1.49 §27.11.
+    private void RefreshHeroScreenCompetencies()
     {
         heroScreenCompetenciesRow.Clear();
-        int fieldcraft = hero != null ? hero.GetCompetency(NarrativeCompetencyIds.Fieldcraft) : 0;
+        string personId = HeroItemsPersonId();
+        PersonProgressionData record = CharacterProgressionService.Get(gameState, personId);
+        string personName = CharacterProgressionService.DisplayName(gameState, personId);
+        Label title = interfaceRoot.Q<Label>("hero-screen-competencies-title");
+        if (title != null)
+            title.text = "РАЗВИТИЕ — " + (personName ?? string.Empty).ToUpperInvariant();
+        if (record == null)
+        {
+            AddHeroScreenHint(heroScreenCompetenciesRow, "Этот человек не развивается как боец.");
+            return;
+        }
+
+        CharacterProgressionService.GetLevelProgress(record, out int current, out int required);
         AddHeroScreenStatRow(
             heroScreenCompetenciesRow,
-            NarrativeCompetencyLabels.GetLabel(NarrativeCompetencyIds.Fieldcraft).ToUpperInvariant(),
-            fieldcraft + " / 5",
-            "Чтение следов, разведка, поиск скрытых мест, выбор маршрута, устройство лагеря, обнаружение засад и подготовка к дорожным встречам.");
+            "УРОВЕНЬ",
+            record.Level + (required > 0 ? "  ·  " + current + " / " + required : "  ·  предел"),
+            "Общий опыт: уникально пережитое — новые бои, места, встречи, важные решения. " +
+            "Повтор одного и того же почти ничему не учит. Уровень сам не прибавляет силы; " +
+            "каждые " + CharacterProgression.ChoiceEveryLevels + " уровня — значимый выбор развития. " +
+            "Всего опыта: " + record.Experience + ".");
+
+        RefreshHeroDevelopmentChoice(personId);
+
+        List<string> known = CharacterProgressionService.KnownCompetencies(gameState, personId);
+        foreach (string competencyId in known)
+        {
+            int rank = CharacterProgressionService.GetCompetencyRank(gameState, personId, competencyId);
+            CompetencyProgressData entry = record.FindCompetency(competencyId);
+            int ceiling = entry != null ? Mathf.Max(CharacterProgression.PracticeCeiling, entry.Ceiling) : CharacterProgression.PracticeCeiling;
+            string practice = rank >= CharacterProgression.MaxCompetencyRank
+                ? "Высшая ступень."
+                : rank >= ceiling
+                    ? "Собственной практикой дальше не вырасти: нужен наставник или новое знание."
+                    : "Практика: " + (entry != null ? entry.Practice : 0) + " / " +
+                      CharacterProgression.PracticeToNextRank(rank) + " до ступени " + (rank + 1) + ".";
+            AddHeroScreenStatRow(
+                heroScreenCompetenciesRow,
+                NarrativeCompetencyLabels.GetLabel(competencyId).ToUpperInvariant(),
+                rank + " / " + CharacterProgression.MaxCompetencyRank,
+                NarrativeCompetencyLabels.GetDescription(competencyId) + "\n" +
+                "Растёт от реального применения и учителей. " + practice);
+        }
+
+        if (known.Count == 0)
+            AddHeroScreenHint(heroScreenCompetenciesRow, "Пока ничего не освоено: компетенции растут от применения.");
+    }
+
+    // Значимый выбор каждые 3 уровня (§27.1.1): персональные варианты из
+    // пережитого и полезные нейтральные.
+    private void RefreshHeroDevelopmentChoice(string personId)
+    {
+        int pending = CharacterProgressionService.PendingChoices(gameState, personId);
+        if (pending <= 0)
+            return;
+
+        AddHeroScreenHint(heroScreenCompetenciesRow,
+            "Выбор развития" + (pending > 1 ? " (" + pending + ")" : string.Empty) + ": кем становится человек.");
+        foreach (DevelopmentOption option in CharacterProgressionService.GetChoiceOptions(gameState, personId))
+        {
+            string optionId = option.Id;
+            string description = (option.IsPersonal ? "Из пережитого. " : "Нейтральный вариант. ") + option.Description;
+            Button button = AddHeroItemButton(heroScreenCompetenciesRow, option.Title, () =>
+                RunHeroItemCommand(CharacterProgressionService.TryApplyChoice(gameState, personId, optionId, out string message), message));
+            button.RegisterCallback<PointerEnterEvent>(_ => ShowHeroScreenTagTooltip(button, option.Title, description));
+            button.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenTagTooltip());
+        }
     }
 
     private void AddHeroScreenStatRow(VisualElement parent, string title, string value, string explanation)
@@ -671,6 +733,11 @@ public partial class PrototypeUIController
                 HeroScreenTraitChipColor,
                 "Открывает авторские блоки и варианты, связанные с растениями, животными, погодой, болезнями, водой и природными изменениями.");
         }
+
+        // ПР-08 (§8.2 ТЗ): сделанный в главе выбор пути — приобретённая черта.
+        string growth = gameState != null ? Chapter01OutcomeApplier.DescribeRoadGrowth(gameState.Narrative) : null;
+        if (!string.IsNullOrEmpty(growth))
+            AddHeroScreenChip(heroScreenTraitsRow, "Путь", HeroScreenTraitChipColor, growth);
 
         if (heroScreenTraitsRow.childCount == 0)
             AddHeroScreenHint(heroScreenTraitsRow, "У героя пока нет особенностей.");

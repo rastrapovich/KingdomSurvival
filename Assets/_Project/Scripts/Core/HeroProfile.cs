@@ -14,20 +14,57 @@ public enum HeroQuality
     Character
 }
 
-// Стабильные строковые ID компетенций и особенностей, зарегистрированных
-// на сегодня. Список расширяется по мере появления реального контента —
-// см. §3/§4 инструкции.
+// Стабильные строковые ID компетенций и особенностей. Компетенции — первый
+// базовый каталог канона v1.49 §27.11 (24 штуки, порядок канона). Новая
+// компетенция добавляется только при нескольких разных применениях.
 public static class NarrativeCompetencyIds
 {
+    // Следопытство (исторический ID «полевого дела» сохранён: он уже
+    // записан в диалогах и сохранениях).
     public const string Fieldcraft = "fieldcraft";
+    public const string Stealth = "stealth";
+    public const string Hunting = "hunting";
 
     // Зарегистрирована по решению DEC-08 (см. ProjectDocs/DEVELOPMENT_STATUS.md §2):
     // осознанное отступление от рекомендации сводной инструкции по Главе 01
     // не добавлять новую компетенцию ради одной сцены. Используется впервые
     // в N08 «Семь зубцов» (chapter01.node.08).
     public const string Craft = "craft";
+    public const string Healing = "healing";
+    public const string Household = "household";
+    public const string Trade = "trade";
+    public const string Negotiation = "negotiation";
+    public const string CustomAndLaw = "custom_and_law";
+    public const string Lore = "lore";
+    public const string Rites = "rites";
+    public const string ChoppingWeapons = "chopping_weapons";
+    public const string Shooting = "shooting";
+    public const string ShieldAndLine = "shield_and_line";
+    public const string Herbalism = "herbalism";
+    public const string Spearcraft = "spearcraft";
+    public const string Observation = "observation";
+    public const string Insight = "insight";
+    public const string Fishing = "fishing";
+    public const string Forestry = "forestry";
+    public const string Livestock = "livestock";
+    public const string Farming = "farming";
+    public const string Building = "building";
+    public const string Investigation = "investigation";
 
-    public static readonly IReadOnlyList<string> Known = new List<string> { Fieldcraft, Craft };
+    public static readonly IReadOnlyList<string> Known = new List<string>
+    {
+        Fieldcraft, Stealth, Hunting, Craft, Healing, Household, Trade, Negotiation,
+        CustomAndLaw, Lore, Rites, ChoppingWeapons, Shooting, ShieldAndLine, Herbalism,
+        Spearcraft, Observation, Insight, Fishing, Forestry, Livestock, Farming, Building,
+        Investigation
+    };
+
+    // Каталог постоянного бойца уже каталога Командира: бой и поход (§25.5).
+    public static readonly IReadOnlyList<string> FighterCatalog = new List<string>
+    {
+        Fieldcraft, Stealth, Hunting, Healing, ChoppingWeapons, Shooting, ShieldAndLine,
+        Spearcraft, Observation
+    };
 
     public static bool IsKnown(string competencyId)
     {

@@ -1085,7 +1085,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                                 " " + (effect.IntParam >= 0 ? "+" : string.Empty) + effect.IntParam;
                         break;
                     case NarrativeEffectType.ShortcutRouteCells:
+                    case NarrativeEffectType.GrantExperience:
                         text += " " + effect.IntParam;
+                        break;
+                    case NarrativeEffectType.GrantCompetencyPractice:
+                    case NarrativeEffectType.TeachCompetency:
+                        text += " «" + NarrativeCompetencyLabels.GetLabel(effect.StringParam) + "» " + effect.IntParam;
                         break;
                     default:
                         text += " «" + effect.StringParam + "»";
@@ -1599,6 +1604,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 case NarrativeEffectType.ChangeFood: return "Изменить еду Дома";
                 case NarrativeEffectType.ChangeSupplies: return "Изменить припасы похода";
                 case NarrativeEffectType.ShortcutRouteCells: return "Сократить путь (клеток)";
+                case NarrativeEffectType.GrantExperience: return "Дать опыт (герой и бойцы похода)";
+                case NarrativeEffectType.GrantCompetencyPractice: return "Практика компетенции героя";
+                case NarrativeEffectType.TeachCompetency: return "Наставник: поднять потолок компетенции";
                 default: return type.ToString();
             }
         }
@@ -1638,6 +1646,9 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 case NarrativeEffectType.GrantItem:
                 case NarrativeEffectType.RemoveItem:
                     return "ID предмета";
+                case NarrativeEffectType.GrantCompetencyPractice:
+                case NarrativeEffectType.TeachCompetency:
+                    return "ID компетенции";
                 default:
                     return "Параметр";
             }
@@ -1703,6 +1714,12 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 EditorGUILayout.PropertyField(intParam, new GUIContent("Изменение (+/−)"));
             else if (kind == NarrativeEffectType.ShortcutRouteCells)
                 EditorGUILayout.PropertyField(intParam, new GUIContent("Клеток вперёд"));
+            else if (kind == NarrativeEffectType.GrantExperience)
+                EditorGUILayout.PropertyField(intParam, new GUIContent("Опыт каждому"));
+            else if (kind == NarrativeEffectType.GrantCompetencyPractice)
+                EditorGUILayout.PropertyField(intParam, new GUIContent("Очки практики"));
+            else if (kind == NarrativeEffectType.TeachCompetency)
+                EditorGUILayout.PropertyField(intParam, new GUIContent("Новый потолок (4–5)"));
 
             EndSemanticCard(category);
             return false;

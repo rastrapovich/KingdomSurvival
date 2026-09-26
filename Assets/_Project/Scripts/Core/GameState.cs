@@ -278,6 +278,10 @@ public class GameState
     // ПР-11: история значимых событий (Chronicle).
     public ChronicleData Chronicle = new ChronicleData();
 
+    // Канон v1.48 §27: уровень, опыт, практика компетенций и выборы развития
+    // Командира и постоянных бойцов (CharacterProgressionService).
+    public ProgressionStateData Progression = new ProgressionStateData();
+
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
 
@@ -493,6 +497,9 @@ public class GameState
         // ПР-08: стартовое снаряжение и кладовая Дома.
         Inventory = new InventoryData();
         ItemService.EnsureInventory(this);
+
+        Progression = new ProgressionStateData();
+        CharacterProgressionService.EnsureState(this);
     }
 
     public CommanderData GetSelectedCommander()

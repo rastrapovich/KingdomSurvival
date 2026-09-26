@@ -43,6 +43,33 @@ public sealed class CampaignBattleSurvivor
     public int HitPoints;
 }
 
+// Канон v1.48 §27.3: что участник реально сделал в бою. Полученный урон
+// вкладом не считается; последний удар отдельно не вознаграждается.
+[Serializable]
+public sealed class CampaignBattleContribution
+{
+    public string PersonId;
+    // Урон, действительно снятый с противников (не больше их остатка HP),
+    // включая ответные удары.
+    public int DamageDealt;
+    // Урон, который защитная стойка не пропустила.
+    public int DamagePrevented;
+    public bool UsedRangedAttack;
+    public bool UsedMeleeAttack;
+}
+
+// Противник, с которым отряд столкнулся, — для банка опыта боя.
+[Serializable]
+public sealed class CampaignBattleEnemyRecord
+{
+    public string UnitTypeId;
+    public int MaxHitPoints;
+    public int Attack;
+    public int Defense;
+    public int Damage;
+    public bool Defeated;
+}
+
 [Serializable]
 public sealed class CampaignBattleEnemy
 {
@@ -84,6 +111,10 @@ public sealed class CampaignBattleResult
 
     // ПР-10: сколько раундов шёл бой — для изнеможения после долгого боя.
     public int Rounds;
+
+    // Канон v1.48 §27.2–27.3: участники с их вкладом и противники боя.
+    public List<CampaignBattleContribution> Contributions = new List<CampaignBattleContribution>();
+    public List<CampaignBattleEnemyRecord> Enemies = new List<CampaignBattleEnemyRecord>();
 }
 
 public enum CampaignBattleApplyStatus
@@ -281,6 +312,10 @@ public static class CampaignBattleBridge
                 outcomeText + (fallenHere.Count > 0 ? " Погибли: " + string.Join(", ", fallenHere) + "." : " Все живы.") +
                 (aftermath.Count > 0 ? " " + string.Join(" ", aftermath) : string.Empty),
                 state.HasActiveExpedition ? state.ActiveExpedition.LocationId : null);
+
+            // Канон v1.48 §27.2: общий опыт из единого банка боя и практика.
+            List<string> experience = BattleExperience.Apply(state, result);
+            notes?.AddRange(experience);
         }
 
         return heroFell ? CampaignBattleApplyStatus.HeroFell : CampaignBattleApplyStatus.SquadSurvived;

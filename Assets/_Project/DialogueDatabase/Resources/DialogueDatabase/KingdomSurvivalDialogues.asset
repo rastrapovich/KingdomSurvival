@@ -15045,8 +15045,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 60, y: 60}
+      hasEditorPosition: 1
     - id: success
       speakerId: narrator
       text: 
@@ -15093,8 +15093,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 60}
+      hasEditorPosition: 1
     - id: leave
       speakerId: narrator
       text: 
@@ -15122,7 +15122,7 @@ MonoBehaviour:
         - EffectExecutionId: ROAD_BAD_WATER_01.pr12.leave.supplies
           Type: 10
           StringParam: 
-          IntParam: -1
+          IntParam: -10
       choices:
       - text: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u043F\u0443\u0442\u044C."
         nextNodeId: 
@@ -15144,8 +15144,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 436.225}
+      hasEditorPosition: 1
     schemaVersion: 1
   - id: road_cache_01
     title: "\u041A\u0430\u043C\u0435\u043D\u044C \u043D\u0430\u0434 \u0442\u0430\u0439\u043D\u0438\u043A\u043E\u043C"
@@ -15668,8 +15668,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 60, y: 60}
+      hasEditorPosition: 1
     - id: success
       speakerId: narrator
       text: 
@@ -15720,8 +15720,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 60}
+      hasEditorPosition: 1
     - id: failure
       speakerId: narrator
       text: 
@@ -15771,8 +15771,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 476.8375}
+      hasEditorPosition: 1
     - id: leave
       speakerId: narrator
       text: 
@@ -15818,8 +15818,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 882.0625}
+      hasEditorPosition: 1
     schemaVersion: 1
   - id: road_washed_road_01
     title: "\u0420\u0430\u0437\u043C\u044B\u0442\u044B\u0439 \u043A\u0440\u0430\u0439"
@@ -19992,8 +19992,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 60, y: 60}
+      hasEditorPosition: 1
     - id: success
       speakerId: narrator
       text: 
@@ -20044,8 +20044,8 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 60}
+      hasEditorPosition: 1
     - id: leave
       speakerId: narrator
       text: 
@@ -20091,6 +20091,6 @@ MonoBehaviour:
         failureNodeId: 
         successEffects: []
         failureEffects: []
-      editorPosition: {x: 0, y: 0}
-      hasEditorPosition: 0
+      editorPosition: {x: 780, y: 476.8375}
+      hasEditorPosition: 1
     schemaVersion: 1

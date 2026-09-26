@@ -40,8 +40,9 @@ public sealed class PR12RoadContentTests
                 foreach (DialogueChoiceData choice in node.Choices)
                     if (choice.IsActiveCheck) checks++;
         }
-        Assert.That(small, Is.EqualTo(20));
-        Assert.That(checks, Is.EqualTo(12));
+        // 26.09.2026: 12 старых дорожных встреч списаны автором — в пуле 8 коротких сцен, 4 из них с активной проверкой.
+        Assert.That(small, Is.EqualTo(8));
+        Assert.That(checks, Is.EqualTo(4));
     }
 
     [Test]
@@ -72,7 +73,7 @@ public sealed class PR12RoadContentTests
             Assert.That(seen.Add(result.EncounterId), Is.True,
                 "Одноразовое событие повторилось: " + result.EncounterId);
         }
-        Assert.That(seen.Count, Is.GreaterThan(10));
+        Assert.That(seen.Count, Is.GreaterThanOrEqualTo(8));
         Assert.That(silent, Is.GreaterThan(0));
     }
 }

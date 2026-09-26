@@ -168,6 +168,7 @@ namespace KingdomSurvival.BattleSandbox
         private List<SandboxUnitDefinition> BuildCampaignEnemies()
         {
             List<SandboxUnitDefinition> enemies = new List<SandboxUnitDefinition>();
+            campaignEnemyLevels.Clear();
             if (campaignBattle.Enemies != null)
             {
                 foreach (CampaignBattleEnemy enemy in campaignBattle.Enemies)
@@ -178,14 +179,45 @@ namespace KingdomSurvival.BattleSandbox
                         Debug.LogWarning("Бой кампании: нет существа '" + (enemy != null ? enemy.UnitTypeId : "?") + "'.");
                         continue;
                     }
+                    int level = Mathf.Clamp(enemy.Level, 1, ProgressionProfile.LevelCount);
+                    SandboxUnitDefinition leveled = ApplyEnemyLevel(definition, level);
                     for (int i = 0; i < Mathf.Max(1, enemy.Count) && enemies.Count < 4; i++)
-                        enemies.Add(definition);
+                    {
+                        enemies.Add(leveled);
+                        campaignEnemyLevels.Add(level);
+                    }
                 }
             }
             if (enemies.Count == 0)
+            {
                 enemies.AddRange(unitContent.EnemyEncounter);
+                campaignEnemyLevels.Clear();
+            }
             return enemies;
         }
+
+        // Уровень противника: накопленные прибавки из карты развития его типа
+        // («База развития»). На 1-м уровне по умолчанию прибавок нет.
+        private static SandboxUnitDefinition ApplyEnemyLevel(SandboxUnitDefinition definition, int level)
+        {
+            StatModifier bonus = ProgressionRules.Current.GetProfile(definition.Id).CumulativeBonus(level);
+            if (bonus.IsZero)
+                return definition;
+            return new SandboxUnitDefinition(
+                definition.Id,
+                definition.RoleLabel,
+                definition.Role,
+                Mathf.Max(1, definition.MaxHitPoints + bonus.MaxHitPoints),
+                Mathf.Max(0, definition.Attack + bonus.Attack),
+                Mathf.Max(0, definition.Defense + bonus.Defense),
+                Mathf.Max(1, definition.Damage + bonus.Damage),
+                Mathf.Max(1, definition.Movement + bonus.Movement),
+                Mathf.Max(0, definition.Initiative + bonus.Initiative),
+                Mathf.Max(1, definition.AttackRange + bonus.AttackRange),
+                definition.TagIds);
+        }
+
+        private readonly List<int> campaignEnemyLevels = new List<int>();
 
         private bool campaignRetreated;
 
@@ -244,11 +276,15 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             // Противники боя — их «цена» составляет банк опыта (§27.2).
+            int enemyIndex = 0;
             foreach (SandboxUnitState enemy in battle.Units.Where(candidate => candidate.Team == SandboxTeam.Enemy))
             {
+                int level = enemyIndex < campaignEnemyLevels.Count ? campaignEnemyLevels[enemyIndex] : 1;
+                enemyIndex++;
                 result.Enemies.Add(new CampaignBattleEnemyRecord
                 {
                     UnitTypeId = enemy.TypeId,
+                    Level = level,
                     MaxHitPoints = enemy.MaxHitPoints,
                     Attack = enemy.Attack,
                     Defense = enemy.Defense,

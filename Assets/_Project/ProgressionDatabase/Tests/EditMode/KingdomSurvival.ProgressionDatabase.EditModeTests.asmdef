@@ -1,0 +1,24 @@
+{
+  "name": "KingdomSurvival.ProgressionDatabase.EditModeTests",
+  "rootNamespace": "KingdomSurvival.ProgressionDatabase.Tests",
+  "references": [
+    "KingdomSurvival.Core",
+    "KingdomSurvival.ProgressionDatabase",
+    "KingdomSurvival.ProgressionDatabase.Editor",
+    "KingdomSurvival.UnitDatabase"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

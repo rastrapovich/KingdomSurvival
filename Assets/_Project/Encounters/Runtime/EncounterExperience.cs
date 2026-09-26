@@ -11,14 +11,18 @@ namespace KingdomSurvival.Encounters
     {
         public const string SourcePrefix = "encounter.";
 
+        // Опыт по классу длительности — из общих правил «Базы развития».
         public static int ForDurationClass(EncounterDurationClass durationClass)
         {
+            ProgressionRules rules = ProgressionRules.Current;
             switch (durationClass)
             {
-                case EncounterDurationClass.Short: return 20;
-                case EncounterDurationClass.Standard: return 40;
-                case EncounterDurationClass.Complex: return 80;
-                case EncounterDurationClass.QuestSeed: return 30;
+                case EncounterDurationClass.Reaction: return rules.EncounterReactionExperience;
+                case EncounterDurationClass.Micro: return rules.EncounterMicroExperience;
+                case EncounterDurationClass.Short: return rules.EncounterShortExperience;
+                case EncounterDurationClass.Standard: return rules.EncounterStandardExperience;
+                case EncounterDurationClass.Complex: return rules.EncounterComplexExperience;
+                case EncounterDurationClass.QuestSeed: return rules.EncounterQuestSeedExperience;
                 default: return 0;
             }
         }

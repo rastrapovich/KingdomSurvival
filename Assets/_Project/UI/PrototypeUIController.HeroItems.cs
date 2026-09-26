@@ -297,7 +297,7 @@ public partial class PrototypeUIController
             return;
         }
 
-        CharacterProgressionService.GetLevelProgress(record, out int current, out int required);
+        CharacterProgressionService.GetLevelProgress(gameState, record, out int current, out int required);
         heroScreenLevelLabel.text = "УР. " + record.Level;
         string progress = required > 0 ? current + " / " + required + " опыта" : "предел пути";
         if (CharacterProgressionService.PendingChoices(gameState, commander.Id) > 0)

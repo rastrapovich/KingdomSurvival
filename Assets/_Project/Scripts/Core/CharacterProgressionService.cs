@@ -62,17 +62,34 @@ public static class CharacterProgressionService
         }
 
         FighterData data = FindPersonData(state, personId);
-        int startingLevel = Math.Max(1, Math.Min(CharacterProgression.MaxLevel, data != null ? data.Level : 1));
+        ProgressionProfile profile = ProfileFor(state, personId);
+        int startingLevel = Math.Max(1, Math.Min(CharacterProgression.MaxLevel,
+            Math.Max(data != null ? data.Level : 1, profile.StartingLevel)));
         PersonProgressionData record = new PersonProgressionData
         {
             PersonId = personId,
             Level = startingLevel,
             StartingLevel = startingLevel,
-            Experience = CharacterProgression.TotalExperienceForLevel(startingLevel)
+            Experience = profile.TotalExperienceForLevel(startingLevel)
         };
         state.Progression.People.Add(record);
-        GrantStartingCompetencies(state, record, data);
+        GrantStartingCompetencies(state, record, profile);
+        SyncDisplayedLevel(state, record);
         return record;
+    }
+
+    // Профиль развития человека: Командир — «hero», боец — его тип из Базы
+    // существ (карта уровней, выборы, стартовые умения, оружие).
+    public static ProgressionProfile ProfileFor(GameState state, string personId)
+    {
+        ProgressionRules rules = ProgressionRules.Current;
+        if (IsHero(state, personId))
+            return rules.GetProfile(ProgressionRules.HeroProfileId);
+        ResidentState resident = HomePeopleService.Find(state, personId);
+        string unitTypeId = resident != null && !string.IsNullOrEmpty(resident.UnitTypeId)
+            ? resident.UnitTypeId
+            : FindFighter(state, personId)?.UnitTypeId;
+        return rules.GetProfile(unitTypeId);
     }
 
     // ----------------------------------------------------------------
@@ -99,6 +116,9 @@ public static class CharacterProgressionService
         ResidentState resident = HomePeopleService.Find(state, personId);
         if (resident != null && !resident.IsAlive)
             return null;
+        ProgressionProfile profile = ProfileFor(state, personId);
+        if (!profile.Progresses)
+            return null;
 
         state.Progression.AppliedSources.Add(sourceId + SourceSeparator + personId);
         if (amount <= 0)
@@ -106,9 +126,9 @@ public static class CharacterProgressionService
 
         int oldLevel = record.Level;
         int pendingBefore = PendingChoices(state, personId);
-        int cap = CharacterProgression.TotalExperienceForLevel(CharacterProgression.MaxLevel);
+        int cap = profile.TotalExperienceForLevel(CharacterProgression.MaxLevel);
         record.Experience = Math.Min(cap, record.Experience + amount);
-        record.Level = Math.Max(record.Level, CharacterProgression.LevelForExperience(record.Experience));
+        record.Level = Math.Max(record.Level, profile.LevelForExperience(record.Experience));
         SyncDisplayedLevel(state, record);
 
         return new ExperienceGain
@@ -157,14 +177,15 @@ public static class CharacterProgressionService
     }
 
     // Опыт внутри текущего уровня: сколько набрано и сколько нужно.
-    public static void GetLevelProgress(PersonProgressionData record, out int current, out int required)
+    public static void GetLevelProgress(GameState state, PersonProgressionData record, out int current, out int required)
     {
         current = 0;
         required = 0;
         if (record == null || record.Level >= CharacterProgression.MaxLevel)
             return;
-        current = Math.Max(0, record.Experience - CharacterProgression.TotalExperienceForLevel(record.Level));
-        required = CharacterProgression.ExperienceToNextLevel(record.Level);
+        ProgressionProfile profile = ProfileFor(state, record.PersonId);
+        current = Math.Max(0, record.Experience - profile.TotalExperienceForLevel(record.Level));
+        required = profile.ExperienceToNextLevel(record.Level);
     }
 
     // ----------------------------------------------------------------
@@ -284,18 +305,18 @@ public static class CharacterProgressionService
         return true;
     }
 
-    // Какую компетенцию развивает удар этой боевой основы.
-    public static string WeaponCompetencyFor(string unitTypeId, bool rangedAttack)
+    // Какую компетенцию развивает удар этого человека — из его профиля.
+    public static string WeaponCompetencyFor(GameState state, string personId, bool rangedAttack)
     {
-        if (rangedAttack)
-            return NarrativeCompetencyIds.Shooting;
-        if (unitTypeId == "spearman")
-            return NarrativeCompetencyIds.Spearcraft;
-        return NarrativeCompetencyIds.ChoppingWeapons;
+        ProgressionProfile profile = ProfileFor(state, personId);
+        string competencyId = rangedAttack ? profile.RangedCompetencyId : profile.MeleeCompetencyId;
+        if (!string.IsNullOrWhiteSpace(competencyId))
+            return competencyId;
+        return rangedAttack ? NarrativeCompetencyIds.Shooting : NarrativeCompetencyIds.ChoppingWeapons;
     }
 
     // ----------------------------------------------------------------
-    // Значимый выбор каждые 3 уровня
+    // Значимый выбор — на уровнях, отмеченных в карте развития (канон: каждые 3)
     // ----------------------------------------------------------------
 
     public static int PendingChoices(GameState state, string personId)
@@ -303,8 +324,7 @@ public static class CharacterProgressionService
         PersonProgressionData record = Get(state, personId);
         if (record == null)
             return 0;
-        int earned = record.Level / CharacterProgression.ChoiceEveryLevels -
-                     record.StartingLevel / CharacterProgression.ChoiceEveryLevels;
+        int earned = ProfileFor(state, personId).CountChoiceLevels(record.StartingLevel, record.Level);
         return Math.Max(0, earned - record.ChoicesTaken);
     }
 
@@ -316,7 +336,11 @@ public static class CharacterProgressionService
             return options;
 
         bool isHero = IsHero(state, personId);
-        IReadOnlyList<string> catalog = isHero ? NarrativeCompetencyIds.Known : NarrativeCompetencyIds.FighterCatalog;
+        ProgressionProfile profile = ProfileFor(state, personId);
+        IReadOnlyList<string> known = NarrativeCompetencyIds.Known;
+        IReadOnlyList<string> catalog = profile.ChoiceCompetencies != null && profile.ChoiceCompetencies.Count > 0
+            ? profile.ChoiceCompetencies.Where(id => known.Contains(id)).ToList()
+            : isHero ? known : NarrativeCompetencyIds.FighterCatalog;
 
         // Персональные: то, что человек реально делал с прошлого выбора.
         List<CompetencyProgressData> practiced = record.Competencies
@@ -529,40 +553,28 @@ public static class CharacterProgressionService
         return list.Count;
     }
 
-    // Боец умеет то, что требует его роль (§27.8): первая ступень владения
-    // своим оружием. Ступень 1 не меняет боевых чисел.
-    private static void GrantStartingCompetencies(GameState state, PersonProgressionData record, FighterData data)
+    // Человек приходит с тем, что умеет его тип (§27.8): стартовые компетенции
+    // профиля. У Командира ступень пишется в HeroProfile и не понижается.
+    private static void GrantStartingCompetencies(GameState state, PersonProgressionData record, ProgressionProfile profile)
     {
-        if (data == null || IsHero(state, record.PersonId) || string.IsNullOrEmpty(data.UnitTypeId))
+        if (profile?.StartingCompetencies == null)
             return;
-
-        List<string> starting = new List<string>();
-        switch (data.UnitTypeId)
+        foreach (CompetencyRank starting in profile.StartingCompetencies)
         {
-            case "guard":
-                starting.Add(NarrativeCompetencyIds.ShieldAndLine);
-                starting.Add(NarrativeCompetencyIds.ChoppingWeapons);
-                break;
-            case "archer":
-                starting.Add(NarrativeCompetencyIds.Shooting);
-                break;
-            case "healer":
-                starting.Add(NarrativeCompetencyIds.Healing);
-                break;
-            case "spearman":
-                starting.Add(NarrativeCompetencyIds.Spearcraft);
-                break;
-            case "scout":
-                starting.Add(NarrativeCompetencyIds.Fieldcraft);
-                starting.Add(NarrativeCompetencyIds.Stealth);
-                break;
-            default:
-                starting.Add(NarrativeCompetencyIds.ChoppingWeapons);
-                break;
+            if (starting == null || string.IsNullOrWhiteSpace(starting.CompetencyId) || starting.Rank <= 0)
+                continue;
+            int rank = Math.Min(CharacterProgression.MaxCompetencyRank, starting.Rank);
+            if (IsHero(state, record.PersonId))
+            {
+                if (GetCompetencyRank(state, record.PersonId, starting.CompetencyId) < rank)
+                    SetCompetencyRank(state, record.PersonId, starting.CompetencyId, rank);
+            }
+            else
+            {
+                CompetencyProgressData entry = record.GetOrCreateCompetency(starting.CompetencyId);
+                entry.Rank = Math.Max(entry.Rank, rank);
+            }
         }
-
-        foreach (string competencyId in starting)
-            record.GetOrCreateCompetency(competencyId).Rank = 1;
     }
 
     private static void SyncDisplayedLevel(GameState state, PersonProgressionData record)

@@ -25,9 +25,21 @@ public static class BattleExperience
         foreach (CampaignBattleEnemyRecord enemy in enemies ?? Enumerable.Empty<CampaignBattleEnemyRecord>())
         {
             if (enemy != null)
-                bank += CharacterProgression.EnemyExperience(enemy.MaxHitPoints, enemy.Attack, enemy.Defense, enemy.Damage);
+                bank += EnemyValue(enemy);
         }
         return bank;
+    }
+
+    // «Цена» противника: из карты развития его типа на его уровне, а если
+    // там 0 — по характеристикам, с которыми он вышел в бой.
+    public static int EnemyValue(CampaignBattleEnemyRecord enemy)
+    {
+        if (enemy == null)
+            return 0;
+        int authored = ProgressionRules.Current.GetProfile(enemy.UnitTypeId).GetLevel(Math.Max(1, enemy.Level)).BattleExperience;
+        return authored > 0
+            ? authored
+            : CharacterProgression.EnemyExperience(enemy.MaxHitPoints, enemy.Attack, enemy.Defense, enemy.Damage);
     }
 
     // Один и тот же состав противников — «тот же бой» для антифарма.
@@ -155,13 +167,12 @@ public static class BattleExperience
             ResidentState resident = HomePeopleService.Find(state, contribution.PersonId);
             if (resident != null && !resident.IsAlive)
                 continue;
-            string unitTypeId = UnitTypeOf(state, contribution.PersonId);
             if (contribution.DamageDealt > 0 && contribution.UsedRangedAttack)
                 practice.Add(CharacterProgressionService.AddPractice(state, contribution.PersonId,
-                    CharacterProgressionService.WeaponCompetencyFor(unitTypeId, true), CharacterProgression.PracticePerUse, repeatKey));
+                    CharacterProgressionService.WeaponCompetencyFor(state, contribution.PersonId, true), CharacterProgression.PracticePerUse, repeatKey));
             if (contribution.DamageDealt > 0 && (contribution.UsedMeleeAttack || !contribution.UsedRangedAttack))
                 practice.Add(CharacterProgressionService.AddPractice(state, contribution.PersonId,
-                    CharacterProgressionService.WeaponCompetencyFor(unitTypeId, false), CharacterProgression.PracticePerUse, repeatKey));
+                    CharacterProgressionService.WeaponCompetencyFor(state, contribution.PersonId, false), CharacterProgression.PracticePerUse, repeatKey));
             if (contribution.DamagePrevented > 0)
                 practice.Add(CharacterProgressionService.AddPractice(state, contribution.PersonId,
                     NarrativeCompetencyIds.ShieldAndLine, CharacterProgression.PracticePerUse, repeatKey));
@@ -197,14 +208,5 @@ public static class BattleExperience
                 contributions.Add(new CampaignBattleContribution { PersonId = personId });
         }
         return contributions;
-    }
-
-    private static string UnitTypeOf(GameState state, string personId)
-    {
-        CommanderData hero = state.GetSelectedCommander();
-        if (hero != null && hero.Id == personId)
-            return string.IsNullOrWhiteSpace(hero.UnitTypeId) ? CampaignBattleBridge.HeroFallbackUnitTypeId : hero.UnitTypeId;
-        ResidentState resident = HomePeopleService.Find(state, personId);
-        return resident != null ? resident.UnitTypeId : null;
     }
 }

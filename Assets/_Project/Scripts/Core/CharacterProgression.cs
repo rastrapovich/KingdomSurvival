@@ -137,96 +137,71 @@ public sealed class DevelopmentOption
     public bool IsPersonal;
 }
 
-// Рабочие числа [РАБОЧЕЕ][KINGDOM SURVIVAL]: канон v1.48 §27.10 оставляет
-// кривую XP, ступени компетенций, число вариантов и коэффициенты открытыми
-// для настройки при реализации. Утверждены только потолок 100, выбор
-// каждые 3 уровня и деление боевого банка 60/40.
+// Числа прогрессии берутся из действующих правил «Базы развития»
+// (ProgressionRules.Current; без базы — рабочие значения по умолчанию
+// [РАБОЧЕЕ]). Канон v1.48 §27.10 оставляет кривую XP, ступени компетенций,
+// число вариантов и коэффициенты открытыми для настройки; утверждены потолок
+// 100, выбор каждые 3 уровня и деление боевого банка 60/40.
 public static class CharacterProgression
 {
-    public const int MaxLevel = 100;
-    public const int ChoiceEveryLevels = 3;
-
+    public const int MaxLevel = ProgressionProfile.LevelCount;
     public const int MaxCompetencyRank = 5;
-    // «Условная средняя степень», до которой хватает собственной практики.
-    public const int PracticeCeiling = 3;
 
-    // Боевой банк: 60% участие / 40% реальный вклад (§27.2).
-    public const int ParticipationPercent = 60;
+    private static ProgressionRules Rules => ProgressionRules.Current;
 
-    // Отход из написанного боя — половина банка.
-    public const int RetreatBankPercent = 50;
+    public static int ParticipationPercent => Rules.ParticipationPercent;
+    public static int RetreatBankPercent => Rules.RetreatBankPercent;
+    public static int PracticePerUse => Rules.PracticePerUse;
+    public static int PracticeCeiling => Math.Max(1, Math.Min(MaxCompetencyRank, Rules.PracticeCeiling));
+    public static int ExplorationExperience => Rules.ExplorationExperience;
+    public static int ToughnessHitPoints => Rules.ToughnessHitPoints;
+    public static int MaxToughnessChoices => Rules.MaxToughnessChoices;
+    public static int CombatBonusFirstRank => Rules.CombatBonusFirstRank;
+    public static int CombatBonusSecondRank => Rules.CombatBonusSecondRank;
 
-    // Повтор боя против того же состава: банк 100% → 50% → 25% → 10% → 5%.
-    private static readonly int[] RepeatBattlePercents = { 100, 50, 25, 10, 5 };
-
-    // Практика за одно содержательное применение и её угасание при повторе.
-    public const int PracticePerUse = 2;
-    private static readonly int[] RepeatPracticePoints = { 2, 2, 1, 1, 1, 1 };
-
-    // Практика до следующей ступени: 0→1, 1→2, 2→3, 3→4, 4→5.
-    private static readonly int[] PracticeToNextRankTable = { 3, 6, 10, 15, 20 };
-
-    // Опыт за впервые исследованное место.
-    public const int ExplorationExperience = 30;
-
-    // Крепость тела: +2 HP, не больше трёх раз за жизнь (HP растут очень
-    // ограниченно, §27.5).
-    public const int ToughnessHitPoints = 2;
-    public const int MaxToughnessChoices = 3;
-
-    // Боевые числа растут от владения (§27.5): ступень 3 — +1, ступень 5 — +2.
-    public const int CombatBonusFirstRank = 3;
-    public const int CombatBonusSecondRank = 5;
-
-    // Опыт до следующего уровня: 100 на первом, +25 за каждый следующий.
-    // До 100-го уровня — 131 175 опыта: практически недостижимо в обычном
-    // прохождении, но реально при целенаправленной долгой игре.
+    // Кривая Командира (профиль «hero»). У каждого типа персонажа — своя
+    // карта развития: ProgressionRules.Current.GetProfile(id).
     public static int ExperienceToNextLevel(int level)
     {
-        if (level >= MaxLevel)
-            return 0;
-        return 100 + 25 * (Math.Max(1, level) - 1);
+        return Rules.GetProfile(ProgressionRules.HeroProfileId).ExperienceToNextLevel(level);
     }
 
     public static int TotalExperienceForLevel(int level)
     {
-        int clamped = Math.Max(1, Math.Min(MaxLevel, level));
-        int steps = clamped - 1;
-        return 100 * steps + 25 * steps * (steps - 1) / 2;
+        return Rules.GetProfile(ProgressionRules.HeroProfileId).TotalExperienceForLevel(level);
     }
 
     public static int LevelForExperience(int experience)
     {
-        int level = 1;
-        while (level < MaxLevel && experience >= TotalExperienceForLevel(level + 1))
-            level++;
-        return level;
+        return Rules.GetProfile(ProgressionRules.HeroProfileId).LevelForExperience(experience);
     }
 
     public static int PracticeToNextRank(int rank)
     {
-        if (rank < 0 || rank >= PracticeToNextRankTable.Length)
-            return 0;
-        return PracticeToNextRankTable[rank];
+        return Rules.PracticeToNext(rank);
     }
 
     public static int RepeatBattlePercent(int previousCount)
     {
-        int index = Math.Max(0, Math.Min(RepeatBattlePercents.Length - 1, previousCount));
-        return RepeatBattlePercents[index];
+        int[] percents = Rules.RepeatBattlePercents;
+        if (percents == null || percents.Length == 0)
+            return 100;
+        int index = Math.Max(0, Math.Min(percents.Length - 1, previousCount));
+        return percents[index];
     }
 
     // Сотый безопасный удар почти ничему не учит (§27.6).
     public static int RepeatPractice(int previousCount)
     {
+        int[] points = Rules.RepeatPracticePoints;
         if (previousCount < 0)
             previousCount = 0;
-        return previousCount < RepeatPracticePoints.Length ? RepeatPracticePoints[previousCount] : 0;
+        return points != null && previousCount < points.Length ? points[previousCount] : 0;
     }
 
-    // Сколько «стоит» противник в банке боя: здоровье и боевые числа.
+    // «Цена» противника по характеристикам, если карта уровня её не задаёт.
     public static int EnemyExperience(int maxHitPoints, int attack, int defense, int damage)
     {
-        return Math.Max(0, 5 * maxHitPoints + 10 * (attack + defense + damage));
+        return Math.Max(0, Rules.EnemyHitPointWeight * maxHitPoints + Rules.EnemyStatWeight * (attack + defense + damage));
     }
 }

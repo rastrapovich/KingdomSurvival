@@ -123,7 +123,7 @@ public partial class PrototypeUIController
         PersonProgressionData record = CharacterProgressionService.Get(gameState, resident.PersonId);
         if (record != null)
         {
-            CharacterProgressionService.GetLevelProgress(record, out int current, out int required);
+            CharacterProgressionService.GetLevelProgress(gameState, record, out int current, out int required);
             heroCardLevel.text = "УР. " + record.Level;
             heroCardExperienceLabel.text = required > 0 ? current + " / " + required + " опыта" : "предел пути";
             float percent = required > 0 ? Mathf.Clamp01((float)current / required) * 100f : 100f;
@@ -290,9 +290,9 @@ public partial class PrototypeUIController
         }
         else
         {
-            int nextChoiceLevel = (record.Level / CharacterProgression.ChoiceEveryLevels + 1) * CharacterProgression.ChoiceEveryLevels;
+            int nextChoiceLevel = CharacterProgressionService.ProfileFor(gameState, personId).NextChoiceLevel(record.Level);
             heroCardChoice.Add(CreateHeroItemRow(
-                "Следующий выбор — на уровне " + Mathf.Min(nextChoiceLevel, CharacterProgression.MaxLevel),
+                nextChoiceLevel > 0 ? "Следующий выбор — на уровне " + nextChoiceLevel : "Выборов развития больше нет",
                 "Опыт — за новое и значимое: бои, места, встречи. Повтор одного и того же почти ничему не учит; уровень сам сил не прибавляет."));
         }
 

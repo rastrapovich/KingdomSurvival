@@ -22,6 +22,8 @@ public sealed class ProgressionCanon27Tests
     [SetUp]
     public void SetUp()
     {
+        ProgressionRules.Current = ProgressionRules.CreateDefault();
+        ProgressionCatalog.Current = ProgressionCatalog.CreateDefault();
         previousProvider = GameState.UnitStatsProvider;
         GameState.UnitStatsProvider = new FixedStats();
     }
@@ -29,6 +31,8 @@ public sealed class ProgressionCanon27Tests
     [TearDown]
     public void TearDown()
     {
+        ProgressionRules.Current = ProgressionRules.CreateDefault();
+        ProgressionCatalog.Current = ProgressionCatalog.CreateDefault();
         GameState.UnitStatsProvider = previousProvider;
     }
 
@@ -392,5 +396,100 @@ public sealed class ProgressionCanon27Tests
             Assert.AreNotEqual(id, NarrativeCompetencyLabels.GetLabel(id), id);
             Assert.IsNotEmpty(NarrativeCompetencyLabels.GetDescription(id), id);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Карты развития из «Базы развития» (профили типов)
+
+    private static ProgressionProfile EditProfile(string id)
+    {
+        ProgressionProfile profile = ProgressionRules.Current.GetProfile(id);
+        return profile;
+    }
+
+    [Test]
+    public void Profile_OwnCurve_PerCharacterType()
+    {
+        ProgressionProfile archer = EditProfile("archer");
+        for (int level = 1; level < ProgressionProfile.LevelCount; level++)
+            archer.Levels[level - 1].ExperienceToNext = 50;
+
+        GameState state = OnTheRoad("edric", "garrick");
+        CharacterProgressionService.AwardExperience(state, "edric", "test.curve", 150);
+        CharacterProgressionService.AwardExperience(state, "garrick", "test.curve", 150);
+        Assert.AreEqual(4, CharacterProgressionService.Get(state, "edric").Level, "У лучника своя кривая: 50 на уровень.");
+        Assert.AreEqual(2, CharacterProgressionService.Get(state, "garrick").Level, "У гвардейца — кривая по умолчанию.");
+    }
+
+    [Test]
+    public void Profile_ChoiceLevels_FromMap()
+    {
+        ProgressionProfile guard = EditProfile("guard");
+        for (int level = 1; level <= ProgressionProfile.LevelCount; level++)
+            guard.Levels[level - 1].Choice = level % 2 == 0;
+
+        GameState state = OnTheRoad("garrick");
+        CharacterProgressionService.AwardExperience(state, "garrick", "test.choices", guard.TotalExperienceForLevel(4));
+        Assert.AreEqual(4, CharacterProgressionService.Get(state, "garrick").Level);
+        Assert.AreEqual(2, CharacterProgressionService.PendingChoices(state, "garrick"), "Выбор на 2-м и 4-м уровнях.");
+    }
+
+    [Test]
+    public void Profile_LevelBonuses_AddToCombatStats()
+    {
+        ProgressionProfile spearman = EditProfile("spearman");
+        spearman.Levels[1].Bonus = new StatModifier { Attack = 1, MaxHitPoints = 3 };
+
+        GameState state = OnTheRoad("torvin");
+        UnitCombatStats before = CombatStatsAssembler.Compute(state, "torvin").Final;
+        CharacterProgressionService.AwardExperience(state, "torvin", "test.bonus", spearman.TotalExperienceForLevel(2));
+        AssembledCombatStats after = CombatStatsAssembler.Compute(state, "torvin");
+        Assert.AreEqual(before.Attack + 1, after.Final.Attack);
+        Assert.AreEqual(before.MaxHitPoints + 3, after.Final.MaxHitPoints);
+        Assert.IsTrue(after.Sources.Any(source => source.StartsWith("Уровень 2")), string.Join(" | ", after.Sources));
+    }
+
+    [Test]
+    public void Profile_StartingCompetencies_AndWeapon_FromMap()
+    {
+        ProgressionProfile archer = EditProfile("archer");
+        archer.StartingCompetencies.Clear();
+        archer.StartingCompetencies.Add(new CompetencyRank { CompetencyId = NarrativeCompetencyIds.Hunting, Rank = 2 });
+        archer.RangedCompetencyId = NarrativeCompetencyIds.Hunting;
+
+        GameState state = OnTheRoad("edric");
+        Assert.AreEqual(2, CharacterProgressionService.GetCompetencyRank(state, "edric", NarrativeCompetencyIds.Hunting));
+        Assert.AreEqual(0, CharacterProgressionService.GetCompetencyRank(state, "edric", NarrativeCompetencyIds.Shooting));
+        Assert.AreEqual(NarrativeCompetencyIds.Hunting, CharacterProgressionService.WeaponCompetencyFor(state, "edric", true));
+    }
+
+    [Test]
+    public void Profile_NotProgressing_GetsNoExperience()
+    {
+        EditProfile("healer").Progresses = false;
+        GameState state = OnTheRoad("marta");
+        Assert.IsNull(CharacterProgressionService.AwardExperience(state, "marta", "test.none", 500));
+    }
+
+    [Test]
+    public void EnemyValue_FromMapLevel_OrFormula()
+    {
+        ProgressionProfile beast = EditProfile("forest_beast");
+        beast.Levels[4].BattleExperience = 999;
+        Assert.AreEqual(999, BattleExperience.EnemyValue(new CampaignBattleEnemyRecord { UnitTypeId = "forest_beast", Level = 5, MaxHitPoints = 10, Attack = 2, Defense = 1, Damage = 3 }));
+        Assert.AreEqual(110, BattleExperience.EnemyValue(new CampaignBattleEnemyRecord { UnitTypeId = "forest_beast", Level = 1, MaxHitPoints = 10, Attack = 2, Defense = 1, Damage = 3 }),
+            "0 в карте — цена по формуле общих правил.");
+    }
+
+    [Test]
+    public void Catalog_RenamesFlowToLabels()
+    {
+        ProgressionCatalog.Current.FindCompetency(NarrativeCompetencyIds.Spearcraft).Name = "Копьё";
+        ProgressionCatalog.Current.FindQuality(HeroQuality.Instinct).Name = "Нюх";
+        ProgressionCatalog.Current.Traits.Add(new TraitCatalogEntry { Id = "test_trait", Name = "Проба", Description = "Описание" });
+        Assert.AreEqual("Копьё", NarrativeCompetencyLabels.GetLabel(NarrativeCompetencyIds.Spearcraft));
+        Assert.AreEqual("Нюх", NarrativeQualityLabels.GetLabel(HeroQuality.Instinct));
+        Assert.AreEqual("Проба", NarrativeTraitLabels.GetLabel("test_trait"));
+        Assert.Contains("test_trait", NarrativeTraitIds.Known.ToList());
     }
 }

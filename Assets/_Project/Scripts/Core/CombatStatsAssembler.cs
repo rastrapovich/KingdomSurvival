@@ -45,7 +45,7 @@ public static class CombatStatsAssembler
         if (commander != null && commander.Id == personId && commander.HeroProfile != null)
             ApplyQualities(commander.HeroProfile, ref stats, result.Sources);
 
-        ApplyProgression(state, personId, unitTypeId, ref stats, result.Sources);
+        ApplyProgression(state, personId, ref stats, result.Sources);
 
         foreach (ItemInstanceData item in ItemService.OwnedBy(state, personId))
         {
@@ -107,13 +107,26 @@ public static class CombatStatsAssembler
     // Канон v1.48 §27.5: точность растёт от владения своим оружием, защита —
     // от защитной практики, здоровье — очень ограниченно (крепость тела).
     // Уровень сам по себе боевые числа не меняет.
-    private static void ApplyProgression(GameState state, string personId, string unitTypeId,
+    private static void ApplyProgression(GameState state, string personId,
         ref UnitCombatStats stats, List<string> sources)
     {
         if (!CharacterProgressionService.IsProgressing(state, personId))
             return;
 
-        string weapon = CharacterProgressionService.WeaponCompetencyFor(unitTypeId, stats.AttackRange > 1);
+        // Прибавки, заданные в карте развития типа на пройденных уровнях
+        // (по умолчанию их нет: канон §27.5 — уровень сам числа не раздувает).
+        PersonProgressionData record = CharacterProgressionService.Get(state, personId);
+        if (record != null)
+        {
+            StatModifier levelBonus = CharacterProgressionService.ProfileFor(state, personId).CumulativeBonus(record.Level);
+            if (!levelBonus.IsZero)
+            {
+                Apply(ref stats, levelBonus);
+                sources.Add("Уровень " + record.Level + ": " + levelBonus.Describe());
+            }
+        }
+
+        string weapon = CharacterProgressionService.WeaponCompetencyFor(state, personId, stats.AttackRange > 1);
         int attackBonus = CompetencyBonus(CharacterProgressionService.GetCompetencyRank(state, personId, weapon));
         if (attackBonus > 0)
         {

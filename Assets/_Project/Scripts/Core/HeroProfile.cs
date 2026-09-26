@@ -51,20 +51,36 @@ public static class NarrativeCompetencyIds
     public const string Building = "building";
     public const string Investigation = "investigation";
 
-    public static readonly IReadOnlyList<string> Known = new List<string>
+    // Действующий перечень — из «Базы развития» (ProgressionCatalog); по
+    // умолчанию — 24 компетенции канона в его порядке.
+    public static IReadOnlyList<string> Known
     {
-        Fieldcraft, Stealth, Hunting, Craft, Healing, Household, Trade, Negotiation,
-        CustomAndLaw, Lore, Rites, ChoppingWeapons, Shooting, ShieldAndLine, Herbalism,
-        Spearcraft, Observation, Insight, Fishing, Forestry, Livestock, Farming, Building,
-        Investigation
-    };
+        get
+        {
+            List<string> ids = new List<string>();
+            foreach (CompetencyCatalogEntry entry in ProgressionCatalog.Current.Competencies)
+            {
+                if (entry != null && !string.IsNullOrWhiteSpace(entry.Id) && !ids.Contains(entry.Id))
+                    ids.Add(entry.Id);
+            }
+            return ids;
+        }
+    }
 
     // Каталог постоянного бойца уже каталога Командира: бой и поход (§25.5).
-    public static readonly IReadOnlyList<string> FighterCatalog = new List<string>
+    public static IReadOnlyList<string> FighterCatalog
     {
-        Fieldcraft, Stealth, Hunting, Healing, ChoppingWeapons, Shooting, ShieldAndLine,
-        Spearcraft, Observation
-    };
+        get
+        {
+            List<string> ids = new List<string>();
+            foreach (CompetencyCatalogEntry entry in ProgressionCatalog.Current.Competencies)
+            {
+                if (entry != null && entry.FighterCatalog && !string.IsNullOrWhiteSpace(entry.Id) && !ids.Contains(entry.Id))
+                    ids.Add(entry.Id);
+            }
+            return ids;
+        }
+    }
 
     public static bool IsKnown(string competencyId)
     {
@@ -77,7 +93,19 @@ public static class NarrativeTraitIds
     public const string KnowsTheWay = "knows_the_way";
     public const string Naturalist = "naturalist";
 
-    public static readonly IReadOnlyList<string> Known = new List<string> { KnowsTheWay, Naturalist };
+    public static IReadOnlyList<string> Known
+    {
+        get
+        {
+            List<string> ids = new List<string>();
+            foreach (TraitCatalogEntry entry in ProgressionCatalog.Current.Traits)
+            {
+                if (entry != null && !string.IsNullOrWhiteSpace(entry.Id) && !ids.Contains(entry.Id))
+                    ids.Add(entry.Id);
+            }
+            return ids;
+        }
+    }
 }
 
 [Serializable]

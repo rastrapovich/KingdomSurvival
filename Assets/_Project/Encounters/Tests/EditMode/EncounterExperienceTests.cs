@@ -6,6 +6,21 @@ using NUnit.Framework;
 // без опыта; повторное завершение не даёт опыта снова.
 public sealed class EncounterExperienceTests
 {
+    [SetUp]
+    public void SetUp()
+    {
+        ProgressionRules.Current = ProgressionRules.CreateDefault();
+        ProgressionCatalog.Current = ProgressionCatalog.CreateDefault();
+    }
+
+    [Test]
+    public void DurationClass_FromRules()
+    {
+        ProgressionRules.Current.EncounterStandardExperience = 77;
+        Assert.AreEqual(77, EncounterExperience.ForDurationClass(EncounterDurationClass.Standard));
+        ProgressionRules.Current = ProgressionRules.CreateDefault();
+    }
+
     [Test]
     public void DurationClass_MicroGivesNothing_LongerGivesMore()
     {

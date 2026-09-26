@@ -88,6 +88,7 @@
 
 - `Assets/_Project/Scripts/Core` — кампания, карта, время, экспедиции, строительство.
 - `Assets/_Project/BattlefieldDatabase`, `DialogueDatabase`, `UILayout` — отдельные модули с `Runtime/`, `Editor/`, `Resources/`; не тянуть Unity-зависимости в `KingdomSurvival.Core`.
+- `Assets/_Project/ProgressionDatabase` — «База развития»: правила опыта, карты развития 1–100 для Командира и каждого типа из Базы существ, перечни качеств, особенностей, компетенций. Числа опыта и уровней не хардкодить в ядре — ядро читает `ProgressionRules.Current`/`ProgressionCatalog.Current` (значения по умолчанию совпадают с исходной базой).
 - `Assets/_Project/Tests/EditMode` — EditMode-тесты.
 - `BattleSandbox` — единственная основа будущих боёв. Старый стратегический `BattleSystem` удалён и не восстанавливается.
 

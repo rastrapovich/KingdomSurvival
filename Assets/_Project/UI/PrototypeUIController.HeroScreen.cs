@@ -40,21 +40,6 @@ public partial class PrototypeUIController
         "strength", "dexterity", "fortitude", "instinct", "judgment", "character"
     };
 
-    private static readonly string[] HeroScreenQualityCaptions =
-    {
-        "Сила", "Сноровка", "Стойкость", "Чутьё", "Суждение", "Характер"
-    };
-
-    private static readonly string[] HeroScreenQualityMeanings =
-    {
-        "Физическое воздействие.",
-        "Координация, точность и скорость.",
-        "Здоровье и физические лишения.",
-        "Наблюдение, следы и опасность.",
-        "Анализ, планирование и интерпретация.",
-        "Сила личности, влияние и сопротивление давлению."
-    };
-
     // Порядок совпадает с FillHeroCardStats (карточка человека).
     private static readonly string[] HeroScreenStatSuffixes =
     {
@@ -390,8 +375,9 @@ public partial class PrototypeUIController
         {
             VisualElement box = heroScreenQualityBoxes[i];
             int index = i;
-            string title = HeroScreenQualityCaptions[i].ToUpperInvariant();
-            box.RegisterCallback<PointerEnterEvent>(_ => ShowHeroScreenStatTooltip(box, title, heroScreenQualityExplanations[index]));
+            HeroQuality quality = (HeroQuality)i;
+            box.RegisterCallback<PointerEnterEvent>(_ => ShowHeroScreenStatTooltip(box,
+                NarrativeQualityLabels.GetLabel(quality).ToUpperInvariant(), heroScreenQualityExplanations[index]));
             box.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenStatTooltip());
         }
 
@@ -578,9 +564,12 @@ public partial class PrototypeUIController
             HeroQuality quality = (HeroQuality)i;
             int value = hero != null ? hero.GetQuality(quality) : HeroProfileData.DefaultQualityValue;
             heroScreenQualityValues[i].text = value + " / " + HeroProfileData.MaxQualityValue;
+            Label caption = heroScreenQualityBoxes[i].Q<Label>(className: "hero-screen-stat-box-caption");
+            if (caption != null)
+                caption.text = NarrativeQualityLabels.GetLabel(quality);
             heroScreenQualityExplanations[i] =
-                HeroScreenQualityCaptions[i] + " " + value + " из 10 (" + GetHeroScreenQualityRangeLabel(value) + "). " +
-                HeroScreenQualityMeanings[i];
+                NarrativeQualityLabels.GetLabel(quality) + " " + value + " из 10 (" + GetHeroScreenQualityRangeLabel(value) + "). " +
+                NarrativeQualityLabels.GetDescription(quality);
         }
     }
 
@@ -627,22 +616,19 @@ public partial class PrototypeUIController
     {
         heroScreenTraitsRow.Clear();
 
-        if (hero != null && hero.HasTrait(NarrativeTraitIds.KnowsTheWay))
+        // Названия и описания — из каталога «Базы развития».
+        if (hero?.Traits != null)
         {
-            AddHeroScreenChip(
-                heroScreenTraitsRow,
-                "Знающий дорогу",
-                HeroScreenTraitChipColor,
-                "При успешном обнаружении дорожный Encounter начинается в подготовленном состоянии: герой замечает событие раньше, может наблюдать, обойти или занять выгодную позицию.");
-        }
-
-        if (hero != null && hero.HasTrait(NarrativeTraitIds.Naturalist))
-        {
-            AddHeroScreenChip(
-                heroScreenTraitsRow,
-                "Натуралист",
-                HeroScreenTraitChipColor,
-                "Открывает авторские блоки и варианты, связанные с растениями, животными, погодой, болезнями, водой и природными изменениями.");
+            foreach (string traitId in hero.Traits)
+            {
+                if (string.IsNullOrWhiteSpace(traitId))
+                    continue;
+                AddHeroScreenChip(
+                    heroScreenTraitsRow,
+                    NarrativeTraitLabels.GetLabel(traitId),
+                    HeroScreenTraitChipColor,
+                    NarrativeTraitLabels.GetDescription(traitId));
+            }
         }
 
         // ПР-08 (§8.2 ТЗ): сделанный в главе выбор пути — приобретённая черта.
@@ -693,7 +679,7 @@ public partial class PrototypeUIController
             string progress = string.Empty;
             if (record != null)
             {
-                CharacterProgressionService.GetLevelProgress(record, out int current, out int required);
+                CharacterProgressionService.GetLevelProgress(gameState, record, out int current, out int required);
                 progress = required > 0 ? "\nОпыт: " + current + " / " + required + " до уровня " + (record.Level + 1) + "." : string.Empty;
             }
 

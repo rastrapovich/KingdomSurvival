@@ -63,6 +63,7 @@ public sealed class CampaignBattleContribution
 public sealed class CampaignBattleEnemyRecord
 {
     public string UnitTypeId;
+    public int Level = 1;
     public int MaxHitPoints;
     public int Attack;
     public int Defense;
@@ -75,6 +76,8 @@ public sealed class CampaignBattleEnemy
 {
     public string UnitTypeId;
     public int Count = 1;
+    // Уровень противника: прибавки и цена в опыте — из его карты развития.
+    public int Level = 1;
 }
 
 [Serializable]

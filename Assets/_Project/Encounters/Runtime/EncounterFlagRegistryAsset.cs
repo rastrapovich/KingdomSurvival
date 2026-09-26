@@ -48,18 +48,18 @@ namespace KingdomSurvival.Encounters
                 EncounterFlagDefinition flag = flags[i];
                 if (flag == null || string.IsNullOrWhiteSpace(flag.FlagId))
                 {
-                    issues.Add("Флаг #" + (i + 1) + ": отсутствует FlagId.");
+                    issues.Add("Флаг #" + (i + 1) + ": нет ID флага.");
                     continue;
                 }
 
                 if (!flagIds.Add(flag.FlagId))
-                    issues.Add("Повторяющийся FlagId: " + flag.FlagId + ".");
+                    issues.Add("Повторяющийся ID флага: " + flag.FlagId + ".");
 
                 // Active + Unused — предупреждение (§31), но проверка "нет
                 // потребителя" требует знания Encounter Database и потому
                 // выполняется отдельным кросс-валидатором, не здесь.
                 if (flag.Status == EncounterFlagStatus.Active && string.IsNullOrWhiteSpace(flag.DisplayName))
-                    issues.Add(flag.FlagId + ": Active-флаг без DisplayName.");
+                    issues.Add(flag.FlagId + ": используемый флаг без названия.");
             }
         }
     }

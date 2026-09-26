@@ -26,7 +26,7 @@ public sealed class EncounterFlagRegistryTests
 
         List<string> issues = new List<string>();
         registry.CollectValidationIssues(issues);
-        Assert.That(issues, Has.Some.Contains("Повторяющийся FlagId"));
+        Assert.That(issues, Has.Some.Contains("Повторяющийся ID флага"));
     }
 
     [Test]
@@ -39,7 +39,7 @@ public sealed class EncounterFlagRegistryTests
 
         List<string> issues = new List<string>();
         registry.CollectValidationIssues(issues);
-        Assert.That(issues, Has.Some.Contains("без DisplayName"));
+        Assert.That(issues, Has.Some.Contains("без названия"));
     }
 
     [Test]

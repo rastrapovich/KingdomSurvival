@@ -69,6 +69,8 @@ public sealed class EncounterEditorWindowTests
             {
                 tab.SetValue(window, value);
                 Assert.DoesNotThrow(() => show.Invoke(window, null), "Вкладка " + value);
+                if (value.ToString() == "Flags")
+                    Assert.IsTrue(root.Query<Label>().ToList().Exists(label => label.text == "ГДЕ ИСПОЛЬЗУЕТСЯ"), "Карточка флага построена.");
             }
         }
         finally

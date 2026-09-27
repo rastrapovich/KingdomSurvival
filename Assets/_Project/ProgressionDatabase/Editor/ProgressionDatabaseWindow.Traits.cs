@@ -190,7 +190,10 @@ namespace KingdomSurvival.ProgressionDatabase.Editor
             AddNote(card, FeatureLabels.Layer(record.layer) + " · " + FeatureLabels.Owner(record.owner) + " · " +
                           FeatureLabels.Kind(record.kind) + " · " + (record.combat ? "бой" : "вне боя") + " · реализация " +
                           FeatureLabels.Implementation(record.implementation) + " · предел " + FeatureLabels.Limit(record.limit) +
-                          (ProgressionFeatureImplementations.IsImplemented(record.id) ? " · код в игре есть" : string.Empty));
+                          (ProgressionFeatureImplementations.IsImplemented(record.id) ? " · код в игре есть" : string.Empty) +
+                          (ProgressionFeatureImplementations.TryGetStubTrigger(record.id, out FeatureTrigger waits)
+                              ? " · заглушка в движке, ждёт события «" + FeatureTriggers.Label(waits) + "»"
+                              : string.Empty));
 
             AddSection(card, "КАРТОЧКА");
             AddProperty(card, entry.FindPropertyRelative("id"), "ID");

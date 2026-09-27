@@ -480,6 +480,16 @@ public static partial class ContinuousSimulationSystem
         expedition.Phase = CommanderState.AtLocation;
         commander.State = CommanderState.AtLocation;
         LocationData location = state.FindLocation(expedition.LocationId);
+        if (location != null && !location.IsWaypoint)
+        {
+            FeatureDispatcher.Raise(new FeatureEvent
+            {
+                Trigger = FeatureTrigger.LocationEntered,
+                State = state,
+                LocationId = location.Id,
+                EventKey = "arrival:" + CharacterProgressionService.EnsureState(state).ExpeditionEpoch + ":" + location.Id
+            });
+        }
 
         if (location != null && !location.IsWaypoint)
         {

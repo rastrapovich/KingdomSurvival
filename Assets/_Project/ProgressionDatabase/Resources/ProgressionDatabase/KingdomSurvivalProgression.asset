@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c30a5c0f24d56454b9134d6d92ab4f30, type: 3}
   m_Name: KingdomSurvivalProgression
   m_EditorClassIdentifier: KingdomSurvival.ProgressionDatabase::KingdomSurvival.ProgressionDatabase.ProgressionDatabaseAsset
-  schemaVersion: 2
+  schemaVersion: 3
   rules:
     participationPercent: 60
     retreatBankPercent: 50
@@ -34,6 +34,9 @@ MonoBehaviour:
     encounterQuestSeedExperience: 30
     toughnessHitPoints: 2
     maxToughnessChoices: 3
+    firstChoiceOptions: 3
+    choiceOptionsGrowth: 1
+    maxChoiceOptions: 35
   profiles:
   - id: hero
     displayName: "\u041A\u043E\u043C\u0430\u043D\u0434\u0438\u0440"
@@ -10183,7 +10186,7 @@ MonoBehaviour:
     group: "\u041F\u0443\u0442\u044C \u0438 \u043C\u0435\u0441\u0442\u043D\u043E\u0441\u0442\u044C"
     owner: 0
     kind: 0
-    combat: 0
+    combat: 1
     status: 2
     implementation: 1
     sources: 3
@@ -10384,7 +10387,7 @@ MonoBehaviour:
     owner: 2
     kind: 1
     combat: 1
-    status: 0
+    status: 1
     implementation: 8
     sources: 9
     limit: 2
@@ -10902,7 +10905,7 @@ MonoBehaviour:
     owner: 2
     kind: 1
     combat: 1
-    status: 0
+    status: 1
     implementation: 8
     sources: 9
     limit: 2
@@ -12355,7 +12358,7 @@ MonoBehaviour:
     owner: 2
     kind: 0
     combat: 1
-    status: 0
+    status: 1
     implementation: 8
     sources: 1
     limit: 3
@@ -12404,7 +12407,7 @@ MonoBehaviour:
     owner: 2
     kind: 0
     combat: 1
-    status: 0
+    status: 1
     implementation: 8
     sources: 1
     limit: 0
@@ -16937,7 +16940,7 @@ MonoBehaviour:
     owner: 0
     kind: 2
     combat: 0
-    status: 0
+    status: 1
     implementation: 8
     sources: 1
     limit: 9

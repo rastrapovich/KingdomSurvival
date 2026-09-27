@@ -293,6 +293,15 @@ public static class CampRest
             night.ChosenActions.Clear();
         }
 
+        // 12Е-4: ночь прошла — эпоха «до лагеря» сменилась, особенности
+        // ночёвки срабатывают.
+        List<FeatureActivation> activations = FeatureDispatcher.Raise(new FeatureEvent { Trigger = FeatureTrigger.CampNight, State = state });
+        foreach (FeatureActivation activation in activations)
+        {
+            if (!string.IsNullOrEmpty(activation.Text))
+                results.Add(activation.Text);
+        }
+
         messages?.Add(results.Count == 0
             ? "Ночь прошла спокойно. Отряд продолжает путь."
             : "Утро после ночлега: " + string.Join("; ", results) + ".");

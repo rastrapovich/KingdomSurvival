@@ -217,8 +217,9 @@ namespace KingdomSurvival.ProgressionDatabase
     {
         public const string ResourcesPath = "ProgressionDatabase/KingdomSurvivalProgression";
         public const string AssetPath = "Assets/_Project/ProgressionDatabase/Resources/ProgressionDatabase/KingdomSurvivalProgression.asset";
-        // 2 — карточки особенностей, приёмов и приказов (каталог 27.09.2026).
-        public const int CurrentSchemaVersion = 2;
+        // 2 — карточки особенностей, приёмов и приказов (каталог 27.09.2026);
+        // 3 — статус «Заглушка» у заглушек движка (12Е-4).
+        public const int CurrentSchemaVersion = 3;
 
         public int schemaVersion = CurrentSchemaVersion;
         public ProgressionGlobalRecord rules = new ProgressionGlobalRecord();
@@ -244,6 +245,19 @@ namespace KingdomSurvival.ProgressionDatabase
                 return false;
             if (traits == null)
                 traits = new List<TraitRecord>();
+            if (schemaVersion < 2)
+                UpgradeToCatalogCards();
+            foreach (TraitRecord trait in traits)
+            {
+                if (trait != null && trait.status == FeatureStatus.Candidate && ProgressionFeatureImplementations.IsStub(trait.id))
+                    trait.status = FeatureStatus.Stub;
+            }
+            schemaVersion = CurrentSchemaVersion;
+            return true;
+        }
+
+        private void UpgradeToCatalogCards()
+        {
             foreach (TraitCatalogEntry entry in ProgressionCatalog.CreateDefault().Traits)
             {
                 TraitRecord existing = FindTrait(entry.Id);
@@ -259,8 +273,6 @@ namespace KingdomSurvival.ProgressionDatabase
                     filled.description = existing.description;
                 traits[traits.IndexOf(existing)] = filled;
             }
-            schemaVersion = CurrentSchemaVersion;
-            return true;
         }
 
         // Добавляет записи каталога по умолчанию, которых нет в базе (по ID).
@@ -649,6 +661,11 @@ namespace KingdomSurvival.ProgressionDatabase
                         warnings.Add(name + ": открывает «" + id + "», но это не приём и не приказ.");
                 }
                 bool implemented = ProgressionFeatureImplementations.IsImplemented(trait.id);
+                bool stub = ProgressionFeatureImplementations.IsStub(trait.id);
+                if (trait.status == FeatureStatus.Stub && !stub)
+                    warnings.Add(name + ": статус «Заглушка», но в движке заглушки нет.");
+                else if (stub && trait.status != FeatureStatus.Stub)
+                    warnings.Add(name + ": в движке это заглушка, а статус — «" + FeatureLabels.Status(trait.status) + "».");
                 if (trait.status == FeatureStatus.Active && !implemented)
                     warnings.Add(name + ": статус «Активна», но в игре нет её кода — в выбор она не попадёт.");
                 else if (implemented && trait.status != FeatureStatus.Active)

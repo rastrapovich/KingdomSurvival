@@ -189,6 +189,15 @@ public static class CampaignBattleBridge
             }
         }
 
+        FeatureDispatcher.Raise(new FeatureEvent
+        {
+            Trigger = FeatureTrigger.BattleStarted,
+            State = state,
+            BattleId = battleId,
+            EventKey = "battle-start:" + battleId,
+            LocationId = request.LocationId
+        });
+
         return request;
     }
 
@@ -319,6 +328,20 @@ public static class CampaignBattleBridge
             // Канон v1.48 §27.2: общий опыт из единого банка боя и практика.
             List<string> experience = BattleExperience.Apply(state, result);
             notes?.AddRange(experience);
+        }
+
+        List<FeatureActivation> activations = FeatureDispatcher.Raise(new FeatureEvent
+        {
+            Trigger = FeatureTrigger.BattleEnded,
+            State = state,
+            BattleId = result.BattleId,
+            BattleResult = result,
+            EventKey = "battle-end:" + result.BattleId
+        });
+        foreach (FeatureActivation activation in activations)
+        {
+            if (!string.IsNullOrEmpty(activation.Text))
+                notes?.Add(activation.Text);
         }
 
         return heroFell ? CampaignBattleApplyStatus.HeroFell : CampaignBattleApplyStatus.SquadSurvived;

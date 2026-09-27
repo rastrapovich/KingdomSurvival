@@ -746,6 +746,7 @@ public class GameState
         ActiveExpedition = expedition;
         ExpeditionPreparation.RememberExpeditionRoster(this);
         commander.State = CommanderState.TravellingToLocation;
+        FeatureDispatcher.Raise(new FeatureEvent { Trigger = FeatureTrigger.ExpeditionStarted, State = this, LocationId = location.Id });
 
         string destinationText = location.IsWaypoint
             ? "выбранную точку"
@@ -1088,6 +1089,8 @@ public class GameState
         ActiveExpedition.PendingDecision = null;
         ActiveExpedition.HasInterruptedRoute = false;
         // ПР-07А-1: вернувшийся состав — основа следующей подготовки.
+        // 12Е-4: особенности узнают о возвращении (пока поход ещё известен).
+        FeatureDispatcher.Raise(new FeatureEvent { Trigger = FeatureTrigger.ReturnedHome, State = this, LocationId = ActiveExpedition.LocationId });
         ExpeditionPreparation.RememberExpeditionRoster(this);
         ActiveExpedition.IsActive = false;
 

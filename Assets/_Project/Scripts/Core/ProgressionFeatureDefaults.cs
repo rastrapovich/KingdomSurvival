@@ -5,7 +5,7 @@ using System.Collections.Generic;
 // ProjectDocs/FEATURES_REFERENCES_ADAPTATION.md (§3.1–§4); дальше каталог
 // правится в окне «База развития», а этот список — исходное содержимое базы
 // и значения ядра без неё (EditMode-тесты). Всё [РАБОЧЕЕ]: названия, условия
-// и числа не утверждены. Активны только особенности, у которых есть код.
+// и числа не утверждены. Активны только особенности, у которых есть код; заглушки ждут своей механики.
 public static class ProgressionFeatureDefaults
 {
     public static void AddTo(List<TraitCatalogEntry> list)
@@ -41,7 +41,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-03 Щит товарища
-        e = New("Б-03", "shchit_tovarishcha", "Щит товарища", FeatureLayer.Feature, "Строй и защита", FeatureOwner.Fighter, FeatureKind.Reaction, true, FeatureStatus.Candidate);
+        e = New("Б-03", "shchit_tovarishcha", "Щит товарища", FeatureLayer.Feature, "Строй и защита", FeatureOwner.Fighter, FeatureKind.Reaction, true, FeatureStatus.Stub);
         e.Implementation = FeatureImplementation.Future;
         e.Sources = FeatureSource.LevelChoice | FeatureSource.Trace;
         e.Limit = FeatureLimit.Round;
@@ -197,7 +197,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-15 Встречает первым
-        e = New("Б-15", "vstrechaet_pervym", "Встречает первым", FeatureLayer.Feature, "Ответ и реакция", FeatureOwner.Fighter, FeatureKind.Reaction, true, FeatureStatus.Candidate);
+        e = New("Б-15", "vstrechaet_pervym", "Встречает первым", FeatureLayer.Feature, "Ответ и реакция", FeatureOwner.Fighter, FeatureKind.Reaction, true, FeatureStatus.Stub);
         e.Implementation = FeatureImplementation.Future;
         e.Sources = FeatureSource.LevelChoice | FeatureSource.Trace;
         e.Limit = FeatureLimit.Round;
@@ -670,7 +670,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-50 Быстрая перезарядка
-        e = New("Б-50", "bystraya_perezaryadka", "Быстрая перезарядка", FeatureLayer.Feature, "Боезапас и последствия боя", FeatureOwner.Fighter, FeatureKind.Permanent, true, FeatureStatus.Candidate);
+        e = New("Б-50", "bystraya_perezaryadka", "Быстрая перезарядка", FeatureLayer.Feature, "Боезапас и последствия боя", FeatureOwner.Fighter, FeatureKind.Permanent, true, FeatureStatus.Stub);
         e.Implementation = FeatureImplementation.Future;
         e.Sources = FeatureSource.LevelChoice;
         e.Limit = FeatureLimit.Battle;
@@ -686,7 +686,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-51 Бережёт стрелы
-        e = New("Б-51", "berezhyot_strely", "Бережёт стрелы", FeatureLayer.Feature, "Боезапас и последствия боя", FeatureOwner.Fighter, FeatureKind.Permanent, true, FeatureStatus.Candidate);
+        e = New("Б-51", "berezhyot_strely", "Бережёт стрелы", FeatureLayer.Feature, "Боезапас и последствия боя", FeatureOwner.Fighter, FeatureKind.Permanent, true, FeatureStatus.Stub);
         e.Implementation = FeatureImplementation.Future;
         e.Sources = FeatureSource.LevelChoice;
         e.Description = "После боя возвращается часть действительно выпущенных стрел; без отдельной рутины подсчёта";
@@ -2081,7 +2081,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-73 Полевой ремонт
-        e = New("Н-73", "polevoy_remont", "Полевой ремонт", FeatureLayer.Feature, "Лечение и ремесло", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Candidate);
+        e = New("Н-73", "polevoy_remont", "Полевой ремонт", FeatureLayer.Feature, "Лечение и ремесло", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Stub);
         e.Implementation = FeatureImplementation.Future;
         e.Sources = FeatureSource.LevelChoice;
         e.Limit = FeatureLimit.Expedition;

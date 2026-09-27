@@ -352,6 +352,16 @@ public static class ExpeditionIncidentSystem
             "road_predator_detection_" + finishedDay + "_" + occurrenceId,
             out naturalistBonus,
             PartyHasFeature(state, NarrativeTraitIds.KnowsTheWay));
+        if (entryState != RoadPredatorEntryState.Unaware)
+        {
+            FeatureDispatcher.Raise(new FeatureEvent
+            {
+                Trigger = FeatureTrigger.RoadEncounterDetected,
+                State = state,
+                EventKey = "road:" + definition.Id + ":" + finishedDay + ":" + occurrenceId,
+                LocationId = state.ActiveExpedition != null ? state.ActiveExpedition.LocationId : string.Empty
+            });
+        }
 
         List<string> consequences = new List<string>();
         ExpeditionIncidentTone tone;

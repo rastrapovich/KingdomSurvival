@@ -23,6 +23,11 @@ public sealed class NarrativeCheckResult
     // Игровой runtime такой результат никогда не создаёт.
     public bool IsForcedByPreview;
 
+    // Результат получен перебросом (12Е-4): чем перебросили и какой кубик
+    // был до переброса. Пусто — переброса не было.
+    public string RerolledBy = string.Empty;
+    public int RerolledDieBefore;
+
     // Снимок реально сработавших контекстных модификаторов в момент
     // расчёта (§8 инструкции по визуализации проверок). Список правил
     // (NarrativeContextModifierRule) сюда не попадает — только неизменяемая

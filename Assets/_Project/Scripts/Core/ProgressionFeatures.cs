@@ -334,9 +334,11 @@ public static class FeatureLabels
     }
 }
 
-// Особенности, у которых в игре уже есть код. Только они могут быть
-// «Активна» и попадать в выбор развития; окно базы сверяет статус с этим
-// списком. Новая реализация добавляет сюда свой ID.
+// Особенности, у которых в игре уже есть код, и заглушки. Только
+// реализованные могут быть «Активна» и попадать в выбор развития;
+// заглушка — «Заглушка»: подписана на событие ещё не существующей механики
+// и ничего не делает (правила каталога §0.1). Окно базы сверяет статусы с
+// этим списком.
 public static class ProgressionFeatureImplementations
 {
     private static readonly HashSet<string> Implemented = new HashSet<string>(StringComparer.Ordinal)
@@ -346,23 +348,65 @@ public static class ProgressionFeatureImplementations
         "toughness"
     };
 
+    private static readonly Dictionary<string, FeatureTrigger> Stubs = new Dictionary<string, FeatureTrigger>(StringComparer.Ordinal);
+
+    static ProgressionFeatureImplementations()
+    {
+        // Каталог §6.1 «Заглушки сразу»: ждут боезапаса, реакций и
+        // состояния вещей.
+        RegisterStub("bystraya_perezaryadka", FeatureTrigger.WeaponReloaded);
+        RegisterStub("berezhyot_strely", FeatureTrigger.ArrowsSpent);
+        RegisterStub("vstrechaet_pervym", FeatureTrigger.EnemyEntersAdjacentHex);
+        RegisterStub("shchit_tovarishcha", FeatureTrigger.AllyAttacked);
+        RegisterStub("polevoy_remont", FeatureTrigger.ItemDamaged);
+    }
+
+    // Вызывается диспетчером событий: гарантирует, что регистрации сделаны.
+    public static void EnsureRegistered()
+    {
+    }
+
     public static bool IsImplemented(string id)
     {
         return !string.IsNullOrEmpty(id) && Implemented.Contains(id);
     }
 
-    public static IEnumerable<string> All => Implemented;
+    public static bool IsStub(string id)
+    {
+        return !string.IsNullOrEmpty(id) && Stubs.ContainsKey(id);
+    }
 
-    // Регистрация кода особенности (реализации первой партии и тесты).
+    // Какого события ждёт заглушка.
+    public static bool TryGetStubTrigger(string id, out FeatureTrigger trigger)
+    {
+        trigger = default;
+        return !string.IsNullOrEmpty(id) && Stubs.TryGetValue(id, out trigger);
+    }
+
+    public static IEnumerable<string> All => Implemented;
+    public static IEnumerable<string> AllStubs => Stubs.Keys;
+
+    // Регистрация кода особенности (реализации и тесты).
     public static void Register(string id)
     {
-        if (!string.IsNullOrWhiteSpace(id))
-            Implemented.Add(id);
+        if (string.IsNullOrWhiteSpace(id))
+            return;
+        Implemented.Add(id);
+        Stubs.Remove(id);
     }
 
     public static void Unregister(string id)
     {
         if (!string.IsNullOrWhiteSpace(id))
             Implemented.Remove(id);
+    }
+
+    // Заглушка: особенность заведена в движке и ждёт события механики,
+    // которой ещё нет. Когда механика появится, заглушку заменит Register.
+    public static void RegisterStub(string id, FeatureTrigger trigger)
+    {
+        if (string.IsNullOrWhiteSpace(id) || Implemented.Contains(id))
+            return;
+        Stubs[id] = trigger;
     }
 }

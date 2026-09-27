@@ -111,6 +111,8 @@ namespace KingdomSurvival.ProgressionDatabase.Tests
             {
                 Assert.AreEqual(ProgressionFeatureImplementations.IsImplemented(trait.Id), trait.Status == FeatureStatus.Active,
                     trait.Code + " " + trait.Name);
+                Assert.AreEqual(ProgressionFeatureImplementations.IsStub(trait.Id), trait.Status == FeatureStatus.Stub,
+                    trait.Code + " " + trait.Name + ": статус «Заглушка» — только у заглушек движка.");
             }
             Assert.AreEqual("Н-47", ProgressionCatalog.CreateDefault().FindTrait(NarrativeTraitIds.KnowsTheWay).Code);
             Assert.IsNotNull(ProgressionCatalog.CreateDefault().FindTrait(NarrativeTraitIds.Naturalist));
@@ -199,7 +201,7 @@ namespace KingdomSurvival.ProgressionDatabase.Tests
             List<string> warnings = new List<string>();
             database.CollectValidationIssues(errors, warnings);
             Assert.That(errors, Is.Empty, string.Join("\n", errors));
-            Assert.That(warnings.Where(w => w.Contains("Активна") || w.Contains("код в игре")), Is.Empty);
+            Assert.That(warnings.Where(w => w.Contains("Активна") || w.Contains("код в игре") || w.Contains("аглушк")), Is.Empty);
         }
 
         [Test]

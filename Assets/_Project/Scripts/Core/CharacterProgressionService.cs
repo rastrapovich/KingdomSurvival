@@ -21,6 +21,12 @@ public static class CharacterProgressionService
             progression.AppliedSources = new List<string>();
         if (progression.Repeats == null)
             progression.Repeats = new List<ProgressionRepeatData>();
+        if (progression.FeatureUses == null)
+            progression.FeatureUses = new List<FeatureUseData>();
+        if (progression.HandledFeatureEvents == null)
+            progression.HandledFeatureEvents = new List<string>();
+        if (progression.RecentFeatureActivations == null)
+            progression.RecentFeatureActivations = new List<FeatureActivation>();
 
         CommanderData hero = state.GetSelectedCommander();
         if (hero != null)

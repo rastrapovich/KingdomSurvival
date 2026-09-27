@@ -97,6 +97,16 @@ public sealed class ProgressionStateData
     public List<string> AppliedSources = new List<string>();
 
     public List<ProgressionRepeatData> Repeats = new List<ProgressionRepeatData>();
+
+    // 12Е-4: особенности и их пределы. Эпохи растут с каждым выходом в поход
+    // и каждой ночёвкой — на них держатся «1/поход» и «до лагеря».
+    public int ExpeditionEpoch;
+    public int CampEpoch;
+    public List<FeatureUseData> FeatureUses = new List<FeatureUseData>();
+    // Ключи уже обработанных событий: повтор не срабатывает дважды.
+    public List<string> HandledFeatureEvents = new List<string>();
+    // Последние сработавшие особенности — для показа игроку.
+    public List<FeatureActivation> RecentFeatureActivations = new List<FeatureActivation>();
 }
 
 public sealed class ExperienceGain

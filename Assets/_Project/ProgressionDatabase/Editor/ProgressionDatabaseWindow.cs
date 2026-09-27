@@ -376,6 +376,13 @@ namespace KingdomSurvival.ProgressionDatabase.Editor
             AddSection(page, "ВЫБОР РАЗВИТИЯ");
             AddProperty(page, Rules("toughnessHitPoints"), "«Крепость тела»: +HP");
             AddProperty(page, Rules("maxToughnessChoices"), "«Крепость тела»: не больше раз");
+
+            AddSection(page, "ПОКАЗ ВЫБОРА РАЗВИТИЯ");
+            AddNote(page, "Решение автора (каталог особенностей §0.1): первый показ — 3 карточки, каждый следующий этому же человеку на одну больше, " +
+                          "не больше 35. Это число вариантов на выбор, а не число выборов. В выбор попадают только активные особенности.");
+            AddProperty(page, Rules("firstChoiceOptions"), "Карточек на первом показе");
+            AddProperty(page, Rules("choiceOptionsGrowth"), "Прибавка с каждым показом");
+            AddProperty(page, Rules("maxChoiceOptions"), "Не больше карточек");
         }
 
         // ------------------------------------------------------------------

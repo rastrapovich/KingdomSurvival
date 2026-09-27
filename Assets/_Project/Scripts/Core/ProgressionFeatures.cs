@@ -352,4 +352,17 @@ public static class ProgressionFeatureImplementations
     }
 
     public static IEnumerable<string> All => Implemented;
+
+    // Регистрация кода особенности (реализации первой партии и тесты).
+    public static void Register(string id)
+    {
+        if (!string.IsNullOrWhiteSpace(id))
+            Implemented.Add(id);
+    }
+
+    public static void Unregister(string id)
+    {
+        if (!string.IsNullOrWhiteSpace(id))
+            Implemented.Remove(id);
+    }
 }

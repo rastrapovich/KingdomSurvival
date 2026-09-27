@@ -128,6 +128,7 @@ public sealed class HeroScreenLayoutTests
     [TestCase("hero-screen-unit-card-available", "hero-screen-unit-card-equipment")]
     [TestCase("hero-screen-unit-card-choice", "hero-screen-unit-card-development")]
     [TestCase("hero-screen-unit-card-competencies", "hero-screen-unit-card-development")]
+    [TestCase("hero-screen-unit-card-features", "hero-screen-unit-card-development")]
     public void HeroScreen_PersonDetails_LiveInPersonCard(string elementId, string expectedParentId)
     {
         UILayoutScreenDefinition screen = LoadDatabase().FindScreen(HeroScreenId);

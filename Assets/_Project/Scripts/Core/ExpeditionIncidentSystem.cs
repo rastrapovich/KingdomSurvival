@@ -301,7 +301,8 @@ public static class ExpeditionIncidentSystem
         HeroProfileData hero,
         NarrativeStateData narrativeState,
         string checkId,
-        out bool naturalistBonus)
+        out bool naturalistBonus,
+        bool partyKnowsTheWay = false)
     {
         NarrativeEvaluationContext context = new NarrativeEvaluationContext(hero, narrativeState);
         NarrativeCheckSpec detectionCheck = BuildRoadPredatorDetectionCheck(checkId);
@@ -312,9 +313,21 @@ public static class ExpeditionIncidentSystem
         if (!detected)
             return RoadPredatorEntryState.Unaware;
 
-        return hero.HasTrait(NarrativeTraitIds.KnowsTheWay)
+        // «Знающий дорогу» (каталог Н-47, «оба»): достаточно, чтобы
+        // особенность была у Командира или у бойца в этом походе.
+        return hero.HasTrait(NarrativeTraitIds.KnowsTheWay) || partyKnowsTheWay
             ? RoadPredatorEntryState.Prepared
             : RoadPredatorEntryState.Aware;
+    }
+
+    private static bool PartyHasFeature(GameState state, string featureId)
+    {
+        foreach (string personId in CharacterProgressionService.PartyPersonIds(state))
+        {
+            if (CharacterFeatureService.Has(state, personId, featureId))
+                return true;
+        }
+        return false;
     }
 
     private static ExpeditionIncidentOccurrence ApplyRoadPredatorEncounter(
@@ -337,7 +350,8 @@ public static class ExpeditionIncidentSystem
             hero,
             narrativeState,
             "road_predator_detection_" + finishedDay + "_" + occurrenceId,
-            out naturalistBonus);
+            out naturalistBonus,
+            PartyHasFeature(state, NarrativeTraitIds.KnowsTheWay));
 
         List<string> consequences = new List<string>();
         ExpeditionIncidentTone tone;

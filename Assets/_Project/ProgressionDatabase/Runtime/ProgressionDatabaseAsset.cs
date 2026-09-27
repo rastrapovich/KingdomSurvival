@@ -69,6 +69,9 @@ namespace KingdomSurvival.ProgressionDatabase
         public int encounterQuestSeedExperience = 30;
         public int toughnessHitPoints = 2;
         public int maxToughnessChoices = 3;
+        public int firstChoiceOptions = 3;
+        public int choiceOptionsGrowth = 1;
+        public int maxChoiceOptions = 35;
     }
 
     [Serializable]
@@ -316,7 +319,10 @@ namespace KingdomSurvival.ProgressionDatabase
                 EncounterComplexExperience = rules.encounterComplexExperience,
                 EncounterQuestSeedExperience = rules.encounterQuestSeedExperience,
                 ToughnessHitPoints = rules.toughnessHitPoints,
-                MaxToughnessChoices = rules.maxToughnessChoices
+                MaxToughnessChoices = rules.maxToughnessChoices,
+                FirstChoiceOptions = rules.firstChoiceOptions,
+                ChoiceOptionsGrowth = rules.choiceOptionsGrowth,
+                MaxChoiceOptions = rules.maxChoiceOptions
             };
 
             foreach (ProgressionProfileRecord record in profiles)
@@ -438,7 +444,10 @@ namespace KingdomSurvival.ProgressionDatabase
                 encounterComplexExperience = source.EncounterComplexExperience,
                 encounterQuestSeedExperience = source.EncounterQuestSeedExperience,
                 toughnessHitPoints = source.ToughnessHitPoints,
-                maxToughnessChoices = source.MaxToughnessChoices
+                maxToughnessChoices = source.MaxToughnessChoices,
+                firstChoiceOptions = source.FirstChoiceOptions,
+                choiceOptionsGrowth = source.ChoiceOptionsGrowth,
+                maxChoiceOptions = source.MaxChoiceOptions
             };
 
             profiles = new List<ProgressionProfileRecord>();
@@ -529,6 +538,12 @@ namespace KingdomSurvival.ProgressionDatabase
                 errors.Add("Потолок собственной практики должен быть от 1 до 5.");
             if (rules.repeatBattlePercents == null || rules.repeatBattlePercents.Count == 0)
                 errors.Add("Повтор боя: нужен хотя бы один процент (первый бой).");
+            if (rules.firstChoiceOptions < 1)
+                errors.Add("Показ выбора: первый показ — хотя бы 1 карточка.");
+            if (rules.maxChoiceOptions < rules.firstChoiceOptions)
+                errors.Add("Показ выбора: предел меньше первого показа.");
+            if (rules.firstChoiceOptions != 3 || rules.choiceOptionsGrowth != 1 || rules.maxChoiceOptions != 35)
+                warnings.Add("Показ выбора " + rules.firstChoiceOptions + " / +" + rules.choiceOptionsGrowth + " / до " + rules.maxChoiceOptions + " — решение автора (каталог §0.1): 3, +1, до 35.");
 
             HashSet<string> competencyIds = new HashSet<string>();
             foreach (CompetencyRecord competency in competencies)

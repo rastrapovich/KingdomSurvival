@@ -670,6 +670,8 @@
                     <ui:ScrollView name="hero-screen-unit-card-development" class="hero-screen-unit-card-column" horizontal-scroller-visibility="Hidden">
                         <ui:Label text="РАЗВИТИЕ" class="hero-screen-unit-card-section-title" />
                         <ui:VisualElement name="hero-screen-unit-card-choice" class="hero-item-list" />
+                        <ui:Label text="ОСОБЕННОСТИ" class="hero-screen-unit-card-section-title hero-screen-unit-card-subsection" />
+                        <ui:VisualElement name="hero-screen-unit-card-features" class="hero-item-list" />
                         <ui:Label text="КОМПЕТЕНЦИИ" class="hero-screen-unit-card-section-title hero-screen-unit-card-subsection" />
                         <ui:VisualElement name="hero-screen-unit-card-competencies" />
                     </ui:ScrollView>

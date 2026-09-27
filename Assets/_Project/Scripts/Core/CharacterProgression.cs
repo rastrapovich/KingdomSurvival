@@ -50,6 +50,9 @@ public sealed class PersonProgressionData
     public List<string> ChosenOptionIds = new List<string>();
     public List<CompetencyProgressData> Competencies = new List<CompetencyProgressData>();
 
+    // Особенности с рангом и источником (12Е-2, CharacterFeatureService).
+    public List<PersonFeatureData> Features = new List<PersonFeatureData>();
+
     public CompetencyProgressData FindCompetency(string competencyId)
     {
         if (Competencies == null)
@@ -124,7 +127,9 @@ public enum DevelopmentOptionKind
     // Нейтральный: начать осваивать новое дело.
     Learn,
     // Нейтральный: крепость тела, немного здоровья (строго ограничено).
-    Toughness
+    Toughness,
+    // Особенность из каталога (12Е-3): новая или следующий ранг.
+    Feature
 }
 
 public sealed class DevelopmentOption
@@ -132,6 +137,8 @@ public sealed class DevelopmentOption
     public string Id;
     public DevelopmentOptionKind Kind;
     public string CompetencyId;
+    public string FeatureId;
+    public int FeatureRank;
     public string Title;
     public string Description;
     public bool IsPersonal;
@@ -156,6 +163,15 @@ public static class CharacterProgression
     public static int ExplorationExperience => Rules.ExplorationExperience;
     public static int ToughnessHitPoints => Rules.ToughnessHitPoints;
     public static int MaxToughnessChoices => Rules.MaxToughnessChoices;
+
+    // Сколько вариантов на показе выбора: первый — 3, каждый следующий этому
+    // же человеку на 1 больше, не больше 35 (правила каталога §0.1).
+    public static int ChoiceOptionCount(int choicesTaken)
+    {
+        int first = Math.Max(1, Rules.FirstChoiceOptions);
+        int count = first + Math.Max(0, choicesTaken) * Math.Max(0, Rules.ChoiceOptionsGrowth);
+        return Math.Max(first, Math.Min(Math.Max(first, Rules.MaxChoiceOptions), count));
+    }
     public static int CombatBonusFirstRank => Rules.CombatBonusFirstRank;
     public static int CombatBonusSecondRank => Rules.CombatBonusSecondRank;
 

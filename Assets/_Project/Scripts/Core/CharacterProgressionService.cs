@@ -328,6 +328,14 @@ public static class CharacterProgressionService
         return Math.Max(0, earned - record.ChoicesTaken);
     }
 
+    // Показ выбора (§27.1.1, правила каталога §0.1): первый — 3 карточки,
+    // каждый следующий этому же человеку на одну больше, до 35. Варианты идут
+    // по кругу из трёх корзин, чтобы даже короткий показ был разным:
+    // 1) личное — углубить то, что реально делал, и особенности, требования
+    //    которых человек уже выполнил;
+    // 2) новое дело — сначала то, что уже пробовал, затем по кругу каталога;
+    // 3) нейтральное — крепость тела и особенности без требований.
+    // В выбор попадают только активные особенности (у которых есть код).
     public static List<DevelopmentOption> GetChoiceOptions(GameState state, string personId)
     {
         List<DevelopmentOption> options = new List<DevelopmentOption>();
@@ -342,20 +350,23 @@ public static class CharacterProgressionService
             ? profile.ChoiceCompetencies.Where(id => known.Contains(id)).ToList()
             : isHero ? known : NarrativeCompetencyIds.FighterCatalog;
 
-        // Персональные: то, что человек реально делал с прошлого выбора.
+        List<DevelopmentOption> personal = new List<DevelopmentOption>();
+        List<DevelopmentOption> newCraft = new List<DevelopmentOption>();
+        List<DevelopmentOption> neutral = new List<DevelopmentOption>();
+
+        // Личное: то, что человек реально делал с прошлого выбора.
         List<CompetencyProgressData> practiced = record.Competencies
             .Where(entry => entry != null && entry.PracticeSinceChoice > 0 &&
                             catalog.Contains(entry.CompetencyId) &&
                             GetCompetencyRank(state, personId, entry.CompetencyId) < Ceiling(entry))
             .OrderByDescending(entry => entry.PracticeSinceChoice)
             .ThenBy(entry => IndexOf(catalog, entry.CompetencyId))
-            .Take(2)
             .ToList();
         foreach (CompetencyProgressData entry in practiced)
         {
             int rank = GetCompetencyRank(state, personId, entry.CompetencyId);
             string label = NarrativeCompetencyLabels.GetLabel(entry.CompetencyId);
-            options.Add(new DevelopmentOption
+            personal.Add(new DevelopmentOption
             {
                 Id = "deepen:" + entry.CompetencyId,
                 Kind = DevelopmentOptionKind.Deepen,
@@ -367,25 +378,25 @@ public static class CharacterProgressionService
             });
         }
 
-        // Нейтральные: новое дело — сначала то, что уже пробовал, затем по
-        // кругу каталога, чтобы каждый выбор предлагал другое.
+        // Новое дело — сначала то, что уже пробовал, затем по кругу каталога,
+        // чтобы каждый выбор предлагал другое.
         List<string> untouched = catalog
-            .Where(id => GetCompetencyRank(state, personId, id) == 0 && options.All(option => option.CompetencyId != id))
+            .Where(id => GetCompetencyRank(state, personId, id) == 0 && personal.All(option => option.CompetencyId != id))
             .ToList();
         List<string> learn = untouched.Where(id => record.FindCompetency(id)?.Practice > 0).ToList();
         if (untouched.Count > 0)
         {
             int offset = (record.ChoicesTaken * 2) % untouched.Count;
-            for (int i = 0; i < untouched.Count && learn.Count < 2; i++)
+            for (int i = 0; i < untouched.Count; i++)
             {
                 string id = untouched[(offset + i) % untouched.Count];
                 if (!learn.Contains(id))
                     learn.Add(id);
             }
         }
-        foreach (string competencyId in learn.Take(2))
+        foreach (string competencyId in learn)
         {
-            options.Add(new DevelopmentOption
+            newCraft.Add(new DevelopmentOption
             {
                 Id = "learn:" + competencyId,
                 Kind = DevelopmentOptionKind.Learn,
@@ -398,7 +409,7 @@ public static class CharacterProgressionService
 
         if (record.ToughnessChoices < CharacterProgression.MaxToughnessChoices)
         {
-            options.Add(new DevelopmentOption
+            neutral.Add(new DevelopmentOption
             {
                 Id = "toughness",
                 Kind = DevelopmentOptionKind.Toughness,
@@ -409,7 +420,113 @@ public static class CharacterProgressionService
             });
         }
 
+        // Особенности каталога: активные, доступные этому человеку, с
+        // выполненными требованиями, не исключённые уже взятыми.
+        foreach (TraitCatalogEntry entry in ProgressionCatalog.Current.Traits)
+        {
+            DevelopmentOption option = FeatureOption(state, personId, entry);
+            if (option == null)
+                continue;
+            if (option.IsPersonal)
+                personal.Add(option);
+            else
+                neutral.Add(option);
+        }
+
+        int limit = CharacterProgression.ChoiceOptionCount(record.ChoicesTaken);
+        List<List<DevelopmentOption>> buckets = new List<List<DevelopmentOption>> { personal, newCraft, neutral };
+        while (options.Count < limit && buckets.Any(bucket => bucket.Count > 0))
+        {
+            foreach (List<DevelopmentOption> bucket in buckets)
+            {
+                if (options.Count >= limit || bucket.Count == 0)
+                    continue;
+                options.Add(bucket[0]);
+                bucket.RemoveAt(0);
+            }
+        }
         return options;
+    }
+
+    // Вариант «особенность» для показа выбора или null, если она сейчас не
+    // может быть предложена этому человеку.
+    public static DevelopmentOption FeatureOption(GameState state, string personId, TraitCatalogEntry entry)
+    {
+        if (entry == null || entry.Status != FeatureStatus.Active || entry.Id == CharacterFeatureService.ToughnessId)
+            return null;
+        if ((entry.Sources & FeatureSource.LevelChoice) == 0 || !ProgressionFeatureImplementations.IsImplemented(entry.Id))
+            return null;
+        if (!CharacterFeatureService.CanOwn(state, personId, entry, out _))
+            return null;
+        int owned = CharacterFeatureService.GetRank(state, personId, entry.Id);
+        if (owned >= entry.RankCount)
+            return null;
+        if (owned == 0 && IsExcluded(state, personId, entry))
+            return null;
+        if (!RequirementsMet(state, personId, entry))
+            return null;
+
+        int rank = owned + 1;
+        string title = owned == 0
+            ? "Особенность: " + (entry.RankCount > 1 ? entry.RankName(1) : entry.Name)
+            : "Усилить: " + entry.RankName(owned) + " → " + entry.RankName(rank);
+        string effect = rank <= entry.Ranks.Count ? entry.Ranks[rank - 1].Effect : entry.Description;
+        return new DevelopmentOption
+        {
+            Id = "feature:" + entry.Id,
+            Kind = DevelopmentOptionKind.Feature,
+            FeatureId = entry.Id,
+            FeatureRank = rank,
+            Title = title,
+            Description = effect + (entry.Requirements.Count > 0 ? " Открыта: " + entry.UnlockText + "." : string.Empty),
+            IsPersonal = owned > 0 || entry.Requirements.Count > 0
+        };
+    }
+
+    // Требования записи: компетенция ≥ ступени, качество ≥ значения (качества
+    // есть только у Командира), другая особенность ≥ ранга.
+    public static bool RequirementsMet(GameState state, string personId, TraitCatalogEntry entry)
+    {
+        if (entry == null || entry.Requirements.Count == 0)
+            return true;
+        HeroProfileData hero = IsHero(state, personId) ? state.GetSelectedCommander()?.HeroProfile : null;
+        bool any = false;
+        bool all = true;
+        foreach (FeatureRequirement requirement in entry.Requirements)
+        {
+            bool met;
+            switch (requirement.Kind)
+            {
+                case FeatureRequirementKind.Competency:
+                    met = GetCompetencyRank(state, personId, requirement.Id) >= requirement.Value;
+                    break;
+                case FeatureRequirementKind.Quality:
+                    met = hero != null && Enum.TryParse(requirement.Id, out HeroQuality quality) &&
+                          hero.GetQuality(quality) >= requirement.Value;
+                    break;
+                default:
+                    met = CharacterFeatureService.GetRank(state, personId, requirement.Id) >= Math.Max(1, requirement.Value);
+                    break;
+            }
+            any |= met;
+            all &= met;
+        }
+        return entry.RequirementsAnyOf ? any : all;
+    }
+
+    private static bool IsExcluded(GameState state, string personId, TraitCatalogEntry entry)
+    {
+        foreach (string id in entry.ExcludesIds)
+        {
+            if (CharacterFeatureService.Has(state, personId, id))
+                return true;
+        }
+        foreach (OwnedFeature owned in CharacterFeatureService.GetFeatures(state, personId))
+        {
+            if (owned.Entry != null && owned.Entry.ExcludesIds.Contains(entry.Id))
+                return true;
+        }
+        return false;
     }
 
     public static bool TryApplyChoice(GameState state, string personId, string optionId, out string message)
@@ -446,6 +563,10 @@ public static class CharacterProgressionService
                 record.ToughnessChoices++;
                 ItemService.RefreshMaxHitPoints(state, personId);
                 message = name + ": крепость тела, +" + CharacterProgression.ToughnessHitPoints + " к здоровью.";
+                break;
+            case DevelopmentOptionKind.Feature:
+                if (!CharacterFeatureService.Grant(state, personId, option.FeatureId, option.FeatureRank, FeatureSource.LevelChoice, null, out message, chronicle: false))
+                    return false;
                 break;
         }
 

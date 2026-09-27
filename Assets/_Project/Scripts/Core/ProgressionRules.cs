@@ -225,6 +225,11 @@ public sealed class ProgressionRules
     public int ToughnessHitPoints = 2;
     public int MaxToughnessChoices = 3;
 
+    // Показ выбора развития: 3 → 4 → … → 35 карточек (каталог §0.1).
+    public int FirstChoiceOptions = 3;
+    public int ChoiceOptionsGrowth = 1;
+    public int MaxChoiceOptions = 35;
+
     private readonly Dictionary<string, ProgressionProfile> profiles = new Dictionary<string, ProgressionProfile>(StringComparer.Ordinal);
 
     public IEnumerable<ProgressionProfile> Profiles => profiles.Values;

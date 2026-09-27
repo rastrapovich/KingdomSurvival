@@ -25,6 +25,7 @@ public partial class PrototypeUIController
     private Label heroCardMessageLabel;
     private VisualElement heroCardChoice;
     private VisualElement heroCardCompetencies;
+    private VisualElement heroCardFeatures;
     private readonly string[] heroCardStatExplanations = new string[7];
 
     private bool IsHeroCardOpen =>
@@ -42,11 +43,12 @@ public partial class PrototypeUIController
         heroCardMessageLabel = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-message");
         heroCardChoice = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-choice");
         heroCardCompetencies = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-competencies");
+        heroCardFeatures = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-features");
 
         bool ok = heroCardSubtitle != null && heroCardLevel != null && heroCardExperienceLabel != null &&
                   heroCardExperienceFill != null && heroCardCondition != null && heroCardHealthFill != null &&
                   heroCardAvailable != null && heroCardMessageLabel != null && heroCardChoice != null &&
-                  heroCardCompetencies != null;
+                  heroCardCompetencies != null && heroCardFeatures != null;
 
         // Портрет добавлен в слот после полосы здоровья — полоса поверх него.
         if (ok && heroScreenUnitCardPortraitHealthBar != null)
@@ -264,6 +266,7 @@ public partial class PrototypeUIController
     {
         heroCardChoice.Clear();
         heroCardCompetencies.Clear();
+        heroCardFeatures.Clear();
         PersonProgressionData record = CharacterProgressionService.Get(gameState, personId);
         if (record == null)
         {
@@ -277,16 +280,11 @@ public partial class PrototypeUIController
             heroCardChoice.Add(CreateHeroItemRow(
                 "Выбор развития" + (pending > 1 ? " (" + pending + ")" : string.Empty),
                 "Кем становится человек: из пережитого или новое направление."));
-            foreach (DevelopmentOption option in CharacterProgressionService.GetChoiceOptions(gameState, personId))
-            {
-                string optionId = option.Id;
-                VisualElement row = CreateHeroItemRow(
-                    option.Title,
-                    (option.IsPersonal ? "Из пережитого. " : "Нейтральный вариант. ") + option.Description);
-                AddHeroCardAction(row, "Выбрать", () =>
-                    RunHeroCardCommand(CharacterProgressionService.TryApplyChoice(gameState, personId, optionId, out string message), message));
-                heroCardChoice.Add(row);
-            }
+            // Показ растёт с 3 до 35 карточек (12Е-3) — группы по смыслу.
+            List<DevelopmentOption> options = CharacterProgressionService.GetChoiceOptions(gameState, personId);
+            AddHeroCardChoiceGroup(personId, "Из пережитого", options.FindAll(option => option.IsPersonal));
+            AddHeroCardChoiceGroup(personId, "Новое дело", options.FindAll(option => !option.IsPersonal && option.Kind == DevelopmentOptionKind.Learn));
+            AddHeroCardChoiceGroup(personId, "Нейтральное", options.FindAll(option => !option.IsPersonal && option.Kind != DevelopmentOptionKind.Learn));
         }
         else
         {
@@ -295,6 +293,8 @@ public partial class PrototypeUIController
                 nextChoiceLevel > 0 ? "Следующий выбор — на уровне " + nextChoiceLevel : "Выборов развития больше нет",
                 "Опыт — за новое и значимое: бои, места, встречи. Повтор одного и того же почти ничему не учит; уровень сам сил не прибавляет."));
         }
+
+        RefreshHeroCardFeatures(personId);
 
         List<string> known = CharacterProgressionService.KnownCompetencies(gameState, personId);
         foreach (string competencyId in known)
@@ -317,6 +317,42 @@ public partial class PrototypeUIController
 
         if (known.Count == 0)
             AddHeroScreenHint(heroCardCompetencies, "Пока ничего не освоено: компетенции растут от применения.");
+    }
+
+    private void AddHeroCardChoiceGroup(string personId, string title, List<DevelopmentOption> options)
+    {
+        if (options.Count == 0)
+            return;
+        AddHeroScreenHint(heroCardChoice, title + " · " + options.Count);
+        foreach (DevelopmentOption option in options)
+        {
+            string optionId = option.Id;
+            VisualElement row = CreateHeroItemRow(option.Title, option.Description);
+            AddHeroCardAction(row, "Выбрать", () =>
+                RunHeroCardCommand(CharacterProgressionService.TryApplyChoice(gameState, personId, optionId, out string message), message));
+            heroCardChoice.Add(row);
+        }
+    }
+
+    // Особенности человека (12Е-2): название с рангом, что даёт и откуда взялась.
+    private void RefreshHeroCardFeatures(string personId)
+    {
+        List<OwnedFeature> features = CharacterFeatureService.GetFeatures(gameState, personId);
+        foreach (OwnedFeature owned in features)
+        {
+            string effect = string.Empty;
+            if (owned.Entry != null)
+            {
+                List<string> ranks = new List<string>();
+                for (int rank = 1; rank <= Mathf.Min(owned.Rank, owned.Entry.Ranks.Count); rank++)
+                    ranks.Add(owned.Entry.Ranks[rank - 1].Effect);
+                effect = ranks.Count > 0 ? string.Join(" ", ranks) : owned.Entry.Description;
+            }
+            heroCardFeatures.Add(CreateHeroItemRow(owned.Title, Join(effect, "откуда: " + FeatureLabels.Sources(owned.Source))));
+        }
+
+        if (features.Count == 0)
+            heroCardFeatures.Add(CreateHeroItemRow("Пока нет", "Особенности приходят из выбора развития, биографии, историй и от учителей."));
     }
 
     private void AddHeroCardAction(VisualElement row, string text, System.Action action)

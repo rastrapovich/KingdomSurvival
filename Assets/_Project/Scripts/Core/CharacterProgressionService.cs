@@ -27,6 +27,10 @@ public static class CharacterProgressionService
             progression.HandledFeatureEvents = new List<string>();
         if (progression.RecentFeatureActivations == null)
             progression.RecentFeatureActivations = new List<FeatureActivation>();
+        if (progression.FeaturePendings == null)
+            progression.FeaturePendings = new List<FeaturePendingData>();
+        if (progression.RecentApplications == null)
+            progression.RecentApplications = new List<string>();
 
         CommanderData hero = state.GetSelectedCommander();
         if (hero != null)
@@ -240,7 +244,8 @@ public static class CharacterProgressionService
 
     // Практика одного содержательного применения. repeatKey — одинаковое
     // содержание (тот же состав врагов): с повтором практика угасает.
-    public static PracticeGain AddPractice(GameState state, string personId, string competencyId, int points, string repeatKey = null)
+    public static PracticeGain AddPractice(GameState state, string personId, string competencyId, int points, string repeatKey = null,
+        bool countsAsApplication = true)
     {
         if (state == null || string.IsNullOrEmpty(competencyId) || !NarrativeCompetencyIds.IsKnown(competencyId))
             return null;
@@ -256,6 +261,10 @@ public static class CharacterProgressionService
         }
         if (points <= 0)
             return null;
+
+        // 12Е-5: применение компетенции с последнего привала (Наставник).
+        if (countsAsApplication)
+            FeatureImplementationsFirstBatch.RecordApplication(state, personId, competencyId);
 
         CompetencyProgressData entry = record.GetOrCreateCompetency(competencyId);
         int ceiling = Math.Max(CharacterProgression.PracticeCeiling, Math.Min(CharacterProgression.MaxCompetencyRank, entry.Ceiling));
@@ -466,6 +475,12 @@ public static class CharacterProgressionService
             return null;
         int owned = CharacterFeatureService.GetRank(state, personId, entry.Id);
         if (owned >= entry.RankCount)
+            return null;
+        // Следующий ранг без кода не предлагается; особенности на проверках —
+        // только Командиру, пока проверки проходит он один.
+        if (owned + 1 > ProgressionFeatureImplementations.ImplementedRankCount(entry.Id))
+            return null;
+        if (ProgressionFeatureImplementations.IsCommanderChecksOnly(entry.Id) && !IsHero(state, personId))
             return null;
         if (owned == 0 && IsExcluded(state, personId, entry))
             return null;

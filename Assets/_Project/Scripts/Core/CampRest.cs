@@ -57,6 +57,12 @@ public static class CampRest
     public const string RestActivityId = "camp_rest";
     public const double RestHours = 8.0;
     public const int MaxActionsPerNight = 2;
+
+    // Сколько дел можно выбрать этой ночью: 2, с «Полевым ночлегом» в отряде — 3.
+    public static int ActionsPerNight(GameState state)
+    {
+        return MaxActionsPerNight + FeatureEffects.ExtraCampActions(state);
+    }
     public const int InspectRadiusCells = 3;
     public const string MartaId = "marta";
     public const string AgnessaId = "agnessa";
@@ -230,9 +236,12 @@ public static class CampRest
             }
         }
 
-        if (night.ChosenActions.Count >= MaxActionsPerNight)
+        int allowed = ActionsPerNight(state);
+        if (night.ChosenActions.Count >= allowed)
         {
-            message = "За ночь — не больше двух дел: остальным нужно спать.";
+            message = allowed > MaxActionsPerNight
+                ? "За ночь — не больше " + allowed + " дел, даже с привычкой к полевому ночлегу."
+                : "За ночь — не больше двух дел: остальным нужно спать.";
             return false;
         }
 

@@ -328,6 +328,10 @@ public sealed class NarrativeEvaluationContext
     // существующие вызовы (тот же принцип, что и PartySize выше).
     public GameState GameState { get; }
 
+    // Сцена — один запуск диалога или встречи (12Е-5): «в той же сцене»
+    // для особенностей. Задаётся сессией диалога.
+    public string SceneId { get; set; } = string.Empty;
+
     public NarrativeEvaluationContext(
         HeroProfileData hero,
         NarrativeStateData state,

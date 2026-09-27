@@ -33,7 +33,10 @@ public enum FeatureTrigger
     AllyAttacked,
     WeaponReloaded,
     ArrowsSpent,
-    ItemDamaged
+    ItemDamaged,
+
+    // Новое сведение получено (12Е-5, «Вторая версия»).
+    KnowledgeGained
 }
 
 public static class FeatureTriggers
@@ -47,7 +50,8 @@ public static class FeatureTriggers
         FeatureTrigger.CampNight,
         FeatureTrigger.BattleStarted,
         FeatureTrigger.BattleEnded,
-        FeatureTrigger.ReturnedHome
+        FeatureTrigger.ReturnedHome,
+        FeatureTrigger.KnowledgeGained
     };
 
     // Сообщает ли игра об этом событии сейчас.
@@ -79,6 +83,7 @@ public static class FeatureTriggers
             case FeatureTrigger.WeaponReloaded: return "перезарядка";
             case FeatureTrigger.ArrowsSpent: return "расход стрел";
             case FeatureTrigger.ItemDamaged: return "вещь повреждена";
+            case FeatureTrigger.KnowledgeGained: return "новое сведение";
             default: return trigger.ToString();
         }
     }
@@ -103,6 +108,12 @@ public sealed class FeatureEvent
     public string LocationId = string.Empty;
     public string BattleId = string.Empty;
     public CampaignBattleResult BattleResult;
+
+    // Проверка: сцена (запуск диалога), seed мира и состояние проверок —
+    // для перебросов и отложенных эффектов.
+    public string SceneId = string.Empty;
+    public int WorldSeed;
+    public NarrativeStateData Narrative;
 
     public readonly List<FeatureActivation> Activations = new List<FeatureActivation>();
 }
@@ -141,6 +152,7 @@ public static class FeatureDispatcher
         public string FeatureId;
         public FeatureTrigger Trigger;
         public FeatureHandler Handler;
+        public int Order;
     }
 
     private static readonly List<Registration> Handlers = new List<Registration>();
@@ -152,14 +164,16 @@ public static class FeatureDispatcher
 
     // Код особенности: подписка на событие. Особенность становится
     // «реализованной» и может быть активной.
-    public static void Register(string featureId, FeatureTrigger trigger, FeatureHandler handler)
+    // Order — порядок среди особенностей одного события: меньший раньше
+    // (переброс «Счастливчика» — раньше тех, кто смотрит на итог проверки).
+    public static void Register(string featureId, FeatureTrigger trigger, FeatureHandler handler, int order = 0)
     {
         if (string.IsNullOrWhiteSpace(featureId))
             throw new ArgumentException("Нужен ID особенности.", nameof(featureId));
         if (handler == null)
             throw new ArgumentNullException(nameof(handler));
         Handlers.RemoveAll(existing => existing.FeatureId == featureId && existing.Trigger == trigger);
-        Handlers.Add(new Registration { FeatureId = featureId, Trigger = trigger, Handler = handler });
+        Handlers.Add(new Registration { FeatureId = featureId, Trigger = trigger, Handler = handler, Order = order });
         ProgressionFeatureImplementations.Register(featureId);
     }
 
@@ -203,6 +217,8 @@ public static class FeatureDispatcher
         if (handlers.Count == 0)
             return featureEvent.Activations;
 
+        List<KeyValuePair<Registration, OwnedFeature>> calls = new List<KeyValuePair<Registration, OwnedFeature>>();
+        List<string> owners = new List<string>();
         foreach (string personId in Participants(featureEvent))
         {
             foreach (OwnedFeature owned in CharacterFeatureService.GetFeatures(state, personId))
@@ -210,16 +226,36 @@ public static class FeatureDispatcher
                 foreach (Registration registration in handlers)
                 {
                     if (registration.FeatureId == owned.FeatureId && !ProgressionFeatureImplementations.IsStub(owned.FeatureId))
-                        registration.Handler(featureEvent, personId, owned.Rank);
+                    {
+                        calls.Add(new KeyValuePair<Registration, OwnedFeature>(registration, owned));
+                        owners.Add(personId);
+                    }
                 }
             }
         }
+        List<int> order = new List<int>();
+        for (int i = 0; i < calls.Count; i++)
+            order.Add(i);
+        order.Sort((a, b) => calls[a].Key.Order != calls[b].Key.Order ? calls[a].Key.Order.CompareTo(calls[b].Key.Order) : a.CompareTo(b));
+        foreach (int index in order)
+            calls[index].Key.Handler(featureEvent, owners[index], calls[index].Value.Rank);
 
         foreach (FeatureActivation activation in featureEvent.Activations)
             progression.RecentFeatureActivations.Add(activation);
         if (progression.RecentFeatureActivations.Count > KeptActivations)
             progression.RecentFeatureActivations.RemoveRange(0, progression.RecentFeatureActivations.Count - KeptActivations);
         return featureEvent.Activations;
+    }
+
+    // Сработавшая особенность вне события (изменение числа: припасы, задержка).
+    public static void Record(GameState state, FeatureActivation activation)
+    {
+        if (state == null || activation == null)
+            return;
+        ProgressionStateData progression = CharacterProgressionService.EnsureState(state);
+        progression.RecentFeatureActivations.Add(activation);
+        if (progression.RecentFeatureActivations.Count > KeptActivations)
+            progression.RecentFeatureActivations.RemoveRange(0, progression.RecentFeatureActivations.Count - KeptActivations);
     }
 
     // Обработчик сообщает, что особенность сработала.

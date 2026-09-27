@@ -265,6 +265,16 @@ public static class NarrativeCheckResolver
             }
         }
 
+        // 12Е-5: прибавки от особенностей (например, Зацепка) — как контекстные
+        // модификаторы, чтобы их было видно в разборе проверки.
+        List<NarrativeContextModifierRule> featureRules = new List<NarrativeContextModifierRule>();
+        FeatureCheckHooks.CollectModifiers(spec, context, featureRules);
+        foreach (NarrativeContextModifierRule rule in featureRules)
+        {
+            rawContext += rule.Value;
+            applied.Add(rule);
+        }
+
         int appliedContext = NarrativeCheckMath.ClampContextModifier(rawContext);
         return new NarrativeCheckMathBreakdown(quality, competency, rawContext, appliedContext, applied);
     }
@@ -450,28 +460,12 @@ public static class NarrativeCheckResolver
                 CharacterProgressionService.AddPractice(context.GameState, hero.Id, spec.CompetencyId, CharacterProgression.PracticePerUse);
         }
 
-        // 12Е-4: особенности Командира узнают о решённой проверке.
+        // 12Е-4/12Е-5: отложенные перебросы и особенности Командира узнают о
+        // решённой проверке; результат — окончательный, после перебросов.
         if (forcedOutcome == NarrativeCheckForcedOutcome.None && context.GameState != null)
-            RaiseCheckResolved(spec, context, result);
+            result = FeatureCheckHooks.AfterResolved(spec, context, result);
 
         return new NarrativeCheckAttempt { Outcome = NarrativeCheckAttemptOutcome.Resolved, Result = result };
-    }
-
-    private static void RaiseCheckResolved(NarrativeCheckSpec spec, NarrativeEvaluationContext context, NarrativeCheckResult result)
-    {
-        CommanderData hero = context.GameState.GetSelectedCommander();
-        if (hero == null || !ReferenceEquals(hero.HeroProfile, context.Hero))
-            return;
-        FeatureDispatcher.Raise(new FeatureEvent
-        {
-            Trigger = FeatureTrigger.CheckResolved,
-            State = context.GameState,
-            PersonId = hero.Id,
-            EventKey = "check:" + spec.CheckId + ":" + result.AttemptNumber,
-            CheckId = spec.CheckId,
-            CompetencyId = spec.CompetencyId ?? string.Empty,
-            CheckResult = result
-        });
     }
 
     private static void RequireActiveKind(NarrativeCheckSpec spec)

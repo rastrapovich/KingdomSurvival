@@ -350,6 +350,13 @@ public static class ProgressionFeatureImplementations
 
     private static readonly Dictionary<string, FeatureTrigger> Stubs = new Dictionary<string, FeatureTrigger>(StringComparer.Ordinal);
 
+    // До какого ранга есть код (остальные ранги не предлагаются).
+    private static readonly Dictionary<string, int> ImplementedRanks = new Dictionary<string, int>(StringComparer.Ordinal);
+
+    // Работает только на проверках, а проверки пока проходит один Командир:
+    // бойцу такая особенность в выбор не предлагается.
+    private static readonly HashSet<string> CommanderChecksOnly = new HashSet<string>(StringComparer.Ordinal);
+
     static ProgressionFeatureImplementations()
     {
         // Каталог §6.1 «Заглушки сразу»: ждут боезапаса, реакций и
@@ -359,6 +366,9 @@ public static class ProgressionFeatureImplementations
         RegisterStub("vstrechaet_pervym", FeatureTrigger.EnemyEntersAdjacentHex);
         RegisterStub("shchit_tovarishcha", FeatureTrigger.AllyAttacked);
         RegisterStub("polevoy_remont", FeatureTrigger.ItemDamaged);
+
+        // 12Е-5: первая партия особенностей вне боя.
+        FeatureImplementationsFirstBatch.RegisterAll();
     }
 
     // Вызывается диспетчером событий: гарантирует, что регистрации сделаны.
@@ -383,6 +393,29 @@ public static class ProgressionFeatureImplementations
         return !string.IsNullOrEmpty(id) && Stubs.TryGetValue(id, out trigger);
     }
 
+    // Сколько рангов особенности реализовано (без ограничения — все).
+    public static int ImplementedRankCount(string id)
+    {
+        return !string.IsNullOrEmpty(id) && ImplementedRanks.TryGetValue(id, out int ranks) ? ranks : int.MaxValue;
+    }
+
+    public static void SetImplementedRanks(string id, int ranks)
+    {
+        if (!string.IsNullOrWhiteSpace(id))
+            ImplementedRanks[id] = Math.Max(1, ranks);
+    }
+
+    public static bool IsCommanderChecksOnly(string id)
+    {
+        return !string.IsNullOrEmpty(id) && CommanderChecksOnly.Contains(id);
+    }
+
+    public static void SetCommanderChecksOnly(string id)
+    {
+        if (!string.IsNullOrWhiteSpace(id))
+            CommanderChecksOnly.Add(id);
+    }
+
     public static IEnumerable<string> All => Implemented;
     public static IEnumerable<string> AllStubs => Stubs.Keys;
 
@@ -398,7 +431,11 @@ public static class ProgressionFeatureImplementations
     public static void Unregister(string id)
     {
         if (!string.IsNullOrWhiteSpace(id))
+        {
             Implemented.Remove(id);
+            ImplementedRanks.Remove(id);
+            CommanderChecksOnly.Remove(id);
+        }
     }
 
     // Заглушка: особенность заведена в движке и ждёт события механики,

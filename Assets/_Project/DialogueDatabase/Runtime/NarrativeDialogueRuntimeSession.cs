@@ -75,6 +75,7 @@ namespace KingdomSurvival.DialogueDatabase
             database = dialogueDatabase;
             dialogue = dialogueData;
             context = new NarrativeEvaluationContext(hero, state, presentCompanionIds, presentItemIds, worldSeedValue, partySize, gameState);
+            context.SceneId = FeatureScenes.Begin(gameState, dialogueId);
             worldSeed = worldSeedValue;
             CurrentNodeId = dialogueData.StartNodeId;
             ResetPresentationState();

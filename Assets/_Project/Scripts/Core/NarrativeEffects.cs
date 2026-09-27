@@ -80,8 +80,24 @@ public sealed class NarrativeEffect
                 context.State.ClearFlag(StringParam);
                 break;
             case NarrativeEffectType.AddKnowledge:
+            {
+                bool isNew = !context.State.HasKnowledge(StringParam);
                 context.State.AddKnowledge(StringParam);
+                // 12Е-5: новое сведение — событие для особенностей (Вторая версия).
+                CommanderData commander = context.GameState?.GetSelectedCommander();
+                if (isNew && commander != null && ReferenceEquals(commander.HeroProfile, context.Hero))
+                {
+                    FeatureDispatcher.Raise(new FeatureEvent
+                    {
+                        Trigger = FeatureTrigger.KnowledgeGained,
+                        State = context.GameState,
+                        PersonId = commander.Id,
+                        EventKey = "knowledge:" + StringParam,
+                        Narrative = context.State
+                    });
+                }
                 break;
+            }
             case NarrativeEffectType.ChangeRelation:
                 context.State.ChangeRelation(StringParam, IntParam);
                 break;

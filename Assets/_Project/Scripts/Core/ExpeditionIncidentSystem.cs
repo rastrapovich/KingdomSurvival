@@ -229,11 +229,16 @@ public static class ExpeditionIncidentSystem
             return ApplyRoadPredatorEncounter(state, definition, finishedDay);
 
         List<string> consequences = new List<string>();
+        // 12Е-5: особенности похода (Запас на чёрный день, Запасной путь).
+        List<string> featureNotes = new List<string>();
 
         if (definition.EffectKind == IncidentEffectKind.Supply ||
             definition.EffectKind == IncidentEffectKind.SupplyAndRoute)
         {
-            int actualSupplyDelta = ApplySupplyDelta(state, definition.SupplyDelta);
+            int supplyDelta = definition.SupplyDelta < 0
+                ? -FeatureEffects.ReduceEventSupplyLoss(state, -definition.SupplyDelta, featureNotes)
+                : definition.SupplyDelta;
+            int actualSupplyDelta = ApplySupplyDelta(state, supplyDelta);
             consequences.Add(FormatSupplyConsequence(actualSupplyDelta));
         }
 
@@ -246,7 +251,9 @@ public static class ExpeditionIncidentSystem
                     state,
                     definition.Id,
                     definition.Title,
-                    definition.RouteAdjustment,
+                    definition.RouteAdjustment > 0
+                        ? FeatureEffects.ReduceRoadDelay(state, definition.RouteAdjustment, featureNotes)
+                        : definition.RouteAdjustment,
                     out arrivalText);
 
             consequences.Add(
@@ -255,6 +262,8 @@ public static class ExpeditionIncidentSystem
             if (!string.IsNullOrWhiteSpace(arrivalText))
                 consequences.Add(arrivalText);
         }
+
+        consequences.AddRange(featureNotes);
 
         ExpeditionIncidentOccurrence occurrence =
             new ExpeditionIncidentOccurrence
@@ -368,10 +377,12 @@ public static class ExpeditionIncidentSystem
 
         if (entryState == RoadPredatorEntryState.Unaware)
         {
-            int supplyLoss = ApplySupplyDelta(state, -3);
+            List<string> featureNotes = new List<string>();
+            int supplyLoss = ApplySupplyDelta(state, -FeatureEffects.ReduceEventSupplyLoss(state, 3, featureNotes));
             string arrivalText;
             int routeDelay = ApplyRouteAdjustment(state, definition.Id + "_unaware", definition.Title, 1, out arrivalText);
             consequences.Add(FormatSupplyConsequence(supplyLoss));
+            consequences.AddRange(featureNotes);
             if (routeDelay != 0)
                 consequences.Add(FormatRouteConsequence(routeDelay));
             if (!string.IsNullOrWhiteSpace(arrivalText))

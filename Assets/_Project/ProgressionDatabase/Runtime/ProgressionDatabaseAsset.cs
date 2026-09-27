@@ -218,8 +218,9 @@ namespace KingdomSurvival.ProgressionDatabase
         public const string ResourcesPath = "ProgressionDatabase/KingdomSurvivalProgression";
         public const string AssetPath = "Assets/_Project/ProgressionDatabase/Resources/ProgressionDatabase/KingdomSurvivalProgression.asset";
         // 2 — карточки особенностей, приёмов и приказов (каталог 27.09.2026);
-        // 3 — статус «Заглушка» у заглушек движка (12Е-4).
-        public const int CurrentSchemaVersion = 3;
+        // 3 — статус «Заглушка» у заглушек движка (12Е-4);
+        // 4 — первая партия особенностей вне боя активна (12Е-5).
+        public const int CurrentSchemaVersion = 4;
 
         public int schemaVersion = CurrentSchemaVersion;
         public ProgressionGlobalRecord rules = new ProgressionGlobalRecord();
@@ -252,8 +253,36 @@ namespace KingdomSurvival.ProgressionDatabase
                 if (trait != null && trait.status == FeatureStatus.Candidate && ProgressionFeatureImplementations.IsStub(trait.id))
                     trait.status = FeatureStatus.Stub;
             }
+            if (schemaVersion < 4)
+                UpgradeToFirstBatch();
             schemaVersion = CurrentSchemaVersion;
             return true;
+        }
+
+        // Схема 4: у реализованных особенностей — статус «Активна», предел и
+        // заметка из значений по умолчанию (если в базе их не задавали);
+        // «Знаю, что искать» честно помечена как ждущая сведений с уверенностью.
+        private void UpgradeToFirstBatch()
+        {
+            ProgressionCatalog defaults = ProgressionCatalog.CreateDefault();
+            foreach (TraitRecord trait in traits)
+            {
+                TraitCatalogEntry source = trait != null ? defaults.FindTrait(trait.id) : null;
+                if (source == null)
+                    continue;
+                if (ProgressionFeatureImplementations.IsImplemented(trait.id) && trait.status == FeatureStatus.Candidate)
+                    trait.status = FeatureStatus.Active;
+                if (ProgressionFeatureImplementations.IsImplemented(trait.id) && trait.limit == FeatureLimit.None)
+                    trait.limit = source.Limit;
+                if (string.IsNullOrWhiteSpace(trait.note))
+                    trait.note = source.Note;
+                if (trait.id == "znayu_chto_iskat" && trait.support == "есть (сведения со степенью уверенности)")
+                {
+                    trait.support = source.Support;
+                    trait.dependency = source.Dependency;
+                    trait.implementation = source.Implementation;
+                }
+            }
         }
 
         private void UpgradeToCatalogCards()

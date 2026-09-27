@@ -107,6 +107,13 @@ public sealed class ProgressionStateData
     public List<string> HandledFeatureEvents = new List<string>();
     // Последние сработавшие особенности — для показа игроку.
     public List<FeatureActivation> RecentFeatureActivations = new List<FeatureActivation>();
+
+    // 12Е-5: отложенные эффекты особенностей (переброс или +1 следующей
+    // проверке, отпереть проверку после нового сведения), счётчик сцен
+    // (диалогов) и применения компетенций с последнего привала (Наставник).
+    public List<FeaturePendingData> FeaturePendings = new List<FeaturePendingData>();
+    public int SceneCounter;
+    public List<string> RecentApplications = new List<string>();
 }
 
 public sealed class ExperienceGain

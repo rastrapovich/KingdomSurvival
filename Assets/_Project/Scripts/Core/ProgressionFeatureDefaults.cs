@@ -1055,7 +1055,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-01 Счастливчик
-        e = New("Н-01", "schastlivchik", "Счастливчик", FeatureLayer.Feature, "Проверки и риск", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Candidate);
+        e = New("Н-01", "schastlivchik", "Счастливчик", FeatureLayer.Feature, "Проверки и риск", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice;
         e.Limit = FeatureLimit.Expedition;
@@ -1065,6 +1065,7 @@ public static class ProgressionFeatureDefaults
         e.Display = "Диалог и итог: цветная метка сработавшей особенности и что она дала";
         e.MergedFrom = "Luck (Heroes), Вторая попытка (Arkham, была 1/встречу)";
         Rank(e, "", "1/поход переброс одного d6 любой активной проверки");
+        e.Note = "Решение автора 27.09.2026: переброс 1/поход. Срабатывает сам при провале активной проверки.";
         list.Add(e);
 
         // Н-02 Набитая рука
@@ -1081,7 +1082,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-03 Почти получилось
-        e = New("Н-03", "pochti_poluchilos", "Почти получилось", FeatureLayer.Feature, "Проверки и риск", FeatureOwner.Both, FeatureKind.Reaction, false, FeatureStatus.Candidate);
+        e = New("Н-03", "pochti_poluchilos", "Почти получилось", FeatureLayer.Feature, "Проверки и риск", FeatureOwner.Both, FeatureKind.Reaction, false, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice;
         e.Description = "Провал на 1–2: следующая проверка в этой сцене получает переброс";
@@ -1090,6 +1091,7 @@ public static class ProgressionFeatureDefaults
         e.Display = "Диалог и итог: цветная метка сработавшей особенности и что она дала";
         e.MergedFrom = "Почти получилось, Собрался после ошибки, На ошибках учатся (Arkham)";
         Rank(e, "", "Провал на 1–2: следующая проверка в этой сцене получает переброс");
+        e.Note = "Решение автора 27.09.2026: цена первой ошибки остаётся; переброс — следующей проверке в этой сцене.";
         list.Add(e);
 
         // Н-04 Другой подход
@@ -1131,7 +1133,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-07 Вторая версия
-        e = New("Н-07", "vtoraya_versiya", "Вторая версия", FeatureLayer.Feature, "Проверки и риск", FeatureOwner.Both, FeatureKind.Reaction, false, FeatureStatus.Candidate);
+        e = New("Н-07", "vtoraya_versiya", "Вторая версия", FeatureLayer.Feature, "Проверки и риск", FeatureOwner.Both, FeatureKind.Reaction, false, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice;
         e.Description = "Провал возвратной проверки не закрывает её навсегда: после нового факта можно вернуться";
@@ -1146,7 +1148,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-08 Первый взгляд
-        e = New("Н-08", "pervyy_vzglyad", "Первый взгляд", FeatureLayer.Feature, "Наблюдение, знания, расследование", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Candidate);
+        e = New("Н-08", "pervyy_vzglyad", "Первый взгляд", FeatureLayer.Feature, "Наблюдение, знания, расследование", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice;
         e.Description = "Первая Наблюдательность после входа в новую локацию — переброс. Вариант (Приметливый, канон §25.4): +1 к пассивной Наблюдательности — проще, не требует новых реплик";
@@ -1159,7 +1161,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-09 Зацепка
-        e = New("Н-09", "zatsepka", "Зацепка", FeatureLayer.Feature, "Наблюдение, знания, расследование", FeatureOwner.Both, FeatureKind.Reaction, false, FeatureStatus.Candidate);
+        e = New("Н-09", "zatsepka", "Зацепка", FeatureLayer.Feature, "Наблюдение, знания, расследование", FeatureOwner.Both, FeatureKind.Reaction, false, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice;
         e.Description = "После успешной Наблюдательности следующее Расследование в той же сцене +1";
@@ -1169,6 +1171,7 @@ public static class ProgressionFeatureDefaults
         e.MergedFrom = "По следу причины (KCD), Зацепка (Arkham), Память на детали";
         Rank(e, "", "После успешной Наблюдательности следующее Расследование в той же сцене +1");
         Require(e, FeatureRequirementKind.Competency, "observation", 2);
+        e.Note = "Решение автора 27.09.2026: +1 к следующему Расследованию в той же сцене.";
         list.Add(e);
 
         // Н-10 След не врёт
@@ -1212,11 +1215,12 @@ public static class ProgressionFeatureDefaults
 
         // Н-13 Знаю, что искать
         e = New("Н-13", "znayu_chto_iskat", "Знаю, что искать", FeatureLayer.Feature, "Наблюдение, знания, расследование", FeatureOwner.Both, FeatureKind.Permanent, false, FeatureStatus.Candidate);
-        e.Implementation = FeatureImplementation.System;
+        e.Implementation = FeatureImplementation.Future;
         e.Sources = FeatureSource.LevelChoice;
         e.Description = "Если есть проверенное (не слух) сведение о месте или вопросе, первая профильная проверка там — переброс";
         e.UnlockText = "—";
-        e.Support = "есть (сведения со степенью уверенности)";
+        e.Support = "нет: сведения в игре — только ID, без степени уверенности и привязки к месту";
+        e.Dependency = "сведения со степенью уверенности (слух / проверено) и привязкой к месту или вопросу";
         e.Display = "Диалог и итог: цветная метка сработавшей особенности и что она дала";
         e.MergedFrom = "Знаю, что искать, Проверяй дважды (Arkham)";
         Rank(e, "", "Если есть проверенное (не слух) сведение о месте или вопросе, первая профильная проверка там — переброс");
@@ -1824,9 +1828,10 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-56 Запас на чёрный день
-        e = New("Н-56", "zapas_na_chyornyy_den", "Запас на чёрный день", FeatureLayer.Feature, "Путь и местность", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Candidate);
+        e = New("Н-56", "zapas_na_chyornyy_den", "Запас на чёрный день", FeatureLayer.Feature, "Путь и местность", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice;
+        e.Limit = FeatureLimit.Expedition;
         e.Description = "Первая потеря Припасов от события за поход −1";
         e.UnlockText = "нейтральная";
         e.Support = "есть";
@@ -1848,7 +1853,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-58 Запасной путь
-        e = New("Н-58", "zapasnoy_put", "Запасной путь", FeatureLayer.Feature, "Путь и местность", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Candidate);
+        e = New("Н-58", "zapasnoy_put", "Запасной путь", FeatureLayer.Feature, "Путь и местность", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice;
         e.Limit = FeatureLimit.Expedition;
@@ -1859,6 +1864,7 @@ public static class ProgressionFeatureDefaults
         e.MergedFrom = "Запасной путь, Не сбавлять шага (Arkham), Тропа назад (KCD)";
         Rank(e, "", "Первая задержка от небоевого дорожного события за поход −1 ч.");
         Rank(e, "", "1/поход после провала дорожной проверки или исследования отменить лишнюю потерю времени за 1 Припас");
+        e.Note = "Реализован ранг I (12Е-5): задержка от небоевого дорожного события −1 ч, 1/поход.";
         list.Add(e);
 
         // Н-59 Ранний подъём
@@ -1961,7 +1967,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-64 Полевой ночлег
-        e = New("Н-64", "polevoy_nochleg", "Полевой ночлег", FeatureLayer.Feature, "Лагерь, раны, выносливость", FeatureOwner.Both, FeatureKind.Permanent, false, FeatureStatus.Candidate);
+        e = New("Н-64", "polevoy_nochleg", "Полевой ночлег", FeatureLayer.Feature, "Лагерь, раны, выносливость", FeatureOwner.Both, FeatureKind.Permanent, false, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice;
         e.Description = "Первое действие обустройства ночлега не тратит лагерный выбор (сейчас их 2 за ночь); успешное Следопытство при выборе стоянки даёт ещё +1 HP каждому";
@@ -1971,6 +1977,7 @@ public static class ProgressionFeatureDefaults
         e.MergedFrom = "Home on the Range (Fallout NV), Хорошее место (Arkham)";
         Rank(e, "", "Первое действие обустройства ночлега не тратит лагерный выбор (сейчас их 2 за ночь); успешное Следопытство при выборе стоянки даёт ещё +1 HP каждому");
         Require(e, FeatureRequirementKind.Competency, "fieldcraft", 2);
+        e.Note = "Реализовано (12Е-5): +1 дело на ночь, пока носитель в походе. Вторая часть (Следопытство при выборе стоянки) ждёт выбора стоянки с проверкой.";
         list.Add(e);
 
         // Н-65 Привычный к дороге
@@ -2037,7 +2044,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-70 Полевой лекарь
-        e = New("Н-70", "polevoy_lekar", "Полевой лекарь", FeatureLayer.Feature, "Лечение и ремесло", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Candidate);
+        e = New("Н-70", "polevoy_lekar", "Полевой лекарь", FeatureLayer.Feature, "Лечение и ремесло", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice;
         e.Limit = FeatureLimit.Night;
@@ -2049,6 +2056,7 @@ public static class ProgressionFeatureDefaults
         Rank(e, "", "1/ночёвку в походе один раненый восстанавливает часть HP, тяжёлая рана в дороге не ухудшается.");
         Rank(e, "", "Ещё снимает одно лёгкое состояние");
         Require(e, FeatureRequirementKind.Competency, "healing", 2);
+        e.Note = "Реализован ранг I (12Е-5): 1/ночёвку самый тяжело раненый в походе восстанавливает до 1/4 здоровья (решение автора). «Тяжёлая рана не ухудшается» — ухудшения ран в дороге пока нет.";
         list.Add(e);
 
         // Н-71 Вытащить живым
@@ -2194,7 +2202,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Н-81 Наставник
-        e = New("Н-81", "nastavnik", "Наставник", FeatureLayer.Feature, "Дом, люди, обучение", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Candidate);
+        e = New("Н-81", "nastavnik", "Наставник", FeatureLayer.Feature, "Дом, люди, обучение", FeatureOwner.Both, FeatureKind.Limited, false, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System | FeatureImplementation.Future;
         e.Sources = FeatureSource.LevelChoice;
         e.Limit = FeatureLimit.Night;
@@ -2206,6 +2214,7 @@ public static class ProgressionFeatureDefaults
         e.MergedFrom = "Наставник ×6 (Fallout, KCD, Heroes, King's Bounty, Корсары), Показывает на деле, Ученик мастера, Наставник в пути, Учитель, Разбор боя; домашнее обучение — Н-112";
         Rank(e, "", "После совместного содержательного применения компетенции (наставник 4+, ученик ≤2; бой тоже считается) на ближайшем привале ученик получает +1 практики (1/привал, не выше потолка).");
         Rank(e, "Наставник дружины, мастерская", "Передаёт свой приём. Требует: оружейная компетенция 5 + реально обученный ученик.");
+        e.Note = "Реализован ранг I (12Е-5): кто применял ту же компетенцию с последнего привала (у наставника 4+, у ученика ≤2; бой считается), получает +1 практики, не больше раза за ночь.";
         list.Add(e);
 
         // Н-82 Подсказать

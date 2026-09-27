@@ -241,7 +241,9 @@ public partial class PrototypeUIController
                 ? reason
                 : !string.IsNullOrEmpty(campActionMessage)
                     ? campActionMessage
-                    : "Можно выбрать до двух дел на ночь — или просто лечь спать. Ночлег: 8 часов, припасы — обычным порядком.";
+                    : CampRest.ActionsPerNight(gameState) > CampRest.MaxActionsPerNight
+                        ? "Можно выбрать до " + CampRest.ActionsPerNight(gameState) + " дел на ночь (полевой ночлег) — или просто лечь спать. Ночлег: 8 часов, припасы — обычным порядком."
+                        : "Можно выбрать до двух дел на ночь — или просто лечь спать. Ночлег: 8 часов, припасы — обычным порядком.";
         }
     }
 

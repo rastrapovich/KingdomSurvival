@@ -178,7 +178,7 @@ namespace KingdomSurvival.ProgressionDatabase.Editor
 
             AddNavHeader("ПЕРЕЧНИ");
             AddNavItem("Качества", QualitiesPage);
-            AddNavItem("Особенности", TraitsPage);
+            AddNavItem("Особенности, приёмы, приказы", TraitsPage);
             AddNavItem("Компетенции", CompetenciesPage);
             AddNavItem("Теги (База существ)", TagsPage);
 
@@ -398,30 +398,6 @@ namespace KingdomSurvival.ProgressionDatabase.Editor
                 AddProperty(row, entry.FindPropertyRelative("displayName"), "Название");
                 AddProperty(row, entry.FindPropertyRelative("description"), "Описание");
             }
-        }
-
-        private void BuildTraitsPage(VisualElement page)
-        {
-            AddTitle(page, "Особенности");
-            AddNote(page, "Особенности героя (стабильные ID). Каталог особенностей для выбора развития в каноне пока открыт (§25.3–25.4): " +
-                          "здесь можно вести рабочий перечень. «knows_the_way» и «naturalist» используются игрой — их ID не менять.");
-            SerializedProperty list = serializedDatabase.FindProperty("traits");
-            for (int i = 0; i < list.arraySize; i++)
-            {
-                int index = i;
-                SerializedProperty entry = list.GetArrayElementAtIndex(i);
-                VisualElement card = CreateCard(page);
-                AddProperty(card, entry.FindPropertyRelative("id"), "ID");
-                AddProperty(card, entry.FindPropertyRelative("displayName"), "Название");
-                AddProperty(card, entry.FindPropertyRelative("description"), "Описание");
-                AddRemoveButton(card, "Удалить особенность", () => RemoveArrayElement("traits", index, TraitsPage));
-            }
-            page.Add(new Button(() => AddArrayElement("traits", TraitsPage, element =>
-            {
-                element.FindPropertyRelative("id").stringValue = "trait_" + Guid.NewGuid().ToString("N").Substring(0, 6);
-                element.FindPropertyRelative("displayName").stringValue = "Новая особенность";
-                element.FindPropertyRelative("description").stringValue = string.Empty;
-            })) { text = "+ ОСОБЕННОСТЬ" });
         }
 
         private void BuildCompetenciesPage(VisualElement page)

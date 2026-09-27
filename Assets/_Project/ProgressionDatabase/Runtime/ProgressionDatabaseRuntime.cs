@@ -25,6 +25,8 @@ namespace KingdomSurvival.ProgressionDatabase
         {
             if (database == null)
                 return;
+            // Не обновлённая в редакторе база (схема 1) дополняется каталогом в памяти.
+            database.UpgradeSchema();
             ProgressionRules.Current = database.ToRules();
             ProgressionCatalog.Current = database.ToCatalog();
         }

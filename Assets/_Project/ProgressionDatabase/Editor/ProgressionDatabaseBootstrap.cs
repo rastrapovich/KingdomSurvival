@@ -14,7 +14,14 @@ namespace KingdomSurvival.ProgressionDatabase.Editor
         {
             ProgressionDatabaseAsset database = AssetDatabase.LoadAssetAtPath<ProgressionDatabaseAsset>(ProgressionDatabaseAsset.AssetPath);
             if (database != null)
+            {
+                if (database.UpgradeSchema())
+                {
+                    EditorUtility.SetDirty(database);
+                    AssetDatabase.SaveAssets();
+                }
                 return database;
+            }
 
             EnsureFolder("Assets/_Project/ProgressionDatabase", "Resources");
             EnsureFolder("Assets/_Project/ProgressionDatabase/Resources", "ProgressionDatabase");
@@ -80,7 +87,7 @@ namespace KingdomSurvival.ProgressionDatabase.Editor
             ProgressionDatabaseAsset database = LoadOrCreate();
             SyncWithUnits(database, AssetDatabase.LoadAssetAtPath<UnitDatabaseAsset>(UnitDatabasePath));
             AssetDatabase.SaveAssets();
-            Debug.Log("База развития: профилей " + database.profiles.Count + ", компетенций " + database.competencies.Count + ".");
+            Debug.Log("База развития: профилей " + database.profiles.Count + ", компетенций " + database.competencies.Count + ", особенностей, приёмов и приказов " + database.traits.Count + ".");
         }
 
         private static void EnsureFolder(string parent, string name)

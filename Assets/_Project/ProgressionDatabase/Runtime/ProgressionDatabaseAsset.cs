@@ -80,11 +80,124 @@ namespace KingdomSurvival.ProgressionDatabase
     }
 
     [Serializable]
+    public sealed class FeatureRequirementRecord
+    {
+        public FeatureRequirementKind kind;
+        public string id = string.Empty;
+        public int value = 1;
+    }
+
+    [Serializable]
+    public sealed class FeatureRankRecord
+    {
+        public string name = string.Empty;
+        [TextArea(2, 5)] public string effect = string.Empty;
+    }
+
+    // Карточка особенности, приёма или приказа (каталог §0.1).
+    [Serializable]
     public sealed class TraitRecord
     {
         public string id = string.Empty;
         public string displayName = string.Empty;
-        [TextArea(2, 4)] public string description = string.Empty;
+        [TextArea(2, 6)] public string description = string.Empty;
+        public string code = string.Empty;
+        public FeatureLayer layer;
+        public string group = string.Empty;
+        public FeatureOwner owner;
+        public FeatureKind kind;
+        public bool combat;
+        public FeatureStatus status;
+        public FeatureImplementation implementation;
+        public FeatureSource sources;
+        public FeatureLimit limit;
+        [TextArea(1, 4)] public string unlockText = string.Empty;
+        public List<FeatureRequirementRecord> requirements = new List<FeatureRequirementRecord>();
+        public bool requirementsAnyOf;
+        public List<FeatureRankRecord> ranks = new List<FeatureRankRecord>();
+        public string dependency = string.Empty;
+        [TextArea(1, 3)] public string support = string.Empty;
+        [TextArea(1, 3)] public string display = string.Empty;
+        public List<string> excludesIds = new List<string>();
+        public List<string> opensIds = new List<string>();
+        [TextArea(1, 4)] public string mergedFrom = string.Empty;
+        [TextArea(1, 4)] public string note = string.Empty;
+
+        public TraitCatalogEntry ToEntry()
+        {
+            TraitCatalogEntry entry = new TraitCatalogEntry
+            {
+                Id = id,
+                Name = displayName ?? string.Empty,
+                Description = description ?? string.Empty,
+                Code = code ?? string.Empty,
+                Layer = layer,
+                Group = group ?? string.Empty,
+                Owner = owner,
+                Kind = kind,
+                Combat = combat,
+                Status = status,
+                Implementation = implementation,
+                Sources = sources,
+                Limit = limit,
+                UnlockText = unlockText ?? string.Empty,
+                RequirementsAnyOf = requirementsAnyOf,
+                Dependency = dependency ?? string.Empty,
+                Support = support ?? string.Empty,
+                Display = display ?? string.Empty,
+                MergedFrom = mergedFrom ?? string.Empty,
+                Note = note ?? string.Empty
+            };
+            foreach (FeatureRequirementRecord requirement in requirements ?? new List<FeatureRequirementRecord>())
+            {
+                if (requirement != null && !string.IsNullOrWhiteSpace(requirement.id))
+                    entry.Requirements.Add(new FeatureRequirement { Kind = requirement.kind, Id = requirement.id, Value = requirement.value });
+            }
+            foreach (FeatureRankRecord rank in ranks ?? new List<FeatureRankRecord>())
+            {
+                if (rank != null)
+                    entry.Ranks.Add(new FeatureRank { Name = rank.name ?? string.Empty, Effect = rank.effect ?? string.Empty });
+            }
+            if (excludesIds != null)
+                entry.ExcludesIds.AddRange(excludesIds.FindAll(value => !string.IsNullOrWhiteSpace(value)));
+            if (opensIds != null)
+                entry.OpensIds.AddRange(opensIds.FindAll(value => !string.IsNullOrWhiteSpace(value)));
+            return entry;
+        }
+
+        public static TraitRecord FromEntry(TraitCatalogEntry entry)
+        {
+            TraitRecord record = new TraitRecord
+            {
+                id = entry.Id ?? string.Empty,
+                displayName = entry.Name ?? string.Empty,
+                description = entry.Description ?? string.Empty,
+                code = entry.Code ?? string.Empty,
+                layer = entry.Layer,
+                group = entry.Group ?? string.Empty,
+                owner = entry.Owner,
+                kind = entry.Kind,
+                combat = entry.Combat,
+                status = entry.Status,
+                implementation = entry.Implementation,
+                sources = entry.Sources,
+                limit = entry.Limit,
+                unlockText = entry.UnlockText ?? string.Empty,
+                requirementsAnyOf = entry.RequirementsAnyOf,
+                dependency = entry.Dependency ?? string.Empty,
+                support = entry.Support ?? string.Empty,
+                display = entry.Display ?? string.Empty,
+                mergedFrom = entry.MergedFrom ?? string.Empty,
+                note = entry.Note ?? string.Empty
+            };
+            foreach (FeatureRequirement requirement in entry.Requirements)
+                record.requirements.Add(new FeatureRequirementRecord { kind = requirement.Kind, id = requirement.Id, value = requirement.Value });
+            foreach (FeatureRank rank in entry.Ranks)
+                record.ranks.Add(new FeatureRankRecord { name = rank.Name, effect = rank.Effect });
+            record.excludesIds.AddRange(entry.ExcludesIds);
+            record.opensIds.AddRange(entry.OpensIds);
+            return record;
+        }
     }
 
     [Serializable]
@@ -101,7 +214,8 @@ namespace KingdomSurvival.ProgressionDatabase
     {
         public const string ResourcesPath = "ProgressionDatabase/KingdomSurvivalProgression";
         public const string AssetPath = "Assets/_Project/ProgressionDatabase/Resources/ProgressionDatabase/KingdomSurvivalProgression.asset";
-        public const int CurrentSchemaVersion = 1;
+        // 2 — карточки особенностей, приёмов и приказов (каталог 27.09.2026).
+        public const int CurrentSchemaVersion = 2;
 
         public int schemaVersion = CurrentSchemaVersion;
         public ProgressionGlobalRecord rules = new ProgressionGlobalRecord();
@@ -109,6 +223,59 @@ namespace KingdomSurvival.ProgressionDatabase
         public List<QualityRecord> qualities = new List<QualityRecord>();
         public List<TraitRecord> traits = new List<TraitRecord>();
         public List<CompetencyRecord> competencies = new List<CompetencyRecord>();
+
+        public TraitRecord FindTrait(string id)
+        {
+            if (string.IsNullOrEmpty(id) || traits == null)
+                return null;
+            return traits.Find(trait => trait != null && trait.id == id);
+        }
+
+        // Схема 1 → 2: у прежних особенностей (knows_the_way, naturalist)
+        // появляются поля карточки, недостающие записи каталога добавляются.
+        // Название и описание, правленные в базе, сохраняются. True — база
+        // изменилась.
+        public bool UpgradeSchema()
+        {
+            if (schemaVersion >= CurrentSchemaVersion)
+                return false;
+            if (traits == null)
+                traits = new List<TraitRecord>();
+            foreach (TraitCatalogEntry entry in ProgressionCatalog.CreateDefault().Traits)
+            {
+                TraitRecord existing = FindTrait(entry.Id);
+                if (existing == null)
+                {
+                    traits.Add(TraitRecord.FromEntry(entry));
+                    continue;
+                }
+                TraitRecord filled = TraitRecord.FromEntry(entry);
+                if (!string.IsNullOrWhiteSpace(existing.displayName))
+                    filled.displayName = existing.displayName;
+                if (!string.IsNullOrWhiteSpace(existing.description))
+                    filled.description = existing.description;
+                traits[traits.IndexOf(existing)] = filled;
+            }
+            schemaVersion = CurrentSchemaVersion;
+            return true;
+        }
+
+        // Добавляет записи каталога по умолчанию, которых нет в базе (по ID).
+        // Существующие не трогает. Возвращает число добавленных.
+        public int AddMissingTraits()
+        {
+            if (traits == null)
+                traits = new List<TraitRecord>();
+            int added = 0;
+            foreach (TraitCatalogEntry entry in ProgressionCatalog.CreateDefault().Traits)
+            {
+                if (FindTrait(entry.Id) != null)
+                    continue;
+                traits.Add(TraitRecord.FromEntry(entry));
+                added++;
+            }
+            return added;
+        }
 
         public ProgressionProfileRecord FindProfile(string id)
         {
@@ -225,7 +392,7 @@ namespace KingdomSurvival.ProgressionDatabase
             foreach (TraitRecord trait in traits)
             {
                 if (trait != null && !string.IsNullOrWhiteSpace(trait.id))
-                    catalog.Traits.Add(new TraitCatalogEntry { Id = trait.id, Name = trait.displayName, Description = trait.description });
+                    catalog.Traits.Add(trait.ToEntry());
             }
             foreach (CompetencyRecord competency in competencies)
             {
@@ -283,7 +450,7 @@ namespace KingdomSurvival.ProgressionDatabase
                 qualities.Add(new QualityRecord { quality = quality.Quality, displayName = quality.Name, description = quality.Description });
             traits = new List<TraitRecord>();
             foreach (TraitCatalogEntry trait in catalog.Traits)
-                traits.Add(new TraitRecord { id = trait.Id, displayName = trait.Name, description = trait.Description });
+                traits.Add(TraitRecord.FromEntry(trait));
             competencies = new List<CompetencyRecord>();
             foreach (CompetencyCatalogEntry competency in catalog.Competencies)
             {
@@ -382,6 +549,7 @@ namespace KingdomSurvival.ProgressionDatabase
                 else if (!traitIds.Add(trait.id))
                     errors.Add("Повторяется ID особенности «" + trait.id + "».");
             }
+            ValidateTraits(traitIds, competencyIds, errors, warnings);
             foreach (string required in new[] { NarrativeTraitIds.KnowsTheWay, NarrativeTraitIds.Naturalist })
             {
                 if (!traitIds.Contains(required))
@@ -411,6 +579,66 @@ namespace KingdomSurvival.ProgressionDatabase
             }
             if (!profileIds.Contains(ProgressionRules.HeroProfileId))
                 errors.Add("Нет профиля Командира («" + ProgressionRules.HeroProfileId + "»).");
+        }
+
+        private void ValidateTraits(HashSet<string> traitIds, HashSet<string> competencyIds, List<string> errors, List<string> warnings)
+        {
+            HashSet<string> codes = new HashSet<string>();
+            foreach (TraitRecord trait in traits)
+            {
+                if (trait == null || string.IsNullOrWhiteSpace(trait.id))
+                    continue;
+                string name = (string.IsNullOrWhiteSpace(trait.code) ? string.Empty : trait.code + " ") +
+                              "«" + (string.IsNullOrWhiteSpace(trait.displayName) ? trait.id : trait.displayName) + "»";
+                if (string.IsNullOrWhiteSpace(trait.displayName))
+                    warnings.Add(name + ": нет названия.");
+                if (!string.IsNullOrWhiteSpace(trait.code) && trait.code != "—" && !codes.Add(trait.code))
+                    warnings.Add(name + ": номер каталога повторяется.");
+                if (trait.ranks == null || trait.ranks.Count == 0)
+                    errors.Add(name + ": нет ни одного ранга (нужно от 1 до " + TraitCatalogEntry.MaxRanks + ").");
+                else if (trait.ranks.Count > TraitCatalogEntry.MaxRanks)
+                    errors.Add(name + ": рангов больше " + TraitCatalogEntry.MaxRanks + ".");
+                foreach (FeatureRequirementRecord requirement in trait.requirements ?? new List<FeatureRequirementRecord>())
+                {
+                    if (requirement == null)
+                        continue;
+                    switch (requirement.kind)
+                    {
+                        case FeatureRequirementKind.Competency:
+                            if (!competencyIds.Contains(requirement.id))
+                                errors.Add(name + ": требование — неизвестная компетенция «" + requirement.id + "».");
+                            else if (requirement.value < 1 || requirement.value > CharacterProgression.MaxCompetencyRank)
+                                errors.Add(name + ": ступень компетенции в требовании вне 1–5.");
+                            break;
+                        case FeatureRequirementKind.Quality:
+                            if (!Enum.TryParse(requirement.id, out HeroQuality _))
+                                errors.Add(name + ": требование — неизвестное качество «" + requirement.id + "».");
+                            break;
+                        case FeatureRequirementKind.Feature:
+                            if (!traitIds.Contains(requirement.id))
+                                errors.Add(name + ": требование — неизвестная особенность «" + requirement.id + "».");
+                            break;
+                    }
+                }
+                foreach (string id in trait.excludesIds ?? new List<string>())
+                {
+                    if (!traitIds.Contains(id))
+                        errors.Add(name + ": взаимоисключение с неизвестной записью «" + id + "».");
+                }
+                foreach (string id in trait.opensIds ?? new List<string>())
+                {
+                    TraitRecord opened = FindTrait(id);
+                    if (opened == null)
+                        errors.Add(name + ": открывает неизвестную запись «" + id + "».");
+                    else if (opened.layer == FeatureLayer.Feature)
+                        warnings.Add(name + ": открывает «" + id + "», но это не приём и не приказ.");
+                }
+                bool implemented = ProgressionFeatureImplementations.IsImplemented(trait.id);
+                if (trait.status == FeatureStatus.Active && !implemented)
+                    warnings.Add(name + ": статус «Активна», но в игре нет её кода — в выбор она не попадёт.");
+                else if (implemented && trait.status != FeatureStatus.Active)
+                    warnings.Add(name + ": код в игре есть, а статус — «" + FeatureLabels.Status(trait.status) + "».");
+            }
         }
 
         private static void ValidateProfile(ProgressionProfileRecord profile, HashSet<string> competencyIds,

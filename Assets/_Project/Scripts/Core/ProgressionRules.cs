@@ -316,13 +316,6 @@ public sealed class QualityCatalogEntry
     public string Description = string.Empty;
 }
 
-public sealed class TraitCatalogEntry
-{
-    public string Id = string.Empty;
-    public string Name = string.Empty;
-    public string Description = string.Empty;
-}
-
 public sealed class CompetencyCatalogEntry
 {
     public string Id = string.Empty;
@@ -386,18 +379,9 @@ public sealed class ProgressionCatalog
         AddQuality(catalog, HeroQuality.Judgment, "Суждение", "Анализ, планирование и интерпретация.");
         AddQuality(catalog, HeroQuality.Character, "Характер", "Сила личности, влияние и сопротивление давлению.");
 
-        catalog.Traits.Add(new TraitCatalogEntry
-        {
-            Id = NarrativeTraitIds.KnowsTheWay,
-            Name = "Знающий дорогу",
-            Description = "При успешном обнаружении дорожный Encounter начинается в подготовленном состоянии: герой замечает событие раньше, может наблюдать, обойти или занять выгодную позицию."
-        });
-        catalog.Traits.Add(new TraitCatalogEntry
-        {
-            Id = NarrativeTraitIds.Naturalist,
-            Name = "Натуралист",
-            Description = "Открывает авторские блоки и варианты, связанные с растениями, животными, погодой, болезнями, водой и природными изменениями."
-        });
+        // Рабочий каталог особенностей, приёмов и приказов
+        // (FEATURES_REFERENCES_ADAPTATION.md) и прежние особенности игры.
+        ProgressionFeatureDefaults.AddTo(catalog.Traits);
 
         // Первый базовый каталог компетенций — канон v1.49 §27.11.
         AddCompetency(catalog, NarrativeCompetencyIds.Fieldcraft, "Следопытство", "Читать следы и изменения местности.", true);

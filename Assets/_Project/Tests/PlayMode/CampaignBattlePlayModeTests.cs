@@ -171,6 +171,20 @@ public sealed class CampaignBattlePlayModeTests
         return (bool)info.GetValue(target);
     }
 
+    // После отхода поход снова в пути и время идёт (первый кадр после
+    // загрузки сцены — ещё и её длительность, ~0,25 игрового часа). Если
+    // случайная дневная проверка похода попадает в это окно, происшествие
+    // («Хищник у тропы» — −3 припаса) меняет припасы, и тест мигает.
+    // Проверки этого дня отмечаются пройденными: сверка припасов видит
+    // только последствия боя.
+    private static void SkipTodaysRandomChecks(GameState campaign)
+    {
+        ContinuousSimulationSnapshotData clock = ContinuousSimulationSystem.ExportSnapshot(campaign);
+        clock.ExpeditionIncidentChecked = true;
+        clock.ExpeditionDecisionChecked = true;
+        ContinuousSimulationSystem.RestoreSnapshot(campaign, clock);
+    }
+
     // ПР-10: сюжетный бой главы из обычного прохождения — ночлег, вступление,
     // бой с тремя зверями, отход и последствия в той же кампании.
     [UnityTest]
@@ -182,7 +196,9 @@ public sealed class CampaignBattlePlayModeTests
         campaign.Narrative.SetFlag("chapter01.flag.expedition_started");
         Assert.IsTrue(CampRest.TryStartRest(campaign, out string message), message);
         campaign.ActiveExpedition.ActiveActivity.RemainingHours = 6.0;
+        SkipTodaysRandomChecks(campaign);
         int supply = campaign.ArmySupply;
+        int day = campaign.Day;
 
         MonoBehaviour main = FindBehaviour("PrototypeUIController");
         for (int i = 0; i < 60 && !GetBool(main, "IsNarrativeDialogueActive"); i++)
@@ -206,6 +222,7 @@ public sealed class CampaignBattlePlayModeTests
 
         Assert.AreSame(campaign, CampaignSession.Current);
         Assert.IsTrue(campaign.Narrative.HasFlag("chapter01.flag.camp_beasts_resolved"));
+        Assert.AreEqual(day, campaign.Day, "Полночь с суточным расходом не наступила.");
         Assert.AreEqual(supply - CampaignBattleBridge.RetreatSupplyLoss, campaign.ArmySupply);
         Assert.IsFalse(CampRest.IsResting(campaign), "Ночлег прерван отходом.");
         Assert.IsTrue(HomePeopleService.Find(campaign, campaign.GetSelectedCommander().Id).Exhausted);

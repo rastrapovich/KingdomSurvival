@@ -1,0 +1,53 @@
+{
+  "id": "freeplay_coal_hutor_after",
+  "title": "И-1 — Хутор у дальних ям",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-1 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Вход на хутор после отхода или поражения у ям (флаг freeplay.coal.hutor_moved). Обмен вдвое дороже: флаг freeplay.coal.trade_double, −12 еды Дома.",
+  "startNodeId": "freeplay.coal.after.start",
+  "tags": ["свободная_игра", "И-1"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.coal.after.start",
+      "speakerId": "coalburner",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.after.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Хутор перебрался к дальним ямам. Дымит одна, и дым этот неровный — то гуще, то реже, как дыхание человека, который давно не спал."
+        },
+        {
+          "blockId": "freeplay.coal.after.start.price",
+          "kind": 0,
+          "text": "— Уголь есть. Только теперь возим его дальше и стережём вдвоём. Хлеба — вдвое."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.after.pay", "text": "Берём вдвое.", "kind": 0, "nextNodeId": "freeplay.coal.after.deal" },
+        { "choiceId": "freeplay.coal.after.leave", "text": "Не сейчас.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.coal.after.deal",
+      "speakerId": "coalburner",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.after.deal.text",
+          "kind": 0,
+          "text": "— По рукам. А зверь, если что, всё там же — у старых ям.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.coal.after.trade_done", "Type": 0, "StringParam": "freeplay.coal.trade_double" },
+            { "EffectExecutionId": "freeplay.coal.after.trade_food", "Type": 9, "IntParam": -12 }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.after.go", "text": "Уходим.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

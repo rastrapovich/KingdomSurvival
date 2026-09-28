@@ -1,0 +1,17 @@
+{
+  "name": "KingdomSurvival.FreePlay.Editor",
+  "rootNamespace": "KingdomSurvival.FreePlay.Editor",
+  "references": [
+    "KingdomSurvival.Core",
+    "KingdomSurvival.DialogueDatabase"
+  ],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

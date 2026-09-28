@@ -77,6 +77,25 @@ public sealed class CampaignContentProvider
     public Func<GameState, IReadOnlyList<HomeCareView>> HomeCares;
     // Однократная настройка только что созданной кампании этого режима.
     public Action<GameState> OnNewCampaign;
+
+    // ПР-12Б: авторские истории режима. Узкие точки входа, не система
+    // квестов: сцена при входе в место, конец разговора, бой после сцены,
+    // итог такого боя, скорость работ Дома и опрос каждого кадра с
+    // донесениями.
+    public Func<GameState, string, LocationEntryView> LocationEntry;
+    public Action<GameState, string> DialogueCompleted;
+    public Func<GameState, string, CampaignBattleRequest> BattleAfterDialogue;
+    public Action<GameState, CampaignBattleResult, List<string>> BattleApplied;
+    public Func<GameState, double> HomeWorkRate;
+    public Func<GameState, List<string>> Refresh;
+}
+
+// Сцена при входе в достигнутое место: какой диалог и как подписана кнопка.
+public sealed class LocationEntryView
+{
+    public string DialogueId;
+    public string ButtonText;
+    public string Hint;
 }
 
 public static class CampaignContent
@@ -130,6 +149,42 @@ public static class CampaignContent
     public static void InitializeNewCampaign(GameState state)
     {
         Find(state)?.OnNewCampaign?.Invoke(state);
+    }
+
+    public static LocationEntryView LocationEntry(GameState state, string locationId)
+    {
+        CampaignContentProvider provider = Find(state);
+        return provider?.LocationEntry != null ? provider.LocationEntry(state, locationId) : null;
+    }
+
+    public static void OnDialogueCompleted(GameState state, string dialogueId)
+    {
+        Find(state)?.DialogueCompleted?.Invoke(state, dialogueId);
+    }
+
+    public static CampaignBattleRequest BattleAfterDialogue(GameState state, string dialogueId)
+    {
+        CampaignContentProvider provider = Find(state);
+        return provider?.BattleAfterDialogue != null ? provider.BattleAfterDialogue(state, dialogueId) : null;
+    }
+
+    public static void OnBattleApplied(GameState state, CampaignBattleResult result, List<string> reports)
+    {
+        Find(state)?.BattleApplied?.Invoke(state, result, reports);
+    }
+
+    // Множитель скорости работ Дома (1 — обычная).
+    public static double HomeWorkRate(GameState state)
+    {
+        CampaignContentProvider provider = Find(state);
+        return provider?.HomeWorkRate != null ? Math.Max(0.0, provider.HomeWorkRate(state)) : 1.0;
+    }
+
+    // Опрос содержания режима; возвращает донесения для игрока.
+    public static List<string> Refresh(GameState state)
+    {
+        CampaignContentProvider provider = Find(state);
+        return provider?.Refresh != null ? provider.Refresh(state) ?? new List<string>() : new List<string>();
     }
 
     private static CampaignContentProvider Find(GameState state)

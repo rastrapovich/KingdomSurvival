@@ -23,9 +23,30 @@ namespace KingdomSurvival.FreePlay
             {
                 Goals = BuildGoals,
                 HomeObjects = DescribeHomeObjects,
-                HomeCares = HomeCares.DescribeCommon,
-                OnNewCampaign = InitializeNewCampaign
+                HomeCares = DescribeHomeCares,
+                OnNewCampaign = InitializeNewCampaign,
+                // ПР-12Б: история И-1 «Уголь для Лады».
+                LocationEntry = FreePlayCoalStory.LocationEntry,
+                BattleAfterDialogue = FreePlayCoalStory.BattleAfterDialogue,
+                BattleApplied = FreePlayCoalStory.BattleApplied,
+                HomeWorkRate = FreePlayCoalStory.HomeWorkRate,
+                Refresh = RefreshWithReports
             });
+        }
+
+        public static List<HomeCareView> DescribeHomeCares(GameState state)
+        {
+            List<HomeCareView> cares = HomeCares.DescribeCommon(state);
+            if (state != null)
+                FreePlayCoalStory.AddHomeCares(state, cares);
+            return cares;
+        }
+
+        // Опрос режима: история походов и истории режима; донесения — игроку.
+        public static List<string> RefreshWithReports(GameState state)
+        {
+            Refresh(state);
+            return CampaignContent.IsFreePlay(state) ? FreePlayCoalStory.Refresh(state) : new List<string>();
         }
 
         public static void InitializeNewCampaign(GameState state)
@@ -95,9 +116,13 @@ namespace KingdomSurvival.FreePlay
                 return goals;
 
             goals.Add(BuildRegionGoal(state));
+            goals.Add(FreePlayCoalStory.BuildGoal(state));
             foreach (LocationData location in state.Locations)
             {
                 if (location == null || location.IsWaypoint || !location.IsVisibleOnMap || !location.IsDiscovered)
+                    continue;
+                // Хутор ведёт своя история («Уголь для Лады»).
+                if (location.Id == FreePlayCoalStory.LocationId)
                     continue;
                 goals.Add(BuildPlaceGoal(location));
             }

@@ -65,7 +65,10 @@ public partial class PrototypeUIController
         if (gameState != null)
         {
             KingdomSurvival.Chapter01.Chapter01Chronicle.Refresh(gameState);
-            KingdomSurvival.FreePlay.FreePlayContent.Refresh(gameState);
+            // ПР-12Б: содержание режима (история походов, истории свободной
+            // игры) — с донесениями для игрока.
+            foreach (string report in CampaignContent.Refresh(gameState))
+                AddReport(report);
         }
 
         if (!debugMenuInitialized)

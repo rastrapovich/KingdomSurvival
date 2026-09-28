@@ -1,0 +1,165 @@
+{
+  "id": "freeplay_coal_hutor",
+  "title": "И-1 — Хутор углежогов",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-1 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Вход на хутор (LocationEntry). Пути: охота — флаг freeplay.coal.hunt, после разговора бой «Вожак у угольных ям» (forest_beast_alpha + forest_beast, отход разрешён; найденная тропа или Агнесса — подготовленное начало); изгородь — только с Ладой, флаг freeplay.coal.fence, −2 припаса похода; обмен — флаг freeplay.coal.trade, −6 еды Дома. Лор — LORE.md §17.1.",
+  "startNodeId": "freeplay.coal.hutor.start",
+  "tags": ["свободная_игра", "И-1"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.coal.hutor.start",
+      "speakerId": "coalburner",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.hutor.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Две ямы дымят ровно, третья стоит холодная. У холодной — ни души, только лопата, воткнутая в землю так, будто её бросили на полуслове."
+        },
+        {
+          "blockId": "freeplay.coal.hutor.start.greet",
+          "kind": 0,
+          "text": "— Из Дома? Давно вас не видели. Мы бы сами пришли, да от ям не отойти."
+        },
+        {
+          "blockId": "freeplay.coal.hutor.start.beast",
+          "kind": 0,
+          "text": "— Зверь повадился. Старый, седой по хребту. Огня не боится, крика — тем более. Третью ночь ходит к дальней яме, как к себе в кладовую. Сало унёс, вчера — собаку."
+        },
+        {
+          "blockId": "freeplay.coal.hutor.start.agnessa",
+          "kind": 4,
+          "speakerIdOverride": "agnessa",
+          "text": "— Он ходит одной тропой, через ручей от ельника. Ждать его надо там, а не у ям.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "agnessa" } ] }
+        },
+        {
+          "blockId": "freeplay.coal.hutor.start.lada",
+          "kind": 4,
+          "speakerIdOverride": "lada",
+          "text": "— Кольев тут на три ямы хватит, и дёготь свой. Огневую изгородь к вечеру поставим.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "lada" } ] }
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.hutor.hunt", "text": "Выследим его и отгоним.", "kind": 0, "nextNodeId": "freeplay.coal.hutor.hunt" },
+        {
+          "choiceId": "freeplay.coal.hutor.fence",
+          "text": "Поставим огневую изгородь вокруг ям.",
+          "kind": 0,
+          "nextNodeId": "freeplay.coal.hutor.fence",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "lada" } ] },
+          "unavailablePresentation": 1
+        },
+        { "choiceId": "freeplay.coal.hutor.trade", "text": "Меняем хлеб на уголь — и уходим.", "kind": 0, "nextNodeId": "freeplay.coal.hutor.trade" },
+        { "choiceId": "freeplay.coal.hutor.leave", "text": "Подумаем.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.coal.hutor.hunt",
+      "speakerId": "coalburner",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.hutor.hunt.deal",
+          "kind": 0,
+          "text": "— К ночи он придёт. Прогоните — мешки ваши, и мы в долгу не останемся.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.coal.hutor.hunt_chosen", "Type": 0, "StringParam": "freeplay.coal.hunt" }
+          ]
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "freeplay.coal.hutor.trail",
+          "text": "Найти его тропу, пока светло.",
+          "kind": 2,
+          "check": { "CheckId": "freeplay.coal.trail_check", "Kind": 2, "Quality": 3, "CompetencyId": "fieldcraft", "Difficulty": 11 },
+          "successNodeId": "freeplay.coal.hutor.trail_found",
+          "failureNodeId": "freeplay.coal.hutor.trail_lost",
+          "successEffects": [
+            { "EffectExecutionId": "freeplay.coal.hutor.trail_ok", "Type": 0, "StringParam": "freeplay.coal.trail" }
+          ]
+        },
+        { "choiceId": "freeplay.coal.hutor.wait", "text": "Ждать у ям.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.coal.hutor.trail_found",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.hutor.trail_found.text",
+          "kind": 5,
+          "text": "Тропа находится у ручья: примятая осока, клок седой шерсти на ольховом суку. Отсюда ямы как на ладони — а зверь будет смотреть на ямы, а не на вас."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.hutor.trail_wait", "text": "Ждём здесь.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.coal.hutor.trail_lost",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.hutor.trail_lost.text",
+          "kind": 5,
+          "text": "Следов у ручья много, и все не те: лось, лиса, собака, которой больше нет. К закату так и не ясно, откуда он выйдет. Ждать придётся у ям."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.hutor.pits_wait", "text": "Ждём у ям.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.coal.hutor.fence",
+      "speakerId": "coalburner",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.hutor.fence.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "К вечеру вокруг ям стоит частокол из обожжённых кольев, между ними — канавка с дёгтем. Углежог поджигает её сам и долго смотрит, будто проверяет, не передумает ли огонь.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.coal.hutor.fence_built", "Type": 0, "StringParam": "freeplay.coal.fence" },
+            { "EffectExecutionId": "freeplay.coal.hutor.fence_supplies", "Type": 10, "IntParam": -2 }
+          ]
+        },
+        {
+          "blockId": "freeplay.coal.hutor.fence.thanks",
+          "kind": 0,
+          "text": "— Пусть теперь ходит вокруг. Угля — сколько унесёте."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.hutor.fence_leave", "text": "В путь.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.coal.hutor.trade",
+      "speakerId": "coalburner",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.hutor.trade.deal",
+          "kind": 0,
+          "text": "— Хлеб — это разговор. Два мешка за хлеб. И не обессудьте: провожать не пойдём, ямы одни не оставим.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.coal.hutor.trade_done", "Type": 0, "StringParam": "freeplay.coal.trade" },
+            { "EffectExecutionId": "freeplay.coal.hutor.trade_food", "Type": 9, "IntParam": -6 }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.hutor.trade_leave", "text": "По рукам.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

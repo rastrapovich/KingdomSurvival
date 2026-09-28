@@ -346,7 +346,12 @@ public partial class PrototypeUIController
         if (gameState == null)
             return;
 
-        Chapter01HomeActivities.TryStartYardDeck(gameState, out string message);
+        // ПР-12Б: в свободной игре настил просто прогнил — без условия главы.
+        string message;
+        if (CampaignContent.IsFreePlay(gameState))
+            HomeLife.TryStartYardDeck(gameState, out message);
+        else
+            Chapter01HomeActivities.TryStartYardDeck(gameState, out message);
         AddReport(message);
         homePeopleSignature = null;
         homeScreenSignature = null;

@@ -308,7 +308,9 @@ public static class HomeLife
         if (!IsWorkInProgress(deck))
             return;
 
-        double rate = HomeFunctionResolver.Resolve(state, HomeFunctionResolver.MaintenanceId).Rate;
+        // ПР-12Б: режим может замедлить работы (например, без угля для правки).
+        double rate = HomeFunctionResolver.Resolve(state, HomeFunctionResolver.MaintenanceId).Rate *
+                      CampaignContent.HomeWorkRate(state);
         if (rate <= 0.0)
             return;
 

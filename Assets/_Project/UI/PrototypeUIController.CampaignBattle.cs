@@ -59,9 +59,10 @@ public partial class PrototypeUIController
     // Опрос каждого кадра: вступление к сюжетному бою и запуск боя после него.
     private void RefreshStoryBattle()
     {
-        if (gameState == null || isGameOver || !Chapter01Crisis.IsActive(gameState))
+        if (gameState == null || isGameOver)
             return;
 
+        // Бой после сцены — и главы, и свободной игры (ПР-12Б).
         if (pendingStoryBattle != null)
         {
             if (IsNarrativeDialogueActive || HasBlockingModalWork())
@@ -73,6 +74,9 @@ public partial class PrototypeUIController
             return;
         }
 
+        if (!Chapter01Crisis.IsActive(gameState))
+            return;
+
         string dialogueId = Chapter01CampBattle.GetPendingDialogueId(gameState);
         if (!string.IsNullOrEmpty(dialogueId))
             TryOpenNarrativeDialogueById(dialogueId);
@@ -80,8 +84,17 @@ public partial class PrototypeUIController
 
     private void OnStoryDialogueCompleted(string dialogueId)
     {
-        if (dialogueId == Chapter01Ids.Dialogues.CampBeasts && gameState != null)
+        if (gameState == null)
+            return;
+        if (dialogueId == Chapter01Ids.Dialogues.CampBeasts)
+        {
             pendingStoryBattle = Chapter01CampBattle.CreateRequest(gameState);
+            return;
+        }
+
+        // ПР-12Б: сцены свободной игры — реакция режима и, если нужно, бой.
+        CampaignContent.OnDialogueCompleted(gameState, dialogueId);
+        pendingStoryBattle = CampaignContent.BattleAfterDialogue(gameState, dialogueId);
     }
 
     // Вызывается при подхвате кампании: если она вернулась из боя —
@@ -118,6 +131,15 @@ public partial class PrototypeUIController
         {
             gameState.Narrative.SetFlag(Chapter01Ids.Flags.CampBeastsResolved);
             AddReport(Chapter01CampBattle.DescribeOutcome(result.Outcome));
+        }
+
+        // ПР-12Б: исход боя истории свободной игры.
+        if (status == CampaignBattleApplyStatus.SquadSurvived)
+        {
+            List<string> storyReports = new List<string>();
+            CampaignContent.OnBattleApplied(gameState, result, storyReports);
+            foreach (string report in storyReports)
+                AddReport(report);
         }
 
         if (status == CampaignBattleApplyStatus.SquadSurvived)

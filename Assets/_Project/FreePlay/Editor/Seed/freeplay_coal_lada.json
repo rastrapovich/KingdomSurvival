@@ -1,0 +1,57 @@
+{
+  "id": "freeplay_coal_lada",
+  "title": "И-1 — Уголь для Лады",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-1 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Зацепка: забота Дома «Уголь у Лады». Реплика «Возьмём» ставит freeplay.coal.asked — хутор углежогов появляется на карте (FreePlayCoalStory). Лор — LORE.md §17.1.",
+  "startNodeId": "freeplay.coal.lada.start",
+  "tags": ["свободная_игра", "И-1"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.coal.lada.start",
+      "speakerId": "lada",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.lada.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Лада сидит на пороге кладовой и пересчитывает скобы. Считает второй раз — будто от этого их станет больше."
+        },
+        {
+          "blockId": "freeplay.coal.lada.start.coal",
+          "kind": 0,
+          "text": "— Настил я сделаю. Только скобы гнутые, их править в огне, а угля у меня на две правки. Дальше буду гнуть руками — и дело пойдёт вдвое дольше."
+        },
+        {
+          "blockId": "freeplay.coal.lada.start.hutor",
+          "kind": 0,
+          "text": "— Углежоги с кромки Чёрного леса раньше сами к нам ходили: уголь за хлеб. Этой весной ни разу не пришли."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.lada.go", "text": "Сходим к углежогам.", "kind": 0, "nextNodeId": "freeplay.coal.lada.way" },
+        { "choiceId": "freeplay.coal.lada.later", "text": "Пока обойдёмся.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.coal.lada.way",
+      "speakerId": "lada",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.lada.way.smoke",
+          "kind": 0,
+          "text": "— Их дым видно с дороги, если смотреть поверх ольшаника. Хлеба возьми. С пустыми руками там разговаривают коротко.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.coal.lada.asked", "Type": 0, "StringParam": "freeplay.coal.asked" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.lada.take", "text": "Возьмём.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

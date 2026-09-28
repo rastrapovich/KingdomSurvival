@@ -116,6 +116,12 @@ public partial class PrototypeUIController
 
         string entryDialogueId =
             Chapter01StoryDirector.GetLocationEntryDialogueId(gameState, location.Id);
+        // ПР-12Б: сцена места свободной игры (своя подпись кнопки).
+        LocationEntryView modeEntry = string.IsNullOrEmpty(entryDialogueId)
+            ? CampaignContent.LocationEntry(gameState, location.Id)
+            : null;
+        if (modeEntry != null)
+            entryDialogueId = modeEntry.DialogueId;
 
         Button primaryButton = InstantiateFlatTemplate<Button>(LoadNarrativeChoiceButtonTemplate(), "narrative-dialogue-choice");
         if (primaryButton != null)
@@ -126,8 +132,8 @@ public partial class PrototypeUIController
 
             if (!string.IsNullOrEmpty(entryDialogueId))
             {
-                primaryButtonText = "ПОДОЙТИ К ЛЮДЯМ";
-                primaryHint = "Поговорить с людьми, живущими ниже по течению.";
+                primaryButtonText = modeEntry != null ? modeEntry.ButtonText : "ПОДОЙТИ К ЛЮДЯМ";
+                primaryHint = modeEntry != null ? modeEntry.Hint : "Поговорить с людьми, живущими ниже по течению.";
                 primaryEnabled = true;
                 primaryButton.clicked += () =>
                     OnLocationInteractionNarrativeEntryClicked(entryDialogueId);
@@ -181,7 +187,8 @@ public partial class PrototypeUIController
 
         string locationId = locationInteractionLocationId;
         string availableDialogueId =
-            Chapter01StoryDirector.GetLocationEntryDialogueId(gameState, locationId);
+            Chapter01StoryDirector.GetLocationEntryDialogueId(gameState, locationId) ??
+            CampaignContent.LocationEntry(gameState, locationId)?.DialogueId;
         if (!string.Equals(
                 availableDialogueId,
                 dialogueId,

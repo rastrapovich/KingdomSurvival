@@ -1,0 +1,57 @@
+{
+  "id": "freeplay_mine_ostafiy",
+  "title": "И-2 — Остафий вспоминает",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-2 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Забота Дома после первого возвращения. «Сходим посмотреть» ставит freeplay.mine.known — старая шахта на карте. Лор — LORE.md §17.1: шахта старше Дома, кем вырыта — открыто.",
+  "startNodeId": "freeplay.mine.ostafiy.start",
+  "tags": ["свободная_игра", "И-2"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.mine.ostafiy.start",
+      "speakerId": "ostafiy",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.ostafiy.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Остафий дожидается, пока отряд разберёт вещи, и только тогда подходит — так он подходит всегда, когда хочет сказать что-то не к спеху, но важное."
+        },
+        {
+          "blockId": "freeplay.mine.ostafiy.start.mine",
+          "kind": 0,
+          "text": "— Дальше по старой дороге есть шахта. Мы её не копали. И никто в Доме не скажет, кто копал."
+        },
+        {
+          "blockId": "freeplay.mine.ostafiy.start.iron",
+          "kind": 0,
+          "text": "— Говорят, штольни там сухие. И железо лежит, будто его ждут."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.ostafiy.go", "text": "Сходим посмотреть.", "kind": 0, "nextNodeId": "freeplay.mine.ostafiy.way" },
+        { "choiceId": "freeplay.mine.ostafiy.later", "text": "Не сейчас.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.ostafiy.way",
+      "speakerId": "ostafiy",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.ostafiy.way.text",
+          "kind": 0,
+          "text": "— Возьми меня, если не жалко места. Я на железо посмотрю — по нему видно, кто работал и как.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.ostafiy.known", "Type": 0, "StringParam": "freeplay.mine.known" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.ostafiy.ok", "text": "Посмотрим.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

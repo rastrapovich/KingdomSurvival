@@ -1,0 +1,34 @@
+{
+  "id": "freeplay_mine_deep",
+  "title": "И-2 — Дальняя штольня",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-2 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Повторный вход в шахту, пока логово не очищено. Один путь — после разговора бой «Логово в штольне» (2 × forest_beast, отход разрешён, с Агнессой — подготовленное начало). Отказаться — кнопкой «Отменить» у места. Повторяемо: эффектов нет.",
+  "startNodeId": "freeplay.mine.deep.start",
+  "tags": ["свободная_игра", "И-2"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.mine.deep.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.deep.start.text",
+          "kind": 5,
+          "text": "Из дальней штольни всё так же тянет теплом и зверем. У входа — свежие следы, крупные, в две цепочки."
+        },
+        {
+          "blockId": "freeplay.mine.deep.start.lada",
+          "kind": 4,
+          "speakerIdOverride": "lada",
+          "text": "— Крепь поставлю у входа. Если придётся отходить, свод на голову не сядет.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "lada" } ] }
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.deep.go", "text": "Спускаемся.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "id": "freeplay_mine_mark_talk",
+  "title": "И-2 — Остафий о клейме",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-2 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Отложенное последствие: прочитанное клеймо открывает у Остафия разговор о прежних работах. Сходство с кладкой руин — только догадка Остафия (ВЕРОВАНИЕ), не факт: кто копал шахту — ОТКРЫТО (LORE.md §17.1).",
+  "startNodeId": "freeplay.mine.mark_talk.start",
+  "tags": ["свободная_игра", "И-2"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.mine.mark_talk.start",
+      "speakerId": "ostafiy",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.mark_talk.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Остафий долго вертит скобу у огня, водит по клейму ногтем, будто так его лучше слышно."
+        },
+        {
+          "blockId": "freeplay.mine.mark_talk.start.text",
+          "kind": 0,
+          "text": "— Два угла в одном. Такой знак я где-то видел — на камне, не на железе. Может, в кладке у затопленных руин. А может, мне кажется: старость любит сходства.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.mark_talk.done", "Type": 0, "StringParam": "freeplay.mine.mark_talked" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.mark_talk.remember", "text": "Запомним.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

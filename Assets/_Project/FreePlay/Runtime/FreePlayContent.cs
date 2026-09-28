@@ -25,13 +25,35 @@ namespace KingdomSurvival.FreePlay
                 HomeObjects = DescribeHomeObjects,
                 HomeCares = DescribeHomeCares,
                 OnNewCampaign = InitializeNewCampaign,
-                // ПР-12Б: история И-1 «Уголь для Лады».
-                LocationEntry = FreePlayCoalStory.LocationEntry,
-                BattleAfterDialogue = FreePlayCoalStory.BattleAfterDialogue,
-                BattleApplied = FreePlayCoalStory.BattleApplied,
+                // ПР-12Б: истории свободной игры.
+                LocationEntry = LocationEntry,
+                DialogueCompleted = DialogueCompleted,
+                BattleAfterDialogue = BattleAfterDialogue,
+                BattleApplied = BattleApplied,
                 HomeWorkRate = FreePlayCoalStory.HomeWorkRate,
                 Refresh = RefreshWithReports
             });
+        }
+
+        public static LocationEntryView LocationEntry(GameState state, string locationId)
+        {
+            return FreePlayCoalStory.LocationEntry(state, locationId) ?? FreePlayMineStory.LocationEntry(state, locationId);
+        }
+
+        public static void DialogueCompleted(GameState state, string dialogueId)
+        {
+            FreePlayMineStory.DialogueCompleted(state, dialogueId);
+        }
+
+        public static CampaignBattleRequest BattleAfterDialogue(GameState state, string dialogueId)
+        {
+            return FreePlayCoalStory.BattleAfterDialogue(state, dialogueId) ?? FreePlayMineStory.BattleAfterDialogue(state, dialogueId);
+        }
+
+        public static void BattleApplied(GameState state, CampaignBattleResult result, List<string> reports)
+        {
+            FreePlayCoalStory.BattleApplied(state, result, reports);
+            FreePlayMineStory.BattleApplied(state, result, reports);
         }
 
         public static List<HomeCareView> DescribeHomeCares(GameState state)
@@ -41,6 +63,7 @@ namespace KingdomSurvival.FreePlay
             {
                 FreePlayMillerStory.AddHomeCares(state, cares);
                 FreePlayCoalStory.AddHomeCares(state, cares);
+                FreePlayMineStory.AddHomeCares(state, cares);
             }
             return cares;
         }
@@ -53,6 +76,7 @@ namespace KingdomSurvival.FreePlay
                 return new List<string>();
             List<string> reports = FreePlayCoalStory.Refresh(state);
             reports.AddRange(FreePlayMillerStory.Refresh(state));
+            reports.AddRange(FreePlayMineStory.Refresh(state));
             reports.AddRange(FreePlaySummary.Refresh(state));
             return reports;
         }
@@ -140,13 +164,17 @@ namespace KingdomSurvival.FreePlay
             JournalGoalViewData guest = FreePlayMillerStory.BuildGoal(state);
             if (guest != null)
                 goals.Add(guest);
+            JournalGoalViewData mine = FreePlayMineStory.BuildGoal(state);
+            if (mine != null)
+                goals.Add(mine);
             foreach (LocationData location in state.Locations)
             {
                 if (location == null || location.IsWaypoint || !location.IsVisibleOnMap || !location.IsDiscovered)
                     continue;
                 // Хутор ведёт своя история («Уголь для Лады»); место без
                 // осмотра (Чёрный лес) — только через историю.
-                if (location.Id == FreePlayCoalStory.LocationId || location.ExplorationHours <= 0.0)
+                if (location.Id == FreePlayCoalStory.LocationId || location.Id == FreePlayMineStory.LocationId ||
+                    location.ExplorationHours <= 0.0)
                     continue;
                 goals.Add(BuildPlaceGoal(location));
             }

@@ -1,0 +1,179 @@
+{
+  "id": "freeplay_mine_entry",
+  "title": "И-2 — Сухая шахта",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-2 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Первый вход в шахту. Отвалы — решающая Наблюдательность (Чутьё, 13): успех — железо (freeplay.mine.iron_dumps) и клеймо. Клеймо: Остафий в отряде читает сам (функция присутствия) или решающее Расследование (Суждение, 13) → freeplay.mine.mark. Дальняя штольня — флаг freeplay.mine.deep, после разговора бой «Логово в штольне» (2 × forest_beast, отход разрешён).",
+  "startNodeId": "freeplay.mine.entry.start",
+  "tags": ["свободная_игра", "И-2"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.mine.entry.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.entry.start.scene",
+          "kind": 5,
+          "text": "Штольни сухие, как и говорили. У входа — отвалы, заросшие иван-чаем, и из них торчит железо: где скоба, где обух, где что-то, чему уже нет имени.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.entry.entered", "Type": 0, "StringParam": "freeplay.mine.entered" }
+          ]
+        },
+        {
+          "blockId": "freeplay.mine.entry.start.ostafiy",
+          "kind": 4,
+          "speakerIdOverride": "ostafiy",
+          "text": "— Уходили отсюда не второпях. Инструмент сложен, а не брошен.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "ostafiy" } ] }
+        },
+        {
+          "blockId": "freeplay.mine.entry.start.torvin",
+          "kind": 4,
+          "speakerIdOverride": "torvin",
+          "text": "— Железо бы пригодилось. Ржавое, да наше будет.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "torvin" } ] }
+        },
+        {
+          "blockId": "freeplay.mine.entry.start.deep",
+          "kind": 5,
+          "text": "Из дальней штольни тянет теплом и зверем."
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "freeplay.mine.entry.dumps",
+          "text": "Перебрать отвалы.",
+          "kind": 2,
+          "check": { "CheckId": "freeplay.mine.dumps_check", "Kind": 2, "Quality": 3, "CompetencyId": "observation", "Difficulty": 13 },
+          "successNodeId": "freeplay.mine.entry.iron",
+          "failureNodeId": "freeplay.mine.entry.rust"
+        },
+        { "choiceId": "freeplay.mine.entry.go_deep", "text": "Спуститься в дальнюю штольню.", "kind": 0, "nextNodeId": "freeplay.mine.entry.deep" },
+        { "choiceId": "freeplay.mine.entry.leave", "text": "Уходим.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.entry.iron",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.entry.iron.text",
+          "kind": 5,
+          "text": "Под ржавчиной — добрая полоса железа на три-четыре поковки. На каждой скобе одно и то же клеймо: два угла, вписанные один в другой.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.entry.iron_found", "Type": 0, "StringParam": "freeplay.mine.iron_dumps" }
+          ]
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "freeplay.mine.entry.ask_ostafiy",
+          "text": "Остафий, взгляни на клеймо.",
+          "kind": 0,
+          "nextNodeId": "freeplay.mine.entry.mark_ostafiy",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "ostafiy" } ] }
+        },
+        {
+          "choiceId": "freeplay.mine.entry.read_mark",
+          "text": "Разобрать клеймо самим.",
+          "kind": 2,
+          "check": { "CheckId": "freeplay.mine.mark_check", "Kind": 2, "Quality": 4, "CompetencyId": "investigation", "Difficulty": 13 },
+          "successNodeId": "freeplay.mine.entry.mark_read",
+          "failureNodeId": "freeplay.mine.entry.mark_lost"
+        },
+        { "choiceId": "freeplay.mine.entry.iron_leave", "text": "Забираем железо и уходим.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.entry.rust",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.entry.rust.text",
+          "kind": 5,
+          "text": "Железо рассыпается в пальцах рыжей чешуёй. Что держалось, то держалось, пока его не трогали."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.entry.rust_deep", "text": "Спуститься в дальнюю штольню.", "kind": 0, "nextNodeId": "freeplay.mine.entry.deep" },
+        { "choiceId": "freeplay.mine.entry.rust_leave", "text": "Уходим.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.entry.mark_ostafiy",
+      "speakerId": "ostafiy",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.entry.mark_ostafiy.text",
+          "kind": 0,
+          "text": "— Не наше. И не с дальней мельницы — там клеймят кругом. Кто-то метил своё железо, чтобы его узнавали. Значит, было кому узнавать.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.entry.mark_by_ostafiy", "Type": 0, "StringParam": "freeplay.mine.mark" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.entry.mark_ostafiy_deep", "text": "Спуститься в дальнюю штольню.", "kind": 0, "nextNodeId": "freeplay.mine.entry.deep" },
+        { "choiceId": "freeplay.mine.entry.mark_ostafiy_leave", "text": "Забираем железо и уходим.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.entry.mark_read",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.entry.mark_read.text",
+          "kind": 5,
+          "text": "Клеймо выбито одним и тем же пуансоном — ровно, без перекоса. Это не кузнец-одиночка, это мастерская: кто-то метил своё железо, чтобы его узнавали.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.entry.mark_by_hero", "Type": 0, "StringParam": "freeplay.mine.mark" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.entry.mark_read_deep", "text": "Спуститься в дальнюю штольню.", "kind": 0, "nextNodeId": "freeplay.mine.entry.deep" },
+        { "choiceId": "freeplay.mine.entry.mark_read_leave", "text": "Забираем железо и уходим.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.entry.mark_lost",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.entry.mark_lost.text",
+          "kind": 5,
+          "text": "Два угла — и всё. Без знающего глаза это просто царапины. Остафий бы, может, разобрал."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.entry.mark_lost_deep", "text": "Спуститься в дальнюю штольню.", "kind": 0, "nextNodeId": "freeplay.mine.entry.deep" },
+        { "choiceId": "freeplay.mine.entry.mark_lost_leave", "text": "Забираем железо и уходим.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.entry.deep",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.entry.deep.text",
+          "kind": 5,
+          "text": "В дальней штольне тепло, как в хлеву, и пахнет так же. В темноте кто-то встаёт — не один.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.entry.deep_chosen", "Type": 0, "StringParam": "freeplay.mine.deep" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.entry.deep_fight", "text": "К оружию.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

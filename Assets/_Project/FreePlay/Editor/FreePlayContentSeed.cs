@@ -23,7 +23,8 @@ namespace KingdomSurvival.FreePlay.Editor
         private static readonly (string Id, string Name, string Role)[] Speakers =
         {
             ("coalburner", "Углежог", "Хутор у кромки Чёрного леса"),
-            ("agnessa", "Агнесса", "Разведчица")
+            ("agnessa", "Агнесса", "Разведчица"),
+            ("miller_son", "Сын мельника", "С дальней мельницы")
         };
 
         [MenuItem("Kingdom Survival/Свободная игра/Добавить недостающие сцены в базу диалогов")]

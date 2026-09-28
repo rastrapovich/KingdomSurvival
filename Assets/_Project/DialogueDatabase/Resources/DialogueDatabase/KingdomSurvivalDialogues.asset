@@ -160,6 +160,14 @@ MonoBehaviour:
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
+  - id: miller_son
+    displayName: "\u0421\u044B\u043D \u043C\u0435\u043B\u044C\u043D\u0438\u043A\u0430"
+    role: "\u0421 \u0434\u0430\u043B\u044C\u043D\u0435\u0439 \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
   dialogues:
   - id: chapter01_dialogue_01_ordinary_morning
     title: "N01 \u2014 \u041E\u0431\u044B\u0447\u043D\u043E\u0435 \u0443\u0442\u0440\u043E
@@ -21285,6 +21293,442 @@ MonoBehaviour:
         nextNodeId: 
         endsDialogue: 1
         choiceId: freeplay.coal.smoke.go
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: freeplay_miller_guest
+    title: "\u0418-3 \u2014 \u0413\u043E\u0441\u0442\u044C \u0441 \u0434\u0430\u043B\u044C\u043D\u0435\u0439
+      \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u044B"
+    category: 2
+    status: 1
+    developerComment: "\u041F\u0420-12\u0411, \u0438\u0441\u0442\u043E\u0440\u0438\u044F
+      \u0418-3 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415][KINGDOM SURVIVAL]. \u0427\u0435\u0440\u0435\u0437
+      5 \u0434\u043D\u0435\u0439 \u043F\u043E\u0441\u043B\u0435 \u0432\u0441\u0442\u0440\u0435\u0447\u0438
+      ROAD_MILLER_SACK_01 \u2014 \u0437\u0430\u0431\u043E\u0442\u0430 \u0414\u043E\u043C\u0430
+      \xAB\u0413\u043E\u0441\u0442\u044C \u0443 \u0432\u043E\u0440\u043E\u0442\xBB.
+      \u0412\u0435\u0442\u043A\u0430 \u0437\u0430\u0432\u0438\u0441\u0438\u0442 \u043E\u0442
+      \u044D\u0444\u0444\u0435\u043A\u0442\u0430 ROAD_MILLER_SACK_01.pr12.success.supplies
+      (\u0432\u0437\u044F\u043B\u0438 \u043A\u0440\u0443\u043F\u0443). \u0418\u0441\u0445\u043E\u0434\u044B:
+      freeplay.miller.friend \u0438\u043B\u0438 freeplay.miller.cool. \u041B\u043E\u0440
+      \u2014 LORE.md \xA717.1 (\u0434\u0430\u043B\u044C\u043D\u044F\u044F \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0430)."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: freeplay.miller.guest.start
+    tags:
+    - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
+    - "\u0418-3"
+    nodes:
+    - id: freeplay.miller.guest.start
+      speakerId: miller_son
+      text: 
+      textBlocks:
+      - blockId: freeplay.miller.guest.start.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u0423 \u0432\u043E\u0440\u043E\u0442 \u0441\u0442\u043E\u0438\u0442
+          \u043F\u0430\u0440\u0435\u043D\u044C, \u0441\u0435\u0434\u043E\u0439 \u043E\u0442
+          \u043C\u0443\u043A\u0438 \u043F\u043E \u0441\u0430\u043C\u044B\u0435 \u0431\u0440\u043E\u0432\u0438.
+          \u041C\u0443\u043A\u0430 \u0432\u044A\u0435\u043B\u0430\u0441\u044C \u0432
+          \u0448\u0430\u043F\u043A\u0443 \u0435\u0449\u0451 \u0434\u043E\u043C\u0430,
+          \u0430 \u0434\u043E\u0440\u043E\u0433\u0430 \u0442\u043E\u043B\u044C\u043A\u043E
+          \u0434\u043E\u0431\u0430\u0432\u0438\u043B\u0430 \u043F\u044B\u043B\u0438.
+          \u0412 \u0440\u0443\u043A\u0430\u0445 \u2014 \u043C\u0435\u0448\u043E\u043A
+          \u0441 \u0442\u0435\u043C \u0436\u0435 \u043A\u043B\u0435\u0439\u043C\u043E\u043C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.miller.guest.start.took
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041C\u0435\u0442\u043A\u0443 \u0432\u0430\u0448\u0443 \u043D\u0430
+          \u0432\u0435\u0442\u043A\u0435 \u044F \u043D\u0430\u0448\u0451\u043B. \u041A\u0440\u0443\u043F\u0443
+          \u0432\u044B \u0432\u0437\u044F\u043B\u0438 \u2014 \u044D\u0442\u043E \u043B\u0430\u0434\u043D\u043E,
+          \u043E\u0442\u0435\u0446 \u043D\u0435 \u043E\u0431\u0435\u0434\u043D\u0435\u0435\u0442.
+          \u042F \u0437\u0430 \u043C\u0435\u0448\u043A\u043E\u043C \u0448\u0451\u043B,
+          \u0430 \u043D\u0430\u0448\u0451\u043B \u0443\u0437\u0435\u043B\u043E\u043A.
+          \u0417\u043D\u0430\u0447\u0438\u0442, \u043B\u044E\u0434\u0438 \u0442\u0443\u0442
+          \u0435\u0441\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 14
+            StringParam: ROAD_MILLER_SACK_01.pr12.success.supplies
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.miller.guest.start.left
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041C\u0435\u0448\u043E\u043A \u044F \u043D\u0430\u0448\u0451\u043B
+          \u0432\u044B\u0448\u0435 \u0432\u043E\u0434\u044B, \u043F\u043E\u0434 \u0432\u0435\u0442\u043A\u0430\u043C\u0438.
+          \u0421\u0443\u0445\u043E\u0439, \u0438 \u043A\u0440\u0443\u043F\u0430 \u0446\u0435\u043B\u0430\u044F.
+          \u041A\u0442\u043E \u0442\u0430\u043A \u043A\u043B\u0430\u0434\u0451\u0442
+          \u0447\u0443\u0436\u043E\u0435, \u0442\u043E\u0442 \u0438 \u0441\u0430\u043C
+          \u043D\u0435 \u043F\u0440\u043E\u043F\u0430\u0434\u0451\u0442. \u041E\u0442\u0435\u0446
+          \u0432\u0435\u043B\u0435\u043B \u0441\u043A\u0430\u0437\u0430\u0442\u044C
+          \u0441\u043F\u0430\u0441\u0438\u0431\u043E."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 14
+            StringParam: ROAD_MILLER_SACK_01.pr12.success.supplies
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.miller.guest.start.miron
+        kind: 4
+        speakerIdOverride: miron
+        text: "\u2014 \u041A\u043B\u0435\u0439\u043C\u043E \u044F \u0437\u043D\u0430\u044E:
+          \u0434\u0430\u043B\u044C\u043D\u044F\u044F \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0430.
+          \u0416\u0435\u0440\u043D\u043E\u0432 \u0442\u0430\u043C \u043A\u043B\u0430\u0434\u0443\u0442
+          \u043F\u043E-\u0441\u0432\u043E\u0435\u043C\u0443 \u2014 \u043C\u0443\u043A\u0430
+          \u043C\u0435\u043B\u044C\u0447\u0435 \u043D\u0430\u0448\u0435\u0439."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0412\u0435\u0440\u043D\u0443\u0442\u044C \u043A\u0440\u0443\u043F\u0443
+          \u0438\u0437 \u0437\u0430\u043F\u0430\u0441\u043E\u0432 \u0414\u043E\u043C\u0430."
+        nextNodeId: freeplay.miller.guest.returned
+        endsDialogue: 0
+        choiceId: freeplay.miller.guest.return
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 14
+            StringParam: ROAD_MILLER_SACK_01.pr12.success.supplies
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u041A\u0440\u0443\u043F\u0443 \u043C\u044B \u0441\u044A\u0435\u043B\u0438
+          \u0432 \u0434\u043E\u0440\u043E\u0433\u0435. \u041C\u0435\u0448\u043E\u043A
+          \u2014 \u0442\u0432\u043E\u0439."
+        nextNodeId: freeplay.miller.guest.cold
+        endsDialogue: 0
+        choiceId: freeplay.miller.guest.eaten
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 14
+            StringParam: ROAD_MILLER_SACK_01.pr12.success.supplies
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u041F\u043E\u0437\u0432\u0430\u0442\u044C \u043A \u0441\u0442\u043E\u043B\u0443."
+        nextNodeId: freeplay.miller.guest.fed
+        endsDialogue: 0
+        choiceId: freeplay.miller.guest.table
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 14
+            StringParam: ROAD_MILLER_SACK_01.pr12.success.supplies
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u0421\u043F\u0430\u0441\u0438\u0431\u043E \u043F\u0440\u0438\u043D\u044F\u0442\u043E.
+          \u0421\u0442\u0443\u043F\u0430\u0439 \u0441 \u0431\u043E\u0433\u043E\u043C."
+        nextNodeId: freeplay.miller.guest.cold
+        endsDialogue: 0
+        choiceId: freeplay.miller.guest.off
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 14
+            StringParam: ROAD_MILLER_SACK_01.pr12.success.supplies
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.miller.guest.returned
+      speakerId: miller_son
+      text: 
+      textBlocks:
+      - blockId: freeplay.miller.guest.returned.text
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0412\u043E\u0442 \u044D\u0442\u043E \u043F\u043E-\u0441\u043E\u0441\u0435\u0434\u0441\u043A\u0438.
+          \u041E\u0442\u0446\u0443 \u0441\u043A\u0430\u0436\u0443 \u2014 \u0431\u0443\u0434\u0435\u0442
+          \u043F\u043E\u043C\u043D\u0438\u0442\u044C, \u0447\u0435\u0439 \u0414\u043E\u043C
+          \u0441\u0442\u043E\u0438\u0442 \u0443 \u0434\u043E\u0440\u043E\u0433\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.miller.guest.returned_food
+          Type: 9
+          StringParam: 
+          IntParam: -2
+        - EffectExecutionId: freeplay.miller.guest.returned_friend
+          Type: 0
+          StringParam: freeplay.miller.friend
+          IntParam: 0
+      choices:
+      - text: "\u0414\u043E\u0431\u0440\u043E\u0439 \u0434\u043E\u0440\u043E\u0433\u0438."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.miller.guest.returned_bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.miller.guest.fed
+      speakerId: miller_son
+      text: 
+      textBlocks:
+      - blockId: freeplay.miller.guest.fed.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u041E\u043D \u0435\u0441\u0442 \u0431\u044B\u0441\u0442\u0440\u043E
+          \u0438 \u0430\u043A\u043A\u0443\u0440\u0430\u0442\u043D\u043E, \u043A\u0430\u043A
+          \u0447\u0435\u043B\u043E\u0432\u0435\u043A, \u043A\u043E\u0442\u043E\u0440\u043E\u043C\u0443
+          \u0435\u0449\u0451 \u0434\u0432\u0430 \u0434\u043D\u044F \u0438\u0434\u0442\u0438
+          \u043E\u0431\u0440\u0430\u0442\u043D\u043E. \u041F\u0435\u0440\u0435\u0434
+          \u0443\u0445\u043E\u0434\u043E\u043C \u0441\u0442\u0430\u0432\u0438\u0442
+          \u043D\u0430 \u043B\u0430\u0432\u043A\u0443 \u043C\u0435\u0448\u043E\u0447\u0435\u043A
+          \u043C\u0443\u043A\u0438 \u2014 \u043C\u0435\u043B\u043A\u043E\u0439, \u043A\u0430\u043A
+          \u0438 \u0433\u043E\u0432\u043E\u0440\u0438\u043B \u041C\u0438\u0440\u043E\u043D."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.miller.guest.fed.text
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041E\u0442\u0435\u0446 \u043F\u0435\u0440\u0435\u0434\u0430\u043B.
+          \u0415\u0441\u043B\u0438 \u043F\u043E\u043D\u0430\u0434\u043E\u0431\u0438\u0442\u0441\u044F
+          \u043C\u0443\u043A\u0430 \u2014 \u0441\u043F\u0440\u043E\u0441\u0438\u0442\u0435
+          \u0443 \u043D\u0430\u0441. \u041D\u0435 \u0437\u0430\u0434\u0430\u0440\u043E\u043C,
+          \u043D\u043E \u0438 \u043D\u0435 \u0432\u0442\u0440\u0438\u0434\u043E\u0440\u043E\u0433\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.miller.guest.fed_flour
+          Type: 9
+          StringParam: 
+          IntParam: 4
+        - EffectExecutionId: freeplay.miller.guest.fed_friend
+          Type: 0
+          StringParam: freeplay.miller.friend
+          IntParam: 0
+      choices:
+      - text: "\u0414\u043E\u0431\u0440\u043E\u0439 \u0434\u043E\u0440\u043E\u0433\u0438."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.miller.guest.fed_bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.miller.guest.cold
+      speakerId: miller_son
+      text: 
+      textBlocks:
+      - blockId: freeplay.miller.guest.cold.text
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041D\u0443, \u0442\u0430\u043A \u0442\u0430\u043A."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.miller.guest.cold_flag
+          Type: 0
+          StringParam: freeplay.miller.cool
+          IntParam: 0
+      - blockId: freeplay.miller.guest.cold.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u041E\u043D \u0441\u0432\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0435\u0442
+          \u043C\u0435\u0448\u043E\u043A \u0438 \u0443\u0445\u043E\u0434\u0438\u0442,
+          \u043D\u0435 \u0434\u043E\u0436\u0438\u0434\u0430\u044F\u0441\u044C, \u043F\u043E\u043A\u0430
+          \u0435\u043C\u0443 \u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0430\u0442
+          \u0432\u043E\u0434\u044B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u2026"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.miller.guest.cold_bye
         kind: 3
         conditions:
           Combinator: 0

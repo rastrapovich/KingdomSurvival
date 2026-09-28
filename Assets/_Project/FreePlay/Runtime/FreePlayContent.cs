@@ -38,7 +38,10 @@ namespace KingdomSurvival.FreePlay
         {
             List<HomeCareView> cares = HomeCares.DescribeCommon(state);
             if (state != null)
+            {
+                FreePlayMillerStory.AddHomeCares(state, cares);
                 FreePlayCoalStory.AddHomeCares(state, cares);
+            }
             return cares;
         }
 
@@ -46,7 +49,11 @@ namespace KingdomSurvival.FreePlay
         public static List<string> RefreshWithReports(GameState state)
         {
             Refresh(state);
-            return CampaignContent.IsFreePlay(state) ? FreePlayCoalStory.Refresh(state) : new List<string>();
+            if (!CampaignContent.IsFreePlay(state))
+                return new List<string>();
+            List<string> reports = FreePlayCoalStory.Refresh(state);
+            reports.AddRange(FreePlayMillerStory.Refresh(state));
+            return reports;
         }
 
         public static void InitializeNewCampaign(GameState state)
@@ -120,6 +127,9 @@ namespace KingdomSurvival.FreePlay
             JournalGoalViewData leader = FreePlayCoalStory.BuildLeaderGoal(state);
             if (leader != null)
                 goals.Add(leader);
+            JournalGoalViewData guest = FreePlayMillerStory.BuildGoal(state);
+            if (guest != null)
+                goals.Add(guest);
             foreach (LocationData location in state.Locations)
             {
                 if (location == null || location.IsWaypoint || !location.IsVisibleOnMap || !location.IsDiscovered)

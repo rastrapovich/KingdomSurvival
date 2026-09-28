@@ -1,0 +1,141 @@
+{
+  "id": "freeplay_miller_guest",
+  "title": "И-3 — Гость с дальней мельницы",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-3 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Через 5 дней после встречи ROAD_MILLER_SACK_01 — забота Дома «Гость у ворот». Ветка зависит от эффекта ROAD_MILLER_SACK_01.pr12.success.supplies (взяли крупу). Исходы: freeplay.miller.friend или freeplay.miller.cool. Лор — LORE.md §17.1 (дальняя мельница).",
+  "startNodeId": "freeplay.miller.guest.start",
+  "tags": ["свободная_игра", "И-3"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.miller.guest.start",
+      "speakerId": "miller_son",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.miller.guest.start.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "У ворот стоит парень, седой от муки по самые брови. Мука въелась в шапку ещё дома, а дорога только добавила пыли. В руках — мешок с тем же клеймом."
+        },
+        {
+          "blockId": "freeplay.miller.guest.start.took",
+          "kind": 0,
+          "text": "— Метку вашу на ветке я нашёл. Крупу вы взяли — это ладно, отец не обеднеет. Я за мешком шёл, а нашёл узелок. Значит, люди тут есть.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 14, "StringParam": "ROAD_MILLER_SACK_01.pr12.success.supplies" } ] }
+        },
+        {
+          "blockId": "freeplay.miller.guest.start.left",
+          "kind": 0,
+          "text": "— Мешок я нашёл выше воды, под ветками. Сухой, и крупа целая. Кто так кладёт чужое, тот и сам не пропадёт. Отец велел сказать спасибо.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 14, "StringParam": "ROAD_MILLER_SACK_01.pr12.success.supplies", "Negate": true } ] }
+        },
+        {
+          "blockId": "freeplay.miller.guest.start.miron",
+          "kind": 4,
+          "speakerIdOverride": "miron",
+          "text": "— Клеймо я знаю: дальняя мельница. Жернов там кладут по-своему — мука мельче нашей."
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "freeplay.miller.guest.return",
+          "text": "Вернуть крупу из запасов Дома.",
+          "kind": 0,
+          "nextNodeId": "freeplay.miller.guest.returned",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 14, "StringParam": "ROAD_MILLER_SACK_01.pr12.success.supplies" } ] }
+        },
+        {
+          "choiceId": "freeplay.miller.guest.eaten",
+          "text": "Крупу мы съели в дороге. Мешок — твой.",
+          "kind": 0,
+          "nextNodeId": "freeplay.miller.guest.cold",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 14, "StringParam": "ROAD_MILLER_SACK_01.pr12.success.supplies" } ] }
+        },
+        {
+          "choiceId": "freeplay.miller.guest.table",
+          "text": "Позвать к столу.",
+          "kind": 0,
+          "nextNodeId": "freeplay.miller.guest.fed",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 14, "StringParam": "ROAD_MILLER_SACK_01.pr12.success.supplies", "Negate": true } ] }
+        },
+        {
+          "choiceId": "freeplay.miller.guest.off",
+          "text": "Спасибо принято. Ступай с богом.",
+          "kind": 0,
+          "nextNodeId": "freeplay.miller.guest.cold",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 14, "StringParam": "ROAD_MILLER_SACK_01.pr12.success.supplies", "Negate": true } ] }
+        }
+      ]
+    },
+    {
+      "id": "freeplay.miller.guest.returned",
+      "speakerId": "miller_son",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.miller.guest.returned.text",
+          "kind": 0,
+          "text": "— Вот это по-соседски. Отцу скажу — будет помнить, чей Дом стоит у дороги.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.miller.guest.returned_food", "Type": 9, "IntParam": -2 },
+            { "EffectExecutionId": "freeplay.miller.guest.returned_friend", "Type": 0, "StringParam": "freeplay.miller.friend" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.miller.guest.returned_bye", "text": "Доброй дороги.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.miller.guest.fed",
+      "speakerId": "miller_son",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.miller.guest.fed.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Он ест быстро и аккуратно, как человек, которому ещё два дня идти обратно. Перед уходом ставит на лавку мешочек муки — мелкой, как и говорил Мирон."
+        },
+        {
+          "blockId": "freeplay.miller.guest.fed.text",
+          "kind": 0,
+          "text": "— Отец передал. Если понадобится мука — спросите у нас. Не задаром, но и не втридорога.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.miller.guest.fed_flour", "Type": 9, "IntParam": 4 },
+            { "EffectExecutionId": "freeplay.miller.guest.fed_friend", "Type": 0, "StringParam": "freeplay.miller.friend" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.miller.guest.fed_bye", "text": "Доброй дороги.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.miller.guest.cold",
+      "speakerId": "miller_son",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.miller.guest.cold.text",
+          "kind": 0,
+          "text": "— Ну, так так.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.miller.guest.cold_flag", "Type": 0, "StringParam": "freeplay.miller.cool" }
+          ]
+        },
+        {
+          "blockId": "freeplay.miller.guest.cold.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Он сворачивает мешок и уходит, не дожидаясь, пока ему предложат воды."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.miller.guest.cold_bye", "text": "…", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

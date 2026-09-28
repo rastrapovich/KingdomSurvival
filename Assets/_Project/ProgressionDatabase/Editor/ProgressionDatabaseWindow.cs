@@ -383,6 +383,12 @@ namespace KingdomSurvival.ProgressionDatabase.Editor
             AddProperty(page, Rules("firstChoiceOptions"), "Карточек на первом показе");
             AddProperty(page, Rules("choiceOptionsGrowth"), "Прибавка с каждым показом");
             AddProperty(page, Rules("maxChoiceOptions"), "Не больше карточек");
+
+            AddSection(page, "СЛЕДЫ РАЗВИТИЯ");
+            AddNote(page, "Решение автора 28.09.2026 (каталог особенностей, вопрос 3): след — пережитое в разных боях, «нет → замечено → характерно». " +
+                          "За бой след засчитывается один раз. «Характерно» открывает особенность в предложении выбора личным вариантом, вместо требования компетенции.");
+            AddProperty(page, Rules("traceNoticedSituations"), "Боёв до «замечено»");
+            AddProperty(page, Rules("traceCharacteristicSituations"), "Боёв до «характерно»");
         }
 
         // ------------------------------------------------------------------

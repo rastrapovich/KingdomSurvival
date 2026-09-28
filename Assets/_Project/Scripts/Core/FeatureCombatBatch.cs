@@ -130,8 +130,9 @@ public static class FeatureCombatBatch
             return;
         foreach (string personId in result.ForcedHeavyWoundIds)
         {
-            notes?.Add(Recorded(state, personId, CombatFeatureIds.StillStanding, FeatureTrigger.BattleEnded,
-                "устоял под смертельным ударом — после боя тяжело ранен."));
+            string line = Recorded(state, personId, CombatFeatureIds.StillStanding, FeatureTrigger.BattleEnded,
+                "устоял под смертельным ударом — после боя тяжело ранен.");
+            notes?.Add(line);
         }
     }
 
@@ -153,8 +154,9 @@ public static class FeatureCombatBatch
         result.Survivors.Add(new CampaignBattleSurvivor { PersonId = saved, HitPoints = 1 });
         if (!result.ForcedHeavyWoundIds.Contains(saved))
             result.ForcedHeavyWoundIds.Add(saved);
-        notes?.Add(Recorded(state, commander.Id, CombatFeatureIds.LeavesNoOne, FeatureTrigger.BattleEnded,
-            "вынес " + CharacterProgressionService.DisplayName(state, saved) + " из боя живым — тяжело ранен."));
+        string line = Recorded(state, commander.Id, CombatFeatureIds.LeavesNoOne, FeatureTrigger.BattleEnded,
+            "вынес " + CharacterProgressionService.DisplayName(state, saved) + " из боя живым — тяжело ранен.");
+        notes?.Add(line);
     }
 
     // Записать срабатывание и вернуть строку итогов (12Е-7).

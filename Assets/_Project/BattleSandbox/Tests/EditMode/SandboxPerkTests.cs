@@ -195,6 +195,37 @@ namespace KingdomSurvival.BattleSandbox.Tests
             Assert.IsTrue(bearer.IsDefeated, "Следующий удар бьёт как обычно.");
         }
 
+        // 12Е-8: счётчики боя для следов развития в кампании.
+        [Test]
+        public void TraceCounters_AttacksRetaliationsAndShotFromPlace()
+        {
+            SandboxBattle melee = TwoAttackersOnDefender(SandboxPerks.Counterstrike);
+            Attack(melee, "p1", "e");
+            ResolveRetaliationAndEnd(melee);
+            Attack(melee, "p2", "e");
+            ResolveRetaliationAndEnd(melee);
+            Assert.AreEqual(2, melee.GetUnit("e").TimesAttacked);
+            Assert.AreEqual(2, melee.GetUnit("e").RetaliationsMade);
+            Assert.IsFalse(melee.GetUnit("p1").ShotFromPlace, "Ближний удар — не выстрел.");
+
+            HexCoord shooterCell = new HexCoord(0, 2);
+            HexCoord targetCell = new HexCoord(2, 2);
+            Spec Shooter() => new Spec { Id = "p", Team = SandboxTeam.Player, Position = shooterCell, Range = 3, Initiative = 10 };
+            Spec Target() => new Spec { Id = "e", Team = SandboxTeam.Enemy, Position = targetCell };
+
+            SandboxBattle still = Battle(Shooter(), Target());
+            Attack(still, "p", "e");
+            Assert.IsTrue(still.GetUnit("p").ShotFromPlace);
+
+            SandboxBattle moved = Battle(Shooter(), Target());
+            HexCoord step = Enumerable.Range(0, 6)
+                .SelectMany(q => Enumerable.Range(0, 6).Select(r => new HexCoord(q, r)))
+                .First(cell => cell.DistanceTo(shooterCell) == 1 && cell.DistanceTo(targetCell) == 2);
+            Assert.IsTrue(moved.TryMove("p", step, out string moveMessage), moveMessage);
+            Attack(moved, "p", "e");
+            Assert.IsFalse(moved.GetUnit("p").ShotFromPlace, "Сначала шёл, потом стрелял.");
+        }
+
         [Test]
         public void FirstRoundInitiativeBonus_PlayerActsFirst_OnlyInFirstRound()
         {

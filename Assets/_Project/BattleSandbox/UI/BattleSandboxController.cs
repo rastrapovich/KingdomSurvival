@@ -280,7 +280,11 @@ namespace KingdomSurvival.BattleSandbox
                         DamageDealt = unit.DamageDealt,
                         DamagePrevented = unit.DamagePrevented,
                         UsedRangedAttack = unit.UsedRangedAttack,
-                        UsedMeleeAttack = unit.UsedMeleeAttack
+                        UsedMeleeAttack = unit.UsedMeleeAttack,
+                        // 12Е-8: для следов развития.
+                        TimesAttacked = unit.TimesAttacked,
+                        Retaliations = unit.RetaliationsMade,
+                        ShotFromPlace = unit.ShotFromPlace
                     });
                 }
             }

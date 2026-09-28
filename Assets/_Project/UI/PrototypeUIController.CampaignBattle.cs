@@ -127,9 +127,11 @@ public partial class PrototypeUIController
             string losses = fallenNames.Count == 0
                 ? "Все вернулись из боя."
                 : "Погибли: " + string.Join(", ", fallenNames) + ".";
-            // 12Е-7: сработавшие особенности — отдельными строками под итогом.
-            List<string> plain = notes.FindAll(note => !FeaturePresentation.IsFeatureLine(note));
-            List<string> features = notes.FindAll(FeaturePresentation.IsFeatureLine);
+            // 12Е-7/12Е-8: сработавшие особенности и выросшие следы — отдельными
+            // строками под итогом.
+            System.Predicate<string> ownLine = note => FeaturePresentation.IsFeatureLine(note) || ProgressionTraces.IsTraceLine(note);
+            List<string> plain = notes.FindAll(note => !ownLine(note));
+            List<string> features = notes.FindAll(ownLine);
             AddReport("[БОЙ] " + outcome + " " + losses + (plain.Count > 0 ? " " + string.Join(" ", plain) : string.Empty) +
                       (features.Count > 0 ? "\n" + string.Join("\n", features) : string.Empty));
             RefreshInterface();

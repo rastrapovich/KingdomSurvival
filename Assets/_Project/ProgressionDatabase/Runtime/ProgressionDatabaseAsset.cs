@@ -72,6 +72,8 @@ namespace KingdomSurvival.ProgressionDatabase
         public int firstChoiceOptions = 3;
         public int choiceOptionsGrowth = 1;
         public int maxChoiceOptions = 35;
+        public int traceNoticedSituations = 1;
+        public int traceCharacteristicSituations = 3;
     }
 
     [Serializable]
@@ -220,8 +222,9 @@ namespace KingdomSurvival.ProgressionDatabase
         // 2 — карточки особенностей, приёмов и приказов (каталог 27.09.2026);
         // 3 — статус «Заглушка» у заглушек движка (12Е-4);
         // 4 — первая партия особенностей вне боя активна (12Е-5);
-        // 5 — первая партия боевых особенностей активна (12Е-6).
-        public const int CurrentSchemaVersion = 5;
+        // 5 — первая партия боевых особенностей активна (12Е-6);
+        // 6 — пороги следов развития в правилах (12Е-8).
+        public const int CurrentSchemaVersion = 6;
 
         public int schemaVersion = CurrentSchemaVersion;
         public ProgressionGlobalRecord rules = new ProgressionGlobalRecord();
@@ -365,7 +368,9 @@ namespace KingdomSurvival.ProgressionDatabase
                 MaxToughnessChoices = rules.maxToughnessChoices,
                 FirstChoiceOptions = rules.firstChoiceOptions,
                 ChoiceOptionsGrowth = rules.choiceOptionsGrowth,
-                MaxChoiceOptions = rules.maxChoiceOptions
+                MaxChoiceOptions = rules.maxChoiceOptions,
+                TraceNoticedSituations = rules.traceNoticedSituations,
+                TraceCharacteristicSituations = rules.traceCharacteristicSituations
             };
 
             foreach (ProgressionProfileRecord record in profiles)
@@ -490,7 +495,9 @@ namespace KingdomSurvival.ProgressionDatabase
                 maxToughnessChoices = source.MaxToughnessChoices,
                 firstChoiceOptions = source.FirstChoiceOptions,
                 choiceOptionsGrowth = source.ChoiceOptionsGrowth,
-                maxChoiceOptions = source.MaxChoiceOptions
+                maxChoiceOptions = source.MaxChoiceOptions,
+                traceNoticedSituations = source.TraceNoticedSituations,
+                traceCharacteristicSituations = source.TraceCharacteristicSituations
             };
 
             profiles = new List<ProgressionProfileRecord>();
@@ -585,6 +592,8 @@ namespace KingdomSurvival.ProgressionDatabase
                 errors.Add("Показ выбора: первый показ — хотя бы 1 карточка.");
             if (rules.maxChoiceOptions < rules.firstChoiceOptions)
                 errors.Add("Показ выбора: предел меньше первого показа.");
+            if (rules.traceNoticedSituations < 1 || rules.traceCharacteristicSituations < rules.traceNoticedSituations)
+                errors.Add("Следы: «замечено» — хотя бы 1 бой, «характерно» — не меньше, чем «замечено».");
             if (rules.firstChoiceOptions != 3 || rules.choiceOptionsGrowth != 1 || rules.maxChoiceOptions != 35)
                 warnings.Add("Показ выбора " + rules.firstChoiceOptions + " / +" + rules.choiceOptionsGrowth + " / до " + rules.maxChoiceOptions + " — решение автора (каталог §0.1): 3, +1, до 35.");
 

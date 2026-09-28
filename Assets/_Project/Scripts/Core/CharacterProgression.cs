@@ -53,6 +53,9 @@ public sealed class PersonProgressionData
     // Особенности с рангом и источником (12Е-2, CharacterFeatureService).
     public List<PersonFeatureData> Features = new List<PersonFeatureData>();
 
+    // Следы развития (12Е-8, ProgressionTraces): какие ситуации засчитаны.
+    public List<PersonTraceData> Traces = new List<PersonTraceData>();
+
     public CompetencyProgressData FindCompetency(string competencyId)
     {
         if (Competencies == null)

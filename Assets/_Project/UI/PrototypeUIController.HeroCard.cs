@@ -353,6 +353,11 @@ public partial class PrototypeUIController
 
         if (features.Count == 0)
             heroCardFeatures.Add(CreateHeroItemRow("Пока нет", "Особенности приходят из выбора развития, биографии, историй и от учителей."));
+
+        // 12Е-8: следы развития — только след и ступень; что он откроет,
+        // карточка не говорит (решение автора 28.09.2026).
+        foreach (KeyValuePair<TraceDefinition, TraceStage> trace in ProgressionTraces.Visible(gameState, personId))
+            heroCardFeatures.Add(CreateHeroItemRow("След: " + trace.Key.Name, ProgressionTraces.StageLabel(trace.Value)));
     }
 
     private void AddHeroCardAction(VisualElement row, string text, System.Action action)

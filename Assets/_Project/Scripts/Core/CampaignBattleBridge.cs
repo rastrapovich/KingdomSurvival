@@ -59,6 +59,12 @@ public sealed class CampaignBattleContribution
     public int DamagePrevented;
     public bool UsedRangedAttack;
     public bool UsedMeleeAttack;
+
+    // 12Е-8: для следов развития — сколько раз был целью атаки, сколько
+    // ответных ударов нанёс, стрелял ли, не сходя с места.
+    public int TimesAttacked;
+    public int Retaliations;
+    public bool ShotFromPlace;
 }
 
 // Противник, с которым отряд столкнулся, — для банка опыта боя.
@@ -283,6 +289,18 @@ public static class CampaignBattleBridge
 
         if (result.ForcedHeavyWoundIds == null)
             result.ForcedHeavyWoundIds = new List<string>();
+
+        // 12Е-8: для следов — каким бой был до применения итога (кто пал и
+        // кто уже был тяжело ранен).
+        bool retreatForWounded = ProgressionTraces.IsRetreatForWounded(state, result);
+        HashSet<string> woundedBeforeBattle = new HashSet<string>();
+        foreach (CampaignBattleSurvivor survivor in result.Survivors ?? new List<CampaignBattleSurvivor>())
+        {
+            ResidentState resident = HomePeopleService.Find(state, survivor.PersonId);
+            if (resident != null && resident.Injury == ResidentInjury.Recovering)
+                woundedBeforeBattle.Add(survivor.PersonId);
+        }
+
         // 12Е-6: «Ещё на ногах» и «Не бросает своих» — до того, как павшие
         // уйдут из отряда.
         FeatureCombatBatch.RecordStillStanding(state, result, notes);
@@ -352,6 +370,10 @@ public static class CampaignBattleBridge
             // Канон v1.48 §27.2: общий опыт из единого банка боя и практика.
             List<string> experience = BattleExperience.Apply(state, result);
             notes?.AddRange(experience);
+
+            // 12Е-8: следы развития этого боя (записываются и без списка строк).
+            List<string> traces = ProgressionTraces.RecordBattle(state, result, retreatForWounded, woundedBeforeBattle);
+            notes?.AddRange(traces);
         }
 
         List<FeatureActivation> activations = FeatureDispatcher.Raise(new FeatureEvent

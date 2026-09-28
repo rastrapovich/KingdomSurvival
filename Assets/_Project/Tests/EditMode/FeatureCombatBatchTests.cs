@@ -140,6 +140,21 @@ public sealed class FeatureCombatBatchTests
     }
 
     [Test]
+    public void StillStanding_RecordedEvenWithoutNotes()
+    {
+        GameState state = OnTheRoad("garrick");
+        Give(state, "garrick", CombatFeatureIds.StillStanding);
+        CampaignBattleResult result = Result("test.standing_quiet", CampaignBattleOutcome.Victory,
+            new Dictionary<string, int> { { Hero(state), 20 }, { "garrick", 30 } });
+        result.ForcedHeavyWoundIds.Add("garrick");
+
+        CampaignBattleBridge.ApplyResult(state, result, new List<string>());
+
+        Assert.IsTrue(CharacterProgressionService.EnsureState(state).RecentFeatureActivations
+            .Any(a => a.PersonId == "garrick" && a.FeatureId == CombatFeatureIds.StillStanding));
+    }
+
+    [Test]
     public void LeavesNoOne_OnRetreat_CarriesFallenFighterAlive_OncePerExpedition()
     {
         GameState state = OnTheRoad("garrick", "edric");

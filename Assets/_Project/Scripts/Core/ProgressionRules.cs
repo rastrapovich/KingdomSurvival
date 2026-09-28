@@ -230,6 +230,11 @@ public sealed class ProgressionRules
     public int ChoiceOptionsGrowth = 1;
     public int MaxChoiceOptions = 35;
 
+    // 12Е-8: следы развития — сколько разных боёв до «замечено» и
+    // «характерно» (решение автора 28.09.2026, числа рабочие).
+    public int TraceNoticedSituations = 1;
+    public int TraceCharacteristicSituations = 3;
+
     private readonly Dictionary<string, ProgressionProfile> profiles = new Dictionary<string, ProgressionProfile>(StringComparer.Ordinal);
 
     public IEnumerable<ProgressionProfile> Profiles => profiles.Values;

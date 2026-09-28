@@ -130,6 +130,11 @@ namespace KingdomSurvival.BattleSandbox
         public int TimesAttackedThisRound { get; internal set; }
         public bool MovedThisActivation { get; internal set; }
         public bool StillStandingUsed { get; internal set; }
+
+        // 12Е-8: за весь бой — для следов развития в кампании.
+        public int TimesAttacked { get; internal set; }
+        public int RetaliationsMade { get; internal set; }
+        public bool ShotFromPlace { get; internal set; }
         public int RetaliationsPerRound => HasPerk(SandboxPerks.Counterstrike) ? 2 : 1;
         public bool HasRetaliatedThisRound => RetaliationsThisRound >= RetaliationsPerRound;
 
@@ -641,6 +646,7 @@ namespace KingdomSurvival.BattleSandbox
             {
                 int counter = BuildAttackPreview(target, attacker, target.Position, retaliation: true).Damage;
                 target.RetaliationsThisRound++;
+                target.RetaliationsMade++;
                 RecordHit(target, attacker, counter, target.Position);
                 target.UsedMeleeAttack = true;
                 bool attackerStanding = attacker.StillStandingUsed;
@@ -661,12 +667,18 @@ namespace KingdomSurvival.BattleSandbox
 
             RecordHit(attacker, target, preview.Damage, attacker.Position);
             if (attacker.Position.DistanceTo(target.Position) > 1)
+            {
                 attacker.UsedRangedAttack = true;
+                attacker.ShotFromPlace = attacker.ShotFromPlace || !attacker.MovedThisActivation;
+            }
             else
+            {
                 attacker.UsedMeleeAttack = true;
+            }
             bool targetStanding = target.StillStandingUsed;
             target.ReceiveDamage(preview.Damage);
             target.TimesAttackedThisRound++;
+            target.TimesAttacked++;
             attacker.ActionPoints--;
             attacker.RemainingMovement = 0;
             attacker.HasAttacked = true;
@@ -727,6 +739,7 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState defender = GetUnit(pendingRetaliationDefenderId);
             SandboxUnitState attacker = GetUnit(pendingRetaliationAttackerId);
             defender.RetaliationsThisRound++;
+            defender.RetaliationsMade++;
             RecordHit(defender, attacker, preview.Damage, defender.Position);
             defender.UsedMeleeAttack = true;
             bool attackerStanding = attacker.StillStandingUsed;

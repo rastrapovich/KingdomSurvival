@@ -484,7 +484,10 @@ public static class CharacterProgressionService
             return null;
         if (owned == 0 && IsExcluded(state, personId, entry))
             return null;
-        if (!RequirementsMet(state, personId, entry))
+        // 12Е-8: след на ступени «характерно» открывает особенность вместо
+        // требования и делает её личным вариантом.
+        TraceDefinition trace = ProgressionTraces.OpeningTrace(state, personId, entry.Id);
+        if (trace == null && !RequirementsMet(state, personId, entry))
             return null;
 
         int rank = owned + 1;
@@ -499,8 +502,10 @@ public static class CharacterProgressionService
             FeatureId = entry.Id,
             FeatureRank = rank,
             Title = title,
-            Description = effect + (entry.Requirements.Count > 0 ? " Открыта: " + entry.UnlockText + "." : string.Empty),
-            IsPersonal = owned > 0 || entry.Requirements.Count > 0
+            Description = effect + (trace != null
+                ? " Открыта следом: «" + trace.Name + "»."
+                : entry.Requirements.Count > 0 ? " Открыта: " + entry.UnlockText + "." : string.Empty),
+            IsPersonal = owned > 0 || entry.Requirements.Count > 0 || trace != null
         };
     }
 

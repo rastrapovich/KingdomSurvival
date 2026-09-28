@@ -85,6 +85,37 @@ public partial class PrototypeUIController
             EncounterRuntimeService.RecordEncounterStarted(gameState, selection.SelectedEncounter, opportunity.WorldHour);
     }
 
+    // ПР-12В: встреча в лагере — одна возможность на ночлег (CampEncounters),
+    // та же цепочка: выбор → открытие диалога → запись начала. В кампании
+    // главы у лагеря свои сцены, поэтому здесь — вне главы.
+    private void TryResolveCampEncounterOpportunity()
+    {
+        if (gameState == null || isGameOver || KingdomSurvival.Chapter01.Chapter01Crisis.IsActive(gameState) ||
+            HasBlockingModalWork())
+            return;
+
+        EncounterOpportunity opportunity = CampEncounters.Opportunity(gameState);
+        if (opportunity == null)
+            return;
+
+        EncounterDatabaseAsset database = LoadEncounterDatabase();
+        CommanderData commander = gameState.GetSelectedCommander();
+        gameState.Encounters.MarkOpportunityProcessed(opportunity.OpportunityId);
+        if (database == null || commander == null)
+            return;
+        if (commander.HeroProfile == null)
+            commander.HeroProfile = new HeroProfileData();
+
+        EncounterSelectionResult selection = EncounterRuntimeService.SelectEncounter(
+            gameState, commander.HeroProfile, opportunity, database);
+        if (!selection.HasSelection)
+            return;
+
+        EncounterRuntimeService.RecordSelectionPacing(gameState, selection, opportunity);
+        if (TryOpenNarrativeDialogueById(selection.SelectedEncounter.DialogueId))
+            EncounterRuntimeService.RecordEncounterStarted(gameState, selection.SelectedEncounter, opportunity.WorldHour);
+    }
+
     // Принудительный запуск для тестирования (P14-T01, "Принудительный запуск
     // для тестирования"): та же цепочка вызовов, что и реальный игровой путь
     // выше (SelectEncounter → RecordSelectionPacing → TryOpenNarrativeDialogueById →

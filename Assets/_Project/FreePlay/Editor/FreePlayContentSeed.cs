@@ -113,6 +113,16 @@ namespace KingdomSurvival.FreePlay.Editor
                 }
             }
 
+            List<EncounterPoolDefinition> poolList = PrivateList<EncounterDatabaseAsset, EncounterPoolDefinition>(encounters, "pools");
+            foreach (string file in SeedFiles(SeedFolder + "/Pools"))
+            {
+                EncounterPoolDefinition pool = JsonUtility.FromJson<EncounterPoolDefinition>(File.ReadAllText(file));
+                if (encounters.FindPool(pool.PoolId) != null)
+                    continue;
+                poolList.Add(pool);
+                added.Add("пул " + pool.PoolId);
+            }
+
             List<EncounterDefinition> encounterList = PrivateList<EncounterDatabaseAsset, EncounterDefinition>(encounters, "encounters");
             foreach (string file in SeedFiles(SeedFolder + "/Encounters"))
             {

@@ -1,0 +1,94 @@
+{
+  "id": "freeplay_coal_leader_signs",
+  "title": "И-1 — Следы вожака",
+  "category": 3,
+  "status": 1,
+  "developerComment": "ПР-12В, лагерная встреча FREEPLAY_COAL_LEADER_SIGNS_01 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Выйти с факелом — решающая проверка Чутьё + Следопытство (11): успех ставит freeplay.coal.leader_trail_seen — бой «Тропа вожака» начнётся подготовленно.",
+  "startNodeId": "freeplay.coal.signs.start",
+  "tags": ["свободная_игра", "И-1", "лагерь"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.coal.signs.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.signs.start.night",
+          "kind": 5,
+          "text": "Ночью дозорный трогает за плечо: за кругом света кто-то ходит. Тяжело, не таясь, и останавливается ровно там, где свет кончается."
+        },
+        {
+          "blockId": "freeplay.coal.signs.start.back",
+          "kind": 5,
+          "text": "В отсвете мелькает седой хребет."
+        },
+        {
+          "blockId": "freeplay.coal.signs.start.thought",
+          "kind": 3,
+          "speakerIdOverride": "hero_thought",
+          "text": "Он пришёл посмотреть на нас — так же, как ходил к угольным ямам."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.signs.fire", "text": "Подбросить в костёр и не спать до утра.", "kind": 0, "nextNodeId": "freeplay.coal.signs.morning" },
+        {
+          "choiceId": "freeplay.coal.signs.torch",
+          "text": "Выйти с факелом за круг.",
+          "kind": 2,
+          "check": { "CheckId": "freeplay.coal.signs_check", "Kind": 2, "Quality": 3, "CompetencyId": "fieldcraft", "Difficulty": 11 },
+          "successNodeId": "freeplay.coal.signs.seen",
+          "failureNodeId": "freeplay.coal.signs.lost",
+          "successEffects": [
+            { "EffectExecutionId": "freeplay.coal.signs.trail_seen", "Type": 0, "StringParam": "freeplay.coal.leader_trail_seen" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "freeplay.coal.signs.morning",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.signs.morning.text",
+          "kind": 5,
+          "text": "До рассвета никто не спит. Утром у края кострища — следы, глубокие, как от человека с ношей. Ушёл к лесу."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.signs.morning_go", "text": "Собираемся.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.coal.signs.seen",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.signs.seen.text",
+          "kind": 5,
+          "text": "Шагов через двадцать факел выхватывает тропу: примятая трава уходит к Чёрному лесу, к ручью. Теперь ясно, где его ждать."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.signs.seen_back", "text": "Вернуться к костру.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.coal.signs.lost",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.signs.lost.text",
+          "kind": 5,
+          "text": "За кругом света темнота гуще, чем кажется. Факел гаснет от ветра, и дальше идти глупо. Он уходит, так и не показавшись."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.signs.lost_back", "text": "Вернуться к костру.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

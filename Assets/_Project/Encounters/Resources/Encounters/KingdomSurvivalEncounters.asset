@@ -28,6 +28,21 @@ MonoBehaviour:
       \u043E\u0432\u0446\u0430\xBB. \u041E\u0434\u043D\u043E \u0434\u043E\u0440\u043E\u0436\u043D\u043E\u0435
       \u0441\u043E\u0431\u044B\u0442\u0438\u0435 \u0432 \u0441\u0443\u0442\u043A\u0438
       \u043C\u0430\u043A\u0441\u0438\u043C\u0443\u043C."
+  - PoolId: CAMP_POOL_01
+    DisplayName: "\u041B\u0430\u0433\u0435\u0440\u043D\u044B\u0435 \u0432\u0441\u0442\u0440\u0435\u0447\u0438
+      (\u043F\u0435\u0440\u0432\u044B\u0439 \u0440\u0435\u0433\u0438\u043E\u043D)"
+    Enabled: 1
+    GlobalTriggerChancePercent: 100
+    MinimumHoursBetweenEncounters: 24
+    MinimumHoursBetweenReactiveEncounters: 0
+    MaxReactiveEncountersPerTravelDay: 0
+    DesignerNotes: "\u041F\u0420-12\u0412: \u043E\u0434\u043D\u0430 \u0432\u043E\u0437\u043C\u043E\u0436\u043D\u043E\u0441\u0442\u044C
+      \u043D\u0430 \u043D\u043E\u0447\u043B\u0435\u0433, \u043F\u043E\u0441\u043B\u0435
+      \u043F\u0435\u0440\u0432\u043E\u0433\u043E \u0447\u0430\u0441\u0430 \u0441\u043D\u0430
+      (CampEncounters). \u0412\u044B\u043F\u0430\u0434\u0430\u0435\u0442 \u043B\u0438
+      \u0447\u0442\u043E-\u0442\u043E \u2014 \u0440\u0435\u0448\u0430\u044E\u0442
+      \u0443\u0441\u043B\u043E\u0432\u0438\u044F \u0441\u0430\u043C\u0438\u0445 \u0432\u0441\u0442\u0440\u0435\u0447;
+      \u0442\u0438\u0448\u0438\u043D\u0430 \u0434\u043E\u043F\u0443\u0441\u0442\u0438\u043C\u0430."
   encounters:
   - EncounterId: ROAD_WARM_SHEEP_01
     DisplayName: "\u0422\u0451\u043F\u043B\u0430\u044F \u043E\u0432\u0446\u0430"
@@ -999,4 +1014,56 @@ MonoBehaviour:
       \u0443\u0437\u043D\u0430\u0442\u044C \u043E \u0445\u0443\u0442\u043E\u0440\u0435,
       \u043A\u0440\u043E\u043C\u0435 \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440\u0430
       \u0441 \u041B\u0430\u0434\u043E\u0439."
+    FutureHooksNotes: 
+  - EncounterId: FREEPLAY_COAL_LEADER_SIGNS_01
+    DisplayName: "\u0421\u043B\u0435\u0434\u044B \u0432\u043E\u0436\u0430\u043A\u0430"
+    Description: "\u041D\u043E\u0447\u044C\u044E \u0437\u0430 \u043A\u0440\u0443\u0433\u043E\u043C
+      \u0441\u0432\u0435\u0442\u0430 \u0445\u043E\u0434\u0438\u0442 \u0441\u0442\u0430\u0440\u044B\u0439
+      \u0432\u043E\u0436\u0430\u043A. \u0422\u043E\u043B\u044C\u043A\u043E \u0432
+      \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0439 \u0438\u0433\u0440\u0435,
+      \u043F\u043E\u043A\u0430 \u043E\u043D \u0436\u0438\u0432 \u0438 \u0443\u0448\u0451\u043B
+      \u043E\u0442 \u0443\u0433\u043E\u043B\u044C\u043D\u044B\u0445 \u044F\u043C
+      \u043A \u0434\u043E\u0440\u043E\u0433\u0435 \u0438\u043B\u0438 \u0445\u0443\u0442\u043E\u0440
+      \u043F\u0435\u0440\u0435\u0431\u0440\u0430\u043B\u0441\u044F."
+    Status: 1
+    Category: 1
+    Tags:
+    - camp
+    - freeplay
+    DurationClass: 1
+    MemoryClass: 0
+    Functions: 
+    DialogueId: freeplay_coal_leader_signs
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: CAMP_POOL_01
+    DiscoveryChancePercent: 100
+    SelectionWeight: 10
+    UnlimitedOccurrences: 0
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 0
+    AllowedRegionIds:
+    - camp
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll:
+    - freeplay.mode
+    RequiredFlagsAny:
+    - freeplay.coal.leader_on_road
+    - freeplay.coal.hutor_moved
+    ForbiddenFlags:
+    - freeplay.coal.leader_killed
+    - freeplay.coal.leader_driven
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0420-12\u0412, \u0418-1 (PR12BV_FREE_PLAY_CONTENT_SPEC.md
+      \xA75): \u043B\u0430\u0433\u0435\u0440\u043D\u0430\u044F \u0432\u0441\u0442\u0440\u0435\u0447\u0430.
+      \u0423\u0432\u0438\u0434\u0435\u043B\u0438, \u043A\u0443\u0434\u0430 \u0443\u0445\u043E\u0434\u0438\u0442
+      \u0432\u043E\u0436\u0430\u043A (\u0427\u0443\u0442\u044C\u0451 + \u0421\u043B\u0435\u0434\u043E\u043F\u044B\u0442\u0441\u0442\u0432\u043E,
+      11), \u2014 \u0431\u043E\u0439 \xAB\u0422\u0440\u043E\u043F\u0430 \u0432\u043E\u0436\u0430\u043A\u0430\xBB
+      \u043D\u0430\u0447\u0438\u043D\u0430\u0435\u0442\u0441\u044F \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u043E."
     FutureHooksNotes: 

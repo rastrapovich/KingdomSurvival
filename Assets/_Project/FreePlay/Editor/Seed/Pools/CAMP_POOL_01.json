@@ -1,0 +1,10 @@
+{
+  "PoolId": "CAMP_POOL_01",
+  "DisplayName": "Лагерные встречи (первый регион)",
+  "Enabled": true,
+  "GlobalTriggerChancePercent": 100,
+  "MinimumHoursBetweenEncounters": 24,
+  "MinimumHoursBetweenReactiveEncounters": 0,
+  "MaxReactiveEncountersPerTravelDay": 0,
+  "DesignerNotes": "ПР-12В: одна возможность на ночлег, после первого часа сна (CampEncounters). Выпадает ли что-то — решают условия самих встреч; тишина допустима."
+}

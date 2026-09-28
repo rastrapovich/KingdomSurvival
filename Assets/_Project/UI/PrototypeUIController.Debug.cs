@@ -62,6 +62,7 @@ public partial class PrototypeUIController
         RefreshChapter01HomeFlow();
         RefreshHomePeopleUi();
         RefreshStoryBattle();
+        TryResolveCampEncounterOpportunity();
         if (gameState != null)
         {
             KingdomSurvival.Chapter01.Chapter01Chronicle.Refresh(gameState);

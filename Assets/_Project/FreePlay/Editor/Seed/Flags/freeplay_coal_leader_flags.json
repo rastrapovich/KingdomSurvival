@@ -1,0 +1,36 @@
+{
+  "flags": [
+    {
+      "FlagId": "freeplay.coal.leader_on_road",
+      "DisplayName": "Вожак вышел к дороге",
+      "Description": "Через неделю после того, как уголь только купили, старый вожак ушёл от угольных ям к дороге.",
+      "Category": "freeplay_coal",
+      "Status": 0,
+      "FutureUseNotes": "Ставит: FreePlayCoalStory. Потребитель: FREEPLAY_COAL_LEADER_SIGNS_01 (RequiredFlagsAny)."
+    },
+    {
+      "FlagId": "freeplay.coal.hutor_moved",
+      "DisplayName": "Хутор ушёл к дальним ямам",
+      "Description": "Отход или поражение у угольных ям: вожак остался, углежоги перебрались.",
+      "Category": "freeplay_coal",
+      "Status": 0,
+      "FutureUseNotes": "Ставит: FreePlayCoalStory. Потребитель: FREEPLAY_COAL_LEADER_SIGNS_01 (RequiredFlagsAny)."
+    },
+    {
+      "FlagId": "freeplay.coal.leader_killed",
+      "DisplayName": "Вожак убит",
+      "Description": "Старый вожак убит на своей тропе в Чёрном лесу.",
+      "Category": "freeplay_coal",
+      "Status": 0,
+      "FutureUseNotes": "Ставит: FreePlayCoalStory. Потребитель: FREEPLAY_COAL_LEADER_SIGNS_01 (ForbiddenFlags)."
+    },
+    {
+      "FlagId": "freeplay.coal.leader_driven",
+      "DisplayName": "Вожак отогнан",
+      "Description": "Вожака отогнали от угольных ям.",
+      "Category": "freeplay_coal",
+      "Status": 0,
+      "FutureUseNotes": "Ставит: FreePlayCoalStory. Потребитель: FREEPLAY_COAL_LEADER_SIGNS_01 (ForbiddenFlags)."
+    }
+  ]
+}

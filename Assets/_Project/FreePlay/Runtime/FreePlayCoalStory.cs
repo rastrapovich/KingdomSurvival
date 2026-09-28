@@ -44,6 +44,8 @@ namespace KingdomSurvival.FreePlay
             public const string Visited = "freeplay.coal.visited";
             public const string LeaderOnRoad = "freeplay.coal.leader_on_road";
             public const string LeaderKilled = "freeplay.coal.leader_killed";
+            // Лагерная встреча «Следы вожака»: видели, куда он уходит.
+            public const string LeaderTrailSeen = "freeplay.coal.leader_trail_seen";
         }
 
         // Партия свободной игры (для встреч общего пула, которые бывают
@@ -292,8 +294,9 @@ namespace KingdomSurvival.FreePlay
             request.AllowRetreat = true;
             request.Enemies.Add(new CampaignBattleEnemy { UnitTypeId = "forest_beast_alpha", Count = 1 });
             request.Enemies.Add(new CampaignBattleEnemy { UnitTypeId = "forest_beast_strong", Count = 1 });
-            // Агнесса в отряде — вожака ждут там, где он пойдёт.
-            request.PreparedStart = CampRest.PartyIds(state).Contains(CampRest.AgnessaId);
+            // Агнесса в отряде или видели ночью, куда он уходит, — вожака
+            // ждут там, где он пойдёт.
+            request.PreparedStart = CampRest.PartyIds(state).Contains(CampRest.AgnessaId) || Has(state, Flags.LeaderTrailSeen);
             FeatureCombatBatch.ApplyPreparedStart(state, request);
             return request;
         }

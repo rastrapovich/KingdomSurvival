@@ -308,6 +308,69 @@ public sealed class FreePlayCoalStoryTests
         Assert.IsEmpty(FreePlayContent.RefreshWithReports(state), "Визит один раз.");
     }
 
+    private static HomeCareView TradeCare(GameState state)
+    {
+        return CampaignContent.DescribeHomeCares(state).SingleOrDefault(c => c.Id == "home.care.freeplay_coal_trade");
+    }
+
+    [Test]
+    public void Trade_WeeklyAtGate_TwoDays_OncePerWeek()
+    {
+        GameState state = NewFreePlay();
+        state.Narrative.SetFlag(FreePlayCoalStory.Flags.Fence);
+        FreePlayContent.RefreshWithReports(state);
+        Assert.IsFalse(CampaignContent.BuildGoals(state).Any(g => g.Id == "freeplay.goal.coal_trade"), "До визита обмена нет.");
+        state.Day += FreePlayCoalStory.AftermathDays;
+        FreePlayContent.RefreshWithReports(state);
+        Assert.IsTrue(Flag(state, FreePlayCoalStory.Flags.Visited));
+        int visitDay = state.Day;
+
+        Assert.IsNull(TradeCare(state), "В день первого визита обмена нет — это и есть визит.");
+        StringAssert.Contains("около дня " + (visitDay + 7), CampaignContent.BuildGoals(state).Single(g => g.Id == "freeplay.goal.coal_trade").CurrentStep);
+        StringAssert.Contains("нет", CampaignContent.RunHomeAction(state, FreePlayCoalStory.TradeActionId));
+
+        state.Day = visitDay + FreePlayCoalStory.TradeEveryDays;
+        HomeCareView care = TradeCare(state);
+        Assert.IsNotNull(care);
+        Assert.AreEqual(HomeCareAction.ModeAction, care.Action);
+        Assert.AreEqual(FreePlayCoalStory.TradeActionId, care.ActionId);
+        Assert.IsTrue(care.ActionEnabled);
+        StringAssert.Contains("у ворот", CampaignContent.BuildGoals(state).Single(g => g.Id == "freeplay.goal.coal_trade").CurrentStep);
+
+        int food = state.Food;
+        int supplies = state.ArmySupply;
+        StringAssert.Contains("Углежоги забрали", CampaignContent.RunHomeAction(state, FreePlayCoalStory.TradeActionId));
+        Assert.AreEqual(food - FreePlayCoalStory.TradeFoodCost, state.Food);
+        Assert.AreEqual(supplies + FreePlayCoalStory.TradeSupplyGain, state.ArmySupply);
+        Assert.IsNull(TradeCare(state), "Раз в неделю.");
+        CampaignContent.RunHomeAction(state, FreePlayCoalStory.TradeActionId);
+        Assert.AreEqual(food - FreePlayCoalStory.TradeFoodCost, state.Food, "Второй обмен за неделю не проходит.");
+
+        // Следующая неделя: ждут два дня, на третий уходят.
+        state.Day = visitDay + 2 * FreePlayCoalStory.TradeEveryDays + 1;
+        Assert.IsNotNull(TradeCare(state), "Второй день ожидания.");
+        state.Day += 1;
+        Assert.IsNull(TradeCare(state), "Не дождались — ушли.");
+        StringAssert.Contains("около дня " + (visitDay + 21), CampaignContent.BuildGoals(state).Single(g => g.Id == "freeplay.goal.coal_trade").CurrentStep);
+    }
+
+    [Test]
+    public void Trade_NotEnoughBread_Disabled()
+    {
+        GameState state = NewFreePlay();
+        state.Narrative.SetFlag(FreePlayCoalStory.Flags.Fence);
+        FreePlayContent.RefreshWithReports(state);
+        state.Day += FreePlayCoalStory.AftermathDays;
+        FreePlayContent.RefreshWithReports(state);
+        state.Day += FreePlayCoalStory.TradeEveryDays;
+        state.Food = FreePlayCoalStory.TradeFoodCost - 1;
+        Assert.IsFalse(TradeCare(state).ActionEnabled);
+        int supplies = state.ArmySupply;
+        CampaignContent.RunHomeAction(state, FreePlayCoalStory.TradeActionId);
+        Assert.AreEqual(supplies, state.ArmySupply);
+        Assert.AreEqual(string.Empty, CampaignContent.RunHomeAction(state, "unknown.action"));
+    }
+
     [Test]
     public void BoughtOnly_LeaderComesToRoad_AfterAWeek_ForestTrailOpens()
     {

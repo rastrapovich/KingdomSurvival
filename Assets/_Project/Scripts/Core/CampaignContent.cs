@@ -26,7 +26,11 @@ public enum HomeCareAction
 {
     None,
     StartYardDeck,
-    OpenDialogue
+    OpenDialogue,
+    // ПР-12Б: повторяемое действие режима (ActionId → CampaignContent.RunHomeAction),
+    // например недельный обмен. Сцена здесь не подходит: её эффекты
+    // применяются один раз навсегда.
+    ModeAction
 }
 
 // Забота: одна проблема — одна карточка (PR07_HOME_SPEC §7.1).
@@ -42,6 +46,8 @@ public sealed class HomeCareView
     public string ActionLabel;
     public HomeCareAction Action;
     public string DialogueId;
+    // Для HomeCareAction.ModeAction.
+    public string ActionId;
     public bool ActionEnabled;
 }
 
@@ -88,6 +94,9 @@ public sealed class CampaignContentProvider
     public Action<GameState, CampaignBattleResult, List<string>> BattleApplied;
     public Func<GameState, double> HomeWorkRate;
     public Func<GameState, List<string>> Refresh;
+    // Повторяемое действие заботы Дома (HomeCareAction.ModeAction):
+    // выполняет и возвращает донесение (пусто — ничего не сделано).
+    public Func<GameState, string, string> HomeAction;
 }
 
 // Сцена при входе в достигнутое место: какой диалог и как подписана кнопка.
@@ -171,6 +180,12 @@ public static class CampaignContent
     public static void OnBattleApplied(GameState state, CampaignBattleResult result, List<string> reports)
     {
         Find(state)?.BattleApplied?.Invoke(state, result, reports);
+    }
+
+    public static string RunHomeAction(GameState state, string actionId)
+    {
+        CampaignContentProvider provider = Find(state);
+        return provider?.HomeAction != null ? provider.HomeAction(state, actionId) ?? string.Empty : string.Empty;
     }
 
     // Множитель скорости работ Дома (1 — обычная).

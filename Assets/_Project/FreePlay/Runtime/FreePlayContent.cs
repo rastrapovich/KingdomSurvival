@@ -31,7 +31,8 @@ namespace KingdomSurvival.FreePlay
                 BattleAfterDialogue = BattleAfterDialogue,
                 BattleApplied = BattleApplied,
                 HomeWorkRate = FreePlayCoalStory.HomeWorkRate,
-                Refresh = RefreshWithReports
+                Refresh = RefreshWithReports,
+                HomeAction = HomeAction
             });
         }
 
@@ -39,6 +40,11 @@ namespace KingdomSurvival.FreePlay
         {
             return FreePlayCoalStory.LocationEntry(state, locationId) ?? FreePlayMineStory.LocationEntry(state, locationId) ??
                    FreePlayKurganStory.LocationEntry(state, locationId);
+        }
+
+        public static string HomeAction(GameState state, string actionId)
+        {
+            return actionId == FreePlayCoalStory.TradeActionId ? FreePlayCoalStory.RunTrade(state) : string.Empty;
         }
 
         public static void DialogueCompleted(GameState state, string dialogueId)
@@ -164,6 +170,9 @@ namespace KingdomSurvival.FreePlay
             JournalGoalViewData leader = FreePlayCoalStory.BuildLeaderGoal(state);
             if (leader != null)
                 goals.Add(leader);
+            JournalGoalViewData trade = FreePlayCoalStory.BuildTradeGoal(state);
+            if (trade != null)
+                goals.Add(trade);
             JournalGoalViewData guest = FreePlayMillerStory.BuildGoal(state);
             if (guest != null)
                 goals.Add(guest);

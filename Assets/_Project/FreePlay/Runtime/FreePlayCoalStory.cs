@@ -341,6 +341,93 @@ namespace KingdomSurvival.FreePlay
         // Дом: скорость работ и заботы
         // ------------------------------------------------------------------
 
+        // ------------------------------------------------------------------
+        // «Обмен с углежогами»: после первого визита углежоги приходят раз в
+        // неделю и ждут у ворот два дня — 3 хлеба за 4 припаса в дорогу.
+        // Повторяемо, поэтому действие кнопкой, а не сценой.
+        // ------------------------------------------------------------------
+
+        public const string TradeActionId = "freeplay.coal.trade_week";
+        public const int TradeEveryDays = 7;
+        public const int TradeWaitDays = 2;
+        public const int TradeFoodCost = 3;
+        public const int TradeSupplyGain = 4;
+        private const string TradeDayPrefix = "freeplay.coal.trade_week.";
+
+        // Номер недели визита, если углежоги сейчас у ворот, иначе 0.
+        public static int TradeVisitNumber(GameState state)
+        {
+            if (!Has(state, Flags.Visited))
+                return 0;
+            int since = state.Day - DayOf(state, ChronicleVisit);
+            if (since < TradeEveryDays)
+                return 0;
+            int week = since / TradeEveryDays;
+            if (since - week * TradeEveryDays >= TradeWaitDays || Has(state, TradeDayPrefix + week))
+                return 0;
+            return week;
+        }
+
+        public static int NextTradeDay(GameState state)
+        {
+            int visit = DayOf(state, ChronicleVisit);
+            int week = Math.Max(1, (state.Day - visit) / TradeEveryDays + 1);
+            return visit + week * TradeEveryDays;
+        }
+
+        public static string RunTrade(GameState state)
+        {
+            int week = TradeVisitNumber(state);
+            if (week == 0)
+                return "Углежогов у ворот нет.";
+            if (HomePeopleService.HasDeparted(state))
+                return "Меняться с углежогами некому: Командир в походе.";
+            if (state.Food < TradeFoodCost)
+                return "Хлеба на обмен нет.";
+            state.Food -= TradeFoodCost;
+            state.ArmySupply += TradeSupplyGain;
+            state.Narrative.SetFlag(TradeDayPrefix + week);
+            return "Углежоги забрали " + TradeFoodCost + " хлеба и оставили " + TradeSupplyGain +
+                   " припаса в дорогу — вяленое мясо и мешок угля сверху, для Лады.";
+        }
+
+        private static void AddTradeCare(GameState state, List<HomeCareView> cares)
+        {
+            if (TradeVisitNumber(state) == 0)
+                return;
+            bool atHome = !HomePeopleService.HasDeparted(state);
+            cares.Add(new HomeCareView
+            {
+                Id = "home.care.freeplay_coal_trade",
+                Title = "Углежоги у ворот",
+                Cause = "Принесли вяленое мясо и уголь. Просят хлеба. Ждут до завтрашнего вечера.",
+                Status = TradeFoodCost + " хлеба за " + TradeSupplyGain + " припаса в дорогу.",
+                Priority = HomeCares.PriorityOptional,
+                ActionLabel = "Обменять · " + TradeFoodCost + " еды",
+                Action = HomeCareAction.ModeAction,
+                ActionId = TradeActionId,
+                ActionEnabled = atHome && state.Food >= TradeFoodCost
+            });
+        }
+
+        public static JournalGoalViewData BuildTradeGoal(GameState state)
+        {
+            if (!Has(state, Flags.Visited))
+                return null;
+            return new JournalGoalViewData
+            {
+                Id = "freeplay.goal.coal_trade",
+                Title = "Обмен с углежогами",
+                Description = "Хутор у кромки Чёрного леса помнит, кто ему помог. Углежоги приходят в Дом сами.",
+                CurrentStep = TradeVisitNumber(state) > 0
+                    ? "Углежоги у ворот: " + TradeFoodCost + " хлеба за " + TradeSupplyGain + " припаса — на экране Дома."
+                    : "Углежоги придут снова около дня " + NextTradeDay(state) + ".",
+                RevisionId = "freeplay.goal.coal_trade." + (TradeVisitNumber(state) > 0 ? "at_gate" : "waiting"),
+                Category = JournalGoalCategory.Optional,
+                State = JournalGoalState.Active
+            };
+        }
+
         public static double HomeWorkRate(GameState state)
         {
             return HasCoal(state) ? 1.0 : WorkRateWithoutCoal;
@@ -349,6 +436,7 @@ namespace KingdomSurvival.FreePlay
         public static void AddHomeCares(GameState state, List<HomeCareView> cares)
         {
             AddYardDeck(state, cares);
+            AddTradeCare(state, cares);
             if (HasCoal(state))
                 return;
 

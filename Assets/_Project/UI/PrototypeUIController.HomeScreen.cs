@@ -319,6 +319,16 @@ public partial class PrototypeUIController
                 action.SetEnabled(care.ActionEnabled);
                 card.Add(action);
             }
+            else if (care.Action == HomeCareAction.ModeAction && !string.IsNullOrEmpty(care.ActionId))
+            {
+                // ПР-12Б: повторяемое действие режима (недельный обмен и т. п.).
+                string actionId = care.ActionId;
+                Button action = new Button(() => OnModeCareActionClicked(actionId)) { text = care.ActionLabel };
+                action.AddToClassList("game-menu-button");
+                action.AddToClassList("home-care-action");
+                action.SetEnabled(care.ActionEnabled);
+                card.Add(action);
+            }
             else if (care.Action == HomeCareAction.OpenDialogue && !string.IsNullOrEmpty(care.DialogueId))
             {
                 string dialogueId = care.DialogueId;
@@ -339,6 +349,16 @@ public partial class PrototypeUIController
         Label label = new Label(text);
         label.AddToClassList(className);
         card.Add(label);
+    }
+
+    private void OnModeCareActionClicked(string actionId)
+    {
+        if (gameState == null)
+            return;
+        AddReport(CampaignContent.RunHomeAction(gameState, actionId));
+        homePeopleSignature = null;
+        homeScreenSignature = null;
+        RefreshInterface();
     }
 
     private void OnYardDeckCareClicked()

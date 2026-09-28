@@ -53,6 +53,7 @@ namespace KingdomSurvival.FreePlay
                 return new List<string>();
             List<string> reports = FreePlayCoalStory.Refresh(state);
             reports.AddRange(FreePlayMillerStory.Refresh(state));
+            reports.AddRange(FreePlaySummary.Refresh(state));
             return reports;
         }
 
@@ -118,11 +119,20 @@ namespace KingdomSurvival.FreePlay
 
         public static IReadOnlyList<JournalGoalViewData> BuildGoals(GameState state)
         {
+            return BuildGoals(state, includeSummary: true);
+        }
+
+        public static List<JournalGoalViewData> BuildGoals(GameState state, bool includeSummary)
+        {
             List<JournalGoalViewData> goals = new List<JournalGoalViewData>();
             if (state == null)
                 return goals;
 
             goals.Add(BuildRegionGoal(state));
+            // ПР-12Б: контрольный итог — после первого возвращения.
+            JournalGoalViewData summary = includeSummary ? FreePlaySummary.BuildGoal(state) : null;
+            if (summary != null)
+                goals.Add(summary);
             goals.Add(FreePlayCoalStory.BuildGoal(state));
             JournalGoalViewData leader = FreePlayCoalStory.BuildLeaderGoal(state);
             if (leader != null)

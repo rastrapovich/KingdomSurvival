@@ -5,7 +5,8 @@
     "KingdomSurvival.Core",
     "KingdomSurvival.Chapter01",
     "KingdomSurvival.DialogueDatabase",
-    "KingdomSurvival.FreePlay"
+    "KingdomSurvival.FreePlay",
+    "KingdomSurvival.Encounters"
   ],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],

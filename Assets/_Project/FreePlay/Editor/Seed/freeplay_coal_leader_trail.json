@@ -1,0 +1,40 @@
+{
+  "id": "freeplay_coal_leader_trail",
+  "title": "И-1 — Тропа вожака",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-1 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Вход в Чёрный лес, пока вожак жив (отход у ям или неделя после покупки угля). Один путь — после разговора бой «Тропа вожака» (forest_beast_alpha + forest_beast_strong, отход разрешён, с Агнессой — подготовленное начало). Отказаться — кнопкой «Отменить» у места. Повторяемо: эффектов нет.",
+  "startNodeId": "freeplay.coal.trail.start",
+  "tags": ["свободная_игра", "И-1"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.coal.trail.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.trail.start.path",
+          "kind": 5,
+          "text": "Тропа идёт от ручья к ельнику — не звериная, почти дорога: так ходят те, кто никого не боится. На ольховом суку висит клок седой шерсти."
+        },
+        {
+          "blockId": "freeplay.coal.trail.start.agnessa",
+          "kind": 4,
+          "speakerIdOverride": "agnessa",
+          "text": "— Свежий. Утром он был здесь и вечером вернётся тем же путём. Встанем по ветру.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "agnessa" } ] }
+        },
+        {
+          "blockId": "freeplay.coal.trail.start.thought",
+          "kind": 3,
+          "speakerIdOverride": "hero_thought",
+          "text": "Если ждать — то здесь. Второй раз он может выбрать уже не ямы, а Дом."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.trail.wait", "text": "Ждём его здесь.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

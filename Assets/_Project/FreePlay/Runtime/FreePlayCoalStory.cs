@@ -39,7 +39,24 @@ namespace KingdomSurvival.FreePlay
             public const string HutorMoved = "freeplay.coal.hutor_moved";
             // Уголь в Доме.
             public const string Coal = "freeplay.coal.coal";
+            // Отложенные последствия: углежоги пришли сами; вожак вышел к
+            // дороге; вожак убит на своей тропе.
+            public const string Visited = "freeplay.coal.visited";
+            public const string LeaderOnRoad = "freeplay.coal.leader_on_road";
+            public const string LeaderKilled = "freeplay.coal.leader_killed";
         }
+
+        // Партия свободной игры (для встреч общего пула, которые бывают
+        // только здесь, — «Дым над лесом»).
+        public const string ModeFlag = "freeplay.mode";
+
+        public const string TrailDialogueId = "freeplay_coal_leader_trail";
+        public const string SmokeDialogueId = "freeplay_coal_smoke";
+        public const string TrailBattlePrefix = "freeplay.battle.leader_trail.";
+
+        // Через сколько дней после угля приходят последствия.
+        public const int AftermathDays = 7;
+        public const int VisitSupplies = 4;
 
         // Без угля Лада гнёт скобы руками: работы Дома вдвое медленнее.
         public const double WorkRateWithoutCoal = 0.5;
@@ -49,6 +66,28 @@ namespace KingdomSurvival.FreePlay
 
         private const string ChronicleCoal = "freeplay.coal.chronicle.coal";
         private const string ChronicleMoved = "freeplay.coal.chronicle.moved";
+        private const string ChronicleVisit = "freeplay.coal.chronicle.visit";
+        private const string ChronicleLeaderRoad = "freeplay.coal.chronicle.leader_road";
+        private const string ChronicleLeaderKilled = "freeplay.coal.chronicle.leader_killed";
+
+        // Хутору помогли: вожак отогнан или убит, или ямы обнесены огнём.
+        public static bool Helped(GameState state)
+        {
+            return Has(state, Flags.LeaderDriven) || Has(state, Flags.Fence) || Has(state, Flags.LeaderKilled);
+        }
+
+        // Вожак жив и его можно искать на тропе в Чёрном лесу.
+        public static bool IsLeaderTrailOpen(GameState state)
+        {
+            return !Has(state, Flags.LeaderDriven) && !Has(state, Flags.LeaderKilled) &&
+                   (Has(state, Flags.HutorMoved) || Has(state, Flags.LeaderOnRoad));
+        }
+
+        private static int DayOf(GameState state, string chronicleId)
+        {
+            ChronicleEntryData entry = Chronicle.Find(state, chronicleId);
+            return entry != null ? entry.Day : int.MaxValue / 2;
+        }
 
         private static bool Has(GameState state, string flag)
         {
@@ -70,15 +109,20 @@ namespace KingdomSurvival.FreePlay
             if (state?.Narrative == null)
                 return reports;
 
+            if (!Has(state, ModeFlag))
+                state.Narrative.SetFlag(ModeFlag);
             if (Has(state, Flags.Asked))
                 EnsureHutor(state);
+            RefreshAftermath(state, reports);
 
             bool paid = Has(state, Flags.Fence) || Has(state, Flags.Trade) || Has(state, Flags.TradeDouble) ||
-                        Has(state, Flags.LeaderDriven);
+                        Has(state, Flags.LeaderDriven) || Has(state, Flags.LeaderKilled);
             if (paid && !HasCoal(state))
             {
                 state.Narrative.SetFlag(Flags.Coal);
-                string how = Has(state, Flags.LeaderDriven)
+                string how = Has(state, Flags.LeaderKilled)
+                    ? "за убитого вожака"
+                    : Has(state, Flags.LeaderDriven)
                     ? "за отогнанного вожака"
                     : Has(state, Flags.Fence)
                         ? "за огневую изгородь вокруг ям"
@@ -88,6 +132,46 @@ namespace KingdomSurvival.FreePlay
                 reports.Add(text);
             }
             return reports;
+        }
+
+        // Отложенные последствия (ТЗ §4, И-1): через неделю после того, как
+        // хутору помогли, углежоги приходят сами; если уголь просто купили,
+        // вожак через неделю выходит к дороге. Отход у ям сразу оставляет
+        // вожака на его тропе.
+        private static void RefreshAftermath(GameState state, List<string> reports)
+        {
+            if (Helped(state) && !Has(state, Flags.Visited))
+            {
+                int since = Has(state, Flags.LeaderKilled) ? DayOf(state, ChronicleLeaderKilled) : DayOf(state, ChronicleCoal);
+                if (state.Day >= since + AftermathDays)
+                {
+                    state.Narrative.SetFlag(Flags.Visited);
+                    state.ArmySupply += VisitSupplies;
+                    string text = "Углежоги пришли в Дом сами — с мешком угля и связкой вяленого мяса в дорогу (+" + VisitSupplies +
+                                  " припаса). Лада забирает мешок к себе раньше, чем его успевают поставить на землю.";
+                    Chronicle.Record(state, ChronicleVisit, "Углежоги пришли сами", text, LocationId, ChronicleCoal);
+                    reports.Add(text);
+                }
+            }
+
+            bool boughtOnly = HasCoal(state) && !Helped(state) && !Has(state, Flags.HutorMoved);
+            if (boughtOnly && !Has(state, Flags.LeaderOnRoad) && state.Day >= DayOf(state, ChronicleCoal) + AftermathDays)
+            {
+                state.Narrative.SetFlag(Flags.LeaderOnRoad);
+                string text = "Старый вожак ушёл от угольных ям к дороге: у кромки Чёрного леса нашли задранную овцу. Его тропу можно искать в лесу.";
+                Chronicle.Record(state, ChronicleLeaderRoad, "Вожак вышел к дороге", text, ForestLocationId, ChronicleCoal);
+                reports.Add(text);
+            }
+
+            if (IsLeaderTrailOpen(state))
+            {
+                LocationData forest = state.FindLocation(ForestLocationId);
+                if (forest != null && (!forest.IsVisibleOnMap || !forest.IsDiscovered))
+                {
+                    forest.IsVisibleOnMap = true;
+                    forest.IsDiscovered = true;
+                }
+            }
         }
 
         // Хутор у кромки Чёрного леса: чуть ближе к Дому, чем сам лес, и
@@ -142,6 +226,19 @@ namespace KingdomSurvival.FreePlay
 
         public static LocationEntryView LocationEntry(GameState state, string locationId)
         {
+            // Тропа вожака в Чёрном лесу — пока он жив и туда стоит идти.
+            if (locationId == ForestLocationId)
+            {
+                return IsLeaderTrailOpen(state)
+                    ? new LocationEntryView
+                    {
+                        DialogueId = TrailDialogueId,
+                        ButtonText = "ИДТИ ПО ТРОПЕ ВОЖАКА",
+                        Hint = "Найти старого вожака на его тропе и покончить с этим."
+                    }
+                    : null;
+            }
+
             if (locationId != LocationId || HasCoal(state) || Has(state, Flags.Hunt) && !Has(state, Flags.HutorMoved))
                 return null;
             return new LocationEntryView
@@ -160,6 +257,9 @@ namespace KingdomSurvival.FreePlay
 
         public static CampaignBattleRequest BattleAfterDialogue(GameState state, string dialogueId)
         {
+            if (dialogueId == TrailDialogueId)
+                return IsLeaderTrailOpen(state) && state.HasActiveExpedition ? CreateTrailRequest(state) : null;
+
             if (dialogueId != HutorDialogueId || !Has(state, Flags.Hunt) || HasCoal(state) || Has(state, Flags.HutorMoved) ||
                 CampaignBattleBridge.IsApplied(state, BattleId) || !state.HasActiveExpedition)
                 return null;
@@ -180,9 +280,45 @@ namespace KingdomSurvival.FreePlay
             return request;
         }
 
+        // «Тропа вожака»: вожак и крупный зверь; после отхода можно прийти
+        // снова — у каждой попытки свой ID (итог применяется один раз).
+        public static CampaignBattleRequest CreateTrailRequest(GameState state)
+        {
+            int attempt = 1;
+            while (CampaignBattleBridge.IsApplied(state, TrailBattlePrefix + attempt))
+                attempt++;
+            CampaignBattleRequest request = CampaignBattleBridge.CreateRequest(state, TrailBattlePrefix + attempt);
+            request.SourceId = TrailDialogueId;
+            request.AllowRetreat = true;
+            request.Enemies.Add(new CampaignBattleEnemy { UnitTypeId = "forest_beast_alpha", Count = 1 });
+            request.Enemies.Add(new CampaignBattleEnemy { UnitTypeId = "forest_beast_strong", Count = 1 });
+            // Агнесса в отряде — вожака ждут там, где он пойдёт.
+            request.PreparedStart = CampRest.PartyIds(state).Contains(CampRest.AgnessaId);
+            FeatureCombatBatch.ApplyPreparedStart(state, request);
+            return request;
+        }
+
         public static void BattleApplied(GameState state, CampaignBattleResult result, List<string> reports)
         {
-            if (state?.Narrative == null || result == null || result.BattleId != BattleId)
+            if (state?.Narrative == null || result == null)
+                return;
+
+            if (result.BattleId != null && result.BattleId.StartsWith(TrailBattlePrefix, StringComparison.Ordinal))
+            {
+                if (result.Outcome != CampaignBattleOutcome.Victory)
+                {
+                    reports?.Add("Вожак ушёл в ельник. Тропа никуда не делась — можно вернуться с другими людьми.");
+                    return;
+                }
+                state.Narrative.SetFlag(Flags.LeaderKilled);
+                string killed = "Старый вожак убит на своей тропе. У угольных ям и на дороге станет тише.";
+                Chronicle.Record(state, ChronicleLeaderKilled, "Вожак убит", killed, ForestLocationId,
+                    Has(state, Flags.LeaderOnRoad) ? ChronicleLeaderRoad : ChronicleMoved);
+                reports?.Add(killed);
+                return;
+            }
+
+            if (result.BattleId != BattleId)
                 return;
 
             if (result.Outcome == CampaignBattleOutcome.Victory)
@@ -282,6 +418,27 @@ namespace KingdomSurvival.FreePlay
         // ------------------------------------------------------------------
         // «Дело»
         // ------------------------------------------------------------------
+
+        // «Старый вожак» — пока вожак жив и ходит у леса, и после его смерти.
+        public static JournalGoalViewData BuildLeaderGoal(GameState state)
+        {
+            bool killed = Has(state, Flags.LeaderKilled);
+            if (!killed && !IsLeaderTrailOpen(state))
+                return null;
+            return new JournalGoalViewData
+            {
+                Id = "freeplay.goal.coal_leader",
+                Title = "Старый вожак",
+                Description = "Седой по хребту, огня не боится и научился брать у людей. " +
+                              (Has(state, Flags.HutorMoved) ? "Из-за него углежоги ушли к дальним ямам." : "Теперь он ходит к дороге."),
+                CurrentStep = killed
+                    ? "Вожак убит на своей тропе."
+                    : "Идти в Чёрный лес по его тропе. С Агнессой его ждут там, где он пойдёт.",
+                RevisionId = "freeplay.goal.coal_leader." + (killed ? "done" : "open"),
+                Category = JournalGoalCategory.Optional,
+                State = killed ? JournalGoalState.Completed : JournalGoalState.Active
+            };
+        }
 
         public static JournalGoalViewData BuildGoal(GameState state)
         {

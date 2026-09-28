@@ -1,0 +1,20 @@
+{
+  "flags": [
+    {
+      "FlagId": "freeplay.mode",
+      "DisplayName": "Свободная игра",
+      "Description": "Партия идёт в режиме «Свободная игра». Ставится содержанием режима при опросе.",
+      "Category": "freeplay",
+      "Status": 0,
+      "FutureUseNotes": "Потребитель: встречи общего пула, которые бывают только в свободной игре (RequiredFlagsAll)."
+    },
+    {
+      "FlagId": "freeplay.coal.asked",
+      "DisplayName": "Хутор углежогов известен",
+      "Description": "Лада рассказала о хуторе или отряд заметил дым угольных ям — хутор на карте.",
+      "Category": "freeplay_coal",
+      "Status": 0,
+      "FutureUseNotes": "Ставят: сцены freeplay_coal_lada и freeplay_coal_smoke. Потребитель: FREEPLAY_COAL_SMOKE_01 (ForbiddenFlags), FreePlayCoalStory."
+    }
+  ]
+}

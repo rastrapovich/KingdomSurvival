@@ -1,0 +1,52 @@
+{
+  "id": "freeplay_coal_smoke",
+  "title": "И-1 — Дым над лесом",
+  "category": 3,
+  "status": 1,
+  "developerComment": "ПР-12В, встреча FREEPLAY_COAL_SMOKE_01 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Только в свободной игре (флаг freeplay.mode), пока хутор не известен. «Запомнить, где дым» ставит freeplay.coal.asked — хутор углежогов появляется на карте, как после разговора с Ладой.",
+  "startNodeId": "freeplay.coal.smoke.start",
+  "tags": ["свободная_игра", "И-1", "дорога"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.coal.smoke.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.smoke.start.smoke",
+          "kind": 5,
+          "text": "Над ольшаником, далеко к лесу, стоит дым. Ровный, серый, без огня — так не горит ни пожар, ни костёр. Так дымят угольные ямы."
+        },
+        {
+          "blockId": "freeplay.coal.smoke.start.thought",
+          "kind": 3,
+          "speakerIdOverride": "hero_thought",
+          "text": "Кто-то жжёт уголь у кромки Чёрного леса — и, похоже, не первый год."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.smoke.mark", "text": "Запомнить, где дым.", "kind": 0, "nextNodeId": "freeplay.coal.smoke.marked" },
+        { "choiceId": "freeplay.coal.smoke.pass", "text": "Мало ли кто там дымит.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.coal.smoke.marked",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.coal.smoke.marked.text",
+          "kind": 5,
+          "text": "Дорогу к дыму видно по сломанным ольховым веткам: там ходят с тачками. Место легко найти снова.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.coal.smoke.asked", "Type": 0, "StringParam": "freeplay.coal.asked" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.coal.smoke.go", "text": "Дальше.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

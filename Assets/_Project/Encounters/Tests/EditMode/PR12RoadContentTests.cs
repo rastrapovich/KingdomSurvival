@@ -41,7 +41,8 @@ public sealed class PR12RoadContentTests
                     if (choice.IsActiveCheck) checks++;
         }
         // 26.09.2026: 12 старых дорожных встреч списаны автором — в пуле 8 коротких сцен, 4 из них с активной проверкой.
-        Assert.That(small, Is.EqualTo(8));
+        // 28.09.2026 (ПР-12Б, И-1): + «Дым над лесом» — только в свободной игре, без проверки.
+        Assert.That(small, Is.EqualTo(9));
         Assert.That(checks, Is.EqualTo(4));
     }
 

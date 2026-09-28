@@ -95,7 +95,8 @@ public sealed class FreePlayCoalStoryTests
     [Test]
     public void SeedScenes_AreInDatabase_AndValid()
     {
-        foreach (string id in new[] { FreePlayCoalStory.LadaDialogueId, FreePlayCoalStory.HutorDialogueId, FreePlayCoalStory.HutorAfterDialogueId })
+        foreach (string id in new[] { FreePlayCoalStory.LadaDialogueId, FreePlayCoalStory.HutorDialogueId, FreePlayCoalStory.HutorAfterDialogueId,
+                     FreePlayCoalStory.TrailDialogueId, FreePlayCoalStory.SmokeDialogueId })
         {
             Assert.IsNotNull(database.FindDialogue(id), id);
             List<string> issues = new List<string>();
@@ -280,6 +281,115 @@ public sealed class FreePlayCoalStoryTests
         double fastDone = HomeLife.FindWork(fast, HomeLife.YardDeckWorkId).DoneWork;
         Assert.Greater(fastDone, 0.0);
         Assert.AreEqual(fastDone * FreePlayCoalStory.WorkRateWithoutCoal, slowDone, 0.0001, "Без угля — вдвое медленнее.");
+    }
+
+    // ------------------------------------------------------------------
+    // Отложенные последствия
+    // ------------------------------------------------------------------
+
+    [Test]
+    public void Helped_CoalburnersComeThemselves_AfterAWeek_Once()
+    {
+        GameState state = AtHutor("garrick", HomePeopleService.LadaId);
+        Play(state, FreePlayCoalStory.HutorDialogueId, "freeplay.coal.hutor.fence", "freeplay.coal.hutor.fence_leave");
+        FreePlayContent.RefreshWithReports(state);
+        int supplies = state.ArmySupply;
+
+        state.Day += FreePlayCoalStory.AftermathDays - 1;
+        Assert.IsEmpty(FreePlayContent.RefreshWithReports(state), "Неделя ещё не прошла.");
+
+        state.Day += 1;
+        StringAssert.Contains("Углежоги пришли в Дом сами", FreePlayContent.RefreshWithReports(state).Single());
+        Assert.AreEqual(supplies + FreePlayCoalStory.VisitSupplies, state.ArmySupply);
+        Assert.AreEqual("freeplay.coal.chronicle.coal", Chronicle.Find(state, "freeplay.coal.chronicle.visit").CauseId);
+        Assert.IsFalse(Flag(state, FreePlayCoalStory.Flags.LeaderOnRoad), "Хутору помогли — вожак к дороге не выходит.");
+
+        state.Day += 10;
+        Assert.IsEmpty(FreePlayContent.RefreshWithReports(state), "Визит один раз.");
+    }
+
+    [Test]
+    public void BoughtOnly_LeaderComesToRoad_AfterAWeek_ForestTrailOpens()
+    {
+        GameState state = AtHutor("garrick");
+        Play(state, FreePlayCoalStory.HutorDialogueId, "freeplay.coal.hutor.trade", "freeplay.coal.hutor.trade_leave");
+        FreePlayContent.RefreshWithReports(state);
+        Assert.IsNull(CampaignContent.LocationEntry(state, FreePlayCoalStory.ForestLocationId));
+        Assert.IsFalse(CampaignContent.BuildGoals(state).Any(g => g.Id == "freeplay.goal.coal_leader"));
+
+        state.Day += FreePlayCoalStory.AftermathDays;
+        StringAssert.Contains("Старый вожак ушёл от угольных ям к дороге", FreePlayContent.RefreshWithReports(state).Single());
+        LocationData forest = state.FindLocation(FreePlayCoalStory.ForestLocationId);
+        Assert.IsTrue(forest.IsVisibleOnMap && forest.IsDiscovered, "Лес на карте.");
+        Assert.AreEqual(FreePlayCoalStory.TrailDialogueId, CampaignContent.LocationEntry(state, forest.Id).DialogueId);
+        Assert.AreEqual(JournalGoalState.Active, CampaignContent.BuildGoals(state).Single(g => g.Id == "freeplay.goal.coal_leader").State);
+        Assert.IsFalse(CampaignContent.BuildGoals(state).Any(g => g.Id == "freeplay.goal.place." + forest.Id),
+            "Лес без осмотра — не отдельное «Дело» места.");
+        Assert.IsFalse(Flag(state, FreePlayCoalStory.Flags.Visited), "Уголь купили — благодарить не за что.");
+    }
+
+    [Test]
+    public void Trail_RepeatableAfterRetreat_VictoryKillsLeader_ThenVisit()
+    {
+        GameState state = AtHutor("garrick");
+        Play(state, FreePlayCoalStory.HutorDialogueId, "freeplay.coal.hutor.hunt", "freeplay.coal.hutor.wait");
+        CampaignBattleResult atPits = Result(state, CampaignBattleOutcome.Retreat);
+        CampaignBattleBridge.ApplyResult(state, atPits, new List<string>());
+        CampaignContent.OnBattleApplied(state, atPits, new List<string>());
+        FreePlayContent.RefreshWithReports(state);
+        Assert.IsTrue(FreePlayCoalStory.IsLeaderTrailOpen(state), "Отход у ям — тропа вожака открыта сразу.");
+
+        Assert.IsNull(Play(state, FreePlayCoalStory.TrailDialogueId, "freeplay.coal.trail.wait"));
+        CampaignBattleRequest first = CampaignContent.BattleAfterDialogue(state, FreePlayCoalStory.TrailDialogueId);
+        CollectionAssert.AreEquivalent(new[] { "forest_beast_alpha", "forest_beast_strong" }, first.Enemies.Select(e => e.UnitTypeId));
+        Assert.IsTrue(first.AllowRetreat);
+        Assert.IsFalse(first.PreparedStart, "Без Агнессы — не подготовлено.");
+
+        CampaignBattleResult lost = Result(state, CampaignBattleOutcome.Retreat);
+        lost.BattleId = first.BattleId;
+        CampaignBattleBridge.ApplyResult(state, lost, new List<string>());
+        CampaignContent.OnBattleApplied(state, lost, new List<string>());
+        Assert.IsTrue(FreePlayCoalStory.IsLeaderTrailOpen(state), "После отхода можно вернуться.");
+
+        CampaignBattleRequest second = CampaignContent.BattleAfterDialogue(state, FreePlayCoalStory.TrailDialogueId);
+        Assert.AreNotEqual(first.BattleId, second.BattleId, "Новая попытка — новый бой.");
+        CampaignBattleResult won = Result(state, CampaignBattleOutcome.Victory);
+        won.BattleId = second.BattleId;
+        CampaignBattleBridge.ApplyResult(state, won, new List<string>());
+        List<string> reports = new List<string>();
+        CampaignContent.OnBattleApplied(state, won, reports);
+        StringAssert.Contains("Старый вожак убит", reports.Single());
+
+        Assert.IsFalse(FreePlayCoalStory.IsLeaderTrailOpen(state));
+        Assert.IsNull(CampaignContent.LocationEntry(state, FreePlayCoalStory.ForestLocationId));
+        StringAssert.Contains("за убитого вожака", FreePlayContent.RefreshWithReports(state).Single(), "Углежоги рассчитываются углём.");
+        Assert.AreEqual(JournalGoalState.Completed, CampaignContent.BuildGoals(state).Single(g => g.Id == "freeplay.goal.coal_leader").State);
+
+        state.Day += FreePlayCoalStory.AftermathDays;
+        StringAssert.Contains("Углежоги пришли в Дом сами", FreePlayContent.RefreshWithReports(state).Single());
+    }
+
+    [Test]
+    public void Smoke_FreePlayOnly_UntilHutorKnown_RevealsHutor()
+    {
+        KingdomSurvival.Encounters.EncounterDatabaseAsset encounters =
+            Resources.Load<KingdomSurvival.Encounters.EncounterDatabaseAsset>(KingdomSurvival.Encounters.EncounterDatabaseAsset.ResourcesPath);
+        KingdomSurvival.Encounters.EncounterDefinition smoke = encounters.FindById("FREEPLAY_COAL_SMOKE_01");
+        Assert.IsNotNull(smoke);
+        Assert.AreEqual(FreePlayCoalStory.SmokeDialogueId, smoke.DialogueId);
+        CollectionAssert.Contains(smoke.RequiredFlagsAll, FreePlayCoalStory.ModeFlag);
+        CollectionAssert.Contains(smoke.ForbiddenFlags, FreePlayCoalStory.Flags.Asked);
+
+        GameState state = NewFreePlay();
+        FreePlayContent.RefreshWithReports(state);
+        Assert.IsTrue(Flag(state, FreePlayCoalStory.ModeFlag), "Свободная партия помечена.");
+        Assert.IsNull(Play(state, FreePlayCoalStory.SmokeDialogueId, "freeplay.coal.smoke.mark", "freeplay.coal.smoke.go"));
+        FreePlayContent.RefreshWithReports(state);
+        Assert.IsNotNull(FreePlayCoalStory.FindHutor(state), "Дым привёл к хутору.");
+
+        GameState story = new CampaignSetup { WorldSeed = Seed }.CreateCampaign();
+        CampaignContent.Refresh(story);
+        Assert.IsFalse(story.Narrative != null && story.Narrative.HasFlag(FreePlayCoalStory.ModeFlag), "В главе встречи нет.");
     }
 
     [Test]

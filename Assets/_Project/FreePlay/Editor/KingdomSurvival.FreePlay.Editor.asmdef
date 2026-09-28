@@ -3,7 +3,8 @@
   "rootNamespace": "KingdomSurvival.FreePlay.Editor",
   "references": [
     "KingdomSurvival.Core",
-    "KingdomSurvival.DialogueDatabase"
+    "KingdomSurvival.DialogueDatabase",
+    "KingdomSurvival.Encounters"
   ],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],

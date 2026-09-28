@@ -953,3 +953,50 @@ MonoBehaviour:
       Micro \u0441\u0446\u0435\u043D\u0430. \u041E\u0434\u0438\u043D \u0440\u0430\u0437
       \u0437\u0430 \u043F\u0440\u043E\u0445\u043E\u0436\u0434\u0435\u043D\u0438\u0435."
     FutureHooksNotes: 
+  - EncounterId: FREEPLAY_COAL_SMOKE_01
+    DisplayName: "\u0414\u044B\u043C \u043D\u0430\u0434 \u043B\u0435\u0441\u043E\u043C"
+    Description: "\u041D\u0430\u0434 \u043E\u043B\u044C\u0448\u0430\u043D\u0438\u043A\u043E\u043C,
+      \u0434\u0430\u043B\u0435\u043A\u043E \u043A \u043B\u0435\u0441\u0443, \u0440\u043E\u0432\u043D\u044B\u0439
+      \u0441\u0435\u0440\u044B\u0439 \u0434\u044B\u043C \u0443\u0433\u043E\u043B\u044C\u043D\u044B\u0445
+      \u044F\u043C. \u0422\u043E\u043B\u044C\u043A\u043E \u0432 \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0439
+      \u0438\u0433\u0440\u0435, \u043F\u043E\u043A\u0430 \u0445\u0443\u0442\u043E\u0440
+      \u0443\u0433\u043B\u0435\u0436\u043E\u0433\u043E\u0432 \u043D\u0435 \u0438\u0437\u0432\u0435\u0441\u0442\u0435\u043D."
+    Status: 1
+    Category: 0
+    Tags:
+    - road
+    - freeplay
+    DurationClass: 1
+    MemoryClass: 0
+    Functions: 
+    DialogueId: freeplay_coal_smoke
+    ResolutionMode: 0
+    SelectionMode: 0
+    PoolId: ROAD_POOL_01
+    DiscoveryChancePercent: 90
+    SelectionWeight: 10
+    UnlimitedOccurrences: 0
+    MaxOccurrencesPerGame: 1
+    CooldownHours: 0
+    AllowedRegionIds:
+    - road
+    RequiredLocationTags: []
+    ForbiddenLocationTags: []
+    RequiredConditions:
+      Combinator: 0
+      Conditions: []
+    RequiredFlagsAll:
+    - freeplay.mode
+    RequiredFlagsAny: []
+    ForbiddenFlags:
+    - freeplay.coal.asked
+    FlagsSetOnStart: []
+    FlagsSetOnComplete: []
+    ClearFlagsOnComplete: []
+    DesignerNotes: "\u041F\u0420-12\u0412, \u0418-1 \xAB\u0423\u0433\u043E\u043B\u044C
+      \u0434\u043B\u044F \u041B\u0430\u0434\u044B\xBB (PR12BV_FREE_PLAY_CONTENT_SPEC.md
+      \xA75). \u0412\u0442\u043E\u0440\u043E\u0439 \u0441\u043F\u043E\u0441\u043E\u0431
+      \u0443\u0437\u043D\u0430\u0442\u044C \u043E \u0445\u0443\u0442\u043E\u0440\u0435,
+      \u043A\u0440\u043E\u043C\u0435 \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440\u0430
+      \u0441 \u041B\u0430\u0434\u043E\u0439."
+    FutureHooksNotes: 

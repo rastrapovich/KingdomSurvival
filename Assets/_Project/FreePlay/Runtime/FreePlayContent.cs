@@ -117,12 +117,16 @@ namespace KingdomSurvival.FreePlay
 
             goals.Add(BuildRegionGoal(state));
             goals.Add(FreePlayCoalStory.BuildGoal(state));
+            JournalGoalViewData leader = FreePlayCoalStory.BuildLeaderGoal(state);
+            if (leader != null)
+                goals.Add(leader);
             foreach (LocationData location in state.Locations)
             {
                 if (location == null || location.IsWaypoint || !location.IsVisibleOnMap || !location.IsDiscovered)
                     continue;
-                // Хутор ведёт своя история («Уголь для Лады»).
-                if (location.Id == FreePlayCoalStory.LocationId)
+                // Хутор ведёт своя история («Уголь для Лады»); место без
+                // осмотра (Чёрный лес) — только через историю.
+                if (location.Id == FreePlayCoalStory.LocationId || location.ExplorationHours <= 0.0)
                     continue;
                 goals.Add(BuildPlaceGoal(location));
             }

@@ -58,6 +58,10 @@ public static class CombatStatsAssembler
             result.Sources.Add(definition.Name + ": " + definition.Modifier.Describe());
         }
 
+        // 12Е-6: боевые особенности — условные правила, чисел не меняют.
+        foreach (string line in FeatureCombatBatch.Describe(state, personId))
+            result.Sources.Add(line);
+
         if (resident != null && resident.Exhausted)
         {
             StatModifier exhaustion = ExhaustionModifier;

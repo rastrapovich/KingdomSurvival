@@ -74,10 +74,13 @@ namespace KingdomSurvival.BattleSandbox
         // ПР-03: бой из готового упорядоченного состава — у кампании это
         // конкретные люди (герой и бойцы похода), в том числе несколько
         // бойцов одного типа. Юнит i получает ID "player:<тип>:<i+1>".
+        // 12Е-6: прибавка к инициативе отряда в первом раунде («Засада»)
+        // ставится до Start() — иначе очередь первого раунда уже построена.
         public static SandboxBattle CreateBattle(
             IReadOnlyList<SandboxUnitDefinition> fighters,
             IEnumerable<SandboxUnitDefinition> enemyEncounter,
-            int? terrainSeed = null)
+            int? terrainSeed = null,
+            int playerFirstRoundInitiativeBonus = 0)
         {
             if (fighters == null)
                 throw new ArgumentNullException(nameof(fighters));
@@ -139,6 +142,7 @@ namespace KingdomSurvival.BattleSandbox
                 SandboxArenaShape.Height,
                 units,
                 terrain);
+            battle.PlayerFirstRoundInitiativeBonus = playerFirstRoundInitiativeBonus;
             battle.Start();
             return battle;
         }

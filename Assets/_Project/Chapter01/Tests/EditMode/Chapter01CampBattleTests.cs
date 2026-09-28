@@ -61,6 +61,36 @@ public sealed class Chapter01CampBattleTests
         Assert.IsTrue(request.Participants.Any(p => p.IsHero));
     }
 
+    // 12Е-6, «Засада» [РАБОЧЕЕ, решение автора 28.09.2026]: выставленный на
+    // ночь дозор замечает зверей заранее — бой начинается подготовленно.
+    [Test]
+    public void Request_WatchMakesStartPrepared_AmbushGivesInitiative()
+    {
+        GameState unwatched = RestingOnTheRoad(2.0);
+        Assert.IsTrue(CharacterFeatureService.Grant(unwatched, unwatched.GetSelectedCommander().Id, CombatFeatureIds.Ambush, 1,
+            FeatureSource.Story, null, out string message), message);
+        CampaignBattleRequest open = Chapter01CampBattle.CreateRequest(unwatched);
+        Assert.IsFalse(open.PreparedStart, "Без дозора зверей не заметили.");
+        Assert.AreEqual(0, open.PlayerFirstRoundInitiativeBonus);
+
+        GameState gameState = NewGame(20260925);
+        gameState.Narrative.SetFlag(Chapter01Ids.Flags.ExpeditionStarted);
+        gameState.ArmySupply = 50;
+        LocationData target = gameState.Locations.First(location => !location.IsWaypoint);
+        Assert.IsTrue(gameState.TryStartExpedition(target.Id, new List<string> { "garrick" }, out message), message);
+        gameState.ActiveExpedition.RouteIndex = 1;
+        Assert.IsTrue(CharacterFeatureService.Grant(gameState, gameState.GetSelectedCommander().Id, CombatFeatureIds.Ambush, 1,
+            FeatureSource.Story, null, out message), message);
+        CampRest.GetNight(gameState).NearWater = true;
+        Assert.IsTrue(CampRest.TryToggleAction(gameState, CampActionKind.Watch, out message), message);
+        Assert.IsTrue(CampRest.TryStartRest(gameState, out message), message);
+
+        CampaignBattleRequest prepared = Chapter01CampBattle.CreateRequest(gameState);
+        Assert.IsTrue(prepared.PreparedStart);
+        Assert.AreEqual(FeatureCombatBatch.AmbushInitiativeBonus, prepared.PlayerFirstRoundInitiativeBonus);
+        Assert.IsTrue(prepared.Notes.Any(note => note.Contains("«Засада»")));
+    }
+
     [Test]
     public void IntroDialogue_ExistsAndEndsWithFight()
     {

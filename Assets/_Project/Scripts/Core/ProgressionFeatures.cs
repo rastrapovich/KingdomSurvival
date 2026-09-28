@@ -369,6 +369,8 @@ public static class ProgressionFeatureImplementations
 
         // 12Е-5: первая партия особенностей вне боя.
         FeatureImplementationsFirstBatch.RegisterAll();
+        // 12Е-6: первая партия боевых особенностей.
+        FeatureCombatBatch.RegisterAll();
     }
 
     // Вызывается диспетчером событий: гарантирует, что регистрации сделаны.

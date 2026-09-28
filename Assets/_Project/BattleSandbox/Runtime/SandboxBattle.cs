@@ -44,6 +44,7 @@ namespace KingdomSurvival.BattleSandbox
     public sealed class SandboxUnitDefinition
     {
         private readonly HashSet<string> tagIds;
+        private readonly HashSet<string> perkIds;
 
         public string Id { get; }
         public string RoleLabel { get; }
@@ -57,6 +58,9 @@ namespace KingdomSurvival.BattleSandbox
         public int AttackRange { get; }
         public IReadOnlyCollection<string> TagIds => tagIds;
 
+        // 12Е-6: боевые правила особенностей человека (SandboxPerks).
+        public IReadOnlyCollection<string> PerkIds => perkIds;
+
         public SandboxUnitDefinition(
             string id,
             string roleLabel,
@@ -68,7 +72,8 @@ namespace KingdomSurvival.BattleSandbox
             int movement,
             int initiative,
             int attackRange,
-            IEnumerable<string> tags = null)
+            IEnumerable<string> tags = null,
+            IEnumerable<string> perks = null)
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("ID типа бойца не может быть пустым.", nameof(id));
@@ -88,11 +93,19 @@ namespace KingdomSurvival.BattleSandbox
                     tags.Where(tag => !string.IsNullOrWhiteSpace(tag)),
                     StringComparer.Ordinal)
                 : new HashSet<string>(StringComparer.Ordinal);
+            perkIds = perks != null
+                ? new HashSet<string>(perks.Where(perk => !string.IsNullOrWhiteSpace(perk)), StringComparer.Ordinal)
+                : new HashSet<string>(StringComparer.Ordinal);
         }
 
         public bool HasTag(string tagId)
         {
             return !string.IsNullOrWhiteSpace(tagId) && tagIds.Contains(tagId);
+        }
+
+        public bool HasPerk(string perkId)
+        {
+            return !string.IsNullOrWhiteSpace(perkId) && perkIds.Contains(perkId);
         }
     }
 
@@ -110,7 +123,15 @@ namespace KingdomSurvival.BattleSandbox
         public int RemainingMovement { get; internal set; }
         public bool HasAttacked { get; internal set; }
         public bool IsGuarding { get; internal set; }
-        public bool HasRetaliatedThisRound { get; internal set; }
+        // 12Е-6: ответов за раунд (Контрудар даёт два), атак по бойцу за раунд
+        // (Основная защита), двигался ли в эту активацию (Холодный глаз) и
+        // сработало ли «Ещё на ногах».
+        public int RetaliationsThisRound { get; internal set; }
+        public int TimesAttackedThisRound { get; internal set; }
+        public bool MovedThisActivation { get; internal set; }
+        public bool StillStandingUsed { get; internal set; }
+        public int RetaliationsPerRound => HasPerk(SandboxPerks.Counterstrike) ? 2 : 1;
+        public bool HasRetaliatedThisRound => RetaliationsThisRound >= RetaliationsPerRound;
 
         // Реальный вклад в бой (канон v1.48 §27.3): урон, действительно
         // снятый с противников, и урон, не пропущенный защитной стойкой.
@@ -148,6 +169,11 @@ namespace KingdomSurvival.BattleSandbox
             return Definition.HasTag(tagId);
         }
 
+        public bool HasPerk(string perkId)
+        {
+            return Definition.HasPerk(perkId);
+        }
+
         public SandboxUnitState(
             SandboxUnitDefinition definition,
             SandboxTeam team,
@@ -178,10 +204,18 @@ namespace KingdomSurvival.BattleSandbox
             RemainingMovement = Movement;
             HasAttacked = false;
             IsGuarding = false;
+            MovedThisActivation = false;
         }
 
         internal void ReceiveDamage(int damage)
         {
+            // «Ещё на ногах»: 1/бой урон, который вывел бы из строя, оставляет 1 HP.
+            if (HasPerk(SandboxPerks.StillStanding) && !StillStandingUsed && HitPoints > 0 && HitPoints - Math.Max(0, damage) <= 0)
+            {
+                StillStandingUsed = true;
+                HitPoints = 1;
+                return;
+            }
             HitPoints = Math.Max(0, HitPoints - Math.Max(0, damage));
             if (IsDefeated)
             {
@@ -413,6 +447,7 @@ namespace KingdomSurvival.BattleSandbox
             HexCoord origin = unit.Position;
             int movementCost = reachable[destination];
             unit.Position = destination;
+            unit.MovedThisActivation = unit.MovedThisActivation || destination != origin;
             unit.RemainingMovement = Math.Max(0, unit.RemainingMovement - movementCost);
             message = unit.DisplayLabel + " перемещается " + origin + " → " + destination +
                       ". Осталось движения: " + unit.RemainingMovement + ".";
@@ -597,19 +632,48 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitState attacker = GetUnit(attackerId);
             SandboxUnitState target = GetUnit(targetId);
             ClearPendingRetaliation();
+
+            // «Упреждающий удар»: носитель в защитной стойке отвечает на ближнюю
+            // атаку до удара противника.
+            string firstStrike = string.Empty;
+            if (target.IsGuarding && target.HasPerk(SandboxPerks.FirstStrike) && target.CanRetaliate &&
+                attacker.AttackRange == 1 && attacker.Position.DistanceTo(target.Position) == 1)
+            {
+                int counter = BuildAttackPreview(target, attacker, target.Position, retaliation: true).Damage;
+                target.RetaliationsThisRound++;
+                RecordHit(target, attacker, counter, target.Position);
+                target.UsedMeleeAttack = true;
+                bool attackerStanding = attacker.StillStandingUsed;
+                attacker.ReceiveDamage(counter);
+                firstStrike = target.DisplayLabel + " бьёт первым («Упреждающий удар») и наносит " + counter + " урона" +
+                              (attacker.IsDefeated ? " — " + attacker.DisplayLabel + " выведен из строя." : StillStandingNote(attacker, attackerStanding) + ".") + " ";
+                if (attacker.IsDefeated)
+                {
+                    attacker.HasAttacked = true;
+                    attacker.ActionPoints = 0;
+                    attacker.RemainingMovement = 0;
+                    message = firstStrike.Trim();
+                    EvaluateBattleOutcome();
+                    return true;
+                }
+                preview = BuildAttackPreview(attacker, target, attacker.Position);
+            }
+
             RecordHit(attacker, target, preview.Damage, attacker.Position);
             if (attacker.Position.DistanceTo(target.Position) > 1)
                 attacker.UsedRangedAttack = true;
             else
                 attacker.UsedMeleeAttack = true;
+            bool targetStanding = target.StillStandingUsed;
             target.ReceiveDamage(preview.Damage);
+            target.TimesAttackedThisRound++;
             attacker.ActionPoints--;
             attacker.RemainingMovement = 0;
             attacker.HasAttacked = true;
 
-            message = attacker.DisplayLabel + " наносит " + target.DisplayLabel + " " +
+            message = firstStrike + attacker.DisplayLabel + " наносит " + target.DisplayLabel + " " +
                       preview.Damage + " урона" +
-                      (target.IsDefeated ? " и выводит цель из строя." : ".");
+                      (target.IsDefeated ? " и выводит цель из строя." : StillStandingNote(target, targetStanding) + ".");
 
             EvaluateBattleOutcome();
             if (Phase == SandboxBattlePhase.InProgress &&
@@ -647,7 +711,7 @@ namespace KingdomSurvival.BattleSandbox
                 return SandboxAttackPreview.Invalid("Ответный удар больше недоступен.");
             }
 
-            return BuildAttackPreview(defender, attacker, defender.Position);
+            return BuildAttackPreview(defender, attacker, defender.Position, retaliation: true);
         }
 
         public bool TryResolvePendingRetaliation(out string message)
@@ -662,15 +726,16 @@ namespace KingdomSurvival.BattleSandbox
 
             SandboxUnitState defender = GetUnit(pendingRetaliationDefenderId);
             SandboxUnitState attacker = GetUnit(pendingRetaliationAttackerId);
-            defender.HasRetaliatedThisRound = true;
+            defender.RetaliationsThisRound++;
             RecordHit(defender, attacker, preview.Damage, defender.Position);
             defender.UsedMeleeAttack = true;
+            bool attackerStanding = attacker.StillStandingUsed;
             attacker.ReceiveDamage(preview.Damage);
             ClearPendingRetaliation();
 
             message = defender.DisplayLabel + " отвечает " + attacker.DisplayLabel + " и наносит " +
                       preview.Damage + " урона" +
-                      (attacker.IsDefeated ? " и выводит атакующего из строя." : ".");
+                      (attacker.IsDefeated ? " и выводит атакующего из строя." : StillStandingNote(attacker, attackerStanding) + ".");
             EvaluateBattleOutcome();
             return true;
         }
@@ -845,7 +910,7 @@ namespace KingdomSurvival.BattleSandbox
             turnOrderIds.AddRange(
                 units
                     .Where(unit => !unit.IsDefeated)
-                    .OrderByDescending(unit => unit.Initiative)
+                    .OrderByDescending(unit => GetRoundInitiative(unit))
                     .ThenBy(unit => unit.Team)
                     .ThenBy(unit => unit.Id, StringComparer.Ordinal)
                     .Select(unit => unit.Id));
@@ -894,6 +959,15 @@ namespace KingdomSurvival.BattleSandbox
         // другие ещё стоят.
         public string LeaderUnitId { get; set; }
 
+        // 12Е-6, «Засада»: бой начат подготовленно — отряд игрока получает
+        // прибавку к инициативе в первом раунде.
+        public int PlayerFirstRoundInitiativeBonus { get; set; }
+
+        public int GetRoundInitiative(SandboxUnitState unit)
+        {
+            return unit.Initiative + (Round <= 1 && unit.Team == SandboxTeam.Player ? PlayerFirstRoundInitiativeBonus : 0);
+        }
+
         private void EvaluateBattleOutcome()
         {
             bool playersAlive = units.Any(unit => unit.Team == SandboxTeam.Player && !unit.IsDefeated);
@@ -916,7 +990,10 @@ namespace KingdomSurvival.BattleSandbox
         {
             ClearPendingRetaliation();
             foreach (SandboxUnitState unit in units)
-                unit.HasRetaliatedThisRound = false;
+            {
+                unit.RetaliationsThisRound = 0;
+                unit.TimesAttackedThisRound = 0;
+            }
         }
 
         private void ClearPendingRetaliation()
@@ -945,13 +1022,22 @@ namespace KingdomSurvival.BattleSandbox
         private static SandboxAttackPreview BuildAttackPreview(
             SandboxUnitState attacker,
             SandboxUnitState target,
-            HexCoord attackPosition)
+            HexCoord attackPosition,
+            bool retaliation = false)
         {
             decimal effectiveAttack = SandboxCombatTagRules.GetEffectiveAttack(
                 attacker,
                 target,
                 attackPosition);
             decimal effectiveDefense = SandboxCombatTagRules.GetEffectiveDefense(target);
+
+            // 12Е-6: «Основная защита» — первая атака по носителю за раунд −1 Атака.
+            if (!retaliation && target.HasPerk(SandboxPerks.BasicDefense) && target.TimesAttackedThisRound == 0)
+                effectiveAttack = Math.Max(0m, effectiveAttack - 1m);
+            // «Холодный глаз» — стрелок, не двигавшийся в этот ход, игнорирует 1 Защиту цели.
+            if (attacker.HasPerk(SandboxPerks.ColdEye) && !attacker.MovedThisActivation && attackPosition == attacker.Position &&
+                attackPosition.DistanceTo(target.Position) > 1)
+                effectiveDefense = Math.Max(0m, effectiveDefense - 1m);
             decimal statDifference = effectiveAttack - effectiveDefense;
             decimal damageMultiplier;
 
@@ -975,12 +1061,20 @@ namespace KingdomSurvival.BattleSandbox
             int damage = Math.Max(
                 1,
                 (int)Math.Floor(attacker.Damage * damageMultiplier));
+            // «Контрудар II» — первый ответный удар за раунд +1 Урон.
+            if (retaliation && attacker.HasPerk(SandboxPerks.CounterstrikeDamage) && attacker.RetaliationsThisRound == 0)
+                damage++;
 
             return new SandboxAttackPreview(
                 true,
                 string.Empty,
                 damage,
                 Math.Max(0, target.HitPoints - damage));
+        }
+
+        private static string StillStandingNote(SandboxUnitState unit, bool usedBefore)
+        {
+            return !usedBefore && unit.StillStandingUsed ? " — " + unit.DisplayLabel + " остаётся на ногах («Ещё на ногах»)" : string.Empty;
         }
 
         private bool CanPrepareAttack(

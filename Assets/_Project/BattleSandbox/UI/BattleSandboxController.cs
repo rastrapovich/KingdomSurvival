@@ -119,7 +119,9 @@ namespace KingdomSurvival.BattleSandbox
                     assembled ? participant.Movement : baseDefinition.Movement,
                     assembled ? participant.Initiative : baseDefinition.Initiative,
                     assembled ? participant.AttackRange : baseDefinition.AttackRange,
-                    baseDefinition.TagIds));
+                    baseDefinition.TagIds,
+                    // 12Е-6: боевые правила особенностей человека.
+                    participant.PerkIds));
                 campaignParticipants.Add(participant);
             }
 
@@ -134,7 +136,8 @@ namespace KingdomSurvival.BattleSandbox
             for (int i = 0; i < fighters.Count; i++)
                 campaignUnitIds.Add("player:" + fighters[i].Id + ":" + (i + 1));
 
-            battle = SandboxRoster.CreateBattle(fighters, BuildCampaignEnemies(), campaignBattle.Seed);
+            battle = SandboxRoster.CreateBattle(fighters, BuildCampaignEnemies(), campaignBattle.Seed,
+                campaignBattle.PlayerFirstRoundInitiativeBonus);
 
             // ПР-10: пал герой — бой проигран.
             for (int i = 0; i < campaignParticipants.Count; i++)
@@ -157,6 +160,9 @@ namespace KingdomSurvival.BattleSandbox
 
             battleLog.Clear();
             battleLog.Add("Бой начался. Отряд встречает засаду.");
+            // 12Е-6: что особенности отряда дали ещё до первого удара.
+            if (campaignBattle.Notes != null)
+                battleLog.AddRange(campaignBattle.Notes);
             selectedTargetId = null;
             BuildBattleScreen();
             RefreshBattleScreen();
@@ -259,6 +265,10 @@ namespace KingdomSurvival.BattleSandbox
                         PersonId = campaignParticipants[i].PersonId,
                         HitPoints = unit.HitPoints
                     });
+                    // 12Е-6, «Ещё на ногах»: устоял на 1 здоровья — после боя
+                    // обязательная тяжёлая рана.
+                    if (unit.StillStandingUsed)
+                        result.ForcedHeavyWoundIds.Add(campaignParticipants[i].PersonId);
                 }
 
                 // Канон v1.48 §27.3: реальный вклад участника в банк опыта.

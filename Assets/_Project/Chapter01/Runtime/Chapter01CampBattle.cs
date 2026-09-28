@@ -49,6 +49,10 @@ namespace KingdomSurvival.Chapter01
             request.AllowRetreat = true;
             request.Enemies.Add(new CampaignBattleEnemy { UnitTypeId = "forest_beast", Count = 2 });
             request.Enemies.Add(new CampaignBattleEnemy { UnitTypeId = "forest_beast_alpha", Count = 1 });
+            // 12Е-6: выставленный на ночь дозор замечает зверей заранее — бой
+            // начинается подготовленно (это важно для «Засады»).
+            request.PreparedStart = CampRest.IsChosen(gameState, CampActionKind.Watch);
+            FeatureCombatBatch.ApplyPreparedStart(gameState, request);
             return request;
         }
 

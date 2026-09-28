@@ -34,6 +34,9 @@ public sealed class CampaignBattleParticipant
     public int Movement;
     public int Initiative;
     public int AttackRange;
+
+    // 12Е-6: боевые правила особенностей человека (CombatPerkIds).
+    public List<string> PerkIds = new List<string>();
 }
 
 [Serializable]
@@ -93,6 +96,13 @@ public sealed class CampaignBattleRequest
     public List<CampaignBattleEnemy> Enemies = new List<CampaignBattleEnemy>();
     public int Seed;
     public bool AllowRetreat;
+
+    // 12Е-6: бой начат подготовленно (отряд заметил угрозу заранее) и
+    // прибавка к инициативе отряда в первом раунде («Засада»); строки для
+    // журнала боя.
+    public bool PreparedStart;
+    public int PlayerFirstRoundInitiativeBonus;
+    public List<string> Notes = new List<string>();
 }
 
 public enum CampaignBattleOutcome
@@ -118,6 +128,10 @@ public sealed class CampaignBattleResult
     // Канон v1.48 §27.2–27.3: участники с их вкладом и противники боя.
     public List<CampaignBattleContribution> Contributions = new List<CampaignBattleContribution>();
     public List<CampaignBattleEnemyRecord> Enemies = new List<CampaignBattleEnemyRecord>();
+
+    // 12Е-6: кто после боя обязательно тяжело ранен («Ещё на ногах»,
+    // вынесенный с поля «Не бросает своих»).
+    public List<string> ForcedHeavyWoundIds = new List<string>();
 }
 
 public enum CampaignBattleApplyStatus
@@ -204,6 +218,9 @@ public static class CampaignBattleBridge
     // ПР-06А: текущие HP берутся из записи человека, а не из шаблона.
     private static void FillHitPoints(GameState state, CampaignBattleParticipant participant)
     {
+        // 12Е-6: боевые правила особенностей человека.
+        participant.PerkIds = FeatureCombatBatch.PerksFor(state, participant.PersonId);
+
         ResidentState resident = HomePeopleService.Find(state, participant.PersonId);
         if (resident == null)
             return;
@@ -263,6 +280,13 @@ public static class CampaignBattleBridge
             return CampaignBattleApplyStatus.AlreadyApplied;
 
         state.Narrative.MarkEffectApplied(AppliedEffectPrefix + result.BattleId);
+
+        if (result.ForcedHeavyWoundIds == null)
+            result.ForcedHeavyWoundIds = new List<string>();
+        // 12Е-6: «Ещё на ногах» и «Не бросает своих» — до того, как павшие
+        // уйдут из отряда.
+        FeatureCombatBatch.RecordStillStanding(state, result, notes);
+        FeatureCombatBatch.CarryFallenOnRetreat(state, result, notes);
 
         CommanderData hero = state.GetSelectedCommander();
         bool heroFell = false;
@@ -361,7 +385,8 @@ public static class CampaignBattleBridge
             if (resident == null || !resident.IsAlive || !resident.HasCombatState)
                 continue;
 
-            if (resident.CurrentHitPoints * HeavyWoundHitPointsDivisor <= resident.MaxHitPoints &&
+            bool forced = result.ForcedHeavyWoundIds != null && result.ForcedHeavyWoundIds.Contains(survivor.PersonId);
+            if ((forced || resident.CurrentHitPoints * FeatureCombatBatch.HeavyWoundDivisor(state, survivor.PersonId) <= resident.MaxHitPoints) &&
                 resident.Injury != ResidentInjury.Recovering)
             {
                 resident.Injury = ResidentInjury.Recovering;

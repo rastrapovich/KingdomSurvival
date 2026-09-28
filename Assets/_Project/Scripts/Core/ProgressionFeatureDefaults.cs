@@ -57,7 +57,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-04 Основная защита
-        e = New("Б-04", "osnovnaya_zashchita", "Основная защита", FeatureLayer.Feature, "Строй и защита", FeatureOwner.Fighter, FeatureKind.Permanent, true, FeatureStatus.Candidate);
+        e = New("Б-04", "osnovnaya_zashchita", "Основная защита", FeatureLayer.Feature, "Строй и защита", FeatureOwner.Fighter, FeatureKind.Permanent, true, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice | FeatureSource.Trace;
         e.Description = "I: первая атака по носителю за раунд −1 Атака. II (Крепкая защита): если носитель не двигался в свой ход — ещё +1 Защита до следующего хода";
@@ -95,7 +95,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-07 Упрямец
-        e = New("Б-07", "upryamets", "Упрямец", FeatureLayer.Feature, "Строй и защита", FeatureOwner.Both, FeatureKind.Permanent, true, FeatureStatus.Candidate);
+        e = New("Б-07", "upryamets", "Упрямец", FeatureLayer.Feature, "Строй и защита", FeatureOwner.Both, FeatureKind.Permanent, true, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice | FeatureSource.Trace;
         e.Description = "Тяжёлая рана по итогам боя наступает при HP ≤ 1/8 максимума вместо 1/4; будущие штрафы ранения в бою подавлены до конца боя";
@@ -107,7 +107,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-08 Ещё на ногах
-        e = New("Б-08", "eshchyo_na_nogakh", "Ещё на ногах", FeatureLayer.Feature, "Строй и защита", FeatureOwner.Both, FeatureKind.Limited, true, FeatureStatus.Candidate);
+        e = New("Б-08", "eshchyo_na_nogakh", "Ещё на ногах", FeatureLayer.Feature, "Строй и защита", FeatureOwner.Both, FeatureKind.Limited, true, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice | FeatureSource.Trace;
         e.Limit = FeatureLimit.Battle;
@@ -116,6 +116,7 @@ public static class ProgressionFeatureDefaults
         e.Support = "есть";
         e.Display = "Бой: строка «из чего сложилось» и запись в журнале боя; карточка человека";
         e.MergedFrom = "Ещё на ногах (Arkham), Последний на ногах (Heroes V), Божественная броня (King's Bounty)";
+        e.Note = "Решение автора 28.09.2026: спасает от одного удара за бой; следующий удар бьёт как обычно.";
         Rank(e, "", "1/бой урон, который вывел бы носителя из строя, оставляет 1 HP; после боя — обязательная тяжёлая рана");
         list.Add(e);
 
@@ -157,7 +158,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-12 Контрудар
-        e = New("Б-12", "kontrudar", "Контрудар", FeatureLayer.Feature, "Ответ и реакция", FeatureOwner.Fighter, FeatureKind.Reaction, true, FeatureStatus.Candidate);
+        e = New("Б-12", "kontrudar", "Контрудар", FeatureLayer.Feature, "Ответ и реакция", FeatureOwner.Fighter, FeatureKind.Reaction, true, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice | FeatureSource.Trace;
         e.Description = "I: ответный удар доступен дважды за раунд. II: первый ответный удар за раунд +1 Урон";
@@ -165,12 +166,13 @@ public static class ProgressionFeatureDefaults
         e.Support = "есть (ответ раз в раунд)";
         e.Display = "Бой: строка «из чего сложилось» и запись в журнале боя; карточка человека";
         e.MergedFrom = "Контрудар (King's Bounty, Корсары), Встречный боец (Eador), Ответный удар (Heroes VI, канон §27.1.1), Неожиданный отпор";
+        e.Note = "Решение автора 28.09.2026 [РАБОЧЕЕ]: второй ответный удар за раунд; пересмотреть вместе с экономикой реакций (вопрос 17).";
         Rank(e, "", "Ответный удар доступен дважды за раунд.");
         Rank(e, "", "Первый ответный удар за раунд +1 Урон");
         list.Add(e);
 
         // Б-13 Упреждающий удар
-        e = New("Б-13", "uprezhdayushchiy_udar", "Упреждающий удар", FeatureLayer.Feature, "Ответ и реакция", FeatureOwner.Fighter, FeatureKind.Reaction, true, FeatureStatus.Candidate);
+        e = New("Б-13", "uprezhdayushchiy_udar", "Упреждающий удар", FeatureLayer.Feature, "Ответ и реакция", FeatureOwner.Fighter, FeatureKind.Reaction, true, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice | FeatureSource.Trace;
         e.Description = "Если носитель в защитной стойке, его ответ на ближнюю атаку наносится до удара противника";
@@ -240,7 +242,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-18 Холодный глаз
-        e = New("Б-18", "kholodnyy_glaz", "Холодный глаз", FeatureLayer.Feature, "Нападение и стиль", FeatureOwner.Fighter, FeatureKind.Permanent, true, FeatureStatus.Candidate);
+        e = New("Б-18", "kholodnyy_glaz", "Холодный глаз", FeatureLayer.Feature, "Нападение и стиль", FeatureOwner.Fighter, FeatureKind.Permanent, true, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System | FeatureImplementation.Future;
         e.Sources = FeatureSource.LevelChoice | FeatureSource.Trace;
         e.Description = "I: стрелок, не двигавшийся в этот ход, игнорирует 1 Защиту цели (из трёх исходных версий нужно выбрать одну). II (Ищет щель): после действия «Прицелиться» (П-16) выстрел частично обходит защиту цели";
@@ -249,6 +251,7 @@ public static class ProgressionFeatureDefaults
         e.Dependency = "действие «Прицелиться»";
         e.Display = "Бой: строка «из чего сложилось» и запись в журнале боя; карточка человека";
         e.MergedFrom = "Холодный глаз (Eador), Steady Aim (KCD2), Точная дистанция, Выверенный выстрел, Ищет щель";
+        e.Note = "Решение автора 28.09.2026: ранг I — стрелок, не двигавшийся в этот ход, стреляет с −1 к Защите цели.";
         Rank(e, "", "Стрелок, не двигавшийся в этот ход, игнорирует 1 Защиту цели (из трёх исходных версий нужно выбрать одну).");
         Rank(e, "Ищет щель", "После действия «Прицелиться» (П-16) выстрел частично обходит защиту цели");
         Require(e, FeatureRequirementKind.Competency, "shooting", 2);
@@ -544,7 +547,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-41 Засада
-        e = New("Б-41", "zasada", "Засада", FeatureLayer.Feature, "Командир: до и во время боя", FeatureOwner.Commander, FeatureKind.Permanent, true, FeatureStatus.Candidate);
+        e = New("Б-41", "zasada", "Засада", FeatureLayer.Feature, "Командир: до и во время боя", FeatureOwner.Commander, FeatureKind.Permanent, true, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice;
         e.Description = "Если встреча началась подготовленно (обнаружена заранее) — весь отряд +1 Инициатива в первом раунде. Со Скрытным движением 3: враг в первом раунде не получает бонусов позиции";
@@ -552,6 +555,7 @@ public static class ProgressionFeatureDefaults
         e.Support = "есть (подготовленное начало уже есть у «Знающего дорогу»)";
         e.Display = "Бой: строка «из чего сложилось» и запись в журнале боя; карточка человека";
         e.MergedFrom = "Засада (Heroes VI), Первый натиск (King's Bounty), Onslaught";
+        e.Note = "Решение автора 28.09.2026 [РАБОЧЕЕ]: подготовленное начало — бой у стоянки при выставленном дозоре; пересмотреть с подготовленными встречами свободной игры (12В).";
         Rank(e, "", "Если встреча началась подготовленно (обнаружена заранее) — весь отряд +1 Инициатива в первом раунде. Со Скрытным движением 3: враг в первом раунде не получает бонусов позиции");
         list.Add(e);
 
@@ -639,7 +643,7 @@ public static class ProgressionFeatureDefaults
         list.Add(e);
 
         // Б-48 Не бросает своих
-        e = New("Б-48", "ne_brosaet_svoikh", "Не бросает своих", FeatureLayer.Feature, "Командир: до и во время боя", FeatureOwner.Commander, FeatureKind.Limited, true, FeatureStatus.Candidate);
+        e = New("Б-48", "ne_brosaet_svoikh", "Не бросает своих", FeatureLayer.Feature, "Командир: до и во время боя", FeatureOwner.Commander, FeatureKind.Limited, true, FeatureStatus.Active);
         e.Implementation = FeatureImplementation.System;
         e.Sources = FeatureSource.LevelChoice | FeatureSource.Trace;
         e.Limit = FeatureLimit.Expedition;
@@ -648,6 +652,7 @@ public static class ProgressionFeatureDefaults
         e.Support = "есть (отход и павшие уже в итоге боя)";
         e.Display = "Бой: строка «из чего сложилось» и запись в журнале боя; карточка человека";
         e.MergedFrom = "Не бросает своих (Eador, Корсары, Arkham), Вернулся за своими (KCD), Прикрыть отход (канон)";
+        e.Note = "Решение автора 28.09.2026 (вопрос 14): смягчать смерть бойца можно — 1/поход, только при отходе, с тяжёлой раной. Сложение с Н-71 и порядок спасений — когда появится Н-71.";
         Rank(e, "", "1/поход при отходе из боя один выведенный из строя боец не погибает, а выносится с тяжёлой раной");
         list.Add(e);
 

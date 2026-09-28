@@ -219,8 +219,9 @@ namespace KingdomSurvival.ProgressionDatabase
         public const string AssetPath = "Assets/_Project/ProgressionDatabase/Resources/ProgressionDatabase/KingdomSurvivalProgression.asset";
         // 2 — карточки особенностей, приёмов и приказов (каталог 27.09.2026);
         // 3 — статус «Заглушка» у заглушек движка (12Е-4);
-        // 4 — первая партия особенностей вне боя активна (12Е-5).
-        public const int CurrentSchemaVersion = 4;
+        // 4 — первая партия особенностей вне боя активна (12Е-5);
+        // 5 — первая партия боевых особенностей активна (12Е-6).
+        public const int CurrentSchemaVersion = 5;
 
         public int schemaVersion = CurrentSchemaVersion;
         public ProgressionGlobalRecord rules = new ProgressionGlobalRecord();
@@ -253,7 +254,8 @@ namespace KingdomSurvival.ProgressionDatabase
                 if (trait != null && trait.status == FeatureStatus.Candidate && ProgressionFeatureImplementations.IsStub(trait.id))
                     trait.status = FeatureStatus.Stub;
             }
-            if (schemaVersion < 4)
+            // Схемы 4 и 5: у новых реализованных особенностей — «Активна».
+            if (schemaVersion < 5)
                 UpgradeToFirstBatch();
             schemaVersion = CurrentSchemaVersion;
             return true;

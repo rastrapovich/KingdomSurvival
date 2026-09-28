@@ -37,7 +37,8 @@ namespace KingdomSurvival.FreePlay
 
         public static LocationEntryView LocationEntry(GameState state, string locationId)
         {
-            return FreePlayCoalStory.LocationEntry(state, locationId) ?? FreePlayMineStory.LocationEntry(state, locationId);
+            return FreePlayCoalStory.LocationEntry(state, locationId) ?? FreePlayMineStory.LocationEntry(state, locationId) ??
+                   FreePlayKurganStory.LocationEntry(state, locationId);
         }
 
         public static void DialogueCompleted(GameState state, string dialogueId)
@@ -64,6 +65,7 @@ namespace KingdomSurvival.FreePlay
                 FreePlayMillerStory.AddHomeCares(state, cares);
                 FreePlayCoalStory.AddHomeCares(state, cares);
                 FreePlayMineStory.AddHomeCares(state, cares);
+                FreePlayKurganStory.AddHomeCares(state, cares);
             }
             return cares;
         }
@@ -77,6 +79,7 @@ namespace KingdomSurvival.FreePlay
             List<string> reports = FreePlayCoalStory.Refresh(state);
             reports.AddRange(FreePlayMillerStory.Refresh(state));
             reports.AddRange(FreePlayMineStory.Refresh(state));
+            reports.AddRange(FreePlayKurganStory.Refresh(state));
             reports.AddRange(FreePlaySummary.Refresh(state));
             return reports;
         }
@@ -167,6 +170,9 @@ namespace KingdomSurvival.FreePlay
             JournalGoalViewData mine = FreePlayMineStory.BuildGoal(state);
             if (mine != null)
                 goals.Add(mine);
+            JournalGoalViewData kurgan = FreePlayKurganStory.BuildGoal(state);
+            if (kurgan != null)
+                goals.Add(kurgan);
             foreach (LocationData location in state.Locations)
             {
                 if (location == null || location.IsWaypoint || !location.IsVisibleOnMap || !location.IsDiscovered)
@@ -174,6 +180,7 @@ namespace KingdomSurvival.FreePlay
                 // Хутор ведёт своя история («Уголь для Лады»); место без
                 // осмотра (Чёрный лес) — только через историю.
                 if (location.Id == FreePlayCoalStory.LocationId || location.Id == FreePlayMineStory.LocationId ||
+                    location.Id == FreePlayKurganStory.LocationId ||
                     location.ExplorationHours <= 0.0)
                     continue;
                 goals.Add(BuildPlaceGoal(location));

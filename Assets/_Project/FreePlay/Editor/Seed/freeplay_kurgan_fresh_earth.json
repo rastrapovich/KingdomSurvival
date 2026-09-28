@@ -1,0 +1,46 @@
+{
+  "id": "freeplay_kurgan_fresh_earth",
+  "title": "И-4 — Свежая земля",
+  "category": 3,
+  "status": 1,
+  "developerComment": "ПР-12В, встреча FREEPLAY_KURGAN_FRESH_EARTH_01 [РАБОЧЕЕ][KINGDOM SURVIVAL]. Только в свободной игре, пока курган не известен. «Запомнить место» ставит freeplay.kurgan.known — курган на карте (иначе он находится после осмотра руин).",
+  "startNodeId": "freeplay.kurgan.earth.start",
+  "tags": ["свободная_игра", "И-4", "дорога"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.kurgan.earth.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.earth.start.text",
+          "kind": 5,
+          "text": "У старой дороги, за руинами, на склоне кургана рыжеет свежая земля. Кто-то копал — и недавно: ворона ещё ходит по отвалу, выбирает."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.earth.mark", "text": "Запомнить место.", "kind": 0, "nextNodeId": "freeplay.kurgan.earth.marked" },
+        { "choiceId": "freeplay.kurgan.earth.pass", "text": "Не наше дело.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.earth.marked",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.earth.marked.text",
+          "kind": 5,
+          "text": "Место приметное: курган один такой у дороги, и камень у подножия. Вернуться нетрудно.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.earth.known", "Type": 0, "StringParam": "freeplay.kurgan.known" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.earth.go", "text": "Дальше.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

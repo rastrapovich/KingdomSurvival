@@ -176,6 +176,22 @@ MonoBehaviour:
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
+  - id: refugee
+    displayName: "\u0411\u0435\u0436\u0435\u043D\u0435\u0446"
+    role: "\u0423 \u043A\u043E\u0441\u0442\u0440\u0430 \u0437\u0430 \u043E\u043B\u044C\u0448\u0430\u043D\u0438\u043A\u043E\u043C"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
+  - id: refugee_woman
+    displayName: "\u0411\u0435\u0436\u0435\u043D\u043A\u0430"
+    role: "\u0423 \u043A\u043E\u0441\u0442\u0440\u0430 \u0437\u0430 \u043E\u043B\u044C\u0448\u0430\u043D\u0438\u043A\u043E\u043C"
+    portrait: {fileID: 0}
+    overridePortraitFraming: 0
+    portraitScale: 1
+    portraitOffsetNormalized: {x: 0, y: 0}
+    portraitFlipX: 0
   dialogues:
   - id: chapter01_dialogue_01_ordinary_morning
     title: "N01 \u2014 \u041E\u0431\u044B\u0447\u043D\u043E\u0435 \u0443\u0442\u0440\u043E
@@ -23032,6 +23048,1271 @@ MonoBehaviour:
         nextNodeId: 
         endsDialogue: 1
         choiceId: freeplay.coal.signs.lost_back
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: freeplay_kurgan_fresh_earth
+    title: "\u0418-4 \u2014 \u0421\u0432\u0435\u0436\u0430\u044F \u0437\u0435\u043C\u043B\u044F"
+    category: 3
+    status: 1
+    developerComment: "\u041F\u0420-12\u0412, \u0432\u0441\u0442\u0440\u0435\u0447\u0430
+      FREEPLAY_KURGAN_FRESH_EARTH_01 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415][KINGDOM
+      SURVIVAL]. \u0422\u043E\u043B\u044C\u043A\u043E \u0432 \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0439
+      \u0438\u0433\u0440\u0435, \u043F\u043E\u043A\u0430 \u043A\u0443\u0440\u0433\u0430\u043D
+      \u043D\u0435 \u0438\u0437\u0432\u0435\u0441\u0442\u0435\u043D. \xAB\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C
+      \u043C\u0435\u0441\u0442\u043E\xBB \u0441\u0442\u0430\u0432\u0438\u0442 freeplay.kurgan.known
+      \u2014 \u043A\u0443\u0440\u0433\u0430\u043D \u043D\u0430 \u043A\u0430\u0440\u0442\u0435
+      (\u0438\u043D\u0430\u0447\u0435 \u043E\u043D \u043D\u0430\u0445\u043E\u0434\u0438\u0442\u0441\u044F
+      \u043F\u043E\u0441\u043B\u0435 \u043E\u0441\u043C\u043E\u0442\u0440\u0430 \u0440\u0443\u0438\u043D)."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: freeplay.kurgan.earth.start
+    tags:
+    - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
+    - "\u0418-4"
+    - "\u0434\u043E\u0440\u043E\u0433\u0430"
+    nodes:
+    - id: freeplay.kurgan.earth.start
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.earth.start.text
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0423 \u0441\u0442\u0430\u0440\u043E\u0439 \u0434\u043E\u0440\u043E\u0433\u0438,
+          \u0437\u0430 \u0440\u0443\u0438\u043D\u0430\u043C\u0438, \u043D\u0430 \u0441\u043A\u043B\u043E\u043D\u0435
+          \u043A\u0443\u0440\u0433\u0430\u043D\u0430 \u0440\u044B\u0436\u0435\u0435\u0442
+          \u0441\u0432\u0435\u0436\u0430\u044F \u0437\u0435\u043C\u043B\u044F. \u041A\u0442\u043E-\u0442\u043E
+          \u043A\u043E\u043F\u0430\u043B \u2014 \u0438 \u043D\u0435\u0434\u0430\u0432\u043D\u043E:
+          \u0432\u043E\u0440\u043E\u043D\u0430 \u0435\u0449\u0451 \u0445\u043E\u0434\u0438\u0442
+          \u043F\u043E \u043E\u0442\u0432\u0430\u043B\u0443, \u0432\u044B\u0431\u0438\u0440\u0430\u0435\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0417\u0430\u043F\u043E\u043C\u043D\u0438\u0442\u044C \u043C\u0435\u0441\u0442\u043E."
+        nextNodeId: freeplay.kurgan.earth.marked
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.earth.mark
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u041D\u0435 \u043D\u0430\u0448\u0435 \u0434\u0435\u043B\u043E."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.earth.pass
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.earth.marked
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.earth.marked.text
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041C\u0435\u0441\u0442\u043E \u043F\u0440\u0438\u043C\u0435\u0442\u043D\u043E\u0435:
+          \u043A\u0443\u0440\u0433\u0430\u043D \u043E\u0434\u0438\u043D \u0442\u0430\u043A\u043E\u0439
+          \u0443 \u0434\u043E\u0440\u043E\u0433\u0438, \u0438 \u043A\u0430\u043C\u0435\u043D\u044C
+          \u0443 \u043F\u043E\u0434\u043D\u043E\u0436\u0438\u044F. \u0412\u0435\u0440\u043D\u0443\u0442\u044C\u0441\u044F
+          \u043D\u0435\u0442\u0440\u0443\u0434\u043D\u043E."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.kurgan.earth.known
+          Type: 0
+          StringParam: freeplay.kurgan.known
+          IntParam: 0
+      choices:
+      - text: "\u0414\u0430\u043B\u044C\u0448\u0435."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.earth.go
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: freeplay_kurgan_mound
+    title: "\u0418-4 \u2014 \u0420\u0430\u0437\u0440\u044B\u0442\u044B\u0439 \u043A\u0443\u0440\u0433\u0430\u043D"
+    category: 2
+    status: 1
+    developerComment: "\u041F\u0420-12\u0411, \u0438\u0441\u0442\u043E\u0440\u0438\u044F
+      \u0418-4 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415][KINGDOM SURVIVAL + LORE
+      \xA712, \xA715, \xA728]. \u0412\u0445\u043E\u0434 \u043A \u043A\u0443\u0440\u0433\u0430\u043D\u0443.
+      \u0421\u043B\u0435\u0434\u044B: \u0410\u0433\u043D\u0435\u0441\u0441\u0430
+      \u0447\u0438\u0442\u0430\u0435\u0442 \u0441\u0430\u043C\u0430, \u0438\u043D\u0430\u0447\u0435
+      \u0440\u0435\u0448\u0430\u044E\u0449\u0435\u0435 \u0421\u043B\u0435\u0434\u043E\u043F\u044B\u0442\u0441\u0442\u0432\u043E
+      (\u0427\u0443\u0442\u044C\u0451, 13); \u043F\u0440\u043E\u0432\u0430\u043B
+      \u2014 freeplay.kurgan.track_lost. \u0421\u0435\u043C\u044C\u044F \u0443 \u043A\u043E\u0441\u0442\u0440\u0430:
+      \u0432 \u0414\u043E\u043C \u0441 \u0432\u043E\u0437\u0432\u0440\u0430\u0442\u043E\u043C
+      (family_joined + filled), \u0432 \u0414\u043E\u043C \u0431\u0435\u0437 \u0432\u043E\u0437\u0432\u0440\u0430\u0442\u0430
+      (family_joined), \u0432\u0435\u0440\u043D\u0443\u0442\u044C \u0438 \u043E\u0442\u043F\u0443\u0441\u0442\u0438\u0442\u044C
+      (filled + family_left), \u043E\u0442\u043E\u0431\u0440\u0430\u0442\u044C \u0443\u0437\u0435\u043B
+      (took_find + family_left), \u043E\u0442\u043F\u0443\u0441\u0442\u0438\u0442\u044C
+      (family_left). \u0417\u0430\u0441\u044B\u043F\u0430\u0442\u044C \u0441\u0430\u043C\u0438\u043C
+      \u2014 filled. \u041F\u043E\u0432\u0435\u0440\u044C\u0435 \u2014 \u0412\u0415\u0420\u041E\u0412\u0410\u041D\u0418\u0415;
+      \u043A\u0442\u043E \u043B\u0435\u0436\u0438\u0442 \u0432 \u043A\u0443\u0440\u0433\u0430\u043D\u0435
+      \u2014 \u041E\u0422\u041A\u0420\u042B\u0422\u041E."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: freeplay.kurgan.mound.start
+    tags:
+    - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
+    - "\u0418-4"
+    nodes:
+    - id: freeplay.kurgan.mound.start
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.mound.start.scene
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041A\u0443\u0440\u0433\u0430\u043D \u0440\u0430\u0437\u0440\u044B\u0442
+          \u0441 \u044E\u0436\u043D\u043E\u0433\u043E \u0431\u043E\u043A\u0430 \u2014
+          \u043D\u0435\u0433\u043B\u0443\u0431\u043E\u043A\u043E, \u0442\u043E\u0440\u043E\u043F\u043B\u0438\u0432\u043E,
+          \u0440\u0443\u043A\u0430\u043C\u0438 \u0438 \u043F\u0430\u043B\u043A\u043E\u0439.
+          \u0417\u0435\u043C\u043B\u044F \u0435\u0449\u0451 \u0441\u044B\u0440\u0430\u044F.
+          \u041D\u0430 \u043E\u0442\u0432\u0430\u043B\u0435 \u2014 \u0447\u0435\u0440\u0435\u043F\u043E\u043A
+          \u0438 \u0434\u0435\u0442\u0441\u043A\u0438\u0439 \u0441\u043B\u0435\u0434."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.kurgan.mound.start.agnessa
+        kind: 4
+        speakerIdOverride: agnessa
+        text: "\u2014 \u0414\u0432\u043E\u0435 \u0432\u0437\u0440\u043E\u0441\u043B\u044B\u0445
+          \u0438 \u0440\u0435\u0431\u0451\u043D\u043E\u043A. \u0423\u0448\u043B\u0438
+          \u043A \u043E\u043B\u044C\u0448\u0430\u043D\u0438\u043A\u0443 \u043D\u0435\u0434\u0430\u0432\u043D\u043E.
+          \u041D\u0435\u0441\u043B\u0438 \u0447\u0442\u043E-\u0442\u043E \u0442\u044F\u0436\u0451\u043B\u043E\u0435
+          \u2014 \u0448\u0430\u0433 \u043A\u043E\u0440\u043E\u0442\u043A\u0438\u0439."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 4
+            StringParam: agnessa
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.kurgan.mound.start.ostafiy
+        kind: 4
+        speakerIdOverride: ostafiy
+        text: "\u2014 \u0418\u0437 \u043A\u0443\u0440\u0433\u0430\u043D\u0430 \u043D\u0435
+          \u0431\u0435\u0440\u0443\u0442. \u0413\u043E\u0432\u043E\u0440\u044F\u0442,
+          \u0445\u043E\u0437\u044F\u0438\u043D \u043F\u0440\u0438\u0434\u0451\u0442
+          \u0437\u0430 \u0441\u0432\u043E\u0438\u043C. \u041F\u0440\u0430\u0432\u0434\u0430
+          \u043B\u0438 \u2014 \u043D\u0435 \u0437\u043D\u0430\u044E. \u041D\u043E
+          \u0442\u0430\u043A \u0433\u043E\u0432\u043E\u0440\u044F\u0442 \u043D\u0435
+          \u0437\u0440\u044F."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 4
+            StringParam: ostafiy
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0418\u0434\u0442\u0438 \u043F\u043E \u0441\u043B\u0435\u0434\u0430\u043C
+          \u0437\u0430 \u0410\u0433\u043D\u0435\u0441\u0441\u043E\u0439."
+        nextNodeId: freeplay.kurgan.mound.family
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.mound.follow_agnessa
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 4
+            StringParam: agnessa
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u0418\u0441\u043A\u0430\u0442\u044C \u0438\u0445 \u0441\u043B\u0435\u0434."
+        nextNodeId: 
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.mound.track
+        kind: 2
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 4
+            StringParam: agnessa
+            QualityParam: 0
+            IntParam: 0
+            Negate: 1
+        unavailablePresentation: 0
+        check:
+          CheckId: freeplay.kurgan.track_check
+          Kind: 2
+          Quality: 3
+          CompetencyId: fieldcraft
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: freeplay.kurgan.mound.family
+        failureNodeId: freeplay.kurgan.mound.lost
+        successEffects: []
+        failureEffects:
+        - EffectExecutionId: freeplay.kurgan.mound.track_lost
+          Type: 0
+          StringParam: freeplay.kurgan.track_lost
+          IntParam: 0
+      - text: "\u0417\u0430\u0441\u044B\u043F\u0430\u0442\u044C \u043A\u0443\u0440\u0433\u0430\u043D
+          \u0441\u0430\u043C\u0438\u043C."
+        nextNodeId: freeplay.kurgan.mound.filled
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.mound.fill
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u0423\u0445\u043E\u0434\u0438\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.mound.leave
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.mound.lost
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.mound.lost.text
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u043B\u0435\u0434 \u0442\u0435\u0440\u044F\u0435\u0442\u0441\u044F
+          \u043D\u0430 \u0432\u044B\u0433\u043E\u043D\u0435, \u0441\u0440\u0435\u0434\u0438
+          \u043A\u043E\u0440\u043E\u0432\u044C\u0438\u0445 \u043A\u043E\u043F\u044B\u0442.
+          \u041A\u0442\u043E \u043A\u043E\u043F\u0430\u043B, \u0442\u043E\u0433\u043E
+          \u0443\u0436\u0435 \u043D\u0435 \u0434\u043E\u0433\u043D\u0430\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0417\u0430\u0441\u044B\u043F\u0430\u0442\u044C \u043A\u0443\u0440\u0433\u0430\u043D
+          \u0441\u0430\u043C\u0438\u043C."
+        nextNodeId: freeplay.kurgan.mound.filled
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.mound.lost_fill
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u0423\u0445\u043E\u0434\u0438\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.mound.lost_leave
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.mound.filled
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.mound.filled.text
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041A \u0432\u0435\u0447\u0435\u0440\u0443 \u043A\u0443\u0440\u0433\u0430\u043D
+          \u0441\u043D\u043E\u0432\u0430 \u043A\u0443\u0440\u0433\u0430\u043D. \u0427\u0435\u0440\u0435\u043F\u043E\u043A
+          \u043A\u043B\u0430\u0434\u0443\u0442 \u043E\u0431\u0440\u0430\u0442\u043D\u043E
+          \u2014 \u0432 \u0437\u0435\u043C\u043B\u044E, \u043E\u0442\u043A\u0443\u0434\u0430
+          \u0432\u0437\u044F\u043B\u0438. \u041D\u0438\u043A\u0442\u043E \u043D\u0435
+          \u0433\u043E\u0432\u043E\u0440\u0438\u0442 \u0437\u0430\u0447\u0435\u043C,
+          \u043D\u043E \u0432\u0441\u0435 \u0441\u0442\u0430\u0440\u0430\u044E\u0442\u0441\u044F
+          \u043D\u0435 \u0448\u0443\u043C\u0435\u0442\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.kurgan.mound.filled_by_party
+          Type: 0
+          StringParam: freeplay.kurgan.filled
+          IntParam: 0
+      choices:
+      - text: "\u0423\u0445\u043E\u0434\u0438\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.mound.filled_go
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.mound.family
+      speakerId: refugee
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.mound.family.scene
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u0417\u0430 \u043E\u043B\u044C\u0448\u0430\u043D\u0438\u043A\u043E\u043C
+          \u2014 \u043A\u043E\u0441\u0442\u0435\u0440\u043E\u043A \u0431\u0435\u0437
+          \u0434\u044B\u043C\u0430 \u0438 \u0442\u0440\u043E\u0435 \u0443 \u043E\u0433\u043D\u044F.
+          \u041C\u0443\u0436\u0447\u0438\u043D\u0430 \u0432\u0441\u0442\u0430\u0451\u0442
+          \u043F\u0435\u0440\u0432\u044B\u043C, \u0436\u0435\u043D\u0449\u0438\u043D\u0430
+          \u043F\u0440\u0438\u0436\u0438\u043C\u0430\u0435\u0442 \u043A \u0441\u0435\u0431\u0435
+          \u043C\u0430\u043B\u044C\u0447\u0438\u0448\u043A\u0443. \u0420\u044F\u0434\u043E\u043C
+          \u0443\u0437\u0435\u043B: \u043C\u0435\u0434\u043D\u0430\u044F \u043F\u0440\u044F\u0436\u043A\u0430,
+          \u0433\u043E\u0440\u0448\u043E\u043A, \u0442\u0443\u0441\u043A\u043B\u044B\u0435
+          \u0431\u0443\u0441\u0438\u043D\u044B."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.kurgan.mound.family.man
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u041C\u044B \u043D\u0435 \u0432\u043E\u0440\u044B. \u0422\u0440\u0435\u0442\u0438\u0439
+          \u0434\u0435\u043D\u044C \u0431\u0435\u0437 \u0445\u043B\u0435\u0431\u0430.
+          \u0414\u0443\u043C\u0430\u043B\u0438 \u0432\u044B\u043C\u0435\u043D\u044F\u0442\u044C
+          \u0443 \u043B\u044E\u0434\u0435\u0439 \u2014 \u043C\u0435\u0434\u044C \u0432\u0441\u0451-\u0442\u0430\u043A\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.kurgan.mound.family.woman
+        kind: 4
+        speakerIdOverride: refugee_woman
+        text: "\u2014 \u042F \u0433\u043E\u0432\u043E\u0440\u0438\u043B\u0430 \u0435\u043C\u0443:
+          \u0438\u0437 \u043A\u0443\u0440\u0433\u0430\u043D\u0430 \u043D\u0435 \u0431\u0435\u0440\u0443\u0442.
+          \u0410 \u043E\u043D \u0433\u043E\u0432\u043E\u0440\u0438\u043B: \u043C\u0451\u0440\u0442\u0432\u044B\u0435
+          \u043D\u0435 \u0435\u0434\u044F\u0442."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041F\u043E\u0439\u0434\u0451\u043C\u0442\u0435 \u0432 \u0414\u043E\u043C.
+          \u0410 \u0432\u0437\u044F\u0442\u043E\u0435 \u0432\u0435\u0440\u043D\u0451\u043C
+          \u0442\u0443\u0434\u0430, \u0433\u0434\u0435 \u0432\u0437\u044F\u043B\u0438."
+        nextNodeId: freeplay.kurgan.mound.joined_returned
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.mound.home_return
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u041F\u043E\u0439\u0434\u0451\u043C\u0442\u0435 \u0432 \u0414\u043E\u043C."
+        nextNodeId: freeplay.kurgan.mound.joined
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.mound.home_keep
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u0412\u0435\u0440\u043D\u0438\u0442\u0435 \u0432\u0437\u044F\u0442\u043E\u0435
+          \u2014 \u0438 \u0441\u0442\u0443\u043F\u0430\u0439\u0442\u0435 \u0441 \u0431\u043E\u0433\u043E\u043C."
+        nextNodeId: freeplay.kurgan.mound.returned_left
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.mound.return_go
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u041E\u0442\u0434\u0430\u0439\u0442\u0435 \u0443\u0437\u0435\u043B
+          \u043D\u0430\u043C."
+        nextNodeId: freeplay.kurgan.mound.taken
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.mound.take
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u0421\u0442\u0443\u043F\u0430\u0439\u0442\u0435."
+        nextNodeId: freeplay.kurgan.mound.let_go
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.mound.let_go
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.mound.joined_returned
+      speakerId: refugee
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.mound.joined_returned.text
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0412\u0435\u0440\u043D\u0451\u043C. \u0421\u0430\u043C\u0438
+          \u0438 \u0437\u0430\u0441\u044B\u043F\u043B\u0435\u043C \u2014 \u043D\u0430\u043C
+          \u0442\u0435\u043F\u0435\u0440\u044C \u0436\u0438\u0442\u044C \u0440\u044F\u0434\u043E\u043C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.kurgan.mound.joined_returned_join
+          Type: 0
+          StringParam: freeplay.kurgan.family_joined
+          IntParam: 0
+        - EffectExecutionId: freeplay.kurgan.mound.joined_returned_fill
+          Type: 0
+          StringParam: freeplay.kurgan.filled
+          IntParam: 0
+      choices:
+      - text: "\u0418\u0434\u0451\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.mound.joined_returned_go
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.mound.joined
+      speakerId: refugee
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.mound.joined.text
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0421\u043F\u0430\u0441\u0438 \u0431\u043E\u0433. \u0410 \u0443\u0437\u0435\u043B\u2026
+          \u0442\u0430\u043A \u0438 \u043D\u0435\u0441\u0442\u0438?"
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.kurgan.mound.joined_join
+          Type: 0
+          StringParam: freeplay.kurgan.family_joined
+          IntParam: 0
+      - blockId: freeplay.kurgan.mound.joined.after
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u0423\u0437\u0435\u043B \u043D\u0435\u0441\u0443\u0442. \u041A\u0443\u0440\u0433\u0430\u043D
+          \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F \u0437\u0430 \u0441\u043F\u0438\u043D\u043E\u0439
+          \u0440\u0430\u0437\u0440\u044B\u0442\u044B\u043C, \u0438 \u043E\u0433\u043B\u044F\u0434\u044B\u0432\u0430\u0435\u0442\u0441\u044F
+          \u043D\u0430 \u043D\u0435\u0433\u043E \u0442\u043E\u043B\u044C\u043A\u043E
+          \u0436\u0435\u043D\u0449\u0438\u043D\u0430."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u0418\u0434\u0451\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.mound.joined_go
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.mound.returned_left
+      speakerId: refugee_woman
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.mound.returned_left.text
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0412\u0435\u0440\u043D\u0451\u043C. \u0425\u043B\u0435\u0431\u0430
+          \u0431\u044B \u0442\u043E\u043B\u044C\u043A\u043E\u2026"
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.kurgan.mound.returned_left_fill
+          Type: 0
+          StringParam: freeplay.kurgan.filled
+          IntParam: 0
+        - EffectExecutionId: freeplay.kurgan.mound.returned_left_go
+          Type: 0
+          StringParam: freeplay.kurgan.family_left
+          IntParam: 0
+      - blockId: freeplay.kurgan.mound.returned_left.after
+        kind: 5
+        speakerIdOverride: narrator
+        text: "\u0412\u0437\u044F\u0442\u043E\u0435 \u043A\u043B\u0430\u0434\u0443\u0442
+          \u043E\u0431\u0440\u0430\u0442\u043D\u043E \u0438 \u0437\u0430\u0441\u044B\u043F\u0430\u044E\u0442.
+          \u041F\u043E\u0442\u043E\u043C \u0442\u0440\u043E\u0435 \u0443\u0445\u043E\u0434\u044F\u0442
+          \u043A \u0434\u043E\u0440\u043E\u0433\u0435, \u043D\u0435 \u043E\u0433\u043B\u044F\u0434\u044B\u0432\u0430\u044F\u0441\u044C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u2026"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.mound.returned_left_bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.mound.taken
+      speakerId: refugee
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.mound.taken.text
+        kind: 0
+        speakerIdOverride: 
+        text: "\u2014 \u0411\u0435\u0440\u0438\u0442\u0435. \u0422\u0435\u043F\u0435\u0440\u044C
+          \u044D\u0442\u043E \u0432\u0430\u0448\u0435 \u2014 \u0438 \u0442\u043E,
+          \u0447\u0442\u043E \u0437\u0430 \u043D\u0438\u043C \u043F\u0440\u0438\u0434\u0451\u0442,
+          \u0442\u043E\u0436\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.kurgan.mound.taken_find
+          Type: 0
+          StringParam: freeplay.kurgan.took_find
+          IntParam: 0
+        - EffectExecutionId: freeplay.kurgan.mound.taken_go
+          Type: 0
+          StringParam: freeplay.kurgan.family_left
+          IntParam: 0
+      choices:
+      - text: "\u2026"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.mound.taken_bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.mound.let_go
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.mound.let_go.text
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041E\u043D\u0438 \u0441\u043E\u0431\u0438\u0440\u0430\u044E\u0442\u0441\u044F
+          \u043C\u043E\u043B\u0447\u0430 \u0438 \u0443\u0445\u043E\u0434\u044F\u0442
+          \u043A \u0434\u043E\u0440\u043E\u0433\u0435 \u0432\u043C\u0435\u0441\u0442\u0435
+          \u0441 \u0443\u0437\u043B\u043E\u043C. \u041A\u0443\u0440\u0433\u0430\u043D
+          \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F \u0440\u0430\u0437\u0440\u044B\u0442\u044B\u043C."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.kurgan.mound.let_go_go
+          Type: 0
+          StringParam: freeplay.kurgan.family_left
+          IntParam: 0
+      choices:
+      - text: "\u2026"
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.mound.let_go_bye
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    schemaVersion: 1
+  - id: freeplay_kurgan_walking
+    title: "\u0418-4 \u2014 \u041A\u0442\u043E-\u0442\u043E \u0445\u043E\u0434\u0438\u0442
+      \u0443 \u0414\u043E\u043C\u0430"
+    category: 2
+    status: 1
+    developerComment: "\u041F\u0420-12\u0411, \u0438\u0441\u0442\u043E\u0440\u0438\u044F
+      \u0418-4 [\u0420\u0410\u0411\u041E\u0427\u0415\u0415][KINGDOM SURVIVAL + LORE
+      \xA715]. \u041E\u0442\u043B\u043E\u0436\u0435\u043D\u043D\u043E\u0435 \u043F\u043E\u0441\u043B\u0435\u0434\u0441\u0442\u0432\u0438\u0435:
+      \u043A\u0443\u0440\u0433\u0430\u043D \u043E\u0441\u0442\u0430\u0432\u0438\u043B\u0438
+      \u0440\u0430\u0437\u0440\u044B\u0442\u044B\u043C \u2014 \u0447\u0435\u0440\u0435\u0437
+      5 \u0434\u043D\u0435\u0439 \u0443 \u0414\u043E\u043C\u0430 \xAB\u043A\u0442\u043E-\u0442\u043E
+      \u0445\u043E\u0434\u0438\u0442\xBB. \u0414\u0432\u0443\u0441\u043C\u044B\u0441\u043B\u0435\u043D\u043D\u043E,
+      \u0440\u0430\u0437\u0433\u0430\u0434\u043A\u0438 \u043D\u0435\u0442. \u041E\u0442\u0432\u0435\u0442\u044B:
+      \u0437\u0430\u0441\u044B\u043F\u0430\u0442\u044C \u043A\u0443\u0440\u0433\u0430\u043D
+      \u0441 \u0445\u043B\u0435\u0431\u043E\u043C (\u22123 \u0435\u0434\u044B, walking_filled),
+      \u0434\u043E\u0437\u043E\u0440 (walking_watch), \u043D\u0435 \u043E\u0431\u0440\u0430\u0449\u0430\u0442\u044C
+      \u0432\u043D\u0438\u043C\u0430\u043D\u0438\u044F (walking_ignored)."
+    sceneIllustration: {fileID: 0}
+    sceneIllustrationFillFrame: 0
+    sceneIllustrationScale: 1
+    sceneIllustrationOffsetNormalized: {x: 0, y: 0}
+    startNodeId: freeplay.kurgan.walking.start
+    tags:
+    - "\u0441\u0432\u043E\u0431\u043E\u0434\u043D\u0430\u044F_\u0438\u0433\u0440\u0430"
+    - "\u0418-4"
+    nodes:
+    - id: freeplay.kurgan.walking.start
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.walking.start.scene
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0422\u0440\u0435\u0442\u044C\u044E \u043D\u043E\u0447\u044C \u0441\u043E\u0431\u0430\u043A\u0438
+          \u043B\u0430\u044E\u0442 \u0432 \u043E\u0434\u043D\u0443 \u0441\u0442\u043E\u0440\u043E\u043D\u0443
+          \u2014 \u043A \u0441\u0442\u0430\u0440\u043E\u0439 \u0434\u043E\u0440\u043E\u0433\u0435.
+          \u0423\u0442\u0440\u043E\u043C \u0443 \u0442\u044B\u043D\u0430 \u0441\u043B\u0435\u0434\u044B:
+          \u0431\u043E\u0441\u044B\u0435, \u0431\u043E\u043B\u044C\u0448\u0438\u0435,
+          \u0438 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u0438\u0434\u043D\u043E,
+          \u043E\u0442\u043A\u0443\u0434\u0430 \u043E\u043D\u0438 \u043F\u0440\u0438\u0448\u043B\u0438."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.kurgan.walking.start.ulyana
+        kind: 4
+        speakerIdOverride: ulyana
+        text: "\u2014 \u042D\u0442\u043E \u0438\u0437-\u0437\u0430 \u043A\u0443\u0440\u0433\u0430\u043D\u0430.
+          \u0417\u0430\u0441\u044B\u043F\u0430\u0442\u044C \u0431\u044B. \u0418 \u0445\u043B\u0435\u0431\u0430
+          \u043E\u0442\u043D\u0435\u0441\u0442\u0438 \u2014 \u043D\u0435 \u043D\u0430\u043C,
+          \u0442\u0430\u043A \u0435\u043C\u0443."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      - blockId: freeplay.kurgan.walking.start.zlata
+        kind: 4
+        speakerIdOverride: refugee_woman
+        text: "\u2014 \u041C\u044B \u0442\u0443\u0442 \u043D\u0438 \u043F\u0440\u0438
+          \u0447\u0451\u043C. \u041C\u044B \u0441\u043F\u0438\u043C \u043A\u0430\u043A
+          \u0443\u0431\u0438\u0442\u044B\u0435 \u2014 \u0432\u0441\u0435 \u0442\u0440\u043E\u0435."
+        conditions:
+          Combinator: 0
+          Conditions:
+          - Type: 0
+            StringParam: freeplay.kurgan.family_joined
+            QualityParam: 0
+            IntParam: 0
+            Negate: 0
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects: []
+      choices:
+      - text: "\u041E\u0442\u043D\u0435\u0441\u0442\u0438 \u043A \u043A\u0443\u0440\u0433\u0430\u043D\u0443
+          \u0445\u043B\u0435\u0431 \u0438 \u0437\u0430\u0441\u044B\u043F\u0430\u0442\u044C
+          \u0435\u0433\u043E."
+        nextNodeId: freeplay.kurgan.walking.filled
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.walking.fill
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u041F\u043E\u0441\u0442\u0430\u0432\u0438\u0442\u044C \u0434\u043E\u0437\u043E\u0440
+          \u0443 \u0442\u044B\u043D\u0430."
+        nextNodeId: freeplay.kurgan.walking.watched
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.walking.watch
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      - text: "\u041D\u0435 \u043E\u0431\u0440\u0430\u0449\u0430\u0442\u044C \u0432\u043D\u0438\u043C\u0430\u043D\u0438\u044F."
+        nextNodeId: freeplay.kurgan.walking.ignored
+        endsDialogue: 0
+        choiceId: freeplay.kurgan.walking.ignore
+        kind: 0
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.walking.filled
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.walking.filled.text
+        kind: 5
+        speakerIdOverride: 
+        text: "\u041A \u043A\u0443\u0440\u0433\u0430\u043D\u0443 \u0438\u0434\u0443\u0442
+          \u0434\u043D\u0451\u043C, \u0432\u0447\u0435\u0442\u0432\u0435\u0440\u043E\u043C,
+          \u0441 \u0445\u043B\u0435\u0431\u043E\u043C \u0438 \u043B\u043E\u043F\u0430\u0442\u0430\u043C\u0438.
+          \u0417\u0430\u0441\u044B\u043F\u0430\u044E\u0442 \u043C\u043E\u043B\u0447\u0430.
+          \u0425\u043B\u0435\u0431 \u043E\u0441\u0442\u0430\u0432\u043B\u044F\u044E\u0442
+          \u043D\u0430 \u0432\u0435\u0440\u0448\u0438\u043D\u0435 \u2014 \u0438 \u043D\u0438\u043A\u0442\u043E
+          \u043D\u0435 \u043E\u0431\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0435\u0442\u0441\u044F."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.kurgan.walking.filled_flag
+          Type: 0
+          StringParam: freeplay.kurgan.walking_filled
+          IntParam: 0
+        - EffectExecutionId: freeplay.kurgan.walking.filled_bread
+          Type: 9
+          StringParam: 
+          IntParam: -3
+      choices:
+      - text: "\u0425\u0432\u0430\u0442\u0438\u0442 \u043E\u0431 \u044D\u0442\u043E\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.walking.filled_ok
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.walking.watched
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.walking.watched.text
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0414\u043E\u0437\u043E\u0440\u043D\u044B\u0435 \u0432\u0441\u044E
+          \u043D\u043E\u0447\u044C \u0441\u043C\u043E\u0442\u0440\u044F\u0442 \u043D\u0430
+          \u0434\u043E\u0440\u043E\u0433\u0443 \u0438 \u043D\u0438\u043A\u043E\u0433\u043E
+          \u043D\u0435 \u0432\u0438\u0434\u044F\u0442. \u041F\u043E\u0434 \u0443\u0442\u0440\u043E
+          \u0441\u043B\u0435\u0434\u044B \u0443 \u0442\u044B\u043D\u0430 \u0432\u0441\u0451
+          \u0440\u0430\u0432\u043D\u043E \u0435\u0441\u0442\u044C \u2014 \u0441\u0432\u0435\u0436\u0438\u0435,
+          \u043F\u043E \u0440\u043E\u0441\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.kurgan.walking.watched_flag
+          Type: 0
+          StringParam: freeplay.kurgan.walking_watch
+          IntParam: 0
+      choices:
+      - text: "\u0425\u0432\u0430\u0442\u0438\u0442 \u043E\u0431 \u044D\u0442\u043E\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.walking.watched_ok
+        kind: 3
+        conditions:
+          Combinator: 0
+          Conditions: []
+        unavailablePresentation: 0
+        check:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        successNodeId: 
+        failureNodeId: 
+        successEffects: []
+        failureEffects: []
+      editorPosition: {x: 0, y: 0}
+      hasEditorPosition: 0
+    - id: freeplay.kurgan.walking.ignored
+      speakerId: narrator
+      text: 
+      textBlocks:
+      - blockId: freeplay.kurgan.walking.ignored.text
+        kind: 5
+        speakerIdOverride: 
+        text: "\u0421\u043E\u0431\u0430\u043A\u0438 \u043F\u0440\u0438\u0432\u044B\u043A\u0430\u044E\u0442
+          \u043F\u0435\u0440\u0432\u044B\u043C\u0438. \u041B\u044E\u0434\u0438 \u2014
+          \u043F\u043E\u0437\u0436\u0435, \u0438 \u043D\u0435 \u0432\u0441\u0435."
+        conditions:
+          Combinator: 0
+          Conditions: []
+        hasPassiveCheck: 0
+        passiveCheck:
+          CheckId: 
+          Kind: 0
+          Quality: 0
+          CompetencyId: 
+          Difficulty: 13
+          ModifierRules: []
+        onRevealEffects:
+        - EffectExecutionId: freeplay.kurgan.walking.ignored_flag
+          Type: 0
+          StringParam: freeplay.kurgan.walking_ignored
+          IntParam: 0
+      choices:
+      - text: "\u0425\u0432\u0430\u0442\u0438\u0442 \u043E\u0431 \u044D\u0442\u043E\u043C."
+        nextNodeId: 
+        endsDialogue: 1
+        choiceId: freeplay.kurgan.walking.ignored_ok
         kind: 3
         conditions:
           Combinator: 0

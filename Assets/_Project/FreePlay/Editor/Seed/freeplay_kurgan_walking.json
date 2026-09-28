@@ -1,0 +1,97 @@
+{
+  "id": "freeplay_kurgan_walking",
+  "title": "И-4 — Кто-то ходит у Дома",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-4 [РАБОЧЕЕ][KINGDOM SURVIVAL + LORE §15]. Отложенное последствие: курган оставили разрытым — через 5 дней у Дома «кто-то ходит». Двусмысленно, разгадки нет. Ответы: засыпать курган с хлебом (−3 еды, walking_filled), дозор (walking_watch), не обращать внимания (walking_ignored).",
+  "startNodeId": "freeplay.kurgan.walking.start",
+  "tags": ["свободная_игра", "И-4"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.kurgan.walking.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.walking.start.scene",
+          "kind": 5,
+          "text": "Третью ночь собаки лают в одну сторону — к старой дороге. Утром у тына следы: босые, большие, и нигде не видно, откуда они пришли."
+        },
+        {
+          "blockId": "freeplay.kurgan.walking.start.ulyana",
+          "kind": 4,
+          "speakerIdOverride": "ulyana",
+          "text": "— Это из-за кургана. Засыпать бы. И хлеба отнести — не нам, так ему."
+        },
+        {
+          "blockId": "freeplay.kurgan.walking.start.zlata",
+          "kind": 4,
+          "speakerIdOverride": "refugee_woman",
+          "text": "— Мы тут ни при чём. Мы спим как убитые — все трое.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 0, "StringParam": "freeplay.kurgan.family_joined" } ] }
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.walking.fill", "text": "Отнести к кургану хлеб и засыпать его.", "kind": 0, "nextNodeId": "freeplay.kurgan.walking.filled" },
+        { "choiceId": "freeplay.kurgan.walking.watch", "text": "Поставить дозор у тына.", "kind": 0, "nextNodeId": "freeplay.kurgan.walking.watched" },
+        { "choiceId": "freeplay.kurgan.walking.ignore", "text": "Не обращать внимания.", "kind": 0, "nextNodeId": "freeplay.kurgan.walking.ignored" }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.walking.filled",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.walking.filled.text",
+          "kind": 5,
+          "text": "К кургану идут днём, вчетвером, с хлебом и лопатами. Засыпают молча. Хлеб оставляют на вершине — и никто не оборачивается.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.walking.filled_flag", "Type": 0, "StringParam": "freeplay.kurgan.walking_filled" },
+            { "EffectExecutionId": "freeplay.kurgan.walking.filled_bread", "Type": 9, "IntParam": -3 }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.walking.filled_ok", "text": "Хватит об этом.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.walking.watched",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.walking.watched.text",
+          "kind": 5,
+          "text": "Дозорные всю ночь смотрят на дорогу и никого не видят. Под утро следы у тына всё равно есть — свежие, по росе.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.walking.watched_flag", "Type": 0, "StringParam": "freeplay.kurgan.walking_watch" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.walking.watched_ok", "text": "Хватит об этом.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.walking.ignored",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.walking.ignored.text",
+          "kind": 5,
+          "text": "Собаки привыкают первыми. Люди — позже, и не все.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.walking.ignored_flag", "Type": 0, "StringParam": "freeplay.kurgan.walking_ignored" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.walking.ignored_ok", "text": "Хватит об этом.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

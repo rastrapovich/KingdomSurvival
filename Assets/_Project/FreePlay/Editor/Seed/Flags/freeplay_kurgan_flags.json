@@ -1,0 +1,12 @@
+{
+  "flags": [
+    {
+      "FlagId": "freeplay.kurgan.known",
+      "DisplayName": "Разрытый курган известен",
+      "Description": "Курган у старой дороги нашли — после осмотра руин или по встрече «Свежая земля».",
+      "Category": "freeplay_kurgan",
+      "Status": 0,
+      "FutureUseNotes": "Ставят: FreePlayKurganStory, сцена freeplay_kurgan_fresh_earth. Потребитель: FREEPLAY_KURGAN_FRESH_EARTH_01 (ForbiddenFlags)."
+    }
+  ]
+}

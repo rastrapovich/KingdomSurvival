@@ -1,0 +1,231 @@
+{
+  "id": "freeplay_kurgan_mound",
+  "title": "И-4 — Разрытый курган",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12Б, история И-4 [РАБОЧЕЕ][KINGDOM SURVIVAL + LORE §12, §15, §28]. Вход к кургану. Следы: Агнесса читает сама, иначе решающее Следопытство (Чутьё, 13); провал — freeplay.kurgan.track_lost. Семья у костра: в Дом с возвратом (family_joined + filled), в Дом без возврата (family_joined), вернуть и отпустить (filled + family_left), отобрать узел (took_find + family_left), отпустить (family_left). Засыпать самим — filled. Поверье — ВЕРОВАНИЕ; кто лежит в кургане — ОТКРЫТО.",
+  "startNodeId": "freeplay.kurgan.mound.start",
+  "tags": ["свободная_игра", "И-4"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.kurgan.mound.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.mound.start.scene",
+          "kind": 5,
+          "text": "Курган разрыт с южного бока — неглубоко, торопливо, руками и палкой. Земля ещё сырая. На отвале — черепок и детский след."
+        },
+        {
+          "blockId": "freeplay.kurgan.mound.start.agnessa",
+          "kind": 4,
+          "speakerIdOverride": "agnessa",
+          "text": "— Двое взрослых и ребёнок. Ушли к ольшанику недавно. Несли что-то тяжёлое — шаг короткий.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "agnessa" } ] }
+        },
+        {
+          "blockId": "freeplay.kurgan.mound.start.ostafiy",
+          "kind": 4,
+          "speakerIdOverride": "ostafiy",
+          "text": "— Из кургана не берут. Говорят, хозяин придёт за своим. Правда ли — не знаю. Но так говорят не зря.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "ostafiy" } ] }
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "freeplay.kurgan.mound.follow_agnessa",
+          "text": "Идти по следам за Агнессой.",
+          "kind": 0,
+          "nextNodeId": "freeplay.kurgan.mound.family",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "agnessa" } ] }
+        },
+        {
+          "choiceId": "freeplay.kurgan.mound.track",
+          "text": "Искать их след.",
+          "kind": 2,
+          "check": { "CheckId": "freeplay.kurgan.track_check", "Kind": 2, "Quality": 3, "CompetencyId": "fieldcraft", "Difficulty": 13 },
+          "successNodeId": "freeplay.kurgan.mound.family",
+          "failureNodeId": "freeplay.kurgan.mound.lost",
+          "failureEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.mound.track_lost", "Type": 0, "StringParam": "freeplay.kurgan.track_lost" }
+          ],
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "agnessa", "Negate": true } ] }
+        },
+        { "choiceId": "freeplay.kurgan.mound.fill", "text": "Засыпать курган самим.", "kind": 0, "nextNodeId": "freeplay.kurgan.mound.filled" },
+        { "choiceId": "freeplay.kurgan.mound.leave", "text": "Уходим.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.mound.lost",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.mound.lost.text",
+          "kind": 5,
+          "text": "След теряется на выгоне, среди коровьих копыт. Кто копал, того уже не догнать."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.mound.lost_fill", "text": "Засыпать курган самим.", "kind": 0, "nextNodeId": "freeplay.kurgan.mound.filled" },
+        { "choiceId": "freeplay.kurgan.mound.lost_leave", "text": "Уходим.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.mound.filled",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.mound.filled.text",
+          "kind": 5,
+          "text": "К вечеру курган снова курган. Черепок кладут обратно — в землю, откуда взяли. Никто не говорит зачем, но все стараются не шуметь.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.mound.filled_by_party", "Type": 0, "StringParam": "freeplay.kurgan.filled" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.mound.filled_go", "text": "Уходим.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.mound.family",
+      "speakerId": "refugee",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.mound.family.scene",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "За ольшаником — костерок без дыма и трое у огня. Мужчина встаёт первым, женщина прижимает к себе мальчишку. Рядом узел: медная пряжка, горшок, тусклые бусины."
+        },
+        {
+          "blockId": "freeplay.kurgan.mound.family.man",
+          "kind": 0,
+          "text": "— Мы не воры. Третий день без хлеба. Думали выменять у людей — медь всё-таки."
+        },
+        {
+          "blockId": "freeplay.kurgan.mound.family.woman",
+          "kind": 4,
+          "speakerIdOverride": "refugee_woman",
+          "text": "— Я говорила ему: из кургана не берут. А он говорил: мёртвые не едят."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.mound.home_return", "text": "Пойдёмте в Дом. А взятое вернём туда, где взяли.", "kind": 0, "nextNodeId": "freeplay.kurgan.mound.joined_returned" },
+        { "choiceId": "freeplay.kurgan.mound.home_keep", "text": "Пойдёмте в Дом.", "kind": 0, "nextNodeId": "freeplay.kurgan.mound.joined" },
+        { "choiceId": "freeplay.kurgan.mound.return_go", "text": "Верните взятое — и ступайте с богом.", "kind": 0, "nextNodeId": "freeplay.kurgan.mound.returned_left" },
+        { "choiceId": "freeplay.kurgan.mound.take", "text": "Отдайте узел нам.", "kind": 0, "nextNodeId": "freeplay.kurgan.mound.taken" },
+        { "choiceId": "freeplay.kurgan.mound.let_go", "text": "Ступайте.", "kind": 0, "nextNodeId": "freeplay.kurgan.mound.let_go" }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.mound.joined_returned",
+      "speakerId": "refugee",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.mound.joined_returned.text",
+          "kind": 0,
+          "text": "— Вернём. Сами и засыплем — нам теперь жить рядом.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.mound.joined_returned_join", "Type": 0, "StringParam": "freeplay.kurgan.family_joined" },
+            { "EffectExecutionId": "freeplay.kurgan.mound.joined_returned_fill", "Type": 0, "StringParam": "freeplay.kurgan.filled" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.mound.joined_returned_go", "text": "Идём.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.mound.joined",
+      "speakerId": "refugee",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.mound.joined.text",
+          "kind": 0,
+          "text": "— Спаси бог. А узел… так и нести?",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.mound.joined_join", "Type": 0, "StringParam": "freeplay.kurgan.family_joined" }
+          ]
+        },
+        {
+          "blockId": "freeplay.kurgan.mound.joined.after",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Узел несут. Курган остаётся за спиной разрытым, и оглядывается на него только женщина."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.mound.joined_go", "text": "Идём.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.mound.returned_left",
+      "speakerId": "refugee_woman",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.mound.returned_left.text",
+          "kind": 0,
+          "text": "— Вернём. Хлеба бы только…",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.mound.returned_left_fill", "Type": 0, "StringParam": "freeplay.kurgan.filled" },
+            { "EffectExecutionId": "freeplay.kurgan.mound.returned_left_go", "Type": 0, "StringParam": "freeplay.kurgan.family_left" }
+          ]
+        },
+        {
+          "blockId": "freeplay.kurgan.mound.returned_left.after",
+          "kind": 5,
+          "speakerIdOverride": "narrator",
+          "text": "Взятое кладут обратно и засыпают. Потом трое уходят к дороге, не оглядываясь."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.mound.returned_left_bye", "text": "…", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.mound.taken",
+      "speakerId": "refugee",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.mound.taken.text",
+          "kind": 0,
+          "text": "— Берите. Теперь это ваше — и то, что за ним придёт, тоже.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.mound.taken_find", "Type": 0, "StringParam": "freeplay.kurgan.took_find" },
+            { "EffectExecutionId": "freeplay.kurgan.mound.taken_go", "Type": 0, "StringParam": "freeplay.kurgan.family_left" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.mound.taken_bye", "text": "…", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.kurgan.mound.let_go",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.kurgan.mound.let_go.text",
+          "kind": 5,
+          "text": "Они собираются молча и уходят к дороге вместе с узлом. Курган остаётся разрытым.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.kurgan.mound.let_go_go", "Type": 0, "StringParam": "freeplay.kurgan.family_left" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.kurgan.mound.let_go_bye", "text": "…", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

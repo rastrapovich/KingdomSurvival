@@ -174,7 +174,10 @@ public static class CampRest
         if (!state.HasActiveExpedition)
             return options;
 
-        bool martaHere = InParty(state, MartaId);
+        // 12Е-9: кто что может в пути — функции присутствия (PresenceFunctions).
+        List<string> party = PartyIds(state);
+        List<string> fighters = state.ActiveExpedition.FighterIds;
+        bool martaHere = PresenceFunctions.Provider(state, PresenceFunctions.Bandage, party, fighters) != null;
         bool anyWounded = false;
         foreach (string id in PartyIds(state))
         {
@@ -188,12 +191,12 @@ public static class CampRest
             martaHere && anyWounded,
             !martaHere ? "Некому: Марта не в отряде." : "Раненых нет."));
 
-        bool scout = InParty(state, AgnessaId) || InParty(state, HomePeopleService.OstafiyId);
+        bool scout = PresenceFunctions.Provider(state, PresenceFunctions.Inspect, party, fighters) != null;
         options.Add(new CampActionOption(CampActionKind.Inspect, "Осмотреть окрестности",
             "Агнесса или Остафий обходят округу: может найтись место рядом.",
             scout, "Некому: ни Агнессы, ни Остафия в отряде."));
 
-        bool fighter = state.ActiveExpedition.FighterIds.Count > 0;
+        bool fighter = PresenceFunctions.Provider(state, PresenceFunctions.Watch, party, fighters) != null;
         CampNightData night = GetNight(state);
         bool watchPlace = GetPlace(state) == CampPlaceKind.Road || night.NearWater;
         options.Add(new CampActionOption(CampActionKind.Watch, "Выставить дозор",

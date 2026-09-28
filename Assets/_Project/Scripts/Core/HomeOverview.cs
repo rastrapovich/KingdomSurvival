@@ -202,6 +202,13 @@ public static class HomeOverview
         return leaving;
     }
 
+    // 12Е-9: что подготовленный состав даёт в пути (функции присутствия):
+    // «Перевязка раненых — Марта…» или «Без Марты не будет: перевязка раненых».
+    public static List<string> DescribeRoad(GameState state)
+    {
+        return PresenceFunctions.DescribeRoad(state, GetLeavingIds(state), ExpeditionPreparation.GetFighterIds(state));
+    }
+
     public static List<string> DescribeDeparture(GameState state)
     {
         List<string> changed = new List<string>();

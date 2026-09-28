@@ -185,6 +185,9 @@ public sealed class HomeScreenPlayModeTests
 
         string forecast = root.Q<Label>("home-prep-forecast").text;
         StringAssert.Contains("Ремонт продолжит Остафий — медленнее", forecast);
+        // 12Е-9: что состав даёт в пути.
+        StringAssert.Contains("\nВ пути:\n", forecast);
+        StringAssert.Contains("Дозор — бойцы отряда", forecast);
         Assert.AreEqual(homeBefore, campaign.DailyFoodConsumption, "Подготовка не уводит людей из Дома.");
 
         Assert.IsTrue(root.Q<VisualElement>("home-people-list").Query<Label>().ToList()

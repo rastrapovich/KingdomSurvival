@@ -408,6 +408,14 @@
     color: rgb(193, 183, 158);
 }
 
+/* 12Е-9: что человек даёт в пути (функции присутствия). */
+.home-prep-slot-function {
+    font-size: 11px;
+    white-space: normal;
+    color: rgb(170, 186, 160);
+    -unity-font-style: italic;
+}
+
 .home-prep-slot-buttons {
     flex-direction: row;
     flex-wrap: wrap;

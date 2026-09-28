@@ -170,7 +170,11 @@ public partial class PrototypeUIController
 
         homePrepForecast.style.display = away ? DisplayStyle.None : DisplayStyle.Flex;
         if (!away)
-            homePrepForecast.text = "После выхода:\n" + string.Join("\n", HomeOverview.DescribeDeparture(gameState));
+        {
+            // 12Е-9: и что состав даёт в пути — функции присутствия.
+            homePrepForecast.text = "После выхода:\n" + string.Join("\n", HomeOverview.DescribeDeparture(gameState)) +
+                                    "\n\nВ пути:\n" + string.Join("\n", HomeOverview.DescribeRoad(gameState));
+        }
 
         if (homePrepReplacingId != null)
         {
@@ -325,6 +329,15 @@ public partial class PrototypeUIController
             role.AddToClassList("home-prep-slot-role");
             card.Add(name);
             card.Add(role);
+
+            // 12Е-9: что человек даёт в пути (функции присутствия).
+            List<PresenceFunction> functions = PresenceFunctions.ProvidedBy(resident.PersonId);
+            if (functions.Count > 0)
+            {
+                Label road = new Label("в пути: " + string.Join(", ", functions.ConvertAll(function => function.Title)));
+                road.AddToClassList("home-prep-slot-function");
+                card.Add(road);
+            }
 
             bool recovering = resident.Injury == ResidentInjury.Recovering;
             if (recovering)

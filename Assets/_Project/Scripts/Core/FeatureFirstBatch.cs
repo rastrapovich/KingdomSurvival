@@ -146,7 +146,7 @@ public static class FeatureCheckHooks
             PersonId = personId,
             FeatureId = featureId,
             Trigger = FeatureTrigger.CheckResolved,
-            Text = FeatureName(featureId) + ": переброс, кубик " + after.RerolledDieBefore + " → " +
+            Text = "переброс, кубик " + after.RerolledDieBefore + " → " +
                    (after.DieOne + after.DieTwo - (before.DieOne + before.DieTwo) + after.RerolledDieBefore) +
                    (after.Success ? " — теперь получилось." : " — всё равно не вышло.")
         };
@@ -233,9 +233,9 @@ public static class FeatureEffects
 
     private static void Note(GameState state, List<string> notes, string owner, string featureId, FeatureTrigger trigger, string text)
     {
-        string line = CharacterProgressionService.DisplayName(state, owner) + " («" + FeatureCheckHooks.FeatureName(featureId) + "»): " + text;
-        notes?.Add(line);
-        FeatureDispatcher.Record(state, new FeatureActivation { PersonId = owner, FeatureId = featureId, Trigger = trigger, Text = line });
+        FeatureActivation activation = new FeatureActivation { PersonId = owner, FeatureId = featureId, Trigger = trigger, Text = text };
+        FeatureDispatcher.Record(state, activation);
+        notes?.Add(FeaturePresentation.Line(state, activation));
     }
 }
 
@@ -300,7 +300,7 @@ public static class FeatureImplementationsFirstBatch
             SceneId = featureEvent.SceneId
         });
         FeatureDispatcher.Activate(featureEvent, owner, FeatureIds.AlmostThere,
-            "Почти получилось: не хватило " + miss + " — следующая попытка в этом разговоре получит переброс.");
+            "не хватило " + miss + " — следующая попытка в этом разговоре получит переброс.");
     }
 
     // Н-07 Вторая версия: проваленная возвратная проверка откроется снова,
@@ -319,7 +319,7 @@ public static class FeatureImplementationsFirstBatch
             CheckId = featureEvent.CheckId
         });
         FeatureDispatcher.Activate(featureEvent, owner, FeatureIds.SecondVersion,
-            "Вторая версия: к этому можно будет вернуться, когда появится новое сведение.");
+            "к этому можно будет вернуться, когда появится новое сведение.");
     }
 
     private static void OnSecondVersionFact(FeatureEvent featureEvent, string owner, int rank)
@@ -336,7 +336,7 @@ public static class FeatureImplementationsFirstBatch
                 continue;
             narrative.UnlockCheck(pending.CheckId);
             FeatureDispatcher.Activate(featureEvent, owner, FeatureIds.SecondVersion,
-                "Вторая версия: новое сведение — к проваленной попытке можно вернуться.");
+                "новое сведение — к проваленной попытке можно вернуться.");
         }
     }
 
@@ -376,7 +376,7 @@ public static class FeatureImplementationsFirstBatch
             SceneId = featureEvent.SceneId
         });
         FeatureDispatcher.Activate(featureEvent, owner, FeatureIds.Lead,
-            "Зацепка: замеченное пригодится — следующее Расследование в этом разговоре +1.");
+            "замеченное пригодится — следующее Расследование в этом разговоре +1.");
     }
 
     // Н-70 Полевой лекарь I: 1/ночёвку самый тяжело раненый в походе
@@ -404,7 +404,7 @@ public static class FeatureImplementationsFirstBatch
         int heal = Math.Min(worst.MaxHitPoints - worst.CurrentHitPoints, Math.Max(1, (worst.MaxHitPoints + 3) / 4));
         worst.CurrentHitPoints += heal;
         FeatureDispatcher.Activate(featureEvent, owner, FeatureIds.FieldMedic,
-            CharacterProgressionService.DisplayName(state, owner) + " («Полевой лекарь») выхаживает " + worst.DisplayName + ": +" + heal + " здоровья");
+            "выхаживает " + worst.DisplayName + ": +" + heal + " здоровья");
     }
 
     // Н-81 Наставник I: кто с последнего привала применял ту же компетенцию,
@@ -428,7 +428,7 @@ public static class FeatureImplementationsFirstBatch
                     continue;
                 CharacterProgressionService.AddPractice(state, studentId, competencyId, 1, countsAsApplication: false);
                 FeatureDispatcher.Activate(featureEvent, owner, FeatureIds.Mentor,
-                    CharacterProgressionService.DisplayName(state, owner) + " («Наставник») показал " +
+                    "показал " +
                     CharacterProgressionService.DisplayName(state, studentId) + ", как надо: " +
                     NarrativeCompetencyLabels.GetLabel(competencyId) + " +1 практики");
             }

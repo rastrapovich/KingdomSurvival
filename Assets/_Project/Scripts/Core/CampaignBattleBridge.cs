@@ -362,11 +362,7 @@ public static class CampaignBattleBridge
             BattleResult = result,
             EventKey = "battle-end:" + result.BattleId
         });
-        foreach (FeatureActivation activation in activations)
-        {
-            if (!string.IsNullOrEmpty(activation.Text))
-                notes?.Add(activation.Text);
-        }
+        notes?.AddRange(FeaturePresentation.Lines(state, activations));
 
         return heroFell ? CampaignBattleApplyStatus.HeroFell : CampaignBattleApplyStatus.SquadSurvived;
     }

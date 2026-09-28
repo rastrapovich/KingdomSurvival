@@ -263,8 +263,6 @@ public static class ExpeditionIncidentSystem
                 consequences.Add(arrivalText);
         }
 
-        consequences.AddRange(featureNotes);
-
         ExpeditionIncidentOccurrence occurrence =
             new ExpeditionIncidentOccurrence
             {
@@ -272,7 +270,7 @@ public static class ExpeditionIncidentSystem
                 Day = finishedDay,
                 Title = definition.Title,
                 Description = definition.Description,
-                ConsequenceText = string.Join(" ", consequences),
+                ConsequenceText = JoinConsequences(consequences, featureNotes),
                 Tone = definition.Tone
             };
 
@@ -373,16 +371,16 @@ public static class ExpeditionIncidentSystem
         }
 
         List<string> consequences = new List<string>();
+        // 12Е-7: строки сработавших особенностей — отдельными строками.
+        List<string> featureNotes = new List<string>();
         ExpeditionIncidentTone tone;
 
         if (entryState == RoadPredatorEntryState.Unaware)
         {
-            List<string> featureNotes = new List<string>();
             int supplyLoss = ApplySupplyDelta(state, -FeatureEffects.ReduceEventSupplyLoss(state, 3, featureNotes));
             string arrivalText;
             int routeDelay = ApplyRouteAdjustment(state, definition.Id + "_unaware", definition.Title, 1, out arrivalText);
             consequences.Add(FormatSupplyConsequence(supplyLoss));
-            consequences.AddRange(featureNotes);
             if (routeDelay != 0)
                 consequences.Add(FormatRouteConsequence(routeDelay));
             if (!string.IsNullOrWhiteSpace(arrivalText))
@@ -417,9 +415,17 @@ public static class ExpeditionIncidentSystem
             Day = finishedDay,
             Title = definition.Title,
             Description = definition.Description,
-            ConsequenceText = string.Join(" ", consequences),
+            ConsequenceText = JoinConsequences(consequences, featureNotes),
             Tone = tone
         };
+    }
+
+    // 12Е-7: последствия одной фразой, сработавшие особенности — отдельными
+    // строками под ней.
+    private static string JoinConsequences(List<string> consequences, List<string> featureNotes)
+    {
+        string text = string.Join(" ", consequences);
+        return featureNotes.Count == 0 ? text : text + "\n" + string.Join("\n", featureNotes);
     }
 
     private static int ApplySupplyDelta(GameState state, int requestedDelta)

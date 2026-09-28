@@ -107,6 +107,8 @@ public sealed class ProgressionStateData
     public List<string> HandledFeatureEvents = new List<string>();
     // Последние сработавшие особенности — для показа игроку.
     public List<FeatureActivation> RecentFeatureActivations = new List<FeatureActivation>();
+    // 12Е-7: номер последнего срабатывания (растёт, не сбрасывается).
+    public int FeatureActivationSequence;
 
     // 12Е-5: отложенные эффекты особенностей (переброс или +1 следующей
     // проверке, отпереть проверку после нового сведения), счётчик сцен

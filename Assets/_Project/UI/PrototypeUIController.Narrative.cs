@@ -55,6 +55,9 @@ public partial class PrototypeUIController
         public NarrativeCheckPresentationData LeadingActiveCheck;
         public IReadOnlyList<NarrativeDialogueVisibleBlock> Blocks;
 
+        // 12Е-7: особенности, сработавшие на выборе, который привёл к шагу.
+        public List<FeatureActivation> Features;
+
         public static NarrativeUiHistoryItem ForPlayerChoice(string text)
         {
             return new NarrativeUiHistoryItem { Kind = NarrativeUiHistoryItemKind.PlayerChoice, PlayerChoiceText = text };
@@ -62,13 +65,15 @@ public partial class PrototypeUIController
 
         public static NarrativeUiHistoryItem ForResponseGroup(
             NarrativeCheckPresentationData leadingActiveCheck,
-            IReadOnlyList<NarrativeDialogueVisibleBlock> blocks)
+            IReadOnlyList<NarrativeDialogueVisibleBlock> blocks,
+            List<FeatureActivation> features = null)
         {
             return new NarrativeUiHistoryItem
             {
                 Kind = NarrativeUiHistoryItemKind.ResponseGroup,
                 LeadingActiveCheck = leadingActiveCheck,
-                Blocks = blocks
+                Blocks = blocks,
+                Features = features
             };
         }
     }
@@ -346,9 +351,10 @@ public partial class PrototypeUIController
     // Единая точка показа нового presentation-шага. В view находится ровно
     // одна текущая реплика (или ни одной в техническом узле); следующие
     // TextBlock выдаются runtime по одному через нейтральный Continue.
-    private void DisplayNarrativeView(NarrativeDialogueView view, NarrativeCheckPresentationData checkPresentation)
+    private void DisplayNarrativeView(NarrativeDialogueView view, NarrativeCheckPresentationData checkPresentation,
+        List<FeatureActivation> features = null)
     {
-        narrativeHistory.Add(NarrativeUiHistoryItem.ForResponseGroup(checkPresentation, view.VisibleTextBlocks));
+        narrativeHistory.Add(NarrativeUiHistoryItem.ForResponseGroup(checkPresentation, view.VisibleTextBlocks, features));
 
         NarrativeDialogueVisibleBlock latestBlock = view.VisibleTextBlocks.Count > 0
             ? view.VisibleTextBlocks[view.VisibleTextBlocks.Count - 1]
@@ -463,7 +469,45 @@ public partial class PrototypeUIController
     // с превью редактора (NarrativeDialogueRendering.BuildHistoryGroup).
     private VisualElement BuildNarrativeHistoryGroupElement(NarrativeUiHistoryItem item)
     {
-        return NarrativeDialogueRendering.BuildHistoryGroup(item.LeadingActiveCheck, item.Blocks, NarrativeCheckTooltipHost);
+        VisualElement group = NarrativeDialogueRendering.BuildHistoryGroup(item.LeadingActiveCheck, item.Blocks, NarrativeCheckTooltipHost);
+        if (item.Features == null || item.Features.Count == 0)
+            return group;
+
+        // 12Е-7: сработавшая особенность — сразу после итога проверки (если
+        // он есть) и до ответной реплики.
+        int index = 0;
+        for (int i = 0; i < group.childCount; i++)
+        {
+            if (group[i].ClassListContains("narrative-dialogue-history-check-result"))
+            {
+                index = i + 1;
+                break;
+            }
+        }
+        foreach (FeatureActivation activation in item.Features)
+            group.Insert(index++, BuildNarrativeFeatureElement(activation));
+        return group;
+    }
+
+    // «Особенность · Гаррик — «Зацепка»» и что она дала. Цвет один и тот же
+    // при любом исходе: он отмечает особенность, а не правильный ответ.
+    private VisualElement BuildNarrativeFeatureElement(FeatureActivation activation)
+    {
+        VisualElement element = new VisualElement();
+        element.AddToClassList("narrative-dialogue-history-feature");
+
+        Label title = new Label("Особенность · " + FeaturePresentation.Title(gameState, activation));
+        title.AddToClassList("narrative-dialogue-history-feature-title");
+        element.Add(title);
+
+        string bodyText = FeaturePresentation.Body(activation);
+        if (!string.IsNullOrWhiteSpace(bodyText))
+        {
+            Label body = new Label(bodyText);
+            body.AddToClassList("narrative-dialogue-history-feature-body");
+            element.Add(body);
+        }
+        return element;
     }
 
     // Иллюстрация события при наличии заменяет портрет на всю сцену; без неё —
@@ -493,6 +537,8 @@ public partial class PrototypeUIController
         if (choiceKind != DialogueChoiceKind.Continue)
             narrativeHistory.Add(NarrativeUiHistoryItem.ForPlayerChoice(choiceText));
 
+        // 12Е-7: что сработало на этом выборе (проверка, переброс, новое сведение).
+        int featureSequence = FeatureDispatcher.LastActivationSequence(gameState);
         NarrativeDialogueSelectionResult result;
         try
         {
@@ -503,9 +549,14 @@ public partial class PrototypeUIController
             Debug.LogError("Narrative UI: не удалось выбрать ответ '" + choiceId + "'.\n" + exception.Message);
             return;
         }
+        List<FeatureActivation> features = FeatureDispatcher.ActivationsSince(gameState, featureSequence);
 
         if (result.DialogueEnded)
         {
+            // Разговор закрывается этим выбором — сработавшее остаётся в донесениях.
+            if (gameState != null && features.Count > 0)
+                AddReport(string.Join("\n", FeaturePresentation.Lines(gameState, features)));
+
             string completedDialogueId = narrativeDialogueSession.DialogueId;
             Chapter01StoryDirector.HandleDialogueCompleted(gameState, completedDialogueId);
             OnStoryDialogueCompleted(completedDialogueId);
@@ -528,7 +579,7 @@ public partial class PrototypeUIController
             return;
         }
 
-        DisplayNarrativeView(result.View, result.CheckPresentation);
+        DisplayNarrativeView(result.View, result.CheckPresentation, features);
     }
 
     private void CloseNarrativeDialogue()

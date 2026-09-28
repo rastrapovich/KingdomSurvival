@@ -304,16 +304,14 @@ public static class CampRest
 
         // 12Е-4: ночь прошла — эпоха «до лагеря» сменилась, особенности
         // ночёвки срабатывают.
-        List<FeatureActivation> activations = FeatureDispatcher.Raise(new FeatureEvent { Trigger = FeatureTrigger.CampNight, State = state });
-        foreach (FeatureActivation activation in activations)
-        {
-            if (!string.IsNullOrEmpty(activation.Text))
-                results.Add(activation.Text);
-        }
+        // 12Е-7: сработавшие особенности — отдельными строками под итогом.
+        List<string> features = FeaturePresentation.Lines(state,
+            FeatureDispatcher.Raise(new FeatureEvent { Trigger = FeatureTrigger.CampNight, State = state }));
 
-        messages?.Add(results.Count == 0
+        string morning = results.Count == 0
             ? "Ночь прошла спокойно. Отряд продолжает путь."
-            : "Утро после ночлега: " + string.Join("; ", results) + ".");
+            : "Утро после ночлега: " + string.Join("; ", results) + ".";
+        messages?.Add(features.Count == 0 ? morning : morning + "\n" + string.Join("\n", features));
     }
 
     private static string ApplyAction(GameState state, CampActionKind kind)

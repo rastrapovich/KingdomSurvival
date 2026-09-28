@@ -460,7 +460,7 @@ public partial class PrototypeUIController : MonoBehaviour
         reportHistory.Add("День " + reportDay + "\n" + message);
         reportRequiresAcknowledgement.Add(false);
         reportReadStates.Add(true);
-        reportHistoryLabel.text = string.Join("\n\n", reportHistory);
+        reportHistoryLabel.text = DecorateFeatureLines(string.Join("\n\n", reportHistory));
 
         reportHistoryScroll.schedule.Execute(() =>
         {

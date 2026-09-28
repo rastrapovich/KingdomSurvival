@@ -117,7 +117,8 @@ public static class FeatureCombatBatch
         if (commander == null || !CharacterFeatureService.Has(state, commander.Id, CombatFeatureIds.Ambush))
             return;
         request.PlayerFirstRoundInitiativeBonus = AmbushInitiativeBonus;
-        request.Notes.Add(commander.Name + " («Засада»): отряд готов — +" + AmbushInitiativeBonus + " к инициативе в первом раунде.");
+        request.Notes.Add(Recorded(state, commander.Id, CombatFeatureIds.Ambush, FeatureTrigger.BattleStarted,
+            "отряд готов — +" + AmbushInitiativeBonus + " к инициативе в первом раунде."));
     }
 
     // «Ещё на ногах»: бой отметил, кто устоял на 1 здоровья, — строка итога
@@ -129,16 +130,8 @@ public static class FeatureCombatBatch
             return;
         foreach (string personId in result.ForcedHeavyWoundIds)
         {
-            string line = CharacterProgressionService.DisplayName(state, personId) +
-                          " («Ещё на ногах») устоял под смертельным ударом — после боя тяжело ранен.";
-            notes?.Add(line);
-            FeatureDispatcher.Record(state, new FeatureActivation
-            {
-                PersonId = personId,
-                FeatureId = CombatFeatureIds.StillStanding,
-                Trigger = FeatureTrigger.BattleEnded,
-                Text = line
-            });
+            notes?.Add(Recorded(state, personId, CombatFeatureIds.StillStanding, FeatureTrigger.BattleEnded,
+                "устоял под смертельным ударом — после боя тяжело ранен."));
         }
     }
 
@@ -160,15 +153,21 @@ public static class FeatureCombatBatch
         result.Survivors.Add(new CampaignBattleSurvivor { PersonId = saved, HitPoints = 1 });
         if (!result.ForcedHeavyWoundIds.Contains(saved))
             result.ForcedHeavyWoundIds.Add(saved);
-        string line = commander.Name + " («Не бросает своих») вынес " + CharacterProgressionService.DisplayName(state, saved) +
-                      " из боя живым — тяжело ранен.";
-        notes?.Add(line);
-        FeatureDispatcher.Record(state, new FeatureActivation
+        notes?.Add(Recorded(state, commander.Id, CombatFeatureIds.LeavesNoOne, FeatureTrigger.BattleEnded,
+            "вынес " + CharacterProgressionService.DisplayName(state, saved) + " из боя живым — тяжело ранен."));
+    }
+
+    // Записать срабатывание и вернуть строку итогов (12Е-7).
+    private static string Recorded(GameState state, string personId, string featureId, FeatureTrigger trigger, string text)
+    {
+        FeatureActivation activation = new FeatureActivation
         {
-            PersonId = commander.Id,
-            FeatureId = CombatFeatureIds.LeavesNoOne,
-            Trigger = FeatureTrigger.BattleEnded,
-            Text = line
-        });
+            PersonId = personId,
+            FeatureId = featureId,
+            Trigger = trigger,
+            Text = text
+        };
+        FeatureDispatcher.Record(state, activation);
+        return FeaturePresentation.Line(state, activation);
     }
 }

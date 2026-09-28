@@ -126,7 +126,11 @@ public sealed class FeatureActivation
     public string PersonId = string.Empty;
     public string FeatureId = string.Empty;
     public FeatureTrigger Trigger;
+    // Что особенность дала — без имени человека и особенности (их
+    // добавляет FeaturePresentation).
     public string Text = string.Empty;
+    // 12Е-7: порядковый номер срабатывания в кампании.
+    public int Sequence;
 }
 
 // Обработчик особенности: владелец и его ранг.
@@ -241,9 +245,7 @@ public static class FeatureDispatcher
             calls[index].Key.Handler(featureEvent, owners[index], calls[index].Value.Rank);
 
         foreach (FeatureActivation activation in featureEvent.Activations)
-            progression.RecentFeatureActivations.Add(activation);
-        if (progression.RecentFeatureActivations.Count > KeptActivations)
-            progression.RecentFeatureActivations.RemoveRange(0, progression.RecentFeatureActivations.Count - KeptActivations);
+            Store(progression, activation);
         return featureEvent.Activations;
     }
 
@@ -252,7 +254,32 @@ public static class FeatureDispatcher
     {
         if (state == null || activation == null)
             return;
-        ProgressionStateData progression = CharacterProgressionService.EnsureState(state);
+        Store(CharacterProgressionService.EnsureState(state), activation);
+    }
+
+    // 12Е-7: номер последнего срабатывания — показ берёт всё, что новее.
+    public static int LastActivationSequence(GameState state)
+    {
+        return state != null ? CharacterProgressionService.EnsureState(state).FeatureActivationSequence : 0;
+    }
+
+    // Сработавшие после номера since, по порядку.
+    public static List<FeatureActivation> ActivationsSince(GameState state, int since)
+    {
+        List<FeatureActivation> activations = new List<FeatureActivation>();
+        if (state == null)
+            return activations;
+        foreach (FeatureActivation activation in CharacterProgressionService.EnsureState(state).RecentFeatureActivations)
+        {
+            if (activation != null && activation.Sequence > since)
+                activations.Add(activation);
+        }
+        return activations;
+    }
+
+    private static void Store(ProgressionStateData progression, FeatureActivation activation)
+    {
+        activation.Sequence = ++progression.FeatureActivationSequence;
         progression.RecentFeatureActivations.Add(activation);
         if (progression.RecentFeatureActivations.Count > KeptActivations)
             progression.RecentFeatureActivations.RemoveRange(0, progression.RecentFeatureActivations.Count - KeptActivations);

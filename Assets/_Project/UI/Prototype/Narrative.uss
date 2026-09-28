@@ -236,6 +236,34 @@
     white-space: normal;
 }
 
+/* 12Е-7: сработавшая особенность — кто, какая и что дала. Холодный
+   нейтральный цвет, одинаковый при любом исходе: не зелёный «успех», не
+   красный «провал» и не золото заголовков — выделение отмечает особенность,
+   а не подсказывает правильный ответ. Тот же цвет у строк
+   «[ОСОБЕННОСТЬ]» в донесениях (PrototypeUIController.StableUI.cs). */
+.narrative-dialogue-history-feature {
+    margin-left: 24px;
+    margin-bottom: 18px;
+    padding-left: 12px;
+    border-left-width: 2px;
+    border-left-color: rgb(96, 116, 138);
+    white-space: normal;
+}
+
+.narrative-dialogue-history-feature-title {
+    color: rgb(143, 165, 190);
+    font-size: 12px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.narrative-dialogue-history-feature-body {
+    margin-top: 2px;
+    color: rgb(200, 204, 208);
+    font-size: 14px;
+    white-space: normal;
+}
+
 /* Narrative Check Presentation Layer — единый компонент для пассивных
    блоков и активных проверок (§13 инструкции по визуализации проверок).
    Сам билдер (PrototypeUIController.NarrativeCheckPresentation.cs) этим

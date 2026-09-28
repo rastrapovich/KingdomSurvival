@@ -211,6 +211,24 @@ public partial class PrototypeUIController
             .ExecuteLater(2);
     }
 
+    // 12Е-7: цвет строк сработавших особенностей в донесениях — тот же, что
+    // у особенности в диалоге (Narrative.uss, .narrative-dialogue-history-feature-title).
+    // Один цвет при любом исходе: отмечает особенность, а не удачу.
+    private const string FeatureLineColor = "#8FA5BE";
+
+    private static string DecorateFeatureLines(string text)
+    {
+        if (string.IsNullOrEmpty(text) || !text.Contains(FeaturePresentation.Tag))
+            return text;
+        string[] lines = text.Split('\n');
+        for (int i = 0; i < lines.Length; i++)
+        {
+            if (FeaturePresentation.IsFeatureLine(lines[i]))
+                lines[i] = "<color=" + FeatureLineColor + ">" + lines[i] + "</color>";
+        }
+        return string.Join("\n", lines);
+    }
+
     private void RenderRoyalReportsNewestFirst()
     {
         if (reportHistory == null || reportHistoryLabel == null)
@@ -245,7 +263,7 @@ public partial class PrototypeUIController
             entry = entry.Replace(
                 "Откройте нужный экран круглой кнопкой слева сверху.",
                 "Выберите нужный раздел в нижнем меню.");
-            newestFirst.Add(entry);
+            newestFirst.Add(DecorateFeatureLines(entry));
         }
 
         string expected = string.Join("\n\n", newestFirst);

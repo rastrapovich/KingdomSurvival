@@ -7953,7 +7953,7 @@ MonoBehaviour:
         \u0440\u0438\u0441\u0443\u043D\u043A\u0430\xBB; \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u043C\u044B\u0439
         \u0437\u0430\u0441\u0435\u0432."
       category: 4
-      status: 0
+      status: 2
       required: 1
       order: 20
       priority: 0
@@ -7963,13 +7963,13 @@ MonoBehaviour:
       acceptanceCriteria:
       - text: "24 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0430 \u0441 \u0447\u0438\u0441\u043B\u0430\u043C\u0438
           \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0430"
-        done: 0
+        done: 1
       - text: "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0431\u0430\u0437\u044B
           \u0431\u0435\u0437 \u043E\u0448\u0438\u0431\u043E\u043A"
-        done: 0
+        done: 1
       - text: "\u041F\u043E\u0432\u0442\u043E\u0440\u043D\u044B\u0439 \u0437\u0430\u0441\u0435\u0432
           \u043D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043C\u0435\u043D\u044F\u0435\u0442"
-        done: 0
+        done: 1
       manualChecks:
       - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435"
       fileReferences:

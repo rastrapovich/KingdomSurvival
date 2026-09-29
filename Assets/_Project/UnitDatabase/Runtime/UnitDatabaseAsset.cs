@@ -24,6 +24,128 @@ namespace KingdomSurvival.UnitDatabase
         Custom
     }
 
+    // ПР-12Ж: размер существа — для жетона без рисунка сейчас и для
+    // принудительного перемещения и контроля в ПР-16.
+    public enum UnitSize
+    {
+        Medium,
+        Small,
+        Large
+    }
+
+    // Общие боевые кирпичи (BESTIARY.md COMBAT-B3), на которых строится
+    // способность существа. Кирпичи реализуются в ПР-16.
+    public enum UnitCombatBrick
+    {
+        AiPriority,
+        ForcedMovement,
+        GrappleTether,
+        StatusMark,
+        HazardTileState,
+        Charge,
+        AttachPersistent,
+        CorpseInteraction,
+        HiddenBurrow,
+        Telegraph,
+        Extension
+    }
+
+    public enum UnitAbilityStatus
+    {
+        // Записана в базе, но не действует: её кирпича ещё нет.
+        WaitsForMechanic,
+        Active
+    }
+
+    // Фирменная способность существа как данные: включается статусом в базе,
+    // а не отдельным кодом под существо.
+    [Serializable]
+    public sealed class UnitAbilityData
+    {
+        [SerializeField] private string id = string.Empty;
+        [SerializeField] private string title = string.Empty;
+        [SerializeField, TextArea(2, 4)] private string description = string.Empty;
+        [SerializeField] private UnitCombatBrick brick = UnitCombatBrick.Extension;
+        [SerializeField] private UnitAbilityStatus status = UnitAbilityStatus.WaitsForMechanic;
+
+        public string Id => id;
+        public string Title => title;
+        public string Description => description;
+        public UnitCombatBrick Brick => brick;
+        public UnitAbilityStatus Status => status;
+        public bool IsActive => status == UnitAbilityStatus.Active;
+
+        public static UnitAbilityData WaitingFor(string id, string title, UnitCombatBrick brick, string description)
+        {
+            return new UnitAbilityData
+            {
+                id = id ?? string.Empty,
+                title = title ?? string.Empty,
+                brick = brick,
+                description = description ?? string.Empty,
+                status = UnitAbilityStatus.WaitsForMechanic
+            };
+        }
+    }
+
+    [Serializable]
+    public sealed class UnitEncounterSlot
+    {
+        [SerializeField] private string unitId = string.Empty;
+        [SerializeField, Min(1)] private int count = 1;
+
+        public string UnitId => unitId;
+        public int Count => Mathf.Max(1, count);
+
+        public UnitEncounterSlot()
+        {
+        }
+
+        public UnitEncounterSlot(string unitId, int count)
+        {
+            this.unitId = unitId ?? string.Empty;
+            this.count = Mathf.Max(1, count);
+        }
+    }
+
+    // Готовый состав противников для тестового боя.
+    [Serializable]
+    public sealed class UnitEncounterPreset
+    {
+        [SerializeField] private string id = string.Empty;
+        [SerializeField] private string title = string.Empty;
+        [SerializeField, TextArea(1, 3)] private string purpose = string.Empty;
+        [SerializeField] private List<UnitEncounterSlot> slots = new List<UnitEncounterSlot>();
+
+        public string Id => id;
+        public string Title => title;
+        public string Purpose => purpose;
+        public IReadOnlyList<UnitEncounterSlot> Slots => slots;
+
+        public int TotalCount
+        {
+            get
+            {
+                int total = 0;
+                if (slots != null)
+                    foreach (UnitEncounterSlot slot in slots)
+                        total += slot != null ? slot.Count : 0;
+                return total;
+            }
+        }
+
+        public static UnitEncounterPreset Create(string id, string title, string purpose, params UnitEncounterSlot[] slots)
+        {
+            return new UnitEncounterPreset
+            {
+                id = id ?? string.Empty,
+                title = title ?? string.Empty,
+                purpose = purpose ?? string.Empty,
+                slots = new List<UnitEncounterSlot>(slots ?? Array.Empty<UnitEncounterSlot>())
+            };
+        }
+    }
+
     [Serializable]
     public sealed class UnitTagDefinition
     {
@@ -79,7 +201,13 @@ namespace KingdomSurvival.UnitDatabase
         [Header("Теги")]
         [SerializeField] private List<string> tagIds = new List<string>();
 
+        [Header("Существо")]
+        [SerializeField] private UnitSize size = UnitSize.Medium;
+        [SerializeField] private List<UnitAbilityData> abilities = new List<UnitAbilityData>();
+
         public string Id => id;
+        public UnitSize Size => size;
+        public IReadOnlyList<UnitAbilityData> Abilities => abilities;
         public string DisplayLabel => displayLabel;
         public UnitCategory Category => category;
         public UnitCombatRole CombatRole => combatRole;
@@ -102,6 +230,42 @@ namespace KingdomSurvival.UnitDatabase
         public Vector2 BattlefieldOffset => battlefieldOffset;
         public int SandboxEncounterCount => Mathf.Max(0, sandboxEncounterCount);
         public IReadOnlyList<string> TagIds => tagIds;
+
+        // Существо каталога без рисунков: портрет и миниатюру назначает
+        // художник позже, бой рисует жетон.
+        public static UnitDefinitionData CreateCreature(
+            string id,
+            string displayLabel,
+            UnitSize size,
+            int maxHitPoints,
+            int attack,
+            int defense,
+            int damage,
+            int movement,
+            int initiative,
+            int attackRange,
+            IEnumerable<string> tagIds,
+            IEnumerable<UnitAbilityData> abilities)
+        {
+            return new UnitDefinitionData
+            {
+                id = id ?? string.Empty,
+                displayLabel = displayLabel ?? string.Empty,
+                category = UnitCategory.Creature,
+                combatRole = UnitCombatRole.Creature,
+                size = size,
+                maxHitPoints = Mathf.Max(1, maxHitPoints),
+                attack = Mathf.Max(0, attack),
+                defense = Mathf.Max(0, defense),
+                damage = Mathf.Max(1, damage),
+                movement = Mathf.Max(1, movement),
+                initiative = Mathf.Max(0, initiative),
+                attackRange = Mathf.Max(1, attackRange),
+                sandboxEncounterCount = 0,
+                tagIds = new List<string>(tagIds ?? Array.Empty<string>()),
+                abilities = new List<UnitAbilityData>(abilities ?? Array.Empty<UnitAbilityData>())
+            };
+        }
 
         internal void MigrateLegacyPortraitFraming()
         {
@@ -136,33 +300,94 @@ namespace KingdomSurvival.UnitDatabase
     public sealed class UnitDatabaseAsset : ScriptableObject
     {
         public const string ResourcesPath = "UnitDatabase/KingdomSurvivalUnits";
-        public const int CurrentSchemaVersion = 1;
+        // Схема 2 (ПР-12Ж): размер и способности существ, составы боя.
+        public const int CurrentSchemaVersion = 2;
+
+        // Сколько противников помещается в один бой (SandboxRoster.MaxEnemies).
+        public const int MaxEncounterSize = 8;
 
         [SerializeField, HideInInspector] private int schemaVersion;
         [SerializeField] private List<UnitTagDefinition> tags = new List<UnitTagDefinition>();
         [SerializeField] private List<UnitDefinitionData> units = new List<UnitDefinitionData>();
+        [SerializeField] private List<UnitEncounterPreset> encounterPresets = new List<UnitEncounterPreset>();
 
         public int SchemaVersion => schemaVersion;
         public IReadOnlyList<UnitTagDefinition> Tags => tags;
         public IReadOnlyList<UnitDefinitionData> Units => units;
+        public IReadOnlyList<UnitEncounterPreset> EncounterPresets => encounterPresets;
 
         /// <summary>
-        /// Переносит старое пиксельное кадрирование портретов в доли рамки.
-        /// Метод идемпотентен и не изменяет уже обновлённую базу.
+        /// Переносит старое пиксельное кадрирование портретов в доли рамки
+        /// (до схемы 1). Схема 2 новых полей не переносит: их значения по
+        /// умолчанию подходят старым записям. Метод идемпотентен.
         /// </summary>
         public bool MigrateIfNeeded()
         {
             if (schemaVersion >= CurrentSchemaVersion)
                 return false;
 
-            if (units != null)
+            if (schemaVersion < 1 && units != null)
             {
                 for (int i = 0; i < units.Count; i++)
                     units[i]?.MigrateLegacyPortraitFraming();
             }
 
+            if (encounterPresets == null)
+                encounterPresets = new List<UnitEncounterPreset>();
             schemaVersion = CurrentSchemaVersion;
             return true;
+        }
+
+        // Для засева каталога: добавляет только отсутствующее.
+        public bool AddUnitIfMissing(UnitDefinitionData unit)
+        {
+            if (unit == null || string.IsNullOrWhiteSpace(unit.Id) || FindById(unit.Id) != null)
+                return false;
+            units.Add(unit);
+            return true;
+        }
+
+        public bool AddPresetIfMissing(UnitEncounterPreset preset)
+        {
+            if (preset == null || string.IsNullOrWhiteSpace(preset.Id) || FindPreset(preset.Id) != null)
+                return false;
+            if (encounterPresets == null)
+                encounterPresets = new List<UnitEncounterPreset>();
+            encounterPresets.Add(preset);
+            return true;
+        }
+
+        public UnitEncounterPreset FindPreset(string presetId)
+        {
+            if (string.IsNullOrWhiteSpace(presetId) || encounterPresets == null)
+                return null;
+            foreach (UnitEncounterPreset preset in encounterPresets)
+            {
+                if (preset != null && string.Equals(preset.Id, presetId, StringComparison.Ordinal))
+                    return preset;
+            }
+            return null;
+        }
+
+        // Существа, которые ждут рисунка художника. Это не ошибка базы:
+        // бой рисует для них жетон.
+        public void CollectArtGaps(List<string> gaps)
+        {
+            if (gaps == null)
+                throw new ArgumentNullException(nameof(gaps));
+
+            gaps.Clear();
+            foreach (UnitDefinitionData unit in units)
+            {
+                if (unit == null || string.IsNullOrWhiteSpace(unit.Id))
+                    continue;
+                if (unit.Portrait == null && unit.BattlefieldSprite == null)
+                    gaps.Add(unit.Id + ": ждёт портрета и миниатюры поля.");
+                else if (unit.Portrait == null)
+                    gaps.Add(unit.Id + ": ждёт портрета.");
+                else if (unit.BattlefieldSprite == null)
+                    gaps.Add(unit.Id + ": ждёт миниатюры поля.");
+            }
         }
 
         public UnitDefinitionData FindById(string typeId)
@@ -231,16 +456,46 @@ namespace KingdomSurvival.UnitDatabase
                     issues.Add(unit.Id + ": отсутствует отображаемое название типа.");
                 if (unit.MaxHitPoints < 1 || unit.Damage < 1 || unit.Movement < 1 || unit.AttackRange < 1)
                     issues.Add(unit.Id + ": одна из обязательных характеристик меньше 1.");
-                if (unit.Portrait == null)
-                    issues.Add(unit.Id + ": не назначен портрет.");
-                if (unit.BattlefieldSprite == null)
-                    issues.Add(unit.Id + ": не назначена миниатюра поля.");
+                // Отсутствие рисунка — не ошибка, а «ждёт рисунка»: CollectArtGaps.
 
                 for (int tagIndex = 0; tagIndex < unit.TagIds.Count; tagIndex++)
                 {
                     string tagId = unit.TagIds[tagIndex];
                     if (!tagIdSet.Contains(tagId))
                         issues.Add(unit.Id + ": неизвестный тег " + tagId + ".");
+                }
+
+                HashSet<string> abilityIds = new HashSet<string>(StringComparer.Ordinal);
+                foreach (UnitAbilityData ability in unit.Abilities)
+                {
+                    if (ability == null || string.IsNullOrWhiteSpace(ability.Id))
+                        issues.Add(unit.Id + ": способность без ID.");
+                    else if (!abilityIds.Add(ability.Id))
+                        issues.Add(unit.Id + ": повторяющийся ID способности " + ability.Id + ".");
+                    else if (string.IsNullOrWhiteSpace(ability.Title))
+                        issues.Add(unit.Id + ": у способности " + ability.Id + " нет названия.");
+                }
+            }
+
+            HashSet<string> presetIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (UnitEncounterPreset preset in encounterPresets ?? new List<UnitEncounterPreset>())
+            {
+                if (preset == null || string.IsNullOrWhiteSpace(preset.Id))
+                {
+                    issues.Add("Состав боя без ID.");
+                    continue;
+                }
+                if (!presetIds.Add(preset.Id))
+                    issues.Add("Повторяющийся ID состава боя: " + preset.Id + ".");
+                if (preset.TotalCount < 1 || preset.TotalCount > MaxEncounterSize)
+                    issues.Add("Состав " + preset.Id + ": противников должно быть от 1 до " + MaxEncounterSize + ".");
+                foreach (UnitEncounterSlot slot in preset.Slots)
+                {
+                    UnitDefinitionData member = slot != null ? FindById(slot.UnitId) : null;
+                    if (member == null)
+                        issues.Add("Состав " + preset.Id + ": неизвестное существо " + (slot != null ? slot.UnitId : "?") + ".");
+                    else if (member.Category != UnitCategory.Creature)
+                        issues.Add("Состав " + preset.Id + ": " + member.Id + " не существо.");
                 }
             }
         }

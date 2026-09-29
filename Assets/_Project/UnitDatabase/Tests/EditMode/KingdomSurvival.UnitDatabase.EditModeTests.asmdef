@@ -3,7 +3,10 @@
   "rootNamespace": "KingdomSurvival.UnitDatabase.Tests",
   "references": [
     "KingdomSurvival.Core",
-    "KingdomSurvival.UnitDatabase"
+    "KingdomSurvival.UnitDatabase",
+    "KingdomSurvival.UnitDatabase.Editor",
+    "KingdomSurvival.ProgressionDatabase",
+    "KingdomSurvival.ProgressionDatabase.Editor"
   ],
   "includePlatforms": [
     "Editor"

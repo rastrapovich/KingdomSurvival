@@ -1,0 +1,137 @@
+using System.Collections.Generic;
+using System.Linq;
+using KingdomSurvival.ProgressionDatabase;
+using KingdomSurvival.UnitDatabase.Editor;
+using NUnit.Framework;
+using UnityEngine;
+
+namespace KingdomSurvival.UnitDatabase.Tests
+{
+    // ПР-12Ж: прототипный боевой каталог из 24 существ и 8 составов
+    // (BESTIARY_COMBAT_PASSPORTS.md, «Прототипный каталог 24»).
+    public sealed class UnitCatalogTests
+    {
+        private static UnitDatabaseAsset Database()
+        {
+            UnitDatabaseAsset database = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
+            Assert.IsNotNull(database);
+            return database;
+        }
+
+        [Test]
+        public void Catalog_Has24Creatures_WithCatalogStats()
+        {
+            UnitDatabaseAsset database = Database();
+            List<UnitDefinitionData> catalog = UnitCatalogSeed.Creatures();
+            Assert.AreEqual(24, catalog.Count);
+            foreach (UnitDefinitionData expected in catalog)
+            {
+                UnitDefinitionData actual = database.FindById(expected.Id);
+                Assert.IsNotNull(actual, "Нет существа " + expected.Id + " — нужен засев каталога.");
+                Assert.AreEqual(UnitCategory.Creature, actual.Category, expected.Id);
+                Assert.AreEqual(0, actual.SandboxEncounterCount, expected.Id + " не входит в засаду по умолчанию.");
+                Assert.AreEqual(
+                    new[] { expected.MaxHitPoints, expected.Attack, expected.Defense, expected.Damage, expected.Movement, expected.Initiative, expected.AttackRange },
+                    new[] { actual.MaxHitPoints, actual.Attack, actual.Defense, actual.Damage, actual.Movement, actual.Initiative, actual.AttackRange },
+                    expected.Id);
+                CollectionAssert.AreEquivalent(expected.TagIds, actual.TagIds, expected.Id);
+                Assert.AreEqual(expected.Size, actual.Size, expected.Id);
+            }
+
+            UnitDefinitionData treshchotka = database.FindById("treshchotka");
+            Assert.AreEqual(5, treshchotka.AttackRange);
+            Assert.IsTrue(treshchotka.HasTag("combat.ranged"));
+            Assert.IsTrue(database.FindById("chernolob").HasTag("trait.armored"));
+        }
+
+        [Test]
+        public void Abilities_WaitForMechanic_UntilPR16()
+        {
+            UnitDatabaseAsset database = Database();
+            List<UnitAbilityData> abilities = UnitCatalogSeed.Creatures()
+                .SelectMany(unit => database.FindById(unit.Id).Abilities)
+                .ToList();
+            Assert.Greater(abilities.Count, 15);
+            Assert.IsTrue(abilities.All(ability => ability.Status == UnitAbilityStatus.WaitsForMechanic));
+            Assert.AreEqual(UnitCombatBrick.AttachPersistent,
+                database.FindById("blood_kleshchen").Abilities.Single().Brick);
+            CollectionAssert.AreEquivalent(new[] { UnitCombatBrick.StatusMark, UnitCombatBrick.Telegraph },
+                database.FindById("zvonnik").Abilities.Select(ability => ability.Brick));
+        }
+
+        [Test]
+        public void Database_Valid_MissingArtIsAGap_NotAnError()
+        {
+            UnitDatabaseAsset database = Database();
+            List<string> issues = new List<string>();
+            database.CollectValidationIssues(issues);
+            Assert.IsEmpty(issues, string.Join("\n", issues));
+
+            List<string> gaps = new List<string>();
+            database.CollectArtGaps(gaps);
+            Assert.IsTrue(gaps.Any(gap => gap.StartsWith("wolf:")));
+            Assert.IsFalse(gaps.Any(gap => gap.StartsWith("guard:")), "У Гвардейца рисунки есть.");
+        }
+
+        [Test]
+        public void Presets_EightValidCompositions_UpToEightEnemies()
+        {
+            UnitDatabaseAsset database = Database();
+            Assert.AreEqual(8, database.EncounterPresets.Count);
+            foreach (UnitEncounterPreset preset in database.EncounterPresets)
+            {
+                Assert.That(preset.TotalCount, Is.InRange(1, UnitDatabaseAsset.MaxEncounterSize), preset.Id);
+                Assert.IsTrue(preset.Slots.All(slot => database.FindById(slot.UnitId) != null), preset.Id);
+            }
+            Assert.AreEqual(6, database.FindPreset("preset.swarm").TotalCount);
+        }
+
+        [Test]
+        public void PresetValidation_RejectsUnknownCreatureAndTooMany()
+        {
+            UnitDatabaseAsset database = Object.Instantiate(Database());
+            try
+            {
+                database.AddPresetIfMissing(UnitEncounterPreset.Create("preset.bad", "Плохой", string.Empty,
+                    new UnitEncounterSlot("nobody", 1), new UnitEncounterSlot("wolf", 9)));
+                List<string> issues = new List<string>();
+                database.CollectValidationIssues(issues);
+                Assert.IsTrue(issues.Any(issue => issue.Contains("nobody")));
+                Assert.IsTrue(issues.Any(issue => issue.Contains("от 1 до 8")));
+            }
+            finally
+            {
+                Object.DestroyImmediate(database);
+            }
+        }
+
+        [Test]
+        public void Seed_IsIdempotent()
+        {
+            UnitDatabaseAsset database = Object.Instantiate(Database());
+            try
+            {
+                int units = database.Units.Count;
+                Assert.IsEmpty(UnitCatalogSeed.AddMissing(database), "Всё уже засеяно.");
+                Assert.AreEqual(units, database.Units.Count);
+            }
+            finally
+            {
+                Object.DestroyImmediate(database);
+            }
+        }
+
+        [Test]
+        public void EveryCatalogCreature_HasNonProgressingProfile()
+        {
+            ProgressionDatabaseAsset progression = Resources.Load<ProgressionDatabaseAsset>(ProgressionDatabaseAsset.ResourcesPath);
+            Assert.IsNotNull(progression);
+            foreach (UnitDefinitionData creature in UnitCatalogSeed.Creatures())
+            {
+                ProgressionProfileRecord profile = progression.FindProfile(creature.Id);
+                Assert.IsNotNull(profile, "Нет карты развития для " + creature.Id);
+                Assert.IsFalse(profile.progresses, creature.Id + ": существо не копит опыт.");
+            }
+        }
+    }
+}

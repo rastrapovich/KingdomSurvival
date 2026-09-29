@@ -16,7 +16,7 @@ namespace KingdomSurvival.UnitDatabase.Tests
                 UnitDatabaseAsset.ResourcesPath);
 
             Assert.That(database, Is.Not.Null);
-            Assert.That(database.Units.Count, Is.EqualTo(9));
+            Assert.That(database.Units.Count, Is.EqualTo(9 + 24), "9 исходных типов и 24 существа каталога ПР-12Ж.");
             Assert.That(
                 database.Units.Select(unit => unit.Id).Distinct().Count(),
                 Is.EqualTo(database.Units.Count));
@@ -28,24 +28,34 @@ namespace KingdomSurvival.UnitDatabase.Tests
         {
             UnitDatabaseAsset database = Resources.Load<UnitDatabaseAsset>(
                 UnitDatabaseAsset.ResourcesPath);
+            // Каталог ПР-12Ж сознательно шире: от Шешки до Чернолоба.
+            UnitDefinitionData[] original = database.Units
+                .Where(unit => !UnitCatalogIds.Contains(unit.Id))
+                .ToArray();
 
-            Assert.That(database.Units.All(unit =>
+            Assert.That(original.Length, Is.EqualTo(9));
+            Assert.That(original.All(unit =>
                 unit.MaxHitPoints >= 10 && unit.MaxHitPoints <= 18), Is.True);
-            Assert.That(database.Units.All(unit =>
+            Assert.That(original.All(unit =>
                 unit.Attack >= 1 && unit.Attack <= 4), Is.True);
-            Assert.That(database.Units.All(unit =>
+            Assert.That(original.All(unit =>
                 unit.Defense >= 1 && unit.Defense <= 4), Is.True);
-            Assert.That(database.Units.All(unit =>
+            Assert.That(original.All(unit =>
                 unit.Damage >= 3 && unit.Damage <= 5), Is.True);
         }
+
+        private static readonly HashSet<string> UnitCatalogIds = new HashSet<string>(
+            KingdomSurvival.UnitDatabase.Editor.UnitCatalogSeed.Creatures().Select(unit => unit.Id));
 
         [Test]
         public void BeastTagDefinesFourCreatureInstancesForSandboxEncounter()
         {
             UnitDatabaseAsset database = Resources.Load<UnitDatabaseAsset>(
                 UnitDatabaseAsset.ResourcesPath);
+            // Фиксированная засада тестового боя — только старые звери;
+            // существа каталога в неё не входят.
             UnitDefinitionData[] creatures = database.Units
-                .Where(unit => unit.Category == UnitCategory.Creature)
+                .Where(unit => unit.Category == UnitCategory.Creature && unit.SandboxEncounterCount > 0)
                 .ToArray();
 
             Assert.That(creatures.Length, Is.EqualTo(3));
@@ -158,6 +168,32 @@ namespace KingdomSurvival.UnitDatabase.Tests
                 Assert.That(unit.PortraitFitMode, Is.EqualTo(PortraitFitMode.Cover));
                 Assert.That(unit.PortraitFlipX, Is.False);
                 Assert.That(database.MigrateIfNeeded(), Is.False);
+            }
+            finally
+            {
+                Object.DestroyImmediate(database);
+            }
+        }
+
+        // Схема 1 → 2 не должна повторно переносить кадрирование портретов.
+        [Test]
+        public void SchemaOneMigratesToTwo_WithoutTouchingPortraitFraming()
+        {
+            UnitDatabaseAsset database = ScriptableObject.CreateInstance<UnitDatabaseAsset>();
+            try
+            {
+                UnitDefinitionData unit = new UnitDefinitionData();
+                SetPrivateField(unit, "portraitOffsetNormalized", new Vector2(0.3f, 0.2f));
+                SetPrivateField(unit, "portraitOffset", new Vector2(15f, -20f));
+                SetPrivateField(database, "units", new List<UnitDefinitionData> { unit });
+                SetPrivateField(database, "schemaVersion", 1);
+
+                Assert.That(database.MigrateIfNeeded(), Is.True);
+                Assert.That(database.SchemaVersion, Is.EqualTo(2));
+                Assert.That(unit.PortraitOffsetNormalized.x, Is.EqualTo(0.3f).Within(0.0001f));
+                Assert.That(unit.Size, Is.EqualTo(UnitSize.Medium));
+                Assert.That(unit.Abilities, Is.Empty);
+                Assert.That(database.EncounterPresets, Is.Empty);
             }
             finally
             {

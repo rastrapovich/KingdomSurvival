@@ -447,6 +447,12 @@ namespace KingdomSurvival.UnitDatabase.Editor
             AddHeader("ТЕГИ");
             BuildTagToggles(unit.FindPropertyRelative("tagIds"));
 
+            // ПР-12Ж: способности со статусом «ждёт механики» не действуют,
+            // пока в ПР-16 нет их общего кирпича.
+            AddHeader("СУЩЕСТВО");
+            AddField(unit, "size", "Размер");
+            AddField(unit, "abilities", "Способности");
+
             AddHeader("ПРЕДПРОСМОТР");
             VisualElement previews = new VisualElement();
             previews.style.flexDirection = FlexDirection.Row;
@@ -467,6 +473,10 @@ namespace KingdomSurvival.UnitDatabase.Editor
             PropertyField tagDefinitions = new PropertyField(tagsProperty, "Теги базы");
             tagEditor.Add(tagDefinitions);
             detailPane.Add(tagEditor);
+
+            Foldout presetEditor = new Foldout { text = "Составы тестового боя", value = false };
+            presetEditor.Add(new PropertyField(serializedDatabase.FindProperty("encounterPresets"), "Составы"));
+            detailPane.Add(presetEditor);
 
             detailPane.Bind(serializedDatabase);
             RefreshPreviews();
@@ -818,11 +828,18 @@ namespace KingdomSurvival.UnitDatabase.Editor
             serializedDatabase.ApplyModifiedProperties();
             List<string> issues = new List<string>();
             database.CollectValidationIssues(issues);
+            List<string> artGaps = new List<string>();
+            database.CollectArtGaps(artGaps);
+            string artLine = artGaps.Count == 0
+                ? string.Empty
+                : "\n\nЖдут рисунка (бой рисует жетон): " + artGaps.Count + ".";
             if (issues.Count == 0)
             {
-                validationLabel.text = "Ошибок не найдено";
+                validationLabel.text = artGaps.Count == 0
+                    ? "Ошибок не найдено"
+                    : "Ошибок нет · ждут рисунка: " + artGaps.Count;
                 validationLabel.style.color = new Color(0.35f, 0.72f, 0.40f, 1f);
-                EditorUtility.DisplayDialog("Проверка базы", "Ошибок не найдено.", "Хорошо");
+                EditorUtility.DisplayDialog("Проверка базы", "Ошибок не найдено." + artLine, "Хорошо");
                 return;
             }
 

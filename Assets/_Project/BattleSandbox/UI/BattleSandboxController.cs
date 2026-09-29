@@ -170,7 +170,7 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         // ПР-10: враги из запроса (шаблоны UnitDatabase × количество); без
-        // списка — стандартная засада. Не больше четырёх существ.
+        // списка — стандартная засада. Не больше SandboxRoster.MaxEnemies существ.
         private List<SandboxUnitDefinition> BuildCampaignEnemies()
         {
             List<SandboxUnitDefinition> enemies = new List<SandboxUnitDefinition>();
@@ -187,7 +187,7 @@ namespace KingdomSurvival.BattleSandbox
                     }
                     int level = Mathf.Clamp(enemy.Level, 1, ProgressionProfile.LevelCount);
                     SandboxUnitDefinition leveled = ApplyEnemyLevel(definition, level);
-                    for (int i = 0; i < Mathf.Max(1, enemy.Count) && enemies.Count < 4; i++)
+                    for (int i = 0; i < Mathf.Max(1, enemy.Count) && enemies.Count < SandboxRoster.MaxEnemies; i++)
                     {
                         enemies.Add(leveled);
                         campaignEnemyLevels.Add(level);

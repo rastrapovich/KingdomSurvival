@@ -972,7 +972,7 @@ namespace KingdomSurvival.BattleSandbox
             portraitLabel.style.display = openedPortrait == null
                 ? DisplayStyle.Flex
                 : DisplayStyle.None;
-            portraitLabel.text = openedDefinition.RoleLabel.ToUpper() + "\n\nИЗОБРАЖЕНИЕ\nБОЙЦА";
+            portraitLabel.text = openedDefinition.RoleLabel.ToUpper() + "\n\nЖДЁТ\nРИСУНКА";
             teamLabel.text = openedState == null || openedState.Team == SandboxTeam.Player
                 ? "ОТРЯД ДОМА"
                 : "ПРОТИВНИК";

@@ -28,6 +28,8 @@ namespace KingdomSurvival.BattleSandbox
             new Dictionary<string, SandboxUnitVisual>();
         private readonly Dictionary<string, Image> unitImages =
             new Dictionary<string, Image>();
+        private readonly Dictionary<string, Label> unitTokenLabels =
+            new Dictionary<string, Label>();
         private readonly Dictionary<string, VisualElement> unitHealthBars =
             new Dictionary<string, VisualElement>();
         private readonly Dictionary<string, VisualElement> unitHealthFills =
@@ -647,8 +649,9 @@ namespace KingdomSurvival.BattleSandbox
                 center += targetOffset;
             }
 
-            float radius = layout.Size * 0.55f;
             bool hasBattlefieldSprite = HasBattlefieldSprite(unit.TypeId);
+            string tokenText = GetTokenText(unit.TypeId, out float tokenScale);
+            float radius = layout.Size * 0.55f * (hasBattlefieldSprite ? 1f : tokenScale);
             if (!hasBattlefieldSprite)
             {
                 Color fill = unit.Team == SandboxTeam.Player
@@ -692,8 +695,20 @@ namespace KingdomSurvival.BattleSandbox
                     false);
             }
 
-            if (!hasBattlefieldSprite)
+            // У существа без рисунка вместо значка роли — буквы названия
+            // (подпись ставит SyncUnitImages).
+            if (!hasBattlefieldSprite && string.IsNullOrEmpty(tokenText))
                 DrawRoleMark(painter, center, layout.Size, unit.Role);
+        }
+
+        private string GetTokenText(string typeId, out float tokenScale)
+        {
+            tokenScale = 1f;
+            SandboxUnitVisual visual;
+            if (string.IsNullOrWhiteSpace(typeId) || !unitVisuals.TryGetValue(typeId, out visual) || visual == null)
+                return string.Empty;
+            tokenScale = visual.TokenScale;
+            return visual.TokenText;
         }
 
         private static void DrawAttackCursor(
@@ -912,6 +927,7 @@ namespace KingdomSurvival.BattleSandbox
             HexLayout layout = CalculateLayout();
             HashSet<string> visibleUnitIds = new HashSet<string>();
             HashSet<string> visibleImageIds = new HashSet<string>();
+            HashSet<string> visibleTokenIds = new HashSet<string>();
             foreach (SandboxUnitState unit in battle.Units)
             {
                 bool animatedDefeatedTarget = IsAnimating && unit.Id == animationTargetId;
@@ -959,8 +975,49 @@ namespace KingdomSurvival.BattleSandbox
                     healthCenter = center;
                     healthTop = center.y + size * 0.5f - HealthBarBottomInset - HealthBarHeight;
                 }
+                else if (visual != null && !string.IsNullOrEmpty(visual.TokenText))
+                {
+                    Label token;
+                    if (!unitTokenLabels.TryGetValue(unit.Id, out token))
+                    {
+                        token = new Label { pickingMode = PickingMode.Ignore };
+                        token.style.position = Position.Absolute;
+                        token.style.unityTextAlign = TextAnchor.MiddleCenter;
+                        token.style.unityFontStyleAndWeight = FontStyle.Bold;
+                        token.style.color = new Color(0.98f, 0.94f, 0.86f, 1f);
+                        unitTokenLabels.Add(unit.Id, token);
+                        Add(token);
+                    }
+
+                    visibleTokenIds.Add(unit.Id);
+                    float tokenSize = layout.Size * 1.1f * visual.TokenScale;
+                    token.text = visual.TokenText;
+                    token.style.fontSize = Mathf.Max(9f, layout.Size * 0.42f * visual.TokenScale);
+                    token.style.width = tokenSize;
+                    token.style.height = tokenSize;
+                    token.style.left = unitCenter.x - tokenSize * 0.5f;
+                    token.style.top = unitCenter.y - tokenSize * 0.5f;
+                    healthTop = unitCenter.y + layout.Size * 0.34f * visual.TokenScale;
+                }
 
                 SyncHealthBar(unit, healthCenter, healthTop, layout.Size * HealthBarWidthScale);
+            }
+
+            List<string> removedTokenIds = null;
+            foreach (KeyValuePair<string, Label> pair in unitTokenLabels)
+            {
+                if (visibleTokenIds.Contains(pair.Key))
+                    continue;
+                if (removedTokenIds == null)
+                    removedTokenIds = new List<string>();
+                removedTokenIds.Add(pair.Key);
+                pair.Value.RemoveFromHierarchy();
+            }
+
+            if (removedTokenIds != null)
+            {
+                for (int i = 0; i < removedTokenIds.Count; i++)
+                    unitTokenLabels.Remove(removedTokenIds[i]);
             }
 
             List<string> removedImageIds = null;
@@ -1075,6 +1132,10 @@ namespace KingdomSurvival.BattleSandbox
             foreach (Image image in unitImages.Values)
                 image.RemoveFromHierarchy();
             unitImages.Clear();
+
+            foreach (Label token in unitTokenLabels.Values)
+                token.RemoveFromHierarchy();
+            unitTokenLabels.Clear();
 
             foreach (VisualElement healthBar in unitHealthBars.Values)
                 healthBar.RemoveFromHierarchy();

@@ -18,16 +18,46 @@ namespace KingdomSurvival.BattleSandbox
         public float BattlefieldScale { get; }
         public Vector2 BattlefieldOffset { get; }
 
+        // ПР-12Ж: жетон существа без миниатюры — буквы названия и размер.
+        public string TokenText { get; }
+        public float TokenScale { get; }
+
         public SandboxUnitVisual(
             Sprite portrait,
             Sprite battlefieldSprite,
             float battlefieldScale,
-            Vector2 battlefieldOffset)
+            Vector2 battlefieldOffset,
+            string tokenText = null,
+            float tokenScale = 1f)
         {
             Portrait = portrait;
             BattlefieldSprite = battlefieldSprite;
             BattlefieldScale = Mathf.Max(0.1f, battlefieldScale);
             BattlefieldOffset = battlefieldOffset;
+            TokenText = tokenText ?? string.Empty;
+            TokenScale = Mathf.Clamp(tokenScale, 0.5f, 1.5f);
+        }
+
+        // «Кровяной клещень» → «КК», «Волк» → «ВО».
+        public static string MakeTokenText(string displayLabel)
+        {
+            if (string.IsNullOrWhiteSpace(displayLabel))
+                return string.Empty;
+            string[] words = displayLabel.Split(new[] { ' ', '-' }, StringSplitOptions.RemoveEmptyEntries);
+            string text = words.Length >= 2
+                ? words[0].Substring(0, 1) + words[1].Substring(0, 1)
+                : words[0].Substring(0, Math.Min(2, words[0].Length));
+            return text.ToUpperInvariant();
+        }
+
+        public static float TokenScaleFor(UnitSize size)
+        {
+            switch (size)
+            {
+                case UnitSize.Small: return 0.8f;
+                case UnitSize.Large: return 1.2f;
+                default: return 1f;
+            }
         }
     }
 
@@ -115,7 +145,11 @@ namespace KingdomSurvival.BattleSandbox
                     source.Portrait,
                     source.BattlefieldSprite,
                     source.BattlefieldScale,
-                    source.BattlefieldOffset);
+                    source.BattlefieldOffset,
+                    source.Category == UnitCategory.Creature
+                        ? SandboxUnitVisual.MakeTokenText(source.DisplayLabel)
+                        : string.Empty,
+                    SandboxUnitVisual.TokenScaleFor(source.Size));
 
                 if (source.Category == UnitCategory.Fighter)
                 {

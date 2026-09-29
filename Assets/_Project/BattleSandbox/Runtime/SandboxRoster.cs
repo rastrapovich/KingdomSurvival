@@ -12,6 +12,10 @@ namespace KingdomSurvival.BattleSandbox
         private const int MaxImpassableCells = 5;
         private const int TerrainGenerationAttempts = 64;
 
+        // ПР-12Ж: столько противников помещается в один бой
+        // (UnitDatabaseAsset.MaxEncounterSize — то же число для составов).
+        public const int MaxEnemies = 8;
+
         private static readonly SandboxUnitDefinition[] PlayerRosterData =
         {
             new SandboxUnitDefinition("guard", "Гвардеец", SandboxUnitRole.Guard, 18, 2, 4, 3, 3, 3, 1,
@@ -93,8 +97,8 @@ namespace KingdomSurvival.BattleSandbox
 
             if (fighters.Count < 1 || fighters.Count > 6)
                 throw new ArgumentException("Для полигона нужно выбрать от одного до шести бойцов.");
-            if (enemies.Count < 1 || enemies.Count > 4)
-                throw new ArgumentException("Тестовая засада должна содержать от одного до четырёх существ.");
+            if (enemies.Count < 1 || enemies.Count > MaxEnemies)
+                throw new ArgumentException("В бою должно быть от одного до " + MaxEnemies + " противников.");
 
             HexCoord[] playerPositions =
             {
@@ -111,7 +115,12 @@ namespace KingdomSurvival.BattleSandbox
                 new HexCoord(8, 1),
                 new HexCoord(9, 2),
                 new HexCoord(9, 3),
-                new HexCoord(9, 4)
+                new HexCoord(9, 4),
+                // ПР-12Ж: места 5–8 для больших составов каталога.
+                new HexCoord(8, 5),
+                new HexCoord(8, 0),
+                new HexCoord(8, 3),
+                new HexCoord(8, 6)
             };
 
             List<SandboxUnitState> units = new List<SandboxUnitState>();

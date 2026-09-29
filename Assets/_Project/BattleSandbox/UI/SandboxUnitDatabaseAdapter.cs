@@ -61,8 +61,29 @@ namespace KingdomSurvival.BattleSandbox
         }
     }
 
+    // ПР-12Ж: готовый состав противников тестового боя из Базы существ.
+    internal sealed class SandboxEncounterChoice
+    {
+        public string Id { get; }
+        public string Title { get; }
+        public string Purpose { get; }
+        public IReadOnlyList<SandboxUnitDefinition> Enemies { get; }
+
+        public SandboxEncounterChoice(string id, string title, string purpose, IReadOnlyList<SandboxUnitDefinition> enemies)
+        {
+            Id = id ?? string.Empty;
+            Title = title ?? string.Empty;
+            Purpose = purpose ?? string.Empty;
+            Enemies = enemies ?? new List<SandboxUnitDefinition>();
+        }
+    }
+
     internal sealed class SandboxUnitContent
     {
+        // ПР-12Ж: все существа базы по порядку (свой состав) и готовые составы.
+        public List<SandboxUnitDefinition> Creatures { get; } = new List<SandboxUnitDefinition>();
+        public List<SandboxEncounterChoice> Presets { get; } = new List<SandboxEncounterChoice>();
+
         private readonly Dictionary<string, SandboxUnitVisual> visuals;
 
         public IReadOnlyList<SandboxUnitDefinition> PlayerRoster { get; }
@@ -171,7 +192,40 @@ namespace KingdomSurvival.BattleSandbox
             SandboxUnitContent content = new SandboxUnitContent(fighters, enemies, visuals, true);
             foreach (KeyValuePair<string, SandboxUnitDefinition> creature in creatures)
                 content.CreaturesById[creature.Key] = creature.Value;
+            foreach (UnitDefinitionData source in database.Units)
+            {
+                if (source != null && source.Category == UnitCategory.Creature &&
+                    creatures.TryGetValue(source.Id, out SandboxUnitDefinition creature) &&
+                    !content.Creatures.Contains(creature))
+                {
+                    content.Creatures.Add(creature);
+                }
+            }
+            foreach (UnitEncounterPreset preset in database.EncounterPresets)
+            {
+                List<SandboxUnitDefinition> members = ExpandPreset(preset, creatures);
+                if (members.Count > 0)
+                    content.Presets.Add(new SandboxEncounterChoice(preset.Id, preset.Title, preset.Purpose, members));
+            }
             return content;
+        }
+
+        // Состав с неизвестным существом или больше MaxEnemies не собирается.
+        internal static List<SandboxUnitDefinition> ExpandPreset(
+            UnitEncounterPreset preset,
+            IReadOnlyDictionary<string, SandboxUnitDefinition> creatures)
+        {
+            List<SandboxUnitDefinition> members = new List<SandboxUnitDefinition>();
+            if (preset == null || creatures == null)
+                return members;
+            foreach (UnitEncounterSlot slot in preset.Slots)
+            {
+                if (slot == null || !creatures.TryGetValue(slot.UnitId, out SandboxUnitDefinition creature))
+                    return new List<SandboxUnitDefinition>();
+                for (int i = 0; i < slot.Count; i++)
+                    members.Add(creature);
+            }
+            return members.Count <= SandboxRoster.MaxEnemies ? members : new List<SandboxUnitDefinition>();
         }
 
         private static SandboxUnitContent CreateFallback()

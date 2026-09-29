@@ -39,7 +39,8 @@ public static class BattleExperience
         int authored = ProgressionRules.Current.GetProfile(enemy.UnitTypeId).GetLevel(Math.Max(1, enemy.Level)).BattleExperience;
         return authored > 0
             ? authored
-            : CharacterProgression.EnemyExperience(enemy.MaxHitPoints, enemy.Attack, enemy.Defense, enemy.Damage);
+            : CharacterProgression.EnemyExperience(enemy.MaxHitPoints, enemy.Attack, enemy.Defense, enemy.Damage,
+                enemy.Movement, enemy.Initiative, enemy.AttackRange, enemy.TagIds);
     }
 
     // Один и тот же состав противников — «тот же бой» для антифарма.

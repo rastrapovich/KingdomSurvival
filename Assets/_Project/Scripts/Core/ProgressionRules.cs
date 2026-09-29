@@ -202,6 +202,17 @@ public sealed class ProgressionRules
     public int EnemyHitPointWeight = 5;
     public int EnemyStatWeight = 10;
 
+    // ПР-12Ж [РАБОЧЕЕ]: подвижность, ранний ход, дальность и боевые теги
+    // тоже делают противника опаснее. Считается превышение над базой.
+    public int EnemyMovementWeight = 5;
+    public int EnemyInitiativeWeight = 3;
+    public int EnemyRangeWeight = 10;
+    public int EnemyCombatTagWeight = 15;
+    public int EnemyBaseMovement = 3;
+    public int EnemyBaseInitiative = 3;
+    public int EnemyBaseRange = 1;
+    public string[] EnemyCombatTagIds = { "combat.ranged", "role.defender", "trait.armored", "trait.human_slayer", "trait.beast_slayer" };
+
     // Практика (§27.6).
     public int PracticePerUse = 2;
     public int[] RepeatPracticePoints = { 2, 2, 1, 1, 1, 1 };

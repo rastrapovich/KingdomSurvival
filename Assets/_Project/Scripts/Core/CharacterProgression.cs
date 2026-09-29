@@ -238,8 +238,45 @@ public static class CharacterProgression
     }
 
     // «Цена» противника по характеристикам, если карта уровня её не задаёт.
+    // Без хода, инициативы, дальности и тегов — как у базового противника.
     public static int EnemyExperience(int maxHitPoints, int attack, int defense, int damage)
     {
-        return Math.Max(0, Rules.EnemyHitPointWeight * maxHitPoints + Rules.EnemyStatWeight * (attack + defense + damage));
+        return EnemyExperience(maxHitPoints, attack, defense, damage, 0, 0, 0, null);
+    }
+
+    // ПР-12Ж: ход, инициатива и дальность выше базы и каждый боевой тег
+    // добавляют к цене. 0 — «не известно», считается базой.
+    public static int EnemyExperience(int maxHitPoints, int attack, int defense, int damage,
+        int movement, int initiative, int attackRange, IEnumerable<string> tagIds)
+    {
+        return EnemyExperience(Rules, new UnitCombatStats
+        {
+            MaxHitPoints = maxHitPoints, Attack = attack, Defense = defense, Damage = damage,
+            Movement = movement, Initiative = initiative, AttackRange = attackRange
+        }, tagIds);
+    }
+
+    // С явными правилами — для окна Базы развития, где правила ещё не
+    // назначены в Current.
+    public static int EnemyExperience(ProgressionRules rules, UnitCombatStats stats, IEnumerable<string> tagIds)
+    {
+        rules = rules ?? Rules;
+        int maxHitPoints = stats.MaxHitPoints, attack = stats.Attack, defense = stats.Defense, damage = stats.Damage;
+        int movement = stats.Movement, initiative = stats.Initiative, attackRange = stats.AttackRange;
+        int value = rules.EnemyHitPointWeight * maxHitPoints + rules.EnemyStatWeight * (attack + defense + damage);
+        value += rules.EnemyMovementWeight * Math.Max(0, movement - rules.EnemyBaseMovement);
+        value += rules.EnemyInitiativeWeight * Math.Max(0, initiative - rules.EnemyBaseInitiative);
+        value += rules.EnemyRangeWeight * Math.Max(0, attackRange - rules.EnemyBaseRange);
+        if (tagIds != null && rules.EnemyCombatTagIds != null)
+        {
+            HashSet<string> combatTags = new HashSet<string>(rules.EnemyCombatTagIds, StringComparer.Ordinal);
+            HashSet<string> counted = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string tagId in tagIds)
+            {
+                if (tagId != null && combatTags.Contains(tagId) && counted.Add(tagId))
+                    value += rules.EnemyCombatTagWeight;
+            }
+        }
+        return Math.Max(0, value);
     }
 }

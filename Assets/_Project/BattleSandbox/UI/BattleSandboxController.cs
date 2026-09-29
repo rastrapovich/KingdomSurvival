@@ -303,6 +303,11 @@ namespace KingdomSurvival.BattleSandbox
                     Attack = enemy.Attack,
                     Defense = enemy.Defense,
                     Damage = enemy.Damage,
+                    // ПР-12Ж: дальность — по основе, без бонуса холма.
+                    Movement = enemy.Movement,
+                    Initiative = enemy.Initiative,
+                    AttackRange = enemy.Definition.AttackRange,
+                    TagIds = enemy.Definition.TagIds.ToList(),
                     Defeated = enemy.IsDefeated
                 });
             }

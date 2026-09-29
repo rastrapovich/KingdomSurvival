@@ -54,6 +54,15 @@ namespace KingdomSurvival.ProgressionDatabase
         public List<int> repeatBattlePercents = new List<int>();
         public int enemyHitPointWeight = 5;
         public int enemyStatWeight = 10;
+        // ПР-12Ж: ход, инициатива, дальность и боевые теги в цене противника.
+        public int enemyMovementWeight = 5;
+        public int enemyInitiativeWeight = 3;
+        public int enemyRangeWeight = 10;
+        public int enemyCombatTagWeight = 15;
+        public int enemyBaseMovement = 3;
+        public int enemyBaseInitiative = 3;
+        public int enemyBaseRange = 1;
+        public List<string> enemyCombatTagIds = new List<string> { "combat.ranged", "role.defender", "trait.armored", "trait.human_slayer", "trait.beast_slayer" };
         public int practicePerUse = 2;
         public List<int> repeatPracticePoints = new List<int>();
         public List<int> practiceToNextRank = new List<int>();
@@ -223,8 +232,10 @@ namespace KingdomSurvival.ProgressionDatabase
         // 3 — статус «Заглушка» у заглушек движка (12Е-4);
         // 4 — первая партия особенностей вне боя активна (12Е-5);
         // 5 — первая партия боевых особенностей активна (12Е-6);
-        // 6 — пороги следов развития в правилах (12Е-8).
-        public const int CurrentSchemaVersion = 6;
+        // 6 — пороги следов развития в правилах (12Е-8);
+        // 7 — ход, инициатива, дальность и теги в цене противника (12Ж);
+        // новые поля правил приходят со значениями по умолчанию.
+        public const int CurrentSchemaVersion = 7;
 
         public int schemaVersion = CurrentSchemaVersion;
         public ProgressionGlobalRecord rules = new ProgressionGlobalRecord();
@@ -351,6 +362,14 @@ namespace KingdomSurvival.ProgressionDatabase
                 RepeatBattlePercents = ToArray(rules.repeatBattlePercents, new[] { 100 }),
                 EnemyHitPointWeight = rules.enemyHitPointWeight,
                 EnemyStatWeight = rules.enemyStatWeight,
+                EnemyMovementWeight = rules.enemyMovementWeight,
+                EnemyInitiativeWeight = rules.enemyInitiativeWeight,
+                EnemyRangeWeight = rules.enemyRangeWeight,
+                EnemyCombatTagWeight = rules.enemyCombatTagWeight,
+                EnemyBaseMovement = rules.enemyBaseMovement,
+                EnemyBaseInitiative = rules.enemyBaseInitiative,
+                EnemyBaseRange = rules.enemyBaseRange,
+                EnemyCombatTagIds = rules.enemyCombatTagIds != null ? rules.enemyCombatTagIds.ToArray() : new string[0],
                 PracticePerUse = rules.practicePerUse,
                 RepeatPracticePoints = ToArray(rules.repeatPracticePoints, new int[0]),
                 PracticeToNextRank = ToArray(rules.practiceToNextRank, new[] { 3, 6, 10, 15, 20 }),
@@ -478,6 +497,14 @@ namespace KingdomSurvival.ProgressionDatabase
                 repeatBattlePercents = new List<int>(source.RepeatBattlePercents ?? new int[0]),
                 enemyHitPointWeight = source.EnemyHitPointWeight,
                 enemyStatWeight = source.EnemyStatWeight,
+                enemyMovementWeight = source.EnemyMovementWeight,
+                enemyInitiativeWeight = source.EnemyInitiativeWeight,
+                enemyRangeWeight = source.EnemyRangeWeight,
+                enemyCombatTagWeight = source.EnemyCombatTagWeight,
+                enemyBaseMovement = source.EnemyBaseMovement,
+                enemyBaseInitiative = source.EnemyBaseInitiative,
+                enemyBaseRange = source.EnemyBaseRange,
+                enemyCombatTagIds = new List<string>(source.EnemyCombatTagIds ?? new string[0]),
                 practicePerUse = source.PracticePerUse,
                 repeatPracticePoints = new List<int>(source.RepeatPracticePoints ?? new int[0]),
                 practiceToNextRank = new List<int>(source.PracticeToNextRank ?? new int[0]),

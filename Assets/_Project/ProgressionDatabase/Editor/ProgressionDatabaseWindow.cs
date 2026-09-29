@@ -348,12 +348,21 @@ namespace KingdomSurvival.ProgressionDatabase.Editor
 
             AddSection(page, "БОЕВОЙ БАНК");
             AddNote(page, "Банк боя = сумма «цены» противников. Цена берётся из карты развития типа на его уровне, а если там 0 — " +
-                          "по формуле: вес HP × здоровье + вес чисел × (атака + защита + урон).");
+                          "по формуле: вес HP × здоровье + вес чисел × (атака + защита + урон) + превышение хода, инициативы " +
+                          "и дальности над базой × их веса + вес тега × число боевых тегов (12Ж, числа рабочие).");
             AddProperty(page, Rules("participationPercent"), "Доля участия, %", "Остальное делится по реальному вкладу. Канон — 60.");
             AddProperty(page, Rules("retreatBankPercent"), "Отход из боя, % банка");
             AddProperty(page, Rules("repeatBattlePercents"), "Повтор того же состава, % банка", "1-й бой, 2-й, 3-й… последнее значение — дальше.");
             AddProperty(page, Rules("enemyHitPointWeight"), "Формула цены: вес HP");
             AddProperty(page, Rules("enemyStatWeight"), "Формула цены: вес атаки+защиты+урона");
+            AddProperty(page, Rules("enemyMovementWeight"), "Формула цены: вес хода сверх базы");
+            AddProperty(page, Rules("enemyBaseMovement"), "База хода");
+            AddProperty(page, Rules("enemyInitiativeWeight"), "Формула цены: вес инициативы сверх базы");
+            AddProperty(page, Rules("enemyBaseInitiative"), "База инициативы");
+            AddProperty(page, Rules("enemyRangeWeight"), "Формула цены: вес дальности сверх базы");
+            AddProperty(page, Rules("enemyBaseRange"), "База дальности");
+            AddProperty(page, Rules("enemyCombatTagWeight"), "Формула цены: вес боевого тега");
+            AddProperty(page, Rules("enemyCombatTagIds"), "Боевые теги", "Каждый из этих тегов у противника добавляет вес тега. Происхождение (species.*) не считается.");
 
             AddSection(page, "ОПЫТ ВНЕ БОЯ");
             AddProperty(page, Rules("explorationExperience"), "Впервые исследованное место");

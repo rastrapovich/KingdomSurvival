@@ -77,6 +77,11 @@ public sealed class CampaignBattleEnemyRecord
     public int Attack;
     public int Defense;
     public int Damage;
+    // ПР-12Ж: для цены противника. 0 — не известно (старый результат).
+    public int Movement;
+    public int Initiative;
+    public int AttackRange;
+    public List<string> TagIds = new List<string>();
     public bool Defeated;
 }
 

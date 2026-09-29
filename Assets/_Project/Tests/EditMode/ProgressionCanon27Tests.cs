@@ -481,6 +481,34 @@ public sealed class ProgressionCanon27Tests
             "0 в карте — цена по формуле общих правил.");
     }
 
+    // ПР-12Ж: ход, инициатива, дальность и боевые теги входят в цену.
+    // Числа — «Прототипный каталог 24» (BESTIARY_COMBAT_PASSPORTS.md).
+    [Test]
+    public void EnemyValue_CountsMobilityRangeAndCombatTags()
+    {
+        CampaignBattleEnemyRecord Record(string id, int hp, int a, int d, int dmg, int mv, int ini, int rng, params string[] tags) =>
+            new CampaignBattleEnemyRecord
+            {
+                UnitTypeId = id, MaxHitPoints = hp, Attack = a, Defense = d, Damage = dmg,
+                Movement = mv, Initiative = ini, AttackRange = rng, TagIds = tags.ToList()
+            };
+
+        CampaignBattleEnemyRecord treshchotka = Record("treshchotka", 8, 3, 0, 3, 4, 8, 5, "combat.ranged");
+        CampaignBattleEnemyRecord kamnespin = Record("kamnespin", 16, 2, 3, 3, 2, 2, 1, "trait.armored", "role.defender");
+        Assert.AreEqual(175, BattleExperience.EnemyValue(treshchotka));
+        Assert.AreEqual(190, BattleExperience.EnemyValue(kamnespin));
+        Assert.Greater(BattleExperience.EnemyValue(treshchotka), CharacterProgression.EnemyExperience(8, 3, 0, 3), "Снайпер дороже прежней формулы.");
+        Assert.Greater(BattleExperience.EnemyValue(kamnespin), CharacterProgression.EnemyExperience(16, 2, 3, 3), "Броня и Защитник дороже прежней формулы.");
+        Assert.AreEqual(139, BattleExperience.EnemyValue(Record("wolf", 10, 3, 1, 3, 5, 6, 1, "species.beast")), "Происхождение не считается.");
+        Assert.AreEqual(295, BattleExperience.EnemyValue(Record("chernolob", 28, 5, 4, 5, 3, 2, 1, "species.beast", "trait.armored", "trait.armored")),
+            "Один тег считается один раз.");
+
+        // Веса — из правил.
+        ProgressionRules.Current.EnemyRangeWeight = 0;
+        ProgressionRules.Current.EnemyCombatTagWeight = 0;
+        Assert.AreEqual(120, BattleExperience.EnemyValue(treshchotka));
+    }
+
     [Test]
     public void Catalog_RenamesFlowToLabels()
     {

@@ -349,8 +349,8 @@ namespace KingdomSurvival.ProgressionDatabase.Editor
                     for (int i = 0; i < ProgressionProfile.LevelCount; i++)
                     {
                         UnitCombatStats stats = statsAtLevel[i];
-                        record.levels[i].battleExperience = Math.Max(0,
-                            rules.EnemyHitPointWeight * stats.MaxHitPoints + rules.EnemyStatWeight * (stats.Attack + stats.Defense + stats.Damage));
+                        UnitDefinitionData unit = BaseUnit(record.id);
+                        record.levels[i].battleExperience = CharacterProgression.EnemyExperience(rules, stats, unit != null ? unit.TagIds : null);
                     }
                 })) { text = "ЦЕНА В БОЮ ПО ФОРМУЛЕ" });
                 value.Add(new Button(() => ModifyProfile("Цена в бою — формулой", record =>
@@ -508,7 +508,7 @@ namespace KingdomSurvival.ProgressionDatabase.Editor
                 statsAtLevel[level - 1] = stats;
                 battleValue[level - 1] = data.BattleExperience > 0
                     ? data.BattleExperience
-                    : Math.Max(0, rules.EnemyHitPointWeight * stats.MaxHitPoints + rules.EnemyStatWeight * (stats.Attack + stats.Defense + stats.Damage));
+                    : CharacterProgression.EnemyExperience(rules, stats, unit != null ? unit.TagIds : null);
                 if (data.Choice)
                 {
                     choiceCount++;

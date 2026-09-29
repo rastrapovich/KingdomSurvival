@@ -12,13 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c30a5c0f24d56454b9134d6d92ab4f30, type: 3}
   m_Name: KingdomSurvivalProgression
   m_EditorClassIdentifier: KingdomSurvival.ProgressionDatabase::KingdomSurvival.ProgressionDatabase.ProgressionDatabaseAsset
-  schemaVersion: 6
+  schemaVersion: 7
   rules:
     participationPercent: 60
     retreatBankPercent: 50
     repeatBattlePercents: 6400000032000000190000000a00000005000000
     enemyHitPointWeight: 5
     enemyStatWeight: 10
+    enemyMovementWeight: 5
+    enemyInitiativeWeight: 3
+    enemyRangeWeight: 10
+    enemyCombatTagWeight: 15
+    enemyBaseMovement: 3
+    enemyBaseInitiative: 3
+    enemyBaseRange: 1
+    enemyCombatTagIds:
+    - combat.ranged
+    - role.defender
+    - trait.armored
+    - trait.human_slayer
+    - trait.beast_slayer
     practicePerUse: 2
     repeatPracticePoints: 020000000200000001000000010000000100000001000000
     practiceToNextRank: 03000000060000000a0000000f00000014000000

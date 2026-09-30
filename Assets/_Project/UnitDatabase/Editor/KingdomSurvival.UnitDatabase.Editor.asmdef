@@ -3,7 +3,9 @@
   "rootNamespace": "KingdomSurvival.UnitDatabase.Editor",
   "references": [
     "KingdomSurvival.Core",
-    "KingdomSurvival.UnitDatabase"
+    "KingdomSurvival.UnitDatabase",
+    "KingdomSurvival.AnimationDatabase",
+    "KingdomSurvival.AnimationDatabase.Editor"
   ],
   "includePlatforms": [
     "Editor"

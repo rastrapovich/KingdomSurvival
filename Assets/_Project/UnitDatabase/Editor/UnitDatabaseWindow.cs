@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using KingdomSurvival.AnimationDatabase;
+using KingdomSurvival.AnimationDatabase.Editor;
 using KingdomSurvival.UnitDatabase;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -44,12 +46,66 @@ namespace KingdomSurvival.UnitDatabase.Editor
         private Vector2 portraitDragStartPointer;
         private Vector2 portraitDragStartOffset;
 
+        // ПР-12З: предпросмотр набора анимаций в карточке существа.
+        private CreatureAnimationDatabaseAsset animationDatabase;
+        private CreatureAnimationPreviewElement animationPreview;
+        private VisualElement animationSetRow;
+
         [MenuItem("Kingdom Survival/База существ")]
         public static void OpenWindow()
         {
             UnitDatabaseWindow window = GetWindow<UnitDatabaseWindow>();
             window.titleContent = new GUIContent("База существ");
             window.minSize = new Vector2(960f, 620f);
+        }
+
+        private void OnEnable()
+        {
+            Undo.undoRedoPerformed += OnAnimationDataChanged;
+            CreatureAnimationEditorData.DataChanged += OnAnimationDataChanged;
+        }
+
+        private void OnDisable()
+        {
+            Undo.undoRedoPerformed -= OnAnimationDataChanged;
+            CreatureAnimationEditorData.DataChanged -= OnAnimationDataChanged;
+        }
+
+        // «Открыть в базе существ» из Базы анимаций выбирает нужное существо.
+        private void OnFocus()
+        {
+            ApplyPendingSelection();
+        }
+
+        private void ApplyPendingSelection()
+        {
+            string pending = SessionState.GetString(CreatureAnimationDatabaseWindow.PendingUnitSelectionKey, string.Empty);
+            if (string.IsNullOrEmpty(pending) || database == null || unitList == null)
+                return;
+            SessionState.EraseString(CreatureAnimationDatabaseWindow.PendingUnitSelectionKey);
+            for (int i = 0; i < database.Units.Count; i++)
+            {
+                if (database.Units[i] == null || database.Units[i].Id != pending)
+                    continue;
+                if (searchField != null)
+                    searchField.SetValueWithoutNotify(string.Empty);
+                if (categoryField != null)
+                    categoryField.index = 0;
+                if (tagFilterField != null)
+                    tagFilterField.index = 0;
+                selectedUnitIndex = i;
+                RefreshUnitList();
+                RestoreSelection();
+                return;
+            }
+        }
+
+        private void OnAnimationDataChanged()
+        {
+            if (serializedDatabase == null || detailPane == null)
+                return;
+            serializedDatabase.Update();
+            RefreshAnimationCard();
         }
 
         public void CreateGUI()
@@ -99,6 +155,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
             RefreshTagFilter();
             RefreshUnitList();
             RestoreSelection();
+            ApplyPendingSelection();
         }
 
         private void BuildToolbar()
@@ -229,6 +286,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 unitList.RefreshItems();
                 RefreshPreviews();
                 RefreshTagFilter();
+                RefreshAnimationPreviewData();
             });
             pane.Add(detailPane);
             return pane;
@@ -468,6 +526,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
             previews.Add(portraitCard);
             previews.Add(battlefieldCard);
             detailPane.Add(previews);
+            BuildAnimationCard();
 
             Foldout tagEditor = new Foldout { text = "Настройка справочника тегов" };
             PropertyField tagDefinitions = new PropertyField(tagsProperty, "Теги базы");
@@ -633,6 +692,118 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 unit.BattlefieldOffset);
         }
 
+        // ПР-12З: тот же предпросмотр, что в Базе анимаций. Клипы правятся
+        // в Базе анимаций; карточка сразу показывает результат.
+        private void BuildAnimationCard()
+        {
+            animationDatabase = CreatureAnimationEditorData.LoadOrCreate();
+
+            VisualElement card = new VisualElement();
+            card.style.marginTop = 10f;
+            card.style.paddingLeft = 8f;
+            card.style.paddingRight = 8f;
+            card.style.paddingTop = 8f;
+            card.style.paddingBottom = 8f;
+            card.style.maxWidth = 520f;
+            card.style.backgroundColor = new Color(0.10f, 0.11f, 0.13f, 1f);
+
+            Label title = new Label("ПОЛЕВАЯ МИНИАТЮРА · АНИМАЦИЯ");
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            card.Add(title);
+
+            animationSetRow = new VisualElement();
+            card.Add(animationSetRow);
+
+            animationPreview = new CreatureAnimationPreviewElement(260f) { AllowPivotEditing = false };
+            animationPreview.style.flexGrow = 0f;
+            card.Add(animationPreview);
+            detailPane.Add(card);
+            RefreshAnimationCard();
+        }
+
+        private void RefreshAnimationCard()
+        {
+            if (animationSetRow == null || database == null ||
+                selectedUnitIndex < 0 || selectedUnitIndex >= database.Units.Count)
+            {
+                return;
+            }
+
+            UnitDefinitionData unit = database.Units[selectedUnitIndex];
+            CreatureAnimationSetData set = animationDatabase != null ? animationDatabase.FindSet(unit.AnimationSetId) : null;
+            animationSetRow.Clear();
+
+            List<string> setIds = new List<string> { string.Empty };
+            if (animationDatabase != null)
+                setIds.AddRange(animationDatabase.Sets.Where(item => item != null).Select(item => item.Id));
+            if (!setIds.Contains(unit.AnimationSetId))
+                setIds.Add(unit.AnimationSetId);
+            PopupField<string> setField = new PopupField<string>(
+                "Набор анимаций",
+                setIds,
+                unit.AnimationSetId,
+                DescribeAnimationSet,
+                DescribeAnimationSet);
+            setField.tooltip = "Набор из Базы анимаций. Один набор можно дать нескольким существам.";
+            setField.RegisterValueChangedCallback(evt => AssignAnimationSet(evt.newValue));
+            animationSetRow.Add(setField);
+
+            Label note = new Label(set != null
+                ? "Используют: " + CreatureAnimationEditorData.DescribeUsers(database, set.Id) +
+                  ". Размер и опору на поле задаёт набор; «Масштаб миниатюры» и «Смещение миниатюры» для этого существа не применяются."
+                : string.IsNullOrEmpty(unit.AnimationSetId)
+                    ? "Набора нет: в бою статичная миниатюра, без неё — жетон."
+                    : "Набор «" + unit.AnimationSetId + "» не найден в Базе анимаций: в бою статичная миниатюра.");
+            note.style.whiteSpace = WhiteSpace.Normal;
+            note.style.fontSize = 10f;
+            note.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
+            animationSetRow.Add(note);
+
+            Button open = new Button(() => CreatureAnimationDatabaseWindow.Open(unit.Id))
+            {
+                text = "ОТКРЫТЬ В БАЗЕ АНИМАЦИЙ"
+            };
+            open.style.marginTop = 4f;
+            animationSetRow.Add(open);
+
+            RefreshAnimationPreviewData();
+        }
+
+        private void RefreshAnimationPreviewData()
+        {
+            if (animationPreview == null || database == null ||
+                selectedUnitIndex < 0 || selectedUnitIndex >= database.Units.Count)
+            {
+                return;
+            }
+            UnitDefinitionData unit = database.Units[selectedUnitIndex];
+            CreatureAnimationSetData set = animationDatabase != null ? animationDatabase.FindSet(unit.AnimationSetId) : null;
+            animationPreview.SetData(animationDatabase, set, unit.BattlefieldSprite);
+        }
+
+        private string DescribeAnimationSet(string setId)
+        {
+            if (string.IsNullOrEmpty(setId))
+                return "— нет —";
+            CreatureAnimationSetData set = animationDatabase != null ? animationDatabase.FindSet(setId) : null;
+            return set == null
+                ? setId + " (не найден)"
+                : set.DisplayName + " [" + set.Id + "] · " + CreatureAnimationLabels.StatusTitle(set.Status);
+        }
+
+        private void AssignAnimationSet(string setId)
+        {
+            if (selectedUnitIndex < 0 || selectedUnitIndex >= unitsProperty.arraySize)
+                return;
+            serializedDatabase.Update();
+            unitsProperty.GetArrayElementAtIndex(selectedUnitIndex)
+                .FindPropertyRelative("animationSetId").stringValue = setId ?? string.Empty;
+            serializedDatabase.ApplyModifiedProperties();
+            EditorUtility.SetDirty(database);
+            CreatureAnimationEditorData.NotifyChanged();
+            RefreshAnimationCard();
+        }
+
         private static void ApplyImageFraming(Image image, float scale, Vector2 offset)
         {
             if (image == null)
@@ -753,6 +924,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
             unit.FindPropertyRelative("battlefieldSprite").objectReferenceValue = null;
             unit.FindPropertyRelative("battlefieldScale").floatValue = 1f;
             unit.FindPropertyRelative("battlefieldOffset").vector2Value = Vector2.zero;
+            unit.FindPropertyRelative("animationSetId").stringValue = string.Empty;
             unit.FindPropertyRelative("sandboxEncounterCount").intValue = 0;
             unit.FindPropertyRelative("tagIds").ClearArray();
             serializedDatabase.ApplyModifiedProperties();

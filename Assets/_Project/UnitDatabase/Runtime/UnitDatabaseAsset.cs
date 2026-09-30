@@ -195,6 +195,10 @@ namespace KingdomSurvival.UnitDatabase
         [SerializeField, Min(0.1f)] private float battlefieldScale = 1f;
         [SerializeField] private Vector2 battlefieldOffset = Vector2.zero;
 
+        // ПР-12З: набор анимаций из Базы анимаций по стабильному ID. Пусто —
+        // на поле статичная миниатюра или жетон, как раньше.
+        [SerializeField] private string animationSetId = string.Empty;
+
         [Header("Тестовый бой")]
         [SerializeField, Min(0)] private int sandboxEncounterCount;
 
@@ -228,6 +232,7 @@ namespace KingdomSurvival.UnitDatabase
         public Sprite BattlefieldSprite => battlefieldSprite;
         public float BattlefieldScale => Mathf.Max(0.1f, battlefieldScale);
         public Vector2 BattlefieldOffset => battlefieldOffset;
+        public string AnimationSetId => animationSetId ?? string.Empty;
         public int SandboxEncounterCount => Mathf.Max(0, sandboxEncounterCount);
         public IReadOnlyList<string> TagIds => tagIds;
 
@@ -301,7 +306,8 @@ namespace KingdomSurvival.UnitDatabase
     {
         public const string ResourcesPath = "UnitDatabase/KingdomSurvivalUnits";
         // Схема 2 (ПР-12Ж): размер и способности существ, составы боя.
-        public const int CurrentSchemaVersion = 2;
+        // Схема 3 (ПР-12З): ссылка на набор анимаций; пустая у старых записей.
+        public const int CurrentSchemaVersion = 3;
 
         // Сколько противников помещается в один бой (SandboxRoster.MaxEnemies).
         public const int MaxEncounterSize = 8;
@@ -318,8 +324,9 @@ namespace KingdomSurvival.UnitDatabase
 
         /// <summary>
         /// Переносит старое пиксельное кадрирование портретов в доли рамки
-        /// (до схемы 1). Схема 2 новых полей не переносит: их значения по
-        /// умолчанию подходят старым записям. Метод идемпотентен.
+        /// (до схемы 1). Схемы 2 и 3 новых полей не переносят: их значения по
+        /// умолчанию подходят старым записям (у старого существа нет набора
+        /// анимаций — это не ошибка). Метод идемпотентен.
         /// </summary>
         public bool MigrateIfNeeded()
         {

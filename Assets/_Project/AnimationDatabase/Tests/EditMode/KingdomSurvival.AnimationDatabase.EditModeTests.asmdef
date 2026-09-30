@@ -1,0 +1,23 @@
+{
+  "name": "KingdomSurvival.AnimationDatabase.EditModeTests",
+  "rootNamespace": "KingdomSurvival.AnimationDatabase.Tests",
+  "references": [
+    "KingdomSurvival.AnimationDatabase",
+    "KingdomSurvival.AnimationDatabase.Editor",
+    "KingdomSurvival.UnitDatabase"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f6a8d629e1644bd8b451c1cf11db201, type: 3}
   m_Name: KingdomSurvivalUnits
   m_EditorClassIdentifier: 
-  schemaVersion: 2
+  schemaVersion: 3
   tags:
   - id: species.human
     displayLabel: "\u0427\u0435\u043B\u043E\u0432\u0435\u043A"

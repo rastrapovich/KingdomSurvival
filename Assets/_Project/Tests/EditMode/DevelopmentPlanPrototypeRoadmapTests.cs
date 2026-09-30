@@ -171,6 +171,37 @@ public sealed class DevelopmentPlanPrototypeRoadmapTests
         }
     }
 
+    // 01.10.2026: поставка 12З (анимации существ) добавляется в ПР-12 один раз.
+    [Test]
+    public void CreatureAnimation_AddsTasksToFreePlay_Once()
+    {
+        DevelopmentPlanAsset plan = NewSeededPlan();
+        try
+        {
+            DevelopmentPlanPrototypeRoadmapSync.Apply(plan);
+            Assert.IsFalse(DevelopmentPlanCreatureAnimationSync.Apply(plan), "Без ПР-12 синхронизация не срабатывает.");
+            DevelopmentPlanPr12FreePlaySync.Apply(plan);
+            DevelopmentPlanPr12FeaturesSync.Apply(plan);
+            DevelopmentPlanCreatureCatalogSync.Apply(plan);
+            DevelopmentPhaseData freePlay = plan.FindPhase(DevelopmentPlanPr12FreePlaySync.FreePlayPhaseId);
+            int before = freePlay.tasks.Count;
+
+            Assert.IsTrue(DevelopmentPlanCreatureAnimationSync.Apply(plan));
+            Assert.IsTrue(DevelopmentPlanCreatureAnimationSync.Apply(plan));
+            Assert.AreEqual(before + 4, freePlay.tasks.Count, "Повторный запуск не дублирует задачи.");
+            Assert.AreEqual(freePlay.tasks.Count, freePlay.tasks.Select(t => t.order).Distinct().Count());
+
+            List<ValidationIssue> errors = DevelopmentPlanValidator.Validate(plan)
+                .Where(i => i.Severity == ValidationSeverity.Error)
+                .ToList();
+            Assert.IsEmpty(errors, string.Join("\n", errors.Select(e => e.EntityId + ": " + e.Message)));
+        }
+        finally
+        {
+            Object.DestroyImmediate(plan);
+        }
+    }
+
     // Канон v1.45: ПР-12 — свободная игра; прежние ПР-12/ПР-13 сдвигаются
     // в ПР-14/ПР-13, главовая часть — в ПР-15. Задачи не теряются.
     [Test]

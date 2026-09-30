@@ -175,9 +175,10 @@ namespace KingdomSurvival.UnitDatabase.Tests
             }
         }
 
-        // Схема 1 → 2 не должна повторно переносить кадрирование портретов.
+        // Схема 1 → текущая не должна повторно переносить кадрирование портретов.
+        // Схема 3 (ПР-12З): у старой записи нет набора анимаций — это не ошибка.
         [Test]
-        public void SchemaOneMigratesToTwo_WithoutTouchingPortraitFraming()
+        public void SchemaOneMigratesToCurrent_WithoutTouchingPortraitFraming()
         {
             UnitDatabaseAsset database = ScriptableObject.CreateInstance<UnitDatabaseAsset>();
             try
@@ -189,11 +190,14 @@ namespace KingdomSurvival.UnitDatabase.Tests
                 SetPrivateField(database, "schemaVersion", 1);
 
                 Assert.That(database.MigrateIfNeeded(), Is.True);
-                Assert.That(database.SchemaVersion, Is.EqualTo(2));
+                Assert.That(database.SchemaVersion, Is.EqualTo(UnitDatabaseAsset.CurrentSchemaVersion));
+                Assert.That(database.SchemaVersion, Is.EqualTo(3));
                 Assert.That(unit.PortraitOffsetNormalized.x, Is.EqualTo(0.3f).Within(0.0001f));
                 Assert.That(unit.Size, Is.EqualTo(UnitSize.Medium));
                 Assert.That(unit.Abilities, Is.Empty);
+                Assert.That(unit.AnimationSetId, Is.Empty);
                 Assert.That(database.EncounterPresets, Is.Empty);
+                Assert.That(database.MigrateIfNeeded(), Is.False, "Повторная миграция ничего не меняет.");
             }
             finally
             {

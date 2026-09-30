@@ -231,6 +231,51 @@ namespace KingdomSurvival.BattleSandbox
         }
     }
 
+    // ПР-12З: вид удара в записи результата.
+    public enum SandboxHitKind
+    {
+        Attack,
+        // «Упреждающий удар» защитника до атаки противника.
+        FirstStrike,
+        Retaliation
+    }
+
+    // ПР-12З: запись одного удара. Исход уже применён моделью; представление
+    // только показывает его по порядку и ничего не пересчитывает.
+    public sealed class SandboxHitRecord
+    {
+        public SandboxHitKind Kind { get; }
+        public string StrikerId { get; }
+        public string TargetId { get; }
+        public HexCoord StrikerPosition { get; }
+        public HexCoord TargetPosition { get; }
+        public int Damage { get; }
+        public int TargetHitPointsBefore { get; }
+        public int TargetHitPointsAfter { get; }
+        public bool TargetDefeated => TargetHitPointsAfter <= 0;
+        public bool IsRanged => StrikerPosition.DistanceTo(TargetPosition) > 1;
+
+        public SandboxHitRecord(
+            SandboxHitKind kind,
+            string strikerId,
+            string targetId,
+            HexCoord strikerPosition,
+            HexCoord targetPosition,
+            int damage,
+            int targetHitPointsBefore,
+            int targetHitPointsAfter)
+        {
+            Kind = kind;
+            StrikerId = strikerId;
+            TargetId = targetId;
+            StrikerPosition = strikerPosition;
+            TargetPosition = targetPosition;
+            Damage = damage;
+            TargetHitPointsBefore = targetHitPointsBefore;
+            TargetHitPointsAfter = targetHitPointsAfter;
+        }
+    }
+
     public sealed class SandboxAttackPreview
     {
         public static SandboxAttackPreview Invalid(string reason)
@@ -265,6 +310,19 @@ namespace KingdomSurvival.BattleSandbox
         private int currentTurnIndex = -1;
         private string pendingRetaliationDefenderId;
         private string pendingRetaliationAttackerId;
+        private readonly List<SandboxHitRecord> hitRecords = new List<SandboxHitRecord>();
+
+        // ПР-12З: все удары боя по порядку. Представление берёт новые записи
+        // после действия, а не ищет изменения здоровья по всей модели.
+        public IReadOnlyList<SandboxHitRecord> HitRecords => hitRecords;
+
+        public List<SandboxHitRecord> GetHitRecordsSince(int index)
+        {
+            int start = Math.Max(0, index);
+            return start >= hitRecords.Count
+                ? new List<SandboxHitRecord>()
+                : hitRecords.GetRange(start, hitRecords.Count - start);
+        }
 
         public int Width { get; }
         public int Height { get; }
@@ -650,7 +708,7 @@ namespace KingdomSurvival.BattleSandbox
                 RecordHit(target, attacker, counter, target.Position);
                 target.UsedMeleeAttack = true;
                 bool attackerStanding = attacker.StillStandingUsed;
-                attacker.ReceiveDamage(counter);
+                ApplyHit(SandboxHitKind.FirstStrike, target, attacker, counter);
                 firstStrike = target.DisplayLabel + " бьёт первым («Упреждающий удар») и наносит " + counter + " урона" +
                               (attacker.IsDefeated ? " — " + attacker.DisplayLabel + " выведен из строя." : StillStandingNote(attacker, attackerStanding) + ".") + " ";
                 if (attacker.IsDefeated)
@@ -676,7 +734,7 @@ namespace KingdomSurvival.BattleSandbox
                 attacker.UsedMeleeAttack = true;
             }
             bool targetStanding = target.StillStandingUsed;
-            target.ReceiveDamage(preview.Damage);
+            ApplyHit(SandboxHitKind.Attack, attacker, target, preview.Damage);
             target.TimesAttackedThisRound++;
             target.TimesAttacked++;
             attacker.ActionPoints--;
@@ -743,7 +801,7 @@ namespace KingdomSurvival.BattleSandbox
             RecordHit(defender, attacker, preview.Damage, defender.Position);
             defender.UsedMeleeAttack = true;
             bool attackerStanding = attacker.StillStandingUsed;
-            attacker.ReceiveDamage(preview.Damage);
+            ApplyHit(SandboxHitKind.Retaliation, defender, attacker, preview.Damage);
             ClearPendingRetaliation();
 
             message = defender.DisplayLabel + " отвечает " + attacker.DisplayLabel + " и наносит " +
@@ -1013,6 +1071,22 @@ namespace KingdomSurvival.BattleSandbox
         {
             pendingRetaliationDefenderId = null;
             pendingRetaliationAttackerId = null;
+        }
+
+        // Урон применяется один раз, здесь же пишется запись удара (ПР-12З).
+        private void ApplyHit(SandboxHitKind kind, SandboxUnitState striker, SandboxUnitState target, int damage)
+        {
+            int before = target.HitPoints;
+            target.ReceiveDamage(damage);
+            hitRecords.Add(new SandboxHitRecord(
+                kind,
+                striker.Id,
+                target.Id,
+                striker.Position,
+                target.Position,
+                damage,
+                before,
+                target.HitPoints));
         }
 
         // Учёт вклада до нанесения удара: сколько HP реально снято и сколько

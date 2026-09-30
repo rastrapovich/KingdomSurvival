@@ -714,7 +714,7 @@ namespace KingdomSurvival.BattleSandbox
             body.style.alignItems = Align.Stretch;
 
             board = new HexBoardElement();
-            board.SetUnitVisuals(unitContent.Visuals);
+            board.SetUnitVisuals(unitContent.Visuals, unitContent.AnimationDatabase);
             board.style.marginRight = 14f;
             board.HexClicked += OnBoardHexClicked;
             board.UnitDetailsRequested += OnBoardUnitDetailsRequested;
@@ -1309,63 +1309,25 @@ namespace KingdomSurvival.BattleSandbox
                 return;
 
             combatAnimationRunning = true;
-            bool attackApplied = false;
             RefreshBattleScreen();
 
-            bool started = board.PlayAttackAnimation(
-                attackerId,
-                targetId,
-                damage,
-                () =>
-                {
-                    string message;
-                    attackApplied = battle.TryAttack(attackerId, targetId, out message);
-                    if (attackApplied)
-                        AddBattleLog(message);
-                },
-                () => ContinueAttackSequence(attackApplied, onComplete));
-
-            if (started)
-                return;
-
-            string fallbackMessage;
-            attackApplied = battle.TryAttack(attackerId, targetId, out fallbackMessage);
+            // ПР-12З: сначала исход — модель считает удар и ответный удар один
+            // раз, — затем поле показывает записи ударов по порядку. Маркеры
+            // анимации ничего не пересчитывают; без анимации исход тот же.
+            int firstRecord = battle.HitRecords.Count;
+            string message;
+            bool attackApplied = battle.TryAttack(attackerId, targetId, out message);
             if (attackApplied)
-                AddBattleLog(fallbackMessage);
-            ContinueAttackSequence(attackApplied, onComplete);
-        }
-
-        private void ContinueAttackSequence(bool attackApplied, Action<bool> onComplete)
-        {
-            if (attackApplied && battle != null && board != null && battle.HasPendingRetaliation)
             {
-                string retaliationDefenderId = battle.PendingRetaliationDefenderId;
-                string retaliationAttackerId = battle.PendingRetaliationAttackerId;
-                SandboxAttackPreview retaliationPreview = battle.PreviewPendingRetaliation();
-                if (retaliationPreview.IsValid &&
-                    !string.IsNullOrEmpty(retaliationDefenderId) &&
-                    !string.IsNullOrEmpty(retaliationAttackerId))
-                {
-                    bool retaliationStarted = board.PlayAttackAnimation(
-                        retaliationDefenderId,
-                        retaliationAttackerId,
-                        retaliationPreview.Damage,
-                        () =>
-                        {
-                            string retaliationMessage;
-                            if (battle.TryResolvePendingRetaliation(out retaliationMessage))
-                                AddBattleLog(retaliationMessage);
-                        },
-                        () => FinishAttackSequence(attackApplied, onComplete));
-
-                    if (retaliationStarted)
-                        return;
-                }
-
-                string fallbackRetaliationMessage;
-                if (battle.TryResolvePendingRetaliation(out fallbackRetaliationMessage))
-                    AddBattleLog(fallbackRetaliationMessage);
+                AddBattleLog(message);
+                string retaliationMessage;
+                if (battle.HasPendingRetaliation && battle.TryResolvePendingRetaliation(out retaliationMessage))
+                    AddBattleLog(retaliationMessage);
             }
+
+            List<SandboxHitRecord> records = battle.GetHitRecordsSince(firstRecord);
+            if (attackApplied && board.PlayHitSequence(records, () => FinishAttackSequence(true, onComplete)))
+                return;
 
             FinishAttackSequence(attackApplied, onComplete);
         }

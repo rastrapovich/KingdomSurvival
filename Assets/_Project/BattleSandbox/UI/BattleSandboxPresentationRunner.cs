@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -50,8 +49,6 @@ namespace KingdomSurvival.BattleSandbox
         private const string ResultOverlayName = "battle-sandbox-result-overlay";
         private const string LogScrollName = "battle-sandbox-log-scroll";
         private const float BattleGridVerticalScale = 0.75f;
-        private const float HealthBarHeight = 4.2f;
-        private const float HealthBarBottomInset = 8f;
 
         private VisualElement styledScreen;
         private VisualElement styledSurface;
@@ -94,7 +91,8 @@ namespace KingdomSurvival.BattleSandbox
                 }
 
                 CenterActiveArena(board);
-                AnchorUnitSpritesByFeet(board);
+                // Опору миниатюр и анимаций считает само поле (HexBoardElement):
+                // покадровая подгонка по границам картинки здесь больше не нужна.
                 TrimRoundLabel(FindRoundLabel(screen));
                 return;
             }
@@ -205,81 +203,6 @@ namespace KingdomSurvival.BattleSandbox
 
             float halfHexOffset = Mathf.Sqrt(3f) * size * 0.5f;
             board.transform.position = new Vector3(-halfHexOffset, 0f, 0f);
-        }
-
-        private static void AnchorUnitSpritesByFeet(VisualElement board)
-        {
-            if (board == null)
-                return;
-
-            List<Image> unitImages = new List<Image>();
-            List<VisualElement> healthBars = new List<VisualElement>();
-            foreach (VisualElement child in board.Children())
-            {
-                if (child is Image image && image.sprite != null)
-                {
-                    unitImages.Add(image);
-                    continue;
-                }
-
-                if (IsUnitHealthBar(child))
-                    healthBars.Add(child);
-            }
-
-            for (int i = 0; i < unitImages.Count; i++)
-            {
-                Image image = unitImages[i];
-                float spriteHeight = image.resolvedStyle.height;
-                if (spriteHeight <= 1f)
-                    continue;
-
-                float verticalShift = -spriteHeight * 0.5f;
-                image.transform.position = new Vector3(0f, verticalShift, 0f);
-
-                VisualElement healthBar = FindNearestHealthBar(image, healthBars);
-                if (healthBar != null)
-                    healthBar.transform.position = new Vector3(0f, verticalShift, 0f);
-            }
-        }
-
-        private static bool IsUnitHealthBar(VisualElement element)
-        {
-            if (element == null || element.childCount != 1)
-                return false;
-
-            float height = element.resolvedStyle.height;
-            return Mathf.Abs(height - HealthBarHeight) <= 1.5f;
-        }
-
-        private static VisualElement FindNearestHealthBar(
-            Image image,
-            List<VisualElement> healthBars)
-        {
-            if (image == null || healthBars == null || healthBars.Count == 0)
-                return null;
-
-            float imageCenterX = image.resolvedStyle.left + image.resolvedStyle.width * 0.5f;
-            float expectedBarY = image.resolvedStyle.top + image.resolvedStyle.height -
-                                 HealthBarBottomInset - HealthBarHeight * 0.5f;
-            VisualElement best = null;
-            float bestDistance = float.MaxValue;
-
-            for (int i = 0; i < healthBars.Count; i++)
-            {
-                VisualElement bar = healthBars[i];
-                float barCenterX = bar.resolvedStyle.left + bar.resolvedStyle.width * 0.5f;
-                float barCenterY = bar.resolvedStyle.top + bar.resolvedStyle.height * 0.5f;
-                float dx = barCenterX - imageCenterX;
-                float dy = barCenterY - expectedBarY;
-                float distance = dx * dx + dy * dy;
-                if (distance < bestDistance)
-                {
-                    bestDistance = distance;
-                    best = bar;
-                }
-            }
-
-            return best;
         }
 
         private static void StyleHeader(VisualElement header)

@@ -69,6 +69,21 @@ namespace KingdomSurvival.BattleSandbox
                 yield return this + direction;
         }
 
+        // ПР-12З: номер соседа в порядке Neighbors() — 0 вправо, 1 вправо-вверх,
+        // 2 влево-вверх, 3 влево, 4 влево-вниз, 5 вправо-вниз; −1 — не сосед.
+        public int GetNeighborIndex(HexCoord other)
+        {
+            HexCoord[] directions = (R & 1) == 0
+                ? EvenRowDirections
+                : OddRowDirections;
+            for (int i = 0; i < directions.Length; i++)
+            {
+                if (this + directions[i] == other)
+                    return i;
+            }
+            return -1;
+        }
+
         public int DistanceTo(HexCoord other)
         {
             int thisX = ToCubeX(Q, R);

@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using KingdomSurvival.AnimationDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KingdomSurvival.BattleSandbox
 {
-    public sealed class HexBoardElement : VisualElement
+    public sealed partial class HexBoardElement : VisualElement
     {
         private const float AttackLungeDuration = 0.12f;
         private const float AttackReturnDuration = 0.10f;
@@ -37,16 +38,12 @@ namespace KingdomSurvival.BattleSandbox
         private readonly VisualElement attackCursorOverlay;
         private readonly Label damageLabel;
 
-        private IVisualElementScheduledItem attackAnimationItem;
+        // Текущий шаг очереди ударов (HexBoardElement.Presentation.cs).
         private string animationAttackerId;
         private string animationTargetId;
         private Vector2 attackerOffset;
         private Vector2 targetOffset;
         private float targetFlash;
-        private float attackAnimationStartedAt;
-        private bool impactApplied;
-        private Action impactCallback;
-        private Action completionCallback;
 
         private IVisualElementScheduledItem movementAnimationItem;
         private string movementUnitId;
@@ -110,8 +107,9 @@ namespace KingdomSurvival.BattleSandbox
                 ClearPointerPreview(false);
                 ClearUnitImages();
                 movementAnimationItem?.Pause();
-                attackAnimationItem?.Pause();
+                PausePresentation();
             });
+            RegisterCallback<AttachToPanelEvent>(_ => EnsurePresentationTicker());
             RegisterCallback<GeometryChangedEvent>(_ =>
             {
                 SyncUnitImages();
@@ -134,9 +132,13 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         internal void SetUnitVisuals(
-            IReadOnlyDictionary<string, SandboxUnitVisual> visuals)
+            IReadOnlyDictionary<string, SandboxUnitVisual> visuals,
+            CreatureAnimationDatabaseAsset animations = null)
         {
             unitVisuals = visuals ?? new Dictionary<string, SandboxUnitVisual>();
+            animationDatabase = animations;
+            presentations.Clear();
+            depthOrder.Clear();
             SyncUnitImages();
             MarkDirtyRepaint();
         }
@@ -144,6 +146,7 @@ namespace KingdomSurvival.BattleSandbox
         public void SetBattle(SandboxBattle value, string targetId)
         {
             battle = value;
+            ResetPresentationsIfBattleChanged();
             selectedTargetId = targetId;
             ClearPointerPreview(false);
             SyncUnitImages();
@@ -170,45 +173,8 @@ namespace KingdomSurvival.BattleSandbox
             movementSegmentStartedAt = Time.realtimeSinceStartup;
             movementVisualPosition = CalculateLayout().GetCenter(path[0]);
             movementCompletionCallback = onComplete;
+            BeginWalkPresentation(unitId, movementPath);
             movementAnimationItem = schedule.Execute(UpdateMovementAnimation).Every(16);
-            SyncUnitImages();
-            MarkDirtyRepaint();
-            return true;
-        }
-
-        public bool PlayAttackAnimation(
-            string attackerId,
-            string targetId,
-            int damage,
-            Action onImpact,
-            Action onComplete)
-        {
-            if (IsAnimating || battle == null)
-                return false;
-
-            ClearPointerPreview(false);
-
-            SandboxUnitState attacker = battle.GetUnit(attackerId);
-            SandboxUnitState target = battle.GetUnit(targetId);
-            if (attacker == null || target == null || attacker.IsDefeated || target.IsDefeated)
-                return false;
-
-            IsAnimating = true;
-            animationAttackerId = attackerId;
-            animationTargetId = targetId;
-            attackerOffset = Vector2.zero;
-            targetOffset = Vector2.zero;
-            targetFlash = 0f;
-            impactApplied = false;
-            impactCallback = onImpact;
-            completionCallback = onComplete;
-            attackAnimationStartedAt = Time.realtimeSinceStartup;
-
-            damageLabel.text = "−" + Mathf.Max(0, damage);
-            damageLabel.style.display = DisplayStyle.None;
-            damageLabel.style.opacity = 1f;
-
-            attackAnimationItem = schedule.Execute(UpdateAttackAnimation).Every(16);
             SyncUnitImages();
             MarkDirtyRepaint();
             return true;
@@ -564,8 +530,7 @@ namespace KingdomSurvival.BattleSandbox
 
             foreach (SandboxUnitState unit in battle.Units)
             {
-                bool animatedDefeatedTarget = IsAnimating && unit.Id == animationTargetId;
-                if (unit.IsDefeated && !animatedDefeatedTarget)
+                if (!IsShownAlive(unit))
                     continue;
                 DrawUnit(painter, layout, unit, current);
             }
@@ -771,7 +736,7 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             }
 
-            float duration = MovementSegmentDuration;
+            float duration = GetMovementSegmentDuration(movementUnitId);
             if (battle.GetTerrain(movementPath[movementSegmentIndex + 1]) == SandboxTerrain.Difficult)
                 duration *= 1.35f;
 
@@ -793,6 +758,7 @@ namespace KingdomSurvival.BattleSandbox
                     FinishMovementAnimation();
                     return;
                 }
+                UpdateWalkFacing(movementUnitId, movementPath, movementSegmentIndex);
             }
 
             SyncUnitImages();
@@ -807,6 +773,7 @@ namespace KingdomSurvival.BattleSandbox
             movementAnimationItem?.Pause();
             movementAnimationItem = null;
             IsAnimating = false;
+            EndWalkPresentation(movementUnitId);
             movementUnitId = null;
             movementPath = null;
             movementSegmentIndex = 0;
@@ -819,101 +786,10 @@ namespace KingdomSurvival.BattleSandbox
             callback?.Invoke();
         }
 
-        private void UpdateAttackAnimation()
-        {
-            if (!IsAnimating || battle == null)
-            {
-                FinishAttackAnimation();
-                return;
-            }
-
-            SandboxUnitState attacker = battle.GetUnit(animationAttackerId);
-            SandboxUnitState target = battle.GetUnit(animationTargetId);
-            if (attacker == null || target == null)
-            {
-                FinishAttackAnimation();
-                return;
-            }
-
-            float elapsed = Mathf.Max(0f, Time.realtimeSinceStartup - attackAnimationStartedAt);
-            HexLayout layout = CalculateLayout();
-            Vector2 direction = layout.GetCenter(target.Position) - layout.GetCenter(attacker.Position);
-            direction = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
-            float lungeDistance = layout.Size * 0.34f;
-
-            if (elapsed < AttackLungeDuration)
-            {
-                float progress = Mathf.Clamp01(elapsed / AttackLungeDuration);
-                float eased = 1f - Mathf.Pow(1f - progress, 3f);
-                attackerOffset = direction * lungeDistance * eased;
-            }
-            else
-            {
-                if (!impactApplied)
-                {
-                    impactApplied = true;
-                    damageLabel.style.display = DisplayStyle.Flex;
-                    impactCallback?.Invoke();
-                }
-
-                float sinceImpact = elapsed - AttackLungeDuration;
-                float returnProgress = Mathf.Clamp01(sinceImpact / AttackReturnDuration);
-                attackerOffset = direction * lungeDistance * (1f - Mathf.SmoothStep(0f, 1f, returnProgress));
-
-                float reactionProgress = Mathf.Clamp01(sinceImpact / 0.24f);
-                float reactionStrength = 1f - reactionProgress;
-                Vector2 perpendicular = new Vector2(-direction.y, direction.x);
-                targetOffset = perpendicular * Mathf.Sin(sinceImpact * 72f) * 5f * reactionStrength;
-                targetFlash = reactionStrength;
-
-                float floatProgress = Mathf.Clamp01(sinceImpact / DamageFloatDuration);
-                Vector2 targetCenter = layout.GetCenter(target.Position) + targetOffset;
-                damageLabel.style.left = targetCenter.x - 60f;
-                damageLabel.style.top = targetCenter.y - layout.Size * 0.88f - floatProgress * 38f;
-                damageLabel.style.opacity = 1f - floatProgress;
-
-                if (sinceImpact >= DamageFloatDuration)
-                {
-                    FinishAttackAnimation();
-                    return;
-                }
-            }
-
-            SyncUnitImages();
-            MarkDirtyRepaint();
-        }
-
-        private void FinishAttackAnimation()
-        {
-            if (attackAnimationItem == null && string.IsNullOrEmpty(animationAttackerId))
-                return;
-
-            attackAnimationItem?.Pause();
-            attackAnimationItem = null;
-            IsAnimating = false;
-            animationAttackerId = null;
-            animationTargetId = null;
-            attackerOffset = Vector2.zero;
-            targetOffset = Vector2.zero;
-            targetFlash = 0f;
-            damageLabel.style.display = DisplayStyle.None;
-            damageLabel.style.opacity = 1f;
-            impactCallback = null;
-
-            Action callback = completionCallback;
-            completionCallback = null;
-            SyncUnitImages();
-            MarkDirtyRepaint();
-            callback?.Invoke();
-        }
-
         private bool HasBattlefieldSprite(string typeId)
         {
-            SandboxUnitVisual visual;
-            return !string.IsNullOrWhiteSpace(typeId) &&
-                   unitVisuals.TryGetValue(typeId, out visual) &&
-                   visual != null &&
-                   visual.BattlefieldSprite != null;
+            SandboxUnitVisual visual = GetVisual(typeId);
+            return visual != null && visual.HasImage;
         }
 
         private void SyncUnitImages()
@@ -928,23 +804,21 @@ namespace KingdomSurvival.BattleSandbox
             HashSet<string> visibleUnitIds = new HashSet<string>();
             HashSet<string> visibleImageIds = new HashSet<string>();
             HashSet<string> visibleTokenIds = new HashSet<string>();
+            List<(string id, float key, VisualElement element)> depthEntries =
+                new List<(string id, float key, VisualElement element)>();
             foreach (SandboxUnitState unit in battle.Units)
             {
-                bool animatedDefeatedTarget = IsAnimating && unit.Id == animationTargetId;
-                if (unit.IsDefeated && !animatedDefeatedTarget)
+                bool shownAlive = IsShownAlive(unit);
+                bool corpse = !shownAlive && IsCorpse(unit);
+                if (!shownAlive && !corpse)
                     continue;
 
-                visibleUnitIds.Add(unit.Id);
                 Vector2 unitCenter = GetUnitVisualCenter(layout, unit);
                 Vector2 healthCenter = unitCenter;
                 float healthTop = unitCenter.y + layout.Size * 0.34f;
 
-                SandboxUnitVisual visual;
-                bool hasBattlefieldSprite =
-                    unitVisuals.TryGetValue(unit.TypeId, out visual) &&
-                    visual != null &&
-                    visual.BattlefieldSprite != null;
-                if (hasBattlefieldSprite)
+                SandboxUnitVisual visual = GetVisual(unit.TypeId);
+                if (visual != null && visual.HasImage)
                 {
                     Image image;
                     if (!unitImages.TryGetValue(unit.Id, out image))
@@ -960,20 +834,39 @@ namespace KingdomSurvival.BattleSandbox
                     }
 
                     visibleImageIds.Add(unit.Id);
-                    image.sprite = visual.BattlefieldSprite;
-                    float size = layout.Size * 1.35f * visual.BattlefieldScale;
-                    Vector2 center = unitCenter + visual.BattlefieldOffset;
-                    image.style.width = size;
-                    image.style.height = size;
-                    image.style.left = center.x - size * 0.5f;
-                    image.style.top = center.y - size * 0.5f;
-                    image.tintColor = IsAnimating && unit.Id == animationTargetId && targetFlash > 0f
-                        ? Color.Lerp(Color.white, new Color(1f, 0.58f, 0.52f, 1f), targetFlash)
-                        : Color.white;
+                    bool flashing = IsAnimating && unit.Id == animationTargetId && targetFlash > 0f;
+                    if (visual.IsAnimated)
+                    {
+                        UnitPresentation presentation = GetPresentation(unit);
+                        LayoutAnimatedImage(image, visual, presentation, unitCenter, layout);
+                        image.tintColor = presentation.CorpseDarkened
+                            ? CorpseTint
+                            : flashing
+                                ? Color.Lerp(Color.white, new Color(1f, 0.58f, 0.52f, 1f), targetFlash)
+                                : Color.white;
+                        // Полоса здоровья привязана к гексу, а не к границам кадра.
+                        healthTop = unitCenter.y + layout.Size * 0.30f;
+                    }
+                    else
+                    {
+                        // Прежнее правило миниатюры: квадратная рамка, центр гекса
+                        // на 15% выше её нижнего края.
+                        image.sprite = visual.BattlefieldSprite;
+                        image.scaleMode = ScaleMode.ScaleToFit;
+                        float size = layout.Size * FieldHeightInHexSizes * visual.BattlefieldScale;
+                        Vector2 center = unitCenter + visual.BattlefieldOffset;
+                        image.style.width = size;
+                        image.style.height = size;
+                        image.style.left = center.x - size * 0.5f;
+                        image.style.top = center.y - size * (1f - StaticAnchorFromBottom);
+                        image.tintColor = flashing
+                            ? Color.Lerp(Color.white, new Color(1f, 0.58f, 0.52f, 1f), targetFlash)
+                            : Color.white;
+                        healthCenter = center;
+                        healthTop = center.y + size * StaticAnchorFromBottom - HealthBarBottomInset - HealthBarHeight;
+                    }
                     image.style.display = DisplayStyle.Flex;
-
-                    healthCenter = center;
-                    healthTop = center.y + size * 0.5f - HealthBarBottomInset - HealthBarHeight;
+                    depthEntries.Add((unit.Id, (corpse ? -100000f : 0f) + unitCenter.y, image));
                 }
                 else if (visual != null && !string.IsNullOrEmpty(visual.TokenText))
                 {
@@ -998,9 +891,14 @@ namespace KingdomSurvival.BattleSandbox
                     token.style.left = unitCenter.x - tokenSize * 0.5f;
                     token.style.top = unitCenter.y - tokenSize * 0.5f;
                     healthTop = unitCenter.y + layout.Size * 0.34f * visual.TokenScale;
+                    depthEntries.Add((unit.Id, unitCenter.y, token));
                 }
 
-                SyncHealthBar(unit, healthCenter, healthTop, layout.Size * HealthBarWidthScale);
+                if (shownAlive)
+                {
+                    visibleUnitIds.Add(unit.Id);
+                    SyncHealthBar(unit, healthCenter, healthTop, layout.Size * HealthBarWidthScale);
+                }
             }
 
             List<string> removedTokenIds = null;
@@ -1057,6 +955,9 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
 
+            ApplyDepthOrder(depthEntries);
+            foreach (VisualElement healthBar in unitHealthBars.Values)
+                healthBar.BringToFront();
             attackCursorOverlay.BringToFront();
             damageLabel.BringToFront();
         }
@@ -1102,17 +1003,17 @@ namespace KingdomSurvival.BattleSandbox
                 healthFill = unitHealthFills[unit.Id];
             }
 
-            float ratio = Mathf.Clamp01((float)unit.HitPoints / Mathf.Max(1, unit.MaxHitPoints));
+            int shownHitPoints = GetShownHitPoints(unit);
+            float ratio = Mathf.Clamp01((float)shownHitPoints / Mathf.Max(1, unit.MaxHitPoints));
             healthBar.style.width = width;
             healthBar.style.height = HealthBarHeight;
             healthBar.style.left = center.x - width * 0.5f;
             healthBar.style.top = top;
             healthBar.style.display = DisplayStyle.Flex;
             healthFill.style.width = Length.Percent(ratio * 100f);
-            healthFill.style.backgroundColor = unit.HitPoints > unit.MaxHitPoints * 0.35f
+            healthFill.style.backgroundColor = shownHitPoints > unit.MaxHitPoints * 0.35f
                 ? new Color(0.32f, 0.72f, 0.38f, 1f)
                 : new Color(0.84f, 0.31f, 0.26f, 1f);
-            healthBar.BringToFront();
         }
 
         private Vector2 GetUnitVisualCenter(HexLayout layout, SandboxUnitState unit)

@@ -4,6 +4,7 @@
     "references": [
         "KingdomSurvival.BattleSandbox.Runtime",
         "KingdomSurvival.UnitDatabase",
+        "KingdomSurvival.AnimationDatabase",
         "KingdomSurvival.Core"
     ],
     "includePlatforms": [],

@@ -2,7 +2,10 @@
   "name": "KingdomSurvival.PlayModeTests",
   "rootNamespace": "",
   "references": [
-    "KingdomSurvival.Core"
+    "KingdomSurvival.Core",
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.BattleSandbox.UI",
+    "KingdomSurvival.AnimationDatabase"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using KingdomSurvival.AnimationDatabase;
 using KingdomSurvival.UnitDatabase;
 using UnityEngine;
 
@@ -22,13 +23,19 @@ namespace KingdomSurvival.BattleSandbox
         public string TokenText { get; }
         public float TokenScale { get; }
 
+        // ПР-12З: набор из Базы анимаций. С ним размер и опору задаёт набор,
+        // а BattlefieldScale/BattlefieldOffset не применяются (не дважды).
+        public CreatureAnimationSetData AnimationSet { get; }
+        public bool IsAnimated => AnimationSet != null;
+
         public SandboxUnitVisual(
             Sprite portrait,
             Sprite battlefieldSprite,
             float battlefieldScale,
             Vector2 battlefieldOffset,
             string tokenText = null,
-            float tokenScale = 1f)
+            float tokenScale = 1f,
+            CreatureAnimationSetData animationSet = null)
         {
             Portrait = portrait;
             BattlefieldSprite = battlefieldSprite;
@@ -36,7 +43,11 @@ namespace KingdomSurvival.BattleSandbox
             BattlefieldOffset = battlefieldOffset;
             TokenText = tokenText ?? string.Empty;
             TokenScale = Mathf.Clamp(tokenScale, 0.5f, 1.5f);
+            AnimationSet = animationSet != null && animationSet.HasAnyFrames ? animationSet : null;
         }
+
+        // Есть ли что рисовать картинкой, а не жетоном.
+        public bool HasImage => IsAnimated || BattlefieldSprite != null;
 
         // «Кровяной клещень» → «КК», «Волк» → «ВО».
         public static string MakeTokenText(string displayLabel)
@@ -111,6 +122,9 @@ namespace KingdomSurvival.BattleSandbox
             }
         }
 
+        // ПР-12З: таблица ракурсов и наборы; null — анимаций нет, всё статично.
+        public CreatureAnimationDatabaseAsset AnimationDatabase { get; set; }
+
         public SandboxUnitVisual GetVisual(string typeId)
         {
             SandboxUnitVisual visual;
@@ -130,6 +144,11 @@ namespace KingdomSurvival.BattleSandbox
                 UnitDatabaseAsset.ResourcesPath);
             if (database == null)
                 return CreateFallback();
+
+            // Один и тот же набор работает во всех входах в бой: тестовом,
+            // кампании, свободной игре — все идут через этот адаптер.
+            CreatureAnimationDatabaseAsset animations = Resources.Load<CreatureAnimationDatabaseAsset>(
+                CreatureAnimationDatabaseAsset.ResourcesPath);
 
             List<SandboxUnitDefinition> fighters = new List<SandboxUnitDefinition>();
             List<SandboxUnitDefinition> enemies = new List<SandboxUnitDefinition>();
@@ -170,7 +189,8 @@ namespace KingdomSurvival.BattleSandbox
                     source.Category == UnitCategory.Creature
                         ? SandboxUnitVisual.MakeTokenText(source.DisplayLabel)
                         : string.Empty,
-                    SandboxUnitVisual.TokenScaleFor(source.Size));
+                    SandboxUnitVisual.TokenScaleFor(source.Size),
+                    animations != null ? animations.FindSet(source.AnimationSetId) : null);
 
                 if (source.Category == UnitCategory.Fighter)
                 {
@@ -189,7 +209,10 @@ namespace KingdomSurvival.BattleSandbox
             if (fighters.Count == 0 || enemies.Count == 0)
                 return CreateFallback();
 
-            SandboxUnitContent content = new SandboxUnitContent(fighters, enemies, visuals, true);
+            SandboxUnitContent content = new SandboxUnitContent(fighters, enemies, visuals, true)
+            {
+                AnimationDatabase = animations
+            };
             foreach (KeyValuePair<string, SandboxUnitDefinition> creature in creatures)
                 content.CreaturesById[creature.Key] = creature.Value;
             foreach (UnitDefinitionData source in database.Units)

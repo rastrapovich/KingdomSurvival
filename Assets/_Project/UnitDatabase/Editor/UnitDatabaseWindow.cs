@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using KingdomSurvival.AnimationDatabase;
 using KingdomSurvival.AnimationDatabase.Editor;
@@ -186,7 +187,13 @@ namespace KingdomSurvival.UnitDatabase.Editor
                           "Существа этой базы показываются там как заглушки состава."
             };
 
-            foreach (Button button in new[] { add, duplicate, remove, addTag, validate, heroScreen })
+            Button cleanArt = new Button(CleanUnusedArt)
+            {
+                text = "ОЧИСТИТЬ КАРТИНКИ",
+                tooltip = "Убрать в корзину загруженные портреты и миниатюры, которые остались от прежних замен и никому не нужны."
+            };
+
+            foreach (Button button in new[] { add, duplicate, remove, addTag, validate, heroScreen, cleanArt })
             {
                 button.style.height = 26f;
                 button.style.marginRight = 6f;
@@ -473,6 +480,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             AddHeader("ИЗОБРАЖЕНИЯ");
             AddField(unit, "portrait", "Портрет");
+            detailPane.Add(BuildArtButtons(UnitArtKind.Portrait));
             AddField(unit, "portraitFitMode", "Вписывание портрета");
             AddField(unit, "portraitScale", "Масштаб портрета");
             AddField(unit, "portraitOffsetNormalized", "Offset X / Y (доля рамки)");
@@ -498,6 +506,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
             detailPane.Add(portraitHint);
 
             AddField(unit, "battlefieldSprite", "Миниатюра на поле");
+            detailPane.Add(BuildArtButtons(UnitArtKind.Battlefield));
             AddField(unit, "battlefieldScale", "Масштаб миниатюры");
             AddField(unit, "battlefieldOffset", "Смещение миниатюры X / Y");
 
@@ -522,9 +531,18 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 200f,
                 ScaleMode.ScaleToFit,
                 out battlefieldPreview);
+            // Картинку можно перетащить прямо на карточку предпросмотра.
+            RegisterArtDrop(portraitCard, UnitArtKind.Portrait);
+            RegisterArtDrop(battlefieldCard, UnitArtKind.Battlefield);
             previews.Add(portraitCard);
             previews.Add(battlefieldCard);
             detailPane.Add(previews);
+            Label dropHint = new Label("Перетащите PNG/JPG с диска или Sprite из окна Project на карточку портрета или миниатюры, чтобы загрузить или заменить картинку.");
+            dropHint.style.whiteSpace = WhiteSpace.Normal;
+            dropHint.style.fontSize = 10f;
+            dropHint.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
+            dropHint.style.marginBottom = 6f;
+            detailPane.Add(dropHint);
             BuildAnimationCard();
 
             Foldout tagEditor = new Foldout { text = "Настройка справочника тегов" };
@@ -534,6 +552,175 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             detailPane.Bind(serializedDatabase);
             RefreshPreviews();
+        }
+
+        // ------------------------------------------------------------------
+        // Загрузка и замена портрета и полевой миниатюры (как в Базе анимаций).
+        // ------------------------------------------------------------------
+
+        private static string ArtProperty(UnitArtKind kind)
+        {
+            return kind == UnitArtKind.Portrait ? "portrait" : "battlefieldSprite";
+        }
+
+        private VisualElement BuildArtButtons(UnitArtKind kind)
+        {
+            VisualElement row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.marginBottom = 6f;
+            row.style.marginLeft = 3f;
+            Button load = new Button(() => LoadArtFromDialog(kind))
+            {
+                text = kind == UnitArtKind.Portrait ? "ЗАГРУЗИТЬ ПОРТРЕТ…" : "ЗАГРУЗИТЬ МИНИАТЮРУ…",
+                tooltip = "PNG или JPG с диска: файл копируется в проект и импортируется как Sprite. " +
+                          "Можно и просто перетащить файл на карточку предпросмотра ниже."
+            };
+            Button clear = new Button(() => AssignArt(kind, null))
+            {
+                text = "УБРАТЬ",
+                tooltip = "Убрать картинку у существа. Файл остаётся в проекте; отменить можно через Undo."
+            };
+            row.Add(load);
+            row.Add(clear);
+            return row;
+        }
+
+        private void LoadArtFromDialog(UnitArtKind kind)
+        {
+            string path = EditorUtility.OpenFilePanelWithFilters(
+                kind == UnitArtKind.Portrait ? "Портрет существа" : "Миниатюра на поле",
+                SessionState.GetString("KS.UnitDatabase.LastArtFolder", string.Empty),
+                new[] { "Изображения", "png,jpg,jpeg" });
+            if (string.IsNullOrEmpty(path))
+                return;
+            SessionState.SetString("KS.UnitDatabase.LastArtFolder", Path.GetDirectoryName(path) ?? string.Empty);
+            ImportArtFile(kind, path);
+        }
+
+        private void ImportArtFile(UnitArtKind kind, string path)
+        {
+            if (selectedUnitIndex < 0 || selectedUnitIndex >= database.Units.Count)
+                return;
+            UnitDefinitionData unit = database.Units[selectedUnitIndex];
+            if (!ConfirmReplace(kind, unit))
+                return;
+            Sprite sprite = UnitArtImporter.ImportExternal(path, unit.Id, kind, out string error);
+            if (sprite == null)
+            {
+                EditorUtility.DisplayDialog("Картинка не загружена", error ?? "Неизвестная ошибка.", "Закрыть");
+                return;
+            }
+            AssignArt(kind, sprite);
+        }
+
+        private bool ConfirmReplace(UnitArtKind kind, UnitDefinitionData unit)
+        {
+            Sprite current = kind == UnitArtKind.Portrait ? unit.Portrait : unit.BattlefieldSprite;
+            return current == null || EditorUtility.DisplayDialog(
+                "Заменить " + UnitArtImporter.KindTitle(kind) + "?",
+                (string.IsNullOrWhiteSpace(unit.DisplayLabel) ? unit.Id : unit.DisplayLabel) + ": сейчас «" + current.name +
+                "». Прежний файл останется в проекте; отменить можно через Undo.",
+                "Заменить",
+                "Отмена");
+        }
+
+        // Назначение через SerializedProperty: Undo, сохранение и привязанные
+        // поля работают как у остальных полей базы.
+        private void AssignArt(UnitArtKind kind, Sprite sprite)
+        {
+            if (selectedUnitIndex < 0 || selectedUnitIndex >= unitsProperty.arraySize)
+                return;
+            serializedDatabase.Update();
+            SerializedProperty property = unitsProperty.GetArrayElementAtIndex(selectedUnitIndex)
+                .FindPropertyRelative(ArtProperty(kind));
+            if (property.objectReferenceValue == sprite)
+                return;
+            property.objectReferenceValue = sprite;
+            serializedDatabase.ApplyModifiedProperties();
+            EditorUtility.SetDirty(database);
+            AssetDatabase.SaveAssetIfDirty(database);
+            unitList.RefreshItems();
+            RefreshPreviews();
+            RefreshAnimationPreviewData();
+        }
+
+        private void RegisterArtDrop(VisualElement card, UnitArtKind kind)
+        {
+            void Highlight(bool on)
+            {
+                Color color = on ? new Color(0.88f, 0.71f, 0.38f, 1f) : new Color(0f, 0f, 0f, 0f);
+                float width = on ? 2f : 0f;
+                card.style.borderLeftWidth = width;
+                card.style.borderRightWidth = width;
+                card.style.borderTopWidth = width;
+                card.style.borderBottomWidth = width;
+                card.style.borderLeftColor = color;
+                card.style.borderRightColor = color;
+                card.style.borderTopColor = color;
+                card.style.borderBottomColor = color;
+            }
+
+            card.tooltip = "Перетащите сюда PNG/JPG или Sprite, чтобы загрузить " + UnitArtImporter.KindTitle(kind) + ".";
+            card.RegisterCallback<DragEnterEvent>(_ => Highlight(HasDroppableArt()));
+            card.RegisterCallback<DragLeaveEvent>(_ => Highlight(false));
+            card.RegisterCallback<DragExitedEvent>(_ => Highlight(false));
+            card.RegisterCallback<DragUpdatedEvent>(evt =>
+            {
+                DragAndDrop.visualMode = HasDroppableArt() ? DragAndDropVisualMode.Copy : DragAndDropVisualMode.Rejected;
+                evt.StopPropagation();
+            });
+            card.RegisterCallback<DragPerformEvent>(evt =>
+            {
+                Highlight(false);
+                if (!HasDroppableArt())
+                    return;
+                DragAndDrop.AcceptDrag();
+                evt.StopPropagation();
+
+                Sprite projectSprite = (DragAndDrop.objectReferences ?? Array.Empty<UnityEngine.Object>())
+                    .Select(UnitArtImporter.FromProjectObject)
+                    .FirstOrDefault(sprite => sprite != null);
+                if (projectSprite != null)
+                {
+                    if (selectedUnitIndex >= 0 && ConfirmReplace(kind, database.Units[selectedUnitIndex]))
+                        AssignArt(kind, projectSprite);
+                    return;
+                }
+                string file = (DragAndDrop.paths ?? Array.Empty<string>()).FirstOrDefault(UnitArtImporter.IsImageFile);
+                if (file != null)
+                    ImportArtFile(kind, Path.IsPathRooted(file) ? file : UnitArtImporter.ToAbsolute(file));
+            });
+        }
+
+        private static bool HasDroppableArt()
+        {
+            if ((DragAndDrop.objectReferences ?? Array.Empty<UnityEngine.Object>()).Any(item => item is Sprite || item is Texture2D))
+                return true;
+            return (DragAndDrop.paths ?? Array.Empty<string>()).Any(UnitArtImporter.IsImageFile);
+        }
+
+        private void CleanUnusedArt()
+        {
+            List<string> unused = UnitArtImporter.FindUnused(database);
+            if (unused.Count == 0)
+            {
+                EditorUtility.DisplayDialog("Картинки существ", "Неиспользуемых загруженных картинок нет.", "Хорошо");
+                return;
+            }
+            if (!EditorUtility.DisplayDialog(
+                    "Убрать неиспользуемые картинки?",
+                    "Эти портреты и миниатюры остались от прежних загрузок и не нужны ни одному существу:\n" +
+                    string.Join("\n", unused.Take(12).Select(Path.GetFileName)) +
+                    (unused.Count > 12 ? "\n…и ещё " + (unused.Count - 12) : string.Empty) +
+                    "\n\nФайлы уйдут в корзину. После этого Undo прежних замен не вернёт эти картинки.",
+                    "В корзину",
+                    "Отмена"))
+            {
+                return;
+            }
+            List<string> failed = new List<string>();
+            AssetDatabase.MoveAssetsToTrash(unused.ToArray(), failed);
+            validationLabel.text = "Убрано картинок: " + (unused.Count - failed.Count);
         }
 
         private void AddHeader(string text)

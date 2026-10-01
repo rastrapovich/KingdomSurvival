@@ -155,6 +155,47 @@ public sealed class CreatureAnimationBattlePlayModeTests
         yield return WaitFrames(10);
     }
 
+    // Полевая миниатюра без анимаций у противника тоже отражена, у своих — нет.
+    [UnityTest]
+    public IEnumerator StaticMiniatures_AreMirroredForEnemies()
+    {
+        SceneManager.LoadScene(BattleScene);
+        for (int i = 0; i < 600 && SceneManager.GetActiveScene().name != BattleScene; i++)
+            yield return null;
+        UIDocument document = null;
+        for (int i = 0; i < 120 && document == null; i++)
+        {
+            document = Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None).FirstOrDefault(d => d.rootVisualElement != null);
+            yield return null;
+        }
+        HexBoardElement board = new HexBoardElement { name = "test-static-board" };
+        board.style.position = Position.Absolute;
+        board.style.width = 900f;
+        board.style.height = 620f;
+        document.rootVisualElement.Add(board);
+
+        Texture2D texture = new Texture2D(16, 16);
+        created.Add(texture);
+        Sprite miniature = Sprite.Create(texture, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0f));
+        created.Add(miniature);
+        Type visualType = typeof(HexBoardElement).Assembly.GetType("KingdomSurvival.BattleSandbox.SandboxUnitVisual");
+        IDictionary visuals = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(typeof(string), visualType));
+        foreach (string typeId in new[] { "hero", "beast" })
+        {
+            visuals[typeId] = Activator.CreateInstance(visualType, AnyInstance, null,
+                new object[] { null, miniature, 1f, new Vector2(4f, 0f), string.Empty, 1f, null }, null);
+        }
+        typeof(HexBoardElement).GetMethod("SetUnitVisuals", AnyInstance).Invoke(board, new object[] { visuals, null });
+        board.SetBattle(Battle(heroDamage: 3, beastHp: 10, beastPosition: new HexCoord(3, 2), extraBeastPosition: new HexCoord(4, 4)), null);
+        yield return WaitFrames(6);
+
+        Image hero = (Image)Images(board)["hero"];
+        Image beast = (Image)Images(board)["beastA"];
+        Assert.AreEqual(1f, hero.style.scale.value.value.x, 0.001f, "Свой боец не отражён.");
+        Assert.AreEqual(-1f, beast.style.scale.value.value.x, 0.001f, "Миниатюра противника отражена.");
+        board.RemoveFromHierarchy();
+    }
+
     private CreatureAnimationSetData BuildSet()
     {
         CreatureAnimationSetData set = new CreatureAnimationSetData("test_shared", "Тестовый набор");

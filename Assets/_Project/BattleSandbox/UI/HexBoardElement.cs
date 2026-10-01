@@ -845,10 +845,17 @@ namespace KingdomSurvival.BattleSandbox
                     {
                         // Прежнее правило миниатюры: квадратная рамка, центр гекса
                         // на 15% выше её нижнего края.
+                        // Противник, как и с анимацией, отражён по горизонтали;
+                        // смещение X отражается вместе с картинкой.
+                        bool mirrored = unit.Team == SandboxTeam.Enemy;
                         image.sprite = visual.BattlefieldSprite;
                         image.scaleMode = ScaleMode.ScaleToFit;
+                        image.style.scale = new Scale(new Vector3(mirrored ? -1f : 1f, 1f, 1f));
                         float size = layout.Size * FieldHeightInHexSizes * visual.BattlefieldScale;
-                        Vector2 center = unitCenter + visual.BattlefieldOffset;
+                        Vector2 offset = visual.BattlefieldOffset;
+                        if (mirrored)
+                            offset.x = -offset.x;
+                        Vector2 center = unitCenter + offset;
                         image.style.width = size;
                         image.style.height = size;
                         image.style.left = center.x - size * 0.5f;

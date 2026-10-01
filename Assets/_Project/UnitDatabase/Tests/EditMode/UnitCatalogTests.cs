@@ -66,10 +66,24 @@ namespace KingdomSurvival.UnitDatabase.Tests
             database.CollectValidationIssues(issues);
             Assert.IsEmpty(issues, string.Join("\n", issues));
 
-            List<string> gaps = new List<string>();
-            database.CollectArtGaps(gaps);
-            Assert.IsTrue(gaps.Any(gap => gap.StartsWith("wolf:")));
-            Assert.IsFalse(gaps.Any(gap => gap.StartsWith("guard:")), "У Гвардейца рисунки есть.");
+            // Существо без рисунка — пробел «ждёт рисунка», а не ошибка базы.
+            // Проверка не зависит от того, кому художник уже загрузил арт.
+            UnitDatabaseAsset copy = Object.Instantiate(database);
+            try
+            {
+                copy.AddUnitIfMissing(UnitDefinitionData.CreateCreature(
+                    "zz_no_art", "Без рисунка", UnitSize.Medium, 10, 1, 1, 1, 3, 3, 1, new string[0], new UnitAbilityData[0]));
+                copy.CollectValidationIssues(issues);
+                Assert.IsEmpty(issues, string.Join("\n", issues));
+                List<string> gaps = new List<string>();
+                copy.CollectArtGaps(gaps);
+                Assert.IsTrue(gaps.Any(gap => gap.StartsWith("zz_no_art:")));
+                Assert.IsFalse(gaps.Any(gap => gap.StartsWith("guard:")), "У Гвардейца рисунки есть.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(copy);
+            }
         }
 
         [Test]

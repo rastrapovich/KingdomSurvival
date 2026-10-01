@@ -62,13 +62,13 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
         private void OnEnable()
         {
-            Undo.undoRedoPerformed += OnAnimationDataChanged;
+            Undo.undoRedoPerformed += OnUndoRedo;
             CreatureAnimationEditorData.DataChanged += OnAnimationDataChanged;
         }
 
         private void OnDisable()
         {
-            Undo.undoRedoPerformed -= OnAnimationDataChanged;
+            Undo.undoRedoPerformed -= OnUndoRedo;
             CreatureAnimationEditorData.DataChanged -= OnAnimationDataChanged;
         }
 
@@ -99,6 +99,17 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 RestoreSelection();
                 return;
             }
+        }
+
+        // После Undo карточка перестраивается: русские списки не привязаны
+        // к полям напрямую и иначе показали бы прежнее значение.
+        private void OnUndoRedo()
+        {
+            if (serializedDatabase == null || detailPane == null)
+                return;
+            serializedDatabase.Update();
+            unitList?.RefreshItems();
+            ShowSelectedUnit();
         }
 
         private void OnAnimationDataChanged()
@@ -145,7 +156,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             TwoPaneSplitView mainSplit = new TwoPaneSplitView(
                 0,
-                310f,
+                ListPaneWidth,
                 TwoPaneSplitViewOrientation.Horizontal);
             mainSplit.style.flexGrow = 1f;
             rootVisualElement.Add(mainSplit);
@@ -222,50 +233,50 @@ namespace KingdomSurvival.UnitDatabase.Editor
                 "чтобы настроить разметку блоков состава, характеристик и снаряжения.");
         }
 
+        // Узкая левая панель: фильтры без боковых подписей во всю ширину —
+        // при сужении панели они не наезжают друг на друга.
+        private const float ListPaneWidth = 190f;
+        private const float ThumbnailScale = 0.56f;
+
         private VisualElement BuildListPane()
         {
             VisualElement pane = new VisualElement();
-            pane.style.paddingLeft = 8f;
-            pane.style.paddingRight = 8f;
-            pane.style.paddingTop = 8f;
-            pane.style.paddingBottom = 8f;
+            pane.style.minWidth = 150f;
+            pane.style.paddingLeft = 6f;
+            pane.style.paddingRight = 6f;
+            pane.style.paddingTop = 6f;
+            pane.style.paddingBottom = 6f;
 
-            searchField = new TextField { label = "Поиск" };
+            searchField = new TextField { tooltip = "Поиск по названию" };
+            searchField.textEdition.placeholder = "Поиск…";
+            searchField.style.marginLeft = 0f;
+            searchField.style.marginRight = 0f;
             searchField.RegisterValueChangedCallback(_ => RefreshUnitList());
             pane.Add(searchField);
 
-            categoryField = new PopupField<string>(
-                "Категория",
-                categoryChoices,
-                0);
+            categoryField = new PopupField<string>(categoryChoices, 0) { tooltip = "Категория" };
+            categoryField.style.marginLeft = 0f;
+            categoryField.style.marginRight = 0f;
+            categoryField.style.marginTop = 4f;
             categoryField.RegisterValueChangedCallback(_ => RefreshUnitList());
             pane.Add(categoryField);
 
-            tagFilterField = new PopupField<string>(
-                "Тег",
-                new List<string> { "Все теги" },
-                0);
+            tagFilterField = new PopupField<string>(new List<string> { "Все теги" }, 0) { tooltip = "Тег" };
+            tagFilterField.style.marginLeft = 0f;
+            tagFilterField.style.marginRight = 0f;
+            tagFilterField.style.marginTop = 4f;
             tagFilterField.RegisterValueChangedCallback(_ => RefreshUnitList());
             pane.Add(tagFilterField);
 
             unitList = new ListView();
             unitList.style.flexGrow = 1f;
             unitList.style.marginTop = 8f;
-            unitList.fixedItemHeight = 60f;
+            unitList.fixedItemHeight = PortraitSizeTable.Get(PortraitSize.XS).Height * ThumbnailScale + 8f;
             unitList.selectionType = SelectionType.Single;
             unitList.makeItem = CreateUnitListItem;
             unitList.bindItem = BindUnitListItem;
             unitList.selectionChanged += _ => SelectVisibleUnit(unitList.selectedIndex);
             pane.Add(unitList);
-
-            Label explanation = new Label(
-                "ID определяет тип. Личное имя не хранится. " +
-                "Индивидуальное развитие экземпляра будет находиться в сохранении.");
-            explanation.style.whiteSpace = WhiteSpace.Normal;
-            explanation.style.fontSize = 10f;
-            explanation.style.marginTop = 6f;
-            explanation.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
-            pane.Add(explanation);
             return pane;
         }
 
@@ -309,11 +320,10 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             VisualElement thumbnailFrame = new VisualElement { name = "thumbnail-frame" };
             PortraitSizeDefinition thumbnailPreset = PortraitSizeTable.Get(PortraitSize.XS);
-            const float thumbnailDisplayScale = 0.4f;
-            // XS 100x140 в масштабе 40%: даже миниатюра списка сохраняет
-            // каноническое отношение рамки 5:7, а не прежнее 3:4.
-            thumbnailFrame.style.width = thumbnailPreset.Width * thumbnailDisplayScale;
-            thumbnailFrame.style.height = thumbnailPreset.Height * thumbnailDisplayScale;
+            // XS 100x140 в масштабе 56% (было 40%): миниатюра списка крупнее и
+            // сохраняет каноническое отношение рамки 5:7.
+            thumbnailFrame.style.width = thumbnailPreset.Width * ThumbnailScale;
+            thumbnailFrame.style.height = thumbnailPreset.Height * ThumbnailScale;
             thumbnailFrame.style.flexShrink = 0f;
             thumbnailFrame.style.marginRight = 8f;
             thumbnailFrame.style.backgroundColor = new Color(0.10f, 0.10f, 0.10f, 1f);
@@ -334,13 +344,16 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             VisualElement text = new VisualElement();
             text.style.flexGrow = 1f;
+            text.style.flexShrink = 1f;
+            text.style.minWidth = 0f;
             Label title = new Label { name = "title" };
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            Label id = new Label { name = "id" };
-            id.style.fontSize = 10f;
-            id.style.color = new Color(0.60f, 0.60f, 0.60f, 1f);
+            title.style.whiteSpace = WhiteSpace.Normal;
+            Label info = new Label { name = "info" };
+            info.style.fontSize = 10f;
+            info.style.color = new Color(0.60f, 0.60f, 0.60f, 1f);
             text.Add(title);
-            text.Add(id);
+            text.Add(info);
             row.Add(text);
             return row;
         }
@@ -354,7 +367,11 @@ namespace KingdomSurvival.UnitDatabase.Editor
             element.Q<Label>("title").text = string.IsNullOrWhiteSpace(unit.DisplayLabel)
                 ? "БЕЗ НАЗВАНИЯ ТИПА"
                 : unit.DisplayLabel;
-            element.Q<Label>("id").text = unit.Id + " · " + GetCategoryLabel(unit.Category);
+            // Без английского ID: категория и, если нужно, что ждёт рисунка.
+            string waiting = unit.Portrait == null && unit.BattlefieldSprite == null
+                ? " · ждёт рисунка"
+                : unit.Portrait == null ? " · нет портрета" : string.Empty;
+            element.Q<Label>("info").text = GetCategoryLabel(unit.Category) + waiting;
 
             UnitPortraitElement thumbnail = element.Q<UnitPortraitElement>("thumbnail");
             thumbnail.SetPortrait(unit);
@@ -446,6 +463,26 @@ namespace KingdomSurvival.UnitDatabase.Editor
             ShowSelectedUnit();
         }
 
+        // ------------------------------------------------------------------
+        // Карточка существа — блоки фиксированной ширины, которые переносятся
+        // по ширине окна: тип, характеристики, теги, портрет, миниатюра,
+        // анимация, способности. Числа — ползунками с полем ввода, настройки
+        // картинки — под самой картинкой.
+        // ------------------------------------------------------------------
+
+        private static readonly Color CardColor = new Color(0.13f, 0.14f, 0.16f, 1f);
+        private static readonly Color CardBorder = new Color(0.22f, 0.23f, 0.25f, 1f);
+        private static readonly Color HeaderColor = new Color(0.86f, 0.70f, 0.38f, 1f);
+        private static readonly Color HintColor = new Color(0.60f, 0.60f, 0.60f, 1f);
+
+        private const float FieldViewportWidth = 250f;
+        private const float FieldViewportHeight = 290f;
+        private const float FieldBaseBoxSize = 190f;
+        private const float FieldAnchorY = 0.72f;
+
+        private VisualElement battlefieldViewport;
+        private VisualElement battlefieldAnchorMarker;
+
         private void ShowSelectedUnit()
         {
             portraitDragging = false;
@@ -463,95 +500,391 @@ namespace KingdomSurvival.UnitDatabase.Editor
             detailPane.Clear();
 
             SerializedProperty unit = unitsProperty.GetArrayElementAtIndex(selectedUnitIndex);
-            AddHeader("ИДЕНТИФИКАЦИЯ ТИПА");
-            AddField(unit, "id", "ID типа");
-            AddField(unit, "displayLabel", "Название типа");
-            AddField(unit, "category", "Категория");
-            AddField(unit, "combatRole", "Боевая роль");
+            UnitDefinitionData data = database.Units[selectedUnitIndex];
 
-            AddHeader("БОЕВЫЕ ХАРАКТЕРИСТИКИ");
-            AddField(unit, "maxHitPoints", "HP");
-            AddField(unit, "attack", "Атака");
-            AddField(unit, "defense", "Защита");
-            AddField(unit, "damage", "Урон");
-            AddField(unit, "movement", "Ход");
-            AddField(unit, "initiative", "Инициатива");
-            AddField(unit, "attackRange", "Дальность");
+            VisualElement titleRow = new VisualElement();
+            titleRow.style.flexDirection = FlexDirection.Row;
+            titleRow.style.alignItems = Align.FlexEnd;
+            titleRow.style.marginBottom = 10f;
+            Label name = new Label(string.IsNullOrWhiteSpace(data.DisplayLabel) ? "Без названия" : data.DisplayLabel);
+            name.style.fontSize = 20f;
+            name.style.unityFontStyleAndWeight = FontStyle.Bold;
+            name.style.color = HeaderColor;
+            titleRow.Add(name);
+            Label category = new Label(GetCategoryLabel(data.Category));
+            category.style.marginLeft = 10f;
+            category.style.marginBottom = 3f;
+            category.style.color = HintColor;
+            titleRow.Add(category);
+            detailPane.Add(titleRow);
 
-            AddHeader("ИЗОБРАЖЕНИЯ");
-            AddField(unit, "portrait", "Портрет");
-            detailPane.Add(BuildArtButtons(UnitArtKind.Portrait));
-            AddField(unit, "portraitFitMode", "Вписывание портрета");
-            AddField(unit, "portraitScale", "Масштаб портрета");
-            AddField(unit, "portraitOffsetNormalized", "Offset X / Y (доля рамки)");
-            AddField(unit, "portraitFlipX", "Отразить портрет по X");
+            VisualElement grid = new VisualElement();
+            grid.style.flexDirection = FlexDirection.Row;
+            grid.style.flexWrap = Wrap.Wrap;
+            grid.style.alignItems = Align.FlexStart;
+            detailPane.Add(grid);
 
-            Button resetPortrait = new Button(ResetPortraitFraming)
-            {
-                text = "СБРОСИТЬ КАДРИРОВАНИЕ ПОРТРЕТА"
-            };
-            resetPortrait.style.marginTop = 4f;
-            resetPortrait.style.marginBottom = 6f;
-            detailPane.Add(resetPortrait);
+            VisualElement typeCard = Card("ТИП", 320f);
+            AddField(typeCard, unit, "displayLabel", "Название");
+            AddField(typeCard, unit, "id", "ID типа");
+            typeCard.Add(EnumPopup(unit, "category", "Категория", CategoryNames));
+            typeCard.Add(EnumPopup(unit, "combatRole", "Боевая роль", RoleNames));
+            typeCard.Add(EnumPopup(unit, "size", "Размер", SizeNames));
+            grid.Add(typeCard);
 
-            Label portraitHint = new Label(
-                "Портрет редактируется в рамке 5:7. Полный Sprite проходит через " +
-                "Cover/Contain → Scale → Offset → Flip X, после чего рамка обрезает лишнее. " +
-                "Перетаскивайте изображение мышью прямо в preview; движение не ограничено. " +
-                "Размер конкретного места показа (XS–XL) задаётся в UI Конструкторе.");
-            portraitHint.style.whiteSpace = WhiteSpace.Normal;
-            portraitHint.style.fontSize = 10f;
-            portraitHint.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
-            portraitHint.style.marginBottom = 8f;
-            detailPane.Add(portraitHint);
+            VisualElement statsCard = Card("БОЕВЫЕ ХАРАКТЕРИСТИКИ", 320f);
+            statsCard.Add(IntSlider(unit, "maxHitPoints", "HP", 1, 100, "Здоровье."));
+            statsCard.Add(IntSlider(unit, "attack", "Атака", 0, 20, "Сравнивается с Защитой цели и меняет урон."));
+            statsCard.Add(IntSlider(unit, "defense", "Защита", 0, 20, "Снижает урон от атак."));
+            statsCard.Add(IntSlider(unit, "damage", "Урон", 1, 30, "Базовый урон удара."));
+            statsCard.Add(IntSlider(unit, "movement", "Ход", 1, 30, "Очки перемещения за активацию."));
+            statsCard.Add(IntSlider(unit, "initiative", "Инициатива", 0, 20, "Порядок ходов в раунде."));
+            statsCard.Add(IntSlider(unit, "attackRange", "Дальность", 1, 10, "1 — ближний бой, больше — стрелок."));
+            grid.Add(statsCard);
 
-            AddField(unit, "battlefieldSprite", "Миниатюра на поле");
-            detailPane.Add(BuildArtButtons(UnitArtKind.Battlefield));
-            AddField(unit, "battlefieldScale", "Масштаб миниатюры");
-            AddField(unit, "battlefieldOffset", "Смещение миниатюры X / Y");
+            VisualElement tagsCard = Card("ТЕГИ", 320f);
+            BuildTagToggles(tagsCard, unit.FindPropertyRelative("tagIds"));
+            grid.Add(tagsCard);
 
-            AddHeader("ТЕГИ");
-            BuildTagToggles(unit.FindPropertyRelative("tagIds"));
+            grid.Add(BuildPortraitCard(unit));
+            grid.Add(BuildBattlefieldCard(unit, data));
+            BuildAnimationCard(grid);
 
             // ПР-12Ж: способности со статусом «ждёт механики» не действуют,
             // пока в ПР-16 нет их общего кирпича.
-            AddHeader("СУЩЕСТВО");
-            AddField(unit, "size", "Размер");
-            AddField(unit, "abilities", "Способности");
+            VisualElement abilitiesCard = Card("СПОСОБНОСТИ", 660f);
+            abilitiesCard.style.flexGrow = 1f;
+            abilitiesCard.style.maxWidth = 980f;
+            abilitiesCard.Add(new PropertyField(unit.FindPropertyRelative("abilities"), "Способности"));
+            grid.Add(abilitiesCard);
 
-            AddHeader("ПРЕДПРОСМОТР");
-            VisualElement previews = new VisualElement();
-            previews.style.flexDirection = FlexDirection.Row;
-            previews.style.height = 270f;
-
-            VisualElement portraitCard = CreatePortraitPreview(out portraitPreview);
-            VisualElement battlefieldCard = CreatePreview(
-                "ПОЛЕВАЯ МИНИАТЮРА",
-                150f,
-                200f,
-                ScaleMode.ScaleToFit,
-                out battlefieldPreview);
-            // Картинку можно перетащить прямо на карточку предпросмотра.
-            RegisterArtDrop(portraitCard, UnitArtKind.Portrait);
-            RegisterArtDrop(battlefieldCard, UnitArtKind.Battlefield);
-            previews.Add(portraitCard);
-            previews.Add(battlefieldCard);
-            detailPane.Add(previews);
-            Label dropHint = new Label("Перетащите PNG/JPG с диска или Sprite из окна Project на карточку портрета или миниатюры, чтобы загрузить или заменить картинку.");
-            dropHint.style.whiteSpace = WhiteSpace.Normal;
-            dropHint.style.fontSize = 10f;
-            dropHint.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
-            dropHint.style.marginBottom = 6f;
-            detailPane.Add(dropHint);
-            BuildAnimationCard();
-
-            Foldout tagEditor = new Foldout { text = "Настройка справочника тегов" };
-            PropertyField tagDefinitions = new PropertyField(tagsProperty, "Теги базы");
-            tagEditor.Add(tagDefinitions);
+            Foldout tagEditor = new Foldout { text = "Справочник тегов базы", value = false };
+            tagEditor.style.marginTop = 4f;
+            tagEditor.Add(new PropertyField(tagsProperty, "Теги базы"));
             detailPane.Add(tagEditor);
 
             detailPane.Bind(serializedDatabase);
             RefreshPreviews();
+        }
+
+        private static VisualElement Card(string title, float width)
+        {
+            VisualElement card = new VisualElement();
+            card.style.width = width;
+            card.style.marginRight = 12f;
+            card.style.marginBottom = 12f;
+            card.style.paddingLeft = 10f;
+            card.style.paddingRight = 10f;
+            card.style.paddingTop = 8f;
+            card.style.paddingBottom = 10f;
+            card.style.backgroundColor = CardColor;
+            card.style.borderLeftWidth = 1f;
+            card.style.borderRightWidth = 1f;
+            card.style.borderTopWidth = 1f;
+            card.style.borderBottomWidth = 1f;
+            card.style.borderLeftColor = CardBorder;
+            card.style.borderRightColor = CardBorder;
+            card.style.borderTopColor = CardBorder;
+            card.style.borderBottomColor = CardBorder;
+            card.style.borderTopLeftRadius = 6f;
+            card.style.borderTopRightRadius = 6f;
+            card.style.borderBottomLeftRadius = 6f;
+            card.style.borderBottomRightRadius = 6f;
+
+            Label header = new Label(title);
+            header.style.unityFontStyleAndWeight = FontStyle.Bold;
+            header.style.fontSize = 11f;
+            header.style.letterSpacing = 1f;
+            header.style.color = HeaderColor;
+            header.style.marginBottom = 6f;
+            card.Add(header);
+            return card;
+        }
+
+        // Русские подписи значений в порядке объявления перечислений.
+        private static readonly string[] CategoryNames = { "Боец", "Существо", "Командир", "Прочее" };
+        private static readonly string[] RoleNames = { "Защитник", "Лучник", "Лекарь", "Копейщик", "Разведчик", "Ополченец", "Существо", "Другая" };
+        private static readonly string[] SizeNames = { "Средний", "Малый", "Крупный" };
+        private static readonly string[] FitNames = { "Заполнить рамку (обрезать)", "Вписать целиком" };
+
+        // Выбор значения перечисления с русскими подписями; запись через
+        // SerializedProperty, поэтому Undo работает как у остальных полей.
+        private VisualElement EnumPopup(SerializedProperty owner, string propertyName, string label, string[] names)
+        {
+            SerializedProperty property = owner.FindPropertyRelative(propertyName);
+            string path = property.propertyPath;
+            List<int> choices = Enumerable.Range(0, names.Length).ToList();
+            int current = Mathf.Clamp(property.enumValueIndex, 0, names.Length - 1);
+            PopupField<int> field = new PopupField<int>(label, choices, current, index => names[index], index => names[index]);
+            field.RegisterValueChangedCallback(evt =>
+            {
+                serializedDatabase.Update();
+                serializedDatabase.FindProperty(path).enumValueIndex = evt.newValue;
+                serializedDatabase.ApplyModifiedProperties();
+                EditorUtility.SetDirty(database);
+                SchedulePreviewRefresh();
+            });
+            return field;
+        }
+
+        // Ссылка на картинку без заголовков-атрибутов поля.
+        private static ObjectField SpriteField(SerializedProperty owner, string propertyName)
+        {
+            ObjectField field = new ObjectField("Файл")
+            {
+                objectType = typeof(Sprite),
+                allowSceneObjects = false,
+                tooltip = "Sprite из проекта. Загрузить с диска — кнопкой выше или перетаскиванием на картинку."
+            };
+            field.labelElement.style.minWidth = 70f;
+            field.labelElement.style.width = 70f;
+            field.BindProperty(owner.FindPropertyRelative(propertyName));
+            return field;
+        }
+
+        private static void WidenSliderInput(VisualElement slider, float width)
+        {
+            VisualElement input = slider.Q(className: "unity-base-slider__text-field");
+            if (input != null)
+            {
+                input.style.width = width;
+                input.style.minWidth = width;
+            }
+        }
+
+        private static void AddField(VisualElement parent, SerializedProperty owner, string propertyName, string label)
+        {
+            PropertyField field = new PropertyField(owner.FindPropertyRelative(propertyName), label);
+            parent.Add(field);
+        }
+
+        private static Label Hint(string text)
+        {
+            Label hint = new Label(text);
+            hint.style.whiteSpace = WhiteSpace.Normal;
+            hint.style.fontSize = 10f;
+            hint.style.color = HintColor;
+            hint.style.marginTop = 4f;
+            return hint;
+        }
+
+        // Ползунок с полем ввода, привязанный к полю базы: Undo и сохранение
+        // работают как у остальных полей.
+        private SliderInt IntSlider(SerializedProperty owner, string propertyName, string label, int low, int high, string tooltip)
+        {
+            SliderInt slider = new SliderInt(label, low, high) { showInputField = true, tooltip = tooltip };
+            slider.labelElement.style.minWidth = 86f;
+            slider.labelElement.style.width = 86f;
+            slider.BindProperty(owner.FindPropertyRelative(propertyName));
+            slider.RegisterValueChangedCallback(_ => SchedulePreviewRefresh());
+            WidenSliderInput(slider, 48f);
+            return slider;
+        }
+
+        private Slider FloatSlider(SerializedProperty property, string label, float low, float high, string tooltip)
+        {
+            Slider slider = new Slider(label, low, high) { showInputField = true, tooltip = tooltip };
+            slider.labelElement.style.minWidth = 70f;
+            slider.labelElement.style.width = 70f;
+            slider.BindProperty(property);
+            slider.RegisterValueChangedCallback(_ => SchedulePreviewRefresh());
+            WidenSliderInput(slider, 62f);
+            return slider;
+        }
+
+        // Привязка пишет значение в базу чуть позже события ползунка —
+        // предпросмотр обновляется на следующем кадре.
+        private void SchedulePreviewRefresh()
+        {
+            rootVisualElement.schedule.Execute(() =>
+            {
+                RefreshPreviews();
+                unitList?.RefreshItems();
+            });
+        }
+
+        private VisualElement BuildPortraitCard(SerializedProperty unit)
+        {
+            PortraitSizeDefinition preset = PortraitSizeTable.Get(PortraitSize.S);
+            VisualElement card = Card("ПОРТРЕТ", 270f);
+
+            VisualElement frame = new VisualElement();
+            frame.style.alignSelf = Align.Center;
+            frame.style.marginBottom = 6f;
+            portraitPreview = new UnitPortraitElement
+            {
+                name = "portrait-preview",
+                focusable = true,
+                tooltip = "ЛКМ + перетаскивание — сдвинуть портрет в рамке 5:7. Сюда же можно перетащить PNG/JPG или Sprite."
+            };
+            portraitPreview.style.width = preset.Width;
+            portraitPreview.style.height = preset.Height;
+            portraitPreview.style.backgroundColor = new Color(0.055f, 0.06f, 0.07f, 1f);
+            portraitPreview.RegisterCallback<PointerDownEvent>(BeginPortraitDrag);
+            portraitPreview.RegisterCallback<PointerMoveEvent>(ContinuePortraitDrag);
+            portraitPreview.RegisterCallback<PointerUpEvent>(EndPortraitDrag);
+            portraitPreview.RegisterCallback<PointerCaptureOutEvent>(_ => CancelPortraitDrag());
+            frame.Add(portraitPreview);
+            card.Add(frame);
+            RegisterArtDrop(card, UnitArtKind.Portrait);
+
+            card.Add(BuildArtButtons(UnitArtKind.Portrait));
+            card.Add(SpriteField(unit, "portrait"));
+            card.Add(EnumPopup(unit, "portraitFitMode", "Вписывание", FitNames));
+            SerializedProperty offset = unit.FindPropertyRelative("portraitOffsetNormalized");
+            card.Add(FloatSlider(unit.FindPropertyRelative("portraitScale"), "Масштаб", 0.2f, 4f, "Масштаб портрета в рамке."));
+            card.Add(FloatSlider(offset.FindPropertyRelative("x"), "Сдвиг X", -1f, 1f, "Сдвиг по горизонтали, доля рамки."));
+            card.Add(FloatSlider(offset.FindPropertyRelative("y"), "Сдвиг Y", -1f, 1f, "Сдвиг по вертикали, доля рамки."));
+            AddField(card, unit, "portraitFlipX", "Отразить");
+
+            Button reset = new Button(ResetPortraitFraming) { text = "СБРОСИТЬ КАДРИРОВАНИЕ" };
+            reset.style.marginTop = 4f;
+            card.Add(reset);
+            card.Add(Hint("Рамка 5:7, как в игре. Тяните портрет мышью прямо в рамке."));
+            return card;
+        }
+
+        private VisualElement BuildBattlefieldCard(SerializedProperty unit, UnitDefinitionData data)
+        {
+            VisualElement card = Card("ПОЛЕВАЯ МИНИАТЮРА", 290f);
+
+            battlefieldViewport = new VisualElement
+            {
+                tooltip = "Красная точка — центр гекса. Сюда можно перетащить PNG/JPG или Sprite."
+            };
+            battlefieldViewport.style.alignSelf = Align.Center;
+            battlefieldViewport.style.width = FieldViewportWidth;
+            battlefieldViewport.style.height = FieldViewportHeight;
+            battlefieldViewport.style.marginBottom = 6f;
+            battlefieldViewport.style.overflow = Overflow.Hidden;
+            battlefieldViewport.style.backgroundColor = new Color(0.055f, 0.06f, 0.07f, 1f);
+            battlefieldViewport.generateVisualContent += DrawFieldGround;
+
+            battlefieldPreview = new Image { scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
+            battlefieldPreview.style.position = Position.Absolute;
+            battlefieldViewport.Add(battlefieldPreview);
+
+            battlefieldAnchorMarker = new VisualElement { pickingMode = PickingMode.Ignore };
+            battlefieldAnchorMarker.style.position = Position.Absolute;
+            battlefieldAnchorMarker.style.width = 10f;
+            battlefieldAnchorMarker.style.height = 10f;
+            battlefieldAnchorMarker.style.backgroundColor = new Color(0.95f, 0.08f, 0.06f, 1f);
+            battlefieldAnchorMarker.style.borderTopLeftRadius = 5f;
+            battlefieldAnchorMarker.style.borderTopRightRadius = 5f;
+            battlefieldAnchorMarker.style.borderBottomLeftRadius = 5f;
+            battlefieldAnchorMarker.style.borderBottomRightRadius = 5f;
+            battlefieldAnchorMarker.style.left = FieldViewportWidth * 0.5f - 5f;
+            battlefieldAnchorMarker.style.top = FieldViewportHeight * FieldAnchorY - 5f;
+            battlefieldViewport.Add(battlefieldAnchorMarker);
+            card.Add(battlefieldViewport);
+            RegisterArtDrop(card, UnitArtKind.Battlefield);
+
+            card.Add(BuildArtButtons(UnitArtKind.Battlefield));
+            card.Add(SpriteField(unit, "battlefieldSprite"));
+            SerializedProperty offset = unit.FindPropertyRelative("battlefieldOffset");
+            card.Add(FloatSlider(unit.FindPropertyRelative("battlefieldScale"), "Масштаб", 0.1f, 4f, "Размер миниатюры на поле."));
+            card.Add(FloatSlider(offset.FindPropertyRelative("x"), "Сдвиг X", -200f, 200f, "Сдвиг по горизонтали, пиксели поля."));
+            card.Add(FloatSlider(offset.FindPropertyRelative("y"), "Сдвиг Y", -200f, 200f, "Сдвиг по вертикали, пиксели поля."));
+            card.Add(Hint(!string.IsNullOrEmpty(data.AnimationSetId)
+                ? "У существа есть набор анимаций: в бою размер и опору задаёт набор, а эта миниатюра — запасная."
+                : "Центр гекса на 15% выше нижнего края рамки. У противника миниатюра в бою отражена."));
+            return card;
+        }
+
+        // Земля и гекс в предпросмотре миниатюры: где центр гекса и где «пол».
+        private void DrawFieldGround(MeshGenerationContext context)
+        {
+            Painter2D painter = context.painter2D;
+            Vector2 center = new Vector2(FieldViewportWidth * 0.5f, FieldViewportHeight * FieldAnchorY);
+            painter.strokeColor = new Color(0.95f, 0.85f, 0.45f, 0.45f);
+            painter.lineWidth = 1.2f;
+            painter.BeginPath();
+            float radius = FieldBaseBoxSize / 1.35f;
+            for (int i = 0; i < 6; i++)
+            {
+                float angle = Mathf.Deg2Rad * (60f * i - 30f);
+                Vector2 point = center + new Vector2(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius * 0.75f);
+                if (i == 0)
+                    painter.MoveTo(point);
+                else
+                    painter.LineTo(point);
+            }
+            painter.ClosePath();
+            painter.Stroke();
+        }
+
+        private void BuildTagToggles(VisualElement parent, SerializedProperty selectedTags)
+        {
+            VisualElement container = new VisualElement();
+            container.style.flexDirection = FlexDirection.Row;
+            container.style.flexWrap = Wrap.Wrap;
+
+            for (int i = 0; i < database.Tags.Count; i++)
+            {
+                UnitTagDefinition tag = database.Tags[i];
+                Toggle toggle = new Toggle(tag.DisplayLabel);
+                toggle.tooltip = tag.Description;
+                toggle.value = SerializedListContains(selectedTags, tag.Id);
+                toggle.style.width = 145f;
+                toggle.style.marginBottom = 4f;
+                toggle.labelElement.style.minWidth = 0f;
+                toggle.labelElement.style.width = 112f;
+                toggle.labelElement.style.whiteSpace = WhiteSpace.Normal;
+                string capturedId = tag.Id;
+                toggle.RegisterValueChangedCallback(evt =>
+                {
+                    serializedDatabase.Update();
+                    SerializedProperty currentUnit = unitsProperty.GetArrayElementAtIndex(selectedUnitIndex);
+                    SerializedProperty currentTags = currentUnit.FindPropertyRelative("tagIds");
+                    SetSerializedListValue(currentTags, capturedId, evt.newValue);
+                    serializedDatabase.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(database);
+                    RefreshUnitList();
+                });
+                container.Add(toggle);
+            }
+
+            parent.Add(container);
+        }
+
+        private void RefreshPreviews()
+        {
+            if (portraitPreview == null || battlefieldPreview == null ||
+                selectedUnitIndex < 0 || selectedUnitIndex >= database.Units.Count)
+            {
+                return;
+            }
+
+            UnitDefinitionData unit = database.Units[selectedUnitIndex];
+            portraitPreview.SetPortrait(unit);
+
+            // Как на поле: квадратная рамка × масштаб, центр гекса на 15% выше
+            // её нижнего края, затем смещение.
+            battlefieldPreview.sprite = unit.BattlefieldSprite;
+            float box = FieldBaseBoxSize * Mathf.Max(0.1f, unit.BattlefieldScale);
+            Vector2 anchor = new Vector2(FieldViewportWidth * 0.5f, FieldViewportHeight * FieldAnchorY);
+            battlefieldPreview.style.width = box;
+            battlefieldPreview.style.height = box;
+            battlefieldPreview.style.left = anchor.x - box * 0.5f + unit.BattlefieldOffset.x;
+            battlefieldPreview.style.top = anchor.y - box * 0.85f + unit.BattlefieldOffset.y;
+            battlefieldAnchorMarker?.BringToFront();
+        }
+
+        // ПР-12З: тот же предпросмотр, что в Базе анимаций. Клипы правятся
+        // в Базе анимаций; карточка сразу показывает результат.
+        private void BuildAnimationCard(VisualElement parent)
+        {
+            animationDatabase = CreatureAnimationEditorData.LoadOrCreate();
+
+            VisualElement card = Card("АНИМАЦИЯ НА ПОЛЕ", 330f);
+            animationSetRow = new VisualElement();
+            card.Add(animationSetRow);
+
+            animationPreview = new CreatureAnimationPreviewElement(250f) { AllowPivotEditing = false };
+            animationPreview.style.flexGrow = 0f;
+            card.Add(animationPreview);
+            parent.Add(card);
+            RefreshAnimationCard();
         }
 
         // ------------------------------------------------------------------
@@ -723,186 +1056,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
             validationLabel.text = "Убрано картинок: " + (unused.Count - failed.Count);
         }
 
-        private void AddHeader(string text)
-        {
-            Label header = new Label(text);
-            header.style.marginTop = 12f;
-            header.style.marginBottom = 5f;
-            header.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.style.color = new Color(0.80f, 0.66f, 0.34f, 1f);
-            detailPane.Add(header);
-        }
-
-        private void AddField(SerializedProperty owner, string propertyName, string label)
-        {
-            SerializedProperty property = owner.FindPropertyRelative(propertyName);
-            PropertyField field = new PropertyField(property, label);
-            detailPane.Add(field);
-        }
-
-        private void BuildTagToggles(SerializedProperty selectedTags)
-        {
-            VisualElement container = new VisualElement();
-            container.style.flexDirection = FlexDirection.Row;
-            container.style.flexWrap = Wrap.Wrap;
-
-            for (int i = 0; i < database.Tags.Count; i++)
-            {
-                UnitTagDefinition tag = database.Tags[i];
-                Toggle toggle = new Toggle(tag.DisplayLabel);
-                toggle.tooltip = tag.Id + "\n" + tag.Description;
-                toggle.value = SerializedListContains(selectedTags, tag.Id);
-                toggle.style.marginRight = 12f;
-                toggle.style.marginBottom = 5f;
-                string capturedId = tag.Id;
-                toggle.RegisterValueChangedCallback(evt =>
-                {
-                    serializedDatabase.Update();
-                    SerializedProperty currentUnit = unitsProperty.GetArrayElementAtIndex(selectedUnitIndex);
-                    SerializedProperty currentTags = currentUnit.FindPropertyRelative("tagIds");
-                    SetSerializedListValue(currentTags, capturedId, evt.newValue);
-                    serializedDatabase.ApplyModifiedProperties();
-                    EditorUtility.SetDirty(database);
-                    RefreshUnitList();
-                });
-                container.Add(toggle);
-            }
-
-            detailPane.Add(container);
-        }
-
-        private static VisualElement CreatePreview(
-            string label,
-            float frameWidth,
-            float frameHeight,
-            ScaleMode scaleMode,
-            out Image image)
-        {
-            VisualElement card = new VisualElement();
-            card.style.width = Mathf.Max(frameWidth + 24f, 190f);
-            card.style.height = frameHeight + 42f;
-            card.style.marginRight = 12f;
-            card.style.paddingLeft = 8f;
-            card.style.paddingRight = 8f;
-            card.style.paddingTop = 8f;
-            card.style.paddingBottom = 8f;
-            card.style.alignItems = Align.Center;
-            card.style.backgroundColor = new Color(0.10f, 0.11f, 0.13f, 1f);
-
-            Label title = new Label(label);
-            title.style.unityTextAlign = TextAnchor.MiddleCenter;
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            card.Add(title);
-
-            VisualElement viewport = new VisualElement();
-            viewport.style.width = frameWidth;
-            viewport.style.height = frameHeight;
-            viewport.style.marginTop = 6f;
-            viewport.style.position = Position.Relative;
-            viewport.style.overflow = Overflow.Hidden;
-            viewport.style.backgroundColor = new Color(0.055f, 0.06f, 0.07f, 1f);
-            card.Add(viewport);
-
-            image = new Image
-            {
-                scaleMode = scaleMode,
-                pickingMode = PickingMode.Ignore
-            };
-            image.style.position = Position.Absolute;
-            image.style.left = 0f;
-            image.style.right = 0f;
-            image.style.top = 0f;
-            image.style.bottom = 0f;
-            viewport.Add(image);
-            return card;
-        }
-
-        private VisualElement CreatePortraitPreview(out UnitPortraitElement image)
-        {
-            PortraitSizeDefinition preset = PortraitSizeTable.Get(PortraitSize.S);
-            VisualElement card = new VisualElement();
-            card.style.width = Mathf.Max(preset.Width + 24f, 190f);
-            card.style.height = preset.Height + 42f;
-            card.style.marginRight = 12f;
-            card.style.paddingLeft = 8f;
-            card.style.paddingRight = 8f;
-            card.style.paddingTop = 8f;
-            card.style.paddingBottom = 8f;
-            card.style.alignItems = Align.Center;
-            card.style.backgroundColor = new Color(0.10f, 0.11f, 0.13f, 1f);
-
-            Label title = new Label(
-                "ПОРТРЕТ · S " + preset.Width + "×" + preset.Height + " · 5:7");
-            title.style.fontSize = 10f;
-            title.style.unityTextAlign = TextAnchor.MiddleCenter;
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            card.Add(title);
-
-            image = new UnitPortraitElement
-            {
-                name = "portrait-preview",
-                focusable = true,
-                tooltip = "ЛКМ + перетаскивание — свободное смещение портрета"
-            };
-            image.style.width = preset.Width;
-            image.style.height = preset.Height;
-            image.style.marginTop = 6f;
-            image.style.backgroundColor = new Color(0.055f, 0.06f, 0.07f, 1f);
-            image.RegisterCallback<PointerDownEvent>(BeginPortraitDrag);
-            image.RegisterCallback<PointerMoveEvent>(ContinuePortraitDrag);
-            image.RegisterCallback<PointerUpEvent>(EndPortraitDrag);
-            image.RegisterCallback<PointerCaptureOutEvent>(_ => CancelPortraitDrag());
-            card.Add(image);
-            return card;
-        }
-
-        private void RefreshPreviews()
-        {
-            if (portraitPreview == null || battlefieldPreview == null ||
-                selectedUnitIndex < 0 || selectedUnitIndex >= database.Units.Count)
-            {
-                return;
-            }
-
-            UnitDefinitionData unit = database.Units[selectedUnitIndex];
-            portraitPreview.SetPortrait(unit);
-
-            battlefieldPreview.sprite = unit.BattlefieldSprite;
-            ApplyImageFraming(
-                battlefieldPreview,
-                unit.BattlefieldScale,
-                unit.BattlefieldOffset);
-        }
-
-        // ПР-12З: тот же предпросмотр, что в Базе анимаций. Клипы правятся
-        // в Базе анимаций; карточка сразу показывает результат.
-        private void BuildAnimationCard()
-        {
-            animationDatabase = CreatureAnimationEditorData.LoadOrCreate();
-
-            VisualElement card = new VisualElement();
-            card.style.marginTop = 10f;
-            card.style.paddingLeft = 8f;
-            card.style.paddingRight = 8f;
-            card.style.paddingTop = 8f;
-            card.style.paddingBottom = 8f;
-            card.style.maxWidth = 520f;
-            card.style.backgroundColor = new Color(0.10f, 0.11f, 0.13f, 1f);
-
-            Label title = new Label("ПОЛЕВАЯ МИНИАТЮРА · АНИМАЦИЯ");
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            card.Add(title);
-
-            animationSetRow = new VisualElement();
-            card.Add(animationSetRow);
-
-            animationPreview = new CreatureAnimationPreviewElement(260f) { AllowPivotEditing = false };
-            animationPreview.style.flexGrow = 0f;
-            card.Add(animationPreview);
-            detailPane.Add(card);
-            RefreshAnimationCard();
-        }
-
         private void RefreshAnimationCard()
         {
             if (animationSetRow == null || database == null ||
@@ -984,16 +1137,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
             EditorUtility.SetDirty(database);
             CreatureAnimationEditorData.NotifyChanged();
             RefreshAnimationCard();
-        }
-
-        private static void ApplyImageFraming(Image image, float scale, Vector2 offset)
-        {
-            if (image == null)
-                return;
-
-            float safeScale = Mathf.Max(0.1f, scale);
-            image.style.scale = new Scale(new Vector3(safeScale, safeScale, 1f));
-            image.transform.position = new Vector3(offset.x, offset.y, 0f);
         }
 
         private void BeginPortraitDrag(PointerDownEvent evt)

@@ -343,8 +343,20 @@ namespace KingdomSurvival.BattleSandbox
 
         private readonly Dictionary<string, int> playerCounts = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly Dictionary<string, int> enemyCounts = new Dictionary<string, int>(StringComparer.Ordinal);
-        private VisualElement playerColumn;
-        private VisualElement enemyColumn;
+        private static readonly Color PlayerSideAccent = new Color(0.88f, 0.71f, 0.38f, 1f);
+        private static readonly Color EnemySideAccent = new Color(0.88f, 0.40f, 0.32f, 1f);
+        // Три карточки в ряд: 3 × (150 + 10) + поля и полоса прокрутки.
+        private const float SideColumnWidth = 524f;
+
+        private readonly Dictionary<string, SandboxPickCard> playerCards = new Dictionary<string, SandboxPickCard>(StringComparer.Ordinal);
+        private readonly Dictionary<string, SandboxPickCard> enemyCards = new Dictionary<string, SandboxPickCard>(StringComparer.Ordinal);
+        private Label playerCounterLabel;
+        private Label enemyCounterLabel;
+        private Label playerSummaryLabel;
+        private Label enemySummaryLabel;
+        private Button playerClearButton;
+        private Button enemyClearButton;
+        private Label startHintLabel;
 
         private void BuildSetupScreen()
         {
@@ -353,57 +365,45 @@ namespace KingdomSurvival.BattleSandbox
             battle = null;
             root.Clear();
             fighterDetailsView = new SandboxFighterDetailsView(root);
+            playerCards.Clear();
+            enemyCards.Clear();
 
-            ScrollView scroll = new ScrollView(ScrollViewMode.Vertical);
-            scroll.style.flexGrow = 1f;
-            scroll.style.paddingLeft = 36f;
-            scroll.style.paddingRight = 36f;
-            scroll.style.paddingTop = 24f;
-            scroll.style.paddingBottom = 28f;
-            root.Add(scroll);
+            VisualElement screen = new VisualElement { name = "sandbox-setup-screen" };
+            screen.style.flexGrow = 1f;
+            screen.style.flexDirection = FlexDirection.Column;
+            screen.style.paddingLeft = 28f;
+            screen.style.paddingRight = 28f;
+            screen.style.paddingTop = 18f;
+            screen.style.paddingBottom = 24f;
+            root.Add(screen);
 
-            Label eyebrow = CreateLabel("ИЗОЛИРОВАННЫЙ БОЕВОЙ ПОЛИГОН", 12, new Color(0.62f, 0.57f, 0.47f, 1f));
-            eyebrow.style.unityFontStyleAndWeight = FontStyle.Bold;
-            scroll.Add(eyebrow);
-
-            Label title = CreateLabel("ГЕКСОВЫЙ БОЙ · ЧЁРНЫЙ ЛЕС", 30, new Color(0.95f, 0.84f, 0.60f, 1f));
+            // Шапка: только название полигона по центру.
+            VisualElement header = new VisualElement();
+            header.style.alignItems = Align.Center;
+            header.style.flexShrink = 0f;
+            Label title = CreateLabel("ИЗОЛИРОВАННЫЙ БОЕВОЙ ПОЛИГОН", 16, new Color(0.93f, 0.80f, 0.55f, 1f));
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            title.style.marginTop = 5f;
-            scroll.Add(title);
+            title.style.letterSpacing = 4f;
+            header.Add(title);
+            VisualElement rule = new VisualElement();
+            rule.style.width = 420f;
+            rule.style.height = 1f;
+            rule.style.marginTop = 10f;
+            rule.style.backgroundColor = new Color(0.88f, 0.71f, 0.38f, 0.35f);
+            header.Add(rule);
+            screen.Add(header);
 
-            Label description = CreateLabel(
-                "Слева — ваш отряд (1–" + MaxPlayerUnits + "), справа — противник (1–" + SandboxRoster.MaxEnemies + "). " +
-                "В обеих колонках доступны все бойцы и существа базы, один тип можно взять несколько раз. " +
-                "Щелчок по имени открывает карточку. Полигон не изменяет состояние основной игры.",
-                13,
-                new Color(0.72f, 0.72f, 0.69f, 1f));
-            description.style.marginTop = 8f;
-            description.style.marginBottom = 18f;
-            description.style.whiteSpace = WhiteSpace.Normal;
-            scroll.Add(description);
-
-            VisualElement columns = new VisualElement();
-            columns.style.flexDirection = FlexDirection.Row;
-            columns.style.alignItems = Align.FlexStart;
-            playerColumn = CreatePanel();
-            playerColumn.style.flexGrow = 1f;
-            playerColumn.style.flexBasis = 0f;
-            playerColumn.style.marginRight = 7f;
-            enemyColumn = CreatePanel();
-            enemyColumn.style.flexGrow = 1f;
-            enemyColumn.style.flexBasis = 0f;
-            enemyColumn.style.marginLeft = 7f;
-            columns.Add(playerColumn);
-            columns.Add(enemyColumn);
-            scroll.Add(columns);
-
-            startBattleButton = new Button(StartBattle) { text = "НАЧАТЬ БОЙ" };
-            StylePrimaryButton(startBattleButton);
-            startBattleButton.style.width = 320f;
-            startBattleButton.style.height = 52f;
-            startBattleButton.style.marginTop = 20f;
-            startBattleButton.style.alignSelf = Align.Center;
-            scroll.Add(startBattleButton);
+            // Две колонки у краёв, между ними — кнопка боя.
+            VisualElement body = new VisualElement();
+            body.style.flexGrow = 1f;
+            body.style.flexShrink = 1f;
+            body.style.minHeight = 0f;
+            body.style.flexDirection = FlexDirection.Row;
+            body.style.marginTop = 18f;
+            body.Add(BuildSideColumn(false));
+            body.Add(BuildSetupCenter());
+            body.Add(BuildSideColumn(true));
+            screen.Add(body);
 
             RefreshSetupColumns();
         }
@@ -446,123 +446,233 @@ namespace KingdomSurvival.BattleSandbox
             return units;
         }
 
+        // Карточки обновляются на месте: колонка не перестраивается и не
+        // теряет прокрутку при каждом щелчке.
         private void RefreshSetupColumns()
         {
-            if (playerColumn == null || enemyColumn == null)
+            if (startBattleButton == null)
                 return;
-            BuildSideColumn(playerColumn, false);
-            BuildSideColumn(enemyColumn, true);
-            startBattleButton.SetEnabled(SideTotal(false) > 0 && SideTotal(true) > 0);
+            RefreshSide(false);
+            RefreshSide(true);
+            int players = SideTotal(false);
+            int enemies = SideTotal(true);
+            bool ready = players > 0 && enemies > 0;
+            startBattleButton.SetEnabled(ready);
+            if (startHintLabel != null)
+            {
+                startHintLabel.text = ready
+                    ? "Отряд: " + players + " · Противник: " + enemies
+                    : players == 0 && enemies == 0
+                        ? "Наберите отряд слева и противника справа"
+                        : players == 0 ? "Добавьте хотя бы одного бойца в отряд" : "Добавьте хотя бы одного противника";
+            }
         }
 
-        private void BuildSideColumn(VisualElement column, bool enemySide)
+        private void RefreshSide(bool enemySide)
         {
-            column.Clear();
             int total = SideTotal(enemySide);
             int limit = SideLimit(enemySide);
+            Label counter = enemySide ? enemyCounterLabel : playerCounterLabel;
+            Label summary = enemySide ? enemySummaryLabel : playerSummaryLabel;
+            Button clear = enemySide ? enemyClearButton : playerClearButton;
+            if (counter != null)
+                counter.text = total + " / " + limit;
+            clear?.SetEnabled(total > 0);
+            if (summary != null)
+            {
+                summary.text = total == 0
+                    ? "Пока никого — щёлкните по карточке, чтобы добавить."
+                    : string.Join(", ", PickedUnits(enemySide).GroupBy(unit => unit.RoleLabel)
+                        .Select(picked => picked.Count() > 1 ? picked.Key + " ×" + picked.Count() : picked.Key));
+            }
+            Dictionary<string, int> counts = CountsFor(enemySide);
+            foreach (KeyValuePair<string, SandboxPickCard> pair in enemySide ? enemyCards : playerCards)
+            {
+                counts.TryGetValue(pair.Key, out int count);
+                pair.Value.SetState(count, total < limit);
+            }
+        }
+
+        private VisualElement BuildSideColumn(bool enemySide)
+        {
+            Color accent = enemySide ? EnemySideAccent : PlayerSideAccent;
+            VisualElement column = new VisualElement { name = enemySide ? "sandbox-enemy-column" : "sandbox-player-column" };
+            column.style.width = SideColumnWidth;
+            column.style.maxWidth = Length.Percent(40f);
+            column.style.flexShrink = 1f;
+            column.style.minHeight = 0f;
+            column.style.flexDirection = FlexDirection.Column;
+            column.style.paddingLeft = 14f;
+            column.style.paddingRight = 6f;
+            column.style.paddingTop = 14f;
+            column.style.paddingBottom = 8f;
+            column.style.backgroundColor = new Color(0.06f, 0.07f, 0.08f, 0.92f);
+            SetBorder(column, new Color(accent.r, accent.g, accent.b, 0.30f));
+            SetRadius(column, 8f);
 
             VisualElement header = new VisualElement();
             header.style.flexDirection = FlexDirection.Row;
             header.style.alignItems = Align.Center;
-            Label title = CreateSectionTitle((enemySide ? "ПРОТИВНИК" : "ВАШ ОТРЯД") + " · " + total + " / " + limit);
+            header.style.flexShrink = 0f;
+            header.style.paddingRight = 8f;
+            Label title = CreateLabel(enemySide ? "ПРОТИВНИК" : "ВАШ ОТРЯД", 17, accent);
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.letterSpacing = 2f;
             title.style.flexGrow = 1f;
             header.Add(title);
+            Label counter = CreateLabel(string.Empty, 17, new Color(0.92f, 0.88f, 0.80f, 1f));
+            counter.style.unityFontStyleAndWeight = FontStyle.Bold;
+            counter.style.marginRight = 10f;
+            header.Add(counter);
             Button clear = new Button(() => ClearSide(enemySide)) { text = "ОЧИСТИТЬ" };
             StyleSecondaryButton(clear);
-            clear.style.height = 24f;
-            clear.SetEnabled(total > 0);
+            clear.style.height = 26f;
+            clear.style.fontSize = 10f;
             header.Add(clear);
             column.Add(header);
 
-            Label hint = CreateLabel(
-                total == 0
-                    ? (enemySide ? "Добавьте хотя бы одного противника." : "Добавьте хотя бы одного бойца.")
-                    : string.Join(", ", PickedUnits(enemySide).GroupBy(unit => unit.RoleLabel)
-                        .Select(group => group.Count() > 1 ? group.Key + " ×" + group.Count() : group.Key)),
-                11,
-                total == 0 ? new Color(0.90f, 0.62f, 0.45f, 1f) : new Color(0.78f, 0.74f, 0.66f, 1f));
-            hint.style.whiteSpace = WhiteSpace.Normal;
-            hint.style.marginTop = 4f;
-            hint.style.marginBottom = 6f;
-            column.Add(hint);
+            Label summary = CreateLabel(string.Empty, 11, new Color(0.70f, 0.68f, 0.62f, 1f));
+            summary.style.whiteSpace = WhiteSpace.Normal;
+            summary.style.minHeight = 30f;
+            summary.style.marginTop = 6f;
+            summary.style.paddingRight = 8f;
+            summary.style.flexShrink = 0f;
+            column.Add(summary);
 
+            VisualElement rule = new VisualElement();
+            rule.style.height = 1f;
+            rule.style.marginTop = 6f;
+            rule.style.marginRight = 8f;
+            rule.style.marginBottom = 8f;
+            rule.style.flexShrink = 0f;
+            rule.style.backgroundColor = new Color(accent.r, accent.g, accent.b, 0.25f);
+            column.Add(rule);
+
+            // Своя прокрутка у каждой колонки: колесом по 90 пикселей, без «резинки».
+            ScrollView scroll = new ScrollView(ScrollViewMode.Vertical)
+            {
+                name = enemySide ? "sandbox-enemy-scroll" : "sandbox-player-scroll",
+                horizontalScrollerVisibility = ScrollerVisibility.Hidden,
+                verticalScrollerVisibility = ScrollerVisibility.Auto,
+                mouseWheelScrollSize = 90f,
+                touchScrollBehavior = ScrollView.TouchScrollBehavior.Clamped
+            };
+            scroll.style.flexGrow = 1f;
+            scroll.style.flexShrink = 1f;
+            scroll.style.minHeight = 0f;
+            StyleDarkScroller(scroll.verticalScroller, accent);
+            column.Add(scroll);
+
+            Dictionary<string, SandboxPickCard> cards = enemySide ? enemyCards : playerCards;
+            VisualElement grid = null;
             string currentGroup = null;
             foreach (SandboxUnitOption option in unitContent.AllUnits)
             {
-                if (option.Group != currentGroup)
+                if (option.Group != currentGroup || grid == null)
                 {
                     currentGroup = option.Group;
-                    Label groupLabel = CreateLabel(currentGroup.ToUpperInvariant(), 10, new Color(0.62f, 0.57f, 0.47f, 1f));
+                    Label groupLabel = CreateLabel(currentGroup.ToUpperInvariant(), 11, new Color(0.62f, 0.57f, 0.47f, 1f));
                     groupLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-                    groupLabel.style.marginTop = 8f;
-                    groupLabel.style.marginBottom = 2f;
-                    column.Add(groupLabel);
+                    groupLabel.style.letterSpacing = 2f;
+                    groupLabel.style.marginTop = cards.Count == 0 ? 0f : 8f;
+                    groupLabel.style.marginBottom = 8f;
+                    scroll.Add(groupLabel);
+                    grid = new VisualElement();
+                    grid.style.flexDirection = FlexDirection.Row;
+                    grid.style.flexWrap = Wrap.Wrap;
+                    scroll.Add(grid);
                 }
-                column.Add(BuildUnitRow(option.Definition, enemySide, total < limit));
+
+                SandboxUnitDefinition definition = option.Definition;
+                SandboxUnitVisual visual = unitContent.GetVisual(definition.Id);
+                SandboxPickCard card = new SandboxPickCard(
+                    definition,
+                    visual,
+                    accent,
+                    () => ChangeCount(enemySide, definition.Id, 1),
+                    () => ChangeCount(enemySide, definition.Id, -1),
+                    () => fighterDetailsView.Open(definition, portrait: visual.Portrait));
+                cards[definition.Id] = card;
+                grid.Add(card.Root);
+            }
+
+            if (enemySide)
+            {
+                enemyCounterLabel = counter;
+                enemySummaryLabel = summary;
+                enemyClearButton = clear;
+            }
+            else
+            {
+                playerCounterLabel = counter;
+                playerSummaryLabel = summary;
+                playerClearButton = clear;
+            }
+            return column;
+        }
+
+        // Тонкая тёмная полоса прокрутки без стрелок, ползунок — цвета стороны.
+        private static void StyleDarkScroller(Scroller scroller, Color accent)
+        {
+            if (scroller == null)
+                return;
+            scroller.style.width = 8f;
+            scroller.style.minWidth = 8f;
+            scroller.style.marginLeft = 4f;
+            scroller.style.borderLeftWidth = 0f;
+            scroller.style.backgroundColor = new Color(0f, 0f, 0f, 0f);
+            scroller.lowButton.style.display = DisplayStyle.None;
+            scroller.highButton.style.display = DisplayStyle.None;
+            scroller.slider.style.marginTop = 0f;
+            scroller.slider.style.marginBottom = 0f;
+            VisualElement tracker = scroller.slider.Q("unity-tracker");
+            if (tracker != null)
+            {
+                tracker.style.backgroundColor = new Color(1f, 1f, 1f, 0.05f);
+                SetBorder(tracker, new Color(0f, 0f, 0f, 0f), 0f);
+                SetRadius(tracker, 4f);
+            }
+            VisualElement dragger = scroller.slider.Q("unity-dragger");
+            if (dragger != null)
+            {
+                dragger.style.backgroundColor = new Color(accent.r, accent.g, accent.b, 0.55f);
+                SetBorder(dragger, new Color(0f, 0f, 0f, 0f), 0f);
+                SetRadius(dragger, 4f);
+                dragger.style.width = 8f;
+                dragger.style.left = 0f;
             }
         }
 
-        private VisualElement BuildUnitRow(SandboxUnitDefinition definition, bool enemySide, bool canAdd)
+        private VisualElement BuildSetupCenter()
         {
-            CountsFor(enemySide).TryGetValue(definition.Id, out int count);
-            SandboxUnitVisual visual = unitContent.GetVisual(definition.Id);
+            VisualElement center = new VisualElement { name = "sandbox-setup-center" };
+            center.style.flexGrow = 1f;
+            center.style.minWidth = 220f;
+            center.style.alignItems = Align.Center;
+            center.style.justifyContent = Justify.Center;
+            center.style.paddingLeft = 20f;
+            center.style.paddingRight = 20f;
 
-            VisualElement row = new VisualElement();
-            row.style.flexDirection = FlexDirection.Row;
-            row.style.alignItems = Align.Center;
-            row.style.height = 30f;
-            row.style.marginBottom = 2f;
-            row.style.paddingLeft = 4f;
-            row.style.paddingRight = 4f;
-            row.style.backgroundColor = count > 0
-                ? new Color(0.20f, 0.17f, 0.10f, 0.9f)
-                : new Color(0f, 0f, 0f, 0f);
-            SetRadius(row, 3f);
+            startBattleButton = new Button(StartBattle) { text = "НАЧАТЬ БОЙ", name = "sandbox-start-battle" };
+            StylePrimaryButton(startBattleButton);
+            startBattleButton.style.width = 260f;
+            startBattleButton.style.height = 64f;
+            startBattleButton.style.fontSize = 18f;
+            startBattleButton.style.letterSpacing = 3f;
+            center.Add(startBattleButton);
 
-            Image portrait = new Image
-            {
-                sprite = visual.Portrait != null ? visual.Portrait : visual.BattlefieldSprite,
-                scaleMode = ScaleMode.ScaleAndCrop,
-                pickingMode = PickingMode.Ignore
-            };
-            portrait.style.width = 22f;
-            portrait.style.height = 28f;
-            portrait.style.marginRight = 6f;
-            portrait.style.flexShrink = 0f;
-            row.Add(portrait);
+            startHintLabel = CreateLabel(string.Empty, 12, new Color(0.70f, 0.68f, 0.62f, 1f));
+            startHintLabel.style.marginTop = 12f;
+            startHintLabel.style.maxWidth = 260f;
+            startHintLabel.style.whiteSpace = WhiteSpace.Normal;
+            startHintLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            center.Add(startHintLabel);
 
-            Button name = new Button(() => fighterDetailsView.Open(definition, portrait: visual.Portrait))
-            {
-                text = definition.RoleLabel + "   " + definition.MaxHitPoints + "/" + definition.Attack + "/" +
-                       definition.Defense + "/" + definition.Damage,
-                tooltip = "Карточка. HP / Атака / Защита / Урон · Ход " + definition.Movement +
-                          " · Инициатива " + definition.Initiative + " · Дальность " + definition.AttackRange
-            };
-            name.style.flexGrow = 1f;
-            name.style.unityTextAlign = TextAnchor.MiddleLeft;
-            name.style.backgroundColor = new Color(0f, 0f, 0f, 0f);
-            SetBorder(name, new Color(0f, 0f, 0f, 0f), 0f);
-            name.style.color = count > 0 ? new Color(0.95f, 0.84f, 0.60f, 1f) : new Color(0.78f, 0.77f, 0.72f, 1f);
-            name.style.fontSize = 12f;
-            row.Add(name);
-
-            Button minus = new Button(() => ChangeCount(enemySide, definition.Id, -1)) { text = "−" };
-            Label value = CreateLabel(count.ToString(), 12, new Color(0.95f, 0.84f, 0.60f, 1f));
-            value.style.width = 20f;
-            value.style.unityTextAlign = TextAnchor.MiddleCenter;
-            Button plus = new Button(() => ChangeCount(enemySide, definition.Id, 1)) { text = "+" };
-            foreach (Button button in new[] { minus, plus })
-            {
-                StyleSecondaryButton(button);
-                button.style.height = 22f;
-                button.style.width = 26f;
-            }
-            minus.SetEnabled(count > 0);
-            plus.SetEnabled(canAdd);
-            row.Add(minus);
-            row.Add(value);
-            row.Add(plus);
-            return row;
+            Label help = CreateLabel("ЛКМ — добавить · ПКМ — карточка · «−» — убрать", 10, new Color(0.48f, 0.48f, 0.46f, 1f));
+            help.style.marginTop = 6f;
+            help.style.unityTextAlign = TextAnchor.MiddleCenter;
+            center.Add(help);
+            return center;
         }
 
         private void StartBattle()

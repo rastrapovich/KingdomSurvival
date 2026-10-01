@@ -9,6 +9,7 @@ public partial class PrototypeUIController
     private GameState continuousBoundGameState;
     private float continuousDetailsRefreshTimer;
     private bool continuousDebugAutopauseRegistered;
+    private const float MaxSimulationFrameSeconds = 0.1f;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InitializeContinuousTimeRuntime()
@@ -98,6 +99,10 @@ public partial class PrototypeUIController
         worldMap.RegisterCallback<PointerDownEvent>(
             OnContinuousMapPointerDown,
             TrickleDown.TrickleDown);
+        // 12И: зажатая кнопка — бег за курсором.
+        worldMap.RegisterCallback<PointerMoveEvent>(OnContinuousMapPointerMove);
+        worldMap.RegisterCallback<PointerUpEvent>(OnContinuousMapPointerUp);
+        worldMap.RegisterCallback<PointerCaptureOutEvent>(OnContinuousMapPointerCaptureOut);
     }
 
     private void RegisterContinuousDebugAutopause()
@@ -147,16 +152,19 @@ public partial class PrototypeUIController
         {
             RefreshAutoTimeState();
 
+            // 12И: бегущий отряд проходит 2 клетки в секунду — долгий кадр
+            // (загрузка сцены, подвисание) не должен переносить героя скачком.
             ContinuousSimulationBatch batch =
                 ContinuousSimulationSystem.Advance(
                     gameState,
-                    Time.unscaledDeltaTime);
+                    Mathf.Min(Time.unscaledDeltaTime, MaxSimulationFrameSeconds));
 
             if (batch.HasReportableContent)
                 ProcessContinuousSimulationBatch(batch);
         }
 
         RegisterContinuousDebugAutopause();
+        EnsureDeferredWorldMapUi();
         RefreshContinuousClockOnly();
         RefreshContinuousMapMarker();
 
@@ -166,6 +174,35 @@ public partial class PrototypeUIController
             continuousDetailsRefreshTimer = 0f;
             RefreshContinuousTimeUi(true);
         }
+    }
+
+    // 12И: части карты, которые поднимаются отложенно, запускаются через
+    // RuntimeInitializeOnLoadMethod только при первой загрузке сцены. После
+    // повторной загрузки (возврат из боя, загрузка партии) их поднимает этот
+    // страховочный вызов — раз в полсекунды, пока всё не готово.
+    private int deferredWorldMapUiFrame;
+
+    private void EnsureDeferredWorldMapUi()
+    {
+        if (worldMapHeroInitialized &&
+            worldMapPolishInitialized &&
+            worldMapInteractionPolishInitialized &&
+            worldMapLocationActionsInitialized)
+        {
+            return;
+        }
+
+        if (++deferredWorldMapUiFrame % 30 != 1)
+            return;
+
+        if (!worldMapPolishInitialized)
+            TryInitializeWorldMapPolish();
+        if (!worldMapInteractionPolishInitialized)
+            TryInitializeWorldMapInteractionPolish();
+        if (!worldMapLocationActionsInitialized)
+            TryInitializeWorldMapLocationActions();
+        if (!worldMapHeroInitialized)
+            TryInitializeWorldMapHero();
     }
 
     private void ProcessContinuousSimulationBatch(

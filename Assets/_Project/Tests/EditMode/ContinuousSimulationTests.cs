@@ -38,15 +38,12 @@ public class ContinuousSimulationTests
         Assert.That(clock.HourOfDay, Is.EqualTo(8.0).Within(0.01));
     }
 
-    // Задача "пересобрать масштаб путешествия" — явный контрактный тест
-    // (число НАМЕРЕННО захардкожено, не выведено из BaseTravelHoursPerCell/
-    // GameHoursPerRealSecond): без активного авторского мира действует
-    // безопасный fallback 4 игровых часа на клетку — 10 реальных секунд на
-    // обычной скорости (4ч × 60с/24ч). Если рабочий эталон масштаба
-    // путешествия когда-нибудь изменится, тест должен сломаться и заставить
-    // осознанно обновить число здесь, а не молча продолжать проходить.
+    // 12И (канон v1.50 §9.6) — явный контрактный тест: пока отряд бежит,
+    // часы идут в темпе бега. По умолчанию ядра — 2 клетки в секунду и
+    // 4 игровых часа на клетку открытой местности: за полсекунды бега
+    // ровно одна клетка и ровно 4 часа. Числа захардкожены намеренно.
     [Test]
-    public void Expedition_OneCellAdvancesExactlyBaseTravelHoursAtNormalSpeed()
+    public void Expedition_OneHexTakesTravelHoursPerHexWhileRunning()
     {
         WorldMapNavigation.ConfigureDefaultTerrain();
         GameState state = CreateTravellingState();
@@ -55,18 +52,22 @@ public class ContinuousSimulationTests
         ContinuousSimulationSystem.SetPaused(state, false);
 
         ExpeditionData expedition = state.ActiveExpedition;
-        int startIndex = expedition.RouteIndex;
+        float startX = expedition.CurrentMapXPercent;
+        float startY = expedition.CurrentMapYPercent;
         int startDay = state.Day;
         double startHour = ContinuousSimulationSystem.GetClock(state).HourOfDay;
 
-        ContinuousSimulationSystem.Advance(state, 10f, false);
+        ContinuousSimulationSystem.Advance(state, 0.5f, false);
 
-        Assert.That(expedition.RouteIndex, Is.EqualTo(startIndex + 1));
+        Assert.That(
+            WorldMapNavigation.DistanceHexes(startX, startY, expedition.CurrentMapXPercent, expedition.CurrentMapYPercent),
+            Is.EqualTo(1.0).Within(0.001),
+            "Полсекунды бега — одна клетка.");
         Assert.That(state.Day, Is.EqualTo(startDay), "4 часа от 08:00 не пересекают полночь.");
         Assert.That(
             ContinuousSimulationSystem.GetClock(state).HourOfDay,
             Is.EqualTo(startHour + 4.0).Within(0.01),
-            "1 клетка маршрута должна занимать ровно 4 игровых часа (BaseTravelHoursPerCell по умолчанию).");
+            "1 клетка пути по открытой местности — ровно 4 игровых часа.");
     }
 
     [Test]
@@ -88,8 +89,10 @@ public class ContinuousSimulationTests
             Is.EqualTo(startHour).Within(0.001));
     }
 
+    // 12И: кнопки скорости меняют темп дома и дел похода, но не бег —
+    // бегущий отряд сам задаёт темп часов.
     [Test]
-    public void FastSpeed_TriplesClockAndMovesOneCellPerBaseTravelHours()
+    public void FastSpeed_DoesNotChangeRunningPace()
     {
         WorldMapNavigation.ConfigureDefaultTerrain();
         GameState state = CreateTravellingState();
@@ -99,38 +102,18 @@ public class ContinuousSimulationTests
         ContinuousSimulationSystem.ToggleSpeed(state);
 
         ExpeditionData expedition = state.ActiveExpedition;
-        int startIndex = expedition.RouteIndex;
-        int startDay = state.Day;
+        float startX = expedition.CurrentMapXPercent;
+        float startY = expedition.CurrentMapYPercent;
         double startHour = ContinuousSimulationSystem.GetClock(state).HourOfDay;
 
-        ContinuousSimulationSystem.Advance(state, 2f, false);
+        ContinuousSimulationSystem.Advance(state, 0.5f, false);
 
-        // WM-13: было захардкожено 1.2 под старое RealSecondsPerGameDay —
-        // считаем ожидание из констант, чтобы ускорение времени не ломало тест.
-        double expectedHours =
-            2.0 *
-            ContinuousSimulationSystem.FastSpeedMultiplier *
-            ContinuousSimulationSystem.GameHoursPerRealSecond;
-        ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
-        Assert.That(clock.HourOfDay - startHour, Is.EqualTo(expectedHours).Within(0.02));
+        Assert.That(ContinuousSimulationSystem.GetSpeedMultiplier(state),
+            Is.EqualTo(ContinuousSimulationSystem.FastSpeedMultiplier));
         Assert.That(
-            expedition.RouteIndex,
-            Is.EqualTo(startIndex),
-            "при базовом эталоне (4ч/клетку) 2 реальные секунды на Fast (2.4 игровых часа) ещё не завершают клетку");
-
-        // Задача "пересобрать масштаб путешествия": та же клетка
-        // (BaseTravelHoursPerCell, по умолчанию 4ч) на Fast (×3) проходится
-        // за (4ч/GameHoursPerRealSecond)/3 реальных секунд — догоняем
-        // остаток времени до полной клетки.
-        double oneCellHours = 1.0 / ContinuousSimulationSystem.CellsPerGameHour;
-        float totalSecondsForOneCellAtFastSpeed = (float)(
-            (oneCellHours / ContinuousSimulationSystem.GameHoursPerRealSecond) /
-            ContinuousSimulationSystem.FastSpeedMultiplier);
-        float remainingSeconds = totalSecondsForOneCellAtFastSpeed - 2f;
-        ContinuousSimulationSystem.Advance(state, remainingSeconds, false);
-
-        Assert.That(expedition.RouteIndex, Is.EqualTo(startIndex + 1));
-        Assert.That(state.Day, Is.EqualTo(startDay), "4 часа от 08:00 не пересекают полночь.");
+            WorldMapNavigation.DistanceHexes(startX, startY, expedition.CurrentMapXPercent, expedition.CurrentMapYPercent),
+            Is.EqualTo(1.0).Within(0.001));
+        Assert.That(ContinuousSimulationSystem.GetClock(state).HourOfDay - startHour, Is.EqualTo(4.0).Within(0.01));
     }
 
     [Test]
@@ -213,7 +196,7 @@ public class ContinuousSimulationTests
 
         Assert.That(started, Is.True, message);
         Assert.That(state.ActiveExpedition.FighterIds.Count, Is.EqualTo(4));
-        Assert.That(state.ActiveExpedition.Route.Count, Is.GreaterThan(5));
+        Assert.That(state.ActiveExpedition.Route.Count, Is.GreaterThan(1));
         return state;
     }
 }

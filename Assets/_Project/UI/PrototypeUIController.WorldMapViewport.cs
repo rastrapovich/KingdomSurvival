@@ -23,19 +23,14 @@ public partial class PrototypeUIController
     // при подборе константы. Это значение — только запасной вариант до
     // первого GeometryChangedEvent.
     private const float WorldMapMaxZoomFallback = 10f;
-    // Доля меньшей стороны viewport, которую должна занимать одна клетка на
-    // максимальном приближении — середина требуемого диапазона 85-90%.
-    private const float WorldMapMaxZoomCellFraction = 0.875f;
+    // 12И: доля меньшей стороны viewport, которую занимает одна клетка на
+    // максимальном приближении. Раньше 0,875 (клетка во весь экран) — для
+    // бегущей фигуры героя достаточно трети экрана.
+    private const float WorldMapMaxZoomCellFraction = 0.3f;
     // Мультипликативный шаг (±15% за нотч), а не аддитивный — даёт
     // равномерное ощущение зума независимо от того, насколько широк
     // фактический диапазон [WorldMapMinZoom; worldMapMaxZoom].
     private const float WorldMapZoomStepFactor = 1.15f;
-    // WM-14: единый визуальный размер логической клетки в пикселях при
-    // zoom=1. Конкретное число не имеет смысла само по себе (пропорции
-    // компенсируются zoom/maxZoom) — важно только то, что ОДНО и то же
-    // значение используется для ширины и высоты канваса, поэтому клетка
-    // сетки всегда квадратная независимо от формы viewport.
-    private const float WorldMapBaseCellSizePx = 32f;
 
     private float worldMapMinZoom = WorldMapMinZoomFallback;
     private float worldMapMaxZoom = WorldMapMaxZoomFallback;
@@ -54,10 +49,8 @@ public partial class PrototypeUIController
     private Vector2 worldMapPanPointerStart;
     private Vector2 worldMapPanOffsetStart;
     private bool worldMapInitialFocusApplied;
-    // WM-14: собственный (не растянутый под viewport) размер .world-map при
-    // zoom=1 — (GridWidth-1)/(GridHeight-1) клеток по WorldMapBaseCellSizePx.
-    // Единственный источник истины для canvasWidth/canvasHeight, которые
-    // раньше ошибочно принимались равными размеру viewport.
+    // 12И: собственный размер .world-map при zoom=1 — полотно активного мира
+    // в пикселях (то же, в котором считается шестиугольная сетка).
     private float worldMapCanvasWidth;
     private float worldMapCanvasHeight;
 
@@ -74,19 +67,17 @@ public partial class PrototypeUIController
         ApplyWorldMapViewportTransform();
     }
 
-    // WM-14: canvasWidth/canvasHeight зависят только от размера сетки и
-    // WorldMapBaseCellSizePx — не от viewport, поэтому это можно и нужно
-    // выставить сразу, до первого GeometryChangedEvent (в отличие от
-    // maxZoom/pan, которым реальный размер viewport обязателен).
+    // 12И: размер полотна — из активного мира (MapCanvasWidth/Height), не
+    // зависит от viewport, поэтому выставляется сразу.
     private void ConfigureWorldMapCanvasSize()
     {
         if (worldMap == null)
             return;
 
-        worldMapCanvasWidth =
-            (WorldMapNavigation.GridWidth - 1) * WorldMapBaseCellSizePx;
-        worldMapCanvasHeight =
-            (WorldMapNavigation.GridHeight - 1) * WorldMapBaseCellSizePx;
+        WorldMapDatabaseAsset database = WorldMapVisualRuntime.LoadDatabase();
+        WorldMapWorldDefinitionAsset world = database != null ? database.ActiveWorld : null;
+        worldMapCanvasWidth = world != null ? world.MapCanvasWidth : WorldMapHexGrid.DefaultCanvasWidth;
+        worldMapCanvasHeight = world != null ? world.MapCanvasHeight : WorldMapHexGrid.DefaultCanvasHeight;
 
         worldMap.style.width = worldMapCanvasWidth;
         worldMap.style.height = worldMapCanvasHeight;
@@ -189,8 +180,9 @@ public partial class PrototypeUIController
         float viewportWidth = Mathf.Max(1f, worldMapViewport.resolvedStyle.width);
         float viewportHeight = Mathf.Max(1f, worldMapViewport.resolvedStyle.height);
 
+        WorldMapHexGrid grid = WorldMapNavigation.Grid;
         float baseCellSizePx =
-            worldMapCanvasWidth / (WorldMapNavigation.GridWidth - 1);
+            (float)grid.HexWidth * worldMapCanvasWidth / grid.CanvasWidth;
         float targetVisibleCellPx =
             WorldMapMaxZoomCellFraction * Mathf.Min(viewportWidth, viewportHeight);
 
@@ -311,6 +303,7 @@ public partial class PrototypeUIController
     // карта помещается в viewport, с центрированием.
     private void OnWorldMapFitButtonClicked()
     {
+        SuspendWorldMapCameraFollow();
         worldMapZoom = worldMapMinZoom;
         CenterWorldMapOn(50f, 50f);
         ClampWorldMapPan();
@@ -320,6 +313,7 @@ public partial class PrototypeUIController
 
     private void OnWorldMapFocusHomeButtonClicked()
     {
+        SuspendWorldMapCameraFollow();
         CenterWorldMapOn(GetWorldMapHomeXPercent(), GetWorldMapHomeYPercent());
         ClampWorldMapPan();
         ApplyWorldMapViewportTransform();
@@ -342,6 +336,7 @@ public partial class PrototypeUIController
         CenterWorldMapOn(heroX, heroY);
         ClampWorldMapPan();
         ApplyWorldMapViewportTransform();
+        ResumeWorldMapCameraFollow();
     }
 
     private void RefreshWorldMapZoomIndicator()
@@ -364,6 +359,7 @@ public partial class PrototypeUIController
             return;
 
         isPanningWorldMap = true;
+        SuspendWorldMapCameraFollow();
         worldMapPanPointerStart = evt.position;
         worldMapPanOffsetStart = new Vector2(worldMapPanOffsetX, worldMapPanOffsetY);
         worldMapViewport.CapturePointer(evt.pointerId);

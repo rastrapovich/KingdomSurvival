@@ -40,41 +40,36 @@ public class WorldMapNavigationTests
     }
 
     [Test]
-    public void ConfigureDefaultTerrain_IsEntirelyPlainsEverywhere()
+    public void ConfigureDefaultTerrain_IsEntirelyOpenGroundEverywhere()
     {
         WorldMapNavigation.ConfigureDefaultTerrain();
 
-        for (int y = 0; y < WorldMapNavigation.GridHeight; y += 7)
+        for (float y = 0f; y <= 100f; y += 7f)
         {
-            for (int x = 0; x < WorldMapNavigation.GridWidth; x += 7)
+            for (float x = 0f; x <= 100f; x += 7f)
             {
                 Assert.That(
-                    WorldMapNavigation.GetTerrainAtGridCell(x, y),
-                    Is.EqualTo(WorldMapTerrainType.Plains),
-                    $"Без авторского мира география должна быть безопасной сплошной Plains, " +
-                    "а не скрытым остатком процедурной генерации.");
+                    WorldMapNavigation.GetTerrainAtPercent(x, y),
+                    Is.EqualTo(WorldMapGameplayTerrainType.OpenGround),
+                    "Без авторского мира вся карта — открытая местность, а не скрытая генерация.");
             }
         }
     }
 
+    // 12И: множители местности — рабочие числа ядра; проверяется их смысл.
     [Test]
-    public void TerrainTravelCost_MatchesApprovedMultipliers()
+    public void TerrainRules_RoadIsFasterForestSlowerWaterBlocked()
     {
-        Assert.That(
-            WorldMapNavigation.GetTerrainTravelCost(WorldMapTerrainType.Plains),
-            Is.EqualTo(1));
-        Assert.That(
-            WorldMapNavigation.GetTerrainTravelCost(WorldMapTerrainType.Hills),
-            Is.EqualTo(2));
-        Assert.That(
-            WorldMapNavigation.GetTerrainTravelCost(WorldMapTerrainType.Mountains),
-            Is.EqualTo(3));
-        Assert.That(
-            WorldMapNavigation.GetTerrainSpeedMultiplier(WorldMapTerrainType.Hills),
-            Is.EqualTo(0.5f).Within(0.0001f));
-        Assert.That(
-            WorldMapNavigation.GetTerrainSpeedMultiplier(WorldMapTerrainType.Mountains),
-            Is.EqualTo(1f / 3f).Within(0.0001f));
+        WorldMapMovementRules rules = WorldMapMovementRules.CreateDefault();
+
+        Assert.That(rules.HoursPerHex(WorldMapGameplayTerrainType.Road),
+            Is.LessThan(rules.HoursPerHex(WorldMapGameplayTerrainType.OpenGround)));
+        Assert.That(rules.HoursPerHex(WorldMapGameplayTerrainType.Forest),
+            Is.GreaterThan(rules.HoursPerHex(WorldMapGameplayTerrainType.OpenGround)));
+        Assert.That(rules.IsTraversable(WorldMapGameplayTerrainType.Water), Is.False);
+        Assert.That(rules.IsTraversable(WorldMapGameplayTerrainType.Cliffs), Is.False);
+        Assert.That(rules.HoursPerHex(WorldMapGameplayTerrainType.OpenGround),
+            Is.EqualTo(WorldMapMovementRules.DefaultTravelHoursPerHex).Within(0.0001));
     }
 
     [Test]
@@ -165,7 +160,7 @@ public class WorldMapNavigationTests
 
         Assert.That(started, Is.True, message);
         Assert.That(state.ActiveExpedition.FighterIds.Count, Is.EqualTo(4));
-        Assert.That(state.ActiveExpedition.Route.Count, Is.GreaterThan(5));
+        Assert.That(state.ActiveExpedition.Route.Count, Is.GreaterThan(1));
         return state;
     }
 }

@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1b16bdb8122fd948582415c4723edb4, type: 3}
+  m_Name: KingdomSurvivalWorldMapMovement
+  m_EditorClassIdentifier: 
+  heroRunSpeedHexesPerSecond: 2
+  travelHoursPerHex: 1.5
+  discoveryRadiusHexes: 1.25
+  terrain:
+  - Terrain: 0
+    Traversable: 1
+    TravelSpeedMultiplier: 1
+    RunSpeedMultiplier: 1
+    PreviewColor: {r: 0.7, g: 0.8, b: 0.62, a: 1}
+  - Terrain: 1
+    Traversable: 1
+    TravelSpeedMultiplier: 1.3
+    RunSpeedMultiplier: 1.15
+    PreviewColor: {r: 0.86, g: 0.7, b: 0.42, a: 1}
+  - Terrain: 5
+    Traversable: 1
+    TravelSpeedMultiplier: 1.1
+    RunSpeedMultiplier: 1.05
+    PreviewColor: {r: 0.8, g: 0.74, b: 0.52, a: 1}
+  - Terrain: 2
+    Traversable: 1
+    TravelSpeedMultiplier: 0.9
+    RunSpeedMultiplier: 0.95
+    PreviewColor: {r: 0.86, g: 0.84, b: 0.38, a: 1}
+  - Terrain: 3
+    Traversable: 1
+    TravelSpeedMultiplier: 0.7
+    RunSpeedMultiplier: 0.8
+    PreviewColor: {r: 0.2, g: 0.52, b: 0.25, a: 1}
+  - Terrain: 6
+    Traversable: 1
+    TravelSpeedMultiplier: 0.5
+    RunSpeedMultiplier: 0.65
+    PreviewColor: {r: 0.38, g: 0.48, b: 0.3, a: 1}
+  - Terrain: 7
+    Traversable: 1
+    TravelSpeedMultiplier: 0.5
+    RunSpeedMultiplier: 0.75
+    PreviewColor: {r: 0.66, g: 0.52, b: 0.34, a: 1}
+  - Terrain: 8
+    Traversable: 1
+    TravelSpeedMultiplier: 0.33
+    RunSpeedMultiplier: 0.6
+    PreviewColor: {r: 0.56, g: 0.54, b: 0.56, a: 1}
+  - Terrain: 4
+    Traversable: 0
+    TravelSpeedMultiplier: 1
+    RunSpeedMultiplier: 1
+    PreviewColor: {r: 0.22, g: 0.46, b: 0.86, a: 1}
+  - Terrain: 9
+    Traversable: 0
+    TravelSpeedMultiplier: 1
+    RunSpeedMultiplier: 1
+    PreviewColor: {r: 0.32, g: 0.28, b: 0.3, a: 1}
+  heroAnimationSetId: militia
+  heroHeightInHexRadii: 1.4
+  syncWalkCadence: 1
+  holdRepathIntervalSeconds: 0.1
+  holdRepathMinShiftHexes: 0.3
+  showClickMarker: 1
+  clickMarkerSeconds: 0.45
+  clickMarkerColor: {r: 0.96, g: 0.88, b: 0.62, a: 0.9}
+  cameraFollowsHero: 1
+  cameraFollowSharpness: 6

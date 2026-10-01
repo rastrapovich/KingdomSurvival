@@ -435,7 +435,7 @@ public class GameState
         // (через WorldMapDatabaseAsset.ActiveWorld на стороне UI), география
         // берётся из него — WorldSeed остаётся только для наполнения
         // (расстановка допустимых малых локаций по слотам). Без авторского
-        // мира — безопасная сплошная Plains, а не скрытая процедурная
+        // мира — сплошная открытая местность, а не скрытая процедурная
         // генерация (см. WorldMapNavigation.ConfigureDefaultTerrain).
         if (worldDefinition != null && worldDefinition.IsValid)
             WorldMapNavigation.ConfigureFromDefinition(worldDefinition);
@@ -1156,10 +1156,10 @@ public class GameState
                     location.MapXPercent,
                     location.MapYPercent));
 
+        // 12И (канон v1.50 §9): отряд останавливается там, где заметил место,
+        // а не переносится к нему скачком — фигура на карте не прыгает.
         expedition.LocationId = location.Id;
         expedition.Phase = CommanderState.AtLocation;
-        expedition.CurrentMapXPercent = location.MapXPercent;
-        expedition.CurrentMapYPercent = location.MapYPercent;
         expedition.TargetMapXPercent = location.MapXPercent;
         expedition.TargetMapYPercent = location.MapYPercent;
         expedition.RemainingRouteCells = 0;
@@ -1169,7 +1169,7 @@ public class GameState
         expedition.ActiveActivity = null;
         expedition.Route = new List<MapPointData>
         {
-            new MapPointData(location.MapXPercent, location.MapYPercent)
+            new MapPointData(expedition.CurrentMapXPercent, expedition.CurrentMapYPercent)
         };
         expedition.LastTravelPoints.Clear();
         commander.State = CommanderState.AtLocation;

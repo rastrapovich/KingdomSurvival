@@ -98,9 +98,11 @@ public static class CampRest
                 return CampPlaceKind.AtLocation;
         }
 
-        WorldMapGameplayTerrainType terrain = WorldMapGameplayTerrainQuery.GetTerrainTypeAtPosition(
-            WorldMapNavigation.ActiveDefinition, expedition.CurrentMapXPercent, expedition.CurrentMapYPercent);
-        return terrain == WorldMapGameplayTerrainType.Road ? CampPlaceKind.Road : CampPlaceKind.OpenGround;
+        WorldMapGameplayTerrainType terrain = WorldMapNavigation.GetTerrainAtPercent(
+            expedition.CurrentMapXPercent, expedition.CurrentMapYPercent);
+        return terrain == WorldMapGameplayTerrainType.Road || terrain == WorldMapGameplayTerrainType.Trail
+            ? CampPlaceKind.Road
+            : CampPlaceKind.OpenGround;
     }
 
     public static string DescribePlace(GameState state)
@@ -364,19 +366,18 @@ public static class CampRest
         if (!state.HasActiveExpedition || state.Locations == null)
             return null;
         ExpeditionData expedition = state.ActiveExpedition;
-        int x = WorldMapNavigation.GridXFromPercent(expedition.CurrentMapXPercent);
-        int y = WorldMapNavigation.GridYFromPercent(expedition.CurrentMapYPercent);
-
+        // 12И: радиус в клетках пути шестиугольной сетки (+полклетки — как
+        // прежний квадрат вокруг клетки героя).
         LocationData best = null;
-        int bestDistance = int.MaxValue;
+        double bestDistance = double.MaxValue;
         foreach (LocationData location in state.Locations)
         {
             if (location.IsWaypoint || location.IsVisibleOnMap)
                 continue;
-            int distance = Math.Max(
-                Math.Abs(WorldMapNavigation.GridXFromPercent(location.MapXPercent) - x),
-                Math.Abs(WorldMapNavigation.GridYFromPercent(location.MapYPercent) - y));
-            if (distance <= InspectRadiusCells && distance < bestDistance)
+            double distance = WorldMapNavigation.DistanceHexes(
+                expedition.CurrentMapXPercent, expedition.CurrentMapYPercent,
+                location.MapXPercent, location.MapYPercent);
+            if (distance <= InspectRadiusCells + 0.5 && distance < bestDistance)
             {
                 best = location;
                 bestDistance = distance;

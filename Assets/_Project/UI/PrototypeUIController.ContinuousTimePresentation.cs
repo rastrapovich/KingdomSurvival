@@ -69,7 +69,6 @@ public partial class PrototypeUIController
             return;
 
         RefreshWorldMapArmyMarker();
-        RefreshWorldMapRouteProgress();
 
         if (gameState.HasActiveExpedition &&
             worldMapArmyMarkerLabel != null)

@@ -34,7 +34,8 @@ public sealed class Chapter01FishingAndKnowledgeTests
     {
         LocationData target = gameState.Locations.First(location => !location.IsWaypoint);
         Assert.IsTrue(gameState.TryStartExpedition(target.Id, fighters.ToList(), out string message, retinue), message);
-        gameState.ActiveExpedition.RouteIndex = 1;
+        WorldMapNavigation.AdvanceRouteByCells(gameState.ActiveExpedition, 1);
+        gameState.ActiveExpedition.LastTravelPoints.Clear();
     }
 
     private static void ReturnHome(GameState gameState)

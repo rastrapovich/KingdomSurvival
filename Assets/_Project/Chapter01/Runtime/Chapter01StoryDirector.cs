@@ -684,11 +684,11 @@ namespace KingdomSurvival.Chapter01
             if (ford == null)
                 return false;
             ExpeditionData expedition = gameState.ActiveExpedition;
-            int dx = Math.Abs(WorldMapNavigation.GridXFromPercent(expedition.CurrentMapXPercent) -
-                              WorldMapNavigation.GridXFromPercent(ford.MapXPercent));
-            int dy = Math.Abs(WorldMapNavigation.GridYFromPercent(expedition.CurrentMapYPercent) -
-                              WorldMapNavigation.GridYFromPercent(ford.MapYPercent));
-            return Math.Max(dx, dy) <= FordCampRadiusCells;
+            // 12И: радиус в клетках пути (+полклетки, как прежний квадрат).
+            return WorldMapNavigation.IsWithinHexes(
+                expedition.CurrentMapXPercent, expedition.CurrentMapYPercent,
+                ford.MapXPercent, ford.MapYPercent,
+                FordCampRadiusCells + 0.5);
         }
 
         // Название стоянки для лагеря: у брода — своё.

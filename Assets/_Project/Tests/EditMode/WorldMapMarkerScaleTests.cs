@@ -121,6 +121,10 @@ namespace KingdomSurvival.Tests.EditMode
             }
         }
 
+        // 12И: клетка — шестиугольник; её ширина (шаг между центрами) в процентах полотна.
+        private static float HexWidthPercentX => (float)(WorldMapNavigation.Grid.HexWidth / WorldMapNavigation.Grid.CanvasWidth * 100.0);
+        private static float HexWidthPercentY => (float)(WorldMapNavigation.Grid.HexWidth / WorldMapNavigation.Grid.CanvasHeight * 100.0);
+
         // Размер в клетках правильно переводится в размер map canvas
         // (те же проценты, что и Bounds/позиции всего остального авторства —
         // 100/(GridWidth-1) и 100/(GridHeight-1) на клетку).
@@ -129,18 +133,18 @@ namespace KingdomSurvival.Tests.EditMode
         {
             const float sizeCells = 0.7f;
 
-            float expectedWidthPercent = 100f / (WorldMapNavigation.GridWidth - 1) * sizeCells;
-            float expectedHeightPercent = 100f / (WorldMapNavigation.GridHeight - 1) * sizeCells;
+            float expectedWidthPercent = HexWidthPercentX * sizeCells;
+            float expectedHeightPercent = HexWidthPercentY * sizeCells;
 
             // Одна клетка карты — 100/(GridWidth-1) процентов ширины; полный
             // маркер размером 1.0 клетки должен занимать ровно эту долю.
-            Assert.That(expectedWidthPercent, Is.EqualTo(100f / (WorldMapNavigation.GridWidth - 1) * 0.7f).Within(0.0001f));
-            Assert.That(expectedHeightPercent, Is.EqualTo(100f / (WorldMapNavigation.GridHeight - 1) * 0.7f).Within(0.0001f));
+            Assert.That(expectedWidthPercent, Is.EqualTo(HexWidthPercentX * 0.7f).Within(0.0001f));
+            Assert.That(expectedHeightPercent, Is.EqualTo(HexWidthPercentY * 0.7f).Within(0.0001f));
 
             // При sizeCells=1.0 маркер занимает ровно долю одной клетки по
             // каждой оси — база перевода корректна и симметрична по осям.
-            float oneCellWidthPercent = 100f / (WorldMapNavigation.GridWidth - 1);
-            float oneCellHeightPercent = 100f / (WorldMapNavigation.GridHeight - 1);
+            float oneCellWidthPercent = HexWidthPercentX;
+            float oneCellHeightPercent = HexWidthPercentY;
             Assert.That(oneCellWidthPercent, Is.GreaterThan(0f));
             Assert.That(oneCellHeightPercent, Is.GreaterThan(0f));
         }
@@ -155,7 +159,7 @@ namespace KingdomSurvival.Tests.EditMode
         public void MarkerSizePercent_ScalesWithMapRectSizeLikeZoom()
         {
             const float sizeCells = 0.7f;
-            float widthPercent = 100f / (WorldMapNavigation.GridWidth - 1) * sizeCells;
+            float widthPercent = HexWidthPercentX * sizeCells;
 
             Rect fitRect = new Rect(0f, 0f, 800f, 492f);
             Rect zoomedRect = WorldMapPreviewMath.ApplyZoomPan(fitRect, 2f, Vector2.zero);
@@ -201,7 +205,7 @@ namespace KingdomSurvival.Tests.EditMode
         public void MarkerSize_DoesNotAffectTravelCalculations()
         {
             WorldMapNavigation.ConfigureDefaultTerrain();
-            double cellsPerGameHourBefore = ContinuousSimulationSystem.CellsPerGameHour;
+            double hoursPerHexBefore = WorldMapMovementRules.Current.HoursPerHex(WorldMapGameplayTerrainType.OpenGround);
 
             WorldMapVisualTheme theme = CreateTheme();
             try
@@ -209,7 +213,7 @@ namespace KingdomSurvival.Tests.EditMode
                 SetPrivateFloat(theme, "heroMarkerSizeCells", 1.9f);
                 SetPrivateFloat(theme, "homeMarkerSizeCells", 3.5f);
 
-                Assert.That(ContinuousSimulationSystem.CellsPerGameHour, Is.EqualTo(cellsPerGameHourBefore));
+                Assert.That(WorldMapMovementRules.Current.HoursPerHex(WorldMapGameplayTerrainType.OpenGround), Is.EqualTo(hoursPerHexBefore));
             }
             finally
             {
@@ -229,8 +233,8 @@ namespace KingdomSurvival.Tests.EditMode
         {
             const float sizeCells = 1.3f;
 
-            float widthPercent = 100f / (WorldMapNavigation.GridWidth - 1) * sizeCells;
-            float heightPercent = 100f / (WorldMapNavigation.GridHeight - 1) * sizeCells;
+            float widthPercent = HexWidthPercentX * sizeCells;
+            float heightPercent = HexWidthPercentY * sizeCells;
 
             // Оба вычислены из ОДНОГО sizeCells — при равном GridWidth/GridHeight
             // результат был бы идентичен; при неравном (104×64, как сейчас)
@@ -238,7 +242,7 @@ namespace KingdomSurvival.Tests.EditMode
             // (GridWidth-1)/(GridHeight-1) (percent = 100/(cells-1), поэтому
             // больше клеток по оси → меньше процента на клетку), а не
             // произвольному искажению.
-            float expectedRatio = (float)(WorldMapNavigation.GridWidth - 1) / (WorldMapNavigation.GridHeight - 1);
+            float expectedRatio = WorldMapNavigation.Grid.CanvasWidth / WorldMapNavigation.Grid.CanvasHeight;
             float actualRatio = heightPercent / widthPercent;
 
             Assert.That(actualRatio, Is.EqualTo(expectedRatio).Within(0.0001f));

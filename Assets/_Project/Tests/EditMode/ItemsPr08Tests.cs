@@ -51,7 +51,8 @@ public sealed class ItemsPr08Tests
     {
         LocationData target = state.Locations.First(location => !location.IsWaypoint);
         Assert.IsTrue(state.TryStartExpedition(target.Id, fighters.ToList(), out string message), message);
-        state.ActiveExpedition.RouteIndex = 1;
+        WorldMapNavigation.AdvanceRouteByCells(state.ActiveExpedition, 1);
+        state.ActiveExpedition.LastTravelPoints.Clear();
     }
 
     // --- Стартовый набор ---

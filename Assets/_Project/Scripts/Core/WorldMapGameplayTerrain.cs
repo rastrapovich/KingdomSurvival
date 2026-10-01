@@ -1,179 +1,333 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
-// WM-T01 (раздел 9.9 канона, задача "gameplay-география дорог"): отдельный
-// слой gameplay-местности, независимый от WorldMapTerrainType (Plains/Hills/
-// Mountains), который остаётся исключительно источником стоимости для
-// WorldMapNavigation.FindPath (плотность маршрута, посчитанная один раз при
-// прокладке пути) и этой правкой не трогается вообще.
-//
-// Этот слой — про другое: живой запрос "какая местность прямо под героем
-// сейчас" (WorldMapGameplayTerrainQuery), используемый в
-// ContinuousSimulationSystem.AdvanceExpeditionMovement, чтобы скорость
-// менялась по ходу движения, не через плотность заранее посчитанного пути.
+// 12И (канон v1.50 §9.9): тип местности клетки шестиугольной сетки.
+// Значения сериализуются в разметку мира — новые типы добавлять только в
+// конец. Список рабочий: типы задают проходимость и множители движения
+// через WorldMapMovementRules, а не через код.
 public enum WorldMapGameplayTerrainType
 {
-    OpenGround,
-    Road,
-    Field,
-    Forest,
-    Water
+    OpenGround = 0,
+    Road = 1,
+    Field = 2,
+    Forest = 3,
+    Water = 4,
+    Trail = 5,
+    Swamp = 6,
+    Hills = 7,
+    Mountains = 8,
+    Cliffs = 9
+}
+
+public static class WorldMapTerrainLabels
+{
+    public static readonly WorldMapGameplayTerrainType[] All =
+    {
+        WorldMapGameplayTerrainType.OpenGround,
+        WorldMapGameplayTerrainType.Road,
+        WorldMapGameplayTerrainType.Trail,
+        WorldMapGameplayTerrainType.Field,
+        WorldMapGameplayTerrainType.Forest,
+        WorldMapGameplayTerrainType.Swamp,
+        WorldMapGameplayTerrainType.Hills,
+        WorldMapGameplayTerrainType.Mountains,
+        WorldMapGameplayTerrainType.Water,
+        WorldMapGameplayTerrainType.Cliffs
+    };
+
+    public static string Name(WorldMapGameplayTerrainType terrain)
+    {
+        switch (terrain)
+        {
+            case WorldMapGameplayTerrainType.OpenGround: return "Открытая местность";
+            case WorldMapGameplayTerrainType.Road: return "Дорога";
+            case WorldMapGameplayTerrainType.Trail: return "Тропа";
+            case WorldMapGameplayTerrainType.Field: return "Поле";
+            case WorldMapGameplayTerrainType.Forest: return "Лес";
+            case WorldMapGameplayTerrainType.Swamp: return "Болото";
+            case WorldMapGameplayTerrainType.Hills: return "Холмы";
+            case WorldMapGameplayTerrainType.Mountains: return "Горы";
+            case WorldMapGameplayTerrainType.Water: return "Вода";
+            case WorldMapGameplayTerrainType.Cliffs: return "Скалы";
+            default: return terrain.ToString();
+        }
+    }
+}
+
+// Разметка мира: тип местности каждой клетки. Пустая разметка — вся карта
+// открытая местность (безопасное значение без авторского мира).
+public sealed class WorldMapTerrainLayer
+{
+    private readonly byte[] cells;
+
+    public WorldMapHexGrid Grid { get; }
+
+    public WorldMapTerrainLayer(WorldMapHexGrid grid, byte[] cells = null)
+    {
+        Grid = grid ?? WorldMapHexGrid.CreateDefault();
+        this.cells = new byte[Grid.CellCount];
+        if (cells != null)
+            Array.Copy(cells, this.cells, Math.Min(cells.Length, this.cells.Length));
+    }
+
+    public static WorldMapTerrainLayer CreateDefault() =>
+        new WorldMapTerrainLayer(WorldMapHexGrid.CreateDefault());
+
+    public byte[] CopyCells() => (byte[])cells.Clone();
+
+    public WorldMapGameplayTerrainType Get(WorldMapHexCell cell) =>
+        Grid.IsInside(cell) ? (WorldMapGameplayTerrainType)cells[Grid.IndexOf(cell)] : WorldMapGameplayTerrainType.OpenGround;
+
+    public WorldMapGameplayTerrainType GetAtIndex(int index) =>
+        index >= 0 && index < cells.Length ? (WorldMapGameplayTerrainType)cells[index] : WorldMapGameplayTerrainType.OpenGround;
+
+    public void Set(WorldMapHexCell cell, WorldMapGameplayTerrainType terrain)
+    {
+        if (Grid.IsInside(cell))
+            cells[Grid.IndexOf(cell)] = (byte)terrain;
+    }
+
+    public WorldMapGameplayTerrainType GetAtPixel(double x, double y) => Get(Grid.CellAtPixel(x, y));
+
+    public WorldMapGameplayTerrainType GetAtPercent(float xPercent, float yPercent) =>
+        Get(Grid.CellAtPercent(xPercent, yPercent));
+
+    public bool IsEmpty
+    {
+        get
+        {
+            foreach (byte value in cells)
+            {
+                if (value != 0)
+                    return false;
+            }
+            return true;
+        }
+    }
+
+    // Пересчёт под другую сетку (смена размера клетки): каждая новая клетка
+    // берёт тип старой клетки под своим центром.
+    public WorldMapTerrainLayer ResampleTo(WorldMapHexGrid target)
+    {
+        WorldMapTerrainLayer result = new WorldMapTerrainLayer(target);
+        double scaleX = Grid.CanvasWidth / (double)target.CanvasWidth;
+        double scaleY = Grid.CanvasHeight / (double)target.CanvasHeight;
+        for (int index = 0; index < target.CellCount; index++)
+        {
+            WorldMapHexCell cell = target.CellAt(index);
+            target.CellCenter(cell, out double x, out double y);
+            result.cells[index] = (byte)GetAtPixel(x * scaleX, y * scaleY);
+        }
+        return result;
+    }
+
+    // Компактная запись для ассета: «число*тип» через запятую, одиночная
+    // клетка — просто «тип». Пример: «4100*0,3*4,12*0».
+    public string Encode()
+    {
+        StringBuilder builder = new StringBuilder();
+        int i = 0;
+        while (i < cells.Length)
+        {
+            byte value = cells[i];
+            int run = 1;
+            while (i + run < cells.Length && cells[i + run] == value)
+                run++;
+            if (builder.Length > 0)
+                builder.Append(',');
+            if (run > 1)
+                builder.Append(run).Append('*');
+            builder.Append(value);
+            i += run;
+        }
+        return builder.ToString();
+    }
+
+    // Нераспознанные куски пропускаются; недостающие клетки — открытая местность.
+    public static WorldMapTerrainLayer Decode(WorldMapHexGrid grid, string encoded)
+    {
+        WorldMapTerrainLayer layer = new WorldMapTerrainLayer(grid);
+        if (string.IsNullOrWhiteSpace(encoded))
+            return layer;
+
+        int position = 0;
+        foreach (string token in encoded.Split(','))
+        {
+            if (position >= layer.cells.Length)
+                break;
+            string trimmed = token.Trim();
+            if (trimmed.Length == 0)
+                continue;
+            int run = 1;
+            string valueText = trimmed;
+            int star = trimmed.IndexOf('*');
+            if (star >= 0)
+            {
+                if (!int.TryParse(trimmed.Substring(0, star), out run) || run <= 0)
+                    continue;
+                valueText = trimmed.Substring(star + 1);
+            }
+            if (!byte.TryParse(valueText, out byte value))
+                value = 0;
+            int end = Math.Min(layer.cells.Length, position + run);
+            for (int i = position; i < end; i++)
+                layer.cells[i] = value;
+            position = end;
+        }
+        return layer;
+    }
 }
 
 [Serializable]
-public sealed class WorldMapGameplayTerrainSettings
+public sealed class WorldMapTerrainRule
 {
     public WorldMapGameplayTerrainType Terrain;
     public bool Traversable = true;
-    public float MovementMultiplier = 1f;
+    // Скорость по игровому времени: часы на клетку = TravelHoursPerHex / множитель.
+    public float TravelSpeedMultiplier = 1f;
+    // Видимая скорость бега фигуры на экране.
+    public float RunSpeedMultiplier = 1f;
+
+    public WorldMapTerrainRule Clone() => new WorldMapTerrainRule
+    {
+        Terrain = Terrain,
+        Traversable = Traversable,
+        TravelSpeedMultiplier = TravelSpeedMultiplier,
+        RunSpeedMultiplier = RunSpeedMultiplier
+    };
 }
 
-// WM-T02: дорога — упорядоченный путь точек (в тех же процентных координатах
-// карты 0..100, что и всё остальное) плюс ширина gameplay-зоны в тех же
-// единицах (не в пикселях PNG — раздел 6 задачи). Не GameObject сцены и не
-// отдельная система координат — обычные сериализуемые данные
-// WorldMapDefinitionData, как регионы/зоны местности/слоты.
-[Serializable]
-public sealed class WorldMapRoadDefinition
+// 12И: правила перемещения по карте — рабочие числа базы, а не канон.
+// Ядро читает только Current; ассет настроек WorldMapVisual подменяет его
+// при загрузке игры. Значения по умолчанию совпадают с исходным ассетом,
+// кроме TravelHoursPerHex: ядро без мира берёт прежний эталон 4 ч/клетку.
+public sealed class WorldMapMovementRules
 {
-    public string Id = string.Empty;
-    public string DisplayName = string.Empty;
-    public bool Enabled = true;
+    public const float DefaultHeroRunSpeedHexesPerSecond = 2f;
+    public const float DefaultTravelHoursPerHex = 4f;
+    public const float DefaultDiscoveryRadiusHexes = 1.25f;
+    public const float MinSpeedMultiplier = 0.05f;
 
-    // Ширина gameplay-зоны дороги в координатах карты (проценты 0..100,
-    // та же ось, что и Points) — не разрешение фоновой текстуры.
-    public float Width = 1f;
+    private static WorldMapMovementRules current = CreateDefault();
 
-    public List<MapPointData> Points = new List<MapPointData>();
-}
+    public static WorldMapMovementRules Current
+    {
+        get => current;
+        set => current = value ?? CreateDefault();
+    }
 
-// WM-T03/T04: чистая геометрия — расстояние от точки до отрезка, без сетки и
-// без обращения к WorldMapNavigation.GetTerrainAtGridCell. Приоритет: Road
-// побеждает базовую местность (раздел 12 задачи) — сейчас единственный
-// реализованный Area Terrain, Field/Forest пока только данные без полигонов
-// (раздел 11 задачи), поэтому запрос вне дороги всегда даёт OpenGround.
-public static class WorldMapGameplayTerrainQuery
-{
-    private static readonly List<WorldMapGameplayTerrainSettings> DefaultSettings =
-        new List<WorldMapGameplayTerrainSettings>
+    public float HeroRunSpeedHexesPerSecond = DefaultHeroRunSpeedHexesPerSecond;
+    public float TravelHoursPerHex = DefaultTravelHoursPerHex;
+    public float DiscoveryRadiusHexes = DefaultDiscoveryRadiusHexes;
+    public List<WorldMapTerrainRule> Terrain = new List<WorldMapTerrainRule>();
+
+    public static WorldMapMovementRules CreateDefault()
+    {
+        WorldMapMovementRules rules = new WorldMapMovementRules();
+        rules.Terrain.AddRange(DefaultTerrainRules());
+        return rules;
+    }
+
+    public static List<WorldMapTerrainRule> DefaultTerrainRules()
+    {
+        return new List<WorldMapTerrainRule>
         {
-            new WorldMapGameplayTerrainSettings { Terrain = WorldMapGameplayTerrainType.OpenGround, Traversable = true, MovementMultiplier = 1.00f },
-            new WorldMapGameplayTerrainSettings { Terrain = WorldMapGameplayTerrainType.Road, Traversable = true, MovementMultiplier = 1.30f },
-            new WorldMapGameplayTerrainSettings { Terrain = WorldMapGameplayTerrainType.Field, Traversable = true, MovementMultiplier = 0.90f },
-            new WorldMapGameplayTerrainSettings { Terrain = WorldMapGameplayTerrainType.Forest, Traversable = true, MovementMultiplier = 0.70f },
-            new WorldMapGameplayTerrainSettings { Terrain = WorldMapGameplayTerrainType.Water, Traversable = false, MovementMultiplier = 1.00f }
+            Rule(WorldMapGameplayTerrainType.OpenGround, true, 1.00f, 1.00f),
+            Rule(WorldMapGameplayTerrainType.Road, true, 1.30f, 1.15f),
+            Rule(WorldMapGameplayTerrainType.Trail, true, 1.10f, 1.05f),
+            Rule(WorldMapGameplayTerrainType.Field, true, 0.90f, 0.95f),
+            Rule(WorldMapGameplayTerrainType.Forest, true, 0.70f, 0.80f),
+            Rule(WorldMapGameplayTerrainType.Swamp, true, 0.50f, 0.65f),
+            Rule(WorldMapGameplayTerrainType.Hills, true, 0.50f, 0.75f),
+            Rule(WorldMapGameplayTerrainType.Mountains, true, 0.33f, 0.60f),
+            Rule(WorldMapGameplayTerrainType.Water, false, 1.00f, 1.00f),
+            Rule(WorldMapGameplayTerrainType.Cliffs, false, 1.00f, 1.00f)
+        };
+    }
+
+    private static WorldMapTerrainRule Rule(WorldMapGameplayTerrainType terrain, bool traversable, float travel, float run) =>
+        new WorldMapTerrainRule
+        {
+            Terrain = terrain,
+            Traversable = traversable,
+            TravelSpeedMultiplier = travel,
+            RunSpeedMultiplier = run
         };
 
-    public static WorldMapGameplayTerrainType GetTerrainTypeAtPosition(
-        WorldMapDefinitionData definition,
-        float xPercent,
-        float yPercent)
+    public WorldMapTerrainRule GetRule(WorldMapGameplayTerrainType terrain)
     {
-        if (definition?.Roads != null)
+        if (Terrain != null)
         {
-            foreach (WorldMapRoadDefinition road in definition.Roads)
+            foreach (WorldMapTerrainRule rule in Terrain)
             {
-                if (road != null && road.Enabled && IsInsideRoad(road, xPercent, yPercent))
-                    return WorldMapGameplayTerrainType.Road;
+                if (rule != null && rule.Terrain == terrain)
+                    return rule;
             }
         }
-
-        return WorldMapGameplayTerrainType.OpenGround;
+        foreach (WorldMapTerrainRule rule in DefaultTerrainRules())
+        {
+            if (rule.Terrain == terrain)
+                return rule;
+        }
+        return Rule(terrain, true, 1f, 1f);
     }
 
-    public static WorldMapGameplayTerrainSettings GetSettings(
-        WorldMapDefinitionData definition,
-        WorldMapGameplayTerrainType terrain)
+    public bool IsTraversable(WorldMapGameplayTerrainType terrain) => GetRule(terrain).Traversable;
+
+    public double SafeTravelHoursPerHex =>
+        TravelHoursPerHex > 0f && !float.IsNaN(TravelHoursPerHex) ? TravelHoursPerHex : DefaultTravelHoursPerHex;
+
+    public double SafeRunSpeedHexesPerSecond =>
+        HeroRunSpeedHexesPerSecond > 0f && !float.IsNaN(HeroRunSpeedHexesPerSecond)
+            ? HeroRunSpeedHexesPerSecond
+            : DefaultHeroRunSpeedHexesPerSecond;
+
+    // Игровые часы на одну клетку пути в этой местности.
+    public double HoursPerHex(WorldMapGameplayTerrainType terrain) =>
+        SafeTravelHoursPerHex / Math.Max(MinSpeedMultiplier, GetRule(terrain).TravelSpeedMultiplier);
+
+    public double RunSpeedMultiplier(WorldMapGameplayTerrainType terrain) =>
+        Math.Max(MinSpeedMultiplier, GetRule(terrain).RunSpeedMultiplier);
+
+    // Относительная цена клетки для поиска пути (открытая местность = 1).
+    public double PathCost(WorldMapGameplayTerrainType terrain) =>
+        1.0 / Math.Max(MinSpeedMultiplier, GetRule(terrain).TravelSpeedMultiplier);
+
+    public double MinPathCost
     {
-        if (definition?.GameplayTerrainSettings != null)
+        get
         {
-            foreach (WorldMapGameplayTerrainSettings settings in definition.GameplayTerrainSettings)
+            double min = double.MaxValue;
+            foreach (WorldMapGameplayTerrainType terrain in WorldMapTerrainLabels.All)
             {
-                if (settings != null && settings.Terrain == terrain)
-                    return settings;
+                if (IsTraversable(terrain))
+                    min = Math.Min(min, PathCost(terrain));
+            }
+            return min == double.MaxValue ? 1.0 : min;
+        }
+    }
+
+    // Пока отряд бежит, часы идут со скоростью бега: клетки в секунду × часы на клетку.
+    public double RunningGameHoursPerRealSecond(WorldMapGameplayTerrainType terrain) =>
+        SafeRunSpeedHexesPerSecond * RunSpeedMultiplier(terrain) * HoursPerHex(terrain);
+
+    public WorldMapMovementRules Clone()
+    {
+        WorldMapMovementRules copy = new WorldMapMovementRules
+        {
+            HeroRunSpeedHexesPerSecond = HeroRunSpeedHexesPerSecond,
+            TravelHoursPerHex = TravelHoursPerHex,
+            DiscoveryRadiusHexes = DiscoveryRadiusHexes
+        };
+        if (Terrain != null)
+        {
+            foreach (WorldMapTerrainRule rule in Terrain)
+            {
+                if (rule != null)
+                    copy.Terrain.Add(rule.Clone());
             }
         }
-
-        foreach (WorldMapGameplayTerrainSettings settings in DefaultSettings)
-        {
-            if (settings.Terrain == terrain)
-                return settings;
-        }
-
-        return DefaultSettings[0];
-    }
-
-    // Раздел 13 задачи: единая точка входа "какой множитель скорости
-    // прямо в этой точке карты сейчас" — используется в живом запросе
-    // движения, не в WorldMapNavigation.FindPath.
-    public static float GetMovementMultiplier(
-        WorldMapDefinitionData definition,
-        float xPercent,
-        float yPercent)
-    {
-        WorldMapGameplayTerrainType terrain =
-            GetTerrainTypeAtPosition(definition, xPercent, yPercent);
-        return GetSettings(definition, terrain).MovementMultiplier;
-    }
-
-    public static bool IsInsideRoad(
-        WorldMapRoadDefinition road,
-        float xPercent,
-        float yPercent)
-    {
-        if (road?.Points == null || road.Points.Count < 2 || road.Width <= 0f)
-            return false;
-
-        double halfWidth = road.Width * 0.5;
-
-        for (int i = 1; i < road.Points.Count; i++)
-        {
-            MapPointData a = road.Points[i - 1];
-            MapPointData b = road.Points[i];
-            if (a == null || b == null)
-                continue;
-
-            double distance = DistancePointToSegment(
-                xPercent, yPercent,
-                a.XPercent, a.YPercent,
-                b.XPercent, b.YPercent);
-
-            if (distance <= halfWidth)
-                return true;
-        }
-
-        return false;
-    }
-
-    // Корректно обрабатывает вертикальные/горизонтальные/диагональные
-    // сегменты и сегменты нулевой длины (совпадающие точки) — раздел 10
-    // задачи. Стандартная проекция точки на отрезок с зажимом параметра t
-    // в [0,1], без сеточных допущений.
-    public static double DistancePointToSegment(
-        double px, double py,
-        double ax, double ay,
-        double bx, double by)
-    {
-        double abx = bx - ax;
-        double aby = by - ay;
-        double lengthSquared = abx * abx + aby * aby;
-
-        if (lengthSquared <= double.Epsilon)
-        {
-            double dx0 = px - ax;
-            double dy0 = py - ay;
-            return Math.Sqrt(dx0 * dx0 + dy0 * dy0);
-        }
-
-        double apx = px - ax;
-        double apy = py - ay;
-        double t = (apx * abx + apy * aby) / lengthSquared;
-        t = Math.Max(0.0, Math.Min(1.0, t));
-
-        double closestX = ax + t * abx;
-        double closestY = ay + t * aby;
-        double dx = px - closestX;
-        double dy = py - closestY;
-        return Math.Sqrt(dx * dx + dy * dy);
+        return copy;
     }
 }

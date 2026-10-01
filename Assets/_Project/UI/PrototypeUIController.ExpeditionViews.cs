@@ -420,7 +420,7 @@ public partial class PrototypeUIController
                 return;
         }
 
-        IssueImmediateMapOrder(
+        IssueContinuousMapOrder(
             location.MapXPercent,
             location.MapYPercent,
             location.Id);

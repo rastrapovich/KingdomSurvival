@@ -258,16 +258,14 @@ public static partial class ContinuousSimulationSystem
             return gameHours;
         }
 
-        // WM-T04 (задача "gameplay-география дорог"): бюджет ведётся в
-        // игровых часах, а не в клетках, как раньше — скорость (клеток на
-        // час) больше не постоянна на весь вызов, а зависит от того, где
-        // герой находится ПРЯМО СЕЙЧАС (живой запрос, не связан с плотностью
-        // маршрута, посчитанной один раз в WorldMapNavigation.FindPath для
-        // Hills/Mountains — тот механизм не тронут). При множителе 1.0
-        // (везде, где нет дороги) арифметика идентична прежней константе
-        // CellsPerGameHour.
+        // 12И (канон v1.50 §9): герой непрерывно идёт по сглаженному пути.
+        // Бюджет — игровые часы; часы на клетку берутся из местности прямо
+        // под героем, поэтому лес, дорога и болото меняют темп по ходу пути.
+        // Шаг не длиннее четверти клетки — находки и смена местности не
+        // проскакиваются.
         double hoursRemaining = movementHours;
         double hoursUsedByMovement = 0.0;
+        WorldMapMovementRules rules = WorldMapMovementRules.Current;
 
         while (hoursRemaining > Epsilon && state.HasActiveExpedition)
         {
@@ -289,42 +287,53 @@ public static partial class ContinuousSimulationSystem
                 expedition.LastTravelTargetYPercent = expedition.TargetMapYPercent;
             }
 
-            float speedMultiplier = GetLiveMovementSpeedMultiplier(
-                expedition.CurrentMapXPercent,
-                expedition.CurrentMapYPercent);
-            double effectiveCellsPerGameHour =
-                CellsPerGameHour * Math.Max(0.0001, speedMultiplier);
-
-            double segmentRemaining = 1.0 - runtime.SegmentProgress;
-            double maxCellsThisStep = hoursRemaining * effectiveCellsPerGameHour;
-            double usedCells = Math.Min(maxCellsThisStep, segmentRemaining);
-            double usedHours = usedCells / effectiveCellsPerGameHour;
-
-            runtime.SegmentProgress += usedCells;
-            hoursRemaining -= usedHours;
-            hoursUsedByMovement += usedHours;
-
             MapPointData from = expedition.Route[expedition.RouteIndex];
             MapPointData to = expedition.Route[expedition.RouteIndex + 1];
-            float t = (float)Math.Max(0.0, Math.Min(1.0, runtime.SegmentProgress));
-            expedition.CurrentMapXPercent = Lerp(from.XPercent, to.XPercent, t);
-            expedition.CurrentMapYPercent = Lerp(from.YPercent, to.YPercent, t);
+            double segmentHexes = WorldMapNavigation.DistanceHexes(from, to);
+
+            if (segmentHexes > MovementEpsilonHexes)
+            {
+                WorldMapGameplayTerrainType terrain = WorldMapNavigation.GetTerrainAtPercent(
+                    expedition.CurrentMapXPercent,
+                    expedition.CurrentMapYPercent);
+                if (!rules.IsTraversable(terrain))
+                    terrain = WorldMapGameplayTerrainType.OpenGround;
+                double hoursPerHex = rules.HoursPerHex(terrain);
+
+                double remainingHexes = segmentHexes * (1.0 - runtime.SegmentProgress);
+                double stepHexes = Math.Min(
+                    Math.Min(remainingHexes, MovementSubstepHexes),
+                    hoursRemaining / hoursPerHex);
+                double stepHours = stepHexes * hoursPerHex;
+
+                runtime.SegmentProgress = Math.Min(1.0, runtime.SegmentProgress + stepHexes / segmentHexes);
+                hoursRemaining -= stepHours;
+                hoursUsedByMovement += stepHours;
+
+                float t = (float)runtime.SegmentProgress;
+                expedition.CurrentMapXPercent = Lerp(from.XPercent, to.XPercent, t);
+                expedition.CurrentMapYPercent = Lerp(from.YPercent, to.YPercent, t);
+                expedition.LastTravelPoints.Add(
+                    new MapPointData(expedition.CurrentMapXPercent, expedition.CurrentMapYPercent));
+
+                if (TryResolveDiscovery(state, runtime, batch))
+                    break;
+
+                expedition.LastTravelPoints.Clear();
+            }
+            else
+            {
+                runtime.SegmentProgress = 1.0;
+            }
 
             if (runtime.SegmentProgress < 1.0 - Epsilon)
-                break;
+                continue;
 
             expedition.RouteIndex++;
             runtime.TrackedRouteIndex = expedition.RouteIndex;
             runtime.SegmentProgress = 0.0;
             expedition.CurrentMapXPercent = to.XPercent;
             expedition.CurrentMapYPercent = to.YPercent;
-            expedition.LastTravelPoints.Add(
-                new MapPointData(to.XPercent, to.YPercent));
-
-            if (TryResolveDiscovery(state, runtime, batch))
-                break;
-
-            expedition.LastTravelPoints.Clear();
 
             if (expedition.RouteIndex >= expedition.Route.Count - 1)
             {
@@ -342,18 +351,9 @@ public static partial class ContinuousSimulationSystem
         return gameHours;
     }
 
-    // WM-T04: единственное место, где живой запрос местности превращается в
-    // множитель скорости для движения экспедиции. Не размазано по UI/другим
-    // системам — раздел 11 задачи.
-    private static float GetLiveMovementSpeedMultiplier(
-        float xPercent,
-        float yPercent)
-    {
-        return WorldMapGameplayTerrainQuery.GetMovementMultiplier(
-            WorldMapNavigation.ActiveDefinition,
-            xPercent,
-            yPercent);
-    }
+    // 12И: шаг движения и порог «точки совпали», в клетках пути.
+    private const double MovementSubstepHexes = 0.25;
+    private const double MovementEpsilonHexes = 0.0001;
 
     private static double ConsumeTravelDelay(
         ExpeditionData expedition,
@@ -509,8 +509,8 @@ public static partial class ContinuousSimulationSystem
         }
         else
         {
-            string arrival = commander.Name + " достиг выбранной точки и остановился.";
-            batch.Result.Messages.Add(arrival);
+            // 12И: остановка в свободной точке — обычная часть бега по
+            // карте, без донесения и без окна.
             ResetRouteTracking(runtime, expedition);
             return;
         }
@@ -548,9 +548,6 @@ public static partial class ContinuousSimulationSystem
         }
         else
         {
-            batch.Result.Messages.Add(
-                commander.Name + " достиг выбранной точки и остановился.");
-            batch.ReportDay = state.Day;
             return;
         }
 

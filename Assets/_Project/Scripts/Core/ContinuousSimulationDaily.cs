@@ -237,6 +237,7 @@ public static partial class ContinuousSimulationSystem
         runtime.SegmentProgress = 0.0;
     }
 
+    // 12И: остаток пути в клетках — непрерывная длина ломаной от героя.
     private static double GetRemainingCells(
         ExpeditionData expedition,
         RuntimeState runtime)
@@ -244,10 +245,14 @@ public static partial class ContinuousSimulationSystem
         if (expedition == null || expedition.Route == null || expedition.Route.Count <= 1)
             return 0.0;
 
-        int fullSegments = Math.Max(
-            0,
-            expedition.Route.Count - 1 - expedition.RouteIndex);
-        return Math.Max(0.0, fullSegments - runtime.SegmentProgress);
+        int index = Math.Max(0, expedition.RouteIndex);
+        if (index >= expedition.Route.Count - 1)
+            return 0.0;
+
+        double current = WorldMapNavigation.DistanceHexes(
+            expedition.Route[index],
+            expedition.Route[index + 1]) * (1.0 - runtime.SegmentProgress);
+        return Math.Max(0.0, current + WorldMapNavigation.PathLengthHexes(expedition.Route, index + 1));
     }
 
     private static void UpdateRemainingRouteCells(
@@ -257,8 +262,10 @@ public static partial class ContinuousSimulationSystem
         if (expedition == null)
             return;
 
-        expedition.RemainingRouteCells =
-            (int)Math.Ceiling(GetRemainingCells(expedition, runtime));
+        double remaining = GetRemainingCells(expedition, runtime);
+        expedition.RemainingRouteCells = remaining <= 0.0001
+            ? 0
+            : (int)Math.Ceiling(remaining - 0.0001);
     }
 
     private static float Lerp(float a, float b, float t) =>

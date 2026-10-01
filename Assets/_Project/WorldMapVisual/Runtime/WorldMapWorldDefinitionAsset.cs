@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace KingdomSurvival.WorldMapVisual
 {
@@ -7,6 +8,11 @@ namespace KingdomSurvival.WorldMapVisual
     // источник географии для новой партии. Asset хранит только сериализуемые
     // Unity-поля и преобразуется в чистый WorldMapDefinitionData через
     // ToData(); сам Core-класс не знает про ScriptableObject/UnityEngine.
+    //
+    // 12И (канон v1.50 §9.9): геймплейная разметка — шестиугольная сетка на
+    // всё полотно, клетки размечаются кистью в Базе карты (режим «Местность»).
+    // Прежние прямоугольные зоны и ломаные дороги читаются только ради
+    // разового переноса в разметку (MigrateLegacyMarkup) и затем очищаются.
     [CreateAssetMenu(
         fileName = "KingdomSurvivalWorldDefinition",
         menuName = "Kingdom Survival/Карта/World Definition")]
@@ -19,71 +25,58 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private float homeXPercent = WorldMapNavigation.CapitalXPercent;
         [SerializeField] private float homeYPercent = WorldMapNavigation.CapitalYPercent;
 
-        // Задача "Global Map Aspect" (WM-T04.9): reference canvas, который
-        // определяет ТОЛЬКО геометрические пропорции глобальной карты — не
-        // требование к разрешению какой-либо Texture (раздел 2/49 задачи).
-        // Gameplay-координаты остаются 0..100 независимо от этих чисел.
-        // Старые ассеты без этих полей получают default через инициализатор
-        // при десериализации — пересоздавать вручную не нужно (раздел 4).
-        public const float DefaultMapCanvasWidth = 4160f;
-        public const float DefaultMapCanvasHeight = 2560f;
+        // Задача "Global Map Aspect" (WM-T04.9): полотно карты в пикселях.
+        // Gameplay-координаты остаются 0..100; сетка и разметка считаются в
+        // этих пикселях.
+        public const float DefaultMapCanvasWidth = WorldMapHexGrid.DefaultCanvasWidth;
+        public const float DefaultMapCanvasHeight = WorldMapHexGrid.DefaultCanvasHeight;
 
         [SerializeField] private float mapCanvasWidth = DefaultMapCanvasWidth;
         [SerializeField] private float mapCanvasHeight = DefaultMapCanvasHeight;
 
-        // Задача "пересобрать масштаб путешествия": сколько игровых часов
-        // занимает пересечение одной обычной клетки на обычной скорости —
-        // балансировочная настройка мира (не константа кода). Дороги/
-        // Hills/Mountains изменяют итоговое время поверх неё, саму
-        // настройку не заменяют. Старые ассеты без этого поля получают
-        // default через инициализатор при десериализации.
-        public const float DefaultBaseTravelHoursPerCell = 4f;
+        // Размер сетки (клеток по ширине полотна) и разметка клеток в
+        // записи WorldMapTerrainLayer.Encode.
+        [SerializeField] private int hexesAcross = WorldMapHexGrid.DefaultHexesAcross;
+        [SerializeField, TextArea] private string terrainCells = string.Empty;
 
-        [SerializeField] private float baseTravelHoursPerCell = DefaultBaseTravelHoursPerCell;
-
-        [SerializeField] private List<TerrainAreaEntry> terrainAreas =
-            new List<TerrainAreaEntry>();
         [SerializeField] private List<SpawnSlotEntry> spawnSlots =
             new List<SpawnSlotEntry>();
 
-        // Задача "gameplay-география дорог" (WM-T01/T02): настройки классов
-        // gameplay-местности (Traversable/MovementMultiplier) и авторские
-        // дороги — независимый слой от terrainAreas выше (тот отвечает
-        // только за стоимость пути в WorldMapNavigation.FindPath).
-        [SerializeField] private List<GameplayTerrainSettingsEntry> gameplayTerrainSettings =
-            new List<GameplayTerrainSettingsEntry>();
-        [SerializeField] private List<RoadEntry> roads = new List<RoadEntry>();
+        // Устаревшая разметка до v1.50 — только для переноса.
+        [SerializeField, HideInInspector, FormerlySerializedAs("terrainAreas")]
+        private List<LegacyTerrainArea> legacyTerrainAreas = new List<LegacyTerrainArea>();
+        [SerializeField, HideInInspector, FormerlySerializedAs("roads")]
+        private List<LegacyRoad> legacyRoads = new List<LegacyRoad>();
 
         public string WorldDefinitionId => worldDefinitionId;
         public int GeographyVersion => geographyVersion;
         public float HomeXPercent => homeXPercent;
         public float HomeYPercent => homeYPercent;
 
-        public float MapCanvasWidth => mapCanvasWidth;
-        public float MapCanvasHeight => mapCanvasHeight;
+        public float MapCanvasWidth => mapCanvasWidth > 1f ? mapCanvasWidth : DefaultMapCanvasWidth;
+        public float MapCanvasHeight => mapCanvasHeight > 1f ? mapCanvasHeight : DefaultMapCanvasHeight;
+        public int HexesAcross => WorldMapHexGrid.SanitizeHexesAcross(hexesAcross);
+        public string TerrainCells => terrainCells ?? string.Empty;
 
-        // Раздел 4/50 задачи: защита от divide-by-zero и невалидных значений —
-        // невалидный/нулевой/отрицательный размер откатывается на default,
-        // а не роняет Preview или производит Infinity/NaN дальше по цепочке.
-        public float GlobalMapAspect
-        {
-            get
-            {
-                float width = mapCanvasWidth > 0f ? mapCanvasWidth : DefaultMapCanvasWidth;
-                float height = mapCanvasHeight > 0f ? mapCanvasHeight : DefaultMapCanvasHeight;
-                return width / height;
-            }
-        }
+        // Раздел 4/50 задачи "Global Map Aspect": защита от деления на ноль.
+        public float GlobalMapAspect => MapCanvasWidth / MapCanvasHeight;
 
-        // Тот же принцип защиты, что у GlobalMapAspect выше — невалидное/
-        // нулевое/отрицательное значение откатывается на default, а не даёт
-        // деление на ноль/бесконечную скорость в ContinuousSimulationSystem.
-        public float BaseTravelHoursPerCell =>
-            baseTravelHoursPerCell > 0f ? baseTravelHoursPerCell : DefaultBaseTravelHoursPerCell;
-        public IReadOnlyList<TerrainAreaEntry> TerrainAreas => terrainAreas;
         public IReadOnlyList<SpawnSlotEntry> SpawnSlots => spawnSlots;
-        public IReadOnlyList<GameplayTerrainSettingsEntry> GameplayTerrainSettings => gameplayTerrainSettings;
-        public IReadOnlyList<RoadEntry> Roads => roads;
+        public bool HasLegacyMarkup =>
+            (legacyTerrainAreas != null && legacyTerrainAreas.Count > 0) ||
+            (legacyRoads != null && legacyRoads.Count > 0);
+
+        public WorldMapHexGrid CreateGrid() => new WorldMapHexGrid(MapCanvasWidth, MapCanvasHeight, HexesAcross);
+
+        // Разметка для игры и редактора. Если перенос ещё не сделан, старые
+        // зоны и дороги накладываются на лету — игра и предпросмотр совпадают.
+        public WorldMapTerrainLayer BuildTerrainLayer()
+        {
+            WorldMapTerrainLayer layer = WorldMapTerrainLayer.Decode(CreateGrid(), terrainCells);
+            if (HasLegacyMarkup && layer.IsEmpty)
+                PaintLegacyMarkup(layer);
+            return layer;
+        }
 
         public WorldMapDefinitionData ToData()
         {
@@ -94,29 +87,11 @@ namespace KingdomSurvival.WorldMapVisual
                 HomeLocationId = homeLocationId,
                 HomeXPercent = homeXPercent,
                 HomeYPercent = homeYPercent,
-                BaseTravelHoursPerCell = BaseTravelHoursPerCell
+                CanvasWidth = MapCanvasWidth,
+                CanvasHeight = MapCanvasHeight,
+                HexesAcross = HexesAcross,
+                TerrainCells = BuildTerrainLayer().Encode()
             };
-
-            if (terrainAreas != null)
-            {
-                foreach (TerrainAreaEntry area in terrainAreas)
-                {
-                    if (area == null || string.IsNullOrWhiteSpace(area.Id))
-                        continue;
-
-                    data.TerrainAreas.Add(new WorldMapTerrainAreaData
-                    {
-                        Id = area.Id,
-                        Terrain = area.Terrain,
-                        Tags = new List<string>(area.Tags ?? new List<string>()),
-                        MinXPercent = area.MinXPercent,
-                        MaxXPercent = area.MaxXPercent,
-                        MinYPercent = area.MinYPercent,
-                        MaxYPercent = area.MaxYPercent,
-                        Priority = area.Priority
-                    });
-                }
-            }
 
             if (spawnSlots != null)
             {
@@ -137,53 +112,11 @@ namespace KingdomSurvival.WorldMapVisual
                 }
             }
 
-            if (gameplayTerrainSettings != null)
-            {
-                foreach (GameplayTerrainSettingsEntry entry in gameplayTerrainSettings)
-                {
-                    if (entry == null)
-                        continue;
-
-                    data.GameplayTerrainSettings.Add(new WorldMapGameplayTerrainSettings
-                    {
-                        Terrain = entry.Terrain,
-                        Traversable = entry.Traversable,
-                        MovementMultiplier = entry.MovementMultiplier
-                    });
-                }
-            }
-
-            if (roads != null)
-            {
-                foreach (RoadEntry road in roads)
-                {
-                    if (road == null || string.IsNullOrWhiteSpace(road.Id))
-                        continue;
-
-                    WorldMapRoadDefinition roadData = new WorldMapRoadDefinition
-                    {
-                        Id = road.Id,
-                        DisplayName = road.DisplayName,
-                        Enabled = road.Enabled,
-                        Width = road.Width
-                    };
-
-                    if (road.Points != null)
-                    {
-                        foreach (Vector2 point in road.Points)
-                            roadData.Points.Add(new MapPointData(point.x, point.y));
-                    }
-
-                    data.Roads.Add(roadData);
-                }
-            }
-
             return data;
         }
 
         // Авторские методы для заполнения ассета из редакторских инструментов
-        // (AM-03) или разовых скриптов миграции (AM-02). Не используются в
-        // рантайме игры — только на этапе авторинга.
+        // или разовых скриптов миграции. Не используются в рантайме игры.
         public void EditorSetWorldId(string id, int geographyVersion)
         {
             worldDefinitionId = id;
@@ -197,21 +130,22 @@ namespace KingdomSurvival.WorldMapVisual
             homeYPercent = yPercent;
         }
 
-        public void EditorAddTerrainArea(TerrainAreaEntry area)
+        public void EditorSetTerrainLayer(WorldMapTerrainLayer layer)
         {
-            terrainAreas.Add(area);
+            if (layer == null)
+                return;
+            terrainCells = layer.IsEmpty ? string.Empty : layer.Encode();
         }
 
-        public void EditorClearTerrainAreas() => terrainAreas.Clear();
-
-        // Задача "Terrain Area Preview Authoring" (WM-T04.8): точечное
-        // удаление одной зоны (создание/перемещение/resize/удаление мышью
-        // в Preview) — в отличие от EditorClearTerrainAreas, которая
-        // очищает всё сразу.
-        public void EditorRemoveTerrainAreaAt(int index)
+        // Смена размера клетки: разметка пересчитывается под новую сетку.
+        public void EditorSetHexesAcross(int value)
         {
-            if (index >= 0 && index < terrainAreas.Count)
-                terrainAreas.RemoveAt(index);
+            int sanitized = WorldMapHexGrid.SanitizeHexesAcross(value);
+            if (sanitized == HexesAcross)
+                return;
+            WorldMapTerrainLayer old = BuildTerrainLayer();
+            hexesAcross = sanitized;
+            EditorSetTerrainLayer(old.ResampleTo(CreateGrid()));
         }
 
         public void EditorAddSpawnSlot(SpawnSlotEntry slot)
@@ -221,46 +155,82 @@ namespace KingdomSurvival.WorldMapVisual
 
         public void EditorClearSpawnSlots() => spawnSlots.Clear();
 
-        public void EditorAddRoad(RoadEntry road)
+        // Разовый перенос: старые зоны и дороги записываются в разметку
+        // клеток (поверх уже нарисованного) и удаляются. True — что-то перенесено.
+        public bool MigrateLegacyMarkup()
         {
-            roads.Add(road);
+            if (!HasLegacyMarkup)
+                return false;
+            WorldMapTerrainLayer layer = WorldMapTerrainLayer.Decode(CreateGrid(), terrainCells);
+            PaintLegacyMarkup(layer);
+            EditorSetTerrainLayer(layer);
+            legacyTerrainAreas?.Clear();
+            legacyRoads?.Clear();
+            return true;
         }
 
-        public void EditorClearRoads() => roads.Clear();
-
-        public void EditorEnsureDefaultGameplayTerrainSettings()
+        private void PaintLegacyMarkup(WorldMapTerrainLayer layer)
         {
-            if (gameplayTerrainSettings.Count > 0)
-                return;
+            WorldMapHexGrid grid = layer.Grid;
 
-            gameplayTerrainSettings.Add(new GameplayTerrainSettingsEntry
-            { Terrain = WorldMapGameplayTerrainType.OpenGround, Traversable = true, MovementMultiplier = 1.00f });
-            gameplayTerrainSettings.Add(new GameplayTerrainSettingsEntry
-            { Terrain = WorldMapGameplayTerrainType.Road, Traversable = true, MovementMultiplier = 1.30f });
-            gameplayTerrainSettings.Add(new GameplayTerrainSettingsEntry
-            { Terrain = WorldMapGameplayTerrainType.Field, Traversable = true, MovementMultiplier = 0.90f });
-            gameplayTerrainSettings.Add(new GameplayTerrainSettingsEntry
-            { Terrain = WorldMapGameplayTerrainType.Forest, Traversable = true, MovementMultiplier = 0.70f });
-            gameplayTerrainSettings.Add(new GameplayTerrainSettingsEntry
-            { Terrain = WorldMapGameplayTerrainType.Water, Traversable = false, MovementMultiplier = 1.00f });
+            if (legacyTerrainAreas != null)
+            {
+                List<LegacyTerrainArea> ordered = new List<LegacyTerrainArea>();
+                foreach (LegacyTerrainArea area in legacyTerrainAreas)
+                {
+                    if (area != null)
+                        ordered.Add(area);
+                }
+                ordered.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+
+                for (int index = 0; index < grid.CellCount; index++)
+                {
+                    WorldMapHexCell cell = grid.CellAt(index);
+                    grid.CellCenter(cell, out double x, out double y);
+                    float xPercent = grid.PixelToPercentX(x);
+                    float yPercent = grid.PixelToPercentY(y);
+                    foreach (LegacyTerrainArea area in ordered)
+                    {
+                        if (xPercent >= area.MinXPercent && xPercent < area.MaxXPercent &&
+                            yPercent >= area.MinYPercent && yPercent < area.MaxYPercent)
+                        {
+                            // Прежние классы: 0 — равнина, 1 — холмы, 2 — горы.
+                            layer.Set(cell, area.Terrain == 2
+                                ? WorldMapGameplayTerrainType.Mountains
+                                : area.Terrain == 1
+                                    ? WorldMapGameplayTerrainType.Hills
+                                    : WorldMapGameplayTerrainType.OpenGround);
+                        }
+                    }
+                }
+            }
+
+            if (legacyRoads != null)
+            {
+                foreach (LegacyRoad road in legacyRoads)
+                {
+                    if (road == null || !road.Enabled || road.Points == null)
+                        continue;
+                    for (int i = 1; i < road.Points.Count; i++)
+                        PaintSegment(layer, road.Points[i - 1], road.Points[i], WorldMapGameplayTerrainType.Road);
+                }
+            }
         }
 
-        [System.Serializable]
-        public sealed class TerrainAreaEntry
+        private static void PaintSegment(WorldMapTerrainLayer layer, Vector2 fromPercent, Vector2 toPercent, WorldMapGameplayTerrainType terrain)
         {
-            public string Id;
-            public WorldMapTerrainType Terrain;
-
-            // AM-07.5: чисто описательные теги ("Forest", "Shore", "Road" —
-            // что нарисовано на арте в этой области), не влияют на стоимость
-            // движения (это делает только Terrain).
-            public List<string> Tags = new List<string>();
-
-            public float MinXPercent;
-            public float MaxXPercent;
-            public float MinYPercent;
-            public float MaxYPercent;
-            public int Priority;
+            WorldMapHexGrid grid = layer.Grid;
+            double ax = grid.PercentToPixelX(fromPercent.x);
+            double ay = grid.PercentToPixelY(fromPercent.y);
+            double bx = grid.PercentToPixelX(toPercent.x);
+            double by = grid.PercentToPixelY(toPercent.y);
+            double length = System.Math.Sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
+            int samples = System.Math.Max(1, (int)System.Math.Ceiling(length / (grid.HexRadius * 0.4)));
+            for (int s = 0; s <= samples; s++)
+            {
+                double t = s / (double)samples;
+                layer.Set(grid.CellAtPixel(ax + (bx - ax) * t, ay + (by - ay) * t), terrain);
+            }
         }
 
         // AM-07.5: авторский слот появления малых локаций поверх готовой
@@ -279,29 +249,22 @@ namespace KingdomSurvival.WorldMapVisual
         }
 
         [System.Serializable]
-        public sealed class GameplayTerrainSettingsEntry
-        {
-            public WorldMapGameplayTerrainType Terrain;
-            public bool Traversable = true;
-            public float MovementMultiplier = 1f;
-        }
-
-        // WM-T02: дорога — упорядоченный путь точек в тех же процентных
-        // координатах карты (0..100), что и всё остальное авторство, плюс
-        // ширина gameplay-зоны в тех же единицах — НЕ в пикселях фоновой
-        // текстуры (раздел 6 задачи). Не GameObject сцены — обычные
-        // сериализуемые данные ассета.
-        [System.Serializable]
-        public sealed class RoadEntry
+        private sealed class LegacyTerrainArea
         {
             public string Id;
-            public string DisplayName;
+            public int Terrain;
+            public float MinXPercent;
+            public float MaxXPercent;
+            public float MinYPercent;
+            public float MaxYPercent;
+            public int Priority;
+        }
+
+        [System.Serializable]
+        private sealed class LegacyRoad
+        {
+            public string Id;
             public bool Enabled = true;
-
-            // Ширина gameplay-зоны дороги в координатах карты (проценты
-            // 0..100 по обеим осям) — не разрешение PNG фона.
-            public float Width = 1f;
-
             public List<Vector2> Points = new List<Vector2>();
         }
     }

@@ -21,6 +21,8 @@ public partial class PrototypeUIController
     // по всему UI, каждый из которых был потенциальным скрытым откатом к ней.
     private static void EnsureWorldMapGeographyConfigured()
     {
+        // 12И: правила перемещения (темп, местность) — из ассета настроек.
+        WorldMapVisualRuntime.ApplyMovementRules();
         WorldMapDatabaseAsset database = WorldMapVisualRuntime.LoadDatabase();
         if (database != null && database.ActiveWorld != null)
             WorldMapNavigation.ConfigureFromDefinition(database.ActiveWorld.ToData());
@@ -48,8 +50,6 @@ public partial class PrototypeUIController
     private VisualElement worldMapLocationActivity;
     private VisualElement worldMapLocationActivityFill;
     private Label worldMapLocationActivityLabel;
-    private List<MapPointData> renderedWorldMapRoute;
-    private int renderedWorldMapRouteIndex = -1;
     private Label worldMapHintLabel;
     private VisualElement mapSelectionCard;
     private Label mapSelectionTitle;
@@ -72,8 +72,6 @@ public partial class PrototypeUIController
     private bool hasSelectedMapPoint;
     private float selectedMapXPercent;
     private float selectedMapYPercent;
-    private readonly List<MapPointData> selectedMapRoute =
-        new List<MapPointData>();
 
     private void FindWorldMapElements(VisualElement root)
     {
@@ -190,8 +188,6 @@ public partial class PrototypeUIController
 
     private void RegisterWorldMapCallbacks()
     {
-        worldMap.RegisterCallback<PointerDownEvent>(
-            OnWorldMapPointerDown);
         worldMapCapitalButton.clicked +=
             OnWorldMapCapitalClicked;
         RegisterWorldMapViewportCallbacks();
@@ -200,8 +196,6 @@ public partial class PrototypeUIController
 
     private void UnregisterWorldMapCallbacks()
     {
-        worldMap.UnregisterCallback<PointerDownEvent>(
-            OnWorldMapPointerDown);
         worldMapCapitalButton.clicked -=
             OnWorldMapCapitalClicked;
         UnregisterWorldMapViewportCallbacks();
@@ -244,48 +238,9 @@ public partial class PrototypeUIController
     {
         selectedMapLocationId = null;
         hasSelectedMapPoint = false;
-        selectedMapRoute.Clear();
     }
 
-    private void OnWorldMapPointerDown(PointerDownEvent evt)
-    {
-        if (evt.button != 0 || isGameOver)
-            return;
-
-        VisualElement clicked =
-            evt.target as VisualElement;
-
-        // Кнопки столицы и найденных локаций обрабатывают собственный клик.
-        if (clicked != worldMap &&
-            clicked != worldMapTerrain &&
-            clicked != worldMapRoutes &&
-            clicked != worldMapMarkers)
-        {
-            return;
-        }
-
-        Vector2 local =
-            worldMap.WorldToLocal(evt.position);
-        float width =
-            Math.Max(1f, worldMap.resolvedStyle.width);
-        float height =
-            Math.Max(1f, worldMap.resolvedStyle.height);
-
-        float xPercent =
-            WorldMapNavigation.ClampMapX(
-                local.x / width * 100f);
-        float yPercent =
-            WorldMapNavigation.ClampMapY(
-                local.y / height * 100f);
-
-        IssueImmediateMapOrder(
-            xPercent,
-            yPercent,
-            null);
-
-        evt.StopPropagation();
-    }
-
+    // 12И: клик по маркеру места — бег к нему (тот же приказ, что у карты).
     private void SelectWorldMapLocation(string locationId)
     {
         LocationData location =
@@ -298,62 +253,10 @@ public partial class PrototypeUIController
             return;
         }
 
-        IssueImmediateMapOrder(
+        IssueContinuousMapOrder(
             location.MapXPercent,
             location.MapYPercent,
             location.Id);
-    }
-
-    private void IssueImmediateMapOrder(
-        float targetXPercent,
-        float targetYPercent,
-        string locationId)
-    {
-        if (gameState == null || isGameOver)
-            return;
-
-        string resultMessage;
-        bool changed;
-
-        if (!gameState.HasActiveExpedition)
-        {
-            changed =
-                gameState.TryStartExpeditionToMapPoint(
-                    targetXPercent,
-                    targetYPercent,
-                    locationId,
-                    false,
-                    new List<string>(selectedFighterIds),
-                    out resultMessage,
-                    ExpeditionPreparation.GetRetinueId(gameState));
-
-            if (changed)
-            {
-                CommanderData commander =
-                    gameState.FindCommander(
-                        gameState.ActiveExpedition.CommanderId);
-
-                // Приказ отдан, но мир ещё не сделал следующий ход.
-                if (commander != null)
-                    commander.State = CommanderState.InCastle;
-            }
-        }
-        else
-        {
-            changed =
-                gameState.TryChangeExpeditionRoute(
-                    targetXPercent,
-                    targetYPercent,
-                    locationId,
-                    out resultMessage);
-        }
-
-        AddReport(resultMessage);
-
-        if (changed)
-            ResetWorldMapSelection();
-
-        RefreshStableUiAfterStateChange();
     }
 
     // Старый подтверждающий обработчик больше не используется.
@@ -406,8 +309,6 @@ public partial class PrototypeUIController
         worldMapRoutes.Clear();
         worldMapMarkers.Clear();
         worldMapFog?.Clear();
-        renderedWorldMapRoute = null;
-        renderedWorldMapRouteIndex = -1;
 
         ApplyWorldMapBackground();
         ApplyWorldMapArtLayers();
@@ -421,15 +322,6 @@ public partial class PrototypeUIController
             }
 
             CreateWorldMapNode(location);
-        }
-
-        if (gameState.HasActiveExpedition)
-        {
-            DrawRoute(
-                gameState.ActiveExpedition.Route,
-                "world-map-route-dot-active");
-            renderedWorldMapRoute = gameState.ActiveExpedition.Route;
-            renderedWorldMapRouteIndex = gameState.ActiveExpedition.RouteIndex;
         }
 
         RefreshWorldMapCapital();
@@ -493,172 +385,10 @@ public partial class PrototypeUIController
         }
     }
 
-    // AM-07.5 (канон v1.35, §9.9): рельеф (холмы/горы/лес/поля) больше не
-    // рисуется кодом — ни плоскими клетками, ни рассыпанными по кластерам
-    // спрайтами-"массами". Художественный источник истины — baseMapSprite
-    // (ApplyWorldMapBackground выше); логическая сетка WorldMapNavigation
-    // используется только для стоимости/скорости пути, невидимо.
-
-    // WM-16: маршрут — только очень мелкий частый пунктир. Крупные узловые
-    // точки маршрута больше не рисуются: логические route[i] остаются в данных,
-    // но визуально игрок видит непрерывную пунктирную траекторию.
-    private const float RouteDashScreenDiameter = 1.5f;
-    private const float RouteDashesPerCell = 7f;
-    private const int RouteDashesMinPerSegment = 1;
-    private const int RouteDashesMaxPerSegment = 28;
-
-    private void DrawRoute(
-        List<MapPointData> route,
-        string extraClass)
-    {
-        if (route == null || route.Count < 2)
-            return;
-
-        int firstSegmentIndex = 0;
-
-        if (gameState.HasActiveExpedition &&
-            route == gameState.ActiveExpedition.Route)
-        {
-            firstSegmentIndex = Mathf.Clamp(
-                gameState.ActiveExpedition.RouteIndex,
-                0,
-                route.Count - 2);
-        }
-
-        for (int i = firstSegmentIndex;
-             i < route.Count - 1;
-             i++)
-        {
-            AddRouteDashes(
-                route[i],
-                route[i + 1],
-                extraClass);
-        }
-    }
-
-    private void AddRouteDashes(
-        MapPointData from,
-        MapPointData to,
-        string extraClass)
-    {
-        // WM-14/16: расстояние считаем в единицах grid-клетки. После введения
-        // квадратного canvas один шаг по X и Y физически равны, поэтому
-        // плотность пунктира одинакова для прямых и диагональных сегментов.
-        float fromCellX = from.XPercent / 100f * (WorldMapNavigation.GridWidth - 1);
-        float fromCellY = from.YPercent / 100f * (WorldMapNavigation.GridHeight - 1);
-        float toCellX = to.XPercent / 100f * (WorldMapNavigation.GridWidth - 1);
-        float toCellY = to.YPercent / 100f * (WorldMapNavigation.GridHeight - 1);
-
-        float segmentLengthCells = Mathf.Sqrt(
-            (toCellX - fromCellX) * (toCellX - fromCellX) +
-            (toCellY - fromCellY) * (toCellY - fromCellY));
-
-        int dashCount = Mathf.Clamp(
-            Mathf.RoundToInt(segmentLengthCells * RouteDashesPerCell),
-            RouteDashesMinPerSegment,
-            RouteDashesMaxPerSegment);
-
-        for (int d = 1; d <= dashCount; d++)
-        {
-            float t = d / (float)(dashCount + 1);
-
-            AddRouteMarker(
-                Mathf.Lerp(from.XPercent, to.XPercent, t),
-                Mathf.Lerp(from.YPercent, to.YPercent, t),
-                extraClass,
-                RouteDashScreenDiameter);
-        }
-    }
-
-    private void AddRouteMarker(
-        float xPercent,
-        float yPercent,
-        string extraClass,
-        float screenDiameter)
-    {
-        VisualElement dot =
-            new VisualElement();
-
-        dot.AddToClassList("world-map-route-dot");
-        dot.AddToClassList(WorldMapRouteMarkerClass);
-        dot.AddToClassList("world-map-route-dash");
-        dot.AddToClassList(extraClass);
-        // Читается в RefreshWorldMapZoomCompensatedVisuals, чтобы пересчитать
-        // px при изменении zoom — сам этот вызов уже выставляет актуальный
-        // размер для текущего zoom (см. конец метода).
-        dot.userData = screenDiameter;
-
-        dot.style.left =
-            new Length(xPercent, LengthUnit.Percent);
-        dot.style.top =
-            new Length(yPercent, LengthUnit.Percent);
-
-        worldMapRoutes.Add(dot);
-
-        float size = screenDiameter / Mathf.Max(0.0001f, worldMapZoom);
-        dot.style.width = size;
-        dot.style.height = size;
-    }
-
-    private void RefreshWorldMapRouteProgress()
-    {
-        if (worldMapRoutes == null || gameState == null)
-            return;
-
-        if (!gameState.HasActiveExpedition ||
-            gameState.ActiveExpedition.Route == null)
-        {
-            if (worldMapRoutes.childCount > 0)
-                worldMapRoutes.Clear();
-
-            renderedWorldMapRoute = null;
-            renderedWorldMapRouteIndex = -1;
-            return;
-        }
-
-        ExpeditionData expedition = gameState.ActiveExpedition;
-        bool routeChanged =
-            !object.ReferenceEquals(renderedWorldMapRoute, expedition.Route) ||
-            renderedWorldMapRouteIndex != expedition.RouteIndex;
-
-        if (routeChanged)
-        {
-            worldMapRoutes.Clear();
-            DrawRoute(expedition.Route, "world-map-route-dot-active");
-            renderedWorldMapRoute = expedition.Route;
-            renderedWorldMapRouteIndex = expedition.RouteIndex;
-        }
-
-        FadeNextRoutePoint(expedition);
-    }
-
-    private void FadeNextRoutePoint(ExpeditionData expedition)
-    {
-        if (worldMapRoutes.childCount == 0 ||
-            expedition.RouteIndex < 0 ||
-            expedition.RouteIndex >= expedition.Route.Count - 1)
-        {
-            return;
-        }
-
-        MapPointData from = expedition.Route[expedition.RouteIndex];
-        MapPointData to = expedition.Route[expedition.RouteIndex + 1];
-        float dx = to.XPercent - from.XPercent;
-        float dy = to.YPercent - from.YPercent;
-        float lengthSquared = dx * dx + dy * dy;
-        float progress = 0f;
-
-        if (lengthSquared > 0.0001f)
-        {
-            float currentDx = expedition.CurrentMapXPercent - from.XPercent;
-            float currentDy = expedition.CurrentMapYPercent - from.YPercent;
-            progress = Mathf.Clamp01(
-                (currentDx * dx + currentDy * dy) / lengthSquared);
-        }
-
-        worldMapRoutes.ElementAt(0).style.opacity =
-            Mathf.Lerp(0.96f, 0.08f, progress);
-    }
+    // AM-07.5 (канон v1.35, §9.9): рельеф больше не рисуется кодом.
+    // Художественный источник истины — baseMapSprite; шестиугольная сетка
+    // WorldMapNavigation невидима. 12И (канон v1.50): путь героя тоже не
+    // рисуется — ни пунктиром, ни точками.
 
     private void CreateWorldMapNode(
         LocationData location)
@@ -860,7 +590,9 @@ public partial class PrototypeUIController
                     ContinuousSimulationSystem.GetTravelHoursRemaining(gameState))
                 : "на месте";
 
+        // 12И: надпись времени у героя не показывается — только подсказка.
         worldMapArmyMarkerLabel.text = armyStatusText;
+        worldMapArmyMarkerLabel.style.display = DisplayStyle.None;
         worldMapArmyMarker.tooltip = "Отряд — " + armyStatusText;
 
         RefreshWorldMapActivityProgress(expedition);
@@ -886,14 +618,15 @@ public partial class PrototypeUIController
     }
 
     // Задача "регулируемый визуальный размер героя и Дома": единый перевод
-    // "доли логической клетки" → "проценты карты" для обеих осей —
-    // используется и Домом, и героем, чтобы не разойтись в двух местах.
-    // GridWidth/GridHeight отдельные — сетка не обязана быть квадратной.
+    // "доли клетки" → "проценты карты" для обеих осей. 12И: клетка —
+    // шестиугольник активного мира, её ширина — шаг между центрами соседей.
     private static Vector2 GetMarkerSizePercent(float sizeCells)
     {
+        WorldMapHexGrid grid = WorldMapNavigation.Grid;
+        float cellPixels = (float)grid.HexWidth * sizeCells;
         return new Vector2(
-            100f / (WorldMapNavigation.GridWidth - 1) * sizeCells,
-            100f / (WorldMapNavigation.GridHeight - 1) * sizeCells);
+            cellPixels / grid.CanvasWidth * 100f,
+            cellPixels / grid.CanvasHeight * 100f);
     }
 
     private static WorldMapVisualTheme GetActiveMarkerTheme() =>

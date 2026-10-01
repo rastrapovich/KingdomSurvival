@@ -7,7 +7,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
     // Редактор World Map Database: текстуры, реальные стартовые локации,
     // проверка конфигурации и быстрый preview без Play Mode. Полигональный
     // редактор регионов и Rule Tile по-прежнему не вводятся.
-    public sealed class WorldMapDatabaseWindow : EditorWindow
+    public sealed partial class WorldMapDatabaseWindow : EditorWindow
     {
         private enum WindowTab
         {
@@ -16,7 +16,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Geography,
             Locations,
             Validate,
-            Preview
+            Preview,
+            Movement
         }
 
         private WorldMapDatabaseAsset database;
@@ -30,23 +31,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private List<string> issues = new List<string>();
         private bool validated;
 
-        // WM-T02: индекс дороги, которую сейчас редактируют кликом по карте
-        // на вкладке «Предпросмотр» (-1 — ни одна не выбрана).
-        private int editingRoadIndex = -1;
-
-        // Задача "Preview + редактирование дорог поверх арта": выбранная
-        // точка редактируемой дороги (-1 — ничего не выбрано) и флаг
-        // активного перетаскивания. Один drag = одна операция Undo —
-        // Undo.RecordObject вызывается один раз при MouseDown, не на
-        // каждый MouseDrag.
-        private int selectedRoadPointIndex = -1;
-        private bool isDraggingRoadPoint;
-
         // Editor-only переключатели слоёв Preview — не сериализуются в
         // игровой asset (раздел 13 задачи), хранятся в EditorPrefs.
         private const string PrefShowArt = "KingdomSurvival.WorldMapPreview.ShowArt";
-        private const string PrefShowRoads = "KingdomSurvival.WorldMapPreview.ShowRoads";
-        private const string PrefShowTerrainAreas = "KingdomSurvival.WorldMapPreview.ShowTerrainAreas";
         private const string PrefShowLocations = "KingdomSurvival.WorldMapPreview.ShowLocations";
         private const string PrefShowSpawnSlots = "KingdomSurvival.WorldMapPreview.ShowSpawnSlots";
 
@@ -58,8 +45,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private const string PrefShowArtLayerBounds = "KingdomSurvival.WorldMapPreview.ShowArtLayerBounds";
 
         private bool previewShowArt = true;
-        private bool previewShowRoads = true;
-        private bool previewShowTerrainAreas = true;
         private bool previewShowLocations = true;
         private bool previewShowSpawnSlots = true;
         private bool previewShowArtLayers = true;
@@ -90,51 +75,17 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         // порог не ограничивает.
         private const float MinArtLayerSizePercent = 1f;
 
-        // Задача "Terrain Area Preview Authoring" (WM-T04.8): единственный
-        // режим редактирования Preview активен в любой момент — Art Layers,
-        // Terrain Areas, Roads или чистый просмотр. Заменяет прежнюю неявную
-        // логику (Art Layer editing был активен всегда, кроме Road mode) на
-        // явный выбор, требуемый разделом 2 задачи.
+        // Единственный режим редактирования Preview активен в любой момент.
+        // 12И (канон v1.50 §9.9): режим «Местность» — кисть разметки клеток
+        // шестиугольной сетки; прежние Terrain Areas и Roads отменены.
         private enum PreviewEditMode
         {
             View,
             ArtLayers,
-            TerrainAreas,
-            Roads
+            Terrain
         }
 
         private PreviewEditMode previewEditMode = PreviewEditMode.View;
-
-        private const string PrefTerrainAreaOpacity = "KingdomSurvival.WorldMapPreview.TerrainAreaOpacity";
-        private float previewTerrainAreaOpacity = 0.2f;
-
-        // Выбранная Terrain Area (-1 — ничего не выбрано), состояние
-        // drag/resize — тот же паттерн, что и у Art Layers (originalBounds
-        // + суммарная дельта от MouseDown, один Undo.RecordObject на
-        // MouseDown, не на каждый MouseDrag).
-        private int selectedTerrainAreaIndex = -1;
-        private WorldMapWorldDefinitionAsset lastSeenTerrainAreaWorld;
-        private bool isDraggingTerrainArea;
-        private bool isResizingTerrainArea;
-        private ArtLayerCorner resizingTerrainAreaCorner;
-        private MapBounds originalTerrainAreaBounds;
-        private Vector2 terrainAreaDragStartMapPoint;
-
-        // Создание новой зоны протягиванием (раздел 7 задачи): после нажатия
-        // "+ Нарисовать новую зону" armedToCreateTerrainArea ждёт следующий
-        // MouseDown в mapRect, после чего isDraggingNewTerrainArea рисует
-        // live-preview до MouseUp.
-        private bool armedToCreateTerrainArea;
-        private bool isDraggingNewTerrainArea;
-        private Vector2 terrainAreaCreateStartMapPoint;
-        private Vector2 terrainAreaCreateStartScreenPoint;
-        private WorldMapTerrainType terrainAreaCreateType = WorldMapTerrainType.Hills;
-
-        // Раздел 10 задачи: минимальный drag в экранных пикселях (иначе
-        // случайный клик создаёт зону нулевого размера) и минимальный
-        // размер в map-space (тот же порядок величины, что и у Art Layers).
-        private const float TerrainAreaCreateDragThresholdPixels = 5f;
-        private const float MinTerrainAreaSizePercent = 0.5f;
 
         // Задача "Global Map Aspect + Preview Canvas Navigation" (WM-T04.9):
         // zoom/pan — editor-only viewport state, НЕ gameplay-данные (раздел
@@ -181,18 +132,11 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 database = Resources.Load<WorldMapDatabaseAsset>(WorldMapDatabaseAsset.ResourcesPath);
 
             previewShowArt = EditorPrefs.GetBool(PrefShowArt, true);
-            previewShowRoads = EditorPrefs.GetBool(PrefShowRoads, true);
-            // Раздел 20 задачи "Terrain Area Preview Authoring": по умолчанию
-            // выключено, чтобы Preview в первую очередь показывал арт карты —
-            // но EditorPrefs.GetBool использует false только пока ключ ещё
-            // не существовал, так что уже сохранённый выбор пользователя
-            // (в т.ч. прежнее true) не переопределяется.
-            previewShowTerrainAreas = EditorPrefs.GetBool(PrefShowTerrainAreas, false);
             previewShowLocations = EditorPrefs.GetBool(PrefShowLocations, true);
             previewShowSpawnSlots = EditorPrefs.GetBool(PrefShowSpawnSlots, true);
             previewShowArtLayers = EditorPrefs.GetBool(PrefShowArtLayers, true);
             previewShowArtLayerBounds = EditorPrefs.GetBool(PrefShowArtLayerBounds, false);
-            previewTerrainAreaOpacity = EditorPrefs.GetFloat(PrefTerrainAreaOpacity, 0.2f);
+            LoadTerrainPaintPrefs();
 
             previewZoom = ClampPreviewZoom(EditorPrefs.GetFloat(PrefPreviewZoom, 1f));
             previewPanFraction = new Vector2(
@@ -223,21 +167,17 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 lastSeenArtLayerTheme = activeTheme;
             }
 
-            // Задача "Terrain Area Preview Authoring" (WM-T04.8, раздел 4 —
-            // тот же принцип, что и для Art Layer выше): при смене мира
-            // индекс выбранной Terrain Area может указывать на совсем
-            // другую зону.
             WorldMapWorldDefinitionAsset activeWorld = database != null ? database.ActiveWorld : null;
-            if (activeWorld != lastSeenTerrainAreaWorld)
+            if (activeWorld != lastSeenTerrainWorld)
             {
-                selectedTerrainAreaIndex = -1;
-                lastSeenTerrainAreaWorld = activeWorld;
+                InvalidateTerrainPaintCache();
+                lastSeenTerrainWorld = activeWorld;
             }
 
             EditorGUILayout.Space(6f);
             tab = (WindowTab)GUILayout.Toolbar(
                 (int)tab,
-                new[] { "Мир", "Текстуры", "География", "Локации", "Проверка", "Предпросмотр" });
+                new[] { "Мир", "Текстуры", "География", "Локации", "Проверка", "Предпросмотр", "Перемещение" });
             EditorGUILayout.Space(8f);
 
             switch (tab)
@@ -259,6 +199,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                     break;
                 case WindowTab.Preview:
                     DrawPreviewSection();
+                    break;
+                case WindowTab.Movement:
+                    DrawMovementSection();
                     break;
             }
         }
@@ -332,35 +275,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             EditorGUILayout.Space(10f);
             DrawGlobalMapCanvasSection(worldSO, world);
 
-            EditorGUILayout.Space(10f);
-            DrawTravelScaleSection(worldSO, world);
-
             EditorGUILayout.EndScrollView();
             worldSO.ApplyModifiedProperties();
-        }
-
-        // Задача "пересобрать масштаб путешествия": балансировочная
-        // настройка мира, не константа кода — можно менять без пересборки.
-        // Дороги и Hills/Mountains изменяют итоговое время поверх этого
-        // базового значения, сама настройка не заменяется ими.
-        private static void DrawTravelScaleSection(SerializedObject worldSO, WorldMapWorldDefinitionAsset world)
-        {
-            EditorGUILayout.LabelField("Путешествие", EditorStyles.boldLabel);
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.PropertyField(
-                worldSO.FindProperty("baseTravelHoursPerCell"),
-                new GUIContent("Базовое время на клетку, ч"));
-
-            using (new EditorGUI.DisabledScope(true))
-                EditorGUILayout.FloatField("Действующее значение, ч", world.BaseTravelHoursPerCell);
-
-            EditorGUILayout.HelpBox(
-                "Сколько игровых часов занимает пересечение одной обычной клетки. Дороги и тип " +
-                "местности изменяют это значение (Hills/Mountains — во столько же раз больше, " +
-                "дорога — по своему множителю скорости). 0 или отрицательное значение безопасно " +
-                "откатывается на 4ч, деление на ноль исключено.",
-                MessageType.None);
-            EditorGUILayout.EndVertical();
         }
 
         // Задача "Global Map Aspect" (WM-T04.9, раздел 7): reference canvas,
@@ -435,265 +351,12 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             geographyScroll = EditorGUILayout.BeginScrollView(geographyScroll);
 
-            DrawTerrainAreasSection(worldSO);
+            DrawTerrainMarkupSection(database.ActiveWorld);
             EditorGUILayout.Space(14f);
             DrawSpawnSlotsSection(worldSO);
-            EditorGUILayout.Space(14f);
-            DrawGameplayTerrainSettingsSection(worldSO);
-            EditorGUILayout.Space(14f);
-            DrawRoadsSection(worldSO);
 
             EditorGUILayout.EndScrollView();
             worldSO.ApplyModifiedProperties();
-        }
-
-        // --------------------------------------------------------------
-        // Типы местности (WM-T01) — задача "gameplay-география дорог".
-        // --------------------------------------------------------------
-
-        private static void DrawGameplayTerrainSettingsSection(SerializedObject worldSO)
-        {
-            EditorGUILayout.LabelField("Типы местности", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox(
-                "Проходимость и множитель скорости движения — независимо от Terrain выше " +
-                "(тот считает только стоимость пути при построении маршрута). Здесь — живой " +
-                "запрос текущей позиции героя (WorldMapGameplayTerrainQuery), проверяется на " +
-                "каждом шаге движения.",
-                MessageType.None);
-
-            SerializedProperty settingsProp = worldSO.FindProperty("gameplayTerrainSettings");
-
-            if (settingsProp.arraySize == 0 && GUILayout.Button("+ Заполнить значениями по умолчанию"))
-            {
-                WorldMapWorldDefinitionAsset world = (WorldMapWorldDefinitionAsset)worldSO.targetObject;
-                Undo.RecordObject(world, "Fill Default Gameplay Terrain Settings");
-                world.EditorEnsureDefaultGameplayTerrainSettings();
-                worldSO.Update();
-                settingsProp = worldSO.FindProperty("gameplayTerrainSettings");
-            }
-
-            for (int i = 0; i < settingsProp.arraySize; i++)
-            {
-                SerializedProperty entry = settingsProp.GetArrayElementAtIndex(i);
-                SerializedProperty terrainProp = entry.FindPropertyRelative("Terrain");
-
-                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-                EditorGUILayout.LabelField(
-                    ((WorldMapGameplayTerrainType)terrainProp.enumValueIndex).ToString(),
-                    EditorStyles.boldLabel,
-                    GUILayout.Width(110f));
-                EditorGUILayout.PropertyField(
-                    entry.FindPropertyRelative("Traversable"),
-                    new GUIContent("Проходимость"),
-                    GUILayout.Width(140f));
-                EditorGUILayout.PropertyField(
-                    entry.FindPropertyRelative("MovementMultiplier"),
-                    new GUIContent("Скорость"));
-                EditorGUILayout.EndHorizontal();
-            }
-        }
-
-        // --------------------------------------------------------------
-        // Дороги (WM-T02) — задача "gameplay-география дорог".
-        // --------------------------------------------------------------
-
-        private void DrawRoadsSection(SerializedObject worldSO)
-        {
-            EditorGUILayout.LabelField("Дороги", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox(
-                "Путь — центр уже нарисованной художником дороги; ширина — gameplay-зона в тех " +
-                "же координатах карты (0..100%), не пиксели фона. Точки редактируются числами " +
-                "здесь или добавляются кликом по карте на вкладке «Предпросмотр», когда дорога " +
-                "выбрана для редактирования.",
-                MessageType.None);
-
-            SerializedProperty roadsProp = worldSO.FindProperty("roads");
-
-            for (int i = 0; i < roadsProp.arraySize; i++)
-            {
-                SerializedProperty road = roadsProp.GetArrayElementAtIndex(i);
-                SerializedProperty idProp = road.FindPropertyRelative("Id");
-                SerializedProperty pointsProp = road.FindPropertyRelative("Points");
-
-                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                EditorGUILayout.BeginHorizontal();
-                bool isEditingThis = editingRoadIndex == i;
-                EditorGUILayout.LabelField(
-                    (string.IsNullOrWhiteSpace(idProp.stringValue) ? $"Дорога {i + 1}" : idProp.stringValue) +
-                    (isEditingThis ? "  [редактируется]" : ""),
-                    EditorStyles.boldLabel);
-                if (GUILayout.Button("Удалить", GUILayout.Width(80f)))
-                {
-                    roadsProp.DeleteArrayElementAtIndex(i);
-                    if (editingRoadIndex == i)
-                        editingRoadIndex = -1;
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.EndVertical();
-                    break;
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.PropertyField(idProp, new GUIContent("ID"));
-                EditorGUILayout.PropertyField(
-                    road.FindPropertyRelative("DisplayName"), new GUIContent("Название"));
-                EditorGUILayout.PropertyField(
-                    road.FindPropertyRelative("Enabled"), new GUIContent("Активна"));
-                EditorGUILayout.PropertyField(
-                    road.FindPropertyRelative("Width"),
-                    new GUIContent(
-                        "Ширина",
-                        "Ширина gameplay-зоны дороги в координатах карты (0..100% по обеим осям), " +
-                        "не разрешение фоновой текстуры."));
-
-                EditorGUILayout.LabelField($"Точек: {pointsProp.arraySize}");
-                for (int p = 0; p < pointsProp.arraySize; p++)
-                {
-                    EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField($"#{p}", GUILayout.Width(28f));
-                    EditorGUILayout.PropertyField(pointsProp.GetArrayElementAtIndex(p), GUIContent.none);
-                    if (GUILayout.Button("✕", GUILayout.Width(22f)))
-                    {
-                        pointsProp.DeleteArrayElementAtIndex(p);
-                        EditorGUILayout.EndHorizontal();
-                        break;
-                    }
-                    EditorGUILayout.EndHorizontal();
-                }
-
-                if (GUILayout.Button("+ Добавить точку (числом)"))
-                {
-                    int index = pointsProp.arraySize;
-                    pointsProp.InsertArrayElementAtIndex(index);
-                    pointsProp.GetArrayElementAtIndex(index).vector2Value =
-                        new Vector2(50f, 50f);
-                }
-
-                EditorGUILayout.BeginHorizontal();
-                if (!isEditingThis)
-                {
-                    if (GUILayout.Button("Редактировать путь"))
-                    {
-                        editingRoadIndex = i;
-                        previewEditMode = PreviewEditMode.Roads;
-                        tab = WindowTab.Preview;
-                    }
-                }
-                else
-                {
-                    EditorGUILayout.HelpBox(
-                        "Клик по карте на вкладке «Предпросмотр» добавляет точку в конец пути.",
-                        MessageType.Info);
-                    if (GUILayout.Button("Готово"))
-                        editingRoadIndex = -1;
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.EndVertical();
-                EditorGUILayout.Space(4f);
-            }
-
-            if (GUILayout.Button("+ ДОБАВИТЬ ДОРОГУ", GUILayout.Height(26f)))
-            {
-                int index = roadsProp.arraySize;
-                roadsProp.InsertArrayElementAtIndex(index);
-                SerializedProperty road = roadsProp.GetArrayElementAtIndex(index);
-                road.FindPropertyRelative("Id").stringValue = "road-" + (index + 1);
-                road.FindPropertyRelative("DisplayName").stringValue = "Новая дорога";
-                road.FindPropertyRelative("Enabled").boolValue = true;
-                road.FindPropertyRelative("Width").floatValue = 1f;
-                road.FindPropertyRelative("Points").ClearArray();
-            }
-        }
-
-        private void DrawTerrainAreasSection(SerializedObject worldSO)
-        {
-            EditorGUILayout.LabelField("Авторские зоны местности", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox(
-                "Прямоугольник в процентах карты (0..100) над уже нарисованной художником картой — " +
-                "невидимая gameplay-разметка, не рисует местность. Terrain определяет стоимость пути " +
-                "(Plains/Hills/Mountains); Tags — чисто описательные, для подбора совместимых слотов " +
-                "(Forest, Shore, Road и т.п.), не влияют на скорость сами по себе. При равном Priority " +
-                "побеждает последняя область в списке — вкладка «Проверка» предупредит о конфликте.",
-                MessageType.None);
-
-            SerializedProperty areasProp = worldSO.FindProperty("terrainAreas");
-
-            for (int i = 0; i < areasProp.arraySize; i++)
-            {
-                SerializedProperty area = areasProp.GetArrayElementAtIndex(i);
-                SerializedProperty idProp = area.FindPropertyRelative("Id");
-
-                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                EditorGUILayout.BeginHorizontal();
-                bool isShownInPreview =
-                    previewEditMode == PreviewEditMode.TerrainAreas && selectedTerrainAreaIndex == i;
-                EditorGUILayout.LabelField(
-                    (string.IsNullOrWhiteSpace(idProp.stringValue) ? $"Зона {i + 1}" : idProp.stringValue) +
-                    (isShownInPreview ? "  [показана в Preview]" : ""),
-                    EditorStyles.boldLabel);
-                // Раздел 22 задачи: сразу переключает Preview в режим
-                // Terrain Areas и выбирает эту зону — не только листает
-                // вкладку, как раньше у Roads/Art Layers до правок этой
-                // задачи.
-                if (GUILayout.Button("Показать в Preview", GUILayout.Width(150f)))
-                {
-                    selectedTerrainAreaIndex = i;
-                    previewEditMode = PreviewEditMode.TerrainAreas;
-                    tab = WindowTab.Preview;
-                }
-                if (GUILayout.Button("Удалить", GUILayout.Width(80f)))
-                {
-                    areasProp.DeleteArrayElementAtIndex(i);
-                    if (selectedTerrainAreaIndex == i)
-                        selectedTerrainAreaIndex = -1;
-                    else if (selectedTerrainAreaIndex > i)
-                        selectedTerrainAreaIndex--;
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.EndVertical();
-                    break;
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.PropertyField(idProp, new GUIContent("ID"));
-                EditorGUILayout.PropertyField(
-                    area.FindPropertyRelative("Terrain"), new GUIContent("Местность (стоимость пути)"));
-                DrawTagsField(
-                    area.FindPropertyRelative("Tags"),
-                    "Теги (через запятую, напр. Forest, NearRoad)");
-                EditorGUILayout.PropertyField(
-                    area.FindPropertyRelative("Priority"), new GUIContent("Priority"));
-
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PropertyField(
-                    area.FindPropertyRelative("MinXPercent"), new GUIContent("Min X, %"));
-                EditorGUILayout.PropertyField(
-                    area.FindPropertyRelative("MaxXPercent"), new GUIContent("Max X, %"));
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PropertyField(
-                    area.FindPropertyRelative("MinYPercent"), new GUIContent("Min Y, %"));
-                EditorGUILayout.PropertyField(
-                    area.FindPropertyRelative("MaxYPercent"), new GUIContent("Max Y, %"));
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.EndVertical();
-                EditorGUILayout.Space(4f);
-            }
-
-            if (GUILayout.Button("+ ДОБАВИТЬ ЗОНУ МЕСТНОСТИ", GUILayout.Height(26f)))
-            {
-                int index = areasProp.arraySize;
-                areasProp.InsertArrayElementAtIndex(index);
-                SerializedProperty area = areasProp.GetArrayElementAtIndex(index);
-                area.FindPropertyRelative("Id").stringValue = "area-" + (index + 1);
-                area.FindPropertyRelative("Terrain").enumValueIndex = (int)WorldMapTerrainType.Hills;
-                area.FindPropertyRelative("Tags").ClearArray();
-                area.FindPropertyRelative("MinXPercent").floatValue = 40f;
-                area.FindPropertyRelative("MaxXPercent").floatValue = 60f;
-                area.FindPropertyRelative("MinYPercent").floatValue = 40f;
-                area.FindPropertyRelative("MaxYPercent").floatValue = 60f;
-                area.FindPropertyRelative("Priority").intValue = 0;
-            }
         }
 
         private static void DrawSpawnSlotsSection(SerializedObject worldSO)
@@ -1439,54 +1102,16 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 result.Add("Координаты Дома в Active World должны быть в диапазоне 0..100%.");
             }
 
-            HashSet<string> areaIds = new HashSet<string>();
-            List<WorldMapWorldDefinitionAsset.TerrainAreaEntry> areas =
-                new List<WorldMapWorldDefinitionAsset.TerrainAreaEntry>(world.TerrainAreas);
-
-            foreach (WorldMapWorldDefinitionAsset.TerrainAreaEntry area in areas)
+            // 12И: разметка клеток вместо зон и дорог.
+            if (world.HasLegacyMarkup)
             {
-                if (area == null)
-                {
-                    result.Add("В географии Active World есть пустая зона местности.");
-                    continue;
-                }
-
-                if (string.IsNullOrWhiteSpace(area.Id))
-                    result.Add("У зоны местности не заполнен ID.");
-                else if (!areaIds.Add(area.Id))
-                    result.Add($"Дублирующийся ID зоны местности: '{area.Id}'.");
-
-                if (area.MinXPercent >= area.MaxXPercent || area.MinYPercent >= area.MaxYPercent)
-                {
-                    result.Add(
-                        $"Зона местности '{area.Id}': Min должен быть строго меньше Max по обеим осям.");
-                }
+                result.Add("В Active World остались старые зоны местности или дороги — перенесите их " +
+                           "в разметку клеток (География → Местность → «Перенести старую разметку»).");
             }
 
-            // Конфликт равных приоритетов — не зависит от порядка объектов в
-            // списке, поэтому выявляется явной проверкой пересечений здесь,
-            // а не оставляется на "последняя побеждает" в рантайме.
-            for (int i = 0; i < areas.Count; i++)
-            {
-                for (int j = i + 1; j < areas.Count; j++)
-                {
-                    WorldMapWorldDefinitionAsset.TerrainAreaEntry a = areas[i];
-                    WorldMapWorldDefinitionAsset.TerrainAreaEntry b = areas[j];
-                    if (a == null || b == null || a.Priority != b.Priority)
-                        continue;
-
-                    bool overlaps =
-                        a.MinXPercent < b.MaxXPercent && b.MinXPercent < a.MaxXPercent &&
-                        a.MinYPercent < b.MaxYPercent && b.MinYPercent < a.MaxYPercent;
-
-                    if (overlaps)
-                    {
-                        result.Add(
-                            $"Зоны местности '{a.Id}' и '{b.Id}' пересекаются при одинаковом " +
-                            $"Priority ({a.Priority}) — результат недетерминирован, задайте разный приоритет.");
-                    }
-                }
-            }
+            WorldMapHexGrid markupGrid = world.CreateGrid();
+            if (markupGrid.Columns * markupGrid.Rows > 400000)
+                result.Add("Сетка Active World слишком мелкая (больше 400 000 клеток) — увеличьте размер клетки.");
 
             HashSet<string> slotIds = new HashSet<string>();
             foreach (WorldMapWorldDefinitionAsset.SpawnSlotEntry slot in world.SpawnSlots)
@@ -1509,70 +1134,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 }
             }
 
-            CollectRoadIssues(world, result);
-        }
-
-        // WM-T02 (раздел 17 задачи): проверки дорог — расширение
-        // существующей Validate, не отдельная система.
-        private static void CollectRoadIssues(
-            WorldMapWorldDefinitionAsset world,
-            List<string> result)
-        {
-            HashSet<string> roadIds = new HashSet<string>();
-            bool hasRoadTerrainRule = false;
-
-            foreach (WorldMapWorldDefinitionAsset.GameplayTerrainSettingsEntry entry in
-                     world.GameplayTerrainSettings)
-            {
-                if (entry != null && entry.Terrain == WorldMapGameplayTerrainType.Road)
-                    hasRoadTerrainRule = true;
-            }
-
-            foreach (WorldMapWorldDefinitionAsset.RoadEntry road in world.Roads)
-            {
-                if (road == null)
-                {
-                    result.Add("В географии Active World есть пустая дорога.");
-                    continue;
-                }
-
-                if (string.IsNullOrWhiteSpace(road.Id))
-                    result.Add("У дороги не заполнен ID.");
-                else if (!roadIds.Add(road.Id))
-                    result.Add($"Дублирующийся ID дороги: '{road.Id}'.");
-
-                if (!road.Enabled)
-                    continue; // Раздел 17: выключенная дорога — не ошибка.
-
-                if (road.Width <= 0f)
-                    result.Add($"Дорога '{road.Id}': Width должен быть больше нуля.");
-
-                if (road.Points == null || road.Points.Count < 2)
-                {
-                    result.Add(
-                        $"Дорога '{road.Id}': путь содержит меньше 2 точек — не участвует в gameplay.");
-                }
-                else
-                {
-                    foreach (Vector2 point in road.Points)
-                    {
-                        if (point.x < 0f || point.x > 100f || point.y < 0f || point.y > 100f)
-                        {
-                            result.Add(
-                                $"Дорога '{road.Id}': точка ({point.x:0.##}, {point.y:0.##}) вне " +
-                                "допустимого диапазона карты 0..100%.");
-                            break;
-                        }
-                    }
-                }
-
-                if (!hasRoadTerrainRule)
-                {
-                    result.Add(
-                        $"Дорога '{road.Id}' задана, но в «Типы местности» нет правила для Road — " +
-                        "будет использован запасной множитель ×1.30 по умолчанию.");
-                }
-            }
         }
 
         // ------------------------------------------------------------------
@@ -1593,30 +1154,26 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             using (new EditorGUI.DisabledScope(true))
                 previewSeed = EditorGUILayout.IntField("Seed наполнения (пока не используется)", previewSeed);
             if (GUILayout.Button("REGENERATE", GUILayout.Width(120f)))
+            {
                 ApplyPreviewGeography();
+                InvalidateTerrainPaintCache();
+            }
             EditorGUILayout.EndHorizontal();
 
             if (hasAuthoredWorld)
             {
                 EditorGUILayout.HelpBox(
-                    $"Активен авторский мир '{database.ActiveWorld.WorldDefinitionId}' — рельеф постоянный " +
-                    "и задан вручную (Terrain Areas на вкладке «География»), не зависит от Seed.",
+                    $"Активен авторский мир '{database.ActiveWorld.WorldDefinitionId}' — местность постоянная " +
+                    "и размечена вручную (режим «Местность»), не зависит от Seed.",
                     MessageType.None);
             }
             else
             {
                 EditorGUILayout.HelpBox(
-                    $"Схематичный превью-грид ({WorldMapNavigation.GridWidth}×{WorldMapNavigation.GridHeight}), не финальный визуал. " +
-                    "Без Active World вся карта — сплошная Plains: процедурной генерации местности " +
-                    "больше нет ни в каком виде.",
+                    "Без Active World вся карта — сплошная открытая местность: процедурной " +
+                    "генерации местности нет ни в каком виде.",
                     MessageType.None);
             }
-
-            EditorGUILayout.HelpBox(
-                "Предпросмотр использует общий статический WorldMapNavigation — держите это окно " +
-                "закрытым или на другой вкладке во время Play Mode с работающей партией, иначе Preview " +
-                "временно подменит географию живой игры (известное ограничение, снимается в AM-10).",
-                MessageType.Warning);
 
             DrawPreviewLayerToggles();
             DrawPreviewModeToolbar();
@@ -1626,16 +1183,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 ? database.ActiveTheme.BaseMapSprite
                 : null;
 
-            if (editingRoadIndex >= 0 && hasAuthoredWorld &&
-                editingRoadIndex < database.ActiveWorld.Roads.Count)
-            {
-                DrawEditingRoadBanner();
-            }
-
-            if (previewEditMode == PreviewEditMode.TerrainAreas && hasAuthoredWorld)
-                DrawTerrainAreaModeBanner();
-
-            ApplyPreviewGeography();
+            if (previewEditMode == PreviewEditMode.Terrain && hasAuthoredWorld)
+                DrawTerrainPaintBanner(database.ActiveWorld);
 
             // Задача "Global Map Aspect + Preview Canvas Navigation"
             // (WM-T04.9, раздел 8/9): canvas занимает всё оставшееся место
@@ -1681,8 +1230,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (previewShowArtLayers && database != null && database.ActiveTheme != null)
                 DrawPreviewArtLayers(mapRect, database.ActiveTheme.ArtLayers);
 
-            if (previewShowTerrainAreas && hasAuthoredWorld)
-                DrawPreviewTerrainAreas(mapRect, database.ActiveWorld);
+            if ((previewShowTerrainMarkup || previewEditMode == PreviewEditMode.Terrain) && hasAuthoredWorld)
+                DrawPreviewTerrainMarkup(mapRect, database.ActiveWorld);
 
             if (previewShowSpawnSlots && hasAuthoredWorld)
                 DrawPreviewSpawnSlots(mapRect, database.ActiveWorld);
@@ -1690,8 +1239,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (previewShowLocations)
                 DrawPreviewLocations(mapRect);
 
-            if (previewShowRoads && hasAuthoredWorld)
-                DrawPreviewRoads(mapRect);
 
             // Раздел 17/26 задачи: zoom (wheel) и pan (MMB) работают
             // независимо от PreviewEditMode — button==2/ScrollWheel никогда
@@ -1706,16 +1253,13 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             // с другим, независимо от порядка current.Use().
             switch (previewEditMode)
             {
-                case PreviewEditMode.Roads:
-                    HandleRoadPathEditingInput(mapRect);
-                    break;
                 case PreviewEditMode.ArtLayers:
                     if (database != null && database.ActiveTheme != null)
                         HandleArtLayerEditingInput(mapRect, database.ActiveTheme.ArtLayers);
                     break;
-                case PreviewEditMode.TerrainAreas:
+                case PreviewEditMode.Terrain:
                     if (hasAuthoredWorld)
-                        HandleTerrainAreaEditingInput(mapRect, database.ActiveWorld);
+                        HandleTerrainPaintInput(mapRect, database.ActiveWorld);
                     break;
                 case PreviewEditMode.View:
                 default:
@@ -1831,7 +1375,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             EditorGUILayout.LabelField("Режим редактирования", EditorStyles.miniBoldLabel);
             PreviewEditMode newMode = (PreviewEditMode)GUILayout.Toolbar(
                 (int)previewEditMode,
-                new[] { "Просмотр", "Art Layers", "Terrain Areas", "Roads" });
+                new[] { "Просмотр", "Art Layers", "Местность" });
 
             if (newMode != previewEditMode)
             {
@@ -1841,41 +1385,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 // фантомное изменение к чужому объекту.
                 isDraggingArtLayer = false;
                 isResizingArtLayer = false;
-                isDraggingTerrainArea = false;
-                isResizingTerrainArea = false;
-                armedToCreateTerrainArea = false;
-                isDraggingNewTerrainArea = false;
+                EndTerrainPaintStroke();
                 previewEditMode = newMode;
-            }
-        }
-
-        private void DrawTerrainAreaModeBanner()
-        {
-            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-            terrainAreaCreateType = (WorldMapTerrainType)EditorGUILayout.EnumPopup(
-                "Terrain", terrainAreaCreateType, GUILayout.Width(220f));
-
-            using (new EditorGUI.DisabledScope(armedToCreateTerrainArea || isDraggingNewTerrainArea))
-            {
-                if (GUILayout.Button("+ Нарисовать новую зону", GUILayout.Width(190f)))
-                    armedToCreateTerrainArea = true;
-            }
-
-            bool hasSelection = selectedTerrainAreaIndex >= 0 &&
-                                 database.ActiveWorld != null &&
-                                 selectedTerrainAreaIndex < database.ActiveWorld.TerrainAreas.Count;
-            using (new EditorGUI.DisabledScope(!hasSelection))
-            {
-                if (GUILayout.Button("Удалить выбранную зону", GUILayout.Width(190f)))
-                    DeleteSelectedTerrainArea();
-            }
-            EditorGUILayout.EndHorizontal();
-
-            if (armedToCreateTerrainArea && !isDraggingNewTerrainArea)
-            {
-                EditorGUILayout.HelpBox(
-                    "Протяните прямоугольник мышью по карте, чтобы создать новую зону.",
-                    MessageType.Info);
             }
         }
 
@@ -1885,8 +1396,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             EditorGUILayout.BeginHorizontal();
             DrawLayerToggle(ref previewShowArt, "Base Map", PrefShowArt);
             DrawLayerToggle(ref previewShowArtLayers, "Map Art Layers", PrefShowArtLayers);
-            DrawLayerToggle(ref previewShowRoads, "Дороги", PrefShowRoads);
-            DrawLayerToggle(ref previewShowTerrainAreas, "Terrain Areas", PrefShowTerrainAreas);
+            DrawLayerToggle(ref previewShowTerrainMarkup, "Местность", PrefShowTerrainMarkup);
             DrawLayerToggle(ref previewShowLocations, "Locations", PrefShowLocations);
             DrawLayerToggle(ref previewShowSpawnSlots, "Spawn Slots", PrefShowSpawnSlots);
             EditorGUILayout.EndHorizontal();
@@ -1894,19 +1404,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             DrawLayerToggle(ref previewShowArtLayerBounds, "Art Layer Bounds", PrefShowArtLayerBounds);
             EditorGUILayout.EndHorizontal();
 
-            // Раздел 16/17 задачи "Terrain Area Preview Authoring": прозрачность
-            // ТОЛЬКО настройка Preview (EditorPrefs) — Opacity НЕ добавляется в
-            // саму TerrainAreaEntry (раздел 1 задачи, явный запрет).
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Прозрачность Terrain Areas", GUILayout.Width(180f));
-            float newOpacity = GUILayout.HorizontalSlider(previewTerrainAreaOpacity, 0f, 1f, GUILayout.Width(120f));
-            GUILayout.Label(Mathf.RoundToInt(newOpacity * 100f) + "%", GUILayout.Width(40f));
-            if (!Mathf.Approximately(newOpacity, previewTerrainAreaOpacity))
-            {
-                previewTerrainAreaOpacity = newOpacity;
-                EditorPrefs.SetFloat(PrefTerrainAreaOpacity, newOpacity);
-            }
-            EditorGUILayout.EndHorizontal();
+            DrawTerrainMarkupOpacitySlider();
         }
 
         private static void DrawLayerToggle(ref bool value, string label, string prefKey)
@@ -1915,32 +1413,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (newValue != value)
                 EditorPrefs.SetBool(prefKey, newValue);
             value = newValue;
-        }
-
-        private void DrawEditingRoadBanner()
-        {
-            WorldMapWorldDefinitionAsset.RoadEntry road =
-                database.ActiveWorld.Roads[editingRoadIndex];
-
-            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-            EditorGUILayout.LabelField(
-                "Режим редактирования: " +
-                (string.IsNullOrWhiteSpace(road.Id) ? "(без ID)" : road.Id),
-                EditorStyles.boldLabel);
-
-            using (new EditorGUI.DisabledScope(
-                       selectedRoadPointIndex < 0 || selectedRoadPointIndex >= road.Points.Count))
-            {
-                if (GUILayout.Button("Удалить выбранную точку", GUILayout.Width(190f)))
-                    DeleteSelectedRoadPoint();
-            }
-
-            if (GUILayout.Button("Завершить редактирование", GUILayout.Width(190f)))
-            {
-                editingRoadIndex = -1;
-                selectedRoadPointIndex = -1;
-            }
-            EditorGUILayout.EndHorizontal();
         }
 
         private void ApplyPreviewGeography()
@@ -2270,318 +1742,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             return -1;
         }
 
-        // Задача "Terrain Area Preview Authoring" (WM-T04.8): рисует САМИ
-        // прямоугольники TerrainAreaEntry (раньше здесь рисовалась испечённая
-        // grid-сетка WorldMapNavigation — она не позволяла кликнуть по
-        // конкретной зоне, так как клетка не хранит, какая именно
-        // TerrainAreaEntry её раскрасила приоритетом). Цвета — тот же
-        // GetPreviewTerrainColor, что и раньше (раздел 19 задачи — не
-        // переделываем отдельную color-базу). Alpha заливки — из
-        // previewTerrainAreaOpacity (EditorPrefs, НЕ поле TerrainAreaEntry —
-        // раздел 1/16 задачи); граница всегда заметнее заливки и видна даже
-        // при Opacity = 0 (раздел 18 задачи), пока сам слой включён.
-        private void DrawPreviewTerrainAreas(Rect mapRect, WorldMapWorldDefinitionAsset world)
-        {
-            IReadOnlyList<WorldMapWorldDefinitionAsset.TerrainAreaEntry> areas = world.TerrainAreas;
-
-            for (int i = 0; i < areas.Count; i++)
-            {
-                WorldMapWorldDefinitionAsset.TerrainAreaEntry area = areas[i];
-                if (area == null)
-                    continue;
-
-                Rect areaRect = WorldMapPreviewMath.MapBoundsToRect(
-                    mapRect, area.MinXPercent, area.MinYPercent, area.MaxXPercent, area.MaxYPercent);
-                bool isSelected = previewEditMode == PreviewEditMode.TerrainAreas && i == selectedTerrainAreaIndex;
-
-                Color baseColor = GetPreviewTerrainColor(area.Terrain);
-
-                Color fill = baseColor;
-                fill.a = Mathf.Clamp01(previewTerrainAreaOpacity + (isSelected ? 0.1f : 0f));
-                if (fill.a > 0.001f)
-                    EditorGUI.DrawRect(areaRect, fill);
-
-                Color outline = baseColor;
-                outline.a = isSelected ? 0.95f : 0.75f;
-                DrawRectOutline(areaRect, isSelected ? Color.white : outline);
-
-                if (isSelected)
-                {
-                    GUI.Label(
-                        new Rect(areaRect.x + 2f, areaRect.y + 2f, 200f, 16f),
-                        string.IsNullOrWhiteSpace(area.Id) ? area.Terrain.ToString() : area.Id,
-                        EditorStyles.whiteMiniLabel);
-                    DrawArtLayerResizeHandles(areaRect);
-                }
-            }
-
-            if (isDraggingNewTerrainArea && Event.current != null)
-            {
-                Vector2 currentMapPoint =
-                    WorldMapPreviewMath.PreviewToMapClamped(mapRect, Event.current.mousePosition);
-                MapBounds liveBounds = WorldMapArtLayerBoundsMath.NormalizeBoundsFromTwoPoints(
-                    terrainAreaCreateStartMapPoint, currentMapPoint);
-                Rect liveRect = WorldMapPreviewMath.MapBoundsToRect(
-                    mapRect, liveBounds.MinX, liveBounds.MinY, liveBounds.MaxX, liveBounds.MaxY);
-
-                Color previewColor = GetPreviewTerrainColor(terrainAreaCreateType);
-                previewColor.a = 0.35f;
-                EditorGUI.DrawRect(liveRect, previewColor);
-                DrawRectOutline(liveRect, Color.white);
-            }
-        }
-
-        // Задача "Terrain Area Preview Authoring" (WM-T04.8, разделы
-        // 6/7/11/12/14): единственный обработчик мыши для select/move/
-        // resize/create/delete Terrain Area в Preview. Вызывается ТОЛЬКО
-        // когда previewEditMode == TerrainAreas (см. DrawPreviewSection) —
-        // не может столкнуться с Road/Art Layer editing.
-        private void HandleTerrainAreaEditingInput(Rect mapRect, WorldMapWorldDefinitionAsset world)
-        {
-            Event current = Event.current;
-            if (current == null)
-                return;
-
-            IReadOnlyList<WorldMapWorldDefinitionAsset.TerrainAreaEntry> areas = world.TerrainAreas;
-
-            if (current.type == EventType.MouseDown && current.button == 0)
-            {
-                if (!mapRect.Contains(current.mousePosition))
-                    return;
-
-                // 0) Явно активированное создание новой зоны — приоритет
-                // над select/move существующих (раздел 7 задачи).
-                if (armedToCreateTerrainArea)
-                {
-                    terrainAreaCreateStartMapPoint =
-                        WorldMapPreviewMath.PreviewToMapClamped(mapRect, current.mousePosition);
-                    terrainAreaCreateStartScreenPoint = current.mousePosition;
-                    isDraggingNewTerrainArea = true;
-                    current.Use();
-                    Repaint();
-                    return;
-                }
-
-                // 1) Ручки resize — только у уже выбранной зоны.
-                if (selectedTerrainAreaIndex >= 0 && selectedTerrainAreaIndex < areas.Count)
-                {
-                    WorldMapWorldDefinitionAsset.TerrainAreaEntry selected = areas[selectedTerrainAreaIndex];
-                    if (selected != null)
-                    {
-                        Rect areaRect = WorldMapPreviewMath.MapBoundsToRect(
-                            mapRect, selected.MinXPercent, selected.MinYPercent,
-                            selected.MaxXPercent, selected.MaxYPercent);
-
-                        if (TryFindArtLayerCorner(areaRect, current.mousePosition, out ArtLayerCorner corner))
-                        {
-                            Undo.RecordObject(database.ActiveWorld, "Resize Terrain Area");
-                            originalTerrainAreaBounds = new MapBounds(
-                                selected.MinXPercent, selected.MinYPercent,
-                                selected.MaxXPercent, selected.MaxYPercent);
-                            resizingTerrainAreaCorner = corner;
-                            isResizingTerrainArea = true;
-                            isDraggingTerrainArea = false;
-                            current.Use();
-                            Repaint();
-                            return;
-                        }
-                    }
-                }
-
-                // 2) Тело зоны — среди пересекающихся выбираем с наибольшим
-                // Priority (раздел 6/I задачи; при равном Priority — тот же
-                // "последний в списке побеждает", что уже документирован в
-                // подсказке вкладки «География» для gameplay-разрешения).
-                int hitIndex = FindTerrainAreaIndexAtPoint(mapRect, areas, current.mousePosition);
-                if (hitIndex >= 0)
-                {
-                    selectedTerrainAreaIndex = hitIndex;
-                    WorldMapWorldDefinitionAsset.TerrainAreaEntry area = areas[hitIndex];
-
-                    Undo.RecordObject(database.ActiveWorld, "Move Terrain Area");
-                    originalTerrainAreaBounds = new MapBounds(
-                        area.MinXPercent, area.MinYPercent, area.MaxXPercent, area.MaxYPercent);
-                    terrainAreaDragStartMapPoint = WorldMapPreviewMath.PreviewToMap(mapRect, current.mousePosition);
-                    isDraggingTerrainArea = true;
-                    isResizingTerrainArea = false;
-                    current.Use();
-                    Repaint();
-                    return;
-                }
-
-                // 3) Пустое место — снять выделение, ничего не создавать.
-                selectedTerrainAreaIndex = -1;
-                Repaint();
-            }
-            else if (current.type == EventType.MouseDrag && isDraggingNewTerrainArea)
-            {
-                // Сам прямоугольник считается заново в DrawPreviewTerrainAreas
-                // каждый Repaint из terrainAreaCreateStartMapPoint + текущей
-                // позиции мыши — здесь достаточно перерисовать окно.
-                current.Use();
-                Repaint();
-            }
-            else if (current.type == EventType.MouseDrag && (isDraggingTerrainArea || isResizingTerrainArea))
-            {
-                if (selectedTerrainAreaIndex < 0 || selectedTerrainAreaIndex >= areas.Count)
-                {
-                    isDraggingTerrainArea = false;
-                    isResizingTerrainArea = false;
-                    return;
-                }
-
-                WorldMapWorldDefinitionAsset.TerrainAreaEntry area = areas[selectedTerrainAreaIndex];
-                Vector2 currentMapPoint = WorldMapPreviewMath.PreviewToMap(mapRect, current.mousePosition);
-
-                MapBounds newBounds;
-                if (isResizingTerrainArea)
-                {
-                    // Раздел 12 задачи: свободный resize, aspect ratio НЕ
-                    // сохраняется — тот же ResizeBoundsFromCorner, что у Art
-                    // Layers, с preserveAspect: false (переиспользование без
-                    // дублирования математики, раздел 26 задачи).
-                    newBounds = WorldMapArtLayerBoundsMath.ResizeBoundsFromCorner(
-                        originalTerrainAreaBounds, resizingTerrainAreaCorner, currentMapPoint,
-                        preserveAspect: false, aspectRatio: 1f, minSizePercent: MinTerrainAreaSizePercent);
-                }
-                else
-                {
-                    Vector2 totalDelta = currentMapPoint - terrainAreaDragStartMapPoint;
-                    newBounds = WorldMapArtLayerBoundsMath.MoveBounds(
-                        originalTerrainAreaBounds, totalDelta.x, totalDelta.y);
-                }
-
-                area.MinXPercent = newBounds.MinX;
-                area.MinYPercent = newBounds.MinY;
-                area.MaxXPercent = newBounds.MaxX;
-                area.MaxYPercent = newBounds.MaxY;
-
-                EditorUtility.SetDirty(database.ActiveWorld);
-                current.Use();
-                Repaint();
-            }
-            else if (current.type == EventType.MouseUp && current.button == 0 && isDraggingNewTerrainArea)
-            {
-                isDraggingNewTerrainArea = false;
-                armedToCreateTerrainArea = false;
-
-                Vector2 endMapPoint = WorldMapPreviewMath.PreviewToMapClamped(mapRect, current.mousePosition);
-                float dragPixels = Vector2.Distance(terrainAreaCreateStartScreenPoint, current.mousePosition);
-
-                // Раздел 10 задачи: слишком маленький drag (клик без
-                // движения) не создаёт зону вообще — ни нулевого, ни
-                // минимального размера.
-                if (dragPixels >= TerrainAreaCreateDragThresholdPixels)
-                {
-                    MapBounds bounds = WorldMapArtLayerBoundsMath.NormalizeBoundsFromTwoPoints(
-                        terrainAreaCreateStartMapPoint, endMapPoint);
-
-                    if (bounds.Width >= MinTerrainAreaSizePercent && bounds.Height >= MinTerrainAreaSizePercent)
-                    {
-                        Undo.RecordObject(database.ActiveWorld, "Create Terrain Area");
-                        WorldMapWorldDefinitionAsset.TerrainAreaEntry newArea =
-                            new WorldMapWorldDefinitionAsset.TerrainAreaEntry
-                            {
-                                Id = GenerateUniqueTerrainAreaId(world.TerrainAreas),
-                                Terrain = terrainAreaCreateType,
-                                Tags = new List<string>(),
-                                MinXPercent = bounds.MinX,
-                                MinYPercent = bounds.MinY,
-                                MaxXPercent = bounds.MaxX,
-                                MaxYPercent = bounds.MaxY,
-                                Priority = 0
-                            };
-                        world.EditorAddTerrainArea(newArea);
-                        selectedTerrainAreaIndex = world.TerrainAreas.Count - 1;
-                        EditorUtility.SetDirty(database.ActiveWorld);
-                    }
-                }
-
-                current.Use();
-                Repaint();
-            }
-            else if (current.type == EventType.MouseUp && current.button == 0 &&
-                     (isDraggingTerrainArea || isResizingTerrainArea))
-            {
-                isDraggingTerrainArea = false;
-                isResizingTerrainArea = false;
-                current.Use();
-            }
-        }
-
-        // Раздел 6/I/J задачи: при перекрытии зон выбирается наибольший
-        // Priority; при равенстве — "последний в списке побеждает" (тот же
-        // принцип, что уже задокументирован в подсказке вкладки «География»
-        // для gameplay-разрешения одинакового Priority). Возвращает индекс в
-        // исходном списке world.TerrainAreas. Публичный static — используется
-        // напрямую из EditMode-тестов, как FindArtLayerIndexAtPoint.
-        public static int FindTerrainAreaIndexAtPoint(
-            Rect mapRect,
-            IReadOnlyList<WorldMapWorldDefinitionAsset.TerrainAreaEntry> areas,
-            Vector2 screenPoint)
-        {
-            int bestIndex = -1;
-            int bestPriority = int.MinValue;
-
-            for (int i = 0; i < areas.Count; i++)
-            {
-                WorldMapWorldDefinitionAsset.TerrainAreaEntry area = areas[i];
-                if (area == null)
-                    continue;
-
-                Rect areaRect = WorldMapPreviewMath.MapBoundsToRect(
-                    mapRect, area.MinXPercent, area.MinYPercent, area.MaxXPercent, area.MaxYPercent);
-                if (!areaRect.Contains(screenPoint))
-                    continue;
-
-                if (area.Priority >= bestPriority)
-                {
-                    bestPriority = area.Priority;
-                    bestIndex = i;
-                }
-            }
-
-            return bestIndex;
-        }
-
-        // Раздел 9 задачи: короткий уникальный ID для новой зоны — не
-        // duplicate, легко переименовать вручную на вкладке «География».
-        private static string GenerateUniqueTerrainAreaId(
-            IReadOnlyList<WorldMapWorldDefinitionAsset.TerrainAreaEntry> areas)
-        {
-            HashSet<string> existingIds = new HashSet<string>();
-            foreach (WorldMapWorldDefinitionAsset.TerrainAreaEntry area in areas)
-            {
-                if (area != null && !string.IsNullOrWhiteSpace(area.Id))
-                    existingIds.Add(area.Id);
-            }
-
-            for (int n = 1; n < 100000; n++)
-            {
-                string candidate = "terrain-area-" + n.ToString("000");
-                if (!existingIds.Contains(candidate))
-                    return candidate;
-            }
-
-            return "terrain-area-" + System.Guid.NewGuid().ToString("N").Substring(0, 8);
-        }
-
-        private void DeleteSelectedTerrainArea()
-        {
-            if (database == null || database.ActiveWorld == null)
-                return;
-
-            IReadOnlyList<WorldMapWorldDefinitionAsset.TerrainAreaEntry> areas = database.ActiveWorld.TerrainAreas;
-            if (selectedTerrainAreaIndex < 0 || selectedTerrainAreaIndex >= areas.Count)
-                return;
-
-            Undo.RecordObject(database.ActiveWorld, "Delete Terrain Area");
-            database.ActiveWorld.EditorRemoveTerrainAreaAt(selectedTerrainAreaIndex);
-            selectedTerrainAreaIndex = -1;
-            EditorUtility.SetDirty(database.ActiveWorld);
-            Repaint();
-        }
-
         private static void DrawPreviewSpawnSlots(Rect mapRect, WorldMapWorldDefinitionAsset world)
         {
             Color fill = new Color(0.32f, 0.55f, 0.92f, 0.16f);
@@ -2640,8 +1800,10 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             float homeMarkerSizeCells = database.ActiveTheme != null
                 ? database.ActiveTheme.HomeMarkerSizeCells
                 : WorldMapVisualTheme.DefaultHomeMarkerSizeCells;
-            float homeWidth = mapRect.width / (WorldMapNavigation.GridWidth - 1) * homeMarkerSizeCells;
-            float homeHeight = mapRect.height / (WorldMapNavigation.GridHeight - 1) * homeMarkerSizeCells;
+            // 12И: доля клетки — ширина шестиугольника активного мира.
+            WorldMapHexGrid homeGrid = WorldMapNavigation.Grid;
+            float homeWidth = mapRect.width * (float)homeGrid.HexWidth / homeGrid.CanvasWidth * homeMarkerSizeCells;
+            float homeHeight = mapRect.height * (float)homeGrid.HexWidth / homeGrid.CanvasHeight * homeMarkerSizeCells;
 
             Vector2 homePoint = WorldMapPreviewMath.MapToPreview(mapRect, homeXPercent, homeYPercent);
             Rect capitalRect = new Rect(
@@ -2692,241 +1854,5 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 }
             }
         }
-
-        // WM-T02/T03 (задача "gameplay-география дорог"): debug-визуализация
-        // дорог — только в редакторе, не попадает в обычный игровой экран
-        // карты. Показывает саму gameplay-ширину (полупрозрачная полоса), не
-        // только центральную линию.
-        private void DrawPreviewRoads(Rect mapRect)
-        {
-            IReadOnlyList<WorldMapWorldDefinitionAsset.RoadEntry> roads = database.ActiveWorld.Roads;
-            for (int index = 0; index < roads.Count; index++)
-            {
-                WorldMapWorldDefinitionAsset.RoadEntry road = roads[index];
-                if (road?.Points != null && road.Points.Count >= 2)
-                    DrawPreviewRoad(mapRect, road, index == editingRoadIndex);
-            }
-        }
-
-        private void DrawPreviewRoad(
-            Rect mapRect,
-            WorldMapWorldDefinitionAsset.RoadEntry road,
-            bool isBeingEdited)
-        {
-            // Раздел 23 задачи: редактируемая дорога — полная яркость,
-            // остальные — тусклее, чтобы точка случайно не добавилась не в
-            // ту дорогу (HandleRoadPathEditingInput и так работает только с
-            // editingRoadIndex, это чисто визуальная подсказка).
-            float dim = isBeingEdited || editingRoadIndex < 0 ? 1f : 0.4f;
-
-            Color lineColor = road.Enabled
-                ? new Color(0.85f, 0.72f, 0.35f, 0.95f)
-                : new Color(0.5f, 0.5f, 0.5f, 0.6f);
-            lineColor.a *= dim;
-            Color zoneColor = road.Enabled
-                ? new Color(0.85f, 0.72f, 0.35f, 0.22f)
-                : new Color(0.5f, 0.5f, 0.5f, 0.12f);
-            zoneColor.a *= dim;
-
-            float halfWidthPercent = road.Width * 0.5f;
-
-            for (int i = 1; i < road.Points.Count; i++)
-            {
-                Vector2 aPercent = road.Points[i - 1];
-                Vector2 bPercent = road.Points[i];
-
-                DrawRoadSegmentZone(mapRect, aPercent, bPercent, halfWidthPercent, zoneColor);
-
-                Vector2 a = WorldMapPreviewMath.MapToPreview(mapRect, aPercent.x, aPercent.y);
-                Vector2 b = WorldMapPreviewMath.MapToPreview(mapRect, bPercent.x, bPercent.y);
-                Handles.BeginGUI();
-                Handles.color = lineColor;
-                Handles.DrawLine(a, b);
-                Handles.EndGUI();
-            }
-
-            for (int i = 0; i < road.Points.Count; i++)
-            {
-                Vector2 p = WorldMapPreviewMath.MapToPreview(mapRect, road.Points[i].x, road.Points[i].y);
-                bool isSelected = isBeingEdited && i == selectedRoadPointIndex;
-                float size = isSelected ? 10f : 6f;
-                Rect pointRect = new Rect(p.x - size * 0.5f, p.y - size * 0.5f, size, size);
-                EditorGUI.DrawRect(pointRect, isSelected ? Color.white : lineColor);
-                if (isSelected)
-                {
-                    DrawRectOutline(
-                        new Rect(pointRect.x - 2f, pointRect.y - 2f, pointRect.width + 4f, pointRect.height + 4f),
-                        Color.white);
-                }
-                GUI.Label(new Rect(p.x + 6f, p.y - 7f, 24f, 14f), i.ToString(), EditorStyles.miniLabel);
-            }
-        }
-
-        // Раздел 12 задачи: смещение на половину ширины считается В
-        // ПРОЦЕНТАХ (map-space, та же метрика, что использует runtime
-        // WorldMapGameplayTerrainQuery.DistancePointToSegment), и только
-        // потом получившиеся 4 угла переводятся в экран той же функцией,
-        // что и всё остальное. При не квадратном mapRect это даёт ровно ту
-        // область, которую считает "дорогой" runtime — не декоративную
-        // толщину в экранных пикселях.
-        private static void DrawRoadSegmentZone(
-            Rect mapRect,
-            Vector2 aPercent,
-            Vector2 bPercent,
-            float halfWidthPercent,
-            Color color)
-        {
-            if (halfWidthPercent <= 0.001f)
-                return;
-
-            Vector2 direction = bPercent - aPercent;
-            if (direction.sqrMagnitude < 0.0001f)
-                direction = new Vector2(1f, 0f);
-            direction.Normalize();
-            Vector2 normal = new Vector2(-direction.y, direction.x) * halfWidthPercent;
-
-            Vector2 a1 = WorldMapPreviewMath.MapToPreview(mapRect, aPercent.x + normal.x, aPercent.y + normal.y);
-            Vector2 a2 = WorldMapPreviewMath.MapToPreview(mapRect, aPercent.x - normal.x, aPercent.y - normal.y);
-            Vector2 b1 = WorldMapPreviewMath.MapToPreview(mapRect, bPercent.x + normal.x, bPercent.y + normal.y);
-            Vector2 b2 = WorldMapPreviewMath.MapToPreview(mapRect, bPercent.x - normal.x, bPercent.y - normal.y);
-
-            Handles.BeginGUI();
-            Handles.color = color;
-            Handles.DrawAAConvexPolygon(a1, b1, b2, a2);
-            Handles.EndGUI();
-        }
-
-        // Раздел 9/24/25 задачи: ЛКМ по пустому месту карты — добавить точку
-        // в конец; ЛКМ рядом с существующей точкой (hitRadiusPixels в
-        // экранных пикселях, не связано с gameplay Width) — выбрать её и
-        // начать drag; отпускание кнопки — конец drag. Один Undo.RecordObject
-        // на MouseDown (не на каждый MouseDrag) — весь drag одной операцией.
-        // Клик на letterbox/тулбаре не долетает сюда: летербокс не входит в
-        // mapRect.Contains, тулбар/тогглы уже потребили событие раньше.
-        private void HandleRoadPathEditingInput(Rect mapRect)
-        {
-            if (editingRoadIndex < 0 ||
-                database == null ||
-                database.ActiveWorld == null ||
-                editingRoadIndex >= database.ActiveWorld.Roads.Count)
-            {
-                return;
-            }
-
-            WorldMapWorldDefinitionAsset.RoadEntry road = database.ActiveWorld.Roads[editingRoadIndex];
-            Event current = Event.current;
-            if (current == null)
-                return;
-
-            const float hitRadiusPixels = 8f;
-
-            if (current.type == EventType.MouseDown && current.button == 0)
-            {
-                if (!mapRect.Contains(current.mousePosition))
-                    return;
-
-                int hitIndex = FindNearestRoadPoint(mapRect, road, current.mousePosition, hitRadiusPixels);
-
-                if (hitIndex >= 0)
-                {
-                    Undo.RecordObject(database.ActiveWorld, "Move Road Point");
-                    selectedRoadPointIndex = hitIndex;
-                    isDraggingRoadPoint = true;
-                }
-                else
-                {
-                    Undo.RecordObject(database.ActiveWorld, "Add Road Point");
-                    Vector2 newPoint = WorldMapPreviewMath.PreviewToMapClamped(mapRect, current.mousePosition);
-                    road.Points.Add(newPoint);
-                    selectedRoadPointIndex = road.Points.Count - 1;
-                    isDraggingRoadPoint = false;
-                }
-
-                EditorUtility.SetDirty(database.ActiveWorld);
-                current.Use();
-                Repaint();
-            }
-            else if (current.type == EventType.MouseDrag && isDraggingRoadPoint)
-            {
-                if (selectedRoadPointIndex < 0 || selectedRoadPointIndex >= road.Points.Count)
-                {
-                    isDraggingRoadPoint = false;
-                    return;
-                }
-
-                road.Points[selectedRoadPointIndex] =
-                    WorldMapPreviewMath.PreviewToMapClamped(mapRect, current.mousePosition);
-                EditorUtility.SetDirty(database.ActiveWorld);
-                current.Use();
-                Repaint();
-            }
-            else if (current.type == EventType.MouseUp && current.button == 0 && isDraggingRoadPoint)
-            {
-                isDraggingRoadPoint = false;
-                current.Use();
-            }
-        }
-
-        private static int FindNearestRoadPoint(
-            Rect mapRect,
-            WorldMapWorldDefinitionAsset.RoadEntry road,
-            Vector2 screenPosition,
-            float hitRadiusPixels)
-        {
-            int best = -1;
-            float bestDistance = hitRadiusPixels;
-
-            for (int i = 0; i < road.Points.Count; i++)
-            {
-                Vector2 screenPoint = WorldMapPreviewMath.MapToPreview(
-                    mapRect, road.Points[i].x, road.Points[i].y);
-                float distance = Vector2.Distance(screenPoint, screenPosition);
-                if (distance <= bestDistance)
-                {
-                    bestDistance = distance;
-                    best = i;
-                }
-            }
-
-            return best;
-        }
-
-        private void DeleteSelectedRoadPoint()
-        {
-            if (editingRoadIndex < 0 || database == null || database.ActiveWorld == null)
-                return;
-
-            IReadOnlyList<WorldMapWorldDefinitionAsset.RoadEntry> roads = database.ActiveWorld.Roads;
-            if (editingRoadIndex >= roads.Count)
-                return;
-
-            WorldMapWorldDefinitionAsset.RoadEntry road = roads[editingRoadIndex];
-            if (selectedRoadPointIndex < 0 || selectedRoadPointIndex >= road.Points.Count)
-                return;
-
-            Undo.RecordObject(database.ActiveWorld, "Delete Road Point");
-            road.Points.RemoveAt(selectedRoadPointIndex);
-            selectedRoadPointIndex = -1;
-            EditorUtility.SetDirty(database.ActiveWorld);
-            Repaint();
-        }
-
-        // AM-07.5: это диагностическая раскраска невидимой gameplay-разметки
-        // в редакторе (проверить, что авторские Terrain Areas легли туда,
-        // куда задумано), а не превью финального визуала — финальный визуал
-        // целиком в baseMapSprite темы.
-        private static Color GetPreviewTerrainColor(WorldMapTerrainType terrain)
-        {
-            switch (terrain)
-            {
-                case WorldMapTerrainType.Hills:
-                    return new Color(0.34f, 0.40f, 0.30f, 1f);
-                case WorldMapTerrainType.Mountains:
-                    return new Color(0.32f, 0.30f, 0.29f, 1f);
-                default:
-                    return new Color(0.16f, 0.17f, 0.15f, 1f);
-            }
-        }
-
     }
 }

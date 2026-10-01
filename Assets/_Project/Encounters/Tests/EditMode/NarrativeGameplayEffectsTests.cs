@@ -77,7 +77,7 @@ public sealed class NarrativeGameplayEffectsTests
     }
 
     [Test]
-    public void ShortcutRouteCells_Advances_RouteIndex()
+    public void ShortcutRouteCells_MovesHeroForwardAlongPath()
     {
         GameState state = new GameState
         {
@@ -98,7 +98,11 @@ public sealed class NarrativeGameplayEffectsTests
         new NarrativeEffect { EffectExecutionId = "e1", Type = NarrativeEffectType.ShortcutRouteCells, IntParam = 1 }
             .Apply(context);
 
-        Assert.That(state.ActiveExpedition.RouteIndex, Is.EqualTo(1));
+        // 12И: короткий путь — сдвиг на N клеток пути от текущей позиции.
+        Assert.That(
+            WorldMapNavigation.DistanceHexes(0f, 0f, state.ActiveExpedition.CurrentMapXPercent, state.ActiveExpedition.CurrentMapYPercent),
+            Is.EqualTo(1.0).Within(0.01));
+        Assert.That(state.ActiveExpedition.Route[0].XPercent, Is.EqualTo(state.ActiveExpedition.CurrentMapXPercent));
     }
 
     [Test]

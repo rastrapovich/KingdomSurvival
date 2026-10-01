@@ -1,3 +1,4 @@
+using KingdomSurvival.WorldMapVisual;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -11,16 +12,8 @@ public partial class PrototypeUIController
     // выключена" — по умолчанию false, включается явно переключателем
     // world-map-grid-toggle, а не всегда рисуется при видимости оверлея.
     private bool worldMapGridEnabled;
-    private readonly List<VisualElement> worldMapGridVerticalLines =
-        new List<VisualElement>();
-    private readonly List<VisualElement> worldMapGridHorizontalLines =
-        new List<VisualElement>();
-
-    // Общий класс для ЛЮБОЙ точки/штриха маршрута (узел или декоративный
-    // штрих между узлами) — по нему RefreshWorldMapZoomCompensatedVisuals
-    // находит все элементы, которым нужна компенсация zoom, независимо от
-    // их конкретного визуального варианта (world-map-route-dot-active и т.п.).
-    private const string WorldMapRouteMarkerClass = "world-map-route-marker";
+    private static readonly Color WorldMapGridLineColor = new Color32(240, 236, 220, 70);
+    private const float WorldMapGridTerrainAlpha = 0.32f;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InitializeWorldMapPolishRuntime()
@@ -100,17 +93,15 @@ public partial class PrototypeUIController
             compass.style.display = DisplayStyle.None;
     }
 
+    // 12И (канон v1.50 §9.9): служебный показ шестиугольной сетки и её
+    // разметки — выключен по умолчанию, включается переключателем сетки.
+    // Рисуется в координатах viewport (линии всегда 1px, без субпикселей
+    // при zoom, как требовал WM-15) и только для видимых клеток.
     private void EnsureWorldMapGrid()
     {
         if (worldMapViewport == null)
             return;
 
-        // WM-15: старая сетка была дочерним элементом масштабируемого
-        // world-map. На больших zoom её толщина компенсировалась как 1/zoom,
-        // из-за чего UI Toolkit получал линии 0.5/0.2/0.1 px и на части
-        // масштабов растрировал их нестабильно: исчезала одна ось или вся
-        // сетка. Удаляем возможный старый экземпляр и создаём сетку как
-        // screen-space overlay непосредственно внутри viewport.
         VisualElement existing =
             interfaceRoot != null
                 ? interfaceRoot.Q<VisualElement>("world-map-grid-overlay")
@@ -118,9 +109,6 @@ public partial class PrototypeUIController
 
         if (existing != null)
             existing.RemoveFromHierarchy();
-
-        worldMapGridVerticalLines.Clear();
-        worldMapGridHorizontalLines.Clear();
 
         VisualElement overlay = new VisualElement
         {
@@ -133,54 +121,18 @@ public partial class PrototypeUIController
         overlay.style.right = 0f;
         overlay.style.top = 0f;
         overlay.style.bottom = 0f;
-
-        Color gridColor = new Color32(95, 99, 92, 72);
-
-        for (int x = 0; x < WorldMapNavigation.GridWidth; x++)
-        {
-            VisualElement line = new VisualElement
-            {
-                pickingMode = PickingMode.Ignore
-            };
-
-            line.style.position = Position.Absolute;
-            line.style.width = 1f;
-            line.style.backgroundColor = gridColor;
-            line.style.display = DisplayStyle.None;
-
-            overlay.Add(line);
-            worldMapGridVerticalLines.Add(line);
-        }
-
-        for (int y = 0; y < WorldMapNavigation.GridHeight; y++)
-        {
-            VisualElement line = new VisualElement
-            {
-                pickingMode = PickingMode.Ignore
-            };
-
-            line.style.position = Position.Absolute;
-            line.style.height = 1f;
-            line.style.backgroundColor = gridColor;
-            line.style.display = DisplayStyle.None;
-
-            overlay.Add(line);
-            worldMapGridHorizontalLines.Add(line);
-        }
+        overlay.style.display = DisplayStyle.None;
+        overlay.generateVisualContent += DrawWorldMapHexGrid;
 
         worldMapViewport.Add(overlay);
-        // Сетка остаётся под содержимым карты: terrain/route/markers рисуются
-        // поверх неё, но сама сетка уже не наследует scale world-map.
-        overlay.SendToBack();
+        // Поверх рисунка карты, но под героем, маркерами и карточками.
+        if (worldMap != null && worldMap.parent == worldMapViewport)
+            overlay.PlaceInFront(worldMap);
         worldMapGridOverlay = overlay;
 
         RefreshWorldMapGridOverlay();
     }
 
-    // WM-15: сетка рисуется в координатах viewport и всегда имеет настоящую
-    // толщину 1px. Позиция каждой линии вычисляется из pan + zoom карты, а не
-    // через масштабирование самих line-элементов. Поэтому линии не становятся
-    // субпиксельными и не исчезают на отдельных уровнях zoom.
     private void OnWorldMapGridToggleChanged(ChangeEvent<bool> evt)
     {
         worldMapGridEnabled = evt.newValue;
@@ -189,7 +141,17 @@ public partial class PrototypeUIController
 
     private void RefreshWorldMapGridOverlay()
     {
-        if (worldMapGridOverlay == null ||
+        if (worldMapGridOverlay == null)
+            return;
+
+        worldMapGridOverlay.style.display = worldMapGridEnabled ? DisplayStyle.Flex : DisplayStyle.None;
+        if (worldMapGridEnabled)
+            worldMapGridOverlay.MarkDirtyRepaint();
+    }
+
+    private void DrawWorldMapHexGrid(MeshGenerationContext context)
+    {
+        if (!worldMapGridEnabled ||
             worldMapViewport == null ||
             worldMapCanvasWidth <= 0f ||
             worldMapCanvasHeight <= 0f)
@@ -197,117 +159,81 @@ public partial class PrototypeUIController
             return;
         }
 
-        if (!worldMapGridEnabled)
-        {
-            worldMapGridOverlay.style.display = DisplayStyle.None;
-            return;
-        }
-
         float viewportWidth = worldMapViewport.resolvedStyle.width;
         float viewportHeight = worldMapViewport.resolvedStyle.height;
-
-        if (float.IsNaN(viewportWidth) ||
-            float.IsNaN(viewportHeight) ||
-            viewportWidth <= 0f ||
-            viewportHeight <= 0f)
-        {
+        if (float.IsNaN(viewportWidth) || float.IsNaN(viewportHeight) || viewportWidth <= 0f || viewportHeight <= 0f)
             return;
-        }
 
+        WorldMapTerrainLayer layer = WorldMapNavigation.ActiveLayer;
+        WorldMapHexGrid grid = layer.Grid;
         float zoom = Mathf.Max(0.0001f, worldMapZoom);
-        float cellScreenSize = WorldMapBaseCellSizePx * zoom;
-        float mapLeft = worldMapPanOffsetX;
-        float mapTop = worldMapPanOffsetY;
-        float mapRight = mapLeft + worldMapCanvasWidth * zoom;
-        float mapBottom = mapTop + worldMapCanvasHeight * zoom;
-
-        float visibleLeft = Mathf.Max(0f, mapLeft);
-        float visibleTop = Mathf.Max(0f, mapTop);
-        float visibleRight = Mathf.Min(viewportWidth, mapRight);
-        float visibleBottom = Mathf.Min(viewportHeight, mapBottom);
-
-        if (visibleRight <= visibleLeft || visibleBottom <= visibleTop)
-        {
-            worldMapGridOverlay.style.display = DisplayStyle.None;
+        // Пиксели полотна сетки → пиксели canvas интерфейса → экран.
+        float scaleX = worldMapCanvasWidth / grid.CanvasWidth * zoom;
+        float scaleY = worldMapCanvasHeight / grid.CanvasHeight * zoom;
+        float radiusScreen = grid.HexRadius * Mathf.Min(scaleX, scaleY);
+        if (radiusScreen < 2f)
             return;
-        }
 
-        worldMapGridOverlay.style.display = DisplayStyle.Flex;
+        // Видимый прямоугольник в пикселях полотна сетки (с запасом в клетку).
+        double minX = (0f - worldMapPanOffsetX) / scaleX - grid.HexWidth;
+        double maxX = (viewportWidth - worldMapPanOffsetX) / scaleX + grid.HexWidth;
+        double minY = (0f - worldMapPanOffsetY) / scaleY - grid.RowStep;
+        double maxY = (viewportHeight - worldMapPanOffsetY) / scaleY + grid.RowStep;
+        int firstRow = Mathf.Max(0, (int)System.Math.Floor(minY / grid.RowStep));
+        int lastRow = Mathf.Min(grid.Rows - 1, (int)System.Math.Ceiling(maxY / grid.RowStep));
+        int firstColumn = Mathf.Max(0, (int)System.Math.Floor(minX / grid.HexWidth) - 1);
+        int lastColumn = Mathf.Min(grid.Columns - 1, (int)System.Math.Ceiling(maxX / grid.HexWidth));
 
-        float snappedLeft = Mathf.Round(visibleLeft);
-        float snappedTop = Mathf.Round(visibleTop);
-        float snappedRight = Mathf.Round(visibleRight);
-        float snappedBottom = Mathf.Round(visibleBottom);
-        float verticalHeight = Mathf.Max(1f, snappedBottom - snappedTop);
-        float horizontalWidth = Mathf.Max(1f, snappedRight - snappedLeft);
-        float maxVisibleX = Mathf.Max(0f, viewportWidth - 1f);
-        float maxVisibleY = Mathf.Max(0f, viewportHeight - 1f);
+        WorldMapMovementSettingsAsset settings = WorldMapVisualRuntime.LoadMovementSettings();
+        Painter2D painter = context.painter2D;
+        painter.lineWidth = 1f;
+        painter.strokeColor = WorldMapGridLineColor;
 
-        for (int x = 0; x < worldMapGridVerticalLines.Count; x++)
+        for (int row = firstRow; row <= lastRow; row++)
         {
-            VisualElement line = worldMapGridVerticalLines[x];
-            float screenX = mapLeft + x * cellScreenSize;
-
-            if (screenX < visibleLeft - 0.5f ||
-                screenX > visibleRight + 0.5f)
+            for (int column = firstColumn; column <= lastColumn; column++)
             {
-                line.style.display = DisplayStyle.None;
-                continue;
+                WorldMapHexCell cell = new WorldMapHexCell(column, row);
+                grid.CellCenter(cell, out double cx, out double cy);
+                Vector2 center = new Vector2(
+                    worldMapPanOffsetX + (float)cx * scaleX,
+                    worldMapPanOffsetY + (float)cy * scaleY);
+
+                WorldMapGameplayTerrainType terrain = layer.Get(cell);
+                BuildWorldMapHexPath(painter, center, radiusScreen);
+                if (terrain != WorldMapGameplayTerrainType.OpenGround)
+                {
+                    Color fill = settings != null
+                        ? settings.GetTerrainColor(terrain)
+                        : WorldMapMovementSettingsAsset.DefaultColor(terrain);
+                    fill.a = WorldMapGridTerrainAlpha;
+                    painter.fillColor = fill;
+                    painter.Fill();
+                }
+                painter.Stroke();
             }
-
-            line.style.display = DisplayStyle.Flex;
-            line.style.left = Mathf.Clamp(Mathf.Round(screenX), 0f, maxVisibleX);
-            line.style.top = snappedTop;
-            line.style.width = 1f;
-            line.style.height = verticalHeight;
-        }
-
-        for (int y = 0; y < worldMapGridHorizontalLines.Count; y++)
-        {
-            VisualElement line = worldMapGridHorizontalLines[y];
-            float screenY = mapTop + y * cellScreenSize;
-
-            if (screenY < visibleTop - 0.5f ||
-                screenY > visibleBottom + 0.5f)
-            {
-                line.style.display = DisplayStyle.None;
-                continue;
-            }
-
-            line.style.display = DisplayStyle.Flex;
-            line.style.left = snappedLeft;
-            line.style.top = Mathf.Clamp(Mathf.Round(screenY), 0f, maxVisibleY);
-            line.style.width = horizontalWidth;
-            line.style.height = 1f;
         }
     }
 
-    // Route-маркеры остаются внутри world-map, поэтому их физический размер
-    // компенсируется обратно пропорционально zoom. Сетка вынесена в
-    // screen-space overlay и обновляется отдельно. Маркер героя сюда больше
-    // не входит: задача "регулируемый визуальный размер героя и Дома"
-    // сознательно отказалась от компенсации zoom для героя — его процентный
-    // размер (RefreshWorldMapArmyMarkerSize) масштабируется вместе с картой
-    // автоматически через transform:scale на world-map, без ручного пересчёта.
+    // Острые вершины сверху, как у поля боя.
+    private static void BuildWorldMapHexPath(Painter2D painter, Vector2 center, float radius)
+    {
+        painter.BeginPath();
+        for (int i = 0; i < 6; i++)
+        {
+            float angle = Mathf.Deg2Rad * (60f * i - 90f);
+            Vector2 point = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+            if (i == 0)
+                painter.MoveTo(point);
+            else
+                painter.LineTo(point);
+        }
+        painter.ClosePath();
+    }
+
     private void RefreshWorldMapZoomCompensatedVisuals()
     {
         RefreshWorldMapGridOverlay();
-
-        float zoom = Mathf.Max(0.0001f, worldMapZoom);
-
-        if (worldMapRoutes != null)
-        {
-            worldMapRoutes.Query<VisualElement>(
-                className: WorldMapRouteMarkerClass).ForEach(dot =>
-            {
-                if (dot.userData is float screenDiameter)
-                {
-                    float size = screenDiameter / zoom;
-                    dot.style.width = size;
-                    dot.style.height = size;
-                }
-            });
-        }
     }
 
     private void RegisterCancelledRosterPreservation(

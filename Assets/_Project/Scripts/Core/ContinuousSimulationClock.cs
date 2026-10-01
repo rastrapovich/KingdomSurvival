@@ -60,10 +60,9 @@ public sealed class ContinuousSimulationSnapshotData
 public static partial class ContinuousSimulationSystem
 {
     // Ускорение ×2 (запрос пользователя, WM-13): было 120.0. Это темп течения
-    // МИРОВОГО времени (сколько реальных секунд занимают игровые сутки) —
-    // отдельная система от того, какое расстояние герой проходит за игровой
-    // час (см. CellsPerGameHour ниже). Менять эту константу можно свободно,
-    // не трогая масштаб путешествия по карте.
+    // МИРОВОГО времени дома и во время дел похода (ночлег, исследование).
+    // Пока отряд бежит по карте, часы идут в темпе бега (12И, канон v1.50,
+    // см. GetRunningGameHoursPerRealSecond), а не по этой константе.
     public const double RealSecondsPerGameDay = 60.0;
     public const double GameHoursPerRealSecond = 24.0 / RealSecondsPerGameDay;
     public const int NormalSpeedMultiplier = 1;
@@ -217,12 +216,7 @@ public static partial class ContinuousSimulationSystem
         ResetRouteTracking(runtime, expedition);
     }
 
-    // WM-T05 (раздел 20 задачи): раньше делилось на плоский CellsPerGameHour
-    // и НЕ учитывало живой gameplay-multiplier дорог впереди по маршруту —
-    // теперь идёт через единый WorldMapRoutePlanner.EstimateRouteTravelHours
-    // (тот же helper, что CalculateTravelHours ниже), который считает
-    // multiplier по каждому оставшемуся сегменту отдельно. RouteDelayHours
-    // по-прежнему складывается отдельно, как и раньше.
+    // 12И: оставшиеся часы пути — по местности под каждым куском пути.
     public static double GetTravelHoursRemaining(GameState state)
     {
         if (state == null || !state.HasActiveExpedition)
@@ -238,10 +232,48 @@ public static partial class ContinuousSimulationSystem
             return 0.0;
         }
 
-        double movementHours = WorldMapRoutePlanner.EstimateRouteTravelHours(
-            expedition.Route, expedition.RouteIndex, runtime.SegmentProgress, WorldMapNavigation.ActiveDefinition);
+        double movementHours = WorldMapNavigation.EstimateTravelHours(
+            expedition.Route, expedition.RouteIndex, runtime.SegmentProgress);
         double delayHours = Math.Max(0.0, expedition.RouteDelayHoursRemaining);
         return movementHours + delayHours;
+    }
+
+    // 12И (канон v1.50 §9.6): отряд бежит — путь есть, задержек, дел и
+    // обязательного решения нет. Только в этом состоянии часы идут в темпе бега.
+    public static bool IsExpeditionRunning(GameState state)
+    {
+        if (state == null || !state.HasActiveExpedition || state.HasPendingExpeditionDecision)
+            return false;
+
+        ExpeditionData expedition = state.ActiveExpedition;
+        if (expedition.HasTimedActivity ||
+            expedition.RouteDelayHoursRemaining > Epsilon ||
+            (expedition.Phase != CommanderState.TravellingToLocation &&
+             expedition.Phase != CommanderState.ReturningToCastle))
+        {
+            return false;
+        }
+
+        return expedition.Route != null &&
+               expedition.Route.Count > 1 &&
+               expedition.RouteIndex < expedition.Route.Count - 1;
+    }
+
+    // Игровые часы за реальную секунду бега в местности под героем:
+    // скорость бега (клеток/с) × часы на клетку.
+    public static double GetRunningGameHoursPerRealSecond(GameState state)
+    {
+        WorldMapMovementRules rules = WorldMapMovementRules.Current;
+        if (state == null || !state.HasActiveExpedition)
+            return rules.RunningGameHoursPerRealSecond(WorldMapGameplayTerrainType.OpenGround);
+
+        ExpeditionData expedition = state.ActiveExpedition;
+        WorldMapGameplayTerrainType terrain = WorldMapNavigation.GetTerrainAtPercent(
+            expedition.CurrentMapXPercent,
+            expedition.CurrentMapYPercent);
+        if (!rules.IsTraversable(terrain))
+            terrain = WorldMapGameplayTerrainType.OpenGround;
+        return rules.RunningGameHoursPerRealSecond(terrain);
     }
 
     public static double GetResearchHoursRemaining(GameState state)
@@ -284,13 +316,19 @@ public static partial class ContinuousSimulationSystem
             return batch;
         }
 
-        double scaledRealSeconds =
-            unscaledRealSeconds * runtime.SpeedMultiplier;
-        double remainingGameHours =
-            scaledRealSeconds * GameHoursPerRealSecond;
+        // 12И: бегущий отряд задаёт темп часов сам — кнопки скорости на бег
+        // не действуют; дома и в делах похода часы идут как прежде.
+        bool running = IsExpeditionRunning(state);
+        double remainingGameHours = running
+            ? unscaledRealSeconds * GetRunningGameHoursPerRealSecond(state)
+            : unscaledRealSeconds * runtime.SpeedMultiplier * GameHoursPerRealSecond;
 
         while (remainingGameHours > Epsilon && !runtime.IsPaused)
         {
+            // Отряд остановился посреди кадра — остаток кадра стоя не тратится.
+            if (running && !IsExpeditionRunning(state))
+                break;
+
             if (processRandomEvents &&
                 ProcessDueRandomChecks(state, runtime, batch))
             {
@@ -369,44 +407,12 @@ public static partial class ContinuousSimulationSystem
         return hours.ToString("00") + ":" + minutes.ToString("00");
     }
 
-    // Задача "пересобрать масштаб путешествия": скорость армии больше не
-    // выведена из длительности игровых суток (RealSecondsPerGameDay/
-    // GameHoursPerRealSecond — темп течения МИРОВОГО времени, отдельная
-    // система). База — редактируемая настройка активного мира
-    // (WorldMapDefinitionData.BaseTravelHoursPerCell, World Map Database →
-    // «Мир» → «Путешествие»); без активного мира или при невалидном
-    // (<=0) значении — безопасный fallback 4ч/клетку, без деления на 0.
-    // Хиллы/горы автоматически становятся ×2/×3 от этой базы — это уже
-    // даёт WorldMapNavigation.GetTerrainTravelCost через удвоение/утроение
-    // под-точек маршрута в FindPath (независимый слой, не трогается);
-    // живой множитель дорог/местности (WorldMapGameplayTerrainQuery)
-    // применяется поверх в ContinuousSimulationActivities — тоже не трогается.
-    public static double CellsPerGameHour
-    {
-        get
-        {
-            float hoursPerCell = WorldMapNavigation.ActiveDefinition != null
-                ? WorldMapNavigation.ActiveDefinition.BaseTravelHoursPerCell
-                : DefaultBaseTravelHoursPerCell;
-            if (hoursPerCell <= 0f)
-                hoursPerCell = DefaultBaseTravelHoursPerCell;
-            return 1.0 / hoursPerCell;
-        }
-    }
-
-    public const float DefaultBaseTravelHoursPerCell = 4f;
-
-    // WM-T05 (раздел 20 задачи): единый принцип с GetTravelHoursRemaining —
-    // теперь честно учитывает gameplay-multiplier (дороги и т.д.) вдоль
-    // всего route, а не только плоскую базовую ставку. Для маршрута без
-    // прогресса (segmentProgress=0) — как раз случай "оценка для ещё не
-    // начатой поездки" (TravelHoursFromCapital, превью перед стартом и т.п.).
+    // 12И: оценка для ещё не начатой поездки (TravelHoursFromCapital, превью).
     public static double CalculateTravelHours(
         List<MapPointData> route,
         int routeIndex = 0)
     {
-        return WorldMapRoutePlanner.EstimateRouteTravelHours(
-            route, routeIndex, 0.0, WorldMapNavigation.ActiveDefinition);
+        return WorldMapNavigation.EstimateTravelHours(route, routeIndex);
     }
 
     public static string FormatTravelTime(

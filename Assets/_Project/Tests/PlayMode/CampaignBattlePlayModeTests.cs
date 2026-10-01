@@ -148,7 +148,10 @@ public sealed class CampaignBattlePlayModeTests
         Assert.AreEqual(day, campaign.Day);
         Assert.GreaterOrEqual(ContinuousSimulationSystem.GetClock(campaign).HourOfDay, hour,
             "Время суток не сбрасывается на 08:00 после боя.");
-        Assert.Less(ContinuousSimulationSystem.GetClock(campaign).HourOfDay - hour, 1.0,
+        // 12И: после возврата отряд снова бежит, и часы идут в темпе бега —
+        // за кадры загрузки сцены проходит меньше полусекунды бега.
+        Assert.Less(ContinuousSimulationSystem.GetClock(campaign).HourOfDay - hour,
+            ContinuousSimulationSystem.GetRunningGameHoursPerRealSecond(campaign) * 0.5,
             "Пока шёл бой, время кампании стояло.");
         Assert.IsTrue(campaign.HasActiveExpedition, "Поход продолжается.");
         Assert.AreEqual(fightersBefore - 1, campaign.Fighters.Count);

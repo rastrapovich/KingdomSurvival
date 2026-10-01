@@ -6,26 +6,18 @@ using NUnit.Framework;
 
 public class StabilityRegressionTests
 {
-    // Задача "пересобрать масштаб путешествия": одна клетка теперь занимает
-    // 1.0/CellsPerGameHour игровых часов (балансировочная настройка мира, по
-    // умолчанию 4ч — не жёстко "1 сутки"), а не фиксированную долю
-    // RealSecondsPerGameDay. Считаем нужные реальные секунды из этих же
-    // констант, а не из старого предположения — формула остаётся верной при
-    // любом BaseTravelHoursPerCell. Запас ×1.5, чтобы гарантированно
-    // пересечь ровно одну клетку маршрута независимо от гранулярности шагов
-    // внутри ContinuousSimulationSystem.Advance. Явно сбрасываем географию
-    // до default ПЕРЕД вычислением — CellsPerGameHour читает
-    // WorldMapNavigation.ActiveDefinition, а это static readonly поле
-    // вычисляется один раз при первом обращении к классу, до TearDown любого
-    // теста; без явного сброса значение зависело бы от порядка запуска тестов.
+    // 12И (канон v1.50 §9.6): пока отряд бежит, часы идут в темпе бега —
+    // клетка пути занимает 1/скорость реальных секунд. Запас ×1.5, чтобы
+    // гарантированно пройти одну клетку; остановка обрывает кадр точно.
     private static readonly float OneCellAdvanceSeconds;
 
     static StabilityRegressionTests()
     {
-        WorldMapNavigation.ConfigureDefaultTerrain();
-        OneCellAdvanceSeconds = (float)((1.0 / ContinuousSimulationSystem.CellsPerGameHour) /
-            ContinuousSimulationSystem.GameHoursPerRealSecond * 1.5);
+        OneCellAdvanceSeconds = (float)(1.5 / WorldMapMovementRules.CreateDefault().SafeRunSpeedHexesPerSecond);
     }
+
+    private static double HoursPerOpenHex =>
+        WorldMapMovementRules.Current.HoursPerHex(WorldMapGameplayTerrainType.OpenGround);
 
     [Test]
     public void CreateNewGame_SameSeedIsIndependentOfPreviouslyConfiguredTerrain()
@@ -61,12 +53,10 @@ public class StabilityRegressionTests
             false);
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
 
-        // 1.0/CellsPerGameHour часов после старта (StartHour) — если это
-        // пересекает полночь, часы суток оборачиваются по модулю 24
-        // (ResolveMidnight), поэтому ожидание тоже нужно свернуть.
+        // Цель — ровно в одной клетке от Дома: прибытие через одну клетку
+        // игрового времени после старта.
         double expectedArrivalHour =
-            (ContinuousSimulationSystem.StartHour +
-             1.0 / ContinuousSimulationSystem.CellsPerGameHour) % 24.0;
+            (ContinuousSimulationSystem.StartHour + HoursPerOpenHex) % 24.0;
         Assert.That(batch.RequestAutoPause, Is.True);
         Assert.That(clock.IsPaused, Is.True);
         Assert.That(clock.HourOfDay, Is.EqualTo(expectedArrivalHour).Within(0.001));
@@ -85,9 +75,13 @@ public class StabilityRegressionTests
         {
             IsWaypoint = true,
             IsVisibleOnMap = false,
-            MapXPercent = 95f,
-            MapYPercent = 5f
+            MapXPercent = WorldMapNavigation.CapitalXPercent + 6f,
+            MapYPercent = WorldMapNavigation.CapitalYPercent
         };
+        // 12И: скрытое место в двух клетках по пути — замечается, как только
+        // отряд подходит на радиус обнаружения.
+        hidden.MapXPercent = WorldMapNavigation.CapitalXPercent + 2f;
+        hidden.MapYPercent = WorldMapNavigation.CapitalYPercent;
         state.Locations.Add(waypoint);
 
         CommanderData commander = state.GetSelectedCommander();
@@ -97,8 +91,8 @@ public class StabilityRegressionTests
             CommanderId = commander.Id,
             LocationId = waypoint.Id,
             Phase = CommanderState.TravellingToLocation,
-            RemainingRouteCells = 2,
-            RouteLengthCells = 2,
+            RemainingRouteCells = 6,
+            RouteLengthCells = 6,
             CurrentMapXPercent = WorldMapNavigation.CapitalXPercent,
             CurrentMapYPercent = WorldMapNavigation.CapitalYPercent,
             TargetMapXPercent = waypoint.MapXPercent,
@@ -124,10 +118,9 @@ public class StabilityRegressionTests
             false);
         ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(state);
 
-        // WM-12: см. комментарий в ContinuousMovement_ArrivalStopsClockAtExactArrivalTime.
+        double discoveryHexes = 2.0 - WorldMapMovementRules.Current.DiscoveryRadiusHexes;
         double expectedDiscoveryHour =
-            (ContinuousSimulationSystem.StartHour +
-             1.0 / ContinuousSimulationSystem.CellsPerGameHour) % 24.0;
+            (ContinuousSimulationSystem.StartHour + discoveryHexes * HoursPerOpenHex) % 24.0;
         Assert.That(batch.RequestAutoPause, Is.True);
         Assert.That(clock.IsPaused, Is.True);
         Assert.That(clock.HourOfDay, Is.EqualTo(expectedDiscoveryHour).Within(0.001));
@@ -154,6 +147,11 @@ public class StabilityRegressionTests
         LocationData target)
     {
         CommanderData commander = state.GetSelectedCommander();
+        target.MapXPercent = WorldMapNavigation.CapitalXPercent + 1f;
+        target.MapYPercent = WorldMapNavigation.CapitalYPercent;
+        // Известное место: проверяется прибытие, а не находка по пути.
+        target.IsVisibleOnMap = true;
+        target.IsDiscovered = true;
         state.ActiveExpedition = new ExpeditionData
         {
             IsActive = true,

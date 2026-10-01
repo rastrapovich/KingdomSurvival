@@ -71,7 +71,8 @@ public class TimedExpeditionActivityTests
             Is.True,
             message);
 
-        int startRouteIndex = state.ActiveExpedition.RouteIndex;
+        float startX = state.ActiveExpedition.CurrentMapXPercent;
+        float startY = state.ActiveExpedition.CurrentMapYPercent;
         Assert.That(state.ArmySupply, Is.EqualTo(10));
         Assert.That(state.ActiveExpedition.IsRoadStopInProgress, Is.True);
         Assert.That(
@@ -88,14 +89,11 @@ public class TimedExpeditionActivityTests
         ContinuousSimulationSystem.Advance(state, twoActivityHoursSeconds, false);
 
         Assert.That(state.ArmySupply, Is.EqualTo(10));
-        Assert.That(state.ActiveExpedition.RouteIndex, Is.EqualTo(startRouteIndex));
+        Assert.That(MovedHexes(state, startX, startY), Is.EqualTo(0.0).Within(0.0001), "Во время дела отряд стоит.");
 
-        // Задача "пересобрать масштаб путешествия": клетка маршрута теперь
-        // BaseTravelHoursPerCell игровых часов (по умолчанию 4, не 24) —
-        // остаток активности (1ч) + запас в 1.5 клетки движения гарантированно
-        // завершает РОВНО одну клетку (больше 1×, меньше 2× клетки), не
-        // зависит от округления и не переползает на клетку дальше.
-        double oneCellHours = 1.0 / ContinuousSimulationSystem.CellsPerGameHour;
+        // 12И: остаток дела (1 ч) по часам дела, затем 6 ч бега по открытой
+        // местности — ровно полторы клетки пути (4 ч на клетку).
+        double oneCellHours = WorldMapMovementRules.Current.HoursPerHex(WorldMapGameplayTerrainType.OpenGround);
         float secondAdvanceSeconds = (float)(
             (1.0 + oneCellHours * 1.5) / ContinuousSimulationSystem.GameHoursPerRealSecond);
         ContinuousSimulationBatch completed =
@@ -108,9 +106,7 @@ public class TimedExpeditionActivityTests
         // полночь) — дневной расход снабжения здесь не срабатывает, снабжение
         // отражает только награду за сбор ягод: 10 + 3 = 13.
         Assert.That(state.ArmySupply, Is.EqualTo(13));
-        Assert.That(
-            state.ActiveExpedition.RouteIndex,
-            Is.EqualTo(startRouteIndex + 1));
+        Assert.That(MovedHexes(state, startX, startY), Is.EqualTo(1.5).Within(0.01), "После дела отряд продолжил путь.");
         Assert.That(completed.RequestAutoPause, Is.False);
         Assert.That(ContinuousSimulationSystem.IsPaused(state), Is.False);
     }
@@ -151,21 +147,22 @@ public class TimedExpeditionActivityTests
         float halfActivityHourSeconds = (float)(
             0.5 / ContinuousSimulationSystem.GameHoursPerRealSecond);
 
+        float startX = state.ActiveExpedition.CurrentMapXPercent;
+        float startY = state.ActiveExpedition.CurrentMapYPercent;
         ContinuousSimulationSystem.SetPaused(state, false);
         ContinuousSimulationSystem.Advance(state, halfActivityHourSeconds, false);
 
         Assert.That(activity.Progress01, Is.EqualTo(0.5).Within(0.01));
-        Assert.That(state.ActiveExpedition.RouteIndex, Is.Zero);
+        Assert.That(MovedHexes(state, startX, startY), Is.EqualTo(0.0).Within(0.0001));
 
-        // WM-12: "1 клетка = 1 сутки" — после оставшихся 0.5ч активности
-        // нужно ещё почти сутки движения, чтобы продвинуть маршрут.
+        // После оставшихся 0.5 ч дела отряд снова идёт по пути.
         float secondAdvanceSeconds = (float)(
             30.0 / ContinuousSimulationSystem.GameHoursPerRealSecond);
         ContinuousSimulationBatch completed =
             ContinuousSimulationSystem.Advance(state, secondAdvanceSeconds, false);
 
         Assert.That(state.ActiveExpedition.ActiveActivity, Is.Null);
-        Assert.That(state.ActiveExpedition.RouteIndex, Is.GreaterThan(0));
+        Assert.That(MovedHexes(state, startX, startY), Is.GreaterThan(1.0));
         Assert.That(completed.RequestAutoPause, Is.False);
     }
 
@@ -230,7 +227,8 @@ public class TimedExpeditionActivityTests
         ContinuousSimulationSystem.Reset(state);
         ContinuousSimulationSystem.NotifyRouteChanged(state);
         ContinuousSimulationSystem.SetPaused(state, false);
-        ContinuousSimulationSystem.Advance(state, 2f, false);
+        // 12И: секунда бега — две клетки и 8 часов, до полуночи и суточного расхода.
+        ContinuousSimulationSystem.Advance(state, 1f, false);
         ContinuousSimulationSystem.SetPaused(state, true);
 
         string message;
@@ -319,18 +317,23 @@ public class TimedExpeditionActivityTests
             new MapPointData(5f, 0f)
         };
 
-        // Задача "пересобрать масштаб путешествия": без активного авторского
-        // мира (или с невалидным BaseTravelHoursPerCell) действует безопасный
-        // fallback — 4 игровых часа на клетку, CellsPerGameHour = 1/4.
-        // Явный сброс географии делает тест независимым от порядка запуска.
+        // 12И: без ассета настроек ядро берёт 4 игровых часа на клетку открытой
+        // местности; при сетке по умолчанию 1% ширины карты — ровно одна клетка.
         WorldMapNavigation.ConfigureDefaultTerrain();
         Assert.That(
-            ContinuousSimulationSystem.CellsPerGameHour,
+            (1.0 / WorldMapMovementRules.Current.HoursPerHex(WorldMapGameplayTerrainType.OpenGround)),
             Is.EqualTo(1.0 / 4.0).Within(0.0001));
         Assert.That(
             ContinuousSimulationSystem.CalculateTravelHours(route),
             Is.EqualTo(20.0).Within(0.001));
     }
+
+    private static double MovedHexes(GameState state, float startX, float startY) =>
+        WorldMapNavigation.DistanceHexes(
+            startX,
+            startY,
+            state.ActiveExpedition.CurrentMapXPercent,
+            state.ActiveExpedition.CurrentMapYPercent);
 
     private static GameState CreateTravellingState()
     {

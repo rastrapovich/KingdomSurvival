@@ -231,7 +231,7 @@ public sealed class ContinuousMovementTimeTests
         ContinuousSimulationSystem.NotifyRouteChanged(state);
         ContinuousSimulationSystem.SetPaused(state, false);
 
-        ContinuousSimulationSystem.Advance(state, 8f, false);
+        ContinuousSimulationSystem.Advance(state, 1.5f, false);
 
         Assert.IsTrue(state.HasActiveExpedition);
         Assert.AreEqual(

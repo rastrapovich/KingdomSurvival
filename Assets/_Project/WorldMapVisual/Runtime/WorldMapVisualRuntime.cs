@@ -35,11 +35,37 @@ namespace KingdomSurvival.WorldMapVisual
             return database != null ? database.FindLocation(locationId) : null;
         }
 
+        // 12И: настройки прямого управления героем (темп, местность, герой, камера).
+        public static WorldMapMovementSettingsAsset LoadMovementSettings()
+        {
+            if (!attemptedMovementLoad)
+            {
+                cachedMovementSettings = Resources.Load<WorldMapMovementSettingsAsset>(
+                    WorldMapMovementSettingsAsset.ResourcesPath);
+                attemptedMovementLoad = true;
+            }
+
+            return cachedMovementSettings;
+        }
+
+        // Ядро получает правила из ассета; без ассета остаются значения ядра.
+        public static void ApplyMovementRules()
+        {
+            WorldMapMovementSettingsAsset settings = LoadMovementSettings();
+            if (settings != null)
+                settings.ApplyToCore();
+        }
+
         // Для EditMode-тестов/Editor-превью, где кэш между сценариями мешает.
         public static void ClearCache()
         {
             cachedDatabase = null;
             attemptedLoad = false;
+            cachedMovementSettings = null;
+            attemptedMovementLoad = false;
         }
+
+        private static WorldMapMovementSettingsAsset cachedMovementSettings;
+        private static bool attemptedMovementLoad;
     }
 }

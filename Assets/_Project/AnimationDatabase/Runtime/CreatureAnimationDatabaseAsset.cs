@@ -109,6 +109,9 @@ namespace KingdomSurvival.AnimationDatabase
         [SerializeField, Range(0f, 1f)] private float impactTime = 0.5f;
         // «Исходный темп»: длительность кадра по разнице номеров Blender.
         [SerializeField] private bool useSourceTiming;
+        // Последний кадр дублирует первый (экспорт цикла с добавленным
+        // последним кадром): не показывать его, чтобы цикл не «залипал».
+        [SerializeField] private bool skipLastFrame;
         [SerializeField] private float sourceFramesPerSecond = 24f;
         [SerializeField] private List<CreatureAnimationFrames> directions = new List<CreatureAnimationFrames>();
 
@@ -120,6 +123,7 @@ namespace KingdomSurvival.AnimationDatabase
         public float ImpactTime => Mathf.Clamp01(impactTime);
         public float RawImpactTime => impactTime;
         public bool UseSourceTiming => useSourceTiming;
+        public bool SkipLastFrame => skipLastFrame;
         public float SourceFramesPerSecond => Mathf.Clamp(sourceFramesPerSecond, MinFramesPerSecond, 240f);
         public float RawSourceFramesPerSecond => sourceFramesPerSecond;
         public IReadOnlyList<CreatureAnimationFrames> Directions => directions;
@@ -206,6 +210,20 @@ namespace KingdomSurvival.AnimationDatabase
         public void SetImpactTime(float value) { impactTime = value; }
         public void SetUseSourceTiming(bool value) { useSourceTiming = value; }
         public void SetSourceFramesPerSecond(float value) { sourceFramesPerSecond = value; }
+        public void SetSkipLastFrame(bool value) { skipLastFrame = value; }
+
+        // Настройки воспроизведения из образца; кадры не копируются.
+        public void CopySettingsFrom(CreatureAnimationClipData other)
+        {
+            if (other == null)
+                return;
+            framesPerSecond = other.framesPerSecond;
+            playback = other.playback;
+            impactTime = other.impactTime;
+            useSourceTiming = other.useSourceTiming;
+            sourceFramesPerSecond = other.sourceFramesPerSecond;
+            skipLastFrame = other.skipLastFrame;
+        }
     }
 
     // Набор анимаций типа существа. Связь с существом — по стабильному Id.
@@ -362,6 +380,15 @@ namespace KingdomSurvival.AnimationDatabase
         public void SetPivot(Vector2 value) { pivot = value; }
         public void SetFieldScale(float value) { fieldScale = Mathf.Max(0.1f, value); }
         public void SetCanvasSize(Vector2Int value) { canvasSize = value; }
+
+        // Опора и масштаб на поле из образца.
+        public void CopyLookFrom(CreatureAnimationSetData other)
+        {
+            if (other == null)
+                return;
+            pivot = other.pivot;
+            fieldScale = other.fieldScale;
+        }
     }
 
     // Какой ракурс рендера смотрит в какую сторону гекса на экране.
@@ -399,6 +426,47 @@ namespace KingdomSurvival.AnimationDatabase
         [SerializeField, HideInInspector] private int schemaVersion;
         [SerializeField] private List<CreatureAnimationDirectionMapping> directionMap = new List<CreatureAnimationDirectionMapping>();
         [SerializeField] private List<CreatureAnimationSetData> sets = new List<CreatureAnimationSetData>();
+        // Образец: новые наборы берут у него опору и масштаб, новые действия —
+        // скорость, воспроизведение, маркер и «не учитывать последний кадр».
+        [SerializeField] private string templateSetId = string.Empty;
+
+        public string TemplateSetId => templateSetId ?? string.Empty;
+        public CreatureAnimationSetData TemplateSet => FindSet(templateSetId);
+        public void SetTemplateSetId(string value) { templateSetId = value ?? string.Empty; }
+
+        // Новый набор как образец: та же опора и тот же масштаб.
+        public void ApplyTemplateLook(CreatureAnimationSetData set)
+        {
+            CreatureAnimationSetData template = TemplateSet;
+            if (set != null && template != null && !ReferenceEquals(template, set))
+                set.CopyLookFrom(template);
+        }
+
+        // Новое действие набора — с настройками того же действия образца.
+        // Если у образца его нет, цикл берёт «не учитывать последний кадр»
+        // у любого циклического действия образца.
+        public void ApplyTemplateClipSettings(CreatureAnimationClipData clip)
+        {
+            CreatureAnimationSetData template = TemplateSet;
+            if (clip == null || template == null)
+                return;
+            CreatureAnimationClipData same = template.FindClip(clip.Action, clip.ClipKey) ?? template.FindClip(clip.Action);
+            if (same != null && !ReferenceEquals(same, clip))
+            {
+                clip.CopySettingsFrom(same);
+                return;
+            }
+            if (clip.Playback != CreatureAnimationPlayback.Loop)
+                return;
+            foreach (CreatureAnimationClipData other in template.Clips)
+            {
+                if (other != null && other.Playback == CreatureAnimationPlayback.Loop)
+                {
+                    clip.SetSkipLastFrame(other.SkipLastFrame);
+                    return;
+                }
+            }
+        }
 
         public int SchemaVersion => schemaVersion;
         public IReadOnlyList<CreatureAnimationSetData> Sets => sets;
@@ -406,17 +474,18 @@ namespace KingdomSurvival.AnimationDatabase
 
         // Камера KS Sprite Renderer повёрнута на 30°: шесть ракурсов совпадают
         // с шестью соседями гекса. Какая папка какому соседу соответствует,
-        // проверяется на первом настоящем существе (12З-4) и правится в окне.
+        // выставлена художником на первом настоящем существе (Ополченец,
+        // 01.10.2026): Front — вправо, дальше по кругу против часовой стрелки.
         public static CreatureAnimationDirectionMapping[] DefaultDirectionMap()
         {
             return new[]
             {
-                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.Front, HexFacing.SouthEast),
-                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.FrontRight, HexFacing.East),
-                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.BackRight, HexFacing.NorthEast),
-                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.Back, HexFacing.NorthWest),
-                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.BackLeft, HexFacing.West),
-                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.FrontLeft, HexFacing.SouthWest)
+                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.Front, HexFacing.East),
+                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.FrontRight, HexFacing.NorthEast),
+                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.BackRight, HexFacing.NorthWest),
+                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.Back, HexFacing.West),
+                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.BackLeft, HexFacing.SouthWest),
+                new CreatureAnimationDirectionMapping(CreatureAnimationDirection.FrontLeft, HexFacing.SouthEast)
             };
         }
 

@@ -203,7 +203,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             Undo.RecordObject(database, "Загрузка анимаций");
             foreach ((CreatureAnimationImportGroup group, CreatureAnimationImportCell cell) in cells)
             {
-                CreatureAnimationClipData clip = set.GetOrAddClip(group.ChosenAction.Value, group.ClipKey);
+                CreatureAnimationClipData clip = GetOrAddClipFromTemplate(database, set, group.ChosenAction.Value, group.ClipKey);
                 CreatureAnimationFrames target = clip.GetOrAddDirection(cell.Direction);
                 if (mode == CreatureAnimationImportMode.Append)
                     target.AppendFrames(built[cell], cell.Numbers);
@@ -277,7 +277,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             }
 
             Undo.RecordObject(database, "Загрузка кадров");
-            CreatureAnimationFrames target = set.GetOrAddClip(action, clipKey).GetOrAddDirection(direction);
+            CreatureAnimationFrames target = GetOrAddClipFromTemplate(database, set, action, clipKey).GetOrAddDirection(direction);
             if (mode == CreatureAnimationImportMode.Append)
                 target.AppendFrames(ordered, numbers);
             else
@@ -290,6 +290,20 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             message = CreatureAnimationLabels.ActionTitle(action) + " → " + CreatureAnimationLabels.DirectionTitle(direction) +
                       ": " + ordered.Count + " кадр(ов) из проекта.";
             return true;
+        }
+
+        // Новое действие получает настройки того же действия образца.
+        private static CreatureAnimationClipData GetOrAddClipFromTemplate(
+            CreatureAnimationDatabaseAsset database,
+            CreatureAnimationSetData set,
+            CreatureAnimationAction action,
+            string clipKey)
+        {
+            bool existed = set.FindClip(action, clipKey) != null;
+            CreatureAnimationClipData clip = set.GetOrAddClip(action, clipKey);
+            if (!existed)
+                database.ApplyTemplateClipSettings(clip);
+            return clip;
         }
 
         // Атласы управляемой папки, на которые не ссылается ни один набор.

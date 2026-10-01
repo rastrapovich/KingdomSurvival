@@ -125,7 +125,9 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 return null;
             Undo.RecordObject(database, "Создать набор анимаций");
             CreatureAnimationSetData set = database.AddSet(database.MakeUniqueSetId(unit.Id), unit.DisplayLabel);
+            // Масштаб — от старой миниатюры, а если есть образец — его опора и масштаб.
             set.SetFieldScale(unit.BattlefieldScale);
+            database.ApplyTemplateLook(set);
             EditorUtility.SetDirty(database);
             Undo.RecordObject(units, "Назначить набор анимаций");
             AssignSet(units, unit.Id, set.Id);

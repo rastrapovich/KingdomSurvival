@@ -71,8 +71,8 @@ public sealed class CreatureAnimationBattlePlayModeTests
         yield return WaitFrames(6);
 
         Assert.AreEqual(3, Images(board).Count, "Все трое нарисованы картинками набора.");
-        StringAssert.StartsWith("Idle_FrontRight_", SpriteName(board, "hero"), "Герой слева смотрит вправо (таблица ракурсов по умолчанию).");
-        StringAssert.StartsWith("Idle_BackLeft_", SpriteName(board, "beastA"), "Противник справа смотрит влево.");
+        StringAssert.StartsWith("Idle_Front_", SpriteName(board, "hero"), "Герой слева смотрит вправо (таблица ракурсов по умолчанию: Front — вправо).");
+        StringAssert.StartsWith("Idle_Back_", SpriteName(board, "beastA"), "Противник справа смотрит влево (Back).");
 
         int mark = killBattle.HitRecords.Count;
         Assert.IsTrue(killBattle.TryAttack("hero", "beastA", out string message), message);
@@ -90,7 +90,7 @@ public sealed class CreatureAnimationBattlePlayModeTests
         Assert.AreEqual(0, killBattle.GetUnit("beastA").HitPoints, "Исход посчитан моделью один раз.");
         StringAssert.StartsWith("Death_", SpriteName(board, "beastA"), "Павший остаётся кадром смерти.");
         yield return WaitSeconds(0.6f);
-        Assert.AreEqual("Death_BackLeft_3", SpriteName(board, "beastA"), "Смерть держит последний кадр и не возвращается к ожиданию.");
+        Assert.AreEqual("Death_Back_3", SpriteName(board, "beastA"), "Смерть держит последний кадр и не возвращается к ожиданию.");
         Assert.IsFalse(HealthBars(board).Contains("beastA"), "У павшего нет полосы здоровья.");
         StringAssert.StartsWith("Idle_", SpriteName(board, "hero"), "После атаки — снова ожидание.");
 
@@ -103,10 +103,10 @@ public sealed class CreatureAnimationBattlePlayModeTests
         bool moved = false;
         Assert.IsTrue(board.PlayMoveAnimation("hero", path, () => moved = duel.TryMove("hero", new HexCoord(2, 3), out _)));
         yield return WaitFrames(2);
-        StringAssert.StartsWith("Walk_FrontRight_", SpriteName(board, "hero"), "Первый отрезок — вправо.");
+        StringAssert.StartsWith("Walk_Front_", SpriteName(board, "hero"), "Первый отрезок — вправо.");
         yield return WaitUntil(() => moved, 3f);
         Assert.IsTrue(moved);
-        StringAssert.StartsWith("Idle_Front_", SpriteName(board, "hero"), "Последний отрезок — вправо-вниз: ракурс сменился на повороте.");
+        StringAssert.StartsWith("Idle_FrontLeft_", SpriteName(board, "hero"), "Последний отрезок — вправо-вниз: ракурс сменился на повороте.");
 
         mark = duel.HitRecords.Count;
         Assert.IsTrue(duel.TryAttack("hero", "beastA", out message), message);

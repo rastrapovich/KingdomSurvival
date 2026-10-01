@@ -54,6 +54,9 @@ namespace KingdomSurvival.AnimationDatabase.Editor
         private bool advancedOpen;
         private bool directionMapOpen;
         private bool pivotUndoGroupOpen;
+        private int undoGroupIndex;
+        private Slider pivotXSlider;
+        private Slider pivotYSlider;
 
         private CreatureAnimationImportPackage pendingPackage;
         private CreatureAnimationImportMode pendingMode;
@@ -435,17 +438,49 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             users.style.color = new Color(0.65f, 0.65f, 0.65f, 1f);
             setPanel.Add(users);
 
-            FloatField scale = new FloatField("Масштаб на поле") { value = set.FieldScale, isDelayed = true };
-            scale.tooltip = "Размер существа в бою. 1 — высота кадра равна прежней рамке миниатюры (1,35 гекса). " +
-                            "Масштаб просмотра колесом мыши сюда не влияет. Старый «Масштаб миниатюры» для существа с набором не применяется.";
-            scale.RegisterValueChangedCallback(evt => ModifySet("Масштаб на поле", s => s.SetFieldScale(Mathf.Clamp(evt.newValue, 0.1f, 10f))));
+            // Ползунки меняют набор без перестройки панели: перетаскивание не
+            // обрывается, просмотр обновляется сразу, весь жест — одно Undo.
+            Slider scale = LiveSlider("Масштаб на поле", 0.1f, 10f, set.FieldScale,
+                "Размер существа в бою. 1 — высота кадра равна прежней рамке миниатюры (1,35 гекса). " +
+                "Масштаб просмотра колесом мыши сюда не влияет. Старый «Масштаб миниатюры» для существа с набором не применяется.",
+                value => SelectedSet?.SetFieldScale(Mathf.Clamp(value, 0.1f, 10f)));
             setPanel.Add(scale);
 
-            Vector2Field pivot = new Vector2Field("Точка опоры") { value = set.Pivot };
-            pivot.tooltip = "Место кадра, которое стоит в центре гекса: доли холста, X слева, Y снизу. Обычно — ноги. Можно тянуть красную точку в просмотре.";
-            pivot.RegisterValueChangedCallback(evt =>
-                ModifySet("Точка опоры", s => s.SetPivot(new Vector2(Mathf.Clamp01(evt.newValue.x), Mathf.Clamp01(evt.newValue.y)))));
-            setPanel.Add(pivot);
+            pivotXSlider = LiveSlider("Опора X", 0f, 1f, set.Pivot.x,
+                "Точка опоры по горизонтали: доля ширины кадра слева. Обычно 0,5 — середина.",
+                value => { CreatureAnimationSetData s = SelectedSet; s?.SetPivot(new Vector2(Mathf.Clamp01(value), s.Pivot.y)); });
+            pivotYSlider = LiveSlider("Опора Y", 0f, 1f, set.Pivot.y,
+                "Точка опоры по вертикали: доля высоты кадра снизу. Ставится на уровень ног — место контакта с землёй. " +
+                "Красную точку можно тянуть и в просмотре.",
+                value => { CreatureAnimationSetData s = SelectedSet; s?.SetPivot(new Vector2(s.Pivot.x, Mathf.Clamp01(value))); });
+            setPanel.Add(pivotXSlider);
+            setPanel.Add(pivotYSlider);
+
+            CreatureAnimationSetData template = database.TemplateSet;
+            bool isTemplate = template != null && ReferenceEquals(template, set);
+            Label templateLabel = new Label(isTemplate
+                ? "Образец для новых наборов: этот. Новые существа получат его опору и масштаб, новые действия — его скорость, цикл и «последний кадр»."
+                : "Образец для новых наборов: " + (template != null ? "«" + template.DisplayName + "»" : "не выбран") + ".");
+            templateLabel.style.whiteSpace = WhiteSpace.Normal;
+            templateLabel.style.fontSize = 10f;
+            templateLabel.style.marginTop = 4f;
+            templateLabel.style.color = isTemplate ? ReadyColor : new Color(0.65f, 0.65f, 0.65f, 1f);
+            setPanel.Add(templateLabel);
+            if (!isTemplate)
+            {
+                Button makeTemplate = new Button(() =>
+                {
+                    Undo.RecordObject(database, "Образец для новых наборов");
+                    database.SetTemplateSetId(set.Id);
+                    EditorUtility.SetDirty(database);
+                    ShowSelection();
+                })
+                {
+                    text = "Сделать образцом для новых наборов",
+                    tooltip = "Следующие существа сразу загрузятся с этой опорой и масштабом, а новые действия — с настройками этого набора."
+                };
+                setPanel.Add(makeTemplate);
+            }
 
             Label canvas = new Label(set.CanvasSize.x > 0
                 ? "Холст кадров: " + set.CanvasSize.x + "×" + set.CanvasSize.y + " пикс."
@@ -453,6 +488,28 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             canvas.style.fontSize = 10f;
             canvas.style.color = new Color(0.65f, 0.65f, 0.65f, 1f);
             setPanel.Add(canvas);
+        }
+
+        private Slider LiveSlider(string label, float low, float high, float value, string tooltip, Action<float> apply)
+        {
+            Slider slider = new Slider(label, low, high) { value = value, showInputField = true, tooltip = tooltip };
+            slider.style.marginTop = 2f;
+            slider.labelElement.style.minWidth = 110f;
+            slider.RegisterValueChangedCallback(evt =>
+            {
+                if (SelectedSet == null)
+                    return;
+                OpenUndoGroup(label);
+                Undo.RecordObject(database, label);
+                apply(evt.newValue);
+                EditorUtility.SetDirty(database);
+                preview.Rebuild();
+            });
+            // Конец жеста: всё перетаскивание — одна отмена.
+            slider.RegisterCallback<PointerUpEvent>(_ => CloseUndoGroup(), TrickleDown.TrickleDown);
+            slider.RegisterCallback<PointerCaptureOutEvent>(_ => CloseUndoGroup(), TrickleDown.TrickleDown);
+            slider.RegisterCallback<FocusOutEvent>(_ => CloseUndoGroup(), TrickleDown.TrickleDown);
+            return slider;
         }
 
         private string DescribeSet(string setId)
@@ -597,6 +654,12 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             playback.tooltip = "Ожидание и ходьба — цикл; остальные — один раз; смерть держит последний кадр.";
             playback.RegisterValueChangedCallback(evt => ModifyClip("Воспроизведение", c => c.SetPlayback(evt.newValue)));
             detailPanel.Add(playback);
+
+            Toggle skipLast = new Toggle("Не учитывать последний кадр") { value = clip.SkipLastFrame };
+            skipLast.tooltip = "Для цикла, у которого последний кадр экспорта повторяет первый (KS Sprite Renderer всегда добавляет последний кадр). " +
+                               "Без этого цикл на мгновение «залипает» на стыке. Действует на все ракурсы действия; файлы не меняются.";
+            skipLast.RegisterValueChangedCallback(evt => ModifyClip("Последний кадр", c => c.SetSkipLastFrame(evt.newValue)));
+            detailPanel.Add(skipLast);
         }
 
         private void BuildAdvanced(CreatureAnimationSetData set, CreatureAnimationClipData clip)
@@ -757,27 +820,31 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 preview.Rebuild();
         }
 
-        // Одно перетаскивание опоры — одно действие Undo.
+        // Одно перетаскивание опоры — одно действие Undo; ползунки следуют за точкой.
         private void OnPivotDragged(Vector2 pivot, bool finished)
         {
             CreatureAnimationSetData set = SelectedSet;
             if (set == null)
                 return;
-            if (!pivotUndoGroupOpen)
-            {
-                Undo.IncrementCurrentGroup();
-                Undo.SetCurrentGroupName("Точка опоры");
-                pivotUndoGroupOpen = true;
-            }
+            OpenUndoGroup("Точка опоры");
             Undo.RecordObject(database, "Точка опоры");
             set.SetPivot(pivot);
             EditorUtility.SetDirty(database);
+            pivotXSlider?.SetValueWithoutNotify(pivot.x);
+            pivotYSlider?.SetValueWithoutNotify(pivot.y);
             preview.Rebuild();
             if (finished)
-            {
                 CloseUndoGroup();
-                ShowSelection();
-            }
+        }
+
+        private void OpenUndoGroup(string name)
+        {
+            if (pivotUndoGroupOpen)
+                return;
+            Undo.IncrementCurrentGroup();
+            Undo.SetCurrentGroupName(name);
+            undoGroupIndex = Undo.GetCurrentGroup();
+            pivotUndoGroupOpen = true;
         }
 
         private void CloseUndoGroup()
@@ -785,6 +852,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             if (!pivotUndoGroupOpen)
                 return;
             pivotUndoGroupOpen = false;
+            Undo.CollapseUndoOperations(undoGroupIndex);
             Undo.IncrementCurrentGroup();
         }
 

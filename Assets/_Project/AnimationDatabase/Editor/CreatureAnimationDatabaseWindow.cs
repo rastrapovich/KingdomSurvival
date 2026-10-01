@@ -655,10 +655,17 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             playback.RegisterValueChangedCallback(evt => ModifyClip("Воспроизведение", c => c.SetPlayback(evt.newValue)));
             detailPanel.Add(playback);
 
-            Toggle skipLast = new Toggle("Не учитывать последний кадр") { value = clip.SkipLastFrame };
-            skipLast.tooltip = "Для цикла, у которого последний кадр экспорта повторяет первый (KS Sprite Renderer всегда добавляет последний кадр). " +
-                               "Без этого цикл на мгновение «залипает» на стыке. Действует на все ракурсы действия; файлы не меняются.";
-            skipLast.RegisterValueChangedCallback(evt => ModifyClip("Последний кадр", c => c.SetSkipLastFrame(evt.newValue)));
+            List<int> skipChoices = Enumerable.Range(0, CreatureAnimationClipData.MaxSkippedLastFrames + 1).ToList();
+            PopupField<int> skipLast = new PopupField<int>(
+                "Не учитывать последних кадров",
+                skipChoices,
+                clip.SkipLastFrames,
+                SkipChoiceLabel,
+                SkipChoiceLabel);
+            skipLast.tooltip = "Для цикла, у которого последние кадры экспорта повторяют начало: KS Sprite Renderer всегда добавляет " +
+                               "последний кадр, а плавная остановка в Blender даёт ещё почти одинаковые кадры. Без этого цикл «залипает» на стыке. " +
+                               "Действует на все ракурсы действия; файлы не меняются.";
+            skipLast.RegisterValueChangedCallback(evt => ModifyClip("Последние кадры", c => c.SetSkipLastFrames(evt.newValue)));
             detailPanel.Add(skipLast);
         }
 
@@ -724,6 +731,11 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             Button removeSet = new Button(() => RemoveSet(set)) { text = "Удалить набор из базы" };
             removeSet.tooltip = "Убирает набор и ссылки на него. Атласы на диске остаются.";
             advanced.Add(removeSet);
+        }
+
+        private static string SkipChoiceLabel(int count)
+        {
+            return count == 0 ? "0 — показывать все" : count.ToString();
         }
 
         private static string ImpactFrameText(CreatureAnimationClip clip, float normalized)

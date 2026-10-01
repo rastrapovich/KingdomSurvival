@@ -109,9 +109,12 @@ namespace KingdomSurvival.AnimationDatabase
         [SerializeField, Range(0f, 1f)] private float impactTime = 0.5f;
         // «Исходный темп»: длительность кадра по разнице номеров Blender.
         [SerializeField] private bool useSourceTiming;
-        // Последний кадр дублирует первый (экспорт цикла с добавленным
-        // последним кадром): не показывать его, чтобы цикл не «залипал».
-        [SerializeField] private bool skipLastFrame;
+        // Последние кадры экспорта повторяют начало цикла (добавленный
+        // последний кадр, плавная остановка в Blender): не показывать 0–3
+        // последних кадров, чтобы цикл не «залипал» на стыке.
+        [SerializeField, Range(0, MaxSkippedLastFrames)] private int skipLastFrames;
+        // Прежняя галочка (один кадр) — читается, если число не задано.
+        [SerializeField, HideInInspector] private bool skipLastFrame;
         [SerializeField] private float sourceFramesPerSecond = 24f;
         [SerializeField] private List<CreatureAnimationFrames> directions = new List<CreatureAnimationFrames>();
 
@@ -123,7 +126,8 @@ namespace KingdomSurvival.AnimationDatabase
         public float ImpactTime => Mathf.Clamp01(impactTime);
         public float RawImpactTime => impactTime;
         public bool UseSourceTiming => useSourceTiming;
-        public bool SkipLastFrame => skipLastFrame;
+        public const int MaxSkippedLastFrames = 3;
+        public int SkipLastFrames => Mathf.Clamp(skipLastFrames > 0 ? skipLastFrames : (skipLastFrame ? 1 : 0), 0, MaxSkippedLastFrames);
         public float SourceFramesPerSecond => Mathf.Clamp(sourceFramesPerSecond, MinFramesPerSecond, 240f);
         public float RawSourceFramesPerSecond => sourceFramesPerSecond;
         public IReadOnlyList<CreatureAnimationFrames> Directions => directions;
@@ -210,7 +214,11 @@ namespace KingdomSurvival.AnimationDatabase
         public void SetImpactTime(float value) { impactTime = value; }
         public void SetUseSourceTiming(bool value) { useSourceTiming = value; }
         public void SetSourceFramesPerSecond(float value) { sourceFramesPerSecond = value; }
-        public void SetSkipLastFrame(bool value) { skipLastFrame = value; }
+        public void SetSkipLastFrames(int value)
+        {
+            skipLastFrames = Mathf.Clamp(value, 0, MaxSkippedLastFrames);
+            skipLastFrame = false;
+        }
 
         // Настройки воспроизведения из образца; кадры не копируются.
         public void CopySettingsFrom(CreatureAnimationClipData other)
@@ -222,7 +230,7 @@ namespace KingdomSurvival.AnimationDatabase
             impactTime = other.impactTime;
             useSourceTiming = other.useSourceTiming;
             sourceFramesPerSecond = other.sourceFramesPerSecond;
-            skipLastFrame = other.skipLastFrame;
+            SetSkipLastFrames(other.SkipLastFrames);
         }
     }
 
@@ -462,7 +470,7 @@ namespace KingdomSurvival.AnimationDatabase
             {
                 if (other != null && other.Playback == CreatureAnimationPlayback.Loop)
                 {
-                    clip.SetSkipLastFrame(other.SkipLastFrame);
+                    clip.SetSkipLastFrames(other.SkipLastFrames);
                     return;
                 }
             }

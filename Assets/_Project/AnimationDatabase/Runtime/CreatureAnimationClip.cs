@@ -299,8 +299,8 @@ namespace KingdomSurvival.AnimationDatabase
             // Пропавшие картинки (удалён файл) не показываются и не ломают темп.
             List<Sprite> frames = new List<Sprite>(cell.FrameCount);
             List<int> numbers = cell.HasUsableSourceNumbers ? new List<int>(cell.FrameCount) : null;
-            // «Не учитывать последний кадр»: он дублирует первый в цикле.
-            int count = data.SkipLastFrame && cell.FrameCount > 1 ? cell.FrameCount - 1 : cell.FrameCount;
+            // «Не учитывать последних кадров»: они повторяют начало цикла.
+            int count = Mathf.Max(1, cell.FrameCount - data.SkipLastFrames);
             for (int i = 0; i < count; i++)
             {
                 if (cell.Frames[i] == null)

@@ -29,7 +29,7 @@ MonoBehaviour:
   sets:
   - id: militia
     displayName: "\u041E\u043F\u043E\u043B\u0447\u0435\u043D\u0435\u0446"
-    pivot: {x: 0.5, y: 0.37}
+    pivot: {x: 0.507, y: 0.352}
     fieldScale: 3.61
     canvasSize: {x: 512, y: 512}
     clips:
@@ -39,7 +39,8 @@ MonoBehaviour:
       playback: 0
       impactTime: 0.5
       useSourceTiming: 0
-      skipLastFrame: 1
+      skipLastFrames: 3
+      skipLastFrame: 0
       sourceFramesPerSecond: 24
       directions:
       - direction: 0

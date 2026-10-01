@@ -133,25 +133,45 @@ namespace KingdomSurvival.AnimationDatabase.Tests
         }
 
         [Test]
-        public void SkipLastFrame_DropsDuplicateOfFirst_InEveryDirection()
+        public void SkipLastFrames_DropsOneToThreeTrailingFrames_InEveryDirection()
         {
             CreatureAnimationSetData set = MakeSet(
-                (CreatureAnimationAction.Idle, CreatureAnimationDirection.Front, 5),
-                (CreatureAnimationAction.Idle, CreatureAnimationDirection.Back, 5));
+                (CreatureAnimationAction.Idle, CreatureAnimationDirection.Front, 6),
+                (CreatureAnimationAction.Idle, CreatureAnimationDirection.Back, 6));
             CreatureAnimationClipData idle = set.FindClip(CreatureAnimationAction.Idle);
-            Assert.AreEqual(5, CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Idle, CreatureAnimationDirection.Front).FrameCount);
+            Assert.AreEqual(6, CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Idle, CreatureAnimationDirection.Front).FrameCount);
 
-            idle.SetSkipLastFrame(true);
+            idle.SetSkipLastFrames(1);
             CreatureAnimationClip front = CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Idle, CreatureAnimationDirection.Front);
-            Assert.AreEqual(4, front.FrameCount);
-            Assert.AreEqual("Idle_Front_3", front.Frames[3].name, "Последний показанный — предпоследний кадр экспорта.");
-            Assert.AreEqual(4, CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Idle, CreatureAnimationDirection.Back).FrameCount);
-            Assert.AreEqual(5, set.FindFrames(CreatureAnimationAction.Idle, CreatureAnimationDirection.Front).FrameCount, "Данные не меняются.");
+            Assert.AreEqual(5, front.FrameCount);
+            Assert.AreEqual("Idle_Front_4", front.Frames[4].name);
 
-            CreatureAnimationSetData single = MakeSet((CreatureAnimationAction.Idle, CreatureAnimationDirection.Front, 1));
-            single.FindClip(CreatureAnimationAction.Idle).SetSkipLastFrame(true);
-            Assert.AreEqual(1, CreatureAnimationResolver.Resolve(single, CreatureAnimationAction.Idle, CreatureAnimationDirection.Front).FrameCount,
-                "Единственный кадр не пропадает.");
+            idle.SetSkipLastFrames(3);
+            front = CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Idle, CreatureAnimationDirection.Front);
+            Assert.AreEqual(3, front.FrameCount);
+            Assert.AreEqual("Idle_Front_2", front.Frames[2].name, "Последний показанный — четвёртый с конца кадр экспорта.");
+            Assert.AreEqual(3, CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Idle, CreatureAnimationDirection.Back).FrameCount);
+            Assert.AreEqual(6, set.FindFrames(CreatureAnimationAction.Idle, CreatureAnimationDirection.Front).FrameCount, "Данные не меняются.");
+
+            idle.SetSkipLastFrames(10);
+            Assert.AreEqual(CreatureAnimationClipData.MaxSkippedLastFrames, idle.SkipLastFrames, "Не больше трёх.");
+
+            CreatureAnimationSetData few = MakeSet((CreatureAnimationAction.Idle, CreatureAnimationDirection.Front, 2));
+            few.FindClip(CreatureAnimationAction.Idle).SetSkipLastFrames(3);
+            Assert.AreEqual(1, CreatureAnimationResolver.Resolve(few, CreatureAnimationAction.Idle, CreatureAnimationDirection.Front).FrameCount,
+                "Хотя бы один кадр остаётся.");
+        }
+
+        [Test]
+        public void SkipLastFrames_ReadsOldCheckboxAsOne()
+        {
+            CreatureAnimationClipData clip = new CreatureAnimationClipData(CreatureAnimationAction.Idle);
+            typeof(CreatureAnimationClipData)
+                .GetField("skipLastFrame", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .SetValue(clip, true);
+            Assert.AreEqual(1, clip.SkipLastFrames, "Прежняя галочка «последний кадр» — один кадр.");
+            clip.SetSkipLastFrames(0);
+            Assert.AreEqual(0, clip.SkipLastFrames, "Новое значение заменяет прежнюю галочку.");
         }
 
         [Test]
@@ -164,7 +184,7 @@ namespace KingdomSurvival.AnimationDatabase.Tests
             template.SetPivot(new Vector2(0.5f, 0.37f));
             template.SetFieldScale(3.61f);
             CreatureAnimationClipData templateIdle = template.GetOrAddClip(CreatureAnimationAction.Idle);
-            templateIdle.SetSkipLastFrame(true);
+            templateIdle.SetSkipLastFrames(3);
             templateIdle.SetFramesPerSecond(15f);
             CreatureAnimationClipData templateAttack = template.GetOrAddClip(CreatureAnimationAction.Attack);
             templateAttack.SetImpactTime(0.7f);
@@ -177,17 +197,17 @@ namespace KingdomSurvival.AnimationDatabase.Tests
 
             CreatureAnimationClipData wolfIdle = wolf.GetOrAddClip(CreatureAnimationAction.Idle);
             database.ApplyTemplateClipSettings(wolfIdle);
-            Assert.IsTrue(wolfIdle.SkipLastFrame);
+            Assert.AreEqual(3, wolfIdle.SkipLastFrames);
             Assert.AreEqual(15f, wolfIdle.FramesPerSecond, 0.0001f);
 
             CreatureAnimationClipData wolfAttack = wolf.GetOrAddClip(CreatureAnimationAction.Attack);
             database.ApplyTemplateClipSettings(wolfAttack);
             Assert.AreEqual(0.7f, wolfAttack.ImpactTime, 0.0001f);
-            Assert.IsFalse(wolfAttack.SkipLastFrame);
+            Assert.AreEqual(0, wolfAttack.SkipLastFrames);
 
             CreatureAnimationClipData wolfWalk = wolf.GetOrAddClip(CreatureAnimationAction.Walk);
             database.ApplyTemplateClipSettings(wolfWalk);
-            Assert.IsTrue(wolfWalk.SkipLastFrame, "Цикл без пары в образце берёт галочку у цикла образца.");
+            Assert.AreEqual(3, wolfWalk.SkipLastFrames, "Цикл без пары в образце берёт число у цикла образца.");
             Assert.AreEqual(CreatureAnimationClipData.DefaultFramesPerSecond, wolfWalk.FramesPerSecond, 0.0001f);
         }
 

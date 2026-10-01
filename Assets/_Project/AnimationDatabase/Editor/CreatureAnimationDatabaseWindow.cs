@@ -456,6 +456,22 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             setPanel.Add(pivotXSlider);
             setPanel.Add(pivotYSlider);
 
+            Label walkSpeed = new Label(WalkSpeedText(set));
+            walkSpeed.style.fontSize = 10f;
+            walkSpeed.style.color = new Color(0.65f, 0.65f, 0.65f, 1f);
+            Slider walkStep = LiveSlider("Шаг ходьбы", 0.2f, 4f, set.WalkHexesPerCycle,
+                "Сколько гексов боец проходит за один цикл «Ходьбы». Скорость на поле = шаг / длительность цикла, " +
+                "поэтому ноги не скользят. Если ноги «едут» вперёд — уменьшите, если отстают — увеличьте. " +
+                "Общая скорость боя (в самом бою) умножает всё вместе.",
+                value =>
+                {
+                    CreatureAnimationSetData s = SelectedSet;
+                    s?.SetWalkHexesPerCycle(value);
+                    walkSpeed.text = WalkSpeedText(s);
+                });
+            setPanel.Add(walkStep);
+            setPanel.Add(walkSpeed);
+
             CreatureAnimationSetData template = database.TemplateSet;
             bool isTemplate = template != null && ReferenceEquals(template, set);
             Label templateLabel = new Label(isTemplate
@@ -731,6 +747,18 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             Button removeSet = new Button(() => RemoveSet(set)) { text = "Удалить набор из базы" };
             removeSet.tooltip = "Убирает набор и ссылки на него. Атласы на диске остаются.";
             advanced.Add(removeSet);
+        }
+
+        private static string WalkSpeedText(CreatureAnimationSetData set)
+        {
+            if (set == null)
+                return string.Empty;
+            CreatureAnimationClipData walk = set.FindClip(CreatureAnimationAction.Walk);
+            if (walk == null || !walk.HasAnyFrames)
+                return "Ходьбы нет: на поле общая скорость " + CreatureAnimationSetData.DefaultWalkHexesPerSecond.ToString("0.#") + " гекса/с.";
+            return "На поле ≈ " + set.GetWalkHexesPerSecond(CreatureAnimationDirection.Front).ToString("0.0") +
+                   " гекса/с при скорости боя 1× (пределы " + CreatureAnimationSetData.MinWalkHexesPerSecond.ToString("0.#") +
+                   "–" + CreatureAnimationSetData.MaxWalkHexesPerSecond.ToString("0") + ").";
         }
 
         private static string SkipChoiceLabel(int count)

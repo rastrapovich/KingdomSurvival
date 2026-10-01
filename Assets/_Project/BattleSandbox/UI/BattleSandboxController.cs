@@ -814,6 +814,45 @@ namespace KingdomSurvival.BattleSandbox
 
             body.Add(sidebar);
             screen.Add(body);
+            screen.Add(BuildSpeedControl());
+        }
+
+        // ПР-12З: общая скорость показа боя. Добавляется последним ребёнком
+        // экрана: оформление поля опирается на первые два.
+        private static VisualElement BuildSpeedControl()
+        {
+            VisualElement panel = new VisualElement { name = "battle-speed-control" };
+            panel.style.position = Position.Absolute;
+            panel.style.right = 16f;
+            panel.style.top = 104f;
+            panel.style.width = 220f;
+            panel.style.paddingLeft = 10f;
+            panel.style.paddingRight = 10f;
+            panel.style.paddingTop = 6f;
+            panel.style.paddingBottom = 4f;
+            panel.style.backgroundColor = new Color(0.045f, 0.052f, 0.055f, 0.78f);
+            SetBorder(panel, new Color(0.52f, 0.47f, 0.35f, 0.42f));
+            SetRadius(panel, 4f);
+
+            Label title = CreateLabel(string.Empty, 11, new Color(0.92f, 0.84f, 0.68f, 1f));
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            panel.Add(title);
+
+            SliderInt slider = new SliderInt(0, BattlePresentationSpeed.Steps.Length - 1)
+            {
+                name = "battle-speed-slider",
+                value = BattlePresentationSpeed.Index,
+                tooltip = "Скорость ходьбы, ударов и анимаций в бою. На правила боя не влияет."
+            };
+            void Refresh(int index) => title.text = "СКОРОСТЬ БОЯ · " + BattlePresentationSpeed.Label(index);
+            Refresh(slider.value);
+            slider.RegisterValueChangedCallback(evt =>
+            {
+                BattlePresentationSpeed.Index = evt.newValue;
+                Refresh(evt.newValue);
+            });
+            panel.Add(slider);
+            return panel;
         }
 
         private void OnBoardHexClicked(HexCoord coord)
@@ -1252,7 +1291,7 @@ namespace KingdomSurvival.BattleSandbox
 
                 CompleteEnemyActivation(enemy.Id);
                 RefreshBattleScreen();
-            }).ExecuteLater(420);
+            }).ExecuteLater((long)(420f / BattlePresentationSpeed.Multiplier));
         }
 
         private void ContinueEnemyAfterMovement(string enemyId)

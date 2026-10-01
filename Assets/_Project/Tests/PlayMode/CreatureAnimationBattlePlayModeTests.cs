@@ -21,10 +21,14 @@ public sealed class CreatureAnimationBattlePlayModeTests
     private const BindingFlags AnyInstance = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
     private readonly List<Object> created = new List<Object>();
 
+    private int previousSpeed;
+
     [SetUp]
     public void SetUp()
     {
         CampaignSession.Reset();
+        previousSpeed = BattlePresentationSpeed.Index;
+        BattlePresentationSpeed.Index = BattlePresentationSpeed.DefaultIndex;
     }
 
     [TearDown]
@@ -36,6 +40,7 @@ public sealed class CreatureAnimationBattlePlayModeTests
                 Object.Destroy(item);
         }
         created.Clear();
+        BattlePresentationSpeed.Index = previousSpeed;
         CampaignSession.Reset();
     }
 
@@ -132,6 +137,16 @@ public sealed class CreatureAnimationBattlePlayModeTests
         Assert.IsTrue(beastAnswered, "Ответный удар — отдельная атака после реакции.");
         Assert.IsTrue(heroWasHit, "Атакующий получает ответ.");
         Assert.AreEqual(37, duel.GetUnit("beastA").HitPoints);
+
+        // --- Общая скорость боя: часы показа идут вдвое быстрее реального времени.
+        PropertyInfo clock = typeof(HexBoardElement).GetProperty("PresentationTime", AnyInstance);
+        BattlePresentationSpeed.Index = Array.IndexOf(BattlePresentationSpeed.Steps, 2f);
+        float clockStart = (float)clock.GetValue(board);
+        float realStart = Time.realtimeSinceStartup;
+        yield return WaitSeconds(0.4f);
+        float ratio = ((float)clock.GetValue(board) - clockStart) / (Time.realtimeSinceStartup - realStart);
+        Assert.AreEqual(2f, ratio, 0.15f, "Скорость боя 2× ускоряет показ вдвое.");
+        BattlePresentationSpeed.Index = BattlePresentationSpeed.DefaultIndex;
 
         // --- Освобождение: поле снимается с экрана, таймеры не бегут дальше.
         board.RemoveFromHierarchy();

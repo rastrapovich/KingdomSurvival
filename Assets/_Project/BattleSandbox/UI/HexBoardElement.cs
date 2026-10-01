@@ -11,7 +11,8 @@ namespace KingdomSurvival.BattleSandbox
         private const float AttackLungeDuration = 0.12f;
         private const float AttackReturnDuration = 0.10f;
         private const float DamageFloatDuration = 0.58f;
-        private const float MovementSegmentDuration = 0.14f;
+        // Скорость перемещения миниатюр и жетонов без ходьбы, гексов в секунду.
+        private const float StaticMoveHexesPerSecond = 3.5f;
         private const float HealthBarWidthScale = 0.875f;
         private const float HealthBarHeight = 4.2f;
         private const float HealthBarBottomInset = 8f;
@@ -49,7 +50,8 @@ namespace KingdomSurvival.BattleSandbox
         private string movementUnitId;
         private IReadOnlyList<HexCoord> movementPath;
         private int movementSegmentIndex;
-        private float movementSegmentStartedAt;
+        private float movementStartedAt;
+        private float[] movementSegmentDurations;
         private Vector2 movementVisualPosition;
         private Action movementCompletionCallback;
 
@@ -170,10 +172,14 @@ namespace KingdomSurvival.BattleSandbox
             movementUnitId = unitId;
             movementPath = new List<HexCoord>(path);
             movementSegmentIndex = 0;
-            movementSegmentStartedAt = Time.realtimeSinceStartup;
             movementVisualPosition = CalculateLayout().GetCenter(path[0]);
             movementCompletionCallback = onComplete;
             BeginWalkPresentation(unitId, movementPath);
+            // Скорость — по анимации ходьбы набора (или общая для миниатюр),
+            // постоянная по всему маршруту; время — часы показа боя.
+            movementSegmentDurations = SandboxMovementTimeline.BuildSegmentDurations(
+                battle, movementPath, GetWalkHexesPerSecond(unitId));
+            movementStartedAt = PresentationTime;
             movementAnimationItem = schedule.Execute(UpdateMovementAnimation).Every(16);
             SyncUnitImages();
             MarkDirtyRepaint();
@@ -730,36 +736,24 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             }
 
-            if (movementSegmentIndex >= movementPath.Count - 1)
+            // Постоянная скорость без торможения на каждом гексе.
+            float elapsed = PresentationTime - movementStartedAt;
+            HexLayout layout = CalculateLayout();
+            if (!SandboxMovementTimeline.Locate(movementSegmentDurations, elapsed, out int segment, out float progress))
             {
+                movementVisualPosition = layout.GetCenter(movementPath[movementPath.Count - 1]);
                 FinishMovementAnimation();
                 return;
             }
 
-            float duration = GetMovementSegmentDuration(movementUnitId);
-            if (battle.GetTerrain(movementPath[movementSegmentIndex + 1]) == SandboxTerrain.Difficult)
-                duration *= 1.35f;
-
-            float elapsed = Mathf.Max(0f, Time.realtimeSinceStartup - movementSegmentStartedAt);
-            float progress = Mathf.Clamp01(elapsed / duration);
-            float eased = Mathf.SmoothStep(0f, 1f, progress);
-            HexLayout layout = CalculateLayout();
-            Vector2 start = layout.GetCenter(movementPath[movementSegmentIndex]);
-            Vector2 end = layout.GetCenter(movementPath[movementSegmentIndex + 1]);
-            movementVisualPosition = Vector2.Lerp(start, end, eased);
-
-            if (progress >= 1f)
+            if (segment != movementSegmentIndex)
             {
-                movementSegmentIndex++;
-                movementSegmentStartedAt = Time.realtimeSinceStartup;
-                movementVisualPosition = end;
-                if (movementSegmentIndex >= movementPath.Count - 1)
-                {
-                    FinishMovementAnimation();
-                    return;
-                }
+                movementSegmentIndex = segment;
                 UpdateWalkFacing(movementUnitId, movementPath, movementSegmentIndex);
             }
+            Vector2 start = layout.GetCenter(movementPath[segment]);
+            Vector2 end = layout.GetCenter(movementPath[segment + 1]);
+            movementVisualPosition = Vector2.Lerp(start, end, progress);
 
             SyncUnitImages();
             MarkDirtyRepaint();

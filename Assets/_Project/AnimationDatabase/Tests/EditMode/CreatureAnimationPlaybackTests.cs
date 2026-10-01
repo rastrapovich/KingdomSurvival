@@ -175,6 +175,26 @@ namespace KingdomSurvival.AnimationDatabase.Tests
         }
 
         [Test]
+        public void WalkSpeed_FollowsWalkCycle_AndStep()
+        {
+            CreatureAnimationSetData set = MakeSet((CreatureAnimationAction.Walk, CreatureAnimationDirection.Front, 6));
+            Assert.AreEqual(2f, set.GetWalkHexesPerSecond(CreatureAnimationDirection.Front), 0.0001f, "Один гекс за цикл 0,5 с.");
+
+            set.SetWalkHexesPerCycle(1.5f);
+            Assert.AreEqual(3f, set.GetWalkHexesPerSecond(CreatureAnimationDirection.Back), 0.0001f, "Ближайший ракурс ходьбы тоже даёт скорость.");
+
+            set.FindClip(CreatureAnimationAction.Walk).SetFramesPerSecond(24f);
+            Assert.AreEqual(6f, set.GetWalkHexesPerSecond(CreatureAnimationDirection.Front), 0.0001f, "Быстрее цикл — быстрее шаг.");
+
+            set.SetWalkHexesPerCycle(10f);
+            Assert.AreEqual(CreatureAnimationSetData.MaxWalkHexesPerSecond, set.GetWalkHexesPerSecond(CreatureAnimationDirection.Front), 0.0001f);
+
+            CreatureAnimationSetData noWalk = MakeSet((CreatureAnimationAction.Idle, CreatureAnimationDirection.Front, 2));
+            Assert.AreEqual(CreatureAnimationSetData.DefaultWalkHexesPerSecond, noWalk.GetWalkHexesPerSecond(CreatureAnimationDirection.Front),
+                0.0001f, "Без ходьбы — общая скорость.");
+        }
+
+        [Test]
         public void Template_GivesNewSetsLookAndNewActionsSettings()
         {
             CreatureAnimationDatabaseAsset database = ScriptableObject.CreateInstance<CreatureAnimationDatabaseAsset>();

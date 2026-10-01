@@ -250,6 +250,9 @@ namespace KingdomSurvival.AnimationDatabase
         [SerializeField, Min(0.1f)] private float fieldScale = 1f;
         // Общий холст кадров набора в пикселях; задаётся первым импортом.
         [SerializeField] private Vector2Int canvasSize;
+        // Шаг ходьбы: сколько гексов проходит один цикл «Ходьбы». Скорость на
+        // поле = шаг / длительность цикла, поэтому ноги не скользят.
+        [SerializeField, Min(0.1f)] private float walkHexesPerCycle = 1f;
         [SerializeField] private List<CreatureAnimationClipData> clips = new List<CreatureAnimationClipData>();
 
         public string Id => id ?? string.Empty;
@@ -389,6 +392,22 @@ namespace KingdomSurvival.AnimationDatabase
         public void SetFieldScale(float value) { fieldScale = Mathf.Max(0.1f, value); }
         public void SetCanvasSize(Vector2Int value) { canvasSize = value; }
 
+        public const float DefaultWalkHexesPerSecond = 3f;
+        public const float MinWalkHexesPerSecond = 0.5f;
+        public const float MaxWalkHexesPerSecond = 8f;
+
+        public float WalkHexesPerCycle => walkHexesPerCycle > 0f ? Mathf.Max(0.1f, walkHexesPerCycle) : 1f;
+        public void SetWalkHexesPerCycle(float value) { walkHexesPerCycle = Mathf.Clamp(value, 0.1f, 10f); }
+
+        // Скорость перемещения на поле (без общей скорости боя), гексов в секунду.
+        public float GetWalkHexesPerSecond(CreatureAnimationDirection direction)
+        {
+            CreatureAnimationClip walk = CreatureAnimationResolver.Resolve(this, CreatureAnimationAction.Walk, direction);
+            if (walk == null || walk.Action != CreatureAnimationAction.Walk || walk.Duration <= 0.01f)
+                return DefaultWalkHexesPerSecond;
+            return Mathf.Clamp(WalkHexesPerCycle / walk.Duration, MinWalkHexesPerSecond, MaxWalkHexesPerSecond);
+        }
+
         // Опора и масштаб на поле из образца.
         public void CopyLookFrom(CreatureAnimationSetData other)
         {
@@ -396,6 +415,7 @@ namespace KingdomSurvival.AnimationDatabase
                 return;
             pivot = other.pivot;
             fieldScale = other.fieldScale;
+            walkHexesPerCycle = other.walkHexesPerCycle;
         }
     }
 

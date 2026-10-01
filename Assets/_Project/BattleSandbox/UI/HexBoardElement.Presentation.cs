@@ -14,7 +14,6 @@ namespace KingdomSurvival.BattleSandbox
         internal const float FieldHeightInHexSizes = 1.35f;
         // Прежнее правило миниатюры: центр гекса на 15% выше нижнего края рамки.
         internal const float StaticAnchorFromBottom = 0.15f;
-        private const float AnimatedWalkSegmentDuration = 0.26f;
         private const float LegacyReactionDuration = 0.24f;
         private const float HitReactionCap = 1.2f;
         private const float DeathWaitCap = 0.9f;
@@ -55,7 +54,23 @@ namespace KingdomSurvival.BattleSandbox
         private Action hitSequenceCompleted;
         private readonly HashSet<string> vanishAfterStep = new HashSet<string>(StringComparer.Ordinal);
 
-        private static float PresentationTime => Time.realtimeSinceStartup;
+        private float presentationClock;
+        private float presentationClockReal = -1f;
+
+        // Часы показа боя: реальное время × общая скорость боя. На них идут
+        // ходьба, удары и анимации; смена скорости действует сразу.
+        private float PresentationTime
+        {
+            get
+            {
+                float now = Time.realtimeSinceStartup;
+                if (presentationClockReal < 0f)
+                    presentationClockReal = now;
+                presentationClock += Mathf.Max(0f, now - presentationClockReal) * BattlePresentationSpeed.Multiplier;
+                presentationClockReal = now;
+                return presentationClock;
+            }
+        }
 
         private void ResetPresentationsIfBattleChanged()
         {
@@ -228,14 +243,16 @@ namespace KingdomSurvival.BattleSandbox
         // Ходьба
         // ------------------------------------------------------------------
 
-        private float GetMovementSegmentDuration(string unitId)
+        // Скорость по анимации: шаг набора (гексов за цикл ходьбы) / длительность
+        // цикла — ноги не скользят. Без ходьбы — общая скорость миниатюр.
+        private float GetWalkHexesPerSecond(string unitId)
         {
             SandboxUnitState unit = battle?.GetUnit(unitId);
             UnitPresentation presentation = GetPresentation(unit);
-            CreatureAnimationClip clip = presentation?.Player?.Clip;
-            return clip != null && clip.Action == CreatureAnimationAction.Walk
-                ? AnimatedWalkSegmentDuration
-                : MovementSegmentDuration;
+            SandboxUnitVisual visual = unit != null ? GetVisual(unit.TypeId) : null;
+            if (presentation?.Player == null || visual?.AnimationSet == null)
+                return StaticMoveHexesPerSecond;
+            return visual.AnimationSet.GetWalkHexesPerSecond(presentation.Player.Direction);
         }
 
         private void BeginWalkPresentation(string unitId, IReadOnlyList<HexCoord> path)

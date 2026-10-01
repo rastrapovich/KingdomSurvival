@@ -232,6 +232,76 @@ namespace KingdomSurvival.Encounters.Editor
         // Общие мелкие помощники.
         // ---------------------------------------------------------------
 
+        // ---------------------------------------------------------------
+        // Карточки разделов: свой фон, рамка, цветная полоса слева и
+        // заголовок того же цвета — разделы не сливаются в общий серый.
+        // ---------------------------------------------------------------
+
+        private static readonly Color PaneBackground = new Color(0.135f, 0.14f, 0.155f, 1f);
+        private static readonly Color CardBackground = new Color(0.20f, 0.205f, 0.225f, 1f);
+        private static readonly Color CardBorder = new Color(0.10f, 0.10f, 0.11f, 1f);
+        internal static readonly Color SceneAccent = new Color(0.86f, 0.70f, 0.38f, 1f);
+        internal static readonly Color WhenAccent = new Color(0.40f, 0.62f, 0.90f, 1f);
+        internal static readonly Color AfterAccent = new Color(0.45f, 0.75f, 0.50f, 1f);
+        internal static readonly Color NotesAccent = new Color(0.62f, 0.62f, 0.66f, 1f);
+        internal static readonly Color ProductionAccent = new Color(0.68f, 0.52f, 0.88f, 1f);
+
+        // Карточка с заголовком. Ширина: растягивается, но не уже minWidth —
+        // на широком окне карточки встают в две колонки.
+        private static VisualElement SectionCard(string title, Color accent, float minWidth = 380f)
+        {
+            VisualElement card = new VisualElement();
+            card.style.flexGrow = 1f;
+            card.style.flexBasis = minWidth;
+            card.style.minWidth = minWidth;
+            card.style.marginRight = 10f;
+            card.style.marginBottom = 10f;
+            card.style.paddingLeft = 12f;
+            card.style.paddingRight = 12f;
+            card.style.paddingTop = 8f;
+            card.style.paddingBottom = 10f;
+            card.style.backgroundColor = CardBackground;
+            card.style.borderTopWidth = 1f;
+            card.style.borderRightWidth = 1f;
+            card.style.borderBottomWidth = 1f;
+            card.style.borderLeftWidth = 3f;
+            card.style.borderTopColor = CardBorder;
+            card.style.borderRightColor = CardBorder;
+            card.style.borderBottomColor = CardBorder;
+            card.style.borderLeftColor = accent;
+            card.style.borderTopLeftRadius = 5f;
+            card.style.borderTopRightRadius = 5f;
+            card.style.borderBottomLeftRadius = 5f;
+            card.style.borderBottomRightRadius = 5f;
+            if (!string.IsNullOrEmpty(title))
+            {
+                Label header = new Label(title);
+                header.style.unityFontStyleAndWeight = FontStyle.Bold;
+                header.style.fontSize = 11f;
+                header.style.letterSpacing = 1f;
+                header.style.color = accent;
+                header.style.marginBottom = 6f;
+                card.Add(header);
+            }
+            return card;
+        }
+
+        // Сетка карточек с переносом по ширине окна.
+        private static VisualElement CardGrid()
+        {
+            VisualElement grid = new VisualElement();
+            grid.style.flexDirection = FlexDirection.Row;
+            grid.style.flexWrap = Wrap.Wrap;
+            grid.style.alignItems = Align.FlexStart;
+            return grid;
+        }
+
+        // Тёмный фон области карточек: на нём карточки читаются отдельно.
+        private static void StyleCardPane(VisualElement pane)
+        {
+            pane.style.backgroundColor = PaneBackground;
+        }
+
         private static void AddToolbarButton(VisualElement parent, string text, Action action)
         {
             Button button = new Button(action) { text = text };

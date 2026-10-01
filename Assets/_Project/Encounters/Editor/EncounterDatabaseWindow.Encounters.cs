@@ -29,6 +29,8 @@ namespace KingdomSurvival.Encounters.Editor
         private readonly HashSet<string> openSections = new HashSet<string>(StringComparer.Ordinal);
         private Label whenSentence;
         private VisualElement eligibilityResult;
+        // Карточка раздела, в которую сейчас добавляются поля.
+        private VisualElement section;
 
         private void BuildEncountersTab(VisualElement root)
         {
@@ -161,21 +163,48 @@ namespace KingdomSurvival.Encounters.Editor
             RefreshEncounterList();
         }
 
+        // Строка списка: цветная полоса статуса слева, название, краткое описание.
         private static VisualElement MakeEncounterListItem()
         {
             VisualElement row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
             row.style.paddingTop = 3f;
-            row.style.paddingLeft = 2f;
+            row.style.paddingBottom = 3f;
 
+            VisualElement bar = new VisualElement { name = "status-bar" };
+            bar.style.width = 3f;
+            bar.style.marginRight = 6f;
+            bar.style.borderTopLeftRadius = 2f;
+            bar.style.borderBottomLeftRadius = 2f;
+            bar.style.borderTopRightRadius = 2f;
+            bar.style.borderBottomRightRadius = 2f;
+            row.Add(bar);
+
+            VisualElement text = new VisualElement();
+            text.style.flexGrow = 1f;
+            text.style.flexShrink = 1f;
             Label title = new Label { name = "title" };
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            row.Add(title);
+            text.Add(title);
 
             Label meta = new Label { name = "meta" };
             meta.style.fontSize = 10f;
             meta.style.color = MutedColor;
-            row.Add(meta);
+            text.Add(meta);
+            row.Add(text);
             return row;
+        }
+
+        internal static Color StatusColor(EncounterStatus status)
+        {
+            switch (status)
+            {
+                case EncounterStatus.Production: return new Color(0.45f, 0.78f, 0.48f, 1f);
+                case EncounterStatus.Draft: return new Color(0.62f, 0.62f, 0.62f, 1f);
+                case EncounterStatus.Disabled: return new Color(0.90f, 0.66f, 0.30f, 1f);
+                case EncounterStatus.Deprecated: return new Color(0.82f, 0.36f, 0.32f, 1f);
+                default: return new Color(0.5f, 0.5f, 0.5f, 1f);
+            }
         }
 
         private void BindEncounterListItem(VisualElement row, int visibleIndex)
@@ -185,8 +214,10 @@ namespace KingdomSurvival.Encounters.Editor
 
             EncounterDefinition encounter = database.Encounters[visibleEncounterIndices[visibleIndex]];
             Label title = row.Q<Label>("title");
-            title.text = StatusDot(encounter.Status) + " " + (string.IsNullOrWhiteSpace(encounter.DisplayName) ? encounter.EncounterId : encounter.DisplayName);
+            title.text = string.IsNullOrWhiteSpace(encounter.DisplayName) ? encounter.EncounterId : encounter.DisplayName;
             title.tooltip = EncounterEditorLabels.Status(encounter.Status);
+            title.style.color = encounter.Status == EncounterStatus.Deprecated ? MutedColor : new Color(0.90f, 0.88f, 0.84f, 1f);
+            row.Q("status-bar").style.backgroundColor = StatusColor(encounter.Status);
             row.Q<Label>("meta").text = showProduction
                 ? encounter.EncounterId + " · " + EncounterEditorLabels.DescribeListLine(encounter)
                 : EncounterEditorLabels.DescribeListLine(encounter);
@@ -281,10 +312,11 @@ namespace KingdomSurvival.Encounters.Editor
             encounterDetails = new ScrollView();
             encounterDetails.style.display = DisplayStyle.None;
             encounterDetails.style.flexGrow = 1f;
-            encounterDetails.style.paddingLeft = 12f;
-            encounterDetails.style.paddingRight = 12f;
-            encounterDetails.style.paddingTop = 8f;
+            encounterDetails.style.paddingLeft = 10f;
+            encounterDetails.style.paddingRight = 2f;
+            encounterDetails.style.paddingTop = 10f;
             encounterDetails.style.paddingBottom = 16f;
+            StyleCardPane(encounterDetails);
             pane.Add(encounterDetails);
             return pane;
         }
@@ -307,13 +339,36 @@ namespace KingdomSurvival.Encounters.Editor
             serializedDatabase.Update();
 
             SerializedProperty e = encountersProperty.GetArrayElementAtIndex(selectedEncounterIndex);
+            EncounterStatus status = (EncounterStatus)e.FindPropertyRelative("Status").enumValueIndex;
+
+            // Шапка встречи во всю ширину, полоса — цвет статуса.
+            section = SectionCard(null, StatusColor(status), 0f);
+            section.style.marginRight = 10f;
+            section.style.flexGrow = 0f;
+            section.style.flexBasis = StyleKeyword.Auto;
             BuildCardHeader(e);
+            encounterDetails.Add(section);
+
+            VisualElement grid = CardGrid();
+            encounterDetails.Add(grid);
+            section = SectionCard("СЦЕНА", SceneAccent, 420f);
             BuildSceneSection(e);
+            grid.Add(section);
+            section = SectionCard("КОГДА ВЫПАДАЕТ", WhenAccent, 380f);
             BuildWhenSection(e);
+            grid.Add(section);
+            section = SectionCard("ЧТО ОСТАЁТСЯ ПОСЛЕ", AfterAccent, 380f);
             BuildAfterSection(e);
+            grid.Add(section);
+            section = SectionCard("ЗАМЕТКИ", NotesAccent, 380f);
             BuildNotesSection(e);
+            grid.Add(section);
             if (showProduction)
+            {
+                section = SectionCard("ПРОИЗВОДСТВО", ProductionAccent, 380f);
                 BuildProductionSection(e);
+                grid.Add(section);
+            }
 
             encounterDetails.schedule.Execute(() => encounterDetails.scrollOffset = scroll);
         }
@@ -353,14 +408,14 @@ namespace KingdomSurvival.Encounters.Editor
             });
             row.Add(title);
             row.Add(MakeEnumPopup<EncounterStatus>(e.FindPropertyRelative("Status"), null, EncounterEditorLabels.Status, 110f));
-            encounterDetails.Add(row);
+            section.Add(row);
 
             VisualElement meta = Row();
             meta.style.marginTop = 2f;
             meta.Add(MakeEnumPopup<EncounterCategory>(e.FindPropertyRelative("Category"), null, EncounterEditorLabels.Category, 100f));
             meta.Add(MakeEnumPopup<EncounterDurationClass>(e.FindPropertyRelative("DurationClass"), null, EncounterEditorLabels.Duration, 130f));
             meta.Add(MakeFunctionsButton(e.FindPropertyRelative("Functions")));
-            encounterDetails.Add(meta);
+            section.Add(meta);
 
             TextField description = new TextField { value = e.FindPropertyRelative("Description").stringValue, multiline = true, tooltip = "Коротко о сцене — для себя и команды" };
             description.textEdition.placeholder = "Коротко о сцене";
@@ -371,7 +426,7 @@ namespace KingdomSurvival.Encounters.Editor
                 e.FindPropertyRelative("Description").stringValue = evt.newValue;
                 Commit();
             });
-            encounterDetails.Add(description);
+            section.Add(description);
         }
 
         private VisualElement MakeFunctionsButton(SerializedProperty functions)
@@ -419,18 +474,16 @@ namespace KingdomSurvival.Encounters.Editor
         // СЦЕНА: связанный диалог, его начало, «▶ Играть».
         private void BuildSceneSection(SerializedProperty e)
         {
-            AddHeader(encounterDetails, "СЦЕНА");
-            AddDialogueSection(encounterDetails, e.FindPropertyRelative("DialogueId"));
+            AddDialogueSection(section, e.FindPropertyRelative("DialogueId"));
         }
 
         // КОГДА ВЫПАДАЕТ: фраза + правка шанса, повторов, мест, условий, флагов.
         private void BuildWhenSection(SerializedProperty e)
         {
-            AddHeader(encounterDetails, "КОГДА ВЫПАДАЕТ");
             whenSentence = new Label(EncounterEditorLabels.DescribeWhen(database.Encounters[selectedEncounterIndex]));
             whenSentence.style.whiteSpace = WhiteSpace.Normal;
             whenSentence.style.marginBottom = 4f;
-            encounterDetails.Add(whenSentence);
+            section.Add(whenSentence);
 
             VisualElement chanceRow = Row();
             SerializedProperty chance = e.FindPropertyRelative("DiscoveryChancePercent");
@@ -439,7 +492,7 @@ namespace KingdomSurvival.Encounters.Editor
             chanceSlider.style.flexGrow = 1f;
             chanceSlider.RegisterValueChangedCallback(evt => { chance.intValue = evt.newValue; Commit(); });
             chanceRow.Add(chanceSlider);
-            encounterDetails.Add(chanceRow);
+            section.Add(chanceRow);
 
             BuildOccurrencesRow(e);
 
@@ -467,7 +520,7 @@ namespace KingdomSurvival.Encounters.Editor
             eligibilityResult = new VisualElement();
             test.Add(eligibilityResult);
             test.Add(MakeMutedLabel("Проверяет правила этой встречи; шанс пула и бросок не учитываются. Весь пул — во вкладке «Проверка пула»."));
-            encounterDetails.Add(test);
+            section.Add(test);
         }
 
         // «Сколько раз»: один раз / несколько / без ограничений; перерыв — только при повторах.
@@ -502,21 +555,20 @@ namespace KingdomSurvival.Encounters.Editor
                 count.RegisterValueChangedCallback(evt => { max.intValue = Mathf.Max(2, evt.newValue); Commit(); });
                 row.Add(count);
             }
-            encounterDetails.Add(row);
+            section.Add(row);
 
             if (current != 0)
             {
                 IntegerField gap = new IntegerField("Перерыв, ч") { value = cooldown.intValue, tooltip = "Не чаще раза в столько часов" };
                 gap.RegisterValueChangedCallback(evt => { cooldown.intValue = Mathf.Max(0, evt.newValue); Commit(); });
-                encounterDetails.Add(gap);
+                section.Add(gap);
             }
         }
 
         // ЧТО ОСТАЁТСЯ ПОСЛЕ: память мира и флаги.
         private void BuildAfterSection(SerializedProperty e)
         {
-            AddHeader(encounterDetails, "ЧТО ОСТАЁТСЯ ПОСЛЕ");
-            encounterDetails.Add(MakeEnumPopup<EncounterMemoryClass>(e.FindPropertyRelative("MemoryClass"), "Память", EncounterEditorLabels.Memory, 0f));
+            section.Add(MakeEnumPopup<EncounterMemoryClass>(e.FindPropertyRelative("MemoryClass"), "Память", EncounterEditorLabels.Memory, 0f));
             BuildStringList(e.FindPropertyRelative("FlagsSetOnStart"), "Флаги при начале", "флаг");
             BuildStringList(e.FindPropertyRelative("FlagsSetOnComplete"), "Флаги после завершения", "флаг");
             BuildStringList(e.FindPropertyRelative("ClearFlagsOnComplete"), "Снять флаги после завершения", "флаг");
@@ -528,17 +580,15 @@ namespace KingdomSurvival.Encounters.Editor
 
         private void BuildNotesSection(SerializedProperty e)
         {
-            AddHeader(encounterDetails, "ЗАМЕТКИ");
-            encounterDetails.Add(MakeMultilineText(e.FindPropertyRelative("DesignerNotes"), "Заметки автора"));
-            encounterDetails.Add(MakeMultilineText(e.FindPropertyRelative("FutureHooksNotes"), "Зацепки на будущее: продолжения, эхо"));
+            section.Add(MakeMultilineText(e.FindPropertyRelative("DesignerNotes"), "Заметки автора"));
+            section.Add(MakeMultilineText(e.FindPropertyRelative("FutureHooksNotes"), "Зацепки на будущее: продолжения, эхо"));
         }
 
         private void BuildProductionSection(SerializedProperty e)
         {
-            AddHeader(encounterDetails, "ПРОИЗВОДСТВО");
-            encounterDetails.Add(MakeText(e.FindPropertyRelative("EncounterId"), "ID встречи"));
-            encounterDetails.Add(MakeMutedLabel("ID готовой встречи не меняют: его помнят сохранения."));
-            encounterDetails.Add(MakeEnumPopup<EncounterSelectionMode>(e.FindPropertyRelative("SelectionMode"), "Как вызывается", EncounterEditorLabels.SelectionMode, 0f));
+            section.Add(MakeText(e.FindPropertyRelative("EncounterId"), "ID встречи"));
+            section.Add(MakeMutedLabel("ID готовой встречи не меняют: его помнят сохранения."));
+            section.Add(MakeEnumPopup<EncounterSelectionMode>(e.FindPropertyRelative("SelectionMode"), "Как вызывается", EncounterEditorLabels.SelectionMode, 0f));
 
             List<string> poolIds = new List<string>();
             foreach (EncounterPoolDefinition pool in database.Pools)
@@ -549,12 +599,12 @@ namespace KingdomSurvival.Encounters.Editor
                 poolIds.Insert(0, poolId.stringValue);
             PopupField<string> poolField = new PopupField<string>("Пул", poolIds, poolId.stringValue);
             poolField.RegisterValueChangedCallback(evt => { poolId.stringValue = evt.newValue; Commit(); });
-            encounterDetails.Add(poolField);
+            section.Add(poolField);
 
             SerializedProperty weight = e.FindPropertyRelative("SelectionWeight");
             IntegerField weightField = new IntegerField("Вес среди кандидатов") { value = weight.intValue, tooltip = "Чем больше, тем чаще выбирается среди прошедших встреч" };
             weightField.RegisterValueChangedCallback(evt => { weight.intValue = Mathf.Max(0, evt.newValue); Commit(); });
-            encounterDetails.Add(weightField);
+            section.Add(weightField);
 
             BuildStringList(e.FindPropertyRelative("Tags"), "Теги (для поиска)", "тег", "нет", true);
         }
@@ -663,7 +713,7 @@ namespace KingdomSurvival.Encounters.Editor
             }, TrickleDown.TrickleDown);
             chips.Add(input);
             block.Add(chips);
-            encounterDetails.Add(block);
+            section.Add(block);
 
             if (list.arraySize == 0 && openSections.Contains(key))
                 input.schedule.Execute(() => input.Focus());
@@ -706,7 +756,7 @@ namespace KingdomSurvival.Encounters.Editor
             }) { text = "+ ещё условие" };
             add.style.alignSelf = Align.FlexStart;
             block.Add(add);
-            encounterDetails.Add(block);
+            section.Add(block);
         }
 
         private VisualElement MakeConditionRow(SerializedProperty conditions, int index)
@@ -808,7 +858,7 @@ namespace KingdomSurvival.Encounters.Editor
                 row.Add(add);
             }
             if (row.childCount > 0)
-                encounterDetails.Add(row);
+                section.Add(row);
         }
 
         // ---------------------------------------------------------------

@@ -19,12 +19,19 @@ namespace KingdomSurvival.Encounters.Editor
 
         private void BuildPoolCheckTab(VisualElement root)
         {
-            ScrollView pane = new ScrollView();
-            pane.style.flexGrow = 1f;
-            pane.style.paddingLeft = 12f;
-            pane.style.paddingRight = 12f;
-            pane.style.paddingTop = 8f;
-            root.Add(pane);
+            ScrollView scroll = new ScrollView();
+            scroll.style.flexGrow = 1f;
+            scroll.style.paddingLeft = 10f;
+            scroll.style.paddingRight = 2f;
+            scroll.style.paddingTop = 10f;
+            StyleCardPane(scroll);
+            root.Add(scroll);
+
+            // Выбор пула — шапкой во всю ширину, разделы — карточками ниже.
+            VisualElement pane = SectionCard("ПУЛ", SceneAccent, 0f);
+            pane.style.flexGrow = 0f;
+            pane.style.flexBasis = StyleKeyword.Auto;
+            scroll.Add(pane);
 
             serializedDatabase.Update();
             List<string> poolIds = new List<string>();
@@ -55,21 +62,28 @@ namespace KingdomSurvival.Encounters.Editor
                     members++;
             pane.Add(MakeMutedLabel("Готовых встреч в пуле: " + members + "."));
 
-            AddHeader(pane, "ТЕСТОВЫЕ УСЛОВИЯ");
-            BuildPreviewContextFields(pane);
+            VisualElement grid = CardGrid();
+            scroll.Add(grid);
 
-            AddHeader(pane, "СИМУЛЯЦИЯ");
+            VisualElement conditions = SectionCard("ТЕСТОВЫЕ УСЛОВИЯ", WhenAccent, 360f);
+            BuildPreviewContextFields(conditions);
+            grid.Add(conditions);
+
+            VisualElement settings = SectionCard("НАСТРОЙКИ ПУЛА", ProductionAccent, 360f);
+            BuildPoolSettings(settings, selectedPoolId);
+            grid.Add(settings);
+
+            VisualElement simulation = SectionCard("СИМУЛЯЦИЯ", AfterAccent, 360f);
+            simulation.style.flexBasis = Length.Percent(100f);
             simulationTrialsField = new IntegerField("Прогонов одной возможности") { value = DefaultSimulationTrials };
-            pane.Add(simulationTrialsField);
+            simulation.Add(simulationTrialsField);
             VisualElement buttons = Row();
             buttons.Add(new Button(RunMonteCarloSimulation) { text = "Что выпадает чаще", tooltip = "Одна и та же возможность встречи N раз: распределение результатов" });
             buttons.Add(new Button(RunJourneySimulation) { text = "100 путешествий по 30 дней", tooltip = "Дни идут подряд: учитываются одноразовость, перерывы и флаги" });
-            pane.Add(buttons);
+            simulation.Add(buttons);
             simulationResult = new VisualElement();
-            pane.Add(simulationResult);
-
-            AddHeader(pane, "НАСТРОЙКИ ПУЛА");
-            BuildPoolSettings(pane, selectedPoolId);
+            simulation.Add(simulationResult);
+            grid.Add(simulation);
         }
 
         private void BuildPoolSettings(VisualElement parent, string poolId)

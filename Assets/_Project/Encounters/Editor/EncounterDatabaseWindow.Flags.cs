@@ -20,6 +20,8 @@ namespace KingdomSurvival.Encounters.Editor
         private Button flagFilterButton;
         private ListView flagList;
         private ScrollView flagDetails;
+        // Карточка раздела флага, в которую сейчас добавляются поля.
+        private VisualElement flagSection;
         private Label flagEmptyHint;
         private Label flagValidationLabel;
         private VisualElement flagValidationPanel;
@@ -42,6 +44,16 @@ namespace KingdomSurvival.Encounters.Editor
                 case EncounterFlagStatus.Reserved: return "Закладка на будущее";
                 case EncounterFlagStatus.Deprecated: return "Устарел";
                 default: return status.ToString();
+            }
+        }
+
+        private static Color FlagStatusColor(EncounterFlagStatus status)
+        {
+            switch (status)
+            {
+                case EncounterFlagStatus.Active: return new Color(0.45f, 0.78f, 0.48f, 1f);
+                case EncounterFlagStatus.Reserved: return new Color(0.40f, 0.62f, 0.90f, 1f);
+                default: return new Color(0.82f, 0.36f, 0.32f, 1f);
             }
         }
 
@@ -188,7 +200,8 @@ namespace KingdomSurvival.Encounters.Editor
 
             EncounterFlagDefinition flag = flagRegistry.Flags[visibleFlagIndices[visibleIndex]];
             Label title = row.Q<Label>("title");
-            title.text = FlagStatusDot(flag.Status) + " " + (string.IsNullOrWhiteSpace(flag.DisplayName) ? flag.FlagId : flag.DisplayName);
+            title.text = string.IsNullOrWhiteSpace(flag.DisplayName) ? flag.FlagId : flag.DisplayName;
+            row.Q("status-bar").style.backgroundColor = FlagStatusColor(flag.Status);
             title.tooltip = FlagStatusLabel(flag.Status);
 
             FlagUsage usage = CollectFlagUsage(flag.FlagId);
@@ -269,6 +282,7 @@ namespace KingdomSurvival.Encounters.Editor
             flagDetails.style.paddingRight = 12f;
             flagDetails.style.paddingTop = 8f;
             flagDetails.style.paddingBottom = 16f;
+            StyleCardPane(flagDetails);
             pane.Add(flagDetails);
             return pane;
         }
@@ -299,7 +313,11 @@ namespace KingdomSurvival.Encounters.Editor
             SerializedProperty f = flagsProperty.GetArrayElementAtIndex(selectedFlagIndex);
             string flagId = f.FindPropertyRelative("FlagId").stringValue;
 
-            // Название и статус.
+            // Шапка флага: название, статус, группа, описание.
+            flagSection = SectionCard(null, FlagStatusColor((EncounterFlagStatus)f.FindPropertyRelative("Status").enumValueIndex), 0f);
+            flagSection.style.flexGrow = 0f;
+            flagSection.style.flexBasis = StyleKeyword.Auto;
+            flagDetails.Add(flagSection);
             VisualElement header = Row();
             TextField title = new TextField { value = f.FindPropertyRelative("DisplayName").stringValue, tooltip = "Название флага" };
             title.style.flexGrow = 1f;
@@ -319,7 +337,7 @@ namespace KingdomSurvival.Encounters.Editor
                 flagDetails.schedule.Execute(ShowSelectedFlag);
             });
             header.Add(statusField);
-            flagDetails.Add(header);
+            flagSection.Add(header);
 
             // Группа: свободный текст + выбор из существующих.
             VisualElement groupRow = Row();
@@ -345,7 +363,7 @@ namespace KingdomSurvival.Encounters.Editor
                 menu.DropDown(pickGroup.worldBound);
             };
             groupRow.Add(pickGroup);
-            flagDetails.Add(groupRow);
+            flagSection.Add(groupRow);
 
             TextField description = new TextField { value = f.FindPropertyRelative("Description").stringValue, multiline = true, tooltip = "Что означает флаг в мире" };
             description.textEdition.placeholder = "Что означает флаг: какое событие или решение он помнит";
@@ -353,10 +371,13 @@ namespace KingdomSurvival.Encounters.Editor
             description.style.minHeight = 36f;
             description.style.marginTop = 4f;
             description.RegisterValueChangedCallback(evt => { f.FindPropertyRelative("Description").stringValue = evt.newValue; CommitFlags(); });
-            flagDetails.Add(description);
+            flagSection.Add(description);
 
             // Где используется.
-            AddHeader(flagDetails, "ГДЕ ИСПОЛЬЗУЕТСЯ");
+            VisualElement flagGrid = CardGrid();
+            flagDetails.Add(flagGrid);
+            flagSection = SectionCard("ГДЕ ИСПОЛЬЗУЕТСЯ", WhenAccent, 340f);
+            flagGrid.Add(flagSection);
             FlagUsage usage = CollectFlagUsage(flagId);
             EncounterFlagStatus statusValue = (EncounterFlagStatus)status.enumValueIndex;
             if (!usage.IsUsed)
@@ -366,7 +387,7 @@ namespace KingdomSurvival.Encounters.Editor
                     : "Флаг нигде не ставится и не проверяется.");
                 if (statusValue == EncounterFlagStatus.Active)
                     hint.style.color = BadColor;
-                flagDetails.Add(hint);
+                flagSection.Add(hint);
             }
             else
             {
@@ -374,20 +395,22 @@ namespace KingdomSurvival.Encounters.Editor
                 AddUsageRow("Проверяется", usage.ReadBy);
                 AddUsageRow("Снимается", usage.ClearedBy);
                 if (usage.SetBy.Count == 0 && usage.ReadBy.Count > 0)
-                    flagDetails.Add(MakeMutedLabel("Флаг проверяют, но нигде не ставят: такие условия никогда не выполнятся."));
+                    flagSection.Add(MakeMutedLabel("Флаг проверяют, но нигде не ставят: такие условия никогда не выполнятся."));
             }
 
-            AddHeader(flagDetails, "ЗАМЕТКИ");
+            flagSection = SectionCard("ЗАМЕТКИ", NotesAccent, 340f);
+            flagGrid.Add(flagSection);
             TextField notes = new TextField { value = f.FindPropertyRelative("FutureUseNotes").stringValue, multiline = true };
             notes.textEdition.placeholder = "Зачем флаг пригодится дальше: продолжения, эхо";
             notes.style.whiteSpace = WhiteSpace.Normal;
             notes.style.minHeight = 36f;
             notes.RegisterValueChangedCallback(evt => { f.FindPropertyRelative("FutureUseNotes").stringValue = evt.newValue; CommitFlags(); });
-            flagDetails.Add(notes);
+            flagSection.Add(notes);
 
             if (showProduction)
             {
-                AddHeader(flagDetails, "ПРОИЗВОДСТВО");
+                flagSection = SectionCard("ПРОИЗВОДСТВО", ProductionAccent, 340f);
+                flagGrid.Add(flagSection);
                 TextField id = new TextField("ID флага") { value = flagId };
                 id.isDelayed = true;
                 id.RegisterValueChangedCallback(evt =>
@@ -396,8 +419,8 @@ namespace KingdomSurvival.Encounters.Editor
                     CommitFlags();
                     ShowSelectedFlag();
                 });
-                flagDetails.Add(id);
-                flagDetails.Add(MakeMutedLabel("ID пишется во встречах, диалогах и сохранениях. Переименование здесь ссылки не обновляет."));
+                flagSection.Add(id);
+                flagSection.Add(MakeMutedLabel("ID пишется во встречах, диалогах и сохранениях. Переименование здесь ссылки не обновляет."));
             }
         }
 
@@ -418,7 +441,7 @@ namespace KingdomSurvival.Encounters.Editor
                 link.style.height = 18f;
                 row.Add(link);
             }
-            flagDetails.Add(row);
+            flagSection.Add(row);
         }
 
         // Встречи и диалоги, которые ставят, проверяют и снимают флаг.

@@ -4,8 +4,9 @@ using UnityEngine;
 
 namespace KingdomSurvival.UnitDatabase.Editor
 {
-    // ПР-12Ж: прототипный боевой каталог из 24 существ и 8 составов
-    // тестового боя (BESTIARY_COMBAT_PASSPORTS.md, «Прототипный каталог 24»).
+    // ПР-12Ж: прототипный боевой каталог из 24 существ
+    // (BESTIARY_COMBAT_PASSPORTS.md, «Прототипный каталог 24»). Готовые составы
+    // тестового боя убраны 01.10.2026: полигон собирает обе стороны сам.
     // [РАБОЧЕЕ — БОЕВОЙ СЛОЙ]. Засев только ДОБАВЛЯЕТ недостающие записи и
     // никогда не перезаписывает существующие: после засева числа правятся в
     // окне Базы существ, а не здесь.
@@ -47,11 +48,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
             {
                 if (database.AddUnitIfMissing(creature))
                     added.Add(creature.Id);
-            }
-            foreach (UnitEncounterPreset preset in Presets())
-            {
-                if (database.AddPresetIfMissing(preset))
-                    added.Add(preset.Id);
             }
             return added;
         }
@@ -110,29 +106,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
             };
         }
 
-        public static List<UnitEncounterPreset> Presets()
-        {
-            return new List<UnitEncounterPreset>
-            {
-                UnitEncounterPreset.Create("preset.swarm", "Много мелочи", "Окружение, ценность стойки и ответного удара.",
-                    S("sheshka", 6)),
-                UnitEncounterPreset.Create("preset.fast", "Несколько быстрых", "Тающий строй, кто успевает первым.",
-                    S("wolf", 2), S("krivolap", 2)),
-                UnitEncounterPreset.Create("preset.covered_archer", "Дальник под прикрытием", "Дойти до стрелка мимо брони.",
-                    S("shipovik", 2), S("kamnespin", 1)),
-                UnitEncounterPreset.Create("preset.blocker_archer", "Толстый блокер и стрелок", "Обойти или продавить проход.",
-                    S("tinny_polzun", 1), S("shipovik", 1)),
-                UnitEncounterPreset.Create("preset.one_strong", "Один сильный против группы", "Концентрация ударов, раненые.",
-                    S("bear", 1)),
-                UnitEncounterPreset.Create("preset.glass_killers", "Хрупкие убийцы", "Кто ходит первым, защита слабых.",
-                    S("lynx", 2), S("srubnik", 1)),
-                UnitEncounterPreset.Create("preset.slow_heavy", "Медленный тяжёлый зверь", "Темп и отход.",
-                    S("boar", 1), S("bivnesty_gromila", 1)),
-                UnitEncounterPreset.Create("preset.boss_retinue", "Мини-босс со свитой", "Снять свиту или бить вожака.",
-                    S("belorev", 1), S("wolf", 2))
-            };
-        }
-
         private static UnitDefinitionData C(string id, string label, UnitSize size,
             int hp, int attack, int defense, int damage, int movement, int initiative, int range,
             string[] tags, params UnitAbilityData[] abilities)
@@ -143,11 +116,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
         private static UnitAbilityData A(string id, string title, UnitCombatBrick brick, string description)
         {
             return UnitAbilityData.WaitingFor(id, title, brick, description);
-        }
-
-        private static UnitEncounterSlot S(string unitId, int count)
-        {
-            return new UnitEncounterSlot(unitId, count);
         }
     }
 }

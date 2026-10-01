@@ -89,64 +89,6 @@ namespace KingdomSurvival.UnitDatabase
     }
 
     [Serializable]
-    public sealed class UnitEncounterSlot
-    {
-        [SerializeField] private string unitId = string.Empty;
-        [SerializeField, Min(1)] private int count = 1;
-
-        public string UnitId => unitId;
-        public int Count => Mathf.Max(1, count);
-
-        public UnitEncounterSlot()
-        {
-        }
-
-        public UnitEncounterSlot(string unitId, int count)
-        {
-            this.unitId = unitId ?? string.Empty;
-            this.count = Mathf.Max(1, count);
-        }
-    }
-
-    // Готовый состав противников для тестового боя.
-    [Serializable]
-    public sealed class UnitEncounterPreset
-    {
-        [SerializeField] private string id = string.Empty;
-        [SerializeField] private string title = string.Empty;
-        [SerializeField, TextArea(1, 3)] private string purpose = string.Empty;
-        [SerializeField] private List<UnitEncounterSlot> slots = new List<UnitEncounterSlot>();
-
-        public string Id => id;
-        public string Title => title;
-        public string Purpose => purpose;
-        public IReadOnlyList<UnitEncounterSlot> Slots => slots;
-
-        public int TotalCount
-        {
-            get
-            {
-                int total = 0;
-                if (slots != null)
-                    foreach (UnitEncounterSlot slot in slots)
-                        total += slot != null ? slot.Count : 0;
-                return total;
-            }
-        }
-
-        public static UnitEncounterPreset Create(string id, string title, string purpose, params UnitEncounterSlot[] slots)
-        {
-            return new UnitEncounterPreset
-            {
-                id = id ?? string.Empty,
-                title = title ?? string.Empty,
-                purpose = purpose ?? string.Empty,
-                slots = new List<UnitEncounterSlot>(slots ?? Array.Empty<UnitEncounterSlot>())
-            };
-        }
-    }
-
-    [Serializable]
     public sealed class UnitTagDefinition
     {
         [SerializeField] private string id = string.Empty;
@@ -199,9 +141,6 @@ namespace KingdomSurvival.UnitDatabase
         // на поле статичная миниатюра или жетон, как раньше.
         [SerializeField] private string animationSetId = string.Empty;
 
-        [Header("Тестовый бой")]
-        [SerializeField, Min(0)] private int sandboxEncounterCount;
-
         [Header("Теги")]
         [SerializeField] private List<string> tagIds = new List<string>();
 
@@ -233,7 +172,6 @@ namespace KingdomSurvival.UnitDatabase
         public float BattlefieldScale => Mathf.Max(0.1f, battlefieldScale);
         public Vector2 BattlefieldOffset => battlefieldOffset;
         public string AnimationSetId => animationSetId ?? string.Empty;
-        public int SandboxEncounterCount => Mathf.Max(0, sandboxEncounterCount);
         public IReadOnlyList<string> TagIds => tagIds;
 
         // Существо каталога без рисунков: портрет и миниатюру назначает
@@ -266,7 +204,6 @@ namespace KingdomSurvival.UnitDatabase
                 movement = Mathf.Max(1, movement),
                 initiative = Mathf.Max(0, initiative),
                 attackRange = Mathf.Max(1, attackRange),
-                sandboxEncounterCount = 0,
                 tagIds = new List<string>(tagIds ?? Array.Empty<string>()),
                 abilities = new List<UnitAbilityData>(abilities ?? Array.Empty<UnitAbilityData>())
             };
@@ -307,20 +244,18 @@ namespace KingdomSurvival.UnitDatabase
         public const string ResourcesPath = "UnitDatabase/KingdomSurvivalUnits";
         // Схема 2 (ПР-12Ж): размер и способности существ, составы боя.
         // Схема 3 (ПР-12З): ссылка на набор анимаций; пустая у старых записей.
-        public const int CurrentSchemaVersion = 3;
+        // Схема 4 (01.10.2026): убраны готовые составы и засада тестового боя —
+        // полигон собирает обе стороны сам; старые поля в файле игнорируются.
+        public const int CurrentSchemaVersion = 4;
 
-        // Сколько противников помещается в один бой (SandboxRoster.MaxEnemies).
-        public const int MaxEncounterSize = 8;
 
         [SerializeField, HideInInspector] private int schemaVersion;
         [SerializeField] private List<UnitTagDefinition> tags = new List<UnitTagDefinition>();
         [SerializeField] private List<UnitDefinitionData> units = new List<UnitDefinitionData>();
-        [SerializeField] private List<UnitEncounterPreset> encounterPresets = new List<UnitEncounterPreset>();
 
         public int SchemaVersion => schemaVersion;
         public IReadOnlyList<UnitTagDefinition> Tags => tags;
         public IReadOnlyList<UnitDefinitionData> Units => units;
-        public IReadOnlyList<UnitEncounterPreset> EncounterPresets => encounterPresets;
 
         /// <summary>
         /// Переносит старое пиксельное кадрирование портретов в доли рамки
@@ -339,8 +274,6 @@ namespace KingdomSurvival.UnitDatabase
                     units[i]?.MigrateLegacyPortraitFraming();
             }
 
-            if (encounterPresets == null)
-                encounterPresets = new List<UnitEncounterPreset>();
             schemaVersion = CurrentSchemaVersion;
             return true;
         }
@@ -352,28 +285,6 @@ namespace KingdomSurvival.UnitDatabase
                 return false;
             units.Add(unit);
             return true;
-        }
-
-        public bool AddPresetIfMissing(UnitEncounterPreset preset)
-        {
-            if (preset == null || string.IsNullOrWhiteSpace(preset.Id) || FindPreset(preset.Id) != null)
-                return false;
-            if (encounterPresets == null)
-                encounterPresets = new List<UnitEncounterPreset>();
-            encounterPresets.Add(preset);
-            return true;
-        }
-
-        public UnitEncounterPreset FindPreset(string presetId)
-        {
-            if (string.IsNullOrWhiteSpace(presetId) || encounterPresets == null)
-                return null;
-            foreach (UnitEncounterPreset preset in encounterPresets)
-            {
-                if (preset != null && string.Equals(preset.Id, presetId, StringComparison.Ordinal))
-                    return preset;
-            }
-            return null;
         }
 
         // Существа, которые ждут рисунка художника. Это не ошибка базы:
@@ -481,28 +392,6 @@ namespace KingdomSurvival.UnitDatabase
                         issues.Add(unit.Id + ": повторяющийся ID способности " + ability.Id + ".");
                     else if (string.IsNullOrWhiteSpace(ability.Title))
                         issues.Add(unit.Id + ": у способности " + ability.Id + " нет названия.");
-                }
-            }
-
-            HashSet<string> presetIds = new HashSet<string>(StringComparer.Ordinal);
-            foreach (UnitEncounterPreset preset in encounterPresets ?? new List<UnitEncounterPreset>())
-            {
-                if (preset == null || string.IsNullOrWhiteSpace(preset.Id))
-                {
-                    issues.Add("Состав боя без ID.");
-                    continue;
-                }
-                if (!presetIds.Add(preset.Id))
-                    issues.Add("Повторяющийся ID состава боя: " + preset.Id + ".");
-                if (preset.TotalCount < 1 || preset.TotalCount > MaxEncounterSize)
-                    issues.Add("Состав " + preset.Id + ": противников должно быть от 1 до " + MaxEncounterSize + ".");
-                foreach (UnitEncounterSlot slot in preset.Slots)
-                {
-                    UnitDefinitionData member = slot != null ? FindById(slot.UnitId) : null;
-                    if (member == null)
-                        issues.Add("Состав " + preset.Id + ": неизвестное существо " + (slot != null ? slot.UnitId : "?") + ".");
-                    else if (member.Category != UnitCategory.Creature)
-                        issues.Add("Состав " + preset.Id + ": " + member.Id + " не существо.");
                 }
             }
         }

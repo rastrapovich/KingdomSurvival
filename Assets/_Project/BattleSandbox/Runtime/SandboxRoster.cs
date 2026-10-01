@@ -13,7 +13,7 @@ namespace KingdomSurvival.BattleSandbox
         private const int TerrainGenerationAttempts = 64;
 
         // ПР-12Ж: столько противников помещается в один бой
-        // (UnitDatabaseAsset.MaxEncounterSize — то же число для составов).
+        // (правая колонка полигона, противники кампании).
         public const int MaxEnemies = 8;
 
         private static readonly SandboxUnitDefinition[] PlayerRosterData =

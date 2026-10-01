@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f6a8d629e1644bd8b451c1cf11db201, type: 3}
   m_Name: KingdomSurvivalUnits
   m_EditorClassIdentifier: 
-  schemaVersion: 3
+  schemaVersion: 4
   tags:
   - id: species.human
     displayLabel: "\u0427\u0435\u043B\u043E\u0432\u0435\u043A"
@@ -100,7 +100,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.human
     - role.defender
@@ -128,7 +127,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.human
     - combat.ranged
@@ -155,7 +153,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.human
     size: 0
@@ -181,7 +178,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: -9, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.human
     - trait.beast_slayer
@@ -208,7 +204,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.human
     size: 0
@@ -221,7 +216,7 @@ MonoBehaviour:
     attack: 2
     defense: 2
     damage: 3
-    movement: 3
+    movement: 24
     initiative: 2
     attackRange: 1
     portrait: {fileID: 21300000, guid: 6e6b1183fa308e64e8773ce8b59a02c9, type: 3}
@@ -234,7 +229,6 @@ MonoBehaviour:
     battlefieldScale: 1.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: militia
-    sandboxEncounterCount: 0
     tagIds:
     - species.human
     size: 0
@@ -260,7 +254,6 @@ MonoBehaviour:
     battlefieldScale: 1.1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 2
     tagIds:
     - species.beast
     size: 0
@@ -286,7 +279,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 1
     tagIds:
     - species.beast
     size: 0
@@ -312,7 +304,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 1
     tagIds:
     - species.beast
     - trait.human_slayer
@@ -339,7 +330,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     size: 0
@@ -372,7 +362,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     size: 0
@@ -405,7 +394,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     size: 0
@@ -438,7 +426,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     size: 2
@@ -471,7 +458,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     size: 2
@@ -503,7 +489,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds: []
     size: 1
     abilities: []
@@ -528,7 +513,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds: []
     size: 1
     abilities: []
@@ -553,7 +537,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     size: 1
@@ -587,7 +570,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     size: 0
@@ -619,7 +601,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     size: 0
@@ -657,7 +638,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - combat.ranged
     size: 0
@@ -690,7 +670,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - combat.ranged
     size: 0
@@ -716,7 +695,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - combat.ranged
     size: 1
@@ -749,7 +727,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - role.defender
     size: 2
@@ -782,7 +759,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - trait.armored
     - role.defender
@@ -809,7 +785,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds: []
     size: 2
     abilities:
@@ -841,7 +816,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - trait.human_slayer
     size: 0
@@ -874,7 +848,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     size: 2
@@ -908,7 +881,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - trait.human_slayer
     size: 2
@@ -934,7 +906,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds: []
     size: 0
     abilities:
@@ -971,7 +942,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - combat.ranged
     size: 2
@@ -1004,7 +974,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds: []
     size: 2
     abilities:
@@ -1042,7 +1011,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     size: 2
@@ -1075,7 +1043,6 @@ MonoBehaviour:
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
-    sandboxEncounterCount: 0
     tagIds:
     - species.beast
     - trait.armored
@@ -1095,75 +1062,3 @@ MonoBehaviour:
         \u0432\u0438\u0434\u043D\u0430 \u0437\u0430 \u0445\u043E\u0434."
       brick: 9
       status: 0
-  encounterPresets:
-  - id: preset.swarm
-    title: "\u041C\u043D\u043E\u0433\u043E \u043C\u0435\u043B\u043E\u0447\u0438"
-    purpose: "\u041E\u043A\u0440\u0443\u0436\u0435\u043D\u0438\u0435, \u0446\u0435\u043D\u043D\u043E\u0441\u0442\u044C
-      \u0441\u0442\u043E\u0439\u043A\u0438 \u0438 \u043E\u0442\u0432\u0435\u0442\u043D\u043E\u0433\u043E
-      \u0443\u0434\u0430\u0440\u0430."
-    slots:
-    - unitId: sheshka
-      count: 6
-  - id: preset.fast
-    title: "\u041D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0431\u044B\u0441\u0442\u0440\u044B\u0445"
-    purpose: "\u0422\u0430\u044E\u0449\u0438\u0439 \u0441\u0442\u0440\u043E\u0439,
-      \u043A\u0442\u043E \u0443\u0441\u043F\u0435\u0432\u0430\u0435\u0442 \u043F\u0435\u0440\u0432\u044B\u043C."
-    slots:
-    - unitId: wolf
-      count: 2
-    - unitId: krivolap
-      count: 2
-  - id: preset.covered_archer
-    title: "\u0414\u0430\u043B\u044C\u043D\u0438\u043A \u043F\u043E\u0434 \u043F\u0440\u0438\u043A\u0440\u044B\u0442\u0438\u0435\u043C"
-    purpose: "\u0414\u043E\u0439\u0442\u0438 \u0434\u043E \u0441\u0442\u0440\u0435\u043B\u043A\u0430
-      \u043C\u0438\u043C\u043E \u0431\u0440\u043E\u043D\u0438."
-    slots:
-    - unitId: shipovik
-      count: 2
-    - unitId: kamnespin
-      count: 1
-  - id: preset.blocker_archer
-    title: "\u0422\u043E\u043B\u0441\u0442\u044B\u0439 \u0431\u043B\u043E\u043A\u0435\u0440
-      \u0438 \u0441\u0442\u0440\u0435\u043B\u043E\u043A"
-    purpose: "\u041E\u0431\u043E\u0439\u0442\u0438 \u0438\u043B\u0438 \u043F\u0440\u043E\u0434\u0430\u0432\u0438\u0442\u044C
-      \u043F\u0440\u043E\u0445\u043E\u0434."
-    slots:
-    - unitId: tinny_polzun
-      count: 1
-    - unitId: shipovik
-      count: 1
-  - id: preset.one_strong
-    title: "\u041E\u0434\u0438\u043D \u0441\u0438\u043B\u044C\u043D\u044B\u0439 \u043F\u0440\u043E\u0442\u0438\u0432
-      \u0433\u0440\u0443\u043F\u043F\u044B"
-    purpose: "\u041A\u043E\u043D\u0446\u0435\u043D\u0442\u0440\u0430\u0446\u0438\u044F
-      \u0443\u0434\u0430\u0440\u043E\u0432, \u0440\u0430\u043D\u0435\u043D\u044B\u0435."
-    slots:
-    - unitId: bear
-      count: 1
-  - id: preset.glass_killers
-    title: "\u0425\u0440\u0443\u043F\u043A\u0438\u0435 \u0443\u0431\u0438\u0439\u0446\u044B"
-    purpose: "\u041A\u0442\u043E \u0445\u043E\u0434\u0438\u0442 \u043F\u0435\u0440\u0432\u044B\u043C,
-      \u0437\u0430\u0449\u0438\u0442\u0430 \u0441\u043B\u0430\u0431\u044B\u0445."
-    slots:
-    - unitId: lynx
-      count: 2
-    - unitId: srubnik
-      count: 1
-  - id: preset.slow_heavy
-    title: "\u041C\u0435\u0434\u043B\u0435\u043D\u043D\u044B\u0439 \u0442\u044F\u0436\u0451\u043B\u044B\u0439
-      \u0437\u0432\u0435\u0440\u044C"
-    purpose: "\u0422\u0435\u043C\u043F \u0438 \u043E\u0442\u0445\u043E\u0434."
-    slots:
-    - unitId: boar
-      count: 1
-    - unitId: bivnesty_gromila
-      count: 1
-  - id: preset.boss_retinue
-    title: "\u041C\u0438\u043D\u0438-\u0431\u043E\u0441\u0441 \u0441\u043E \u0441\u0432\u0438\u0442\u043E\u0439"
-    purpose: "\u0421\u043D\u044F\u0442\u044C \u0441\u0432\u0438\u0442\u0443 \u0438\u043B\u0438
-      \u0431\u0438\u0442\u044C \u0432\u043E\u0436\u0430\u043A\u0430."
-    slots:
-    - unitId: belorev
-      count: 1
-    - unitId: wolf
-      count: 2

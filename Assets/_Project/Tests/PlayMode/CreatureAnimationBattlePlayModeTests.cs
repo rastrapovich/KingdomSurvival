@@ -77,7 +77,9 @@ public sealed class CreatureAnimationBattlePlayModeTests
 
         Assert.AreEqual(3, Images(board).Count, "Все трое нарисованы картинками набора.");
         StringAssert.StartsWith("Idle_Front_", SpriteName(board, "hero"), "Герой слева смотрит вправо (таблица ракурсов по умолчанию: Front — вправо).");
-        StringAssert.StartsWith("Idle_Back_", SpriteName(board, "beastA"), "Противник справа смотрит влево (Back).");
+        StringAssert.StartsWith("Idle_Front_", SpriteName(board, "beastA"), "Противник смотрит влево зеркально: кадры «вправо» (лицом к камере).");
+        Assert.AreEqual(-1f, ((Image)Images(board)["beastA"]).style.scale.value.value.x, 0.001f, "Картинка противника отражена.");
+        Assert.AreEqual(1f, ((Image)Images(board)["hero"]).style.scale.value.value.x, 0.001f, "Свой боец не отражён.");
 
         int mark = killBattle.HitRecords.Count;
         Assert.IsTrue(killBattle.TryAttack("hero", "beastA", out string message), message);
@@ -95,7 +97,7 @@ public sealed class CreatureAnimationBattlePlayModeTests
         Assert.AreEqual(0, killBattle.GetUnit("beastA").HitPoints, "Исход посчитан моделью один раз.");
         StringAssert.StartsWith("Death_", SpriteName(board, "beastA"), "Павший остаётся кадром смерти.");
         yield return WaitSeconds(0.6f);
-        Assert.AreEqual("Death_Back_3", SpriteName(board, "beastA"), "Смерть держит последний кадр и не возвращается к ожиданию.");
+        Assert.AreEqual("Death_Front_3", SpriteName(board, "beastA"), "Смерть держит последний кадр и не возвращается к ожиданию.");
         Assert.IsFalse(HealthBars(board).Contains("beastA"), "У павшего нет полосы здоровья.");
         StringAssert.StartsWith("Idle_", SpriteName(board, "hero"), "После атаки — снова ожидание.");
 

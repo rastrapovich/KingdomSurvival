@@ -72,33 +72,29 @@ namespace KingdomSurvival.BattleSandbox
         }
     }
 
-    // ПР-12Ж: готовый состав противников тестового боя из Базы существ.
-    internal sealed class SandboxEncounterChoice
-    {
-        public string Id { get; }
-        public string Title { get; }
-        public string Purpose { get; }
-        public IReadOnlyList<SandboxUnitDefinition> Enemies { get; }
 
-        public SandboxEncounterChoice(string id, string title, string purpose, IReadOnlyList<SandboxUnitDefinition> enemies)
+    // Тип из Базы существ для выбора в полигоне: в любую из двух колонок.
+    internal sealed class SandboxUnitOption
+    {
+        public SandboxUnitDefinition Definition { get; }
+        public string Group { get; }
+
+        public SandboxUnitOption(SandboxUnitDefinition definition, string group)
         {
-            Id = id ?? string.Empty;
-            Title = title ?? string.Empty;
-            Purpose = purpose ?? string.Empty;
-            Enemies = enemies ?? new List<SandboxUnitDefinition>();
+            Definition = definition ?? throw new ArgumentNullException(nameof(definition));
+            Group = group ?? string.Empty;
         }
     }
 
     internal sealed class SandboxUnitContent
     {
-        // ПР-12Ж: все существа базы по порядку (свой состав) и готовые составы.
-        public List<SandboxUnitDefinition> Creatures { get; } = new List<SandboxUnitDefinition>();
-        public List<SandboxEncounterChoice> Presets { get; } = new List<SandboxEncounterChoice>();
-
         private readonly Dictionary<string, SandboxUnitVisual> visuals;
 
+        // Все типы базы по порядку: полигон ставит любого с любой стороны.
+        public List<SandboxUnitOption> AllUnits { get; } = new List<SandboxUnitOption>();
+
+        // Бойцы — основа людей кампании (UnitTypeId).
         public IReadOnlyList<SandboxUnitDefinition> PlayerRoster { get; }
-        public IReadOnlyList<SandboxUnitDefinition> EnemyEncounter { get; }
         public bool UsesDatabaseAsset { get; }
 
         // ПР-10: существа по ID — враги из запроса боя кампании.
@@ -107,23 +103,26 @@ namespace KingdomSurvival.BattleSandbox
 
         public SandboxUnitContent(
             IReadOnlyList<SandboxUnitDefinition> playerRoster,
-            IReadOnlyList<SandboxUnitDefinition> enemyEncounter,
             Dictionary<string, SandboxUnitVisual> visuals,
             bool usesDatabaseAsset)
         {
             PlayerRoster = playerRoster ?? throw new ArgumentNullException(nameof(playerRoster));
-            EnemyEncounter = enemyEncounter ?? throw new ArgumentNullException(nameof(enemyEncounter));
             this.visuals = visuals ?? new Dictionary<string, SandboxUnitVisual>();
             UsesDatabaseAsset = usesDatabaseAsset;
-            foreach (SandboxUnitDefinition enemy in enemyEncounter)
-            {
-                if (enemy != null && !CreaturesById.ContainsKey(enemy.Id))
-                    CreaturesById[enemy.Id] = enemy;
-            }
         }
 
         // ПР-12З: таблица ракурсов и наборы; null — анимаций нет, всё статично.
         public CreatureAnimationDatabaseAsset AnimationDatabase { get; set; }
+
+        public SandboxUnitDefinition FindUnit(string typeId)
+        {
+            foreach (SandboxUnitOption option in AllUnits)
+            {
+                if (string.Equals(option.Definition.Id, typeId, StringComparison.Ordinal))
+                    return option.Definition;
+            }
+            return null;
+        }
 
         public SandboxUnitVisual GetVisual(string typeId)
         {
@@ -151,7 +150,7 @@ namespace KingdomSurvival.BattleSandbox
                 CreatureAnimationDatabaseAsset.ResourcesPath);
 
             List<SandboxUnitDefinition> fighters = new List<SandboxUnitDefinition>();
-            List<SandboxUnitDefinition> enemies = new List<SandboxUnitDefinition>();
+            List<SandboxUnitOption> options = new List<SandboxUnitOption>();
             Dictionary<string, SandboxUnitVisual> visuals =
                 new Dictionary<string, SandboxUnitVisual>(StringComparer.Ordinal);
             HashSet<string> acceptedIds = new HashSet<string>(StringComparer.Ordinal);
@@ -192,72 +191,51 @@ namespace KingdomSurvival.BattleSandbox
                     SandboxUnitVisual.TokenScaleFor(source.Size),
                     animations != null ? animations.FindSet(source.AnimationSetId) : null);
 
+                options.Add(new SandboxUnitOption(definition, GroupLabel(source.Category)));
                 if (source.Category == UnitCategory.Fighter)
-                {
                     fighters.Add(definition);
-                    continue;
-                }
-
-                if (source.Category != UnitCategory.Creature)
-                    continue;
-                creatures[source.Id] = definition;
-
-                for (int count = 0; count < source.SandboxEncounterCount; count++)
-                    enemies.Add(definition);
+                else if (source.Category == UnitCategory.Creature)
+                    creatures[source.Id] = definition;
             }
 
-            if (fighters.Count == 0 || enemies.Count == 0)
+            if (fighters.Count == 0 || options.Count == 0)
                 return CreateFallback();
 
-            SandboxUnitContent content = new SandboxUnitContent(fighters, enemies, visuals, true)
+            SandboxUnitContent content = new SandboxUnitContent(fighters, visuals, true)
             {
                 AnimationDatabase = animations
             };
+            content.AllUnits.AddRange(options);
             foreach (KeyValuePair<string, SandboxUnitDefinition> creature in creatures)
                 content.CreaturesById[creature.Key] = creature.Value;
-            foreach (UnitDefinitionData source in database.Units)
-            {
-                if (source != null && source.Category == UnitCategory.Creature &&
-                    creatures.TryGetValue(source.Id, out SandboxUnitDefinition creature) &&
-                    !content.Creatures.Contains(creature))
-                {
-                    content.Creatures.Add(creature);
-                }
-            }
-            foreach (UnitEncounterPreset preset in database.EncounterPresets)
-            {
-                List<SandboxUnitDefinition> members = ExpandPreset(preset, creatures);
-                if (members.Count > 0)
-                    content.Presets.Add(new SandboxEncounterChoice(preset.Id, preset.Title, preset.Purpose, members));
-            }
             return content;
         }
 
-        // Состав с неизвестным существом или больше MaxEnemies не собирается.
-        internal static List<SandboxUnitDefinition> ExpandPreset(
-            UnitEncounterPreset preset,
-            IReadOnlyDictionary<string, SandboxUnitDefinition> creatures)
+        private static string GroupLabel(UnitCategory category)
         {
-            List<SandboxUnitDefinition> members = new List<SandboxUnitDefinition>();
-            if (preset == null || creatures == null)
-                return members;
-            foreach (UnitEncounterSlot slot in preset.Slots)
+            switch (category)
             {
-                if (slot == null || !creatures.TryGetValue(slot.UnitId, out SandboxUnitDefinition creature))
-                    return new List<SandboxUnitDefinition>();
-                for (int i = 0; i < slot.Count; i++)
-                    members.Add(creature);
+                case UnitCategory.Fighter: return "Бойцы";
+                case UnitCategory.Creature: return "Существа";
+                case UnitCategory.Commander: return "Командиры";
+                default: return "Прочие";
             }
-            return members.Count <= SandboxRoster.MaxEnemies ? members : new List<SandboxUnitDefinition>();
         }
 
         private static SandboxUnitContent CreateFallback()
         {
-            return new SandboxUnitContent(
+            SandboxUnitContent content = new SandboxUnitContent(
                 SandboxRoster.PlayerRoster,
-                SandboxRoster.EnemyRoster,
                 new Dictionary<string, SandboxUnitVisual>(),
                 false);
+            foreach (SandboxUnitDefinition fighter in SandboxRoster.PlayerRoster)
+                content.AllUnits.Add(new SandboxUnitOption(fighter, "Бойцы"));
+            foreach (SandboxUnitDefinition beast in SandboxRoster.EnemyRoster)
+            {
+                content.AllUnits.Add(new SandboxUnitOption(beast, "Существа"));
+                content.CreaturesById[beast.Id] = beast;
+            }
+            return content;
         }
 
         private static SandboxUnitRole ConvertRole(UnitCombatRole role)

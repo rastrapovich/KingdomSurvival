@@ -500,7 +500,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
             AddField(unit, "battlefieldSprite", "Миниатюра на поле");
             AddField(unit, "battlefieldScale", "Масштаб миниатюры");
             AddField(unit, "battlefieldOffset", "Смещение миниатюры X / Y");
-            AddField(unit, "sandboxEncounterCount", "Количество в тестовой засаде");
 
             AddHeader("ТЕГИ");
             BuildTagToggles(unit.FindPropertyRelative("tagIds"));
@@ -532,10 +531,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
             PropertyField tagDefinitions = new PropertyField(tagsProperty, "Теги базы");
             tagEditor.Add(tagDefinitions);
             detailPane.Add(tagEditor);
-
-            Foldout presetEditor = new Foldout { text = "Составы тестового боя", value = false };
-            presetEditor.Add(new PropertyField(serializedDatabase.FindProperty("encounterPresets"), "Составы"));
-            detailPane.Add(presetEditor);
 
             detailPane.Bind(serializedDatabase);
             RefreshPreviews();
@@ -925,7 +920,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
             unit.FindPropertyRelative("battlefieldScale").floatValue = 1f;
             unit.FindPropertyRelative("battlefieldOffset").vector2Value = Vector2.zero;
             unit.FindPropertyRelative("animationSetId").stringValue = string.Empty;
-            unit.FindPropertyRelative("sandboxEncounterCount").intValue = 0;
             unit.FindPropertyRelative("tagIds").ClearArray();
             serializedDatabase.ApplyModifiedProperties();
             EditorUtility.SetDirty(database);

@@ -48,22 +48,6 @@ namespace KingdomSurvival.UnitDatabase.Tests
             KingdomSurvival.UnitDatabase.Editor.UnitCatalogSeed.Creatures().Select(unit => unit.Id));
 
         [Test]
-        public void BeastTagDefinesFourCreatureInstancesForSandboxEncounter()
-        {
-            UnitDatabaseAsset database = Resources.Load<UnitDatabaseAsset>(
-                UnitDatabaseAsset.ResourcesPath);
-            // Фиксированная засада тестового боя — только старые звери;
-            // существа каталога в неё не входят.
-            UnitDefinitionData[] creatures = database.Units
-                .Where(unit => unit.Category == UnitCategory.Creature && unit.SandboxEncounterCount > 0)
-                .ToArray();
-
-            Assert.That(creatures.Length, Is.EqualTo(3));
-            Assert.That(creatures.All(unit => unit.HasTag("species.beast")), Is.True);
-            Assert.That(creatures.Sum(unit => unit.SandboxEncounterCount), Is.EqualTo(4));
-        }
-
-        [Test]
         public void DefaultDatabaseDoesNotUseRedundantMeleeTag()
         {
             UnitDatabaseAsset database = Resources.Load<UnitDatabaseAsset>(
@@ -177,6 +161,7 @@ namespace KingdomSurvival.UnitDatabase.Tests
 
         // Схема 1 → текущая не должна повторно переносить кадрирование портретов.
         // Схема 3 (ПР-12З): у старой записи нет набора анимаций — это не ошибка.
+        // Схема 4: готовых составов и засады больше нет.
         [Test]
         public void SchemaOneMigratesToCurrent_WithoutTouchingPortraitFraming()
         {
@@ -191,12 +176,11 @@ namespace KingdomSurvival.UnitDatabase.Tests
 
                 Assert.That(database.MigrateIfNeeded(), Is.True);
                 Assert.That(database.SchemaVersion, Is.EqualTo(UnitDatabaseAsset.CurrentSchemaVersion));
-                Assert.That(database.SchemaVersion, Is.EqualTo(3));
+                Assert.That(database.SchemaVersion, Is.EqualTo(4));
                 Assert.That(unit.PortraitOffsetNormalized.x, Is.EqualTo(0.3f).Within(0.0001f));
                 Assert.That(unit.Size, Is.EqualTo(UnitSize.Medium));
                 Assert.That(unit.Abilities, Is.Empty);
                 Assert.That(unit.AnimationSetId, Is.Empty);
-                Assert.That(database.EncounterPresets, Is.Empty);
                 Assert.That(database.MigrateIfNeeded(), Is.False, "Повторная миграция ничего не меняет.");
             }
             finally

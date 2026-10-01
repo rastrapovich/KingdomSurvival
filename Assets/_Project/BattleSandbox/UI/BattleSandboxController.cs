@@ -9,19 +9,10 @@ namespace KingdomSurvival.BattleSandbox
     [RequireComponent(typeof(UIDocument))]
     public sealed class BattleSandboxController : MonoBehaviour
     {
-        private readonly HashSet<string> selectedFighterIds = new HashSet<string>
-        {
-            "guard",
-            "archer",
-            "spearman",
-            "scout"
-        };
-        private readonly Dictionary<string, Button> rosterButtons = new Dictionary<string, Button>();
         private readonly List<string> battleLog = new List<string>();
 
         private SandboxUnitContent unitContent;
         private VisualElement root;
-        private Label selectedCountLabel;
         private Button startBattleButton;
         private SandboxFighterDetailsView fighterDetailsView;
 
@@ -43,6 +34,18 @@ namespace KingdomSurvival.BattleSandbox
         private bool initialized;
         private bool enemyStepScheduled;
         private bool combatAnimationRunning;
+        // Номер боя: колбэки анимаций и отложенные ходы прежнего боя (после
+        // «Повторить бой» или «Новый состав») игнорируются.
+        private int battleGeneration;
+
+        // Новый бой или экран состава: незавершённый показ прежнего боя не
+        // должен оставить флаги взведёнными — иначе в новом бою никто не ходит.
+        private void ResetCombatFlow()
+        {
+            battleGeneration++;
+            enemyStepScheduled = false;
+            combatAnimationRunning = false;
+        }
 
         private void OnEnable()
         {
@@ -61,10 +64,6 @@ namespace KingdomSurvival.BattleSandbox
 
             initialized = true;
             unitContent = SandboxUnitDatabaseAdapter.Load();
-            selectedFighterIds.RemoveWhere(typeId =>
-                !unitContent.PlayerRoster.Any(definition => definition.Id == typeId));
-            if (selectedFighterIds.Count == 0 && unitContent.PlayerRoster.Count > 0)
-                selectedFighterIds.Add(unitContent.PlayerRoster[0].Id);
 
             root.style.flexGrow = 1f;
             root.style.backgroundColor = new Color(0.035f, 0.043f, 0.050f, 1f);
@@ -194,9 +193,16 @@ namespace KingdomSurvival.BattleSandbox
                     }
                 }
             }
+            // Запрос без известных существ — ошибка данных; бой всё же
+            // начинается против первого существа базы, а не падает.
             if (enemies.Count == 0)
             {
-                enemies.AddRange(unitContent.EnemyEncounter);
+                SandboxUnitDefinition fallback = unitContent.CreaturesById.Values.FirstOrDefault();
+                if (fallback != null)
+                {
+                    Debug.LogWarning("Бой кампании без известных противников: подставлено «" + fallback.RoleLabel + "».");
+                    enemies.Add(fallback);
+                }
                 campaignEnemyLevels.Clear();
             }
             return enemies;
@@ -327,13 +333,24 @@ namespace KingdomSurvival.BattleSandbox
 
         private const string CampaignSceneName = "Prototype_Main";
 
+        // ------------------------------------------------------------------
+        // Полигон: две колонки. Слева — свой отряд (1–6), справа — противник
+        // (1–MaxEnemies). В обеих доступны все типы Базы существ, один тип
+        // можно взять несколько раз. Автовыбора нет: колонки начинаются пустыми.
+        // ------------------------------------------------------------------
+
+        public const int MaxPlayerUnits = 6;
+
+        private readonly Dictionary<string, int> playerCounts = new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly Dictionary<string, int> enemyCounts = new Dictionary<string, int>(StringComparer.Ordinal);
+        private VisualElement playerColumn;
+        private VisualElement enemyColumn;
+
         private void BuildSetupScreen()
         {
-            enemyStepScheduled = false;
-            combatAnimationRunning = false;
+            ResetCombatFlow();
             selectedTargetId = null;
             battle = null;
-            rosterButtons.Clear();
             root.Clear();
             fighterDetailsView = new SandboxFighterDetailsView(root);
 
@@ -355,43 +372,30 @@ namespace KingdomSurvival.BattleSandbox
             scroll.Add(title);
 
             Label description = CreateLabel(
-                "Выберите от одного до шести бойцов. ЛКМ меняет состав, ПКМ открывает карточку бойца. Полигон не изменяет состояние основной игры.",
+                "Слева — ваш отряд (1–" + MaxPlayerUnits + "), справа — противник (1–" + SandboxRoster.MaxEnemies + "). " +
+                "В обеих колонках доступны все бойцы и существа базы, один тип можно взять несколько раз. " +
+                "Щелчок по имени открывает карточку. Полигон не изменяет состояние основной игры.",
                 13,
                 new Color(0.72f, 0.72f, 0.69f, 1f));
             description.style.marginTop = 8f;
-            description.style.marginBottom = 22f;
+            description.style.marginBottom = 18f;
             description.style.whiteSpace = WhiteSpace.Normal;
             scroll.Add(description);
 
-            VisualElement rosterPanel = CreatePanel();
-            rosterPanel.Add(CreateSectionTitle("ВАШ ОТРЯД"));
-
-            VisualElement rosterGrid = new VisualElement();
-            rosterGrid.style.flexDirection = FlexDirection.Row;
-            rosterGrid.style.flexWrap = Wrap.Wrap;
-            rosterGrid.style.marginTop = 10f;
-            foreach (SandboxUnitDefinition definition in unitContent.PlayerRoster)
-            {
-                SandboxUnitDefinition captured = definition;
-                SandboxUnitVisual visual = unitContent.GetVisual(captured.Id);
-                Button card = SandboxFighterCardFactory.CreateRosterCard(
-                    captured,
-                    visual.Portrait,
-                    () => ToggleFighter(captured.Id),
-                    () => fighterDetailsView.Open(captured, portrait: visual.Portrait));
-                rosterButtons[definition.Id] = card;
-                rosterGrid.Add(card);
-            }
-            rosterPanel.Add(rosterGrid);
-
-            selectedCountLabel = CreateLabel(string.Empty, 12, new Color(0.78f, 0.74f, 0.66f, 1f));
-            selectedCountLabel.style.marginTop = 3f;
-            rosterPanel.Add(selectedCountLabel);
-            scroll.Add(rosterPanel);
-
-            enemyPanel = CreatePanel();
-            enemyPanel.style.marginTop = 14f;
-            scroll.Add(enemyPanel);
+            VisualElement columns = new VisualElement();
+            columns.style.flexDirection = FlexDirection.Row;
+            columns.style.alignItems = Align.FlexStart;
+            playerColumn = CreatePanel();
+            playerColumn.style.flexGrow = 1f;
+            playerColumn.style.flexBasis = 0f;
+            playerColumn.style.marginRight = 7f;
+            enemyColumn = CreatePanel();
+            enemyColumn.style.flexGrow = 1f;
+            enemyColumn.style.flexBasis = 0f;
+            enemyColumn.style.marginLeft = 7f;
+            columns.Add(playerColumn);
+            columns.Add(enemyColumn);
+            scroll.Add(columns);
 
             startBattleButton = new Button(StartBattle) { text = "НАЧАТЬ БОЙ" };
             StylePrimaryButton(startBattleButton);
@@ -401,262 +405,180 @@ namespace KingdomSurvival.BattleSandbox
             startBattleButton.style.alignSelf = Align.Center;
             scroll.Add(startBattleButton);
 
-            BuildEnemyPanel();
-            RefreshRosterSelection();
+            RefreshSetupColumns();
         }
 
-        // ------------------------------------------------------------------
-        // ПР-12Ж: противник тестового боя — засада по умолчанию, готовый
-        // состав из Базы существ или свой состав до MaxEnemies существ.
-        // ------------------------------------------------------------------
+        private Dictionary<string, int> CountsFor(bool enemySide) => enemySide ? enemyCounts : playerCounts;
+        private int SideLimit(bool enemySide) => enemySide ? SandboxRoster.MaxEnemies : MaxPlayerUnits;
+        private int SideTotal(bool enemySide) => CountsFor(enemySide).Values.Sum();
 
-        private enum EnemyMode
+        private void ChangeCount(bool enemySide, string typeId, int delta)
         {
-            DefaultAmbush,
-            Preset,
-            Custom
-        }
-
-        private VisualElement enemyPanel;
-        private EnemyMode enemyMode = EnemyMode.DefaultAmbush;
-        private int selectedPresetIndex;
-        private readonly Dictionary<string, int> customEnemyCounts = new Dictionary<string, int>();
-
-        private List<SandboxUnitDefinition> CurrentEnemies()
-        {
-            switch (enemyMode)
-            {
-                case EnemyMode.Preset:
-                    return selectedPresetIndex >= 0 && selectedPresetIndex < unitContent.Presets.Count
-                        ? unitContent.Presets[selectedPresetIndex].Enemies.ToList()
-                        : new List<SandboxUnitDefinition>();
-                case EnemyMode.Custom:
-                    List<SandboxUnitDefinition> enemies = new List<SandboxUnitDefinition>();
-                    foreach (SandboxUnitDefinition creature in unitContent.Creatures)
-                    {
-                        customEnemyCounts.TryGetValue(creature.Id, out int count);
-                        for (int i = 0; i < count; i++)
-                            enemies.Add(creature);
-                    }
-                    return enemies;
-                default:
-                    return unitContent.EnemyEncounter.ToList();
-            }
-        }
-
-        private int CustomEnemyTotal() => customEnemyCounts.Values.Sum();
-
-        private void SetEnemyMode(EnemyMode mode)
-        {
-            enemyMode = mode;
-            BuildEnemyPanel();
-            RefreshRosterSelection();
-        }
-
-        private void SelectPreset(int index)
-        {
-            enemyMode = EnemyMode.Preset;
-            selectedPresetIndex = index;
-            BuildEnemyPanel();
-            RefreshRosterSelection();
-        }
-
-        private void ChangeCustomCount(string creatureId, int delta)
-        {
-            customEnemyCounts.TryGetValue(creatureId, out int count);
+            Dictionary<string, int> counts = CountsFor(enemySide);
+            counts.TryGetValue(typeId, out int count);
+            if (delta > 0 && SideTotal(enemySide) >= SideLimit(enemySide))
+                return;
             int next = Mathf.Max(0, count + delta);
-            if (delta > 0 && CustomEnemyTotal() >= SandboxRoster.MaxEnemies)
-                return;
-            customEnemyCounts[creatureId] = next;
-            BuildEnemyPanel();
-            RefreshRosterSelection();
-        }
-
-        private void BuildEnemyPanel()
-        {
-            if (enemyPanel == null)
-                return;
-            enemyPanel.Clear();
-
-            string title = enemyMode == EnemyMode.Preset
-                ? "ПРОТИВНИК · ГОТОВЫЙ СОСТАВ"
-                : enemyMode == EnemyMode.Custom
-                    ? "ПРОТИВНИК · СВОЙ СОСТАВ"
-                    : "ПРОТИВНИК · ЗАСАДА В ЧЁРНОМ ЛЕСУ";
-            enemyPanel.Add(CreateSectionTitle(title));
-
-            VisualElement modes = new VisualElement();
-            modes.style.flexDirection = FlexDirection.Row;
-            modes.style.marginTop = 8f;
-            AddModeButton(modes, "ЗАСАДА ПО УМОЛЧАНИЮ", EnemyMode.DefaultAmbush, true);
-            AddModeButton(modes, "ГОТОВЫЙ СОСТАВ", EnemyMode.Preset, unitContent.Presets.Count > 0);
-            AddModeButton(modes, "СВОЙ СОСТАВ", EnemyMode.Custom, unitContent.Creatures.Count > 0);
-            enemyPanel.Add(modes);
-
-            if (enemyMode == EnemyMode.Preset)
-                BuildPresetList();
-            else if (enemyMode == EnemyMode.Custom)
-                BuildCustomList();
-
-            VisualElement enemyGrid = new VisualElement();
-            enemyGrid.style.flexDirection = FlexDirection.Row;
-            enemyGrid.style.flexWrap = Wrap.Wrap;
-            enemyGrid.style.marginTop = 10f;
-            foreach (SandboxUnitDefinition enemy in CurrentEnemies())
-            {
-                SandboxUnitDefinition captured = enemy;
-                SandboxUnitVisual visual = unitContent.GetVisual(captured.Id);
-                Button enemyCard = SandboxFighterCardFactory.CreateEnemyPreviewCard(
-                    captured,
-                    visual.Portrait,
-                    () => fighterDetailsView.Open(captured, portrait: visual.Portrait));
-                enemyGrid.Add(enemyCard);
-            }
-            enemyPanel.Add(enemyGrid);
-        }
-
-        private void AddModeButton(VisualElement row, string text, EnemyMode mode, bool available)
-        {
-            Button button = new Button(() => SetEnemyMode(mode)) { text = text };
-            if (enemyMode == mode)
-                StylePrimaryButton(button);
+            if (next == 0)
+                counts.Remove(typeId);
             else
-                StyleSecondaryButton(button);
-            button.style.height = 30f;
-            button.style.marginRight = 6f;
-            button.SetEnabled(available);
-            row.Add(button);
+                counts[typeId] = next;
+            RefreshSetupColumns();
         }
 
-        private void BuildPresetList()
+        private void ClearSide(bool enemySide)
         {
-            VisualElement list = new VisualElement();
-            list.style.flexDirection = FlexDirection.Row;
-            list.style.flexWrap = Wrap.Wrap;
-            list.style.marginTop = 8f;
-            for (int i = 0; i < unitContent.Presets.Count; i++)
-            {
-                int index = i;
-                SandboxEncounterChoice preset = unitContent.Presets[i];
-                Button button = new Button(() => SelectPreset(index))
-                {
-                    text = preset.Title + " · " + preset.Enemies.Count,
-                    tooltip = preset.Purpose
-                };
-                if (index == selectedPresetIndex)
-                    StylePrimaryButton(button);
-                else
-                    StyleSecondaryButton(button);
-                button.style.height = 28f;
-                button.style.marginRight = 6f;
-                button.style.marginBottom = 6f;
-                list.Add(button);
-            }
-            enemyPanel.Add(list);
-
-            if (selectedPresetIndex >= 0 && selectedPresetIndex < unitContent.Presets.Count)
-            {
-                Label purpose = CreateLabel(unitContent.Presets[selectedPresetIndex].Purpose, 12, new Color(0.72f, 0.72f, 0.69f, 1f));
-                purpose.style.whiteSpace = WhiteSpace.Normal;
-                enemyPanel.Add(purpose);
-            }
+            CountsFor(enemySide).Clear();
+            RefreshSetupColumns();
         }
 
-        private void BuildCustomList()
+        // Состав стороны в порядке Базы существ: тип × число.
+        private List<SandboxUnitDefinition> PickedUnits(bool enemySide)
         {
-            Label total = CreateLabel(
-                "В составе: " + CustomEnemyTotal() + " / " + SandboxRoster.MaxEnemies +
-                (CustomEnemyTotal() == 0 ? " · добавьте хотя бы одно существо" : string.Empty),
-                12,
-                new Color(0.78f, 0.74f, 0.66f, 1f));
-            total.style.marginTop = 8f;
-            enemyPanel.Add(total);
-
-            VisualElement grid = new VisualElement();
-            grid.style.flexDirection = FlexDirection.Row;
-            grid.style.flexWrap = Wrap.Wrap;
-            grid.style.marginTop = 6f;
-            foreach (SandboxUnitDefinition creature in unitContent.Creatures)
+            Dictionary<string, int> counts = CountsFor(enemySide);
+            List<SandboxUnitDefinition> units = new List<SandboxUnitDefinition>();
+            foreach (SandboxUnitOption option in unitContent.AllUnits)
             {
-                string creatureId = creature.Id;
-                customEnemyCounts.TryGetValue(creatureId, out int count);
+                counts.TryGetValue(option.Definition.Id, out int count);
+                for (int i = 0; i < count; i++)
+                    units.Add(option.Definition);
+            }
+            return units;
+        }
 
-                VisualElement row = new VisualElement();
-                row.style.flexDirection = FlexDirection.Row;
-                row.style.alignItems = Align.Center;
-                row.style.width = 250f;
-                row.style.marginRight = 8f;
-                row.style.marginBottom = 4f;
+        private void RefreshSetupColumns()
+        {
+            if (playerColumn == null || enemyColumn == null)
+                return;
+            BuildSideColumn(playerColumn, false);
+            BuildSideColumn(enemyColumn, true);
+            startBattleButton.SetEnabled(SideTotal(false) > 0 && SideTotal(true) > 0);
+        }
 
-                Label name = CreateLabel(
-                    creature.RoleLabel + "  " + creature.MaxHitPoints + "/" + creature.Attack + "/" + creature.Defense + "/" + creature.Damage,
-                    12,
-                    count > 0 ? new Color(0.95f, 0.84f, 0.60f, 1f) : new Color(0.78f, 0.77f, 0.72f, 1f));
-                name.style.flexGrow = 1f;
-                name.tooltip = "HP / Атака / Защита / Урон · Ход " + creature.Movement +
-                               " · Инициатива " + creature.Initiative + " · Дальность " + creature.AttackRange;
-                row.Add(name);
+        private void BuildSideColumn(VisualElement column, bool enemySide)
+        {
+            column.Clear();
+            int total = SideTotal(enemySide);
+            int limit = SideLimit(enemySide);
 
-                Button minus = new Button(() => ChangeCustomCount(creatureId, -1)) { text = "−" };
-                Label value = CreateLabel(count.ToString(), 12, new Color(0.95f, 0.84f, 0.60f, 1f));
-                value.style.width = 18f;
-                value.style.unityTextAlign = TextAnchor.MiddleCenter;
-                Button plus = new Button(() => ChangeCustomCount(creatureId, 1)) { text = "+" };
-                foreach (Button button in new[] { minus, plus })
+            VisualElement header = new VisualElement();
+            header.style.flexDirection = FlexDirection.Row;
+            header.style.alignItems = Align.Center;
+            Label title = CreateSectionTitle((enemySide ? "ПРОТИВНИК" : "ВАШ ОТРЯД") + " · " + total + " / " + limit);
+            title.style.flexGrow = 1f;
+            header.Add(title);
+            Button clear = new Button(() => ClearSide(enemySide)) { text = "ОЧИСТИТЬ" };
+            StyleSecondaryButton(clear);
+            clear.style.height = 24f;
+            clear.SetEnabled(total > 0);
+            header.Add(clear);
+            column.Add(header);
+
+            Label hint = CreateLabel(
+                total == 0
+                    ? (enemySide ? "Добавьте хотя бы одного противника." : "Добавьте хотя бы одного бойца.")
+                    : string.Join(", ", PickedUnits(enemySide).GroupBy(unit => unit.RoleLabel)
+                        .Select(group => group.Count() > 1 ? group.Key + " ×" + group.Count() : group.Key)),
+                11,
+                total == 0 ? new Color(0.90f, 0.62f, 0.45f, 1f) : new Color(0.78f, 0.74f, 0.66f, 1f));
+            hint.style.whiteSpace = WhiteSpace.Normal;
+            hint.style.marginTop = 4f;
+            hint.style.marginBottom = 6f;
+            column.Add(hint);
+
+            string currentGroup = null;
+            foreach (SandboxUnitOption option in unitContent.AllUnits)
+            {
+                if (option.Group != currentGroup)
                 {
-                    StyleSecondaryButton(button);
-                    button.style.height = 22f;
-                    button.style.width = 24f;
+                    currentGroup = option.Group;
+                    Label groupLabel = CreateLabel(currentGroup.ToUpperInvariant(), 10, new Color(0.62f, 0.57f, 0.47f, 1f));
+                    groupLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+                    groupLabel.style.marginTop = 8f;
+                    groupLabel.style.marginBottom = 2f;
+                    column.Add(groupLabel);
                 }
-                minus.SetEnabled(count > 0);
-                plus.SetEnabled(CustomEnemyTotal() < SandboxRoster.MaxEnemies);
-                row.Add(minus);
-                row.Add(value);
-                row.Add(plus);
-                grid.Add(row);
+                column.Add(BuildUnitRow(option.Definition, enemySide, total < limit));
             }
-            enemyPanel.Add(grid);
         }
 
-        private void ToggleFighter(string fighterId)
+        private VisualElement BuildUnitRow(SandboxUnitDefinition definition, bool enemySide, bool canAdd)
         {
-            if (selectedFighterIds.Contains(fighterId))
-                selectedFighterIds.Remove(fighterId);
-            else if (selectedFighterIds.Count < 6)
-                selectedFighterIds.Add(fighterId);
+            CountsFor(enemySide).TryGetValue(definition.Id, out int count);
+            SandboxUnitVisual visual = unitContent.GetVisual(definition.Id);
 
-            RefreshRosterSelection();
-        }
+            VisualElement row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.alignItems = Align.Center;
+            row.style.height = 30f;
+            row.style.marginBottom = 2f;
+            row.style.paddingLeft = 4f;
+            row.style.paddingRight = 4f;
+            row.style.backgroundColor = count > 0
+                ? new Color(0.20f, 0.17f, 0.10f, 0.9f)
+                : new Color(0f, 0f, 0f, 0f);
+            SetRadius(row, 3f);
 
-        private void RefreshRosterSelection()
-        {
-            foreach (KeyValuePair<string, Button> pair in rosterButtons)
+            Image portrait = new Image
             {
-                bool selected = selectedFighterIds.Contains(pair.Key);
-                SandboxFighterCardFactory.SetRosterSelected(pair.Value, selected);
-            }
+                sprite = visual.Portrait != null ? visual.Portrait : visual.BattlefieldSprite,
+                scaleMode = ScaleMode.ScaleAndCrop,
+                pickingMode = PickingMode.Ignore
+            };
+            portrait.style.width = 22f;
+            portrait.style.height = 28f;
+            portrait.style.marginRight = 6f;
+            portrait.style.flexShrink = 0f;
+            row.Add(portrait);
 
-            selectedCountLabel.text =
-                "Выбрано: " + selectedFighterIds.Count + " / 6" +
-                (selectedFighterIds.Count == 0 ? " · выберите хотя бы одного бойца" : string.Empty);
-            startBattleButton.SetEnabled(selectedFighterIds.Count > 0 && CurrentEnemies().Count > 0);
+            Button name = new Button(() => fighterDetailsView.Open(definition, portrait: visual.Portrait))
+            {
+                text = definition.RoleLabel + "   " + definition.MaxHitPoints + "/" + definition.Attack + "/" +
+                       definition.Defense + "/" + definition.Damage,
+                tooltip = "Карточка. HP / Атака / Защита / Урон · Ход " + definition.Movement +
+                          " · Инициатива " + definition.Initiative + " · Дальность " + definition.AttackRange
+            };
+            name.style.flexGrow = 1f;
+            name.style.unityTextAlign = TextAnchor.MiddleLeft;
+            name.style.backgroundColor = new Color(0f, 0f, 0f, 0f);
+            SetBorder(name, new Color(0f, 0f, 0f, 0f), 0f);
+            name.style.color = count > 0 ? new Color(0.95f, 0.84f, 0.60f, 1f) : new Color(0.78f, 0.77f, 0.72f, 1f);
+            name.style.fontSize = 12f;
+            row.Add(name);
+
+            Button minus = new Button(() => ChangeCount(enemySide, definition.Id, -1)) { text = "−" };
+            Label value = CreateLabel(count.ToString(), 12, new Color(0.95f, 0.84f, 0.60f, 1f));
+            value.style.width = 20f;
+            value.style.unityTextAlign = TextAnchor.MiddleCenter;
+            Button plus = new Button(() => ChangeCount(enemySide, definition.Id, 1)) { text = "+" };
+            foreach (Button button in new[] { minus, plus })
+            {
+                StyleSecondaryButton(button);
+                button.style.height = 22f;
+                button.style.width = 26f;
+            }
+            minus.SetEnabled(count > 0);
+            plus.SetEnabled(canAdd);
+            row.Add(minus);
+            row.Add(value);
+            row.Add(plus);
+            return row;
         }
 
         private void StartBattle()
         {
-            List<SandboxUnitDefinition> enemies = CurrentEnemies();
-            if (selectedFighterIds.Count == 0 || enemies.Count == 0)
+            List<SandboxUnitDefinition> fighters = PickedUnits(false);
+            List<SandboxUnitDefinition> enemies = PickedUnits(true);
+            if (fighters.Count == 0 || enemies.Count == 0)
                 return;
 
-            battle = SandboxRoster.CreateDefaultBattle(
-                selectedFighterIds,
-                unitContent.PlayerRoster,
-                enemies);
+            // «Повторить бой» во время незавершённого показа прежнего боя не
+            // должен унаследовать его флаги.
+            ResetCombatFlow();
+            battle = SandboxRoster.CreateBattle(fighters, enemies);
             battleLog.Clear();
-            battleLog.Add(enemyMode == EnemyMode.DefaultAmbush
-                ? "Бой начался. Враг перекрывает дорогу через Чёрный лес."
-                : "Бой начался. Противник: " + string.Join(", ", enemies.GroupBy(enemy => enemy.RoleLabel)
-                    .Select(group => group.Count() > 1 ? group.Key + " ×" + group.Count() : group.Key)) + ".");
+            battleLog.Add("Бой начался. Противник: " + string.Join(", ", enemies.GroupBy(enemy => enemy.RoleLabel)
+                .Select(group => group.Count() > 1 ? group.Key + " ×" + group.Count() : group.Key)) + ".");
             selectedTargetId = null;
             BuildBattleScreen();
             RefreshBattleScreen();
@@ -1035,11 +957,15 @@ namespace KingdomSurvival.BattleSandbox
             combatAnimationRunning = true;
             RefreshBattleScreen();
 
+            int generation = battleGeneration;
             bool started = board.PlayMoveAnimation(
                 unitId,
                 path,
                 () =>
                 {
+                    // Поле прежнего боя ничего не меняет в новом.
+                    if (generation != battleGeneration)
+                        return;
                     bool moved = false;
                     string message = string.Empty;
                     if (battle != null)
@@ -1232,7 +1158,9 @@ namespace KingdomSurvival.BattleSandbox
 
         private void RefreshResultBanner()
         {
-            if (battle.Phase == SandboxBattlePhase.InProgress)
+            // Итог показывается, когда доиграл показ последнего удара: иначе
+            // «Повторить бой» можно нажать посреди анимации смерти.
+            if (battle.Phase == SandboxBattlePhase.InProgress || combatAnimationRunning)
             {
                 resultBanner.style.display = DisplayStyle.None;
                 return;
@@ -1255,8 +1183,12 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             enemyStepScheduled = true;
+            int generation = battleGeneration;
             root.schedule.Execute(() =>
             {
+                // Отложенный ход прежнего боя в новом не выполняется.
+                if (generation != battleGeneration)
+                    return;
                 if (battle == null || battle.Phase != SandboxBattlePhase.InProgress ||
                     battle.CurrentUnit == null || battle.CurrentUnit.Team != SandboxTeam.Enemy)
                 {
@@ -1365,8 +1297,15 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             List<SandboxHitRecord> records = battle.GetHitRecordsSince(firstRecord);
-            if (attackApplied && board.PlayHitSequence(records, () => FinishAttackSequence(true, onComplete)))
+            int generation = battleGeneration;
+            if (attackApplied && board.PlayHitSequence(records, () =>
+                {
+                    if (generation == battleGeneration)
+                        FinishAttackSequence(true, onComplete);
+                }))
+            {
                 return;
+            }
 
             FinishAttackSequence(attackApplied, onComplete);
         }

@@ -26,6 +26,8 @@ namespace KingdomSurvival.BattleSandbox
         {
             public CreatureAnimationPlayer Player;
             public HexFacing Facing;
+            // Противник: зеркальный ракурс и отражённая картинка.
+            public bool Mirrored;
             // Здоровье, которое очередь уже показала; null — как в модели.
             public int? PresentedHitPoints;
             // Павший остаётся на поле последним кадром смерти.
@@ -96,13 +98,17 @@ namespace KingdomSurvival.BattleSandbox
             if (presentations.TryGetValue(unit.Id, out UnitPresentation presentation))
                 return presentation;
 
-            presentation = new UnitPresentation { Facing = InitialFacing(unit) };
+            presentation = new UnitPresentation
+            {
+                Facing = InitialFacing(unit),
+                Mirrored = unit.Team == SandboxTeam.Enemy
+            };
             SandboxUnitVisual visual = GetVisual(unit.TypeId);
             if (visual != null && visual.IsAnimated)
             {
                 // Сдвиг фазы по ID: одинаковые существа не дышат в такт.
                 float phase = (unit.Id.GetHashCode() & 0x7fff) / 32767f * 2f;
-                presentation.Player = new CreatureAnimationPlayer(visual.AnimationSet, ToDirection(presentation.Facing), phase);
+                presentation.Player = new CreatureAnimationPlayer(visual.AnimationSet, DirectionFor(presentation, presentation.Facing), phase);
                 presentation.Player.Play(CreatureAnimationAction.Idle, PresentationTime);
             }
             presentations.Add(unit.Id, presentation);
@@ -132,7 +138,28 @@ namespace KingdomSurvival.BattleSandbox
             if (presentation == null)
                 return;
             presentation.Facing = facing;
-            presentation.Player?.SetDirection(ToDirection(facing));
+            presentation.Player?.SetDirection(DirectionFor(presentation, facing));
+        }
+
+        // Противник показан зеркально: ракурс отражённого направления
+        // (влево ↔ вправо) и картинка, отражённая по горизонтали. Обе стороны
+        // симметричны: свои лицом к камере, глядя вправо, противники — влево.
+        private CreatureAnimationDirection DirectionFor(UnitPresentation presentation, HexFacing facing)
+        {
+            return ToDirection(presentation != null && presentation.Mirrored ? MirrorFacing(facing) : facing);
+        }
+
+        internal static HexFacing MirrorFacing(HexFacing facing)
+        {
+            switch (facing)
+            {
+                case HexFacing.East: return HexFacing.West;
+                case HexFacing.West: return HexFacing.East;
+                case HexFacing.NorthEast: return HexFacing.NorthWest;
+                case HexFacing.NorthWest: return HexFacing.NorthEast;
+                case HexFacing.SouthEast: return HexFacing.SouthWest;
+                default: return HexFacing.SouthEast;
+            }
         }
 
         // В начале боя каждый смотрит в сторону противника.
@@ -538,7 +565,12 @@ namespace KingdomSurvival.BattleSandbox
             image.scaleMode = ScaleMode.StretchToFill;
             image.style.width = width;
             image.style.height = height;
-            image.style.left = ground.x - set.Pivot.x * width + cellOffset.x * width;
+            // Отражение — вокруг центра картинки, поэтому опора X тоже отражается:
+            // ноги остаются в центре гекса.
+            float pivotX = presentation.Mirrored ? 1f - set.Pivot.x : set.Pivot.x;
+            float offsetX = presentation.Mirrored ? -cellOffset.x : cellOffset.x;
+            image.style.scale = new Scale(new Vector3(presentation.Mirrored ? -1f : 1f, 1f, 1f));
+            image.style.left = ground.x - pivotX * width + offsetX * width;
             image.style.top = ground.y - (1f - set.Pivot.y) * height - cellOffset.y * height;
         }
 

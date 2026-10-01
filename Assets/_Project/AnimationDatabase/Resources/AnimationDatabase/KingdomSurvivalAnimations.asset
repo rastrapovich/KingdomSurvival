@@ -32,6 +32,7 @@ MonoBehaviour:
     pivot: {x: 0.507, y: 0.352}
     fieldScale: 3.61
     canvasSize: {x: 512, y: 512}
+    walkHexesPerCycle: 3.05
     clips:
     - action: 0
       clipKey: 
@@ -231,10 +232,10 @@ MonoBehaviour:
         offset: {x: 0, y: 0}
     - action: 1
       clipKey: 
-      framesPerSecond: 23.9
+      framesPerSecond: 27
       playback: 0
       impactTime: 0.5
-      useSourceTiming: 1
+      useSourceTiming: 0
       skipLastFrames: 0
       skipLastFrame: 0
       sourceFramesPerSecond: 24

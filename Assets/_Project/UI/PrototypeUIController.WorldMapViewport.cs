@@ -98,6 +98,7 @@ public partial class PrototypeUIController
         // верхний угол карты — центрируем явно.
         if (!worldMapInitialFocusApplied)
         {
+            CancelWorldMapZoomAnimation();
             worldMapZoom = Mathf.Sqrt(worldMapMinZoom * worldMapMaxZoom);
             CenterWorldMapOn(GetWorldMapHomeXPercent(), GetWorldMapHomeYPercent());
             worldMapInitialFocusApplied = true;
@@ -108,6 +109,7 @@ public partial class PrototypeUIController
             // min/max могли сместиться, не даём текущему zoom выйти за
             // новые пределы.
             worldMapZoom = Mathf.Clamp(worldMapZoom, worldMapMinZoom, worldMapMaxZoom);
+            worldMapZoomTarget = Mathf.Clamp(worldMapZoomTarget, worldMapMinZoom, worldMapMaxZoom);
         }
 
         RefreshWorldMapZoomIndicator();
@@ -249,8 +251,8 @@ public partial class PrototypeUIController
             : WorldMapZoomStepFactor;
 
         Vector2 localPoint = worldMapViewport.WorldToLocal(evt.mousePosition);
-        if (ZoomWorldMapAroundScreenPoint(factor, localPoint))
-            evt.StopPropagation();
+        StartWorldMapZoom(factor, localPoint);
+        evt.StopPropagation();
     }
 
     // AM-06: общая точка входа для колеса мыши и кнопок +/- ("Зум — до 10×,
@@ -296,7 +298,7 @@ public partial class PrototypeUIController
         Vector2 center = new Vector2(
             worldMapViewport.resolvedStyle.width * 0.5f,
             worldMapViewport.resolvedStyle.height * 0.5f);
-        ZoomWorldMapAroundScreenPoint(factor, center);
+        StartWorldMapZoom(factor, center);
     }
 
     // "Вся карта" — раздел 7 инструкции: минимальный зум, при котором вся
@@ -304,6 +306,7 @@ public partial class PrototypeUIController
     private void OnWorldMapFitButtonClicked()
     {
         SuspendWorldMapCameraFollow();
+        CancelWorldMapZoomAnimation();
         worldMapZoom = worldMapMinZoom;
         CenterWorldMapOn(50f, 50f);
         ClampWorldMapPan();

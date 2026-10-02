@@ -65,6 +65,7 @@ public partial class PrototypeUIController
     private Button worldMapZoomOutButton;
     private Label worldMapZoomIndicatorLabel;
     private Toggle worldMapGridToggle;
+    private Toggle worldMapFollowToggle;
 
     // Эти поля оставлены для совместимости со старым прототипным UI.
     // Подтверждение цели больше не используется: клик сразу отдаёт приказ.
@@ -102,6 +103,7 @@ public partial class PrototypeUIController
         worldMapZoomOutButton = root.Q<Button>("world-map-zoom-out-button");
         worldMapZoomIndicatorLabel = root.Q<Label>("world-map-zoom-indicator");
         worldMapGridToggle = root.Q<Toggle>("world-map-grid-toggle");
+        worldMapFollowToggle = root.Q<Toggle>("world-map-follow-toggle");
 
         // Слои-заготовки (WM-02) пока ничего не рисуют, но не должны перехватывать
         // клики по карте — как и остальные декоративные/маршрутные слои.
@@ -216,6 +218,11 @@ public partial class PrototypeUIController
             worldMapZoomOutButton.clicked += OnWorldMapZoomOutButtonClicked;
         if (worldMapGridToggle != null)
             worldMapGridToggle.RegisterValueChangedCallback(OnWorldMapGridToggleChanged);
+        if (worldMapFollowToggle != null)
+        {
+            worldMapFollowToggle.SetValueWithoutNotify(IsWorldMapCameraFollowEnabled());
+            worldMapFollowToggle.RegisterValueChangedCallback(OnWorldMapFollowToggleChanged);
+        }
     }
 
     private void UnregisterWorldMapNavControlCallbacks()
@@ -232,6 +239,8 @@ public partial class PrototypeUIController
             worldMapZoomOutButton.clicked -= OnWorldMapZoomOutButtonClicked;
         if (worldMapGridToggle != null)
             worldMapGridToggle.UnregisterValueChangedCallback(OnWorldMapGridToggleChanged);
+        if (worldMapFollowToggle != null)
+            worldMapFollowToggle.UnregisterValueChangedCallback(OnWorldMapFollowToggleChanged);
     }
 
     private void ResetWorldMapSelection()

@@ -75,5 +75,5 @@ MonoBehaviour:
   showClickMarker: 1
   clickMarkerSeconds: 0.45
   clickMarkerColor: {r: 0.96, g: 0.88, b: 0.62, a: 0.9}
-  cameraFollowsHero: 1
+  cameraFollowsHero: 0
   cameraFollowSharpness: 6

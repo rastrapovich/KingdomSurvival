@@ -37,6 +37,14 @@ public partial class PrototypeUIController
 
     private Vector2 worldMapHeroAppliedSize = new Vector2(-1f, -1f);
     private bool worldMapCameraFollowSuspended;
+    private const string WorldMapFollowPrefKey = "KingdomSurvival.WorldMap.FollowHero";
+
+    // Плавный зум: колесо и кнопки задают цель, масштаб догоняет её за доли
+    // секунды вокруг точки под курсором — без скачков по 15%.
+    private const float WorldMapZoomSharpness = 14f;
+    private bool worldMapZoomAnimating;
+    private float worldMapZoomTarget = 1f;
+    private Vector2 worldMapZoomPivot;
 
     private float worldMapClickMarkerStartedAt = -1f;
     private float worldMapClickMarkerXPercent;
@@ -173,6 +181,7 @@ public partial class PrototypeUIController
 
         WorldMapMovementSettingsAsset settings = WorldMapVisualRuntime.LoadMovementSettings();
         TickWorldMapHold(now, settings);
+        TickWorldMapZoom(dt);
         TickWorldMapCameraFollow(dt, settings);
         TickWorldMapClickMarker(now, settings);
         TickWorldMapHeroFigure(dt, settings);
@@ -400,7 +409,7 @@ public partial class PrototypeUIController
             !gameState.HasActiveExpedition ||
             isPanningWorldMap ||
             worldMapCameraFollowSuspended ||
-            (settings != null && !settings.CameraFollowsHero))
+            !IsWorldMapCameraFollowEnabled())
         {
             return;
         }
@@ -423,6 +432,51 @@ public partial class PrototypeUIController
         worldMapPanOffsetY = newY;
         ClampWorldMapPan();
         ApplyWorldMapViewportTransform();
+    }
+
+    // Следование за героем — переключатель «За героем» на карте; пока игрок
+    // его не трогал, действует значение из настроек перемещения.
+    private static bool IsWorldMapCameraFollowEnabled()
+    {
+        if (PlayerPrefs.HasKey(WorldMapFollowPrefKey))
+            return PlayerPrefs.GetInt(WorldMapFollowPrefKey) != 0;
+        WorldMapMovementSettingsAsset settings = WorldMapVisualRuntime.LoadMovementSettings();
+        return settings != null && settings.CameraFollowsHero;
+    }
+
+    private void OnWorldMapFollowToggleChanged(ChangeEvent<bool> evt)
+    {
+        PlayerPrefs.SetInt(WorldMapFollowPrefKey, evt.newValue ? 1 : 0);
+        PlayerPrefs.Save();
+        if (evt.newValue)
+            ResumeWorldMapCameraFollow();
+    }
+
+    private void StartWorldMapZoom(float factor, Vector2 pivotScreenPoint)
+    {
+        float from = worldMapZoomAnimating ? worldMapZoomTarget : worldMapZoom;
+        worldMapZoomTarget = Mathf.Clamp(from * factor, worldMapMinZoom, worldMapMaxZoom);
+        worldMapZoomPivot = pivotScreenPoint;
+        worldMapZoomAnimating = !Mathf.Approximately(worldMapZoomTarget, worldMapZoom);
+    }
+
+    private void CancelWorldMapZoomAnimation() => worldMapZoomAnimating = false;
+
+    private void TickWorldMapZoom(float dt)
+    {
+        if (!worldMapZoomAnimating || dt <= 0f)
+            return;
+
+        // В логарифме масштаба: шаг ощущается одинаково на любом приближении.
+        float blend = 1f - Mathf.Exp(-WorldMapZoomSharpness * dt);
+        float next = Mathf.Exp(Mathf.Lerp(Mathf.Log(worldMapZoom), Mathf.Log(worldMapZoomTarget), blend));
+        if (Mathf.Abs(next - worldMapZoomTarget) <= worldMapZoomTarget * 0.002f)
+        {
+            next = worldMapZoomTarget;
+            worldMapZoomAnimating = false;
+        }
+
+        ZoomWorldMapAroundScreenPoint(next / Mathf.Max(0.0001f, worldMapZoom), worldMapZoomPivot);
     }
 
     // Ручная панорама отпускает камеру до следующего приказа или «К герою».

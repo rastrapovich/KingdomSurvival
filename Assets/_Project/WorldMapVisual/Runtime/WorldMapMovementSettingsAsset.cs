@@ -48,8 +48,8 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private Color clickMarkerColor = new Color(0.96f, 0.88f, 0.62f, 0.9f);
 
         [Header("Камера")]
-        [Tooltip("Камера плавно держит героя в центре, пока он в походе.")]
-        [SerializeField] private bool cameraFollowsHero = true;
+        [Tooltip("Камера плавно держит героя в центре, пока он в походе. Значение по умолчанию: игрок меняет его переключателем «За героем» на карте.")]
+        [SerializeField] private bool cameraFollowsHero;
         [Tooltip("Чем больше, тем быстрее камера догоняет героя.")]
         [SerializeField, Range(0.5f, 30f)] private float cameraFollowSharpness = 6f;
 

@@ -200,6 +200,7 @@
                                             <ui:Button name="world-map-zoom-in-button" text="+" tooltip="Увеличить" class="world-map-zoom-step-button" />
                                         </ui:VisualElement>
                                         <ui:Toggle name="world-map-grid-toggle" label="Сетка" tooltip="Вспомогательная сетка на близком масштабе" class="world-map-grid-toggle" />
+                                        <ui:Toggle name="world-map-follow-toggle" label="За героем" tooltip="Камера следует за героем в походе" class="world-map-grid-toggle" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
 

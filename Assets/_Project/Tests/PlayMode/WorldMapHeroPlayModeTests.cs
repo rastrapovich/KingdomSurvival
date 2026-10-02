@@ -17,9 +17,16 @@ public sealed class WorldMapHeroPlayModeTests
     private const string MainScene = "Prototype_Main";
     private const BindingFlags AnyInstance = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
+    private const string FollowPrefKey = "KingdomSurvival.WorldMap.FollowHero";
+    private bool hadFollowPref;
+    private int followPref;
+
     [SetUp]
     public void SetUp()
     {
+        hadFollowPref = PlayerPrefs.HasKey(FollowPrefKey);
+        followPref = PlayerPrefs.GetInt(FollowPrefKey, 0);
+        PlayerPrefs.DeleteKey(FollowPrefKey);
         CampaignSession.Reset();
         PlayModeSaveIsolation.Begin();
     }
@@ -27,6 +34,10 @@ public sealed class WorldMapHeroPlayModeTests
     [TearDown]
     public void TearDown()
     {
+        if (hadFollowPref)
+            PlayerPrefs.SetInt(FollowPrefKey, followPref);
+        else
+            PlayerPrefs.DeleteKey(FollowPrefKey);
         CampaignSession.Reset();
         PlayModeSaveIsolation.End();
     }
@@ -65,6 +76,12 @@ public sealed class WorldMapHeroPlayModeTests
         Image hero = root.Q<Image>("world-map-hero-figure");
         VisualElement fallback = root.Q<VisualElement>("world-map-hero-fallback");
         Assert.IsNotNull(hero, "Фигура героя создана.");
+
+        // Камера по умолчанию не следует за героем; включается переключателем на карте.
+        Toggle follow = root.Q<Toggle>("world-map-follow-toggle");
+        Assert.IsNotNull(follow, "Переключатель «За героем» на карте.");
+        Assert.IsFalse(follow.value, "По умолчанию камера не следует за героем.");
+        follow.value = true;
 
         bool sawRunning = false;
         float until = Time.realtimeSinceStartup + 0.3f;
@@ -112,6 +129,22 @@ public sealed class WorldMapHeroPlayModeTests
         Invoke(main, "IssueContinuousMapOrder", targetX + 3f, targetY, null, false);
         Assert.AreEqual(CommanderState.TravellingToLocation, campaign.ActiveExpedition.Phase);
         Assert.AreEqual(targetX, campaign.ActiveExpedition.Route[0].XPercent, 0.05f, "Путь от текущей позиции.");
+
+        // Зум колесом плавный: масштаб доходит до цели за несколько кадров.
+        FieldInfo zoomField = main.GetType().GetField("worldMapZoom", AnyInstance);
+        float startZoom = (float)zoomField.GetValue(main);
+        Vector2 zoomPivot = new Vector2(viewport.resolvedStyle.width, viewport.resolvedStyle.height) * 0.5f;
+        Invoke(main, "StartWorldMapZoom", 1f / 1.3f, zoomPivot);
+        float target = (float)main.GetType().GetField("worldMapZoomTarget", AnyInstance).GetValue(main);
+        yield return null;
+        yield return null;
+        float midZoom = (float)zoomField.GetValue(main);
+        Assert.Less(midZoom, startZoom);
+        Assert.Greater(midZoom, target, "Масштаб меняется не скачком.");
+        until = Time.realtimeSinceStartup + 1f;
+        while (Time.realtimeSinceStartup < until)
+            yield return null;
+        Assert.AreEqual(target, (float)zoomField.GetValue(main), target * 0.01f, "Масштаб дошёл до цели.");
     }
 
     private static void SkipTodaysRandomChecks(GameState campaign)

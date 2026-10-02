@@ -5,6 +5,7 @@
     "KingdomSurvival.Core",
     "KingdomSurvival.DialogueDatabase",
     "KingdomSurvival.Encounters",
+    "KingdomSurvival.FreePlay.Editor",
     "KingdomSurvival.UILayout"
   ],
   "includePlatforms": ["Editor"],

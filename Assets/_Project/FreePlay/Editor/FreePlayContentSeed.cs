@@ -30,14 +30,22 @@ namespace KingdomSurvival.FreePlay.Editor
             ("refugee_woman", "Беженка", "У костра за ольшаником")
         };
 
-        [MenuItem("Kingdom Survival/Свободная игра/Добавить недостающие сцены в базу диалогов")]
+        // Запуск — кнопкой «+ Сцены свободной игры» в окне Базы диалогов
+        // (пункт верхнего меню убран 02.10.2026) или через -executeMethod.
         public static void Seed()
+        {
+            Run();
+        }
+
+        // Выполняет засев и возвращает короткий итог для окна Базы диалогов.
+        public static string Run()
         {
             DialogueDatabaseAsset database = AssetDatabase.LoadAssetAtPath<DialogueDatabaseAsset>(DialogueDatabasePath);
             if (database == null)
             {
-                Debug.LogError("Свободная игра: база диалогов не найдена: " + DialogueDatabasePath);
-                return;
+                string missing = "Свободная игра: база диалогов не найдена: " + DialogueDatabasePath;
+                Debug.LogError(missing);
+                return missing;
             }
 
             List<string> added = AddMissing(database);
@@ -63,9 +71,11 @@ namespace KingdomSurvival.FreePlay.Editor
 
             if (added.Count > 0)
                 AssetDatabase.SaveAssets();
-            Debug.Log(added.Count > 0
+            string result = added.Count > 0
                 ? "Свободная игра: добавлено в базу диалогов — " + string.Join(", ", added) + "."
-                : "Свободная игра: все сцены уже в базе диалогов.");
+                : "Свободная игра: все сцены уже в базе диалогов.";
+            Debug.Log(result);
+            return result;
         }
 
         // Добавляет недостающих говорящих и сцены. Возвращает, что добавлено.

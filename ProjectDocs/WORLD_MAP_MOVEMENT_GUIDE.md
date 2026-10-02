@@ -14,7 +14,7 @@
 
 ## Где настраивать
 
-Меню **Kingdom Survival → Карта → World Map Database**.
+Меню **Kingdom Survival → Карта** (открывает окно World Map Database).
 
 ### География → Местность
 

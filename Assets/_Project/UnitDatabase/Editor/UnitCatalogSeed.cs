@@ -9,7 +9,8 @@ namespace KingdomSurvival.UnitDatabase.Editor
     // тестового боя убраны 01.10.2026: полигон собирает обе стороны сам.
     // [РАБОЧЕЕ — БОЕВОЙ СЛОЙ]. Засев только ДОБАВЛЯЕТ недостающие записи и
     // никогда не перезаписывает существующие: после засева числа правятся в
-    // окне Базы существ, а не здесь.
+    // окне Базы существ, а не здесь. Пункта меню нет (убран 02.10.2026):
+    // каталог нужен тестам, засев доступен через -executeMethod.
     public static class UnitCatalogSeed
     {
         public const string UnitDatabasePath = "Assets/_Project/UnitDatabase/Resources/UnitDatabase/KingdomSurvivalUnits.asset";
@@ -20,7 +21,6 @@ namespace KingdomSurvival.UnitDatabase.Editor
         private const string Armored = "trait.armored";
         private const string HumanSlayer = "trait.human_slayer";
 
-        [MenuItem("Kingdom Survival/База существ/Добавить недостающих существ каталога")]
         public static void Seed()
         {
             UnitDatabaseAsset database = AssetDatabase.LoadAssetAtPath<UnitDatabaseAsset>(UnitDatabasePath);

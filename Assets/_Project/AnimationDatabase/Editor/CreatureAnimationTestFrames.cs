@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor;
 using UnityEngine;
 
 namespace KingdomSurvival.AnimationDatabase.Editor
 {
     // Тестовые кадры в структуре экспорта KS Sprite Renderer:
     // <папка>/<Действие>/<Ракурс>/<Действие>_<Ракурс>_<номер>.png.
-    // Нужны, чтобы проверить импорт, предпросмотр и бой до настоящих спрайтов.
+    // Нужны тестам импорта и предпросмотра; пункта меню нет (убран 02.10.2026).
     // Номера — как у Step 3 с отрицательным стартом и добавленным последним.
     public static class CreatureAnimationTestFrames
     {
@@ -24,21 +23,6 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             new Vector2(-0.866f, -1.125f),
             new Vector2(0.866f, -1.125f)
         };
-
-        [MenuItem("Kingdom Survival/База анимаций: создать тестовые кадры…", priority = 2001)]
-        private static void GenerateFromMenu()
-        {
-            string parent = EditorUtility.OpenFolderPanel("Куда положить тестовые кадры", string.Empty, string.Empty);
-            if (string.IsNullOrEmpty(parent))
-                return;
-            string root = Path.Combine(parent, "KS_TestCreature").Replace('\\', '/');
-            CreatureAnimationDatabaseAsset database = CreatureAnimationEditorData.LoadOrCreate();
-            int count = Generate(root, database, true);
-            EditorUtility.DisplayDialog(
-                "Тестовые кадры",
-                "Создано " + count + " PNG в\n" + root + "\n\nПеретащите эту папку в «Базу анимаций» на любое существо.",
-                "Хорошо");
-        }
 
         // Номера кадров экспорта: start..end через step, последний всегда входит.
         public static List<int> ExportNumbers(int start, int end, int step)

@@ -143,6 +143,17 @@ namespace KingdomSurvival.DialogueDatabase.Editor
 
             GUILayout.FlexibleSpace();
 
+            // Сцены свободной игры: добавляет только недостающие сцены и
+            // говорящих, правки автора в базе не перезаписывает.
+            if (GUILayout.Button(
+                    new GUIContent("+ Сцены свободной игры", "Добавить недостающие сцены свободной игры, их говорящих и встречи. Уже существующие не меняются."),
+                    EditorStyles.toolbarButton, GUILayout.Width(150f)))
+            {
+                string result = KingdomSurvival.FreePlay.Editor.FreePlayContentSeed.Run();
+                ShowNotification(new GUIContent(result));
+                Repaint();
+            }
+
             bool nextShowProduction = GUILayout.Toggle(
                 showProduction,
                 new GUIContent("⚙ Производство", "Показать технические поля: ID, категории, статусы, условия, эффекты, параметры проверок"),

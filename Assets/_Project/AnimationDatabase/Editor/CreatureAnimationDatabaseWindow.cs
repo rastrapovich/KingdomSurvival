@@ -144,7 +144,6 @@ namespace KingdomSurvival.AnimationDatabase.Editor
 
             ToolbarMenu more = new ToolbarMenu { text = "Ещё" };
             more.menu.AppendAction("Очистить неиспользуемые атласы…", _ => CleanUnusedAtlases());
-            more.menu.AppendAction("Создать тестовые кадры…", _ => EditorApplication.ExecuteMenuItem("Kingdom Survival/База анимаций: создать тестовые кадры…"));
             more.menu.AppendAction("Показать папку атласов", _ =>
             {
                 UnityEngine.Object folder = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(CreatureAnimationEditorData.ArtRoot);

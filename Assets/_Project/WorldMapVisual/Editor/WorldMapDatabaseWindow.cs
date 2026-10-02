@@ -117,7 +117,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private Rect lastPreviewCanvasRect;
         private float lastPreviewReferenceWidth = WorldMapWorldDefinitionAsset.DefaultMapCanvasWidth;
 
-        [MenuItem("Kingdom Survival/Карта/World Map Database")]
+        [MenuItem("Kingdom Survival/Карта")]
         private static void Open()
         {
             WorldMapDatabaseWindow window = GetWindow<WorldMapDatabaseWindow>();

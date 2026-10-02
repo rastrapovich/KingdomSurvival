@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using KingdomSurvival.AnimationDatabase;
+using KingdomSurvival.BattlefieldDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,10 +20,11 @@ namespace KingdomSurvival.BattleSandbox
         private const float MeleeAutoSelectRadiusScale = 0.48f;
         private const float GridVerticalScale = 0.75f;
 
-        private static readonly Color NormalColor = new Color(0f, 0f, 0f, 0f);
-        private static readonly Color DifficultColor = new Color(0.29f, 0.25f, 0.17f, 0.80f);
-        private static readonly Color ImpassableColor = new Color(0.07f, 0.08f, 0.09f, 0.80f);
-        private static readonly Color ReachableColor = new Color(0.28f, 0.75f, 0.90f, 0.40f);
+        // Поле из Базы полей боя: кадр, отключённые гексы и вид гекса.
+        private BattlefieldDefinitionData battlefield;
+        private BattlefieldHexStyle hexStyle = new BattlefieldHexStyle();
+        // Основной вид гексов рисует BattlefieldView под полем.
+        private bool baseGridDrawnBelow;
 
         private SandboxBattle battle;
         private string selectedTargetId;
@@ -141,6 +143,18 @@ namespace KingdomSurvival.BattleSandbox
             animationDatabase = animations;
             presentations.Clear();
             depthOrder.Clear();
+            SyncUnitImages();
+            MarkDirtyRepaint();
+        }
+
+        public void SetBattlefield(
+            BattlefieldDefinitionData field,
+            BattlefieldHexStyle style,
+            bool gridDrawnBelow)
+        {
+            battlefield = field;
+            hexStyle = style ?? new BattlefieldHexStyle();
+            baseGridDrawnBelow = gridDrawnBelow;
             SyncUnitImages();
             MarkDirtyRepaint();
         }
@@ -483,6 +497,9 @@ namespace KingdomSurvival.BattleSandbox
                     ? battle.GetReachable(current.Id)
                     : new Dictionary<HexCoord, int>();
 
+            float radius = layout.Size * (1f - hexStyle.Gap);
+            Color lineColor = hexStyle.Fade(hexStyle.LineColor);
+            bool drawLine = hexStyle.LineWidth > 0.01f && lineColor.a > 0.001f;
             for (int r = 0; r < battle.Height; r++)
             {
                 for (int q = 0; q < battle.Width; q++)
@@ -496,17 +513,18 @@ namespace KingdomSurvival.BattleSandbox
                     Color fill = GetTerrainColor(terrain);
 
                     if (occupant != null && occupant.Id == selectedTargetId)
-                        fill = new Color(0.58f, 0.20f, 0.17f, 0.80f);
+                        fill = hexStyle.TargetColor;
 
-                    DrawHex(
-                        painter,
-                        layout.GetCenter(coord),
-                        layout.Size - 1.5f,
-                        fill,
-                        new Color(0.36f, 0.38f, 0.38f, 0.80f),
-                        1.2f,
-                        true,
-                        layout.VerticalScale);
+                    // Без BattlefieldView под полем подложку и линию рисует поле.
+                    if (!baseGridDrawnBelow)
+                        DrawHex(painter, layout.GetCenter(coord), radius, hexStyle.Fade(hexStyle.FillColor),
+                            drawLine ? lineColor : Color.clear, drawLine ? hexStyle.LineWidth : 0f,
+                            true, layout.VerticalScale);
+
+                    if (fill.a > 0.001f)
+                        DrawHex(painter, layout.GetCenter(coord), radius, fill,
+                            drawLine ? lineColor : Color.clear, drawLine ? hexStyle.LineWidth : 0f,
+                            true, layout.VerticalScale);
                 }
             }
 
@@ -522,10 +540,10 @@ namespace KingdomSurvival.BattleSandbox
                     DrawHex(
                         painter,
                         layout.GetCenter(pair.Key),
-                        layout.Size - 2.6f,
+                        Mathf.Max(1f, radius - hexStyle.ReachableLineWidth * 0.5f),
                         new Color(0f, 0f, 0f, 0f),
-                        ReachableColor,
-                        2.2f,
+                        hexStyle.ReachableColor,
+                        hexStyle.ReachableLineWidth,
                         false,
                         layout.VerticalScale);
                 }
@@ -549,9 +567,9 @@ namespace KingdomSurvival.BattleSandbox
                     DrawHex(
                         painter,
                         layout.GetCenter(hoverAttackPosition.Value),
-                        layout.Size - 4f,
-                        new Color(0.82f, 0.64f, 0.18f, 0.16f),
-                        new Color(0.98f, 0.80f, 0.32f, 0.95f),
+                        Mathf.Max(1f, radius - 2.5f),
+                        hexStyle.AttackHoverFill,
+                        hexStyle.AttackHoverLine,
                         3f,
                         true,
                         layout.VerticalScale);
@@ -1101,16 +1119,16 @@ namespace KingdomSurvival.BattleSandbox
             painter.Stroke();
         }
 
-        private static Color GetTerrainColor(SandboxTerrain terrain)
+        private Color GetTerrainColor(SandboxTerrain terrain)
         {
             switch (terrain)
             {
                 case SandboxTerrain.Difficult:
-                    return DifficultColor;
+                    return hexStyle.DifficultColor;
                 case SandboxTerrain.Impassable:
-                    return ImpassableColor;
+                    return hexStyle.ImpassableColor;
                 default:
-                    return NormalColor;
+                    return Color.clear;
             }
         }
 
@@ -1144,7 +1162,8 @@ namespace KingdomSurvival.BattleSandbox
             painter.ClosePath();
             if (fillShape)
                 painter.Fill();
-            painter.Stroke();
+            if (lineWidth > 0.01f && stroke.a > 0.001f)
+                painter.Stroke();
         }
 
         private static void DrawRectangle(
@@ -1205,6 +1224,15 @@ namespace KingdomSurvival.BattleSandbox
 
         private HexLayout CalculateLayout()
         {
+            // Стандартная арена — в кадре поля боя, как фон и окно базы.
+            if (SandboxArenaShape.MatchesDimensions(battle.Width, battle.Height))
+            {
+                Rect gridArea = BattlefieldFrame.GetGridArea(battlefield);
+                Rect frame = BattlefieldFrame.FitFrame(contentRect, gridArea, true);
+                BattlefieldGridLayout grid = BattlefieldFrame.ComputeLayout(frame, gridArea);
+                return new HexLayout(grid.Size, grid.Origin, grid.VerticalScale);
+            }
+
             float availableWidth = Mathf.Max(100f, contentRect.width - 36f);
             float availableHeight = Mathf.Max(100f, contentRect.height - 36f);
             bool compactArena = SandboxArenaShape.MatchesDimensions(battle.Width, battle.Height);

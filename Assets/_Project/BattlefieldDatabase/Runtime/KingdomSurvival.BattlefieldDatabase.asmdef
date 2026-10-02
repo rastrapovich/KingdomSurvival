@@ -1,7 +1,9 @@
 {
   "name": "KingdomSurvival.BattlefieldDatabase",
   "rootNamespace": "KingdomSurvival.BattlefieldDatabase",
-  "references": [],
+  "references": [
+    "KingdomSurvival.BattleSandbox.Runtime"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

@@ -5,7 +5,8 @@
         "KingdomSurvival.BattleSandbox.Runtime",
         "KingdomSurvival.UnitDatabase",
         "KingdomSurvival.AnimationDatabase",
-        "KingdomSurvival.Core"
+        "KingdomSurvival.Core",
+        "KingdomSurvival.BattlefieldDatabase"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

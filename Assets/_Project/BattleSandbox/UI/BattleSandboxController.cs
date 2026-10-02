@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using KingdomSurvival.BattlefieldDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -18,6 +19,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private SandboxBattle battle;
         private HexBoardElement board;
+        private BattlefieldDatabaseAsset battlefieldDatabase;
         private Label roundLabel;
         private VisualElement initiativeRow;
         private Label currentUnitLabel;
@@ -64,6 +66,7 @@ namespace KingdomSurvival.BattleSandbox
 
             initialized = true;
             unitContent = SandboxUnitDatabaseAdapter.Load();
+            battlefieldDatabase = Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
 
             root.style.flexGrow = 1f;
             root.style.backgroundColor = new Color(0.035f, 0.043f, 0.050f, 1f);
@@ -136,7 +139,7 @@ namespace KingdomSurvival.BattleSandbox
                 campaignUnitIds.Add("player:" + fighters[i].Id + ":" + (i + 1));
 
             battle = SandboxRoster.CreateBattle(fighters, BuildCampaignEnemies(), campaignBattle.Seed,
-                campaignBattle.PlayerFirstRoundInitiativeBonus);
+                campaignBattle.PlayerFirstRoundInitiativeBonus, BattlefieldFrame.DisabledCells(ActiveBattlefield()));
 
             // ПР-10: пал герой — бой проигран.
             for (int i = 0; i < campaignParticipants.Count; i++)
@@ -675,6 +678,51 @@ namespace KingdomSurvival.BattleSandbox
             return center;
         }
 
+        private BattlefieldDefinitionData ActiveBattlefield()
+        {
+            return battlefieldDatabase != null ? battlefieldDatabase.GetSandboxBattlefield() : null;
+        }
+
+        // Поле из Базы полей боя: фон и основной вид гексов в кадре 16:9,
+        // поверх — интерактивное поле. Оба считают раскладку одинаково.
+        private BattlefieldView CreateBattlefieldSurface(HexBoardElement boardElement)
+        {
+            BattlefieldDefinitionData field = ActiveBattlefield();
+            BattlefieldHexStyle style = battlefieldDatabase != null ? battlefieldDatabase.GetHexStyle(field) : null;
+
+            BattlefieldView surface = new BattlefieldView(true) { name = "battlefield-surface" };
+            surface.style.flexGrow = 1f;
+            surface.style.flexShrink = 1f;
+            surface.style.minWidth = 620f;
+            surface.style.minHeight = 520f;
+            surface.style.position = Position.Relative;
+            surface.style.backgroundColor = new Color(0.035f, 0.043f, 0.050f, 1f);
+            surface.Show(field, style);
+            // В редакторе правки окна базы видны в идущем бою.
+            if (Application.isEditor)
+            {
+                surface.EnableLiveRefresh(500);
+                surface.LayoutChanged += boardElement.MarkDirtyRepaint;
+            }
+
+            boardElement.style.position = Position.Absolute;
+            boardElement.style.left = 0f;
+            boardElement.style.right = 0f;
+            boardElement.style.top = 0f;
+            boardElement.style.bottom = 0f;
+            boardElement.style.minWidth = 0f;
+            boardElement.style.minHeight = 0f;
+            boardElement.style.marginRight = 0f;
+            boardElement.style.backgroundColor = Color.clear;
+            boardElement.style.borderLeftWidth = 0f;
+            boardElement.style.borderRightWidth = 0f;
+            boardElement.style.borderTopWidth = 0f;
+            boardElement.style.borderBottomWidth = 0f;
+            boardElement.SetBattlefield(field, style, true);
+            surface.Add(boardElement);
+            return surface;
+        }
+
         private void StartBattle()
         {
             List<SandboxUnitDefinition> fighters = PickedUnits(false);
@@ -685,7 +733,8 @@ namespace KingdomSurvival.BattleSandbox
             // «Повторить бой» во время незавершённого показа прежнего боя не
             // должен унаследовать его флаги.
             ResetCombatFlow();
-            battle = SandboxRoster.CreateBattle(fighters, enemies);
+            battle = SandboxRoster.CreateBattle(fighters, enemies,
+                disabledCells: BattlefieldFrame.DisabledCells(ActiveBattlefield()));
             battleLog.Clear();
             battleLog.Add("Бой начался. Противник: " + string.Join(", ", enemies.GroupBy(enemy => enemy.RoleLabel)
                 .Select(group => group.Count() > 1 ? group.Key + " ×" + group.Count() : group.Key)) + ".");
@@ -747,11 +796,10 @@ namespace KingdomSurvival.BattleSandbox
 
             board = new HexBoardElement();
             board.SetUnitVisuals(unitContent.Visuals, unitContent.AnimationDatabase);
-            board.style.marginRight = 14f;
             board.HexClicked += OnBoardHexClicked;
             board.UnitDetailsRequested += OnBoardUnitDetailsRequested;
             board.AttackRequested += OnBoardAttackRequested;
-            body.Add(board);
+            body.Add(CreateBattlefieldSurface(board));
 
             VisualElement sidebar = CreatePanel();
             sidebar.style.width = 330f;

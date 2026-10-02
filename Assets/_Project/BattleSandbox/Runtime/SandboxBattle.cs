@@ -306,6 +306,8 @@ namespace KingdomSurvival.BattleSandbox
         private readonly List<SandboxUnitState> units;
         private readonly Dictionary<HexCoord, SandboxTerrain> terrain;
         private readonly bool usesCompactArenaShape;
+        // Гексы, отключённые на конкретном поле (База полей боя): их нет в бою.
+        private readonly HashSet<HexCoord> disabledCells = new HashSet<HexCoord>();
         private readonly List<string> turnOrderIds = new List<string>();
         private int currentTurnIndex = -1;
         private string pendingRetaliationDefenderId;
@@ -355,7 +357,8 @@ namespace KingdomSurvival.BattleSandbox
             int width,
             int height,
             IEnumerable<SandboxUnitState> units,
-            IDictionary<HexCoord, SandboxTerrain> terrain = null)
+            IDictionary<HexCoord, SandboxTerrain> terrain = null,
+            IEnumerable<HexCoord> disabledCells = null)
         {
             if (width < 2 || height < 2)
                 throw new ArgumentOutOfRangeException(nameof(width));
@@ -372,6 +375,8 @@ namespace KingdomSurvival.BattleSandbox
                                     SandboxArenaShape.InactiveCells().All(coord =>
                                         this.terrain.TryGetValue(coord, out SandboxTerrain value) &&
                                         value == SandboxTerrain.Impassable);
+            if (disabledCells != null)
+                this.disabledCells.UnionWith(disabledCells);
 
             ValidateInitialState();
         }
@@ -410,7 +415,7 @@ namespace KingdomSurvival.BattleSandbox
             bool insideRectangle =
                 position.Q >= 0 && position.Q < Width &&
                 position.R >= 0 && position.R < Height;
-            if (!insideRectangle)
+            if (!insideRectangle || disabledCells.Contains(position))
                 return false;
 
             return !usesCompactArenaShape || SandboxArenaShape.Contains(position);

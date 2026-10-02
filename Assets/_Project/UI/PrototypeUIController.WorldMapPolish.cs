@@ -171,7 +171,7 @@ public partial class PrototypeUIController
         float scaleX = worldMapCanvasWidth / grid.CanvasWidth * zoom;
         float scaleY = worldMapCanvasHeight / grid.CanvasHeight * zoom;
         float radiusScreen = grid.HexRadius * Mathf.Min(scaleX, scaleY);
-        if (radiusScreen < 2f)
+        if (radiusScreen < 4f)
             return;
 
         // Видимый прямоугольник в пикселях полотна сетки (с запасом в клетку).

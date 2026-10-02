@@ -69,6 +69,7 @@ MonoBehaviour:
   heroAnimationSetId: militia
   heroHeightInHexRadii: 1.4
   syncWalkCadence: 1
+  holdStartDelaySeconds: 0.25
   holdRepathIntervalSeconds: 0.1
   holdRepathMinShiftHexes: 0.3
   showClickMarker: 1

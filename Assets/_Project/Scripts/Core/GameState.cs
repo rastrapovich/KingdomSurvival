@@ -1375,13 +1375,15 @@ public class GameState
         waypoint.MapYPercent = WorldMapNavigation.ClampMapY(yPercent);
         waypoint.RegionId = "waypoint";
         waypoint.RegionName = GetRegionName(waypoint.MapXPercent, waypoint.MapYPercent);
+        // 12И: точку пути переставляют по десять раз в секунду, пока кнопка
+        // зажата, — оценка по прямой, без второго поиска пути от Дома.
         waypoint.TravelHoursFromCapital =
-            ContinuousSimulationSystem.CalculateTravelHours(
-                WorldMapNavigation.FindPath(
-                    WorldMapNavigation.CapitalXPercent,
-                    WorldMapNavigation.CapitalYPercent,
-                    waypoint.MapXPercent,
-                    waypoint.MapYPercent));
+            WorldMapNavigation.DistanceHexes(
+                WorldMapNavigation.CapitalXPercent,
+                WorldMapNavigation.CapitalYPercent,
+                waypoint.MapXPercent,
+                waypoint.MapYPercent) *
+            WorldMapMovementRules.Current.HoursPerHex(WorldMapGameplayTerrainType.OpenGround);
         waypoint.IsVisibleOnMap = false;
         waypoint.IsDiscovered = true;
         waypoint.IsExplored = false;

@@ -10,6 +10,11 @@ using UnityEngine.UIElements;
 // месту — бег к нему (прибытие откроет место); клик по Дому — возвращение.
 public partial class PrototypeUIController
 {
+    // Кнопка нажата: короткий клик — бег к точке клика; дольше порога —
+    // бег за курсором. Пока порог не пройден, цель не трогается: камера едет
+    // за героем, и точка под неподвижным курсором иначе уползала бы от клика.
+    private bool worldMapHoldPressed;
+    private float worldMapHoldPressedAt;
     private bool worldMapHoldActive;
     private int worldMapHoldPointerId = -1;
     private Vector2 worldMapHoldPanelPosition;
@@ -65,10 +70,12 @@ public partial class PrototypeUIController
         ShowWorldMapClickMarker(point.x, point.y);
         IssueContinuousMapOrder(point.x, point.y, null);
 
-        // Кнопка зажата — дальше герой бежит за курсором.
-        worldMapHoldActive = gameState.HasActiveExpedition;
-        if (worldMapHoldActive)
+        // Кнопка зажата дольше порога — дальше герой бежит за курсором.
+        worldMapHoldPressed = gameState.HasActiveExpedition;
+        worldMapHoldActive = false;
+        if (worldMapHoldPressed)
         {
+            worldMapHoldPressedAt = Time.realtimeSinceStartup;
             worldMapHoldPointerId = evt.pointerId;
             worldMapHoldPanelPosition = evt.position;
             worldMapHoldLastRepathTime = Time.realtimeSinceStartup;
@@ -82,27 +89,36 @@ public partial class PrototypeUIController
 
     private void OnContinuousMapPointerMove(PointerMoveEvent evt)
     {
-        if (!worldMapHoldActive || evt.pointerId != worldMapHoldPointerId)
+        if (!worldMapHoldPressed || evt.pointerId != worldMapHoldPointerId)
             return;
         worldMapHoldPanelPosition = evt.position;
     }
 
     private void OnContinuousMapPointerUp(PointerUpEvent evt)
     {
-        if (!worldMapHoldActive || evt.pointerId != worldMapHoldPointerId)
+        if (!worldMapHoldPressed || evt.pointerId != worldMapHoldPointerId)
             return;
+
+        // Бег за курсором закончился — последняя цель ровно под курсором.
+        bool wasFollowing = worldMapHoldActive;
         EndWorldMapHold();
+        if (wasFollowing && gameState != null && gameState.HasActiveExpedition && !isGameOver)
+        {
+            Vector2 point = WorldMapPanelToPercent(evt.position);
+            IssueContinuousMapOrder(point.x, point.y, null, silent: true);
+        }
     }
 
     private void OnContinuousMapPointerCaptureOut(PointerCaptureOutEvent evt)
     {
-        if (worldMapHoldActive)
+        if (worldMapHoldPressed)
             EndWorldMapHold();
     }
 
     private void EndWorldMapHold()
     {
         int pointerId = worldMapHoldPointerId;
+        worldMapHoldPressed = false;
         worldMapHoldActive = false;
         worldMapHoldPointerId = -1;
         if (worldMap != null && pointerId >= 0 && worldMap.HasPointerCapture(pointerId))
@@ -113,13 +129,22 @@ public partial class PrototypeUIController
     // от движения камеры за героем — поэтому цель пересчитывается по таймеру.
     private void TickWorldMapHold(float now, WorldMapMovementSettingsAsset settings)
     {
-        if (!worldMapHoldActive || worldMap == null || gameState == null)
+        if (!worldMapHoldPressed || worldMap == null || gameState == null)
             return;
 
         if (!gameState.HasActiveExpedition || isGameOver || HasBlockingModalWork())
         {
             EndWorldMapHold();
             return;
+        }
+
+        if (!worldMapHoldActive)
+        {
+            float delay = settings != null ? settings.HoldStartDelaySeconds : 0.25f;
+            if (now - worldMapHoldPressedAt < delay)
+                return;
+            worldMapHoldActive = true;
+            worldMapHoldLastRepathTime = 0f;
         }
 
         float interval = settings != null ? settings.HoldRepathIntervalSeconds : 0.1f;

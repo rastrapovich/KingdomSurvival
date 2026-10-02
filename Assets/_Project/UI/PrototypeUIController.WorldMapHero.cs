@@ -8,11 +8,15 @@ using UnityEngine.UIElements;
 // прямым управлением игрока. Траектория не рисуется; есть только короткая
 // отметка места клика. Камера по умолчанию плавно держит героя в центре.
 // Фигура и отметка — экранные элементы внутри viewport: их положение
-// пересчитывается из процентов карты, pan и zoom каждый тик.
+// пересчитывается из процентов карты, pan и zoom каждый кадр, сразу после
+// шага симуляции (Update), и задаётся через translate — без пересчёта
+// раскладки и без округления до пикселя, иначе фигура дёргается.
 public partial class PrototypeUIController
 {
-    private const long WorldMapHeroTickMs = 16;
     private const float WorldMapHeroFallbackDiameter = 10f;
+    // Смена ракурса — только при заметной смене направления: при пересчёте
+    // пути под курсором фигура не мигает между двумя соседними ракурсами.
+    private const float WorldMapHeroFacingHysteresis = 0.08f;
     // Высота фигуры в бою — 1,35 радиуса клетки (HexBoardElement): по ней
     // шаг ходьбы из Базы анимаций переводится в клетки карты.
     private const float BattleFigureHeightInHexRadii = 1.35f;
@@ -26,11 +30,12 @@ public partial class PrototypeUIController
     private CreatureAnimationSetData worldMapHeroAnimationSet;
     private CreatureAnimationPlayer worldMapHeroPlayer;
     private string worldMapHeroAnimationSetId;
+    private bool worldMapHeroAnimationSetResolved;
     private float worldMapHeroAnimationClock;
     private HexFacing worldMapHeroFacing = HexFacing.SouthEast;
     private Sprite worldMapHeroLastSprite;
 
-    private float worldMapHeroLastTickTime = -1f;
+    private Vector2 worldMapHeroAppliedSize = new Vector2(-1f, -1f);
     private bool worldMapCameraFollowSuspended;
 
     private float worldMapClickMarkerStartedAt = -1f;
@@ -83,11 +88,7 @@ public partial class PrototypeUIController
 
         EnsureWorldMapHeroElements();
         worldMapHeroInitialized = true;
-
-        worldMapViewport.schedule
-            .Execute(TickWorldMapHero)
-            .Every(WorldMapHeroTickMs);
-        TickWorldMapHero();
+        TickWorldMapHero(0f);
     }
 
     private void EnsureWorldMapHeroElements()
@@ -102,6 +103,8 @@ public partial class PrototypeUIController
             };
             worldMapHeroFallback.AddToClassList("world-map-army-marker");
             worldMapHeroFallback.style.position = Position.Absolute;
+            worldMapHeroFallback.style.left = 0f;
+            worldMapHeroFallback.style.top = 0f;
             worldMapHeroFallback.style.width = WorldMapHeroFallbackDiameter;
             worldMapHeroFallback.style.height = WorldMapHeroFallbackDiameter;
             worldMapHeroFallback.style.minWidth = new Length(0f, LengthUnit.Pixel);
@@ -122,6 +125,8 @@ public partial class PrototypeUIController
                 scaleMode = ScaleMode.StretchToFill
             };
             worldMapHeroImage.style.position = Position.Absolute;
+            worldMapHeroImage.style.left = 0f;
+            worldMapHeroImage.style.top = 0f;
             worldMapHeroImage.style.display = DisplayStyle.None;
             worldMapViewport.Add(worldMapHeroImage);
         }
@@ -135,6 +140,8 @@ public partial class PrototypeUIController
                 pickingMode = PickingMode.Ignore
             };
             worldMapClickMarker.style.position = Position.Absolute;
+            worldMapClickMarker.style.left = 0f;
+            worldMapClickMarker.style.top = 0f;
             worldMapClickMarker.style.display = DisplayStyle.None;
             worldMapViewport.Add(worldMapClickMarker);
         }
@@ -153,15 +160,14 @@ public partial class PrototypeUIController
             inspectionCard.BringToFront();
     }
 
-    private void TickWorldMapHero()
+    // Вызывается из Update каждый кадр сразу после шага симуляции — фигура,
+    // камера и время сдвигаются в одном и том же кадре.
+    private void TickWorldMapHero(float dt)
     {
         if (!worldMapHeroInitialized || gameState == null || worldMapViewport == null)
             return;
 
         float now = Time.realtimeSinceStartup;
-        float dt = worldMapHeroLastTickTime < 0f ? 0f : Mathf.Clamp(now - worldMapHeroLastTickTime, 0f, 0.1f);
-        worldMapHeroLastTickTime = now;
-
         if (!IsWorldMapScreenGeometryReady())
             return;
 
@@ -219,10 +225,7 @@ public partial class PrototypeUIController
         CreatureAnimationSetData set = ResolveWorldMapHeroAnimationSet(settings);
         if (set == null)
         {
-            worldMapHeroImage.style.display = DisplayStyle.None;
-            worldMapHeroFallback.style.display = DisplayStyle.Flex;
-            worldMapHeroFallback.style.left = Mathf.Round(ground.x);
-            worldMapHeroFallback.style.top = Mathf.Round(ground.y);
+            ShowWorldMapHeroFallback(ground);
             return;
         }
 
@@ -240,10 +243,7 @@ public partial class PrototypeUIController
             sprite = worldMapHeroLastSprite != null ? worldMapHeroLastSprite : set.FindFirstFrame();
         if (sprite == null)
         {
-            worldMapHeroImage.style.display = DisplayStyle.None;
-            worldMapHeroFallback.style.display = DisplayStyle.Flex;
-            worldMapHeroFallback.style.left = Mathf.Round(ground.x);
-            worldMapHeroFallback.style.top = Mathf.Round(ground.y);
+            ShowWorldMapHeroFallback(ground);
             return;
         }
 
@@ -260,20 +260,41 @@ public partial class PrototypeUIController
         float width = height * canvas.x / Mathf.Max(1f, canvas.y);
         Vector2 cellOffset = worldMapHeroPlayer.Clip != null ? worldMapHeroPlayer.Clip.Offset : Vector2.zero;
 
-        worldMapHeroFallback.style.display = DisplayStyle.None;
-        worldMapHeroImage.style.display = DisplayStyle.Flex;
-        worldMapHeroImage.style.width = width;
-        worldMapHeroImage.style.height = height;
-        worldMapHeroImage.style.left = ground.x - set.Pivot.x * width + cellOffset.x * width;
-        worldMapHeroImage.style.top = ground.y - (1f - set.Pivot.y) * height - cellOffset.y * height;
+        if (worldMapHeroFallback.style.display != DisplayStyle.None)
+            worldMapHeroFallback.style.display = DisplayStyle.None;
+        if (worldMapHeroImage.style.display != DisplayStyle.Flex)
+            worldMapHeroImage.style.display = DisplayStyle.Flex;
+
+        // Размер меняется только с зумом — раскладку не трогаем каждый кадр.
+        if (Mathf.Abs(worldMapHeroAppliedSize.x - width) > 0.01f ||
+            Mathf.Abs(worldMapHeroAppliedSize.y - height) > 0.01f)
+        {
+            worldMapHeroImage.style.width = width;
+            worldMapHeroImage.style.height = height;
+            worldMapHeroAppliedSize = new Vector2(width, height);
+        }
+
+        worldMapHeroImage.style.translate = new Translate(
+            ground.x - set.Pivot.x * width + cellOffset.x * width,
+            ground.y - (1f - set.Pivot.y) * height - cellOffset.y * height);
+    }
+
+    private void ShowWorldMapHeroFallback(Vector2 ground)
+    {
+        if (worldMapHeroImage.style.display != DisplayStyle.None)
+            worldMapHeroImage.style.display = DisplayStyle.None;
+        if (worldMapHeroFallback.style.display != DisplayStyle.Flex)
+            worldMapHeroFallback.style.display = DisplayStyle.Flex;
+        worldMapHeroFallback.style.translate = new Translate(ground.x, ground.y);
     }
 
     private CreatureAnimationSetData ResolveWorldMapHeroAnimationSet(WorldMapMovementSettingsAsset settings)
     {
         string setId = settings != null ? settings.HeroAnimationSetId : "militia";
-        if (worldMapHeroPlayer != null && worldMapHeroAnimationSetId == setId)
+        if (worldMapHeroAnimationSetResolved && worldMapHeroAnimationSetId == setId)
             return worldMapHeroAnimationSet;
 
+        worldMapHeroAnimationSetResolved = true;
         worldMapHeroAnimationSetId = setId;
         worldMapHeroAnimationDatabase = Resources.Load<CreatureAnimationDatabaseAsset>(
             CreatureAnimationDatabaseAsset.ResourcesPath);
@@ -305,7 +326,15 @@ public partial class PrototypeUIController
         if (direction.sqrMagnitude < 0.0001f)
             return;
 
-        worldMapHeroFacing = HexFacingMath.Nearest(direction, WorldMapHexNeighborVectors, worldMapHeroFacing);
+        HexFacing nearest = HexFacingMath.Nearest(direction, WorldMapHexNeighborVectors, worldMapHeroFacing);
+        if (nearest == worldMapHeroFacing)
+            return;
+
+        Vector2 normalized = direction.normalized;
+        float currentDot = Vector2.Dot(normalized, WorldMapHexNeighborVectors[(int)worldMapHeroFacing]);
+        float nearestDot = Vector2.Dot(normalized, WorldMapHexNeighborVectors[(int)nearest]);
+        if (nearestDot - currentDot > WorldMapHeroFacingHysteresis)
+            worldMapHeroFacing = nearest;
     }
 
     private static readonly Vector2[] WorldMapHexNeighborVectors =
@@ -427,16 +456,17 @@ public partial class PrototypeUIController
         }
 
         float t = Mathf.Clamp01(elapsed / duration);
-        float size = Mathf.Lerp(8f, 22f, t);
+        const float size = 22f;
         Color color = settings != null ? settings.ClickMarkerColor : new Color(0.96f, 0.88f, 0.62f, 0.9f);
         color.a *= 1f - t;
 
         Vector2 position = MapPercentToWorldMapViewport(worldMapClickMarkerXPercent, worldMapClickMarkerYPercent);
         worldMapClickMarker.style.display = DisplayStyle.Flex;
-        worldMapClickMarker.style.left = position.x - size * 0.5f;
-        worldMapClickMarker.style.top = position.y - size * 0.25f;
         worldMapClickMarker.style.width = size;
         worldMapClickMarker.style.height = size * 0.5f;
+        worldMapClickMarker.style.translate = new Translate(position.x - size * 0.5f, position.y - size * 0.25f);
+        float grow = Mathf.Lerp(0.35f, 1f, t);
+        worldMapClickMarker.style.scale = new Scale(new Vector3(grow, grow, 1f));
         worldMapClickMarker.style.borderTopLeftRadius = size * 0.5f;
         worldMapClickMarker.style.borderTopRightRadius = size * 0.5f;
         worldMapClickMarker.style.borderBottomLeftRadius = size * 0.5f;

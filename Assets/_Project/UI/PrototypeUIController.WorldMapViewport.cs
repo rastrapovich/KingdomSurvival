@@ -427,9 +427,12 @@ public partial class PrototypeUIController
         if (worldMap == null)
             return;
 
+        // 12И: сдвиг — translate, а не left/top: камера едет за героем каждый
+        // кадр, и пересчёт раскладки всего полотна с маркерами давал рывки.
         worldMap.style.scale = new Scale(new Vector3(worldMapZoom, worldMapZoom, 1f));
-        worldMap.style.left = new Length(worldMapPanOffsetX, LengthUnit.Pixel);
-        worldMap.style.top = new Length(worldMapPanOffsetY, LengthUnit.Pixel);
+        worldMap.style.left = 0f;
+        worldMap.style.top = 0f;
+        worldMap.style.translate = new Translate(worldMapPanOffsetX, worldMapPanOffsetY);
 
         RefreshWorldMapZoomCompensatedVisuals();
     }

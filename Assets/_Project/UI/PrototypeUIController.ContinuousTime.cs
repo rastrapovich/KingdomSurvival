@@ -10,6 +10,39 @@ public partial class PrototypeUIController
     private float continuousDetailsRefreshTimer;
     private bool continuousDebugAutopauseRegistered;
     private const float MaxSimulationFrameSeconds = 0.1f;
+    // Сглаживание времени кадра: неровные кадры не дают рывков бегущей фигуры.
+    private const float FrameSecondsSmoothing = 0.15f;
+    private float smoothedFrameSeconds;
+
+    // 12И: без синхронизации с монитором (уровень качества Very Low) кадры
+    // идут неровно, и карта за героем едет рывками. Синхронизация — на всю
+    // игру; если её нет, частота кадров ограничена частотой экрана.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void ConfigureFramePacing()
+    {
+        if (Application.isBatchMode)
+            return;
+
+        QualitySettings.vSyncCount = 1;
+        double refresh = Screen.currentResolution.refreshRateRatio.value;
+        Application.targetFrameRate = refresh > 1.0 ? Mathf.RoundToInt((float)refresh) : 60;
+    }
+
+    // Одиночный долгий кадр (загрузка сцены, подвисание) отбрасывается, а не
+    // размазывается на следующие кадры: учитывается не больше двух обычных.
+    private float NextFrameSeconds()
+    {
+        float raw = Mathf.Min(Time.unscaledDeltaTime, MaxSimulationFrameSeconds);
+        if (smoothedFrameSeconds <= 0f)
+        {
+            smoothedFrameSeconds = Mathf.Min(raw, 1f / 60f);
+            return smoothedFrameSeconds;
+        }
+
+        raw = Mathf.Min(raw, smoothedFrameSeconds * 2f);
+        smoothedFrameSeconds = Mathf.Lerp(smoothedFrameSeconds, raw, FrameSecondsSmoothing);
+        return smoothedFrameSeconds;
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InitializeContinuousTimeRuntime()
@@ -148,6 +181,7 @@ public partial class PrototypeUIController
             RefreshContinuousTimeUi(true);
         }
 
+        float frameSeconds = NextFrameSeconds();
         if (!isGameOver)
         {
             RefreshAutoTimeState();
@@ -157,7 +191,7 @@ public partial class PrototypeUIController
             ContinuousSimulationBatch batch =
                 ContinuousSimulationSystem.Advance(
                     gameState,
-                    Mathf.Min(Time.unscaledDeltaTime, MaxSimulationFrameSeconds));
+                    frameSeconds);
 
             if (batch.HasReportableContent)
                 ProcessContinuousSimulationBatch(batch);
@@ -166,7 +200,7 @@ public partial class PrototypeUIController
         RegisterContinuousDebugAutopause();
         EnsureDeferredWorldMapUi();
         RefreshContinuousClockOnly();
-        RefreshContinuousMapMarker();
+        TickWorldMapHero(frameSeconds);
 
         continuousDetailsRefreshTimer += Time.unscaledDeltaTime;
         if (continuousDetailsRefreshTimer >= 0.20f)

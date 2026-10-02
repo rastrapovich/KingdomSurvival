@@ -36,6 +36,8 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private bool syncWalkCadence = true;
 
         [Header("Управление")]
+        [Tooltip("Сколько секунд держать кнопку, чтобы герой побежал за курсором. Короче — обычный клик: бег к точке клика.")]
+        [SerializeField, Range(0.05f, 1f)] private float holdStartDelaySeconds = 0.25f;
         [Tooltip("Как часто пересчитывается путь, пока кнопка мыши зажата (секунды).")]
         [SerializeField, Range(0.03f, 1f)] private float holdRepathIntervalSeconds = 0.1f;
         [Tooltip("Насколько должна сместиться точка под курсором (в клетках), чтобы путь пересчитался.")]
@@ -58,6 +60,7 @@ namespace KingdomSurvival.WorldMapVisual
         public string HeroAnimationSetId => heroAnimationSetId ?? string.Empty;
         public float HeroHeightInHexRadii => Mathf.Max(0.1f, heroHeightInHexRadii);
         public bool SyncWalkCadence => syncWalkCadence;
+        public float HoldStartDelaySeconds => Mathf.Max(0f, holdStartDelaySeconds);
         public float HoldRepathIntervalSeconds => Mathf.Max(0.01f, holdRepathIntervalSeconds);
         public float HoldRepathMinShiftHexes => Mathf.Max(0.01f, holdRepathMinShiftHexes);
         public bool ShowClickMarker => showClickMarker;

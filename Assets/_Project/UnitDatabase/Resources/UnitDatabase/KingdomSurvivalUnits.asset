@@ -83,7 +83,7 @@ MonoBehaviour:
     displayLabel: "\u0413\u0432\u0430\u0440\u0434\u0435\u0435\u0446"
     category: 0
     combatRole: 0
-    maxHitPoints: 18
+    maxHitPoints: 16
     attack: 2
     defense: 4
     damage: 3
@@ -320,13 +320,13 @@ MonoBehaviour:
     movement: 5
     initiative: 6
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: efad44e20fe38234ca561e97cd608fcb, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
+    battlefieldSprite: {fileID: 21300000, guid: 0812ed47fc68073488bf6c3f28c0fcfd, type: 3}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
@@ -352,13 +352,13 @@ MonoBehaviour:
     movement: 5
     initiative: 8
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: cf53281dff0e1fb419aa911799450e07, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
+    battlefieldSprite: {fileID: 21300000, guid: 430f68a6f5e424a4eb1ec062d081b72e, type: 3}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
@@ -384,13 +384,13 @@ MonoBehaviour:
     movement: 4
     initiative: 4
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: fe08e4446d6eec34eabf49711d18bd02, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
+    battlefieldSprite: {fileID: 21300000, guid: 16a8a9d88c501eb4a98712969adefb8c, type: 3}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
@@ -416,14 +416,14 @@ MonoBehaviour:
     movement: 3
     initiative: 2
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 8cbf59b9a5790014aae946bded29ee14, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 14a1b4236c11de14e9bef0f0ce3b2b5d, type: 3}
+    battlefieldScale: 1.27
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -448,14 +448,14 @@ MonoBehaviour:
     movement: 5
     initiative: 5
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: b054dd5942260fb4cbd8e452ee74f418, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 70dd635b5aca81d4ca875675696bd0f0, type: 3}
+    battlefieldScale: 1.45
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -479,14 +479,14 @@ MonoBehaviour:
     movement: 5
     initiative: 8
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: ba3549140884ffd40b1a85e586bfaef8, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 5698113710d4f704b8cc7c638ab80d55, type: 3}
+    battlefieldScale: 0.85
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds: []
@@ -503,13 +503,13 @@ MonoBehaviour:
     movement: 4
     initiative: 6
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 154e610a10410974b927ba654c3ee412, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
+    battlefieldSprite: {fileID: 21300000, guid: 4c7d9cf8aa240314eac6547c809c81e6, type: 3}
     battlefieldScale: 1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
@@ -527,14 +527,14 @@ MonoBehaviour:
     movement: 5
     initiative: 7
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 34a5d14802a902b44b546cb1c7fec3c4, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 6fc3b9447087df8429bd11ef4052c2a4, type: 3}
+    battlefieldScale: 1.22
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -560,14 +560,14 @@ MonoBehaviour:
     movement: 5
     initiative: 7
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 2cfd60e5de0370943afcf3caa80aad37, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 0439c02fb8578164fb9ab009f74a82c6, type: 3}
+    battlefieldScale: 1.3
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -591,15 +591,15 @@ MonoBehaviour:
     movement: 4
     initiative: 5
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 8999cb1c04540e54794be0f4f9195017, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
-    battlefieldOffset: {x: 0, y: 0}
+    battlefieldSprite: {fileID: 21300000, guid: 56506fbbc53dcf046a5b8763c0de2e2c, type: 3}
+    battlefieldScale: 1.48
+    battlefieldOffset: {x: 0, y: 114}
     animationSetId: 
     tagIds:
     - species.beast
@@ -628,14 +628,14 @@ MonoBehaviour:
     movement: 3
     initiative: 6
     attackRange: 4
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: b41134c4883495843a237b1bfaef6826, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: b726eac066fadd94e8d154d1775dd4e5, type: 3}
+    battlefieldScale: 0.8
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -660,18 +660,19 @@ MonoBehaviour:
     movement: 3
     initiative: 4
     attackRange: 3
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 3d3410eb17bbc194a99e4870fcbfb64a, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: e8a39c8fdd92b2746a7a024de919f645, type: 3}
+    battlefieldScale: 1.74
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
     - combat.ranged
+    - trait.armored
     size: 0
     abilities: []
   - id: treshchotka
@@ -685,14 +686,14 @@ MonoBehaviour:
     movement: 4
     initiative: 8
     attackRange: 5
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 80b325788aa0cec4ba3badbe2dc32a4e, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: ebfc67d8a20626149b04801fbe5c8dc2, type: 3}
+    battlefieldScale: 1.15
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -717,14 +718,14 @@ MonoBehaviour:
     movement: 2
     initiative: 2
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 2c0cf0adf8f302a4b99d3d8c533a9f31, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 9d144b19730a3b048a6708c19d9f6a5c, type: 3}
+    battlefieldScale: 2.1
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -749,14 +750,14 @@ MonoBehaviour:
     movement: 2
     initiative: 2
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 9575ee9c423d22c4facba944ad24fd97, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 92c1145ba4ca0484f9c6aa664bc870dc, type: 3}
+    battlefieldScale: 2.03
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -775,14 +776,14 @@ MonoBehaviour:
     movement: 2
     initiative: 2
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: d3bb35d3c2c01984dbc60a8433a04d34, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: e4d2ac79e862c254b91941fa786736e2, type: 3}
+    battlefieldScale: 1.89
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds: []
@@ -806,14 +807,14 @@ MonoBehaviour:
     movement: 3
     initiative: 7
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 4cb8c301c7bca36439ea09133731b96d, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: e5bda1b1cbd790a4890e6d5b01f3942f, type: 3}
+    battlefieldScale: 1.94
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -838,14 +839,14 @@ MonoBehaviour:
     movement: 4
     initiative: 5
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: bfff0fc3c635aa742a8f5c9b080c688d, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 236d1db967b0a8a4f9bba1eb6491b0c1, type: 3}
+    battlefieldScale: 1.71
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -871,14 +872,14 @@ MonoBehaviour:
     movement: 3
     initiative: 3
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 5a1127cf5a7e4654c9ba4d9fcd9af3b2, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: c90c20f2d83bc95499273436853d8cc2, type: 3}
+    battlefieldScale: 1.6
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -896,14 +897,14 @@ MonoBehaviour:
     movement: 3
     initiative: 4
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: e13b1409b001e654eb3501ffb3298091, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 0dd5d0ce885f9f941bea18fdd6b6d65d, type: 3}
+    battlefieldScale: 1.25
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds: []
@@ -932,14 +933,14 @@ MonoBehaviour:
     movement: 1
     initiative: 3
     attackRange: 3
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 42f2902a13357f84ca62bf5706f2c21f, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: c700d65608563264d9ca71c55d23fdf0, type: 3}
+    battlefieldScale: 1.36
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -964,14 +965,14 @@ MonoBehaviour:
     movement: 3
     initiative: 5
     attackRange: 2
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: cbd348e92e807294b989eadcf3698327, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 75081cf0f248fbc4a959bc6df564e29d, type: 3}
+    battlefieldScale: 1.19
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds: []
@@ -1001,14 +1002,14 @@ MonoBehaviour:
     movement: 3
     initiative: 3
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 37a6ee3015251fa4a8ee16b0a9917e9d, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: 09a7b2a0b73ce2342888b6955a530da5, type: 3}
+    battlefieldScale: 1.8
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -1033,14 +1034,14 @@ MonoBehaviour:
     movement: 3
     initiative: 2
     attackRange: 1
-    portrait: {fileID: 0}
+    portrait: {fileID: 21300000, guid: e8988342dd767b944b62220f90e0bb64, type: 3}
     portraitFitMode: 0
     portraitScale: 1
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
-    battlefieldSprite: {fileID: 0}
-    battlefieldScale: 1
+    battlefieldSprite: {fileID: 21300000, guid: a15f78be86dd7ca4881de6ca43d6d522, type: 3}
+    battlefieldScale: 1.62
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:

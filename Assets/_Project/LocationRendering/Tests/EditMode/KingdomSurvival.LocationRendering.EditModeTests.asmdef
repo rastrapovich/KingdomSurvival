@@ -1,0 +1,30 @@
+{
+  "name": "KingdomSurvival.LocationRendering.EditModeTests",
+  "rootNamespace": "KingdomSurvival.LocationRendering",
+  "references": [
+    "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.Core",
+    "KingdomSurvival.AnimationDatabase",
+    "KingdomSurvival.UnitDatabase",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime",
+    "KingdomSurvival.LocationRendering",
+    "Unity.RenderPipelines.Universal.2D.Runtime",
+    "KingdomSurvival.LocationRendering.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

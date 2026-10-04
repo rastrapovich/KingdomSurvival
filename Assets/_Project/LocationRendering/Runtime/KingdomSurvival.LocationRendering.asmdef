@@ -1,0 +1,23 @@
+{
+  "name": "KingdomSurvival.LocationRendering",
+  "rootNamespace": "KingdomSurvival.LocationRendering",
+  "references": [
+    "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.Core",
+    "KingdomSurvival.AnimationDatabase",
+    "KingdomSurvival.UnitDatabase",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime",
+    "Unity.RenderPipelines.Universal.2D.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

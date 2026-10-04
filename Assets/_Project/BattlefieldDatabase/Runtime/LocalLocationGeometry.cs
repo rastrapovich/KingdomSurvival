@@ -15,10 +15,13 @@ namespace KingdomSurvival.BattlefieldDatabase
         private readonly HashSet<HexCoord> blocked = new HashSet<HexCoord>();
         private readonly HashSet<HexCoord> difficult = new HashSet<HexCoord>();
 
-        public LocalLocationGeometry(LocalLocationDefinition definition, BattlefieldDefinitionData battlefield)
+        public LocalLocationGeometry(LocalLocationDefinition definition, BattlefieldDefinitionData battlefield, IEnumerable<HexCoord> visualBlockedCells = null)
         {
             Definition = definition ?? throw new ArgumentNullException(nameof(definition));
             Battlefield = battlefield;
+            if (visualBlockedCells != null)
+                foreach (HexCoord cell in visualBlockedCells)
+                    blocked.Add(cell);
             if (battlefield != null)
             {
                 foreach (HexCoord cell in BattlefieldFrame.DisabledCells(battlefield))

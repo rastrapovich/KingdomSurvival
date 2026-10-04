@@ -19,6 +19,11 @@ namespace KingdomSurvival.BattlefieldDatabase
         [Tooltip("Исследуемые места. Клетки — (столбец Q, ряд R) арены 7/8/9/10/9/8/7 поля места.")]
         public List<LocalLocationDefinition> locations = new List<LocalLocationDefinition>();
 
+        // Художественная сборка ссылается на ID места: игровые данные остаются выше.
+        public List<LocationVisualDefinition> visuals = new List<LocationVisualDefinition>();
+
+        public LocationVisualDefinition FindVisual(string id) => visuals?.Find(item => item != null && item.LocationId == id);
+
         // Подставить правленые места в каталог ядра (при запуске игры).
         public static void ApplyToCatalog()
         {

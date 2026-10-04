@@ -12,6 +12,26 @@ using System.Collections.Generic;
 // павшие бойцы погибают насовсем и уходят из отряда; если пал герой —
 // «Отряд разбит»: кампания заканчивается, игрок загружает сохранение или
 // начинает заново. Скрытого бессмертия у героя нет.
+
+// ПР-12К (канон v1.53 §28.3): откуда начался бой. Дорожный — отдельная
+// арена с возвратом на глобальную карту (прежнее поведение, значение по
+// умолчанию); на месте — то же поле исследуемого места, без смены сцены.
+public enum CampaignBattleSourceKind
+{
+    Road = 0,
+    Local = 1
+}
+
+// ПР-12К (канон v1.53 §28.10): происхождение участия. Человек Дома —
+// основа отряда; наёмник и существо-союзник — редкие внешние участники.
+// Происхождение не определяет сторону в бою и допуск в поселение.
+public enum CampaignParticipantOrigin
+{
+    HomePerson = 0,
+    Mercenary = 1,
+    CreatureAlly = 2
+}
+
 [Serializable]
 public sealed class CampaignBattleParticipant
 {
@@ -19,6 +39,15 @@ public sealed class CampaignBattleParticipant
     public string DisplayName;
     public string UnitTypeId;
     public bool IsHero;
+
+    // ПР-12К: внешний участник может брать боевой шаблон существа из общего
+    // каталога, человек Дома — только из отряда.
+    public CampaignParticipantOrigin Origin;
+
+    // ПР-12К: клетка поля для боя на месте (HasCell — задана явно).
+    public bool HasCell;
+    public int CellQ;
+    public int CellR;
 
     // ПР-06А: текущие HP человека; 0 — боевое состояние ещё не заведено,
     // сцена боя берёт полный запас из шаблона.
@@ -44,6 +73,11 @@ public sealed class CampaignBattleSurvivor
 {
     public string PersonId;
     public int HitPoints;
+
+    // ПР-12К: где выживший стоял в конце боя на месте.
+    public bool HasCell;
+    public int CellQ;
+    public int CellR;
 }
 
 // Канон v1.48 §27.3: что участник реально сделал в бою. Полученный урон
@@ -83,6 +117,14 @@ public sealed class CampaignBattleEnemyRecord
     public int AttackRange;
     public List<string> TagIds = new List<string>();
     public bool Defeated;
+
+    // ПР-12К: конкретный противник места (устойчивый InstanceId), его
+    // здоровье и клетка в конце боя. Пусто — безымянный противник дороги.
+    public string InstanceId = string.Empty;
+    public int HitPoints;
+    public bool HasCell;
+    public int CellQ;
+    public int CellR;
 }
 
 [Serializable]
@@ -92,6 +134,24 @@ public sealed class CampaignBattleEnemy
     public int Count = 1;
     // Уровень противника: прибавки и цена в опыте — из его карты развития.
     public int Level = 1;
+
+    // ПР-12К: конкретный противник места. InstanceId не пуст — это один
+    // экземпляр (Count не используется) со своим здоровьем и клеткой;
+    // погибший не появляется снова, раненый не исцеляется молча.
+    public string InstanceId = string.Empty;
+    // 0 — полный запас шаблона.
+    public int CurrentHitPoints;
+    public bool HasCell;
+    public int CellQ;
+    public int CellR;
+}
+
+// ПР-12К: клетка поля (q, r) в данных запроса.
+[Serializable]
+public sealed class CampaignBattleCell
+{
+    public int Q;
+    public int R;
 }
 
 [Serializable]
@@ -114,6 +174,23 @@ public sealed class CampaignBattleRequest
     public bool PreparedStart;
     public int PlayerFirstRoundInitiativeBonus;
     public List<string> Notes = new List<string>();
+
+    // ПР-12К (канон v1.53 §28.3): источник боя и его пространство.
+    // Дорожный бой: BattlefieldId — арена по местности (пусто — общее поле
+    // полигона, отмеченный временный вариант). Бой на месте: поле
+    // исследуемого места, явные клетки участников и противников, трудная
+    // местность места; стены — отключённые гексы этого поля.
+    public CampaignBattleSourceKind SourceKind = CampaignBattleSourceKind.Road;
+    public string BattlefieldId = string.Empty;
+    public string LocalLocationId = string.Empty;
+    // Столкновение места, из которого начат бой.
+    public string EncounterId = string.Empty;
+    public List<CampaignBattleCell> DifficultCells = new List<CampaignBattleCell>();
+    // Клетки, занятые объектами места (кроме стен поля): в бою они так же
+    // непроходимы, как при исследовании.
+    public List<CampaignBattleCell> BlockedCells = new List<CampaignBattleCell>();
+
+    public bool IsLocal => SourceKind == CampaignBattleSourceKind.Local;
 }
 
 public enum CampaignBattleOutcome
@@ -143,6 +220,13 @@ public sealed class CampaignBattleResult
     // 12Е-6: кто после боя обязательно тяжело ранен («Ещё на ногах»,
     // вынесенный с поля «Не бросает своих»).
     public List<string> ForcedHeavyWoundIds = new List<string>();
+
+    // ПР-12К: откуда был бой — итог боя на месте меняет и само место
+    // (противники по InstanceId, позиции выживших) тем же однократным
+    // применением, что и кампанию.
+    public CampaignBattleSourceKind SourceKind = CampaignBattleSourceKind.Road;
+    public string LocalLocationId = string.Empty;
+    public string EncounterId = string.Empty;
 }
 
 public enum CampaignBattleApplyStatus
@@ -161,7 +245,25 @@ public static class CampaignBattleBridge
 
     public const string AppliedEffectPrefix = "campaign.battle.result.";
 
+    // Прежний вход: все, кто может сражаться здесь (PartyPresence). Без
+    // разделения отряда это герой и бойцы похода без тяжелораненых — как до
+    // ПР-12К.
     public static CampaignBattleRequest CreateRequest(GameState state, string battleId)
+    {
+        if (state == null)
+            throw new ArgumentNullException(nameof(state));
+        return CreateRequestFor(state, battleId, PartyPresence.BattleCandidateIds(state));
+    }
+
+    // ПР-12К: явная сборка запроса из выбранных участников (по ID, в этом
+    // порядке). Берутся только те, кто реально может вступить в этот бой:
+    // присутствует, жив, боеспособен, не свита. Событие начала боя видит уже
+    // окончательный состав — особенности не срабатывают за отсутствующих.
+    public static CampaignBattleRequest CreateRequestFor(
+        GameState state,
+        string battleId,
+        IEnumerable<string> participantIds,
+        CampaignBattleSourceKind sourceKind = CampaignBattleSourceKind.Road)
     {
         if (state == null)
             throw new ArgumentNullException(nameof(state));
@@ -171,56 +273,61 @@ public static class CampaignBattleBridge
         CampaignBattleRequest request = new CampaignBattleRequest
         {
             BattleId = battleId,
-            LocationId = state.HasActiveExpedition ? state.ActiveExpedition.LocationId : string.Empty
+            LocationId = state.HasActiveExpedition ? state.ActiveExpedition.LocationId : string.Empty,
+            SourceKind = sourceKind
         };
-
-        CommanderData hero = state.GetSelectedCommander();
-        if (hero != null)
-        {
-            request.Participants.Add(new CampaignBattleParticipant
-            {
-                PersonId = hero.Id,
-                DisplayName = hero.Name,
-                UnitTypeId = string.IsNullOrWhiteSpace(hero.UnitTypeId) ? HeroFallbackUnitTypeId : hero.UnitTypeId,
-                IsHero = true
-            });
-        }
-
-        foreach (CampaignBattleParticipant participant in request.Participants)
-            FillHitPoints(state, participant);
         request.Seed = unchecked(state.WorldSeed * 31 + battleId.GetHashCode());
 
-        if (state.HasActiveExpedition && state.ActiveExpedition.FighterIds != null)
+        CommanderData hero = state.GetSelectedCommander();
+        List<string> allowed = PartyPresence.BattleCandidateIds(state);
+        foreach (string personId in participantIds ?? new List<string>())
         {
-            foreach (string fighterId in state.ActiveExpedition.FighterIds)
+            if (string.IsNullOrEmpty(personId) || !allowed.Contains(personId) ||
+                request.Participants.Exists(existing => existing.PersonId == personId))
+                continue;
+
+            CampaignBattleParticipant participant;
+            if (hero != null && personId == hero.Id)
             {
-                FighterData fighter = FindFighter(state, fighterId);
+                participant = new CampaignBattleParticipant
+                {
+                    PersonId = hero.Id,
+                    DisplayName = hero.Name,
+                    UnitTypeId = string.IsNullOrWhiteSpace(hero.UnitTypeId) ? HeroFallbackUnitTypeId : hero.UnitTypeId,
+                    IsHero = true
+                };
+            }
+            else
+            {
+                FighterData fighter = FindFighter(state, personId);
                 if (fighter == null || string.IsNullOrWhiteSpace(fighter.UnitTypeId))
                     continue;
-
-                // ПР-10: тяжелораненый идёт с отрядом, но в бой не вступает.
-                ResidentState wounded = HomePeopleService.Find(state, fighterId);
-                if (wounded != null && wounded.Injury == ResidentInjury.Recovering)
-                    continue;
-
-                request.Participants.Add(new CampaignBattleParticipant
+                participant = new CampaignBattleParticipant
                 {
                     PersonId = fighter.Id,
                     DisplayName = fighter.Name,
                     UnitTypeId = fighter.UnitTypeId,
                     IsHero = false
-                });
-                FillHitPoints(state, request.Participants[request.Participants.Count - 1]);
+                };
             }
+
+            ResidentState resident = HomePeopleService.Find(state, personId);
+            participant.Origin = resident != null ? resident.Origin : CampaignParticipantOrigin.HomePerson;
+            FillHitPoints(state, participant);
+            request.Participants.Add(participant);
         }
 
+        List<string> roster = new List<string>();
+        foreach (CampaignBattleParticipant participant in request.Participants)
+            roster.Add(participant.PersonId);
         FeatureDispatcher.Raise(new FeatureEvent
         {
             Trigger = FeatureTrigger.BattleStarted,
             State = state,
             BattleId = battleId,
             EventKey = "battle-start:" + battleId,
-            LocationId = request.LocationId
+            LocationId = request.LocationId,
+            ParticipantIds = roster
         });
 
         return request;
@@ -379,15 +486,25 @@ public static class CampaignBattleBridge
             // 12Е-8: следы развития этого боя (записываются и без списка строк).
             List<string> traces = ProgressionTraces.RecordBattle(state, result, retreatForWounded, woundedBeforeBattle);
             notes?.AddRange(traces);
+
+            // ПР-12К: бой на месте меняет и само место — тем же однократным
+            // применением (противники по InstanceId, позиции выживших).
+            LocalExplorationService.ApplyBattle(state, result);
         }
 
+        List<string> battleRoster = new List<string>();
+        foreach (CampaignBattleContribution contribution in result.Contributions ?? new List<CampaignBattleContribution>())
+            battleRoster.Add(contribution.PersonId);
         List<FeatureActivation> activations = FeatureDispatcher.Raise(new FeatureEvent
         {
             Trigger = FeatureTrigger.BattleEnded,
             State = state,
             BattleId = result.BattleId,
             BattleResult = result,
-            EventKey = "battle-end:" + result.BattleId
+            EventKey = "battle-end:" + result.BattleId,
+            // ПР-12К: только те, кто был в бою; старый итог без вклада —
+            // как раньше, весь присутствующий отряд.
+            ParticipantIds = battleRoster.Count > 0 ? battleRoster : null
         });
         notes?.AddRange(FeaturePresentation.Lines(state, activations));
 
@@ -431,7 +548,9 @@ public static class CampaignBattleBridge
                 state.ActiveExpedition.ActiveActivity = null;
                 CampRest.GetNight(state).ChosenActions.Clear();
             }
-            notes?.Add("Отряд бросил стоянку: потеряно " + RetreatSupplyLoss + " припаса, ночлег прерван.");
+            notes?.Add(result.SourceKind == CampaignBattleSourceKind.Local
+                ? "Отряд отошёл, бросив часть поклажи: потеряно " + RetreatSupplyLoss + " припаса."
+                : "Отряд бросил стоянку: потеряно " + RetreatSupplyLoss + " припаса, ночлег прерван.");
         }
 
         if (heavy.Count > 0)

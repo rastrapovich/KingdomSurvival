@@ -28,7 +28,11 @@ public enum ResidentMembership
 {
     HomeMember,
     Offered,
-    Departed
+    Departed,
+    // ПР-12К (канон v1.53 §28.10): внешний участник похода (наёмник,
+    // существо-союзник). Не член населения Дома: не ест дома, не работает,
+    // не считается в Population. Добавлено строго в конец.
+    External
 }
 
 public enum ResidentInjury
@@ -60,6 +64,13 @@ public sealed class ResidentState
     public ResidentAgeGroup AgeGroup = ResidentAgeGroup.Adult;
     public ResidentInjury Injury = ResidentInjury.None;
     public ResidentTravelRole TravelRole = ResidentTravelRole.None;
+
+    // ПР-12К (канон v1.53 §28.10): происхождение участия. Человек Дома — по
+    // умолчанию (старые сохранения); внешний участник — Membership.External.
+    public CampaignParticipantOrigin Origin = CampaignParticipantOrigin.HomePerson;
+    // Допуск в поселения: пусто — допускается; иначе причина отказа,
+    // которую игрок видит заранее («Не допускается: …»).
+    public string SettlementAdmissionBlock = string.Empty;
 
     // Индивидуальные боевые данные: шаблон и формулы — в UnitDatabase,
     // здесь только текущее состояние этого человека.

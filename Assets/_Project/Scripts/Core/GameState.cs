@@ -282,6 +282,14 @@ public class GameState
     // Командира и постоянных бойцов (CharacterProgressionService).
     public ProgressionStateData Progression = new ProgressionStateData();
 
+    // ПР-12К (канон v1.53 §28.9): временный лагерь у поселения. null — лагеря
+    // нет (в сохранении наличие отмечает CampaignSaveData.HasSettlementCamp).
+    public SettlementCampData SettlementCamp;
+
+    // ПР-12К (канон v1.53 §28.3): исследуемые места — изменения каждого места
+    // и текущий слой исследования.
+    public LocalExplorationStateData LocalExploration = new LocalExplorationStateData();
+
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
 

@@ -34,6 +34,8 @@ namespace KingdomSurvival.FreePlay
                 Refresh = RefreshWithReports,
                 HomeAction = HomeAction
             });
+            // ПР-12К: исследуемые места режима (пилот — Старая шахта).
+            LocalLocationCatalog.RegisterDefault(FreePlayMineLocal.Create());
         }
 
         public static LocationEntryView LocationEntry(GameState state, string locationId)

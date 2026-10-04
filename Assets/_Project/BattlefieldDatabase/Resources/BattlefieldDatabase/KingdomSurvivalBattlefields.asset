@@ -65,6 +65,11 @@ MonoBehaviour:
     description: "\u041F\u0440\u0438\u0433\u043B\u0443\u0448\u0451\u043D\u043D\u0430\u044F
       \u0441\u0443\u0440\u043E\u0432\u0430\u044F \u0430\u0442\u043C\u043E\u0441\u0444\u0435\u0440\u0430
       \u043D\u0438\u0437\u043A\u043E\u0433\u043E \u0444\u044D\u043D\u0442\u0435\u0437\u0438."
+  - id: terrain.mine
+    displayLabel: "Шахта"
+    category: "Местность"
+    color: {r: 0.36, g: 0.33, b: 0.29, a: 1}
+    description: "Штольни и отвалы старой шахты."
   battlefields:
   - id: forest_clearing_01
     displayLabel: "\u041B\u0435\u0441\u043D\u0430\u044F \u043F\u043E\u043B\u044F\u043D\u0430"
@@ -96,4 +101,52 @@ MonoBehaviour:
     tagIds:
     - biome.forest
     - terrain.clearing
+    - mood.dark
+  - id: old_mine_01
+    displayLabel: "Старая шахта"
+    background: {fileID: 0}
+    backgroundScale: 1
+    backgroundOffset: {x: 0, y: 0}
+    awaitingArt: 1
+    gridScale: 0.879
+    gridOffset: {x: 0, y: 0}
+    disabledCells:
+    - {x: 2, y: 0}
+    - {x: 3, y: 0}
+    - {x: 4, y: 0}
+    - {x: 5, y: 0}
+    - {x: 6, y: 0}
+    - {x: 7, y: 0}
+    - {x: 8, y: 0}
+    - {x: 5, y: 1}
+    - {x: 5, y: 2}
+    - {x: 5, y: 5}
+    - {x: 2, y: 6}
+    - {x: 3, y: 6}
+    - {x: 4, y: 6}
+    - {x: 5, y: 6}
+    - {x: 6, y: 6}
+    - {x: 7, y: 6}
+    - {x: 8, y: 6}
+    useOwnHexStyle: 0
+    hexStyle:
+      hexImage: {fileID: 0}
+      hexImageTint: {r: 1, g: 1, b: 1, a: 1}
+      frameImage: {fileID: 0}
+      frameImageTint: {r: 1, g: 1, b: 1, a: 1}
+      imageScale: 1
+      fillColor: {r: 0, g: 0, b: 0, a: 0}
+      lineColor: {r: 0.36, g: 0.38, b: 0.38, a: 0.8}
+      lineWidth: 1.2
+      gap: 0.02
+      opacity: 1
+      difficultColor: {r: 0.29, g: 0.25, b: 0.17, a: 0.8}
+      impassableColor: {r: 0.07, g: 0.08, b: 0.09, a: 0.8}
+      reachableColor: {r: 0.28, g: 0.75, b: 0.9, a: 0.4}
+      reachableLineWidth: 2.2
+      targetColor: {r: 0.58, g: 0.2, b: 0.17, a: 0.8}
+      attackHoverFill: {r: 0.82, g: 0.64, b: 0.18, a: 0.16}
+      attackHoverLine: {r: 0.98, g: 0.8, b: 0.32, a: 0.95}
+    tagIds:
+    - terrain.mine
     - mood.dark

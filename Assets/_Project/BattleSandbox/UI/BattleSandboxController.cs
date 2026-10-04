@@ -51,6 +51,8 @@ namespace KingdomSurvival.BattleSandbox
 
         private void OnEnable()
         {
+            if (hosted)
+                return;
             UIDocument document = GetComponent<UIDocument>();
             root = document != null ? document.rootVisualElement : null;
             if (root == null)
@@ -59,14 +61,19 @@ namespace KingdomSurvival.BattleSandbox
             root.schedule.Execute(Initialize).ExecuteLater(1);
         }
 
+        private void LoadContent()
+        {
+            unitContent = SandboxUnitDatabaseAdapter.Load();
+            battlefieldDatabase = Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
+        }
+
         private void Initialize()
         {
             if (initialized || root == null)
                 return;
 
             initialized = true;
-            unitContent = SandboxUnitDatabaseAdapter.Load();
-            battlefieldDatabase = Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
+            LoadContent();
 
             root.style.flexGrow = 1f;
             root.style.backgroundColor = new Color(0.035f, 0.043f, 0.050f, 1f);
@@ -83,6 +90,105 @@ namespace KingdomSurvival.BattleSandbox
         }
 
         // ------------------------------------------------------------------
+        // ПР-12К (канон v1.53 §28.3): бой на месте — внутри основной сцены,
+        // без загрузки другой сцены. Тот же движок, расчёт, показ и итог;
+        // поле заполняет весь контейнер (как экран исследования), панели
+        // лежат поверх, поэтому фон и клетки не сдвигаются при начале боя.
+        // По итогу вызывающий получает CampaignBattleResult и сам применяет
+        // его к кампании.
+        // ------------------------------------------------------------------
+
+        private bool hosted;
+        private Action<CampaignBattleResult> hostedFinished;
+        private GameObject hostedObject;
+        private GameObject hostedPresentation;
+
+        public bool IsHostedBattleRunning => hosted && campaignBattle != null && battle != null;
+
+        // Идущий встроенный бой (один за раз) — для оформления боевого экрана.
+        internal static BattleSandboxController HostedInstance { get; private set; }
+
+        // Боевой экран сейчас есть: сцена полигона/дорожного боя или бой на месте.
+        internal static bool IsBattleContextActive =>
+            HostedInstance != null ||
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "BattleSandbox";
+
+        public static BattleSandboxController HostLocalBattle(
+            VisualElement container,
+            CampaignBattleRequest request,
+            Action<CampaignBattleResult> onFinished,
+            out string error)
+        {
+            error = string.Empty;
+            if (container == null || request == null || onFinished == null)
+            {
+                error = "Бой на месте: нет контейнера, запроса или получателя итога.";
+                return null;
+            }
+
+            // Неактивный объект: OnEnable не ищет UIDocument, Update не нужен —
+            // показ идёт по расписанию элементов основной панели.
+            GameObject host = new GameObject("LocalBattleHost");
+            host.SetActive(false);
+            BattleSandboxController controller = host.AddComponent<BattleSandboxController>();
+            controller.hosted = true;
+            controller.hostedObject = host;
+            controller.hostedFinished = onFinished;
+            controller.root = container;
+            controller.initialized = true;
+            controller.LoadContent();
+            controller.campaignBattle = request;
+            container.Clear();
+            HostedInstance?.DisposeHosted();
+            if (!controller.StartCampaignBattle())
+            {
+                error = string.IsNullOrEmpty(controller.startError)
+                    ? "Бой на месте не может начаться: неверные данные."
+                    : controller.startError;
+                container.Clear();
+                Destroy(host);
+                return null;
+            }
+
+            HostedInstance = controller;
+            // Тот же облик, что у боя в сцене полигона: поле на весь экран,
+            // очередь хода, действия и журнал — поверх.
+            controller.hostedPresentation = new GameObject("LocalBattlePresentation");
+            controller.hostedPresentation.hideFlags = HideFlags.HideInHierarchy;
+            controller.hostedPresentation.AddComponent<BattleSandboxPresentationRunner>();
+            controller.hostedPresentation.AddComponent<BattleSandboxCombatLogCompactRefiner>();
+            controller.hostedPresentation.AddComponent<BattleSandboxCombatLogPresentation>();
+            controller.hostedPresentation.AddComponent<BattleSandboxDefenseUiRefiner>();
+            controller.hostedPresentation.AddComponent<BattlefieldTerrainDetailsOverlay>();
+            return controller;
+        }
+
+        // Закрыть встроенный бой без итога (выход партии, загрузка): старые
+        // колбэки показа и ходы врага больше ничего не делают.
+        public void DisposeHosted()
+        {
+            ResetCombatFlow();
+            hostedFinished = null;
+            campaignBattle = null;
+            battle = null;
+            root?.Clear();
+            if (HostedInstance == this)
+                HostedInstance = null;
+            if (hostedPresentation != null)
+                Destroy(hostedPresentation);
+            hostedPresentation = null;
+            if (hostedObject != null)
+                Destroy(hostedObject);
+        }
+
+        private void FinishHosted(CampaignBattleResult result)
+        {
+            Action<CampaignBattleResult> finished = hostedFinished;
+            DisposeHosted();
+            finished?.Invoke(result);
+        }
+
+        // ------------------------------------------------------------------
         // ПР-03: бой кампании. Юнит i — участник запроса i (герой и бойцы
         // похода) со своим именем и боевой основой из UnitDatabase по
         // UnitTypeId. По итогу — «Вернуться в кампанию» с павшими по ID.
@@ -92,16 +198,42 @@ namespace KingdomSurvival.BattleSandbox
         private readonly List<CampaignBattleParticipant> campaignParticipants = new List<CampaignBattleParticipant>();
         private readonly List<string> campaignUnitIds = new List<string>();
 
+        private string startError = string.Empty;
+        // ПР-12К: ID юнитов противников боя → InstanceId противника места.
+        private readonly Dictionary<string, string> campaignEnemyInstances = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        // ПР-12К (канон v1.53 §28.10): боевой шаблон участника. Человек Дома —
+        // только из отряда; внешний участник (наёмник, существо-союзник) может
+        // взять запись общего каталога существ. Доступ к шаблону не меняет
+        // сторону в бою и не делает существо нанимаемым.
+        private SandboxUnitDefinition ResolveParticipantTemplate(CampaignBattleParticipant participant)
+        {
+            SandboxUnitDefinition definition = unitContent.PlayerRoster
+                .FirstOrDefault(candidate => candidate.Id == participant.UnitTypeId);
+            if (definition == null && participant.Origin != CampaignParticipantOrigin.HomePerson &&
+                !string.IsNullOrWhiteSpace(participant.UnitTypeId))
+                unitContent.CreaturesById.TryGetValue(participant.UnitTypeId, out definition);
+            return definition;
+        }
+
         private bool StartCampaignBattle()
         {
+            startError = string.Empty;
             campaignParticipants.Clear();
             List<SandboxUnitDefinition> fighters = new List<SandboxUnitDefinition>();
             foreach (CampaignBattleParticipant participant in campaignBattle.Participants)
             {
-                SandboxUnitDefinition baseDefinition = unitContent.PlayerRoster
-                    .FirstOrDefault(definition => definition.Id == participant.UnitTypeId);
+                SandboxUnitDefinition baseDefinition = ResolveParticipantTemplate(participant);
                 if (baseDefinition == null)
                 {
+                    // ПР-12К: в бою на месте неверный тип — ошибка данных, бой не
+                    // начинается, а не идёт без участника.
+                    if (campaignBattle.IsLocal)
+                    {
+                        startError = "Нет боевой основы '" + participant.UnitTypeId + "' для " + participant.DisplayName + ".";
+                        Debug.LogError("Бой на месте: " + startError);
+                        return false;
+                    }
                     Debug.LogWarning("Бой кампании: нет боевой основы '" + participant.UnitTypeId +
                                      "' для " + participant.DisplayName + " — участник пропущен.");
                     continue;
@@ -129,8 +261,28 @@ namespace KingdomSurvival.BattleSandbox
 
             if (fighters.Count == 0)
             {
+                startError = "В запросе нет ни одного участника с боевой основой.";
                 Debug.LogError("Бой кампании: в запросе нет ни одного участника с боевой основой.");
                 return false;
+            }
+
+            campaignEnemyInstances.Clear();
+            if (campaignBattle.IsLocal)
+            {
+                if (!TryCreateLocalBattle(fighters))
+                {
+                    Debug.LogError("Бой на месте не начат: " + startError);
+                    return false;
+                }
+                campaignRetreated = false;
+                battleLog.Clear();
+                battleLog.Add("Бой начался.");
+                if (campaignBattle.Notes != null)
+                    battleLog.AddRange(campaignBattle.Notes);
+                selectedTargetId = null;
+                BuildBattleScreen();
+                RefreshBattleScreen();
+                return true;
             }
 
             // Тот же формат ID, что задаёт SandboxRoster.CreateBattle.
@@ -168,6 +320,98 @@ namespace KingdomSurvival.BattleSandbox
             selectedTargetId = null;
             BuildBattleScreen();
             RefreshBattleScreen();
+            return true;
+        }
+
+        // ПР-12К: бой на месте — из явной геометрии места. Стены — отключённые
+        // гексы поля места, трудная местность — из места, клетки участников и
+        // противников — из запроса. Ничего не подменяется и не генерируется:
+        // неверные данные — ошибка, бой не начинается.
+        private bool TryCreateLocalBattle(List<SandboxUnitDefinition> fighters)
+        {
+            BattlefieldDefinitionData field = battlefieldDatabase != null
+                ? battlefieldDatabase.FindById(campaignBattle.BattlefieldId)
+                : null;
+            if (field == null)
+            {
+                startError = "Нет поля места '" + campaignBattle.BattlefieldId + "' в Базе полей боя.";
+                return false;
+            }
+
+            SandboxBattleLayout layout = new SandboxBattleLayout
+            {
+                PlayerFirstRoundInitiativeBonus = campaignBattle.PlayerFirstRoundInitiativeBonus
+            };
+            foreach (HexCoord blocked in BattlefieldFrame.DisabledCells(field))
+                layout.BlockedCells.Add(blocked);
+            foreach (CampaignBattleCell cell in campaignBattle.BlockedCells ?? new List<CampaignBattleCell>())
+            {
+                HexCoord blocked = new HexCoord(cell.Q, cell.R);
+                if (SandboxArenaShape.Contains(blocked))
+                    layout.BlockedCells.Add(blocked);
+            }
+            foreach (CampaignBattleCell cell in campaignBattle.DifficultCells ?? new List<CampaignBattleCell>())
+                layout.DifficultCells.Add(new HexCoord(cell.Q, cell.R));
+
+            campaignUnitIds.Clear();
+            for (int i = 0; i < campaignParticipants.Count; i++)
+            {
+                CampaignBattleParticipant participant = campaignParticipants[i];
+                if (!participant.HasCell)
+                {
+                    startError = participant.DisplayName + ": не задана клетка поля.";
+                    return false;
+                }
+                string unitId = "player:" + participant.PersonId;
+                campaignUnitIds.Add(unitId);
+                layout.Units.Add(new SandboxLayoutUnit
+                {
+                    InstanceId = unitId,
+                    Definition = fighters[i],
+                    Team = SandboxTeam.Player,
+                    Position = new HexCoord(participant.CellQ, participant.CellR),
+                    StartingHitPoints = participant.CurrentHitPoints
+                });
+                // ПР-10: пал герой — бой проигран.
+                if (participant.IsHero)
+                    layout.LeaderUnitId = unitId;
+            }
+
+            campaignEnemyLevels.Clear();
+            foreach (CampaignBattleEnemy enemy in campaignBattle.Enemies ?? new List<CampaignBattleEnemy>())
+            {
+                if (enemy == null || string.IsNullOrWhiteSpace(enemy.InstanceId) || !enemy.HasCell)
+                {
+                    startError = "Противник места без устойчивого ID или клетки.";
+                    return false;
+                }
+                if (string.IsNullOrWhiteSpace(enemy.UnitTypeId) ||
+                    !unitContent.CreaturesById.TryGetValue(enemy.UnitTypeId, out SandboxUnitDefinition definition))
+                {
+                    startError = "Нет существа '" + enemy.UnitTypeId + "' для противника " + enemy.InstanceId + ".";
+                    return false;
+                }
+                int level = Mathf.Clamp(enemy.Level, 1, ProgressionProfile.LevelCount);
+                string unitId = "enemy:" + enemy.InstanceId;
+                campaignEnemyInstances[unitId] = enemy.InstanceId;
+                campaignEnemyLevels.Add(level);
+                layout.Units.Add(new SandboxLayoutUnit
+                {
+                    InstanceId = unitId,
+                    Definition = ApplyEnemyLevel(definition, level),
+                    Team = SandboxTeam.Enemy,
+                    Position = new HexCoord(enemy.CellQ, enemy.CellR),
+                    StartingHitPoints = enemy.CurrentHitPoints
+                });
+            }
+
+            List<string> errors = layout.Validate();
+            if (errors.Count > 0)
+            {
+                startError = string.Join(" ", errors);
+                return false;
+            }
+            battle = layout.CreateBattle();
             return true;
         }
 
@@ -243,6 +487,11 @@ namespace KingdomSurvival.BattleSandbox
                 battle.Phase != SandboxBattlePhase.InProgress)
                 return;
             campaignRetreated = true;
+            if (hosted)
+            {
+                FinishHosted(BuildCampaignBattleResult());
+                return;
+            }
             CampaignSession.CompleteBattle(BuildCampaignBattleResult());
             campaignBattle = null;
             UnityEngine.SceneManagement.SceneManager.LoadScene(CampaignSceneName);
@@ -258,8 +507,13 @@ namespace KingdomSurvival.BattleSandbox
                     : battle.Phase == SandboxBattlePhase.PlayerVictory
                         ? CampaignBattleOutcome.Victory
                         : CampaignBattleOutcome.Defeat,
-                Rounds = battle.Round
+                Rounds = battle.Round,
+                // ПР-12К: итог боя на месте вернётся и в само место.
+                SourceKind = campaignBattle.SourceKind,
+                LocalLocationId = campaignBattle.LocalLocationId ?? string.Empty,
+                EncounterId = campaignBattle.EncounterId ?? string.Empty
             };
+            bool local = campaignBattle.IsLocal;
 
             for (int i = 0; i < campaignParticipants.Count; i++)
             {
@@ -272,7 +526,10 @@ namespace KingdomSurvival.BattleSandbox
                     result.Survivors.Add(new CampaignBattleSurvivor
                     {
                         PersonId = campaignParticipants[i].PersonId,
-                        HitPoints = unit.HitPoints
+                        HitPoints = unit.HitPoints,
+                        HasCell = local,
+                        CellQ = unit.Position.Q,
+                        CellR = unit.Position.R
                     });
                     // 12Е-6, «Ещё на ногах»: устоял на 1 здоровья — после боя
                     // обязательная тяжёлая рана.
@@ -317,7 +574,13 @@ namespace KingdomSurvival.BattleSandbox
                     Initiative = enemy.Initiative,
                     AttackRange = enemy.Definition.AttackRange,
                     TagIds = enemy.Definition.TagIds.ToList(),
-                    Defeated = enemy.IsDefeated
+                    Defeated = enemy.IsDefeated,
+                    // ПР-12К: конкретный противник места — по InstanceId.
+                    InstanceId = campaignEnemyInstances.TryGetValue(enemy.Id, out string instanceId) ? instanceId : string.Empty,
+                    HitPoints = enemy.HitPoints,
+                    HasCell = local,
+                    CellQ = enemy.Position.Q,
+                    CellR = enemy.Position.R
                 });
             }
 
@@ -329,6 +592,11 @@ namespace KingdomSurvival.BattleSandbox
             if (campaignBattle == null || battle == null || battle.Phase == SandboxBattlePhase.InProgress)
                 return;
 
+            if (hosted)
+            {
+                FinishHosted(BuildCampaignBattleResult());
+                return;
+            }
             CampaignSession.CompleteBattle(BuildCampaignBattleResult());
             campaignBattle = null;
             UnityEngine.SceneManagement.SceneManager.LoadScene(CampaignSceneName);
@@ -678,9 +946,20 @@ namespace KingdomSurvival.BattleSandbox
             return center;
         }
 
+        // ПР-12К: бой кампании — на поле из запроса (место или арена по
+        // местности); без своего поля — общее поле полигона (отмеченный
+        // временный вариант дорожного боя). Полигон — всегда своё поле.
         private BattlefieldDefinitionData ActiveBattlefield()
         {
-            return battlefieldDatabase != null ? battlefieldDatabase.GetSandboxBattlefield() : null;
+            if (battlefieldDatabase == null)
+                return null;
+            if (campaignBattle != null && !string.IsNullOrWhiteSpace(campaignBattle.BattlefieldId))
+            {
+                BattlefieldDefinitionData requested = battlefieldDatabase.FindById(campaignBattle.BattlefieldId);
+                if (requested != null)
+                    return requested;
+            }
+            return battlefieldDatabase.GetSandboxBattlefield();
         }
 
         // Поле из Базы полей боя: фон и основной вид гексов в кадре 16:9,
@@ -868,7 +1147,10 @@ namespace KingdomSurvival.BattleSandbox
                 // Бой кампании нельзя переиграть или пересобрать: итог
                 // возвращается в ту же кампанию.
                 returnToSetupButton.style.display = DisplayStyle.None;
-                Button returnButton = new Button(ReturnToCampaign) { text = "ВЕРНУТЬСЯ В КАМПАНИЮ" };
+                Button returnButton = new Button(ReturnToCampaign)
+                {
+                    text = hosted ? "ПРОДОЛЖИТЬ ИССЛЕДОВАНИЕ" : "ВЕРНУТЬСЯ В КАМПАНИЮ"
+                };
                 returnButton.name = "campaign-return-button";
                 StylePrimaryButton(returnButton);
                 returnButton.style.marginTop = 9f;
@@ -1280,7 +1562,9 @@ namespace KingdomSurvival.BattleSandbox
                 : battle.Phase == SandboxBattlePhase.InProgress
                     ? "Противник выполняет свою активацию…"
                     : campaignBattle != null
-                        ? "Бой окончен. Вернитесь в кампанию — итог боя перейдёт в отряд."
+                        ? hosted
+                            ? "Бой окончен. Итог перейдёт в отряд, исследование продолжится здесь же."
+                            : "Бой окончен. Вернитесь в кампанию — итог боя перейдёт в отряд."
                         : "Можно повторить бой тем же составом или вернуться к выбору бойцов.";
 
             logLabel.text = string.Join("\n", battleLog.Skip(Math.Max(0, battleLog.Count - 9)));

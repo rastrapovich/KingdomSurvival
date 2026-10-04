@@ -185,7 +185,7 @@ namespace KingdomSurvival.FreePlay
             request.SourceId = DeepDialogueId;
             request.AllowRetreat = true;
             request.Enemies.Add(new CampaignBattleEnemy { UnitTypeId = "forest_beast", Count = 2 });
-            request.PreparedStart = CampRest.PartyIds(state).Contains(CampRest.AgnessaId);
+            request.PreparedStart = PartyPresence.IsPresent(state, CampRest.AgnessaId);
             FeatureCombatBatch.ApplyPreparedStart(state, request);
             return request;
         }

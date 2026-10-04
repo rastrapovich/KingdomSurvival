@@ -69,14 +69,15 @@ namespace KingdomSurvival.BattleSandbox
 
         private void LateUpdate()
         {
-            if (SceneManager.GetActiveScene().name != "BattleSandbox")
+            // ПР-12К: и во встроенном бою на месте (основная сцена).
+            if (!BattleSandboxController.IsBattleContextActive)
             {
                 Destroy(gameObject);
                 return;
             }
 
             if (controller == null)
-                controller = FindFirstObjectByType<BattleSandboxController>();
+                controller = BattleSandboxController.HostedInstance ?? FindFirstObjectByType<BattleSandboxController>();
             if (controller == null || BattleField == null)
                 return;
 

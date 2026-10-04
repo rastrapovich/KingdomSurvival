@@ -17,6 +17,10 @@ namespace KingdomSurvival.BattlefieldDatabase
         private readonly bool cover;
         private readonly VisualElement frame;
         private readonly Image background;
+        private readonly VisualElement placeholderLayer;
+        private readonly Label placeholderLabel;
+        private static readonly Color PlaceholderRock = new Color(0.10f, 0.095f, 0.09f, 1f);
+        private static readonly Color PlaceholderFloor = new Color(0.27f, 0.24f, 0.20f, 1f);
         private readonly VisualElement fillLayer;
         private readonly VisualElement imageLayer;
         private readonly VisualElement lineLayer;
@@ -53,6 +57,16 @@ namespace KingdomSurvival.BattlefieldDatabase
             frame.Add(background);
             Add(frame);
 
+            // ПР-12К: техническая заглушка поля, которое ждёт рисунка: камень
+            // на отключённых гексах и пол на доступных — чтобы стены места были
+            // видны и в исследовании, и в бою.
+            placeholderLayer = CreateLayer("battlefield-placeholder", DrawPlaceholder);
+            placeholderLabel = new Label("ВРЕМЕННЫЙ ФОН · ЖДЁТ РИСУНКА") { name = "battlefield-placeholder-label", pickingMode = PickingMode.Ignore };
+            placeholderLabel.style.position = Position.Absolute;
+            placeholderLabel.style.fontSize = 11f;
+            placeholderLabel.style.color = new Color(0.78f, 0.72f, 0.60f, 0.55f);
+            frame.Add(placeholderLabel);
+
             fillLayer = CreateLayer("battlefield-hex-fill", DrawFill);
             imageLayer = CreateLayer("battlefield-hex-images", null);
             lineLayer = CreateLayer("battlefield-hex-lines", DrawLines);
@@ -73,6 +87,9 @@ namespace KingdomSurvival.BattlefieldDatabase
         {
             background.sprite = battlefield != null ? battlefield.Background : null;
             background.style.display = background.sprite != null ? DisplayStyle.Flex : DisplayStyle.None;
+            bool placeholder = IsPlaceholder;
+            placeholderLayer.style.display = placeholder ? DisplayStyle.Flex : DisplayStyle.None;
+            placeholderLabel.style.display = placeholder ? DisplayStyle.Flex : DisplayStyle.None;
             activeCells.Clear();
             activeCells.AddRange(BattlefieldFrame.ActiveCells(battlefield));
             Relayout();
@@ -105,6 +122,9 @@ namespace KingdomSurvival.BattlefieldDatabase
                 new Length(offset.x * FrameRect.width, LengthUnit.Pixel),
                 new Length(offset.y * FrameRect.height, LengthUnit.Pixel));
 
+            placeholderLabel.style.left = 12f;
+            placeholderLabel.style.bottom = 8f;
+            placeholderLayer.MarkDirtyRepaint();
             SyncImages();
             fillLayer.MarkDirtyRepaint();
             lineLayer.MarkDirtyRepaint();
@@ -155,6 +175,22 @@ namespace KingdomSurvival.BattlefieldDatabase
             {
                 if (frameImage.parent == imageLayer)
                     frameImage.BringToFront();
+            }
+        }
+
+        private bool IsPlaceholder => battlefield != null && battlefield.AwaitingArt && battlefield.Background == null;
+
+        private void DrawPlaceholder(MeshGenerationContext context)
+        {
+            if (!IsPlaceholder || Layout.Size <= 0.01f)
+                return;
+
+            Painter2D painter = context.painter2D;
+            foreach (HexCoord cell in SandboxArenaShape.Cells())
+            {
+                painter.fillColor = battlefield.IsCellDisabled(cell.Q, cell.R) ? PlaceholderRock : PlaceholderFloor;
+                BattlefieldFrame.FillHexPath(painter, Layout.GetCenter(cell.Q, cell.R), Layout.Size * 1.02f, Layout.VerticalScale);
+                painter.Fill();
             }
         }
 

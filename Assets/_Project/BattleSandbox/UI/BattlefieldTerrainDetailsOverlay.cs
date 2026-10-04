@@ -37,7 +37,8 @@ namespace KingdomSurvival.BattleSandbox
 
         private void Update()
         {
-            if (SceneManager.GetActiveScene().name != "BattleSandbox")
+            // ПР-12К: и во встроенном бою на месте (основная сцена).
+            if (!BattleSandboxController.IsBattleContextActive)
             {
                 Destroy(gameObject);
                 return;

@@ -98,6 +98,10 @@ public sealed class FeatureEvent
     // Кого касается; пусто — всех людей похода (дома — Командира и бойцов).
     public string PersonId = string.Empty;
 
+    // ПР-12К: точный состав события (участники боя). null — по PersonId или
+    // всем присутствующим в походе.
+    public List<string> ParticipantIds;
+
     // Устойчивый ключ: событие с тем же ключом повторно не обрабатывается
     // (загрузка, повтор текста, повторный вызов).
     public string EventKey = string.Empty;
@@ -303,6 +307,8 @@ public static class FeatureDispatcher
     {
         if (!string.IsNullOrWhiteSpace(featureEvent.PersonId))
             return new List<string> { featureEvent.PersonId };
+        if (featureEvent.ParticipantIds != null)
+            return new List<string>(featureEvent.ParticipantIds);
 
         GameState state = featureEvent.State;
         if (state.HasActiveExpedition || featureEvent.Trigger == FeatureTrigger.ReturnedHome)

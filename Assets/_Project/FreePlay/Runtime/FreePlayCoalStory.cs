@@ -277,7 +277,7 @@ namespace KingdomSurvival.FreePlay
             request.Enemies.Add(new CampaignBattleEnemy { UnitTypeId = "forest_beast", Count = 1 });
             // Агнесса в отряде или найденная тропа — зверя ждут там, где он
             // пойдёт: подготовленное начало («Засада»).
-            request.PreparedStart = Has(state, Flags.Trail) || CampRest.PartyIds(state).Contains(CampRest.AgnessaId);
+            request.PreparedStart = Has(state, Flags.Trail) || PartyPresence.IsPresent(state, CampRest.AgnessaId);
             FeatureCombatBatch.ApplyPreparedStart(state, request);
             return request;
         }
@@ -296,7 +296,7 @@ namespace KingdomSurvival.FreePlay
             request.Enemies.Add(new CampaignBattleEnemy { UnitTypeId = "forest_beast_strong", Count = 1 });
             // Агнесса в отряде или видели ночью, куда он уходит, — вожака
             // ждут там, где он пойдёт.
-            request.PreparedStart = CampRest.PartyIds(state).Contains(CampRest.AgnessaId) || Has(state, Flags.LeaderTrailSeen);
+            request.PreparedStart = PartyPresence.IsPresent(state, CampRest.AgnessaId) || Has(state, Flags.LeaderTrailSeen);
             FeatureCombatBatch.ApplyPreparedStart(state, request);
             return request;
         }

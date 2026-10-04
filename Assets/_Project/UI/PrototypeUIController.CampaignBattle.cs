@@ -50,10 +50,36 @@ public partial class PrototypeUIController
         // загрузка этого сохранения снова откроет вступление и бой.
         if (request.BattleId == Chapter01CampBattle.BattleId && gameState.Narrative != null)
             gameState.Narrative.SetFlag(Chapter01Ids.Flags.CampBeastsTriggered);
+        // ПР-12К (канон v1.53 §28.3): дорожный бой — арена по местности, где
+        // стоит отряд; подходящего рисунка нет — общее поле полигона.
+        if (!request.IsLocal && string.IsNullOrEmpty(request.BattlefieldId))
+            request.BattlefieldId = SelectRoadBattlefieldId();
         CampaignSession.EnterBattle(request);
         ContinuousSimulationSystem.SetPaused(gameState, true);
         SceneManager.LoadScene(BattleSceneName);
         return true;
+    }
+
+    private string SelectRoadBattlefieldId()
+    {
+        KingdomSurvival.BattlefieldDatabase.BattlefieldDatabaseAsset database =
+            UnityEngine.Resources.Load<KingdomSurvival.BattlefieldDatabase.BattlefieldDatabaseAsset>(
+                KingdomSurvival.BattlefieldDatabase.BattlefieldDatabaseAsset.ResourcesPath);
+        if (database == null || gameState == null || !gameState.HasActiveExpedition)
+            return string.Empty;
+        WorldMapGameplayTerrainType terrain = WorldMapNavigation.GetTerrainAtPercent(
+            gameState.ActiveExpedition.CurrentMapXPercent,
+            gameState.ActiveExpedition.CurrentMapYPercent);
+        KingdomSurvival.BattlefieldDatabase.BattlefieldDefinitionData field =
+            database.FindForTags(RoadBattlefieldTags.For(terrain));
+        if (field == null)
+        {
+            // Отмеченный временный вариант: рисунка для этой местности нет.
+            UnityEngine.Debug.Log("Дорожный бой: для местности «" + terrain +
+                                  "» нет своего поля — временно общее поле полигона.");
+            return string.Empty;
+        }
+        return field.Id;
     }
 
     // Опрос каждого кадра: вступление к сюжетному бою и запуск боя после него.

@@ -167,7 +167,9 @@ public static class CharacterProgressionService
         return gains;
     }
 
-    // Кто сейчас в пути: герой и живые бойцы похода (свита не прогрессирует).
+    // Кто сейчас в пути рядом с героем: герой и живые бойцы похода (свита не
+    // прогрессирует). ПР-12К: ждущий в лагере у поселения не участвует в
+    // том, что происходит внутри, — ни опытом, ни особенностями.
     public static List<string> PartyPersonIds(GameState state)
     {
         List<string> ids = new List<string>();
@@ -179,7 +181,8 @@ public static class CharacterProgressionService
             foreach (string fighterId in state.ActiveExpedition.FighterIds)
             {
                 ResidentState resident = HomePeopleService.Find(state, fighterId);
-                if ((resident == null || resident.IsAlive) && IsProgressing(state, fighterId))
+                if ((resident == null || resident.IsAlive) && IsProgressing(state, fighterId) &&
+                    !PartyPresence.IsWaitingInCamp(state, fighterId))
                     ids.Add(fighterId);
             }
         }

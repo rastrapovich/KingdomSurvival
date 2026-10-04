@@ -30,6 +30,7 @@ public static class CampaignSaveService
             HasActiveExpedition = hasExpedition,
             HasActiveActivity = hasExpedition && state.ActiveExpedition.ActiveActivity != null,
             HasPendingDecision = hasExpedition && state.ActiveExpedition.PendingDecision != null,
+            HasSettlementCamp = hasExpedition && SettlementCampService.HasCamp(state),
             ClockSnapshot = ContinuousSimulationSystem.ExportSnapshot(state),
             BuildingSnapshot = BuildingSystem.ExportSnapshot(state)
         };
@@ -109,6 +110,15 @@ public static class CampaignSaveService
             if (!data.HasPendingDecision)
                 state.ActiveExpedition.PendingDecision = null;
         }
+
+        // ПР-12К: лагерь у поселения — только если он был; исследуемые места
+        // у сохранений до ПР-12К пусты (отряд на глобальной карте).
+        if (!data.HasSettlementCamp || state.ActiveExpedition == null)
+            state.SettlementCamp = null;
+        if (state.LocalExploration == null)
+            state.LocalExploration = new LocalExplorationStateData();
+        if (state.ActiveExpedition == null)
+            LocalExplorationService.Exit(state);
 
         ContinuousSimulationSystem.RestoreSnapshot(state, data.ClockSnapshot);
         BuildingSystem.RestoreSnapshot(state, data.BuildingSnapshot);

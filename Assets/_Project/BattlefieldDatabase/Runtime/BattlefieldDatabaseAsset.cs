@@ -30,6 +30,10 @@ namespace KingdomSurvival.BattlefieldDatabase
         [SerializeField] private Sprite background;
         [SerializeField, Min(0.1f)] private float backgroundScale = 1f;
         [SerializeField] private Vector2 backgroundOffset = Vector2.zero;
+        // ПР-12К: рисунка ещё нет — поле показывает техническую заглушку
+        // (камень и пол по отключённым гексам) с пометкой «ждёт рисунка».
+        [Tooltip("Рисунка ещё нет: показывается техническая заглушка с пометкой «ждёт рисунка».")]
+        [SerializeField] private bool awaitingArt;
 
         [Header("Сетка")]
         [SerializeField, Range(0.5f, 1.5f)] private float gridScale = 1f;
@@ -49,6 +53,7 @@ namespace KingdomSurvival.BattlefieldDatabase
         public Sprite Background => background;
         public float BackgroundScale => Mathf.Max(0.1f, backgroundScale);
         public Vector2 BackgroundOffset => backgroundOffset;
+        public bool AwaitingArt => awaitingArt;
         public float GridScale => Mathf.Clamp(gridScale, 0.5f, 1.5f);
         public Vector2 GridOffset => gridOffset;
         public IReadOnlyList<Vector2Int> DisabledCells =>
@@ -142,6 +147,26 @@ namespace KingdomSurvival.BattlefieldDatabase
             return null;
         }
 
+        // ПР-12К (канон v1.53 §28.3): арена дорожного боя по местности — первое
+        // поле с рисунком и всеми нужными тегами; null — подходящего рисунка
+        // ещё нет (вызывающий берёт отмеченный временный вариант).
+        public BattlefieldDefinitionData FindForTags(IReadOnlyList<string> requiredTags)
+        {
+            if (battlefields == null || requiredTags == null || requiredTags.Count == 0)
+                return null;
+            foreach (BattlefieldDefinitionData battlefield in battlefields)
+            {
+                if (battlefield == null || battlefield.AwaitingArt || battlefield.Background == null)
+                    continue;
+                bool matches = true;
+                foreach (string tag in requiredTags)
+                    matches &= battlefield.HasTag(tag);
+                if (matches)
+                    return battlefield;
+            }
+            return null;
+        }
+
         public BattlefieldDefinitionData GetSandboxBattlefield()
         {
             BattlefieldDefinitionData selected = FindById(sandboxBattlefieldId);
@@ -195,7 +220,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                     issues.Add("Повторяющийся ID поля: " + battlefield.Id + ".");
                 if (string.IsNullOrWhiteSpace(battlefield.DisplayLabel))
                     issues.Add(battlefield.Id + ": отсутствует отображаемое название.");
-                if (battlefield.Background == null)
+                if (battlefield.Background == null && !battlefield.AwaitingArt)
                     issues.Add(battlefield.Id + ": не назначено изображение поля.");
 
                 int activeCells = BattlefieldFrame.CountActiveCells(battlefield);

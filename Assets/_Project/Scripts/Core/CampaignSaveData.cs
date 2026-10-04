@@ -25,6 +25,9 @@ public sealed class CampaignSaveData
     public bool HasActiveExpedition;
     public bool HasActiveActivity;
     public bool HasPendingDecision;
+    // ПР-12К: лагерь у поселения. Формат 2 без этого поля — лагеря нет
+    // (false по умолчанию), фиктивная стоянка не появляется.
+    public bool HasSettlementCamp;
 
     public ContinuousSimulationSnapshotData ClockSnapshot;
     public BuildingSystemSnapshotData BuildingSnapshot;

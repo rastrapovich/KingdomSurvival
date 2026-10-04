@@ -1,0 +1,34 @@
+{
+  "id": "freeplay_mine_local_signs",
+  "title": "И-2 — Проход в дальнюю штольню (шахта на локальной карте)",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12К, пилот Старой шахты [РАБОЧЕЕ][KINGDOM SURVIVAL]. Признаки опасности перед глубиной: текст прежних сцен первого входа и дальней штольни. Эффектов нет; шаг за проход начинает бой «Логово в штольне».",
+  "startNodeId": "freeplay.mine.local.signs.start",
+  "tags": ["свободная_игра", "И-2", "ПР-12К"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.mine.local.signs.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.local.signs.start.text",
+          "kind": 5,
+          "text": "Из дальней штольни тянет теплом и зверем. У прохода — свежие следы, крупные, в две цепочки."
+        },
+        {
+          "blockId": "freeplay.mine.local.signs.start.lada",
+          "kind": 4,
+          "speakerIdOverride": "lada",
+          "text": "— Крепь поставлю у входа. Если придётся отходить, свод на голову не сядет.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "lada" } ] }
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.local.signs.ok", "text": "Понятно.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

@@ -73,7 +73,9 @@ namespace KingdomSurvival.FreePlay
                 Cell = new LocalCellData(4, 6),
                 DialogueId = MarkDialogueId,
                 Text = "Кованые скобы в старой крепи.",
-                OnceOnly = true,
+                // Пока клеймо не прочитано, к крепи можно вернуться — с
+                // Остафием; своя попытка Расследования одна (условие сцены).
+                OnceOnly = false,
                 HiddenWhenFlag = FreePlayMineStory.Flags.Mark
             });
 

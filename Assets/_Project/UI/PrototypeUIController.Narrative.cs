@@ -116,6 +116,8 @@ public partial class PrototypeUIController
 
     private void Awake()
     {
+        // ПР-12К: правленые в Inspector исследуемые места поверх значений по умолчанию.
+        KingdomSurvival.BattlefieldDatabase.LocalLocationDatabaseAsset.ApplyToCatalog();
         narrativeDialogueSession = new NarrativeDialogueRuntimeSession();
         narrativeDialogueDatabase = DialogueDatabaseRuntime.LoadDefaultDatabase();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

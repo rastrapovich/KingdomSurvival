@@ -3,7 +3,10 @@
   "rootNamespace": "KingdomSurvival.BattlefieldDatabase.Editor",
   "references": [
     "KingdomSurvival.BattlefieldDatabase",
-    "KingdomSurvival.BattleSandbox.Runtime"
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.Core",
+    "KingdomSurvival.DialogueDatabase",
+    "KingdomSurvival.UnitDatabase"
   ],
   "includePlatforms": [
     "Editor"

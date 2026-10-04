@@ -26,16 +26,15 @@ namespace KingdomSurvival.Chapter01
                 GetPartySize(gameState));
         }
 
+        // ПР-06А: специалист свиты тоже физически рядом (CompanionPresent);
+        // в PartySize он не входит — это число бойцов с героем.
+        // ПР-12К (канон v1.53 §28.9): только физически присутствующие —
+        // оставленный в лагере у поселения не отвечает изнутри.
         public static List<string> GetPresentCompanionIds(GameState gameState)
         {
-            List<string> companions = new List<string>();
-            if (gameState != null && gameState.HasActiveExpedition && gameState.ActiveExpedition.FighterIds != null)
-                companions.AddRange(gameState.ActiveExpedition.FighterIds);
-            // ПР-06А: специалист свиты тоже физически рядом (CompanionPresent);
-            // в PartySize он не входит — это число бойцов с героем.
-            if (gameState != null && gameState.HasActiveExpedition && gameState.ActiveExpedition.RetinueIds != null)
-                companions.AddRange(gameState.ActiveExpedition.RetinueIds);
-            return companions;
+            if (gameState == null || !gameState.HasActiveExpedition)
+                return new List<string>();
+            return PartyPresence.PresentCompanionIds(gameState);
         }
 
         public static List<string> GetPresentItemIds(GameState gameState)
@@ -52,7 +51,7 @@ namespace KingdomSurvival.Chapter01
         {
             if (gameState == null || !gameState.HasActiveExpedition || gameState.ActiveExpedition.FighterIds == null)
                 return 1;
-            return gameState.ActiveExpedition.FighterIds.Count + 1;
+            return PartyPresence.PresentPartySize(gameState);
         }
     }
 }

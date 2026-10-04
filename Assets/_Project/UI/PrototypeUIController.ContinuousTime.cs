@@ -162,6 +162,8 @@ public partial class PrototypeUIController
     private void Update()
     {
         RefreshNarrativePresentationFrame();
+        // ПР-12К: исследуемое место — и закрытие его экрана, когда партии нет.
+        TickLocalExploration(Time.unscaledDeltaTime);
 
         if (gameState == null)
             return;
@@ -305,7 +307,18 @@ public partial class PrototypeUIController
     // через PauseForBlockingModal — здесь их работа не переопределяется.
     private void RefreshAutoTimeState()
     {
-        if (gameState == null || isGameOver || HasBlockingModalWork())
+        if (gameState == null || isGameOver)
+            return;
+
+        // ПР-12К (канон v1.53 §28.3): в исследуемом месте мировые часы стоят —
+        // время тратят шаги и действия (ContinuousSimulationSystem.AdvanceLocalHours).
+        if (LocalExplorationService.IsActive(gameState))
+        {
+            ContinuousSimulationSystem.SetPaused(gameState, true);
+            return;
+        }
+
+        if (HasBlockingModalWork())
             return;
 
         // P09-T01/T02/T03: продолжение "старого пути" после временного

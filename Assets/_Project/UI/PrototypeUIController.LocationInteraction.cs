@@ -47,6 +47,13 @@ public partial class PrototypeUIController
         if (location == null || location.IsWaypoint)
             return false;
 
+        // ПР-12К (канон v1.53 §28.3): место с локальной картой открывается
+        // исследованием, а не текстовым входом; оба сразу не показываются.
+        if (IsLocalScreenOpen)
+            return false;
+        if (TryEnterLocalExploration(location))
+            return true;
+
         locationInteractionActive = true;
         locationInteractionLocationId = location.Id;
 

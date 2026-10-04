@@ -18,6 +18,7 @@
     <Style src="HomeScreen.uss" />
     <Style src="GameMenus.uss" />
     <Style src="Expedition.uss" />
+    <Style src="LocalExploration.uss" />
 
     <ui:VisualElement name="screen" class="screen shell-screen">
 
@@ -685,6 +686,31 @@
             <ui:VisualElement name="hero-screen-tag-tooltip" picking-mode="Ignore" class="hero-screen-tooltip">
                 <ui:Label name="hero-screen-tag-tooltip-title" class="hero-screen-tag-tooltip-title" />
                 <ui:Label name="hero-screen-tag-tooltip-text" class="hero-screen-tooltip-text hero-screen-tag-tooltip-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ПР-12К (канон v1.53 §28.3): исследуемое место — небольшая локальная
+             карта. Поле (local-exploration-field) строит C#: то же поле Базы
+             полей боя, что и в бою на месте; бой на месте показывается в том же
+             контейнере. Панели — здесь и в LocalExploration.uss; диалог
+             (narrative-dialogue-overlay ниже) открывается поверх. Код:
+             PrototypeUIController.LocalExploration.cs. -->
+        <ui:VisualElement name="local-exploration-screen" class="local-exploration-screen">
+            <ui:VisualElement name="local-exploration-field" class="local-exploration-field" />
+            <ui:VisualElement name="local-exploration-hud" class="local-exploration-hud" picking-mode="Ignore">
+                <ui:VisualElement name="local-exploration-header" class="local-exploration-header ks-panel-deep">
+                    <ui:Label name="local-exploration-title" text="" class="local-exploration-title ks-gold-text" />
+                    <ui:Label name="local-exploration-time" text="" class="local-exploration-time ks-muted-text" />
+                    <ui:Label name="local-exploration-art-note" text="" class="local-exploration-art-note" />
+                </ui:VisualElement>
+                <ui:VisualElement name="local-exploration-party" class="local-exploration-party ks-panel-deep">
+                    <ui:Label text="ОТРЯД" class="ks-panel-title" />
+                    <ui:VisualElement name="local-exploration-party-list" class="local-exploration-party-list" />
+                </ui:VisualElement>
+                <ui:VisualElement name="local-exploration-actions" class="local-exploration-actions ks-panel-deep">
+                    <ui:Label name="local-exploration-notice" text="" class="local-exploration-notice" />
+                    <ui:Button name="local-exploration-exit-button" text="ВЫЙТИ" class="ks-button local-exploration-exit-button" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

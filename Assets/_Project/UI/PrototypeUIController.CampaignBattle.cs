@@ -120,6 +120,13 @@ public partial class PrototypeUIController
 
         // ПР-12Б: сцены свободной игры — реакция режима и, если нужно, бой.
         CampaignContent.OnDialogueCompleted(gameState, dialogueId);
+        // ПР-12К: в исследуемом месте бой после сцены начинается на месте —
+        // отдельная арена здесь не грузится.
+        if (IsLocalScreenOpen)
+        {
+            OnLocalDialogueCompleted(dialogueId);
+            return;
+        }
         pendingStoryBattle = CampaignContent.BattleAfterDialogue(gameState, dialogueId);
     }
 

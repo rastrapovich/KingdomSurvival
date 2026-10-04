@@ -1,0 +1,77 @@
+{
+  "id": "freeplay_mine_local_dumps",
+  "title": "И-2 — Отвалы (шахта на локальной карте)",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12К, пилот Старой шахты [РАБОЧЕЕ][KINGDOM SURVIVAL]. Объект «Отвалы» локальной карты. Текст и проверка — из прежнего первого входа (freeplay_mine_entry): решающая Наблюдательность (Чутьё, 13), тот же CheckId. Успех — железо (freeplay.mine.iron_dumps). Сцена ставит freeplay.mine.entered; один раз.",
+  "startNodeId": "freeplay.mine.local.dumps.start",
+  "tags": ["свободная_игра", "И-2", "ПР-12К"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.mine.local.dumps.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.local.dumps.start.scene",
+          "kind": 5,
+          "text": "Штольни сухие, как и говорили. Отвалы заросли иван-чаем, и из них торчит железо: где скоба, где обух, где что-то, чему уже нет имени.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.local.dumps.entered", "Type": 0, "StringParam": "freeplay.mine.entered" }
+          ]
+        },
+        {
+          "blockId": "freeplay.mine.local.dumps.start.torvin",
+          "kind": 4,
+          "speakerIdOverride": "torvin",
+          "text": "— Железо бы пригодилось. Ржавое, да наше будет.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "torvin" } ] }
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "freeplay.mine.local.dumps.search",
+          "text": "Перебрать отвалы.",
+          "kind": 2,
+          "check": { "CheckId": "freeplay.mine.dumps_check", "Kind": 2, "Quality": 3, "CompetencyId": "observation", "Difficulty": 13 },
+          "successNodeId": "freeplay.mine.local.dumps.iron",
+          "failureNodeId": "freeplay.mine.local.dumps.rust"
+        }
+      ]
+    },
+    {
+      "id": "freeplay.mine.local.dumps.iron",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.local.dumps.iron.text",
+          "kind": 5,
+          "text": "Под ржавчиной — добрая полоса железа на три-четыре поковки.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.local.dumps.iron_found", "Type": 0, "StringParam": "freeplay.mine.iron_dumps" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.local.dumps.iron_take", "text": "Забрать железо.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.local.dumps.rust",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.local.dumps.rust.text",
+          "kind": 5,
+          "text": "Железо рассыпается в пальцах рыжей чешуёй. Что держалось, то держалось, пока его не трогали."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.local.dumps.rust_leave", "text": "Отряхнуть руки.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

@@ -8583,7 +8583,7 @@ MonoBehaviour:
         \u043E\u0442\u0445\u043E\u0434, \u0432\u044B\u0445\u043E\u0434 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u043D\u044B\u0439
         \u0432\u0445\u043E\u0434."
       category: 3
-      status: 0
+      status: 2
       required: 1
       order: 34
       priority: 0
@@ -8593,15 +8593,15 @@ MonoBehaviour:
       acceptanceCriteria:
       - text: "\u0411\u043E\u0439 \u0438\u0434\u0451\u0442 \u043D\u0430 \u0442\u043E\u043C
           \u0436\u0435 \u043F\u043E\u043B\u0435"
-        done: 0
+        done: 1
       - text: "\u041F\u043E\u0441\u043B\u0435 \u0432\u044B\u0445\u043E\u0434\u0430
           \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u043D\u043E\u0433\u043E \u0432\u0445\u043E\u0434\u0430
           \u0437\u0432\u0435\u0440\u0438 \u0438 \u0436\u0435\u043B\u0435\u0437\u043E
           \u043D\u0435 \u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u044E\u0442\u0441\u044F"
-        done: 0
+        done: 1
       - text: "\u0413\u0435\u0440\u043E\u0439 \u043C\u043E\u0436\u0435\u0442 \u043F\u0440\u043E\u0439\u0442\u0438
           \u0448\u0430\u0445\u0442\u0443 \u043E\u0434\u0438\u043D"
-        done: 0
+        done: 1
       manualChecks:
       - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435"
       fileReferences:
@@ -8611,7 +8611,7 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: 
+      implementationNote: "EditMode LocalPartyMoverTests, FreePlayMineLocalTests; PlayMode LocalExplorationPlayModeTests (вход вместо текстового окна, ходьба со спутниками, отвалы, бой на том же поле, отход, победа, save/load, выход, повторный вход без зверей и железа); снимки экрана из PlayMode просмотрены. EditMode 1372 (1358/0/14), PlayMode 27/27. Фон — заглушка; ручной проход в Editor не делался."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 

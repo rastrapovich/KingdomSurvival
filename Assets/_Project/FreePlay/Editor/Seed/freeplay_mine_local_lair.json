@@ -1,0 +1,30 @@
+{
+  "id": "freeplay_mine_local_lair",
+  "title": "И-2 — Логово в штольне (шахта на локальной карте)",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12К, пилот Старой шахты [РАБОЧЕЕ][KINGDOM SURVIVAL]. Шаг за проход в дальнюю штольню: одна реплика, затем бой на месте (2 × forest_beast, отход разрешён, с Агнессой рядом — подготовленное начало). Текст — прежний узел freeplay.mine.entry.deep; ставит freeplay.mine.deep.",
+  "startNodeId": "freeplay.mine.local.lair.start",
+  "tags": ["свободная_игра", "И-2", "ПР-12К"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.mine.local.lair.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.local.lair.start.text",
+          "kind": 5,
+          "text": "В дальней штольне тепло, как в хлеву, и пахнет так же. В темноте кто-то встаёт — не один.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.local.lair.deep", "Type": 0, "StringParam": "freeplay.mine.deep" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.local.lair.fight", "text": "К оружию.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

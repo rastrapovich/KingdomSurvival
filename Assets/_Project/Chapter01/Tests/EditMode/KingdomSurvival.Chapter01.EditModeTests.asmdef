@@ -6,7 +6,10 @@
     "KingdomSurvival.Chapter01",
     "KingdomSurvival.DialogueDatabase",
     "KingdomSurvival.FreePlay",
-    "KingdomSurvival.Encounters"
+    "KingdomSurvival.Encounters",
+    "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.UnitDatabase"
   ],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],

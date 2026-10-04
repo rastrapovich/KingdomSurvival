@@ -276,9 +276,11 @@ namespace KingdomSurvival.BattleSandbox
                 }
                 campaignRetreated = false;
                 battleLog.Clear();
-                battleLog.Add("Бой начался.");
-                if (campaignBattle.Notes != null)
-                    battleLog.AddRange(campaignBattle.Notes);
+                // Журнал боя показывает первую строку целиком: пояснения
+                // (кто не сражается, что дали особенности) — в ней.
+                battleLog.Add("Бой начался." + (campaignBattle.Notes != null && campaignBattle.Notes.Count > 0
+                    ? " " + string.Join(" ", campaignBattle.Notes)
+                    : string.Empty));
                 selectedTargetId = null;
                 BuildBattleScreen();
                 RefreshBattleScreen();
@@ -1156,14 +1158,6 @@ namespace KingdomSurvival.BattleSandbox
                 returnButton.style.marginTop = 9f;
                 resultBanner.Add(returnButton);
 
-                if (campaignBattle.AllowRetreat)
-                {
-                    Button retreatButton = new Button(RetreatFromCampaignBattle) { text = "ОТСТУПИТЬ" };
-                    retreatButton.name = "campaign-retreat-button";
-                    StylePrimaryButton(retreatButton);
-                    retreatButton.style.marginTop = 12f;
-                    sidebar.Add(retreatButton);
-                }
             }
             else
             {
@@ -1173,6 +1167,19 @@ namespace KingdomSurvival.BattleSandbox
                 resultBanner.Add(repeatButton);
             }
             sidebar.Add(resultBanner);
+
+            // ПР-12К: кнопка отхода — после баннера итога. Оформление боя
+            // (BattleSandboxPresentationRunner) ищет итог девятым ребёнком
+            // панели; раньше на этом месте оказывалась кнопка отхода, и она
+            // вставала посреди поля. Теперь её ставят к кнопкам действий.
+            if (campaignBattle != null && campaignBattle.AllowRetreat)
+            {
+                Button retreatButton = new Button(RetreatFromCampaignBattle) { text = "ОТСТУПИТЬ" };
+                retreatButton.name = "campaign-retreat-button";
+                StylePrimaryButton(retreatButton);
+                retreatButton.style.marginTop = 12f;
+                sidebar.Add(retreatButton);
+            }
 
             body.Add(sidebar);
             screen.Add(body);

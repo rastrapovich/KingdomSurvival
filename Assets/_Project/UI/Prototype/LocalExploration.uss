@@ -1,0 +1,122 @@
+/* ================================================================
+   ПР-12К: ИССЛЕДУЕМОЕ МЕСТО (канон v1.53 §28.3)
+   Поле — на весь экран; панели лежат поверх и не сжимают поле, поэтому
+   фон и клетки не сдвигаются при начале боя на месте.
+   ================================================================ */
+
+.local-exploration-screen {
+    position: absolute;
+    left: 0px; right: 0px; top: 0px; bottom: 0px;
+    display: none;
+    background-color: rgb(9, 11, 13);
+}
+
+.local-exploration-field {
+    position: absolute;
+    left: 0px; right: 0px; top: 0px; bottom: 0px;
+}
+
+.local-exploration-hud {
+    position: absolute;
+    left: 0px; right: 0px; top: 0px; bottom: 0px;
+}
+
+.local-exploration-header {
+    position: absolute;
+    left: 14px; top: 12px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 12px; padding-right: 12px; padding-top: 6px; padding-bottom: 6px;
+    border-radius: 4px;
+    background-color: rgba(20, 23, 27, 0.82);
+}
+
+.local-exploration-title { font-size: 18px; -unity-font-style: bold; }
+.local-exploration-time { font-size: 12px; margin-left: 14px; }
+.local-exploration-art-note { font-size: 11px; margin-left: 14px; color: rgb(170, 146, 104); }
+
+.local-exploration-party {
+    position: absolute;
+    left: 14px; bottom: 14px;
+    width: 260px;
+    padding-left: 10px; padding-right: 10px; padding-top: 8px; padding-bottom: 8px;
+    border-radius: 4px;
+    background-color: rgba(20, 23, 27, 0.82);
+}
+
+.local-party-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 2px;
+}
+.local-party-name { font-size: 12px; color: rgb(226, 219, 204); }
+.local-party-status { font-size: 11px; color: rgb(156, 154, 148); -unity-text-align: middle-right; }
+.local-party-status--wounded { color: rgb(205, 129, 104); }
+.local-party-status--away { color: rgb(150, 160, 175); }
+
+.local-exploration-actions {
+    position: absolute;
+    right: 14px; bottom: 14px;
+    width: 300px;
+    padding-left: 10px; padding-right: 10px; padding-top: 8px; padding-bottom: 8px;
+    border-radius: 4px;
+    background-color: rgba(20, 23, 27, 0.82);
+}
+
+.local-exploration-notice {
+    font-size: 12px;
+    white-space: normal;
+    color: rgb(226, 219, 204);
+    margin-bottom: 6px;
+    min-height: 16px;
+}
+
+.local-exploration-exit-button { height: 32px; }
+
+/* Объекты места: подпись над клеткой. */
+.local-object-marker {
+    align-items: center;
+}
+.local-object-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding-left: 6px; padding-right: 6px; padding-top: 2px; padding-bottom: 2px;
+    border-radius: 3px;
+    background-color: rgba(14, 16, 20, 0.72);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62);
+    border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
+}
+.local-object-marker--active .local-object-label {
+    color: rgb(232, 196, 120);
+    border-left-color: rgb(196, 152, 76); border-right-color: rgb(196, 152, 76);
+    border-top-color: rgb(196, 152, 76); border-bottom-color: rgb(196, 152, 76);
+}
+.local-object-marker--done .local-object-label {
+    color: rgb(140, 136, 128);
+}
+
+.local-exploration-click-marker {
+    border-radius: 50%;
+    border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px;
+    border-left-color: rgb(232, 196, 120); border-right-color: rgb(232, 196, 120);
+    border-top-color: rgb(232, 196, 120); border-bottom-color: rgb(232, 196, 120);
+}
+
+.local-actor-token {
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    color: rgb(250, 240, 220);
+    border-radius: 50%;
+    background-color: rgba(70, 64, 52, 0.92);
+    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
+    border-left-color: rgb(196, 152, 76); border-right-color: rgb(196, 152, 76);
+    border-top-color: rgb(196, 152, 76); border-bottom-color: rgb(196, 152, 76);
+}
+.local-actor--retinue .local-actor-token {
+    background-color: rgba(52, 60, 70, 0.92);
+}
+.local-actor--enemy .local-actor-token {
+    background-color: rgba(96, 40, 32, 0.92);
+}

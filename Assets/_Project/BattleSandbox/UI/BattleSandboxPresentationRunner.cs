@@ -355,6 +355,16 @@ namespace KingdomSurvival.BattleSandbox
                 StyleInteractiveButton(guardButton);
             if (endTurn is Button endTurnButton)
                 StyleInteractiveButton(endTurnButton);
+            // ПР-12К: отход написанного боя — рядом с действиями, не на поле.
+            Button retreat = sidebar.Q<Button>("campaign-retreat-button");
+            if (retreat != null)
+            {
+                retreat.RemoveFromHierarchy();
+                retreat.style.marginTop = 6f;
+                retreat.style.height = 32f;
+                actions.Add(retreat);
+                StyleInteractiveButton(retreat);
+            }
 
             VisualElement resultOverlay = new VisualElement { name = ResultOverlayName };
             resultOverlay.style.position = Position.Absolute;

@@ -1,0 +1,101 @@
+{
+  "id": "freeplay_mine_local_mark",
+  "title": "И-2 — Клеймо на скобах крепи (шахта на локальной карте)",
+  "category": 2,
+  "status": 1,
+  "developerComment": "ПР-12К, пилот Старой шахты [РАБОЧЕЕ][KINGDOM SURVIVAL]. Объект «Старая крепь». Текст и проверка — из прежнего первого входа: Остафий рядом читает сам (функция присутствия) или одна попытка Расследования (Суждение, 13, тот же CheckId). Успех — freeplay.mine.mark. Без Остафия после неудачи можно вернуться с ним.",
+  "startNodeId": "freeplay.mine.local.mark.start",
+  "tags": ["свободная_игра", "И-2", "ПР-12К"],
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "id": "freeplay.mine.local.mark.start",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.local.mark.start.scene",
+          "kind": 5,
+          "text": "В старой крепи — кованые скобы. На каждой одно и то же клеймо: два угла, вписанные один в другой."
+        },
+        {
+          "blockId": "freeplay.mine.local.mark.start.ostafiy",
+          "kind": 4,
+          "speakerIdOverride": "ostafiy",
+          "text": "— Уходили отсюда не второпях. Инструмент сложен, а не брошен.",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "ostafiy" } ] }
+        }
+      ],
+      "choices": [
+        {
+          "choiceId": "freeplay.mine.local.mark.ask_ostafiy",
+          "text": "Остафий, взгляни на клеймо.",
+          "kind": 0,
+          "nextNodeId": "freeplay.mine.local.mark.ostafiy",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 4, "StringParam": "ostafiy" } ] }
+        },
+        {
+          "choiceId": "freeplay.mine.local.mark.read",
+          "text": "Разобрать клеймо самим.",
+          "kind": 2,
+          "check": { "CheckId": "freeplay.mine.mark_check", "Kind": 2, "Quality": 4, "CompetencyId": "investigation", "Difficulty": 13 },
+          "successNodeId": "freeplay.mine.local.mark.read_ok",
+          "failureNodeId": "freeplay.mine.local.mark.lost",
+          "conditions": { "Combinator": 0, "Conditions": [ { "Type": 10, "StringParam": "freeplay.mine.mark_check" } ] }
+        },
+        { "choiceId": "freeplay.mine.local.mark.leave", "text": "Оставить скобы.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.local.mark.ostafiy",
+      "speakerId": "ostafiy",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.local.mark.ostafiy.text",
+          "kind": 0,
+          "text": "— Не наше. И не с дальней мельницы — там клеймят кругом. Кто-то метил своё железо, чтобы его узнавали. Значит, было кому узнавать.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.local.mark.by_ostafiy", "Type": 0, "StringParam": "freeplay.mine.mark" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.local.mark.ostafiy_done", "text": "Запомнить знак.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.local.mark.read_ok",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.local.mark.read_ok.text",
+          "kind": 5,
+          "text": "Клеймо выбито одним и тем же пуансоном — ровно, без перекоса. Это не кузнец-одиночка, это мастерская: кто-то метил своё железо, чтобы его узнавали.",
+          "onRevealEffects": [
+            { "EffectExecutionId": "freeplay.mine.local.mark.by_hero", "Type": 0, "StringParam": "freeplay.mine.mark" }
+          ]
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.local.mark.read_done", "text": "Запомнить знак.", "kind": 3, "endsDialogue": true }
+      ]
+    },
+    {
+      "id": "freeplay.mine.local.mark.lost",
+      "speakerId": "narrator",
+      "text": "",
+      "textBlocks": [
+        {
+          "blockId": "freeplay.mine.local.mark.lost.text",
+          "kind": 5,
+          "text": "Два угла — и всё. Без знающего глаза это просто царапины. Остафий бы, может, разобрал."
+        }
+      ],
+      "choices": [
+        { "choiceId": "freeplay.mine.local.mark.lost_leave", "text": "Оставить скобы.", "kind": 3, "endsDialogue": true }
+      ]
+    }
+  ]
+}

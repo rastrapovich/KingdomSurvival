@@ -98,6 +98,14 @@ public partial class PrototypeUIController
             return false;
         }
 
+        // ПР-12К: незавершённый бой на месте не сохраняется — есть сохранение
+        // перед боем.
+        if (IsLocalBattleRunning)
+        {
+            ReportCampaignIo("[Сохранение] Во время боя сохранить нельзя — перед боем партия уже сохранена.");
+            return false;
+        }
+
         try
         {
             GetActiveWorld(out string worldId, out int geographyVersion);
@@ -116,7 +124,7 @@ public partial class PrototypeUIController
     // Тихое автосохранение в устойчивой точке. Ошибка не прерывает игру.
     private void Autosave()
     {
-        if (gameState == null || isGameOver || !CampaignSession.HasActive)
+        if (gameState == null || isGameOver || !CampaignSession.HasActive || IsLocalBattleRunning)
             return;
 
         try

@@ -47,6 +47,27 @@ public static class PartyPresence
         return ids;
     }
 
+    // Присутствующие бойцы похода (без свиты и командира).
+    public static List<string> PresentFighterIds(GameState state)
+    {
+        List<string> ids = new List<string>();
+        if (state == null || !state.HasActiveExpedition || state.ActiveExpedition.FighterIds == null)
+            return ids;
+        foreach (string fighterId in state.ActiveExpedition.FighterIds)
+        {
+            if (IsAlive(state, fighterId) && !IsWaitingInCamp(state, fighterId) && !ids.Contains(fighterId))
+                ids.Add(fighterId);
+        }
+        return ids;
+    }
+
+    // Размер группы здесь: командир + присутствующие бойцы (1..5), свита не
+    // входит — как прежнее PartySize.
+    public static int PresentPartySize(GameState state)
+    {
+        return PresentFighterIds(state).Count + 1;
+    }
+
     // Кто может вступить в бой здесь: командир и присутствующие бойцы, живые
     // и не тяжелораненые. Свита в бой не вступает.
     public static List<string> BattleCandidateIds(GameState state)

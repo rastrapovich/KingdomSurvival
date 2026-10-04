@@ -29,12 +29,10 @@ namespace KingdomSurvival.Encounters
                 gameState);
         }
 
+        // ПР-12К (канон v1.53 §28.9): бойцы, физически присутствующие рядом.
         public static List<string> GetPresentCompanionIds(GameState gameState)
         {
-            List<string> companions = new List<string>();
-            if (gameState != null && gameState.HasActiveExpedition && gameState.ActiveExpedition.FighterIds != null)
-                companions.AddRange(gameState.ActiveExpedition.FighterIds);
-            return companions;
+            return PartyPresence.PresentFighterIds(gameState);
         }
 
         public static List<string> GetPresentItemIds(GameState gameState)
@@ -47,7 +45,7 @@ namespace KingdomSurvival.Encounters
         {
             if (gameState == null || !gameState.HasActiveExpedition || gameState.ActiveExpedition.FighterIds == null)
                 return 1;
-            return gameState.ActiveExpedition.FighterIds.Count + 1;
+            return PartyPresence.PresentPartySize(gameState);
         }
     }
 }

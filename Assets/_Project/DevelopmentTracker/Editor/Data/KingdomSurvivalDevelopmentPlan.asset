@@ -8673,7 +8673,7 @@ MonoBehaviour:
         \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u044F
         \u043D\u0435 \u043F\u043E\u0432\u0442\u043E\u0440\u044F\u0435\u0442 \u0438\u0442\u043E\u0433\u043E\u0432."
       category: 3
-      status: 0
+      status: 3
       required: 1
       order: 36
       priority: 0
@@ -8684,11 +8684,11 @@ MonoBehaviour:
       - text: "\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0432
           \u0448\u0430\u0445\u0442\u0435 \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0435\u0442
           \u0441\u043B\u043E\u0439 \u0438 \u043F\u043E\u0437\u0438\u0446\u0438\u0438"
-        done: 0
+        done: 1
       - text: "\u0421\u0442\u0430\u0440\u043E\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435
           \u0431\u0435\u0437 \u043D\u043E\u0432\u044B\u0445 \u043F\u043E\u043B\u0435\u0439
           \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u0442\u0441\u044F"
-        done: 0
+        done: 1
       manualChecks:
       - "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0432 \u0438\u0433\u0440\u0435"
       fileReferences:
@@ -8698,8 +8698,8 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: 
-      completedAt: 
+      implementationNote: "EditMode LocalExplorationCoreTests (настоящий JsonUtility roundtrip места, сохранение формата 2 без новых полей, null-маркер без фиктивной стоянки), SettlementCampTests (roundtrip лагеря); PlayMode LocalExplorationPlayModeTests: сохранение и загрузка в шахте — тот же слой, позиции и итоги, звери не возвращаются; во время боя сохранение запрещено."
+      completedAt: 2026-10-04
       completedCommit: 
       optionalAutoCheckId: 
     - id: PR12K-T05
@@ -8712,7 +8712,7 @@ MonoBehaviour:
         \u043C\u0435\u0441\u0442\u0430 \u0438 \u0432\u043D\u0435\u0448\u043D\u0435\u0433\u043E
         \u0443\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u0430."
       category: 8
-      status: 0
+      status: 1
       required: 1
       order: 37
       priority: 0
@@ -8721,7 +8721,7 @@ MonoBehaviour:
       dependencies: []
       acceptanceCriteria:
       - text: "\u0412\u0441\u0435 \u0442\u0435\u0441\u0442\u044B \u0437\u0435\u043B\u0451\u043D\u044B\u0435"
-        done: 0
+        done: 1
       - text: "\u0420\u0443\u0447\u043D\u043E\u0439 \u043F\u0440\u043E\u0445\u043E\u0434
           \u0448\u0430\u0445\u0442\u044B \u0431\u0435\u0437 Debug"
         done: 0
@@ -8734,7 +8734,7 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: 
+      implementationNote: "Автоматическая часть: EditMode 1392 (1378/0/14), PlayMode 30/30, прогон главы в EditMode зелёный; инструкция LOCAL_EXPLORATION_GUIDE.md. Ручной проход шахты в Editor без Debug пользователем не выполнен."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 

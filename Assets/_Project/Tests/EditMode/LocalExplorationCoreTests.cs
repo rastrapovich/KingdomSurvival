@@ -117,6 +117,20 @@ public sealed class LocalExplorationCoreTests
     }
 
     [Test]
+    public void HeroAlone_EntersAndFights_WithoutFourFighters()
+    {
+        GameState state = NewStateAtCave(0);
+        LocalLocationDefinition cave = LocalLocationCatalog.Find(TestLocationId);
+        Assert.IsTrue(LocalExplorationService.Enter(state, cave, "in", out string reason), reason);
+        Assert.AreEqual(1, state.LocalExploration.Party.Count, "Внутри только командир.");
+
+        CampaignBattleRequest request = LocalExplorationService.BuildEncounterRequest(
+            state, cave, cave.FindEncounter(EncounterId), CellsFor(state));
+        Assert.AreEqual(1, request.Participants.Count);
+        Assert.IsTrue(request.Participants[0].IsHero && request.Participants[0].HasCell);
+    }
+
+    [Test]
     public void LocalVictory_ChangesThePlaceOnce_AndDefeatedDoNotReturn()
     {
         GameState state = NewStateAtCave(1);

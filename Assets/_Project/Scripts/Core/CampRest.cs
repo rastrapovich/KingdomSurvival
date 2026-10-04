@@ -155,6 +155,17 @@ public static class CampRest
             reason = "Сначала нужно принять решение.";
             return false;
         }
+        // ПР-12К: ночлег — вместе, в лагере, а не порознь.
+        if (SettlementCampService.IsCommanderInside(state))
+        {
+            reason = "Сначала вернитесь к лагерю у поселения.";
+            return false;
+        }
+        if (LocalExplorationService.IsActive(state))
+        {
+            reason = "Сначала выйдите из места.";
+            return false;
+        }
         if (expedition.HasTimedActivity)
         {
             reason = IsResting(state) ? "Отряд уже спит." : "Отряд занят: " + expedition.ActiveActivity.DisplayName + ".";

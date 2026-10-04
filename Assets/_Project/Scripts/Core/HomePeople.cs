@@ -71,6 +71,8 @@ public sealed class ResidentState
     // Допуск в поселения: пусто — допускается; иначе причина отказа,
     // которую игрок видит заранее («Не допускается: …»).
     public string SettlementAdmissionBlock = string.Empty;
+    // Флаг истории, снимающий запрет (авторское исключение); пусто — нет.
+    public string SettlementAdmissionExceptionFlag = string.Empty;
 
     // Индивидуальные боевые данные: шаблон и формулы — в UnitDatabase,
     // здесь только текущее состояние этого человека.

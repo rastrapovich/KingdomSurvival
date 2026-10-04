@@ -106,6 +106,10 @@ public class LocationData
     public bool IsVisibleOnMap;
     public bool IsWaypoint;
 
+    // ПР-12К (канон v1.53 §28.9): населённое место — у входа можно разбить
+    // временный лагерь и войти с выбранной группой.
+    public bool IsSettlement;
+
     // Литературный текст для Location Interaction (presentation-слой, не
     // Dialogue Database — локация не NPC). Пусто по умолчанию: старые/
     // технические локации без описания получают нейтральный fallback-текст

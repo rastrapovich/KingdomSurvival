@@ -197,6 +197,12 @@ public partial class PrototypeUIController
             DebugTriggerAuthoredEncounter);
         scroll.Add(debugForceEncounterButton);
 
+        // ПР-12К: техническое поселение у отряда, наёмник и существо-союзник
+        // (существо в поселение не пускают) — проверка лагеря и присутствия.
+        scroll.Add(CreateDebugActionButton(
+            "ТЕХНИЧЕСКОЕ ПОСЕЛЕНИЕ И ЛАГЕРЬ (ПР-12К)",
+            DebugSettlementCamp));
+
         // ПР-03: черновой вход в бой реальным отрядом похода. Сюжетного боя
         // в главе пока нет — настоящий вход появится в ПР-10.
         scroll.Add(CreateDebugActionButton(
@@ -544,6 +550,24 @@ public partial class PrototypeUIController
     {
         if (!TryStartCampaignBattle("debug." + Guid.NewGuid().ToString("N"), out string message))
             AddReport("[DEBUG] " + message);
+    }
+
+    // ПР-12К: техническое поселение у отряда + наёмник и существо-союзник.
+    private void DebugSettlementCamp()
+    {
+        if (gameState == null || isGameOver)
+            return;
+        if (!SettlementCampDevFixture.Apply(gameState, out string report))
+        {
+            AddReport("[DEBUG] " + report);
+            return;
+        }
+        AddReport("[DEBUG] " + report);
+        // Окно прежнего места (например, места прибытия) уступает поселению.
+        if (IsLocationInteractionActive)
+            CloseLocationInteraction();
+        RefreshInterface();
+        TryOpenLocationInteraction(SettlementCampDevFixture.SettlementId);
     }
 
     // Для ручной проверки домашней части: открывает сцену, которая сейчас

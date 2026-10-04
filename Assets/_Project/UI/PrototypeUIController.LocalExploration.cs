@@ -88,6 +88,14 @@ public partial class PrototypeUIController
 
     private void TickLocalExploration(float deltaSeconds)
     {
+        // ПР-12К: лагерь у поселения — без забытых и погибших в ожидающих;
+        // ушедший от поселения отряд уходит вместе.
+        if (gameState != null && !isGameOver)
+        {
+            foreach (string report in SettlementCampService.Normalize(gameState))
+                AddReport(report);
+        }
+
         BindLocalExplorationUi();
         if (!localUiBound)
             return;

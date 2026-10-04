@@ -106,6 +106,10 @@ public partial class PrototypeUIController
         string description = !string.IsNullOrWhiteSpace(location.InteractionDescription)
             ? location.InteractionDescription
             : "Отряд находится внутри локации «" + location.Name + "».";
+        // ПР-12К: кто ждёт в лагере у поселения.
+        string campLine = SettlementCampLine(location);
+        if (!string.IsNullOrEmpty(campLine))
+            description += "\n\n" + campLine;
 
         Label text = new Label(description);
         text.AddToClassList("narrative-dialogue-history-text");
@@ -120,6 +124,10 @@ public partial class PrototypeUIController
             return;
 
         narrativeChoicesContainer.Clear();
+
+        // ПР-12К: у поселения — лагерь и входящая группа.
+        if (RenderSettlementChoices(location))
+            return;
 
         string entryDialogueId =
             Chapter01StoryDirector.GetLocationEntryDialogueId(gameState, location.Id);
@@ -185,6 +193,8 @@ public partial class PrototypeUIController
                 narrativeChoicesContainer.Add(hint);
             }
         }
+
+        AddSettlementInsideChoices(location);
     }
 
     private void OnLocationInteractionNarrativeEntryClicked(string dialogueId)
@@ -300,6 +310,7 @@ public partial class PrototypeUIController
 
     private void CloseLocationInteraction()
     {
+        ResetSettlementView();
         locationInteractionActive = false;
         locationInteractionLocationId = null;
 

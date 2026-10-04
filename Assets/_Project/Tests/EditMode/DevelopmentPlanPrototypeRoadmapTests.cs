@@ -203,6 +203,36 @@ public sealed class DevelopmentPlanPrototypeRoadmapTests
         }
     }
 
+    // 04.10.2026: поставка 12К (исследуемые места) добавляется в ПР-12 один раз.
+    [Test]
+    public void LocalExploration_AddsTasksToFreePlay_Once()
+    {
+        DevelopmentPlanAsset plan = NewSeededPlan();
+        try
+        {
+            DevelopmentPlanPrototypeRoadmapSync.Apply(plan);
+            Assert.IsFalse(DevelopmentPlanLocalExplorationSync.Apply(plan), "Без ПР-12 синхронизация не срабатывает.");
+            DevelopmentPlanPr12FreePlaySync.Apply(plan);
+            DevelopmentPlanMapMovementSync.Apply(plan);
+            DevelopmentPhaseData freePlay = plan.FindPhase(DevelopmentPlanPr12FreePlaySync.FreePlayPhaseId);
+            int before = freePlay.tasks.Count;
+
+            Assert.IsTrue(DevelopmentPlanLocalExplorationSync.Apply(plan));
+            Assert.IsTrue(DevelopmentPlanLocalExplorationSync.Apply(plan));
+            Assert.AreEqual(before + 5, freePlay.tasks.Count, "Повторный запуск не дублирует задачи.");
+            Assert.AreEqual(freePlay.tasks.Count, freePlay.tasks.Select(t => t.order).Distinct().Count());
+
+            List<ValidationIssue> errors = DevelopmentPlanValidator.Validate(plan)
+                .Where(i => i.Severity == ValidationSeverity.Error)
+                .ToList();
+            Assert.IsEmpty(errors, string.Join("\n", errors.Select(e => e.EntityId + ": " + e.Message)));
+        }
+        finally
+        {
+            Object.DestroyImmediate(plan);
+        }
+    }
+
     // 01.10.2026: поставка 12З (анимации существ) добавляется в ПР-12 один раз.
     [Test]
     public void CreatureAnimation_AddsTasksToFreePlay_Once()

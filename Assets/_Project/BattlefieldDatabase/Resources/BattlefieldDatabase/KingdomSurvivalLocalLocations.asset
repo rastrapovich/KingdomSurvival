@@ -38,7 +38,7 @@ MonoBehaviour:
         \u043E\u0442\u0432\u0430\u043B\u044B, \u0438\u0437 \u043D\u0438\u0445 \u0442\u043E\u0440\u0447\u0438\u0442
         \u0441\u0442\u0430\u0440\u043E\u0435 \u0436\u0435\u043B\u0435\u0437\u043E."
       OnceOnly: 1
-      RequiresFlag:
+      RequiresFlag: 
       HiddenWhenFlag: freeplay.mine.entered
     - Id: mine.mark
       Label: "\u0421\u0442\u0430\u0440\u0430\u044F \u043A\u0440\u0435\u043F\u044C"
@@ -51,7 +51,7 @@ MonoBehaviour:
       Text: "\u041A\u043E\u0432\u0430\u043D\u044B\u0435 \u0441\u043A\u043E\u0431\u044B
         \u0432 \u0441\u0442\u0430\u0440\u043E\u0439 \u043A\u0440\u0435\u043F\u0438."
       OnceOnly: 0
-      RequiresFlag:
+      RequiresFlag: 
       HiddenWhenFlag: freeplay.mine.mark
     - Id: mine.signs
       Label: "\u041F\u0440\u043E\u0445\u043E\u0434 \u0432 \u0434\u0430\u043B\u044C\u043D\u044E\u044E
@@ -66,7 +66,7 @@ MonoBehaviour:
         \u0442\u044F\u043D\u0435\u0442 \u0442\u0435\u043F\u043B\u043E\u043C \u0438
         \u0437\u0432\u0435\u0440\u0435\u043C."
       OnceOnly: 1
-      RequiresFlag:
+      RequiresFlag: 
       HiddenWhenFlag: freeplay.mine.lair_cleared
     - Id: mine.dry_face
       Label: "\u0421\u0443\u0445\u043E\u0439 \u0437\u0430\u0431\u043E\u0439"
@@ -75,7 +75,7 @@ MonoBehaviour:
       Cell:
         Q: 8
         R: 0
-      DialogueId:
+      DialogueId: 
       Text: "\u0421\u0443\u0445\u043E\u0439 \u0437\u0430\u0431\u043E\u0439 \u0438
         \u0436\u0435\u043B\u0435\u0437\u043E, \u0441\u043B\u043E\u0436\u0435\u043D\u043D\u043E\u0435
         \u0430\u043A\u043A\u0443\u0440\u0430\u0442\u043D\u043E, \u0431\u0443\u0434\u0442\u043E
@@ -83,7 +83,7 @@ MonoBehaviour:
         \u0437\u0430\u0432\u0442\u0440\u0430."
       OnceOnly: 0
       RequiresFlag: freeplay.mine.lair_cleared
-      HiddenWhenFlag:
+      HiddenWhenFlag: 
     Enemies:
     - InstanceId: mine.beast.1
       UnitTypeId: forest_beast
@@ -128,7 +128,7 @@ MonoBehaviour:
     HoursPerCell: 0.05
     HoursPerInteraction: 0.25
   - Id: technical_lighting_camp
-    ModeId:
+    ModeId: 
     WorldLocationId: __technical_lighting_camp
     DisplayName: "\u041B\u0430\u0433\u0435\u0440\u044C"
     BattlefieldId: technical_lighting_camp_field
@@ -252,10 +252,10 @@ MonoBehaviour:
     Objects:
     - Id: 93f4ce5edc884539b13db4cd7a15d2d9
       Name: "\u041F\u0430\u043B\u0430\u0442\u043A\u0430 \u0441\u043B\u0435\u0432\u0430"
-      GroupId:
+      GroupId: 
       Sprite: {fileID: 0}
       Variants: []
-      DefaultVariantId:
+      DefaultVariantId: 
       Placeholder: 1
       Position: {x: 0.27, y: 0.4}
       Pivot: {x: 0.5, y: 0.15}
@@ -284,10 +284,10 @@ MonoBehaviour:
         Offset: {x: 0, y: 0.2}
     - Id: b13ed7f91efd40d4b7f9af02e3c7c082
       Name: "\u041F\u0430\u043B\u0430\u0442\u043A\u0430 \u0441\u043F\u0440\u0430\u0432\u0430"
-      GroupId:
+      GroupId: 
       Sprite: {fileID: 0}
       Variants: []
-      DefaultVariantId:
+      DefaultVariantId: 
       Placeholder: 1
       Position: {x: 0.72, y: 0.39}
       Pivot: {x: 0.5, y: 0.15}
@@ -316,10 +316,10 @@ MonoBehaviour:
         Offset: {x: 0, y: 0.2}
     - Id: 8fd932338dc941799050f33a1b00dbff
       Name: "\u041F\u0430\u043B\u0430\u0442\u043A\u0430 \u0432 \u0433\u043B\u0443\u0431\u0438\u043D\u0435"
-      GroupId:
+      GroupId: 
       Sprite: {fileID: 0}
       Variants: []
-      DefaultVariantId:
+      DefaultVariantId: 
       Placeholder: 1
       Position: {x: 0.51, y: 0.25}
       Pivot: {x: 0.5, y: 0.15}
@@ -348,10 +348,10 @@ MonoBehaviour:
         Offset: {x: 0, y: 0.2}
     - Id: 24aa9b3525444484bf205e6c9af682cf
       Name: "\u041A\u043E\u0441\u0442\u0451\u0440"
-      GroupId:
+      GroupId: 
       Sprite: {fileID: 0}
       Variants: []
-      DefaultVariantId:
+      DefaultVariantId: 
       Placeholder: 2
       Position: {x: 0.51, y: 0.58}
       Pivot: {x: 0.5, y: 0.15}
@@ -361,7 +361,7 @@ MonoBehaviour:
       Locked: 0
       Band: 2
       OrderOffset: 0
-      BlocksMovement: 0
+      BlocksMovement: 1
       Footprint: {x: 0.65, y: 0.65}
       CastsShadow: 0
       Light:
@@ -380,10 +380,10 @@ MonoBehaviour:
         Offset: {x: 0, y: 0.2}
     - Id: 9a29e67b2a734c58bed6e830d18bd47d
       Name: "\u042F\u0449\u0438\u043A"
-      GroupId:
+      GroupId: 
       Sprite: {fileID: 0}
       Variants: []
-      DefaultVariantId:
+      DefaultVariantId: 
       Placeholder: 3
       Position: {x: 0.33, y: 0.69}
       Pivot: {x: 0.5, y: 0.15}
@@ -412,10 +412,10 @@ MonoBehaviour:
         Offset: {x: 0, y: 0.2}
     - Id: 80ba98843a244dcfa24c175551397817
       Name: "\u041A\u0430\u043C\u0435\u043D\u044C"
-      GroupId:
+      GroupId: 
       Sprite: {fileID: 0}
       Variants: []
-      DefaultVariantId:
+      DefaultVariantId: 
       Placeholder: 4
       Position: {x: 0.76, y: 0.72}
       Pivot: {x: 0.5, y: 0.15}
@@ -444,10 +444,10 @@ MonoBehaviour:
         Offset: {x: 0, y: 0.2}
     - Id: 3ee74a32714443c0a1315978f2147e70
       Name: "\u041A\u0443\u0441\u0442"
-      GroupId:
+      GroupId: 
       Sprite: {fileID: 0}
       Variants: []
-      DefaultVariantId:
+      DefaultVariantId: 
       Placeholder: 5
       Position: {x: 0.18, y: 0.72}
       Pivot: {x: 0.5, y: 0.15}
@@ -475,5 +475,5 @@ MonoBehaviour:
         Flicker: 0.08
         Offset: {x: 0, y: 0.2}
     TestStart: {x: 4, y: 4}
-    TestUnitId: guard
+    TestUnitId: militia
     TestFollowers: 2

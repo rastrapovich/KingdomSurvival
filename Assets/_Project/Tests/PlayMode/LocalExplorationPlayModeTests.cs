@@ -200,6 +200,16 @@ public sealed class LocalExplorationPlayModeTests
         Assert.AreEqual(new HexCoord(3, 3), mover.Leader.Cell);
         Assert.AreEqual(mover.Members.Count, mover.Members.Select(m => m.Cell).Distinct().Count(), "Никто не стоит в чужой клетке.");
         Assert.Greater(ContinuousSimulationSystem.GetClock(campaign).HourOfDay, hourAtEntry, "Шаги тратят время.");
+        // Зажатая кнопка ведёт командира за курсором: новая клетка под курсором
+        // сразу меняет цель (стена — цель не меняется).
+        Invoke(main, "OnLocalCellHeld", new HexCoord(2, 2));
+        Invoke(main, "OnLocalCellHeld", new HexCoord(5, 1));
+        Invoke(main, "OnLocalCellHeld", new HexCoord(3, 4));
+        yield return Until(() => Mover(main).Leader.Cell == new HexCoord(3, 4) && !Mover(main).LeaderHasOrder, 10f);
+        Assert.AreEqual(new HexCoord(3, 4), Mover(main).Leader.Cell, "Командир шёл за курсором до последней клетки.");
+        yield return WalkTo(main, new HexCoord(3, 3));
+        yield return Until(() => Mover(main).IsIdle && Mover(main).IsGathered, 10f);
+
         Invoke(main, "OnLocalCellClicked", new HexCoord(5, 1));
         yield return null;
         StringAssert.Contains("не пройти", ((Label)root.Q("local-exploration-notice")).text, "В стену не пройти.");

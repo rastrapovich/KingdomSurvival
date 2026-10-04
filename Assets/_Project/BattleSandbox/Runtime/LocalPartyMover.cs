@@ -157,32 +157,52 @@ namespace KingdomSurvival.BattleSandbox
             if (deltaSeconds <= 0f || members.Count == 0)
                 return entered;
 
+            // Шаги идут без паузы: остаток времени после клетки сразу уходит в
+            // следующий шаг. Иначе на границе клеток участник на кадр «стоит»,
+            // и цикл ходьбы каждый раз начинается заново (рывок).
             Member leader = Leader;
-            if (!leader.Stepping && leader.Path.Count > 0)
+            float remaining = deltaSeconds;
+            for (int guard = 0; guard < 16 && remaining > 0f; guard++)
             {
-                IsWaitingForStragglers = HasStraggler();
-                if (!IsWaitingForStragglers)
+                if (!leader.Stepping)
+                {
+                    if (leader.Path.Count == 0)
+                    {
+                        IsWaitingForStragglers = false;
+                        break;
+                    }
+                    IsWaitingForStragglers = HasStraggler();
+                    if (IsWaitingForStragglers)
+                        break;
                     StartLeaderStep(leader);
-            }
-            else if (!leader.Stepping)
-            {
-                IsWaitingForStragglers = false;
-            }
-            if (Advance(leader, deltaSeconds))
-            {
+                    if (!leader.Stepping)
+                        break;
+                }
+                remaining = Advance(leader, remaining, out bool completed);
+                if (!completed)
+                    break;
                 trail.Add(leader.Cell);
                 if (trail.Count > TrailLength)
                     trail.RemoveRange(0, trail.Count - TrailLength);
                 entered.Add(leader.Cell);
             }
 
-            List<HexCoord> targets = FollowerTargets();
             for (int i = 1; i < members.Count; i++)
             {
                 Member follower = members[i];
-                if (!follower.Stepping)
-                    StartFollowerStep(follower, targets[i], deltaSeconds);
-                Advance(follower, deltaSeconds);
+                float left = deltaSeconds;
+                for (int guard = 0; guard < 16 && left > 0f; guard++)
+                {
+                    if (!follower.Stepping)
+                    {
+                        StartFollowerStep(follower, FollowerTargets()[i], left);
+                        if (!follower.Stepping)
+                            break;
+                    }
+                    left = Advance(follower, left, out bool completed);
+                    if (!completed)
+                        break;
+                }
             }
             return entered;
         }
@@ -237,18 +257,24 @@ namespace KingdomSurvival.BattleSandbox
             member.Stepping = true;
         }
 
-        // True — шаг завершён в этом тике.
-        private bool Advance(Member member, float deltaSeconds)
+        // completed — шаг завершён; возвращает неистраченные секунды тика.
+        private float Advance(Member member, float deltaSeconds, out bool completed)
         {
+            completed = false;
             if (!member.Stepping)
-                return false;
-            member.Progress += deltaSeconds * CellsPerSecond / Math.Max(1, stepCost(member.Next));
-            if (member.Progress < 1f)
-                return false;
+                return 0f;
+            float speed = CellsPerSecond / Math.Max(1, stepCost(member.Next));
+            float needed = (1f - member.Progress) / Math.Max(0.0001f, speed);
+            if (deltaSeconds < needed)
+            {
+                member.Progress += deltaSeconds * speed;
+                return 0f;
+            }
             member.Cell = member.Next;
             member.Stepping = false;
             member.Progress = 0f;
-            return true;
+            completed = true;
+            return deltaSeconds - needed;
         }
 
         private bool IsReservedByOther(HexCoord cell, Member self)

@@ -73,7 +73,8 @@ namespace KingdomSurvival.BattlefieldDatabase
             LocalLocationDefinition definition,
             BattlefieldDatabaseAsset battlefields,
             Func<string, bool> dialogueExists = null,
-            Func<string, bool> creatureExists = null)
+            Func<string, bool> creatureExists = null,
+            IEnumerable<HexCoord> visualBlockedCells = null)
         {
             List<string> errors = new List<string>();
             if (definition == null)
@@ -94,7 +95,8 @@ namespace KingdomSurvival.BattlefieldDatabase
                 return errors;
             }
 
-            LocalLocationGeometry geometry = new LocalLocationGeometry(definition, field);
+            // Основания предметов художественной сборки — тоже препятствия.
+            LocalLocationGeometry geometry = new LocalLocationGeometry(definition, field, visualBlockedCells);
             HashSet<string> ids = new HashSet<string>(StringComparer.Ordinal);
             void CheckId(string kind, string id)
             {

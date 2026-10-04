@@ -75,14 +75,29 @@ namespace KingdomSurvival.LocationRendering
             root.Add(field);
             field.RegisterCallback<PointerDownEvent>(evt =>
             {
-                if (evt.button != 0) return;
-                Vector2 screen = new Vector2(evt.position.x / root.resolvedStyle.width * Screen.width,
-                    (1 - evt.position.y / root.resolvedStyle.height) * Screen.height);
-                if (!Renderer.Camera.pixelRect.Contains(screen)) return;
-                Vector2 world = Renderer.Camera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, 10));
-                if (!LocationVisualGeometry.TryCell(Renderer.Field, world, out HexCoord cell) || !Mover.MoveLeaderTo(cell))
+                if (evt.button != 0 || !TryCellAt(root, evt.position, out HexCoord cell)) return;
+                if (!Mover.MoveLeaderTo(cell))
                     notice.text = "Туда не пройти.";
-                else notice.text = "Командир идёт к точке; спутники следуют за ним.";
+                else notice.text = "Командир идёт к точке; спутники следуют за ним. Зажатая кнопка — идти за курсором.";
+                // Зажатая кнопка — командир идёт за курсором, как на глобальной карте.
+                heldCell = cell;
+                holding = true;
+                field.CapturePointer(evt.pointerId);
+            });
+            field.RegisterCallback<PointerMoveEvent>(evt =>
+            {
+                if (!holding) return;
+                if ((evt.pressedButtons & 1) == 0) { holding = false; field.ReleasePointer(evt.pointerId); return; }
+                if (TryCellAt(root, evt.position, out HexCoord cell) && cell != heldCell)
+                {
+                    heldCell = cell;
+                    if (Renderer.Geometry.IsPassable(cell)) Mover.MoveLeaderTo(cell);
+                }
+            });
+            field.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                holding = false;
+                if (field.HasPointerCapture(evt.pointerId)) field.ReleasePointer(evt.pointerId);
             });
             VisualElement bar = new VisualElement();
             bar.style.position = Position.Absolute;
@@ -121,6 +136,20 @@ namespace KingdomSurvival.LocationRendering
             notice = new Label("Кликните по земле. Время теста не затрагивает кампанию.");
             notice.style.color = new Color(.75f, .77f, .72f);
             bar.Add(notice);
+        }
+
+        private bool holding;
+        private HexCoord heldCell;
+
+        // Точка панели → клетка поля через камеру сцены (с учётом полос по краям).
+        private bool TryCellAt(VisualElement root, Vector2 panelPosition, out HexCoord cell)
+        {
+            cell = default;
+            Vector2 screen = new Vector2(panelPosition.x / root.resolvedStyle.width * Screen.width,
+                (1 - panelPosition.y / root.resolvedStyle.height) * Screen.height);
+            if (!Renderer.Camera.pixelRect.Contains(screen)) return false;
+            Vector2 world = Renderer.Camera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, 10));
+            return LocationVisualGeometry.TryCell(Renderer.Field, world, out cell);
         }
 
         private void Update()

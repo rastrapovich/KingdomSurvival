@@ -59,6 +59,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             EditorApplication.playModeStateChanged -= PlayChanged;
             ReleasePreview();
             if (database != null) AssetDatabase.SaveAssetIfDirty(database);
+            if (fields != null) AssetDatabase.SaveAssetIfDirty(fields);
         }
         private void UndoChanged() { RefreshList(); BuildSettings(); RebuildPreview(); }
         private void PlayChanged(PlayModeStateChange state)
@@ -143,13 +144,31 @@ namespace KingdomSurvival.LocationRendering.Editor
                 item.Id.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
             list.itemsSource = visible; list.Rebuild();
         }
+        // Пересборка предпросмотра и запись ассета — не на каждый шаг ползунка:
+        // один раз за кадр и через полсекунды после последней правки.
+        private bool rebuildRequested;
+        private double saveAt = -1;
         private void Change(Action action, bool refreshSettings = false)
         {
             Undo.RecordObject(database, "Изменить локацию"); action();
             EditorUtility.SetDirty(database);
-            AssetDatabase.SaveAssetIfDirty(database);
-            RebuildPreview();
+            saveAt = EditorApplication.timeSinceStartup + .5;
+            rebuildRequested = true;
             if (refreshSettings) BuildSettings();
+        }
+        private void FlushPending()
+        {
+            if (rebuildRequested && !dragging) { rebuildRequested = false; RebuildPreview(); }
+            if (saveAt > 0 && EditorApplication.timeSinceStartup >= saveAt && !dragging)
+            {
+                saveAt = -1;
+                if (database != null) AssetDatabase.SaveAssetIfDirty(database);
+            }
+            if (fieldsSaveAt > 0 && EditorApplication.timeSinceStartup >= fieldsSaveAt)
+            {
+                fieldsSaveAt = -1;
+                if (fields != null) AssetDatabase.SaveAssetIfDirty(fields);
+            }
         }
         private void Heading(string text)
         {
@@ -202,6 +221,15 @@ namespace KingdomSurvival.LocationRendering.Editor
             fieldChoice.RegisterValueChangedCallback(evt => Change(() => Location.BattlefieldId = fieldOptions[fieldChoice.index].Id, true));
             settings.Add(fieldChoice);
             SpriteField("Фон земли", Field?.Background, SetGround);
+            Heading("Размер и сетка");
+            settings.Add(new HelpBox(
+                "Арена всегда 10 столбцов × 7 рядов (58 клеток) — та же, что в бою. «Масштаб сетки» задаёт, какую часть кадра " +
+                "она занимает: меньше — клетки и люди мельче, место кажется просторнее; больше — крупнее и теснее. " +
+                "Это настройки поля: они меняют и бой, и все места с этим полем.", HelpBoxMessageType.Info));
+            FieldNumber("Масштаб сетки", "gridScale", Field?.GridScale ?? 1, .5f, 1.5f);
+            FieldVector("Сдвиг сетки", "gridOffset", Field?.GridOffset ?? Vector2.zero);
+            FieldNumber("Масштаб фона", "backgroundScale", Field?.BackgroundScale ?? 1, .1f, 3f);
+            FieldVector("Сдвиг фона", "backgroundOffset", Field?.BackgroundOffset ?? Vector2.zero);
             Heading("Общий свет");
             Number("Общая яркость", Visual.Daylight.Intensity, 0, 2, value => Visual.Daylight.Intensity = value);
             CurveField curve = new CurveField("Яркость за сутки") { value = Visual.Daylight.Brightness };
@@ -314,6 +342,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             double now = EditorApplication.timeSinceStartup;
             float delta = Mathf.Clamp((float)(now - lastUpdate), 0, .1f); lastUpdate = now;
+            FlushPending();
             if (cycle) hour = Mathf.Repeat(hour + delta * 24 / 30, 24);
             if (clock != null) clock.text = LocationLightingTest.FormatHour(hour);
             hourSlider?.SetValueWithoutNotify(hour);
@@ -409,12 +438,18 @@ namespace KingdomSurvival.LocationRendering.Editor
                     LocationVisualObject selected = Object;
                     foreach (LocationVisualObject item in Visual.Objects)
                         if (!item.Locked && (item == selected || (!string.IsNullOrEmpty(selected.GroupId) && item.GroupId == selected.GroupId)))
+                        {
                             item.Position += new Vector2(delta.x / LocationVisualDefinition.WorldWidth, -delta.y / LocationVisualDefinition.WorldHeight);
-                    lastPointer = world; EditorUtility.SetDirty(database); RebuildPreview(); evt.Use();
+                            renderer.MoveObject(item.Id, item.Position);
+                        }
+                    lastPointer = world; EditorUtility.SetDirty(database); evt.Use();
                 }
             }
             if (evt.type == EventType.MouseUp && dragging)
-            { dragging = false; AssetDatabase.SaveAssetIfDirty(database); evt.Use(); }
+            {
+                // Отпустили — пересчитать проходимость оснований и записать.
+                dragging = false; RebuildPreview(); AssetDatabase.SaveAssetIfDirty(database); evt.Use();
+            }
             if (evt.type != EventType.Repaint || preview == null) return;
             renderer.SetTime(hour, (float)EditorApplication.timeSinceStartup);
             if (mover != null) renderer.RenderActors(mover.Members, (float)EditorApplication.timeSinceStartup);
@@ -461,7 +496,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Name = sprite != null ? sprite.name : placeholder == LocationPlaceholder.Fire ? "Костёр" : "Палатка",
                     Position = LocationVisualGeometry.ToNormalized(world ?? Vector2.zero),
                     Height = placeholder == LocationPlaceholder.Fire ? .8f : 1.8f,
-                    BlocksMovement = placeholder == LocationPlaceholder.Tent,
+                    // В костёр и в палатку не встают.
+                    BlocksMovement = placeholder == LocationPlaceholder.Tent || placeholder == LocationPlaceholder.Fire,
                     CastsShadow = placeholder == LocationPlaceholder.Tent };
                 if (placeholder == LocationPlaceholder.Fire) item.Light.Enabled = true;
                 Visual.Objects.Add(item); selectedObjectId = item.Id;
@@ -510,6 +546,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             List<string> errors = LocationVisualGeometry.Validate(Location, Visual, Field);
             if (errors.Count > 0) { Validate(); return; }
             AssetDatabase.SaveAssetIfDirty(database);
+            if (fields != null) AssetDatabase.SaveAssetIfDirty(fields);
             ReleasePreview();
             LocationLightingTestBootstrap.Launch(selectedId, hour);
         }
@@ -554,6 +591,39 @@ namespace KingdomSurvival.LocationRendering.Editor
                 database.locations.Remove(location); database.visuals.Remove(visual);
                 selectedId = LocationLightingTestBootstrap.CampId; selectedObjectId = null; RefreshList();
             }, true);
+        }
+        // Свойство связанного поля Базы полей боя (общее для боя и всех мест с ним).
+        private SerializedProperty FieldProperty(SerializedObject serialized, string name)
+        {
+            int index = fields.Battlefields.ToList().FindIndex(item => item != null && item.Id == Location?.BattlefieldId);
+            if (index < 0) return null;
+            return serialized.FindProperty("battlefields").GetArrayElementAtIndex(index).FindPropertyRelative(name);
+        }
+        private void ApplyField(string undoName, Action<SerializedProperty> apply, string name)
+        {
+            if (Field == null) return;
+            Undo.RecordObject(fields, undoName);
+            SerializedObject serialized = new SerializedObject(fields);
+            SerializedProperty property = FieldProperty(serialized, name);
+            if (property == null) return;
+            apply(property);
+            serialized.ApplyModifiedProperties();
+            EditorUtility.SetDirty(fields);
+            fieldsSaveAt = EditorApplication.timeSinceStartup + .5;
+            rebuildRequested = true;
+        }
+        private double fieldsSaveAt = -1;
+        private void FieldNumber(string label, string name, float value, float min, float max)
+        {
+            Slider field = new Slider(label, min, max) { value = value, showInputField = true };
+            field.RegisterValueChangedCallback(evt => ApplyField("Изменить поле", property => property.floatValue = evt.newValue, name));
+            settings.Add(field);
+        }
+        private void FieldVector(string label, string name, Vector2 value)
+        {
+            Vector2Field field = new Vector2Field(label) { value = value };
+            field.RegisterValueChangedCallback(evt => ApplyField("Изменить поле", property => property.vector2Value = evt.newValue, name));
+            settings.Add(field);
         }
         private void SetGround(Sprite sprite)
         {

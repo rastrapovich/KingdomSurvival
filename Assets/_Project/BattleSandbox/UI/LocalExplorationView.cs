@@ -111,6 +111,9 @@ namespace KingdomSurvival.BattleSandbox
             Add(actorLayer);
 
             RegisterCallback<PointerDownEvent>(OnPointerDown);
+            RegisterCallback<PointerMoveEvent>(OnPointerMove);
+            RegisterCallback<PointerUpEvent>(evt => StopHolding(evt.pointerId));
+            RegisterCallback<PointerCaptureOutEvent>(_ => holding = false);
         }
 
         private static void Fill(VisualElement element)
@@ -372,7 +375,40 @@ namespace KingdomSurvival.BattleSandbox
                 }
             }
             CellClicked?.Invoke(cell);
+            // Зажатая кнопка — командир идёт за курсором (как на глобальной карте).
+            heldCell = cell;
+            holding = true;
+            this.CapturePointer(evt.pointerId);
             evt.StopPropagation();
+        }
+
+        private bool holding;
+        private HexCoord heldCell;
+
+        // Новая клетка под зажатым курсором; клик-и-отпустить её не вызывает.
+        public event Action<HexCoord> CellHeld;
+
+        private void OnPointerMove(PointerMoveEvent evt)
+        {
+            if (!holding)
+                return;
+            if ((evt.pressedButtons & 1) == 0)
+            {
+                StopHolding(evt.pointerId);
+                return;
+            }
+            if (TryGetCell(evt.localPosition, out HexCoord cell) && cell != heldCell)
+            {
+                heldCell = cell;
+                CellHeld?.Invoke(cell);
+            }
+        }
+
+        private void StopHolding(int pointerId)
+        {
+            holding = false;
+            if (this.HasPointerCapture(pointerId))
+                this.ReleasePointer(pointerId);
         }
 
         public bool TryGetCell(Vector2 localPoint, out HexCoord cell)

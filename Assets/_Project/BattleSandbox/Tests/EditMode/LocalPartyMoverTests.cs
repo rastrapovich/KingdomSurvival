@@ -97,6 +97,25 @@ namespace KingdomSurvival.BattleSandbox.Tests
             AssertNoOverlapAtRest(mover);
         }
 
+        // Рывок ходьбы: на границе клеток участник не должен на кадр
+        // «останавливаться» — иначе цикл ходьбы каждый раз начинается заново.
+        [Test]
+        public void Walking_IsContinuous_AcrossCells_UntilArrival()
+        {
+            LocalPartyMover mover = NewParty(3);
+            Assert.IsTrue(mover.MoveLeaderTo(new HexCoord(4, 3)));
+            int ticks = 0;
+            while (mover.LeaderHasOrder && ticks++ < 400)
+            {
+                mover.Tick(1f / 60f);
+                if (mover.LeaderHasOrder)
+                    Assert.IsTrue(mover.Leader.Stepping, "Командир «стоит» между клетками на тике " + ticks + ".");
+            }
+            Assert.AreEqual(new HexCoord(4, 3), mover.Leader.Cell);
+            // Скорость не зависит от частоты кадров: 3 клетки при 2,5 кл/с ≈ 1,2 с.
+            Assert.That(ticks / 60f, Is.InRange(1.1f, 1.3f));
+        }
+
         [Test]
         public void LeaderEnteredCells_AreReportedOncePerStep()
         {

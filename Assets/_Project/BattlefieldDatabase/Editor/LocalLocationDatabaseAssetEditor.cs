@@ -49,9 +49,12 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
             {
                 if (location != null && !ids.Add(location.Id))
                     issues.Add("Повторный ID места: " + location.Id + ".");
+                LocationVisualDefinition visual = location != null ? asset.FindVisual(location.Id) : null;
+                BattlefieldDefinitionData field = location != null && battlefields != null ? battlefields.FindById(location.BattlefieldId) : null;
                 issues.AddRange(LocalLocationValidator.Validate(location, battlefields,
                     id => dialogues != null && dialogues.FindDialogue(id) != null,
-                    id => units != null && units.FindById(id) != null));
+                    id => units != null && units.FindById(id) != null,
+                    visual != null && field != null ? LocationVisualGeometry.BlockedCells(visual, field) : null));
             }
         }
     }

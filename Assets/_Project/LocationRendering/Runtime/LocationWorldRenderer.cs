@@ -223,6 +223,16 @@ namespace KingdomSurvival.LocationRendering
         }
 
         public SpriteRenderer FindObject(string id) => placed.Find(item => item.Data.Id == id)?.Image;
+
+        // Перемещение объекта без пересборки сцены (перетаскивание в редакторе);
+        // свет и тень едут вместе с опорой. Проходимость пересчитывает пересборка.
+        public void MoveObject(string id, Vector2 normalizedPosition)
+        {
+            Placed item = placed.Find(entry => entry.Data.Id == id);
+            if (item == null) return;
+            item.Anchor.localPosition = LocationVisualGeometry.ToWorld(normalizedPosition);
+            item.Image.sortingOrder = LocationVisualGeometry.SortOrder(item.Data.Band, item.Anchor.localPosition.y, item.Data.OrderOffset);
+        }
         // Смена состояния одного объекта, без пересборки фона и без изменения авторских данных.
         public bool SetObjectVariant(string objectId, string variantId)
         {

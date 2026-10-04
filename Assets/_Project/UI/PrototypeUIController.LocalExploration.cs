@@ -64,7 +64,8 @@ public partial class PrototypeUIController
         BattlefieldDatabaseAsset battlefields = Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
         DialogueDatabaseAsset dialogues = DialogueDatabaseRuntime.LoadDefaultDatabase();
         List<string> errors = LocalLocationValidator.Validate(definition, battlefields,
-            id => dialogues != null && dialogues.FindDialogue(id) != null);
+            id => dialogues != null && dialogues.FindDialogue(id) != null, null,
+            VisualBlockedCells(definition, battlefields?.FindById(definition.BattlefieldId)));
         if (errors.Count > 0)
         {
             Debug.LogError("Исследуемое место «" + definition.DisplayName + "» с ошибками данных:\n" + string.Join("\n", errors));
@@ -197,6 +198,17 @@ public partial class PrototypeUIController
             return;
         }
         localView.ShowClickMarker(cell);
+    }
+
+    // Зажатая кнопка: командир идёт за курсором; в стену — просто не меняем цель.
+    private void OnLocalCellHeld(HexCoord cell)
+    {
+        if (LocalCommandsBlocked || !localGeometry.IsPassable(cell))
+            return;
+        localPendingObjectId = null;
+        LocalEntranceDefinition entrance = localDefinition.FindEntrance(gameState.LocalExploration.EntranceId);
+        localPendingExit = entrance != null && entrance.Cell.Is(cell.Q, cell.R);
+        localMover.MoveLeaderTo(cell);
     }
 
     private void OnLocalObjectClicked(string objectId)
@@ -367,6 +379,10 @@ public partial class PrototypeUIController
         foreach (KeyValuePair<string, HexCoord> entry in assigned)
             cells[entry.Key] = new LocalCellData(entry.Value.Q, entry.Value.R);
         CampaignBattleRequest request = LocalExplorationService.BuildEncounterRequest(gameState, localDefinition, encounter, cells);
+        // Та же проходимость, что при исследовании: стены поля, объекты места и
+        // основания предметов художественной сборки (База локаций).
+        foreach (HexCoord blocked in localGeometry.BlockedCells)
+            request.BlockedCells.Add(new CampaignBattleCell { Q = blocked.Q, R = blocked.R });
 
         // Небоевые остаются в безопасной точке — не исчезают без объяснения.
         foreach (LocalPartyMover.Member member in localMover.Members)
@@ -470,9 +486,10 @@ public partial class PrototypeUIController
 
         localGeneration++;
         localBoundState = gameState;
-        localGeometry = new LocalLocationGeometry(localDefinition, field);
+        localGeometry = new LocalLocationGeometry(localDefinition, field, VisualBlockedCells(localDefinition, field));
         localView = new LocalExplorationView(field, battlefields.GetHexStyle(field));
         localView.CellClicked += OnLocalCellClicked;
+        localView.CellHeld += OnLocalCellHeld;
         localView.ObjectClicked += OnLocalObjectClicked;
         localField.Clear();
         localField.Add(localView);
@@ -630,6 +647,15 @@ public partial class PrototypeUIController
         if (localNoticeLabel != null && Time.realtimeSinceStartup > localNoticeUntil)
             localNoticeLabel.text = string.Empty;
         RefreshLocalPartyList();
+    }
+
+    // Основания предметов из художественной сборки места (База локаций): они
+    // непроходимы и при исследовании, и в бою на месте. Нет сборки — пусто.
+    private static List<HexCoord> VisualBlockedCells(LocalLocationDefinition definition, BattlefieldDefinitionData field)
+    {
+        LocalLocationDatabaseAsset database = Resources.Load<LocalLocationDatabaseAsset>(LocalLocationDatabaseAsset.ResourcesPath);
+        LocationVisualDefinition visual = database != null && definition != null ? database.FindVisual(definition.Id) : null;
+        return visual != null && field != null ? LocationVisualGeometry.BlockedCells(visual, field) : new List<HexCoord>();
     }
 
     private string FindFighterUnitType(string personId)

@@ -79,7 +79,10 @@ namespace KingdomSurvival.LocationRendering.Editor
                 visual.Objects.Add(Placed("Палатка слева", LocationPlaceholder.Tent, .27f, .40f, 2, true));
                 visual.Objects.Add(Placed("Палатка справа", LocationPlaceholder.Tent, .72f, .39f, 2.2f, true));
                 visual.Objects.Add(Placed("Палатка в глубине", LocationPlaceholder.Tent, .51f, .25f, 1.8f, true));
-                LocationVisualObject fire = Placed("Костёр", LocationPlaceholder.Fire, .51f, .58f, .8f, false);
+                // В костёр не встают; тени от своего основания у него нет — иначе
+                // он затенял бы собственный свет.
+                LocationVisualObject fire = Placed("Костёр", LocationPlaceholder.Fire, .51f, .58f, .8f, true);
+                fire.CastsShadow = false;
                 fire.Light.Enabled = true; fire.Light.Radius = 3.6f; fire.Light.Intensity = 1.7f;
                 visual.Objects.Add(fire);
                 visual.Objects.Add(Placed("Ящик", LocationPlaceholder.Crate, .33f, .69f, .7f, true));

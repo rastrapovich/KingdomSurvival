@@ -110,6 +110,24 @@ public sealed class FreePlayMineLocalTests
         Assert.IsTrue(mine.PlaceholderArt, "Фон шахты — заглушка, рисунка нет.");
     }
 
+    // Основания предметов из Базы локаций — те же препятствия, что стены:
+    // предмет на входе делает место непригодным, а не «проходимым насквозь».
+    [Test]
+    public void VisualFootprints_AreObstacles_ForValidation()
+    {
+        BattlefieldDatabaseAsset battlefields = Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
+        LocalLocationDefinition mine = FreePlayMineLocal.Create();
+        List<string> errors = LocalLocationValidator.Validate(mine, battlefields, null, null,
+            new[] { new KingdomSurvival.BattleSandbox.HexCoord(0, 3) });
+        Assert.IsTrue(errors.Any(error => error.Contains("вход")), string.Join("\n", errors));
+
+        LocalLocationGeometry geometry = new LocalLocationGeometry(mine, battlefields.FindById(mine.BattlefieldId),
+            new[] { new KingdomSurvival.BattleSandbox.HexCoord(3, 3) });
+        Assert.IsFalse(geometry.IsPassable(new KingdomSurvival.BattleSandbox.HexCoord(3, 3)));
+        CollectionAssert.Contains(geometry.BlockedCells, new KingdomSurvival.BattleSandbox.HexCoord(3, 3),
+            "Бой на месте получает те же клетки.");
+    }
+
     [Test]
     public void MineScenes_InDatabase_Valid()
     {

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using KingdomSurvival.BattlefieldDatabase;
-using KingdomSurvival.BattleSandbox;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,12 +8,14 @@ namespace KingdomSurvival.LocationRendering
 {
     // Универсальная служебная сцена: те же renderer/анимации/движение,
     // отдельное состояние без CampaignSession, расходов, событий и save/load.
+    // Движение — как на глобальной карте (LocalFreeMover), камера следует
+    // за командиром.
     public sealed class LocationLightingTest : MonoBehaviour
     {
         public PanelSettings Panel;
         public string LocationId = "technical_lighting_camp";
         public LocationWorldRenderer Renderer { get; private set; }
-        public LocalPartyMover Mover { get; private set; }
+        public LocalFreeMover Mover { get; private set; }
         public float Hour = 13;
         public bool Cycle;
         public float CycleSeconds = 30;
@@ -48,17 +49,39 @@ namespace KingdomSurvival.LocationRendering
             if (errors.Count > 0) throw new InvalidOperationException(string.Join("\n", errors));
             Renderer?.Dispose();
             Renderer = new LocationWorldRenderer(location, visual, field, transform);
-            List<HexCoord> cells = new List<HexCoord>(Renderer.Geometry.Region(new HexCoord(visual.TestStart.x, visual.TestStart.y)));
-            HexCoord start = new HexCoord(visual.TestStart.x, visual.TestStart.y);
-            cells.Sort((a, b) => a.DistanceTo(start).CompareTo(b.DistanceTo(start)));
+            Vector2 start = LocationVisualGeometry.ToPixel(location, visual.TestStartPoint);
             int count = Mathf.Clamp(visual.TestFollowers + 1, 1, 5);
-            if (cells.Count < count) throw new InvalidOperationException("Рядом с точкой старта мало места для тестового отряда.");
-            List<KeyValuePair<string, HexCoord>> members = new List<KeyValuePair<string, HexCoord>>();
-            for (int i = 0; i < count; i++) members.Add(new KeyValuePair<string, HexCoord>("test_" + i, cells[i]));
-            Mover = new LocalPartyMover(Renderer.Geometry.IsPassable, Renderer.Geometry.StepCost, members);
-            Renderer.AddTestActors(count);
-            Renderer.RenderActors(Mover.Members, 0);
+            float spacing = Renderer.HexSizePixels * 1.2f;
+            List<LocalPointData> points = Renderer.Geometry.SpreadAround(new LocalPointData(start.x, start.y), count, spacing);
+            List<KeyValuePair<string, LocalPointData>> members = new List<KeyValuePair<string, LocalPointData>>();
+            for (int i = 0; i < count; i++) members.Add(new KeyValuePair<string, LocalPointData>("test_" + i, points[i]));
+            Mover = new LocalFreeMover(Renderer.Geometry.Layer, Renderer.Geometry.Rules, members, spacing);
+            ViewHeight = Mathf.Min(Renderer.CanvasSize.y, 1080);
+            RenderActors(0);
             Renderer.SetTime(Hour, 0);
+        }
+
+        // Высота видимой части рисунка (пиксели) — камера следует за командиром.
+        public float ViewHeight { get; set; } = 1080;
+
+        private void RenderActors(float seconds)
+        {
+            List<LocationWorldRenderer.ActorFrame> frames = new List<LocationWorldRenderer.ActorFrame>();
+            for (int i = 0; i < Mover.Members.Count; i++)
+            {
+                LocalFreeMover.Member member = Mover.Members[i];
+                frames.Add(new LocationWorldRenderer.ActorFrame
+                {
+                    Id = member.Id, UnitTypeId = Renderer.Definition.TestUnitId,
+                    Kind = i == 0 ? LocationWorldRenderer.ActorKind.Party : LocationWorldRenderer.ActorKind.Retinue,
+                    Pixel = new Vector2((float)member.X, (float)member.Y),
+                    Direction = new Vector2((float)member.DirectionX, (float)member.DirectionY),
+                    Walking = member.Walking
+                });
+            }
+            Renderer.SetActors(frames, seconds);
+            LocalFreeMover.Member leader = Mover.Leader;
+            Renderer.LookAt(new Vector2((float)leader.X, (float)leader.Y), ViewHeight);
         }
 
         private void BuildHud()
@@ -75,12 +98,12 @@ namespace KingdomSurvival.LocationRendering
             root.Add(field);
             field.RegisterCallback<PointerDownEvent>(evt =>
             {
-                if (evt.button != 0 || !TryCellAt(root, evt.position, out HexCoord cell)) return;
-                if (!Mover.MoveLeaderTo(cell))
+                if (evt.button != 0 || !TryPointAt(root, evt.position, out Vector2 point)) return;
+                if (!Mover.MoveLeaderTo(point.x, point.y))
                     notice.text = "Туда не пройти.";
                 else notice.text = "Командир идёт к точке; спутники следуют за ним. Зажатая кнопка — идти за курсором.";
                 // Зажатая кнопка — командир идёт за курсором, как на глобальной карте.
-                heldCell = cell;
+                heldPoint = point;
                 holding = true;
                 field.CapturePointer(evt.pointerId);
             });
@@ -88,10 +111,10 @@ namespace KingdomSurvival.LocationRendering
             {
                 if (!holding) return;
                 if ((evt.pressedButtons & 1) == 0) { holding = false; field.ReleasePointer(evt.pointerId); return; }
-                if (TryCellAt(root, evt.position, out HexCoord cell) && cell != heldCell)
+                if (TryPointAt(root, evt.position, out Vector2 point) && (point - heldPoint).sqrMagnitude > 64)
                 {
-                    heldCell = cell;
-                    if (Renderer.Geometry.IsPassable(cell)) Mover.MoveLeaderTo(cell);
+                    heldPoint = point;
+                    if (Mover.IsPassable(point.x, point.y)) Mover.MoveLeaderTo(point.x, point.y);
                 }
             });
             field.RegisterCallback<PointerUpEvent>(evt =>
@@ -139,37 +162,25 @@ namespace KingdomSurvival.LocationRendering
         }
 
         private bool holding;
-        private HexCoord heldCell;
+        private Vector2 heldPoint;
 
-        // Точка панели → клетка поля через камеру сцены (с учётом полос по краям).
-        private bool TryCellAt(VisualElement root, Vector2 panelPosition, out HexCoord cell)
+        // Точка панели → точка рисунка места через кадр камеры (весь экран).
+        private bool TryPointAt(VisualElement root, Vector2 panelPosition, out Vector2 point)
         {
-            cell = default;
-            Vector2 screen = new Vector2(panelPosition.x / root.resolvedStyle.width * Screen.width,
-                (1 - panelPosition.y / root.resolvedStyle.height) * Screen.height);
-            if (!Renderer.Camera.pixelRect.Contains(screen)) return false;
-            Vector2 world = Renderer.Camera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, 10));
-            return LocationVisualGeometry.TryCell(Renderer.Field, world, out cell);
+            Vector2 viewport = new Vector2(panelPosition.x / Mathf.Max(1, root.resolvedStyle.width),
+                panelPosition.y / Mathf.Max(1, root.resolvedStyle.height));
+            point = Renderer.ViewportToPixel(viewport);
+            return point.x >= 0 && point.y >= 0 && point.x <= Renderer.CanvasSize.x && point.y <= Renderer.CanvasSize.y;
         }
 
         private void Update()
         {
             if (Renderer == null || Mover == null) return;
             if (Cycle) Hour = Mathf.Repeat(Hour + Time.unscaledDeltaTime * 24 / Mathf.Max(1, CycleSeconds), 24);
-            Mover.Tick(Time.unscaledDeltaTime);
-            Renderer.RenderActors(Mover.Members, Time.unscaledTime);
+            Mover.Tick(Time.unscaledDeltaTime, out _);
+            Renderer.Camera.aspect = Screen.width / (float)Mathf.Max(1, Screen.height);
+            RenderActors(Time.unscaledTime);
             Renderer.SetTime(Hour, Time.unscaledTime);
-            float screenAspect = Screen.width / (float)Mathf.Max(1, Screen.height);
-            if (screenAspect > BattlefieldFrame.Aspect)
-            {
-                float w = BattlefieldFrame.Aspect / screenAspect;
-                Renderer.Camera.rect = new Rect((1 - w) / 2, 0, w, 1);
-            }
-            else
-            {
-                float h = screenAspect / BattlefieldFrame.Aspect;
-                Renderer.Camera.rect = new Rect(0, (1 - h) / 2, 1, h);
-            }
             if (clock != null) clock.text = FormatHour(Hour);
             timeSlider?.SetValueWithoutNotify(Hour);
         }

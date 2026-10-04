@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using KingdomSurvival.BattlefieldDatabase;
-using KingdomSurvival.BattleSandbox;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -33,33 +32,37 @@ namespace KingdomSurvival.LocationRendering.Tests
         }
 
         [Test]
-        public void WorldAndCellCoordinatesRoundTrip()
+        public void WorldAndPixelCoordinatesRoundTrip()
         {
-            foreach (HexCoord cell in SandboxArenaShape.Cells())
+            LocalLocationDefinition location = new LocalLocationDefinition { CanvasWidth = 2400, CanvasHeight = 1200 };
+            Assert.That(LocationVisualGeometry.PixelToWorld(location, new Vector2(1200, 600)), Is.EqualTo(Vector2.zero));
+            Assert.That(LocationVisualGeometry.PixelToWorld(location, new Vector2(1200 + LocationVisualGeometry.PixelsPerUnit, 600)).x,
+                Is.EqualTo(1).Within(.0001f), "Единица мира — PixelsPerUnit пикселей рисунка.");
+            Assert.That(LocationVisualGeometry.PixelToWorld(location, new Vector2(1200, 0)).y, Is.GreaterThan(0), "Y рисунка вниз, Y мира вверх.");
+            foreach (Vector2 pixel in new[] { new Vector2(0, 0), new Vector2(2400, 1200), new Vector2(317, 905) })
             {
-                Vector2 world = LocationVisualGeometry.CellPosition(null, cell);
-                Assert.That(LocationVisualGeometry.TryCell(null, world, out HexCoord found), Is.True);
-                Assert.That(found, Is.EqualTo(cell));
-                Assert.That(Vector2.Distance(world, LocationVisualGeometry.ToWorld(LocationVisualGeometry.ToNormalized(world))), Is.LessThan(.0001f));
+                Vector2 world = LocationVisualGeometry.PixelToWorld(location, pixel);
+                Assert.That(Vector2.Distance(pixel, LocationVisualGeometry.WorldToPixel(location, world)), Is.LessThan(.001f));
+                Vector2 normalized = LocationVisualGeometry.ToNormalized(location, pixel);
+                Assert.That(Vector2.Distance(world, LocationVisualGeometry.ToWorld(location, normalized)), Is.LessThan(.0001f));
             }
         }
 
         [Test]
-        public void MovingFootprintMovesTheBlockedCellsAndUsesExistingNavigation()
+        public void MovingFootprintMovesTheObstacle()
         {
-            HexCoord a = new HexCoord(4, 3), b = new HexCoord(6, 3);
-            LocationVisualObject tent = new LocationVisualObject { BlocksMovement = true, Footprint = new Vector2(.5f, .5f),
-                Position = LocationVisualGeometry.ToNormalized(LocationVisualGeometry.CellPosition(null, a)) };
+            LocalLocationDefinition location = new LocalLocationDefinition();
+            Vector2 a = new Vector2(600, 500), b = new Vector2(1300, 500);
+            LocationVisualObject tent = new LocationVisualObject { BlocksMovement = true, Footprint = new Vector2(1, 1),
+                Position = LocationVisualGeometry.ToNormalized(location, a) };
             LocationVisualDefinition visual = new LocationVisualDefinition { Objects = new List<LocationVisualObject> { tent } };
-            List<HexCoord> first = LocationVisualGeometry.BlockedCells(visual, null);
-            CollectionAssert.Contains(first, a); CollectionAssert.DoesNotContain(first, b);
-            tent.Position = LocationVisualGeometry.ToNormalized(LocationVisualGeometry.CellPosition(null, b));
-            List<HexCoord> second = LocationVisualGeometry.BlockedCells(visual, null);
-            CollectionAssert.DoesNotContain(second, a); CollectionAssert.Contains(second, b);
-            LocalLocationGeometry geometry = new LocalLocationGeometry(new LocalLocationDefinition(), null, second);
-            Assert.That(geometry.IsPassable(a), Is.True); Assert.That(geometry.IsPassable(b), Is.False);
+            LocalLocationGeometry first = new LocalLocationGeometry(location, null, LocationVisualGeometry.BlockedAreas(visual, location));
+            Assert.That(first.IsPassable(a.x, a.y), Is.False); Assert.That(first.IsPassable(b.x, b.y), Is.True);
+            tent.Position = LocationVisualGeometry.ToNormalized(location, b);
+            LocalLocationGeometry second = new LocalLocationGeometry(location, null, LocationVisualGeometry.BlockedAreas(visual, location));
+            Assert.That(second.IsPassable(a.x, a.y), Is.True); Assert.That(second.IsPassable(b.x, b.y), Is.False);
             tent.Hidden = true;
-            Assert.That(LocationVisualGeometry.BlockedCells(visual, null), Is.Empty);
+            Assert.That(LocationVisualGeometry.BlockedAreas(visual, location), Is.Empty);
         }
 
         [Test]

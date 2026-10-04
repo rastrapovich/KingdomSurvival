@@ -3,10 +3,11 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 
-// ПР-12К (канон v1.53 §28.3, §28.9): ядро исследуемых мест и присутствия.
-// Бой на месте собирается только из присутствующих боеспособных, его итог
-// меняет место ровно один раз вместе с кампанией, отход ведёт к безопасной
-// точке, а состояние места переживает настоящий JsonUtility roundtrip.
+// ПР-12К (канон v1.54 §28.3, §28.9): ядро исследуемых мест и присутствия.
+// Место — точки рисунка; бой на месте собирается только из присутствующих
+// боеспособных, его итог меняет место ровно один раз вместе с кампанией,
+// отход ведёт к безопасной точке, а состояние места переживает настоящий
+// JsonUtility roundtrip.
 public sealed class LocalExplorationCoreTests
 {
     private const string TestLocationId = "test.local.cave";
@@ -35,18 +36,18 @@ public sealed class LocalExplorationCoreTests
             DisplayName = "Пещера",
             BattlefieldId = "test_cave"
         };
-        cave.Entrances.Add(new LocalEntranceDefinition { Id = "in", Cell = new LocalCellData(0, 3) });
-        cave.Objects.Add(new LocalObjectDefinition { Id = "pile", Kind = LocalObjectKind.Inspect, Text = "Куча.", Cell = new LocalCellData(2, 0) });
-        cave.Enemies.Add(new LocalEnemyDefinition { InstanceId = "cave.beast.1", UnitTypeId = "forest_beast", Cell = new LocalCellData(8, 2), EncounterId = EncounterId });
-        cave.Enemies.Add(new LocalEnemyDefinition { InstanceId = "cave.beast.2", UnitTypeId = "forest_beast", Cell = new LocalCellData(8, 4), EncounterId = EncounterId });
+        cave.Entrances.Add(new LocalEntranceDefinition { Id = "in", Point = new LocalPointData(300, 540) });
+        cave.Objects.Add(new LocalObjectDefinition { Id = "pile", Kind = LocalObjectKind.Inspect, Text = "Куча.", Point = new LocalPointData(500, 300) });
+        cave.Enemies.Add(new LocalEnemyDefinition { InstanceId = "cave.beast.1", UnitTypeId = "forest_beast", Point = new LocalPointData(1500, 400), EncounterId = EncounterId });
+        cave.Enemies.Add(new LocalEnemyDefinition { InstanceId = "cave.beast.2", UnitTypeId = "forest_beast", Point = new LocalPointData(1500, 700), EncounterId = EncounterId });
         LocalEncounterDefinition lair = new LocalEncounterDefinition
         {
             Id = EncounterId,
             BattleIdPrefix = "test.battle.cave.",
             AllowRetreat = true,
-            RetreatCell = new LocalCellData(1, 3)
+            TriggerArea = new LocalAreaData(1100, 300, 100, 500),
+            RetreatPoint = new LocalPointData(400, 540)
         };
-        lair.TriggerCells.Add(new LocalCellData(6, 3));
         cave.Encounters.Add(lair);
         return cave;
     }
@@ -72,6 +73,16 @@ public sealed class LocalExplorationCoreTests
             cells[id] = new LocalCellData(q++, 3);
         return cells;
     }
+
+    private static readonly Dictionary<string, LocalCellData> EnemyCells = new Dictionary<string, LocalCellData>
+    {
+        ["cave.beast.1"] = new LocalCellData(8, 2),
+        ["cave.beast.2"] = new LocalCellData(8, 4)
+    };
+
+    private static CampaignBattleRequest Request(GameState state, LocalLocationDefinition cave) =>
+        LocalExplorationService.BuildEncounterRequest(state, cave, cave.FindEncounter(EncounterId), CellsFor(state), EnemyCells,
+            new[] { new LocalCellData(2, 0) }, new[] { new LocalCellData(3, 3) });
 
     [Test]
     public void Enter_RequiresStandingAtTheEntrance()
@@ -99,8 +110,7 @@ public sealed class LocalExplorationCoreTests
         LocalLocationDefinition cave = LocalLocationCatalog.Find(TestLocationId);
         Assert.IsTrue(LocalExplorationService.Enter(state, cave, "in", out _));
 
-        CampaignBattleRequest request = LocalExplorationService.BuildEncounterRequest(
-            state, cave, cave.FindEncounter(EncounterId), CellsFor(state));
+        CampaignBattleRequest request = Request(state, cave);
 
         Assert.IsTrue(request.IsLocal);
         Assert.AreEqual(TestLocationId, request.LocalLocationId);
@@ -113,7 +123,9 @@ public sealed class LocalExplorationCoreTests
         Assert.IsTrue(request.Participants.All(p => p.HasCell));
         CollectionAssert.AreEquivalent(new[] { "cave.beast.1", "cave.beast.2" }, request.Enemies.Select(e => e.InstanceId));
         Assert.IsTrue(request.Enemies.All(e => e.HasCell && e.Count == 1));
-        CollectionAssert.Contains(request.BlockedCells.Select(c => c.Q * 100 + c.R).ToList(), 200, "Объект места непроходим и в бою.");
+        CollectionAssert.Contains(request.BlockedCells.Select(c => c.Q * 100 + c.R).ToList(), 200, "Стены кадра — из разметки места.");
+        CollectionAssert.Contains(request.DifficultCells.Select(c => c.Q * 100 + c.R).ToList(), 303);
+        Assert.IsTrue(request.IgnoreFieldDisabledCells, "Отключённые гексы поля в бою на месте не действуют.");
     }
 
     [Test]
@@ -124,8 +136,7 @@ public sealed class LocalExplorationCoreTests
         Assert.IsTrue(LocalExplorationService.Enter(state, cave, "in", out string reason), reason);
         Assert.AreEqual(1, state.LocalExploration.Party.Count, "Внутри только командир.");
 
-        CampaignBattleRequest request = LocalExplorationService.BuildEncounterRequest(
-            state, cave, cave.FindEncounter(EncounterId), CellsFor(state));
+        CampaignBattleRequest request = Request(state, cave);
         Assert.AreEqual(1, request.Participants.Count);
         Assert.IsTrue(request.Participants[0].IsHero && request.Participants[0].HasCell);
     }
@@ -136,8 +147,7 @@ public sealed class LocalExplorationCoreTests
         GameState state = NewStateAtCave(1);
         LocalLocationDefinition cave = LocalLocationCatalog.Find(TestLocationId);
         Assert.IsTrue(LocalExplorationService.Enter(state, cave, "in", out _));
-        CampaignBattleRequest request = LocalExplorationService.BuildEncounterRequest(
-            state, cave, cave.FindEncounter(EncounterId), CellsFor(state));
+        CampaignBattleRequest request = Request(state, cave);
         string hero = state.GetSelectedCommander().Id;
 
         CampaignBattleResult result = new CampaignBattleResult
@@ -147,7 +157,7 @@ public sealed class LocalExplorationCoreTests
             SourceKind = CampaignBattleSourceKind.Local,
             LocalLocationId = TestLocationId,
             EncounterId = EncounterId,
-            Survivors = new List<CampaignBattleSurvivor> { new CampaignBattleSurvivor { PersonId = hero, HitPoints = 5, HasCell = true, CellQ = 7, CellR = 3 } },
+            Survivors = new List<CampaignBattleSurvivor> { new CampaignBattleSurvivor { PersonId = hero, HitPoints = 5, HasPoint = true, PointX = 1300, PointY = 540 } },
             Enemies = new List<CampaignBattleEnemyRecord>
             {
                 new CampaignBattleEnemyRecord { UnitTypeId = "forest_beast", InstanceId = "cave.beast.1", Defeated = true },
@@ -162,9 +172,10 @@ public sealed class LocalExplorationCoreTests
 
         Assert.IsEmpty(LocalExplorationService.AliveEnemies(state, cave), "Побеждённые не появляются снова.");
         Assert.IsFalse(LocalExplorationService.IsEncounterActive(state, cave, cave.FindEncounter(EncounterId)));
-        Assert.IsNull(LocalExplorationService.EncounterAt(state, cave, 6, 3), "Зона угрозы больше не начинает бой.");
+        Assert.IsNull(LocalExplorationService.EncounterAt(state, cave, 1150, 540), "Зона угрозы больше не начинает бой.");
         LocalActorStateData heroActor = state.LocalExploration.Party.First(a => a.ActorId == hero);
-        Assert.AreEqual(7, heroActor.Q, "Выживший продолжает с того места, где закончил бой.");
+        Assert.AreEqual(1300, heroActor.X, "Выживший продолжает с того места, где закончил бой.");
+        Assert.AreEqual(540, heroActor.Y);
 
         LocalExplorationService.Exit(state);
         Assert.IsTrue(LocalExplorationService.Enter(state, cave, "in", out _));
@@ -177,8 +188,7 @@ public sealed class LocalExplorationCoreTests
         GameState state = NewStateAtCave(1);
         LocalLocationDefinition cave = LocalLocationCatalog.Find(TestLocationId);
         Assert.IsTrue(LocalExplorationService.Enter(state, cave, "in", out _));
-        CampaignBattleRequest request = LocalExplorationService.BuildEncounterRequest(
-            state, cave, cave.FindEncounter(EncounterId), CellsFor(state));
+        CampaignBattleRequest request = Request(state, cave);
         string hero = state.GetSelectedCommander().Id;
         int supply = state.ArmySupply;
 
@@ -189,11 +199,11 @@ public sealed class LocalExplorationCoreTests
             SourceKind = CampaignBattleSourceKind.Local,
             LocalLocationId = TestLocationId,
             EncounterId = EncounterId,
-            Survivors = new List<CampaignBattleSurvivor> { new CampaignBattleSurvivor { PersonId = hero, HitPoints = 6, HasCell = true, CellQ = 6, CellR = 3 } },
+            Survivors = new List<CampaignBattleSurvivor> { new CampaignBattleSurvivor { PersonId = hero, HitPoints = 6, HasPoint = true, PointX = 1150, PointY = 540 } },
             Enemies = new List<CampaignBattleEnemyRecord>
             {
                 new CampaignBattleEnemyRecord { InstanceId = "cave.beast.1", Defeated = true },
-                new CampaignBattleEnemyRecord { InstanceId = "cave.beast.2", HitPoints = 3, HasCell = true, CellQ = 6, CellR = 4 }
+                new CampaignBattleEnemyRecord { InstanceId = "cave.beast.2", HitPoints = 3, HasPoint = true, PointX = 1180, PointY = 600 }
             }
         };
         CampaignBattleBridge.ApplyResult(state, result, new List<string>());
@@ -201,14 +211,15 @@ public sealed class LocalExplorationCoreTests
 
         Assert.AreEqual(supply - CampaignBattleBridge.RetreatSupplyLoss, state.ArmySupply, "Цена отхода — один раз.");
         LocalActorStateData heroActor = state.LocalExploration.Party.First(a => a.ActorId == hero);
-        Assert.AreEqual(1, heroActor.Q, "Отряд у безопасной точки.");
-        Assert.AreEqual(3, heroActor.R);
-        Assert.IsNull(LocalExplorationService.EncounterAt(state, cave, heroActor.Q, heroActor.R), "Бой не начинается в следующем кадре.");
+        Assert.AreEqual(400, heroActor.X, "Отряд у безопасной точки.");
+        Assert.AreEqual(540, heroActor.Y);
+        Assert.IsNull(LocalExplorationService.EncounterAt(state, cave, heroActor.X, heroActor.Y), "Бой не начинается в следующем кадре.");
 
         List<LocalActorStateData> alive = LocalExplorationService.AliveEnemies(state, cave);
         Assert.AreEqual(1, alive.Count, "Убитый зверь не воскресает.");
         Assert.AreEqual(3, alive[0].HitPoints, "Раны остаются.");
-        Assert.AreEqual(8, alive[0].Q, "Выживший зверь вернулся в логово.");
+        Assert.AreEqual(1500, alive[0].X, "Выживший зверь вернулся в логово.");
+        Assert.AreEqual(700, alive[0].Y);
         Assert.IsTrue(LocalExplorationService.IsEncounterActive(state, cave, cave.FindEncounter(EncounterId)),
             "Незавершённая встреча допускает новый бой при осмысленном входе.");
         Assert.AreEqual("test.battle.cave.2", LocalExplorationService.NextBattleId(state, cave.FindEncounter(EncounterId)));
@@ -221,7 +232,7 @@ public sealed class LocalExplorationCoreTests
         LocalLocationDefinition cave = LocalLocationCatalog.Find(TestLocationId);
         Assert.IsTrue(LocalExplorationService.Enter(state, cave, "in", out _));
         string hero = state.GetSelectedCommander().Id;
-        LocalExplorationService.StorePartyPosition(state, hero, 4, 2, 3);
+        LocalExplorationService.StorePartyPosition(state, hero, 640, 420, 3);
         LocalExplorationService.MarkInteraction(state, cave, cave.FindObject("pile"));
 
         CampaignSaveData data = CampaignSaveService.ExportCampaign(state);
@@ -234,8 +245,8 @@ public sealed class LocalExplorationCoreTests
         Assert.IsTrue(LocalExplorationService.IsActive(restored));
         Assert.AreEqual(TestLocationId, restored.LocalExploration.ActiveLocalLocationId);
         LocalActorStateData heroActor = restored.LocalExploration.Party.First(a => a.ActorId == hero);
-        Assert.AreEqual(4, heroActor.Q);
-        Assert.AreEqual(2, heroActor.R);
+        Assert.AreEqual(640, heroActor.X);
+        Assert.AreEqual(420, heroActor.Y);
         Assert.AreEqual(3, heroActor.Facing);
         Assert.IsTrue(LocalExplorationService.IsObjectDone(restored, cave, cave.FindObject("pile")), "Однократное действие не повторяется после загрузки.");
         Assert.AreEqual(2, LocalExplorationService.AliveEnemies(restored, cave).Count);
@@ -274,5 +285,25 @@ public sealed class LocalExplorationCoreTests
         Assert.IsFalse(LocalExplorationService.IsActive(state));
         Assert.IsTrue(state.HasActiveExpedition, "Кампания цела.");
         Assert.IsNotEmpty(state.LocalExploration.PendingNotice);
+    }
+
+    [Test]
+    public void PositionsOutsideTheCanvas_AfterLoad_GoToTheEntrance()
+    {
+        GameState state = NewStateAtCave(1);
+        LocalLocationDefinition cave = LocalLocationCatalog.Find(TestLocationId);
+        Assert.IsTrue(LocalExplorationService.Enter(state, cave, "in", out _));
+        string hero = state.GetSelectedCommander().Id;
+
+        // Сохранение прежнего формата (клетки вместо точек): координат нет.
+        LocalExplorationService.StorePartyPosition(state, hero, 0, 0, 0);
+        LocalExplorationService.NormalizeAfterLoad(state);
+        LocalActorStateData actor = state.LocalExploration.Party.First(a => a.ActorId == hero);
+        Assert.AreEqual(300, actor.X);
+        Assert.AreEqual(540, actor.Y);
+
+        LocalExplorationService.StorePartyPosition(state, hero, 5000, 30, 0);
+        LocalExplorationService.NormalizeAfterLoad(state);
+        Assert.AreEqual(300, actor.X, "Точка за краем рисунка — к входу.");
     }
 }

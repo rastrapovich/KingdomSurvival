@@ -18,8 +18,8 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
         public override void OnInspectorGUI()
         {
             EditorGUILayout.HelpBox(
-                "Исследуемые места (ПР-12К). Фон, сетка и стены — у поля в Базе полей боя (BattlefieldId). " +
-                "Клетки — (Q, R) арены 7/8/9/10/9/8/7. Объект стоит на стене или краю, к нему подходят с соседней клетки.",
+                "Исследуемые места (ПР-12К, канон v1.54). Удобнее править в окне «Kingdom Survival → База локаций»: " +
+                "рисунок, разметка местности, точки мышью. Точки — пиксели рисунка места (Y вниз); сетка боя — у поля Базы полей боя.",
                 MessageType.Info);
             DrawDefaultInspector();
 
@@ -50,11 +50,10 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
                 if (location != null && !ids.Add(location.Id))
                     issues.Add("Повторный ID места: " + location.Id + ".");
                 LocationVisualDefinition visual = location != null ? asset.FindVisual(location.Id) : null;
-                BattlefieldDefinitionData field = location != null && battlefields != null ? battlefields.FindById(location.BattlefieldId) : null;
                 issues.AddRange(LocalLocationValidator.Validate(location, battlefields,
                     id => dialogues != null && dialogues.FindDialogue(id) != null,
                     id => units != null && units.FindById(id) != null,
-                    visual != null && field != null ? LocationVisualGeometry.BlockedCells(visual, field) : null));
+                    LocationVisualGeometry.BlockedAreas(visual, location)));
             }
         }
     }

@@ -78,6 +78,10 @@ public sealed class CampaignBattleSurvivor
     public bool HasCell;
     public int CellQ;
     public int CellR;
+    // Та же клетка как точка рисунка места (заполняет слой места).
+    public bool HasPoint;
+    public float PointX;
+    public float PointY;
 }
 
 // Канон v1.48 §27.3: что участник реально сделал в бою. Полученный урон
@@ -125,6 +129,9 @@ public sealed class CampaignBattleEnemyRecord
     public bool HasCell;
     public int CellQ;
     public int CellR;
+    public bool HasPoint;
+    public float PointX;
+    public float PointY;
 }
 
 [Serializable]
@@ -189,6 +196,10 @@ public sealed class CampaignBattleRequest
     // Клетки, занятые объектами места (кроме стен поля): в бою они так же
     // непроходимы, как при исследовании.
     public List<CampaignBattleCell> BlockedCells = new List<CampaignBattleCell>();
+    // ПР-12К (канон v1.54): бой на месте — кадр поля лежит на рисунке места,
+    // его стены задаёт разметка места (BlockedCells), а не отключённые гексы
+    // собственного рисунка поля.
+    public bool IgnoreFieldDisabledCells;
 
     public bool IsLocal => SourceKind == CampaignBattleSourceKind.Local;
 }

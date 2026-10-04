@@ -8,7 +8,9 @@ using KingdomSurvival.UnitDatabase;
 using NUnit.Framework;
 using UnityEngine;
 
-// ПР-12К (канон v1.53 §28.3, §28.6): пилот «Старая шахта» на локальной карте.
+// ПР-12К (канон v1.54 §28.3, §28.6): пилот «Старая шахта» на локальной карте.
+// Ходят по разметке рисунка, как по глобальной карте; бой — в кадре поля
+// old_mine_01, сетка и стены которого совпадают с прежним полем шахты.
 // Прежние итоги истории (железо, клеймо, логово, топор) идут через те же
 // флаги; бой — на месте с конкретными зверями; после победы и выхода
 // звери и железо не возвращаются; старое завершённое сохранение не
@@ -76,13 +78,19 @@ public sealed class FreePlayMineLocalTests
         return view;
     }
 
-    private static Dictionary<string, LocalCellData> CellsNearPassage(GameState state)
+    private static BattlefieldDatabaseAsset Battlefields() => Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
+
+    private static LocalLocationGeometry Geometry(LocalLocationDefinition mine) =>
+        new LocalLocationGeometry(mine, Battlefields().FindById(mine.BattlefieldId));
+
+    // Отряд у прохода в дальнюю штольню (точки рисунка).
+    private static List<KeyValuePair<string, Vector2>> PartyNearPassage(GameState state)
     {
-        LocalCellData[] cells = { new LocalCellData(6, 3), new LocalCellData(5, 3), new LocalCellData(5, 4), new LocalCellData(4, 3), new LocalCellData(4, 4) };
-        Dictionary<string, LocalCellData> result = new Dictionary<string, LocalCellData>();
+        Vector2[] points = { new Vector2(1150, 551), new Vector2(1000, 600), new Vector2(880, 551), new Vector2(880, 640), new Vector2(760, 551) };
+        List<KeyValuePair<string, Vector2>> result = new List<KeyValuePair<string, Vector2>>();
         int index = 0;
         foreach (string id in PartyPresence.BattleCandidateIds(state))
-            result[id] = cells[index++];
+            result.Add(new KeyValuePair<string, Vector2>(id, points[index++]));
         return result;
     }
 
@@ -108,6 +116,62 @@ public sealed class FreePlayMineLocalTests
         errors = Validate(mine);
         Assert.IsEmpty(errors, string.Join("\n", errors));
         Assert.IsTrue(mine.PlaceholderArt, "Фон шахты — заглушка, рисунка нет.");
+        Assert.AreEqual(LocalLocationDatabaseAsset.CurrentPointFormatVersion, asset.pointFormatVersion, "База в точках рисунка.");
+    }
+
+    // Кадр боя шахты закрывает весь рисунок: сетка — ровно настройки поля
+    // old_mine_01, стены боя совпадают с прежними отключёнными гексами,
+    // осыпи — прежние трудные клетки.
+    [Test]
+    public void MineArena_MatchesTheBattlefieldGrid_AndOldWalls()
+    {
+        LocalLocationDefinition mine = FreePlayMineLocal.Create();
+        BattlefieldDefinitionData field = Battlefields().FindById(mine.BattlefieldId);
+        LocalLocationGeometry geometry = Geometry(mine);
+        Vector2 center = geometry.ArenaCenterFor(mine.FindEncounter(FreePlayMineLocal.LairEncounterId), null);
+        Rect frame = geometry.FrameRect(center);
+        Assert.AreEqual(0, frame.x, 0.01);
+        Assert.AreEqual(0, frame.y, 0.01);
+        Assert.AreEqual(1920, frame.width, 0.01);
+        Assert.AreEqual(1080, frame.height, 0.01);
+        CollectionAssert.AreEquivalent(BattlefieldFrame.DisabledCells(field), geometry.ArenaBlockedCells(center));
+        CollectionAssert.AreEquivalent(new[] { new KingdomSurvival.BattleSandbox.HexCoord(2, 4), new KingdomSurvival.BattleSandbox.HexCoord(7, 1) },
+            geometry.ArenaDifficultCells(center));
+    }
+
+    // Движение как на глобальной карте: от входа к логову — только через
+    // проход в стенке, шаг за проход поднимает зверей.
+    [Test]
+    public void WalkFromTheEntrance_GoesThroughThePassage_IntoTheLair()
+    {
+        GameState state = AtMine(NewFreePlay(), "garrick");
+        LocalLocationDefinition mine = LocalLocationCatalog.ForWorldLocation(state, FreePlayMineStory.LocationId);
+        Assert.IsTrue(LocalExplorationService.Enter(state, mine, null, out _));
+        LocalLocationGeometry geometry = Geometry(mine);
+        LocalPointData start = mine.FindEntrance(null).Point;
+        LocalFreeMover mover = new LocalFreeMover(geometry.Layer, geometry.Rules,
+            new List<KeyValuePair<string, LocalPointData>> { new KeyValuePair<string, LocalPointData>("hero", start) }, 90);
+        Assert.IsTrue(mover.MoveLeaderTo(1355, 380));
+        LocalEncounterDefinition met = null;
+        for (int i = 0; i < 3000 && met == null && !mover.IsIdle; i++)
+        {
+            mover.Tick(1 / 60.0, out _);
+            LocalFreeMover.Member leader = mover.Leader;
+            Assert.IsTrue(geometry.IsPassable(leader.X, leader.Y));
+            if (leader.X > 940 && leader.X < 1060)
+                Assert.That(leader.Y, Is.InRange(500, 690), "Стенку проходят только через проход.");
+            met = LocalExplorationService.EncounterAt(state, mine, leader.X, leader.Y);
+        }
+        Assert.IsNotNull(met, "Шаг за проход поднимает зверей.");
+        Assert.AreEqual(FreePlayMineLocal.LairEncounterId, met.Id);
+
+        // Отвалы на стене — к ним подходят на расстояние действия.
+        mover.Place(new Dictionary<string, LocalPointData> { ["hero"] = start });
+        LocalPointData dumps = mine.FindObject(FreePlayMineLocal.DumpsObjectId).Point;
+        mover.MoveLeaderTo(dumps.X, dumps.Y);
+        for (int i = 0; i < 3000 && !mover.IsIdle; i++)
+            mover.Tick(1 / 60.0, out _);
+        Assert.LessOrEqual(dumps.DistanceTo(mover.Leader.X, mover.Leader.Y), mine.FindObject(FreePlayMineLocal.DumpsObjectId).InteractRadius);
     }
 
     // Основания предметов из Базы локаций — те же препятствия, что стены:
@@ -118,14 +182,14 @@ public sealed class FreePlayMineLocalTests
         BattlefieldDatabaseAsset battlefields = Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
         LocalLocationDefinition mine = FreePlayMineLocal.Create();
         List<string> errors = LocalLocationValidator.Validate(mine, battlefields, null, null,
-            new[] { new KingdomSurvival.BattleSandbox.HexCoord(0, 3) });
+            new[] { new Rect(330, 510, 80, 80) });
         Assert.IsTrue(errors.Any(error => error.Contains("вход")), string.Join("\n", errors));
 
         LocalLocationGeometry geometry = new LocalLocationGeometry(mine, battlefields.FindById(mine.BattlefieldId),
-            new[] { new KingdomSurvival.BattleSandbox.HexCoord(3, 3) });
-        Assert.IsFalse(geometry.IsPassable(new KingdomSurvival.BattleSandbox.HexCoord(3, 3)));
-        CollectionAssert.Contains(geometry.BlockedCells, new KingdomSurvival.BattleSandbox.HexCoord(3, 3),
-            "Бой на месте получает те же клетки.");
+            new[] { new Rect(730, 520, 64, 64) });
+        Assert.IsFalse(geometry.IsPassable(762, 551));
+        CollectionAssert.Contains(geometry.ArenaBlockedCells(new Vector2(960, 540)), new KingdomSurvival.BattleSandbox.HexCoord(3, 3),
+            "Бой на месте получает то же препятствие.");
     }
 
     [Test]
@@ -200,11 +264,15 @@ public sealed class FreePlayMineLocalTests
         GameState state = AtMine(NewFreePlay(), "garrick", CampRest.AgnessaId);
         LocalLocationDefinition mine = LocalLocationCatalog.ForWorldLocation(state, FreePlayMineStory.LocationId);
         Assert.IsTrue(LocalExplorationService.Enter(state, mine, null, out _));
-        LocalEncounterDefinition lair = LocalExplorationService.EncounterAt(state, mine, 6, 3);
+        LocalEncounterDefinition lair = LocalExplorationService.EncounterAt(state, mine, 1150, 551);
         Assert.IsNotNull(lair, "Шаг за проход поднимает зверей.");
-        Assert.IsNull(LocalExplorationService.EncounterAt(state, mine, 4, 3), "У входа тихо.");
+        Assert.IsNull(LocalExplorationService.EncounterAt(state, mine, 368, 551), "У входа тихо.");
 
-        CampaignBattleRequest request = LocalExplorationService.BuildEncounterRequest(state, mine, lair, CellsNearPassage(state));
+        Assert.IsTrue(Geometry(mine).TryBuildEncounterRequest(state, lair, PartyNearPassage(state),
+            out CampaignBattleRequest request, out Vector2 center, out string error), error);
+        Assert.AreEqual(new Vector2(960, 540), center, "Кадр боя шахты — весь рисунок.");
+        Assert.IsTrue(request.IgnoreFieldDisabledCells);
+        Assert.IsTrue(request.Participants.All(participant => participant.HasCell));
         Assert.IsTrue(request.IsLocal);
         Assert.AreEqual(FreePlayMineLocal.BattlefieldId, request.BattlefieldId);
         StringAssert.StartsWith(FreePlayMineStory.LairBattlePrefix, request.BattleId);
@@ -222,7 +290,7 @@ public sealed class FreePlayMineLocalTests
             LocalLocationId = mine.Id,
             EncounterId = lair.Id
         };
-        won.Survivors.Add(new CampaignBattleSurvivor { PersonId = state.GetSelectedCommander().Id, HitPoints = 10, HasCell = true, CellQ = 7, CellR = 3 });
+        won.Survivors.Add(new CampaignBattleSurvivor { PersonId = state.GetSelectedCommander().Id, HitPoints = 10, HasPoint = true, PointX = 1290, PointY = 551 });
         foreach (CampaignBattleEnemy enemy in request.Enemies)
             won.Enemies.Add(new CampaignBattleEnemyRecord { UnitTypeId = enemy.UnitTypeId, InstanceId = enemy.InstanceId, Defeated = true, MaxHitPoints = 10 });
         Assert.AreEqual(CampaignBattleApplyStatus.SquadSurvived, CampaignBattleBridge.ApplyResult(state, won, new List<string>()));
@@ -234,7 +302,7 @@ public sealed class FreePlayMineLocalTests
         LocalExplorationService.Exit(state);
         Assert.IsTrue(LocalExplorationService.Enter(state, mine, null, out _));
         Assert.IsEmpty(LocalExplorationService.AliveEnemies(state, mine), "Звери не возрождаются.");
-        Assert.IsNull(LocalExplorationService.EncounterAt(state, mine, 6, 3));
+        Assert.IsNull(LocalExplorationService.EncounterAt(state, mine, 1150, 551));
         Assert.IsTrue(LocalExplorationService.IsObjectAvailable(state, mine, mine.FindObject(FreePlayMineLocal.FaceObjectId)),
             "Сухой забой виден после очищения.");
         Assert.IsFalse(LocalExplorationService.IsObjectAvailable(state, mine, mine.FindObject(FreePlayMineLocal.SignsObjectId)));
@@ -255,6 +323,6 @@ public sealed class FreePlayMineLocalTests
         Assert.IsEmpty(LocalExplorationService.AliveEnemies(state, mine), "Очищенное логово не наполняется зверями.");
         Assert.IsFalse(LocalExplorationService.IsObjectAvailable(state, mine, mine.FindObject(FreePlayMineLocal.DumpsObjectId)),
             "Отвалы уже перебраны — железо не выдаётся второй раз.");
-        Assert.IsNull(LocalExplorationService.EncounterAt(state, mine, 6, 3));
+        Assert.IsNull(LocalExplorationService.EncounterAt(state, mine, 1150, 551));
     }
 }

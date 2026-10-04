@@ -65,7 +65,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Id = CampId, WorldLocationId = "__technical_lighting_camp", DisplayName = "Лагерь",
                     BattlefieldId = FieldId, PlaceholderArt = true,
                     Entrances = new List<LocalEntranceDefinition>
-                    { new LocalEntranceDefinition { Id = "camp_entry", Label = "Вход", Cell = new LocalCellData(4, 4) } }
+                    { new LocalEntranceDefinition { Id = "camp_entry", Label = "Вход", Point = new LocalPointData(960, 540) } }
                 });
                 EditorUtility.SetDirty(database);
             }

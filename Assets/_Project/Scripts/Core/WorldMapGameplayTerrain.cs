@@ -202,6 +202,7 @@ public sealed class WorldMapTerrainRule
 // Ядро читает только Current; ассет настроек WorldMapVisual подменяет его
 // при загрузке игры. Значения по умолчанию совпадают с исходным ассетом,
 // кроме TravelHoursPerHex: ядро без мира берёт прежний эталон 4 ч/клетку.
+[Serializable]
 public sealed class WorldMapMovementRules
 {
     public const float DefaultHeroRunSpeedHexesPerSecond = 2f;

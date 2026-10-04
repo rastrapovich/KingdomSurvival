@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using KingdomSurvival.BattlefieldDatabase;
-using KingdomSurvival.BattleSandbox;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -24,7 +23,8 @@ namespace KingdomSurvival.LocationRendering.Tests
             Scene scene = SceneManager.GetSceneByPath(path);
             LocationLightingTest test = scene.GetRootGameObjects()[0].GetComponent<LocationLightingTest>();
             Assert.That(test.Renderer, Is.Not.Null);
-            Assert.That(test.Mover.Members.Count, Is.EqualTo(3));
+            LocationVisualDefinition visual = Resources.Load<LocalLocationDatabaseAsset>(LocalLocationDatabaseAsset.ResourcesPath).FindVisual(test.LocationId);
+            Assert.That(test.Mover.Members.Count, Is.EqualTo(Mathf.Clamp(visual.TestFollowers + 1, 1, 5)));
             UIDocument hud = test.GetComponent<UIDocument>();
             Assert.That(hud.rootVisualElement.Q("location-lighting-playfield"), Is.Not.Null);
             Slider slider = hud.rootVisualElement.Q<Slider>();
@@ -50,12 +50,14 @@ namespace KingdomSurvival.LocationRendering.Tests
                 target.Create(); renderer.Camera.targetTexture = target;
                 renderer.SetTime(13, 0);
                 float day = renderer.GlobalLight.intensity;
-                List<HexCoord> cells = new List<HexCoord>(renderer.Geometry.Region(new HexCoord(4, 4)));
-                Assert.That(cells.Count, Is.GreaterThan(5));
-                List<KeyValuePair<string, HexCoord>> members = new List<KeyValuePair<string, HexCoord>>();
-                for (int i = 0; i < 3; i++) members.Add(new KeyValuePair<string, HexCoord>("test_" + i, cells[i]));
-                LocalPartyMover mover = new LocalPartyMover(renderer.Geometry.IsPassable, renderer.Geometry.StepCost, members);
-                renderer.AddTestActors(3); renderer.RenderActors(mover.Members, 0);
+                Vector2 start = LocationVisualGeometry.ToPixel(location, visual.TestStartPoint);
+                float spacing = renderer.HexSizePixels * 1.2f;
+                List<LocalPointData> points = renderer.Geometry.SpreadAround(new LocalPointData(start.x, start.y), 3, spacing);
+                List<KeyValuePair<string, LocalPointData>> members = new List<KeyValuePair<string, LocalPointData>>();
+                for (int i = 0; i < 3; i++) members.Add(new KeyValuePair<string, LocalPointData>("test_" + i, points[i]));
+                LocalFreeMover mover = new LocalFreeMover(renderer.Geometry.Layer, renderer.Geometry.Rules, members, spacing);
+                Render(renderer, mover, visual, 0);
+                Assert.That(renderer.HasActor("test_2"), Is.True);
                 yield return null; yield return null;
                 Color dayPixel = SaveFrame(target, "camp-day");
                 renderer.SetTime(1, 0);
@@ -63,15 +65,17 @@ namespace KingdomSurvival.LocationRendering.Tests
                 yield return null; yield return null;
                 Color nightPixel = SaveFrame(target, "camp-night");
                 Assert.That(dayPixel.grayscale, Is.GreaterThan(nightPixel.grayscale + .03f), "Фон должен действительно темнеть в отрендеренном кадре.");
-                HexCoord destination = cells[cells.Count - 1];
-                Assert.That(mover.MoveLeaderTo(destination), Is.True);
+                // Через весь лагерь, в обход палаток и костра.
+                Vector2 destination = new Vector2(location.CanvasWidth * .85f, location.CanvasHeight * .5f);
+                Assert.That(renderer.Geometry.IsPassable(destination.x, destination.y), Is.True);
+                Assert.That(mover.MoveLeaderTo(destination.x, destination.y), Is.True);
                 for (int i = 0; i < 800 && (!mover.IsIdle || !mover.IsGathered); i++)
                 {
-                    mover.Tick(.1f); renderer.RenderActors(mover.Members, i * .1f);
-                    foreach (LocalPartyMover.Member member in mover.Members)
-                        Assert.That(renderer.Geometry.IsPassable(member.SettledCell), Is.True);
+                    mover.Tick(.1f, out _); Render(renderer, mover, visual, i * .1f);
+                    foreach (LocalFreeMover.Member member in mover.Members)
+                        Assert.That(renderer.Geometry.IsPassable(member.X, member.Y), Is.True);
                 }
-                Assert.That(mover.Leader.Cell, Is.EqualTo(destination));
+                Assert.That(Vector2.Distance(destination, new Vector2((float)mover.Leader.X, (float)mover.Leader.Y)), Is.LessThan(1f));
                 renderer.Camera.targetTexture = null;
                 Object.Destroy(target);
             }
@@ -100,6 +104,15 @@ namespace KingdomSurvival.LocationRendering.Tests
             }
             Object.Destroy(burned); Object.Destroy(texture);
             yield return null;
+        }
+
+        private static void Render(LocationWorldRenderer renderer, LocalFreeMover mover, LocationVisualDefinition visual, float seconds)
+        {
+            List<LocationWorldRenderer.ActorFrame> frames = new List<LocationWorldRenderer.ActorFrame>();
+            foreach (LocalFreeMover.Member member in mover.Members)
+                frames.Add(new LocationWorldRenderer.ActorFrame { Id = member.Id, UnitTypeId = visual.TestUnitId,
+                    Pixel = new Vector2((float)member.X, (float)member.Y), Direction = new Vector2((float)member.DirectionX, (float)member.DirectionY), Walking = member.Walking });
+            renderer.SetActors(frames, seconds);
         }
 
         private static Color SaveFrame(RenderTexture target, string name)

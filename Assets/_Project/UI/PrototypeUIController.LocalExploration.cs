@@ -1,21 +1,34 @@
 using System.Collections.Generic;
+using KingdomSurvival.AnimationDatabase;
 using KingdomSurvival.BattlefieldDatabase;
 using KingdomSurvival.BattleSandbox;
 using KingdomSurvival.DialogueDatabase;
+using KingdomSurvival.LocationRendering;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-// ПР-12К (канон v1.53 §28.3): исследуемое место на локальной карте.
-// Командир ходит кликом, видимые спутники идут следом; объекты открывают
-// существующие диалоги; шаг в зону угрозы начинает бой здесь же, на том же
-// поле (BattleSandboxController.HostLocalBattle), после боя исследование
+// ПР-12К (канон v1.54 §28.3): исследуемое место на локальной карте.
+// Движение — то же, что на глобальной карте: клик ведёт командира по
+// разметке местности с обходом, зажатая кнопка — за курсором, спутники идут
+// следом по его следу; клеток нет. Рисунок места рисует общий рендерер Базы
+// локаций (LocationWorldRenderer) в текстуру экрана. Объекты открывают
+// существующие диалоги; вход в зону угрозы начинает бой здесь же: кадр поля
+// из Базы полей боя ложится на рисунок, сетка — ровно настройки этого поля,
+// стены боя — непроходимое под клетками. После боя исследование
 // продолжается. Состояние — в GameState.LocalExploration (Core); здесь
-// только показ и команды. Время идёт шагами и действиями через общие часы.
+// только показ и команды. Время идёт пройденным путём и действиями.
 //
 // Места без локальной карты по-прежнему открывают Location Interaction;
 // место с локальной картой не показывает текстовый вход.
 public partial class PrototypeUIController
 {
+    // Видимая высота рисунка (пиксели) при обычном приближении.
+    private const float LocalDefaultViewHeight = 1080f;
+    // Командир у входа — можно выходить (пиксели рисунка).
+    private const float LocalExitRadius = 56f;
+    // Мелкие отрезки времени копятся до минуты, чтобы не дёргать симуляцию.
+    private const double LocalMinHoursStep = 1.0 / 60.0;
+
     private VisualElement localScreen;
     private VisualElement localField;
     private VisualElement localHud;
@@ -29,22 +42,33 @@ public partial class PrototypeUIController
 
     private GameState localBoundState;
     private LocalLocationDefinition localDefinition;
+    private LocationWorldRenderer localRenderer;
     private LocalLocationGeometry localGeometry;
-    private LocalExplorationView localView;
+    private LocalFreeMover localMover;
+    private Image localImage;
+    private VisualElement localOverlay;
+    private VisualElement localClickMarker;
+    private readonly Dictionary<string, Label> localObjectLabels = new Dictionary<string, Label>();
     private VisualElement localBattleHost;
-    private LocalPartyMover localMover;
     private BattleSandboxController localBattle;
+    private Vector2 localArenaCenter;
 
     private string localPendingObjectId;
     private bool localPendingExit;
     private LocalEncounterDefinition localPendingEncounter;
     private bool localBattleRequested;
     private float localNoticeUntil;
+    private float localClickMarkerUntil;
+    private Vector2 localClickMarkerPoint;
     private string localPartySignature;
+    private double localPendingHours;
+    private float localZoom = 1f;
+    private bool localHolding;
+    private Vector2 localHeldPoint;
     // Номер показа места: колбэки прежнего показа (бой, загрузка) не действуют.
     private int localGeneration;
 
-    private bool IsLocalScreenOpen => localView != null;
+    private bool IsLocalScreenOpen => localRenderer != null;
     private bool IsLocalBattleRunning => localBattle != null;
 
     // ------------------------------------------------------------------
@@ -65,7 +89,7 @@ public partial class PrototypeUIController
         DialogueDatabaseAsset dialogues = DialogueDatabaseRuntime.LoadDefaultDatabase();
         List<string> errors = LocalLocationValidator.Validate(definition, battlefields,
             id => dialogues != null && dialogues.FindDialogue(id) != null, null,
-            VisualBlockedCells(definition, battlefields?.FindById(definition.BattlefieldId)));
+            LocationVisualGeometry.BlockedAreas(FindLocalVisual(definition), definition));
         if (errors.Count > 0)
         {
             Debug.LogError("Исследуемое место «" + definition.DisplayName + "» с ошибками данных:\n" + string.Join("\n", errors));
@@ -81,6 +105,12 @@ public partial class PrototypeUIController
         AddReport("Отряд вошёл: " + definition.DisplayName + ".");
         Autosave();
         return true;
+    }
+
+    private static LocationVisualDefinition FindLocalVisual(LocalLocationDefinition definition)
+    {
+        LocalLocationDatabaseAsset database = Resources.Load<LocalLocationDatabaseAsset>(LocalLocationDatabaseAsset.ResourcesPath);
+        return database != null && definition != null ? database.FindVisual(definition.Id) : null;
     }
 
     // ------------------------------------------------------------------
@@ -117,8 +147,15 @@ public partial class PrototypeUIController
                 return;
             OpenLocalScreen();
         }
-        if (!IsLocalScreenOpen || IsLocalBattleRunning)
+        if (!IsLocalScreenOpen)
             return;
+
+        if (IsLocalBattleRunning)
+        {
+            AlignLocalBattleCamera();
+            RenderLocalWorld();
+            return;
+        }
 
         bool blocked = HasBlockingModalWork() || IsNarrativeDialogueActive;
         if (!blocked)
@@ -132,34 +169,48 @@ public partial class PrototypeUIController
                 return;
             }
 
-            foreach (HexCoord cell in localMover.Tick(Mathf.Min(deltaSeconds, 0.1f)))
-            {
-                OnLocalLeaderEnteredCell(cell);
-                if (localPendingEncounter != null || IsLocalBattleRunning || !IsLocalScreenOpen)
-                    return;
-            }
+            localMover.Tick(Mathf.Min(deltaSeconds, 0.1f), out double hours);
+            AddLocalHours(hours, false);
+            if (!IsLocalScreenOpen)
+                return;
+            CheckLocalEncounter();
+            if (localPendingEncounter != null || IsLocalBattleRunning || !IsLocalScreenOpen)
+                return;
             StoreLocalPositions();
             TryCompleteLocalPendingAction();
+            if (!IsLocalScreenOpen)
+                return;
         }
 
         RenderLocalExploration();
     }
 
-    private void OnLocalLeaderEnteredCell(HexCoord cell)
+    // Время места — пройденным путём, как на глобальной карте (свои числа у
+    // каждого места): мелкие отрезки копятся до минуты.
+    private void AddLocalHours(double hours, bool flush)
     {
-        // Время места: шаг стоит своих минут (трудная клетка — дороже).
-        double hours = localDefinition.HoursPerCell * localGeometry.StepCost(cell);
-        ContinuousSimulationBatch batch = ContinuousSimulationSystem.AdvanceLocalHours(gameState, hours);
+        localPendingHours += hours;
+        if (localPendingHours <= 0 || (!flush && localPendingHours < LocalMinHoursStep))
+            return;
+        double advance = localPendingHours;
+        localPendingHours = 0;
+        ContinuousSimulationBatch batch = ContinuousSimulationSystem.AdvanceLocalHours(gameState, advance);
         if (batch.HasReportableContent)
             ProcessContinuousSimulationBatch(batch);
+    }
 
-        LocalEncounterDefinition encounter = LocalExplorationService.EncounterAt(gameState, localDefinition, cell.Q, cell.R);
+    private void CheckLocalEncounter()
+    {
+        LocalFreeMover.Member leader = localMover.Leader;
+        LocalEncounterDefinition encounter = LocalExplorationService.EncounterAt(gameState, localDefinition, leader.X, leader.Y);
         if (encounter == null)
             return;
 
         // Зона угрозы: движение и следование останавливаются, позиции
         // фиксируются; бой — один раз, после вступительной реплики.
         localMover.Stop();
+        localHolding = false;
+        AddLocalHours(0, true);
         localPendingObjectId = null;
         localPendingExit = false;
         localPendingEncounter = encounter;
@@ -185,30 +236,102 @@ public partial class PrototypeUIController
         !IsLocalScreenOpen || IsLocalBattleRunning || localPendingEncounter != null ||
         HasBlockingModalWork() || IsNarrativeDialogueActive;
 
-    private void OnLocalCellClicked(HexCoord cell)
+    private bool TryLocalPointAt(Vector2 localPosition, out Vector2 point)
+    {
+        point = default;
+        Rect bounds = localImage.contentRect;
+        if (bounds.width < 1f || bounds.height < 1f)
+            return false;
+        point = localRenderer.ViewportToPixel(new Vector2(localPosition.x / bounds.width, localPosition.y / bounds.height));
+        return point.x >= 0 && point.y >= 0 && point.x <= localDefinition.CanvasWidth && point.y <= localDefinition.CanvasHeight;
+    }
+
+    private void OnLocalPointerDown(PointerDownEvent evt)
+    {
+        if (evt.button != 0 || !TryLocalPointAt(evt.localPosition, out Vector2 point))
+            return;
+        OnLocalGroundClicked(point);
+        localHolding = !LocalCommandsBlocked;
+        localHeldPoint = point;
+        if (localHolding)
+            localImage.CapturePointer(evt.pointerId);
+    }
+
+    // Зажатая кнопка: командир идёт за курсором; в стену — просто не меняем цель.
+    private void OnLocalPointerMove(PointerMoveEvent evt)
+    {
+        if (!localHolding)
+            return;
+        if ((evt.pressedButtons & 1) == 0)
+        {
+            StopLocalHolding(evt.pointerId);
+            return;
+        }
+        if (TryLocalPointAt(evt.localPosition, out Vector2 point) && (point - localHeldPoint).sqrMagnitude >= 64f)
+            OnLocalHeldAt(point);
+    }
+
+    private void OnLocalHeldAt(Vector2 point)
+    {
+        if (LocalCommandsBlocked || !localMover.IsPassable(point.x, point.y))
+            return;
+        localHeldPoint = point;
+        localPendingObjectId = null;
+        localPendingExit = IsAtLocalEntrance(point);
+        localMover.MoveLeaderTo(point.x, point.y);
+    }
+
+    private void OnLocalPointerUp(PointerUpEvent evt) => StopLocalHolding(evt.pointerId);
+
+    private void StopLocalHolding(int pointerId)
+    {
+        localHolding = false;
+        if (localImage != null && localImage.HasPointerCapture(pointerId))
+            localImage.ReleasePointer(pointerId);
+    }
+
+    private void OnLocalWheel(WheelEvent evt)
+    {
+        localZoom = Mathf.Clamp(localZoom * (evt.delta.y > 0 ? 0.9f : 1.1f), 0.6f, 1.8f);
+        evt.StopPropagation();
+    }
+
+    private void OnLocalGroundClicked(Vector2 point)
     {
         if (LocalCommandsBlocked)
             return;
+        // Клик по объекту (рядом с его точкой) — подойти и действовать.
+        LocalObjectDefinition item = LocalObjectNear(point);
+        if (item != null)
+        {
+            OnLocalObjectClicked(item.Id);
+            return;
+        }
         localPendingObjectId = null;
-        LocalEntranceDefinition entrance = localDefinition.FindEntrance(gameState.LocalExploration.EntranceId);
-        localPendingExit = entrance != null && entrance.Cell.Is(cell.Q, cell.R);
-        if (!localMover.MoveLeaderTo(cell))
+        localPendingExit = IsAtLocalEntrance(point);
+        if (!localMover.MoveLeaderTo(point.x, point.y))
         {
             ShowLocalNotice("Туда не пройти.");
             return;
         }
-        localView.ShowClickMarker(cell);
+        ShowLocalClickMarker(point);
     }
 
-    // Зажатая кнопка: командир идёт за курсором; в стену — просто не меняем цель.
-    private void OnLocalCellHeld(HexCoord cell)
+    private LocalObjectDefinition LocalObjectNear(Vector2 point)
     {
-        if (LocalCommandsBlocked || !localGeometry.IsPassable(cell))
-            return;
-        localPendingObjectId = null;
+        float radius = localRenderer.HexSizePixels * 0.6f;
+        foreach (LocalObjectDefinition item in localDefinition.Objects)
+        {
+            if (LocalExplorationService.IsObjectVisible(gameState, item) && item.Point.DistanceTo(point.x, point.y) <= radius)
+                return item;
+        }
+        return null;
+    }
+
+    private bool IsAtLocalEntrance(Vector2 point)
+    {
         LocalEntranceDefinition entrance = localDefinition.FindEntrance(gameState.LocalExploration.EntranceId);
-        localPendingExit = entrance != null && entrance.Cell.Is(cell.Q, cell.R);
-        localMover.MoveLeaderTo(cell);
+        return entrance != null && entrance.Point.DistanceTo(point.x, point.y) <= LocalExitRadius;
     }
 
     private void OnLocalObjectClicked(string objectId)
@@ -225,32 +348,20 @@ public partial class PrototypeUIController
         }
 
         localPendingExit = false;
-        HexCoord leader = localMover.Leader.SettledCell;
-        List<HexCoord> spots = localGeometry.InteractionCells(item);
-        if (spots.Contains(leader) && !localMover.LeaderHasOrder)
+        LocalFreeMover.Member leader = localMover.Leader;
+        if (item.Point.DistanceTo(leader.X, leader.Y) <= item.InteractRadius && !localMover.LeaderHasOrder)
         {
             PerformLocalObject(item);
             return;
         }
-
-        HexCoord? best = null;
-        int bestLength = int.MaxValue;
-        foreach (HexCoord spot in spots)
-        {
-            List<HexCoord> path = localGeometry.FindPath(leader, spot);
-            if (path.Count > 0 && path.Count < bestLength)
-            {
-                best = spot;
-                bestLength = path.Count;
-            }
-        }
-        if (best == null || !localMover.MoveLeaderTo(best.Value))
+        // Объект может стоять на стене: путь ведёт к ближайшей доступной точке.
+        if (!localMover.MoveLeaderTo(item.Point.X, item.Point.Y))
         {
             ShowLocalNotice("К этому не подойти.");
             return;
         }
         localPendingObjectId = item.Id;
-        localView.ShowClickMarker(best.Value);
+        ShowLocalClickMarker(new Vector2(item.Point.X, item.Point.Y));
     }
 
     private void OnLocalExitClicked()
@@ -261,45 +372,50 @@ public partial class PrototypeUIController
         if (entrance == null)
             return;
         localPendingObjectId = null;
-        HexCoord cell = LocalLocationGeometry.Cell(entrance.Cell);
-        if (localMover.Leader.Cell == cell && !localMover.LeaderHasOrder)
+        LocalFreeMover.Member leader = localMover.Leader;
+        if (entrance.Point.DistanceTo(leader.X, leader.Y) <= LocalExitRadius && !localMover.LeaderHasOrder)
         {
             localPendingExit = true;
             return;
         }
-        if (!localMover.MoveLeaderTo(cell))
+        if (!localMover.MoveLeaderTo(entrance.Point.X, entrance.Point.Y))
         {
             ShowLocalNotice("К выходу не пройти.");
             return;
         }
         localPendingExit = true;
-        localView.ShowClickMarker(cell);
+        ShowLocalClickMarker(new Vector2(entrance.Point.X, entrance.Point.Y));
     }
 
     private void TryCompleteLocalPendingAction()
     {
         if (localMover.LeaderHasOrder)
             return;
+        LocalFreeMover.Member leader = localMover.Leader;
 
         if (!string.IsNullOrEmpty(localPendingObjectId))
         {
             LocalObjectDefinition item = localDefinition.FindObject(localPendingObjectId);
             localPendingObjectId = null;
-            if (item != null && localGeometry.InteractionCells(item).Contains(localMover.Leader.Cell))
+            if (item == null)
+                return;
+            if (item.Point.DistanceTo(leader.X, leader.Y) <= item.InteractRadius)
                 PerformLocalObject(item);
+            else
+                ShowLocalNotice("К этому не подойти.");
             return;
         }
 
         if (localPendingExit)
         {
             LocalEntranceDefinition entrance = localDefinition.FindEntrance(gameState.LocalExploration.EntranceId);
-            if (entrance == null || !entrance.Cell.Is(localMover.Leader.Cell.Q, localMover.Leader.Cell.R))
+            if (entrance == null || entrance.Point.DistanceTo(leader.X, leader.Y) > LocalExitRadius)
             {
                 localPendingExit = false;
                 return;
             }
             // Перед выходом группа собирается физически.
-            if (!localMover.IsGathered)
+            if (!localMover.IsGathered || !localMover.IsIdle)
             {
                 ShowLocalNotice("Отряд собирается у выхода…");
                 return;
@@ -327,15 +443,14 @@ public partial class PrototypeUIController
             AddReport(item.Label + ": " + item.Text);
         }
         LocalExplorationService.MarkInteraction(gameState, localDefinition, item);
-        ContinuousSimulationBatch batch = ContinuousSimulationSystem.AdvanceLocalHours(gameState, localDefinition.HoursPerInteraction);
-        if (batch.HasReportableContent)
-            ProcessContinuousSimulationBatch(batch);
+        AddLocalHours(localDefinition.HoursPerInteraction, true);
         RefreshLocalObjects();
     }
 
     private void LeaveLocalExploration()
     {
         string name = localDefinition.DisplayName;
+        AddLocalHours(0, true);
         StoreLocalPositions();
         LocalExplorationService.Exit(gameState);
         CloseLocalScreen();
@@ -353,39 +468,29 @@ public partial class PrototypeUIController
         if (!LocalExplorationService.IsEncounterActive(gameState, localDefinition, encounter))
             return;
 
-        // Позиции: каждый боец — на ближайшую свободную клетку со своей
-        // стороны стены; клетки противников заняты.
-        HashSet<HexCoord> reserved = new HashSet<HexCoord>();
-        foreach (LocalActorStateData enemy in LocalExplorationService.AliveEnemies(gameState, localDefinition))
-            reserved.Add(new HexCoord(enemy.Q, enemy.R));
+        // Кадр поля ложится на рисунок; каждый боец — на ближайшую свободную
+        // клетку кадра со своей стороны стены, клетки противников заняты.
         List<string> candidates = PartyPresence.BattleCandidateIds(gameState);
-        List<KeyValuePair<string, HexCoord>> preferred = new List<KeyValuePair<string, HexCoord>>();
-        foreach (LocalPartyMover.Member member in localMover.Members)
+        List<KeyValuePair<string, Vector2>> party = new List<KeyValuePair<string, Vector2>>();
+        foreach (LocalFreeMover.Member member in localMover.Members)
         {
             if (candidates.Contains(member.Id))
-                preferred.Add(new KeyValuePair<string, HexCoord>(member.Id, member.SettledCell));
+                party.Add(new KeyValuePair<string, Vector2>(member.Id, new Vector2((float)member.X, (float)member.Y)));
         }
-        if (!SandboxLocalNavigation.TryAssignCells(preferred, localGeometry.IsPassable, reserved, out Dictionary<string, HexCoord> assigned))
+        if (!localGeometry.TryBuildEncounterRequest(gameState, encounter, party,
+                out CampaignBattleRequest request, out Vector2 arenaCenter, out string buildError))
         {
-            Debug.LogError("Бой на месте: не хватило клеток для отряда — бой не начат.");
+            Debug.LogError("Бой на месте не начат: " + buildError);
             ShowLocalNotice("Здесь не развернуться для боя.");
             return;
         }
 
-        // ПР-04: предбоевая точка возврата — до сборки запроса.
+        // ПР-04: предбоевая точка возврата — до показа боя.
+        AddLocalHours(0, true);
         Autosave();
 
-        Dictionary<string, LocalCellData> cells = new Dictionary<string, LocalCellData>();
-        foreach (KeyValuePair<string, HexCoord> entry in assigned)
-            cells[entry.Key] = new LocalCellData(entry.Value.Q, entry.Value.R);
-        CampaignBattleRequest request = LocalExplorationService.BuildEncounterRequest(gameState, localDefinition, encounter, cells);
-        // Та же проходимость, что при исследовании: стены поля, объекты места и
-        // основания предметов художественной сборки (База локаций).
-        foreach (HexCoord blocked in localGeometry.BlockedCells)
-            request.BlockedCells.Add(new CampaignBattleCell { Q = blocked.Q, R = blocked.R });
-
         // Небоевые остаются в безопасной точке — не исчезают без объяснения.
-        foreach (LocalPartyMover.Member member in localMover.Members)
+        foreach (LocalFreeMover.Member member in localMover.Members)
         {
             if (candidates.Contains(member.Id))
                 continue;
@@ -393,7 +498,8 @@ public partial class PrototypeUIController
             string who = resident != null ? resident.DisplayName : member.Id;
             request.Notes.Add(who + " держится у выхода: " +
                               PartyPresence.BattleExclusionReason(gameState, member.Id).ToLowerInvariant() + ".");
-            LocalExplorationService.StorePartyPosition(gameState, member.Id, encounter.RetreatCell.Q, encounter.RetreatCell.R, member.Facing);
+            LocalExplorationService.StorePartyPosition(gameState, member.Id, encounter.RetreatPoint.X, encounter.RetreatPoint.Y,
+                (int)LocationWorldRenderer.FacingFrom(new Vector2((float)member.DirectionX, (float)member.DirectionY)));
         }
 
         localBattleHost = new VisualElement { name = "local-battle-host" };
@@ -415,9 +521,32 @@ public partial class PrototypeUIController
             return;
         }
 
+        localArenaCenter = arenaCenter;
         CampaignSession.EnterBattle(request);
-        localView.style.display = DisplayStyle.None;
+        // Фигуры боя рисует поле боя; рисунок места остаётся под ним.
+        localRenderer.ActorsVisible = false;
+        localOverlay.style.display = DisplayStyle.None;
         localHud.style.display = DisplayStyle.None;
+        AlignLocalBattleCamera();
+    }
+
+    // Камера места совмещает кадр арены на рисунке с кадром поля боя на
+    // экране: фон и клетки при начале боя не сдвигаются.
+    private void AlignLocalBattleCamera()
+    {
+        BattlefieldView surface = localBattle?.BattlefieldSurface;
+        if (surface == null || localImage == null)
+            return;
+        Rect image = localImage.worldBound;
+        Rect frame = surface.FrameRect;
+        if (image.width < 1f || image.height < 1f || frame.width < 1f)
+            return;
+        Vector2 min = surface.LocalToWorld(frame.min);
+        Vector2 max = surface.LocalToWorld(frame.max);
+        Rect viewport = Rect.MinMaxRect(
+            (min.x - image.x) / image.width, (min.y - image.y) / image.height,
+            (max.x - image.x) / image.width, (max.y - image.y) / image.height);
+        localRenderer.AlignFrame(localGeometry.FrameRect(localArenaCenter), viewport);
     }
 
     private void OnLocalBattleFinished(CampaignBattleResult result, int generation)
@@ -429,6 +558,8 @@ public partial class PrototypeUIController
         if (generation != localGeneration || gameState == null || localBoundState != gameState)
             return;
 
+        // Клетки, где закончили бой, — обратно в точки рисунка места.
+        localGeometry.WritePoints(result, localArenaCenter);
         CampaignSession.CompleteBattle(result);
         if (!ApplyReturnedCampaignBattle())
         {
@@ -438,7 +569,8 @@ public partial class PrototypeUIController
 
         // Исследование продолжается на том же месте: выжившие там, где
         // закончили бой; при отходе — у безопасной точки; павших нет.
-        localView.style.display = DisplayStyle.Flex;
+        localRenderer.ActorsVisible = true;
+        localOverlay.style.display = DisplayStyle.Flex;
         localHud.style.display = DisplayStyle.Flex;
         RebuildLocalMover();
         RefreshLocalObjects();
@@ -479,6 +611,7 @@ public partial class PrototypeUIController
             : null;
         if (localDefinition == null || field == null)
         {
+            localDefinition = null;
             LocalExplorationService.Exit(gameState);
             AddReport("Место недоступно — отряд снаружи, у входа.");
             return;
@@ -486,13 +619,39 @@ public partial class PrototypeUIController
 
         localGeneration++;
         localBoundState = gameState;
-        localGeometry = new LocalLocationGeometry(localDefinition, field, VisualBlockedCells(localDefinition, field));
-        localView = new LocalExplorationView(field, battlefields.GetHexStyle(field));
-        localView.CellClicked += OnLocalCellClicked;
-        localView.CellHeld += OnLocalCellHeld;
-        localView.ObjectClicked += OnLocalObjectClicked;
+        localRenderer = new LocationWorldRenderer(localDefinition, FindLocalVisual(localDefinition), field);
+        // Мир места — вдали от сцены глобальной карты: её камера его не видит.
+        localRenderer.Root.transform.position = new Vector3(10000f, 10000f, 0f);
+        localRenderer.SuppressOtherGlobalLights();
+        localGeometry = localRenderer.Geometry;
+
         localField.Clear();
-        localField.Add(localView);
+        localImage = new Image { name = "local-exploration-image", scaleMode = ScaleMode.StretchToFill };
+        localImage.style.position = Position.Absolute;
+        localImage.style.left = 0f;
+        localImage.style.right = 0f;
+        localImage.style.top = 0f;
+        localImage.style.bottom = 0f;
+        localImage.RegisterCallback<PointerDownEvent>(OnLocalPointerDown);
+        localImage.RegisterCallback<PointerMoveEvent>(OnLocalPointerMove);
+        localImage.RegisterCallback<PointerUpEvent>(OnLocalPointerUp);
+        localImage.RegisterCallback<WheelEvent>(OnLocalWheel);
+        localField.Add(localImage);
+
+        localOverlay = new VisualElement { name = "local-exploration-overlay", pickingMode = PickingMode.Ignore };
+        localOverlay.style.position = Position.Absolute;
+        localOverlay.style.left = 0f;
+        localOverlay.style.right = 0f;
+        localOverlay.style.top = 0f;
+        localOverlay.style.bottom = 0f;
+        localField.Add(localOverlay);
+        localClickMarker = new VisualElement { name = "local-exploration-click-marker", pickingMode = PickingMode.Ignore };
+        localClickMarker.AddToClassList("local-exploration-click-marker");
+        localClickMarker.style.position = Position.Absolute;
+        localClickMarker.style.display = DisplayStyle.None;
+        localOverlay.Add(localClickMarker);
+        localObjectLabels.Clear();
+
         localHud.style.display = DisplayStyle.Flex;
         localScreen.style.display = DisplayStyle.Flex;
         localScreen.BringToFront();
@@ -503,6 +662,9 @@ public partial class PrototypeUIController
         localPendingEncounter = null;
         localBattleRequested = false;
         localPartySignature = null;
+        localPendingHours = 0;
+        localZoom = 1f;
+        localHolding = false;
         if (localTitleLabel != null)
             localTitleLabel.text = localDefinition.DisplayName.ToUpperInvariant();
         if (localArtNoteLabel != null)
@@ -525,7 +687,14 @@ public partial class PrototypeUIController
         }
         localBattleHost = null;
         localField?.Clear();
-        localView = null;
+        if (localImage != null)
+            localImage.image = null;
+        localRenderer?.Dispose();
+        localRenderer = null;
+        localImage = null;
+        localOverlay = null;
+        localClickMarker = null;
+        localObjectLabels.Clear();
         localMover = null;
         localDefinition = null;
         localGeometry = null;
@@ -534,128 +703,208 @@ public partial class PrototypeUIController
         localPendingExit = false;
         localPendingEncounter = null;
         localBattleRequested = false;
+        localHolding = false;
         if (localScreen != null)
             localScreen.style.display = DisplayStyle.None;
     }
 
+    // Расстояние между участниками отряда — чуть больше клетки боя.
+    private float LocalSpacing => localRenderer.HexSizePixels * 1.2f;
+
     // Отряд места из состояния: командир первым, затем бойцы и свита;
-    // каждому — своя проходимая клетка без наложения.
+    // каждому — своя проходимая точка без наложения.
     private void RebuildLocalMover()
     {
         LocalExplorationStateData data = gameState.LocalExploration;
         List<string> present = PartyPresence.PresentIds(gameState);
-        HashSet<HexCoord> taken = new HashSet<HexCoord>();
-        foreach (LocalActorStateData enemy in LocalExplorationService.AliveEnemies(gameState, localDefinition))
-            taken.Add(new HexCoord(enemy.Q, enemy.R));
-
         LocalEntranceDefinition entrance = localDefinition.FindEntrance(data.EntranceId);
-        HexCoord fallback = entrance != null ? LocalLocationGeometry.Cell(entrance.Cell) : new HexCoord(0, 3);
-        List<KeyValuePair<string, HexCoord>> members = new List<KeyValuePair<string, HexCoord>>();
-        List<int> facings = new List<int>();
+        LocalPointData fallback = entrance != null ? entrance.Point : new LocalPointData(localDefinition.CanvasWidth / 2f, localDefinition.CanvasHeight / 2f);
+        float spacing = LocalSpacing;
+
+        List<KeyValuePair<string, LocalPointData>> members = new List<KeyValuePair<string, LocalPointData>>();
+        List<LocalPointData> spare = null;
         foreach (string personId in present)
         {
             LocalActorStateData stored = data.Party.Find(actor => actor.ActorId == personId);
-            HexCoord preferred = stored != null ? new HexCoord(stored.Q, stored.R) : fallback;
-            if (!localGeometry.IsPassable(preferred))
-                preferred = fallback;
-            HexCoord? cell = SandboxLocalNavigation.NearestFree(preferred, localGeometry.IsPassable, taken);
-            if (cell == null)
-                continue;
-            taken.Add(cell.Value);
-            members.Add(new KeyValuePair<string, HexCoord>(personId, cell.Value));
-            facings.Add(stored != null ? stored.Facing : 0);
-            LocalExplorationService.StorePartyPosition(gameState, personId, cell.Value.Q, cell.Value.R, facings[facings.Count - 1]);
+            LocalPointData point = stored != null ? new LocalPointData(stored.X, stored.Y) : fallback;
+            if (!localGeometry.IsPassable(point))
+                point = members.Count > 0 ? members[0].Value : fallback;
+            bool crowded = members.Exists(entry => entry.Value.DistanceTo(point.X, point.Y) < spacing * 0.5);
+            if (crowded || !localGeometry.IsPassable(point))
+            {
+                LocalPointData anchor = members.Count > 0 ? members[0].Value : point;
+                if (spare == null)
+                    spare = localGeometry.SpreadAround(anchor, present.Count * 3, spacing);
+                LocalPointData free = spare.Find(candidate => !members.Exists(entry => entry.Value.DistanceTo(candidate.X, candidate.Y) < spacing * 0.5));
+                if (free != null)
+                    point = free;
+            }
+            members.Add(new KeyValuePair<string, LocalPointData>(personId, point));
+            LocalExplorationService.StorePartyPosition(gameState, personId, point.X, point.Y, stored != null ? stored.Facing : 0);
         }
         data.Party.RemoveAll(actor => !present.Contains(actor.ActorId));
-        localMover = new LocalPartyMover(localGeometry.IsPassable, localGeometry.StepCost, members, facings);
+        if (members.Count == 0)
+            members.Add(new KeyValuePair<string, LocalPointData>(gameState.GetSelectedCommander()?.Id ?? "hero", fallback));
+        localMover = new LocalFreeMover(localGeometry.Layer, localGeometry.Rules, members, spacing);
     }
 
     private void StoreLocalPositions()
     {
         if (localMover == null)
             return;
-        foreach (LocalPartyMover.Member member in localMover.Members)
-            LocalExplorationService.StorePartyPosition(gameState, member.Id, member.SettledCell.Q, member.SettledCell.R, member.Facing);
+        foreach (LocalFreeMover.Member member in localMover.Members)
+        {
+            int facing = (int)LocationWorldRenderer.FacingFrom(new Vector2((float)member.DirectionX, (float)member.DirectionY));
+            LocalExplorationService.StorePartyPosition(gameState, member.Id, (float)member.X, (float)member.Y, facing);
+        }
     }
 
+    // Подписи объектов — над их точками на рисунке; клик — подойти.
     private void RefreshLocalObjects()
     {
-        if (localView == null)
+        if (localOverlay == null)
             return;
         foreach (LocalObjectDefinition item in localDefinition.Objects)
         {
-            bool required = string.IsNullOrEmpty(item.RequiresFlag) ||
-                            (gameState.Narrative != null && gameState.Narrative.HasFlag(item.RequiresFlag));
+            bool visible = LocalExplorationService.IsObjectVisible(gameState, item);
             bool active = LocalExplorationService.IsObjectAvailable(gameState, localDefinition, item);
-            localView.SetObject(item.Id, LocalLocationGeometry.Cell(item.Cell), active ? item.Label : item.Label, active, required);
+            if (!localObjectLabels.TryGetValue(item.Id, out Label label))
+            {
+                string objectId = item.Id;
+                label = new Label(item.Label) { name = "local-object-" + item.Id };
+                label.AddToClassList("local-object-label");
+                label.style.position = Position.Absolute;
+                label.RegisterCallback<PointerDownEvent>(evt =>
+                {
+                    if (evt.button != 0)
+                        return;
+                    evt.StopPropagation();
+                    OnLocalObjectClicked(objectId);
+                });
+                localOverlay.Add(label);
+                localObjectLabels[item.Id] = label;
+            }
+            label.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            label.pickingMode = visible ? PickingMode.Position : PickingMode.Ignore;
+            label.EnableInClassList("local-object-label--active", active);
+            label.EnableInClassList("local-object-label--done", !active);
         }
     }
 
     private void RenderLocalExploration()
     {
-        if (localView == null || localMover == null)
+        if (localRenderer == null || localMover == null)
             return;
 
-        List<LocalExplorationView.ActorFrame> frames = new List<LocalExplorationView.ActorFrame>();
-        CommanderData hero = gameState.GetSelectedCommander();
-        List<string> retinue = gameState.ActiveExpedition?.RetinueIds ?? new List<string>();
-        foreach (LocalPartyMover.Member member in localMover.Members)
-        {
-            ResidentState resident = HomePeopleService.Find(gameState, member.Id);
-            string unitType = hero != null && member.Id == hero.Id
-                ? (string.IsNullOrWhiteSpace(hero.UnitTypeId) ? CampaignBattleBridge.HeroFallbackUnitTypeId : hero.UnitTypeId)
-                : FindFighterUnitType(member.Id) ?? resident?.UnitTypeId;
-            string name = resident != null ? resident.DisplayName : member.Id;
-            frames.Add(new LocalExplorationView.ActorFrame
-            {
-                Id = member.Id,
-                UnitTypeId = unitType ?? string.Empty,
-                TokenText = string.IsNullOrEmpty(name) ? "?" : name.Substring(0, 1),
-                Kind = retinue.Contains(member.Id) ? LocalExplorationView.ActorKind.Retinue : LocalExplorationView.ActorKind.Fighter,
-                From = member.Cell,
-                To = member.Stepping ? member.Next : member.Cell,
-                Progress = member.Progress,
-                Facing = (KingdomSurvival.AnimationDatabase.HexFacing)member.Facing,
-                Walking = member.Stepping,
-                Wounded = resident != null && resident.Injury == ResidentInjury.Recovering
-            });
-        }
-        foreach (LocalActorStateData enemy in LocalExplorationService.AliveEnemies(gameState, localDefinition))
-        {
-            LocalEnemyDefinition definition = localDefinition.FindEnemy(enemy.ActorId);
-            HexCoord cell = new HexCoord(enemy.Q, enemy.R);
-            frames.Add(new LocalExplorationView.ActorFrame
-            {
-                Id = enemy.ActorId,
-                UnitTypeId = definition.UnitTypeId,
-                TokenText = "З",
-                Kind = LocalExplorationView.ActorKind.Enemy,
-                From = cell,
-                To = cell,
-                Facing = KingdomSurvival.AnimationDatabase.HexFacing.West
-            });
-        }
-        localView.Render(frames);
+        LocalFreeMover.Member leader = localMover.Leader;
+        float viewHeight = Mathf.Min(localDefinition.CanvasHeight, LocalDefaultViewHeight) / localZoom;
+        localRenderer.LookAt(new Vector2((float)leader.X, (float)leader.Y), viewHeight);
+        RenderLocalWorld();
+        LayoutLocalOverlay();
 
         if (localTimeLabel != null)
         {
             ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(gameState);
             localTimeLabel.text = "День " + clock.Day + " · " + ContinuousSimulationSystem.FormatClock(clock.HourOfDay);
         }
-        if (localMover.IsWaitingForStragglers)
-            ShowLocalNotice("Отряд отстаёт — командир ждёт.");
         if (localNoticeLabel != null && Time.realtimeSinceStartup > localNoticeUntil)
             localNoticeLabel.text = string.Empty;
         RefreshLocalPartyList();
     }
 
-    // Основания предметов из художественной сборки места (База локаций): они
-    // непроходимы и при исследовании, и в бою на месте. Нет сборки — пусто.
-    private static List<HexCoord> VisualBlockedCells(LocalLocationDefinition definition, BattlefieldDefinitionData field)
+    // Рисунок места в текстуру экрана: размер текстуры — размер поля на
+    // экране в пикселях; фигуры, свет и время суток — из состояния.
+    private void RenderLocalWorld()
     {
-        LocalLocationDatabaseAsset database = Resources.Load<LocalLocationDatabaseAsset>(LocalLocationDatabaseAsset.ResourcesPath);
-        LocationVisualDefinition visual = database != null && definition != null ? database.FindVisual(definition.Id) : null;
-        return visual != null && field != null ? LocationVisualGeometry.BlockedCells(visual, field) : new List<HexCoord>();
+        Rect bounds = localImage.contentRect;
+        if (bounds.width >= 1f && bounds.height >= 1f && interfaceRoot != null)
+        {
+            float scale = Screen.height / Mathf.Max(1f, interfaceRoot.layout.height);
+            RenderTexture target = localRenderer.EnsureTarget(Mathf.RoundToInt(bounds.width * scale), Mathf.RoundToInt(bounds.height * scale));
+            if (localImage.image != target)
+                localImage.image = target;
+        }
+
+        ContinuousClockSnapshot clock = ContinuousSimulationSystem.GetClock(gameState);
+        localRenderer.SetTime((float)clock.HourOfDay, Time.unscaledTime);
+        if (!localRenderer.ActorsVisible || localMover == null)
+            return;
+
+        List<LocationWorldRenderer.ActorFrame> frames = new List<LocationWorldRenderer.ActorFrame>();
+        CommanderData hero = gameState.GetSelectedCommander();
+        List<string> retinue = gameState.ActiveExpedition?.RetinueIds ?? new List<string>();
+        foreach (LocalFreeMover.Member member in localMover.Members)
+        {
+            ResidentState resident = HomePeopleService.Find(gameState, member.Id);
+            string unitType = hero != null && member.Id == hero.Id
+                ? (string.IsNullOrWhiteSpace(hero.UnitTypeId) ? CampaignBattleBridge.HeroFallbackUnitTypeId : hero.UnitTypeId)
+                : FindFighterUnitType(member.Id) ?? resident?.UnitTypeId;
+            frames.Add(new LocationWorldRenderer.ActorFrame
+            {
+                Id = member.Id,
+                UnitTypeId = unitType ?? string.Empty,
+                Kind = retinue.Contains(member.Id) ? LocationWorldRenderer.ActorKind.Retinue : LocationWorldRenderer.ActorKind.Party,
+                Pixel = new Vector2((float)member.X, (float)member.Y),
+                Direction = new Vector2((float)member.DirectionX, (float)member.DirectionY),
+                Walking = member.Walking,
+                Wounded = resident != null && resident.Injury == ResidentInjury.Recovering
+            });
+        }
+        foreach (LocalActorStateData enemy in LocalExplorationService.AliveEnemies(gameState, localDefinition))
+        {
+            LocalEnemyDefinition definition = localDefinition.FindEnemy(enemy.ActorId);
+            frames.Add(new LocationWorldRenderer.ActorFrame
+            {
+                Id = enemy.ActorId,
+                UnitTypeId = definition.UnitTypeId,
+                Kind = LocationWorldRenderer.ActorKind.Enemy,
+                Pixel = new Vector2(enemy.X, enemy.Y)
+            });
+        }
+        localRenderer.SetActors(frames, Time.unscaledTime);
+    }
+
+    private Vector2 LocalPixelToPanel(Vector2 pixel)
+    {
+        Rect bounds = localImage.contentRect;
+        Vector2 viewport = localRenderer.PixelToViewport(pixel);
+        return new Vector2(viewport.x * bounds.width, viewport.y * bounds.height);
+    }
+
+    private void LayoutLocalOverlay()
+    {
+        if (localOverlay == null)
+            return;
+        float lift = localRenderer.HexSizePixels * 0.9f;
+        foreach (LocalObjectDefinition item in localDefinition.Objects)
+        {
+            if (!localObjectLabels.TryGetValue(item.Id, out Label label) || label.style.display == DisplayStyle.None)
+                continue;
+            Vector2 panel = LocalPixelToPanel(new Vector2(item.Point.X, item.Point.Y - lift));
+            float width = label.resolvedStyle.width;
+            float height = label.resolvedStyle.height;
+            label.style.left = panel.x - (float.IsNaN(width) ? 0f : width / 2f);
+            label.style.top = panel.y - (float.IsNaN(height) ? 0f : height);
+        }
+
+        bool marker = Time.realtimeSinceStartup < localClickMarkerUntil;
+        localClickMarker.style.display = marker ? DisplayStyle.Flex : DisplayStyle.None;
+        if (marker)
+        {
+            Rect bounds = localImage.contentRect;
+            float size = Mathf.Max(10f, localRenderer.HexSizePixels / Mathf.Max(1f, localRenderer.ViewHeight) * bounds.height * 0.6f);
+            Vector2 panel = LocalPixelToPanel(localClickMarkerPoint);
+            localClickMarker.style.left = panel.x - size / 2f;
+            localClickMarker.style.top = panel.y - size * 0.3f;
+            localClickMarker.style.width = size;
+            localClickMarker.style.height = size * 0.6f;
+        }
+    }
+
+    private void ShowLocalClickMarker(Vector2 point)
+    {
+        localClickMarkerPoint = point;
+        localClickMarkerUntil = Time.realtimeSinceStartup + 0.6f;
     }
 
     private string FindFighterUnitType(string personId)

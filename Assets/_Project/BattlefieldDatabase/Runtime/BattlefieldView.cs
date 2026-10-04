@@ -30,12 +30,38 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         private BattlefieldDefinitionData battlefield;
         private BattlefieldHexStyle hexStyle = new BattlefieldHexStyle();
+        private bool worldUnderlay;
+        private readonly HashSet<HexCoord> underlayBlocked = new HashSet<HexCoord>();
 
         public Rect FrameRect { get; private set; }
         public BattlefieldGridLayout Layout { get; private set; }
         public BattlefieldDefinitionData Battlefield => battlefield;
         public BattlefieldHexStyle HexStyle => hexStyle;
         public event Action LayoutChanged;
+
+        // ПР-12К (канон v1.54 §28.3): бой на месте рисуется поверх рисунка
+        // места — кадр прозрачный, без фона и заглушки поля; сетка — все
+        // клетки арены (стены боя задаёт место, а не отключённые гексы поля).
+        public bool WorldUnderlay
+        {
+            get => worldUnderlay;
+            set
+            {
+                worldUnderlay = value;
+                frame.style.backgroundColor = value ? Color.clear : EmptyFrameColor;
+                Refresh();
+            }
+        }
+
+        // Стены боя на рисунке места: их клетки не рисуются, как отключённые
+        // гексы обычного поля.
+        public void SetWorldUnderlay(IEnumerable<HexCoord> blockedCells)
+        {
+            underlayBlocked.Clear();
+            if (blockedCells != null)
+                underlayBlocked.UnionWith(blockedCells);
+            WorldUnderlay = true;
+        }
 
         public BattlefieldView(bool cover)
         {
@@ -85,13 +111,17 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         public void Refresh()
         {
-            background.sprite = battlefield != null ? battlefield.Background : null;
+            background.sprite = battlefield != null && !worldUnderlay ? battlefield.Background : null;
             background.style.display = background.sprite != null ? DisplayStyle.Flex : DisplayStyle.None;
             bool placeholder = IsPlaceholder;
             placeholderLayer.style.display = placeholder ? DisplayStyle.Flex : DisplayStyle.None;
             placeholderLabel.style.display = placeholder ? DisplayStyle.Flex : DisplayStyle.None;
             activeCells.Clear();
-            activeCells.AddRange(BattlefieldFrame.ActiveCells(battlefield));
+            foreach (HexCoord cell in BattlefieldFrame.ActiveCells(worldUnderlay ? null : battlefield))
+            {
+                if (!worldUnderlay || !underlayBlocked.Contains(cell))
+                    activeCells.Add(cell);
+            }
             Relayout();
         }
 
@@ -178,7 +208,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             }
         }
 
-        private bool IsPlaceholder => battlefield != null && battlefield.AwaitingArt && battlefield.Background == null;
+        private bool IsPlaceholder => !worldUnderlay && battlefield != null && battlefield.AwaitingArt && battlefield.Background == null;
 
         private void DrawPlaceholder(MeshGenerationContext context)
         {

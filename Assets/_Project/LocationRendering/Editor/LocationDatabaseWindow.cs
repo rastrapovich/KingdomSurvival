@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using KingdomSurvival.BattlefieldDatabase;
 using KingdomSurvival.BattleSandbox;
+using KingdomSurvival.DialogueDatabase;
 using KingdomSurvival.UnitDatabase;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -14,11 +14,26 @@ using UnityEngine.Rendering.Universal;
 
 namespace KingdomSurvival.LocationRendering.Editor
 {
+    // ПР-12К (канон v1.54 §28.3): окно «База локаций». Место — рисунок своего
+    // размера; разметка местности (кисть, как у глобальной карты) задаёт, где
+    // ходят; входы, объекты, противники, зоны угрозы, точки отхода и кадры
+    // боя ставятся мышью. Сетка боя — ровно настройки поля Базы полей боя:
+    // кадр поля показывается на рисунке там, где начнётся бой.
     public sealed class LocationDatabaseWindow : EditorWindow
     {
+        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot }
+        private enum Kind { None, Art, Entrance, GameObject, Enemy, Encounter }
+
+        private static readonly string[] ToolNames =
+        {
+            "Выбор", "Местность", "Вход", "Объект места", "Противник", "Зона угрозы", "Кадр боя", "Точка отхода", "Старт теста", "Опора рисунка"
+        };
+
         private LocalLocationDatabaseAsset database;
         private BattlefieldDatabaseAsset fields;
-        private string selectedId = LocationLightingTestBootstrap.CampId, selectedObjectId;
+        private string selectedId = LocationLightingTestBootstrap.CampId;
+        private Kind selectedKind;
+        private string selectedElementId;
         private ListView list;
         private ScrollView settings;
         private Label clock, status;
@@ -26,18 +41,33 @@ namespace KingdomSurvival.LocationRendering.Editor
         private IMGUIContainer canvas;
         private PreviewRenderUtility preview;
         private LocationWorldRenderer renderer;
-        private LocalPartyMover mover;
+        private LocalLocationGeometry geometry;
+        private Texture2D terrainOverlay;
         private float hour = 13, zoom = 1;
-        private Vector2 pan;
-        private bool cycle, showGrid, showBlocked, setStart, setPivot, dragging;
-        private Vector2 lastPointer;
+        private Vector2 viewCenter;
+        private bool cycle, showTerrain = true, showArena = true, showMarkers = true, dragging;
+        private Tool tool;
+        private WorldMapGameplayTerrainType brushTerrain = WorldMapGameplayTerrainType.Cliffs;
+        private float brushRadius = 40;
+        private WorldMapTerrainLayer paintLayer;
+        private Vector2 lastPointer, dragStart;
         private double lastUpdate;
         private List<LocalLocationDefinition> visible = new List<LocalLocationDefinition>();
         private string query = "";
+
         private LocalLocationDefinition Location => database?.locations.Find(item => item.Id == selectedId);
         private LocationVisualDefinition Visual => database?.FindVisual(selectedId);
         private BattlefieldDefinitionData Field => Location != null ? fields?.FindById(Location.BattlefieldId) : null;
-        private LocationVisualObject Object => Visual?.Objects.Find(item => item.Id == selectedObjectId);
+        private LocationVisualObject ArtObject => selectedKind == Kind.Art ? Visual?.Objects.Find(item => item.Id == selectedElementId) : null;
+        private LocalEntranceDefinition SelectedEntrance => selectedKind == Kind.Entrance ? Location?.Entrances.Find(item => item.Id == selectedElementId) : null;
+        private LocalObjectDefinition SelectedGameObject => selectedKind == Kind.GameObject ? Location?.FindObject(selectedElementId) : null;
+        private LocalEnemyDefinition SelectedEnemy => selectedKind == Kind.Enemy ? Location?.FindEnemy(selectedElementId) : null;
+        private LocalEncounterDefinition SelectedEncounter =>
+            selectedKind == Kind.Encounter ? Location?.FindEncounter(selectedElementId)
+            : selectedKind == Kind.Enemy ? Location?.FindEncounter(SelectedEnemy?.EncounterId)
+            : Location?.Encounters.FirstOrDefault();
+        private Vector2 CanvasSize => LocationVisualGeometry.CanvasSize(Location);
+        private float ViewHeight => CanvasSize.y / zoom;
 
         [MenuItem("Kingdom Survival/База локаций")]
         public static void OpenWindow()
@@ -46,12 +76,14 @@ namespace KingdomSurvival.LocationRendering.Editor
             window.titleContent = new GUIContent("База локаций");
             window.minSize = new Vector2(1080, 650);
         }
+
         private void OnEnable()
         {
             Undo.undoRedoPerformed += UndoChanged;
             EditorApplication.update += Tick;
             EditorApplication.playModeStateChanged += PlayChanged;
         }
+
         private void OnDisable()
         {
             Undo.undoRedoPerformed -= UndoChanged;
@@ -61,12 +93,15 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (database != null) AssetDatabase.SaveAssetIfDirty(database);
             if (fields != null) AssetDatabase.SaveAssetIfDirty(fields);
         }
+
         private void UndoChanged() { RefreshList(); BuildSettings(); RebuildPreview(); }
+
         private void PlayChanged(PlayModeStateChange state)
         {
             if (state == PlayModeStateChange.ExitingEditMode) ReleasePreview();
             if (state == PlayModeStateChange.EnteredEditMode) { LocationLightingTestBootstrap.RestorePlayScene(); RebuildPreview(); }
         }
+
         public void CreateGUI()
         {
             LocationLightingTestBootstrap.EnsureCamp();
@@ -98,13 +133,13 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocalLocationDefinition selected = values.OfType<LocalLocationDefinition>().FirstOrDefault();
                 if (selected == null) return;
                 if (database != null) AssetDatabase.SaveAssetIfDirty(database);
-                selectedId = selected.Id; selectedObjectId = null;
-                pan = Vector2.zero; zoom = 1; setStart = setPivot = false;
+                selectedId = selected.Id; selectedKind = Kind.None; selectedElementId = null;
+                zoom = 1; viewCenter = CanvasSize / 2; tool = Tool.Select;
                 BuildSettings(); RebuildPreview();
             };
             left.Add(list);
             outer.Add(left);
-            TwoPaneSplitView inner = new TwoPaneSplitView(1, 315, TwoPaneSplitViewOrientation.Horizontal);
+            TwoPaneSplitView inner = new TwoPaneSplitView(1, 340, TwoPaneSplitViewOrientation.Horizontal);
             VisualElement center = new VisualElement(); center.style.flexGrow = 1;
             VisualElement time = new VisualElement();
             time.style.flexDirection = FlexDirection.Row; time.style.alignItems = Align.Center;
@@ -116,27 +151,56 @@ namespace KingdomSurvival.LocationRendering.Editor
             time.Add(hourSlider);
             AddButton(time, "▶ Сутки", () => cycle = !cycle);
             center.Add(time);
-            VisualElement presets = new VisualElement(); presets.style.flexDirection = FlexDirection.Row;
+            VisualElement presets = new VisualElement(); presets.style.flexDirection = FlexDirection.Row; presets.style.flexWrap = Wrap.Wrap;
             foreach ((string title, float h) in new[] { ("Рассвет", 6f), ("Утро", 8f), ("День", 13f), ("Вечер", 19f), ("Ночь", 1f) })
                 AddButton(presets, title, () => { hour = h; cycle = false; });
-            AddButton(presets, "Весь кадр", () => { pan = Vector2.zero; zoom = 1; });
+            AddButton(presets, "Весь рисунок", () => { viewCenter = CanvasSize / 2; zoom = 1; });
             center.Add(presets);
+            VisualElement tools = new VisualElement(); tools.style.flexDirection = FlexDirection.Row; tools.style.flexWrap = Wrap.Wrap;
+            for (int i = 0; i < ToolNames.Length - 1; i++)
+            {
+                Tool value = (Tool)i;
+                AddButton(tools, ToolNames[i], () => SetTool(value));
+            }
+            center.Add(tools);
             canvas = new IMGUIContainer(DrawPreview);
             canvas.style.flexGrow = 1;
             center.Add(canvas);
-            Label hints = new Label("Перетащите PNG или Sprite сюда · ЛКМ: выбор и перемещение · ПКМ: панорама · Колесо: масштаб");
+            Label hints = new Label("Перетащите PNG или Sprite сюда · ЛКМ: инструмент · ПКМ: панорама · Колесо: масштаб");
             hints.style.whiteSpace = WhiteSpace.Normal; hints.style.color = new Color(.65f, .71f, .65f);
             hints.style.paddingLeft = 8; hints.style.paddingBottom = 5; center.Add(hints);
             inner.Add(center);
             settings = new ScrollView(); settings.style.paddingLeft = settings.style.paddingRight = 10;
             inner.Add(settings); outer.Add(inner); rootVisualElement.Add(outer);
-            status = new Label("Первый этап · сборка лагеря и свет. Тест использует отдельное состояние.");
+            status = new Label("Движение по месту — как на глобальной карте; клетки — только в бою.");
             status.style.paddingLeft = 8; status.style.height = 26; rootVisualElement.Add(status);
             RefreshList();
+            viewCenter = CanvasSize / 2;
             list.SetSelection(visible.FindIndex(item => item.Id == selectedId));
             BuildSettings(); RebuildPreview();
         }
+
+        private void SetTool(Tool value)
+        {
+            tool = value;
+            switch (value)
+            {
+                case Tool.Terrain: status.text = "Местность: ЛКМ — красить выбранным типом (тип и размер кисти — справа)."; break;
+                case Tool.Entrance: status.text = "Вход: клик — поставить выбранный вход (или новый)."; break;
+                case Tool.ObjectPoint: status.text = "Объект места: клик — поставить выбранный объект (или новый)."; break;
+                case Tool.Enemy: status.text = "Противник: клик — поставить выбранного противника (или нового)."; break;
+                case Tool.TriggerArea: status.text = "Зона угрозы: протяните прямоугольник для выбранного столкновения."; break;
+                case Tool.ArenaFrame: status.text = "Кадр боя: клик — центр кадра поля для выбранного столкновения."; break;
+                case Tool.RetreatPoint: status.text = "Точка отхода: клик — безопасная точка выбранного столкновения."; break;
+                case Tool.TestStart: status.text = "Старт теста: клик по проходимой точке."; break;
+                case Tool.Pivot: status.text = "Кликните по точке опоры на рисунке выбранного объекта."; break;
+                default: status.text = "Выбор: клик по метке или предмету, перетаскивание — переместить."; break;
+            }
+            BuildSettings();
+        }
+
         private static void AddButton(VisualElement parent, string title, Action action) => parent.Add(new Button(action) { text = title });
+
         private void RefreshList()
         {
             if (list == null || database == null) return;
@@ -144,10 +208,13 @@ namespace KingdomSurvival.LocationRendering.Editor
                 item.Id.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
             list.itemsSource = visible; list.Rebuild();
         }
+
         // Пересборка предпросмотра и запись ассета — не на каждый шаг ползунка:
         // один раз за кадр и через полсекунды после последней правки.
         private bool rebuildRequested;
         private double saveAt = -1;
+        private double fieldsSaveAt = -1;
+
         private void Change(Action action, bool refreshSettings = false)
         {
             Undo.RecordObject(database, "Изменить локацию"); action();
@@ -156,6 +223,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             rebuildRequested = true;
             if (refreshSettings) BuildSettings();
         }
+
         private void FlushPending()
         {
             if (rebuildRequested && !dragging) { rebuildRequested = false; RebuildPreview(); }
@@ -170,116 +238,327 @@ namespace KingdomSurvival.LocationRendering.Editor
                 if (fields != null) AssetDatabase.SaveAssetIfDirty(fields);
             }
         }
+
+        // ------------------------------------------------------------------
+        // Панель настроек
+        // ------------------------------------------------------------------
+
         private void Heading(string text)
         {
             Label label = new Label(text); label.style.unityFontStyleAndWeight = FontStyle.Bold;
             label.style.fontSize = 14; label.style.color = new Color(.88f, .78f, .53f);
             label.style.marginTop = 14; label.style.marginBottom = 7; settings.Add(label);
         }
+
+        private void Help(string text) => settings.Add(new HelpBox(text, HelpBoxMessageType.Info));
+
         private void Text(string label, string value, Action<string> set)
         {
-            TextField field = new TextField(label) { value = value, isDelayed = true };
+            TextField field = new TextField(label) { value = value ?? string.Empty, isDelayed = true };
             field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue))); settings.Add(field);
         }
-        private void Toggle(string label, bool value, Action<bool> set)
+
+        private void LongText(string label, string value, Action<string> set)
+        {
+            TextField field = new TextField(label) { value = value ?? string.Empty, isDelayed = true, multiline = true };
+            field.style.whiteSpace = WhiteSpace.Normal;
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue))); settings.Add(field);
+        }
+
+        private void Toggle(string label, bool value, Action<bool> set, bool refresh = false)
         {
             UnityEngine.UIElements.Toggle field = new UnityEngine.UIElements.Toggle(label) { value = value };
-            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue))); settings.Add(field);
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), refresh)); settings.Add(field);
         }
+
         private void Number(string label, float value, float min, float max, Action<float> set, string help = null)
         {
             Slider field = new Slider(label, min, max) { value = value, showInputField = true, tooltip = help };
             field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue))); settings.Add(field);
         }
+
+        private void Integer(string label, int value, Action<int> set, string help = null)
+        {
+            IntegerField field = new IntegerField(label) { value = value, isDelayed = true, tooltip = help };
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), true)); settings.Add(field);
+        }
+
+        private void Point(string label, LocalPointData point)
+        {
+            Vector2Field field = new Vector2Field(label) { value = new Vector2(point.X, point.Y) };
+            field.RegisterValueChangedCallback(evt => Change(() => { point.X = evt.newValue.x; point.Y = evt.newValue.y; }));
+            settings.Add(field);
+        }
+
         private void ColorField(string label, Color value, Action<Color> set)
         {
             UnityEditor.UIElements.ColorField field = new UnityEditor.UIElements.ColorField(label) { value = value };
             field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue))); settings.Add(field);
         }
+
         private void SpriteField(string label, Sprite value, Action<Sprite> set)
         {
             ObjectField field = new ObjectField(label) { objectType = typeof(Sprite), allowSceneObjects = false, value = value };
             field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue as Sprite))); settings.Add(field);
         }
+
+        private void Choice<T>(string label, List<T> options, Func<T, string> name, T current, Action<T> set)
+        {
+            List<string> names = options.Select(name).ToList();
+            PopupField<string> field = new PopupField<string>(label, names, Mathf.Max(0, options.IndexOf(current)));
+            field.RegisterValueChangedCallback(evt => Change(() => set(options[field.index]), true));
+            settings.Add(field);
+        }
+
+        private void Select(Kind kind, string id)
+        {
+            selectedKind = kind;
+            selectedElementId = id;
+            BuildSettings();
+        }
+
+        private void SelectButton(Kind kind, string id, string title)
+        {
+            bool active = selectedKind == kind && selectedElementId == id;
+            AddButton(settings, (active ? "● " : "") + title, () => Select(kind, id));
+        }
+
         private void BuildSettings()
         {
             if (settings == null) return;
             settings.Clear();
-            if (Location == null) return;
-            Heading(Location.DisplayName);
-            Text("Название", Location.DisplayName, value => { Location.DisplayName = value; RefreshList(); });
-            if (Visual == null)
+            LocalLocationDefinition location = Location;
+            if (location == null) return;
+            Heading(location.DisplayName);
+            Text("Название", location.DisplayName, value => { location.DisplayName = value; RefreshList(); });
+            Text("ID места карты", location.WorldLocationId, value => location.WorldLocationId = value);
+
+            if (tool == Tool.Terrain)
             {
-                settings.Add(new HelpBox("Для этого места ещё нет художественной сборки.", HelpBoxMessageType.Info));
+                Heading("Кисть местности");
+                Help("Как «Местность» глобальной карты: скалы и вода непроходимы, холмы, лес и болото замедляют. " +
+                     "В бою клетка, чей центр на непроходимом, — стена; на замедляющем — трудная.");
+                List<WorldMapGameplayTerrainType> types = WorldMapTerrainLabels.All.ToList();
+                PopupField<string> type = new PopupField<string>("Тип", types.Select(WorldMapTerrainLabels.Name).ToList(), Mathf.Max(0, types.IndexOf(brushTerrain)));
+                type.RegisterValueChangedCallback(evt => brushTerrain = types[type.index]); settings.Add(type);
+                Slider radius = new Slider("Радиус кисти", 8, 300) { value = brushRadius, showInputField = true };
+                radius.RegisterValueChangedCallback(evt => brushRadius = evt.newValue); settings.Add(radius);
+                AddButton(settings, "Залить всё выбранным", () => Change(() =>
+                {
+                    WorldMapTerrainLayer layer = new WorldMapTerrainLayer(location.CreateGrid());
+                    for (int i = 0; i < layer.Grid.CellCount; i++) layer.Set(layer.Grid.CellAt(i), brushTerrain);
+                    location.TerrainCells = layer.Encode();
+                }));
+            }
+
+            Heading("Рисунок и размер");
+            Help("Размер рисунка места — в пикселях, как у глобальной карты. «Клеток проходимости по ширине» — " +
+                 "точность разметки. При смене размера разметка пересчитывается.");
+            Integer("Ширина рисунка", Mathf.RoundToInt(location.CanvasWidth), value => ResizeCanvas(location, value, location.CanvasHeight, location.HexesAcross));
+            Integer("Высота рисунка", Mathf.RoundToInt(location.CanvasHeight), value => ResizeCanvas(location, location.CanvasWidth, value, location.HexesAcross));
+            Integer("Клеток проходимости по ширине", location.HexesAcross, value => ResizeCanvas(location, location.CanvasWidth, location.CanvasHeight, value));
+            if (Visual != null)
+                SpriteField("Рисунок места", Visual.Background, value => Visual.Background = value);
+            Toggle("Рисунок — временная заглушка", location.PlaceholderArt, value => location.PlaceholderArt = value);
+
+            Heading("Перемещение");
+            Help("Те же поля, что «Перемещение» глобальной карты, но свои числа для этого места.");
+            WorldMapMovementRules rules = location.MovementRules;
+            Number("Скорость бега (клеток/с)", rules.HeroRunSpeedHexesPerSecond, .5f, 30, value => location.Movement.HeroRunSpeedHexesPerSecond = value);
+            Number("Часов на клетку", rules.TravelHoursPerHex, .001f, .2f, value => location.Movement.TravelHoursPerHex = value);
+            Number("Часов на действие", (float)location.HoursPerInteraction, 0, 2, value => location.HoursPerInteraction = value);
+
+            Heading("Бой на месте");
+            Help("Сетка боя — ровно настройки поля Базы полей боя (масштаб и сдвиг сетки). Кадр поля (16:9) ложится на " +
+                 "рисунок там, где задан кадр столкновения; «Ширина кадра» — сколько пикселей рисунка он закрывает. " +
+                 "Отключённые гексы поля в бою на месте не действуют: стены задаёт разметка.");
+            List<BattlefieldDefinitionData> fieldOptions = fields.Battlefields.Where(item => item != null).ToList();
+            Choice("Поле боя", fieldOptions, item => item.DisplayLabel, Field, item => location.BattlefieldId = item.Id);
+            AddButton(settings, "Открыть поле в базе", () => EditorApplication.ExecuteMenuItem("Kingdom Survival/База полей боя"));
+            FieldNumber("Масштаб сетки (поле)", "gridScale", Field?.GridScale ?? 1, .5f, 1.5f);
+            FieldVector("Сдвиг сетки (поле)", "gridOffset", Field?.GridOffset ?? Vector2.zero);
+            Number("Ширина кадра боя (пиксели)", location.BattleFrameWidth, 320, Mathf.Max(640, location.CanvasWidth * 2), value => location.BattleFrameWidth = value);
+
+            Heading("Служебные слои");
+            UnityEngine.UIElements.Toggle terrain = new UnityEngine.UIElements.Toggle("Местность") { value = showTerrain };
+            terrain.RegisterValueChangedCallback(evt => showTerrain = evt.newValue); settings.Add(terrain);
+            UnityEngine.UIElements.Toggle markers = new UnityEngine.UIElements.Toggle("Входы, объекты, противники") { value = showMarkers };
+            markers.RegisterValueChangedCallback(evt => showMarkers = evt.newValue); settings.Add(markers);
+            UnityEngine.UIElements.Toggle arena = new UnityEngine.UIElements.Toggle("Зоны угрозы и кадры боя") { value = showArena };
+            arena.RegisterValueChangedCallback(evt => showArena = evt.newValue); settings.Add(arena);
+
+            BuildGameSettings(location);
+            BuildVisualSettings(location);
+        }
+
+        private void BuildGameSettings(LocalLocationDefinition location)
+        {
+            Heading("Входы");
+            foreach (LocalEntranceDefinition entrance in location.Entrances)
+                SelectButton(Kind.Entrance, entrance.Id, entrance.Label + " · " + entrance.Point);
+            AddButton(settings, "+ Вход", () => Change(() =>
+            {
+                LocalEntranceDefinition entrance = new LocalEntranceDefinition { Id = UniqueId(location, "entry"), Label = "Вход", Point = new LocalPointData(viewCenter.x, viewCenter.y) };
+                location.Entrances.Add(entrance); selectedKind = Kind.Entrance; selectedElementId = entrance.Id;
+            }, true));
+            LocalEntranceDefinition selectedEntrance = SelectedEntrance;
+            if (selectedEntrance != null)
+            {
+                Text("ID", selectedEntrance.Id, value => { selectedEntrance.Id = value; selectedElementId = value; });
+                Text("Подпись", selectedEntrance.Label, value => selectedEntrance.Label = value);
+                Point("Точка", selectedEntrance.Point);
+                AddButton(settings, "Удалить вход", () => Change(() => { location.Entrances.Remove(selectedEntrance); selectedKind = Kind.None; }, true));
+            }
+
+            Heading("Объекты места");
+            foreach (LocalObjectDefinition item in location.Objects)
+                SelectButton(Kind.GameObject, item.Id, item.Label + " · " + item.Point);
+            AddButton(settings, "+ Объект", () => Change(() =>
+            {
+                LocalObjectDefinition item = new LocalObjectDefinition { Id = UniqueId(location, "object"), Label = "Объект", ActionLabel = "Осмотреть",
+                    Kind = LocalObjectKind.Inspect, Text = "Описание.", Point = new LocalPointData(viewCenter.x, viewCenter.y) };
+                location.Objects.Add(item); selectedKind = Kind.GameObject; selectedElementId = item.Id;
+            }, true));
+            LocalObjectDefinition selectedObject = SelectedGameObject;
+            if (selectedObject != null)
+            {
+                Text("ID", selectedObject.Id, value => { selectedObject.Id = value; selectedElementId = value; });
+                Text("Подпись", selectedObject.Label, value => selectedObject.Label = value);
+                Text("Действие", selectedObject.ActionLabel, value => selectedObject.ActionLabel = value);
+                Choice("Вид", new List<LocalObjectKind> { LocalObjectKind.Dialogue, LocalObjectKind.Inspect },
+                    kind => kind == LocalObjectKind.Dialogue ? "Диалог" : "Осмотр (текст)", selectedObject.Kind, kind => selectedObject.Kind = kind);
+                if (selectedObject.Kind == LocalObjectKind.Dialogue)
+                    Text("ID диалога", selectedObject.DialogueId, value => selectedObject.DialogueId = value);
+                LongText("Текст", selectedObject.Text, value => selectedObject.Text = value);
+                Point("Точка", selectedObject.Point);
+                Number("Радиус действия", selectedObject.InteractRadius, 20, 300, value => selectedObject.InteractRadius = value,
+                    "Командир действует, подойдя на это расстояние (пиксели рисунка).");
+                Toggle("Однократно", selectedObject.OnceOnly, value => selectedObject.OnceOnly = value);
+                Text("Виден, если флаг", selectedObject.RequiresFlag, value => selectedObject.RequiresFlag = value);
+                Text("Скрыт, если флаг", selectedObject.HiddenWhenFlag, value => selectedObject.HiddenWhenFlag = value);
+                AddButton(settings, "Удалить объект места", () => Change(() => { location.Objects.Remove(selectedObject); selectedKind = Kind.None; }, true));
+            }
+
+            Heading("Столкновения");
+            foreach (LocalEncounterDefinition encounter in location.Encounters)
+                SelectButton(Kind.Encounter, encounter.Id, encounter.Id);
+            AddButton(settings, "+ Столкновение", () => Change(() =>
+            {
+                string id = UniqueId(location, "encounter");
+                LocalEncounterDefinition encounter = new LocalEncounterDefinition
+                {
+                    Id = id, BattleIdPrefix = "local.battle." + id + ".",
+                    TriggerArea = new LocalAreaData(viewCenter.x - 60, viewCenter.y - 120, 120, 240),
+                    RetreatPoint = new LocalPointData(viewCenter.x - 300, viewCenter.y)
+                };
+                location.Encounters.Add(encounter); selectedKind = Kind.Encounter; selectedElementId = id;
+            }, true));
+            LocalEncounterDefinition selectedEncounter = selectedKind == Kind.Encounter ? SelectedEncounter : null;
+            if (selectedEncounter != null)
+            {
+                Text("ID", selectedEncounter.Id, value =>
+                {
+                    foreach (LocalEnemyDefinition enemy in location.Enemies.Where(enemy => enemy.EncounterId == selectedEncounter.Id))
+                        enemy.EncounterId = value;
+                    selectedEncounter.Id = value; selectedElementId = value;
+                });
+                Text("Префикс ID боя", selectedEncounter.BattleIdPrefix, value => selectedEncounter.BattleIdPrefix = value);
+                Text("Диалог перед боем", selectedEncounter.IntroDialogueId, value => selectedEncounter.IntroDialogueId = value);
+                Toggle("Отход разрешён", selectedEncounter.AllowRetreat, value => selectedEncounter.AllowRetreat = value);
+                Point("Точка отхода", selectedEncounter.RetreatPoint);
+                Toggle("Кадр боя задан", selectedEncounter.HasArenaCenter, value => selectedEncounter.HasArenaCenter = value, true);
+                if (selectedEncounter.HasArenaCenter)
+                    Point("Центр кадра боя", selectedEncounter.ArenaCenter);
+                else
+                    Help("Кадр не задан — в бою он встанет посередине между отрядом и противниками.");
+                Text("Подготовленное начало (спутник)", selectedEncounter.PreparedStartCompanionId, value => selectedEncounter.PreparedStartCompanionId = value);
+                Text("Флаг исчерпания", selectedEncounter.ResolvedFlag, value => selectedEncounter.ResolvedFlag = value);
+                AddButton(settings, "Удалить столкновение", () => Change(() => { location.Encounters.Remove(selectedEncounter); selectedKind = Kind.None; }, true));
+            }
+
+            Heading("Противники");
+            foreach (LocalEnemyDefinition enemy in location.Enemies)
+                SelectButton(Kind.Enemy, enemy.InstanceId, enemy.InstanceId + " · " + enemy.UnitTypeId);
+            AddButton(settings, "+ Противник", () => Change(() =>
+            {
+                LocalEnemyDefinition enemy = new LocalEnemyDefinition
+                {
+                    InstanceId = UniqueId(location, "enemy"), UnitTypeId = "forest_beast", Level = 1,
+                    Point = new LocalPointData(viewCenter.x, viewCenter.y),
+                    EncounterId = (SelectedEncounter ?? location.Encounters.FirstOrDefault())?.Id ?? string.Empty
+                };
+                location.Enemies.Add(enemy); selectedKind = Kind.Enemy; selectedElementId = enemy.InstanceId;
+            }, true));
+            LocalEnemyDefinition selectedEnemy = SelectedEnemy;
+            if (selectedEnemy != null)
+            {
+                Text("ID экземпляра", selectedEnemy.InstanceId, value => { selectedEnemy.InstanceId = value; selectedElementId = value; });
+                UnitDatabaseAsset units = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
+                List<UnitDefinitionData> options = units != null ? units.Units.Where(item => item != null).ToList() : new List<UnitDefinitionData>();
+                if (options.Count > 0)
+                    Choice("Существо", options, item => item.DisplayLabel + " (" + item.Id + ")", options.Find(item => item.Id == selectedEnemy.UnitTypeId),
+                        item => selectedEnemy.UnitTypeId = item.Id);
+                Integer("Уровень", selectedEnemy.Level, value => selectedEnemy.Level = Mathf.Max(1, value));
+                if (location.Encounters.Count > 0)
+                    Choice("Столкновение", location.Encounters, item => item.Id, location.FindEncounter(selectedEnemy.EncounterId), item => selectedEnemy.EncounterId = item.Id);
+                Point("Логово (точка)", selectedEnemy.Point);
+                AddButton(settings, "Удалить противника", () => Change(() => { location.Enemies.Remove(selectedEnemy); selectedKind = Kind.None; }, true));
+            }
+        }
+
+        private void BuildVisualSettings(LocalLocationDefinition location)
+        {
+            LocationVisualDefinition visual = Visual;
+            if (visual == null)
+            {
+                Heading("Художественная сборка");
+                Help("Для этого места ещё нет художественной сборки (рисунок, предметы, свет).");
                 AddButton(settings, "Добавить сборку и свет", () => Change(() => database.visuals.Add(new LocationVisualDefinition { LocationId = selectedId }), true));
                 return;
             }
-            AddButton(settings, "Открыть поле в базе", () => EditorApplication.ExecuteMenuItem("Kingdom Survival/База полей боя"));
-            List<BattlefieldDefinitionData> fieldOptions = fields.Battlefields.Where(item => item != null).ToList();
-            PopupField<string> fieldChoice = new PopupField<string>("Поле / геометрия", fieldOptions.Select(item => item.DisplayLabel).ToList(),
-                Mathf.Max(0, fieldOptions.FindIndex(item => item.Id == Location.BattlefieldId)));
-            fieldChoice.RegisterValueChangedCallback(evt => Change(() => Location.BattlefieldId = fieldOptions[fieldChoice.index].Id, true));
-            settings.Add(fieldChoice);
-            SpriteField("Фон земли", Field?.Background, SetGround);
-            Heading("Размер и сетка");
-            settings.Add(new HelpBox(
-                "Арена всегда 10 столбцов × 7 рядов (58 клеток) — та же, что в бою. «Масштаб сетки» задаёт, какую часть кадра " +
-                "она занимает: меньше — клетки и люди мельче, место кажется просторнее; больше — крупнее и теснее. " +
-                "Это настройки поля: они меняют и бой, и все места с этим полем.", HelpBoxMessageType.Info));
-            FieldNumber("Масштаб сетки", "gridScale", Field?.GridScale ?? 1, .5f, 1.5f);
-            FieldVector("Сдвиг сетки", "gridOffset", Field?.GridOffset ?? Vector2.zero);
-            FieldNumber("Масштаб фона", "backgroundScale", Field?.BackgroundScale ?? 1, .1f, 3f);
-            FieldVector("Сдвиг фона", "backgroundOffset", Field?.BackgroundOffset ?? Vector2.zero);
             Heading("Общий свет");
-            Number("Общая яркость", Visual.Daylight.Intensity, 0, 2, value => Visual.Daylight.Intensity = value);
-            CurveField curve = new CurveField("Яркость за сутки") { value = Visual.Daylight.Brightness };
-            curve.RegisterValueChangedCallback(evt => Change(() => Visual.Daylight.Brightness = evt.newValue)); settings.Add(curve);
-            GradientField gradient = new GradientField("Цвет за сутки") { value = Visual.Daylight.Color };
-            gradient.RegisterValueChangedCallback(evt => Change(() => Visual.Daylight.Color = evt.newValue)); settings.Add(gradient);
-            Heading("Служебные слои");
-            UnityEngine.UIElements.Toggle grid = new UnityEngine.UIElements.Toggle("Сетка") { value = showGrid };
-            grid.RegisterValueChangedCallback(evt => showGrid = evt.newValue); settings.Add(grid);
-            UnityEngine.UIElements.Toggle blocked = new UnityEngine.UIElements.Toggle("Проходимость и основания") { value = showBlocked };
-            blocked.RegisterValueChangedCallback(evt => showBlocked = evt.newValue); settings.Add(blocked);
-            AddButton(settings, "Поставить точку старта мышью", () => { setStart = true; setPivot = false; status.text = "Кликните по проходимой клетке."; });
+            Number("Общая яркость", visual.Daylight.Intensity, 0, 2, value => visual.Daylight.Intensity = value);
+            CurveField curve = new CurveField("Яркость за сутки") { value = visual.Daylight.Brightness };
+            curve.RegisterValueChangedCallback(evt => Change(() => visual.Daylight.Brightness = evt.newValue)); settings.Add(curve);
+            GradientField gradient = new GradientField("Цвет за сутки") { value = visual.Daylight.Color };
+            gradient.RegisterValueChangedCallback(evt => Change(() => visual.Daylight.Color = evt.newValue)); settings.Add(gradient);
+
+            Heading("Тест");
             UnitDatabaseAsset units = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
             if (units != null)
             {
                 List<UnitDefinitionData> options = units.Units.Where(item => item != null).ToList();
-                PopupField<string> unit = new PopupField<string>("Персонаж теста", options.Select(item => item.DisplayLabel).ToList(),
-                    Mathf.Max(0, options.FindIndex(item => item.Id == Visual.TestUnitId)));
-                unit.RegisterValueChangedCallback(evt => Change(() => Visual.TestUnitId = options[unit.index].Id)); settings.Add(unit);
+                Choice("Персонаж теста", options, item => item.DisplayLabel, options.Find(item => item.Id == visual.TestUnitId), item => visual.TestUnitId = item.Id);
             }
-            SliderInt followers = new SliderInt("Спутников в тесте", 0, 4) { value = Visual.TestFollowers, showInputField = true };
-            followers.RegisterValueChangedCallback(evt => Change(() => Visual.TestFollowers = evt.newValue)); settings.Add(followers);
-            Heading("Объекты");
+            SliderInt followers = new SliderInt("Спутников в тесте", 0, 4) { value = visual.TestFollowers, showInputField = true };
+            followers.RegisterValueChangedCallback(evt => Change(() => visual.TestFollowers = evt.newValue)); settings.Add(followers);
+
+            Heading("Предметы рисунка");
             VisualElement actions = new VisualElement(); actions.style.flexDirection = FlexDirection.Row; settings.Add(actions);
             AddButton(actions, "PNG…", ImportPng);
-            AddButton(actions, "+ Костёр", () => AddObject(null, LocationPlaceholder.Fire));
-            AddButton(actions, "+ Палатка", () => AddObject(null, LocationPlaceholder.Tent));
-            foreach (LocationVisualObject item in Visual.Objects)
-                AddButton(settings, (item.Id == selectedObjectId ? "● " : "") + item.Name + (item.Hidden ? " · скрыт" : ""), () =>
-                { selectedObjectId = item.Id; BuildSettings(); });
-            LocationVisualObject selected = Object;
+            AddButton(actions, "+ Костёр", () => AddArtObject(null, LocationPlaceholder.Fire));
+            AddButton(actions, "+ Палатка", () => AddArtObject(null, LocationPlaceholder.Tent));
+            foreach (LocationVisualObject item in visual.Objects)
+                SelectButton(Kind.Art, item.Id, item.Name + (item.Hidden ? " · скрыт" : ""));
+            LocationVisualObject selected = ArtObject;
             if (selected == null) return;
-            Heading("Выбранный объект");
+            Heading("Выбранный предмет");
             Text("Название", selected.Name, value => selected.Name = value);
             SpriteField("Рисунок", selected.Sprite, value => selected.Sprite = value);
             Text("Группа частей", selected.GroupId, value => selected.GroupId = value);
-            Number("Высота рисунка", selected.Height, .1f, 6, value => selected.Height = value, "Герой показан рядом в том же масштабе.");
+            Number("Высота рисунка", selected.Height, .1f, 6, value => selected.Height = value, "Единицы мира: 108 пикселей рисунка = 1.");
             Toggle("Отразить по X", selected.FlipX, value => selected.FlipX = value);
             Toggle("Заблокировать", selected.Locked, value => selected.Locked = value);
             Toggle("Скрыть", selected.Hidden, value => selected.Hidden = value);
             PopupField<string> band = new PopupField<string>("Слой", new List<string> { "Земля", "Детали земли", "Объекты и персонажи", "Кроны / крыши" }, (int)selected.Band);
             band.RegisterValueChangedCallback(evt => Change(() => selected.Band = (LocationVisualBand)band.index)); settings.Add(band);
             Number("Порядок внутри слоя", selected.OrderOffset, -1000, 1000, value => selected.OrderOffset = Mathf.RoundToInt(value));
-            AddButton(settings, "Поставить точку опоры мышью", () => { setPivot = true; setStart = false; status.text = "Кликните по точке опоры на рисунке."; });
+            AddButton(settings, "Поставить точку опоры мышью", () => SetTool(Tool.Pivot));
             Toggle("Блокирует проход", selected.BlocksMovement, value => selected.BlocksMovement = value);
             Vector2Field footprint = new Vector2Field("Основание на земле") { value = selected.Footprint };
             footprint.RegisterValueChangedCallback(evt => Change(() => selected.Footprint = Vector2.Max(Vector2.zero, evt.newValue))); settings.Add(footprint);
             Toggle("Тень от локального света", selected.CastsShadow, value => selected.CastsShadow = value);
-            settings.Add(new HelpBox("Тень строится от основания. Солнечные тени и произвольный контур — следующий этап.", HelpBoxMessageType.Info));
-            Heading("Свет этого объекта");
+            Heading("Свет этого предмета");
             Toggle("Источник включён", selected.Light.Enabled, value => selected.Light.Enabled = value);
             ColorField("Цвет", selected.Light.Color, value => selected.Light.Color = value);
             Number("Яркость", selected.Light.Intensity, 0, 5, value => selected.Light.Intensity = value);
@@ -303,41 +582,109 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
             AddButton(settings, "+ Состояние", () => Change(() => selected.Variants.Add(new LocationVisualVariant { Id = Guid.NewGuid().ToString("N"), Name = "Новое состояние" }), true));
             AddButton(settings, "Основной рисунок", () => Change(() => selected.DefaultVariantId = ""));
-            AddButton(settings, "Дублировать объект", () => Change(() =>
+            AddButton(settings, "Дублировать предмет", () => Change(() =>
             {
                 LocationVisualObject copy = JsonUtility.FromJson<LocationVisualObject>(JsonUtility.ToJson(selected));
                 copy.Id = Guid.NewGuid().ToString("N"); copy.GroupId = ""; copy.Position += new Vector2(.03f, .03f);
-                Visual.Objects.Add(copy); selectedObjectId = copy.Id;
+                visual.Objects.Add(copy); selectedElementId = copy.Id;
             }, true));
-            AddButton(settings, "Удалить объект", () => Change(() => { Visual.Objects.Remove(selected); selectedObjectId = null; }, true));
+            AddButton(settings, "Удалить предмет", () => Change(() => { visual.Objects.Remove(selected); selectedKind = Kind.None; }, true));
         }
+
+        private static string UniqueId(LocalLocationDefinition location, string prefix)
+        {
+            HashSet<string> ids = new HashSet<string>(location.Entrances.Select(item => item.Id)
+                .Concat(location.Objects.Select(item => item.Id))
+                .Concat(location.Enemies.Select(item => item.InstanceId))
+                .Concat(location.Encounters.Select(item => item.Id)));
+            for (int i = 1; ; i++)
+            {
+                string id = location.Id + "." + prefix + "." + i;
+                if (!ids.Contains(id)) return id;
+            }
+        }
+
+        // Новый размер рисунка: разметка пересчитывается, точки — в той же доле.
+        private void ResizeCanvas(LocalLocationDefinition location, float width, float height, int hexesAcross)
+        {
+            width = Mathf.Clamp(width, 256, 8192);
+            height = Mathf.Clamp(height, 256, 8192);
+            WorldMapTerrainLayer old = location.CreateTerrainLayer();
+            float sx = width / Mathf.Max(1, location.CanvasWidth), sy = height / Mathf.Max(1, location.CanvasHeight);
+            void Scale(LocalPointData point) { if (point == null) return; point.X *= sx; point.Y *= sy; }
+            location.CanvasWidth = width;
+            location.CanvasHeight = height;
+            location.HexesAcross = WorldMapHexGrid.SanitizeHexesAcross(hexesAcross);
+            location.TerrainCells = old.IsEmpty ? string.Empty : old.ResampleTo(location.CreateGrid()).Encode();
+            location.Entrances.ForEach(item => Scale(item.Point));
+            location.Objects.ForEach(item => Scale(item.Point));
+            location.Enemies.ForEach(item => Scale(item.Point));
+            foreach (LocalEncounterDefinition encounter in location.Encounters)
+            {
+                Scale(encounter.RetreatPoint); Scale(encounter.ArenaCenter);
+                encounter.TriggerArea.X *= sx; encounter.TriggerArea.Width *= sx;
+                encounter.TriggerArea.Y *= sy; encounter.TriggerArea.Height *= sy;
+            }
+            viewCenter = new Vector2(width, height) / 2;
+            zoom = 1;
+        }
+
+        // ------------------------------------------------------------------
+        // Предпросмотр
+        // ------------------------------------------------------------------
 
         private void RebuildPreview()
         {
             ReleasePreview();
-            if (Visual == null || Field == null || EditorApplication.isPlayingOrWillChangePlaymode) return;
+            if (Location == null || Field == null || EditorApplication.isPlayingOrWillChangePlaymode) return;
             preview = new PreviewRenderUtility(true);
             renderer = new LocationWorldRenderer(Location, Visual, Field);
             renderer.Camera.enabled = false;
+            geometry = renderer.Geometry;
             preview.AddSingleGO(renderer.Root);
             preview.camera.orthographic = true;
             preview.camera.GetUniversalAdditionalCameraData().SetRenderer(0);
             preview.camera.GetUniversalAdditionalCameraData().renderPostProcessing = false;
             preview.camera.clearFlags = CameraClearFlags.SolidColor;
             preview.camera.backgroundColor = new Color(.035f, .045f, .04f);
-            List<HexCoord> cells = new List<HexCoord>(renderer.Geometry.Region(new HexCoord(Visual.TestStart.x, Visual.TestStart.y)));
-            HexCoord start = new HexCoord(Visual.TestStart.x, Visual.TestStart.y);
-            cells.Sort((a, b) => a.DistanceTo(start).CompareTo(b.DistanceTo(start)));
-            List<KeyValuePair<string, HexCoord>> members = new List<KeyValuePair<string, HexCoord>>();
-            int count = Mathf.Min(cells.Count, Visual.TestFollowers + 1);
-            for (int i = 0; i < count; i++) members.Add(new KeyValuePair<string, HexCoord>("preview_" + i, cells[i]));
-            if (count > 0) { mover = new LocalPartyMover(renderer.Geometry.IsPassable, renderer.Geometry.StepCost, members); renderer.AddTestActors(count); }
+            RebuildTerrainOverlay();
         }
+
+        private void RebuildTerrainOverlay()
+        {
+            if (terrainOverlay != null) DestroyImmediate(terrainOverlay);
+            terrainOverlay = null;
+            LocalLocationDefinition location = Location;
+            if (location == null) return;
+            WorldMapTerrainLayer layer = paintLayer ?? location.CreateTerrainLayer();
+            int width = Mathf.Clamp(Mathf.RoundToInt(location.CanvasWidth / 8), 8, 512);
+            int height = Mathf.Clamp(Mathf.RoundToInt(location.CanvasHeight / 8), 8, 512);
+            terrainOverlay = new Texture2D(width, height, TextureFormat.RGBA32, false) { hideFlags = HideFlags.HideAndDontSave, filterMode = FilterMode.Point };
+            Color[] colors = new Color[width * height];
+            WorldMapMovementRules rules = location.MovementRules;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    WorldMapGameplayTerrainType type = layer.GetAtPixel((x + .5) / width * location.CanvasWidth, (1 - (y + .5) / height) * location.CanvasHeight);
+                    Color color = !rules.IsTraversable(type) ? new Color(1, .15f, .1f, .38f)
+                        : rules.RunSpeedMultiplier(type) < LocalLocationGeometry.DifficultRunMultiplier ? new Color(1, .75f, .2f, .28f)
+                        : type == WorldMapGameplayTerrainType.OpenGround ? Color.clear : new Color(.4f, .8f, 1, .18f);
+                    colors[y * width + x] = color;
+                }
+            }
+            terrainOverlay.SetPixels(colors);
+            terrainOverlay.Apply();
+        }
+
         private void ReleasePreview()
         {
-            renderer?.Dispose(); renderer = null;
-            preview?.Cleanup(); preview = null; mover = null;
+            renderer?.Dispose(); renderer = null; geometry = null;
+            preview?.Cleanup(); preview = null;
+            if (terrainOverlay != null) DestroyImmediate(terrainOverlay);
+            terrainOverlay = null;
         }
+
         private void Tick()
         {
             double now = EditorApplication.timeSinceStartup;
@@ -348,168 +695,436 @@ namespace KingdomSurvival.LocationRendering.Editor
             hourSlider?.SetValueWithoutNotify(hour);
             canvas?.MarkDirtyRepaint();
         }
-        private Rect FrameRect(Rect area)
+
+        private Rect CanvasFrame(Rect area)
         {
-            float height = Mathf.Min(area.height, area.width / BattlefieldFrame.Aspect);
-            return new Rect(area.center.x - height * BattlefieldFrame.Aspect / 2, area.center.y - height / 2,
-                height * BattlefieldFrame.Aspect, height);
+            float aspect = CanvasSize.x / CanvasSize.y;
+            float height = Mathf.Min(area.height, area.width / aspect);
+            return new Rect(area.center.x - height * aspect / 2, area.center.y - height / 2, height * aspect, height);
         }
-        private Vector2 MouseWorld(Rect frame, Vector2 mouse) => pan + new Vector2(
-            (mouse.x - frame.center.x) / frame.height, -(mouse.y - frame.center.y) / frame.height) * LocationVisualDefinition.WorldHeight / zoom;
-        private Vector2 WorldMouse(Rect frame, Vector2 world) => frame.center + new Vector2(world.x - pan.x, -(world.y - pan.y)) *
-            frame.height * zoom / LocationVisualDefinition.WorldHeight;
+
+        private Vector2 ToPixel(Rect frame, Vector2 mouse) => viewCenter + (mouse - frame.center) * (ViewHeight / frame.height);
+        private Vector2 ToGui(Rect frame, Vector2 pixel) => frame.center + (pixel - viewCenter) * (frame.height / ViewHeight);
 
         private void DrawPreview()
         {
             Rect area = new Rect(0, 0, canvas.contentRect.width, canvas.contentRect.height);
             if (area.width < 10 || area.height < 10) return;
             EditorGUI.DrawRect(area, new Color(.045f, .055f, .05f));
-            Rect frame = FrameRect(area);
             if (renderer == null || preview == null)
-            { GUI.Label(area, EditorApplication.isPlaying ? "Локация запущена во вкладке Game." : "Выберите локацию с художественной сборкой."); return; }
+            {
+                GUI.Label(area, EditorApplication.isPlaying ? "Локация запущена во вкладке Game." : "Выберите место с полем боя.");
+                return;
+            }
+            Rect frame = CanvasFrame(area);
             Event evt = Event.current;
-            Vector2 world = MouseWorld(frame, evt.mousePosition);
-            if ((evt.type == EventType.DragUpdated || evt.type == EventType.DragPerform) && frame.Contains(evt.mousePosition))
-            {
-                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
-                if (evt.type == EventType.DragPerform)
-                {
-                    DragAndDrop.AcceptDrag();
-                    Sprite[] sprites = DragAndDrop.objectReferences.OfType<Sprite>().ToArray();
-                    foreach (Sprite sprite in sprites) AddObject(sprite, LocationPlaceholder.None, world);
-                    foreach (string path in DragAndDrop.paths)
-                    {
-                        if (sprites.Any(sprite => AssetDatabase.GetAssetPath(sprite) == path)) continue;
-                        Sprite sprite = ImportSprite(path);
-                        if (sprite != null) AddObject(sprite, LocationPlaceholder.None, world);
-                    }
-                }
-                evt.Use(); return;
-            }
-            if (evt.type == EventType.ScrollWheel && frame.Contains(evt.mousePosition))
-            { zoom = Mathf.Clamp(zoom * Mathf.Pow(1.1f, -evt.delta.y), .6f, 4); evt.Use(); }
-            if (evt.type == EventType.MouseDown && frame.Contains(evt.mousePosition))
-            {
-                if (evt.button == 1) { lastPointer = evt.mousePosition; evt.Use(); }
-                else if (evt.button == 0)
-                {
-                    if (setStart)
-                    {
-                        if (LocationVisualGeometry.TryCell(Field, world, out HexCoord cell) && renderer.Geometry.IsPassable(cell))
-                        { Change(() => Visual.TestStart = new Vector2Int(cell.Q, cell.R)); setStart = false; status.text = "Точка старта поставлена."; }
-                        else status.text = "Точка должна быть на проходимой клетке.";
-                    }
-                    else if (setPivot && Object != null)
-                    {
-                        SpriteRenderer image = renderer.FindObject(Object.Id);
-                        if (image != null)
-                        {
-                            Bounds bounds = image.bounds;
-                            Vector2 pivot = new Vector2(Mathf.Clamp01((world.x - bounds.min.x) / bounds.size.x),
-                                Mathf.Clamp01((world.y - bounds.min.y) / bounds.size.y));
-                            LocationVisualObject selected = Object;
-                            Change(() => { selected.Pivot = pivot; selected.Position = LocationVisualGeometry.ToNormalized(world); }, true);
-                            setPivot = false; status.text = "Точка опоры поставлена.";
-                        }
-                    }
-                    else
-                    {
-                        selectedObjectId = Visual.Objects.Where(item => !item.Hidden && renderer.FindObject(item.Id) != null &&
-                            renderer.FindObject(item.Id).bounds.Contains(new Vector3(world.x, world.y, 0)))
-                            .OrderByDescending(item => renderer.FindObject(item.Id).sortingOrder).FirstOrDefault()?.Id;
-                        BuildSettings();
-                        dragging = Object != null && !Object.Locked;
-                        if (dragging) { Undo.RecordObject(database, "Переместить объект или группу"); lastPointer = world; }
-                    }
-                    evt.Use();
-                }
-            }
-            if (evt.type == EventType.MouseDrag)
-            {
-                if (evt.button == 1)
-                {
-                    Vector2 delta = evt.mousePosition - lastPointer;
-                    pan -= new Vector2(delta.x, -delta.y) * LocationVisualDefinition.WorldHeight / frame.height / zoom;
-                    lastPointer = evt.mousePosition; evt.Use();
-                }
-                else if (dragging && Object != null)
-                {
-                    Vector2 delta = world - lastPointer;
-                    LocationVisualObject selected = Object;
-                    foreach (LocationVisualObject item in Visual.Objects)
-                        if (!item.Locked && (item == selected || (!string.IsNullOrEmpty(selected.GroupId) && item.GroupId == selected.GroupId)))
-                        {
-                            item.Position += new Vector2(delta.x / LocationVisualDefinition.WorldWidth, -delta.y / LocationVisualDefinition.WorldHeight);
-                            renderer.MoveObject(item.Id, item.Position);
-                        }
-                    lastPointer = world; EditorUtility.SetDirty(database); evt.Use();
-                }
-            }
-            if (evt.type == EventType.MouseUp && dragging)
-            {
-                // Отпустили — пересчитать проходимость оснований и записать.
-                dragging = false; RebuildPreview(); AssetDatabase.SaveAssetIfDirty(database); evt.Use();
-            }
-            if (evt.type != EventType.Repaint || preview == null) return;
+            Vector2 pixel = ToPixel(frame, evt.mousePosition);
+            if (HandleDrop(evt, frame, pixel) || HandleInput(evt, frame, pixel)) return;
+            if (evt.type != EventType.Repaint) return;
+
             renderer.SetTime(hour, (float)EditorApplication.timeSinceStartup);
-            if (mover != null) renderer.RenderActors(mover.Members, (float)EditorApplication.timeSinceStartup);
-            preview.camera.transform.position = new Vector3(pan.x, pan.y, -10);
+            RenderPreviewActors();
+            Vector2 world = LocationVisualGeometry.PixelToWorld(Location, viewCenter);
+            preview.camera.transform.position = new Vector3(world.x, world.y, -10);
             preview.camera.transform.rotation = Quaternion.identity;
-            preview.camera.orthographicSize = LocationVisualDefinition.WorldHeight / zoom / 2;
+            preview.camera.orthographicSize = ViewHeight / LocationVisualGeometry.PixelsPerUnit / 2;
             preview.BeginPreview(frame, GUIStyle.none);
             preview.Render(true);
             Texture texture = preview.EndPreview();
             GUI.DrawTexture(frame, texture, ScaleMode.StretchToFill);
-            if (showGrid || showBlocked)
+            Vector2 mouse = evt.mousePosition;
+            GUI.BeginClip(frame);
+            Vector2 shift = -frame.position;
+            if (showTerrain && terrainOverlay != null)
             {
-                Handles.BeginGUI();
-                foreach (HexCoord cell in SandboxArenaShape.Cells())
-                {
-                    Vector2 p = WorldMouse(frame, LocationVisualGeometry.CellPosition(Field, cell));
-                    bool blocked = !renderer.Geometry.IsPassable(cell);
-                    if (showBlocked && blocked) EditorGUI.DrawRect(new Rect(p - new Vector2(9, 6), new Vector2(18, 12)), new Color(1, .2f, .12f, .7f));
-                    else if (showGrid) { Handles.color = new Color(.8f, .8f, .65f, .4f); Handles.DrawWireDisc(p, Vector3.forward, 5); }
-                }
-                foreach (LocationVisualObject item in Visual.Objects)
-                {
-                    if (!showBlocked || item.Hidden || !item.BlocksMovement) continue;
-                    Vector2 a = WorldMouse(frame, LocationVisualGeometry.ToWorld(item.Position) - item.Footprint / 2);
-                    Vector2 b = WorldMouse(frame, LocationVisualGeometry.ToWorld(item.Position) + item.Footprint / 2);
-                    Handles.DrawSolidRectangleWithOutline(new Rect(Vector2.Min(a, b), new Vector2(Mathf.Abs(b.x - a.x), Mathf.Abs(b.y - a.y))),
-                        new Color(1, .35f, .15f, .1f), new Color(1, .4f, .2f, .8f));
-                }
-                Handles.EndGUI();
+                Vector2 a = ToGui(frame, Vector2.zero) + shift, b = ToGui(frame, CanvasSize) + shift;
+                GUI.DrawTexture(Rect.MinMaxRect(a.x, a.y, b.x, b.y), terrainOverlay, ScaleMode.StretchToFill, true);
             }
-            if (Object != null)
+            DrawOverlays(frame, shift);
+            if (tool == Tool.Terrain && frame.Contains(mouse))
             {
-                Vector2 p = WorldMouse(frame, LocationVisualGeometry.ToWorld(Object.Position));
+                Handles.color = new Color(1, 1, 1, .7f);
+                Handles.DrawWireDisc(mouse + shift, Vector3.forward, brushRadius * frame.height / ViewHeight);
+            }
+            GUI.EndClip();
+        }
+
+        private void RenderPreviewActors()
+        {
+            List<LocationWorldRenderer.ActorFrame> frames = new List<LocationWorldRenderer.ActorFrame>();
+            if (Visual != null)
+            {
+                Vector2 start = LocationVisualGeometry.ToPixel(Location, Visual.TestStartPoint);
+                frames.Add(new LocationWorldRenderer.ActorFrame { Id = "preview_hero", UnitTypeId = Visual.TestUnitId, Pixel = start });
+            }
+            foreach (LocalEnemyDefinition enemy in Location.Enemies)
+            {
+                if (enemy == null || enemy.Point == null) continue;
+                frames.Add(new LocationWorldRenderer.ActorFrame
+                {
+                    Id = "preview_" + enemy.InstanceId, UnitTypeId = enemy.UnitTypeId,
+                    Kind = LocationWorldRenderer.ActorKind.Enemy, Pixel = new Vector2(enemy.Point.X, enemy.Point.Y)
+                });
+            }
+            renderer.SetActors(frames, (float)EditorApplication.timeSinceStartup);
+        }
+
+        private void DrawOverlays(Rect frame, Vector2 shift)
+        {
+            LocalLocationDefinition location = Location;
+            Vector2 Gui(float x, float y) => ToGui(frame, new Vector2(x, y)) + shift;
+            float scale = frame.height / ViewHeight;
+            Handles.BeginGUI();
+            if (showArena && geometry != null && Field != null)
+            {
+                foreach (LocalEncounterDefinition encounter in location.Encounters)
+                {
+                    bool active = encounter == SelectedEncounter;
+                    LocalAreaData area = encounter.TriggerArea;
+                    Vector2 a = Gui(area.X, area.Y), b = Gui(area.X + area.Width, area.Y + area.Height);
+                    Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(a.x, a.y, b.x, b.y), new Color(1, .45f, .1f, active ? .16f : .07f), new Color(1, .5f, .15f, .9f));
+                    Vector2 retreat = Gui(encounter.RetreatPoint.X, encounter.RetreatPoint.Y);
+                    Handles.color = new Color(.4f, .7f, 1f, .95f);
+                    Handles.DrawWireDisc(retreat, Vector3.forward, 7);
+                    GUI.Label(new Rect(retreat.x + 8, retreat.y - 9, 120, 18), "отход");
+                    if (!active) continue;
+                    List<LocalPointData> anchor = location.Enemies.Where(enemy => enemy.EncounterId == encounter.Id).Select(enemy => enemy.Point).ToList();
+                    anchor.Add(new LocalPointData(area.X + area.Width / 2, area.Y + area.Height / 2));
+                    Vector2 arenaCenter = geometry.ArenaCenterFor(encounter, anchor);
+                    Rect rect = geometry.FrameRect(arenaCenter);
+                    Vector2 fa = Gui(rect.xMin, rect.yMin), fb = Gui(rect.xMax, rect.yMax);
+                    Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(fa.x, fa.y, fb.x, fb.y), Color.clear, new Color(.95f, .9f, .6f, .9f));
+                    HashSet<HexCoord> blocked = geometry.ArenaBlockedCells(arenaCenter);
+                    HashSet<HexCoord> difficult = geometry.ArenaDifficultCells(arenaCenter);
+                    BattlefieldGridLayout layout = geometry.ArenaLayout(arenaCenter);
+                    foreach (HexCoord cell in SandboxArenaShape.Cells())
+                    {
+                        Vector2 center = layout.GetCenter(cell.Q, cell.R);
+                        Vector2 p = Gui(center.x, center.y);
+                        Handles.color = blocked.Contains(cell) ? new Color(1, .25f, .2f, .9f)
+                            : difficult.Contains(cell) ? new Color(1, .8f, .3f, .9f) : new Color(.85f, .85f, .7f, .55f);
+                        Handles.DrawWireDisc(p, Vector3.forward, Mathf.Max(3, layout.Size * scale * .8f));
+                    }
+                }
+            }
+            if (showMarkers)
+            {
+                foreach (LocalEntranceDefinition entrance in location.Entrances)
+                    Marker(Gui(entrance.Point.X, entrance.Point.Y), new Color(.35f, .9f, .45f), entrance.Label, selectedKind == Kind.Entrance && selectedElementId == entrance.Id);
+                foreach (LocalObjectDefinition item in location.Objects)
+                {
+                    Vector2 p = Gui(item.Point.X, item.Point.Y);
+                    Handles.color = new Color(.95f, .8f, .4f, .35f);
+                    Handles.DrawWireDisc(p, Vector3.forward, item.InteractRadius * scale);
+                    Marker(p, new Color(.95f, .8f, .4f), item.Label, selectedKind == Kind.GameObject && selectedElementId == item.Id);
+                }
+                foreach (LocalEnemyDefinition enemy in location.Enemies)
+                    Marker(Gui(enemy.Point.X, enemy.Point.Y), new Color(.95f, .35f, .3f), enemy.InstanceId, selectedKind == Kind.Enemy && selectedElementId == enemy.InstanceId);
+                if (Visual != null)
+                {
+                    Vector2 start = LocationVisualGeometry.ToPixel(location, Visual.TestStartPoint);
+                    Marker(Gui(start.x, start.y), new Color(.6f, .8f, 1f), "старт теста", false);
+                }
+            }
+            LocationVisualObject art = ArtObject;
+            if (art != null)
+            {
+                Vector2 point = LocationVisualGeometry.ToPixel(location, art.Position);
+                Vector2 p = Gui(point.x, point.y);
                 EditorGUI.DrawRect(new Rect(p.x - 5, p.y - 1, 10, 2), Color.yellow);
                 EditorGUI.DrawRect(new Rect(p.x - 1, p.y - 5, 2, 10), Color.yellow);
+                if (art.BlocksMovement)
+                {
+                    Vector2 size = art.Footprint * LocationVisualGeometry.PixelsPerUnit * scale;
+                    Handles.DrawSolidRectangleWithOutline(new Rect(p - size / 2, size), new Color(1, .35f, .15f, .1f), new Color(1, .4f, .2f, .8f));
+                }
             }
+            Handles.EndGUI();
         }
-        private void AddObject(Sprite sprite, LocationPlaceholder placeholder, Vector2? world = null)
+
+        private static void Marker(Vector2 p, Color color, string label, bool selected)
+        {
+            Handles.color = color;
+            Handles.DrawSolidDisc(p, Vector3.forward, selected ? 7 : 5);
+            if (selected) { Handles.color = Color.white; Handles.DrawWireDisc(p, Vector3.forward, 10); }
+            GUIStyle style = new GUIStyle(EditorStyles.miniBoldLabel) { normal = { textColor = color } };
+            GUI.Label(new Rect(p.x + 9, p.y - 9, 220, 18), label, style);
+        }
+
+        private bool HandleDrop(Event evt, Rect frame, Vector2 pixel)
+        {
+            if ((evt.type != EventType.DragUpdated && evt.type != EventType.DragPerform) || !frame.Contains(evt.mousePosition)) return false;
+            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+            if (evt.type == EventType.DragPerform)
+            {
+                DragAndDrop.AcceptDrag();
+                Sprite[] sprites = DragAndDrop.objectReferences.OfType<Sprite>().ToArray();
+                foreach (Sprite sprite in sprites) AddArtObject(sprite, LocationPlaceholder.None, pixel);
+                foreach (string path in DragAndDrop.paths)
+                {
+                    if (sprites.Any(sprite => AssetDatabase.GetAssetPath(sprite) == path)) continue;
+                    Sprite sprite = ImportSprite(path);
+                    if (sprite != null) AddArtObject(sprite, LocationPlaceholder.None, pixel);
+                }
+            }
+            evt.Use();
+            return true;
+        }
+
+        private bool HandleInput(Event evt, Rect frame, Vector2 pixel)
+        {
+            LocalLocationDefinition location = Location;
+            if (evt.type == EventType.ScrollWheel && frame.Contains(evt.mousePosition))
+            {
+                Vector2 before = pixel;
+                zoom = Mathf.Clamp(zoom * Mathf.Pow(1.1f, -evt.delta.y), .5f, 8);
+                viewCenter += before - ToPixel(frame, evt.mousePosition);
+                evt.Use(); return true;
+            }
+            if (evt.type == EventType.MouseDown && evt.button == 1 && frame.Contains(evt.mousePosition))
+            {
+                lastPointer = evt.mousePosition; evt.Use(); return true;
+            }
+            if (evt.type == EventType.MouseDrag && evt.button == 1)
+            {
+                viewCenter -= (evt.mousePosition - lastPointer) * (ViewHeight / frame.height);
+                lastPointer = evt.mousePosition; evt.Use(); return true;
+            }
+            if (evt.type == EventType.MouseDown && evt.button == 0 && frame.Contains(evt.mousePosition))
+            {
+                MouseDown(location, frame, pixel);
+                evt.Use(); return true;
+            }
+            if (evt.type == EventType.MouseDrag && evt.button == 0 && dragging)
+            {
+                MouseDrag(location, pixel);
+                evt.Use(); return true;
+            }
+            if (evt.type == EventType.MouseUp && evt.button == 0 && dragging)
+            {
+                MouseUp(location, pixel);
+                evt.Use(); return true;
+            }
+            return false;
+        }
+
+        private void MouseDown(LocalLocationDefinition location, Rect frame, Vector2 pixel)
+        {
+            LocalPointData point = new LocalPointData(pixel.x, pixel.y);
+            switch (tool)
+            {
+                case Tool.Terrain:
+                    Undo.RecordObject(database, "Местность места");
+                    paintLayer = location.CreateTerrainLayer();
+                    Paint(pixel);
+                    dragging = true;
+                    return;
+                case Tool.Entrance:
+                    Change(() =>
+                    {
+                        LocalEntranceDefinition entrance = SelectedEntrance;
+                        if (entrance == null) { entrance = new LocalEntranceDefinition { Id = UniqueId(location, "entry"), Label = "Вход" }; location.Entrances.Add(entrance); }
+                        entrance.Point = point; selectedKind = Kind.Entrance; selectedElementId = entrance.Id;
+                    }, true);
+                    return;
+                case Tool.ObjectPoint:
+                    Change(() =>
+                    {
+                        LocalObjectDefinition item = SelectedGameObject;
+                        if (item == null)
+                        {
+                            item = new LocalObjectDefinition { Id = UniqueId(location, "object"), Label = "Объект", ActionLabel = "Осмотреть", Kind = LocalObjectKind.Inspect, Text = "Описание." };
+                            location.Objects.Add(item);
+                        }
+                        item.Point = point; selectedKind = Kind.GameObject; selectedElementId = item.Id;
+                    }, true);
+                    return;
+                case Tool.Enemy:
+                    Change(() =>
+                    {
+                        LocalEnemyDefinition enemy = SelectedEnemy;
+                        if (enemy == null)
+                        {
+                            enemy = new LocalEnemyDefinition { InstanceId = UniqueId(location, "enemy"), UnitTypeId = "forest_beast", Level = 1,
+                                EncounterId = location.Encounters.FirstOrDefault()?.Id ?? string.Empty };
+                            location.Enemies.Add(enemy);
+                        }
+                        enemy.Point = point; selectedKind = Kind.Enemy; selectedElementId = enemy.InstanceId;
+                    }, true);
+                    return;
+                case Tool.TriggerArea:
+                    if (SelectedEncounter == null) { status.text = "Сначала выберите или добавьте столкновение."; return; }
+                    Undo.RecordObject(database, "Зона угрозы");
+                    dragStart = pixel; dragging = true;
+                    return;
+                case Tool.ArenaFrame:
+                    LocalEncounterDefinition framed = SelectedEncounter;
+                    if (framed == null) { status.text = "Сначала выберите или добавьте столкновение."; return; }
+                    Change(() => { framed.HasArenaCenter = true; framed.ArenaCenter = point; }, true);
+                    return;
+                case Tool.RetreatPoint:
+                    LocalEncounterDefinition retreating = SelectedEncounter;
+                    if (retreating == null) { status.text = "Сначала выберите или добавьте столкновение."; return; }
+                    Change(() => retreating.RetreatPoint = point, true);
+                    return;
+                case Tool.TestStart:
+                    if (Visual == null) return;
+                    if (geometry != null && !geometry.IsPassable(pixel.x, pixel.y)) { status.text = "Точка должна быть проходимой."; return; }
+                    Change(() => Visual.TestStartPoint = LocationVisualGeometry.ToNormalized(location, pixel));
+                    status.text = "Точка старта поставлена.";
+                    return;
+                case Tool.Pivot:
+                    LocationVisualObject art = ArtObject;
+                    SpriteRenderer image = art != null ? renderer.FindObject(art.Id) : null;
+                    if (image == null) return;
+                    Vector2 world = LocationVisualGeometry.PixelToWorld(location, pixel);
+                    Bounds bounds = image.bounds;
+                    Vector2 pivot = new Vector2(Mathf.Clamp01((world.x - bounds.min.x) / bounds.size.x), Mathf.Clamp01((world.y - bounds.min.y) / bounds.size.y));
+                    Change(() => { art.Pivot = pivot; art.Position = LocationVisualGeometry.ToNormalized(location, pixel); }, true);
+                    tool = Tool.Select; status.text = "Точка опоры поставлена.";
+                    return;
+            }
+
+            // Выбор: метки места ближе всего, затем предметы рисунка.
+            float pick = 12 * ViewHeight / frame.height;
+            (Kind kind, string id) hit = PickMarker(location, pixel, pick);
+            if (hit.kind == Kind.None && Visual != null)
+            {
+                Vector2 world = LocationVisualGeometry.PixelToWorld(location, pixel);
+                string artId = Visual.Objects.Where(item => !item.Hidden && renderer.FindObject(item.Id) != null &&
+                        renderer.FindObject(item.Id).bounds.Contains(new Vector3(world.x, world.y, 0)))
+                    .OrderByDescending(item => renderer.FindObject(item.Id).sortingOrder).FirstOrDefault()?.Id;
+                if (artId != null) hit = (Kind.Art, artId);
+            }
+            if (hit.kind == Kind.None && showArena)
+            {
+                LocalEncounterDefinition encounter = location.Encounters.FirstOrDefault(item => item.TriggerArea.Contains(pixel.x, pixel.y));
+                if (encounter != null) hit = (Kind.Encounter, encounter.Id);
+            }
+            selectedKind = hit.kind; selectedElementId = hit.id;
+            BuildSettings();
+            bool locked = hit.kind == Kind.Art && ArtObject != null && ArtObject.Locked;
+            dragging = hit.kind != Kind.None && !locked;
+            if (dragging) { Undo.RecordObject(database, "Переместить"); lastPointer = pixel; }
+        }
+
+        private (Kind, string) PickMarker(LocalLocationDefinition location, Vector2 pixel, float radius)
+        {
+            (Kind, string) best = (Kind.None, null);
+            float bestDistance = radius;
+            void Try(Kind kind, string id, LocalPointData point)
+            {
+                if (point == null) return;
+                float distance = (float)point.DistanceTo(pixel.x, pixel.y);
+                if (distance <= bestDistance) { bestDistance = distance; best = (kind, id); }
+            }
+            if (!showMarkers) return best;
+            location.Entrances.ForEach(item => Try(Kind.Entrance, item.Id, item.Point));
+            location.Objects.ForEach(item => Try(Kind.GameObject, item.Id, item.Point));
+            location.Enemies.ForEach(item => Try(Kind.Enemy, item.InstanceId, item.Point));
+            return best;
+        }
+
+        private void MouseDrag(LocalLocationDefinition location, Vector2 pixel)
+        {
+            if (tool == Tool.Terrain) { Paint(pixel); return; }
+            if (tool == Tool.TriggerArea)
+            {
+                LocalEncounterDefinition encounter = SelectedEncounter;
+                if (encounter == null) return;
+                Rect rect = Rect.MinMaxRect(Mathf.Min(dragStart.x, pixel.x), Mathf.Min(dragStart.y, pixel.y), Mathf.Max(dragStart.x, pixel.x), Mathf.Max(dragStart.y, pixel.y));
+                encounter.TriggerArea = new LocalAreaData(rect.x, rect.y, rect.width, rect.height);
+                EditorUtility.SetDirty(database);
+                return;
+            }
+            Vector2 delta = pixel - lastPointer;
+            lastPointer = pixel;
+            void Move(LocalPointData point) { if (point != null) { point.X += delta.x; point.Y += delta.y; } }
+            switch (selectedKind)
+            {
+                case Kind.Entrance: Move(SelectedEntrance?.Point); break;
+                case Kind.GameObject: Move(SelectedGameObject?.Point); break;
+                case Kind.Enemy: Move(SelectedEnemy?.Point); break;
+                case Kind.Encounter:
+                    LocalEncounterDefinition encounter = SelectedEncounter;
+                    if (encounter != null) { encounter.TriggerArea.X += delta.x; encounter.TriggerArea.Y += delta.y; }
+                    break;
+                case Kind.Art:
+                    LocationVisualObject selected = ArtObject;
+                    if (selected == null) break;
+                    Vector2 normalized = new Vector2(delta.x / CanvasSize.x, delta.y / CanvasSize.y);
+                    foreach (LocationVisualObject item in Visual.Objects)
+                    {
+                        if (!item.Locked && (item == selected || (!string.IsNullOrEmpty(selected.GroupId) && item.GroupId == selected.GroupId)))
+                        {
+                            item.Position += normalized;
+                            renderer.MoveObject(item.Id, item.Position);
+                        }
+                    }
+                    break;
+            }
+            EditorUtility.SetDirty(database);
+        }
+
+        private void MouseUp(LocalLocationDefinition location, Vector2 pixel)
+        {
+            dragging = false;
+            if (tool == Tool.Terrain && paintLayer != null)
+            {
+                location.TerrainCells = paintLayer.Encode();
+                paintLayer = null;
+            }
+            EditorUtility.SetDirty(database);
+            // Отпустили — пересчитать проходимость и записать.
+            RebuildPreview();
+            BuildSettings();
+            AssetDatabase.SaveAssetIfDirty(database);
+        }
+
+        private void Paint(Vector2 pixel)
+        {
+            if (paintLayer == null) return;
+            WorldMapHexGrid grid = paintLayer.Grid;
+            for (int index = 0; index < grid.CellCount; index++)
+            {
+                WorldMapHexCell cell = grid.CellAt(index);
+                grid.CellCenter(cell, out double x, out double y);
+                if ((x - pixel.x) * (x - pixel.x) + (y - pixel.y) * (y - pixel.y) <= brushRadius * brushRadius)
+                    paintLayer.Set(cell, brushTerrain);
+            }
+            RebuildTerrainOverlay();
+        }
+
+        // ------------------------------------------------------------------
+        // Предметы рисунка, проверка, запуск, места
+        // ------------------------------------------------------------------
+
+        private void AddArtObject(Sprite sprite, LocationPlaceholder placeholder, Vector2? pixel = null)
         {
             if (Visual == null) return;
+            LocalLocationDefinition location = Location;
             Change(() =>
             {
                 LocationVisualObject item = new LocationVisualObject { Sprite = sprite, Placeholder = placeholder,
                     Name = sprite != null ? sprite.name : placeholder == LocationPlaceholder.Fire ? "Костёр" : "Палатка",
-                    Position = LocationVisualGeometry.ToNormalized(world ?? Vector2.zero),
+                    Position = LocationVisualGeometry.ToNormalized(location, pixel ?? viewCenter),
                     Height = placeholder == LocationPlaceholder.Fire ? .8f : 1.8f,
                     // В костёр и в палатку не встают.
                     BlocksMovement = placeholder == LocationPlaceholder.Tent || placeholder == LocationPlaceholder.Fire,
                     CastsShadow = placeholder == LocationPlaceholder.Tent };
                 if (placeholder == LocationPlaceholder.Fire) item.Light.Enabled = true;
-                Visual.Objects.Add(item); selectedObjectId = item.Id;
+                Visual.Objects.Add(item); selectedKind = Kind.Art; selectedElementId = item.Id;
             }, true);
         }
+
         private void ImportPng()
         {
             string path = EditorUtility.OpenFilePanel("Загрузить PNG локации", "", "png");
             if (string.IsNullOrEmpty(path)) return;
             Sprite sprite = ImportSprite(path);
-            if (sprite != null) AddObject(sprite, LocationPlaceholder.None);
+            if (sprite != null) AddArtObject(sprite, LocationPlaceholder.None);
         }
+
         internal static Sprite ImportSprite(string path)
         {
             if (!File.Exists(path)) return null;
@@ -534,15 +1149,30 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
             return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
+
+        private List<string> CollectErrors()
+        {
+            DialogueDatabaseAsset dialogues = DialogueDatabaseRuntime.LoadDefaultDatabase();
+            UnitDatabaseAsset units = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
+            List<string> errors = LocalLocationValidator.Validate(Location, fields,
+                id => dialogues != null && dialogues.FindDialogue(id) != null,
+                id => units != null && units.FindById(id) != null,
+                LocationVisualGeometry.BlockedAreas(Visual, Location));
+            if (Visual != null) errors.AddRange(LocationVisualGeometry.Validate(Location, Visual, Field));
+            return errors;
+        }
+
         private void Validate()
         {
-            List<string> errors = LocationVisualGeometry.Validate(Location, Visual, Field);
+            List<string> errors = CollectErrors();
             status.text = errors.Count == 0 ? "Проверка пройдена." : string.Join(" · ", errors);
             if (errors.Count > 0) EditorUtility.DisplayDialog("Проверка локации", string.Join("\n", errors), "Понятно");
         }
+
         private void Launch()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            if (Visual == null) { status.text = "Для запуска нужна художественная сборка (кнопка справа)."; return; }
             List<string> errors = LocationVisualGeometry.Validate(Location, Visual, Field);
             if (errors.Count > 0) { Validate(); return; }
             AssetDatabase.SaveAssetIfDirty(database);
@@ -550,32 +1180,38 @@ namespace KingdomSurvival.LocationRendering.Editor
             ReleasePreview();
             LocationLightingTestBootstrap.Launch(selectedId, hour);
         }
+
         private void AddLocation()
         {
             string sourceFieldId = Field?.Id ?? LocationLightingTestBootstrap.FieldId;
             Change(() =>
             {
                 selectedId = "location_" + Guid.NewGuid().ToString("N").Substring(0, 8);
-                database.locations.Add(new LocalLocationDefinition { Id = selectedId, DisplayName = "Новая локация",
-                    WorldLocationId = "__technical", BattlefieldId = sourceFieldId,
-                    Entrances = new List<LocalEntranceDefinition> { new LocalEntranceDefinition { Id = "entry", Label = "Вход", Cell = new LocalCellData(4, 4) } } });
+                database.locations.Add(new LocalLocationDefinition
+                {
+                    Id = selectedId, DisplayName = "Новая локация", WorldLocationId = "__technical", BattlefieldId = sourceFieldId,
+                    Entrances = new List<LocalEntranceDefinition> { new LocalEntranceDefinition { Id = "entry", Label = "Вход", Point = new LocalPointData(960, 540) } }
+                });
                 database.visuals.Add(new LocationVisualDefinition { LocationId = selectedId, TechnicalTest = true });
                 RefreshList();
             }, true);
         }
+
         private void DuplicateLocation()
         {
-            if (Location == null || Visual == null) return;
+            if (Location == null) return;
             Change(() =>
             {
                 LocalLocationDefinition location = JsonUtility.FromJson<LocalLocationDefinition>(JsonUtility.ToJson(Location));
-                LocationVisualDefinition visual = JsonUtility.FromJson<LocationVisualDefinition>(JsonUtility.ToJson(Visual));
+                LocationVisualDefinition visual = Visual != null ? JsonUtility.FromJson<LocationVisualDefinition>(JsonUtility.ToJson(Visual)) : null;
                 selectedId = "location_" + Guid.NewGuid().ToString("N").Substring(0, 8);
                 location.Id = selectedId; location.DisplayName += " · копия"; location.WorldLocationId = "__technical";
-                visual.LocationId = selectedId; visual.TechnicalTest = true;
-                database.locations.Add(location); database.visuals.Add(visual); RefreshList();
+                database.locations.Add(location);
+                if (visual != null) { visual.LocationId = selectedId; visual.TechnicalTest = true; database.visuals.Add(visual); }
+                RefreshList();
             }, true);
         }
+
         private void DeleteLocation()
         {
             if (Location == null || selectedId == LocationLightingTestBootstrap.CampId) return;
@@ -589,9 +1225,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             Change(() =>
             {
                 database.locations.Remove(location); database.visuals.Remove(visual);
-                selectedId = LocationLightingTestBootstrap.CampId; selectedObjectId = null; RefreshList();
+                selectedId = LocationLightingTestBootstrap.CampId; selectedKind = Kind.None; RefreshList();
             }, true);
         }
+
         // Свойство связанного поля Базы полей боя (общее для боя и всех мест с ним).
         private SerializedProperty FieldProperty(SerializedObject serialized, string name)
         {
@@ -599,6 +1236,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (index < 0) return null;
             return serialized.FindProperty("battlefields").GetArrayElementAtIndex(index).FindPropertyRelative(name);
         }
+
         private void ApplyField(string undoName, Action<SerializedProperty> apply, string name)
         {
             if (Field == null) return;
@@ -612,32 +1250,21 @@ namespace KingdomSurvival.LocationRendering.Editor
             fieldsSaveAt = EditorApplication.timeSinceStartup + .5;
             rebuildRequested = true;
         }
-        private double fieldsSaveAt = -1;
+
         private void FieldNumber(string label, string name, float value, float min, float max)
         {
-            Slider field = new Slider(label, min, max) { value = value, showInputField = true };
+            Slider field = new Slider(label, min, max) { value = value, showInputField = true,
+                tooltip = "Настройка поля в Базе полей боя: меняет и бой, и все места с этим полем." };
             field.RegisterValueChangedCallback(evt => ApplyField("Изменить поле", property => property.floatValue = evt.newValue, name));
             settings.Add(field);
         }
+
         private void FieldVector(string label, string name, Vector2 value)
         {
-            Vector2Field field = new Vector2Field(label) { value = value };
+            Vector2Field field = new Vector2Field(label) { value = value,
+                tooltip = "Настройка поля в Базе полей боя: меняет и бой, и все места с этим полем." };
             field.RegisterValueChangedCallback(evt => ApplyField("Изменить поле", property => property.vector2Value = evt.newValue, name));
             settings.Add(field);
-        }
-        private void SetGround(Sprite sprite)
-        {
-            if (Field == null) return;
-            Undo.RecordObject(fields, "Изменить фон поля");
-            SerializedObject serialized = new SerializedObject(fields);
-            SerializedProperty array = serialized.FindProperty("battlefields");
-            int index = fields.Battlefields.ToList().FindIndex(item => item.Id == Location.BattlefieldId);
-            SerializedProperty field = array.GetArrayElementAtIndex(index);
-            field.FindPropertyRelative("background").objectReferenceValue = sprite;
-            field.FindPropertyRelative("awaitingArt").boolValue = sprite == null;
-            serialized.ApplyModifiedProperties();
-            AssetDatabase.SaveAssetIfDirty(fields);
-            status.text = "Обновлён фон связанного поля. Его используют все места с этим полем.";
         }
     }
 }

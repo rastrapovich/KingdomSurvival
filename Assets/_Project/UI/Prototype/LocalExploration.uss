@@ -1,7 +1,7 @@
 /* ================================================================
-   ПР-12К: ИССЛЕДУЕМОЕ МЕСТО (канон v1.53 §28.3)
-   Поле — на весь экран; панели лежат поверх и не сжимают поле, поэтому
-   фон и клетки не сдвигаются при начале боя на месте.
+   ПР-12К: ИССЛЕДУЕМОЕ МЕСТО (канон v1.54 §28.3)
+   Рисунок места — на весь экран; панели лежат поверх и не сжимают его,
+   поэтому при начале боя на месте картинка не сдвигается.
    ================================================================ */
 
 .local-exploration-screen {
@@ -73,10 +73,7 @@
 
 .local-exploration-exit-button { height: 32px; }
 
-/* Объекты места: подпись над клеткой. */
-.local-object-marker {
-    align-items: center;
-}
+/* Объекты места: подпись над точкой объекта. */
 .local-object-label {
     font-size: 12px;
     -unity-font-style: bold;
@@ -88,12 +85,12 @@
     border-left-color: rgb(91, 80, 62); border-right-color: rgb(91, 80, 62);
     border-top-color: rgb(91, 80, 62); border-bottom-color: rgb(91, 80, 62);
 }
-.local-object-marker--active .local-object-label {
+.local-object-label--active {
     color: rgb(232, 196, 120);
     border-left-color: rgb(196, 152, 76); border-right-color: rgb(196, 152, 76);
     border-top-color: rgb(196, 152, 76); border-bottom-color: rgb(196, 152, 76);
 }
-.local-object-marker--done .local-object-label {
+.local-object-label--done {
     color: rgb(140, 136, 128);
 }
 
@@ -104,19 +101,3 @@
     border-top-color: rgb(232, 196, 120); border-bottom-color: rgb(232, 196, 120);
 }
 
-.local-actor-token {
-    -unity-text-align: middle-center;
-    -unity-font-style: bold;
-    color: rgb(250, 240, 220);
-    border-radius: 50%;
-    background-color: rgba(70, 64, 52, 0.92);
-    border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;
-    border-left-color: rgb(196, 152, 76); border-right-color: rgb(196, 152, 76);
-    border-top-color: rgb(196, 152, 76); border-bottom-color: rgb(196, 152, 76);
-}
-.local-actor--retinue .local-actor-token {
-    background-color: rgba(52, 60, 70, 0.92);
-}
-.local-actor--enemy .local-actor-token {
-    background-color: rgba(96, 40, 32, 0.92);
-}

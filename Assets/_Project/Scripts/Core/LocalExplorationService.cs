@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-// ПР-12К (канон v1.53 §28.3): исследуемое место — команды и правила без
-// Unity. Геометрия (проходимость, путь, расстановка) считается слоем поля
-// боя; здесь — что изменилось в месте и как бой на месте возвращает итог.
+// ПР-12К (канон v1.54 §28.3): исследуемое место — команды и правила без
+// Unity. Геометрия (проходимость, путь, кадр арены) считается слоем места
+// (LocalLocationGeometry); здесь — что изменилось в месте и как бой на месте
+// возвращает итог.
 //
 // Рабочее правило противников после отхода [РАБОЧЕЕ]: выжившие звери
-// возвращаются в логово (свою авторскую клетку), раны остаются; убитые не
+// возвращаются в логово (свою авторскую точку), раны остаются; убитые не
 // появляются снова. Исцеление — только по отдельному правилу сценария.
 public static class LocalExplorationService
 {
@@ -103,15 +104,15 @@ public static class LocalExplorationService
         location.Visited = true;
         EnsureEnemies(state, definition);
 
-        // Отряд входит у входа; точные клетки без наложения расставляет слой
-        // поля (NormalizeParty), здесь — только точка сбора.
+        // Отряд входит у входа; точки без наложения расставляет слой места
+        // (SpreadAround), здесь — только точка сбора.
         foreach (string personId in PartyPresence.PresentIds(state))
         {
             data.Party.Add(new LocalActorStateData
             {
                 ActorId = personId,
-                Q = entrance != null ? entrance.Cell.Q : 0,
-                R = entrance != null ? entrance.Cell.R : 0
+                X = entrance != null ? entrance.Point.X : 0,
+                Y = entrance != null ? entrance.Point.Y : 0
             });
         }
         return true;
@@ -147,21 +148,36 @@ public static class LocalExplorationService
             return;
         }
 
-        // Погибших и ушедших из похода в месте нет.
+        // Погибших и ушедших из похода в месте нет. Точка вне рисунка (старое
+        // сохранение с клетками вместо точек) — к входу.
+        LocalEntranceDefinition entrance = definition.FindEntrance(data.EntranceId);
+        float entranceX = entrance != null ? entrance.Point.X : 0;
+        float entranceY = entrance != null ? entrance.Point.Y : 0;
         List<string> present = PartyPresence.PresentIds(state);
         data.Party.RemoveAll(actor => actor == null || !present.Contains(actor.ActorId));
+        foreach (LocalActorStateData actor in data.Party)
+        {
+            if (!IsOnCanvas(definition, actor.X, actor.Y) || (actor.X == 0 && actor.Y == 0))
+            {
+                actor.X = entranceX;
+                actor.Y = entranceY;
+            }
+        }
         foreach (string personId in present)
         {
             if (!data.Party.Exists(actor => actor.ActorId == personId))
             {
                 LocalActorStateData hero = data.Party.Count > 0 ? data.Party[0] : null;
-                data.Party.Add(new LocalActorStateData { ActorId = personId, Q = hero?.Q ?? 0, R = hero?.R ?? 0 });
+                data.Party.Add(new LocalActorStateData { ActorId = personId, X = hero?.X ?? entranceX, Y = hero?.Y ?? entranceY });
             }
         }
         EnsureEnemies(state, definition);
     }
 
-    public static void StorePartyPosition(GameState state, string personId, int q, int r, int facing)
+    private static bool IsOnCanvas(LocalLocationDefinition definition, float x, float y) =>
+        x >= 0 && y >= 0 && x <= definition.CanvasWidth && y <= definition.CanvasHeight;
+
+    public static void StorePartyPosition(GameState state, string personId, float x, float y, int facing)
     {
         LocalExplorationStateData data = Data(state);
         if (data == null || !data.IsActive || string.IsNullOrEmpty(personId))
@@ -172,8 +188,8 @@ public static class LocalExplorationService
             actor = new LocalActorStateData { ActorId = personId };
             data.Party.Add(actor);
         }
-        actor.Q = q;
-        actor.R = r;
+        actor.X = x;
+        actor.Y = y;
         actor.Facing = facing;
     }
 
@@ -181,7 +197,7 @@ public static class LocalExplorationService
     // Противники, объекты, столкновения
     // ------------------------------------------------------------------
 
-    // Противники места заводятся при первом входе по авторским клеткам.
+    // Противники места заводятся при первом входе по авторским точкам.
     // Исчерпанное историей столкновение (флаг) — его противников нет:
     // старая партия, очистившая логово до локальной карты, не встретит их.
     public static void EnsureEnemies(GameState state, LocalLocationDefinition definition)
@@ -196,7 +212,7 @@ public static class LocalExplorationService
             LocalActorStateData actor = location.Enemies.Find(item => item.ActorId == enemy.InstanceId);
             if (actor == null)
             {
-                actor = new LocalActorStateData { ActorId = enemy.InstanceId, Q = enemy.Cell.Q, R = enemy.Cell.R };
+                actor = new LocalActorStateData { ActorId = enemy.InstanceId, X = enemy.Point.X, Y = enemy.Point.Y };
                 location.Enemies.Add(actor);
             }
             LocalEncounterDefinition encounter = definition.FindEncounter(enemy.EncounterId);
@@ -235,14 +251,14 @@ public static class LocalExplorationService
         return AliveEnemies(state, definition, encounter.Id).Count > 0;
     }
 
-    // Столкновение, которое начинает шаг командира в эту клетку; null — нет.
-    public static LocalEncounterDefinition EncounterAt(GameState state, LocalLocationDefinition definition, int q, int r)
+    // Столкновение, в зону угрозы которого вошёл командир; null — нет.
+    public static LocalEncounterDefinition EncounterAt(GameState state, LocalLocationDefinition definition, double x, double y)
     {
         if (definition == null)
             return null;
         foreach (LocalEncounterDefinition encounter in definition.Encounters)
         {
-            if (encounter != null && encounter.TriggerCells.Exists(cell => cell.Is(q, r)) &&
+            if (encounter?.TriggerArea != null && encounter.TriggerArea.Contains(x, y) &&
                 IsEncounterActive(state, definition, encounter))
                 return encounter;
         }
@@ -293,13 +309,17 @@ public static class LocalExplorationService
         return encounter.BattleIdPrefix + attempt;
     }
 
-    // Запрос боя на месте. partyCells — клетки присутствующих (расставлены
-    // слоем поля без наложения); в бой идут только кандидаты присутствия.
+    // Запрос боя на месте. Клетки кадра арены (участников, противников, стен)
+    // считает слой места по разметке и кадру поля; в бой идут только
+    // кандидаты присутствия.
     public static CampaignBattleRequest BuildEncounterRequest(
         GameState state,
         LocalLocationDefinition definition,
         LocalEncounterDefinition encounter,
-        IReadOnlyDictionary<string, LocalCellData> partyCells)
+        IReadOnlyDictionary<string, LocalCellData> partyCells,
+        IReadOnlyDictionary<string, LocalCellData> enemyCells,
+        IEnumerable<LocalCellData> blockedCells,
+        IEnumerable<LocalCellData> difficultCells = null)
     {
         if (state == null || definition == null || encounter == null)
             throw new ArgumentNullException(nameof(encounter));
@@ -312,13 +332,11 @@ public static class LocalExplorationService
         request.LocalLocationId = definition.Id;
         request.BattlefieldId = definition.BattlefieldId;
         request.AllowRetreat = encounter.AllowRetreat;
-        foreach (LocalCellData cell in definition.DifficultCells)
+        request.IgnoreFieldDisabledCells = true;
+        foreach (LocalCellData cell in blockedCells ?? new List<LocalCellData>())
+            request.BlockedCells.Add(new CampaignBattleCell { Q = cell.Q, R = cell.R });
+        foreach (LocalCellData cell in difficultCells ?? new List<LocalCellData>())
             request.DifficultCells.Add(new CampaignBattleCell { Q = cell.Q, R = cell.R });
-        foreach (LocalObjectDefinition item in definition.Objects)
-        {
-            if (item?.Cell != null)
-                request.BlockedCells.Add(new CampaignBattleCell { Q = item.Cell.Q, R = item.Cell.R });
-        }
 
         foreach (CampaignBattleParticipant participant in request.Participants)
         {
@@ -333,6 +351,8 @@ public static class LocalExplorationService
         foreach (LocalActorStateData actor in AliveEnemies(state, definition, encounter.Id))
         {
             LocalEnemyDefinition enemy = definition.FindEnemy(actor.ActorId);
+            LocalCellData cell = null;
+            enemyCells?.TryGetValue(enemy.InstanceId, out cell);
             request.Enemies.Add(new CampaignBattleEnemy
             {
                 UnitTypeId = enemy.UnitTypeId,
@@ -340,9 +360,9 @@ public static class LocalExplorationService
                 Count = 1,
                 InstanceId = enemy.InstanceId,
                 CurrentHitPoints = actor.HitPoints,
-                HasCell = true,
-                CellQ = actor.Q,
-                CellR = actor.R
+                HasCell = cell != null,
+                CellQ = cell?.Q ?? 0,
+                CellR = cell?.R ?? 0
             });
         }
 
@@ -383,13 +403,13 @@ public static class LocalExplorationService
             LocalEnemyDefinition enemy = definition?.FindEnemy(record.InstanceId);
             if (retreat && enemy != null)
             {
-                actor.Q = enemy.Cell.Q;
-                actor.R = enemy.Cell.R;
+                actor.X = enemy.Point.X;
+                actor.Y = enemy.Point.Y;
             }
-            else if (record.HasCell)
+            else if (record.HasPoint)
             {
-                actor.Q = record.CellQ;
-                actor.R = record.CellR;
+                actor.X = record.PointX;
+                actor.Y = record.PointY;
             }
         }
 
@@ -398,7 +418,7 @@ public static class LocalExplorationService
             location.ResolvedEncounterIds.Add(result.EncounterId);
 
         // Отряд: выжившие — где стояли; при отходе — к безопасной точке
-        // (точные клетки без наложения расставит слой поля).
+        // (точки без наложения расставит слой места).
         LocalExplorationStateData data = Data(state);
         if (!data.IsActive || data.ActiveLocalLocationId != result.LocalLocationId)
             return;
@@ -411,13 +431,13 @@ public static class LocalExplorationService
                 continue;
             if (retreat && encounter != null)
             {
-                actor.Q = encounter.RetreatCell.Q;
-                actor.R = encounter.RetreatCell.R;
+                actor.X = encounter.RetreatPoint.X;
+                actor.Y = encounter.RetreatPoint.Y;
             }
-            else if (survivor.HasCell)
+            else if (survivor.HasPoint)
             {
-                actor.Q = survivor.CellQ;
-                actor.R = survivor.CellR;
+                actor.X = survivor.PointX;
+                actor.Y = survivor.PointY;
             }
         }
         // Не сражавшиеся (свита, раненые) при отходе уходят вместе со всеми.
@@ -427,8 +447,8 @@ public static class LocalExplorationService
             {
                 if (result.Survivors == null || !result.Survivors.Exists(survivor => survivor.PersonId == actor.ActorId))
                 {
-                    actor.Q = encounter.RetreatCell.Q;
-                    actor.R = encounter.RetreatCell.R;
+                    actor.X = encounter.RetreatPoint.X;
+                    actor.Y = encounter.RetreatPoint.Y;
                 }
             }
         }

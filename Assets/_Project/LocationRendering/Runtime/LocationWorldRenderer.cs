@@ -2,17 +2,36 @@ using System;
 using System.Collections.Generic;
 using KingdomSurvival.AnimationDatabase;
 using KingdomSurvival.BattlefieldDatabase;
-using KingdomSurvival.BattleSandbox;
 using KingdomSurvival.UnitDatabase;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 namespace KingdomSurvival.LocationRendering
 {
-    // Один визуальный слой для редактора и теста. Не владеет сохранением/часами кампании.
+    // ПР-12К (канон v1.54 §28.3): один рендерер места — для окна «База
+    // локаций», тестовой сцены света и игры. Рисует рисунок места (или
+    // заглушку по разметке местности), предметы художественной сборки со
+    // светом и тенями и фигуры. Бой на месте идёт поверх той же картинки:
+    // камера совмещает кадр арены на рисунке с полем боя на экране.
+    // Не владеет сохранением и часами кампании.
     public sealed class LocationWorldRenderer : IDisposable
     {
+        public enum ActorKind { Party, Retinue, Enemy }
+
+        // Как показать одного участника в этом кадре.
+        public struct ActorFrame
+        {
+            public string Id;
+            public string UnitTypeId;
+            public ActorKind Kind;
+            // Опора фигуры — точка рисунка места (пиксели, Y вниз).
+            public Vector2 Pixel;
+            // Направление взгляда на рисунке (Y вниз); ноль — прежнее.
+            public Vector2 Direction;
+            public bool Walking;
+            public bool Wounded;
+        }
+
         private sealed class Placed
         {
             public LocationVisualObject Data;
@@ -20,41 +39,59 @@ namespace KingdomSurvival.LocationRendering
             public SpriteRenderer Image;
             public Light2D Light;
         }
+
         private sealed class Actor
         {
+            public string Id;
+            public string UnitTypeId;
             public Transform Anchor;
             public SpriteRenderer Image;
             public CreatureAnimationPlayer Player;
             public UnitDefinitionData Unit;
+            public HexFacing Facing = HexFacing.East;
+            public bool Seen;
         }
+
+        // Высота фигуры в размерах клетки боя — как у поля боя.
+        public const float FieldHeightInHexSizes = 1.35f;
 
         public GameObject Root { get; }
         public Camera Camera { get; }
         public Light2D GlobalLight { get; private set; }
         public LocalLocationGeometry Geometry { get; }
+        public LocalLocationDefinition Location { get; }
         public LocationVisualDefinition Definition { get; }
         public BattlefieldDefinitionData Field { get; }
         public float Hour { get; private set; } = 13;
+        public RenderTexture Target { get; private set; }
+
+        // Видимая область: центр и высота в пикселях рисунка.
+        public Vector2 ViewCenter { get; private set; }
+        public float ViewHeight { get; private set; }
+
         private readonly List<Placed> placed = new List<Placed>();
-        private readonly List<Actor> actors = new List<Actor>();
+        private readonly Dictionary<string, Actor> actors = new Dictionary<string, Actor>(StringComparer.Ordinal);
         private readonly List<UnityEngine.Object> owned = new List<UnityEngine.Object>();
+        private readonly List<Light2D> suppressed = new List<Light2D>();
         private readonly Material lit, unlit;
         private readonly CreatureAnimationDatabaseAsset animations;
+        private readonly UnitDatabaseAsset units;
+        private readonly Transform actorLayer;
+        private Sprite placeholderActor, placeholderShadow;
 
-        public LocationWorldRenderer(LocalLocationDefinition location, LocationVisualDefinition definition,
+        public LocationWorldRenderer(LocalLocationDefinition location, LocationVisualDefinition visual,
             BattlefieldDefinitionData field, Transform parent = null)
         {
-            Definition = definition ?? throw new ArgumentNullException(nameof(definition));
+            Location = location ?? throw new ArgumentNullException(nameof(location));
+            Definition = visual ?? new LocationVisualDefinition { LocationId = location.Id };
             Field = field;
-            Geometry = new LocalLocationGeometry(location, field, LocationVisualGeometry.BlockedCells(definition, field));
+            Geometry = new LocalLocationGeometry(location, field, LocationVisualGeometry.BlockedAreas(Definition, location));
             Root = new GameObject("Локация · " + location.DisplayName);
             if (parent != null) Root.transform.SetParent(parent, false);
             lit = Own(new Material(Shader.Find("Universal Render Pipeline/2D/Sprite-Lit-Default")));
             unlit = Own(new Material(Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default")));
             Camera = Child("Камера").AddComponent<Camera>();
             Camera.orthographic = true;
-            Camera.orthographicSize = LocationVisualDefinition.WorldHeight / 2;
-            Camera.aspect = BattlefieldFrame.Aspect;
             Camera.transform.localPosition = new Vector3(0, 0, -10);
             Camera.clearFlags = CameraClearFlags.SolidColor;
             Camera.backgroundColor = new Color(.035f, .045f, .04f);
@@ -62,33 +99,30 @@ namespace KingdomSurvival.LocationRendering
             Camera.GetUniversalAdditionalCameraData().renderPostProcessing = false;
             GlobalLight = Child("Общий свет").AddComponent<Light2D>();
             GlobalLight.lightType = Light2D.LightType.Global;
-            Sprite background = field?.Background;
-            // Unity-ссылка может сохранять managed-обёртку после удаления native-объекта.
-            if (background == null) background = PlaceholderSprite(LocationPlaceholder.None, true);
-            SpriteRenderer ground = Image(Child("Земля"), background, false);
-            ground.color = field?.Background != null ? Color.white : new Color(.40f, .43f, .34f);
-            ground.sortingOrder = -30000;
-            Vector2 size = background.bounds.size;
-            ground.transform.localScale = new Vector3(LocationVisualDefinition.WorldWidth / size.x,
-                LocationVisualDefinition.WorldHeight / size.y, 1);
-            if (field?.Background != null)
-            {
-                ground.transform.localScale *= field.BackgroundScale;
-                ground.transform.localPosition = new Vector3(field.BackgroundOffset.x * LocationVisualDefinition.WorldWidth,
-                    -field.BackgroundOffset.y * LocationVisualDefinition.WorldHeight, 0);
-            }
-            foreach (LocationVisualObject item in definition.Objects) AddObject(item);
+
+            BuildGround();
+            foreach (LocationVisualObject item in Definition.Objects) AddObject(item);
+            actorLayer = Child("Фигуры").transform;
             animations = Resources.Load<CreatureAnimationDatabaseAsset>(CreatureAnimationDatabaseAsset.ResourcesPath);
+            units = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
+            ShowWhole();
             SetTime(13, 0);
         }
 
+        public Vector2 CanvasSize => LocationVisualGeometry.CanvasSize(Location);
+
+        // Размер клетки боя на рисунке (пиксели) — от него рост фигур.
+        public float HexSizePixels => Field != null ? Geometry.ArenaHexSize : 40f;
+
         private T Own<T>(T value) where T : UnityEngine.Object { owned.Add(value); return value; }
+
         private GameObject Child(string name)
         {
             GameObject child = new GameObject(name);
             child.transform.SetParent(Root.transform, false);
             return child;
         }
+
         private SpriteRenderer Image(GameObject target, Sprite sprite, bool fullbright)
         {
             SpriteRenderer renderer = target.AddComponent<SpriteRenderer>();
@@ -96,11 +130,69 @@ namespace KingdomSurvival.LocationRendering
             renderer.sharedMaterial = fullbright ? unlit : lit;
             return renderer;
         }
+
+        // Рисунок места на весь размер рисунка; нет рисунка — заглушка по
+        // разметке местности (камень, пол, осыпь, вода), чтобы стены были видны.
+        private void BuildGround()
+        {
+            Sprite background = Definition.Background;
+            bool placeholder = background == null;
+            if (placeholder) background = TerrainPlaceholder();
+            SpriteRenderer ground = Image(Child("Земля"), background, false);
+            ground.sortingOrder = -30000;
+            Vector2 size = background.bounds.size;
+            Vector2 world = LocationVisualGeometry.WorldSize(Location);
+            ground.transform.localScale = new Vector3(world.x / size.x, world.y / size.y, 1);
+        }
+
+        private Sprite TerrainPlaceholder()
+        {
+            WorldMapTerrainLayer layer = Location.CreateTerrainLayer();
+            Vector2 canvas = CanvasSize;
+            int width = Mathf.Clamp(Mathf.RoundToInt(canvas.x / 8), 8, 512);
+            int height = Mathf.Clamp(Mathf.RoundToInt(canvas.y / 8), 8, 512);
+            bool empty = layer.IsEmpty;
+            Texture2D texture = Own(new Texture2D(width, height, TextureFormat.RGBA32, false));
+            texture.name = "Техническая заглушка места";
+            texture.filterMode = FilterMode.Bilinear;
+            texture.wrapMode = TextureWrapMode.Clamp;
+            Color[] colors = new Color[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    double px = (x + .5) / width * canvas.x;
+                    double py = (1 - (y + .5) / height) * canvas.y;
+                    colors[y * width + x] = empty ? new Color(.40f, .43f, .34f) : TerrainColor(layer.GetAtPixel(px, py));
+                }
+            }
+            texture.SetPixels(colors);
+            texture.Apply();
+            return Own(Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(.5f, .5f), 100));
+        }
+
+        public static Color TerrainColor(WorldMapGameplayTerrainType terrain)
+        {
+            switch (terrain)
+            {
+                case WorldMapGameplayTerrainType.Cliffs: return new Color(.10f, .095f, .09f);
+                case WorldMapGameplayTerrainType.Mountains: return new Color(.22f, .21f, .20f);
+                case WorldMapGameplayTerrainType.Hills: return new Color(.36f, .31f, .24f);
+                case WorldMapGameplayTerrainType.Road: return new Color(.40f, .35f, .27f);
+                case WorldMapGameplayTerrainType.Trail: return new Color(.33f, .29f, .23f);
+                case WorldMapGameplayTerrainType.Field: return new Color(.36f, .38f, .22f);
+                case WorldMapGameplayTerrainType.Forest: return new Color(.17f, .24f, .14f);
+                case WorldMapGameplayTerrainType.Swamp: return new Color(.20f, .24f, .18f);
+                case WorldMapGameplayTerrainType.Water: return new Color(.12f, .20f, .27f);
+                default: return new Color(.27f, .24f, .20f);
+            }
+        }
+
         private void AddObject(LocationVisualObject item)
         {
             if (item == null || item.Hidden) return;
             Transform anchor = Child(item.Name).transform;
-            anchor.localPosition = LocationVisualGeometry.ToWorld(item.Position);
+            anchor.localPosition = LocationVisualGeometry.ToWorld(Location, item.Position);
             GameObject imageObject = new GameObject("Рисунок");
             imageObject.transform.SetParent(anchor, false);
             Sprite sprite = item.ResolveSprite();
@@ -154,56 +246,247 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
-        public void AddTestActors(int count)
+        // Общий свет сцены, в которую встроено место (глобальная карта),
+        // не должен складываться со светом места: на время показа гасится.
+        public void SuppressOtherGlobalLights()
         {
-            UnitDatabaseAsset units = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
-            UnitDefinitionData unit = null;
-            if (units != null)
-                foreach (UnitDefinitionData candidate in units.Units)
-                    if (candidate.Id == Definition.TestUnitId) { unit = candidate; break; }
-            for (int i = 0; i < count; i++)
+            foreach (Light2D light in UnityEngine.Object.FindObjectsByType<Light2D>(FindObjectsSortMode.None))
             {
-                Transform anchor = Child(i == 0 ? "Командир" : "Спутник " + i).transform;
-                GameObject imageObject = new GameObject("Персонаж");
-                imageObject.transform.SetParent(anchor, false);
-                Actor actor = new Actor { Anchor = anchor, Unit = unit,
-                    Image = Image(imageObject, unit?.BattlefieldSprite ?? PlaceholderActor(), false) };
-                CreatureAnimationSetData set = animations?.FindSet(unit?.AnimationSetId);
-                if (set != null && set.HasAnyFrames)
-                    actor.Player = new CreatureAnimationPlayer(set, CreatureAnimationDirection.Front, i * .3f);
-                actor.Image.color = i == 0 ? Color.white : new Color(.87f, .86f, .78f);
-                actors.Add(actor);
-                SpriteRenderer shadow = Image(new GameObject("Тень под ногами"), PlaceholderEllipse(), false);
-                shadow.transform.SetParent(anchor, false);
-                shadow.transform.localScale = new Vector3(.65f, .19f, 1);
-                shadow.color = new Color(0, 0, 0, .35f);
-                shadow.sortingOrder = -24000;
+                if (light == null || light == GlobalLight || !light.enabled || light.lightType != Light2D.LightType.Global ||
+                    light.transform.IsChildOf(Root.transform))
+                    continue;
+                light.enabled = false;
+                suppressed.Add(light);
             }
         }
 
-        public void RenderActors(IReadOnlyList<LocalPartyMover.Member> members, float seconds)
+        private void RestoreSuppressedLights()
         {
-            float defaultHeight = LocationVisualGeometry.Layout(Field).Size * 1.35f;
-            for (int i = 0; i < actors.Count && i < members.Count; i++)
+            foreach (Light2D light in suppressed)
             {
-                Actor actor = actors[i];
-                LocalPartyMover.Member member = members[i];
-                actor.Anchor.localPosition = Vector2.Lerp(LocationVisualGeometry.CellPosition(Field, member.Cell),
-                    LocationVisualGeometry.CellPosition(Field, member.Next), member.Stepping ? member.Progress : 0);
-                float height = defaultHeight * (actor.Unit?.BattlefieldScale ?? 1);
-                Vector2 pivot = new Vector2(.5f, .15f), offset = Vector2.zero;
-                if (actor.Player != null)
+                if (light != null) light.enabled = true;
+            }
+            suppressed.Clear();
+        }
+
+        // ------------------------------------------------------------------
+        // Камера: рисунок места ↔ кадр на экране
+        // ------------------------------------------------------------------
+
+        // Камера рисует в текстуру (экран исследования в UI Toolkit). Размер
+        // меняется — текстура пересоздаётся.
+        public RenderTexture EnsureTarget(int width, int height)
+        {
+            width = Mathf.Max(16, width);
+            height = Mathf.Max(16, height);
+            if (Target != null && Target.width == width && Target.height == height)
+                return Target;
+            if (Target != null)
+            {
+                Camera.targetTexture = null;
+                Target.Release();
+                Destroy(Target);
+                owned.Remove(Target);
+            }
+            Target = Own(new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32) { name = "Место · кадр" });
+            Target.Create();
+            Camera.targetTexture = Target;
+            Camera.aspect = width / (float)height;
+            ApplyView();
+            return Target;
+        }
+
+        private float Aspect => Camera.aspect > 0.01f ? Camera.aspect : BattlefieldFrame.Aspect;
+
+        // Весь рисунок по высоте.
+        public void ShowWhole() => SetView(CanvasSize / 2, CanvasSize.y);
+
+        public void SetView(Vector2 centerPixel, float heightPixels)
+        {
+            ViewHeight = Mathf.Max(32, heightPixels);
+            ViewCenter = centerPixel;
+            ApplyView();
+        }
+
+        // Следить за точкой; край рисунка не уходит внутрь кадра.
+        public void LookAt(Vector2 pixel, float heightPixels)
+        {
+            ViewHeight = Mathf.Max(32, heightPixels);
+            Vector2 canvas = CanvasSize;
+            float halfH = ViewHeight / 2, halfW = halfH * Aspect;
+            float x = canvas.x <= halfW * 2 ? canvas.x / 2 : Mathf.Clamp(pixel.x, halfW, canvas.x - halfW);
+            float y = canvas.y <= halfH * 2 ? canvas.y / 2 : Mathf.Clamp(pixel.y, halfH, canvas.y - halfH);
+            ViewCenter = new Vector2(x, y);
+            ApplyView();
+        }
+
+        // Бой: прямоугольник рисунка canvasRect (кадр арены) должен совпасть
+        // с прямоугольником viewportRect (доли кадра камеры, Y вниз), где
+        // поле боя рисует свою арену.
+        public void AlignFrame(Rect canvasRect, Rect viewportRect)
+        {
+            if (viewportRect.height <= 0.0001f || viewportRect.width <= 0.0001f)
+                return;
+            ViewHeight = canvasRect.height / viewportRect.height;
+            float viewWidth = ViewHeight * Aspect;
+            ViewCenter = new Vector2(
+                canvasRect.center.x + (.5f - viewportRect.center.x) * viewWidth,
+                canvasRect.center.y + (.5f - viewportRect.center.y) * ViewHeight);
+            ApplyView();
+        }
+
+        private void ApplyView()
+        {
+            Camera.orthographicSize = ViewHeight / LocationVisualGeometry.PixelsPerUnit / 2;
+            Vector2 world = LocationVisualGeometry.PixelToWorld(Location, ViewCenter);
+            Camera.transform.localPosition = new Vector3(world.x, world.y, -10);
+        }
+
+        // Доли кадра камеры (Y вниз) ↔ пиксели рисунка места.
+        public Vector2 ViewportToPixel(Vector2 viewport) => ViewCenter + new Vector2(
+            (viewport.x - .5f) * ViewHeight * Aspect, (viewport.y - .5f) * ViewHeight);
+
+        public Vector2 PixelToViewport(Vector2 pixel) => new Vector2(
+            (pixel.x - ViewCenter.x) / (ViewHeight * Aspect) + .5f, (pixel.y - ViewCenter.y) / ViewHeight + .5f);
+
+        // ------------------------------------------------------------------
+        // Фигуры
+        // ------------------------------------------------------------------
+
+        public bool ActorsVisible
+        {
+            get => actorLayer.gameObject.activeSelf;
+            set => actorLayer.gameObject.SetActive(value);
+        }
+
+        public void SetActors(IReadOnlyList<ActorFrame> frames, float seconds)
+        {
+            foreach (Actor actor in actors.Values) actor.Seen = false;
+            float hexWorld = HexSizePixels / LocationVisualGeometry.PixelsPerUnit;
+            foreach (ActorFrame frame in frames)
+            {
+                if (string.IsNullOrEmpty(frame.Id)) continue;
+                if (!actors.TryGetValue(frame.Id, out Actor actor) || actor.UnitTypeId != (frame.UnitTypeId ?? string.Empty))
                 {
-                    actor.Player.SetDirection(animations.GetDirection((HexFacing)member.Facing));
-                    CreatureAnimationAction action = member.Stepping ? CreatureAnimationAction.Walk : CreatureAnimationAction.Idle;
-                    if (actor.Player.Action != action) actor.Player.Play(action, seconds);
-                    actor.Image.sprite = actor.Player.Evaluate(seconds) ?? actor.Player.Set.FindFirstFrame();
-                    height = defaultHeight * actor.Player.Set.FieldScale;
-                    pivot = actor.Player.Set.Pivot;
-                    offset = actor.Player.Clip?.Offset ?? Vector2.zero;
+                    if (actor != null) Destroy(actor.Anchor.gameObject);
+                    actor = CreateActor(frame);
+                    actors[frame.Id] = actor;
                 }
-                Fit(actor.Image, height, pivot, false, offset);
-                actor.Image.sortingOrder = LocationVisualGeometry.SortOrder(LocationVisualBand.World, actor.Anchor.localPosition.y);
+                actor.Seen = true;
+                LayoutActor(actor, frame, hexWorld, seconds);
+            }
+            List<string> gone = new List<string>();
+            foreach (KeyValuePair<string, Actor> entry in actors)
+            {
+                if (!entry.Value.Seen) gone.Add(entry.Key);
+            }
+            foreach (string id in gone)
+            {
+                Destroy(actors[id].Anchor.gameObject);
+                actors.Remove(id);
+            }
+        }
+
+        public bool HasActor(string id) => actors.ContainsKey(id);
+
+        private Actor CreateActor(ActorFrame frame)
+        {
+            Transform anchor = new GameObject(frame.Id).transform;
+            anchor.SetParent(actorLayer, false);
+            GameObject imageObject = new GameObject("Фигура");
+            imageObject.transform.SetParent(anchor, false);
+            UnitDefinitionData unit = units != null && !string.IsNullOrEmpty(frame.UnitTypeId) ? units.FindById(frame.UnitTypeId) : null;
+            Actor actor = new Actor
+            {
+                Id = frame.Id,
+                UnitTypeId = frame.UnitTypeId ?? string.Empty,
+                Anchor = anchor,
+                Unit = unit,
+                Facing = frame.Kind == ActorKind.Enemy ? HexFacing.West : HexFacing.East
+            };
+            actor.Image = Image(imageObject, unit?.BattlefieldSprite != null ? unit.BattlefieldSprite : PlaceholderActor(), false);
+            CreatureAnimationSetData set = animations != null && unit != null ? animations.FindSet(unit.AnimationSetId) : null;
+            if (set != null && set.HasAnyFrames)
+            {
+                float phase = (frame.Id.GetHashCode() & 0x7fff) / 32767f * 2f;
+                actor.Player = new CreatureAnimationPlayer(set, DirectionFor(actor.Facing, frame.Kind), phase);
+            }
+            if (placeholderShadow == null) placeholderShadow = PlaceholderEllipse();
+            SpriteRenderer shadow = Image(new GameObject("Тень под ногами"), placeholderShadow, false);
+            shadow.transform.SetParent(anchor, false);
+            shadow.color = new Color(0, 0, 0, .35f);
+            shadow.sortingOrder = -24000;
+            return actor;
+        }
+
+        private void LayoutActor(Actor actor, ActorFrame frame, float hexWorld, float seconds)
+        {
+            actor.Anchor.localPosition = LocationVisualGeometry.PixelToWorld(Location, frame.Pixel);
+            if (frame.Direction.sqrMagnitude > 1e-6f)
+                actor.Facing = FacingFrom(frame.Direction);
+            bool mirrored = frame.Kind == ActorKind.Enemy;
+            Transform shadow = actor.Anchor.Find("Тень под ногами");
+            if (shadow != null) shadow.localScale = new Vector3(hexWorld * .9f, hexWorld * .27f, 1);
+
+            float height = hexWorld * FieldHeightInHexSizes * (actor.Unit?.BattlefieldScale ?? 1);
+            Vector2 pivot = new Vector2(.5f, .15f), offset = Vector2.zero;
+            if (actor.Player != null)
+            {
+                actor.Player.SetDirection(DirectionFor(actor.Facing, frame.Kind));
+                CreatureAnimationAction action = frame.Walking ? CreatureAnimationAction.Walk : CreatureAnimationAction.Idle;
+                if (actor.Player.Action != action) actor.Player.Play(action, seconds);
+                Sprite sprite = actor.Player.Evaluate(seconds) ?? actor.Player.Set.FindFirstFrame();
+                if (sprite != null) actor.Image.sprite = sprite;
+                height = hexWorld * FieldHeightInHexSizes * actor.Player.Set.FieldScale;
+                pivot = actor.Player.Set.Pivot;
+                offset = actor.Player.Clip?.Offset ?? Vector2.zero;
+            }
+            else if (actor.Unit?.BattlefieldSprite == null)
+            {
+                actor.Image.color = frame.Kind == ActorKind.Enemy ? new Color(.85f, .55f, .50f)
+                    : frame.Kind == ActorKind.Retinue ? new Color(.70f, .76f, .85f) : Color.white;
+            }
+            Color tint = frame.Kind == ActorKind.Retinue ? new Color(.87f, .86f, .78f) : Color.white;
+            if (frame.Wounded) tint *= new Color(.85f, .75f, .75f);
+            if (actor.Player != null || actor.Unit?.BattlefieldSprite != null) actor.Image.color = tint;
+            Fit(actor.Image, height, pivot, mirrored, offset);
+            actor.Image.sortingOrder = LocationVisualGeometry.SortOrder(LocationVisualBand.World, actor.Anchor.localPosition.y);
+        }
+
+        private CreatureAnimationDirection DirectionFor(HexFacing facing, ActorKind kind)
+        {
+            // Противники на поле зеркальны — как в бою.
+            if (kind == ActorKind.Enemy) facing = Mirror(facing);
+            if (animations != null) return animations.GetDirection(facing);
+            foreach (CreatureAnimationDirectionMapping entry in CreatureAnimationDatabaseAsset.DefaultDirectionMap())
+            {
+                if (entry.Facing == facing) return entry.Direction;
+            }
+            return CreatureAnimationDirection.Front;
+        }
+
+        // Направление на рисунке (Y вниз) → ракурс шестиугольника.
+        public static HexFacing FacingFrom(Vector2 direction)
+        {
+            float angle = Mathf.Repeat(Mathf.Atan2(-direction.y, direction.x) * Mathf.Rad2Deg, 360);
+            if (angle < 30 || angle >= 330) return HexFacing.East;
+            if (angle < 90) return HexFacing.NorthEast;
+            if (angle < 150) return HexFacing.NorthWest;
+            if (angle < 210) return HexFacing.West;
+            if (angle < 270) return HexFacing.SouthWest;
+            return HexFacing.SouthEast;
+        }
+
+        private static HexFacing Mirror(HexFacing facing)
+        {
+            switch (facing)
+            {
+                case HexFacing.East: return HexFacing.West;
+                case HexFacing.West: return HexFacing.East;
+                case HexFacing.NorthEast: return HexFacing.NorthWest;
+                case HexFacing.NorthWest: return HexFacing.NorthEast;
+                case HexFacing.SouthEast: return HexFacing.SouthWest;
+                default: return HexFacing.SouthEast;
             }
         }
 
@@ -217,10 +500,14 @@ namespace KingdomSurvival.LocationRendering
             // Sprite pivot не меняется в importer: индивидуальная опора хранится у размещения.
             Vector2 originalPivot = image.sprite.pivot / image.sprite.rect.size;
             image.transform.localPosition = new Vector2(
-                ((flip ? 1 - originalPivot.x : originalPivot.x) - pivot.x + offset.x) * width,
+                ((flip ? 1 - originalPivot.x : originalPivot.x) - (flip ? 1 - pivot.x : pivot.x) + (flip ? -offset.x : offset.x)) * width,
                 (originalPivot.y - pivot.y + offset.y) * height);
             image.flipX = flip;
         }
+
+        // ------------------------------------------------------------------
+        // Предметы сборки (редактор)
+        // ------------------------------------------------------------------
 
         public SpriteRenderer FindObject(string id) => placed.Find(item => item.Data.Id == id)?.Image;
 
@@ -230,9 +517,10 @@ namespace KingdomSurvival.LocationRendering
         {
             Placed item = placed.Find(entry => entry.Data.Id == id);
             if (item == null) return;
-            item.Anchor.localPosition = LocationVisualGeometry.ToWorld(normalizedPosition);
+            item.Anchor.localPosition = LocationVisualGeometry.ToWorld(Location, normalizedPosition);
             item.Image.sortingOrder = LocationVisualGeometry.SortOrder(item.Data.Band, item.Anchor.localPosition.y, item.Data.OrderOffset);
         }
+
         // Смена состояния одного объекта, без пересборки фона и без изменения авторских данных.
         public bool SetObjectVariant(string objectId, string variantId)
         {
@@ -243,12 +531,24 @@ namespace KingdomSurvival.LocationRendering
             Fit(item.Image, item.Data.Height, item.Data.Pivot, item.Data.FlipX, Vector2.zero);
             return true;
         }
+
         public void Dispose()
         {
+            // Свой общий свет гаснет раньше, чем включается свет сцены: двух
+            // общих источников на одном слое не бывает даже на кадр.
+            if (GlobalLight != null) GlobalLight.enabled = false;
+            RestoreSuppressedLights();
+            if (Camera != null) Camera.targetTexture = null;
             Destroy(Root);
-            foreach (UnityEngine.Object item in owned) Destroy(item);
+            foreach (UnityEngine.Object item in owned)
+            {
+                if (item is RenderTexture texture) texture.Release();
+                Destroy(item);
+            }
             owned.Clear();
+            Target = null;
         }
+
         private static void Destroy(UnityEngine.Object item)
         {
             if (item == null) return;
@@ -267,18 +567,25 @@ namespace KingdomSurvival.LocationRendering
             texture.SetPixels(colors); texture.Apply();
             return Own(Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(.5f, .5f), 100));
         }
+
         private Sprite PlaceholderEllipse() => MakeSprite(64, 32, (x, y) =>
             Mathf.Pow((x - .5f) * 2, 2) + Mathf.Pow((y - .5f) * 2, 2) <= 1 ? Color.white : Color.clear);
-        private Sprite PlaceholderActor() => MakeSprite(64, 100, (x, y) =>
+
+        private Sprite PlaceholderActor()
         {
-            if (Vector2.Distance(new Vector2(x, y), new Vector2(.5f, .80f)) < .14f) return new Color(.72f, .59f, .43f);
-            if (y > .23f && y < .70f && Mathf.Abs(x - .5f) < .20f) return new Color(.43f, .45f, .35f);
-            if (y > .04f && y < .28f && (Mathf.Abs(x - .37f) < .08f || Mathf.Abs(x - .63f) < .08f)) return new Color(.25f, .26f, .23f);
-            return Color.clear;
-        });
-        private Sprite PlaceholderSprite(LocationPlaceholder kind, bool ground = false) => MakeSprite(128, 96, (x, y) =>
+            if (placeholderActor != null) return placeholderActor;
+            placeholderActor = MakeSprite(64, 100, (x, y) =>
+            {
+                if (Vector2.Distance(new Vector2(x, y), new Vector2(.5f, .80f)) < .14f) return new Color(.72f, .59f, .43f);
+                if (y > .23f && y < .70f && Mathf.Abs(x - .5f) < .20f) return new Color(.43f, .45f, .35f);
+                if (y > .04f && y < .28f && (Mathf.Abs(x - .37f) < .08f || Mathf.Abs(x - .63f) < .08f)) return new Color(.25f, .26f, .23f);
+                return Color.clear;
+            });
+            return placeholderActor;
+        }
+
+        private Sprite PlaceholderSprite(LocationPlaceholder kind) => MakeSprite(128, 96, (x, y) =>
         {
-            if (ground) return Color.white;
             switch (kind)
             {
                 case LocationPlaceholder.Tent:

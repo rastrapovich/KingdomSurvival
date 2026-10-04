@@ -8738,6 +8738,39 @@ MonoBehaviour:
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
+    - id: PR12K-T06
+      title: "12К-6 · Движение как на глобальной карте, клетки только в бою"
+      details: "Канон v1.54 §28.3: место — рисунок с разметкой местности, свободное движение командира и спутников по следу; кадр поля Базы полей боя кладётся на рисунок в заданной точке, сетка — настройки поля; общий рендерер Базы локаций в исследовании и бою; окно базы — размер, кисть местности, точки мышью."
+      category: 8
+      status: 1
+      required: 1
+      order: 38
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12K-T05
+      acceptanceCriteria:
+      - text: "Все тесты зелёные"
+        done: 1
+      - text: "Сетка и стены боя шахты совпадают с полем old_mine_01"
+        done: 1
+      - text: "Ручная проверка мышью: ходьба, бой, окно базы"
+        done: 0
+      manualChecks:
+      - "Пройти шахту в игре и поправить место в окне «База локаций»"
+      fileReferences:
+      - KINGDOM_SURVIVAL_GAME_CONCEPT_CANON_RU_v1_54.md
+      - ProjectDocs/LOCAL_EXPLORATION_GUIDE.md
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1398 (1384/0/14), PlayMode 31/31; снимки входа, боя и лагеря просмотрены. Ручная проверка мышью в Editor не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
   - id: PR15_HOME_WATER
     title: "\u041F\u0420-15. \xAB\u0414\u043E\u043C \u043D\u0430 \u0447\u0443\u0436\u043E\u0439
       \u0432\u043E\u0434\u0435\xBB \u043D\u0430 \u043E\u0431\u0449\u0435\u0439 \u043E\u0441\u043D\u043E\u0432\u0435"

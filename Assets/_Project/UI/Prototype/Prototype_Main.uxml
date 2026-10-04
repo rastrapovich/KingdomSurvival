@@ -689,10 +689,10 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- ПР-12К (канон v1.53 §28.3): исследуемое место — небольшая локальная
-             карта. Поле (local-exploration-field) строит C#: то же поле Базы
-             полей боя, что и в бою на месте; бой на месте показывается в том же
-             контейнере. Панели — здесь и в LocalExploration.uss; диалог
+        <!-- ПР-12К (канон v1.54 §28.3): исследуемое место — небольшая локальная
+             карта. Поле (local-exploration-field) строит C#: рисунок места из
+             Базы локаций, движение как на глобальной карте; бой на месте
+             показывается в том же контейнере поверх того же рисунка. Панели — здесь и в LocalExploration.uss; диалог
              (narrative-dialogue-overlay ниже) открывается поверх. Код:
              PrototypeUIController.LocalExploration.cs. -->
         <ui:VisualElement name="local-exploration-screen" class="local-exploration-screen">

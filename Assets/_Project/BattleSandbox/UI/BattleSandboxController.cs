@@ -105,6 +105,12 @@ namespace KingdomSurvival.BattleSandbox
 
         public bool IsHostedBattleRunning => hosted && campaignBattle != null && battle != null;
 
+        // Кадр поля на экране — по нему камера рисунка места совмещает кадр
+        // арены с полем боя.
+        public BattlefieldView BattlefieldSurface { get; private set; }
+
+        private bool IsWorldUnderlayBattle => hosted && campaignBattle != null && campaignBattle.IsLocal && campaignBattle.IgnoreFieldDisabledCells;
+
         // Идущий встроенный бой (один за раз) — для оформления боевого экрана.
         internal static BattleSandboxController HostedInstance { get; private set; }
 
@@ -344,8 +350,13 @@ namespace KingdomSurvival.BattleSandbox
             {
                 PlayerFirstRoundInitiativeBonus = campaignBattle.PlayerFirstRoundInitiativeBonus
             };
-            foreach (HexCoord blocked in BattlefieldFrame.DisabledCells(field))
-                layout.BlockedCells.Add(blocked);
+            // Бой поверх рисунка места: стены — из разметки места (в запросе),
+            // отключённые гексы поля не применяются.
+            if (!campaignBattle.IgnoreFieldDisabledCells)
+            {
+                foreach (HexCoord blocked in BattlefieldFrame.DisabledCells(field))
+                    layout.BlockedCells.Add(blocked);
+            }
             foreach (CampaignBattleCell cell in campaignBattle.BlockedCells ?? new List<CampaignBattleCell>())
             {
                 HexCoord blocked = new HexCoord(cell.Q, cell.R);
@@ -979,6 +990,13 @@ namespace KingdomSurvival.BattleSandbox
             surface.style.position = Position.Relative;
             surface.style.backgroundColor = new Color(0.035f, 0.043f, 0.050f, 1f);
             surface.Show(field, style);
+            // ПР-12К: бой на месте — поверх рисунка места, кадр прозрачный.
+            if (IsWorldUnderlayBattle)
+            {
+                surface.style.backgroundColor = Color.clear;
+                surface.SetWorldUnderlay((campaignBattle.BlockedCells ?? new List<CampaignBattleCell>()).Select(cell => new HexCoord(cell.Q, cell.R)));
+            }
+            BattlefieldSurface = surface;
             // В редакторе правки окна базы видны в идущем бою.
             if (Application.isEditor)
             {

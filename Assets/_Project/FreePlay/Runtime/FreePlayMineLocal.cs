@@ -1,14 +1,19 @@
+using System;
+
 namespace KingdomSurvival.FreePlay
 {
-    // ПР-12К (канон v1.53 §28.3, §28.6): Старая шахта как исследуемое место —
+    // ПР-12К (канон v1.54 §28.3, §28.6): Старая шахта как исследуемое место —
     // пилот локальной карты. Содержание и итоги прежние (FreePlayMineStory):
     // железо в отвалах, клеймо старых работ, звери в дальней штольне, отход,
     // топор из железа и угля. Флаги истории остаются единственным источником
-    // истины о находках. Расстановка, клетки и минуты на шаг — [РАБОЧЕЕ];
+    // истины о находках. Расстановка, размеры и минуты на шаг — [РАБОЧЕЕ];
     // кто вырыл шахту — [ОТКРЫТО] (LORE.md §17.1), здесь не решается.
     //
-    // Поле old_mine_01 (База полей боя): камень сверху и снизу, стенка в
-    // столбце 5 с проходом в дальнюю штольню; рисунка ещё нет — заглушка.
+    // Рисунок 1920×1080 (заглушка — рисунка ещё нет). Перемещение — как на
+    // глобальной карте, по разметке местности: выработка — овал, вокруг
+    // камень, поперёк — стенка с проходом в дальнюю штольню. Кадр боя поля
+    // old_mine_01 закрывает весь рисунок, поэтому сетка боя — ровно сетка
+    // этого поля из Базы полей боя; стены боя — клетки, чей центр на камне.
     public static class FreePlayMineLocal
     {
         public const string LocalLocationId = "local.old_mine";
@@ -28,6 +33,10 @@ namespace KingdomSurvival.FreePlay
 
         public const string BeastUnitTypeId = "forest_beast";
 
+        public const int CanvasWidth = 1920;
+        public const int CanvasHeight = 1080;
+        public const int HexesAcross = 60;
+
         public static LocalLocationDefinition Create()
         {
             LocalLocationDefinition mine = new LocalLocationDefinition
@@ -38,15 +47,19 @@ namespace KingdomSurvival.FreePlay
                 DisplayName = "Старая шахта",
                 BattlefieldId = BattlefieldId,
                 PlaceholderArt = true,
-                HoursPerCell = 0.05,
+                CanvasWidth = CanvasWidth,
+                CanvasHeight = CanvasHeight,
+                HexesAcross = HexesAcross,
+                BattleFrameWidth = CanvasWidth,
                 HoursPerInteraction = 0.25
             };
+            mine.TerrainCells = CreateTerrain(mine);
 
             mine.Entrances.Add(new LocalEntranceDefinition
             {
                 Id = EntranceId,
                 Label = "Выход из шахты",
-                Cell = new LocalCellData(0, 3)
+                Point = new LocalPointData(368, 551)
             });
 
             // Отвалы у входа: прежняя проверка Наблюдательности, один раз.
@@ -56,7 +69,7 @@ namespace KingdomSurvival.FreePlay
                 Label = "Отвалы",
                 ActionLabel = "Перебрать отвалы",
                 Kind = LocalObjectKind.Dialogue,
-                Cell = new LocalCellData(2, 0),
+                Point = new LocalPointData(565, 330),
                 DialogueId = DumpsDialogueId,
                 Text = "Заросшие иван-чаем отвалы, из них торчит старое железо.",
                 OnceOnly = true,
@@ -70,7 +83,7 @@ namespace KingdomSurvival.FreePlay
                 Label = "Старая крепь",
                 ActionLabel = "Осмотреть скобы",
                 Kind = LocalObjectKind.Dialogue,
-                Cell = new LocalCellData(4, 6),
+                Point = new LocalPointData(828, 790),
                 DialogueId = MarkDialogueId,
                 Text = "Кованые скобы в старой крепи.",
                 // Пока клеймо не прочитано, к крепи можно вернуться — с
@@ -86,7 +99,7 @@ namespace KingdomSurvival.FreePlay
                 Label = "Проход в дальнюю штольню",
                 ActionLabel = "Прислушаться",
                 Kind = LocalObjectKind.Dialogue,
-                Cell = new LocalCellData(5, 2),
+                Point = new LocalPointData(930, 470),
                 DialogueId = SignsDialogueId,
                 Text = "Из дальней штольни тянет теплом и зверем.",
                 OnceOnly = true,
@@ -100,7 +113,7 @@ namespace KingdomSurvival.FreePlay
                 Label = "Сухой забой",
                 ActionLabel = "Осмотреть забой",
                 Kind = LocalObjectKind.Inspect,
-                Cell = new LocalCellData(8, 0),
+                Point = new LocalPointData(1355, 330),
                 Text = "Сухой забой и железо, сложенное аккуратно, будто его оставили до завтра.",
                 OnceOnly = false,
                 RequiresFlag = FreePlayMineStory.Flags.LairCleared
@@ -111,7 +124,7 @@ namespace KingdomSurvival.FreePlay
                 InstanceId = "mine.beast.1",
                 UnitTypeId = BeastUnitTypeId,
                 Level = 1,
-                Cell = new LocalCellData(8, 2),
+                Point = new LocalPointData(1355, 465),
                 EncounterId = LairEncounterId
             });
             mine.Enemies.Add(new LocalEnemyDefinition
@@ -119,29 +132,56 @@ namespace KingdomSurvival.FreePlay
                 InstanceId = "mine.beast.2",
                 UnitTypeId = BeastUnitTypeId,
                 Level = 1,
-                Cell = new LocalCellData(8, 4),
+                Point = new LocalPointData(1355, 636),
                 EncounterId = LairEncounterId
             });
 
-            // Логово: шаг за проход в дальнюю штольню поднимает зверей.
-            LocalEncounterDefinition lair = new LocalEncounterDefinition
+            // Логово: шаг за проход в дальнюю штольню поднимает зверей. Кадр
+            // боя — весь рисунок (его центр).
+            mine.Encounters.Add(new LocalEncounterDefinition
             {
                 Id = LairEncounterId,
                 BattleIdPrefix = FreePlayMineStory.LairBattlePrefix,
+                TriggerArea = new LocalAreaData(1100, 320, 110, 460),
+                HasArenaCenter = true,
+                ArenaCenter = new LocalPointData(CanvasWidth / 2f, CanvasHeight / 2f),
                 IntroDialogueId = LairDialogueId,
                 AllowRetreat = true,
-                RetreatCell = new LocalCellData(1, 3),
+                RetreatPoint = new LocalPointData(499, 551),
                 PreparedStartCompanionId = CampRest.AgnessaId,
                 ResolvedFlag = FreePlayMineStory.Flags.LairCleared
-            };
-            for (int r = 1; r <= 5; r++)
-                lair.TriggerCells.Add(new LocalCellData(6, r));
-            mine.Encounters.Add(lair);
-
-            // Осыпи [РАБОЧЕЕ].
-            mine.DifficultCells.Add(new LocalCellData(2, 4));
-            mine.DifficultCells.Add(new LocalCellData(7, 1));
+            });
             return mine;
         }
+
+        // Разметка: овал выработки, стенка с проходом, осыпи [РАБОЧЕЕ].
+        public static string CreateTerrain(LocalLocationDefinition mine)
+        {
+            WorldMapHexGrid grid = mine.CreateGrid();
+            WorldMapTerrainLayer layer = new WorldMapTerrainLayer(grid);
+            for (int index = 0; index < grid.CellCount; index++)
+            {
+                WorldMapHexCell cell = grid.CellAt(index);
+                grid.CellCenter(cell, out double x, out double y);
+                layer.Set(cell, TerrainAt(x, y));
+            }
+            return layer.Encode();
+        }
+
+        public static WorldMapGameplayTerrainType TerrainAt(double x, double y)
+        {
+            double dx = (x - 960) / 720;
+            double dy = (y - 550) / 240;
+            bool inside = dx * dx + dy * dy <= 1 && y > 320 && y < 780;
+            bool wall = x >= 930 && x <= 1065 && (y < 510 || y > 680);
+            if (!inside || wall)
+                return WorldMapGameplayTerrainType.Cliffs;
+            if (Near(x, y, 565, 636, 45) || Near(x, y, 1289, 390, 45))
+                return WorldMapGameplayTerrainType.Hills;
+            return WorldMapGameplayTerrainType.OpenGround;
+        }
+
+        private static bool Near(double x, double y, double cx, double cy, double radius) =>
+            Math.Sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy)) <= radius;
     }
 }

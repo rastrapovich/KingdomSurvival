@@ -1,13 +1,41 @@
 using System;
 using System.Collections.Generic;
 
-// ПР-12К (канон v1.53 §28.3): неизменяемая авторская конфигурация
-// исследуемого места. Фон, сетка и стены — поле из Базы полей боя
-// (BattlefieldId, его отключённые гексы); здесь только то, чего в поле нет:
-// входы, объекты, противники, столкновения и трудная местность. Одна и та же
-// геометрия служит и исследованию, и бою. Координаты — клетки (q, r)
-// скрытой гексовой разметки поля.
+// ПР-12К (канон v1.54 §28.3): неизменяемая авторская конфигурация
+// исследуемого места. Место — рисунок своего размера (пиксели, Y вниз, как
+// у глобальной карты). По нему отряд ходит так же, как по глобальной карте:
+// своя разметка местности (сетка WorldMapHexGrid + WorldMapTerrainLayer),
+// поиск пути с обходом и сглаживанием (WorldMapPathfinder), свои числа
+// движения. Клетки боя появляются только в бою: кадр поля из Базы полей
+// боя кладётся на рисунок в заданном месте (ArenaCenter столкновения).
 
+[Serializable]
+public sealed class LocalPointData
+{
+    public float X;
+    public float Y;
+
+    public LocalPointData()
+    {
+    }
+
+    public LocalPointData(float x, float y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public double DistanceTo(double x, double y)
+    {
+        double dx = X - x;
+        double dy = Y - y;
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
+
+    public override string ToString() => "(" + X.ToString("0") + ", " + Y.ToString("0") + ")";
+}
+
+// Клетка арены боя (q, r) — в данных запроса и расстановки.
 [Serializable]
 public sealed class LocalCellData
 {
@@ -28,6 +56,31 @@ public sealed class LocalCellData
     public override string ToString() => "(" + Q + ", " + R + ")";
 }
 
+// Прямоугольник на рисунке места (пиксели) — зона угрозы.
+[Serializable]
+public sealed class LocalAreaData
+{
+    public float X;
+    public float Y;
+    public float Width;
+    public float Height;
+
+    public LocalAreaData()
+    {
+    }
+
+    public LocalAreaData(float x, float y, float width, float height)
+    {
+        X = x;
+        Y = y;
+        Width = width;
+        Height = height;
+    }
+
+    public bool Contains(double x, double y) =>
+        x >= X && x <= X + Width && y >= Y && y <= Y + Height;
+}
+
 public enum LocalObjectKind
 {
     // Подойти и открыть диалог из Базы диалогов.
@@ -42,7 +95,7 @@ public sealed class LocalEntranceDefinition
 {
     public string Id = string.Empty;
     public string Label = string.Empty;
-    public LocalCellData Cell = new LocalCellData();
+    public LocalPointData Point = new LocalPointData();
 }
 
 [Serializable]
@@ -53,10 +106,11 @@ public sealed class LocalObjectDefinition
     public string Label = string.Empty;
     public string ActionLabel = string.Empty;
     public LocalObjectKind Kind = LocalObjectKind.Dialogue;
-    // Клетка объекта; объект занимает её, к нему подходят на соседнюю.
-    public LocalCellData Cell = new LocalCellData();
+    // Точка объекта на рисунке; подходят на расстояние InteractRadius.
+    public LocalPointData Point = new LocalPointData();
+    public float InteractRadius = 70f;
     public string DialogueId = string.Empty;
-    // Текст для Inspect и короткая подсказка при наведении.
+    // Текст для Inspect и короткая подсказка.
     public string Text = string.Empty;
     // Отработал один раз — больше не предлагается.
     public bool OnceOnly = true;
@@ -75,28 +129,31 @@ public sealed class LocalEnemyDefinition
     public int Level = 1;
     // Логово: здесь противник стоит при входе и сюда возвращается после
     // отхода отряда (раны остаются).
-    public LocalCellData Cell = new LocalCellData();
+    public LocalPointData Point = new LocalPointData();
     public string EncounterId = string.Empty;
 }
 
-// Столкновение: зона угрозы, вовлечённые противники и правила отхода.
+// Столкновение: зона угрозы, кадр арены, вовлечённые противники и отход.
 [Serializable]
 public sealed class LocalEncounterDefinition
 {
     public string Id = string.Empty;
     // ID боя = префикс + номер попытки (как у истории места).
     public string BattleIdPrefix = string.Empty;
-    // Шаг командира в одну из клеток начинает столкновение.
-    public List<LocalCellData> TriggerCells = new List<LocalCellData>();
+    // Командир вошёл в зону — столкновение начинается.
+    public LocalAreaData TriggerArea = new LocalAreaData();
+    // Центр кадра поля боя на рисунке места; не задан — середина между
+    // отрядом и противниками.
+    public bool HasArenaCenter;
+    public LocalPointData ArenaCenter = new LocalPointData();
     // Диалог перед боем (одна реплика за шагом); пусто — бой сразу.
     public string IntroDialogueId = string.Empty;
     public bool AllowRetreat = true;
     // Куда отряд отходит при разрешённом отходе — безопасная точка.
-    public LocalCellData RetreatCell = new LocalCellData();
-    // Подготовленное начало, если этот спутник присутствует (заметит заранее).
+    public LocalPointData RetreatPoint = new LocalPointData();
+    // Подготовленное начало, если этот спутник присутствует.
     public string PreparedStartCompanionId = string.Empty;
-    // Флаг истории, означающий, что столкновение исчерпано (например,
-    // «логово очищено»): тогда оно не начинается и противников нет.
+    // Флаг истории, исчерпывающий столкновение (например, «логово очищено»).
     public string ResolvedFlag = string.Empty;
 }
 
@@ -110,19 +167,45 @@ public sealed class LocalLocationDefinition
     // Место глобальной карты, у которого этот вход.
     public string WorldLocationId = string.Empty;
     public string DisplayName = string.Empty;
-    // Поле Базы полей боя: фон, сетка и стены.
+    // Поле Базы полей боя: настройки сетки и вид клеток боя на месте.
     public string BattlefieldId = string.Empty;
     // Фон — временная заглушка, рисунка ещё нет (показывается игроку).
     public bool PlaceholderArt;
+
+    // Размер рисунка места в пикселях и плотность сетки проходимости
+    // (клеток по ширине) — как у глобальной карты.
+    public float CanvasWidth = 1920f;
+    public float CanvasHeight = 1080f;
+    public int HexesAcross = 60;
+    // Разметка местности (WorldMapTerrainLayer.Encode). Пусто — всё проходимо.
+    public string TerrainCells = string.Empty;
+    // Ширина кадра поля боя (16:9) на рисунке места: из неё — размер клетки
+    // боя и фигур в исследовании и в бою (одинаковый).
+    public float BattleFrameWidth = 1920f;
+    // Те же поля, что «Перемещение» глобальной карты, но свои числа:
+    // шаг по шахте не стоит часов глобальной клетки [РАБОЧЕЕ].
+    public WorldMapMovementRules Movement = DefaultMovement();
+
     public List<LocalEntranceDefinition> Entrances = new List<LocalEntranceDefinition>();
     public List<LocalObjectDefinition> Objects = new List<LocalObjectDefinition>();
     public List<LocalEnemyDefinition> Enemies = new List<LocalEnemyDefinition>();
     public List<LocalEncounterDefinition> Encounters = new List<LocalEncounterDefinition>();
-    public List<LocalCellData> DifficultCells = new List<LocalCellData>();
-    // Рабочие числа времени [РАБОЧЕЕ]: шаг по месту и значимое действие
-    // стоят своих минут, а не часов глобальной клетки.
-    public double HoursPerCell = 0.05;
     public double HoursPerInteraction = 0.25;
+
+    public static WorldMapMovementRules DefaultMovement()
+    {
+        WorldMapMovementRules rules = WorldMapMovementRules.CreateDefault();
+        rules.HeroRunSpeedHexesPerSecond = 9f;
+        rules.TravelHoursPerHex = 0.0125f;
+        return rules;
+    }
+
+    public WorldMapHexGrid CreateGrid() => new WorldMapHexGrid(
+        Math.Max(1f, CanvasWidth), Math.Max(1f, CanvasHeight), WorldMapHexGrid.SanitizeHexesAcross(HexesAcross));
+
+    public WorldMapTerrainLayer CreateTerrainLayer() => WorldMapTerrainLayer.Decode(CreateGrid(), TerrainCells);
+
+    public WorldMapMovementRules MovementRules => Movement ?? DefaultMovement();
 
     public LocalEntranceDefinition FindEntrance(string id)
     {
@@ -137,7 +220,7 @@ public sealed class LocalLocationDefinition
 
 // Каталог исследуемых мест. Значения по умолчанию регистрирует модуль
 // содержания (свободная игра — пилот «Старая шахта»); Unity-слой при запуске
-// подставляет правленые в Inspector записи с теми же ID.
+// подставляет правленые в Базе локаций записи с теми же ID.
 public static class LocalLocationCatalog
 {
     private static readonly List<LocalLocationDefinition> Defaults = new List<LocalLocationDefinition>();

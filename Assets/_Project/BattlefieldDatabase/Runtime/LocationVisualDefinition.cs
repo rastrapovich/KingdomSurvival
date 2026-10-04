@@ -81,7 +81,7 @@ namespace KingdomSurvival.BattlefieldDatabase
         public List<LocationVisualVariant> Variants = new List<LocationVisualVariant>();
         public string DefaultVariantId = "";
         public LocationPlaceholder Placeholder;
-        // Доли единого кадра поля, Y растёт вниз — как у BattlefieldFrame.
+        // Доли рисунка места, Y растёт вниз (как точки места).
         public Vector2 Position = new Vector2(.5f, .5f);
         public Vector2 Pivot = new Vector2(.5f, .15f);
         public float Height = 1.8f;
@@ -107,55 +107,69 @@ namespace KingdomSurvival.BattlefieldDatabase
     {
         public string LocationId;
         public bool TechnicalTest;
+        // Рисунок места целиком (растягивается на размер рисунка места). Нет —
+        // техническая заглушка по разметке местности.
+        public Sprite Background;
         public LocationDaylight Daylight = new LocationDaylight();
         public List<LocationVisualObject> Objects = new List<LocationVisualObject>();
-        public Vector2Int TestStart = new Vector2Int(4, 4);
+        // Точка появления тестового отряда — доли рисунка места.
+        public Vector2 TestStartPoint = new Vector2(.25f, .5f);
         public string TestUnitId = "militia";
         public int TestFollowers = 2;
-        // Единый размер и в предпросмотре, и в тесте. Это размер авторского кадра.
-        public const float WorldHeight = 10;
-        public const float WorldWidth = WorldHeight * BattlefieldFrame.Aspect;
     }
 
+    // ПР-12К (канон v1.54 §28.3): мир места. Позиции объектов — доли рисунка
+    // места (Y вниз), мир — пиксели рисунка / PixelsPerUnit, начало — центр
+    // рисунка, Y вверх. Высоты, основания и радиусы света — в единицах мира.
     public static class LocationVisualGeometry
     {
-        public static BattlefieldGridLayout Layout(BattlefieldDefinitionData field) =>
-            BattlefieldFrame.ComputeLayout(new Rect(0, 0, LocationVisualDefinition.WorldWidth, LocationVisualDefinition.WorldHeight),
-                BattlefieldFrame.GetGridArea(field));
+        // 1080 пикселей рисунка = 10 единиц мира (прежний кадр 16:9).
+        public const float PixelsPerUnit = 108f;
 
-        public static Vector2 ToWorld(Vector2 normalized) => new Vector2(
-            (normalized.x - .5f) * LocationVisualDefinition.WorldWidth,
-            (.5f - normalized.y) * LocationVisualDefinition.WorldHeight);
+        public static Vector2 CanvasSize(LocalLocationDefinition location) => location != null
+            ? new Vector2(Mathf.Max(1, location.CanvasWidth), Mathf.Max(1, location.CanvasHeight))
+            : new Vector2(1920, 1080);
 
-        public static Vector2 ToNormalized(Vector2 world) => new Vector2(
-            world.x / LocationVisualDefinition.WorldWidth + .5f,
-            .5f - world.y / LocationVisualDefinition.WorldHeight);
+        public static Vector2 WorldSize(LocalLocationDefinition location) => CanvasSize(location) / PixelsPerUnit;
 
-        public static Vector2 CellPosition(BattlefieldDefinitionData field, HexCoord cell)
+        public static Vector2 PixelToWorld(LocalLocationDefinition location, Vector2 pixel)
         {
-            Vector2 p = Layout(field).GetCenter(cell.Q, cell.R);
-            return new Vector2(p.x - LocationVisualDefinition.WorldWidth / 2, LocationVisualDefinition.WorldHeight / 2 - p.y);
+            Vector2 canvas = CanvasSize(location);
+            return new Vector2((pixel.x - canvas.x / 2) / PixelsPerUnit, (canvas.y / 2 - pixel.y) / PixelsPerUnit);
         }
 
-        public static bool TryCell(BattlefieldDefinitionData field, Vector2 world, out HexCoord cell)
+        public static Vector2 WorldToPixel(LocalLocationDefinition location, Vector2 world)
         {
-            Vector2 p = new Vector2(world.x + LocationVisualDefinition.WorldWidth / 2, LocationVisualDefinition.WorldHeight / 2 - world.y);
-            bool found = Layout(field).TryGetCell(p, out int q, out int r);
-            cell = new HexCoord(q, r);
-            return found;
+            Vector2 canvas = CanvasSize(location);
+            return new Vector2(world.x * PixelsPerUnit + canvas.x / 2, canvas.y / 2 - world.y * PixelsPerUnit);
         }
 
-        public static List<HexCoord> BlockedCells(LocationVisualDefinition visual, BattlefieldDefinitionData field)
+        public static Vector2 ToPixel(LocalLocationDefinition location, Vector2 normalized) =>
+            Vector2.Scale(normalized, CanvasSize(location));
+
+        public static Vector2 ToNormalized(LocalLocationDefinition location, Vector2 pixel)
         {
-            HashSet<HexCoord> result = new HashSet<HexCoord>();
+            Vector2 canvas = CanvasSize(location);
+            return new Vector2(pixel.x / canvas.x, pixel.y / canvas.y);
+        }
+
+        public static Vector2 ToWorld(LocalLocationDefinition location, Vector2 normalized) =>
+            PixelToWorld(location, ToPixel(location, normalized));
+
+        // Основания предметов, которые не пропускают (пиксели рисунка).
+        public static List<Rect> BlockedAreas(LocationVisualDefinition visual, LocalLocationDefinition location)
+        {
+            List<Rect> result = new List<Rect>();
+            if (visual == null)
+                return result;
             foreach (LocationVisualObject item in visual.Objects)
             {
                 if (item == null || item.Hidden || !item.BlocksMovement) continue;
-                Rect area = new Rect(ToWorld(item.Position) - item.Footprint / 2, item.Footprint);
-                foreach (HexCoord cell in SandboxArenaShape.Cells())
-                    if (area.Contains(CellPosition(field, cell))) result.Add(cell);
+                Vector2 center = ToPixel(location, item.Position);
+                Vector2 size = item.Footprint * PixelsPerUnit;
+                result.Add(new Rect(center - size / 2, size));
             }
-            return new List<HexCoord>(result);
+            return result;
         }
 
         public static int SortOrder(LocationVisualBand band, float groundY, int offset = 0)
@@ -177,12 +191,12 @@ namespace KingdomSurvival.BattlefieldDatabase
                 if (string.IsNullOrWhiteSpace(item.Id) || !ids.Add(item.Id)) errors.Add(item.Name + ": пустой или повторный ID.");
                 if (item.Sprite == null && item.Placeholder == LocationPlaceholder.None) errors.Add(item.Name + ": нет спрайта.");
                 if (item.Height <= 0 || item.Footprint.x < 0 || item.Footprint.y < 0) errors.Add(item.Name + ": неверный размер.");
-                if (item.Position.x < 0 || item.Position.x > 1 || item.Position.y < 0 || item.Position.y > 1) errors.Add(item.Name + ": за пределами кадра.");
+                if (item.Position.x < 0 || item.Position.x > 1 || item.Position.y < 0 || item.Position.y > 1) errors.Add(item.Name + ": за пределами рисунка.");
                 if (item.Light.Enabled && (item.Light.Radius <= 0 || item.Light.Intensity < 0)) errors.Add(item.Name + ": неверный свет.");
             }
-            LocalLocationGeometry geometry = new LocalLocationGeometry(location, field, BlockedCells(visual, field));
-            HexCoord start = new HexCoord(visual.TestStart.x, visual.TestStart.y);
-            if (!geometry.IsPassable(start)) errors.Add("Точка тестового появления непроходима.");
+            LocalLocationGeometry geometry = new LocalLocationGeometry(location, field, BlockedAreas(visual, location));
+            Vector2 start = ToPixel(location, visual.TestStartPoint);
+            if (!geometry.IsPassable(start.x, start.y)) errors.Add("Точка тестового появления непроходима.");
             return errors;
         }
     }

@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using KingdomSurvival.BattleSandbox;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UIElements;
 
-// ПР-12К (канон v1.53 §28.3, §28.6): Старая шахта на настоящей сцене.
+// ПР-12К (канон v1.54 §28.3, §28.6): Старая шахта на настоящей сцене.
 // Свободная игра → отряд у шахты → вход открывает локальную карту (а не
-// текстовое окно) → ходьба со спутниками → отвалы через существующий
-// диалог → шаг за проход: реплика и бой на том же поле → отход к выходу →
+// текстовое окно) → ходьба как на глобальной карте со спутниками → отвалы
+// через существующий диалог → шаг за проход: реплика и бой поверх того же
+// рисунка → отход к выходу →
 // снова бой и победа → выход на карту → повторный вход без зверей.
 // Контроллер — через рефлексию (Assembly-CSharp тестам недоступна).
 public sealed class LocalExplorationPlayModeTests
@@ -96,7 +96,11 @@ public sealed class LocalExplorationPlayModeTests
         }
     }
 
-    private static LocalPartyMover Mover(MonoBehaviour main) => (LocalPartyMover)GetField(main, "localMover");
+    private static LocalFreeMover Mover(MonoBehaviour main) => (LocalFreeMover)GetField(main, "localMover");
+
+    private static Vector2 Leader(MonoBehaviour main) => new Vector2((float)Mover(main).Leader.X, (float)Mover(main).Leader.Y);
+
+    private static bool HasActor(MonoBehaviour main, string id) => (bool)Invoke(GetField(main, "localRenderer"), "HasActor", id);
 
     // Ждать условия по реальному времени: ходьба идёт с реальной скоростью.
     private static IEnumerator Until(System.Func<bool> condition, float seconds = 20f)
@@ -106,14 +110,13 @@ public sealed class LocalExplorationPlayModeTests
             yield return null;
     }
 
-    private static IEnumerator WalkTo(MonoBehaviour main, HexCoord cell)
+    private static IEnumerator WalkTo(MonoBehaviour main, Vector2 point)
     {
-        Invoke(main, "OnLocalCellClicked", cell);
+        Invoke(main, "OnLocalGroundClicked", point);
         yield return Until(() =>
         {
-            LocalPartyMover mover = Mover(main);
-            return mover == null || DialogueActive(main) || GetField(main, "localBattle") != null ||
-                   (mover.Leader.Cell == cell && !mover.LeaderHasOrder);
+            LocalFreeMover mover = Mover(main);
+            return mover == null || DialogueActive(main) || GetField(main, "localBattle") != null || !mover.LeaderHasOrder;
         });
     }
 
@@ -186,34 +189,45 @@ public sealed class LocalExplorationPlayModeTests
         Assert.IsFalse((bool)Member(main, "IsLocationInteractionActive"), "Текстовый вход не показан одновременно.");
         Assert.IsTrue(LocalExplorationService.IsActive(campaign));
         Assert.AreEqual(4, Mover(main).Members.Count, "Виден весь отряд: командир, двое бойцов и свита.");
-        Assert.AreEqual(4 + 2, root.Query(className: "local-actor").ToList().Count, "Отряд и двое зверей на поле.");
+        Assert.IsTrue(HasActor(main, "mine.beast.1") && HasActor(main, "mine.beast.2"), "Звери видны в логове.");
+        Assert.IsTrue(Mover(main).Members.All(m => HasActor(main, m.Id)), "Отряд виден.");
+        Assert.IsNotNull(root.Q<Image>("local-exploration-image").image, "Рисунок места рисует общий рендерер Базы локаций.");
         double hourAtEntry = ContinuousSimulationSystem.GetClock(campaign).HourOfDay;
         yield return Frames(30);
         Assert.AreEqual(hourAtEntry, ContinuousSimulationSystem.GetClock(campaign).HourOfDay, 1e-6, "Стоя на месте, время не идёт.");
         yield return Capture(main, "mine_01_entry");
 
-        // Ходьба: спутники следом, без наложения; время идёт шагами.
-        yield return WalkTo(main, new HexCoord(3, 3));
+        // Ходьба как на глобальной карте: спутники следом, без наложения;
+        // время идёт пройденным путём.
+        Vector2 hall = new Vector2(760, 600);
+        yield return WalkTo(main, hall);
         yield return Until(() => Mover(main).IsIdle && Mover(main).IsGathered, 10f);
-        LocalPartyMover mover = Mover(main);
+        LocalFreeMover mover = Mover(main);
         Assert.IsTrue(mover.IsGathered, "Спутники подошли следом.");
-        Assert.AreEqual(new HexCoord(3, 3), mover.Leader.Cell);
-        Assert.AreEqual(mover.Members.Count, mover.Members.Select(m => m.Cell).Distinct().Count(), "Никто не стоит в чужой клетке.");
-        Assert.Greater(ContinuousSimulationSystem.GetClock(campaign).HourOfDay, hourAtEntry, "Шаги тратят время.");
-        // Зажатая кнопка ведёт командира за курсором: новая клетка под курсором
-        // сразу меняет цель (стена — цель не меняется).
-        Invoke(main, "OnLocalCellHeld", new HexCoord(2, 2));
-        Invoke(main, "OnLocalCellHeld", new HexCoord(5, 1));
-        Invoke(main, "OnLocalCellHeld", new HexCoord(3, 4));
-        yield return Until(() => Mover(main).Leader.Cell == new HexCoord(3, 4) && !Mover(main).LeaderHasOrder, 10f);
-        Assert.AreEqual(new HexCoord(3, 4), Mover(main).Leader.Cell, "Командир шёл за курсором до последней клетки.");
-        yield return WalkTo(main, new HexCoord(3, 3));
+        Assert.Less(Vector2.Distance(hall, Leader(main)), 1f);
+        for (int a = 0; a < mover.Members.Count; a++)
+            for (int b = a + 1; b < mover.Members.Count; b++)
+                Assert.Greater(Vector2.Distance(new Vector2((float)mover.Members[a].X, (float)mover.Members[a].Y),
+                    new Vector2((float)mover.Members[b].X, (float)mover.Members[b].Y)), 20f, "Никто не стоит в другом: " +
+                    string.Join("; ", mover.Members.Select(m => m.Id + " " + m.X.ToString("0") + "," + m.Y.ToString("0"))));
+        Assert.Greater(ContinuousSimulationSystem.GetClock(campaign).HourOfDay, hourAtEntry, "Путь тратит время.");
+        // Зажатая кнопка ведёт командира за курсором: новая точка сразу меняет
+        // цель (стена — цель не меняется).
+        Invoke(main, "OnLocalHeldAt", new Vector2(620, 470));
+        Invoke(main, "OnLocalHeldAt", new Vector2(990, 400));
+        Invoke(main, "OnLocalHeldAt", new Vector2(700, 680));
+        yield return Until(() => !Mover(main).LeaderHasOrder, 10f);
+        Assert.Less(Vector2.Distance(new Vector2(700, 680), Leader(main)), 1f, "Командир шёл за курсором до последней точки.");
+        yield return WalkTo(main, hall);
         yield return Until(() => Mover(main).IsIdle && Mover(main).IsGathered, 10f);
 
-        Invoke(main, "OnLocalCellClicked", new HexCoord(5, 1));
-        yield return null;
-        StringAssert.Contains("не пройти", ((Label)root.Q("local-exploration-notice")).text, "В стену не пройти.");
-        Assert.AreEqual(new HexCoord(3, 3), Mover(main).Leader.Cell, "Без телепорта.");
+        // Клик в камень — к ближайшей доступной точке, без телепорта.
+        Invoke(main, "OnLocalGroundClicked", new Vector2(760, 150));
+        Assert.IsFalse(Mover(main).LastOrderReachesTarget);
+        yield return Until(() => !Mover(main).LeaderHasOrder, 10f);
+        Assert.IsTrue(Mover(main).IsPassable(Leader(main).x, Leader(main).y));
+        Assert.Less(Leader(main).y, 400f, "Командир дошёл до края выработки.");
+        yield return WalkTo(main, hall);
 
         // Отвалы: подойти и перебрать — существующая сцена и флаг.
         Invoke(main, "OnLocalObjectClicked", "mine.dumps");
@@ -226,7 +240,7 @@ public sealed class LocalExplorationPlayModeTests
         Assert.IsTrue(campaign.Narrative.HasFlag("freeplay.mine.entered"));
 
         // Шаг за проход: реплика, затем бой на том же поле.
-        yield return WalkTo(main, new HexCoord(6, 3));
+        yield return WalkTo(main, new Vector2(1180, 590));
         yield return Until(() => DialogueActive(main), 5f);
         Assert.IsTrue(DialogueActive(main), "Перед боем — реплика логова.");
         yield return Choose(main, "freeplay.mine.local.lair.fight");
@@ -236,6 +250,7 @@ public sealed class LocalExplorationPlayModeTests
         Assert.IsNotNull(battleHost, "Бой начался на месте.");
         Assert.AreEqual(MainScene, SceneManager.GetActiveScene().name, "Отдельная арена не грузится.");
         Assert.IsNotNull(root.Q("local-exploration-field").Q("battle-sandbox-board"));
+        Assert.IsFalse((bool)Member(GetField(main, "localRenderer"), "ActorsVisible"), "Фигуры боя рисует поле боя, рисунок места — под ним.");
         yield return Frames(10);
         yield return Capture(main, "mine_03_battle");
         Assert.IsFalse((bool)Invoke(main, "SaveCampaign", CampaignSaveStore.ManualSlotIds[0]),
@@ -247,14 +262,14 @@ public sealed class LocalExplorationPlayModeTests
         yield return Frames(5);
         Assert.IsNull(GetField(main, "localBattle"));
         Assert.AreEqual(supply - CampaignBattleBridge.RetreatSupplyLoss, campaign.ArmySupply);
-        Assert.AreEqual(new HexCoord(1, 3), Mover(main).Leader.Cell, "Отряд у безопасной точки.");
+        Assert.Less(Vector2.Distance(new Vector2(499, 551), Leader(main)), 1f, "Отряд у безопасной точки.");
         yield return Frames(30);
         Assert.IsNull(GetField(main, "localBattle"), "Бой не зациклился.");
         Assert.IsFalse(DialogueActive(main));
         Assert.AreEqual(2, LocalExplorationService.AliveEnemies(campaign, LocalExplorationService.ActiveDefinition(campaign)).Count);
 
         // Снова в штольню — победа.
-        yield return WalkTo(main, new HexCoord(6, 3));
+        yield return WalkTo(main, new Vector2(1180, 590));
         yield return Until(() => DialogueActive(main), 5f);
         Assert.IsTrue(DialogueActive(main), "Снова реплика логова — новый бой после отхода.");
         yield return Choose(main, "freeplay.mine.local.lair.fight");
@@ -272,7 +287,7 @@ public sealed class LocalExplorationPlayModeTests
 
         // Сохранение и загрузка в шахте: тот же слой, позиции и итоги.
         yield return Until(() => Mover(main).IsIdle, 10f);
-        HexCoord leaderBefore = Mover(main).Leader.Cell;
+        Vector2 leaderBefore = Leader(main);
         Assert.IsTrue((bool)Invoke(main, "SaveCampaign", CampaignSaveStore.ManualSlotIds[0]));
         Assert.IsTrue((bool)Invoke(main, "LoadCampaign", CampaignSaveStore.ManualSlotIds[0]));
         yield return Frames(5);
@@ -280,7 +295,7 @@ public sealed class LocalExplorationPlayModeTests
         campaign = CampaignSession.Current;
         Assert.IsTrue(LocalExplorationService.IsActive(campaign), "После загрузки — снова в шахте.");
         Assert.IsNotNull(Mover(main), "Экран места поднят заново.");
-        Assert.AreEqual(leaderBefore, Mover(main).Leader.Cell, "Командир там же.");
+        Assert.Less(Vector2.Distance(leaderBefore, Leader(main)), 1f, "Командир там же.");
         Assert.IsTrue(campaign.Narrative.HasFlag("freeplay.mine.lair_cleared"));
         Assert.IsEmpty(LocalExplorationService.AliveEnemies(campaign, LocalExplorationService.ActiveDefinition(campaign)),
             "Повтор восстановления не возвращает зверей.");
@@ -295,7 +310,8 @@ public sealed class LocalExplorationPlayModeTests
         // Повторный вход: звери и находки не возвращаются.
         Assert.IsTrue((bool)Invoke(main, "TryOpenLocationInteraction", "mine"));
         yield return Frames(5);
-        Assert.AreEqual(4, root.Query(className: "local-actor").ToList().Count, "Только отряд — зверей нет.");
+        Assert.IsFalse(HasActor(main, "mine.beast.1") || HasActor(main, "mine.beast.2"), "Зверей нет.");
+        Assert.AreEqual(4, Mover(main).Members.Count, "Отряд на месте.");
         LocalLocationDefinition mine = LocalExplorationService.ActiveDefinition(campaign);
         Assert.IsFalse(LocalExplorationService.IsObjectAvailable(campaign, mine, mine.FindObject("mine.dumps")));
     }

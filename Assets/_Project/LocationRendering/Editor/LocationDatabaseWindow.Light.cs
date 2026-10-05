@@ -246,6 +246,16 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Number("Темнота", light.ProjectedShadowOpacity, 0, 1, value => light.ProjectedShadowOpacity = value);
                 Number("Наибольшая длина", light.ProjectedShadowMaxLength, .2f, 6, value => light.ProjectedShadowMaxLength = value);
             }
+            if (!owner.LightOnly)
+            {
+                Toggle("Своя тень предмета во все стороны (костёр, лампа)", light.OwnRadialShadow, value => light.OwnRadialShadow = value, true);
+                if (light.OwnRadialShadow)
+                {
+                    Number("Длина своей тени", light.OwnShadowLength, 0, 1.5f, value => light.OwnShadowLength = value,
+                        "Насколько силуэт предмета расходится от огня (доля размера предмета).");
+                    Number("Темнота своей тени", light.OwnShadowOpacity, 0, 1, value => light.OwnShadowOpacity = value);
+                }
+            }
             Toggle("Предметы перекрывают свет", light.Shadows, value => light.Shadows = value, true);
             if (light.Shadows)
             {

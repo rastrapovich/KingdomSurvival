@@ -38,8 +38,6 @@ namespace KingdomSurvival.LocationRendering
             public bool Battle;
             public bool Disabled;
             public readonly SpriteRenderer[] Shadows = new SpriteRenderer[1 + MaxLocalShadows];
-            // Вторая тень того же слота: около горизонтали — наклон к зрителю (перетекание без скачка).
-            public readonly SpriteRenderer[] Mirrors = new SpriteRenderer[1 + MaxLocalShadows];
         }
 
         private sealed class ActiveLight
@@ -194,7 +192,7 @@ namespace KingdomSurvival.LocationRendering
                 DayFactor = Mathf.Clamp01(Sky.Daylight.Brightness.Evaluate(hour));
                 Sky.Sun.Evaluate(hour, out Vector2 direction, out float length, out float opacity);
                 sunRaw = direction * length;
-                sunVector = Lean(sunRaw, Sky.ShadowMinLean);
+                sunVector = SoftLean(sunRaw, Sky.ShadowMinLean);
                 sunOpacity = opacity;
             }
 
@@ -210,6 +208,9 @@ namespace KingdomSurvival.LocationRendering
                 item.Light.intensity = intensity;
                 if (on && data.ProjectsShadows && (data.Shape == LocationLightShape.Point || data.Shape == LocationLightShape.Spot))
                     activeLights.Add(new ActiveLight { Placed = item, Ground = item.Anchor.position, Intensity = intensity });
+                // Днём своя тень огня слабее: её перебивает общий свет.
+                float flicker = Mathf.Lerp(1, Mathf.Clamp01(intensity / Mathf.Max(.01f, data.Intensity)), FlickerShadowShare);
+                UpdateRadialShadows(item, on ? flicker * (Indoor ? 1 : Mathf.Lerp(1, .25f, DayFactor)) : 0);
             }
             ApplyPost();
             UpdateShadows();
@@ -352,27 +353,81 @@ namespace KingdomSurvival.LocationRendering
             shadow.SetPropertyBlock(shadowBlock);
         }
 
-        // Тень с наименьшим наклоном к земле. Около горизонтали (свет сбоку)
-        // прежде наклон перескакивал «от зрителя» ↔ «к зрителю» при смене
-        // знака — тень прыгала. Теперь там две тени (наклон вверх и вниз),
-        // их темнота плавно перетекает по вертикальной доле исходной тени.
-        private void SetLeanedShadow(Caster caster, int index, bool visible, Vector2 raw, Color color, float opacity, float softness)
+        // ------------------------------------------------------------------
+        // Своя тень светящего предмета во все стороны
+        // ------------------------------------------------------------------
+
+        private const int RadialLayers = 6;
+
+        // Слои силуэта предмета, растянутые от точки огня на земле (опоры):
+        // каждый следующий крупнее и светлее — камни кольца дают тени-лучи
+        // наружу, в промежутки между камнями свет проходит. Лежат под
+        // предметами, на земле.
+        private void BuildRadialShadows(Placed entry)
         {
-            float lean = Mathf.Max(0, Sky.ShadowMinLean);
-            if (!visible || lean <= 0 || Mathf.Abs(raw.y) >= lean)
+            if (shadowMaterial == null) return;
+            LocationLightDefinition light = entry.Data.Light;
+            for (int p = 0; p < entry.Images.Count; p++)
             {
-                SetShadow(caster, caster.Shadows, index, visible, Lean(raw, lean), color, opacity, softness);
-                SetShadow(caster, caster.Mirrors, index, false, Vector2.zero, color, 0, softness);
-                return;
+                LocationResolvedPart part = entry.Parts[p];
+                if (part.Placeholder || part.Band != LocationVisualBand.World) continue;
+                SpriteRenderer image = entry.Images[p];
+                for (int i = 1; i <= RadialLayers; i++)
+                {
+                    float scale = 1 + Mathf.Max(0, light.OwnShadowLength) * i / RadialLayers;
+                    GameObject layer = new GameObject("Своя тень огня");
+                    layer.transform.SetParent(entry.Anchor, false);
+                    layer.transform.localPosition = image.transform.localPosition * scale;
+                    layer.transform.localScale = image.transform.localScale * scale;
+                    SpriteRenderer shadow = layer.AddComponent<SpriteRenderer>();
+                    shadow.sprite = image.sprite;
+                    shadow.flipX = image.flipX;
+                    shadow.sharedMaterial = shadowMaterial;
+                    shadow.sortingOrder = ShadowSortingOrder;
+                    entry.RadialShadows.Add(shadow);
+                }
             }
-            float up = LeanBlend(raw.y, lean);
-            SetShadow(caster, caster.Shadows, index, true, new Vector2(raw.x, lean), color, opacity * up, softness);
-            SetShadow(caster, caster.Mirrors, index, true, new Vector2(raw.x, -lean), color, opacity * (1 - up), softness);
         }
 
-        // Доля тени с наклоном «от зрителя» (вверх): 1 при y ≥ lean, 0 при y ≤ −lean.
-        public static float LeanBlend(float y, float lean) =>
-            lean <= 0 ? (y >= 0 ? 1 : 0) : Mathf.SmoothStep(0, 1, Mathf.InverseLerp(-lean, lean, y));
+        // share — 0..1: огонь горит, мерцание, день / ночь.
+        private void UpdateRadialShadows(Placed entry, float share)
+        {
+            if (entry.RadialShadows.Count == 0 || shadowBlock == null) return;
+            float alpha = Mathf.Clamp01(entry.Data.Light.OwnShadowOpacity) * .35f * Mathf.Clamp01(share);
+            foreach (SpriteRenderer shadow in entry.RadialShadows)
+            {
+                if (shadow == null) continue;
+                shadow.enabled = alpha > .001f;
+                if (!shadow.enabled) continue;
+                shadowBlock.Clear();
+                Vector4 uvRect = SpriteUVRect(shadow.sprite);
+                // Без проекции: силуэт как есть (высота — от «земли» далеко внизу).
+                shadowBlock.SetVector(ShadowVectorId, new Vector4(0, 1, 0, 0));
+                shadowBlock.SetFloat(GroundYId, -100000);
+                shadowBlock.SetColor(ShadowColorId, new Color(0, 0, 0, alpha));
+                shadowBlock.SetFloat(BlurId, .02f * (uvRect.w - uvRect.y));
+                shadowBlock.SetVector(UVRectId, uvRect);
+                shadow.SetPropertyBlock(shadowBlock);
+            }
+        }
+
+        private void SetLeanedShadow(Caster caster, int index, bool visible, Vector2 raw, Color color, float opacity, float softness) =>
+            SetShadow(caster, caster.Shadows, index, visible, SoftLean(raw, Sky.ShadowMinLean), color, opacity, softness);
+
+        // Одна тень с плавным наклоном «вглубь» (от зрителя), как от толщины
+        // предмета. Прежний наименьший наклон при свете строго сбоку менял знак
+        // скачком (тень прыгала вверх-вниз), а перетекание двух наклонов
+        // раздваивало тень. Здесь добавка вверх — lean, когда тень лежит вдоль
+        // горизонтали, и плавно исчезает к |y| ≥ 2·lean (свет спереди и сзади —
+        // честная проекция). Вертикальная доля монотонно и непрерывно зависит
+        // от исходной: ни скачка, ни второй тени.
+        public static Vector2 SoftLean(Vector2 vector, float lean)
+        {
+            lean = Mathf.Max(0, lean);
+            if (lean <= 0) return vector;
+            float bias = lean * (1 - Mathf.SmoothStep(0, 1, Mathf.Abs(vector.y) / (2 * lean)));
+            return new Vector2(vector.x, vector.y + bias);
+        }
 
         // Тень всегда немного «лежит» на земле: вертикальная доля не меньше
         // minLean, знак сохраняется (сбоку — от зрителя).
@@ -399,12 +454,10 @@ namespace KingdomSurvival.LocationRendering
         {
             get
             {
-                // Слот (солнце или источник) с тенью — одна тень, даже если она
-                // сейчас перетекает между двумя наклонами.
                 int count = 0;
                 foreach (Caster caster in casters)
-                    for (int i = 0; i < caster.Shadows.Length; i++)
-                        if ((caster.Shadows[i] != null && caster.Shadows[i].enabled) || (caster.Mirrors[i] != null && caster.Mirrors[i].enabled)) count++;
+                    foreach (SpriteRenderer shadow in caster.Shadows)
+                        if (shadow != null && shadow.enabled) count++;
                 return count;
             }
         }

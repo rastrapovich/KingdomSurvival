@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using KingdomSurvival.AnimationDatabase;
 using KingdomSurvival.ArtAssets;
 using KingdomSurvival.BattlefieldDatabase;
@@ -42,6 +41,8 @@ namespace KingdomSurvival.LocationRendering
             public SpriteRenderer Image;
             public readonly List<SpriteRenderer> Images = new List<SpriteRenderer>();
             public readonly List<LocationResolvedPart> Parts = new List<LocationResolvedPart>();
+            // Своя тень светящего предмета во все стороны (слои силуэта).
+            public readonly List<SpriteRenderer> RadialShadows = new List<SpriteRenderer>();
             public LocationResolvedVisual Resolved;
             public Light2D Light;
         }
@@ -245,6 +246,7 @@ namespace KingdomSurvival.LocationRendering
                 if (part.ProjectsShadow)
                     AddCaster(anchor, image, part.ShadowSprite, part.ShadowHeight, part.ShadowPivot, resolved.FlipX, resolved.ShadowLength, null);
             }
+            if (item.Light.Enabled && item.Light.OwnRadialShadow) BuildRadialShadows(entry);
             if (resolved.OccludesLight)
             {
                 // Форма у основания, независимая от рисунка и его прозрачных полей.
@@ -267,7 +269,7 @@ namespace KingdomSurvival.LocationRendering
             casters.RemoveAll(caster =>
             {
                 if (caster.Anchor != entry.Anchor) return false;
-                foreach (SpriteRenderer shadow in caster.Shadows.Concat(caster.Mirrors))
+                foreach (SpriteRenderer shadow in caster.Shadows)
                     if (shadow != null) Destroy(shadow.gameObject);
                 return true;
             });
@@ -279,6 +281,7 @@ namespace KingdomSurvival.LocationRendering
                 Destroy(child.gameObject);
             }
             entry.Images.Clear();
+            entry.RadialShadows.Clear();
             entry.Parts.Clear();
             entry.Image = null;
         }

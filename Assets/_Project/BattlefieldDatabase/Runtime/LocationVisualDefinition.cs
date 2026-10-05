@@ -89,6 +89,11 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float ProjectedShadowOpacity = .55f;
         public float ProjectedShadowMaxLength = 2.5f;
         public float ShadowSoftnessFalloff = .5f;
+        // Своя тень предмета, который сам светит (костёр, лампа): его силуэт
+        // расходится от огня во все стороны — камни кольца дают лучи-тени.
+        public bool OwnRadialShadow = true;
+        public float OwnShadowLength = .45f;
+        public float OwnShadowOpacity = .5f;
 
         // Яркость с учётом жизни огня в момент seconds.
         public float AnimatedIntensity(float seconds, float seed)

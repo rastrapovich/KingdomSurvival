@@ -97,21 +97,65 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(LocationWorldRenderer.Lean(new Vector2(2, 0), 0), Is.EqualTo(new Vector2(2, 0)), "0 — честная проекция.");
         }
 
-        // Свет проходит через «строго сбоку»: тень не перескакивает с наклона
-        // вверх на наклон вниз — темнота двух наклонов перетекает плавно.
+        // Светящий предмет (костёр) отбрасывает свою тень во все стороны:
+        // слои силуэта от точки огня; потушен — тени нет; днём слабее.
         [Test]
-        public void SideLight_ShadowLeanBlendsWithoutJump()
+        public void LightEmittingObject_CastsOwnRadialShadow()
         {
-            Assert.That(LocationWorldRenderer.LeanBlend(.4f, .4f), Is.EqualTo(1).Within(1e-5f));
-            Assert.That(LocationWorldRenderer.LeanBlend(-.4f, .4f), Is.EqualTo(0).Within(1e-5f));
-            Assert.That(LocationWorldRenderer.LeanBlend(0, .4f), Is.EqualTo(.5f).Within(1e-5f));
-            float previous = 0;
-            for (float y = -.4f; y <= .4f; y += .01f)
+            Texture2D texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 32, 32), new Vector2(.5f, .5f), 100);
+            LocationVisualObject fire = new LocationVisualObject { Id = "ring", Name = "Кольцо", Sprite = sprite, Position = new Vector2(.5f, .5f), Height = 1 };
+            fire.Light.Enabled = true; fire.Light.NightOnly = true; fire.Light.StartsAt = 18; fire.Light.EndsAt = 6;
+            fire.Light.Animation = LocationLightAnimation.None;
+            LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz", UseWorldLighting = false, Objects = { fire } };
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(new LocalLocationDefinition { Id = "zz" }, visual, null))
             {
-                float blend = LocationWorldRenderer.LeanBlend(y, .4f);
-                Assert.That(blend - previous, Is.LessThan(.05f), "Шаг света в 0,01 не даёт скачка тени (y = " + y + ").");
-                Assert.That(blend, Is.GreaterThanOrEqualTo(previous - 1e-6f));
-                previous = blend;
+                List<SpriteRenderer> layers = new List<SpriteRenderer>();
+                foreach (SpriteRenderer item in renderer.Root.GetComponentsInChildren<SpriteRenderer>(true))
+                    if (item.gameObject.name == "Своя тень огня") layers.Add(item);
+                Assert.That(layers.Count, Is.EqualTo(6), "Слои своей тени у светящего предмета.");
+                Assert.That(layers[5].transform.localScale.x, Is.GreaterThan(layers[0].transform.localScale.x), "Слои расходятся от огня.");
+
+                float Alpha()
+                {
+                    MaterialPropertyBlock block = new MaterialPropertyBlock();
+                    layers[0].GetPropertyBlock(block);
+                    return layers[0].enabled ? block.GetColor("_ShadowColor").a : 0;
+                }
+                renderer.SetTime(1, 0);
+                float night = Alpha();
+                renderer.SetTime(13, 0);
+                Assert.That(night, Is.GreaterThan(0));
+                Assert.That(Alpha(), Is.EqualTo(0), "Днём огонь по расписанию потушен — своей тени нет.");
+                fire.Light.NightOnly = false;
+                renderer.SetTime(13, 0);
+                Assert.That(Alpha(), Is.GreaterThan(0).And.LessThan(night), "Днём своя тень огня слабее.");
+            }
+            Object.DestroyImmediate(sprite);
+            Object.DestroyImmediate(texture);
+        }
+
+        // Свет проходит через «строго сбоку»: одна тень, её наклон меняется
+        // непрерывно и монотонно — без скачка вверх-вниз и без второй тени.
+        // Свет спереди и сзади — честная проекция.
+        [Test]
+        public void SideLight_SingleShadowLeansSmoothly()
+        {
+            const float lean = .4f;
+            Assert.That(LocationWorldRenderer.SoftLean(new Vector2(2, 0), lean).y, Is.EqualTo(lean).Within(1e-5f), "Строго сбоку — тень «вглубь».");
+            Assert.That(LocationWorldRenderer.SoftLean(new Vector2(.3f, 1), lean), Is.EqualTo(new Vector2(.3f, 1)), "Свет спереди — без добавки.");
+            Assert.That(LocationWorldRenderer.SoftLean(new Vector2(.3f, -1), lean), Is.EqualTo(new Vector2(.3f, -1)), "Свет сзади — тень к зрителю.");
+            Assert.That(LocationWorldRenderer.SoftLean(new Vector2(2, 0), 0), Is.EqualTo(new Vector2(2, 0)), "0 — честная проекция.");
+            float previous = float.NegativeInfinity;
+            for (float y = -1.2f; y <= 1.2f; y += .01f)
+            {
+                float leaned = LocationWorldRenderer.SoftLean(new Vector2(2, y), lean).y;
+                if (!float.IsNegativeInfinity(previous))
+                {
+                    Assert.That(leaned - previous, Is.LessThan(.02f), "Шаг света в 0,01 не даёт скачка тени (y = " + y + ").");
+                    Assert.That(leaned, Is.GreaterThan(previous), "Наклон меняется монотонно (y = " + y + ").");
+                }
+                previous = leaned;
             }
         }
 

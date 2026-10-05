@@ -57,6 +57,30 @@ namespace KingdomSurvival.ArtAssets.Editor
             return layout;
         }
 
+        // Видимая (непрозрачная) часть ассета относительно опоры, единицы мира:
+        // по сетке спрайтов, без прозрачных полей PNG.
+        public static Rect OpaqueBounds(Layout layout)
+        {
+            Rect result = default;
+            bool any = false;
+            foreach (LocationResolvedPart part in layout.Resolved.Parts)
+            {
+                Sprite sprite = part.Sprite;
+                if (sprite == null) continue;
+                Rect world = PartRect(part);
+                Vector2 pivot = sprite.pivot;
+                foreach (Vector2 vertex in sprite.vertices)
+                {
+                    Vector2 pixel = vertex * sprite.pixelsPerUnit + pivot;
+                    Vector2 point = new Vector2(world.xMin + pixel.x / sprite.rect.width * world.width, world.yMin + pixel.y / sprite.rect.height * world.height);
+                    if (!any) { result = new Rect(point, Vector2.zero); any = true; }
+                    else result = Rect.MinMaxRect(Mathf.Min(result.xMin, point.x), Mathf.Min(result.yMin, point.y),
+                        Mathf.Max(result.xMax, point.x), Mathf.Max(result.yMax, point.y));
+                }
+            }
+            return any ? result : layout.Bounds;
+        }
+
         // Рисунок части относительно опоры, единицы мира, Y вверх.
         public static Rect PartRect(LocationResolvedPart part)
         {

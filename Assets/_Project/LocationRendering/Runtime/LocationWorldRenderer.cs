@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using KingdomSurvival.AnimationDatabase;
 using KingdomSurvival.ArtAssets;
 using KingdomSurvival.BattlefieldDatabase;
@@ -266,7 +267,7 @@ namespace KingdomSurvival.LocationRendering
             casters.RemoveAll(caster =>
             {
                 if (caster.Anchor != entry.Anchor) return false;
-                foreach (SpriteRenderer shadow in caster.Shadows)
+                foreach (SpriteRenderer shadow in caster.Shadows.Concat(caster.Mirrors))
                     if (shadow != null) Destroy(shadow.gameObject);
                 return true;
             });

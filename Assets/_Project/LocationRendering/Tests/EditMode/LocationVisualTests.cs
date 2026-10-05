@@ -97,6 +97,24 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(LocationWorldRenderer.Lean(new Vector2(2, 0), 0), Is.EqualTo(new Vector2(2, 0)), "0 — честная проекция.");
         }
 
+        // Свет проходит через «строго сбоку»: тень не перескакивает с наклона
+        // вверх на наклон вниз — темнота двух наклонов перетекает плавно.
+        [Test]
+        public void SideLight_ShadowLeanBlendsWithoutJump()
+        {
+            Assert.That(LocationWorldRenderer.LeanBlend(.4f, .4f), Is.EqualTo(1).Within(1e-5f));
+            Assert.That(LocationWorldRenderer.LeanBlend(-.4f, .4f), Is.EqualTo(0).Within(1e-5f));
+            Assert.That(LocationWorldRenderer.LeanBlend(0, .4f), Is.EqualTo(.5f).Within(1e-5f));
+            float previous = 0;
+            for (float y = -.4f; y <= .4f; y += .01f)
+            {
+                float blend = LocationWorldRenderer.LeanBlend(y, .4f);
+                Assert.That(blend - previous, Is.LessThan(.05f), "Шаг света в 0,01 не даёт скачка тени (y = " + y + ").");
+                Assert.That(blend, Is.GreaterThanOrEqualTo(previous - 1e-6f));
+                previous = blend;
+            }
+        }
+
         // Небо места: общий свет мира или своё; своё начинается с копии общего.
         [Test]
         public void SkyIsWorldOrOwn()

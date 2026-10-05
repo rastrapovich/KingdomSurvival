@@ -32,7 +32,7 @@ namespace KingdomSurvival.ArtAssets.Editor
         public bool Favorites, IncompleteViews, MissingNormals, Used, Unused;
         public List<string> Order = new List<string>();
         public bool AllViews;
-        public float LightIntensity = 1.4f, LightHeight = 1.2f;
+        public float LightIntensity = 1.4f, LightHeight = 1.2f, LightNormalDistance = 1.5f;
         public bool LightNormals = true, LightNight = true, LightOrbit;
         public Vector2 LightPosition = new Vector2(.38f, .58f);
 
@@ -65,7 +65,8 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (Bad(CardSize) || CardSize < 80 || CardSize > 260) CardSize = 130;
             if (Bad(GalleryScroll) || GalleryScroll < 0) GalleryScroll = 0;
             if (Bad(LightIntensity)) LightIntensity = 1.4f;
-            if (Bad(LightHeight) || LightHeight <= 0) LightHeight = 1.2f;
+            if (Bad(LightHeight) || LightHeight < 0) LightHeight = 1.2f;
+            if (Bad(LightNormalDistance) || LightNormalDistance <= 0) LightNormalDistance = 1.5f;
             if (Bad(LightPosition.x) || Bad(LightPosition.y)) LightPosition = new Vector2(.38f, .58f);
             Order ??= new List<string>();
             SelectedId ??= "";

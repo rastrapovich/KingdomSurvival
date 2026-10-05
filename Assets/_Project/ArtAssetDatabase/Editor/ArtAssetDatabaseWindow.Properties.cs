@@ -258,7 +258,13 @@ namespace KingdomSurvival.ArtAssets.Editor
                 properties.Add(slider);
             }
             Number("Яркость", state.LightIntensity, 0, 4, value => state.LightIntensity = value);
-            Number("Высота источника", state.LightHeight, .1f, 6, value => state.LightHeight = value);
+            Number("Высота над землёй", state.LightHeight, 0, 6, value => state.LightHeight = value);
+            Number("Расстояние для нормалей", state.LightNormalDistance, .2f, 6, value => state.LightNormalDistance = value);
+            Label distanceHint = new Label("Меньше расстояние — резче рельеф и сильнее светотень; больше — мягче, ровнее.");
+            distanceHint.style.whiteSpace = WhiteSpace.Normal;
+            distanceHint.style.fontSize = 10;
+            distanceHint.style.color = new Color(.65f, .7f, .65f);
+            properties.Add(distanceHint);
             Toggle normals = new Toggle("Учитывать карты нормалей") { value = state.LightNormals };
             normals.RegisterValueChangedCallback(evt => { state.LightNormals = evt.newValue; litDirty = true; ScheduleStateSave(); });
             properties.Add(normals);

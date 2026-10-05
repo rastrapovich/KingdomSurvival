@@ -129,9 +129,13 @@ namespace KingdomSurvival.ArtAssets.Editor
                 Vector2 pixel = LocationVisualGeometry.ToPixel(litLocation, state.LightPosition);
                 Vector2 objectPixel = LocationVisualGeometry.ToPixel(litLocation, new Vector2(.5f, .62f));
                 Vector2 world = (pixel - objectPixel) / LocationVisualGeometry.PixelsPerUnit;
-                Vector2 gui = ToGui(frame, new Vector2(world.x, -world.y));
+                Vector2 ground = ToGui(frame, new Vector2(world.x, -world.y));
+                Vector2 gui = ToGui(frame, new Vector2(world.x, -world.y + state.LightHeight));
                 Handles.BeginGUI();
                 Handles.color = new Color(1, .85f, .5f, .95f);
+                // Источник — на высоте над точкой земли (крестик); тени — от неё.
+                Handles.DrawLine(ground, gui);
+                Handles.DrawLine(ground - new Vector2(5, 0), ground + new Vector2(5, 0));
                 Handles.DrawWireDisc(gui, Vector3.forward, 10);
                 Handles.DrawSolidDisc(gui, Vector3.forward, 4);
                 Handles.EndGUI();
@@ -376,7 +380,7 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         private void EnsureLit(ArtAssetDefinition asset)
         {
-            string key = asset.Id + "|" + cardView + "|" + catalog.Revision + "|" + state.LightIntensity + "|" + state.LightHeight + "|" + state.LightNormals + "|" + state.LightNight;
+            string key = asset.Id + "|" + cardView + "|" + catalog.Revision + "|" + state.LightIntensity + "|" + state.LightHeight + "|" + state.LightNormalDistance + "|" + state.LightNormals + "|" + state.LightNight;
             if (!litDirty && litRenderer != null && key == litKey) return;
             ReleaseLit();
             litDirty = false;
@@ -388,15 +392,18 @@ namespace KingdomSurvival.ArtAssets.Editor
             LocationVisualObject light = new LocationVisualObject { Id = LitLightId, Name = "Контрольный свет", LightOnly = true, Position = state.LightPosition };
             light.Light.Enabled = true;
             light.Light.Color = new Color(1, .86f, .7f);
-            light.Light.Radius = 7;
+            Rect opaque = ArtAssetDrawing.OpaqueBounds(ArtAssetDrawing.Resolve(catalog, asset, cardView));
+            // Радиус — по видимой части объекта: свет достаёт до всего рисунка.
+            light.Light.Radius = Mathf.Max(4, opaque.size.magnitude * 1.6f);
             light.Light.Intensity = state.LightIntensity;
-            light.Light.Height = state.LightHeight;
+            // Высота над землёй: свечение выше точки на земле, тени — от этой высоты.
+            light.Light.Height = Mathf.Max(.1f, state.LightHeight);
             light.Light.NormalMaps = state.LightNormals;
             light.Light.NormalMapsAccurate = true;
-            light.Light.NormalMapDistance = Mathf.Max(.1f, state.LightHeight);
+            light.Light.NormalMapDistance = Mathf.Max(.1f, state.LightNormalDistance);
             light.Light.Animation = LocationLightAnimation.None;
             light.Light.Falloff = .3f;
-            light.Light.Offset = Vector2.zero;
+            light.Light.Offset = new Vector2(0, state.LightHeight);
             visual.Objects.Add(light);
             litRenderer = new LocationWorldRenderer(litLocation, visual, null);
             litRenderer.Camera.enabled = false;
@@ -431,11 +438,12 @@ namespace KingdomSurvival.ArtAssets.Editor
             }
             if (state.LightOrbit)
             {
-                // Источник по кругу у объекта: нормали видны по движению света.
-                Rect bounds = ArtAssetDrawing.Resolve(catalog, asset, cardView).Bounds;
+                // Источник обходит объект по земле (эллипс вокруг видимой части) на
+                // заданной высоте: нормали видны по движению света.
+                Rect opaque = ArtAssetDrawing.OpaqueBounds(ArtAssetDrawing.Resolve(catalog, asset, cardView));
                 float angle = (float)EditorApplication.timeSinceStartup * .9f;
-                MoveLight(new Vector2(bounds.center.x + Mathf.Cos(angle) * Mathf.Max(.5f, bounds.width * .6f),
-                    bounds.center.y + Mathf.Sin(angle) * Mathf.Max(.5f, bounds.height * .6f)));
+                float rx = Mathf.Max(.6f, opaque.width * .7f), ry = Mathf.Max(.3f, rx * .45f);
+                MoveLight(new Vector2(opaque.center.x + Mathf.Cos(angle) * rx, Mathf.Sin(angle) * ry));
             }
             litRenderer.SetTime(state.LightNight ? 1 : 13, (float)EditorApplication.timeSinceStartup);
             // Кадр камеры совпадает с предпросмотром: опора ассета — в frame.Anchor.

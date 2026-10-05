@@ -308,15 +308,28 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void NormalMapField(string label, Sprite sprite, Texture2D value, Action<Texture2D> set)
         {
             ObjectField field = new ObjectField(label) { objectType = typeof(Texture2D), allowSceneObjects = false, value = value };
-            field.RegisterValueChangedCallback(evt =>
+            void Apply(Texture2D normal)
             {
-                Texture2D normal = evt.newValue as Texture2D;
                 Change(() => set(normal));
                 status.text = SpriteNormalMaps.Assign(sprite, normal, out string message)
                     ? (normal != null ? "Карта нормалей подключена к рисунку." : "Карта нормалей снята.")
                     : message;
-            });
+            }
+            field.RegisterValueChangedCallback(evt => Apply(evt.newValue as Texture2D));
             settings.Add(field);
+            // PNG с компьютера: копия в проект, импорт как Normal map.
+            VisualElement row = new VisualElement { style = { flexDirection = FlexDirection.Row } };
+            row.Add(new Button(() =>
+            {
+                string path = EditorUtility.OpenFilePanel("Карта нормалей (PNG)", "", "png");
+                if (string.IsNullOrEmpty(path)) return;
+                Texture2D normal = ImportNormalTexture(path);
+                if (normal == null) { status.text = "Не удалось загрузить " + path; return; }
+                field.SetValueWithoutNotify(normal);
+                Apply(normal);
+            }) { text = "Загрузить нормаль…", tooltip = "PNG карты нормалей с компьютера: копируется в проект и подключается к рисунку" });
+            if (value != null) row.Add(new Button(() => { field.SetValueWithoutNotify(null); Apply(null); }) { text = "Снять" });
+            settings.Add(row);
             if (sprite == null)
                 settings.Add(new HelpBox("Нормали подключаются к рисунку-спрайту; у технической заглушки их нет.", HelpBoxMessageType.None));
         }

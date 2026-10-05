@@ -135,6 +135,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             Toolbar toolbar = new Toolbar();
             toolbar.style.height = 30f;
             AddToolbarButton(toolbar, "Загрузить папку", LoadFolder, "Папка существа, действия или ракурса из KS Sprite Renderer. Можно просто перетащить её в окно.");
+            AddToolbarButton(toolbar, "Загрузить нормали", LoadNormalsFolder, "Папка карт нормалей той же структуры, что и кадры (действие / ракурс / номера): подключаются к уже загруженным кадрам без их перезагрузки. Можно перетащить в окно папку только с файлами *_n.png.");
             AddToolbarButton(toolbar, "Добавить кадры", () => LoadIntoSelectedCell(CreatureAnimationImportMode.Append), "Добавить кадры в конец выбранной ячейки: папка PNG или выделенные Sprite в окне Project.");
             AddToolbarButton(toolbar, "Заменить", () => LoadIntoSelectedCell(CreatureAnimationImportMode.Replace), "Заменить кадры выбранной ячейки: папка PNG или выделенные Sprite в окне Project.");
             AddToolbarButton(toolbar, "Удалить анимацию", DeleteSelectedAnimation, "Убирает назначение из базы. Картинки не удаляются.");
@@ -545,7 +546,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
 
             AddHeader("ДЕЙСТВИЯ И РАКУРСЫ");
             detailPanel.Add(BuildTable(set));
-            Label hint = new Label("Ячейка — число кадров. Щёлкните ячейку, чтобы смотреть её; перетащите на неё папку PNG или Sprite, чтобы загрузить кадры прямо туда.");
+            Label hint = new Label("Ячейка — число кадров, «N» — у кадров есть карты нормалей. Щёлкните ячейку, чтобы смотреть её; перетащите на неё папку PNG или Sprite, чтобы загрузить кадры прямо туда, или только файлы *_n.png — чтобы подключить нормали.");
             hint.style.whiteSpace = WhiteSpace.Normal;
             hint.style.fontSize = 10f;
             hint.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
@@ -561,6 +562,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             else
             {
                 BuildClipSettings(set, clip);
+                BuildCellNormals(set);
             }
 
             BuildAdvanced(set, clip);
@@ -603,7 +605,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                     CreatureAnimationFrames cell = clip?.FindDirection(direction);
                     int count = cell != null ? cell.FrameCount : 0;
                     bool broken = cell != null && Enumerable.Range(0, count).Any(i => cell.Frames[i] == null);
-                    Label cellLabel = TableCellLabel(count > 0 ? count.ToString() : "—", 70f);
+                    int lit = count > 0 ? CreatureAnimationNormals.CountWithNormals(cell) : 0;
+                    Label cellLabel = TableCellLabel(count > 0 ? count + (lit == count ? " N" : lit > 0 ? " n" : string.Empty) : "—", 70f);
                     cellLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
                     cellLabel.style.backgroundColor = broken ? new Color(0.40f, 0.14f, 0.12f, 1f)
                         : count > 0 ? new Color(0.17f, 0.27f, 0.19f, 1f)
@@ -612,7 +615,9 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                     SetBorder(cellLabel, selected ? HeaderColor : new Color(0.25f, 0.25f, 0.26f, 1f), selected ? 2f : 1f);
                     cellLabel.tooltip = CreatureAnimationLabels.ActionTitle(action) + " → " + CreatureAnimationLabels.DirectionTitle(direction) +
                                         (count > 0 ? ": " + count + " кадр(ов)" : ": нет кадров") +
-                                        (broken ? "\nЕсть кадры без картинки (атлас удалён или не на этом компьютере)." : string.Empty);
+                                        (count == 0 ? string.Empty : lit == count ? "\nКарты нормалей: у всех кадров (N)."
+                                            : lit > 0 ? "\nКарты нормалей: у " + lit + " из " + count + " кадров (n)." : "\nКарт нормалей нет.") +
+                                        (broken ?"\nЕсть кадры без картинки (атлас удалён или не на этом компьютере)." : string.Empty);
                     CreatureAnimationAction capturedAction = action;
                     CreatureAnimationDirection capturedDirection = direction;
                     cellLabel.RegisterCallback<PointerDownEvent>(_ =>
@@ -1150,6 +1155,132 @@ namespace KingdomSurvival.AnimationDatabase.Editor
         }
 
         // ------------------------------------------------------------------
+        // Карты нормалей (ПР-12Н): к уже загруженным кадрам, без их перезагрузки
+        // ------------------------------------------------------------------
+
+        private void BuildCellNormals(CreatureAnimationSetData set)
+        {
+            CreatureAnimationFrames cell = set?.FindFrames(selectedAction, selectedDirection);
+            int count = cell?.FrameCount ?? 0;
+            int lit = CreatureAnimationNormals.CountWithNormals(cell);
+            Label state = new Label("Карты нормалей: " + (count == 0 ? "—" : lit == count ? "у всех " + count + " кадров" : lit > 0 ? lit + " из " + count + " кадров" : "нет"));
+            state.style.marginTop = 6f;
+            state.style.color = lit == count && count > 0 ? ReadyColor : lit > 0 ? PartialColor : EmptyColor;
+            detailPanel.Add(state);
+            VisualElement row = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap } };
+            row.Add(new Button(LoadCellNormals) { text = "Нормали ячейки…", tooltip = "Папка с PNG нормалей этой ячейки (по одному на кадр, номера как у кадров)" });
+            if (lit > 0)
+                row.Add(new Button(RemoveCellNormals) { text = "Снять нормали ячейки", tooltip = "Отключить вторую текстуру _NormalMap у страниц атласа этой ячейки; файлы остаются" });
+            detailPanel.Add(row);
+            Label drop = new Label("Перетащите сюда PNG нормалей этой ячейки (или папку с ними)");
+            drop.style.whiteSpace = WhiteSpace.Normal;
+            drop.style.fontSize = 10f;
+            drop.style.paddingTop = drop.style.paddingBottom = 8f;
+            drop.style.paddingLeft = 6f;
+            drop.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
+            SetBorder(drop, new Color(0.35f, 0.35f, 0.40f, 1f), 1f);
+            drop.RegisterCallback<DragUpdatedEvent>(evt =>
+            {
+                DragAndDrop.visualMode = DroppedFiles().Count > 0 ? DragAndDropVisualMode.Copy : DragAndDropVisualMode.Rejected;
+                evt.StopPropagation();
+            });
+            drop.RegisterCallback<DragPerformEvent>(evt =>
+            {
+                DragAndDrop.AcceptDrag();
+                evt.StopPropagation();
+                List<string> files = DroppedFiles();
+                EditorApplication.delayCall += () => ApplyCellNormals(files);
+            });
+            detailPanel.Add(drop);
+        }
+
+        private void LoadNormalsFolder()
+        {
+            if (SelectedSet == null)
+            {
+                ShowMessage("Сначала выберите существо с загруженными кадрами.", ErrorColor);
+                return;
+            }
+            string folder = EditorUtility.OpenFolderPanel("Папка карт нормалей (структура как у кадров)", SessionState.GetString("KS.AnimationDatabase.LastFolder", string.Empty), string.Empty);
+            if (string.IsNullOrEmpty(folder))
+                return;
+            ApplySetNormals(folder, Directory.GetFiles(folder, "*.png", SearchOption.AllDirectories));
+        }
+
+        private void ApplySetNormals(string root, IEnumerable<string> files)
+        {
+            CreatureAnimationSetData set = SelectedSet;
+            if (set == null)
+            {
+                ShowMessage("У существа нет набора анимаций — сначала загрузите кадры.", ErrorColor);
+                return;
+            }
+            string report = CreatureAnimationNormals.AttachFolder(set, root, files, out int cells, out int failures);
+            Debug.Log("База анимаций: " + report);
+            ShowMessage(report.Split('\n')[0], failures == 0 && cells > 0 ? ReadyColor : cells > 0 ? PartialColor : ErrorColor);
+            if (failures > 0)
+                EditorUtility.DisplayDialog("Карты нормалей", report, "Понятно");
+            ShowSelection();
+        }
+
+        private void LoadCellNormals()
+        {
+            string folder = EditorUtility.OpenFolderPanel(
+                "Нормали: " + CreatureAnimationLabels.ActionTitle(selectedAction) + " → " + CreatureAnimationLabels.DirectionTitle(selectedDirection),
+                SessionState.GetString("KS.AnimationDatabase.LastFolder", string.Empty), string.Empty);
+            if (string.IsNullOrEmpty(folder))
+                return;
+            ApplyCellNormals(Directory.GetFiles(folder, "*.png", SearchOption.TopDirectoryOnly).ToList());
+        }
+
+        private void ApplyCellNormals(List<string> files)
+        {
+            CreatureAnimationFrames cell = SelectedSet?.FindFrames(selectedAction, selectedDirection);
+            string where = CreatureAnimationLabels.ActionTitle(selectedAction) + " → " + CreatureAnimationLabels.DirectionTitle(selectedDirection);
+            List<string> normals = files.Where(CreatureAnimationImportParser.IsImageFile).ToList();
+            // Папка с кадрами и нормалями вперемешку: берутся только нормали.
+            if (normals.Any(CreatureAnimationImportParser.IsNormalFile))
+                normals = normals.Where(CreatureAnimationImportParser.IsNormalFile).ToList();
+            if (!CreatureAnimationNormals.Match(cell, normals, out List<string> ordered, out string problem))
+            {
+                ShowMessage(where + ": " + problem + ".", ErrorColor);
+                return;
+            }
+            bool ok = CreatureAnimationNormals.Attach(cell.Frames, ordered, out string message);
+            ShowMessage(where + ": " + message, ok ? ReadyColor : ErrorColor);
+            ShowSelection();
+        }
+
+        private void RemoveCellNormals()
+        {
+            CreatureAnimationFrames cell = SelectedSet?.FindFrames(selectedAction, selectedDirection);
+            if (cell == null)
+                return;
+            int pages = CreatureAnimationNormals.Remove(cell.Frames);
+            ShowMessage("Нормали сняты со страниц атласа: " + pages + ". Файлы нормалей остались.", EmptyColor);
+            ShowSelection();
+        }
+
+        // Файлы перетаскивания (папки — их PNG), абсолютные пути.
+        private static List<string> DroppedFiles()
+        {
+            List<string> files = new List<string>();
+            foreach (string path in DragAndDrop.paths ?? Array.Empty<string>())
+            {
+                string absolute = ToAbsolutePath(path);
+                if (Directory.Exists(absolute))
+                    files.AddRange(Directory.GetFiles(absolute, "*.png", SearchOption.AllDirectories));
+                else if (CreatureAnimationImportParser.IsImageFile(absolute))
+                    files.Add(absolute);
+            }
+            return files;
+        }
+
+        // Перетащили только нормали (*_n.png / *_normal.png): подключаются к кадрам.
+        private static bool OnlyNormals(IReadOnlyCollection<string> files) =>
+            files.Count > 0 && files.All(CreatureAnimationImportParser.IsNormalFile);
+
+        // ------------------------------------------------------------------
         // Перетаскивание
         // ------------------------------------------------------------------
 
@@ -1174,6 +1305,13 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             DragAndDrop.AcceptDrag();
             List<Sprite> sprites = SpritesFrom(DragAndDrop.objectReferences);
             string[] paths = DragAndDrop.paths ?? Array.Empty<string>();
+            List<string> dropped = DroppedFiles();
+            if (sprites.Count == 0 && OnlyNormals(dropped))
+            {
+                string normalRoot = paths.Select(ToAbsolutePath).FirstOrDefault(Directory.Exists) ?? Path.GetDirectoryName(dropped[0]);
+                ApplySetNormals(normalRoot, dropped);
+                return;
+            }
             string externalFolder = paths.FirstOrDefault(Directory.Exists);
             if (externalFolder != null && sprites.Count == 0)
             {
@@ -1210,6 +1348,11 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             }
             if (files.Count == 0)
                 return;
+            if (OnlyNormals(files))
+            {
+                ApplyCellNormals(files);
+                return;
+            }
             BeginImport(CreatureAnimationImportParser.AnalyzeSequence(files, action, direction), CreatureAnimationImportMode.Replace);
         }
 

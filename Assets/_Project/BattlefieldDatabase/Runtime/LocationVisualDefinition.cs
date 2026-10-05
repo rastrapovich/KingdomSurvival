@@ -139,6 +139,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         public string Id;
         public string Name;
         public Sprite Sprite;
+        // Карта нормалей состояния (подключается к его рисунку при импорте).
+        public Texture2D NormalMap;
     }
 
     [Serializable]

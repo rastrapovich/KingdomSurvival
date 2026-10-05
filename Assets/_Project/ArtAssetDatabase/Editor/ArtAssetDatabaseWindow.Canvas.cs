@@ -36,6 +36,7 @@ namespace KingdomSurvival.ArtAssets.Editor
         private readonly List<CanvasRow> canvasRows = new List<CanvasRow>();
         private Rect canvasContent;
         private bool layoutDirty = true;
+        private bool pendingFrameAll;
         private (ArtAssetView view, ArtAssetCanvasScale scale, int zoom) layoutKey;
         private Vector2 lastMouse, pressPosition;
         private string pressedId;
@@ -50,7 +51,9 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             if (catalog == null || state == null) return;
             Rect area = new Rect(0, 0, center.contentRect.width, center.contentRect.height);
-            if (area.width < 20 || area.height < 20) return;
+            // До первой раскладки размер — NaN: не рисовать и не считать.
+            if (!(area.width >= 20) || !(area.height >= 20)) return;
+            if (pendingFrameAll && Event.current.type == EventType.Layout) FrameAll();
             Event evt = Event.current;
             if (evt.type == EventType.DragExited) { dropHint = null; center.MarkDirtyRepaint(); }
             switch (state.Mode)
@@ -219,10 +222,18 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         private void FrameAll()
         {
+            Rect area = center != null ? new Rect(0, 0, center.contentRect.width, center.contentRect.height) : default;
+            // Окно ещё не разложено (размер NaN): «Показать все» — при первой отрисовке.
+            if (!(area.width >= 20) || !(area.height >= 20))
+            {
+                pendingFrameAll = true;
+                center?.MarkDirtyRepaint();
+                return;
+            }
+            pendingFrameAll = false;
             layoutDirty = true;
             BuildCanvasLayout();
-            Rect area = center != null ? new Rect(0, 0, center.contentRect.width, center.contentRect.height) : new Rect(0, 0, 800, 600);
-            if (canvasContent.width <= 0 || area.width < 20) { state.Pan = Vector2.zero; center?.MarkDirtyRepaint(); return; }
+            if (canvasContent.width <= 0) { state.Pan = Vector2.zero; center?.MarkDirtyRepaint(); return; }
             for (int pass = 0; pass < 2; pass++)
             {
                 state.Zoom = Mathf.Clamp(Mathf.Min(area.width / (canvasContent.width + 2), area.height / (canvasContent.height + 2)), 4, 400);
@@ -241,7 +252,9 @@ namespace KingdomSurvival.ArtAssets.Editor
             CanvasItem item = canvasItems.Find(entry => entry.Asset.Id == state.SelectedId);
             if (item == null) { status.text = "Выбранный ассет скрыт фильтром или не выбран."; return; }
             Rect area = new Rect(0, 0, center.contentRect.width, center.contentRect.height);
-            state.Zoom = Mathf.Clamp(Mathf.Min(area.width / (item.Rect.width * 3), area.height / (item.Rect.height * 1.8f)), 4, 400);
+            if (!(area.width >= 20) || !(area.height >= 20)) return;
+            float zoom = Mathf.Min(area.width / Mathf.Max(.01f, item.Rect.width * 3), area.height / Mathf.Max(.01f, item.Rect.height * 1.8f));
+            if (!float.IsNaN(zoom)) state.Zoom = Mathf.Clamp(zoom, 4, 400);
             layoutDirty = true;
             BuildCanvasLayout();
             item = canvasItems.Find(entry => entry.Asset.Id == state.SelectedId);
@@ -318,8 +331,6 @@ namespace KingdomSurvival.ArtAssets.Editor
         private bool HandleCanvasInput(Rect area, Event evt)
         {
             Vector2 mouse = evt.mousePosition;
-            if (HandleAssetDropReorder(evt, () => CanvasHit(area, mouse)?.Asset)) return true;
-            if (HandleFileDrop(evt, area, CanvasHit(area, mouse)?.Asset)) return true;
             switch (evt.type)
             {
                 case EventType.ScrollWheel:
@@ -368,29 +379,17 @@ namespace KingdomSurvival.ArtAssets.Editor
             return false;
         }
 
-        // Перетаскивание своего ассета внутри холста или галереи: новый порядок показа.
-        private bool HandleAssetDropReorder(Event evt, System.Func<ArtAssetDefinition> target)
+        // Свой ассет, брошенный на холст или в галерею: новый порядок показа.
+        private void ReorderBefore(string id, ArtAssetDefinition before)
         {
-            if (evt.type != EventType.DragUpdated && evt.type != EventType.DragPerform) return false;
-            string id = ArtAssetPicker.DraggedAssetId();
-            if (string.IsNullOrEmpty(id)) return false;
-            DragAndDrop.visualMode = DragAndDropVisualMode.Move;
-            if (evt.type == EventType.DragPerform)
-            {
-                DragAndDrop.AcceptDrag();
-                ArtAssetDefinition before = target();
-                List<string> order = Visible().Select(item => item.Id).ToList();
-                order.Remove(id);
-                int index = before != null && before.Id != id ? order.IndexOf(before.Id) : order.Count;
-                order.Insert(Mathf.Max(0, index), id);
-                state.Order = order;
-                visibleDirty = true;
-                ScheduleStateSave();
-                status.text = "Порядок на холсте изменён (только просмотр).";
-            }
-            evt.Use();
-            center.MarkDirtyRepaint();
-            return true;
+            List<string> order = Visible().Select(item => item.Id).ToList();
+            order.Remove(id);
+            int index = before != null && before.Id != id ? order.IndexOf(before.Id) : order.Count;
+            order.Insert(Mathf.Max(0, index), id);
+            state.Order = order;
+            visibleDirty = true;
+            ScheduleStateSave();
+            status.text = "Порядок на холсте изменён (только просмотр).";
         }
 
         // ------------------------------------------------------------------
@@ -419,8 +418,6 @@ namespace KingdomSurvival.ArtAssets.Editor
             float content = Mathf.CeilToInt(items.Count / (float)columns) * rowHeight + 16;
             state.GalleryScroll = Mathf.Clamp(state.GalleryScroll, 0, Mathf.Max(0, content - area.height));
             Vector2 mouse = evt.mousePosition;
-            if (HandleAssetDropReorder(evt, () => GalleryHit(area, mouse))) return;
-            if (HandleFileDrop(evt, area, GalleryHit(area, mouse))) return;
             switch (evt.type)
             {
                 case EventType.ScrollWheel:

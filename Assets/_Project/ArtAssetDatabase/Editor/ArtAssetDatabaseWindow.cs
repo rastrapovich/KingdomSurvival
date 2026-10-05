@@ -127,7 +127,7 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         public void CreateGUI()
         {
-            catalog = ArtAssetImporter.LoadOrCreateCatalog();
+            catalog = ArtAssetDatabaseAsset.Override != null ? ArtAssetDatabaseAsset.Override : ArtAssetImporter.LoadOrCreateCatalog();
             state ??= ArtAssetViewState.Load();
             VisualElement root = rootVisualElement;
             root.Clear();
@@ -197,6 +197,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             status.style.whiteSpace = WhiteSpace.Normal;
             root.Add(status);
 
+            RegisterDrop();
             RefreshUsage();
             BuildModeBar();
             BuildCategories();

@@ -157,6 +157,35 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(plan.Groups.Single().ColorCount, Is.EqualTo(2));
         }
 
+        // Перетащили просто PNG (без ракурса в имени) — новый ассет в ракурсе по
+        // умолчанию, его пара *_normal — нормаль; нормаль без рисунка — нет.
+        [Test]
+        public void LoosePng_WithDefaultView_BecomesNewAsset_WithItsNormal()
+        {
+            string color = Touch("Загрузки/дом.png");
+            string normal = Touch("Загрузки/дом_normal.png");
+            string lone = Touch("Загрузки/normal.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { lone, color, normal }, null, ArtAssetView.Front);
+            ArtAssetImportGroup house = plan.Groups.Single();
+            Assert.That(house.Name, Is.EqualTo("дом"));
+            ArtAssetImportSlot slot = house.Slots.Single();
+            Assert.That(slot.View, Is.EqualTo(ArtAssetView.Front));
+            Assert.That(slot.ViewAssumed, Is.True, "В сводке видно, что ракурс не из имени.");
+            Assert.That(slot.ColorPath, Is.EqualTo(color));
+            Assert.That(slot.NormalPath, Is.EqualTo(normal));
+            Assert.That(plan.Unresolved.Single().Path, Is.EqualTo(lone));
+
+            // Без ракурса по умолчанию — как раньше: на ручное назначение.
+            Assert.That(ArtAssetImportParser.ParsePaths(new[] { color }).Groups, Is.Empty);
+
+            // Рядом с ракурсами объекта файл без ракурса не становится отдельным ассетом.
+            Touch("Телега/Front/color.png");
+            string stray = Touch("Телега/превью.png");
+            plan = ArtAssetImportParser.ParsePaths(new[] { root + "/Телега" }, null, ArtAssetView.Front);
+            Assert.That(plan.Groups.Select(group => group.Name), Is.EquivalentTo(new[] { "Телега" }));
+            Assert.That(plan.Unresolved.Any(item => item.Path == stray), Is.True);
+        }
+
         [Test]
         public void MissingViewFallback_IsNearestOnTheRing_NextInOrderFirst()
         {

@@ -15,6 +15,7 @@ namespace KingdomSurvival.ArtAssets.Tests
         [Test]
         public void WindowOpensFromMenu_WithRussianControls()
         {
+            ArtAssetViewState.DisableSave = true;
             Assert.That(EditorApplication.ExecuteMenuItem("Kingdom Survival/База ассетов"), Is.True, "Окно в общем меню Kingdom Survival.");
             ArtAssetDatabaseWindow window = EditorWindow.GetWindow<ArtAssetDatabaseWindow>();
             window.CreateGUI();
@@ -27,6 +28,7 @@ namespace KingdomSurvival.ArtAssets.Tests
             window.ShowMode(ArtAssetCenterMode.Card);
             window.ShowMode(ArtAssetCenterMode.Canvas);
             window.Close();
+            ArtAssetViewState.DisableSave = false;
         }
 
         // Визуальная проверка без batchmode: снимки окон Базы ассетов и Базы

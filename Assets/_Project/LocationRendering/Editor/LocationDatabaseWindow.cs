@@ -194,6 +194,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
             center.Add(tools);
             canvas = new IMGUIContainer(DrawPreview) { focusable = true };
+            RegisterCanvasDrop();
             canvas.style.flexGrow = 1;
             center.Add(canvas);
             Label hints = new Label("Перетащите PNG или Sprite сюда · ЛКМ: инструмент · ПКМ: панорама · Колесо: масштаб");
@@ -632,6 +633,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 Text("Название состояния", variant.Name, value => variant.Name = value);
                 SpriteField(variant.Name, variant.Sprite, value => variant.Sprite = value);
+                NormalMapField("Нормаль: " + variant.Name, variant.Sprite, variant.NormalMap, value => variant.NormalMap = value);
                 AddButton(settings, "Показать: " + variant.Name, () => Change(() => selected.DefaultVariantId = variant.Id));
             }
             AddButton(settings, "+ Состояние", () => Change(() => selected.Variants.Add(new LocationVisualVariant { Id = Guid.NewGuid().ToString("N"), Name = "Новое состояние" }), true));
@@ -779,7 +781,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Rect frame = CanvasFrame(area);
             Event evt = Event.current;
             Vector2 pixel = ToPixel(frame, evt.mousePosition);
-            if (HandleDrop(evt, frame, pixel) || HandleInput(evt, frame, pixel)) return;
+            if (HandleInput(evt, frame, pixel)) return;
             if (evt.type != EventType.Repaint) return;
 
             renderer.SetTime(hour, (float)EditorApplication.timeSinceStartup);
@@ -918,36 +920,104 @@ namespace KingdomSurvival.LocationRendering.Editor
             GUI.Label(new Rect(p.x + 9, p.y - 9, 220, 18), label, style);
         }
 
-        private bool HandleDrop(Event evt, Rect frame, Vector2 pixel)
+        // Приём перетаскивания — событиями UI Toolkit: файлы из Проводника и
+        // Project, Sprite и ассеты из окна «База ассетов» доходят надёжно.
+        private void RegisterCanvasDrop()
         {
-            if ((evt.type != EventType.DragUpdated && evt.type != EventType.DragPerform) || !frame.Contains(evt.mousePosition)) return false;
-            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+            canvas.RegisterCallback<DragUpdatedEvent>(evt =>
+            {
+                DragAndDrop.visualMode = DropPixel(evt.mousePosition, out _) ? DragAndDropVisualMode.Copy : DragAndDropVisualMode.Rejected;
+                evt.StopPropagation();
+            });
+            canvas.RegisterCallback<DragPerformEvent>(evt =>
+            {
+                evt.StopPropagation();
+                if (!DropPixel(evt.mousePosition, out Vector2 pixel)) return;
+                DragAndDrop.AcceptDrag();
+                string assetId = ArtAssetPicker.DraggedAssetId();
+                Sprite[] sprites = (DragAndDrop.objectReferences ?? Array.Empty<UnityEngine.Object>()).OfType<Sprite>().ToArray();
+                string[] paths = DragAndDrop.paths ?? Array.Empty<string>();
+                ArtAssetPicker.EndDrag();
+                EditorApplication.delayCall += () => PerformCanvasDrop(assetId, sprites, paths, pixel);
+            });
+        }
+
+        private bool DropPixel(Vector2 worldMouse, out Vector2 pixel)
+        {
+            pixel = default;
+            if (renderer == null || compareDay || Visual == null) return false;
+            bool content = !string.IsNullOrEmpty(ArtAssetPicker.DraggedAssetId()) ||
+                           (DragAndDrop.paths != null && DragAndDrop.paths.Length > 0) ||
+                           (DragAndDrop.objectReferences != null && DragAndDrop.objectReferences.Length > 0);
+            Vector2 mouse = canvas.WorldToLocal(worldMouse);
+            Rect frame = CanvasFrame(new Rect(0, 0, canvas.contentRect.width, canvas.contentRect.height));
+            if (!content || !frame.Contains(mouse)) return false;
+            pixel = ToPixel(frame, mouse);
+            return true;
+        }
+
+        private void PerformCanvasDrop(string assetId, Sprite[] sprites, string[] paths, Vector2 pixel)
+        {
             // Ассет, перетащенный из окна «База ассетов»: экземпляр по ссылке.
-            string assetId = ArtAssetPicker.DraggedAssetId();
             if (!string.IsNullOrEmpty(assetId))
             {
-                if (evt.type == EventType.DragPerform)
-                {
-                    DragAndDrop.AcceptDrag();
-                    AddAssetInstance(assetId, pixel);
-                }
-                evt.Use();
-                return true;
+                AddAssetInstance(assetId, pixel);
+                return;
             }
-            if (evt.type == EventType.DragPerform)
+            foreach (Sprite sprite in sprites) AddArtObject(sprite, LocationPlaceholder.None, pixel);
+            // PNG с парой «*_normal.png» / «*_n.png»: нормаль подключается к рисунку.
+            List<string> files = paths.Where(path => sprites.All(sprite => AssetDatabase.GetAssetPath(sprite) != path))
+                .Where(path => File.Exists(path) && path.EndsWith(".png", StringComparison.OrdinalIgnoreCase)).ToList();
+            List<string> normals = files.Where(IsNormalFileName).ToList();
+            int added = 0, withNormals = 0;
+            foreach (string path in files.Except(normals))
             {
-                DragAndDrop.AcceptDrag();
-                Sprite[] sprites = DragAndDrop.objectReferences.OfType<Sprite>().ToArray();
-                foreach (Sprite sprite in sprites) AddArtObject(sprite, LocationPlaceholder.None, pixel);
-                foreach (string path in DragAndDrop.paths)
-                {
-                    if (sprites.Any(sprite => AssetDatabase.GetAssetPath(sprite) == path)) continue;
-                    Sprite sprite = ImportSprite(path);
-                    if (sprite != null) AddArtObject(sprite, LocationPlaceholder.None, pixel);
-                }
+                Sprite sprite = ImportSprite(path);
+                if (sprite == null) continue;
+                string stem = Path.GetFileNameWithoutExtension(path);
+                string normalPath = normals.FirstOrDefault(normal => string.Equals(NormalBaseName(normal), stem, StringComparison.OrdinalIgnoreCase));
+                Texture2D normal = normalPath != null ? ImportNormalTexture(normalPath) : null;
+                if (normal != null && SpriteNormalMaps.Assign(sprite, normal, out _)) withNormals++;
+                AddArtObject(sprite, LocationPlaceholder.None, pixel);
+                if (normal != null && ArtObject != null) Change(() => ArtObject.NormalMap = normal);
+                added++;
             }
-            evt.Use();
-            return true;
+            if (added > 0) status.text = "Добавлено рисунков: " + added + (withNormals > 0 ? ", с нормалями: " + withNormals : "") + ".";
+            else if (normals.Count > 0) status.text = "Нормаль без рисунка: перетащите её в поле «Карта нормалей» предмета (вкладка «Предметы»).";
+        }
+
+        internal static bool IsNormalFileName(string path)
+        {
+            string name = Path.GetFileNameWithoutExtension(path);
+            return name.EndsWith("_n", StringComparison.OrdinalIgnoreCase) || name.EndsWith("_normal", StringComparison.OrdinalIgnoreCase) ||
+                   name.EndsWith("_normals", StringComparison.OrdinalIgnoreCase) || name.EndsWith("_нормаль", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // «tent_normal» → «tent».
+        internal static string NormalBaseName(string path)
+        {
+            string name = Path.GetFileNameWithoutExtension(path);
+            foreach (string suffix in new[] { "_normals", "_normal", "_нормаль", "_n" })
+                if (name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) return name.Substring(0, name.Length - suffix.Length);
+            return name;
+        }
+
+        // Внешняя карта нормалей — копия в Art/Locations, импорт как Normal map.
+        internal static Texture2D ImportNormalTexture(string path)
+        {
+            if (!File.Exists(path)) return null;
+            if (!path.Replace("\\", "/").StartsWith("Assets/", StringComparison.Ordinal))
+            {
+                string folder = "Assets/_Project/Art/Locations";
+                Directory.CreateDirectory(folder);
+                string destination = AssetDatabase.GenerateUniqueAssetPath(folder + "/" + Path.GetFileName(path));
+                File.Copy(path, destination);
+                path = destination;
+                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            }
+            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            if (texture != null) SpriteNormalMaps.PrepareNormalTexture(texture);
+            return texture;
         }
 
         private bool HandleInput(Event evt, Rect frame, Vector2 pixel)

@@ -49,12 +49,9 @@ namespace KingdomSurvival.ArtAssets.Editor
             {
                 if (evt.type == EventType.Repaint)
                     GUI.Label(area, "Выберите ассет на холсте или в галерее.", new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter, normal = { textColor = TextColor } });
-                if (HandleFileDrop(evt, area, null)) return;
                 return;
             }
-            float slotsWidth = Mathf.Clamp(area.width * .42f, 300, 560);
-            Rect preview = new Rect(area.x, area.y, area.width - slotsWidth - 6, area.height);
-            Rect slots = new Rect(preview.xMax + 6, area.y, slotsWidth, area.height);
+            CardLayout(area, out Rect preview, out Rect slots);
             if (DrawSlots(slots, asset, evt)) return;
             if (state.AllViews) DrawAllViews(preview, asset, evt);
             else DrawBigPreview(preview, asset, evt);
@@ -151,7 +148,6 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             Vector2 mouse = evt.mousePosition;
             if (!frame.Preview.Contains(mouse) && !draggingTool && !panning) return false;
-            if (HandleFileDrop(evt, frame.Preview, asset)) return true;
             Vector2 world = ToWorld(frame, mouse);
             ArtAssetViewSettings settings = asset.Settings(cardView);
             switch (evt.type)
@@ -269,6 +265,21 @@ namespace KingdomSurvival.ArtAssets.Editor
         // Ячейки ракурсов
         // ------------------------------------------------------------------
 
+        // Раскладка карточки: слева предпросмотр, справа ячейки ракурсов.
+        private static void CardLayout(Rect area, out Rect preview, out Rect slots)
+        {
+            float slotsWidth = Mathf.Clamp(area.width * .42f, 300, 560);
+            preview = new Rect(area.x, area.y, area.width - slotsWidth - 6, area.height);
+            slots = new Rect(preview.xMax + 6, area.y, slotsWidth, area.height);
+        }
+
+        // Ячейка ракурса: левая половина — рисунок, правая — нормаль.
+        private static void SlotHalves(Rect cell, out Rect color, out Rect normal)
+        {
+            color = new Rect(cell.x + 4, cell.y + 22, cell.width / 2 - 6, cell.height - 62);
+            normal = new Rect(cell.center.x + 2, cell.y + 22, cell.width / 2 - 6, cell.height - 62);
+        }
+
         private Rect SlotRect(Rect slots, int index)
         {
             const float header = 20;
@@ -284,9 +295,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             {
                 ArtAssetView view = ArtAssetLabels.Views[i];
                 Rect cell = SlotRect(slots, i);
-                Rect colorRect = new Rect(cell.x + 4, cell.y + 22, cell.width / 2 - 6, cell.height - 62);
-                Rect normalRect = new Rect(cell.center.x + 2, cell.y + 22, cell.width / 2 - 6, cell.height - 62);
-                if (HandleSlotDrop(evt, cell, colorRect, normalRect, asset, part, view)) return true;
+                SlotHalves(cell, out Rect colorRect, out Rect normalRect);
                 ArtAssetPartView slot = part.View(view);
                 Rect clearColor = new Rect(colorRect.x, cell.yMax - 20, colorRect.width, 16);
                 Rect clearNormal = new Rect(normalRect.x, cell.yMax - 20, normalRect.width, 16);

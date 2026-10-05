@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using KingdomSurvival.AnimationDatabase.Editor;
@@ -113,6 +114,73 @@ namespace KingdomSurvival.AnimationDatabase.Tests
             Assert.AreEqual(TextureImporterType.NormalMap, normalImporter.textureType);
             Assert.IsFalse(CreatureAnimationImporter.FindUnusedAtlases(database).Contains(AssetDatabase.GetAssetPath(normal.texture)),
                 "Страница нормалей используемого атласа не считается лишней.");
+        }
+
+        // ПР-12Н: нормали, отрендеренные позже, подключаются к уже загруженным
+        // кадрам папкой той же структуры — без перезагрузки кадров и правки базы.
+        [Test]
+        public void LaterNormals_AttachToLoadedFrames_WithoutReimport()
+        {
+            CreatureAnimationTestFrames.Generate(sourceRoot, database, false);
+            CreatureAnimationImportPackage package = CreatureAnimationImportParser.Analyze(
+                sourceRoot, Directory.GetFiles(sourceRoot, "*.*", SearchOption.AllDirectories));
+            CreatureAnimationSetData set = database.AddSet(SetId, "Тест нормалей");
+            Assert.IsTrue(CreatureAnimationImporter.Apply(database, set, package, CreatureAnimationImportMode.Replace, out _), string.Join("\n", package.Issues));
+            CreatureAnimationFrames walk = set.FindFrames(CreatureAnimationAction.Walk, CreatureAnimationDirection.BackLeft);
+            Sprite[] before = walk.Frames.ToArray();
+            Assert.AreEqual(0, CreatureAnimationNormals.CountWithNormals(walk), "Кадры загружены без нормалей.");
+
+            WriteNormals(sourceRoot);
+            string[] normals = Directory.GetFiles(sourceRoot, "*_n.png", SearchOption.AllDirectories);
+            string report = CreatureAnimationNormals.AttachFolder(set, sourceRoot, normals, out int cells, out int failures);
+
+            Assert.AreEqual(0, failures, report);
+            Assert.Greater(cells, 0, report);
+            foreach (CreatureAnimationClipData clip in set.Clips)
+                foreach (CreatureAnimationFrames cell in clip.Directions)
+                    Assert.AreEqual(cell.FrameCount, CreatureAnimationNormals.CountWithNormals(cell), clip.Action + " → " + cell.Direction + "\n" + report);
+            CollectionAssert.AreEqual(before, walk.Frames.ToArray(), "Кадры не перезагружены.");
+
+            Texture2D page = CreatureAnimationNormals.FindPageNormal(walk.Frames[0].texture);
+            Assert.AreEqual(TextureImporterType.NormalMap, ((TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(page))).textureType);
+            // В прямоугольнике кадра на странице — нормаль кадра (центр полусферы смотрит на зрителя).
+            Texture2D pixels = new Texture2D(2, 2, TextureFormat.RGBA32, false, true);
+            pixels.LoadImage(File.ReadAllBytes(CreatureAnimationAtlasBuilder.ToAbsolute(AssetDatabase.GetAssetPath(page))));
+            Rect rect = walk.Frames[0].rect;
+            Color32 middle = pixels.GetPixel(Mathf.RoundToInt(rect.center.x), Mathf.RoundToInt(rect.center.y));
+            Object.DestroyImmediate(pixels);
+            Assert.Greater(middle.b, 240, "Синий канал — нормаль к зрителю.");
+            Assert.AreEqual(128f, middle.r, 3f);
+
+            Assert.Greater(CreatureAnimationNormals.Remove(walk.Frames), 0);
+            Assert.AreEqual(0, CreatureAnimationNormals.CountWithNormals(walk), "Нормали ячейки сняты.");
+        }
+
+        [Test]
+        public void CellNormals_MatchByFrameNumbers_AndRejectMissingOnes()
+        {
+            CreatureAnimationTestFrames.Generate(sourceRoot, database, false);
+            CreatureAnimationImportPackage package = CreatureAnimationImportParser.Analyze(
+                sourceRoot, Directory.GetFiles(sourceRoot, "*.*", SearchOption.AllDirectories));
+            CreatureAnimationSetData set = database.AddSet(SetId, "Тест нормалей");
+            Assert.IsTrue(CreatureAnimationImporter.Apply(database, set, package, CreatureAnimationImportMode.Replace, out _));
+            WriteNormals(sourceRoot);
+            CreatureAnimationFrames idle = set.FindFrames(CreatureAnimationAction.Idle, CreatureAnimationDirection.Front);
+            string folder = Path.GetDirectoryName(package.Groups.First(group => group.ChosenAction == CreatureAnimationAction.Idle)
+                .Cells[CreatureAnimationDirection.Front].Frames[0].Path);
+            List<string> normals = Directory.GetFiles(folder, "*_n.png").ToList();
+
+            // Порядок файлов не важен: сопоставление по номерам кадров.
+            normals.Reverse();
+            Assert.IsTrue(CreatureAnimationNormals.Match(idle, normals, out List<string> ordered, out string problem), problem);
+            for (int i = 0; i < ordered.Count; i++)
+            {
+                CreatureAnimationImportParser.TryParseFrameNumber(CreatureAnimationNormals.BaseName(ordered[i]), out int number);
+                Assert.AreEqual(idle.SourceFrameNumbers[i], number);
+            }
+            normals.RemoveAt(0);
+            Assert.IsFalse(CreatureAnimationNormals.Match(idle, normals, out _, out problem));
+            StringAssert.Contains("нет нормалей для кадров", problem);
         }
     }
 }

@@ -628,6 +628,36 @@ namespace KingdomSurvival.UnitDatabase.Editor
         }
 
         // Ссылка на картинку без заголовков-атрибутов поля.
+        // ПР-12Н: карта нормалей запасного рисунка на поле — им показывается
+        // существо без набора анимаций (в местах, под светом огня и солнца).
+        private VisualElement BattlefieldNormalRow(UnitDefinitionData data)
+        {
+            VisualElement row = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap, alignItems = Align.Center } };
+            Sprite sprite = data.BattlefieldSprite;
+            bool has = CreatureAnimationNormals.HasNormal(sprite);
+            Label label = new Label(sprite == null ? "Нормаль: нет рисунка" : has ? "Нормаль: подключена" : "Нормаль: нет");
+            label.style.minWidth = 140f;
+            row.Add(label);
+            Button load = new Button(() =>
+            {
+                string path = EditorUtility.OpenFilePanel("Карта нормалей рисунка на поле (PNG того же размера)", "", "png");
+                if (string.IsNullOrEmpty(path)) return;
+                bool ok = CreatureAnimationNormals.Attach(new[] { sprite }, new[] { path }, out string message);
+                if (!ok) EditorUtility.DisplayDialog("Карта нормалей", message, "Закрыть");
+                RefreshPreviews();
+                label.text = CreatureAnimationNormals.HasNormal(sprite) ? "Нормаль: подключена" : "Нормаль: нет";
+            }) { text = "Загрузить нормаль…", tooltip = "PNG карты нормалей того же размера, что и рисунок: подключается к рисунку второй текстурой _NormalMap" };
+            load.SetEnabled(sprite != null);
+            row.Add(load);
+            if (has)
+                row.Add(new Button(() =>
+                {
+                    CreatureAnimationNormals.Remove(new[] { sprite });
+                    label.text = "Нормаль: нет";
+                }) { text = "Снять" });
+            return row;
+        }
+
         private static ObjectField SpriteField(SerializedProperty owner, string propertyName)
         {
             ObjectField field = new ObjectField("Файл")
@@ -781,6 +811,7 @@ namespace KingdomSurvival.UnitDatabase.Editor
 
             card.Add(BuildArtButtons(UnitArtKind.Battlefield));
             card.Add(SpriteField(unit, "battlefieldSprite"));
+            card.Add(BattlefieldNormalRow(data));
             SerializedProperty offset = unit.FindPropertyRelative("battlefieldOffset");
             card.Add(FloatSlider(unit.FindPropertyRelative("battlefieldScale"), "Масштаб", 0.1f, 4f, "Размер миниатюры на поле."));
             card.Add(FloatSlider(offset.FindPropertyRelative("x"), "Сдвиг X", -200f, 200f, "Сдвиг по горизонтали, пиксели поля."));

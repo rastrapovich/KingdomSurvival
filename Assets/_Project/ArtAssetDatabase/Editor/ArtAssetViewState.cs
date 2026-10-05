@@ -36,22 +36,45 @@ namespace KingdomSurvival.ArtAssets.Editor
         public bool LightNormals = true, LightNight;
         public Vector2 LightPosition = new Vector2(.38f, .58f);
 
+        // Тесты не трогают настройки просмотра пользователя.
+        public static bool DisableSave;
+
         public static ArtAssetViewState Load()
         {
+            ArtAssetViewState state = null;
             try
             {
-                if (File.Exists(FilePath))
-                    return JsonUtility.FromJson<ArtAssetViewState>(File.ReadAllText(FilePath)) ?? new ArtAssetViewState();
+                if (!DisableSave && File.Exists(FilePath))
+                    state = JsonUtility.FromJson<ArtAssetViewState>(File.ReadAllText(FilePath));
             }
             catch (Exception exception)
             {
                 Debug.LogWarning("База ассетов: настройки просмотра не прочитаны: " + exception.Message);
             }
-            return new ArtAssetViewState();
+            state ??= new ArtAssetViewState();
+            state.Sanitize();
+            return state;
+        }
+
+        // Повреждённые числа (NaN, бесконечность, ноль) не должны ломать холст.
+        public void Sanitize()
+        {
+            static bool Bad(float value) => float.IsNaN(value) || float.IsInfinity(value);
+            if (Bad(Zoom) || Zoom < 4 || Zoom > 400) Zoom = 60;
+            if (Bad(Pan.x) || Bad(Pan.y)) Pan = Vector2.zero;
+            if (Bad(CardSize) || CardSize < 80 || CardSize > 260) CardSize = 130;
+            if (Bad(GalleryScroll) || GalleryScroll < 0) GalleryScroll = 0;
+            if (Bad(LightIntensity)) LightIntensity = 1.4f;
+            if (Bad(LightHeight) || LightHeight <= 0) LightHeight = 1.2f;
+            if (Bad(LightPosition.x) || Bad(LightPosition.y)) LightPosition = new Vector2(.38f, .58f);
+            Order ??= new List<string>();
+            SelectedId ??= "";
         }
 
         public void Save()
         {
+            if (DisableSave) return;
+            Sanitize();
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(FilePath));

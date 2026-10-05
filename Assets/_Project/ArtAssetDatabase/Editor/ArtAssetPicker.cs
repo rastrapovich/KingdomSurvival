@@ -39,7 +39,17 @@ namespace KingdomSurvival.ArtAssets.Editor
             DragAndDrop.StartDrag(asset.Name);
         }
 
-        public static string DraggedAssetId() => DragAndDrop.GetGenericData(DragKey) as string;
+        // Свой ассет тащится, только если вместе с ним не тащат файлы: метка
+        // прошлого перетаскивания не должна перехватывать PNG из Проводника.
+        public static string DraggedAssetId()
+        {
+            if ((DragAndDrop.paths != null && DragAndDrop.paths.Length > 0) ||
+                (DragAndDrop.objectReferences != null && DragAndDrop.objectReferences.Length > 0))
+                return null;
+            return DragAndDrop.GetGenericData(DragKey) as string;
+        }
+
+        public static void EndDrag() => DragAndDrop.SetGenericData(DragKey, null);
 
         private void OnGUI()
         {

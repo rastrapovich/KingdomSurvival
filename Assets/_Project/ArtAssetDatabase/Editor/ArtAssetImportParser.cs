@@ -16,6 +16,8 @@ namespace KingdomSurvival.ArtAssets.Editor
         public string Part = string.Empty;
         public string ColorPath;
         public string NormalPath;
+        // Ракурса в имени не было: поставлен ракурс по умолчанию (видно в сводке).
+        public bool ViewAssumed;
     }
 
     // Один распознанный объект пакета.
@@ -84,12 +86,17 @@ namespace KingdomSurvival.ArtAssets.Editor
         private static readonly HashSet<string> MainPartNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         { "", "основа", "base", "main", "body" };
 
+        public const string NoViewProblem = "не удалось определить ракурс";
+
         public static bool IsImage(string path) =>
             ImageExtensions.Contains(Path.GetExtension(path ?? string.Empty).ToLowerInvariant());
 
         // Пакет из Проводника или Project: файлы и папки (папки — рекурсивно).
         // forcedAssetName — всё идёт в одну запись (перетаскивание на карточку).
-        public static ArtAssetImportPlan ParsePaths(IEnumerable<string> paths, string forcedAssetName = null)
+        // defaultView — ракурс для файлов без ракурса в имени (новый объект из
+        // одного рисунка); внутри папки объекта с ракурсами такие файлы остаются
+        // на ручное назначение. null — не назначать.
+        public static ArtAssetImportPlan ParsePaths(IEnumerable<string> paths, string forcedAssetName = null, ArtAssetView? defaultView = null)
         {
             List<(string full, List<string> segments)> files = new List<(string, List<string>)>();
             List<ArtAssetImportIssue> skipped = new List<ArtAssetImportIssue>();
@@ -121,14 +128,15 @@ namespace KingdomSurvival.ArtAssets.Editor
                 }
                 else skipped.Add(new ArtAssetImportIssue { Path = path, Reason = "не PNG — пропущен" });
             }
-            ArtAssetImportPlan plan = ParseFiles(files, forcedAssetName);
+            ArtAssetImportPlan plan = ParseFiles(files, forcedAssetName, defaultView);
             plan.Unresolved.AddRange(skipped);
             return plan;
         }
 
         // segments — путь от корня перетаскивания: [папка-корень, …, файл].
         // Последняя папка одиночного файла тоже передаётся: она — запасное имя.
-        public static ArtAssetImportPlan ParseFiles(IEnumerable<(string full, List<string> segments)> files, string forcedAssetName = null)
+        public static ArtAssetImportPlan ParseFiles(IEnumerable<(string full, List<string> segments)> files, string forcedAssetName = null,
+            ArtAssetView? defaultView = null)
         {
             ArtAssetImportPlan plan = new ArtAssetImportPlan();
             Dictionary<string, ArtAssetImportGroup> groups = new Dictionary<string, ArtAssetImportGroup>(StringComparer.OrdinalIgnoreCase);
@@ -137,13 +145,10 @@ namespace KingdomSurvival.ArtAssets.Editor
             Dictionary<string, (ArtAssetImportGroup group, ArtAssetView view, string part, ArtAssetFileKind kind)> targets =
                 new Dictionary<string, (ArtAssetImportGroup, ArtAssetView, string, ArtAssetFileKind)>(StringComparer.OrdinalIgnoreCase);
 
-            foreach ((string full, List<string> segments) in files)
+            HashSet<string> assumed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<(string full, List<string> segments)> viewless = new List<(string, List<string>)>();
+            void Claim(string full, string objectName, ArtAssetView view, string part, ArtAssetFileKind kind)
             {
-                if (!Classify(segments, forcedAssetName, out string objectName, out ArtAssetView view, out string part, out ArtAssetFileKind kind, out string problem))
-                {
-                    plan.Unresolved.Add(new ArtAssetImportIssue { Path = full, Reason = problem });
-                    continue;
-                }
                 string key = NormalizeKey(objectName);
                 if (!groups.TryGetValue(key, out ArtAssetImportGroup group))
                 {
@@ -153,6 +158,43 @@ namespace KingdomSurvival.ArtAssets.Editor
                 string claim = key + "|" + view + "|" + part.ToLowerInvariant() + "|" + kind;
                 if (!claims.TryGetValue(claim, out List<string> list)) { list = new List<string>(); claims.Add(claim, list); targets[claim] = (group, view, part, kind); }
                 list.Add(full);
+            }
+
+            foreach ((string full, List<string> segments) in files)
+            {
+                if (!Classify(segments, forcedAssetName, out string objectName, out ArtAssetView view, out string part, out ArtAssetFileKind kind, out string problem))
+                {
+                    if (defaultView.HasValue && problem == NoViewProblem) viewless.Add((full, segments));
+                    else plan.Unresolved.Add(new ArtAssetImportIssue { Path = full, Reason = problem });
+                    continue;
+                }
+                Claim(full, objectName, view, part, kind);
+            }
+
+            // Файлы без ракурса: отдельный рисунок (и его пара *_normal) — новый
+            // объект в ракурсе по умолчанию; рядом с ракурсами объекта — вручную.
+            HashSet<string> structured = new HashSet<string>(groups.Keys, StringComparer.OrdinalIgnoreCase);
+            foreach ((string full, List<string> segments) in viewless)
+            {
+                string parent = segments.Count > 1 ? segments[segments.Count - 2] : string.Empty;
+                if (string.IsNullOrEmpty(forcedAssetName) && parent.Length > 0 && structured.Contains(NormalizeKey(parent)))
+                {
+                    plan.Unresolved.Add(new ArtAssetImportIssue { Path = full, Reason = NoViewProblem + " (рядом с ракурсами «" + parent + "»)" });
+                    continue;
+                }
+                List<string> stem = Tokens(Path.GetFileNameWithoutExtension(segments[segments.Count - 1]));
+                bool normal = RemoveTokens(stem, NormalTokens);
+                if (!normal && stem.Count > 1 && stem[stem.Count - 1] == "n") { normal = true; stem.RemoveAt(stem.Count - 1); }
+                RemoveTokens(stem, ColorTokens);
+                string rest = Join(stem);
+                string name = !string.IsNullOrEmpty(forcedAssetName) ? forcedAssetName : rest.Length > 0 ? rest : parent;
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    plan.Unresolved.Add(new ArtAssetImportIssue { Path = full, Reason = "не удалось определить объект" });
+                    continue;
+                }
+                assumed.Add(full);
+                Claim(full, name.Trim(), defaultView.Value, string.Empty, normal ? ArtAssetFileKind.Normal : ArtAssetFileKind.Color);
             }
 
             foreach (KeyValuePair<string, List<string>> claim in claims)
@@ -166,7 +208,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     continue;
                 }
                 ArtAssetImportSlot slot = group.Slot(view, part);
-                if (kind == ArtAssetFileKind.Color) slot.ColorPath = claim.Value[0];
+                if (kind == ArtAssetFileKind.Color) { slot.ColorPath = claim.Value[0]; slot.ViewAssumed = assumed.Contains(claim.Value[0]); }
                 else slot.NormalPath = claim.Value[0];
             }
 
@@ -251,7 +293,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             }
             else
             {
-                problem = "не удалось определить ракурс";
+                problem = NoViewProblem;
                 return false;
             }
 

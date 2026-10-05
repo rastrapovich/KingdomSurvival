@@ -429,6 +429,14 @@ namespace KingdomSurvival.ArtAssets.Editor
                 GUI.Label(area, "Предпросмотр под светом недоступен в Play Mode.");
                 return;
             }
+            if (state.LightOrbit)
+            {
+                // Источник по кругу у объекта: нормали видны по движению света.
+                Rect bounds = ArtAssetDrawing.Resolve(catalog, asset, cardView).Bounds;
+                float angle = (float)EditorApplication.timeSinceStartup * .9f;
+                MoveLight(new Vector2(bounds.center.x + Mathf.Cos(angle) * Mathf.Max(.5f, bounds.width * .6f),
+                    bounds.center.y + Mathf.Sin(angle) * Mathf.Max(.5f, bounds.height * .6f)));
+            }
             litRenderer.SetTime(state.LightNight ? 1 : 13, (float)EditorApplication.timeSinceStartup);
             // Кадр камеры совпадает с предпросмотром: опора ассета — в frame.Anchor.
             Vector2 objectPixel = LocationVisualGeometry.ToPixel(litLocation, new Vector2(.5f, .62f));

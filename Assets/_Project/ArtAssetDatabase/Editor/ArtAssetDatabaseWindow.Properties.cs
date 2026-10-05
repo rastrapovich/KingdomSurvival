@@ -153,10 +153,25 @@ namespace KingdomSurvival.ArtAssets.Editor
                 Help(issue.Text, issue.Level == ArtAssetIssueLevel.Error ? HelpBoxMessageType.Error : issue.Level == ArtAssetIssueLevel.Warning ? HelpBoxMessageType.Warning : HelpBoxMessageType.Info);
             Row(("Исправить подключения нормалей", () =>
             {
-                int count = ArtAssetValidator.RepairNormals(asset);
-                status.text = count > 0 ? "Подключено нормалей: " + count + "." : "Все нормали уже подключены.";
+                int count = 0;
+                Edit("Исправить подключения нормалей", () => count = ArtAssetValidator.RepairNormals(asset));
+                status.text = count > 0 ? "Исправлено подключений нормалей: " + count + "." : "Все нормали уже подключены.";
+                litDirty = true;
                 BuildProperties();
             }));
+            if (issues.Any(issue => issue.Text.Contains("гамма-коррекцией")))
+                Row(("Исправить гамму нормалей", () =>
+                {
+                    if (!EditorUtility.DisplayDialog("Исправить гамму нормалей?",
+                            "Карты нормалей этого ассета в проекте будут пересчитаны из sRGB в линейные числа (файлы переписываются, GUID сохраняется). " +
+                            "Ваши исходные файлы вне проекта не меняются. Для новых рендеров лучше поставить в Blender View Transform = Raw.", "Исправить", "Отмена"))
+                        return;
+                    int count = ArtAssetValidator.FixNormalGamma(asset);
+                    status.text = "Исправлено карт нормалей: " + count + ".";
+                    litDirty = true;
+                    catalog.MarkChanged();
+                    BuildProperties();
+                }));
 
             Heading("Где используется");
             List<ArtAssetUsage> usages = ArtAssetUsages.Find(asset.Id);
@@ -230,7 +245,12 @@ namespace KingdomSurvival.ArtAssets.Editor
         private void BuildLightProperties()
         {
             Heading("Под светом");
-            Help("Контрольный источник — общими средствами рендерера мест. Перетаскивайте его инструментом «Свет».", HelpBoxMessageType.None);
+            Help("Контрольный источник — общими средствами рендерера мест. Нормали действуют только от местного источника: " +
+                 "общий дневной свет освещает рисунок ровно и их заглушает — смотрите ночью. Включите «Свет по кругу» или тащите " +
+                 "источник инструментом «Свет» и переключайте «Учитывать карты нормалей»: с нормалями проявляется объём.", HelpBoxMessageType.None);
+            Toggle orbit = new Toggle("Свет по кругу") { value = state.LightOrbit, tooltip = "Источник ходит вокруг объекта — видно, как нормали лепят объём" };
+            orbit.RegisterValueChangedCallback(evt => { state.LightOrbit = evt.newValue; ScheduleStateSave(); });
+            properties.Add(orbit);
             void Number(string label, float value, float min, float max, Action<float> set)
             {
                 Slider slider = new Slider(label, min, max) { value = value, showInputField = true };

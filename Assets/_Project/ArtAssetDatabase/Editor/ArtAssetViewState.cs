@@ -33,7 +33,7 @@ namespace KingdomSurvival.ArtAssets.Editor
         public List<string> Order = new List<string>();
         public bool AllViews;
         public float LightIntensity = 1.4f, LightHeight = 1.2f;
-        public bool LightNormals = true, LightNight;
+        public bool LightNormals = true, LightNight = true, LightOrbit;
         public Vector2 LightPosition = new Vector2(.38f, .58f);
 
         // Тесты не трогают настройки просмотра пользователя.

@@ -144,6 +144,40 @@ namespace KingdomSurvival.ArtAssets.Editor
             return preview;
         }
 
+        // Средняя длина вектора карты нормалей по непрозрачным пикселям: у
+        // правильной карты ≈ 1; ≈ 1,1–1,2 — карта записана с гамма-коррекцией
+        // sRGB (в Blender не Raw). 0 — прочитать не удалось.
+        private static readonly Dictionary<string, (System.DateTime stamp, float length)> normalLengths =
+            new Dictionary<string, (System.DateTime, float)>();
+
+        public static float NormalLength(Texture2D normal)
+        {
+            if (normal == null) return 0;
+            string path = AssetDatabase.GetAssetPath(normal);
+            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return 0;
+            System.DateTime stamp = System.IO.File.GetLastWriteTimeUtc(path);
+            if (normalLengths.TryGetValue(path, out (System.DateTime stamp, float length) cached) && cached.stamp == stamp) return cached.length;
+            Texture2D preview = NormalPreview(normal);
+            float length = 0;
+            if (preview != null && preview != normal)
+            {
+                Color32[] pixels = preview.GetPixels32();
+                int step = Mathf.Max(1, pixels.Length / 40000), count = 0;
+                double sum = 0;
+                for (int i = 0; i < pixels.Length; i += step)
+                {
+                    Color32 c = pixels[i];
+                    if (c.a < 200) continue;
+                    float x = c.r / 127.5f - 1, y = c.g / 127.5f - 1, z = c.b / 127.5f - 1;
+                    sum += Mathf.Sqrt(x * x + y * y + z * z);
+                    count++;
+                }
+                length = count > 0 ? (float)(sum / count) : 0;
+            }
+            normalLengths[path] = (stamp, length);
+            return length;
+        }
+
         public static void DrawSprite(Rect rect, Sprite sprite, bool flip = false, Color? tint = null)
         {
             if (sprite == null || sprite.texture == null || Event.current.type != EventType.Repaint) return;

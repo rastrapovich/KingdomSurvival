@@ -53,7 +53,12 @@ namespace KingdomSurvival.ArtAssets.Editor
                     string where = partName + ArtAssetLabels.ViewTitle(view) + ": ";
                     if (slot.Sprite != null && part != asset.MainPart && !asset.HasView(view))
                         Add(ArtAssetIssueLevel.Info, where + "есть часть, но нет рисунка основы — ракурс не показывается.", view);
-                    if (slot.NormalMap == null) continue;
+                    if (slot.NormalMap == null)
+                    {
+                        if (slot.Sprite != null && SpriteNormalMaps.Find(slot.Sprite) != null)
+                            Add(ArtAssetIssueLevel.Warning, where + "нормаль подключена к рисунку, но не записана в карточке — нажмите «Исправить подключения».", view);
+                        continue;
+                    }
                     if (slot.Sprite == null)
                     {
                         Add(ArtAssetIssueLevel.Warning, where + "нормаль без рисунка.", view);
@@ -69,6 +74,10 @@ namespace KingdomSurvival.ArtAssets.Editor
                     if (SpriteNormalMaps.Find(slot.Sprite) != slot.NormalMap)
                         Add(ArtAssetIssueLevel.Warning, where + "нормаль не подключена к рисунку (_NormalMap) — нажмите «Исправить подключения».", view);
                     if (sheet) Add(ArtAssetIssueLevel.Info, where + "рисунок из листа: нормаль назначается всему листу.", view);
+                    float length = ArtAssetDrawing.NormalLength(slot.NormalMap);
+                    if (length > GammaLength)
+                        Add(ArtAssetIssueLevel.Warning, where + "нормаль, похоже, записана с гамма-коррекцией sRGB (длина векторов " + length.ToString("0.00") +
+                                                        " вместо 1,00): свет ложится криво. В Blender — View Transform = Raw; для готового файла — «Исправить гамму нормалей».", view);
                     Texture2D texture = slot.Sprite.texture;
                     if (sheetNormals.TryGetValue(texture, out Texture2D other) && other != slot.NormalMap)
                         Add(ArtAssetIssueLevel.Warning, where + "один лист рисунков — разные нормали: у листа может быть только одна.", view);
@@ -109,7 +118,12 @@ namespace KingdomSurvival.ArtAssets.Editor
             }
         }
 
-        // Подключить нормали заново по записи (вторая текстура, импорт как Normal map).
+        // Длина вектора, начиная с которой нормаль считается записанной с гаммой.
+        public const float GammaLength = 1.06f;
+
+        // Подключить нормали заново по записи (вторая текстура, импорт как
+        // Normal map); нормаль, подключённую к рисунку, но не записанную в
+        // карточке (например, после Undo импорта), — записать.
         public static int RepairNormals(ArtAssetDefinition asset)
         {
             int fixedCount = 0;
@@ -117,11 +131,54 @@ namespace KingdomSurvival.ArtAssets.Editor
                 foreach (ArtAssetView view in ArtAssetLabels.Views)
                 {
                     ArtAssetPartView slot = part.FindView(view);
+                    if (slot?.Sprite != null && slot.NormalMap == null && SpriteNormalMaps.Find(slot.Sprite) != null)
+                    {
+                        slot.NormalMap = SpriteNormalMaps.Find(slot.Sprite);
+                        fixedCount++;
+                        continue;
+                    }
                     if (slot?.Sprite == null || slot.NormalMap == null) continue;
                     if (SpriteNormalMaps.Find(slot.Sprite) == slot.NormalMap && SpriteNormalMaps.IsNormalMapImport(slot.NormalMap)) continue;
                     if (SpriteNormalMaps.Assign(slot.Sprite, slot.NormalMap, out _)) fixedCount++;
                 }
             return fixedCount;
         }
+
+        // Снять гамма-коррекцию с карт нормалей ассета (sRGB → линейные числа).
+        // Переписывается файл в проекте (GUID сохраняется); исходники
+        // пользователя вне проекта не меняются.
+        public static int FixNormalGamma(ArtAssetDefinition asset)
+        {
+            int count = 0;
+            foreach (Texture2D normal in asset.Parts.Where(item => item != null).SelectMany(part => part.Views ?? new List<ArtAssetPartView>())
+                         .Where(slot => slot?.NormalMap != null).Select(slot => slot.NormalMap).Distinct())
+            {
+                if (ArtAssetDrawing.NormalLength(normal) <= GammaLength) continue;
+                string path = AssetDatabase.GetAssetPath(normal);
+                Texture2D source = new Texture2D(2, 2, TextureFormat.RGBA32, false, true);
+                try
+                {
+                    if (!source.LoadImage(System.IO.File.ReadAllBytes(path), false)) continue;
+                    Color32[] pixels = source.GetPixels32();
+                    for (int i = 0; i < pixels.Length; i++)
+                    {
+                        Color32 c = pixels[i];
+                        pixels[i] = new Color32(Linear(c.r), Linear(c.g), Linear(c.b), c.a);
+                    }
+                    source.SetPixels32(pixels);
+                    source.Apply(false);
+                    System.IO.File.WriteAllBytes(path, source.EncodeToPNG());
+                }
+                finally
+                {
+                    Object.DestroyImmediate(source);
+                }
+                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+                count++;
+            }
+            return count;
+        }
+
+        private static byte Linear(byte value) => (byte)Mathf.Clamp(Mathf.RoundToInt(Mathf.GammaToLinearSpace(value / 255f) * 255f), 0, 255);
     }
 }

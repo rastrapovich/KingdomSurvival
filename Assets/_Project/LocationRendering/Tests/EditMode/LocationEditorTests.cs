@@ -35,6 +35,51 @@ namespace KingdomSurvival.LocationRendering.Tests
             window.Close();
         }
 
+        // ПР-12Н: в окнах редактора (сцена предпросмотра) Unity не вызывает
+        // LateUpdate у Light2D — местный свет отсекался, и в предпросмотре не
+        // было ни огня, ни нормалей. Рендерер обновляет источники сам.
+        [Test]
+        public void EditorPreview_RendersLocalLights()
+        {
+            float Render(bool withLight)
+            {
+                LocalLocationDefinition location = new LocalLocationDefinition { Id = "zz_preview_light" };
+                LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = location.Id, UseWorldLighting = false };
+                LocationVisualObject light = new LocationVisualObject { Id = "l", Name = "l", LightOnly = true, Position = new Vector2(.5f, .5f) };
+                light.Light.Enabled = withLight; light.Light.Radius = 4; light.Light.Intensity = 2; light.Light.Color = Color.white;
+                light.Light.Animation = LocationLightAnimation.None; light.Light.Offset = Vector2.zero;
+                visual.Objects.Add(light);
+                LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null);
+                renderer.Camera.enabled = false;
+                PreviewRenderUtility preview = new PreviewRenderUtility(true);
+                try
+                {
+                    preview.AddSingleGO(renderer.Root);
+                    preview.camera.orthographic = true;
+                    UnityEngine.Rendering.Universal.CameraExtensions.GetUniversalAdditionalCameraData(preview.camera).SetRenderer(0);
+                    preview.camera.clearFlags = CameraClearFlags.SolidColor;
+                    preview.camera.backgroundColor = Color.black;
+                    preview.camera.transform.position = new Vector3(0, 0, -10);
+                    preview.camera.orthographicSize = 3;
+                    renderer.SetTime(1, 0);
+                    preview.BeginStaticPreview(new Rect(0, 0, 200, 150));
+                    preview.Render(true);
+                    Texture2D image = preview.EndStaticPreview();
+                    float sum = 0;
+                    foreach (Color color in image.GetPixels()) sum += color.grayscale;
+                    Object.DestroyImmediate(image);
+                    return sum / (200 * 150);
+                }
+                finally
+                {
+                    preview.Cleanup();
+                    renderer.Dispose();
+                }
+            }
+            float dark = Render(false), lit = Render(true);
+            Assert.That(lit, Is.GreaterThan(dark + .05f), "Ночью источник в предпросмотре освещает место: " + dark + " → " + lit);
+        }
+
         // Визуальная проверка без batchmode; снимок только окна базы.
         public static void CaptureEditor()
         {

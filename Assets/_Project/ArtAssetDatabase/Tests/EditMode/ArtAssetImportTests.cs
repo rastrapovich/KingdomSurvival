@@ -133,6 +133,33 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(SpriteNormalMaps.Find(backSprite), Is.Null);
         }
 
+        // Нормаль, записанная с гаммой sRGB (как из Blender не в Raw): «плоская»
+        // (128,128,255) стала (188,188,255). Проверка это видит, «Исправить
+        // гамму» возвращает длину векторов к 1. Нормаль, подключённая к рисунку,
+        // но не записанная в карточке, подхватывается «Исправить подключения».
+        [Test]
+        public void GammaEncodedNormal_IsDetectedAndFixed_AndLostRecordIsRepaired()
+        {
+            Png("Телега/Front/color.png", 32, 32, Color.red);
+            Png("Телега/Front/normal.png", 32, 32, new Color(188 / 255f, 188 / 255f, 1, 1));
+            ImportCart();
+            ArtAssetDefinition cart = catalog.assets.Single();
+            ArtAssetPartView slot = cart.MainPart.FindView(ArtAssetView.Front);
+            Assert.That(ArtAssetDrawing.NormalLength(slot.NormalMap), Is.GreaterThan(ArtAssetValidator.GammaLength));
+            Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.True);
+
+            Assert.That(ArtAssetValidator.FixNormalGamma(cart), Is.EqualTo(1));
+            Assert.That(ArtAssetDrawing.NormalLength(slot.NormalMap), Is.EqualTo(1f).Within(.03f));
+            Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.False);
+
+            // Запись нормали потеряна (например, Undo импорта), а к рисунку она подключена.
+            Texture2D normal = slot.NormalMap;
+            slot.NormalMap = null;
+            Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("не записана в карточке")), Is.True);
+            Assert.That(ArtAssetValidator.RepairNormals(cart), Is.EqualTo(1));
+            Assert.That(slot.NormalMap == normal, Is.True);
+        }
+
         [Test]
         public void NameMatchAlone_DoesNotOverwrite()
         {

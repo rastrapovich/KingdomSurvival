@@ -567,6 +567,7 @@ namespace KingdomSurvival.LocationRendering
             item.Anchor.localPosition = LocationVisualGeometry.ToWorld(Location, normalizedPosition);
             for (int i = 0; i < item.Images.Count; i++)
                 item.Images[i].sortingOrder = LocationVisualGeometry.SortOrder(item.Parts[i].Band, item.Anchor.localPosition.y, item.Parts[i].OrderOffset);
+            if (item.Light != null) RefreshLightsOutsidePlay();
         }
 
         // Смена состояния одного объекта, без пересборки фона и без изменения авторских данных.

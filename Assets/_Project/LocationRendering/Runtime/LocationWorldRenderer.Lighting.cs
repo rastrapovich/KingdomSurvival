@@ -63,6 +63,20 @@ namespace KingdomSurvival.LocationRendering
         private static readonly int UVRectId = Shader.PropertyToID("_UVRect");
         private static readonly FieldInfo NormalQualityField =
             typeof(Light2D).GetField("m_NormalMapQuality", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static readonly MethodInfo LightLateUpdate =
+            typeof(Light2D).GetMethod("LateUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        // Вне Play Mode (окна баз, сцена предпросмотра) Unity не вызывает
+        // LateUpdate у Light2D: его геометрия и границы не пересчитываются, и
+        // URP отсекает местный свет целиком — в окне не видно ни огня, ни
+        // нормалей. Пересчёт вручную перед кадром; в игре не нужен.
+        public void RefreshLightsOutsidePlay()
+        {
+            if (Application.isPlaying || LightLateUpdate == null || Root == null) return;
+            foreach (Light2D light in Root.GetComponentsInChildren<Light2D>())
+                if (light != null && light.lightType != Light2D.LightType.Global) LightLateUpdate.Invoke(light, null);
+        }
+
         private static readonly FieldInfo NormalDistanceField =
             typeof(Light2D).GetField("m_NormalMapDistance", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -196,6 +210,7 @@ namespace KingdomSurvival.LocationRendering
             }
             ApplyPost();
             UpdateShadows();
+            RefreshLightsOutsidePlay();
         }
 
         // ------------------------------------------------------------------

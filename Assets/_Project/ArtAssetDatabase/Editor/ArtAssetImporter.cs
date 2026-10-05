@@ -1,0 +1,416 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+
+namespace KingdomSurvival.ArtAssets.Editor
+{
+    public sealed class ArtAssetImportResult
+    {
+        public readonly List<string> Created = new List<string>();
+        public readonly List<string> Updated = new List<string>();
+        public readonly List<string> Errors = new List<string>();
+        public readonly List<string> Warnings = new List<string>();
+        public bool Cancelled;
+
+        public string Summary
+        {
+            get
+            {
+                List<string> parts = new List<string>();
+                if (Created.Count > 0) parts.Add("создано: " + Created.Count);
+                if (Updated.Count > 0) parts.Add("обновлено: " + Updated.Count);
+                if (Errors.Count > 0) parts.Add("ошибок: " + Errors.Count);
+                if (Cancelled) parts.Add("остановлено пользователем");
+                return parts.Count == 0 ? "Ничего не импортировано." : "Импорт: " + string.Join(", ", parts) + ".";
+            }
+        }
+    }
+
+    // ПР-12Н: загрузка рисунков и нормалей в каталог. Внешние файлы копируются
+    // в управляемую папку проекта (Assets/_Project/Art/Assets/<ID>/), исходники
+    // пользователя не меняются. Обновление того же ракурса перезаписывает файл
+    // по тому же пути — .meta и GUID сохраняются, ссылки мест не рвутся.
+    // Один объект импортируется согласованно: при ошибке его новые файлы
+    // удаляются, перезаписанные восстанавливаются, запись каталога не меняется.
+    public static class ArtAssetImporter
+    {
+        public const string ManagedRoot = "Assets/_Project/Art/Assets";
+
+        public static ArtAssetDatabaseAsset LoadOrCreateCatalog()
+        {
+            ArtAssetDatabaseAsset catalog = AssetDatabase.LoadAssetAtPath<ArtAssetDatabaseAsset>(ArtAssetDatabaseAsset.AssetPath);
+            if (catalog != null) return catalog;
+            Directory.CreateDirectory(Path.GetDirectoryName(ArtAssetDatabaseAsset.AssetPath));
+            catalog = ScriptableObject.CreateInstance<ArtAssetDatabaseAsset>();
+            AssetDatabase.CreateAsset(catalog, ArtAssetDatabaseAsset.AssetPath);
+            AssetDatabase.SaveAssets();
+            ArtAssetDatabaseAsset.ResetCurrent();
+            return catalog;
+        }
+
+        // targetFor: существующая запись для обновления или null — создать новую.
+        public static ArtAssetImportResult Import(ArtAssetDatabaseAsset catalog, ArtAssetImportPlan plan,
+            Func<ArtAssetImportGroup, ArtAssetDefinition> targetFor, bool progress = true)
+        {
+            ArtAssetImportResult result = new ArtAssetImportResult();
+            if (catalog == null || plan == null) return result;
+            try
+            {
+                for (int i = 0; i < plan.Groups.Count; i++)
+                {
+                    ArtAssetImportGroup group = plan.Groups[i];
+                    if (progress && EditorUtility.DisplayCancelableProgressBar("База ассетов · импорт",
+                            (i + 1) + " из " + plan.Groups.Count + ": " + group.Name, i / (float)Math.Max(1, plan.Groups.Count)))
+                    {
+                        result.Cancelled = true;
+                        break;
+                    }
+                    ArtAssetDefinition existing = targetFor?.Invoke(group);
+                    try
+                    {
+                        ArtAssetDefinition imported = ImportGroup(catalog, group, existing, result.Warnings);
+                        (existing != null ? result.Updated : result.Created).Add(imported.Id);
+                    }
+                    catch (Exception exception)
+                    {
+                        result.Errors.Add(group.Name + ": " + exception.Message);
+                        Debug.LogWarning("База ассетов: «" + group.Name + "» не импортирован: " + exception);
+                    }
+                }
+            }
+            finally
+            {
+                if (progress) EditorUtility.ClearProgressBar();
+            }
+            if (result.Created.Count + result.Updated.Count > 0)
+            {
+                catalog.MarkChanged();
+                EditorUtility.SetDirty(catalog);
+                AssetDatabase.SaveAssetIfDirty(catalog);
+            }
+            return result;
+        }
+
+        private sealed class FileTransaction
+        {
+            public readonly List<string> Created = new List<string>();
+            public readonly List<(string path, string backup)> Overwritten = new List<(string, string)>();
+
+            public void Rollback()
+            {
+                foreach (string path in Created)
+                    AssetDatabase.DeleteAsset(path);
+                foreach ((string path, string backup) in Overwritten)
+                {
+                    if (!File.Exists(backup)) continue;
+                    File.Copy(backup, path, true);
+                    File.Delete(backup);
+                    AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+                }
+            }
+
+            public void Commit()
+            {
+                foreach ((string _, string backup) in Overwritten)
+                    if (File.Exists(backup)) File.Delete(backup);
+            }
+        }
+
+        private static ArtAssetDefinition ImportGroup(ArtAssetDatabaseAsset catalog, ArtAssetImportGroup group, ArtAssetDefinition existing, List<string> warnings)
+        {
+            ArtAssetDefinition working = existing != null ? Clone(existing) : new ArtAssetDefinition { Name = group.Name };
+            working.ImportKey = group.Key;
+            FileTransaction transaction = new FileTransaction();
+            try
+            {
+                foreach (ArtAssetImportSlot slot in group.Slots)
+                {
+                    ArtAssetPart part = FindOrAddPart(working, slot.Part);
+                    ArtAssetPartView view = part.View(slot.View);
+                    Sprite sprite = slot.ColorPath != null ? ImportColor(working, part, slot.View, slot.ColorPath, view.Sprite, transaction) : view.Sprite;
+                    Texture2D normal = slot.NormalPath != null ? ImportNormal(working, part, slot.View, slot.NormalPath, view.NormalMap, transaction) : view.NormalMap;
+                    view.Sprite = sprite;
+                    view.NormalMap = normal;
+                    if (sprite != null && normal != null)
+                        AssignNormal(sprite, normal, warnings, working.Name + " · " + ArtAssetLabels.ViewTitle(slot.View));
+                }
+                if (existing == null)
+                    InitializeScale(working);
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+            Undo.RecordObject(catalog, existing != null ? "Обновить ассет" : "Создать ассет");
+            int index = existing != null ? catalog.assets.IndexOf(existing) : -1;
+            if (index >= 0) catalog.assets[index] = working;
+            else catalog.assets.Add(working);
+            EditorUtility.SetDirty(catalog);
+            return working;
+        }
+
+        // Новый ассет: эталонный ракурс высотой примерно в человеческий рост,
+        // если рисунок не огромный; дальше размер правится в карточке.
+        public static void InitializeScale(ArtAssetDefinition asset)
+        {
+            if (!asset.TryReferenceView(out ArtAssetView view)) return;
+            float pixels = asset.MainSprite(view).rect.height;
+            asset.PixelsPerUnit = Mathf.Max(ArtAssetDefinition.DefaultPixelsPerUnit, pixels / 6f);
+        }
+
+        public static ArtAssetPart FindOrAddPart(ArtAssetDefinition asset, string name)
+        {
+            if (string.IsNullOrEmpty(name)) return asset.MainPart;
+            ArtAssetPart part = asset.Parts.FirstOrDefault(item => item != null && string.Equals(item.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (part != null) return part;
+            part = new ArtAssetPart { Name = PrettyPartName(name), Layer = ArtAssetLayer.World };
+            asset.Parts.Add(part);
+            return part;
+        }
+
+        private static string PrettyPartName(string name)
+        {
+            string value = name.Replace('_', ' ').Trim();
+            return value.Length == 0 ? "Часть" : char.ToUpperInvariant(value[0]) + value.Substring(1);
+        }
+
+        public static ArtAssetDefinition Clone(ArtAssetDefinition source) =>
+            JsonUtility.FromJson<ArtAssetDefinition>(JsonUtility.ToJson(source));
+
+        // ------------------------------------------------------------------
+        // Файлы
+        // ------------------------------------------------------------------
+
+        public static string AssetFolder(ArtAssetDefinition asset) => ManagedRoot + "/" + asset.Id;
+
+        private static string ManagedPath(ArtAssetDefinition asset, ArtAssetPart part, ArtAssetView view, bool normal)
+        {
+            string name = ArtAssetLabels.ViewFolder(view);
+            if (part != asset.MainPart) name += "_part-" + part.Id.Substring(0, Math.Min(8, part.Id.Length));
+            if (normal) name += "_normal";
+            return AssetFolder(asset) + "/" + name + ".png";
+        }
+
+        public static bool IsProjectPath(string path)
+        {
+            string normalized = path.Replace('\\', '/');
+            if (normalized.StartsWith("Assets/", StringComparison.Ordinal)) return true;
+            string data = Application.dataPath.Replace('\\', '/');
+            return normalized.StartsWith(data + "/", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static string ToProjectPath(string path)
+        {
+            string normalized = path.Replace('\\', '/');
+            string data = Application.dataPath.Replace('\\', '/');
+            return normalized.StartsWith(data + "/", StringComparison.OrdinalIgnoreCase) ? "Assets" + normalized.Substring(data.Length) : normalized;
+        }
+
+        // Внешний файл → управляемая копия; файл проекта — как есть.
+        private static string Bring(string source, string destination, string current, ArtAssetDefinition asset, FileTransaction transaction)
+        {
+            if (IsProjectPath(source)) return ToProjectPath(source);
+            if (!File.Exists(source)) throw new FileNotFoundException("нет файла " + source);
+            // Тот же ракурс уже в управляемой папке — перезаписать на месте (GUID сохраняется).
+            string target = current != null && current.StartsWith(AssetFolder(asset) + "/", StringComparison.Ordinal) ? current : destination;
+            Directory.CreateDirectory(Path.GetDirectoryName(target));
+            if (File.Exists(target))
+            {
+                if (target != current) target = AssetDatabase.GenerateUniqueAssetPath(target);
+                else
+                {
+                    string backup = Path.Combine(Path.GetTempPath(), "ks_art_" + Guid.NewGuid().ToString("N") + ".png");
+                    File.Copy(target, backup, true);
+                    transaction.Overwritten.Add((target, backup));
+                }
+            }
+            bool created = !File.Exists(target);
+            File.Copy(source, target, true);
+            if (created) transaction.Created.Add(target);
+            AssetDatabase.ImportAsset(target, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+            return target;
+        }
+
+        private static Sprite ImportColor(ArtAssetDefinition asset, ArtAssetPart part, ArtAssetView view, string source, Sprite current,
+            FileTransaction transaction)
+        {
+            string currentPath = current != null ? AssetDatabase.GetAssetPath(current) : null;
+            bool external = !IsProjectPath(source);
+            string path = Bring(source, ManagedPath(asset, part, view, false), currentPath, asset, transaction);
+            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
+                throw new InvalidOperationException("файл не является изображением: " + path);
+            if (external) EnsureColorSettings(importer);
+            else if (importer.textureType != TextureImporterType.Sprite)
+            {
+                // Не перенарезать существующие атласы: меняется только не-спрайт.
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.alphaIsTransparency = true;
+                importer.sRGBTexture = true;
+                SpriteNormalMaps.SaveVerified(importer, meta => SpriteNormalMaps.MetaValue(meta, "textureType") == SpriteType);
+            }
+            if (importer.spriteImportMode == SpriteImportMode.Multiple)
+                throw new InvalidOperationException("«" + Path.GetFileName(path) + "» — лист из нескольких спрайтов: перетащите нужный спрайт прямо в ячейку ракурса.");
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (sprite == null) throw new InvalidOperationException("не удалось получить спрайт из " + path);
+            return sprite;
+        }
+
+        private static Texture2D ImportNormal(ArtAssetDefinition asset, ArtAssetPart part, ArtAssetView view, string source, Texture2D current,
+            FileTransaction transaction)
+        {
+            string currentPath = current != null ? AssetDatabase.GetAssetPath(current) : null;
+            bool external = !IsProjectPath(source);
+            string path = Bring(source, ManagedPath(asset, part, view, true), currentPath, asset, transaction);
+            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
+                throw new InvalidOperationException("файл не является изображением: " + path);
+            if (external && importer.textureType != TextureImporterType.NormalMap) ConfigureNormal(importer);
+            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            if (texture == null) throw new InvalidOperationException("не удалось загрузить нормаль " + path);
+            SpriteNormalMaps.PrepareNormalTexture(texture);
+            return texture;
+        }
+
+        private static readonly string SpriteType = ((int)TextureImporterType.Sprite).ToString();
+        private static readonly string NormalType = ((int)TextureImporterType.NormalMap).ToString();
+
+        // Управляемые копии настраивает ArtAssetTexturePostprocessor при первом
+        // импорте; здесь — только если настройки всё же не те.
+        public static void EnsureColorSettings(TextureImporter importer)
+        {
+            if (importer.textureType == TextureImporterType.Sprite && importer.spriteImportMode == SpriteImportMode.Single && importer.sRGBTexture)
+                return;
+            ConfigureColor(importer);
+        }
+
+        public static void ConfigureColor(TextureImporter importer)
+        {
+            importer.GetSourceTextureWidthAndHeight(out int width, out int height);
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.alphaIsTransparency = true;
+            importer.sRGBTexture = true;
+            importer.mipmapEnabled = false;
+            importer.maxTextureSize = MaxSize(width, height);
+            SpriteNormalMaps.SaveVerified(importer, meta => SpriteNormalMaps.MetaValue(meta, "textureType") == SpriteType);
+        }
+
+        public static void ConfigureNormal(TextureImporter importer)
+        {
+            importer.GetSourceTextureWidthAndHeight(out int width, out int height);
+            importer.textureType = TextureImporterType.NormalMap;
+            importer.mipmapEnabled = false;
+            importer.maxTextureSize = MaxSize(width, height);
+            SpriteNormalMaps.SaveVerified(importer, meta => SpriteNormalMaps.MetaValue(meta, "textureType") == NormalType);
+        }
+
+        private static int MaxSize(int width, int height) =>
+            Mathf.Clamp(Mathf.NextPowerOfTwo(Mathf.Max(32, Mathf.Max(width, height))), 32, 8192);
+
+        private static void AssignNormal(Sprite sprite, Texture2D normal, List<string> warnings, string where)
+        {
+            if (SpriteNormalMaps.IsSheet(sprite))
+                warnings.Add(where + ": рисунок из листа — нормаль назначена всему листу.");
+            Vector2Int color = SpriteNormalMaps.SourceSize(sprite.texture), map = SpriteNormalMaps.SourceSize(normal);
+            if (color != map)
+                warnings.Add(where + ": размер нормали " + map.x + "×" + map.y + " не совпадает с рисунком " + color.x + "×" + color.y + ".");
+            if (!SpriteNormalMaps.Assign(sprite, normal, out string message))
+                throw new InvalidOperationException(message);
+        }
+
+        // ------------------------------------------------------------------
+        // Ячейка ракурса: один файл, очистка
+        // ------------------------------------------------------------------
+
+        // Один файл в конкретный слот. Рисунок сохраняет имеющуюся нормаль слота
+        // (пара остаётся); нормаль подключается к рисунку слота.
+        public static string AssignFile(ArtAssetDatabaseAsset catalog, ArtAssetDefinition asset, ArtAssetPart part, ArtAssetView view,
+            string source, ArtAssetFileKind kind)
+        {
+            List<string> warnings = new List<string>();
+            FileTransaction transaction = new FileTransaction();
+            ArtAssetPartView slot = part.View(view);
+            Sprite sprite = slot.Sprite;
+            Texture2D normal = slot.NormalMap;
+            try
+            {
+                if (kind == ArtAssetFileKind.Color) sprite = ImportColor(asset, part, view, source, slot.Sprite, transaction);
+                else normal = ImportNormal(asset, part, view, source, slot.NormalMap, transaction);
+                if (sprite != null && normal != null) AssignNormal(sprite, normal, warnings, ArtAssetLabels.ViewTitle(view));
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+            bool firstArt = asset.IsEmpty;
+            Undo.RecordObject(catalog, kind == ArtAssetFileKind.Color ? "Заменить рисунок ракурса" : "Заменить нормаль ракурса");
+            slot.Sprite = sprite;
+            slot.NormalMap = normal;
+            if (firstArt && part == asset.MainPart) InitializeScale(asset);
+            Changed(catalog);
+            return warnings.Count > 0 ? string.Join(" ", warnings) : null;
+        }
+
+        // Спрайт или текстура из Project — прямо в слот, без копирования.
+        public static string AssignProjectObject(ArtAssetDatabaseAsset catalog, ArtAssetDefinition asset, ArtAssetPart part, ArtAssetView view,
+            UnityEngine.Object value, ArtAssetFileKind kind)
+        {
+            ArtAssetPartView slot = part.View(view);
+            List<string> warnings = new List<string>();
+            Sprite sprite = slot.Sprite;
+            Texture2D normal = slot.NormalMap;
+            if (kind == ArtAssetFileKind.Color)
+            {
+                sprite = value as Sprite;
+                if (sprite == null && value is Texture2D texture)
+                    sprite = ImportColor(asset, part, view, AssetDatabase.GetAssetPath(texture), slot.Sprite, new FileTransaction());
+                if (sprite == null) throw new InvalidOperationException("нужен Sprite или PNG.");
+            }
+            else
+            {
+                normal = value as Texture2D ?? (value as Sprite)?.texture;
+                if (normal == null) throw new InvalidOperationException("нужна текстура карты нормалей.");
+                SpriteNormalMaps.PrepareNormalTexture(normal);
+            }
+            if (sprite != null && normal != null) AssignNormal(sprite, normal, warnings, ArtAssetLabels.ViewTitle(view));
+            bool firstArt = asset.IsEmpty;
+            Undo.RecordObject(catalog, "Назначить рисунок ракурса");
+            slot.Sprite = sprite;
+            slot.NormalMap = normal;
+            if (firstArt && part == asset.MainPart) InitializeScale(asset);
+            Changed(catalog);
+            return warnings.Count > 0 ? string.Join(" ", warnings) : null;
+        }
+
+        // Снять рисунок ракурса. Файлы не удаляются.
+        public static void ClearColor(ArtAssetDatabaseAsset catalog, ArtAssetPart part, ArtAssetView view)
+        {
+            Undo.RecordObject(catalog, "Очистить рисунок ракурса");
+            part.View(view).Sprite = null;
+            Changed(catalog);
+        }
+
+        // Снять нормаль: и назначение в записи, и вторую текстуру импорта рисунка.
+        public static void ClearNormal(ArtAssetDatabaseAsset catalog, ArtAssetPart part, ArtAssetView view)
+        {
+            ArtAssetPartView slot = part.View(view);
+            if (slot.Sprite != null) SpriteNormalMaps.Assign(slot.Sprite, null, out _);
+            Undo.RecordObject(catalog, "Снять нормаль ракурса");
+            slot.NormalMap = null;
+            Changed(catalog);
+        }
+
+        public static void Changed(ArtAssetDatabaseAsset catalog)
+        {
+            EditorUtility.SetDirty(catalog);
+            catalog.MarkChanged();
+        }
+    }
+}

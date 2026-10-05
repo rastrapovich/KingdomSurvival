@@ -282,6 +282,72 @@ MonoBehaviour:
       PreparedStartCompanionId: 
       ResolvedFlag: 
     HoursPerInteraction: 0.25
+  - Id: technical_asset_demo
+    ModeId: 
+    WorldLocationId: __technical_asset_demo
+    DisplayName: "\u0410\u0441\u0441\u0435\u0442\u044B \xB7 \u0442\u0435\u0441\u0442"
+    BattlefieldId: technical_lighting_camp_field
+    PlaceholderArt: 1
+    CanvasWidth: 1920
+    CanvasHeight: 1080
+    HexesAcross: 60
+    TerrainCells: 
+    BattleFrameWidth: 1920
+    Movement:
+      HeroRunSpeedHexesPerSecond: 9
+      TravelHoursPerHex: 0.0125
+      DiscoveryRadiusHexes: 1.25
+      Terrain:
+      - Terrain: 0
+        Traversable: 1
+        TravelSpeedMultiplier: 1
+        RunSpeedMultiplier: 1
+      - Terrain: 1
+        Traversable: 1
+        TravelSpeedMultiplier: 1.3
+        RunSpeedMultiplier: 1.15
+      - Terrain: 5
+        Traversable: 1
+        TravelSpeedMultiplier: 1.1
+        RunSpeedMultiplier: 1.05
+      - Terrain: 2
+        Traversable: 1
+        TravelSpeedMultiplier: 0.9
+        RunSpeedMultiplier: 0.95
+      - Terrain: 3
+        Traversable: 1
+        TravelSpeedMultiplier: 0.7
+        RunSpeedMultiplier: 0.8
+      - Terrain: 6
+        Traversable: 1
+        TravelSpeedMultiplier: 0.5
+        RunSpeedMultiplier: 0.65
+      - Terrain: 7
+        Traversable: 1
+        TravelSpeedMultiplier: 0.5
+        RunSpeedMultiplier: 0.75
+      - Terrain: 8
+        Traversable: 1
+        TravelSpeedMultiplier: 0.33
+        RunSpeedMultiplier: 0.6
+      - Terrain: 4
+        Traversable: 0
+        TravelSpeedMultiplier: 1
+        RunSpeedMultiplier: 1
+      - Terrain: 9
+        Traversable: 0
+        TravelSpeedMultiplier: 1
+        RunSpeedMultiplier: 1
+    Entrances:
+    - Id: asset_demo_entry
+      Label: "\u0412\u0445\u043E\u0434"
+      Point:
+        X: 400
+        Y: 760
+    Objects: []
+    Enemies: []
+    Encounters: []
+    HoursPerInteraction: 0.25
   visuals:
   - LocationId: technical_lighting_camp
     TechnicalTest: 1
@@ -505,6 +571,10 @@ MonoBehaviour:
       ShadowLength: 1
       ShadowSprite: {fileID: 0}
       NormalMap: {fileID: 0}
+      AssetId: 
+      View: 0
+      Scale: 1
+      Overrides: 0
     - Id: b13ed7f91efd40d4b7f9af02e3c7c082
       Name: "\u041F\u0430\u043B\u0430\u0442\u043A\u0430 \u0441\u043F\u0440\u0430\u0432\u0430"
       GroupId: 
@@ -572,6 +642,10 @@ MonoBehaviour:
       ShadowLength: 1
       ShadowSprite: {fileID: 0}
       NormalMap: {fileID: 0}
+      AssetId: 
+      View: 0
+      Scale: 1
+      Overrides: 0
     - Id: 8fd932338dc941799050f33a1b00dbff
       Name: "\u041F\u0430\u043B\u0430\u0442\u043A\u0430 \u0432 \u0433\u043B\u0443\u0431\u0438\u043D\u0435"
       GroupId: 
@@ -639,6 +713,10 @@ MonoBehaviour:
       ShadowLength: 1
       ShadowSprite: {fileID: 0}
       NormalMap: {fileID: 0}
+      AssetId: 
+      View: 0
+      Scale: 1
+      Overrides: 0
     - Id: 24aa9b3525444484bf205e6c9af682cf
       Name: "\u041A\u043E\u0441\u0442\u0451\u0440"
       GroupId: 
@@ -706,6 +784,10 @@ MonoBehaviour:
       ShadowLength: 1
       ShadowSprite: {fileID: 0}
       NormalMap: {fileID: 0}
+      AssetId: 
+      View: 0
+      Scale: 1
+      Overrides: 0
     - Id: 9a29e67b2a734c58bed6e830d18bd47d
       Name: "\u042F\u0449\u0438\u043A"
       GroupId: 
@@ -773,6 +855,10 @@ MonoBehaviour:
       ShadowLength: 1
       ShadowSprite: {fileID: 0}
       NormalMap: {fileID: 0}
+      AssetId: 
+      View: 0
+      Scale: 1
+      Overrides: 0
     - Id: 80ba98843a244dcfa24c175551397817
       Name: "\u041A\u0430\u043C\u0435\u043D\u044C"
       GroupId: 
@@ -840,6 +926,10 @@ MonoBehaviour:
       ShadowLength: 1
       ShadowSprite: {fileID: 0}
       NormalMap: {fileID: 0}
+      AssetId: 
+      View: 0
+      Scale: 1
+      Overrides: 0
     - Id: 3ee74a32714443c0a1315978f2147e70
       Name: "\u041A\u0443\u0441\u0442"
       GroupId: 
@@ -907,6 +997,10 @@ MonoBehaviour:
       ShadowLength: 1
       ShadowSprite: {fileID: 0}
       NormalMap: {fileID: 0}
+      AssetId: 
+      View: 0
+      Scale: 1
+      Overrides: 0
     TestStartPoint: {x: 0.25, y: 0.5}
     TestUnitId: militia
     TestFollowers: 1
@@ -1132,7 +1226,595 @@ MonoBehaviour:
       ShadowLength: 1
       ShadowSprite: {fileID: 0}
       NormalMap: {fileID: 0}
+      AssetId: 
+      View: 0
+      Scale: 1
+      Overrides: 0
     TestStartPoint: {x: 0.19166666, y: 0.5101852}
+    TestUnitId: militia
+    TestFollowers: 2
+  - LocationId: technical_asset_demo
+    TechnicalTest: 1
+    Background: {fileID: 0}
+    Lighting: 0
+    UseWorldLighting: 1
+    IndoorColor: {r: 0.62, g: 0.57, b: 0.5, a: 1}
+    IndoorIntensity: 0.55
+    Daylight:
+      Brightness:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0.16
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 5
+          value: 0.16
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 8
+          value: 0.8
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 13
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 18
+          value: 0.7
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 21
+          value: 0.16
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 24
+          value: 0.16
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      Color:
+        serializedVersion: 2
+        key0: {r: 0.48, g: 0.6, b: 0.85, a: 1}
+        key1: {r: 0.48, g: 0.6, b: 0.85, a: 1}
+        key2: {r: 1, g: 0.84, b: 0.66, a: 0}
+        key3: {r: 1, g: 1, b: 1, a: 0}
+        key4: {r: 1, g: 0.75, b: 0.52, a: 0}
+        key5: {r: 0.48, g: 0.6, b: 0.85, a: 0}
+        key6: {r: 0.48, g: 0.6, b: 0.85, a: 0}
+        key7: {r: 0, g: 0, b: 0, a: 0}
+        ctime0: 0
+        ctime1: 13762
+        ctime2: 19661
+        ctime3: 32768
+        ctime4: 50462
+        ctime5: 57671
+        ctime6: 65535
+        ctime7: 0
+        atime0: 0
+        atime1: 65535
+        atime2: 0
+        atime3: 0
+        atime4: 0
+        atime5: 0
+        atime6: 0
+        atime7: 0
+        m_Mode: 0
+        m_ColorSpace: -1
+        m_NumColorKeys: 7
+        m_NumAlphaKeys: 2
+      Intensity: 1
+    Sun:
+      Enabled: 1
+      Sunrise: 6
+      Sunset: 20
+      MorningAngle: 165
+      EveningAngle: 15
+      NoonLength: 0.45
+      LowLength: 1.8
+      Opacity: 0.42
+      Softness: 0.3
+      Color: {r: 0.05, g: 0.06, b: 0.1, a: 1}
+      MoonShadows: 0
+      MoonAngle: 110
+      MoonLength: 0.9
+      MoonOpacity: 0.15
+    Post:
+      Enabled: 0
+      Day:
+        Exposure: 0
+        Contrast: 0
+        Saturation: 0
+        Temperature: 0
+        Tint: 0
+        Filter: {r: 1, g: 1, b: 1, a: 1}
+      Night:
+        Exposure: -0.25
+        Contrast: 8
+        Saturation: -30
+        Temperature: -18
+        Tint: 0
+        Filter: {r: 0.82, g: 0.88, b: 1, a: 1}
+      Bloom: 1
+      BloomIntensity: 0.6
+      BloomThreshold: 0.9
+      BloomScatter: 0.6
+      BloomTint: {r: 1, g: 1, b: 1, a: 1}
+      Vignette: 0
+      VignetteIntensity: 0.28
+      VignetteSmoothness: 0.45
+      VignetteColor: {r: 0, g: 0, b: 0, a: 1}
+      Grain: 0
+      Tonemapping: 0
+    PeopleCastShadows: 1
+    PeopleShadowLength: 1
+    ShadowMinLean: 0.4
+    BackgroundNormalMap: {fileID: 0}
+    Objects:
+    - Id: 747237546b764cbf8d21578282cf8792
+      Name: "\u0414\u043E\u043C (\u0442\u0435\u0441\u0442)"
+      GroupId: 
+      Sprite: {fileID: 0}
+      Variants: []
+      DefaultVariantId: 
+      Placeholder: 0
+      Position: {x: 0.5, y: 0.42}
+      Pivot: {x: 0.5, y: 0.06}
+      Height: 2.6086957
+      FlipX: 0
+      Hidden: 0
+      Locked: 0
+      Band: 2
+      OrderOffset: 0
+      BlocksMovement: 1
+      Footprint: {x: 2.4, y: 0.9}
+      CastsShadow: 1
+      Light:
+        Enabled: 0
+        Color: {r: 1, g: 0.48, b: 0.16, a: 1}
+        Intensity: 1.6
+        Radius: 3
+        Softness: 0.7
+        Shadows: 1
+        ShadowStrength: 0.8
+        ShadowSoftness: 0.25
+        NightOnly: 0
+        StartsAt: 18.5
+        EndsAt: 5.5
+        Flicker: 0.08
+        Offset: {x: 0, y: 0.2}
+        Shape: 0
+        Direction: 270
+        InnerAngle: 40
+        OuterAngle: 70
+        Falloff: 0.5
+        FreeformPoints:
+        - {x: -1, y: -0.6}
+        - {x: 1, y: -0.6}
+        - {x: 1, y: 0.6}
+        - {x: -1, y: 0.6}
+        FreeformFalloff: 0.5
+        Cookie: {fileID: 0}
+        CookieSize: {x: 3, y: 3}
+        Volumetric: 0
+        VolumeIntensity: 0.25
+        VolumetricShadows: 0
+        VolumeShadowIntensity: 0.5
+        BlendStyle: 0
+        AlphaOverlap: 0
+        Order: 0
+        Animation: 1
+        AnimationSpeed: 1
+        NormalMaps: 0
+        NormalMapsAccurate: 0
+        NormalMapDistance: 3
+        ProjectsShadows: 1
+        Height: 1.4
+        ProjectedShadowOpacity: 0.55
+        ProjectedShadowMaxLength: 2.5
+        ShadowSoftnessFalloff: 0.5
+      LightOnly: 0
+      ProjectsShadow: 1
+      ShadowLength: 1
+      ShadowSprite: {fileID: 0}
+      NormalMap: {fileID: 0}
+      AssetId: tech_house
+      View: 0
+      Scale: 1
+      Overrides: 0
+    - Id: e2ae56f174f643c79fb52d1fb976bbb0
+      Name: "\u0414\u0435\u0440\u0435\u0432\u043E (\u0442\u0435\u0441\u0442)"
+      GroupId: 
+      Sprite: {fileID: 0}
+      Variants: []
+      DefaultVariantId: 
+      Placeholder: 0
+      Position: {x: 0.25, y: 0.5}
+      Pivot: {x: 0.5, y: 0.04}
+      Height: 3.2142856
+      FlipX: 0
+      Hidden: 0
+      Locked: 0
+      Band: 2
+      OrderOffset: 0
+      BlocksMovement: 1
+      Footprint: {x: 0.3, y: 0.18}
+      CastsShadow: 0
+      Light:
+        Enabled: 0
+        Color: {r: 1, g: 0.48, b: 0.16, a: 1}
+        Intensity: 1.6
+        Radius: 3
+        Softness: 0.7
+        Shadows: 1
+        ShadowStrength: 0.8
+        ShadowSoftness: 0.25
+        NightOnly: 0
+        StartsAt: 18.5
+        EndsAt: 5.5
+        Flicker: 0.08
+        Offset: {x: 0, y: 0.2}
+        Shape: 0
+        Direction: 270
+        InnerAngle: 40
+        OuterAngle: 70
+        Falloff: 0.5
+        FreeformPoints:
+        - {x: -1, y: -0.6}
+        - {x: 1, y: -0.6}
+        - {x: 1, y: 0.6}
+        - {x: -1, y: 0.6}
+        FreeformFalloff: 0.5
+        Cookie: {fileID: 0}
+        CookieSize: {x: 3, y: 3}
+        Volumetric: 0
+        VolumeIntensity: 0.25
+        VolumetricShadows: 0
+        VolumeShadowIntensity: 0.5
+        BlendStyle: 0
+        AlphaOverlap: 0
+        Order: 0
+        Animation: 1
+        AnimationSpeed: 1
+        NormalMaps: 0
+        NormalMapsAccurate: 0
+        NormalMapDistance: 3
+        ProjectsShadows: 1
+        Height: 1.4
+        ProjectedShadowOpacity: 0.55
+        ProjectedShadowMaxLength: 2.5
+        ShadowSoftnessFalloff: 0.5
+      LightOnly: 0
+      ProjectsShadow: 1
+      ShadowLength: 1
+      ShadowSprite: {fileID: 0}
+      NormalMap: {fileID: 0}
+      AssetId: tech_tree
+      View: 1
+      Scale: 1
+      Overrides: 0
+    - Id: 718aba84d31c4af48a5dcec6dc68ec5f
+      Name: "\u0414\u0435\u0440\u0435\u0432\u043E 2 (\u0442\u0435\u0441\u0442)"
+      GroupId: 
+      Sprite: {fileID: 0}
+      Variants: []
+      DefaultVariantId: 
+      Placeholder: 0
+      Position: {x: 0.78, y: 0.55}
+      Pivot: {x: 0.5, y: 0.04}
+      Height: 3.2142856
+      FlipX: 0
+      Hidden: 0
+      Locked: 0
+      Band: 2
+      OrderOffset: 0
+      BlocksMovement: 1
+      Footprint: {x: 0.3, y: 0.18}
+      CastsShadow: 0
+      Light:
+        Enabled: 0
+        Color: {r: 1, g: 0.48, b: 0.16, a: 1}
+        Intensity: 1.6
+        Radius: 3
+        Softness: 0.7
+        Shadows: 1
+        ShadowStrength: 0.8
+        ShadowSoftness: 0.25
+        NightOnly: 0
+        StartsAt: 18.5
+        EndsAt: 5.5
+        Flicker: 0.08
+        Offset: {x: 0, y: 0.2}
+        Shape: 0
+        Direction: 270
+        InnerAngle: 40
+        OuterAngle: 70
+        Falloff: 0.5
+        FreeformPoints:
+        - {x: -1, y: -0.6}
+        - {x: 1, y: -0.6}
+        - {x: 1, y: 0.6}
+        - {x: -1, y: 0.6}
+        FreeformFalloff: 0.5
+        Cookie: {fileID: 0}
+        CookieSize: {x: 3, y: 3}
+        Volumetric: 0
+        VolumeIntensity: 0.25
+        VolumetricShadows: 0
+        VolumeShadowIntensity: 0.5
+        BlendStyle: 0
+        AlphaOverlap: 0
+        Order: 0
+        Animation: 1
+        AnimationSpeed: 1
+        NormalMaps: 0
+        NormalMapsAccurate: 0
+        NormalMapDistance: 3
+        ProjectsShadows: 1
+        Height: 1.4
+        ProjectedShadowOpacity: 0.55
+        ProjectedShadowMaxLength: 2.5
+        ShadowSoftnessFalloff: 0.5
+      LightOnly: 0
+      ProjectsShadow: 1
+      ShadowLength: 1
+      ShadowSprite: {fileID: 0}
+      NormalMap: {fileID: 0}
+      AssetId: tech_tree
+      View: 3
+      Scale: 1
+      Overrides: 0
+    - Id: 97ef2f0c2c944db1bb77b564e1a41347
+      Name: "\u042F\u0449\u0438\u043A (\u0442\u0435\u0441\u0442)"
+      GroupId: 
+      Sprite: {fileID: 0}
+      Variants: []
+      DefaultVariantId: 
+      Placeholder: 0
+      Position: {x: 0.4, y: 0.7}
+      Pivot: {x: 0.5, y: 0.1}
+      Height: 0.45070422
+      FlipX: 0
+      Hidden: 0
+      Locked: 0
+      Band: 2
+      OrderOffset: 0
+      BlocksMovement: 1
+      Footprint: {x: 0.6, y: 0.3}
+      CastsShadow: 0
+      Light:
+        Enabled: 0
+        Color: {r: 1, g: 0.48, b: 0.16, a: 1}
+        Intensity: 1.6
+        Radius: 3
+        Softness: 0.7
+        Shadows: 1
+        ShadowStrength: 0.8
+        ShadowSoftness: 0.25
+        NightOnly: 0
+        StartsAt: 18.5
+        EndsAt: 5.5
+        Flicker: 0.08
+        Offset: {x: 0, y: 0.2}
+        Shape: 0
+        Direction: 270
+        InnerAngle: 40
+        OuterAngle: 70
+        Falloff: 0.5
+        FreeformPoints:
+        - {x: -1, y: -0.6}
+        - {x: 1, y: -0.6}
+        - {x: 1, y: 0.6}
+        - {x: -1, y: 0.6}
+        FreeformFalloff: 0.5
+        Cookie: {fileID: 0}
+        CookieSize: {x: 3, y: 3}
+        Volumetric: 0
+        VolumeIntensity: 0.25
+        VolumetricShadows: 0
+        VolumeShadowIntensity: 0.5
+        BlendStyle: 0
+        AlphaOverlap: 0
+        Order: 0
+        Animation: 1
+        AnimationSpeed: 1
+        NormalMaps: 0
+        NormalMapsAccurate: 0
+        NormalMapDistance: 3
+        ProjectsShadows: 1
+        Height: 1.4
+        ProjectedShadowOpacity: 0.55
+        ProjectedShadowMaxLength: 2.5
+        ShadowSoftnessFalloff: 0.5
+      LightOnly: 0
+      ProjectsShadow: 1
+      ShadowLength: 1
+      ShadowSprite: {fileID: 0}
+      NormalMap: {fileID: 0}
+      AssetId: tech_crate
+      View: 5
+      Scale: 1
+      Overrides: 0
+    - Id: 4292088ac45549989b68c0991b52c9ce
+      Name: "\u042F\u0449\u0438\u043A 2 (\u0442\u0435\u0441\u0442)"
+      GroupId: 
+      Sprite: {fileID: 0}
+      Variants: []
+      DefaultVariantId: 
+      Placeholder: 0
+      Position: {x: 0.62, y: 0.74}
+      Pivot: {x: 0.5, y: 0.1}
+      Height: 0.45070422
+      FlipX: 0
+      Hidden: 0
+      Locked: 0
+      Band: 2
+      OrderOffset: 0
+      BlocksMovement: 1
+      Footprint: {x: 0.6, y: 0.3}
+      CastsShadow: 0
+      Light:
+        Enabled: 0
+        Color: {r: 1, g: 0.48, b: 0.16, a: 1}
+        Intensity: 1.6
+        Radius: 3
+        Softness: 0.7
+        Shadows: 1
+        ShadowStrength: 0.8
+        ShadowSoftness: 0.25
+        NightOnly: 0
+        StartsAt: 18.5
+        EndsAt: 5.5
+        Flicker: 0.08
+        Offset: {x: 0, y: 0.2}
+        Shape: 0
+        Direction: 270
+        InnerAngle: 40
+        OuterAngle: 70
+        Falloff: 0.5
+        FreeformPoints:
+        - {x: -1, y: -0.6}
+        - {x: 1, y: -0.6}
+        - {x: 1, y: 0.6}
+        - {x: -1, y: 0.6}
+        FreeformFalloff: 0.5
+        Cookie: {fileID: 0}
+        CookieSize: {x: 3, y: 3}
+        Volumetric: 0
+        VolumeIntensity: 0.25
+        VolumetricShadows: 0
+        VolumeShadowIntensity: 0.5
+        BlendStyle: 0
+        AlphaOverlap: 0
+        Order: 0
+        Animation: 1
+        AnimationSpeed: 1
+        NormalMaps: 0
+        NormalMapsAccurate: 0
+        NormalMapDistance: 3
+        ProjectsShadows: 1
+        Height: 1.4
+        ProjectedShadowOpacity: 0.55
+        ProjectedShadowMaxLength: 2.5
+        ShadowSoftnessFalloff: 0.5
+      LightOnly: 0
+      ProjectsShadow: 1
+      ShadowLength: 1
+      ShadowSprite: {fileID: 0}
+      NormalMap: {fileID: 0}
+      AssetId: tech_crate
+      View: 0
+      Scale: 1
+      Overrides: 0
+    - Id: d7a205b56fda49f1b2864ca656dc7a17
+      Name: "\u0421\u0432\u0435\u0442 \u0443 \u0434\u043E\u043C\u0430"
+      GroupId: 
+      Sprite: {fileID: 0}
+      Variants: []
+      DefaultVariantId: 
+      Placeholder: 0
+      Position: {x: 0.36, y: 0.6}
+      Pivot: {x: 0.5, y: 0.15}
+      Height: 1.8
+      FlipX: 0
+      Hidden: 0
+      Locked: 0
+      Band: 2
+      OrderOffset: 0
+      BlocksMovement: 0
+      Footprint: {x: 1.2, y: 0.55}
+      CastsShadow: 0
+      Light:
+        Enabled: 1
+        Color: {r: 1, g: 0.48, b: 0.16, a: 1}
+        Intensity: 1.6
+        Radius: 5
+        Softness: 0.7
+        Shadows: 1
+        ShadowStrength: 0.8
+        ShadowSoftness: 0.25
+        NightOnly: 1
+        StartsAt: 18.5
+        EndsAt: 5.5
+        Flicker: 0.08
+        Offset: {x: 0, y: 0.2}
+        Shape: 0
+        Direction: 270
+        InnerAngle: 40
+        OuterAngle: 70
+        Falloff: 0.5
+        FreeformPoints:
+        - {x: -1, y: -0.6}
+        - {x: 1, y: -0.6}
+        - {x: 1, y: 0.6}
+        - {x: -1, y: 0.6}
+        FreeformFalloff: 0.5
+        Cookie: {fileID: 0}
+        CookieSize: {x: 3, y: 3}
+        Volumetric: 0
+        VolumeIntensity: 0.25
+        VolumetricShadows: 0
+        VolumeShadowIntensity: 0.5
+        BlendStyle: 0
+        AlphaOverlap: 0
+        Order: 0
+        Animation: 1
+        AnimationSpeed: 1
+        NormalMaps: 1
+        NormalMapsAccurate: 0
+        NormalMapDistance: 3
+        ProjectsShadows: 1
+        Height: 1.4
+        ProjectedShadowOpacity: 0.55
+        ProjectedShadowMaxLength: 2.5
+        ShadowSoftnessFalloff: 0.5
+      LightOnly: 1
+      ProjectsShadow: 1
+      ShadowLength: 1
+      ShadowSprite: {fileID: 0}
+      NormalMap: {fileID: 0}
+      AssetId: 
+      View: 0
+      Scale: 1
+      Overrides: 0
+    TestStartPoint: {x: 0.2, y: 0.72}
     TestUnitId: militia
     TestFollowers: 2
   pointFormatVersion: 1

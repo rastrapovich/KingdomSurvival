@@ -1,0 +1,27 @@
+{
+  "name": "KingdomSurvival.ArtAssetDatabase.EditModeTests",
+  "rootNamespace": "KingdomSurvival.ArtAssets.Tests",
+  "references": [
+    "KingdomSurvival.ArtAssetDatabase",
+    "KingdomSurvival.ArtAssetDatabase.Editor",
+    "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.Core",
+    "KingdomSurvival.AnimationDatabase",
+    "KingdomSurvival.LocationRendering"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

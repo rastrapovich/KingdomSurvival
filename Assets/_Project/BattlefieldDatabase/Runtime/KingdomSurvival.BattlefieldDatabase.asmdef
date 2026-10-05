@@ -3,7 +3,8 @@
   "rootNamespace": "KingdomSurvival.BattlefieldDatabase",
   "references": [
     "KingdomSurvival.BattleSandbox.Runtime",
-    "KingdomSurvival.Core"
+    "KingdomSurvival.Core",
+    "KingdomSurvival.ArtAssetDatabase"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using KingdomSurvival.BattlefieldDatabase;
-using UnityEditor;
 using UnityEngine;
 
 namespace KingdomSurvival.LocationRendering.Editor
@@ -75,58 +72,5 @@ namespace KingdomSurvival.LocationRendering.Editor
                 };
             } }
         };
-    }
-
-    // ПР-12М: карта нормалей подключается к спрайту как вторая текстура
-    // `_NormalMap` в настройках импорта — так её находит 2D-свет Unity,
-    // и для отдельного рисунка, и для страницы атласа.
-    public static class LocationNormalMaps
-    {
-        public const string SecondaryName = "_NormalMap";
-
-        public static bool Assign(Sprite sprite, Texture2D normal, out string message)
-        {
-            message = string.Empty;
-            if (sprite == null)
-            {
-                message = "Нормали подключаются к рисунку-спрайту; у заглушки их нет.";
-                return false;
-            }
-            string path = AssetDatabase.GetAssetPath(sprite.texture);
-            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
-            {
-                message = "У рисунка нет настроек импорта: " + path;
-                return false;
-            }
-            if (normal != null)
-                PrepareNormalTexture(normal);
-            List<SecondarySpriteTexture> textures = (importer.secondarySpriteTextures ?? Array.Empty<SecondarySpriteTexture>())
-                .Where(item => item.name != SecondaryName).ToList();
-            if (normal != null)
-                textures.Add(new SecondarySpriteTexture { name = SecondaryName, texture = normal });
-            importer.secondarySpriteTextures = textures.ToArray();
-            importer.SaveAndReimport();
-            return true;
-        }
-
-        // Карта нормалей импортируется как «Normal map» (линейная, без sRGB).
-        public static void PrepareNormalTexture(Texture2D normal)
-        {
-            string path = AssetDatabase.GetAssetPath(normal);
-            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer) || importer.textureType == TextureImporterType.NormalMap)
-                return;
-            importer.textureType = TextureImporterType.NormalMap;
-            importer.SaveAndReimport();
-        }
-
-        public static Texture2D Find(Sprite sprite)
-        {
-            if (sprite == null) return null;
-            string path = AssetDatabase.GetAssetPath(sprite.texture);
-            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer)) return null;
-            foreach (SecondarySpriteTexture item in importer.secondarySpriteTextures ?? Array.Empty<SecondarySpriteTexture>())
-                if (item.name == SecondaryName) return item.texture;
-            return null;
-        }
     }
 }

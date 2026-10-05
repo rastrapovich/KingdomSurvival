@@ -1,0 +1,27 @@
+{
+  "name": "KingdomSurvival.ArtAssetDatabase.Editor",
+  "rootNamespace": "KingdomSurvival.ArtAssets.Editor",
+  "references": [
+    "KingdomSurvival.ArtAssetDatabase",
+    "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.Core",
+    "KingdomSurvival.AnimationDatabase",
+    "KingdomSurvival.UnitDatabase",
+    "KingdomSurvival.LocationRendering",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime",
+    "Unity.RenderPipelines.Universal.2D.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

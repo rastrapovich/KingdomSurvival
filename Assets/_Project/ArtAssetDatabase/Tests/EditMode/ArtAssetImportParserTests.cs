@@ -1,0 +1,170 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using KingdomSurvival.ArtAssets.Editor;
+using NUnit.Framework;
+
+namespace KingdomSurvival.ArtAssets.Tests
+{
+    // ПР-12Н: разбор пакета файлов. Ракурс — по папке или имени файла
+    // (английские токены экспорта и русские имена по таблице), нормаль — по
+    // слову normal. Неоднозначное — на ручное назначение; нормаль без рисунка
+    // не становится предметом.
+    public sealed class ArtAssetImportParserTests
+    {
+        private string root;
+
+        [SetUp]
+        public void SetUp()
+        {
+            root = Path.Combine(Path.GetTempPath(), "ks_art_parser_" + System.Guid.NewGuid().ToString("N").Substring(0, 8)).Replace('\\', '/');
+            Directory.CreateDirectory(root);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (Directory.Exists(root)) Directory.Delete(root, true);
+        }
+
+        private string Touch(string relative)
+        {
+            string path = Path.Combine(root, relative).Replace('\\', '/');
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            File.WriteAllBytes(path, new byte[] { 0 });
+            return path;
+        }
+
+        private static readonly string[] Folders = { "Front", "Front_Right", "Back_Right", "Back", "Back_Left", "Front_Left" };
+
+        [Test]
+        public void ObjectFolder_SixViewsAndSixNormals_GivesOneAssetWithPairs()
+        {
+            foreach (string folder in Folders)
+            {
+                Touch("Телега/" + folder + "/color.png");
+                Touch("Телега/" + folder + "/normal.png");
+            }
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { root + "/Телега" });
+            Assert.That(plan.Groups.Count, Is.EqualTo(1));
+            ArtAssetImportGroup group = plan.Groups[0];
+            Assert.That(group.Name, Is.EqualTo("Телега"));
+            Assert.That(group.MainViewCount, Is.EqualTo(6));
+            Assert.That(group.NormalCount, Is.EqualTo(6));
+            foreach (ArtAssetImportSlot slot in group.Slots)
+            {
+                string folder = ArtAssetLabels.ViewFolder(slot.View);
+                StringAssert.EndsWith("/" + folder + "/color.png", slot.ColorPath);
+                StringAssert.EndsWith("/" + folder + "/normal.png", slot.NormalPath, "Нормаль — к рисунку своего ракурса.");
+            }
+            Assert.That(plan.Unresolved, Is.Empty);
+        }
+
+        [Test]
+        public void ParentFolder_CreatesSeveralAssets_NormalsAreNotSeparateObjects()
+        {
+            foreach (string name in new[] { "Телега", "Бочка", "Забор" })
+                foreach (string folder in Folders.Take(3))
+                {
+                    Touch("Пакет/" + name + "/" + folder + "/color.png");
+                    Touch("Пакет/" + name + "/" + folder + "/normal.png");
+                }
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { root + "/Пакет" });
+            Assert.That(plan.Groups.Select(group => group.Name), Is.EquivalentTo(new[] { "Телега", "Бочка", "Забор" }));
+            Assert.That(plan.Groups.All(group => group.ColorCount == 3 && group.NormalCount == 3));
+            Assert.That(plan.Groups.Any(group => group.Name.ToLowerInvariant().Contains("normal")), Is.False);
+        }
+
+        [Test]
+        public void FlatPairs_AreRecognized_ByViewTokenInFileName()
+        {
+            Touch("export/cart_Front.png");
+            Touch("export/cart_Front_normal.png");
+            Touch("export/cart_Back_Left.png");
+            Touch("export/cart_Back_Left_normal.png");
+            Touch("export/backpack_Front_Right.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(Directory.GetFiles(root + "/export"));
+            ArtAssetImportGroup cart = plan.Groups.Single(group => group.Name == "cart");
+            Assert.That(cart.Slots.Select(slot => slot.View), Is.EquivalentTo(new[] { ArtAssetView.Front, ArtAssetView.BackLeft }));
+            Assert.That(cart.Slots.All(slot => slot.ColorPath != null && slot.NormalPath != null));
+            ArtAssetImportGroup backpack = plan.Groups.Single(group => group.Name == "backpack");
+            Assert.That(backpack.Slots.Single().View, Is.EqualTo(ArtAssetView.FrontRight), "«backpack» не путается с «back».");
+        }
+
+        [Test]
+        public void RussianViewNames_AreRecognizedByExplicitTable()
+        {
+            Touch("Дом/Спереди справа/цвет.png");
+            Touch("Дом/Спереди справа/нормаль.png");
+            Touch("Дом/Сзади_слева/цвет.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { root + "/Дом" });
+            ArtAssetImportGroup house = plan.Groups.Single();
+            Assert.That(house.Slots.Select(slot => slot.View), Is.EquivalentTo(new[] { ArtAssetView.FrontRight, ArtAssetView.BackLeft }));
+            Assert.That(house.Slots.Single(slot => slot.View == ArtAssetView.FrontRight).NormalPath, Is.Not.Null);
+        }
+
+        [Test]
+        public void LoneNormalWithoutContext_IsNotAnAsset()
+        {
+            string normal = Touch("normal.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { normal });
+            Assert.That(plan.Groups, Is.Empty, "Внешний normal.png без контекста не становится отдельным предметом.");
+            Assert.That(plan.Unresolved.Single().Path, Is.EqualTo(normal));
+
+            string paired = Touch("Бочка/Front/normal.png");
+            plan = ArtAssetImportParser.ParsePaths(new[] { root + "/Бочка" });
+            Assert.That(plan.Groups, Is.Empty, "Нормаль без своего рисунка — не пара и не предмет.");
+            StringAssert.Contains("нормаль без рисунка", plan.Unresolved.Single(item => item.Path == paired).Reason);
+        }
+
+        [Test]
+        public void AmbiguousFiles_AreLeftForManualAssignment()
+        {
+            Touch("Ящик/Front/color.png");
+            Touch("Ящик/Front/основа.png");
+            Touch("Ящик/Back/color.png");
+            Touch("Ящик/картинка.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { root + "/Ящик" });
+            ArtAssetImportGroup crate = plan.Groups.Single();
+            Assert.That(crate.Slots.Single(slot => slot.Part.Length == 0).View, Is.EqualTo(ArtAssetView.Back));
+            Assert.That(plan.Unresolved.Any(item => item.Path.EndsWith("картинка.png") && item.Reason.Contains("ракурс")), Is.True,
+                "Направление по картинке не угадывается.");
+        }
+
+        [Test]
+        public void PartsInViewFolder_BecomeNamedParts()
+        {
+            foreach (string folder in Folders.Take(2))
+            {
+                Touch("Изба/" + folder + "/Основа.png");
+                Touch("Изба/" + folder + "/Основа_normal.png");
+                Touch("Изба/" + folder + "/Крыша.png");
+                Touch("Изба/" + folder + "/Крыша_normal.png");
+            }
+            ArtAssetImportGroup house = ArtAssetImportParser.ParsePaths(new[] { root + "/Изба" }).Groups.Single();
+            Assert.That(house.Parts, Is.EquivalentTo(new[] { "", "крыша" }));
+            Assert.That(house.MainViewCount, Is.EqualTo(2));
+            Assert.That(house.NormalCount, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void ForcedAssetName_PutsEveryFileIntoOneRecord()
+        {
+            Touch("x/barrel_Front.png");
+            Touch("x/cask_Back.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(Directory.GetFiles(root + "/x"), "Бочка");
+            Assert.That(plan.Groups.Single().Name, Is.EqualTo("Бочка"));
+            Assert.That(plan.Groups.Single().ColorCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void MissingViewFallback_IsNearestOnTheRing_NextInOrderFirst()
+        {
+            Assert.That(ArtAssetLabels.FallbackOrder(ArtAssetView.Back), Is.EqualTo(new[]
+            {
+                ArtAssetView.Back, ArtAssetView.BackLeft, ArtAssetView.BackRight, ArtAssetView.FrontLeft, ArtAssetView.FrontRight, ArtAssetView.Front
+            }));
+            Assert.That(ArtAssetLabels.FallbackOrder(ArtAssetView.Front).Distinct().Count(), Is.EqualTo(6));
+        }
+    }
+}

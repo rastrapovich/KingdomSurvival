@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using KingdomSurvival.ArtAssets.Editor;
 using KingdomSurvival.BattlefieldDatabase;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -311,7 +312,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 Texture2D normal = evt.newValue as Texture2D;
                 Change(() => set(normal));
-                status.text = LocationNormalMaps.Assign(sprite, normal, out string message)
+                status.text = SpriteNormalMaps.Assign(sprite, normal, out string message)
                     ? (normal != null ? "Карта нормалей подключена к рисунку." : "Карта нормалей снята.")
                     : message;
             });

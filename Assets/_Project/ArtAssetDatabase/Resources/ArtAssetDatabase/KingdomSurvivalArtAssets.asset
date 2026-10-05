@@ -1,0 +1,274 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa126bff6ad1fe74baca33c7a0e6cacf, type: 3}
+  m_Name: KingdomSurvivalArtAssets
+  m_EditorClassIdentifier: KingdomSurvival.ArtAssetDatabase::KingdomSurvival.ArtAssets.ArtAssetDatabaseAsset
+  assets:
+  - Id: tech_crate
+    Name: "\u0422\u0435\u0445. \u044F\u0449\u0438\u043A (\u0437\u0430\u0433\u043B\u0443\u0448\u043A\u0430)"
+    Category: 5
+    Tags:
+    - "\u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0435"
+    - "\u0437\u0430\u0433\u043B\u0443\u0448\u043A\u0430"
+    Favorite: 0
+    Credit: "\u0422\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0430\u044F \u0437\u0430\u0433\u043B\u0443\u0448\u043A\u0430
+      Kingdom Survival"
+    SourceUrl: 
+    ImportKey: 
+    PixelsPerUnit: 284
+    BlocksMovement: 1
+    OccludesLight: 0
+    ShadowLength: 1
+    ViewSettings:
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 0.6, y: 0.3}
+      FootprintOffset: {x: 0, y: 0}
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 0.6, y: 0.3}
+      FootprintOffset: {x: 0, y: 0}
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 0.6, y: 0.3}
+      FootprintOffset: {x: 0, y: 0}
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 0.6, y: 0.3}
+      FootprintOffset: {x: 0, y: 0}
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 0.6, y: 0.3}
+      FootprintOffset: {x: 0, y: 0}
+    - Pivot: {x: 0.5, y: 0.1}
+      FootprintSize: {x: 0.6, y: 0.3}
+      FootprintOffset: {x: 0, y: 0}
+    Parts:
+    - Id: a9b0405ed3e54ad4b79853695a46dd09
+      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
+      Layer: 2
+      OrderOffset: 0
+      ProjectsShadow: 1
+      Views:
+      - Sprite: {fileID: 21300000, guid: 2670ed598a61ed8438f41da9677b2cff, type: 3}
+        NormalMap: {fileID: 2800000, guid: 708598d290cf2304699f9b7f7ada80d0, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 7e32e5c2fee0dc44884fe3feba8f9288, type: 3}
+        NormalMap: {fileID: 2800000, guid: 2c7830f84fe048a40a27b84a1d1cc7f1, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: bc67cc8048d818f43902bc5769907d88, type: 3}
+        NormalMap: {fileID: 2800000, guid: 5c9b70f99fe01d54689eca420df33e44, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 02800952196d8d144828244e34bb6fb7, type: 3}
+        NormalMap: {fileID: 2800000, guid: 7ebebeb1041450d4a95273c6427fb478, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 6491b37b1d462034e94873ee5e04d221, type: 3}
+        NormalMap: {fileID: 2800000, guid: ea201a1f9a7510248a3c1e4ca90d283c, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 98c4eba7d39046344889f837eaca7e2d, type: 3}
+        NormalMap: {fileID: 2800000, guid: e9c84d02dc4582443a8c4a291abed38d, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+  - Id: tech_tree
+    Name: "\u0422\u0435\u0445. \u0434\u0435\u0440\u0435\u0432\u043E \u0441 \u043A\u0440\u043E\u043D\u043E\u0439
+      (\u0437\u0430\u0433\u043B\u0443\u0448\u043A\u0430)"
+    Category: 2
+    Tags:
+    - "\u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0435"
+    - "\u0437\u0430\u0433\u043B\u0443\u0448\u043A\u0430"
+    - "\u043A\u0440\u043E\u043D\u0430"
+    Favorite: 0
+    Credit: "\u0422\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0430\u044F \u0437\u0430\u0433\u043B\u0443\u0448\u043A\u0430
+      Kingdom Survival"
+    SourceUrl: 
+    ImportKey: 
+    PixelsPerUnit: 112
+    BlocksMovement: 1
+    OccludesLight: 0
+    ShadowLength: 1
+    ViewSettings:
+    - Pivot: {x: 0.5, y: 0.04}
+      FootprintSize: {x: 0.3, y: 0.18}
+      FootprintOffset: {x: 0, y: 0}
+    - Pivot: {x: 0.5, y: 0.04}
+      FootprintSize: {x: 0.3, y: 0.18}
+      FootprintOffset: {x: 0, y: 0}
+    - Pivot: {x: 0.5, y: 0.04}
+      FootprintSize: {x: 0.3, y: 0.18}
+      FootprintOffset: {x: 0, y: 0}
+    - Pivot: {x: 0.5, y: 0.04}
+      FootprintSize: {x: 0.3, y: 0.18}
+      FootprintOffset: {x: 0, y: 0}
+    - Pivot: {x: 0.5, y: 0.04}
+      FootprintSize: {x: 0.3, y: 0.18}
+      FootprintOffset: {x: 0, y: 0}
+    - Pivot: {x: 0.5, y: 0.04}
+      FootprintSize: {x: 0.3, y: 0.18}
+      FootprintOffset: {x: 0, y: 0}
+    Parts:
+    - Id: aab215d020f047fe99fb09d3a430c8af
+      Name: "\u0421\u0442\u0432\u043E\u043B"
+      Layer: 2
+      OrderOffset: 0
+      ProjectsShadow: 1
+      Views:
+      - Sprite: {fileID: 21300000, guid: b7157c8a76c842143929e69c1a7c0d21, type: 3}
+        NormalMap: {fileID: 2800000, guid: d9a4777f7a5839e4f9ded633c2927a5f, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 047a904bdccc5174cadefa9b3e08f176, type: 3}
+        NormalMap: {fileID: 2800000, guid: 2d0a12ee32366c748a6cf67fa2aad737, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: f6691fbe0b9cec54ea780b1e8ad4f6b3, type: 3}
+        NormalMap: {fileID: 2800000, guid: 2e51c816cd2c7c440a5dfe56ec96be46, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 289a105ae0183374ebd04aeb6d45155f, type: 3}
+        NormalMap: {fileID: 2800000, guid: c782a5a8be87bde4b85ae05e9ff01dd3, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: ee99950c3e050d340b214630e9f82840, type: 3}
+        NormalMap: {fileID: 2800000, guid: c9c62567d36a4cf4982206b954e3cb03, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 174eb4bfcde7c034f9b16e764c5098fd, type: 3}
+        NormalMap: {fileID: 2800000, guid: 27f718b4b9880354bb3b767282e56cee, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+    - Id: tech_tree_1
+      Name: "\u041A\u0440\u043E\u043D\u0430"
+      Layer: 2
+      OrderOffset: 1
+      ProjectsShadow: 1
+      Views:
+      - Sprite: {fileID: 21300000, guid: 249f0cdefe6f6e44db14b5a1e5b61296, type: 3}
+        NormalMap: {fileID: 2800000, guid: 6dfb5d7158e78cb4b983a44f2352cdcd, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: b5210bd285096fc4193b991ef8801047, type: 3}
+        NormalMap: {fileID: 2800000, guid: 8660ea130ebcdf94c9b2d2e343a3d6bb, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 60fd3dc645e41d74bb44104865caea5f, type: 3}
+        NormalMap: {fileID: 2800000, guid: facb7298dd6e1d841bd1365218fb39dc, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: ae0afbca31f9f904197eea14d150f1a9, type: 3}
+        NormalMap: {fileID: 2800000, guid: 6f228b9a267d81244bbf6ae166ab5b80, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 76041d0ae160b524a8a0ca158378bd52, type: 3}
+        NormalMap: {fileID: 2800000, guid: f7bbc76e237836349b50cb7f07c85e4f, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: b810cb5f54f45814ebcd70b013f819b8, type: 3}
+        NormalMap: {fileID: 2800000, guid: 8156a06de24851c419c0b342b34f30bc, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+  - Id: tech_house
+    Name: "\u0422\u0435\u0445. \u0434\u043E\u043C \u0441 \u043A\u0440\u044B\u0448\u0435\u0439
+      (\u0437\u0430\u0433\u043B\u0443\u0448\u043A\u0430)"
+    Category: 1
+    Tags:
+    - "\u0442\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u043E\u0435"
+    - "\u0437\u0430\u0433\u043B\u0443\u0448\u043A\u0430"
+    - "\u043A\u0440\u044B\u0448\u0430"
+    Favorite: 0
+    Credit: "\u0422\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0430\u044F \u0437\u0430\u0433\u043B\u0443\u0448\u043A\u0430
+      Kingdom Survival"
+    SourceUrl: 
+    ImportKey: 
+    PixelsPerUnit: 115
+    BlocksMovement: 1
+    OccludesLight: 1
+    ShadowLength: 1
+    ViewSettings:
+    - Pivot: {x: 0.5, y: 0.06}
+      FootprintSize: {x: 2.4, y: 0.9}
+      FootprintOffset: {x: 0, y: 0.2}
+    - Pivot: {x: 0.5, y: 0.06}
+      FootprintSize: {x: 2.4, y: 0.9}
+      FootprintOffset: {x: 0, y: 0.2}
+    - Pivot: {x: 0.5, y: 0.06}
+      FootprintSize: {x: 2.4, y: 0.9}
+      FootprintOffset: {x: 0, y: 0.2}
+    - Pivot: {x: 0.5, y: 0.06}
+      FootprintSize: {x: 2.4, y: 0.9}
+      FootprintOffset: {x: 0, y: 0.2}
+    - Pivot: {x: 0.5, y: 0.06}
+      FootprintSize: {x: 2.4, y: 0.9}
+      FootprintOffset: {x: 0, y: 0.2}
+    - Pivot: {x: 0.5, y: 0.06}
+      FootprintSize: {x: 2.4, y: 0.9}
+      FootprintOffset: {x: 0, y: 0.2}
+    Parts:
+    - Id: d43109176b484717b4f37d0312359d62
+      Name: "\u041E\u0441\u043D\u043E\u0432\u0430"
+      Layer: 2
+      OrderOffset: 0
+      ProjectsShadow: 1
+      Views:
+      - Sprite: {fileID: 21300000, guid: ae19e75322c26e64097efc89b529e05c, type: 3}
+        NormalMap: {fileID: 2800000, guid: 92d51b97dd1e2944594572274b56f9b1, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: cf99dc858bd266a428341010d9b8e843, type: 3}
+        NormalMap: {fileID: 2800000, guid: c38f023d71d08b348af16d81501d68db, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 066934a8be4461c4c8f57b2c7f47f6dd, type: 3}
+        NormalMap: {fileID: 2800000, guid: 72415873b5e9d9049b1350e39ec66f39, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 01eae40022198084a8f7ed4b1edf73af, type: 3}
+        NormalMap: {fileID: 2800000, guid: ca34fa14921f99448a865d6cf2151333, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 92dc36834fcd3784db334239f40259d7, type: 3}
+        NormalMap: {fileID: 2800000, guid: 26353256467fd334a810a68ecb6749d2, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 9e64f3fedd232fc42b0e08612b076901, type: 3}
+        NormalMap: {fileID: 2800000, guid: aab55b9d76eef2d40836fd385aa0e2c0, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+    - Id: tech_house_1
+      Name: "\u041A\u0440\u044B\u0448\u0430"
+      Layer: 2
+      OrderOffset: 1
+      ProjectsShadow: 1
+      Views:
+      - Sprite: {fileID: 21300000, guid: e8858fdbc03d2734e888a5f3e9f4d0f6, type: 3}
+        NormalMap: {fileID: 2800000, guid: 333004409bd6e7647bc16300e5d3263a, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: cbccd8ac4f444e3428d2fe0c4e4272e1, type: 3}
+        NormalMap: {fileID: 2800000, guid: c5906aa6790ca974a8dd51cab97d6941, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: caee50111557a9a4f858d24838f78174, type: 3}
+        NormalMap: {fileID: 2800000, guid: 6a220fff2ef0c374eae2f7de74cc56c3, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: 662175efbec1b574bb6496610e1ebab4, type: 3}
+        NormalMap: {fileID: 2800000, guid: 8698a59b2a837144bb4df2fc1126a658, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: a1efc16060b13ef4083297a1cadadacc, type: 3}
+        NormalMap: {fileID: 2800000, guid: c478ad666db282d4e9ff622357476464, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}
+      - Sprite: {fileID: 21300000, guid: d49f5f64e82ffaa4887529d28f5998bd, type: 3}
+        NormalMap: {fileID: 2800000, guid: fcc3c1c784f07274c954614573de2678, type: 3}
+        Offset: {x: 0, y: 0}
+        ShadowSprite: {fileID: 0}

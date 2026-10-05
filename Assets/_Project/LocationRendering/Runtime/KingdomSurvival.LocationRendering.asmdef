@@ -3,6 +3,7 @@
   "rootNamespace": "KingdomSurvival.LocationRendering",
   "references": [
     "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.ArtAssetDatabase",
     "KingdomSurvival.BattleSandbox.Runtime",
     "KingdomSurvival.Core",
     "KingdomSurvival.AnimationDatabase",

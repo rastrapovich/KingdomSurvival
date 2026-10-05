@@ -8916,6 +8916,154 @@ MonoBehaviour:
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
+    - id: PR12N-T01
+      title: "12Н-1 · Модель Базы ассетов и ссылка экземпляра"
+      details: "Запись с шестью ракурсами, частями, опорой и основанием ракурса; экземпляр места — ID ассета, ракурс, масштаб, переопределения. Разрешение ссылки в рендерере, проходимости и проверке; прежние прямые рисунки работают."
+      category: 3
+      status: 1
+      required: 1
+      order: 44
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12M-T05
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Ручная проверка: старые места и новые экземпляры в Editor"
+        done: 0
+      manualChecks:
+      - "Проверить в окнах «База ассетов» и «База локаций»"
+      fileReferences:
+      - ProjectDocs/ASSET_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; снимки окон просмотрены. Ручная проверка мышью в Editor не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12N-T02
+      title: "12Н-2 · Окно «База ассетов» и загрузка"
+      details: "Холст объектов рядом (игровой размер с человеком / ячейки), галерея, карточка с шестью ячейками; загрузка файлов и папок из Проводника и Project с разбором ракурсов и нормалей, сводкой и откатом по объекту."
+      category: 5
+      status: 1
+      required: 1
+      order: 45
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12N-T01
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Ручная проверка: перетаскивание папки из Проводника и работа мышью на холсте"
+        done: 0
+      manualChecks:
+      - "Перетащить в окно папку с 6 рисунками и 6 нормалями"
+      fileReferences:
+      - ProjectDocs/ASSET_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; снимки окон просмотрены. Ручная проверка мышью в Editor не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12N-T03
+      title: "12Н-3 · Размер, опора, части и свет"
+      details: "Общий масштаб ракурсов, опора кликом, основание мышью, части «Основа / Крыша / Крона / Ствол», предпросмотр «под светом» общим рендерером мест."
+      category: 3
+      status: 1
+      required: 1
+      order: 46
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12N-T02
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Ручная проверка: опора, основание и свет на своём рисунке"
+        done: 0
+      manualChecks:
+      - "Проверить в карточке ассета"
+      fileReferences:
+      - ProjectDocs/ASSET_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; снимки окон просмотрены. Ручная проверка мышью в Editor не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12N-T04
+      title: "12Н-4 · Ассеты в Базе локаций"
+      details: "«+ Из Базы ассетов», перетаскивание, палитра, ракурс с миниатюрами, «Заменить ассет», «Открыть в Базе ассетов», «Где используется», запрет удаления используемой записи, перевод прежних предметов."
+      category: 7
+      status: 1
+      required: 1
+      order: 47
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12N-T03
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Ручная проверка: расстановка, смена ракурса, служебный запуск технического места"
+        done: 0
+      manualChecks:
+      - "Меню «Kingdom Survival/Служебное/База ассетов: техническое место» → «Запустить локацию»"
+      fileReferences:
+      - ProjectDocs/ASSET_DATABASE_GUIDE.md
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; снимки окон просмотрены. Ручная проверка мышью в Editor не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12N-T05
+      title: "12Н-5 · Приёмка Базы ассетов"
+      details: "EditMode: разбор, ID, перевод, удаление, разрешение ссылок, совместимость; PlayMode: десять экземпляров, шесть ракурсов без сдвига опоры, перекрытие героя, свет по нормалям; технический набор; сборка Player."
+      category: 8
+      status: 1
+      required: 1
+      order: 48
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12N-T04
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Сборка Player: каталог грузится без Editor API"
+        done: 0
+      - text: "Ручная проверка художником на своём арте"
+        done: 0
+      manualChecks:
+      - "Собрать Player и открыть техническое место"
+      fileReferences:
+      - ProjectDocs/ASSET_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1432 (1418/0/14), PlayMode 37/37; снимки окон просмотрены. Сборка Player не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
   - id: PR15_HOME_WATER
     title: "\u041F\u0420-15. \xAB\u0414\u043E\u043C \u043D\u0430 \u0447\u0443\u0436\u043E\u0439
       \u0432\u043E\u0434\u0435\xBB \u043D\u0430 \u043E\u0431\u0449\u0435\u0439 \u043E\u0441\u043D\u043E\u0432\u0435"

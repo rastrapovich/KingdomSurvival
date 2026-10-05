@@ -1,0 +1,159 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using KingdomSurvival.ArtAssets.Editor;
+using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
+
+namespace KingdomSurvival.ArtAssets.Tests
+{
+    // ПР-12Н: настоящий импорт папки из «Проводника» (временная папка вне
+    // проекта): копии в управляемой папке, рисунок — спрайт, нормаль — Normal
+    // map и вторая текстура _NormalMap рисунка; повторный импорт сохраняет
+    // ID и GUID; замена одного ракурса не трогает остальные.
+    public sealed class ArtAssetImportTests
+    {
+        private string source;
+        private ArtAssetDatabaseAsset catalog;
+        private readonly List<string> folders = new List<string>();
+
+        [SetUp]
+        public void SetUp()
+        {
+            source = Path.Combine(Path.GetTempPath(), "ks_art_import_" + System.Guid.NewGuid().ToString("N").Substring(0, 8)).Replace('\\', '/');
+            Directory.CreateDirectory(source);
+            catalog = ScriptableObject.CreateInstance<ArtAssetDatabaseAsset>();
+            ArtAssetDatabaseAsset.Override = catalog;
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            ArtAssetDatabaseAsset.Override = null;
+            foreach (ArtAssetDefinition asset in catalog.assets)
+                folders.Add(ArtAssetImporter.AssetFolder(asset));
+            foreach (string folder in folders.Distinct())
+                if (AssetDatabase.IsValidFolder(folder)) AssetDatabase.DeleteAsset(folder);
+            Object.DestroyImmediate(catalog);
+            if (Directory.Exists(source)) Directory.Delete(source, true);
+        }
+
+        private void Png(string relative, int width, int height, Color color)
+        {
+            string path = Path.Combine(source, relative);
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            texture.SetPixels(Enumerable.Repeat(color, width * height).ToArray());
+            texture.Apply();
+            File.WriteAllBytes(path, texture.EncodeToPNG());
+            Object.DestroyImmediate(texture);
+        }
+
+        private static readonly Color Normal = new Color(.5f, .5f, 1, 1);
+
+        private ArtAssetImportResult ImportCart(System.Func<ArtAssetImportGroup, ArtAssetDefinition> target = null)
+        {
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { source + "/Телега" });
+            return ArtAssetImporter.Import(catalog, plan, target, false);
+        }
+
+        [Test]
+        public void FolderWithSixViews_ImportsOneRecord_WithAssignedNormals()
+        {
+            foreach (ArtAssetView view in ArtAssetLabels.Views)
+            {
+                Png("Телега/" + ArtAssetLabels.ViewFolder(view) + "/color.png", 64, 48, new Color(.6f, .4f, .2f, 1));
+                Png("Телега/" + ArtAssetLabels.ViewFolder(view) + "/normal.png", 64, 48, Normal);
+            }
+            ArtAssetImportResult result = ImportCart();
+            Assert.That(result.Errors, Is.Empty, string.Join("; ", result.Errors));
+            Assert.That(catalog.assets.Count, Is.EqualTo(1));
+            ArtAssetDefinition cart = catalog.assets[0];
+            Assert.That(cart.Name, Is.EqualTo("Телега"));
+            Assert.That(cart.ViewCount, Is.EqualTo(6));
+            Assert.That(cart.NormalCount, Is.EqualTo(6));
+            foreach (ArtAssetView view in ArtAssetLabels.Views)
+            {
+                ArtAssetPartView slot = cart.MainPart.FindView(view);
+                string path = AssetDatabase.GetAssetPath(slot.Sprite);
+                StringAssert.StartsWith(ArtAssetImporter.AssetFolder(cart) + "/", path, "Внешний арт копируется в управляемую папку.");
+                Assert.That(SpriteNormalMaps.Find(slot.Sprite) == slot.NormalMap, Is.True, "Нормаль подключена к рисунку своего ракурса.");
+                Assert.That(SpriteNormalMaps.IsNormalMapImport(slot.NormalMap), Is.True, "Нормаль — данные, не sRGB-картинка.");
+                TextureImporter color = (TextureImporter)AssetImporter.GetAtPath(path);
+                Assert.That(color.sRGBTexture, Is.True);
+                Assert.That(color.textureType, Is.EqualTo(TextureImporterType.Sprite));
+            }
+            Assert.That(File.Exists(source + "/Телега/Front/color.png"), Is.True, "Источники пользователя не меняются.");
+            Assert.That(ArtAssetValidator.Validate(catalog, cart).Where(issue => issue.Level != ArtAssetIssueLevel.Info), Is.Empty);
+        }
+
+        [Test]
+        public void Reimport_KeepsIdAndGuids_AndReplacingOneViewKeepsOthers()
+        {
+            Png("Телега/Front/color.png", 32, 32, Color.red);
+            Png("Телега/Front/normal.png", 32, 32, Normal);
+            Png("Телега/Back/color.png", 32, 32, Color.green);
+            ImportCart();
+            ArtAssetDefinition cart = catalog.assets.Single();
+            string id = cart.Id;
+            string frontPath = AssetDatabase.GetAssetPath(cart.MainPart.FindView(ArtAssetView.Front).Sprite);
+            string frontGuid = AssetDatabase.AssetPathToGUID(frontPath);
+            Sprite back = cart.MainPart.FindView(ArtAssetView.Back).Sprite;
+
+            Png("Телега/Front/color.png", 32, 32, Color.blue);
+            ArtAssetImportResult result = ImportCart(group => catalog.assets[0]);
+            Assert.That(result.Updated.Count, Is.EqualTo(1));
+            Assert.That(catalog.assets.Count, Is.EqualTo(1), "Повторный импорт в ту же запись — не дубликат.");
+            ArtAssetDefinition updated = catalog.assets.Single();
+            Assert.That(updated.Id, Is.EqualTo(id));
+            Sprite front = updated.MainPart.FindView(ArtAssetView.Front).Sprite;
+            Assert.That(AssetDatabase.GetAssetPath(front), Is.EqualTo(frontPath));
+            Assert.That(AssetDatabase.AssetPathToGUID(frontPath), Is.EqualTo(frontGuid), "GUID и .meta сохранены — ссылки мест не рвутся.");
+            Assert.That(File.ReadAllBytes(frontPath), Is.EqualTo(File.ReadAllBytes(source + "/Телега/Front/color.png")), "Содержимое обновилось.");
+            Assert.That(SpriteNormalMaps.Find(front), Is.Not.Null, "Пара рисунок–нормаль сохранилась.");
+
+            // Один файл в ячейку «Сзади»: остальные ракурсы не сбрасываются.
+            Png("одиночный.png", 40, 40, Color.white);
+            ArtAssetImporter.AssignFile(catalog, updated, updated.MainPart, ArtAssetView.Back, source + "/одиночный.png", ArtAssetFileKind.Color);
+            Assert.That(updated.MainPart.FindView(ArtAssetView.Back).Sprite.rect.width, Is.EqualTo(40), "Заменён рисунок «Сзади».");
+            Assert.That(AssetDatabase.GetAssetPath(updated.MainPart.FindView(ArtAssetView.Back).Sprite), Is.EqualTo(AssetDatabase.GetAssetPath(back)));
+            Assert.That(updated.MainPart.FindView(ArtAssetView.Front).Sprite == front, Is.True, "«Спереди» не тронут.");
+
+            // Несовпадающая нормаль: понятное предупреждение.
+            Png("кривая_нормаль.png", 16, 16, Normal);
+            string warning = ArtAssetImporter.AssignFile(catalog, updated, updated.MainPart, ArtAssetView.Back, source + "/кривая_нормаль.png", ArtAssetFileKind.Normal);
+            StringAssert.Contains("не совпадает", warning);
+            Assert.That(ArtAssetValidator.Validate(catalog, updated).Any(issue => issue.Level == ArtAssetIssueLevel.Warning && issue.Text.Contains("размер нормали")), Is.True);
+
+            // Снятие нормали снимает и вторую текстуру импорта.
+            Sprite backSprite = updated.MainPart.FindView(ArtAssetView.Back).Sprite;
+            ArtAssetImporter.ClearNormal(catalog, updated.MainPart, ArtAssetView.Back);
+            Assert.That(updated.MainPart.FindView(ArtAssetView.Back).NormalMap, Is.Null);
+            Assert.That(SpriteNormalMaps.Find(backSprite), Is.Null);
+        }
+
+        [Test]
+        public void NameMatchAlone_DoesNotOverwrite()
+        {
+            Png("Телега/Front/color.png", 16, 16, Color.red);
+            ImportCart();
+            ImportCart();
+            Assert.That(catalog.assets.Count, Is.EqualTo(2), "Без явного «обновить» совпадение имени создаёт новую запись.");
+            Assert.That(catalog.assets[0].Id, Is.Not.EqualTo(catalog.assets[1].Id));
+        }
+
+        [Test]
+        public void FailedObject_LeavesNoBrokenRecord()
+        {
+            Png("Пакет/Бочка/Front/color.png", 16, 16, Color.red);
+            Png("Пакет/Телега/Front/color.png", 16, 16, Color.red);
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { source + "/Пакет" });
+            // Файл одного объекта исчез между разбором и импортом.
+            File.Delete(source + "/Пакет/Бочка/Front/color.png");
+            ArtAssetImportResult result = ArtAssetImporter.Import(catalog, plan, null, false);
+            Assert.That(result.Errors.Count, Is.EqualTo(1));
+            Assert.That(catalog.assets.Select(asset => asset.Name), Is.EquivalentTo(new[] { "Телега" }), "Ошибка одного объекта не портит остальные.");
+        }
+    }
+}

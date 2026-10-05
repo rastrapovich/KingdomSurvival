@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using KingdomSurvival.AnimationDatabase;
+using KingdomSurvival.ArtAssets;
 using KingdomSurvival.BattlefieldDatabase;
 using KingdomSurvival.UnitDatabase;
 using UnityEngine;
@@ -36,7 +37,11 @@ namespace KingdomSurvival.LocationRendering
         {
             public LocationVisualObject Data;
             public Transform Anchor;
+            // Рисунок основы; у составного ассета — ещё части (Images[0] == Image).
             public SpriteRenderer Image;
+            public readonly List<SpriteRenderer> Images = new List<SpriteRenderer>();
+            public readonly List<LocationResolvedPart> Parts = new List<LocationResolvedPart>();
+            public LocationResolvedVisual Resolved;
             public Light2D Light;
         }
 
@@ -193,23 +198,53 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
+        // ПР-12Н: предмет — прямой рисунок или запись Базы ассетов (ракурс,
+        // части, опора и основание ракурса); оба пути проходят через
+        // LocationVisualResolver, поэтому окно базы, тест, игра и бой на месте
+        // показывают одно и то же.
         private void AddObject(LocationVisualObject item)
         {
             if (item == null || item.Hidden) return;
             Transform anchor = Child(item.Name).transform;
             anchor.localPosition = LocationVisualGeometry.ToWorld(Location, item.Position);
-            SpriteRenderer image = null;
-            if (!item.LightOnly)
+            Placed entry = new Placed { Data = item, Anchor = anchor };
+            placed.Add(entry);
+            BuildObjectArt(entry, null);
+            entry.Light = item.Light.Enabled ? CreateLight(anchor, item.Light) : null;
+        }
+
+        private void BuildObjectArt(Placed entry, string variantId)
+        {
+            LocationVisualObject item = entry.Data;
+            Transform anchor = entry.Anchor;
+            LocationResolvedVisual resolved = LocationVisualResolver.Resolve(item, variantId);
+            entry.Resolved = resolved;
+            if (item.LightOnly) return;
+            for (int i = 0; i < resolved.Parts.Count; i++)
             {
-                GameObject imageObject = new GameObject("Рисунок");
+                LocationResolvedPart part = resolved.Parts[i];
+                GameObject imageObject = new GameObject(i == 0 ? "Рисунок" : "Часть · " + part.Name);
                 imageObject.transform.SetParent(anchor, false);
-                Sprite sprite = item.ResolveSprite();
-                if (sprite == null) sprite = PlaceholderSprite(item.Placeholder);
-                image = Image(imageObject, sprite, item.Placeholder == LocationPlaceholder.Fire);
-                Fit(image, item.Height, item.Pivot, item.FlipX, Vector2.zero);
-                image.sortingOrder = LocationVisualGeometry.SortOrder(item.Band, anchor.localPosition.y, item.OrderOffset);
+                Sprite sprite = part.Sprite;
+                bool fullbright = false;
+                if (sprite == null)
+                {
+                    LocationPlaceholder kind = resolved.FromAsset ? LocationPlaceholder.Crate : item.Placeholder;
+                    sprite = PlaceholderSprite(kind);
+                    fullbright = kind == LocationPlaceholder.Fire;
+                }
+                SpriteRenderer image = Image(imageObject, sprite, fullbright);
+                // Ассет без рисунка — заметная заглушка, а не «ящик».
+                if (part.Placeholder && resolved.FromAsset) image.color = new Color(1, .45f, .75f);
+                Fit(image, part.Height, part.Pivot, resolved.FlipX, Vector2.zero);
+                image.sortingOrder = LocationVisualGeometry.SortOrder(part.Band, anchor.localPosition.y, part.OrderOffset);
+                entry.Images.Add(image);
+                entry.Parts.Add(part);
+                if (i == 0) entry.Image = image;
+                if (part.ProjectsShadow)
+                    AddCaster(anchor, image, part.ShadowSprite, part.ShadowHeight, part.ShadowPivot, resolved.FlipX, resolved.ShadowLength, null);
             }
-            if (item.CastsShadow && !item.LightOnly)
+            if (resolved.OccludesLight)
             {
                 // Форма у основания, независимая от рисунка и его прозрачных полей.
                 // URP 17.6 не предоставляет runtime-setter контура. Используем
@@ -218,14 +253,33 @@ namespace KingdomSurvival.LocationRendering
                 if (template != null)
                 {
                     GameObject shadow = UnityEngine.Object.Instantiate(template, anchor, false);
-                    shadow.transform.localScale = new Vector3(item.Footprint.x, item.Footprint.y, 1);
+                    shadow.name = "Перекрытие света";
+                    shadow.transform.localPosition = resolved.FootprintOffset;
+                    shadow.transform.localScale = new Vector3(resolved.FootprintSize.x, resolved.FootprintSize.y, 1);
                 }
             }
-            Light2D light = item.Light.Enabled ? CreateLight(anchor, item.Light) : null;
-            Placed entry = new Placed { Data = item, Anchor = anchor, Image = image, Light = light };
-            placed.Add(entry);
-            if (image != null && item.ProjectsShadow && item.Band == LocationVisualBand.World)
-                AddCaster(anchor, image, item.ShadowSprite, item.Height, item.Pivot, item.FlipX, item.ShadowLength, null);
+        }
+
+        // Снять рисунки, тени и перекрытие света предмета (свет и опора остаются).
+        private void ClearObjectArt(Placed entry)
+        {
+            casters.RemoveAll(caster =>
+            {
+                if (caster.Anchor != entry.Anchor) return false;
+                foreach (SpriteRenderer shadow in caster.Shadows)
+                    if (shadow != null) Destroy(shadow.gameObject);
+                return true;
+            });
+            for (int i = entry.Anchor.childCount - 1; i >= 0; i--)
+            {
+                Transform child = entry.Anchor.GetChild(i);
+                if (entry.Light != null && child == entry.Light.transform) continue;
+                child.gameObject.SetActive(false);
+                Destroy(child.gameObject);
+            }
+            entry.Images.Clear();
+            entry.Parts.Clear();
+            entry.Image = null;
         }
 
         public void SetTime(float hours, float seconds)
@@ -511,7 +565,8 @@ namespace KingdomSurvival.LocationRendering
             Placed item = placed.Find(entry => entry.Data.Id == id);
             if (item == null) return;
             item.Anchor.localPosition = LocationVisualGeometry.ToWorld(Location, normalizedPosition);
-            if (item.Image != null) item.Image.sortingOrder = LocationVisualGeometry.SortOrder(item.Data.Band, item.Anchor.localPosition.y, item.Data.OrderOffset);
+            for (int i = 0; i < item.Images.Count; i++)
+                item.Images[i].sortingOrder = LocationVisualGeometry.SortOrder(item.Parts[i].Band, item.Anchor.localPosition.y, item.Parts[i].OrderOffset);
         }
 
         // Смена состояния одного объекта, без пересборки фона и без изменения авторских данных.
@@ -520,9 +575,55 @@ namespace KingdomSurvival.LocationRendering
             Placed item = placed.Find(entry => entry.Data.Id == objectId);
             LocationVisualVariant variant = item?.Data.Variants?.Find(entry => entry.Id == variantId);
             if (variant?.Sprite == null || item.Image == null) return false;
+            LocationResolvedPart main = LocationVisualResolver.Resolve(item.Data, variantId).Main;
             item.Image.sprite = variant.Sprite;
-            Fit(item.Image, item.Data.Height, item.Data.Pivot, item.Data.FlipX, Vector2.zero);
+            Fit(item.Image, main?.Height ?? item.Data.Height, main?.Pivot ?? item.Data.Pivot, item.Data.FlipX, Vector2.zero);
             return true;
+        }
+
+        // ПР-12Н: смена ракурса экземпляра ассета без пересборки сцены и без
+        // изменения авторских данных. Опора остаётся на месте; рисунки, нормали
+        // (вторая текстура рисунка), части, тени и основание — нового ракурса.
+        public bool SetObjectView(string objectId, ArtAssetView view)
+        {
+            Placed item = placed.Find(entry => entry.Data.Id == objectId);
+            if (item == null || !item.Data.UsesAsset) return false;
+            ArtAssetView previous = item.Data.View;
+            ClearObjectArt(item);
+            item.Data.View = view;
+            try { BuildObjectArt(item, null); }
+            finally { item.Data.View = previous; }
+            item.Resolved.RequestedView = view;
+            UpdateShadows();
+            return true;
+        }
+
+        // Ракурс, который сейчас показан у предмета (с учётом запасного).
+        public LocationResolvedVisual ResolvedObject(string objectId) => placed.Find(entry => entry.Data.Id == objectId)?.Resolved;
+
+        // Все рисунки предмета (основа и части) — для выбора мышью и проверок.
+        public IReadOnlyList<SpriteRenderer> ObjectImages(string objectId) =>
+            placed.Find(entry => entry.Data.Id == objectId)?.Images ?? (IReadOnlyList<SpriteRenderer>)Array.Empty<SpriteRenderer>();
+
+        public bool TryObjectBounds(string objectId, out Bounds bounds)
+        {
+            bounds = default;
+            bool any = false;
+            foreach (SpriteRenderer image in ObjectImages(objectId))
+            {
+                if (image == null) continue;
+                if (!any) { bounds = image.bounds; any = true; }
+                else bounds.Encapsulate(image.bounds);
+            }
+            return any;
+        }
+
+        public int ObjectSortingOrder(string objectId)
+        {
+            int order = int.MinValue;
+            foreach (SpriteRenderer image in ObjectImages(objectId))
+                if (image != null) order = Mathf.Max(order, image.sortingOrder);
+            return order;
         }
 
         public void Dispose()

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using KingdomSurvival.ArtAssets;
 using KingdomSurvival.BattleSandbox;
 using UnityEngine;
 
@@ -126,6 +127,12 @@ namespace KingdomSurvival.BattlefieldDatabase
     public enum LocationVisualBand { Ground, GroundDetail, World, Foreground }
     public enum LocationPlaceholder { None, Tent, Fire, Crate, Rock, Bush }
 
+    // ПР-12Н: какие настройки экземпляр ассета задаёт сам, а не берёт из
+    // Базы ассетов. Слой — у основы; проходимость — блокировка и размер
+    // основания; тени — силуэт, длина и перекрытие света.
+    [Flags]
+    public enum LocationAssetOverride { None = 0, Layer = 1, Passability = 2, Shadows = 4 }
+
     [Serializable]
     public sealed class LocationVisualVariant
     {
@@ -166,6 +173,21 @@ namespace KingdomSurvival.BattlefieldDatabase
         public Sprite ShadowSprite;
         // Карта нормалей рисунка (подключается к спрайту при импорте).
         public Texture2D NormalMap;
+
+        // ПР-12Н: ссылка на запись Базы ассетов. Пусто — прежний прямой
+        // рисунок (Sprite, Height, Pivot выше). Задано — рисунки ракурсов,
+        // части, опора, основание и рекомендуемые настройки берутся из
+        // каталога; поля выше остаются запасным показом и значениями
+        // явных переопределений (Overrides).
+        public string AssetId = "";
+        public ArtAssetView View = ArtAssetView.Front;
+        // Локальный масштаб экземпляра (1 — игровой размер ассета).
+        public float Scale = 1;
+        public LocationAssetOverride Overrides;
+
+        public bool UsesAsset => !string.IsNullOrEmpty(AssetId);
+        public bool IsOverridden(LocationAssetOverride flag) => (Overrides & flag) != 0;
+
         public Sprite ResolveSprite(string variantId = null)
         {
             string id = variantId ?? DefaultVariantId;
@@ -251,12 +273,21 @@ namespace KingdomSurvival.BattlefieldDatabase
                 return result;
             foreach (LocationVisualObject item in visual.Objects)
             {
-                if (item == null || item.Hidden || !item.BlocksMovement) continue;
-                Vector2 center = ToPixel(location, item.Position);
-                Vector2 size = item.Footprint * PixelsPerUnit;
-                result.Add(new Rect(center - size / 2, size));
+                if (item == null || item.Hidden) continue;
+                LocationResolvedVisual resolved = LocationVisualResolver.Resolve(item);
+                if (!resolved.BlocksMovement) continue;
+                result.Add(FootprintRect(location, item, resolved));
             }
             return result;
+        }
+
+        // Основание предмета на рисунке места (пиксели, Y вниз).
+        public static Rect FootprintRect(LocalLocationDefinition location, LocationVisualObject item, LocationResolvedVisual resolved)
+        {
+            Vector2 center = ToPixel(location, item.Position) +
+                             new Vector2(resolved.FootprintOffset.x, -resolved.FootprintOffset.y) * PixelsPerUnit;
+            Vector2 size = Vector2.Max(Vector2.zero, resolved.FootprintSize) * PixelsPerUnit;
+            return new Rect(center - size / 2, size);
         }
 
         public static int SortOrder(LocationVisualBand band, float groundY, int offset = 0)
@@ -276,8 +307,14 @@ namespace KingdomSurvival.BattlefieldDatabase
             {
                 if (item == null) { errors.Add("Пустой объект."); continue; }
                 if (string.IsNullOrWhiteSpace(item.Id) || !ids.Add(item.Id)) errors.Add(item.Name + ": пустой или повторный ID.");
-                if (!item.LightOnly && item.Sprite == null && item.Placeholder == LocationPlaceholder.None) errors.Add(item.Name + ": нет спрайта.");
-                if (item.Height <= 0 || item.Footprint.x < 0 || item.Footprint.y < 0) errors.Add(item.Name + ": неверный размер.");
+                if (item.UsesAsset)
+                {
+                    if (ArtAssetDatabaseAsset.FindCurrent(item.AssetId) == null)
+                        errors.Add(item.Name + ": ассет «" + item.AssetId + "» не найден в Базе ассетов.");
+                    if (item.Scale <= 0) errors.Add(item.Name + ": неверный масштаб экземпляра.");
+                }
+                else if (!item.LightOnly && item.Sprite == null && item.Placeholder == LocationPlaceholder.None) errors.Add(item.Name + ": нет спрайта.");
+                if ((!item.UsesAsset && item.Height <= 0) || item.Footprint.x < 0 || item.Footprint.y < 0) errors.Add(item.Name + ": неверный размер.");
                 if (item.Position.x < 0 || item.Position.x > 1 || item.Position.y < 0 || item.Position.y > 1) errors.Add(item.Name + ": за пределами рисунка.");
                 if (item.Light.Enabled && (item.Light.Radius <= 0 || item.Light.Intensity < 0)) errors.Add(item.Name + ": неверный свет.");
             }

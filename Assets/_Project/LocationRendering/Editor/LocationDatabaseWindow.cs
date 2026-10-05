@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using KingdomSurvival.ArtAssets;
+using KingdomSurvival.ArtAssets.Editor;
 using KingdomSurvival.BattlefieldDatabase;
 using KingdomSurvival.BattleSandbox;
 using KingdomSurvival.DialogueDatabase;
@@ -21,14 +23,14 @@ namespace KingdomSurvival.LocationRendering.Editor
     // кадр поля показывается на рисунке там, где начнётся бой.
     public sealed partial class LocationDatabaseWindow : EditorWindow
     {
-        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape }
+        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape, PlaceAsset }
         private enum Kind { None, Art, Entrance, GameObject, Enemy, Encounter }
         private enum Tab { Place, Game, Light, Art }
         private static readonly string[] TabNames = { "Место", "Игровое", "Свет", "Предметы" };
 
         private static readonly string[] ToolNames =
         {
-            "Выбор", "Местность", "Вход", "Объект места", "Противник", "Зона угрозы", "Кадр боя", "Точка отхода", "Старт теста", "Опора рисунка", "Форма света"
+            "Выбор", "Местность", "Вход", "Объект места", "Противник", "Зона угрозы", "Кадр боя", "Точка отхода", "Старт теста", "Опора рисунка", "Форма света", "Ставить ассет"
         };
 
         private LocalLocationDatabaseAsset database;
@@ -87,6 +89,27 @@ namespace KingdomSurvival.LocationRendering.Editor
             Undo.undoRedoPerformed += UndoChanged;
             EditorApplication.update += Tick;
             EditorApplication.playModeStateChanged += PlayChanged;
+            ArtAssetDatabaseAsset.Changed += CatalogChanged;
+            ArtAssetUsages.LocationRequested += OpenRequested;
+        }
+
+        // Каталог изменился: экземпляры пересобираются с новыми рисунками,
+        // их положение, ракурс и переопределения остаются.
+        private void CatalogChanged() => rebuildRequested = true;
+
+        private void OpenRequested(string locationId, string objectId)
+        {
+            ArtAssetUsages.PendingLocationId = ArtAssetUsages.PendingObjectId = null;
+            if (database == null || database.locations.All(item => item.Id != locationId)) return;
+            if (database != null) AssetDatabase.SaveAssetIfDirty(database);
+            selectedId = locationId;
+            tab = Tab.Art;
+            selectedKind = objectId != null ? Kind.Art : Kind.None;
+            selectedElementId = objectId;
+            zoom = 1; viewCenter = CanvasSize / 2;
+            list?.SetSelectionWithoutNotify(new[] { visible.FindIndex(item => item.Id == selectedId) });
+            BuildSettings(); RebuildPreview();
+            Focus();
         }
 
         private void OnDisable()
@@ -94,6 +117,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             Undo.undoRedoPerformed -= UndoChanged;
             EditorApplication.update -= Tick;
             EditorApplication.playModeStateChanged -= PlayChanged;
+            ArtAssetDatabaseAsset.Changed -= CatalogChanged;
+            ArtAssetUsages.LocationRequested -= OpenRequested;
             ReleasePreview();
             if (database != null) AssetDatabase.SaveAssetIfDirty(database);
             if (fields != null) AssetDatabase.SaveAssetIfDirty(fields);
@@ -168,7 +193,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 AddButton(tools, ToolNames[i], () => SetTool(value));
             }
             center.Add(tools);
-            canvas = new IMGUIContainer(DrawPreview);
+            canvas = new IMGUIContainer(DrawPreview) { focusable = true };
             canvas.style.flexGrow = 1;
             center.Add(canvas);
             Label hints = new Label("Перетащите PNG или Sprite сюда · ЛКМ: инструмент · ПКМ: панорама · Колесо: масштаб");
@@ -183,6 +208,9 @@ namespace KingdomSurvival.LocationRendering.Editor
             viewCenter = CanvasSize / 2;
             list.SetSelection(visible.FindIndex(item => item.Id == selectedId));
             BuildSettings(); RebuildPreview();
+            // Переход «Где используется» из Базы ассетов, пока окно открывалось.
+            if (!string.IsNullOrEmpty(ArtAssetUsages.PendingLocationId))
+                OpenRequested(ArtAssetUsages.PendingLocationId, ArtAssetUsages.PendingObjectId);
         }
 
         private void SetTool(Tool value)
@@ -200,11 +228,12 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case Tool.TestStart: status.text = "Старт теста: клик по проходимой точке."; break;
                 case Tool.Pivot: status.text = "Кликните по точке опоры на рисунке выбранного объекта."; break;
                 case Tool.LightShape: status.text = "Форма света: тяните точку, клик у края — новая точка, Shift+клик — удалить."; break;
+                case Tool.PlaceAsset: status.text = "Ставить ассет «" + (ArtAssetDatabaseAsset.FindCurrent(placingAssetId)?.Name ?? "?") + "»: клик — новый экземпляр; Esc или «Выбор» — закончить."; break;
                 default: status.text = "Выбор: клик по метке или предмету, перетаскивание — переместить."; break;
             }
             if (value == Tool.Terrain) tab = Tab.Place;
             else if (value == Tool.LightShape) tab = Tab.Light;
-            else if (value == Tool.TestStart || value == Tool.Pivot) tab = tab == Tab.Light ? Tab.Light : Tab.Art;
+            else if (value == Tool.TestStart || value == Tool.Pivot || value == Tool.PlaceAsset) tab = tab == Tab.Light ? Tab.Light : Tab.Art;
             else if (value != Tool.Select) tab = Tab.Game;
             BuildSettings();
         }
@@ -556,16 +585,26 @@ namespace KingdomSurvival.LocationRendering.Editor
             followers.RegisterValueChangedCallback(evt => Change(() => visual.TestFollowers = evt.newValue)); settings.Add(followers);
 
             Heading("Предметы рисунка");
-            VisualElement actions = new VisualElement(); actions.style.flexDirection = FlexDirection.Row; settings.Add(actions);
+            VisualElement actions = new VisualElement(); actions.style.flexDirection = FlexDirection.Row; actions.style.flexWrap = Wrap.Wrap; settings.Add(actions);
+            AddButton(actions, "+ Из Базы ассетов", PickAssetToAdd);
             AddButton(actions, "PNG…", ImportPng);
             AddButton(actions, "+ Костёр", () => AddArtObject(null, LocationPlaceholder.Fire));
             AddButton(actions, "+ Палатка", () => AddArtObject(null, LocationPlaceholder.Tent));
+            BuildAssetPalette();
             foreach (LocationVisualObject item in visual.Objects)
-                SelectButton(Kind.Art, item.Id, item.Name + (item.Hidden ? " · скрыт" : ""));
+                SelectButton(Kind.Art, item.Id, item.Name + (item.UsesAsset ? " · ассет" : "") + (item.Hidden ? " · скрыт" : ""));
+            AddButton(settings, "Перевести предметы места в Базу ассетов…", MigrateLocationObjects);
             LocationVisualObject selected = ArtObject;
             if (selected == null) return;
             Heading("Выбранный предмет");
+            if (selected.UsesAsset)
+            {
+                BuildAssetInstanceSettings(visual, selected);
+                return;
+            }
             Text("Название", selected.Name, value => selected.Name = value);
+            if (!selected.LightOnly && selected.Sprite != null)
+                AddButton(settings, "Сохранить этот предмет в Базу ассетов", () => MigrateObjects(new List<LocationVisualObject> { selected }, false));
             SpriteField("Рисунок", selected.Sprite, value => selected.Sprite = value);
             Text("Группа частей", selected.GroupId, value => selected.GroupId = value);
             Number("Высота рисунка", selected.Height, .1f, 6, value => selected.Height = value, "Единицы мира: 108 пикселей рисунка = 1.");
@@ -858,10 +897,13 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Vector2 p = Gui(point.x, point.y);
                 EditorGUI.DrawRect(new Rect(p.x - 5, p.y - 1, 10, 2), Color.yellow);
                 EditorGUI.DrawRect(new Rect(p.x - 1, p.y - 5, 2, 10), Color.yellow);
-                if (art.BlocksMovement)
+                LocationResolvedVisual resolved = LocationVisualResolver.Resolve(art);
+                if (resolved.BlocksMovement || art.UsesAsset)
                 {
-                    Vector2 size = art.Footprint * LocationVisualGeometry.PixelsPerUnit * scale;
-                    Handles.DrawSolidRectangleWithOutline(new Rect(p - size / 2, size), new Color(1, .35f, .15f, .1f), new Color(1, .4f, .2f, .8f));
+                    Rect footprint = LocationVisualGeometry.FootprintRect(location, art, resolved);
+                    Vector2 a = Gui(footprint.xMin, footprint.yMin), b = Gui(footprint.xMax, footprint.yMax);
+                    Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(a.x, a.y, b.x, b.y),
+                        new Color(1, .35f, .15f, resolved.BlocksMovement ? .1f : .03f), new Color(1, .4f, .2f, resolved.BlocksMovement ? .8f : .3f));
                 }
             }
             Handles.EndGUI();
@@ -880,6 +922,18 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             if ((evt.type != EventType.DragUpdated && evt.type != EventType.DragPerform) || !frame.Contains(evt.mousePosition)) return false;
             DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+            // Ассет, перетащенный из окна «База ассетов»: экземпляр по ссылке.
+            string assetId = ArtAssetPicker.DraggedAssetId();
+            if (!string.IsNullOrEmpty(assetId))
+            {
+                if (evt.type == EventType.DragPerform)
+                {
+                    DragAndDrop.AcceptDrag();
+                    AddAssetInstance(assetId, pixel);
+                }
+                evt.Use();
+                return true;
+            }
             if (evt.type == EventType.DragPerform)
             {
                 DragAndDrop.AcceptDrag();
@@ -899,6 +953,11 @@ namespace KingdomSurvival.LocationRendering.Editor
         private bool HandleInput(Event evt, Rect frame, Vector2 pixel)
         {
             LocalLocationDefinition location = Location;
+            if (evt.type == EventType.MouseDown && frame.Contains(evt.mousePosition)) canvas.Focus();
+            if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.Escape && tool == Tool.PlaceAsset)
+            {
+                SetTool(Tool.Select); evt.Use(); return true;
+            }
             if (evt.type == EventType.ScrollWheel && frame.Contains(evt.mousePosition))
             {
                 Vector2 before = pixel;
@@ -1008,8 +1067,18 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Change(() => Visual.TestStartPoint = LocationVisualGeometry.ToNormalized(location, pixel));
                     status.text = "Точка старта поставлена.";
                     return;
+                case Tool.PlaceAsset:
+                    if (string.IsNullOrEmpty(placingAssetId)) { SetTool(Tool.Select); return; }
+                    AddAssetInstance(placingAssetId, pixel);
+                    return;
                 case Tool.Pivot:
                     LocationVisualObject art = ArtObject;
+                    if (art != null && art.UsesAsset)
+                    {
+                        status.text = "Опора ассета задаётся в Базе ассетов (у каждого ракурса своя).";
+                        tool = Tool.Select;
+                        return;
+                    }
                     SpriteRenderer image = art != null ? renderer.FindObject(art.Id) : null;
                     if (image == null) return;
                     Vector2 world = LocationVisualGeometry.PixelToWorld(location, pixel);
@@ -1026,9 +1095,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (hit.kind == Kind.None && Visual != null)
             {
                 Vector2 world = LocationVisualGeometry.PixelToWorld(location, pixel);
-                string artId = Visual.Objects.Where(item => !item.Hidden && renderer.FindObject(item.Id) != null &&
-                        renderer.FindObject(item.Id).bounds.Contains(new Vector3(world.x, world.y, 0)))
-                    .OrderByDescending(item => renderer.FindObject(item.Id).sortingOrder).FirstOrDefault()?.Id;
+                // Составной ассет выбирается целиком: по любой своей части.
+                string artId = Visual.Objects.Where(item => !item.Hidden && renderer.ObjectImages(item.Id)
+                        .Any(part => part != null && part.bounds.Contains(new Vector3(world.x, world.y, 0))))
+                    .OrderByDescending(item => renderer.ObjectSortingOrder(item.Id)).FirstOrDefault()?.Id;
                 if (artId != null) hit = (Kind.Art, artId);
             }
             if (hit.kind == Kind.None && showArena)

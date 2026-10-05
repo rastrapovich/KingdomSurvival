@@ -53,10 +53,12 @@ namespace KingdomSurvival.LocationRendering
         private MaterialPropertyBlock shadowBlock;
         private Volume postVolume;
         private VolumeProfile postProfile;
-        private Vector2 sunVector, sunRaw;
+        private Vector2 sunRaw;
         private float sunOpacity;
 
         private static readonly int ShadowVectorId = Shader.PropertyToID("_ShadowVector");
+        private static readonly int ShadowSideId = Shader.PropertyToID("_ShadowSide");
+        private static readonly int GroundXId = Shader.PropertyToID("_GroundX");
         private static readonly int GroundYId = Shader.PropertyToID("_GroundY");
         private static readonly int ShadowColorId = Shader.PropertyToID("_ShadowColor");
         private static readonly int BlurId = Shader.PropertyToID("_Blur");
@@ -81,7 +83,7 @@ namespace KingdomSurvival.LocationRendering
             typeof(Light2D).GetField("m_NormalMapDistance", BindingFlags.Instance | BindingFlags.NonPublic);
 
         // Тень от солнца сейчас (для окна базы): направление на экране и длина.
-        public Vector2 SunShadowVector => sunVector;
+        public Vector2 SunShadowVector => sunRaw;
         public float SunShadowOpacity => sunOpacity;
         // Доля дня 0..1 (по кривой яркости) — для обработки кадра.
         public float DayFactor { get; private set; } = 1;
@@ -183,7 +185,7 @@ namespace KingdomSurvival.LocationRendering
                 GlobalLight.intensity = Definition.IndoorIntensity;
                 DayFactor = 1;
                 sunOpacity = 0;
-                sunVector = sunRaw = Vector2.zero;
+                sunRaw = Vector2.zero;
             }
             else
             {
@@ -192,7 +194,6 @@ namespace KingdomSurvival.LocationRendering
                 DayFactor = Mathf.Clamp01(Sky.Daylight.Brightness.Evaluate(hour));
                 Sky.Sun.Evaluate(hour, out Vector2 direction, out float length, out float opacity);
                 sunRaw = direction * length;
-                sunVector = SoftLean(sunRaw, Sky.ShadowMinLean);
                 sunOpacity = opacity;
             }
 
@@ -252,7 +253,7 @@ namespace KingdomSurvival.LocationRendering
                 Vector2 ground = caster.Anchor.position;
 
                 // Солнце (или луна).
-                SetLeanedShadow(caster, 0, enabled && sunOpacity > .001f, sunRaw * scale, Sky.Sun.Color, sunOpacity,
+                SetShadow(caster, 0, enabled && sunOpacity > .001f, sunRaw * scale, Sky.Sun.Color, sunOpacity,
                     Sky.Sun.Softness);
 
                 // Местные источники: самые сильные в своём радиусе.
@@ -271,13 +272,13 @@ namespace KingdomSurvival.LocationRendering
                         Vector2 vector = away / Mathf.Max(.2f, data.Height);
                         if (vector.magnitude > data.ProjectedShadowMaxLength)
                             vector = vector.normalized * data.ProjectedShadowMaxLength;
-                        SetLeanedShadow(caster, slot, true, vector * scale, Color.black, strength * data.ProjectedShadowOpacity,
+                        SetShadow(caster, slot, true, vector * scale, Color.black, strength * data.ProjectedShadowOpacity,
                             data.ShadowSoftness);
                         slot++;
                     }
                 }
                 for (; slot <= MaxLocalShadows; slot++)
-                    SetLeanedShadow(caster, slot, false, Vector2.zero, Color.black, 0, 0);
+                    SetShadow(caster, slot, false, Vector2.zero, Color.black, 0, 0);
             }
         }
 
@@ -298,9 +299,9 @@ namespace KingdomSurvival.LocationRendering
             return brightness * Mathf.Sqrt(1 - distance / radius);
         }
 
-        private void SetShadow(Caster caster, SpriteRenderer[] set, int index, bool visible, Vector2 vector, Color color, float opacity, float softness)
+        private void SetShadow(Caster caster, int index, bool visible, Vector2 vector, Color color, float opacity, float softness)
         {
-            SpriteRenderer shadow = set[index];
+            SpriteRenderer shadow = caster.Shadows[index];
             if (!visible || opacity <= .001f || vector.sqrMagnitude < 1e-6f)
             {
                 if (shadow != null) shadow.enabled = false;
@@ -313,7 +314,7 @@ namespace KingdomSurvival.LocationRendering
                 shadow = target.AddComponent<SpriteRenderer>();
                 shadow.sharedMaterial = shadowMaterial;
                 shadow.sortingOrder = ShadowSortingOrder;
-                set[index] = shadow;
+                caster.Shadows[index] = shadow;
             }
             shadow.enabled = true;
             if (caster.Override != null)
@@ -345,6 +346,8 @@ namespace KingdomSurvival.LocationRendering
             shadowBlock.Clear();
             Vector4 uvRect = SpriteUVRect(shadow.sprite);
             shadowBlock.SetVector(ShadowVectorId, vector);
+            shadowBlock.SetVector(ShadowSideId, ShadowSide(vector, Sky.ShadowMinLean));
+            shadowBlock.SetFloat(GroundXId, caster.Anchor.position.x);
             shadowBlock.SetFloat(GroundYId, caster.Anchor.position.y);
             shadowBlock.SetColor(ShadowColorId, new Color(color.r, color.g, color.b, Mathf.Clamp01(opacity)));
             // Размытие — в долях своего кадра, а не всей страницы атласа.
@@ -403,6 +406,7 @@ namespace KingdomSurvival.LocationRendering
                 Vector4 uvRect = SpriteUVRect(shadow.sprite);
                 // Без проекции: силуэт как есть (высота — от «земли» далеко внизу).
                 shadowBlock.SetVector(ShadowVectorId, new Vector4(0, 1, 0, 0));
+                shadowBlock.SetVector(ShadowSideId, new Vector4(1, 0, 0, 0));
                 shadowBlock.SetFloat(GroundYId, -100000);
                 shadowBlock.SetColor(ShadowColorId, new Color(0, 0, 0, alpha));
                 shadowBlock.SetFloat(BlurId, .02f * (uvRect.w - uvRect.y));
@@ -411,31 +415,21 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
-        private void SetLeanedShadow(Caster caster, int index, bool visible, Vector2 raw, Color color, float opacity, float softness) =>
-            SetShadow(caster, caster.Shadows, index, visible, SoftLean(raw, Sky.ShadowMinLean), color, opacity, softness);
-
-        // Одна тень с плавным наклоном «вглубь» (от зрителя), как от толщины
-        // предмета. Прежний наименьший наклон при свете строго сбоку менял знак
-        // скачком (тень прыгала вверх-вниз), а перетекание двух наклонов
-        // раздваивало тень. Здесь добавка вверх — lean, когда тень лежит вдоль
-        // горизонтали, и плавно исчезает к |y| ≥ 2·lean (свет спереди и сзади —
-        // честная проекция). Вертикальная доля монотонно и непрерывно зависит
-        // от исходной: ни скачка, ни второй тени.
-        public static Vector2 SoftLean(Vector2 vector, float lean)
+        // Как ширина рисунка ложится на землю (сторона тени) при тени вдоль
+        // along. Свет спереди (тень вверх, вглубь) — (1, 0): прямая проекция,
+        // ширина остаётся шириной. Сбоку и сзади плоский силуэт при прямой
+        // проекции сплющивается в линию, поэтому он плавно поворачивается
+        // вокруг точки опоры и ложится на землю: поперёк тени остаётся
+        // depth (доля ширины) — толщина предмета. Сторона никогда не
+        // параллельна тени: ни линии, ни скачка, ни второй тени. Свет строго
+        // сзади зеркалит силуэт по ширине — цена непрерывности.
+        public static Vector2 ShadowSide(Vector2 along, float depth)
         {
-            lean = Mathf.Max(0, lean);
-            if (lean <= 0) return vector;
-            float bias = lean * (1 - Mathf.SmoothStep(0, 1, Mathf.Abs(vector.y) / (2 * lean)));
-            return new Vector2(vector.x, vector.y + bias);
-        }
-
-        // Тень всегда немного «лежит» на земле: вертикальная доля не меньше
-        // minLean, знак сохраняется (сбоку — от зрителя).
-        public static Vector2 Lean(Vector2 vector, float minLean)
-        {
-            minLean = Mathf.Max(0, minLean);
-            if (vector.sqrMagnitude < 1e-8f || Mathf.Abs(vector.y) >= minLean) return vector;
-            return new Vector2(vector.x, vector.y < -1e-4f ? -minLean : minLean);
+            if (along.sqrMagnitude < 1e-8f) return Vector2.right;
+            Vector2 direction = along.normalized;
+            float turn = 1 - Mathf.SmoothStep(0, 1, direction.y / .5f);
+            Vector2 turned = new Vector2(direction.y, -direction.x * Mathf.Max(.05f, depth));
+            return Vector2.Lerp(Vector2.right, turned, turn);
         }
 
         // Прямоугольник кадра в UV его текстуры (u, v мин; u, v макс).

@@ -224,8 +224,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Тени людей (исследование и бой на месте).
         public bool PeopleCastShadows = true;
         public float PeopleShadowLength = 1;
-        // Наименьший наклон тени «от зрителя» (доля высоты): иначе тень от огня
-        // сбоку или от низкого солнца сплющивается в линию.
+        // Толщина тени сбоку (доля ширины предмета): при огне сбоку или сзади и
+        // низком солнце силуэт тени поворачивается и ложится на землю. Имя поля — прежнее (данные).
         public float ShadowMinLean = .4f;
         public Texture2D BackgroundNormalMap;
         public List<LocationVisualObject> Objects = new List<LocationVisualObject>();

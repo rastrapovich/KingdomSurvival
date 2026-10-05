@@ -87,16 +87,6 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(moon, Is.EqualTo(sun.MoonOpacity).Within(.001f));
         }
 
-        // Тень от огня строго сбоку не сплющивается в линию: есть наклон к земле.
-        [Test]
-        public void ShadowAlwaysLeansOntoTheGround()
-        {
-            Assert.That(LocationWorldRenderer.Lean(new Vector2(2, 0), .4f), Is.EqualTo(new Vector2(2, .4f)));
-            Assert.That(LocationWorldRenderer.Lean(new Vector2(2, -.1f), .4f), Is.EqualTo(new Vector2(2, -.4f)), "Свет сзади — тень к зрителю.");
-            Assert.That(LocationWorldRenderer.Lean(new Vector2(.3f, .9f), .4f), Is.EqualTo(new Vector2(.3f, .9f)));
-            Assert.That(LocationWorldRenderer.Lean(new Vector2(2, 0), 0), Is.EqualTo(new Vector2(2, 0)), "0 — честная проекция.");
-        }
-
         // Светящий предмет (костёр) отбрасывает свою тень во все стороны:
         // слои силуэта от точки огня; потушен — тени нет; днём слабее.
         [Test]
@@ -135,27 +125,29 @@ namespace KingdomSurvival.LocationRendering.Tests
             Object.DestroyImmediate(texture);
         }
 
-        // Свет проходит через «строго сбоку»: одна тень, её наклон меняется
-        // непрерывно и монотонно — без скачка вверх-вниз и без второй тени.
-        // Свет спереди и сзади — честная проекция.
+        // Свет обходит предмет по кругу: тень одна и никогда не сплющивается в
+        // линию — сторона тени не параллельна её направлению, меняется
+        // непрерывно. Свет спереди — прямая проекция, сбоку — силуэт лежит на
+        // земле с заданной толщиной.
         [Test]
-        public void SideLight_SingleShadowLeansSmoothly()
+        public void ShadowNeverCollapsesIntoLine()
         {
-            const float lean = .4f;
-            Assert.That(LocationWorldRenderer.SoftLean(new Vector2(2, 0), lean).y, Is.EqualTo(lean).Within(1e-5f), "Строго сбоку — тень «вглубь».");
-            Assert.That(LocationWorldRenderer.SoftLean(new Vector2(.3f, 1), lean), Is.EqualTo(new Vector2(.3f, 1)), "Свет спереди — без добавки.");
-            Assert.That(LocationWorldRenderer.SoftLean(new Vector2(.3f, -1), lean), Is.EqualTo(new Vector2(.3f, -1)), "Свет сзади — тень к зрителю.");
-            Assert.That(LocationWorldRenderer.SoftLean(new Vector2(2, 0), 0), Is.EqualTo(new Vector2(2, 0)), "0 — честная проекция.");
-            float previous = float.NegativeInfinity;
-            for (float y = -1.2f; y <= 1.2f; y += .01f)
+            const float depth = .4f;
+            Assert.That(LocationWorldRenderer.ShadowSide(new Vector2(.3f, 1), depth), Is.EqualTo(Vector2.right), "Свет спереди — ширина остаётся шириной.");
+            Vector2 side = LocationWorldRenderer.ShadowSide(new Vector2(2, 0), depth);
+            Assert.That(side.x, Is.EqualTo(0).Within(1e-4f));
+            Assert.That(Mathf.Abs(side.y), Is.EqualTo(depth).Within(1e-4f), "Сбоку — поперёк тени толщина предмета.");
+            Vector2 previous = Vector2.zero;
+            for (int degree = 0; degree <= 360; degree++)
             {
-                float leaned = LocationWorldRenderer.SoftLean(new Vector2(2, y), lean).y;
-                if (!float.IsNegativeInfinity(previous))
-                {
-                    Assert.That(leaned - previous, Is.LessThan(.02f), "Шаг света в 0,01 не даёт скачка тени (y = " + y + ").");
-                    Assert.That(leaned, Is.GreaterThan(previous), "Наклон меняется монотонно (y = " + y + ").");
-                }
-                previous = leaned;
+                float angle = degree * Mathf.Deg2Rad;
+                Vector2 along = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 2;
+                Vector2 current = LocationWorldRenderer.ShadowSide(along, depth);
+                float cross = along.normalized.x * current.y - along.normalized.y * current.x;
+                Assert.That(cross, Is.LessThan(-.1f), "Тень не линия (угол " + degree + ").");
+                if (degree > 0)
+                    Assert.That((current - previous).magnitude, Is.LessThan(.1f), "Без скачка (угол " + degree + ").");
+                previous = current;
             }
         }
 

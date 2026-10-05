@@ -97,8 +97,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             Heading("Стиль теней");
             Toggle("Люди отбрасывают тени (солнце и огонь)", sky.PeopleCastShadows, value => sky.PeopleCastShadows = value);
             Number("Длина тени людей (множитель)", sky.PeopleShadowLength, 0, 3, value => sky.PeopleShadowLength = value);
-            Number("Наклон тени к земле (наименьший)", sky.ShadowMinLean, 0, 1.5f, value => sky.ShadowMinLean = value,
-                "Тень всегда немного уходит «от зрителя», даже если огонь строго сбоку или солнце низко. 0 — честная проекция (сбоку — линия).");
+            Number("Толщина тени сбоку", sky.ShadowMinLean, .05f, 1.5f, value => sky.ShadowMinLean = value,
+                "Когда огонь сбоку или сзади (или солнце низко), силуэт тени поворачивается и ложится на землю, а не сплющивается в линию. Это его толщина поперёк тени — доля ширины предмета.");
 
             Heading("Источники света");
             VisualElement add = Row();

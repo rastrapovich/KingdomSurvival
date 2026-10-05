@@ -77,10 +77,11 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Жизнь огня.
         public LocationLightAnimation Animation = LocationLightAnimation.Flicker;
         public float AnimationSpeed = 1;
-        // Карты нормалей: свет «облегает» рисунки, у которых они есть.
-        public bool NormalMaps;
-        public bool NormalMapsAccurate;
-        public float NormalMapDistance = 3;
+        // Карты нормалей: свет «облегает» рисунки, у которых они есть. У новых
+        // источников включены (рисунки идут с нормалями); прежние — как были.
+        public bool NormalMaps = true;
+        public bool NormalMapsAccurate = true;
+        public float NormalMapDistance = 1.5f;
         // Тень предметов и людей от этого источника — силуэт по рисунку,
         // отброшенный от света; длина зависит от высоты источника.
         public bool ProjectsShadows = true;

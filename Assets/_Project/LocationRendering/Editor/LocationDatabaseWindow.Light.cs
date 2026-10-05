@@ -108,7 +108,21 @@ namespace KingdomSurvival.LocationRendering.Editor
             AddButton(add, "+ Свет-рисунок", () => AddLightSource("Свет-рисунок", LocationLightShape.Sprite));
             AddButton(add, "+ Костёр", () => AddArtObject(null, LocationPlaceholder.Fire));
             foreach (LocationVisualObject item in visual.Objects.Where(item => item.Light.Enabled || item.LightOnly))
-                SelectButton(Kind.Art, item.Id, (item.LightOnly ? "☀ " : "▣ ") + item.Name + " · " + ShapeName(item.Light.Shape));
+                SelectButton(Kind.Art, item.Id, (item.LightOnly ? "☀ " : "▣ ") + item.Name + " · " + ShapeName(item.Light.Shape) +
+                                                (item.Light.NormalMaps ? "" : " · без нормалей"));
+            List<LocationVisualObject> withoutNormals = visual.Objects.Where(item => item.Light.Enabled && !item.Light.NormalMaps).ToList();
+            if (withoutNormals.Count > 0)
+            {
+                Help("Источников без «Карт нормалей»: " + withoutNormals.Count + ". Их свет ложится на предметы ровно, нормали не видны.");
+                AddButton(settings, "Карты нормалей у всех источников места", () => Change(() =>
+                {
+                    foreach (LocationVisualObject item in withoutNormals)
+                    {
+                        item.Light.NormalMaps = true;
+                        item.Light.NormalMapsAccurate = true;
+                    }
+                }, true));
+            }
             LocationVisualObject selected = ArtObject;
             if (selected != null && (selected.Light.Enabled || selected.LightOnly))
             {
@@ -171,6 +185,14 @@ namespace KingdomSurvival.LocationRendering.Editor
                 ShapeName, light.Shape, value => light.Shape = value);
             ColorField("Цвет", light.Color, value => light.Color = value);
             Number("Яркость", light.Intensity, 0, 5, value => light.Intensity = value);
+            Toggle("Карты нормалей", light.NormalMaps, value => light.NormalMaps = value, true);
+            if (light.NormalMaps)
+            {
+                Number("Расстояние для нормалей", light.NormalMapDistance, .1f, 10, value => light.NormalMapDistance = value,
+                    "Меньше — резче рельеф и сильнее светотень; больше — мягче, ровнее.");
+                Toggle("Точный расчёт нормалей", light.NormalMapsAccurate, value => light.NormalMapsAccurate = value);
+            }
+            else Help("Без «Карт нормалей» свет ложится на предметы и фигуры ровно, их нормали не используются.");
             switch (light.Shape)
             {
                 case LocationLightShape.Spot:
@@ -244,12 +266,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                 light.BlendStyle, value => light.BlendStyle = value);
             Toggle("Перекрывать другие источники (не складывать)", light.AlphaOverlap, value => light.AlphaOverlap = value);
             Integer("Порядок источника", light.Order, value => light.Order = value);
-            Toggle("Карты нормалей", light.NormalMaps, value => light.NormalMaps = value, true);
-            if (light.NormalMaps)
-            {
-                Toggle("Точный расчёт нормалей", light.NormalMapsAccurate, value => light.NormalMapsAccurate = value);
-                Number("Высота для нормалей", light.NormalMapDistance, .1f, 10, value => light.NormalMapDistance = value);
-            }
         }
 
         private static string AnimationName(LocationLightAnimation value)

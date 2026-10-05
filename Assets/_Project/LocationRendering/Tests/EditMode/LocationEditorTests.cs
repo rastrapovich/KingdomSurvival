@@ -80,6 +80,25 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(lit, Is.GreaterThan(dark + .05f), "Ночью источник в предпросмотре освещает место: " + dark + " → " + lit);
         }
 
+        // Размер PNG по заголовку: по нему окно решает, похож ли брошенный
+        // рисунок на фон места.
+        [Test]
+        public void PngSize_IsReadFromHeader()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "ks_png_size_" + System.Guid.NewGuid().ToString("N") + ".png");
+            Texture2D texture = new Texture2D(321, 123, TextureFormat.RGBA32, false);
+            File.WriteAllBytes(path, texture.EncodeToPNG());
+            Object.DestroyImmediate(texture);
+            try
+            {
+                Assert.That(LocationDatabaseWindow.PngSize(path), Is.EqualTo(new Vector2Int(321, 123)));
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
         // Визуальная проверка без batchmode; снимок только окна базы.
         public static void CaptureEditor()
         {

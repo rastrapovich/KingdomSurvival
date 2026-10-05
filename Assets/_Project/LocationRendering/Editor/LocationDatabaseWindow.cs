@@ -417,6 +417,39 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (Visual != null)
             {
                 SpriteField("Рисунок места", Visual.Background, value => Visual.Background = value);
+                Label drop = new Label("Перетащите сюда рисунок места (PNG из Проводника или Sprite; рядом «имя_normal.png» — его нормали)");
+                drop.style.whiteSpace = WhiteSpace.Normal;
+                drop.style.unityTextAlign = TextAnchor.MiddleCenter;
+                drop.style.paddingTop = drop.style.paddingBottom = 12;
+                drop.style.marginTop = drop.style.marginBottom = 4;
+                drop.style.color = new Color(.7f, .76f, .7f);
+                drop.style.borderTopWidth = drop.style.borderBottomWidth = drop.style.borderLeftWidth = drop.style.borderRightWidth = 1;
+                drop.style.borderTopColor = drop.style.borderBottomColor = drop.style.borderLeftColor = drop.style.borderRightColor = new Color(.45f, .5f, .45f);
+                drop.RegisterCallback<DragUpdatedEvent>(evt =>
+                {
+                    bool content = (DragAndDrop.paths != null && DragAndDrop.paths.Length > 0) || DragAndDrop.objectReferences.OfType<Sprite>().Any() ||
+                                   DragAndDrop.objectReferences.OfType<Texture2D>().Any();
+                    DragAndDrop.visualMode = content ? DragAndDropVisualMode.Copy : DragAndDropVisualMode.Rejected;
+                    drop.style.backgroundColor = new Color(.95f, .75f, .3f, .2f);
+                    evt.StopPropagation();
+                });
+                drop.RegisterCallback<DragLeaveEvent>(_ => drop.style.backgroundColor = StyleKeyword.Null);
+                drop.RegisterCallback<DragPerformEvent>(evt =>
+                {
+                    DragAndDrop.AcceptDrag();
+                    evt.StopPropagation();
+                    Sprite[] sprites = DragAndDrop.objectReferences.OfType<Sprite>()
+                        .Concat(DragAndDrop.objectReferences.OfType<Texture2D>().Select(texture => AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GetAssetPath(texture))))
+                        .Where(sprite => sprite != null).ToArray();
+                    string[] paths = DragAndDrop.paths ?? Array.Empty<string>();
+                    EditorApplication.delayCall += () => SetBackgroundFrom(sprites, paths);
+                });
+                settings.Add(drop);
+                AddButton(settings, "Загрузить рисунок места…", () =>
+                {
+                    string path = EditorUtility.OpenFilePanel("Рисунок места (PNG)", "", "png");
+                    if (!string.IsNullOrEmpty(path)) SetBackgroundFrom(Array.Empty<Sprite>(), new[] { path });
+                });
                 NormalMapField("Нормали рисунка места", Visual.Background, Visual.BackgroundNormalMap, value => Visual.BackgroundNormalMap = value);
             }
             Toggle("Рисунок — временная заглушка", location.PlaceholderArt, value => location.PlaceholderArt = value);
@@ -964,11 +997,25 @@ namespace KingdomSurvival.LocationRendering.Editor
                 AddAssetInstance(assetId, pixel);
                 return;
             }
-            foreach (Sprite sprite in sprites) AddArtObject(sprite, LocationPlaceholder.None, pixel);
-            // PNG с парой «*_normal.png» / «*_n.png»: нормаль подключается к рисунку.
             List<string> files = paths.Where(path => sprites.All(sprite => AssetDatabase.GetAssetPath(sprite) != path))
                 .Where(path => File.Exists(path) && path.EndsWith(".png", StringComparison.OrdinalIgnoreCase)).ToList();
             List<string> normals = files.Where(IsNormalFileName).ToList();
+            // Один большой рисунок — скорее всего фон места: спросить, куда его.
+            List<string> colors = files.Except(normals).ToList();
+            if (sprites.Length + colors.Count == 1)
+            {
+                Vector2Int size = sprites.Length == 1 ? new Vector2Int((int)sprites[0].rect.width, (int)sprites[0].rect.height) : PngSize(colors[0]);
+                if (size.x >= CanvasSize.x * .5f || size.y >= CanvasSize.y * .5f)
+                {
+                    int choice = EditorUtility.DisplayDialogComplex("Куда поставить рисунок?",
+                        "Рисунок " + size.x + "×" + size.y + " — размером почти с место (" + Mathf.RoundToInt(CanvasSize.x) + "×" + Mathf.RoundToInt(CanvasSize.y) + ").",
+                        "Рисунок места (фон)", "Отмена", "Предмет");
+                    if (choice == 1) return;
+                    if (choice == 0) { SetBackgroundFrom(sprites, paths); return; }
+                }
+            }
+            foreach (Sprite sprite in sprites) AddArtObject(sprite, LocationPlaceholder.None, pixel);
+            // PNG с парой «*_normal.png» / «*_n.png»: нормаль подключается к рисунку.
             int added = 0, withNormals = 0;
             foreach (string path in files.Except(normals))
             {
@@ -984,6 +1031,63 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
             if (added > 0) status.text = "Добавлено рисунков: " + added + (withNormals > 0 ? ", с нормалями: " + withNormals : "") + ".";
             else if (normals.Count > 0) status.text = "Нормаль без рисунка: перетащите её в поле «Карта нормалей» предмета (вкладка «Предметы»).";
+        }
+
+        // Размер PNG по заголовку (без импорта).
+        public static Vector2Int PngSize(string path)
+        {
+            try
+            {
+                using (FileStream stream = File.OpenRead(path))
+                {
+                    byte[] header = new byte[24];
+                    if (stream.Read(header, 0, 24) < 24) return Vector2Int.zero;
+                    int width = (header[16] << 24) | (header[17] << 16) | (header[18] << 8) | header[19];
+                    int height = (header[20] << 24) | (header[21] << 16) | (header[22] << 8) | header[23];
+                    return new Vector2Int(width, height);
+                }
+            }
+            catch (IOException)
+            {
+                return Vector2Int.zero;
+            }
+        }
+
+        // Рисунок места из перетаскивания (PNG из Проводника или Sprite из
+        // Project); пара «*_normal» / «*_n» — нормали рисунка места. Если
+        // размер рисунка другой — предложить подогнать размер места.
+        private void SetBackgroundFrom(Sprite[] sprites, string[] paths)
+        {
+            if (Visual == null || Location == null) { status.text = "Для рисунка места нужна художественная сборка (вкладка «Предметы»)."; return; }
+            List<string> files = paths.Where(path => File.Exists(path) && path.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                .Where(path => sprites.All(sprite => AssetDatabase.GetAssetPath(sprite) != path)).ToList();
+            List<string> normals = files.Where(IsNormalFileName).ToList();
+            Sprite background = sprites.FirstOrDefault() ?? files.Except(normals).Select(ImportSprite).FirstOrDefault(sprite => sprite != null);
+            if (background == null)
+            {
+                status.text = normals.Count > 0 ? "Это карта нормалей — перетащите вместе с ней сам рисунок места." : "Нужен PNG или Sprite.";
+                return;
+            }
+            string stem = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(background));
+            string normalPath = normals.FirstOrDefault(normal => string.Equals(NormalBaseName(normal), stem, StringComparison.OrdinalIgnoreCase)) ??
+                                (normals.Count == 1 ? normals[0] : null);
+            Texture2D normal = normalPath != null ? ImportNormalTexture(normalPath) : null;
+            if (normal != null) SpriteNormalMaps.Assign(background, normal, out _);
+            LocalLocationDefinition location = Location;
+            Vector2 size = background.rect.size;
+            bool resize = Mathf.Abs(size.x - location.CanvasWidth) > .5f || Mathf.Abs(size.y - location.CanvasHeight) > .5f;
+            if (resize)
+                resize = EditorUtility.DisplayDialog("Размер места",
+                    "Рисунок " + size.x + "×" + size.y + ", место " + Mathf.RoundToInt(location.CanvasWidth) + "×" + Mathf.RoundToInt(location.CanvasHeight) +
+                    ".\nПодогнать размер места под рисунок? Входы, объекты и противники сохранят свою долю рисунка, разметка пересчитается.",
+                    "Подогнать", "Растянуть рисунок на место");
+            Change(() =>
+            {
+                Visual.Background = background;
+                if (normal != null) Visual.BackgroundNormalMap = normal;
+                if (resize) ResizeCanvas(location, size.x, size.y, location.HexesAcross);
+            }, true);
+            status.text = "Рисунок места: " + background.name + (normal != null ? " (с нормалями)" : "") + (resize ? ", размер места подогнан." : ".");
         }
 
         internal static bool IsNormalFileName(string path)

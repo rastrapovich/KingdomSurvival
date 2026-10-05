@@ -19,14 +19,16 @@ namespace KingdomSurvival.LocationRendering.Editor
     // ходят; входы, объекты, противники, зоны угрозы, точки отхода и кадры
     // боя ставятся мышью. Сетка боя — ровно настройки поля Базы полей боя:
     // кадр поля показывается на рисунке там, где начнётся бой.
-    public sealed class LocationDatabaseWindow : EditorWindow
+    public sealed partial class LocationDatabaseWindow : EditorWindow
     {
-        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot }
+        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape }
         private enum Kind { None, Art, Entrance, GameObject, Enemy, Encounter }
+        private enum Tab { Place, Game, Light, Art }
+        private static readonly string[] TabNames = { "Место", "Игровое", "Свет", "Предметы" };
 
         private static readonly string[] ToolNames =
         {
-            "Выбор", "Местность", "Вход", "Объект места", "Противник", "Зона угрозы", "Кадр боя", "Точка отхода", "Старт теста", "Опора рисунка"
+            "Выбор", "Местность", "Вход", "Объект места", "Противник", "Зона угрозы", "Кадр боя", "Точка отхода", "Старт теста", "Опора рисунка", "Форма света"
         };
 
         private LocalLocationDatabaseAsset database;
@@ -47,6 +49,9 @@ namespace KingdomSurvival.LocationRendering.Editor
         private Vector2 viewCenter;
         private bool cycle, showTerrain = true, showArena = true, showMarkers = true, dragging;
         private Tool tool;
+        private Tab tab = Tab.Place;
+        private bool showLights = true, compareDay;
+        private int dragVertex = -1;
         private WorldMapGameplayTerrainType brushTerrain = WorldMapGameplayTerrainType.Cliffs;
         private float brushRadius = 40;
         private WorldMapTerrainLayer paintLayer;
@@ -157,7 +162,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             AddButton(presets, "Весь рисунок", () => { viewCenter = CanvasSize / 2; zoom = 1; });
             center.Add(presets);
             VisualElement tools = new VisualElement(); tools.style.flexDirection = FlexDirection.Row; tools.style.flexWrap = Wrap.Wrap;
-            for (int i = 0; i < ToolNames.Length - 1; i++)
+            for (int i = 0; i <= (int)Tool.TestStart; i++)
             {
                 Tool value = (Tool)i;
                 AddButton(tools, ToolNames[i], () => SetTool(value));
@@ -194,8 +199,13 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case Tool.RetreatPoint: status.text = "Точка отхода: клик — безопасная точка выбранного столкновения."; break;
                 case Tool.TestStart: status.text = "Старт теста: клик по проходимой точке."; break;
                 case Tool.Pivot: status.text = "Кликните по точке опоры на рисунке выбранного объекта."; break;
+                case Tool.LightShape: status.text = "Форма света: тяните точку, клик у края — новая точка, Shift+клик — удалить."; break;
                 default: status.text = "Выбор: клик по метке или предмету, перетаскивание — переместить."; break;
             }
+            if (value == Tool.Terrain) tab = Tab.Place;
+            else if (value == Tool.LightShape) tab = Tab.Light;
+            else if (value == Tool.TestStart || value == Tool.Pivot) tab = tab == Tab.Light ? Tab.Light : Tab.Art;
+            else if (value != Tool.Select) tab = Tab.Game;
             BuildSettings();
         }
 
@@ -314,6 +324,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             selectedKind = kind;
             selectedElementId = id;
+            if (kind == Kind.Art) { if (tab != Tab.Light) tab = Tab.Art; }
+            else if (kind != Kind.None) tab = Tab.Game;
             BuildSettings();
         }
 
@@ -330,6 +342,21 @@ namespace KingdomSurvival.LocationRendering.Editor
             LocalLocationDefinition location = Location;
             if (location == null) return;
             Heading(location.DisplayName);
+            VisualElement tabs = new VisualElement(); tabs.style.flexDirection = FlexDirection.Row; tabs.style.flexWrap = Wrap.Wrap;
+            for (int i = 0; i < TabNames.Length; i++)
+            {
+                Tab value = (Tab)i;
+                Button button = new Button(() => { tab = value; BuildSettings(); }) { text = TabNames[i] };
+                if (value == tab) { button.style.unityFontStyleAndWeight = FontStyle.Bold; button.style.color = new Color(.95f, .82f, .5f); }
+                tabs.Add(button);
+            }
+            settings.Add(tabs);
+            switch (tab)
+            {
+                case Tab.Game: BuildGameSettings(location); return;
+                case Tab.Light: BuildLightSettings(location); return;
+                case Tab.Art: BuildVisualSettings(location); return;
+            }
             Text("Название", location.DisplayName, value => { location.DisplayName = value; RefreshList(); });
             Text("ID места карты", location.WorldLocationId, value => location.WorldLocationId = value);
 
@@ -358,7 +385,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             Integer("Высота рисунка", Mathf.RoundToInt(location.CanvasHeight), value => ResizeCanvas(location, location.CanvasWidth, value, location.HexesAcross));
             Integer("Клеток проходимости по ширине", location.HexesAcross, value => ResizeCanvas(location, location.CanvasWidth, location.CanvasHeight, value));
             if (Visual != null)
+            {
                 SpriteField("Рисунок места", Visual.Background, value => Visual.Background = value);
+                NormalMapField("Нормали рисунка места", Visual.Background, Visual.BackgroundNormalMap, value => Visual.BackgroundNormalMap = value);
+            }
             Toggle("Рисунок — временная заглушка", location.PlaceholderArt, value => location.PlaceholderArt = value);
 
             Heading("Перемещение");
@@ -386,9 +416,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             markers.RegisterValueChangedCallback(evt => showMarkers = evt.newValue); settings.Add(markers);
             UnityEngine.UIElements.Toggle arena = new UnityEngine.UIElements.Toggle("Зоны угрозы и кадры боя") { value = showArena };
             arena.RegisterValueChangedCallback(evt => showArena = evt.newValue); settings.Add(arena);
-
-            BuildGameSettings(location);
-            BuildVisualSettings(location);
+            UnityEngine.UIElements.Toggle lights = new UnityEngine.UIElements.Toggle("Источники света и солнце") { value = showLights };
+            lights.RegisterValueChangedCallback(evt => showLights = evt.newValue); settings.Add(lights);
         }
 
         private void BuildGameSettings(LocalLocationDefinition location)
@@ -516,13 +545,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                 AddButton(settings, "Добавить сборку и свет", () => Change(() => database.visuals.Add(new LocationVisualDefinition { LocationId = selectedId }), true));
                 return;
             }
-            Heading("Общий свет");
-            Number("Общая яркость", visual.Daylight.Intensity, 0, 2, value => visual.Daylight.Intensity = value);
-            CurveField curve = new CurveField("Яркость за сутки") { value = visual.Daylight.Brightness };
-            curve.RegisterValueChangedCallback(evt => Change(() => visual.Daylight.Brightness = evt.newValue)); settings.Add(curve);
-            GradientField gradient = new GradientField("Цвет за сутки") { value = visual.Daylight.Color };
-            gradient.RegisterValueChangedCallback(evt => Change(() => visual.Daylight.Color = evt.newValue)); settings.Add(gradient);
-
             Heading("Тест");
             UnitDatabaseAsset units = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
             if (units != null)
@@ -557,22 +579,15 @@ namespace KingdomSurvival.LocationRendering.Editor
             Toggle("Блокирует проход", selected.BlocksMovement, value => selected.BlocksMovement = value);
             Vector2Field footprint = new Vector2Field("Основание на земле") { value = selected.Footprint };
             footprint.RegisterValueChangedCallback(evt => Change(() => selected.Footprint = Vector2.Max(Vector2.zero, evt.newValue))); settings.Add(footprint);
-            Toggle("Тень от локального света", selected.CastsShadow, value => selected.CastsShadow = value);
+            Toggle("Только источник света (без рисунка)", selected.LightOnly, value => selected.LightOnly = value, true);
+            Heading("Тени предмета");
+            Toggle("Отбрасывает тень-силуэт (солнце и огонь)", selected.ProjectsShadow, value => selected.ProjectsShadow = value);
+            Number("Длина тени (множитель)", selected.ShadowLength, 0, 3, value => selected.ShadowLength = value);
+            SpriteField("Свой силуэт тени", selected.ShadowSprite, value => selected.ShadowSprite = value);
+            Toggle("Перекрывает свет местных источников (по основанию)", selected.CastsShadow, value => selected.CastsShadow = value);
+            NormalMapField("Карта нормалей", selected.ResolveSprite(), selected.NormalMap, value => selected.NormalMap = value);
             Heading("Свет этого предмета");
-            Toggle("Источник включён", selected.Light.Enabled, value => selected.Light.Enabled = value);
-            ColorField("Цвет", selected.Light.Color, value => selected.Light.Color = value);
-            Number("Яркость", selected.Light.Intensity, 0, 5, value => selected.Light.Intensity = value);
-            Number("Радиус", selected.Light.Radius, .1f, 10, value => selected.Light.Radius = value);
-            Number("Мягкость границы", selected.Light.Softness, 0, 1, value => selected.Light.Softness = value);
-            Toggle("Отбрасываемые тени", selected.Light.Shadows, value => selected.Light.Shadows = value);
-            Number("Темнота тени", selected.Light.ShadowStrength, 0, 1, value => selected.Light.ShadowStrength = value);
-            Number("Мягкость тени", selected.Light.ShadowSoftness, 0, 1, value => selected.Light.ShadowSoftness = value);
-            Number("Мерцание", selected.Light.Flicker, 0, .3f, value => selected.Light.Flicker = value);
-            Toggle("По расписанию", selected.Light.NightOnly, value => selected.Light.NightOnly = value);
-            Number("Включить в", selected.Light.StartsAt, 0, 24, value => selected.Light.StartsAt = value);
-            Number("Выключить в", selected.Light.EndsAt, 0, 24, value => selected.Light.EndsAt = value);
-            Vector2Field offset = new Vector2Field("Смещение источника") { value = selected.Light.Offset };
-            offset.RegisterValueChangedCallback(evt => Change(() => selected.Light.Offset = evt.newValue)); settings.Add(offset);
+            LightEditor(selected);
             Heading("Состояния рисунка");
             foreach (LocationVisualVariant variant in selected.Variants)
             {
@@ -638,13 +653,14 @@ namespace KingdomSurvival.LocationRendering.Editor
             ReleasePreview();
             if (Location == null || Field == null || EditorApplication.isPlayingOrWillChangePlaymode) return;
             preview = new PreviewRenderUtility(true);
-            renderer = new LocationWorldRenderer(Location, Visual, Field);
+            renderer = new LocationWorldRenderer(Location, Visual, Field, null, database.worldLighting);
             renderer.Camera.enabled = false;
             geometry = renderer.Geometry;
             preview.AddSingleGO(renderer.Root);
             preview.camera.orthographic = true;
             preview.camera.GetUniversalAdditionalCameraData().SetRenderer(0);
             preview.camera.GetUniversalAdditionalCameraData().renderPostProcessing = false;
+            preview.camera.GetUniversalAdditionalCameraData().volumeLayerMask = 1 << LocationWorldRenderer.PostVolumeLayer;
             preview.camera.clearFlags = CameraClearFlags.SolidColor;
             preview.camera.backgroundColor = new Color(.035f, .045f, .04f);
             RebuildTerrainOverlay();
@@ -716,6 +732,11 @@ namespace KingdomSurvival.LocationRendering.Editor
                 GUI.Label(area, EditorApplication.isPlaying ? "Локация запущена во вкладке Game." : "Выберите место с полем боя.");
                 return;
             }
+            if (compareDay)
+            {
+                if (Event.current.type == EventType.Repaint) DrawDayComparison(area);
+                return;
+            }
             Rect frame = CanvasFrame(area);
             Event evt = Event.current;
             Vector2 pixel = ToPixel(frame, evt.mousePosition);
@@ -728,6 +749,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             preview.camera.transform.position = new Vector3(world.x, world.y, -10);
             preview.camera.transform.rotation = Quaternion.identity;
             preview.camera.orthographicSize = ViewHeight / LocationVisualGeometry.PixelsPerUnit / 2;
+            preview.camera.GetUniversalAdditionalCameraData().renderPostProcessing = Visual != null && Visual.Post.Enabled;
             preview.BeginPreview(frame, GUIStyle.none);
             preview.Render(true);
             Texture texture = preview.EndPreview();
@@ -741,6 +763,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                 GUI.DrawTexture(Rect.MinMaxRect(a.x, a.y, b.x, b.y), terrainOverlay, ScaleMode.StretchToFill, true);
             }
             DrawOverlays(frame, shift);
+            Handles.BeginGUI();
+            DrawLightOverlays(frame, shift);
+            Handles.EndGUI();
             if (tool == Tool.Terrain && frame.Contains(mouse))
             {
                 Handles.color = new Color(1, 1, 1, .7f);
@@ -890,6 +915,16 @@ namespace KingdomSurvival.LocationRendering.Editor
                 viewCenter -= (evt.mousePosition - lastPointer) * (ViewHeight / frame.height);
                 lastPointer = evt.mousePosition; evt.Use(); return true;
             }
+            if (tool == Tool.LightShape && evt.type == EventType.MouseDown && evt.button == 0 && frame.Contains(evt.mousePosition))
+            {
+                LightShapeMouseDown(location, frame, evt.mousePosition, evt.shift);
+                evt.Use(); return true;
+            }
+            if (tool == Tool.LightShape && evt.type == EventType.MouseDrag && evt.button == 0 && dragging)
+            {
+                LightShapeMouseDrag(location, frame, evt.mousePosition);
+                evt.Use(); return true;
+            }
             if (evt.type == EventType.MouseDown && evt.button == 0 && frame.Contains(evt.mousePosition))
             {
                 MouseDown(location, frame, pixel);
@@ -1001,8 +1036,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocalEncounterDefinition encounter = location.Encounters.FirstOrDefault(item => item.TriggerArea.Contains(pixel.x, pixel.y));
                 if (encounter != null) hit = (Kind.Encounter, encounter.Id);
             }
-            selectedKind = hit.kind; selectedElementId = hit.id;
-            BuildSettings();
+            Select(hit.kind, hit.id);
             bool locked = hit.kind == Kind.Art && ArtObject != null && ArtObject.Locked;
             dragging = hit.kind != Kind.None && !locked;
             if (dragging) { Undo.RecordObject(database, "Переместить"); lastPointer = pixel; }
@@ -1022,6 +1056,12 @@ namespace KingdomSurvival.LocationRendering.Editor
             location.Entrances.ForEach(item => Try(Kind.Entrance, item.Id, item.Point));
             location.Objects.ForEach(item => Try(Kind.GameObject, item.Id, item.Point));
             location.Enemies.ForEach(item => Try(Kind.Enemy, item.InstanceId, item.Point));
+            if (Visual != null)
+                foreach (LocationVisualObject item in Visual.Objects.Where(item => item.LightOnly && !item.Hidden))
+                {
+                    Vector2 point = LocationVisualGeometry.ToPixel(location, item.Position);
+                    Try(Kind.Art, item.Id, new LocalPointData(point.x, point.y));
+                }
             return best;
         }
 

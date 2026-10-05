@@ -65,6 +65,68 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(LocationVisualGeometry.BlockedAreas(visual, location), Is.Empty);
         }
 
+        // ПР-12М: тень от солнца — утром в сторону утреннего угла, длинная;
+        // в полдень короткая; ночью нет (или от луны).
+        [Test]
+        public void SunShadowFollowsTheDay()
+        {
+            LocationSunDefinition sun = new LocationSunDefinition { Sunrise = 6, Sunset = 20, MorningAngle = 170, EveningAngle = 10, NoonLength = .4f, LowLength = 2 };
+            sun.Evaluate(7, out Vector2 morning, out float morningLength, out float morningOpacity);
+            sun.Evaluate(13, out Vector2 noon, out float noonLength, out _);
+            sun.Evaluate(19, out Vector2 evening, out _, out _);
+            sun.Evaluate(1, out _, out _, out float night);
+            Assert.That(morning.x, Is.LessThan(-.5f), "Утром тень уходит влево.");
+            Assert.That(evening.x, Is.GreaterThan(.5f), "Вечером — вправо.");
+            Assert.That(noon.y, Is.GreaterThan(.9f), "В полдень — вверх, по кратчайшей дуге.");
+            Assert.That(morningLength, Is.GreaterThan(noonLength));
+            Assert.That(noonLength, Is.EqualTo(.4f).Within(.01f));
+            Assert.That(morningOpacity, Is.GreaterThan(0));
+            Assert.That(night, Is.EqualTo(0));
+            sun.MoonShadows = true;
+            sun.Evaluate(1, out _, out _, out float moon);
+            Assert.That(moon, Is.EqualTo(sun.MoonOpacity).Within(.001f));
+        }
+
+        // Тень от огня строго сбоку не сплющивается в линию: есть наклон к земле.
+        [Test]
+        public void ShadowAlwaysLeansOntoTheGround()
+        {
+            Assert.That(LocationWorldRenderer.Lean(new Vector2(2, 0), .4f), Is.EqualTo(new Vector2(2, .4f)));
+            Assert.That(LocationWorldRenderer.Lean(new Vector2(2, -.1f), .4f), Is.EqualTo(new Vector2(2, -.4f)), "Свет сзади — тень к зрителю.");
+            Assert.That(LocationWorldRenderer.Lean(new Vector2(.3f, .9f), .4f), Is.EqualTo(new Vector2(.3f, .9f)));
+            Assert.That(LocationWorldRenderer.Lean(new Vector2(2, 0), 0), Is.EqualTo(new Vector2(2, 0)), "0 — честная проекция.");
+        }
+
+        // Небо места: общий свет мира или своё; своё начинается с копии общего.
+        [Test]
+        public void SkyIsWorldOrOwn()
+        {
+            LocationWorldLighting world = new LocationWorldLighting { PeopleShadowLength = 2 };
+            LocationVisualDefinition visual = new LocationVisualDefinition { PeopleShadowLength = .5f };
+            LocationSky sky = new LocationSky(visual, world);
+            Assert.That(sky.IsWorld, Is.True);
+            Assert.That(sky.PeopleShadowLength, Is.EqualTo(2));
+            sky.Sun.Opacity = .9f;
+            Assert.That(world.Sun.Opacity, Is.EqualTo(.9f), "Правка общего неба — в общем свете мира.");
+            LocationSky.CopyWorldToOwn(world, visual);
+            visual.UseWorldLighting = false;
+            Assert.That(sky.PeopleShadowLength, Is.EqualTo(2));
+            Assert.That(sky.Sun.Opacity, Is.EqualTo(.9f));
+            sky.Sun.Opacity = .1f;
+            Assert.That(world.Sun.Opacity, Is.EqualTo(.9f), "Своё небо — отдельная копия.");
+        }
+
+        [Test]
+        public void LightAnimationKeepsTheBaseIntensity()
+        {
+            LocationLightDefinition light = new LocationLightDefinition { Intensity = 2, Animation = LocationLightAnimation.None };
+            Assert.That(light.AnimatedIntensity(3.3f, 1), Is.EqualTo(2));
+            light.Animation = LocationLightAnimation.Pulse; light.Flicker = .5f;
+            Assert.That(light.AnimatedIntensity(.5f, 1), Is.EqualTo(3).Within(.01f), "Пульс: вершина волны.");
+            light.Animation = LocationLightAnimation.Strobe;
+            Assert.That(light.AnimatedIntensity(.75f, 1), Is.LessThan(2));
+        }
+
         [Test]
         public void GroundObjectsAndForegroundKeepTheirRelativeOrder()
         {

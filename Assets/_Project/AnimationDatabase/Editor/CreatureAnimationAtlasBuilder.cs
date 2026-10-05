@@ -111,11 +111,14 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             string baseName,
             string spritePrefix,
             IReadOnlyList<string> framePaths,
-            Vector2Int canvas)
+            Vector2Int canvas,
+            IReadOnlyList<string> normalPaths = null)
         {
             CreatureAnimationEditorData.EnsureFolder(folder);
             List<CreatureAnimationAtlasPage> pages = ComputeLayout(framePaths.Count, canvas);
+            bool withNormals = normalPaths != null && normalPaths.Count == framePaths.Count && normalPaths.All(path => !string.IsNullOrEmpty(path));
             List<string> pagePaths = new List<string>();
+            List<Texture2D> normalPages = new List<Texture2D>();
             List<List<string>> pageSpriteNames = new List<List<string>>();
 
             int frameIndex = 0;
@@ -155,12 +158,16 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 }
                 pagePaths.Add(pagePath);
                 pageSpriteNames.Add(names);
+                normalPages.Add(withNormals
+                    ? BuildNormalPage(folder + "/" + baseName + (pages.Count > 1 ? "_p" + (pageIndex + 1) : string.Empty) + "_n.png",
+                        page, normalPaths, frameIndex - page.Cells.Count, canvas)
+                    : null);
             }
 
             List<Sprite> sprites = new List<Sprite>();
             for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
             {
-                ImportAsSlicedSprite(pagePaths[pageIndex], pages[pageIndex], pageSpriteNames[pageIndex]);
+                ImportAsSlicedSprite(pagePaths[pageIndex], pages[pageIndex], pageSpriteNames[pageIndex], normalPages[pageIndex]);
                 Dictionary<string, Sprite> byName = AssetDatabase.LoadAllAssetsAtPath(pagePaths[pageIndex])
                     .OfType<Sprite>()
                     .ToDictionary(sprite => sprite.name, StringComparer.Ordinal);
@@ -176,7 +183,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
 
         // Импорт: Sprite (2D and UI), альфа, без мип-карт, билинейная
         // фильтрация, сжатие высокого качества без уменьшения разрешения.
-        private static void ImportAsSlicedSprite(string assetPath, CreatureAnimationAtlasPage page, IReadOnlyList<string> spriteNames)
+        private static void ImportAsSlicedSprite(string assetPath, CreatureAnimationAtlasPage page, IReadOnlyList<string> spriteNames, Texture2D normalPage = null)
         {
             AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
             TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(assetPath);
@@ -194,6 +201,10 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             importer.spritePixelsPerUnit = 100f;
             importer.maxTextureSize = NextPowerOfTwo(Math.Max(page.Width, page.Height));
             importer.textureCompression = TextureImporterCompression.CompressedHQ;
+            // ПР-12М: нормали — вторая текстура спрайтов этой страницы.
+            importer.secondarySpriteTextures = normalPage != null
+                ? new[] { new SecondarySpriteTexture { name = NormalMapName, texture = normalPage } }
+                : Array.Empty<SecondarySpriteTexture>();
 
             SpriteDataProviderFactories factories = new SpriteDataProviderFactories();
             factories.Init();
@@ -217,6 +228,56 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             names?.SetNameFileIdPairs(rects.Select(rect => new SpriteNameFileIdPair(rect.name, rect.spriteID)).ToList());
             provider.Apply();
             importer.SaveAndReimport();
+        }
+
+        public const string NormalMapName = "_NormalMap";
+        private static readonly Color32 FlatNormal = new Color32(128, 128, 255, 255);
+
+        // ПР-12М: страница нормалей с той же раскладкой, что и цветная; пустое —
+        // «плоская» нормаль. Импорт — как карта нормалей (линейная).
+        private static Texture2D BuildNormalPage(string pagePath, CreatureAnimationAtlasPage page, IReadOnlyList<string> normalPaths,
+            int firstFrame, Vector2Int canvas)
+        {
+            Texture2D atlas = new Texture2D(page.Width, page.Height, TextureFormat.RGBA32, false, true);
+            try
+            {
+                Color32[] fill = new Color32[page.Width * page.Height];
+                for (int i = 0; i < fill.Length; i++) fill[i] = FlatNormal;
+                atlas.SetPixels32(fill);
+                for (int i = 0; i < page.Cells.Count; i++)
+                {
+                    RectInt cell = page.Cells[i];
+                    string path = normalPaths[firstFrame + i];
+                    Texture2D frame = new Texture2D(2, 2, TextureFormat.RGBA32, false, true);
+                    try
+                    {
+                        if (!frame.LoadImage(File.ReadAllBytes(path), false))
+                            throw new InvalidOperationException("Повреждённая карта нормалей: " + path);
+                        if (frame.width != canvas.x || frame.height != canvas.y)
+                            throw new InvalidOperationException("Размер карты нормалей не совпадает с кадром: " + path);
+                        atlas.SetPixels32(cell.x, cell.y, cell.width, cell.height, frame.GetPixels32());
+                    }
+                    finally
+                    {
+                        UnityEngine.Object.DestroyImmediate(frame);
+                    }
+                }
+                atlas.Apply(false);
+                File.WriteAllBytes(ToAbsolute(pagePath), atlas.EncodeToPNG());
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(atlas);
+            }
+            AssetDatabase.ImportAsset(pagePath, ImportAssetOptions.ForceSynchronousImport);
+            TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(pagePath);
+            importer.textureType = TextureImporterType.NormalMap;
+            importer.mipmapEnabled = false;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.maxTextureSize = NextPowerOfTwo(Math.Max(page.Width, page.Height));
+            importer.SaveAndReimport();
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(pagePath);
         }
 
         private static int NextPowerOfTwo(int value)

@@ -250,7 +250,10 @@ public sealed class LocalExplorationPlayModeTests
         Assert.IsNotNull(battleHost, "Бой начался на месте.");
         Assert.AreEqual(MainScene, SceneManager.GetActiveScene().name, "Отдельная арена не грузится.");
         Assert.IsNotNull(root.Q("local-exploration-field").Q("battle-sandbox-board"));
-        Assert.IsFalse((bool)Member(GetField(main, "localRenderer"), "ActorsVisible"), "Фигуры боя рисует поле боя, рисунок места — под ним.");
+        Assert.IsFalse((bool)Member(GetField(main, "localRenderer"), "ActorsVisible"), "Фигуры исследования в бою скрыты.");
+        yield return Frames(3);
+        Assert.Greater((int)Member(GetField(main, "localRenderer"), "BattleFigureCount"), 0, "Фигуры боя рисует рендерер места — под его светом.");
+        Assert.IsTrue((bool)Member(GetField(main, "localRenderer"), "Indoor"), "Шахта — место под крышей.");
         yield return Frames(10);
         yield return Capture(main, "mine_03_battle");
         Assert.IsFalse((bool)Invoke(main, "SaveCampaign", CampaignSaveStore.ManualSlotIds[0]),

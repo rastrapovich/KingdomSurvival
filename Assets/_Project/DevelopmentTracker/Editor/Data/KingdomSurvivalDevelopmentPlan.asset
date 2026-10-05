@@ -8771,6 +8771,151 @@ MonoBehaviour:
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
+    - id: PR12M-T01
+      title: "12М-1 · Под крышей и свет на фигурах боя"
+      details: "Режим места улица / под крышей; фигуры боя на месте рисует рендерер места — на них действуют свет, огонь и тени."
+      category: 8
+      status: 1
+      required: 1
+      order: 39
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12K-T06
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Ручная проверка: шахта ночью и днём, бой у огня"
+        done: 0
+      manualChecks:
+      - "Проверить в окне «База локаций» и в игре"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; снимки теней, нормалей и боя в шахте просмотрены. Ручная проверка в Editor не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12M-T02
+      title: "12М-2 · Солнечные тени"
+      details: "Тень-силуэт по рисунку от точки опоры, направление и длина по часу, луна, тени людей."
+      category: 8
+      status: 1
+      required: 1
+      order: 40
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12M-T01
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Ручная проверка: тени утром, в полдень и вечером"
+        done: 0
+      manualChecks:
+      - "Проверить в окне «База локаций» и в игре"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; снимки теней, нормалей и боя в шахте просмотрены. Ручная проверка в Editor не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12M-T03
+      title: "12М-3 · Тени источников"
+      details: "Тени-силуэты от местных источников (высота, затухание, длина), перекрытие света по основанию, тени людей от огня."
+      category: 8
+      status: 1
+      required: 1
+      order: 41
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12M-T02
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Ручная проверка: тени у костра ночью"
+        done: 0
+      manualChecks:
+      - "Проверить в окне «База локаций» и в игре"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; снимки теней, нормалей и боя в шахте просмотрены. Ручная проверка в Editor не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12M-T04
+      title: "12М-4 · Остальной свет Unity и обработка кадра"
+      details: "Конус, своя форма, свет-рисунок, свечение воздуха, смешивание, жизнь огня, обработка кадра, готовые настройки, сравнение суток."
+      category: 8
+      status: 1
+      required: 1
+      order: 42
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12M-T03
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Ручная проверка вкладки «Свет»"
+        done: 0
+      manualChecks:
+      - "Проверить в окне «База локаций» и в игре"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; снимки теней, нормалей и боя в шахте просмотрены. Ручная проверка в Editor не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12M-T05
+      title: "12М-5 · Карты нормалей"
+      details: "Нормали рисунков мест и кадров анимации (страница нормалей атласа), инструкция Blender; первое существо из Blender."
+      category: 8
+      status: 1
+      required: 1
+      order: 43
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12M-T04
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Первое существо с нормалями из Blender: свет костра в месте и в бою"
+        done: 0
+      manualChecks:
+      - "Проверить в окне «База локаций» и в игре"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1405 (1391/0/14), PlayMode 34/34; снимки теней, нормалей и боя в шахте просмотрены. Ручная проверка в Editor не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
   - id: PR15_HOME_WATER
     title: "\u041F\u0420-15. \xAB\u0414\u043E\u043C \u043D\u0430 \u0447\u0443\u0436\u043E\u0439
       \u0432\u043E\u0434\u0435\xBB \u043D\u0430 \u043E\u0431\u0449\u0435\u0439 \u043E\u0441\u043D\u043E\u0432\u0435"

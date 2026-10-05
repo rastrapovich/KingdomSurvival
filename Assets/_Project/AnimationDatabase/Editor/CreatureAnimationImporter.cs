@@ -186,7 +186,10 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                         baseName,
                         spritePrefix,
                         cell.Frames.Select(frame => frame.Path).ToList(),
-                        canvas);
+                        canvas,
+                        cell.Frames.All(frame => !string.IsNullOrEmpty(frame.NormalPath))
+                            ? cell.Frames.Select(frame => frame.NormalPath).ToList()
+                            : null);
                 }
             }
             catch (Exception exception)
@@ -217,7 +220,9 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 AssetDatabase.SaveAssetIfDirty(database);
             CreatureAnimationEditorData.NotifyChanged();
 
+            int normalCells = cells.Count(entry => entry.cell.Frames.Count > 0 && entry.cell.Frames.All(frame => !string.IsNullOrEmpty(frame.NormalPath)));
             report = "Загружено в «" + set.DisplayName + "»: " + package.ChosenGroups.Sum(group => group.FileCount) + " файл(ов).\n" +
+                     (normalCells > 0 ? "С картами нормалей: " + normalCells + " ячеек.\n" : string.Empty) +
                      string.Join("\n", changes.Select(change => change.Describe(mode)));
             return true;
         }
@@ -331,6 +336,18 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                             }
                         }
                     }
+                }
+            }
+
+            // ПР-12М: страница нормалей используемого атласа тоже используется.
+            foreach (string path in used.ToList())
+            {
+                if (!(AssetImporter.GetAtPath(path) is TextureImporter importer) || importer.secondarySpriteTextures == null)
+                    continue;
+                foreach (SecondarySpriteTexture secondary in importer.secondarySpriteTextures)
+                {
+                    if (secondary.texture != null)
+                        used.Add(AssetDatabase.GetAssetPath(secondary.texture));
                 }
             }
 

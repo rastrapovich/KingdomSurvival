@@ -153,6 +153,7 @@ public partial class PrototypeUIController
         if (IsLocalBattleRunning)
         {
             AlignLocalBattleCamera();
+            SyncLocalBattleFigures();
             RenderLocalWorld();
             return;
         }
@@ -549,9 +550,47 @@ public partial class PrototypeUIController
         localRenderer.AlignFrame(localGeometry.FrameRect(localArenaCenter), viewport);
     }
 
+    // ПР-12М: фигуры боя рисует рендерер места — под его светом и тенями.
+    // Поле боя отдаёт кадр, прямоугольник и отражение каждой фигуры.
+    private readonly List<LocationWorldRenderer.BattleFigureFrame> localBattleFrames = new List<LocationWorldRenderer.BattleFigureFrame>();
+
+    private void SyncLocalBattleFigures()
+    {
+        HexBoardElement board = localBattle?.Board;
+        if (board == null || localImage == null)
+            return;
+        Rect image = localImage.worldBound;
+        if (image.width < 1f || image.height < 1f)
+            return;
+        Vector2 ToPixel(Vector2 boardPoint)
+        {
+            Vector2 world = board.LocalToWorld(boardPoint);
+            return localRenderer.ViewportToPixel(new Vector2((world.x - image.x) / image.width, (world.y - image.y) / image.height));
+        }
+        localBattleFrames.Clear();
+        foreach (BoardFigure figure in board.Figures)
+        {
+            Vector2 min = ToPixel(figure.Rect.min);
+            Vector2 max = ToPixel(figure.Rect.max);
+            localBattleFrames.Add(new LocationWorldRenderer.BattleFigureFrame
+            {
+                Id = figure.UnitId,
+                Sprite = figure.Sprite,
+                Rect = Rect.MinMaxRect(min.x, min.y, max.x, max.y),
+                Ground = ToPixel(figure.Ground),
+                Mirrored = figure.Mirrored,
+                FitInside = figure.FitInside,
+                Tint = figure.Tint,
+                Corpse = figure.Corpse
+            });
+        }
+        localRenderer.SetBattleFigures(localBattleFrames);
+    }
+
     private void OnLocalBattleFinished(CampaignBattleResult result, int generation)
     {
         localBattle = null;
+        localRenderer?.ClearBattleFigures();
         localBattleHost?.RemoveFromHierarchy();
         localBattleHost = null;
         // Прежний показ (загрузка, новая партия) — итог не применяется.

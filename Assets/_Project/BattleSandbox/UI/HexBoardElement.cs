@@ -57,6 +57,26 @@ namespace KingdomSurvival.BattleSandbox
         private Vector2 movementVisualPosition;
         private Action movementCompletionCallback;
 
+        // ПР-12М: бой на месте — картинки бойцов рисует рендерер места (под его
+        // светом и тенями). Поле по-прежнему считает кадр, позицию и отражение,
+        // но само картинки не показывает; полосы здоровья и жетоны — здесь же.
+        private bool externalFigures;
+        private readonly List<BoardFigure> figures = new List<BoardFigure>();
+
+        public bool ExternalFigures
+        {
+            get => externalFigures;
+            set
+            {
+                externalFigures = value;
+                foreach (Image image in unitImages.Values)
+                    image.style.visibility = value ? Visibility.Hidden : Visibility.Visible;
+            }
+        }
+
+        // Кадр фигур после последней раскладки (координаты поля).
+        public IReadOnlyList<BoardFigure> Figures => figures;
+
         private string hoverAttackTargetId;
         private HexCoord? hoverAttackPosition;
         private Vector2 hoverCursorPosition;
@@ -806,6 +826,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void SyncUnitImages()
         {
+            figures.Clear();
             if (battle == null || contentRect.width <= 1f || contentRect.height <= 1f)
             {
                 ClearUnitImages();
@@ -885,6 +906,19 @@ namespace KingdomSurvival.BattleSandbox
                         healthTop = center.y + size * StaticAnchorFromBottom - HealthBarBottomInset - HealthBarHeight;
                     }
                     image.style.display = DisplayStyle.Flex;
+                    image.style.visibility = externalFigures ? Visibility.Hidden : Visibility.Visible;
+                    figures.Add(new BoardFigure
+                    {
+                        UnitId = unit.Id,
+                        Sprite = image.sprite,
+                        Rect = new Rect(image.style.left.value.value, image.style.top.value.value,
+                            image.style.width.value.value, image.style.height.value.value),
+                        Mirrored = image.style.scale.value.value.x < 0f,
+                        FitInside = !visual.IsAnimated,
+                        Tint = image.tintColor,
+                        Ground = unitCenter,
+                        Corpse = corpse
+                    });
                     depthEntries.Add((unit.Id, (corpse ? -100000f : 0f) + unitCenter.y, image));
                 }
                 else if (visual != null && !string.IsNullOrEmpty(visual.TokenText))

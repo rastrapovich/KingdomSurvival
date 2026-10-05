@@ -109,6 +109,9 @@ namespace KingdomSurvival.BattleSandbox
         // арены с полем боя.
         public BattlefieldView BattlefieldSurface { get; private set; }
 
+        // Поле боя — фигуры для рендерера места (бой на месте).
+        public HexBoardElement Board => board;
+
         private bool IsWorldUnderlayBattle => hosted && campaignBattle != null && campaignBattle.IsLocal && campaignBattle.IgnoreFieldDisabledCells;
 
         // Идущий встроенный бой (один за раз) — для оформления боевого экрана.
@@ -1094,6 +1097,8 @@ namespace KingdomSurvival.BattleSandbox
             body.style.alignItems = Align.Stretch;
 
             board = new HexBoardElement();
+            // ПР-12М: бой на месте — фигуры рисует рендерер места под его светом.
+            board.ExternalFigures = IsWorldUnderlayBattle;
             board.SetUnitVisuals(unitContent.Visuals, unitContent.AnimationDatabase);
             board.HexClicked += OnBoardHexClicked;
             board.UnitDetailsRequested += OnBoardUnitDetailsRequested;

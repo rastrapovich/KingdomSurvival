@@ -14,7 +14,7 @@ namespace KingdomSurvival.LocationRendering
     // светом и тенями и фигуры. Бой на месте идёт поверх той же картинки:
     // камера совмещает кадр арены на рисунке с полем боя на экране.
     // Не владеет сохранением и часами кампании.
-    public sealed class LocationWorldRenderer : IDisposable
+    public sealed partial class LocationWorldRenderer : IDisposable
     {
         public enum ActorKind { Party, Retinue, Enemy }
 
@@ -61,6 +61,8 @@ namespace KingdomSurvival.LocationRendering
         public LocalLocationGeometry Geometry { get; }
         public LocalLocationDefinition Location { get; }
         public LocationVisualDefinition Definition { get; }
+        // Небо места: общий свет мира или своё.
+        public LocationSky Sky { get; }
         public BattlefieldDefinitionData Field { get; }
         public float Hour { get; private set; } = 13;
         public RenderTexture Target { get; private set; }
@@ -79,11 +81,13 @@ namespace KingdomSurvival.LocationRendering
         private readonly Transform actorLayer;
         private Sprite placeholderActor, placeholderShadow;
 
+        // world — общий свет мира; не задан — из Базы локаций.
         public LocationWorldRenderer(LocalLocationDefinition location, LocationVisualDefinition visual,
-            BattlefieldDefinitionData field, Transform parent = null)
+            BattlefieldDefinitionData field, Transform parent = null, LocationWorldLighting world = null)
         {
             Location = location ?? throw new ArgumentNullException(nameof(location));
             Definition = visual ?? new LocationVisualDefinition { LocationId = location.Id };
+            Sky = new LocationSky(Definition, world ?? LocalLocationDatabaseAsset.LoadWorldLighting());
             Field = field;
             Geometry = new LocalLocationGeometry(location, field, LocationVisualGeometry.BlockedAreas(Definition, location));
             Root = new GameObject("Локация · " + location.DisplayName);
@@ -99,6 +103,7 @@ namespace KingdomSurvival.LocationRendering
             Camera.GetUniversalAdditionalCameraData().renderPostProcessing = false;
             GlobalLight = Child("Общий свет").AddComponent<Light2D>();
             GlobalLight.lightType = Light2D.LightType.Global;
+            InitializeLighting();
 
             BuildGround();
             foreach (LocationVisualObject item in Definition.Objects) AddObject(item);
@@ -193,14 +198,18 @@ namespace KingdomSurvival.LocationRendering
             if (item == null || item.Hidden) return;
             Transform anchor = Child(item.Name).transform;
             anchor.localPosition = LocationVisualGeometry.ToWorld(Location, item.Position);
-            GameObject imageObject = new GameObject("Рисунок");
-            imageObject.transform.SetParent(anchor, false);
-            Sprite sprite = item.ResolveSprite();
-            if (sprite == null) sprite = PlaceholderSprite(item.Placeholder);
-            SpriteRenderer image = Image(imageObject, sprite, item.Placeholder == LocationPlaceholder.Fire);
-            Fit(image, item.Height, item.Pivot, item.FlipX, Vector2.zero);
-            image.sortingOrder = LocationVisualGeometry.SortOrder(item.Band, anchor.localPosition.y, item.OrderOffset);
-            if (item.CastsShadow)
+            SpriteRenderer image = null;
+            if (!item.LightOnly)
+            {
+                GameObject imageObject = new GameObject("Рисунок");
+                imageObject.transform.SetParent(anchor, false);
+                Sprite sprite = item.ResolveSprite();
+                if (sprite == null) sprite = PlaceholderSprite(item.Placeholder);
+                image = Image(imageObject, sprite, item.Placeholder == LocationPlaceholder.Fire);
+                Fit(image, item.Height, item.Pivot, item.FlipX, Vector2.zero);
+                image.sortingOrder = LocationVisualGeometry.SortOrder(item.Band, anchor.localPosition.y, item.OrderOffset);
+            }
+            if (item.CastsShadow && !item.LightOnly)
             {
                 // Форма у основания, независимая от рисунка и его прозрачных полей.
                 // URP 17.6 не предоставляет runtime-setter контура. Используем
@@ -212,39 +221,21 @@ namespace KingdomSurvival.LocationRendering
                     shadow.transform.localScale = new Vector3(item.Footprint.x, item.Footprint.y, 1);
                 }
             }
-            Light2D light = null;
-            if (item.Light.Enabled)
-            {
-                GameObject source = new GameObject("Источник света");
-                source.transform.SetParent(anchor, false);
-                source.transform.localPosition = item.Light.Offset;
-                light = source.AddComponent<Light2D>();
-                light.lightType = Light2D.LightType.Point;
-                light.pointLightOuterAngle = 360;
-                light.pointLightInnerAngle = 360;
-                light.pointLightOuterRadius = item.Light.Radius;
-                light.pointLightInnerRadius = item.Light.Radius * (1 - item.Light.Softness);
-                light.shadowsEnabled = item.Light.Shadows;
-                light.shadowIntensity = item.Light.ShadowStrength;
-                light.shadowSoftness = item.Light.ShadowSoftness;
-            }
-            placed.Add(new Placed { Data = item, Anchor = anchor, Image = image, Light = light });
+            Light2D light = item.Light.Enabled ? CreateLight(anchor, item.Light) : null;
+            Placed entry = new Placed { Data = item, Anchor = anchor, Image = image, Light = light };
+            placed.Add(entry);
+            if (image != null && item.ProjectsShadow && item.Band == LocationVisualBand.World)
+                AddCaster(anchor, image, item.ShadowSprite, item.Height, item.Pivot, item.FlipX, item.ShadowLength, null);
         }
 
         public void SetTime(float hours, float seconds)
         {
             Hour = Mathf.Repeat(hours, 24);
-            GlobalLight.color = Definition.Daylight.EvaluateColor(Hour);
-            GlobalLight.intensity = Definition.Daylight.Evaluate(Hour);
-            foreach (Placed item in placed)
-            {
-                if (item.Light == null) continue;
-                item.Light.enabled = item.Data.Light.ActiveAt(Hour);
-                item.Light.color = item.Data.Light.Color;
-                float wave = Mathf.PerlinNoise(seconds * 1.8f, item.Data.Position.x * 31);
-                item.Light.intensity = item.Data.Light.Intensity * (1 + (wave * 2 - 1) * item.Data.Light.Flicker);
-            }
+            Seconds = seconds;
+            ApplyLighting();
         }
+
+        public float Seconds { get; private set; }
 
         // Общий свет сцены, в которую встроено место (глобальная карта),
         // не должен складываться со светом места: на время показа гасится.
@@ -385,6 +376,7 @@ namespace KingdomSurvival.LocationRendering
                 Destroy(actors[id].Anchor.gameObject);
                 actors.Remove(id);
             }
+            UpdateShadows();
         }
 
         public bool HasActor(string id) => actors.ContainsKey(id);
@@ -416,6 +408,7 @@ namespace KingdomSurvival.LocationRendering
             shadow.transform.SetParent(anchor, false);
             shadow.color = new Color(0, 0, 0, .35f);
             shadow.sortingOrder = -24000;
+            AddCaster(anchor, actor.Image, null, 0, Vector2.zero, false, 1, null, true);
             return actor;
         }
 
@@ -518,7 +511,7 @@ namespace KingdomSurvival.LocationRendering
             Placed item = placed.Find(entry => entry.Data.Id == id);
             if (item == null) return;
             item.Anchor.localPosition = LocationVisualGeometry.ToWorld(Location, normalizedPosition);
-            item.Image.sortingOrder = LocationVisualGeometry.SortOrder(item.Data.Band, item.Anchor.localPosition.y, item.Data.OrderOffset);
+            if (item.Image != null) item.Image.sortingOrder = LocationVisualGeometry.SortOrder(item.Data.Band, item.Anchor.localPosition.y, item.Data.OrderOffset);
         }
 
         // Смена состояния одного объекта, без пересборки фона и без изменения авторских данных.
@@ -526,7 +519,7 @@ namespace KingdomSurvival.LocationRendering
         {
             Placed item = placed.Find(entry => entry.Data.Id == objectId);
             LocationVisualVariant variant = item?.Data.Variants?.Find(entry => entry.Id == variantId);
-            if (variant?.Sprite == null) return false;
+            if (variant?.Sprite == null || item.Image == null) return false;
             item.Image.sprite = variant.Sprite;
             Fit(item.Image, item.Data.Height, item.Data.Pivot, item.Data.FlipX, Vector2.zero);
             return true;

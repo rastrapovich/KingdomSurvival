@@ -26,6 +26,16 @@ namespace KingdomSurvival.BattlefieldDatabase
         // 1 — места в точках рисунка (канон v1.54); 0 — прежние клетки поля,
         // переводятся один раз при загрузке редактора.
         public int pointFormatVersion;
+
+        // ПР-12М: общий свет мира — небо всех мест с «Общим светом мира».
+        public LocationWorldLighting worldLighting = new LocationWorldLighting();
+        public bool worldLightingInitialized;
+
+        public static LocationWorldLighting LoadWorldLighting()
+        {
+            LocalLocationDatabaseAsset asset = Resources.Load<LocalLocationDatabaseAsset>(ResourcesPath);
+            return asset != null && asset.worldLighting != null ? asset.worldLighting : new LocationWorldLighting();
+        }
         public const int CurrentPointFormatVersion = 1;
 
         public LocationVisualDefinition FindVisual(string id) => visuals?.Find(item => item != null && item.LocationId == id);

@@ -49,6 +49,63 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float Flicker = .08f;
         public Vector2 Offset = new Vector2(0, .2f);
 
+        // ПР-12М: остальные возможности 2D-света Unity.
+        public LocationLightShape Shape = LocationLightShape.Point;
+        // Конус (Shape = Spot): поворот в градусах (0 — вправо, 90 — вверх) и углы.
+        public float Direction = 270;
+        public float InnerAngle = 40;
+        public float OuterAngle = 70;
+        // Резкость спада к краю (0 — мягко, 1 — резко).
+        public float Falloff = .5f;
+        // Свет произвольной формы: точки контура (единицы мира от источника) и мягкость края.
+        public List<Vector2> FreeformPoints = new List<Vector2>
+        { new Vector2(-1, -.6f), new Vector2(1, -.6f), new Vector2(1, .6f), new Vector2(-1, .6f) };
+        public float FreeformFalloff = .5f;
+        // Свет-рисунок (маска).
+        public Sprite Cookie;
+        public Vector2 CookieSize = new Vector2(3, 3);
+        // Свечение воздуха.
+        public bool Volumetric;
+        public float VolumeIntensity = .25f;
+        public bool VolumetricShadows;
+        public float VolumeShadowIntensity = .5f;
+        // Смешивание (стиль рендерера 2D, 0..3), перекрытие и порядок.
+        public int BlendStyle;
+        public bool AlphaOverlap;
+        public int Order;
+        // Жизнь огня.
+        public LocationLightAnimation Animation = LocationLightAnimation.Flicker;
+        public float AnimationSpeed = 1;
+        // Карты нормалей: свет «облегает» рисунки, у которых они есть.
+        public bool NormalMaps;
+        public bool NormalMapsAccurate;
+        public float NormalMapDistance = 3;
+        // Тень предметов и людей от этого источника — силуэт по рисунку,
+        // отброшенный от света; длина зависит от высоты источника.
+        public bool ProjectsShadows = true;
+        public float Height = 1.4f;
+        public float ProjectedShadowOpacity = .55f;
+        public float ProjectedShadowMaxLength = 2.5f;
+        public float ShadowSoftnessFalloff = .5f;
+
+        // Яркость с учётом жизни огня в момент seconds.
+        public float AnimatedIntensity(float seconds, float seed)
+        {
+            float speed = Mathf.Max(.01f, AnimationSpeed);
+            switch (Animation)
+            {
+                case LocationLightAnimation.Flicker:
+                    float wave = Mathf.PerlinNoise(seconds * 1.8f * speed, seed * 31);
+                    return Intensity * (1 + (wave * 2 - 1) * Flicker);
+                case LocationLightAnimation.Pulse:
+                    return Intensity * (1 + Mathf.Sin(seconds * Mathf.PI * speed) * Flicker);
+                case LocationLightAnimation.Strobe:
+                    return Mathf.Repeat(seconds * speed, 1) < .5f ? Intensity : Intensity * (1 - Mathf.Clamp01(Flicker * 4));
+                default:
+                    return Intensity;
+            }
+        }
+
         // Интервал включает начало, исключает конец; одинаковые часы = весь день.
         public bool ActiveAt(float hour)
         {
@@ -59,6 +116,12 @@ namespace KingdomSurvival.BattlefieldDatabase
             return Mathf.Approximately(start, end) || (start < end ? hour >= start && hour < end : hour >= start || hour < end);
         }
     }
+
+    public enum LocationLightShape { Point, Spot, Freeform, Sprite }
+    public enum LocationLightAnimation { None, Flicker, Pulse, Strobe }
+    // Улица — общий свет по суткам и солнце; под крышей (пещера, изба) —
+    // постоянный свет, без солнечных теней.
+    public enum LocationLightingMode { Outdoor, Indoor }
 
     public enum LocationVisualBand { Ground, GroundDetail, World, Foreground }
     public enum LocationPlaceholder { None, Tent, Fire, Crate, Rock, Bush }
@@ -94,6 +157,15 @@ namespace KingdomSurvival.BattlefieldDatabase
         public Vector2 Footprint = new Vector2(1.2f, .55f);
         public bool CastsShadow;
         public LocationLightDefinition Light = new LocationLightDefinition();
+        // ПР-12М: только источник света, без рисунка.
+        public bool LightOnly;
+        // Отброшенная тень-силуэт (от солнца и местных источников).
+        public bool ProjectsShadow = true;
+        public float ShadowLength = 1;
+        // Свой силуэт тени (дерево: тень кроны не совпадает с рисунком).
+        public Sprite ShadowSprite;
+        // Карта нормалей рисунка (подключается к спрайту при импорте).
+        public Texture2D NormalMap;
         public Sprite ResolveSprite(string variantId = null)
         {
             string id = variantId ?? DefaultVariantId;
@@ -110,7 +182,22 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Рисунок места целиком (растягивается на размер рисунка места). Нет —
         // техническая заглушка по разметке местности.
         public Sprite Background;
+        public LocationLightingMode Lighting = LocationLightingMode.Outdoor;
+        // Небо (сутки, солнце, луна, стиль теней, обработка кадра): общий свет
+        // мира (База локаций) или своё — поля ниже.
+        public bool UseWorldLighting = true;
+        public Color IndoorColor = new Color(.62f, .57f, .50f);
+        public float IndoorIntensity = .55f;
         public LocationDaylight Daylight = new LocationDaylight();
+        public LocationSunDefinition Sun = new LocationSunDefinition();
+        public LocationPostEffects Post = new LocationPostEffects();
+        // Тени людей (исследование и бой на месте).
+        public bool PeopleCastShadows = true;
+        public float PeopleShadowLength = 1;
+        // Наименьший наклон тени «от зрителя» (доля высоты): иначе тень от огня
+        // сбоку или от низкого солнца сплющивается в линию.
+        public float ShadowMinLean = .4f;
+        public Texture2D BackgroundNormalMap;
         public List<LocationVisualObject> Objects = new List<LocationVisualObject>();
         // Точка появления тестового отряда — доли рисунка места.
         public Vector2 TestStartPoint = new Vector2(.25f, .5f);
@@ -189,7 +276,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             {
                 if (item == null) { errors.Add("Пустой объект."); continue; }
                 if (string.IsNullOrWhiteSpace(item.Id) || !ids.Add(item.Id)) errors.Add(item.Name + ": пустой или повторный ID.");
-                if (item.Sprite == null && item.Placeholder == LocationPlaceholder.None) errors.Add(item.Name + ": нет спрайта.");
+                if (!item.LightOnly && item.Sprite == null && item.Placeholder == LocationPlaceholder.None) errors.Add(item.Name + ": нет спрайта.");
                 if (item.Height <= 0 || item.Footprint.x < 0 || item.Footprint.y < 0) errors.Add(item.Name + ": неверный размер.");
                 if (item.Position.x < 0 || item.Position.x > 1 || item.Position.y < 0 || item.Position.y > 1) errors.Add(item.Name + ": за пределами рисунка.");
                 if (item.Light.Enabled && (item.Light.Radius <= 0 || item.Light.Intensity < 0)) errors.Add(item.Name + ": неверный свет.");

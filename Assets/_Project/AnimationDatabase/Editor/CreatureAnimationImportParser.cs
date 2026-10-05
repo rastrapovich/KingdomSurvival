@@ -43,6 +43,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
     {
         public string Path { get; }
         public int Number { get; }
+        // ПР-12М: карта нормалей кадра (файл «имя_n.png» рядом с кадром), если есть.
+        public string NormalPath { get; set; } = string.Empty;
 
         public CreatureAnimationSourceFrame(string path, int number)
         {
@@ -224,6 +226,57 @@ namespace KingdomSurvival.AnimationDatabase.Editor
 
         public static readonly string[] ImageExtensions = { ".png" };
 
+        // ПР-12М: карта нормалей кадра — тот же файл с окончанием «_n» или
+        // «_normal» (walk_se_007.png → walk_se_007_n.png). В действия не попадает.
+        public static bool IsNormalFile(string path)
+        {
+            string name = Path.GetFileNameWithoutExtension(path ?? string.Empty);
+            return name.EndsWith("_n", StringComparison.OrdinalIgnoreCase) ||
+                   name.EndsWith("_normal", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static IEnumerable<string> NormalCandidates(string colorPath)
+        {
+            string folder = Path.GetDirectoryName(colorPath) ?? string.Empty;
+            string name = Path.GetFileNameWithoutExtension(colorPath);
+            string extension = Path.GetExtension(colorPath);
+            yield return NormalizePath(Path.Combine(folder, name + "_n" + extension));
+            yield return NormalizePath(Path.Combine(folder, name + "_normal" + extension));
+        }
+
+        // Нормали подключаются к ячейке, только если они есть у всех её кадров.
+        private static void AttachNormals(CreatureAnimationImportPackage package, IEnumerable<string> normalFiles)
+        {
+            HashSet<string> normals = new HashSet<string>(normalFiles, StringComparer.OrdinalIgnoreCase);
+            if (normals.Count == 0)
+                return;
+            HashSet<string> used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (CreatureAnimationImportGroup group in package.Groups)
+            {
+                foreach (CreatureAnimationImportCell cell in group.Cells.Values)
+                {
+                    foreach (CreatureAnimationSourceFrame frame in cell.Frames)
+                    {
+                        frame.NormalPath = NormalCandidates(frame.Path).FirstOrDefault(normals.Contains) ?? string.Empty;
+                        if (frame.NormalPath.Length > 0)
+                            used.Add(frame.NormalPath);
+                    }
+                    int withNormals = cell.Frames.Count(frame => frame.NormalPath.Length > 0);
+                    if (withNormals > 0 && withNormals < cell.Frames.Count)
+                    {
+                        package.AddWarning(group.RawName + " → " + CreatureAnimationLabels.DirectionTitle(cell.Direction) +
+                                           ": нормали есть не у всех кадров (" + withNormals + " из " + cell.Frames.Count + ") — ячейка загрузится без нормалей.");
+                        foreach (CreatureAnimationSourceFrame frame in cell.Frames)
+                            frame.NormalPath = string.Empty;
+                    }
+                }
+            }
+            List<string> orphans = normals.Where(path => !used.Contains(path)).ToList();
+            if (orphans.Count > 0)
+                package.AddWarning("Карты нормалей без цветного кадра: " + string.Join(", ", orphans.Take(3).Select(Path.GetFileName)) +
+                                   (orphans.Count > 3 ? " и ещё " + (orphans.Count - 3) : string.Empty) + ".");
+        }
+
         public static bool IsImageFile(string path)
         {
             string extension = Path.GetExtension(path ?? string.Empty);
@@ -382,11 +435,13 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             Dictionary<string, CreatureAnimationImportGroup> groups =
                 new Dictionary<string, CreatureAnimationImportGroup>(StringComparer.Ordinal);
 
-            List<string> imageFiles = (files ?? Enumerable.Empty<string>())
+            List<string> allImages = (files ?? Enumerable.Empty<string>())
                 .Select(NormalizePath)
                 .Where(IsImageFile)
                 .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .ToList();
+            List<string> normalFiles = allImages.Where(IsNormalFile).ToList();
+            List<string> imageFiles = allImages.Where(path => !IsNormalFile(path)).ToList();
 
             if (imageFiles.Count == 0)
             {
@@ -497,6 +552,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 }
             }
 
+            AttachNormals(package, normalFiles);
             ValidateDuplicateTargets(package);
             return package;
         }
@@ -508,10 +564,12 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             CreatureAnimationDirection direction,
             string clipKey = null)
         {
-            List<string> imageFiles = (files ?? Enumerable.Empty<string>())
+            List<string> allImages = (files ?? Enumerable.Empty<string>())
                 .Select(NormalizePath)
                 .Where(IsImageFile)
                 .ToList();
+            List<string> normalFiles = allImages.Where(IsNormalFile).ToList();
+            List<string> imageFiles = allImages.Where(path => !IsNormalFile(path)).ToList();
             string root = imageFiles.Count > 0 ? Path.GetDirectoryName(imageFiles[0]) : string.Empty;
             CreatureAnimationImportPackage package = new CreatureAnimationImportPackage(root);
             if (imageFiles.Count == 0)
@@ -533,6 +591,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 cell.Frames.Add(new CreatureAnimationSourceFrame(file, TryParseFrameNumber(fileName, out int number) ? number : int.MinValue));
             }
             FinishCell(package, CreatureAnimationLabels.ActionTitle(action), cell);
+            AttachNormals(package, normalFiles);
             return package;
         }
 

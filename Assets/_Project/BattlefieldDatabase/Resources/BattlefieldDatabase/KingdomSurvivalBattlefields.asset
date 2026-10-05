@@ -159,7 +159,7 @@ MonoBehaviour:
     backgroundScale: 1
     backgroundOffset: {x: 0, y: 0}
     awaitingArt: 1
-    gridScale: 0.512
+    gridScale: 0.5
     gridOffset: {x: 0, y: 0}
     disabledCells: []
     useOwnHexStyle: 0

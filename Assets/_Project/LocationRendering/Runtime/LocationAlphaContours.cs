@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace KingdomSurvival.LocationRendering
 {
-    // ПР-12М: контуры рисунка по альфа-каналу — для тени от огня. Свет
+    // ПР-12М: контуры рисунка по альфа-каналу — для тени от огня (по
+    // желанию — только нижней части рисунка, которой он стоит на земле). Свет
     // проходит там, где рисунок прозрачен: между ногами, под рукой, сквозь
     // кольцо. Внешние контуры обходятся против часовой стрелки, дырки — по
     // часовой (непрозрачное всегда слева). Единицы — спрайта, от его опоры.
@@ -26,20 +27,22 @@ namespace KingdomSurvival.LocationRendering
         }
 
         private static readonly Dictionary<Texture2D, AlphaGrid> grids = new Dictionary<Texture2D, AlphaGrid>();
-        private static readonly Dictionary<Sprite, List<Vector2[]>> contours = new Dictionary<Sprite, List<Vector2[]>>();
+        private static readonly Dictionary<(Sprite, int), List<Vector2[]>> contours = new Dictionary<(Sprite, int), List<Vector2[]>>();
 
-        // Контуры рисунка; пусто — альфу прочитать не удалось.
-        public static List<Vector2[]> Of(Sprite sprite)
+        // Контуры рисунка; band — доля высоты непрозрачного от низа (1 — весь
+        // рисунок). Пусто — альфу прочитать не удалось.
+        public static List<Vector2[]> Of(Sprite sprite, float band = 1)
         {
             if (sprite == null || sprite.texture == null) return new List<Vector2[]>();
-            if (contours.TryGetValue(sprite, out List<Vector2[]> cached)) return cached;
+            int key = Mathf.RoundToInt(Mathf.Clamp01(band) * 100);
+            if (contours.TryGetValue((sprite, key), out List<Vector2[]> cached)) return cached;
             if (contours.Count > 4096) contours.Clear();
-            List<Vector2[]> result = Build(sprite);
-            contours[sprite] = result;
+            List<Vector2[]> result = Build(sprite, key / 100f);
+            contours[(sprite, key)] = result;
             return result;
         }
 
-        private static List<Vector2[]> Build(Sprite sprite)
+        private static List<Vector2[]> Build(Sprite sprite, float band)
         {
             List<Vector2[]> result = new List<Vector2[]>();
             AlphaGrid grid = Grid(sprite.texture);
@@ -58,6 +61,7 @@ namespace KingdomSurvival.LocationRendering
             for (int y = 0; y < h; y++)
                 for (int x = 0; x < w; x++)
                     inside[y * w + x] = grid.Alpha[(y0 + y) * grid.Width + x0 + x] >= AlphaCutoff;
+            Band(inside, w, h, band);
             float ppu = Mathf.Max(.001f, sprite.pixelsPerUnit);
             foreach (List<Vector2> loop in Trace(inside, w, h))
             {
@@ -73,6 +77,24 @@ namespace KingdomSurvival.LocationRendering
                 result.Add(points);
             }
             return result;
+        }
+
+        // Оставить нижнюю долю band непрозрачного (от его нижнего ряда к верхнему).
+        public static void Band(bool[] inside, int w, int h, float band)
+        {
+            if (band >= 1) return;
+            int low = -1, high = -1;
+            for (int y = 0; y < h && low < 0; y++)
+                for (int x = 0; x < w; x++)
+                    if (inside[y * w + x]) { low = y; break; }
+            for (int y = h - 1; y >= 0 && high < 0; y--)
+                for (int x = 0; x < w; x++)
+                    if (inside[y * w + x]) { high = y; break; }
+            if (low < 0) return;
+            int cut = low + Mathf.Max(1, Mathf.CeilToInt((high - low + 1) * Mathf.Clamp01(band)));
+            for (int y = cut; y < h; y++)
+                for (int x = 0; x < w; x++)
+                    inside[y * w + x] = false;
         }
 
         private static AlphaGrid Grid(Texture2D texture)

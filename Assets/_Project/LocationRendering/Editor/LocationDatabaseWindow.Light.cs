@@ -98,16 +98,17 @@ namespace KingdomSurvival.LocationRendering.Editor
             Toggle("Люди отбрасывают тени (солнце и огонь)", sky.PeopleCastShadows, value => sky.PeopleCastShadows = value);
             Number("Длина тени людей (множитель)", sky.PeopleShadowLength, 0, 3, value => sky.PeopleShadowLength = value);
             LocationShadowStyle style = sky.ShadowStyle;
-            Help("Тень от солнца — силуэт: верен, пока свет спереди или сзади, и плавно гаснет, когда свет уходит вбок (плоский рисунок сбоку дал бы линию). Тень от огня — с учётом высоты (настройки у источника).");
+            Help("Тень от солнца и огня — силуэт: верен, пока свет спереди или сзади, и плавно гаснет, когда свет уходит вбок (плоский рисунок сбоку дал бы линию).");
             Number("Силуэт исчезает: свет сбоку ближе, чем (°)", style.SilhouetteHiddenBelow, 0, 90, value => style.SilhouetteHiddenBelow = value,
                 "0° — свет строго сбоку, 90° — строго спереди или сзади. Ближе к боку силуэт плоского рисунка сплющивается в линию, поэтому его нет.");
             Number("Силуэт виден полностью от (°)", style.SilhouetteFullAbove, 0, 90, value => style.SilhouetteFullAbove = value,
                 "Между двумя углами силуэт плавно проявляется.");
             Toggle("Силуэт при свете сзади (тень к зрителю)", style.SilhouetteBehind, value => style.SilhouetteBehind = value);
             Number("Темнота силуэта (множитель)", style.SilhouetteOpacity, 0, 2, value => style.SilhouetteOpacity = value);
-            Number("Тень от огня: глубина предметов (доля ширины)", style.LightObjectDepth, .05f, 1, value => style.LightObjectDepth = value,
-                "Огонь сбоку видит глубину предмета, а не ширину рисунка: ящик сбоку уже, чем спереди. Предмет стоит серединой глубины позади переднего края.");
-            Number("Тень от огня: глубина людей (доля ширины)", style.LightPeopleDepth, .05f, 1, value => style.LightPeopleDepth = value);
+            Number("Огонь перекрывает: низ людей (доля высоты)", style.FireBlockPeople, .05f, 1, value => style.FireBlockPeople = value,
+                "Тень от огня идёт только от нижней части рисунка — той, которой человек стоит на земле: между ногами свет проходит дальше, под руками светло. 1 — весь рисунок.");
+            Number("Огонь перекрывает: низ предметов (доля высоты)", style.FireBlockObjects, .05f, 1, value => style.FireBlockObjects = value,
+                "У дерева — ствол без кроны, у ящика — почти весь.");
             AddButton(settings, "Стиль теней по умолчанию", () => Change(() => sky.ShadowStyle = new LocationShadowStyle(), true));
 
             Heading("Источники света");
@@ -259,19 +260,12 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Number("Темнота своей тени", light.OwnShadowOpacity, 0, 1, value => light.OwnShadowOpacity = value);
                 }
             }
-            Toggle("Тени предметов и людей", light.Shadows, value => light.Shadows = value, true);
+            Toggle("Тени предметов и людей (по контуру, до края света)", light.Shadows, value => light.Shadows = value, true);
             if (light.Shadows)
             {
-                Toggle("С учётом высоты (свет проходит сквозь просветы и идёт дальше)", light.ShadowsFromHeight, value => light.ShadowsFromHeight = value, true);
-                if (light.ShadowsFromHeight)
-                    Number("Высота огня", light.Height, .2f, 6, value => light.Height = value,
-                        "Над землёй, в единицах мира. Части предмета выше огня на землю не падают, чуть ниже — тянутся до края света; ниже огонь — длиннее тени.");
-                else
-                    Help("Тень — 2D-конус Unity от контура рисунка до края света: проще, но без высоты.");
                 Number("Темнота тени", light.ShadowStrength, 0, 1, value => light.ShadowStrength = value);
                 Number("Мягкость края", light.ShadowSoftness, 0, 1, value => light.ShadowSoftness = value);
-                if (!light.ShadowsFromHeight)
-                    Number("Мягкость вдали", light.ShadowSoftnessFalloff, 0, 1, value => light.ShadowSoftnessFalloff = value);
+                Number("Мягкость вдали", light.ShadowSoftnessFalloff, 0, 1, value => light.ShadowSoftnessFalloff = value);
             }
 
             Heading("Тонкая настройка");

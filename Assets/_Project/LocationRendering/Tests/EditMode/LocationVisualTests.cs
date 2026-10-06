@@ -200,22 +200,25 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(loops.Max(loop => loop.Count), Is.LessThan(40), "Лесенка пикселей упрощена.");
         }
 
-        // Тень от огня с высотой накрывает путь от основания предмета до края
-        // света — в сторону от огня, с любой стороны (сбоку — не линия).
+        // Огонь перекрывает только нижняя часть рисунка: у «человека» с двумя
+        // ногами и туловищем — две ноги отдельно (между ними свет), руки нет.
         [Test]
-        public void LightShadowReachesEdgeOfLightAwayFromFire()
+        public void FireBlockBandKeepsOnlyFeet()
         {
-            for (int degree = 0; degree < 360; degree += 45)
-            {
-                Vector2 direction = new Vector2(Mathf.Cos(degree * Mathf.Deg2Rad), Mathf.Sin(degree * Mathf.Deg2Rad));
-                Vector2 foot = direction * 1.5f;
-                Rect bounds = LocationWorldRenderer.LightShadowBounds(Vector2.zero, 3, foot, .4f);
-                Vector2 edge = direction * 3;
-                Assert.That(bounds.Contains(edge * .999f), Is.True, "До края света (угол " + degree + ").");
-                Assert.That(bounds.Contains(foot + direction * .01f), Is.True, "От основания.");
-                Assert.That(bounds.Contains(-direction), Is.False, "Не в сторону огня.");
-                Assert.That(Mathf.Min(bounds.width, bounds.height), Is.GreaterThan(.5f), "Не линия.");
-            }
+            const int w = 10, h = 20;
+            bool[] inside = new bool[w * h];
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                {
+                    bool legs = y < 8 && (x == 2 || x == 3 || x == 6 || x == 7);
+                    bool body = y >= 8 && x >= 2 && x <= 7;
+                    inside[y * w + x] = legs || body;
+                }
+            Assert.That(LocationAlphaContours.Trace((bool[])inside.Clone(), w, h).Count, Is.EqualTo(1), "Весь рисунок — один контур.");
+            LocationAlphaContours.Band(inside, w, h, .35f);
+            List<List<Vector2>> feet = LocationAlphaContours.Trace(inside, w, h);
+            Assert.That(feet.Count, Is.EqualTo(2), "Низ — две ноги, между ними свет.");
+            Assert.That(feet.SelectMany(loop => loop).Max(point => point.y), Is.LessThanOrEqualTo(7), "Туловище и руки свет не перекрывают.");
         }
 
         // Контур: отражённый рисунок — отражённый контур; оболочка — выпуклая.

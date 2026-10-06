@@ -42,6 +42,10 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float Radius = 3;
         public float Softness = .7f;
         public bool Shadows = true;
+        // Тень с учётом высоты: предмет — карточка лицом к огню, огонь — на
+        // высоте Height; луч проходит сквозь прозрачное и продолжается. Нет —
+        // 2D-конус Unity по контуру до края света.
+        public bool ShadowsFromHeight = true;
         public float ShadowStrength = .8f;
         public float ShadowSoftness = .25f;
         public bool NightOnly;
@@ -82,8 +86,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         public bool NormalMaps = true;
         public bool NormalMapsAccurate = true;
         public float NormalMapDistance = 1.5f;
-        // Тень предметов и людей от этого источника — силуэт по рисунку,
-        // отброшенный от света; длина зависит от высоты источника.
+        // Высота огня (для тени с учётом высоты). ProjectsShadows и поля
+        // силуэта ниже — от прежней тени-силуэта огня, не используются (данные).
         public bool ProjectsShadows = true;
         public float Height = 1.4f;
         public float ProjectedShadowOpacity = .55f;

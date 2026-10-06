@@ -111,10 +111,11 @@ namespace KingdomSurvival.BattlefieldDatabase
 
 namespace KingdomSurvival.BattlefieldDatabase
 {
-    // ПР-12М: стиль теней от солнца и огня. Тень — прямая проекция рисунка
+    // ПР-12М: стиль теней. От солнца — прямая проекция рисунка
     // (силуэт): верна, пока свет спереди или сзади, и плавно гаснет, когда
     // свет уходит вбок — плоский рисунок там дал бы линию. Углы и темнота
-    // подбираются в «Стиле теней» Базы локаций.
+    // подбираются в «Стиле теней» Базы локаций. От огня — тень с учётом
+    // высоты (LocationLightShadow); здесь — глубина предметов и людей для неё.
     [System.Serializable]
     public sealed class LocationShadowStyle
     {
@@ -124,6 +125,11 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float SilhouetteFullAbove = 35;
         public bool SilhouetteBehind = true;
         public float SilhouetteOpacity = 1;
+        // Тень от огня с высотой: глубина предмета и человека (доля ширины
+        // рисунка) — сбоку огонь видит её, а не ширину; предмет стоит
+        // серединой глубины позади переднего края.
+        public float LightObjectDepth = .55f;
+        public float LightPeopleDepth = .45f;
 
         // 0..1: насколько виден силуэт при тени вдоль vector (экран).
         public float SilhouetteShare(UnityEngine.Vector2 vector)

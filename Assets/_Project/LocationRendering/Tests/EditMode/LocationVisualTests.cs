@@ -200,6 +200,24 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(loops.Max(loop => loop.Count), Is.LessThan(40), "Лесенка пикселей упрощена.");
         }
 
+        // Тень от огня с высотой накрывает путь от основания предмета до края
+        // света — в сторону от огня, с любой стороны (сбоку — не линия).
+        [Test]
+        public void LightShadowReachesEdgeOfLightAwayFromFire()
+        {
+            for (int degree = 0; degree < 360; degree += 45)
+            {
+                Vector2 direction = new Vector2(Mathf.Cos(degree * Mathf.Deg2Rad), Mathf.Sin(degree * Mathf.Deg2Rad));
+                Vector2 foot = direction * 1.5f;
+                Rect bounds = LocationWorldRenderer.LightShadowBounds(Vector2.zero, 3, foot, .4f);
+                Vector2 edge = direction * 3;
+                Assert.That(bounds.Contains(edge * .999f), Is.True, "До края света (угол " + degree + ").");
+                Assert.That(bounds.Contains(foot + direction * .01f), Is.True, "От основания.");
+                Assert.That(bounds.Contains(-direction), Is.False, "Не в сторону огня.");
+                Assert.That(Mathf.Min(bounds.width, bounds.height), Is.GreaterThan(.5f), "Не линия.");
+            }
+        }
+
         // Контур: отражённый рисунок — отражённый контур; оболочка — выпуклая.
         [Test]
         public void ContourHullAndMirror()

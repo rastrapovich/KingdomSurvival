@@ -44,11 +44,23 @@ namespace KingdomSurvival.LocationRendering
             public ShadowCaster2D Contour;
             public Sprite ContourSprite;
             public bool ContourFlip;
+            // Тени от огня с учётом высоты (по источникам).
+            public readonly SpriteRenderer[] LightShadows = new SpriteRenderer[MaxLightShadows];
         }
 
+        private sealed class ActiveLight
+        {
+            public Placed Placed;
+            public Vector2 Position;
+            public float Brightness;
+        }
 
         private readonly List<Caster> casters = new List<Caster>();
-        private Material shadowMaterial;
+        private Material shadowMaterial, lightShadowMaterial;
+        private Sprite lightShadowSquare;
+        private readonly List<ActiveLight> activeLights = new List<ActiveLight>();
+        // Сколько источников дают тень с учётом высоты одному предмету (самые сильные).
+        public const int MaxLightShadows = 2;
         private MaterialPropertyBlock shadowBlock;
         private Volume postVolume;
         private VolumeProfile postProfile;
@@ -57,6 +69,10 @@ namespace KingdomSurvival.LocationRendering
 
         private static readonly int ShadowVectorId = Shader.PropertyToID("_ShadowVector");
         private static readonly int GroundYId = Shader.PropertyToID("_GroundY");
+        private static readonly int CasterTexId = Shader.PropertyToID("_CasterTex");
+        private static readonly int SpriteRectId = Shader.PropertyToID("_SpriteRect");
+        private static readonly int FootId = Shader.PropertyToID("_Foot");
+        private static readonly int LightId = Shader.PropertyToID("_Light");
         private static readonly int ShadowColorId = Shader.PropertyToID("_ShadowColor");
         private static readonly int BlurId = Shader.PropertyToID("_Blur");
         private static readonly int UVRectId = Shader.PropertyToID("_UVRect");
@@ -95,6 +111,16 @@ namespace KingdomSurvival.LocationRendering
             Shader shader = Resources.Load<Shader>("LocationRendering/LocationProjectedShadow");
             if (shader != null)
                 shadowMaterial = Own(new Material(shader) { name = "Тень-силуэт места" });
+            Shader lightShadow = Resources.Load<Shader>("LocationRendering/LocationLightShadow");
+            if (lightShadow != null && lightShadow.isSupported)
+            {
+                lightShadowMaterial = Own(new Material(lightShadow) { name = "Тень от огня с высотой" });
+                Texture2D white = Own(new Texture2D(4, 4, TextureFormat.RGBA32, false) { name = "Квадрат тени от огня" });
+                white.SetPixels32(Enumerable.Repeat(new Color32(255, 255, 255, 255), 16).ToArray());
+                white.Apply();
+                // Квадрат 1×1 от левого нижнего угла: растягивается на всю тень.
+                lightShadowSquare = Own(Sprite.Create(white, new Rect(0, 0, 4, 4), Vector2.zero, 4, 0, SpriteMeshType.FullRect));
+            }
             shadowBlock = new MaterialPropertyBlock();
 
             GameObject volumeObject = Child("Обработка кадра");
@@ -160,7 +186,8 @@ namespace KingdomSurvival.LocationRendering
             light.color = data.Color;
             light.intensity = data.Intensity;
             light.falloffIntensity = Mathf.Clamp01(data.Falloff);
-            light.shadowsEnabled = data.Shadows;
+            // Тень с учётом высоты рисует база; 2D-конус Unity — только без неё.
+            light.shadowsEnabled = data.Shadows && !data.ShadowsFromHeight;
             light.shadowIntensity = data.ShadowStrength;
             light.shadowSoftness = data.ShadowSoftness;
             light.shadowSoftnessFalloffIntensity = Mathf.Clamp01(data.ShadowSoftnessFalloff);
@@ -198,6 +225,7 @@ namespace KingdomSurvival.LocationRendering
                 sunOpacity = opacity;
             }
 
+            activeLights.Clear();
             foreach (Placed item in placed)
             {
                 if (item.Light == null) continue;
@@ -210,6 +238,9 @@ namespace KingdomSurvival.LocationRendering
                 // Днём своя тень огня слабее: её перебивает общий свет.
                 float flicker = Mathf.Lerp(1, Mathf.Clamp01(intensity / Mathf.Max(.01f, data.Intensity)), FlickerShadowShare);
                 UpdateRadialShadows(item, on ? flicker * (Indoor ? 1 : Mathf.Lerp(1, .25f, DayFactor)) : 0);
+                if (on && data.Shadows && data.ShadowsFromHeight && (data.Shape == LocationLightShape.Point || data.Shape == LocationLightShape.Spot))
+                    activeLights.Add(new ActiveLight { Placed = item, Position = item.Light.transform.position,
+                        Brightness = flicker * (Indoor ? 1 : Mathf.Lerp(1, .25f, DayFactor)) });
             }
             ApplyPost();
             UpdateShadows();
@@ -253,10 +284,152 @@ namespace KingdomSurvival.LocationRendering
                 // Солнце (или луна) — тень-силуэт.
                 CastShadow(caster, 0, enabled && sunOpacity > .001f, sunRaw * scale, Sky.Sun.Color, sunOpacity,
                     Sky.Sun.Softness);
-                // Огонь и другие источники — тень по контуру рисунка до края света.
+                // Огонь и другие источники: тень с учётом высоты или 2D-конус по контуру.
                 UpdateContour(caster, enabled);
+                UpdateLightShadows(caster, enabled);
             }
         }
+
+        // ------------------------------------------------------------------
+        // Тени от огня с учётом высоты
+        // ------------------------------------------------------------------
+
+        // До MaxLightShadows самых сильных источников рядом: предмет —
+        // карточка лицом к огню, огонь — на своей высоте (LocationLightShadow).
+        private void UpdateLightShadows(Caster caster, bool enabled)
+        {
+            int slot = 0;
+            if (enabled && lightShadowMaterial != null && caster.Source.sprite != null && caster.Source.sprite.texture != null)
+            {
+                Vector2 foot = caster.Anchor.position;
+                activeLights.Sort((a, b) => Strength(b, foot).CompareTo(Strength(a, foot)));
+                foreach (ActiveLight light in activeLights)
+                {
+                    if (slot >= MaxLightShadows) break;
+                    if (caster.Anchor.IsChildOf(light.Placed.Anchor)) continue;
+                    if (Strength(light, foot) <= .01f) break;
+                    SetLightShadow(caster, slot++, light, foot);
+                }
+            }
+            for (; slot < MaxLightShadows; slot++)
+                if (caster.LightShadows[slot] != null) caster.LightShadows[slot].enabled = false;
+        }
+
+        // Сила тени от источника у предмета: яркость и близость; 0 — вне света.
+        private static float Strength(ActiveLight light, Vector2 foot)
+        {
+            LocationLightDefinition data = light.Placed.Data.Light;
+            Vector2 away = foot - light.Position;
+            float distance = away.magnitude, radius = Mathf.Max(.01f, data.Radius);
+            if (distance < .05f || distance > radius) return 0;
+            if (data.Shape == LocationLightShape.Spot)
+            {
+                float angle = Vector2.Angle(new Vector2(Mathf.Cos(data.Direction * Mathf.Deg2Rad), Mathf.Sin(data.Direction * Mathf.Deg2Rad)), away);
+                if (angle > data.OuterAngle / 2) return 0;
+            }
+            return light.Brightness * (1 - distance / radius);
+        }
+
+        private void SetLightShadow(Caster caster, int slot, ActiveLight light, Vector2 foot)
+        {
+            SpriteRenderer shadow = caster.LightShadows[slot];
+            if (shadow == null)
+            {
+                GameObject target = new GameObject("Тень от огня");
+                target.transform.SetParent(caster.Anchor, false);
+                shadow = target.AddComponent<SpriteRenderer>();
+                shadow.sprite = lightShadowSquare;
+                shadow.sharedMaterial = lightShadowMaterial;
+                shadow.sortingOrder = ShadowSortingOrder;
+                caster.LightShadows[slot] = shadow;
+            }
+            shadow.enabled = true;
+            LocationLightDefinition data = light.Placed.Data.Light;
+            SpriteRenderer source = caster.Source;
+            Vector4 rect = SpriteRectFromFoot(source, foot);
+            Vector2 card = LightShadowCard(light.Position, foot, ref rect, caster.People, Sky.ShadowStyle);
+            Rect bounds = LightShadowBounds(light.Position, data.Radius, card, Mathf.Max(Mathf.Abs(rect.x), Mathf.Abs(rect.y)));
+            Transform transform = shadow.transform;
+            transform.position = new Vector3(bounds.xMin, bounds.yMin, source.transform.position.z);
+            Vector3 parent = caster.Anchor.lossyScale;
+            transform.localScale = new Vector3(
+                bounds.width / (Mathf.Abs(parent.x) < 1e-5f ? 1 : parent.x),
+                bounds.height / (Mathf.Abs(parent.y) < 1e-5f ? 1 : parent.y), 1);
+
+            Vector4 uvRect = SpriteUVRect(source.sprite);
+            shadowBlock.Clear();
+            shadowBlock.SetTexture(CasterTexId, source.sprite.texture);
+            shadowBlock.SetVector(UVRectId, uvRect);
+            shadowBlock.SetVector(SpriteRectId, rect);
+            shadowBlock.SetVector(FootId, card);
+            shadowBlock.SetVector(LightId, new Vector4(light.Position.x, light.Position.y, Mathf.Max(.1f, data.Height), Mathf.Max(.01f, data.Radius)));
+            shadowBlock.SetFloat(BlurId, Mathf.Clamp01(data.ShadowSoftness) * .03f * (uvRect.w - uvRect.y));
+            shadowBlock.SetColor(ShadowColorId, new Color(0, 0, 0, Mathf.Clamp01(data.ShadowStrength * light.Brightness)));
+            shadow.SetPropertyBlock(shadowBlock);
+        }
+
+        // Карточка предмета для огня: огонь видит ширину рисунка спереди и сзади,
+        // а сбоку — глубину (доля ширины из стиля); ширина сужается плавно.
+        // Предмет стоит серединой глубины позади переднего края (опоры), человек —
+        // на опоре. Возвращает середину карточки; rect — ширины от неё.
+        public static Vector2 LightShadowCard(Vector2 light, Vector2 foot, ref Vector4 rect, bool people, LocationShadowStyle style)
+        {
+            float width = Mathf.Abs(rect.y - rect.x);
+            float share = Mathf.Clamp(people ? style.LightPeopleDepth : style.LightObjectDepth, .05f, 1);
+            Vector2 toFoot = foot - light;
+            float facing = toFoot.sqrMagnitude > 1e-8f ? Mathf.Abs(toFoot.normalized.y) : 1;
+            float scale = Mathf.Lerp(share, 1, facing);
+            float middle = (rect.x + rect.y) / 2;
+            rect.x = middle + (rect.x - middle) * scale;
+            rect.y = middle + (rect.y - middle) * scale;
+            return people ? foot : foot + new Vector2(0, width * share / 2);
+        }
+
+        // Прямоугольник, накрывающий тень: от основания карточки (ширина
+        // halfWidth в обе стороны) до края света по лучам через её края.
+        public static Rect LightShadowBounds(Vector2 light, float radius, Vector2 foot, float halfWidth)
+        {
+            Vector2 toFoot = foot - light;
+            Vector2 d = toFoot.sqrMagnitude > 1e-8f ? toFoot.normalized : Vector2.up;
+            Vector2 side = new Vector2(d.y, -d.x) * halfWidth;
+            Vector2 a = foot - side, b = foot + side;
+            radius = Mathf.Max(radius, toFoot.magnitude);
+            Vector2[] points =
+            {
+                a, b, light + d * radius,
+                light + (a - light).normalized * radius, light + (b - light).normalized * radius
+            };
+            Vector2 min = points[0], max = points[0];
+            foreach (Vector2 point in points)
+            {
+                min = Vector2.Min(min, point);
+                max = Vector2.Max(max, point);
+            }
+            return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+        }
+
+        // Рисунок (опора, масштаб, отражение) — в прямоугольник от опоры:
+        // x, y — ширина у u = 0 и u = 1; z, w — высота у v = 0 и v = 1.
+        private static Vector4 SpriteRectFromFoot(SpriteRenderer image, Vector2 foot)
+        {
+            Sprite sprite = image.sprite;
+            Rect texture;
+            Vector2 offset;
+            try { texture = sprite.textureRect; offset = sprite.textureRectOffset; }
+            catch (System.Exception) { texture = sprite.rect; offset = Vector2.zero; }
+            float ppu = Mathf.Max(.001f, sprite.pixelsPerUnit);
+            Vector2 low = (offset - sprite.pivot) / ppu, high = low + texture.size / ppu;
+            Vector3 position = image.transform.position, scale = image.transform.lossyScale;
+            float left = image.flipX ? -low.x : low.x, right = image.flipX ? -high.x : high.x;
+            return new Vector4(
+                position.x + scale.x * left - foot.x,
+                position.x + scale.x * right - foot.x,
+                position.y + scale.y * low.y - foot.y,
+                position.y + scale.y * high.y - foot.y);
+        }
+
+        // Сколько сейчас теней от огня с учётом высоты (для проверки).
+        public int LightShadowCount => casters.Sum(caster => caster.LightShadows.Count(shadow => shadow != null && shadow.enabled));
 
         // Тень-силуэт от солнца: гаснет, когда свет уходит вбок
         // (плоский рисунок сбоку дал бы линию).

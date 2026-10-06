@@ -1,18 +1,13 @@
 // ПР-12М: отброшенная тень-силуэт для мест (солнце и местные источники).
 // Тот же спрайт, что у предмета или фигуры, ложится на землю от точки опоры:
 // чем выше точка рисунка над землёй (_GroundY), тем дальше она уходит по
-// _ShadowVector (сдвиг на единицу высоты), а ширина рисунка ложится вдоль
-// _ShadowSide от точки опоры (_GroundX, _GroundY). При свете спереди сторона —
-// (1, 0), как у прямой проекции; сбоку и сзади силуэт поворачивается и
-// ложится на землю, а не сплющивается в линию. Края смягчаются выборкой рядом.
+// _ShadowVector (сдвиг на единицу высоты). Края смягчаются выборкой рядом.
 Shader "Kingdom Survival/Location Projected Shadow"
 {
     Properties
     {
         _MainTex ("Sprite Texture", 2D) = "white" {}
         _ShadowVector ("Shadow Vector", Vector) = (0.5, 0.3, 0, 0)
-        _ShadowSide ("Shadow Side", Vector) = (1, 0, 0, 0)
-        _GroundX ("Ground X", Float) = 0
         _GroundY ("Ground Y", Float) = 0
         _ShadowColor ("Shadow Color", Color) = (0, 0, 0, 0.5)
         _Blur ("Blur", Float) = 0.004
@@ -58,8 +53,6 @@ Shader "Kingdom Survival/Location Projected Shadow"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _ShadowVector;
-                float4 _ShadowSide;
-                float _GroundX;
                 float _GroundY;
                 half4 _ShadowColor;
                 float _Blur;
@@ -78,8 +71,8 @@ Shader "Kingdom Survival/Location Projected Shadow"
                 // Часть рисунка ниже точки опоры не прижимается к земле (полоска),
                 // а отсекается во фрагменте.
                 float height = world.y - _GroundY;
-                float side = world.x - _GroundX;
-                world.xy = float2(_GroundX, _GroundY) + height * _ShadowVector.xy + side * _ShadowSide.xy;
+                world.x += height * _ShadowVector.x;
+                world.y = _GroundY + height * _ShadowVector.y;
                 o.positionCS = TransformWorldToHClip(world);
                 o.uv = input.uv;
                 o.height = height;

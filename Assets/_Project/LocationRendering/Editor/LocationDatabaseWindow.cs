@@ -451,6 +451,17 @@ namespace KingdomSurvival.LocationRendering.Editor
                     if (!string.IsNullOrEmpty(path)) SetBackgroundFrom(Array.Empty<Sprite>(), new[] { path });
                 });
                 NormalMapField("Нормали рисунка места", Visual.Background, Visual.BackgroundNormalMap, value => Visual.BackgroundNormalMap = value);
+                if (Visual.BackgroundNormalMap != null)
+                    AddButton(settings, "Выпрямить нормали земли (снято наклонной камерой)", () =>
+                    {
+                        Texture2D level = GroundNormals.LevelCopy(Visual.BackgroundNormalMap, out string message);
+                        if (level != null)
+                        {
+                            SpriteNormalMaps.Assign(Visual.Background, level, out _);
+                            Change(() => Visual.BackgroundNormalMap = level, true);
+                        }
+                        status.text = message;
+                    });
             }
             Toggle("Рисунок — временная заглушка", location.PlaceholderArt, value => location.PlaceholderArt = value);
 

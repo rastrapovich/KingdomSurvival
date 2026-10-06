@@ -244,7 +244,9 @@ namespace KingdomSurvival.LocationRendering
                 entry.Parts.Add(part);
                 if (i == 0) entry.Image = image;
                 if (part.ProjectsShadow)
-                    AddCaster(anchor, image, part.ShadowSprite, part.ShadowHeight, part.ShadowPivot, resolved.FlipX, resolved.ShadowLength, null);
+                    // Предмет со своим светом свой огонь не перекрывает (источник внутри контура).
+                    AddCaster(anchor, image, part.ShadowSprite, part.ShadowHeight, part.ShadowPivot, resolved.FlipX, resolved.ShadowLength, null,
+                        contour: !item.Light.Enabled);
             }
             if (item.Light.Enabled && item.Light.OwnRadialShadow) BuildRadialShadows(entry);
             if (resolved.OccludesLight)

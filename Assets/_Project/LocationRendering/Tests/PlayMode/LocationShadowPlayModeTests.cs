@@ -112,7 +112,8 @@ namespace KingdomSurvival.LocationRendering.Tests
             {
                 RenderTexture target = Target(renderer);
                 renderer.SetTime(1, 0);
-                Assert.That(renderer.VisibleShadowCount, Is.EqualTo(1), "Ночью тень даёт огонь.");
+                Assert.That(renderer.ContourCount, Is.EqualTo(1), "Ночью ящик перекрывает свет огня по контуру.");
+                Assert.That(renderer.VisibleShadowCount, Is.EqualTo(0), "Силуэт — только от солнца.");
                 yield return null; yield return null;
                 Save(target, "shadow-fire-night");
                 float behind = Brightness(target, new Vector2(1200, 505));

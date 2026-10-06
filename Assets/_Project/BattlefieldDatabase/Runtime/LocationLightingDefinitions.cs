@@ -111,6 +111,37 @@ namespace KingdomSurvival.BattlefieldDatabase
 
 namespace KingdomSurvival.BattlefieldDatabase
 {
+    // ПР-12М: стиль теней от солнца и огня. Тень — прямая проекция рисунка
+    // (силуэт): верна, пока свет спереди или сзади, и плавно гаснет, когда
+    // свет уходит вбок — плоский рисунок там дал бы линию. Углы и темнота
+    // подбираются в «Стиле теней» Базы локаций.
+    [System.Serializable]
+    public sealed class LocationShadowStyle
+    {
+        // Угол света от бока (0° — строго сбоку, 90° — спереди или сзади):
+        // ниже «исчезает» силуэта нет, выше «виден полностью» — полный.
+        public float SilhouetteHiddenBelow = 12;
+        public float SilhouetteFullAbove = 35;
+        public bool SilhouetteBehind = true;
+        public float SilhouetteOpacity = 1;
+
+        // 0..1: насколько виден силуэт при тени вдоль vector (экран).
+        public float SilhouetteShare(UnityEngine.Vector2 vector)
+        {
+            if (vector.sqrMagnitude < 1e-8f) return 1;
+            UnityEngine.Vector2 direction = vector.normalized;
+            if (direction.y < 0 && !SilhouetteBehind) return 0;
+            float angle = UnityEngine.Mathf.Asin(UnityEngine.Mathf.Clamp(UnityEngine.Mathf.Abs(direction.y), 0, 1)) * UnityEngine.Mathf.Rad2Deg;
+            float from = UnityEngine.Mathf.Clamp(SilhouetteHiddenBelow, 0, 90), to = UnityEngine.Mathf.Clamp(SilhouetteFullAbove, 0, 90);
+            if (to <= from) return angle >= from ? 1 : 0;
+            float t = UnityEngine.Mathf.Clamp01((angle - from) / (to - from));
+            return t * t * (3 - 2 * t);
+        }
+
+        public LocationShadowStyle Clone() =>
+            UnityEngine.JsonUtility.FromJson<LocationShadowStyle>(UnityEngine.JsonUtility.ToJson(this));
+    }
+
     // ПР-12М: общий свет мира — небо одно на все места: кривая суток и цвет
     // неба, солнце и луна, стиль теней, обработка кадра. Место либо берёт его
     // («Общий свет мира»), либо своё. «Улица / под крышей», источники и
@@ -123,7 +154,9 @@ namespace KingdomSurvival.BattlefieldDatabase
         public LocationPostEffects Post = new LocationPostEffects();
         public bool PeopleCastShadows = true;
         public float PeopleShadowLength = 1;
+        // Прежняя «толщина тени сбоку» — не используется (данные).
         public float ShadowMinLean = .4f;
+        public LocationShadowStyle ShadowStyle = new LocationShadowStyle();
     }
 
     // Небо места: общий свет мира или свой — одна точка чтения и правки
@@ -172,10 +205,14 @@ namespace KingdomSurvival.BattlefieldDatabase
             set { if (IsWorld) World.PeopleShadowLength = value; else visual.PeopleShadowLength = value; }
         }
 
-        public float ShadowMinLean
+        public LocationShadowStyle ShadowStyle
         {
-            get => IsWorld ? World.ShadowMinLean : visual.ShadowMinLean;
-            set { if (IsWorld) World.ShadowMinLean = value; else visual.ShadowMinLean = value; }
+            get
+            {
+                if (IsWorld) return World.ShadowStyle ?? (World.ShadowStyle = new LocationShadowStyle());
+                return visual.ShadowStyle ?? (visual.ShadowStyle = new LocationShadowStyle());
+            }
+            set { if (IsWorld) World.ShadowStyle = value; else visual.ShadowStyle = value; }
         }
 
         // Своё небо места — копия общего (кнопка «Скопировать общий свет мира»).
@@ -187,7 +224,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             visual.Post = UnityEngine.JsonUtility.FromJson<LocationPostEffects>(UnityEngine.JsonUtility.ToJson(world.Post));
             visual.PeopleCastShadows = world.PeopleCastShadows;
             visual.PeopleShadowLength = world.PeopleShadowLength;
-            visual.ShadowMinLean = world.ShadowMinLean;
+            visual.ShadowStyle = (world.ShadowStyle ?? new LocationShadowStyle()).Clone();
         }
 
         public static LocationWorldLighting FromOwn(LocationVisualDefinition visual)
@@ -199,7 +236,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             world.Post = UnityEngine.JsonUtility.FromJson<LocationPostEffects>(UnityEngine.JsonUtility.ToJson(visual.Post));
             world.PeopleCastShadows = visual.PeopleCastShadows;
             world.PeopleShadowLength = visual.PeopleShadowLength;
-            world.ShadowMinLean = visual.ShadowMinLean;
+            world.ShadowStyle = (visual.ShadowStyle ?? new LocationShadowStyle()).Clone();
             return world;
         }
     }

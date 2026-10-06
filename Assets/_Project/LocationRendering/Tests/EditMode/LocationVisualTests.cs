@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using KingdomSurvival.BattlefieldDatabase;
+using KingdomSurvival.LocationRendering.Editor;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace KingdomSurvival.LocationRendering.Tests
 {
@@ -125,30 +128,116 @@ namespace KingdomSurvival.LocationRendering.Tests
             Object.DestroyImmediate(texture);
         }
 
-        // Свет обходит предмет по кругу: тень одна и никогда не сплющивается в
-        // линию — сторона тени не параллельна её направлению, меняется
-        // непрерывно. Свет спереди — прямая проекция, сбоку — силуэт лежит на
-        // земле с заданной толщиной.
+        // Силуэт верен при свете спереди и сзади и плавно гаснет, когда свет
+        // уходит вбок (иначе плоский рисунок даёт линию); без скачков.
         [Test]
-        public void ShadowNeverCollapsesIntoLine()
+        public void SilhouetteFadesWhenLightGoesSideways()
         {
-            const float depth = .4f;
-            Assert.That(LocationWorldRenderer.ShadowSide(new Vector2(.3f, 1), depth), Is.EqualTo(Vector2.right), "Свет спереди — ширина остаётся шириной.");
-            Vector2 side = LocationWorldRenderer.ShadowSide(new Vector2(2, 0), depth);
-            Assert.That(side.x, Is.EqualTo(0).Within(1e-4f));
-            Assert.That(Mathf.Abs(side.y), Is.EqualTo(depth).Within(1e-4f), "Сбоку — поперёк тени толщина предмета.");
-            Vector2 previous = Vector2.zero;
-            for (int degree = 0; degree <= 360; degree++)
+            LocationShadowStyle style = new LocationShadowStyle();
+            Assert.That(style.SilhouetteShare(new Vector2(0, 1)), Is.EqualTo(1), "Свет спереди — силуэт полный.");
+            Assert.That(style.SilhouetteShare(new Vector2(0, -1)), Is.EqualTo(1), "Свет сзади — тень к зрителю.");
+            Assert.That(style.SilhouetteShare(new Vector2(2, 0)), Is.EqualTo(0), "Строго сбоку силуэта нет.");
+            Assert.That(style.SilhouetteShare(new Vector2(2, .2f)), Is.EqualTo(0), "Почти сбоку — тоже (иначе линия).");
+            Assert.That(style.SilhouetteShare(Vector2.zero), Is.EqualTo(1), "Свет сверху.");
+            style.SilhouetteBehind = false;
+            Assert.That(style.SilhouetteShare(new Vector2(0, -1)), Is.EqualTo(0), "Можно выключить силуэт при свете сзади.");
+            style.SilhouetteBehind = true;
+            float previous = style.SilhouetteShare(new Vector2(1, 0));
+            for (int degree = 1; degree <= 90; degree++)
             {
                 float angle = degree * Mathf.Deg2Rad;
-                Vector2 along = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 2;
-                Vector2 current = LocationWorldRenderer.ShadowSide(along, depth);
-                float cross = along.normalized.x * current.y - along.normalized.y * current.x;
-                Assert.That(cross, Is.LessThan(-.1f), "Тень не линия (угол " + degree + ").");
-                if (degree > 0)
-                    Assert.That((current - previous).magnitude, Is.LessThan(.1f), "Без скачка (угол " + degree + ").");
-                previous = current;
+                float share = style.SilhouetteShare(new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)));
+                Assert.That(share, Is.GreaterThanOrEqualTo(previous), "Монотонно (угол " + degree + ").");
+                Assert.That(share - previous, Is.LessThan(.1f), "Без скачка (угол " + degree + ").");
+                previous = share;
             }
+        }
+
+        // Тень от огня — по контуру рисунка: предмет перекрывает свет своей
+        // формой (ShadowCaster2D), предмет со своим светом — нет.
+        [Test]
+        public void ObjectsBlockFireLightByContour_FireRingDoesNot()
+        {
+            Texture2D texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 32, 32), new Vector2(.5f, 0), 32);
+            LocationVisualObject crate = new LocationVisualObject { Id = "crate", Name = "Ящик", Sprite = sprite, Position = new Vector2(.6f, .5f), Height = 1 };
+            LocationVisualObject fire = new LocationVisualObject { Id = "ring", Name = "Кольцо", Sprite = sprite, Position = new Vector2(.3f, .5f), Height = 1 };
+            fire.Light.Enabled = true;
+            LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz", UseWorldLighting = false, Objects = { crate, fire } };
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(new LocalLocationDefinition { Id = "zz" }, visual, null))
+            {
+                renderer.SetTime(1, 0);
+                Assert.That(renderer.ContourCount, Is.EqualTo(1), "Ящик перекрывает свет, кольцо костра свой огонь — нет.");
+                ShadowCaster2D contour = renderer.Root.GetComponentsInChildren<ShadowCaster2D>()[0];
+                Assert.That(contour.castsShadows, Is.True);
+                Assert.That(contour.selfShadows, Is.False, "Сам предмет своей тенью не темнеет.");
+                Assert.That(contour.mesh != null && contour.mesh.vertexCount > 0, Is.True, "Форма тени задана.");
+            }
+            Object.DestroyImmediate(sprite);
+            Object.DestroyImmediate(texture);
+        }
+
+        // Контуры по альфе: кольцо — внешний контур и дырка (свет проходит
+        // сквозь прозрачное), обход у них противоположный; лесенка сглажена.
+        [Test]
+        public void AlphaContoursKeepHoles()
+        {
+            const int size = 20;
+            bool[] inside = new bool[size * size];
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float r = new Vector2(x + .5f - 10, y + .5f - 10).magnitude;
+                    inside[y * size + x] = r >= 4 && r <= 9;
+                }
+            List<List<Vector2>> loops = LocationAlphaContours.Trace(inside, size, size)
+                .Select(loop => LocationAlphaContours.Simplify(loop, 1.2f)).ToList();
+            Assert.That(loops.Count, Is.EqualTo(2), "Внешний край и дырка.");
+            List<float> areas = loops.Select(loop => LocationAlphaContours.Area(loop)).OrderBy(area => area).ToList();
+            Assert.That(areas[0], Is.LessThan(0), "Дырка — по часовой.");
+            Assert.That(areas[1], Is.GreaterThan(0), "Внешний — против часовой.");
+            Assert.That(Mathf.Abs(areas[1]), Is.GreaterThan(Mathf.Abs(areas[0]) * 3));
+            Assert.That(loops.Max(loop => loop.Count), Is.LessThan(40), "Лесенка пикселей упрощена.");
+        }
+
+        // Контур: отражённый рисунок — отражённый контур; оболочка — выпуклая.
+        [Test]
+        public void ContourHullAndMirror()
+        {
+            List<Vector2> hull = LocationWorldRenderer.ConvexHull(new List<Vector2>
+            {
+                new Vector2(0, 0), new Vector2(2, 0), new Vector2(2, 2), new Vector2(0, 2), new Vector2(1, 1), new Vector2(1, .5f)
+            });
+            Assert.That(hull.Count, Is.EqualTo(4), "Внутренние точки отброшены.");
+            Assert.That(hull.Contains(new Vector2(1, 1)), Is.False);
+
+            Texture2D texture = new Texture2D(16, 16, TextureFormat.RGBA32, false);
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 16, 16), new Vector2(.25f, 0), 16);
+            Vector3[] plain = LocationWorldRenderer.ContourPath(sprite, false);
+            Vector3[] flipped = LocationWorldRenderer.ContourPath(sprite, true);
+            Assert.That(plain.Length, Is.GreaterThanOrEqualTo(3));
+            Assert.That(flipped.Max(point => point.x), Is.EqualTo(-plain.Min(point => point.x)).Within(1e-4f), "Отражение по опоре.");
+            Object.DestroyImmediate(sprite);
+            Object.DestroyImmediate(texture);
+        }
+
+        // Нормали земли, снятые наклонённой камерой: после выравнивания ровная
+        // земля смотрит на камеру — огонь светит во все стороны, рельеф цел.
+        [Test]
+        public void GroundNormalsLevelToCamera()
+        {
+            Vector3 tilted = new Vector3(0, .875f, .46f).normalized;
+            Vector3 bump = Quaternion.Euler(-62, 0, 0) * new Vector3(.3f, 0, .95f).normalized;
+            Color32 Encode(Vector3 n) => new Color32((byte)((n.x * .5f + .5f) * 255), (byte)((n.y * .5f + .5f) * 255), (byte)((n.z * .5f + .5f) * 255), 255);
+            Color32[] pixels = Enumerable.Repeat(Encode(tilted), 70).Concat(new[] { Encode(bump) }).ToArray();
+            float tilt = GroundNormals.TiltDegrees(GroundNormals.MeanNormal(pixels));
+            Assert.That(tilt, Is.EqualTo(62.3f).Within(1.5f));
+            GroundNormals.Level(pixels, tilt);
+            Vector3 level = new Vector3(pixels[0].r / 255f * 2 - 1, pixels[0].g / 255f * 2 - 1, pixels[0].b / 255f * 2 - 1);
+            Assert.That(level.z, Is.GreaterThan(.98f), "Ровная земля — к камере.");
+            Assert.That(Mathf.Abs(level.y), Is.LessThan(.03f));
+            Color32 last = pixels[pixels.Length - 1];
+            Assert.That(last.r / 255f * 2 - 1, Is.EqualTo(.3f / new Vector3(.3f, 0, .95f).magnitude).Within(.03f), "Рельеф сохранён.");
         }
 
         // Небо места: общий свет мира или своё; своё начинается с копии общего.

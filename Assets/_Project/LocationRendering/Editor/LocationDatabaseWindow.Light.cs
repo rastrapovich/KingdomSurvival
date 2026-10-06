@@ -97,8 +97,15 @@ namespace KingdomSurvival.LocationRendering.Editor
             Heading("Стиль теней");
             Toggle("Люди отбрасывают тени (солнце и огонь)", sky.PeopleCastShadows, value => sky.PeopleCastShadows = value);
             Number("Длина тени людей (множитель)", sky.PeopleShadowLength, 0, 3, value => sky.PeopleShadowLength = value);
-            Number("Толщина тени сбоку", sky.ShadowMinLean, .05f, 1.5f, value => sky.ShadowMinLean = value,
-                "Когда огонь сбоку или сзади (или солнце низко), силуэт тени поворачивается и ложится на землю, а не сплющивается в линию. Это его толщина поперёк тени — доля ширины предмета.");
+            LocationShadowStyle style = sky.ShadowStyle;
+            Help("Тень от солнца и огня — силуэт: верен, пока свет спереди или сзади, и плавно гаснет, когда свет уходит вбок (плоский рисунок сбоку дал бы линию).");
+            Number("Силуэт исчезает: свет сбоку ближе, чем (°)", style.SilhouetteHiddenBelow, 0, 90, value => style.SilhouetteHiddenBelow = value,
+                "0° — свет строго сбоку, 90° — строго спереди или сзади. Ближе к боку силуэт плоского рисунка сплющивается в линию, поэтому его нет.");
+            Number("Силуэт виден полностью от (°)", style.SilhouetteFullAbove, 0, 90, value => style.SilhouetteFullAbove = value,
+                "Между двумя углами силуэт плавно проявляется.");
+            Toggle("Силуэт при свете сзади (тень к зрителю)", style.SilhouetteBehind, value => style.SilhouetteBehind = value);
+            Number("Темнота силуэта (множитель)", style.SilhouetteOpacity, 0, 2, value => style.SilhouetteOpacity = value);
+            AddButton(settings, "Стиль теней по умолчанию", () => Change(() => sky.ShadowStyle = new LocationShadowStyle(), true));
 
             Heading("Источники света");
             VisualElement add = Row();
@@ -239,13 +246,6 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
 
             Heading("Тени от этого света");
-            Toggle("Тени-силуэты предметов и людей", light.ProjectsShadows, value => light.ProjectsShadows = value, true);
-            if (light.ProjectsShadows)
-            {
-                Number("Высота источника", light.Height, .2f, 6, value => light.Height = value, "Ниже — тени длиннее. Единицы мира.");
-                Number("Темнота", light.ProjectedShadowOpacity, 0, 1, value => light.ProjectedShadowOpacity = value);
-                Number("Наибольшая длина", light.ProjectedShadowMaxLength, .2f, 6, value => light.ProjectedShadowMaxLength = value);
-            }
             if (!owner.LightOnly)
             {
                 Toggle("Своя тень предмета во все стороны (костёр, лампа)", light.OwnRadialShadow, value => light.OwnRadialShadow = value, true);
@@ -256,11 +256,11 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Number("Темнота своей тени", light.OwnShadowOpacity, 0, 1, value => light.OwnShadowOpacity = value);
                 }
             }
-            Toggle("Предметы перекрывают свет", light.Shadows, value => light.Shadows = value, true);
+            Toggle("Тени предметов и людей (по контуру, до края света)", light.Shadows, value => light.Shadows = value, true);
             if (light.Shadows)
             {
-                Number("Темнота перекрытия", light.ShadowStrength, 0, 1, value => light.ShadowStrength = value);
-                Number("Мягкость перекрытия", light.ShadowSoftness, 0, 1, value => light.ShadowSoftness = value);
+                Number("Темнота тени", light.ShadowStrength, 0, 1, value => light.ShadowStrength = value);
+                Number("Мягкость края", light.ShadowSoftness, 0, 1, value => light.ShadowSoftness = value);
                 Number("Мягкость вдали", light.ShadowSoftnessFalloff, 0, 1, value => light.ShadowSoftnessFalloff = value);
             }
 

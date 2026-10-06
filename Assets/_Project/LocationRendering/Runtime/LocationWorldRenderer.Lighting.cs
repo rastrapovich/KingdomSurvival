@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using Unity.Collections;
 using KingdomSurvival.BattlefieldDatabase;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -11,16 +13,15 @@ namespace KingdomSurvival.LocationRendering
     // ПР-12М: свет места. Общий свет — по суткам (улица) или постоянный
     // (под крышей); источники — все виды 2D-света Unity (точка, конус,
     // произвольная форма, свет-рисунок) с жизнью огня, свечением воздуха,
-    // нормалями и перекрытием предметами. Тени-силуэты от солнца и от
-    // местных источников рисует LocationProjectedShadow: 2D-свет Unity сам
-    // таких теней не даёт (у общего света теней нет, а тени источников
-    // тянутся до края радиуса). Обработка кадра — URP Volume своего слоя.
+    // нормалями и перекрытием предметами. Тень-силуэт от солнца рисует
+    // LocationProjectedShadow (у общего света 2D Unity теней нет); тени от
+    // огня и других источников — перекрытие света по контуру рисунка
+    // (ShadowCaster2D): тёмный конус до края радиуса. Обработка кадра — URP
+    // Volume своего слоя.
     public sealed partial class LocationWorldRenderer
     {
         // Слой обработки кадра места: камера сцены глобальной карты его не видит.
         public const int PostVolumeLayer = 31;
-        // Сколько местных источников дают тень одному предмету (самые сильные).
-        public const int MaxLocalShadows = 2;
         private const int ShadowSortingOrder = -24500;
         // Мерцание огня меняет темноту тени только наполовину: иначе тень дёргается.
         private const float FlickerShadowShare = .5f;
@@ -37,18 +38,16 @@ namespace KingdomSurvival.LocationRendering
             public bool People;
             public bool Battle;
             public bool Disabled;
-            public readonly SpriteRenderer[] Shadows = new SpriteRenderer[1 + MaxLocalShadows];
+            // Тень-силуэт от солнца (одна).
+            public readonly SpriteRenderer[] Shadows = new SpriteRenderer[1];
+            // Перекрытие света огня по контуру рисунка; нет — предмет сам светит.
+            public ShadowCaster2D Contour;
+            public Sprite ContourSprite;
+            public bool ContourFlip;
         }
 
-        private sealed class ActiveLight
-        {
-            public Placed Placed;
-            public Vector2 Ground;
-            public float Intensity;
-        }
 
         private readonly List<Caster> casters = new List<Caster>();
-        private readonly List<ActiveLight> activeLights = new List<ActiveLight>();
         private Material shadowMaterial;
         private MaterialPropertyBlock shadowBlock;
         private Volume postVolume;
@@ -57,8 +56,6 @@ namespace KingdomSurvival.LocationRendering
         private float sunOpacity;
 
         private static readonly int ShadowVectorId = Shader.PropertyToID("_ShadowVector");
-        private static readonly int ShadowSideId = Shader.PropertyToID("_ShadowSide");
-        private static readonly int GroundXId = Shader.PropertyToID("_GroundX");
         private static readonly int GroundYId = Shader.PropertyToID("_GroundY");
         private static readonly int ShadowColorId = Shader.PropertyToID("_ShadowColor");
         private static readonly int BlurId = Shader.PropertyToID("_Blur");
@@ -74,7 +71,11 @@ namespace KingdomSurvival.LocationRendering
         // нормалей. Пересчёт вручную перед кадром; в игре не нужен.
         public void RefreshLightsOutsidePlay()
         {
-            if (Application.isPlaying || LightLateUpdate == null || Root == null) return;
+            if (Application.isPlaying || Root == null) return;
+            // Перекрытие света: форма и группа теней обновляются в Update.
+            foreach (ShadowCaster2D contour in Root.GetComponentsInChildren<ShadowCaster2D>())
+                if (contour != null && contour.enabled) contour.Update();
+            if (LightLateUpdate == null) return;
             foreach (Light2D light in Root.GetComponentsInChildren<Light2D>())
                 if (light != null && light.lightType != Light2D.LightType.Global) LightLateUpdate.Invoke(light, null);
         }
@@ -197,7 +198,6 @@ namespace KingdomSurvival.LocationRendering
                 sunOpacity = opacity;
             }
 
-            activeLights.Clear();
             foreach (Placed item in placed)
             {
                 if (item.Light == null) continue;
@@ -207,8 +207,6 @@ namespace KingdomSurvival.LocationRendering
                 item.Light.color = data.Color;
                 float intensity = data.AnimatedIntensity(Seconds, item.Data.Position.x);
                 item.Light.intensity = intensity;
-                if (on && data.ProjectsShadows && (data.Shape == LocationLightShape.Point || data.Shape == LocationLightShape.Spot))
-                    activeLights.Add(new ActiveLight { Placed = item, Ground = item.Anchor.position, Intensity = intensity });
                 // Днём своя тень огня слабее: её перебивает общий свет.
                 float flicker = Mathf.Lerp(1, Mathf.Clamp01(intensity / Mathf.Max(.01f, data.Intensity)), FlickerShadowShare);
                 UpdateRadialShadows(item, on ? flicker * (Indoor ? 1 : Mathf.Lerp(1, .25f, DayFactor)) : 0);
@@ -223,7 +221,7 @@ namespace KingdomSurvival.LocationRendering
         // ------------------------------------------------------------------
 
         private Caster AddCaster(Transform anchor, SpriteRenderer source, Sprite overrideSprite, float height, Vector2 pivot,
-            bool flip, float lengthScale, string battleId, bool people = false)
+            bool flip, float lengthScale, string battleId, bool people = false, bool contour = true)
         {
             if (shadowMaterial == null || source == null) return null;
             Caster caster = new Caster
@@ -232,6 +230,7 @@ namespace KingdomSurvival.LocationRendering
                 OverridePivot = pivot, OverrideFlip = flip, LengthScale = lengthScale, People = people,
                 Battle = battleId != null
             };
+            if (contour) caster.Contour = AddContour(source);
             casters.Add(caster);
             return caster;
         }
@@ -250,54 +249,164 @@ namespace KingdomSurvival.LocationRendering
                 bool enabled = !caster.Disabled && caster.Source.enabled && caster.Source.gameObject.activeInHierarchy &&
                                (!caster.People || Sky.PeopleCastShadows);
                 float scale = caster.People ? Sky.PeopleShadowLength : caster.LengthScale;
-                Vector2 ground = caster.Anchor.position;
 
-                // Солнце (или луна).
-                SetShadow(caster, 0, enabled && sunOpacity > .001f, sunRaw * scale, Sky.Sun.Color, sunOpacity,
+                // Солнце (или луна) — тень-силуэт.
+                CastShadow(caster, 0, enabled && sunOpacity > .001f, sunRaw * scale, Sky.Sun.Color, sunOpacity,
                     Sky.Sun.Softness);
-
-                // Местные источники: самые сильные в своём радиусе.
-                int slot = 1;
-                if (enabled)
-                {
-                    activeLights.Sort((a, b) => Strength(b, ground).CompareTo(Strength(a, ground)));
-                    foreach (ActiveLight light in activeLights)
-                    {
-                        if (slot > MaxLocalShadows) break;
-                        if (caster.Anchor.IsChildOf(light.Placed.Anchor)) continue;
-                        float strength = Strength(light, ground);
-                        if (strength <= .01f) break;
-                        LocationLightDefinition data = light.Placed.Data.Light;
-                        Vector2 away = ground - light.Ground;
-                        Vector2 vector = away / Mathf.Max(.2f, data.Height);
-                        if (vector.magnitude > data.ProjectedShadowMaxLength)
-                            vector = vector.normalized * data.ProjectedShadowMaxLength;
-                        SetShadow(caster, slot, true, vector * scale, Color.black, strength * data.ProjectedShadowOpacity,
-                            data.ShadowSoftness);
-                        slot++;
-                    }
-                }
-                for (; slot <= MaxLocalShadows; slot++)
-                    SetShadow(caster, slot, false, Vector2.zero, Color.black, 0, 0);
+                // Огонь и другие источники — тень по контуру рисунка до края света.
+                UpdateContour(caster, enabled);
             }
         }
 
-        // Сила тени от источника в точке: яркость и близость к нему.
-        private static float Strength(ActiveLight light, Vector2 ground)
+        // Тень-силуэт от солнца: гаснет, когда свет уходит вбок
+        // (плоский рисунок сбоку дал бы линию).
+        private void CastShadow(Caster caster, int index, bool visible, Vector2 vector, Color color, float opacity, float softness)
         {
-            LocationLightDefinition data = light.Placed.Data.Light;
-            Vector2 away = ground - light.Ground;
-            float distance = away.magnitude;
-            float radius = Mathf.Max(.01f, data.Radius);
-            if (distance < .05f || distance > radius) return 0;
-            if (data.Shape == LocationLightShape.Spot)
-            {
-                float angle = Vector2.Angle(new Vector2(Mathf.Cos(data.Direction * Mathf.Deg2Rad), Mathf.Sin(data.Direction * Mathf.Deg2Rad)), away);
-                if (angle > data.OuterAngle / 2) return 0;
-            }
-            float brightness = Mathf.Lerp(1, Mathf.Clamp01(light.Intensity / Mathf.Max(.01f, data.Intensity)), FlickerShadowShare);
-            return brightness * Mathf.Sqrt(1 - distance / radius);
+            LocationShadowStyle style = Sky.ShadowStyle;
+            float share = style.SilhouetteShare(vector);
+            SetShadow(caster, index, visible, vector, color, opacity * share * Mathf.Max(0, style.SilhouetteOpacity), softness);
         }
+
+        // ------------------------------------------------------------------
+        // Тени от огня: перекрытие света по контуру рисунка
+        // ------------------------------------------------------------------
+
+        // 2D-свет Unity сам даёт от контура тёмный конус до края своего радиуса
+        // (у источника — «Тени предметов и людей»). Контуры — по альфа-каналу
+        // рисунка (LocationAlphaContours): свет проходит сквозь прозрачное —
+        // между ногами, под рукой. Не вышло — выпуклая оболочка формы. Сам
+        // предмет своей тенью не темнеет. Готовые контуры URP 17 принимает
+        // только от своих источников формы, поэтому форма тени задаётся
+        // напрямую (закрытые поля), а свой источник формы отключён.
+        private static readonly FieldInfo ContourMeshField =
+            typeof(ShadowCaster2D).GetField("m_ShadowMesh", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static readonly FieldInfo ContourProviderField =
+            typeof(ShadowCaster2D).GetField("m_ShadowShape2DProvider", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static readonly FieldInfo ContourComponentField =
+            typeof(ShadowCaster2D).GetField("m_ShadowShape2DComponent", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static readonly PropertyInfo ContourSourceProperty =
+            typeof(ShadowCaster2D).GetProperty("shadowCastingSource", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        private static ShadowCaster2D AddContour(SpriteRenderer source)
+        {
+            if (ContourMeshField == null || ContourSourceProperty == null) return null;
+            ShadowCaster2D contour = source.gameObject.GetComponent<ShadowCaster2D>();
+            if (contour == null) contour = source.gameObject.AddComponent<ShadowCaster2D>();
+            // Редактор Unity сам цепляет форму от сетки спрайта — отцепить
+            // (выключение отписывает её от смены рисунка) и включить снова.
+            contour.enabled = false;
+            ContourProviderField?.SetValue(contour, null);
+            ContourComponentField?.SetValue(contour, null);
+            ContourSourceProperty.SetValue(contour, Enum.ToObject(ContourSourceProperty.PropertyType, 2));
+            contour.castingOption = ShadowCaster2D.ShadowCastingOptions.CastShadow;
+            contour.useRendererSilhouette = true;
+            contour.enabled = true;
+            return contour;
+        }
+
+        private static void UpdateContour(Caster caster, bool enabled)
+        {
+            ShadowCaster2D contour = caster.Contour;
+            if (contour == null) return;
+            Sprite sprite = caster.Source.sprite;
+            enabled &= sprite != null;
+            if (contour.enabled != enabled) contour.enabled = enabled;
+            if (!enabled || (sprite == caster.ContourSprite && caster.Source.flipX == caster.ContourFlip)) return;
+            caster.ContourSprite = sprite;
+            caster.ContourFlip = caster.Source.flipX;
+            SetContourShape(contour, SpriteContours(sprite), caster.ContourFlip);
+        }
+
+        // Контуры рисунка: по альфе; не вышло — один выпуклый.
+        public static List<Vector2[]> SpriteContours(Sprite sprite)
+        {
+            List<Vector2[]> loops = LocationAlphaContours.Of(sprite);
+            if (loops.Count > 0) return loops;
+            Vector3[] path = ContourPath(sprite, false);
+            Vector2[] loop = path.Select(point => (Vector2)point).ToArray();
+            if (LocationAlphaContours.Area(loop) < 0) Array.Reverse(loop);
+            return new List<Vector2[]> { loop };
+        }
+
+        // Контуры — набором отрезков: внешние против часовой стрелки, дырки по
+        // часовой. Отражённый рисунок — отражённые контуры, обход обратный.
+        private static void SetContourShape(ShadowCaster2D contour, List<Vector2[]> loops, bool flip)
+        {
+            if (!(ContourMeshField.GetValue(contour) is ShadowShape2D shape)) return;
+            int count = loops.Sum(loop => loop.Length);
+            if (count < 3) return;
+            NativeArray<Vector3> vertices = new NativeArray<Vector3>(count, Allocator.Temp);
+            NativeArray<int> indices = new NativeArray<int>(count * 2, Allocator.Temp);
+            int index = 0;
+            foreach (Vector2[] loop in loops)
+            {
+                int start = index;
+                for (int i = 0; i < loop.Length; i++, index++)
+                {
+                    vertices[index] = new Vector3(flip ? -loop[i].x : loop[i].x, loop[i].y, 0);
+                    indices[index * 2] = index;
+                    indices[index * 2 + 1] = i == loop.Length - 1 ? start : index + 1;
+                }
+            }
+            shape.SetShape(vertices, indices, ShadowShape2D.OutlineTopology.Lines,
+                flip ? ShadowShape2D.WindingOrder.Clockwise : ShadowShape2D.WindingOrder.CounterClockwise, false);
+            vertices.Dispose();
+            indices.Dispose();
+        }
+
+        // Контур рисунка в его единицах (от опоры спрайта): одна форма
+        // physics shape — как есть; несколько или нет — выпуклая оболочка.
+        public static Vector3[] ContourPath(Sprite sprite, bool flip)
+        {
+            List<Vector2> points = new List<Vector2>();
+            int shapes = sprite.GetPhysicsShapeCount();
+            if (shapes == 1)
+                sprite.GetPhysicsShape(0, points);
+            else
+            {
+                List<Vector2> shape = new List<Vector2>();
+                for (int i = 0; i < shapes; i++)
+                {
+                    sprite.GetPhysicsShape(i, shape);
+                    points.AddRange(shape);
+                }
+                if (points.Count < 3) points.AddRange(sprite.vertices);
+                points = ConvexHull(points);
+            }
+            Vector3[] path = new Vector3[points.Count];
+            for (int i = 0; i < points.Count; i++)
+            {
+                // Отражённый рисунок — отражённый контур; обход — в прежнюю сторону.
+                Vector2 point = points[flip ? points.Count - 1 - i : i];
+                path[i] = new Vector3(flip ? -point.x : point.x, point.y, 0);
+            }
+            return path;
+        }
+
+        public static List<Vector2> ConvexHull(List<Vector2> points)
+        {
+            List<Vector2> sorted = points.Distinct().OrderBy(p => p.x).ThenBy(p => p.y).ToList();
+            if (sorted.Count < 3) return sorted;
+            List<Vector2> hull = new List<Vector2>();
+            for (int pass = 0; pass < 2; pass++)
+            {
+                int start = hull.Count;
+                IEnumerable<Vector2> order = pass == 0 ? sorted : Enumerable.Reverse(sorted);
+                foreach (Vector2 point in order)
+                {
+                    while (hull.Count >= start + 2 && Cross(hull[hull.Count - 2], hull[hull.Count - 1], point) <= 0)
+                        hull.RemoveAt(hull.Count - 1);
+                    hull.Add(point);
+                }
+                hull.RemoveAt(hull.Count - 1);
+            }
+            return hull;
+        }
+
+        private static float Cross(Vector2 o, Vector2 a, Vector2 b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+
+        // Сколько предметов и людей сейчас перекрывают свет огня (для проверки).
+        public int ContourCount => casters.Count(caster => caster.Contour != null && caster.Contour.enabled);
 
         private void SetShadow(Caster caster, int index, bool visible, Vector2 vector, Color color, float opacity, float softness)
         {
@@ -346,8 +455,6 @@ namespace KingdomSurvival.LocationRendering
             shadowBlock.Clear();
             Vector4 uvRect = SpriteUVRect(shadow.sprite);
             shadowBlock.SetVector(ShadowVectorId, vector);
-            shadowBlock.SetVector(ShadowSideId, ShadowSide(vector, Sky.ShadowMinLean));
-            shadowBlock.SetFloat(GroundXId, caster.Anchor.position.x);
             shadowBlock.SetFloat(GroundYId, caster.Anchor.position.y);
             shadowBlock.SetColor(ShadowColorId, new Color(color.r, color.g, color.b, Mathf.Clamp01(opacity)));
             // Размытие — в долях своего кадра, а не всей страницы атласа.
@@ -406,30 +513,12 @@ namespace KingdomSurvival.LocationRendering
                 Vector4 uvRect = SpriteUVRect(shadow.sprite);
                 // Без проекции: силуэт как есть (высота — от «земли» далеко внизу).
                 shadowBlock.SetVector(ShadowVectorId, new Vector4(0, 1, 0, 0));
-                shadowBlock.SetVector(ShadowSideId, new Vector4(1, 0, 0, 0));
                 shadowBlock.SetFloat(GroundYId, -100000);
                 shadowBlock.SetColor(ShadowColorId, new Color(0, 0, 0, alpha));
                 shadowBlock.SetFloat(BlurId, .02f * (uvRect.w - uvRect.y));
                 shadowBlock.SetVector(UVRectId, uvRect);
                 shadow.SetPropertyBlock(shadowBlock);
             }
-        }
-
-        // Как ширина рисунка ложится на землю (сторона тени) при тени вдоль
-        // along. Свет спереди (тень вверх, вглубь) — (1, 0): прямая проекция,
-        // ширина остаётся шириной. Сбоку и сзади плоский силуэт при прямой
-        // проекции сплющивается в линию, поэтому он плавно поворачивается
-        // вокруг точки опоры и ложится на землю: поперёк тени остаётся
-        // depth (доля ширины) — толщина предмета. Сторона никогда не
-        // параллельна тени: ни линии, ни скачка, ни второй тени. Свет строго
-        // сзади зеркалит силуэт по ширине — цена непрерывности.
-        public static Vector2 ShadowSide(Vector2 along, float depth)
-        {
-            if (along.sqrMagnitude < 1e-8f) return Vector2.right;
-            Vector2 direction = along.normalized;
-            float turn = 1 - Mathf.SmoothStep(0, 1, direction.y / .5f);
-            Vector2 turned = new Vector2(direction.y, -direction.x * Mathf.Max(.05f, depth));
-            return Vector2.Lerp(Vector2.right, turned, turn);
         }
 
         // Прямоугольник кадра в UV его текстуры (u, v мин; u, v макс).

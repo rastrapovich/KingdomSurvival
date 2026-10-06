@@ -221,6 +221,43 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(feet.SelectMany(loop => loop).Max(point => point.y), Is.LessThanOrEqualTo(7), "Туловище и руки свет не перекрывают.");
         }
 
+        // Точка огня дрожит: в пределах размаха, плавно, у разных огней — по-своему;
+        // размах 0 — неподвижна. Источник в сцене ходит вместе с ней.
+        [Test]
+        public void FirePointWandersWithinRange()
+        {
+            LocationLightDefinition light = new LocationLightDefinition { Offset = new Vector2(0, .2f), Wander = .1f, WanderVertical = .5f, WanderSpeed = 1.5f };
+            Vector2 previous = light.AnimatedOffset(0, .3f);
+            float moved = 0;
+            for (float t = .02f; t < 20; t += .02f)
+            {
+                Vector2 point = light.AnimatedOffset(t, .3f);
+                Vector2 delta = point - light.Offset;
+                Assert.That(Mathf.Abs(delta.x), Is.LessThanOrEqualTo(.1f + 1e-4f), "В пределах размаха.");
+                Assert.That(Mathf.Abs(delta.y), Is.LessThanOrEqualTo(.05f + 1e-4f), "По вертикали — доля размаха.");
+                Assert.That((point - previous).magnitude, Is.LessThan(.03f), "Без скачков.");
+                moved = Mathf.Max(moved, delta.magnitude);
+                previous = point;
+            }
+            Assert.That(moved, Is.GreaterThan(.04f), "Точка действительно гуляет.");
+            Assert.That(light.AnimatedOffset(7, .3f), Is.Not.EqualTo(light.AnimatedOffset(7, .8f)), "У разных огней — по-своему.");
+            light.Wander = 0;
+            Assert.That(light.AnimatedOffset(7, .3f), Is.EqualTo(light.Offset), "0 — неподвижна.");
+
+            LocationVisualObject fire = new LocationVisualObject { Id = "fire", Name = "Огонь", LightOnly = true, Position = new Vector2(.5f, .5f) };
+            fire.Light.Enabled = true; fire.Light.Wander = .1f;
+            LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz", UseWorldLighting = false, Objects = { fire } };
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(new LocalLocationDefinition { Id = "zz" }, visual, null))
+            {
+                Transform source = renderer.Root.GetComponentsInChildren<Light2D>().First(item => item.lightType != Light2D.LightType.Global).transform;
+                renderer.SetTime(1, 3);
+                Vector3 first = source.localPosition;
+                renderer.SetTime(1, 4.5f);
+                Assert.That(source.localPosition, Is.Not.EqualTo(first), "Источник ходит со временем.");
+                Assert.That(((Vector2)source.localPosition - fire.Light.Offset).magnitude, Is.LessThan(.15f));
+            }
+        }
+
         // Контур: отражённый рисунок — отражённый контур; оболочка — выпуклая.
         [Test]
         public void ContourHullAndMirror()

@@ -242,6 +242,10 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Number("Сила", light.Flicker, 0, .6f, value => light.Flicker = value);
                 Number("Скорость", light.AnimationSpeed, .05f, 10, value => light.AnimationSpeed = value);
             }
+            Number("Дрожание точки света (размах)", light.Wander, 0, .5f, value => light.Wander = value,
+                "Точка огня слегка хаотично гуляет — вместе с ней ходят свет и тени. В единицах мира; 0 — неподвижна. Для костра — 0,03–0,08.");
+            Number("Дрожание по вертикали (доля)", light.WanderVertical, 0, 1.5f, value => light.WanderVertical = value);
+            Number("Скорость дрожания", light.WanderSpeed, .05f, 10, value => light.WanderSpeed = value);
             Toggle("По расписанию", light.NightOnly, value => light.NightOnly = value, true);
             if (light.NightOnly)
             {

@@ -208,6 +208,8 @@ namespace KingdomSurvival.LocationRendering
                 item.Light.color = data.Color;
                 float intensity = data.AnimatedIntensity(Seconds, item.Data.Position.x);
                 item.Light.intensity = intensity;
+                // Точка огня дрожит; тени от этого света ходят вместе с ней.
+                item.Light.transform.localPosition = data.AnimatedOffset(Seconds, item.Data.Position.x);
                 // Днём своя тень огня слабее: её перебивает общий свет.
                 float flicker = Mathf.Lerp(1, Mathf.Clamp01(intensity / Mathf.Max(.01f, data.Intensity)), FlickerShadowShare);
                 UpdateRadialShadows(item, on ? flicker * (Indoor ? 1 : Mathf.Lerp(1, .25f, DayFactor)) : 0);

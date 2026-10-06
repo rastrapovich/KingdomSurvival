@@ -1407,7 +1407,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                     // В костёр и в палатку не встают.
                     BlocksMovement = placeholder == LocationPlaceholder.Tent || placeholder == LocationPlaceholder.Fire,
                     CastsShadow = placeholder == LocationPlaceholder.Tent };
-                if (placeholder == LocationPlaceholder.Fire) item.Light.Enabled = true;
+                if (placeholder == LocationPlaceholder.Fire) { item.Light.Enabled = true; item.Light.Wander = .05f; }
                 Visual.Objects.Add(item); selectedKind = Kind.Art; selectedElementId = item.Id;
             }, true);
         }

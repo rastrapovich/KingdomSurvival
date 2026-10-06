@@ -77,6 +77,12 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Жизнь огня.
         public LocationLightAnimation Animation = LocationLightAnimation.Flicker;
         public float AnimationSpeed = 1;
+        // Дрожание точки света (огонь «гуляет»): размах в единицах мира, доля
+        // размаха по вертикали, скорость; 0 — точка неподвижна. Вместе с
+        // точкой ходят тени от этого света.
+        public float Wander;
+        public float WanderVertical = .6f;
+        public float WanderSpeed = 1.5f;
         // Карты нормалей: свет «облегает» рисунки, у которых они есть. У новых
         // источников включены (рисунки идут с нормалями); прежние — как были.
         public bool NormalMaps = true;
@@ -112,6 +118,20 @@ namespace KingdomSurvival.BattlefieldDatabase
                     return Intensity;
             }
         }
+
+        // Точка света в момент seconds: Offset плюс дрожание — плавное
+        // блуждание и мелкая дрожь (два слоя шума), не дальше размаха.
+        public Vector2 AnimatedOffset(float seconds, float seed)
+        {
+            if (Wander <= 0) return Offset;
+            float t = seconds * Mathf.Max(.01f, WanderSpeed);
+            float x = Noise(t * 1.3f, seed * 17 + 3.1f) * .7f + Noise(t * 4.7f, seed * 23 + 9.7f) * .3f;
+            float y = Noise(seed * 19 + 5.3f, t * 1.1f) * .7f + Noise(seed * 29 + 1.9f, t * 5.3f) * .3f;
+            return Offset + new Vector2(x, y * Mathf.Max(0, WanderVertical)) * Wander;
+        }
+
+        // Шум −1..1 (Перлин в Unity редко выходит за 0,15..0,85 — растянут).
+        private static float Noise(float a, float b) => Mathf.Clamp((Mathf.PerlinNoise(a, b) - .5f) * 2.8f, -1, 1);
 
         // Интервал включает начало, исключает конец; одинаковые часы = весь день.
         public bool ActiveAt(float hour)

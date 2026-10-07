@@ -100,6 +100,46 @@ namespace KingdomSurvival.LocationRendering.Editor
             return path;
         }
 
+        // Формат KS Ground Renderer 2 (schema 2): карта целиком тремя файлами
+        // (Color RGBA 8, Normal RGB 8, Height серый+альфа 16) и manifest.
+        public string WriteWhole(string folder)
+        {
+            Directory.CreateDirectory(folder);
+            int w = VirtualWidth, h = VirtualHeight;
+            ushort[] color = new ushort[w * h * 4], normal = new ushort[w * h * 3], height = new ushort[w * h * 2];
+            for (int ty = 0; ty < Rows; ty++)
+                for (int tx = 0; tx < Columns; tx++)
+                {
+                    ushort[] c = PngCodec.Decode(ColorPng(tx, ty), out _), n = PngCodec.Decode(NormalPng(tx, ty), out _), z = PngCodec.Decode(HeightPng(tx, ty), out _);
+                    for (int py = 0; py < Height; py++)
+                        for (int px = 0; px < Width; px++)
+                        {
+                            int src = py * Width + px, dst = ((Rows - 1 - ty) * Height + py) * w + tx * Width + px;
+                            for (int k = 0; k < 4; k++) color[dst * 4 + k] = c[src * 4 + k];
+                            for (int k = 0; k < 3; k++) normal[dst * 3 + k] = n[src * 4 + k];
+                            height[dst * 2] = z[src * 4]; height[dst * 2 + 1] = z[src * 4 + 3];
+                        }
+                }
+            string Save(string name, byte[] png) { File.WriteAllBytes(Path.Combine(folder, name), png); return GroundExportPackage.Sha256Hex(png); }
+            string colorSha = Save(MapId + "_color.png", PngCodec.Encode(w, h, 8, PngCodec.Rgba, color, new[] { 1 }, true));
+            string normalSha = Save(MapId + "_normal.png", PngCodec.Encode(w, h, 8, PngCodec.Rgb, normal, new[] { 1 }));
+            string heightSha = Save(MapId + "_height.png", PngCodec.Encode(w, h, 16, PngCodec.GrayAlpha, height, new[] { 1 }));
+            double[] bounds = { Origin[0], Origin[1], Origin[0] + w * Q, Origin[1] + h * Q };
+            string manifest = "{\n\"format\": \"ks_ground_map\", \"schema_version\": 2, \"exporter_version\": \"2.0.0\", \"map_id\": \"" + MapId + "\", \"revision_id\": \"" + RevisionId +
+                              "\", \"status\": \"" + Status + "\",\n\"image\": {\"width\": " + w + ", \"height\": " + h + ", \"rows\": \"top_to_bottom\", \"tile\": [" + Width + ", " + Height +
+                              "], \"grid\": [" + Columns + ", " + Rows + "], \"tile_indices\": \"bottom_left, X right, Y up\"},\n\"projection\": {\"q\": " + N(Q) + ", \"origin\": [" + N(Origin[0]) + ", " +
+                              N(Origin[1]) + "], \"requested_bounds\": [" + string.Join(", ", Array.ConvertAll(bounds, N)) +
+                              "], \"reference\": [0.0, -10.0, 0.0], \"basis\": [[1.0, 0.0, 0.0], [0.0, 0.5, 0.8660254037844386], [0.0, -0.8660254037844386, 0.5]]},\n" +
+                              "\"units\": {\"meters_per_blender_unit\": 1.0, \"pixels_per_blender_unit\": " + N(1 / Q) + "},\n\"character\": {\"height_px\": 120.0},\n" +
+                              "\"files\": {\"Color\": {\"path\": \"" + MapId + "_color.png\", \"sha256\": \"" + colorSha + "\", \"bit_depth\": 8, \"channels\": \"RGBA\"},\n" +
+                              "\"Normal\": {\"path\": \"" + MapId + "_normal.png\", \"sha256\": \"" + normalSha + "\", \"bit_depth\": 8, \"channels\": \"RGB\", \"invert_green\": false},\n" +
+                              "\"Height\": {\"path\": \"" + MapId + "_height.png\", \"sha256\": \"" + heightSha + "\", \"bit_depth\": 16, \"channels\": \"GA\", \"min\": " + N(HeightMin) +
+                              ", \"max\": " + N(HeightMax) + ", \"source\": \"world_position_z\", \"units\": \"Blender Unit\", \"alpha\": \"coverage; alpha=0 invalid\"}},\n\"warnings\": []\n}\n";
+            string path = Path.Combine(folder, MapId + "_manifest.json");
+            File.WriteAllText(path, manifest, new UTF8Encoding(false));
+            return path;
+        }
+
         private string Pass(string kind, string folder, int x, int y, byte[] png, int bits)
         {
             string relative = TilePath(kind, MapId, x, y);

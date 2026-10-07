@@ -84,3 +84,7 @@ Desktop.ini
 # Данные высоты земли из Blender (ПР-12О) — производные от PNG-экспорта,
 # как и сами рисунки: только локально; их .meta остаются в git.
 /[Aa]ssets/**/*_height__*.bytes
+
+# Аддон Blender (Tools/Blender): кэш Python и вывод тестов
+__pycache__/
+/Tools/Blender/tests/_out/

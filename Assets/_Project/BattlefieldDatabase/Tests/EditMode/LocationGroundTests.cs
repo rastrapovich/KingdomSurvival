@@ -28,6 +28,71 @@ namespace KingdomSurvival.BattlefieldDatabase.Tests
             Assert.That(decoded[0], Is.Not.EqualTo(decoded[4]));
         }
 
+        // Большие карты читаются потоком из файла: IDAT разбит на много мелких
+        // блоков (как пишет аддон Blender), CRC каждого проверяется.
+        [Test]
+        public void StreamDecodeAcrossManySmallIdatChunks()
+        {
+            const int w = 23, h = 11;
+            ushort[] samples = new ushort[w * h * 2];
+            for (int i = 0; i < samples.Length; i++) samples[i] = (ushort)(i * 2654435761u >> 16);
+            byte[] png = SplitIdat(PngCodec.Encode(w, h, 16, PngCodec.GrayAlpha, samples, new[] { 1, 4, 0 }), 7);
+            List<ushort> streamed = new List<ushort>();
+            int rawRows = 0;
+            using (MemoryStream stream = new MemoryStream(png))
+                PngCodec.DecodeRows(stream, (y, row) => streamed.AddRange(row), (y, raw) => { Assert.That(raw.Length, Is.EqualTo(w * 4)); rawRows++; });
+            Assert.That(streamed, Is.EqualTo(samples));
+            Assert.That(rawRows, Is.EqualTo(h));
+            Assert.That(PngCodec.Decode(png, out _), Is.EqualTo(samples));
+            // Повреждённый средний блок — ошибка CRC, а не тихо неверные данные.
+            byte[] broken = (byte[])png.Clone();
+            broken[png.Length / 2] ^= 0x40;
+            using (MemoryStream stream = new MemoryStream(broken))
+                Assert.That(() => PngCodec.DecodeRows(stream, (y, row) => { }), Throws.TypeOf<InvalidDataException>());
+            // Строки через RowWriter в том же формате — тот же файл по значениям.
+            PngCodec.RowWriter writer = new PngCodec.RowWriter(w, h, 16, PngCodec.GrayAlpha, false);
+            using (MemoryStream stream = new MemoryStream(png))
+                PngCodec.DecodeRows(stream, null, (y, raw) => writer.WriteRow(raw, 0));
+            Assert.That(PngCodec.Decode(writer.Finish(), out PngCodec.Header header), Is.EqualTo(samples));
+            Assert.That(header.ColorType, Is.EqualTo(PngCodec.GrayAlpha));
+        }
+
+        // Пересобрать PNG, разрезав данные IDAT на блоки по size байт.
+        private static byte[] SplitIdat(byte[] png, int size)
+        {
+            List<byte> idat = new List<byte>();
+            List<byte[]> before = new List<byte[]>();
+            int offset = 8;
+            while (offset < png.Length)
+            {
+                int length = png[offset] << 24 | png[offset + 1] << 16 | png[offset + 2] << 8 | png[offset + 3];
+                string name = System.Text.Encoding.ASCII.GetString(png, offset + 4, 4);
+                byte[] chunk = new byte[length + 12];
+                Array.Copy(png, offset, chunk, 0, chunk.Length);
+                if (name == "IDAT") for (int i = 0; i < length; i++) idat.Add(png[offset + 8 + i]);
+                else if (name != "IEND") before.Add(chunk);
+                offset += length + 12;
+            }
+            using (MemoryStream file = new MemoryStream())
+            {
+                file.Write(png, 0, 8);
+                foreach (byte[] chunk in before) file.Write(chunk, 0, chunk.Length);
+                void Chunk(string name, byte[] body)
+                {
+                    byte[] data = new byte[body.Length + 12];
+                    data[0] = (byte)(body.Length >> 24); data[1] = (byte)(body.Length >> 16); data[2] = (byte)(body.Length >> 8); data[3] = (byte)body.Length;
+                    for (int i = 0; i < 4; i++) data[4 + i] = (byte)name[i];
+                    Array.Copy(body, 0, data, 8, body.Length);
+                    uint crc = PngCodec.Crc32(data, 4, body.Length + 4);
+                    data[body.Length + 8] = (byte)(crc >> 24); data[body.Length + 9] = (byte)(crc >> 16); data[body.Length + 10] = (byte)(crc >> 8); data[body.Length + 11] = (byte)crc;
+                    file.Write(data, 0, data.Length);
+                }
+                for (int i = 0; i < idat.Count; i += size) Chunk("IDAT", idat.GetRange(i, Math.Min(size, idat.Count - i)).ToArray());
+                Chunk("IEND", Array.Empty<byte>());
+                return file.ToArray();
+            }
+        }
+
         [Test]
         public void Png8AndGrayDecodeExactly()
         {

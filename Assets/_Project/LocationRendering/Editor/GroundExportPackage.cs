@@ -43,7 +43,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         public IEnumerable<string> Problems => Passes.Values.Where(pass => !string.IsNullOrEmpty(pass.Problem)).Select(pass => pass.Kind + ": " + pass.Problem);
     }
 
-    public sealed class GroundExportPackage
+    public sealed partial class GroundExportPackage
     {
         public const string Color = "Color", Normal = "Normal", Height = "Height";
         public static readonly string[] Kinds = { Color, Normal, Height };
@@ -159,6 +159,12 @@ namespace KingdomSurvival.LocationRendering.Editor
                 package.Errors.Add("Manifest не прочитан: " + error.Message);
                 return package;
             }
+            // schema 2 — KS Ground Renderer 2: карта целиком тремя файлами.
+            if (GroundJson.Num(root, "schema_version") == 2)
+            {
+                package.ReadWhole(root);
+                return package;
+            }
             package.ReadManifest(root);
             if (package.Errors.Count == 0) package.Verify();
             return package;
@@ -171,7 +177,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Schema = schema.HasValue ? (int)schema.Value : 0;
             if (Schema != 1)
             {
-                Errors.Add("Неподдержанная версия manifest: schema_version = " + (schema?.ToString() ?? "нет") + ". Поддержана 1 (KS Ground Renderer 1.0.0).");
+                Errors.Add("Неподдержанная версия manifest: schema_version = " + (schema?.ToString() ?? "нет") + ". Поддержаны 1 (KS Ground Renderer 1.0, участками) и 2 (KS Ground Renderer 2, карта целиком).");
                 return;
             }
             MapId = GroundJson.Str(root, "map_id") ?? string.Empty;

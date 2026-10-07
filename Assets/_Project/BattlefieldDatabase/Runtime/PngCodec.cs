@@ -115,10 +115,25 @@ namespace KingdomSurvival.BattlefieldDatabase
         }
 
         // Построчное декодирование: row — значения каналов строки y (0 — верх
-        // файла), 16 бит без потерь; массив строки переиспользуется.
+        // файла), 16 бит без потерь; raw — та же строка байтами PNG после
+        // снятия фильтра (нарезка без преобразований). Массивы переиспользуются.
         public static Header DecodeRows(byte[] data, Action<int, ushort[]> row)
         {
-            if (!TryReadHeader(data, out Header header, out string error) || !IsSupported(header, out error))
+            using (MemoryStream stream = new MemoryStream(data, false))
+                return DecodeRows(stream, row);
+        }
+
+        // Из потока (файла): блоки читаются по очереди, в памяти — только строки.
+        public static Header DecodeRows(Stream stream, Action<int, ushort[]> row, Action<int, byte[]> raw = null)
+        {
+            byte[] head = new byte[33];
+            string error = null;
+            Header header = default;
+            if (!ReadExactly(stream, head, 33) || !TryReadHeader(head, out header, out error))
+                throw new InvalidDataException(error ?? "Файл слишком короткий для PNG.");
+            if (Crc32(head, 12, 17) != ReadUInt32(head, 29))
+                throw new InvalidDataException("Повреждённый PNG: не совпала контрольная сумма блока IHDR.");
+            if (!IsSupported(header, out error))
                 throw new InvalidDataException(error);
             int bytesPerSample = header.BitDepth / 8;
             int bpp = header.Channels * bytesPerSample;
@@ -127,19 +142,18 @@ namespace KingdomSurvival.BattlefieldDatabase
                 throw new InvalidDataException("PNG слишком широкий.");
             int stride = (int)strideLong;
 
-            byte[] compressed = CollectImageData(data, ref header);
-            if (compressed.Length < 6)
+            ImageData data = new ImageData(stream);
+            int cmf = data.ReadByte(), flg = data.ReadByte();
+            if (cmf < 0 || flg < 0)
                 throw new InvalidDataException("Повреждённый PNG: нет сжатых данных.");
-            int cmf = compressed[0], flg = compressed[1];
             if ((cmf & 0x0F) != 8 || ((cmf << 8) | flg) % 31 != 0 || (flg & 0x20) != 0)
                 throw new InvalidDataException("Повреждённый PNG: неверный заголовок zlib.");
-            uint expectedAdler = ReadUInt32(compressed, compressed.Length - 4);
+            header.HasSrgbChunk = data.Srgb;
 
             byte[] current = new byte[stride], previous = new byte[stride];
-            ushort[] samples = new ushort[(long)header.Width * header.Channels];
+            ushort[] samples = row != null ? new ushort[(long)header.Width * header.Channels] : null;
             uint adlerA = 1, adlerB = 0;
-            using (MemoryStream source = new MemoryStream(compressed, 2, compressed.Length - 6))
-            using (DeflateStream inflate = new DeflateStream(source, CompressionMode.Decompress))
+            using (DeflateStream inflate = new DeflateStream(data, CompressionMode.Decompress, true))
             {
                 byte[] filter = new byte[1];
                 for (int y = 0; y < header.Height; y++)
@@ -149,23 +163,29 @@ namespace KingdomSurvival.BattlefieldDatabase
                     Adler(filter, 1, ref adlerA, ref adlerB);
                     Adler(current, stride, ref adlerA, ref adlerB);
                     Unfilter(filter[0], current, previous, bpp);
-                    if (bytesPerSample == 2)
+                    raw?.Invoke(y, current);
+                    if (row != null)
                     {
-                        for (int i = 0, s = 0; i < stride; i += 2, s++)
-                            samples[s] = (ushort)((current[i] << 8) | current[i + 1]);
+                        if (bytesPerSample == 2)
+                        {
+                            for (int i = 0, s = 0; i < stride; i += 2, s++)
+                                samples[s] = (ushort)((current[i] << 8) | current[i + 1]);
+                        }
+                        else
+                        {
+                            for (int i = 0; i < stride; i++)
+                                samples[i] = current[i];
+                        }
+                        row(y, samples);
                     }
-                    else
-                    {
-                        for (int i = 0; i < stride; i++)
-                            samples[i] = current[i];
-                    }
-                    row(y, samples);
                     byte[] swap = previous; previous = current; current = swap;
                 }
                 if (inflate.ReadByte() >= 0)
                     throw new InvalidDataException("Повреждённый PNG: лишние данные после последней строки.");
             }
-            if (((adlerB << 16) | adlerA) != expectedAdler)
+            // Хвост IDAT (Adler-32) и остальные блоки до IEND — с проверкой CRC.
+            data.Drain();
+            if (((adlerB << 16) | adlerA) != data.Trailer)
                 throw new InvalidDataException("Повреждённый PNG: не совпала контрольная сумма Adler-32.");
             return header;
         }
@@ -189,30 +209,111 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         private static int HeaderHeight(byte[] data) => (int)ReadUInt32(data, 20);
 
-        private static byte[] CollectImageData(byte[] data, ref Header header)
+        // Склеенные данные блоков IDAT как поток; CRC каждого блока
+        // проверяется по мере чтения, последние 4 байта (Adler-32) запоминаются.
+        private sealed class ImageData : Stream
         {
-            using (MemoryStream idat = new MemoryStream())
+            private readonly Stream source;
+            private readonly byte[] chunkHeader = new byte[8], crcBytes = new byte[4];
+            private long remaining;
+            private uint crc;
+            private bool inIdat, finished, seenEnd;
+            private readonly byte[] tail = new byte[4];
+            private long total;
+            public bool Srgb { get; private set; }
+
+            public ImageData(Stream source)
             {
-                int offset = 8;
-                bool end = false;
-                while (offset + 12 <= data.Length)
-                {
-                    uint length = ReadUInt32(data, offset);
-                    if (length > data.Length - offset - 12)
-                        throw new InvalidDataException("Повреждённый PNG: блок выходит за конец файла.");
-                    int type = offset + 4, body = offset + 8, size = (int)length;
-                    if (Crc32(data, type, size + 4) != ReadUInt32(data, body + size))
-                        throw new InvalidDataException("Повреждённый PNG: не совпала контрольная сумма блока " + ChunkName(data, type) + ".");
-                    string name = ChunkName(data, type);
-                    if (name == "IDAT") idat.Write(data, body, size);
-                    else if (name == "sRGB") header.HasSrgbChunk = true;
-                    else if (name == "IEND") { end = true; break; }
-                    offset = body + size + 4;
-                }
-                if (!end)
-                    throw new InvalidDataException("Повреждённый PNG: нет блока IEND (файл обрезан?).");
-                return idat.ToArray();
+                this.source = source;
+                NextIdat();
             }
+
+            public uint Trailer => total < 4 ? 0 : (uint)(tail[total % 4] << 24 | tail[(total + 1) % 4] << 16 | tail[(total + 2) % 4] << 8 | tail[(total + 3) % 4]);
+
+            // Перейти к следующему IDAT; другие блоки до IEND проверяются и пропускаются.
+            private void NextIdat()
+            {
+                while (true)
+                {
+                    if (!ReadExactly(source, chunkHeader, 8))
+                        throw new InvalidDataException("Повреждённый PNG: нет блока IEND (файл обрезан?).");
+                    long length = ReadUInt32(chunkHeader, 0);
+                    string name = new string(new[] { (char)chunkHeader[4], (char)chunkHeader[5], (char)chunkHeader[6], (char)chunkHeader[7] });
+                    crc = UpdateCrc(0xFFFFFFFFu, chunkHeader, 4, 4);
+                    if (name == "IDAT")
+                    {
+                        if (finished)
+                            throw new InvalidDataException("Повреждённый PNG: блоки IDAT разорваны.");
+                        inIdat = true;
+                        remaining = length;
+                        if (length == 0) { CloseChunk(); continue; }
+                        return;
+                    }
+                    if (inIdat) finished = true;
+                    inIdat = false;
+                    byte[] body = new byte[Math.Min(length, 1 << 20)];
+                    long left = length;
+                    while (left > 0)
+                    {
+                        int n = (int)Math.Min(left, body.Length);
+                        if (!ReadExactly(source, body, n))
+                            throw new InvalidDataException("Повреждённый PNG: блок выходит за конец файла.");
+                        crc = UpdateCrc(crc, body, 0, n);
+                        left -= n;
+                    }
+                    if (name == "sRGB") Srgb = true;
+                    CheckCrc(name);
+                    if (name == "IEND") { seenEnd = true; finished = true; return; }
+                    if (finished) continue;
+                }
+            }
+
+            private void CloseChunk() => CheckCrc("IDAT");
+
+            private void CheckCrc(string name)
+            {
+                if (!ReadExactly(source, crcBytes, 4))
+                    throw new InvalidDataException("Повреждённый PNG: блок выходит за конец файла.");
+                if ((crc ^ 0xFFFFFFFFu) != ReadUInt32(crcBytes, 0))
+                    throw new InvalidDataException("Повреждённый PNG: не совпала контрольная сумма блока " + name + ".");
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                while (inIdat && remaining == 0)
+                {
+                    CloseChunk();
+                    NextIdat();
+                }
+                if (!inIdat) return 0;
+                int n = source.Read(buffer, offset, (int)Math.Min(count, remaining));
+                if (n <= 0)
+                    throw new InvalidDataException("Повреждённый PNG: блок выходит за конец файла.");
+                crc = UpdateCrc(crc, buffer, offset, n);
+                remaining -= n;
+                for (int i = 0; i < n; i++) tail[(total + i) % 4] = buffer[offset + i];
+                total += n;
+                return n;
+            }
+
+            // Дочитать IDAT и все блоки до IEND.
+            public void Drain()
+            {
+                byte[] skip = new byte[1 << 16];
+                while (Read(skip, 0, skip.Length) > 0) { }
+                if (!seenEnd)
+                    throw new InvalidDataException("Повреждённый PNG: нет блока IEND (файл обрезан?).");
+            }
+
+            public override bool CanRead => true;
+            public override bool CanSeek => false;
+            public override bool CanWrite => false;
+            public override long Length => throw new NotSupportedException();
+            public override long Position { get => total; set => throw new NotSupportedException(); }
+            public override void Flush() { }
+            public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+            public override void SetLength(long value) => throw new NotSupportedException();
+            public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
         }
 
         private static string ChunkName(byte[] data, int offset) =>
@@ -354,30 +455,35 @@ namespace KingdomSurvival.BattlefieldDatabase
         {
             private readonly MemoryStream compressed = new MemoryStream();
             private readonly DeflateStream deflate;
-            private readonly int width, height, stride;
+            private readonly int width, height, stride, bpp, bitDepth, colorType;
             private readonly bool srgb;
-            private byte[] previous, filtered;
+            private readonly byte[] filtered;
             private readonly byte[] filter = { 1 };
             private uint adlerA = 1, adlerB = 0;
             private int rows;
 
-            public RowWriter(int width, int height, bool srgb = true)
+            public RowWriter(int width, int height, bool srgb = true) : this(width, height, 8, Rgba, srgb) { }
+
+            // Любой формат декодера: строки — байты PNG (16 бит — big endian).
+            public RowWriter(int width, int height, int bitDepth, int colorType, bool srgb)
             {
                 if (width <= 0 || height <= 0) throw new ArgumentException("Неверный размер PNG.");
-                this.width = width; this.height = height; this.srgb = srgb;
-                stride = width * 4;
-                previous = new byte[stride];
+                if ((bitDepth != 8 && bitDepth != 16) || ChannelsOf(colorType) == 0) throw new ArgumentException("Неверный формат PNG.");
+                this.width = width; this.height = height; this.srgb = srgb; this.bitDepth = bitDepth; this.colorType = colorType;
+                bpp = ChannelsOf(colorType) * bitDepth / 8;
+                stride = width * bpp;
+
                 filtered = new byte[stride];
                 compressed.WriteByte(0x78); compressed.WriteByte(0x9C);
                 deflate = new DeflateStream(compressed, CompressionLevel.Fastest, true);
             }
 
-            // Строка RGBA 8 бит (сверху вниз), фильтр Sub.
+            // Строка (сверху вниз) байтами PNG, фильтр Sub.
             public void WriteRow(byte[] row, int offset)
             {
                 if (rows >= height) throw new InvalidOperationException("Лишняя строка PNG.");
                 for (int i = 0; i < stride; i++)
-                    filtered[i] = (byte)(row[offset + i] - (i >= 4 ? row[offset + i - 4] : 0));
+                    filtered[i] = (byte)(row[offset + i] - (i >= bpp ? row[offset + i - bpp] : 0));
                 deflate.Write(filter, 0, 1);
                 deflate.Write(filtered, 0, stride);
                 Adler(filter, 1, ref adlerA, ref adlerB);
@@ -398,7 +504,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                     byte[] ihdr = new byte[13];
                     WriteUInt32(ihdr, 0, (uint)width);
                     WriteUInt32(ihdr, 4, (uint)height);
-                    ihdr[8] = 8; ihdr[9] = Rgba;
+                    ihdr[8] = (byte)bitDepth; ihdr[9] = (byte)colorType;
                     WriteChunk(file, "IHDR", ihdr);
                     if (srgb) WriteChunk(file, "sRGB", new byte[] { 0 });
                     WriteChunk(file, "IDAT", compressed.ToArray());
@@ -450,7 +556,10 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         private static uint[] crcTable;
 
-        public static uint Crc32(byte[] data, int offset, int count)
+        public static uint Crc32(byte[] data, int offset, int count) => UpdateCrc(0xFFFFFFFFu, data, offset, count) ^ 0xFFFFFFFFu;
+
+        // Нарастающий CRC (без финального XOR) — для блоков, читаемых частями.
+        private static uint UpdateCrc(uint crc, byte[] data, int offset, int count)
         {
             if (crcTable == null)
             {
@@ -463,10 +572,9 @@ namespace KingdomSurvival.BattlefieldDatabase
                 }
                 crcTable = table;
             }
-            uint crc = 0xFFFFFFFFu;
             for (int i = offset, end = offset + count; i < end; i++)
                 crc = crcTable[(crc ^ data[i]) & 0xFF] ^ (crc >> 8);
-            return crc ^ 0xFFFFFFFFu;
+            return crc;
         }
     }
 }

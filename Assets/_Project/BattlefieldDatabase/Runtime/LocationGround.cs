@@ -114,6 +114,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float ColorScale = 1;
         public string PaintSource = string.Empty;
         public string PaintedUtc = string.Empty;
+        // Рост эталона персонажа в экспорте Blender (px) — для подгонки людей места.
+        public float ExportCharacterPx;
 
         public List<LocationGroundTile> Tiles = new List<LocationGroundTile>();
 

@@ -103,9 +103,12 @@ namespace KingdomSurvival.LocationRendering.Editor
                              count(TileAction.Unchanged) + ", пропустить " + count(TileAction.Skip) + ".");
             int painted = plan.ReplacesWholeGround ? 0 : ground.Tiles.Count(tile => tile != null && tile.IsPainted &&
                 plan.Actions.TryGetValue(tile.Key, out TileAction action) && action == TileAction.Replace);
-            if (painted > 0)
+            if (painted > 0 && !package.ColorPainted)
                 plan.Changes.Add("Обрисовка Color сохраняется у " + painted + " заменяемых участков (обновится рендер под ней, Normal и Height). " +
                                  "Снимите «Сохранить обрисовку Color», чтобы вернуть Color из нового рендера.");
+            if (package.ColorPainted)
+                plan.Changes.Add("Color — обрисовка из файла экспорта «" + package.ColorFile + "»: ляжет на все выбранные участки" +
+                                 (Math.Abs(package.ColorScale - 1) > 1e-6 ? " с разрешением ×" + package.ColorScale.ToString("0.###") : "") + ".");
             else if (plan.ReplacesWholeGround && ground.IsPainted)
                 plan.Changes.Add("Обрисовка Color прежней земли не переносится на новую карту.");
             return plan;
@@ -225,7 +228,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 {
                     EditorUtility.DisplayProgressBar("Земля из Blender", "Настройки импорта " + item.Tile.Key, done++ / (float)Math.Max(1, staged.Count));
                     if (item.NormalPath != null) ConfigureNormal(item.NormalPath, Math.Max(package.TileWidth, package.TileHeight));
-                    ConfigureColor(item.ColorPath, item.NormalPath, Math.Max(package.TileWidth, package.TileHeight));
+                    ConfigureColor(item.ColorPath, item.NormalPath, (int)Math.Ceiling(Math.Max(package.TileWidth, package.TileHeight) * package.ColorScale));
                 }
                 foreach (Staged item in staged)
                 {
@@ -244,7 +247,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 {
                     LocationGroundTile tile = ground.Find(item.Tile.X, item.Tile.Y);
                     if (tile == null) { tile = new LocationGroundTile { X = item.Tile.X, Y = item.Tile.Y }; ground.Tiles.Add(tile); }
-                    if (tile.IsPainted && plan.KeepPaint)
+                    if (tile.IsPainted && plan.KeepPaint && !package.ColorPainted)
                     {
                         // Обрисовка остаётся Color; новый рендер — её основа для возврата.
                         if (!string.Equals(tile.ColorSha256, item.ColorSha, StringComparison.OrdinalIgnoreCase)) paintBehindRender++;
@@ -253,7 +256,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                     else
                     {
                         tile.Color = AssetDatabase.LoadAssetAtPath<Sprite>(item.ColorPath);
-                        tile.PaintSha256 = tile.RenderColorGuid = string.Empty;
+                        // Color, обрисованный прямо в файле экспорта, — сразу обрисовка (рендера под ней нет).
+                        tile.PaintSha256 = package.ColorPainted ? item.ColorSha : string.Empty;
+                        tile.RenderColorGuid = string.Empty;
                     }
                     tile.ColorSha256 = item.ColorSha; tile.ColorRevision = item.Tile.Pass(GroundExportPackage.Color)?.Revision ?? string.Empty;
                     if (item.NormalPath != null)
@@ -269,7 +274,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                     }
                 }
                 ground.Tiles.Sort((a, b) => a.Y != b.Y ? a.Y.CompareTo(b.Y) : a.X.CompareTo(b.X));
-                if (!ground.IsPainted) { ground.ColorScale = 1; ground.PaintSource = ground.PaintedUtc = string.Empty; }
+                if (package.ColorPainted) { ground.ColorScale = package.ColorScale; ground.PaintSource = package.ColorFile; ground.PaintedUtc = DateTime.UtcNow.ToString("u"); }
+                else if (!ground.IsPainted) { ground.ColorScale = 1; ground.PaintSource = ground.PaintedUtc = string.Empty; }
                 ground.HeightEnabled = ground.HasAnyHeight;
                 ground.Incomplete = IsIncomplete(ground);
                 if (visual.Camera == null || visual.Camera.Version == 0) visual.Camera = LocationCameraSettings.ForLargeMap();
@@ -485,6 +491,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             ground.MetersPerBlenderUnit = package.MetersPerBlenderUnit;
             ground.NormalGreenInverted = package.InvertGreen;
             ground.NormalLevelDegrees = plan.LevelNormals ? package.NormalTiltDegrees : 0;
+            if (package.CharacterHeightPx > 0) ground.ExportCharacterPx = (float)package.CharacterHeightPx;
         }
 
         private static Vector3 ToVector(double[] value) => value != null && value.Length == 3 ? new Vector3((float)value[0], (float)value[1], (float)value[2]) : Vector3.zero;

@@ -111,7 +111,7 @@ namespace KingdomSurvival.LocationRendering.Tests
                 Assert.That(string.Join("\n", package.Errors), Does.Contain(error), from + " → " + to);
                 Assert.That(package.CanApply, Is.False);
             }
-            Expect("\"schema_version\": 1", "\"schema_version\": 2", "schema_version");
+            Expect("\"schema_version\": 1", "\"schema_version\": 3", "schema_version");
             Expect("\"pixel_rect\": [64, 48, 64, 48]", "\"pixel_rect\": [64, 0, 64, 48]", "pixel_rect");
             Expect("\"virtual_size\": [128, 96]", "\"virtual_size\": [96, 128]", "virtual_size");
             Expect("\"tile_indices\": \"bottom_left, X right, Y up\"", "\"tile_indices\": \"top_left\"", "индексов");
@@ -291,6 +291,101 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(single.ReadyTiles, Is.EqualTo(1));
             options.Confirmed = false;
             Assert.That(string.Join("\n", GroundImporter.FromFiles(Directory.GetFiles(manualFolder), options).Errors), Does.Contain("Подтвердите"));
+        }
+
+        // KS Ground Renderer 2: карта целиком тремя файлами — база режет сама.
+        [Test]
+        public void WholeMapExportImportsLikeTiles()
+        {
+            GroundSyntheticExport export = Small();
+            string manifest = export.WriteWhole(Path.Combine(folder, "whole"));
+            GroundExportPackage package = GroundExportPackage.Load(manifest);
+            Assert.That(package.Errors, Is.Empty, string.Join("\n", package.Errors));
+            Assert.That(package.WholeMap, Is.True);
+            Assert.That(package.ColorPainted, Is.False);
+            Assert.That(package.ReadyTiles, Is.EqualTo(4));
+            Assert.That(Apply(package, out string message), Is.True, message);
+            LocationGroundDefinition ground = Visual.Ground;
+            Assert.That(ground.Tiles.Count, Is.EqualTo(4));
+            Assert.That(ground.IsPainted, Is.False);
+            Assert.That(ground.ExportCharacterPx, Is.EqualTo(120));
+            Assert.That(LocationGroundLayout.RuntimeErrors(Visual, Location), Is.Empty);
+            foreach (LocationGroundTile tile in ground.Tiles)
+            {
+                Assert.That(tile.Color.rect.size, Is.EqualTo(new Vector2(64, 48)));
+                Assert.That(ArtAssets.Editor.SpriteNormalMaps.Find(tile.Color), Is.EqualTo(tile.Normal));
+                LocationHeightTileData data = LocationHeightTileData.Deserialize(tile.Height.bytes);
+                for (int y = 0; y < data.Height; y += 5)
+                    for (int x = 0; x < data.Width; x += 3)
+                        Assert.That(data.Values[y * data.Width + x], Is.EqualTo(export.RawHeight(tile.X * 64 + x + .5, tile.Y * 48 + y + .5)), tile.Key + " " + x + "," + y);
+                // Тот же участок, что в экспорте участками (schema 1).
+                Assert.That(TilePixel(tile, 5, 7, out _), Is.EqualTo(Decoded(export.ColorPng(tile.X, tile.Y), 5, 7)));
+            }
+            // Повторная проверка того же экспорта — нарезка из кэша, участки «без изменений».
+            GroundImporter.Plan again = GroundImporter.Analyze(GroundExportPackage.Load(manifest), Location, Visual);
+            Assert.That(again.Actions.Values, Is.All.EqualTo(GroundImporter.TileAction.Unchanged));
+        }
+
+        [Test]
+        public void WholeMapColorPaintedInPlaceAndChangedHeightRejected()
+        {
+            GroundSyntheticExport export = Small();
+            string manifest = export.WriteWhole(Path.Combine(folder, "whole"));
+            // Обрисовка прямо в файле экспорта, ×2.
+            File.Copy(PaintedMap(256, 192, 180, "paint.png"), Path.Combine(folder, "whole", "Test_Map_color.png"), true);
+            GroundExportPackage package = GroundExportPackage.Load(manifest);
+            Assert.That(package.Errors, Is.Empty, string.Join("\n", package.Errors));
+            Assert.That(package.ColorPainted, Is.True);
+            Assert.That(package.ColorScale, Is.EqualTo(2));
+            Assert.That(Apply(package, out string message), Is.True, message);
+            LocationGroundDefinition ground = Visual.Ground;
+            Assert.That(ground.IsPainted, Is.True);
+            Assert.That(ground.ColorScale, Is.EqualTo(2));
+            foreach (LocationGroundTile tile in ground.Tiles)
+            {
+                Assert.That(tile.Color.rect.size, Is.EqualTo(new Vector2(128, 96)));
+                Color32 pixel = TilePixel(tile, 0, 0, out _);
+                Assert.That(new Vector2Int(pixel.r, pixel.g), Is.EqualTo(new Vector2Int((byte)(tile.X * 128), (byte)((1 - tile.Y) * 96))), tile.Key);
+            }
+            Assert.That(LocationGroundLayout.RuntimeErrors(Visual, Location), Is.Empty);
+            // Изменённая карта высот — отказ с понятной причиной.
+            File.WriteAllBytes(Path.Combine(folder, "whole", "Test_Map_height.png"), PngCodec.Encode(128, 96, 16, PngCodec.GrayAlpha, new ushort[128 * 96 * 2]));
+            Assert.That(string.Join("\n", GroundExportPackage.Load(manifest).Errors), Does.Contain("Height изменён"));
+        }
+
+        private static Color32 Decoded(byte[] png, int x, int y)
+        {
+            ushort[] samples = PngCodec.Decode(png, out PngCodec.Header header);
+            int i = (y * header.Width + x) * header.Channels;
+            return new Color32((byte)samples[i], (byte)samples[i + 1], (byte)samples[i + 2], 255);
+        }
+
+        // Настоящий экспорт KS Ground Renderer 2 из Blender (папка — в KS_GROUND_V2_EXPORT).
+        [Test]
+        public void RealBlenderV2ExportImportsWhenPresent()
+        {
+            string path = Environment.GetEnvironmentVariable("KS_GROUND_V2_EXPORT");
+            if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) Assert.Ignore("Нет экспорта Blender 2.0 (переменная KS_GROUND_V2_EXPORT).");
+            GroundExportPackage package = GroundExportPackage.Load(path);
+            Assert.That(package.Errors, Is.Empty, string.Join("\n", package.Errors));
+            Assert.That(package.ReadyTiles, Is.EqualTo(package.Columns * package.Rows));
+            Assert.That(Apply(package, out string message), Is.True, message);
+            LocationGroundDefinition ground = Visual.Ground;
+            Assert.That(LocationGroundLayout.RuntimeErrors(Visual, Location), Is.Empty);
+            LocationHeightField field = LocationHeightField.Load(ground, Location, null);
+            int valid = 0;
+            for (int i = 0; i < 400; i++)
+            {
+                Vector2 pixel = new Vector2((i * 7919 % 1000) / 1000f * Location.CanvasWidth, (i * 104729 % 1000) / 1000f * Location.CanvasHeight);
+                if (field.TrySampleCanvas(pixel, out HeightSample sample) && sample.Valid)
+                {
+                    Assert.That(sample.Blender, Is.InRange(ground.HeightMin - 1e-6, ground.HeightMax + 1e-6));
+                    valid++;
+                }
+            }
+            Assert.That(valid, Is.GreaterThan(50), "на карте есть земля с высотой");
+            TestContext.WriteLine("Экспорт Blender 2: " + package.MapWidth + "×" + package.MapHeight + ", участков " + ground.Tiles.Count +
+                                  ", рост эталона " + ground.ExportCharacterPx.ToString("0") + " px, точек с высотой " + valid + "/400");
         }
 
         // Обрисованная карта целиком: пиксель (x, y сверху) = (x mod 256, y mod 256, mark).

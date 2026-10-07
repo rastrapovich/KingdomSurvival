@@ -123,6 +123,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
 
             if (ground.IsTiled && ground.Tiles.Count > 0) BuildPaintOver(location, ground);
+            if (ground.IsTiled && ground.Tiles.Count > 0) BuildPeopleHeight(location, ground);
 
             // ---------------- Карта высот ----------------
             Heading("Карта высот");
@@ -255,6 +256,25 @@ namespace KingdomSurvival.LocationRendering.Editor
             buttons.Add(apply);
             AddButton(buttons, "Отмена", () => { pendingPaint = null; BuildSettings(); });
             settings.Add(buttons);
+        }
+
+        // Рост людей места задаёт «Ширина кадра боя» (клетка боя ∝ ширине кадра);
+        // эталон персонажа из Blender даёт нужный рост в пикселях карты.
+        private void BuildPeopleHeight(LocalLocationDefinition location, LocationGroundDefinition ground)
+        {
+            Heading("Рост людей");
+            float current = renderer != null ? renderer.HexSizePixels * LocationWorldRenderer.FieldHeightInHexSizes : 0;
+            Help("Люди места сейчас ≈ " + current.ToString("0") + " px (от «Ширины кадра боя», вкладка «Место»)." +
+                 (ground.ExportCharacterPx > 0
+                     ? " Эталон персонажа в экспорте Blender ≈ " + ground.ExportCharacterPx.ToString("0") + " px."
+                     : " Укажите «Эталон персонажа» в аддоне — тогда рост подгоняется кнопкой."));
+            if (ground.ExportCharacterPx > 0 && current > 1)
+                AddButton(settings, "Подогнать рост людей под эталон", () =>
+                {
+                    float scale = ground.ExportCharacterPx / current;
+                    Change(() => location.BattleFrameWidth = Mathf.Max(64, location.BattleFrameWidth * scale), true);
+                    status.text = "Ширина кадра боя: " + location.BattleFrameWidth.ToString("0") + " px — люди ≈ " + ground.ExportCharacterPx.ToString("0") + " px.";
+                });
         }
 
         private void LoadPaint(string path)
@@ -469,7 +489,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 }
                 if (Mathf.RoundToInt(tile.Color.rect.width) != expectW || Mathf.RoundToInt(tile.Color.rect.height) != expectH)
                     result.Add(tile.Key + ": Sprite " + tile.Color.rect.width + "×" + tile.Color.rect.height + " — не весь участок.");
-                if (tile.IsPainted && AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(tile.RenderColorGuid)) == null)
+                if (tile.IsPainted && !string.IsNullOrEmpty(tile.RenderColorGuid) && AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(tile.RenderColorGuid)) == null)
                     result.Add(tile.Key + ": нет рендера Color под обрисовкой — вернуть рендер нельзя, пока экспорт не переимпортирован.");
             }
             if (result.Count == 0) result.Add("✓ Земля в порядке: " + ground.Tiles.Count + " участков, ориентация и размеры согласованы.");

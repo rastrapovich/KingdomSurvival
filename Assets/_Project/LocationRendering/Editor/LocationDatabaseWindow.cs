@@ -164,7 +164,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocalLocationDefinition selected = values.OfType<LocalLocationDefinition>().FirstOrDefault();
                 if (selected == null) return;
                 if (database != null) AssetDatabase.SaveAssetIfDirty(database);
-                ClearGroundPreview(); pendingPackage = null; pendingPlan = null; pendingPaint = null; groundCheck.Clear();
+                ClearGroundPreview(); pendingPackage = null; pendingPlan = null; pendingPaint = null; cropRect = null; cropPlan = null; cropDrawing = false; groundCheck.Clear();
                 selectedId = selected.Id; selectedKind = Kind.None; selectedElementId = null;
                 zoom = 1; viewCenter = CanvasSize / 2; tool = Tool.Select;
                 BuildSettings(); RebuildPreview();
@@ -1159,6 +1159,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             LocalLocationDefinition location = Location;
             if (evt.type == EventType.MouseDown && frame.Contains(evt.mousePosition)) canvas.Focus();
+            if (HandleCropInput(evt, frame, pixel)) return true;
             if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.Escape && tool == Tool.PlaceAsset)
             {
                 SetTool(Tool.Select); evt.Use(); return true;

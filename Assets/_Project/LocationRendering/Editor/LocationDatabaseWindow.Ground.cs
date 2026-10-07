@@ -123,6 +123,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
 
             if (ground.IsTiled && ground.Tiles.Count > 0) BuildPaintOver(location, ground);
+            if (ground.IsTiled && ground.Tiles.Count > 0) BuildCrop(location, ground);
             if (ground.IsTiled && ground.Tiles.Count > 0) BuildPeopleHeight(location, ground);
 
             // ---------------- Карта высот ----------------
@@ -256,6 +257,115 @@ namespace KingdomSurvival.LocationRendering.Editor
             buttons.Add(apply);
             AddButton(buttons, "Отмена", () => { pendingPaint = null; BuildSettings(); });
             settings.Add(buttons);
+        }
+
+        // ------------------------------------------------------------------
+        // Обрезка земли
+        // ------------------------------------------------------------------
+
+        private RectInt? cropRect;
+        private GroundCrop.Plan cropPlan;
+        private bool cropDrawing;
+        private Vector2 cropStart;
+        private int cropMargin = 16;
+
+        private void BuildCrop(LocalLocationDefinition location, LocationGroundDefinition ground)
+        {
+            Heading("Обрезка");
+            Help("Чёрное — пустота: прозрачные поля экспорта и добивка до целых участков. «Найти рамку по земле» берёт рамку по непрозрачным " +
+                 "пикселям Color; рамку можно нарисовать мышью на картинке или поправить числами. Земля перенарезается, входы, объекты, " +
+                 "противники, зоны и разметка остаются на своих местах земли.");
+            if (ground.Cropped)
+            {
+                Label state = new Label("Земля обрезана: " + ground.Columns * ground.TileWidth + "×" + ground.Rows * ground.TileHeight + " px.");
+                settings.Add(state);
+                Toggle("Обрезать так же при переимпорте", ground.CropOnReimport, value => ground.CropOnReimport = value);
+            }
+            IntegerField margin = new IntegerField("Запас вокруг земли (px)") { value = cropMargin };
+            margin.RegisterValueChangedCallback(evt => cropMargin = Mathf.Max(0, evt.newValue));
+            settings.Add(margin);
+            VisualElement row = new VisualElement(); row.style.flexDirection = FlexDirection.Row; row.style.flexWrap = Wrap.Wrap;
+            AddButton(row, "Найти рамку по земле", () =>
+            {
+                EditorUtility.DisplayProgressBar("Обрезка земли", "Поиск непрозрачных пикселей…", .5f);
+                bool found;
+                RectInt bounds;
+                string problem;
+                try { found = GroundCrop.TryContentBounds(ground, location, out bounds, out problem); }
+                finally { EditorUtility.ClearProgressBar(); }
+                if (!found) { status.text = problem; return; }
+                SetCropRect(location, ground, new RectInt(bounds.x - cropMargin, bounds.y - cropMargin, bounds.width + 2 * cropMargin, bounds.height + 2 * cropMargin));
+            });
+            AddButton(row, cropDrawing ? "● Рисую рамку (ЛКМ)" : "Нарисовать рамку мышью", () =>
+            {
+                cropDrawing = !cropDrawing;
+                status.text = cropDrawing ? "Протяните рамку обрезки ЛКМ по картинке места." : status.text;
+                BuildSettings();
+            });
+            settings.Add(row);
+            if (cropRect == null || cropPlan == null) return;
+            RectIntField field = new RectIntField("Рамка (px, Y вниз)") { value = cropRect.Value };
+            field.RegisterValueChangedCallback(evt => SetCropRect(location, ground, evt.newValue));
+            settings.Add(field);
+            Label summary = new Label(cropPlan.CanApply ? cropPlan.Summary(LocationVisualGeometry.CanvasSize(location)) : string.Empty);
+            summary.style.whiteSpace = WhiteSpace.Normal;
+            settings.Add(summary);
+            foreach (string error in cropPlan.Errors) settings.Add(new HelpBox(error, HelpBoxMessageType.Error));
+            foreach (string warning in cropPlan.Warnings) settings.Add(new HelpBox(warning, HelpBoxMessageType.Warning));
+            VisualElement buttons = new VisualElement(); buttons.style.flexDirection = FlexDirection.Row;
+            Button apply = new Button(() =>
+            {
+                AssetDatabase.SaveAssetIfDirty(database);
+                bool ok = GroundCrop.Apply(cropPlan, database, location.Id, out string message);
+                status.text = message;
+                if (!ok) { EditorUtility.DisplayDialog("Обрезка земли", message, "Понятно"); return; }
+                cropRect = null; cropPlan = null; cropDrawing = false;
+                zoom = 1; viewCenter = CanvasSize / 2;
+                ClearGroundPreview();
+                groundCheck = CheckGround(location);
+                BuildSettings(); RebuildPreview();
+            }) { text = "Обрезать" };
+            apply.SetEnabled(cropPlan.CanApply);
+            buttons.Add(apply);
+            AddButton(buttons, "Отмена", () => { cropRect = null; cropPlan = null; cropDrawing = false; BuildSettings(); });
+            settings.Add(buttons);
+        }
+
+        private void SetCropRect(LocalLocationDefinition location, LocationGroundDefinition ground, RectInt rect)
+        {
+            cropRect = rect;
+            cropPlan = GroundCrop.Analyze(ground, location, rect);
+            tab = Tab.Ground;
+            BuildSettings();
+        }
+
+        // Рамка обрезки мышью: ЛКМ — протянуть.
+        private bool HandleCropInput(Event evt, Rect frame, Vector2 pixel)
+        {
+            if (!cropDrawing || tab != Tab.Ground || Ground == null || !Ground.IsTiled) return false;
+            if (evt.type == EventType.MouseDown && evt.button == 0 && frame.Contains(evt.mousePosition))
+            {
+                cropStart = pixel;
+                dragging = true;
+                evt.Use();
+                return true;
+            }
+            if (evt.type == EventType.MouseDrag && evt.button == 0 && dragging)
+            {
+                Vector2 a = Vector2.Min(cropStart, pixel), b = Vector2.Max(cropStart, pixel);
+                cropRect = new RectInt(Mathf.RoundToInt(a.x), Mathf.RoundToInt(a.y), Mathf.RoundToInt(b.x - a.x), Mathf.RoundToInt(b.y - a.y));
+                evt.Use();
+                return true;
+            }
+            if (evt.type == EventType.MouseUp && evt.button == 0 && dragging)
+            {
+                dragging = false;
+                cropDrawing = false;
+                if (cropRect.HasValue) SetCropRect(Location, Ground, cropRect.Value);
+                evt.Use();
+                return true;
+            }
+            return false;
         }
 
         // Рост людей места задаёт «Ширина кадра боя» (клетка боя ∝ ширине кадра);
@@ -612,6 +722,20 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Vector2 a = Gui(useful.min), b = Gui(useful.max);
                     Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(a.x, a.y, b.x, b.y), Color.clear, new Color(.4f, .9f, 1f, .5f));
                 }
+            }
+            if (cropRect.HasValue && tab == Tab.Ground)
+            {
+                // Что останется (итоговая рамка с добором до сетки) и что отрежется — затемнено.
+                RectInt keep = cropPlan != null && cropPlan.CanApply && !dragging ? cropPlan.Canvas : cropRect.Value;
+                Vector2 a = Gui(new Vector2(keep.xMin, keep.yMin)), b = Gui(new Vector2(keep.xMax, keep.yMax));
+                Vector2 c0 = Gui(Vector2.zero), c1 = Gui(CanvasSize);
+                Color dim = new Color(0, 0, 0, .55f);
+                Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(c0.x, c0.y, c1.x, a.y), dim, Color.clear);
+                Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(c0.x, b.y, c1.x, c1.y), dim, Color.clear);
+                Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(c0.x, a.y, a.x, b.y), dim, Color.clear);
+                Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(b.x, a.y, c1.x, b.y), dim, Color.clear);
+                Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(a.x, a.y, b.x, b.y), Color.clear, new Color(1, .55f, .1f, 1));
+                GUI.Label(new Rect(a.x + 4, a.y + 2, 260, 16), "обрезка " + keep.width + "×" + keep.height, EditorStyles.whiteMiniLabel);
             }
             if (showCameraFrame && tab == Tab.Ground && Visual != null)
             {

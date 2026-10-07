@@ -114,6 +114,12 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float ColorScale = 1;
         public string PaintSource = string.Empty;
         public string PaintedUtc = string.Empty;
+        // Обрезка земли: рамка в плоскости проекции Blender (единицы плоскости,
+        // начало снизу слева) — от экспорта не зависит, поэтому переимпорт с
+        // тем же ракурсом и масштабом обрезает так же, раскладка места не едет.
+        public bool Cropped;
+        public Rect CropPlane;
+        public bool CropOnReimport = true;
         // Рост эталона персонажа в экспорте Blender (px) — для подгонки людей места.
         public float ExportCharacterPx;
 

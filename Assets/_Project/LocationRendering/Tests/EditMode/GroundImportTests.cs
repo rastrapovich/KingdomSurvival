@@ -293,6 +293,72 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(string.Join("\n", GroundImporter.FromFiles(Directory.GetFiles(manualFolder), options).Errors), Does.Contain("Подтвердите"));
         }
 
+        // Земля только в части карты (плоскость: x 2,5…12,5, y 1,25…8,75 при q = 0,125).
+        private static GroundSyntheticExport Partial(double originX = 0)
+        {
+            GroundSyntheticExport export = Small();
+            export.Origin = new[] { originX, 0.0 };
+            export.Covered = (x, y) => x >= 2.5 && x < 12.5 && y >= 1.25 && y < 8.75;
+            return export;
+        }
+
+        private HeightSample HeightAt(Vector2 canvas)
+        {
+            LocationHeightField field = LocationHeightField.Load(Visual.Ground, Location, null);
+            field.TrySampleCanvas(canvas, out HeightSample sample, true);
+            return sample;
+        }
+
+        [Test]
+        public void CropByContentRemovesEmptyAndKeepsLayoutOnGround()
+        {
+            string manifest = Partial().WriteWhole(Path.Combine(folder, "whole"));
+            Assert.That(Apply(GroundExportPackage.Load(manifest), out string message), Is.True, message);
+            Location.Entrances[0].Point = new LocalPointData(50.5f, 40.5f);
+            Visual.Objects[0].Position = new Vector2(32.5f / 128, 48.5f / 96);
+            HeightSample before = HeightAt(new Vector2(50.5f, 40.5f));
+            Assert.That(before.Valid, Is.True);
+
+            Assert.That(GroundCrop.TryContentBounds(Visual.Ground, Location, out RectInt bounds, out string problem), Is.True, problem);
+            // Плоскость x 2,5…12,5 → пиксели 20…100; y 1,25…8,75 → снизу 10…70 → на рисунке сверху 26…86.
+            Assert.That(bounds, Is.EqualTo(new RectInt(20, 26, 80, 60)));
+            GroundCrop.Plan plan = GroundCrop.Analyze(Visual.Ground, Location, bounds);
+            Assert.That(plan.Errors, Is.Empty);
+            Assert.That(plan.Canvas, Is.EqualTo(new RectInt(20, 26, 80, 60)));
+            Assert.That(new Vector2Int(plan.Columns, plan.Rows), Is.EqualTo(new Vector2Int(2, 2)));
+            Assert.That(new Vector2Int(plan.TileWidth, plan.TileHeight), Is.EqualTo(new Vector2Int(40, 30)));
+            Assert.That(GroundCrop.Apply(plan, database, locationId, out message), Is.True, message);
+
+            LocationGroundDefinition ground = Visual.Ground;
+            Assert.That(ground.Cropped, Is.True);
+            Assert.That(new Vector2(Location.CanvasWidth, Location.CanvasHeight), Is.EqualTo(new Vector2(80, 60)));
+            Assert.That(LocationGroundLayout.RuntimeErrors(Visual, Location), Is.Empty);
+            Assert.That(new Vector2(Location.Entrances[0].Point.X, Location.Entrances[0].Point.Y), Is.EqualTo(new Vector2(30.5f, 14.5f)));
+            Assert.That(Vector2.Scale(Visual.Objects[0].Position, new Vector2(80, 60)).x, Is.EqualTo(12.5f).Within(1e-3f));
+            HeightSample after = HeightAt(new Vector2(30.5f, 14.5f));
+            Assert.That(after.Blender, Is.EqualTo(before.Blender).Within(1e-9), "вход на той же точке земли");
+            Assert.That(ground.Origin.x, Is.EqualTo(2.5f).Within(1e-5f));
+            Assert.That(ground.Origin.y, Is.EqualTo(1.25f).Within(1e-5f));
+            // Вся земля в рамке: углы рамки — покрытые пиксели, пустота убрана.
+            Assert.That(HeightAt(new Vector2(.5f, .5f)).Valid, Is.True);
+            Assert.That(HeightAt(new Vector2(79.5f, 59.5f)).Valid, Is.True);
+
+            // Переимпорт того же экспорта — обрезка повторяется, раскладка на месте.
+            Assert.That(Apply(GroundExportPackage.Load(manifest), out message), Is.True, message);
+            Assert.That(message, Does.Contain("Обрезка повторена"));
+            Assert.That(new Vector2(Location.CanvasWidth, Location.CanvasHeight), Is.EqualTo(new Vector2(80, 60)));
+            Assert.That(new Vector2(Location.Entrances[0].Point.X, Location.Entrances[0].Point.Y), Is.EqualTo(new Vector2(30.5f, 14.5f)));
+            Assert.That(HeightAt(new Vector2(30.5f, 14.5f)).Blender, Is.EqualTo(before.Blender).Within(1e-9));
+
+            // Экспорт с другой областью (сдвиг на 8 пикселей) — земля та же, вход на той же точке.
+            string shifted = Partial(-1.0).WriteWhole(Path.Combine(folder, "shifted"));
+            Assert.That(Apply(GroundExportPackage.Load(shifted), out message), Is.True, message);
+            Assert.That(message, Does.Contain("Обрезка повторена"));
+            Assert.That(new Vector2(Location.CanvasWidth, Location.CanvasHeight), Is.EqualTo(new Vector2(80, 60)));
+            Assert.That(new Vector2(Location.Entrances[0].Point.X, Location.Entrances[0].Point.Y), Is.EqualTo(new Vector2(30.5f, 14.5f)));
+            Assert.That(HeightAt(new Vector2(30.5f, 14.5f)).Blender, Is.EqualTo(before.Blender).Within(1e-9));
+        }
+
         // KS Ground Renderer 2: карта целиком тремя файлами — база режет сама.
         [Test]
         public void WholeMapExportImportsLikeTiles()
@@ -386,6 +452,16 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(valid, Is.GreaterThan(50), "на карте есть земля с высотой");
             TestContext.WriteLine("Экспорт Blender 2: " + package.MapWidth + "×" + package.MapHeight + ", участков " + ground.Tiles.Count +
                                   ", рост эталона " + ground.ExportCharacterPx.ToString("0") + " px, точек с высотой " + valid + "/400");
+
+            // Обрезка пустоты по земле.
+            Assert.That(GroundCrop.TryContentBounds(ground, Location, out RectInt bounds, out string problem), Is.True, problem);
+            GroundCrop.Plan plan = GroundCrop.Analyze(ground, Location, bounds);
+            Assert.That(plan.Errors, Is.Empty, string.Join("\n", plan.Errors));
+            string summary = plan.Summary(new Vector2(Location.CanvasWidth, Location.CanvasHeight));
+            Assert.That(GroundCrop.Apply(plan, database, locationId, out message), Is.True, message);
+            Assert.That(LocationGroundLayout.RuntimeErrors(Visual, Location), Is.Empty);
+            Assert.That(Location.CanvasWidth * Location.CanvasHeight, Is.LessThan(package.MapWidth * package.MapHeight));
+            TestContext.WriteLine("Обрезка: " + summary);
         }
 
         // Обрисованная карта целиком: пиксель (x, y сверху) = (x mod 256, y mod 256, mark).

@@ -27,25 +27,32 @@ namespace KingdomSurvival.LocationRendering.Editor
         public string Status = "complete";
         public string RevisionId = "00000000000000000000000000000001";
         public double UnityPpu = 108;
-        // Высота, BU, в точке виртуальной карты (пиксели снизу слева).
+        // Высота, BU, в точке плоскости Blender (единицы плоскости): не зависит
+        // от origin — сдвинутый экспорт показывает ту же землю.
         public Func<double, double, double> Surface;
+        // Есть ли земля в точке плоскости (нет — прозрачно, высоты нет).
+        public Func<double, double, bool> Covered;
 
         public GroundSyntheticExport()
         {
             Surface = (x, y) =>
             {
-                double w = Columns * Width, h = Rows * Height;
+                double w = Columns * Width * Q, h = Rows * Height * Q;
                 double hills = Math.Sin(x / w * Math.PI * 3) * Math.Cos(y / h * Math.PI * 2);
                 return 1 + 1.5 * hills;
             };
         }
+
+        // Точка виртуальной карты (пиксели снизу слева) → плоскость.
+        public double At(double x, double y) => Surface(Origin[0] + x * Q, Origin[1] + y * Q);
+        public bool CoveredAt(double x, double y) => Covered == null || Covered(Origin[0] + x * Q, Origin[1] + y * Q);
 
         public int VirtualWidth => Columns * Width;
         public int VirtualHeight => Rows * Height;
 
         public ushort RawHeight(double x, double y)
         {
-            double t = (Surface(x, y) - HeightMin) / (HeightMax - HeightMin);
+            double t = (At(x, y) - HeightMin) / (HeightMax - HeightMin);
             double max = HeightBits == 16 ? 65535 : 255;
             return (ushort)Math.Round(Math.Max(0, Math.Min(1, t)) * max);
         }
@@ -168,7 +175,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 for (int px = 0; px < Width; px++)
                 {
                     Virtual(tx, ty, px, py, out double x, out double y);
-                    double shade = (Surface(x, y) - HeightMin) / (HeightMax - HeightMin);
+                    double shade = (At(x, y) - HeightMin) / (HeightMax - HeightMin);
                     bool stripe = ((int)Math.Floor((x + y) / 24)) % 2 == 0;
                     Color color = Color.Lerp(new Color(.30f, .34f, .22f), new Color(.62f, .58f, .42f), (float)shade);
                     if (stripe) color *= .9f;
@@ -181,7 +188,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                     samples[i] = (ushort)Mathf.RoundToInt(Mathf.Clamp01(color.r) * 255);
                     samples[i + 1] = (ushort)Mathf.RoundToInt(Mathf.Clamp01(color.g) * 255);
                     samples[i + 2] = (ushort)Mathf.RoundToInt(Mathf.Clamp01(color.b) * 255);
-                    samples[i + 3] = 255;
+                    samples[i + 3] = (ushort)(CoveredAt(x, y) ? 255 : 0);
                 }
             }
             return PngCodec.Encode(Width, Height, 8, PngCodec.Rgba, samples, null, true);
@@ -196,7 +203,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 for (int px = 0; px < Width; px++)
                 {
                     Virtual(tx, ty, px, py, out double x, out double y);
-                    double dx = (Surface(x + 1, y) - Surface(x - 1, y)) / (2 * Q), dy = (Surface(x, y + 1) - Surface(x, y - 1)) / (2 * Q);
+                    double dx = (At(x + 1, y) - At(x - 1, y)) / (2 * Q), dy = (At(x, y + 1) - At(x, y - 1)) / (2 * Q);
                     Vector3 n = new Vector3((float)-dx, (float)-dy, 1).normalized;
                     if (InvertGreen) n.y = -n.y;
                     int i = (py * Width + px) * 4;
@@ -220,7 +227,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Virtual(tx, ty, px, py, out double x, out double y);
                     int i = (py * Width + px) * 4;
                     samples[i] = samples[i + 1] = samples[i + 2] = RawHeight(x, y);
-                    samples[i + 3] = (ushort)max;
+                    bool covered = CoveredAt(x, y);
+                    if (!covered) samples[i] = samples[i + 1] = samples[i + 2] = 0;
+                    samples[i + 3] = (ushort)(covered ? max : 0);
                 }
             }
             return PngCodec.Encode(Width, Height, HeightBits, PngCodec.Rgba, samples);

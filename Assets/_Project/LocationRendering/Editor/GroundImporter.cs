@@ -201,6 +201,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             // 2. Запись в Assets (новые файлы рядом со старыми).
             List<string> created = new List<string>();
             int paintBehindRender = 0;
+            bool sameView = false, recrop = false;
+            Rect cropPlane = default;
             try
             {
                 Directory.CreateDirectory(folder + "/Color");
@@ -241,7 +243,15 @@ namespace KingdomSurvival.LocationRendering.Editor
                 paintBehindRender = 0;
                 Undo.RecordObject(database, "Импорт земли из Blender");
                 LocationGroundDefinition ground = visual.Ground ?? (visual.Ground = new LocationGroundDefinition());
-                if (plan.ReplacesWholeGround) ground.Tiles.Clear();
+                // Прежняя земля из Blender с тем же ракурсом и масштабом: раскладка
+                // места переносится сдвигом по плоскости камеры, обрезка повторяется.
+                bool oldTiled = ground.IsTiled && ground.Tiles.Count > 0;
+                sameView = oldTiled && SameView(ground, package) && LocationGroundGrid.For(ground, location).IsOneToOne;
+                Vector2 oldOrigin = ground.Origin;
+                int oldHeight = ground.Rows * ground.TileHeight;
+                recrop = sameView && plan.ReplacesWholeGround && ground.Cropped && ground.CropOnReimport;
+                cropPlane = ground.CropPlane;
+                if (plan.ReplacesWholeGround) { ground.Tiles.Clear(); ground.Cropped = false; }
                 WriteHeader(ground, package, plan, manifestPath);
                 foreach (Staged item in staged)
                 {
@@ -280,7 +290,16 @@ namespace KingdomSurvival.LocationRendering.Editor
                 ground.Incomplete = IsIncomplete(ground);
                 if (visual.Camera == null || visual.Camera.Version == 0) visual.Camera = LocationCameraSettings.ForLargeMap();
                 Vector2 canvas = LocationVisualGeometry.CanvasSize(location);
-                if (plan.ResizeCanvas && (Mathf.Abs(canvas.x - package.VirtualWidth) > .5f || Mathf.Abs(canvas.y - package.VirtualHeight) > .5f))
+                bool resized = Mathf.Abs(canvas.x - package.VirtualWidth) > .5f || Mathf.Abs(canvas.y - package.VirtualHeight) > .5f;
+                if (plan.ResizeCanvas && sameView)
+                {
+                    // Та же плоскость: точка земли (x, y) → новая карта сдвигом, без растяжения.
+                    Vector2 offset = new Vector2((float)((package.Origin[0] - oldOrigin.x) / package.Q),
+                        (float)(oldHeight - package.VirtualHeight + (oldOrigin.y - package.Origin[1]) / package.Q));
+                    if (resized || offset.sqrMagnitude > 1e-4f)
+                        LocationRebase.Translate(location, visual, offset, new Vector2(package.VirtualWidth, package.VirtualHeight));
+                }
+                else if (plan.ResizeCanvas && resized)
                     resizeCanvas(location, package.VirtualWidth, package.VirtualHeight);
                 EditorUtility.SetDirty(database);
                 if (AssetDatabase.Contains(database)) AssetDatabase.SaveAssetIfDirty(database);
@@ -303,8 +322,22 @@ namespace KingdomSurvival.LocationRendering.Editor
                       (removed > 0 ? ", удалено устаревших файлов " + removed : "") +
                       (paintBehindRender > 0 ? ". Рендер Color изменился у " + paintBehindRender + " обрисованных участков — обрисовка сохранена; сохраните Color всей карты и проверьте её" : "") +
                       (visual.Ground.Incomplete ? ". Земля неполная — только предпросмотр, в игру не пойдёт." : ".");
+            if (recrop)
+            {
+                // Прежняя обрезка — по той же рамке плоскости Blender.
+                visual.Ground.CropPlane = cropPlane;
+                GroundCrop.Plan crop = GroundCrop.Analyze(visual.Ground, location, GroundCrop.CanvasRectFromPlane(visual.Ground));
+                if (crop.CanApply && GroundCrop.Apply(crop, database, location.Id, out string cropMessage))
+                    message += " Обрезка повторена: " + cropMessage;
+                else
+                    message += " Обрезка не повторена: " + string.Join(" ", crop.Errors) + " — обрежьте заново во вкладке «Земля».";
+            }
             return true;
         }
+
+        private static bool SameView(LocationGroundDefinition ground, GroundExportPackage package) =>
+            !package.Manual && ground.ProjectionQ > 0 && package.Q > 0 && Math.Abs(ground.ProjectionQ - package.Q) <= package.Q * 1e-5 &&
+            Same(ground.BasisRight, package.Basis[0]) && Same(ground.BasisUp, package.Basis[1]) && Same(ground.BasisBack, package.Basis[2]);
 
         // Итог импорта: у каждого участка сетки будет Color, а у выбранных —
         // все заказанные проходы? Иначе — только частичный предпросмотр.
@@ -442,7 +475,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 throw new IOException("Не записаны настройки импорта " + path + ".");
         }
 
-        private static void ConfigureNormal(string path, int largestSide)
+        internal static void ConfigureNormal(string path, int largestSide)
         {
             TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(path);
             importer.textureType = TextureImporterType.NormalMap;

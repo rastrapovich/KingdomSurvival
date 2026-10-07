@@ -213,6 +213,14 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float Scale = 1;
         public LocationAssetOverride Overrides;
 
+        // ПР-12Р: облик экземпляра (у ассета и у прямого рисунка). Растяжение —
+        // множитель ширины (1 — как есть); поворот — градусы против часовой
+        // вокруг опоры; цвет — сдвиг тона (градусы), насыщенность и яркость
+        // (множители) и подкраска. Значения по умолчанию — рисунок как есть.
+        public float Stretch = 1;
+        public float Rotation;
+        public LocationColorAdjust ColorAdjust = new LocationColorAdjust();
+
         public bool UsesAsset => !string.IsNullOrEmpty(AssetId);
         public bool IsOverridden(LocationAssetOverride flag) => (Overrides & flag) != 0;
 
@@ -254,6 +262,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         public LocationGroundDefinition Ground = new LocationGroundDefinition();
         public LocationCameraSettings Camera = new LocationCameraSettings();
         public List<LocationVisualObject> Objects = new List<LocationVisualObject>();
+        // ПР-12Р: слои раскидки (трава, камни, мох) — кистью, сотнями штук.
+        public List<LocationScatterLayer> ScatterLayers = new List<LocationScatterLayer>();
         // Точка появления тестового отряда — доли рисунка места.
         public Vector2 TestStartPoint = new Vector2(.25f, .5f);
         public string TestUnitId = "militia";
@@ -311,6 +321,18 @@ namespace KingdomSurvival.BattlefieldDatabase
                 if (!resolved.BlocksMovement) continue;
                 result.Add(FootprintRect(location, item, resolved));
             }
+            // ПР-12Р: раскидка объектами с проходимостью «как у ассета» (камни).
+            if (visual.ScatterLayers != null)
+                foreach (LocationScatterLayer layer in visual.ScatterLayers)
+                {
+                    if (layer == null || layer.Hidden || !layer.BlocksMovement || layer.Mode != LocationScatterMode.Objects) continue;
+                    foreach (LocationScatterInstance instance in layer.Instances)
+                    {
+                        LocationVisualObject item = layer.ToObject(instance);
+                        LocationResolvedVisual resolved = LocationVisualResolver.Resolve(item);
+                        if (resolved.BlocksMovement) result.Add(FootprintRect(location, item, resolved));
+                    }
+                }
             return result;
         }
 
@@ -352,6 +374,16 @@ namespace KingdomSurvival.BattlefieldDatabase
                 if (item.Position.x < 0 || item.Position.x > 1 || item.Position.y < 0 || item.Position.y > 1) errors.Add(item.Name + ": за пределами рисунка.");
                 if (item.Light.Enabled && (item.Light.Radius <= 0 || item.Light.Intensity < 0)) errors.Add(item.Name + ": неверный свет.");
             }
+            if (visual.ScatterLayers != null)
+                foreach (LocationScatterLayer layer in visual.ScatterLayers)
+                {
+                    if (layer == null) { errors.Add("Пустой слой раскидки."); continue; }
+                    HashSet<string> missing = new HashSet<string>();
+                    foreach (LocationScatterInstance instance in layer.Instances)
+                        if (ArtAssetDatabaseAsset.FindCurrent(instance.AssetId) == null) missing.Add(instance.AssetId);
+                    if (missing.Count > 0)
+                        errors.Add("Раскидка «" + layer.Name + "»: ассетов нет в Базе ассетов — " + string.Join(", ", missing) + ".");
+                }
             LocalLocationGeometry geometry = new LocalLocationGeometry(location, field, BlockedAreas(visual, location));
             Vector2 start = ToPixel(location, visual.TestStartPoint);
             if (!geometry.IsPassable(start.x, start.y)) errors.Add("Точка тестового появления непроходима.");

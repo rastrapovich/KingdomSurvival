@@ -9280,6 +9280,96 @@ MonoBehaviour:
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
+    - id: PR12R-T01
+      title: "12Р-1 · Облик предмета: растяжение, поворот, цвет"
+      details: "Растяжение по ширине, поворот вокруг опоры, сдвиг тона, насыщенность, яркость и подкраска у предмета места; шейдер Location Sprite Adjust под 2D-светом; тень-силуэт повторяет растяжение и поворот."
+      category: 3
+      status: 3
+      required: 1
+      order: 56
+      priority: 0
+      verificationType: 2
+      blockerReason: 4
+      dependencies:
+      - PR12P-T02
+      acceptanceCriteria:
+      - text: "Сдвиг тона красного на 120° даёт зелёный (объект и ковёр)"
+        done: 1
+      - text: "Прежние предметы читаются без изменения облика"
+        done: 1
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "LocationScatterPlayModeTests.HueShift…, LocationScatterTests.OldData… зелёные; снимки Logs/Scatter просмотрены."
+      completedAt: 2026-10-07
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12R-T02
+      title: "12Р-2 · Кисть раскидки в Базе локаций"
+      details: "Вкладка «Раскидка»: слои, ассеты кисти с весами, радиус, плотность, наименьшее расстояние, спад; разброс размера, растяжения, поворота, отражения, ракурса, тона, насыщенности, яркости, подкраски; маска местности; кисть, ластик, перекраска, заливка; один мазок — один Undo."
+      category: 3
+      status: 2
+      required: 1
+      order: 57
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12R-T01
+      acceptanceCriteria:
+      - text: "Плотность, наименьшее расстояние, маска, веса и пределы разброса (EditMode)"
+        done: 1
+      - text: "Вкладка открывается в окне"
+        done: 1
+      - text: "Рисование мышью, ластик, перекраска и Undo в окне — проверка пользователем"
+        done: 0
+      manualChecks:
+      - "Служебное → «База ассетов: техническое место», вкладка «Раскидка»: порисовать, стереть, перекрасить, Ctrl+Z"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "LocationScatterTests 9/9. Мышью в окне не проверялось."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12R-T03
+      title: "12Р-3 · Раскидка объектами и ковром в месте"
+      details: "Объекты — как предметы места (сортировка с людьми, кадры, нормали, тени слоя, проходимость «как у ассета»); ковёр — пачкой-сеткой на группу (ассет, ракурс, часть, фаза), слоем, по нормалям; одинаково в окне, исследовании и бою на месте."
+      category: 3
+      status: 2
+      required: 1
+      order: 58
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12R-T02
+      acceptanceCriteria:
+      - text: "Ковёр ложится как объект: опора, поворот, растяжение, отражение (PlayMode)"
+        done: 1
+      - text: "Ковёр виден в предпросмотре окна (EditMode)"
+        done: 1
+      - text: "Тысячи штук ковром в игре без провала кадров — проверка пользователем"
+        done: 0
+      manualChecks:
+      - "Залить место ковром травы, пройти отрядом, посмотреть ночью у огня"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "LocationScatterPlayModeTests 3/3; ночной снимок: ковёр и объекты освещены огнём по нормалям."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
   - id: PR15_HOME_WATER
     title: "\u041F\u0420-15. \xAB\u0414\u043E\u043C \u043D\u0430 \u0447\u0443\u0436\u043E\u0439
       \u0432\u043E\u0434\u0435\xBB \u043D\u0430 \u043E\u0431\u0449\u0435\u0439 \u043E\u0441\u043D\u043E\u0432\u0435"

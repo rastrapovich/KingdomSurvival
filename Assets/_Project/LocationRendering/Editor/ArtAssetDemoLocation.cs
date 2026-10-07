@@ -36,10 +36,13 @@ namespace KingdomSurvival.LocationRendering.Editor
             LocationVisualDefinition existing = database.locations.Any(item => item.Id == Id) ? database.FindVisual(Id) : null;
             if (existing != null)
             {
-                // Место создано до ПР-12П — дописать заросль травы.
-                if (existing.Objects.Any(item => item != null && item.AssetId == ArtAssetTechnicalSet.GrassId)) return;
+                // Место создано раньше — дописать заросль травы (12П) и раскидку (12Р).
+                bool grass = existing.Objects.Any(item => item != null && item.AssetId == ArtAssetTechnicalSet.GrassId);
+                bool scatter = existing.ScatterLayers != null && existing.ScatterLayers.Count > 0;
+                if (grass && scatter) return;
                 Undo.RecordObject(database, "Техническое место Базы ассетов: трава");
-                PlaceGrass(existing, catalog);
+                if (!grass) PlaceGrass(existing, catalog);
+                if (!scatter) PlaceScatter(existing, database.locations.Find(item => item.Id == Id));
                 EditorUtility.SetDirty(database);
                 AssetDatabase.SaveAssetIfDirty(database);
                 return;
@@ -66,6 +69,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Place(visual, catalog, ArtAssetTechnicalSet.CrateId, "Ящик (тест)", .4f, .7f, ArtAssetView.FrontLeft);
             Place(visual, catalog, ArtAssetTechnicalSet.CrateId, "Ящик 2 (тест)", .62f, .74f, ArtAssetView.Front);
             PlaceGrass(visual, catalog);
+            PlaceScatter(visual, database.locations.Find(item => item.Id == Id));
             LocationVisualObject fire = new LocationVisualObject { Name = "Свет у дома", LightOnly = true, Position = new Vector2(.36f, .6f) };
             fire.Light.Enabled = true; fire.Light.Radius = 5; fire.Light.Intensity = 1.6f; fire.Light.NormalMaps = true; fire.Light.NightOnly = true;
             visual.Objects.Add(fire);
@@ -96,6 +100,42 @@ namespace KingdomSurvival.LocationRendering.Editor
             };
             for (int i = 0; i < points.Length; i++)
                 Place(visual, catalog, ArtAssetTechnicalSet.GrassId, "Трава " + (i + 1) + " (тест)", points[i].x, points[i].y, ArtAssetView.Front, i % 2 == 1);
+        }
+
+        // ПР-12Р: раскидка технической травой — низкая ковром у дома, высокая
+        // объектами справа (герой заходит за неё). Разброс размера, поворота,
+        // тона и яркости — по кисти; повтор даёт то же (постоянное зерно).
+        private static void PlaceScatter(LocationVisualDefinition visual, LocalLocationDefinition location)
+        {
+            if (location == null) return;
+            if (visual.ScatterLayers == null) visual.ScatterLayers = new List<LocationScatterLayer>();
+            LocationScatterLayer carpet = new LocationScatterLayer { Name = "Низкая трава (тест)", Mode = LocationScatterMode.Carpet, Band = LocationVisualBand.GroundDetail };
+            carpet.Assets.Add(new LocationScatterEntry { AssetId = ArtAssetTechnicalSet.GrassId });
+            carpet.Brush.Radius = 220;
+            carpet.Brush.Density = 10;
+            carpet.Brush.MinDistance = 8;
+            carpet.Brush.Scale = new Vector2(.45f, .75f);
+            carpet.Brush.Rotation = new Vector2(-6, 6);
+            carpet.Brush.HueJitter = 12;
+            carpet.Brush.Brightness = new Vector2(.8f, 1.1f);
+            LocationScatterLayer tall = new LocationScatterLayer { Name = "Высокая трава (тест)", Mode = LocationScatterMode.Objects, Band = LocationVisualBand.World, ProjectsShadow = true };
+            tall.Assets.Add(new LocationScatterEntry { AssetId = ArtAssetTechnicalSet.GrassId });
+            tall.Brush.Radius = 160;
+            tall.Brush.Density = 2.5f;
+            tall.Brush.MinDistance = 26;
+            tall.Brush.Scale = new Vector2(.9f, 1.4f);
+            tall.Brush.Stretch = new Vector2(.85f, 1.2f);
+            tall.Brush.Rotation = new Vector2(-5, 5);
+            tall.Brush.HueShift = -8;
+            tall.Brush.HueJitter = 10;
+            System.Random random = new System.Random(12);
+            foreach (Vector2 center in new[] { new Vector2(560, 820), new Vector2(820, 860) })
+                LocationScatterPainter.Stamp(carpet, location, center, random, LocationScatterPainter.Mask(carpet.Brush, location, visual),
+                    LocationScatterIndex.Of(carpet, location));
+            LocationScatterPainter.Stamp(tall, location, new Vector2(1500, 860), random, LocationScatterPainter.Mask(tall.Brush, location, visual),
+                LocationScatterIndex.Of(tall, location));
+            visual.ScatterLayers.Add(carpet);
+            visual.ScatterLayers.Add(tall);
         }
 
         // Для пакетного запуска (-executeMethod).

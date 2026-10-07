@@ -174,6 +174,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Number("Масштаб экземпляра", selected.Scale, .1f, 4, value => selected.Scale = Mathf.Max(.05f, value),
                 "1 — игровой размер ассета. Опора остаётся на месте.");
             Toggle("Отразить по X", selected.FlipX, value => selected.FlipX = value);
+            LookSettings(selected);
             Toggle("Заблокировать", selected.Locked, value => selected.Locked = value);
             Toggle("Скрыть", selected.Hidden, value => selected.Hidden = value);
 

@@ -83,6 +83,11 @@ namespace KingdomSurvival.LocationRendering
         private readonly List<UnityEngine.Object> owned = new List<UnityEngine.Object>();
         private readonly List<Light2D> suppressed = new List<Light2D>();
         private readonly Material lit, unlit;
+        // ПР-12Р: тот же свет, плюс цвет экземпляра (тон, насыщенность, яркость).
+        public const string AdjustShaderPath = "LocationRendering/LocationSpriteAdjust";
+        private readonly Material adjustLit;
+        private readonly MaterialPropertyBlock adjustBlock = new MaterialPropertyBlock();
+        private static readonly int HsvId = Shader.PropertyToID("_KsHsv");
         private readonly CreatureAnimationDatabaseAsset animations;
         private readonly UnitDatabaseAsset units;
         private readonly Transform actorLayer;
@@ -101,6 +106,8 @@ namespace KingdomSurvival.LocationRendering
             if (parent != null) Root.transform.SetParent(parent, false);
             lit = Own(new Material(Shader.Find("Universal Render Pipeline/2D/Sprite-Lit-Default")));
             unlit = Own(new Material(Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default")));
+            Shader adjust = Resources.Load<Shader>(AdjustShaderPath);
+            if (adjust != null) adjustLit = Own(new Material(adjust) { name = "Рисунок места · цвет" });
             Camera = Child("Камера").AddComponent<Camera>();
             Camera.orthographic = true;
             Camera.transform.localPosition = new Vector3(0, 0, -10);
@@ -114,6 +121,7 @@ namespace KingdomSurvival.LocationRendering
 
             BuildGround();
             foreach (LocationVisualObject item in Definition.Objects) AddObject(item);
+            BuildScatter();
             actorLayer = Child("Фигуры").transform;
             animations = Resources.Load<CreatureAnimationDatabaseAsset>(CreatureAnimationDatabaseAsset.ResourcesPath);
             units = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
@@ -349,7 +357,8 @@ namespace KingdomSurvival.LocationRendering
                 SpriteRenderer image = Image(imageObject, sprite, fullbright);
                 // Ассет без рисунка — заметная заглушка, а не «ящик».
                 if (part.Placeholder && resolved.FromAsset) image.color = new Color(1, .45f, .75f);
-                Fit(image, part.Height, part.Pivot, resolved.FlipX, Vector2.zero);
+                else if (!fullbright) ApplyColor(image, resolved.ColorAdjust);
+                Fit(image, part.Height, part.Pivot, resolved.FlipX, Vector2.zero, resolved.Stretch, resolved.Rotation);
                 image.sortingOrder = LocationVisualGeometry.SortOrder(part.Band, anchor.localPosition.y, part.OrderOffset);
                 entry.Images.Add(image);
                 entry.Parts.Add(part);
@@ -404,6 +413,7 @@ namespace KingdomSurvival.LocationRendering
             Hour = Mathf.Repeat(hours, 24);
             Seconds = seconds;
             AnimateObjects();
+            AnimateScatter();
             ApplyLighting();
         }
 
@@ -703,19 +713,39 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
-        private static void Fit(SpriteRenderer image, float height, Vector2 pivot, bool flip, Vector2 offset)
+        // stretch — множитель ширины, rotation — градусы против часовой вокруг
+        // опоры (опора стоит на месте, рисунок поворачивается вокруг неё).
+        private static void Fit(SpriteRenderer image, float height, Vector2 pivot, bool flip, Vector2 offset, float stretch = 1, float rotation = 0)
         {
             if (image.sprite == null) return;
             Vector2 size = image.sprite.bounds.size;
             float scale = height / Mathf.Max(.001f, size.y);
-            float width = size.x * scale;
-            image.transform.localScale = Vector3.one * scale;
+            stretch = stretch > .01f ? stretch : 1;
+            float width = size.x * scale * stretch;
+            image.transform.localScale = new Vector3(scale * stretch, scale, 1);
             // Sprite pivot не меняется в importer: индивидуальная опора хранится у размещения.
             Vector2 originalPivot = image.sprite.pivot / image.sprite.rect.size;
-            image.transform.localPosition = new Vector2(
+            Vector2 position = new Vector2(
                 ((flip ? 1 - originalPivot.x : originalPivot.x) - (flip ? 1 - pivot.x : pivot.x) + (flip ? -offset.x : offset.x)) * width,
                 (originalPivot.y - pivot.y + offset.y) * height);
+            Quaternion turn = Quaternion.Euler(0, 0, rotation);
+            image.transform.localPosition = turn * position;
+            image.transform.localRotation = turn;
             image.flipX = flip;
+        }
+
+        // ПР-12Р: цвет экземпляра. Подкраска — цветом рендерера; тон,
+        // насыщенность и яркость — материалом с поправкой и блоком свойств
+        // (без поправки — общий материал, рисунки собираются в пачки).
+        private void ApplyColor(SpriteRenderer image, LocationColorAdjust adjust)
+        {
+            if (adjust == null || adjust.IsIdentity) return;
+            image.color = adjust.Tint;
+            if (!adjust.HasHsv || adjustLit == null) return;
+            image.sharedMaterial = adjustLit;
+            image.GetPropertyBlock(adjustBlock);
+            adjustBlock.SetVector(HsvId, adjust.ShaderHsv);
+            image.SetPropertyBlock(adjustBlock);
         }
 
         // ------------------------------------------------------------------
@@ -746,7 +776,8 @@ namespace KingdomSurvival.LocationRendering
             // Состояние заменяет рисунок основы целиком — её кадры больше не идут.
             if (main != null && item.Parts.Count > 0) item.Parts[0] = main;
             item.Image.sprite = variant.Sprite;
-            Fit(item.Image, main?.Height ?? item.Data.Height, main?.Pivot ?? item.Data.Pivot, item.Data.FlipX, Vector2.zero);
+            Fit(item.Image, main?.Height ?? item.Data.Height, main?.Pivot ?? item.Data.Pivot, item.Data.FlipX, Vector2.zero,
+                item.Resolved?.Stretch ?? 1, item.Resolved?.Rotation ?? 0);
             return true;
         }
 

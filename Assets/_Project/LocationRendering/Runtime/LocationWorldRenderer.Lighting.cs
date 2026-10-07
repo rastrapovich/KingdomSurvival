@@ -445,15 +445,18 @@ namespace KingdomSurvival.LocationRendering
                 shadow.sprite = caster.Source.sprite;
                 shadow.flipX = caster.Source.flipX;
                 Transform from = caster.Source.transform;
+                // Растянутый и повёрнутый рисунок (ПР-12Р) — такой же силуэт.
                 if (from.parent == caster.Anchor)
                 {
                     shadow.transform.localPosition = from.localPosition;
                     shadow.transform.localScale = from.localScale;
+                    shadow.transform.localRotation = from.localRotation;
                 }
                 else
                 {
                     shadow.transform.position = from.position;
                     shadow.transform.localScale = from.lossyScale;
+                    shadow.transform.rotation = from.rotation;
                 }
             }
             // Блок свойств — с чистого листа: старый блок мог нести текстуру
@@ -495,6 +498,7 @@ namespace KingdomSurvival.LocationRendering
                     layer.transform.SetParent(entry.Anchor, false);
                     layer.transform.localPosition = image.transform.localPosition * scale;
                     layer.transform.localScale = image.transform.localScale * scale;
+                    layer.transform.localRotation = image.transform.localRotation;
                     SpriteRenderer shadow = layer.AddComponent<SpriteRenderer>();
                     shadow.sprite = image.sprite;
                     shadow.flipX = image.flipX;

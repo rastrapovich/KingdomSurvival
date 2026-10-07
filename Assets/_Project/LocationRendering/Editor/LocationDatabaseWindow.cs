@@ -23,14 +23,15 @@ namespace KingdomSurvival.LocationRendering.Editor
     // кадр поля показывается на рисунке там, где начнётся бой.
     public sealed partial class LocationDatabaseWindow : EditorWindow
     {
-        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape, PlaceAsset }
+        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape, PlaceAsset, Scatter }
         private enum Kind { None, Art, Entrance, GameObject, Enemy, Encounter }
-        private enum Tab { Place, Game, Light, Art, Ground }
-        private static readonly string[] TabNames = { "Место", "Игровое", "Свет", "Предметы", "Земля" };
+        private enum Tab { Place, Game, Light, Art, Ground, Scatter }
+        private static readonly string[] TabNames = { "Место", "Игровое", "Свет", "Предметы", "Земля", "Раскидка" };
 
         private static readonly string[] ToolNames =
         {
-            "Выбор", "Местность", "Вход", "Объект места", "Противник", "Зона угрозы", "Кадр боя", "Точка отхода", "Старт теста", "Опора рисунка", "Форма света", "Ставить ассет"
+            "Выбор", "Местность", "Вход", "Объект места", "Противник", "Зона угрозы", "Кадр боя", "Точка отхода", "Старт теста", "Опора рисунка", "Форма света", "Ставить ассет",
+            "Кисть раскидки"
         };
 
         private LocalLocationDatabaseAsset database;
@@ -232,9 +233,11 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case Tool.Pivot: status.text = "Кликните по точке опоры на рисунке выбранного объекта."; break;
                 case Tool.LightShape: status.text = "Форма света: тяните точку, клик у края — новая точка, Shift+клик — удалить."; break;
                 case Tool.PlaceAsset: status.text = "Ставить ассет «" + (ArtAssetDatabaseAsset.FindCurrent(placingAssetId)?.Name ?? "?") + "»: клик — новый экземпляр; Esc или «Выбор» — закончить."; break;
+                case Tool.Scatter: status.text = ScatterHint(); break;
                 default: status.text = "Выбор: клик по метке или предмету, перетаскивание — переместить."; break;
             }
-            if (value == Tool.Terrain) tab = Tab.Place;
+            if (value == Tool.Scatter) tab = Tab.Scatter;
+            else if (value == Tool.Terrain) tab = Tab.Place;
             else if (value == Tool.LightShape) tab = Tab.Light;
             else if (value == Tool.TestStart || value == Tool.Pivot || value == Tool.PlaceAsset) tab = tab == Tab.Light ? Tab.Light : Tab.Art;
             else if (value != Tool.Select) tab = Tab.Game;
@@ -389,6 +392,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case Tab.Light: BuildLightSettings(location); return;
                 case Tab.Art: BuildVisualSettings(location); return;
                 case Tab.Ground: BuildGroundSettings(location); return;
+                case Tab.Scatter: BuildScatterSettings(location); return;
             }
             Text("Название", location.DisplayName, value => { location.DisplayName = value; RefreshList(); });
             Text("ID места карты", location.WorldLocationId, value => location.WorldLocationId = value);
@@ -659,6 +663,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Text("Группа частей", selected.GroupId, value => selected.GroupId = value);
             Number("Высота рисунка", selected.Height, .1f, 6, value => selected.Height = value, "Единицы мира: 108 пикселей рисунка = 1.");
             Toggle("Отразить по X", selected.FlipX, value => selected.FlipX = value);
+            LookSettings(selected);
             Toggle("Заблокировать", selected.Locked, value => selected.Locked = value);
             Toggle("Скрыть", selected.Hidden, value => selected.Hidden = value);
             PopupField<string> band = new PopupField<string>("Слой", new List<string> { "Земля", "Детали земли", "Объекты и персонажи", "Кроны / крыши" }, (int)selected.Band);
@@ -870,6 +875,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Handles.color = new Color(1, 1, 1, .7f);
                 Handles.DrawWireDisc(mouse + shift, Vector3.forward, brushRadius * frame.height / ViewHeight);
             }
+            if (tool == Tool.Scatter && frame.Contains(mouse)) DrawScatterBrush(mouse + shift, frame.height / ViewHeight, evt);
             GUI.EndClip();
         }
 
@@ -1180,6 +1186,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 viewCenter -= (evt.mousePosition - lastPointer) * (ViewHeight / frame.height);
                 lastPointer = evt.mousePosition; evt.Use(); return true;
             }
+            if (tool == Tool.Scatter && HandleScatterInput(evt, frame, pixel)) return true;
             if (tool == Tool.LightShape && evt.type == EventType.MouseDown && evt.button == 0 && frame.Contains(evt.mousePosition))
             {
                 LightShapeMouseDown(location, frame, evt.mousePosition, evt.shift);

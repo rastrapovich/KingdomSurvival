@@ -51,6 +51,11 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float FramesPerSecond;
         public ArtAssetPlayback Playback;
         public float Phase;
+        // ПР-12Р: облик экземпляра — растяжение ширины, поворот вокруг опоры
+        // (градусы против часовой), цвет.
+        public float Stretch = 1;
+        public float Rotation;
+        public LocationColorAdjust ColorAdjust = new LocationColorAdjust();
 
         public bool FromAsset => Asset != null;
         public bool ViewFallback => FromAsset && !NoArt && ShownView != RequestedView;
@@ -77,6 +82,12 @@ namespace KingdomSurvival.BattlefieldDatabase
             }
             if (asset == null) ResolveDirect(item, variantId, result);
             else ResolveAsset(item, asset, variantId, result);
+            result.Stretch = item.Stretch > .01f ? item.Stretch : 1;
+            result.Rotation = item.Rotation;
+            result.ColorAdjust = item.ColorAdjust ?? new LocationColorAdjust();
+            // Растянутый предмет занимает и землю шире.
+            result.FootprintSize.x *= result.Stretch;
+            result.FootprintOffset.x *= result.Stretch;
             return result;
         }
 

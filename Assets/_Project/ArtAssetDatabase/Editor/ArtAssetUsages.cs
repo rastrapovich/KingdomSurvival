@@ -87,6 +87,23 @@ namespace KingdomSurvival.ArtAssets.Editor
                             Open = () => OpenLocation(locationId, objectId)
                         };
                     }
+                    // ПР-12Р: раскидка — одна строка на ассет слоя (кисть или экземпляры).
+                    foreach (LocationScatterLayer layer in (visual.ScatterLayers ?? new List<LocationScatterLayer>()).Where(item => item != null))
+                    {
+                        Dictionary<string, int> counts = new Dictionary<string, int>(StringComparer.Ordinal);
+                        foreach (LocationScatterEntry entry in layer.Assets.Where(item => item != null && !string.IsNullOrEmpty(item.AssetId)))
+                            if (!counts.ContainsKey(entry.AssetId)) counts[entry.AssetId] = 0;
+                        foreach (LocationScatterInstance instance in layer.Instances.Where(item => item != null && !string.IsNullOrEmpty(item.AssetId)))
+                            counts[instance.AssetId] = counts.TryGetValue(instance.AssetId, out int count) ? count + 1 : 1;
+                        string locationId = visual.LocationId, layerName = layer.Name;
+                        foreach (KeyValuePair<string, int> pair in counts)
+                            yield return new ArtAssetUsage
+                            {
+                                AssetId = pair.Key, Database = "База локаций", Owner = name, OwnerId = locationId,
+                                Element = "раскидка «" + layerName + "» · " + pair.Value + " шт.", ElementId = null,
+                                Open = () => OpenLocation(locationId, null)
+                            };
+                    }
                 }
             }
         }
@@ -113,6 +130,21 @@ namespace KingdomSurvival.ArtAssets.Editor
                     if (!touched) { Undo.RecordObject(database, "Заменить ассет во всех местах"); touched = true; }
                     item.AssetId = toId;
                     count++;
+                }
+                foreach (LocationScatterLayer layer in database.visuals.Where(item => item?.ScatterLayers != null).SelectMany(visual => visual.ScatterLayers))
+                {
+                    if (layer == null) continue;
+                    foreach (LocationScatterEntry entry in layer.Assets.Where(item => item != null && item.AssetId == fromId))
+                    {
+                        if (!touched) { Undo.RecordObject(database, "Заменить ассет во всех местах"); touched = true; }
+                        entry.AssetId = toId;
+                    }
+                    foreach (LocationScatterInstance instance in layer.Instances.Where(item => item != null && item.AssetId == fromId))
+                    {
+                        if (!touched) { Undo.RecordObject(database, "Заменить ассет во всех местах"); touched = true; }
+                        instance.AssetId = toId;
+                        count++;
+                    }
                 }
                 if (touched) { EditorUtility.SetDirty(database); AssetDatabase.SaveAssetIfDirty(database); }
             }

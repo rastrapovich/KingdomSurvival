@@ -403,7 +403,34 @@ namespace KingdomSurvival.LocationRendering
         {
             Hour = Mathf.Repeat(hours, 24);
             Seconds = seconds;
+            AnimateObjects();
             ApplyLighting();
+        }
+
+        // ПР-12П: кадры анимированных предметов — по тому же времени, что жизнь
+        // огня. Нормаль приходит второй текстурой рисунка кадра; тень-силуэт
+        // от солнца и контур для огня берут текущий кадр в UpdateShadows.
+        private void AnimateObjects()
+        {
+            foreach (Placed item in placed)
+            {
+                if (item.Resolved == null) continue;
+                for (int i = 0; i < item.Images.Count && i < item.Parts.Count; i++)
+                {
+                    LocationResolvedPart part = item.Parts[i];
+                    SpriteRenderer image = item.Images[i];
+                    if (part == null || !part.Animated || image == null) continue;
+                    Sprite sprite = LocationVisualResolver.FrameAt(item.Resolved, part, Seconds);
+                    if (image.sprite != sprite) image.sprite = sprite;
+                }
+            }
+        }
+
+        // Рисунок, который сейчас показан у части предмета (кадр анимации).
+        public Sprite ObjectSprite(string objectId, int part = 0)
+        {
+            Placed item = placed.Find(entry => entry.Data.Id == objectId);
+            return item != null && part >= 0 && part < item.Images.Count ? item.Images[part]?.sprite : null;
         }
 
         public float Seconds { get; private set; }
@@ -716,6 +743,8 @@ namespace KingdomSurvival.LocationRendering
             LocationVisualVariant variant = item?.Data.Variants?.Find(entry => entry.Id == variantId);
             if (variant?.Sprite == null || item.Image == null) return false;
             LocationResolvedPart main = LocationVisualResolver.Resolve(item.Data, variantId).Main;
+            // Состояние заменяет рисунок основы целиком — её кадры больше не идут.
+            if (main != null && item.Parts.Count > 0) item.Parts[0] = main;
             item.Image.sprite = variant.Sprite;
             Fit(item.Image, main?.Height ?? item.Data.Height, main?.Pivot ?? item.Data.Pivot, item.Data.FlipX, Vector2.zero);
             return true;

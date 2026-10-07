@@ -51,6 +51,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     ArtAssetPartView slot = part.FindView(view);
                     if (slot == null) continue;
                     string where = partName + ArtAssetLabels.ViewTitle(view) + ": ";
+                    ValidateFrames(slot, where, view, Add);
                     if (slot.Sprite != null && part != asset.MainPart && !asset.HasView(view))
                         Add(ArtAssetIssueLevel.Info, where + "есть часть, но нет рисунка основы — ракурс не показывается.", view);
                     if (slot.NormalMap == null)
@@ -86,6 +87,35 @@ namespace KingdomSurvival.ArtAssets.Editor
             }
             issues.AddRange(LostReferences(catalog, asset));
             return issues;
+        }
+
+        // ПР-12П: кадры анимации — того же размера, что первый (иначе предмет
+        // «дышит» и съезжает с опоры); нормали — у всех кадров или ни у одного.
+        private static void ValidateFrames(ArtAssetPartView slot, string where, ArtAssetView view,
+            System.Action<ArtAssetIssueLevel, string, ArtAssetView?> add)
+        {
+            if (slot.Frames == null || slot.Frames.Count == 0) return;
+            if (slot.Sprite == null)
+            {
+                add(ArtAssetIssueLevel.Warning, where + "кадры анимации без первого рисунка — не показываются.", view);
+                return;
+            }
+            Vector2Int first = SpriteNormalMaps.SourceSize(slot.Sprite.texture);
+            int wrongSize = 0, withoutNormal = 0, detached = 0;
+            foreach (ArtAssetFrame frame in slot.Frames)
+            {
+                if (frame?.Sprite == null) continue;
+                if (SpriteNormalMaps.SourceSize(frame.Sprite.texture) != first) wrongSize++;
+                if (frame.NormalMap == null) { if (slot.NormalMap != null) withoutNormal++; }
+                else if (SpriteNormalMaps.Find(frame.Sprite) != frame.NormalMap) detached++;
+            }
+            if (wrongSize > 0)
+                add(ArtAssetIssueLevel.Warning, where + "кадров другого размера, чем первый (" + first.x + "×" + first.y + "): " + wrongSize +
+                                                 ". Рисуйте все кадры на одном холсте — иначе предмет дёргается.", view);
+            if (withoutNormal > 0)
+                add(ArtAssetIssueLevel.Warning, where + "кадров без нормали: " + withoutNormal + " — под местным светом они будут плоскими.", view);
+            if (detached > 0)
+                add(ArtAssetIssueLevel.Warning, where + "нормали кадров не подключены к рисункам: " + detached + " — нажмите «Исправить подключения».", view);
         }
 
         // Ссылка есть, а файла на этом компьютере нет (рисунки хранятся локально).
@@ -131,6 +161,19 @@ namespace KingdomSurvival.ArtAssets.Editor
                 foreach (ArtAssetView view in ArtAssetLabels.Views)
                 {
                     ArtAssetPartView slot = part.FindView(view);
+                    if (slot?.Frames != null)
+                        foreach (ArtAssetFrame frame in slot.Frames)
+                        {
+                            if (frame?.Sprite == null) continue;
+                            Texture2D attached = SpriteNormalMaps.Find(frame.Sprite);
+                            if (frame.NormalMap == null)
+                            {
+                                if (attached != null) { frame.NormalMap = attached; fixedCount++; }
+                                continue;
+                            }
+                            if (attached == frame.NormalMap && SpriteNormalMaps.IsNormalMapImport(frame.NormalMap)) continue;
+                            if (SpriteNormalMaps.Assign(frame.Sprite, frame.NormalMap, out _)) fixedCount++;
+                        }
                     if (slot?.Sprite != null && slot.NormalMap == null && SpriteNormalMaps.Find(slot.Sprite) != null)
                     {
                         slot.NormalMap = SpriteNormalMaps.Find(slot.Sprite);
@@ -150,8 +193,11 @@ namespace KingdomSurvival.ArtAssets.Editor
         public static int FixNormalGamma(ArtAssetDefinition asset)
         {
             int count = 0;
+            // Нормали первых кадров и всех следующих (кадры идут из одного рендера).
             foreach (Texture2D normal in asset.Parts.Where(item => item != null).SelectMany(part => part.Views ?? new List<ArtAssetPartView>())
-                         .Where(slot => slot?.NormalMap != null).Select(slot => slot.NormalMap).Distinct())
+                         .Where(slot => slot != null)
+                         .SelectMany(slot => new[] { slot.NormalMap }.Concat((slot.Frames ?? new List<ArtAssetFrame>()).Select(frame => frame?.NormalMap)))
+                         .Where(normal => normal != null).Distinct())
             {
                 if (ArtAssetDrawing.NormalLength(normal) <= GammaLength) continue;
                 string path = AssetDatabase.GetAssetPath(normal);

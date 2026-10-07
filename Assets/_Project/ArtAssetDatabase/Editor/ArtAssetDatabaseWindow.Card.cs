@@ -87,7 +87,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             {
                 ArtAssetDrawing.DrawAsset(catalog, asset, cardView, local.Anchor, local.PixelsPerUnit,
                     state.CardDisplay == ArtAssetCardDisplay.Normal ? ArtAssetDrawMode.Normal : ArtAssetDrawMode.Color, null,
-                    cardTool == CardTool.PartOffset ? cardPart : -1);
+                    cardTool == CardTool.PartOffset ? cardPart : -1, asset.IsAnimated ? EditorApplication.timeSinceStartup : -1);
             }
             DrawCardOverlays(local, asset, layout, new Rect(0, 0, preview.width, preview.height));
             GUI.EndClip();
@@ -325,8 +325,10 @@ namespace KingdomSurvival.ArtAssets.Editor
                         GUI.DrawTexture(Fit(normalRect, new Vector2(slot.NormalMap.width, slot.NormalMap.height)), ArtAssetDrawing.NormalPreview(slot.NormalMap), ScaleMode.StretchToFill, true);
                     else GUI.Label(normalRect, "нормаль\n(PNG сюда)", new GUIStyle(EditorStyles.centeredGreyMiniLabel) { wordWrap = true });
                     GUIStyle head = new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = selected ? new Color(1, .85f, .45f) : new Color(.85f, .87f, .82f) } };
+                    int frames = slot.FrameCount;
                     GUI.Label(new Rect(cell.x + 4, cell.y + 2, cell.width - 8, 18), ArtAssetLabels.ViewTitle(view) + "  " +
-                                                                                (slot.Sprite != null ? "✓" : "—") + (slot.NormalMap != null ? " · N" : ""), head);
+                                                                                (slot.Sprite != null ? "✓" : "—") + (slot.NormalMap != null ? " · N" : "") +
+                                                                                (frames > 1 ? " · кадров: " + frames : ""), head);
                     string info = slot.Sprite != null ? SizeText(SpriteNormalMaps.SourceSize(slot.Sprite.texture)) : "";
                     if (slot.Sprite != null && slot.NormalMap != null && SpriteNormalMaps.SourceSize(slot.Sprite.texture) != SpriteNormalMaps.SourceSize(slot.NormalMap))
                         info += " ⚠ размер нормали " + SizeText(SpriteNormalMaps.SourceSize(slot.NormalMap));

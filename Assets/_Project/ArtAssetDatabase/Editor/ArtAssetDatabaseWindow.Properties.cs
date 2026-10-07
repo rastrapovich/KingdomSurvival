@@ -127,6 +127,8 @@ namespace KingdomSurvival.ArtAssets.Editor
             FloatProperty("Длина тени (множитель)", asset.ShadowLength, value => asset.ShadowLength = Mathf.Max(0, value));
 
             ArtAssetView view = CardView;
+            BuildAnimationProperties(asset, view);
+
             Heading("Ракурс «" + ArtAssetLabels.ViewTitle(view) + "»");
             if (state.Mode != ArtAssetCenterMode.Card) Help("Опору и основание удобно ставить мышью в карточке (инструменты «Опора» и «Основание»).", HelpBoxMessageType.None);
             ArtAssetViewSettings settings = asset.Settings(view);
@@ -224,6 +226,47 @@ namespace KingdomSurvival.ArtAssets.Editor
                     if (!EditorUtility.DisplayDialog("Удалить часть?", "Часть «" + part.Name + "» будет снята со всех ракурсов. Файлы останутся.", "Удалить", "Отмена")) return;
                     Edit("Удалить часть", () => asset.Parts.Remove(part), true);
                     cardPart = 0;
+                    BuildProperties();
+                }));
+        }
+
+        // ПР-12П: покадровая анимация — кадры приходят импортом (номер в конце
+        // имени файла), здесь — скорость, порядок и фаза.
+        private void BuildAnimationProperties(ArtAssetDefinition asset, ArtAssetView view)
+        {
+            Heading("Анимация");
+            if (!asset.IsAnimated)
+            {
+                Help("Неподвижный рисунок. Чтобы трава качалась, загрузите кадры: номер в конце имени файла — " +
+                     "Трава/Front/000.png, 001.png … или трава_Front_000.png, трава_Front_001.png (нормали — трава_Front_000_normal.png). " +
+                     "Несколько файлов с номерами без ракурса в имени можно бросить прямо в ячейку ракурса.", HelpBoxMessageType.None);
+                return;
+            }
+            List<string> counts = new List<string>();
+            foreach (ArtAssetView item in ArtAssetLabels.Views)
+            {
+                int frames = asset.FrameCountIn(item);
+                if (frames > 1) counts.Add(ArtAssetLabels.ViewTitle(item) + " — " + frames);
+            }
+            Label summary = new Label("Кадров: " + string.Join(", ", counts));
+            summary.style.whiteSpace = WhiteSpace.Normal;
+            summary.style.color = new Color(.75f, .8f, .75f);
+            properties.Add(summary);
+            FloatProperty("Кадров в секунду", asset.FramesPerSecond, value => asset.FramesPerSecond = Mathf.Clamp(value, .1f, 60),
+                "Общая скорость для всех частей и ракурсов.");
+            ChoiceProperty("Порядок кадров", new[] { ArtAssetPlayback.Loop, ArtAssetPlayback.PingPong }, ArtAssetAnimation.PlaybackTitle, asset.Playback,
+                value => asset.Playback = value);
+            BoolProperty("Своя фаза у каждого экземпляра", asset.RandomPhase, value => asset.RandomPhase = value,
+                "Включено — одинаковые кусты в заросли качаются вразнобой (сдвиг по ID экземпляра, при каждом запуске один и тот же).");
+            cardPart = Mathf.Clamp(cardPart, 0, asset.Parts.Count - 1);
+            ArtAssetPart part = asset.Parts[cardPart];
+            ArtAssetPartView slot = part?.FindView(view);
+            if (slot != null && slot.IsAnimated)
+                Row(("Снять кадры «" + ArtAssetLabels.ViewTitle(view) + "»" + (asset.Parts.Count > 1 ? " · " + part.Name : "") + " (оставить первый)", () =>
+                {
+                    ArtAssetImporter.ClearFrames(catalog, part, view);
+                    status.text = "Кадры сняты, остался первый рисунок (файлы не удалены).";
+                    litDirty = true;
                     BuildProperties();
                 }));
         }

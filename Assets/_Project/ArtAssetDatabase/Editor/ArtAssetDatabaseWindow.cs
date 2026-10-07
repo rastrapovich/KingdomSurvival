@@ -103,7 +103,9 @@ namespace KingdomSurvival.ArtAssets.Editor
                 catalogDirtyFromOutside = false;
                 litDirty = true;
             }
-            if (state?.Mode == ArtAssetCenterMode.Card && state.CardDisplay == ArtAssetCardDisplay.Lit) center?.MarkDirtyRepaint();
+            // Под светом и у анимированного ассета карточка живёт — перерисовка каждый кадр.
+            if (state?.Mode == ArtAssetCenterMode.Card && (state.CardDisplay == ArtAssetCardDisplay.Lit || (Selected?.IsAnimated ?? false)))
+                center?.MarkDirtyRepaint();
         }
 
         private void ScheduleStateSave() => stateSaveAt = EditorApplication.timeSinceStartup + 1;

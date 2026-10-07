@@ -11,7 +11,8 @@ namespace KingdomSurvival.LocationRendering.Editor
     // ПР-12Н: техническое место «Ассеты · тест» — проверка Базы ассетов в
     // служебном запуске: ящик, дерево с кроной и дом с крышей из технического
     // набора стоят экземплярами (ссылками), у костра можно проверить ночь,
-    // нормали и перекрытие героя крышей и кроной. Не игровое место.
+    // нормали и перекрытие героя крышей и кроной. ПР-12П: заросль технической
+    // травы — покадровая анимация, у каждого куста своя фаза. Не игровое место.
     public static class ArtAssetDemoLocation
     {
         public const string Id = "technical_asset_demo";
@@ -32,7 +33,17 @@ namespace KingdomSurvival.LocationRendering.Editor
             ArtAssetTechnicalSet.Ensure(catalog);
             LocalLocationDatabaseAsset database = AssetDatabase.LoadAssetAtPath<LocalLocationDatabaseAsset>(LocalLocationDatabaseAsset.AssetPath);
             if (database == null) return;
-            if (database.locations.Any(item => item.Id == Id) && database.FindVisual(Id) != null) return;
+            LocationVisualDefinition existing = database.locations.Any(item => item.Id == Id) ? database.FindVisual(Id) : null;
+            if (existing != null)
+            {
+                // Место создано до ПР-12П — дописать заросль травы.
+                if (existing.Objects.Any(item => item != null && item.AssetId == ArtAssetTechnicalSet.GrassId)) return;
+                Undo.RecordObject(database, "Техническое место Базы ассетов: трава");
+                PlaceGrass(existing, catalog);
+                EditorUtility.SetDirty(database);
+                AssetDatabase.SaveAssetIfDirty(database);
+                return;
+            }
             Undo.RecordObject(database, "Техническое место Базы ассетов");
             if (database.locations.All(item => item.Id != Id))
                 database.locations.Add(new LocalLocationDefinition
@@ -49,27 +60,42 @@ namespace KingdomSurvival.LocationRendering.Editor
                 if (camp != null) visual.TestUnitId = camp.TestUnitId;
                 database.visuals.Add(visual);
             }
-            void Place(string assetId, string name, float x, float y, ArtAssetView view)
-            {
-                ArtAssetDefinition asset = catalog.Find(assetId);
-                if (asset == null) return;
-                ArtAssetViewSettings settings = asset.Settings(view);
-                visual.Objects.Add(new LocationVisualObject
-                {
-                    Name = name, AssetId = assetId, View = view, Position = new Vector2(x, y), Height = asset.Height, Pivot = settings.Pivot,
-                    BlocksMovement = asset.BlocksMovement, Footprint = settings.FootprintSize, CastsShadow = asset.OccludesLight
-                });
-            }
-            Place(ArtAssetTechnicalSet.HouseId, "Дом (тест)", .5f, .42f, ArtAssetView.Front);
-            Place(ArtAssetTechnicalSet.TreeId, "Дерево (тест)", .25f, .5f, ArtAssetView.FrontRight);
-            Place(ArtAssetTechnicalSet.TreeId, "Дерево 2 (тест)", .78f, .55f, ArtAssetView.Back);
-            Place(ArtAssetTechnicalSet.CrateId, "Ящик (тест)", .4f, .7f, ArtAssetView.FrontLeft);
-            Place(ArtAssetTechnicalSet.CrateId, "Ящик 2 (тест)", .62f, .74f, ArtAssetView.Front);
+            Place(visual, catalog, ArtAssetTechnicalSet.HouseId, "Дом (тест)", .5f, .42f, ArtAssetView.Front);
+            Place(visual, catalog, ArtAssetTechnicalSet.TreeId, "Дерево (тест)", .25f, .5f, ArtAssetView.FrontRight);
+            Place(visual, catalog, ArtAssetTechnicalSet.TreeId, "Дерево 2 (тест)", .78f, .55f, ArtAssetView.Back);
+            Place(visual, catalog, ArtAssetTechnicalSet.CrateId, "Ящик (тест)", .4f, .7f, ArtAssetView.FrontLeft);
+            Place(visual, catalog, ArtAssetTechnicalSet.CrateId, "Ящик 2 (тест)", .62f, .74f, ArtAssetView.Front);
+            PlaceGrass(visual, catalog);
             LocationVisualObject fire = new LocationVisualObject { Name = "Свет у дома", LightOnly = true, Position = new Vector2(.36f, .6f) };
             fire.Light.Enabled = true; fire.Light.Radius = 5; fire.Light.Intensity = 1.6f; fire.Light.NormalMaps = true; fire.Light.NightOnly = true;
             visual.Objects.Add(fire);
             EditorUtility.SetDirty(database);
             AssetDatabase.SaveAssetIfDirty(database);
+        }
+
+        private static void Place(LocationVisualDefinition visual, ArtAssetDatabaseAsset catalog, string assetId, string name, float x, float y,
+            ArtAssetView view, bool flip = false)
+        {
+            ArtAssetDefinition asset = catalog.Find(assetId);
+            if (asset == null) return;
+            ArtAssetViewSettings settings = asset.Settings(view);
+            visual.Objects.Add(new LocationVisualObject
+            {
+                Name = name, AssetId = assetId, View = view, Position = new Vector2(x, y), Height = asset.Height, Pivot = settings.Pivot, FlipX = flip,
+                BlocksMovement = asset.BlocksMovement, Footprint = settings.FootprintSize, CastsShadow = asset.OccludesLight
+            });
+        }
+
+        // Заросль у дорожки: одинаковые кусты качаются вразнобой (своя фаза по ID).
+        private static void PlaceGrass(LocationVisualDefinition visual, ArtAssetDatabaseAsset catalog)
+        {
+            Vector2[] points =
+            {
+                new Vector2(.28f, .78f), new Vector2(.31f, .81f), new Vector2(.34f, .77f), new Vector2(.37f, .83f),
+                new Vector2(.70f, .80f), new Vector2(.73f, .84f), new Vector2(.76f, .79f)
+            };
+            for (int i = 0; i < points.Length; i++)
+                Place(visual, catalog, ArtAssetTechnicalSet.GrassId, "Трава " + (i + 1) + " (тест)", points[i].x, points[i].y, ArtAssetView.Front, i % 2 == 1);
         }
 
         // Для пакетного запуска (-executeMethod).

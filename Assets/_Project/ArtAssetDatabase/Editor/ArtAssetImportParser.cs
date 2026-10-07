@@ -8,16 +8,29 @@ namespace KingdomSurvival.ArtAssets.Editor
 {
     public enum ArtAssetFileKind { Color, Normal }
 
+    // ПР-12П: следующий кадр анимации ракурса (номер — из имени файла).
+    public sealed class ArtAssetImportFrame
+    {
+        public int Number;
+        public string ColorPath;
+        public string NormalPath;
+    }
+
     // Один ракурс одной части: рисунок и его нормаль (пути файлов).
     public sealed class ArtAssetImportSlot
     {
         public ArtAssetView View;
         // Пусто — основа.
         public string Part = string.Empty;
+        // Первый кадр (у неподвижного — единственный рисунок).
         public string ColorPath;
         public string NormalPath;
         // Ракурса в имени не было: поставлен ракурс по умолчанию (видно в сводке).
         public bool ViewAssumed;
+        // Кадры после первого, по возрастанию номера.
+        public readonly List<ArtAssetImportFrame> Frames = new List<ArtAssetImportFrame>();
+
+        public int FrameCount => ColorPath == null ? 0 : 1 + Frames.Count;
     }
 
     // Один распознанный объект пакета.
@@ -39,6 +52,7 @@ namespace KingdomSurvival.ArtAssets.Editor
         public int ColorCount => Slots.Count(slot => slot.ColorPath != null);
         public int NormalCount => Slots.Count(slot => slot.NormalPath != null);
         public int MainViewCount => Slots.Count(slot => slot.Part.Length == 0 && slot.ColorPath != null);
+        public int MaxFrameCount => Slots.Count == 0 ? 0 : Slots.Max(slot => slot.FrameCount);
     }
 
     // Файл, который не удалось однозначно назначить: остаётся для ручного назначения.
@@ -60,6 +74,12 @@ namespace KingdomSurvival.ArtAssets.Editor
     // по слову normal / нормаль. Направление по картинке не угадывается;
     // неоднозначное и нераспознанное — в список для ручного назначения.
     // Нормаль без своего рисунка не становится отдельным предметом.
+    // ПР-12П: число последним словом имени (Front/000.png, трава_Front_001.png,
+    // трава_Front_001_normal.png) — номер кадра анимации, если в том же ракурсе
+    // той же части таких рисунков два и больше; одиночный номер остаётся
+    // частью имени (rock_Front_01.png — объект «rock_01»). Без ракурса в имени
+    // номер — кадр только при загрузке в выбранную запись или со словом
+    // frame / кадр перед ним: rock_01.png, rock_02.png остаются разными объектами.
     public static class ArtAssetImportParser
     {
         public static readonly string[] ImageExtensions = { ".png" };
@@ -85,6 +105,10 @@ namespace KingdomSurvival.ArtAssets.Editor
         // Имена основы среди частей.
         private static readonly HashSet<string> MainPartNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         { "", "основа", "base", "main", "body" };
+
+        // Слово перед номером кадра (необязательное).
+        private static readonly HashSet<string> FrameTokens = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        { "frame", "кадр", "f" };
 
         public const string NoViewProblem = "не удалось определить ракурс";
 
@@ -133,6 +157,22 @@ namespace KingdomSurvival.ArtAssets.Editor
             return plan;
         }
 
+        // Разобранный файл пакета (первый проход).
+        private sealed class ParsedFile
+        {
+            public string Full;
+            public List<string> Segments;
+            public bool Ok;
+            public string ObjectName;
+            public ArtAssetView View;
+            public string Part;
+            public ArtAssetFileKind Kind;
+            public string Problem;
+            public int Frame = -1;
+
+            public string SlotKey => NormalizeKey(ObjectName) + "|" + View + "|" + Part.ToLowerInvariant();
+        }
+
         // segments — путь от корня перетаскивания: [папка-корень, …, файл].
         // Последняя папка одиночного файла тоже передаётся: она — запасное имя.
         public static ArtAssetImportPlan ParseFiles(IEnumerable<(string full, List<string> segments)> files, string forcedAssetName = null,
@@ -140,14 +180,14 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             ArtAssetImportPlan plan = new ArtAssetImportPlan();
             Dictionary<string, ArtAssetImportGroup> groups = new Dictionary<string, ArtAssetImportGroup>(StringComparer.OrdinalIgnoreCase);
-            // (группа, ракурс, часть, вид) → файлы: дубликаты выявляются до назначения.
+            // (группа, ракурс, часть, вид, кадр) → файлы: дубликаты выявляются до назначения.
             Dictionary<string, List<string>> claims = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-            Dictionary<string, (ArtAssetImportGroup group, ArtAssetView view, string part, ArtAssetFileKind kind)> targets =
-                new Dictionary<string, (ArtAssetImportGroup, ArtAssetView, string, ArtAssetFileKind)>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, (ArtAssetImportGroup group, ArtAssetView view, string part, ArtAssetFileKind kind, int frame)> targets =
+                new Dictionary<string, (ArtAssetImportGroup, ArtAssetView, string, ArtAssetFileKind, int)>(StringComparer.OrdinalIgnoreCase);
 
             HashSet<string> assumed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             List<(string full, List<string> segments)> viewless = new List<(string, List<string>)>();
-            void Claim(string full, string objectName, ArtAssetView view, string part, ArtAssetFileKind kind)
+            void Claim(string full, string objectName, ArtAssetView view, string part, ArtAssetFileKind kind, int frame)
             {
                 string key = NormalizeKey(objectName);
                 if (!groups.TryGetValue(key, out ArtAssetImportGroup group))
@@ -155,25 +195,39 @@ namespace KingdomSurvival.ArtAssets.Editor
                     group = new ArtAssetImportGroup { Name = objectName, Key = key };
                     groups.Add(key, group);
                 }
-                string claim = key + "|" + view + "|" + part.ToLowerInvariant() + "|" + kind;
-                if (!claims.TryGetValue(claim, out List<string> list)) { list = new List<string>(); claims.Add(claim, list); targets[claim] = (group, view, part, kind); }
+                string claim = key + "|" + view + "|" + part.ToLowerInvariant() + "|" + kind + "|" + frame;
+                if (!claims.TryGetValue(claim, out List<string> list)) { list = new List<string>(); claims.Add(claim, list); targets[claim] = (group, view, part, kind, frame); }
                 list.Add(full);
             }
 
+            // Первый проход — с номерами кадров; одиночный номер в ракурсе — снова как часть имени.
+            List<ParsedFile> parsed = new List<ParsedFile>();
             foreach ((string full, List<string> segments) in files)
             {
-                if (!Classify(segments, forcedAssetName, out string objectName, out ArtAssetView view, out string part, out ArtAssetFileKind kind, out string problem))
+                ParsedFile file = new ParsedFile { Full = full, Segments = segments };
+                file.Ok = Classify(segments, forcedAssetName, true, out file.ObjectName, out file.View, out file.Part, out file.Kind, out file.Problem, out file.Frame);
+                parsed.Add(file);
+            }
+            Dictionary<string, int> numbered = parsed.Where(file => file.Ok && file.Frame >= 0 && file.Kind == ArtAssetFileKind.Color)
+                .GroupBy(file => file.SlotKey, StringComparer.OrdinalIgnoreCase).ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase);
+            foreach (ParsedFile file in parsed)
+            {
+                if (file.Ok && file.Frame >= 0 && (!numbered.TryGetValue(file.SlotKey, out int count) || count < 2))
+                    file.Ok = Classify(file.Segments, forcedAssetName, false, out file.ObjectName, out file.View, out file.Part, out file.Kind, out file.Problem, out file.Frame);
+                if (!file.Ok)
                 {
-                    if (defaultView.HasValue && problem == NoViewProblem) viewless.Add((full, segments));
-                    else plan.Unresolved.Add(new ArtAssetImportIssue { Path = full, Reason = problem });
+                    if (defaultView.HasValue && file.Problem == NoViewProblem) viewless.Add((file.Full, file.Segments));
+                    else plan.Unresolved.Add(new ArtAssetImportIssue { Path = file.Full, Reason = file.Problem });
                     continue;
                 }
-                Claim(full, objectName, view, part, kind);
+                Claim(file.Full, file.ObjectName, file.View, file.Part, file.Kind, file.Frame);
             }
 
             // Файлы без ракурса: отдельный рисунок (и его пара *_normal) — новый
             // объект в ракурсе по умолчанию; рядом с ракурсами объекта — вручную.
+            // Номер — кадр только в выбранной записи или со словом frame / кадр.
             HashSet<string> structured = new HashSet<string>(groups.Keys, StringComparer.OrdinalIgnoreCase);
+            List<(string full, string name, string framedName, bool normal, int frame)> loose = new List<(string, string, string, bool, int)>();
             foreach ((string full, List<string> segments) in viewless)
             {
                 string parent = segments.Count > 1 ? segments[segments.Count - 2] : string.Empty;
@@ -186,42 +240,78 @@ namespace KingdomSurvival.ArtAssets.Editor
                 bool normal = RemoveTokens(stem, NormalTokens);
                 if (!normal && stem.Count > 1 && stem[stem.Count - 1] == "n") { normal = true; stem.RemoveAt(stem.Count - 1); }
                 RemoveTokens(stem, ColorTokens);
-                string rest = Join(stem);
+                List<string> framed = new List<string>(stem);
+                int frame = TakeFrameNumber(framed, out bool marker);
+                if (frame >= 0 && string.IsNullOrEmpty(forcedAssetName) && !marker) frame = -1;
+                string rest = Join(stem), framedRest = Join(framed);
                 string name = !string.IsNullOrEmpty(forcedAssetName) ? forcedAssetName : rest.Length > 0 ? rest : parent;
-                if (string.IsNullOrWhiteSpace(name))
+                string framedName = !string.IsNullOrEmpty(forcedAssetName) ? forcedAssetName : framedRest.Length > 0 ? framedRest : parent;
+                if (string.IsNullOrWhiteSpace(frame >= 0 ? framedName : name))
                 {
                     plan.Unresolved.Add(new ArtAssetImportIssue { Path = full, Reason = "не удалось определить объект" });
                     continue;
                 }
+                loose.Add((full, name, framedName, normal, frame));
+            }
+            Dictionary<string, int> looseFrames = loose.Where(item => item.frame >= 0 && !item.normal)
+                .GroupBy(item => NormalizeKey(item.framedName), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase);
+            foreach ((string full, string name, string framedName, bool normal, int frame) in loose)
+            {
+                bool animated = frame >= 0 && looseFrames.TryGetValue(NormalizeKey(framedName), out int count) && count >= 2;
                 assumed.Add(full);
-                Claim(full, name.Trim(), defaultView.Value, string.Empty, normal ? ArtAssetFileKind.Normal : ArtAssetFileKind.Color);
+                Claim(full, (animated ? framedName : name).Trim(), defaultView.Value, string.Empty,
+                    normal ? ArtAssetFileKind.Normal : ArtAssetFileKind.Color, animated ? frame : -1);
             }
 
+            // Ракурс части: кадры по номеру (без номера — первым), нормаль — к рисунку своего кадра.
+            Dictionary<ArtAssetImportSlot, SortedDictionary<int, (string color, string normal)>> slotFrames =
+                new Dictionary<ArtAssetImportSlot, SortedDictionary<int, (string, string)>>();
             foreach (KeyValuePair<string, List<string>> claim in claims)
             {
-                (ArtAssetImportGroup group, ArtAssetView view, string part, ArtAssetFileKind kind) = targets[claim.Key];
+                (ArtAssetImportGroup group, ArtAssetView view, string part, ArtAssetFileKind kind, int frame) = targets[claim.Key];
                 if (claim.Value.Count > 1)
                 {
                     foreach (string path in claim.Value)
                         plan.Unresolved.Add(new ArtAssetImportIssue { Path = path, Reason = "неоднозначно: несколько файлов для «" + group.Name + "» · " +
-                            ArtAssetLabels.ViewTitle(view) + (part.Length > 0 ? " · " + part : "") + (kind == ArtAssetFileKind.Normal ? " (нормаль)" : "") });
+                            ArtAssetLabels.ViewTitle(view) + (part.Length > 0 ? " · " + part : "") + (frame >= 0 ? " · кадр " + frame : "") +
+                            (kind == ArtAssetFileKind.Normal ? " (нормаль)" : "") });
                     continue;
                 }
                 ArtAssetImportSlot slot = group.Slot(view, part);
-                if (kind == ArtAssetFileKind.Color) { slot.ColorPath = claim.Value[0]; slot.ViewAssumed = assumed.Contains(claim.Value[0]); }
-                else slot.NormalPath = claim.Value[0];
+                if (!slotFrames.TryGetValue(slot, out SortedDictionary<int, (string color, string normal)> frames))
+                    slotFrames[slot] = frames = new SortedDictionary<int, (string, string)>();
+                frames.TryGetValue(frame, out (string color, string normal) entry);
+                if (kind == ArtAssetFileKind.Color) entry.color = claim.Value[0];
+                else entry.normal = claim.Value[0];
+                frames[frame] = entry;
+            }
+            foreach (KeyValuePair<ArtAssetImportSlot, SortedDictionary<int, (string color, string normal)>> pair in slotFrames)
+            {
+                ArtAssetImportSlot slot = pair.Key;
+                ArtAssetImportGroup group = groups.Values.First(item => item.Slots.Contains(slot));
+                foreach (KeyValuePair<int, (string color, string normal)> frame in pair.Value)
+                {
+                    if (frame.Value.color == null)
+                    {
+                        // Нормаль без своего рисунка — не предмет и не пара: на ручное назначение.
+                        plan.Unresolved.Add(new ArtAssetImportIssue { Path = frame.Value.normal, Reason = "нормаль без рисунка: «" + group.Name + "» · " +
+                            ArtAssetLabels.ViewTitle(slot.View) + (frame.Key >= 0 ? " · кадр " + frame.Key : "") });
+                        continue;
+                    }
+                    if (slot.ColorPath == null)
+                    {
+                        slot.ColorPath = frame.Value.color;
+                        slot.NormalPath = frame.Value.normal;
+                        slot.ViewAssumed = assumed.Contains(frame.Value.color);
+                    }
+                    else slot.Frames.Add(new ArtAssetImportFrame { Number = frame.Key, ColorPath = frame.Value.color, NormalPath = frame.Value.normal });
+                }
             }
 
             foreach (ArtAssetImportGroup group in groups.Values)
             {
-                // Нормаль без своего рисунка — не предмет и не пара: на ручное назначение.
-                foreach (ArtAssetImportSlot slot in group.Slots.ToList())
-                {
-                    if (slot.ColorPath != null) continue;
-                    if (slot.NormalPath != null)
-                        plan.Unresolved.Add(new ArtAssetImportIssue { Path = slot.NormalPath, Reason = "нормаль без рисунка: «" + group.Name + "» · " + ArtAssetLabels.ViewTitle(slot.View) });
-                    group.Slots.Remove(slot);
-                }
+                group.Slots.RemoveAll(slot => slot.ColorPath == null);
                 if (group.Slots.Count == 0) continue;
                 group.Slots.Sort((a, b) =>
                 {
@@ -234,11 +324,33 @@ namespace KingdomSurvival.ArtAssets.Editor
             return plan;
         }
 
+        // Номер кадра — последнее слово из цифр (и слово frame / кадр перед ним):
+        // убирается из stem. -1 — номера нет.
+        private static int TakeFrameNumber(List<string> stem, out bool marker)
+        {
+            marker = false;
+            if (stem.Count == 0) return -1;
+            string last = stem[stem.Count - 1];
+            if (last.Length == 0 || last.Length > 6 || !last.All(char.IsDigit)) return -1;
+            stem.RemoveAt(stem.Count - 1);
+            if (stem.Count > 0 && FrameTokens.Contains(stem[stem.Count - 1]))
+            {
+                stem.RemoveAt(stem.Count - 1);
+                marker = true;
+            }
+            return int.Parse(last);
+        }
+
         // Один файл: объект, ракурс, часть, рисунок или нормаль.
         public static bool Classify(IReadOnlyList<string> segments, string forcedAssetName, out string objectName, out ArtAssetView view,
-            out string part, out ArtAssetFileKind kind, out string problem)
+            out string part, out ArtAssetFileKind kind, out string problem) =>
+            Classify(segments, forcedAssetName, false, out objectName, out view, out part, out kind, out problem, out _);
+
+        // frames — номер в конце имени считается кадром (frame ≥ 0) и в имя не входит.
+        public static bool Classify(IReadOnlyList<string> segments, string forcedAssetName, bool frames, out string objectName, out ArtAssetView view,
+            out string part, out ArtAssetFileKind kind, out string problem, out int frame)
         {
-            objectName = null; view = ArtAssetView.Front; part = string.Empty; kind = ArtAssetFileKind.Color; problem = null;
+            objectName = null; view = ArtAssetView.Front; part = string.Empty; kind = ArtAssetFileKind.Color; problem = null; frame = -1;
             if (segments == null || segments.Count == 0) { problem = "пустой путь"; return false; }
             string file = segments[segments.Count - 1];
             List<string> stem = Tokens(Path.GetFileNameWithoutExtension(file));
@@ -247,6 +359,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             bool normal = RemoveTokens(stem, NormalTokens);
             if (!normal && stem.Count > 1 && stem[stem.Count - 1] == "n") { normal = true; stem.RemoveAt(stem.Count - 1); }
             RemoveTokens(stem, ColorTokens);
+            if (frames) frame = TakeFrameNumber(stem, out _);
 
             // Ракурс в имени файла?
             int fileViews = FindViews(stem, out ArtAssetView fileView, out int viewStart, out int viewLength);

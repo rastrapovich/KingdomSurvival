@@ -4,6 +4,14 @@ using UnityEngine;
 
 namespace KingdomSurvival.ArtAssets
 {
+    // Следующий кадр покадровой анимации: рисунок и его карта нормалей.
+    [Serializable]
+    public sealed class ArtAssetFrame
+    {
+        public Sprite Sprite;
+        public Texture2D NormalMap;
+    }
+
     // Одна часть объекта в одном ракурсе: рисунок, его карта нормалей,
     // смещение и (необязательно) свой силуэт тени.
     [Serializable]
@@ -19,9 +27,48 @@ namespace KingdomSurvival.ArtAssets
         public Vector2 Offset;
         // Свой силуэт тени (крона: тень не совпадает с рисунком).
         public Sprite ShadowSprite;
+        // ПР-12П: кадры анимации после первого (первый — Sprite выше). Пусто —
+        // неподвижный рисунок. Кадры одного размера с первым; нормаль — своя
+        // у каждого кадра (подключается к его рисунку при импорте).
+        public List<ArtAssetFrame> Frames = new List<ArtAssetFrame>();
 
         public bool HasSprite => Sprite != null;
         public bool HasNormal => Sprite != null && NormalMap != null;
+
+        // Кадров всего, считая первый; кадры без рисунка пропускаются.
+        public int FrameCount
+        {
+            get
+            {
+                if (Sprite == null) return 0;
+                int count = 1;
+                if (Frames != null)
+                    foreach (ArtAssetFrame frame in Frames) if (frame?.Sprite != null) count++;
+                return count;
+            }
+        }
+
+        public bool IsAnimated => FrameCount > 1;
+
+        // Рисунки кадров по порядку, первый — Sprite.
+        public Sprite[] FrameSprites()
+        {
+            if (Sprite == null) return Array.Empty<Sprite>();
+            List<Sprite> result = new List<Sprite> { Sprite };
+            if (Frames != null)
+                foreach (ArtAssetFrame frame in Frames) if (frame?.Sprite != null) result.Add(frame.Sprite);
+            return result.ToArray();
+        }
+
+        // Нормаль кадра с этим рисунком (первого или следующего).
+        public Texture2D NormalOf(Sprite sprite)
+        {
+            if (sprite == null) return null;
+            if (sprite == Sprite) return NormalMap;
+            if (Frames != null)
+                foreach (ArtAssetFrame frame in Frames) if (frame != null && frame.Sprite == sprite) return frame.NormalMap;
+            return null;
+        }
     }
 
     // Логическая часть: «Основа», «Крыша», «Крона», «Ствол» или своё имя.
@@ -87,6 +134,14 @@ namespace KingdomSurvival.ArtAssets
         public bool OccludesLight;
         public float ShadowLength = 1;
 
+        // ПР-12П: покадровая анимация (трава, флаг, вода). Скорость и порядок
+        // общие для всех частей и ракурсов; у каждой части — свои кадры.
+        // Случайная фаза — у каждого экземпляра свой сдвиг по ID, чтобы
+        // заросль из одинаковых кустов не качалась в такт.
+        public float FramesPerSecond = 8;
+        public ArtAssetPlayback Playback = ArtAssetPlayback.Loop;
+        public bool RandomPhase = true;
+
         public List<ArtAssetViewSettings> ViewSettings = new List<ArtAssetViewSettings>();
         public List<ArtAssetPart> Parts = new List<ArtAssetPart> { new ArtAssetPart() };
 
@@ -139,6 +194,35 @@ namespace KingdomSurvival.ArtAssets
                 foreach (ArtAssetView view in ArtAssetLabels.Views) if (HasNormal(view)) count++;
                 return count;
             }
+        }
+
+        // Есть ли кадры анимации хотя бы у одной части в каком-нибудь ракурсе.
+        public bool IsAnimated
+        {
+            get
+            {
+                if (Parts == null) return false;
+                foreach (ArtAssetPart part in Parts)
+                {
+                    if (part?.Views == null) continue;
+                    foreach (ArtAssetPartView view in part.Views)
+                        if (view != null && view.IsAnimated) return true;
+                }
+                return false;
+            }
+        }
+
+        // Наибольшее число кадров среди частей в ракурсе (1 — неподвижный).
+        public int FrameCountIn(ArtAssetView view)
+        {
+            int count = 0;
+            if (Parts == null) return count;
+            foreach (ArtAssetPart part in Parts)
+            {
+                ArtAssetPartView slot = part?.FindView(view);
+                if (slot != null) count = Math.Max(count, slot.FrameCount);
+            }
+            return count;
         }
 
         public bool IsEmpty

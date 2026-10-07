@@ -20,6 +20,10 @@ namespace KingdomSurvival.BattlefieldDatabase
         public Sprite ShadowSprite;
         public float ShadowHeight;
         public Vector2 ShadowPivot;
+        // ПР-12П: кадры анимации части (первый — Sprite); null — неподвижна.
+        public Sprite[] Frames;
+
+        public bool Animated => Frames != null && Frames.Length > 1;
     }
 
     // Предмет места в выбранном ракурсе: прямой рисунок (прежний формат) или
@@ -43,6 +47,10 @@ namespace KingdomSurvival.BattlefieldDatabase
         public Vector2 FootprintOffset;
         public bool OccludesLight;
         public float ShadowLength = 1;
+        // ПР-12П: ход кадров у анимированных частей; фаза — своя у экземпляра.
+        public float FramesPerSecond;
+        public ArtAssetPlayback Playback;
+        public float Phase;
 
         public bool FromAsset => Asset != null;
         public bool ViewFallback => FromAsset && !NoArt && ShownView != RequestedView;
@@ -148,6 +156,8 @@ namespace KingdomSurvival.BattlefieldDatabase
                     resolved.ShadowHeight = shadow.rect.height / ppu * scale;
                     resolved.ShadowPivot = Divide(pivotPixels - offsetPixels, shadow.rect.size);
                 }
+                // Состояние объекта (вариант) заменяет рисунок основы — без анимации.
+                if (view != null && view.IsAnimated && !(main && variant != null)) resolved.Frames = view.FrameSprites();
                 result.Parts.Add(resolved);
             }
 
@@ -160,6 +170,17 @@ namespace KingdomSurvival.BattlefieldDatabase
             bool shadows = item.IsOverridden(LocationAssetOverride.Shadows);
             result.OccludesLight = shadows ? item.CastsShadow : asset.OccludesLight;
             result.ShadowLength = shadows ? item.ShadowLength : asset.ShadowLength;
+            result.FramesPerSecond = asset.FramesPerSecond;
+            result.Playback = asset.Playback;
+            result.Phase = asset.RandomPhase ? ArtAssetAnimation.StablePhase(item.Id) : 0;
+        }
+
+        // Рисунок части в момент seconds (у неподвижной — её единственный).
+        public static Sprite FrameAt(LocationResolvedVisual visual, LocationResolvedPart part, double seconds)
+        {
+            if (part == null) return null;
+            if (visual == null || !part.Animated) return part.Sprite;
+            return part.Frames[ArtAssetAnimation.FrameIndex(part.Frames.Length, visual.FramesPerSecond, visual.Playback, seconds, visual.Phase)];
         }
 
         private static Vector2 Divide(Vector2 value, Vector2 size) =>

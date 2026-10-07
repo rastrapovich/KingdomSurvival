@@ -331,9 +331,12 @@ namespace KingdomSurvival.ArtAssets.Editor
                     List<string> views = ArtAssetLabels.Views.Select(view =>
                     {
                         ArtAssetImportSlot slot = group.Slots.FirstOrDefault(item => item.View == view && item.Part.Length == 0);
-                        return ArtAssetLabels.ViewTitle(view) + (slot?.ColorPath != null ? " ✓" + (slot.NormalPath != null ? "N" : "") : " —");
+                        return ArtAssetLabels.ViewTitle(view) + (slot?.ColorPath != null ? " ✓" + (slot.NormalPath != null ? "N" : "") +
+                            (slot.FrameCount > 1 ? " ×" + slot.FrameCount : "") : " —");
                     }).ToList();
                     EditorGUILayout.LabelField("Основа: " + string.Join(" · ", views), EditorStyles.wordWrappedMiniLabel);
+                    if (group.MaxFrameCount > 1)
+                        EditorGUILayout.LabelField("Анимация: до " + group.MaxFrameCount + " кадров в ракурсе (номер в конце имени файла).", EditorStyles.wordWrappedMiniLabel);
                     ArtAssetImportSlot assumed = group.Slots.FirstOrDefault(slot => slot.ViewAssumed);
                     if (assumed != null)
                         EditorGUILayout.HelpBox("Ракурса в имени файла нет — рисунок поставлен в «" + ArtAssetLabels.ViewTitle(assumed.View) +

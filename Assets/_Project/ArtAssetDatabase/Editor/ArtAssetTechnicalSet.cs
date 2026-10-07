@@ -16,14 +16,16 @@ namespace KingdomSurvival.ArtAssets.Editor
     public static class ArtAssetTechnicalSet
     {
         public const string Folder = ArtAssetImporter.ManagedRoot + "/_Technical";
-        public const string CrateId = "tech_crate", TreeId = "tech_tree", HouseId = "tech_house";
+        public const string CrateId = "tech_crate", TreeId = "tech_tree", HouseId = "tech_house", GrassId = "tech_grass";
+        // ПР-12П: кадров у технической травы.
+        public const int GrassFrames = 4;
 
         [MenuItem("Kingdom Survival/Служебное/База ассетов: технический набор")]
         public static void CreateFromMenu()
         {
             ArtAssetDatabaseAsset catalog = ArtAssetImporter.LoadOrCreateCatalog();
             Ensure(catalog);
-            EditorUtility.DisplayDialog("База ассетов", "Технический набор готов: ящик, дерево с кроной, дом с крышей.", "Понятно");
+            EditorUtility.DisplayDialog("База ассетов", "Технический набор готов: ящик, дерево с кроной, дом с крышей, трава из четырёх кадров.", "Понятно");
         }
 
         public static void Ensure(ArtAssetDatabaseAsset catalog)
@@ -71,6 +73,22 @@ namespace KingdomSurvival.ArtAssets.Editor
                 Fill(house.MainPart, view, "house_base", 320, 300, (x, y) => HouseBase(x, y, view), (x, y) => BoxNormal(x, y, .1f, .9f, .06f, .58f));
                 Fill(roof, view, "house_roof", 320, 300, (x, y) => Roof(x, y, view), (x, y) => RoofNormal(x, y));
             }
+
+            // ПР-12П: покадровая анимация — пучок травы качается туда-обратно.
+            // Один ракурс «Спереди» (остальные показывают его же как запасной).
+            ArtAssetDefinition grass = Entry(catalog, GrassId, "Тех. трава, 4 кадра (заглушка)", ArtAssetCategory.Vegetation, 160);
+            grass.Tags = new System.Collections.Generic.List<string> { "техническое", "заглушка", "анимация" };
+            grass.Playback = ArtAssetPlayback.PingPong;
+            grass.FramesPerSecond = 5;
+            grass.RandomPhase = true;
+            ArtAssetViewSettings grassSettings = grass.Settings(ArtAssetView.Front);
+            grassSettings.Pivot = new Vector2(.5f, .04f);
+            grassSettings.FootprintSize = new Vector2(.5f, .2f);
+            for (int frame = 0; frame < GrassFrames; frame++)
+            {
+                int index = frame;
+                Fill(grass.MainPart, ArtAssetView.Front, "grass", 96, 128, (x, y) => Grass(x, y, index), (x, y) => GrassNormal(x, y, index), index);
+            }
             AssetDatabase.SaveAssets();
             ArtAssetImporter.Changed(catalog);
             AssetDatabase.SaveAssetIfDirty(catalog);
@@ -100,10 +118,11 @@ namespace KingdomSurvival.ArtAssets.Editor
         }
 
         // Файлы ракурса: рисуются, только если их нет; назначение — если слот пуст.
+        // frame > 0 — следующий кадр анимации (файл …_f001).
         private static void Fill(ArtAssetPart part, ArtAssetView view, string name, int width, int height,
-            Func<float, float, Color> color, Func<float, float, Color> normal)
+            Func<float, float, Color> color, Func<float, float, Color> normal, int frame = 0)
         {
-            string stem = Folder + "/" + name + "_" + ArtAssetLabels.ViewFolder(view);
+            string stem = Folder + "/" + name + "_" + ArtAssetLabels.ViewFolder(view) + (frame > 0 ? "_f" + frame.ToString("000") : "");
             string colorPath = stem + ".png", normalPath = stem + "_normal.png";
             bool colorNew = Write(colorPath, width, height, color, false);
             bool normalNew = Write(normalPath, width, height, normal, true);
@@ -112,6 +131,16 @@ namespace KingdomSurvival.ArtAssets.Editor
             Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(colorPath);
             Texture2D map = AssetDatabase.LoadAssetAtPath<Texture2D>(normalPath);
             ArtAssetPartView slot = part.View(view);
+            if (frame > 0)
+            {
+                if (slot.Frames == null) slot.Frames = new System.Collections.Generic.List<ArtAssetFrame>();
+                while (slot.Frames.Count < frame) slot.Frames.Add(new ArtAssetFrame());
+                ArtAssetFrame entry = slot.Frames[frame - 1] ?? (slot.Frames[frame - 1] = new ArtAssetFrame());
+                if (entry.Sprite == null) entry.Sprite = sprite;
+                if (entry.NormalMap == null) entry.NormalMap = map;
+                if (entry.Sprite != null && entry.NormalMap != null) SpriteNormalMaps.Assign(entry.Sprite, entry.NormalMap, out _);
+                return;
+            }
             if (slot.Sprite == null) slot.Sprite = sprite;
             if (slot.NormalMap == null) slot.NormalMap = map;
             if (slot.Sprite != null && slot.NormalMap != null) SpriteNormalMaps.Assign(slot.Sprite, slot.NormalMap, out _);
@@ -197,6 +226,33 @@ namespace KingdomSurvival.ArtAssets.Editor
             float half = .46f * (1 - (y - .54f) / .41f);
             return Mathf.Abs(x - .5f) < half + .02f ? new Color(.44f, .40f, .33f) : Color.clear;
         }
+
+        // Пучок травы: пять стеблей, верхушки отклоняются по кадру (−1 … +1),
+        // основание стоит на месте — опора не дрожит.
+        private static readonly float[] BladeBase = { .22f, .36f, .5f, .64f, .78f };
+        private static readonly float[] BladeHeight = { .62f, .84f, .95f, .78f, .6f };
+
+        private static bool Blade(float x, float y, int frame, out float across)
+        {
+            across = 0;
+            if (y < .03f) return false;
+            float sway = (frame / (float)(GrassFrames - 1) * 2 - 1) * .12f;
+            for (int i = 0; i < BladeBase.Length; i++)
+            {
+                float t = (y - .03f) / BladeHeight[i];
+                if (t > 1) continue;
+                float center = BladeBase[i] + sway * t * t * (i % 2 == 0 ? 1 : .8f);
+                float half = .038f * (1 - t) + .004f;
+                if (Mathf.Abs(x - center) < half) { across = (x - center) / half; return true; }
+            }
+            return false;
+        }
+
+        private static Color Grass(float x, float y, int frame) =>
+            Blade(x, y, frame, out _) ? Color.Lerp(new Color(.24f, .34f, .16f), new Color(.52f, .62f, .30f), y) : Color.clear;
+
+        private static Color GrassNormal(float x, float y, int frame) =>
+            Blade(x, y, frame, out float across) ? Encode(new Vector3(across * .7f, .2f, 1)) : Encode(Vector3.forward);
 
         // ------------------------------------------------------------------
         // Известные тестовые нормали

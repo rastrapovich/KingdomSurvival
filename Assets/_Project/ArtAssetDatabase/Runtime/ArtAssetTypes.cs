@@ -37,6 +37,46 @@ namespace KingdomSurvival.ArtAssets
         Foreground
     }
 
+    // ПР-12П: порядок кадров — по кругу (1-2-3-1-2-3) или туда-обратно
+    // (1-2-3-2-1: качание травы без скачка с последнего кадра на первый).
+    // Значения сериализуются — новые только в конец.
+    public enum ArtAssetPlayback
+    {
+        Loop,
+        PingPong
+    }
+
+    public static class ArtAssetAnimation
+    {
+        public static string PlaybackTitle(ArtAssetPlayback playback) =>
+            playback == ArtAssetPlayback.PingPong ? "Туда-обратно" : "По кругу";
+
+        // Кадр в момент seconds: count — кадров, fps — кадров в секунду,
+        // phase — сдвиг 0..1 доли полного цикла (свой у экземпляра).
+        public static int FrameIndex(int count, float fps, ArtAssetPlayback playback, double seconds, float phase)
+        {
+            if (count <= 1 || fps <= 0) return 0;
+            int cycle = playback == ArtAssetPlayback.PingPong ? count * 2 - 2 : count;
+            double position = seconds * fps + phase * cycle;
+            int step = (int)(Math.Floor(position) % cycle);
+            if (step < 0) step += cycle;
+            return step < count ? step : cycle - step;
+        }
+
+        // Устойчивый сдвиг 0..1 по ID экземпляра (FNV-1a): один и тот же при
+        // каждом запуске и на любой машине — не string.GetHashCode.
+        public static float StablePhase(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return 0;
+            unchecked
+            {
+                uint hash = 2166136261;
+                foreach (char c in id) hash = (hash ^ c) * 16777619;
+                return (hash & 0xFFFFFF) / (float)0x1000000;
+            }
+        }
+    }
+
     public static class ArtAssetLabels
     {
         public const int ViewCount = 6;

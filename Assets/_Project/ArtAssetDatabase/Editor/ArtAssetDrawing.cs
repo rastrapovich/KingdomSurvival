@@ -91,8 +91,9 @@ namespace KingdomSurvival.ArtAssets.Editor
         }
 
         // Ассет на экране: anchor — опора в GUI, pixelsPerUnit — масштаб.
+        // seconds ≥ 0 — кадр анимации в этот момент; иначе первый кадр.
         public static void DrawAsset(ArtAssetDatabaseAsset catalog, ArtAssetDefinition asset, ArtAssetView view, Vector2 anchor, float pixelsPerUnit,
-            ArtAssetDrawMode mode = ArtAssetDrawMode.Color, Color? tint = null, int highlightPart = -1)
+            ArtAssetDrawMode mode = ArtAssetDrawMode.Color, Color? tint = null, int highlightPart = -1, double seconds = -1)
         {
             if (Event.current.type != EventType.Repaint) return;
             Layout layout = Resolve(catalog, asset, view);
@@ -116,14 +117,15 @@ namespace KingdomSurvival.ArtAssets.Editor
                     EditorGUI.DrawRect(gui, new Color(1, .45f, .75f, .35f));
                     continue;
                 }
+                Sprite sprite = seconds >= 0 ? LocationVisualResolver.FrameAt(layout.Resolved, part, seconds) : part.Sprite;
                 if (mode == ArtAssetDrawMode.Normal)
                 {
-                    Texture2D normal = NormalPreview(NormalOf(asset, part, layout.Resolved.ShownView));
+                    Texture2D normal = NormalPreview(NormalOf(asset, sprite, layout.Resolved.ShownView));
                     if (normal != null) GUI.DrawTexture(gui, normal, ScaleMode.StretchToFill, true, 0, color, 0, 0);
                     else EditorGUI.DrawRect(gui, new Color(.5f, .5f, 1, .25f));
                     continue;
                 }
-                DrawSprite(gui, part.Sprite, false, color);
+                DrawSprite(gui, sprite, false, color);
             }
         }
 
@@ -134,12 +136,13 @@ namespace KingdomSurvival.ArtAssets.Editor
             return -1;
         }
 
-        public static Texture2D NormalOf(ArtAssetDefinition asset, LocationResolvedPart part, ArtAssetView view)
+        // Нормаль показанного рисунка (первого кадра или следующего).
+        public static Texture2D NormalOf(ArtAssetDefinition asset, Sprite sprite, ArtAssetView view)
         {
             foreach (ArtAssetPart item in asset.Parts)
             {
-                ArtAssetPartView slot = item?.FindView(view);
-                if (slot != null && slot.Sprite == part.Sprite) return slot.NormalMap;
+                Texture2D normal = item?.FindView(view)?.NormalOf(sprite);
+                if (normal != null) return normal;
             }
             return null;
         }
@@ -247,6 +250,6 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         // Строка состояния ассета: «Ракурсы 6/6 · Нормали 6/6».
         public static string Completeness(ArtAssetDefinition asset) =>
-            "Ракурсы: " + asset.ViewCount + "/6 · Нормали: " + asset.NormalCount + "/6";
+            "Ракурсы: " + asset.ViewCount + "/6 · Нормали: " + asset.NormalCount + "/6" + (asset.IsAnimated ? " · анимация" : "");
     }
 }

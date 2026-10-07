@@ -186,6 +186,92 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(plan.Unresolved.Any(item => item.Path == stray), Is.True);
         }
 
+        // ПР-12П: номер в конце имени — кадр анимации ракурса (папка с кадрами
+        // из Blender: Front/0000.png …), нормаль — к рисунку своего кадра.
+        [Test]
+        public void FrameSequence_InViewFolder_BecomesFramesOfOneSlot()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                Touch("Трава/Front/" + i.ToString("0000") + ".png");
+                Touch("Трава/Front/" + i.ToString("0000") + "_normal.png");
+            }
+            Touch("Трава/Back/0001.png");
+            Touch("Трава/Back/0002.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { root + "/Трава" });
+            ArtAssetImportGroup grass = plan.Groups.Single();
+            Assert.That(grass.Name, Is.EqualTo("Трава"));
+            Assert.That(grass.Parts, Is.EquivalentTo(new[] { "" }), "Номер кадра не становится частью «0001».");
+            ArtAssetImportSlot front = grass.Slots.Single(slot => slot.View == ArtAssetView.Front);
+            StringAssert.EndsWith("/Front/0000.png", front.ColorPath, "Первый кадр — наименьший номер.");
+            StringAssert.EndsWith("/Front/0000_normal.png", front.NormalPath);
+            Assert.That(front.FrameCount, Is.EqualTo(4));
+            Assert.That(front.Frames.Select(frame => frame.Number), Is.EqualTo(new[] { 1, 2, 3 }));
+            for (int i = 0; i < 3; i++)
+            {
+                StringAssert.EndsWith("/Front/" + (i + 1).ToString("0000") + ".png", front.Frames[i].ColorPath);
+                StringAssert.EndsWith("/Front/" + (i + 1).ToString("0000") + "_normal.png", front.Frames[i].NormalPath, "Нормаль — к своему кадру.");
+            }
+            Assert.That(grass.Slots.Single(slot => slot.View == ArtAssetView.Back).FrameCount, Is.EqualTo(2), "Нумерация может начинаться не с нуля.");
+            Assert.That(grass.MaxFrameCount, Is.EqualTo(4));
+            Assert.That(plan.Unresolved, Is.Empty);
+        }
+
+        [Test]
+        public void FlatFrames_WithViewInName_AreFrames_LoneNumberStaysInName()
+        {
+            Touch("export/flag_Front_01.png");
+            Touch("export/flag_Front_02.png");
+            Touch("export/flag_Front_02_normal.png");
+            Touch("export/flag_Front_03.png");
+            Touch("export/rock_Front_01.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(Directory.GetFiles(root + "/export"));
+            ArtAssetImportSlot flag = plan.Groups.Single(group => group.Name == "flag").Slots.Single();
+            Assert.That(flag.FrameCount, Is.EqualTo(3));
+            Assert.That(flag.NormalPath, Is.Null);
+            StringAssert.EndsWith("flag_Front_02_normal.png", flag.Frames[0].NormalPath);
+            Assert.That(plan.Groups.Select(group => group.Name), Is.EquivalentTo(new[] { "flag", "rock_01" }),
+                "Одиночный номер — часть имени объекта, как раньше.");
+            Assert.That(plan.Groups.Single(group => group.Name == "rock_01").Slots.Single().FrameCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void LooseNumberedFiles_StaySeparateObjects_UnlessIntoAssetOrMarked()
+        {
+            string rock1 = Touch("Загрузки/rock_01.png");
+            string rock2 = Touch("Загрузки/rock_02.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { rock1, rock2 }, null, ArtAssetView.Front);
+            Assert.That(plan.Groups.Select(group => group.Name), Is.EquivalentTo(new[] { "rock_01", "rock_02" }),
+                "Варианты камня без ракурса не склеиваются в анимацию.");
+
+            // В выбранную запись (перетаскивание в ячейку ракурса) — кадры.
+            plan = ArtAssetImportParser.ParsePaths(new[] { rock1, rock2, Touch("Загрузки/rock_03.png") }, "Трава", ArtAssetView.FrontLeft);
+            ArtAssetImportSlot slot = plan.Groups.Single().Slots.Single();
+            Assert.That(slot.View, Is.EqualTo(ArtAssetView.FrontLeft));
+            Assert.That(slot.FrameCount, Is.EqualTo(3));
+            Assert.That(slot.ViewAssumed, Is.True);
+
+            // Слово frame / кадр перед номером — кадры и в новом объекте.
+            string a = Touch("Загрузки/костёр_кадр_1.png"), b = Touch("Загрузки/костёр_кадр_2.png");
+            plan = ArtAssetImportParser.ParsePaths(new[] { a, b }, null, ArtAssetView.Front);
+            ArtAssetImportGroup fire = plan.Groups.Single();
+            Assert.That(fire.Name, Is.EqualTo("костёр"));
+            Assert.That(fire.Slots.Single().FrameCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void DuplicateFrameNumbers_AreLeftForManualAssignment()
+        {
+            Touch("Флаг/Front/01.png");
+            Touch("Флаг/Front/1.png");
+            Touch("Флаг/Front/02.png");
+            Touch("Флаг/Front/05_normal.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { root + "/Флаг" });
+            Assert.That(plan.Unresolved.Count(item => item.Reason.Contains("кадр 1")), Is.EqualTo(2), "Два файла на один кадр — неоднозначно.");
+            Assert.That(plan.Unresolved.Any(item => item.Path.EndsWith("05_normal.png") && item.Reason.Contains("нормаль без рисунка")), Is.True);
+            Assert.That(plan.Groups.Single().Slots.Single().FrameCount, Is.EqualTo(1));
+        }
+
         [Test]
         public void MissingViewFallback_IsNearestOnTheRing_NextInOrderFirst()
         {

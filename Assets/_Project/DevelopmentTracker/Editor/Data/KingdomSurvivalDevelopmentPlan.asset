@@ -9219,6 +9219,67 @@ MonoBehaviour:
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
+    - id: PR12P-T01
+      title: "12П-1 · Кадры анимации в Базе ассетов"
+      details: "Кадры после первого у каждой части в каждом ракурсе (рисунок и нормаль), скорость, порядок «по кругу / туда-обратно», своя фаза экземпляра; импорт по номеру в конце имени файла; карточка, сводка импорта, проверка и «Снять кадры»."
+      category: 3
+      status: 3
+      required: 1
+      order: 54
+      priority: 0
+      verificationType: 1
+      blockerReason: 4
+      dependencies:
+      - PR12N-T05
+      acceptanceCriteria:
+      - text: "Front/0000.png… и трава_Front_001.png — кадры одного ракурса, нормаль к своему кадру"
+        done: 1
+      - text: "Одиночный номер и rock_01/rock_02 без ракурса остаются разными объектами"
+        done: 1
+      - text: "Прежние неподвижные ассеты работают без пересборки"
+        done: 1
+      manualChecks: []
+      fileReferences:
+      - ProjectDocs/ASSET_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "ArtAssetImportParserTests (4 новых) и ArtAssetAnimationTests зелёные; EditMode 1490 (1474/0/16)."
+      completedAt: 2026-10-07
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12P-T02
+      title: "12П-2 · Анимированные предметы в местах"
+      details: "Общий рендерер мест меняет кадр по времени места (окно Базы локаций, исследование, бой на месте); нормаль и тень-силуэт — текущего кадра; состояние объекта анимацию основы снимает; техническая трава из четырёх кадров в месте «Ассеты · тест»."
+      category: 3
+      status: 2
+      required: 1
+      order: 55
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12P-T01
+      acceptanceCriteria:
+      - text: "Кадр меняется по времени, у двух экземпляров своя фаза (EditMode)"
+        done: 1
+      - text: "PlayMode зелёный"
+        done: 1
+      - text: "Заросль травы качается в окне Базы локаций и в игре, свет по нормалям кадров"
+        done: 0
+      manualChecks:
+      - "Служебное → «База ассетов: техническое место», посмотреть траву днём и ночью у света"
+      fileReferences:
+      - ProjectDocs/ASSET_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "Renderer_ChangesFrameWithLocationTime_PerInstancePhase зелёный; PlayMode 42/42. Глазами в редакторе не проверялось."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
   - id: PR15_HOME_WATER
     title: "\u041F\u0420-15. \xAB\u0414\u043E\u043C \u043D\u0430 \u0447\u0443\u0436\u043E\u0439
       \u0432\u043E\u0434\u0435\xBB \u043D\u0430 \u043E\u0431\u0449\u0435\u0439 \u043E\u0441\u043D\u043E\u0432\u0435"

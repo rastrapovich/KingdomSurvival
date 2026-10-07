@@ -136,6 +136,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     view.NormalMap = normal;
                     if (sprite != null && normal != null)
                         AssignNormal(sprite, normal, warnings, working.Name + " · " + ArtAssetLabels.ViewTitle(slot.View));
+                    if (slot.Frames.Count > 0) ImportFrames(working, part, slot, view, transaction, warnings);
                 }
                 if (existing == null)
                     InitializeScale(working);
@@ -152,6 +153,34 @@ namespace KingdomSurvival.ArtAssets.Editor
             else catalog.assets.Add(working);
             EditorUtility.SetDirty(catalog);
             return working;
+        }
+
+        // ПР-12П: кадры после первого. Пакет с кадрами заменяет прежний список
+        // кадров ракурса целиком; файл кадра k перезаписывается на месте
+        // (GUID сохраняется). Пакет без кадров прежние кадры не трогает.
+        private static void ImportFrames(ArtAssetDefinition asset, ArtAssetPart part, ArtAssetImportSlot slot, ArtAssetPartView view,
+            FileTransaction transaction, List<string> warnings)
+        {
+            List<ArtAssetFrame> previous = view.Frames ?? new List<ArtAssetFrame>();
+            List<ArtAssetFrame> frames = new List<ArtAssetFrame>();
+            Vector2Int firstSize = view.Sprite != null ? SpriteNormalMaps.SourceSize(view.Sprite.texture) : Vector2Int.zero;
+            for (int i = 0; i < slot.Frames.Count; i++)
+            {
+                ArtAssetImportFrame source = slot.Frames[i];
+                ArtAssetFrame current = i < previous.Count ? previous[i] : null;
+                int number = i + 1;
+                string where = asset.Name + " · " + ArtAssetLabels.ViewTitle(slot.View) + " · кадр " + (number + 1);
+                Sprite sprite = ImportColor(asset, part, slot.View, source.ColorPath, current?.Sprite, transaction, number);
+                Texture2D normal = source.NormalPath != null
+                    ? ImportNormal(asset, part, slot.View, source.NormalPath, current?.NormalMap, transaction, number)
+                    : null;
+                if (normal != null) AssignNormal(sprite, normal, warnings, where);
+                Vector2Int size = SpriteNormalMaps.SourceSize(sprite.texture);
+                if (firstSize != Vector2Int.zero && size != firstSize)
+                    warnings.Add(where + ": размер " + size.x + "×" + size.y + " не совпадает с первым кадром " + firstSize.x + "×" + firstSize.y + ".");
+                frames.Add(new ArtAssetFrame { Sprite = sprite, NormalMap = normal });
+            }
+            view.Frames = frames;
         }
 
         // Новый ассет: эталонный ракурс высотой примерно в человеческий рост,
@@ -188,10 +217,12 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         public static string AssetFolder(ArtAssetDefinition asset) => ManagedRoot + "/" + asset.Id;
 
-        private static string ManagedPath(ArtAssetDefinition asset, ArtAssetPart part, ArtAssetView view, bool normal)
+        // frame — номер кадра анимации: 0 — первый (прежнее имя), дальше _f001…
+        private static string ManagedPath(ArtAssetDefinition asset, ArtAssetPart part, ArtAssetView view, bool normal, int frame = 0)
         {
             string name = ArtAssetLabels.ViewFolder(view);
             if (part != asset.MainPart) name += "_part-" + part.Id.Substring(0, Math.Min(8, part.Id.Length));
+            if (frame > 0) name += "_f" + frame.ToString("000");
             if (normal) name += "_normal";
             return AssetFolder(asset) + "/" + name + ".png";
         }
@@ -237,11 +268,11 @@ namespace KingdomSurvival.ArtAssets.Editor
         }
 
         private static Sprite ImportColor(ArtAssetDefinition asset, ArtAssetPart part, ArtAssetView view, string source, Sprite current,
-            FileTransaction transaction)
+            FileTransaction transaction, int frame = 0)
         {
             string currentPath = current != null ? AssetDatabase.GetAssetPath(current) : null;
             bool external = !IsProjectPath(source);
-            string path = Bring(source, ManagedPath(asset, part, view, false), currentPath, asset, transaction);
+            string path = Bring(source, ManagedPath(asset, part, view, false, frame), currentPath, asset, transaction);
             if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
                 throw new InvalidOperationException("файл не является изображением: " + path);
             if (external) EnsureColorSettings(importer);
@@ -262,11 +293,11 @@ namespace KingdomSurvival.ArtAssets.Editor
         }
 
         private static Texture2D ImportNormal(ArtAssetDefinition asset, ArtAssetPart part, ArtAssetView view, string source, Texture2D current,
-            FileTransaction transaction)
+            FileTransaction transaction, int frame = 0)
         {
             string currentPath = current != null ? AssetDatabase.GetAssetPath(current) : null;
             bool external = !IsProjectPath(source);
-            string path = Bring(source, ManagedPath(asset, part, view, true), currentPath, asset, transaction);
+            string path = Bring(source, ManagedPath(asset, part, view, true, frame), currentPath, asset, transaction);
             if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
                 throw new InvalidOperationException("файл не является изображением: " + path);
             if (external && importer.textureType != TextureImporterType.NormalMap) ConfigureNormal(importer);
@@ -389,21 +420,38 @@ namespace KingdomSurvival.ArtAssets.Editor
             return warnings.Count > 0 ? string.Join(" ", warnings) : null;
         }
 
-        // Снять рисунок ракурса. Файлы не удаляются.
+        // Снять рисунок ракурса вместе с кадрами анимации. Файлы не удаляются.
         public static void ClearColor(ArtAssetDatabaseAsset catalog, ArtAssetPart part, ArtAssetView view)
         {
             Undo.RecordObject(catalog, "Очистить рисунок ракурса");
-            part.View(view).Sprite = null;
+            ArtAssetPartView slot = part.View(view);
+            slot.Sprite = null;
+            slot.Frames = new List<ArtAssetFrame>();
             Changed(catalog);
         }
 
-        // Снять нормаль: и назначение в записи, и вторую текстуру импорта рисунка.
+        // Снять нормаль: и назначение в записи, и вторую текстуру импорта рисунка
+        // (у первого кадра и у всех следующих).
         public static void ClearNormal(ArtAssetDatabaseAsset catalog, ArtAssetPart part, ArtAssetView view)
         {
             ArtAssetPartView slot = part.View(view);
             if (slot.Sprite != null) SpriteNormalMaps.Assign(slot.Sprite, null, out _);
+            if (slot.Frames != null)
+                foreach (ArtAssetFrame frame in slot.Frames)
+                    if (frame?.Sprite != null && frame.NormalMap != null) SpriteNormalMaps.Assign(frame.Sprite, null, out _);
             Undo.RecordObject(catalog, "Снять нормаль ракурса");
             slot.NormalMap = null;
+            if (slot.Frames != null)
+                foreach (ArtAssetFrame frame in slot.Frames)
+                    if (frame != null) frame.NormalMap = null;
+            Changed(catalog);
+        }
+
+        // ПР-12П: снять кадры анимации ракурса — остаётся первый рисунок. Файлы не удаляются.
+        public static void ClearFrames(ArtAssetDatabaseAsset catalog, ArtAssetPart part, ArtAssetView view)
+        {
+            Undo.RecordObject(catalog, "Снять кадры анимации");
+            part.View(view).Frames = new List<ArtAssetFrame>();
             Changed(catalog);
         }
 

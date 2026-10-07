@@ -22,8 +22,6 @@ using UnityEngine.UIElements;
 // место с локальной картой не показывает текстовый вход.
 public partial class PrototypeUIController
 {
-    // Видимая высота рисунка (пиксели) при обычном приближении.
-    private const float LocalDefaultViewHeight = 1080f;
     // Командир у входа — можно выходить (пиксели рисунка).
     private const float LocalExitRadius = 56f;
     // Мелкие отрезки времени копятся до минуты, чтобы не дёргать симуляцию.
@@ -67,6 +65,12 @@ public partial class PrototypeUIController
     private Vector2 localHeldPoint;
     // Номер показа места: колбэки прежнего показа (бой, загрузка) не действуют.
     private int localGeneration;
+    // ПР-12О: камера следует за командиром; при входе, загрузке и смене
+    // командира кадр ставится сразу (без пролёта от прежней карты).
+    private bool localCameraSnap;
+    private string localFollowedLeaderId;
+    // Высота земли под ногами командира (диагностика и будущие системы).
+    private HeightSample localLeaderHeight;
 
     private bool IsLocalScreenOpen => localRenderer != null;
     private bool IsLocalBattleRunning => localBattle != null;
@@ -90,6 +94,8 @@ public partial class PrototypeUIController
         List<string> errors = LocalLocationValidator.Validate(definition, battlefields,
             id => dialogues != null && dialogues.FindDialogue(id) != null, null,
             LocationVisualGeometry.BlockedAreas(FindLocalVisual(definition), definition));
+        // Земля из участков: неполный экспорт и пропуски Color в игру не идут.
+        errors.AddRange(LocationGroundLayout.RuntimeErrors(FindLocalVisual(definition), definition));
         if (errors.Count > 0)
         {
             Debug.LogError("Исследуемое место «" + definition.DisplayName + "» с ошибками данных:\n" + string.Join("\n", errors));
@@ -713,6 +719,8 @@ public partial class PrototypeUIController
         RebuildLocalMover();
         RefreshLocalObjects();
         ContinuousSimulationSystem.SetPaused(gameState, true);
+        localCameraSnap = true;
+        localFollowedLeaderId = null;
         RenderLocalExploration();
     }
 
@@ -836,10 +844,18 @@ public partial class PrototypeUIController
             return;
 
         LocalFreeMover.Member leader = localMover.Leader;
-        float viewHeight = Mathf.Min(localDefinition.CanvasHeight, LocalDefaultViewHeight) / localZoom;
-        localRenderer.LookAt(new Vector2((float)leader.X, (float)leader.Y), viewHeight);
+        float viewHeight = LocationCameraFollow.DefaultViewHeight(localRenderer.Definition, localDefinition) / localZoom;
+        // Новый командир — новая цель: кадр сразу на нём.
+        if (leader.Id != localFollowedLeaderId)
+        {
+            localFollowedLeaderId = leader.Id;
+            localCameraSnap = true;
+        }
+        localRenderer.Follow(new Vector2((float)leader.X, (float)leader.Y), viewHeight, Time.unscaledDeltaTime, localCameraSnap);
+        localCameraSnap = false;
         RenderLocalWorld();
         LayoutLocalOverlay();
+        UpdateLocalLeaderHeight(leader.Id);
 
         if (localTimeLabel != null)
         {
@@ -901,6 +917,25 @@ public partial class PrototypeUIController
             });
         }
         localRenderer.SetActors(frames, Time.unscaledTime);
+    }
+
+    // Высота под ногами командира — тем же сервисом, что окно базы; в
+    // сборке разработчика видна в подписи места. Положение и сортировку
+    // фигуры высота не меняет: рисунок земли уже ортографическая проекция.
+    private void UpdateLocalLeaderHeight(string leaderId)
+    {
+        if (localRenderer.Height == null)
+        {
+            localLeaderHeight = HeightSample.Invalid("У места нет карты высот.");
+            return;
+        }
+        localRenderer.TrySampleActorHeight(leaderId, out localLeaderHeight);
+        if (localArtNoteLabel == null || !Debug.isDebugBuild)
+            return;
+        string art = localDefinition.PlaceholderArt ? "временный фон — рисунка ещё нет · " : string.Empty;
+        localArtNoteLabel.text = art + (localLeaderHeight.Valid
+            ? "высота под ногами: " + localLeaderHeight.Meters.ToString("0.00") + " м"
+            : "высота: " + localLeaderHeight.Reason);
     }
 
     private Vector2 LocalPixelToPanel(Vector2 pixel)

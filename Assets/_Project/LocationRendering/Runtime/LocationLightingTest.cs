@@ -19,7 +19,7 @@ namespace KingdomSurvival.LocationRendering
         public float Hour = 13;
         public bool Cycle;
         public float CycleSeconds = 30;
-        private Label clock, notice;
+        private Label clock, notice, heightLabel;
         private Slider timeSlider;
         private UIDocument document;
         private PanelSettings panelInstance;
@@ -56,15 +56,18 @@ namespace KingdomSurvival.LocationRendering
             List<KeyValuePair<string, LocalPointData>> members = new List<KeyValuePair<string, LocalPointData>>();
             for (int i = 0; i < count; i++) members.Add(new KeyValuePair<string, LocalPointData>("test_" + i, points[i]));
             Mover = new LocalFreeMover(Renderer.Geometry.Layer, Renderer.Geometry.Rules, members, spacing);
-            ViewHeight = Mathf.Min(Renderer.CanvasSize.y, 1080);
-            RenderActors(0);
+            ViewHeight = LocationCameraFollow.DefaultViewHeight(visual, location);
+            RenderActors(0, 0, true);
             Renderer.SetTime(Hour, 0);
         }
 
         // Высота видимой части рисунка (пиксели) — камера следует за командиром.
         public float ViewHeight { get; set; } = 1080;
 
-        private void RenderActors(float seconds)
+        // Высота земли под ногами командира (если у места есть карта высот).
+        public HeightSample LeaderHeight { get; private set; }
+
+        private void RenderActors(float seconds, float deltaTime, bool snap)
         {
             List<LocationWorldRenderer.ActorFrame> frames = new List<LocationWorldRenderer.ActorFrame>();
             for (int i = 0; i < Mover.Members.Count; i++)
@@ -81,7 +84,9 @@ namespace KingdomSurvival.LocationRendering
             }
             Renderer.SetActors(frames, seconds);
             LocalFreeMover.Member leader = Mover.Leader;
-            Renderer.LookAt(new Vector2((float)leader.X, (float)leader.Y), ViewHeight);
+            Renderer.Follow(new Vector2((float)leader.X, (float)leader.Y), ViewHeight, deltaTime, snap);
+            Renderer.TrySampleActorHeight(leader.Id, out HeightSample height);
+            LeaderHeight = height;
         }
 
         private void BuildHud()
@@ -159,6 +164,9 @@ namespace KingdomSurvival.LocationRendering
             notice = new Label("Кликните по земле. Время теста не затрагивает кампанию.");
             notice.style.color = new Color(.75f, .77f, .72f);
             bar.Add(notice);
+            heightLabel = new Label { name = "location-lighting-height" };
+            heightLabel.style.color = new Color(.70f, .82f, .90f);
+            bar.Add(heightLabel);
         }
 
         private bool holding;
@@ -179,9 +187,14 @@ namespace KingdomSurvival.LocationRendering
             if (Cycle) Hour = Mathf.Repeat(Hour + Time.unscaledDeltaTime * 24 / Mathf.Max(1, CycleSeconds), 24);
             Mover.Tick(Time.unscaledDeltaTime, out _);
             Renderer.Camera.aspect = Screen.width / (float)Mathf.Max(1, Screen.height);
-            RenderActors(Time.unscaledTime);
+            RenderActors(Time.unscaledTime, Time.unscaledDeltaTime, false);
             Renderer.SetTime(Hour, Time.unscaledTime);
             if (clock != null) clock.text = FormatHour(Hour);
+            if (heightLabel != null)
+                heightLabel.text = Renderer.Height == null ? string.Empty
+                    : LeaderHeight.Valid ? "Высота под ногами: " + LeaderHeight.Meters.ToString("0.000") + " м · участок " +
+                                           LocationGroundTile.KeyOf(LeaderHeight.Column, LeaderHeight.Row) + (LeaderHeight.Coverage < .999f ? " · у края" : "")
+                    : "Высота: " + LeaderHeight.Reason;
             timeSlider?.SetValueWithoutNotify(Hour);
         }
 

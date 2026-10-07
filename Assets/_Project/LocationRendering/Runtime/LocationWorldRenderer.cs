@@ -145,16 +145,127 @@ namespace KingdomSurvival.LocationRendering
 
         // Рисунок места на весь размер рисунка; нет рисунка — заглушка по
         // разметке местности (камень, пол, осыпь, вода), чтобы стены были видны.
+        // ПР-12О: земля из участков — по SpriteRenderer на участок в общей
+        // системе координат места (LocationGroundLayout): один материал, слой
+        // и порядок; шаг — размер участка без overscan, без наложения.
         private void BuildGround()
         {
-            Sprite background = Definition.Background;
-            bool placeholder = background == null;
-            if (placeholder) background = TerrainPlaceholder();
-            SpriteRenderer ground = Image(Child("Земля"), background, false);
-            ground.sortingOrder = -30000;
-            Vector2 size = background.bounds.size;
-            Vector2 world = LocationVisualGeometry.WorldSize(Location);
-            ground.transform.localScale = new Vector3(world.x / size.x, world.y / size.y, 1);
+            GameObject root = Child("Земля");
+            groundPieces.Clear();
+            bool tiled = Definition.Ground != null && Definition.Ground.IsTiled;
+            foreach (LocationGroundLayout.Piece piece in LocationGroundLayout.Resolve(Definition, Location))
+            {
+                Sprite sprite = piece.Sprite;
+                bool missing = sprite == null;
+                if (missing) sprite = tiled ? MissingTileSprite() : TerrainPlaceholder();
+                GameObject target = tiled ? new GameObject("Участок " + LocationGroundTile.KeyOf(piece.Column, piece.Row)) : root;
+                if (tiled) target.transform.SetParent(root.transform, false);
+                SpriteRenderer ground = Image(target, sprite, false);
+                ground.sortingOrder = -30000;
+                GroundPiece entry = new GroundPiece { Renderer = ground, Column = piece.Column, Row = piece.Row, Rect = piece.CanvasRect, Sprite = sprite, Missing = missing && tiled };
+                groundPieces.Add(entry);
+                PlaceGround(entry, sprite);
+            }
+            heightProblems.Clear();
+            Height = LocationHeightField.Load(Definition.Ground, Location, heightProblems);
+        }
+
+        private sealed class GroundPiece
+        {
+            public SpriteRenderer Renderer;
+            public int Column, Row;
+            public Rect Rect;
+            public Sprite Sprite;
+            public bool Missing;
+        }
+
+        private readonly List<GroundPiece> groundPieces = new List<GroundPiece>();
+        private readonly List<string> heightProblems = new List<string>();
+        private Sprite missingTile;
+
+        // Участок занимает свой прямоугольник рисунка места ровно: масштаб и
+        // сдвиг из границ спрайта — точка опоры спрайта учитывается один раз.
+        private void PlaceGround(GroundPiece piece, Sprite sprite)
+        {
+            Vector2 a = LocationVisualGeometry.PixelToWorld(Location, piece.Rect.min);
+            Vector2 b = LocationVisualGeometry.PixelToWorld(Location, piece.Rect.max);
+            Vector2 world = new Vector2(Mathf.Abs(b.x - a.x), Mathf.Abs(a.y - b.y));
+            Bounds local = sprite.bounds;
+            Vector2 scale = new Vector2(world.x / Mathf.Max(1e-6f, local.size.x), world.y / Mathf.Max(1e-6f, local.size.y));
+            piece.Renderer.transform.localScale = new Vector3(scale.x, scale.y, 1);
+            piece.Renderer.transform.localPosition = (a + b) / 2 - Vector2.Scale(local.center, scale);
+        }
+
+        // Участок без Color (частичный предпросмотр неполного экспорта).
+        private Sprite MissingTileSprite()
+        {
+            if (missingTile != null) return missingTile;
+            missingTile = MakeSprite(16, 16, (x, y) => ((int)(x * 4) + (int)(y * 4)) % 2 == 0 ? new Color(.45f, .08f, .12f) : new Color(.25f, .05f, .08f));
+            missingTile.texture.filterMode = FilterMode.Point;
+            return missingTile;
+        }
+
+        // Участки земли, их прямоугольники и пропуски (окно базы, проверки).
+        public int GroundPieceCount => groundPieces.Count;
+        public SpriteRenderer GroundRenderer(int column, int row) => groundPieces.Find(item => item.Column == column && item.Row == row)?.Renderer;
+        public bool IsGroundPieceMissing(int column, int row) => groundPieces.Find(item => item.Column == column && item.Row == row)?.Missing ?? true;
+
+        // Предпросмотр редактора: показать вместо Color другой рисунок участка
+        // (нормали, высота) без света; null — вернуть Color под светом.
+        public void ShowGroundOverride(Func<int, int, Sprite> sprite)
+        {
+            foreach (GroundPiece piece in groundPieces)
+            {
+                Sprite shown = sprite?.Invoke(piece.Column, piece.Row);
+                if (shown == null) shown = piece.Sprite;
+                piece.Renderer.sprite = shown;
+                piece.Renderer.sharedMaterial = sprite != null ? unlit : lit;
+                PlaceGround(piece, shown);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Высота земли (ПР-12О)
+        // ------------------------------------------------------------------
+
+        // Сервис высоты места; null — у места нет данных высоты.
+        public LocationHeightField Height { get; private set; }
+        public IReadOnlyList<string> HeightProblems => heightProblems;
+
+        // Высота под точкой мира (позиция ног). Корень места может быть сдвинут:
+        // перевод через InverseTransformPoint, а не «начало мира = ноль».
+        public bool TrySampleHeight(Vector3 worldFootPosition, out HeightSample sample, bool nearest = false)
+        {
+            if (Height == null)
+            {
+                sample = HeightSample.Invalid("У места нет карты высот.");
+                return false;
+            }
+            Vector3 local = Root.transform.InverseTransformPoint(worldFootPosition);
+            return Height.TrySampleCanvas(LocationVisualGeometry.WorldToPixel(Location, local), out sample, nearest);
+        }
+
+        // Высота под точкой рисунка места (пиксели, Y вниз).
+        public bool TrySampleHeightAtPixel(Vector2 pixel, out HeightSample sample, bool nearest = false)
+        {
+            if (Height == null)
+            {
+                sample = HeightSample.Invalid("У места нет карты высот.");
+                return false;
+            }
+            return Height.TrySampleCanvas(pixel, out sample, nearest);
+        }
+
+        // Высота под ногами фигуры: опора — логический якорь (Anchor), а не
+        // спрайт: кадр анимации и сдвиг рисунка точку земли не меняют.
+        public bool TrySampleActorHeight(string actorId, out HeightSample sample)
+        {
+            if (actorId == null || !actors.TryGetValue(actorId, out Actor actor))
+            {
+                sample = HeightSample.Invalid("Фигуры нет в месте.");
+                return false;
+            }
+            return TrySampleHeight(actor.Anchor.position, out sample);
         }
 
         private Sprite TerrainPlaceholder()
@@ -356,20 +467,41 @@ namespace KingdomSurvival.LocationRendering
         {
             ViewHeight = Mathf.Max(32, heightPixels);
             ViewCenter = centerPixel;
+            viewFromFollow = false;
             ApplyView();
         }
 
-        // Следить за точкой; край рисунка не уходит внутрь кадра.
+        // Рамка камеры места (весь рисунок, полезная область или своя).
+        public Rect CameraBounds => LocationCameraFollow.ResolveBounds(Definition, Location);
+
+        // Сразу на точку; край рамки не уходит внутрь кадра.
         public void LookAt(Vector2 pixel, float heightPixels)
         {
             ViewHeight = Mathf.Max(32, heightPixels);
-            Vector2 canvas = CanvasSize;
-            float halfH = ViewHeight / 2, halfW = halfH * Aspect;
-            float x = canvas.x <= halfW * 2 ? canvas.x / 2 : Mathf.Clamp(pixel.x, halfW, canvas.x - halfW);
-            float y = canvas.y <= halfH * 2 ? canvas.y / 2 : Mathf.Clamp(pixel.y, halfH, canvas.y - halfH);
-            ViewCenter = new Vector2(x, y);
+            ViewCenter = LocationCameraFollow.ClampView(pixel, new Vector2(ViewHeight * Aspect, ViewHeight), CameraBounds);
+            follow.Continue(ViewCenter);
+            viewFromFollow = true;
             ApplyView();
         }
+
+        // ПР-12О: следование за командиром по настройкам камеры места —
+        // сглаживание с явным временем кадра, мёртвая зона, ограничение всего
+        // кадра. snap — первое появление, загрузка, телепорт: без пролёта.
+        // После временной камеры (кадр боя) следование продолжается от неё.
+        public void Follow(Vector2 leaderPixel, float heightPixels, float deltaTime, bool snap = false)
+        {
+            ViewHeight = Mathf.Max(32, heightPixels);
+            if (!viewFromFollow && follow.HasCenter) follow.Continue(ViewCenter);
+            ViewCenter = follow.Step(leaderPixel, new Vector2(ViewHeight * Aspect, ViewHeight), CameraBounds, Definition.Camera, deltaTime, snap);
+            viewFromFollow = true;
+            ApplyView();
+        }
+
+        // Новая цель следования (смена командира): следующий шаг — сразу на ней.
+        public void ResetFollow() => follow.Reset();
+
+        private readonly LocationCameraFollow follow = new LocationCameraFollow();
+        private bool viewFromFollow;
 
         // Бой: прямоугольник рисунка canvasRect (кадр арены) должен совпасть
         // с прямоугольником viewportRect (доли кадра камеры, Y вниз), где
@@ -378,6 +510,7 @@ namespace KingdomSurvival.LocationRendering
         {
             if (viewportRect.height <= 0.0001f || viewportRect.width <= 0.0001f)
                 return;
+            viewFromFollow = false;
             ViewHeight = canvasRect.height / viewportRect.height;
             float viewWidth = ViewHeight * Aspect;
             ViewCenter = new Vector2(
@@ -640,6 +773,9 @@ namespace KingdomSurvival.LocationRendering
             if (GlobalLight != null) GlobalLight.enabled = false;
             RestoreSuppressedLights();
             if (Camera != null) Camera.targetTexture = null;
+            // CPU-данные высоты принадлежат месту и уходят вместе с ним.
+            Height = null;
+            groundPieces.Clear();
             Destroy(Root);
             foreach (UnityEngine.Object item in owned)
             {

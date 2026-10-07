@@ -9064,6 +9064,161 @@ MonoBehaviour:
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
+    - id: PR12O-T01
+      title: "12О-1 · Импорт экспорта Blender (manifest schema 1)"
+      details: "Вкладка «Земля» Базы локаций: manifest или папка, проверка структуры, путей, sha256, размеров и статусов; отчёт и план; транзакционное применение, повтор без дублей, замена участков, отказ несовместимым наборам, ручной путь без manifest."
+      category: 5
+      status: 1
+      required: 1
+      order: 49
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12N-T05
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Настоящие экспорты аддона проходят проверку пакета"
+        done: 1
+      - text: "Ручной импорт настоящей карты в окне"
+        done: 0
+      manualChecks:
+      - "Импортировать свой экспорт из Blender во вкладке «Земля»"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "GroundImportTests 13/13, 18 настоящих экспортов KS Ground Renderer. Ручная проверка мышью не делалась."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12O-T02
+      title: "12О-2 · Карта высот 16 бит и выборка под ногами"
+      details: "Свой декодер PNG16, CPU-данные ushort + покрытие, выборка через швы, невалидное — признак; высота под ногами командира в диагностике без сдвига фигуры."
+      category: 3
+      status: 1
+      required: 1
+      order: 50
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12O-T01
+      acceptanceCriteria:
+      - text: "32768 и 32769 различаются; min, max, отрицательный диапазон, прозрачный пиксель"
+        done: 1
+      - text: "Градиент через шов без скачка"
+        done: 1
+      - text: "Проверка на настоящей карте с рельефом"
+        done: 0
+      manualChecks:
+      - "Посмотреть высоту под указателем и под ногами командира на своей карте"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "LocationGroundTests 16/16; Unity LoadImage читает PNG16 как 8 бит — подтверждено тестом."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12O-T03
+      title: "12О-3 · Земля места из нескольких участков"
+      details: "Участки — SpriteRenderer в общей системе координат места; прежний рисунок места — режим «Один участок»; неполная земля в игру не идёт."
+      category: 3
+      status: 1
+      required: 1
+      order: 51
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12O-T01
+      acceptanceCriteria:
+      - text: "Четыре угла и ориентация X/Y верны; отряд проходит швы без пересборки"
+        done: 1
+      - text: "Нормали под светом с четырёх сторон"
+        done: 1
+      - text: "Швы на настоящем арте при игровом масштабе"
+        done: 0
+      manualChecks:
+      - "Запустить демо 4×4 и свою карту, пройти через границы участков"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "LocationGroundPlayModeTests 5/5."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12O-T04
+      title: "12О-4 · Камера следует за командиром"
+      details: "Сглаживание, мёртвая зона, смещение, видимая высота, границы карты для всего кадра, мгновенная постановка при входе и телепорте, возврат после кадра боя; прежние места — прежнее поведение."
+      category: 5
+      status: 1
+      required: 1
+      order: 52
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12O-T03
+      acceptanceCriteria:
+      - text: "30 и 144 кадров в секунду; 16:9, 16:10, 21:9; малая карта по центру"
+        done: 1
+      - text: "Плавность на глаз в игре и после боя на месте"
+        done: 0
+      manualChecks:
+      - "Пройти по большой карте, вступить в бой на месте и вернуться"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "Тесты камеры зелёные; PlayMode основной сцены 41/41."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12O-T05
+      title: "12О-5 · Приёмка земли из Blender"
+      details: "EditMode и PlayMode проверки; демо 4×4; замер памяти и загрузки; сборка Player без исходной папки Blender."
+      category: 8
+      status: 1
+      required: 1
+      order: 53
+      priority: 0
+      verificationType: 3
+      blockerReason: 4
+      dependencies:
+      - PR12O-T04
+      acceptanceCriteria:
+      - text: "Тесты зелёные"
+        done: 1
+      - text: "Скрипты Player компилируются"
+        done: 1
+      - text: "Полная сборка Player: земля и высота без исходной папки"
+        done: 0
+      - text: "Ручная проверка художником на своей карте"
+        done: 0
+      manualChecks:
+      - "Собрать Player и открыть место с землёй из участков"
+      fileReferences:
+      - ProjectDocs/LOCATION_DATABASE_GUIDE.md
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "EditMode 1475 (1461/0/14), PlayMode 41/41 + 5 новых. Участок 2048² Height16: импорт 0,37 с, загрузка 0,06 с, 12 МиБ."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
   - id: PR15_HOME_WATER
     title: "\u041F\u0420-15. \xAB\u0414\u043E\u043C \u043D\u0430 \u0447\u0443\u0436\u043E\u0439
       \u0432\u043E\u0434\u0435\xBB \u043D\u0430 \u043E\u0431\u0449\u0435\u0439 \u043E\u0441\u043D\u043E\u0432\u0435"

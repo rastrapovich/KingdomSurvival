@@ -249,6 +249,10 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float ShadowMinLean = .4f;
         public LocationShadowStyle ShadowStyle = new LocationShadowStyle();
         public Texture2D BackgroundNormalMap;
+        // ПР-12О: земля из участков Blender-экспорта (Color/Normal/Height) и
+        // камера места. Нет земли из участков — прежний рисунок места выше.
+        public LocationGroundDefinition Ground = new LocationGroundDefinition();
+        public LocationCameraSettings Camera = new LocationCameraSettings();
         public List<LocationVisualObject> Objects = new List<LocationVisualObject>();
         // Точка появления тестового отряда — доли рисунка места.
         public Vector2 TestStartPoint = new Vector2(.25f, .5f);
@@ -331,6 +335,7 @@ namespace KingdomSurvival.BattlefieldDatabase
         {
             List<string> errors = new List<string>();
             if (location == null || visual == null || field == null) { errors.Add("Не найдены место, художественная сборка или поле."); return errors; }
+            errors.AddRange(LocationGroundLayout.RuntimeErrors(visual, location));
             HashSet<string> ids = new HashSet<string>();
             foreach (LocationVisualObject item in visual.Objects)
             {

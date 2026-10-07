@@ -25,8 +25,8 @@ namespace KingdomSurvival.LocationRendering.Editor
     {
         private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape, PlaceAsset }
         private enum Kind { None, Art, Entrance, GameObject, Enemy, Encounter }
-        private enum Tab { Place, Game, Light, Art }
-        private static readonly string[] TabNames = { "Место", "Игровое", "Свет", "Предметы" };
+        private enum Tab { Place, Game, Light, Art, Ground }
+        private static readonly string[] TabNames = { "Место", "Игровое", "Свет", "Предметы", "Земля" };
 
         private static readonly string[] ToolNames =
         {
@@ -120,6 +120,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             ArtAssetDatabaseAsset.Changed -= CatalogChanged;
             ArtAssetUsages.LocationRequested -= OpenRequested;
             ReleasePreview();
+            ClearGroundPreview();
             if (database != null) AssetDatabase.SaveAssetIfDirty(database);
             if (fields != null) AssetDatabase.SaveAssetIfDirty(fields);
         }
@@ -163,6 +164,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocalLocationDefinition selected = values.OfType<LocalLocationDefinition>().FirstOrDefault();
                 if (selected == null) return;
                 if (database != null) AssetDatabase.SaveAssetIfDirty(database);
+                ClearGroundPreview(); pendingPackage = null; pendingPlan = null; groundCheck.Clear();
                 selectedId = selected.Id; selectedKind = Kind.None; selectedElementId = null;
                 zoom = 1; viewCenter = CanvasSize / 2; tool = Tool.Select;
                 BuildSettings(); RebuildPreview();
@@ -386,6 +388,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case Tab.Game: BuildGameSettings(location); return;
                 case Tab.Light: BuildLightSettings(location); return;
                 case Tab.Art: BuildVisualSettings(location); return;
+                case Tab.Ground: BuildGroundSettings(location); return;
             }
             Text("Название", location.DisplayName, value => { location.DisplayName = value; RefreshList(); });
             Text("ID места карты", location.WorldLocationId, value => location.WorldLocationId = value);
@@ -414,6 +417,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             Integer("Ширина рисунка", Mathf.RoundToInt(location.CanvasWidth), value => ResizeCanvas(location, value, location.CanvasHeight, location.HexesAcross));
             Integer("Высота рисунка", Mathf.RoundToInt(location.CanvasHeight), value => ResizeCanvas(location, location.CanvasWidth, value, location.HexesAcross));
             Integer("Клеток проходимости по ширине", location.HexesAcross, value => ResizeCanvas(location, location.CanvasWidth, location.CanvasHeight, value));
+            if (Visual?.Ground != null && Visual.Ground.IsTiled)
+                Help("Земля места — из участков экспорта Blender (вкладка «Земля»): «Рисунок места» ниже сейчас не показывается.");
             if (Visual != null)
             {
                 SpriteField("Рисунок места", Visual.Background, value => Visual.Background = value);
@@ -705,10 +710,19 @@ namespace KingdomSurvival.LocationRendering.Editor
         }
 
         // Новый размер рисунка: разметка пересчитывается, точки — в той же доле.
-        private void ResizeCanvas(LocalLocationDefinition location, float width, float height, int hexesAcross)
+        // exact — размер земли из участков (1 пиксель земли = 1 пиксель места),
+        // без ограничений поля ввода.
+        private void ResizeCanvas(LocalLocationDefinition location, float width, float height, int hexesAcross, bool exact = false)
         {
-            width = Mathf.Clamp(width, 256, 8192);
-            height = Mathf.Clamp(height, 256, 8192);
+            ResizeLocation(location, width, height, hexesAcross, exact);
+            viewCenter = new Vector2(location.CanvasWidth, location.CanvasHeight) / 2;
+            zoom = 1;
+        }
+
+        public static void ResizeLocation(LocalLocationDefinition location, float width, float height, int hexesAcross, bool exact = false)
+        {
+            width = exact ? Mathf.Clamp(width, 16, 65536) : Mathf.Clamp(width, 256, 8192);
+            height = exact ? Mathf.Clamp(height, 16, 65536) : Mathf.Clamp(height, 256, 8192);
             WorldMapTerrainLayer old = location.CreateTerrainLayer();
             float sx = width / Mathf.Max(1, location.CanvasWidth), sy = height / Mathf.Max(1, location.CanvasHeight);
             void Scale(LocalPointData point) { if (point == null) return; point.X *= sx; point.Y *= sy; }
@@ -725,8 +739,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                 encounter.TriggerArea.X *= sx; encounter.TriggerArea.Width *= sx;
                 encounter.TriggerArea.Y *= sy; encounter.TriggerArea.Height *= sy;
             }
-            viewCenter = new Vector2(width, height) / 2;
-            zoom = 1;
         }
 
         // ------------------------------------------------------------------
@@ -749,6 +761,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             preview.camera.clearFlags = CameraClearFlags.SolidColor;
             preview.camera.backgroundColor = new Color(.035f, .045f, .04f);
             RebuildTerrainOverlay();
+            ApplyGroundView();
         }
 
         private void RebuildTerrainOverlay()
@@ -851,6 +864,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Handles.BeginGUI();
             DrawLightOverlays(frame, shift);
             Handles.EndGUI();
+            DrawGroundOverlay(frame, shift, mouse);
             if (tool == Tool.Terrain && frame.Contains(mouse))
             {
                 Handles.color = new Color(1, 1, 1, .7f);
@@ -1006,6 +1020,12 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (!string.IsNullOrEmpty(assetId))
             {
                 AddAssetInstance(assetId, pixel);
+                return;
+            }
+            // Папка экспорта Blender или его manifest — импорт земли.
+            if (paths.Length == 1 && (Directory.Exists(paths[0]) || paths[0].EndsWith("_manifest.json", StringComparison.OrdinalIgnoreCase)))
+            {
+                LoadPackage(paths[0]);
                 return;
             }
             List<string> files = paths.Where(path => sprites.All(sprite => AssetDatabase.GetAssetPath(sprite) != path))

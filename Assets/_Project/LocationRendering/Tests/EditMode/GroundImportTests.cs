@@ -293,6 +293,102 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(string.Join("\n", GroundImporter.FromFiles(Directory.GetFiles(manualFolder), options).Errors), Does.Contain("Подтвердите"));
         }
 
+        // Обрисованная карта целиком: пиксель (x, y сверху) = (x mod 256, y mod 256, mark).
+        private string PaintedMap(int width, int height, byte mark, string name, Func<int, int, bool> marked = null)
+        {
+            PngCodec.RowWriter writer = new PngCodec.RowWriter(width, height);
+            byte[] row = new byte[width * 4];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    row[x * 4] = (byte)x; row[x * 4 + 1] = (byte)y;
+                    row[x * 4 + 2] = marked == null || marked(x, y) ? mark : (byte)7; row[x * 4 + 3] = 255;
+                }
+                writer.WriteRow(row, 0);
+            }
+            string path = Path.Combine(folder, name);
+            Directory.CreateDirectory(folder);
+            File.WriteAllBytes(path, writer.Finish());
+            return path;
+        }
+
+        private static Color32 TilePixel(LocationGroundTile tile, int x, int yTop, out PngCodec.Header header)
+        {
+            ushort[] samples = PngCodec.Decode(File.ReadAllBytes(AssetDatabase.GetAssetPath(tile.Color.texture)), out header);
+            int i = (yTop * header.Width + x) * header.Channels;
+            return new Color32((byte)samples[i], (byte)samples[i + 1], (byte)samples[i + 2], 255);
+        }
+
+        [Test]
+        public void PaintOverWholeMapIsSlicedOnGridAndKept()
+        {
+            string manifest = Export(Small());
+            Assert.That(Apply(GroundExportPackage.Load(manifest), out string message), Is.True, message);
+            LocationGroundDefinition ground = Visual.Ground;
+            string renderPath = AssetDatabase.GetAssetPath(ground.Find(1, 0).Color.texture);
+
+            // Неверные размеры — понятный отказ.
+            Assert.That(string.Join("\n", GroundPaintOver.Analyze(PaintedMap(130, 96, 1, "bad.png"), ground).Errors), Does.Contain("не кратен"));
+            Assert.That(string.Join("\n", GroundPaintOver.Analyze(PaintedMap(64, 48, 1, "small.png"), ground).Errors), Does.Contain("меньше рендера"));
+
+            // ×2: участки 128×96 на тех же прямоугольниках; (i, j) — снизу слева.
+            GroundPaintOver.Plan plan = GroundPaintOver.Analyze(PaintedMap(256, 192, 200, "paint.png"), ground);
+            Assert.That(plan.Errors, Is.Empty, string.Join("\n", plan.Errors));
+            Assert.That(plan.Scale, Is.EqualTo(2));
+            Assert.That(GroundPaintOver.Apply(plan, database, locationId, out message), Is.True, message);
+            Assert.That(ground.IsPainted, Is.True);
+            Assert.That(ground.ColorScale, Is.EqualTo(2));
+            foreach (LocationGroundTile tile in ground.Tiles)
+            {
+                Assert.That(tile.Color.rect.size, Is.EqualTo(new Vector2(128, 96)));
+                Assert.That(ArtAssets.Editor.SpriteNormalMaps.Find(tile.Color), Is.EqualTo(tile.Normal), "нормаль экспорта подключена к обрисовке");
+                Assert.That(AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(tile.RenderColorGuid)), Is.Not.Null, "рендер сохранён");
+                int left = tile.X * 128, top = (1 - tile.Y) * 96;
+                foreach ((int x, int y) in new[] { (0, 0), (127, 0), (0, 95), (127, 95) })
+                {
+                    Color32 pixel = TilePixel(tile, x, y, out _);
+                    Assert.That(new Vector2Int(pixel.r, pixel.g), Is.EqualTo(new Vector2Int((byte)(left + x), (byte)(top + y))), tile.Key + " " + x + "," + y);
+                }
+            }
+            Assert.That(LocationGroundLayout.RuntimeErrors(Visual, Location), Is.Empty);
+
+            // Тот же файл — без изменений; правка внутри X001_Y000 — меняется только он.
+            Assert.That(GroundPaintOver.Apply(GroundPaintOver.Analyze(Path.Combine(folder, "paint.png"), ground), database, locationId, out message), Is.True);
+            Assert.That(message, Does.Contain("без изменений"));
+            Dictionary<string, string> before = ground.Tiles.ToDictionary(tile => tile.Key, tile => tile.PaintSha256);
+            string again = PaintedMap(256, 192, 200, "paint2.png", (x, y) => !(x >= 150 && x < 160 && y >= 120 && y < 130));
+            Assert.That(GroundPaintOver.Apply(GroundPaintOver.Analyze(again, ground), database, locationId, out message), Is.True, message);
+            foreach (LocationGroundTile tile in ground.Tiles)
+                Assert.That(tile.PaintSha256 != before[tile.Key], Is.EqualTo(tile.Key == "X001_Y000"), tile.Key);
+
+            // Сшивание: карта целиком из текущих участков — та же, что обрисовка.
+            string whole = Path.Combine(folder, "whole.png");
+            Assert.That(GroundPaintOver.ExportWhole(ground, whole, out message), Is.True, message);
+            Assert.That(PngCodec.Decode(File.ReadAllBytes(whole), out PngCodec.Header wholeHeader), Is.EqualTo(PngCodec.Decode(File.ReadAllBytes(again), out _)));
+            Assert.That(wholeHeader.Width, Is.EqualTo(256));
+
+            // Переимпорт экспорта с новым рендером X001_Y000: обрисовка остаётся.
+            Sprite painted = ground.Find(1, 0).Color;
+            string color = Path.Combine(folder, "a", "Color", "Test_Map_X001_Y000.png");
+            string oldSha = GroundExportPackage.Sha256Hex(File.ReadAllBytes(color));
+            byte[] render = PngCodec.Encode(64, 48, 8, PngCodec.Rgba, Enumerable.Repeat((ushort)90, 64 * 48 * 4).ToArray());
+            File.WriteAllBytes(color, render);
+            File.WriteAllText(manifest, File.ReadAllText(manifest).Replace(oldSha, GroundExportPackage.Sha256Hex(render)));
+            Assert.That(Apply(GroundExportPackage.Load(manifest), out message), Is.True, message);
+            Assert.That(message, Does.Contain("Рендер Color изменился"));
+            Assert.That(ground.Find(1, 0).Color, Is.SameAs(painted));
+            Assert.That(AssetDatabase.GUIDToAssetPath(ground.Find(1, 0).RenderColorGuid), Is.Not.EqualTo(renderPath));
+
+            // Возврат к рендеру.
+            Assert.That(GroundPaintOver.RevertToRender(database, locationId, out message), Is.True, message);
+            Assert.That(ground.IsPainted, Is.False);
+            Assert.That(ground.ColorScale, Is.EqualTo(1));
+            Assert.That(ground.Find(1, 0).Color.rect.size, Is.EqualTo(new Vector2(64, 48)));
+            Assert.That(TilePixel(ground.Find(1, 0), 3, 3, out _).r, Is.EqualTo(90));
+            Assert.That(Directory.GetFiles(GroundImporter.Root + "/" + locationId, "*_paint__*.png", SearchOption.AllDirectories), Is.Empty);
+        }
+
         // Демо 4×4 (меню «Технические») и вкладка «Земля» окна базы — на
         // временной копии базы: настоящая база места не меняется.
         [Test]

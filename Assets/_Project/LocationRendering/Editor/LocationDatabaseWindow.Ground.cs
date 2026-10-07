@@ -20,6 +20,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         private enum GroundView { Color, Normal, Height }
 
         private GroundExportPackage pendingPackage;
+        private GroundPaintOver.Plan pendingPaint;
+        private bool pendingKeepPaint = true;
         private GroundImporter.Plan pendingPlan;
         private HashSet<string> pendingSelection;
         private bool pendingLevelNormals, pendingResize = true;
@@ -113,12 +115,14 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Foldout list = new Foldout { text = "Участки (" + ground.Tiles.Count + ")", value = ground.Tiles.Count <= 16 };
                 foreach (LocationGroundTile tile in ground.Tiles)
                 {
-                    Label line = new Label(tile.Key + " · Color " + Mark(tile.Color) + " · Normal " + Mark(tile.Normal) + " · Height " + Mark(tile.Height));
+                    Label line = new Label(tile.Key + " · Color " + (tile.IsPainted ? "обрисовка" : Mark(tile.Color)) + " · Normal " + Mark(tile.Normal) + " · Height " + Mark(tile.Height));
                     line.style.fontSize = 11;
                     list.Add(line);
                 }
                 settings.Add(list);
             }
+
+            if (ground.IsTiled && ground.Tiles.Count > 0) BuildPaintOver(location, ground);
 
             // ---------------- Карта высот ----------------
             Heading("Карта высот");
@@ -193,9 +197,78 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private static string Mark(UnityEngine.Object value) => value != null ? "✓" : "—";
 
+        // Обрисовка Color всей карты одним файлом: сохранить основу → обрисовать
+        // в редакторе (можно крупнее в целое число раз) → загрузить; нарезка — сама.
+        private void BuildPaintOver(LocalLocationDefinition location, LocationGroundDefinition ground)
+        {
+            Heading("Обрисовка Color");
+            Help("1. «Сохранить Color всей карты» — один PNG " + ground.VirtualSize.x + "×" + ground.VirtualSize.y + ".\n" +
+                 "2. Обрисуйте его целиком, не меняя кадр (без обрезки и полей); можно увеличить в целое число раз (×2 — " +
+                 ground.VirtualSize.x * 2 + "×" + ground.VirtualSize.y * 2 + ").\n" +
+                 "3. «Заменить Color обрисовкой» или перетащите PNG в поле выше — база нарежет его по сетке сама. Normal и Height остаются из экспорта.");
+            if (ground.IsPainted)
+                Help("Сейчас Color — обрисовка «" + ground.PaintSource + "» (" + ground.PaintedUtc + (Mathf.Abs(ground.ColorScale - 1) > 1e-4f
+                    ? ", разрешение ×" + ground.ColorScale.ToString("0.###") : "") + "). Новый импорт экспорта её сохраняет.");
+            VisualElement row = new VisualElement(); row.style.flexDirection = FlexDirection.Row; row.style.flexWrap = Wrap.Wrap;
+            AddButton(row, "Сохранить Color всей карты…", () =>
+            {
+                string path = EditorUtility.SaveFilePanel("Color всей карты (основа обрисовки)", "", GroundImporter.Sanitize(ground.MapId) + "_color_full.png", "png");
+                if (string.IsNullOrEmpty(path)) return;
+                GroundPaintOver.ExportWhole(ground, path, out string message);
+                status.text = message;
+                EditorUtility.RevealInFinder(path);
+            });
+            AddButton(row, "Заменить Color обрисовкой…", () =>
+            {
+                string path = EditorUtility.OpenFilePanel("Обрисованный Color всей карты (PNG)", "", "png");
+                if (!string.IsNullOrEmpty(path)) LoadPaint(path);
+            });
+            if (ground.IsPainted)
+                AddButton(row, "Вернуть Color из рендера", () =>
+                {
+                    if (!EditorUtility.DisplayDialog("Вернуть Color из рендера?", "Обрисовка будет убрана из проекта (ваш исходный файл обрисовки не трогается).", "Вернуть", "Отмена")) return;
+                    GroundPaintOver.RevertToRender(database, location.Id, out string message);
+                    status.text = message;
+                    BuildSettings(); RebuildPreview();
+                });
+            settings.Add(row);
+
+            if (pendingPaint == null) return;
+            Label summary = new Label(pendingPaint.Header.Width > 0 ? pendingPaint.Summary : Path.GetFileName(pendingPaint.SourcePath));
+            summary.style.whiteSpace = WhiteSpace.Normal;
+            settings.Add(summary);
+            foreach (string error in pendingPaint.Errors) settings.Add(new HelpBox(error, HelpBoxMessageType.Error));
+            foreach (string warning in pendingPaint.Warnings) settings.Add(new HelpBox(warning, HelpBoxMessageType.Warning));
+            VisualElement buttons = new VisualElement(); buttons.style.flexDirection = FlexDirection.Row;
+            Button apply = new Button(() =>
+            {
+                AssetDatabase.SaveAssetIfDirty(database);
+                bool ok = GroundPaintOver.Apply(pendingPaint, database, location.Id, out string message);
+                status.text = message;
+                if (!ok) { EditorUtility.DisplayDialog("Обрисовка Color", message, "Понятно"); return; }
+                pendingPaint = null;
+                groundView = GroundView.Color;
+                groundCheck = CheckGround(location);
+                BuildSettings(); RebuildPreview();
+            }) { text = "Применить обрисовку" };
+            apply.SetEnabled(pendingPaint.CanApply);
+            buttons.Add(apply);
+            AddButton(buttons, "Отмена", () => { pendingPaint = null; BuildSettings(); });
+            settings.Add(buttons);
+        }
+
+        private void LoadPaint(string path)
+        {
+            pendingPaint = GroundPaintOver.Analyze(path, Ground);
+            pendingPackage = null; pendingPlan = null;
+            tab = Tab.Ground;
+            status.text = pendingPaint.CanApply ? "Обрисовка подходит к сетке — нажмите «Применить обрисовку»." : "Обрисовка не подходит — см. «Обрисовка Color».";
+            BuildSettings();
+        }
+
         private VisualElement GroundDropZone()
         {
-            Label drop = new Label("Перетащите сюда manifest или папку экспорта (или PNG участков — ручной путь)");
+            Label drop = new Label("Перетащите сюда manifest или папку экспорта, обрисованный Color всей карты (один PNG) или PNG участков (ручной путь)");
             drop.style.whiteSpace = WhiteSpace.Normal;
             drop.style.unityTextAlign = TextAnchor.MiddleCenter;
             drop.style.paddingTop = drop.style.paddingBottom = 12;
@@ -218,6 +291,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                 EditorApplication.delayCall += () =>
                 {
                     if (paths.Length == 1 && (Directory.Exists(paths[0]) || paths[0].EndsWith(".json", StringComparison.OrdinalIgnoreCase))) LoadPackage(paths[0]);
+                    // Один большой PNG при земле из участков — обрисовка Color всей карты.
+                    else if (paths.Length == 1 && paths[0].EndsWith(".png", StringComparison.OrdinalIgnoreCase) && Ground != null && Ground.IsTiled && Ground.Tiles.Count > 0)
+                        LoadPaint(paths[0]);
                     else if (paths.Length > 0 && paths.All(path => path.EndsWith(".png", StringComparison.OrdinalIgnoreCase))) LoadManual(paths);
                     else status.text = "Нужен manifest экспорта, папка экспорта или PNG участков.";
                 };
@@ -232,6 +308,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             finally { EditorUtility.ClearProgressBar(); }
             pendingSelection = null;
             pendingLevelNormals = false;
+            pendingKeepPaint = true;
+            pendingPaint = null;
             pendingResize = true;
             ReplanPending();
             tab = Tab.Ground;
@@ -309,6 +387,13 @@ namespace KingdomSurvival.LocationRendering.Editor
                 level.RegisterValueChangedCallback(evt => pendingLevelNormals = evt.newValue);
                 settings.Add(level);
             }
+            if (Ground != null && Ground.IsPainted)
+            {
+                UnityEngine.UIElements.Toggle keep = new UnityEngine.UIElements.Toggle("Сохранить обрисовку Color") { value = pendingKeepPaint,
+                    tooltip = "Обновятся рендер под обрисовкой, Normal и Height; сама обрисовка останется Color участков." };
+                keep.RegisterValueChangedCallback(evt => pendingKeepPaint = evt.newValue);
+                settings.Add(keep);
+            }
             UnityEngine.UIElements.Toggle resize = new UnityEngine.UIElements.Toggle("Подогнать размер места под землю") { value = pendingResize };
             resize.RegisterValueChangedCallback(evt => pendingResize = evt.newValue);
             settings.Add(resize);
@@ -326,6 +411,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (pendingPlan == null) return;
             pendingPlan.LevelNormals = pendingLevelNormals;
             pendingPlan.ResizeCanvas = pendingResize;
+            pendingPlan.KeepPaint = pendingKeepPaint;
             if (GroundImporter.WouldBeIncomplete(pendingPlan, Ground))
             {
                 if (!EditorUtility.DisplayDialog("Неполный пакет",
@@ -367,6 +453,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                 if (tile?.Color == null) continue;
                 gpu += UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(tile.Color.texture);
                 if (tile.Normal != null) gpu += UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(tile.Normal);
+                // Обрисовка может быть в k раз подробнее рендера — на тот же прямоугольник.
+                float scale = tile.IsPainted ? ground.ColorScale : 1;
+                int expectW = Mathf.RoundToInt(ground.TileWidth * scale), expectH = Mathf.RoundToInt(ground.TileHeight * scale);
                 if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(tile.Color.texture)) is TextureImporter importer)
                 {
                     TextureImporterSettings settings = new TextureImporterSettings();
@@ -374,12 +463,14 @@ namespace KingdomSurvival.LocationRendering.Editor
                     if (settings.spriteMeshType != SpriteMeshType.FullRect) result.Add(tile.Key + ": сетка спрайта не «Full Rect» — возможны щели на швах.");
                     if (importer.mipmapEnabled) result.Add(tile.Key + ": включены mipmaps — края участков могут различаться.");
                     importer.GetSourceTextureWidthAndHeight(out int w, out int h);
-                    if (w != ground.TileWidth || h != ground.TileHeight) result.Add(tile.Key + ": исходный PNG " + w + "×" + h + " вместо " + ground.TileWidth + "×" + ground.TileHeight + ".");
+                    if (w != expectW || h != expectH) result.Add(tile.Key + ": исходный PNG " + w + "×" + h + " вместо " + expectW + "×" + expectH + ".");
                     if (importer.maxTextureSize < Mathf.Max(w, h)) result.Add(tile.Key + ": Max Size " + importer.maxTextureSize + " уменьшает участок.");
                     if (tile.Normal != null && SpriteNormalMaps.Find(importer) != tile.Normal) result.Add(tile.Key + ": нормаль не подключена второй текстурой _NormalMap.");
                 }
-                if (tile.Color.rect.width != ground.TileWidth || tile.Color.rect.height != ground.TileHeight)
+                if (Mathf.RoundToInt(tile.Color.rect.width) != expectW || Mathf.RoundToInt(tile.Color.rect.height) != expectH)
                     result.Add(tile.Key + ": Sprite " + tile.Color.rect.width + "×" + tile.Color.rect.height + " — не весь участок.");
+                if (tile.IsPainted && AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(tile.RenderColorGuid)) == null)
+                    result.Add(tile.Key + ": нет рендера Color под обрисовкой — вернуть рендер нельзя, пока экспорт не переимпортирован.");
             }
             if (result.Count == 0) result.Add("✓ Земля в порядке: " + ground.Tiles.Count + " участков, ориентация и размеры согласованы.");
             result.Add("✓ Память: текстуры Color/Normal ≈ " + (gpu / 1048576.0).ToString("0.0") + " МиБ" +

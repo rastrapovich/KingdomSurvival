@@ -9182,7 +9182,7 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "Тесты камеры зелёные; PlayMode основной сцены 41/41."
+      implementationNote: "Тесты камеры зелёные; PlayMode 42/42, включая основную сцену."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
@@ -9215,7 +9215,7 @@ MonoBehaviour:
       relatedFlagIds: []
       relatedKnowledgeIds: []
       blockerNote: 
-      implementationNote: "EditMode 1475 (1461/0/14), PlayMode 41/41 + 5 новых. Участок 2048² Height16: импорт 0,37 с, загрузка 0,06 с, 12 МиБ."
+      implementationNote: "EditMode 1476 (1462/0/14), PlayMode 42/42 (5 новых). Участок 2048² Height16: импорт 0,37 с, загрузка 0,06 с, 12 МиБ."
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 

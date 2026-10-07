@@ -164,7 +164,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocalLocationDefinition selected = values.OfType<LocalLocationDefinition>().FirstOrDefault();
                 if (selected == null) return;
                 if (database != null) AssetDatabase.SaveAssetIfDirty(database);
-                ClearGroundPreview(); pendingPackage = null; pendingPlan = null; groundCheck.Clear();
+                ClearGroundPreview(); pendingPackage = null; pendingPlan = null; pendingPaint = null; groundCheck.Clear();
                 selectedId = selected.Id; selectedKind = Kind.None; selectedElementId = null;
                 zoom = 1; viewCenter = CanvasSize / 2; tool = Tool.Select;
                 BuildSettings(); RebuildPreview();

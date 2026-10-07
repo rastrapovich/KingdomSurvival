@@ -32,7 +32,14 @@ namespace KingdomSurvival.BattlefieldDatabase
         public string ColorSha256 = string.Empty;
         public string NormalSha256 = string.Empty;
         public string HeightSha256 = string.Empty;
+        // Обрисовка: Color — нарезка обрисованной карты, PaintSha256 — её
+        // отпечаток; исходный рендер Color хранится по GUID (строкой, чтобы
+        // игра не грузила его вместе с обрисовкой) — к нему можно вернуться.
+        // ColorSha256 по-прежнему — рендер из manifest.
+        public string PaintSha256 = string.Empty;
+        public string RenderColorGuid = string.Empty;
 
+        public bool IsPainted => !string.IsNullOrEmpty(PaintSha256);
         public string Key => KeyOf(X, Y);
         public static string KeyOf(int x, int y) => "X" + x.ToString("000") + "_Y" + y.ToString("000");
     }
@@ -101,12 +108,20 @@ namespace KingdomSurvival.BattlefieldDatabase
         // в игру не пропускается.
         public bool Incomplete;
 
+        // Обрисовка Color одним файлом всей карты: во сколько раз её
+        // разрешение выше рендера (участок — W·k × H·k пикселей на тот же
+        // прямоугольник), имя исходного файла и время.
+        public float ColorScale = 1;
+        public string PaintSource = string.Empty;
+        public string PaintedUtc = string.Empty;
+
         public List<LocationGroundTile> Tiles = new List<LocationGroundTile>();
 
         public bool IsTiled => Mode == LocationGroundMode.Tiles;
         public Vector2Int VirtualSize => new Vector2Int(Mathf.Max(1, Columns) * Mathf.Max(1, TileWidth), Mathf.Max(1, Rows) * Mathf.Max(1, TileHeight));
         public LocationGroundTile Find(int x, int y) => Tiles.Find(tile => tile != null && tile.X == x && tile.Y == y);
         public bool HasAnyHeight => Tiles.Exists(tile => tile?.Height != null);
+        public bool IsPainted => Tiles.Exists(tile => tile != null && tile.IsPainted);
     }
 
     [Serializable]

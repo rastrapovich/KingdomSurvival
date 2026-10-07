@@ -346,6 +346,85 @@ namespace KingdomSurvival.BattlefieldDatabase
         }
 
         // ------------------------------------------------------------------
+        // Построчная запись RGBA 8 бит: большие карты режутся и сшиваются без
+        // массива всего изображения в памяти (держится только сжатый результат).
+        // ------------------------------------------------------------------
+
+        public sealed class RowWriter
+        {
+            private readonly MemoryStream compressed = new MemoryStream();
+            private readonly DeflateStream deflate;
+            private readonly int width, height, stride;
+            private readonly bool srgb;
+            private byte[] previous, filtered;
+            private readonly byte[] filter = { 1 };
+            private uint adlerA = 1, adlerB = 0;
+            private int rows;
+
+            public RowWriter(int width, int height, bool srgb = true)
+            {
+                if (width <= 0 || height <= 0) throw new ArgumentException("Неверный размер PNG.");
+                this.width = width; this.height = height; this.srgb = srgb;
+                stride = width * 4;
+                previous = new byte[stride];
+                filtered = new byte[stride];
+                compressed.WriteByte(0x78); compressed.WriteByte(0x9C);
+                deflate = new DeflateStream(compressed, CompressionLevel.Fastest, true);
+            }
+
+            // Строка RGBA 8 бит (сверху вниз), фильтр Sub.
+            public void WriteRow(byte[] row, int offset)
+            {
+                if (rows >= height) throw new InvalidOperationException("Лишняя строка PNG.");
+                for (int i = 0; i < stride; i++)
+                    filtered[i] = (byte)(row[offset + i] - (i >= 4 ? row[offset + i - 4] : 0));
+                deflate.Write(filter, 0, 1);
+                deflate.Write(filtered, 0, stride);
+                Adler(filter, 1, ref adlerA, ref adlerB);
+                Adler(filtered, stride, ref adlerA, ref adlerB);
+                rows++;
+            }
+
+            public byte[] Finish()
+            {
+                if (rows != height) throw new InvalidOperationException("PNG: записано строк " + rows + " из " + height + ".");
+                deflate.Dispose();
+                byte[] adler = new byte[4];
+                WriteUInt32(adler, 0, (adlerB << 16) | adlerA);
+                compressed.Write(adler, 0, 4);
+                using (MemoryStream file = new MemoryStream())
+                {
+                    file.Write(Signature, 0, Signature.Length);
+                    byte[] ihdr = new byte[13];
+                    WriteUInt32(ihdr, 0, (uint)width);
+                    WriteUInt32(ihdr, 4, (uint)height);
+                    ihdr[8] = 8; ihdr[9] = Rgba;
+                    WriteChunk(file, "IHDR", ihdr);
+                    if (srgb) WriteChunk(file, "sRGB", new byte[] { 0 });
+                    WriteChunk(file, "IDAT", compressed.ToArray());
+                    WriteChunk(file, "IEND", Array.Empty<byte>());
+                    return file.ToArray();
+                }
+            }
+        }
+
+        // Значения строки декодера (любой поддержанный тип и разрядность) →
+        // RGBA 8 бит; без альфы — непрозрачно.
+        public static void ToRgba8(ushort[] samples, Header header, byte[] target, int offset = 0)
+        {
+            int channels = header.Channels;
+            bool wide = header.BitDepth == 16;
+            for (int x = 0; x < header.Width; x++)
+            {
+                int s = x * channels, t = offset + x * 4;
+                byte Read(int c) => wide ? (byte)((samples[s + c] * 255 + 32767) / 65535) : (byte)samples[s + c];
+                if (channels >= 3) { target[t] = Read(0); target[t + 1] = Read(1); target[t + 2] = Read(2); }
+                else target[t] = target[t + 1] = target[t + 2] = Read(0);
+                target[t + 3] = header.HasAlpha ? Read(channels - 1) : (byte)255;
+            }
+        }
+
+        // ------------------------------------------------------------------
 
         private static uint ReadUInt32(byte[] data, int offset) =>
             (uint)(data[offset] << 24 | data[offset + 1] << 16 | data[offset + 2] << 8 | data[offset + 3]);

@@ -38,6 +38,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             public bool ResizeCanvas = true;
             // Частичный пакет применяется только как предпросмотр.
             public bool AllowPartial;
+            // Обрисованные участки сохраняют обрисовку (обновляется только рендер под ней).
+            public bool KeepPaint = true;
             public readonly Dictionary<string, TileAction> Actions = new Dictionary<string, TileAction>();
             public readonly List<string> Changes = new List<string>();
             public readonly List<string> Blockers = new List<string>();
@@ -99,6 +101,13 @@ namespace KingdomSurvival.LocationRendering.Editor
             int count(TileAction action) => plan.Actions.Values.Count(value => value == action);
             plan.Changes.Add("Участки: новых " + count(TileAction.New) + ", заменить " + count(TileAction.Replace) + ", без изменений " +
                              count(TileAction.Unchanged) + ", пропустить " + count(TileAction.Skip) + ".");
+            int painted = plan.ReplacesWholeGround ? 0 : ground.Tiles.Count(tile => tile != null && tile.IsPainted &&
+                plan.Actions.TryGetValue(tile.Key, out TileAction action) && action == TileAction.Replace);
+            if (painted > 0)
+                plan.Changes.Add("Обрисовка Color сохраняется у " + painted + " заменяемых участков (обновится рендер под ней, Normal и Height). " +
+                                 "Снимите «Сохранить обрисовку Color», чтобы вернуть Color из нового рендера.");
+            else if (plan.ReplacesWholeGround && ground.IsPainted)
+                plan.Changes.Add("Обрисовка Color прежней земли не переносится на новую карту.");
             return plan;
         }
 
@@ -188,6 +197,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
             // 2. Запись в Assets (новые файлы рядом со старыми).
             List<string> created = new List<string>();
+            int paintBehindRender = 0;
             try
             {
                 Directory.CreateDirectory(folder + "/Color");
@@ -214,8 +224,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                 foreach (Staged item in staged)
                 {
                     EditorUtility.DisplayProgressBar("Земля из Blender", "Настройки импорта " + item.Tile.Key, done++ / (float)Math.Max(1, staged.Count));
-                    if (item.NormalPath != null) ConfigureNormal(item.NormalPath, package);
-                    ConfigureColor(item.ColorPath, item.NormalPath, package);
+                    if (item.NormalPath != null) ConfigureNormal(item.NormalPath, Math.Max(package.TileWidth, package.TileHeight));
+                    ConfigureColor(item.ColorPath, item.NormalPath, Math.Max(package.TileWidth, package.TileHeight));
                 }
                 foreach (Staged item in staged)
                 {
@@ -225,6 +235,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 }
 
                 // 3. Подмена ссылок.
+                paintBehindRender = 0;
                 Undo.RecordObject(database, "Импорт земли из Blender");
                 LocationGroundDefinition ground = visual.Ground ?? (visual.Ground = new LocationGroundDefinition());
                 if (plan.ReplacesWholeGround) ground.Tiles.Clear();
@@ -233,12 +244,23 @@ namespace KingdomSurvival.LocationRendering.Editor
                 {
                     LocationGroundTile tile = ground.Find(item.Tile.X, item.Tile.Y);
                     if (tile == null) { tile = new LocationGroundTile { X = item.Tile.X, Y = item.Tile.Y }; ground.Tiles.Add(tile); }
-                    tile.Color = AssetDatabase.LoadAssetAtPath<Sprite>(item.ColorPath);
+                    if (tile.IsPainted && plan.KeepPaint)
+                    {
+                        // Обрисовка остаётся Color; новый рендер — её основа для возврата.
+                        if (!string.Equals(tile.ColorSha256, item.ColorSha, StringComparison.OrdinalIgnoreCase)) paintBehindRender++;
+                        tile.RenderColorGuid = AssetDatabase.AssetPathToGUID(item.ColorPath);
+                    }
+                    else
+                    {
+                        tile.Color = AssetDatabase.LoadAssetAtPath<Sprite>(item.ColorPath);
+                        tile.PaintSha256 = tile.RenderColorGuid = string.Empty;
+                    }
                     tile.ColorSha256 = item.ColorSha; tile.ColorRevision = item.Tile.Pass(GroundExportPackage.Color)?.Revision ?? string.Empty;
                     if (item.NormalPath != null)
                     {
                         tile.Normal = AssetDatabase.LoadAssetAtPath<Texture2D>(item.NormalPath);
                         tile.NormalSha256 = item.NormalSha; tile.NormalRevision = item.Tile.Pass(GroundExportPackage.Normal)?.Revision ?? string.Empty;
+                        if (tile.IsPainted) SpriteNormalMaps.Assign(tile.Color, tile.Normal, out _);
                     }
                     if (item.HeightPath != null)
                     {
@@ -247,6 +269,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                     }
                 }
                 ground.Tiles.Sort((a, b) => a.Y != b.Y ? a.Y.CompareTo(b.Y) : a.X.CompareTo(b.X));
+                if (!ground.IsPainted) { ground.ColorScale = 1; ground.PaintSource = ground.PaintedUtc = string.Empty; }
                 ground.HeightEnabled = ground.HasAnyHeight;
                 ground.Incomplete = IsIncomplete(ground);
                 if (visual.Camera == null || visual.Camera.Version == 0) visual.Camera = LocationCameraSettings.ForLargeMap();
@@ -272,6 +295,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             int unchanged = plan.Actions.Values.Count(action => action == TileAction.Unchanged);
             message = "Земля «" + package.MapId + "»: обновлено участков " + staged.Count + (unchanged > 0 ? ", без изменений " + unchanged : "") +
                       (removed > 0 ? ", удалено устаревших файлов " + removed : "") +
+                      (paintBehindRender > 0 ? ". Рендер Color изменился у " + paintBehindRender + " обрисованных участков — обрисовка сохранена; сохраните Color всей карты и проверьте её" : "") +
                       (visual.Ground.Incomplete ? ". Земля неполная — только предпросмотр, в игру не пойдёт." : ".");
             return true;
         }
@@ -382,7 +406,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         // Земля: Sprite на полный прямоугольник (без tight mesh и обрезки по
         // альфе), без mipmaps и уменьшения, Clamp — согласованно у всех участков.
-        private static void ConfigureColor(string path, string normalPath, GroundExportPackage package)
+        internal static void ConfigureColor(string path, string normalPath, int largestSide)
         {
             TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(path);
             importer.textureType = TextureImporterType.Sprite;
@@ -393,7 +417,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             importer.mipmapEnabled = false;
             importer.wrapMode = TextureWrapMode.Clamp;
             importer.filterMode = FilterMode.Bilinear;
-            importer.maxTextureSize = MaxSize(package);
+            importer.maxTextureSize = MaxSize(largestSide);
             importer.npotScale = TextureImporterNPOTScale.None;
             TextureImporterSettings settings = new TextureImporterSettings();
             importer.ReadTextureSettings(settings);
@@ -412,23 +436,23 @@ namespace KingdomSurvival.LocationRendering.Editor
                 throw new IOException("Не записаны настройки импорта " + path + ".");
         }
 
-        private static void ConfigureNormal(string path, GroundExportPackage package)
+        private static void ConfigureNormal(string path, int largestSide)
         {
             TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(path);
             importer.textureType = TextureImporterType.NormalMap;
             importer.mipmapEnabled = false;
             importer.wrapMode = TextureWrapMode.Clamp;
             importer.filterMode = FilterMode.Bilinear;
-            importer.maxTextureSize = MaxSize(package);
+            importer.maxTextureSize = MaxSize(largestSide);
             importer.npotScale = TextureImporterNPOTScale.None;
             if (!SpriteNormalMaps.SaveVerified(importer, meta => SpriteNormalMaps.MetaValue(meta, "textureType") == ((int)TextureImporterType.NormalMap).ToString()))
                 throw new IOException("Не записаны настройки импорта " + path + ".");
         }
 
-        private static int MaxSize(GroundExportPackage package)
+        private static int MaxSize(int largestSide)
         {
             int size = 32;
-            while (size < Math.Max(package.TileWidth, package.TileHeight) && size < 16384) size *= 2;
+            while (size < largestSide && size < 16384) size *= 2;
             return Math.Max(2048, size);
         }
 
@@ -491,6 +515,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                     if (asset != null) used.Add(AssetDatabase.GetAssetPath(asset));
             }
             if (ground?.Manifest != null) used.Add(AssetDatabase.GetAssetPath(ground.Manifest));
+            // Рендер Color под обрисовкой — основа для возврата.
+            foreach (LocationGroundTile tile in ground?.Tiles ?? new List<LocationGroundTile>())
+                if (!string.IsNullOrEmpty(tile?.RenderColorGuid)) used.Add(AssetDatabase.GUIDToAssetPath(tile.RenderColorGuid));
             int removed = 0;
             foreach (string guid in AssetDatabase.FindAssets(string.Empty, new[] { folder }))
             {

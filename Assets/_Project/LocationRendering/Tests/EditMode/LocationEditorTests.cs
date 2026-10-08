@@ -35,6 +35,36 @@ namespace KingdomSurvival.LocationRendering.Tests
             window.Close();
         }
 
+        // Гексы боя на месте — тот же BattlefieldView, что в бою (поверх
+        // рисунка), а настройки сетки и вида гекса — те же карточки, что в
+        // Базе полей боя.
+        [Test]
+        public void ArenaHexesUseBattlefieldViewAndBattlefieldDatabaseCards()
+        {
+            System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            LocationDatabaseWindow window = EditorWindow.GetWindow<LocationDatabaseWindow>();
+            try
+            {
+                window.CreateGUI();
+                BattlefieldView view = window.rootVisualElement.Q<BattlefieldView>();
+                Assert.That(view, Is.Not.Null);
+                Assert.That(view.WorldUnderlay, Is.True, "кадр прозрачный — гексы поверх рисунка места, как в бою");
+                Assert.That(view.pickingMode, Is.EqualTo(PickingMode.Ignore));
+
+                ScrollView settings = (ScrollView)typeof(LocationDatabaseWindow).GetField("settings", flags).GetValue(window);
+                System.Collections.Generic.List<string> texts = new System.Collections.Generic.List<string>();
+                settings.Query<TextElement>().ForEach(item => texts.Add(item.text));
+                foreach (string expected in new[] { "СЕТКА", "Сдвиг X", "Сдвиг Y", "Сбросить положение", "ВИД ГЕКСА",
+                             "Свой вид у этого поля", "Цвета состояний в бою", "Показать состояния на предпросмотре", "Сбросить вид гекса" })
+                    Assert.That(texts, Has.Some.EqualTo(expected), expected);
+                Assert.That(texts, Has.None.EqualTo("Масштаб сетки (поле)"), "старые поля сетки заменены карточками");
+            }
+            finally
+            {
+                window.Close();
+            }
+        }
+
         // ПР-12Н: в окнах редактора (сцена предпросмотра) Unity не вызывает
         // LateUpdate у Light2D — местный свет отсекался, и в предпросмотре не
         // было ни огня, ни нормалей. Рендерер обновляет источники сам.

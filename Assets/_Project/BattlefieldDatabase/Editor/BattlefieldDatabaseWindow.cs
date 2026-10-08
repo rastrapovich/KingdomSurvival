@@ -13,16 +13,12 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
     {
         private const string AssetPath = "Assets/_Project/BattlefieldDatabase/Resources/BattlefieldDatabase/KingdomSurvivalBattlefields.asset";
         internal const string BackgroundFolder = "Assets/_Project/Art/Battlefields";
-        internal const string HexImageFolder = "Assets/_Project/Art/Battlefields/Hexes";
 
         private static readonly Color PaneBackground = new Color(0.135f, 0.14f, 0.155f, 1f);
-        private static readonly Color CardBackground = new Color(0.20f, 0.205f, 0.225f, 1f);
-        private static readonly Color CardBorder = new Color(0.10f, 0.10f, 0.11f, 1f);
-        private static readonly Color MutedText = new Color(0.62f, 0.62f, 0.62f, 1f);
+        private static readonly Color CardBorder = BattlefieldHexEditorKit.CardBorder;
+        private static readonly Color MutedText = BattlefieldHexEditorKit.MutedText;
         private static readonly Color FieldAccent = new Color(0.86f, 0.70f, 0.38f, 1f);
         private static readonly Color BackgroundAccent = new Color(0.45f, 0.75f, 0.50f, 1f);
-        private static readonly Color GridAccent = new Color(0.40f, 0.62f, 0.90f, 1f);
-        private static readonly Color HexAccent = new Color(0.68f, 0.52f, 0.88f, 1f);
         private static readonly Color WarningColor = new Color(0.90f, 0.48f, 0.38f, 1f);
         private static readonly Color OkColor = new Color(0.42f, 0.72f, 0.45f, 1f);
 
@@ -448,263 +444,45 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
             return card;
         }
 
-        // ── Карточка «Сетка» ───────────────────────────────────────────────
+        // ── Карточки «Сетка» и «Вид гекса» — общие с «Базой локаций» ───────
 
         private VisualElement BuildGridCard(SerializedProperty field)
         {
-            VisualElement card = SectionCard("СЕТКА", GridAccent);
-            Label hint = new Label("ЛКМ по гексу на предпросмотре — отключить или включить его, протяжка — кистью. " +
-                                   "На отключённые гексы нельзя пойти, в бою их нет.");
-            hint.style.whiteSpace = WhiteSpace.Normal;
-            hint.style.fontSize = 10f;
-            hint.style.color = MutedText;
-            hint.style.marginBottom = 4f;
-            card.Add(hint);
-            card.Add(BoundSlider("Размер", field.FindPropertyRelative("gridScale"), 0.5f, 1.5f));
-            SerializedProperty offset = field.FindPropertyRelative("gridOffset");
-            card.Add(BoundSlider("Сдвиг X", offset.FindPropertyRelative("x"), -0.3f, 0.3f));
-            card.Add(BoundSlider("Сдвиг Y", offset.FindPropertyRelative("y"), -0.3f, 0.3f));
-
-            VisualElement row = new VisualElement();
-            row.style.flexDirection = FlexDirection.Row;
-            row.Add(SmallButton("Сбросить положение", () => ResetValues(field,
-                ("gridScale", 1f), ("gridOffset.x", 0f), ("gridOffset.y", 0f))));
-            row.Add(SmallButton("Включить все гексы", EnableAllCells));
-            row.Add(SmallButton("Инвертировать", InvertCells));
-            card.Add(row);
-            return card;
+            return BattlefieldHexEditorKit.GridCard(serializedDatabase, field,
+                "ЛКМ по гексу на предпросмотре — отключить или включить его, протяжка — кистью. " +
+                "На отключённые гексы нельзя пойти, в бою их нет.",
+                ScheduleRefresh,
+                SmallButton("Включить все гексы", EnableAllCells),
+                SmallButton("Инвертировать", InvertCells));
         }
-
-        // ── Карточка «Вид гекса» ───────────────────────────────────────────
 
         private VisualElement BuildHexCard(SerializedProperty field)
         {
-            VisualElement card = SectionCard("ВИД ГЕКСА", HexAccent);
-            SerializedProperty useOwn = field.FindPropertyRelative("useOwnHexStyle");
-            Toggle own = new Toggle("Свой вид у этого поля") { value = useOwn.boolValue };
-            Compact(own);
-            own.tooltip = "Выключено — общий вид для всех полей базы. Включено — вид только этого поля " +
-                          "(при включении копируется общий).";
-            own.RegisterValueChangedCallback(evt => SetOwnHexStyle(evt.newValue));
-            card.Add(own);
-
-            Label scope = new Label(useOwn.boolValue
-                ? "Правки ниже — только для этого поля."
-                : "Правки ниже — для всех полей без своего вида.");
-            scope.style.fontSize = 10f;
-            scope.style.color = MutedText;
-            scope.style.marginBottom = 4f;
-            card.Add(scope);
-
-            SerializedProperty style = useOwn.boolValue
-                ? field.FindPropertyRelative("hexStyle")
-                : serializedDatabase.FindProperty("hexStyle");
-
-            card.Add(ImageSlot("Картинка гекса", style.FindPropertyRelative("hexImage"), HexImageFolder));
-            card.Add(BoundColor("Оттенок картинки", style.FindPropertyRelative("hexImageTint")));
-            card.Add(ImageSlot("Картинка рамки", style.FindPropertyRelative("frameImage"), HexImageFolder));
-            card.Add(BoundColor("Оттенок рамки", style.FindPropertyRelative("frameImageTint")));
-            card.Add(BoundSlider("Размер картинок", style.FindPropertyRelative("imageScale"), 0.5f, 1.5f));
-            card.Add(BoundColor("Подложка", style.FindPropertyRelative("fillColor")));
-            card.Add(BoundColor("Линия", style.FindPropertyRelative("lineColor")));
-            card.Add(BoundSlider("Толщина линии", style.FindPropertyRelative("lineWidth"), 0f, 6f));
-            card.Add(BoundSlider("Зазор", style.FindPropertyRelative("gap"), 0f, 0.3f));
-            card.Add(BoundSlider("Непрозрачность", style.FindPropertyRelative("opacity"), 0f, 1f));
-
-            Foldout states = new Foldout { text = "Цвета состояний в бою", value = false };
-            states.Add(BoundColor("Трудный", style.FindPropertyRelative("difficultColor")));
-            states.Add(BoundColor("Непроходимый", style.FindPropertyRelative("impassableColor")));
-            states.Add(BoundColor("Доступный ход", style.FindPropertyRelative("reachableColor")));
-            states.Add(BoundSlider("Толщина хода", style.FindPropertyRelative("reachableLineWidth"), 0.5f, 6f));
-            states.Add(BoundColor("Цель", style.FindPropertyRelative("targetColor")));
-            states.Add(BoundColor("Наведение: заливка", style.FindPropertyRelative("attackHoverFill")));
-            states.Add(BoundColor("Наведение: линия", style.FindPropertyRelative("attackHoverLine")));
-            card.Add(states);
-
-            Toggle samples = new Toggle("Показать состояния на предпросмотре") { value = showStateSamples };
-            samples.RegisterValueChangedCallback(evt =>
-            {
-                showStateSamples = evt.newValue;
-                RefreshPreview();
-            });
-            card.Add(samples);
-
-            card.Add(SmallButton("Сбросить вид гекса", ResetHexStyle));
-            Label size = new Label("Картинка гекса растягивается на прямоугольник гекса: ширина : высота ≈ 1,15 : 1. " +
-                                   "Изображения можно перетаскивать прямо на ячейки.");
-            size.style.whiteSpace = WhiteSpace.Normal;
-            size.style.fontSize = 10f;
-            size.style.color = MutedText;
-            size.style.marginTop = 4f;
-            card.Add(size);
-            return card;
-        }
-
-        private BattlefieldHexStyle CurrentHexStyle => database.GetHexStyle(SelectedField);
-
-        private void SetOwnHexStyle(bool own)
-        {
-            if (!HasSelection)
-                return;
-            Undo.RecordObject(database, own ? "Свой вид гекса" : "Общий вид гекса");
-            BattlefieldDefinitionData field = SelectedField;
-            if (own)
-                EditorJsonUtility.FromJsonOverwrite(EditorJsonUtility.ToJson(database.HexStyle), field.OwnHexStyle);
-            serializedDatabase.Update();
-            SelectedProperty.FindPropertyRelative("useOwnHexStyle").boolValue = own;
-            serializedDatabase.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(database);
-            ShowSelected();
-        }
-
-        private void ResetHexStyle()
-        {
-            if (!HasSelection)
-                return;
-            Undo.RecordObject(database, "Сбросить вид гекса");
-            EditorJsonUtility.FromJsonOverwrite(EditorJsonUtility.ToJson(new BattlefieldHexStyle()), CurrentHexStyle);
-            EditorUtility.SetDirty(database);
-            serializedDatabase.Update();
-            ShowSelected();
+            return BattlefieldHexEditorKit.HexCard(database, serializedDatabase, selectedIndex, this, showStateSamples,
+                value =>
+                {
+                    showStateSamples = value;
+                    RefreshPreview();
+                },
+                ShowSelected, ScheduleRefresh);
         }
 
         // ── Элементы настроек ──────────────────────────────────────────────
 
-        private static VisualElement SectionCard(string title, Color accent)
-        {
-            VisualElement card = new VisualElement();
-            card.style.marginLeft = 4f;
-            card.style.marginRight = 6f;
-            card.style.marginBottom = 8f;
-            card.style.paddingLeft = 10f;
-            card.style.paddingRight = 10f;
-            card.style.paddingTop = 7f;
-            card.style.paddingBottom = 9f;
-            card.style.backgroundColor = CardBackground;
-            card.style.borderTopWidth = 1f;
-            card.style.borderRightWidth = 1f;
-            card.style.borderBottomWidth = 1f;
-            card.style.borderLeftWidth = 3f;
-            card.style.borderTopColor = CardBorder;
-            card.style.borderRightColor = CardBorder;
-            card.style.borderBottomColor = CardBorder;
-            card.style.borderLeftColor = accent;
-            card.style.borderTopLeftRadius = 5f;
-            card.style.borderTopRightRadius = 5f;
-            card.style.borderBottomLeftRadius = 5f;
-            card.style.borderBottomRightRadius = 5f;
-            Label header = new Label(title);
-            header.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.style.fontSize = 11f;
-            header.style.letterSpacing = 1f;
-            header.style.color = accent;
-            header.style.marginBottom = 5f;
-            card.Add(header);
-            return card;
-        }
+        private static VisualElement SectionCard(string title, Color accent) => BattlefieldHexEditorKit.SectionCard(title, accent);
 
-        private static void Compact(VisualElement field)
-        {
-            field.style.marginLeft = 0f;
-            field.style.marginRight = 0f;
-            Label label = field.Q<Label>(className: BaseField<int>.labelUssClassName);
-            if (label == null)
-                return;
-            label.style.minWidth = 112f;
-            label.style.width = 112f;
-        }
+        private static void Compact(VisualElement field) => BattlefieldHexEditorKit.Compact(field);
 
-        private static Slider BoundSlider(string label, SerializedProperty property, float min, float max)
-        {
-            Slider slider = new Slider(label, min, max) { showInputField = true, bindingPath = property.propertyPath };
-            Compact(slider);
-            return slider;
-        }
+        private static Slider BoundSlider(string label, SerializedProperty property, float min, float max) =>
+            BattlefieldHexEditorKit.BoundSlider(label, property, min, max);
 
-        private static ColorField BoundColor(string label, SerializedProperty property)
-        {
-            ColorField field = new ColorField(label) { bindingPath = property.propertyPath, showAlpha = true };
-            Compact(field);
-            return field;
-        }
+        private static Button SmallButton(string text, Action action) => BattlefieldHexEditorKit.SmallButton(text, action);
 
-        private static Button SmallButton(string text, Action action)
-        {
-            Button button = new Button(action) { text = text };
-            button.style.height = 20f;
-            button.style.marginLeft = 0f;
-            button.style.marginRight = 4f;
-            button.style.marginTop = 4f;
-            button.style.fontSize = 11f;
-            button.style.alignSelf = Align.FlexStart;
-            return button;
-        }
+        private VisualElement ImageSlot(string label, SerializedProperty property, string importFolder) =>
+            BattlefieldHexEditorKit.ImageSlot(this, serializedDatabase, label, property, importFolder, ScheduleRefresh);
 
-        // Ячейка картинки: миниатюра + поле выбора; принимает перетаскивание
-        // спрайтов, текстур проекта и файлов из проводника.
-        private VisualElement ImageSlot(string label, SerializedProperty property, string importFolder)
-        {
-            VisualElement slot = new VisualElement();
-            slot.style.flexDirection = FlexDirection.Row;
-            slot.style.alignItems = Align.Center;
-            slot.style.marginTop = 3f;
-            slot.style.marginBottom = 3f;
-            slot.style.paddingLeft = 3f;
-            slot.style.paddingTop = 3f;
-            slot.style.paddingBottom = 3f;
-            slot.style.backgroundColor = new Color(0.16f, 0.165f, 0.18f, 1f);
-            slot.style.borderTopLeftRadius = 3f;
-            slot.style.borderTopRightRadius = 3f;
-            slot.style.borderBottomLeftRadius = 3f;
-            slot.style.borderBottomRightRadius = 3f;
-
-            Image thumb = new Image { scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
-            thumb.style.width = 58f;
-            thumb.style.height = 40f;
-            thumb.style.marginRight = 6f;
-            thumb.style.backgroundColor = new Color(0.08f, 0.085f, 0.09f, 1f);
-            thumb.sprite = property.objectReferenceValue as Sprite;
-            slot.Add(thumb);
-
-            VisualElement column = new VisualElement();
-            column.style.flexGrow = 1f;
-            column.style.flexShrink = 1f;
-            Label caption = new Label(label);
-            caption.style.fontSize = 10f;
-            caption.style.color = MutedText;
-            caption.style.whiteSpace = WhiteSpace.Normal;
-            column.Add(caption);
-            ObjectField picker = new ObjectField
-            {
-                objectType = typeof(Sprite),
-                allowSceneObjects = false,
-                bindingPath = property.propertyPath
-            };
-            picker.style.marginLeft = 0f;
-            picker.RegisterValueChangedCallback(evt => thumb.sprite = evt.newValue as Sprite);
-            column.Add(picker);
-            slot.Add(column);
-
-            string path = property.propertyPath;
-            RegisterImageDrop(slot, importFolder, false, sprites =>
-            {
-                serializedDatabase.Update();
-                serializedDatabase.FindProperty(path).objectReferenceValue = sprites[0];
-                serializedDatabase.ApplyModifiedProperties();
-                thumb.sprite = sprites[0];
-                ScheduleRefresh();
-            });
-            return slot;
-        }
-
-        private void ResetValues(SerializedProperty field, params (string Path, float Value)[] values)
-        {
-            serializedDatabase.Update();
-            foreach ((string path, float value) in values)
-                field.FindPropertyRelative(path).floatValue = value;
-            serializedDatabase.ApplyModifiedProperties();
-            ScheduleRefresh();
-        }
+        private void ResetValues(SerializedProperty field, params (string Path, float Value)[] values) =>
+            BattlefieldHexEditorKit.ResetValues(serializedDatabase, field, ScheduleRefresh, values);
 
         // ── Операции с базой ───────────────────────────────────────────────
 

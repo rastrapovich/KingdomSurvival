@@ -199,7 +199,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             canvas = new IMGUIContainer(DrawPreview) { focusable = true };
             RegisterCanvasDrop();
             canvas.style.flexGrow = 1;
-            center.Add(canvas);
+            VisualElement canvasHost = new VisualElement(); canvasHost.style.flexGrow = 1;
+            canvasHost.Add(canvas);
+            canvasHost.Add(BuildArenaLayer());
+            center.Add(canvasHost);
             Label hints = new Label("Перетащите PNG или Sprite сюда · ЛКМ: инструмент · ПКМ: панорама · Колесо: масштаб");
             hints.style.whiteSpace = WhiteSpace.Normal; hints.style.color = new Color(.65f, .71f, .65f);
             hints.style.paddingLeft = 8; hints.style.paddingBottom = 5; center.Add(hints);
@@ -482,15 +485,14 @@ namespace KingdomSurvival.LocationRendering.Editor
             Number("Часов на действие", (float)location.HoursPerInteraction, 0, 2, value => location.HoursPerInteraction = value);
 
             Heading("Бой на месте");
-            Help("Сетка боя — ровно настройки поля Базы полей боя (масштаб и сдвиг сетки). Кадр поля (16:9) ложится на " +
-                 "рисунок там, где задан кадр столкновения; «Ширина кадра» — сколько пикселей рисунка он закрывает. " +
-                 "Отключённые гексы поля в бою на месте не действуют: стены задаёт разметка.");
+            Help("Сетка и вид гексов — ровно настройки поля Базы полей боя: правка здесь меняет и бой, и все места с этим полем. " +
+                 "Кадр поля (16:9) ложится на рисунок там, где задан кадр столкновения; «Ширина кадра» — сколько пикселей рисунка он закрывает. " +
+                 "Отключённые гексы поля в бою на месте не действуют: стены задаёт разметка (на рисунке — красный крест).");
             List<BattlefieldDefinitionData> fieldOptions = fields.Battlefields.Where(item => item != null).ToList();
             Choice("Поле боя", fieldOptions, item => item.DisplayLabel, Field, item => location.BattlefieldId = item.Id);
             AddButton(settings, "Открыть поле в базе", () => EditorApplication.ExecuteMenuItem("Kingdom Survival/База полей боя"));
-            FieldNumber("Масштаб сетки (поле)", "gridScale", Field?.GridScale ?? 1, .5f, 1.5f);
-            FieldVector("Сдвиг сетки (поле)", "gridOffset", Field?.GridOffset ?? Vector2.zero);
             Number("Ширина кадра боя (пиксели)", location.BattleFrameWidth, 320, Mathf.Max(640, location.CanvasWidth * 2), value => location.BattleFrameWidth = value);
+            BuildFieldHexCards();
 
             Heading("Служебные слои");
             UnityEngine.UIElements.Toggle terrain = new UnityEngine.UIElements.Toggle("Местность") { value = showTerrain };
@@ -812,6 +814,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (cycle) hour = Mathf.Repeat(hour + delta * 24 / 30, 24);
             if (clock != null) clock.text = LocationLightingTest.FormatHour(hour);
             hourSlider?.SetValueWithoutNotify(hour);
+            SyncArenaView();
             canvas?.MarkDirtyRepaint();
         }
 
@@ -843,7 +846,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             Rect frame = CanvasFrame(area);
             Event evt = Event.current;
             Vector2 pixel = ToPixel(frame, evt.mousePosition);
-            if (HandleInput(evt, frame, pixel)) return;
+            bool handled = HandleInput(evt, frame, pixel);
+            // Пан и масштаб — в слой боя до раскладки, без отставания на кадр.
+            if (evt.type != EventType.Repaint) SyncArenaView();
+            if (handled) return;
             if (evt.type != EventType.Repaint) return;
 
             renderer.SetTime(hour, (float)EditorApplication.timeSinceStartup);
@@ -918,23 +924,10 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Handles.DrawWireDisc(retreat, Vector3.forward, 7);
                     GUI.Label(new Rect(retreat.x + 8, retreat.y - 9, 120, 18), "отход");
                     if (!active) continue;
-                    List<LocalPointData> anchor = location.Enemies.Where(enemy => enemy.EncounterId == encounter.Id).Select(enemy => enemy.Point).ToList();
-                    anchor.Add(new LocalPointData(area.X + area.Width / 2, area.Y + area.Height / 2));
-                    Vector2 arenaCenter = geometry.ArenaCenterFor(encounter, anchor);
-                    Rect rect = geometry.FrameRect(arenaCenter);
+                    // Гексы кадра рисует слой боя (BattlefieldView) поверх холста.
+                    Rect rect = geometry.FrameRect(ArenaCenterOf(encounter));
                     Vector2 fa = Gui(rect.xMin, rect.yMin), fb = Gui(rect.xMax, rect.yMax);
                     Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(fa.x, fa.y, fb.x, fb.y), Color.clear, new Color(.95f, .9f, .6f, .9f));
-                    HashSet<HexCoord> blocked = geometry.ArenaBlockedCells(arenaCenter);
-                    HashSet<HexCoord> difficult = geometry.ArenaDifficultCells(arenaCenter);
-                    BattlefieldGridLayout layout = geometry.ArenaLayout(arenaCenter);
-                    foreach (HexCoord cell in SandboxArenaShape.Cells())
-                    {
-                        Vector2 center = layout.GetCenter(cell.Q, cell.R);
-                        Vector2 p = Gui(center.x, center.y);
-                        Handles.color = blocked.Contains(cell) ? new Color(1, .25f, .2f, .9f)
-                            : difficult.Contains(cell) ? new Color(1, .8f, .3f, .9f) : new Color(.85f, .85f, .7f, .55f);
-                        Handles.DrawWireDisc(p, Vector3.forward, Mathf.Max(3, layout.Size * scale * .8f));
-                    }
                 }
             }
             if (showMarkers)
@@ -1550,44 +1543,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                 database.locations.Remove(location); database.visuals.Remove(visual);
                 selectedId = LocationLightingTestBootstrap.CampId; selectedKind = Kind.None; RefreshList();
             }, true);
-        }
-
-        // Свойство связанного поля Базы полей боя (общее для боя и всех мест с ним).
-        private SerializedProperty FieldProperty(SerializedObject serialized, string name)
-        {
-            int index = fields.Battlefields.ToList().FindIndex(item => item != null && item.Id == Location?.BattlefieldId);
-            if (index < 0) return null;
-            return serialized.FindProperty("battlefields").GetArrayElementAtIndex(index).FindPropertyRelative(name);
-        }
-
-        private void ApplyField(string undoName, Action<SerializedProperty> apply, string name)
-        {
-            if (Field == null) return;
-            Undo.RecordObject(fields, undoName);
-            SerializedObject serialized = new SerializedObject(fields);
-            SerializedProperty property = FieldProperty(serialized, name);
-            if (property == null) return;
-            apply(property);
-            serialized.ApplyModifiedProperties();
-            EditorUtility.SetDirty(fields);
-            fieldsSaveAt = EditorApplication.timeSinceStartup + .5;
-            rebuildRequested = true;
-        }
-
-        private void FieldNumber(string label, string name, float value, float min, float max)
-        {
-            Slider field = new Slider(label, min, max) { value = value, showInputField = true,
-                tooltip = "Настройка поля в Базе полей боя: меняет и бой, и все места с этим полем." };
-            field.RegisterValueChangedCallback(evt => ApplyField("Изменить поле", property => property.floatValue = evt.newValue, name));
-            settings.Add(field);
-        }
-
-        private void FieldVector(string label, string name, Vector2 value)
-        {
-            Vector2Field field = new Vector2Field(label) { value = value,
-                tooltip = "Настройка поля в Базе полей боя: меняет и бой, и все места с этим полем." };
-            field.RegisterValueChangedCallback(evt => ApplyField("Изменить поле", property => property.vector2Value = evt.newValue, name));
-            settings.Add(field);
         }
     }
 }

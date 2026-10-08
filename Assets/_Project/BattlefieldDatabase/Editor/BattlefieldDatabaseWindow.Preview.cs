@@ -9,17 +9,6 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
     // Предпросмотр поля в кадре боя 16:9 и включение/отключение гексов.
     public sealed partial class BattlefieldDatabaseWindow
     {
-        private static readonly Color DisabledFill = new Color(0.45f, 0.06f, 0.06f, 0.45f);
-        private static readonly Color DisabledLine = new Color(0.95f, 0.36f, 0.30f, 0.90f);
-        private static readonly Color HoverLine = new Color(1f, 1f, 1f, 0.85f);
-
-        // Образцы состояний для предпросмотра — как в бою.
-        private static readonly Vector2Int[] SampleDifficult = { new Vector2Int(3, 2), new Vector2Int(4, 2) };
-        private static readonly Vector2Int[] SampleImpassable = { new Vector2Int(6, 4) };
-        private static readonly Vector2Int[] SampleReachable = { new Vector2Int(2, 3), new Vector2Int(3, 3), new Vector2Int(2, 4) };
-        private static readonly Vector2Int SampleTarget = new Vector2Int(7, 3);
-        private static readonly Vector2Int SampleHover = new Vector2Int(6, 2);
-
         private BattlefieldView previewView;
         private CellOverlay overlay;
         private Label cellsInfo;
@@ -270,89 +259,19 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
                 BattlefieldDefinitionData field = window.SelectedField;
                 BattlefieldHexStyle style = window.database.GetHexStyle(field);
                 Painter2D painter = context.painter2D;
-                float radius = Layout.Size * (1f - style.Gap);
 
                 if (window.showStateSamples)
-                {
-                    foreach (Vector2Int cell in SampleDifficult)
-                        FillCell(painter, field, cell, radius, style.DifficultColor, style);
-                    foreach (Vector2Int cell in SampleImpassable)
-                        FillCell(painter, field, cell, radius, style.ImpassableColor, style);
-                    FillCell(painter, field, SampleTarget, radius, style.TargetColor, style);
-                    foreach (Vector2Int cell in SampleReachable)
-                    {
-                        if (field.IsCellDisabled(cell.x, cell.y))
-                            continue;
-                        painter.strokeColor = style.ReachableColor;
-                        painter.lineWidth = style.ReachableLineWidth;
-                        BattlefieldFrame.FillHexPath(painter, Layout.GetCenter(cell.x, cell.y),
-                            Mathf.Max(1f, radius - style.ReachableLineWidth * 0.5f), Layout.VerticalScale);
-                        painter.Stroke();
-                    }
-                    if (!field.IsCellDisabled(SampleHover.x, SampleHover.y))
-                    {
-                        painter.fillColor = style.AttackHoverFill;
-                        painter.strokeColor = style.AttackHoverLine;
-                        painter.lineWidth = 3f;
-                        BattlefieldFrame.FillHexPath(painter, Layout.GetCenter(SampleHover.x, SampleHover.y),
-                            Mathf.Max(1f, radius - 2.5f), Layout.VerticalScale);
-                        painter.Fill();
-                        painter.Stroke();
-                    }
-                }
+                    BattlefieldHexPainter.DrawStateSamples(painter, Layout, style, field.IsCellDisabled);
 
                 // Отключённые гексы: красная штриховка с крестом.
                 foreach (HexCoord cell in SandboxArenaShape.Cells())
                 {
-                    if (!field.IsCellDisabled(cell.Q, cell.R))
-                        continue;
-                    Vector2 center = Layout.GetCenter(cell.Q, cell.R);
-                    painter.fillColor = DisabledFill;
-                    painter.strokeColor = DisabledLine;
-                    painter.lineWidth = 1.5f;
-                    BattlefieldFrame.FillHexPath(painter, center, radius, Layout.VerticalScale);
-                    painter.Fill();
-                    painter.Stroke();
-                    float arm = radius * 0.32f;
-                    painter.BeginPath();
-                    painter.MoveTo(center + new Vector2(-arm, -arm * Layout.VerticalScale));
-                    painter.LineTo(center + new Vector2(arm, arm * Layout.VerticalScale));
-                    painter.MoveTo(center + new Vector2(arm, -arm * Layout.VerticalScale));
-                    painter.LineTo(center + new Vector2(-arm, arm * Layout.VerticalScale));
-                    painter.Stroke();
+                    if (field.IsCellDisabled(cell.Q, cell.R))
+                        BattlefieldHexPainter.DrawDisabled(painter, Layout, style, cell.Q, cell.R);
                 }
 
                 if (hover.HasValue)
-                {
-                    painter.strokeColor = HoverLine;
-                    painter.lineWidth = 2f;
-                    BattlefieldFrame.FillHexPath(painter, Layout.GetCenter(hover.Value.x, hover.Value.y), radius,
-                        Layout.VerticalScale);
-                    painter.Stroke();
-                }
-            }
-
-            private void FillCell(
-                Painter2D painter,
-                BattlefieldDefinitionData field,
-                Vector2Int cell,
-                float radius,
-                Color fill,
-                BattlefieldHexStyle style)
-            {
-                if (field.IsCellDisabled(cell.x, cell.y))
-                    return;
-                Vector2 center = Layout.GetCenter(cell.x, cell.y);
-                painter.fillColor = fill;
-                BattlefieldFrame.FillHexPath(painter, center, radius, Layout.VerticalScale);
-                painter.Fill();
-                Color line = style.Fade(style.LineColor);
-                if (style.LineWidth > 0.01f && line.a > 0.001f)
-                {
-                    painter.strokeColor = line;
-                    painter.lineWidth = style.LineWidth;
-                    painter.Stroke();
-                }
+                    BattlefieldHexPainter.DrawHover(painter, Layout, style, hover.Value.x, hover.Value.y);
             }
         }
     }

@@ -69,7 +69,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             BattlefieldDefinitionData field = Field;
             LocalEncounterDefinition encounter = SelectedEncounter;
             Rect area = new Rect(0, 0, canvas.contentRect.width, canvas.contentRect.height);
-            bool show = showArena && !compareDay && renderer != null && geometry != null && field != null && encounter != null &&
+            bool show = showArena && !compareDay && !PictureCropActive && renderer != null && geometry != null && field != null && encounter != null &&
                         !float.IsNaN(area.width) && area.width >= 10 && area.height >= 10;
             arenaClip.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
             if (!show) return;

@@ -13,6 +13,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         public sealed class Result
         {
             public int Outside;
+            // Экземпляры раскидки за новым краем — удаляются вместе с краем.
+            public int ScatterRemoved;
             public readonly List<string> Names = new List<string>();
         }
 
@@ -73,6 +75,21 @@ namespace KingdomSurvival.LocationRendering.Editor
                 foreach (LocationVisualObject item in visual.Objects)
                     if (item != null) item.Position = Normalized(item.Position, "предмет «" + item.Name + "»");
                 visual.TestStartPoint = Normalized(visual.TestStartPoint, "старт теста");
+                if (visual.ScatterLayers != null)
+                {
+                    foreach (LocationScatterLayer layer in visual.ScatterLayers)
+                    {
+                        if (layer?.Instances == null) continue;
+                        result.ScatterRemoved += layer.Instances.RemoveAll(instance =>
+                        {
+                            if (instance == null) return true;
+                            Vector2 pixel = Vector2.Scale(instance.Position, old) - offset;
+                            if (pixel.x < 0 || pixel.y < 0 || pixel.x > canvas.x || pixel.y > canvas.y) return true;
+                            instance.Position = new Vector2(pixel.x / canvas.x, pixel.y / canvas.y);
+                            return false;
+                        });
+                    }
+                }
                 if (visual.Camera != null)
                 {
                     Rect bounds = visual.Camera.CustomBounds;

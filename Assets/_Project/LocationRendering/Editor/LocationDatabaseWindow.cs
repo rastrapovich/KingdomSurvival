@@ -165,7 +165,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocalLocationDefinition selected = values.OfType<LocalLocationDefinition>().FirstOrDefault();
                 if (selected == null) return;
                 if (database != null) AssetDatabase.SaveAssetIfDirty(database);
-                ClearGroundPreview(); pendingPackage = null; pendingPlan = null; pendingPaint = null; cropRect = null; cropPlan = null; cropDrawing = false; groundCheck.Clear();
+                ClearGroundPreview(); pendingPackage = null; pendingPlan = null; pendingPaint = null; cropRect = null; cropPlan = null; cropDrawing = false; groundCheck.Clear(); ResetPictureCrop();
                 selectedId = selected.Id; selectedKind = Kind.None; selectedElementId = null;
                 zoom = 1; viewCenter = CanvasSize / 2; tool = Tool.Select;
                 BuildSettings(); RebuildPreview();
@@ -475,6 +475,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                         status.text = message;
                     });
             }
+            BuildPictureSettings(location);
             Toggle("Рисунок — временная заглушка", location.PlaceholderArt, value => location.PlaceholderArt = value);
 
             Heading("Перемещение");
@@ -876,6 +877,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             DrawLightOverlays(frame, shift);
             Handles.EndGUI();
             DrawGroundOverlay(frame, shift, mouse);
+            DrawPictureCrop(frame, shift);
             if (tool == Tool.Terrain && frame.Contains(mouse))
             {
                 Handles.color = new Color(1, 1, 1, .7f);
@@ -1104,7 +1106,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Texture2D normal = normalPath != null ? ImportNormalTexture(normalPath) : null;
             if (normal != null) SpriteNormalMaps.Assign(background, normal, out _);
             LocalLocationDefinition location = Location;
-            Vector2 size = background.rect.size;
+            Vector2 size = LocationPictureCrop.SourceSize(background);
             bool resize = Mathf.Abs(size.x - location.CanvasWidth) > .5f || Mathf.Abs(size.y - location.CanvasHeight) > .5f;
             if (resize)
                 resize = EditorUtility.DisplayDialog("Размер места",
@@ -1115,7 +1117,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 Visual.Background = background;
                 if (normal != null) Visual.BackgroundNormalMap = normal;
-                if (resize) ResizeCanvas(location, size.x, size.y, location.HexesAcross);
+                if (resize) ResizeCanvas(location, size.x, size.y, location.HexesAcross, true);
             }, true);
             status.text = "Рисунок места: " + background.name + (normal != null ? " (с нормалями)" : "") + (resize ? ", размер места подогнан." : ".");
         }
@@ -1159,6 +1161,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             LocalLocationDefinition location = Location;
             if (evt.type == EventType.MouseDown && frame.Contains(evt.mousePosition)) canvas.Focus();
             if (HandleCropInput(evt, frame, pixel)) return true;
+            if (HandlePictureCropInput(evt, frame, pixel)) return true;
             if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.Escape && tool == Tool.PlaceAsset)
             {
                 SetTool(Tool.Select); evt.Use(); return true;

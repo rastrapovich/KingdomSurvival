@@ -53,10 +53,15 @@ namespace KingdomSurvival.AnimationDatabase.Editor
 
         // Файлы нормалей → по кадру ячейки: по номерам кадров (как у загруженных
         // кадров), иначе по порядку имён при равном числе.
-        public static bool Match(CreatureAnimationFrames cell, IReadOnlyList<string> normalFiles, out List<string> ordered, out string problem)
+        public static bool Match(CreatureAnimationFrames cell, IReadOnlyList<string> normalFiles, out List<string> ordered, out string problem) =>
+            Match(cell, normalFiles, out ordered, out problem, out _);
+
+        // note — пояснение к удачному сопоставлению (например, «по порядку»).
+        public static bool Match(CreatureAnimationFrames cell, IReadOnlyList<string> normalFiles, out List<string> ordered, out string problem, out string note)
         {
             ordered = null;
             problem = null;
+            note = null;
             int frames = cell?.FrameCount ?? 0;
             if (frames == 0) { problem = "в ячейке нет кадров"; return false; }
             List<(string path, int number, bool numbered)> files = normalFiles
@@ -72,6 +77,14 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                     byNumber[number] = path;
                 }
                 List<int> missing = cell.SourceFrameNumbers.Where(number => !byNumber.ContainsKey(number)).ToList();
+                // Номера другие (рендер нормалей с иного кадра), но файлов ровно
+                // по кадру — по порядку номеров.
+                if (missing.Count > 0 && files.Count == frames)
+                {
+                    ordered = files.OrderBy(file => file.number).Select(file => file.path).ToList();
+                    note = "номера файлов не совпали с кадрами — по порядку";
+                    return true;
+                }
                 if (missing.Count > 0)
                 {
                     problem = "нет нормалей для кадров " + string.Join(", ", missing.Take(8)) + (missing.Count > 8 ? "…" : "") +
@@ -101,6 +114,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 return false;
             }
             List<string> errors = new List<string>();
+            int resized = 0;
             foreach (IGrouping<string, int> page in Enumerable.Range(0, frames.Count)
                          .Where(index => frames[index] != null)
                          .GroupBy(index => AssetDatabase.GetAssetPath(frames[index].texture)))
@@ -134,10 +148,18 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                         {
                             if (!File.Exists(normalFiles[index]) || !source.LoadImage(File.ReadAllBytes(normalFiles[index]), false))
                                 throw new InvalidOperationException("не читается " + Path.GetFileName(normalFiles[index]));
+                            Color32[] pixels = source.GetPixels32();
                             if (source.width != cell.width || source.height != cell.height)
-                                throw new InvalidOperationException(Path.GetFileName(normalFiles[index]) + ": размер " + source.width + "×" + source.height +
-                                                                    ", а кадр " + cell.width + "×" + cell.height);
-                            normalPage.SetPixels32(cell.x, cell.y, cell.width, cell.height, source.GetPixels32());
+                            {
+                                // Те же пропорции, другое разрешение рендера — подгоняется под кадр.
+                                float sourceAspect = source.width / (float)source.height, cellAspect = cell.width / (float)cell.height;
+                                if (Mathf.Abs(sourceAspect - cellAspect) > cellAspect * .02f)
+                                    throw new InvalidOperationException(Path.GetFileName(normalFiles[index]) + ": размер " + source.width + "×" + source.height +
+                                                                        ", а кадр " + cell.width + "×" + cell.height + " — пропорции разные, нужен рендер той же камерой");
+                                pixels = Resample(pixels, source.width, source.height, cell.width, cell.height);
+                                resized++;
+                            }
+                            normalPage.SetPixels32(cell.x, cell.y, cell.width, cell.height, pixels);
                         }
                         finally
                         {
@@ -160,8 +182,74 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 if (imported == null || !SetPageNormal(importer, imported))
                     errors.Add("не удалось подключить " + Path.GetFileName(normalPath));
             }
-            message = errors.Count == 0 ? "Нормали подключены: " + frames.Count + " кадр(ов)." : "Ошибки нормалей: " + string.Join("; ", errors.Distinct().Take(4));
+            message = errors.Count == 0
+                ? "Нормали подключены: " + frames.Count + " кадр(ов)." + (resized > 0 ? " Размер подогнан под кадр у " + resized + "." : string.Empty)
+                : "Ошибки нормалей: " + string.Join("; ", errors.Distinct().Take(4));
             return errors.Count == 0;
+        }
+
+        // Билинейное изменение размера карты нормалей; направление
+        // переводится обратно в единичное.
+        public static Color32[] Resample(Color32[] source, int width, int height, int targetWidth, int targetHeight)
+        {
+            Color32[] result = new Color32[targetWidth * targetHeight];
+            for (int y = 0; y < targetHeight; y++)
+            {
+                float sy = Mathf.Clamp((y + .5f) * height / targetHeight - .5f, 0, height - 1);
+                int y0 = (int)sy, y1 = Mathf.Min(y0 + 1, height - 1);
+                float ty = sy - y0;
+                for (int x = 0; x < targetWidth; x++)
+                {
+                    float sx = Mathf.Clamp((x + .5f) * width / targetWidth - .5f, 0, width - 1);
+                    int x0 = (int)sx, x1 = Mathf.Min(x0 + 1, width - 1);
+                    float tx = sx - x0;
+                    Color a = Color.Lerp(source[y0 * width + x0], source[y0 * width + x1], tx);
+                    Color b = Color.Lerp(source[y1 * width + x0], source[y1 * width + x1], tx);
+                    Color c = Color.Lerp(a, b, ty);
+                    Vector3 n = new Vector3(c.r * 2 - 1, c.g * 2 - 1, c.b * 2 - 1);
+                    if (n.sqrMagnitude > 1e-4f) n.Normalize();
+                    result[y * targetWidth + x] = new Color(n.x * .5f + .5f, n.y * .5f + .5f, n.z * .5f + .5f, c.a);
+                }
+            }
+            return result;
+        }
+
+        // Похоже ли изображение на карту нормалей: почти все непрозрачные
+        // пиксели — единичные векторы, смотрящие к зрителю. Защита от загрузки
+        // нормалей вместо цветных кадров.
+        public static bool LooksLikeNormalMap(string path)
+        {
+            Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false, true);
+            try
+            {
+                if (string.IsNullOrEmpty(path) || !File.Exists(path) || !texture.LoadImage(File.ReadAllBytes(path), false)) return false;
+                Color32[] pixels = texture.GetPixels32();
+                int step = Mathf.Max(1, Mathf.RoundToInt(Mathf.Sqrt(pixels.Length / 4096f)));
+                int opaque = 0, normal = 0;
+                for (int y = 0; y < texture.height; y += step)
+                {
+                    for (int x = 0; x < texture.width; x += step)
+                    {
+                        Color32 pixel = pixels[y * texture.width + x];
+                        if (pixel.a < 128) continue;
+                        opaque++;
+                        Vector3 n = new Vector3(pixel.r / 127.5f - 1, pixel.g / 127.5f - 1, pixel.b / 127.5f - 1);
+                        float length = n.magnitude;
+                        if (n.z >= -.02f && length > .8f && length < 1.2f) normal++;
+                    }
+                }
+                return opaque >= 16 && normal >= opaque * .9f;
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(texture);
+            }
+        }
+
+        public static bool LookLikeNormalMaps(IEnumerable<string> files)
+        {
+            List<string> sample = (files ?? Enumerable.Empty<string>()).Where(CreatureAnimationImportParser.IsImageFile).Take(3).ToList();
+            return sample.Count > 0 && sample.All(LooksLikeNormalMap);
         }
 
         // Снять нормали со страниц кадров ячейки (файлы страниц нормалей остаются).
@@ -280,7 +368,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                         continue;
                     }
                     List<string> normals = source.Frames.Select(frame => real.TryGetValue(frame.Path, out string path) ? path : frame.Path).ToList();
-                    if (!Match(target, normals, out List<string> ordered, out string problem))
+                    if (!Match(target, normals, out List<string> ordered, out string problem, out string note))
                     {
                         lines.Add(where + ": " + problem);
                         failures++;
@@ -288,7 +376,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                     }
                     if (Attach(target.Frames, ordered, out string message)) cells++;
                     else failures++;
-                    lines.Add(where + ": " + message);
+                    lines.Add(where + ": " + message + (note != null ? " (" + note + ")" : string.Empty));
                 }
             }
             return "Нормали: ячеек подключено " + cells + (failures > 0 ? ", с замечаниями " + failures : "") + ".\n" + string.Join("\n", lines.Take(30));

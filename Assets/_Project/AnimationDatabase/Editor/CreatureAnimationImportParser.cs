@@ -232,7 +232,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
         {
             string name = Path.GetFileNameWithoutExtension(path ?? string.Empty);
             return name.EndsWith("_n", StringComparison.OrdinalIgnoreCase) ||
-                   name.EndsWith("_normal", StringComparison.OrdinalIgnoreCase);
+                   name.EndsWith("_normal", StringComparison.OrdinalIgnoreCase) ||
+                   name.EndsWith("_normals", StringComparison.OrdinalIgnoreCase);
         }
 
         public static IEnumerable<string> NormalCandidates(string colorPath)
@@ -242,6 +243,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             string extension = Path.GetExtension(colorPath);
             yield return NormalizePath(Path.Combine(folder, name + "_n" + extension));
             yield return NormalizePath(Path.Combine(folder, name + "_normal" + extension));
+            yield return NormalizePath(Path.Combine(folder, name + "_normals" + extension));
         }
 
         // Нормали подключаются к ячейке, только если они есть у всех её кадров.

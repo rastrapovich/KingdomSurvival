@@ -39,11 +39,17 @@ namespace KingdomSurvival.AnimationDatabase.Tests
         }
 
         // Нормали как из Blender: (0.5·n + 0.5) в RGB, полусфера к зрителю.
-        private static void WriteNormals(string root)
+        private static void WriteNormals(string root) => WriteNormals(root, null, 1);
+
+        // target — отдельная папка той же структуры с теми же именами, что у
+        // кадров (без «_n»); scale — другое разрешение рендера.
+        private static void WriteNormals(string root, string target, int scale)
         {
             foreach (string color in Directory.GetFiles(root, "*.png", SearchOption.AllDirectories))
             {
-                Texture2D texture = new Texture2D(CreatureAnimationTestFrames.Width, CreatureAnimationTestFrames.Height, TextureFormat.RGBA32, false, true);
+                if (CreatureAnimationImportParser.IsNormalFile(color))
+                    continue;
+                Texture2D texture = new Texture2D(CreatureAnimationTestFrames.Width * scale, CreatureAnimationTestFrames.Height * scale, TextureFormat.RGBA32, false, true);
                 Color32[] pixels = new Color32[texture.width * texture.height];
                 for (int y = 0; y < texture.height; y++)
                 {
@@ -55,9 +61,78 @@ namespace KingdomSurvival.AnimationDatabase.Tests
                     }
                 }
                 texture.SetPixels32(pixels);
-                File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(color), Path.GetFileNameWithoutExtension(color) + "_n.png"), texture.EncodeToPNG());
+                string path = target == null
+                    ? Path.Combine(Path.GetDirectoryName(color), Path.GetFileNameWithoutExtension(color) + "_n.png")
+                    : Path.Combine(target, color.Substring(root.Length).TrimStart('/', '\\'));
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                File.WriteAllBytes(path, texture.EncodeToPNG());
                 Object.DestroyImmediate(texture);
             }
+        }
+
+        private CreatureAnimationSetData ImportFramesWithoutNormals(out CreatureAnimationImportPackage package)
+        {
+            CreatureAnimationTestFrames.Generate(sourceRoot, database, false);
+            package = CreatureAnimationImportParser.Analyze(sourceRoot, Directory.GetFiles(sourceRoot, "*.*", SearchOption.AllDirectories));
+            CreatureAnimationSetData set = database.AddSet(SetId, "Тест нормалей");
+            Assert.IsTrue(CreatureAnimationImporter.Apply(database, set, package, CreatureAnimationImportMode.Replace, out _), string.Join("\n", package.Issues));
+            return set;
+        }
+
+        // Нормали без «_normal» — отдельной папкой с теми же именами, что у
+        // кадров (проход Normals в другую папку): подключаются и к ячейке, и
+        // всей папкой; другое разрешение подгоняется под кадр.
+        [Test]
+        public void NormalsWithoutSuffix_InSeparateFolder_AttachToCellAndSet()
+        {
+            CreatureAnimationSetData set = ImportFramesWithoutNormals(out CreatureAnimationImportPackage package);
+            string normalsRoot = sourceRoot + "_normals";
+            try
+            {
+                WriteNormals(sourceRoot, normalsRoot, 2);
+                string[] normals = Directory.GetFiles(normalsRoot, "*.png", SearchOption.AllDirectories);
+                Assert.IsFalse(normals.Any(CreatureAnimationImportParser.IsNormalFile), "У файлов нет суффикса нормали.");
+                Assert.IsTrue(CreatureAnimationNormals.LooksLikeNormalMap(normals[0]), "Рендер нормалей узнаётся по содержимому.");
+                string colorFrame = package.Groups.First().Cells.Values.First().Frames[0].Path;
+                Assert.IsFalse(CreatureAnimationNormals.LooksLikeNormalMap(colorFrame), "Цветной кадр — не нормаль.");
+
+                // Ячейка: файлы ячейки в любом порядке, рендер вдвое крупнее.
+                CreatureAnimationFrames idle = set.FindFrames(CreatureAnimationAction.Idle, CreatureAnimationDirection.Front);
+                string cellFolder = Path.GetDirectoryName(package.Groups.First(group => group.ChosenAction == CreatureAnimationAction.Idle)
+                    .Cells[CreatureAnimationDirection.Front].Frames[0].Path).Replace('\\', '/');
+                string cellNormals = normalsRoot + cellFolder.Substring(sourceRoot.Length);
+                List<string> files = Directory.GetFiles(cellNormals, "*.png").Reverse().ToList();
+                Assert.IsTrue(CreatureAnimationNormals.Match(idle, files, out List<string> ordered, out string problem), problem);
+                Assert.IsTrue(CreatureAnimationNormals.Attach(idle.Frames, ordered, out string message), message);
+                StringAssert.Contains("Размер подогнан", message);
+                Assert.AreEqual(idle.FrameCount, CreatureAnimationNormals.CountWithNormals(idle));
+
+                // Весь набор — папкой той же структуры.
+                string report = CreatureAnimationNormals.AttachFolder(set, normalsRoot, normals, out int cells, out int failures);
+                Assert.AreEqual(0, failures, report);
+                foreach (CreatureAnimationClipData clip in set.Clips)
+                    foreach (CreatureAnimationFrames cell in clip.Directions)
+                        Assert.AreEqual(cell.FrameCount, CreatureAnimationNormals.CountWithNormals(cell), clip.Action + " → " + cell.Direction + "\n" + report);
+            }
+            finally
+            {
+                if (Directory.Exists(normalsRoot))
+                    Directory.Delete(normalsRoot, true);
+            }
+        }
+
+        // Номера нормалей другие (рендер с иного кадра), но файлов ровно по
+        // кадру — сопоставление по порядку, с пояснением.
+        [Test]
+        public void CellNormals_WithOtherNumbers_MatchByOrder()
+        {
+            CreatureAnimationSetData set = ImportFramesWithoutNormals(out _);
+            CreatureAnimationFrames idle = set.FindFrames(CreatureAnimationAction.Idle, CreatureAnimationDirection.Front);
+            List<string> files = Enumerable.Range(0, idle.FrameCount).Select(i => "normal_" + (500 + i).ToString("0000") + ".png").Reverse().ToList();
+            Assert.IsTrue(CreatureAnimationNormals.Match(idle, files, out List<string> ordered, out string problem, out string note), problem);
+            Assert.IsNotNull(note);
+            Assert.AreEqual("normal_0500.png", ordered[0]);
+            Assert.AreEqual(idle.FrameCount, ordered.Count);
         }
 
         [Test]

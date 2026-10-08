@@ -619,6 +619,17 @@ namespace KingdomSurvival.LocationRendering.Tests
                 Assert.That(texts, Has.Some.Contains("без изменений"));
                 List<string> check = (List<string>)typeof(LocationDatabaseWindow).GetMethod("CheckGround", flags).Invoke(window, new object[] { location });
                 Assert.That(check.First(), Does.StartWith("✓"), string.Join("\n", check));
+
+                // «Место» у земли из Blender: сводка и переход, без полей
+                // обычного рисунка и ручного размера.
+                tab.SetValue(window, Enum.Parse(tab.FieldType, "Place"));
+                typeof(LocationDatabaseWindow).GetMethod("BuildSettings", flags).Invoke(window, null);
+                texts = settings.Query<TextElement>().ToList().Select(item => item.text).ToList();
+                Assert.That(texts, Has.Some.EqualTo("Пол и размер"));
+                Assert.That(texts, Has.Some.EqualTo("Открыть вкладку «Земля»"));
+                Assert.That(texts, Has.Some.EqualTo("Клеток проходимости по ширине"));
+                foreach (string hidden in new[] { "Рисунок места", "Ширина рисунка", "Высота рисунка", "Загрузить рисунок места…", "Нормали рисунка места", "Кадрирование рисунка" })
+                    Assert.That(texts, Has.None.EqualTo(hidden), hidden);
             }
             finally
             {

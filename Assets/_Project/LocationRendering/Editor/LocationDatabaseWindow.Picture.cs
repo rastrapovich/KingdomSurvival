@@ -34,6 +34,39 @@ namespace KingdomSurvival.LocationRendering.Editor
             pictureDrag = PictureDrag.None;
         }
 
+        // Место с землёй из Blender: пол, его обрезка и размер — на вкладке
+        // «Земля»; здесь только сводка и переход.
+        private void BuildTiledGroundSummary(LocalLocationDefinition location)
+        {
+            LocationGroundDefinition ground = Ground;
+            LocationGroundGrid grid = LocationGroundGrid.For(ground, location);
+            Heading("Пол и размер");
+            Label info = new Label("Пол — земля из Blender: участки " + ground.Columns + "×" + ground.Rows + " по " + ground.TileWidth + "×" +
+                                   ground.TileHeight + " px · место " + Mathf.RoundToInt(location.CanvasWidth) + "×" + Mathf.RoundToInt(location.CanvasHeight) + " px.");
+            info.style.whiteSpace = WhiteSpace.Normal;
+            info.style.unityFontStyleAndWeight = FontStyle.Bold;
+            info.style.marginBottom = 4;
+            settings.Add(info);
+            Help("Пол этого места настраивается на вкладке «Земля»: импорт экспорта Blender, обрисовка Color, обрезка пустоты, " +
+                 "высоты и камера. Размер места равен земле (1 пиксель земли = 1 пиксель места) и меняется только там — " +
+                 "«Обрезкой» или переимпортом. Здесь — разметка местности, перемещение и бой.");
+            if (!grid.IsOneToOne)
+            {
+                settings.Add(new HelpBox("Размер места не совпадает с землёй (" + grid.VirtualWidth + "×" + grid.VirtualHeight +
+                                         " px): земля растянута, обрезка недоступна.", HelpBoxMessageType.Warning));
+                AddButton(settings, "Подогнать размер места под землю", () =>
+                {
+                    Change(() => ResizeCanvas(location, grid.VirtualWidth, grid.VirtualHeight, location.HexesAcross, true), true);
+                    status.text = "Размер места подогнан под землю: " + grid.VirtualWidth + "×" + grid.VirtualHeight + " px.";
+                });
+            }
+            AddButton(settings, "Открыть вкладку «Земля»", () =>
+            {
+                tab = Tab.Ground;
+                BuildSettings();
+            });
+        }
+
         private void BuildPictureSettings(LocalLocationDefinition location)
         {
             if (!HasPlainPicture) return;

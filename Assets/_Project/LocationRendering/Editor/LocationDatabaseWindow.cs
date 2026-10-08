@@ -418,15 +418,23 @@ namespace KingdomSurvival.LocationRendering.Editor
                 }));
             }
 
-            Heading("Рисунок и размер");
-            Help("Размер рисунка места — в пикселях, как у глобальной карты. «Клеток проходимости по ширине» — " +
-                 "точность разметки. При смене размера разметка пересчитывается.");
-            Integer("Ширина рисунка", Mathf.RoundToInt(location.CanvasWidth), value => ResizeCanvas(location, value, location.CanvasHeight, location.HexesAcross));
-            Integer("Высота рисунка", Mathf.RoundToInt(location.CanvasHeight), value => ResizeCanvas(location, location.CanvasWidth, value, location.HexesAcross));
-            Integer("Клеток проходимости по ширине", location.HexesAcross, value => ResizeCanvas(location, location.CanvasWidth, location.CanvasHeight, value));
-            if (Visual?.Ground != null && Visual.Ground.IsTiled)
-                Help("Земля места — из участков экспорта Blender (вкладка «Земля»): «Рисунок места» ниже сейчас не показывается.");
-            if (Visual != null)
+            // Пол места — либо один рисунок (здесь), либо земля из Blender
+            // (вкладка «Земля»): поля рисунка у такого места не действуют.
+            bool tiledGround = Ground != null && Ground.IsTiled;
+            if (tiledGround)
+            {
+                BuildTiledGroundSummary(location);
+            }
+            else
+            {
+                Heading("Рисунок и размер");
+                Help("Размер рисунка места — в пикселях, как у глобальной карты. «Клеток проходимости по ширине» — " +
+                     "точность разметки. При смене размера разметка пересчитывается.");
+                Integer("Ширина рисунка", Mathf.RoundToInt(location.CanvasWidth), value => ResizeCanvas(location, value, location.CanvasHeight, location.HexesAcross));
+                Integer("Высота рисунка", Mathf.RoundToInt(location.CanvasHeight), value => ResizeCanvas(location, location.CanvasWidth, value, location.HexesAcross));
+            }
+            Integer("Клеток проходимости по ширине", location.HexesAcross, value => ResizeCanvas(location, location.CanvasWidth, location.CanvasHeight, value, true));
+            if (Visual != null && !tiledGround)
             {
                 SpriteField("Рисунок места", Visual.Background, value => Visual.Background = value);
                 Label drop = new Label("Перетащите сюда рисунок места (PNG из Проводника или Sprite; рядом «имя_normal.png» — его нормали)");
@@ -476,7 +484,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                     });
             }
             BuildPictureSettings(location);
-            Toggle("Рисунок — временная заглушка", location.PlaceholderArt, value => location.PlaceholderArt = value);
+            Toggle(tiledGround ? "Пол — временная заглушка" : "Рисунок — временная заглушка", location.PlaceholderArt, value => location.PlaceholderArt = value);
+            settings[settings.childCount - 1].tooltip = "В игре у места подпись «временный фон — рисунка ещё нет».";
 
             Heading("Перемещение");
             Help("Те же поля, что «Перемещение» глобальной карты, но свои числа для этого места.");
@@ -1037,7 +1046,15 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (sprites.Length + colors.Count == 1)
             {
                 Vector2Int size = sprites.Length == 1 ? new Vector2Int((int)sprites[0].rect.width, (int)sprites[0].rect.height) : PngSize(colors[0]);
-                if (size.x >= CanvasSize.x * .5f || size.y >= CanvasSize.y * .5f)
+                if ((size.x >= CanvasSize.x * .5f || size.y >= CanvasSize.y * .5f) && Ground != null && Ground.IsTiled)
+                {
+                    // Пол такого места — земля из Blender, фоном рисунок не станет.
+                    if (!EditorUtility.DisplayDialog("Куда поставить рисунок?",
+                            "Рисунок " + size.x + "×" + size.y + " — размером почти с место. Пол этого места — земля из Blender: " +
+                            "её Color меняется на вкладке «Земля» («Заменить Color обрисовкой»).\nПоставить рисунок предметом?",
+                            "Предмет", "Отмена")) return;
+                }
+                else if (size.x >= CanvasSize.x * .5f || size.y >= CanvasSize.y * .5f)
                 {
                     int choice = EditorUtility.DisplayDialogComplex("Куда поставить рисунок?",
                         "Рисунок " + size.x + "×" + size.y + " — размером почти с место (" + Mathf.RoundToInt(CanvasSize.x) + "×" + Mathf.RoundToInt(CanvasSize.y) + ").",
@@ -1091,6 +1108,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void SetBackgroundFrom(Sprite[] sprites, string[] paths)
         {
             if (Visual == null || Location == null) { status.text = "Для рисунка места нужна художественная сборка (вкладка «Предметы»)."; return; }
+            if (Ground != null && Ground.IsTiled) { status.text = "Пол этого места — земля из Blender: рисунок меняется на вкладке «Земля» («Заменить Color обрисовкой»)."; return; }
             List<string> files = paths.Where(path => File.Exists(path) && path.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
                 .Where(path => sprites.All(sprite => AssetDatabase.GetAssetPath(sprite) != path)).ToList();
             List<string> normals = files.Where(IsNormalFileName).ToList();

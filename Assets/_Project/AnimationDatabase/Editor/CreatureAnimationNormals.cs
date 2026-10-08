@@ -42,6 +42,20 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             return count;
         }
 
+        private static readonly System.Text.RegularExpressions.Regex NormalFolderSuffix =
+            new System.Text.RegularExpressions.Regex(@"[_\- ](normals?|нормали|нормаль)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        // Папки нормалей названы как папки кадров с суффиксом: «Idle_normal/Front» →
+        // «Idle/Front». Имя файла (последняя часть) не трогается.
+        public static string StripNormalFolders(string path)
+        {
+            string[] parts = (path ?? string.Empty).Split('/');
+            int folders = Path.HasExtension(path) ? parts.Length - 1 : parts.Length;
+            for (int i = 0; i < folders; i++)
+                parts[i] = NormalFolderSuffix.Replace(parts[i], string.Empty);
+            return string.Join("/", parts);
+        }
+
         // Имя файла нормали без «_n» / «_normal»: «walk_se_007_n» → «walk_se_007».
         public static string BaseName(string path)
         {
@@ -226,12 +240,16 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 Color32[] pixels = texture.GetPixels32();
                 int step = Mathf.Max(1, Mathf.RoundToInt(Mathf.Sqrt(pixels.Length / 4096f)));
                 int opaque = 0, normal = 0;
+                // Непрозрачный фон рендера (цвет угла) не считается.
+                Color32 corner = pixels[0];
+                bool Background(Color32 pixel) => corner.a >= 128 &&
+                                                  Mathf.Abs(pixel.r - corner.r) <= 6 && Mathf.Abs(pixel.g - corner.g) <= 6 && Mathf.Abs(pixel.b - corner.b) <= 6;
                 for (int y = 0; y < texture.height; y += step)
                 {
                     for (int x = 0; x < texture.width; x += step)
                     {
                         Color32 pixel = pixels[y * texture.width + x];
-                        if (pixel.a < 128) continue;
+                        if (pixel.a < 128 || Background(pixel)) continue;
                         opaque++;
                         Vector3 n = new Vector3(pixel.r / 127.5f - 1, pixel.g / 127.5f - 1, pixel.b / 127.5f - 1);
                         float length = n.magnitude;
@@ -340,13 +358,18 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             cells = failures = 0;
             if (set == null) return "Не выбран набор анимаций.";
             Dictionary<string, string> real = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (string file in (files ?? Enumerable.Empty<string>()).Select(CreatureAnimationImportParser.NormalizePath).Where(CreatureAnimationImportParser.IsImageFile))
+            List<string> images = (files ?? Enumerable.Empty<string>()).Select(CreatureAnimationImportParser.NormalizePath)
+                .Where(CreatureAnimationImportParser.IsImageFile).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            // Кадры и нормали «_normal» вперемешку: берутся только нормали.
+            if (images.Any(CreatureAnimationImportParser.IsNormalFile))
+                images = images.Where(CreatureAnimationImportParser.IsNormalFile).ToList();
+            foreach (string file in images)
             {
-                string pseudo = CreatureAnimationImportParser.NormalizePath(Path.Combine(Path.GetDirectoryName(file) ?? string.Empty, BaseName(file) + Path.GetExtension(file)));
+                string pseudo = StripNormalFolders(CreatureAnimationImportParser.NormalizePath(Path.Combine(Path.GetDirectoryName(file) ?? string.Empty, BaseName(file) + Path.GetExtension(file))));
                 if (!real.ContainsKey(pseudo)) real[pseudo] = file;
             }
             if (real.Count == 0) return "В папке нет PNG нормалей.";
-            CreatureAnimationImportPackage package = CreatureAnimationImportParser.Analyze(root, real.Keys);
+            CreatureAnimationImportPackage package = CreatureAnimationImportParser.Analyze(StripNormalFolders(CreatureAnimationImportParser.NormalizePath(root ?? string.Empty)), real.Keys);
             List<string> lines = new List<string>();
             foreach (CreatureAnimationImportGroup group in package.Groups)
             {

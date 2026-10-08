@@ -121,6 +121,86 @@ namespace KingdomSurvival.AnimationDatabase.Tests
             }
         }
 
+        // Папка нормалей одного действия со всеми ракурсами, названная
+        // «Idle_normal», — как папка кадров: каждый ракурс в свою ячейку.
+        [Test]
+        public void ActionNormalsFolder_WithAllDirections_AttachesEveryDirection()
+        {
+            CreatureAnimationSetData set = ImportFramesWithoutNormals(out _);
+            string normalsRoot = sourceRoot + "_normals";
+            try
+            {
+                WriteNormals(sourceRoot, normalsRoot, 1);
+                string idleNormals = normalsRoot + "/Idle_normal";
+                Directory.Move(normalsRoot + "/Idle", idleNormals);
+                string[] files = Directory.GetFiles(idleNormals, "*.png", SearchOption.AllDirectories);
+                Assert.Greater(files.Select(Path.GetDirectoryName).Distinct().Count(), 1, "В папке несколько ракурсов.");
+
+                string report = CreatureAnimationNormals.AttachFolder(set, idleNormals, files, out int cells, out int failures);
+
+                Assert.AreEqual(0, failures, report);
+                Assert.AreEqual(CreatureAnimationLabels.Directions.Length, cells, report);
+                foreach (CreatureAnimationDirection direction in CreatureAnimationLabels.Directions)
+                {
+                    CreatureAnimationFrames idle = set.FindFrames(CreatureAnimationAction.Idle, direction);
+                    Assert.AreEqual(idle.FrameCount, CreatureAnimationNormals.CountWithNormals(idle), direction + "\n" + report);
+                }
+                CreatureAnimationFrames walk = set.FindFrames(CreatureAnimationAction.Walk, CreatureAnimationDirection.Front);
+                Assert.AreEqual(0, CreatureAnimationNormals.CountWithNormals(walk), "Другие действия не тронуты.");
+            }
+            finally
+            {
+                if (Directory.Exists(normalsRoot))
+                    Directory.Delete(normalsRoot, true);
+            }
+        }
+
+        // Папка, где кадры и «_n» вперемешку: нормалями берутся только «_n».
+        [Test]
+        public void MixedFolder_UsesOnlySuffixedNormals()
+        {
+            CreatureAnimationSetData set = ImportFramesWithoutNormals(out _);
+            WriteNormals(sourceRoot);
+            string[] all = Directory.GetFiles(sourceRoot, "*.png", SearchOption.AllDirectories);
+            string report = CreatureAnimationNormals.AttachFolder(set, sourceRoot, all, out int cells, out int failures);
+            Assert.AreEqual(0, failures, report);
+            CreatureAnimationFrames walk = set.FindFrames(CreatureAnimationAction.Walk, CreatureAnimationDirection.BackLeft);
+            Texture2D page = CreatureAnimationNormals.FindPageNormal(walk.Frames[0].texture);
+            Texture2D pixels = new Texture2D(2, 2, TextureFormat.RGBA32, false, true);
+            pixels.LoadImage(File.ReadAllBytes(CreatureAnimationAtlasBuilder.ToAbsolute(AssetDatabase.GetAssetPath(page))));
+            Color32 middle = pixels.GetPixel(Mathf.RoundToInt(walk.Frames[0].rect.center.x), Mathf.RoundToInt(walk.Frames[0].rect.center.y));
+            Object.DestroyImmediate(pixels);
+            Assert.Greater(middle.b, 240, "На странице нормалей — нормаль, а не цветной кадр.");
+        }
+
+        [Test]
+        public void NormalFolderNames_AndOpaqueBackground_AreRecognized()
+        {
+            Assert.AreEqual("C:/Art/Idle/Front/Idle_Front_0001.png", CreatureAnimationNormals.StripNormalFolders("C:/Art/Idle_normal/Front/Idle_Front_0001.png"));
+            Assert.AreEqual("C:/Art/Normals/Idle/Front", CreatureAnimationNormals.StripNormalFolders("C:/Art/Normals/Idle/Front_Normals"));
+
+            // Рендер нормалей без прозрачного фона: фон серый, фигура — нормали.
+            Directory.CreateDirectory(sourceRoot);
+            string path = sourceRoot + "/opaque.png";
+            Texture2D texture = new Texture2D(64, 64, TextureFormat.RGBA32, false, true);
+            Color32[] pixels = new Color32[64 * 64];
+            for (int y = 0; y < 64; y++)
+            {
+                for (int x = 0; x < 64; x++)
+                {
+                    float nx = (x - 32) / 20f, ny = (y - 32) / 20f;
+                    float d = nx * nx + ny * ny;
+                    pixels[y * 64 + x] = d >= 1
+                        ? new Color32(50, 50, 50, 255)
+                        : new Color32((byte)((nx * .5f + .5f) * 255), (byte)((ny * .5f + .5f) * 255), (byte)((Mathf.Sqrt(1 - d) * .5f + .5f) * 255), 255);
+                }
+            }
+            texture.SetPixels32(pixels);
+            File.WriteAllBytes(path, texture.EncodeToPNG());
+            Object.DestroyImmediate(texture);
+            Assert.IsTrue(CreatureAnimationNormals.LooksLikeNormalMap(path));
+        }
+
         // Номера нормалей другие (рендер с иного кадра), но файлов ровно по
         // кадру — сопоставление по порядку, с пояснением.
         [Test]

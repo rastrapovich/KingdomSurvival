@@ -551,6 +551,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             hint.style.fontSize = 10f;
             hint.style.color = new Color(0.62f, 0.62f, 0.62f, 1f);
             detailPanel.Add(hint);
+            if (set != null)
+                detailPanel.Add(BuildNormalsFolderZone());
 
             CreatureAnimationClipData clip = set?.FindClip(selectedAction);
             AddHeader(CreatureAnimationLabels.ActionTitle(selectedAction).ToUpperInvariant() + " → " +
@@ -723,6 +725,44 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             }));
             box.Add(normals);
             return box;
+        }
+
+        // Нормали папкой — как папка кадров: действие с ракурсами или всё
+        // существо; каждый ракурс ложится в свою ячейку, имена любые.
+        private VisualElement BuildNormalsFolderZone()
+        {
+            VisualElement zone = new VisualElement();
+            zone.style.flexDirection = FlexDirection.Row;
+            zone.style.alignItems = Align.Center;
+            zone.style.marginTop = 6f;
+            zone.style.paddingLeft = 8f;
+            zone.style.paddingRight = 4f;
+            zone.style.paddingTop = 6f;
+            zone.style.paddingBottom = 6f;
+            zone.style.backgroundColor = NormalEmptyColor;
+            SetBorder(zone, new Color(0.35f, 0.38f, 0.55f, 1f), 1f);
+            Label text = new Label("Нормали папкой: перетащите сюда папку нормалей — действие с ракурсами (Idle/Front, Idle/Back…) или всё существо. " +
+                                   "Каждый ракурс ляжет в свою ячейку; имена — как у кадров, суффикс «_normal» не нужен.");
+            text.style.whiteSpace = WhiteSpace.Normal;
+            text.style.flexGrow = 1f;
+            text.style.flexShrink = 1f;
+            text.style.fontSize = 10f;
+            text.style.color = new Color(0.72f, 0.80f, 1f, 1f);
+            text.pickingMode = PickingMode.Ignore;
+            zone.Add(text);
+            zone.Add(new Button(LoadNormalsFolder) { text = "Выбрать папку…" });
+            RegisterCellDrop(zone, () =>
+            {
+                List<string> files = DroppedFilesSnapshot;
+                if (files.Count == 0)
+                {
+                    ShowMessage("В брошенном нет PNG нормалей.", ErrorColor);
+                    return;
+                }
+                string root = (DragAndDrop.paths ?? Array.Empty<string>()).Select(ToAbsolutePath).FirstOrDefault(Directory.Exists) ?? CommonFolder(files);
+                EditorApplication.delayCall += () => ApplySetNormals(root, files);
+            });
+            return zone;
         }
 
         // Файлы последнего перетаскивания: после DragPerform их уже не прочитать.
@@ -1354,6 +1394,14 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 ShowMessage(where + ": нет PNG нормалей.", ErrorColor);
                 return;
             }
+            // Папка с ракурсами (или действиями) — каждый ракурс в свою ячейку,
+            // как папка кадров.
+            if (normals.Select(path => CreatureAnimationImportParser.NormalizePath(Path.GetDirectoryName(path) ?? string.Empty))
+                    .Distinct(StringComparer.OrdinalIgnoreCase).Count() > 1)
+            {
+                ApplySetNormals(CommonFolder(normals), normals);
+                return;
+            }
             if (!CreatureAnimationNormals.Match(cell, normals, out List<string> ordered, out string problem, out string note))
             {
                 ShowMessage(where + ": " + problem + ".", ErrorColor);
@@ -1368,16 +1416,42 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             ShowSelection();
         }
 
-        // Бросили на кадры картинки, похожие на карты нормалей, — спросить.
-        // true — разобрано (подключено нормалями или отменено).
+        // Общая папка файлов (корень папки нормалей: существо, действие или ракурс).
+        private static string CommonFolder(IReadOnlyList<string> files)
+        {
+            List<string[]> folders = files.Select(path => CreatureAnimationImportParser.NormalizePath(Path.GetDirectoryName(path) ?? string.Empty).Split('/')).ToList();
+            if (folders.Count == 0)
+                return string.Empty;
+            int length = folders.Min(parts => parts.Length);
+            int common = 0;
+            while (common < length && folders.All(parts => string.Equals(parts[common], folders[0][common], StringComparison.OrdinalIgnoreCase)))
+                common++;
+            return string.Join("/", folders[0].Take(common));
+        }
+
+        // Путь говорит, что это нормали: папка или файл со словом normal / нормал.
+        private static bool PathSaysNormals(string path)
+        {
+            string normalized = CreatureAnimationImportParser.NormalizePath(path ?? string.Empty).ToLowerInvariant();
+            return normalized.Split('/').Any(part => part.Contains("normal") || part.Contains("нормал"));
+        }
+
+        // Бросили на кадры папку или картинки, похожие на карты нормалей
+        // (по пути или по содержимому), — спросить. true — разобрано
+        // (подключено нормалями или отменено).
         private bool OfferNormals(List<string> files, Action asNormals)
         {
             List<string> images = files.Where(CreatureAnimationImportParser.IsImageFile).Where(path => !CreatureAnimationImportParser.IsNormalFile(path)).ToList();
-            if (!CreatureAnimationNormals.LookLikeNormalMaps(images))
+            if (images.Count == 0)
+                return false;
+            string root = CommonFolder(images);
+            bool byPath = PathSaysNormals(root);
+            if (!byPath && !CreatureAnimationNormals.LookLikeNormalMaps(images))
                 return false;
             int choice = EditorUtility.DisplayDialogComplex("Это карты нормалей?",
-                "Картинки похожи на карты нормалей (сине-фиолетовые). Подключить их нормалями к уже загруженным кадрам? " +
-                "Суффикс «_normal» в именах не нужен.",
+                (byPath ? "Папка «" + Path.GetFileName(root) + "» названа как нормали." : "Картинки похожи на карты нормалей (сине-фиолетовые).") +
+                " Подключить их нормалями к уже загруженным кадрам? Папка может содержать все ракурсы и действия — " +
+                "каждый ракурс ляжет в свою ячейку. Суффикс «_normal» в именах не нужен.",
                 "Подключить нормалями", "Отмена", "Загрузить как кадры");
             if (choice == 2)
                 return false;
@@ -1487,7 +1561,22 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                     files.Add(absolute);
             }
             if (files.Count == 0)
+            {
+                // Папка с ракурсами или действиями — как папка, брошенная в окно.
+                string folder = (DragAndDrop.paths ?? Array.Empty<string>()).Select(ToAbsolutePath).FirstOrDefault(Directory.Exists);
+                List<string> nested = folder != null ? Directory.GetFiles(folder, "*.png", SearchOption.AllDirectories).ToList() : new List<string>();
+                if (nested.Count == 0)
+                    return;
+                if (OnlyNormals(nested))
+                {
+                    ApplySetNormals(folder, nested);
+                    return;
+                }
+                if (OfferNormals(nested, () => ApplySetNormals(folder, nested)))
+                    return;
+                AnalyzeFolder(folder);
                 return;
+            }
             if (OnlyNormals(files))
             {
                 ApplyCellNormals(files);

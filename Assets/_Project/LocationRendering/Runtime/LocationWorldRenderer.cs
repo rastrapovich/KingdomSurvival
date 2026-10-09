@@ -91,7 +91,7 @@ namespace KingdomSurvival.LocationRendering
         private readonly CreatureAnimationDatabaseAsset animations;
         private readonly UnitDatabaseAsset units;
         private readonly Transform actorLayer;
-        private Sprite placeholderActor, placeholderShadow;
+        private Sprite placeholderActor;
 
         // world — общий свет мира; не задан — из Базы локаций.
         public LocationWorldRenderer(LocalLocationDefinition location, LocationVisualDefinition visual,
@@ -633,11 +633,6 @@ namespace KingdomSurvival.LocationRendering
                 float phase = (frame.Id.GetHashCode() & 0x7fff) / 32767f * 2f;
                 actor.Player = new CreatureAnimationPlayer(set, DirectionFor(actor.Facing, frame.Kind), phase);
             }
-            if (placeholderShadow == null) placeholderShadow = PlaceholderEllipse();
-            SpriteRenderer shadow = Image(new GameObject("Тень под ногами"), placeholderShadow, false);
-            shadow.transform.SetParent(anchor, false);
-            shadow.color = new Color(0, 0, 0, .35f);
-            shadow.sortingOrder = -24000;
             AddCaster(anchor, actor.Image, null, 0, Vector2.zero, false, 1, null, true);
             return actor;
         }
@@ -648,8 +643,6 @@ namespace KingdomSurvival.LocationRendering
             if (frame.Direction.sqrMagnitude > 1e-6f)
                 actor.Facing = FacingFrom(frame.Direction);
             bool mirrored = frame.Kind == ActorKind.Enemy;
-            Transform shadow = actor.Anchor.Find("Тень под ногами");
-            if (shadow != null) shadow.localScale = new Vector3(hexWorld * .9f, hexWorld * .27f, 1);
 
             float height = hexWorld * FieldHeightInHexSizes * (actor.Unit?.BattlefieldScale ?? 1);
             Vector2 pivot = new Vector2(.5f, .15f), offset = Vector2.zero;
@@ -864,9 +857,6 @@ namespace KingdomSurvival.LocationRendering
             texture.SetPixels(colors); texture.Apply();
             return Own(Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(.5f, .5f), 100));
         }
-
-        private Sprite PlaceholderEllipse() => MakeSprite(64, 32, (x, y) =>
-            Mathf.Pow((x - .5f) * 2, 2) + Mathf.Pow((y - .5f) * 2, 2) <= 1 ? Color.white : Color.clear);
 
         private Sprite PlaceholderActor()
         {

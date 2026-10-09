@@ -156,6 +156,7 @@ public partial class PrototypeUIController
         if (!IsLocalScreenOpen)
             return;
 
+        HandleLocalCameraHotkeys();
         if (IsLocalBattleRunning)
         {
             AlignLocalBattleCamera();
@@ -295,12 +296,6 @@ public partial class PrototypeUIController
         localHolding = false;
         if (localImage != null && localImage.HasPointerCapture(pointerId))
             localImage.ReleasePointer(pointerId);
-    }
-
-    private void OnLocalWheel(WheelEvent evt)
-    {
-        localZoom = Mathf.Clamp(localZoom * (evt.delta.y > 0 ? 0.9f : 1.1f), 0.6f, 1.8f);
-        evt.StopPropagation();
     }
 
     private void OnLocalGroundClicked(Vector2 point)
@@ -534,6 +529,7 @@ public partial class PrototypeUIController
         localRenderer.ActorsVisible = false;
         localOverlay.style.display = DisplayStyle.None;
         localHud.style.display = DisplayStyle.None;
+        BindLocalBattleCamera();
         AlignLocalBattleCamera();
     }
 
@@ -596,6 +592,9 @@ public partial class PrototypeUIController
     private void OnLocalBattleFinished(CampaignBattleResult result, int generation)
     {
         localBattle = null;
+        localBattleSurface = null;
+        localBattlePanning = false;
+        RefreshLocalCameraPanel();
         localRenderer?.ClearBattleFigures();
         localBattleHost?.RemoveFromHierarchy();
         localBattleHost = null;
@@ -708,8 +707,11 @@ public partial class PrototypeUIController
         localBattleRequested = false;
         localPartySignature = null;
         localPendingHours = 0;
-        localZoom = 1f;
+        // Закреплённая камера держит масштаб и в новом месте.
+        if (!localCameraLocked)
+            localZoom = 1f;
         localHolding = false;
+        BuildLocalCameraPanel();
         if (localTitleLabel != null)
             localTitleLabel.text = localDefinition.DisplayName.ToUpperInvariant();
         if (localArtNoteLabel != null)
@@ -733,6 +735,8 @@ public partial class PrototypeUIController
             localBattle = null;
         }
         localBattleHost = null;
+        localBattleSurface = null;
+        localBattlePanning = false;
         localField?.Clear();
         if (localImage != null)
             localImage.image = null;
@@ -845,13 +849,15 @@ public partial class PrototypeUIController
 
         LocalFreeMover.Member leader = localMover.Leader;
         float viewHeight = LocationCameraFollow.DefaultViewHeight(localRenderer.Definition, localDefinition) / localZoom;
-        // Новый командир — новая цель: кадр сразу на нём.
+        // Новый командир — новая цель: кадр сразу на нём (закреплённая камера стоит).
         if (leader.Id != localFollowedLeaderId)
         {
             localFollowedLeaderId = leader.Id;
-            localCameraSnap = true;
+            localCameraSnap |= !localCameraLocked;
         }
-        localRenderer.Follow(new Vector2((float)leader.X, (float)leader.Y), viewHeight, Time.unscaledDeltaTime, localCameraSnap);
+        // Закреплённая камера не едет за командиром; первый кадр места — на нём.
+        if (!localCameraLocked || localCameraSnap)
+            localRenderer.Follow(new Vector2((float)leader.X, (float)leader.Y), viewHeight, Time.unscaledDeltaTime, localCameraSnap);
         localCameraSnap = false;
         RenderLocalWorld();
         LayoutLocalOverlay();

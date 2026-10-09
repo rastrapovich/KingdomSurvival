@@ -101,3 +101,36 @@
     border-top-color: rgb(232, 196, 120); border-bottom-color: rgb(232, 196, 120);
 }
 
+
+/* Камера места и боя на месте: масштаб и «Закрепить» (C#: PrototypeUIController.LocalCamera.cs). */
+.local-camera-panel {
+    position: absolute;
+    right: 14px; top: 12px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 6px; padding-right: 6px; padding-top: 4px; padding-bottom: 4px;
+    border-radius: 4px;
+    background-color: rgba(20, 23, 27, 0.82);
+}
+
+.local-camera-button {
+    height: 26px;
+    min-width: 30px;
+    margin-left: 2px; margin-right: 2px;
+    padding-left: 6px; padding-right: 6px;
+    font-size: 13px;
+}
+
+.local-camera-zoom {
+    min-width: 44px;
+    font-size: 12px;
+    -unity-text-align: middle-center;
+    color: rgb(226, 219, 204);
+}
+
+.local-camera-lock { margin-left: 8px; font-size: 11px; }
+
+.local-camera-lock--on {
+    background-color: rgb(120, 92, 46);
+    color: rgb(255, 236, 196);
+}

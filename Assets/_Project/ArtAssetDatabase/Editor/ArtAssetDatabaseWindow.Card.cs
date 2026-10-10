@@ -382,7 +382,7 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         private void EnsureLit(ArtAssetDefinition asset)
         {
-            string key = asset.Id + "|" + cardView + "|" + catalog.Revision + "|" + state.LightIntensity + "|" + state.LightHeight + "|" + state.LightNormalDistance + "|" + state.LightNormals + "|" + state.LightNight;
+            string key = asset.Id + "|" + cardView + "|" + catalog.Revision + "|" + state.LightIntensity + "|" + state.LightHeight + "|" + state.LightNormalDistance + "|" + state.LightNormals + "|" + state.LightNight + "|" + state.LightEnabled;
             if (!litDirty && litRenderer != null && key == litKey) return;
             ReleaseLit();
             litDirty = false;
@@ -392,7 +392,8 @@ namespace KingdomSurvival.ArtAssets.Editor
             LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = litLocation.Id, UseWorldLighting = false, TechnicalTest = true };
             visual.Objects.Add(new LocationVisualObject { Id = LitObjectId, Name = asset.Name, AssetId = asset.Id, View = cardView, Position = new Vector2(.5f, .62f) });
             LocationVisualObject light = new LocationVisualObject { Id = LitLightId, Name = "Контрольный свет", LightOnly = true, Position = state.LightPosition };
-            light.Light.Enabled = true;
+            // Выключенный контрольный свет — источника нет вовсе (виден только общий свет).
+            light.Light.Enabled = state.LightEnabled;
             light.Light.Color = new Color(1, .86f, .7f);
             Rect opaque = ArtAssetDrawing.OpaqueBounds(ArtAssetDrawing.Resolve(catalog, asset, cardView));
             // Радиус — по видимой части объекта: свет достаёт до всего рисунка.
@@ -438,7 +439,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                 GUI.Label(area, "Предпросмотр под светом недоступен в Play Mode.");
                 return;
             }
-            if (state.LightOrbit)
+            if (state.LightOrbit && state.LightEnabled)
             {
                 // Источник обходит объект по земле (эллипс вокруг видимой части) на
                 // заданной высоте: нормали видны по движению света.

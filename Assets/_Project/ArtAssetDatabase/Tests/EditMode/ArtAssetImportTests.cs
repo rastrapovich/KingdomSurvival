@@ -183,6 +183,25 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(catalog.assets.Select(asset => asset.Name), Is.EquivalentTo(new[] { "Телега" }), "Ошибка одного объекта не портит остальные.");
         }
 
+        // Ассет, загруженный прежним разбором (кадры в частях с именем самого
+        // объекта, основа пуста), чинится новой загрузкой той же папки.
+        [Test]
+        public void ReimportIntoMisparsedAsset_MovesFramesToTheMainPart()
+        {
+            for (int i = 1; i <= 2; i++) Png("LowGrass/Front/LowGrass_000" + i + ".png", 32, 32, new Color(.2f, .6f, .2f, 1));
+            ArtAssetDefinition broken = new ArtAssetDefinition { Name = "LowGrass" };
+            broken.Parts.Add(new ArtAssetPart { Name = "Lowgrass" });
+            broken.Parts.Add(new ArtAssetPart { Name = "LowGrass" });
+            catalog.assets.Add(broken);
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { source + "/LowGrass" });
+            ArtAssetImportResult result = ArtAssetImporter.Import(catalog, plan, _ => broken, false);
+            Assert.That(result.Errors, Is.Empty, string.Join("; ", result.Errors));
+            ArtAssetDefinition fixedAsset = catalog.assets.Single();
+            Assert.That(fixedAsset.Parts.Count, Is.EqualTo(1), "Ошибочные части убраны.");
+            Assert.That(fixedAsset.MainPart.FindView(ArtAssetView.Front).FrameCount, Is.EqualTo(2));
+            Assert.That(fixedAsset.ViewCount, Is.EqualTo(1));
+        }
+
         // Кадры анимации — листом, как в Базе анимаций: страница с кадрами и
         // страница нормалей той же раскладки (вторая текстура); места берут
         // анимацию из листа; снятые кадры — лист убран.

@@ -122,6 +122,7 @@ namespace KingdomSurvival.ArtAssets.Editor
         private static ArtAssetDefinition ImportGroup(ArtAssetDatabaseAsset catalog, ArtAssetImportGroup group, ArtAssetDefinition existing, List<string> warnings)
         {
             ArtAssetDefinition working = existing != null ? Clone(existing) : new ArtAssetDefinition { Name = group.Name };
+            if (existing != null) RemoveMisparsedParts(working, group);
             working.ImportKey = group.Key;
             // Источник вне проекта запоминается: «Обновить из папки».
             if (!string.IsNullOrEmpty(group.SourceFolder) && !IsProjectPath(group.SourceFolder)) working.SourceFolder = group.SourceFolder;
@@ -196,10 +197,26 @@ namespace KingdomSurvival.ArtAssets.Editor
             asset.PixelsPerUnit = Mathf.Max(ArtAssetDefinition.DefaultPixelsPerUnit, pixels / 6f);
         }
 
+        // Прежний разбор принимал имя объекта в имени кадра за часть: у основы
+        // пусто, а части называются как сам объект. Новая загрузка той же папки
+        // кладёт кадры в основу — такие части убираются (файлы остаются).
+        private static void RemoveMisparsedParts(ArtAssetDefinition asset, ArtAssetImportGroup group)
+        {
+            if (asset.Parts == null || asset.Parts.Count < 2 || asset.MainPart.Views.Any(view => view?.Sprite != null)) return;
+            if (!group.Slots.Any(slot => slot.Part.Length == 0)) return;
+            HashSet<string> own = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ArtAssetImportParser.NormalizeKey(asset.Name), group.Key, ArtAssetImportParser.NormalizeKey(group.Name)
+            };
+            asset.Parts.RemoveAll(part => part != null && part != asset.MainPart && own.Contains(ArtAssetImportParser.NormalizeKey(part.Name)));
+        }
+
         public static ArtAssetPart FindOrAddPart(ArtAssetDefinition asset, string name)
         {
             if (string.IsNullOrEmpty(name)) return asset.MainPart;
-            ArtAssetPart part = asset.Parts.FirstOrDefault(item => item != null && string.Equals(item.Name, name, StringComparison.OrdinalIgnoreCase));
+            // «lowgrass_wind» и «Lowgrass wind» — одна часть.
+            string key = ArtAssetImportParser.NormalizeKey(name);
+            ArtAssetPart part = asset.Parts.Skip(1).FirstOrDefault(item => item != null && ArtAssetImportParser.NormalizeKey(item.Name) == key);
             if (part != null) return part;
             part = new ArtAssetPart { Name = PrettyPartName(name), Layer = ArtAssetLayer.World };
             asset.Parts.Add(part);

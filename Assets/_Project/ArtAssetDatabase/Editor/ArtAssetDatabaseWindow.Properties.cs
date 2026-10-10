@@ -437,6 +437,9 @@ namespace KingdomSurvival.ArtAssets.Editor
             Section("Под светом", true, "lit");
             Note("Нормали действуют только от местного источника: дневной свет освещает ровно и их заглушает — смотрите ночью.",
                 "Включите «Свет по кругу» или тащите источник инструментом «Свет» и переключайте «Учитывать карты нормалей»: с нормалями проявляется объём.");
+            Toggle enabled = new Toggle("Контрольный свет (точечный)") { value = state.LightEnabled, tooltip = "Выключено — источника нет: виден только общий свет дня или ночи." };
+            enabled.RegisterValueChangedCallback(evt => { state.LightEnabled = evt.newValue; litDirty = true; ScheduleStateSave(); BuildProperties(); });
+            Add(enabled);
             Toggle orbit = new Toggle("Свет по кругу") { value = state.LightOrbit, tooltip = "Источник ходит вокруг объекта — видно, как нормали лепят объём" };
             orbit.RegisterValueChangedCallback(evt => { state.LightOrbit = evt.newValue; ScheduleStateSave(); });
             Add(orbit);

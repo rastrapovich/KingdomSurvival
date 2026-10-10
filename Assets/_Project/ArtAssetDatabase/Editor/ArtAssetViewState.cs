@@ -34,6 +34,8 @@ namespace KingdomSurvival.ArtAssets.Editor
         public bool AllViews;
         public float LightIntensity = 1.4f, LightHeight = 1.2f, LightNormalDistance = 1.5f;
         public bool LightNormals = true, LightNight = true, LightOrbit;
+        // Контрольный точечный источник карточки «Под светом»; выключен — только общий свет (день или ночь).
+        public bool LightEnabled = true;
         public Vector2 LightPosition = new Vector2(.38f, .58f);
 
         // Тесты не трогают настройки просмотра пользователя.

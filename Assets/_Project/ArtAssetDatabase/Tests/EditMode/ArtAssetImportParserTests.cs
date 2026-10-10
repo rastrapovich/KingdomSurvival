@@ -298,6 +298,30 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(group.SourceFolder, Does.EndWith("/Трава"), "Папка источника — папка объекта.");
         }
 
+        // Имя объекта в имени каждого кадра (LowGrass_Wind_Loop_6s/Front/
+        // LowGrass_Wind_Loop_6s_0001.png) — это основа, а не часть с тем же именем.
+        [Test]
+        public void ObjectNameInFrameNames_IsTheMainPart()
+        {
+            foreach (string folder in new[] { "Front", "Back_Left" })
+                for (int i = 1; i <= 3; i++)
+                {
+                    Touch("LowGrass_Wind_Loop_6s/" + folder + "/LowGrass_Wind_Loop_6s_000" + i + ".png");
+                    Touch("LowGrass_Wind_Loop_6s/" + folder + "/LowGrass_Wind_Loop_6s_000" + i + "_n.png");
+                }
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { root + "/LowGrass_Wind_Loop_6s" });
+            Assert.That(plan.Unresolved, Is.Empty, string.Join("\n", plan.Unresolved.Select(item => item.Path + " — " + item.Reason)));
+            ArtAssetImportGroup group = plan.Groups.Single();
+            Assert.That(group.Parts, Is.EqualTo(new[] { "" }), "Кадры — в основе.");
+            Assert.That(group.MainViewCount, Is.EqualTo(2));
+            Assert.That(group.Slots.All(slot => slot.FrameCount == 3 && slot.NormalPath != null), Is.True);
+            // Своя часть по-прежнему распознаётся.
+            Touch("Дом/Front/Крыша.png");
+            Touch("Дом/Front/Дом.png");
+            ArtAssetImportGroup house = ArtAssetImportParser.ParsePaths(new[] { root + "/Дом" }).Groups.Single();
+            Assert.That(house.Parts, Is.EquivalentTo(new[] { "", "крыша" }));
+        }
+
         // Плоские имена рендера с отметкой времени: из нескольких рендеров
         // одного ракурса берётся самый свежий; отметка — не часть имени.
         [Test]

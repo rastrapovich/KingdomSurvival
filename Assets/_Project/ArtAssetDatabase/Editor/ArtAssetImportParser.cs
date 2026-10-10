@@ -505,9 +505,8 @@ namespace KingdomSurvival.ArtAssets.Editor
                 string rest = Join(stem);
                 if (folderIndex >= 0)
                 {
-                    if (stem.All(ActionTokens.Contains)) rest = string.Empty;
-                    part = MainPartNames.Contains(rest) ? string.Empty : rest;
                     objectName = objectIndex >= 0 ? segments[objectIndex] : null;
+                    part = PartName(stem, objectName, forcedAssetName);
                 }
                 else
                 {
@@ -520,9 +519,8 @@ namespace KingdomSurvival.ArtAssets.Editor
             else if (folderIndex >= 0)
             {
                 view = folderView;
-                string rest = stem.All(ActionTokens.Contains) ? string.Empty : Join(stem);
-                part = MainPartNames.Contains(rest) ? string.Empty : rest;
                 objectName = objectIndex >= 0 ? segments[objectIndex] : null;
+                part = PartName(stem, objectName, forcedAssetName);
             }
             else
             {
@@ -537,6 +535,23 @@ namespace KingdomSurvival.ArtAssets.Editor
         }
 
         public static string NormalizeKey(string name) => Join(Tokens(name ?? string.Empty));
+
+        // Часть по остатку имени файла в папке ракурса. Основа — пусто, имя
+        // основы, только слова действия или имя самого объекта (рендер кладёт
+        // имя объекта в имя каждого кадра: Трава/Front/Трава_Front_0001.png).
+        private static string PartName(List<string> stem, string objectName, string forcedAssetName)
+        {
+            List<string> rest = stem.Where(token => !ActionTokens.Contains(token)).ToList();
+            string joined = Join(rest);
+            if (MainPartNames.Contains(joined)) return string.Empty;
+            foreach (string name in new[] { objectName, forcedAssetName })
+            {
+                if (string.IsNullOrEmpty(name)) continue;
+                List<string> own = Tokens(name).Where(token => !ActionTokens.Contains(token)).ToList();
+                if (Join(own) == joined) return string.Empty;
+            }
+            return joined;
+        }
 
         private static bool IsAction(string segment)
         {

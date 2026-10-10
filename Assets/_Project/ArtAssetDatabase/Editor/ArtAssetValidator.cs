@@ -75,10 +75,9 @@ namespace KingdomSurvival.ArtAssets.Editor
                     if (SpriteNormalMaps.Find(slot.Sprite) != slot.NormalMap)
                         Add(ArtAssetIssueLevel.Warning, where + "нормаль не подключена к рисунку (_NormalMap) — нажмите «Исправить подключения».", view);
                     if (sheet) Add(ArtAssetIssueLevel.Info, where + "рисунок из листа: нормаль назначается всему листу.", view);
-                    float length = ArtAssetDrawing.NormalLength(slot.NormalMap);
-                    if (length > GammaLength)
-                        Add(ArtAssetIssueLevel.Warning, where + "нормаль, похоже, записана с гамма-коррекцией sRGB (длина векторов " + length.ToString("0.00") +
-                                                        " вместо 1,00): свет ложится криво. В Blender — View Transform = Raw; для готового файла — «Исправить гамму нормалей».", view);
+                    // Гамма и «не те» нормали — по доле единичных векторов, а не по средней длине.
+                    string problem = ArtAssetNormalCheck.Problem(ArtAssetNormalCheck.Measure(slot.NormalMap));
+                    if (problem != null) Add(ArtAssetIssueLevel.Warning, where + problem, view);
                     Texture2D texture = slot.Sprite.texture;
                     if (sheetNormals.TryGetValue(texture, out Texture2D other) && other != slot.NormalMap)
                         Add(ArtAssetIssueLevel.Warning, where + "один лист рисунков — разные нормали: у листа может быть только одна.", view);
@@ -148,8 +147,6 @@ namespace KingdomSurvival.ArtAssets.Editor
             }
         }
 
-        // Длина вектора, начиная с которой нормаль считается записанной с гаммой.
-        public const float GammaLength = 1.06f;
 
         // Подключить нормали заново по записи (вторая текстура, импорт как
         // Normal map); нормаль, подключённую к рисунку, но не записанную в
@@ -199,32 +196,14 @@ namespace KingdomSurvival.ArtAssets.Editor
                          .SelectMany(slot => new[] { slot.NormalMap }.Concat((slot.Frames ?? new List<ArtAssetFrame>()).Select(frame => frame?.NormalMap)))
                          .Where(normal => normal != null).Distinct())
             {
-                if (ArtAssetDrawing.NormalLength(normal) <= GammaLength) continue;
+                // Только записанные с гаммой: после пересчёта они единичные и второй раз не пересчитываются.
+                if (ArtAssetNormalCheck.Measure(normal).Encoding != ArtAssetNormalEncoding.Gamma) continue;
                 string path = AssetDatabase.GetAssetPath(normal);
-                Texture2D source = new Texture2D(2, 2, TextureFormat.RGBA32, false, true);
-                try
-                {
-                    if (!source.LoadImage(System.IO.File.ReadAllBytes(path), false)) continue;
-                    Color32[] pixels = source.GetPixels32();
-                    for (int i = 0; i < pixels.Length; i++)
-                    {
-                        Color32 c = pixels[i];
-                        pixels[i] = new Color32(Linear(c.r), Linear(c.g), Linear(c.b), c.a);
-                    }
-                    source.SetPixels32(pixels);
-                    source.Apply(false);
-                    System.IO.File.WriteAllBytes(path, source.EncodeToPNG());
-                }
-                finally
-                {
-                    Object.DestroyImmediate(source);
-                }
+                if (!ArtAssetNormalCheck.Linearize(path)) continue;
                 AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
                 count++;
             }
             return count;
         }
-
-        private static byte Linear(byte value) => (byte)Mathf.Clamp(Mathf.RoundToInt(Mathf.GammaToLinearSpace(value / 255f) * 255f), 0, 255);
     }
 }

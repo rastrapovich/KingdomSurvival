@@ -134,7 +134,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     ArtAssetPart part = FindOrAddPart(working, slot.Part);
                     ArtAssetPartView view = part.View(slot.View);
                     Sprite sprite = slot.ColorPath != null ? ImportColor(working, part, slot.View, slot.ColorPath, view.Sprite, transaction) : view.Sprite;
-                    Texture2D normal = slot.NormalPath != null ? ImportNormal(working, part, slot.View, slot.NormalPath, view.NormalMap, transaction) : view.NormalMap;
+                    Texture2D normal = slot.NormalPath != null ? ImportNormal(working, part, slot.View, slot.NormalPath, view.NormalMap, transaction, 0, warnings) : view.NormalMap;
                     view.Sprite = sprite;
                     view.NormalMap = normal;
                     if (sprite != null && normal != null)
@@ -177,7 +177,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                 string where = asset.Name + " · " + ArtAssetLabels.ViewTitle(slot.View) + " · кадр " + (number + 1);
                 Sprite sprite = ImportColor(asset, part, slot.View, source.ColorPath, current?.Sprite, transaction, number);
                 Texture2D normal = source.NormalPath != null
-                    ? ImportNormal(asset, part, slot.View, source.NormalPath, current?.NormalMap, transaction, number)
+                    ? ImportNormal(asset, part, slot.View, source.NormalPath, current?.NormalMap, transaction, number, warnings)
                     : null;
                 if (normal != null) AssignNormal(sprite, normal, warnings, where);
                 Vector2Int size = SpriteNormalMaps.SourceSize(sprite.texture);
@@ -314,11 +314,19 @@ namespace KingdomSurvival.ArtAssets.Editor
         }
 
         private static Texture2D ImportNormal(ArtAssetDefinition asset, ArtAssetPart part, ArtAssetView view, string source, Texture2D current,
-            FileTransaction transaction, int frame = 0)
+            FileTransaction transaction, int frame = 0, List<string> warnings = null)
         {
             string currentPath = current != null ? AssetDatabase.GetAssetPath(current) : null;
             bool external = !IsProjectPath(source);
             string path = Bring(source, ManagedPath(asset, part, view, true, frame), currentPath, asset, transaction);
+            // Нормаль с гаммой sRGB (Blender не в Raw) — исправить в копии проекта
+            // сразу; файл пользователя вне проекта не меняется. Другие «не те»
+            // нормали пересчёт не лечит — о них скажет проверка.
+            if (external && ArtAssetNormalCheck.Measure(path).Encoding == ArtAssetNormalEncoding.Gamma && ArtAssetNormalCheck.Linearize(path))
+            {
+                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+                if (warnings != null && !warnings.Contains(GammaFixedNote)) warnings.Add(GammaFixedNote);
+            }
             if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
                 throw new InvalidOperationException("файл не является изображением: " + path);
             if (external && importer.textureType != TextureImporterType.NormalMap) ConfigureNormal(importer);
@@ -330,6 +338,7 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         private static readonly string SpriteType = ((int)TextureImporterType.Sprite).ToString();
         private static readonly string NormalType = ((int)TextureImporterType.NormalMap).ToString();
+        public const string GammaFixedNote = "Нормали, записанные с гаммой sRGB (Blender не в Raw), исправлены при загрузке — в копии проекта; ваши файлы не изменены.";
 
         // Управляемые копии настраивает ArtAssetTexturePostprocessor при первом
         // импорте; здесь — только если настройки всё же не те.
@@ -392,7 +401,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             try
             {
                 if (kind == ArtAssetFileKind.Color) sprite = ImportColor(asset, part, view, source, slot.Sprite, transaction);
-                else normal = ImportNormal(asset, part, view, source, slot.NormalMap, transaction);
+                else normal = ImportNormal(asset, part, view, source, slot.NormalMap, transaction, 0, warnings);
                 if (sprite != null && normal != null) AssignNormal(sprite, normal, warnings, ArtAssetLabels.ViewTitle(view));
                 transaction.Commit();
             }
@@ -499,7 +508,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     for (int i = 0; i < Math.Min(frames, pair.Value.Count); i++)
                     {
                         Texture2D current = i == 0 ? slot.NormalMap : slot.Frames[i - 1]?.NormalMap;
-                        Texture2D normal = ImportNormal(asset, part, pair.Key.view, pair.Value[i], current, transaction, i);
+                        Texture2D normal = ImportNormal(asset, part, pair.Key.view, pair.Value[i], current, transaction, i, warnings);
                         AssignNormal(i == 0 ? slot.Sprite : slot.Frames[i - 1].Sprite, normal, warnings, where + (frames > 1 ? " · кадр " + (i + 1) : ""));
                         plan.Add((slot, i, normal));
                     }

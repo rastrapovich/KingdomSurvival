@@ -134,23 +134,36 @@ namespace KingdomSurvival.ArtAssets.Tests
         }
 
         // Нормаль, записанная с гаммой sRGB (как из Blender не в Raw): «плоская»
-        // (128,128,255) стала (188,188,255). Проверка это видит, «Исправить
-        // гамму» возвращает длину векторов к 1. Нормаль, подключённая к рисунку,
-        // но не записанная в карточке, подхватывается «Исправить подключения».
+        // (128,128,255) стала (188,188,255). Загрузка папкой исправляет копию
+        // в проекте сама (файл пользователя не меняется); уже лежащую в проекте
+        // такую карту видит проверка, «Исправить гамму» возвращает длину
+        // векторов к 1 и второй раз её не трогает. Нормаль, подключённая к
+        // рисунку, но не записанная в карточке, подхватывается «Исправить подключения».
         [Test]
-        public void GammaEncodedNormal_IsDetectedAndFixed_AndLostRecordIsRepaired()
+        public void GammaEncodedNormal_IsFixedOnImport_DetectedAndFixedOnce_AndLostRecordIsRepaired()
         {
             Png("Телега/Front/color.png", 32, 32, Color.red);
             Png("Телега/Front/normal.png", 32, 32, new Color(188 / 255f, 188 / 255f, 1, 1));
-            ImportCart();
+            byte[] original = File.ReadAllBytes(source + "/Телега/Front/normal.png");
+            ArtAssetImportResult result = ImportCart();
             ArtAssetDefinition cart = catalog.assets.Single();
             ArtAssetPartView slot = cart.MainPart.FindView(ArtAssetView.Front);
-            Assert.That(ArtAssetDrawing.NormalLength(slot.NormalMap), Is.GreaterThan(ArtAssetValidator.GammaLength));
-            Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.True);
+            Assert.That(ArtAssetNormalCheck.Measure(slot.NormalMap).Encoding, Is.EqualTo(ArtAssetNormalEncoding.Correct), "Исправлено при загрузке.");
+            Assert.That(ArtAssetDrawing.NormalLength(slot.NormalMap), Is.EqualTo(1f).Within(.03f));
+            Assert.That(result.Warnings, Has.Member(ArtAssetImporter.GammaFixedNote));
+            Assert.That(File.ReadAllBytes(source + "/Телега/Front/normal.png"), Is.EqualTo(original), "Файл пользователя не изменён.");
+            Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.False);
 
+            // Такая же карта уже в проекте (загружена раньше) — проверка и кнопка.
+            string path = AssetDatabase.GetAssetPath(slot.NormalMap);
+            File.WriteAllBytes(path, original);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+            Assert.That(ArtAssetNormalCheck.Measure(slot.NormalMap).Encoding, Is.EqualTo(ArtAssetNormalEncoding.Gamma));
+            Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.True);
             Assert.That(ArtAssetValidator.FixNormalGamma(cart), Is.EqualTo(1));
             Assert.That(ArtAssetDrawing.NormalLength(slot.NormalMap), Is.EqualTo(1f).Within(.03f));
             Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.False);
+            Assert.That(ArtAssetValidator.FixNormalGamma(cart), Is.EqualTo(0), "Исправленная карта второй раз не пересчитывается.");
 
             // Запись нормали потеряна (например, Undo импорта), а к рисунку она подключена.
             Texture2D normal = slot.NormalMap;
@@ -158,6 +171,35 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(ArtAssetValidator.Validate(catalog, cart).Any(issue => issue.Text.Contains("не записана в карточке")), Is.True);
             Assert.That(ArtAssetValidator.RepairNormals(cart), Is.EqualTo(1));
             Assert.That(slot.NormalMap == normal, Is.True);
+        }
+
+        // Карта «не для 2D-света» (мировые нормали: векторы не единичные ни как
+        // записано, ни после пересчёта, часть смотрит от зрителя) — при загрузке
+        // не трогается, проверка говорит прямо, «Исправить гамму» её не меняет.
+        // Правильная карта со средней длиной чуть больше 1 гаммой не считается.
+        [Test]
+        public void OtherNormalKind_IsReportedButNotRecomputed_AndCorrectMapIsNotGamma()
+        {
+            Png("Телега/Front/color.png", 32, 32, Color.red);
+            Png("Телега/Front/normal.png", 32, 32, new Color(230 / 255f, 50 / 255f, 60 / 255f, 1));
+            byte[] original = File.ReadAllBytes(source + "/Телега/Front/normal.png");
+            ArtAssetImportResult result = ImportCart();
+            ArtAssetDefinition cart = catalog.assets.Single();
+            ArtAssetPartView slot = cart.MainPart.FindView(ArtAssetView.Front);
+            Assert.That(ArtAssetNormalCheck.Measure(slot.NormalMap).Encoding, Is.EqualTo(ArtAssetNormalEncoding.Other));
+            Assert.That(File.ReadAllBytes(AssetDatabase.GetAssetPath(slot.NormalMap)), Is.EqualTo(original), "Копия не пересчитана.");
+            Assert.That(result.Warnings, Has.No.Member(ArtAssetImporter.GammaFixedNote));
+            List<ArtAssetIssue> issues = ArtAssetValidator.Validate(catalog, cart);
+            Assert.That(issues.Any(issue => issue.Text.Contains("не похоже на карту нормалей")), Is.True);
+            Assert.That(issues.Any(issue => issue.Text.Contains("гамма-коррекцией")), Is.False);
+            Assert.That(ArtAssetValidator.FixNormalGamma(cart), Is.EqualTo(0));
+
+            // Правильная карта с краями: 70 % единичных, средняя длина 1,08 (как у рендера фигур).
+            Color32[] pixels = new Color32[100];
+            for (int i = 0; i < 100; i++) pixels[i] = i < 70 ? new Color32(128, 128, 255, 255) : new Color32(250, 250, 250, 255);
+            ArtAssetNormalStats stats = ArtAssetNormalCheck.Measure(pixels);
+            Assert.That(stats.Length, Is.GreaterThan(1.06f));
+            Assert.That(stats.Encoding, Is.EqualTo(ArtAssetNormalEncoding.Correct), "Не гамма: пересчёт такую карту испортил бы.");
         }
 
         [Test]

@@ -171,6 +171,24 @@ namespace KingdomSurvival.LocationRendering.Editor
                     settings.Add(new HelpBox("У ассета нет рисунков — показана розовая заглушка.", HelpBoxMessageType.Warning));
             }
 
+            // Главное для боя на месте — сразу на виду: основание предмета —
+            // стена и в исследовании, и в бою (гексы с центром на нём недоступны).
+            UnityEngine.UIElements.Toggle blocks = new UnityEngine.UIElements.Toggle("Перекрывает проход (и в бою — стена)")
+            {
+                value = resolved.BlocksMovement,
+                tooltip = "Основание предмета непроходимо: командир обходит его, а в бою гексы, чей центр на основании, — стены. " +
+                          "Размер основания — «Проходимость» ниже или в Базе ассетов."
+            };
+            blocks.RegisterValueChangedCallback(evt => Change(() =>
+            {
+                if (!selected.IsOverridden(LocationAssetOverride.Passability))
+                {
+                    selected.Footprint = resolved.FootprintSize;
+                    selected.Overrides |= LocationAssetOverride.Passability;
+                }
+                selected.BlocksMovement = evt.newValue;
+            }, true));
+            settings.Add(blocks);
             Number("Масштаб экземпляра", selected.Scale, .1f, 4, value => selected.Scale = Mathf.Max(.05f, value),
                 "1 — игровой размер ассета. Опора остаётся на месте.");
             Toggle("Отразить по X", selected.FlipX, value => selected.FlipX = value);

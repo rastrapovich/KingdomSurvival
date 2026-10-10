@@ -320,6 +320,24 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(ArtAssetImportParser.Stamp("x__20261009-142811-641.png"), Is.EqualTo("202610091428110641"));
         }
 
+        // Нормали папкой, как в Базе анимаций: имена любые, суффикс не нужен;
+        // ракурс — по папке, порядок кадров — по номеру в конце имени.
+        [Test]
+        public void NormalsFolder_WithoutSuffix_ByViewAndFrameNumber()
+        {
+            Touch("Нормали/Front/Idle_Front_0002.png");
+            Touch("Нормали/Front/Idle_Front_0001.png");
+            Touch("Нормали/Back_Left/whatever.png");
+            Touch("Нормали/loose.png");
+            List<string> problems = new List<string>();
+            Dictionary<(ArtAssetView view, string part), List<string>> slots =
+                ArtAssetImportParser.ParseNormals(new[] { root + "/Нормали" }, "Трава", ArtAssetView.Back, problems);
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+            Assert.That(slots[(ArtAssetView.Front, "")].Select(Path.GetFileName), Is.EqualTo(new[] { "Idle_Front_0001.png", "Idle_Front_0002.png" }));
+            Assert.That(slots[(ArtAssetView.BackLeft, "")].Count, Is.EqualTo(1));
+            Assert.That(slots[(ArtAssetView.Back, "")].Single(), Does.EndWith("loose.png"), "Без ракурса — в выбранный ракурс карточки.");
+        }
+
         [Test]
         public void MissingViewFallback_IsNearestOnTheRing_NextInOrderFirst()
         {

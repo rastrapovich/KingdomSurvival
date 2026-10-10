@@ -353,6 +353,12 @@ namespace KingdomSurvival.BattleSandbox
             {
                 PlayerFirstRoundInitiativeBonus = campaignBattle.PlayerFirstRoundInitiativeBonus
             };
+            // ПР-12К: поле — гексы всей локации.
+            if (campaignBattle.UsesLocationGrid)
+            {
+                layout.Width = campaignBattle.GridWidth;
+                layout.Height = campaignBattle.GridHeight;
+            }
             // Бой поверх рисунка места: стены — из разметки места (в запросе),
             // отключённые гексы поля не применяются.
             if (!campaignBattle.IgnoreFieldDisabledCells)
@@ -363,7 +369,7 @@ namespace KingdomSurvival.BattleSandbox
             foreach (CampaignBattleCell cell in campaignBattle.BlockedCells ?? new List<CampaignBattleCell>())
             {
                 HexCoord blocked = new HexCoord(cell.Q, cell.R);
-                if (SandboxArenaShape.Contains(blocked))
+                if (layout.InBoard(blocked))
                     layout.BlockedCells.Add(blocked);
             }
             foreach (CampaignBattleCell cell in campaignBattle.DifficultCells ?? new List<CampaignBattleCell>())
@@ -998,6 +1004,22 @@ namespace KingdomSurvival.BattleSandbox
             {
                 surface.style.backgroundColor = Color.clear;
                 surface.SetWorldUnderlay((campaignBattle.BlockedCells ?? new List<CampaignBattleCell>()).Select(cell => new HexCoord(cell.Q, cell.R)));
+            }
+            // Гексы всей локации: поле — весь рисунок места (его размер и
+            // положение на экране задаёт камера боя места).
+            if (campaignBattle != null && campaignBattle.UsesLocationGrid)
+            {
+                LocationBattleGrid grid = new LocationBattleGrid(
+                    new Vector2(campaignBattle.GridCanvasWidth, campaignBattle.GridCanvasHeight), campaignBattle.GridHexSize);
+                surface.SetLocationGrid(grid);
+                boardElement.SetLocationGrid(grid);
+                surface.style.flexGrow = 0f;
+                surface.style.flexShrink = 0f;
+                surface.style.minWidth = 0f;
+                surface.style.minHeight = 0f;
+                surface.style.position = Position.Absolute;
+                surface.style.left = 0f;
+                surface.style.top = 0f;
             }
             BattlefieldSurface = surface;
             // В редакторе правки окна базы видны в идущем бою.

@@ -888,13 +888,17 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             IReadOnlyDictionary<HexCoord, int> reachable = GetReachable(unit.Id);
+            // ПР-12К: на большом поле (вся локация) — по длине пути в обход
+            // стен, а не по прямой: иначе противник упирается в стену.
+            Dictionary<HexCoord, int> path = usesCompactArenaShape ? null : PathDistances(target);
+            int Distance(HexCoord cell) => path != null && path.TryGetValue(cell, out int steps) ? steps : path != null ? 100000 + cell.DistanceTo(target) : cell.DistanceTo(target);
             HexCoord best = unit.Position;
-            int bestDistance = best.DistanceTo(target);
+            int bestDistance = Distance(best);
             int bestCost = 0;
 
             foreach (KeyValuePair<HexCoord, int> pair in reachable)
             {
-                int distance = pair.Key.DistanceTo(target);
+                int distance = Distance(pair.Key);
                 if (distance < bestDistance ||
                     (distance == bestDistance && pair.Value < bestCost) ||
                     (distance == bestDistance && pair.Value == bestCost && pair.Key.CompareTo(best) < 0))
@@ -906,6 +910,27 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             return best;
+        }
+
+        // Длина пути до клетки target по проходимым клеткам (без учёта фигур).
+        private Dictionary<HexCoord, int> PathDistances(HexCoord target)
+        {
+            Dictionary<HexCoord, int> distances = new Dictionary<HexCoord, int> { { target, 0 } };
+            Queue<HexCoord> frontier = new Queue<HexCoord>();
+            frontier.Enqueue(target);
+            while (frontier.Count > 0)
+            {
+                HexCoord current = frontier.Dequeue();
+                int next = distances[current] + 1;
+                foreach (HexCoord neighbor in current.Neighbors())
+                {
+                    if (distances.ContainsKey(neighbor) || !IsInside(neighbor) || GetTerrain(neighbor) == SandboxTerrain.Impassable)
+                        continue;
+                    distances[neighbor] = next;
+                    frontier.Enqueue(neighbor);
+                }
+            }
+            return distances;
         }
 
         private SandboxUnitState FindBestReachableAttackTarget(SandboxUnitState attacker)

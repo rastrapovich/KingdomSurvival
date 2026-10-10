@@ -200,8 +200,17 @@ public sealed class CampaignBattleRequest
     // его стены задаёт разметка места (BlockedCells), а не отключённые гексы
     // собственного рисунка поля.
     public bool IgnoreFieldDisabledCells;
+    // ПР-12К: бой на месте идёт на гексах всей локации — прямоугольная сетка
+    // GridWidth × GridHeight клеток размера GridHexSize (пиксели рисунка
+    // места GridCanvasWidth × GridCanvasHeight). 0 — арена поля 10×7.
+    public int GridWidth;
+    public int GridHeight;
+    public float GridHexSize;
+    public float GridCanvasWidth;
+    public float GridCanvasHeight;
 
     public bool IsLocal => SourceKind == CampaignBattleSourceKind.Local;
+    public bool UsesLocationGrid => IsLocal && GridWidth > 0 && GridHeight > 0 && GridHexSize > 0;
 }
 
 public enum CampaignBattleOutcome

@@ -29,7 +29,6 @@ namespace KingdomSurvival.LocationRendering.Editor
         private readonly HashSet<HexCoord> arenaDifficult = new HashSet<HexCoord>();
         private SerializedObject fieldsSerialized;
         private LocalLocationGeometry arenaGeometry;
-        private Vector2 arenaCellsCenter;
 
         // Слой над холстом: обрезан по рисунку, мышь не перехватывает.
         private VisualElement BuildArenaLayer()
@@ -66,16 +65,6 @@ namespace KingdomSurvival.LocationRendering.Editor
             return geometry.ArenaCenterFor(encounter, anchor);
         }
 
-        // Где показать гексы: кадр боя выбранного столкновения; столкновений
-        // нет — кадр у старта теста (или в середине места), чтобы размер и вид
-        // гекса были видны на рисунке всегда.
-        private Vector2 HexFrameCenter()
-        {
-            LocalEncounterDefinition encounter = SelectedEncounter;
-            if (encounter != null) return ArenaCenterOf(encounter);
-            return Visual != null ? LocationVisualGeometry.ToPixel(Location, Visual.TestStartPoint) : CanvasSize / 2;
-        }
-
         // Кадр боя — туда же, где он на рисунке.
         private void SyncArenaView()
         {
@@ -88,8 +77,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (!show) return;
 
             Rect frame = CanvasFrame(area);
-            Vector2 arenaCenter = HexFrameCenter();
-            Rect rect = geometry.FrameRect(arenaCenter);
+            // Гексы боя — на всём рисунке места: бой идёт на всей локации.
+            Rect rect = new Rect(Vector2.zero, CanvasSize);
             Vector2 a = ToGui(frame, rect.min), b = ToGui(frame, rect.max);
             arenaClip.style.left = frame.x;
             arenaClip.style.top = frame.y;
@@ -101,24 +90,24 @@ namespace KingdomSurvival.LocationRendering.Editor
             arenaView.style.height = b.y - a.y;
 
             BattlefieldHexStyle style = fields.GetHexStyle(field);
-            bool changed = field != arenaField || style != arenaView.HexStyle;
+            bool changed = field != arenaField || style != arenaView.HexStyle || geometry != arenaGeometry;
             if (changed)
             {
                 arenaField = field;
+                arenaView.SetLocationGrid(geometry.BattleGrid);
                 arenaView.Show(field, style);
             }
-            // Клетки кадра пересчитываются, только когда сдвинулся кадр или пересобрано место.
-            if (!changed && geometry == arenaGeometry && arenaCenter == arenaCellsCenter) return;
+            // Клетки пересчитываются, только когда пересобрано место.
+            if (!changed) return;
             arenaGeometry = geometry;
-            arenaCellsCenter = arenaCenter;
-            HashSet<HexCoord> blocked = geometry.ArenaBlockedCells(arenaCenter);
+            HashSet<HexCoord> blocked = geometry.GridBlockedCells();
             if (changed || !blocked.SetEquals(arenaBlocked))
             {
                 arenaBlocked.Clear();
                 arenaBlocked.UnionWith(blocked);
                 arenaView.SetWorldUnderlay(blocked);
             }
-            HashSet<HexCoord> difficult = geometry.ArenaDifficultCells(arenaCenter);
+            HashSet<HexCoord> difficult = geometry.GridDifficultCells();
             if (!difficult.SetEquals(arenaDifficult))
             {
                 arenaDifficult.Clear();

@@ -25,6 +25,15 @@ namespace KingdomSurvival.BattleSandbox
         private BattlefieldHexStyle hexStyle = new BattlefieldHexStyle();
         // Основной вид гексов рисует BattlefieldView под полем.
         private bool baseGridDrawnBelow;
+        // ПР-12К: бой на гексах всей локации — раскладка по сетке места в
+        // прямоугольнике поля (весь элемент — рисунок места).
+        private LocationBattleGrid? locationGrid;
+
+        public void SetLocationGrid(LocationBattleGrid? grid)
+        {
+            locationGrid = grid;
+            MarkDirtyRepaint();
+        }
 
         private SandboxBattle battle;
         private string selectedTargetId;
@@ -1258,6 +1267,11 @@ namespace KingdomSurvival.BattleSandbox
 
         private HexLayout CalculateLayout()
         {
+            if (locationGrid.HasValue)
+            {
+                BattlefieldGridLayout grid = locationGrid.Value.LayoutIn(new Rect(0f, 0f, contentRect.width, contentRect.height));
+                return new HexLayout(grid.Size, grid.Origin, grid.VerticalScale);
+            }
             // Стандартная арена — в кадре поля боя, как фон и окно базы.
             if (SandboxArenaShape.MatchesDimensions(battle.Width, battle.Height))
             {

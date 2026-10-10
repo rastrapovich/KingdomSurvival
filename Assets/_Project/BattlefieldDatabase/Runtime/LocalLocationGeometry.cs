@@ -9,9 +9,11 @@ namespace KingdomSurvival.BattlefieldDatabase
     // ПР-12К (канон v1.54 §28.3): геометрия исследуемого места.
     // Исследование: разметка местности места (как на глобальной карте) плюс
     // основания предметов художественной сборки — непроходимы.
-    // Бой: кадр поля из Базы полей боя (16:9, ширина BattleFrameWidth) лежит
-    // на рисунке места; его сетка — ровно настройки этого поля (масштаб и
-    // сдвиг сетки). Клетки, центр которых попал на непроходимое, — стены боя.
+    // Бой: гексы покрывают весь рисунок места (LocationBattleGrid); размер
+    // клетки — как у кадра поля из Базы полей боя (16:9, ширина
+    // BattleFrameWidth, масштаб сетки поля). Бой на месте идёт на всей сетке;
+    // клетки, центр которых вне рисунка или на непроходимом, — стены боя.
+    // Кадр (FrameRect) остался как начальный вид камеры боя.
     public sealed class LocalLocationGeometry
     {
         // Минимальное число клеток для отряда и противников в кадре боя.
@@ -157,6 +159,62 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         public const double DifficultRunMultiplier = 0.9;
 
+        // ------------------------------------------------------------------
+        // Сетка боя на всю локацию
+        // ------------------------------------------------------------------
+
+        private LocationBattleGrid? battleGrid;
+
+        public LocationBattleGrid BattleGrid => battleGrid ??= new LocationBattleGrid(new Vector2(CanvasWidth, CanvasHeight), ArenaHexSize);
+
+        // Стены боя: клетки, чей центр вне рисунка или на непроходимом.
+        public HashSet<HexCoord> GridBlockedCells()
+        {
+            LocationBattleGrid grid = BattleGrid;
+            BattlefieldGridLayout layout = grid.Layout;
+            HashSet<HexCoord> blocked = new HashSet<HexCoord>();
+            foreach (HexCoord cell in grid.Cells())
+            {
+                Vector2 point = layout.GetCenter(cell.Q, cell.R);
+                if (!IsPassable(point.x, point.y)) blocked.Add(cell);
+            }
+            return blocked;
+        }
+
+        public HashSet<HexCoord> GridDifficultCells()
+        {
+            LocationBattleGrid grid = BattleGrid;
+            BattlefieldGridLayout layout = grid.Layout;
+            HashSet<HexCoord> difficult = new HashSet<HexCoord>();
+            foreach (HexCoord cell in grid.Cells())
+            {
+                Vector2 point = layout.GetCenter(cell.Q, cell.R);
+                if (IsPassable(point.x, point.y) && Rules.RunSpeedMultiplier(Layer.GetAtPixel(point.x, point.y)) < DifficultRunMultiplier)
+                    difficult.Add(cell);
+            }
+            return difficult;
+        }
+
+        // Расстановка к бою на всей сетке: каждому — уникальная ближайшая
+        // свободная клетка по проходимой области (со своей стороны стены).
+        public bool TryAssignGridCells(IReadOnlyList<KeyValuePair<string, Vector2>> preferred, ISet<HexCoord> reserved, HashSet<HexCoord> blocked,
+            out Dictionary<string, HexCoord> assigned)
+        {
+            LocationBattleGrid grid = BattleGrid;
+            bool Passable(HexCoord cell) => grid.Contains(cell) && !blocked.Contains(cell);
+            List<KeyValuePair<string, HexCoord>> start = new List<KeyValuePair<string, HexCoord>>();
+            foreach (KeyValuePair<string, Vector2> entry in preferred)
+            {
+                HexCoord cell = grid.CellAt(entry.Value);
+                if (!Passable(cell)) cell = NearestGridPassable(cell, Passable);
+                start.Add(new KeyValuePair<string, HexCoord>(entry.Key, cell));
+            }
+            return SandboxLocalNavigation.TryAssignCells(start, Passable, reserved, out assigned);
+        }
+
+        private HexCoord NearestGridPassable(HexCoord from, Func<HexCoord, bool> passable) =>
+            BattleGrid.Cells().Where(passable).OrderBy(cell => cell.DistanceTo(from)).ThenBy(cell => cell).FirstOrDefault();
+
         // Бой на месте: кадр поля ложится на рисунок (центр — из редактора или
         // середина между отрядом и противниками), участники и противники
         // встают на ближайшие свободные клетки со своей стороны стены.
@@ -177,12 +235,19 @@ namespace KingdomSurvival.BattlefieldDatabase
             List<LocalPointData> anchor = enemies.Select(item => new LocalPointData(item.Value.x, item.Value.y))
                 .Concat(partyPoints.Select(item => new LocalPointData(item.Value.x, item.Value.y)))
                 .ToList();
+            // Начальный вид камеры боя — кадр у столкновения; поле — вся локация.
             arenaCenter = ArenaCenterFor(encounter, anchor);
-
-            if (!TryAssignArenaCells(arenaCenter, enemies, null, out Dictionary<string, HexCoord> enemyCells) ||
-                !TryAssignArenaCells(arenaCenter, partyPoints, new HashSet<HexCoord>(enemyCells.Values), out Dictionary<string, HexCoord> partyCells))
+            LocationBattleGrid grid = BattleGrid;
+            if (grid.IsTooLarge)
             {
-                error = "В кадре боя не хватает свободных клеток.";
+                error = "Место слишком велико для гексов этого размера (" + grid.CellCount + " клеток, предел " + LocationBattleGrid.MaxCells + ").";
+                return false;
+            }
+            HashSet<HexCoord> blocked = GridBlockedCells();
+            if (!TryAssignGridCells(enemies, null, blocked, out Dictionary<string, HexCoord> enemyCells) ||
+                !TryAssignGridCells(partyPoints, new HashSet<HexCoord>(enemyCells.Values), blocked, out Dictionary<string, HexCoord> partyCells))
+            {
+                error = "На месте не хватает свободных клеток для боя.";
                 return false;
             }
 
@@ -192,8 +257,13 @@ namespace KingdomSurvival.BattlefieldDatabase
                 encounter,
                 partyCells.ToDictionary(item => item.Key, item => new LocalCellData(item.Value.Q, item.Value.R)),
                 enemyCells.ToDictionary(item => item.Key, item => new LocalCellData(item.Value.Q, item.Value.R)),
-                ArenaBlockedCells(arenaCenter).Select(cell => new LocalCellData(cell.Q, cell.R)),
-                ArenaDifficultCells(arenaCenter).Select(cell => new LocalCellData(cell.Q, cell.R)));
+                blocked.Select(cell => new LocalCellData(cell.Q, cell.R)),
+                GridDifficultCells().Select(cell => new LocalCellData(cell.Q, cell.R)));
+            request.GridWidth = grid.Columns;
+            request.GridHeight = grid.Rows;
+            request.GridHexSize = grid.HexSize;
+            request.GridCanvasWidth = grid.Canvas.x;
+            request.GridCanvasHeight = grid.Canvas.y;
             return true;
         }
 
@@ -203,7 +273,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         {
             if (result == null)
                 return;
-            BattlefieldGridLayout layout = ArenaLayout(arenaCenter);
+            // Клетки боя — сетки всей локации (кадр больше не ограничивает поле).
+            BattlefieldGridLayout layout = BattleGrid.Layout;
             foreach (CampaignBattleSurvivor survivor in result.Survivors ?? new List<CampaignBattleSurvivor>())
             {
                 if (survivor == null || !survivor.HasCell)
@@ -434,16 +505,21 @@ namespace KingdomSurvival.BattlefieldDatabase
                 List<LocalPointData> anchor = enemies.Select(enemy => enemy.Point).ToList();
                 if (area != null)
                     anchor.Add(new LocalPointData(area.X + area.Width / 2, area.Y + area.Height / 2));
-                Vector2 center = geometry.ArenaCenterFor(encounter, anchor);
-                Rect frame = geometry.FrameRect(center);
+                // Бой — на всей локации: противник должен стоять на рисунке.
                 foreach (LocalEnemyDefinition enemy in enemies)
                 {
-                    if (!frame.Contains(new Vector2(enemy.Point.X, enemy.Point.Y)))
-                        errors.Add(prefix + ": противник '" + enemy.InstanceId + "' вне кадра боя '" + encounter.Id + "'.");
+                    if (enemy.Point == null || enemy.Point.X < 0 || enemy.Point.Y < 0 || enemy.Point.X > definition.CanvasWidth || enemy.Point.Y > definition.CanvasHeight)
+                        errors.Add(prefix + ": противник '" + enemy.InstanceId + "' вне рисунка места.");
                 }
-                int free = SandboxArenaShape.CellCount - geometry.ArenaBlockedCells(center).Count;
-                if (free < LocalLocationGeometry.PartyCapacity + enemies.Count)
-                    errors.Add(prefix + ": в кадре боя '" + encounter.Id + "' мало свободных клеток (" + free + ").");
+                LocationBattleGrid grid = geometry.BattleGrid;
+                if (grid.IsTooLarge)
+                    errors.Add(prefix + ": гексов боя слишком много (" + grid.CellCount + ", предел " + LocationBattleGrid.MaxCells + ") — увеличьте «Ширину кадра боя».");
+                else
+                {
+                    int free = grid.CellCount - geometry.GridBlockedCells().Count;
+                    if (free < LocalLocationGeometry.PartyCapacity + enemies.Count)
+                        errors.Add(prefix + ": на месте мало свободных клеток для боя (" + free + ").");
+                }
             }
 
             return errors;

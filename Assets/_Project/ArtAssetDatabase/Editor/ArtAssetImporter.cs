@@ -449,6 +449,62 @@ namespace KingdomSurvival.ArtAssets.Editor
             Changed(catalog);
         }
 
+        // Нормали папкой, как в Базе анимаций: папка с теми же ракурсами (и
+        // кадрами), что у рисунков; имена любые, суффикс «_normal» не нужен.
+        // Ракурс — по папке или имени, кадр — по номеру в конце имени (иначе
+        // по порядку). Рисунки ракурсов не меняются. Возвращает отчёт.
+        public static string AttachNormalFolder(ArtAssetDatabaseAsset catalog, ArtAssetDefinition asset, IEnumerable<string> paths, ArtAssetView? defaultView,
+            out int attached)
+        {
+            attached = 0;
+            List<string> warnings = new List<string>();
+            Dictionary<(ArtAssetView view, string part), List<string>> slots = ArtAssetImportParser.ParseNormals(paths, asset.Name, defaultView, warnings,
+                name => asset.Parts.Skip(1).Any(item => item != null && string.Equals(ArtAssetImportParser.NormalizeKey(item.Name), ArtAssetImportParser.NormalizeKey(name), StringComparison.OrdinalIgnoreCase)));
+            FileTransaction transaction = new FileTransaction();
+            List<(ArtAssetPartView slot, int index, Texture2D normal)> plan = new List<(ArtAssetPartView, int, Texture2D)>();
+            try
+            {
+                foreach (KeyValuePair<(ArtAssetView view, string part), List<string>> pair in slots)
+                {
+                    ArtAssetPart part = string.IsNullOrEmpty(pair.Key.part) ? asset.MainPart
+                        : asset.Parts.FirstOrDefault(item => item != null && string.Equals(ArtAssetImportParser.NormalizeKey(item.Name), ArtAssetImportParser.NormalizeKey(pair.Key.part), StringComparison.OrdinalIgnoreCase));
+                    string where = ArtAssetLabels.ViewTitle(pair.Key.view) + (string.IsNullOrEmpty(pair.Key.part) ? "" : " · " + pair.Key.part);
+                    ArtAssetPartView slot = part?.FindView(pair.Key.view);
+                    if (slot?.Sprite == null) { warnings.Add(where + ": у ассета нет рисунка — нормали пропущены."); continue; }
+                    int frames = slot.FrameCount;
+                    if (pair.Value.Count != frames)
+                        warnings.Add(where + ": нормалей " + pair.Value.Count + ", кадров " + frames + (pair.Value.Count < frames ? " — у остальных кадров нормалей нет." : " — лишние пропущены."));
+                    for (int i = 0; i < Math.Min(frames, pair.Value.Count); i++)
+                    {
+                        Texture2D current = i == 0 ? slot.NormalMap : slot.Frames[i - 1]?.NormalMap;
+                        Texture2D normal = ImportNormal(asset, part, pair.Key.view, pair.Value[i], current, transaction, i);
+                        AssignNormal(i == 0 ? slot.Sprite : slot.Frames[i - 1].Sprite, normal, warnings, where + (frames > 1 ? " · кадр " + (i + 1) : ""));
+                        plan.Add((slot, i, normal));
+                    }
+                }
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+            if (plan.Count > 0)
+            {
+                Undo.RecordObject(catalog, "Нормали папкой");
+                foreach ((ArtAssetPartView slot, int index, Texture2D normal) in plan)
+                {
+                    if (index == 0) slot.NormalMap = normal;
+                    else slot.Frames[index - 1].NormalMap = normal;
+                }
+                attached = plan.Count;
+                Changed(catalog);
+                AssetDatabase.SaveAssetIfDirty(catalog);
+            }
+            return "Нормалей подключено: " + attached + (slots.Count > 0 ? " (ракурсов " + slots.Count + ")" : "") + "." +
+                   (warnings.Count > 0 ? " ⚠ " + string.Join(" ", warnings.Take(6)) : "");
+        }
+
         // ПР-12П: снять кадры анимации ракурса — остаётся первый рисунок. Файлы не удаляются.
         public static void ClearFrames(ArtAssetDatabaseAsset catalog, ArtAssetPart part, ArtAssetView view)
         {

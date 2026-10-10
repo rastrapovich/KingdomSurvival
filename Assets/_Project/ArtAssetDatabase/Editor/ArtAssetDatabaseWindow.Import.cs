@@ -13,7 +13,7 @@ namespace KingdomSurvival.ArtAssets.Editor
     // ячейку ракурса — замена одного рисунка или нормали.
     public sealed partial class ArtAssetDatabaseWindow
     {
-        private enum DropKind { None, Reorder, Create, AddToAsset, Slot }
+        private enum DropKind { None, Reorder, Create, AddToAsset, Slot, Normals }
 
         private struct DropTarget
         {
@@ -121,6 +121,10 @@ namespace KingdomSurvival.ArtAssets.Editor
                 case DropKind.Reorder:
                     ReorderBefore(reorderId, target.Asset);
                     break;
+                case DropKind.Normals:
+                    cardView = target.View;
+                    AttachNormalFolder(target.Asset, paths);
+                    break;
                 case DropKind.Slot when target.Single:
                     AssignSingle(target.Asset, target.Part, target.View, paths[0], projectObject, target.Normal ? ArtAssetFileKind.Normal : ArtAssetFileKind.Color);
                     break;
@@ -166,6 +170,13 @@ namespace KingdomSurvival.ArtAssets.Editor
                     ArtAssetView view = ArtAssetLabels.Views[i];
                     bool normal = mouse.x >= normalRect.x - 2 || (single && LooksLikeNormal(paths[0]));
                     string partNote = selected.Parts.Count > 1 ? " · " + part.Name : "";
+                    // Папка на половину нормали — нормали папкой, как в Базе анимаций.
+                    if (normal && paths.Any(Directory.Exists))
+                        return new DropTarget
+                        {
+                            Kind = DropKind.Normals, Asset = selected, View = view, Rect = cell,
+                            Hint = "Нормали папкой → «" + selected.Name + "» (ракурсы по папкам или именам, без ракурса — «" + ArtAssetLabels.ViewTitle(view) + "»)"
+                        };
                     return new DropTarget
                     {
                         Kind = DropKind.Slot, Asset = selected, Part = part, View = view, Normal = normal, Single = single, DefaultView = view,

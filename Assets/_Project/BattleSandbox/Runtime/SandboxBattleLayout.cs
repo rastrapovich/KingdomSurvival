@@ -28,24 +28,36 @@ namespace KingdomSurvival.BattleSandbox
         public readonly HashSet<HexCoord> DifficultCells = new HashSet<HexCoord>();
         public int PlayerFirstRoundInitiativeBonus;
         public string LeaderUnitId;
+        // Размер поля: по умолчанию — арена 10×7 (её форма); иначе — прямоугольник
+        // Width × Height целиком (бой на всей локации).
+        public int Width = SandboxArenaShape.Width;
+        public int Height = SandboxArenaShape.Height;
+
+        public bool IsCompactArena => SandboxArenaShape.MatchesDimensions(Width, Height);
+
+        public bool InBoard(HexCoord cell) => IsCompactArena
+            ? SandboxArenaShape.Contains(cell)
+            : cell.Q >= 0 && cell.R >= 0 && cell.Q < Width && cell.R < Height;
 
         public bool IsPassable(HexCoord cell)
         {
-            return SandboxArenaShape.Contains(cell) && !BlockedCells.Contains(cell);
+            return InBoard(cell) && !BlockedCells.Contains(cell);
         }
 
         // Пустой список — раскладка годится для боя.
         public List<string> Validate()
         {
             List<string> errors = new List<string>();
+            if (Width <= 0 || Height <= 0)
+                errors.Add("Неверный размер поля: " + Width + "×" + Height + ".");
             foreach (HexCoord cell in BlockedCells)
             {
-                if (!SandboxArenaShape.Contains(cell))
+                if (!InBoard(cell))
                     errors.Add("Стена вне поля: " + cell + ".");
             }
             foreach (HexCoord cell in DifficultCells)
             {
-                if (!SandboxArenaShape.Contains(cell) || BlockedCells.Contains(cell))
+                if (!InBoard(cell) || BlockedCells.Contains(cell))
                     errors.Add("Трудная клетка вне доступной области: " + cell + ".");
             }
 
@@ -103,8 +115,9 @@ namespace KingdomSurvival.BattleSandbox
                 throw new InvalidOperationException("Бой не может начаться: " + string.Join(" ", errors));
 
             Dictionary<HexCoord, SandboxTerrain> terrain = new Dictionary<HexCoord, SandboxTerrain>();
-            foreach (HexCoord inactive in SandboxArenaShape.InactiveCells())
-                terrain[inactive] = SandboxTerrain.Impassable;
+            if (IsCompactArena)
+                foreach (HexCoord inactive in SandboxArenaShape.InactiveCells())
+                    terrain[inactive] = SandboxTerrain.Impassable;
             foreach (HexCoord blocked in BlockedCells)
                 terrain[blocked] = SandboxTerrain.Impassable;
             foreach (HexCoord difficult in DifficultCells)
@@ -121,8 +134,8 @@ namespace KingdomSurvival.BattleSandbox
 
             SandboxTerrainRules.RegisterBattle(units, terrain);
             SandboxBattle battle = new SandboxBattle(
-                SandboxArenaShape.Width,
-                SandboxArenaShape.Height,
+                Width,
+                Height,
                 units,
                 terrain,
                 BlockedCells);

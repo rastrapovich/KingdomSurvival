@@ -169,6 +169,70 @@ namespace KingdomSurvival.ArtAssets.Editor
             return plan;
         }
 
+        // Нормали папкой для одного ассета: ракурс (и часть) → файлы по порядку
+        // кадров. Суффикс «_normal» не нужен: всё в папке — нормали. Ракурс —
+        // по папке или имени; без ракурса — defaultView. Номер в конце имени —
+        // порядок кадров (без номера — по имени).
+        public static Dictionary<(ArtAssetView view, string part), List<string>> ParseNormals(IEnumerable<string> paths, string assetName,
+            ArtAssetView? defaultView, List<string> problems, Func<string, bool> isPart = null)
+        {
+            Dictionary<(ArtAssetView view, string part), List<(int frame, string path)>> found = new Dictionary<(ArtAssetView, string), List<(int, string)>>();
+            foreach ((string full, List<string> segments) in Collect(paths))
+            {
+                bool ok = Classify(segments, assetName, true, out _, out ArtAssetView view, out string part, out _, out string problem, out int frame);
+                if (!ok)
+                {
+                    if (problem != NoViewProblem || !defaultView.HasValue) { problems?.Add(Path.GetFileName(full) + ": " + problem); continue; }
+                    List<string> stem = Tokens(Path.GetFileNameWithoutExtension(full));
+                    RemoveTokens(stem, NormalTokens);
+                    if (stem.Count > 1 && stem[stem.Count - 1] == "n") stem.RemoveAt(stem.Count - 1);
+                    RemoveStamp(stem);
+                    frame = TakeFrameNumber(stem, out _);
+                    view = defaultView.Value;
+                    part = string.Empty;
+                }
+                // Остаток имени — часть, только если такая часть у ассета есть (имена нормалей любые).
+                string partName = !string.IsNullOrEmpty(part) && isPart != null && isPart(part) ? part : string.Empty;
+                (ArtAssetView, string) key = (view, partName);
+                if (!found.TryGetValue(key, out List<(int, string)> list)) found[key] = list = new List<(int, string)>();
+                list.Add((frame, full));
+            }
+            return found.ToDictionary(pair => pair.Key, pair => pair.Value.OrderBy(item => item.frame).ThenBy(item => item.path, StringComparer.OrdinalIgnoreCase)
+                .Select(item => item.path).ToList());
+        }
+
+        // Файлы пакета с путём от корня перетаскивания (папки — рекурсивно).
+        private static List<(string full, List<string> segments)> Collect(IEnumerable<string> paths)
+        {
+            List<(string full, List<string> segments)> files = new List<(string, List<string>)>();
+            foreach (string raw in paths ?? Enumerable.Empty<string>())
+            {
+                if (string.IsNullOrEmpty(raw)) continue;
+                string path = raw.Replace('\\', '/').TrimEnd('/');
+                if (Directory.Exists(path))
+                {
+                    string rootName = Path.GetFileName(path);
+                    foreach (string file in Directory.GetFiles(path, "*", SearchOption.AllDirectories).OrderBy(item => item, StringComparer.Ordinal))
+                    {
+                        string normalized = file.Replace('\\', '/');
+                        if (!IsImage(normalized)) continue;
+                        List<string> segments = new List<string> { rootName };
+                        segments.AddRange(normalized.Substring(path.Length).Trim('/').Split('/'));
+                        files.Add((normalized, segments));
+                    }
+                }
+                else if (IsImage(path))
+                {
+                    string parent = Path.GetFileName(Path.GetDirectoryName(path) ?? string.Empty);
+                    List<string> segments = new List<string>();
+                    if (!string.IsNullOrEmpty(parent)) segments.Add(parent);
+                    segments.Add(Path.GetFileName(path));
+                    files.Add((path, segments));
+                }
+            }
+            return files;
+        }
+
         // Разобранный файл пакета (первый проход).
         private sealed class ParsedFile
         {

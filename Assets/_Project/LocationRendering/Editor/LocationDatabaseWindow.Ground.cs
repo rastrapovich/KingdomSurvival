@@ -363,7 +363,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (!ok) { EditorUtility.DisplayDialog("Слои земли", message, "Понятно"); return; }
             GroundLayers.Layer layer = pendingLayer.Layer;
             pendingLayer = null;
-            groundView = layer == GroundLayers.Layer.Normal ? GroundView.Normal : layer == GroundLayers.Layer.Height ? GroundView.Height : GroundView.Color;
+            groundView = GroundView.Color;
             ClearGroundPreview();
             groundCheck = CheckGround(Location);
             BuildSettings(); RebuildPreview();
@@ -739,9 +739,12 @@ namespace KingdomSurvival.LocationRendering.Editor
         // Предпросмотр
         // ------------------------------------------------------------------
 
+        // Normal и Height (без света) — только на вкладке «Земля»; на других
+        // вкладках и после ухода с неё — Color под светом суток.
         private void ApplyGroundView()
         {
             if (renderer == null || Ground == null || !Ground.IsTiled) return;
+            if (tab != Tab.Ground) groundView = GroundView.Color;
             if (groundView == GroundView.Color) { renderer.ShowGroundOverride(null); return; }
             GroundView view = groundView;
             renderer.ShowGroundOverride((column, row) => PreviewSprite(Ground.Find(column, row), view));
@@ -878,6 +881,12 @@ namespace KingdomSurvival.LocationRendering.Editor
                 GUI.Label(new Rect(c.x + 4, c.y + 2, 260, 16), "кадр 16:9 у старта теста", EditorStyles.miniLabel);
             }
             Handles.EndGUI();
+            if (groundView != GroundView.Color && ground != null && ground.IsTiled)
+            {
+                // Нормали и высота показываются без света — о смене суток напоминает подпись.
+                GUIStyle note = new GUIStyle(EditorStyles.helpBox) { fontSize = 11, normal = { textColor = new Color(1, .85f, .45f) } };
+                GUI.Label(new Rect(8, frame.height - 30, 420, 22), "Показан " + groundView + " без света — время суток не видно. Вернуть: «Color».", note);
+            }
 
             if (renderer?.Height != null && frame.Contains(mouse) && (tab == Tab.Ground || groundView == GroundView.Height))
             {

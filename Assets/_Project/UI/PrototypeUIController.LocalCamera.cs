@@ -121,6 +121,7 @@ public partial class PrototypeUIController
         {
             localBattleZoom = 1f;
             localBattlePan = Vector2.zero;
+            localBattleCentered = false;
             ApplyLocalBattleCamera();
         }
         else
@@ -174,9 +175,16 @@ public partial class PrototypeUIController
             localBattlePan = Vector2.zero;
         }
         localBattlePanning = false;
+        localBattleCentered = false;
         if (localBattleSurface == null)
             return;
         localBattleSurface.style.transformOrigin = new TransformOrigin(0f, 0f);
+        // Поле — вся локация: окно камеры — родитель поля, лишнее обрезается.
+        if (localBattleSurface.HasLocationGrid && localBattleSurface.parent != null)
+        {
+            localBattleSurface.parent.style.overflow = Overflow.Hidden;
+            localBattleSurface.parent.RegisterCallback<GeometryChangedEvent>(_ => ApplyLocalBattleCamera());
+        }
         localBattleSurface.RegisterCallback<WheelEvent>(OnLocalBattleWheel);
         localBattleSurface.RegisterCallback<PointerDownEvent>(OnLocalBattlePointerDown, TrickleDown.TrickleDown);
         localBattleSurface.RegisterCallback<PointerMoveEvent>(OnLocalBattlePointerMove, TrickleDown.TrickleDown);
@@ -224,14 +232,34 @@ public partial class PrototypeUIController
     }
 
     // Прямоугольник поля в раскладке боя (без масштаба) — «окно» камеры.
-    private Rect LocalBattleArea => localBattleSurface != null ? localBattleSurface.layout : default;
+    // Поле на всю локацию больше экрана: окно — его родитель.
+    private Rect LocalBattleArea => localBattleSurface == null ? default
+        : localBattleSurface.HasLocationGrid && localBattleSurface.parent != null
+            ? new Rect(Vector2.zero, localBattleSurface.parent.contentRect.size)
+            : localBattleSurface.layout;
+
+    // Бой на всей локации стартует кадром у столкновения (как прежняя арена).
+    private bool localBattleCentered;
+
+    // Пикселей экрана на пиксель рисунка места при масштабе 1: кадр боя
+    // («Ширина кадра боя») — во всю ширину окна, как раньше арена.
+    private float LocalBattleBaseScale(Rect view) => view.width / Mathf.Max(1f, localGeometry != null ? localGeometry.FrameWidth : 1920f);
+
+    private float LocalBattleZoomFloor(Rect view)
+    {
+        if (localBattleSurface == null || !localBattleSurface.HasLocationGrid || localGeometry == null) return LocalBattleZoomMin;
+        float scale = LocalBattleBaseScale(view);
+        // Отдалить можно до всей локации целиком.
+        float whole = Mathf.Min(view.width / (localGeometry.CanvasWidth * scale), view.height / (localGeometry.CanvasHeight * scale));
+        return Mathf.Min(LocalBattleZoomMin, whole);
+    }
 
     private void SetLocalBattleZoom(float zoom, Vector2? anchorPanel)
     {
         if (localBattleSurface == null || localBattleSurface.parent == null)
             return;
-        float next = Mathf.Clamp(zoom, LocalBattleZoomMin, LocalBattleZoomMax);
         Rect area = LocalBattleArea;
+        float next = Mathf.Clamp(zoom, LocalBattleZoomFloor(area), LocalBattleZoomMax);
         Vector2 anchor = anchorPanel.HasValue
             ? localBattleSurface.parent.WorldToLocal(anchorPanel.Value) - area.position
             : area.size / 2f;
@@ -251,6 +279,23 @@ public partial class PrototypeUIController
             return;
         float zoom = localBattleZoom;
         Vector2 size = area.size * zoom;
+        if (localBattleSurface.HasLocationGrid && localGeometry != null)
+        {
+            // Поле — весь рисунок места в масштабе кадра боя.
+            float scale = LocalBattleBaseScale(area);
+            Vector2 canvas = new Vector2(localGeometry.CanvasWidth, localGeometry.CanvasHeight) * scale;
+            if (Mathf.Abs(localBattleSurface.resolvedStyle.width - canvas.x) > .5f || Mathf.Abs(localBattleSurface.resolvedStyle.height - canvas.y) > .5f)
+            {
+                localBattleSurface.style.width = canvas.x;
+                localBattleSurface.style.height = canvas.y;
+            }
+            size = canvas * zoom;
+            if (!localBattleCentered)
+            {
+                localBattleCentered = true;
+                localBattlePan = area.size / 2f - localArenaCenter * scale * zoom;
+            }
+        }
         localBattlePan = new Vector2(ClampPan(localBattlePan.x, area.width, size.x), ClampPan(localBattlePan.y, area.height, size.y));
         localBattleSurface.style.scale = new Scale(new Vector3(zoom, zoom, 1f));
         localBattleSurface.style.translate = new Translate(localBattlePan.x, localBattlePan.y);

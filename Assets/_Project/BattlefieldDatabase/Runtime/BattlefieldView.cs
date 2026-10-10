@@ -63,6 +63,18 @@ namespace KingdomSurvival.BattlefieldDatabase
             WorldUnderlay = true;
         }
 
+        // ПР-12К: гексы всей локации — элемент целиком изображает рисунок
+        // места, сетка — LocationBattleGrid в его прямоугольнике.
+        private LocationBattleGrid? locationGrid;
+
+        public bool HasLocationGrid => locationGrid.HasValue;
+
+        public void SetLocationGrid(LocationBattleGrid? grid)
+        {
+            locationGrid = grid;
+            Refresh();
+        }
+
         public BattlefieldView(bool cover)
         {
             this.cover = cover;
@@ -117,7 +129,8 @@ namespace KingdomSurvival.BattlefieldDatabase
             placeholderLayer.style.display = placeholder ? DisplayStyle.Flex : DisplayStyle.None;
             placeholderLabel.style.display = placeholder ? DisplayStyle.Flex : DisplayStyle.None;
             activeCells.Clear();
-            foreach (HexCoord cell in BattlefieldFrame.ActiveCells(worldUnderlay ? null : battlefield))
+            IEnumerable<HexCoord> cells = locationGrid.HasValue ? locationGrid.Value.Cells() : BattlefieldFrame.ActiveCells(worldUnderlay ? null : battlefield);
+            foreach (HexCoord cell in cells)
             {
                 if (!worldUnderlay || !underlayBlocked.Contains(cell))
                     activeCells.Add(cell);
@@ -137,8 +150,17 @@ namespace KingdomSurvival.BattlefieldDatabase
                 return;
 
             Rect gridArea = BattlefieldFrame.GetGridArea(battlefield);
-            FrameRect = BattlefieldFrame.FitFrame(area, gridArea, cover);
-            Layout = BattlefieldFrame.ComputeLayout(FrameRect, gridArea);
+            if (locationGrid.HasValue)
+            {
+                // Весь элемент — рисунок места.
+                FrameRect = new Rect(0f, 0f, area.width, area.height);
+                Layout = locationGrid.Value.LayoutIn(FrameRect);
+            }
+            else
+            {
+                FrameRect = BattlefieldFrame.FitFrame(area, gridArea, cover);
+                Layout = BattlefieldFrame.ComputeLayout(FrameRect, gridArea);
+            }
 
             frame.style.left = FrameRect.x;
             frame.style.top = FrameRect.y;

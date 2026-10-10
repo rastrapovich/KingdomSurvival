@@ -151,7 +151,8 @@ namespace KingdomSurvival.ArtAssets.Editor
 
             Section("В местах по умолчанию", false);
             Note("Экземпляр в месте берёт эти значения, пока для него не включено «Настроить для этого экземпляра».");
-            BoolProperty("Блокирует проход (по основанию)", asset.BlocksMovement, value => asset.BlocksMovement = value);
+            BoolProperty("Перекрывает проход (и в бою — стена)", asset.BlocksMovement, value => asset.BlocksMovement = value,
+                "Основание предмета непроходимо: в исследовании его обходят, в бою на месте гексы с центром на основании — стены.");
             BoolProperty("Перекрывает свет местных источников", asset.OccludesLight, value => asset.OccludesLight = value,
                 "Тень по контуру от огня. Для травы и мелочи выключите — сотни перекрытий дороги.");
             FloatProperty("Длина тени (множитель)", asset.ShadowLength, value => asset.ShadowLength = Mathf.Max(0, value));
@@ -256,7 +257,38 @@ namespace KingdomSurvival.ArtAssets.Editor
                 LastFolder = Path.GetDirectoryName(folder) ?? string.Empty;
                 ImportPaths(new List<string> { folder }, asset, cardView);
             }) { text = known ? "Другая папка…" : "Загрузить из папки…", tooltip = "Все файлы папки — в этот ассет: ракурсы, кадры и нормали по именам." });
+            row.Add(new Button(() => PickNormalFolder(asset))
+            {
+                text = "Нормали папкой…",
+                tooltip = "Как в Базе анимаций: папка нормалей с теми же ракурсами (Front, Back… — папками или в имени) и кадрами; имена любые, суффикс «_normal» не нужен. " +
+                          "Можно бросить папку на правую половину ячейки ракурса в карточке."
+            });
             Add(row);
+        }
+
+        private void PickNormalFolder(ArtAssetDefinition asset)
+        {
+            string folder = EditorUtility.OpenFolderPanel("Папка нормалей «" + asset.Name + "» (ракурсы и кадры как у рисунков)", LastFolder, "");
+            if (string.IsNullOrEmpty(folder)) return;
+            LastFolder = Path.GetDirectoryName(folder) ?? string.Empty;
+            AttachNormalFolder(asset, new List<string> { folder });
+        }
+
+        // Нормали папкой: всё в папке — нормали этого ассета; ракурс — по папке
+        // или имени (без ракурса — выбранный в карточке), кадры — по номерам.
+        private void AttachNormalFolder(ArtAssetDefinition asset, List<string> paths)
+        {
+            try
+            {
+                status.text = ArtAssetImporter.AttachNormalFolder(catalog, asset, paths, cardView, out int attached);
+                if (attached > 0) { litDirty = true; visibleDirty = true; saveAt = EditorApplication.timeSinceStartup + .3; }
+            }
+            catch (Exception exception)
+            {
+                status.text = "Нормали не подключены: " + exception.Message;
+            }
+            BuildProperties();
+            center?.MarkDirtyRepaint();
         }
 
         private void RefreshFromFolder(ArtAssetDefinition asset)

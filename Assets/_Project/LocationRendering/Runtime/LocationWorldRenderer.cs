@@ -225,9 +225,12 @@ namespace KingdomSurvival.LocationRendering
             foreach (GroundPiece piece in groundPieces)
             {
                 Sprite shown = sprite?.Invoke(piece.Column, piece.Row);
-                if (shown == null) shown = piece.Sprite;
+                // Нет нормали или высоты у участка — его Color, и под светом
+                // (иначе Color застывал без смены суток).
+                bool replaced = shown != null;
+                if (!replaced) shown = piece.Sprite;
                 piece.Renderer.sprite = shown;
-                piece.Renderer.sharedMaterial = sprite != null ? unlit : lit;
+                piece.Renderer.sharedMaterial = replaced ? unlit : lit;
                 PlaceGround(piece, shown);
             }
         }

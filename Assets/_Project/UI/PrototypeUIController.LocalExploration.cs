@@ -549,7 +549,9 @@ public partial class PrototypeUIController
         Rect viewport = Rect.MinMaxRect(
             (min.x - image.x) / image.width, (min.y - image.y) / image.height,
             (max.x - image.x) / image.width, (max.y - image.y) / image.height);
-        localRenderer.AlignFrame(localGeometry.FrameRect(localArenaCenter), viewport);
+        // Поле на всю локацию — весь рисунок места; иначе — кадр арены.
+        Rect canvasRect = surface.HasLocationGrid ? new Rect(0f, 0f, localGeometry.CanvasWidth, localGeometry.CanvasHeight) : localGeometry.FrameRect(localArenaCenter);
+        localRenderer.AlignFrame(canvasRect, viewport);
     }
 
     // ПР-12М: фигуры боя рисует рендерер места — под его светом и тенями.

@@ -191,7 +191,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             UnityEngine.UIElements.Toggle hexes = new UnityEngine.UIElements.Toggle("Гексы боя")
             {
                 value = showHexes,
-                tooltip = "Показать на рисунке сетку боя: у выбранного столкновения — его кадр, иначе — кадр у старта теста. Вид гекса — вкладка «Место» → «Бой на месте»."
+                tooltip = "Показать гексы боя на всём рисунке: бой на месте идёт на всей локации. Стены — клетки на непроходимом и под предметами, которые перекрывают проход. " +
+                          "Размер гекса — «Ширина кадра боя», вид — вкладка «Место» → «Бой на месте»."
             };
             hexes.style.marginLeft = 12;
             hexes.RegisterValueChangedCallback(evt => { showHexes = evt.newValue; SyncArenaView(); });
@@ -392,7 +393,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             for (int i = 0; i < TabNames.Length; i++)
             {
                 Tab value = (Tab)i;
-                Button button = new Button(() => { tab = value; BuildSettings(); }) { text = TabNames[i] };
+                Button button = new Button(() => { tab = value; ApplyGroundView(); BuildSettings(); }) { text = TabNames[i] };
                 if (value == tab) { button.style.unityFontStyleAndWeight = FontStyle.Bold; button.style.color = new Color(.95f, .82f, .5f); }
                 tabs.Add(button);
             }
@@ -504,8 +505,12 @@ namespace KingdomSurvival.LocationRendering.Editor
 
             Heading("Бой на месте");
             Help("Сетка и вид гексов — ровно настройки поля Базы полей боя: правка здесь меняет и бой, и все места с этим полем. " +
-                 "Кадр поля (16:9) ложится на рисунок там, где задан кадр столкновения; «Ширина кадра» — сколько пикселей рисунка он закрывает. " +
-                 "Отключённые гексы поля в бою на месте не действуют: стены задаёт разметка (на рисунке — красный крест).");
+                 "Бой идёт на гексах всей локации; размер гекса — от «Ширины кадра боя» (сколько пикселей рисунка помещается по ширине экрана в начале боя), " +
+                 "кадр столкновения — где камера боя смотрит в начале. Отключённые гексы поля в бою на месте не действуют: стены задаёт разметка и предметы, " +
+                 "которые перекрывают проход (на рисунке — красный крест).");
+            if (geometry != null)
+                Help("Гексов боя на месте: " + geometry.BattleGrid.Columns + "×" + geometry.BattleGrid.Rows + " = " + geometry.BattleGrid.CellCount +
+                     (geometry.BattleGrid.IsTooLarge ? " — больше предела " + LocationBattleGrid.MaxCells + ": увеличьте «Ширину кадра боя»." : "."));
             List<BattlefieldDefinitionData> fieldOptions = fields.Battlefields.Where(item => item != null).ToList();
             Choice("Поле боя", fieldOptions, item => item.DisplayLabel, Field, item => location.BattlefieldId = item.Id);
             AddButton(settings, "Открыть поле в базе", () => EditorApplication.ExecuteMenuItem("Kingdom Survival/База полей боя"));
@@ -690,7 +695,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             band.RegisterValueChangedCallback(evt => Change(() => selected.Band = (LocationVisualBand)band.index)); settings.Add(band);
             Number("Порядок внутри слоя", selected.OrderOffset, -1000, 1000, value => selected.OrderOffset = Mathf.RoundToInt(value));
             AddButton(settings, "Поставить точку опоры мышью", () => SetTool(Tool.Pivot));
-            Toggle("Блокирует проход", selected.BlocksMovement, value => selected.BlocksMovement = value);
+            Toggle("Перекрывает проход (и в бою — стена)", selected.BlocksMovement, value => selected.BlocksMovement = value, true);
             Vector2Field footprint = new Vector2Field("Основание на земле") { value = selected.Footprint };
             footprint.RegisterValueChangedCallback(evt => Change(() => selected.Footprint = Vector2.Max(Vector2.zero, evt.newValue))); settings.Add(footprint);
             Toggle("Только источник света (без рисунка)", selected.LightOnly, value => selected.LightOnly = value, true);
@@ -953,7 +958,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Handles.DrawWireDisc(retreat, Vector3.forward, 7);
                     GUI.Label(new Rect(retreat.x + 8, retreat.y - 9, 120, 18), "отход");
                     if (!active) continue;
-                    // Гексы кадра рисует слой боя (BattlefieldView) поверх холста.
+                    // Начальный кадр камеры боя; гексы всей локации рисует слой боя (BattlefieldView).
                     Rect rect = geometry.FrameRect(ArenaCenterOf(encounter));
                     Vector2 fa = Gui(rect.xMin, rect.yMin), fb = Gui(rect.xMax, rect.yMax);
                     Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(fa.x, fa.y, fb.x, fb.y), Color.clear, new Color(.95f, .9f, .6f, .9f));

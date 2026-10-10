@@ -87,7 +87,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 if (!plan.Selected.Contains(tile.Key) || !tile.Usable(GroundExportPackage.Color)) { plan.Actions[tile.Key] = TileAction.Skip; continue; }
                 LocationGroundTile current = plan.ReplacesWholeGround ? null : ground.Find(tile.X, tile.Y);
                 if (current == null) plan.Actions[tile.Key] = TileAction.New;
-                else plan.Actions[tile.Key] = SameContent(current, tile) ? TileAction.Unchanged : TileAction.Replace;
+                else plan.Actions[tile.Key] = SameContent(current, tile, package) ? TileAction.Unchanged : TileAction.Replace;
             }
             Vector2 canvas = LocationVisualGeometry.CanvasSize(location);
             if (Mathf.Abs(canvas.x - package.VirtualWidth) > .5f || Mathf.Abs(canvas.y - package.VirtualHeight) > .5f)
@@ -133,11 +133,11 @@ namespace KingdomSurvival.LocationRendering.Editor
         private static bool Same(Vector3 axis, double[] value) =>
             value != null && value.Length == 3 && Math.Abs(axis.x - value[0]) < 1e-5 && Math.Abs(axis.y - value[1]) < 1e-5 && Math.Abs(axis.z - value[2]) < 1e-5;
 
-        // Тот же участок: у каждого готового прохода есть ассет с тем же sha256 исходника.
-        private static bool SameContent(LocationGroundTile current, GroundExportTile tile)
+        // Тот же участок: у каждого загружаемого готового прохода есть ассет с тем же sha256 исходника.
+        private static bool SameContent(LocationGroundTile current, GroundExportTile tile, GroundExportPackage package)
         {
             bool Same(string have, GroundExportPass pass, UnityEngine.Object asset) =>
-                pass == null || !pass.Usable || (asset != null && string.Equals(have, pass.Sha256, StringComparison.OrdinalIgnoreCase));
+                pass == null || !pass.Usable || !package.Requested(pass.Kind) || (asset != null && string.Equals(have, pass.Sha256, StringComparison.OrdinalIgnoreCase));
             return Same(current.ColorSha256, tile.Pass(GroundExportPackage.Color), current.Color) &&
                    Same(current.NormalSha256, tile.Pass(GroundExportPackage.Normal), current.Normal) &&
                    Same(current.HeightSha256, tile.Pass(GroundExportPackage.Height), current.Height);
@@ -230,7 +230,11 @@ namespace KingdomSurvival.LocationRendering.Editor
                 {
                     EditorUtility.DisplayProgressBar("Земля из Blender", "Настройки импорта " + item.Tile.Key, done++ / (float)Math.Max(1, staged.Count));
                     if (item.NormalPath != null) ConfigureNormal(item.NormalPath, Math.Max(package.TileWidth, package.TileHeight));
-                    ConfigureColor(item.ColorPath, item.NormalPath, (int)Math.Ceiling(Math.Max(package.TileWidth, package.TileHeight) * package.ColorScale));
+                    // Normal из пакета не загружается — у участка остаётся прежний (та же земля).
+                    Texture2D kept = item.NormalPath == null && !package.Requested(GroundExportPackage.Normal) && !plan.ReplacesWholeGround
+                        ? visual.Ground?.Find(item.Tile.X, item.Tile.Y)?.Normal : null;
+                    ConfigureColor(item.ColorPath, item.NormalPath ?? (kept != null ? AssetDatabase.GetAssetPath(kept) : null),
+                        (int)Math.Ceiling(Math.Max(package.TileWidth, package.TileHeight) * package.ColorScale));
                 }
                 foreach (Staged item in staged)
                 {
@@ -367,7 +371,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             staged.ColorSha = tile.Pass(GroundExportPackage.Color).Sha256;
             staged.ColorPath = folder + "/Color/" + name + "__" + staged.ColorSha.Substring(0, 10) + ".png";
             GroundExportPass normal = tile.Pass(GroundExportPackage.Normal);
-            if (normal != null && normal.Usable)
+            if (normal != null && normal.Usable && package.Requested(GroundExportPackage.Normal))
             {
                 byte[] bytes = ReadVerified(normal);
                 staged.NormalSha = normal.Sha256;
@@ -377,7 +381,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 staged.NormalPath = folder + "/Normal/" + name + "_normal__" + tag + ".png";
             }
             GroundExportPass height = tile.Pass(GroundExportPackage.Height);
-            if (height != null && height.Usable)
+            if (height != null && height.Usable && package.Requested(GroundExportPackage.Height))
             {
                 byte[] bytes = ReadVerified(height);
                 LocationHeightTileData data = LocationHeightTileData.FromPng(bytes, package.HeightMin, package.HeightMax);
@@ -522,8 +526,11 @@ namespace KingdomSurvival.LocationRendering.Editor
                 ground.HeightBitDepth = package.HeightBits;
             }
             ground.MetersPerBlenderUnit = package.MetersPerBlenderUnit;
-            ground.NormalGreenInverted = package.InvertGreen;
-            ground.NormalLevelDegrees = plan.LevelNormals ? package.NormalTiltDegrees : 0;
+            if (package.Requested(GroundExportPackage.Normal))
+            {
+                ground.NormalGreenInverted = package.InvertGreen;
+                ground.NormalLevelDegrees = plan.LevelNormals ? package.NormalTiltDegrees : 0;
+            }
             if (package.CharacterHeightPx > 0) ground.ExportCharacterPx = (float)package.CharacterHeightPx;
         }
 

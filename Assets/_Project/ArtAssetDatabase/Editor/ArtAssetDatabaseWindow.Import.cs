@@ -214,8 +214,9 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         private void LoadFiles()
         {
-            string path = EditorUtility.OpenFilePanel("Загрузить PNG", "", "png");
+            string path = EditorUtility.OpenFilePanel("Загрузить PNG", LastFolder, "png");
             if (string.IsNullOrEmpty(path)) return;
+            LastFolder = Path.GetDirectoryName(path) ?? string.Empty;
             ArtAssetDefinition asset = state.Mode == ArtAssetCenterMode.Card ? Selected : null;
             if (asset != null)
             {
@@ -233,14 +234,18 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         private void LoadFolder()
         {
-            string path = EditorUtility.OpenFolderPanel("Загрузить папку с рисунками", "", "");
+            string title = CurrentCategory.HasValue ? "Папка рисунков → «" + ArtAssetLabels.CategoryTitle(CurrentCategory.Value) + "»" : "Загрузить папку с рисунками";
+            string path = EditorUtility.OpenFolderPanel(title, LastFolder, "");
             if (string.IsNullOrEmpty(path)) return;
+            LastFolder = Path.GetDirectoryName(path) ?? string.Empty;
             ImportPaths(new List<string> { path }, null, ArtAssetView.Front);
         }
 
         // Пакет: разбор → сводка → импорт. target — все файлы в одну запись.
-        private void ImportPaths(List<string> paths, ArtAssetDefinition target, ArtAssetView? defaultView = null)
+        // category — куда положить новые записи (по умолчанию — выбранная категория).
+        private void ImportPaths(List<string> paths, ArtAssetDefinition target, ArtAssetView? defaultView = null, ArtAssetCategory? category = null)
         {
+            if (target == null && category == null) category = CurrentCategory;
             ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(paths, target?.Name, defaultView);
             if (plan.IsEmpty)
             {
@@ -262,12 +267,24 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (!ArtAssetImportSummaryWindow.Confirm(plan, matches, update, target)) { status.text = "Импорт отменён."; return; }
             ArtAssetImportResult result = ArtAssetImporter.Import(catalog, plan,
                 group => update.TryGetValue(group, out bool yes) && yes && matches.TryGetValue(group, out ArtAssetDefinition existing) ? existing : null);
+            if (category.HasValue && result.Created.Count > 0)
+                Edit("Категория новых ассетов", () =>
+                {
+                    foreach (string id in result.Created)
+                    {
+                        ArtAssetDefinition created = catalog.Find(id);
+                        if (created != null && created.Category == ArtAssetCategory.None) created.Category = category.Value;
+                    }
+                });
             visibleDirty = true;
             layoutDirty = true;
             BuildCategories();
             string first = result.Created.Concat(result.Updated).FirstOrDefault();
             if (first != null) SelectAsset(first, plan.Groups.Count == 1);
-            status.text = result.Summary + (result.Warnings.Count > 0 ? " ⚠ " + string.Join(" ", result.Warnings.Take(3)) : "") +
+            int older = plan.Groups.Sum(group => group.SkippedOlder);
+            status.text = result.Summary + (category.HasValue && result.Created.Count > 0 ? " Категория: «" + ArtAssetLabels.CategoryTitle(category.Value) + "»." : "") +
+                          (older > 0 ? " Старых рендеров пропущено: " + older + " (взяты самые свежие)." : "") +
+                          (result.Warnings.Count > 0 ? " ⚠ " + string.Join(" ", result.Warnings.Take(3)) : "") +
                           (result.Errors.Count > 0 ? " Ошибки: " + string.Join("; ", result.Errors.Take(3)) : "") +
                           (plan.Unresolved.Count > 0 ? " Не назначено файлов: " + plan.Unresolved.Count + " — перетащите их в ячейки вручную." : "");
             if (result.Errors.Count > 0 || result.Warnings.Count > 0) Debug.Log("База ассетов: " + status.text);
@@ -337,6 +354,9 @@ namespace KingdomSurvival.ArtAssets.Editor
                     EditorGUILayout.LabelField("Основа: " + string.Join(" · ", views), EditorStyles.wordWrappedMiniLabel);
                     if (group.MaxFrameCount > 1)
                         EditorGUILayout.LabelField("Анимация: до " + group.MaxFrameCount + " кадров в ракурсе (номер в конце имени файла).", EditorStyles.wordWrappedMiniLabel);
+                    if (group.SkippedOlder > 0)
+                        EditorGUILayout.LabelField("Из нескольких рендеров одного ракурса взяты самые свежие (по времени в имени); старых пропущено: " + group.SkippedOlder + ".",
+                            EditorStyles.wordWrappedMiniLabel);
                     ArtAssetImportSlot assumed = group.Slots.FirstOrDefault(slot => slot.ViewAssumed);
                     if (assumed != null)
                         EditorGUILayout.HelpBox("Ракурса в имени файла нет — рисунок поставлен в «" + ArtAssetLabels.ViewTitle(assumed.View) +

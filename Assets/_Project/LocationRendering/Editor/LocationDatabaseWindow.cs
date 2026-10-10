@@ -165,7 +165,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocalLocationDefinition selected = values.OfType<LocalLocationDefinition>().FirstOrDefault();
                 if (selected == null) return;
                 if (database != null) AssetDatabase.SaveAssetIfDirty(database);
-                ClearGroundPreview(); pendingPackage = null; pendingPlan = null; pendingPaint = null; cropRect = null; cropPlan = null; cropDrawing = false; groundCheck.Clear(); ResetPictureCrop();
+                ClearGroundPreview(); pendingPackage = null; pendingPlan = null; pendingLayer = null; cropRect = null; cropPlan = null; cropDrawing = false; groundCheck.Clear(); ResetPictureCrop();
                 selectedId = selected.Id; selectedKind = Kind.None; selectedElementId = null;
                 zoom = 1; viewCenter = CanvasSize / 2; tool = Tool.Select;
                 BuildSettings(); RebuildPreview();
@@ -188,6 +188,14 @@ namespace KingdomSurvival.LocationRendering.Editor
             foreach ((string title, float h) in new[] { ("Рассвет", 6f), ("Утро", 8f), ("День", 13f), ("Вечер", 19f), ("Ночь", 1f) })
                 AddButton(presets, title, () => { hour = h; cycle = false; });
             AddButton(presets, "Весь рисунок", () => { viewCenter = CanvasSize / 2; zoom = 1; });
+            UnityEngine.UIElements.Toggle hexes = new UnityEngine.UIElements.Toggle("Гексы боя")
+            {
+                value = showHexes,
+                tooltip = "Показать на рисунке сетку боя: у выбранного столкновения — его кадр, иначе — кадр у старта теста. Вид гекса — вкладка «Место» → «Бой на месте»."
+            };
+            hexes.style.marginLeft = 12;
+            hexes.RegisterValueChangedCallback(evt => { showHexes = evt.newValue; SyncArenaView(); });
+            presets.Add(hexes);
             center.Add(presets);
             VisualElement tools = new VisualElement(); tools.style.flexDirection = FlexDirection.Row; tools.style.flexWrap = Wrap.Wrap;
             for (int i = 0; i <= (int)Tool.TestStart; i++)
@@ -825,8 +833,18 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (clock != null) clock.text = LocationLightingTest.FormatHour(hour);
             hourSlider?.SetValueWithoutNotify(hour);
             SyncArenaView();
-            canvas?.MarkDirtyRepaint();
+            // Предпросмотр с 2D-светом и сотнями предметов дорог: не каждый
+            // тик редактора (сотни раз в секунду), а ~30 кадров в секунду в
+            // работе и ~5 — когда окно в фоне. Мышь и клавиши перерисовывают сами.
+            bool active = focusedWindow == this || mouseOverWindow == this || dragging;
+            if (now >= nextRepaint)
+            {
+                nextRepaint = now + (active ? 1 / 30.0 : 1 / 5.0);
+                canvas?.MarkDirtyRepaint();
+            }
         }
+
+        private double nextRepaint;
 
         private Rect CanvasFrame(Rect area)
         {

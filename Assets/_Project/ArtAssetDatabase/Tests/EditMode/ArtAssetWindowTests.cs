@@ -21,7 +21,7 @@ namespace KingdomSurvival.ArtAssets.Tests
             window.CreateGUI();
             Assert.That(window.rootVisualElement.Q<IMGUIContainer>(), Is.Not.Null, "Холст / галерея / карточка.");
             List<string> texts = window.rootVisualElement.Query<TextElement>().ToList().Select(item => item.text).ToList();
-            foreach (string expected in new[] { "+ Ассет", "Загрузить файлы", "Загрузить папку", "Холст", "Галерея", "Карточка", "Проверить", "Сохранить" })
+            foreach (string expected in new[] { "Загрузить папку…", "Загрузить файлы…", "+ Пустой ассет", "Холст", "Галерея", "Карточка", "Проверить", "Сохранить" })
                 Assert.That(texts, Has.Member(expected));
             Assert.That(texts.Any(text => text.StartsWith("Все (")), Is.True, "Категории с числом записей.");
             window.ShowMode(ArtAssetCenterMode.Gallery);

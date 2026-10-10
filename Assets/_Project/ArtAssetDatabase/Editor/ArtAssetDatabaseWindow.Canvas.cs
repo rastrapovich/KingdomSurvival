@@ -62,6 +62,20 @@ namespace KingdomSurvival.ArtAssets.Editor
                 case ArtAssetCenterMode.Card: DrawCard(area, evt); break;
                 default: DrawCanvas(area, evt); break;
             }
+            if (evt.type == EventType.Repaint && state.Mode != ArtAssetCenterMode.Card)
+            {
+                int count = Visible().Count;
+                UpdateCategoryLabel(count);
+                if (count == 0 && dropHint == null)
+                {
+                    // Пустая категория — сразу видно, как её наполнить.
+                    string where = CurrentCategory.HasValue ? "«" + ArtAssetLabels.CategoryTitle(CurrentCategory.Value) + "»" : "базе";
+                    GUIStyle empty = new GUIStyle(EditorStyles.wordWrappedLabel) { alignment = TextAnchor.MiddleCenter, fontSize = 13, normal = { textColor = TextColor } };
+                    GUI.Label(new Rect(area.x + 40, area.center.y - 40, area.width - 80, 80),
+                        "В " + where + " пока ничего нет" + (string.IsNullOrEmpty(query) ? "" : " по запросу «" + query + "»") +
+                        ".\nПеретащите сюда папку или PNG из Проводника либо нажмите «+ Добавить…» сверху.", empty);
+                }
+            }
             if (dropHint != null && evt.type == EventType.Repaint)
             {
                 Handles.DrawSolidRectangleWithOutline(dropRect, new Color(.95f, .75f, .3f, .12f), new Color(.95f, .75f, .3f, .95f));

@@ -103,10 +103,16 @@ namespace KingdomSurvival.ArtAssets.Editor
                 catalogDirtyFromOutside = false;
                 litDirty = true;
             }
-            // Под светом и у анимированного ассета карточка живёт — перерисовка каждый кадр.
-            if (state?.Mode == ArtAssetCenterMode.Card && (state.CardDisplay == ArtAssetCardDisplay.Lit || (Selected?.IsAnimated ?? false)))
+            // Под светом и у анимированного ассета карточка живёт — ~30 кадров в
+            // секунду (в фоне ~5), а не каждый тик редактора.
+            if (state?.Mode == ArtAssetCenterMode.Card && (state.CardDisplay == ArtAssetCardDisplay.Lit || (Selected?.IsAnimated ?? false)) && now >= nextRepaint)
+            {
+                nextRepaint = now + (focusedWindow == this || mouseOverWindow == this ? 1 / 30.0 : 1 / 5.0);
                 center?.MarkDirtyRepaint();
+            }
         }
+
+        private double nextRepaint;
 
         private void ScheduleStateSave() => stateSaveAt = EditorApplication.timeSinceStartup + 1;
 
@@ -141,9 +147,14 @@ namespace KingdomSurvival.ArtAssets.Editor
             search.style.width = 220;
             search.RegisterValueChangedCallback(evt => { query = evt.newValue; visibleDirty = true; center?.MarkDirtyRepaint(); });
             toolbar.Add(search);
-            toolbar.Add(new ToolbarButton(AddEmptyAsset) { text = "+ Ассет", tooltip = "Пустая запись; рисунки — перетаскиванием в ячейки ракурсов" });
-            toolbar.Add(new ToolbarButton(LoadFiles) { text = "Загрузить файлы", tooltip = "PNG рисунка или нормали; без ракурса в имени — в выбранную ячейку карточки" });
-            toolbar.Add(new ToolbarButton(LoadFolder) { text = "Загрузить папку", tooltip = "Папка объекта с ракурсами или родительская папка с несколькими объектами" });
+            toolbar.Add(new ToolbarButton(LoadFolder)
+            {
+                text = "Загрузить папку…",
+                tooltip = "Как в Базе анимаций: папка объекта (или папка с несколькими объектами) — ракурсы, кадры и нормали (…_n.png) подхватываются сами. " +
+                          "Выбрана категория — новые ассеты попадут в неё."
+            });
+            toolbar.Add(new ToolbarButton(LoadFiles) { text = "Загрузить файлы…", tooltip = "PNG рисунков и нормалей; без ракурса в имени — в выбранную ячейку карточки" });
+            toolbar.Add(new ToolbarButton(AddEmptyAsset) { text = "+ Пустой ассет", tooltip = "Пустая запись; рисунки — перетаскиванием в ячейки ракурсов" });
             toolbar.Add(new ToolbarSpacer());
             modeBar = new VisualElement { style = { flexDirection = FlexDirection.Row } };
             toolbar.Add(modeBar);
@@ -253,6 +264,19 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             canvasBar.Clear();
             void Button(string title, Action action, string tip = null) => canvasBar.Add(new Button(action) { text = title, tooltip = tip });
+            if (state.Mode != ArtAssetCenterMode.Card)
+            {
+                // Что показано и куда загрузится новое.
+                string title = CurrentCategory.HasValue ? ArtAssetLabels.CategoryTitle(CurrentCategory.Value) : "Все ассеты";
+                categoryLabel = new Label(title) { style = { unityFontStyleAndWeight = FontStyle.Bold, color = new Color(.95f, .82f, .5f), unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 6, marginRight = 6 } };
+                canvasBar.Add(categoryLabel);
+                string into = CurrentCategory.HasValue ? " в «" + title + "»" : "";
+                Button("+ Добавить" + into + "…", LoadFolder, "Папка объекта или папка с несколькими объектами — ракурсы, кадры и нормали подхватятся сами" +
+                                                         (CurrentCategory.HasValue ? "; новые ассеты попадут в «" + title + "»." : "."));
+                Button("+ Файлы…", LoadFiles, "Отдельные PNG (рисунки и нормали)");
+                Button("+ Пустой", AddEmptyAsset, "Пустая запись" + into + "; рисунки — перетаскиванием в ячейки ракурсов карточки");
+                canvasBar.Add(new VisualElement { style = { width = 12 } });
+            }
             switch (state.Mode)
             {
                 case ArtAssetCenterMode.Canvas:
@@ -305,6 +329,16 @@ namespace KingdomSurvival.ArtAssets.Editor
             }
         }
 
+        private Label categoryLabel;
+
+        // Заголовок: категория и число показанных (поиск и фильтры меняют число).
+        private void UpdateCategoryLabel(int count)
+        {
+            if (categoryLabel == null || state.Mode == ArtAssetCenterMode.Card) return;
+            string title = (CurrentCategory.HasValue ? ArtAssetLabels.CategoryTitle(CurrentCategory.Value) : "Все ассеты") + " · " + count;
+            if (categoryLabel.text != title) categoryLabel.text = title;
+        }
+
         private void AddBackgroundChoice()
         {
             PopupField<string> background = new PopupField<string>(new List<string> { "Светлый фон", "Тёмный фон", "Шахматный фон" }, (int)state.Background);
@@ -322,10 +356,34 @@ namespace KingdomSurvival.ArtAssets.Editor
             categories.Clear();
             void Add(int index, string title, int count)
             {
-                Button button = new Button(() => { state.Category = index; visibleDirty = true; ScheduleStateSave(); BuildCategories(); center.MarkDirtyRepaint(); })
-                { text = title + " (" + count + ")" };
+                Button button = new Button(() => ShowCategory(index))
+                {
+                    text = title + " (" + count + ")",
+                    tooltip = index >= 0 ? "Показать всё «" + title + "». Перетащите сюда файлы или папку — они загрузятся в эту категорию." : "Показать все ассеты"
+                };
                 button.style.unityTextAlign = TextAnchor.MiddleLeft;
                 if (state.Category == index) { button.style.unityFontStyleAndWeight = FontStyle.Bold; button.style.color = new Color(.95f, .82f, .5f); }
+                // Файлы и папки, брошенные на категорию, — загрузка прямо в неё.
+                button.RegisterCallback<DragUpdatedEvent>(evt =>
+                {
+                    if (!HasExternalDrag() || !string.IsNullOrEmpty(ArtAssetPicker.DraggedAssetId())) return;
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                    status.text = "Отпустите — загрузить в «" + title + "»: файлов и папок " + DraggedPaths().Count + ".";
+                    evt.StopPropagation();
+                });
+                button.RegisterCallback<DragPerformEvent>(evt =>
+                {
+                    if (!HasExternalDrag() || !string.IsNullOrEmpty(ArtAssetPicker.DraggedAssetId())) return;
+                    DragAndDrop.AcceptDrag();
+                    evt.StopPropagation();
+                    List<string> paths = DraggedPaths();
+                    ArtAssetPicker.EndDrag();
+                    EditorApplication.delayCall += () =>
+                    {
+                        ShowCategory(index);
+                        ImportPaths(paths, null, ArtAssetView.Front, index >= 0 ? ArtAssetLabels.Categories[index] : (ArtAssetCategory?)null);
+                    };
+                });
                 categories.Add(button);
             }
             Add(-1, "Все", catalog.assets.Count(item => item != null));
@@ -334,6 +392,33 @@ namespace KingdomSurvival.ArtAssets.Editor
                 ArtAssetCategory category = ArtAssetLabels.Categories[i];
                 Add(i, ArtAssetLabels.CategoryTitle(category), catalog.assets.Count(item => item != null && item.Category == category));
             }
+        }
+
+        // Категория слева: всё в ней — в галерее (из карточки переходим к галерее),
+        // сверху — «Добавить в категорию».
+        private void ShowCategory(int index)
+        {
+            state.Category = index;
+            visibleDirty = true;
+            ScheduleStateSave();
+            if (state.Mode == ArtAssetCenterMode.Card)
+            {
+                state.Mode = ArtAssetCenterMode.Gallery;
+                BuildModeBar();
+                BuildProperties();
+            }
+            else BuildCanvasBar();
+            BuildCategories();
+            center?.MarkDirtyRepaint();
+        }
+
+        private ArtAssetCategory? CurrentCategory => state.Category >= 0 && state.Category < ArtAssetLabels.Categories.Length
+            ? ArtAssetLabels.Categories[state.Category] : (ArtAssetCategory?)null;
+
+        private static string LastFolder
+        {
+            get => SessionState.GetString("KS.ArtAssets.LastFolder", string.Empty);
+            set => SessionState.SetString("KS.ArtAssets.LastFolder", value ?? string.Empty);
         }
 
         private void BuildFilters()
@@ -409,7 +494,7 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         private void AddEmptyAsset()
         {
-            ArtAssetDefinition asset = new ArtAssetDefinition { Name = "Новый ассет", Category = state.Category >= 0 ? ArtAssetLabels.Categories[state.Category] : ArtAssetCategory.None };
+            ArtAssetDefinition asset = new ArtAssetDefinition { Name = "Новый ассет", Category = CurrentCategory ?? ArtAssetCategory.None };
             Edit("Создать ассет", () => catalog.assets.Add(asset));
             visibleDirty = true;
             BuildCategories();

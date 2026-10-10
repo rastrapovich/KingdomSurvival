@@ -27,6 +27,9 @@ namespace KingdomSurvival.LocationRendering.Editor
         public double CharacterHeightPx;
         public int MapWidth, MapHeight;
 
+        // Проходы, которые не подошли к карте (размер): не загружаются, включить нельзя.
+        public readonly HashSet<string> Unavailable = new HashSet<string>();
+
         private readonly Dictionary<string, string> wholeFiles = new Dictionary<string, string>();
         private readonly Dictionary<string, string> wholeSha = new Dictionary<string, string>();
 
@@ -120,8 +123,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                     if (header.Width % Columns != 0 || header.Height % Rows != 0 ||
                         (long)(header.Width / Columns) * TileHeight != (long)(header.Height / Rows) * TileWidth || header.Width < MapWidth)
                     {
-                        Errors.Add("Color " + header.Width + "×" + header.Height + " не совпадает с картой " + MapWidth + "×" + MapHeight +
-                                   ": обрисовка должна сохранить кадр (тот же размер или больше в целое число раз).");
+                        Errors.Add("Color " + header.Width + "×" + header.Height + " не совпадает с картой экспорта " + MapWidth + "×" + MapHeight +
+                                   " (нужен тот же кадр — тот же размер или больше в целое число раз). Если Color перерисован под место или обрезан, " +
+                                   "замените его в разделе «Слои земли» — там подойдёт любой размер.");
                         continue;
                     }
                     ColorScale = header.Width / (float)MapWidth;
@@ -131,19 +135,32 @@ namespace KingdomSurvival.LocationRendering.Editor
                                   (Math.Abs(ColorScale - 1) > 1e-6 ? " (разрешение ×" + ColorScale.ToString("0.###") + ")" : "") + ".");
                     continue;
                 }
+                if (header.Width != MapWidth || header.Height != MapHeight)
+                {
+                    // Не подходит к карте — проход не загружается, остальное импортируется.
+                    Unavailable.Add(kind);
+                    Excluded.Add(kind);
+                    wholeFiles.Remove(kind);
+                    Warnings.Add(kind + " " + header.Width + "×" + header.Height + " не совпадает с картой " + MapWidth + "×" + MapHeight +
+                                 " — не загружается. Добавьте его после импорта в «Слои земли»: там он пересчитается под карту.");
+                    continue;
+                }
                 if (!same)
-                    Errors.Add(kind + " изменён после экспорта или повреждён (sha256 не совпадает). Normal и Height не обрисовываются — экспортируйте карту заново.");
-                else if (header.Width != MapWidth || header.Height != MapHeight)
-                    Errors.Add(kind + ": " + header.Width + "×" + header.Height + " вместо " + MapWidth + "×" + MapHeight + ".");
-                else if (kind == Height && (header.BitDepth != HeightBits || !header.HasAlpha))
-                    Errors.Add("Height: нужен PNG " + HeightBits + " бит с покрытием в альфе.");
+                    Warnings.Add(kind + " изменён после экспорта (sha256 не совпадает) — загружается как есть. Не нужен — снимите «" + kind + " из пакета» ниже.");
+                if (kind == Height && header.BitDepth != HeightBits)
+                {
+                    Warnings.Add("Height " + header.BitDepth + " бит (в manifest " + HeightBits + ") — используется разрядность файла.");
+                    HeightBits = header.BitDepth;
+                }
+                if (kind == Height && !header.HasAlpha)
+                    Warnings.Add("Height без альфы — высота считается заданной везде (покрытие полное).");
             }
         }
 
         // Нарезка трёх файлов на участки в кэш (повторная проверка того же экспорта — без повторной нарезки).
         private void Unpack()
         {
-            string key = Sha256Hex(Encoding.UTF8.GetBytes(string.Join("|", Kinds.Select(kind => FileSha256(wholeFiles[kind]))) + "|" + Columns + "x" + Rows)).Substring(0, 16);
+            string key = Sha256Hex(Encoding.UTF8.GetBytes(string.Join("|", Kinds.Where(wholeFiles.ContainsKey).Select(kind => kind + ":" + FileSha256(wholeFiles[kind]))) + "|" + Columns + "x" + Rows)).Substring(0, 16);
             string folder = System.IO.Path.GetFullPath(System.IO.Path.Combine(UnpackRoot, GroundImporter.Sanitize(MapId) + "_" + key));
             string done = System.IO.Path.Combine(folder, "done.txt");
             Dictionary<string, string> hashes = new Dictionary<string, string>();
@@ -161,7 +178,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 {
                     if (Directory.Exists(folder)) Directory.Delete(folder, true);
                     int step = 0;
-                    foreach (string kind in Kinds)
+                    foreach (string kind in Kinds.Where(wholeFiles.ContainsKey))
                     {
                         string sub = System.IO.Path.Combine(folder, kind);
                         Directory.CreateDirectory(sub);
@@ -189,6 +206,11 @@ namespace KingdomSurvival.LocationRendering.Editor
                     GroundExportTile tile = new GroundExportTile { X = x, Y = y, Status = "complete" };
                     foreach (string kind in Kinds)
                     {
+                        if (!wholeFiles.ContainsKey(kind))
+                        {
+                            tile.Passes[kind] = new GroundExportPass { Kind = kind, Status = "not_requested", Path = kind + " · " + tile.Key };
+                            continue;
+                        }
                         string full = System.IO.Path.Combine(folder, kind, TileFile(kind, tile.Key));
                         hashes.TryGetValue(full.Substring(folder.Length + 1).Replace('\\', '/'), out string sha);
                         tile.Passes[kind] = new GroundExportPass

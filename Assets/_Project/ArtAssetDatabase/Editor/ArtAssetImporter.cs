@@ -123,6 +123,8 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             ArtAssetDefinition working = existing != null ? Clone(existing) : new ArtAssetDefinition { Name = group.Name };
             working.ImportKey = group.Key;
+            // Источник вне проекта запоминается: «Обновить из папки».
+            if (!string.IsNullOrEmpty(group.SourceFolder) && !IsProjectPath(group.SourceFolder)) working.SourceFolder = group.SourceFolder;
             FileTransaction transaction = new FileTransaction();
             try
             {

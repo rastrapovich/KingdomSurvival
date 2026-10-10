@@ -205,6 +205,20 @@ namespace KingdomSurvival.BattlefieldDatabase
             Problems = problems ?? Array.Empty<string>();
         }
 
+        // Распакованные участки последней загрузки: пересборка того же места
+        // (окно базы пересобирает предпросмотр после каждой правки) не
+        // распаковывает их снова. Данные неизменяемы; держится одно место.
+        private static Dictionary<TextAsset, (long size, LocationHeightTileData data)> decodedTiles = new Dictionary<TextAsset, (long, LocationHeightTileData)>();
+
+        private static LocationHeightTileData Decode(TextAsset asset, Dictionary<TextAsset, (long size, LocationHeightTileData data)> used)
+        {
+            long size = asset.dataSize;
+            if (!decodedTiles.TryGetValue(asset, out (long size, LocationHeightTileData data) hit) || hit.size != size)
+                hit = (size, LocationHeightTileData.Deserialize(asset.bytes));
+            used[asset] = hit;
+            return hit.data;
+        }
+
         // Высота места по данным сборки; нет высоты — null, проблемы — в errors.
         public static LocationHeightField Load(LocationGroundDefinition ground, LocalLocationDefinition location, List<string> errors)
         {
@@ -213,12 +227,13 @@ namespace KingdomSurvival.BattlefieldDatabase
             LocationGroundGrid grid = LocationGroundGrid.For(ground, location);
             LocationHeightTileData[] data = new LocationHeightTileData[grid.Columns * grid.Rows];
             List<string> problems = new List<string>();
+            Dictionary<TextAsset, (long size, LocationHeightTileData data)> used = new Dictionary<TextAsset, (long, LocationHeightTileData)>();
             foreach (LocationGroundTile tile in ground.Tiles)
             {
                 if (tile?.Height == null || tile.X < 0 || tile.Y < 0 || tile.X >= grid.Columns || tile.Y >= grid.Rows) continue;
                 try
                 {
-                    LocationHeightTileData decoded = LocationHeightTileData.Deserialize(tile.Height.bytes);
+                    LocationHeightTileData decoded = Decode(tile.Height, used);
                     if (decoded.Width != grid.TileWidth || decoded.Height != grid.TileHeight)
                         problems.Add("Высота " + tile.Key + ": размер " + decoded.Width + "×" + decoded.Height + " вместо " + grid.TileWidth + "×" + grid.TileHeight + ".");
                     else if (Math.Abs(decoded.Min - ground.HeightMin) > 1e-9 || Math.Abs(decoded.Max - ground.HeightMax) > 1e-9)
@@ -230,6 +245,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                     problems.Add("Высота " + tile.Key + ": " + error.Message);
                 }
             }
+            decodedTiles = used;
             errors?.AddRange(problems);
             return new LocationHeightField(grid, ground.HeightMin, ground.HeightMax, ground.MetersPerBlenderUnit, ground.SeamlessMeters, data, problems);
         }

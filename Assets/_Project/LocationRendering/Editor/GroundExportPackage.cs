@@ -82,7 +82,12 @@ namespace KingdomSurvival.LocationRendering.Editor
         public readonly List<string> Warnings = new List<string>();
         public readonly List<string> Notes = new List<string>();
 
-        public bool Requested(string kind) => RequestedPasses.Contains(kind);
+        // Проходы, которые автор решил не загружать (или они не подошли к карте).
+        public readonly HashSet<string> Excluded = new HashSet<string>();
+
+        public bool Requested(string kind) => RequestedPasses.Contains(kind) && !Excluded.Contains(kind);
+        // Проход есть в экспорте (даже если сейчас не загружается).
+        public bool Exported(string kind) => RequestedPasses.Contains(kind);
         public GroundExportTile Find(int x, int y) => Tiles.Find(tile => tile.X == x && tile.Y == y);
         public int VirtualWidth => Columns * TileWidth;
         public int VirtualHeight => Rows * TileHeight;
@@ -92,7 +97,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         public bool Partial => Tiles.Count < Columns * Rows || Tiles.Any(tile => !TileReady(tile));
         public bool CanApply => Errors.Count == 0 && Tiles.Any(tile => tile.Usable(Color));
 
-        public bool TileReady(GroundExportTile tile) => RequestedPasses.All(kind => tile.Usable(kind));
+        public bool TileReady(GroundExportTile tile) => RequestedPasses.Where(Requested).All(kind => tile.Usable(kind));
 
         // Наклон камеры: ровная земля (мировая Z) в базисе картинки — (r.z, u.z, b.z).
         public float NormalTiltDegrees => (float)(Math.Atan2(Basis[1][2], Basis[2][2]) * 180 / Math.PI);
@@ -485,7 +490,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                             (ExporterVersion.Length > 0 ? " · KS Ground Renderer " + ExporterVersion : ""));
             text.AppendLine("Сетка " + Columns + "×" + Rows + " · участок " + TileWidth + "×" + TileHeight + " px · вся карта " + VirtualWidth + "×" + VirtualHeight + " px");
             text.AppendLine("PPU экспорта " + UnityPpu.ToString("0.##") + " · в месте 1 пиксель рисунка = 1 пиксель места (" + LocationVisualGeometry.PixelsPerUnit + " px на единицу мира)");
-            text.AppendLine("Проходы: " + (RequestedPasses.Count > 0 ? string.Join(", ", RequestedPasses) : "нет"));
+            text.AppendLine("Проходы: " + (RequestedPasses.Count > 0 ? string.Join(", ", RequestedPasses.Select(kind => Requested(kind) ? kind : kind + " (не загружается)")) : "нет"));
             if (Requested(Height))
                 text.AppendLine("Height Range " + HeightMin.ToString("0.####") + " … " + HeightMax.ToString("0.####") + " BU · " + HeightBits + " бит · шаг " +
                                 ((HeightMax - HeightMin) / (HeightBits == 16 ? 65535 : 255)).ToString("0.######") + " BU · " + MetersPerBlenderUnit.ToString("0.###") + " м/BU");

@@ -272,6 +272,54 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(plan.Groups.Single().Slots.Single().FrameCount, Is.EqualTo(1));
         }
 
+        // Рендер KS Sprite Renderer, как в Базе анимаций: Объект/Действие/Ракурс/
+        // Действие_Ракурс_0001.png и нормали «…_n.png» рядом — всё из одной папки.
+        [Test]
+        public void SpriteRendererFolder_ActionFolderAndFramesWithNormals()
+        {
+            foreach (string folder in new[] { "Front", "Back" })
+                for (int i = 1; i <= 3; i++)
+                {
+                    Touch("Трава/Idle/" + folder + "/Idle_" + folder + "_000" + i + ".png");
+                    Touch("Трава/Idle/" + folder + "/Idle_" + folder + "_000" + i + "_n.png");
+                }
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { root + "/Трава" });
+            Assert.That(plan.Unresolved, Is.Empty, string.Join("\n", plan.Unresolved.Select(item => item.Path + " — " + item.Reason)));
+            ArtAssetImportGroup group = plan.Groups.Single();
+            Assert.That(group.Name, Is.EqualTo("Трава"), "Папка действия не становится объектом.");
+            Assert.That(group.Parts, Is.EqualTo(new[] { "" }), "Действие не становится частью.");
+            Assert.That(group.Slots.Count, Is.EqualTo(2));
+            foreach (ArtAssetImportSlot slot in group.Slots)
+            {
+                Assert.That(slot.FrameCount, Is.EqualTo(3));
+                Assert.That(slot.NormalPath, Does.EndWith("_0001_n.png"));
+                Assert.That(slot.Frames.All(frame => frame.NormalPath != null), Is.True);
+            }
+            Assert.That(group.SourceFolder, Does.EndWith("/Трава"), "Папка источника — папка объекта.");
+        }
+
+        // Плоские имена рендера с отметкой времени: из нескольких рендеров
+        // одного ракурса берётся самый свежий; отметка — не часть имени.
+        [Test]
+        public void StampedRenders_NewestWins()
+        {
+            Touch("renders/grass__Idle_Front__20261001-165836-060.png");
+            Touch("renders/grass__Idle_Front__20261009-142811-641.png");
+            Touch("renders/grass__Idle_Front__20261009-142811-641_n.png");
+            Touch("renders/grass__Idle_Back_Left__20261009-142811-641.png");
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { root + "/renders" });
+            Assert.That(plan.Unresolved, Is.Empty, string.Join("\n", plan.Unresolved.Select(item => item.Path + " — " + item.Reason)));
+            ArtAssetImportGroup group = plan.Groups.Single();
+            Assert.That(group.Name, Is.EqualTo("grass"));
+            ArtAssetImportSlot front = group.Slots.Single(slot => slot.View == ArtAssetView.Front);
+            Assert.That(front.ColorPath, Does.EndWith("20261009-142811-641.png"));
+            Assert.That(front.NormalPath, Does.EndWith("641_n.png"));
+            Assert.That(front.FrameCount, Is.EqualTo(1), "Отметка времени — не номер кадра.");
+            Assert.That(group.SkippedOlder, Is.EqualTo(1));
+            Assert.That(group.Slots.Any(slot => slot.View == ArtAssetView.BackLeft), Is.True);
+            Assert.That(ArtAssetImportParser.Stamp("x__20261009-142811-641.png"), Is.EqualTo("202610091428110641"));
+        }
+
         [Test]
         public void MissingViewFallback_IsNearestOnTheRing_NextInOrderFirst()
         {

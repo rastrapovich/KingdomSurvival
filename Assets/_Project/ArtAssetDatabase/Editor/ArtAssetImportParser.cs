@@ -49,6 +49,10 @@ namespace KingdomSurvival.ArtAssets.Editor
         }
 
         public IEnumerable<string> Parts => Slots.Select(slot => slot.Part).Distinct(StringComparer.OrdinalIgnoreCase);
+        // Папка объекта (общая для его файлов) — для «Обновить из папки».
+        public string SourceFolder = string.Empty;
+        // Пропущено старых рендеров (та же ячейка, отметка времени раньше).
+        public int SkippedOlder;
         public int ColorCount => Slots.Count(slot => slot.ColorPath != null);
         public int NormalCount => Slots.Count(slot => slot.NormalPath != null);
         public int MainViewCount => Slots.Count(slot => slot.Part.Length == 0 && slot.ColorPath != null);
@@ -109,6 +113,14 @@ namespace KingdomSurvival.ArtAssets.Editor
         // Слово перед номером кадра (необязательное).
         private static readonly HashSet<string> FrameTokens = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         { "frame", "кадр", "f" };
+
+        // Имя «действия» рендера (KS Sprite Renderer: Объект/Idle/Front/Idle_Front_0001.png):
+        // у предмета оно одно и в имя объекта и части не входит.
+        private static readonly HashSet<string> ActionTokens = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "idle", "static", "still", "default", "anim", "animation", "loop", "sway", "wind", "breeze",
+            "ожидание", "покой", "статика", "анимация", "ветер", "качание"
+        };
 
         public const string NoViewProblem = "не удалось определить ракурс";
 
@@ -270,6 +282,18 @@ namespace KingdomSurvival.ArtAssets.Editor
             foreach (KeyValuePair<string, List<string>> claim in claims)
             {
                 (ArtAssetImportGroup group, ArtAssetView view, string part, ArtAssetFileKind kind, int frame) = targets[claim.Key];
+                // Несколько рендеров одного ракурса с отметками времени — берётся самый свежий.
+                if (claim.Value.Count > 1)
+                {
+                    List<(string path, string stamp)> stamped = claim.Value.Select(path => (path, Stamp(path))).ToList();
+                    if (stamped.All(item => item.stamp.Length > 0) && stamped.Select(item => item.stamp).Distinct().Count() == stamped.Count)
+                    {
+                        string newest = stamped.OrderByDescending(item => item.stamp, StringComparer.Ordinal).First().path;
+                        group.SkippedOlder += claim.Value.Count - 1;
+                        claim.Value.Clear();
+                        claim.Value.Add(newest);
+                    }
+                }
                 if (claim.Value.Count > 1)
                 {
                     foreach (string path in claim.Value)
@@ -313,6 +337,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             {
                 group.Slots.RemoveAll(slot => slot.ColorPath == null);
                 if (group.Slots.Count == 0) continue;
+                group.SourceFolder = CommonFolder(group.Slots.Select(slot => slot.ColorPath));
                 group.Slots.Sort((a, b) =>
                 {
                     int part = string.Compare(a.Part, b.Part, StringComparison.OrdinalIgnoreCase);
@@ -322,6 +347,26 @@ namespace KingdomSurvival.ArtAssets.Editor
             }
             plan.Groups.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
             return plan;
+        }
+
+        // Общая папка файлов объекта; папки ракурса, действия и нормалей — выше.
+        private static string CommonFolder(IEnumerable<string> files)
+        {
+            List<string> folders = files.Where(path => !string.IsNullOrEmpty(path)).Select(path => (Path.GetDirectoryName(path) ?? string.Empty).Replace('\\', '/')).Distinct().ToList();
+            if (folders.Count == 0) return string.Empty;
+            string common = folders[0];
+            foreach (string folder in folders.Skip(1))
+                while (common.Length > 0 && !(folder + "/").StartsWith(common + "/", StringComparison.OrdinalIgnoreCase))
+                    common = (Path.GetDirectoryName(common) ?? string.Empty).Replace('\\', '/');
+            while (common.Length > 0)
+            {
+                List<string> tokens = Tokens(Path.GetFileName(common));
+                bool service = tokens.Count > 0 && (tokens.All(NormalTokens.Contains) || IsAction(Path.GetFileName(common)) ||
+                                                    (FindViews(tokens, out _, out int start, out int length) == 1 && start == 0 && length == tokens.Count));
+                if (!service) break;
+                common = (Path.GetDirectoryName(common) ?? string.Empty).Replace('\\', '/');
+            }
+            return common;
         }
 
         // Номер кадра — последнее слово из цифр (и слово frame / кадр перед ним):
@@ -359,6 +404,8 @@ namespace KingdomSurvival.ArtAssets.Editor
             bool normal = RemoveTokens(stem, NormalTokens);
             if (!normal && stem.Count > 1 && stem[stem.Count - 1] == "n") { normal = true; stem.RemoveAt(stem.Count - 1); }
             RemoveTokens(stem, ColorTokens);
+            // Отметка времени рендера («…__20261009-142811-641») — не имя и не кадр.
+            RemoveStamp(stem);
             if (frames) frame = TakeFrameNumber(stem, out _);
 
             // Ракурс в имени файла?
@@ -378,6 +425,9 @@ namespace KingdomSurvival.ArtAssets.Editor
                     break;
                 }
             }
+            // Папка действия над папкой ракурса (Трава/Idle/Front): объект — выше неё.
+            int objectIndex = folderIndex - 1;
+            if (objectIndex >= 1 && IsAction(segments[objectIndex])) objectIndex--;
 
             kind = normal ? ArtAssetFileKind.Normal : ArtAssetFileKind.Color;
             if (fileViews == 1)
@@ -385,24 +435,30 @@ namespace KingdomSurvival.ArtAssets.Editor
                 if (folderIndex >= 0 && folderView != fileView) { problem = "неоднозначно: ракурс папки и файла различаются"; return false; }
                 view = fileView;
                 stem.RemoveRange(viewStart, viewLength);
+                // Действие рендера перед ракурсом (grass__Idle_Front…) — не часть имени.
+                if (viewStart > 0 && viewStart - 1 < stem.Count && ActionTokens.Contains(stem[viewStart - 1])) stem.RemoveAt(viewStart - 1);
                 // Плоские пары cart_Front.png / cart_Front_normal.png: остаток имени — объект.
                 string rest = Join(stem);
                 if (folderIndex >= 0)
                 {
+                    if (stem.All(ActionTokens.Contains)) rest = string.Empty;
                     part = MainPartNames.Contains(rest) ? string.Empty : rest;
-                    objectName = folderIndex > 0 ? segments[folderIndex - 1] : null;
+                    objectName = objectIndex >= 0 ? segments[objectIndex] : null;
                 }
                 else
                 {
-                    objectName = rest.Length > 0 ? rest : segments.Count > 1 ? segments[segments.Count - 2] : null;
+                    // Без папки ракурса: имя — остаток имени файла, иначе папка (папка действия — пропускается).
+                    int parent = segments.Count - 2;
+                    if (parent >= 1 && IsAction(segments[parent])) parent--;
+                    objectName = rest.Length > 0 ? rest : parent >= 0 ? segments[parent] : null;
                 }
             }
             else if (folderIndex >= 0)
             {
                 view = folderView;
-                string rest = Join(stem);
+                string rest = stem.All(ActionTokens.Contains) ? string.Empty : Join(stem);
                 part = MainPartNames.Contains(rest) ? string.Empty : rest;
-                objectName = folderIndex > 0 ? segments[folderIndex - 1] : null;
+                objectName = objectIndex >= 0 ? segments[objectIndex] : null;
             }
             else
             {
@@ -417,6 +473,39 @@ namespace KingdomSurvival.ArtAssets.Editor
         }
 
         public static string NormalizeKey(string name) => Join(Tokens(name ?? string.Empty));
+
+        private static bool IsAction(string segment)
+        {
+            List<string> tokens = Tokens(segment);
+            return tokens.Count > 0 && tokens.All(ActionTokens.Contains);
+        }
+
+        // Отметка времени рендера: ГГГГММДД, ЧЧММСС и (необязательно) миллисекунды.
+        private static void RemoveStamp(List<string> tokens)
+        {
+            for (int i = 0; i + 1 < tokens.Count; i++)
+            {
+                if (!IsDigits(tokens[i], 8) || !IsDigits(tokens[i + 1], 6)) continue;
+                int count = i + 2 < tokens.Count && tokens[i + 2].Length <= 4 && tokens[i + 2].All(char.IsDigit) ? 3 : 2;
+                tokens.RemoveRange(i, count);
+                return;
+            }
+        }
+
+        private static bool IsDigits(string token, int length) => token.Length == length && token.All(char.IsDigit);
+
+        // Отметка времени рендера в имени файла («20261009142811641»); нет — пусто.
+        public static string Stamp(string path)
+        {
+            List<string> tokens = Tokens(Path.GetFileNameWithoutExtension(path ?? string.Empty));
+            for (int i = 0; i + 1 < tokens.Count; i++)
+            {
+                if (!IsDigits(tokens[i], 8) || !IsDigits(tokens[i + 1], 6)) continue;
+                string ms = i + 2 < tokens.Count && tokens[i + 2].Length <= 4 && tokens[i + 2].All(char.IsDigit) ? tokens[i + 2].PadLeft(4, '0') : "0000";
+                return tokens[i] + tokens[i + 1] + ms;
+            }
+            return string.Empty;
+        }
 
         // Слова имени: нижний регистр, разделители _ - пробел точка.
         public static List<string> Tokens(string value)

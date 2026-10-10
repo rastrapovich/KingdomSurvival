@@ -160,15 +160,17 @@ namespace KingdomSurvival.LocationRendering.Tests
         {
             Texture2D texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
             Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 32, 32), new Vector2(.5f, 0), 32);
-            LocationVisualObject crate = new LocationVisualObject { Id = "crate", Name = "Ящик", Sprite = sprite, Position = new Vector2(.6f, .5f), Height = 1 };
+            LocationVisualObject crate = new LocationVisualObject { Id = "crate", Name = "Ящик", Sprite = sprite, Position = new Vector2(.4f, .5f), Height = 1 };
+            // Далеко за радиусом огня: его тени не видно — контур выключен (сотни предметов не считаются зря).
+            LocationVisualObject far = new LocationVisualObject { Id = "far", Name = "Дальний ящик", Sprite = sprite, Position = new Vector2(.95f, .5f), Height = 1 };
             LocationVisualObject fire = new LocationVisualObject { Id = "ring", Name = "Кольцо", Sprite = sprite, Position = new Vector2(.3f, .5f), Height = 1 };
             fire.Light.Enabled = true;
-            LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz", UseWorldLighting = false, Objects = { crate, fire } };
+            LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz", UseWorldLighting = false, Objects = { crate, far, fire } };
             using (LocationWorldRenderer renderer = new LocationWorldRenderer(new LocalLocationDefinition { Id = "zz" }, visual, null))
             {
                 renderer.SetTime(1, 0);
-                Assert.That(renderer.ContourCount, Is.EqualTo(1), "Ящик перекрывает свет, кольцо костра свой огонь — нет.");
-                ShadowCaster2D contour = renderer.Root.GetComponentsInChildren<ShadowCaster2D>()[0];
+                Assert.That(renderer.ContourCount, Is.EqualTo(1), "Ящик у огня перекрывает свет, дальний ящик и кольцо костра свой огонь — нет.");
+                ShadowCaster2D contour = renderer.Root.GetComponentsInChildren<ShadowCaster2D>().First(item => item.enabled);
                 Assert.That(contour.castsShadows, Is.True);
                 Assert.That(contour.selfShadows, Is.False, "Сам предмет своей тенью не темнеет.");
                 Assert.That(contour.mesh != null && contour.mesh.vertexCount > 0, Is.True, "Форма тени задана.");

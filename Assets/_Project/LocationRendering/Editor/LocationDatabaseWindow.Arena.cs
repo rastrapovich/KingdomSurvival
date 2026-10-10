@@ -18,6 +18,8 @@ namespace KingdomSurvival.LocationRendering.Editor
     public sealed partial class LocationDatabaseWindow
     {
         [SerializeField] private bool showHexSamples;
+        // Гексы боя на рисунке: одна галочка над холстом.
+        [SerializeField] private bool showHexes = true;
 
         private VisualElement arenaClip;
         private BattlefieldView arenaView;
@@ -26,6 +28,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         private readonly HashSet<HexCoord> arenaBlocked = new HashSet<HexCoord>();
         private readonly HashSet<HexCoord> arenaDifficult = new HashSet<HexCoord>();
         private SerializedObject fieldsSerialized;
+        private LocalLocationGeometry arenaGeometry;
+        private Vector2 arenaCellsCenter;
 
         // Слой над холстом: обрезан по рисунку, мышь не перехватывает.
         private VisualElement BuildArenaLayer()
@@ -62,20 +66,29 @@ namespace KingdomSurvival.LocationRendering.Editor
             return geometry.ArenaCenterFor(encounter, anchor);
         }
 
-        // Кадр боя выбранного столкновения — туда же, где он на рисунке.
+        // Где показать гексы: кадр боя выбранного столкновения; столкновений
+        // нет — кадр у старта теста (или в середине места), чтобы размер и вид
+        // гекса были видны на рисунке всегда.
+        private Vector2 HexFrameCenter()
+        {
+            LocalEncounterDefinition encounter = SelectedEncounter;
+            if (encounter != null) return ArenaCenterOf(encounter);
+            return Visual != null ? LocationVisualGeometry.ToPixel(Location, Visual.TestStartPoint) : CanvasSize / 2;
+        }
+
+        // Кадр боя — туда же, где он на рисунке.
         private void SyncArenaView()
         {
             if (arenaClip == null || canvas == null) return;
             BattlefieldDefinitionData field = Field;
-            LocalEncounterDefinition encounter = SelectedEncounter;
             Rect area = new Rect(0, 0, canvas.contentRect.width, canvas.contentRect.height);
-            bool show = showArena && !compareDay && !PictureCropActive && renderer != null && geometry != null && field != null && encounter != null &&
+            bool show = showHexes && !compareDay && !PictureCropActive && renderer != null && geometry != null && field != null && Location != null &&
                         !float.IsNaN(area.width) && area.width >= 10 && area.height >= 10;
             arenaClip.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
             if (!show) return;
 
             Rect frame = CanvasFrame(area);
-            Vector2 arenaCenter = ArenaCenterOf(encounter);
+            Vector2 arenaCenter = HexFrameCenter();
             Rect rect = geometry.FrameRect(arenaCenter);
             Vector2 a = ToGui(frame, rect.min), b = ToGui(frame, rect.max);
             arenaClip.style.left = frame.x;
@@ -94,6 +107,10 @@ namespace KingdomSurvival.LocationRendering.Editor
                 arenaField = field;
                 arenaView.Show(field, style);
             }
+            // Клетки кадра пересчитываются, только когда сдвинулся кадр или пересобрано место.
+            if (!changed && geometry == arenaGeometry && arenaCenter == arenaCellsCenter) return;
+            arenaGeometry = geometry;
+            arenaCellsCenter = arenaCenter;
             HashSet<HexCoord> blocked = geometry.ArenaBlockedCells(arenaCenter);
             if (changed || !blocked.SetEquals(arenaBlocked))
             {

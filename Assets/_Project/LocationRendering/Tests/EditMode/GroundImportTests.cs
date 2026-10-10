@@ -393,7 +393,7 @@ namespace KingdomSurvival.LocationRendering.Tests
         }
 
         [Test]
-        public void WholeMapColorPaintedInPlaceAndChangedHeightRejected()
+        public void WholeMapColorPaintedInPlaceAndChangedHeightWarned()
         {
             GroundSyntheticExport export = Small();
             string manifest = export.WriteWhole(Path.Combine(folder, "whole"));
@@ -414,9 +414,11 @@ namespace KingdomSurvival.LocationRendering.Tests
                 Assert.That(new Vector2Int(pixel.r, pixel.g), Is.EqualTo(new Vector2Int((byte)(tile.X * 128), (byte)((1 - tile.Y) * 96))), tile.Key);
             }
             Assert.That(LocationGroundLayout.RuntimeErrors(Visual, Location), Is.Empty);
-            // Изменённая карта высот — отказ с понятной причиной.
+            // Изменённая карта высот того же размера не блокирует импорт: предупреждение, загружается как есть.
             File.WriteAllBytes(Path.Combine(folder, "whole", "Test_Map_height.png"), PngCodec.Encode(128, 96, 16, PngCodec.GrayAlpha, new ushort[128 * 96 * 2]));
-            Assert.That(string.Join("\n", GroundExportPackage.Load(manifest).Errors), Does.Contain("Height изменён"));
+            GroundExportPackage changed = GroundExportPackage.Load(manifest);
+            Assert.That(changed.Errors, Is.Empty, string.Join("\n", changed.Errors));
+            Assert.That(string.Join("\n", changed.Warnings), Does.Contain("Height изменён"));
         }
 
         private static Color32 Decoded(byte[] png, int x, int y)

@@ -45,7 +45,26 @@ namespace KingdomSurvival.LocationRendering
             public Sprite ContourSprite;
             public bool ContourFlip;
             public float ContourBand;
+            // Что уже записано в блок свойств тени: без изменений — не трогать (сотни предметов за кадр).
+            public bool ShadowShown;
+            public Sprite ShadowSprite;
+            public Vector2 ShadowVector;
+            public float ShadowGroundY, ShadowOpacity, ShadowSoftness;
+            public Color ShadowColor;
         }
+
+        // Местный источник, дающий тени по контуру: где он светит.
+        private struct ShadowLight
+        {
+            public Vector2 Position;
+            public float Radius;
+        }
+
+        private readonly List<ShadowLight> shadowLights = new List<ShadowLight>();
+        private bool anyShadowLight;
+        private ShadowCaster2D[] cachedContours = Array.Empty<ShadowCaster2D>();
+        private Light2D[] cachedLights = Array.Empty<Light2D>();
+        private int cachedHierarchy = -1;
 
 
         private readonly List<Caster> casters = new List<Caster>();
@@ -70,14 +89,25 @@ namespace KingdomSurvival.LocationRendering
         // LateUpdate у Light2D: его геометрия и границы не пересчитываются, и
         // URP отсекает местный свет целиком — в окне не видно ни огня, ни
         // нормалей. Пересчёт вручную перед кадром; в игре не нужен.
+        // Списки компонентов кэшируются: поиск по сотням предметов каждый кадр
+        // дорог; состав сцены меняется — меняется число узлов иерархии.
         public void RefreshLightsOutsidePlay()
         {
             if (Application.isPlaying || Root == null) return;
-            // Перекрытие света: форма и группа теней обновляются в Update.
-            foreach (ShadowCaster2D contour in Root.GetComponentsInChildren<ShadowCaster2D>())
-                if (contour != null && contour.enabled) contour.Update();
+            int hierarchy = Root.transform.hierarchyCount;
+            if (hierarchy != cachedHierarchy)
+            {
+                cachedHierarchy = hierarchy;
+                cachedContours = Root.GetComponentsInChildren<ShadowCaster2D>();
+                cachedLights = Root.GetComponentsInChildren<Light2D>();
+            }
+            // Перекрытие света: форма и группа теней обновляются в Update —
+            // только если есть местный свет с тенями (иначе контуры выключены).
+            if (anyShadowLight)
+                foreach (ShadowCaster2D contour in cachedContours)
+                    if (contour != null && contour.enabled) contour.Update();
             if (LightLateUpdate == null) return;
-            foreach (Light2D light in Root.GetComponentsInChildren<Light2D>())
+            foreach (Light2D light in cachedLights)
                 if (light != null && light.lightType != Light2D.LightType.Global) LightLateUpdate.Invoke(light, null);
         }
 
@@ -241,6 +271,7 @@ namespace KingdomSurvival.LocationRendering
         private void UpdateShadows()
         {
             if (shadowMaterial == null) return;
+            CollectShadowLights();
             for (int i = casters.Count - 1; i >= 0; i--)
             {
                 Caster caster = casters[i];
@@ -256,9 +287,45 @@ namespace KingdomSurvival.LocationRendering
                 // Солнце (или луна) — тень-силуэт.
                 CastShadow(caster, 0, enabled && sunOpacity > .001f, sunRaw * scale, Sky.Sun.Color, sunOpacity,
                     Sky.Sun.Softness);
-                // Огонь и другие источники — тень по контуру рисунка до края света.
-                UpdateContour(caster, enabled);
+                // Огонь и другие источники — тень по контуру рисунка до края света;
+                // вдали от всех таких источников контур выключен (его тени не видно).
+                UpdateContour(caster, enabled && NearShadowLight(caster));
             }
+        }
+
+        // Включённые местные источники с тенями: позиция и радиус в мире.
+        // Свет формы и свет-рисунок — без радиуса (действует везде).
+        private void CollectShadowLights()
+        {
+            shadowLights.Clear();
+            anyShadowLight = false;
+            foreach (Placed item in placed)
+            {
+                Light2D light = item.Light;
+                if (light == null || !light.enabled || !light.shadowsEnabled || light.intensity <= 0) continue;
+                anyShadowLight = true;
+                bool point = light.lightType == Light2D.LightType.Point;
+                Vector3 scale = light.transform.lossyScale;
+                shadowLights.Add(new ShadowLight
+                {
+                    Position = light.transform.position,
+                    Radius = point ? light.pointLightOuterRadius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y)) : float.PositiveInfinity
+                });
+            }
+        }
+
+        private bool NearShadowLight(Caster caster)
+        {
+            if (shadowLights.Count == 0) return false;
+            Bounds bounds = caster.Source.bounds;
+            Vector2 center = bounds.center;
+            float extent = bounds.extents.magnitude;
+            foreach (ShadowLight light in shadowLights)
+            {
+                float reach = light.Radius + extent;
+                if (float.IsInfinity(reach) || (center - light.Position).sqrMagnitude <= reach * reach) return true;
+            }
+            return false;
         }
 
         // Тень-силуэт от солнца: гаснет, когда свет уходит вбок
@@ -313,7 +380,12 @@ namespace KingdomSurvival.LocationRendering
             if (contour == null) return;
             Sprite sprite = caster.Source.sprite;
             enabled &= sprite != null;
-            if (contour.enabled != enabled) contour.enabled = enabled;
+            if (contour.enabled != enabled)
+            {
+                contour.enabled = enabled;
+                // Снова включён (подошёл к огню, наступила ночь) — форму задать заново.
+                if (enabled) caster.ContourSprite = null;
+            }
             LocationShadowStyle style = Sky.ShadowStyle;
             float band = Mathf.Clamp(caster.People ? style.FireBlockPeople : style.FireBlockObjects, .05f, 1);
             if (!enabled || (sprite == caster.ContourSprite && caster.Source.flipX == caster.ContourFlip && band == caster.ContourBand)) return;
@@ -419,7 +491,8 @@ namespace KingdomSurvival.LocationRendering
             SpriteRenderer shadow = caster.Shadows[index];
             if (!visible || opacity <= .001f || vector.sqrMagnitude < 1e-6f)
             {
-                if (shadow != null) shadow.enabled = false;
+                if (shadow != null && shadow.enabled) shadow.enabled = false;
+                caster.ShadowShown = false;
                 return;
             }
             if (shadow == null)
@@ -431,7 +504,7 @@ namespace KingdomSurvival.LocationRendering
                 shadow.sortingOrder = ShadowSortingOrder;
                 caster.Shadows[index] = shadow;
             }
-            shadow.enabled = true;
+            if (!shadow.enabled) shadow.enabled = true;
             if (caster.Override != null)
             {
                 if (shadow.sprite != caster.Override)
@@ -459,12 +532,25 @@ namespace KingdomSurvival.LocationRendering
                     shadow.transform.rotation = from.rotation;
                 }
             }
+            // Ничего не изменилось с прошлого кадра — блок свойств прежний.
+            float groundY = caster.Anchor.position.y;
+            if (caster.ShadowShown && caster.ShadowSprite == shadow.sprite && (caster.ShadowVector - vector).sqrMagnitude < 1e-8f &&
+                Mathf.Abs(caster.ShadowGroundY - groundY) < 1e-5f && Mathf.Abs(caster.ShadowOpacity - opacity) < 1e-4f &&
+                Mathf.Abs(caster.ShadowSoftness - softness) < 1e-4f && caster.ShadowColor == color)
+                return;
+            caster.ShadowShown = true;
+            caster.ShadowSprite = shadow.sprite;
+            caster.ShadowVector = vector;
+            caster.ShadowGroundY = groundY;
+            caster.ShadowOpacity = opacity;
+            caster.ShadowSoftness = softness;
+            caster.ShadowColor = color;
             // Блок свойств — с чистого листа: старый блок мог нести текстуру
             // прошлого кадра анимации (другой страницы атласа).
             shadowBlock.Clear();
             Vector4 uvRect = SpriteUVRect(shadow.sprite);
             shadowBlock.SetVector(ShadowVectorId, vector);
-            shadowBlock.SetFloat(GroundYId, caster.Anchor.position.y);
+            shadowBlock.SetFloat(GroundYId, groundY);
             shadowBlock.SetColor(ShadowColorId, new Color(color.r, color.g, color.b, Mathf.Clamp01(opacity)));
             // Размытие — в долях своего кадра, а не всей страницы атласа.
             shadowBlock.SetFloat(BlurId, Mathf.Clamp01(softness) * .05f * (uvRect.w - uvRect.y));

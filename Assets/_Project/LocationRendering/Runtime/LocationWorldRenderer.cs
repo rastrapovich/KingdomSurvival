@@ -86,6 +86,8 @@ namespace KingdomSurvival.LocationRendering
         // ПР-12Р: тот же свет, плюс цвет экземпляра (тон, насыщенность, яркость).
         public const string AdjustShaderPath = "LocationRendering/LocationSpriteAdjust";
         private readonly Material adjustLit;
+        // Деталь земли без поправки цвета: общий материал «как земля».
+        private readonly Material adjustGround;
         private readonly MaterialPropertyBlock adjustBlock = new MaterialPropertyBlock();
         private static readonly int HsvId = Shader.PropertyToID("_KsHsv");
         private static readonly int LightShareId = Shader.PropertyToID("_KsLight");
@@ -108,7 +110,12 @@ namespace KingdomSurvival.LocationRendering
             lit = Own(new Material(Shader.Find("Universal Render Pipeline/2D/Sprite-Lit-Default")));
             unlit = Own(new Material(Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default")));
             Shader adjust = Resources.Load<Shader>(AdjustShaderPath);
-            if (adjust != null) adjustLit = Own(new Material(adjust) { name = "Рисунок места · цвет" });
+            if (adjust != null)
+            {
+                adjustLit = Own(new Material(adjust) { name = "Рисунок места · цвет" });
+                adjustGround = Own(new Material(adjust) { name = "Рисунок места · деталь земли" });
+                adjustGround.SetVector(LightShareId, LightShare(null, true));
+            }
             Camera = Child("Камера").AddComponent<Camera>();
             Camera.orthographic = true;
             Camera.transform.localPosition = new Vector3(0, 0, -10);
@@ -361,16 +368,17 @@ namespace KingdomSurvival.LocationRendering
                 SpriteRenderer image = Image(imageObject, sprite, fullbright);
                 // Ассет без рисунка — заметная заглушка, а не «ящик».
                 if (part.Placeholder && resolved.FromAsset) image.color = new Color(1, .45f, .75f);
-                else if (!fullbright) ApplyColor(image, resolved.ColorAdjust, resolved);
+                else if (!fullbright) ApplyColor(image, resolved.ColorAdjust, resolved, LitAsGround(part.Band));
                 Fit(image, part.Height, part.Pivot, resolved.FlipX, Vector2.zero, resolved.Stretch, resolved.Rotation);
                 image.sortingOrder = LocationVisualGeometry.SortOrder(part.Band, anchor.localPosition.y, part.OrderOffset);
                 entry.Images.Add(image);
                 entry.Parts.Add(part);
                 if (i == 0) entry.Image = image;
-                if (part.ProjectsShadow)
+                // Тень от солнца — силуэт, от огня — контур (каждая своей галочкой).
+                if (part.ProjectsShadow || part.ProjectsFireShadow)
                     // Предмет со своим светом свой огонь не перекрывает (источник внутри контура).
                     AddCaster(anchor, image, part.ShadowSprite, part.ShadowHeight, part.ShadowPivot, resolved.FlipX, resolved.ShadowLength, null,
-                        contour: !item.Light.Enabled);
+                        contour: part.ProjectsFireShadow && !item.Light.Enabled, sun: part.ProjectsShadow);
             }
             if (item.Light.Enabled && item.Light.OwnRadialShadow) BuildRadialShadows(entry);
             if (resolved.OccludesLight)
@@ -575,6 +583,34 @@ namespace KingdomSurvival.LocationRendering
             (pixel.x - ViewCenter.x) / (ViewHeight * Aspect) + .5f, (pixel.y - ViewCenter.y) / ViewHeight + .5f);
 
         // ------------------------------------------------------------------
+        // Слои показа (окно базы: гексы между землёй и предметами)
+        // ------------------------------------------------------------------
+
+        // С этого порядка — «верх»: предметы, люди, кроны и передний план.
+        // Ниже — земля, её детали и тени на земле.
+        public const int UpperSortingFrom = -22000;
+        private Renderer[] cachedRenderers = Array.Empty<Renderer>();
+        private int cachedRendererHierarchy = -1;
+
+        // Показать только землю (upper = false), только верх (ground = false)
+        // или всё. Включённость компонентов не трогается — только отрисовка.
+        public void SetLayersVisible(bool ground, bool upper)
+        {
+            if (Root == null) return;
+            int hierarchy = Root.transform.hierarchyCount;
+            bool stale = hierarchy != cachedRendererHierarchy;
+            // Удалённое и добавленное за один кадр число узлов не меняет — по пропавшим.
+            for (int i = 0; !stale && i < cachedRenderers.Length; i++) stale = cachedRenderers[i] == null;
+            if (stale)
+            {
+                cachedRendererHierarchy = hierarchy;
+                cachedRenderers = Root.GetComponentsInChildren<Renderer>(true);
+            }
+            foreach (Renderer item in cachedRenderers)
+                if (item != null) item.forceRenderingOff = item.sortingOrder >= UpperSortingFrom ? !upper : !ground;
+        }
+
+        // ------------------------------------------------------------------
         // Фигуры
         // ------------------------------------------------------------------
 
@@ -736,22 +772,32 @@ namespace KingdomSurvival.LocationRendering
         // (без поправки — общий материал, рисунки собираются в пачки).
         // Свет ассета (солнце / огонь по отдельности) — тем же материалом с
         // поправкой; оба включены — общий материал.
-        private void ApplyColor(SpriteRenderer image, LocationColorAdjust adjust, LocationResolvedVisual resolved = null)
+        // groundLit — деталь земли: свет с нормалями ложится на неё как на
+        // землю под ней (своя нормаль не пишется).
+        private void ApplyColor(SpriteRenderer image, LocationColorAdjust adjust, LocationResolvedVisual resolved = null, bool groundLit = false)
         {
             bool identity = adjust == null || adjust.IsIdentity;
             bool lighting = resolved != null && !resolved.DefaultLighting;
             if (!identity) image.color = adjust.Tint;
             bool hsv = !identity && adjust.HasHsv;
-            if ((!hsv && !lighting) || adjustLit == null) return;
+            if (adjustLit == null) return;
+            if (!hsv && !lighting)
+            {
+                if (groundLit && adjustGround != null) image.sharedMaterial = adjustGround;
+                return;
+            }
             image.sharedMaterial = adjustLit;
             image.GetPropertyBlock(adjustBlock);
             adjustBlock.SetVector(HsvId, hsv ? adjust.ShaderHsv : new Vector4(0, 1, 1, 0));
-            adjustBlock.SetVector(LightShareId, LightShare(resolved));
+            adjustBlock.SetVector(LightShareId, LightShare(resolved, groundLit));
             image.SetPropertyBlock(adjustBlock);
         }
 
-        public static Vector4 LightShare(LocationResolvedVisual resolved) =>
-            new Vector4(resolved == null || resolved.LitBySun ? 1 : 0, resolved == null || resolved.LitByFire ? 1 : 0, 0, 0);
+        public static Vector4 LightShare(LocationResolvedVisual resolved, bool groundLit = false) =>
+            new Vector4(resolved == null || resolved.LitBySun ? 1 : 0, resolved == null || resolved.LitByFire ? 1 : 0, groundLit ? 1 : 0, 0);
+
+        // Слой рисунка, который освещается как земля: сама земля и её детали.
+        public static bool LitAsGround(LocationVisualBand band) => band == LocationVisualBand.Ground || band == LocationVisualBand.GroundDetail;
 
         // ------------------------------------------------------------------
         // Предметы сборки (редактор)

@@ -165,7 +165,10 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         private LocationBattleGrid? battleGrid;
 
-        public LocationBattleGrid BattleGrid => battleGrid ??= new LocationBattleGrid(new Vector2(CanvasWidth, CanvasHeight), ArenaHexSize);
+        public LocationBattleGrid BattleGrid => battleGrid ??= new LocationBattleGrid(new Vector2(CanvasWidth, CanvasHeight), ArenaHexSize, GridShift);
+
+        // «Сдвиг X / Y» сетки поля (доли кадра боя) — в пикселях рисунка места.
+        public Vector2 GridShift => Battlefield != null ? Vector2.Scale(Battlefield.GridOffset, new Vector2(FrameWidth, FrameHeight)) : Vector2.zero;
 
         // Стены боя: клетки, чей центр вне рисунка или на непроходимом.
         public HashSet<HexCoord> GridBlockedCells()
@@ -264,6 +267,8 @@ namespace KingdomSurvival.BattlefieldDatabase
             request.GridHexSize = grid.HexSize;
             request.GridCanvasWidth = grid.Canvas.x;
             request.GridCanvasHeight = grid.Canvas.y;
+            request.GridShiftX = grid.Shift.x;
+            request.GridShiftY = grid.Shift.y;
             return true;
         }
 

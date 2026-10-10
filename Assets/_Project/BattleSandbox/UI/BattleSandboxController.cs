@@ -1010,7 +1010,8 @@ namespace KingdomSurvival.BattleSandbox
             if (campaignBattle != null && campaignBattle.UsesLocationGrid)
             {
                 LocationBattleGrid grid = new LocationBattleGrid(
-                    new Vector2(campaignBattle.GridCanvasWidth, campaignBattle.GridCanvasHeight), campaignBattle.GridHexSize);
+                    new Vector2(campaignBattle.GridCanvasWidth, campaignBattle.GridCanvasHeight), campaignBattle.GridHexSize,
+                    new Vector2(campaignBattle.GridShiftX, campaignBattle.GridShiftY));
                 surface.SetLocationGrid(grid);
                 boardElement.SetLocationGrid(grid);
                 surface.style.flexGrow = 0f;

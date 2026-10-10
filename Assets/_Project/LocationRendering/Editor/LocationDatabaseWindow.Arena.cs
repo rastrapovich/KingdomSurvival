@@ -65,14 +65,19 @@ namespace KingdomSurvival.LocationRendering.Editor
             return geometry.ArenaCenterFor(encounter, anchor);
         }
 
+        // Слой гексов виден: галочка «Гексы боя», место собрано, не сравнение
+        // суток и не кадрирование рисунка.
+        private bool HexesShown(Rect area) =>
+            showHexes && !compareDay && !PictureCropActive && renderer != null && geometry != null && Field != null && Location != null &&
+            !float.IsNaN(area.width) && area.width >= 10 && area.height >= 10;
+
         // Кадр боя — туда же, где он на рисунке.
         private void SyncArenaView()
         {
             if (arenaClip == null || canvas == null) return;
             BattlefieldDefinitionData field = Field;
             Rect area = new Rect(0, 0, canvas.contentRect.width, canvas.contentRect.height);
-            bool show = showHexes && !compareDay && !PictureCropActive && renderer != null && geometry != null && field != null && Location != null &&
-                        !float.IsNaN(area.width) && area.width >= 10 && area.height >= 10;
+            bool show = HexesShown(area);
             arenaClip.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
             if (!show) return;
 

@@ -16,7 +16,9 @@ namespace KingdomSurvival.BattlefieldDatabase
         public Vector2 Pivot;
         public LocationVisualBand Band;
         public int OrderOffset;
+        // Тень от солнца (силуэт) и от огня (по контуру).
         public bool ProjectsShadow;
+        public bool ProjectsFireShadow;
         public Sprite ShadowSprite;
         public float ShadowHeight;
         public Vector2 ShadowPivot;
@@ -107,6 +109,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                 Name = item.Name, Sprite = sprite, Placeholder = sprite == null,
                 Height = item.Height, Pivot = item.Pivot, Band = item.Band, OrderOffset = item.OrderOffset,
                 ProjectsShadow = item.ProjectsShadow && item.Band == LocationVisualBand.World,
+                ProjectsFireShadow = item.ProjectsFireShadow && item.Band == LocationVisualBand.World,
                 ShadowSprite = item.ShadowSprite, ShadowHeight = item.Height, ShadowPivot = item.Pivot
             });
             result.BlocksMovement = item.BlocksMovement;
@@ -144,11 +147,14 @@ namespace KingdomSurvival.BattlefieldDatabase
                 LocationVisualBand band = Band(part.Layer);
                 int order = part.OrderOffset;
                 if (main && item.IsOverridden(LocationAssetOverride.Layer)) { band = item.Band; order = item.OrderOffset; }
-                bool projects = item.IsOverridden(LocationAssetOverride.Shadows) ? item.ProjectsShadow : part.ProjectsShadow;
+                bool own = item.IsOverridden(LocationAssetOverride.Shadows);
+                bool projects = own ? item.ProjectsShadow : part.ProjectsShadow;
+                bool fire = own ? item.ProjectsFireShadow : part.ProjectsFireShadow;
                 LocationResolvedPart resolved = new LocationResolvedPart
                 {
                     Name = part.Name, Sprite = sprite, Placeholder = sprite == null, Band = band, OrderOffset = order,
-                    ProjectsShadow = projects && band == LocationVisualBand.World
+                    ProjectsShadow = projects && band == LocationVisualBand.World,
+                    ProjectsFireShadow = fire && band == LocationVisualBand.World
                 };
                 if (sprite == null)
                 {

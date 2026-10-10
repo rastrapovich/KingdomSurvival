@@ -208,6 +208,9 @@ public sealed class CampaignBattleRequest
     public float GridHexSize;
     public float GridCanvasWidth;
     public float GridCanvasHeight;
+    // Сдвиг сетки поля (пиксели рисунка места), уже приведённый к периоду сетки.
+    public float GridShiftX;
+    public float GridShiftY;
 
     public bool IsLocal => SourceKind == CampaignBattleSourceKind.Local;
     public bool UsesLocationGrid => IsLocal && GridWidth > 0 && GridHeight > 0 && GridHexSize > 0;

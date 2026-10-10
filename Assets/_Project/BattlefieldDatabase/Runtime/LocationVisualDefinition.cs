@@ -194,8 +194,16 @@ namespace KingdomSurvival.BattlefieldDatabase
         public LocationLightDefinition Light = new LocationLightDefinition();
         // ПР-12М: только источник света, без рисунка.
         public bool LightOnly;
-        // Отброшенная тень-силуэт (от солнца и местных источников).
+        // Тень от солнца — силуэт рисунка на земле.
         public bool ProjectsShadow = true;
+        // Тень от огня и других местных источников — перекрытие света по
+        // контуру рисунка. 0 — прежняя запись (как тень от солнца), 1 — да, 2 — нет.
+        public int FireShadowState;
+        public bool ProjectsFireShadow
+        {
+            get => FireShadowState == 0 ? ProjectsShadow : FireShadowState == 1;
+            set => FireShadowState = value ? 1 : 2;
+        }
         public float ShadowLength = 1;
         // Свой силуэт тени (дерево: тень кроны не совпадает с рисунком).
         public Sprite ShadowSprite;

@@ -194,6 +194,95 @@ namespace KingdomSurvival.LocationRendering
             Assert.That(layer.Instances.Select(item => item.View).Distinct().Count(), Is.EqualTo(2));
         }
 
+        // Рисование поверх: прежние экземпляры не мешают ни плотности, ни
+        // расстоянию — мазок досыпает ещё столько же; внутри мазка
+        // наименьшее расстояние соблюдается. Нажим — доля недостающего за отпечаток.
+        [Test]
+        public void PaintOver_AddsAnotherLayer_AndFlowFillsGradually()
+        {
+            Asset("grass");
+            LocalLocationDefinition location = Location();
+            LocationScatterLayer layer = Layer("grass");
+            layer.Brush.Radius = 200;
+            layer.Brush.Density = 6;
+            layer.Brush.MinDistance = 30;
+            Vector2 center = new Vector2(960, 540);
+            System.Random random = new System.Random(3);
+            LocationScatterPainter.Stamp(layer, location, center, random, null, LocationScatterIndex.Of(layer, location));
+            int first = layer.Instances.Count;
+            Assert.That(first, Is.GreaterThan(20));
+            Assert.That(LocationScatterPainter.Stamp(layer, location, center, random, null, LocationScatterIndex.Of(layer, location)).Count, Is.LessThanOrEqualTo(2),
+                "Без «поверх» заполненное место не досыпается.");
+
+            int before = layer.Instances.Count;
+            HashSet<int> stroke = new HashSet<int>();
+            LocationScatterIndex strokeIndex = new LocationScatterIndex(layer.Brush.MinDistance);
+            for (int i = 0; i < 4; i++)
+                foreach (LocationScatterInstance added in LocationScatterPainter.Stamp(layer, location, center, random, null, strokeIndex, null, stroke))
+                    stroke.Add(added.Key);
+            Assert.That(stroke.Count, Is.InRange(first * .7f, first * 1.3f + 2), "Поверх — ещё один слой той же плотности, повторные отпечатки мазка его не утраивают.");
+            Assert.That(layer.Instances.Count, Is.EqualTo(before + stroke.Count));
+            List<Vector2> strokePoints = layer.Instances.Where(item => stroke.Contains(item.Key)).Select(item => LocationVisualGeometry.ToPixel(location, item.Position)).ToList();
+            for (int i = 0; i < strokePoints.Count; i++)
+                for (int j = i + 1; j < strokePoints.Count; j++)
+                    Assert.That(Vector2.Distance(strokePoints[i], strokePoints[j]), Is.GreaterThanOrEqualTo(30 - .01f), "Наименьшее расстояние — внутри мазка.");
+
+            LocationScatterLayer gentle = Layer("grass");
+            gentle.Brush.Radius = 200;
+            gentle.Brush.Density = 6;
+            gentle.Brush.MinDistance = 0;
+            gentle.Brush.Flow = .1f;
+            LocationScatterIndex gentleIndex = LocationScatterIndex.Of(gentle, location);
+            LocationScatterPainter.Stamp(gentle, location, center, random, null, gentleIndex);
+            Assert.That(gentle.Instances.Count, Is.LessThanOrEqualTo(first * .2f + 1), "Нажим 0,1 — отпечаток добавляет десятую долю.");
+            for (int i = 0; i < 60; i++) LocationScatterPainter.Stamp(gentle, location, center, random, null, gentleIndex);
+            Assert.That(gentle.Instances.Count, Is.InRange(first * .8f, first * 1.2f + 2), "Мазок с малым нажимом набирает ту же плотность.");
+
+            LocationScatterLayer filled = Layer("grass");
+            filled.Brush.Density = 1;
+            filled.Brush.MinDistance = 0;
+            int once = LocationScatterPainter.Fill(filled, location, new System.Random(1), null, null).Count;
+            Assert.That(LocationScatterPainter.Fill(filled, location, new System.Random(2), null, null).Count, Is.EqualTo(0));
+            Assert.That(LocationScatterPainter.Fill(filled, location, new System.Random(2), null, new LocationScatterIndex(8), null, 20000, true).Count, Is.EqualTo(once),
+                "Заливка поверх — ещё один слой плотности.");
+        }
+
+        [Test]
+        public void NewBrush_RandomViewAndHueSpread_ShadowsFromSunAndFireSeparate()
+        {
+            LocationScatterBrush brush = new LocationScatterBrush();
+            Assert.That(brush.ViewMode, Is.EqualTo(LocationScatterViewMode.Random), "По умолчанию — случайный ракурс из имеющихся.");
+            Assert.That(brush.HueJitter, Is.EqualTo(15));
+            Assert.That(brush.Flow, Is.EqualTo(1));
+            Assert.That(brush.PaintOver, Is.False);
+
+            // Прежний слой (без отдельной галочки огня): тень от огня — как от солнца.
+            LocationScatterLayer old = JsonUtility.FromJson<LocationScatterLayer>("{\"Name\":\"Старая\",\"ProjectsShadow\":true}");
+            Assert.That(old.ProjectsFireShadow, Is.True);
+            old.ProjectsFireShadow = false;
+            Assert.That(old.ProjectsShadow, Is.True, "Галочки независимы.");
+            LocationScatterLayer copy = JsonUtility.FromJson<LocationScatterLayer>(JsonUtility.ToJson(old));
+            Assert.That(copy.ProjectsShadow && !copy.ProjectsFireShadow, Is.True, "Раздельные тени сохраняются.");
+
+            Asset("bush");
+            copy.Assets.Add(new LocationScatterEntry { AssetId = "bush" });
+            copy.Instances.Add(new LocationScatterInstance { Key = 1, AssetId = "bush", Position = new Vector2(.5f, .5f) });
+            LocationResolvedPart part = LocationVisualResolver.Resolve(copy.ToObject(copy.Instances[0])).Main;
+            Assert.That(part.ProjectsShadow, Is.True);
+            Assert.That(part.ProjectsFireShadow, Is.False);
+
+            // Часть ассета: тени от солнца и огня — отдельными галочками, у экземпляра — как у ассета.
+            ArtAssetDefinition asset = catalog.Find("bush");
+            asset.MainPart.ProjectsFireShadow = false;
+            LocationVisualObject instance = new LocationVisualObject { Id = "one", AssetId = "bush", Scale = 1 };
+            part = LocationVisualResolver.Resolve(instance).Main;
+            Assert.That(part.ProjectsShadow && !part.ProjectsFireShadow, Is.True);
+            asset.MainPart.ProjectsShadow = false;
+            asset.MainPart.ProjectsFireShadow = true;
+            part = LocationVisualResolver.Resolve(instance).Main;
+            Assert.That(!part.ProjectsShadow && part.ProjectsFireShadow, Is.True);
+        }
+
         [Test]
         public void Erase_AndRecolor_WorkInsideCircle_OnlyBrushAssetsFilter()
         {

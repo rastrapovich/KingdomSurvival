@@ -75,7 +75,20 @@ namespace KingdomSurvival.LocationRendering.Editor
             : selectedKind == Kind.Enemy ? Location?.FindEncounter(SelectedEnemy?.EncounterId)
             : Location?.Encounters.FirstOrDefault();
         private Vector2 CanvasSize => LocationVisualGeometry.CanvasSize(Location);
-        private float ViewHeight => CanvasSize.y / zoom;
+        // Предпросмотр занимает всю область холста; при масштабе 1 весь рисунок
+        // помещается в неё (по меньшей из сторон), остальное — поле вокруг.
+        private float ViewHeight => FitHeight / zoom;
+
+        private float FitHeight
+        {
+            get
+            {
+                Vector2 canvasSize = CanvasSize;
+                Rect area = canvas != null ? canvas.contentRect : default;
+                float aspect = area.height > 1 && !float.IsNaN(area.width) ? area.width / area.height : canvasSize.x / Mathf.Max(1, canvasSize.y);
+                return Mathf.Max(canvasSize.y, canvasSize.x / Mathf.Max(.01f, aspect));
+            }
+        }
 
         [MenuItem("Kingdom Survival/База локаций")]
         public static void OpenWindow()
@@ -121,6 +134,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             ArtAssetDatabaseAsset.Changed -= CatalogChanged;
             ArtAssetUsages.LocationRequested -= OpenRequested;
             ReleasePreview();
+            ReleaseUpperLayer();
             ClearGroundPreview();
             if (database != null) AssetDatabase.SaveAssetIfDirty(database);
             if (fields != null) AssetDatabase.SaveAssetIfDirty(fields);
@@ -211,6 +225,11 @@ namespace KingdomSurvival.LocationRendering.Editor
             VisualElement canvasHost = new VisualElement(); canvasHost.style.flexGrow = 1;
             canvasHost.Add(canvas);
             canvasHost.Add(BuildArenaLayer());
+            // Над гексами: предметы и люди, метки и кисти. Мышь — холсту под ним.
+            canvasTop = new IMGUIContainer(DrawPreviewTop) { pickingMode = PickingMode.Ignore, focusable = false };
+            canvasTop.style.position = Position.Absolute;
+            canvasTop.style.left = canvasTop.style.top = canvasTop.style.right = canvasTop.style.bottom = 0;
+            canvasHost.Add(canvasTop);
             center.Add(canvasHost);
             Label hints = new Label("Перетащите PNG или Sprite сюда · ЛКМ: инструмент · ПКМ: панорама · Колесо: масштаб");
             hints.style.whiteSpace = WhiteSpace.Normal; hints.style.color = new Color(.65f, .71f, .65f);
@@ -700,10 +719,11 @@ namespace KingdomSurvival.LocationRendering.Editor
             footprint.RegisterValueChangedCallback(evt => Change(() => selected.Footprint = Vector2.Max(Vector2.zero, evt.newValue))); settings.Add(footprint);
             Toggle("Только источник света (без рисунка)", selected.LightOnly, value => selected.LightOnly = value, true);
             Heading("Тени предмета");
-            Toggle("Отбрасывает тень-силуэт (солнце и огонь)", selected.ProjectsShadow, value => selected.ProjectsShadow = value);
+            Toggle("Тень от солнца (силуэт)", selected.ProjectsShadow, value => selected.ProjectsShadow = value);
+            Toggle("Тень от огня (по контуру рисунка)", selected.ProjectsFireShadow, value => selected.ProjectsFireShadow = value);
             Number("Длина тени (множитель)", selected.ShadowLength, 0, 3, value => selected.ShadowLength = value);
             SpriteField("Свой силуэт тени", selected.ShadowSprite, value => selected.ShadowSprite = value);
-            Toggle("Перекрывает свет местных источников (по основанию)", selected.CastsShadow, value => selected.CastsShadow = value);
+            Toggle("Перекрывает свет основанием", selected.CastsShadow, value => selected.CastsShadow = value);
             NormalMapField("Карта нормалей", selected.ResolveSprite(), selected.NormalMap, value => selected.NormalMap = value);
             Heading("Свет этого предмета");
             LightEditor(selected);
@@ -824,6 +844,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void ReleasePreview()
         {
             renderer?.Dispose(); renderer = null; geometry = null;
+            topReady = false;
             preview?.Cleanup(); preview = null;
             if (terrainOverlay != null) DestroyImmediate(terrainOverlay);
             terrainOverlay = null;
@@ -846,12 +867,94 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 nextRepaint = now + (active ? 1 / 30.0 : 1 / 5.0);
                 canvas?.MarkDirtyRepaint();
+                canvasTop?.MarkDirtyRepaint();
             }
         }
 
         private double nextRepaint;
 
-        private Rect CanvasFrame(Rect area)
+        // Верхний слой предпросмотра (предметы и люди над гексами боя).
+        private IMGUIContainer canvasTop;
+        private RenderTexture fullTexture, upperTexture;
+        private Material upperMaterial;
+        private bool topReady;
+        private Vector2 previewMouse;
+        private static readonly int MaskTexId = Shader.PropertyToID("_MaskTex");
+
+        // Цвет — из полного кадра (обработка кадра, свет и тени как обычно),
+        // форма — из кадра одних предметов и людей на прозрачном фоне (без
+        // обработки кадра: она стирает прозрачность). false — не вышло.
+        private bool RenderUpperLayer(Rect frame)
+        {
+            if (upperMaterial == null)
+            {
+                Shader shader = Shader.Find("Hidden/KingdomSurvival/LocationTopLayer");
+                if (shader == null) return false;
+                upperMaterial = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
+            }
+            RenderTexture active = RenderTexture.active;
+            preview.BeginPreview(frame, GUIStyle.none);
+            preview.Render(true);
+            Texture full = preview.EndPreview();
+            fullTexture = MatchTexture(fullTexture, full);
+            Graphics.Blit(full, fullTexture);
+
+            Camera camera = preview.camera;
+            UniversalAdditionalCameraData data = camera.GetUniversalAdditionalCameraData();
+            bool post = data.renderPostProcessing;
+            Color background = camera.backgroundColor;
+            data.renderPostProcessing = false;
+            camera.backgroundColor = Color.clear;
+            renderer.SetLayersVisible(false, true);
+            preview.BeginPreview(frame, GUIStyle.none);
+            preview.Render(true);
+            Texture mask = preview.EndPreview();
+            renderer.SetLayersVisible(true, true);
+            camera.backgroundColor = background;
+            data.renderPostProcessing = post;
+
+            upperTexture = MatchTexture(upperTexture, full);
+            upperMaterial.SetTexture(MaskTexId, mask);
+            Graphics.Blit(fullTexture, upperTexture, upperMaterial);
+            RenderTexture.active = active;
+            return true;
+        }
+
+        private static RenderTexture MatchTexture(RenderTexture texture, Texture source)
+        {
+            if (texture != null && texture.width == source.width && texture.height == source.height) return texture;
+            ReleaseTexture(ref texture);
+            RenderTextureDescriptor descriptor = source is RenderTexture rt ? rt.descriptor
+                : new RenderTextureDescriptor(source.width, source.height, RenderTextureFormat.ARGBHalf, 0);
+            descriptor.depthBufferBits = 0;
+            descriptor.msaaSamples = 1;
+            texture = new RenderTexture(descriptor) { hideFlags = HideFlags.HideAndDontSave };
+            texture.Create();
+            return texture;
+        }
+
+        private static void ReleaseTexture(ref RenderTexture texture)
+        {
+            if (texture == null) return;
+            texture.Release();
+            DestroyImmediate(texture);
+            texture = null;
+        }
+
+        private void ReleaseUpperLayer()
+        {
+            topReady = false;
+            ReleaseTexture(ref fullTexture);
+            ReleaseTexture(ref upperTexture);
+            if (upperMaterial != null) DestroyImmediate(upperMaterial);
+            upperMaterial = null;
+        }
+
+        // Кадр предпросмотра — вся область холста, без полос сверху и снизу.
+        private static Rect CanvasFrame(Rect area) => area;
+
+        // Весь рисунок с его пропорциями внутри области (сравнение суток).
+        private Rect AspectFrame(Rect area)
         {
             float aspect = CanvasSize.x / CanvasSize.y;
             float height = Mathf.Min(area.height, area.width / aspect);
@@ -892,11 +995,31 @@ namespace KingdomSurvival.LocationRendering.Editor
             preview.camera.transform.rotation = Quaternion.identity;
             preview.camera.orthographicSize = ViewHeight / LocationVisualGeometry.PixelsPerUnit / 2;
             preview.camera.GetUniversalAdditionalCameraData().renderPostProcessing = Visual != null && Visual.Post.Enabled;
+            previewMouse = evt.mousePosition;
+            // Гексы боя — между землёй и предметами: здесь земля (с тенями на
+            // ней), над ней слой гексов, выше — верхний слой (предметы и люди).
+            bool layered = HexesShown(area);
+            topReady = layered && RenderUpperLayer(frame);
+            if (topReady) renderer.SetLayersVisible(true, false);
             preview.BeginPreview(frame, GUIStyle.none);
             preview.Render(true);
             Texture texture = preview.EndPreview();
-            GUI.DrawTexture(frame, texture, ScaleMode.StretchToFill);
-            Vector2 mouse = evt.mousePosition;
+            if (topReady) renderer.SetLayersVisible(true, true);
+            GUI.DrawTexture(frame, texture, ScaleMode.StretchToFill, false);
+        }
+
+        // Верхний слой предпросмотра: предметы и люди поверх гексов боя,
+        // затем служебные наложения (метки, свет, кисти).
+        private void DrawPreviewTop()
+        {
+            if (canvasTop == null || Event.current.type != EventType.Repaint) return;
+            if (renderer == null || preview == null || compareDay || Location == null) return;
+            Rect area = new Rect(0, 0, canvasTop.contentRect.width, canvasTop.contentRect.height);
+            if (float.IsNaN(area.width) || area.width < 10 || area.height < 10) return;
+            Rect frame = CanvasFrame(area);
+            Event evt = Event.current;
+            if (topReady && upperTexture != null) GUI.DrawTexture(frame, upperTexture, ScaleMode.StretchToFill, true);
+            Vector2 mouse = previewMouse;
             GUI.BeginClip(frame);
             Vector2 shift = -frame.position;
             if (showTerrain && terrainOverlay != null)

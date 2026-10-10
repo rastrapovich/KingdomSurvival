@@ -141,6 +141,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             main.Layer = LocationVisualResolver.Layer(item.Band);
             main.OrderOffset = item.OrderOffset;
             main.ProjectsShadow = item.ProjectsShadow;
+            main.FireShadowState = item.FireShadowState;
             ArtAssetPartView view = main.View(ArtAssetView.Front);
             view.Sprite = sprite;
             view.NormalMap = item.NormalMap != null ? item.NormalMap : SpriteNormalMaps.Find(sprite);
@@ -167,7 +168,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (asset.BlocksMovement != item.BlocksMovement || Vector2.Distance(settings.FootprintSize * item.Scale, item.Footprint) > .001f ||
                 settings.FootprintOffset.sqrMagnitude > 1e-6f)
                 overrides |= LocationAssetOverride.Passability;
-            if (main.ProjectsShadow != item.ProjectsShadow || !Mathf.Approximately(asset.ShadowLength, item.ShadowLength) ||
+            if (main.ProjectsShadow != item.ProjectsShadow || main.ProjectsFireShadow != item.ProjectsFireShadow || !Mathf.Approximately(asset.ShadowLength, item.ShadowLength) ||
                 asset.OccludesLight != item.CastsShadow)
                 overrides |= LocationAssetOverride.Shadows;
             item.Overrides = overrides;
@@ -182,7 +183,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (Mathf.Abs(a.Height - b.Height) > .001f) return "другая высота";
             if (Vector2.Distance(a.Pivot, b.Pivot) > .001f) return "другая опора";
             if (a.Band != b.Band || a.OrderOffset != b.OrderOffset) return "другой слой";
-            if (a.ProjectsShadow != b.ProjectsShadow) return "другая тень";
+            if (a.ProjectsShadow != b.ProjectsShadow || a.ProjectsFireShadow != b.ProjectsFireShadow) return "другая тень";
             if (before.BlocksMovement != after.BlocksMovement || Vector2.Distance(before.FootprintSize, after.FootprintSize) > .001f ||
                 Vector2.Distance(before.FootprintOffset, after.FootprintOffset) > .001f) return "другое основание";
             if (before.OccludesLight != after.OccludesLight || Mathf.Abs(before.ShadowLength - after.ShadowLength) > .001f) return "другие тени";

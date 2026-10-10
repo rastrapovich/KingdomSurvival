@@ -148,7 +148,8 @@ namespace KingdomSurvival.LocationRendering
             {
                 Object = target, Renderer = renderer, Mesh = mesh, Frames = frames, Bucket = bucket, Buckets = buckets,
                 FramesPerSecond = resolved.FramesPerSecond, Playback = resolved.Playback, Normals = new Texture[frames.Length],
-                LightShare = LocationWorldRenderer.LightShare(resolved)
+                // Ковёр под людьми освещается как земля под ним.
+                LightShare = LocationWorldRenderer.LightShare(resolved, layer.CarpetBand != LocationVisualBand.Foreground)
             };
             for (int i = 0; i < frames.Length; i++) group.Normals[i] = NormalOf(asset, resolved.ShownView, frames[i]);
             groups.Add(group);

@@ -99,6 +99,33 @@ namespace KingdomSurvival.LocationRendering.Tests
             yield return null;
         }
 
+        // Тень от солнца и тень от огня — отдельные галочки: без тени от огня
+        // контура нет, а силуэт от солнца есть; и наоборот.
+        [UnityTest]
+        public IEnumerator SunAndFireShadowsAreSeparate()
+        {
+            foreach ((bool sun, bool fire) in new[] { (true, false), (false, true) })
+            {
+                LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz_shadow_test", UseWorldLighting = false };
+                visual.Sun = new LocationSunDefinition { MorningAngle = 170, EveningAngle = 10, Opacity = .8f, LowLength = 1.8f, Softness = .1f };
+                LocationVisualObject crate = Crate();
+                crate.ProjectsShadow = sun;
+                crate.ProjectsFireShadow = fire;
+                visual.Objects.Add(crate);
+                LocationVisualObject light = new LocationVisualObject { Id = "fire", Name = "Огонь", LightOnly = true, Position = new Vector2(.3f, .5f) };
+                light.Light.Enabled = true; light.Light.Radius = 8; light.Light.Intensity = 2; light.Light.Animation = LocationLightAnimation.None;
+                visual.Objects.Add(light);
+                using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null))
+                {
+                    renderer.SetTime(1, 0);
+                    Assert.That(renderer.ContourCount, Is.EqualTo(fire ? 1 : 0), "Тень от огня — своя галочка (солнце " + sun + ", огонь " + fire + ").");
+                    renderer.SetTime(8, 0);
+                    Assert.That(renderer.VisibleShadowCount, Is.EqualTo(sun ? 1 : 0), "Тень от солнца — своя галочка (солнце " + sun + ", огонь " + fire + ").");
+                }
+                yield return null;
+            }
+        }
+
         [UnityTest]
         public IEnumerator FireCastsShadowsAtNight_AndIndoorHasNoSun()
         {

@@ -36,6 +36,46 @@ namespace KingdomSurvival.BattlefieldDatabase.Tests
                 Assert.That(grid.CellAt(grid.CellCenter(cell)), Is.EqualTo(cell));
         }
 
+        // «Сдвиг X / Y» сетки поля двигает гексы всей локации: сдвиг на
+        // полпериода — центры сместились, сетка по-прежнему покрывает рисунок;
+        // сдвиг на целый период — та же сетка.
+        [Test]
+        public void FieldGridOffset_ShiftsLocationHexes_AndStillCoversThePicture()
+        {
+            Vector2 canvas = new Vector2(3000, 1800);
+            const float size = 60;
+            LocationBattleGrid plain = new LocationBattleGrid(canvas, size);
+            Vector2 period = LocationBattleGrid.Period(size);
+            LocationBattleGrid same = new LocationBattleGrid(canvas, size, period * 3);
+            Assert.That(same.Shift, Is.EqualTo(Vector2.zero), "Сдвиг на целый период — та же сетка.");
+            Assert.That(same.Columns, Is.EqualTo(plain.Columns));
+
+            LocationBattleGrid shifted = new LocationBattleGrid(canvas, size, period * .5f);
+            Assert.That(shifted.Shift.x, Is.InRange(-period.x, 0f));
+            Assert.That(shifted.Shift.y, Is.InRange(-period.y, 0f));
+            Vector2 moved = shifted.Layout.GetCenter(1, 2) - plain.Layout.GetCenter(1, 2);
+            Assert.That(Mathf.Abs(Mathf.Repeat(moved.x, period.x) - period.x * .5f), Is.LessThan(.01f), "Гексы сдвинуты на полстолбца.");
+            Assert.That(Mathf.Abs(Mathf.Repeat(moved.y, period.y) - period.y * .5f), Is.LessThan(.01f), "И на полпериода по высоте.");
+            // Каждая точка рисунка — в своём гексе: ближайший центр не дальше радиуса.
+            for (float x = 0; x <= canvas.x; x += 97)
+                for (float y = 0; y <= canvas.y; y += 89)
+                {
+                    Vector2 point = new Vector2(x, y);
+                    Vector2 delta = point - shifted.CellCenter(shifted.CellAt(point));
+                    delta.y /= BattlefieldFrame.VerticalScale;
+                    Assert.That(delta.magnitude, Is.LessThanOrEqualTo(size * 1.01f), "Точка " + point + " покрыта сеткой.");
+                }
+
+            // Место берёт сдвиг поля (доли кадра боя → пиксели рисунка).
+            BattlefieldDefinitionData field = new BattlefieldDefinitionData();
+            typeof(BattlefieldDefinitionData).GetField("gridOffset", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .SetValue(field, new Vector2(.01f, .02f));
+            LocalLocationGeometry geometry = new LocalLocationGeometry(Location(5169, 2140), field);
+            LocalLocationGeometry still = new LocalLocationGeometry(Location(5169, 2140), null);
+            Assert.That(geometry.GridShift, Is.EqualTo(new Vector2(.01f * geometry.FrameWidth, .02f * geometry.FrameHeight)));
+            Assert.That(geometry.BattleGrid.Layout.Origin, Is.Not.EqualTo(still.BattleGrid.Layout.Origin), "Сдвиг сетки поля двигает гексы места.");
+        }
+
         [Test]
         public void BigBoardBattle_StartsFromLayout_AndEnemyWalksAroundTheWall()
         {

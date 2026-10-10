@@ -107,7 +107,16 @@ namespace KingdomSurvival.ArtAssets
         public string Name = "Основа";
         public ArtAssetLayer Layer = ArtAssetLayer.World;
         public int OrderOffset;
+        // Тень от солнца — силуэт рисунка на земле.
         public bool ProjectsShadow = true;
+        // Тень от огня и других местных источников — перекрытие света по
+        // контуру рисунка. 0 — прежняя запись (как тень от солнца), 1 — да, 2 — нет.
+        public int FireShadowState;
+        public bool ProjectsFireShadow
+        {
+            get => FireShadowState == 0 ? ProjectsShadow : FireShadowState == 1;
+            set => FireShadowState = value ? 1 : 2;
+        }
         public List<ArtAssetPartView> Views = new List<ArtAssetPartView>();
 
         public ArtAssetPartView View(ArtAssetView view)

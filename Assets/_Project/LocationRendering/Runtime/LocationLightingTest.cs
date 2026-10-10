@@ -56,13 +56,37 @@ namespace KingdomSurvival.LocationRendering
             List<KeyValuePair<string, LocalPointData>> members = new List<KeyValuePair<string, LocalPointData>>();
             for (int i = 0; i < count; i++) members.Add(new KeyValuePair<string, LocalPointData>("test_" + i, points[i]));
             Mover = new LocalFreeMover(Renderer.Geometry.Layer, Renderer.Geometry.Rules, members, spacing);
-            ViewHeight = LocationCameraFollow.DefaultViewHeight(visual, location);
+            BaseViewHeight = LocationCameraFollow.DefaultViewHeight(visual, location);
             RenderActors(0, 0, true);
             Renderer.SetTime(Hour, 0);
         }
 
-        // Высота видимой части рисунка (пиксели) — камера следует за командиром.
-        public float ViewHeight { get; set; } = 1080;
+        // Высота видимой части рисунка (пиксели) при масштабе 1 — из настроек
+        // камеры места; камера следует за командиром.
+        public float BaseViewHeight { get; set; } = 1080;
+
+        // Камера теста, как в игре: приближение (колесо, «+ / −», клавиши
+        // + / −, «0» — сброс, ползунок «Высота камеры») и «Закрепить» (F):
+        // закреплённая камера стоит на месте и держит масштаб.
+        public const float ZoomMin = .35f, ZoomMax = 3f, ZoomStep = 1.15f;
+        public float Zoom { get; private set; } = 1;
+        public bool CameraLocked { get; private set; }
+        public float ViewHeight => BaseViewHeight / Zoom;
+
+        public void SetZoom(float zoom)
+        {
+            if (CameraLocked) return;
+            Zoom = Mathf.Clamp(zoom, ZoomMin, ZoomMax);
+            RefreshCameraPanel();
+        }
+
+        public void ToggleCameraLock()
+        {
+            CameraLocked = !CameraLocked;
+            RefreshCameraPanel();
+            if (notice != null)
+                notice.text = CameraLocked ? "Камера закреплена: стоит на месте и держит масштаб (F — отпустить)." : "Камера снова следует за командиром.";
+        }
 
         // Высота земли под ногами командира (если у места есть карта высот).
         public HeightSample LeaderHeight { get; private set; }
@@ -84,7 +108,9 @@ namespace KingdomSurvival.LocationRendering
             }
             Renderer.SetActors(frames, seconds);
             LocalFreeMover.Member leader = Mover.Leader;
-            Renderer.Follow(new Vector2((float)leader.X, (float)leader.Y), ViewHeight, deltaTime, snap);
+            // Закреплённая камера не едет за командиром и не меняет масштаб.
+            if (!CameraLocked || snap)
+                Renderer.Follow(new Vector2((float)leader.X, (float)leader.Y), ViewHeight, deltaTime, snap);
             Renderer.TrySampleActorHeight(leader.Id, out HeightSample height);
             LeaderHeight = height;
         }
@@ -101,8 +127,17 @@ namespace KingdomSurvival.LocationRendering
             VisualElement field = new VisualElement { name = "location-lighting-playfield" };
             field.style.flexGrow = 1;
             root.Add(field);
+            field.focusable = true;
+            field.RegisterCallback<WheelEvent>(evt =>
+            {
+                evt.StopPropagation();
+                SetZoom(Zoom * (evt.delta.y > 0 ? 1 / ZoomStep : ZoomStep));
+            });
+            // Клавиши камеры — с любого элемента экрана теста (всплывают к корню).
+            root.RegisterCallback<KeyDownEvent>(OnCameraKey);
             field.RegisterCallback<PointerDownEvent>(evt =>
             {
+                field.Focus();
                 if (evt.button != 0 || !TryPointAt(root, evt.position, out Vector2 point)) return;
                 if (!Mover.MoveLeaderTo(point.x, point.y))
                     notice.text = "Туда не пройти.";
@@ -161,7 +196,8 @@ namespace KingdomSurvival.LocationRendering
                 Application.Quit();
 #endif
             }) { text = "Вернуться в редактор" });
-            notice = new Label("Кликните по земле. Время теста не затрагивает кампанию.");
+            BuildCameraPanel(bar);
+            notice = new Label("Кликните по земле. Колесо — приблизить и отдалить, F — закрепить камеру. Время теста не затрагивает кампанию.");
             notice.style.color = new Color(.75f, .77f, .72f);
             bar.Add(notice);
             heightLabel = new Label { name = "location-lighting-height" };
@@ -171,6 +207,66 @@ namespace KingdomSurvival.LocationRendering
 
         private bool holding;
         private Vector2 heldPoint;
+        private Slider heightSlider;
+        private Label zoomLabel;
+        private Button lockButton;
+        private readonly List<Button> zoomButtons = new List<Button>();
+
+        // Ряд камеры: высота (видимая высота рисунка), «− / + / 1:1», «Закрепить».
+        private void BuildCameraPanel(VisualElement bar)
+        {
+            VisualElement row = new VisualElement { name = "location-lighting-camera" };
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.alignItems = Align.Center;
+            bar.Add(row);
+            heightSlider = new Slider("Высота камеры", ZoomMin, ZoomMax)
+            {
+                value = 1, inverted = true,
+                tooltip = "Выше — видно больше места, ниже — крупнее. Колесо мыши и клавиши + / − делают то же."
+            };
+            heightSlider.style.width = 350;
+            heightSlider.RegisterValueChangedCallback(evt => SetZoom(evt.newValue));
+            row.Add(heightSlider);
+            zoomLabel = new Label();
+            zoomLabel.style.width = 120;
+            zoomLabel.style.marginLeft = 6;
+            row.Add(zoomLabel);
+            zoomButtons.Clear();
+            zoomButtons.Add(new Button(() => SetZoom(Zoom / ZoomStep)) { text = "−", tooltip = "Отдалить (колесо, клавиша −)" });
+            zoomButtons.Add(new Button(() => SetZoom(Zoom * ZoomStep)) { text = "+", tooltip = "Приблизить (колесо, клавиша +)" });
+            zoomButtons.Add(new Button(() => SetZoom(1)) { text = "1:1", tooltip = "Обычная высота (клавиша 0)" });
+            foreach (Button button in zoomButtons) row.Add(button);
+            lockButton = new Button(ToggleCameraLock) { name = "location-lighting-camera-lock" };
+            row.Add(lockButton);
+            RefreshCameraPanel();
+        }
+
+        private void RefreshCameraPanel()
+        {
+            heightSlider?.SetValueWithoutNotify(Zoom);
+            heightSlider?.SetEnabled(!CameraLocked);
+            if (zoomLabel != null) zoomLabel.text = Mathf.RoundToInt(Zoom * 100) + "% · " + Mathf.RoundToInt(ViewHeight) + " пикс.";
+            foreach (Button button in zoomButtons) button.SetEnabled(!CameraLocked);
+            if (lockButton == null) return;
+            lockButton.text = CameraLocked ? "ЗАКРЕПЛЕНО" : "ЗАКРЕПИТЬ";
+            lockButton.tooltip = CameraLocked
+                ? "Камера закреплена: стоит на месте и держит масштаб. Нажмите, чтобы отпустить (клавиша F)."
+                : "Закрепить камеру: стоит на месте и держит масштаб (клавиша F)";
+            lockButton.style.color = CameraLocked ? new StyleColor(new Color(.95f, .82f, .5f)) : new StyleColor(StyleKeyword.Null);
+        }
+
+        private void OnCameraKey(KeyDownEvent evt)
+        {
+            switch (evt.keyCode)
+            {
+                case KeyCode.F: ToggleCameraLock(); break;
+                case KeyCode.Equals: case KeyCode.Plus: case KeyCode.KeypadPlus: SetZoom(Zoom * ZoomStep); break;
+                case KeyCode.Minus: case KeyCode.KeypadMinus: SetZoom(Zoom / ZoomStep); break;
+                case KeyCode.Alpha0: case KeyCode.Keypad0: SetZoom(1); break;
+                default: return;
+            }
+            evt.StopPropagation();
+        }
 
         // Точка панели → точка рисунка места через кадр камеры (весь экран).
         private bool TryPointAt(VisualElement root, Vector2 panelPosition, out Vector2 point)

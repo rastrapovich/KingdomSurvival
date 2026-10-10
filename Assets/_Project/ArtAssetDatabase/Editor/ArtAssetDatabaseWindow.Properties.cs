@@ -101,6 +101,38 @@ namespace KingdomSurvival.ArtAssets.Editor
             Add(field);
         }
 
+        // Ползунок с полем числа: правка видна сразу, одно перетаскивание —
+        // один шаг Undo. Поле принимает и значения за краями ползунка.
+        private void SliderProperty(string label, float value, float min, float max, Action<float> set, string tip = null)
+        {
+            Slider field = new Slider(label, Mathf.Min(min, value), Mathf.Max(max, value)) { value = value, showInputField = true, tooltip = tip };
+            field.labelElement.style.minWidth = 150;
+            field.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue < field.lowValue) field.lowValue = evt.newValue;
+                if (evt.newValue > field.highValue) field.highValue = evt.newValue;
+                LiveEdit(label, () => set(evt.newValue));
+            });
+            Add(field);
+        }
+
+        private double liveEditAt;
+        private string liveEditName;
+
+        private void LiveEdit(string undoName, Action action)
+        {
+            if (catalog == null) return;
+            double now = EditorApplication.timeSinceStartup;
+            if (liveEditName != undoName || now - liveEditAt > .5) Undo.RecordObject(catalog, undoName);
+            liveEditName = undoName;
+            liveEditAt = now;
+            action();
+            EditorUtility.SetDirty(catalog);
+            catalog.MarkChanged();
+            saveAt = now + .6;
+            center?.MarkDirtyRepaint();
+        }
+
         private void ChoiceProperty<T>(string label, IList<T> options, Func<T, string> name, T current, Action<T> set)
         {
             List<string> names = options.Select(name).ToList();
@@ -153,8 +185,9 @@ namespace KingdomSurvival.ArtAssets.Editor
             Note("Экземпляр в месте берёт эти значения, пока для него не включено «Настроить для этого экземпляра».");
             BoolProperty("Перекрывает проход (и в бою — стена)", asset.BlocksMovement, value => asset.BlocksMovement = value,
                 "Основание предмета непроходимо: в исследовании его обходят, в бою на месте гексы с центром на основании — стены.");
-            BoolProperty("Перекрывает свет местных источников", asset.OccludesLight, value => asset.OccludesLight = value,
-                "Тень по контуру от огня. Для травы и мелочи выключите — сотни перекрытий дороги.");
+            BoolProperty("Перекрывает свет основанием", asset.OccludesLight, value => asset.OccludesLight = value,
+                "Свет огня не проходит сквозь основание предмета на земле (прямоугольник основания). Тени по рисунку — галочки " +
+                "«Тень от солнца» и «Тень от огня» у части ниже.");
             FloatProperty("Длина тени (множитель)", asset.ShadowLength, value => asset.ShadowLength = Mathf.Max(0, value));
             BoolProperty("Освещается солнцем (смена суток)", asset.LitBySun, value => asset.LitBySun = value,
                 "Выключено — рисунок не темнеет ночью и не меняет цвет со временем суток: всегда как днём (светящийся гриб, огонь, вывеска).");
@@ -167,11 +200,30 @@ namespace KingdomSurvival.ArtAssets.Editor
 
             Section("Ракурс «" + ArtAssetLabels.ViewTitle(view) + "»", true, "view");
             ArtAssetViewSettings settings = asset.Settings(view);
-            VectorProperty("Опора (доля рисунка, Y вверх)", settings.Pivot, value => settings.Pivot = value,
-                "Точка касания земли: 0 — левый/нижний край, 1 — правый/верхний. Мышью — в карточке, инструмент «Опора».");
-            VectorProperty("Основание: размер", settings.FootprintSize, value => settings.FootprintSize = Vector2.Max(Vector2.zero, value),
-                "Занятая земля, единицы мира. Мышью — в карточке, инструмент «Основание».");
-            VectorProperty("Основание: смещение", settings.FootprintOffset, value => settings.FootprintOffset = value, "Центр основания от опоры, единицы мира (Y — вглубь)");
+            // Ползунки — в пределах рисунка ракурса (единицы мира); в поле
+            // справа можно ввести и больше.
+            Sprite viewSprite = asset.MainSprite(view);
+            Vector2 picture = viewSprite != null ? viewSprite.rect.size / asset.SafePixelsPerUnit : new Vector2(2, 2);
+            Label pivotTitle = SectionTitle("Опора — точка касания земли");
+            pivotTitle.style.fontSize = 11;
+            Add(pivotTitle);
+            SliderProperty("По ширине (0 — лево, 1 — право)", settings.Pivot.x, 0, 1, value => settings.Pivot = new Vector2(value, settings.Pivot.y),
+                "Доля ширины рисунка. Мышью — в карточке, инструмент «Опора».");
+            SliderProperty("По высоте (0 — низ, 1 — верх)", settings.Pivot.y, 0, 1, value => settings.Pivot = new Vector2(settings.Pivot.x, value),
+                "Доля высоты рисунка: обычно там, где предмет стоит на земле (ножки, низ ствола).");
+            Label footprintTitle = SectionTitle("Основание — занятая земля");
+            footprintTitle.style.fontSize = 11;
+            Add(footprintTitle);
+            SliderProperty("Ширина, ед.", settings.FootprintSize.x, 0, Mathf.Max(1, picture.x * 1.5f),
+                value => settings.FootprintSize = new Vector2(Mathf.Max(0, value), settings.FootprintSize.y),
+                "Единицы мира (108 пикселей рисунка места = 1). Мышью — в карточке, инструмент «Основание».");
+            SliderProperty("Глубина, ед.", settings.FootprintSize.y, 0, Mathf.Max(1, picture.x),
+                value => settings.FootprintSize = new Vector2(settings.FootprintSize.x, Mathf.Max(0, value)),
+                "Сколько земли вглубь занимает предмет, единицы мира.");
+            SliderProperty("Сдвиг по ширине, ед.", settings.FootprintOffset.x, -Mathf.Max(.5f, picture.x), Mathf.Max(.5f, picture.x),
+                value => settings.FootprintOffset = new Vector2(value, settings.FootprintOffset.y), "Центр основания от опоры: плюс — вправо.");
+            SliderProperty("Сдвиг вглубь, ед.", settings.FootprintOffset.y, -Mathf.Max(.5f, picture.x * .5f), Mathf.Max(.5f, picture.x * .5f),
+                value => settings.FootprintOffset = new Vector2(settings.FootprintOffset.x, value), "Центр основания от опоры: плюс — вглубь (вверх на рисунке).");
             Row(("Опору и основание — во все ракурсы", () => Edit("Опора во все ракурсы", () =>
             {
                 foreach (ArtAssetView other in ArtAssetLabels.Views)
@@ -344,7 +396,11 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (part.Layer == ArtAssetLayer.Foreground)
                 Note("Передний план всегда перекрывает героя. Если перекрытие должно зависеть от положения героя — оставьте «Объекты и персонажи».");
             IntProperty("Порядок внутри слоя", part.OrderOffset, value => part.OrderOffset = value);
-            BoolProperty("Отбрасывает тень-силуэт", part.ProjectsShadow, value => part.ProjectsShadow = value);
+            BoolProperty("Тень от солнца (силуэт)", part.ProjectsShadow, value => part.ProjectsShadow = value,
+                "Силуэт рисунка ложится на землю от солнца и луны. Только у слоя «Объекты и персонажи».");
+            BoolProperty("Тень от огня (по контуру рисунка)", part.ProjectsFireShadow, value => part.ProjectsFireShadow = value,
+                "Костёр, факел и другие местные источники дают за предметом тёмный конус по контуру рисунка. Только у слоя «Объекты и персонажи». " +
+                "Для травы и мелочи в сотнях лучше выключить — дорого.");
             ArtAssetPartView slot = part.View(view);
             if (cardPart > 0)
                 VectorProperty("Смещение в ракурсе «" + ArtAssetLabels.ViewTitle(view) + "»", slot.Offset, value => slot.Offset = value,

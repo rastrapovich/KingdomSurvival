@@ -216,6 +216,109 @@ namespace KingdomSurvival.LocationRendering.Tests
             yield return null;
         }
 
+        // Детали земли огонь освещает как землю: своя нормаль (даже «от огня»)
+        // их не затемняет. Та же нормаль у предмета слоя «Объекты» работает.
+        [UnityTest]
+        public IEnumerator GroundDetailIsLitByFireLikeTheGround()
+        {
+            Texture2D albedo = Texture(64, 64, (x, y) => new Color(.6f, .6f, .6f));
+            // Огонь справа, поверхность смотрит влево — от огня.
+            Vector3 away = new Vector3(-.95f, 0, .3f).normalized;
+            Texture2D normal = Texture(64, 64, (x, y) => new Color(away.x * .5f + .5f, away.y * .5f + .5f, away.z * .5f + .5f, 1), true);
+            Sprite turned = Sprite.Create(albedo, new Rect(0, 0, 64, 64), new Vector2(.5f, .5f), 100, 0, SpriteMeshType.FullRect, Vector4.zero, false,
+                new[] { new SecondarySpriteTexture { name = "_NormalMap", texture = normal } });
+            Sprite plain = Sprite.Create(albedo, new Rect(0, 0, 64, 64), new Vector2(.5f, .5f), 100);
+            owned.Add(turned);
+            owned.Add(plain);
+            (Sprite sprite, LocationVisualBand band)[] runs = { (plain, LocationVisualBand.GroundDetail), (turned, LocationVisualBand.GroundDetail), (turned, LocationVisualBand.World) };
+            float[] results = new float[runs.Length];
+            for (int run = 0; run < runs.Length; run++)
+            {
+                LocationVisualDefinition visual = new LocationVisualDefinition
+                {
+                    LocationId = "zz_asset_test", UseWorldLighting = false, Lighting = LocationLightingMode.Indoor, IndoorIntensity = .05f
+                };
+                visual.Objects.Add(new LocationVisualObject
+                {
+                    Id = "patch", Name = "Пятно", Sprite = runs[run].sprite, Height = 2, Pivot = new Vector2(.5f, .5f), Band = runs[run].band,
+                    Position = new Vector2(.5f, .5f), ProjectsShadow = false
+                });
+                LocationVisualObject fire = new LocationVisualObject { Id = "fire", Name = "Огонь", LightOnly = true, Position = new Vector2(.62f, .5f) };
+                fire.Light.Enabled = true; fire.Light.Radius = 12; fire.Light.Intensity = 1.5f; fire.Light.Softness = 0;
+                fire.Light.Animation = LocationLightAnimation.None; fire.Light.Offset = Vector2.zero; fire.Light.Falloff = 0;
+                fire.Light.NormalMaps = true; fire.Light.NormalMapsAccurate = true; fire.Light.NormalMapDistance = 1;
+                fire.Light.ProjectsShadows = false; fire.Light.Shadows = false;
+                visual.Objects.Add(fire);
+                using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null))
+                {
+                    RenderTexture target = Target(renderer);
+                    renderer.SetTime(1, 0);
+                    yield return null; yield return null;
+                    Save(target, "ground-detail-light-" + run);
+                    results[run] = Brightness(target, new Vector2(960, 540));
+                    renderer.Camera.targetTexture = null;
+                    Object.Destroy(target);
+                }
+            }
+            string all = string.Join(", ", results);
+            Assert.That(results[2], Is.LessThan(results[1] - .03f), "У предмета нормаль «от огня» затемняет — проверка самого теста: " + all);
+            Assert.That(Mathf.Abs(results[1] - results[0]), Is.LessThan(.02f), "Деталь земли освещена как земля, своя нормаль не мешает: " + all);
+        }
+
+        // Окно базы: гексы между землёй и предметами. Верхний слой — предметы
+        // и люди на прозрачном фоне; земля и её детали в нём не рисуются.
+        [UnityTest]
+        public IEnumerator UpperLayerRendersObjectsOverTransparency()
+        {
+            LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz_asset_test", UseWorldLighting = false };
+            visual.Objects.Add(new LocationVisualObject
+            {
+                Id = "crate", Name = "Ящик", Placeholder = LocationPlaceholder.Crate, Position = new Vector2(.5f, .5f),
+                Height = 2, Pivot = new Vector2(.5f, .1f), Band = LocationVisualBand.World
+            });
+            visual.Objects.Add(new LocationVisualObject
+            {
+                Id = "patch", Name = "Пятно", Sprite = Lit(64, 64, new Color(.5f, .7f, .3f)), Height = 1, Pivot = new Vector2(.5f, .5f),
+                Band = LocationVisualBand.GroundDetail, Position = new Vector2(.3f, .5f), ProjectsShadow = false
+            });
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null))
+            {
+                RenderTexture target = new RenderTexture(Width, Height, 24, RenderTextureFormat.ARGB32);
+                target.Create();
+                renderer.Camera.targetTexture = target;
+                renderer.Camera.aspect = Width / (float)Height;
+                renderer.Camera.allowHDR = false;
+                renderer.Camera.backgroundColor = Color.clear;
+                renderer.ShowWhole();
+                renderer.SetTime(13, 0);
+                renderer.SetLayersVisible(false, true);
+                yield return null; yield return null;
+                Assert.That(Alpha(target, new Vector2(960, 540 - 100)), Is.GreaterThan(.9f), "Ящик — в верхнем слое.");
+                Assert.That(Alpha(target, new Vector2(576, 540)), Is.LessThan(.05f), "Деталь земли — под гексами.");
+                Assert.That(Alpha(target, new Vector2(1500, 250)), Is.LessThan(.05f), "Земля — под гексами.");
+                renderer.SetLayersVisible(true, true);
+                foreach (Renderer item in renderer.Root.GetComponentsInChildren<Renderer>(true))
+                    Assert.That(item.forceRenderingOff, Is.False, "После слоёв всё снова рисуется: " + item.name);
+                renderer.Camera.targetTexture = null;
+                Object.Destroy(target);
+            }
+            yield return null;
+        }
+
+        private static float Alpha(RenderTexture target, Vector2 canvasPixel)
+        {
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture.active = target;
+            Texture2D texture = new Texture2D(Width, Height, TextureFormat.RGBA32, false);
+            texture.ReadPixels(new Rect(0, 0, Width, Height), 0, 0);
+            texture.Apply();
+            RenderTexture.active = previous;
+            int x = Mathf.RoundToInt(canvasPixel.x / 1920f * Width), y = Mathf.RoundToInt((1 - canvasPixel.y / 1080f) * Height);
+            float alpha = texture.GetPixel(x, y).a;
+            Object.Destroy(texture);
+            return alpha;
+        }
+
         // Свет слева и справа: сторона к огню заметно светлее — по нормалям
         // ракурса; после смены ракурса и у отражённого экземпляра тоже.
         [UnityTest]

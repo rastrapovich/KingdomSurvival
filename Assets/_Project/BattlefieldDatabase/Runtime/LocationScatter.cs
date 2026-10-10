@@ -56,6 +56,12 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float MinDistance = 16;
         // 0 — ровно до края круга, 1 — к краю редеет до нуля.
         public float Falloff = .4f;
+        // Нажим: какую долю недостающего до плотности добавляет один отпечаток
+        // кисти. 1 — сразу до плотности; меньше — мазок набирает постепенно.
+        public float Flow = 1;
+        // Поверх уже стоящих: мазок не считает прежние экземпляры слоя (ни для
+        // плотности, ни для наименьшего расстояния) — новый «слой» той же кисти.
+        public bool PaintOver;
 
         public Vector2 Scale = new Vector2(.85f, 1.15f);
         // Растяжение / сжатие по горизонтали (множитель ширины).
@@ -63,13 +69,13 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Поворот вокруг опоры, градусы против часовой.
         public Vector2 Rotation = new Vector2(0, 0);
         public LocationScatterFlip Flip = LocationScatterFlip.Random;
-        public LocationScatterViewMode ViewMode = LocationScatterViewMode.Fixed;
+        public LocationScatterViewMode ViewMode = LocationScatterViewMode.Random;
         public ArtAssetView View = ArtAssetView.Front;
 
         // Цвет: общий сдвиг тона и разброс ± (градусы), множители насыщенности
         // и яркости, подкраска — случайная между двумя цветами.
         public float HueShift;
-        public float HueJitter;
+        public float HueJitter = 15;
         public Vector2 Saturation = new Vector2(1, 1);
         public Vector2 Brightness = new Vector2(.9f, 1.1f);
         public Color TintA = Color.white;
@@ -121,9 +127,16 @@ namespace KingdomSurvival.BattlefieldDatabase
         // с людьми не сортируется: «Объекты и персонажи» у него — как детали земли.
         public LocationVisualBand Band = LocationVisualBand.World;
         public int OrderOffset;
-        // Объекты: тень-силуэт от солнца и огня; проходимость — как у ассета
-        // (иначе не мешает никогда).
+        // Объекты: тень от солнца (силуэт) и от огня (по контуру рисунка);
+        // проходимость — как у ассета (иначе не мешает никогда).
         public bool ProjectsShadow;
+        // Тень от огня: 0 — прежний слой (как тень от солнца), 1 — да, 2 — нет.
+        public int FireShadowState;
+        public bool ProjectsFireShadow
+        {
+            get => FireShadowState == 0 ? ProjectsShadow : FireShadowState == 1;
+            set => FireShadowState = value ? 1 : 2;
+        }
         public bool BlocksMovement;
         public List<LocationScatterEntry> Assets = new List<LocationScatterEntry>();
         public LocationScatterBrush Brush = new LocationScatterBrush();
@@ -146,7 +159,8 @@ namespace KingdomSurvival.BattlefieldDatabase
                 Id = InstanceId(instance), Name = Name + " " + instance.Key, AssetId = instance.AssetId, View = instance.View,
                 Position = instance.Position, Scale = instance.Scale, Stretch = instance.Stretch, Rotation = instance.Rotation,
                 FlipX = instance.FlipX, ColorAdjust = instance.ColorAdjust, Band = Band, OrderOffset = OrderOffset,
-                ProjectsShadow = ProjectsShadow && Mode == LocationScatterMode.Objects, CastsShadow = false,
+                ProjectsShadow = ProjectsShadow && Mode == LocationScatterMode.Objects,
+                ProjectsFireShadow = ProjectsFireShadow && Mode == LocationScatterMode.Objects, CastsShadow = false,
                 Overrides = LocationAssetOverride.Layer | LocationAssetOverride.Shadows
             };
             if (!BlocksMovement)
@@ -255,9 +269,12 @@ namespace KingdomSurvival.BattlefieldDatabase
             return result;
         }
 
-        // Мазок в круге: возвращает добавленные экземпляры.
+        // Мазок в круге: возвращает добавленные экземпляры. countOnly — для
+        // плотности считаются только эти экземпляры (рисование поверх: только
+        // поставленные этим мазком); null — все экземпляры слоя.
         public static List<LocationScatterInstance> Stamp(LocationScatterLayer layer, LocalLocationDefinition location, Vector2 center,
-            System.Random random, Func<Vector2, bool> allowed, LocationScatterIndex index, ArtAssetDatabaseAsset catalog = null)
+            System.Random random, Func<Vector2, bool> allowed, LocationScatterIndex index, ArtAssetDatabaseAsset catalog = null,
+            ICollection<int> countOnly = null)
         {
             List<LocationScatterInstance> added = new List<LocationScatterInstance>();
             LocationScatterBrush brush = layer.Brush;
@@ -267,8 +284,11 @@ namespace KingdomSurvival.BattlefieldDatabase
             float target = Mathf.Max(0, brush.Density) / DensityArea * Mathf.PI * radius * radius * (1 - falloff * 2 / 3f);
             int existing = 0;
             foreach (LocationScatterInstance instance in layer.Instances)
-                if ((LocationVisualGeometry.ToPixel(location, instance.Position) - center).sqrMagnitude <= radius * radius) existing++;
-            int need = Mathf.FloorToInt(target - existing + (float)random.NextDouble());
+                if ((countOnly == null || countOnly.Contains(instance.Key)) &&
+                    (LocationVisualGeometry.ToPixel(location, instance.Position) - center).sqrMagnitude <= radius * radius) existing++;
+            // Нажим: отпечаток добавляет долю недостающего; дробная часть — случаем.
+            float flow = Mathf.Clamp(brush.Flow, .01f, 1);
+            int need = Mathf.FloorToInt((target - existing) * flow + (float)random.NextDouble());
             if (need <= 0) return added;
             int attempts = need * 6 + 8;
             for (int i = 0; i < attempts && added.Count < need; i++)
@@ -283,13 +303,14 @@ namespace KingdomSurvival.BattlefieldDatabase
             return added;
         }
 
-        // Залить весь рисунок места до плотности кисти.
+        // Залить весь рисунок места до плотности кисти; over — ещё один слой
+        // плотности поверх уже стоящих (index тогда пустой).
         public static List<LocationScatterInstance> Fill(LocationScatterLayer layer, LocalLocationDefinition location, System.Random random,
-            Func<Vector2, bool> allowed, LocationScatterIndex index, ArtAssetDatabaseAsset catalog = null, int limit = 20000)
+            Func<Vector2, bool> allowed, LocationScatterIndex index, ArtAssetDatabaseAsset catalog = null, int limit = 20000, bool over = false)
         {
             List<LocationScatterInstance> added = new List<LocationScatterInstance>();
             Vector2 canvas = LocationVisualGeometry.CanvasSize(location);
-            int need = Mathf.Min(limit, Mathf.FloorToInt(Mathf.Max(0, layer.Brush.Density) / DensityArea * canvas.x * canvas.y) - layer.Instances.Count);
+            int need = Mathf.Min(limit, Mathf.FloorToInt(Mathf.Max(0, layer.Brush.Density) / DensityArea * canvas.x * canvas.y) - (over ? 0 : layer.Instances.Count));
             int attempts = need * 6 + 8;
             for (int i = 0; i < attempts && added.Count < need; i++)
             {

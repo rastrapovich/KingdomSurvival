@@ -12,6 +12,8 @@
 // стилях 1–3 (обычный местный свет — стиль 2 «умножение с маской», без
 // маски — как стиль 0). Солнце выключено — рисунок как при полном свете
 // (не темнеет ночью); огонь выключен — местные источники не освещают.
+// _KsLight.z = 1 — деталь земли: в проход нормалей не пишет, свет с
+// нормалями ложится на неё так же, как на землю под ней.
 Shader "Kingdom Survival/Location Sprite Adjust"
 {
     Properties
@@ -21,7 +23,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         _NormalMap("Normal Map", 2D) = "bump" {}
         _KsHsv("Hue (turns), Saturation, Brightness", Vector) = (0, 1, 1, 0)
         _KsUvRect("Particle UV rect (offset, scale)", Vector) = (0, 0, 1, 1)
-        _KsLight("Sun, fire light share", Vector) = (1, 1, 0, 0)
+        _KsLight("Sun, fire light share, ground-lit", Vector) = (1, 1, 0, 0)
         [MaterialToggle] _ZWrite("ZWrite", Float) = 0
         [HideInInspector] _Color("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor("RendererColor", Color) = (1,1,1,1)
@@ -292,6 +294,10 @@ Shader "Kingdom Survival/Location Sprite Adjust"
 
             half4 NormalsFragment(Varyings input) : SV_Target
             {
+                // Детали земли (_KsLight.z = 1) свою нормаль не пишут: под ними
+                // остаётся нормаль земли, и огонь освещает их как землю.
+                if (_KsLight.z > 0.5)
+                    discard;
                 const half4 mainTex = input.color * SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
                 half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv));
             #if defined(_KS_PARTICLE)

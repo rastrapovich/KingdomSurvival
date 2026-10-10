@@ -509,7 +509,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             for (int i = 0; i < 4; i++)
             {
                 Rect cell = new Rect(area.x + (i % 2) * half.x, area.y + (i / 2) * half.y, half.x, half.y);
-                Rect frame = CanvasFrame(new Rect(cell.x + 4, cell.y + 4, cell.width - 8, cell.height - 8));
+                Rect frame = AspectFrame(new Rect(cell.x + 4, cell.y + 4, cell.width - 8, cell.height - 8));
                 renderer.SetTime(hours[i], (float)EditorApplication.timeSinceStartup);
                 RenderPreviewActors();
                 preview.camera.orthographicSize = CanvasSize.y / LocationVisualGeometry.PixelsPerUnit / 2;

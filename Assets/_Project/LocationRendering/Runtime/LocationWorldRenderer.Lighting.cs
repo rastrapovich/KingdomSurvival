@@ -40,6 +40,8 @@ namespace KingdomSurvival.LocationRendering
             public bool People;
             public bool Battle;
             public bool Disabled;
+            // Тень-силуэт от солнца есть (часть ассета: «Тень от солнца»).
+            public bool Sun = true;
             // Тень-силуэт от солнца (одна).
             public readonly SpriteRenderer[] Shadows = new SpriteRenderer[1];
             // Перекрытие света огня по контуру рисунка; нет — предмет сам светит.
@@ -260,14 +262,14 @@ namespace KingdomSurvival.LocationRendering
         // ------------------------------------------------------------------
 
         private Caster AddCaster(Transform anchor, SpriteRenderer source, Sprite overrideSprite, float height, Vector2 pivot,
-            bool flip, float lengthScale, string battleId, bool people = false, bool contour = true)
+            bool flip, float lengthScale, string battleId, bool people = false, bool contour = true, bool sun = true)
         {
             if (shadowMaterial == null || source == null) return null;
             Caster caster = new Caster
             {
                 Anchor = anchor, Source = source, Override = overrideSprite, OverrideHeight = height,
                 OverridePivot = pivot, OverrideFlip = flip, LengthScale = lengthScale, People = people,
-                Battle = battleId != null
+                Battle = battleId != null, Sun = sun
             };
             if (contour) caster.Contour = AddContour(source);
             casters.Add(caster);
@@ -291,7 +293,7 @@ namespace KingdomSurvival.LocationRendering
                 float scale = caster.People ? Sky.PeopleShadowLength : caster.LengthScale;
 
                 // Солнце (или луна) — тень-силуэт.
-                CastShadow(caster, 0, enabled && sunOpacity > .001f, sunRaw * scale, Sky.Sun.Color, sunOpacity,
+                CastShadow(caster, 0, enabled && caster.Sun && sunOpacity > .001f, sunRaw * scale, Sky.Sun.Color, sunOpacity,
                     Sky.Sun.Softness);
                 // Огонь и другие источники — тень по контуру рисунка до края света;
                 // вдали от всех таких источников контур выключен (его тени не видно).

@@ -21,14 +21,37 @@ namespace KingdomSurvival.BattlefieldDatabase
         public int Rows { get; }
         public float HexSize { get; }
         public Vector2 Canvas { get; }
+        // Сдвиг сетки (пиксели рисунка), уже приведённый к одному периоду
+        // сетки влево-вверх: (−√3·гекс…0] по X, (−два ряда…0] по Y. Сетка
+        // по-прежнему покрывает весь рисунок — с лишним столбцом и двумя рядами.
+        public Vector2 Shift { get; }
 
-        public LocationBattleGrid(Vector2 canvas, float hexSize)
+        public LocationBattleGrid(Vector2 canvas, float hexSize) : this(canvas, hexSize, Vector2.zero) { }
+
+        // shift — «Сдвиг X / Y» сетки поля в пикселях рисунка (любой величины).
+        public LocationBattleGrid(Vector2 canvas, float hexSize, Vector2 shift)
         {
             Canvas = new Vector2(Mathf.Max(1f, canvas.x), Mathf.Max(1f, canvas.y));
             HexSize = Mathf.Max(1f, hexSize);
             float vertical = HexSize * BattlefieldFrame.VerticalScale;
-            Columns = Mathf.Max(1, Mathf.FloorToInt(Canvas.x / (Sqrt3 * HexSize) + .5f));
-            Rows = Mathf.Max(1, Mathf.FloorToInt((Canvas.y / vertical - 1f) / 1.5f) + 1);
+            Shift = Wrap(shift, HexSize);
+            Columns = Mathf.Max(1, Mathf.FloorToInt(Canvas.x / (Sqrt3 * HexSize) + .5f)) + (Shift.x < 0f ? 1 : 0);
+            Rows = Mathf.Max(1, Mathf.FloorToInt((Canvas.y / vertical - 1f) / 1.5f) + 1) + (Shift.y < 0f ? 2 : 0);
+        }
+
+        // Период сетки: столбец по X, два ряда по Y (нечётные ряды сдвинуты на
+        // полклетки — сдвиг на один ряд поменял бы раскладку).
+        public static Vector2 Period(float hexSize) =>
+            new Vector2(Sqrt3 * hexSize, 3f * hexSize * BattlefieldFrame.VerticalScale);
+
+        private static Vector2 Wrap(Vector2 shift, float hexSize)
+        {
+            Vector2 period = Period(hexSize);
+            float x = Mathf.Repeat(shift.x, period.x), y = Mathf.Repeat(shift.y, period.y);
+            // Почти ноль или почти период — без сдвига (не добавлять столбец зря).
+            x = x < .01f || period.x - x < .01f ? 0f : x - period.x;
+            y = y < .01f || period.y - y < .01f ? 0f : y - period.y;
+            return new Vector2(x, y);
         }
 
         public int CellCount => Columns * Rows;
@@ -41,7 +64,7 @@ namespace KingdomSurvival.BattlefieldDatabase
         {
             float k = rect.width / Canvas.x;
             float size = HexSize * k;
-            Vector2 origin = rect.position + new Vector2(Sqrt3 * HexSize * .5f, HexSize * BattlefieldFrame.VerticalScale) * k;
+            Vector2 origin = rect.position + (new Vector2(Sqrt3 * HexSize * .5f, HexSize * BattlefieldFrame.VerticalScale) + Shift) * k;
             return new BattlefieldGridLayout(size, origin, BattlefieldFrame.VerticalScale, rect);
         }
 

@@ -27,6 +27,9 @@ namespace KingdomSurvival.LocationRendering.Editor
         private Vector2 lastStamp;
         private double carpetRefreshAt;
         private readonly HashSet<int> strokeChanged = new HashSet<int>();
+        // Мазок поверх уже стоящих: плотность считается только по его экземплярам.
+        private bool strokeOver;
+        private readonly HashSet<int> strokeAdded = new HashSet<int>();
 
         // Больше этого в слое объектами — предложить ковёр.
         private const int HeavyObjectLayer = 3000;
@@ -82,12 +85,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             AddButton(add, "+ Слой ковром", () => AddScatterLayer(LocationScatterMode.Carpet));
             LocationScatterLayer selected = ScatterLayer;
             foreach (LocationScatterLayer layer in visual.ScatterLayers.Where(item => item != null))
-            {
-                string id = layer.Id;
-                string title = (layer == selected ? "● " : "") + layer.Name + " · " + layer.Instances.Count + " шт. · " +
-                               (layer.Mode == LocationScatterMode.Carpet ? "ковёр" : "объекты") + (layer.Hidden ? " · скрыт" : "") + (layer.Locked ? " · закреплён" : "");
-                AddButton(settings, title, () => { scatterLayerId = id; BuildSettings(); if (tool == Tool.Scatter) status.text = ScatterHint(); });
-            }
+                BuildScatterLayerRow(visual, layer, layer == selected);
             if (selected == null) return;
 
             BuildScatterTools(selected);
@@ -98,6 +96,39 @@ namespace KingdomSurvival.LocationRendering.Editor
             BuildScatterColor(selected);
             BuildScatterMask(selected);
             BuildScatterActions(location, visual, selected);
+        }
+
+        // Строка слоя: выбрать, скрыть, удалить — сразу в списке слоёв.
+        private void BuildScatterLayerRow(LocationVisualDefinition visual, LocationScatterLayer layer, bool selected)
+        {
+            VisualElement row = Row();
+            row.style.flexWrap = Wrap.NoWrap;
+            row.style.alignItems = Align.Center;
+            string id = layer.Id;
+            string title = (selected ? "● " : "") + layer.Name + " · " + layer.Instances.Count + " шт. · " +
+                           (layer.Mode == LocationScatterMode.Carpet ? "ковёр" : "объекты") + (layer.Locked ? " · закреплён" : "");
+            Button select = new Button(() => { scatterLayerId = id; BuildSettings(); if (tool == Tool.Scatter) status.text = ScatterHint(); }) { text = title };
+            select.style.flexGrow = 1;
+            select.style.flexShrink = 1;
+            select.style.unityTextAlign = TextAnchor.MiddleLeft;
+            if (selected) { select.style.unityFontStyleAndWeight = FontStyle.Bold; select.style.color = new Color(.95f, .82f, .5f); }
+            if (layer.Hidden) select.style.opacity = .55f;
+            row.Add(select);
+            UnityEngine.UIElements.Toggle hidden = new UnityEngine.UIElements.Toggle("скрыть") { value = layer.Hidden, tooltip = "Скрыть слой в месте (экземпляры остаются)" };
+            hidden.labelElement.style.minWidth = 0;
+            hidden.labelElement.style.paddingRight = 2;
+            hidden.style.flexShrink = 0;
+            hidden.style.marginLeft = 6;
+            hidden.RegisterValueChangedCallback(evt => Change(() => layer.Hidden = evt.newValue, true));
+            row.Add(hidden);
+            Button delete = new Button(() =>
+            {
+                if (!EditorUtility.DisplayDialog("Удалить слой?", "Слой «" + layer.Name + "» и все его экземпляры (" + layer.Instances.Count + " шт.) будут удалены.", "Удалить", "Отмена")) return;
+                Change(() => { visual.ScatterLayers.Remove(layer); if (scatterLayerId == id) scatterLayerId = null; }, true);
+                if (tool == Tool.Scatter && ScatterLayer == null) SetTool(Tool.Select);
+            }) { text = "удалить", tooltip = "Удалить слой и все его экземпляры" };
+            delete.style.flexShrink = 0;
+            row.Add(delete);
         }
 
         private void BuildScatterTools(LocationScatterLayer layer)
@@ -139,11 +170,16 @@ namespace KingdomSurvival.LocationRendering.Editor
             LocationVisualBand band = layer.Mode == LocationScatterMode.Carpet ? layer.CarpetBand : layer.Band;
             Choice("Слой рисунка", bands, BandTitle, band, value => layer.Band = value);
             Number("Порядок внутри слоя", layer.OrderOffset, -1000, 1000, value => layer.OrderOffset = Mathf.RoundToInt(value));
-            Toggle("Скрыть", layer.Hidden, value => layer.Hidden = value, true);
             Toggle("Закрепить (кисть не меняет)", layer.Locked, value => layer.Locked = value, true);
             if (layer.Mode == LocationScatterMode.Objects)
             {
-                Toggle("Тени-силуэты (солнце и огонь)", layer.ProjectsShadow, value => layer.ProjectsShadow = value);
+                Toggle("Тень от солнца (силуэт)", layer.ProjectsShadow, value => layer.ProjectsShadow = value);
+                settings[settings.childCount - 1].tooltip = "Силуэт рисунка ложится на землю от солнца и луны — как «Тень от солнца» части в Базе ассетов.";
+                Toggle("Тень от огня (по контуру рисунка)", layer.ProjectsFireShadow, value => layer.ProjectsFireShadow = value);
+                settings[settings.childCount - 1].tooltip = "Костёр и другие местные источники дают за экземпляром тёмный конус — как «Тень от огня» части в Базе ассетов. " +
+                                                            "Сотни экземпляров с этой тенью дороги: траве обычно не нужна.";
+                if (layer.Band != LocationVisualBand.World)
+                    Help("Тени — только у слоя «Объекты и персонажи»: детали земли и передний план их не отбрасывают.");
                 Toggle("Проходимость — как у ассета (камни мешают)", layer.BlocksMovement, value => layer.BlocksMovement = value);
             }
             else Help("Ковёр не сортируется с людьми, не отбрасывает тени и не мешает проходу. Анимация ассетов идёт, фаза разложена по группам.");
@@ -242,11 +278,27 @@ namespace KingdomSurvival.LocationRendering.Editor
             LocationScatterBrush brush = layer.Brush;
             Heading("Кисть");
             BrushNumber("Радиус (пиксели)", brush.Radius, 4, 1000, value => brush.Radius = Mathf.Max(1, value), "Размер круга кисти на рисунке места. [ и ] — меньше / больше.");
-            BrushNumber("Плотность (шт. на 100×100 пикс.)", brush.Density, 0, 60, value => brush.Density = Mathf.Max(0, value),
-                "Итоговая плотность: повторный мазок по заполненному месту больше не добавляет.");
+            Label spacing = new Label();
+            void Spacing(float density) => spacing.text = density > 0
+                ? "В среднем одна штука на квадрат ≈ " + Mathf.RoundToInt(100 / Mathf.Sqrt(density)) + "×" + Mathf.RoundToInt(100 / Mathf.Sqrt(density)) + " пикс."
+                : "Плотность 0 — кисть ничего не ставит.";
+            BrushLogNumber("Плотность (шт. на 100×100 пикс.)", brush.Density, .01f, 60, value => { brush.Density = Mathf.Max(0, value); Spacing(brush.Density); },
+                "Итоговая плотность мазка. Шкала ползунка логарифмическая: 0,01…1 так же точны, как 1…60; точное число — в поле справа.");
+            spacing.style.color = new Color(.68f, .74f, .68f);
+            spacing.style.marginLeft = 150;
+            spacing.style.fontSize = 11;
+            Spacing(brush.Density);
+            settings.Add(spacing);
+            BrushNumber("Нажим (за отпечаток)", brush.Flow, .01f, 1, value => brush.Flow = Mathf.Clamp(value, .01f, 1),
+                "Какую долю недостающего до плотности добавляет один отпечаток кисти. 1 — сразу до плотности; 0,1 — мазок набирает постепенно: " +
+                "водите по месту, пока не станет достаточно.");
             BrushNumber("Наименьшее расстояние (пикс.)", brush.MinDistance, 0, 400, value => brush.MinDistance = Mathf.Max(0, value),
-                "Между опорами, в том числе до уже стоящих экземпляров слоя.");
+                "Между опорами, в том числе до уже стоящих экземпляров слоя (с «Рисовать поверх» — только внутри мазка).");
             BrushNumber("Спад к краю", brush.Falloff, 0, 1, value => brush.Falloff = Mathf.Clamp01(value), "0 — ровно до края круга, 1 — к краю редеет до нуля.");
+            BrushToggle("Рисовать поверх уже стоящих", brush.PaintOver, value => brush.PaintOver = value);
+            settings[settings.childCount - 1].tooltip = "Мазок не считает прежние экземпляры слоя — ни для плотности, ни для наименьшего расстояния: " +
+                                                        "каждый новый мазок досыпает ещё столько же поверх. Наименьшее расстояние действует внутри мазка. " +
+                                                        "«Залить всё место» тогда добавляет ещё один слой плотности.";
             BrushToggle("Ластик и перекраска — только ассеты кисти", brush.OnlyBrushAssets, value => brush.OnlyBrushAssets = value);
         }
 
@@ -335,12 +387,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                 visual.ScatterLayers.Add(copy);
                 scatterLayerId = copy.Id;
             }, true));
-            AddButton(row, "Удалить слой", () =>
-            {
-                if (!EditorUtility.DisplayDialog("Удалить слой?", "Слой «" + layer.Name + "» и все его экземпляры (" + layer.Instances.Count + " шт.) будут удалены.", "Удалить", "Отмена")) return;
-                Change(() => { visual.ScatterLayers.Remove(layer); scatterLayerId = null; }, true);
-                if (tool == Tool.Scatter) SetTool(Tool.Select);
-            });
         }
 
         private void AddScatterLayer(LocationScatterMode mode)
@@ -354,7 +400,14 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Name = mode == LocationScatterMode.Carpet ? "Низкая трава" : "Трава",
                     Mode = mode, Band = mode == LocationScatterMode.Carpet ? LocationVisualBand.GroundDetail : LocationVisualBand.World
                 };
-                if (mode == LocationScatterMode.Carpet) { layer.Brush.Density = 12; layer.Brush.MinDistance = 6; }
+                if (mode == LocationScatterMode.Carpet)
+                {
+                    layer.Brush.Density = 12; layer.Brush.MinDistance = 6;
+                    // Ковёр живее с разбросом облика: ширина, насыщенность, яркость ±15 %.
+                    layer.Brush.Stretch = new Vector2(.85f, 1.15f);
+                    layer.Brush.Saturation = new Vector2(.85f, 1.15f);
+                    layer.Brush.Brightness = new Vector2(.85f, 1.15f);
+                }
                 // Новый слой — с ассетами кисти выбранного слоя: удобно для «трава ковром + трава объектами».
                 LocationScatterLayer current = ScatterLayer;
                 if (current != null)
@@ -371,7 +424,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (layer.Locked) { status.text = "Слой закреплён."; return; }
             if (LocationScatterPainter.PickEntry(layer, new System.Random(1)) == null) { status.text = "Добавьте в кисть хотя бы один ассет."; return; }
             Vector2 canvas = LocationVisualGeometry.CanvasSize(location);
-            int expected = Mathf.FloorToInt(layer.Brush.Density / LocationScatterPainter.DensityArea * canvas.x * canvas.y);
+            int expected = Mathf.FloorToInt(layer.Brush.Density / LocationScatterPainter.DensityArea * canvas.x * canvas.y) +
+                           (layer.Brush.PaintOver ? layer.Instances.Count : 0);
             if (layer.Mode == LocationScatterMode.Objects && expected > HeavyObjectLayer &&
                 !EditorUtility.DisplayDialog("Много объектов", "При этой плотности выйдет около " + expected + " объектов — место может тормозить. " +
                                                               "Для низкой травы лучше слой ковром. Всё равно залить?", "Залить", "Отмена"))
@@ -379,11 +433,12 @@ namespace KingdomSurvival.LocationRendering.Editor
             int added = 0;
             Change(() =>
             {
-                LocationScatterIndex index = LocationScatterIndex.Of(layer, location);
+                bool over = layer.Brush.PaintOver;
+                LocationScatterIndex index = over ? new LocationScatterIndex(Mathf.Max(8, layer.Brush.MinDistance)) : LocationScatterIndex.Of(layer, location);
                 added = LocationScatterPainter.Fill(layer, location, new System.Random(Environment.TickCount),
-                    LocationScatterPainter.Mask(layer.Brush, location, visual), index).Count;
+                    LocationScatterPainter.Mask(layer.Brush, location, visual), index, null, 20000, over).Count;
             }, true);
-            status.text = "Залито: +" + added + " шт. (с учётом «Где можно» и наименьшего расстояния).";
+            status.text = "Залито: +" + added + " шт. (с учётом «Где можно» и наименьшего расстояния" + (layer.Brush.PaintOver ? ", поверх уже стоящих" : "") + ").";
         }
 
         // ------------------------------------------------------------------
@@ -395,6 +450,42 @@ namespace KingdomSurvival.LocationRendering.Editor
             Slider field = new Slider(label, Mathf.Min(min, value), Mathf.Max(max, value)) { value = value, showInputField = true, tooltip = help };
             field.RegisterValueChangedCallback(evt => BrushEdit(() => set(evt.newValue)));
             settings.Add(field);
+        }
+
+        // Число в логарифмической шкале (min > 0): малые значения так же
+        // точны, как большие. Поле справа — точное число (можно и 0).
+        private void BrushLogNumber(string label, float value, float min, float max, Action<float> set, string help = null)
+        {
+            VisualElement row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center }, tooltip = help };
+            Label title = new Label(label) { tooltip = help };
+            title.style.width = 150;
+            title.style.flexShrink = 0;
+            title.style.whiteSpace = WhiteSpace.Normal;
+            row.Add(title);
+            float low = Mathf.Log(min), high = Mathf.Log(max);
+            float ToSlider(float number) => Mathf.InverseLerp(low, high, Mathf.Log(Mathf.Clamp(number, min, max)));
+            float FromSlider(float t) => Mathf.Exp(Mathf.Lerp(low, high, t));
+            float Round(float number) => (float)Math.Round(number, number < .1f ? 3 : number < 10 ? 2 : 1);
+            Slider slider = new Slider(0, 1) { value = ToSlider(value) };
+            slider.style.flexGrow = 1;
+            FloatField field = new FloatField { value = value, isDelayed = true };
+            field.style.width = 60;
+            slider.RegisterValueChangedCallback(evt =>
+            {
+                float number = Round(FromSlider(evt.newValue));
+                field.SetValueWithoutNotify(number);
+                BrushEdit(() => set(number));
+            });
+            field.RegisterValueChangedCallback(evt =>
+            {
+                float number = Mathf.Max(0, evt.newValue);
+                field.SetValueWithoutNotify(number);
+                slider.SetValueWithoutNotify(ToSlider(number));
+                BrushEdit(() => set(number));
+            });
+            row.Add(slider);
+            row.Add(field);
+            settings.Add(row);
         }
 
         private void BrushToggle(string label, bool value, Action<bool> set)
@@ -516,7 +607,10 @@ namespace KingdomSurvival.LocationRendering.Editor
                 return;
             }
             Undo.RecordObject(database, "Раскидка: " + ScatterToolNames[(int)strokeTool].ToLowerInvariant());
-            scatterIndex = LocationScatterIndex.Of(layer, Location);
+            // Поверх уже стоящих: прежние экземпляры не мешают ни плотности, ни расстоянию.
+            strokeOver = layer.Brush.PaintOver;
+            strokeAdded.Clear();
+            scatterIndex = strokeOver ? new LocationScatterIndex(Mathf.Max(8, layer.Brush.MinDistance)) : LocationScatterIndex.Of(layer, Location);
             scatterRandom = new System.Random(Environment.TickCount);
             scatterMask = LocationScatterPainter.Mask(layer.Brush, Location, Visual);
             strokeChanged.Clear();
@@ -542,7 +636,10 @@ namespace KingdomSurvival.LocationRendering.Editor
                     changed = recolored.Count > 0;
                     break;
                 default:
-                    changed = LocationScatterPainter.Stamp(layer, Location, pixel, scatterRandom, scatterMask, scatterIndex).Count > 0;
+                    List<LocationScatterInstance> added = LocationScatterPainter.Stamp(layer, Location, pixel, scatterRandom, scatterMask, scatterIndex,
+                        null, strokeOver ? strokeAdded : null);
+                    foreach (LocationScatterInstance instance in added) strokeAdded.Add(instance.Key);
+                    changed = added.Count > 0;
                     break;
             }
             if (!changed) return;

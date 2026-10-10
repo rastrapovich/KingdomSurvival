@@ -41,7 +41,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Height = Mathf.Max(.1f, asset.Height), Pivot = settings.Pivot,
                     Band = LocationVisualResolver.Band(main.Layer), OrderOffset = main.OrderOffset,
                     BlocksMovement = asset.BlocksMovement, Footprint = settings.FootprintSize,
-                    ProjectsShadow = main.ProjectsShadow, ShadowLength = asset.ShadowLength, CastsShadow = asset.OccludesLight
+                    ProjectsShadow = main.ProjectsShadow, FireShadowState = main.FireShadowState, ShadowLength = asset.ShadowLength, CastsShadow = asset.OccludesLight
                 };
                 Visual.Objects.Add(item);
                 selectedKind = Kind.Art;
@@ -219,17 +219,20 @@ namespace KingdomSurvival.LocationRendering.Editor
                 },
                 () => { selected.BlocksMovement = resolved.BlocksMovement; selected.Footprint = resolved.FootprintSize; });
             OverrideGroup(selected, asset, LocationAssetOverride.Shadows, "Тени",
-                () => (resolved.Main?.ProjectsShadow == true ? "тень-силуэт" : "без тени-силуэта") + ", длина " + resolved.ShadowLength.ToString("0.##") +
-                      (resolved.OccludesLight ? ", перекрывает свет" : ""),
+                () => (asset?.MainPart.ProjectsShadow == true ? "тень от солнца" : "без тени от солнца") + ", " +
+                      (asset?.MainPart.ProjectsFireShadow == true ? "тень от огня" : "без тени от огня") + ", длина " + resolved.ShadowLength.ToString("0.##") +
+                      (resolved.OccludesLight ? ", перекрывает свет основанием" : ""),
                 () =>
                 {
-                    Toggle("Отбрасывает тень-силуэт", selected.ProjectsShadow, value => selected.ProjectsShadow = value);
+                    Toggle("Тень от солнца (силуэт)", selected.ProjectsShadow, value => selected.ProjectsShadow = value);
+                    Toggle("Тень от огня (по контуру рисунка)", selected.ProjectsFireShadow, value => selected.ProjectsFireShadow = value);
                     Number("Длина тени (множитель)", selected.ShadowLength, 0, 3, value => selected.ShadowLength = value);
-                    Toggle("Перекрывает свет местных источников (по основанию)", selected.CastsShadow, value => selected.CastsShadow = value);
+                    Toggle("Перекрывает свет основанием", selected.CastsShadow, value => selected.CastsShadow = value);
                 },
                 () =>
                 {
-                    selected.ProjectsShadow = asset.MainPart.ProjectsShadow; selected.ShadowLength = resolved.ShadowLength; selected.CastsShadow = resolved.OccludesLight;
+                    selected.ProjectsShadow = asset.MainPart.ProjectsShadow; selected.FireShadowState = asset.MainPart.FireShadowState;
+                    selected.ShadowLength = resolved.ShadowLength; selected.CastsShadow = resolved.OccludesLight;
                 });
 
             Heading("Свет этого предмета");

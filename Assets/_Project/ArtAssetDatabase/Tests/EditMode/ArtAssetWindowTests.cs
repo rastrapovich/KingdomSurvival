@@ -12,6 +12,67 @@ namespace KingdomSurvival.ArtAssets.Tests
 {
     public sealed class ArtAssetWindowTests
     {
+        // Кисть основания в карточке: мазок закрашивает землю, «По силуэту
+        // рисунка» — непрозрачную часть рисунка основы, «Стереть кисть» —
+        // снова прямоугольник.
+        [Test]
+        public void FootprintBrush_PaintsMask_AndFillsBySilhouette()
+        {
+            ArtAssetViewState.DisableSave = true;
+            ArtAssetDatabaseAsset catalog = ScriptableObject.CreateInstance<ArtAssetDatabaseAsset>();
+            // Рисунок: нижняя половина непрозрачна, верхняя — пусто.
+            Texture2D texture = new Texture2D(40, 40, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[40 * 40];
+            for (int i = 0; i < pixels.Length; i++) pixels[i] = i / 40 < 20 ? Color.gray : Color.clear;
+            texture.SetPixels(pixels);
+            texture.Apply();
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 40, 40), new Vector2(.5f, 0), 100);
+            ArtAssetDefinition asset = new ArtAssetDefinition { Id = "zz_brush", Name = "Камень", PixelsPerUnit = 40 };
+            asset.MainPart.View(ArtAssetView.Front).Sprite = sprite;
+            asset.Settings(ArtAssetView.Front).Pivot = new Vector2(.5f, 0);
+            catalog.assets.Add(asset);
+            ArtAssetDatabaseAsset.Override = catalog;
+            ArtAssetDatabaseWindow window = EditorWindow.GetWindow<ArtAssetDatabaseWindow>();
+            try
+            {
+                window.CreateGUI();
+                window.SelectAsset(asset.Id, true);
+                ArtAssetFootprintMask mask = asset.Settings(ArtAssetView.Front).FootprintMask;
+                System.Reflection.MethodInfo paint = typeof(ArtAssetDatabaseWindow).GetMethod("PaintFootprint",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                paint.Invoke(window, new object[] { asset, new Vector2(0, .2f) });
+                Assert.That(mask.Contains(new Vector2(0, .2f)), Is.True, "Мазок закрасил землю под кистью.");
+                Assert.That(mask.Contains(new Vector2(0, .9f)), Is.False);
+                Assert.That(asset.Settings(ArtAssetView.Front).UsesFootprintMask, Is.True);
+
+                window.SelectAsset(asset.Id, true);
+                void Click(string text)
+                {
+                    Button button = window.rootVisualElement.Query<Button>().ToList().First(item => item.text == text);
+                    using (NavigationSubmitEvent submit = NavigationSubmitEvent.GetPooled())
+                    {
+                        submit.target = button;
+                        button.SendEvent(submit);
+                    }
+                }
+                Click("По силуэту рисунка");
+                Assert.That(mask.Contains(new Vector2(0, .25f)) && mask.Contains(new Vector2(-.4f, .1f)), Is.True, "Непрозрачная нижняя половина закрашена.");
+                Assert.That(mask.Contains(new Vector2(0, .75f)), Is.False, "Прозрачный верх — нет.");
+                Assert.That(mask.Contains(new Vector2(.7f, .1f)), Is.False, "За краем рисунка — нет.");
+                Click("Стереть кисть — снова прямоугольник");
+                Assert.That(asset.Settings(ArtAssetView.Front).UsesFootprintMask, Is.False);
+            }
+            finally
+            {
+                window.Close();
+                ArtAssetDatabaseAsset.Override = null;
+                ArtAssetViewState.DisableSave = false;
+                UnityEngine.Object.DestroyImmediate(catalog);
+                UnityEngine.Object.DestroyImmediate(sprite);
+                UnityEngine.Object.DestroyImmediate(texture);
+            }
+        }
+
         [Test]
         public void WindowOpensFromMenu_WithRussianControls()
         {

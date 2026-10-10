@@ -209,7 +209,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                 },
                 () => { selected.Band = LocationVisualResolver.Band(asset.MainPart.Layer); selected.OrderOffset = asset.MainPart.OrderOffset; });
             OverrideGroup(selected, asset, LocationAssetOverride.Passability, "Проходимость",
-                () => (resolved.BlocksMovement ? "блокирует, основание " : "не блокирует, основание ") + resolved.FootprintSize.x.ToString("0.##") + "×" + resolved.FootprintSize.y.ToString("0.##"),
+                () => (resolved.BlocksMovement ? "блокирует, основание " : "не блокирует, основание ") + (resolved.FootprintCells != null ? "кистью, охват " : "") +
+                      resolved.FootprintSize.x.ToString("0.##") + "×" + resolved.FootprintSize.y.ToString("0.##"),
                 () =>
                 {
                     Toggle("Блокирует проход", selected.BlocksMovement, value => selected.BlocksMovement = value);

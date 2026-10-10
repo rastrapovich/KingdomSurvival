@@ -1116,10 +1116,15 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocationResolvedVisual resolved = LocationVisualResolver.Resolve(art);
                 if (resolved.BlocksMovement || art.UsesAsset)
                 {
-                    Rect footprint = LocationVisualGeometry.FootprintRect(location, art, resolved);
-                    Vector2 a = Gui(footprint.xMin, footprint.yMin), b = Gui(footprint.xMax, footprint.yMax);
-                    Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(a.x, a.y, b.x, b.y),
-                        new Color(1, .35f, .15f, resolved.BlocksMovement ? .1f : .03f), new Color(1, .4f, .2f, resolved.BlocksMovement ? .8f : .3f));
+                    // Основание кистью — закрашенными клетками, прямоугольником — с рамкой.
+                    bool cells = resolved.FootprintCells != null;
+                    foreach (Rect footprint in LocationVisualGeometry.FootprintRects(location, art, resolved))
+                    {
+                        Vector2 a = Gui(footprint.xMin, footprint.yMin), b = Gui(footprint.xMax, footprint.yMax);
+                        Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(a.x, a.y, b.x, b.y),
+                            new Color(1, .35f, .15f, resolved.BlocksMovement ? (cells ? .3f : .1f) : .06f),
+                            cells ? Color.clear : new Color(1, .4f, .2f, resolved.BlocksMovement ? .8f : .3f));
+                    }
                 }
             }
             Handles.EndGUI();

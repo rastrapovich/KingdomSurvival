@@ -81,6 +81,44 @@ namespace KingdomSurvival.ArtAssets.Editor
             return any ? result : layout.Bounds;
         }
 
+        // Непрозрачен ли рисунок основы в точке (единицы мира от опоры, Y
+        // вверх) — для «Основание по силуэту». Пиксели читаются через
+        // RenderTexture: годится и сжатая, и нечитаемая текстура. null — рисунка нет.
+        public static System.Func<Vector2, bool> SilhouetteTest(Layout layout)
+        {
+            LocationResolvedPart main = layout.Resolved.Main;
+            Sprite sprite = main?.Sprite;
+            if (sprite == null || main.Placeholder) return null;
+            Texture2D source = sprite.texture;
+            RenderTexture temporary = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGB32);
+            RenderTexture previous = RenderTexture.active;
+            Graphics.Blit(source, temporary);
+            RenderTexture.active = temporary;
+            // Рисунок в своей текстуре — весь прямоугольник спрайта (textureRect
+            // у «плотной» сетки обрезан до непрозрачного); в атласе — его
+            // кусок со смещением внутри прямоугольника спрайта.
+            Rect rect = sprite.packed ? sprite.textureRect : sprite.rect;
+            Vector2 offset = sprite.packed ? sprite.textureRectOffset : Vector2.zero;
+            int width = Mathf.Max(1, Mathf.RoundToInt(rect.width)), height = Mathf.Max(1, Mathf.RoundToInt(rect.height));
+            Texture2D pixels = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            pixels.ReadPixels(new Rect(rect.x, rect.y, width, height), 0, 0);
+            pixels.Apply();
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(temporary);
+            Color32[] colors = pixels.GetPixels32();
+            Object.DestroyImmediate(pixels);
+            Rect world = PartRect(main);
+            Vector2 size = sprite.rect.size;
+            return point =>
+            {
+                float u = (point.x - world.xMin) / world.width, v = (point.y - world.yMin) / world.height;
+                if (u < 0 || v < 0 || u >= 1 || v >= 1) return false;
+                int x = (int)(u * size.x - offset.x), y = (int)(v * size.y - offset.y);
+                if (x < 0 || y < 0 || x >= width || y >= height) return false;
+                return colors[y * width + x].a > 127;
+            };
+        }
+
         // Рисунок части относительно опоры, единицы мира, Y вверх.
         public static Rect PartRect(LocationResolvedPart part)
         {

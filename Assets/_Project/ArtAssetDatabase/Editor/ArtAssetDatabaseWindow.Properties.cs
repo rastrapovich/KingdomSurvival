@@ -101,6 +101,59 @@ namespace KingdomSurvival.ArtAssets.Editor
             Add(field);
         }
 
+        // Основание кистью: закрашенная земля вместо прямоугольника — для
+        // предметов неровной формы. Рисуется инструментом «Кисть основания».
+        private void BuildFootprintBrush(ArtAssetDefinition asset, ArtAssetView view, ArtAssetViewSettings settings)
+        {
+            Label title = SectionTitle("Основание кистью");
+            title.style.fontSize = 11;
+            Add(title);
+            if (settings.FootprintMask == null) settings.FootprintMask = new ArtAssetFootprintMask();
+            ArtAssetFootprintMask mask = settings.FootprintMask;
+            if (settings.UsesFootprintMask)
+            {
+                Rect bounds = mask.Bounds();
+                Note("Основание задано кистью: закрашено " + mask.Count + " клеток, охват " + bounds.width.ToString("0.##") + "×" + bounds.height.ToString("0.##") +
+                     " ед. Прямоугольник выше не действует.",
+                    "В местах закрашенная земля — непроходима (если включено «Перекрывает проход»), в бою гексы с центром на ней — стены; " +
+                    "маска следует за масштабом, отражением и растяжением экземпляра.");
+            }
+            else Note("Сейчас основание — прямоугольник. Для камня, коряги, частокола закрасьте землю кистью: инструмент «Кисть основания» над карточкой.");
+            // Радиус — настройка окна, не ассета: без Undo и записи каталога.
+            Slider radius = new Slider("Радиус кисти, ед.", Mathf.Min(.02f, state.FootprintBrush), Mathf.Max(1.5f, state.FootprintBrush))
+                { value = state.FootprintBrush, showInputField = true, tooltip = "Клавиши [ и ] — меньше / больше." };
+            radius.labelElement.style.minWidth = 150;
+            radius.RegisterValueChangedCallback(evt => { state.FootprintBrush = Mathf.Max(.005f, evt.newValue); ScheduleStateSave(); });
+            Add(radius);
+            Row(("Рисовать кистью", () =>
+                {
+                    cardTool = CardTool.FootprintBrush;
+                    if (state.Mode != ArtAssetCenterMode.Card) SetMode(ArtAssetCenterMode.Card);
+                    BuildCanvasBar();
+                    center.MarkDirtyRepaint();
+                }),
+                ("Из прямоугольника", () => Edit("Основание кистью из прямоугольника", () =>
+                {
+                    Rect rect = new Rect(settings.FootprintOffset - settings.FootprintSize / 2, settings.FootprintSize);
+                    if (!mask.HasGrid) PrepareMaskGrid(asset, mask);
+                    mask.Grow(rect);
+                    mask.Fill(point => rect.Contains(point));
+                }, true)),
+                ("По силуэту рисунка", () =>
+                {
+                    Func<Vector2, bool> inside = ArtAssetDrawing.SilhouetteTest(ArtAssetDrawing.Resolve(catalog, asset, view));
+                    if (inside == null) { status.text = "У ракурса нет рисунка основы — закрашивать не по чему."; return; }
+                    Edit("Основание по силуэту", () =>
+                    {
+                        if (!mask.HasGrid) PrepareMaskGrid(asset, mask);
+                        mask.Fill(inside);
+                    }, true);
+                    status.text = "Закрашен весь силуэт. Сотрите кистью (Shift+ЛКМ) то, что выше земли: верх камня, крону, крышу.";
+                }));
+            if (settings.UsesFootprintMask)
+                Row(("Стереть кисть — снова прямоугольник", () => Edit("Основание прямоугольником", () => mask.Clear(), true)));
+        }
+
         // Ползунок с полем числа: правка видна сразу, одно перетаскивание —
         // один шаг Undo. Поле принимает и значения за краями ползунка.
         private void SliderProperty(string label, float value, float min, float max, Action<float> set, string tip = null)
@@ -224,6 +277,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                 value => settings.FootprintOffset = new Vector2(value, settings.FootprintOffset.y), "Центр основания от опоры: плюс — вправо.");
             SliderProperty("Сдвиг вглубь, ед.", settings.FootprintOffset.y, -Mathf.Max(.5f, picture.x * .5f), Mathf.Max(.5f, picture.x * .5f),
                 value => settings.FootprintOffset = new Vector2(settings.FootprintOffset.x, value), "Центр основания от опоры: плюс — вглубь (вверх на рисунке).");
+            BuildFootprintBrush(asset, view, settings);
             Row(("Опору и основание — во все ракурсы", () => Edit("Опора во все ракурсы", () =>
             {
                 foreach (ArtAssetView other in ArtAssetLabels.Views)
@@ -231,6 +285,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     if (other == view) continue;
                     ArtAssetViewSettings target = asset.Settings(other);
                     target.Pivot = settings.Pivot; target.FootprintSize = settings.FootprintSize; target.FootprintOffset = settings.FootprintOffset;
+                    target.FootprintMask = settings.FootprintMask != null ? settings.FootprintMask.Clone() : new ArtAssetFootprintMask();
                 }
             })));
             EndSection();

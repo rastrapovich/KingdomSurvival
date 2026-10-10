@@ -12,7 +12,7 @@ namespace KingdomSurvival.ArtAssets.Editor
     // с рисунком и нормалью. Опора ставится кликом, основание — мышью.
     public sealed partial class ArtAssetDatabaseWindow
     {
-        private enum CardTool { Pivot, Footprint, PartOffset, Light }
+        private enum CardTool { Pivot, Footprint, FootprintBrush, PartOffset, Light }
 
         private ArtAssetView cardView = ArtAssetView.Front;
         private int cardPart;
@@ -23,6 +23,8 @@ namespace KingdomSurvival.ArtAssets.Editor
         private Vector2 toolStart;
         private Vector2 footprintStartOffset, partStartOffset;
         private bool footprintMove;
+        // Мазок кисти основания: закрашивает или стирает (Shift).
+        private bool brushErase;
 
         private PreviewRenderUtility litPreview;
         private LocationWorldRenderer litRenderer;
@@ -61,7 +63,8 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             Rect bounds = ArtAssetDrawing.Resolve(catalog, asset, cardView).Bounds;
             ArtAssetViewSettings settings = asset.Settings(cardView);
-            Rect footprint = new Rect(settings.FootprintOffset - settings.FootprintSize / 2, settings.FootprintSize);
+            Rect footprint = settings.UsesFootprintMask ? settings.FootprintMask.Bounds()
+                : new Rect(settings.FootprintOffset - settings.FootprintSize / 2, settings.FootprintSize);
             Rect all = Rect.MinMaxRect(Mathf.Min(bounds.xMin, footprint.xMin), Mathf.Min(bounds.yMin, footprint.yMin, -.3f),
                 Mathf.Max(bounds.xMax, footprint.xMax), Mathf.Max(bounds.yMax, footprint.yMax));
             float scale = Mathf.Min((preview.width - 60) / Mathf.Max(.1f, all.width), (preview.height - 90) / Mathf.Max(.1f, all.height)) * cardZoom;
@@ -99,10 +102,29 @@ namespace KingdomSurvival.ArtAssets.Editor
             Color line = state.Background == ArtAssetBackground.Dark || state.CardDisplay == ArtAssetCardDisplay.Lit ? new Color(1, 1, 1, .35f) : new Color(0, 0, 0, .35f);
             EditorGUI.DrawRect(new Rect(clip.x, frame.Anchor.y, clip.width, 1), line);
             ArtAssetViewSettings settings = asset.Settings(cardView);
-            Vector2 fpCenter = ToGui(frame, settings.FootprintOffset);
-            Vector2 fpSize = settings.FootprintSize * frame.PixelsPerUnit;
-            Handles.DrawSolidRectangleWithOutline(new Rect(fpCenter - fpSize / 2, fpSize), new Color(1, .35f, .15f, cardTool == CardTool.Footprint ? .16f : .07f),
-                new Color(1, .45f, .2f, cardTool == CardTool.Footprint ? .95f : .5f));
+            bool brush = cardTool == CardTool.FootprintBrush;
+            if (settings.UsesFootprintMask)
+            {
+                // Основание кистью: закрашенные клетки; прямоугольник не действует.
+                Color fill = new Color(1, .35f, .15f, brush ? .45f : .28f);
+                foreach (Rect cell in settings.FootprintMask.Rects())
+                {
+                    Vector2 min = ToGui(frame, new Vector2(cell.xMin, cell.yMax)), max = ToGui(frame, new Vector2(cell.xMax, cell.yMin));
+                    EditorGUI.DrawRect(Rect.MinMaxRect(min.x, min.y, max.x, max.y), fill);
+                }
+            }
+            else
+            {
+                Vector2 fpCenter = ToGui(frame, settings.FootprintOffset);
+                Vector2 fpSize = settings.FootprintSize * frame.PixelsPerUnit;
+                Handles.DrawSolidRectangleWithOutline(new Rect(fpCenter - fpSize / 2, fpSize), new Color(1, .35f, .15f, cardTool == CardTool.Footprint ? .16f : .07f),
+                    new Color(1, .45f, .2f, cardTool == CardTool.Footprint ? .95f : .5f));
+            }
+            if (brush && clip.Contains(Event.current.mousePosition))
+            {
+                Handles.color = Event.current.shift ? new Color(1, .45f, .4f, .95f) : new Color(1, .8f, .4f, .95f);
+                Handles.DrawWireDisc(Event.current.mousePosition, Vector3.forward, state.FootprintBrush * frame.PixelsPerUnit);
+            }
             foreach (LocationResolvedPart part in layout.Resolved.Parts)
             {
                 Rect world = ArtAssetDrawing.PartRect(part);
@@ -143,6 +165,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             GUIStyle help = new GUIStyle(EditorStyles.miniLabel) { normal = { textColor = state.Background == ArtAssetBackground.Dark ? new Color(.7f, .75f, .7f) : new Color(.2f, .2f, .2f) } };
             string tool = cardTool == CardTool.Pivot ? "Опора: клик по точке касания земли — она встанет на опору (жёлтый крест)."
                 : cardTool == CardTool.Footprint ? "Основание: протяните прямоугольник занятой земли или перетащите его. Блокирует проход, только если включено «Блокирует проход»."
+                : cardTool == CardTool.FootprintBrush ? "Кисть основания: ЛКМ — закрасить занятую землю, Shift+ЛКМ — стереть, [ и ] — радиус. Закрашенное заменяет прямоугольник."
                 : cardTool == CardTool.PartOffset ? "Сдвиг части: перетащите выбранную часть («" + (cardPart < asset.Parts.Count ? asset.Parts[cardPart]?.Name : "") + "»)."
                 : "Свет: перетащите контрольный источник (режим «Под светом»).";
             GUI.Label(new Rect(clip.x + 10, clip.yMax - 20, clip.width - 20, 16), tool, help);
@@ -156,6 +179,15 @@ namespace KingdomSurvival.ArtAssets.Editor
             ArtAssetViewSettings settings = asset.Settings(cardView);
             switch (evt.type)
             {
+                case EventType.MouseMove when cardTool == CardTool.FootprintBrush:
+                    // Круг кисти идёт за мышью.
+                    center.MarkDirtyRepaint();
+                    return false;
+                case EventType.KeyDown when cardTool == CardTool.FootprintBrush && (evt.keyCode == KeyCode.LeftBracket || evt.keyCode == KeyCode.RightBracket):
+                    state.FootprintBrush = Mathf.Clamp(state.FootprintBrush * (evt.keyCode == KeyCode.LeftBracket ? 1 / 1.2f : 1.2f), .01f, 5);
+                    ScheduleStateSave();
+                    BuildProperties();
+                    evt.Use(); center.MarkDirtyRepaint(); return true;
                 case EventType.ScrollWheel:
                     cardZoom = Mathf.Clamp(cardZoom * Mathf.Pow(1.1f, -evt.delta.y), .2f, 8);
                     evt.Use(); center.MarkDirtyRepaint(); return true;
@@ -179,6 +211,12 @@ namespace KingdomSurvival.ArtAssets.Editor
                             footprintMove = current.Contains(world) && settings.FootprintSize.x > .05f;
                             footprintStartOffset = settings.FootprintOffset;
                             evt.Use(); return true;
+                        case CardTool.FootprintBrush:
+                            Undo.RecordObject(catalog, "Кисть основания");
+                            draggingTool = true;
+                            brushErase = evt.shift;
+                            PaintFootprint(asset, world);
+                            evt.Use(); center.MarkDirtyRepaint(); return true;
                         case CardTool.PartOffset:
                             if (cardPart <= 0) { status.text = "Основа задаёт опору; сдвигаются другие части (выберите часть справа)."; evt.Use(); return true; }
                             Undo.RecordObject(catalog, "Сдвиг части");
@@ -203,6 +241,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                         }
                         catalog.MarkChanged();
                     }
+                    else if (cardTool == CardTool.FootprintBrush) PaintFootprint(asset, world);
                     else if (cardTool == CardTool.PartOffset && cardPart > 0)
                     {
                         asset.Parts[cardPart].View(cardView).Offset = partStartOffset + (world - toolStart);
@@ -223,6 +262,35 @@ namespace KingdomSurvival.ArtAssets.Editor
                     evt.Use(); return true;
             }
             return false;
+        }
+
+        // Мазок кисти основания в точке world (единицы мира от опоры). Сетка
+        // маски заводится при первом мазке — по рисунку ракурса, клетка ≈ 1/96
+        // его большей стороны — и растёт, если кисть выходит за край.
+        private void PaintFootprint(ArtAssetDefinition asset, Vector2 world)
+        {
+            ArtAssetViewSettings settings = asset.Settings(cardView);
+            if (settings.FootprintMask == null) settings.FootprintMask = new ArtAssetFootprintMask();
+            ArtAssetFootprintMask mask = settings.FootprintMask;
+            if (!mask.HasGrid)
+            {
+                if (brushErase) return;
+                PrepareMaskGrid(asset, mask);
+            }
+            if (mask.Paint(world, Mathf.Max(.005f, state.FootprintBrush), !brushErase)) catalog.MarkChanged();
+        }
+
+        // Пустая сетка маски по рисунку ракурса (с запасом) и прямоугольнику основания.
+        private void PrepareMaskGrid(ArtAssetDefinition asset, ArtAssetFootprintMask mask)
+        {
+            ArtAssetViewSettings settings = asset.Settings(cardView);
+            Rect picture = ArtAssetDrawing.Resolve(catalog, asset, cardView).Bounds;
+            Rect footprint = new Rect(settings.FootprintOffset - settings.FootprintSize / 2, settings.FootprintSize);
+            Rect area = Rect.MinMaxRect(Mathf.Min(picture.xMin, footprint.xMin), Mathf.Min(picture.yMin, footprint.yMin),
+                Mathf.Max(picture.xMax, footprint.xMax), Mathf.Max(picture.yMax, footprint.yMax));
+            float cell = Mathf.Clamp(Mathf.Max(picture.width, picture.height) / 96, .005f, .25f);
+            area = Rect.MinMaxRect(area.xMin - cell * 4, area.yMin - cell * 4, area.xMax + cell * 4, area.yMax + cell * 4);
+            mask.Reset(area, cell);
         }
 
         // Кликнутая точка рисунка основы становится опорой ракурса.

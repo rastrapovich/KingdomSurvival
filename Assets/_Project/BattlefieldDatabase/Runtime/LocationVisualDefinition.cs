@@ -327,7 +327,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                 if (item == null || item.Hidden) continue;
                 LocationResolvedVisual resolved = LocationVisualResolver.Resolve(item);
                 if (!resolved.BlocksMovement) continue;
-                result.Add(FootprintRect(location, item, resolved));
+                result.AddRange(FootprintRects(location, item, resolved));
             }
             // ПР-12Р: раскидка объектами с проходимостью «как у ассета» (камни).
             if (visual.ScatterLayers != null)
@@ -338,13 +338,27 @@ namespace KingdomSurvival.BattlefieldDatabase
                     {
                         LocationVisualObject item = layer.ToObject(instance);
                         LocationResolvedVisual resolved = LocationVisualResolver.Resolve(item);
-                        if (resolved.BlocksMovement) result.Add(FootprintRect(location, item, resolved));
+                        if (resolved.BlocksMovement) result.AddRange(FootprintRects(location, item, resolved));
                     }
                 }
             return result;
         }
 
-        // Основание предмета на рисунке места (пиксели, Y вниз).
+        // Занятая земля предмета на рисунке места (пиксели, Y вниз): основание
+        // прямоугольником — один прямоугольник, кистью — прямоугольники маски.
+        public static List<Rect> FootprintRects(LocalLocationDefinition location, LocationVisualObject item, LocationResolvedVisual resolved)
+        {
+            if (resolved.FootprintCells == null) return new List<Rect> { FootprintRect(location, item, resolved) };
+            Vector2 anchor = ToPixel(location, item.Position);
+            List<Rect> result = new List<Rect>(resolved.FootprintCells.Count);
+            foreach (Rect cell in resolved.FootprintCells)
+                result.Add(Rect.MinMaxRect(anchor.x + cell.xMin * PixelsPerUnit, anchor.y - cell.yMax * PixelsPerUnit,
+                    anchor.x + cell.xMax * PixelsPerUnit, anchor.y - cell.yMin * PixelsPerUnit));
+            return result;
+        }
+
+        // Основание предмета на рисунке места (пиксели, Y вниз); у основания
+        // кистью — его охват.
         public static Rect FootprintRect(LocalLocationDefinition location, LocationVisualObject item, LocationResolvedVisual resolved)
         {
             Vector2 center = ToPixel(location, item.Position) +

@@ -141,6 +141,232 @@ namespace KingdomSurvival.ArtAssets
         // Занятая область земли: размер и смещение центра от опоры (единицы мира, Y вверх).
         public Vector2 FootprintSize = new Vector2(1.2f, .55f);
         public Vector2 FootprintOffset;
+        // Основание кистью: закрашенные клетки заменяют прямоугольник выше.
+        public ArtAssetFootprintMask FootprintMask = new ArtAssetFootprintMask();
+
+        public bool UsesFootprintMask => FootprintMask != null && !FootprintMask.IsEmpty;
+    }
+
+    // Основание кистью — маска занятой земли ракурса для предметов неровной
+    // формы (камень, коряга, частокол). Сетка клеток в единицах мира от опоры
+    // (X вправо, Y вглубь — вверх на рисунке): левый нижний угол Origin,
+    // сторона клетки Cell, Columns × Rows. Bits — клетки по рядам снизу
+    // вверх, по биту на клетку (base64). Ни одной клетки — основание
+    // прямоугольником. В местах маска — набор прямоугольников (Rects).
+    [Serializable]
+    public sealed class ArtAssetFootprintMask
+    {
+        // Наибольшая сетка: столько клеток по стороне не бывает больше.
+        public const int MaxSide = 256;
+
+        public Vector2 Origin;
+        public float Cell = .05f;
+        public int Columns;
+        public int Rows;
+        public string Bits = "";
+
+        [NonSerialized] private string decoded;
+        [NonSerialized] private bool[] cells;
+        [NonSerialized] private int count;
+        [NonSerialized] private List<Rect> rects;
+
+        public bool HasGrid => Columns > 0 && Rows > 0 && Cell > 0;
+        public bool IsEmpty => !HasGrid || Count == 0;
+        public Rect GridRect => new Rect(Origin, new Vector2(Columns, Rows) * Cell);
+
+        public int Count
+        {
+            get
+            {
+                Decode();
+                return count;
+            }
+        }
+
+        public bool Get(int column, int row)
+        {
+            if (column < 0 || row < 0 || column >= Columns || row >= Rows) return false;
+            Decode();
+            return cells[row * Columns + column];
+        }
+
+        // Точка (единицы мира от опоры) — на закрашенной клетке.
+        public bool Contains(Vector2 point)
+        {
+            if (!HasGrid) return false;
+            return Get(Mathf.FloorToInt((point.x - Origin.x) / Cell), Mathf.FloorToInt((point.y - Origin.y) / Cell));
+        }
+
+        // Пустая сетка, покрывающая area, со стороной клетки cell.
+        public void Reset(Rect area, float cell)
+        {
+            Cell = Mathf.Max(.002f, cell);
+            Columns = Mathf.Clamp(Mathf.CeilToInt(area.width / Cell), 1, MaxSide);
+            Rows = Mathf.Clamp(Mathf.CeilToInt(area.height / Cell), 1, MaxSide);
+            Origin = area.position;
+            cells = new bool[Columns * Rows];
+            count = 0;
+            Encode();
+        }
+
+        // Сетка расширяется до area (закрашенное остаётся на месте).
+        public void Grow(Rect area)
+        {
+            if (!HasGrid) { Reset(area, Cell); return; }
+            Rect current = GridRect;
+            if (current.xMin <= area.xMin && current.yMin <= area.yMin && current.xMax >= area.xMax && current.yMax >= area.yMax) return;
+            Decode();
+            bool[] old = cells;
+            int oldColumns = Columns, oldRows = Rows;
+            Vector2 oldOrigin = Origin;
+            // Новый угол — по шагу прежней сетки: клетки ложатся точно друг на друга.
+            int left = Mathf.Max(0, Mathf.CeilToInt((current.xMin - area.xMin) / Cell));
+            int bottom = Mathf.Max(0, Mathf.CeilToInt((current.yMin - area.yMin) / Cell));
+            int right = Mathf.Max(0, Mathf.CeilToInt((area.xMax - current.xMax) / Cell));
+            int top = Mathf.Max(0, Mathf.CeilToInt((area.yMax - current.yMax) / Cell));
+            left = Mathf.Min(left, MaxSide - oldColumns); right = Mathf.Min(right, MaxSide - oldColumns - left);
+            bottom = Mathf.Min(bottom, MaxSide - oldRows); top = Mathf.Min(top, MaxSide - oldRows - bottom);
+            Columns = oldColumns + left + right;
+            Rows = oldRows + bottom + top;
+            Origin = oldOrigin - new Vector2(left, bottom) * Cell;
+            cells = new bool[Columns * Rows];
+            for (int r = 0; r < oldRows; r++)
+                for (int c = 0; c < oldColumns; c++)
+                    cells[(r + bottom) * Columns + c + left] = old[r * oldColumns + c];
+            Encode();
+        }
+
+        // Кисть: круг радиуса radius с центром center закрашивается (value)
+        // или стирается. true — что-то изменилось.
+        public bool Paint(Vector2 center, float radius, bool value)
+        {
+            if (value) Grow(Rect.MinMaxRect(center.x - radius, center.y - radius, center.x + radius, center.y + radius));
+            if (!HasGrid) return false;
+            Decode();
+            bool changed = false;
+            int c0 = Mathf.Max(0, Mathf.FloorToInt((center.x - radius - Origin.x) / Cell));
+            int c1 = Mathf.Min(Columns - 1, Mathf.FloorToInt((center.x + radius - Origin.x) / Cell));
+            int r0 = Mathf.Max(0, Mathf.FloorToInt((center.y - radius - Origin.y) / Cell));
+            int r1 = Mathf.Min(Rows - 1, Mathf.FloorToInt((center.y + radius - Origin.y) / Cell));
+            // Клетка меньше кисти — по центру клетки; кисть меньше клетки — клетка под центром.
+            float reach = Mathf.Max(radius, Cell * .5f);
+            for (int r = r0; r <= r1; r++)
+                for (int c = c0; c <= c1; c++)
+                {
+                    Vector2 point = Origin + new Vector2(c + .5f, r + .5f) * Cell;
+                    if ((point - center).sqrMagnitude > reach * reach) continue;
+                    int index = r * Columns + c;
+                    if (cells[index] == value) continue;
+                    cells[index] = value;
+                    count += value ? 1 : -1;
+                    changed = true;
+                }
+            if (changed) Encode();
+            return changed;
+        }
+
+        // Закрасить клетки, чьи центры удовлетворяют условию (прямоугольник, силуэт).
+        public void Fill(Func<Vector2, bool> inside)
+        {
+            if (!HasGrid || inside == null) return;
+            Decode();
+            count = 0;
+            for (int r = 0; r < Rows; r++)
+                for (int c = 0; c < Columns; c++)
+                {
+                    bool value = inside(Origin + new Vector2(c + .5f, r + .5f) * Cell);
+                    cells[r * Columns + c] = value;
+                    if (value) count++;
+                }
+            Encode();
+        }
+
+        public void Clear()
+        {
+            Columns = Rows = 0;
+            Bits = "";
+            cells = null;
+            decoded = null;
+            count = 0;
+            rects = null;
+        }
+
+        // Закрашенное — прямоугольниками (единицы мира от опоры): отрезки
+        // рядов, одинаковые в соседних рядах, сливаются в один.
+        public List<Rect> Rects()
+        {
+            Decode();
+            if (rects != null) return rects;
+            rects = new List<Rect>();
+            Dictionary<(int, int), int> open = new Dictionary<(int, int), int>();
+            Dictionary<(int, int), int> next = new Dictionary<(int, int), int>();
+            for (int r = 0; r <= Rows; r++)
+            {
+                next.Clear();
+                if (r < Rows)
+                    for (int c = 0; c < Columns; c++)
+                    {
+                        if (!cells[r * Columns + c]) continue;
+                        int start = c;
+                        while (c + 1 < Columns && cells[r * Columns + c + 1]) c++;
+                        (int, int) span = (start, c);
+                        next[span] = open.TryGetValue(span, out int from) ? from : r;
+                    }
+                foreach (KeyValuePair<(int, int), int> item in open)
+                {
+                    if (next.ContainsKey(item.Key)) continue;
+                    rects.Add(new Rect(Origin + new Vector2(item.Key.Item1, item.Value) * Cell,
+                        new Vector2(item.Key.Item2 - item.Key.Item1 + 1, r - item.Value) * Cell));
+                }
+                (open, next) = (next, open);
+            }
+            return rects;
+        }
+
+        // Охват закрашенного (единицы мира от опоры); пусто — нулевой прямоугольник.
+        public Rect Bounds()
+        {
+            List<Rect> all = Rects();
+            if (all.Count == 0) return default;
+            Rect result = all[0];
+            foreach (Rect rect in all)
+                result = Rect.MinMaxRect(Mathf.Min(result.xMin, rect.xMin), Mathf.Min(result.yMin, rect.yMin),
+                    Mathf.Max(result.xMax, rect.xMax), Mathf.Max(result.yMax, rect.yMax));
+            return result;
+        }
+
+        public ArtAssetFootprintMask Clone() =>
+            new ArtAssetFootprintMask { Origin = Origin, Cell = Cell, Columns = Columns, Rows = Rows, Bits = Bits };
+
+        private void Decode()
+        {
+            int size = Mathf.Max(0, Columns) * Mathf.Max(0, Rows);
+            if (cells != null && cells.Length == size && string.Equals(decoded, Bits, StringComparison.Ordinal)) return;
+            cells = new bool[size];
+            count = 0;
+            rects = null;
+            decoded = Bits;
+            if (size == 0 || string.IsNullOrEmpty(Bits)) return;
+            byte[] bytes;
+            try { bytes = Convert.FromBase64String(Bits); }
+            catch (FormatException) { return; }
+            for (int i = 0; i < size && (i >> 3) < bytes.Length; i++)
+            {
+                if ((bytes[i >> 3] & (1 << (i & 7))) == 0) continue;
+                cells[i] = true;
+                count++;
+            }
+        }
+
+        private void Encode()
+        {
+            byte[] bytes = new byte[(cells.Length + 7) / 8];
+            for (int i = 0; i < cells.Length; i++)
+                if (cells[i]) bytes[i >> 3] |= (byte)(1 << (i & 7));
+            Bits = count > 0 ? Convert.ToBase64String(bytes) : "";
+            decoded = Bits;
+            rects = null;
+        }
     }
 
     // ПР-12Н: запись Базы ассетов — один логический объект с шестью ракурсами.

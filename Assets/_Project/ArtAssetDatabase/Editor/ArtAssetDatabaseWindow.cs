@@ -137,6 +137,8 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             catalog = ArtAssetDatabaseAsset.Override != null ? ArtAssetDatabaseAsset.Override : ArtAssetImporter.LoadOrCreateCatalog();
             state ??= ArtAssetViewState.Load();
+            // Круг кисти основания идёт за мышью.
+            wantsMouseMove = true;
             VisualElement root = rootVisualElement;
             root.Clear();
             root.style.backgroundColor = new Color(.12f, .14f, .135f);
@@ -325,6 +327,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                              {
                                  (CardTool.Pivot, "Опора", "Клик по точке касания земли на рисунке"),
                                  (CardTool.Footprint, "Основание", "Протянуть прямоугольник занятой земли или перетащить его"),
+                                 (CardTool.FootprintBrush, "Кисть основания", "Закрасить занятую землю кистью (Shift — стереть, [ ] — радиус): для камней, коряг, частоколов"),
                                  (CardTool.PartOffset, "Сдвиг части", "Перетащить выбранную часть (её смещение в этом ракурсе)"),
                                  (CardTool.Light, "Свет", "Перетащить контрольный источник (режим «Под светом»)")
                              })

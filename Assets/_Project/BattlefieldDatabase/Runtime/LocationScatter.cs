@@ -264,7 +264,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             {
                 if (item == null || item.Hidden || item.LightOnly) continue;
                 LocationResolvedVisual resolved = LocationVisualResolver.Resolve(item);
-                if (resolved.BlocksMovement) result.Add(LocationVisualGeometry.FootprintRect(location, item, resolved));
+                if (resolved.BlocksMovement) result.AddRange(LocationVisualGeometry.FootprintRects(location, item, resolved));
             }
             return result;
         }

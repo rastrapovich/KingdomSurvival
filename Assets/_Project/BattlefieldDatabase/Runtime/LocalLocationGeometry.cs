@@ -41,16 +41,24 @@ namespace KingdomSurvival.BattlefieldDatabase
         }
 
         // Основание предмета (прямоугольник в пикселях рисунка) — непроходимо.
+        // Перебираются только ряды и столбцы клеток в пределах прямоугольника:
+        // основание кистью — десятки прямоугольников на предмет.
         private void MarkBlocked(Rect area)
         {
             WorldMapHexGrid grid = Layer.Grid;
-            for (int index = 0; index < grid.CellCount; index++)
-            {
-                WorldMapHexCell cell = grid.CellAt(index);
-                grid.CellCenter(cell, out double x, out double y);
-                if (area.Contains(new Vector2((float)x, (float)y)))
-                    Layer.Set(cell, WorldMapGameplayTerrainType.Cliffs);
-            }
+            if (area.width <= 0 || area.height <= 0) return;
+            int rowFrom = Math.Max(0, (int)Math.Floor(area.yMin / grid.RowStep));
+            int rowTo = Math.Min(grid.Rows - 1, (int)Math.Ceiling(area.yMax / grid.RowStep));
+            int columnFrom = Math.Max(0, (int)Math.Floor(area.xMin / grid.HexWidth) - 1);
+            int columnTo = Math.Min(grid.Columns - 1, (int)Math.Ceiling(area.xMax / grid.HexWidth));
+            for (int row = rowFrom; row <= rowTo; row++)
+                for (int column = columnFrom; column <= columnTo; column++)
+                {
+                    WorldMapHexCell cell = new WorldMapHexCell(column, row);
+                    grid.CellCenter(cell, out double x, out double y);
+                    if (area.Contains(new Vector2((float)x, (float)y)))
+                        Layer.Set(cell, WorldMapGameplayTerrainType.Cliffs);
+                }
         }
 
         public float CanvasWidth => Definition.CanvasWidth;

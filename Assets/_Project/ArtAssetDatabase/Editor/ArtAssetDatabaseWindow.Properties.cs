@@ -156,6 +156,10 @@ namespace KingdomSurvival.ArtAssets.Editor
             BoolProperty("Перекрывает свет местных источников", asset.OccludesLight, value => asset.OccludesLight = value,
                 "Тень по контуру от огня. Для травы и мелочи выключите — сотни перекрытий дороги.");
             FloatProperty("Длина тени (множитель)", asset.ShadowLength, value => asset.ShadowLength = Mathf.Max(0, value));
+            BoolProperty("Освещается солнцем (смена суток)", asset.LitBySun, value => asset.LitBySun = value,
+                "Выключено — рисунок не темнеет ночью и не меняет цвет со временем суток: всегда как днём (светящийся гриб, огонь, вывеска).");
+            BoolProperty("Освещается огнём (местные источники)", asset.LitByFire, value => asset.LitByFire = value,
+                "Выключено — костёр, факел и другие местные источники рисунок не освещают (и его нормали не работают).");
             EndSection();
 
             ArtAssetView view = CardView;
@@ -378,6 +382,22 @@ namespace KingdomSurvival.ArtAssets.Editor
                 if (frames > 1) counts.Add(ArtAssetLabels.ViewTitle(item) + " — " + frames);
             }
             Note("Кадров: " + string.Join(", ", counts));
+            // Лист кадров: места показывают анимацию из него (одна текстура на кадры).
+            List<ArtAssetPartView> animated = asset.Parts.Where(item => item != null).SelectMany(item => ArtAssetLabels.Views.Select(item.FindView))
+                .Where(slot => slot != null && slot.IsAnimated).ToList();
+            int stale = animated.Count(ArtAssetSheets.IsStale);
+            int pages = animated.Where(slot => slot.HasSheet).SelectMany(slot => slot.SheetFrames).Select(sprite => sprite.texture).Distinct().Count();
+            Note(stale == 0 ? "Листы кадров собраны: страниц " + pages + "." : "Листов кадров не собрано: " + stale + " из " + animated.Count + " — анимация идёт отдельными рисунками.",
+                "Кадры ракурса складываются на страницы (до 4096×4096) вместе с нормалями — как в Базе анимаций; в местах кадры одной страницы рисуются одной отрисовкой. " +
+                "Лист собирается сам при загрузке и правке кадров; отдельные кадры остаются для правки.");
+            Row((stale > 0 ? "Собрать листы кадров" : "Пересобрать листы кадров", () =>
+            {
+                List<string> warnings = new List<string>();
+                int built = ArtAssetSheets.Refresh(catalog, asset, warnings, stale == 0);
+                litDirty = true;
+                status.text = "Листов собрано: " + built + "." + (warnings.Count > 0 ? " ⚠ " + string.Join(" ", warnings.Take(3)) : "");
+                BuildProperties();
+            }));
             FloatProperty("Кадров в секунду", asset.FramesPerSecond, value => asset.FramesPerSecond = Mathf.Clamp(value, .1f, 60),
                 "Общая скорость для всех частей и ракурсов.");
             ChoiceProperty("Порядок кадров", new[] { ArtAssetPlayback.Loop, ArtAssetPlayback.PingPong }, ArtAssetAnimation.PlaybackTitle, asset.Playback,

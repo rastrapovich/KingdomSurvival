@@ -195,5 +195,55 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(results[2], Is.GreaterThan(results[0] + .05f), "У отражённого рисунка свет тоже со стороны огня: " + string.Join(", ", results));
             Object.Destroy(sprite); Object.Destroy(color); Object.Destroy(normal);
         }
+
+        // Свет на ассет по отдельности: ночью у костра без огня рисунок
+        // темнее, без солнца — светлее (не темнеет ночью); оба — как обычно.
+        [UnityTest]
+        public IEnumerator AssetLightFromSunAndFireIsSeparate()
+        {
+            Texture2D texture = new Texture2D(64, 96, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[64 * 96];
+            for (int i = 0; i < pixels.Length; i++) pixels[i] = new Color(.8f, .8f, .8f, 1);
+            texture.SetPixels(pixels); texture.Apply();
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 64, 96), new Vector2(.5f, 0), 100);
+            KingdomSurvival.ArtAssets.ArtAssetDatabaseAsset catalog = ScriptableObject.CreateInstance<KingdomSurvival.ArtAssets.ArtAssetDatabaseAsset>();
+            KingdomSurvival.ArtAssets.ArtAssetDefinition asset = new KingdomSurvival.ArtAssets.ArtAssetDefinition { Id = "zz_light_split", Name = "Стена", PixelsPerUnit = 48 };
+            asset.MainPart.View(KingdomSurvival.ArtAssets.ArtAssetView.Front).Sprite = sprite;
+            catalog.assets.Add(asset);
+            KingdomSurvival.ArtAssets.ArtAssetDatabaseAsset.Override = catalog;
+            float[] results = new float[3];
+            try
+            {
+                for (int run = 0; run < 3; run++)
+                {
+                    asset.LitByFire = run != 1;
+                    asset.LitBySun = run != 2;
+                    catalog.MarkChanged();
+                    LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz_shadow_test", UseWorldLighting = false };
+                    visual.Objects.Add(new LocationVisualObject { Id = "wall", Name = "Стена", AssetId = asset.Id, Scale = 1, Position = new Vector2(.5f, .5f) });
+                    LocationVisualObject fire = new LocationVisualObject { Id = "fire", Name = "Огонь", LightOnly = true, Position = new Vector2(.42f, .5f) };
+                    fire.Light.Enabled = true; fire.Light.Radius = 6; fire.Light.Intensity = 1.5f; fire.Light.Animation = LocationLightAnimation.None;
+                    fire.Light.Shadows = false; fire.Light.ProjectsShadows = false; fire.Light.NormalMaps = false;
+                    visual.Objects.Add(fire);
+                    using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null))
+                    {
+                        RenderTexture target = Target(renderer);
+                        renderer.SetTime(1, 0);
+                        yield return null; yield return null;
+                        Save(target, "light-split-" + run);
+                        results[run] = Brightness(target, new Vector2(960, 540 - 110));
+                        renderer.Camera.targetTexture = null;
+                        Object.Destroy(target);
+                    }
+                }
+            }
+            finally
+            {
+                KingdomSurvival.ArtAssets.ArtAssetDatabaseAsset.Override = null;
+                Object.Destroy(catalog); Object.Destroy(sprite); Object.Destroy(texture);
+            }
+            Assert.That(results[1], Is.LessThan(results[0] - .05f), "Без огня ночью у костра темнее: " + string.Join(", ", results));
+            Assert.That(results[2], Is.GreaterThan(results[0] + .05f), "Без солнца ночью не темнеет: " + string.Join(", ", results));
+        }
     }
 }

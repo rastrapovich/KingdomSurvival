@@ -154,6 +154,8 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (index >= 0) catalog.assets[index] = working;
             else catalog.assets.Add(working);
             EditorUtility.SetDirty(catalog);
+            // Анимированные ракурсы — листом кадров (кадры остаются источником).
+            ArtAssetSheets.Refresh(catalog, working, warnings);
             return working;
         }
 
@@ -388,6 +390,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             slot.NormalMap = normal;
             if (firstArt && part == asset.MainPart) InitializeScale(asset);
             Changed(catalog);
+            ArtAssetSheets.Refresh(catalog, asset, warnings);
             return warnings.Count > 0 ? string.Join(" ", warnings) : null;
         }
 
@@ -419,6 +422,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             slot.NormalMap = normal;
             if (firstArt && part == asset.MainPart) InitializeScale(asset);
             Changed(catalog);
+            ArtAssetSheets.Refresh(catalog, asset, warnings);
             return warnings.Count > 0 ? string.Join(" ", warnings) : null;
         }
 
@@ -447,6 +451,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                 foreach (ArtAssetFrame frame in slot.Frames)
                     if (frame != null) frame.NormalMap = null;
             Changed(catalog);
+            RefreshOwner(catalog, part);
         }
 
         // Нормали папкой, как в Базе анимаций: папка с теми же ракурсами (и
@@ -499,6 +504,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                 }
                 attached = plan.Count;
                 Changed(catalog);
+                ArtAssetSheets.Refresh(catalog, asset, warnings);
                 AssetDatabase.SaveAssetIfDirty(catalog);
             }
             return "Нормалей подключено: " + attached + (slots.Count > 0 ? " (ракурсов " + slots.Count + ")" : "") + "." +
@@ -510,7 +516,16 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             Undo.RecordObject(catalog, "Снять кадры анимации");
             part.View(view).Frames = new List<ArtAssetFrame>();
+            ArtAssetSheets.Clear(part.View(view));
             Changed(catalog);
+            RefreshOwner(catalog, part);
+        }
+
+        // Лист кадров ассета, которому принадлежит часть, — по новым кадрам.
+        private static void RefreshOwner(ArtAssetDatabaseAsset catalog, ArtAssetPart part)
+        {
+            ArtAssetDefinition owner = catalog?.assets.FirstOrDefault(item => item?.Parts != null && item.Parts.Contains(part));
+            if (owner != null) ArtAssetSheets.Refresh(catalog, owner);
         }
 
         public static void Changed(ArtAssetDatabaseAsset catalog)

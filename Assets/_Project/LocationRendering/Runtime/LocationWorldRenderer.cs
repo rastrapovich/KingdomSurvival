@@ -88,6 +88,7 @@ namespace KingdomSurvival.LocationRendering
         private readonly Material adjustLit;
         private readonly MaterialPropertyBlock adjustBlock = new MaterialPropertyBlock();
         private static readonly int HsvId = Shader.PropertyToID("_KsHsv");
+        private static readonly int LightShareId = Shader.PropertyToID("_KsLight");
         private readonly CreatureAnimationDatabaseAsset animations;
         private readonly UnitDatabaseAsset units;
         private readonly Transform actorLayer;
@@ -360,7 +361,7 @@ namespace KingdomSurvival.LocationRendering
                 SpriteRenderer image = Image(imageObject, sprite, fullbright);
                 // Ассет без рисунка — заметная заглушка, а не «ящик».
                 if (part.Placeholder && resolved.FromAsset) image.color = new Color(1, .45f, .75f);
-                else if (!fullbright) ApplyColor(image, resolved.ColorAdjust);
+                else if (!fullbright) ApplyColor(image, resolved.ColorAdjust, resolved);
                 Fit(image, part.Height, part.Pivot, resolved.FlipX, Vector2.zero, resolved.Stretch, resolved.Rotation);
                 image.sortingOrder = LocationVisualGeometry.SortOrder(part.Band, anchor.localPosition.y, part.OrderOffset);
                 entry.Images.Add(image);
@@ -733,16 +734,24 @@ namespace KingdomSurvival.LocationRendering
         // ПР-12Р: цвет экземпляра. Подкраска — цветом рендерера; тон,
         // насыщенность и яркость — материалом с поправкой и блоком свойств
         // (без поправки — общий материал, рисунки собираются в пачки).
-        private void ApplyColor(SpriteRenderer image, LocationColorAdjust adjust)
+        // Свет ассета (солнце / огонь по отдельности) — тем же материалом с
+        // поправкой; оба включены — общий материал.
+        private void ApplyColor(SpriteRenderer image, LocationColorAdjust adjust, LocationResolvedVisual resolved = null)
         {
-            if (adjust == null || adjust.IsIdentity) return;
-            image.color = adjust.Tint;
-            if (!adjust.HasHsv || adjustLit == null) return;
+            bool identity = adjust == null || adjust.IsIdentity;
+            bool lighting = resolved != null && !resolved.DefaultLighting;
+            if (!identity) image.color = adjust.Tint;
+            bool hsv = !identity && adjust.HasHsv;
+            if ((!hsv && !lighting) || adjustLit == null) return;
             image.sharedMaterial = adjustLit;
             image.GetPropertyBlock(adjustBlock);
-            adjustBlock.SetVector(HsvId, adjust.ShaderHsv);
+            adjustBlock.SetVector(HsvId, hsv ? adjust.ShaderHsv : new Vector4(0, 1, 1, 0));
+            adjustBlock.SetVector(LightShareId, LightShare(resolved));
             image.SetPropertyBlock(adjustBlock);
         }
+
+        public static Vector4 LightShare(LocationResolvedVisual resolved) =>
+            new Vector4(resolved == null || resolved.LitBySun ? 1 : 0, resolved == null || resolved.LitByFire ? 1 : 0, 0, 0);
 
         // ------------------------------------------------------------------
         // Предметы сборки (редактор)

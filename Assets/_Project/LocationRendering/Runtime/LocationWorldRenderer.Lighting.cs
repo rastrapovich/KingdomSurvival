@@ -22,6 +22,8 @@ namespace KingdomSurvival.LocationRendering
     {
         // Слой обработки кадра места: камера сцены глобальной карты его не видит.
         public const int PostVolumeLayer = 31;
+        // Стиль смешивания 2D-света для местных источников с «обычным» смешиванием.
+        public const int LocalLightBlendStyle = 2;
         private const int ShadowSortingOrder = -24500;
         // Мерцание огня меняет темноту тени только наполовину: иначе тень дёргается.
         private const float FlickerShadowShare = .5f;
@@ -199,7 +201,11 @@ namespace KingdomSurvival.LocationRendering
             light.volumeIntensity = data.VolumeIntensity;
             light.volumetricShadowsEnabled = data.Volumetric && data.VolumetricShadows;
             light.shadowVolumeIntensity = data.VolumeShadowIntensity;
-            light.blendStyleIndex = Mathf.Clamp(data.BlendStyle, 0, 3);
+            // Стиль 0 — только солнце (общий свет): местный «обычный» свет —
+            // в стиле 2 (умножение с маской, без маски — как стиль 0), чтобы
+            // рисунок мог брать солнце и огонь по отдельности (LocationSpriteAdjust).
+            int style = Mathf.Clamp(data.BlendStyle, 0, 3);
+            light.blendStyleIndex = style == 0 ? LocalLightBlendStyle : style;
             light.overlapOperation = data.AlphaOverlap ? Light2D.OverlapOperation.AlphaBlend : Light2D.OverlapOperation.Additive;
             light.lightOrder = data.Order;
             // Нормали: в URP 17 у этих полей нет публичной записи.

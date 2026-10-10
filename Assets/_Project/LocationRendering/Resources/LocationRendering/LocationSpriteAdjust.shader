@@ -7,6 +7,11 @@
 // TEXCOORD1.xyz = яркость, отражение ±1, поворот (радианы против часовой);
 // кадр — _MainTex и прямоугольник кадра _KsUvRect у группы. Спрайтовые
 // свойства (цвет, отражение рендерера) у сетки не задаются.
+// Свет по отдельности (_KsLight: x — солнце, y — огонь): общий свет места
+// (солнце, смена суток) лежит в стиле смешивания 0, местные источники — в
+// стилях 1–3 (обычный местный свет — стиль 2 «умножение с маской», без
+// маски — как стиль 0). Солнце выключено — рисунок как при полном свете
+// (не темнеет ночью); огонь выключен — местные источники не освещают.
 Shader "Kingdom Survival/Location Sprite Adjust"
 {
     Properties
@@ -16,6 +21,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         _NormalMap("Normal Map", 2D) = "bump" {}
         _KsHsv("Hue (turns), Saturation, Brightness", Vector) = (0, 1, 1, 0)
         _KsUvRect("Particle UV rect (offset, scale)", Vector) = (0, 0, 1, 1)
+        _KsLight("Sun, fire light share", Vector) = (1, 1, 0, 0)
         [MaterialToggle] _ZWrite("ZWrite", Float) = 0
         [HideInInspector] _Color("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor("RendererColor", Color) = (1,1,1,1)
@@ -32,6 +38,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         half4 _Color;
         float4 _KsHsv;
         float4 _KsUvRect;
+        float4 _KsLight;
     CBUFFER_END
 
     half3 KsAdjust(half3 rgb, float3 hsv)
@@ -100,6 +107,68 @@ Shader "Kingdom Survival/Location Sprite Adjust"
 
             #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/CombinedShapeLightShared.hlsl"
 
+            // Свет одного стиля смешивания (маска стиля — как в URP).
+            void KsShapeLight(half4 light, half4 mask, half4 maskFilter, half4 invertedFilter, half2 factors, out half4 modulate, out half4 additive)
+            {
+                if (any(maskFilter))
+                {
+                    half4 processedMask = (1 - invertedFilter) * mask + invertedFilter * (1 - mask);
+                    light *= dot(processedMask, maskFilter);
+                }
+                modulate = light * factors.x;
+                additive = light * factors.y;
+            }
+
+            // Копия CombinedShapeLightShared URP 17.6: стиль 0 (солнце) и
+            // стили 1–3 (огонь и другие местные источники) — со своими долями.
+            half4 KsCombinedLight(in SurfaceData2D surfaceData, in InputData2D inputData, half2 share)
+            {
+                #if defined(DEBUG_DISPLAY)
+                half4 debugColor = 0;
+                if (CanDebugOverrideOutputColor(surfaceData, inputData, debugColor))
+                    return debugColor;
+                #endif
+                half alpha = surfaceData.alpha;
+                half4 color = half4(surfaceData.albedo, alpha);
+                const half4 mask = surfaceData.mask;
+                const half2 lightingUV = inputData.lightingUV;
+                if (alpha == 0.0)
+                    discard;
+
+            #if !USE_SHAPE_LIGHT_TYPE_0 && !USE_SHAPE_LIGHT_TYPE_1 && !USE_SHAPE_LIGHT_TYPE_2 && !USE_SHAPE_LIGHT_TYPE_3
+                // Света нет вовсе — рисунок как есть (как в URP).
+                return color;
+            #endif
+                half4 modulate = 0, additive = 0, m, a;
+            #if USE_SHAPE_LIGHT_TYPE_0
+                KsShapeLight(SAMPLE_TEXTURE2D(_ShapeLightTexture0, sampler_ShapeLightTexture0, lightingUV), mask,
+                    _ShapeLightMaskFilter0, _ShapeLightInvertedFilter0, _ShapeLightBlendFactors0, m, a);
+                // Без солнца — полный свет: рисунок не меняется со временем суток.
+                modulate += lerp(half4(1, 1, 1, 1), m, share.x);
+                additive += a * share.x;
+            #else
+                modulate += (1 - share.x);
+            #endif
+            #if USE_SHAPE_LIGHT_TYPE_1
+                KsShapeLight(SAMPLE_TEXTURE2D(_ShapeLightTexture1, sampler_ShapeLightTexture1, lightingUV), mask,
+                    _ShapeLightMaskFilter1, _ShapeLightInvertedFilter1, _ShapeLightBlendFactors1, m, a);
+                modulate += m * share.y; additive += a * share.y;
+            #endif
+            #if USE_SHAPE_LIGHT_TYPE_2
+                KsShapeLight(SAMPLE_TEXTURE2D(_ShapeLightTexture2, sampler_ShapeLightTexture2, lightingUV), mask,
+                    _ShapeLightMaskFilter2, _ShapeLightInvertedFilter2, _ShapeLightBlendFactors2, m, a);
+                modulate += m * share.y; additive += a * share.y;
+            #endif
+            #if USE_SHAPE_LIGHT_TYPE_3
+                KsShapeLight(SAMPLE_TEXTURE2D(_ShapeLightTexture3, sampler_ShapeLightTexture3, lightingUV), mask,
+                    _ShapeLightMaskFilter3, _ShapeLightInvertedFilter3, _ShapeLightBlendFactors3, m, a);
+                modulate += m * share.y; additive += a * share.y;
+            #endif
+                half4 finalOutput = _HDREmulationScale * (color * modulate + additive);
+                finalOutput.a = alpha;
+                return max(0, finalOutput);
+            }
+
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
             UNITY_TEXTURE_STREAMING_DEBUG_VARS_FOR_TEX(_MainTex);
@@ -149,7 +218,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 SETUP_DEBUG_TEXTURE_DATA_2D_NO_TS(inputData, input.positionWS, input.positionCS, _MainTex);
                 surfaceData.normalWS = input.normalWS;
             #endif
-                return CombinedShapeLightShared(surfaceData, inputData);
+                return KsCombinedLight(surfaceData, inputData, half2(_KsLight.xy));
             }
             ENDHLSL
         }

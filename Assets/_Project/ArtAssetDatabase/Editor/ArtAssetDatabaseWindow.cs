@@ -171,6 +171,16 @@ namespace KingdomSurvival.ArtAssets.Editor
             ToolbarMenu more = new ToolbarMenu { text = "Ещё" };
             more.menu.AppendAction("Создать технический набор (заглушки)", _ => { ArtAssetTechnicalSet.Ensure(catalog); visibleDirty = true; BuildCategories(); status.text = "Технический набор готов."; });
             more.menu.AppendAction("Открыть Базу локаций", _ => EditorApplication.ExecuteMenuItem("Kingdom Survival/База локаций"));
+            more.menu.AppendAction("Собрать листы кадров у всех ассетов", _ =>
+            {
+                List<string> warnings = new List<string>();
+                int built = 0;
+                foreach (ArtAssetDefinition asset in catalog.assets.Where(item => item != null && item.IsAnimated).ToList())
+                    built += ArtAssetSheets.Refresh(catalog, asset, warnings);
+                litDirty = true;
+                status.text = "Листов кадров собрано: " + built + "." + (warnings.Count > 0 ? " ⚠ " + string.Join(" ", warnings.Take(3)) : "");
+                BuildProperties();
+            });
             toolbar.Add(more);
             root.Add(toolbar);
 

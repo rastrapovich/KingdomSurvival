@@ -31,8 +31,30 @@ namespace KingdomSurvival.ArtAssets
         // неподвижный рисунок. Кадры одного размера с первым; нормаль — своя
         // у каждого кадра (подключается к его рисунку при импорте).
         public List<ArtAssetFrame> Frames = new List<ArtAssetFrame>();
+        // Лист кадров: те же кадры (первый и следующие), собранные базой на
+        // страницы-атласы, нормали — той же раскладкой (вторая текстура
+        // страницы). Места показывают анимацию из листа: кадры одной
+        // текстуры собираются в одну отрисовку. Кадры выше — источник правки;
+        // SheetKey — их отпечаток (изменились — лист собирается заново).
+        public List<Sprite> SheetFrames = new List<Sprite>();
+        public List<Texture2D> SheetNormals = new List<Texture2D>();
+        public string SheetKey = "";
 
         public bool HasSprite => Sprite != null;
+
+        // Лист собран и годится: по рисунку на каждый кадр.
+        public bool HasSheet
+        {
+            get
+            {
+                if (SheetFrames == null || SheetFrames.Count < 2 || SheetFrames.Count != FrameCount) return false;
+                foreach (Sprite sprite in SheetFrames) if (sprite == null) return false;
+                return true;
+            }
+        }
+
+        // Кадры для показа: из листа, если он собран, иначе отдельные файлы.
+        public Sprite[] PlaybackSprites() => HasSheet ? SheetFrames.ToArray() : FrameSprites();
         public bool HasNormal => Sprite != null && NormalMap != null;
 
         // Кадров всего, считая первый; кадры без рисунка пропускаются.
@@ -65,6 +87,11 @@ namespace KingdomSurvival.ArtAssets
         {
             if (sprite == null) return null;
             if (sprite == Sprite) return NormalMap;
+            if (SheetFrames != null)
+            {
+                int index = SheetFrames.IndexOf(sprite);
+                if (index >= 0) return SheetNormals != null && index < SheetNormals.Count ? SheetNormals[index] : null;
+            }
             if (Frames != null)
                 foreach (ArtAssetFrame frame in Frames) if (frame != null && frame.Sprite == sprite) return frame.NormalMap;
             return null;
@@ -136,6 +163,12 @@ namespace KingdomSurvival.ArtAssets
         public bool BlocksMovement;
         public bool OccludesLight;
         public float ShadowLength = 1;
+        // Какой свет действует на рисунок в местах: солнце (общий свет, смена
+        // суток) и огонь (местные источники — костёр, факел). Выключенное
+        // солнце — рисунок не темнеет ночью (всегда как днём); выключенный
+        // огонь — местные источники его не освещают.
+        public bool LitBySun = true;
+        public bool LitByFire = true;
 
         // ПР-12П: покадровая анимация (трава, флаг, вода). Скорость и порядок
         // общие для всех частей и ракурсов; у каждой части — свои кадры.

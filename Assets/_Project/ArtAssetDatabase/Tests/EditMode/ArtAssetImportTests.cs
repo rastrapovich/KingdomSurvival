@@ -182,5 +182,44 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(result.Errors.Count, Is.EqualTo(1));
             Assert.That(catalog.assets.Select(asset => asset.Name), Is.EquivalentTo(new[] { "Телега" }), "Ошибка одного объекта не портит остальные.");
         }
+
+        // Кадры анимации — листом, как в Базе анимаций: страница с кадрами и
+        // страница нормалей той же раскладки (вторая текстура); места берут
+        // анимацию из листа; снятые кадры — лист убран.
+        [Test]
+        public void AnimatedFrames_AreBuiltIntoASheet_WithNormals()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                Png("Трава/Front/" + i.ToString("000") + ".png", 40, 60, new Color(.1f, .3f + i * .15f, .1f, 1));
+                Png("Трава/Front/" + i.ToString("000") + "_n.png", 40, 60, Normal);
+            }
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { source + "/Трава" });
+            ArtAssetImportResult result = ArtAssetImporter.Import(catalog, plan, null, false);
+            Assert.That(result.Errors, Is.Empty, string.Join("; ", result.Errors));
+            ArtAssetDefinition grass = catalog.assets.Single();
+            ArtAssetPartView slot = grass.MainPart.FindView(ArtAssetView.Front);
+            Assert.That(slot.FrameCount, Is.EqualTo(4));
+            Assert.That(slot.HasSheet, Is.True, string.Join("; ", result.Warnings));
+            Assert.That(slot.SheetFrames.Select(sprite => sprite.texture).Distinct().Count(), Is.EqualTo(1), "Четыре кадра — одна страница.");
+            Assert.That(slot.SheetFrames.All(sprite => sprite.rect.size == new Vector2(40, 60)), Is.True, "Кадр в листе — своего размера.");
+            Texture2D normalPage = slot.SheetNormals[0];
+            Assert.That(normalPage, Is.Not.Null);
+            Assert.That(SpriteNormalMaps.Find(slot.SheetFrames[0]), Is.EqualTo(normalPage), "Нормали — второй текстурой страницы.");
+            Assert.That(slot.NormalOf(slot.SheetFrames[2]), Is.EqualTo(normalPage));
+            Assert.That(ArtAssetSheets.IsStale(slot), Is.False);
+            StringAssert.StartsWith(ArtAssetImporter.AssetFolder(grass) + "/" + ArtAssetSheets.FolderName + "/", AssetDatabase.GetAssetPath(normalPage));
+
+            KingdomSurvival.BattlefieldDatabase.LocationResolvedVisual resolved = KingdomSurvival.BattlefieldDatabase.LocationVisualResolver.Resolve(
+                new KingdomSurvival.BattlefieldDatabase.LocationVisualObject { Id = "g1", AssetId = grass.Id, Scale = 1 }, null, catalog);
+            Assert.That(resolved.Main.Frames, Is.EqualTo(slot.SheetFrames.ToArray()), "Места показывают анимацию из листа.");
+            Assert.That(resolved.Main.Sprite, Is.EqualTo(slot.SheetFrames[0]));
+
+            ArtAssetImporter.ClearFrames(catalog, grass.MainPart, ArtAssetView.Front);
+            Assert.That(slot.HasSheet, Is.False);
+            string sheets = ArtAssetImporter.AssetFolder(grass) + "/" + ArtAssetSheets.FolderName;
+            Assert.That(!AssetDatabase.IsValidFolder(sheets) || AssetDatabase.FindAssets(string.Empty, new[] { sheets }).Length == 0, Is.True,
+                "Страницы снятого листа убраны.");
+        }
     }
 }

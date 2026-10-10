@@ -11,7 +11,9 @@
     "KingdomSurvival.LocationRendering",
     "Unity.RenderPipelines.Universal.Runtime",
     "Unity.RenderPipelines.Core.Runtime",
-    "Unity.RenderPipelines.Universal.2D.Runtime"
+    "Unity.RenderPipelines.Universal.2D.Runtime",
+    "KingdomSurvival.AnimationDatabase.Editor",
+    "Unity.2D.Sprite.Editor"
   ],
   "includePlatforms": [
     "Editor"

@@ -56,6 +56,11 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float Stretch = 1;
         public float Rotation;
         public LocationColorAdjust ColorAdjust = new LocationColorAdjust();
+        // Какой свет действует на рисунок: солнце (смена суток) и огонь
+        // (местные источники). Прямой рисунок места — оба.
+        public bool LitBySun = true;
+        public bool LitByFire = true;
+        public bool DefaultLighting => LitBySun && LitByFire;
 
         public bool FromAsset => Asset != null;
         public bool ViewFallback => FromAsset && !NoArt && ShownView != RequestedView;
@@ -131,7 +136,10 @@ namespace KingdomSurvival.BattlefieldDatabase
                 if (part == null) continue;
                 ArtAssetPartView view = part.FindView(shown);
                 bool main = i == 0;
-                Sprite sprite = main && variant != null ? variant : view?.Sprite;
+                bool stateArt = main && variant != null;
+                // Анимация — из листа кадров, если он собран (одна текстура на кадры).
+                bool sheet = view != null && view.IsAnimated && !stateArt && view.HasSheet;
+                Sprite sprite = stateArt ? variant : sheet ? view.SheetFrames[0] : view?.Sprite;
                 if (sprite == null && !main) continue;
                 LocationVisualBand band = Band(part.Layer);
                 int order = part.OrderOffset;
@@ -168,7 +176,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                     resolved.ShadowPivot = Divide(pivotPixels - offsetPixels, shadow.rect.size);
                 }
                 // Состояние объекта (вариант) заменяет рисунок основы — без анимации.
-                if (view != null && view.IsAnimated && !(main && variant != null)) resolved.Frames = view.FrameSprites();
+                if (view != null && view.IsAnimated && !stateArt) resolved.Frames = view.PlaybackSprites();
                 result.Parts.Add(resolved);
             }
 
@@ -183,6 +191,8 @@ namespace KingdomSurvival.BattlefieldDatabase
             result.ShadowLength = shadows ? item.ShadowLength : asset.ShadowLength;
             result.FramesPerSecond = asset.FramesPerSecond;
             result.Playback = asset.Playback;
+            result.LitBySun = asset.LitBySun;
+            result.LitByFire = asset.LitByFire;
             result.Phase = asset.RandomPhase ? ArtAssetAnimation.StablePhase(item.Id) : 0;
         }
 

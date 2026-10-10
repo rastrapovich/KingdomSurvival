@@ -36,6 +36,8 @@ namespace KingdomSurvival.LocationRendering
             public float FramesPerSecond;
             public ArtAssetPlayback Playback;
             public int Shown = -1;
+            // Свет ассета: солнце и огонь по отдельности.
+            public Vector4 LightShare = new Vector4(1, 1, 0, 0);
             public readonly List<Quad> Quads = new List<Quad>();
         }
 
@@ -50,6 +52,7 @@ namespace KingdomSurvival.LocationRendering
         private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
         private static readonly int NormalMapId = Shader.PropertyToID("_NormalMap");
         private static readonly int UvRectId = Shader.PropertyToID("_KsUvRect");
+        private static readonly int LightShareId = Shader.PropertyToID("_KsLight");
 
         private readonly LocationScatterLayer layer;
         private readonly LocalLocationDefinition location;
@@ -144,7 +147,8 @@ namespace KingdomSurvival.LocationRendering
             Group group = new Group
             {
                 Object = target, Renderer = renderer, Mesh = mesh, Frames = frames, Bucket = bucket, Buckets = buckets,
-                FramesPerSecond = resolved.FramesPerSecond, Playback = resolved.Playback, Normals = new Texture[frames.Length]
+                FramesPerSecond = resolved.FramesPerSecond, Playback = resolved.Playback, Normals = new Texture[frames.Length],
+                LightShare = LocationWorldRenderer.LightShare(resolved)
             };
             for (int i = 0; i < frames.Length; i++) group.Normals[i] = NormalOf(asset, resolved.ShownView, frames[i]);
             groups.Add(group);
@@ -263,6 +267,7 @@ namespace KingdomSurvival.LocationRendering
             block.SetTexture(MainTexId, texture);
             block.SetTexture(NormalMapId, group.Normals[index] != null ? group.Normals[index] : Texture2D.normalTexture);
             block.SetVector(UvRectId, new Vector4(rect.x / texture.width, rect.y / texture.height, rect.width / texture.width, rect.height / texture.height));
+            block.SetVector(LightShareId, group.LightShare);
             group.Renderer.SetPropertyBlock(block);
         }
 

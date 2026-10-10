@@ -211,6 +211,15 @@ namespace KingdomSurvival.LocationRendering.Editor
             hexes.style.marginLeft = 12;
             hexes.RegisterValueChangedCallback(evt => { showHexes = evt.newValue; SyncArenaView(); });
             presets.Add(hexes);
+            UnityEngine.UIElements.Toggle footprints = new UnityEngine.UIElements.Toggle("Основания")
+            {
+                value = showFootprints,
+                tooltip = "Показать основания всех предметов места — занятую землю (прямоугольник или кисть Базы ассетов). " +
+                          "Ярче — те, что перекрывают проход; у выбранного — ярче всех."
+            };
+            footprints.style.marginLeft = 12;
+            footprints.RegisterValueChangedCallback(evt => { showFootprints = evt.newValue; canvasTop?.MarkDirtyRepaint(); });
+            presets.Add(footprints);
             center.Add(presets);
             VisualElement tools = new VisualElement(); tools.style.flexDirection = FlexDirection.Row; tools.style.flexWrap = Wrap.Wrap;
             for (int i = 0; i <= (int)Tool.TestStart; i++)
@@ -1113,21 +1122,39 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Vector2 p = Gui(point.x, point.y);
                 EditorGUI.DrawRect(new Rect(p.x - 5, p.y - 1, 10, 2), Color.yellow);
                 EditorGUI.DrawRect(new Rect(p.x - 1, p.y - 5, 2, 10), Color.yellow);
-                LocationResolvedVisual resolved = LocationVisualResolver.Resolve(art);
-                if (resolved.BlocksMovement || art.UsesAsset)
-                {
-                    // Основание кистью — закрашенными клетками, прямоугольником — с рамкой.
-                    bool cells = resolved.FootprintCells != null;
-                    foreach (Rect footprint in LocationVisualGeometry.FootprintRects(location, art, resolved))
-                    {
-                        Vector2 a = Gui(footprint.xMin, footprint.yMin), b = Gui(footprint.xMax, footprint.yMax);
-                        Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(a.x, a.y, b.x, b.y),
-                            new Color(1, .35f, .15f, resolved.BlocksMovement ? (cells ? .3f : .1f) : .06f),
-                            cells ? Color.clear : new Color(1, .4f, .2f, resolved.BlocksMovement ? .8f : .3f));
-                    }
-                }
             }
+            // Основания — у всех предметов сразу, по галочке «Основания» над холстом.
+            if (showFootprints && Visual != null)
+                foreach (LocationVisualObject item in Visual.Objects)
+                {
+                    if (item == null || item.Hidden || item.LightOnly) continue;
+                    DrawFootprint(location, item, item == art, Gui);
+                }
             Handles.EndGUI();
+        }
+
+        // Основание предмета на холсте: прямоугольник с рамкой; кистью —
+        // слабая заливка по клеткам и контур по краю. Выбранный — ярче;
+        // основание, которое не мешает проходу, — едва заметно.
+        private static void DrawFootprint(LocalLocationDefinition location, LocationVisualObject item, bool selected, Func<float, float, Vector2> gui)
+        {
+            LocationResolvedVisual resolved = LocationVisualResolver.Resolve(item);
+            if (!resolved.BlocksMovement && !item.UsesAsset) return;
+            bool cells = resolved.FootprintCells != null;
+            float strength = resolved.BlocksMovement ? (selected ? 1 : .6f) : .35f;
+            Color fill = new Color(1, .35f, .15f, (selected ? .12f : .07f) * (resolved.BlocksMovement ? 1 : .4f));
+            Color edge = new Color(1, .4f, .2f, .85f * strength);
+            foreach (Rect footprint in LocationVisualGeometry.FootprintRects(location, item, resolved))
+            {
+                Vector2 a = gui(footprint.xMin, footprint.yMin), b = gui(footprint.xMax, footprint.yMax);
+                Handles.DrawSolidRectangleWithOutline(Rect.MinMaxRect(a.x, a.y, b.x, b.y), fill, cells ? Color.clear : edge);
+            }
+            if (!cells || resolved.FootprintOutline == null) return;
+            Vector2 anchor = LocationVisualGeometry.ToPixel(location, item.Position);
+            float unit = LocationVisualGeometry.PixelsPerUnit;
+            Handles.color = edge;
+            foreach (Vector4 line in resolved.FootprintOutline)
+                Handles.DrawLine(gui(anchor.x + line.x * unit, anchor.y - line.y * unit), gui(anchor.x + line.z * unit, anchor.y - line.w * unit));
         }
 
         private static void Marker(Vector2 p, Color color, string label, bool selected)

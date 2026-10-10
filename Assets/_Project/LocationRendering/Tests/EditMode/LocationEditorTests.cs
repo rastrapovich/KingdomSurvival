@@ -1,3 +1,4 @@
+using System.Linq;
 using System.IO;
 using KingdomSurvival.BattlefieldDatabase;
 using KingdomSurvival.LocationRendering.Editor;
@@ -32,6 +33,7 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(window.rootVisualElement.Q<IMGUIContainer>(), Is.Not.Null);
             Assert.That(window.rootVisualElement.Q<ScrollView>(), Is.Not.Null);
             Assert.That(window.rootVisualElement.Q<Slider>(), Is.Not.Null);
+            Assert.That(window.rootVisualElement.Query<UnityEngine.UIElements.Toggle>().ToList().Any(item => item.label == "Основания"), Is.True, "Галочка оснований всех предметов.");
             window.Close();
         }
 

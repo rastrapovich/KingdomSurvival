@@ -20,6 +20,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         [SerializeField] private bool showHexSamples;
         // Гексы боя на рисунке: одна галочка над холстом.
         [SerializeField] private bool showHexes = true;
+        // Основания всех предметов на холсте — галочка «Основания» (по умолчанию скрыты).
+        [SerializeField] private bool showFootprints;
 
         private VisualElement arenaClip;
         private BattlefieldView arenaView;

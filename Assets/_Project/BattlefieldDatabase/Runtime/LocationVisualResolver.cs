@@ -51,6 +51,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         // опоры, единицы мира (Y вверх), с масштабом, отражением и растяжением.
         // null — основание прямоугольником выше; Size/Offset тогда — его охват.
         public List<Rect> FootprintCells;
+        // Контур основания кистью — отрезки (x1, y1, x2, y2) в тех же единицах.
+        public List<Vector4> FootprintOutline;
         public bool OccludesLight;
         public float ShadowLength = 1;
         // ПР-12П: ход кадров у анимированных частей; фаза — своя у экземпляра.
@@ -104,6 +106,12 @@ namespace KingdomSurvival.BattlefieldDatabase
                 {
                     Rect cell = result.FootprintCells[i];
                     result.FootprintCells[i] = new Rect(cell.x * result.Stretch, cell.y, cell.width * result.Stretch, cell.height);
+                }
+            if (result.FootprintOutline != null && Mathf.Abs(result.Stretch - 1) > .0001f)
+                for (int i = 0; i < result.FootprintOutline.Count; i++)
+                {
+                    Vector4 edge = result.FootprintOutline[i];
+                    result.FootprintOutline[i] = new Vector4(edge.x * result.Stretch, edge.y, edge.z * result.Stretch, edge.w);
                 }
             return result;
         }
@@ -212,6 +220,10 @@ namespace KingdomSurvival.BattlefieldDatabase
                     if (item.FlipX) scaled.x = -scaled.xMax;
                     result.FootprintCells.Add(scaled);
                 }
+                float flip = item.FlipX ? -scale : scale;
+                result.FootprintOutline = new List<Vector4>();
+                foreach (Vector4 edge in settings.FootprintMask.Outline())
+                    result.FootprintOutline.Add(new Vector4(edge.x * flip, edge.y * scale, edge.z * flip, edge.w * scale));
                 Rect bounds = settings.FootprintMask.Bounds();
                 result.FootprintSize = bounds.size * scale;
                 result.FootprintOffset = new Vector2(item.FlipX ? -bounds.center.x : bounds.center.x, bounds.center.y) * scale;

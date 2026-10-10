@@ -169,6 +169,7 @@ namespace KingdomSurvival.ArtAssets
         [NonSerialized] private bool[] cells;
         [NonSerialized] private int count;
         [NonSerialized] private List<Rect> rects;
+        [NonSerialized] private List<Vector4> outline;
 
         public bool HasGrid => Columns > 0 && Rows > 0 && Cell > 0;
         public bool IsEmpty => !HasGrid || Count == 0;
@@ -289,6 +290,7 @@ namespace KingdomSurvival.ArtAssets
             decoded = null;
             count = 0;
             rects = null;
+            outline = null;
         }
 
         // Закрашенное — прямоугольниками (единицы мира от опоры): отрезки
@@ -323,6 +325,37 @@ namespace KingdomSurvival.ArtAssets
             return rects;
         }
 
+        // Контур закрашенного — отрезки (x1, y1, x2, y2), единицы мира от
+        // опоры: стороны клеток, за которыми пусто; соседние на одной линии
+        // сливаются. Для подсветки основания в окнах.
+        public List<Vector4> Outline()
+        {
+            Decode();
+            if (outline != null) return outline;
+            outline = new List<Vector4>();
+            // Горизонтальные стороны: граница между рядом r-1 и r.
+            for (int r = 0; r <= Rows; r++)
+                for (int c = 0; c < Columns; c++)
+                {
+                    if (Get(c, r - 1) == Get(c, r)) continue;
+                    int start = c;
+                    bool below = Get(c, r - 1);
+                    while (c + 1 < Columns && Get(c + 1, r - 1) != Get(c + 1, r) && Get(c + 1, r - 1) == below) c++;
+                    outline.Add(new Vector4(Origin.x + start * Cell, Origin.y + r * Cell, Origin.x + (c + 1) * Cell, Origin.y + r * Cell));
+                }
+            // Вертикальные: граница между столбцом c-1 и c.
+            for (int c = 0; c <= Columns; c++)
+                for (int r = 0; r < Rows; r++)
+                {
+                    if (Get(c - 1, r) == Get(c, r)) continue;
+                    int start = r;
+                    bool left = Get(c - 1, r);
+                    while (r + 1 < Rows && Get(c - 1, r + 1) != Get(c, r + 1) && Get(c - 1, r + 1) == left) r++;
+                    outline.Add(new Vector4(Origin.x + c * Cell, Origin.y + start * Cell, Origin.x + c * Cell, Origin.y + (r + 1) * Cell));
+                }
+            return outline;
+        }
+
         // Охват закрашенного (единицы мира от опоры); пусто — нулевой прямоугольник.
         public Rect Bounds()
         {
@@ -345,6 +378,7 @@ namespace KingdomSurvival.ArtAssets
             cells = new bool[size];
             count = 0;
             rects = null;
+            outline = null;
             decoded = Bits;
             if (size == 0 || string.IsNullOrEmpty(Bits)) return;
             byte[] bytes;
@@ -366,6 +400,7 @@ namespace KingdomSurvival.ArtAssets
             Bits = count > 0 ? Convert.ToBase64String(bytes) : "";
             decoded = Bits;
             rects = null;
+            outline = null;
         }
     }
 

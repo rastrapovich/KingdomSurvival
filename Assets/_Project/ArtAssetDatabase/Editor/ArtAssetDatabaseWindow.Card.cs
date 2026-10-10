@@ -106,12 +106,17 @@ namespace KingdomSurvival.ArtAssets.Editor
             if (settings.UsesFootprintMask)
             {
                 // Основание кистью: закрашенные клетки; прямоугольник не действует.
-                Color fill = new Color(1, .35f, .15f, brush ? .45f : .28f);
+                // Кистью видно, что закрашено; в остальное время — как прямоугольник:
+                // слабая заливка и контур.
+                Color fill = new Color(1, .35f, .15f, brush ? .4f : .07f);
                 foreach (Rect cell in settings.FootprintMask.Rects())
                 {
                     Vector2 min = ToGui(frame, new Vector2(cell.xMin, cell.yMax)), max = ToGui(frame, new Vector2(cell.xMax, cell.yMin));
                     EditorGUI.DrawRect(Rect.MinMaxRect(min.x, min.y, max.x, max.y), fill);
                 }
+                Handles.color = new Color(1, .45f, .2f, brush ? .95f : .5f);
+                foreach (Vector4 edge in settings.FootprintMask.Outline())
+                    Handles.DrawLine(ToGui(frame, new Vector2(edge.x, edge.y)), ToGui(frame, new Vector2(edge.z, edge.w)));
             }
             else
             {

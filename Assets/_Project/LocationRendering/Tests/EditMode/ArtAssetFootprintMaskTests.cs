@@ -65,6 +65,13 @@ namespace KingdomSurvival.LocationRendering
             Assert.That(copy.FootprintMask.Count, Is.EqualTo(mask.Count));
             Assert.That(copy.FootprintMask.Contains(new Vector2(1.6f, 0)) && !copy.FootprintMask.Contains(Vector2.zero), Is.True);
 
+            // Контур прямоугольника 3×2 клетки — четыре слитых отрезка по краю.
+            mask.Reset(new Rect(0, 0, 1, 1), .1f);
+            mask.Fill(point => point.x < .3f && point.y < .2f);
+            List<Vector4> outline = mask.Outline();
+            Assert.That(outline.Count, Is.EqualTo(4));
+            Assert.That(outline.Sum(edge => Vector2.Distance(new Vector2(edge.x, edge.y), new Vector2(edge.z, edge.w))), Is.EqualTo(1f).Within(1e-4f));
+
             mask.Clear();
             Assert.That(mask.IsEmpty, Is.True);
             Assert.That(new ArtAssetViewSettings().UsesFootprintMask, Is.False, "Прежние ассеты — прямоугольником.");

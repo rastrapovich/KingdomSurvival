@@ -345,6 +345,7 @@ namespace KingdomSurvival.LocationRendering
             enabled &= !caster.NoOcclusion && strength > .001f && radius > 1e-3f && OcclusionMaterial() != null;
             Vector2 direction = enabled ? ShadowDirection(caster) : Vector2.zero;
             List<Rect> footprint = enabled ? Footprint(caster) : null;
+            enabled &= footprint != null && footprint.Count > 0;
             UpdateGroundOcclusion(caster, enabled && ground, footprint, radius, strength, direction);
             UpdateObjectOcclusion(caster, enabled, footprint, radius, strength, direction);
         }
@@ -421,15 +422,43 @@ namespace KingdomSurvival.LocationRendering
         private List<Rect> Footprint(Caster caster)
         {
             if (caster.Footprint != null && caster.Footprint.Count > 0) return caster.Footprint;
-            if (caster.FallbackFootprint == null)
+            if (caster.FallbackFootprint == null && OpaqueBaseExtent(caster, out float left, out float right))
             {
-                Bounds bounds = caster.Source.bounds;
-                float width = bounds.size.x * (caster.People ? .4f : .7f);
-                float depth = Mathf.Max(.05f, width * (caster.People ? .45f : .25f));
-                float center = bounds.center.x - caster.Anchor.position.x;
+                // Ширина — по непрозрачному низу рисунка (ноги, комель), а не
+                // по холсту кадра: у анимаций холст много шире фигуры.
+                float width = (right - left) * (caster.People ? .8f : 1f);
+                float depth = Mathf.Max(.03f, width * (caster.People ? .3f : .25f));
+                float center = (left + right) / 2;
                 caster.FallbackFootprint = new List<Rect> { new Rect(center - width / 2, -depth / 2, width, depth) };
             }
-            return caster.FallbackFootprint;
+            return caster.FallbackFootprint ?? new List<Rect>();
+        }
+
+        // Левый и правый край непрозрачного низа рисунка (доля высоты — та же,
+        // что перекрывает огонь) от опоры, единицы мира. Альфу не прочитать —
+        // половина ширины рисунка по центру.
+        private bool OpaqueBaseExtent(Caster caster, out float left, out float right)
+        {
+            SpriteRenderer source = caster.Source;
+            left = right = 0;
+            if (source.sprite == null) return false;
+            LocationShadowStyle style = Sky.ShadowStyle;
+            float band = Mathf.Clamp(caster.People ? style.FireBlockPeople : style.FireBlockObjects, .05f, 1);
+            float anchorX = caster.Anchor.position.x;
+            bool any = false;
+            foreach (Vector2[] loop in LocationAlphaContours.Of(source.sprite, band))
+                foreach (Vector2 point in loop)
+                {
+                    float x = source.transform.TransformPoint(new Vector3(source.flipX ? -point.x : point.x, point.y, 0)).x - anchorX;
+                    left = any ? Mathf.Min(left, x) : x;
+                    right = any ? Mathf.Max(right, x) : x;
+                    any = true;
+                }
+            if (any && right - left > 1e-3f) return true;
+            Bounds bounds = source.bounds;
+            left = bounds.center.x - anchorX - bounds.extents.x * .5f;
+            right = bounds.center.x - anchorX + bounds.extents.x * .5f;
+            return right - left > 1e-3f;
         }
 
         // Пятно по форме основания: внутри — полная темнота, снаружи спадает

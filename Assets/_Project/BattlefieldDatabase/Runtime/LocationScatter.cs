@@ -59,10 +59,18 @@ namespace KingdomSurvival.BattlefieldDatabase
     [Serializable]
     public sealed class LocationScatterReaction
     {
-        public const float MinRadius = .05f, MaxRadius = 2f;
-        public const float MaxBend = .5f, MaxPress = .25f;
-        public const float MinTime = .02f, MaxTime = 5f;
-        public const float MaxPinned = .9f;
+        // Пределы настроек (окно и расчёт берут одни и те же).
+        public const float MinRadius = .02f, MaxRadius = 6f;
+        public const float MaxCore = .95f, MinSoftness = .2f, MaxSoftness = 12f;
+        public const float MinDepthStretch = .1f, MaxDepthStretch = 6f, MaxLead = 3f;
+        public const float MaxBend = 1.5f, MaxPress = .6f, MaxPinned = .95f;
+        public const float MinCurve = .5f, MaxCurve = 8f, MaxDepthLean = 5f, MaxArcDrop = 5f;
+        public const float MinSumLimit = .05f, MaxSumLimit = 3f;
+        public const float MinTime = .01f, MaxTime = 20f, MaxHold = 10f;
+        public const float MinFrequency = .1f, MaxFrequency = 20f;
+        public const float MinSpeedReference = .05f, MaxSpeedReference = 10f;
+        public const float MinSmoothing = .005f, MaxSmoothing = 5f, MaxJitter = 1f;
+        public const float MaxAssetScale = 10f, MinAssetRadius = .05f;
 
         public bool Enabled;
 
@@ -138,28 +146,28 @@ namespace KingdomSurvival.BattlefieldDatabase
         public bool ShowRadius;
 
         public float SafeRadius => Mathf.Clamp(Radius, MinRadius, MaxRadius);
-        public float SafeCore => Mathf.Clamp(Core, 0, .9f);
-        public float SafeEdgeSoftness => Mathf.Clamp(EdgeSoftness, .5f, 6);
-        public float SafeDepthStretch => Mathf.Clamp(DepthStretch, .2f, 3);
-        public float SafeLead => Mathf.Clamp(Lead, 0, 1);
+        public float SafeCore => Mathf.Clamp(Core, 0, MaxCore);
+        public float SafeEdgeSoftness => Mathf.Clamp(EdgeSoftness, MinSoftness, MaxSoftness);
+        public float SafeDepthStretch => Mathf.Clamp(DepthStretch, MinDepthStretch, MaxDepthStretch);
+        public float SafeLead => Mathf.Clamp(Lead, 0, MaxLead);
         public float SafeBend => Mathf.Clamp(Bend, 0, MaxBend);
         public float SafePress => Mathf.Clamp(Press, 0, MaxPress);
         public float SafePinned => Mathf.Clamp(Pinned, 0, MaxPinned);
-        public float SafeCurve => Mathf.Clamp(Curve, 1, 4);
-        public float SafeDepthLean => Mathf.Clamp(DepthLean, 0, 2);
-        public float SafeArcDrop => Mathf.Clamp(ArcDrop, 0, 2);
+        public float SafeCurve => Mathf.Clamp(Curve, MinCurve, MaxCurve);
+        public float SafeDepthLean => Mathf.Clamp(DepthLean, 0, MaxDepthLean);
+        public float SafeArcDrop => Mathf.Clamp(ArcDrop, 0, MaxArcDrop);
         public float SafeForward => Mathf.Clamp01(Forward);
-        public float SafeSumLimit => Mathf.Clamp(SumLimit, .1f, 1);
+        public float SafeSumLimit => Mathf.Clamp(SumLimit, MinSumLimit, MaxSumLimit);
         public float SafeReactTime => Mathf.Clamp(ReactTime, MinTime, MaxTime);
         public float SafeRecoverTime => Mathf.Clamp(RecoverTime, MinTime, MaxTime);
-        public float SafeHold => Mathf.Clamp(Hold, 0, 3);
+        public float SafeHold => Mathf.Clamp(Hold, 0, MaxHold);
         public float SafeSpring => Mathf.Clamp01(Spring);
-        public float SafeSpringFrequency => Mathf.Clamp(SpringFrequency, .3f, 8);
+        public float SafeSpringFrequency => Mathf.Clamp(SpringFrequency, MinFrequency, MaxFrequency);
         public float SafeSpeedInfluence => Mathf.Clamp01(SpeedInfluence);
-        public float SafeSpeedReference => Mathf.Clamp(SpeedReference, .1f, 3);
-        public float SafeSpeedSmoothing => Mathf.Clamp(SpeedSmoothing, .01f, 2);
-        public float SafeBendJitter => Mathf.Clamp(BendJitter, 0, .9f);
-        public float SafeTimeJitter => Mathf.Clamp(TimeJitter, 0, .9f);
+        public float SafeSpeedReference => Mathf.Clamp(SpeedReference, MinSpeedReference, MaxSpeedReference);
+        public float SafeSpeedSmoothing => Mathf.Clamp(SpeedSmoothing, MinSmoothing, MaxSmoothing);
+        public float SafeBendJitter => Mathf.Clamp(BendJitter, 0, MaxJitter);
+        public float SafeTimeJitter => Mathf.Clamp(TimeJitter, 0, MaxJitter);
 
         // Стартовые настройки эффекта, не ботаническая классификация.
         // «Кто задевает», отладка и включение не меняются.
@@ -285,6 +293,15 @@ namespace KingdomSurvival.BattlefieldDatabase
         public List<LocationScatterEntry> Assets = new List<LocationScatterEntry>();
         public LocationScatterBrush Brush = new LocationScatterBrush();
         public LocationScatterReaction Reaction = new LocationScatterReaction();
+        // Анимация экземпляров вразнобой: своя фаза у каждого (даже если у
+        // ассета «Случайная фаза» снята) и свой темп в пределах ± доли.
+        public bool DesyncAnimation = true;
+        public float AnimationSpeedJitter = .12f;
+        public float SafeAnimationSpeedJitter => Mathf.Clamp(AnimationSpeedJitter, 0, .5f);
+
+        // Устойчивый множитель темпа анимации экземпляра (1 ± разброс).
+        public float AnimationSpeed(string instanceId) => DesyncAnimation
+            ? 1 + SafeAnimationSpeedJitter * (ArtAssetAnimation.StablePhase(instanceId + "~темп") * 2 - 1) : 1;
         public List<LocationScatterInstance> Instances = new List<LocationScatterInstance>();
         public int NextKey = 1;
 

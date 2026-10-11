@@ -72,6 +72,12 @@ namespace KingdomSurvival.ArtAssets
             {
                 uint hash = 2166136261;
                 foreach (char c in id) hash = (hash ^ c) * 16777619;
+                // Перемешивание (fmix32 из MurmurHash3): у FNV-1a ID, различающиеся
+                // последними символами («слой#1», «слой#2»), почти совпадали в
+                // старших битах — фазы ложились в две-три группы.
+                hash ^= hash >> 16; hash *= 0x85ebca6b;
+                hash ^= hash >> 13; hash *= 0xc2b2ae35;
+                hash ^= hash >> 16;
                 return (hash & 0xFFFFFF) / (float)0x1000000;
             }
         }

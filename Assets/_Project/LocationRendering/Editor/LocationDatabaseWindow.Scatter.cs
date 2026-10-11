@@ -122,6 +122,19 @@ namespace KingdomSurvival.LocationRendering.Editor
             hidden.style.marginLeft = 6;
             hidden.RegisterValueChangedCallback(evt => Change(() => layer.Hidden = evt.newValue, true));
             row.Add(hidden);
+            Button copy = new Button(() => CopyScatterSettings(layer))
+            {
+                text = "копировать", tooltip = "Скопировать настройки слоя: кисть, облик, цвет, «Где можно», реакцию на проход, анимацию, тени (без экземпляров)"
+            };
+            copy.style.flexShrink = 0;
+            row.Add(copy);
+            Button paste = new Button(() => PasteScatterSettings(layer))
+            {
+                text = "вставить", tooltip = "Вставить скопированные настройки в этот слой. Экземпляры, название и ассеты кисти остаются; " +
+                                             "настройки совпадающих ассетов (вес, размер, «гнётся», множители) — из копии"
+            };
+            paste.style.flexShrink = 0;
+            row.Add(paste);
             Button delete = new Button(() =>
             {
                 if (!EditorUtility.DisplayDialog("Удалить слой?", "Слой «" + layer.Name + "» и все его экземпляры (" + layer.Instances.Count + " шт.) будут удалены.", "Удалить", "Отмена")) return;
@@ -130,6 +143,68 @@ namespace KingdomSurvival.LocationRendering.Editor
             }) { text = "удалить", tooltip = "Удалить слой и все его экземпляры" };
             delete.style.flexShrink = 0;
             row.Add(delete);
+        }
+
+        // Настройки слоя — через системный буфер обмена (между слоями,
+        // местами и окнами), без экземпляров.
+        private const string ScatterClipboardPrefix = "KS.ScatterLayerSettings:";
+
+        private void CopyScatterSettings(LocationScatterLayer layer)
+        {
+            LocationScatterLayer copy = JsonUtility.FromJson<LocationScatterLayer>(JsonUtility.ToJson(layer));
+            copy.Instances.Clear();
+            EditorGUIUtility.systemCopyBuffer = ScatterClipboardPrefix + JsonUtility.ToJson(copy);
+            status.text = "Настройки слоя «" + layer.Name + "» скопированы — «вставить» у другого слоя.";
+        }
+
+        private void PasteScatterSettings(LocationScatterLayer layer)
+        {
+            string text = EditorGUIUtility.systemCopyBuffer;
+            if (string.IsNullOrEmpty(text) || !text.StartsWith(ScatterClipboardPrefix, StringComparison.Ordinal))
+            {
+                status.text = "В буфере нет настроек слоя раскидки — сначала «копировать» у слоя.";
+                return;
+            }
+            LocationScatterLayer source;
+            try { source = JsonUtility.FromJson<LocationScatterLayer>(text.Substring(ScatterClipboardPrefix.Length)); }
+            catch (Exception) { source = null; }
+            if (source == null) { status.text = "Настройки в буфере не читаются."; return; }
+            Change(() => ApplyScatterSettings(source, layer), true);
+            status.text = "Настройки вставлены в слой «" + layer.Name + "».";
+        }
+
+        // Всё, кроме экземпляров, названия, ID, видимости и закрепления.
+        // Ассеты кисти остаются свои; у совпадающих — настройки из копии;
+        // пустая кисть получает ассеты копии.
+        public static void ApplyScatterSettings(LocationScatterLayer source, LocationScatterLayer target)
+        {
+            LocationScatterLayer clone = JsonUtility.FromJson<LocationScatterLayer>(JsonUtility.ToJson(source));
+            target.Mode = clone.Mode;
+            target.Band = clone.Band;
+            target.OrderOffset = clone.OrderOffset;
+            target.ProjectsShadow = clone.ProjectsShadow;
+            target.FireShadowState = clone.FireShadowState;
+            target.BlocksMovement = clone.BlocksMovement;
+            target.Brush = clone.Brush;
+            target.Reaction = clone.Reaction;
+            target.DesyncAnimation = clone.DesyncAnimation;
+            target.AnimationSpeedJitter = clone.AnimationSpeedJitter;
+            if (target.Assets.Count(item => item != null) == 0)
+            {
+                target.Assets = clone.Assets;
+                return;
+            }
+            foreach (LocationScatterEntry entry in target.Assets)
+            {
+                LocationScatterEntry from = entry != null ? clone.Assets.Find(item => item != null && item.AssetId == entry.AssetId) : null;
+                if (from == null) continue;
+                entry.Weight = from.Weight;
+                entry.ScaleMultiplier = from.ScaleMultiplier;
+                entry.Enabled = from.Enabled;
+                entry.Bends = from.Bends;
+                entry.BendScale = from.BendScale;
+                entry.RadiusScale = from.RadiusScale;
+            }
         }
 
         private void BuildScatterTools(LocationScatterLayer layer)
@@ -172,6 +247,12 @@ namespace KingdomSurvival.LocationRendering.Editor
             Choice("Слой рисунка", bands, BandTitle, band, value => layer.Band = value);
             Number("Порядок внутри слоя", layer.OrderOffset, -1000, 1000, value => layer.OrderOffset = Mathf.RoundToInt(value));
             Toggle("Закрепить (кисть не меняет)", layer.Locked, value => layer.Locked = value, true);
+            Toggle("Анимация вразнобой", layer.DesyncAnimation, value => layer.DesyncAnimation = value, true);
+            settings[settings.childCount - 1].tooltip = "Каждый экземпляр качается со своей фазой и чуть своим темпом — даже если у ассета " +
+                                                        "«Случайная фаза» снята. Выключить — весь слой в такт.";
+            if (layer.DesyncAnimation)
+                Number("Разброс темпа анимации ± (доля)", layer.AnimationSpeedJitter, 0, .5f, value => layer.AnimationSpeedJitter = Mathf.Clamp(value, 0, .5f),
+                    "0 — одинаковый темп (только разные фазы); 0,12 — темп каждого ±12 %: кадры не меняются у всех разом.");
             if (layer.Mode == LocationScatterMode.Objects)
             {
                 Toggle("Тень от солнца (силуэт)", layer.ProjectsShadow, value => layer.ProjectsShadow = value);
@@ -193,7 +274,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             if (layer.Reaction == null) layer.Reaction = new LocationScatterReaction();
             LocationScatterReaction reaction = layer.Reaction;
-            int from = settings.childCount;
+            Heading("Реакция на проход");
             Toggle("Реагирует на персонажей", reaction.Enabled, value => reaction.Enabled = value, true);
             settings[settings.childCount - 1].tooltip = "Мягкая растительность слоя плавно отклоняется от ног проходящих и возвращается после. " +
                                                         "Только картинка: проходимость, гексы и маршрут не меняются.";
@@ -221,66 +302,68 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Who("Противники", r.ByEnemies, value => r.ByEnemies = value);
                 Who("Фигуры боя", r.ByBattle, value => r.ByBattle = value);
 
+                // Линейный ползунок (от нуля) или логарифмический (широкий
+                // диапазон: малые значения так же точны, как большие); число
+                // ограничивается пределами расчёта.
+                void Lin(string label, float value, float max, Action<float> set, string help) =>
+                    BrushNumber(label, value, 0, max, number => set(Mathf.Clamp(number, 0, max)), help);
+                void Log(string label, float value, float min, float max, Action<float> set, string help) =>
+                    BrushLogNumber(label, value, min, max, number => set(Mathf.Clamp(number, min, max)), help);
+
                 SubHeading("Зона касания");
-                BrushNumber("Радиус (клеток боя)", r.Radius, LocationScatterReaction.MinRadius, 1.5f,
-                    value => r.Radius = Mathf.Clamp(value, LocationScatterReaction.MinRadius, LocationScatterReaction.MaxRadius),
+                Log("Радиус (клеток боя)", r.Radius, LocationScatterReaction.MinRadius, LocationScatterReaction.MaxRadius, value => r.Radius = value,
                     "Насколько близкий проход задевает растение — в размерах клетки боя (от неё же рост фигур), не зависит от камеры.");
-                BrushNumber("Полная сила у ног (доля радиуса)", r.Core, 0, .9f, value => r.Core = Mathf.Clamp(value, 0, .9f),
+                Lin("Полная сила у ног (доля радиуса)", r.Core, LocationScatterReaction.MaxCore, value => r.Core = value,
                     "Внутри этой доли радиуса растение гнётся полностью, спад начинается дальше.");
-                BrushNumber("Мягкость края", r.EdgeSoftness, .5f, 6, value => r.EdgeSoftness = Mathf.Clamp(value, .5f, 6),
-                    "1 — сила плавно падает от самых ног; 2 — исходный спад; больше — держит силу дольше и резче спадает у края.");
-                BrushNumber("Вытянутость вглубь", r.DepthStretch, .2f, 3, value => r.DepthStretch = Mathf.Clamp(value, .2f, 3),
+                Log("Мягкость края", r.EdgeSoftness, LocationScatterReaction.MinSoftness, LocationScatterReaction.MaxSoftness, value => r.EdgeSoftness = value,
+                    "Меньше 1 — сила быстро падает от самых ног; 2 — исходный спад; больше — держит силу дольше и резче спадает у края.");
+                Log("Вытянутость вглубь", r.DepthStretch, LocationScatterReaction.MinDepthStretch, LocationScatterReaction.MaxDepthStretch, value => r.DepthStretch = value,
                     "1 — зона на земле как гексы; меньше — задевает в основном сбоку; больше — дальше вверх и вниз по картинке.");
-                BrushNumber("Опережение по ходу (доля радиуса)", r.Lead, 0, 1, value => r.Lead = Mathf.Clamp01(value),
+                Lin("Опережение по ходу (доля радиуса)", r.Lead, LocationScatterReaction.MaxLead, value => r.Lead = value,
                     "Зона сдвигается вперёд по направлению шага: трава расступается заранее и раньше отпускает позади.");
 
                 SubHeading("Форма прогиба");
-                BrushNumber("Сила прогиба (доля высоты)", r.Bend, 0, LocationScatterReaction.MaxBend,
-                    value => r.Bend = Mathf.Clamp(value, 0, LocationScatterReaction.MaxBend),
-                    "Наибольшее отклонение верхушки: 0,1 — на десятую часть высоты растения над опорой.");
-                BrushNumber("Приминание (доля высоты)", r.Press, 0, LocationScatterReaction.MaxPress,
-                    value => r.Press = Mathf.Clamp(value, 0, LocationScatterReaction.MaxPress),
+                Lin("Сила прогиба (доля высоты)", r.Bend, LocationScatterReaction.MaxBend, value => r.Bend = value,
+                    "Наибольшее отклонение верхушки: 0,1 — на десятую часть высоты растения над опорой, 1 — на всю высоту.");
+                Lin("Приминание (доля высоты)", r.Press, LocationScatterReaction.MaxPress, value => r.Press = value,
                     "Насколько опускается верхушка при полном контакте. Растение не исчезает и не меняет цвет.");
-                BrushNumber("Закреплённая нижняя часть (доля высоты)", r.Pinned, 0, LocationScatterReaction.MaxPinned,
-                    value => r.Pinned = Mathf.Clamp(value, 0, LocationScatterReaction.MaxPinned),
+                Lin("Закреплённая нижняя часть (доля высоты)", r.Pinned, LocationScatterReaction.MaxPinned, value => r.Pinned = value,
                     "Нижняя доля рисунка над опорой стоит на месте — корни не едут.");
-                BrushNumber("Изгиб: скос → дуга → верхушка", r.Curve, 1, 4, value => r.Curve = Mathf.Clamp(value, 1, 4),
-                    "1 — растение наклоняется прямо (скос); 2 — дуга; 3–4 — гнётся в основном верхушка.");
-                BrushNumber("Наклон вглубь (к зрителю)", r.DepthLean, 0, 2, value => r.DepthLean = Mathf.Clamp(value, 0, 2),
+                Log("Изгиб: скос → дуга → верхушка", r.Curve, LocationScatterReaction.MinCurve, LocationScatterReaction.MaxCurve, value => r.Curve = value,
+                    "Меньше 1 — гнётся с самого низа; 1 — прямой наклон; 2 — дуга; больше — гнётся только верхушка.");
+                Lin("Наклон вглубь (к зрителю)", r.DepthLean, LocationScatterReaction.MaxDepthLean, value => r.DepthLean = value,
                     "Насколько верхушка уходит вверх-вниз по картинке, когда ноги спереди или сзади. 0 — только вбок.");
-                BrushNumber("Опускание при наклоне", r.ArcDrop, 0, 2, value => r.ArcDrop = Mathf.Clamp(value, 0, 2),
+                Lin("Опускание при наклоне", r.ArcDrop, LocationScatterReaction.MaxArcDrop, value => r.ArcDrop = value,
                     "Верхушка, уходя вбок, опускается по дуге. 0 — не опускается (растение будто растягивается).");
-                BrushNumber("В стороны ↔ по ходу", r.Forward, 0, 1, value => r.Forward = Mathf.Clamp01(value),
+                Lin("В стороны ↔ по ходу", r.Forward, 1, value => r.Forward = value,
                     "0 — трава расступается от ног в стороны; 1 — клонится по направлению шага.");
-                BrushNumber("Предел от нескольких фигур", r.SumLimit, .1f, 1, value => r.SumLimit = Mathf.Clamp(value, .1f, 1),
-                    "Сумма прогибов от нескольких фигур — не больше этой доли полной силы.");
+                Log("Предел от нескольких фигур", r.SumLimit, LocationScatterReaction.MinSumLimit, LocationScatterReaction.MaxSumLimit, value => r.SumLimit = value,
+                    "Сумма прогибов от нескольких фигур — не больше этой доли полной силы (больше 1 — толпа гнёт сильнее одного).");
 
                 SubHeading("Время");
-                BrushNumber("Скорость реакции (с)", r.ReactTime, LocationScatterReaction.MinTime, 1,
-                    value => r.ReactTime = Mathf.Clamp(value, LocationScatterReaction.MinTime, LocationScatterReaction.MaxTime),
+                Log("Скорость реакции (с)", r.ReactTime, LocationScatterReaction.MinTime, LocationScatterReaction.MaxTime, value => r.ReactTime = value,
                     "За сколько секунд растение уступает ногам.");
-                BrushNumber("Время восстановления (с)", r.RecoverTime, LocationScatterReaction.MinTime, 3,
-                    value => r.RecoverTime = Mathf.Clamp(value, LocationScatterReaction.MinTime, LocationScatterReaction.MaxTime),
+                Log("Время восстановления (с)", r.RecoverTime, LocationScatterReaction.MinTime, LocationScatterReaction.MaxTime, value => r.RecoverTime = value,
                     "За сколько секунд возвращается исходная форма после ухода (без покачивания).");
-                BrushNumber("Задержка перед возвратом (с)", r.Hold, 0, 3, value => r.Hold = Mathf.Clamp(value, 0, 3),
+                Lin("Задержка перед возвратом (с)", r.Hold, LocationScatterReaction.MaxHold, value => r.Hold = value,
                     "Сколько примятое держит форму после ухода, прежде чем начать выпрямляться.");
-                BrushNumber("Покачивание при отпускании", r.Spring, 0, 1, value => r.Spring = Mathf.Clamp01(value),
+                Lin("Покачивание при отпускании", r.Spring, 1, value => r.Spring = value,
                     "0 — выпрямляется плавно; больше — проскакивает исходное положение и затухает несколькими качками.");
-                BrushNumber("Частота покачивания (качков/с)", r.SpringFrequency, .3f, 8, value => r.SpringFrequency = Mathf.Clamp(value, .3f, 8),
-                    "Только при покачивании; задаёт и темп возврата.");
+                Log("Частота покачивания (качков/с)", r.SpringFrequency, LocationScatterReaction.MinFrequency, LocationScatterReaction.MaxFrequency,
+                    value => r.SpringFrequency = value, "Только при покачивании; задаёт и темп возврата.");
 
                 SubHeading("Движение");
-                BrushNumber("Влияние скорости (0–1)", r.SpeedInfluence, 0, 1, value => r.SpeedInfluence = Mathf.Clamp01(value),
+                Lin("Влияние скорости (0–1)", r.SpeedInfluence, 1, value => r.SpeedInfluence = value,
                     "0 — стоящий рядом гнёт так же, как идущий; 1 — прогиб только от движения.");
-                BrushNumber("Скорость полной силы (доля шага)", r.SpeedReference, .1f, 3, value => r.SpeedReference = Mathf.Clamp(value, .1f, 3),
-                    "При какой скорости касание полное: 1 — обычный шаг, меньше — уже при медленном.");
-                BrushNumber("Затухание движения (с)", r.SpeedSmoothing, .01f, 2, value => r.SpeedSmoothing = Mathf.Clamp(value, .01f, 2),
-                    "Как плавно после остановки уходит доля прогиба «от движения».");
+                Log("Скорость полной силы (доля шага)", r.SpeedReference, LocationScatterReaction.MinSpeedReference, LocationScatterReaction.MaxSpeedReference,
+                    value => r.SpeedReference = value, "При какой скорости касание полное: 1 — обычный шаг, меньше — уже при медленном.");
+                Log("Затухание движения (с)", r.SpeedSmoothing, LocationScatterReaction.MinSmoothing, LocationScatterReaction.MaxSmoothing,
+                    value => r.SpeedSmoothing = value, "Как плавно после остановки уходит доля прогиба «от движения».");
 
                 SubHeading("Разброс по пучкам");
-                BrushNumber("Упругость ± (доля)", r.BendJitter, 0, .9f, value => r.BendJitter = Mathf.Clamp(value, 0, .9f),
+                Lin("Упругость ± (доля)", r.BendJitter, LocationScatterReaction.MaxJitter, value => r.BendJitter = value,
                     "Каждый пучок гнётся сильнее или слабее на свою долю — заросль не качается одинаково.");
-                BrushNumber("Время ± (доля)", r.TimeJitter, 0, .9f, value => r.TimeJitter = Mathf.Clamp(value, 0, .9f),
+                Lin("Время ± (доля)", r.TimeJitter, LocationScatterReaction.MaxJitter, value => r.TimeJitter = value,
                     "Реакция и возврат у каждого пучка свои — без одновременного выпрямления.");
 
                 List<LocationScatterEntry> entries = layer.Assets.Where(item => item != null && !string.IsNullOrEmpty(item.AssetId)).ToList();
@@ -301,15 +384,15 @@ namespace KingdomSurvival.LocationRendering.Editor
                         bends.RegisterValueChangedCallback(evt => Change(() => entry.Bends = evt.newValue));
                         row.Add(bends);
                         row.Add(new Label(asset != null ? asset.Name : entry.AssetId) { style = { flexGrow = 1, flexShrink = 1, overflow = Overflow.Hidden } });
-                        FloatField bend = new FloatField("сила ×") { value = entry.BendScale, isDelayed = true, tooltip = "Множитель силы прогиба ассета (0–4)" };
+                        FloatField bend = new FloatField("сила ×") { value = entry.BendScale, isDelayed = true, tooltip = "Множитель силы прогиба ассета (0–10)" };
                         bend.labelElement.style.minWidth = 40;
                         bend.style.width = 96;
-                        bend.RegisterValueChangedCallback(evt => Change(() => entry.BendScale = Mathf.Clamp(evt.newValue, 0, 4)));
+                        bend.RegisterValueChangedCallback(evt => Change(() => entry.BendScale = Mathf.Clamp(evt.newValue, 0, LocationScatterReaction.MaxAssetScale)));
                         row.Add(bend);
-                        FloatField radius = new FloatField("радиус ×") { value = entry.RadiusScale, isDelayed = true, tooltip = "Множитель радиуса касания ассета (0,1–4)" };
+                        FloatField radius = new FloatField("радиус ×") { value = entry.RadiusScale, isDelayed = true, tooltip = "Множитель радиуса касания ассета (0,05–10)" };
                         radius.labelElement.style.minWidth = 52;
                         radius.style.width = 108;
-                        radius.RegisterValueChangedCallback(evt => Change(() => entry.RadiusScale = Mathf.Clamp(evt.newValue, .1f, 4)));
+                        radius.RegisterValueChangedCallback(evt => Change(() => entry.RadiusScale = Mathf.Clamp(evt.newValue, LocationScatterReaction.MinAssetRadius, LocationScatterReaction.MaxAssetScale)));
                         row.Add(radius);
                     }
                 }
@@ -323,14 +406,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Help("Числа и «Кто задевает» меняются на ходу, в том числе в идущем тестовом запуске места. Включение, галочки и множители ассетов " +
                      "пересобирают слой (тестовый запуск — перезапустить). В окне базы трава не шевелится; прогиб в базу не записывается.");
             }
-            Foldout foldout = new Foldout { text = "Реакция на проход" + (reaction.Enabled ? " · включена" : ""), value = reactionFoldout };
-            foldout.RegisterValueChangedCallback(evt => { if (evt.target == foldout) reactionFoldout = evt.newValue; });
-            foldout.style.marginTop = 10;
-            while (settings.childCount > from) foldout.Add(settings[from]);
-            settings.Add(foldout);
         }
 
-        private bool reactionFoldout = true;
 
         private void SubHeading(string text)
         {

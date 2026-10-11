@@ -66,6 +66,12 @@ namespace KingdomSurvival.LocationRendering
             Placed entry = new Placed { Data = item, Anchor = anchor, Bends = view.Layer.Bends(instance.AssetId) };
             placed.Add(entry);
             BuildObjectArt(entry, null);
+            // Раскидка вразнобой: своя фаза и темп у экземпляра, а не общий такт ассета.
+            if (view.Layer.DesyncAnimation && entry.Resolved != null)
+            {
+                entry.Resolved.Phase = ArtAssets.ArtAssetAnimation.StablePhase(item.Id);
+                entry.AnimationSpeed = view.Layer.AnimationSpeed(item.Id);
+            }
             view.Objects[instance.Key] = entry;
         }
 

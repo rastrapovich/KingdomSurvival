@@ -385,8 +385,8 @@ namespace KingdomSurvival.LocationRendering
         private Plant Configure(Plant plant, LocationScatterLayer layer, int key, string assetId)
         {
             LocationScatterEntry entry = assetId != null ? layer.Assets.Find(item => item != null && item.AssetId == assetId) : null;
-            plant.AssetBend = entry != null ? Mathf.Clamp(entry.BendScale, 0, 4) : 1;
-            plant.AssetRadius = entry != null ? Mathf.Clamp(entry.RadiusScale, .1f, 4) : 1;
+            plant.AssetBend = entry != null ? Mathf.Clamp(entry.BendScale, 0, LocationScatterReaction.MaxAssetScale) : 1;
+            plant.AssetRadius = entry != null ? Mathf.Clamp(entry.RadiusScale, LocationScatterReaction.MinAssetRadius, LocationScatterReaction.MaxAssetScale) : 1;
             assetRadiusMax = Mathf.Max(assetRadiusMax, plant.AssetRadius);
             uint hash = (uint)key * 2654435761u ^ (uint)layer.Id.GetHashCode();
             plant.BendJitter = (hash & 0xffff) / 32767.5f - 1;

@@ -48,6 +48,8 @@ namespace KingdomSurvival.LocationRendering
             // Гнётся от прохода (слой раскидки с реакцией): рисунок — материалом
             // с поправкой, прогиб — в шейдере.
             public bool Bends;
+            // Темп анимации экземпляра (раскидка вразнобой); 1 — как у ассета.
+            public float AnimationSpeed = 1;
         }
 
         private sealed class Actor
@@ -473,7 +475,7 @@ namespace KingdomSurvival.LocationRendering
                     LocationResolvedPart part = item.Parts[i];
                     SpriteRenderer image = item.Images[i];
                     if (part == null || !part.Animated || image == null) continue;
-                    Sprite sprite = LocationVisualResolver.FrameAt(item.Resolved, part, Seconds);
+                    Sprite sprite = LocationVisualResolver.FrameAt(item.Resolved, part, Seconds * item.AnimationSpeed);
                     if (image.sprite != sprite) image.sprite = sprite;
                 }
             }
@@ -667,7 +669,8 @@ namespace KingdomSurvival.LocationRendering
                 actor.Seen = true;
                 LayoutActor(actor, frame, hexWorld, seconds);
             }
-            List<string> gone = new List<string>();
+            List<string> gone = goneActors;
+            gone.Clear();
             foreach (KeyValuePair<string, Actor> entry in actors)
             {
                 if (!entry.Value.Seen) gone.Add(entry.Key);
@@ -679,6 +682,9 @@ namespace KingdomSurvival.LocationRendering
             }
             UpdateShadows();
         }
+
+        // Без нового списка каждый кадр.
+        private readonly List<string> goneActors = new List<string>();
 
         public bool HasActor(string id) => actors.ContainsKey(id);
 

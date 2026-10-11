@@ -461,6 +461,120 @@ namespace KingdomSurvival.LocationRendering
             Assert.That(filled, Is.GreaterThan(empty + .05f), "Трава ковром видна в предпросмотре окна: " + empty + " → " + filled);
         }
 
+        // Анимация вразнобой: даже у ассета без «Случайной фазы» экземпляры
+        // ковра разложены по фазовым группам со своим темпом, у объектов —
+        // своя фаза и темп; выключено — весь слой в такт.
+        [Test]
+        public void Animation_IsDesynchronized_EvenWithoutRandomPhase()
+        {
+            ArtAssetDefinition asset = Asset("wind");
+            asset.FramesPerSecond = 8;
+            asset.RandomPhase = false;
+            for (int i = 0; i < 5; i++)
+                asset.MainPart.View(ArtAssetView.Front).Frames.Add(new ArtAssetFrame { Sprite = Sprite(new Color(.2f, .6f + i * .05f, .2f)) });
+            catalog.MarkChanged();
+            LocalLocationDefinition location = Location();
+            foreach (bool desync in new[] { true, false })
+            {
+                LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = location.Id, UseWorldLighting = false };
+                LocationScatterLayer carpet = Layer("wind");
+                carpet.Mode = LocationScatterMode.Carpet;
+                carpet.DesyncAnimation = desync;
+                carpet.Brush.Density = 20;
+                carpet.Brush.MinDistance = 4;
+                LocationScatterPainter.Stamp(carpet, location, new Vector2(800, 500), new System.Random(5), null, LocationScatterIndex.Of(carpet, location));
+                LocationScatterLayer objects = Layer("wind");
+                objects.DesyncAnimation = desync;
+                LocationScatterPainter.Stamp(objects, location, new Vector2(1300, 500), new System.Random(6), null, LocationScatterIndex.Of(objects, location));
+                visual.ScatterLayers.Add(carpet);
+                visual.ScatterLayers.Add(objects);
+                using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null))
+                {
+                    int groups = renderer.ScatterCarpet(carpet.Id).GroupCount;
+                    renderer.SetTime(13, 2.37f);
+                    HashSet<Sprite> shown = new HashSet<Sprite>();
+                    foreach (LocationScatterInstance instance in objects.Instances)
+                        shown.Add(renderer.ScatterImages(objects.Id, instance.Key)[0].sprite);
+                    if (desync)
+                    {
+                        Assert.That(groups, Is.GreaterThan(4), "Ковёр — несколько фазовых групп: " + carpet.Instances.Count + " шт., кадров " + LocationVisualResolver.Resolve(new LocationVisualObject { Id = "x", AssetId = "wind", Scale = 1 }).Main.Frames?.Length);
+                        Assert.That(shown.Count, Is.GreaterThan(2), "Объекты показывают разные кадры в один момент.");
+                    }
+                    else
+                    {
+                        Assert.That(groups, Is.EqualTo(1), "Выключено — ковёр одной группой, в такт.");
+                        Assert.That(shown.Count, Is.EqualTo(1), "Выключено — объекты в такт.");
+                    }
+                }
+            }
+            Assert.That(new LocationScatterLayer().AnimationSpeed("a"), Is.InRange(.88f, 1.12f));
+            // Фазы ID, различающихся последними символами, расходятся по всему кругу.
+            int[] bins = new int[10];
+            for (int i = 1; i <= 200; i++) bins[Mathf.Min(9, Mathf.FloorToInt(ArtAssetAnimation.StablePhase("abc#" + i) * 10))]++;
+            Assert.That(bins.Min(), Is.GreaterThan(5), "Фазы по кругу: " + string.Join(", ", bins));
+        }
+
+        // «Копировать / вставить» настроек слоя: всё, кроме экземпляров,
+        // названия и своих ассетов; совпадающие ассеты получают настройки копии.
+        [Test]
+        public void LayerSettings_CopyPaste_KeepsInstancesNameAndOwnAssets()
+        {
+            LocationScatterLayer source = Layer("grass", "stone");
+            source.Name = "Источник";
+            source.Mode = LocationScatterMode.Carpet;
+            source.Brush.Density = 17;
+            source.Reaction.Enabled = true;
+            source.Reaction.Bend = 1.2f;
+            source.DesyncAnimation = false;
+            source.Assets[0].Bends = false;
+            source.Assets[0].Weight = 3;
+            source.Instances.Add(new LocationScatterInstance { Key = 1, AssetId = "grass" });
+            LocationScatterLayer target = Layer("grass", "flower");
+            target.Name = "Цель";
+            target.Instances.Add(new LocationScatterInstance { Key = 5, AssetId = "flower" });
+            LocationDatabaseWindow.ApplyScatterSettings(source, target);
+            Assert.That(target.Name, Is.EqualTo("Цель"));
+            Assert.That(target.Instances.Single().Key, Is.EqualTo(5), "Экземпляры остаются свои.");
+            Assert.That(target.Mode, Is.EqualTo(LocationScatterMode.Carpet));
+            Assert.That(target.Brush.Density, Is.EqualTo(17));
+            Assert.That(target.Brush, Is.Not.SameAs(source.Brush), "Копия, а не общая ссылка.");
+            Assert.That(target.Reaction.Enabled && target.Reaction.SafeBend > 1.1f, Is.True, "Реакция и широкий диапазон силы.");
+            Assert.That(target.DesyncAnimation, Is.False);
+            Assert.That(target.Assets.Select(item => item.AssetId), Is.EqualTo(new[] { "grass", "flower" }), "Ассеты кисти — свои.");
+            Assert.That(target.Assets[0].Bends, Is.False);
+            Assert.That(target.Assets[0].Weight, Is.EqualTo(3), "Совпадающий ассет — с настройками копии.");
+            LocationScatterLayer empty = new LocationScatterLayer();
+            LocationDatabaseWindow.ApplyScatterSettings(source, empty);
+            Assert.That(empty.Assets.Count, Is.EqualTo(2), "Пустая кисть получает ассеты копии.");
+        }
+
+        // Боковая панель — сворачиваемыми блоками по разделам.
+        [Test]
+        public void SettingsPanel_IsGroupedIntoBlocks()
+        {
+            LocationDatabaseWindow window = EditorWindow.GetWindow<LocationDatabaseWindow>();
+            try
+            {
+                window.CreateGUI();
+                System.Type type = typeof(LocationDatabaseWindow);
+                FieldInfo tab = type.GetField("tab", BindingFlags.Instance | BindingFlags.NonPublic);
+                foreach (string name in new[] { "Light", "Scatter", "Place" })
+                {
+                    tab.SetValue(window, System.Enum.Parse(tab.FieldType, name));
+                    type.GetMethod("BuildSettings", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(window, null);
+                    ScrollView settings = (ScrollView)type.GetField("settings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(window);
+                    List<Foldout> blocks = settings.Children().OfType<Foldout>().ToList();
+                    if (settings.childCount <= 2) continue;
+                    Assert.That(blocks.Count, Is.GreaterThan(0), name + ": разделы — блоками.");
+                    Assert.That(settings.Children().Count(item => !(item is Foldout)), Is.LessThanOrEqualTo(2), name + ": сверху только место и вкладки.");
+                }
+            }
+            finally
+            {
+                window.Close();
+            }
+        }
+
         [Test]
         public void ScatterTab_OpensInLocationWindow()
         {

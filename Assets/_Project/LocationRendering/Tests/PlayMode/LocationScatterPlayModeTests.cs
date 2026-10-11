@@ -261,6 +261,8 @@ namespace KingdomSurvival.LocationRendering.Tests
             ArtAssetDefinition asset = Asset("zz_blink", first, second);
             LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz_scatter", UseWorldLighting = false };
             visual.ScatterLayers.Add(Layer(LocationScatterMode.Carpet, asset.Id, new LocationScatterInstance { Position = new Vector2(.5f, .5f) }));
+            // Такт ассета как есть: без своей фазы и темпа экземпляра.
+            visual.ScatterLayers[0].DesyncAnimation = false;
             using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null))
             {
                 LocationScatterCarpet carpet = renderer.ScatterCarpet(visual.ScatterLayers[0].Id);

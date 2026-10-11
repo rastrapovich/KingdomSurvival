@@ -63,6 +63,10 @@ namespace KingdomSurvival.LocationRendering
             public bool NoOcclusion;
             public List<Rect> FallbackFootprint;
             public Vector4 OcclusionBase, OcclusionShape;
+            // Пятно уже построено для этой формы, радиуса и размытия — не искать заново.
+            public List<Rect> OcclusionFor;
+            public float OcclusionRadius = -1, OcclusionBlur = -1;
+            public Sprite OcclusionSprite;
         }
 
         // Местный источник, дающий тени по контуру: где он светит.
@@ -331,9 +335,14 @@ namespace KingdomSurvival.LocationRendering
             return caster;
         }
 
+        // Замер: сколько всего ушло на обновление теней (мс, с начала).
+        public double ShadowMilliseconds { get; private set; }
+        private readonly System.Diagnostics.Stopwatch shadowWatch = new System.Diagnostics.Stopwatch();
+
         private void UpdateShadows()
         {
             if (shadowMaterial == null) return;
+            shadowWatch.Restart();
             CollectShadowLights();
             occludedAnchors.Clear();
             for (int i = casters.Count - 1; i >= 0; i--)
@@ -358,6 +367,7 @@ namespace KingdomSurvival.LocationRendering
                 // низа — у каждой части.
                 UpdateOcclusion(caster, enabled, enabled && occludedAnchors.Add(caster.Anchor));
             }
+            ShadowMilliseconds += shadowWatch.Elapsed.TotalMilliseconds;
         }
 
         // ------------------------------------------------------------------
@@ -410,7 +420,15 @@ namespace KingdomSurvival.LocationRendering
                 caster.Occlusion = blot;
             }
             if (!blot.enabled) blot.enabled = true;
-            Sprite shape = OcclusionSprite(footprint, radius, Mathf.Max(0, Sky.ShadowStyle.OcclusionBlur));
+            float blur = Mathf.Max(0, Sky.ShadowStyle.OcclusionBlur);
+            if (caster.OcclusionSprite == null || caster.OcclusionFor != footprint || caster.OcclusionRadius != radius || caster.OcclusionBlur != blur)
+            {
+                caster.OcclusionSprite = OcclusionSprite(footprint, radius, blur);
+                caster.OcclusionFor = footprint;
+                caster.OcclusionRadius = radius;
+                caster.OcclusionBlur = blur;
+            }
+            Sprite shape = caster.OcclusionSprite;
             if (blot.sprite != shape) blot.sprite = shape;
             blot.transform.localPosition = direction * (radius * OcclusionShift);
             blot.color = new Color(0, 0, 0, strength);
@@ -444,7 +462,8 @@ namespace KingdomSurvival.LocationRendering
             if (overlay.sortingLayerID != source.sortingLayerID) overlay.sortingLayerID = source.sortingLayerID;
             float halfWidth = radius;
             foreach (Rect cell in footprint)
-                halfWidth = Mathf.Max(halfWidth, Mathf.Abs(cell.xMin), Mathf.Abs(cell.xMax));
+                // Два аргумента: Max с тремя создаёт массив на каждый вызов (мусор каждый кадр).
+                halfWidth = Mathf.Max(halfWidth, Mathf.Max(Mathf.Abs(cell.xMin), Mathf.Abs(cell.xMax)));
             Vector2 foot = caster.Anchor.position;
             Vector4 shapeData = new Vector4(direction.x, direction.y, halfWidth, radius * 1.5f);
             Vector4 baseData = new Vector4(foot.x, foot.y, strength, 0);

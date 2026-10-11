@@ -29,7 +29,8 @@ namespace KingdomSurvival.LocationRendering
     // прежние четыре вершины. Кадры, UV, цвет и блок свойств прогиб не трогает.
     public sealed class LocationScatterCarpet
     {
-        public const int MaxPhaseBuckets = 8;
+        // Фазовых групп на ассет, ракурс и часть: больше — меньше видно такт.
+        public const int MaxPhaseBuckets = 16;
         // Ряды гнущегося рисунка над опорой (плюс опора и низ рисунка).
         public const int BendRows = 5;
 
@@ -42,6 +43,8 @@ namespace KingdomSurvival.LocationRendering
             public Texture[] Normals;
             public int Bucket, Buckets;
             public float FramesPerSecond;
+            // Свой темп группы (вразнобой с другими): кадры не меняются разом.
+            public float Speed = 1;
             public ArtAssetPlayback Playback;
             public int Shown = -1;
             // Свет ассета: солнце и огонь по отдельности.
@@ -190,12 +193,14 @@ namespace KingdomSurvival.LocationRendering
                     if (part.Sprite == null) continue;
                     Sprite[] frames = part.Animated ? part.Frames : new[] { part.Sprite };
                     int buckets = frames.Length > 1 && resolved.FramesPerSecond > 0 ? Mathf.Min(MaxPhaseBuckets, frames.Length * 2) : 1;
-                    int bucket = buckets > 1 && asset.RandomPhase
+                    int bucket = buckets > 1 && (asset.RandomPhase || layer.DesyncAnimation)
                         ? Mathf.Min(buckets - 1, Mathf.FloorToInt(ArtAssetAnimation.StablePhase(layer.InstanceId(instance)) * buckets)) : 0;
                     string key = baseKey + "|" + p + "|" + bucket + (bends ? "|гнётся" : "");
                     if (!byKey.TryGetValue(key, out Group group))
                     {
                         group = CreateGroup(asset, resolved, frames, bucket, buckets, order + part.OrderOffset, key);
+                        // Темп — по ассету и фазе, не по части: части одного рисунка идут вместе.
+                        group.Speed = layer.AnimationSpeed(layer.Id + "|" + baseKey + "|" + bucket);
                         group.Bends = bends;
                         group.Rows = bends ? RowsFor(part.Pivot.y) : FlatRows;
                         byKey[key] = group;
@@ -444,7 +449,7 @@ namespace KingdomSurvival.LocationRendering
             {
                 if (group.Frames.Length < 2) continue;
                 float phase = group.Buckets > 1 ? group.Bucket / (float)group.Buckets : 0;
-                ShowFrame(group, ArtAssetAnimation.FrameIndex(group.Frames.Length, group.FramesPerSecond, group.Playback, seconds, phase));
+                ShowFrame(group, ArtAssetAnimation.FrameIndex(group.Frames.Length, group.FramesPerSecond, group.Playback, seconds * group.Speed, phase));
             }
         }
 

@@ -332,7 +332,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             Label label = new Label(text); label.style.unityFontStyleAndWeight = FontStyle.Bold;
             label.style.fontSize = 14; label.style.color = new Color(.88f, .78f, .53f);
-            label.style.marginTop = 14; label.style.marginBottom = 7; settings.Add(label);
+            label.style.marginTop = 14; label.style.marginBottom = 7; label.AddToClassList(HeadingClass); settings.Add(label);
         }
 
         private void Help(string text) => settings.Add(new HelpBox(text, HelpBoxMessageType.Info));
@@ -411,6 +411,12 @@ namespace KingdomSurvival.LocationRendering.Editor
         }
 
         private void BuildSettings()
+        {
+            BuildSettingsContent();
+            GroupSettingsIntoBlocks();
+        }
+
+        private void BuildSettingsContent()
         {
             if (settings == null) return;
             settings.Clear();

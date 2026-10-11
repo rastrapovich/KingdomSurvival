@@ -126,6 +126,8 @@ namespace KingdomSurvival.LocationRendering
             Camera.orthographic = true;
             Camera.transform.localPosition = new Vector3(0, 0, -10);
             Camera.clearFlags = CameraClearFlags.SolidColor;
+            // Без HDR: в буфере кадра есть альфа — тени на земле не складываются (LocationShadowResolve).
+            Camera.allowHDR = false;
             Camera.backgroundColor = new Color(.035f, .045f, .04f);
             Camera.GetUniversalAdditionalCameraData().SetRenderer(0);
             Camera.GetUniversalAdditionalCameraData().renderPostProcessing = false;

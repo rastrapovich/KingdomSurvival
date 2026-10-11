@@ -141,6 +141,7 @@ namespace KingdomSurvival.LocationRendering
             if (shader != null)
                 shadowMaterial = Own(new Material(shader) { name = "Тень-силуэт места" });
             shadowBlock = new MaterialPropertyBlock();
+            BuildShadowResolve();
 
             GameObject volumeObject = Child("Обработка кадра");
             volumeObject.layer = PostVolumeLayer;
@@ -230,8 +231,47 @@ namespace KingdomSurvival.LocationRendering
             NormalDistanceField?.SetValue(light, Mathf.Max(.01f, data.NormalMapDistance));
         }
 
+        // Тени на земле без наложения (LocationShadowResolve): перед тенями —
+        // «свет не закрыт» в альфе кадра, после них — одно затемнение земли
+        // по самой тёмной тени в точке. Прямоугольники во весь рисунок с запасом.
+        private Material shadowApply;
+        private static readonly int ShadowTintId = Shader.PropertyToID("_ShadowTint");
+
+        private void BuildShadowResolve()
+        {
+            Shader shader = Resources.Load<Shader>("LocationRendering/LocationShadowResolve");
+            if (shader == null) return;
+            Material clear = Own(new Material(shader) { name = "Тени · начало" });
+            clear.SetFloat("_KsColorMask", (float)ColorWriteMask.Alpha);
+            clear.SetFloat("_KsSrc", (float)BlendMode.One);
+            clear.SetFloat("_KsDst", (float)BlendMode.Zero);
+            shadowApply = Own(new Material(shader) { name = "Тени · затемнение" });
+            shadowApply.SetFloat("_KsColorMask", (float)ColorWriteMask.All);
+            shadowApply.SetFloat("_KsSrc", (float)BlendMode.OneMinusDstAlpha);
+            shadowApply.SetFloat("_KsDst", (float)BlendMode.DstAlpha);
+            Texture2D white = Own(new Texture2D(4, 4, TextureFormat.RGBA32, false) { name = "Тени · прямоугольник" });
+            Color[] pixels = new Color[16];
+            for (int i = 0; i < pixels.Length; i++) pixels[i] = Color.white;
+            white.SetPixels(pixels);
+            white.Apply();
+            Sprite sprite = Own(Sprite.Create(white, new Rect(0, 0, 4, 4), new Vector2(.5f, .5f), 4, 0, SpriteMeshType.FullRect));
+            Vector2 cover = LocationVisualGeometry.WorldSize(Location) * 6;
+            void Quad(string name, Material material, int order)
+            {
+                SpriteRenderer quad = Child(name).AddComponent<SpriteRenderer>();
+                quad.sprite = sprite;
+                quad.sharedMaterial = material;
+                quad.sortingOrder = order;
+                quad.transform.localScale = new Vector3(cover.x, cover.y, 1);
+            }
+            Quad("Тени · начало", clear, ShadowSortingOrder - 1);
+            Quad("Тени · затемнение", shadowApply, ShadowSortingOrder + 1);
+        }
+
         private void ApplyLighting()
         {
+            // Цвет, к которому темнеет земля в тени (общий для всех теней).
+            if (shadowApply != null) shadowApply.SetColor(ShadowTintId, Sky.Sun.Color);
             float hour = Hour;
             if (Indoor)
             {

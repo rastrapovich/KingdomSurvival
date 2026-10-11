@@ -486,6 +486,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             litPreview = new PreviewRenderUtility(true);
             litPreview.AddSingleGO(litRenderer.Root);
             litPreview.camera.orthographic = true;
+            litPreview.camera.allowHDR = false;
             UniversalAdditionalCameraData data = litPreview.camera.GetUniversalAdditionalCameraData();
             data.SetRenderer(0);
             data.renderPostProcessing = false;

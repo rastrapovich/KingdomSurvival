@@ -1,6 +1,7 @@
 // ПР-12М: окклюзия в тени — мягкое пятно у основания предмета или человека.
 // Темнит то, что под ним, умножением: земля только темнеет (не светлеет и
-// не перекрашивается), сколько бы теней ни лежало рядом. Сила — альфа
+// не перекрашивается); с другими тенями не складывается — берётся самая
+// тёмная (LocationShadowResolve). Сила — альфа
 // цвета рендерера, форма — альфа рисунка пятна.
 Shader "Kingdom Survival/Location Occlusion"
 {
@@ -15,7 +16,10 @@ Shader "Kingdom Survival/Location Occlusion"
     {
         Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
 
-        Blend DstColor Zero
+        // Без наложения: доля света по минимуму в альфу кадра (LocationShadowResolve).
+        ColorMask A
+        BlendOp Min
+        Blend One One
         Cull Off
         ZWrite Off
 
@@ -66,7 +70,7 @@ Shader "Kingdom Survival/Location Occlusion"
             half4 OcclusionFragment(Varyings input) : SV_Target
             {
                 half a = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a * saturate(input.color.a);
-                return half4((1 - a).xxx, 1);
+                return half4(0, 0, 0, 1 - a);
             }
             ENDHLSL
         }

@@ -126,6 +126,41 @@ namespace KingdomSurvival.LocationRendering.Tests
             }
         }
 
+        // Тени на земле не складываются: две тени и пятна окклюзии друг на
+        // друге темнят землю как самая тёмная из них, а не вдвое.
+        [UnityTest]
+        public IEnumerator OverlappingShadowsDoNotStack()
+        {
+            float[] brightness = new float[3];
+            for (int run = 0; run < 3; run++)
+            {
+                LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz_shadow_test", UseWorldLighting = false };
+                visual.Sun = new LocationSunDefinition { MorningAngle = 170, EveningAngle = 10, Opacity = .6f, LowLength = 1.8f, Softness = .1f };
+                visual.ShadowStyle.Occlusion = .6f;
+                if (run > 0) visual.Objects.Add(Crate());
+                if (run > 1)
+                {
+                    LocationVisualObject second = Crate();
+                    second.Id = "crate2";
+                    second.Position = new Vector2(.505f, .5f);
+                    visual.Objects.Add(second);
+                }
+                using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null))
+                {
+                    RenderTexture target = Target(renderer);
+                    renderer.SetTime(8, 0);
+                    yield return null; yield return null;
+                    Save(target, "shadow-stack-" + run);
+                    brightness[run] = Brightness(target, new Vector2(800, 470));
+                    renderer.Camera.targetTexture = null;
+                    Object.Destroy(target);
+                }
+            }
+            string values = string.Join(", ", brightness);
+            Assert.That(brightness[1], Is.LessThan(brightness[0] - .04f), "Тень одного ящика видна: " + values);
+            Assert.That(brightness[2], Is.EqualTo(brightness[1]).Within(.015f), "Две тени друг на друге — как одна: " + values);
+        }
+
         // Окклюзия в тени: пятно у основания — в тени, по другую сторону от
         // огня; сила 0 — пятна нет. Земля под пятном темнее, чем без него.
         [UnityTest]

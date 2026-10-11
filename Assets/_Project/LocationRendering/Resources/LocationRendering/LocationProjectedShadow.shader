@@ -20,7 +20,11 @@ Shader "Kingdom Survival/Location Projected Shadow"
     {
         Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
 
-        Blend SrcAlpha OneMinusSrcAlpha
+        // Без наложения: в альфу кадра — доля света по минимуму, землю
+        // затемняет один раз LocationShadowResolve.
+        ColorMask A
+        BlendOp Min
+        Blend One One
         Cull Off
         ZWrite Off
 
@@ -95,7 +99,7 @@ Shader "Kingdom Survival/Location Projected Shadow"
                         + Alpha(input.uv + float2(0, b)) + Alpha(input.uv - float2(0, b))) * 0.12
                        + (Alpha(input.uv + float2(b, b)) + Alpha(input.uv - float2(b, b))
                         + Alpha(input.uv + float2(b, -b)) + Alpha(input.uv - float2(b, -b))) * 0.04;
-                return half4(_ShadowColor.rgb, a * _ShadowColor.a);
+                return half4(0, 0, 0, 1 - a * _ShadowColor.a);
             }
             ENDHLSL
         }

@@ -814,6 +814,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             geometry = renderer.Geometry;
             preview.AddSingleGO(renderer.Root);
             preview.camera.orthographic = true;
+            // Альфа кадра нужна теням на земле (LocationShadowResolve) — без HDR.
+            preview.camera.allowHDR = false;
             preview.camera.GetUniversalAdditionalCameraData().SetRenderer(0);
             preview.camera.GetUniversalAdditionalCameraData().renderPostProcessing = false;
             preview.camera.GetUniversalAdditionalCameraData().volumeLayerMask = 1 << LocationWorldRenderer.PostVolumeLayer;

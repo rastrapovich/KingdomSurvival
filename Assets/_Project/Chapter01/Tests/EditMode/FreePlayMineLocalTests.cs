@@ -139,8 +139,8 @@ public sealed class FreePlayMineLocalTests
             geometry.ArenaDifficultCells(center));
     }
 
-    // Движение как на глобальной карте: от входа к логову — только через
-    // проход в стенке, шаг за проход поднимает зверей.
+    // Движение по гексам боя места: от входа к логову — только через проход
+    // в стенке, шаг за проход поднимает зверей.
     [Test]
     public void WalkFromTheEntrance_GoesThroughThePassage_IntoTheLair()
     {
@@ -149,15 +149,15 @@ public sealed class FreePlayMineLocalTests
         Assert.IsTrue(LocalExplorationService.Enter(state, mine, null, out _));
         LocalLocationGeometry geometry = Geometry(mine);
         LocalPointData start = mine.FindEntrance(null).Point;
-        LocalFreeMover mover = new LocalFreeMover(geometry.Layer, geometry.Rules,
-            new List<KeyValuePair<string, LocalPointData>> { new KeyValuePair<string, LocalPointData>("hero", start) }, 90);
+        LocalHexMover mover = new LocalHexMover(geometry,
+            new List<KeyValuePair<string, LocalPointData>> { new KeyValuePair<string, LocalPointData>("hero", start) }, 3);
         Assert.IsTrue(mover.MoveLeaderTo(1355, 380));
         LocalEncounterDefinition met = null;
         for (int i = 0; i < 3000 && met == null && !mover.IsIdle; i++)
         {
             mover.Tick(1 / 60.0, out _);
-            LocalFreeMover.Member leader = mover.Leader;
-            Assert.IsTrue(geometry.IsPassable(leader.X, leader.Y));
+            LocalHexMover.Member leader = mover.Leader;
+            Assert.IsTrue(mover.IsPassable(leader.Cell), "Командир идёт только по проходимым клеткам.");
             if (leader.X > 940 && leader.X < 1060)
                 Assert.That(leader.Y, Is.InRange(500, 690), "Стенку проходят только через проход.");
             met = LocalExplorationService.EncounterAt(state, mine, leader.X, leader.Y);
@@ -171,7 +171,7 @@ public sealed class FreePlayMineLocalTests
         mover.MoveLeaderTo(dumps.X, dumps.Y);
         for (int i = 0; i < 3000 && !mover.IsIdle; i++)
             mover.Tick(1 / 60.0, out _);
-        Assert.LessOrEqual(dumps.DistanceTo(mover.Leader.X, mover.Leader.Y), mine.FindObject(FreePlayMineLocal.DumpsObjectId).InteractRadius);
+        Assert.IsTrue(mover.LeaderReached(dumps.X, dumps.Y, mine.FindObject(FreePlayMineLocal.DumpsObjectId).InteractRadius));
     }
 
     // Основания предметов из Базы локаций — те же препятствия, что стены:

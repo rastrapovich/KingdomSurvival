@@ -100,6 +100,31 @@ namespace KingdomSurvival.BattlefieldDatabase
         [SerializeField] private BattlefieldHexStyle hexStyle = new BattlefieldHexStyle();
         [SerializeField] private List<BattlefieldTagDefinition> tags = new List<BattlefieldTagDefinition>();
         [SerializeField] private List<BattlefieldDefinitionData> battlefields = new List<BattlefieldDefinitionData>();
+        [SerializeField] private float walkHexesPerSecond = DefaultWalkHexesPerSecond;
+
+        // Общая скорость ходьбы по гексам — одна на бой и исследование места:
+        // боец на поле и командир с отрядом в месте проходят клетку за одно
+        // время (трудная клетка медленнее). Ходьба набора анимации подстраивает
+        // темп шага под неё, ноги не скользят.
+        public const float DefaultWalkHexesPerSecond = 3f;
+        public const float MinWalkHexesPerSecond = .5f;
+        public const float MaxWalkHexesPerSecond = 8f;
+
+        public float WalkHexesPerSecond
+        {
+            get => walkHexesPerSecond > 0f ? Mathf.Clamp(walkHexesPerSecond, MinWalkHexesPerSecond, MaxWalkHexesPerSecond) : DefaultWalkHexesPerSecond;
+            set => walkHexesPerSecond = Mathf.Clamp(value, MinWalkHexesPerSecond, MaxWalkHexesPerSecond);
+        }
+
+        // Скорость из базы в Resources; базы нет — по умолчанию.
+        public static float SharedWalkHexesPerSecond
+        {
+            get
+            {
+                BattlefieldDatabaseAsset database = Resources.Load<BattlefieldDatabaseAsset>(ResourcesPath);
+                return database != null ? database.WalkHexesPerSecond : DefaultWalkHexesPerSecond;
+            }
+        }
 
         public string SandboxBattlefieldId => sandboxBattlefieldId;
         public IReadOnlyList<BattlefieldTagDefinition> Tags => tags;

@@ -361,8 +361,24 @@ namespace KingdomSurvival.AnimationDatabase
             ClipKey = clipKey ?? string.Empty;
             IsDead = action == CreatureAnimationAction.Death;
             startedAt = time;
+            Rate = 1f;
             clipResolved = false;
             return true;
+        }
+
+        // Темп клипа (1 — как нарисован). Ходьба подстраивает шаг под общую
+        // скорость по гексам; смена темпа не сбивает текущий кадр. Новое
+        // действие (Play) начинается в обычном темпе.
+        public float Rate { get; private set; } = 1f;
+
+        public void SetRate(float rate, float time)
+        {
+            rate = Mathf.Clamp(rate, 0.05f, 20f);
+            if (Mathf.Approximately(rate, Rate))
+                return;
+            float elapsed = Mathf.Max(0f, time - startedAt) * Rate;
+            Rate = rate;
+            startedAt = time - elapsed / rate;
         }
 
         // Смена ракурса не перезапускает клип: ходьба продолжает шаг.
@@ -376,7 +392,7 @@ namespace KingdomSurvival.AnimationDatabase
 
         public float GetElapsed(float time)
         {
-            float elapsed = Mathf.Max(0f, time - startedAt);
+            float elapsed = Mathf.Max(0f, time - startedAt) * Rate;
             CreatureAnimationClip current = Clip;
             if (current != null && current.Playback == CreatureAnimationPlayback.Loop)
                 elapsed += LoopPhase;

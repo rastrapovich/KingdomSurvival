@@ -109,6 +109,13 @@ namespace KingdomSurvival.BattlefieldDatabase.Editor
             validation.style.unityTextAlign = TextAnchor.MiddleRight;
             validation.style.marginRight = 6f;
             toolbar.Add(validation);
+            // Одна скорость на бой и исследование мест.
+            Slider walk = BoundSlider("Ходьба, гексов/с", serializedDatabase.FindProperty("walkHexesPerSecond"),
+                BattlefieldDatabaseAsset.MinWalkHexesPerSecond, BattlefieldDatabaseAsset.MaxWalkHexesPerSecond);
+            walk.tooltip = "Общая скорость ходьбы по гексам: бойцы на поле боя и отряд в исследуемом месте. Трудная клетка проходится медленнее.";
+            walk.style.width = 300f;
+            walk.Bind(serializedDatabase);
+            toolbar.Add(walk);
             AddToolbarButton(toolbar, "Проверить базу", ValidateDatabase);
             rootVisualElement.Add(toolbar);
         }

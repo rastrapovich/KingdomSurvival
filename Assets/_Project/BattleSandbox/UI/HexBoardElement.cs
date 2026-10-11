@@ -13,7 +13,6 @@ namespace KingdomSurvival.BattleSandbox
         private const float AttackReturnDuration = 0.10f;
         private const float DamageFloatDuration = 0.58f;
         // Скорость перемещения миниатюр и жетонов без ходьбы, гексов в секунду.
-        private const float StaticMoveHexesPerSecond = 3.5f;
         private const float HealthBarWidthScale = 0.875f;
         private const float HealthBarHeight = 4.2f;
         private const float HealthBarBottomInset = 8f;

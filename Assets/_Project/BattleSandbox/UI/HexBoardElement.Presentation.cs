@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using KingdomSurvival.AnimationDatabase;
+using KingdomSurvival.BattlefieldDatabase;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -270,16 +271,17 @@ namespace KingdomSurvival.BattleSandbox
         // Ходьба
         // ------------------------------------------------------------------
 
-        // Скорость по анимации: шаг набора (гексов за цикл ходьбы) / длительность
-        // цикла — ноги не скользят. Без ходьбы — общая скорость миниатюр.
-        private float GetWalkHexesPerSecond(string unitId)
+        // Скорость — общая скорость ходьбы по гексам, одна на бой и исследование
+        // места (База полей боя); темп шага набора подстраивается под неё —
+        // ноги не скользят (SyncWalkRate).
+        private static float GetWalkHexesPerSecond(string unitId) => BattlefieldDatabaseAsset.SharedWalkHexesPerSecond;
+
+        private void SyncWalkRate(UnitPresentation presentation)
         {
-            SandboxUnitState unit = battle?.GetUnit(unitId);
-            UnitPresentation presentation = GetPresentation(unit);
-            SandboxUnitVisual visual = unit != null ? GetVisual(unit.TypeId) : null;
-            if (presentation?.Player == null || visual?.AnimationSet == null)
-                return StaticMoveHexesPerSecond;
-            return visual.AnimationSet.GetWalkHexesPerSecond(presentation.Player.Direction);
+            CreatureAnimationPlayer player = presentation?.Player;
+            if (player?.Set == null || player.Action != CreatureAnimationAction.Walk)
+                return;
+            player.SetRate(player.Set.GetWalkRate(player.Direction, BattlefieldDatabaseAsset.SharedWalkHexesPerSecond), PresentationTime);
         }
 
         private void BeginWalkPresentation(string unitId, IReadOnlyList<HexCoord> path)
@@ -290,6 +292,7 @@ namespace KingdomSurvival.BattleSandbox
             if (path.Count > 1)
                 SetFacing(presentation, FacingBetween(path[0], path[1], presentation.Facing));
             presentation.Player?.Play(CreatureAnimationAction.Walk, PresentationTime);
+            SyncWalkRate(presentation);
         }
 
         // Направление обновляется на поворотах маршрута; клип не перезапускается.
@@ -299,6 +302,7 @@ namespace KingdomSurvival.BattleSandbox
                 return;
             UnitPresentation presentation = GetPresentation(battle?.GetUnit(unitId));
             SetFacing(presentation, FacingBetween(path[segmentIndex], path[segmentIndex + 1], presentation != null ? presentation.Facing : HexFacing.East));
+            SyncWalkRate(presentation);
         }
 
         private void EndWalkPresentation(string unitId)

@@ -126,6 +126,46 @@ namespace KingdomSurvival.LocationRendering.Tests
             }
         }
 
+        // Окклюзия в тени: пятно у основания — в тени, по другую сторону от
+        // огня; сила 0 — пятна нет. Земля под пятном темнее, чем без него.
+        [UnityTest]
+        public IEnumerator OcclusionLiesOnTheShadowSide()
+        {
+            float[] brightness = new float[2];
+            for (int run = 0; run < 2; run++)
+            {
+                LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz_shadow_test", UseWorldLighting = false };
+                visual.ShadowStyle.Occlusion = run == 0 ? 0 : 1;
+                visual.Objects.Add(Crate());
+                LocationVisualObject fire = new LocationVisualObject { Id = "fire", Name = "Огонь", LightOnly = true, Position = new Vector2(.3f, .5f) };
+                fire.Light.Enabled = true; fire.Light.Radius = 8; fire.Light.Intensity = 2; fire.Light.Animation = LocationLightAnimation.None;
+                visual.Objects.Add(fire);
+                using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null))
+                {
+                    RenderTexture target = Target(renderer);
+                    renderer.SetTime(1, 0);
+                    Assert.That(renderer.VisibleOcclusionCount, Is.EqualTo(run), "Сила 0 — пятна нет, иначе одно у ящика.");
+                    if (run == 1)
+                    {
+                        SpriteRenderer blot = System.Array.Find(renderer.Root.GetComponentsInChildren<SpriteRenderer>(), item => item.name == "Окклюзия");
+                        Transform anchor = renderer.FindObject("crate").transform.parent;
+                        Assert.That(blot.transform.position.x, Is.GreaterThan(anchor.position.x), "Пятно сдвинуто в тень — от огня.");
+                    }
+                    // Сразу справа от ящика на уровне его основания.
+                    SpriteRenderer image = renderer.FindObject("crate");
+                    Bounds box = image.bounds;
+                    Vector2 sample = LocationVisualGeometry.WorldToPixel(Location(),
+                        new Vector2(box.max.x + box.size.x * .1f, image.transform.parent.position.y));
+                    yield return null; yield return null;
+                    Save(target, "occlusion-" + run);
+                    brightness[run] = Brightness(target, sample);
+                    renderer.Camera.targetTexture = null;
+                    Object.Destroy(target);
+                }
+            }
+            Assert.That(brightness[1], Is.LessThan(brightness[0]), "Окклюзия темнит землю у основания: " + string.Join(", ", brightness));
+        }
+
         [UnityTest]
         public IEnumerator FireCastsShadowsAtNight_AndIndoorHasNoSun()
         {

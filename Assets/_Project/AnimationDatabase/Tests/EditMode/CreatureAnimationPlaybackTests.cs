@@ -281,6 +281,28 @@ namespace KingdomSurvival.AnimationDatabase.Tests
             Assert.AreEqual("Walk_Back_2", player.Evaluate(2.5f / 12f).name);
         }
 
+        // Общая скорость ходьбы по гексам: темп цикла подстраивается под неё,
+        // смена темпа не сбивает кадр, новое действие — в обычном темпе.
+        [Test]
+        public void Player_WalkRate_FollowsTheSharedSpeedWithoutJump()
+        {
+            CreatureAnimationSetData set = MakeSet((CreatureAnimationAction.Walk, CreatureAnimationDirection.Front, 4));
+            float cycle = CreatureAnimationResolver.Resolve(set, CreatureAnimationAction.Walk, CreatureAnimationDirection.Front).Duration;
+            float natural = set.WalkHexesPerCycle / cycle;
+            Assert.AreEqual(2f, set.GetWalkRate(CreatureAnimationDirection.Front, natural * 2f), 1e-4f, "Вдвое быстрее — цикл вдвое чаще.");
+
+            CreatureAnimationPlayer player = new CreatureAnimationPlayer(set, CreatureAnimationDirection.Front);
+            player.Play(CreatureAnimationAction.Walk, 0f);
+            Assert.AreEqual(1f, player.Rate);
+            float now = cycle * 0.3f;
+            Sprite before = player.Evaluate(now);
+            player.SetRate(2f, now);
+            Assert.AreSame(before, player.Evaluate(now), "Смена темпа не сбивает кадр.");
+            Assert.AreEqual(now + cycle * 0.2f, player.GetElapsed(now + cycle * 0.1f), 1e-4f, "Дальше часы клипа идут вдвое быстрее.");
+            player.Play(CreatureAnimationAction.Walk, 1f);
+            Assert.AreEqual(1f, player.Rate, "Новое действие — в обычном темпе.");
+        }
+
         [Test]
         public void Status_ReadyPartialEmpty()
         {

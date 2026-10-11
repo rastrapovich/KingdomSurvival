@@ -109,6 +109,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                 "Тень от огня идёт только от нижней части рисунка — той, которой человек стоит на земле: между ногами свет проходит дальше, под руками светло. 1 — весь рисунок.");
             Number("Огонь перекрывает: низ предметов (доля высоты)", style.FireBlockObjects, .05f, 1, value => style.FireBlockObjects = value,
                 "У дерева — ствол без кроны, у ящика — почти весь.");
+            Number("Окклюзия в тени: сила", style.Occlusion, 0, 1, value => style.Occlusion = value,
+                "Мягкое затемнение земли у основания предмета или человека, сдвинутое в его тень (от огня, иначе по солнцу). 0 — нет.");
+            Number("Окклюзия в тени: размер (доля ширины)", style.OcclusionSize, 0, 3, value => style.OcclusionSize = value);
             AddButton(settings, "Стиль теней по умолчанию", () => Change(() => sky.ShadowStyle = new LocationShadowStyle(), true));
 
             Heading("Источники света");
@@ -267,7 +270,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Toggle("Тени предметов и людей (по контуру, до края света)", light.Shadows, value => light.Shadows = value, true);
             if (light.Shadows)
             {
-                Number("Темнота тени", light.ShadowStrength, 0, 1, value => light.ShadowStrength = value);
+                Help("Тень перекрывает свет целиком (без светлого ореола у предмета). Глубина тени — «Окклюзия в тени» в стиле теней.");
                 Number("Мягкость края", light.ShadowSoftness, 0, 1, value => light.ShadowSoftness = value);
                 Number("Мягкость вдали", light.ShadowSoftnessFalloff, 0, 1, value => light.ShadowSoftnessFalloff = value);
             }

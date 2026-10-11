@@ -130,6 +130,11 @@ namespace KingdomSurvival.BattlefieldDatabase
         // между ногами свет проходит дальше, под руками светло. 1 — весь рисунок.
         public float FireBlockPeople = .3f;
         public float FireBlockObjects = .3f;
+        // Окклюзия в тени: мягкое затемнение земли у основания предмета или
+        // человека, сдвинутое в его тень (от огня или солнца). Сила — темнота
+        // в середине (0 — нет), размер — доля ширины рисунка.
+        public float Occlusion = .3f;
+        public float OcclusionSize = 1;
 
         // 0..1: насколько виден силуэт при тени вдоль vector (экран).
         public float SilhouetteShare(UnityEngine.Vector2 vector)

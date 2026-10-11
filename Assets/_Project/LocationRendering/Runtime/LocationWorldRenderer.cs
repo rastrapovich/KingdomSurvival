@@ -691,6 +691,8 @@ namespace KingdomSurvival.LocationRendering
                 actor.Player.SetDirection(DirectionFor(actor.Facing, frame.Kind));
                 CreatureAnimationAction action = frame.Walking ? CreatureAnimationAction.Walk : CreatureAnimationAction.Idle;
                 if (actor.Player.Action != action) actor.Player.Play(action, seconds);
+                // Темп шага — под общую скорость ходьбы по гексам: ноги не скользят.
+                if (frame.Walking) actor.Player.SetRate(actor.Player.Set.GetWalkRate(actor.Player.Direction, BattlefieldDatabaseAsset.SharedWalkHexesPerSecond), seconds);
                 Sprite sprite = actor.Player.Evaluate(seconds) ?? actor.Player.Set.FindFirstFrame();
                 if (sprite != null) actor.Image.sprite = sprite;
                 height = hexWorld * FieldHeightInHexSizes * actor.Player.Set.FieldScale;
@@ -773,11 +775,12 @@ namespace KingdomSurvival.LocationRendering
         // Свет ассета (солнце / огонь по отдельности) — тем же материалом с
         // поправкой; оба включены — общий материал.
         // groundLit — деталь земли: свет с нормалями ложится на неё как на
-        // землю под ней (своя нормаль не пишется).
+        // землю под ней (своя нормаль не пишется), и солнце, и огонь —
+        // галочки света ассета на неё не действуют.
         private void ApplyColor(SpriteRenderer image, LocationColorAdjust adjust, LocationResolvedVisual resolved = null, bool groundLit = false)
         {
             bool identity = adjust == null || adjust.IsIdentity;
-            bool lighting = resolved != null && !resolved.DefaultLighting;
+            bool lighting = resolved != null && !resolved.DefaultLighting && !groundLit;
             if (!identity) image.color = adjust.Tint;
             bool hsv = !identity && adjust.HasHsv;
             if (adjustLit == null) return;
@@ -793,8 +796,11 @@ namespace KingdomSurvival.LocationRendering
             image.SetPropertyBlock(adjustBlock);
         }
 
+        // Деталь земли освещается ровно как земля под ней: солнцем и огнём,
+        // что бы ни стояло в галочках «Освещается солнцем / огнём» ассета.
         public static Vector4 LightShare(LocationResolvedVisual resolved, bool groundLit = false) =>
-            new Vector4(resolved == null || resolved.LitBySun ? 1 : 0, resolved == null || resolved.LitByFire ? 1 : 0, groundLit ? 1 : 0, 0);
+            groundLit ? new Vector4(1, 1, 1, 0)
+                : new Vector4(resolved == null || resolved.LitBySun ? 1 : 0, resolved == null || resolved.LitByFire ? 1 : 0, 0, 0);
 
         // Слой рисунка, который освещается как земля: сама земля и её детали.
         public static bool LitAsGround(LocationVisualBand band) => band == LocationVisualBand.Ground || band == LocationVisualBand.GroundDetail;

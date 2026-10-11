@@ -525,9 +525,9 @@ namespace KingdomSurvival.LocationRendering.Editor
             settings[settings.childCount - 1].tooltip = "В игре у места подпись «временный фон — рисунка ещё нет».";
 
             Heading("Перемещение");
-            Help("Те же поля, что «Перемещение» глобальной карты, но свои числа для этого места.");
+            Help("Отряд ходит по гексам боя этого места, как на поле боя, с общей скоростью ходьбы («Ходьба, гексов/с» в Базе полей боя: " +
+                 BattlefieldDatabaseAsset.SharedWalkHexesPerSecond.ToString("0.#") + " гекса/с). Время пути — свои числа места.");
             WorldMapMovementRules rules = location.MovementRules;
-            Number("Скорость бега (клеток/с)", rules.HeroRunSpeedHexesPerSecond, .5f, 30, value => location.Movement.HeroRunSpeedHexesPerSecond = value);
             Number("Часов на клетку", rules.TravelHoursPerHex, .001f, .2f, value => location.Movement.TravelHoursPerHex = value);
             Number("Часов на действие", (float)location.HoursPerInteraction, 0, 2, value => location.HoursPerInteraction = value);
 

@@ -148,7 +148,7 @@ namespace KingdomSurvival.LocationRendering.Tests
                 List<KeyValuePair<string, LocalPointData>> members = new List<KeyValuePair<string, LocalPointData>>();
                 List<LocalPointData> points = renderer.Geometry.SpreadAround(new LocalPointData(200, 600), 3, spacing);
                 for (int i = 0; i < 3; i++) members.Add(new KeyValuePair<string, LocalPointData>("member_" + i, points[i]));
-                LocalFreeMover mover = new LocalFreeMover(renderer.Geometry.Layer, renderer.Geometry.Rules, members, spacing);
+                LocalHexMover mover = new LocalHexMover(renderer.Geometry, members);
                 Assert.That(mover.MoveLeaderTo(1700, 150), Is.True);
                 Vector2 previousView = default;
                 bool first = true, crossedColumn = false, crossedRow = false;
@@ -158,7 +158,7 @@ namespace KingdomSurvival.LocationRendering.Tests
                 {
                     mover.Tick(1 / 60f, out _);
                     List<LocationWorldRenderer.ActorFrame> frames = new List<LocationWorldRenderer.ActorFrame>();
-                    foreach (LocalFreeMover.Member member in mover.Members)
+                    foreach (LocalHexMover.Member member in mover.Members)
                         frames.Add(new LocationWorldRenderer.ActorFrame { Id = member.Id, Pixel = new Vector2((float)member.X, (float)member.Y), Walking = member.Walking });
                     renderer.SetActors(frames, frame / 60f);
                     Vector2 leader = new Vector2((float)mover.Leader.X, (float)mover.Leader.Y);

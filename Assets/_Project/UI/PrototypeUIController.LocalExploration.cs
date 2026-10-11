@@ -8,9 +8,10 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 // ПР-12К (канон v1.54 §28.3): исследуемое место на локальной карте.
-// Движение — то же, что на глобальной карте: клик ведёт командира по
-// разметке местности с обходом, зажатая кнопка — за курсором, спутники идут
-// следом по его следу; клеток нет. Рисунок места рисует общий рендерер Базы
+// Движение — строго по гексам боя места, как на поле боя, с той же общей
+// скоростью (LocalHexMover): клик ведёт командира из клетки в клетку с
+// обходом стен, зажатая кнопка — за курсором, спутники идут змейкой по
+// покинутым им клеткам. Рисунок места рисует общий рендерер Базы
 // локаций (LocationWorldRenderer) в текстуру экрана. Объекты открывают
 // существующие диалоги; вход в зону угрозы начинает бой здесь же: кадр поля
 // из Базы полей боя ложится на рисунок, сетка — ровно настройки этого поля,
@@ -42,7 +43,7 @@ public partial class PrototypeUIController
     private LocalLocationDefinition localDefinition;
     private LocationWorldRenderer localRenderer;
     private LocalLocationGeometry localGeometry;
-    private LocalFreeMover localMover;
+    private LocalHexMover localMover;
     private Image localImage;
     private VisualElement localOverlay;
     private VisualElement localClickMarker;
@@ -209,7 +210,7 @@ public partial class PrototypeUIController
 
     private void CheckLocalEncounter()
     {
-        LocalFreeMover.Member leader = localMover.Leader;
+        LocalHexMover.Member leader = localMover.Leader;
         LocalEncounterDefinition encounter = LocalExplorationService.EncounterAt(gameState, localDefinition, leader.X, leader.Y);
         if (encounter == null)
             return;
@@ -350,8 +351,7 @@ public partial class PrototypeUIController
         }
 
         localPendingExit = false;
-        LocalFreeMover.Member leader = localMover.Leader;
-        if (item.Point.DistanceTo(leader.X, leader.Y) <= item.InteractRadius && !localMover.LeaderHasOrder)
+        if (localMover.LeaderReached(item.Point.X, item.Point.Y, item.InteractRadius) && !localMover.LeaderHasOrder)
         {
             PerformLocalObject(item);
             return;
@@ -374,8 +374,7 @@ public partial class PrototypeUIController
         if (entrance == null)
             return;
         localPendingObjectId = null;
-        LocalFreeMover.Member leader = localMover.Leader;
-        if (entrance.Point.DistanceTo(leader.X, leader.Y) <= LocalExitRadius && !localMover.LeaderHasOrder)
+        if (localMover.LeaderReached(entrance.Point.X, entrance.Point.Y, LocalExitRadius) && !localMover.LeaderHasOrder)
         {
             localPendingExit = true;
             return;
@@ -393,7 +392,6 @@ public partial class PrototypeUIController
     {
         if (localMover.LeaderHasOrder)
             return;
-        LocalFreeMover.Member leader = localMover.Leader;
 
         if (!string.IsNullOrEmpty(localPendingObjectId))
         {
@@ -401,7 +399,7 @@ public partial class PrototypeUIController
             localPendingObjectId = null;
             if (item == null)
                 return;
-            if (item.Point.DistanceTo(leader.X, leader.Y) <= item.InteractRadius)
+            if (localMover.LeaderReached(item.Point.X, item.Point.Y, item.InteractRadius))
                 PerformLocalObject(item);
             else
                 ShowLocalNotice("К этому не подойти.");
@@ -411,7 +409,7 @@ public partial class PrototypeUIController
         if (localPendingExit)
         {
             LocalEntranceDefinition entrance = localDefinition.FindEntrance(gameState.LocalExploration.EntranceId);
-            if (entrance == null || entrance.Point.DistanceTo(leader.X, leader.Y) > LocalExitRadius)
+            if (entrance == null || !localMover.LeaderReached(entrance.Point.X, entrance.Point.Y, LocalExitRadius))
             {
                 localPendingExit = false;
                 return;
@@ -474,7 +472,7 @@ public partial class PrototypeUIController
         // клетку кадра со своей стороны стены, клетки противников заняты.
         List<string> candidates = PartyPresence.BattleCandidateIds(gameState);
         List<KeyValuePair<string, Vector2>> party = new List<KeyValuePair<string, Vector2>>();
-        foreach (LocalFreeMover.Member member in localMover.Members)
+        foreach (LocalHexMover.Member member in localMover.Members)
         {
             if (candidates.Contains(member.Id))
                 party.Add(new KeyValuePair<string, Vector2>(member.Id, new Vector2((float)member.X, (float)member.Y)));
@@ -492,7 +490,7 @@ public partial class PrototypeUIController
         Autosave();
 
         // Небоевые остаются в безопасной точке — не исчезают без объяснения.
-        foreach (LocalFreeMover.Member member in localMover.Members)
+        foreach (LocalHexMover.Member member in localMover.Members)
         {
             if (candidates.Contains(member.Id))
                 continue;
@@ -798,14 +796,14 @@ public partial class PrototypeUIController
         data.Party.RemoveAll(actor => !present.Contains(actor.ActorId));
         if (members.Count == 0)
             members.Add(new KeyValuePair<string, LocalPointData>(gameState.GetSelectedCommander()?.Id ?? "hero", fallback));
-        localMover = new LocalFreeMover(localGeometry.Layer, localGeometry.Rules, members, spacing);
+        localMover = new LocalHexMover(localGeometry, members);
     }
 
     private void StoreLocalPositions()
     {
         if (localMover == null)
             return;
-        foreach (LocalFreeMover.Member member in localMover.Members)
+        foreach (LocalHexMover.Member member in localMover.Members)
         {
             int facing = (int)LocationWorldRenderer.FacingFrom(new Vector2((float)member.DirectionX, (float)member.DirectionY));
             LocalExplorationService.StorePartyPosition(gameState, member.Id, (float)member.X, (float)member.Y, facing);
@@ -849,7 +847,7 @@ public partial class PrototypeUIController
         if (localRenderer == null || localMover == null)
             return;
 
-        LocalFreeMover.Member leader = localMover.Leader;
+        LocalHexMover.Member leader = localMover.Leader;
         float viewHeight = LocationCameraFollow.DefaultViewHeight(localRenderer.Definition, localDefinition) / localZoom;
         // Новый командир — новая цель: кадр сразу на нём (закреплённая камера стоит).
         if (leader.Id != localFollowedLeaderId)
@@ -896,7 +894,7 @@ public partial class PrototypeUIController
         List<LocationWorldRenderer.ActorFrame> frames = new List<LocationWorldRenderer.ActorFrame>();
         CommanderData hero = gameState.GetSelectedCommander();
         List<string> retinue = gameState.ActiveExpedition?.RetinueIds ?? new List<string>();
-        foreach (LocalFreeMover.Member member in localMover.Members)
+        foreach (LocalHexMover.Member member in localMover.Members)
         {
             ResidentState resident = HomePeopleService.Find(gameState, member.Id);
             string unitType = hero != null && member.Id == hero.Id

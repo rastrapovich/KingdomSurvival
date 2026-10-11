@@ -460,9 +460,9 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             walkSpeed.style.fontSize = 10f;
             walkSpeed.style.color = new Color(0.65f, 0.65f, 0.65f, 1f);
             Slider walkStep = LiveSlider("Шаг ходьбы", 0.2f, 4f, set.WalkHexesPerCycle,
-                "Сколько гексов боец проходит за один цикл «Ходьбы». Скорость на поле = шаг / длительность цикла, " +
-                "поэтому ноги не скользят. Если ноги «едут» вперёд — уменьшите, если отстают — увеличьте. " +
-                "Общая скорость боя (в самом бою) умножает всё вместе.",
+                "Сколько гексов боец проходит за один цикл «Ходьбы». Скорость ходьбы общая (База полей боя), " +
+                "а темп цикла подстраивается: темп = скорость × длительность цикла / шаг, поэтому ноги не скользят. " +
+                "Если ноги «едут» вперёд — уменьшите, если отстают — увеличьте. Скорость показа боя умножает всё вместе.",
                 value =>
                 {
                     CreatureAnimationSetData s = SelectedSet;
@@ -904,10 +904,10 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 return string.Empty;
             CreatureAnimationClipData walk = set.FindClip(CreatureAnimationAction.Walk);
             if (walk == null || !walk.HasAnyFrames)
-                return "Ходьбы нет: на поле общая скорость " + CreatureAnimationSetData.DefaultWalkHexesPerSecond.ToString("0.#") + " гекса/с.";
-            return "На поле ≈ " + set.GetWalkHexesPerSecond(CreatureAnimationDirection.Front).ToString("0.0") +
-                   " гекса/с при скорости боя 1× (пределы " + CreatureAnimationSetData.MinWalkHexesPerSecond.ToString("0.#") +
-                   "–" + CreatureAnimationSetData.MaxWalkHexesPerSecond.ToString("0") + ").";
+                return "Ходьбы нет: фигура скользит с общей скоростью ходьбы (База полей боя).";
+            return "Скорость на поле и в месте — общая («Ходьба, гексов/с» в Базе полей боя). Свой темп набора — ≈ " +
+                   set.GetWalkHexesPerSecond(CreatureAnimationDirection.Front).ToString("0.0") +
+                   " гекса/с: при другой общей скорости цикл ходьбы ускоряется или замедляется.";
         }
 
         private static string SkipChoiceLabel(int count)

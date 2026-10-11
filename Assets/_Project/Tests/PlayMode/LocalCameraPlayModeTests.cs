@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using KingdomSurvival.BattlefieldDatabase;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -62,7 +63,7 @@ public sealed class LocalCameraPlayModeTests
             yield return null;
     }
 
-    private static LocalFreeMover Mover(MonoBehaviour main) => (LocalFreeMover)Member(main, "localMover");
+    private static LocalHexMover Mover(MonoBehaviour main) => (LocalHexMover)Member(main, "localMover");
     private static object Renderer(MonoBehaviour main) => Member(main, "localRenderer");
     private static Vector2 ViewCenter(MonoBehaviour main) => (Vector2)Member(Renderer(main), "ViewCenter");
     private static float ViewHeight(MonoBehaviour main) => (float)Member(Renderer(main), "ViewHeight");

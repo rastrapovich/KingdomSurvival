@@ -8,14 +8,14 @@ namespace KingdomSurvival.LocationRendering
 {
     // Универсальная служебная сцена: те же renderer/анимации/движение,
     // отдельное состояние без CampaignSession, расходов, событий и save/load.
-    // Движение — как на глобальной карте (LocalFreeMover), камера следует
+    // Движение — по гексам боя места, как в игре (LocalHexMover), камера следует
     // за командиром.
     public sealed class LocationLightingTest : MonoBehaviour
     {
         public PanelSettings Panel;
         public string LocationId = "technical_lighting_camp";
         public LocationWorldRenderer Renderer { get; private set; }
-        public LocalFreeMover Mover { get; private set; }
+        public LocalHexMover Mover { get; private set; }
         public float Hour = 13;
         public bool Cycle;
         public float CycleSeconds = 30;
@@ -55,7 +55,7 @@ namespace KingdomSurvival.LocationRendering
             List<LocalPointData> points = Renderer.Geometry.SpreadAround(new LocalPointData(start.x, start.y), count, spacing);
             List<KeyValuePair<string, LocalPointData>> members = new List<KeyValuePair<string, LocalPointData>>();
             for (int i = 0; i < count; i++) members.Add(new KeyValuePair<string, LocalPointData>("test_" + i, points[i]));
-            Mover = new LocalFreeMover(Renderer.Geometry.Layer, Renderer.Geometry.Rules, members, spacing);
+            Mover = new LocalHexMover(Renderer.Geometry, members);
             BaseViewHeight = LocationCameraFollow.DefaultViewHeight(visual, location);
             RenderActors(0, 0, true);
             Renderer.SetTime(Hour, 0);
@@ -96,7 +96,7 @@ namespace KingdomSurvival.LocationRendering
             List<LocationWorldRenderer.ActorFrame> frames = new List<LocationWorldRenderer.ActorFrame>();
             for (int i = 0; i < Mover.Members.Count; i++)
             {
-                LocalFreeMover.Member member = Mover.Members[i];
+                LocalHexMover.Member member = Mover.Members[i];
                 frames.Add(new LocationWorldRenderer.ActorFrame
                 {
                     Id = member.Id, UnitTypeId = Renderer.Definition.TestUnitId,
@@ -107,7 +107,7 @@ namespace KingdomSurvival.LocationRendering
                 });
             }
             Renderer.SetActors(frames, seconds);
-            LocalFreeMover.Member leader = Mover.Leader;
+            LocalHexMover.Member leader = Mover.Leader;
             // Закреплённая камера не едет за командиром и не меняет масштаб.
             if (!CameraLocked || snap)
                 Renderer.Follow(new Vector2((float)leader.X, (float)leader.Y), ViewHeight, deltaTime, snap);

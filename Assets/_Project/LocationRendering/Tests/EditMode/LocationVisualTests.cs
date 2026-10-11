@@ -10,6 +10,33 @@ namespace KingdomSurvival.LocationRendering.Tests
 {
     public sealed class LocationVisualTests
     {
+        // Деталь земли освещается как земля: солнцем и огнём, что бы ни стояло
+        // в галочках света ассета; у предмета галочки действуют.
+        [Test]
+        public void GroundDetailIgnoresTheAssetLightFlags()
+        {
+            LocationResolvedVisual noFire = new LocationResolvedVisual { LitByFire = false, LitBySun = false };
+            Assert.That(LocationWorldRenderer.LightShare(noFire, true), Is.EqualTo(new Vector4(1, 1, 1, 0)));
+            Assert.That(LocationWorldRenderer.LightShare(noFire), Is.EqualTo(new Vector4(0, 0, 0, 0)));
+            Assert.That(LocationWorldRenderer.LightShare(null), Is.EqualTo(new Vector4(1, 1, 0, 0)));
+        }
+
+        // Тень от огня перекрывает свет целиком: частичная давала светлый
+        // ореол у предмета в тени.
+        [Test]
+        public void FireShadowBlocksTheLightCompletely()
+        {
+            GameObject host = new GameObject("Свет");
+            try
+            {
+                Light2D light = host.AddComponent<Light2D>();
+                LocationLightDefinition data = new LocationLightDefinition { Shadows = true, ShadowStrength = .4f };
+                LocationWorldRenderer.ConfigureLight(light, data);
+                Assert.That(light.shadowsEnabled, Is.True);
+                Assert.That(light.shadowIntensity, Is.EqualTo(1f));
+            }
+            finally { Object.DestroyImmediate(host); }
+        }
         [Test]
         public void MidnightAndNegativeTimesArePeriodic()
         {

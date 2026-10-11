@@ -408,6 +408,16 @@ namespace KingdomSurvival.AnimationDatabase
             return Mathf.Clamp(WalkHexesPerCycle / walk.Duration, MinWalkHexesPerSecond, MaxWalkHexesPerSecond);
         }
 
+        // Темп клипа ходьбы при скорости hexesPerSecond: шаг набора («Шаг
+        // ходьбы», гексов за цикл) ложится на путь — ноги не скользят.
+        public float GetWalkRate(CreatureAnimationDirection direction, float hexesPerSecond)
+        {
+            CreatureAnimationClip walk = CreatureAnimationResolver.Resolve(this, CreatureAnimationAction.Walk, direction);
+            if (walk == null || walk.Action != CreatureAnimationAction.Walk || walk.Duration <= 0.01f || hexesPerSecond <= 0f)
+                return 1f;
+            return Mathf.Clamp(hexesPerSecond * walk.Duration / WalkHexesPerCycle, 0.25f, 4f);
+        }
+
         // Опора и масштаб на поле из образца.
         public void CopyLookFrom(CreatureAnimationSetData other)
         {

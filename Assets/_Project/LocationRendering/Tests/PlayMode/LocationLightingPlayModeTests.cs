@@ -55,7 +55,7 @@ namespace KingdomSurvival.LocationRendering.Tests
                 List<LocalPointData> points = renderer.Geometry.SpreadAround(new LocalPointData(start.x, start.y), 3, spacing);
                 List<KeyValuePair<string, LocalPointData>> members = new List<KeyValuePair<string, LocalPointData>>();
                 for (int i = 0; i < 3; i++) members.Add(new KeyValuePair<string, LocalPointData>("test_" + i, points[i]));
-                LocalFreeMover mover = new LocalFreeMover(renderer.Geometry.Layer, renderer.Geometry.Rules, members, spacing);
+                LocalHexMover mover = new LocalHexMover(renderer.Geometry, members);
                 Render(renderer, mover, visual, 0);
                 Assert.That(renderer.HasActor("test_2"), Is.True);
                 yield return null; yield return null;
@@ -72,10 +72,11 @@ namespace KingdomSurvival.LocationRendering.Tests
                 for (int i = 0; i < 800 && (!mover.IsIdle || !mover.IsGathered); i++)
                 {
                     mover.Tick(.1f, out _); Render(renderer, mover, visual, i * .1f);
-                    foreach (LocalFreeMover.Member member in mover.Members)
-                        Assert.That(renderer.Geometry.IsPassable(member.X, member.Y), Is.True);
+                    foreach (LocalHexMover.Member member in mover.Members)
+                        Assert.That(mover.IsPassable(member.Cell), Is.True, "Отряд идёт только по проходимым клеткам.");
                 }
-                Assert.That(Vector2.Distance(destination, new Vector2((float)mover.Leader.X, (float)mover.Leader.Y)), Is.LessThan(1f));
+                Assert.That(mover.Leader.Cell, Is.EqualTo(mover.CellAt(destination.x, destination.y)), "Командир пришёл в клетку цели.");
+                Assert.That(Vector2.Distance(mover.CellCenter(mover.Leader.Cell), new Vector2((float)mover.Leader.X, (float)mover.Leader.Y)), Is.LessThan(.01f), "И стоит в её центре.");
                 renderer.Camera.targetTexture = null;
                 Object.Destroy(target);
             }
@@ -106,10 +107,10 @@ namespace KingdomSurvival.LocationRendering.Tests
             yield return null;
         }
 
-        private static void Render(LocationWorldRenderer renderer, LocalFreeMover mover, LocationVisualDefinition visual, float seconds)
+        private static void Render(LocationWorldRenderer renderer, LocalHexMover mover, LocationVisualDefinition visual, float seconds)
         {
             List<LocationWorldRenderer.ActorFrame> frames = new List<LocationWorldRenderer.ActorFrame>();
-            foreach (LocalFreeMover.Member member in mover.Members)
+            foreach (LocalHexMover.Member member in mover.Members)
                 frames.Add(new LocationWorldRenderer.ActorFrame { Id = member.Id, UnitTypeId = visual.TestUnitId,
                     Pixel = new Vector2((float)member.X, (float)member.Y), Direction = new Vector2((float)member.DirectionX, (float)member.DirectionY), Walking = member.Walking });
             renderer.SetActors(frames, seconds);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using KingdomSurvival.BattlefieldDatabase;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -96,7 +97,7 @@ public sealed class LocalExplorationPlayModeTests
         }
     }
 
-    private static LocalFreeMover Mover(MonoBehaviour main) => (LocalFreeMover)GetField(main, "localMover");
+    private static LocalHexMover Mover(MonoBehaviour main) => (LocalHexMover)GetField(main, "localMover");
 
     private static Vector2 Leader(MonoBehaviour main) => new Vector2((float)Mover(main).Leader.X, (float)Mover(main).Leader.Y);
 
@@ -115,7 +116,7 @@ public sealed class LocalExplorationPlayModeTests
         Invoke(main, "OnLocalGroundClicked", point);
         yield return Until(() =>
         {
-            LocalFreeMover mover = Mover(main);
+            LocalHexMover mover = Mover(main);
             return mover == null || DialogueActive(main) || GetField(main, "localBattle") != null || !mover.LeaderHasOrder;
         });
     }
@@ -197,14 +198,14 @@ public sealed class LocalExplorationPlayModeTests
         Assert.AreEqual(hourAtEntry, ContinuousSimulationSystem.GetClock(campaign).HourOfDay, 1e-6, "Стоя на месте, время не идёт.");
         yield return Capture(main, "mine_01_entry");
 
-        // Ходьба как на глобальной карте: спутники следом, без наложения;
+        // Ходьба по гексам: спутники следом змейкой, без наложения;
         // время идёт пройденным путём.
         Vector2 hall = new Vector2(760, 600);
         yield return WalkTo(main, hall);
         yield return Until(() => Mover(main).IsIdle && Mover(main).IsGathered, 10f);
-        LocalFreeMover mover = Mover(main);
+        LocalHexMover mover = Mover(main);
         Assert.IsTrue(mover.IsGathered, "Спутники подошли следом.");
-        Assert.Less(Vector2.Distance(hall, Leader(main)), 1f);
+        Assert.LessOrEqual(Vector2.Distance(hall, Leader(main)), Mover(main).CellRadius, "Командир в клетке цели.");
         for (int a = 0; a < mover.Members.Count; a++)
             for (int b = a + 1; b < mover.Members.Count; b++)
                 Assert.Greater(Vector2.Distance(new Vector2((float)mover.Members[a].X, (float)mover.Members[a].Y),
@@ -217,7 +218,7 @@ public sealed class LocalExplorationPlayModeTests
         Invoke(main, "OnLocalHeldAt", new Vector2(990, 400));
         Invoke(main, "OnLocalHeldAt", new Vector2(700, 680));
         yield return Until(() => !Mover(main).LeaderHasOrder, 10f);
-        Assert.Less(Vector2.Distance(new Vector2(700, 680), Leader(main)), 1f, "Командир шёл за курсором до последней точки.");
+        Assert.LessOrEqual(Vector2.Distance(new Vector2(700, 680), Leader(main)), Mover(main).CellRadius, "Командир шёл за курсором до последней точки.");
         yield return WalkTo(main, hall);
         yield return Until(() => Mover(main).IsIdle && Mover(main).IsGathered, 10f);
 
@@ -265,7 +266,7 @@ public sealed class LocalExplorationPlayModeTests
         yield return Frames(5);
         Assert.IsNull(GetField(main, "localBattle"));
         Assert.AreEqual(supply - CampaignBattleBridge.RetreatSupplyLoss, campaign.ArmySupply);
-        Assert.Less(Vector2.Distance(new Vector2(499, 551), Leader(main)), 1f, "Отряд у безопасной точки.");
+        Assert.LessOrEqual(Vector2.Distance(new Vector2(499, 551), Leader(main)), Mover(main).CellRadius, "Отряд в клетке безопасной точки.");
         yield return Frames(30);
         Assert.IsNull(GetField(main, "localBattle"), "Бой не зациклился.");
         Assert.IsFalse(DialogueActive(main));

@@ -136,6 +136,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         // радиус — на сколько затемнение расходится от основания (ед. мира).
         public float Occlusion = .3f;
         public float OcclusionRadius = .35f;
+        // Размытие формы основания (ед. мира): углы и ступеньки кисти мягче.
+        public float OcclusionBlur = .15f;
 
         // 0..1: насколько виден силуэт при тени вдоль vector (экран).
         public float SilhouetteShare(UnityEngine.Vector2 vector)

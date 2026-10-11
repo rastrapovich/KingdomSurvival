@@ -59,7 +59,7 @@ namespace KingdomSurvival.LocationRendering
             public SpriteRenderer Occlusion;
             public SpriteRenderer OcclusionOverlay;
             public List<Rect> Footprint;
-            // Предмет со своим светом (костёр) окклюзии не даёт.
+            // Предмет со своим светом (костёр) и люди окклюзии не дают.
             public bool NoOcclusion;
             public List<Rect> FallbackFootprint;
             public Vector4 OcclusionBase, OcclusionShape;
@@ -282,7 +282,7 @@ namespace KingdomSurvival.LocationRendering
             {
                 Anchor = anchor, Source = source, Override = overrideSprite, OverrideHeight = height,
                 OverridePivot = pivot, OverrideFlip = flip, LengthScale = lengthScale, People = people,
-                Battle = battleId != null, Sun = sun, Footprint = footprint, NoOcclusion = !occlusion
+                Battle = battleId != null, Sun = sun, Footprint = footprint, NoOcclusion = !occlusion || people
             };
             if (contour) caster.Contour = AddContour(source);
             casters.Add(caster);
@@ -332,8 +332,8 @@ namespace KingdomSurvival.LocationRendering
         private const float OcclusionShift = .5f;
 
         // Окклюзия у основания: на земле — по контуру основания предмета
-        // (прямоугольник или основание кистью; у людей — пятно у ног) с мягким
-        // спадом наружу на «радиус», сдвинутая в тень: от ближайшего огня с
+        // (прямоугольник или основание кистью) с мягким спадом наружу на
+        // «радиус» и размытием, сдвинутая в тень: от ближайшего огня с
         // тенями, иначе по солнцу; без того и другого — вокруг основания. На
         // самом предмете — затемнение низа рисунка со стороны тени. Только
         // темнит (умножение), не светлит и не перекрашивает.
@@ -368,7 +368,7 @@ namespace KingdomSurvival.LocationRendering
                 caster.Occlusion = blot;
             }
             if (!blot.enabled) blot.enabled = true;
-            Sprite shape = OcclusionSprite(footprint, radius);
+            Sprite shape = OcclusionSprite(footprint, radius, Mathf.Max(0, Sky.ShadowStyle.OcclusionBlur));
             if (blot.sprite != shape) blot.sprite = shape;
             blot.transform.localPosition = direction * (radius * OcclusionShift);
             blot.color = new Color(0, 0, 0, strength);
@@ -417,17 +417,16 @@ namespace KingdomSurvival.LocationRendering
         }
 
         // Основание от опоры (единицы мира, Y вверх): кистью — клетки,
-        // прямоугольником — он; без основания — полоса у низа рисунка, у
-        // людей — пятно у ног.
+        // прямоугольником — он; без основания — полоса по ширине
+        // непрозрачного низа рисунка. У людей окклюзии нет.
         private List<Rect> Footprint(Caster caster)
         {
             if (caster.Footprint != null && caster.Footprint.Count > 0) return caster.Footprint;
             if (caster.FallbackFootprint == null && OpaqueBaseExtent(caster, out float left, out float right))
             {
-                // Ширина — по непрозрачному низу рисунка (ноги, комель), а не
-                // по холсту кадра: у анимаций холст много шире фигуры.
-                float width = (right - left) * (caster.People ? .8f : 1f);
-                float depth = Mathf.Max(.03f, width * (caster.People ? .3f : .25f));
+                // Ширина — по непрозрачному низу рисунка, а не по холсту кадра.
+                float width = right - left;
+                float depth = Mathf.Max(.03f, width * .25f);
                 float center = (left + right) / 2;
                 caster.FallbackFootprint = new List<Rect> { new Rect(center - width / 2, -depth / 2, width, depth) };
             }
@@ -462,11 +461,12 @@ namespace KingdomSurvival.LocationRendering
         }
 
         // Пятно по форме основания: внутри — полная темнота, снаружи спадает
-        // до нуля на radius. Опора спрайта — опора предмета. Одинаковые формы
+        // до нуля на radius; blur — размытие формы (углы основания и ступеньки
+        // кисти скругляются). Опора спрайта — опора предмета. Одинаковые формы
         // делят одно пятно.
-        private Sprite OcclusionSprite(List<Rect> cells, float radius)
+        private Sprite OcclusionSprite(List<Rect> cells, float radius, float blur)
         {
-            System.Text.StringBuilder key = new System.Text.StringBuilder(radius.ToString("0.###"));
+            System.Text.StringBuilder key = new System.Text.StringBuilder(radius.ToString("0.###")).Append('~').Append(blur.ToString("0.###"));
             foreach (Rect cell in cells)
                 key.Append('|').Append(cell.x.ToString("0.###")).Append(',').Append(cell.y.ToString("0.###"))
                     .Append(',').Append(cell.width.ToString("0.###")).Append(',').Append(cell.height.ToString("0.###"));
@@ -477,9 +477,10 @@ namespace KingdomSurvival.LocationRendering
             foreach (Rect cell in cells)
                 bounds = Rect.MinMaxRect(Mathf.Min(bounds.xMin, cell.xMin), Mathf.Min(bounds.yMin, cell.yMin),
                     Mathf.Max(bounds.xMax, cell.xMax), Mathf.Max(bounds.yMax, cell.yMax));
-            Rect area = Rect.MinMaxRect(bounds.xMin - radius, bounds.yMin - radius, bounds.xMax + radius, bounds.yMax + radius);
-            const int MaxSide = 128;
-            float texel = Mathf.Max(radius / 8, area.width / MaxSide, area.height / MaxSide);
+            float pad = radius + blur * 1.5f;
+            Rect area = Rect.MinMaxRect(bounds.xMin - pad, bounds.yMin - pad, bounds.xMax + pad, bounds.yMax + pad);
+            const int MaxSide = 160;
+            float texel = Mathf.Max(Mathf.Min(radius, blur > 1e-3f ? blur : radius) / 8, area.width / MaxSide, area.height / MaxSide);
             int width = Mathf.Clamp(Mathf.CeilToInt(area.width / texel), 2, MaxSide);
             int height = Mathf.Clamp(Mathf.CeilToInt(area.height / texel), 2, MaxSide);
             // Расстояние до основания (в текселях): два прохода фаски.
@@ -514,12 +515,24 @@ namespace KingdomSurvival.LocationRendering
                     if (x > 0 && y < height - 1) d = Mathf.Min(d, distance[(y + 1) * width + x - 1] + Diagonal);
                     distance[y * width + x] = d;
                 }
-            byte[] alpha = new byte[width * height];
-            for (int i = 0; i < alpha.Length; i++)
+            float[] value = new float[width * height];
+            for (int i = 0; i < value.Length; i++)
             {
                 float t = Mathf.Clamp01(1 - distance[i] * texel / radius);
-                alpha[i] = (byte)Mathf.RoundToInt(t * t * 255);
+                value[i] = t * t;
             }
+            // Размытие: три прохода прямоугольного окна по строкам и столбцам
+            // (почти гаусс).
+            int reach = Mathf.RoundToInt(blur / texel / 1.7f);
+            if (reach > 0)
+                for (int pass = 0; pass < 3; pass++)
+                {
+                    BoxBlur(value, width, height, reach, true);
+                    BoxBlur(value, width, height, reach, false);
+                }
+            byte[] alpha = new byte[width * height];
+            for (int i = 0; i < alpha.Length; i++)
+                alpha[i] = (byte)Mathf.RoundToInt(Mathf.Clamp01(value[i]) * 255);
             Texture2D texture = Own(new Texture2D(width, height, TextureFormat.Alpha8, false)
             {
                 name = "Окклюзия основания", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear
@@ -531,6 +544,28 @@ namespace KingdomSurvival.LocationRendering
             if (occlusionSprites.Count > 512) occlusionSprites.Clear();
             occlusionSprites[id] = sprite;
             return sprite;
+        }
+
+        // Среднее по окну 2·reach+1 вдоль строк (rows) или столбцов, на месте.
+        private static void BoxBlur(float[] value, int width, int height, int reach, bool rows)
+        {
+            int lines = rows ? height : width, length = rows ? width : height;
+            float[] line = new float[length];
+            for (int l = 0; l < lines; l++)
+            {
+                for (int i = 0; i < length; i++)
+                    line[i] = value[rows ? l * width + i : i * width + l];
+                float sum = 0;
+                for (int i = -reach; i <= reach; i++)
+                    sum += i >= 0 && i < length ? line[i] : 0;
+                for (int i = 0; i < length; i++)
+                {
+                    value[rows ? l * width + i : i * width + l] = sum / (2 * reach + 1);
+                    int add = i + reach + 1, remove = i - reach;
+                    if (add < length) sum += line[add];
+                    if (remove >= 0) sum -= line[remove];
+                }
+            }
         }
 
         // Куда от основания уходит тень предмета (единичный вектор на экране).

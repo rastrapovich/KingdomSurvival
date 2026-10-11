@@ -145,17 +145,18 @@ namespace KingdomSurvival.LocationRendering.Tests
                     RenderTexture target = Target(renderer);
                     renderer.SetTime(1, 0);
                     Assert.That(renderer.VisibleOcclusionCount, Is.EqualTo(run), "Сила 0 — пятна нет, иначе одно у ящика.");
+                    Assert.That(renderer.VisibleObjectOcclusionCount, Is.EqualTo(run), "И затемнение низа самого ящика.");
                     if (run == 1)
                     {
                         SpriteRenderer blot = System.Array.Find(renderer.Root.GetComponentsInChildren<SpriteRenderer>(), item => item.name == "Окклюзия");
                         Transform anchor = renderer.FindObject("crate").transform.parent;
                         Assert.That(blot.transform.position.x, Is.GreaterThan(anchor.position.x), "Пятно сдвинуто в тень — от огня.");
                     }
-                    // Сразу справа от ящика на уровне его основания.
+                    // Сразу под ящиком, чуть в сторону тени.
                     SpriteRenderer image = renderer.FindObject("crate");
                     Bounds box = image.bounds;
                     Vector2 sample = LocationVisualGeometry.WorldToPixel(Location(),
-                        new Vector2(box.max.x + box.size.x * .1f, image.transform.parent.position.y));
+                        new Vector2(image.transform.parent.position.x + box.size.x * .2f, box.min.y - .05f));
                     yield return null; yield return null;
                     Save(target, "occlusion-" + run);
                     brightness[run] = Brightness(target, sample);

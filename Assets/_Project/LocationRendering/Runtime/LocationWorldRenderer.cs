@@ -378,7 +378,7 @@ namespace KingdomSurvival.LocationRendering
                 if (part.ProjectsShadow || part.ProjectsFireShadow)
                     // Предмет со своим светом свой огонь не перекрывает (источник внутри контура).
                     AddCaster(anchor, image, part.ShadowSprite, part.ShadowHeight, part.ShadowPivot, resolved.FlipX, resolved.ShadowLength, null,
-                        contour: part.ProjectsFireShadow && !item.Light.Enabled, sun: part.ProjectsShadow);
+                        contour: part.ProjectsFireShadow && !item.Light.Enabled, sun: part.ProjectsShadow, footprint: OcclusionFootprint(resolved), occlusion: !item.Light.Enabled);
             }
             if (item.Light.Enabled && item.Light.OwnRadialShadow) BuildRadialShadows(entry);
             if (resolved.OccludesLight)
@@ -395,6 +395,16 @@ namespace KingdomSurvival.LocationRendering
                     shadow.transform.localScale = new Vector3(resolved.FootprintSize.x, resolved.FootprintSize.y, 1);
                 }
             }
+        }
+
+        // Основание предмета для окклюзии (от опоры, единицы мира): кистью —
+        // клетки, иначе прямоугольник; нет основания — null.
+        private static List<Rect> OcclusionFootprint(LocationResolvedVisual resolved)
+        {
+            if (resolved.FootprintCells != null && resolved.FootprintCells.Count > 0) return resolved.FootprintCells;
+            Vector2 size = resolved.FootprintSize;
+            if (size.x < .01f || size.y < .01f) return null;
+            return new List<Rect> { new Rect(resolved.FootprintOffset - size / 2, size) };
         }
 
         // Снять рисунки, тени и перекрытие света предмета (свет и опора остаются).

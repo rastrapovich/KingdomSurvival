@@ -110,8 +110,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             Number("Огонь перекрывает: низ предметов (доля высоты)", style.FireBlockObjects, .05f, 1, value => style.FireBlockObjects = value,
                 "У дерева — ствол без кроны, у ящика — почти весь.");
             Number("Окклюзия в тени: сила", style.Occlusion, 0, 1, value => style.Occlusion = value,
-                "Мягкое затемнение земли у основания предмета или человека, сдвинутое в его тень (от огня, иначе по солнцу). 0 — нет.");
-            Number("Окклюзия в тени: размер (доля ширины)", style.OcclusionSize, 0, 3, value => style.OcclusionSize = value);
+                "Затемнение земли по контуру основания предмета или человека, сдвинутое в его тень (от огня, иначе по солнцу), " +
+                "и низа самого рисунка со стороны тени. 0 — нет.");
+            Number("Окклюзия в тени: радиус (ед. мира)", style.OcclusionRadius, .02f, 2, value => style.OcclusionRadius = value,
+                "На сколько затемнение расходится от основания по земле; на предмете — высота затемнения ×1,5.");
             AddButton(settings, "Стиль теней по умолчанию", () => Change(() => sky.ShadowStyle = new LocationShadowStyle(), true));
 
             Heading("Источники света");

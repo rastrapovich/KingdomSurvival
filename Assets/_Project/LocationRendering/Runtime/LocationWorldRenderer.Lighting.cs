@@ -55,8 +55,14 @@ namespace KingdomSurvival.LocationRendering
             public Vector2 ShadowVector;
             public float ShadowGroundY, ShadowOpacity, ShadowSoftness;
             public Color ShadowColor;
-            // Окклюзия у основания (в тени).
+            // Окклюзия: пятно на земле по основанию и затемнение низа рисунка.
             public SpriteRenderer Occlusion;
+            public SpriteRenderer OcclusionOverlay;
+            public List<Rect> Footprint;
+            // Предмет со своим светом (костёр) окклюзии не даёт.
+            public bool NoOcclusion;
+            public List<Rect> FallbackFootprint;
+            public Vector4 OcclusionBase, OcclusionShape;
         }
 
         // Местный источник, дающий тени по контуру: где он светит.
@@ -268,14 +274,15 @@ namespace KingdomSurvival.LocationRendering
         // ------------------------------------------------------------------
 
         private Caster AddCaster(Transform anchor, SpriteRenderer source, Sprite overrideSprite, float height, Vector2 pivot,
-            bool flip, float lengthScale, string battleId, bool people = false, bool contour = true, bool sun = true)
+            bool flip, float lengthScale, string battleId, bool people = false, bool contour = true, bool sun = true,
+            List<Rect> footprint = null, bool occlusion = true)
         {
             if (shadowMaterial == null || source == null) return null;
             Caster caster = new Caster
             {
                 Anchor = anchor, Source = source, Override = overrideSprite, OverrideHeight = height,
                 OverridePivot = pivot, OverrideFlip = flip, LengthScale = lengthScale, People = people,
-                Battle = battleId != null, Sun = sun
+                Battle = battleId != null, Sun = sun, Footprint = footprint, NoOcclusion = !occlusion
             };
             if (contour) caster.Contour = AddContour(source);
             casters.Add(caster);
@@ -305,8 +312,9 @@ namespace KingdomSurvival.LocationRendering
                 // Огонь и другие источники — тень по контуру рисунка до края света;
                 // вдали от всех таких источников контур выключен (его тени не видно).
                 UpdateContour(caster, enabled && NearShadowLight(caster));
-                // Одно пятно на предмет: части (стены, крыша) — одна опора.
-                UpdateOcclusion(caster, enabled && occludedAnchors.Add(caster.Anchor));
+                // Пятно на земле — одно на предмет (части — одна опора); затемнение
+                // низа — у каждой части.
+                UpdateOcclusion(caster, enabled, enabled && occludedAnchors.Add(caster.Anchor));
             }
         }
 
@@ -315,49 +323,190 @@ namespace KingdomSurvival.LocationRendering
         // ------------------------------------------------------------------
 
         private readonly HashSet<Transform> occludedAnchors = new HashSet<Transform>();
-        private Material occlusionMaterial;
-        private Sprite occlusionSprite;
+        private readonly Dictionary<string, Sprite> occlusionSprites = new Dictionary<string, Sprite>(StringComparer.Ordinal);
+        private Material occlusionMaterial, occlusionObjectMaterial;
+        private MaterialPropertyBlock occlusionBlock;
+        private static readonly int OcclusionBaseId = Shader.PropertyToID("_OccBase");
+        private static readonly int OcclusionShapeId = Shader.PropertyToID("_OccShape");
+        // Пятно на земле сдвинуто в тень на долю радиуса.
+        private const float OcclusionShift = .5f;
 
-        // Мягкое пятно у основания предмета или человека, сдвинутое в его
-        // тень: от ближайшего огня с тенями, иначе по солнцу; без того и
-        // другого — прямо под основанием. Темнит землю умножением (не светлит
-        // и не перекрашивает), лежит вместе с тенями под предметами.
-        private void UpdateOcclusion(Caster caster, bool enabled)
+        // Окклюзия у основания: на земле — по контуру основания предмета
+        // (прямоугольник или основание кистью; у людей — пятно у ног) с мягким
+        // спадом наружу на «радиус», сдвинутая в тень: от ближайшего огня с
+        // тенями, иначе по солнцу; без того и другого — вокруг основания. На
+        // самом предмете — затемнение низа рисунка со стороны тени. Только
+        // темнит (умножение), не светлит и не перекрашивает.
+        private void UpdateOcclusion(Caster caster, bool enabled, bool ground)
         {
             LocationShadowStyle style = Sky.ShadowStyle;
             float strength = Mathf.Clamp01(style.Occlusion);
-            float size = Mathf.Max(0, style.OcclusionSize);
-            Bounds bounds = caster.Source.bounds;
-            float width = bounds.size.x * size;
-            if (!enabled || strength <= .001f || width <= 1e-4f || OcclusionMaterial() == null)
+            float radius = Mathf.Max(0, style.OcclusionRadius);
+            enabled &= !caster.NoOcclusion && strength > .001f && radius > 1e-3f && OcclusionMaterial() != null;
+            Vector2 direction = enabled ? ShadowDirection(caster) : Vector2.zero;
+            List<Rect> footprint = enabled ? Footprint(caster) : null;
+            UpdateGroundOcclusion(caster, enabled && ground, footprint, radius, strength, direction);
+            UpdateObjectOcclusion(caster, enabled, footprint, radius, strength, direction);
+        }
+
+        private void UpdateGroundOcclusion(Caster caster, bool enabled, List<Rect> footprint, float radius, float strength, Vector2 direction)
+        {
+            SpriteRenderer blot = caster.Occlusion;
+            if (!enabled)
             {
-                if (caster.Occlusion != null && caster.Occlusion.enabled) caster.Occlusion.enabled = false;
+                if (blot != null && blot.enabled) blot.enabled = false;
                 return;
             }
-            SpriteRenderer blot = caster.Occlusion;
             if (blot == null)
             {
                 GameObject target = new GameObject("Окклюзия");
                 target.transform.SetParent(caster.Anchor, false);
                 blot = target.AddComponent<SpriteRenderer>();
-                blot.sprite = occlusionSprite;
                 blot.sharedMaterial = occlusionMaterial;
                 blot.sortingOrder = ShadowSortingOrder;
                 caster.Occlusion = blot;
             }
             if (!blot.enabled) blot.enabled = true;
-            Vector2 direction = ShadowDirection(caster);
-            Vector2 foot = caster.Anchor.position;
-            Vector2 sprite = occlusionSprite.bounds.size;
-            blot.transform.position = foot + direction * (width * .25f);
-            blot.transform.localScale = new Vector3(width / sprite.x, width * .45f / sprite.y, 1);
+            Sprite shape = OcclusionSprite(footprint, radius);
+            if (blot.sprite != shape) blot.sprite = shape;
+            blot.transform.localPosition = direction * (radius * OcclusionShift);
             blot.color = new Color(0, 0, 0, strength);
+        }
+
+        // Низ рисунка темнеет к земле (на высоту полутора радиусов) и к
+        // стороне тени: у стороны к огню — светлее, в середине — наполовину.
+        private void UpdateObjectOcclusion(Caster caster, bool enabled, List<Rect> footprint, float radius, float strength, Vector2 direction)
+        {
+            SpriteRenderer overlay = caster.OcclusionOverlay;
+            if (!enabled || caster.Source.sprite == null || occlusionObjectMaterial == null)
+            {
+                if (overlay != null && overlay.enabled) overlay.enabled = false;
+                return;
+            }
+            if (overlay == null)
+            {
+                GameObject target = new GameObject("Окклюзия на предмете");
+                target.transform.SetParent(caster.Source.transform, false);
+                // Чуть ближе к камере: рисуется сразу после своего рисунка.
+                target.transform.localPosition = new Vector3(0, 0, -.001f);
+                overlay = target.AddComponent<SpriteRenderer>();
+                overlay.sharedMaterial = occlusionObjectMaterial;
+                caster.OcclusionOverlay = overlay;
+            }
+            if (!overlay.enabled) overlay.enabled = true;
+            SpriteRenderer source = caster.Source;
+            if (overlay.sprite != source.sprite) overlay.sprite = source.sprite;
+            if (overlay.flipX != source.flipX) overlay.flipX = source.flipX;
+            if (overlay.sortingOrder != source.sortingOrder) overlay.sortingOrder = source.sortingOrder;
+            if (overlay.sortingLayerID != source.sortingLayerID) overlay.sortingLayerID = source.sortingLayerID;
+            float halfWidth = radius;
+            foreach (Rect cell in footprint)
+                halfWidth = Mathf.Max(halfWidth, Mathf.Abs(cell.xMin), Mathf.Abs(cell.xMax));
+            Vector2 foot = caster.Anchor.position;
+            Vector4 shapeData = new Vector4(direction.x, direction.y, halfWidth, radius * 1.5f);
+            Vector4 baseData = new Vector4(foot.x, foot.y, strength, 0);
+            if (caster.OcclusionShape == shapeData && caster.OcclusionBase == baseData) return;
+            caster.OcclusionShape = shapeData;
+            caster.OcclusionBase = baseData;
+            occlusionBlock ??= new MaterialPropertyBlock();
+            occlusionBlock.Clear();
+            occlusionBlock.SetVector(OcclusionBaseId, baseData);
+            occlusionBlock.SetVector(OcclusionShapeId, shapeData);
+            overlay.SetPropertyBlock(occlusionBlock);
+        }
+
+        // Основание от опоры (единицы мира, Y вверх): кистью — клетки,
+        // прямоугольником — он; без основания — полоса у низа рисунка, у
+        // людей — пятно у ног.
+        private List<Rect> Footprint(Caster caster)
+        {
+            if (caster.Footprint != null && caster.Footprint.Count > 0) return caster.Footprint;
+            if (caster.FallbackFootprint == null)
+            {
+                Bounds bounds = caster.Source.bounds;
+                float width = bounds.size.x * (caster.People ? .4f : .7f);
+                float depth = Mathf.Max(.05f, width * (caster.People ? .45f : .25f));
+                float center = bounds.center.x - caster.Anchor.position.x;
+                caster.FallbackFootprint = new List<Rect> { new Rect(center - width / 2, -depth / 2, width, depth) };
+            }
+            return caster.FallbackFootprint;
+        }
+
+        // Пятно по форме основания: внутри — полная темнота, снаружи спадает
+        // до нуля на radius. Опора спрайта — опора предмета. Одинаковые формы
+        // делят одно пятно.
+        private Sprite OcclusionSprite(List<Rect> cells, float radius)
+        {
+            System.Text.StringBuilder key = new System.Text.StringBuilder(radius.ToString("0.###"));
+            foreach (Rect cell in cells)
+                key.Append('|').Append(cell.x.ToString("0.###")).Append(',').Append(cell.y.ToString("0.###"))
+                    .Append(',').Append(cell.width.ToString("0.###")).Append(',').Append(cell.height.ToString("0.###"));
+            string id = key.ToString();
+            if (occlusionSprites.TryGetValue(id, out Sprite cached) && cached != null) return cached;
+
+            Rect bounds = cells[0];
+            foreach (Rect cell in cells)
+                bounds = Rect.MinMaxRect(Mathf.Min(bounds.xMin, cell.xMin), Mathf.Min(bounds.yMin, cell.yMin),
+                    Mathf.Max(bounds.xMax, cell.xMax), Mathf.Max(bounds.yMax, cell.yMax));
+            Rect area = Rect.MinMaxRect(bounds.xMin - radius, bounds.yMin - radius, bounds.xMax + radius, bounds.yMax + radius);
+            const int MaxSide = 128;
+            float texel = Mathf.Max(radius / 8, area.width / MaxSide, area.height / MaxSide);
+            int width = Mathf.Clamp(Mathf.CeilToInt(area.width / texel), 2, MaxSide);
+            int height = Mathf.Clamp(Mathf.CeilToInt(area.height / texel), 2, MaxSide);
+            // Расстояние до основания (в текселях): два прохода фаски.
+            float[] distance = new float[width * height];
+            const float Far = 1e6f, Diagonal = 1.41421356f;
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    Vector2 point = new Vector2(area.xMin + (x + .5f) * texel, area.yMin + (y + .5f) * texel);
+                    bool inside = false;
+                    foreach (Rect cell in cells)
+                        if (cell.Contains(point)) { inside = true; break; }
+                    distance[y * width + x] = inside ? 0 : Far;
+                }
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    float d = distance[y * width + x];
+                    if (x > 0) d = Mathf.Min(d, distance[y * width + x - 1] + 1);
+                    if (y > 0) d = Mathf.Min(d, distance[(y - 1) * width + x] + 1);
+                    if (x > 0 && y > 0) d = Mathf.Min(d, distance[(y - 1) * width + x - 1] + Diagonal);
+                    if (x < width - 1 && y > 0) d = Mathf.Min(d, distance[(y - 1) * width + x + 1] + Diagonal);
+                    distance[y * width + x] = d;
+                }
+            for (int y = height - 1; y >= 0; y--)
+                for (int x = width - 1; x >= 0; x--)
+                {
+                    float d = distance[y * width + x];
+                    if (x < width - 1) d = Mathf.Min(d, distance[y * width + x + 1] + 1);
+                    if (y < height - 1) d = Mathf.Min(d, distance[(y + 1) * width + x] + 1);
+                    if (x < width - 1 && y < height - 1) d = Mathf.Min(d, distance[(y + 1) * width + x + 1] + Diagonal);
+                    if (x > 0 && y < height - 1) d = Mathf.Min(d, distance[(y + 1) * width + x - 1] + Diagonal);
+                    distance[y * width + x] = d;
+                }
+            byte[] alpha = new byte[width * height];
+            for (int i = 0; i < alpha.Length; i++)
+            {
+                float t = Mathf.Clamp01(1 - distance[i] * texel / radius);
+                alpha[i] = (byte)Mathf.RoundToInt(t * t * 255);
+            }
+            Texture2D texture = Own(new Texture2D(width, height, TextureFormat.Alpha8, false)
+            {
+                name = "Окклюзия основания", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear
+            });
+            texture.LoadRawTextureData(alpha);
+            texture.Apply();
+            Vector2 pivot = new Vector2(-area.xMin / (width * texel), -area.yMin / (height * texel));
+            Sprite sprite = Own(Sprite.Create(texture, new Rect(0, 0, width, height), pivot, 1 / texel, 0, SpriteMeshType.FullRect));
+            if (occlusionSprites.Count > 512) occlusionSprites.Clear();
+            occlusionSprites[id] = sprite;
+            return sprite;
         }
 
         // Куда от основания уходит тень предмета (единичный вектор на экране).
         private Vector2 ShadowDirection(Caster caster)
         {
-            Vector2 center = caster.Source.bounds.center;
             float best = float.PositiveInfinity;
             Vector2 direction = Vector2.zero;
             foreach (ShadowLight light in shadowLights)
@@ -379,27 +528,14 @@ namespace KingdomSurvival.LocationRendering
             Shader shader = Resources.Load<Shader>("LocationRendering/LocationOcclusion");
             if (shader == null) return null;
             occlusionMaterial = Own(new Material(shader) { name = "Окклюзия места" });
-            const int size = 64;
-            Texture2D texture = Own(new Texture2D(size, size, TextureFormat.Alpha8, false)
-            {
-                name = "Окклюзия места", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear
-            });
-            byte[] alpha = new byte[size * size];
-            for (int y = 0; y < size; y++)
-                for (int x = 0; x < size; x++)
-                {
-                    float dx = (x + .5f) / size * 2 - 1, dy = (y + .5f) / size * 2 - 1;
-                    float t = Mathf.Clamp01(1 - (dx * dx + dy * dy));
-                    alpha[y * size + x] = (byte)Mathf.RoundToInt(t * t * 255);
-                }
-            texture.LoadRawTextureData(alpha);
-            texture.Apply();
-            occlusionSprite = Own(Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(.5f, .5f), size));
+            Shader onObject = Resources.Load<Shader>("LocationRendering/LocationOcclusionObject");
+            if (onObject != null) occlusionObjectMaterial = Own(new Material(onObject) { name = "Окклюзия на предмете" });
             return occlusionMaterial;
         }
 
-        // Сколько сейчас видимых пятен окклюзии (для проверки).
+        // Сколько сейчас видимых пятен окклюзии на земле и на предметах (для проверки).
         public int VisibleOcclusionCount => casters.Count(caster => caster.Occlusion != null && caster.Occlusion.enabled);
+        public int VisibleObjectOcclusionCount => casters.Count(caster => caster.OcclusionOverlay != null && caster.OcclusionOverlay.enabled);
 
         // Включённые местные источники с тенями: позиция и радиус в мире.
         // Свет формы и свет-рисунок — без радиуса (действует везде).

@@ -1,9 +1,9 @@
 // ПР-12М: окклюзия на самом предмете — затемнение низа рисунка со стороны
 // тени. Рисуется тем же спрайтом поверх предмета и умножает его цвет: к
 // земле (_OccBase.y) темнее, выше высоты _OccShape.w — без затемнения;
-// поперёк — по направлению тени _OccShape.xy: сторона тени темнее, сторона
-// к свету светлее (полуширина основания _OccShape.z). Без направления —
-// ровно по низу. Сила — _OccBase.z.
+// поперёк — по направлению тени _OccShape.xy (длина — выраженность 0..1):
+// сторона тени темнее, сторона к свету светлее (полуширина основания
+// _OccShape.z). Без тени — ровно по низу. Сила — _OccBase.z.
 Shader "Kingdom Survival/Location Occlusion Object"
 {
     Properties
@@ -75,10 +75,11 @@ Shader "Kingdom Survival/Location Occlusion Object"
                 half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
                 float2 offset = input.world - _OccBase.xy;
                 float height = saturate(1 - max(0, offset.y) / max(1e-4, _OccShape.w));
+                // Направление тени с выраженностью 0..1: без тени — ровно по низу,
+                // с полной — сторона тени тёмная, сторона к свету светлая; между —
+                // плавно.
                 float2 direction = _OccShape.xy;
-                float side = dot(direction, direction) > 1e-6
-                    ? saturate(0.5 + 0.5 * dot(offset, direction) / max(1e-4, _OccShape.z))
-                    : 1;
+                float side = saturate(1 - 0.5 * length(direction) + 0.5 * dot(offset, direction) / max(1e-4, _OccShape.z));
                 half dark = saturate(_OccBase.z) * height * height * side * alpha;
                 return half4((1 - dark).xxx, 1);
             }

@@ -70,6 +70,8 @@ namespace KingdomSurvival.LocationRendering
         {
             public Vector2 Position;
             public float Radius;
+            // Доля силы огня (мерцание, день) 0..1.
+            public float Weight;
         }
 
         private readonly List<ShadowLight> shadowLights = new List<ShadowLight>();
@@ -568,22 +570,36 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
-        // Куда от основания уходит тень предмета (единичный вектор на экране).
+        // Куда от основания уходит тень предмета и насколько она выражена:
+        // смесь направлений от огней (вклад спадает к краю радиуса и с силой
+        // огня) и от солнца (по силе его тени). Длина 0..1 — плавно, без
+        // скачка на краю света и при смене суток; 0 — тени нет, окклюзия ровно
+        // вокруг основания.
         private Vector2 ShadowDirection(Caster caster)
         {
-            float best = float.PositiveInfinity;
-            Vector2 direction = Vector2.zero;
+            Vector2 foot = caster.Anchor.position;
+            Vector2 sum = Vector2.zero;
+            float total = 0;
             foreach (ShadowLight light in shadowLights)
             {
                 if (float.IsInfinity(light.Radius)) continue;
-                Vector2 away = (Vector2)caster.Anchor.position - light.Position;
+                Vector2 away = foot - light.Position;
                 float distance = away.magnitude;
-                if (distance > light.Radius || distance >= best) continue;
-                best = distance;
-                direction = distance > 1e-4f ? away / distance : Vector2.zero;
+                if (distance >= light.Radius || distance < 1e-4f) continue;
+                float t = 1 - distance / light.Radius;
+                float weight = Mathf.SmoothStep(0, 1, Mathf.Clamp01(t * 3)) * light.Weight;
+                sum += away / distance * weight;
+                total += weight;
             }
-            if (!float.IsInfinity(best) || !caster.Sun || sunOpacity <= .001f) return direction;
-            return sunRaw.sqrMagnitude > 1e-8f ? sunRaw.normalized : Vector2.zero;
+            if (caster.Sun && sunRaw.sqrMagnitude > 1e-8f)
+            {
+                float weight = Mathf.SmoothStep(0, 1, Mathf.Clamp01(sunOpacity * 3));
+                sum += sunRaw.normalized * weight;
+                total += weight;
+            }
+            if (total < 1e-4f) return Vector2.zero;
+            // Направление — средневзвешенное, выраженность — до 1.
+            return sum / Mathf.Max(1, total);
         }
 
         private Material OcclusionMaterial()
@@ -617,7 +633,8 @@ namespace KingdomSurvival.LocationRendering
                 shadowLights.Add(new ShadowLight
                 {
                     Position = light.transform.position,
-                    Radius = point ? light.pointLightOuterRadius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y)) : float.PositiveInfinity
+                    Radius = point ? light.pointLightOuterRadius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y)) : float.PositiveInfinity,
+                    Weight = Mathf.Clamp01(light.intensity)
                 });
             }
         }

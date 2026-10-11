@@ -167,6 +167,39 @@ namespace KingdomSurvival.LocationRendering.Tests
             Assert.That(brightness[1], Is.LessThan(brightness[0]), "Окклюзия темнит землю у основания: " + string.Join(", ", brightness));
         }
 
+        // Огонь отходит от ящика за край своего радиуса: сдвиг пятна окклюзии
+        // в тень убывает плавно, без скачка на краю света.
+        [UnityTest]
+        public IEnumerator OcclusionFadesSmoothlyAtTheEdgeOfTheLight()
+        {
+            LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz_shadow_test", UseWorldLighting = false, Lighting = LocationLightingMode.Indoor };
+            visual.ShadowStyle.Occlusion = 1;
+            visual.Objects.Add(Crate());
+            LocationVisualObject fire = new LocationVisualObject { Id = "fire", Name = "Огонь", LightOnly = true, Position = new Vector2(.45f, .5f) };
+            fire.Light.Enabled = true; fire.Light.Radius = 3; fire.Light.Intensity = 2; fire.Light.Animation = LocationLightAnimation.None;
+            visual.Objects.Add(fire);
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null))
+            {
+                float previous = -1, largestStep = 0;
+                for (int i = 0; i <= 40; i++)
+                {
+                    renderer.MoveObject("fire", new Vector2(.45f - i * .01f, .5f));
+                    renderer.SetTime(1, 0);
+                    SpriteRenderer blot = System.Array.Find(renderer.Root.GetComponentsInChildren<SpriteRenderer>(), item => item.name == "Окклюзия");
+                    float shift = blot.transform.localPosition.magnitude;
+                    if (previous >= 0)
+                    {
+                        Assert.That(shift, Is.LessThanOrEqualTo(previous + 1e-4f), "Дальше от огня — не сильнее.");
+                        largestStep = Mathf.Max(largestStep, previous - shift);
+                    }
+                    previous = shift;
+                }
+                Assert.That(previous, Is.LessThan(1e-3f), "За краем света сдвига нет.");
+                Assert.That(largestStep, Is.LessThan(visual.ShadowStyle.OcclusionRadius * .5f * .3f), "Без скачка: шаг " + largestStep);
+            }
+            yield return null;
+        }
+
         [UnityTest]
         public IEnumerator FireCastsShadowsAtNight_AndIndoorHasNoSun()
         {

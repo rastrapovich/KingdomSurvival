@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using KingdomSurvival.ArtAssets;
 using KingdomSurvival.BattlefieldDatabase;
 using NUnit.Framework;
@@ -187,6 +188,70 @@ namespace KingdomSurvival.LocationRendering.Tests
                 }
                 yield return null;
             }
+        }
+
+        // Центр зелёного по строкам кадра: верхняя четверть и нижние строки пучка.
+        private static void GreenRows(Texture2D shot, out float topX, out float bottomX, out int rows)
+        {
+            List<float> centers = new List<float>();
+            for (int y = Height - 1; y >= 0; y--)
+            {
+                float sum = 0;
+                int count = 0;
+                for (int x = 0; x < Width; x++)
+                {
+                    Color color = shot.GetPixel(x, y);
+                    if (color.g > color.r + .3f && color.g > color.b + .3f) { sum += x; count++; }
+                }
+                if (count > 0) centers.Add(sum / count);
+            }
+            rows = centers.Count;
+            int quarter = Mathf.Max(1, rows / 4);
+            topX = centers.Take(quarter).Average();
+            bottomX = centers.Skip(rows - 3).Average();
+        }
+
+        // Реакция на проход в кадре: ноги слева — верх пучка уходит вправо,
+        // низ стоит; объект и ковёр гнутся одинаково; после ухода — как было.
+        [UnityTest]
+        public IEnumerator Grass_BendsAwayFromFeet_InFrame_CarpetAndObject()
+        {
+            Sprite blade = Sprite(16, 64, (x, y) => Mathf.Abs(x - .5f) < .3f ? Color.green : Color.clear);
+            ArtAssetDefinition asset = Asset("zz_blade", blade);
+            asset.Settings(ArtAssetView.Front).Pivot = new Vector2(.5f, .05f);
+            Dictionary<LocationScatterMode, float> shifts = new Dictionary<LocationScatterMode, float>();
+            foreach (LocationScatterMode mode in new[] { LocationScatterMode.Objects, LocationScatterMode.Carpet })
+            {
+                LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz_scatter", UseWorldLighting = false };
+                LocationScatterLayer layer = Layer(mode, asset.Id, new LocationScatterInstance { Position = new Vector2(.5f, 600 / 1080f) });
+                layer.Band = LocationVisualBand.World;
+                layer.Reaction.Enabled = true;
+                layer.Reaction.Radius = 1.5f;
+                layer.Reaction.Bend = .3f;
+                visual.ScatterLayers.Add(layer);
+                using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null) { VegetationReacts = true })
+                {
+                    Texture2D before = Shot(renderer, "bend-" + mode + "-before");
+                    renderer.SetActors(new[] { new LocationWorldRenderer.ActorFrame { Id = "hero", Pixel = new Vector2(930, 600) } }, 0);
+                    for (int i = 0; i < 60; i++) renderer.StepVegetation(1 / 60f);
+                    Texture2D bent = Shot(renderer, "bend-" + mode + "-bent");
+                    renderer.SetActors(new LocationWorldRenderer.ActorFrame[0], 0);
+                    for (int i = 0; i < 240; i++) renderer.StepVegetation(1 / 60f);
+                    Texture2D after = Shot(renderer, "bend-" + mode + "-after");
+                    GreenRows(before, out float topBefore, out float bottomBefore, out int rowsBefore);
+                    GreenRows(bent, out float topBent, out float bottomBent, out int rowsBent);
+                    GreenRows(after, out float topAfter, out _, out _);
+                    Assert.That(topBent - topBefore, Is.GreaterThan(4), mode + ": верх уходит от ног вправо (" + topBefore + " → " + topBent + ").");
+                    Assert.That(Mathf.Abs(bottomBent - bottomBefore), Is.LessThan(1.5f), mode + ": низ на месте.");
+                    Assert.That(rowsBent, Is.LessThanOrEqualTo(rowsBefore).And.GreaterThan(rowsBefore * .8f), mode + ": чуть примят, не провалился.");
+                    Assert.That(Mathf.Abs(topAfter - topBefore), Is.LessThan(.5f), mode + ": после ухода — как было.");
+                    shifts[mode] = topBent - topBefore;
+                    Object.Destroy(before); Object.Destroy(bent); Object.Destroy(after);
+                }
+                yield return null;
+            }
+            Assert.That(shifts[LocationScatterMode.Carpet], Is.EqualTo(shifts[LocationScatterMode.Objects]).Within(shifts[LocationScatterMode.Objects] * .35f),
+                "Ковёр и объект гнутся одним законом.");
         }
 
         [UnityTest]

@@ -14,6 +14,9 @@
 // (не темнеет ночью); огонь выключен — местные источники не освещают.
 // _KsLight.z = 1 — деталь земли: в проход нормалей не пишет, свет с
 // нормалями ложится на неё так же, как на землю под ней.
+// Реакция на проход (отдельный рисунок): _KsBend — смещение верха в мире и
+// опускание, _KsBendShape — опора по Y и 1/высота растения в пространстве
+// рисунка, закреплённая доля; _KsBendShape.y = 0 — без прогиба.
 Shader "Kingdom Survival/Location Sprite Adjust"
 {
     Properties
@@ -24,6 +27,8 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         _KsHsv("Hue (turns), Saturation, Brightness", Vector) = (0, 1, 1, 0)
         _KsUvRect("Particle UV rect (offset, scale)", Vector) = (0, 0, 1, 1)
         _KsLight("Sun, fire light share, ground-lit", Vector) = (1, 1, 0, 0)
+        _KsBend("Bend: top offset xy (world), drop (world)", Vector) = (0, 0, 0, 0)
+        _KsBendShape("Bend shape: root y, 1/height (object), pinned", Vector) = (0, 0, 0, 0)
         [MaterialToggle] _ZWrite("ZWrite", Float) = 0
         [HideInInspector] _Color("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor("RendererColor", Color) = (1,1,1,1)
@@ -41,7 +46,35 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         float4 _KsHsv;
         float4 _KsUvRect;
         float4 _KsLight;
+        float4 _KsBend;
+        float4 _KsBendShape;
     CBUFFER_END
+
+    // Реакция на проход у отдельного рисунка (не ковра: у ковра вершины
+    // гнутся на CPU тем же законом — LocationGrassBend). Вес по высоте над
+    // опорой в долях высоты растения: ниже закреплённой части — 0, к верху —
+    // квадратично. Смещение — в мире, опускание — вдоль оси рисунка. Одна и
+    // та же функция во всех проходах: цвет и нормаль совпадают по форме.
+    float KsBendWeight(float t, float pinned)
+    {
+        pinned = clamp(pinned, 0, 0.95);
+        float s = saturate((t - pinned) / (1 - pinned));
+        return s * s;
+    }
+
+    float3 KsObjectToWorld(float3 positionOS)
+    {
+        float3 world = TransformObjectToWorld(positionOS);
+    #if !defined(_KS_PARTICLE)
+        if (_KsBendShape.y > 0)
+        {
+            float weight = KsBendWeight((positionOS.y - _KsBendShape.x) * _KsBendShape.y, _KsBendShape.z);
+            float3 up = TransformObjectToWorldDir(float3(0, 1, 0));
+            world.xy += (_KsBend.xy - up.xy * _KsBend.z) * weight;
+        }
+    #endif
+        return world;
+    }
 
     half3 KsAdjust(half3 rgb, float3 hsv)
     {
@@ -194,9 +227,10 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 o.color = input.color * _Color * unity_SpriteColor;
                 o.adjust = float4(_KsHsv.xyz, 1);
             #endif
-                o.positionCS = TransformObjectToHClip(position);
+                float3 positionWS = KsObjectToWorld(position);
+                o.positionCS = TransformWorldToHClip(positionWS);
             #if defined(DEBUG_DISPLAY)
-                o.positionWS = TransformObjectToWorld(position);
+                o.positionWS = positionWS;
                 o.normalWS = TransformObjectToWorldDir(input.normal);
             #endif
                 o.uv = KsUv(input.uv.xy, o.adjust.w);
@@ -287,7 +321,8 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 o.tangentWS = TransformObjectToWorldDir(input.tangent.xyz);
                 o.bitangentWS = cross(o.normalWS, o.tangentWS) * input.tangent.w;
             #endif
-                o.positionCS = TransformObjectToHClip(position);
+                float3 positionWS = KsObjectToWorld(position);
+                o.positionCS = TransformWorldToHClip(positionWS);
                 o.uv = KsUv(input.uv.xy, o.flip);
                 return o;
             }
@@ -362,7 +397,8 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 o.color = input.color * _Color * unity_SpriteColor;
                 o.adjust = float4(_KsHsv.xyz, 1);
             #endif
-                o.positionCS = TransformObjectToHClip(position);
+                float3 positionWS = KsObjectToWorld(position);
+                o.positionCS = TransformWorldToHClip(positionWS);
                 o.uv = KsUv(input.uv.xy, o.adjust.w);
                 return o;
             }

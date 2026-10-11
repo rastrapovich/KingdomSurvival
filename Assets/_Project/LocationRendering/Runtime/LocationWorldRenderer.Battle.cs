@@ -31,6 +31,8 @@ namespace KingdomSurvival.LocationRendering
             public SpriteRenderer Image;
             public bool Seen;
             public Caster Caster;
+            public Vector2 Ground;
+            public bool Corpse;
         }
 
         private readonly Dictionary<string, BattleFigure> battleFigures = new Dictionary<string, BattleFigure>(StringComparer.Ordinal);
@@ -95,6 +97,8 @@ namespace KingdomSurvival.LocationRendering
                 rect = new Rect(rect.center.x - width / 2, rect.center.y - height / 2, width, height);
             }
 
+            figure.Ground = frame.Ground;
+            figure.Corpse = frame.Corpse;
             Vector2 ground = LocationVisualGeometry.PixelToWorld(Location, frame.Ground);
             figure.Anchor.localPosition = ground;
             Vector2 center = LocationVisualGeometry.PixelToWorld(Location, rect.center);

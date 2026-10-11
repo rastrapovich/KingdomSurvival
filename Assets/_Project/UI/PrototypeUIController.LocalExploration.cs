@@ -667,6 +667,8 @@ public partial class PrototypeUIController
         // Мир места — вдали от сцены глобальной карты: её камера его не видит.
         localRenderer.Root.transform.position = new Vector3(10000f, 10000f, 0f);
         localRenderer.SuppressOtherGlobalLights();
+        // Трава с «Реакцией на проход» уступает ногам отряда и врагов.
+        localRenderer.VegetationReacts = true;
         localGeometry = localRenderer.Geometry;
 
         localField.Clear();

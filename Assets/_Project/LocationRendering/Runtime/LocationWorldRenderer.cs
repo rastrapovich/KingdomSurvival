@@ -45,6 +45,9 @@ namespace KingdomSurvival.LocationRendering
             public readonly List<SpriteRenderer> RadialShadows = new List<SpriteRenderer>();
             public LocationResolvedVisual Resolved;
             public Light2D Light;
+            // Гнётся от прохода (слой раскидки с реакцией): рисунок — материалом
+            // с поправкой, прогиб — в шейдере.
+            public bool Bends;
         }
 
         private sealed class Actor
@@ -56,6 +59,8 @@ namespace KingdomSurvival.LocationRendering
             public CreatureAnimationPlayer Player;
             public UnitDefinitionData Unit;
             public HexFacing Facing = HexFacing.East;
+            // Опора ног в этом кадре — пиксели рисунка места.
+            public Vector2 Pixel;
             public bool Seen;
         }
 
@@ -368,8 +373,15 @@ namespace KingdomSurvival.LocationRendering
                 SpriteRenderer image = Image(imageObject, sprite, fullbright);
                 // Ассет без рисунка — заметная заглушка, а не «ящик».
                 if (part.Placeholder && resolved.FromAsset) image.color = new Color(1, .45f, .75f);
-                else if (!fullbright) ApplyColor(image, resolved.ColorAdjust, resolved, LitAsGround(part.Band));
+                else if (!fullbright) ApplyColor(image, resolved.ColorAdjust, resolved, LitAsGround(part.Band), entry.Bends);
                 Fit(image, part.Height, part.Pivot, resolved.FlipX, Vector2.zero, resolved.Stretch, resolved.Rotation);
+                if (entry.Bends)
+                {
+                    // Запас под прогиб: верхушка у края кадра не исчезает раньше времени.
+                    Bounds bounds = image.localBounds;
+                    bounds.Expand(new Vector3(bounds.size.y, bounds.size.y, 0) * (LocationScatterReaction.MaxBend + LocationScatterReaction.MaxPress) * 2);
+                    image.localBounds = bounds;
+                }
                 image.sortingOrder = LocationVisualGeometry.SortOrder(part.Band, anchor.localPosition.y, part.OrderOffset);
                 entry.Images.Add(image);
                 entry.Parts.Add(part);
@@ -436,6 +448,7 @@ namespace KingdomSurvival.LocationRendering
             Seconds = seconds;
             AnimateObjects();
             AnimateScatter();
+            StepVegetationByClock(seconds);
             ApplyLighting();
         }
 
@@ -689,6 +702,7 @@ namespace KingdomSurvival.LocationRendering
 
         private void LayoutActor(Actor actor, ActorFrame frame, float hexWorld, float seconds)
         {
+            actor.Pixel = frame.Pixel;
             actor.Anchor.localPosition = LocationVisualGeometry.PixelToWorld(Location, frame.Pixel);
             if (frame.Direction.sqrMagnitude > 1e-6f)
                 actor.Facing = FacingFrom(frame.Direction);
@@ -787,14 +801,16 @@ namespace KingdomSurvival.LocationRendering
         // groundLit — деталь земли: свет с нормалями ложится на неё как на
         // землю под ней (своя нормаль не пишется), и солнце, и огонь —
         // галочки света ассета на неё не действуют.
-        private void ApplyColor(SpriteRenderer image, LocationColorAdjust adjust, LocationResolvedVisual resolved = null, bool groundLit = false)
+        // bends — гнётся от прохода: всегда материал с поправкой (прогиб в нём),
+        // свет — тот же, что выбрал бы общий материал.
+        private void ApplyColor(SpriteRenderer image, LocationColorAdjust adjust, LocationResolvedVisual resolved = null, bool groundLit = false, bool bends = false)
         {
             bool identity = adjust == null || adjust.IsIdentity;
             bool lighting = resolved != null && !resolved.DefaultLighting && !groundLit;
             if (!identity) image.color = adjust.Tint;
             bool hsv = !identity && adjust.HasHsv;
             if (adjustLit == null) return;
-            if (!hsv && !lighting)
+            if (!hsv && !lighting && !bends)
             {
                 if (groundLit && adjustGround != null) image.sharedMaterial = adjustGround;
                 return;
@@ -903,6 +919,13 @@ namespace KingdomSurvival.LocationRendering
             // CPU-данные высоты принадлежат месту и уходят вместе с ним.
             Height = null;
             groundPieces.Clear();
+            // Временный прогиб травы — только в памяти рендерера.
+            plants.Clear();
+            activePlants.Clear();
+            plantCells.Clear();
+            bentCarpets.Clear();
+            bendSources.Clear();
+            radiusRings.Clear();
             Destroy(Root);
             foreach (UnityEngine.Object item in owned)
             {

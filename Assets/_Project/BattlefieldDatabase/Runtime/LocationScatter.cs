@@ -41,6 +41,67 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float Weight = 1;
         public float ScaleMultiplier = 1;
         public bool Enabled = true;
+        // Реакция на проход: гнётся ли этот ассет, если она включена у слоя
+        // (камни в том же слое не гнутся).
+        public bool Bends = true;
+    }
+
+    public enum LocationScatterReactionPreset { SmallGrass, TallGrass, SoftBush }
+
+    // Реакция растительности на проход: временный визуальный прогиб от ног
+    // фигур и плавное восстановление. Не меняет проходимость, гексы, маршрут
+    // и состояние мира; в базу пишутся только настройки, не прогиб.
+    // Доли — от высоты растения над опорой; радиус — в размерах клетки боя
+    // (рост фигур тоже от неё), поэтому камера и масштаб его не меняют.
+    [Serializable]
+    public sealed class LocationScatterReaction
+    {
+        public const float MinRadius = .05f, MaxRadius = 2f;
+        public const float MaxBend = .5f, MaxPress = .25f;
+        public const float MinTime = .02f, MaxTime = 5f;
+        public const float MaxPinned = .9f;
+
+        public bool Enabled;
+        // Радиус воздействия, клеток боя.
+        public float Radius = .45f;
+        // Наибольшее отклонение верха, доля высоты.
+        public float Bend = .1f;
+        // Приминание: опускание верха при полном контакте, доля высоты.
+        public float Press = .03f;
+        // Время, за которое растение уступает и возвращается (с).
+        public float ReactTime = .12f;
+        public float RecoverTime = .6f;
+        // Закреплённая нижняя часть (доля высоты над опорой) — не сдвигается.
+        public float Pinned = .25f;
+        // Влияние скорости: 0 — стоящий гнёт так же, как идущий; 1 — только идущий.
+        public float SpeedInfluence = .3f;
+        // Отладка: контур воздействия у фигур.
+        public bool ShowRadius;
+
+        public float SafeRadius => Mathf.Clamp(Radius, MinRadius, MaxRadius);
+        public float SafeBend => Mathf.Clamp(Bend, 0, MaxBend);
+        public float SafePress => Mathf.Clamp(Press, 0, MaxPress);
+        public float SafeReactTime => Mathf.Clamp(ReactTime, MinTime, MaxTime);
+        public float SafeRecoverTime => Mathf.Clamp(RecoverTime, MinTime, MaxTime);
+        public float SafePinned => Mathf.Clamp(Pinned, 0, MaxPinned);
+        public float SafeSpeedInfluence => Mathf.Clamp01(SpeedInfluence);
+
+        // Стартовые настройки эффекта, не ботаническая классификация.
+        public void Apply(LocationScatterReactionPreset preset)
+        {
+            switch (preset)
+            {
+                case LocationScatterReactionPreset.TallGrass:
+                    Radius = .55f; Bend = .2f; Press = .04f; ReactTime = .15f; RecoverTime = .9f; Pinned = .2f; SpeedInfluence = .35f;
+                    break;
+                case LocationScatterReactionPreset.SoftBush:
+                    Radius = .7f; Bend = .12f; Press = .02f; ReactTime = .22f; RecoverTime = 1.2f; Pinned = .35f; SpeedInfluence = .25f;
+                    break;
+                default:
+                    Radius = .45f; Bend = .1f; Press = .03f; ReactTime = .12f; RecoverTime = .6f; Pinned = .25f; SpeedInfluence = .3f;
+                    break;
+            }
+        }
     }
 
     // Настройки кисти слоя. Пиксели — пиксели рисунка места. Пары min/max —
@@ -140,10 +201,20 @@ namespace KingdomSurvival.BattlefieldDatabase
         public bool BlocksMovement;
         public List<LocationScatterEntry> Assets = new List<LocationScatterEntry>();
         public LocationScatterBrush Brush = new LocationScatterBrush();
+        public LocationScatterReaction Reaction = new LocationScatterReaction();
         public List<LocationScatterInstance> Instances = new List<LocationScatterInstance>();
         public int NextKey = 1;
 
         public string InstanceId(LocationScatterInstance instance) => Id + "#" + instance.Key;
+
+        // Гнётся ли экземпляр этого ассета от прохода. Ассета уже нет в
+        // кисти — как у слоя.
+        public bool Bends(string assetId)
+        {
+            if (Reaction == null || !Reaction.Enabled || Hidden) return false;
+            LocationScatterEntry entry = Assets?.Find(item => item != null && item.AssetId == assetId);
+            return entry == null || entry.Bends;
+        }
 
         // Порядок ковра: детали земли или передний план.
         public LocationVisualBand CarpetBand => Band == LocationVisualBand.Foreground ? LocationVisualBand.Foreground

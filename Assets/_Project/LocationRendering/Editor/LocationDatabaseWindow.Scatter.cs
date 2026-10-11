@@ -90,6 +90,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
             BuildScatterTools(selected);
             BuildScatterLayerSettings(selected);
+            BuildScatterReaction(selected);
             BuildScatterAssets(selected);
             BuildScatterBrush(selected);
             BuildScatterLook(selected);
@@ -184,6 +185,80 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
             else Help("Ковёр не сортируется с людьми, не отбрасывает тени и не мешает проходу. Анимация ассетов идёт, фаза разложена по группам.");
         }
+
+        // Реакция на проход — сворачиваемый раздел. Включение и выбор ассетов
+        // пересобирают слой (у гнущихся рисунков ковра — больше вершин);
+        // числа читаются на ходу, без пересборки.
+        private void BuildScatterReaction(LocationScatterLayer layer)
+        {
+            if (layer.Reaction == null) layer.Reaction = new LocationScatterReaction();
+            LocationScatterReaction reaction = layer.Reaction;
+            int from = settings.childCount;
+            Toggle("Реагирует на персонажей", reaction.Enabled, value => reaction.Enabled = value, true);
+            settings[settings.childCount - 1].tooltip = "Мягкая растительность слоя плавно отклоняется от ног проходящих и возвращается после. " +
+                                                        "Только картинка: проходимость, гексы и маршрут не меняются.";
+            if (reaction.Enabled)
+            {
+                VisualElement presets = Row();
+                void Preset(string title, LocationScatterReactionPreset preset) =>
+                    AddButton(presets, title, () => { BrushEdit(() => reaction.Apply(preset)); BuildSettings(); });
+                Preset("Мелкая трава", LocationScatterReactionPreset.SmallGrass);
+                Preset("Высокая трава", LocationScatterReactionPreset.TallGrass);
+                Preset("Мягкий куст", LocationScatterReactionPreset.SoftBush);
+                BrushNumber("Радиус воздействия (клеток боя)", reaction.Radius, LocationScatterReaction.MinRadius, 1.5f,
+                    value => reaction.Radius = Mathf.Clamp(value, LocationScatterReaction.MinRadius, LocationScatterReaction.MaxRadius),
+                    "Насколько близкий проход задевает растение — в размерах клетки боя (от неё же рост фигур), не зависит от камеры.");
+                BrushNumber("Сила прогиба (доля высоты)", reaction.Bend, 0, LocationScatterReaction.MaxBend,
+                    value => reaction.Bend = Mathf.Clamp(value, 0, LocationScatterReaction.MaxBend),
+                    "Наибольшее отклонение верхушки: 0,1 — на десятую часть высоты растения над опорой.");
+                BrushNumber("Приминание (доля высоты)", reaction.Press, 0, LocationScatterReaction.MaxPress,
+                    value => reaction.Press = Mathf.Clamp(value, 0, LocationScatterReaction.MaxPress),
+                    "Насколько опускается верхушка при полном контакте. Растение не исчезает и не меняет цвет.");
+                BrushNumber("Скорость реакции (с)", reaction.ReactTime, LocationScatterReaction.MinTime, 1,
+                    value => reaction.ReactTime = Mathf.Clamp(value, LocationScatterReaction.MinTime, LocationScatterReaction.MaxTime),
+                    "За сколько секунд растение уступает ногам.");
+                BrushNumber("Время восстановления (с)", reaction.RecoverTime, LocationScatterReaction.MinTime, 3,
+                    value => reaction.RecoverTime = Mathf.Clamp(value, LocationScatterReaction.MinTime, LocationScatterReaction.MaxTime),
+                    "За сколько секунд возвращается исходная форма после ухода. Обычно дольше реакции.");
+                BrushNumber("Закреплённая нижняя часть (доля высоты)", reaction.Pinned, 0, LocationScatterReaction.MaxPinned,
+                    value => reaction.Pinned = Mathf.Clamp(value, 0, LocationScatterReaction.MaxPinned),
+                    "Нижняя доля рисунка над опорой стоит на месте — корни не едут. Выше прогиб плавно растёт к верхушке.");
+                BrushNumber("Влияние скорости (0–1)", reaction.SpeedInfluence, 0, 1, value => reaction.SpeedInfluence = Mathf.Clamp01(value),
+                    "0 — стоящий рядом гнёт так же, как идущий; 1 — прогиб только от движения. Между — у стоящего остаётся мягкий прогиб.");
+                BrushToggle("Показывать радиус (отладка)", reaction.ShowRadius, value => reaction.ShowRadius = value);
+                settings[settings.childCount - 1].tooltip = "Контур воздействия у ног каждой фигуры — в игре и тестовом запуске.";
+
+                List<LocationScatterEntry> entries = layer.Assets.Where(item => item != null && !string.IsNullOrEmpty(item.AssetId)).ToList();
+                if (entries.Count > 1)
+                {
+                    Label title = new Label("Гнутся (камни и твёрдое — снять):");
+                    title.style.marginTop = 4;
+                    settings.Add(title);
+                    VisualElement grid = Row();
+                    foreach (LocationScatterEntry entry in entries)
+                    {
+                        ArtAssetDefinition asset = ArtAssetDatabaseAsset.FindCurrent(entry.AssetId);
+                        UnityEngine.UIElements.Toggle bends = new UnityEngine.UIElements.Toggle(asset != null ? asset.Name : entry.AssetId) { value = entry.Bends };
+                        bends.style.width = 180;
+                        bends.labelElement.style.minWidth = 130;
+                        bends.RegisterValueChangedCallback(evt => Change(() => entry.Bends = evt.newValue));
+                        grid.Add(bends);
+                    }
+                }
+                if (layer.Mode == LocationScatterMode.Objects && (layer.ProjectsShadow || layer.ProjectsFireShadow))
+                    settings.Add(new HelpBox("Тени слоя от солнца и огня остаются неподвижными: прогиб в тени не передаётся. " +
+                                             "Мягкой траве тени обычно не нужны — снимите их у слоя.", HelpBoxMessageType.Warning));
+                Help("Эффект виден в игре и в тестовом запуске места (после изменения включения или ассетов — перезапустить). " +
+                     "В окне базы трава не шевелится; прогиб в базу не записывается.");
+            }
+            Foldout foldout = new Foldout { text = "Реакция на проход" + (reaction.Enabled ? " · включена" : ""), value = reactionFoldout };
+            foldout.RegisterValueChangedCallback(evt => { if (evt.target == foldout) reactionFoldout = evt.newValue; });
+            foldout.style.marginTop = 10;
+            while (settings.childCount > from) foldout.Add(settings[from]);
+            settings.Add(foldout);
+        }
+
+        private bool reactionFoldout = true;
 
         private static string BandTitle(LocationVisualBand band)
         {
@@ -412,7 +487,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocationScatterLayer current = ScatterLayer;
                 if (current != null)
                     foreach (LocationScatterEntry entry in current.Assets.Where(item => item != null))
-                        layer.Assets.Add(new LocationScatterEntry { AssetId = entry.AssetId, Weight = entry.Weight, ScaleMultiplier = entry.ScaleMultiplier, Enabled = entry.Enabled });
+                        layer.Assets.Add(new LocationScatterEntry { AssetId = entry.AssetId, Weight = entry.Weight, ScaleMultiplier = entry.ScaleMultiplier, Enabled = entry.Enabled, Bends = entry.Bends });
                 visual.ScatterLayers.Add(layer);
                 scatterLayerId = layer.Id;
             }, true);

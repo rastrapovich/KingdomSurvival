@@ -46,6 +46,7 @@ namespace KingdomSurvival.LocationRendering
         {
             ScatterView view = new ScatterView { Layer = layer, Mode = layer.Mode, Hidden = layer.Hidden, Root = Child("Раскидка · " + layer.Name).transform };
             scatter[layer.Id] = view;
+            MarkPlantsDirty();
             if (layer.Hidden) return;
             if (layer.Mode == LocationScatterMode.Carpet)
             {
@@ -62,7 +63,7 @@ namespace KingdomSurvival.LocationRendering
             Transform anchor = new GameObject(item.Name).transform;
             anchor.SetParent(view.Root, false);
             anchor.localPosition = LocationVisualGeometry.ToWorld(Location, item.Position);
-            Placed entry = new Placed { Data = item, Anchor = anchor };
+            Placed entry = new Placed { Data = item, Anchor = anchor, Bends = view.Layer.Bends(instance.AssetId) };
             placed.Add(entry);
             BuildObjectArt(entry, null);
             view.Objects[instance.Key] = entry;
@@ -83,6 +84,7 @@ namespace KingdomSurvival.LocationRendering
             view.Carpet = null;
             if (view.Root != null) Destroy(view.Root.gameObject);
             scatter.Remove(view.Layer.Id);
+            MarkPlantsDirty();
         }
 
         // После мазка, ластика или перекраски: объекты — добавить новые,
@@ -97,6 +99,7 @@ namespace KingdomSurvival.LocationRendering
                 return;
             }
             if (layer.Hidden) return;
+            MarkPlantsDirty();
             if (layer.Mode == LocationScatterMode.Carpet)
             {
                 view.Carpet?.Rebuild();

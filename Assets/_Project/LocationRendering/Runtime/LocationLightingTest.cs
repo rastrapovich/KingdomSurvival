@@ -48,7 +48,7 @@ namespace KingdomSurvival.LocationRendering
             List<string> errors = LocationVisualGeometry.Validate(location, visual, field);
             if (errors.Count > 0) throw new InvalidOperationException(string.Join("\n", errors));
             Renderer?.Dispose();
-            Renderer = new LocationWorldRenderer(location, visual, field, transform);
+            Renderer = new LocationWorldRenderer(location, visual, field, transform) { VegetationReacts = true };
             Vector2 start = LocationVisualGeometry.ToPixel(location, visual.TestStartPoint);
             int count = Mathf.Clamp(visual.TestFollowers + 1, 1, 5);
             float spacing = Renderer.HexSizePixels * 1.2f;

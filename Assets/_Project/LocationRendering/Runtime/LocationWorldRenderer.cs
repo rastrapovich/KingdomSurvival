@@ -61,6 +61,7 @@ namespace KingdomSurvival.LocationRendering
             public HexFacing Facing = HexFacing.East;
             // Опора ног в этом кадре — пиксели рисунка места.
             public Vector2 Pixel;
+            public ActorKind Kind;
             public bool Seen;
         }
 
@@ -398,14 +399,19 @@ namespace KingdomSurvival.LocationRendering
                 // Форма у основания, независимая от рисунка и его прозрачных полей.
                 // URP 17.6 не предоставляет runtime-setter контура. Используем
                 // обычный авторский prefab с единичным основанием, масштабируем его.
+                // Основание кистью — по прямоугольнику на каждую полосу клеток
+                // маски (а не один по её габаритам): свет закрывает только
+                // нарисованная опора.
                 GameObject template = Resources.Load<GameObject>("LocationRendering/GroundShadowCaster");
-                if (template != null)
-                {
-                    GameObject shadow = UnityEngine.Object.Instantiate(template, anchor, false);
-                    shadow.name = "Перекрытие света";
-                    shadow.transform.localPosition = resolved.FootprintOffset;
-                    shadow.transform.localScale = new Vector3(resolved.FootprintSize.x, resolved.FootprintSize.y, 1);
-                }
+                List<Rect> shape = OcclusionFootprint(resolved);
+                if (template != null && shape != null)
+                    foreach (Rect cell in shape)
+                    {
+                        GameObject shadow = UnityEngine.Object.Instantiate(template, anchor, false);
+                        shadow.name = "Перекрытие света";
+                        shadow.transform.localPosition = cell.center;
+                        shadow.transform.localScale = new Vector3(cell.width, cell.height, 1);
+                    }
             }
         }
 
@@ -703,6 +709,7 @@ namespace KingdomSurvival.LocationRendering
         private void LayoutActor(Actor actor, ActorFrame frame, float hexWorld, float seconds)
         {
             actor.Pixel = frame.Pixel;
+            actor.Kind = frame.Kind;
             actor.Anchor.localPosition = LocationVisualGeometry.PixelToWorld(Location, frame.Pixel);
             if (frame.Direction.sqrMagnitude > 1e-6f)
                 actor.Facing = FacingFrom(frame.Direction);

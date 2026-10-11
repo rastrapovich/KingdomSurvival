@@ -190,6 +190,9 @@ namespace KingdomSurvival.BattlefieldDatabase
         public int OrderOffset;
         public bool BlocksMovement;
         public Vector2 Footprint = new Vector2(1.2f, .55f);
+        // Экземпляр раскидки: проход переопределён («не мешает»), а форма
+        // основания (окклюзия) — как у ассета, не прямоугольник Footprint.
+        [NonSerialized] public bool AssetFootprint;
         public bool CastsShadow;
         public LocationLightDefinition Light = new LocationLightDefinition();
         // ПР-12М: только источник света, без рисунка.

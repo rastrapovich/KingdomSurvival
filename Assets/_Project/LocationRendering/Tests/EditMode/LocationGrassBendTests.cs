@@ -398,6 +398,150 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
+        // ------------------------------------------------------------------
+        // Расширенные настройки
+        // ------------------------------------------------------------------
+
+        [Test]
+        public void ZoneAndShape_Settings_ChangeLawAsDescribed()
+        {
+            Assert.That(LocationGrassBend.Falloff(3, 10, core: .4f), Is.EqualTo(1), "Внутри ядра — полная сила.");
+            Assert.That(LocationGrassBend.Falloff(5, 10, softness: 4), Is.GreaterThan(LocationGrassBend.Falloff(5, 10)), "Мягкость края держит силу дольше.");
+            Assert.That(LocationGrassBend.Falloff(9.99f, 10, .5f, 4), Is.LessThan(.01f), "У края — к нулю при любой форме.");
+            Assert.That(LocationGrassBend.Weight(.6f, 0, 1), Is.EqualTo(.6f).Within(1e-5f), "Изгиб 1 — прямой наклон.");
+            Assert.That(LocationGrassBend.Weight(.6f, 0, 3), Is.LessThan(LocationGrassBend.Weight(.6f, 0, 2)), "Больше — гнётся верхушка.");
+
+            LocationGrassBend.Zone flat = LocationGrassBend.Zone.Default;
+            flat.DepthStretch = .3f;
+            Vector2 below = new Vector2(0, 6);
+            Assert.That(LocationGrassBend.Push(below, Vector2.zero, Vector2.zero, 10, 1, Vector2.zero, Vector2.zero, flat), Is.EqualTo(Vector2.zero),
+                "Плоская зона не задевает спереди.");
+            LocationGrassBend.Zone lead = LocationGrassBend.Zone.Default;
+            lead.Lead = .5f;
+            Vector2 ahead = new Vector2(12, 0);
+            Assert.That(LocationGrassBend.Push(ahead, Vector2.zero, Vector2.zero, 10, 1, Vector2.right, Vector2.zero, lead).magnitude, Is.GreaterThan(0),
+                "Опережение задевает впереди по ходу.");
+            LocationGrassBend.Zone forward = LocationGrassBend.Zone.Default;
+            forward.Forward = 1;
+            Vector2 side = LocationGrassBend.Push(new Vector2(0, 5), Vector2.zero, Vector2.zero, 10, 1, Vector2.right, Vector2.zero, forward);
+            Assert.That(side.normalized.x, Is.GreaterThan(.99f), "«По ходу» — клонится по направлению шага.");
+            Assert.That(LocationGrassBend.Limit(new Vector2(2, 0), .5f).x, Is.EqualTo(.5f).Within(1e-5f));
+
+            LocationGrassBend.TopOffset(new Vector2(0, 1), 1, .2f, 0, .75f, out Vector2 lean, out _, depthLean: 0);
+            Assert.That(lean, Is.EqualTo(Vector2.zero), "Наклон вглубь 0 — только вбок.");
+            LocationGrassBend.TopOffset(Vector2.right, 1, .2f, 0, .75f, out _, out float noDrop, arcDrop: 0);
+            Assert.That(noDrop, Is.EqualTo(0), "Без опускания дуги.");
+        }
+
+        [Test]
+        public void Spring_Overshoots_ThenSettles_ZeroIsSmooth()
+        {
+            Vector2 Run(float amount, out float minimum)
+            {
+                Vector2 bend = Vector2.right, velocity = Vector2.zero;
+                minimum = 1;
+                for (int i = 0; i < 300; i++)
+                {
+                    LocationGrassBend.SpringStep(ref bend, ref velocity, Vector2.zero, 1 / 60f, 2.5f, amount);
+                    minimum = Mathf.Min(minimum, bend.x);
+                }
+                return bend;
+            }
+            Vector2 springy = Run(.6f, out float springyMin);
+            Assert.That(springyMin, Is.LessThan(-.05f), "Покачивание проскакивает исходное положение.");
+            Assert.That(springy.magnitude, Is.LessThan(.01f), "И затухает.");
+            Run(0, out float smoothMin);
+            Assert.That(smoothMin, Is.GreaterThan(-.01f), "Без покачивания — без перехлёста.");
+        }
+
+        [Test]
+        public void WhoTouches_HoldSpringAndAssetScale_InRenderer()
+        {
+            Asset("grass");
+            LocalLocationDefinition location = Location();
+            LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = location.Id, UseWorldLighting = false };
+            LocationScatterLayer layer = Layer(LocationScatterMode.Carpet, "grass");
+            Put(layer, "grass", new Vector2(510, 500));
+            visual.ScatterLayers.Add(layer);
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null) { VegetationReacts = true })
+            {
+                LocationScatterCarpet carpet = renderer.ScatterCarpet(layer.Id);
+                Vector2Int quad = carpet.BendingPlants.First().Quads[0];
+                float Top() => carpet.QuadPositions(quad).Last().x;
+                float rest = Top();
+                LocationWorldRenderer.ActorFrame enemy = new LocationWorldRenderer.ActorFrame
+                {
+                    Id = "wolf", Pixel = new Vector2(500, 500), Kind = LocationWorldRenderer.ActorKind.Enemy
+                };
+                layer.Reaction.ByEnemies = false;
+                renderer.SetActors(new[] { enemy }, 0);
+                Run(renderer, .5f);
+                Assert.That(Top(), Is.EqualTo(rest), "Противники сняты — не гнут.");
+                layer.Reaction.ByEnemies = true;
+                Run(renderer, .5f);
+                float full = Top() - rest;
+                Assert.That(full, Is.GreaterThan(.005f), "Противники включены на ходу — гнут.");
+
+                // Задержка: после ухода держит прогиб.
+                layer.Reaction.Hold = .5f;
+                renderer.SetActors(new LocationWorldRenderer.ActorFrame[0], 0);
+                Run(renderer, .3f);
+                Assert.That(Top() - rest, Is.EqualTo(full).Within(full * .05f), "Держит форму во время задержки.");
+                Run(renderer, 4);
+                Assert.That(Top(), Is.EqualTo(rest), "Потом возвращается точно.");
+            }
+            layer.Assets[0].BendScale = 2;
+            layer.Reaction.Hold = 0;
+            float Bent()
+            {
+                using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null) { VegetationReacts = true })
+                {
+                    LocationScatterCarpet carpet = renderer.ScatterCarpet(layer.Id);
+                    Vector2Int quad = carpet.BendingPlants.First().Quads[0];
+                    float rest = carpet.QuadPositions(quad).Last().x;
+                    renderer.SetActors(new[] { Actor("hero", new Vector2(500, 500)) }, 0);
+                    Run(renderer, 1);
+                    return carpet.QuadPositions(quad).Last().x - rest;
+                }
+            }
+            float doubled = Bent();
+            layer.Assets[0].BendScale = 1;
+            Assert.That(doubled, Is.EqualTo(Bent() * 2).Within(.002f), "«Сила ×» ассета.");
+        }
+
+        // Основание кистью у экземпляра раскидки «не мешает» сохраняется: и
+        // окклюзия, и перекрытие света — по клеткам, а не по прямоугольнику.
+        [Test]
+        public void ScatterInstance_KeepsPaintedFootprint_LightBlockedPerCell()
+        {
+            Asset("bush");
+            ArtAssetDefinition asset = catalog.Find("bush");
+            asset.OccludesLight = true;
+            ArtAssetFootprintMask mask = asset.Settings(ArtAssetView.Front).FootprintMask;
+            mask.Reset(new Rect(-.5f, -.2f, 1, .4f), .1f);
+            mask.Fill(point => Mathf.Abs(point.x) < .1f || Mathf.Abs(point.y) < .05f);
+            catalog.MarkChanged();
+            LocationScatterLayer layer = Layer(LocationScatterMode.Objects, "bush");
+            layer.Reaction.Enabled = false;
+            LocationScatterInstance instance = Put(layer, "bush", new Vector2(500, 500));
+            LocationVisualObject item = layer.ToObject(instance);
+            LocationResolvedVisual resolved = LocationVisualResolver.Resolve(item);
+            Assert.That(resolved.BlocksMovement, Is.False, "Слой «не мешает».");
+            Assert.That(resolved.FootprintCells, Is.Not.Null.And.Not.Empty, "Форма основания ассета — кистью, а не прямоугольник по умолчанию.");
+
+            asset.OccludesLight = true;
+            LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = "zz_bend", UseWorldLighting = false };
+            visual.Objects.Add(new LocationVisualObject { Id = "bush", Name = "Куст", AssetId = "bush", Position = new Vector2(.3f, .5f) });
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null))
+            {
+                Transform anchor = renderer.FindObject("bush").transform.parent;
+                List<Transform> blockers = anchor.Cast<Transform>().Where(child => child.name == "Перекрытие света").ToList();
+                Assert.That(blockers.Count, Is.EqualTo(mask.Rects().Count), "По прямоугольнику на полосу клеток маски.");
+                float area = blockers.Sum(child => child.localScale.x * child.localScale.y);
+                Assert.That(area, Is.EqualTo(mask.Count * .01f).Within(1e-3f), "Свет закрыт ровно нарисованной опорой, не габаритом.");
+            }
+        }
+
         // Замер цены подсистемы: CPU шага и отсутствие мусора после прогрева.
         // Отрисовки ковра (группы) и вершины — для отчёта.
         [Test]

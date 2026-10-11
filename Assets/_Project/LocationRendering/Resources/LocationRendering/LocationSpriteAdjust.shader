@@ -16,7 +16,7 @@
 // нормалями ложится на неё так же, как на землю под ней.
 // Реакция на проход (отдельный рисунок): _KsBend — смещение верха в мире и
 // опускание, _KsBendShape — опора по Y и 1/высота растения в пространстве
-// рисунка, закреплённая доля; _KsBendShape.y = 0 — без прогиба.
+// рисунка, закреплённая доля, степень изгиба; _KsBendShape.y = 0 — без прогиба.
 Shader "Kingdom Survival/Location Sprite Adjust"
 {
     Properties
@@ -28,7 +28,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         _KsUvRect("Particle UV rect (offset, scale)", Vector) = (0, 0, 1, 1)
         _KsLight("Sun, fire light share, ground-lit", Vector) = (1, 1, 0, 0)
         _KsBend("Bend: top offset xy (world), drop (world)", Vector) = (0, 0, 0, 0)
-        _KsBendShape("Bend shape: root y, 1/height (object), pinned", Vector) = (0, 0, 0, 0)
+        _KsBendShape("Bend shape: root y, 1/height (object), pinned, curve", Vector) = (0, 0, 0, 0)
         [MaterialToggle] _ZWrite("ZWrite", Float) = 0
         [HideInInspector] _Color("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor("RendererColor", Color) = (1,1,1,1)
@@ -55,11 +55,12 @@ Shader "Kingdom Survival/Location Sprite Adjust"
     // опорой в долях высоты растения: ниже закреплённой части — 0, к верху —
     // квадратично. Смещение — в мире, опускание — вдоль оси рисунка. Одна и
     // та же функция во всех проходах: цвет и нормаль совпадают по форме.
-    float KsBendWeight(float t, float pinned)
+    // curve — степень изгиба (w пусто — 2, дуга).
+    float KsBendWeight(float t, float pinned, float curve)
     {
         pinned = clamp(pinned, 0, 0.95);
         float s = saturate((t - pinned) / (1 - pinned));
-        return s * s;
+        return pow(s, curve > 0 ? curve : 2);
     }
 
     float3 KsObjectToWorld(float3 positionOS)
@@ -68,7 +69,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
     #if !defined(_KS_PARTICLE)
         if (_KsBendShape.y > 0)
         {
-            float weight = KsBendWeight((positionOS.y - _KsBendShape.x) * _KsBendShape.y, _KsBendShape.z);
+            float weight = KsBendWeight((positionOS.y - _KsBendShape.x) * _KsBendShape.y, _KsBendShape.z, _KsBendShape.w);
             float3 up = TransformObjectToWorldDir(float3(0, 1, 0));
             world.xy += (_KsBend.xy - up.xy * _KsBend.z) * weight;
         }

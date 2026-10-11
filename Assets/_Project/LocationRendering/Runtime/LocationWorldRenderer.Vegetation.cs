@@ -12,16 +12,19 @@ namespace KingdomSurvival.LocationRendering
     //
     // Источники — опоры ног фигур исследования и живых фигур боя на месте
     // (фактически показанные точки, с промежуточным движением), не центр
-    // рисунка. Расстояние — в плоскости земли (вертикаль разжата на
-    // BattlefieldFrame.VerticalScale, как у гексов). Ноги за шаг — отрезок от
-    // прошлой точки: быстрый шаг не перескакивает пучок; появление, смена
-    // места и скачок дальше нескольких клеток — без отрезка.
+    // рисунка; какие из них задевают слой — настройки слоя. Расстояние — в
+    // плоскости земли (вертикаль разжата на BattlefieldFrame.VerticalScale,
+    // как у гексов). Ноги за шаг — отрезок от прошлой точки: быстрый шаг не
+    // перескакивает пучок; появление, смена места и скачок дальше нескольких
+    // клеток — без отрезка.
     // Растения — в сеточном индексе; каждый шаг обрабатываются только
     // активные: рядом с источниками и ещё восстанавливающиеся.
     // Ковёр гнётся на CPU (LocationScatterCarpet.SetBend), объекты — в
     // шейдере по блоку свойств (_KsBend, _KsBendShape) тем же законом.
     public sealed partial class LocationWorldRenderer
     {
+        private enum SourceKind { Party, Retinue, Enemy, Battle }
+
         private sealed class Plant
         {
             public ScatterView View;
@@ -31,15 +34,20 @@ namespace KingdomSurvival.LocationRendering
             public Placed Object;
             public Vector2 Ground;
             public float Height;
-            public Vector2 Bend;
-            public bool Active;
+            public Vector2 Bend, Velocity;
+            public float HoldLeft;
+            public bool Active, Touched;
             public Vector2 Side;
+            // Множители ассета (сила, радиус) и устойчивый разброс пучка −1..1.
+            public float AssetBend = 1, AssetRadius = 1;
+            public float BendJitter, TimeJitter;
             // Объект: опора по Y и 1/высота в пространстве каждого рисунка.
             public Vector4[] Shapes;
         }
 
         private sealed class BendSource
         {
+            public SourceKind Kind;
             public Vector2 From, To;
             public Vector2 Direction;
             public float Speed;
@@ -60,7 +68,7 @@ namespace KingdomSurvival.LocationRendering
         private readonly MaterialPropertyBlock bendBlock = new MaterialPropertyBlock();
         private readonly System.Diagnostics.Stopwatch vegetationWatch = new System.Diagnostics.Stopwatch();
         private bool plantsDirty = true, vegetationOn;
-        private float plantCell = 64, plantReach;
+        private float plantCell = 64, assetRadiusMax = 1;
         private double lastVegetationSeconds = double.NaN;
         private Transform radiusLayer;
         private readonly Dictionary<string, LineRenderer> radiusRings = new Dictionary<string, LineRenderer>(StringComparer.Ordinal);
@@ -105,7 +113,8 @@ namespace KingdomSurvival.LocationRendering
             UpdateRadiusRings();
             if (plants.Count > 0)
             {
-                foreach (BendSource source in bendSources.Values) Touch(source);
+                float reach = PlantReach();
+                foreach (BendSource source in bendSources.Values) Touch(source, reach);
                 float walk = Mathf.Max(1, BattlefieldDatabaseAsset.SharedWalkHexesPerSecond * HexSizePixels * 1.5f);
                 for (int i = activePlants.Count - 1; i >= 0; i--)
                 {
@@ -128,7 +137,9 @@ namespace KingdomSurvival.LocationRendering
         {
             foreach (Plant plant in activePlants)
             {
-                plant.Bend = Vector2.zero;
+                plant.Bend = plant.Velocity = Vector2.zero;
+                plant.HoldLeft = 0;
+                plant.Touched = false;
                 plant.Active = false;
                 Apply(plant);
             }
@@ -140,27 +151,37 @@ namespace KingdomSurvival.LocationRendering
         }
 
         // Опоры ног: фигуры исследования (если показаны) и живые фигуры боя.
+        // Скорость сглаживается самым долгим «Сглаживанием скорости» слоёв.
         private void UpdateBendSources(float deltaTime)
         {
+            float smoothing = .01f;
+            foreach (ScatterView view in scatter.Values)
+            {
+                LocationScatterReaction reaction = view.Layer?.Reaction;
+                if (reaction != null && reaction.Enabled) smoothing = Mathf.Max(smoothing, reaction.SafeSpeedSmoothing);
+            }
             foreach (BendSource source in bendSources.Values) source.Seen = false;
             if (actorLayer != null && actorLayer.gameObject.activeInHierarchy)
-                foreach (Actor actor in actors.Values) MoveSource(actor.Id, actor.Pixel, deltaTime);
+                foreach (Actor actor in actors.Values)
+                    MoveSource(actor.Id, actor.Kind == ActorKind.Enemy ? SourceKind.Enemy : actor.Kind == ActorKind.Retinue ? SourceKind.Retinue : SourceKind.Party,
+                        actor.Pixel, deltaTime, smoothing);
             foreach (KeyValuePair<string, BattleFigure> entry in battleFigures)
-                if (!entry.Value.Corpse) MoveSource("бой:" + entry.Key, entry.Value.Ground, deltaTime);
+                if (!entry.Value.Corpse) MoveSource(entry.Value.SourceId ??= "бой:" + entry.Key, SourceKind.Battle, entry.Value.Ground, deltaTime, smoothing);
             goneSources.Clear();
             foreach (KeyValuePair<string, BendSource> entry in bendSources)
                 if (!entry.Value.Seen) goneSources.Add(entry.Key);
             foreach (string id in goneSources) bendSources.Remove(id);
         }
 
-        private void MoveSource(string id, Vector2 pixel, float deltaTime)
+        private void MoveSource(string id, SourceKind kind, Vector2 pixel, float deltaTime, float smoothing)
         {
             Vector2 ground = LocationGrassBend.ToGround(pixel, BattlefieldFrame.VerticalScale);
             if (!bendSources.TryGetValue(id, out BendSource source))
             {
-                bendSources[id] = new BendSource { From = ground, To = ground, Seen = true };
+                bendSources[id] = new BendSource { Kind = kind, From = ground, To = ground, Seen = true };
                 return;
             }
+            source.Kind = kind;
             source.Seen = true;
             source.From = source.To;
             source.To = ground;
@@ -174,14 +195,39 @@ namespace KingdomSurvival.LocationRendering
             }
             if (distance > 1e-3f) source.Direction = step / distance;
             // Скорость сглажена: после остановки её доля затухает, а не обрывается.
-            source.Speed += (distance / deltaTime - source.Speed) * (1 - Mathf.Exp(-deltaTime / .12f));
+            source.Speed += (distance / deltaTime - source.Speed) * (1 - Mathf.Exp(-deltaTime / smoothing));
+        }
+
+        private static bool Touches(LocationScatterReaction reaction, SourceKind kind)
+        {
+            switch (kind)
+            {
+                case SourceKind.Retinue: return reaction.ByRetinue;
+                case SourceKind.Enemy: return reaction.ByEnemies;
+                case SourceKind.Battle: return reaction.ByBattle;
+                default: return reaction.ByParty;
+            }
+        }
+
+        // Наибольшая дальность касания слоёв (пиксели плоскости земли) —
+        // для поиска соседей; читается на ходу, как и сами настройки.
+        private float PlantReach()
+        {
+            float reach = 0;
+            foreach (ScatterView view in scatter.Values)
+            {
+                LocationScatterReaction reaction = view.Layer?.Reaction;
+                if (view.Hidden || reaction == null || !reaction.Enabled) continue;
+                reach = Mathf.Max(reach, reaction.SafeRadius * (1 + reaction.SafeLead) * Mathf.Max(1, reaction.SafeDepthStretch));
+            }
+            return reach * HexSizePixels * assetRadiusMax;
         }
 
         // Растения у отрезка ног за шаг — в активный набор.
-        private void Touch(BendSource source)
+        private void Touch(BendSource source, float reach)
         {
-            Vector2 min = Vector2.Min(source.From, source.To) - Vector2.one * plantReach;
-            Vector2 max = Vector2.Max(source.From, source.To) + Vector2.one * plantReach;
+            Vector2 min = Vector2.Min(source.From, source.To) - Vector2.one * reach;
+            Vector2 max = Vector2.Max(source.From, source.To) + Vector2.one * reach;
             int x0 = Mathf.FloorToInt(min.x / plantCell), x1 = Mathf.FloorToInt(max.x / plantCell);
             int y0 = Mathf.FloorToInt(min.y / plantCell), y1 = Mathf.FloorToInt(max.y / plantCell);
             for (int x = x0; x <= x1; x++)
@@ -201,20 +247,50 @@ namespace KingdomSurvival.LocationRendering
         private bool StepPlant(Plant plant, float deltaTime, float walk)
         {
             LocationScatterReaction reaction = plant.View.Layer.Reaction;
-            float radius = reaction.SafeRadius * HexSizePixels;
+            float radius = reaction.SafeRadius * HexSizePixels * plant.AssetRadius;
+            LocationGrassBend.Zone zone = new LocationGrassBend.Zone
+            {
+                Core = reaction.SafeCore, Softness = reaction.SafeEdgeSoftness, DepthStretch = reaction.SafeDepthStretch,
+                Lead = reaction.SafeLead, Forward = reaction.SafeForward
+            };
+            float fullSpeed = walk * reaction.SafeSpeedReference;
             Vector2 fallback = plant.Bend.sqrMagnitude > 1e-6f ? plant.Bend : plant.Side;
             Vector2 target = Vector2.zero;
             foreach (BendSource source in bendSources.Values)
             {
-                float speed = source.Speed / walk;
+                if (!Touches(reaction, source.Kind)) continue;
+                float speed = source.Speed / fullSpeed;
                 Vector2 moving = speed > .05f ? source.Direction : Vector2.zero;
                 target += LocationGrassBend.Push(plant.Ground, source.From, source.To, radius,
-                    LocationGrassBend.Strength(reaction.SafeSpeedInfluence, speed), moving, fallback);
+                    LocationGrassBend.Strength(reaction.SafeSpeedInfluence, speed), moving, fallback, zone);
             }
-            target = LocationGrassBend.Limit(target);
-            Vector2 next = LocationGrassBend.Approach(plant.Bend, target, deltaTime, reaction.SafeReactTime, reaction.SafeRecoverTime);
-            bool rest = target.sqrMagnitude < 1e-8f && next.sqrMagnitude < 1e-5f;
-            if (rest) next = Vector2.zero;
+            target = LocationGrassBend.Limit(target, reaction.SafeSumLimit);
+            float time = Mathf.Max(.1f, 1 + reaction.SafeTimeJitter * plant.TimeJitter);
+            bool touching = target.sqrMagnitude > 1e-8f;
+            // Задержка отсчитывается с ухода последней фигуры.
+            if (touching) { plant.Touched = true; plant.HoldLeft = 0; }
+            else if (plant.Touched) { plant.Touched = false; plant.HoldLeft = reaction.SafeHold * time; }
+            if (!touching && plant.HoldLeft > 0)
+            {
+                // Задержка перед возвратом: держит прогиб, как был.
+                plant.HoldLeft -= deltaTime;
+                plant.Velocity = Vector2.zero;
+                return true;
+            }
+            Vector2 next = plant.Bend;
+            if (reaction.SafeSpring > 0 && target.sqrMagnitude < plant.Bend.sqrMagnitude)
+                LocationGrassBend.SpringStep(ref next, ref plant.Velocity, target, deltaTime, reaction.SafeSpringFrequency / time, reaction.SafeSpring);
+            else
+            {
+                next = LocationGrassBend.Approach(plant.Bend, target, deltaTime, reaction.SafeReactTime * time, reaction.SafeRecoverTime * time);
+                plant.Velocity = (next - plant.Bend) / deltaTime;
+            }
+            bool rest = !touching && next.sqrMagnitude < 1e-5f && plant.Velocity.sqrMagnitude < 1e-3f;
+            if (rest)
+            {
+                next = Vector2.zero;
+                plant.Velocity = Vector2.zero;
+            }
             if (next != plant.Bend)
             {
                 plant.Bend = next;
@@ -226,12 +302,13 @@ namespace KingdomSurvival.LocationRendering
         private void Apply(Plant plant)
         {
             LocationScatterReaction reaction = plant.View.Layer.Reaction;
-            LocationGrassBend.TopOffset(plant.Bend, plant.Height, reaction.SafeBend, reaction.SafePress, BattlefieldFrame.VerticalScale,
-                out Vector2 offset, out float drop);
+            float bend = Mathf.Clamp(reaction.SafeBend * plant.AssetBend * (1 + reaction.SafeBendJitter * plant.BendJitter), 0, LocationScatterReaction.MaxBend * 2);
+            LocationGrassBend.TopOffset(plant.Bend, plant.Height, bend, reaction.SafePress, BattlefieldFrame.VerticalScale,
+                out Vector2 offset, out float drop, reaction.SafeDepthLean, reaction.SafeArcDrop);
             if (plant.CarpetPlant != null)
             {
                 if (plant.Carpet != null && plant.Carpet.Version == plant.CarpetVersion)
-                    plant.Carpet.SetBend(plant.CarpetPlant, offset, drop, reaction.SafePinned);
+                    plant.Carpet.SetBend(plant.CarpetPlant, offset, drop, reaction.SafePinned, reaction.SafeCurve);
                 return;
             }
             Placed entry = plant.Object;
@@ -246,6 +323,7 @@ namespace KingdomSurvival.LocationRendering
                 bendBlock.SetVector(BendId, new Vector4(world.x, world.y, worldDrop, 0));
                 Vector4 shape = plant.Shapes[i];
                 shape.z = reaction.SafePinned;
+                shape.w = reaction.SafeCurve;
                 bendBlock.SetVector(BendShapeId, shape);
                 image.SetPropertyBlock(bendBlock);
             }
@@ -265,36 +343,56 @@ namespace KingdomSurvival.LocationRendering
             plantCells.Clear();
             bentCarpets.Clear();
             plantsDirty = false;
-            plantReach = 0;
+            assetRadiusMax = 1;
+            float reach = 0;
             foreach (ScatterView view in scatter.Values)
             {
                 LocationScatterLayer layer = view.Layer;
                 if (view.Hidden || layer?.Reaction == null || !layer.Reaction.Enabled) continue;
-                plantReach = Mathf.Max(plantReach, layer.Reaction.SafeRadius * HexSizePixels);
+                reach = Mathf.Max(reach, layer.Reaction.SafeRadius * HexSizePixels);
                 if (view.Carpet != null)
                 {
                     if (view.Carpet.BendingCount > 0) bentCarpets.Add(view.Carpet);
                     foreach (LocationScatterCarpet.BendingPlant item in view.Carpet.BendingPlants)
-                        plants.Add(new Plant
+                    {
+                        LocationScatterInstance instance = layer.Instances.Find(entry => entry != null && entry.Key == item.Key);
+                        plants.Add(Configure(new Plant
                         {
                             View = view, Carpet = view.Carpet, CarpetVersion = view.Carpet.Version, CarpetPlant = item,
-                            Ground = LocationGrassBend.ToGround(item.Pixel, BattlefieldFrame.VerticalScale), Height = item.Height, Side = SideOf(item.Key)
-                        });
+                            Ground = LocationGrassBend.ToGround(item.Pixel, BattlefieldFrame.VerticalScale), Height = item.Height
+                        }, layer, item.Key, instance?.AssetId));
+                    }
                     continue;
                 }
                 foreach (KeyValuePair<int, Placed> pair in view.Objects)
                 {
                     Plant plant = ObjectPlant(view, pair.Key, pair.Value);
-                    if (plant != null) plants.Add(plant);
+                    if (plant != null) plants.Add(Configure(plant, layer, pair.Key, pair.Value.Data.AssetId));
                 }
             }
-            plantCell = Mathf.Max(32, plantReach);
+            plantCell = Mathf.Max(32, reach);
+            // Активный набор не растёт в шаге — без выделения памяти по ходу.
+            if (activePlants.Capacity < plants.Count) activePlants.Capacity = plants.Count;
             foreach (Plant plant in plants)
             {
                 long key = CellKey(Mathf.FloorToInt(plant.Ground.x / plantCell), Mathf.FloorToInt(plant.Ground.y / plantCell));
                 if (!plantCells.TryGetValue(key, out List<Plant> cell)) plantCells[key] = cell = new List<Plant>();
                 cell.Add(plant);
             }
+        }
+
+        // Множители ассета кисти и устойчивый разброс пучка (по слою и ключу).
+        private Plant Configure(Plant plant, LocationScatterLayer layer, int key, string assetId)
+        {
+            LocationScatterEntry entry = assetId != null ? layer.Assets.Find(item => item != null && item.AssetId == assetId) : null;
+            plant.AssetBend = entry != null ? Mathf.Clamp(entry.BendScale, 0, 4) : 1;
+            plant.AssetRadius = entry != null ? Mathf.Clamp(entry.RadiusScale, .1f, 4) : 1;
+            assetRadiusMax = Mathf.Max(assetRadiusMax, plant.AssetRadius);
+            uint hash = (uint)key * 2654435761u ^ (uint)layer.Id.GetHashCode();
+            plant.BendJitter = (hash & 0xffff) / 32767.5f - 1;
+            plant.TimeJitter = ((hash >> 16) & 0xffff) / 32767.5f - 1;
+            plant.Side = (key & 1) == 0 ? Vector2.right : Vector2.left;
+            return plant;
         }
 
         // Объект: высота растения над опорой — по самой высокой части; для
@@ -315,30 +413,29 @@ namespace KingdomSurvival.LocationRendering
                 if (image == null) continue;
                 float root = image.InverseTransformPoint(anchor).y;
                 float top = image.InverseTransformPoint(anchor + image.up * height * Root.transform.lossyScale.y).y;
-                shapes[i] = new Vector4(root, Mathf.Abs(top - root) > 1e-6f ? 1 / (top - root) : 0, 0, 0);
+                shapes[i] = new Vector4(root, Mathf.Abs(top - root) > 1e-6f ? 1 / (top - root) : 0, 0, 2);
             }
             return new Plant
             {
-                View = view, Object = entry, Height = height, Shapes = shapes, Side = SideOf(key),
+                View = view, Object = entry, Height = height, Shapes = shapes,
                 Ground = LocationGrassBend.ToGround(LocationVisualGeometry.ToPixel(Location, entry.Data.Position), BattlefieldFrame.VerticalScale)
             };
         }
-
-        // Устойчивая сторона для ног ровно на опоре без движения.
-        private static Vector2 SideOf(int key) => (key & 1) == 0 ? Vector2.right : Vector2.left;
 
         private static long CellKey(int x, int y) => ((long)x << 32) ^ (uint)y;
 
         // Отладка: контур воздействия у каждого источника (эллипс на земле).
         private void UpdateRadiusRings()
         {
-            float radius = 0;
+            float radius = 0, depth = 1;
             if (vegetationOn)
                 foreach (ScatterView view in scatter.Values)
                 {
                     LocationScatterReaction reaction = view.Layer?.Reaction;
-                    if (!view.Hidden && reaction != null && reaction.Enabled && reaction.ShowRadius)
-                        radius = Mathf.Max(radius, reaction.SafeRadius * HexSizePixels);
+                    if (view.Hidden || reaction == null || !reaction.Enabled || !reaction.ShowRadius) continue;
+                    if (reaction.SafeRadius * HexSizePixels <= radius) continue;
+                    radius = reaction.SafeRadius * HexSizePixels;
+                    depth = reaction.SafeDepthStretch;
                 }
             if (radius <= 0)
             {
@@ -378,7 +475,7 @@ namespace KingdomSurvival.LocationRendering
                 for (int i = 0; i < points; i++)
                 {
                     float angle = i * Mathf.PI * 2 / points;
-                    Vector2 pixel = center + new Vector2(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius * BattlefieldFrame.VerticalScale);
+                    Vector2 pixel = center + new Vector2(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius * BattlefieldFrame.VerticalScale * depth);
                     ring.SetPosition(i, LocationVisualGeometry.PixelToWorld(Location, pixel));
                 }
             }

@@ -206,11 +206,14 @@ namespace KingdomSurvival.BattlefieldDatabase
 
             bool passability = item.IsOverridden(LocationAssetOverride.Passability);
             result.BlocksMovement = passability ? item.BlocksMovement : asset.BlocksMovement;
-            result.FootprintSize = passability ? item.Footprint : settings.FootprintSize * scale;
+            // Своё основание — при переопределённом проходе; у экземпляра раскидки
+            // («не мешает») — форма основания ассета (окклюзия, перекрытие света).
+            bool ownFootprint = passability && !item.AssetFootprint;
+            result.FootprintSize = ownFootprint ? item.Footprint : settings.FootprintSize * scale;
             Vector2 offset = settings.FootprintOffset * scale;
             if (item.FlipX) offset.x = -offset.x;
             result.FootprintOffset = offset;
-            if (!passability && settings.UsesFootprintMask)
+            if (!ownFootprint && settings.UsesFootprintMask)
             {
                 // Основание кистью: клетки маски — в масштабе экземпляра, отражение — по X.
                 result.FootprintCells = new List<Rect>();

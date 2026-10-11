@@ -33,6 +33,7 @@ namespace KingdomSurvival.LocationRendering
             public Caster Caster;
             public Vector2 Ground;
             public bool Corpse;
+            public string SourceId;
         }
 
         private readonly Dictionary<string, BattleFigure> battleFigures = new Dictionary<string, BattleFigure>(StringComparer.Ordinal);

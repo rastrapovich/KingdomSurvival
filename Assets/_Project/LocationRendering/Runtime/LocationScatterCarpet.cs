@@ -368,7 +368,7 @@ namespace KingdomSurvival.LocationRendering
         // Прогиб экземпляра: offset — смещение верха растения (единицы мира),
         // drop — опускание верха вдоль оси рисунка. Вершины считаются от
         // исходных — ошибка не накапливается; ноль возвращает исходную форму.
-        public void SetBend(BendingPlant plant, Vector2 offset, float drop, float pinned)
+        public void SetBend(BendingPlant plant, Vector2 offset, float drop, float pinned, float curve = 2)
         {
             foreach (Vector2Int handle in plant.Quads)
             {
@@ -383,7 +383,7 @@ namespace KingdomSurvival.LocationRendering
                 for (int k = 0; k < perQuad; k++)
                 {
                     int vertex = start + k;
-                    float weight = LocationGrassBend.Weight(group.VertexHeight[vertex], pinned);
+                    float weight = LocationGrassBend.Weight(group.VertexHeight[vertex], pinned, curve);
                     group.Positions[vertex] = weight > 0 ? group.Base[vertex] + shift * weight : group.Base[vertex];
                 }
                 if (group.QuadDirty[handle.y]) continue;

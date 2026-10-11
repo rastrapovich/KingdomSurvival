@@ -44,6 +44,9 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Реакция на проход: гнётся ли этот ассет, если она включена у слоя
         // (камни в том же слое не гнутся).
         public bool Bends = true;
+        // Свои множители реакции ассета: сила прогиба и радиус касания.
+        public float BendScale = 1;
+        public float RadiusScale = 1;
     }
 
     public enum LocationScatterReactionPreset { SmallGrass, TallGrass, SoftBush }
@@ -62,43 +65,123 @@ namespace KingdomSurvival.BattlefieldDatabase
         public const float MaxPinned = .9f;
 
         public bool Enabled;
+
+        // --- Кто задевает -------------------------------------------------
+        // Командир и бойцы отряда, свита, противники в исследовании, фигуры
+        // боя на месте (обе стороны).
+        public bool ByParty = true;
+        public bool ByRetinue = true;
+        public bool ByEnemies = true;
+        public bool ByBattle = true;
+
+        // --- Зона касания -------------------------------------------------
         // Радиус воздействия, клеток боя.
         public float Radius = .45f;
+        // Полная сила у самых ног: доля радиуса без спада (0 — спад от центра).
+        public float Core;
+        // Мягкость края: 1 — плавно с самого центра, больше — дольше держит
+        // силу и резче спадает к краю.
+        public float EdgeSoftness = 2;
+        // Вытянутость зоны вглубь картинки: 1 — как гексы на земле, меньше —
+        // зона плоская (задевает только сбоку), больше — длиннее вглубь.
+        public float DepthStretch = 1;
+        // Зона сдвинута вперёд по ходу (доля радиуса): трава расступается заранее.
+        public float Lead;
+
+        // --- Форма прогиба ------------------------------------------------
         // Наибольшее отклонение верха, доля высоты.
         public float Bend = .1f;
         // Приминание: опускание верха при полном контакте, доля высоты.
         public float Press = .03f;
+        // Закреплённая нижняя часть (доля высоты над опорой) — не сдвигается.
+        public float Pinned = .25f;
+        // Изгиб по высоте: 1 — прямой наклон (скос), 2 — дуга, больше —
+        // гнётся только верхушка.
+        public float Curve = 2;
+        // Наклон вглубь картинки (к зрителю / от зрителя) относительно бокового.
+        public float DepthLean = 1;
+        // Укорочение дуги: верх, уходя вбок, опускается (0 — не опускается).
+        public float ArcDrop = 1;
+        // Направление: 0 — от ног (расступается в стороны), 1 — по ходу фигуры.
+        public float Forward;
+        // Предел суммы нескольких фигур (доля полного прогиба).
+        public float SumLimit = 1;
+
+        // --- Время --------------------------------------------------------
         // Время, за которое растение уступает и возвращается (с).
         public float ReactTime = .12f;
         public float RecoverTime = .6f;
-        // Закреплённая нижняя часть (доля высоты над опорой) — не сдвигается.
-        public float Pinned = .25f;
+        // Задержка перед возвратом после ухода (с).
+        public float Hold;
+        // Покачивание при отпускании: 0 — плавно без перехлёста, 1 — сильно.
+        public float Spring;
+        // Частота покачивания, колебаний в секунду.
+        public float SpringFrequency = 2.5f;
+
+        // --- Движение -----------------------------------------------------
         // Влияние скорости: 0 — стоящий гнёт так же, как идущий; 1 — только идущий.
         public float SpeedInfluence = .3f;
+        // Скорость полного касания, доля обычного шага: меньше — полная сила
+        // уже при медленном шаге.
+        public float SpeedReference = 1;
+        // Сглаживание скорости (с): насколько плавно затухает доля движения
+        // после остановки.
+        public float SpeedSmoothing = .12f;
+
+        // --- Разброс по пучкам --------------------------------------------
+        // Упругость: каждый пучок гнётся сильнее или слабее на ± эту долю.
+        public float BendJitter;
+        // Время: реакция и возврат у каждого пучка дольше или короче на ± долю.
+        public float TimeJitter;
+
         // Отладка: контур воздействия у фигур.
         public bool ShowRadius;
 
         public float SafeRadius => Mathf.Clamp(Radius, MinRadius, MaxRadius);
+        public float SafeCore => Mathf.Clamp(Core, 0, .9f);
+        public float SafeEdgeSoftness => Mathf.Clamp(EdgeSoftness, .5f, 6);
+        public float SafeDepthStretch => Mathf.Clamp(DepthStretch, .2f, 3);
+        public float SafeLead => Mathf.Clamp(Lead, 0, 1);
         public float SafeBend => Mathf.Clamp(Bend, 0, MaxBend);
         public float SafePress => Mathf.Clamp(Press, 0, MaxPress);
+        public float SafePinned => Mathf.Clamp(Pinned, 0, MaxPinned);
+        public float SafeCurve => Mathf.Clamp(Curve, 1, 4);
+        public float SafeDepthLean => Mathf.Clamp(DepthLean, 0, 2);
+        public float SafeArcDrop => Mathf.Clamp(ArcDrop, 0, 2);
+        public float SafeForward => Mathf.Clamp01(Forward);
+        public float SafeSumLimit => Mathf.Clamp(SumLimit, .1f, 1);
         public float SafeReactTime => Mathf.Clamp(ReactTime, MinTime, MaxTime);
         public float SafeRecoverTime => Mathf.Clamp(RecoverTime, MinTime, MaxTime);
-        public float SafePinned => Mathf.Clamp(Pinned, 0, MaxPinned);
+        public float SafeHold => Mathf.Clamp(Hold, 0, 3);
+        public float SafeSpring => Mathf.Clamp01(Spring);
+        public float SafeSpringFrequency => Mathf.Clamp(SpringFrequency, .3f, 8);
         public float SafeSpeedInfluence => Mathf.Clamp01(SpeedInfluence);
+        public float SafeSpeedReference => Mathf.Clamp(SpeedReference, .1f, 3);
+        public float SafeSpeedSmoothing => Mathf.Clamp(SpeedSmoothing, .01f, 2);
+        public float SafeBendJitter => Mathf.Clamp(BendJitter, 0, .9f);
+        public float SafeTimeJitter => Mathf.Clamp(TimeJitter, 0, .9f);
 
         // Стартовые настройки эффекта, не ботаническая классификация.
+        // «Кто задевает», отладка и включение не меняются.
         public void Apply(LocationScatterReactionPreset preset)
         {
+            Core = 0; EdgeSoftness = 2; DepthStretch = 1; Lead = 0;
+            Curve = 2; DepthLean = 1; ArcDrop = 1; Forward = 0; SumLimit = 1;
+            Hold = 0; Spring = 0; SpringFrequency = 2.5f;
+            SpeedReference = 1; SpeedSmoothing = .12f; BendJitter = 0; TimeJitter = 0;
             switch (preset)
             {
                 case LocationScatterReactionPreset.TallGrass:
                     Radius = .55f; Bend = .2f; Press = .04f; ReactTime = .15f; RecoverTime = .9f; Pinned = .2f; SpeedInfluence = .35f;
+                    Curve = 2.2f; Forward = .15f; Lead = .1f; BendJitter = .2f; TimeJitter = .15f;
                     break;
                 case LocationScatterReactionPreset.SoftBush:
                     Radius = .7f; Bend = .12f; Press = .02f; ReactTime = .22f; RecoverTime = 1.2f; Pinned = .35f; SpeedInfluence = .25f;
+                    Curve = 1.6f; Hold = .1f; Spring = .2f; SpringFrequency = 1.8f; BendJitter = .15f; TimeJitter = .2f;
                     break;
                 default:
                     Radius = .45f; Bend = .1f; Press = .03f; ReactTime = .12f; RecoverTime = .6f; Pinned = .25f; SpeedInfluence = .3f;
+                    BendJitter = .15f; TimeJitter = .1f;
                     break;
             }
         }
@@ -231,7 +314,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                 Position = instance.Position, Scale = instance.Scale, Stretch = instance.Stretch, Rotation = instance.Rotation,
                 FlipX = instance.FlipX, ColorAdjust = instance.ColorAdjust, Band = Band, OrderOffset = OrderOffset,
                 ProjectsShadow = ProjectsShadow && Mode == LocationScatterMode.Objects,
-                ProjectsFireShadow = ProjectsFireShadow && Mode == LocationScatterMode.Objects, CastsShadow = false,
+                ProjectsFireShadow = ProjectsFireShadow && Mode == LocationScatterMode.Objects, CastsShadow = false, AssetFootprint = true,
                 Overrides = LocationAssetOverride.Layer | LocationAssetOverride.Shadows
             };
             if (!BlocksMovement)

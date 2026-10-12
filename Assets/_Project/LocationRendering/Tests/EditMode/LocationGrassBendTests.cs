@@ -118,8 +118,14 @@ namespace KingdomSurvival.LocationRendering
             Vector2 still = LocationGrassBend.Push(Vector2.zero, Vector2.zero, Vector2.zero, 10, 1, Vector2.zero, Vector2.zero);
             Assert.That(float.IsNaN(still.x) || float.IsNaN(still.y), Is.False);
             Assert.That(still.magnitude, Is.EqualTo(1).Within(1e-4f));
-            Vector2 moving = LocationGrassBend.Push(Vector2.zero, Vector2.zero, Vector2.zero, 10, 1, Vector2.up, Vector2.right);
-            Assert.That(moving.normalized.y, Is.GreaterThan(.99f), "У самых ног — по движению.");
+            Vector2 moving = LocationGrassBend.Push(Vector2.zero, Vector2.zero, Vector2.zero, 10, 1, Vector2.up, Vector2.zero);
+            Assert.That(moving.normalized.y, Is.GreaterThan(.99f), "Прямая трава у самых ног — по шагу.");
+            Vector2 kept = LocationGrassBend.Push(Vector2.zero, Vector2.zero, Vector2.zero, 10, 1, Vector2.up, Vector2.right);
+            Assert.That(kept.normalized.x, Is.GreaterThan(.99f), "Наклонённая — держит свой наклон.");
+            // Ноги на полпикселя левее или правее опоры — травинку не бросает в другую сторону.
+            Vector2 a = LocationGrassBend.Push(Vector2.zero, new Vector2(-.5f, 0), new Vector2(-.5f, 0), 10, 1, Vector2.zero, Vector2.right);
+            Vector2 b = LocationGrassBend.Push(Vector2.zero, new Vector2(.5f, 0), new Vector2(.5f, 0), 10, 1, Vector2.zero, Vector2.right);
+            Assert.That(Mathf.Min(a.normalized.x, b.normalized.x), Is.GreaterThan(.9f), "Наклон не перескакивает.");
             Vector2 fallback = LocationGrassBend.Push(Vector2.zero, Vector2.zero, Vector2.zero, 10, 1, Vector2.zero, Vector2.left);
             Assert.That(fallback.normalized.x, Is.LessThan(-.99f), "Без движения — прежний наклон.");
         }
@@ -153,8 +159,10 @@ namespace KingdomSurvival.LocationRendering
             Vector2 a = LocationGrassBend.Push(Vector2.zero, new Vector2(-1, 0), new Vector2(-1, 0), 10, 1, Vector2.zero, Vector2.zero);
             Vector2 b = LocationGrassBend.Push(Vector2.zero, new Vector2(0, -1), new Vector2(0, -1), 10, 1, Vector2.zero, Vector2.zero);
             Assert.That(LocationGrassBend.Limit(a + b).magnitude, Is.LessThanOrEqualTo(1 + 1e-5f), "Сумма — не больше полного прогиба.");
-            Vector2 c = LocationGrassBend.Push(Vector2.zero, new Vector2(1, 0), new Vector2(1, 0), 10, 1, Vector2.zero, Vector2.zero);
-            Assert.That(LocationGrassBend.Limit(a + c).magnitude, Is.LessThan(.01f), "Встречные — гасят друг друга, без переворота.");
+            // Встречные на расстоянии (не у самых ног) — гасят друг друга.
+            Vector2 left = LocationGrassBend.Push(Vector2.zero, new Vector2(-6, 0), new Vector2(-6, 0), 10, 1, Vector2.zero, Vector2.zero);
+            Vector2 c = LocationGrassBend.Push(Vector2.zero, new Vector2(6, 0), new Vector2(6, 0), 10, 1, Vector2.zero, Vector2.zero);
+            Assert.That(LocationGrassBend.Limit(left + c).magnitude, Is.LessThan(.01f), "Встречные — гасят друг друга, без переворота.");
         }
 
         [Test]
@@ -280,16 +288,21 @@ namespace KingdomSurvival.LocationRendering
             {
                 LocationScatterCarpet carpet = renderer.ScatterCarpet(layer.Id);
                 Vector2Int quad = carpet.BendingPlants.First().Quads[0];
+                float rest = carpet.QuadPositions(quad).Last().x;
                 // Идёт мимо, останавливается рядом.
                 for (int i = 0; i <= 30; i++)
                 {
                     renderer.SetActors(new[] { Actor("hero", new Vector2(470 + i, 500)) }, 0);
                     renderer.StepVegetation(1 / 60f);
                 }
+                Run(renderer, .5f);
+                float early = carpet.QuadPositions(quad).Last().x - rest;
                 Run(renderer, 2);
                 float settled = carpet.QuadPositions(quad).Last().x;
                 renderer.StepVegetation(1 / 60f);
                 Assert.That(carpet.QuadPositions(quad).Last().x, Is.EqualTo(settled).Within(1e-5f), "Стоящий — без бесконечной дрожи.");
+                Assert.That(Mathf.Abs(early), Is.GreaterThan(.005f), "Трава примята.");
+                Assert.That(Mathf.Abs(settled - rest), Is.GreaterThanOrEqualTo(Mathf.Abs(early) * .98f), "Пока стоит — трава не распрямляется.");
                 Assert.That(renderer.ActivePlantCount, Is.EqualTo(1), "Мягкий прогиб удерживается, пока стоит рядом.");
                 // Перенос через полкарты — без полосы прогиба по пути.
                 renderer.SetActors(new[] { Actor("hero", new Vector2(1500, 500)) }, 0);
@@ -331,7 +344,8 @@ namespace KingdomSurvival.LocationRendering
                 Vector4 bend = block.GetVector("_KsBend"), shape = block.GetVector("_KsBendShape");
                 Assert.That(bend.x, Is.GreaterThan(.005f), "Верх — вправо, от ног слева.");
                 Assert.That(shape.y, Is.GreaterThan(0), "Форма прогиба задана.");
-                Assert.That(shape.z, Is.EqualTo(layer.Reaction.SafePinned).Within(1e-5f));
+                Assert.That(shape.z, Is.EqualTo(0), "Отдельный рисунок — прямой наклон от корня, без изломов сетки.");
+                Assert.That(shape.w, Is.EqualTo(1));
                 // Опора в пространстве рисунка: вес прогиба там нулевой.
                 float rootT = (image.transform.InverseTransformPoint(anchor).y - shape.x) * shape.y;
                 Assert.That(LocationGrassBend.Weight(rootT, shape.z), Is.EqualTo(0).Within(1e-5f), "Корни на месте.");

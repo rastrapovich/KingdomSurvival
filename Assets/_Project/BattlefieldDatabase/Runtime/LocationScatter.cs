@@ -58,8 +58,7 @@ namespace KingdomSurvival.BattlefieldDatabase
     {
         // Пределы настроек (окно и расчёт берут одни и те же).
         public const float MinRadius = .1f, MaxRadius = 3f;
-        public const float MaxBend = 1f, MaxPress = .4f;
-        public const float MinCurve = 1f, MaxCurve = 4f;
+        public const float MaxBend = .6f, MaxPress = .4f;
         public const float MinReactTime = .02f, MaxReactTime = 3f;
         public const float MinRecoverTime = .05f, MaxRecoverTime = 5f;
         public const float MaxJitter = 1f;
@@ -69,8 +68,6 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float Radius = .45f;
         // Насколько отходит верхушка, доля высоты травы.
         public float Bend = .25f;
-        // Где гнётся: 1 — наклоняется вся травинка, 2 — дугой, 3–4 — только верхушка.
-        public float Curve = 2;
         // Насколько верхушка опускается при полном касании, доля высоты.
         public float Press = .05f;
         // За сколько секунд трава уступает ногам и возвращается после ухода.
@@ -85,7 +82,8 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         public float SafeRadius => Mathf.Clamp(Radius, MinRadius, MaxRadius);
         public float SafeBend => Mathf.Clamp(Bend, 0, MaxBend);
-        public float SafeCurve => Mathf.Clamp(Curve, MinCurve, MaxCurve);
+        // Ковёр гнётся мягкой дугой; отдельные рисунки — прямым наклоном от корня.
+        public float SafeCurve => 1.5f;
         public float SafePress => Mathf.Clamp(Press, 0, MaxPress);
         public float SafeReactTime => Mathf.Clamp(ReactTime, MinReactTime, MaxReactTime);
         public float SafeRecoverTime => Mathf.Clamp(RecoverTime, MinRecoverTime, MaxRecoverTime);
@@ -108,7 +106,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float SafeArcDrop => 1;
         public float SafeSumLimit => 1;
         public float SafeHold => 0;
-        public float SafeSpeedInfluence => .3f;
+        // Стоящий на траве держит полный прогиб: распрямление — только после ухода.
+        public float SafeSpeedInfluence => 0;
         public float SafeSpeedReference => 1;
         public float SafeSpeedSmoothing => .12f;
         public bool ByParty => true;
@@ -122,13 +121,13 @@ namespace KingdomSurvival.BattlefieldDatabase
             switch (preset)
             {
                 case LocationScatterReactionPreset.TallGrass:
-                    Radius = .55f; Bend = .35f; Curve = 2.2f; Press = .06f; ReactTime = .15f; RecoverTime = 1f; Spring = .15f; Jitter = .25f;
+                    Radius = .55f; Bend = .35f; Press = .06f; ReactTime = .15f; RecoverTime = 1f; Spring = 0; Jitter = .25f;
                     break;
                 case LocationScatterReactionPreset.SoftBush:
-                    Radius = .7f; Bend = .15f; Curve = 1.5f; Press = .02f; ReactTime = .25f; RecoverTime = 1.3f; Spring = .3f; Jitter = .2f;
+                    Radius = .7f; Bend = .15f; Press = .02f; ReactTime = .25f; RecoverTime = 1.3f; Spring = .15f; Jitter = .2f;
                     break;
                 default:
-                    Radius = .45f; Bend = .25f; Curve = 2f; Press = .05f; ReactTime = .12f; RecoverTime = .7f; Spring = 0; Jitter = .2f;
+                    Radius = .45f; Bend = .25f; Press = .05f; ReactTime = .12f; RecoverTime = .7f; Spring = 0; Jitter = .2f;
                     break;
             }
         }

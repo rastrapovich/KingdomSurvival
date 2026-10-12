@@ -290,13 +290,11 @@ namespace KingdomSurvival.LocationRendering.Editor
                 void Log(string label, float value, float min, float max, Action<float> set, string help) =>
                     BrushLogNumber(label, value, min, max, number => set(Mathf.Clamp(number, min, max)), help);
 
-                SubHeading("Касание и изгиб");
+                SubHeading("Касание");
                 Log("Радиус (клеток боя)", r.Radius, LocationScatterReaction.MinRadius, LocationScatterReaction.MaxRadius, value => r.Radius = value,
                     "Как далеко от ног трава чувствует проходящего: 0,3 — только под ногами, 1 — на целую клетку вокруг.");
                 Lin("Сила прогиба", r.Bend, LocationScatterReaction.MaxBend, value => r.Bend = value,
-                    "Насколько отходит верхушка — в долях высоты травы: 0,1 — чуть шевелится, 0,3 — заметно расступается, 0,6 — ложится.");
-                Log("Изгиб: травинка → дуга → верхушка", r.Curve, LocationScatterReaction.MinCurve, LocationScatterReaction.MaxCurve, value => r.Curve = value,
-                    "1 — наклоняется вся травинка; 2 — гнётся дугой; 3–4 — гнётся только верхушка.");
+                    "Насколько отходит верхушка — в долях высоты травы: 0,1 — чуть шевелится, 0,25 — заметно расступается, 0,5 — ложится. Пока персонаж стоит — трава держит прогиб, после ухода — плавно выпрямляется.");
                 Lin("Приминание", r.Press, LocationScatterReaction.MaxPress, value => r.Press = value,
                     "Насколько верхушка опускается под ногами — в долях высоты. Трава не исчезает и не меняет цвет.");
 
@@ -306,7 +304,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Log("Время восстановления (с)", r.RecoverTime, LocationScatterReaction.MinRecoverTime, LocationScatterReaction.MaxRecoverTime, value => r.RecoverTime = value,
                     "За сколько секунд трава выпрямляется после ухода. Обычно дольше реакции.");
                 Lin("Покачивание при отпускании", r.Spring, 1, value => r.Spring = value,
-                    "0 — выпрямляется плавно; 0,3 — пару раз качнётся; 1 — долго качается.");
+                    "0 — выпрямляется плавно (обычно так и нужно); 0,3 — пару раз качнётся; 1 — долго качается.");
                 Lin("Разброс по пучкам", r.Jitter, LocationScatterReaction.MaxJitter, value => r.Jitter = value,
                     "Каждый пучок гнётся и выпрямляется чуть по-своему: заросль не двигается как одна картинка.");
 

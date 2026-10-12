@@ -254,7 +254,8 @@ namespace KingdomSurvival.LocationRendering
                 Lead = reaction.SafeLead, Forward = reaction.SafeForward
             };
             float fullSpeed = walk * reaction.SafeSpeedReference;
-            Vector2 fallback = plant.Bend.sqrMagnitude > 1e-6f ? plant.Bend : plant.Side;
+            // Уже наклонена — держит своё направление у ног; прямая — по шагу, стоящий — устойчивая сторона.
+            bool bent = plant.Bend.sqrMagnitude > 1e-4f;
             Vector2 target = Vector2.zero;
             foreach (BendSource source in bendSources.Values)
             {
@@ -262,7 +263,8 @@ namespace KingdomSurvival.LocationRendering
                 float speed = source.Speed / fullSpeed;
                 Vector2 moving = speed > .05f ? source.Direction : Vector2.zero;
                 target += LocationGrassBend.Push(plant.Ground, source.From, source.To, radius,
-                    LocationGrassBend.Strength(reaction.SafeSpeedInfluence, speed), moving, fallback, zone);
+                    LocationGrassBend.Strength(reaction.SafeSpeedInfluence, speed), moving,
+                    bent ? plant.Bend : moving.sqrMagnitude > 0 ? Vector2.zero : plant.Side, zone);
             }
             target = LocationGrassBend.Limit(target, reaction.SafeSumLimit);
             float time = Mathf.Max(.1f, 1 + reaction.SafeTimeJitter * plant.TimeJitter);
@@ -322,8 +324,10 @@ namespace KingdomSurvival.LocationRendering
                 image.GetPropertyBlock(bendBlock);
                 bendBlock.SetVector(BendId, new Vector4(world.x, world.y, worldDrop, 0));
                 Vector4 shape = plant.Shapes[i];
-                shape.z = reaction.SafePinned;
-                shape.w = reaction.SafeCurve;
+                // Отдельный рисунок — прямой наклон от корня: сетка спрайта по контуру
+                // (длинные треугольники) передаёт только линейный сдвиг без изломов.
+                shape.z = 0;
+                shape.w = 1;
                 bendBlock.SetVector(BendShapeId, shape);
                 image.SetPropertyBlock(bendBlock);
             }
@@ -414,7 +418,7 @@ namespace KingdomSurvival.LocationRendering
                 if (image == null) continue;
                 float root = image.InverseTransformPoint(anchor).y;
                 float top = image.InverseTransformPoint(anchor + image.up * height * Root.transform.lossyScale.y).y;
-                shapes[i] = new Vector4(root, Mathf.Abs(top - root) > 1e-6f ? 1 / (top - root) : 0, 0, 2);
+                shapes[i] = new Vector4(root, Mathf.Abs(top - root) > 1e-6f ? 1 / (top - root) : 0, 0, 1);
             }
             return new Plant
             {

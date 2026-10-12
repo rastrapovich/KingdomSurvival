@@ -89,11 +89,17 @@ namespace KingdomSurvival.LocationRendering
             float distance = away.magnitude;
             float force = Falloff(distance, radius, zone.Core, zone.Softness) * Mathf.Max(0, strength);
             if (force <= 0) return Vector2.zero;
-            float near = radius * .25f;
-            Vector2 direction = away + moveDirection * Mathf.Max(0, near - distance);
+            // У самых ног «от ног» неустойчиво (шаг на пиксель разворачивает
+            // травинку) — там трава держит своё направление (fallback: текущий
+            // наклон; нет — направление шага), дальше плавно переходит к «от ног».
+            Vector2 keep = fallback.sqrMagnitude > 1e-8f ? fallback.normalized
+                : moveDirection.sqrMagnitude > 1e-8f ? moveDirection.normalized : Vector2.right;
+            float near = radius * .4f;
+            float t = Mathf.Clamp01(distance / near);
+            float awayShare = t * t * (3 - 2 * t);
+            Vector2 direction = distance > radius * 1e-3f ? Vector2.Lerp(keep, away / distance, awayShare) : keep;
             float length = direction.magnitude;
-            if (length > radius * 1e-3f) direction /= length;
-            else direction = fallback.sqrMagnitude > 1e-8f ? fallback.normalized : Vector2.right;
+            direction = length > 1e-4f ? direction / length : keep;
             if (zone.Forward > 0 && moveDirection.sqrMagnitude > 1e-8f)
             {
                 Vector2 mixed = Vector2.Lerp(direction, moveDirection.normalized, Mathf.Clamp01(zone.Forward));

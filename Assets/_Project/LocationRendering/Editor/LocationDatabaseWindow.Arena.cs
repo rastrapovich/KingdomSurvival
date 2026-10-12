@@ -84,8 +84,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (!show) return;
 
             Rect frame = CanvasFrame(area);
-            // Гексы боя — на всём рисунке места: бой идёт на всей локации.
-            Rect rect = new Rect(Vector2.zero, CanvasSize);
+            // Гексы боя — на всём рисунке места: бой идёт на всей локации;
+            // у поля боя — арена в рамке кадра поля на холсте.
+            bool battlefield = Location.IsBattlefield;
+            Rect rect = battlefield ? FieldFrameOnCanvas(field) : new Rect(Vector2.zero, CanvasSize);
             Vector2 a = ToGui(frame, rect.min), b = ToGui(frame, rect.max);
             arenaClip.style.left = frame.x;
             arenaClip.style.top = frame.y;
@@ -97,6 +99,24 @@ namespace KingdomSurvival.LocationRendering.Editor
             arenaView.style.height = b.y - a.y;
 
             BattlefieldHexStyle style = fields.GetHexStyle(field);
+            if (battlefield)
+            {
+                // Арена поля: доступные гексы видны, отключённые — крестом.
+                HashSet<HexCoord> disabled = new HashSet<HexCoord>(BattlefieldFrame.DisabledCells(field));
+                if (field != arenaField || arenaView.HasLocationGrid || !disabled.SetEquals(arenaBlocked) || style != arenaView.HexStyle)
+                {
+                    arenaField = field;
+                    arenaGeometry = null;
+                    arenaView.SetLocationGrid(null);
+                    arenaView.Show(field, style);
+                    arenaBlocked.Clear();
+                    arenaBlocked.UnionWith(disabled);
+                    arenaDifficult.Clear();
+                    arenaView.SetWorldUnderlay(disabled);
+                    arenaOverlay.MarkDirtyRepaint();
+                }
+                return;
+            }
             bool changed = field != arenaField || style != arenaView.HexStyle || geometry != arenaGeometry;
             if (changed)
             {

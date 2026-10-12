@@ -157,6 +157,15 @@ public sealed class LocalEncounterDefinition
     public string ResolvedFlag = string.Empty;
 }
 
+// Вид записи Базы локаций: исследуемое место или поле боя, собранное из
+// ассетов, как место (кадр поля 16:9 на холсте; сетка, теги и гексы — у
+// поля Базы полей боя с тем же BattlefieldId). Поле боя картой не открывается.
+public enum LocalLocationKind
+{
+    Place,
+    Battlefield
+}
+
 [Serializable]
 public sealed class LocalLocationDefinition
 {
@@ -167,6 +176,8 @@ public sealed class LocalLocationDefinition
     // Место глобальной карты, у которого этот вход.
     public string WorldLocationId = string.Empty;
     public string DisplayName = string.Empty;
+    public LocalLocationKind Kind = LocalLocationKind.Place;
+    public bool IsBattlefield => Kind == LocalLocationKind.Battlefield;
     // Поле Базы полей боя: настройки сетки и вид клеток боя на месте.
     public string BattlefieldId = string.Empty;
     // Фон — временная заглушка, рисунка ещё нет (показывается игроку).

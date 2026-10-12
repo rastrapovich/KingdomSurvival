@@ -400,7 +400,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             string prefix = string.IsNullOrWhiteSpace(definition.Id) ? "Место без ID" : definition.Id;
             if (string.IsNullOrWhiteSpace(definition.Id))
                 errors.Add(prefix + ": пустой ID.");
-            if (string.IsNullOrWhiteSpace(definition.WorldLocationId))
+            if (!definition.IsBattlefield && string.IsNullOrWhiteSpace(definition.WorldLocationId))
                 errors.Add(prefix + ": не задано место глобальной карты.");
             if (definition.CanvasWidth < 64 || definition.CanvasHeight < 64)
                 errors.Add(prefix + ": размер рисунка места слишком мал.");
@@ -411,6 +411,9 @@ namespace KingdomSurvival.BattlefieldDatabase
                 errors.Add(prefix + ": нет поля '" + definition.BattlefieldId + "' в Базе полей боя.");
                 return errors;
             }
+            // Поле боя, собранное как место: входов, противников и столкновений у него нет.
+            if (definition.IsBattlefield)
+                return errors;
 
             LocalLocationGeometry geometry = new LocalLocationGeometry(definition, field, blockedAreas);
             HashSet<string> ids = new HashSet<string>(StringComparer.Ordinal);

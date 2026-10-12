@@ -23,7 +23,7 @@ namespace KingdomSurvival.LocationRendering.Editor
     // кадр поля показывается на рисунке там, где начнётся бой.
     public sealed partial class LocationDatabaseWindow : EditorWindow
     {
-        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape, PlaceAsset, Scatter }
+        private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape, PlaceAsset, Scatter, FieldHexes }
         private enum Kind { None, Art, Entrance, GameObject, Enemy, Encounter }
         private enum Tab { Place, Game, Light, Art, Ground, Scatter }
         private static readonly string[] TabNames = { "Место", "Игровое", "Свет", "Предметы", "Земля", "Раскидка" };
@@ -31,7 +31,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private static readonly string[] ToolNames =
         {
             "Выбор", "Местность", "Вход", "Объект места", "Противник", "Зона угрозы", "Кадр боя", "Точка отхода", "Старт теста", "Опора рисунка", "Форма света", "Ставить ассет",
-            "Кисть раскидки"
+            "Кисть раскидки", "Кисть гексов поля"
         };
 
         private LocalLocationDatabaseAsset database;
@@ -157,6 +157,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             rootVisualElement.style.backgroundColor = new Color(.12f, .145f, .135f);
             Toolbar toolbar = new Toolbar();
             AddButton(toolbar, "+ Локация", AddLocation);
+            AddButton(toolbar, "+ Поле боя", AddBattlefieldScene);
             AddButton(toolbar, "Дублировать", DuplicateLocation);
             AddButton(toolbar, "Удалить", DeleteLocation);
             AddButton(toolbar, "Проверить", Validate);
@@ -166,6 +167,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             TwoPaneSplitView outer = new TwoPaneSplitView(0, 195, TwoPaneSplitViewOrientation.Horizontal);
             outer.style.flexGrow = 1;
             VisualElement left = new VisualElement();
+            BuildListKind(left);
             ToolbarSearchField search = new ToolbarSearchField();
             search.RegisterValueChangedCallback(evt => { query = evt.newValue; RefreshList(); });
             left.Add(search);
@@ -173,7 +175,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             list.style.flexGrow = 1;
             list.makeItem = () => { Label label = new Label(); label.style.whiteSpace = WhiteSpace.Normal; label.style.paddingLeft = 8; return label; };
             list.bindItem = (row, index) => ((Label)row).text = visible[index].DisplayName + "\n" +
-                (database.FindVisual(visible[index].Id)?.TechnicalTest == true ? "Технический тест" : "Исследуемое место");
+                (visible[index].IsBattlefield ? "Поле боя" : database.FindVisual(visible[index].Id)?.TechnicalTest == true ? "Технический тест" : "Исследуемое место");
             list.selectionChanged += values =>
             {
                 LocalLocationDefinition selected = values.OfType<LocalLocationDefinition>().FirstOrDefault();
@@ -274,9 +276,11 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case Tool.LightShape: status.text = "Форма света: тяните точку, клик у края — новая точка, Shift+клик — удалить."; break;
                 case Tool.PlaceAsset: status.text = "Ставить ассет «" + (ArtAssetDatabaseAsset.FindCurrent(placingAssetId)?.Name ?? "?") + "»: клик — новый экземпляр; Esc или «Выбор» — закончить."; break;
                 case Tool.Scatter: status.text = ScatterHint(); break;
+                case Tool.FieldHexes: status.text = "Гексы поля: ЛКМ по гексу — отключить или включить, протяжка — тем же состоянием; Esc — закончить."; break;
                 default: status.text = "Выбор: клик по метке или предмету, перетаскивание — переместить."; break;
             }
             if (value == Tool.Scatter) tab = Tab.Scatter;
+            else if (value == Tool.FieldHexes) tab = Tab.Place;
             else if (value == Tool.Terrain) tab = Tab.Place;
             else if (value == Tool.LightShape) tab = Tab.Light;
             else if (value == Tool.TestStart || value == Tool.Pivot || value == Tool.PlaceAsset) tab = tab == Tab.Light ? Tab.Light : Tab.Art;
@@ -289,8 +293,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void RefreshList()
         {
             if (list == null || database == null) return;
-            visible = database.locations.Where(item => item.DisplayName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                item.Id.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+            visible = database.locations.Where(item => MatchesListKind(item) && (item.DisplayName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                item.Id.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
             list.itemsSource = visible; list.Rebuild();
         }
 
@@ -424,9 +428,12 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (location == null) return;
             Heading(location.DisplayName);
             VisualElement tabs = new VisualElement(); tabs.style.flexDirection = FlexDirection.Row; tabs.style.flexWrap = Wrap.Wrap;
+            // У поля боя нет входов, противников и столкновений — без «Игрового».
+            if (location.IsBattlefield && tab == Tab.Game) tab = Tab.Place;
             for (int i = 0; i < TabNames.Length; i++)
             {
                 Tab value = (Tab)i;
+                if (location.IsBattlefield && value == Tab.Game) continue;
                 Button button = new Button(() => { tab = value; ApplyGroundView(); BuildSettings(); }) { text = TabNames[i] };
                 if (value == tab) { button.style.unityFontStyleAndWeight = FontStyle.Bold; button.style.color = new Color(.95f, .82f, .5f); }
                 tabs.Add(button);
@@ -441,7 +448,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case Tab.Scatter: BuildScatterSettings(location); return;
             }
             Text("Название", location.DisplayName, value => { location.DisplayName = value; RefreshList(); });
-            Text("ID места карты", location.WorldLocationId, value => location.WorldLocationId = value);
+            if (!location.IsBattlefield)
+                Text("ID места карты", location.WorldLocationId, value => location.WorldLocationId = value);
 
             if (tool == Tool.Terrain)
             {
@@ -530,6 +538,13 @@ namespace KingdomSurvival.LocationRendering.Editor
             Toggle(tiledGround ? "Пол — временная заглушка" : "Рисунок — временная заглушка", location.PlaceholderArt, value => location.PlaceholderArt = value);
             settings[settings.childCount - 1].tooltip = "В игре у места подпись «временный фон — рисунка ещё нет».";
 
+            if (location.IsBattlefield) BuildBattlefieldSceneSettings(location);
+            else BuildPlaceMovementAndBattle(location);
+            BuildServiceLayers();
+        }
+
+        private void BuildPlaceMovementAndBattle(LocalLocationDefinition location)
+        {
             Heading("Перемещение");
             Help("Отряд ходит по гексам боя этого места, как на поле боя, с общей скоростью ходьбы («Ходьба, гексов/с» в Базе полей боя: " +
                  BattlefieldDatabaseAsset.SharedWalkHexesPerSecond.ToString("0.#") + " гекса/с). Время пути — свои числа места.");
@@ -550,7 +565,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             AddButton(settings, "Открыть поле в базе", () => EditorApplication.ExecuteMenuItem("Kingdom Survival/База полей боя"));
             Number("Ширина кадра боя (пиксели)", location.BattleFrameWidth, 320, Mathf.Max(640, location.CanvasWidth * 2), value => location.BattleFrameWidth = value);
             BuildFieldHexCards();
+        }
 
+        private void BuildServiceLayers()
+        {
             Heading("Служебные слои");
             UnityEngine.UIElements.Toggle terrain = new UnityEngine.UIElements.Toggle("Местность") { value = showTerrain };
             terrain.RegisterValueChangedCallback(evt => showTerrain = evt.newValue); settings.Add(terrain);
@@ -1366,7 +1384,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (evt.type == EventType.MouseDown && frame.Contains(evt.mousePosition)) canvas.Focus();
             if (HandleCropInput(evt, frame, pixel)) return true;
             if (HandlePictureCropInput(evt, frame, pixel)) return true;
-            if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.Escape && tool == Tool.PlaceAsset)
+            if (HandleFieldHexInput(evt, frame, pixel)) return true;
+            if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.Escape && (tool == Tool.PlaceAsset || tool == Tool.FieldHexes))
             {
                 SetTool(Tool.Select); evt.Use(); return true;
             }

@@ -1023,6 +1023,10 @@ namespace KingdomSurvival.BattleSandbox
                 surface.style.top = 0f;
             }
             BattlefieldSurface = surface;
+            // Поле, собранное в Базе локаций, — живой кадр места под доской
+            // (дорожный бой и полигон; бой на месте уже идёт поверх места).
+            if (!IsWorldUnderlayBattle && (campaignBattle == null || !campaignBattle.UsesLocationGrid))
+                BattlefieldSceneDriver.TryCreate(field, surface, boardElement);
             // В редакторе правки окна базы видны в идущем бою.
             if (Application.isEditor)
             {

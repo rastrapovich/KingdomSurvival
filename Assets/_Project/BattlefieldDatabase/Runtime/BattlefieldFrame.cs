@@ -21,6 +21,23 @@ namespace KingdomSurvival.BattlefieldDatabase
         private const float CoverMargin = 0.03f;
         private static readonly float Sqrt3 = Mathf.Sqrt(3f);
 
+        // Кадр поля 16:9 на рисунке (пиксели рисунка, Y вниз): рисунок вписан
+        // в кадр с обрезкой (ScaleAndCrop), затем увеличен на scale и сдвинут
+        // на offset (доли кадра) — как фон поля в бою. Для поля, собранного в
+        // Базе локаций, рисунок — холст места, и бой снимает ровно этот кадр.
+        public static Rect FrameOnPicture(Vector2 picture, float scale, Vector2 offset)
+        {
+            picture = Vector2.Max(picture, Vector2.one);
+            Vector2 frame = new Vector2(Aspect, 1f);
+            float fit = Mathf.Max(frame.x / picture.x, frame.y / picture.y) * Mathf.Max(0.1f, scale);
+            Vector2 size = frame / fit;
+            Vector2 min = picture / 2f - (frame / 2f + Vector2.Scale(offset, frame)) / fit;
+            return new Rect(min, size);
+        }
+
+        public static Rect FrameOnPicture(Vector2 picture, BattlefieldDefinitionData battlefield) =>
+            FrameOnPicture(picture, battlefield != null ? battlefield.BackgroundScale : 1f, battlefield != null ? battlefield.BackgroundOffset : Vector2.zero);
+
         public static Rect GetGridArea(BattlefieldDefinitionData battlefield)
         {
             float scale = battlefield != null ? battlefield.GridScale : 1f;

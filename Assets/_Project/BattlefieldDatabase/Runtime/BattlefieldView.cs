@@ -31,6 +31,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         private BattlefieldDefinitionData battlefield;
         private BattlefieldHexStyle hexStyle = new BattlefieldHexStyle();
         private bool worldUnderlay;
+        // Поле, собранное в Базе локаций: живой кадр места вместо картинки поля.
+        private Texture sceneTexture;
         private readonly HashSet<HexCoord> underlayBlocked = new HashSet<HexCoord>();
 
         public Rect FrameRect { get; private set; }
@@ -121,10 +123,31 @@ namespace KingdomSurvival.BattlefieldDatabase
             Refresh();
         }
 
+        // Живой кадр места (поле, собранное в Базе локаций) — ровно кадр поля:
+        // без обрезки, масштаба и сдвига картинки поля. null — снова картинка.
+        public void SetSceneTexture(Texture texture)
+        {
+            sceneTexture = texture;
+            Refresh();
+        }
+
+        public bool HasSceneTexture => sceneTexture != null;
+
         public void Refresh()
         {
-            background.sprite = battlefield != null && !worldUnderlay ? battlefield.Background : null;
-            background.style.display = background.sprite != null ? DisplayStyle.Flex : DisplayStyle.None;
+            if (sceneTexture != null)
+            {
+                background.sprite = null;
+                background.image = sceneTexture;
+                background.scaleMode = ScaleMode.StretchToFill;
+            }
+            else
+            {
+                background.image = null;
+                background.scaleMode = ScaleMode.ScaleAndCrop;
+                background.sprite = battlefield != null && !worldUnderlay ? battlefield.Background : null;
+            }
+            background.style.display = background.sprite != null || sceneTexture != null ? DisplayStyle.Flex : DisplayStyle.None;
             bool placeholder = IsPlaceholder;
             placeholderLayer.style.display = placeholder ? DisplayStyle.Flex : DisplayStyle.None;
             placeholderLabel.style.display = placeholder ? DisplayStyle.Flex : DisplayStyle.None;
@@ -167,8 +190,8 @@ namespace KingdomSurvival.BattlefieldDatabase
             frame.style.width = FrameRect.width;
             frame.style.height = FrameRect.height;
 
-            float scale = battlefield != null ? battlefield.BackgroundScale : 1f;
-            Vector2 offset = battlefield != null ? battlefield.BackgroundOffset : Vector2.zero;
+            float scale = battlefield != null && sceneTexture == null ? battlefield.BackgroundScale : 1f;
+            Vector2 offset = battlefield != null && sceneTexture == null ? battlefield.BackgroundOffset : Vector2.zero;
             background.style.scale = new Scale(new Vector3(scale, scale, 1f));
             background.style.translate = new Translate(
                 new Length(offset.x * FrameRect.width, LengthUnit.Pixel),
@@ -230,7 +253,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             }
         }
 
-        private bool IsPlaceholder => !worldUnderlay && battlefield != null && battlefield.AwaitingArt && battlefield.Background == null;
+        private bool IsPlaceholder => !worldUnderlay && sceneTexture == null && battlefield != null && battlefield.AwaitingArt && battlefield.Background == null;
 
         private void DrawPlaceholder(MeshGenerationContext context)
         {

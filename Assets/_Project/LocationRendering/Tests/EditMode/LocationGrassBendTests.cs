@@ -57,6 +57,7 @@ namespace KingdomSurvival.LocationRendering
             layer.Reaction.Enabled = true;
             layer.Reaction.Radius = 1;
             layer.Reaction.Bend = .2f;
+            layer.Reaction.Jitter = 0;
             return layer;
         }
 
@@ -201,7 +202,7 @@ namespace KingdomSurvival.LocationRendering
             layer.Reaction.Bend = 7;
             layer.Reaction.RecoverTime = -1;
             Assert.That(layer.Reaction.SafeBend, Is.EqualTo(LocationScatterReaction.MaxBend));
-            Assert.That(layer.Reaction.SafeRecoverTime, Is.EqualTo(LocationScatterReaction.MinTime));
+            Assert.That(layer.Reaction.SafeRecoverTime, Is.EqualTo(LocationScatterReaction.MinRecoverTime));
         }
 
         // ------------------------------------------------------------------
@@ -330,7 +331,7 @@ namespace KingdomSurvival.LocationRendering
                 Vector4 bend = block.GetVector("_KsBend"), shape = block.GetVector("_KsBendShape");
                 Assert.That(bend.x, Is.GreaterThan(.005f), "Верх — вправо, от ног слева.");
                 Assert.That(shape.y, Is.GreaterThan(0), "Форма прогиба задана.");
-                Assert.That(shape.z, Is.EqualTo(layer.Reaction.Pinned).Within(1e-5f));
+                Assert.That(shape.z, Is.EqualTo(layer.Reaction.SafePinned).Within(1e-5f));
                 // Опора в пространстве рисунка: вес прогиба там нулевой.
                 float rootT = (image.transform.InverseTransformPoint(anchor).y - shape.x) * shape.y;
                 Assert.That(LocationGrassBend.Weight(rootT, shape.z), Is.EqualTo(0).Within(1e-5f), "Корни на месте.");
@@ -456,7 +457,7 @@ namespace KingdomSurvival.LocationRendering
         }
 
         [Test]
-        public void WhoTouches_HoldSpringAndAssetScale_InRenderer()
+        public void Enemies_Bend_SpringOvershoots_StrengthScales()
         {
             Asset("grass");
             LocalLocationDefinition location = Location();
@@ -464,51 +465,40 @@ namespace KingdomSurvival.LocationRendering
             LocationScatterLayer layer = Layer(LocationScatterMode.Carpet, "grass");
             Put(layer, "grass", new Vector2(510, 500));
             visual.ScatterLayers.Add(layer);
-            using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null) { VegetationReacts = true })
+            float Bent(float bend, float spring, out bool overshoot, out bool settled)
             {
-                LocationScatterCarpet carpet = renderer.ScatterCarpet(layer.Id);
-                Vector2Int quad = carpet.BendingPlants.First().Quads[0];
-                float Top() => carpet.QuadPositions(quad).Last().x;
-                float rest = Top();
-                LocationWorldRenderer.ActorFrame enemy = new LocationWorldRenderer.ActorFrame
-                {
-                    Id = "wolf", Pixel = new Vector2(500, 500), Kind = LocationWorldRenderer.ActorKind.Enemy
-                };
-                layer.Reaction.ByEnemies = false;
-                renderer.SetActors(new[] { enemy }, 0);
-                Run(renderer, .5f);
-                Assert.That(Top(), Is.EqualTo(rest), "Противники сняты — не гнут.");
-                layer.Reaction.ByEnemies = true;
-                Run(renderer, .5f);
-                float full = Top() - rest;
-                Assert.That(full, Is.GreaterThan(.005f), "Противники включены на ходу — гнут.");
-
-                // Задержка: после ухода держит прогиб.
-                layer.Reaction.Hold = .5f;
-                renderer.SetActors(new LocationWorldRenderer.ActorFrame[0], 0);
-                Run(renderer, .3f);
-                Assert.That(Top() - rest, Is.EqualTo(full).Within(full * .05f), "Держит форму во время задержки.");
-                Run(renderer, 4);
-                Assert.That(Top(), Is.EqualTo(rest), "Потом возвращается точно.");
-            }
-            layer.Assets[0].BendScale = 2;
-            layer.Reaction.Hold = 0;
-            float Bent()
-            {
+                layer.Reaction.Bend = bend;
+                layer.Reaction.Spring = spring;
                 using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null) { VegetationReacts = true })
                 {
                     LocationScatterCarpet carpet = renderer.ScatterCarpet(layer.Id);
                     Vector2Int quad = carpet.BendingPlants.First().Quads[0];
-                    float rest = carpet.QuadPositions(quad).Last().x;
-                    renderer.SetActors(new[] { Actor("hero", new Vector2(500, 500)) }, 0);
+                    float Top() => carpet.QuadPositions(quad).Last().x;
+                    float rest = Top();
+                    renderer.SetActors(new[] { new LocationWorldRenderer.ActorFrame { Id = "wolf", Pixel = new Vector2(500, 500), Kind = LocationWorldRenderer.ActorKind.Enemy } }, 0);
                     Run(renderer, 1);
-                    return carpet.QuadPositions(quad).Last().x - rest;
+                    float shift = Top() - rest;
+                    renderer.SetActors(new LocationWorldRenderer.ActorFrame[0], 0);
+                    overshoot = false;
+                    for (int i = 0; i < 240; i++)
+                    {
+                        renderer.StepVegetation(1 / 60f);
+                        overshoot |= Top() < rest - .002f;
+                    }
+                    settled = Top() == rest;
+                    return shift;
                 }
             }
-            float doubled = Bent();
-            layer.Assets[0].BendScale = 1;
-            Assert.That(doubled, Is.EqualTo(Bent() * 2).Within(.002f), "«Сила ×» ассета.");
+            float soft = Bent(.2f, 0, out bool smoothOvershoot, out bool smoothSettled);
+            Assert.That(soft, Is.GreaterThan(.005f), "Противник гнёт траву.");
+            Assert.That(smoothOvershoot, Is.False, "Без покачивания — без перехлёста.");
+            Assert.That(smoothSettled, Is.True, "Возвращается точно.");
+            float strong = Bent(.4f, .8f, out bool springOvershoot, out bool springSettled);
+            Assert.That(strong, Is.EqualTo(soft * 2).Within(.002f), "Сила прогиба вдвое — смещение вдвое.");
+            Assert.That(springOvershoot, Is.True, "Покачивание проскакивает исходное положение.");
+            Assert.That(springSettled, Is.True, "И затухает до исходной формы.");
         }
+
 
         // Основание кистью у экземпляра раскидки «не мешает» сохраняется: и
         // окклюзия, и перекрытие света — по клеткам, а не по прямоугольнику.

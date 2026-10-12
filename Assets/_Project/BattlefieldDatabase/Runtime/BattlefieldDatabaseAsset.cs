@@ -89,9 +89,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         }
     }
 
-    [CreateAssetMenu(
-        fileName = "KingdomSurvivalBattlefields",
-        menuName = "Kingdom Survival/База полей боя")]
+    // Поля боя: правятся только в Базе локаций (вкладка списка «Поля боя»):
+    // своего окна и пункта меню у базы больше нет.
     public sealed class BattlefieldDatabaseAsset : ScriptableObject
     {
         public const string ResourcesPath = "BattlefieldDatabase/KingdomSurvivalBattlefields";

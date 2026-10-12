@@ -524,7 +524,7 @@ namespace KingdomSurvival.LocationRendering
             source.Mode = LocationScatterMode.Carpet;
             source.Brush.Density = 17;
             source.Reaction.Enabled = true;
-            source.Reaction.Bend = 1.2f;
+            source.Reaction.Bend = .9f;
             source.DesyncAnimation = false;
             source.Assets[0].Bends = false;
             source.Assets[0].Weight = 3;
@@ -538,7 +538,7 @@ namespace KingdomSurvival.LocationRendering
             Assert.That(target.Mode, Is.EqualTo(LocationScatterMode.Carpet));
             Assert.That(target.Brush.Density, Is.EqualTo(17));
             Assert.That(target.Brush, Is.Not.SameAs(source.Brush), "Копия, а не общая ссылка.");
-            Assert.That(target.Reaction.Enabled && target.Reaction.SafeBend > 1.1f, Is.True, "Реакция и широкий диапазон силы.");
+            Assert.That(target.Reaction.Enabled && target.Reaction.SafeBend > .85f, Is.True, "Реакция и сила прогиба.");
             Assert.That(target.DesyncAnimation, Is.False);
             Assert.That(target.Assets.Select(item => item.AssetId), Is.EqualTo(new[] { "grass", "flower" }), "Ассеты кисти — свои.");
             Assert.That(target.Assets[0].Bends, Is.False);

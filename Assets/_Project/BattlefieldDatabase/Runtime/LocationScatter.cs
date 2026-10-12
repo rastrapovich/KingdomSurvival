@@ -44,9 +44,6 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Реакция на проход: гнётся ли этот ассет, если она включена у слоя
         // (камни в том же слое не гнутся).
         public bool Bends = true;
-        // Свои множители реакции ассета: сила прогиба и радиус касания.
-        public float BendScale = 1;
-        public float RadiusScale = 1;
     }
 
     public enum LocationScatterReactionPreset { SmallGrass, TallGrass, SoftBush }
@@ -60,136 +57,78 @@ namespace KingdomSurvival.BattlefieldDatabase
     public sealed class LocationScatterReaction
     {
         // Пределы настроек (окно и расчёт берут одни и те же).
-        public const float MinRadius = .02f, MaxRadius = 6f;
-        public const float MaxCore = .95f, MinSoftness = .2f, MaxSoftness = 12f;
-        public const float MinDepthStretch = .1f, MaxDepthStretch = 6f, MaxLead = 3f;
-        public const float MaxBend = 1.5f, MaxPress = .6f, MaxPinned = .95f;
-        public const float MinCurve = .5f, MaxCurve = 8f, MaxDepthLean = 5f, MaxArcDrop = 5f;
-        public const float MinSumLimit = .05f, MaxSumLimit = 3f;
-        public const float MinTime = .01f, MaxTime = 20f, MaxHold = 10f;
-        public const float MinFrequency = .1f, MaxFrequency = 20f;
-        public const float MinSpeedReference = .05f, MaxSpeedReference = 10f;
-        public const float MinSmoothing = .005f, MaxSmoothing = 5f, MaxJitter = 1f;
-        public const float MaxAssetScale = 10f, MinAssetRadius = .05f;
+        public const float MinRadius = .1f, MaxRadius = 3f;
+        public const float MaxBend = 1f, MaxPress = .4f;
+        public const float MinCurve = 1f, MaxCurve = 4f;
+        public const float MinReactTime = .02f, MaxReactTime = 3f;
+        public const float MinRecoverTime = .05f, MaxRecoverTime = 5f;
+        public const float MaxJitter = 1f;
 
         public bool Enabled;
-
-        // --- Кто задевает -------------------------------------------------
-        // Командир и бойцы отряда, свита, противники в исследовании, фигуры
-        // боя на месте (обе стороны).
-        public bool ByParty = true;
-        public bool ByRetinue = true;
-        public bool ByEnemies = true;
-        public bool ByBattle = true;
-
-        // --- Зона касания -------------------------------------------------
-        // Радиус воздействия, клеток боя.
+        // Радиус касания, клеток боя (рост фигур тоже от клетки).
         public float Radius = .45f;
-        // Полная сила у самых ног: доля радиуса без спада (0 — спад от центра).
-        public float Core;
-        // Мягкость края: 1 — плавно с самого центра, больше — дольше держит
-        // силу и резче спадает к краю.
-        public float EdgeSoftness = 2;
-        // Вытянутость зоны вглубь картинки: 1 — как гексы на земле, меньше —
-        // зона плоская (задевает только сбоку), больше — длиннее вглубь.
-        public float DepthStretch = 1;
-        // Зона сдвинута вперёд по ходу (доля радиуса): трава расступается заранее.
-        public float Lead;
-
-        // --- Форма прогиба ------------------------------------------------
-        // Наибольшее отклонение верха, доля высоты.
-        public float Bend = .1f;
-        // Приминание: опускание верха при полном контакте, доля высоты.
-        public float Press = .03f;
-        // Закреплённая нижняя часть (доля высоты над опорой) — не сдвигается.
-        public float Pinned = .25f;
-        // Изгиб по высоте: 1 — прямой наклон (скос), 2 — дуга, больше —
-        // гнётся только верхушка.
+        // Насколько отходит верхушка, доля высоты травы.
+        public float Bend = .25f;
+        // Где гнётся: 1 — наклоняется вся травинка, 2 — дугой, 3–4 — только верхушка.
         public float Curve = 2;
-        // Наклон вглубь картинки (к зрителю / от зрителя) относительно бокового.
-        public float DepthLean = 1;
-        // Укорочение дуги: верх, уходя вбок, опускается (0 — не опускается).
-        public float ArcDrop = 1;
-        // Направление: 0 — от ног (расступается в стороны), 1 — по ходу фигуры.
-        public float Forward;
-        // Предел суммы нескольких фигур (доля полного прогиба).
-        public float SumLimit = 1;
-
-        // --- Время --------------------------------------------------------
-        // Время, за которое растение уступает и возвращается (с).
+        // Насколько верхушка опускается при полном касании, доля высоты.
+        public float Press = .05f;
+        // За сколько секунд трава уступает ногам и возвращается после ухода.
         public float ReactTime = .12f;
-        public float RecoverTime = .6f;
-        // Задержка перед возвратом после ухода (с).
-        public float Hold;
-        // Покачивание при отпускании: 0 — плавно без перехлёста, 1 — сильно.
+        public float RecoverTime = .7f;
+        // Покачивание при отпускании: 0 — плавно, 1 — несколько затухающих качков.
         public float Spring;
-        // Частота покачивания, колебаний в секунду.
-        public float SpringFrequency = 2.5f;
-
-        // --- Движение -----------------------------------------------------
-        // Влияние скорости: 0 — стоящий гнёт так же, как идущий; 1 — только идущий.
-        public float SpeedInfluence = .3f;
-        // Скорость полного касания, доля обычного шага: меньше — полная сила
-        // уже при медленном шаге.
-        public float SpeedReference = 1;
-        // Сглаживание скорости (с): насколько плавно затухает доля движения
-        // после остановки.
-        public float SpeedSmoothing = .12f;
-
-        // --- Разброс по пучкам --------------------------------------------
-        // Упругость: каждый пучок гнётся сильнее или слабее на ± эту долю.
-        public float BendJitter;
-        // Время: реакция и возврат у каждого пучка дольше или короче на ± долю.
-        public float TimeJitter;
-
-        // Отладка: контур воздействия у фигур.
+        // Разброс по пучкам: каждый гнётся и возвращается чуть по-своему.
+        public float Jitter = .2f;
+        // Отладка: контур касания у фигур.
         public bool ShowRadius;
 
         public float SafeRadius => Mathf.Clamp(Radius, MinRadius, MaxRadius);
-        public float SafeCore => Mathf.Clamp(Core, 0, MaxCore);
-        public float SafeEdgeSoftness => Mathf.Clamp(EdgeSoftness, MinSoftness, MaxSoftness);
-        public float SafeDepthStretch => Mathf.Clamp(DepthStretch, MinDepthStretch, MaxDepthStretch);
-        public float SafeLead => Mathf.Clamp(Lead, 0, MaxLead);
         public float SafeBend => Mathf.Clamp(Bend, 0, MaxBend);
-        public float SafePress => Mathf.Clamp(Press, 0, MaxPress);
-        public float SafePinned => Mathf.Clamp(Pinned, 0, MaxPinned);
         public float SafeCurve => Mathf.Clamp(Curve, MinCurve, MaxCurve);
-        public float SafeDepthLean => Mathf.Clamp(DepthLean, 0, MaxDepthLean);
-        public float SafeArcDrop => Mathf.Clamp(ArcDrop, 0, MaxArcDrop);
-        public float SafeForward => Mathf.Clamp01(Forward);
-        public float SafeSumLimit => Mathf.Clamp(SumLimit, MinSumLimit, MaxSumLimit);
-        public float SafeReactTime => Mathf.Clamp(ReactTime, MinTime, MaxTime);
-        public float SafeRecoverTime => Mathf.Clamp(RecoverTime, MinTime, MaxTime);
-        public float SafeHold => Mathf.Clamp(Hold, 0, MaxHold);
+        public float SafePress => Mathf.Clamp(Press, 0, MaxPress);
+        public float SafeReactTime => Mathf.Clamp(ReactTime, MinReactTime, MaxReactTime);
+        public float SafeRecoverTime => Mathf.Clamp(RecoverTime, MinRecoverTime, MaxRecoverTime);
         public float SafeSpring => Mathf.Clamp01(Spring);
-        public float SafeSpringFrequency => Mathf.Clamp(SpringFrequency, MinFrequency, MaxFrequency);
-        public float SafeSpeedInfluence => Mathf.Clamp01(SpeedInfluence);
-        public float SafeSpeedReference => Mathf.Clamp(SpeedReference, MinSpeedReference, MaxSpeedReference);
-        public float SafeSpeedSmoothing => Mathf.Clamp(SpeedSmoothing, MinSmoothing, MaxSmoothing);
-        public float SafeBendJitter => Mathf.Clamp(BendJitter, 0, MaxJitter);
-        public float SafeTimeJitter => Mathf.Clamp(TimeJitter, 0, MaxJitter);
+        public float SafeBendJitter => Mathf.Clamp(Jitter, 0, MaxJitter);
+        public float SafeTimeJitter => Mathf.Clamp(Jitter, 0, MaxJitter) * .8f;
+        // Темп покачивания — от времени восстановления: дольше возврат — медленнее качки.
+        public float SafeSpringFrequency => Mathf.Clamp(1.4f / SafeRecoverTime, .3f, 8);
+
+        // Остальное — постоянное (не настраивается): основание закреплено на
+        // 15 % высоты, зона — круг на земле от ног, трава расступается от ног
+        // в стороны, стоящий держит мягкий прогиб; задевают все фигуры.
+        public float SafePinned => .15f;
+        public float SafeCore => 0;
+        public float SafeEdgeSoftness => 2;
+        public float SafeDepthStretch => 1;
+        public float SafeLead => 0;
+        public float SafeForward => 0;
+        public float SafeDepthLean => 1;
+        public float SafeArcDrop => 1;
+        public float SafeSumLimit => 1;
+        public float SafeHold => 0;
+        public float SafeSpeedInfluence => .3f;
+        public float SafeSpeedReference => 1;
+        public float SafeSpeedSmoothing => .12f;
+        public bool ByParty => true;
+        public bool ByRetinue => true;
+        public bool ByEnemies => true;
+        public bool ByBattle => true;
 
         // Стартовые настройки эффекта, не ботаническая классификация.
-        // «Кто задевает», отладка и включение не меняются.
         public void Apply(LocationScatterReactionPreset preset)
         {
-            Core = 0; EdgeSoftness = 2; DepthStretch = 1; Lead = 0;
-            Curve = 2; DepthLean = 1; ArcDrop = 1; Forward = 0; SumLimit = 1;
-            Hold = 0; Spring = 0; SpringFrequency = 2.5f;
-            SpeedReference = 1; SpeedSmoothing = .12f; BendJitter = 0; TimeJitter = 0;
             switch (preset)
             {
                 case LocationScatterReactionPreset.TallGrass:
-                    Radius = .55f; Bend = .2f; Press = .04f; ReactTime = .15f; RecoverTime = .9f; Pinned = .2f; SpeedInfluence = .35f;
-                    Curve = 2.2f; Forward = .15f; Lead = .1f; BendJitter = .2f; TimeJitter = .15f;
+                    Radius = .55f; Bend = .35f; Curve = 2.2f; Press = .06f; ReactTime = .15f; RecoverTime = 1f; Spring = .15f; Jitter = .25f;
                     break;
                 case LocationScatterReactionPreset.SoftBush:
-                    Radius = .7f; Bend = .12f; Press = .02f; ReactTime = .22f; RecoverTime = 1.2f; Pinned = .35f; SpeedInfluence = .25f;
-                    Curve = 1.6f; Hold = .1f; Spring = .2f; SpringFrequency = 1.8f; BendJitter = .15f; TimeJitter = .2f;
+                    Radius = .7f; Bend = .15f; Curve = 1.5f; Press = .02f; ReactTime = .25f; RecoverTime = 1.3f; Spring = .3f; Jitter = .2f;
                     break;
                 default:
-                    Radius = .45f; Bend = .1f; Press = .03f; ReactTime = .12f; RecoverTime = .6f; Pinned = .25f; SpeedInfluence = .3f;
-                    BendJitter = .15f; TimeJitter = .1f;
+                    Radius = .45f; Bend = .25f; Curve = 2f; Press = .05f; ReactTime = .12f; RecoverTime = .7f; Spring = 0; Jitter = .2f;
                     break;
             }
         }

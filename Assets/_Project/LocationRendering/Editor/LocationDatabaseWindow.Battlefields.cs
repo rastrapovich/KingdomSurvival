@@ -11,19 +11,20 @@ using UnityEngine.UIElements;
 
 namespace KingdomSurvival.LocationRendering.Editor
 {
-    // Поля боя в Базе локаций: поле собирается как место (земля, предметы,
-    // раскидка, свет), его запись в Базе полей боя (тот же BattlefieldId) —
-    // сетка, отключённые гексы, вид гекса и теги — правится здесь же. Кадр
-    // поля 16:9 на холсте — рамка (масштаб и сдвиг кадра); в бою камера места
-    // снимает ровно её (BattlefieldSceneDriver). Окно Базы полей боя остаётся
-    // для общего: скорости ходьбы, общего вида гекса и справочника тегов.
+    // Поля боя — только здесь, в Базе локаций (своего окна у них больше нет).
+    // Поле собирается как место (земля, предметы, раскидка, свет); его запись
+    // в данных полей боя (тот же BattlefieldId) — сетка, отключённые гексы,
+    // вид гекса и теги — правится здесь же, как и общее для всех полей:
+    // скорость ходьбы, общий вид гекса, справочник тегов. Кадр поля 16:9 на
+    // холсте — рамка (масштаб и сдвиг кадра); в бою камера места снимает
+    // ровно её (BattlefieldSceneDriver). Поле без сборки при открытии окна
+    // собирается само: его рисунок — земля.
     public sealed partial class LocationDatabaseWindow
     {
         private enum ListKind { Places, Battlefields }
 
         [SerializeField] private ListKind listKind = ListKind.Places;
         private readonly List<Button> listKindButtons = new List<Button>();
-        private Button migrateButton;
         // Кисть гексов поля: протяжка ставит то же состояние, что первый клик.
         private bool fieldCellPaintDisabled;
         private readonly HashSet<HexCoord> fieldCellsStroke = new HashSet<HexCoord>();
@@ -47,12 +48,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                 row.Add(button);
             }
             left.Add(row);
-            migrateButton = new Button(MigrateBattlefields)
-            {
-                tooltip = "Каждое поле Базы полей боя без своей сборки становится записью «Поле боя» здесь: его рисунок — земля, " +
-                          "кадрирование — рамка кадра, гексы, теги и вид гекса остаются у поля. Дальше на него можно ставить ассеты."
-            };
-            left.Add(migrateButton);
             RefreshListKind();
         }
 
@@ -64,23 +59,46 @@ namespace KingdomSurvival.LocationRendering.Editor
                 listKindButtons[i].style.unityFontStyleAndWeight = active ? FontStyle.Bold : FontStyle.Normal;
                 listKindButtons[i].style.color = active ? new Color(.95f, .82f, .5f) : new StyleColor(StyleKeyword.Null);
             }
-            if (migrateButton == null) return;
-            int missing = UnassembledBattlefields().Count;
-            migrateButton.text = "Перенести поля боя из старой базы (" + missing + ")";
-            migrateButton.style.display = ShowsBattlefields && missing > 0 ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         private bool MatchesListKind(LocalLocationDefinition location) => location.IsBattlefield == ShowsBattlefields;
 
-        // Поля Базы полей боя, у которых ещё нет сборки в Базе локаций.
-        private List<BattlefieldDefinitionData> UnassembledBattlefields()
+        // Поля, у которых ещё нет сборки в Базе локаций.
+        public static List<BattlefieldDefinitionData> UnassembledBattlefields(LocalLocationDatabaseAsset locations, BattlefieldDatabaseAsset battlefields)
         {
-            if (fields == null || database == null) return new List<BattlefieldDefinitionData>();
-            HashSet<string> assembled = new HashSet<string>(database.locations.Where(item => item != null && item.IsBattlefield).Select(item => item.BattlefieldId));
-            return fields.Battlefields.Where(item => item != null && !string.IsNullOrEmpty(item.Id) && !assembled.Contains(item.Id)).ToList();
+            if (battlefields == null || locations == null) return new List<BattlefieldDefinitionData>();
+            HashSet<string> assembled = new HashSet<string>(locations.locations.Where(item => item != null && item.IsBattlefield).Select(item => item.BattlefieldId));
+            return battlefields.Battlefields.Where(item => item != null && !string.IsNullOrEmpty(item.Id) && !assembled.Contains(item.Id)).ToList();
         }
 
-        // Новое поле: запись в Базе полей боя и место вида «Поле боя» 16:9.
+        // Перенос: каждое поле без сборки становится полем-местом — рисунок
+        // поля — земля (холст его размера), кадрирование фона остаётся у поля
+        // и задаёт рамку кадра; гексы, теги и вид гекса — тоже у поля.
+        // Возвращает число перенесённых. Меню: Kingdom Survival → служебное.
+        public static int AssembleAllBattlefields(LocalLocationDatabaseAsset locations, BattlefieldDatabaseAsset battlefields)
+        {
+            List<BattlefieldDefinitionData> missing = UnassembledBattlefields(locations, battlefields);
+            if (missing.Count == 0) return 0;
+            Undo.RecordObject(locations, "Поля боя → База локаций");
+            foreach (BattlefieldDefinitionData field in missing)
+            {
+                Vector2 canvas = field.Background != null ? field.Background.rect.size : new Vector2(1920, 1080);
+                AddSceneFor(locations, field.Id, string.IsNullOrEmpty(field.DisplayLabel) ? field.Id : field.DisplayLabel, field.Background, canvas);
+            }
+            EditorUtility.SetDirty(locations);
+            AssetDatabase.SaveAssetIfDirty(locations);
+            return missing.Count;
+        }
+
+        // Для запуска без окна (batchmode): перенести поля рабочей базы.
+        public static void AssembleAllBattlefieldsInProject()
+        {
+            LocalLocationDatabaseAsset locations = AssetDatabase.LoadAssetAtPath<LocalLocationDatabaseAsset>(LocalLocationDatabaseAsset.AssetPath);
+            BattlefieldDatabaseAsset battlefields = Resources.Load<BattlefieldDatabaseAsset>(BattlefieldDatabaseAsset.ResourcesPath);
+            Debug.Log("Поля боя перенесены в Базу локаций: " + AssembleAllBattlefields(locations, battlefields));
+        }
+
+        // Новое поле: запись поля боя и место вида «Поле боя» 16:9.
         private void AddBattlefieldScene()
         {
             if (fields == null) return;
@@ -104,7 +122,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             EditorUtility.SetDirty(fields);
             Change(() =>
             {
-                selectedId = AddSceneFor(id, "Новое поле боя", null, new Vector2(1920, 1080));
+                selectedId = AddSceneFor(database, id, "Новое поле боя", null, new Vector2(1920, 1080));
                 listKind = ListKind.Battlefields;
                 tab = Tab.Place;
                 RefreshList();
@@ -122,42 +140,128 @@ namespace KingdomSurvival.LocationRendering.Editor
         }
 
         // Место вида «Поле боя» для поля: холст — размер рисунка поля (или 16:9).
-        private string AddSceneFor(string battlefieldId, string label, Sprite picture, Vector2 canvas)
+        private static string AddSceneFor(LocalLocationDatabaseAsset locations, string battlefieldId, string label, Sprite picture, Vector2 canvas)
         {
             string id = "field." + battlefieldId;
             int suffix = 1;
-            while (database.locations.Any(item => item.Id == id)) id = "field." + battlefieldId + "_" + ++suffix;
-            database.locations.Add(new LocalLocationDefinition
+            while (locations.locations.Any(item => item.Id == id)) id = "field." + battlefieldId + "_" + ++suffix;
+            locations.locations.Add(new LocalLocationDefinition
             {
                 Id = id, DisplayName = label, Kind = LocalLocationKind.Battlefield, BattlefieldId = battlefieldId,
                 CanvasWidth = canvas.x, CanvasHeight = canvas.y, BattleFrameWidth = canvas.x
             });
-            database.visuals.Add(new LocationVisualDefinition { LocationId = id, Background = picture });
+            locations.visuals.Add(new LocationVisualDefinition { LocationId = id, Background = picture });
             return id;
         }
 
-        // Старые поля → поля-места: рисунок — земля (холст его размера),
-        // кадрирование фона остаётся у поля и задаёт рамку кадра.
-        private void MigrateBattlefields()
+        // Открыть сборку поля (из места: «Открыть это поле боя»).
+        private void OpenBattlefieldScene(string battlefieldId)
         {
-            List<BattlefieldDefinitionData> missing = UnassembledBattlefields();
-            if (missing.Count == 0) return;
-            if (!EditorUtility.DisplayDialog("Перенести поля боя?",
-                    "Поля без сборки (" + missing.Count + ") станут записями «Поле боя» в Базе локаций: рисунок поля — земля, " +
-                    "кадрирование — рамка кадра; гексы, теги и вид гекса останутся у поля. Шаг отменяется Ctrl+Z.", "Перенести", "Отмена"))
-                return;
+            LocalLocationDefinition scene = database.locations.Find(item => item != null && item.IsBattlefield && item.BattlefieldId == battlefieldId);
+            if (scene == null) { status.text = "У поля «" + battlefieldId + "» нет сборки."; return; }
+            listKind = ListKind.Battlefields;
+            OpenRequested(scene.Id, null);
+        }
+
+        // Удалить поле боя: сборку и запись поля, если на него не ссылаются места и полигон.
+        private bool DeleteBattlefieldScene(LocalLocationDefinition location)
+        {
+            if (!location.IsBattlefield) return false;
+            string fieldId = location.BattlefieldId;
+            List<string> users = database.locations.Where(item => item != null && !item.IsBattlefield && item.BattlefieldId == fieldId)
+                .Select(item => item.DisplayName).ToList();
+            if (fields.SandboxBattlefieldId == fieldId) users.Add("полигон");
+            if (users.Count > 0)
+            {
+                EditorUtility.DisplayDialog("Поле используется", "На поле «" + location.DisplayName + "» ссылаются: " + string.Join(", ", users) +
+                                                                 ".\nСначала выберите им другое поле.", "Понятно");
+                return true;
+            }
+            if (!EditorUtility.DisplayDialog("Удалить поле боя?", location.DisplayName + "\nСборка и запись поля (гексы, теги, вид) будут удалены. Ctrl+Z — вернуть.",
+                    "Удалить", "Отмена"))
+                return true;
+            LocationVisualDefinition visual = database.FindVisual(location.Id);
+            int index = fields.Battlefields.ToList().FindIndex(item => item != null && item.Id == fieldId);
+            if (index >= 0)
+            {
+                SerializedObject serialized = new SerializedObject(fields);
+                serialized.FindProperty("battlefields").DeleteArrayElementAtIndex(index);
+                serialized.ApplyModifiedProperties();
+            }
             Change(() =>
             {
-                foreach (BattlefieldDefinitionData field in missing)
-                {
-                    Vector2 canvas = field.Background != null ? field.Background.rect.size : new Vector2(1920, 1080);
-                    selectedId = AddSceneFor(field.Id, string.IsNullOrEmpty(field.DisplayLabel) ? field.Id : field.DisplayLabel, field.Background, canvas);
-                }
-                listKind = ListKind.Battlefields;
+                database.locations.Remove(location);
+                if (visual != null) database.visuals.Remove(visual);
+                selectedId = database.locations.FirstOrDefault(item => item.IsBattlefield)?.Id ?? LocationLightingTestBootstrap.CampId;
+                selectedKind = Kind.None;
                 RefreshList();
             }, true);
-            RefreshListKind();
-            status.text = "Перенесено полей: " + missing.Count + ". В бою они рисуются живым кадром места.";
+            return true;
+        }
+
+        // Дублировать поле боя: сборку и запись поля (свои гексы, теги, вид).
+        private bool DuplicateBattlefieldScene(LocalLocationDefinition location)
+        {
+            if (!location.IsBattlefield) return false;
+            int index = fields.Battlefields.ToList().FindIndex(item => item != null && item.Id == location.BattlefieldId);
+            string fieldId = UniqueBattlefieldId("field");
+            SerializedObject serialized = new SerializedObject(fields);
+            SerializedProperty list = serialized.FindProperty("battlefields");
+            if (index >= 0)
+            {
+                list.InsertArrayElementAtIndex(index);
+                SerializedProperty copy = list.GetArrayElementAtIndex(index + 1);
+                copy.FindPropertyRelative("id").stringValue = fieldId;
+                copy.FindPropertyRelative("displayLabel").stringValue = location.DisplayName + " · копия";
+                serialized.ApplyModifiedProperties();
+            }
+            LocalLocationDefinition scene = JsonUtility.FromJson<LocalLocationDefinition>(JsonUtility.ToJson(location));
+            LocationVisualDefinition visual = Visual != null ? JsonUtility.FromJson<LocationVisualDefinition>(JsonUtility.ToJson(Visual)) : new LocationVisualDefinition();
+            Change(() =>
+            {
+                scene.Id = "field." + fieldId;
+                scene.DisplayName = location.DisplayName + " · копия";
+                scene.BattlefieldId = index >= 0 ? fieldId : location.BattlefieldId;
+                visual.LocationId = scene.Id;
+                database.locations.Add(scene);
+                database.visuals.Add(visual);
+                selectedId = scene.Id;
+                RefreshList();
+            }, true);
+            return true;
+        }
+
+        // Общее для всех полей: скорость ходьбы и справочник тегов (общий вид
+        // гекса — карточка «Вид гекса» без «Свой вид у этого поля»).
+        private void BuildCommonBattlefieldSettings()
+        {
+            Heading("Общее для всех полей боя");
+            SerializedObject serialized = new SerializedObject(fields);
+            VisualElement common = new VisualElement();
+            Slider walk = BattlefieldHexEditorKit.BoundSlider("Ходьба, гексов/с", serialized.FindProperty("walkHexesPerSecond"),
+                BattlefieldDatabaseAsset.MinWalkHexesPerSecond, BattlefieldDatabaseAsset.MaxWalkHexesPerSecond);
+            walk.tooltip = "Одна скорость на бой и исследование мест: бойцы на поле и отряд в месте. Темп шага анимации подстраивается.";
+            common.Add(walk);
+            Foldout tags = new Foldout { text = "Справочник тегов", value = false };
+            tags.Add(new PropertyField(serialized.FindProperty("tags"), "Теги"));
+            tags.Add(new Button(() =>
+            {
+                serialized.Update();
+                SerializedProperty list = serialized.FindProperty("tags");
+                list.arraySize++;
+                SerializedProperty tag = list.GetArrayElementAtIndex(list.arraySize - 1);
+                string id = "new_tag";
+                for (int i = 2; fields.FindTag(id) != null; i++) id = "new_tag_" + i;
+                tag.FindPropertyRelative("id").stringValue = id;
+                tag.FindPropertyRelative("displayLabel").stringValue = "Новый тег";
+                serialized.ApplyModifiedProperties();
+                BuildSettings();
+            }) { text = "+ Тег" });
+            common.Add(tags);
+            common.Bind(serialized);
+            common.TrackSerializedObjectValue(serialized, _ => EditorUtility.SetDirty(fields));
+            settings.Add(common);
+            Help("Общий вид гекса правится в карточке «Вид гекса» любого поля без своего вида.");
         }
 
         // Вкладка «Место» у поля боя: вместо «Перемещения» и «Боя на месте».
@@ -167,12 +271,12 @@ namespace KingdomSurvival.LocationRendering.Editor
             Heading("Поле боя");
             if (field == null)
             {
-                Help("Нет поля «" + location.BattlefieldId + "» в Базе полей боя — выберите другое.");
+                Help("Нет записи поля «" + location.BattlefieldId + "» — поле боя повреждено: удалите его и создайте заново.");
                 return;
             }
             Help("Поле собирается как место: земля, предметы, раскидка и свет — на других вкладках. В бою (на дороге и в полигоне) " +
                  "камера снимает рамку кадра поля 16:9 на холсте — живьём: время суток, огонь, анимация, трава гнётся от бойцов. " +
-                 "Сетка, отключённые гексы, вид гекса и теги — у поля Базы полей боя «" + field.DisplayLabel + "».");
+                 "Ниже — теги, рамка кадра, гексы и вид гекса этого поля, в конце — общее для всех полей.");
             int index = fields.Battlefields.ToList().IndexOf(field);
             SerializedObject serialized = new SerializedObject(fields);
             SerializedProperty property = BattlefieldHexEditorKit.FieldProperty(serialized, index);
@@ -260,6 +364,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 cells.AddRange(inverted);
             }));
             BuildFieldHexCards();
+            BuildCommonBattlefieldSettings();
         }
 
         // Правка отключённых гексов поля (одна запись Undo).

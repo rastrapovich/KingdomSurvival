@@ -19,9 +19,10 @@ namespace KingdomSurvival.DevelopmentTracker.Editor
             TryExecute("Kingdom Survival/База существ");
         }
 
+        // Поля боя теперь — в Базе локаций (список «Поля боя»).
         public static void OpenBattlefieldDatabase()
         {
-            TryExecute("Kingdom Survival/База полей боя");
+            TryExecute("Kingdom Survival/База локаций");
         }
 
         public static void OpenUILayoutConstructor()

@@ -460,7 +460,7 @@ namespace KingdomSurvival.AnimationDatabase.Editor
             walkSpeed.style.fontSize = 10f;
             walkSpeed.style.color = new Color(0.65f, 0.65f, 0.65f, 1f);
             Slider walkStep = LiveSlider("Шаг ходьбы", 0.2f, 4f, set.WalkHexesPerCycle,
-                "Сколько гексов боец проходит за один цикл «Ходьбы». Скорость ходьбы общая (База полей боя), " +
+                "Сколько гексов боец проходит за один цикл «Ходьбы». Скорость ходьбы общая (База локаций → «Поля боя» → «Общее для всех полей»), " +
                 "а темп цикла подстраивается: темп = скорость × длительность цикла / шаг, поэтому ноги не скользят. " +
                 "Если ноги «едут» вперёд — уменьшите, если отстают — увеличьте. Скорость показа боя умножает всё вместе.",
                 value =>
@@ -904,8 +904,8 @@ namespace KingdomSurvival.AnimationDatabase.Editor
                 return string.Empty;
             CreatureAnimationClipData walk = set.FindClip(CreatureAnimationAction.Walk);
             if (walk == null || !walk.HasAnyFrames)
-                return "Ходьбы нет: фигура скользит с общей скоростью ходьбы (База полей боя).";
-            return "Скорость на поле и в месте — общая («Ходьба, гексов/с» в Базе полей боя). Свой темп набора — ≈ " +
+                return "Ходьбы нет: фигура скользит с общей скоростью ходьбы (База локаций → «Поля боя»).";
+            return "Скорость на поле и в месте — общая («Ходьба, гексов/с» в Базе локаций → «Поля боя»). Свой темп набора — ≈ " +
                    set.GetWalkHexesPerSecond(CreatureAnimationDirection.Front).ToString("0.0") +
                    " гекса/с: при другой общей скорости цикл ходьбы ускоряется или замедляется.";
         }

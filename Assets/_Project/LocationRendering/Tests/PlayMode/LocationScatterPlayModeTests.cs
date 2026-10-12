@@ -228,6 +228,7 @@ namespace KingdomSurvival.LocationRendering.Tests
                 layer.Reaction.Enabled = true;
                 layer.Reaction.Radius = 1.5f;
                 layer.Reaction.Bend = .3f;
+                layer.Reaction.Jitter = 0;
                 visual.ScatterLayers.Add(layer);
                 using (LocationWorldRenderer renderer = new LocationWorldRenderer(Location(), visual, null) { VegetationReacts = true })
                 {

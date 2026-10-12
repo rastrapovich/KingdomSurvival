@@ -131,7 +131,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Button paste = new Button(() => PasteScatterSettings(layer))
             {
                 text = "вставить", tooltip = "Вставить скопированные настройки в этот слой. Экземпляры, название и ассеты кисти остаются; " +
-                                             "настройки совпадающих ассетов (вес, размер, «гнётся», множители) — из копии"
+                                             "настройки совпадающих ассетов (вес, размер, «гнётся») — из копии"
             };
             paste.style.flexShrink = 0;
             row.Add(paste);
@@ -202,8 +202,6 @@ namespace KingdomSurvival.LocationRendering.Editor
                 entry.ScaleMultiplier = from.ScaleMultiplier;
                 entry.Enabled = from.Enabled;
                 entry.Bends = from.Bends;
-                entry.BendScale = from.BendScale;
-                entry.RadiusScale = from.RadiusScale;
             }
         }
 
@@ -287,124 +285,54 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Preset("Высокая трава", LocationScatterReactionPreset.TallGrass);
                 Preset("Мягкий куст", LocationScatterReactionPreset.SoftBush);
                 LocationScatterReaction r = reaction;
-                SubHeading("Кто задевает");
-                VisualElement who = Row();
-                void Who(string title, bool value, Action<bool> set)
-                {
-                    UnityEngine.UIElements.Toggle toggle = new UnityEngine.UIElements.Toggle(title) { value = value };
-                    toggle.style.width = 150;
-                    toggle.labelElement.style.minWidth = 110;
-                    toggle.RegisterValueChangedCallback(evt => BrushEdit(() => set(evt.newValue)));
-                    who.Add(toggle);
-                }
-                Who("Отряд", r.ByParty, value => r.ByParty = value);
-                Who("Свита", r.ByRetinue, value => r.ByRetinue = value);
-                Who("Противники", r.ByEnemies, value => r.ByEnemies = value);
-                Who("Фигуры боя", r.ByBattle, value => r.ByBattle = value);
-
-                // Линейный ползунок (от нуля) или логарифмический (широкий
-                // диапазон: малые значения так же точны, как большие); число
-                // ограничивается пределами расчёта.
                 void Lin(string label, float value, float max, Action<float> set, string help) =>
                     BrushNumber(label, value, 0, max, number => set(Mathf.Clamp(number, 0, max)), help);
                 void Log(string label, float value, float min, float max, Action<float> set, string help) =>
                     BrushLogNumber(label, value, min, max, number => set(Mathf.Clamp(number, min, max)), help);
 
-                SubHeading("Зона касания");
+                SubHeading("Касание и изгиб");
                 Log("Радиус (клеток боя)", r.Radius, LocationScatterReaction.MinRadius, LocationScatterReaction.MaxRadius, value => r.Radius = value,
-                    "Насколько близкий проход задевает растение — в размерах клетки боя (от неё же рост фигур), не зависит от камеры.");
-                Lin("Полная сила у ног (доля радиуса)", r.Core, LocationScatterReaction.MaxCore, value => r.Core = value,
-                    "Внутри этой доли радиуса растение гнётся полностью, спад начинается дальше.");
-                Log("Мягкость края", r.EdgeSoftness, LocationScatterReaction.MinSoftness, LocationScatterReaction.MaxSoftness, value => r.EdgeSoftness = value,
-                    "Меньше 1 — сила быстро падает от самых ног; 2 — исходный спад; больше — держит силу дольше и резче спадает у края.");
-                Log("Вытянутость вглубь", r.DepthStretch, LocationScatterReaction.MinDepthStretch, LocationScatterReaction.MaxDepthStretch, value => r.DepthStretch = value,
-                    "1 — зона на земле как гексы; меньше — задевает в основном сбоку; больше — дальше вверх и вниз по картинке.");
-                Lin("Опережение по ходу (доля радиуса)", r.Lead, LocationScatterReaction.MaxLead, value => r.Lead = value,
-                    "Зона сдвигается вперёд по направлению шага: трава расступается заранее и раньше отпускает позади.");
-
-                SubHeading("Форма прогиба");
-                Lin("Сила прогиба (доля высоты)", r.Bend, LocationScatterReaction.MaxBend, value => r.Bend = value,
-                    "Наибольшее отклонение верхушки: 0,1 — на десятую часть высоты растения над опорой, 1 — на всю высоту.");
-                Lin("Приминание (доля высоты)", r.Press, LocationScatterReaction.MaxPress, value => r.Press = value,
-                    "Насколько опускается верхушка при полном контакте. Растение не исчезает и не меняет цвет.");
-                Lin("Закреплённая нижняя часть (доля высоты)", r.Pinned, LocationScatterReaction.MaxPinned, value => r.Pinned = value,
-                    "Нижняя доля рисунка над опорой стоит на месте — корни не едут.");
-                Log("Изгиб: скос → дуга → верхушка", r.Curve, LocationScatterReaction.MinCurve, LocationScatterReaction.MaxCurve, value => r.Curve = value,
-                    "Меньше 1 — гнётся с самого низа; 1 — прямой наклон; 2 — дуга; больше — гнётся только верхушка.");
-                Lin("Наклон вглубь (к зрителю)", r.DepthLean, LocationScatterReaction.MaxDepthLean, value => r.DepthLean = value,
-                    "Насколько верхушка уходит вверх-вниз по картинке, когда ноги спереди или сзади. 0 — только вбок.");
-                Lin("Опускание при наклоне", r.ArcDrop, LocationScatterReaction.MaxArcDrop, value => r.ArcDrop = value,
-                    "Верхушка, уходя вбок, опускается по дуге. 0 — не опускается (растение будто растягивается).");
-                Lin("В стороны ↔ по ходу", r.Forward, 1, value => r.Forward = value,
-                    "0 — трава расступается от ног в стороны; 1 — клонится по направлению шага.");
-                Log("Предел от нескольких фигур", r.SumLimit, LocationScatterReaction.MinSumLimit, LocationScatterReaction.MaxSumLimit, value => r.SumLimit = value,
-                    "Сумма прогибов от нескольких фигур — не больше этой доли полной силы (больше 1 — толпа гнёт сильнее одного).");
+                    "Как далеко от ног трава чувствует проходящего: 0,3 — только под ногами, 1 — на целую клетку вокруг.");
+                Lin("Сила прогиба", r.Bend, LocationScatterReaction.MaxBend, value => r.Bend = value,
+                    "Насколько отходит верхушка — в долях высоты травы: 0,1 — чуть шевелится, 0,3 — заметно расступается, 0,6 — ложится.");
+                Log("Изгиб: травинка → дуга → верхушка", r.Curve, LocationScatterReaction.MinCurve, LocationScatterReaction.MaxCurve, value => r.Curve = value,
+                    "1 — наклоняется вся травинка; 2 — гнётся дугой; 3–4 — гнётся только верхушка.");
+                Lin("Приминание", r.Press, LocationScatterReaction.MaxPress, value => r.Press = value,
+                    "Насколько верхушка опускается под ногами — в долях высоты. Трава не исчезает и не меняет цвет.");
 
                 SubHeading("Время");
-                Log("Скорость реакции (с)", r.ReactTime, LocationScatterReaction.MinTime, LocationScatterReaction.MaxTime, value => r.ReactTime = value,
-                    "За сколько секунд растение уступает ногам.");
-                Log("Время восстановления (с)", r.RecoverTime, LocationScatterReaction.MinTime, LocationScatterReaction.MaxTime, value => r.RecoverTime = value,
-                    "За сколько секунд возвращается исходная форма после ухода (без покачивания).");
-                Lin("Задержка перед возвратом (с)", r.Hold, LocationScatterReaction.MaxHold, value => r.Hold = value,
-                    "Сколько примятое держит форму после ухода, прежде чем начать выпрямляться.");
+                Log("Скорость реакции (с)", r.ReactTime, LocationScatterReaction.MinReactTime, LocationScatterReaction.MaxReactTime, value => r.ReactTime = value,
+                    "За сколько секунд трава уступает ногам: 0,1 — сразу, 0,5 — с запаздыванием.");
+                Log("Время восстановления (с)", r.RecoverTime, LocationScatterReaction.MinRecoverTime, LocationScatterReaction.MaxRecoverTime, value => r.RecoverTime = value,
+                    "За сколько секунд трава выпрямляется после ухода. Обычно дольше реакции.");
                 Lin("Покачивание при отпускании", r.Spring, 1, value => r.Spring = value,
-                    "0 — выпрямляется плавно; больше — проскакивает исходное положение и затухает несколькими качками.");
-                Log("Частота покачивания (качков/с)", r.SpringFrequency, LocationScatterReaction.MinFrequency, LocationScatterReaction.MaxFrequency,
-                    value => r.SpringFrequency = value, "Только при покачивании; задаёт и темп возврата.");
-
-                SubHeading("Движение");
-                Lin("Влияние скорости (0–1)", r.SpeedInfluence, 1, value => r.SpeedInfluence = value,
-                    "0 — стоящий рядом гнёт так же, как идущий; 1 — прогиб только от движения.");
-                Log("Скорость полной силы (доля шага)", r.SpeedReference, LocationScatterReaction.MinSpeedReference, LocationScatterReaction.MaxSpeedReference,
-                    value => r.SpeedReference = value, "При какой скорости касание полное: 1 — обычный шаг, меньше — уже при медленном.");
-                Log("Затухание движения (с)", r.SpeedSmoothing, LocationScatterReaction.MinSmoothing, LocationScatterReaction.MaxSmoothing,
-                    value => r.SpeedSmoothing = value, "Как плавно после остановки уходит доля прогиба «от движения».");
-
-                SubHeading("Разброс по пучкам");
-                Lin("Упругость ± (доля)", r.BendJitter, LocationScatterReaction.MaxJitter, value => r.BendJitter = value,
-                    "Каждый пучок гнётся сильнее или слабее на свою долю — заросль не качается одинаково.");
-                Lin("Время ± (доля)", r.TimeJitter, LocationScatterReaction.MaxJitter, value => r.TimeJitter = value,
-                    "Реакция и возврат у каждого пучка свои — без одновременного выпрямления.");
+                    "0 — выпрямляется плавно; 0,3 — пару раз качнётся; 1 — долго качается.");
+                Lin("Разброс по пучкам", r.Jitter, LocationScatterReaction.MaxJitter, value => r.Jitter = value,
+                    "Каждый пучок гнётся и выпрямляется чуть по-своему: заросль не двигается как одна картинка.");
 
                 List<LocationScatterEntry> entries = layer.Assets.Where(item => item != null && !string.IsNullOrEmpty(item.AssetId)).ToList();
-                if (entries.Count > 0)
+                if (entries.Count > 1)
                 {
-                    SubHeading("По ассетам кисти");
-                    Label hint = new Label("Галочка — гнётся (камни и твёрдое снять); «сила ×» и «радиус ×» — свои множители ассета.");
-                    hint.style.whiteSpace = WhiteSpace.Normal;
-                    hint.style.color = new Color(.68f, .74f, .68f);
-                    settings.Add(hint);
+                    SubHeading("Гнутся (камни и твёрдое — снять)");
+                    VisualElement grid = Row();
                     foreach (LocationScatterEntry entry in entries)
                     {
                         ArtAssetDefinition asset = ArtAssetDatabaseAsset.FindCurrent(entry.AssetId);
-                        VisualElement row = Row();
-                        row.style.flexWrap = Wrap.NoWrap;
-                        row.style.alignItems = Align.Center;
-                        UnityEngine.UIElements.Toggle bends = new UnityEngine.UIElements.Toggle { value = entry.Bends, tooltip = "Гнётся" };
+                        UnityEngine.UIElements.Toggle bends = new UnityEngine.UIElements.Toggle(asset != null ? asset.Name : entry.AssetId) { value = entry.Bends };
+                        bends.style.width = 180;
+                        bends.labelElement.style.minWidth = 130;
                         bends.RegisterValueChangedCallback(evt => Change(() => entry.Bends = evt.newValue));
-                        row.Add(bends);
-                        row.Add(new Label(asset != null ? asset.Name : entry.AssetId) { style = { flexGrow = 1, flexShrink = 1, overflow = Overflow.Hidden } });
-                        FloatField bend = new FloatField("сила ×") { value = entry.BendScale, isDelayed = true, tooltip = "Множитель силы прогиба ассета (0–10)" };
-                        bend.labelElement.style.minWidth = 40;
-                        bend.style.width = 96;
-                        bend.RegisterValueChangedCallback(evt => Change(() => entry.BendScale = Mathf.Clamp(evt.newValue, 0, LocationScatterReaction.MaxAssetScale)));
-                        row.Add(bend);
-                        FloatField radius = new FloatField("радиус ×") { value = entry.RadiusScale, isDelayed = true, tooltip = "Множитель радиуса касания ассета (0,05–10)" };
-                        radius.labelElement.style.minWidth = 52;
-                        radius.style.width = 108;
-                        radius.RegisterValueChangedCallback(evt => Change(() => entry.RadiusScale = Mathf.Clamp(evt.newValue, LocationScatterReaction.MinAssetRadius, LocationScatterReaction.MaxAssetScale)));
-                        row.Add(radius);
+                        grid.Add(bends);
                     }
                 }
 
-                SubHeading("Отладка");
-                BrushToggle("Показывать радиус", r.ShowRadius, value => r.ShowRadius = value);
+                BrushToggle("Показывать радиус (отладка)", r.ShowRadius, value => r.ShowRadius = value);
                 settings[settings.childCount - 1].tooltip = "Контур зоны касания у ног каждой фигуры — в игре и тестовом запуске.";
                 if (layer.Mode == LocationScatterMode.Objects && (layer.ProjectsShadow || layer.ProjectsFireShadow))
                     settings.Add(new HelpBox("Тени слоя от солнца и огня остаются неподвижными: прогиб в тени не передаётся. " +
                                              "Мягкой траве тени обычно не нужны — снимите их у слоя.", HelpBoxMessageType.Warning));
-                Help("Числа и «Кто задевает» меняются на ходу, в том числе в идущем тестовом запуске места. Включение, галочки и множители ассетов " +
-                     "пересобирают слой (тестовый запуск — перезапустить). В окне базы трава не шевелится; прогиб в базу не записывается.");
+                Help("Начните с пресета, потом подстройте «Силу прогиба» и «Время восстановления». Числа меняются на ходу, в том числе в идущем " +
+                     "тестовом запуске места; включение и «Гнутся» пересобирают слой (тестовый запуск — перезапустить).");
             }
         }
 
@@ -646,7 +574,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocationScatterLayer current = ScatterLayer;
                 if (current != null)
                     foreach (LocationScatterEntry entry in current.Assets.Where(item => item != null))
-                        layer.Assets.Add(new LocationScatterEntry { AssetId = entry.AssetId, Weight = entry.Weight, ScaleMultiplier = entry.ScaleMultiplier, Enabled = entry.Enabled, Bends = entry.Bends, BendScale = entry.BendScale, RadiusScale = entry.RadiusScale });
+                        layer.Assets.Add(new LocationScatterEntry { AssetId = entry.AssetId, Weight = entry.Weight, ScaleMultiplier = entry.ScaleMultiplier, Enabled = entry.Enabled, Bends = entry.Bends });
                 visual.ScatterLayers.Add(layer);
                 scatterLayerId = layer.Id;
             }, true);

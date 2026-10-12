@@ -50,7 +50,12 @@ namespace KingdomSurvival.LocationRendering
             public bool Bends;
             // Темп анимации экземпляра (раскидка вразнобой); 1 — как у ассета.
             public float AnimationSpeed = 1;
-            // Просвечивание: текущая непрозрачность рисунков и их исходная альфа.
+            // Просвечивание: сила круга у каждого закрытого человека (0..1, плавно)
+            // и то, что уже записано в рисунки; запасной путь без шейдера —
+            // непрозрачность всего предмета и исходная альфа рисунков.
+            public readonly Dictionary<Actor, float> Holes = new Dictionary<Actor, float>();
+            public readonly Vector4[] HoleData = new Vector4[SeeThroughHoles];
+            public bool HolesWritten;
             public float SeeThroughLevel = 1;
             public readonly List<float> BaseAlpha = new List<float>();
         }
@@ -68,6 +73,8 @@ namespace KingdomSurvival.LocationRendering
             public Vector2 Pixel;
             public ActorKind Kind;
             public bool Seen;
+            // Рост самой фигуры (мир, наибольший из показанных кадров) — мерка круга просвечивания.
+            public float BodyHeight;
         }
 
         // Высота фигуры в размерах клетки боя — как у поля боя.
@@ -381,7 +388,7 @@ namespace KingdomSurvival.LocationRendering
                 SpriteRenderer image = Image(imageObject, sprite, fullbright);
                 // Ассет без рисунка — заметная заглушка, а не «ящик».
                 if (part.Placeholder && resolved.FromAsset) image.color = new Color(1, .45f, .75f);
-                else if (!fullbright) ApplyColor(image, resolved.ColorAdjust, resolved, LitAsGround(part.Band), entry.Bends);
+                else if (!fullbright) ApplyColor(image, resolved.ColorAdjust, resolved, LitAsGround(part.Band), entry.Bends || resolved.SeeThrough);
                 Fit(image, part.Height, part.Pivot, resolved.FlipX, Vector2.zero, resolved.Stretch, resolved.Rotation);
                 if (entry.Bends)
                 {
@@ -453,6 +460,8 @@ namespace KingdomSurvival.LocationRendering
             entry.Images.Clear();
             entry.BaseAlpha.Clear();
             entry.SeeThroughLevel = 1;
+            entry.Holes.Clear();
+            entry.HolesWritten = false;
             entry.RadialShadows.Clear();
             entry.Parts.Clear();
             entry.Image = null;
@@ -823,7 +832,7 @@ namespace KingdomSurvival.LocationRendering
         // groundLit — деталь земли: свет с нормалями ложится на неё как на
         // землю под ней (своя нормаль не пишется), и солнце, и огонь —
         // галочки света ассета на неё не действуют.
-        // bends — гнётся от прохода: всегда материал с поправкой (прогиб в нём),
+        // bends — гнётся от прохода или просвечивает: всегда материал с поправкой (прогиб и круг в нём),
         // свет — тот же, что выбрал бы общий материал.
         private void ApplyColor(SpriteRenderer image, LocationColorAdjust adjust, LocationResolvedVisual resolved = null, bool groundLit = false, bool bends = false)
         {

@@ -71,7 +71,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         public bool DefaultLighting => LitBySun && LitByFire;
         // Просвечивает, пока за ним человек (Базы ассетов); непрозрачность тогда.
         public bool SeeThrough;
-        public float SeeThroughAlpha = .4f;
+        public float SeeThroughAlpha = .3f;
+        public float SeeThroughSize = 3;
 
         public bool FromAsset => Asset != null;
         public bool ViewFallback => FromAsset && !NoArt && ShownView != RequestedView;
@@ -243,6 +244,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             result.LitByFire = asset.LitByFire;
             result.SeeThrough = asset.SeeThrough;
             result.SeeThroughAlpha = Mathf.Clamp01(asset.SeeThroughAlpha);
+            result.SeeThroughSize = Mathf.Max(0, asset.SeeThroughSize);
             result.Phase = asset.RandomPhase ? ArtAssetAnimation.StablePhase(item.Id) : 0;
         }
 

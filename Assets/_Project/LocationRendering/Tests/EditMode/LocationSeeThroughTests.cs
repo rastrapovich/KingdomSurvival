@@ -6,10 +6,11 @@ using UnityEngine;
 
 namespace KingdomSurvival.LocationRendering
 {
-    // Просвечивание высоких предметов и тень от низа рисунка: дерево с
-    // галочкой «Просвечивает» растворяется, пока за ним человек, и плотнеет,
-    // когда он вышел вперёд; без галочки не меняется. Камень с опорой в
-    // середине рисунка отбрасывает тень от нижнего края, а не от опоры.
+    // Просвечивание высоких предметов и тень камня: в дереве с галочкой
+    // «Просвечивает» плавно открывается круг вокруг человека за ним (сам
+    // рисунок не прозрачен целиком) и закрывается, когда он вышел или стоит
+    // впереди; без галочки ничего не меняется. Камень с опорой в середине
+    // рисунка отбрасывает две проекции силуэта — от опоры и от низа рисунка.
     public sealed class LocationSeeThroughTests
     {
         private readonly List<Object> owned = new List<Object>();
@@ -79,13 +80,23 @@ namespace KingdomSurvival.LocationRendering
                 Assert.That(midway, Is.LessThan(1).And.GreaterThan(.4f), "Растворяется плавно, а не скачком.");
                 renderer.SetTime(13, 1);
                 Assert.That(renderer.ObjectSeeThroughLevel("tree"), Is.EqualTo(.4f).Within(1e-4f));
-                Assert.That(renderer.ObjectImages("tree")[0].color.a, Is.EqualTo(.4f).Within(1e-4f));
+                // Круг вокруг человека, а не весь предмет.
+                Assert.That(renderer.ObjectImages("tree")[0].color.a, Is.EqualTo(1), "Сам рисунок не становится прозрачным целиком.");
+                IReadOnlyList<Vector4> holes = renderer.ObjectSeeThroughHoles("tree");
+                Assert.That(holes.Count, Is.EqualTo(1));
+                Assert.That(holes[0].w, Is.EqualTo(1).Within(1e-4f));
+                Assert.That(holes[0].z, Is.GreaterThan(0));
+                Assert.That(renderer.ObjectImages("tree")[0].bounds.size.x, Is.GreaterThan(holes[0].z * 2), "Круг меньше дерева.");
+                MaterialPropertyBlock block = new MaterialPropertyBlock();
+                renderer.ObjectImages("tree")[0].GetPropertyBlock(block);
+                Assert.That(block.GetVectorArray("_KsHoles")[0], Is.EqualTo(holes[0]), "Круг передан шейдеру рисунка.");
 
                 // Тот же человек за камнем без галочки — камень не меняется.
                 renderer.SetActors(new[] { Actor(new Vector2(1200, 600)) }, 1);
                 renderer.SetTime(13, 2);
                 Assert.That(renderer.ObjectSeeThroughLevel("rock"), Is.EqualTo(1));
                 Assert.That(renderer.ObjectSeeThroughLevel("tree"), Is.EqualTo(1), "Ушёл из-за дерева — оно снова плотное.");
+                Assert.That(renderer.ObjectSeeThroughHoles("tree"), Is.Empty, "Круг закрылся.");
 
                 // Перед деревом — его не закрывает.
                 renderer.SetActors(new[] { Actor(new Vector2(700, 760)) }, 2);
@@ -95,7 +106,7 @@ namespace KingdomSurvival.LocationRendering
         }
 
         [Test]
-        public void StoneWithPivotInTheMiddle_CastsShadowFromItsBottomEdge()
+        public void StoneWithPivotInTheMiddle_CastsShadowFromPivotAndFromItsBottomEdge()
         {
             // Опора — на середине рисунка (как у камня: середина основания).
             Asset("stone", 100, 60, new Vector2(.5f, .5f));
@@ -106,14 +117,23 @@ namespace KingdomSurvival.LocationRendering
             {
                 renderer.SetTime(13, 0);
                 SpriteRenderer image = renderer.FindObject("stone");
-                Transform shadow = image.transform.parent.Find("Тень от солнца");
-                Assert.That(shadow, Is.Not.Null, "В полдень у камня есть тень от солнца.");
-                MaterialPropertyBlock block = new MaterialPropertyBlock();
-                shadow.GetComponent<SpriteRenderer>().GetPropertyBlock(block);
-                float groundY = block.GetFloat("_GroundY");
-                Assert.That(groundY, Is.EqualTo(image.bounds.min.y).Within(.05f), "Линия земли тени — низ рисунка, а не опора.");
-                Assert.That(groundY, Is.LessThan(image.transform.parent.position.y - .5f));
+                float anchorY = image.transform.parent.position.y;
+                // От опоры — верх камня в полдень (короткая тень вверх).
+                Assert.That(GroundY(image, "Тень от солнца"), Is.EqualTo(anchorY).Within(1e-4f));
+                // От низа рисунка — его нижняя половина, когда солнце под углом.
+                Assert.That(GroundY(image, "Тень от солнца · от низа"), Is.EqualTo(image.bounds.min.y).Within(.05f));
             }
+        }
+
+        private static float GroundY(SpriteRenderer image, string name)
+        {
+            Transform shadow = image.transform.parent.Find(name);
+            Assert.That(shadow, Is.Not.Null, "У камня есть «" + name + "».");
+            SpriteRenderer renderer = shadow.GetComponent<SpriteRenderer>();
+            Assert.That(renderer.enabled, Is.True, name);
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(block);
+            return block.GetFloat("_GroundY");
         }
     }
 }

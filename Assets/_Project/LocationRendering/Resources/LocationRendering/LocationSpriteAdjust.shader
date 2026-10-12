@@ -98,6 +98,29 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         return uv;
     #endif
     }
+
+    // Просвечивание (галочка ассета «Просвечивает, когда за ним человек»):
+    // круги вокруг закрытых предметом людей. Вне блока материала — задаются
+    // только блоком свойств рисунка; не заданы — нули, кругов нет.
+    // _KsHoles[i]: xy — центр (мир), z — радиус (мир), w — сила 0..1 (плавное
+    // появление); _KsHoleShape: x — непрозрачность в круге, y — мягкий край
+    // (доля радиуса).
+    float4 _KsHoles[6];
+    float4 _KsHoleShape;
+
+    half KsHoleKeep(float2 world)
+    {
+        half keep = 1;
+        [unroll] for (int i = 0; i < 6; i++)
+        {
+            float4 hole = _KsHoles[i];
+            if (hole.z <= 0) continue;
+            float d = distance(world, hole.xy) / hole.z;
+            float inside = 1 - smoothstep(1 - max(_KsHoleShape.y, 1e-3), 1, d);
+            keep = min(keep, lerp(1, _KsHoleShape.x, inside * saturate(hole.w)));
+        }
+        return keep;
+    }
     ENDHLSL
 
     SubShader
@@ -139,6 +162,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 COMMON_2D_LIT_OUTPUTS
                 half4 color         : COLOR;
                 float4 adjust       : TEXCOORD4;
+                float2 ksWorld      : TEXCOORD5;
             };
 
             #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/CombinedShapeLightShared.hlsl"
@@ -234,6 +258,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 o.positionWS = positionWS;
                 o.normalWS = TransformObjectToWorldDir(input.normal);
             #endif
+                o.ksWorld = positionWS.xy;
                 o.uv = KsUv(input.uv.xy, o.adjust.w);
                 o.lightingUV = half2(ComputeScreenPos(o.positionCS / o.positionCS.w).xy);
                 return o;
@@ -243,7 +268,8 @@ Shader "Kingdom Survival/Location Sprite Adjust"
             {
                 half4 texel = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
                 texel.rgb = KsAdjust(texel.rgb, input.adjust.xyz);
-                const half4 main = input.color * texel;
+                half4 main = input.color * texel;
+                main.a *= KsHoleKeep(input.ksWorld);
                 const half4 mask = SAMPLE_TEXTURE2D(_MaskTex, sampler_MaskTex, input.uv);
                 half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv));
 
@@ -289,6 +315,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 COMMON_2D_NORMALS_OUTPUTS
                 half4 color         : COLOR;
                 float flip          : TEXCOORD4;
+                float2 ksWorld      : TEXCOORD5;
             };
 
             #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/NormalsRenderingShared.hlsl"
@@ -325,6 +352,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 float3 positionWS = KsObjectToWorld(position);
                 o.positionCS = TransformWorldToHClip(positionWS);
                 o.uv = KsUv(input.uv.xy, o.flip);
+                o.ksWorld = positionWS.xy;
                 return o;
             }
 
@@ -334,7 +362,8 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 // остаётся нормаль земли, и огонь освещает их как землю.
                 if (_KsLight.z > 0.5)
                     discard;
-                const half4 mainTex = input.color * SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
+                half4 mainTex = input.color * SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
+                mainTex.a *= KsHoleKeep(input.ksWorld);
                 half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv));
             #if defined(_KS_PARTICLE)
                 // Отражённый рисунок — отражённая нормаль по горизонтали.
@@ -377,6 +406,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 float2 uv           : TEXCOORD0;
                 half4 color         : COLOR;
                 float4 adjust       : TEXCOORD1;
+                float2 ksWorld      : TEXCOORD2;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -400,6 +430,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
             #endif
                 float3 positionWS = KsObjectToWorld(position);
                 o.positionCS = TransformWorldToHClip(positionWS);
+                o.ksWorld = positionWS.xy;
                 o.uv = KsUv(input.uv.xy, o.adjust.w);
                 return o;
             }
@@ -408,7 +439,9 @@ Shader "Kingdom Survival/Location Sprite Adjust"
             {
                 half4 texel = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
                 texel.rgb = KsAdjust(texel.rgb, input.adjust.xyz);
-                return input.color * texel;
+                half4 color = input.color * texel;
+                color.a *= KsHoleKeep(input.ksWorld);
+                return color;
             }
             ENDHLSL
         }

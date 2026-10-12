@@ -42,23 +42,21 @@ namespace KingdomSurvival.LocationRendering
             public bool Disabled;
             // Тень-силуэт от солнца есть (часть ассета: «Тень от солнца»).
             public bool Sun = true;
-            // Тень-силуэт от солнца (одна).
-            public readonly SpriteRenderer[] Shadows = new SpriteRenderer[1];
+            // Тень-силуэт от солнца: [0] — от опоры; [1] — от низа рисунка,
+            // если он заметно ниже опоры (камень). Обе пишут в альфу кадра
+            // минимумом — вместе дают объединение без двойной темноты.
+            public readonly SpriteRenderer[] Shadows = new SpriteRenderer[2];
             // Перекрытие света огня по контуру рисунка; нет — предмет сам светит.
             public ShadowCaster2D Contour;
             public Sprite ContourSprite;
             public bool ContourFlip;
             public float ContourBand;
-            // Что уже записано в блок свойств тени: без изменений — не трогать (сотни предметов за кадр).
-            public bool ShadowShown;
-            // Насколько линия земли тени ниже опоры (единицы мира, ≥ 0): у
-            // камня опора — в середине основания, а низ рисунка — его передний
-            // край на земле. NaN — ещё не измерено.
+            // Что уже записано в блок свойств каждой тени: без изменений — не трогать (сотни предметов за кадр).
+            public readonly ShadowState[] States = { new ShadowState(), new ShadowState() };
+            // Насколько низ рисунка ниже опоры (единицы мира, ≥ 0): у камня
+            // опора — в середине основания, а низ рисунка — его передний край
+            // на земле. NaN — ещё не измерено.
             public float GroundDrop = float.NaN;
-            public Sprite ShadowSprite;
-            public Vector2 ShadowVector;
-            public float ShadowGroundY, ShadowOpacity, ShadowSoftness;
-            public Color ShadowColor;
             // Окклюзия: пятно на земле по основанию и затемнение низа рисунка.
             public SpriteRenderer Occlusion;
             public SpriteRenderer OcclusionOverlay;
@@ -78,6 +76,18 @@ namespace KingdomSurvival.LocationRendering
             public Sprite OcclusionBaseSprite;
             public Vector4 OcclusionRect;
         }
+
+        private sealed class ShadowState
+        {
+            public bool Shown;
+            public Sprite Sprite;
+            public Vector2 Vector;
+            public float GroundY, Opacity, Softness;
+            public Color Color;
+        }
+
+        // Тень от низа рисунка — только если он ниже опоры хотя бы на столько (единицы мира).
+        private const float GroundDropMin = .05f;
 
         // Местный источник, дающий тени по контуру: где он светит.
         private struct ShadowLight
@@ -797,11 +807,19 @@ namespace KingdomSurvival.LocationRendering
 
         // Тень-силуэт от солнца: гаснет, когда свет уходит вбок
         // (плоский рисунок сбоку дал бы линию).
+        // Две проекции силуэта: от опоры и (у предмета, чей низ ниже опоры) от
+        // низа рисунка. Одна линия земли верна не во всех часах: от опоры в
+        // полдень короткая тень выглядывает из-за верха камня, а под углом
+        // не хватает тени у его нижней половины; от низа — наоборот.
         private void CastShadow(Caster caster, int index, bool visible, Vector2 vector, Color color, float opacity, float softness)
         {
             LocationShadowStyle style = Sky.ShadowStyle;
             float share = style.SilhouetteShare(vector);
-            SetShadow(caster, index, visible, vector, color, opacity * share * Mathf.Max(0, style.SilhouetteOpacity), softness);
+            opacity *= share * Mathf.Max(0, style.SilhouetteOpacity);
+            float anchorY = caster.Anchor.position.y;
+            SetShadow(caster, index, visible, vector, color, opacity, softness, anchorY);
+            float drop = visible ? ShadowGroundDrop(caster) : 0;
+            SetShadow(caster, index + 1, visible && drop > GroundDropMin, vector, color, opacity, softness, anchorY - drop);
         }
 
         // ------------------------------------------------------------------
@@ -953,18 +971,19 @@ namespace KingdomSurvival.LocationRendering
         // Сколько предметов и людей сейчас перекрывают свет огня (для проверки).
         public int ContourCount => casters.Count(caster => caster.Contour != null && caster.Contour.enabled);
 
-        private void SetShadow(Caster caster, int index, bool visible, Vector2 vector, Color color, float opacity, float softness)
+        private void SetShadow(Caster caster, int index, bool visible, Vector2 vector, Color color, float opacity, float softness, float groundY)
         {
             SpriteRenderer shadow = caster.Shadows[index];
+            ShadowState state = caster.States[index];
             if (!visible || opacity <= .001f || vector.sqrMagnitude < 1e-6f)
             {
                 if (shadow != null && shadow.enabled) shadow.enabled = false;
-                caster.ShadowShown = false;
+                state.Shown = false;
                 return;
             }
             if (shadow == null)
             {
-                GameObject target = new GameObject(index == 0 ? "Тень от солнца" : "Тень от огня");
+                GameObject target = new GameObject(index == 0 ? "Тень от солнца" : "Тень от солнца · от низа");
                 target.transform.SetParent(caster.Anchor, false);
                 shadow = target.AddComponent<SpriteRenderer>();
                 shadow.sharedMaterial = shadowMaterial;
@@ -1000,18 +1019,17 @@ namespace KingdomSurvival.LocationRendering
                 }
             }
             // Ничего не изменилось с прошлого кадра — блок свойств прежний.
-            float groundY = caster.Anchor.position.y - ShadowGroundDrop(caster);
-            if (caster.ShadowShown && caster.ShadowSprite == shadow.sprite && (caster.ShadowVector - vector).sqrMagnitude < 1e-8f &&
-                Mathf.Abs(caster.ShadowGroundY - groundY) < 1e-5f && Mathf.Abs(caster.ShadowOpacity - opacity) < 1e-4f &&
-                Mathf.Abs(caster.ShadowSoftness - softness) < 1e-4f && caster.ShadowColor == color)
+            if (state.Shown && state.Sprite == shadow.sprite && (state.Vector - vector).sqrMagnitude < 1e-8f &&
+                Mathf.Abs(state.GroundY - groundY) < 1e-5f && Mathf.Abs(state.Opacity - opacity) < 1e-4f &&
+                Mathf.Abs(state.Softness - softness) < 1e-4f && state.Color == color)
                 return;
-            caster.ShadowShown = true;
-            caster.ShadowSprite = shadow.sprite;
-            caster.ShadowVector = vector;
-            caster.ShadowGroundY = groundY;
-            caster.ShadowOpacity = opacity;
-            caster.ShadowSoftness = softness;
-            caster.ShadowColor = color;
+            state.Shown = true;
+            state.Sprite = shadow.sprite;
+            state.Vector = vector;
+            state.GroundY = groundY;
+            state.Opacity = opacity;
+            state.Softness = softness;
+            state.Color = color;
             // Блок свойств — с чистого листа: старый блок мог нести текстуру
             // прошлого кадра анимации (другой страницы атласа).
             shadowBlock.Clear();

@@ -76,7 +76,7 @@ namespace KingdomSurvival.LocationRendering
                     battleFigures.Remove(id);
                 }
             }
-            UpdateShadows();
+            UpdateShadows(peopleOnly: true);
         }
 
         public void ClearBattleFigures() => SetBattleFigures(Array.Empty<BattleFigureFrame>());

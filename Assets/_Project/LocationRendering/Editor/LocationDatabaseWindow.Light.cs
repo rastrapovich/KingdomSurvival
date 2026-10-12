@@ -113,9 +113,16 @@ namespace KingdomSurvival.LocationRendering.Editor
                 "Затемнение земли по контуру основания предмета (у людей нет), сдвинутое в его тень (от огня, иначе по солнцу), " +
                 "и низа самого рисунка со стороны тени. 0 — нет.");
             Number("Окклюзия в тени: радиус (ед. мира)", style.OcclusionRadius, .02f, 2, value => style.OcclusionRadius = value,
-                "На сколько затемнение расходится от основания по земле; на предмете — высота затемнения ×1,5.");
+                "На сколько затемнение расходится от основания по земле.");
             Number("Окклюзия в тени: размытие (ед. мира)", style.OcclusionBlur, 0, 1, value => style.OcclusionBlur = value,
                 "Смягчает форму основания: углы прямоугольника и ступеньки основания кистью. 0 — точно по контуру.");
+            ColorField("Цвет теней и окклюзии", style.OcclusionColor, value => style.OcclusionColor = value);
+            settings[settings.childCount - 1].tooltip = "К какому цвету темнеют тени и окклюзия на земле и предметах. Чёрный — просто темнее фона (цвет сохраняется); " +
+                                                        "тёмно-синий — прохладная ночная тень, тёмно-коричневый — тёплая.";
+            Number("Окклюзия на предмете: сила (доля)", style.OcclusionOnObject, 0, 1, value => style.OcclusionOnObject = value,
+                "Насколько темнеет низ самого предмета — доля от силы окклюзии. 0 — только земля.");
+            Number("Окклюзия на предмете: высота (доля рисунка)", style.OcclusionObjectHeight, .05f, 1, value => style.OcclusionObjectHeight = value,
+                "На какую долю высоты рисунка затемнение поднимается от его нижнего края у земли (по контуру: у камня — по округлому низу).");
             AddButton(settings, "Стиль теней по умолчанию", () => Change(() => sky.ShadowStyle = new LocationShadowStyle(), true));
 
             Heading("Источники света");

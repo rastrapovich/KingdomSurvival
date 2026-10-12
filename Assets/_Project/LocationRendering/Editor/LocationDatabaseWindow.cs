@@ -910,6 +910,10 @@ namespace KingdomSurvival.LocationRendering.Editor
         }
 
         private double nextRepaint;
+        // Последний отрисованный кадр предпросмотра (показ без новой отрисовки).
+        private Texture lastPreview;
+        private Rect lastPreviewFrame;
+        private double lastPreviewAt;
 
         // Верхний слой предпросмотра (предметы и люди над гексами боя).
         private IMGUIContainer canvasTop;
@@ -1026,7 +1030,15 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (handled) return;
             if (evt.type != EventType.Repaint) return;
 
-            renderer.SetTime(hour, (float)EditorApplication.timeSinceStartup);
+            // Кадр места с 2D-светом дорог: не чаще ~30 раз в секунду — частые
+            // события мыши (перетаскивание, кисть) показывают готовый кадр.
+            double now = EditorApplication.timeSinceStartup;
+            if (lastPreview != null && frame == lastPreviewFrame && now - lastPreviewAt < 1 / 30.0)
+            {
+                GUI.DrawTexture(frame, lastPreview, ScaleMode.StretchToFill, false);
+                return;
+            }
+            renderer.SetTime(hour, (float)now);
             RenderPreviewActors();
             Vector2 world = LocationVisualGeometry.PixelToWorld(Location, viewCenter);
             preview.camera.transform.position = new Vector3(world.x, world.y, -10);
@@ -1036,13 +1048,18 @@ namespace KingdomSurvival.LocationRendering.Editor
             previewMouse = evt.mousePosition;
             // Гексы боя — между землёй и предметами: здесь земля (с тенями на
             // ней), над ней слой гексов, выше — верхний слой (предметы и люди).
-            bool layered = HexesShown(area);
+            // Во время перетаскивания и мазка кистью — одна отрисовка вместо трёх
+            // (гексы на это время — поверх предметов), иначе окно тормозит.
+            bool layered = HexesShown(area) && !dragging && !scatterStroke;
             topReady = layered && RenderUpperLayer(frame);
             if (topReady) renderer.SetLayersVisible(true, false);
             preview.BeginPreview(frame, GUIStyle.none);
             preview.Render(true);
             Texture texture = preview.EndPreview();
             if (topReady) renderer.SetLayersVisible(true, true);
+            lastPreview = texture;
+            lastPreviewFrame = frame;
+            lastPreviewAt = now;
             GUI.DrawTexture(frame, texture, ScaleMode.StretchToFill, false);
         }
 

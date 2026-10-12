@@ -1,10 +1,10 @@
-// ПР-12М: окклюзия на самом предмете — затемнение низа рисунка со стороны
-// тени. Рисуется тем же спрайтом поверх предмета и умножает его цвет: к
-// земле (_OccBase.y) темнее — плавно от половины _OccShape.w ниже опоры до
-// _OccShape.w выше неё (без ступеньки по линии опоры);
-// поперёк — по направлению тени _OccShape.xy (длина — выраженность 0..1):
-// сторона тени темнее, сторона к свету светлее (полуширина основания
-// _OccShape.z). Без тени — ровно по низу. Сила — _OccBase.z.
+// ПР-12М: окклюзия на самом предмете — затемнение низа рисунка у земли со
+// стороны тени. Рисуется тем же спрайтом поверх предмета и умножает его
+// цвет к цвету теней _OccColor (чёрный — просто темнее). Высота затемнения
+// _OccShape.w (ед. мира) отсчитывается от нижнего края силуэта в каждом
+// столбце рисунка (_OccUv: низ кадра в UV и UV на единицу мира), только у
+// земли (_OccBase.y — опора); поперёк — по направлению тени _OccShape.xy
+// (полуширина основания _OccShape.z). Сила — _OccBase.z.
 Shader "Kingdom Survival/Location Occlusion Object"
 {
     Properties
@@ -13,6 +13,8 @@ Shader "Kingdom Survival/Location Occlusion Object"
         _OccBase ("Base (x, y), strength", Vector) = (0, 0, 0.3, 0)
         _OccShape ("Shadow direction (x, y), half width, fade height", Vector) = (0, 0, 1, 1)
         _KsBend("Bend: top offset xy (world), drop (world)", Vector) = (0, 0, 0, 0)
+        _OccUv("Sprite uv: min x, min y, max y, v per world unit", Vector) = (0, 0, 1, 1)
+        _OccColor("Occlusion color", Color) = (0, 0, 0, 1)
         _KsBendShape("Bend shape: root y, 1/height (object), pinned, curve", Vector) = (0, 0, 0, 0)
         [HideInInspector] _Color ("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor ("RendererColor", Color) = (1,1,1,1)
@@ -57,6 +59,8 @@ Shader "Kingdom Survival/Location Occlusion Object"
                 float4 _OccBase;
                 float4 _OccShape;
                 float4 _KsBend;
+                float4 _OccUv;
+                half4 _OccColor;
                 float4 _KsBendShape;
                 half4 _Color;
             CBUFFER_END
@@ -90,18 +94,30 @@ Shader "Kingdom Survival/Location Occlusion Object"
             {
                 half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
                 float2 offset = input.world - _OccBase.xy;
-                // Плавно в обе стороны от опоры: у рисунков, где часть травинок
-                // нарисована ниже опоры, иначе по линии опоры — ступенька
-                // (ниже — полная темнота, выше — короткое затухание).
+                // Высота затемнения (ед. мира) — от нижнего края силуэта в этом
+                // столбце рисунка, а не от горизонтали опоры: у камня темнеет
+                // округлый низ, у травы — низ пучка, без ровной полосы.
                 float fade = max(1e-4, _OccShape.w);
-                float height = 1 - smoothstep(-0.5 * fade, fade, offset.y);
+                float stepWorld = fade / 8.0;
+                float stepV = stepWorld * _OccUv.w;
+                float edge = fade;
+                [unroll] for (int i = 1; i <= 8; i++)
+                {
+                    float v = input.uv.y - stepV * i;
+                    half below = v < _OccUv.y ? 0 : SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, float2(input.uv.x, v), 0).a;
+                    if (below < 0.5 && edge >= fade) edge = stepWorld * (i - 0.5);
+                }
+                float height = 1 - smoothstep(0, fade, edge);
+                // Только у земли: нижний край высоко над опорой (крона) не темнеет.
+                float ground = 1 - smoothstep(0.5 * fade, 2.5 * fade, offset.y);
                 // Направление тени с выраженностью 0..1: без тени — ровно по низу,
                 // с полной — сторона тени тёмная, сторона к свету светлая; между —
                 // плавно.
                 float2 direction = _OccShape.xy;
                 float side = saturate(1 - 0.5 * length(direction) + 0.5 * dot(offset, direction) / max(1e-4, _OccShape.z));
-                half dark = saturate(_OccBase.z) * height * side * alpha;
-                return half4((1 - dark).xxx, 1);
+                half dark = saturate(_OccBase.z) * height * ground * side * alpha;
+                // К цвету теней: чёрный — просто темнее (цвет предмета сохраняется).
+                return half4(lerp(half3(1, 1, 1), _OccColor.rgb, dark), 1);
             }
             ENDHLSL
         }

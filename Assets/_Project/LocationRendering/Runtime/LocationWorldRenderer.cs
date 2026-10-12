@@ -680,7 +680,7 @@ namespace KingdomSurvival.LocationRendering
                 Destroy(actors[id].Anchor.gameObject);
                 actors.Remove(id);
             }
-            UpdateShadows();
+            UpdateShadows(peopleOnly: true);
         }
 
         // Без нового списка каждый кадр.

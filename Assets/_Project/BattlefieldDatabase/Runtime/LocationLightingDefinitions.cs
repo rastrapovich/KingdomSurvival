@@ -138,6 +138,13 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float OcclusionRadius = .35f;
         // Размытие формы основания (ед. мира): углы и ступеньки кисти мягче.
         public float OcclusionBlur = .15f;
+        // К какому цвету темнеют тени и окклюзия: чёрный — просто темнее фона
+        // (цвет земли и предмета сохраняется); цветной — подкрашивает тень.
+        public UnityEngine.Color OcclusionColor = UnityEngine.Color.black;
+        // Затемнение на самом предмете: доля силы окклюзии (0 — нет) и высота
+        // от нижнего края рисунка (доля его высоты), до которой оно сходит на нет.
+        public float OcclusionOnObject = .6f;
+        public float OcclusionObjectHeight = .3f;
 
         // 0..1: насколько виден силуэт при тени вдоль vector (экран).
         public float SilhouetteShare(UnityEngine.Vector2 vector)

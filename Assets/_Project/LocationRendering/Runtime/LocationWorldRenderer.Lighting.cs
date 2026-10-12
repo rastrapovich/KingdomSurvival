@@ -62,7 +62,7 @@ namespace KingdomSurvival.LocationRendering
             // Предмет со своим светом (костёр) и люди окклюзии не дают.
             public bool NoOcclusion;
             public List<Rect> FallbackFootprint;
-            public Vector4 OcclusionBase, OcclusionShape;
+            public Vector4 OcclusionBase, OcclusionShape, OcclusionUv;
             // Пятно уже построено для этой формы, радиуса и размытия — не искать заново.
             public List<Rect> OcclusionFor;
             public float OcclusionRadius = -1, OcclusionBlur = -1;
@@ -275,7 +275,11 @@ namespace KingdomSurvival.LocationRendering
         private void ApplyLighting()
         {
             // Цвет, к которому темнеет земля в тени (общий для всех теней).
-            if (shadowApply != null) shadowApply.SetColor(ShadowTintId, Sky.Sun.Color);
+            // Тени и окклюзия темнеют к «Цвету теней и окклюзии» (чёрный — просто темнее фона).
+            Color shadowColor = Sky.ShadowStyle.OcclusionColor;
+            shadowColor.a = 1;
+            if (shadowApply != null) shadowApply.SetColor(ShadowTintId, shadowColor);
+            if (OcclusionMaterial() != null && occlusionObjectMaterial != null) occlusionObjectMaterial.SetColor(OcclusionColorId, shadowColor);
             float hour = Hour;
             if (Indoor)
             {
@@ -339,7 +343,9 @@ namespace KingdomSurvival.LocationRendering
         public double ShadowMilliseconds { get; private set; }
         private readonly System.Diagnostics.Stopwatch shadowWatch = new System.Diagnostics.Stopwatch();
 
-        private void UpdateShadows()
+        // peopleOnly — только фигуры (кадр фигур сменился, предметы стоят): тени
+        // сотен предметов не пересчитываются из-за каждого шага людей.
+        private void UpdateShadows(bool peopleOnly = false)
         {
             if (shadowMaterial == null) return;
             shadowWatch.Restart();
@@ -353,6 +359,7 @@ namespace KingdomSurvival.LocationRendering
                     casters.RemoveAt(i);
                     continue;
                 }
+                if (peopleOnly && !caster.People) continue;
                 bool enabled = !caster.Disabled && caster.Source.enabled && caster.Source.gameObject.activeInHierarchy &&
                                (!caster.People || Sky.PeopleCastShadows);
                 float scale = caster.People ? Sky.PeopleShadowLength : caster.LengthScale;
@@ -380,6 +387,8 @@ namespace KingdomSurvival.LocationRendering
         private MaterialPropertyBlock occlusionBlock;
         private static readonly int OcclusionBaseId = Shader.PropertyToID("_OccBase");
         private static readonly int OcclusionShapeId = Shader.PropertyToID("_OccShape");
+        private static readonly int OcclusionUvId = Shader.PropertyToID("_OccUv");
+        private static readonly int OcclusionColorId = Shader.PropertyToID("_OccColor");
         // Пятно на земле сдвинуто в тень на долю радиуса.
         private const float OcclusionShift = .5f;
         private const string OcclusionOverlayName = "Окклюзия на предмете";
@@ -466,15 +475,36 @@ namespace KingdomSurvival.LocationRendering
                 // Два аргумента: Max с тремя создаёт массив на каждый вызов (мусор каждый кадр).
                 halfWidth = Mathf.Max(halfWidth, Mathf.Max(Mathf.Abs(cell.xMin), Mathf.Abs(cell.xMax)));
             Vector2 foot = caster.Anchor.position;
-            Vector4 shapeData = new Vector4(direction.x, direction.y, halfWidth, radius * 1.5f);
-            Vector4 baseData = new Vector4(foot.x, foot.y, strength, 0);
-            if (caster.OcclusionShape == shapeData && caster.OcclusionBase == baseData) return;
+            // Высота затемнения — доля видимой высоты рисунка над опорой (верх
+            // непрозрачного), отсчёт в шейдере — от нижнего края силуэта.
+            LocationShadowStyle style = Sky.ShadowStyle;
+            Sprite sprite = source.sprite;
+            float opaqueTop = sprite.bounds.min.y + sprite.bounds.size.y * LocationAlphaContours.OpaqueTop(sprite);
+            float visible = Mathf.Max(.1f, source.transform.TransformPoint(new Vector3(0, opaqueTop, 0)).y - foot.y);
+            float fade = Mathf.Clamp(style.OcclusionObjectHeight, .05f, 1) * visible;
+            Vector4 shapeData = new Vector4(direction.x, direction.y, halfWidth, fade);
+            Vector4 baseData = new Vector4(foot.x, foot.y, strength * Mathf.Clamp01(style.OcclusionOnObject), 0);
+            // Кадр в UV: низ (за ним — прозрачно) и UV на единицу мира по высоте.
+            Vector4 uvData = new Vector4(0, 0, 1, 1);
+            Texture texture = sprite.texture;
+            if (texture != null)
+            {
+                Rect rect;
+                try { rect = sprite.textureRect; }
+                catch (Exception) { rect = sprite.rect; }
+                float worldHeight = rect.height / Mathf.Max(1e-3f, sprite.pixelsPerUnit) * Mathf.Abs(source.transform.lossyScale.y);
+                uvData = new Vector4(rect.xMin / texture.width, rect.yMin / texture.height, rect.yMax / texture.height,
+                    rect.height / texture.height / Mathf.Max(1e-4f, worldHeight));
+            }
+            if (caster.OcclusionShape == shapeData && caster.OcclusionBase == baseData && caster.OcclusionUv == uvData) return;
             caster.OcclusionShape = shapeData;
             caster.OcclusionBase = baseData;
+            caster.OcclusionUv = uvData;
             occlusionBlock ??= new MaterialPropertyBlock();
             occlusionBlock.Clear();
             occlusionBlock.SetVector(OcclusionBaseId, baseData);
             occlusionBlock.SetVector(OcclusionShapeId, shapeData);
+            occlusionBlock.SetVector(OcclusionUvId, uvData);
             // Прогиб рисунка (реакция на проход) — и у затемнения на нём.
             source.GetPropertyBlock(bendBlock);
             occlusionBlock.SetVector(BendId, bendBlock.GetVector(BendId));

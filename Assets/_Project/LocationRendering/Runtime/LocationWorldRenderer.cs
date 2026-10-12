@@ -60,6 +60,12 @@ namespace KingdomSurvival.LocationRendering
             public int HoleOverlays;
             public float SeeThroughLevel = 1;
             public readonly List<float> BaseAlpha = new List<float>();
+            public readonly List<Color> BaseColor = new List<Color>();
+            // В чужой тени солнца: плавная сила 0..1 и записанное затемнение.
+            public float ShadeLevel, ShadeTarget;
+            public bool ShadeReady;
+            public Vector3 ShadeFoot;
+            public Color Shade = Color.white;
         }
 
         private sealed class Actor
@@ -77,6 +83,9 @@ namespace KingdomSurvival.LocationRendering
             public bool Seen;
             // Рост самой фигуры (мир, наибольший из показанных кадров) — мерка круга просвечивания.
             public float BodyHeight;
+            // Затемнение от чужих теней солнца (белый — на свету) и его плавная сила 0..1.
+            public Color Shade = Color.white;
+            public float ShadeLevel;
         }
 
         // Высота фигуры в размерах клетки боя — как у поля боя.
@@ -402,6 +411,7 @@ namespace KingdomSurvival.LocationRendering
                 image.sortingOrder = LocationVisualGeometry.SortOrder(part.Band, anchor.localPosition.y, part.OrderOffset);
                 entry.Images.Add(image);
                 entry.BaseAlpha.Add(image.color.a);
+                entry.BaseColor.Add(image.color);
                 entry.Parts.Add(part);
                 if (i == 0) entry.Image = image;
                 // Тень от солнца — силуэт, от огня — контур (каждая своей галочкой).
@@ -461,6 +471,10 @@ namespace KingdomSurvival.LocationRendering
             }
             entry.Images.Clear();
             entry.BaseAlpha.Clear();
+            entry.BaseColor.Clear();
+            entry.Shade = Color.white;
+            entry.ShadeLevel = 0;
+            entry.ShadeReady = false;
             entry.SeeThroughLevel = 1;
             entry.Holes.Clear();
             entry.HolesWritten = false;
@@ -478,6 +492,7 @@ namespace KingdomSurvival.LocationRendering
             AnimateScatter();
             StepVegetationByClock(seconds);
             ApplyLighting();
+            UpdateSunShade();
         }
 
         // ПР-12П: кадры анимированных предметов — по тому же времени, что жизнь
@@ -762,7 +777,9 @@ namespace KingdomSurvival.LocationRendering
                     : frame.Kind == ActorKind.Retinue ? new Color(.70f, .76f, .85f) : Color.white;
             }
             Color tint = frame.Kind == ActorKind.Retinue ? new Color(.87f, .86f, .78f) : Color.white;
-            if (frame.Wounded) tint *= new Color(.85f, .75f, .75f);
+            if (actor.Player != null || actor.Unit?.BattlefieldSprite != null) actor.Image.color = tint;
+            // В тени деревьев и предметов фигура темнеет, как земля под ней (UpdateSunShade).
+            actor.Image.color *= actor.Shade;
             if (actor.Player != null || actor.Unit?.BattlefieldSprite != null) actor.Image.color = tint;
             Fit(actor.Image, height, pivot, mirrored, offset);
             actor.Image.sortingOrder = LocationVisualGeometry.SortOrder(LocationVisualBand.World, actor.Anchor.localPosition.y);

@@ -330,6 +330,15 @@ namespace KingdomSurvival.LocationRendering
                 shape.w = 1;
                 bendBlock.SetVector(BendShapeId, shape);
                 image.SetPropertyBlock(bendBlock);
+                // Затемнение низа на самом рисунке (окклюзия) гнётся вместе с ним.
+                Transform overlayObject = image.transform.Find(OcclusionOverlayName);
+                if (overlayObject != null && overlayObject.TryGetComponent(out SpriteRenderer overlay))
+                {
+                    overlay.GetPropertyBlock(bendBlock);
+                    bendBlock.SetVector(BendId, new Vector4(world.x, world.y, worldDrop, 0));
+                    bendBlock.SetVector(BendShapeId, shape);
+                    overlay.SetPropertyBlock(bendBlock);
+                }
             }
         }
 

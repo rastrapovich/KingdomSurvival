@@ -323,6 +323,9 @@ namespace KingdomSurvival.LocationRendering
             LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = location.Id, UseWorldLighting = false };
             LocationScatterLayer layer = Layer(LocationScatterMode.Objects, "grass");
             layer.Band = LocationVisualBand.World;
+            // С тенью и окклюзией: затемнение низа на рисунке должно гнуться вместе с ним.
+            layer.ProjectsShadow = true;
+            visual.ShadowStyle.Occlusion = .5f;
             LocationScatterInstance tuft = Put(layer, "grass", new Vector2(520, 500));
             LocationScatterLayer plain = Layer(LocationScatterMode.Objects, "grass");
             plain.Reaction.Enabled = false;
@@ -346,6 +349,13 @@ namespace KingdomSurvival.LocationRendering
                 Assert.That(shape.y, Is.GreaterThan(0), "Форма прогиба задана.");
                 Assert.That(shape.z, Is.EqualTo(0), "Отдельный рисунок — прямой наклон от корня, без изломов сетки.");
                 Assert.That(shape.w, Is.EqualTo(1));
+                SpriteRenderer overlay = image.transform.Find("Окклюзия на предмете")?.GetComponent<SpriteRenderer>();
+                Assert.That(overlay, Is.Not.Null, "Окклюзия на рисунке есть.");
+                MaterialPropertyBlock overlayBlock = new MaterialPropertyBlock();
+                overlay.GetPropertyBlock(overlayBlock);
+                Assert.That(overlayBlock.GetVector("_KsBend"), Is.EqualTo(bend), "Затемнение гнётся вместе с рисунком.");
+                Assert.That(overlayBlock.GetVector("_KsBendShape"), Is.EqualTo(shape));
+                Assert.That(overlayBlock.GetVector("_OccBase").z, Is.GreaterThan(0), "Своё затемнение не потеряно.");
                 // Опора в пространстве рисунка: вес прогиба там нулевой.
                 float rootT = (image.transform.InverseTransformPoint(anchor).y - shape.x) * shape.y;
                 Assert.That(LocationGrassBend.Weight(rootT, shape.z), Is.EqualTo(0).Within(1e-5f), "Корни на месте.");

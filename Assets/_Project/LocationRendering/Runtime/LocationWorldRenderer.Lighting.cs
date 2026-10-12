@@ -382,6 +382,7 @@ namespace KingdomSurvival.LocationRendering
         private static readonly int OcclusionShapeId = Shader.PropertyToID("_OccShape");
         // Пятно на земле сдвинуто в тень на долю радиуса.
         private const float OcclusionShift = .5f;
+        private const string OcclusionOverlayName = "Окклюзия на предмете";
 
         // Окклюзия у основания: на земле — по контуру основания предмета
         // (прямоугольник или основание кистью) с мягким спадом наружу на
@@ -446,7 +447,7 @@ namespace KingdomSurvival.LocationRendering
             }
             if (overlay == null)
             {
-                GameObject target = new GameObject("Окклюзия на предмете");
+                GameObject target = new GameObject(OcclusionOverlayName);
                 target.transform.SetParent(caster.Source.transform, false);
                 // Чуть ближе к камере: рисуется сразу после своего рисунка.
                 target.transform.localPosition = new Vector3(0, 0, -.001f);
@@ -474,6 +475,10 @@ namespace KingdomSurvival.LocationRendering
             occlusionBlock.Clear();
             occlusionBlock.SetVector(OcclusionBaseId, baseData);
             occlusionBlock.SetVector(OcclusionShapeId, shapeData);
+            // Прогиб рисунка (реакция на проход) — и у затемнения на нём.
+            source.GetPropertyBlock(bendBlock);
+            occlusionBlock.SetVector(BendId, bendBlock.GetVector(BendId));
+            occlusionBlock.SetVector(BendShapeId, bendBlock.GetVector(BendShapeId));
             overlay.SetPropertyBlock(occlusionBlock);
         }
 

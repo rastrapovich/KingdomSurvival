@@ -130,7 +130,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     break;
                 case DropKind.Slot:
                 case DropKind.AddToAsset:
-                    ImportPaths(paths, target.Asset, target.DefaultView);
+                    ImportPaths(paths, target.Asset, target.DefaultView, null, target.Part);
                     break;
                 case DropKind.Create:
                     ImportPaths(paths, null, ArtAssetView.Front);
@@ -182,13 +182,14 @@ namespace KingdomSurvival.ArtAssets.Editor
                         Kind = DropKind.Slot, Asset = selected, Part = part, View = view, Normal = normal, Single = single, DefaultView = view,
                         Rect = single ? (normal ? normalRect : colorRect) : cell,
                         Hint = single ? (normal ? "Заменить нормаль: " : "Заменить рисунок: ") + ArtAssetLabels.ViewTitle(view) + partNote
-                            : "Добавить файлы в «" + selected.Name + "» (без ракурса в имени — в «" + ArtAssetLabels.ViewTitle(view) + "»)"
+                            : "Добавить файлы в «" + selected.Name + "»" + partNote + " (без ракурса в имени — в «" + ArtAssetLabels.ViewTitle(view) + "»)"
                     };
                 }
                 return new DropTarget
                 {
-                    Kind = DropKind.AddToAsset, Asset = selected, DefaultView = cardView, Rect = preview,
-                    Hint = "Добавить в «" + selected.Name + "» (без ракурса в имени — в «" + ArtAssetLabels.ViewTitle(cardView) + "»)"
+                    Kind = DropKind.AddToAsset, Asset = selected, Part = part, DefaultView = cardView, Rect = preview,
+                    Hint = "Добавить в «" + selected.Name + "»" + (selected.Parts.Count > 1 ? " · " + part.Name : "") +
+                           " (без ракурса в имени — в «" + ArtAssetLabels.ViewTitle(cardView) + "»)"
                 };
             }
             ArtAssetDefinition hit = state.Mode == ArtAssetCenterMode.Gallery ? GalleryHit(area, mouse)
@@ -254,7 +255,9 @@ namespace KingdomSurvival.ArtAssets.Editor
 
         // Пакет: разбор → сводка → импорт. target — все файлы в одну запись.
         // category — куда положить новые записи (по умолчанию — выбранная категория).
-        private void ImportPaths(List<string> paths, ArtAssetDefinition target, ArtAssetView? defaultView = null, ArtAssetCategory? category = null)
+        // intoPart — часть target для файлов без части в имени (выбирается и в сводке).
+        private void ImportPaths(List<string> paths, ArtAssetDefinition target, ArtAssetView? defaultView = null, ArtAssetCategory? category = null,
+            ArtAssetPart intoPart = null)
         {
             if (target == null && category == null) category = CurrentCategory;
             ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(paths, target?.Name, defaultView);
@@ -275,9 +278,12 @@ namespace KingdomSurvival.ArtAssets.Editor
             }
             // Однозначный пакет в выбранную запись — без лишних вопросов.
             Dictionary<ArtAssetImportGroup, bool> update = plan.Groups.ToDictionary(group => group, group => target != null);
-            if (!ArtAssetImportSummaryWindow.Confirm(plan, matches, update, target)) { status.text = "Импорт отменён."; return; }
+            int partIndex = target != null && intoPart != null ? Mathf.Max(0, target.Parts.IndexOf(intoPart)) : 0;
+            if (!ArtAssetImportSummaryWindow.Confirm(plan, matches, update, target, ref partIndex)) { status.text = "Импорт отменён."; return; }
+            ArtAssetPart into = target != null && partIndex > 0 && partIndex < target.Parts.Count ? target.Parts[partIndex] : null;
             ArtAssetImportResult result = ArtAssetImporter.Import(catalog, plan,
-                group => update.TryGetValue(group, out bool yes) && yes && matches.TryGetValue(group, out ArtAssetDefinition existing) ? existing : null);
+                group => update.TryGetValue(group, out bool yes) && yes && matches.TryGetValue(group, out ArtAssetDefinition existing) ? existing : null,
+                true, into?.Id);
             if (category.HasValue && result.Created.Count > 0)
                 Edit("Категория новых ассетов", () =>
                 {
@@ -292,8 +298,10 @@ namespace KingdomSurvival.ArtAssets.Editor
             BuildCategories();
             string first = result.Created.Concat(result.Updated).FirstOrDefault();
             if (first != null) SelectAsset(first, plan.Groups.Count == 1);
+            // Карточка остаётся на той части, куда шла загрузка.
+            if (target != null && result.Updated.Count > 0 && partIndex > 0) { cardPart = partIndex; BuildProperties(); }
             int older = plan.Groups.Sum(group => group.SkippedOlder);
-            status.text = result.Summary + (category.HasValue && result.Created.Count > 0 ? " Категория: «" + ArtAssetLabels.CategoryTitle(category.Value) + "»." : "") +
+            status.text = result.Summary + (into != null ? " Часть: «" + into.Name + "»." : "") + (category.HasValue && result.Created.Count > 0 ? " Категория: «" + ArtAssetLabels.CategoryTitle(category.Value) + "»." : "") +
                           (older > 0 ? " Старых рендеров пропущено: " + older + " (взяты самые свежие)." : "") +
                           (result.Warnings.Count > 0 ? " ⚠ " + string.Join(" ", result.Warnings.Take(3)) : "") +
                           (result.Errors.Count > 0 ? " Ошибки: " + string.Join("; ", result.Errors.Take(3)) : "") +
@@ -311,13 +319,16 @@ namespace KingdomSurvival.ArtAssets.Editor
         private Dictionary<ArtAssetImportGroup, bool> update;
         private ArtAssetDefinition target;
         private bool confirmed, resultOnly;
+        private int partIndex;
         private Vector2 scroll;
 
         // Тесты: сводка подтверждается без окна.
         public static bool AutoConfirm;
 
+        // partIndex — часть target для файлов без части в имени (0 — основа);
+        // у ассета из нескольких частей выбирается в сводке.
         public static bool Confirm(ArtAssetImportPlan plan, Dictionary<ArtAssetImportGroup, ArtAssetDefinition> matches,
-            Dictionary<ArtAssetImportGroup, bool> update, ArtAssetDefinition target)
+            Dictionary<ArtAssetImportGroup, bool> update, ArtAssetDefinition target, ref int partIndex)
         {
             // Тесты и пакетный режим: модальное окно не открывается.
             if (AutoConfirm || Application.isBatchMode) return true;
@@ -327,8 +338,10 @@ namespace KingdomSurvival.ArtAssets.Editor
             window.matches = matches;
             window.update = update;
             window.target = target;
+            window.partIndex = partIndex;
             window.minSize = new Vector2(560, 380);
             window.ShowModalUtility();
+            partIndex = window.partIndex;
             return window.confirmed;
         }
 
@@ -349,20 +362,30 @@ namespace KingdomSurvival.ArtAssets.Editor
         {
             if (plan == null) { Close(); return; }
             EditorGUILayout.LabelField(target != null ? "Файлы для «" + target.Name + "»" : "Распознано объектов: " + plan.Groups.Count, EditorStyles.boldLabel);
+            if (!resultOnly && target?.Parts != null && target.Parts.Count > 1)
+            {
+                string[] names = target.Parts.Select((part, index) => (part?.Name ?? "—") + (index == 0 ? " (основа)" : "")).ToArray();
+                partIndex = EditorGUILayout.Popup(new GUIContent("Загрузить в часть", "Куда идут загружаемые рисунки. Если в пакете несколько частей (имена частей в именах файлов), " +
+                    "в выбранную идут файлы без части, остальные — в свои части."), Mathf.Clamp(partIndex, 0, names.Length - 1), names);
+            }
             scroll = EditorGUILayout.BeginScrollView(scroll);
             foreach (ArtAssetImportGroup group in plan.Groups)
             {
                 using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
                 {
-                    string parts = string.Join(", ", group.Parts.Select(part => part.Length == 0 ? "основа" : part));
+                    string own = target != null && partIndex > 0 && partIndex < target.Parts.Count ? target.Parts[partIndex]?.Name : "основа";
+                    if (string.IsNullOrEmpty(own)) own = "часть";
+                    // Пакет одной части целиком идёт в выбранную часть (как в импорте).
+                    string shown = partIndex > 0 && group.Parts.Count() == 1 ? group.Parts.First() : string.Empty;
+                    string parts = string.Join(", ", group.Parts.Select(part => part.Length == 0 || part == shown ? own : part));
                     EditorGUILayout.LabelField(group.Name, "рисунков: " + group.ColorCount + " · нормалей: " + group.NormalCount + " · части: " + parts);
                     List<string> views = ArtAssetLabels.Views.Select(view =>
                     {
-                        ArtAssetImportSlot slot = group.Slots.FirstOrDefault(item => item.View == view && item.Part.Length == 0);
+                        ArtAssetImportSlot slot = group.Slots.FirstOrDefault(item => item.View == view && string.Equals(item.Part, shown, StringComparison.OrdinalIgnoreCase));
                         return ArtAssetLabels.ViewTitle(view) + (slot?.ColorPath != null ? " ✓" + (slot.NormalPath != null ? "N" : "") +
                             (slot.FrameCount > 1 ? " ×" + slot.FrameCount : "") : " —");
                     }).ToList();
-                    EditorGUILayout.LabelField("Основа: " + string.Join(" · ", views), EditorStyles.wordWrappedMiniLabel);
+                    EditorGUILayout.LabelField(char.ToUpperInvariant(own[0]) + own.Substring(1) + ": " + string.Join(" · ", views), EditorStyles.wordWrappedMiniLabel);
                     if (group.MaxFrameCount > 1)
                         EditorGUILayout.LabelField("Анимация: до " + group.MaxFrameCount + " кадров в ракурсе (номер в конце имени файла).", EditorStyles.wordWrappedMiniLabel);
                     if (group.SkippedOlder > 0)
@@ -372,7 +395,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     if (assumed != null)
                         EditorGUILayout.HelpBox("Ракурса в имени файла нет — рисунок поставлен в «" + ArtAssetLabels.ViewTitle(assumed.View) +
                                                 "». Остальные ракурсы можно добавить позже в карточке.", MessageType.Info);
-                    if (group.MainViewCount == 0)
+                    if (group.MainViewCount == 0 && own == "основа")
                         EditorGUILayout.HelpBox("Нет рисунков основы: будут загружены только части.", MessageType.Warning);
                     if (target == null && matches.TryGetValue(group, out ArtAssetDefinition match))
                     {

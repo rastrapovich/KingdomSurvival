@@ -89,6 +89,72 @@ namespace KingdomSurvival.ArtAssets.Tests
         }
 
         [Test]
+        public void FolderIntoChosenPart_DoesNotTouchMainPart()
+        {
+            Png("Телега/Front/color.png", 32, 32, Color.red);
+            ImportCart();
+            ArtAssetDefinition cart = catalog.assets.Single();
+            string mainPath = AssetDatabase.GetAssetPath(cart.MainPart.FindView(ArtAssetView.Front).Sprite);
+            byte[] mainBytes = File.ReadAllBytes(mainPath);
+            ArtAssetPart crown = new ArtAssetPart { Name = "Крона" };
+            cart.Parts.Add(crown);
+
+            // Рендер кроны: имя файла без части — раньше уходил в основу и затирал её.
+            Png("Крона/Front/Крона_Front_0001.png", 20, 24, Color.green);
+            ArtAssetImportPlan plan = ArtAssetImportParser.ParsePaths(new[] { source + "/Крона" }, cart.Name, ArtAssetView.Front);
+            ArtAssetImportResult result = ArtAssetImporter.Import(catalog, plan, _ => catalog.assets[0], false, crown.Id);
+            Assert.That(result.Errors, Is.Empty, string.Join("; ", result.Errors));
+            ArtAssetDefinition updated = catalog.assets.Single();
+            Assert.That(updated.Parts.Count, Is.EqualTo(2), "Новые части не создаются.");
+            Assert.That(updated.MainPart.FindView(ArtAssetView.Front).Sprite.rect.width, Is.EqualTo(32), "Основа не тронута.");
+            Assert.That(File.ReadAllBytes(mainPath), Is.EqualTo(mainBytes), "Файл основы не перезаписан.");
+            Assert.That(updated.Parts[1].FindView(ArtAssetView.Front).Sprite.rect.width, Is.EqualTo(20), "Рисунок — в выбранной части.");
+        }
+
+        [Test]
+        public void SwapPartArt_AndMakeMainPart_KeepObjectInPlace()
+        {
+            ArtAssetDefinition tree = new ArtAssetDefinition { Name = "Дерево", PixelsPerUnit = 100 };
+            catalog.assets.Add(tree);
+            ArtAssetPart trunk = tree.MainPart, crown = new ArtAssetPart { Name = "Крона" };
+            tree.Parts.Add(crown);
+            List<Object> owned = new List<Object>();
+            Sprite Make(int width, int height)
+            {
+                Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(.5f, .5f), 100);
+                owned.Add(texture);
+                owned.Add(sprite);
+                return sprite;
+            }
+            try
+            {
+                Sprite wide = Make(200, 100), tall = Make(100, 300);
+                // Крона по ошибке в основе, ствол — в части «Крона».
+                trunk.View(ArtAssetView.Front).Sprite = wide;
+                crown.View(ArtAssetView.Front).Sprite = tall;
+                ArtAssetImporter.SwapPartArt(catalog, tree, trunk, crown);
+                Assert.That(trunk.View(ArtAssetView.Front).Sprite == tall && crown.View(ArtAssetView.Front).Sprite == wide, Is.True);
+
+                // Опора — середина низа ствола; крона над стволом со сдвигом.
+                tree.Settings(ArtAssetView.Front).Pivot = new Vector2(.5f, 0);
+                crown.View(ArtAssetView.Front).Offset = new Vector2(-.5f, 2.5f);
+                ArtAssetImporter.MakeMainPart(catalog, tree, crown);
+                Assert.That(tree.MainPart, Is.SameAs(crown));
+                Assert.That(crown.View(ArtAssetView.Front).Offset, Is.EqualTo(Vector2.zero));
+                Assert.That(trunk.View(ArtAssetView.Front).Offset, Is.EqualTo(new Vector2(.5f, -2.5f)), "Ствол — там же относительно кроны.");
+                // Точка опоры в мире та же: (0.5, 0) от угла ствола = (1, -2.5) от угла кроны 2×1.
+                Vector2 pivot = tree.Settings(ArtAssetView.Front).Pivot;
+                Assert.That(pivot.x, Is.EqualTo(.5f).Within(1e-4f));
+                Assert.That(pivot.y, Is.EqualTo(-2.5f).Within(1e-4f));
+            }
+            finally
+            {
+                foreach (Object item in owned) Object.DestroyImmediate(item);
+            }
+        }
+
+        [Test]
         public void Reimport_KeepsIdAndGuids_AndReplacingOneViewKeepsOthers()
         {
             Png("Телега/Front/color.png", 32, 32, Color.red);

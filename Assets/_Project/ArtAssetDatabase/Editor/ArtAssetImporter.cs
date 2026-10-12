@@ -52,8 +52,10 @@ namespace KingdomSurvival.ArtAssets.Editor
         }
 
         // targetFor: существующая запись для обновления или null — создать новую.
+        // intoPartId: часть существующей записи, куда идёт пакет (null — основа);
+        // в пакете из нескольких частей туда идут файлы без части в имени.
         public static ArtAssetImportResult Import(ArtAssetDatabaseAsset catalog, ArtAssetImportPlan plan,
-            Func<ArtAssetImportGroup, ArtAssetDefinition> targetFor, bool progress = true)
+            Func<ArtAssetImportGroup, ArtAssetDefinition> targetFor, bool progress = true, string intoPartId = null)
         {
             ArtAssetImportResult result = new ArtAssetImportResult();
             if (catalog == null || plan == null) return result;
@@ -71,7 +73,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     ArtAssetDefinition existing = targetFor?.Invoke(group);
                     try
                     {
-                        ArtAssetDefinition imported = ImportGroup(catalog, group, existing, result.Warnings);
+                        ArtAssetDefinition imported = ImportGroup(catalog, group, existing, result.Warnings, existing != null ? intoPartId : null);
                         (existing != null ? result.Updated : result.Created).Add(imported.Id);
                     }
                     catch (Exception exception)
@@ -119,10 +121,17 @@ namespace KingdomSurvival.ArtAssets.Editor
             }
         }
 
-        private static ArtAssetDefinition ImportGroup(ArtAssetDatabaseAsset catalog, ArtAssetImportGroup group, ArtAssetDefinition existing, List<string> warnings)
+        private static ArtAssetDefinition ImportGroup(ArtAssetDatabaseAsset catalog, ArtAssetImportGroup group, ArtAssetDefinition existing, List<string> warnings,
+            string intoPartId)
         {
             ArtAssetDefinition working = existing != null ? Clone(existing) : new ArtAssetDefinition { Name = group.Name };
-            if (existing != null) RemoveMisparsedParts(working, group);
+            ArtAssetPart into = string.IsNullOrEmpty(intoPartId) ? null : working.Parts.FirstOrDefault(item => item != null && item.Id == intoPartId);
+            if (!string.IsNullOrEmpty(intoPartId) && into == null) throw new InvalidOperationException("у ассета нет выбранной части.");
+            if (existing != null && (into == null || into == working.MainPart)) RemoveMisparsedParts(working, group);
+            // Пакет одной части (папка рендера кроны) целиком идёт в выбранную
+            // часть, как бы ни назывались файлы; пакет из нескольких частей —
+            // файлы без части в выбранную, остальные в свои.
+            bool onePart = group.Parts.Count() == 1;
             working.ImportKey = group.Key;
             // Источник вне проекта запоминается: «Обновить из папки».
             if (!string.IsNullOrEmpty(group.SourceFolder) && !IsProjectPath(group.SourceFolder)) working.SourceFolder = group.SourceFolder;
@@ -131,7 +140,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             {
                 foreach (ArtAssetImportSlot slot in group.Slots)
                 {
-                    ArtAssetPart part = FindOrAddPart(working, slot.Part);
+                    ArtAssetPart part = into != null && (slot.Part.Length == 0 || onePart) ? into : FindOrAddPart(working, slot.Part);
                     ArtAssetPartView view = part.View(slot.View);
                     Sprite sprite = slot.ColorPath != null ? ImportColor(working, part, slot.View, slot.ColorPath, view.Sprite, transaction) : view.Sprite;
                     Texture2D normal = slot.NormalPath != null ? ImportNormal(working, part, slot.View, slot.NormalPath, view.NormalMap, transaction, 0, warnings) : view.NormalMap;
@@ -545,6 +554,66 @@ namespace KingdomSurvival.ArtAssets.Editor
             ArtAssetSheets.Clear(part.View(view));
             Changed(catalog);
             RefreshOwner(catalog, part);
+        }
+
+        // Поменять рисунки двух частей местами во всех ракурсах: рисунок, нормаль,
+        // кадры и свой силуэт тени. Название, слой, порядок и смещения остаются
+        // у частей. Файлы не переименовываются: следующая загрузка в часть
+        // перезаписывает тот файл, который у неё сейчас.
+        public static void SwapPartArt(ArtAssetDatabaseAsset catalog, ArtAssetDefinition asset, ArtAssetPart first, ArtAssetPart second)
+        {
+            if (first == null || second == null || first == second) return;
+            Undo.RecordObject(catalog, "Поменять рисунки частей");
+            foreach (ArtAssetView view in ArtAssetLabels.Views)
+            {
+                ArtAssetPartView a = first.View(view), b = second.View(view);
+                (a.Sprite, b.Sprite) = (b.Sprite, a.Sprite);
+                (a.NormalMap, b.NormalMap) = (b.NormalMap, a.NormalMap);
+                (a.ShadowSprite, b.ShadowSprite) = (b.ShadowSprite, a.ShadowSprite);
+                (a.Frames, b.Frames) = (b.Frames, a.Frames);
+                // Листы кадров названы по части — собираются заново под новым владельцем.
+                ArtAssetSheets.Clear(a);
+                ArtAssetSheets.Clear(b);
+            }
+            Changed(catalog);
+            ArtAssetSheets.Refresh(catalog, asset);
+        }
+
+        // Сделать часть основой: она встаёт первой, смещения остальных частей
+        // и опора ракурсов пересчитываются от её рисунка — на месте ничего не
+        // сдвигается.
+        public static void MakeMainPart(ArtAssetDatabaseAsset catalog, ArtAssetDefinition asset, ArtAssetPart part)
+        {
+            int index = asset.Parts.IndexOf(part);
+            if (index <= 0) return;
+            Undo.RecordObject(catalog, "Сделать часть основой");
+            ArtAssetPart old = asset.MainPart;
+            float ppu = asset.SafePixelsPerUnit;
+            foreach (ArtAssetView view in ArtAssetLabels.Views)
+            {
+                Vector2 shift = part.View(view).Offset;
+                Sprite oldSprite = old.FindView(view)?.Sprite, newSprite = part.FindView(view)?.Sprite;
+                if (oldSprite != null && newSprite != null)
+                {
+                    // Опора — та же точка мира, в долях нового рисунка.
+                    ArtAssetViewSettings settings = asset.Settings(view);
+                    Vector2 oldSize = oldSprite.rect.size / ppu, newSize = newSprite.rect.size / ppu;
+                    Vector2 point = Vector2.Scale(settings.Pivot, oldSize) - shift;
+                    settings.Pivot = new Vector2(point.x / Mathf.Max(.0001f, newSize.x), point.y / Mathf.Max(.0001f, newSize.y));
+                }
+                foreach (ArtAssetPart item in asset.Parts)
+                    if (item != null && item != old) item.View(view).Offset -= shift;
+                old.View(view).Offset = -shift;
+                part.View(view).Offset = Vector2.zero;
+            }
+            asset.Parts.RemoveAt(index);
+            asset.Parts.Insert(0, part);
+            foreach (ArtAssetPart item in asset.Parts)
+                if (item != null)
+                    foreach (ArtAssetView view in ArtAssetLabels.Views)
+                        if (item.FindView(view) != null) ArtAssetSheets.Clear(item.View(view));
+            Changed(catalog);
+            ArtAssetSheets.Refresh(catalog, asset);
         }
 
         // Лист кадров ассета, которому принадлежит часть, — по новым кадрам.

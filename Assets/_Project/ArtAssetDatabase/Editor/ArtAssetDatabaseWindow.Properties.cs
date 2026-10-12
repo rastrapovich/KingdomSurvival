@@ -431,7 +431,9 @@ namespace KingdomSurvival.ArtAssets.Editor
         private void BuildPartProperties(ArtAssetDefinition asset, ArtAssetView view)
         {
             Section("Части объекта · " + asset.Parts.Count, asset.Parts.Count > 1, "parts");
-            Note("Обычному предмету хватает основы. Дому — «Основа» и «Крыша», дереву — «Ствол» и «Крона»: части меняют ракурс вместе и ставятся в место одним ассетом.");
+            Note("Обычному предмету хватает основы. Дому — «Основа» и «Крыша», дереву — «Ствол» и «Крона»: части меняют ракурс вместе и ставятся в место одним ассетом.",
+                "Рисунки загружаются в выбранную часть (●): кнопками ниже, перетаскиванием в ячейки ракурсов или в предпросмотр карточки. " +
+                "Попало не туда — «Поменять рисунки с…» переносит их в другую часть.");
             VisualElement list = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap } };
             for (int i = 0; i < asset.Parts.Count; i++)
             {
@@ -448,6 +450,14 @@ namespace KingdomSurvival.ArtAssets.Editor
             cardPart = Mathf.Clamp(cardPart, 0, asset.Parts.Count - 1);
             ArtAssetPart part = asset.Parts[cardPart];
             if (part == null) { EndSection(); return; }
+            string partTitle = "«" + part.Name + "»" + (cardPart == 0 ? " (основа)" : "");
+            Row(("Файл в " + partTitle + "…", () => LoadFileInto(asset, part)), ("Папку в " + partTitle + "…", () => LoadFolderInto(asset, part)));
+            if (asset.Parts.Count > 1)
+            {
+                List<(string, Action)> actions = new List<(string, Action)> { ("Поменять рисунки с…", () => SwapPartMenu(asset, part)) };
+                if (cardPart > 0) actions.Add(("Сделать основой", () => MakeMainPart(asset, part)));
+                Row(actions.ToArray());
+            }
             TextProperty("Название части", part.Name, value => part.Name = string.IsNullOrWhiteSpace(value) ? part.Name : value.Trim());
             ChoiceProperty("Слой", ArtAssetLabels.Layers, ArtAssetLabels.LayerTitle, part.Layer, value => part.Layer = value);
             if (part.Layer == ArtAssetLayer.Foreground)
@@ -543,6 +553,67 @@ namespace KingdomSurvival.ArtAssets.Editor
             BuildModeBar();
             BuildProperties();
             status.text = "Часть «" + name + "» добавлена. Перетащите её рисунки в ячейки ракурсов.";
+        }
+
+        // Один PNG в выбранную часть: ракурс и нормаль — по имени файла, без
+        // ракурса в имени — в выбранную ячейку карточки.
+        private void LoadFileInto(ArtAssetDefinition asset, ArtAssetPart part)
+        {
+            string path = EditorUtility.OpenFilePanel("PNG в часть «" + part.Name + "» · " + asset.Name, LastFolder, "png");
+            if (string.IsNullOrEmpty(path)) return;
+            LastFolder = Path.GetDirectoryName(path) ?? string.Empty;
+            bool known = ArtAssetImportParser.Classify(new List<string> { Path.GetFileName(path) }, asset.Name, out _, out ArtAssetView view, out _,
+                out ArtAssetFileKind kind, out _);
+            bool normal = known ? kind == ArtAssetFileKind.Normal : LooksLikeNormal(path);
+            AssignSingle(asset, part, known ? view : cardView, path, null, normal ? ArtAssetFileKind.Normal : ArtAssetFileKind.Color);
+            status.text += " Часть: «" + part.Name + "».";
+        }
+
+        // Папка (ракурсы, кадры, нормали) в выбранную часть; часть можно
+        // сменить в сводке перед загрузкой.
+        private void LoadFolderInto(ArtAssetDefinition asset, ArtAssetPart part)
+        {
+            string folder = EditorUtility.OpenFolderPanel("Папка рисунков → часть «" + part.Name + "» · " + asset.Name, LastFolder, "");
+            if (string.IsNullOrEmpty(folder)) return;
+            LastFolder = Path.GetDirectoryName(folder) ?? string.Empty;
+            ImportPaths(new List<string> { folder }, asset, cardView, null, part);
+        }
+
+        private void SwapPartMenu(ArtAssetDefinition asset, ArtAssetPart part)
+        {
+            GenericMenu menu = new GenericMenu();
+            for (int i = 0; i < asset.Parts.Count; i++)
+            {
+                ArtAssetPart other = asset.Parts[i];
+                if (other == null || other == part) continue;
+                int index = i;
+                menu.AddItem(new GUIContent("«" + other.Name + "»" + (i == 0 ? " (основа)" : "")), false, () =>
+                {
+                    ArtAssetImporter.SwapPartArt(catalog, asset, part, other);
+                    saveAt = EditorApplication.timeSinceStartup + .3;
+                    cardPart = index;
+                    status.text = "Рисунки «" + part.Name + "» и «" + other.Name + "» поменялись местами (все ракурсы, кадры, нормали). " +
+                                  "Названия, слои и смещения остались у частей — проверьте смещение инструментом «Сдвиг части».";
+                    litDirty = true;
+                    visibleDirty = true;
+                    BuildProperties();
+                    center?.MarkDirtyRepaint();
+                });
+            }
+            menu.ShowAsContext();
+        }
+
+        private void MakeMainPart(ArtAssetDefinition asset, ArtAssetPart part)
+        {
+            string old = asset.MainPart.Name;
+            ArtAssetImporter.MakeMainPart(catalog, asset, part);
+            saveAt = EditorApplication.timeSinceStartup + .3;
+            cardPart = 0;
+            status.text = "«" + part.Name + "» теперь основа; «" + old + "» — обычная часть. Смещения частей и опора ракурсов пересчитаны от нового рисунка основы.";
+            litDirty = true;
+            visibleDirty = true;
+            BuildProperties();
+            center?.MarkDirtyRepaint();
         }
 
         private void BuildLightProperties()

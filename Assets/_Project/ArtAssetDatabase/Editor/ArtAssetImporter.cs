@@ -178,9 +178,16 @@ namespace KingdomSurvival.ArtAssets.Editor
             List<ArtAssetFrame> previous = view.Frames ?? new List<ArtAssetFrame>();
             List<ArtAssetFrame> frames = new List<ArtAssetFrame>();
             Vector2Int firstSize = view.Sprite != null ? SpriteNormalMaps.SourceSize(view.Sprite.texture) : Vector2Int.zero;
-            for (int i = 0; i < slot.Frames.Count; i++)
+            List<ArtAssetImportFrame> sources = slot.Frames;
+            // Последний кадр рендера петли повторяет первый — без него стык не запинается.
+            if (ArtAssetLoopSeam.LastRepeatsFirst(new[] { slot.ColorPath }.Concat(slot.Frames.Select(frame => frame.ColorPath)).ToList()))
             {
-                ArtAssetImportFrame source = slot.Frames[i];
+                sources = slot.Frames.Take(slot.Frames.Count - 1).ToList();
+                warnings.Add(asset.Name + " · " + ArtAssetLabels.ViewTitle(slot.View) + ": последний кадр повторяет первый (стык петли) — не загружен, иначе анимация запинается.");
+            }
+            for (int i = 0; i < sources.Count; i++)
+            {
+                ArtAssetImportFrame source = sources[i];
                 ArtAssetFrame current = i < previous.Count ? previous[i] : null;
                 int number = i + 1;
                 string where = asset.Name + " · " + ArtAssetLabels.ViewTitle(slot.View) + " · кадр " + (number + 1);
@@ -554,6 +561,30 @@ namespace KingdomSurvival.ArtAssets.Editor
             ArtAssetSheets.Clear(part.View(view));
             Changed(catalog);
             RefreshOwner(catalog, part);
+        }
+
+        // Уже загруженные кадры: убрать последний, если он повторяет первый
+        // (стык петли). Файлы не удаляются. Возвращает число исправленных ракурсов.
+        public static int TrimLoopSeams(ArtAssetDatabaseAsset catalog, ArtAssetDefinition asset, List<string> fixedViews = null)
+        {
+            int trimmed = 0;
+            foreach (ArtAssetPart part in asset.Parts.Where(item => item != null))
+                foreach (ArtAssetView view in ArtAssetLabels.Views)
+                {
+                    ArtAssetPartView slot = part.FindView(view);
+                    if (slot == null || slot.FrameCount < 4) continue;
+                    List<string> paths = slot.FrameSprites().Select(sprite => AssetDatabase.GetAssetPath(sprite.texture)).ToList();
+                    if (!ArtAssetLoopSeam.LastRepeatsFirst(paths)) continue;
+                    if (trimmed == 0) Undo.RecordObject(catalog, "Убрать повтор первого кадра");
+                    int last = slot.Frames.FindLastIndex(frame => frame?.Sprite != null);
+                    slot.Frames.RemoveAt(last);
+                    fixedViews?.Add(ArtAssetLabels.ViewTitle(view) + (part == asset.MainPart ? "" : " · " + part.Name));
+                    trimmed++;
+                }
+            if (trimmed == 0) return 0;
+            Changed(catalog);
+            ArtAssetSheets.Refresh(catalog, asset);
+            return trimmed;
         }
 
         // Поменять рисунки двух частей местами во всех ракурсах: рисунок, нормаль,

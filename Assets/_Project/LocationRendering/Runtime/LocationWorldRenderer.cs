@@ -50,6 +50,9 @@ namespace KingdomSurvival.LocationRendering
             public bool Bends;
             // Темп анимации экземпляра (раскидка вразнобой); 1 — как у ассета.
             public float AnimationSpeed = 1;
+            // Просвечивание: текущая непрозрачность рисунков и их исходная альфа.
+            public float SeeThroughLevel = 1;
+            public readonly List<float> BaseAlpha = new List<float>();
         }
 
         private sealed class Actor
@@ -389,6 +392,7 @@ namespace KingdomSurvival.LocationRendering
                 }
                 image.sortingOrder = LocationVisualGeometry.SortOrder(part.Band, anchor.localPosition.y, part.OrderOffset);
                 entry.Images.Add(image);
+                entry.BaseAlpha.Add(image.color.a);
                 entry.Parts.Add(part);
                 if (i == 0) entry.Image = image;
                 // Тень от солнца — силуэт, от огня — контур (каждая своей галочкой).
@@ -447,6 +451,8 @@ namespace KingdomSurvival.LocationRendering
                 Destroy(child.gameObject);
             }
             entry.Images.Clear();
+            entry.BaseAlpha.Clear();
+            entry.SeeThroughLevel = 1;
             entry.RadialShadows.Clear();
             entry.Parts.Clear();
             entry.Image = null;
@@ -457,6 +463,7 @@ namespace KingdomSurvival.LocationRendering
             Hour = Mathf.Repeat(hours, 24);
             Seconds = seconds;
             AnimateObjects();
+            UpdateSeeThrough();
             AnimateScatter();
             StepVegetationByClock(seconds);
             ApplyLighting();

@@ -62,6 +62,65 @@ namespace KingdomSurvival.LocationRendering
             return result;
         }
 
+        private static readonly Dictionary<Sprite, Rect> rects = new Dictionary<Sprite, Rect>();
+
+        // Рамка непрозрачного рисунка — единицы спрайта от его опоры. Альфу
+        // не прочитать — рамка всего спрайта.
+        public static Rect OpaqueRect(Sprite sprite)
+        {
+            if (sprite == null) return Rect.zero;
+            if (rects.TryGetValue(sprite, out Rect cached)) return cached;
+            Vector2 min = new Vector2(float.PositiveInfinity, float.PositiveInfinity), max = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+            foreach (Vector2[] loop in Of(sprite))
+                foreach (Vector2 point in loop)
+                {
+                    min = Vector2.Min(min, point);
+                    max = Vector2.Max(max, point);
+                }
+            Bounds bounds = sprite.bounds;
+            Rect result = float.IsInfinity(min.x) ? new Rect(bounds.min, bounds.size) : Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+            if (rects.Count > 4096) rects.Clear();
+            rects[sprite] = result;
+            return result;
+        }
+
+        // Непрозрачен ли рисунок в точке local (единицы спрайта от опоры): по
+        // кэшированным контурам (чёт-нечет — дырки учитываются). Альфу не
+        // прочитать — внутри рамки спрайта.
+        public static bool IsOpaqueAt(Sprite sprite, Vector2 local)
+        {
+            if (sprite == null) return false;
+            List<Vector2[]> loops = Of(sprite);
+            if (loops.Count == 0) return sprite.bounds.Contains(new Vector3(local.x, local.y, sprite.bounds.center.z));
+            bool inside = false;
+            foreach (Vector2[] loop in loops)
+                for (int i = 0, j = loop.Length - 1; i < loop.Length; j = i++)
+                {
+                    Vector2 a = loop[i], b = loop[j];
+                    if ((a.y > local.y) != (b.y > local.y) && local.x < (b.x - a.x) * (local.y - a.y) / (b.y - a.y) + a.x)
+                        inside = !inside;
+                }
+            return inside;
+        }
+
+        private static readonly Dictionary<Sprite, float> bottoms = new Dictionary<Sprite, float>();
+
+        // Низ непрозрачного рисунка — единицы спрайта от его опоры (Y вверх).
+        // Альфу не прочитать — NaN.
+        public static float OpaqueBottom(Sprite sprite)
+        {
+            if (sprite == null) return float.NaN;
+            if (bottoms.TryGetValue(sprite, out float cached)) return cached;
+            float bottom = float.PositiveInfinity;
+            foreach (Vector2[] loop in Of(sprite))
+                foreach (Vector2 point in loop)
+                    bottom = Mathf.Min(bottom, point.y);
+            float result = float.IsInfinity(bottom) ? float.NaN : bottom;
+            if (bottoms.Count > 4096) bottoms.Clear();
+            bottoms[sprite] = result;
+            return result;
+        }
+
         private static List<Vector2[]> Build(Sprite sprite, float band)
         {
             List<Vector2[]> result = new List<Vector2[]>();

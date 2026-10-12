@@ -242,6 +242,11 @@ namespace KingdomSurvival.ArtAssets.Editor
                 "Свет огня не проходит сквозь основание предмета на земле (прямоугольник основания). Тени по рисунку — галочки " +
                 "«Тень от солнца» и «Тень от огня» у части ниже.");
             FloatProperty("Длина тени (множитель)", asset.ShadowLength, value => asset.ShadowLength = Mathf.Max(0, value));
+            BoolProperty("Просвечивает, когда за ним человек", asset.SeeThrough, value => asset.SeeThrough = value,
+                "Для деревьев, домов и других высоких предметов: пока герой, спутник или враг стоит за предметом и рисунок его закрывает, " +
+                "предмет плавно становится полупрозрачным, отошёл — снова плотный. Тень и свет не меняются.");
+            FloatProperty("Непрозрачность при просвечивании", asset.SeeThroughAlpha, value => asset.SeeThroughAlpha = Mathf.Clamp01(value),
+                "0 — предмет исчезает целиком, 1 — не просвечивает. Обычно 0,3–0,5.");
             BoolProperty("Освещается солнцем (смена суток)", asset.LitBySun, value => asset.LitBySun = value,
                 "Выключено — рисунок не темнеет ночью и не меняет цвет со временем суток: всегда как днём (светящийся гриб, огонь, вывеска). " +
                 "На слоях «Земля» и «Деталь земли» не действует: детали земли освещаются как земля под ними.");
@@ -519,6 +524,17 @@ namespace KingdomSurvival.ArtAssets.Editor
                 int built = ArtAssetSheets.Refresh(catalog, asset, warnings, stale == 0);
                 litDirty = true;
                 status.text = "Листов собрано: " + built + "." + (warnings.Count > 0 ? " ⚠ " + string.Join(" ", warnings.Take(3)) : "");
+                BuildProperties();
+            }));
+            Row(("Проверить стык петли", () =>
+            {
+                List<string> fixedViews = new List<string>();
+                int trimmed = ArtAssetImporter.TrimLoopSeams(catalog, asset, fixedViews);
+                status.text = trimmed == 0
+                    ? "Стык петли чистый: последний кадр нигде не повторяет первый."
+                    : "Убран последний кадр, повторявший первый (анимация запиналась на стыке): " + string.Join(", ", fixedViews) + ". Файлы не удалены.";
+                litDirty = true;
+                saveAt = EditorApplication.timeSinceStartup + .3;
                 BuildProperties();
             }));
             FloatProperty("Кадров в секунду", asset.FramesPerSecond, value => asset.FramesPerSecond = Mathf.Clamp(value, .1f, 60),

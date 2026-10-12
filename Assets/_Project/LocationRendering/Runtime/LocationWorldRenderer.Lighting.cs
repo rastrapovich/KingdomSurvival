@@ -51,6 +51,10 @@ namespace KingdomSurvival.LocationRendering
             public float ContourBand;
             // Что уже записано в блок свойств тени: без изменений — не трогать (сотни предметов за кадр).
             public bool ShadowShown;
+            // Насколько линия земли тени ниже опоры (единицы мира, ≥ 0): у
+            // камня опора — в середине основания, а низ рисунка — его передний
+            // край на земле. NaN — ещё не измерено.
+            public float GroundDrop = float.NaN;
             public Sprite ShadowSprite;
             public Vector2 ShadowVector;
             public float ShadowGroundY, ShadowOpacity, ShadowSoftness;
@@ -996,7 +1000,7 @@ namespace KingdomSurvival.LocationRendering
                 }
             }
             // Ничего не изменилось с прошлого кадра — блок свойств прежний.
-            float groundY = caster.Anchor.position.y;
+            float groundY = caster.Anchor.position.y - ShadowGroundDrop(caster);
             if (caster.ShadowShown && caster.ShadowSprite == shadow.sprite && (caster.ShadowVector - vector).sqrMagnitude < 1e-8f &&
                 Mathf.Abs(caster.ShadowGroundY - groundY) < 1e-5f && Mathf.Abs(caster.ShadowOpacity - opacity) < 1e-4f &&
                 Mathf.Abs(caster.ShadowSoftness - softness) < 1e-4f && caster.ShadowColor == color)
@@ -1019,6 +1023,25 @@ namespace KingdomSurvival.LocationRendering
             shadowBlock.SetFloat(BlurId, Mathf.Clamp01(softness) * .05f * (uvRect.w - uvRect.y));
             shadowBlock.SetVector(UVRectId, uvRect);
             shadow.SetPropertyBlock(shadowBlock);
+        }
+
+        // Тень-силуэт ложится от линии земли: часть рисунка ниже неё
+        // отсекается. Опора предмета может стоять выше низа рисунка (камень:
+        // опора в середине основания) — тогда без поправки тень давала бы
+        // только верхняя половина. Линия — по нижнему краю непрозрачного
+        // первого рисунка, если он ниже опоры; измеряется один раз (кадры
+        // ветра тень не дёргают). У людей, своего силуэта тени и нечитаемой
+        // альфы — опора, как раньше.
+        private static float ShadowGroundDrop(Caster caster)
+        {
+            if (!float.IsNaN(caster.GroundDrop)) return caster.GroundDrop;
+            caster.GroundDrop = 0;
+            if (caster.People || caster.Override != null || caster.Source == null || caster.Source.sprite == null) return 0;
+            float bottom = LocationAlphaContours.OpaqueBottom(caster.Source.sprite);
+            if (float.IsNaN(bottom)) return 0;
+            Vector3 local = caster.Anchor.InverseTransformPoint(caster.Source.transform.TransformPoint(new Vector3(0, bottom, 0)));
+            caster.GroundDrop = Mathf.Max(0, -local.y) * Mathf.Abs(caster.Anchor.lossyScale.y);
+            return caster.GroundDrop;
         }
 
         // ------------------------------------------------------------------

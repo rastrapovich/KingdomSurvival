@@ -310,6 +310,29 @@ namespace KingdomSurvival.ArtAssets.Tests
             Assert.That(fixedAsset.ViewCount, Is.EqualTo(1));
         }
 
+        // Рендер петли «LOOP 60» кончается кадром, повторяющим первый: он не
+        // загружается (иначе на стыке один рисунок держится два кадра); у уже
+        // загруженного — убирается кнопкой «Проверить стык петли».
+        [Test]
+        public void LoopRender_LastFrameRepeatingFirst_IsDropped()
+        {
+            float[] greens = { .3f, .45f, .6f, .75f, .302f };
+            for (int i = 0; i < greens.Length; i++)
+                Png("Крона/Front/" + i.ToString("000") + ".png", 40, 60, new Color(.1f, greens[i], .1f, 1));
+            ArtAssetImportResult result = ArtAssetImporter.Import(catalog, ArtAssetImportParser.ParsePaths(new[] { source + "/Крона" }), null, false);
+            Assert.That(result.Errors, Is.Empty, string.Join("; ", result.Errors));
+            ArtAssetPartView slot = catalog.assets.Single().MainPart.FindView(ArtAssetView.Front);
+            Assert.That(slot.FrameCount, Is.EqualTo(4), "Кадр замыкания петли не загружен.");
+            Assert.That(result.Warnings.Any(warning => warning.Contains("стык петли")), Is.True);
+
+            // Уже загруженный повтор: добавить кадр замыкания вручную и убрать проверкой.
+            Sprite first = slot.Sprite;
+            slot.Frames.Add(new ArtAssetFrame { Sprite = first });
+            Assert.That(ArtAssetImporter.TrimLoopSeams(catalog, catalog.assets.Single()), Is.EqualTo(1));
+            Assert.That(slot.FrameCount, Is.EqualTo(4));
+            Assert.That(ArtAssetImporter.TrimLoopSeams(catalog, catalog.assets.Single()), Is.EqualTo(0), "Обычная петля не трогается.");
+        }
+
         // Кадры анимации — листом, как в Базе анимаций: страница с кадрами и
         // страница нормалей той же раскладки (вторая текстура); места берут
         // анимацию из листа; снятые кадры — лист убран.

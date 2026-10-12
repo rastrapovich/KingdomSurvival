@@ -30,6 +30,9 @@ public partial class PrototypeUIController
     private Button localCameraZoomInButton;
     private Button localCameraZoomOutButton;
     private Button localCameraResetButton;
+    private Button localCameraGridButton;
+    // Сетка гексов места вне боя (в бою поле рисует свою).
+    private bool localHexGridShown;
 
     private bool LocalCameraControlsActive => IsLocalScreenOpen && !HasBlockingModalWork() && !IsNarrativeDialogueActive;
 
@@ -56,6 +59,8 @@ public partial class PrototypeUIController
         localCameraPanel.Add(localCameraZoomInButton);
         localCameraPanel.Add(localCameraResetButton);
         localCameraPanel.Add(localCameraLockButton);
+        localCameraGridButton = CameraButton("СЕТКА", "Показать или скрыть гексы места (клавиша G)", ToggleLocalHexGrid);
+        localCameraPanel.Add(localCameraGridButton);
         localScreen.Add(localCameraPanel);
         RefreshLocalCameraPanel();
     }
@@ -84,6 +89,15 @@ public partial class PrototypeUIController
         localCameraZoomInButton.SetEnabled(!localCameraLocked);
         localCameraZoomOutButton.SetEnabled(!localCameraLocked);
         localCameraResetButton.SetEnabled(!localCameraLocked);
+        localCameraGridButton.EnableInClassList("local-camera-lock--on", localHexGridShown);
+        if (localRenderer != null) localRenderer.HexGridVisible = localHexGridShown && !IsLocalBattleRunning;
+    }
+
+    private void ToggleLocalHexGrid()
+    {
+        localHexGridShown = !localHexGridShown;
+        RefreshLocalCameraPanel();
+        ShowLocalNotice(localHexGridShown ? "Сетка гексов показана (G — скрыть)." : "Сетка гексов скрыта.");
     }
 
     private void ToggleLocalCameraLock()
@@ -146,7 +160,9 @@ public partial class PrototypeUIController
             return;
         if (interfaceRoot?.panel?.focusController?.focusedElement is TextField)
             return;
-        if (keyboard.fKey.wasPressedThisFrame)
+        if (keyboard.gKey.wasPressedThisFrame)
+            ToggleLocalHexGrid();
+        else if (keyboard.fKey.wasPressedThisFrame)
             ToggleLocalCameraLock();
         else if (keyboard.equalsKey.wasPressedThisFrame || keyboard.numpadPlusKey.wasPressedThisFrame)
             ZoomLocalCamera(LocalZoomStep);

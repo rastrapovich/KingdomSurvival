@@ -403,7 +403,8 @@ namespace KingdomSurvival.LocationRendering
             if (!entry.Bends || entry.Images.Count == 0) return null;
             float height = 0;
             foreach (LocationResolvedPart part in entry.Parts)
-                if (part != null) height = Mathf.Max(height, part.Height * (1 - Mathf.Clamp01(part.Pivot.y)));
+                // До верха непрозрачного рисунка, а не до края холста PNG.
+                if (part != null && part.Sprite != null) height = Mathf.Max(height, part.Height * LocationScatterCarpet.Above(part));
             if (height <= 1e-4f) return null;
             Vector4[] shapes = new Vector4[entry.Images.Count];
             Vector3 anchor = entry.Anchor.position;

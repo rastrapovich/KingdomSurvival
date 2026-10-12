@@ -226,7 +226,8 @@ namespace KingdomSurvival.LocationRendering
             {
                 LocationScatterCarpet carpet = renderer.ScatterCarpet(layer.Id);
                 Assert.That(carpet.BendingCount, Is.EqualTo(3), "Камень не гнётся — без лишних вершин.");
-                Assert.That(carpet.VertexCount, Is.EqualTo(3 * (LocationScatterCarpet.BendRows + 2) * 2 + 4), "Ряды вершин — только у гнущихся.");
+                Assert.That(carpet.VertexCount - 4, Is.GreaterThanOrEqualTo(3 * (LocationScatterCarpet.BendRows + 2) * 2), "Ряды вершин — только у гнущихся.");
+                Assert.That((carpet.VertexCount - 4) % 3, Is.EqualTo(0), "Камень — прежние четыре вершины.");
                 LocationScatterCarpet.BendingPlant Plant(LocationScatterInstance instance) => carpet.BendingPlants.First(item => item.Key == instance.Key);
                 Vector3[] leftBase = carpet.QuadPositions(Plant(left).Quads[0]);
                 Vector3[] rightBase = carpet.QuadPositions(Plant(right).Quads[0]);
@@ -539,6 +540,79 @@ namespace KingdomSurvival.LocationRendering
                 Assert.That(blockers.Count, Is.EqualTo(mask.Rects().Count), "По прямоугольнику на полосу клеток маски.");
                 float area = blockers.Sum(child => child.localScale.x * child.localScale.y);
                 Assert.That(area, Is.EqualTo(mask.Count * .01f).Within(1e-3f), "Свет закрыт ровно нарисованной опорой, не габаритом.");
+            }
+        }
+
+        // Трава на высоком холсте PNG (сверху пусто): высота растения — по
+        // непрозрачной части, а не по холсту, иначе вся видимая трава попадает
+        // в закреплённую нижнюю часть и не гнётся.
+        [Test]
+        public void TallTransparentCanvas_BendsByOpaqueGrass()
+        {
+            Texture2D texture = new Texture2D(16, 128, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[16 * 128];
+            for (int y = 0; y < 128; y++)
+                for (int x = 0; x < 16; x++)
+                    pixels[y * 16 + x] = y < 32 ? Color.green : Color.clear;
+            texture.SetPixels(pixels);
+            texture.Apply();
+            owned.Add(texture);
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 16, 128), new Vector2(.5f, 0), 100);
+            owned.Add(sprite);
+            Assert.That(LocationAlphaContours.OpaqueTop(sprite), Is.EqualTo(.25f).Within(.04f), "Трава — нижняя четверть холста.");
+            ArtAssetDefinition asset = new ArtAssetDefinition { Id = "tall", Name = "tall", PixelsPerUnit = 40 };
+            asset.MainPart.View(ArtAssetView.Front).Sprite = sprite;
+            asset.Settings(ArtAssetView.Front).Pivot = new Vector2(.5f, 0);
+            catalog.assets.Add(asset);
+            catalog.MarkChanged();
+            foreach (LocationScatterMode mode in new[] { LocationScatterMode.Carpet, LocationScatterMode.Objects })
+            {
+                LocalLocationDefinition location = Location();
+                LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = location.Id, UseWorldLighting = false };
+                LocationScatterLayer layer = Layer(mode, "tall");
+                layer.Band = LocationVisualBand.World;
+                LocationScatterInstance tuft = Put(layer, "tall", new Vector2(520, 500));
+                visual.ScatterLayers.Add(layer);
+                using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null) { VegetationReacts = true })
+                {
+                    renderer.SetActors(new[] { Actor("hero", new Vector2(500, 500)) }, 0);
+                    Run(renderer, .5f);
+                    if (mode == LocationScatterMode.Carpet)
+                    {
+                        LocationScatterCarpet carpet = renderer.ScatterCarpet(layer.Id);
+                        LocationScatterCarpet.BendingPlant plant = carpet.BendingPlants.First();
+                        Assert.That(plant.Height, Is.EqualTo(3.2f * .25f).Within(.15f), "Высота растения — по траве, не по холсту.");
+                        Vector3[] positions = carpet.QuadPositions(plant.Quads[0]);
+                        // Ряд на верхушке травы (последний ряд — край пустого холста).
+                        Assert.That(positions[positions.Length - 3].x - positions[1].x, Is.GreaterThan(.05f), "Верхушка травы гнётся (правый край верха травы против правого края опоры).");
+                    }
+                    else
+                    {
+                        SpriteRenderer image = renderer.ScatterImages(layer.Id, tuft.Key)[0];
+                        MaterialPropertyBlock block = new MaterialPropertyBlock();
+                        image.GetPropertyBlock(block);
+                        Vector4 shape = block.GetVector("_KsBendShape");
+                        float grassTop = (image.sprite.bounds.min.y + image.sprite.bounds.size.y * .25f - shape.x) * shape.y;
+                        Assert.That(grassTop, Is.EqualTo(1).Within(.15f), "Верх травы — верх растения для шейдера.");
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void HexGrid_BuildsWithoutWalls_AndToggles()
+        {
+            LocalLocationDefinition location = Location();
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, new LocationVisualDefinition { LocationId = location.Id }, null))
+            {
+                Assert.That(renderer.HexGridVisible, Is.False, "По умолчанию сетки нет.");
+                renderer.HexGridVisible = true;
+                MeshFilter grid = renderer.Root.GetComponentsInChildren<MeshFilter>(true).First(item => item.name == "Сетка гексов");
+                Assert.That(grid.sharedMesh.vertexCount, Is.GreaterThan(100));
+                Assert.That(grid.GetComponent<MeshRenderer>().sortingOrder, Is.LessThan(LocationWorldRenderer.UpperSortingFrom), "Под предметами и людьми.");
+                renderer.HexGridVisible = false;
+                Assert.That(renderer.HexGridVisible, Is.False);
+                Assert.That(grid.gameObject.activeSelf, Is.False);
             }
         }
 

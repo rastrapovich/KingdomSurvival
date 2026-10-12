@@ -185,7 +185,7 @@ namespace KingdomSurvival.LocationRendering
                 float plantHeight = 0;
                 if (bends)
                     foreach (LocationResolvedPart part in resolved.Parts)
-                        if (part.Sprite != null) plantHeight = Mathf.Max(plantHeight, part.Height * Scale(instance) * (1 - Mathf.Clamp01(part.Pivot.y)));
+                        if (part.Sprite != null) plantHeight = Mathf.Max(plantHeight, part.Height * Scale(instance) * Above(part));
                 bends &= plantHeight > 1e-4f;
                 for (int p = 0; p < resolved.Parts.Count; p++)
                 {
@@ -202,7 +202,7 @@ namespace KingdomSurvival.LocationRendering
                         // Темп — по ассету и фазе, не по части: части одного рисунка идут вместе.
                         group.Speed = layer.AnimationSpeed(layer.Id + "|" + baseKey + "|" + bucket);
                         group.Bends = bends;
-                        group.Rows = bends ? RowsFor(part.Pivot.y) : FlatRows;
+                        group.Rows = bends ? RowsFor(part.Pivot.y, Mathf.Clamp01(part.Pivot.y) + Above(part)) : FlatRows;
                         byKey[key] = group;
                     }
                     group.Quads.Add(QuadOf(instance, part, anchor, plantHeight));
@@ -215,15 +215,26 @@ namespace KingdomSurvival.LocationRendering
 
         private static float Scale(LocationScatterInstance instance) => instance.Scale > 0 ? instance.Scale : 1;
 
-        // Ряды гнущегося рисунка: низ, опора и равные доли выше опоры.
-        private static float[] RowsFor(float pivotY)
+        // Высота растения над опорой — доля холста до верха непрозрачного
+        // рисунка (а не до края PNG): у травы на высоком холсте иначе вся
+        // видимая трава оказывается в «закреплённой» нижней части.
+        internal static float Above(LocationResolvedPart part)
+        {
+            float pivot = Mathf.Clamp01(part.Pivot.y);
+            return Mathf.Max(.05f, LocationAlphaContours.OpaqueTop(part.Sprite) - pivot);
+        }
+
+        // Ряды гнущегося рисунка: низ, опора, равные доли до верха травы и край холста.
+        private static float[] RowsFor(float pivotY, float top)
         {
             float pivot = Mathf.Clamp01(pivotY);
             if (pivot >= .999f) return FlatRows;
-            List<float> rows = new List<float>(BendRows + 2);
+            top = Mathf.Clamp(top, pivot, 1);
+            List<float> rows = new List<float>(BendRows + 3);
             if (pivot > .001f) rows.Add(0);
             rows.Add(pivot);
-            for (int i = 1; i <= BendRows; i++) rows.Add(pivot + (1 - pivot) * i / BendRows);
+            for (int i = 1; i <= BendRows; i++) rows.Add(pivot + (top - pivot) * i / BendRows);
+            if (top < .999f) rows.Add(1);
             return rows.ToArray();
         }
 

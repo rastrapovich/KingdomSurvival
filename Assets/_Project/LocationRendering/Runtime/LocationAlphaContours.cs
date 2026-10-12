@@ -42,6 +42,26 @@ namespace KingdomSurvival.LocationRendering
             return result;
         }
 
+        private static readonly Dictionary<Sprite, float> tops = new Dictionary<Sprite, float>();
+
+        // Верх непрозрачного рисунка — доля высоты холста снизу (0..1): у
+        // травы на высоком PNG сама трава может занимать только низ холста.
+        // Альфу не прочитать — 1 (весь холст).
+        public static float OpaqueTop(Sprite sprite)
+        {
+            if (sprite == null) return 1;
+            if (tops.TryGetValue(sprite, out float cached)) return cached;
+            float top = float.NegativeInfinity;
+            foreach (Vector2[] loop in Of(sprite))
+                foreach (Vector2 point in loop)
+                    top = Mathf.Max(top, point.y);
+            Bounds bounds = sprite.bounds;
+            float result = float.IsInfinity(top) || bounds.size.y <= 1e-6f ? 1 : Mathf.Clamp01((top - bounds.min.y) / bounds.size.y);
+            if (tops.Count > 4096) tops.Clear();
+            tops[sprite] = result;
+            return result;
+        }
+
         private static List<Vector2[]> Build(Sprite sprite, float band)
         {
             List<Vector2[]> result = new List<Vector2[]>();

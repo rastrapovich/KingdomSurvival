@@ -188,6 +188,9 @@ namespace KingdomSurvival.LocationRendering
                 row.Add(button);
             }
             row.Add(new Button(() => Cycle = !Cycle) { text = "Сутки / пауза" });
+            gridButton = new Button(ToggleHexGrid) { name = "location-lighting-grid", tooltip = "Показать или скрыть гексы места (клавиша G)" };
+            row.Add(gridButton);
+            RefreshGridButton();
             row.Add(new Button(() =>
             {
 #if UNITY_EDITOR
@@ -197,12 +200,27 @@ namespace KingdomSurvival.LocationRendering
 #endif
             }) { text = "Вернуться в редактор" });
             BuildCameraPanel(bar);
-            notice = new Label("Кликните по земле. Колесо — приблизить и отдалить, F — закрепить камеру. Время теста не затрагивает кампанию.");
+            notice = new Label("Кликните по земле. Колесо — приблизить и отдалить, F — закрепить камеру, G — сетка гексов. Время теста не затрагивает кампанию.");
             notice.style.color = new Color(.75f, .77f, .72f);
             bar.Add(notice);
             heightLabel = new Label { name = "location-lighting-height" };
             heightLabel.style.color = new Color(.70f, .82f, .90f);
             bar.Add(heightLabel);
+        }
+
+        private Button gridButton;
+
+        // Сетка гексов места (кнопка и клавиша G).
+        public void ToggleHexGrid()
+        {
+            Renderer.HexGridVisible = !Renderer.HexGridVisible;
+            RefreshGridButton();
+        }
+
+        private void RefreshGridButton()
+        {
+            if (gridButton == null) return;
+            gridButton.text = Renderer.HexGridVisible ? "Сетка: вкл (G)" : "Сетка: выкл (G)";
         }
 
         private bool holding;
@@ -260,6 +278,7 @@ namespace KingdomSurvival.LocationRendering
             switch (evt.keyCode)
             {
                 case KeyCode.F: ToggleCameraLock(); break;
+                case KeyCode.G: ToggleHexGrid(); break;
                 case KeyCode.Equals: case KeyCode.Plus: case KeyCode.KeypadPlus: SetZoom(Zoom * ZoomStep); break;
                 case KeyCode.Minus: case KeyCode.KeypadMinus: SetZoom(Zoom / ZoomStep); break;
                 case KeyCode.Alpha0: case KeyCode.Keypad0: SetZoom(1); break;

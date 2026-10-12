@@ -2,6 +2,7 @@
 // Тот же спрайт, что у предмета или фигуры, ложится на землю от точки опоры:
 // чем выше точка рисунка над землёй (_GroundY), тем дальше она уходит по
 // _ShadowVector (сдвиг на единицу высоты). Края смягчаются выборкой рядом.
+// Опора выше низа рисунка — _Lift (см. вершинную программу).
 Shader "Kingdom Survival/Location Projected Shadow"
 {
     Properties
@@ -12,6 +13,7 @@ Shader "Kingdom Survival/Location Projected Shadow"
         _ShadowColor ("Shadow Color", Color) = (0, 0, 0, 0.5)
         _Blur ("Blur", Float) = 0.004
         _UVRect ("Sprite UV Rect", Vector) = (0, 0, 1, 1)
+        _Lift ("Base lift share", Float) = 0
         [HideInInspector] _Color ("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor ("RendererColor", Color) = (1,1,1,1)
     }
@@ -61,6 +63,7 @@ Shader "Kingdom Survival/Location Projected Shadow"
                 half4 _ShadowColor;
                 float _Blur;
                 float4 _UVRect;
+                float _Lift;
                 half4 _Color;
             CBUFFER_END
 
@@ -74,9 +77,21 @@ Shader "Kingdom Survival/Location Projected Shadow"
                 float3 world = TransformObjectToWorld(positionOS);
                 // Часть рисунка ниже точки опоры не прижимается к земле (полоска),
                 // а отсекается во фрагменте.
+                // _Lift — доля высоты рисунка между его низом (_GroundY) и опорой
+                // (камень: опора в середине основания). Низ прижат к земле, верх
+                // ложится туда же, куда лёг бы от опоры: одна тень, прилегающая к
+                // предмету снизу, и в полдень, и при низком солнце. 0 — от опоры.
+                // Опора поднята на заметную долю высоты (от 15 до 30 % и выше) —
+                // низкий широкий предмет (камень): почти весь рисунок — его верх,
+                // уходящий вглубь, а не высота. Тогда тень по вертикали не
+                // сплющивается: её верх идёт от верха предмета (и выше — по
+                // солнцу), а не от опоры. У деревьев и людей опора внизу — тень
+                // как от столба.
                 float height = world.y - _GroundY;
-                world.x += height * _ShadowVector.x;
-                world.y = _GroundY + height * _ShadowVector.y;
+                float rise = 1 - _Lift;
+                float depth = smoothstep(0.15, 0.3, _Lift);
+                world.x += height * rise * _ShadowVector.x;
+                world.y = _GroundY + height * (lerp(_Lift, 1, depth) + rise * _ShadowVector.y);
                 o.positionCS = TransformWorldToHClip(world);
                 o.uv = input.uv;
                 o.height = height;

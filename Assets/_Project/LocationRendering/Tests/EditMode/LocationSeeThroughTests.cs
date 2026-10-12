@@ -10,7 +10,7 @@ namespace KingdomSurvival.LocationRendering
     // «Просвечивает» плавно открывается круг вокруг человека за ним (сам
     // рисунок не прозрачен целиком) и закрывается, когда он вышел или стоит
     // впереди; без галочки ничего не меняется. Камень с опорой в середине
-    // рисунка отбрасывает две проекции силуэта — от опоры и от низа рисунка.
+    // рисунка отбрасывает одну тень от низа рисунка, поднятую до опоры.
     public sealed class LocationSeeThroughTests
     {
         private readonly List<Object> owned = new List<Object>();
@@ -90,6 +90,14 @@ namespace KingdomSurvival.LocationRendering
                 MaterialPropertyBlock block = new MaterialPropertyBlock();
                 renderer.ObjectImages("tree")[0].GetPropertyBlock(block);
                 Assert.That(block.GetVectorArray("_KsHoles")[0], Is.EqualTo(holes[0]), "Круг передан шейдеру рисунка.");
+                // Слой затемнения на рисунке тоже знает о круге (иначе в круге тёмный силуэт).
+                Transform overlay = renderer.ObjectImages("tree")[0].transform.Find("Окклюзия на предмете");
+                if (overlay != null)
+                {
+                    overlay.GetComponent<SpriteRenderer>().GetPropertyBlock(block);
+                    Assert.That(block.GetVectorArray("_KsHoles")[0], Is.EqualTo(holes[0]), "Круг передан слою затемнения.");
+                }
+                else TestContext.WriteLine("У дерева нет слоя затемнения в этом стиле теней — проверка слоя пропущена.");
 
                 // Тот же человек за камнем без галочки — камень не меняется.
                 renderer.SetActors(new[] { Actor(new Vector2(1200, 600)) }, 1);
@@ -106,7 +114,7 @@ namespace KingdomSurvival.LocationRendering
         }
 
         [Test]
-        public void StoneWithPivotInTheMiddle_CastsShadowFromPivotAndFromItsBottomEdge()
+        public void StoneWithPivotInTheMiddle_CastsOneShadowFromItsBottomEdge()
         {
             // Опора — на середине рисунка (как у камня: середина основания).
             Asset("stone", 100, 60, new Vector2(.5f, .5f));
@@ -117,15 +125,23 @@ namespace KingdomSurvival.LocationRendering
             {
                 renderer.SetTime(13, 0);
                 SpriteRenderer image = renderer.FindObject("stone");
-                float anchorY = image.transform.parent.position.y;
-                // От опоры — верх камня в полдень (короткая тень вверх).
-                Assert.That(GroundY(image, "Тень от солнца"), Is.EqualTo(anchorY).Within(1e-4f));
-                // От низа рисунка — его нижняя половина, когда солнце под углом.
-                Assert.That(GroundY(image, "Тень от солнца · от низа"), Is.EqualTo(image.bounds.min.y).Within(.05f));
+                // Одна тень: низ прижат к земле, подъём — половина высоты (опора в
+                // середине рисунка), чтобы верх тени лёг туда же, куда от опоры.
+                Assert.That(ShadowCount(image.transform.parent), Is.EqualTo(1), "Тень одна.");
+                MaterialPropertyBlock block = Block(image, "Тень от солнца");
+                Assert.That(block.GetFloat("_GroundY"), Is.EqualTo(image.bounds.min.y).Within(.05f));
+                Assert.That(block.GetFloat("_Lift"), Is.EqualTo(.5f).Within(.03f));
             }
         }
 
-        private static float GroundY(SpriteRenderer image, string name)
+        private static int ShadowCount(Transform anchor)
+        {
+            int count = 0;
+            foreach (Transform child in anchor) if (child.name.StartsWith("Тень")) count++;
+            return count;
+        }
+
+        private static MaterialPropertyBlock Block(SpriteRenderer image, string name)
         {
             Transform shadow = image.transform.parent.Find(name);
             Assert.That(shadow, Is.Not.Null, "У камня есть «" + name + "».");
@@ -133,7 +149,7 @@ namespace KingdomSurvival.LocationRendering
             Assert.That(renderer.enabled, Is.True, name);
             MaterialPropertyBlock block = new MaterialPropertyBlock();
             renderer.GetPropertyBlock(block);
-            return block.GetFloat("_GroundY");
+            return block;
         }
     }
 }

@@ -73,6 +73,25 @@ Shader "Kingdom Survival/Location Occlusion Object"
                 half4 _Color;
             CBUFFER_END
 
+            // Круги просвечивания предмета (как в Location Sprite Adjust): в круге
+            // затемнение слабеет вместе с рисунком — при нуле его нет совсем.
+            float4 _KsHoles[6];
+            float4 _KsHoleShape;
+
+            half KsHoleKeep(float2 world)
+            {
+                half keep = 1;
+                [unroll] for (int i = 0; i < 6; i++)
+                {
+                    float4 hole = _KsHoles[i];
+                    if (hole.z <= 0) continue;
+                    float d = distance(world, hole.xy) / hole.z;
+                    float inside = 1 - smoothstep(1 - max(_KsHoleShape.y, 1e-3), 1, d);
+                    keep = min(keep, lerp(1, _KsHoleShape.x, inside * saturate(hole.w)));
+                }
+                return keep;
+            }
+
             Varyings OcclusionVertex(Attributes input)
             {
                 Varyings o = (Varyings)0;
@@ -138,7 +157,7 @@ Shader "Kingdom Survival/Location Occlusion Object"
                 // плавно.
                 float2 direction = _OccShape.xy;
                 float side = saturate(1 - 0.5 * length(direction) + 0.5 * dot(offset, direction) / max(1e-4, _OccShape.z));
-                half dark = saturate(_OccBase.z) * height * ground * side * alpha;
+                half dark = saturate(_OccBase.z) * height * ground * side * alpha * KsHoleKeep(input.world);
                 // К цвету теней: чёрный — просто темнее (цвет предмета сохраняется).
                 return half4(lerp(half3(1, 1, 1), _OccColor.rgb, dark), 1);
             }

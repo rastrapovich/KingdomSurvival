@@ -42,21 +42,21 @@ namespace KingdomSurvival.LocationRendering
             public bool Disabled;
             // Тень-силуэт от солнца есть (часть ассета: «Тень от солнца»).
             public bool Sun = true;
-            // Тень-силуэт от солнца: [0] — от опоры; [1] — от низа рисунка,
-            // если он заметно ниже опоры (камень). Обе пишут в альфу кадра
-            // минимумом — вместе дают объединение без двойной темноты.
-            public readonly SpriteRenderer[] Shadows = new SpriteRenderer[2];
+            // Тень-силуэт от солнца (одна).
+            public readonly SpriteRenderer[] Shadows = new SpriteRenderer[1];
             // Перекрытие света огня по контуру рисунка; нет — предмет сам светит.
             public ShadowCaster2D Contour;
             public Sprite ContourSprite;
             public bool ContourFlip;
             public float ContourBand;
             // Что уже записано в блок свойств каждой тени: без изменений — не трогать (сотни предметов за кадр).
-            public readonly ShadowState[] States = { new ShadowState(), new ShadowState() };
+            public readonly ShadowState[] States = { new ShadowState() };
             // Насколько низ рисунка ниже опоры (единицы мира, ≥ 0): у камня
             // опора — в середине основания, а низ рисунка — его передний край
-            // на земле. NaN — ещё не измерено.
+            // на земле. NaN — ещё не измерено. GroundLift — та же величина в
+            // долях высоты рисунка (от низа до верха непрозрачного).
             public float GroundDrop = float.NaN;
+            public float GroundLift;
             // Окклюзия: пятно на земле по основанию и затемнение низа рисунка.
             public SpriteRenderer Occlusion;
             public SpriteRenderer OcclusionOverlay;
@@ -82,12 +82,9 @@ namespace KingdomSurvival.LocationRendering
             public bool Shown;
             public Sprite Sprite;
             public Vector2 Vector;
-            public float GroundY, Opacity, Softness;
+            public float GroundY, Lift, Opacity, Softness;
             public Color Color;
         }
-
-        // Тень от низа рисунка — только если он ниже опоры хотя бы на столько (единицы мира).
-        private const float GroundDropMin = .05f;
 
         // Местный источник, дающий тени по контуру: где он светит.
         private struct ShadowLight
@@ -115,6 +112,7 @@ namespace KingdomSurvival.LocationRendering
 
         private static readonly int ShadowVectorId = Shader.PropertyToID("_ShadowVector");
         private static readonly int GroundYId = Shader.PropertyToID("_GroundY");
+        private static readonly int LiftId = Shader.PropertyToID("_Lift");
         private static readonly int ShadowColorId = Shader.PropertyToID("_ShadowColor");
         private static readonly int BlurId = Shader.PropertyToID("_Blur");
         private static readonly int UVRectId = Shader.PropertyToID("_UVRect");
@@ -540,7 +538,8 @@ namespace KingdomSurvival.LocationRendering
             caster.OcclusionUv = uvData;
             caster.OcclusionRect = rectData;
             occlusionBlock ??= new MaterialPropertyBlock();
-            occlusionBlock.Clear();
+            // Прежний блок слоя — с кругами просвечивания (их пишет UpdateSeeThrough).
+            overlay.GetPropertyBlock(occlusionBlock);
             occlusionBlock.SetVector(OcclusionBaseId, baseData);
             occlusionBlock.SetVector(OcclusionShapeId, shapeData);
             occlusionBlock.SetVector(OcclusionUvId, uvData);
@@ -807,19 +806,18 @@ namespace KingdomSurvival.LocationRendering
 
         // Тень-силуэт от солнца: гаснет, когда свет уходит вбок
         // (плоский рисунок сбоку дал бы линию).
-        // Две проекции силуэта: от опоры и (у предмета, чей низ ниже опоры) от
-        // низа рисунка. Одна линия земли верна не во всех часах: от опоры в
-        // полдень короткая тень выглядывает из-за верха камня, а под углом
-        // не хватает тени у его нижней половины; от низа — наоборот.
+        // У предмета, чей низ ниже опоры (камень), тень одна: низ рисунка
+        // прижат к земле, верх ложится туда же, куда лёг бы от опоры (подъём —
+        // в шейдере, _Lift). Тень от одной опоры в полдень выглядывала из-за
+        // верха камня, но под углом не прилегала к его нижней половине; от
+        // одного низа — наоборот; две копии давали двойную тень.
         private void CastShadow(Caster caster, int index, bool visible, Vector2 vector, Color color, float opacity, float softness)
         {
             LocationShadowStyle style = Sky.ShadowStyle;
             float share = style.SilhouetteShare(vector);
             opacity *= share * Mathf.Max(0, style.SilhouetteOpacity);
-            float anchorY = caster.Anchor.position.y;
-            SetShadow(caster, index, visible, vector, color, opacity, softness, anchorY);
             float drop = visible ? ShadowGroundDrop(caster) : 0;
-            SetShadow(caster, index + 1, visible && drop > GroundDropMin, vector, color, opacity, softness, anchorY - drop);
+            SetShadow(caster, index, visible, vector, color, opacity, softness, caster.Anchor.position.y - drop, drop > 0 ? caster.GroundLift : 0);
         }
 
         // ------------------------------------------------------------------
@@ -971,7 +969,7 @@ namespace KingdomSurvival.LocationRendering
         // Сколько предметов и людей сейчас перекрывают свет огня (для проверки).
         public int ContourCount => casters.Count(caster => caster.Contour != null && caster.Contour.enabled);
 
-        private void SetShadow(Caster caster, int index, bool visible, Vector2 vector, Color color, float opacity, float softness, float groundY)
+        private void SetShadow(Caster caster, int index, bool visible, Vector2 vector, Color color, float opacity, float softness, float groundY, float lift)
         {
             SpriteRenderer shadow = caster.Shadows[index];
             ShadowState state = caster.States[index];
@@ -983,7 +981,7 @@ namespace KingdomSurvival.LocationRendering
             }
             if (shadow == null)
             {
-                GameObject target = new GameObject(index == 0 ? "Тень от солнца" : "Тень от солнца · от низа");
+                GameObject target = new GameObject("Тень от солнца");
                 target.transform.SetParent(caster.Anchor, false);
                 shadow = target.AddComponent<SpriteRenderer>();
                 shadow.sharedMaterial = shadowMaterial;
@@ -1020,13 +1018,14 @@ namespace KingdomSurvival.LocationRendering
             }
             // Ничего не изменилось с прошлого кадра — блок свойств прежний.
             if (state.Shown && state.Sprite == shadow.sprite && (state.Vector - vector).sqrMagnitude < 1e-8f &&
-                Mathf.Abs(state.GroundY - groundY) < 1e-5f && Mathf.Abs(state.Opacity - opacity) < 1e-4f &&
+                Mathf.Abs(state.GroundY - groundY) < 1e-5f && Mathf.Abs(state.Lift - lift) < 1e-5f && Mathf.Abs(state.Opacity - opacity) < 1e-4f &&
                 Mathf.Abs(state.Softness - softness) < 1e-4f && state.Color == color)
                 return;
             state.Shown = true;
             state.Sprite = shadow.sprite;
             state.Vector = vector;
             state.GroundY = groundY;
+            state.Lift = lift;
             state.Opacity = opacity;
             state.Softness = softness;
             state.Color = color;
@@ -1036,6 +1035,7 @@ namespace KingdomSurvival.LocationRendering
             Vector4 uvRect = SpriteUVRect(shadow.sprite);
             shadowBlock.SetVector(ShadowVectorId, vector);
             shadowBlock.SetFloat(GroundYId, groundY);
+            shadowBlock.SetFloat(LiftId, lift);
             shadowBlock.SetColor(ShadowColorId, new Color(color.r, color.g, color.b, Mathf.Clamp01(opacity)));
             // Размытие — в долях своего кадра, а не всей страницы атласа.
             shadowBlock.SetFloat(BlurId, Mathf.Clamp01(softness) * .05f * (uvRect.w - uvRect.y));
@@ -1045,20 +1045,26 @@ namespace KingdomSurvival.LocationRendering
 
         // Тень-силуэт ложится от линии земли: часть рисунка ниже неё
         // отсекается. Опора предмета может стоять выше низа рисунка (камень:
-        // опора в середине основания) — тогда без поправки тень давала бы
-        // только верхняя половина. Линия — по нижнему краю непрозрачного
-        // первого рисунка, если он ниже опоры; измеряется один раз (кадры
-        // ветра тень не дёргают). У людей, своего силуэта тени и нечитаемой
-        // альфы — опора, как раньше.
+        // опора в середине основания) — тогда линия — нижний край
+        // непрозрачного первого рисунка, а доля GroundLift (низ → опора от
+        // всей высоты рисунка) поднимает тень так, что её верх там же, где от
+        // опоры. Измеряется один раз (кадры ветра тень не дёргают). У людей,
+        // своего силуэта тени и нечитаемой альфы — опора, как раньше.
         private static float ShadowGroundDrop(Caster caster)
         {
             if (!float.IsNaN(caster.GroundDrop)) return caster.GroundDrop;
             caster.GroundDrop = 0;
+            caster.GroundLift = 0;
             if (caster.People || caster.Override != null || caster.Source == null || caster.Source.sprite == null) return 0;
+            Rect opaque = LocationAlphaContours.OpaqueRect(caster.Source.sprite);
             float bottom = LocationAlphaContours.OpaqueBottom(caster.Source.sprite);
             if (float.IsNaN(bottom)) return 0;
-            Vector3 local = caster.Anchor.InverseTransformPoint(caster.Source.transform.TransformPoint(new Vector3(0, bottom, 0)));
-            caster.GroundDrop = Mathf.Max(0, -local.y) * Mathf.Abs(caster.Anchor.lossyScale.y);
+            Transform from = caster.Source.transform;
+            float bottomY = caster.Anchor.InverseTransformPoint(from.TransformPoint(new Vector3(0, bottom, 0))).y;
+            float topY = caster.Anchor.InverseTransformPoint(from.TransformPoint(new Vector3(0, opaque.yMax, 0))).y;
+            if (bottomY >= 0 || topY <= bottomY) return 0;
+            caster.GroundDrop = -bottomY * Mathf.Abs(caster.Anchor.lossyScale.y);
+            caster.GroundLift = Mathf.Clamp01(-bottomY / (topY - bottomY));
             return caster.GroundDrop;
         }
 

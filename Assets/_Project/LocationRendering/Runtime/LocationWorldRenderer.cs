@@ -56,6 +56,8 @@ namespace KingdomSurvival.LocationRendering
             public readonly Dictionary<Actor, float> Holes = new Dictionary<Actor, float>();
             public readonly Vector4[] HoleData = new Vector4[SeeThroughHoles];
             public bool HolesWritten;
+            // Сколько слоёв затемнения на рисунках получили круги (слой мог появиться позже).
+            public int HoleOverlays;
             public float SeeThroughLevel = 1;
             public readonly List<float> BaseAlpha = new List<float>();
         }

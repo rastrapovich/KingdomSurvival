@@ -78,19 +78,38 @@ namespace KingdomSurvival.LocationRendering
                 data[count++] = new Vector4(center.x, center.y, radius, hole.Value);
             }
             for (int i = count; i < SeeThroughHoles; i++) data[i] = Vector4.zero;
-            bool same = item.HolesWritten;
+            // Слой затемнения на рисунке (окклюзия) умножает то, что под ним, —
+            // в круге он тоже слабеет, иначе за деревом оставался тёмный силуэт.
+            int overlays = 0;
+            foreach (SpriteRenderer image in item.Images)
+                if (image != null && Overlay(image) != null) overlays++;
+            bool same = item.HolesWritten && overlays == item.HoleOverlays;
             for (int i = 0; i < SeeThroughHoles && same; i++) same = (item.HoleData[i] - data[i]).sqrMagnitude < 1e-10f;
             if (same) return;
             item.HolesWritten = true;
+            item.HoleOverlays = overlays;
             System.Array.Copy(data, item.HoleData, SeeThroughHoles);
+            Vector4 shape = new Vector4(alpha, SeeThroughSoftEdge, 0, 0);
             foreach (SpriteRenderer image in item.Images)
             {
                 if (image == null) continue;
                 image.GetPropertyBlock(adjustBlock);
                 adjustBlock.SetVectorArray(HolesId, item.HoleData);
-                adjustBlock.SetVector(HoleShapeId, new Vector4(alpha, SeeThroughSoftEdge, 0, 0));
+                adjustBlock.SetVector(HoleShapeId, shape);
                 image.SetPropertyBlock(adjustBlock);
+                SpriteRenderer overlay = Overlay(image);
+                if (overlay == null) continue;
+                overlay.GetPropertyBlock(adjustBlock);
+                adjustBlock.SetVectorArray(HolesId, item.HoleData);
+                adjustBlock.SetVector(HoleShapeId, shape);
+                overlay.SetPropertyBlock(adjustBlock);
             }
+        }
+
+        private static SpriteRenderer Overlay(SpriteRenderer image)
+        {
+            Transform child = image.transform.Find(OcclusionOverlayName);
+            return child != null ? child.GetComponent<SpriteRenderer>() : null;
         }
 
         private readonly Vector4[] holeScratch = new Vector4[SeeThroughHoles];

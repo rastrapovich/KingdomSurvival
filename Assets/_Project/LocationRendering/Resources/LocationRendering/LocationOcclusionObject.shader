@@ -16,6 +16,9 @@ Shader "Kingdom Survival/Location Occlusion Object"
         _KsBend("Bend: top offset xy (world), drop (world)", Vector) = (0, 0, 0, 0)
         _OccUv("Sprite uv: u per world unit, min y, max y, v per world unit", Vector) = (0, 0, 1, 1)
         _OccColor("Occlusion color", Color) = (0, 0, 0, 1)
+        _OccMask("Base frame (occlusion field)", 2D) = "white" {}
+        _OccRect("Current frame uv rect", Vector) = (0, 0, 1, 1)
+        _OccBaseRect("Base frame uv rect", Vector) = (0, 0, 1, 1)
         _KsBendShape("Bend shape: root y, 1/height (object), pinned, curve", Vector) = (0, 0, 0, 0)
         [HideInInspector] _Color ("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor ("RendererColor", Color) = (1,1,1,1)
@@ -55,6 +58,8 @@ Shader "Kingdom Survival/Location Occlusion Object"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
+            TEXTURE2D(_OccMask);
+            SAMPLER(sampler_OccMask);
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _OccBase;
@@ -62,6 +67,8 @@ Shader "Kingdom Survival/Location Occlusion Object"
                 float4 _KsBend;
                 float4 _OccUv;
                 half4 _OccColor;
+                float4 _OccRect;
+                float4 _OccBaseRect;
                 float4 _KsBendShape;
                 half4 _Color;
             CBUFFER_END
@@ -101,21 +108,27 @@ Shader "Kingdom Survival/Location Occlusion Object"
                 float fade = max(1e-4, _OccShape.w);
                 float stepWorld = fade / 8.0;
                 float stepV = stepWorld * _OccUv.w;
-                float spread = stepWorld * _OccUv.x;
-                float edge = fade;
+                float spread = 2 * stepWorld * _OccUv.x;
+                // Непрерывно: каждый шаг вниз добавляет столько, насколько под ним
+                // непрозрачно подряд, — без скачков на шаг, когда травинка сдвигается.
+                // Точка этого кадра → та же точка первого кадра (поле неподвижно).
+                float2 baseUv = _OccBaseRect.xy + (input.uv - _OccRect.xy) / max(1e-6, _OccRect.zw) * _OccBaseRect.zw;
+                float edge = 0;
+                float run = 1;
                 [unroll] for (int i = 1; i <= 8; i++)
                 {
-                    float v = input.uv.y - stepV * i;
-                    // Три выборки поперёк (на шаг в стороны): просветы между травинками
+                    float v = baseUv.y - stepV * i;
+                    // Три выборки поперёк (на два шага в стороны): просветы между травинками
                     // — сплошной пучок, край не скачет от кадра к кадру анимации.
                     half below = 0;
                     if (v >= _OccUv.y)
                     {
-                        below = max(SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, float2(input.uv.x, v), 0).a,
-                            max(SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, float2(input.uv.x - spread, v), 0).a,
-                                SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, float2(input.uv.x + spread, v), 0).a));
+                        below = max(SAMPLE_TEXTURE2D_LOD(_OccMask, sampler_OccMask, float2(baseUv.x, v), 0).a,
+                            max(SAMPLE_TEXTURE2D_LOD(_OccMask, sampler_OccMask, float2(baseUv.x - spread, v), 0).a,
+                                SAMPLE_TEXTURE2D_LOD(_OccMask, sampler_OccMask, float2(baseUv.x + spread, v), 0).a));
                     }
-                    if (below < 0.35 && edge >= fade) edge = stepWorld * (i - 0.5);
+                    run *= saturate((below - 0.1) / 0.5);
+                    edge += stepWorld * run;
                 }
                 float height = 1 - smoothstep(0, fade, edge);
                 // Только у земли: нижний край высоко над опорой (крона) не темнеет.

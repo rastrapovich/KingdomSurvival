@@ -70,6 +70,9 @@ namespace KingdomSurvival.LocationRendering
             // Сглаженное по времени направление тени окклюзии (без рывков).
             public Vector2 OcclusionDirection;
             public float OcclusionDirectionAt = float.NaN;
+            public float OcclusionVisible;
+            public Sprite OcclusionBaseSprite;
+            public Vector4 OcclusionRect;
         }
 
         // Местный источник, дающий тени по контуру: где он светит.
@@ -392,6 +395,15 @@ namespace KingdomSurvival.LocationRendering
         private static readonly int OcclusionShapeId = Shader.PropertyToID("_OccShape");
         private static readonly int OcclusionUvId = Shader.PropertyToID("_OccUv");
         private static readonly int OcclusionColorId = Shader.PropertyToID("_OccColor");
+        private static readonly int OcclusionRectId = Shader.PropertyToID("_OccRect");
+        private static readonly int OcclusionBaseRectId = Shader.PropertyToID("_OccBaseRect");
+        private static readonly int OcclusionMaskId = Shader.PropertyToID("_OccMask");
+
+        private static Rect TextureRectOf(Sprite sprite)
+        {
+            try { return sprite.textureRect; }
+            catch (Exception) { return sprite.rect; }
+        }
         private const string OcclusionOverlayName = "Окклюзия на предмете";
 
         // Окклюзия у основания: на земле — по контуру основания предмета
@@ -480,33 +492,47 @@ namespace KingdomSurvival.LocationRendering
             // непрозрачного), отсчёт в шейдере — от нижнего края силуэта.
             LocationShadowStyle style = Sky.ShadowStyle;
             Sprite sprite = source.sprite;
-            float opaqueTop = sprite.bounds.min.y + sprite.bounds.size.y * LocationAlphaContours.OpaqueTop(sprite);
-            float visible = Mathf.Max(.1f, source.transform.TransformPoint(new Vector3(0, opaqueTop, 0)).y - foot.y);
+            // Видимая высота — один раз по первому кадру: у анимированной травы верх
+            // кадра скачет, и вся тёмная зона дёргалась бы вверх-вниз с ветром.
+            if (!(caster.OcclusionVisible > 0))
+            {
+                float opaqueTop = sprite.bounds.min.y + sprite.bounds.size.y * LocationAlphaContours.OpaqueTop(sprite);
+                caster.OcclusionVisible = Mathf.Max(.1f, source.transform.TransformPoint(new Vector3(0, opaqueTop, 0)).y - caster.Anchor.position.y);
+            }
+            float visible = caster.OcclusionVisible;
             float fade = Mathf.Clamp(style.OcclusionObjectHeight, .05f, 1) * visible;
             Vector4 shapeData = new Vector4(direction.x, direction.y, halfWidth, fade);
             Vector4 baseData = new Vector4(foot.x, foot.y, strength * Mathf.Clamp01(style.OcclusionOnObject), 0);
-            // Кадр в UV: UV на единицу мира поперёк, низ (за ним — прозрачно), верх, UV на единицу мира по высоте.
-            Vector4 uvData = new Vector4(0, 0, 1, 1);
-            Texture texture = sprite.texture;
-            if (texture != null)
+            // Поле затемнения — по первому кадру рисунка (неподвижно у земли, как
+            // тень от земли): травинки текущего кадра проходят сквозь него, а не
+            // перерисовывают его каждый кадр ветра — затемнение не мигает.
+            if (caster.OcclusionBaseSprite == null) caster.OcclusionBaseSprite = sprite;
+            Sprite baseSprite = caster.OcclusionBaseSprite;
+            Vector4 uvData = new Vector4(0, 0, 1, 1), rectData = new Vector4(0, 0, 1, 1), baseRectData = new Vector4(0, 0, 1, 1);
+            if (baseSprite.texture != null && sprite.texture != null)
             {
-                Rect rect;
-                try { rect = sprite.textureRect; }
-                catch (Exception) { rect = sprite.rect; }
-                float worldHeight = rect.height / Mathf.Max(1e-3f, sprite.pixelsPerUnit) * Mathf.Abs(source.transform.lossyScale.y);
-                float worldWidth = rect.width / Mathf.Max(1e-3f, sprite.pixelsPerUnit) * Mathf.Abs(source.transform.lossyScale.x);
-                uvData = new Vector4(rect.width / texture.width / Mathf.Max(1e-4f, worldWidth), rect.yMin / texture.height, rect.yMax / texture.height,
-                    rect.height / texture.height / Mathf.Max(1e-4f, worldHeight));
+                Rect baseRect = TextureRectOf(baseSprite), rect = TextureRectOf(sprite);
+                Texture baseTexture = baseSprite.texture, texture = sprite.texture;
+                float worldHeight = baseRect.height / Mathf.Max(1e-3f, baseSprite.pixelsPerUnit) * Mathf.Abs(source.transform.lossyScale.y);
+                float worldWidth = baseRect.width / Mathf.Max(1e-3f, baseSprite.pixelsPerUnit) * Mathf.Abs(source.transform.lossyScale.x);
+                uvData = new Vector4(baseRect.width / baseTexture.width / Mathf.Max(1e-4f, worldWidth), baseRect.yMin / baseTexture.height,
+                    baseRect.yMax / baseTexture.height, baseRect.height / baseTexture.height / Mathf.Max(1e-4f, worldHeight));
+                baseRectData = new Vector4(baseRect.x / baseTexture.width, baseRect.y / baseTexture.height, baseRect.width / baseTexture.width, baseRect.height / baseTexture.height);
+                rectData = new Vector4(rect.x / texture.width, rect.y / texture.height, rect.width / texture.width, rect.height / texture.height);
             }
-            if (caster.OcclusionShape == shapeData && caster.OcclusionBase == baseData && caster.OcclusionUv == uvData) return;
+            if (caster.OcclusionShape == shapeData && caster.OcclusionBase == baseData && caster.OcclusionUv == uvData && caster.OcclusionRect == rectData) return;
             caster.OcclusionShape = shapeData;
             caster.OcclusionBase = baseData;
             caster.OcclusionUv = uvData;
+            caster.OcclusionRect = rectData;
             occlusionBlock ??= new MaterialPropertyBlock();
             occlusionBlock.Clear();
             occlusionBlock.SetVector(OcclusionBaseId, baseData);
             occlusionBlock.SetVector(OcclusionShapeId, shapeData);
             occlusionBlock.SetVector(OcclusionUvId, uvData);
+            occlusionBlock.SetVector(OcclusionRectId, rectData);
+            occlusionBlock.SetVector(OcclusionBaseRectId, baseRectData);
+            occlusionBlock.SetTexture(OcclusionMaskId, baseSprite.texture != null ? baseSprite.texture : Texture2D.whiteTexture);
             // Прогиб рисунка (реакция на проход) — и у затемнения на нём.
             source.GetPropertyBlock(bendBlock);
             occlusionBlock.SetVector(BendId, bendBlock.GetVector(BendId));

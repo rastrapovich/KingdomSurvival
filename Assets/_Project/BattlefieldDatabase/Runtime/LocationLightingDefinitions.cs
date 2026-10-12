@@ -138,6 +138,9 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float OcclusionRadius = .35f;
         // Размытие формы основания (ед. мира): углы и ступеньки кисти мягче.
         public float OcclusionBlur = .15f;
+        // Насколько пятно на земле сдвинуто в тень (доля радиуса): 0 — ровно
+        // вокруг основания (и перед предметом), 1 — целиком в сторону тени.
+        public float OcclusionShift = .5f;
         // К какому цвету темнеют тени и окклюзия: чёрный — просто темнее фона
         // (цвет земли и предмета сохраняется); цветной — подкрашивает тень.
         public UnityEngine.Color OcclusionColor = UnityEngine.Color.black;

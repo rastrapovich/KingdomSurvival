@@ -116,6 +116,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                 "На сколько затемнение расходится от основания по земле.");
             Number("Окклюзия в тени: размытие (ед. мира)", style.OcclusionBlur, 0, 1, value => style.OcclusionBlur = value,
                 "Смягчает форму основания: углы прямоугольника и ступеньки основания кистью. 0 — точно по контуру.");
+            Number("Окклюзия: смещение в тень (доля)", style.OcclusionShift, 0, 1, value => style.OcclusionShift = value,
+                "0 — пятно ровно вокруг основания, в том числе перед предметом (не кажется «приклеенным»); 1 — целиком в сторону тени.");
             ColorField("Цвет теней и окклюзии", style.OcclusionColor, value => style.OcclusionColor = value);
             settings[settings.childCount - 1].tooltip = "К какому цвету темнеют тени и окклюзия на земле и предметах. Чёрный — просто темнее фона (цвет сохраняется); " +
                                                         "тёмно-синий — прохладная ночная тень, тёмно-коричневый — тёплая.";

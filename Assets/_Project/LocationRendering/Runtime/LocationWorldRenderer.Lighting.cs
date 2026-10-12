@@ -67,6 +67,9 @@ namespace KingdomSurvival.LocationRendering
             public List<Rect> OcclusionFor;
             public float OcclusionRadius = -1, OcclusionBlur = -1;
             public Sprite OcclusionSprite;
+            // Сглаженное по времени направление тени окклюзии (без рывков).
+            public Vector2 OcclusionDirection;
+            public float OcclusionDirectionAt = float.NaN;
         }
 
         // Местный источник, дающий тени по контуру: где он светит.
@@ -389,8 +392,6 @@ namespace KingdomSurvival.LocationRendering
         private static readonly int OcclusionShapeId = Shader.PropertyToID("_OccShape");
         private static readonly int OcclusionUvId = Shader.PropertyToID("_OccUv");
         private static readonly int OcclusionColorId = Shader.PropertyToID("_OccColor");
-        // Пятно на земле сдвинуто в тень на долю радиуса.
-        private const float OcclusionShift = .5f;
         private const string OcclusionOverlayName = "Окклюзия на предмете";
 
         // Окклюзия у основания: на земле — по контуру основания предмета
@@ -405,7 +406,7 @@ namespace KingdomSurvival.LocationRendering
             float strength = Mathf.Clamp01(style.Occlusion);
             float radius = Mathf.Max(0, style.OcclusionRadius);
             enabled &= !caster.NoOcclusion && strength > .001f && radius > 1e-3f && OcclusionMaterial() != null;
-            Vector2 direction = enabled ? ShadowDirection(caster) : Vector2.zero;
+            Vector2 direction = enabled ? SmoothedShadowDirection(caster) : Vector2.zero;
             List<Rect> footprint = enabled ? Footprint(caster) : null;
             enabled &= footprint != null && footprint.Count > 0;
             UpdateGroundOcclusion(caster, enabled && ground, footprint, radius, strength, direction);
@@ -440,7 +441,7 @@ namespace KingdomSurvival.LocationRendering
             }
             Sprite shape = caster.OcclusionSprite;
             if (blot.sprite != shape) blot.sprite = shape;
-            blot.transform.localPosition = direction * (radius * OcclusionShift);
+            blot.transform.localPosition = direction * (radius * Mathf.Clamp01(Sky.ShadowStyle.OcclusionShift));
             blot.color = new Color(0, 0, 0, strength);
         }
 
@@ -484,7 +485,7 @@ namespace KingdomSurvival.LocationRendering
             float fade = Mathf.Clamp(style.OcclusionObjectHeight, .05f, 1) * visible;
             Vector4 shapeData = new Vector4(direction.x, direction.y, halfWidth, fade);
             Vector4 baseData = new Vector4(foot.x, foot.y, strength * Mathf.Clamp01(style.OcclusionOnObject), 0);
-            // Кадр в UV: низ (за ним — прозрачно) и UV на единицу мира по высоте.
+            // Кадр в UV: UV на единицу мира поперёк, низ (за ним — прозрачно), верх, UV на единицу мира по высоте.
             Vector4 uvData = new Vector4(0, 0, 1, 1);
             Texture texture = sprite.texture;
             if (texture != null)
@@ -493,7 +494,8 @@ namespace KingdomSurvival.LocationRendering
                 try { rect = sprite.textureRect; }
                 catch (Exception) { rect = sprite.rect; }
                 float worldHeight = rect.height / Mathf.Max(1e-3f, sprite.pixelsPerUnit) * Mathf.Abs(source.transform.lossyScale.y);
-                uvData = new Vector4(rect.xMin / texture.width, rect.yMin / texture.height, rect.yMax / texture.height,
+                float worldWidth = rect.width / Mathf.Max(1e-3f, sprite.pixelsPerUnit) * Mathf.Abs(source.transform.lossyScale.x);
+                uvData = new Vector4(rect.width / texture.width / Mathf.Max(1e-4f, worldWidth), rect.yMin / texture.height, rect.yMax / texture.height,
                     rect.height / texture.height / Mathf.Max(1e-4f, worldHeight));
             }
             if (caster.OcclusionShape == shapeData && caster.OcclusionBase == baseData && caster.OcclusionUv == uvData) return;
@@ -669,6 +671,20 @@ namespace KingdomSurvival.LocationRendering
         // огня) и от солнца (по силе его тени). Длина 0..1 — плавно, без
         // скачка на краю света и при смене суток; 0 — тени нет, окклюзия ровно
         // вокруг основания.
+        // Направление для окклюзии — плавно за ~0,3 с: смена суток и огонь
+        // не дёргают пятно и затемнение. Тот же момент времени (статичный кадр,
+        // проверки) — сразу текущее.
+        private Vector2 SmoothedShadowDirection(Caster caster)
+        {
+            Vector2 target = ShadowDirection(caster);
+            float dt = float.IsNaN(caster.OcclusionDirectionAt) ? 0 : Seconds - caster.OcclusionDirectionAt;
+            caster.OcclusionDirectionAt = Seconds;
+            caster.OcclusionDirection = dt > 0 && dt < 1
+                ? Vector2.Lerp(caster.OcclusionDirection, target, 1 - Mathf.Exp(-dt / .3f))
+                : target;
+            return caster.OcclusionDirection;
+        }
+
         private Vector2 ShadowDirection(Caster caster)
         {
             Vector2 foot = caster.Anchor.position;
@@ -726,9 +742,11 @@ namespace KingdomSurvival.LocationRendering
                 Vector3 scale = light.transform.lossyScale;
                 shadowLights.Add(new ShadowLight
                 {
-                    Position = light.transform.position,
+                    // Без дрожи точки огня: направление тени и окклюзии не дёргается вслед за пламенем.
+                    Position = item.Anchor.TransformPoint(item.Data.Light.Offset),
                     Radius = point ? light.pointLightOuterRadius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y)) : float.PositiveInfinity,
-                    Weight = Mathf.Clamp01(light.intensity)
+                    // Постоянная яркость источника, не мерцание: окклюзия не мигает.
+                    Weight = Mathf.Clamp01(item.Data.Light.Intensity)
                 });
             }
         }

@@ -134,14 +134,16 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
-        // Тень дерева от солнца ложится и на людей, и на предметы: стоящие в
-        // ней темнеют к цвету теней, стоящие на свету — нет; дерево своей
-        // тенью не темнеет.
+        // Тень дерева от солнца ложится и на людей, и на предметы: человек в
+        // ней темнеет целиком, на предмете тень лежит только там, где она
+        // есть (длинный камень — одним концом), стоящие на свету и само дерево
+        // своей тенью не темнеют.
         [Test]
-        public void TreeShadow_DarkensPeopleAndObjectsStandingInIt()
+        public void TreeShadow_FallsOnPeopleAndOntoObjectsWhereItLies()
         {
             Asset("tree", 64, 256, new Vector2(.5f, 0));
-            Asset("stone", 40, 30, new Vector2(.5f, 0));
+            // Длинный камень: 15 × 1,5 ед.
+            Asset("stone", 300, 30, new Vector2(.5f, 0));
             LocalLocationDefinition location = Location();
             LocationVisualDefinition probe = new LocationVisualDefinition { LocationId = location.Id, UseWorldLighting = false };
             probe.Objects.Add(Put("tree", new Vector2(960, 900)));
@@ -164,18 +166,32 @@ namespace KingdomSurvival.LocationRendering
             Vector2 inShadow = LocationVisualGeometry.WorldToPixel(location, foot + vector * 3);
             LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = location.Id, UseWorldLighting = false };
             visual.Objects.Add(Put("tree", new Vector2(960, 900)));
-            visual.Objects.Add(new LocationVisualObject { Id = "stone_in", Name = "stone_in", AssetId = "stone", Position = new Vector2(inShadow.x / 1920, inShadow.y / 1080) });
+            // Камень одним концом в тени ствола, другим — далеко от дерева.
+            Vector2 along = new Vector2(vector.x >= 0 ? -1 : 1, 0);
+            Vector2 stoneAt = LocationVisualGeometry.WorldToPixel(location, foot + vector * 3 + along * 7);
+            visual.Objects.Add(new LocationVisualObject { Id = "stone_in", Name = "stone_in", AssetId = "stone", Position = new Vector2(stoneAt.x / 1920, stoneAt.y / 1080) });
             visual.Objects.Add(new LocationVisualObject { Id = "stone_out", Name = "stone_out", AssetId = "stone", Position = new Vector2(300f / 1920, 300f / 1080) });
             using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null))
             {
                 renderer.SetActors(new[] { Actor(inShadow), new LocationWorldRenderer.ActorFrame { Id = "far", Pixel = new Vector2(1700, 200) } }, 0);
                 for (int i = 0; i <= 10; i++) renderer.SetTime(hour, i * .1f);
+                // Как в игре: фигуры раскладываются после времени — цвет с затемнением.
+                renderer.SetActors(new[] { Actor(inShadow), new LocationWorldRenderer.ActorFrame { Id = "far", Pixel = new Vector2(1700, 200) } }, 1);
                 Assert.That(renderer.ActorShade("hero").r, Is.LessThan(.95f), "Человек в тени дерева темнеет.");
                 Assert.That(renderer.ActorShade("far"), Is.EqualTo(Color.white), "Человек на свету — нет.");
-                Assert.That(renderer.ObjectShade("stone_in").r, Is.LessThan(.95f), "Камень в тени дерева темнеет.");
-                Assert.That(renderer.ObjectShade("stone_out"), Is.EqualTo(Color.white));
-                Assert.That(renderer.ObjectShade("tree"), Is.EqualTo(Color.white), "Своя тень не темнит.");
-                Assert.That(renderer.FindObject("stone_in").color.r, Is.LessThan(.95f), "Затемнение — на самом рисунке.");
+                // Тень ложится на камень только там, где она есть: конец у дерева — в
+                // тени, дальний конец — на свету (а не весь камень целиком).
+                Vector2 shadowEnd = foot + vector * 3 + new Vector2(0, .3f), farEnd = foot + vector * 3 + along * 13 + new Vector2(0, .3f);
+                Assert.That(renderer.ObjectShadeAt("stone_in", shadowEnd), Is.GreaterThan(.05f), "Конец камня в тени дерева темнеет.");
+                Assert.That(renderer.ObjectShadeAt("stone_in", farEnd), Is.EqualTo(0), "Дальний конец камня — на свету.");
+                Assert.That(renderer.ObjectShadeAt("stone_out", LocationVisualGeometry.PixelToWorld(location, new Vector2(300, 290))), Is.EqualTo(0));
+                Assert.That(renderer.ObjectShadeAt("tree", foot + new Vector2(0, 1)), Is.EqualTo(0), "Своя тень не темнит.");
+                SpriteRenderer stone = renderer.FindObject("stone_in");
+                MaterialPropertyBlock block = new MaterialPropertyBlock();
+                stone.GetPropertyBlock(block);
+                Assert.That(block.GetVector("_KsShadeGrid").z, Is.EqualTo(1), "Сетка тени передана шейдеру рисунка.");
+                Assert.That(stone.color, Is.EqualTo(Color.white), "Рисунок не перекрашен целиком.");
+                Assert.That(renderer.Root.transform.Find("Фигуры/hero").GetComponentInChildren<SpriteRenderer>().color.r, Is.LessThan(.95f), "Фигура в тени темнее.");
             }
         }
 

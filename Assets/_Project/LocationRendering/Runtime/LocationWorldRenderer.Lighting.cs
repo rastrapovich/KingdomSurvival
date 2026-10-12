@@ -57,6 +57,8 @@ namespace KingdomSurvival.LocationRendering
             // долях высоты рисунка (от низа до верха непрозрачного).
             public float GroundDrop = float.NaN;
             public float GroundLift;
+            // Силуэт для тени на других (один кадр — ветер не дёргает затемнение).
+            public Sprite ShadeSprite;
             // Окклюзия: пятно на земле по основанию и затемнение низа рисунка.
             public SpriteRenderer Occlusion;
             public SpriteRenderer OcclusionOverlay;

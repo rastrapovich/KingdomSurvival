@@ -60,12 +60,12 @@ namespace KingdomSurvival.LocationRendering
             public int HoleOverlays;
             public float SeeThroughLevel = 1;
             public readonly List<float> BaseAlpha = new List<float>();
-            public readonly List<Color> BaseColor = new List<Color>();
-            // В чужой тени солнца: плавная сила 0..1 и записанное затемнение.
-            public float ShadeLevel, ShadeTarget;
+            // Чужая тень солнца на рисунках (LocationWorldRenderer.SunShade):
+            // у каждого рисунка — сетка тёмности по его площади и его прежний
+            // материал (в тени рисунок идёт материалом с поправкой).
+            public readonly List<ShadeMap> ShadeMaps = new List<ShadeMap>();
             public bool ShadeReady;
             public Vector3 ShadeFoot;
-            public Color Shade = Color.white;
         }
 
         private sealed class Actor
@@ -411,7 +411,7 @@ namespace KingdomSurvival.LocationRendering
                 image.sortingOrder = LocationVisualGeometry.SortOrder(part.Band, anchor.localPosition.y, part.OrderOffset);
                 entry.Images.Add(image);
                 entry.BaseAlpha.Add(image.color.a);
-                entry.BaseColor.Add(image.color);
+                entry.ShadeMaps.Add(new ShadeMap { Material = image.sharedMaterial });
                 entry.Parts.Add(part);
                 if (i == 0) entry.Image = image;
                 // Тень от солнца — силуэт, от огня — контур (каждая своей галочкой).
@@ -471,9 +471,7 @@ namespace KingdomSurvival.LocationRendering
             }
             entry.Images.Clear();
             entry.BaseAlpha.Clear();
-            entry.BaseColor.Clear();
-            entry.Shade = Color.white;
-            entry.ShadeLevel = 0;
+            entry.ShadeMaps.Clear();
             entry.ShadeReady = false;
             entry.SeeThroughLevel = 1;
             entry.Holes.Clear();
@@ -777,10 +775,10 @@ namespace KingdomSurvival.LocationRendering
                     : frame.Kind == ActorKind.Retinue ? new Color(.70f, .76f, .85f) : Color.white;
             }
             Color tint = frame.Kind == ActorKind.Retinue ? new Color(.87f, .86f, .78f) : Color.white;
+            if (frame.Wounded) tint *= new Color(.85f, .75f, .75f);
             if (actor.Player != null || actor.Unit?.BattlefieldSprite != null) actor.Image.color = tint;
             // В тени деревьев и предметов фигура темнеет, как земля под ней (UpdateSunShade).
             actor.Image.color *= actor.Shade;
-            if (actor.Player != null || actor.Unit?.BattlefieldSprite != null) actor.Image.color = tint;
             Fit(actor.Image, height, pivot, mirrored, offset);
             actor.Image.sortingOrder = LocationVisualGeometry.SortOrder(LocationVisualBand.World, actor.Anchor.localPosition.y);
         }

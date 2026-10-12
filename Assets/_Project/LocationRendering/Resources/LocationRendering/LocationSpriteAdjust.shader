@@ -121,6 +121,37 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         }
         return keep;
     }
+
+    // Чужая тень солнца на рисунке (LocationWorldRenderer.SunShade): сетка
+    // тёмности 0..1 по рамке рисунка в мире, до 128 точек (по 4 в векторе),
+    // между точками — плавно. Только блоком свойств; нет карты — без тени.
+    // _KsShadeRect: xy — левый нижний угол (мир), zw — размер; _KsShadeGrid:
+    // x — столбцов, y — рядов, z = 1 — карта есть; _KsShadeTint — цвет теней.
+    float4 _KsShadeMap[32];
+    float4 _KsShadeRect;
+    float4 _KsShadeGrid;
+    float4 _KsShadeTint;
+
+    float KsShadeAt(int column, int row)
+    {
+        int i = row * (int)_KsShadeGrid.x + column;
+        return _KsShadeMap[i >> 2][i & 3];
+    }
+
+    half3 KsShade(half3 rgb, float2 world)
+    {
+        if (_KsShadeGrid.z < 0.5)
+            return rgb;
+        int2 cells = max(int2(_KsShadeGrid.xy), int2(1, 1));
+        float2 p = saturate((world - _KsShadeRect.xy) / max(_KsShadeRect.zw, 1e-4)) * cells - 0.5;
+        float2 base = floor(p);
+        float2 f = p - base;
+        int2 c0 = clamp(int2(base), int2(0, 0), cells - 1);
+        int2 c1 = clamp(int2(base) + 1, int2(0, 0), cells - 1);
+        float s = lerp(lerp(KsShadeAt(c0.x, c0.y), KsShadeAt(c1.x, c0.y), f.x),
+                       lerp(KsShadeAt(c0.x, c1.y), KsShadeAt(c1.x, c1.y), f.x), f.y);
+        return rgb * lerp(half3(1, 1, 1), half3(_KsShadeTint.rgb), saturate(s));
+    }
     ENDHLSL
 
     SubShader
@@ -270,6 +301,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 texel.rgb = KsAdjust(texel.rgb, input.adjust.xyz);
                 half4 main = input.color * texel;
                 main.a *= KsHoleKeep(input.ksWorld);
+                main.rgb = KsShade(main.rgb, input.ksWorld);
                 const half4 mask = SAMPLE_TEXTURE2D(_MaskTex, sampler_MaskTex, input.uv);
                 half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv));
 
@@ -441,6 +473,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 texel.rgb = KsAdjust(texel.rgb, input.adjust.xyz);
                 half4 color = input.color * texel;
                 color.a *= KsHoleKeep(input.ksWorld);
+                color.rgb = KsShade(color.rgb, input.ksWorld);
                 return color;
             }
             ENDHLSL

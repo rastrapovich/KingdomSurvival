@@ -34,6 +34,8 @@ namespace KingdomSurvival.LocationRendering
         // Сетка тени на рисунке: шаг (мир) и наибольшее число точек.
         public const float ShadeCell = .35f;
         public const int ShadeColumns = 16, ShadeRows = 8;
+        // Точек поперёк клетки (среднее).
+        public const int ShadeSubSamples = 4;
 
         private static readonly int ShadeMapId = Shader.PropertyToID("_KsShadeMap");
         private static readonly int ShadeRectId = Shader.PropertyToID("_KsShadeRect");
@@ -46,6 +48,11 @@ namespace KingdomSurvival.LocationRendering
             // Материал рисунка без тени (в тени — материал с поправкой).
             public Material Material;
             public readonly Vector4[] Values = new Vector4[ShadeColumns * ShadeRows / 4];
+            // Тёмность точек: куда идёт (по солнцу) и что показано сейчас — меняется
+            // плавно, за ShadeFadeSeconds, как у людей.
+            public readonly float[] Target = new float[ShadeColumns * ShadeRows];
+            public readonly float[] Current = new float[ShadeColumns * ShadeRows];
+            public bool Ready, Moving, Snap;
             public Rect Rect;
             public int Columns, Rows;
             // Хоть одна точка в тени.
@@ -108,7 +115,7 @@ namespace KingdomSurvival.LocationRendering
             foreach (Placed item in placed)
             {
                 if (item.Resolved == null || item.Images.Count == 0 || !item.Resolved.LitBySun) continue;
-                if (!sunMoved && item.ShadeReady && item.ShadeFoot == item.Anchor.position) continue;
+                bool refill = sunMoved || !item.ShadeReady || item.ShadeFoot != item.Anchor.position;
                 item.ShadeReady = true;
                 item.ShadeFoot = item.Anchor.position;
                 for (int i = 0; i < item.Images.Count && i < item.Parts.Count && i < item.ShadeMaps.Count; i++)
@@ -116,17 +123,20 @@ namespace KingdomSurvival.LocationRendering
                     SpriteRenderer image = item.Images[i];
                     if (image == null || image.sprite == null || LitAsGround(item.Parts[i].Band)) continue;
                     ShadeMap map = item.ShadeMaps[i];
-                    FillShadeMap(item, image, map);
-                    WriteShadeMap(image, map, tint);
+                    if (refill) FillShadeMap(item, image, item.Parts[i].Sprite != null ? item.Parts[i].Sprite : image.sprite, map);
+                    if (map.Moving && StepShadeMap(map, step)) WriteShadeMap(image, map, tint);
                 }
             }
         }
 
         // Сетка тени рисунка: точки по рамке непрозрачного, у каждой — тёмность
         // чужой тени на её точке земли.
-        private void FillShadeMap(Placed item, SpriteRenderer image, ShadeMap map)
+        // Рамка и рост — по неподвижному кадру (stable): с кадрами ветра сетка не
+        // перестраивается. В клетке — среднее нескольких точек: тонкая тень ствола
+        // темнит пучок травы частично, а не целиком.
+        private void FillShadeMap(Placed item, SpriteRenderer image, Sprite stable, ShadeMap map)
         {
-            Rect opaque = LocationAlphaContours.OpaqueRect(image.sprite);
+            Rect opaque = LocationAlphaContours.OpaqueRect(stable);
             Transform from = image.transform;
             Vector2 a = from.TransformPoint(opaque.min), b = from.TransformPoint(opaque.max);
             Rect rect = Rect.MinMaxRect(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
@@ -136,9 +146,13 @@ namespace KingdomSurvival.LocationRendering
             float lift = own != null && ShadowGroundDrop(own) > 0 ? own.GroundLift : 0;
             float depth = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.15f, .3f, lift));
             float baseY = item.Anchor.position.y;
-            map.Columns = Mathf.Clamp(Mathf.CeilToInt(rect.width / ShadeCell), 1, ShadeColumns);
-            map.Rows = depth > .001f ? Mathf.Clamp(Mathf.CeilToInt(rect.height / ShadeCell), 1, ShadeRows) : 1;
-            map.Any = false;
+            int columns = Mathf.Clamp(Mathf.CeilToInt(rect.width / ShadeCell), 1, ShadeColumns);
+            int rows = depth > .001f ? Mathf.Clamp(Mathf.CeilToInt(rect.height / ShadeCell), 1, ShadeRows) : 1;
+            // Сетка поменялась (предмет иной формы или иначе лежит) — без плавного перехода.
+            if (columns != map.Columns || rows != map.Rows) map.Ready = false;
+            map.Columns = columns;
+            map.Rows = rows;
+            int subX = ShadeSubSamples, subY = rows > 1 ? 2 : 1;
             float height = rect.height;
             // Рамка всего рисунка на земле — для отбора теней.
             Rect reach = Rect.MinMaxRect(rect.xMin, Mathf.Min(baseY, rect.yMin), rect.xMax, Mathf.Max(baseY, Mathf.Lerp(baseY, rect.yMax, depth)) + 1e-3f);
@@ -151,14 +165,45 @@ namespace KingdomSurvival.LocationRendering
                     float value = 0;
                     if (near)
                     {
-                        float x = rect.xMin + rect.width * (column + .5f) / map.Columns;
-                        float y = map.Rows == 1 ? baseY : rect.yMin + rect.height * (row + .5f) / map.Rows;
-                        value = DarknessAt(item.Anchor, new Vector2(x, Mathf.Lerp(baseY, y, depth)), height);
+                        for (int sy = 0; sy < subY; sy++)
+                            for (int sx = 0; sx < subX; sx++)
+                            {
+                                float x = rect.xMin + rect.width * (column + (sx + .5f) / subX) / map.Columns;
+                                float y = map.Rows == 1 ? baseY : rect.yMin + rect.height * (row + (sy + .5f) / subY) / map.Rows;
+                                value += DarknessAt(item.Anchor, new Vector2(x, Mathf.Lerp(baseY, y, depth)), height);
+                            }
+                        value /= subX * subY;
                     }
-                    int index = row * map.Columns + column;
-                    map.Values[index / 4][index % 4] = value;
-                    map.Any |= value > .001f;
+                    map.Target[row * map.Columns + column] = value;
                 }
+            if (!map.Ready)
+            {
+                for (int i = 0; i < map.Current.Length; i++) map.Current[i] = i < columns * rows ? map.Target[i] : 0;
+                map.Ready = true;
+            }
+            // Записать хотя бы раз после пересчёта (мог смениться цвет теней).
+            map.Snap = true;
+            map.Moving = true;
+        }
+
+        // Шаг к цели; true — показанное изменилось (записать в рисунок).
+        private static bool StepShadeMap(ShadeMap map, float step)
+        {
+            int count = map.Columns * map.Rows;
+            bool changed = map.Snap, moving = false, any = false;
+            map.Snap = false;
+            for (int i = 0; i < count; i++)
+            {
+                float next = Mathf.MoveTowards(map.Current[i], map.Target[i], step);
+                if (next != map.Current[i]) changed = true;
+                map.Current[i] = next;
+                moving |= Mathf.Abs(next - map.Target[i]) > 1e-4f;
+                any |= next > .001f;
+                map.Values[i / 4][i % 4] = next;
+            }
+            map.Moving = moving;
+            map.Any = any;
+            return changed;
         }
 
         // Сетка — в блок свойств рисунка; в тени рисунок идёт материалом с

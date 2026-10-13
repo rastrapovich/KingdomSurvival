@@ -54,6 +54,8 @@ namespace KingdomSurvival.LocationRendering
             // и то, что уже записано в рисунки; запасной путь без шейдера —
             // непрозрачность всего предмета и исходная альфа рисунков.
             public readonly Dictionary<Actor, float> Holes = new Dictionary<Actor, float>();
+            // Когда человек в последний раз был закрыт предметом (секунды рендерера).
+            public readonly Dictionary<Actor, float> HoleSeen = new Dictionary<Actor, float>();
             public readonly Vector4[] HoleData = new Vector4[SeeThroughHoles];
             public bool HolesWritten;
             // Сколько слоёв затемнения на рисунках получили круги (слой мог появиться позже).
@@ -475,6 +477,7 @@ namespace KingdomSurvival.LocationRendering
             entry.ShadeReady = false;
             entry.SeeThroughLevel = 1;
             entry.Holes.Clear();
+            entry.HoleSeen.Clear();
             entry.HolesWritten = false;
             entry.RadialShadows.Clear();
             entry.Parts.Clear();

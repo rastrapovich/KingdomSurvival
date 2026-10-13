@@ -20,6 +20,8 @@ namespace KingdomSurvival.LocationRendering
         public const float PersonWidthShare = .5f;
         // Мягкий край круга — доля радиуса.
         public const float SeeThroughSoftEdge = .35f;
+        // Сколько секунд круг держится открытым после того, как человек перестал быть закрыт.
+        public const float SeeThroughHoldSeconds = .5f;
 
         private static readonly int HolesId = Shader.PropertyToID("_KsHoles");
         private static readonly int HoleShapeId = Shader.PropertyToID("_KsHoleShape");
@@ -53,9 +55,13 @@ namespace KingdomSurvival.LocationRendering
                 {
                     item.Holes.TryGetValue(actor, out float level);
                     bool present = actor.Anchor != null && actors.TryGetValue(actor.Id, out Actor current) && current == actor;
-                    float target = present && Hides(item, actor) ? 1 : 0;
+                    // Круг закрывается, только если человек не закрыт уже SeeThroughHoldSeconds:
+                    // на границе рисунка (кадры фигуры, шаг) ответ «закрыт» скачет.
+                    if (present && Hides(item, actor)) item.HoleSeen[actor] = Seconds;
+                    bool held = item.HoleSeen.TryGetValue(actor, out float seen) && Seconds - seen < SeeThroughHoldSeconds && Seconds >= seen;
+                    float target = present && held ? 1 : 0;
                     level = Mathf.MoveTowards(level, target, step);
-                    if (level <= 0 && target <= 0) item.Holes.Remove(actor);
+                    if (level <= 0 && target <= 0) { item.Holes.Remove(actor); item.HoleSeen.Remove(actor); }
                     else item.Holes[actor] = level;
                     strongest = Mathf.Max(strongest, level);
                 }
@@ -168,27 +174,31 @@ namespace KingdomSurvival.LocationRendering
             Bounds bounds = figure.bounds;
             // Сама фигура в кадре (у кадров анимации широкие прозрачные поля).
             Rect body = LocationAlphaContours.OpaqueRect(figure.sprite);
-            foreach (SpriteRenderer image in item.Images)
+            for (int i = 0; i < item.Images.Count; i++)
             {
+                SpriteRenderer image = item.Images[i];
                 // Фигура перед предметом — он её не закрывает.
                 if (image == null || image.sprite == null || image.sortingOrder <= figure.sortingOrder) continue;
                 if (!image.bounds.Intersects(bounds)) continue;
+                // По первому кадру: листья и травинки, качаясь от ветра, иначе то
+                // закрывали, то открывали фигуру — круг мерцал.
+                Sprite sprite = i < item.Parts.Count && item.Parts[i]?.Sprite != null ? item.Parts[i].Sprite : image.sprite;
                 foreach (Vector2 probe in ActorProbes)
                 {
                     Vector2 local = new Vector2(body.xMin + body.width * probe.x, body.yMin + body.height * probe.y);
                     if (figure.flipX) local.x = -local.x;
-                    if (Covers(image, figure.transform.TransformPoint(local))) return true;
+                    if (Covers(image, sprite, figure.transform.TransformPoint(local))) return true;
                 }
             }
             return false;
         }
 
-        // Непрозрачен ли рисунок в точке мира (альфа нечитаема — по рамке).
-        private static bool Covers(SpriteRenderer image, Vector3 world)
+        // Непрозрачен ли рисунок sprite (в рамке image) в точке мира (альфа нечитаема — по рамке).
+        private static bool Covers(SpriteRenderer image, Sprite sprite, Vector3 world)
         {
             Vector3 local = image.transform.InverseTransformPoint(world);
             if (image.flipX) local.x = -local.x;
-            return LocationAlphaContours.IsOpaqueAt(image.sprite, local);
+            return LocationAlphaContours.IsOpaqueAt(sprite, local);
         }
     }
 }

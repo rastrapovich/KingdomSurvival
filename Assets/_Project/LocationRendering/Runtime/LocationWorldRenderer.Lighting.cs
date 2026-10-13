@@ -337,6 +337,7 @@ namespace KingdomSurvival.LocationRendering
                 UpdateRadialShadows(item, on ? flicker * (Indoor ? 1 : Mathf.Lerp(1, .25f, DayFactor)) : 0);
             }
             ApplyPost();
+            UpdateEdgeShade();
             UpdateShadows();
             RefreshLightsOutsidePlay();
         }

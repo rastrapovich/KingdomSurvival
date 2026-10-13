@@ -159,7 +159,30 @@ namespace KingdomSurvival.LocationRendering.Editor
                 AddButton(settings, "Удалить", () => Change(() => { visual.Objects.Remove(selected); selectedKind = Kind.None; }, true));
             }
 
+            BuildEdgeShadeSettings(visual);
             BuildPostSettings(sky.Post);
+        }
+
+        // Затемнение краёв и углов самого места — поверх всего, привязано к рисунку места.
+        private void BuildEdgeShadeSettings(LocationVisualDefinition visual)
+        {
+            LocationEdgeShade edge = visual.EdgeShade ??= new LocationEdgeShade();
+            Heading("Затемнение краёв места");
+            Toggle("Включено", edge.Enabled, value => edge.Enabled = value, true);
+            if (!edge.Enabled)
+            {
+                Help("Края и углы этого места темнеют поверх всего — земли, предметов, людей. В отличие от «Затемнения краёв» обработки кадра, привязано к месту, а не к экрану: камера едет — края поляны остаются тёмными.");
+                return;
+            }
+            Number("Сила", edge.Intensity, 0, 1, value => edge.Intensity = value, "0 — нет, 1 — у самого края цвет затемнения целиком.");
+            Number("Ширина", edge.Width, .01f, 1, value => edge.Width = value, "Насколько далеко от края заходит затемнение — доля половины меньшей стороны места.");
+            Number("Скругление углов", edge.Roundness, 0, 1, value => edge.Roundness = value, "0 — затемнение ровной рамкой, 1 — углы сильно скруглены и темнее.");
+            Number("Прижатость к краю", edge.Softness, 0, 1, value => edge.Softness = value, "0 — темнеет равномерно от середины полосы, 1 — тьма прижата к самому краю.");
+            ColorField("Цвет", edge.Color, value => edge.Color = value);
+            Number("Сверху", edge.Top, 0, 1, value => edge.Top = value, "Сила у верхнего края (1 — как задано, 0 — без затемнения).");
+            Number("Снизу", edge.Bottom, 0, 1, value => edge.Bottom = value);
+            Number("Слева", edge.Left, 0, 1, value => edge.Left = value);
+            Number("Справа", edge.Right, 0, 1, value => edge.Right = value);
         }
 
         private VisualElement Row()

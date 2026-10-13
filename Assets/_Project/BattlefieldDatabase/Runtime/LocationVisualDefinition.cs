@@ -243,6 +243,23 @@ namespace KingdomSurvival.BattlefieldDatabase
         }
     }
 
+    // Затемнение краёв места: от каждого края рисунка внутрь на ширину Width
+    // (доля меньшей стороны), плавно к цвету Color на силу Intensity; углы —
+    // скруглённые (Roundness: 0 — прямоугольник, 1 — сильно скруглены, темнее);
+    // Softness — как постепенно темнеет (0 — ровно, 1 — тьма прижата к краю).
+    // Отдельные стороны можно ослабить (Top, Bottom, Left, Right — 0..1).
+    [Serializable]
+    public sealed class LocationEdgeShade
+    {
+        public bool Enabled;
+        public float Intensity = .7f;
+        public float Width = .3f;
+        public float Roundness = .5f;
+        public float Softness = .3f;
+        public Color Color = Color.black;
+        public float Top = 1, Bottom = 1, Left = 1, Right = 1;
+    }
+
     [Serializable]
     public sealed class LocationVisualDefinition
     {
@@ -257,6 +274,9 @@ namespace KingdomSurvival.BattlefieldDatabase
         public bool UseWorldLighting = true;
         public Color IndoorColor = new Color(.62f, .57f, .50f);
         public float IndoorIntensity = .55f;
+        // Затемнение краёв и углов самого места (а не экрана): ложится поверх
+        // всего — земли, предметов, людей, — привязано к рисунку места.
+        public LocationEdgeShade EdgeShade = new LocationEdgeShade();
         public LocationDaylight Daylight = new LocationDaylight();
         public LocationSunDefinition Sun = new LocationSunDefinition();
         public LocationPostEffects Post = new LocationPostEffects();

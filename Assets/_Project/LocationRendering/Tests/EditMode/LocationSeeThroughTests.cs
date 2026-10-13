@@ -195,6 +195,24 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
+        // Своё основание экземпляра (проходимость) — о проходе: пятно у
+        // основания и перекрытие света остаются формой ассета, а не
+        // прямоугольником «Основание на земле».
+        [Test]
+        public void OwnPassabilityFootprint_DoesNotChangeOcclusionShape()
+        {
+            ArtAssetDefinition stone = Asset("stone", 100, 60, new Vector2(.5f, .3f));
+            stone.Settings(ArtAssetView.Front).FootprintSize = new Vector2(1, .5f);
+            LocationVisualObject item = Put("stone", new Vector2(960, 600));
+            item.Overrides |= LocationAssetOverride.Passability;
+            item.BlocksMovement = true;
+            item.Footprint = new Vector2(3.85f, 1.38f);
+            LocationResolvedVisual resolved = LocationVisualResolver.Resolve(item, null, catalog);
+            Assert.That(resolved.FootprintSize, Is.EqualTo(new Vector2(3.85f, 1.38f)), "Проход — по своему основанию.");
+            Assert.That(resolved.ShapeCells, Has.Count.EqualTo(1));
+            Assert.That(resolved.ShapeCells[0].size, Is.EqualTo(new Vector2(1, .5f)), "Окклюзия и свет — по форме ассета.");
+        }
+
         private static int ShadowCount(Transform anchor)
         {
             int count = 0;

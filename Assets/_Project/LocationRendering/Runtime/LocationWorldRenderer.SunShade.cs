@@ -36,6 +36,8 @@ namespace KingdomSurvival.LocationRendering
         public const int ShadeColumns = 16, ShadeRows = 8;
         // Точек поперёк клетки (среднее).
         public const int ShadeSubSamples = 4;
+        // Сколько предметов пересчитывается за кадр после сдвига солнца.
+        public const int ShadeRefillPerFrame = 48;
 
         private static readonly int ShadeMapId = Shader.PropertyToID("_KsShadeMap");
         private static readonly int ShadeRectId = Shader.PropertyToID("_KsShadeRect");
@@ -68,14 +70,22 @@ namespace KingdomSurvival.LocationRendering
             public Sprite Sprite;
             // Видимая высота предмета (мир).
             public float Height;
+            // Перенос силуэта (как в шейдере), линия земли, сила тени и перевод
+            // точки мира в рисунок тени — один раз на сбор, а не в каждой точке.
+            public float A, B, GroundY, Opacity;
+            public Matrix4x4 ToLocal;
+            public bool FlipX;
         }
 
         private float shadeSeconds = float.NaN;
         private Vector2 shadeSun = new Vector2(float.NaN, float.NaN);
         private float shadeOpacity = -1;
         private int shadeCasterCount = -1;
+        private int shadeCursor;
         private Color shadeTint = Color.clear;
         private readonly List<ShadeCaster> shadeCasters = new List<ShadeCaster>();
+        private readonly List<ShadeCaster> shadeNearby = new List<ShadeCaster>();
+        private readonly Dictionary<SpriteRenderer, Caster> shadeOwners = new Dictionary<SpriteRenderer, Caster>();
         private readonly MaterialPropertyBlock shadeBlock = new MaterialPropertyBlock();
 
         private void UpdateSunShade()
@@ -86,13 +96,13 @@ namespace KingdomSurvival.LocationRendering
             Color tint = Sky.ShadowStyle.OcclusionColor;
             tint.a = 1;
             bool sunMoved = float.IsNaN(shadeSun.x) || (shadeSun - sunRaw).sqrMagnitude > 1e-4f || Mathf.Abs(shadeOpacity - sunOpacity) > .01f ||
-                            shadeCasterCount != casters.Count || shadeTint != tint;
+                            shadeCasterCount != casterVersion || shadeTint != tint;
             if (sunMoved)
             {
                 CollectShadeCasters();
                 shadeSun = sunRaw;
                 shadeOpacity = sunOpacity;
-                shadeCasterCount = casters.Count;
+                shadeCasterCount = casterVersion;
                 shadeTint = tint;
             }
 
@@ -111,11 +121,22 @@ namespace KingdomSurvival.LocationRendering
                 actor.Shade = Color.Lerp(Color.white, tint, actor.ShadeLevel);
             }
 
-            // Предметы — тенью на рисунке, заново при сдвиге солнца или предмета.
-            foreach (Placed item in placed)
+            // Предметы — тенью на рисунке. Сдвинулось солнце — все помечаются и
+            // пересчитываются не больше ShadeRefillPerFrame за кадр (без пика в
+            // десятки мс; переход и так плавный). Новый или сдвинутый предмет — сразу.
+            int budget = ShadeRefillPerFrame, total = placed.Count;
+            // По кругу от курсора: при солнце, сдвигающемся каждый кадр, очередь
+            // доходит до всех, а не только до первых в списке.
+            if (shadeCursor >= total) shadeCursor = 0;
+            int start = shadeCursor;
+            for (int k = 0; k < total; k++)
             {
+                Placed item = placed[(start + k) % total];
                 if (item.Resolved == null || item.Images.Count == 0 || !item.Resolved.LitBySun) continue;
-                bool refill = sunMoved || !item.ShadeReady || item.ShadeFoot != item.Anchor.position;
+                if (sunMoved) item.ShadeStale = true;
+                bool refill = !item.ShadeReady || item.ShadeFoot != item.Anchor.position;
+                if (!refill && item.ShadeStale && budget > 0) { refill = true; budget--; shadeCursor = (start + k + 1) % total; }
+                if (refill) item.ShadeStale = false;
                 item.ShadeReady = true;
                 item.ShadeFoot = item.Anchor.position;
                 for (int i = 0; i < item.Images.Count && i < item.Parts.Count && i < item.ShadeMaps.Count; i++)
@@ -142,7 +163,7 @@ namespace KingdomSurvival.LocationRendering
             Rect rect = Rect.MinMaxRect(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
             map.Rect = rect;
             // Низкий широкий предмет — рисунок лежит на земле (как у его тени).
-            Caster own = casters.Find(caster => caster.Source == image);
+            shadeOwners.TryGetValue(image, out Caster own);
             float lift = own != null && ShadowGroundDrop(own) > 0 ? own.GroundLift : 0;
             float depth = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.15f, .3f, lift));
             float baseY = item.Anchor.position.y;
@@ -156,9 +177,11 @@ namespace KingdomSurvival.LocationRendering
             float height = rect.height;
             // Рамка всего рисунка на земле — для отбора теней.
             Rect reach = Rect.MinMaxRect(rect.xMin, Mathf.Min(baseY, rect.yMin), rect.xMax, Mathf.Max(baseY, Mathf.Lerp(baseY, rect.yMax, depth)) + 1e-3f);
-            bool near = false;
+            // Только тени, дотягивающиеся до рисунка: точки проверяются по ним, а не по всем.
+            shadeNearby.Clear();
             foreach (ShadeCaster entry in shadeCasters)
-                if (entry.Caster.Anchor != item.Anchor && entry.Height >= height * ShadeCasterTaller && entry.Box.Overlaps(reach)) { near = true; break; }
+                if (!ReferenceEquals(entry.Caster.Anchor, item.Anchor) && entry.Height >= height * ShadeCasterTaller && entry.Box.Overlaps(reach)) shadeNearby.Add(entry);
+            bool near = shadeNearby.Count > 0;
             for (int row = 0; row < map.Rows; row++)
                 for (int column = 0; column < map.Columns; column++)
                 {
@@ -170,7 +193,7 @@ namespace KingdomSurvival.LocationRendering
                             {
                                 float x = rect.xMin + rect.width * (column + (sx + .5f) / subX) / map.Columns;
                                 float y = map.Rows == 1 ? baseY : rect.yMin + rect.height * (row + (sy + .5f) / subY) / map.Rows;
-                                value += DarknessAt(item.Anchor, new Vector2(x, Mathf.Lerp(baseY, y, depth)), height);
+                                value += DarknessAt(shadeNearby, item.Anchor, new Vector2(x, Mathf.Lerp(baseY, y, depth)), height);
                             }
                         value /= subX * subY;
                     }
@@ -242,13 +265,22 @@ namespace KingdomSurvival.LocationRendering
         private void CollectShadeCasters()
         {
             shadeCasters.Clear();
+            shadeOwners.Clear();
             foreach (Caster caster in casters)
             {
+                if (caster.Source != null) shadeOwners[caster.Source] = caster;
                 if (caster.People || caster.Anchor == null || !ShadowGround(caster, out Rect box)) continue;
                 SpriteRenderer shadow = caster.Shadows[0];
                 if (caster.ShadeSprite == null) caster.ShadeSprite = shadow.sprite;
                 float height = LocationAlphaContours.OpaqueRect(caster.ShadeSprite).height * Mathf.Abs(shadow.transform.lossyScale.y);
-                shadeCasters.Add(new ShadeCaster { Caster = caster, Box = box, Sprite = caster.ShadeSprite, Height = height });
+                ShadowState state = caster.States[0];
+                Projection(state, out float a, out float b);
+                if (Mathf.Abs(a) < 1e-4f) continue;
+                shadeCasters.Add(new ShadeCaster
+                {
+                    Caster = caster, Box = box, Sprite = caster.ShadeSprite, Height = height, A = a, B = b, GroundY = state.GroundY,
+                    Opacity = Mathf.Clamp01(state.Opacity), ToLocal = shadow.transform.worldToLocalMatrix, FlipX = shadow.flipX
+                });
             }
         }
 
@@ -285,32 +317,22 @@ namespace KingdomSurvival.LocationRendering
         }
 
         // Самая тёмная чужая тень в точке земли — от предметов выше height.
-        private float DarknessAt(Transform self, Vector2 point, float height)
+        private float DarknessAt(Transform self, Vector2 point, float height) => DarknessAt(shadeCasters, self, point, height);
+
+        private static float DarknessAt(List<ShadeCaster> list, Transform self, Vector2 point, float height)
         {
             float darkest = 0;
-            foreach (ShadeCaster entry in shadeCasters)
+            foreach (ShadeCaster entry in list)
             {
-                if (entry.Caster.Anchor == self || entry.Height < height * ShadeCasterTaller || !entry.Box.Contains(point)) continue;
-                float darkness = ShadowDarknessAt(entry.Caster, entry.Sprite, point);
-                if (darkness > darkest) darkest = darkness;
+                if (ReferenceEquals(entry.Caster.Anchor, self) || entry.Height < height * ShadeCasterTaller || !entry.Box.Contains(point)) continue;
+                if (entry.Opacity <= darkest) continue;
+                float h = (point.y - entry.GroundY) / entry.A;
+                if (h < 0) continue;
+                Vector3 local = entry.ToLocal.MultiplyPoint3x4(new Vector3(point.x - h * entry.B, entry.GroundY + h, 0));
+                if (entry.FlipX) local.x = -local.x;
+                if (LocationAlphaContours.IsOpaqueAt(entry.Sprite, local)) darkest = entry.Opacity;
             }
             return darkest;
-        }
-
-        // Тёмность тени солнца одного предмета в точке земли (0 — нет тени).
-        private static float ShadowDarknessAt(Caster caster, Sprite sprite, Vector2 point)
-        {
-            SpriteRenderer shadow = caster.Shadows[0];
-            ShadowState state = caster.States[0];
-            if (shadow == null || !shadow.enabled || !state.Shown || sprite == null || state.Opacity <= .001f) return 0;
-            Projection(state, out float a, out float b);
-            if (Mathf.Abs(a) < 1e-4f) return 0;
-            float h = (point.y - state.GroundY) / a;
-            if (h < 0) return 0;
-            float x = point.x - h * b;
-            Vector3 local = shadow.transform.InverseTransformPoint(new Vector3(x, state.GroundY + h, 0));
-            if (shadow.flipX) local.x = -local.x;
-            return LocationAlphaContours.IsOpaqueAt(sprite, local) ? Mathf.Clamp01(state.Opacity) : 0;
         }
 
         // Затемнение человека чужой тенью солнца (белый — на свету).

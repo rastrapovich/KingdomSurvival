@@ -71,6 +71,33 @@ namespace KingdomSurvival.LocationRendering
             if (sprite == null) return Rect.zero;
             if (rects.TryGetValue(sprite, out Rect cached)) return cached;
             Vector2 min = new Vector2(float.PositiveInfinity, float.PositiveInfinity), max = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+            // По маске — проходом по клеткам, без обхода контура (дорого у больших рисунков).
+            Mask mask = MaskOf(sprite);
+            if (mask != null)
+            {
+                int minX = int.MaxValue, minY = int.MaxValue, maxX = -1, maxY = -1;
+                for (int y = 0; y < mask.H; y++)
+                    for (int x = 0; x < mask.W; x++)
+                        if (mask.Inside[y * mask.W + x])
+                        {
+                            if (x < minX) minX = x;
+                            if (x > maxX) maxX = x;
+                            if (y < minY) minY = y;
+                            if (y > maxY) maxY = y;
+                        }
+                if (maxX >= 0)
+                {
+                    // Клетка сетки → пиксель текстуры → единицы спрайта от опоры (как в Build).
+                    Vector2 Local(int gx, int gy) =>
+                        (mask.Offset + new Vector2((mask.X0 + gx) / mask.Scale - mask.MinX, (mask.Y0 + gy) / mask.Scale - mask.MinY) - mask.Pivot) / mask.PixelsPerUnit;
+                    min = Local(minX, minY);
+                    max = Local(maxX + 1, maxY + 1);
+                }
+                Rect fromMask = maxX >= 0 ? Rect.MinMaxRect(min.x, min.y, max.x, max.y) : new Rect(sprite.bounds.min, sprite.bounds.size);
+                if (rects.Count > 4096) rects.Clear();
+                rects[sprite] = fromMask;
+                return fromMask;
+            }
             foreach (Vector2[] loop in Of(sprite))
                 foreach (Vector2 point in loop)
                 {
@@ -90,6 +117,18 @@ namespace KingdomSurvival.LocationRendering
         public static bool IsOpaqueAt(Sprite sprite, Vector2 local)
         {
             if (sprite == null) return false;
+            // Маска альфы рисунка — за O(1); контур (тысячи вершин у кроны) — только
+            // если альфу прочитать не удалось.
+            Mask mask = MaskOf(sprite);
+            if (mask != null)
+            {
+                Vector2 texel = local * mask.PixelsPerUnit + mask.Pivot - mask.Offset;
+                int x = Mathf.FloorToInt((mask.MinX + texel.x) * mask.Scale) - mask.X0;
+                int y = Mathf.FloorToInt((mask.MinY + texel.y) * mask.Scale) - mask.Y0;
+                if (texel.x < 0 || texel.y < 0 || texel.x >= mask.Width || texel.y >= mask.Height) return false;
+                if (x < 0 || y < 0 || x >= mask.W || y >= mask.H) return false;
+                return mask.Inside[y * mask.W + x];
+            }
             List<Vector2[]> loops = Of(sprite);
             if (loops.Count == 0) return sprite.bounds.Contains(new Vector3(local.x, local.y, sprite.bounds.center.z));
             bool inside = false;
@@ -103,6 +142,52 @@ namespace KingdomSurvival.LocationRendering
             return inside;
         }
 
+        // Непрозрачность рисунка клетками сетки альфы (та же сетка, что у контуров).
+        private sealed class Mask
+        {
+            public bool[] Inside;
+            public int W, H, X0, Y0;
+            public float Scale, MinX, MinY, Width, Height, PixelsPerUnit;
+            public Vector2 Pivot, Offset;
+        }
+
+        private static readonly Dictionary<Sprite, Mask> masks = new Dictionary<Sprite, Mask>();
+
+        private static Mask MaskOf(Sprite sprite)
+        {
+            if (masks.TryGetValue(sprite, out Mask cached)) return cached;
+            Mask mask = null;
+            AlphaGrid grid = sprite.texture != null ? Grid(sprite.texture) : null;
+            if (grid != null)
+            {
+                Rect rect;
+                Vector2 offset;
+                try { rect = sprite.textureRect; offset = sprite.textureRectOffset; }
+                catch (System.Exception) { rect = sprite.rect; offset = Vector2.zero; }
+                int x0 = Mathf.Clamp(Mathf.FloorToInt(rect.xMin * grid.Scale), 0, grid.Width);
+                int y0 = Mathf.Clamp(Mathf.FloorToInt(rect.yMin * grid.Scale), 0, grid.Height);
+                int x1 = Mathf.Clamp(Mathf.CeilToInt(rect.xMax * grid.Scale), x0, grid.Width);
+                int y1 = Mathf.Clamp(Mathf.CeilToInt(rect.yMax * grid.Scale), y0, grid.Height);
+                int w = x1 - x0, h = y1 - y0;
+                if (w > 0 && h > 0)
+                {
+                    bool[] inside = new bool[w * h];
+                    for (int y = 0; y < h; y++)
+                        for (int x = 0; x < w; x++)
+                            inside[y * w + x] = grid.Alpha[(y0 + y) * grid.Width + x0 + x] >= AlphaCutoff;
+                    mask = new Mask
+                    {
+                        Inside = inside, W = w, H = h, X0 = x0, Y0 = y0, Scale = grid.Scale, MinX = rect.xMin, MinY = rect.yMin,
+                        Width = rect.width, Height = rect.height, PixelsPerUnit = Mathf.Max(.001f, sprite.pixelsPerUnit),
+                        Pivot = sprite.pivot, Offset = offset
+                    };
+                }
+            }
+            if (masks.Count > 512) masks.Clear();
+            masks[sprite] = mask;
+            return mask;
+        }
+
         private static readonly Dictionary<Sprite, float> bottoms = new Dictionary<Sprite, float>();
 
         // Низ непрозрачного рисунка — единицы спрайта от его опоры (Y вверх).
@@ -112,9 +197,11 @@ namespace KingdomSurvival.LocationRendering
             if (sprite == null) return float.NaN;
             if (bottoms.TryGetValue(sprite, out float cached)) return cached;
             float bottom = float.PositiveInfinity;
-            foreach (Vector2[] loop in Of(sprite))
-                foreach (Vector2 point in loop)
-                    bottom = Mathf.Min(bottom, point.y);
+            if (MaskOf(sprite) != null) bottom = OpaqueRect(sprite).yMin;
+            else
+                foreach (Vector2[] loop in Of(sprite))
+                    foreach (Vector2 point in loop)
+                        bottom = Mathf.Min(bottom, point.y);
             float result = float.IsInfinity(bottom) ? float.NaN : bottom;
             if (bottoms.Count > 4096) bottoms.Clear();
             bottoms[sprite] = result;

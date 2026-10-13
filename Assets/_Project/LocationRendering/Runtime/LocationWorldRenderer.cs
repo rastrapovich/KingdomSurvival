@@ -66,7 +66,7 @@ namespace KingdomSurvival.LocationRendering
             // у каждого рисунка — сетка тёмности по его площади и его прежний
             // материал (в тени рисунок идёт материалом с поправкой).
             public readonly List<ShadeMap> ShadeMaps = new List<ShadeMap>();
-            public bool ShadeReady;
+            public bool ShadeReady, ShadeStale;
             public Vector3 ShadeFoot;
         }
 
@@ -448,6 +448,9 @@ namespace KingdomSurvival.LocationRendering
         // клетки, иначе прямоугольник; нет основания — null.
         private static List<Rect> OcclusionFootprint(LocationResolvedVisual resolved)
         {
+            // Форма ассета: своё основание экземпляра (проходимость) окклюзию и
+            // перекрытие света не меняет — иначе под камнем вставал прямоугольник.
+            if (resolved.ShapeCells != null) return resolved.ShapeCells.Count > 0 ? resolved.ShapeCells : null;
             if (resolved.FootprintCells != null && resolved.FootprintCells.Count > 0) return resolved.FootprintCells;
             Vector2 size = resolved.FootprintSize;
             if (size.x < .01f || size.y < .01f) return null;
@@ -457,6 +460,7 @@ namespace KingdomSurvival.LocationRendering
         // Снять рисунки, тени и перекрытие света предмета (свет и опора остаются).
         private void ClearObjectArt(Placed entry)
         {
+            casterVersion++;
             casters.RemoveAll(caster =>
             {
                 if (caster.Anchor != entry.Anchor) return false;

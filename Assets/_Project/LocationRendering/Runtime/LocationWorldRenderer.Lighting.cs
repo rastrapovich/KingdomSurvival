@@ -105,6 +105,8 @@ namespace KingdomSurvival.LocationRendering
 
 
         private readonly List<Caster> casters = new List<Caster>();
+        // Растёт при каждом изменении списка теней (тень на других собирается заново).
+        private int casterVersion;
         private Material shadowMaterial;
         private MaterialPropertyBlock shadowBlock;
         private Volume postVolume;
@@ -356,6 +358,7 @@ namespace KingdomSurvival.LocationRendering
             };
             if (contour) caster.Contour = AddContour(source);
             casters.Add(caster);
+            casterVersion++;
             return caster;
         }
 
@@ -377,6 +380,7 @@ namespace KingdomSurvival.LocationRendering
                 if (caster.Anchor == null || caster.Source == null)
                 {
                     casters.RemoveAt(i);
+                    casterVersion++;
                     continue;
                 }
                 if (peopleOnly && !caster.People) continue;
@@ -402,7 +406,10 @@ namespace KingdomSurvival.LocationRendering
         // ------------------------------------------------------------------
 
         private readonly HashSet<Transform> occludedAnchors = new HashSet<Transform>();
-        private readonly Dictionary<string, Sprite> occlusionSprites = new Dictionary<string, Sprite>(StringComparer.Ordinal);
+        // Пятна окклюзии — общие для всех рендереров: окно Базы локаций пересоздаёт
+        // место после каждой правки, и сотни пятен (у раскидки свой масштаб) не
+        // строятся заново. Живут до переполнения (тогда освобождаются).
+        private static readonly Dictionary<string, Sprite> occlusionSprites = new Dictionary<string, Sprite>(StringComparer.Ordinal);
         private Material occlusionMaterial, occlusionObjectMaterial;
         private MaterialPropertyBlock occlusionBlock;
         private static readonly int OcclusionBaseId = Shader.PropertyToID("_OccBase");
@@ -625,15 +632,19 @@ namespace KingdomSurvival.LocationRendering
             // Расстояние до основания (в текселях): два прохода фаски.
             float[] distance = new float[width * height];
             const float Far = 1e6f, Diagonal = 1.41421356f;
-            for (int y = 0; y < height; y++)
-                for (int x = 0; x < width; x++)
-                {
-                    Vector2 point = new Vector2(area.xMin + (x + .5f) * texel, area.yMin + (y + .5f) * texel);
-                    bool inside = false;
-                    foreach (Rect cell in cells)
-                        if (cell.Contains(point)) { inside = true; break; }
-                    distance[y * width + x] = inside ? 0 : Far;
-                }
+            for (int i = 0; i < distance.Length; i++) distance[i] = Far;
+            // Клетки основания заливаются в сетку (центр текселя внутри клетки):
+            // время — по площади, а не «тексели × клетки» (у кисти их сотни).
+            foreach (Rect cell in cells)
+            {
+                int x0 = Mathf.Max(0, Mathf.CeilToInt((cell.xMin - area.xMin) / texel - .5f));
+                int x1 = Mathf.Min(width - 1, Mathf.CeilToInt((cell.xMax - area.xMin) / texel - .5f) - 1);
+                int y0 = Mathf.Max(0, Mathf.CeilToInt((cell.yMin - area.yMin) / texel - .5f));
+                int y1 = Mathf.Min(height - 1, Mathf.CeilToInt((cell.yMax - area.yMin) / texel - .5f) - 1);
+                for (int y = y0; y <= y1; y++)
+                    for (int x = x0; x <= x1; x++)
+                        distance[y * width + x] = 0;
+            }
             for (int y = 0; y < height; y++)
                 for (int x = 0; x < width; x++)
                 {
@@ -672,17 +683,30 @@ namespace KingdomSurvival.LocationRendering
             byte[] alpha = new byte[width * height];
             for (int i = 0; i < alpha.Length; i++)
                 alpha[i] = (byte)Mathf.RoundToInt(Mathf.Clamp01(value[i]) * 255);
-            Texture2D texture = Own(new Texture2D(width, height, TextureFormat.Alpha8, false)
+            Texture2D texture = new Texture2D(width, height, TextureFormat.Alpha8, false)
             {
-                name = "Окклюзия основания", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear
-            });
+                name = "Окклюзия основания", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear, hideFlags = HideFlags.HideAndDontSave
+            };
             texture.LoadRawTextureData(alpha);
             texture.Apply();
             Vector2 pivot = new Vector2(-area.xMin / (width * texel), -area.yMin / (height * texel));
-            Sprite sprite = Own(Sprite.Create(texture, new Rect(0, 0, width, height), pivot, 1 / texel, 0, SpriteMeshType.FullRect));
-            if (occlusionSprites.Count > 512) occlusionSprites.Clear();
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, width, height), pivot, 1 / texel, 0, SpriteMeshType.FullRect);
+            sprite.hideFlags = HideFlags.HideAndDontSave;
+            if (occlusionSprites.Count > 1024) ReleaseOcclusionSprites();
             occlusionSprites[id] = sprite;
             return sprite;
+        }
+
+        private static void ReleaseOcclusionSprites()
+        {
+            foreach (Sprite old in occlusionSprites.Values)
+            {
+                if (old == null) continue;
+                Texture2D page = old.texture;
+                Destroy(old);
+                if (page != null) Destroy(page);
+            }
+            occlusionSprites.Clear();
         }
 
         // Среднее по окну 2·reach+1 вдоль строк (rows) или столбцов, на месте.

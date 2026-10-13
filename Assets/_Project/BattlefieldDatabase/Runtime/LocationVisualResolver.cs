@@ -53,6 +53,11 @@ namespace KingdomSurvival.BattlefieldDatabase
         public List<Rect> FootprintCells;
         // Контур основания кистью — отрезки (x1, y1, x2, y2) в тех же единицах.
         public List<Vector4> FootprintOutline;
+        // Форма основания предмета для окклюзии и перекрытия света — всегда
+        // ассета (кистью или прямоугольником), в тех же единицах. Своё основание
+        // экземпляра (проходимость) её не меняет: оно — о проходе, а не о виде.
+        // null — прямой рисунок места: форма — основание выше.
+        public List<Rect> ShapeCells;
         public bool OccludesLight;
         public float ShadowLength = 1;
         // ПР-12П: ход кадров у анимированных частей; фаза — своя у экземпляра.
@@ -110,6 +115,12 @@ namespace KingdomSurvival.BattlefieldDatabase
                 {
                     Rect cell = result.FootprintCells[i];
                     result.FootprintCells[i] = new Rect(cell.x * result.Stretch, cell.y, cell.width * result.Stretch, cell.height);
+                }
+            if (result.ShapeCells != null && Mathf.Abs(result.Stretch - 1) > .0001f)
+                for (int i = 0; i < result.ShapeCells.Count; i++)
+                {
+                    Rect cell = result.ShapeCells[i];
+                    result.ShapeCells[i] = new Rect(cell.x * result.Stretch, cell.y, cell.width * result.Stretch, cell.height);
                 }
             if (result.FootprintOutline != null && Mathf.Abs(result.Stretch - 1) > .0001f)
                 for (int i = 0; i < result.FootprintOutline.Count; i++)
@@ -234,6 +245,20 @@ namespace KingdomSurvival.BattlefieldDatabase
                 Rect bounds = settings.FootprintMask.Bounds();
                 result.FootprintSize = bounds.size * scale;
                 result.FootprintOffset = new Vector2(item.FlipX ? -bounds.center.x : bounds.center.x, bounds.center.y) * scale;
+            }
+            result.ShapeCells = new List<Rect>();
+            if (settings.UsesFootprintMask)
+                foreach (Rect cell in settings.FootprintMask.Rects())
+                {
+                    Rect scaled = new Rect(cell.position * scale, cell.size * scale);
+                    if (item.FlipX) scaled.x = -scaled.xMax;
+                    result.ShapeCells.Add(scaled);
+                }
+            else
+            {
+                Vector2 shapeSize = settings.FootprintSize * scale, shapeOffset = settings.FootprintOffset * scale;
+                if (item.FlipX) shapeOffset.x = -shapeOffset.x;
+                if (shapeSize.x >= .01f && shapeSize.y >= .01f) result.ShapeCells.Add(new Rect(shapeOffset - shapeSize / 2, shapeSize));
             }
             bool shadows = item.IsOverridden(LocationAssetOverride.Shadows);
             result.OccludesLight = shadows ? item.CastsShadow : asset.OccludesLight;

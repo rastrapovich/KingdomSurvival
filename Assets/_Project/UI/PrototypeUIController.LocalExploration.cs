@@ -550,7 +550,13 @@ public partial class PrototypeUIController
         // Поле на всю локацию — весь рисунок места; иначе — кадр арены.
         Rect canvasRect = surface.HasLocationGrid ? new Rect(0f, 0f, localGeometry.CanvasWidth, localGeometry.CanvasHeight) : localGeometry.FrameRect(localArenaCenter);
         localRenderer.AlignFrame(canvasRect, viewport);
+        // Сетка поля — в мире места, под людьми и предметами, а не поверх картинки.
+        surface.GridDrawnBelow = true;
+        if (surface.GridOnCanvas(canvasRect, localBattleGridCenters, out float radius, out float verticalScale, out Color fill, out Color line, out float lineWidth))
+            localRenderer.SetBattleGrid(localBattleGridCenters, radius, verticalScale, fill, line, lineWidth);
     }
+
+    private readonly List<Vector2> localBattleGridCenters = new List<Vector2>();
 
     // ПР-12М: фигуры боя рисует рендерер места — под его светом и тенями.
     // Поле боя отдаёт кадр, прямоугольник и отражение каждой фигуры.
@@ -879,6 +885,9 @@ public partial class PrototypeUIController
     // экране в пикселях; фигуры, свет и время суток — из состояния.
     private void RenderLocalWorld()
     {
+        // Сетка боя — только пока идёт бой на месте.
+        if (!IsLocalBattleRunning && localRenderer != null && localRenderer.BattleGridVisible)
+            localRenderer.SetBattleGrid(null, 0f, 0f, Color.clear, Color.clear, 0f);
         Rect bounds = localImage.contentRect;
         if (bounds.width >= 1f && bounds.height >= 1f && interfaceRoot != null)
         {

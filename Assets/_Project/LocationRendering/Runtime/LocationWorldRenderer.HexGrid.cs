@@ -24,6 +24,99 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
+        // ------------------------------------------------------------------
+        // Сетка боя: клетки поля (BattlefieldView.GridOnCanvas) в стиле поля —
+        // заливка и линии гексов между землёй и предметами, под людьми.
+        // Перестраивается, только когда клетки или стиль изменились.
+        // ------------------------------------------------------------------
+
+        private GameObject battleGrid;
+        private Mesh battleGridMesh;
+        private int battleGridKey;
+
+        public bool BattleGridVisible => battleGrid != null && battleGrid.activeSelf;
+
+        // centers — центры гексов в пикселях рисунка места; null или пусто — скрыть.
+        public void SetBattleGrid(IReadOnlyList<Vector2> centers, float radius, float verticalScale, Color fill, Color line, float lineWidth)
+        {
+            bool fills = fill.a > .001f, lines = line.a > .001f && lineWidth > .01f;
+            // Не тоньше пикселя кадра: у поля линия сглажена, здесь — нет, и
+            // тонкая линия (меньше пикселя кадра) пропадала. Шаг — по приближению камеры.
+            if (lines && Target != null && Target.height > 0 && ViewHeight > 0)
+            {
+                float pixel = ViewHeight / Target.height;
+                lineWidth = Mathf.Max(lineWidth, Mathf.Pow(2, Mathf.Ceil(Mathf.Log(pixel * 1.25f, 2) * 4) / 4));
+            }
+            if (centers == null || centers.Count == 0 || radius <= .01f || (!fills && !lines))
+            {
+                if (battleGrid != null) battleGrid.SetActive(false);
+                return;
+            }
+            int key = 17;
+            unchecked
+            {
+                foreach (Vector2 center in centers) key = key * 31 + Mathf.RoundToInt(center.x * 4) * 7919 + Mathf.RoundToInt(center.y * 4);
+                key = key * 31 + Mathf.RoundToInt(radius * 100);
+                key = key * 31 + Mathf.RoundToInt(verticalScale * 1000);
+                key = key * 31 + fill.GetHashCode();
+                key = key * 31 + line.GetHashCode();
+                key = key * 31 + Mathf.RoundToInt(lineWidth * 20);
+            }
+            if (battleGrid == null)
+            {
+                battleGrid = Child("Сетка боя");
+                battleGridMesh = Own(new Mesh { name = "Сетка боя", indexFormat = IndexFormat.UInt32 });
+                battleGrid.AddComponent<MeshFilter>().sharedMesh = battleGridMesh;
+                MeshRenderer meshRenderer = battleGrid.AddComponent<MeshRenderer>();
+                meshRenderer.sharedMaterial = unlit;
+                meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
+                // Над землёй с тенями, под предметами и людьми.
+                meshRenderer.sortingOrder = ShadowSortingOrder + 5;
+                battleGridKey = 0;
+            }
+            if (!battleGrid.activeSelf) battleGrid.SetActive(true);
+            if (key == battleGridKey) return;
+            battleGridKey = key;
+            List<Vector3> vertices = new List<Vector3>();
+            List<Color> colors = new List<Color>();
+            List<int> indices = new List<int>();
+            Vector2[] corners = new Vector2[6];
+            float half = lineWidth / 2 / LocationVisualGeometry.PixelsPerUnit;
+            foreach (Vector2 center in centers)
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    float angle = (60 * i - 30) * Mathf.Deg2Rad;
+                    corners[i] = LocationVisualGeometry.PixelToWorld(Location,
+                        center + new Vector2(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius * verticalScale));
+                }
+                if (fills)
+                {
+                    int start = vertices.Count;
+                    vertices.Add(LocationVisualGeometry.PixelToWorld(Location, center));
+                    colors.Add(fill);
+                    for (int i = 0; i < 6; i++) { vertices.Add(corners[i]); colors.Add(fill); }
+                    for (int i = 0; i < 6; i++) { indices.Add(start); indices.Add(start + 1 + i); indices.Add(start + 1 + (i + 1) % 6); }
+                }
+                if (lines)
+                    for (int i = 0; i < 6; i++)
+                    {
+                        Vector2 a = corners[i], b = corners[(i + 1) % 6];
+                        Vector2 side = Vector2.Perpendicular((b - a).normalized) * half;
+                        int start = vertices.Count;
+                        vertices.Add(a - side); vertices.Add(a + side); vertices.Add(b + side); vertices.Add(b - side);
+                        for (int k = 0; k < 4; k++) colors.Add(line);
+                        indices.Add(start); indices.Add(start + 1); indices.Add(start + 2);
+                        indices.Add(start); indices.Add(start + 2); indices.Add(start + 3);
+                    }
+            }
+            battleGridMesh.Clear();
+            battleGridMesh.SetVertices(vertices);
+            battleGridMesh.SetColors(colors);
+            battleGridMesh.SetTriangles(indices, 0);
+            battleGridMesh.RecalculateBounds();
+        }
+
         private void BuildHexGrid()
         {
             hexGrid = Child("Сетка гексов");

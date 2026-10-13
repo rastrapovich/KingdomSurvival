@@ -73,6 +73,14 @@ public sealed class BattlefieldScenePlayModeTests
                 .Select(item => item.gameObject).FirstOrDefault(item => item.name == "Фигуры боя");
             Assert.IsNotNull(figures, "У рендерера места есть слой фигур боя.");
             Assert.GreaterOrEqual(figures.transform.childCount, 2, "Боец и противник — фигурами места.");
+            // Сетка — в мире места, под фигурами, а не элементом поля поверх кадра.
+            Assert.IsTrue(surface.GridDrawnBelow, "Поле не рисует сетку поверх кадра.");
+            GameObject grid = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None)
+                .Select(item => item.gameObject).FirstOrDefault(item => item.name == "Сетка боя");
+            Assert.IsNotNull(grid, "Сетка боя — в мире места.");
+            Assert.IsTrue(grid.activeInHierarchy, "Сетка боя видна.");
+            Assert.Less(grid.GetComponent<MeshRenderer>().sortingOrder, figures.GetComponentsInChildren<SpriteRenderer>().Where(item => item.name == "Фигура").Min(item => item.sortingOrder),
+                "Сетка — под фигурами.");
 
             // Снимок для просмотра.
             RenderTexture texture = (RenderTexture)surface.Q<Image>("battlefield-background").image;

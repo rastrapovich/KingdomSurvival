@@ -20,6 +20,7 @@ namespace KingdomSurvival.BattleSandbox
         private readonly HexBoardElement board;
         private readonly Rect frameOnCanvas;
         private readonly List<LocationWorldRenderer.BattleFigureFrame> frames = new List<LocationWorldRenderer.BattleFigureFrame>();
+        private readonly List<Vector2> gridCenters = new List<Vector2>();
         private Texture shown;
         private bool disposed;
 
@@ -73,6 +74,10 @@ namespace KingdomSurvival.BattleSandbox
             }
             renderer.SetView(frameOnCanvas.center, frameOnCanvas.height);
             renderer.SetTime(Hour(), Time.unscaledTime);
+            // Сетка поля — в мире, под людьми и предметами, а не поверх картинки.
+            surface.GridDrawnBelow = true;
+            if (surface.GridOnCanvas(frameOnCanvas, gridCenters, out float radius, out float verticalScale, out Color fill, out Color line, out float lineWidth))
+                renderer.SetBattleGrid(gridCenters, radius, verticalScale, fill, line, lineWidth);
             frames.Clear();
             foreach (BoardFigure figure in board.Figures)
             {
@@ -104,6 +109,7 @@ namespace KingdomSurvival.BattleSandbox
             if (disposed) return;
             disposed = true;
             surface.SetSceneTexture(null);
+            surface.GridDrawnBelow = false;
             renderer.Dispose();
         }
     }

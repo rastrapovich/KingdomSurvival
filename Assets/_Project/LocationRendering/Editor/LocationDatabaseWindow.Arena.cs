@@ -51,6 +51,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             arenaOverlay.generateVisualContent += DrawArenaStates;
             arenaView.Add(arenaOverlay);
             arenaView.LayoutChanged += arenaOverlay.MarkDirtyRepaint;
+            arenaView.LayoutChanged += SyncArenaGrid;
             // Правки Базы полей боя видны на месте сразу, как в идущем бою.
             arenaView.EnableLiveRefresh(500);
             arenaField = null;
@@ -73,8 +74,39 @@ namespace KingdomSurvival.LocationRendering.Editor
             showHexes && !compareDay && !PictureCropActive && renderer != null && geometry != null && Field != null && Location != null &&
             !float.IsNaN(area.width) && area.width >= 10 && area.height >= 10;
 
-        // Кадр боя — туда же, где он на рисунке.
+        // Кадр боя — туда же, где он на рисунке; сетка — в мире места.
         private void SyncArenaView()
+        {
+            SyncArenaLayers();
+            SyncArenaGrid();
+        }
+
+        // Сетка гексов — в мире места, под предметами и людьми (как в игре), а не
+        // поверх картинки; крестики отключённых гексов и трудная местность —
+        // разметка для правки — остаются поверх.
+        private readonly List<Vector2> arenaGridCenters = new List<Vector2>();
+
+        private void SyncArenaGrid()
+        {
+            if (renderer == null) return;
+            BattlefieldDefinitionData field = Field;
+            bool shown = arenaClip != null && arenaClip.style.display != DisplayStyle.None && arenaView != null && field != null && Location != null;
+            if (arenaView != null) arenaView.GridDrawnBelow = shown;
+            float width = arenaView != null ? arenaView.resolvedStyle.width : 0, height = arenaView != null ? arenaView.resolvedStyle.height : 0;
+            if (!shown || float.IsNaN(width) || width < 1 || float.IsNaN(height) || height < 1)
+            {
+                renderer.SetBattleGrid(null, 0, 0, Color.clear, Color.clear, 0);
+                return;
+            }
+            Rect rect = Location.IsBattlefield ? FieldFrameOnCanvas(field) : new Rect(Vector2.zero, CanvasSize);
+            Rect frame = arenaView.FrameRect;
+            Rect canvasRect = new Rect(rect.x + frame.x / width * rect.width, rect.y + frame.y / height * rect.height,
+                frame.width / width * rect.width, frame.height / height * rect.height);
+            if (arenaView.GridOnCanvas(canvasRect, arenaGridCenters, out float radius, out float verticalScale, out Color fill, out Color line, out float lineWidth))
+                renderer.SetBattleGrid(arenaGridCenters, radius, verticalScale, fill, line, lineWidth);
+        }
+
+        private void SyncArenaLayers()
         {
             if (arenaClip == null || canvas == null) return;
             BattlefieldDefinitionData field = Field;

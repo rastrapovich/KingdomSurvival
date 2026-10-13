@@ -71,6 +71,51 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         public bool HasLocationGrid => locationGrid.HasValue;
 
+        // Сетку (заливку и линии гексов) рисует мир под доской — рендерер места
+        // между землёй и предметами, — а не этот элемент поверх картинки: иначе
+        // линии ложились бы на людей и предметы.
+        private bool gridDrawnBelow;
+
+        public bool GridDrawnBelow
+        {
+            get => gridDrawnBelow;
+            set
+            {
+                if (gridDrawnBelow == value) return;
+                gridDrawnBelow = value;
+                DisplayStyle display = value ? DisplayStyle.None : DisplayStyle.Flex;
+                fillLayer.style.display = display;
+                lineLayer.style.display = display;
+            }
+        }
+
+        // Клетки поля на рисунке места: кадр поля (FrameRect) ↔ canvasRect в
+        // пикселях рисунка. Центры, радиус гекса (с зазором стиля), сжатие по
+        // высоте, цвета и толщина линии — в пикселях рисунка. false — поле ещё
+        // не разложено.
+        public bool GridOnCanvas(Rect canvasRect, List<Vector2> centers, out float radius, out float verticalScale, out Color fill, out Color line,
+            out float lineWidth)
+        {
+            centers.Clear();
+            radius = lineWidth = 0f;
+            verticalScale = Layout.VerticalScale;
+            fill = hexStyle.Fade(hexStyle.FillColor);
+            line = hexStyle.Fade(hexStyle.LineColor);
+            Rect frameRect = FrameRect;
+            if (frameRect.width < 1f || frameRect.height < 1f || Layout.Size <= 0.01f)
+                return false;
+            float scale = canvasRect.height / frameRect.height;
+            foreach (HexCoord cell in activeCells)
+            {
+                Vector2 center = Layout.GetCenter(cell.Q, cell.R);
+                centers.Add(canvasRect.position + Vector2.Scale(center - frameRect.position,
+                    new Vector2(canvasRect.width / frameRect.width, canvasRect.height / frameRect.height)));
+            }
+            radius = HexRadius * scale;
+            lineWidth = hexStyle.LineWidth * scale;
+            return true;
+        }
+
         public void SetLocationGrid(LocationBattleGrid? grid)
         {
             locationGrid = grid;

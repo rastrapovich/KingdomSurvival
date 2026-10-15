@@ -725,8 +725,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             AddButton(actions, "+ Костёр", () => AddArtObject(null, LocationPlaceholder.Fire));
             AddButton(actions, "+ Палатка", () => AddArtObject(null, LocationPlaceholder.Tent));
             BuildAssetPalette();
-            foreach (LocationVisualObject item in visual.Objects)
-                SelectButton(Kind.Art, item.Id, item.Name + (item.UsesAsset ? " · ассет" : "") + (item.Hidden ? " · скрыт" : ""));
+            BuildObjectList(location, visual);
             AddButton(settings, "Перевести предметы места в Базу ассетов…", MigrateLocationObjects);
             LocationVisualObject selected = ArtObject;
             if (selected == null) return;
@@ -1161,6 +1160,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Marker(Gui(start.x, start.y), new Color(.6f, .8f, 1f), "старт теста", false);
                 }
             }
+            DrawObjectHighlights(location, frame, Gui);
             LocationVisualObject art = ArtObject;
             if (art != null)
             {
@@ -1409,6 +1409,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 SetTool(Tool.Select); evt.Use(); return true;
             }
+            if (HandleObjectKeys(evt)) { evt.Use(); return true; }
             if (evt.type == EventType.ScrollWheel && frame.Contains(evt.mousePosition))
             {
                 Vector2 before = pixel;
@@ -1438,11 +1439,20 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
             if (evt.type == EventType.MouseDown && evt.button == 0 && frame.Contains(evt.mousePosition))
             {
-                MouseDown(location, frame, pixel);
+                pressGui = evt.mousePosition;
+                dragMoved = false;
+                MouseDown(location, frame, pixel, evt.alt);
                 evt.Use(); return true;
             }
             if (evt.type == EventType.MouseDrag && evt.button == 0 && dragging)
             {
+                // Выбор не сдвигает предмет случайно: тащится только после
+                // заметного движения мыши.
+                if (tool == Tool.Select && !dragMoved)
+                {
+                    if ((evt.mousePosition - pressGui).sqrMagnitude < DragThreshold * DragThreshold) { evt.Use(); return true; }
+                    dragMoved = true;
+                }
                 MouseDrag(location, pixel);
                 evt.Use(); return true;
             }
@@ -1454,7 +1464,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             return false;
         }
 
-        private void MouseDown(LocalLocationDefinition location, Rect frame, Vector2 pixel)
+        private void MouseDown(LocalLocationDefinition location, Rect frame, Vector2 pixel, bool nextUnder = false)
         {
             LocalPointData point = new LocalPointData(pixel.x, pixel.y);
             switch (tool)
@@ -1546,12 +1556,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             (Kind kind, string id) hit = PickMarker(location, pixel, pick);
             if (hit.kind == Kind.None && Visual != null)
             {
-                Vector2 world = LocationVisualGeometry.PixelToWorld(location, pixel);
-                // Составной ассет выбирается целиком: по любой своей части.
-                string artId = Visual.Objects.Where(item => !item.Hidden && renderer.ObjectImages(item.Id)
-                        .Any(part => part != null && part.bounds.Contains(new Vector3(world.x, world.y, 0))))
-                    .OrderByDescending(item => renderer.ObjectSortingOrder(item.Id)).FirstOrDefault()?.Id;
-                if (artId != null) hit = (Kind.Art, artId);
+                // По непрозрачному рисунку (составной ассет — по любой части);
+                // выбранный — первым, Alt — следующий под курсором.
+                LocationVisualObject art = PickArt(location, pixel, nextUnder);
+                if (art != null) hit = (Kind.Art, art.Id);
             }
             if (hit.kind == Kind.None && showArena)
             {
@@ -1631,6 +1639,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void MouseUp(LocalLocationDefinition location, Vector2 pixel)
         {
             dragging = false;
+            // Только выбрали, не сдвинув, — пересобирать нечего.
+            if (tool == Tool.Select && !dragMoved) return;
             if (tool == Tool.Terrain && paintLayer != null)
             {
                 location.TerrainCells = paintLayer.Encode();

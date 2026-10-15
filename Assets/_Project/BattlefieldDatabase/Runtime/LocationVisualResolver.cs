@@ -183,6 +183,11 @@ namespace KingdomSurvival.BattlefieldDatabase
                 bool own = item.IsOverridden(LocationAssetOverride.Shadows);
                 bool projects = own ? item.ProjectsShadow : part.ProjectsShadow;
                 bool fire = own ? item.ProjectsFireShadow : part.ProjectsFireShadow;
+                if (!own && item.ShadowsLimitedByLayer)
+                {
+                    projects &= item.ProjectsShadow;
+                    fire &= item.ProjectsFireShadow;
+                }
                 LocationResolvedPart resolved = new LocationResolvedPart
                 {
                     Name = part.Name, Sprite = sprite, Placeholder = sprite == null, Band = band, OrderOffset = order,

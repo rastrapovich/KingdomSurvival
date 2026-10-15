@@ -253,10 +253,11 @@ namespace KingdomSurvival.LocationRendering.Editor
                     "0 — одинаковый темп (только разные фазы); 0,12 — темп каждого ±12 %: кадры не меняются у всех разом.");
             if (layer.Mode == LocationScatterMode.Objects)
             {
-                Toggle("Тень от солнца (силуэт)", layer.ProjectsShadow, value => layer.ProjectsShadow = value);
-                settings[settings.childCount - 1].tooltip = "Силуэт рисунка ложится на землю от солнца и луны — как «Тень от солнца» части в Базе ассетов.";
-                Toggle("Тень от огня (по контуру рисунка)", layer.ProjectsFireShadow, value => layer.ProjectsFireShadow = value);
-                settings[settings.childCount - 1].tooltip = "Костёр и другие местные источники дают за экземпляром тёмный конус — как «Тень от огня» части в Базе ассетов. " +
+                Toggle("Тень от солнца (если есть у ассета)", layer.ProjectsShadow, value => layer.ProjectsShadow = value);
+                settings[settings.childCount - 1].tooltip = "Силуэт рисунка ложится на землю от солнца и луны — только у ассетов, у которых в Базе ассетов включена «Тень от солнца» части. " +
+                                                            "Галочка слоя может только выключить тень всем экземплярам, но не включить её ассету без тени.";
+                Toggle("Тень от огня (если есть у ассета)", layer.ProjectsFireShadow, value => layer.ProjectsFireShadow = value);
+                settings[settings.childCount - 1].tooltip = "Костёр и другие местные источники дают за экземпляром тёмный конус — только у ассетов с «Тенью от огня» части в Базе ассетов. " +
                                                             "Сотни экземпляров с этой тенью дороги: траве обычно не нужна.";
                 if (layer.Band != LocationVisualBand.World)
                     Help("Тени — только у слоя «Объекты и персонажи»: детали земли и передний план их не отбрасывают.");

@@ -193,6 +193,11 @@ namespace KingdomSurvival.BattlefieldDatabase
         // Экземпляр раскидки: проход переопределён («не мешает»), а форма
         // основания (окклюзия) — как у ассета, не прямоугольник Footprint.
         [NonSerialized] public bool AssetFootprint;
+        // Экземпляр раскидки: галочки теней слоя (ProjectsShadow,
+        // ProjectsFireShadow) только выключают тени частей ассета, но не
+        // включают тень там, где у ассета её нет; длина тени и перекрытие
+        // света — как у ассета.
+        [NonSerialized] public bool ShadowsLimitedByLayer;
         public bool CastsShadow;
         public LocationLightDefinition Light = new LocationLightDefinition();
         // ПР-12М: только источник света, без рисунка.

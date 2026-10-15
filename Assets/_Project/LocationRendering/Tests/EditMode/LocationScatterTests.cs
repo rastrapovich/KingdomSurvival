@@ -317,6 +317,37 @@ namespace KingdomSurvival.LocationRendering
             Assert.That(erased.Count, Is.GreaterThan(0));
         }
 
+        // Тени слоя только выключают тени ассета: трава без тени в Базе ассетов
+        // остаётся без тени в слое с галочкой; длина тени и перекрытие света —
+        // как у ассета.
+        [Test]
+        public void Instance_ShadowsFromLayer_OnlyTurnAssetShadowsOff()
+        {
+            Asset("grass");
+            ArtAssetDefinition asset = catalog.Find("grass");
+            asset.MainPart.ProjectsShadow = false;
+            asset.MainPart.ProjectsFireShadow = false;
+            asset.ShadowLength = 1.7f;
+            asset.OccludesLight = true;
+            LocationScatterLayer layer = Layer("grass");
+            layer.ProjectsShadow = true;
+            layer.ProjectsFireShadow = true;
+            layer.Instances.Add(new LocationScatterInstance { Key = 1, AssetId = "grass", Position = new Vector2(.5f, .5f), Scale = 1 });
+            LocationResolvedVisual resolved = LocationVisualResolver.Resolve(layer.ToObject(layer.Instances[0]));
+            Assert.That(resolved.Main.ProjectsShadow, Is.False, "Галочка слоя не включает тень ассету без тени.");
+            Assert.That(resolved.Main.ProjectsFireShadow, Is.False);
+            Assert.That(resolved.ShadowLength, Is.EqualTo(1.7f).Within(1e-4f), "Длина тени — как у ассета.");
+            Assert.That(resolved.OccludesLight, Is.True, "Перекрытие света — как у ассета.");
+
+            asset.MainPart.ProjectsShadow = true;
+            asset.MainPart.ProjectsFireShadow = true;
+            Assert.That(LocationVisualResolver.Resolve(layer.ToObject(layer.Instances[0])).Main.ProjectsShadow, Is.True, "У ассета с тенью — есть.");
+            layer.ProjectsShadow = false;
+            layer.ProjectsFireShadow = false;
+            resolved = LocationVisualResolver.Resolve(layer.ToObject(layer.Instances[0]));
+            Assert.That(resolved.Main.ProjectsShadow || resolved.Main.ProjectsFireShadow, Is.False, "Слой без теней выключает их всем.");
+        }
+
         [Test]
         public void Instance_AsObject_TakesLayerBandAndPassability_AndBlocksOnlyWhenAsked()
         {

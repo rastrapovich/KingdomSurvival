@@ -269,8 +269,11 @@ namespace KingdomSurvival.BattlefieldDatabase
                 Position = instance.Position, Scale = instance.Scale, Stretch = instance.Stretch, Rotation = instance.Rotation,
                 FlipX = instance.FlipX, ColorAdjust = instance.ColorAdjust, Band = Band, OrderOffset = OrderOffset,
                 ProjectsShadow = ProjectsShadow && Mode == LocationScatterMode.Objects,
-                ProjectsFireShadow = ProjectsFireShadow && Mode == LocationScatterMode.Objects, CastsShadow = false, AssetFootprint = true,
-                Overrides = LocationAssetOverride.Layer | LocationAssetOverride.Shadows
+                ProjectsFireShadow = ProjectsFireShadow && Mode == LocationScatterMode.Objects, AssetFootprint = true,
+                // Тени слоя только выключают тени ассета (трава без тени остаётся
+                // без неё); длина тени и перекрытие света — как у ассета.
+                ShadowsLimitedByLayer = true,
+                Overrides = LocationAssetOverride.Layer
             };
             if (!BlocksMovement)
             {

@@ -8,7 +8,7 @@ namespace KingdomSurvival.LocationRendering
     // людей, — шейдер LocationEdgeShade. Привязан к месту, а не к экрану (в
     // отличие от «Затемнения краёв» обработки кадра): камера едет — края
     // поляны остаются тёмными. Настройки читаются каждый кадр — правка в Базе
-    // локаций видна сразу.
+    // локаций видна сразу. В слоях окна базы (SetLayersVisible) идёт с землёй.
     public sealed partial class LocationWorldRenderer
     {
         public const string EdgeShadeShaderPath = "LocationRendering/LocationEdgeShade";

@@ -195,6 +195,50 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
+        // Тень мелкого (трава, папоротник) не ложится ни на людей, ни на
+        // предметы, даже если он выше того, на кого падает: темнят только
+        // большие тени — от предметов не ниже ShadeCasterMinPeople ростов.
+        [Test]
+        public void SmallPlantShadow_DoesNotDarkenPeopleOrObjects()
+        {
+            LocalLocationDefinition location = Location();
+            float min;
+            using (LocationWorldRenderer probe = new LocationWorldRenderer(location, new LocationVisualDefinition { LocationId = location.Id, UseWorldLighting = false }, null))
+                min = probe.ShadeCasterMinHeight;
+            // Куст: в 1,6 раза ниже порога, но втрое выше камня и выше человека.
+            int bushPixels = Mathf.RoundToInt(min / 1.6f * 20);
+            Asset("bush", 60, bushPixels, new Vector2(.5f, 0));
+            Asset("pebble", 40, Mathf.Max(2, bushPixels / 3), new Vector2(.5f, 0));
+            LocationVisualDefinition visual = new LocationVisualDefinition { LocationId = location.Id, UseWorldLighting = false };
+            visual.Objects.Add(Put("bush", new Vector2(960, 600)));
+            float hour = -1;
+            Vector2 vector = Vector2.zero;
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null))
+                foreach (float candidate in new[] { 13f, 10f, 16f, 8f, 18f })
+                {
+                    renderer.SetTime(candidate, 0);
+                    if (renderer.VisibleShadowCount == 0) continue;
+                    hour = candidate;
+                    vector = renderer.SunShadowVector;
+                    break;
+                }
+            Assume.That(hour, Is.GreaterThan(0), "В стиле неба по умолчанию нет тени от солнца.");
+
+            Vector2 foot = LocationVisualGeometry.PixelToWorld(location, new Vector2(960, 600));
+            float bushHeight = bushPixels / 20f;
+            Vector2 inShadow = LocationVisualGeometry.WorldToPixel(location, foot + vector * bushHeight * .4f);
+            visual.Objects.Add(Put("pebble", inShadow + new Vector2(0, -4)));
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null))
+            {
+                renderer.SetActors(new[] { Actor(inShadow) }, 0);
+                for (int i = 0; i <= 10; i++) renderer.SetTime(hour, i * .1f);
+                renderer.SetActors(new[] { Actor(inShadow) }, 1);
+                Assert.That(renderer.ActorShade("hero"), Is.EqualTo(Color.white), "Человек в тени куста не темнеет.");
+                Rect pebble = renderer.ObjectShadeRect("pebble");
+                Assert.That(renderer.ObjectShadeAt("pebble", pebble.center), Is.EqualTo(0), "Камень в тени куста не темнеет.");
+            }
+        }
+
         // Своё основание экземпляра (проходимость) — о проходе: пятно у
         // основания и перекрытие света остаются формой ассета, а не
         // прямоугольником «Основание на земле».

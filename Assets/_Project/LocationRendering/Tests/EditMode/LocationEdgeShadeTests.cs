@@ -32,6 +32,14 @@ namespace KingdomSurvival.LocationRendering
                     if (image != edge) highest = Mathf.Max(highest, image.sortingOrder);
                 Assert.That(edge.sortingOrder, Is.GreaterThan(highest), "Поверх всего, включая людей у нижнего края.");
 
+                // Слои окна базы: затемнение идёт с землёй, а не с верхом —
+                // иначе оно станет формой верхнего слоя и предмет потемнеет целиком.
+                renderer.SetLayersVisible(false, true);
+                Assert.That(edge.forceRenderingOff, Is.True, "В кадре одного верха затемнения нет.");
+                renderer.SetLayersVisible(true, false);
+                Assert.That(edge.forceRenderingOff, Is.False, "В кадре земли — есть.");
+                renderer.SetLayersVisible(true, true);
+
                 visual.EdgeShade.Enabled = false;
                 renderer.SetTime(13, .2f);
                 Assert.That(renderer.EdgeShadeRenderer, Is.Null, "Выключили — слоя нет.");

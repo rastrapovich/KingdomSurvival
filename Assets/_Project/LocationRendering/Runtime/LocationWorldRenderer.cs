@@ -665,6 +665,10 @@ namespace KingdomSurvival.LocationRendering
 
         // Показать только землю (upper = false), только верх (ground = false)
         // или всё. Включённость компонентов не трогается — только отрисовка.
+        // Затемнение краёв места, хоть и рисуется поверх всего, идёт с землёй:
+        // верх берёт цвет из полного кадра (где края уже темны), а форму — из
+        // кадра одного верха; с ним там затемнение стало бы формой верха, и
+        // земля под ним осталась бы светлой, а предмет — тёмным целиком.
         public void SetLayersVisible(bool ground, bool upper)
         {
             if (Root == null) return;
@@ -678,7 +682,7 @@ namespace KingdomSurvival.LocationRendering
                 cachedRenderers = Root.GetComponentsInChildren<Renderer>(true);
             }
             foreach (Renderer item in cachedRenderers)
-                if (item != null) item.forceRenderingOff = item.sortingOrder >= UpperSortingFrom ? !upper : !ground;
+                if (item != null) item.forceRenderingOff = item.sortingOrder >= UpperSortingFrom && item != edgeShade ? !upper : !ground;
         }
 
         // ------------------------------------------------------------------

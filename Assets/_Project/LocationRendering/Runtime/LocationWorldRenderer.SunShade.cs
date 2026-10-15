@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KingdomSurvival.BattlefieldDatabase;
 using UnityEngine;
 
 namespace KingdomSurvival.LocationRendering
@@ -18,8 +19,9 @@ namespace KingdomSurvival.LocationRendering
     //   столбцом у основания; у низкого широкого (камень, опора поднята —
     //   то же правило, что у его тени) рисунок — верх, уходящий вглубь, и
     //   кусок лежит на земле там же, где нарисован.
-    // Тень даёт только предмет заметно выше того, на кого падает (дерево —
-    // да, трава — нет), силуэт — по одному кадру (ветер не дёргает
+    // Тень даёт только большой предмет — не ниже ShadeCasterMinPeople ростов
+    // человека (дерево — да; трава, папоротник, пень — нет: их кружевная тень
+    // на фигуре только рябит) — и заметно выше того, на кого падает; силуэт — по одному кадру (ветер не дёргает
     // затемнение). Своя тень и тени людей не учитываются; детали земли (их
     // темнит земля) и предметы без «Освещается солнцем» не темнеют. Предметы
     // пересчитываются, только когда сдвинулось солнце или сам предмет.
@@ -31,6 +33,11 @@ namespace KingdomSurvival.LocationRendering
         public const float ShadeFadeSeconds = .3f;
         // Тень даёт только предмет хотя бы во столько раз выше того, на кого она падает.
         public const float ShadeCasterTaller = 1.5f;
+        // Тень даёт только предмет не ниже стольких ростов человека (рост — как у
+        // фигуры на поле: FieldHeightInHexSizes гекса). Трава и папоротник — до
+        // двух ростов, деревья — от восьми.
+        public const float ShadeCasterMinPeople = 2.5f;
+        public float ShadeCasterMinHeight => HexSizePixels / LocationVisualGeometry.PixelsPerUnit * FieldHeightInHexSizes * ShadeCasterMinPeople;
         // Сетка тени на рисунке: шаг (мир) и наибольшее число точек.
         public const float ShadeCell = .35f;
         public const int ShadeColumns = 16, ShadeRows = 8;
@@ -275,7 +282,7 @@ namespace KingdomSurvival.LocationRendering
                 float height = LocationAlphaContours.OpaqueRect(caster.ShadeSprite).height * Mathf.Abs(shadow.transform.lossyScale.y);
                 ShadowState state = caster.States[0];
                 Projection(state, out float a, out float b);
-                if (Mathf.Abs(a) < 1e-4f) continue;
+                if (Mathf.Abs(a) < 1e-4f || height < ShadeCasterMinHeight) continue;
                 shadeCasters.Add(new ShadeCaster
                 {
                     Caster = caster, Box = box, Sprite = caster.ShadeSprite, Height = height, A = a, B = b, GroundY = state.GroundY,

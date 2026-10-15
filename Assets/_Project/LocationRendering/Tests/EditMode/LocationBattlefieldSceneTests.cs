@@ -27,8 +27,15 @@ namespace KingdomSurvival.LocationRendering
             Assert.That(zoomed.center.x, Is.EqualTo(960).Within(.01f));
             Assert.That(zoomed.width, Is.EqualTo(960).Within(.01f), "Увеличение ×2 — кадр вдвое меньше на рисунке.");
 
-            Rect moved = BattlefieldFrame.FrameOnPicture(new Vector2(1920, 1080), 1, new Vector2(.1f, 0));
-            Assert.That(moved.x, Is.EqualTo(-192).Within(.01f), "Фон сдвинут вправо — кадр на рисунке левее.");
+            Rect moved = BattlefieldFrame.FrameOnPicture(new Vector2(1920, 1080), 2, new Vector2(.1f, 0));
+            Assert.That(moved.x, Is.EqualTo(480 - 96).Within(.01f), "Фон сдвинут вправо — кадр на рисунке левее.");
+
+            // Арена не выходит за свой рисунок: ни уменьшением, ни сдвигом.
+            Rect shrunk = BattlefieldFrame.FrameOnPicture(new Vector2(1920, 1080), .93f, Vector2.zero);
+            Assert.That(shrunk, Is.EqualTo(whole), "Уменьшение меньше 1 — всё равно ровно рисунок.");
+            Rect pushed = BattlefieldFrame.FrameOnPicture(new Vector2(1920, 1080), 2, new Vector2(.8f, -.8f));
+            Assert.That(pushed.xMin, Is.EqualTo(0).Within(.01f), "Сдвиг упирается в левый край рисунка,");
+            Assert.That(pushed.yMax, Is.EqualTo(1080).Within(.01f), "и в нижний.");
         }
 
         [Test]

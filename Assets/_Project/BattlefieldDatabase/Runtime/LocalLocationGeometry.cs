@@ -329,7 +329,7 @@ namespace KingdomSurvival.BattlefieldDatabase
         public Vector2 ArenaCenterFor(LocalEncounterDefinition encounter, IEnumerable<LocalPointData> fallbackPoints)
         {
             if (encounter != null && encounter.HasArenaCenter && encounter.ArenaCenter != null)
-                return new Vector2(encounter.ArenaCenter.X, encounter.ArenaCenter.Y);
+                return ClampFrameCenter(new Vector2(encounter.ArenaCenter.X, encounter.ArenaCenter.Y));
             return DefaultArenaCenter(fallbackPoints);
         }
 

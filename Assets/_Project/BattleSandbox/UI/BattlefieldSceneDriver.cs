@@ -90,7 +90,13 @@ namespace KingdomSurvival.BattleSandbox
                 });
             }
             renderer.SetBattleFigures(frames);
+            // Клетки хода, цель, путь и кольца — тоже в мире, под фигурами.
+            board.MarksDrawnBelow = true;
+            BoardMarksInWorld.Convert(board.Marks, point => ToCanvas(point, frame), marks);
+            renderer.SetBattleMarks(marks);
         }
+
+        private readonly List<LocationWorldRenderer.BattleMark> marks = new List<LocationWorldRenderer.BattleMark>();
 
         // Точка доски → пиксели холста места: кадр поля на экране ↔ кадр поля на холсте.
         private Vector2 ToCanvas(Vector2 boardPoint, Rect frame)
@@ -110,6 +116,7 @@ namespace KingdomSurvival.BattleSandbox
             disposed = true;
             surface.SetSceneTexture(null);
             surface.GridDrawnBelow = false;
+            board.MarksDrawnBelow = false;
             renderer.Dispose();
         }
     }

@@ -85,6 +85,27 @@ namespace KingdomSurvival.BattleSandbox
         // Кадр фигур после последней раскладки (координаты поля).
         public IReadOnlyList<BoardFigure> Figures => figures;
 
+        // Отметки клеток, пути и колец рисует мир под доской (рендерер места,
+        // под людьми и предметами), а не поле поверх кадра: поле только
+        // собирает их в Marks. Жетоны без рисунка и прицел — по-прежнему здесь.
+        private bool marksDrawnBelow;
+        private readonly List<BoardMark> marks = new List<BoardMark>();
+
+        public bool MarksDrawnBelow
+        {
+            get => marksDrawnBelow;
+            set
+            {
+                if (marksDrawnBelow == value) return;
+                marksDrawnBelow = value;
+                marks.Clear();
+                MarkDirtyRepaint();
+            }
+        }
+
+        // Отметки последней отрисовки (координаты поля); пусто, если MarksDrawnBelow выключено.
+        public IReadOnlyList<BoardMark> Marks => marks;
+
         private string hoverAttackTargetId;
         private HexCoord? hoverAttackPosition;
         private Vector2 hoverCursorPosition;
@@ -514,6 +535,7 @@ namespace KingdomSurvival.BattleSandbox
 
         private void DrawBoard(MeshGenerationContext context)
         {
+            marks.Clear();
             if (battle == null || contentRect.width <= 1f || contentRect.height <= 1f)
                 return;
 
@@ -545,12 +567,12 @@ namespace KingdomSurvival.BattleSandbox
 
                     // Без BattlefieldView под полем подложку и линию рисует поле.
                     if (!baseGridDrawnBelow)
-                        DrawHex(painter, layout.GetCenter(coord), radius, hexStyle.Fade(hexStyle.FillColor),
+                        PaintHex(painter, layout.GetCenter(coord), radius, hexStyle.Fade(hexStyle.FillColor),
                             drawLine ? lineColor : Color.clear, drawLine ? hexStyle.LineWidth : 0f,
                             true, layout.VerticalScale);
 
                     if (fill.a > 0.001f)
-                        DrawHex(painter, layout.GetCenter(coord), radius, fill,
+                        PaintHex(painter, layout.GetCenter(coord), radius, fill,
                             drawLine ? lineColor : Color.clear, drawLine ? hexStyle.LineWidth : 0f,
                             true, layout.VerticalScale);
                 }
@@ -565,7 +587,7 @@ namespace KingdomSurvival.BattleSandbox
                     if (!IsBoardCell(pair.Key))
                         continue;
 
-                    DrawHex(
+                    PaintHex(
                         painter,
                         layout.GetCenter(pair.Key),
                         Mathf.Max(1f, radius - hexStyle.ReachableLineWidth * 0.5f),
@@ -578,7 +600,7 @@ namespace KingdomSurvival.BattleSandbox
             }
 
             if (hoverMovePath.Count > 1 && !IsAnimating)
-                DrawMovePath(painter, layout, hoverMovePath);
+                PaintMovePath(painter, layout, hoverMovePath);
 
             foreach (SandboxUnitState unit in battle.Units)
             {
@@ -592,7 +614,7 @@ namespace KingdomSurvival.BattleSandbox
                 if (hoverAttackPosition.HasValue && current != null &&
                     hoverAttackPosition.Value != current.Position)
                 {
-                    DrawHex(
+                    PaintHex(
                         painter,
                         layout.GetCenter(hoverAttackPosition.Value),
                         Mathf.Max(1f, radius - 2.5f),
@@ -617,7 +639,52 @@ namespace KingdomSurvival.BattleSandbox
                 hoverAttackDirection);
         }
 
-        private static void DrawMovePath(
+        // Гекс клетки: при MarksDrawnBelow — отметкой для мира под фигурами,
+        // иначе — сразу на поле.
+        private void PaintHex(
+            Painter2D painter,
+            Vector2 center,
+            float radius,
+            Color fill,
+            Color stroke,
+            float lineWidth,
+            bool fillShape = true,
+            float verticalScale = 1f)
+        {
+            if (!marksDrawnBelow)
+            {
+                DrawHex(painter, center, radius, fill, stroke, lineWidth, fillShape, verticalScale);
+                return;
+            }
+            marks.Add(new BoardMark
+            {
+                Kind = BoardMarkKind.Hex, A = center, Radius = radius, VerticalScale = verticalScale,
+                Fill = fillShape ? fill : Color.clear, Line = stroke, LineWidth = lineWidth
+            });
+        }
+
+        private void PaintCircle(
+            Painter2D painter,
+            Vector2 center,
+            float radius,
+            Color fill,
+            Color stroke,
+            float lineWidth,
+            bool fillShape = true)
+        {
+            if (!marksDrawnBelow)
+            {
+                DrawCircle(painter, center, radius, fill, stroke, lineWidth, fillShape);
+                return;
+            }
+            marks.Add(new BoardMark
+            {
+                Kind = BoardMarkKind.Circle, A = center, Radius = radius, VerticalScale = 1f,
+                Fill = fillShape ? fill : Color.clear, Line = stroke, LineWidth = lineWidth
+            });
+        }
+
+        private void PaintMovePath(
             Painter2D painter,
             HexLayout layout,
             IReadOnlyList<HexCoord> path)
@@ -626,17 +693,29 @@ namespace KingdomSurvival.BattleSandbox
                 return;
 
             Color routeColor = new Color(0.62f, 0.86f, 0.92f, 0.86f);
-            painter.strokeColor = routeColor;
-            painter.lineWidth = 3f;
-            painter.BeginPath();
-            painter.MoveTo(layout.GetCenter(path[0]));
-            for (int i = 1; i < path.Count; i++)
-                painter.LineTo(layout.GetCenter(path[i]));
-            painter.Stroke();
+            if (marksDrawnBelow)
+            {
+                for (int i = 1; i < path.Count; i++)
+                    marks.Add(new BoardMark
+                    {
+                        Kind = BoardMarkKind.Segment, A = layout.GetCenter(path[i - 1]), B = layout.GetCenter(path[i]),
+                        Line = routeColor, LineWidth = 3f
+                    });
+            }
+            else
+            {
+                painter.strokeColor = routeColor;
+                painter.lineWidth = 3f;
+                painter.BeginPath();
+                painter.MoveTo(layout.GetCenter(path[0]));
+                for (int i = 1; i < path.Count; i++)
+                    painter.LineTo(layout.GetCenter(path[i]));
+                painter.Stroke();
+            }
 
             for (int i = 1; i < path.Count; i++)
             {
-                DrawCircle(
+                PaintCircle(
                     painter,
                     layout.GetCenter(path[i]),
                     4.5f,
@@ -690,7 +769,7 @@ namespace KingdomSurvival.BattleSandbox
             }
             else if (current != null && current.Id == unit.Id)
             {
-                DrawCircle(
+                PaintCircle(
                     painter,
                     center,
                     radius,
@@ -702,7 +781,7 @@ namespace KingdomSurvival.BattleSandbox
 
             if (unit.IsGuarding)
             {
-                DrawCircle(
+                PaintCircle(
                     painter,
                     center,
                     radius + 5f,

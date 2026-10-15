@@ -25,13 +25,17 @@ namespace KingdomSurvival.BattlefieldDatabase
         // в кадр с обрезкой (ScaleAndCrop), затем увеличен на scale и сдвинут
         // на offset (доли кадра) — как фон поля в бою. Для поля, собранного в
         // Базе локаций, рисунок — холст места, и бой снимает ровно этот кадр.
+        // Кадр не выходит за рисунок: арена показывается в своём размере, а
+        // всё за её краем (кроны и трава, вылезающие за рисунок) — за кадром.
+        // Уменьшение меньше 1 и сдвиг за край не действуют.
         public static Rect FrameOnPicture(Vector2 picture, float scale, Vector2 offset)
         {
             picture = Vector2.Max(picture, Vector2.one);
             Vector2 frame = new Vector2(Aspect, 1f);
-            float fit = Mathf.Max(frame.x / picture.x, frame.y / picture.y) * Mathf.Max(0.1f, scale);
+            float fit = Mathf.Max(frame.x / picture.x, frame.y / picture.y) * Mathf.Max(1f, scale);
             Vector2 size = frame / fit;
             Vector2 min = picture / 2f - (frame / 2f + Vector2.Scale(offset, frame)) / fit;
+            min = new Vector2(Mathf.Clamp(min.x, 0f, picture.x - size.x), Mathf.Clamp(min.y, 0f, picture.y - size.y));
             return new Rect(min, size);
         }
 

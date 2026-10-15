@@ -593,7 +593,13 @@ public partial class PrototypeUIController
             });
         }
         localRenderer.SetBattleFigures(localBattleFrames);
+        // Клетки хода, цель, путь и кольца — в мире места, под фигурами.
+        board.MarksDrawnBelow = true;
+        BoardMarksInWorld.Convert(board.Marks, ToPixel, localBattleMarks);
+        localRenderer.SetBattleMarks(localBattleMarks);
     }
+
+    private readonly List<LocationWorldRenderer.BattleMark> localBattleMarks = new List<LocationWorldRenderer.BattleMark>();
 
     private void OnLocalBattleFinished(CampaignBattleResult result, int generation)
     {
@@ -888,6 +894,8 @@ public partial class PrototypeUIController
         // Сетка боя — только пока идёт бой на месте.
         if (!IsLocalBattleRunning && localRenderer != null && localRenderer.BattleGridVisible)
             localRenderer.SetBattleGrid(null, 0f, 0f, Color.clear, Color.clear, 0f);
+        if (!IsLocalBattleRunning && localRenderer != null && localRenderer.BattleMarksVisible)
+            localRenderer.SetBattleMarks(null);
         Rect bounds = localImage.contentRect;
         if (bounds.width >= 1f && bounds.height >= 1f && interfaceRoot != null)
         {

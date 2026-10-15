@@ -32,6 +32,22 @@ namespace KingdomSurvival.LocationRendering
                 Assert.That(bounds.min.x, Is.EqualTo(left.x).Within(.05f), "Гексы — там, куда их положило поле.");
                 Assert.That(bounds.max.x, Is.EqualTo(right.x).Within(.05f));
 
+                // Отметки боя (клетки хода, путь, кольцо ходящего) — над сеткой, под фигурами.
+                renderer.SetBattleMarks(new[]
+                {
+                    new LocationWorldRenderer.BattleMark { Kind = LocationWorldRenderer.BattleMarkKind.Hex, A = new Vector2(900, 540), Radius = 38, VerticalScale = BattlefieldFrame.VerticalScale, Line = Color.green, LineWidth = 3 },
+                    new LocationWorldRenderer.BattleMark { Kind = LocationWorldRenderer.BattleMarkKind.Segment, A = new Vector2(900, 540), B = new Vector2(980, 540), Line = Color.cyan, LineWidth = 3 },
+                    new LocationWorldRenderer.BattleMark { Kind = LocationWorldRenderer.BattleMarkKind.Circle, A = new Vector2(980, 540), Radius = 20, Fill = Color.white }
+                });
+                Assert.That(renderer.BattleMarksVisible, Is.True);
+                MeshRenderer marks = renderer.Root.transform.Find("Отметки боя").GetComponent<MeshRenderer>();
+                Assert.That(marks.sortingOrder, Is.GreaterThan(grid.sortingOrder), "Над сеткой,");
+                Assert.That(marks.sortingOrder, Is.LessThan(lowestAbove), "под предметами и людьми.");
+                Bounds markBounds = marks.GetComponent<MeshFilter>().sharedMesh.bounds;
+                Assert.That(markBounds.max.x, Is.EqualTo(LocationVisualGeometry.PixelToWorld(location, new Vector2(1000, 540)).x).Within(.05f), "Круг — где его положило поле.");
+                renderer.SetBattleMarks(null);
+                Assert.That(renderer.BattleMarksVisible, Is.False, "Без отметок — скрыты.");
+
                 renderer.SetBattleGrid(null, 0, 0, Color.clear, Color.clear, 0);
                 Assert.That(renderer.BattleGridVisible, Is.False, "Без клеток — скрыта.");
             }

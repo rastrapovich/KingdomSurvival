@@ -341,9 +341,9 @@ namespace KingdomSurvival.LocationRendering.Editor
             settings.Add(use);
 
             Heading("Кадр поля на холсте");
-            Help("Рамка 16:9 на холсте — то, что видно в бою. 1 и 0 — весь холст (у холста 16:9 рамка совпадает с ним).");
+            Help("Рамка 16:9 на холсте — то, что видно в бою. 1 и 0 — весь холст (у холста 16:9 рамка совпадает с ним). Рамка не выходит за холст: всё за его краем в бою за кадром.");
             VisualElement frameCard = new VisualElement();
-            frameCard.Add(BattlefieldHexEditorKit.BoundSlider("Масштаб", property.FindPropertyRelative("backgroundScale"), .5f, 3f));
+            frameCard.Add(BattlefieldHexEditorKit.BoundSlider("Масштаб", property.FindPropertyRelative("backgroundScale"), 1f, 3f));
             SerializedProperty offset = property.FindPropertyRelative("backgroundOffset");
             frameCard.Add(BattlefieldHexEditorKit.BoundSlider("Сдвиг X", offset.FindPropertyRelative("x"), -.5f, .5f));
             frameCard.Add(BattlefieldHexEditorKit.BoundSlider("Сдвиг Y", offset.FindPropertyRelative("y"), -.5f, .5f));

@@ -1,0 +1,85 @@
+{
+"schema_version": 1,
+"exporter_version": "1.0.0",
+"blender_version": "технический",
+"map_id": "KS_Demo_Tiles",
+"revision_id": "00000000000000000000000000000001",
+"created_utc": "2026-10-07T00:00:00+00:00",
+"config": {"single": false, "grid": {"nx": 4, "ny": 4, "origin": [0, 0], "requested_bounds": [0, 0, 51.2, 28.8], "padded_bounds": [0, 0, 51.2, 28.8]}, "size": [640, 360], "overscan": 4, "keep_overscan": false, "passes": ["Color", "Normal", "Height"], "engine": "CYCLES", "projection": {"type": "ORTHO", "q": 0.02, "qx": 0.02, "qy": 0.02, "reference": [0.0, -10.0, 0.0], "basis": [[1.0, 0.0, 0.0], [0.0, 0.5, 0.8660254037844386], [0.0, -0.8660254037844386, 0.5]]}, "units": {"meters_per_blender_unit": 1.0, "pixels_per_projection_unit": 50, "unity_ppu": 108, "unity_units_per_projection_unit": 0.46296296296296291, "downscale": 1.0}, "height": {"min": -2, "max": 4, "axis": [0, 0, 1], "reference_origin": [0, 0, 0], "source": "world_position_z", "render_engine": "CYCLES", "units": "Blender Unit", "bit_depth": 16, "channels": "RGBA", "alpha": "coverage; alpha=0 invalid"}, "normal": {"source": "smoothed_geometry", "space": "sprite_projection", "encoding": "rgb = normalized(camera_basis_normal)*0.5+0.5", "invert_green": false, "strength": 1.0, "bit_depth": 8, "unity_verified": false}, "color": {"profile": "NEUTRAL", "bit_depth": 8, "alpha": "straight", "sources": ["GROUND"]}, "warnings": [], "sources": {"Color": ["GROUND"], "Normal": ["GROUND"], "Height": ["GROUND"]}, "surface_contract": "matched_ground"},
+"configuration_hash": "technical",
+"source": {"blend_path": "", "fingerprint": "technical"},
+"status": "complete",
+"warnings": [],
+"errors": [],
+"tiles": [
+{"x": 0, "y": 0, "center": [6.4, 3.6], "pixel_rect": [0, 1080, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X000_Y000.png", "revision_id": "00000000000000000000000000000001", "sha256": "e20bc661be75981b9e50b25d1a3c93b960f6459bccf22b86a2ca9899ad399582", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X000_Y000_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "bcb415b49dc9e006097ee5df3551793cb3cd0e83cc7c79f7c14bdd3c28d3641c", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X000_Y000_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "880e19ac1d6ea1dae6382ece20a0f4b3281373a65c2270175124338570a01d94", "size": [640, 360], "bit_depth": 16}}},
+{"x": 1, "y": 0, "center": [19.2, 3.6], "pixel_rect": [640, 1080, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X001_Y000.png", "revision_id": "00000000000000000000000000000001", "sha256": "7e67c0fd2456f4a74e99fd9fd3fbcdc58d6cda1e33b182d3eec5e3e333cf0bca", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X001_Y000_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "8788dcf7d31237aec7705e3d9396fb79ca2744615b66bf2d52d6cb81f484022c", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X001_Y000_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "c680d09ba4c7b2113cba68c247a0c5844923ee2eb450b67214fe0d4dd3e79602", "size": [640, 360], "bit_depth": 16}}},
+{"x": 2, "y": 0, "center": [32, 3.6], "pixel_rect": [1280, 1080, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X002_Y000.png", "revision_id": "00000000000000000000000000000001", "sha256": "056f30aa7990b12c22d0e1ebeded13639f30f5705040aa58023ad0fdab261213", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X002_Y000_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "158c3fc5b0c49a8e3e4eb9b685819127e010f2892b3d93d6b5795849ce5c7a2b", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X002_Y000_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "3a2c1e56dca6ac12219f6bee6870a42f95422e898083e5549a1bffe93755f469", "size": [640, 360], "bit_depth": 16}}},
+{"x": 3, "y": 0, "center": [44.800000000000004, 3.6], "pixel_rect": [1920, 1080, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X003_Y000.png", "revision_id": "00000000000000000000000000000001", "sha256": "3ef43fc640094619789103fce539b87524495d54303dc82179a35241ed053d07", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X003_Y000_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "bcb3fbc94f1a5513e7c72d157225329cf3577bd1f980138f7643bdae7e912d8f", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X003_Y000_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "9557ac2a7b78e64d425f9cba641216590cee899ed0ffeb25b58d0412761b3656", "size": [640, 360], "bit_depth": 16}}},
+{"x": 0, "y": 1, "center": [6.4, 10.8], "pixel_rect": [0, 720, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X000_Y001.png", "revision_id": "00000000000000000000000000000001", "sha256": "1956cdb996a19ff780adffd3dd427c5d47523b2f2c84281c616dd152eca6263e", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X000_Y001_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "643cbdb5c1aac1999f35c34ff993eea1f18e1fc7e8b1102a606b41d05f970d84", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X000_Y001_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "e753f58f4b78dd72053a6e2765edc4bbdc72fec7c13c0b220278e335779fe827", "size": [640, 360], "bit_depth": 16}}},
+{"x": 1, "y": 1, "center": [19.2, 10.8], "pixel_rect": [640, 720, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X001_Y001.png", "revision_id": "00000000000000000000000000000001", "sha256": "d9ff382eac20ec20ef4b2dafdf0e763723a2098ce9756c1110df0d51172582d4", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X001_Y001_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "f496d1177f869eaff7785805d64b1b413037a559ec64f39398552a45db875329", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X001_Y001_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "5eac20b6699a68fbcc9166fba20807b31a1b75be46bf67081ed4228c961cc006", "size": [640, 360], "bit_depth": 16}}},
+{"x": 2, "y": 1, "center": [32, 10.8], "pixel_rect": [1280, 720, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X002_Y001.png", "revision_id": "00000000000000000000000000000001", "sha256": "1c4c6ad01ff88081922afb7021c58ca232d6ebeda2b968f0b68e07af7dec089a", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X002_Y001_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "fc5d42a38a6e33214a06a6ae5c93488dd7ec9cf441ba769dd297fa8ba198c1bb", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X002_Y001_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "0af6db0764eea079f2b76c96296a2b80d6561c4d95c849514937eb57b23d077c", "size": [640, 360], "bit_depth": 16}}},
+{"x": 3, "y": 1, "center": [44.800000000000004, 10.8], "pixel_rect": [1920, 720, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X003_Y001.png", "revision_id": "00000000000000000000000000000001", "sha256": "c9c03c034b84061b9561a620ee021077dd0c08aecf46705a9b667e06a63475d5", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X003_Y001_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "076c7675f9e0421d950e84b063fa641032bd7947f30bc8a49641e956b4b0ae0b", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X003_Y001_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "4ed2b420e19da86701051d47356f20dfbdbb29a2362e10cae38a6a41efade15c", "size": [640, 360], "bit_depth": 16}}},
+{"x": 0, "y": 2, "center": [6.4, 18], "pixel_rect": [0, 360, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X000_Y002.png", "revision_id": "00000000000000000000000000000001", "sha256": "e2c91d01aa8c7d154ac52e4abbd6d21e7887fe839ca89b6e9fea421908428d07", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X000_Y002_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "dfc8e39f88fec74efe7b8435b0731a688b10626dbf8c6c8ffc024e36f9dfaa55", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X000_Y002_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "3907577524379986c8104afc6e15a0ad3854e29a5192ea48945f5e96a3e131b2", "size": [640, 360], "bit_depth": 16}}},
+{"x": 1, "y": 2, "center": [19.2, 18], "pixel_rect": [640, 360, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X001_Y002.png", "revision_id": "00000000000000000000000000000001", "sha256": "2c4570b280e9f9632161b8f13c8fa066dd08aa233a0e9c2ab3e198a3dc9a034f", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X001_Y002_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "f9517693be76251d8e370466c7468db5a7a2a9f1ea956f197189e4991b1f6afc", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X001_Y002_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "0106262b8ee9b19a710fbb13acca7623fea9d0ad58adfb2cf24447fed52984c2", "size": [640, 360], "bit_depth": 16}}},
+{"x": 2, "y": 2, "center": [32, 18], "pixel_rect": [1280, 360, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X002_Y002.png", "revision_id": "00000000000000000000000000000001", "sha256": "b18b45e7239320be6d34ecb31071dde67beb7d4d744b4dc9f1ced3ade3607baa", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X002_Y002_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "78a819ab7233bf03cfcea81e283df505ff8e888b792941bb3c015cb7ca34667b", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X002_Y002_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "2f702603c28171040a34eff71dc966ea23db7bbc6a29c496b653dee4955ad382", "size": [640, 360], "bit_depth": 16}}},
+{"x": 3, "y": 2, "center": [44.800000000000004, 18], "pixel_rect": [1920, 360, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X003_Y002.png", "revision_id": "00000000000000000000000000000001", "sha256": "acbe8818024ec6d03aad11eb25fb5c724d3031968ad93fb0440eb74f76c6b854", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X003_Y002_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "29e667ff26edf8e77a9379521bc03c5b328af50ab4fdc675e216a1cf07d24398", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X003_Y002_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "cc8b83b5311d6f2ec9c76303c6d9a6f0f90442e692d9bb1a19549e533fb9c773", "size": [640, 360], "bit_depth": 16}}},
+{"x": 0, "y": 3, "center": [6.4, 25.2], "pixel_rect": [0, 0, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X000_Y003.png", "revision_id": "00000000000000000000000000000001", "sha256": "5a0e4d5176f0cbbd5cca4891f5f5c7817e3c2376151566b1e7ae48984ac51213", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X000_Y003_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "0358187d4a09a757036b9f5960866c468b99c514dae1e034f70ba4598048c9ab", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X000_Y003_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "20413f0b3ac37a7bf5ec07fe87b647e7030696e9d5be6f37bd6d5495e9fda1e2", "size": [640, 360], "bit_depth": 16}}},
+{"x": 1, "y": 3, "center": [19.2, 25.2], "pixel_rect": [640, 0, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X001_Y003.png", "revision_id": "00000000000000000000000000000001", "sha256": "a17b595e245e3c0e323a4cb783549ca596ce766d2605b9c606e8cc9a4b442a88", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X001_Y003_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "1b6d1d463139dd47ad8c9d58857dd82e2f07665f083776dd88c0d3df643bd808", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X001_Y003_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "f23c13d56031fb238aea82c96a65c7136e90b57b6b9589e72a73fac978c72b51", "size": [640, 360], "bit_depth": 16}}},
+{"x": 2, "y": 3, "center": [32, 25.2], "pixel_rect": [1280, 0, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X002_Y003.png", "revision_id": "00000000000000000000000000000001", "sha256": "f6dd7efaaf2bc6d9e3f067d9ef6791b808ab6797f3813b95c4a54f94085878b6", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X002_Y003_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "aa3eb34189514cb9702bcec711255363b02f0029428ef2e3f35120c2c828a47e", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X002_Y003_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "b5fd1c1592819904c9e30d16ebb3102934ee4db3209187d511728d8abfd5820a", "size": [640, 360], "bit_depth": 16}}},
+{"x": 3, "y": 3, "center": [44.800000000000004, 25.2], "pixel_rect": [1920, 0, 640, 360], "status": "complete", "passes": {
+"Color": {"status": "complete", "path": "Color/KS_Demo_Tiles_X003_Y003.png", "revision_id": "00000000000000000000000000000001", "sha256": "e9d47b4a96e8ccbf492ff161b198645fb73de0010647f42e3fc14c356bdc33df", "size": [640, 360], "bit_depth": 8},
+"Normal": {"status": "complete", "path": "Normal/KS_Demo_Tiles_X003_Y003_normal.png", "revision_id": "00000000000000000000000000000001", "sha256": "984885c04e325fb7e1ee995790198db7d7ccf044b8dada7ddca6dc9cf90885bc", "size": [640, 360], "bit_depth": 8},
+"Height": {"status": "complete", "path": "Height/KS_Demo_Tiles_X003_Y003_height.png", "revision_id": "00000000000000000000000000000001", "sha256": "70bcfcc6f83e40d343de32821cffd35e688cd444e459abc9fa21673850caeea4", "size": [640, 360], "bit_depth": 16}}}
+],
+"image_rows": "top_to_bottom",
+"tile_indices": "bottom_left, X right, Y up",
+"virtual_size": [2560, 1440],
+"internal_size": [648, 368],
+"useful_rect_projection": [0, 0, 51.2, 28.8]
+}

@@ -18,16 +18,16 @@ MonoBehaviour:
     hexImageTint: {r: 1, g: 1, b: 1, a: 1}
     frameImage: {fileID: 0}
     frameImageTint: {r: 1, g: 1, b: 1, a: 1}
-    imageScale: 1
-    fillColor: {r: 0.26028472, g: 0.5245282, b: 0.26160035, a: 0}
-    lineColor: {r: 0.60784316, g: 0.6745098, b: 0.5169811, a: 0.8}
-    lineWidth: 0.73
-    gap: 0.087
-    opacity: 0.621
-    difficultColor: {r: 0.29, g: 0.25, b: 0.17, a: 0.8}
-    impassableColor: {r: 0.07, g: 0.08, b: 0.09, a: 0.8}
-    reachableColor: {r: 0.32871866, g: 0.9019608, b: 0.27843133, a: 0.4}
-    reachableLineWidth: 2.36
+    imageScale: 1.01
+    fillColor: {r: 0.7882353, g: 0.3098039, b: 0.3098039, a: 0}
+    lineColor: {r: 0, g: 0, b: 0, a: 0.59607846}
+    lineWidth: 1.08
+    gap: 0.121
+    opacity: 0.42
+    difficultColor: {r: 0.29, g: 0.25, b: 0.17, a: 0.40392157}
+    impassableColor: {r: 0.07, g: 0.08, b: 0.09, a: 0.3529412}
+    reachableColor: {r: 0.32871866, g: 0.9019608, b: 0.27843133, a: 0.19215687}
+    reachableLineWidth: 2.49
     targetColor: {r: 0.58, g: 0.2, b: 0.17, a: 0.8}
     attackHoverFill: {r: 0.82, g: 0.64, b: 0.18, a: 0.16}
     attackHoverLine: {r: 0.98, g: 0.8, b: 0.32, a: 0.95}
@@ -155,12 +155,12 @@ MonoBehaviour:
   - id: technical_lighting_camp_field
     displayLabel: "\u041B\u0430\u0433\u0435\u0440\u044C \xB7 \u0442\u0435\u0441\u0442
       \u0441\u0432\u0435\u0442\u0430"
-    background: {fileID: 0}
+    background: {fileID: -3834196484942233955, guid: b02b2520c4127b8499f99e25d899190d, type: 3}
     backgroundScale: 1
     backgroundOffset: {x: 0, y: 0}
     awaitingArt: 1
-    gridScale: 0.5
-    gridOffset: {x: 0, y: 0}
+    gridScale: 0.6
+    gridOffset: {x: -0.217, y: 0.033}
     disabledCells: []
     useOwnHexStyle: 0
     hexStyle:
@@ -169,16 +169,17 @@ MonoBehaviour:
       frameImage: {fileID: 0}
       frameImageTint: {r: 1, g: 1, b: 1, a: 1}
       imageScale: 1
-      fillColor: {r: 0, g: 0, b: 0, a: 0}
-      lineColor: {r: 0.36, g: 0.38, b: 0.38, a: 0.8}
-      lineWidth: 1.2
-      gap: 0.02
-      opacity: 1
+      fillColor: {r: 0.26028472, g: 0.5245282, b: 0.26160035, a: 0}
+      lineColor: {r: 0.60784316, g: 0.6745098, b: 0.5169811, a: 0.8}
+      lineWidth: 0.83
+      gap: 0.087
+      opacity: 0.621
       difficultColor: {r: 0.29, g: 0.25, b: 0.17, a: 0.8}
       impassableColor: {r: 0.07, g: 0.08, b: 0.09, a: 0.8}
-      reachableColor: {r: 0.28, g: 0.75, b: 0.9, a: 0.4}
-      reachableLineWidth: 2.2
+      reachableColor: {r: 0.32871866, g: 0.9019608, b: 0.27843133, a: 0.4}
+      reachableLineWidth: 2.36
       targetColor: {r: 0.58, g: 0.2, b: 0.17, a: 0.8}
       attackHoverFill: {r: 0.82, g: 0.64, b: 0.18, a: 0.16}
       attackHoverLine: {r: 0.98, g: 0.8, b: 0.32, a: 0.95}
     tagIds: []
+  walkHexesPerSecond: 3

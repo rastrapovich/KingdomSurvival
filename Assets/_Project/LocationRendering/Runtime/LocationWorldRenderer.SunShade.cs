@@ -247,6 +247,8 @@ namespace KingdomSurvival.LocationRendering
             {
                 if (image.sharedMaterial != adjustLit)
                 {
+                    // Ветер и роль прежнего материала со стилем — в блок.
+                    shadeBlock.SetVector(StyleId, StyleOf(image, shadeBlock));
                     image.sharedMaterial = adjustLit;
                     // Свой материал без поправки: цвет как есть, свет — как у общего.
                     shadeBlock.SetVector(HsvId, new Vector4(0, 1, 1, 0));

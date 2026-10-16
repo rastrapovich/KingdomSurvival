@@ -159,6 +159,7 @@ namespace KingdomSurvival.LocationRendering
             GlobalLight = Child("Общий свет").AddComponent<Light2D>();
             GlobalLight.lightType = Light2D.LightType.Global;
             InitializeLighting();
+            InitializeFrame();
 
             BuildGround();
             foreach (LocationVisualObject item in Definition.Objects) AddObject(item);
@@ -498,6 +499,7 @@ namespace KingdomSurvival.LocationRendering
             StepVegetationByClock(seconds);
             ApplyLighting();
             UpdateSunShade();
+            UpdateAtmosphere();
         }
 
         // ПР-12П: кадры анимированных предметов — по тому же времени, что жизнь
@@ -746,6 +748,7 @@ namespace KingdomSurvival.LocationRendering
                 Facing = frame.Kind == ActorKind.Enemy ? HexFacing.West : HexFacing.East
             };
             actor.Image = Image(imageObject, unit?.BattlefieldSprite != null ? unit.BattlefieldSprite : PlaceholderActor(), false);
+            ApplyPersonStyle(actor.Image);
             CreatureAnimationSetData set = animations != null && unit != null ? animations.FindSet(unit.AnimationSetId) : null;
             if (set != null && set.HasAnyFrames)
             {
@@ -872,12 +875,15 @@ namespace KingdomSurvival.LocationRendering
             if (!hsv && !lighting && !bends)
             {
                 if (groundLit && adjustGround != null) image.sharedMaterial = adjustGround;
+                else if (!groundLit && SharedStyleMaterial(resolved) is Material styled) image.sharedMaterial = styled;
                 return;
             }
             image.sharedMaterial = adjustLit;
             image.GetPropertyBlock(adjustBlock);
             adjustBlock.SetVector(HsvId, hsv ? adjust.ShaderHsv : new Vector4(0, 1, 1, 0));
             adjustBlock.SetVector(LightShareId, LightShare(resolved, groundLit));
+            // Ветер и роль рисунка (эффекты рисунков «Обработки кадра»).
+            adjustBlock.SetVector(StyleId, StyleFor(resolved, groundLit));
             image.SetPropertyBlock(adjustBlock);
         }
 
@@ -985,6 +991,7 @@ namespace KingdomSurvival.LocationRendering
             bentCarpets.Clear();
             bendSources.Clear();
             radiusRings.Clear();
+            DisposeFrame();
             Destroy(Root);
             foreach (UnityEngine.Object item in owned)
             {

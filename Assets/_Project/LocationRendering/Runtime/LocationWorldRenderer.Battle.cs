@@ -34,6 +34,8 @@ namespace KingdomSurvival.LocationRendering
             public Vector2 Ground;
             public bool Corpse;
             public string SourceId;
+            // Когда фигура пала (секунды рендерера) — растворение павших.
+            public float DiedAt = float.NaN;
         }
 
         private readonly Dictionary<string, BattleFigure> battleFigures = new Dictionary<string, BattleFigure>(StringComparer.Ordinal);
@@ -56,6 +58,7 @@ namespace KingdomSurvival.LocationRendering
                     GameObject imageObject = new GameObject("Фигура");
                     imageObject.transform.SetParent(anchor, false);
                     figure = new BattleFigure { Anchor = anchor, Image = Image(imageObject, frame.Sprite, false) };
+                    ApplyPersonStyle(figure.Image);
                     battleFigures[frame.Id] = figure;
                     figure.Caster = AddCaster(anchor, figure.Image, null, 0, Vector2.zero, false, 1, frame.Id, true);
                 }
@@ -81,6 +84,22 @@ namespace KingdomSurvival.LocationRendering
 
         public void ClearBattleFigures() => SetBattleFigures(Array.Empty<BattleFigureFrame>());
 
+        // Растворение павшего (0..доля «до какой растворяется») по времени
+        // с гибели; выключено или не пал — 0.
+        private float DissolveAmount(float diedAt)
+        {
+            LocationSpriteEffects s = PostActive ? Sky.Post.Sprites : null;
+            if (s == null || !s.Dissolve || float.IsNaN(diedAt)) return 0;
+            float t = Mathf.Clamp01((Seconds - diedAt) / Mathf.Max(.05f, s.DissolveDuration));
+            return Mathf.Clamp01(s.DissolveAmount) * t;
+        }
+
+        // Пробное растворение фигур исследования (окно «Обработка кадра»): 0..1.
+        public void PreviewDissolve(float amount)
+        {
+            foreach (Actor actor in actors.Values) SetDissolve(actor.Image, Mathf.Clamp01(amount));
+        }
+
         private void PlaceBattleFigure(BattleFigure figure, BattleFigureFrame frame)
         {
             SpriteRenderer image = figure.Image;
@@ -99,7 +118,10 @@ namespace KingdomSurvival.LocationRendering
             }
 
             figure.Ground = frame.Ground;
+            if (frame.Corpse && !figure.Corpse) figure.DiedAt = Seconds;
+            if (!frame.Corpse) figure.DiedAt = float.NaN;
             figure.Corpse = frame.Corpse;
+            SetDissolve(image, DissolveAmount(figure.DiedAt));
             Vector2 ground = LocationVisualGeometry.PixelToWorld(Location, frame.Ground);
             figure.Anchor.localPosition = ground;
             Vector2 center = LocationVisualGeometry.PixelToWorld(Location, rect.center);

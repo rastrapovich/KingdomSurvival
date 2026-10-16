@@ -25,8 +25,8 @@ namespace KingdomSurvival.LocationRendering.Editor
     {
         private enum Tool { Select, Terrain, Entrance, ObjectPoint, Enemy, TriggerArea, ArenaFrame, RetreatPoint, TestStart, Pivot, LightShape, PlaceAsset, Scatter, FieldHexes }
         private enum Kind { None, Art, Entrance, GameObject, Enemy, Encounter }
-        private enum Tab { Place, Game, Light, Art, Ground, Scatter }
-        private static readonly string[] TabNames = { "Место", "Игровое", "Свет", "Предметы", "Земля", "Раскидка" };
+        private enum Tab { Place, Game, Light, Art, Ground, Scatter, Frame }
+        private static readonly string[] TabNames = { "Место", "Игровое", "Свет", "Предметы", "Земля", "Раскидка", "Кадр" };
 
         private static readonly string[] ToolNames =
         {
@@ -105,6 +105,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             EditorApplication.playModeStateChanged += PlayChanged;
             ArtAssetDatabaseAsset.Changed += CatalogChanged;
             ArtAssetUsages.LocationRequested += OpenRequested;
+            FrameStyleWindow.StructureChanged += RequestRebuild;
         }
 
         // Каталог изменился: экземпляры пересобираются с новыми рисунками,
@@ -134,6 +135,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             EditorApplication.playModeStateChanged -= PlayChanged;
             ArtAssetDatabaseAsset.Changed -= CatalogChanged;
             ArtAssetUsages.LocationRequested -= OpenRequested;
+            FrameStyleWindow.StructureChanged -= RequestRebuild;
             ReleasePreview();
             ReleaseUpperLayer();
             ClearGroundPreview();
@@ -471,6 +473,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case Tab.Art: BuildVisualSettings(location); return;
                 case Tab.Ground: BuildGroundSettings(location); return;
                 case Tab.Scatter: BuildScatterSettings(location); return;
+                case Tab.Frame: BuildFrameSettings(location); return;
             }
             Text("Название", location.DisplayName, value => { location.DisplayName = value; RefreshList(); });
             if (!location.IsBattlefield)
@@ -867,6 +870,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             preview.camera.GetUniversalAdditionalCameraData().SetRenderer(0);
             preview.camera.GetUniversalAdditionalCameraData().renderPostProcessing = false;
             preview.camera.GetUniversalAdditionalCameraData().volumeLayerMask = 1 << LocationWorldRenderer.PostVolumeLayer;
+            renderer.BindCamera(preview.camera);
             preview.camera.clearFlags = CameraClearFlags.SolidColor;
             preview.camera.backgroundColor = new Color(.035f, .045f, .04f);
             RebuildTerrainOverlay();
@@ -1065,7 +1069,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             preview.camera.transform.position = new Vector3(world.x, world.y, -10);
             preview.camera.transform.rotation = Quaternion.identity;
             preview.camera.orthographicSize = ViewHeight / LocationVisualGeometry.PixelsPerUnit / 2;
-            preview.camera.GetUniversalAdditionalCameraData().renderPostProcessing = Visual != null && Visual.Post.Enabled;
+            preview.camera.GetUniversalAdditionalCameraData().renderPostProcessing = renderer.PostActive;
+            renderer.IsolatePost();
             previewMouse = evt.mousePosition;
             // Гексы боя — между землёй и предметами: здесь земля (с тенями на
             // ней), над ней слой гексов, выше — верхний слой (предметы и люди).
@@ -1082,6 +1087,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             lastPreviewFrame = frame;
             lastPreviewAt = now;
             GUI.DrawTexture(frame, texture, ScaleMode.StretchToFill, false);
+            // Эффекты рисунков — глобальные значения шейдера: другим окнам их не оставлять.
+            LocationWorldRenderer.ClearFrameGlobals();
         }
 
         // Верхний слой предпросмотра: предметы и люди поверх гексов боя,

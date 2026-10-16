@@ -31,6 +31,18 @@ namespace KingdomSurvival.BattlefieldDatabase
         public LocationWorldLighting worldLighting = new LocationWorldLighting();
         public bool worldLightingInitialized;
 
+        // ПР-12М: сохранённые стили кадра (окно «Обработка кадра» → «Запомнить»).
+        public List<LocationFrameStyle> frameStyles = new List<LocationFrameStyle>();
+
+        public LocationFrameStyle FindFrameStyle(string id) => frameStyles?.Find(item => item != null && item.Id == id);
+
+        // Стиль по имени — для игры (смена стиля кадра сценой), без учёта регистра.
+        public static LocationFrameStyle LoadFrameStyle(string name)
+        {
+            LocalLocationDatabaseAsset asset = Resources.Load<LocalLocationDatabaseAsset>(ResourcesPath);
+            return asset?.frameStyles?.Find(item => item != null && string.Equals(item.Name, name, System.StringComparison.OrdinalIgnoreCase));
+        }
+
         public static LocationWorldLighting LoadWorldLighting()
         {
             LocalLocationDatabaseAsset asset = Resources.Load<LocalLocationDatabaseAsset>(ResourcesPath);

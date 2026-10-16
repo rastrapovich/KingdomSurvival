@@ -181,6 +181,7 @@ namespace KingdomSurvival.LocationRendering
             postProfile.Add<Vignette>(true);
             postProfile.Add<FilmGrain>(true);
             postProfile.Add<Tonemapping>(true);
+            InitializeFrameVolume();
             postVolume.sharedProfile = postProfile;
             UniversalAdditionalCameraData data = Camera.GetUniversalAdditionalCameraData();
             data.volumeLayerMask = 1 << PostVolumeLayer;
@@ -1184,11 +1185,14 @@ namespace KingdomSurvival.LocationRendering
 
         private void ApplyPost()
         {
-            LocationPostEffects post = Sky.Post;
-            bool enabled = post != null && post.Enabled;
+            LocationPostEffects post = Sky.Post?.Repair();
+            bool enabled = PostActive;
             Camera.GetUniversalAdditionalCameraData().renderPostProcessing = enabled;
             postVolume.enabled = enabled;
+            ApplyFrameGlobals(post);
+            ApplyQualityAll();
             if (!enabled) return;
+            ApplyFrameVolume(post);
 
             LocationColorGrade grade = LocationColorGrade.Lerp(post.Night, post.Day, DayFactor);
             if (postProfile.TryGet(out ColorAdjustments color))

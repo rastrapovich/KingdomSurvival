@@ -39,6 +39,8 @@ namespace KingdomSurvival.LocationRendering
             if (shader == null) return null;
             carpetMaterial = Own(new Material(shader) { name = "Ковёр раскидки" });
             carpetMaterial.EnableKeyword("_KS_PARTICLE");
+            // Ковёр — трава: ветер растительности «Обработки кадра».
+            carpetMaterial.SetVector(StyleId, new Vector4(2, 0, 0, 0));
             return carpetMaterial;
         }
 

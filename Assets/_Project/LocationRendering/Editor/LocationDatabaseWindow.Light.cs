@@ -6,6 +6,7 @@ using KingdomSurvival.BattlefieldDatabase;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UIElements;
 
 namespace KingdomSurvival.LocationRendering.Editor
@@ -160,7 +161,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
 
             BuildEdgeShadeSettings(visual);
-            BuildPostSettings(sky.Post);
+            BuildPostPointer(sky.Post);
         }
 
         // Затемнение краёв и углов самого места — поверх всего, привязано к рисунку места.
@@ -336,44 +337,54 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
         }
 
-        private void BuildPostSettings(LocationPostEffects post)
+        // Обработка кадра — своя вкладка «Кадр» и окно «Обработка кадра»;
+        // во вкладке «Свет» — только ссылка на них.
+        private void BuildPostPointer(LocationPostEffects post)
         {
             Heading("Обработка кадра");
-            Toggle("Включена", post.Enabled, value => post.Enabled = value, true);
-            if (!post.Enabled) return;
-            Help("Днём и ночью — свои значения цвета; между ними — по яркости суток. Под крышей — дневные.");
-            GradeEditor("День", post.Day);
-            GradeEditor("Ночь", post.Night);
-            Toggle("Свечение ярких мест (bloom)", post.Bloom, value => post.Bloom = value, true);
-            if (post.Bloom)
-            {
-                Number("Сила свечения", post.BloomIntensity, 0, 5, value => post.BloomIntensity = value);
-                Number("Порог яркости", post.BloomThreshold, 0, 2, value => post.BloomThreshold = value);
-                Number("Разлёт", post.BloomScatter, 0, 1, value => post.BloomScatter = value);
-                ColorField("Оттенок свечения", post.BloomTint, value => post.BloomTint = value);
-            }
-            Toggle("Затемнение краёв", post.Vignette, value => post.Vignette = value, true);
-            if (post.Vignette)
-            {
-                Number("Сила", post.VignetteIntensity, 0, 1, value => post.VignetteIntensity = value);
-                Number("Мягкость", post.VignetteSmoothness, .01f, 1, value => post.VignetteSmoothness = value);
-                ColorField("Цвет краёв", post.VignetteColor, value => post.VignetteColor = value);
-            }
-            Number("Зерно", post.Grain, 0, 1, value => post.Grain = value);
-            Choice("Тональная кривая", new List<LocationTonemapping> { LocationTonemapping.None, LocationTonemapping.Neutral, LocationTonemapping.ACES },
-                value => value == LocationTonemapping.None ? "Нет" : value == LocationTonemapping.Neutral ? "Нейтральная" : "Кино (ACES)",
-                post.Tonemapping, value => post.Tonemapping = value);
+            Help((post != null && post.Enabled ? "Включена. " : "Выключена. ") +
+                 "Цвет дня и ночи, свечение, виньетка, зерно, тон и LUT, холст, эффекты рисунков, атмосфера и сглаживание — на вкладке «Кадр» или в отдельном окне.");
+            VisualElement row = Row();
+            AddButton(row, "Вкладка «Кадр»", () => { tab = Tab.Frame; BuildSettings(); });
+            AddButton(row, "Окно «Обработка кадра» ↗", () => FrameStyleWindow.Open(selectedId));
         }
 
-        private void GradeEditor(string title, LocationColorGrade grade)
+        // ПР-12М: вкладка «Кадр» — та же панель, что в окне «Обработка кадра»
+        // (FrameEffectsEditor), с предпросмотром этого окна.
+        private void BuildFrameSettings(LocalLocationDefinition location)
         {
-            Label label = new Label(title); label.style.unityFontStyleAndWeight = FontStyle.Bold; label.style.marginTop = 6; settings.Add(label);
-            Number(title + ": экспозиция", grade.Exposure, -3, 3, value => grade.Exposure = value);
-            Number(title + ": контраст", grade.Contrast, -100, 100, value => grade.Contrast = value);
-            Number(title + ": насыщенность", grade.Saturation, -100, 100, value => grade.Saturation = value);
-            Number(title + ": тепло / холод", grade.Temperature, -100, 100, value => grade.Temperature = value);
-            Number(title + ": зелень / пурпур", grade.Tint, -100, 100, value => grade.Tint = value);
-            ColorField(title + ": цветной фильтр", grade.Filter, value => grade.Filter = value);
+            LocationVisualDefinition visual = Visual;
+            if (visual == null)
+            {
+                Help("Для обработки кадра нужна художественная сборка места.");
+                AddButton(settings, "Добавить сборку", () => Change(() => database.visuals.Add(new LocationVisualDefinition { LocationId = selectedId }), true));
+                return;
+            }
+            Heading("Обработка кадра");
+            FrameEffectsEditor editor = new FrameEffectsEditor
+            {
+                Database = database,
+                Visual = visual,
+                PlaceName = location.DisplayName,
+                Change = ChangeFrame,
+                Rebuild = BuildSettings,
+                Pulse = () => renderer?.Pulse(),
+                OpenWindow = () => FrameStyleWindow.Open(selectedId)
+            };
+            settings.Add(editor.Build());
+        }
+
+        // Правка обработки кадра: без пересборки места, если набор материалов
+        // рисунков (эффекты рисунков) не сменился — остальное видно сразу.
+        private void ChangeFrame(Action action, bool refreshSettings)
+        {
+            Undo.RecordObject(database, "Обработка кадра");
+            action();
+            EditorUtility.SetDirty(database);
+            saveAt = EditorApplication.timeSinceStartup + .5;
+            if (renderer != null && renderer.BuiltSpriteStructure != LocationWorldRenderer.SpriteStructureKey(new LocationSky(Visual, database.worldLighting).Post))
+                RequestRebuild();
+            if (refreshSettings) BuildSettings();
         }
 
         // Карта нормалей подключается к рисунку как вторая текстура
@@ -550,6 +561,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Rect cell = new Rect(area.x + (i % 2) * half.x, area.y + (i / 2) * half.y, half.x, half.y);
                 Rect frame = AspectFrame(new Rect(cell.x + 4, cell.y + 4, cell.width - 8, cell.height - 8));
                 renderer.SetTime(hours[i], (float)EditorApplication.timeSinceStartup);
+                preview.camera.GetUniversalAdditionalCameraData().renderPostProcessing = renderer.PostActive;
+                renderer.IsolatePost();
                 RenderPreviewActors();
                 preview.camera.orthographicSize = CanvasSize.y / LocationVisualGeometry.PixelsPerUnit / 2;
                 preview.camera.transform.position = new Vector3(0, 0, -10);
@@ -559,6 +572,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 GUI.Label(new Rect(frame.x + 6, frame.y + 4, 160, 18), names[i], EditorStyles.whiteBoldLabel);
             }
             renderer.SetTime(hour, (float)EditorApplication.timeSinceStartup);
+            LocationWorldRenderer.ClearFrameGlobals();
         }
     }
 }

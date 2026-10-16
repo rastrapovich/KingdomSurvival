@@ -83,6 +83,34 @@ namespace KingdomSurvival.BattlefieldDatabase
         public Color VignetteColor = Color.black;
         public float Grain;
         public LocationTonemapping Tonemapping = LocationTonemapping.None;
+        // Окно «Обработка кадра»: зерно подробнее, тон, линза, холст,
+        // рисунки, атмосфера, сглаживание (LocationFrameEffects.cs).
+        public LocationGrainType GrainType = LocationGrainType.Thin;
+        public float GrainResponse = .8f;
+        public LocationToneEffects Tone = new LocationToneEffects();
+        public LocationLensEffects Lens = new LocationLensEffects();
+        public LocationCanvasEffects Canvas = new LocationCanvasEffects();
+        public LocationSpriteEffects Sprites = new LocationSpriteEffects();
+        public LocationAtmosphereEffects Atmosphere = new LocationAtmosphereEffects();
+        public LocationFrameQuality Quality = new LocationFrameQuality();
+
+        // Старые данные без новых разделов (null после загрузки) — разделы по умолчанию.
+        public LocationPostEffects Repair()
+        {
+            Day ??= new LocationColorGrade();
+            Night ??= new LocationColorGrade();
+            Tone ??= new LocationToneEffects();
+            Lens ??= new LocationLensEffects();
+            Canvas ??= new LocationCanvasEffects();
+            Sprites ??= new LocationSpriteEffects();
+            Atmosphere ??= new LocationAtmosphereEffects();
+            Quality ??= new LocationFrameQuality();
+            Tone.Repair();
+            Atmosphere.Repair();
+            return this;
+        }
+
+        public LocationPostEffects Clone() => UnityEngine.JsonUtility.FromJson<LocationPostEffects>(UnityEngine.JsonUtility.ToJson(this)).Repair();
     }
 
     [Serializable]
@@ -107,6 +135,8 @@ namespace KingdomSurvival.BattlefieldDatabase
     }
 
     public enum LocationTonemapping { None, Neutral, ACES }
+
+    public enum LocationGrainType { Thin, Medium, Large }
 }
 
 namespace KingdomSurvival.BattlefieldDatabase

@@ -17,6 +17,11 @@
 // Реакция на проход (отдельный рисунок): _KsBend — смещение верха в мире и
 // опускание, _KsBendShape — опора по Y и 1/высота растения в пространстве
 // рисунка, закреплённая доля, степень изгиба; _KsBendShape.y = 0 — без прогиба.
+// Эффекты рисунков окна «Обработка кадра» (глобальные значения задаёт
+// LocationWorldRenderer перед кадром, без них — нули, эффектов нет):
+// ветер, обводка изнутри, обесцвечивание дальнего плана, растворение.
+// Свой у рисунка — _KsStyle: x — ветер (0 нет, 1 дерево, 2 растительность),
+// y — роль (0 предмет, 1 человек, 2 деталь земли), w — растворение 0..1.
 Shader "Kingdom Survival/Location Sprite Adjust"
 {
     Properties
@@ -29,6 +34,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         _KsLight("Sun, fire light share, ground-lit", Vector) = (1, 1, 0, 0)
         _KsBend("Bend: top offset xy (world), drop (world)", Vector) = (0, 0, 0, 0)
         _KsBendShape("Bend shape: root y, 1/height (object), pinned, curve", Vector) = (0, 0, 0, 0)
+        _KsStyle("Style: wind kind, role, -, dissolve", Vector) = (0, 0, 0, 0)
         [MaterialToggle] _ZWrite("ZWrite", Float) = 0
         [HideInInspector] _Color("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor("RendererColor", Color) = (1,1,1,1)
@@ -48,7 +54,122 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         float4 _KsLight;
         float4 _KsBend;
         float4 _KsBendShape;
+        float4 _KsStyle;
     CBUFFER_END
+
+    // Эффекты окна «Обработка кадра» — глобальные (вне блока материала).
+    // _KsWindParams: x — размах (мир), y — скорость, z — порывы, w — высота полного размаха (мир);
+    // _KsWindShare: x — доля деревьев, y — растительности, z — направление −1..1, w — время (с).
+    float4 _KsWindParams;
+    float4 _KsWindShare;
+    // _KsOutlineParams: x — толщина (пиксели рисунка), y — у людей, z — у предметов, w — включена.
+    float4 _KsOutlineColor;
+    float4 _KsOutlineParams;
+    // _KsDistanceParams: x, y — начало и полная сила (доля высоты экрана), z — обесцвечивание, w — дымка;
+    // _KsDistanceHaze: цвет дымки, a = 1 — включено.
+    float4 _KsDistanceParams;
+    float4 _KsDistanceHaze;
+    // _KsDissolveParams: x — ширина края, y — частота шума (на единицу рисунка); _KsDissolveEdge — цвет края.
+    float4 _KsDissolveParams;
+    float4 _KsDissolveEdge;
+
+    // Ветер: верх рисунка ходит от опоры (вес — высота над опорой к
+    // полной высоте размаха), фаза — от положения опоры: соседние деревья
+    // качаются вразнобой, порывы проходят волной.
+    float KsWindShareOf(float kind)
+    {
+        return kind > 1.5 ? _KsWindShare.y : (kind > 0.5 ? _KsWindShare.x : 0);
+    }
+
+    float3 KsWind(float3 world, float3 origin, float weight, float share)
+    {
+        if (share <= 0 || _KsWindParams.x <= 0 || weight <= 0)
+            return world;
+        float t = _KsWindShare.w * _KsWindParams.y;
+        float phase = origin.x * 0.37 + origin.y * 0.23;
+        float sway = sin(t * 1.7 + phase * 2.1) * 0.6 + sin(t * 0.83 + phase * 1.3 + 1.7) * 0.4;
+        float g = 0.5 + 0.5 * sin(t * 0.37 + origin.x * 0.11 - origin.y * 0.05);
+        float gust = _KsWindParams.z * g * g;
+        float direction = clamp(_KsWindShare.z, -1, 1);
+        float push = direction * (0.5 + gust) + sway * (1 - abs(direction) * 0.6) * (0.4 + gust);
+        float offset = _KsWindParams.x * share * weight * push;
+        world.x += offset;
+        world.y -= abs(offset) * 0.2 * weight;
+        return world;
+    }
+
+    // Дальний план: доля по высоте опоры рисунка на экране (выше — дальше).
+    float KsDistanceFactor(float3 baseWS)
+    {
+        if (_KsDistanceHaze.a < 0.5 || _KsStyle.y > 1.5)
+            return 0;
+        float4 clip = TransformWorldToHClip(baseWS);
+        float y = clip.y / max(clip.w, 1e-5) * _ProjectionParams.x * 0.5 + 0.5;
+        return smoothstep(_KsDistanceParams.x, max(_KsDistanceParams.y, _KsDistanceParams.x + 1e-3), y);
+    }
+
+    half3 KsDistance(half3 rgb, float f)
+    {
+        if (f <= 0)
+            return rgb;
+        half l = dot(rgb, half3(0.299, 0.587, 0.114));
+        rgb = lerp(rgb, half3(l, l, l), saturate(_KsDistanceParams.z) * f);
+        return lerp(rgb, half3(_KsDistanceHaze.rgb), saturate(_KsDistanceParams.w) * f);
+    }
+
+    float KsHash(float2 p)
+    {
+        return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453);
+    }
+
+    float KsValueNoise(float2 p)
+    {
+        float2 i = floor(p), f = frac(p);
+        f = f * f * (3 - 2 * f);
+        return lerp(lerp(KsHash(i), KsHash(i + float2(1, 0)), f.x), lerp(KsHash(i + float2(0, 1)), KsHash(i + float2(1, 1)), f.x), f.y);
+    }
+
+    // Растворение: 0 — целый, 1 — исчез. Возвращает долю края (0..1) и
+    // обнуляет альфу растворённого. Шум — по точке рисунка (кадр анимации не дрожит).
+    half KsDissolve(inout half alpha, float2 objectPos)
+    {
+        float amount = _KsStyle.w;
+        if (amount <= 0)
+            return 0;
+        float scale = max(_KsDissolveParams.y, 1);
+        float n = KsValueNoise(objectPos * scale) * 0.65 + KsValueNoise(objectPos * scale * 2.7 + 13.1) * 0.35;
+        float edge = max(_KsDissolveParams.x, 1e-3);
+        float cut = amount * (1 + edge);
+        if (n < cut - edge)
+        {
+            alpha = 0;
+            return 0;
+        }
+        return n < cut ? 1 - (cut - n) / edge : 0;
+    }
+
+    // Обводка изнутри: край там, где рядом (на толщину) рисунок прозрачен.
+    half KsOutlineMask(TEXTURE2D_PARAM(source, sourceSampler), float2 uv, half alpha)
+    {
+        if (_KsOutlineParams.w < 0.5 || alpha < 0.5 || _KsStyle.y > 1.5)
+            return 0;
+        float on = _KsStyle.y > 0.5 ? _KsOutlineParams.y : _KsOutlineParams.z;
+        if (on < 0.5)
+            return 0;
+        float width, height;
+        source.GetDimensions(width, height);
+        float2 d = max(_KsOutlineParams.x, 0.5) / float2(max(width, 1), max(height, 1));
+        float2 e = d * 0.7071;
+        half a = SAMPLE_TEXTURE2D(source, sourceSampler, uv + float2(d.x, 0)).a;
+        a = min(a, SAMPLE_TEXTURE2D(source, sourceSampler, uv - float2(d.x, 0)).a);
+        a = min(a, SAMPLE_TEXTURE2D(source, sourceSampler, uv + float2(0, d.y)).a);
+        a = min(a, SAMPLE_TEXTURE2D(source, sourceSampler, uv - float2(0, d.y)).a);
+        a = min(a, SAMPLE_TEXTURE2D(source, sourceSampler, uv + e).a);
+        a = min(a, SAMPLE_TEXTURE2D(source, sourceSampler, uv - e).a);
+        a = min(a, SAMPLE_TEXTURE2D(source, sourceSampler, uv + float2(e.x, -e.y)).a);
+        a = min(a, SAMPLE_TEXTURE2D(source, sourceSampler, uv + float2(-e.x, e.y)).a);
+        return saturate((0.5 - a) * 3) * _KsOutlineColor.a;
+    }
 
     // Реакция на проход у отдельного рисунка (не ковра: у ковра вершины
     // гнутся на CPU тем же законом — LocationGrassBend). Вес по высоте над
@@ -63,9 +184,11 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         return pow(s, curve > 0 ? curve : 2);
     }
 
-    float3 KsObjectToWorld(float3 positionOS)
+    // v — высота вершины в прямоугольнике частицы ковра 0..1 (ветер ковра).
+    float3 KsObjectToWorld(float3 positionOS, float v)
     {
         float3 world = TransformObjectToWorld(positionOS);
+        float share = KsWindShareOf(_KsStyle.x);
     #if !defined(_KS_PARTICLE)
         if (_KsBendShape.y > 0)
         {
@@ -73,8 +196,27 @@ Shader "Kingdom Survival/Location Sprite Adjust"
             float3 up = TransformObjectToWorldDir(float3(0, 1, 0));
             world.xy += (_KsBend.xy - up.xy * _KsBend.z) * weight;
         }
+        if (share > 0)
+        {
+            float3 origin = TransformObjectToWorld(float3(0, _KsBendShape.y > 0 ? _KsBendShape.x : 0, 0));
+            float lift = saturate((world.y - origin.y) / max(_KsWindParams.w, 0.01));
+            world = KsWind(world, origin, pow(lift, 1.5), share);
+        }
+    #else
+        if (share > 0)
+            world = KsWind(world, world, v * v * 0.6, share);
     #endif
         return world;
+    }
+
+    // Опора рисунка в мире — для дальнего плана (у ковра — сама вершина).
+    float3 KsBaseWorld(float3 positionWS)
+    {
+    #if defined(_KS_PARTICLE)
+        return positionWS;
+    #else
+        return TransformObjectToWorld(float3(0, 0, 0));
+    #endif
     }
 
     half3 KsAdjust(half3 rgb, float3 hsv)
@@ -194,6 +336,8 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 half4 color         : COLOR;
                 float4 adjust       : TEXCOORD4;
                 float2 ksWorld      : TEXCOORD5;
+                // x — дальний план, zw — точка рисунка (растворение).
+                float4 ksFx         : TEXCOORD6;
             };
 
             #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/CombinedShapeLightShared.hlsl"
@@ -283,13 +427,14 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 o.color = input.color * _Color * unity_SpriteColor;
                 o.adjust = float4(_KsHsv.xyz, 1);
             #endif
-                float3 positionWS = KsObjectToWorld(position);
+                float3 positionWS = KsObjectToWorld(position, input.uv.y);
                 o.positionCS = TransformWorldToHClip(positionWS);
             #if defined(DEBUG_DISPLAY)
                 o.positionWS = positionWS;
                 o.normalWS = TransformObjectToWorldDir(input.normal);
             #endif
                 o.ksWorld = positionWS.xy;
+                o.ksFx = float4(KsDistanceFactor(KsBaseWorld(positionWS)), 0, input.positionOS.xy);
                 o.uv = KsUv(input.uv.xy, o.adjust.w);
                 o.lightingUV = half2(ComputeScreenPos(o.positionCS / o.positionCS.w).xy);
                 return o;
@@ -302,6 +447,9 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 half4 main = input.color * texel;
                 main.a *= KsHoleKeep(input.ksWorld);
                 main.rgb = KsShade(main.rgb, input.ksWorld);
+                main.rgb = lerp(main.rgb, half3(_KsOutlineColor.rgb), KsOutlineMask(TEXTURE2D_ARGS(_MainTex, sampler_MainTex), input.uv, texel.a));
+                main.rgb = KsDistance(main.rgb, input.ksFx.x);
+                half edge = KsDissolve(main.a, input.ksFx.zw);
                 const half4 mask = SAMPLE_TEXTURE2D(_MaskTex, sampler_MaskTex, input.uv);
                 half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv));
 
@@ -313,7 +461,10 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 SETUP_DEBUG_TEXTURE_DATA_2D_NO_TS(inputData, input.positionWS, input.positionCS, _MainTex);
                 surfaceData.normalWS = input.normalWS;
             #endif
-                return KsCombinedLight(surfaceData, inputData, half2(_KsLight.xy));
+                half4 lit = KsCombinedLight(surfaceData, inputData, half2(_KsLight.xy));
+                // Край растворения светится сам (тлеет и ночью).
+                lit.rgb = lerp(lit.rgb, half3(_KsDissolveEdge.rgb), edge);
+                return lit;
             }
             ENDHLSL
         }
@@ -348,6 +499,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 half4 color         : COLOR;
                 float flip          : TEXCOORD4;
                 float2 ksWorld      : TEXCOORD5;
+                float2 ksObject     : TEXCOORD6;
             };
 
             #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/NormalsRenderingShared.hlsl"
@@ -381,10 +533,11 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 o.tangentWS = TransformObjectToWorldDir(input.tangent.xyz);
                 o.bitangentWS = cross(o.normalWS, o.tangentWS) * input.tangent.w;
             #endif
-                float3 positionWS = KsObjectToWorld(position);
+                float3 positionWS = KsObjectToWorld(position, input.uv.y);
                 o.positionCS = TransformWorldToHClip(positionWS);
                 o.uv = KsUv(input.uv.xy, o.flip);
                 o.ksWorld = positionWS.xy;
+                o.ksObject = input.positionOS.xy;
                 return o;
             }
 
@@ -396,6 +549,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                     discard;
                 half4 mainTex = input.color * SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
                 mainTex.a *= KsHoleKeep(input.ksWorld);
+                KsDissolve(mainTex.a, input.ksObject);
                 half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv));
             #if defined(_KS_PARTICLE)
                 // Отражённый рисунок — отражённая нормаль по горизонтали.
@@ -439,6 +593,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 half4 color         : COLOR;
                 float4 adjust       : TEXCOORD1;
                 float2 ksWorld      : TEXCOORD2;
+                float4 ksFx         : TEXCOORD3;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -460,9 +615,10 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 o.color = input.color * _Color * unity_SpriteColor;
                 o.adjust = float4(_KsHsv.xyz, 1);
             #endif
-                float3 positionWS = KsObjectToWorld(position);
+                float3 positionWS = KsObjectToWorld(position, input.uv.y);
                 o.positionCS = TransformWorldToHClip(positionWS);
                 o.ksWorld = positionWS.xy;
+                o.ksFx = float4(KsDistanceFactor(KsBaseWorld(positionWS)), 0, input.positionOS.xy);
                 o.uv = KsUv(input.uv.xy, o.adjust.w);
                 return o;
             }
@@ -474,6 +630,10 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 half4 color = input.color * texel;
                 color.a *= KsHoleKeep(input.ksWorld);
                 color.rgb = KsShade(color.rgb, input.ksWorld);
+                color.rgb = lerp(color.rgb, half3(_KsOutlineColor.rgb), KsOutlineMask(TEXTURE2D_ARGS(_MainTex, sampler_MainTex), input.uv, texel.a));
+                color.rgb = KsDistance(color.rgb, input.ksFx.x);
+                half edge = KsDissolve(color.a, input.ksFx.zw);
+                color.rgb = lerp(color.rgb, half3(_KsDissolveEdge.rgb), edge);
                 return color;
             }
             ENDHLSL

@@ -390,7 +390,11 @@ namespace KingdomSurvival.LocationRendering.Editor
                 preview.Render(true);
                 Texture texture = preview.EndPreview();
                 target = Match(target, texture);
+                // Blit оставляет свою цель активной: без возврата окно рисовало
+                // бы дальше в эту текстуру, а не на экран (чёрный предпросмотр).
+                RenderTexture active = RenderTexture.active;
                 Graphics.Blit(texture, target);
+                RenderTexture.active = active;
                 return target;
             }
             finally

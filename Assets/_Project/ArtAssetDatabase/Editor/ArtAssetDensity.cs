@@ -39,7 +39,7 @@ namespace KingdomSurvival.ArtAssets.Editor
             float shrink = asset.PixelsPerUnit / GamePixelsPerUnit;
             return "рисунок подробнее, чем видно в игре: " + Mathf.RoundToInt(asset.PixelsPerUnit) + " пикс. на ед. мира при " +
                    Mathf.RoundToInt(GamePixelsPerUnit) + " у мест (ужимается в " + shrink.ToString("0.#") +
-                   " раза) — в месте он рябит мелким шумом. Нажмите «Уменьшить рисунок» ниже.";
+                   " раза) — в месте он рябит мелким шумом. Кнопка «Уменьшить рисунок» — в разделе «Общее».";
         }
 
         // Коэффициенты, которые имеет смысл предложить: после уменьшения

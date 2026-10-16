@@ -232,6 +232,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     PersonHeight().ToString("0.##") + " ед.; 108 пикселей рисунка места = 1 ед.", true);
             FloatProperty("Пикселей на ед. мира", asset.PixelsPerUnit, value => asset.PixelsPerUnit = Mathf.Max(.5f, value),
                 "Чем больше, тем меньше объект в месте. Прозрачные поля PNG масштаб не меняют.", true);
+            BuildReduceRow(asset);
             EndSection();
 
             Section("В местах по умолчанию", false);
@@ -338,7 +339,6 @@ namespace KingdomSurvival.ArtAssets.Editor
                     catalog.MarkChanged();
                     BuildProperties();
                 }));
-            BuildReduceRow(asset);
             EndSection();
 
             List<ArtAssetUsage> usages = ArtAssetUsages.Find(asset.Id);
@@ -353,16 +353,15 @@ namespace KingdomSurvival.ArtAssets.Editor
             EndSection();
         }
 
-        // Рисунок подробнее мест (PPU заметно выше 108) — уменьшить сами PNG
-        // и поделить PPU: высота в мире прежняя, шума на экране нет.
+        // Уменьшить сами PNG и поделить PPU: высота в мире прежняя. Нужно,
+        // когда рисунок подробнее мест (PPU заметно выше 108) — иначе шум.
         private void BuildReduceRow(ArtAssetDefinition asset)
         {
-            if (ArtAssetDensity.Problem(asset) == null) return;
-            List<(string, Action)> buttons = new List<(string, Action)>();
-            foreach (int factor in ArtAssetDensity.UsefulFactors(asset))
-                buttons.Add(("Уменьшить рисунок " + (factor == 2 ? "вдвое" : "вчетверо") + " (→ " + Mathf.RoundToInt(asset.PixelsPerUnit / factor) + ")",
-                    () => ReduceAsset(asset, factor)));
-            if (buttons.Count > 0) Row(buttons.ToArray());
+            if (asset.IsEmpty) return;
+            string problem = ArtAssetDensity.Problem(asset);
+            if (problem != null) Help(Char.ToUpper(problem[0]) + problem.Substring(1), HelpBoxMessageType.Warning);
+            Row(("Уменьшить рисунок вдвое (→ " + Mathf.RoundToInt(asset.PixelsPerUnit / 2) + ")", () => ReduceAsset(asset, 2)),
+                ("Вчетверо (→ " + Mathf.RoundToInt(asset.PixelsPerUnit / 4) + ")", () => ReduceAsset(asset, 4)));
         }
 
         private void ReduceAsset(ArtAssetDefinition asset, int factor)
@@ -378,6 +377,8 @@ namespace KingdomSurvival.ArtAssets.Editor
                 "Все PNG папки ассета (" + ArtAssetDensity.Files(asset).Count + " шт.: кадры, ракурсы, части, тени, нормали) будут уменьшены в " + factor +
                 " раза и перезаписаны; «Пикселей на ед. мира» станет " + (asset.PixelsPerUnit / factor).ToString("0.##") +
                 " — высота в мире не изменится, листы кадров пересоберутся.\n\n" +
+                (ArtAssetDensity.UsefulFactors(asset).Contains(factor) ? "" :
+                    "⚠ Это меньше " + Mathf.RoundToInt(ArtAssetDensity.GamePixelsPerUnit) + " у мест: рисунок станет заметно грубее и мыльнее соседей.\n\n") +
                 "Рисунки не хранятся в git, а Undo файлы не вернёт. Рекомендуется сохранить копию исходников в\n" + backupRoot + "/",
                 "С копией", "Отмена", "Без копии");
             if (choice == 1) return;

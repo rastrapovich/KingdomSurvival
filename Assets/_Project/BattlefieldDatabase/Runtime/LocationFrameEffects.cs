@@ -207,6 +207,34 @@ namespace KingdomSurvival.BattlefieldDatabase
             Leaves ??= LocationParticleLayer.DefaultLeaves();
             Sparks ??= LocationParticleLayer.DefaultSparks();
             Breath ??= LocationParticleLayer.DefaultBreath();
+            if (Version < 1)
+            {
+                // Первые значения по умолчанию были мельче пикселя на виде
+                // места: нетронутые (равные им) — на новые, правки остаются.
+                Upgrade(Dust, LocationParticleLayer.DefaultDust(), .03f, 4, .45f, 0);
+                Upgrade(Midges, LocationParticleLayer.DefaultMidges(), .022f, 25, .8f, 0, new Color(.1f, .09f, .07f));
+                Upgrade(Rain, LocationParticleLayer.DefaultRain(), .025f, 60, .35f, 14);
+                Upgrade(Leaves, LocationParticleLayer.DefaultLeaves(), .09f, .6f, .9f, 0, new Color(.62f, .45f, .16f));
+                Upgrade(Sparks, LocationParticleLayer.DefaultSparks(), .03f, 6, 1, 0);
+                Upgrade(Breath, LocationParticleLayer.DefaultBreath(), .16f, .5f, .22f, 0);
+                if (Mathf.Approximately(Breath.Speed, .12f) && Mathf.Approximately(Breath.Gravity, -.02f))
+                {
+                    Breath.Speed = .07f; Breath.Gravity = -.005f; Breath.Lifetime = 1.3f; Breath.Spread = 40;
+                }
+                Version = 1;
+            }
+        }
+
+        // Версия значений по умолчанию (0 — первые, мелкие).
+        public int Version;
+
+        private static void Upgrade(LocationParticleLayer layer, LocationParticleLayer fresh, float oldSize, float oldDensity, float oldOpacity, float oldStretch, Color? oldColor = null)
+        {
+            if (Mathf.Approximately(layer.Size, oldSize)) layer.Size = fresh.Size;
+            if (Mathf.Approximately(layer.Density, oldDensity)) layer.Density = fresh.Density;
+            if (Mathf.Approximately(layer.Opacity, oldOpacity)) layer.Opacity = fresh.Opacity;
+            if (oldStretch > 0 && Mathf.Approximately(layer.Stretch, oldStretch)) layer.Stretch = fresh.Stretch;
+            if (oldColor != null && ((Vector4)(layer.Color - oldColor.Value)).sqrMagnitude < 1e-4f) { layer.Color = fresh.Color; layer.ColorB = fresh.ColorB; }
         }
     }
 
@@ -249,42 +277,42 @@ namespace KingdomSurvival.BattlefieldDatabase
 
         public static LocationParticleLayer DefaultDust() => new LocationParticleLayer
         {
-            Density = 4, Size = .03f, Lifetime = 6, Speed = .05f, Angle = 90, Spread = 360, Wander = .12f, WanderFrequency = .3f,
-            Color = new Color(1, .93f, .78f), ColorB = new Color(1, .85f, .6f), Opacity = .45f, WindShare = .3f, Time = LocationParticleTime.Day
+            Density = 5, Size = .12f, Lifetime = 6, Speed = .05f, Angle = 90, Spread = 360, Wander = .12f, WanderFrequency = .3f,
+            Color = new Color(1, .93f, .78f), ColorB = new Color(1, .85f, .6f), Opacity = .6f, WindShare = .3f, Time = LocationParticleTime.Day
         };
 
         public static LocationParticleLayer DefaultMidges() => new LocationParticleLayer
         {
-            Density = 25, Size = .022f, SizeJitter = .3f, Lifetime = 3, Speed = .05f, Spread = 360, Wander = .9f, WanderFrequency = 3,
-            Color = new Color(.1f, .09f, .07f), ColorB = new Color(.2f, .18f, .12f), Opacity = .8f, WindShare = .1f,
+            Density = 60, Size = .14f, SizeJitter = .3f, Lifetime = 3, Speed = .05f, Spread = 360, Wander = 1.4f, WanderFrequency = 3,
+            Color = new Color(.55f, .5f, .38f), ColorB = new Color(.82f, .76f, .58f), Opacity = .75f, WindShare = .1f,
             Time = LocationParticleTime.Hours, FromHour = 17, ToHour = 22, Groups = 3
         };
 
         public static LocationParticleLayer DefaultRain() => new LocationParticleLayer
         {
-            Density = 60, Size = .025f, SizeJitter = .3f, Lifetime = 1.2f, Speed = 9, Angle = 260, Spread = 4, Wander = 0,
-            Color = new Color(.75f, .8f, .88f), ColorB = new Color(.65f, .7f, .8f), Opacity = .35f, WindShare = 1, Stretch = 14
+            Density = 160, Size = .045f, SizeJitter = .3f, Lifetime = 1.2f, Speed = 9, Angle = 260, Spread = 4, Wander = 0,
+            Color = new Color(.75f, .8f, .88f), ColorB = new Color(.65f, .7f, .8f), Opacity = .55f, WindShare = 1, Stretch = 12
         };
 
         public static LocationParticleLayer DefaultLeaves() => new LocationParticleLayer
         {
-            Density = .6f, Size = .09f, SizeJitter = .4f, Lifetime = 9, Speed = .35f, Angle = 270, Spread = 40, Gravity = .03f,
-            Wander = .5f, WanderFrequency = .4f, Color = new Color(.62f, .45f, .16f), ColorB = new Color(.45f, .3f, .12f),
+            Density = 2, Size = .45f, SizeJitter = .4f, Lifetime = 9, Speed = .35f, Angle = 270, Spread = 40, Gravity = .03f,
+            Wander = .5f, WanderFrequency = .4f, Color = new Color(.86f, .58f, .14f), ColorB = new Color(.7f, .26f, .09f),
             Opacity = .9f, WindShare = 1
         };
 
         public static LocationParticleLayer DefaultSparks() => new LocationParticleLayer
         {
-            Density = 6, Size = .03f, SizeJitter = .5f, Lifetime = 1.6f, Speed = .9f, Angle = 90, Spread = 35, Gravity = -.05f,
+            Density = 16, Size = .12f, SizeJitter = .5f, Lifetime = 1.6f, Speed = .9f, Angle = 90, Spread = 35, Gravity = -.05f,
             Wander = .5f, WanderFrequency = 1.5f, Color = new Color(1, .7f, .25f), ColorB = new Color(1, .35f, .08f),
             Opacity = 1, WindShare = .4f
         };
 
         public static LocationParticleLayer DefaultBreath() => new LocationParticleLayer
         {
-            Density = .5f, Size = .16f, SizeJitter = .3f, Lifetime = 1.6f, Speed = .12f, Angle = 80, Spread = 25, Gravity = -.02f,
+            Density = 2, Size = .5f, SizeJitter = .3f, Lifetime = 1.3f, Speed = .07f, Angle = 80, Spread = 40, Gravity = -.005f,
             Wander = .1f, WanderFrequency = .6f, Color = new Color(.9f, .92f, .95f), ColorB = new Color(.85f, .88f, .92f),
-            Opacity = .22f, WindShare = .5f, Time = LocationParticleTime.Night
+            Opacity = .4f, WindShare = .5f, Time = LocationParticleTime.Night
         };
 
         // Доля видимости в этот час (0..1) по яркости суток dayFactor.

@@ -304,6 +304,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 return;
             }
             if (center == Vector2.zero) center = CanvasSize / 2;
+            HandleDrop(area);
             HandleInput(area);
             if (Event.current.type != EventType.Repaint) return;
 
@@ -343,7 +344,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocationPostEffects post = Sky.Post;
                 status.text = (post != null && post.Enabled ? "Обработка кадра включена" : "Обработка кадра ВЫКЛЮЧЕНА") +
                               " · " + LocationLightingTest.FormatHour(hour) + " · частиц: " + renderer.AtmosphereParticleCount +
-                              " · колесо — масштаб, перетаскивание — сдвиг" + (compare == CompareMode.Curtain ? ", шторка — мышью у линии" : "");
+                              " · колесо — масштаб, перетаскивание — сдвиг" + (compare == CompareMode.Curtain ? ", шторка — мышью у линии" : "") +
+                              " · картинку (PNG, спрайт) можно бросить на кадр: LUT, палитра, бумага, частицы";
             }
         }
 
@@ -436,6 +438,49 @@ namespace KingdomSurvival.LocationRendering.Editor
                 });
             }
             renderer.SetActors(frames, (float)EditorApplication.timeSinceStartup);
+        }
+
+        // Картинка, брошенная на предпросмотр: меню «Использовать как…» —
+        // LUT, палитра, бумага или картинка слоя частиц. Эффект включается.
+        private void HandleDrop(Rect area)
+        {
+            Event evt = Event.current;
+            if (evt.type != EventType.DragUpdated && evt.type != EventType.DragPerform) return;
+            if (!area.Contains(evt.mousePosition) || !FrameTextureDrop.HasCandidate() || Visual == null) return;
+            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+            if (evt.type == EventType.DragPerform)
+            {
+                DragAndDrop.AcceptDrag();
+                UnityEngine.Object dropped = DragAndDrop.objectReferences.FirstOrDefault(item => item is Texture2D || item is Sprite);
+                string path = dropped == null ? (DragAndDrop.paths ?? Array.Empty<string>()).FirstOrDefault(FrameTextureDrop.IsImageFile) : null;
+                GenericMenu menu = new GenericMenu();
+                void Item(string title, FrameTextureKind kind, Action<LocationPostEffects, Texture2D> apply) =>
+                    menu.AddItem(new GUIContent(title), false, () =>
+                    {
+                        Texture2D texture = dropped != null
+                            ? FrameTextureDrop.FromObject(dropped, kind, out string error)
+                            : FrameTextureDrop.FromFile(path, kind, out error);
+                        if (texture == null) { EditorUtility.DisplayDialog("Картинка", error, "Понятно"); return; }
+                        Change(() =>
+                        {
+                            LocationPostEffects post = Sky.Post.Repair();
+                            post.Enabled = true;
+                            apply(post, texture);
+                        }, true);
+                    });
+                Item("LUT (полоска или покрашенный снимок)", FrameTextureKind.Lut, (post, texture) => { post.Tone.Lut = texture; post.Tone.LutContribution = Mathf.Max(post.Tone.LutContribution, 1); });
+                Item("Рисунок-палитра", FrameTextureKind.Palette, (post, texture) => { post.Canvas.PaletteTexture = texture; post.Canvas.Palette = true; });
+                Item("Бумага / холст", FrameTextureKind.Paper, (post, texture) => { post.Canvas.PaperTexture = texture; post.Canvas.Paper = true; });
+                menu.AddSeparator("");
+                Item("Частицы/Пыль в лучах", FrameTextureKind.Particle, (post, texture) => { post.Atmosphere.Dust.Texture = texture; post.Atmosphere.Dust.Enabled = true; });
+                Item("Частицы/Мошкара", FrameTextureKind.Particle, (post, texture) => { post.Atmosphere.Midges.Texture = texture; post.Atmosphere.Midges.Enabled = true; });
+                Item("Частицы/Дождь", FrameTextureKind.Particle, (post, texture) => { post.Atmosphere.Rain.Texture = texture; post.Atmosphere.Rain.Enabled = true; });
+                Item("Частицы/Падающие листья", FrameTextureKind.Particle, (post, texture) => { post.Atmosphere.Leaves.Texture = texture; post.Atmosphere.Leaves.Enabled = true; });
+                Item("Частицы/Искры от огня", FrameTextureKind.Particle, (post, texture) => { post.Atmosphere.Sparks.Texture = texture; post.Atmosphere.Sparks.Enabled = true; });
+                Item("Частицы/Пар изо рта", FrameTextureKind.Particle, (post, texture) => { post.Atmosphere.Breath.Texture = texture; post.Atmosphere.Breath.Enabled = true; });
+                menu.ShowAsContext();
+            }
+            evt.Use();
         }
 
         private void HandleInput(Rect area)

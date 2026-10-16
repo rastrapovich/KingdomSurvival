@@ -354,7 +354,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Help("Как сделать: «Снимок для покраски» → откройте PNG в Photoshop или Krita → красьте корректирующими слоями (кривые, цветовой баланс, оттенок) " +
                      "весь снимок вместе с полоской в левом верхнем углу, размер не меняйте → сохраните PNG → «Извлечь LUT из покрашенного снимка». " +
                      "Unity применит тот же цвет к каждому кадру.");
-                TextureField("LUT (1024×32)", tone.Lut, value => tone.Lut = value);
+                TextureField("LUT (1024×32)", tone.Lut, value => tone.Lut = value, FrameTextureKind.Lut);
                 Slider("Сила", tone.LutContribution, 0, 1, value => tone.LutContribution = value);
                 string problem = LutTools.Problem(tone.Lut);
                 if (problem != null)
@@ -457,7 +457,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Group("Сведение к палитре", "Palette", canvas.Palette, value => canvas.Palette = value, () =>
             {
                 Help("Без рисунка-палитры — по уровням на канал. С рисунком — каждый цвет кадра заменяется ближайшим из палитры (до 64 цветов: каждый пиксель рисунка — цвет).");
-                TextureField("Рисунок-палитра", canvas.PaletteTexture, value => canvas.PaletteTexture = value);
+                TextureField("Рисунок-палитра", canvas.PaletteTexture, value => canvas.PaletteTexture = value, FrameTextureKind.Palette);
                 if (canvas.PaletteTexture != null)
                     parent.Add(new Label("Цветов в палитре: " + LocationCanvasPass.PaletteOf(canvas.PaletteTexture).Length) { style = { marginLeft = 4, marginBottom = 2 } });
                 IntSlider("Уровней на канал (без палитры)", canvas.PaletteLevels, 2, 32, value => canvas.PaletteLevels = value);
@@ -470,7 +470,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             Group("Бумага / холст", "Paper", canvas.Paper, value => canvas.Paper = value, () =>
             {
                 Help("Фактура поверх кадра — картинка выглядит нарисованной. Без своей текстуры — встроенная бумага с волокнами. Своя текстура повторяется по кадру.");
-                TextureField("Своя текстура (необязательно)", canvas.PaperTexture, value => canvas.PaperTexture = value);
+                TextureField("Своя текстура (необязательно)", canvas.PaperTexture, value => canvas.PaperTexture = value, FrameTextureKind.Paper);
                 Slider("Сила", canvas.PaperStrength, 0, 1, value => canvas.PaperStrength = value);
                 Slider("Масштаб", canvas.PaperScale, .1f, 6, value => canvas.PaperScale = value);
                 Slider("Волокна (встроенная)", canvas.PaperFibers, 0, 1, value => canvas.PaperFibers = value);
@@ -542,22 +542,23 @@ namespace KingdomSurvival.LocationRendering.Editor
             LocationAtmosphereEffects a = post.Atmosphere;
             Help("Частицы поверх места. Плотность — частиц в секунду на 100 кв. единиц мира (искры — на источник огня с мерцанием, пар — на человека). " +
                  "Ветер раздела «Рисунки» сносит частицы по их доле ветра.");
-            Particle("Пыль в лучах", "Dust", a.Dust, LocationParticleLayer.DefaultDust, value => a.Dust = value, 0, 40);
-            Particle("Мошкара", "Midges", a.Midges, LocationParticleLayer.DefaultMidges, value => a.Midges = value, 0, 120, true);
+            Particle("Пыль в лучах", "Dust", a.Dust, LocationParticleLayer.DefaultDust, value => a.Dust = value, 0, 40, note: "По умолчанию — только днём (смените «Когда видно»). Тёплые пылинки, медленно плавают.");
+            Particle("Мошкара", "Midges", a.Midges, LocationParticleLayer.DefaultMidges, value => a.Midges = value, 0, 120, true, note: "По умолчанию — только в часы 17–22: днём не видна (смените «Когда видно» или час предпросмотра). Рои плавают по месту.");
             Particle("Дождь", "Rain", a.Rain, LocationParticleLayer.DefaultRain, value => a.Rain = value, 0, 400, false, true);
-            Particle("Падающие листья", "Leaves", a.Leaves, LocationParticleLayer.DefaultLeaves, value => a.Leaves = value, 0, 10);
-            Particle("Искры от огня", "Sparks", a.Sparks, LocationParticleLayer.DefaultSparks, value => a.Sparks = value, 0, 40);
-            Particle("Пар изо рта", "Breath", a.Breath, LocationParticleLayer.DefaultBreath, value => a.Breath = value, 0, 4);
+            Particle("Падающие листья", "Leaves", a.Leaves, LocationParticleLayer.DefaultLeaves, value => a.Leaves = value, 0, 10, note: "Листья сносит ветер раздела «Рисунки», если он включён.");
+            Particle("Искры от огня", "Sparks", a.Sparks, LocationParticleLayer.DefaultSparks, value => a.Sparks = value, 0, 40, note: "Нужен источник света с анимацией «Мерцает» (костёр, факел): искры летят только над ним. Лучше видны в сумерках и ночью.");
+            Particle("Пар изо рта", "Breath", a.Breath, LocationParticleLayer.DefaultBreath, value => a.Breath = value, 0, 4, note: "По умолчанию — только ночью, у голов людей на месте (в предпросмотре — герой у старта теста и противники).");
         }
 
         private void Particle(string title, string key, LocationParticleLayer layer, Func<LocationParticleLayer> defaults, Action<LocationParticleLayer> replace,
-            float minDensity, float maxDensity, bool groups = false, bool streak = false)
+            float minDensity, float maxDensity, bool groups = false, bool streak = false, string note = null)
         {
             Group(title, "Particle" + key, layer.Enabled, value => layer.Enabled = value, () =>
             {
+                if (note != null) Help(note);
                 Slider("Плотность", layer.Density, minDensity, maxDensity, value => layer.Density = value);
                 if (groups) IntSlider("Роёв", layer.Groups, 1, 12, value => layer.Groups = value);
-                Slider("Размер (ед. мира)", layer.Size, .005f, .5f, value => layer.Size = value);
+                Slider("Размер (ед. мира)", layer.Size, .005f, 1, value => layer.Size = value);
                 Slider("Разброс размера", layer.SizeJitter, 0, 1, value => layer.SizeJitter = value);
                 Slider("Жизнь (с)", layer.Lifetime, .1f, 20, value => layer.Lifetime = value);
                 Slider("Скорость", layer.Speed, 0, 20, value => layer.Speed = value);
@@ -571,7 +572,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 ColorField("Второй цвет (вразброс)", layer.ColorB, value => layer.ColorB = value);
                 Slider("Непрозрачность", layer.Opacity, 0, 1, value => layer.Opacity = value);
                 Slider("Доля ветра", layer.WindShare, 0, 2, value => layer.WindShare = value);
-                TextureField("Своя картинка (необязательно)", layer.Texture, value => layer.Texture = value);
+                TextureField("Своя картинка (необязательно)", layer.Texture, value => layer.Texture = value, FrameTextureKind.Particle);
                 Choice("Когда видно", new List<LocationParticleTime> { LocationParticleTime.Always, LocationParticleTime.Day, LocationParticleTime.Night, LocationParticleTime.Hours },
                     value => value == LocationParticleTime.Always ? "Всегда" : value == LocationParticleTime.Day ? "Днём" : value == LocationParticleTime.Night ? "Ночью" : "В часы",
                     layer.Time, value => layer.Time = value);
@@ -725,11 +726,34 @@ namespace KingdomSurvival.LocationRendering.Editor
             parent.Add(field);
         }
 
-        private void TextureField(string label, Texture2D value, Action<Texture2D> set)
+        // Поле картинки: выбор кружком, перетаскивание текстуры или спрайта из
+        // Project и файла с диска (копируется в проект, импорт под назначение),
+        // «Снять». Под полем — что сейчас выбрано (размер).
+        private void TextureField(string label, Texture2D value, Action<Texture2D> set, FrameTextureKind kind)
         {
+            VisualElement box = new VisualElement();
+            box.style.borderTopLeftRadius = box.style.borderTopRightRadius = box.style.borderBottomLeftRadius = box.style.borderBottomRightRadius = 3;
+            box.style.paddingBottom = 2;
             ObjectField field = new ObjectField(label) { objectType = typeof(Texture2D), allowSceneObjects = false, value = value };
+            field.tooltip = "Перетащите сюда текстуру или спрайт из Project или PNG / JPG прямо из проводника";
             field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue as Texture2D), true));
-            parent.Add(field);
+            box.Add(field);
+            VisualElement row = Row(false);
+            Label hint = new Label(value != null
+                ? value.width + "×" + value.height + " · перетащите другую картинку, чтобы заменить"
+                : "Перетащите сюда картинку: из Project или PNG / JPG из проводника");
+            hint.style.flexGrow = 1;
+            hint.style.fontSize = 10;
+            hint.style.color = new Color(.7f, .72f, .66f);
+            hint.style.marginLeft = 4;
+            hint.style.whiteSpace = WhiteSpace.Normal;
+            row.Add(hint);
+            if (value != null) row.Add(new Button(() => Change(() => set(null), true)) { text = "Снять" });
+            box.Add(row);
+            FrameTextureDrop.MakeDropTarget(box, kind,
+                texture => EditorApplication.delayCall += () => Change(() => set(texture), true),
+                error => EditorUtility.DisplayDialog("Картинка", error, "Понятно"));
+            parent.Add(box);
         }
 
         private void Curve(string label, AnimationCurve value, Action<AnimationCurve> set, Rect ranges, Color color)

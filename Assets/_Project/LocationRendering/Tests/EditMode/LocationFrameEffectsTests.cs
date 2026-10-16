@@ -229,6 +229,71 @@ namespace KingdomSurvival.LocationRendering
             return null;
         }
 
+        // Первые значения частиц по умолчанию были мельче пикселя: нетронутые
+        // обновляются, правки пользователя остаются.
+        [Test]
+        public void OldParticleDefaults_AreUpgraded_UserEditsKept()
+        {
+            LocationAtmosphereEffects old = new LocationAtmosphereEffects { Version = 0 };
+            old.Dust.Size = .03f;
+            old.Rain.Size = .025f; old.Rain.Opacity = .35f; old.Rain.Stretch = 14;
+            old.Leaves.Size = .3f;
+            old.Midges.Color = new Color(.1f, .09f, .07f);
+            old.Repair();
+            Assert.That(old.Dust.Size, Is.EqualTo(LocationParticleLayer.DefaultDust().Size));
+            Assert.That(old.Rain.Opacity, Is.EqualTo(LocationParticleLayer.DefaultRain().Opacity));
+            Assert.That(old.Rain.Stretch, Is.EqualTo(LocationParticleLayer.DefaultRain().Stretch));
+            Assert.That(old.Leaves.Size, Is.EqualTo(.3f), "Своё значение остаётся.");
+            Assert.That(old.Midges.Color, Is.EqualTo(LocationParticleLayer.DefaultMidges().Color), "Тёмная мошкара — в новый цвет.");
+            Assert.That(old.Version, Is.EqualTo(1));
+            old.Dust.Size = .03f;
+            old.Repair();
+            Assert.That(old.Dust.Size, Is.EqualTo(.03f), "Обновление — один раз.");
+        }
+
+        // Картинка с диска: копия в проект с импортом под назначение; LUT из
+        // покрашенного снимка — полоска из левого верхнего угла.
+        [Test]
+        public void DroppedFiles_AreImportedForTheirPurpose()
+        {
+            string folder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "ks_frame_drop_" + System.Guid.NewGuid().ToString("N"));
+            System.IO.Directory.CreateDirectory(folder);
+            string paper = System.IO.Path.Combine(folder, "zz_test_paper.png");
+            string shot = System.IO.Path.Combine(folder, "zz_test_shot.png");
+            Texture2D source = new Texture2D(1100, 64, TextureFormat.RGBA32, false);
+            for (int y = 0; y < 64; y++)
+                for (int x = 0; x < 1100; x++)
+                    source.SetPixel(x, y, y >= 32 && x < 1024 ? new Color(1 - LutTools.NeutralAt(x, y - 32).r, .5f, .25f) : Color.gray);
+            source.Apply();
+            System.IO.File.WriteAllBytes(paper, source.EncodeToPNG());
+            System.IO.File.WriteAllBytes(shot, source.EncodeToPNG());
+            Object.DestroyImmediate(source);
+            string paperAsset = null, lutAsset = null;
+            try
+            {
+                Texture2D imported = FrameTextureDrop.FromFile(paper, FrameTextureKind.Paper, out string error);
+                Assert.That(imported, Is.Not.Null, error);
+                paperAsset = UnityEditor.AssetDatabase.GetAssetPath(imported);
+                Assert.That(paperAsset, Does.StartWith(FrameTextureDrop.Folder + "/Paper/"));
+                Assert.That(imported.wrapMode, Is.EqualTo(TextureWrapMode.Repeat), "Бумага повторяется.");
+
+                Texture2D lut = FrameTextureDrop.FromFile(shot, FrameTextureKind.Lut, out error);
+                Assert.That(lut, Is.Not.Null, error);
+                lutAsset = UnityEditor.AssetDatabase.GetAssetPath(lut);
+                Assert.That(LutTools.Problem(lut), Is.Null, "Полоска 1024×32 без sRGB.");
+            }
+            finally
+            {
+                if (paperAsset != null) UnityEditor.AssetDatabase.DeleteAsset(paperAsset);
+                if (lutAsset != null) UnityEditor.AssetDatabase.DeleteAsset(lutAsset);
+                // Папки, созданные тестом и оставшиеся пустыми, — тоже.
+                foreach (string created in new[] { FrameTextureDrop.Folder + "/Paper", FrameTextureDrop.Folder, LutTools.Folder })
+                    if (UnityEditor.AssetDatabase.IsValidFolder(created) && UnityEditor.AssetDatabase.FindAssets("", new[] { created }).Length == 0)
+                        UnityEditor.AssetDatabase.DeleteAsset(created);
+                System.IO.Directory.Delete(folder, true);
+            }
+        }
+
         [Test]
         public void NeutralLut_MapsEachCellToItsColor()
         {

@@ -175,7 +175,7 @@ namespace KingdomSurvival.LocationRendering
             ParticleSystem.ColorOverLifetimeModule color = system.colorOverLifetime;
             color.enabled = true;
             Gradient gradient = new Gradient();
-            float fadeIn = kind == AtmosphereKind.Rain || kind == AtmosphereKind.Sparks ? .05f : .2f;
+            float fadeIn = kind == AtmosphereKind.Rain || kind == AtmosphereKind.Sparks || kind == AtmosphereKind.Breath ? .05f : .2f;
             gradient.SetKeys(new[] { new GradientColorKey(Color.white, 0), new GradientColorKey(Color.white, 1) },
                 new[] { new GradientAlphaKey(0, 0), new GradientAlphaKey(1, fadeIn), new GradientAlphaKey(1, .7f), new GradientAlphaKey(0, 1) });
             color.color = gradient;
@@ -183,7 +183,7 @@ namespace KingdomSurvival.LocationRendering
             ParticleSystem.SizeOverLifetimeModule size = system.sizeOverLifetime;
             size.enabled = kind == AtmosphereKind.Sparks || kind == AtmosphereKind.Breath;
             if (kind == AtmosphereKind.Sparks) size.size = new ParticleSystem.MinMaxCurve(1, AnimationCurve.Linear(0, 1, 1, .2f));
-            if (kind == AtmosphereKind.Breath) size.size = new ParticleSystem.MinMaxCurve(1, AnimationCurve.Linear(0, .45f, 1, 1.6f));
+            if (kind == AtmosphereKind.Breath) size.size = new ParticleSystem.MinMaxCurve(1, AnimationCurve.Linear(0, .5f, 1, 1.3f));
 
             ParticleSystem.RotationOverLifetimeModule rotation = system.rotationOverLifetime;
             rotation.enabled = kind == AtmosphereKind.Leaves;
@@ -244,7 +244,7 @@ namespace KingdomSurvival.LocationRendering
                 case AtmosphereKind.Midges:
                     UpdateSwarms(layer, area);
                     foreach (Vector2 center in swarmCenters)
-                        EmitAt(view, layer, center, .35f, layer.Density * step * visible);
+                        EmitAt(view, layer, center, .6f, layer.Density * step * visible);
                     break;
                 default:
                     float rate = layer.Density * area.width * area.height / 100f * step * visible;
@@ -282,7 +282,8 @@ namespace KingdomSurvival.LocationRendering
             float speed = Mathf.Max(0, layer.Speed) * RandomRange(.7f, 1.3f);
             float size = Mathf.Max(.002f, layer.Size) * (1 + RandomRange(-1, 1) * Mathf.Clamp01(layer.SizeJitter));
             Color color = Color.Lerp(layer.Color, layer.ColorB, Random01());
-            if (view.Kind != AtmosphereKind.Sparks) color = AmbientTint(color);
+            // Пар ночью и мошкара в сумерках видны в отсветах (порог): иначе темнеют вместе с небом.
+            if (view.Kind != AtmosphereKind.Sparks) color = AmbientTint(color, view.Kind == AtmosphereKind.Breath ? .45f : view.Kind == AtmosphereKind.Midges ? .55f : 0);
             color.a = Mathf.Clamp01(layer.Opacity);
             ParticleSystem.EmitParams emit = new ParticleSystem.EmitParams
             {
@@ -298,10 +299,11 @@ namespace KingdomSurvival.LocationRendering
         }
 
         // Цвет частицы под общим светом места (ночью темнее, в цвет неба).
-        private Color AmbientTint(Color color)
+        private Color AmbientTint(Color color, float floor = 0)
         {
             if (GlobalLight == null) return color;
             Color light = GlobalLight.color * Mathf.Clamp(GlobalLight.intensity, .12f, 1.2f);
+            light = new Color(Mathf.Max(light.r, floor), Mathf.Max(light.g, floor), Mathf.Max(light.b, floor));
             return new Color(color.r * light.r, color.g * light.g, color.b * light.b, color.a);
         }
 
@@ -327,11 +329,19 @@ namespace KingdomSurvival.LocationRendering
                     yield return Head(figure.Image);
         }
 
+        // Рот — по непрозрачной части рисунка (у кадров фигур сверху бывает
+        // пустое поле): чуть ниже макушки, к лицу.
         private static Vector2 Head(SpriteRenderer image)
         {
-            Bounds bounds = image.bounds;
+            Rect opaque = LocationAlphaContours.OpaqueRect(image.sprite);
+            if (opaque.width <= 0 || opaque.height <= 0)
+            {
+                Bounds bounds = image.bounds;
+                return new Vector2(bounds.center.x, bounds.max.y - bounds.size.y * .16f);
+            }
             float side = image.flipX ? -1 : 1;
-            return new Vector2(bounds.center.x + bounds.extents.x * .25f * side, bounds.max.y - bounds.size.y * .16f);
+            float x = opaque.center.x + opaque.width * .18f, y = opaque.yMax - opaque.height * .13f;
+            return image.transform.TransformPoint(new Vector3(x * side, y, 0));
         }
 
         // Рои мошкары медленно плавают по месту (устойчиво по времени).

@@ -97,17 +97,27 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             string path = EditorUtility.OpenFilePanel("Покрашенный снимок (PNG)", "", "png");
             if (string.IsNullOrEmpty(path)) return null;
+            Texture2D lut = FromImageFile(path, out string error);
+            if (lut == null) EditorUtility.DisplayDialog("LUT", error, "Понятно");
+            return lut;
+        }
+
+        // LUT из картинки: полоска 1024×32 — как есть; больше — покрашенный
+        // снимок, полоска из его левого верхнего угла. Сохраняется в проект.
+        public static Texture2D FromImageFile(string path, out string error)
+        {
+            error = null;
             Texture2D painted = new Texture2D(2, 2, TextureFormat.RGBA32, false, false);
             try
             {
-                if (!painted.LoadImage(File.ReadAllBytes(path)))
+                if (!File.Exists(path) || !painted.LoadImage(File.ReadAllBytes(path)))
                 {
-                    EditorUtility.DisplayDialog("LUT", "Не удалось прочитать PNG.", "Понятно");
+                    error = "Не удалось прочитать картинку (нужен PNG или JPG): " + path;
                     return null;
                 }
                 if (painted.width < Size * Size || painted.height < Size)
                 {
-                    EditorUtility.DisplayDialog("LUT", "В снимке нет полоски LUT (он меньше 1024×32). Нужен PNG, сделанный кнопкой «Снимок для покраски».", "Понятно");
+                    error = "В картинке нет полоски LUT (она меньше 1024×32). Нужен PNG, сделанный кнопкой «Снимок для покраски», или сама полоска 1024×32.";
                     return null;
                 }
                 Texture2D lut = new Texture2D(Size * Size, Size, TextureFormat.RGBA32, false, true);
@@ -119,8 +129,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                         lut.SetPixel(x, y, c);
                     }
                 lut.Apply();
-                string name = Path.GetFileNameWithoutExtension(path) + "_LUT";
-                return Save(lut, name);
+                string name = Path.GetFileNameWithoutExtension(path);
+                return Save(lut, name.EndsWith("_LUT") ? name : name + "_LUT");
             }
             finally { UnityEngine.Object.DestroyImmediate(painted); }
         }

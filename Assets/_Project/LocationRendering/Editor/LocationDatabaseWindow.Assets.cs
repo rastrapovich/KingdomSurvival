@@ -334,7 +334,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             AssetDatabase.SaveAssetIfDirty(catalog);
             AssetDatabase.SaveAssetIfDirty(database);
             status.text = report.Summary + (report.Problems.Count > 0 ? " " + string.Join(" ", report.Problems.Take(3)) : "");
-            rebuildRequested = true;
+            RequestRebuild();
             BuildSettings();
         }
     }

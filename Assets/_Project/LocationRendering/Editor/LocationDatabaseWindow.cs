@@ -109,7 +109,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         // Каталог изменился: экземпляры пересобираются с новыми рисунками,
         // их положение, ракурс и переопределения остаются.
-        private void CatalogChanged() => rebuildRequested = true;
+        private void CatalogChanged() => RequestRebuild();
 
         private void OpenRequested(string locationId, string objectId)
         {
@@ -250,6 +250,10 @@ namespace KingdomSurvival.LocationRendering.Editor
             hints.style.paddingLeft = 8; hints.style.paddingBottom = 5; center.Add(hints);
             inner.Add(center);
             settings = new ScrollView(); settings.style.paddingLeft = settings.style.paddingRight = 10;
+            // Ползунок панели зажат — предпросмотр и запись ждут отпускания (как перетаскивание на холсте).
+            settings.RegisterCallback<PointerDownEvent>(_ => { fieldHeld = true; fieldHeldAt = EditorApplication.timeSinceStartup; }, TrickleDown.TrickleDown);
+            rootVisualElement.RegisterCallback<PointerUpEvent>(_ => fieldHeld = false, TrickleDown.TrickleDown);
+            rootVisualElement.RegisterCallback<PointerCancelEvent>(_ => fieldHeld = false, TrickleDown.TrickleDown);
             inner.Add(settings); outer.Add(inner); rootVisualElement.Add(outer);
             status = new Label(assembled > 0 ? "Поля боя перенесены сюда: " + assembled + " (список «Поля боя»). Рисунок поля — земля; ставьте на него ассеты." : "Движение по месту — как на глобальной карте; клетки — только в бою.");
             status.style.paddingLeft = 8; status.style.height = 26; rootVisualElement.Add(status);
@@ -301,9 +305,18 @@ namespace KingdomSurvival.LocationRendering.Editor
             list.itemsSource = visible; list.Rebuild();
         }
 
-        // Пересборка предпросмотра и запись ассета — не на каждый шаг ползунка:
-        // один раз за кадр и через полсекунды после последней правки.
+        // Пересборка предпросмотра (весь мир места — сотни миллисекунд) и
+        // запись ассета — не на каждый шаг ползунка: пока ползунок панели
+        // зажат, ничего не пересобирается и не пишется; после отпускания или
+        // ввода с клавиатуры — когда правки стихли на RebuildQuiet, запись —
+        // через полсекунды. Иначе каждое значение ползунка замирало на
+        // пересборке и записи.
+        private const double RebuildQuiet = .25;
+        // Отпускание мыши потерялось (окно потеряло фокус) — не ждать вечно.
+        private const double FieldHoldTimeout = 3;
         private bool rebuildRequested;
+        private bool fieldHeld;
+        private double lastChangeAt, fieldHeldAt;
         private double saveAt = -1;
         private double fieldsSaveAt = -1;
 
@@ -311,20 +324,29 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             Undo.RecordObject(database, "Изменить локацию"); action();
             EditorUtility.SetDirty(database);
-            saveAt = EditorApplication.timeSinceStartup + .5;
-            rebuildRequested = true;
+            RequestRebuild();
+            saveAt = lastChangeAt + .5;
             if (refreshSettings) BuildSettings();
+        }
+
+        private void RequestRebuild()
+        {
+            rebuildRequested = true;
+            lastChangeAt = EditorApplication.timeSinceStartup;
         }
 
         private void FlushPending()
         {
-            if (rebuildRequested && !dragging) { rebuildRequested = false; RebuildPreview(); }
-            if (saveAt > 0 && EditorApplication.timeSinceStartup >= saveAt && !dragging)
+            double now = EditorApplication.timeSinceStartup;
+            if (fieldHeld && now - Math.Max(fieldHeldAt, lastChangeAt) >= FieldHoldTimeout) fieldHeld = false;
+            bool busy = dragging || fieldHeld;
+            if (rebuildRequested && !busy && now - lastChangeAt >= RebuildQuiet) { rebuildRequested = false; RebuildPreview(); }
+            if (saveAt > 0 && now >= saveAt && !busy)
             {
                 saveAt = -1;
                 if (database != null) AssetDatabase.SaveAssetIfDirty(database);
             }
-            if (fieldsSaveAt > 0 && EditorApplication.timeSinceStartup >= fieldsSaveAt)
+            if (fieldsSaveAt > 0 && now >= fieldsSaveAt && !busy)
             {
                 fieldsSaveAt = -1;
                 if (fields != null) AssetDatabase.SaveAssetIfDirty(fields);

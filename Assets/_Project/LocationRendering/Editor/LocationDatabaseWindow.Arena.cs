@@ -216,8 +216,8 @@ namespace KingdomSurvival.LocationRendering.Editor
             cards.Bind(fieldsSerialized);
             cards.TrackSerializedObjectValue(fieldsSerialized, _ => FieldChanged());
             // Сетка меняет кадр боя на рисунке и размер фигур.
-            cards.TrackPropertyValue(property.FindPropertyRelative("gridScale"), _ => rebuildRequested = true);
-            cards.TrackPropertyValue(property.FindPropertyRelative("gridOffset"), _ => rebuildRequested = true);
+            cards.TrackPropertyValue(property.FindPropertyRelative("gridScale"), _ => RequestRebuild());
+            cards.TrackPropertyValue(property.FindPropertyRelative("gridOffset"), _ => RequestRebuild());
             settings.Add(cards);
         }
 

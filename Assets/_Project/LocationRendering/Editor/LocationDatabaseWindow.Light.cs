@@ -499,7 +499,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (shift)
             {
                 if (nearest >= 0 && points.Count > 3) points.RemoveAt(nearest);
-                EditorUtility.SetDirty(database); rebuildRequested = true;
+                EditorUtility.SetDirty(database); RequestRebuild();
                 return;
             }
             if (nearest < 0)

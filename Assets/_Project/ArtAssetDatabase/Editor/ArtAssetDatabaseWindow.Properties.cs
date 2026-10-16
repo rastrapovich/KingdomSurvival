@@ -338,6 +338,7 @@ namespace KingdomSurvival.ArtAssets.Editor
                     catalog.MarkChanged();
                     BuildProperties();
                 }));
+            BuildReduceRow(asset);
             EndSection();
 
             List<ArtAssetUsage> usages = ArtAssetUsages.Find(asset.Id);
@@ -350,6 +351,49 @@ namespace KingdomSurvival.ArtAssets.Editor
                 Add(button);
             }
             EndSection();
+        }
+
+        // Рисунок подробнее мест (PPU заметно выше 108) — уменьшить сами PNG
+        // и поделить PPU: высота в мире прежняя, шума на экране нет.
+        private void BuildReduceRow(ArtAssetDefinition asset)
+        {
+            if (ArtAssetDensity.Problem(asset) == null) return;
+            List<(string, Action)> buttons = new List<(string, Action)>();
+            foreach (int factor in ArtAssetDensity.UsefulFactors(asset))
+                buttons.Add(("Уменьшить рисунок " + (factor == 2 ? "вдвое" : "вчетверо") + " (→ " + Mathf.RoundToInt(asset.PixelsPerUnit / factor) + ")",
+                    () => ReduceAsset(asset, factor)));
+            if (buttons.Count > 0) Row(buttons.ToArray());
+        }
+
+        private void ReduceAsset(ArtAssetDefinition asset, int factor)
+        {
+            string problem = ArtAssetDensity.Check(asset, factor);
+            if (problem != null)
+            {
+                EditorUtility.DisplayDialog("Уменьшить рисунок нельзя", Char.ToUpper(problem[0]) + problem.Substring(1), "Понятно");
+                return;
+            }
+            string backupRoot = ArtAssetDensity.DefaultBackupRoot();
+            int choice = EditorUtility.DisplayDialogComplex("Уменьшить рисунок в " + factor + " раза?",
+                "Все PNG папки ассета (" + ArtAssetDensity.Files(asset).Count + " шт.: кадры, ракурсы, части, тени, нормали) будут уменьшены в " + factor +
+                " раза и перезаписаны; «Пикселей на ед. мира» станет " + (asset.PixelsPerUnit / factor).ToString("0.##") +
+                " — высота в мире не изменится, листы кадров пересоберутся.\n\n" +
+                "Рисунки не хранятся в git, а Undo файлы не вернёт. Рекомендуется сохранить копию исходников в\n" + backupRoot + "/",
+                "С копией", "Отмена", "Без копии");
+            if (choice == 1) return;
+            ArtAssetReduceResult result = ArtAssetDensity.Reduce(catalog, asset, factor, choice == 0 ? backupRoot : null);
+            if (!result.Done)
+            {
+                EditorUtility.DisplayDialog("Уменьшить рисунок не удалось", result.Error, "Понятно");
+                return;
+            }
+            foreach (string warning in result.Warnings) Debug.LogWarning("База ассетов: " + warning);
+            status.text = "Уменьшено рисунков: " + result.Files + ", пикселей на ед. мира " + result.OldPixelsPerUnit.ToString("0.##") + " → " +
+                          result.NewPixelsPerUnit.ToString("0.##") + (result.BackupFolder != null ? ". Копия: " + result.BackupFolder : ". Без копии.") +
+                          (result.Warnings.Count > 0 ? " Замечаний: " + result.Warnings.Count + " (в консоли)." : "");
+            litDirty = true;
+            visibleDirty = true;
+            BuildProperties();
         }
 
         // Папка источника: «Обновить из папки» перечитывает её (новые рендеры,

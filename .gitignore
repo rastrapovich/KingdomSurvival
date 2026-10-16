@@ -88,3 +88,6 @@ Desktop.ini
 # Аддон Blender (Tools/Blender): кэш Python и вывод тестов
 __pycache__/
 /Tools/Blender/tests/_out/
+
+# Копии исходных рисунков перед «Уменьшить рисунок» Базы ассетов — только локально
+/ArtBackups/

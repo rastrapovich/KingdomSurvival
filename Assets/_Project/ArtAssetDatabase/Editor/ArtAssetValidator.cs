@@ -33,6 +33,8 @@ namespace KingdomSurvival.ArtAssets.Editor
             else if (catalog != null && catalog.assets.Count(item => item != null && item.Id == asset.Id) > 1) Add(ArtAssetIssueLevel.Error, "повторный ID " + asset.Id + ".");
             if (string.IsNullOrWhiteSpace(asset.Name)) Add(ArtAssetIssueLevel.Warning, "нет названия.");
             if (asset.PixelsPerUnit <= .01f) Add(ArtAssetIssueLevel.Error, "неверный масштаб (пикселей на единицу мира).");
+            string density = ArtAssetDensity.Problem(asset);
+            if (density != null) Add(ArtAssetIssueLevel.Warning, density);
             if (asset.IsEmpty) Add(ArtAssetIssueLevel.Warning, "нет ни одного рисунка — в месте будет заглушка.");
             else
             {

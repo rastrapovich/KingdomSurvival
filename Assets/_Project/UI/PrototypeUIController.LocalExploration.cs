@@ -521,6 +521,8 @@ public partial class PrototypeUIController
             return;
         }
 
+        // Удар в бою — всплеск обработки кадра места («Всплеск при ударе»).
+        localBattle.Board.ImpactShown += (record, targetOurs) => localRenderer?.BattleHit(targetOurs, record.TargetDefeated);
         localArenaCenter = arenaCenter;
         CampaignSession.EnterBattle(request);
         // Фигуры боя рисует поле боя; рисунок места остаётся под ним.

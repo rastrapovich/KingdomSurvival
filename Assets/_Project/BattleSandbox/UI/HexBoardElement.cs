@@ -118,6 +118,8 @@ namespace KingdomSurvival.BattleSandbox
         public event Action<HexCoord> HexClicked;
         public event Action<string, Vector2> UnitDetailsRequested;
         public event Action<string, HexCoord?> AttackRequested;
+        // Момент попадания удара (запись и «цель — наш боец»): обработка кадра места даёт всплеск.
+        public event Action<SandboxHitRecord, bool> ImpactShown;
         public bool IsAnimating { get; private set; }
 
         public HexBoardElement()

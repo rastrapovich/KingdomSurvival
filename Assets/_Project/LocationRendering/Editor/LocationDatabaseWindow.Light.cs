@@ -368,7 +368,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 PlaceName = location.DisplayName,
                 Change = ChangeFrame,
                 Rebuild = BuildSettings,
-                Pulse = () => renderer?.Pulse(),
+                Pulse = strength => renderer?.Pulse(strength),
                 OpenWindow = () => FrameStyleWindow.Open(selectedId)
             };
             settings.Add(editor.Build());

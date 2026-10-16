@@ -159,6 +159,16 @@ namespace KingdomSurvival.LocationRendering
             pulseStrength = Mathf.Max(0, strength);
         }
 
+        // Удар в бою на месте (момент попадания): всплеск по настройке
+        // «Всплеск при ударе». Возвращает силу (0 — не было).
+        public float BattleHit(bool targetOurs, bool defeated)
+        {
+            if (!PostActive) return 0;
+            float strength = Sky.Post.Lens.HitPulse(targetOurs, defeated);
+            if (strength > 0) Pulse(strength);
+            return strength;
+        }
+
         private float PulseNow(LocationLensEffects lens)
         {
             float duration = Mathf.Max(.02f, lens.PulseDuration);

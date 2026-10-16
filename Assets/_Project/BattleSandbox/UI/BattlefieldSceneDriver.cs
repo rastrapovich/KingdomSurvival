@@ -56,6 +56,7 @@ namespace KingdomSurvival.BattleSandbox
             renderer.SuppressOtherGlobalLights();
             frameOnCanvas = BattlefieldFrame.FrameOnPicture(renderer.CanvasSize, field);
             board.ExternalFigures = true;
+            board.ImpactShown += OnImpact;
             surface.schedule.Execute(Tick).Every(0);
             surface.RegisterCallback<DetachFromPanelEvent>(_ => Dispose());
         }
@@ -110,6 +111,12 @@ namespace KingdomSurvival.BattleSandbox
         private static float Hour() =>
             CampaignSession.HasActive ? (float)ContinuousSimulationSystem.GetClock(CampaignSession.Current).HourOfDay : 13f;
 
+        // Удар на поле: всплеск обработки кадра («Всплеск при ударе»).
+        private void OnImpact(SandboxHitRecord record, bool targetOurs)
+        {
+            if (!disposed) renderer.BattleHit(targetOurs, record.TargetDefeated);
+        }
+
         public void Dispose()
         {
             if (disposed) return;
@@ -117,6 +124,7 @@ namespace KingdomSurvival.BattleSandbox
             surface.SetSceneTexture(null);
             surface.GridDrawnBelow = false;
             board.MarksDrawnBelow = false;
+            board.ImpactShown -= OnImpact;
             renderer.Dispose();
         }
     }

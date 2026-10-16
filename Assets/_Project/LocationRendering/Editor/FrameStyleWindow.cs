@@ -193,7 +193,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 PlaceName = location.DisplayName,
                 Change = Change,
                 Rebuild = BuildPanel,
-                Pulse = () => renderer?.Pulse(),
+                Pulse = strength => renderer?.Pulse(strength),
                 TestDissolve = StartDissolveTest,
                 Snapshot = Snapshot
             };

@@ -174,6 +174,37 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
+        // «Всплеск при ударе»: выключен — удар линзу не трогает; включён —
+        // всплеск по выбранным ударам, при гибели — своя сила.
+        [Test]
+        public void BattleHit_PulsesOnlyWhenSwitchedOn_AndForChosenTargets()
+        {
+            LocationLensEffects lens = new LocationLensEffects { PulseHitStrength = .5f, PulseKillStrength = 1.2f };
+            Assert.That(lens.HitPulse(true, false), Is.EqualTo(0), "Выключено по умолчанию.");
+            lens.PulseOnHit = true;
+            Assert.That(lens.HitPulse(false, false), Is.EqualTo(.5f));
+            Assert.That(lens.HitPulse(false, true), Is.EqualTo(1.2f), "Гибель — своя сила.");
+            lens.PulseOnHitTargets = LocationPulseTargets.Ours;
+            Assert.That(lens.HitPulse(false, false), Is.EqualTo(0), "Удар по врагу — без всплеска.");
+            Assert.That(lens.HitPulse(true, false), Is.EqualTo(.5f));
+            lens.PulseOnHitTargets = LocationPulseTargets.Enemies;
+            Assert.That(lens.HitPulse(true, false), Is.EqualTo(0));
+
+            (LocalLocationDefinition location, LocationVisualDefinition visual) = Place();
+            visual.Post = new LocationPostEffects { Enabled = true };
+            visual.Post.Lens.PulseAberration = .8f;
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null))
+            {
+                renderer.SetTime(13, 10);
+                Assert.That(renderer.BattleHit(true, false), Is.EqualTo(0), "Выключатель снят — нет всплеска.");
+                visual.Post.Lens.PulseOnHit = true;
+                Assert.That(renderer.BattleHit(true, false), Is.GreaterThan(0));
+                renderer.SetTime(13, 10.05f);
+                renderer.Root.GetComponentInChildren<Volume>().sharedProfile.TryGet(out ChromaticAberration aberration);
+                Assert.That(aberration.active, Is.True, "Удар — линза вздрогнула.");
+            }
+        }
+
         [Test]
         public void Atmosphere_EmitsOnlyWhenEnabledAndVisible()
         {

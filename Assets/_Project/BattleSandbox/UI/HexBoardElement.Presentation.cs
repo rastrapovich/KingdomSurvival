@@ -458,6 +458,7 @@ namespace KingdomSurvival.BattleSandbox
             hitStepImpactShown = true;
             damageLabel.style.display = DisplayStyle.Flex;
             SandboxUnitState targetUnit = battle.GetUnit(record.TargetId);
+            ImpactShown?.Invoke(record, targetUnit != null && targetUnit.Team == SandboxTeam.Player);
             UnitPresentation target = GetPresentation(targetUnit);
             if (target == null)
                 return;

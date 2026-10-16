@@ -102,9 +102,27 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float PulseAberration = .6f;
         public float PulseDistortion = -.25f;
         public float PulseDuration = .45f;
+        // Всплеск при ударе в бою на месте: включён ли, по каким ударам и
+        // насколько сильный (доля пика выше; при гибели цели — своя доля).
+        public bool PulseOnHit;
+        public LocationPulseTargets PulseOnHitTargets = LocationPulseTargets.Any;
+        public float PulseHitStrength = .6f;
+        public float PulseKillStrength = 1;
+
+        // Сила всплеска для удара (0 — без всплеска).
+        public float HitPulse(bool targetOurs, bool defeated)
+        {
+            if (!PulseOnHit) return 0;
+            if (PulseOnHitTargets == LocationPulseTargets.Ours && !targetOurs) return 0;
+            if (PulseOnHitTargets == LocationPulseTargets.Enemies && targetOurs) return 0;
+            return Mathf.Max(0, defeated ? PulseKillStrength : PulseHitStrength);
+        }
     }
 
     public enum LocationFogDirection { FromTop, FromBottom }
+
+    // По каким ударам всплеск: любым, по нашим бойцам, по врагам.
+    public enum LocationPulseTargets { Any, Ours, Enemies }
 
     [Serializable]
     public sealed class LocationCanvasEffects

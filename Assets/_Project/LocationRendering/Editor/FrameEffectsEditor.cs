@@ -28,7 +28,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         // Перестроить панель целиком (стили, смена неба).
         public Action Rebuild;
         // Предпросмотр: всплеск линзы и пробное растворение (может не быть).
-        public Action Pulse;
+        public Action<float> Pulse;
         public Action TestDissolve;
         // Снимок кадра без LUT для покраски (null — в этом окне нет).
         public Func<Texture2D> Snapshot;
@@ -334,15 +334,31 @@ namespace KingdomSurvival.LocationRendering.Editor
             }, () => { lens.ChromaticAberration = 0; lens.Distortion = 0; lens.DistortionScale = 1; });
             Group("Краткий всплеск (удар, страх, нечисть рядом)", "Pulse", null, null, () =>
             {
-                Help("Игра вызывает всплеск сама (LocationWorldRenderer.Pulse); здесь — его сила и длительность. На пике к линзе добавляется:");
+                Help("Как выглядит всплеск: на пике к линзе добавляется аберрация и искажение, затем сходит на нет. Включение при ударе — блок ниже.");
                 Slider("Аберрация на пике", lens.PulseAberration, 0, 1, value => lens.PulseAberration = value);
                 Slider("Искажение на пике", lens.PulseDistortion, -1, 1, value => lens.PulseDistortion = value);
                 Slider("Длительность (с)", lens.PulseDuration, .05f, 3, value => lens.PulseDuration = value);
-                if (Pulse != null) Buttons(("Проверить всплеск", Pulse, "Показать всплеск в предпросмотре"));
+                if (Pulse != null) Buttons(("Проверить всплеск", (Action)(() => Pulse(1)), "Показать всплеск в предпросмотре"));
             }, () =>
             {
                 LocationLensEffects fresh = new LocationLensEffects();
                 lens.PulseAberration = fresh.PulseAberration; lens.PulseDistortion = fresh.PulseDistortion; lens.PulseDuration = fresh.PulseDuration;
+            });
+            Group("Всплеск при ударе в бою", "PulseOnHit", lens.PulseOnHit, value => lens.PulseOnHit = value, () =>
+            {
+                Help("В бою на месте в момент попадания линза вздрагивает — вид всплеска задаётся в блоке выше. Сила — доля его пика.");
+                Choice("По каким ударам", new List<LocationPulseTargets> { LocationPulseTargets.Any, LocationPulseTargets.Ours, LocationPulseTargets.Enemies },
+                    value => value == LocationPulseTargets.Any ? "Любые" : value == LocationPulseTargets.Ours ? "Только по нашим бойцам" : "Только по врагам",
+                    lens.PulseOnHitTargets, value => lens.PulseOnHitTargets = value);
+                Slider("Сила при ударе", lens.PulseHitStrength, 0, 1.5f, value => lens.PulseHitStrength = value);
+                Slider("Сила при гибели цели", lens.PulseKillStrength, 0, 1.5f, value => lens.PulseKillStrength = value);
+                if (Pulse != null)
+                    Buttons(("Проверить: удар", (Action)(() => Pulse(lens.PulseHitStrength)), "Всплеск обычного удара в предпросмотре"),
+                        ("Проверить: гибель", (Action)(() => Pulse(lens.PulseKillStrength)), "Всплеск удара, от которого цель пала"));
+            }, () =>
+            {
+                LocationLensEffects fresh = new LocationLensEffects();
+                lens.PulseOnHitTargets = fresh.PulseOnHitTargets; lens.PulseHitStrength = fresh.PulseHitStrength; lens.PulseKillStrength = fresh.PulseKillStrength;
             });
         }
 

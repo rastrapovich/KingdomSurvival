@@ -132,6 +132,10 @@ namespace KingdomSurvival.LocationRendering
         public void BindCamera(Camera camera)
         {
             if (camera == null) return;
+            // Камера PreviewRenderUtility — типа Preview: URP не применяет к ней
+            // ни обработку кадра, ни свои проходы (холст), кадр был бы «до».
+            // Как игровая она рисует то же самое — только сцену предпросмотра.
+            camera.cameraType = CameraType.Game;
             if (!boundCameras.Contains(camera)) boundCameras.Add(camera);
             camera.GetUniversalAdditionalCameraData().volumeLayerMask = 1 << PostVolumeLayer;
             LocationCanvasPass.Bind(camera, this);

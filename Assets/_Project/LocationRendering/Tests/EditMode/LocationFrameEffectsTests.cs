@@ -131,6 +131,28 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
+        // Камера предпросмотра окна (PreviewRenderUtility) — типа Preview, а к
+        // такой URP не применяет обработку кадра и свои проходы: окно
+        // показывало бы кадр без единого эффекта.
+        [Test]
+        public void BoundPreviewCamera_RendersAsGameCamera()
+        {
+            (LocalLocationDefinition location, LocationVisualDefinition visual) = Place();
+            GameObject host = new GameObject("Камера предпросмотра");
+            try
+            {
+                Camera camera = host.AddComponent<Camera>();
+                camera.cameraType = CameraType.Preview;
+                using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null))
+                {
+                    renderer.BindCamera(camera);
+                    Assert.That(camera.cameraType, Is.EqualTo(CameraType.Game));
+                    Assert.That(camera.GetUniversalAdditionalCameraData().volumeLayerMask.value, Is.EqualTo(1 << LocationWorldRenderer.PostVolumeLayer));
+                }
+            }
+            finally { Object.DestroyImmediate(host); }
+        }
+
         [Test]
         public void Pulse_AddsLensForItsDuration()
         {

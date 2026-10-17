@@ -40,16 +40,41 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private VisualElement parent;
 
-        private static readonly string[] TabTitles = LocationFrameSections.Order.Select(LocationFrameSections.Title).ToArray();
+        // Вкладки панели: «Время и зоны» и разделы обработки кадра (как в стилях).
+        private static readonly string[] TabIds =
+            new[] { "Time" }.Concat(LocationFrameSections.Order.Select(section => section.ToString())).ToArray();
 
-        private static int Tab
+        private static string TabId
         {
-            get => Mathf.Clamp(EditorPrefs.GetInt(PrefsKey + "Tab", 0), 0, TabTitles.Length - 1);
-            set => EditorPrefs.SetInt(PrefsKey + "Tab", value);
+            get
+            {
+                string id = EditorPrefs.GetString(PrefsKey + "TabId", "Color");
+                return TabIds.Contains(id) ? id : "Color";
+            }
+            set => EditorPrefs.SetString(PrefsKey + "TabId", value);
         }
 
+        private static string TabTitle(string id) =>
+            id == "Time" ? "Время и зоны" : LocationFrameSections.Title((LocationFrameSection)Enum.Parse(typeof(LocationFrameSection), id));
+
         // Открыта вкладка «Персонажи» (окно показывает существ на поле).
-        public static bool IsCharactersTab => LocationFrameSections.Order[Tab] == LocationFrameSection.Characters;
+        public static bool IsCharactersTab => TabId == LocationFrameSection.Characters.ToString();
+        // Открыта вкладка «Время и зоны» (окно рисует зоны поверх кадра).
+        public static bool IsTimeTab => TabId == "Time";
+
+        // Что правится: "" — основные настройки, "key:<id>" — ключ суток, "zone:<id>" — зона места.
+        public static string EditTarget
+        {
+            get => EditorPrefs.GetString(PrefsKey + "EditTarget", "");
+            set => EditorPrefs.SetString(PrefsKey + "EditTarget", value ?? "");
+        }
+
+        // Хозяин: час и центр предпросмотра (ключи и зоны), проверка перехода к стилю.
+        public Func<float> CurrentHour;
+        public Action<float> SetHour;
+        public Func<Vector2> ViewCenter;
+        public Action<Vector2> SetViewCenter;
+        public Action<LocationPostEffects, float> TestTransition;
 
         private static string SelectedStyle
         {
@@ -64,7 +89,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         }
 
         private LocationSky Sky => new LocationSky(Visual, Database.worldLighting);
-        private LocationPostEffects Post
+
+        private LocationPostEffects BasePost
         {
             get
             {
@@ -74,40 +100,58 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
         }
 
+        private LocationFrameKey EditedKey => EditTarget.StartsWith("key:") ? Sky.FrameKeys.Find(EditTarget.Substring(4)) : null;
+        private LocationFrameZone EditedZone => EditTarget.StartsWith("zone:") ? Visual.FrameZones?.Find(zone => zone != null && zone.Id == EditTarget.Substring(5)) : null;
+
+        // Настройки, которые сейчас правит панель: основные, ключ суток или зона.
+        private LocationPostEffects Post
+        {
+            get
+            {
+                LocationPostEffects target = EditedKey?.Post ?? EditedZone?.Post;
+                return target != null ? target.Repair() : BasePost;
+            }
+        }
+
         public VisualElement Build()
         {
             VisualElement root = new VisualElement();
             parent = root;
             if (Database == null) { Help("База мест не найдена."); return root; }
             if (Visual == null) { Help("У места нет художественной сборки — обработке кадра нечего показывать."); return root; }
+            Visual.FrameZones ??= new List<LocationFrameZone>();
+            if (EditTarget != "" && EditedKey == null && EditedZone == null) EditTarget = "";
             LocationSky sky = Sky;
+            LocationPostEffects basePost = BasePost;
             LocationPostEffects post = Post;
 
             BuildTarget(sky);
-            Toggle("Обработка кадра включена", post.Enabled, value => post.Enabled = value, true,
+            Toggle("Обработка кадра включена", basePost.Enabled, value => basePost.Enabled = value, true,
                 "Главный выключатель: без него ни один эффект ниже не виден.");
-            if (!post.Enabled) Help("Обработка кадра выключена — эффекты не видны (настройки сохраняются).");
+            if (!basePost.Enabled) Help("Обработка кадра выключена — эффекты не видны (настройки сохраняются).");
             if (OpenWindow != null)
                 Buttons(("Открыть в отдельном окне ↗", OpenWindow, "Окно «Обработка кадра»: большой предпросмотр, сравнение «до / после», снимок для LUT"));
+            BuildEditTarget(sky);
 
             BuildStyles(post);
 
             VisualElement tabs = Row(true);
-            for (int i = 0; i < TabTitles.Length; i++)
+            foreach (string id in TabIds)
             {
-                int index = i;
-                Button button = new Button(() => { Tab = index; Rebuild?.Invoke(); }) { text = TabTitles[i] };
-                if (i == Tab) { button.style.unityFontStyleAndWeight = FontStyle.Bold; button.style.color = new Color(.95f, .82f, .5f); }
+                string captured = id;
+                Button button = new Button(() => { TabId = captured; Rebuild?.Invoke(); }) { text = TabTitle(id) };
+                if (id == TabId) { button.style.unityFontStyleAndWeight = FontStyle.Bold; button.style.color = new Color(.95f, .82f, .5f); }
                 tabs.Add(button);
             }
             tabs.style.marginTop = 8;
             root.Add(tabs);
 
             VisualElement body = new VisualElement();
-            body.SetEnabled(post.Enabled);
+            body.SetEnabled(basePost.Enabled);
             root.Add(body);
             parent = body;
-            switch (LocationFrameSections.Order[Tab])
+            if (TabId == "Time") BuildTimeZones(sky, basePost);
+            else switch ((LocationFrameSection)Enum.Parse(typeof(LocationFrameSection), TabId))
             {
                 case LocationFrameSection.Color: BuildColor(post); break;
                 case LocationFrameSection.LightLens: BuildLightLens(post); break;
@@ -120,6 +164,158 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
             parent = root;
             return root;
+        }
+
+        // «Правлю»: основные настройки, ключ суток или зона места (есть ключи или зоны).
+        private void BuildEditTarget(LocationSky sky)
+        {
+            List<string> ids = new List<string> { "" };
+            List<string> names = new List<string> { "Основные настройки" };
+            foreach (LocationFrameKey key in sky.FrameKeys.Keys.Where(item => item != null))
+            {
+                ids.Add("key:" + key.Id);
+                names.Add("Ключ суток: " + key.Name + " (" + LocationLightingTest.FormatHour(key.Hour) + ")");
+            }
+            foreach (LocationFrameZone zone in Visual.FrameZones.Where(item => item != null))
+            {
+                ids.Add("zone:" + zone.Id);
+                names.Add("Зона места: " + zone.Name);
+            }
+            if (ids.Count == 1) return;
+            PopupField<string> field = new PopupField<string>("Правлю", names, Mathf.Max(0, ids.IndexOf(EditTarget)));
+            field.tooltip = "Все вкладки ниже правят выбранное: основные настройки, ключ суток или зону места.";
+            field.RegisterValueChangedCallback(evt => SelectTarget(ids[field.index]));
+            parent.Add(field);
+            if (EditTarget != "")
+            {
+                Label note = new Label(EditedKey != null
+                    ? "Правится ключ «" + EditedKey.Name + "»: предпросмотр — в его час. " + (sky.FrameKeys.Enabled ? "" : "Ключи суток выключены — в игре не действуют.")
+                    : "Правится зона «" + EditedZone.Name + "»: вид внутри неё; предпросмотр — в её центре.");
+                note.style.whiteSpace = WhiteSpace.Normal;
+                note.style.color = new Color(.55f, .85f, 1f);
+                note.style.marginBottom = 4;
+                parent.Add(note);
+            }
+        }
+
+        private void SelectTarget(string target)
+        {
+            EditTarget = target;
+            LocationFrameKey key = EditedKey;
+            LocationFrameZone zone = EditedZone;
+            if (key != null) SetHour?.Invoke(key.Hour);
+            if (zone != null) SetViewCenter?.Invoke(zone.Center);
+            Rebuild?.Invoke();
+        }
+
+        // ------------------------------------------------------------------
+        // Время и зоны
+        // ------------------------------------------------------------------
+
+        private static readonly (string Name, float Hour)[] StandardKeys = { ("Утро", 6), ("День", 13), ("Вечер", 19), ("Ночь", 1) };
+
+        private void BuildTimeZones(LocationSky sky, LocationPostEffects basePost)
+        {
+            LocationFrameKeys keys = sky.FrameKeys;
+            Group("Ключи суток", "TimeKeys", keys.Enabled, value => keys.Enabled = value, () =>
+            {
+                Help("Свой вид кадра в разные часы: между соседними ключами — плавно, по кругу через полночь. Любой параметр любой вкладки: " +
+                     "туман на рассвете, свечение вечером, зерно ночью. Выберите ключ в «Правлю» вверху — вкладки правят его, предпросмотр встаёт в его час. " +
+                     "Галочки эффектов переключаются посередине между ключами: для плавного появления держите эффект включённым и меняйте силу.");
+                if (keys.Keys.Count == 0)
+                    Buttons(("Создать утро, день, вечер, ночь из основных", (Action)(() => Change(() =>
+                    {
+                        foreach ((string name, float hour) in StandardKeys)
+                            keys.Keys.Add(new LocationFrameKey { Name = name, Hour = hour, Post = basePost.Clone() });
+                        keys.Enabled = true;
+                    }, true)), "Четыре ключа — копии основных настроек; дальше правьте каждый"));
+                foreach (LocationFrameKey key in keys.Keys.Where(item => item != null).OrderBy(item => Mathf.Repeat(item.Hour, 24)).ToList())
+                {
+                    LocationFrameKey captured = key;
+                    Label title = new Label((EditTarget == "key:" + key.Id ? "● " : "") + key.Name + " — " + LocationLightingTest.FormatHour(key.Hour));
+                    title.style.unityFontStyleAndWeight = FontStyle.Bold;
+                    title.style.marginTop = 6;
+                    parent.Add(title);
+                    TextField name = new TextField("Имя") { value = key.Name, isDelayed = true };
+                    name.RegisterValueChangedCallback(evt => Change(() => captured.Name = evt.newValue, true));
+                    parent.Add(name);
+                    Slider("Час", key.Hour, 0, 24, value => captured.Hour = value);
+                    Buttons(
+                        ("Править", (Action)(() => SelectTarget("key:" + captured.Id)), "Вкладки правят этот ключ, предпросмотр — в его час"),
+                        ("Основные → сюда", (Action)(() => Change(() => captured.Post = basePost.Clone(), true)), "Заменить ключ копией основных настроек"),
+                        ("Удалить", (Action)(() => Change(() => { keys.Keys.Remove(captured); if (EditTarget == "key:" + captured.Id) EditTarget = ""; }, true)), null));
+                }
+                Buttons(("+ Ключ в час предпросмотра", (Action)(() => Change(() =>
+                {
+                    float hour = CurrentHour?.Invoke() ?? 13;
+                    LocationFrameKey key = new LocationFrameKey { Name = "Ключ " + LocationLightingTest.FormatHour(hour), Hour = hour, Post = basePost.Clone() };
+                    keys.Keys.Add(key);
+                    EditTarget = "key:" + key.Id;
+                }, true)), "Копия основных настроек в нынешний час предпросмотра"));
+            }, null);
+
+            List<LocationFrameZone> zones = Visual.FrameZones;
+            Group("Зоны места", "TimeZones", null, null, () =>
+            {
+                Help("Область рисунка места со своим видом кадра (у реки — туман и холод, у костра — тепло); к краю — плавный переход. " +
+                     "Действует по точке, на которую смотрит камера. Зоны — у этого места (не у общего неба). " +
+                     "В окне зоны видны поверх кадра; выбранную двигайте мышью с зажатым Ctrl.");
+                foreach (LocationFrameZone zone in zones.Where(item => item != null).ToList())
+                {
+                    LocationFrameZone captured = zone;
+                    Label title = new Label((EditTarget == "zone:" + zone.Id ? "● " : "") + zone.Name);
+                    title.style.unityFontStyleAndWeight = FontStyle.Bold;
+                    title.style.marginTop = 6;
+                    parent.Add(title);
+                    TextField name = new TextField("Имя") { value = zone.Name, isDelayed = true };
+                    name.RegisterValueChangedCallback(evt => Change(() => captured.Name = evt.newValue, true));
+                    parent.Add(name);
+                    Toggle("Действует", zone.Enabled, value => captured.Enabled = value);
+                    Toggle("Овал (иначе прямоугольник)", zone.Ellipse, value => captured.Ellipse = value);
+                    Vector2Field center = new Vector2Field("Центр (пиксели рисунка)") { value = zone.Center };
+                    center.RegisterValueChangedCallback(evt => Change(() => captured.Center = evt.newValue, false));
+                    parent.Add(center);
+                    Vector2Field size = new Vector2Field("Размер (пиксели)") { value = zone.Size };
+                    size.RegisterValueChangedCallback(evt => Change(() => captured.Size = new Vector2(Mathf.Max(10, evt.newValue.x), Mathf.Max(10, evt.newValue.y)), false));
+                    parent.Add(size);
+                    Slider("Переход к краю (пиксели)", zone.Feather, 0, 2000, value => captured.Feather = value);
+                    Slider("Сила", zone.Strength, 0, 1, value => captured.Strength = value);
+                    Buttons(
+                        ("Править вид", (Action)(() => SelectTarget("zone:" + captured.Id)), "Вкладки правят вид внутри зоны, предпросмотр — в её центре"),
+                        ("В центр кадра", ViewCenter == null ? null : (Action)(() => Change(() => captured.Center = ViewCenter(), true)), "Поставить зону туда, куда смотрит предпросмотр"),
+                        ("Показать", SetViewCenter == null ? null : (Action)(() => SetViewCenter(captured.Center)), "Навести предпросмотр на зону"),
+                        ("Удалить", (Action)(() => Change(() => { zones.Remove(captured); if (EditTarget == "zone:" + captured.Id) EditTarget = ""; }, true)), null));
+                }
+                Buttons(("+ Зона в центре кадра", (Action)(() => Change(() =>
+                {
+                    LocationFrameZone zone = new LocationFrameZone
+                    {
+                        Name = "Зона " + (zones.Count + 1), Center = ViewCenter?.Invoke() ?? new Vector2(960, 540), Post = basePost.Clone()
+                    };
+                    zones.Add(zone);
+                    EditTarget = "zone:" + zone.Id;
+                }, true)), "Новая зона — копия основных настроек; правьте её вид на вкладках"));
+            }, null);
+
+            Group("Переходы между стилями из игры", "TimeTransitions", null, null, () =>
+            {
+                Help("Игра плавно переводит кадр к сохранённому стилю и обратно: LocationWorldRenderer.TransitionToStyle(\"Имя стиля\", секунды) и EndTransition(секунды) — " +
+                     "сцены, страх, нечисть рядом, ранение. Здесь — проверка на предпросмотре.");
+                List<LocationFrameStyle> styles = Database.frameStyles ?? new List<LocationFrameStyle>();
+                if (styles.Count == 0) { Help("Сначала сохраните хотя бы один стиль («Сохранённые стили» вверху)."); return; }
+                string chosenId = EditorPrefs.GetString(PrefsKey + "TransitionStyle", styles[0].Id);
+                int chosen = Mathf.Max(0, styles.FindIndex(style => style.Id == chosenId));
+                PopupField<string> style = new PopupField<string>("Стиль", styles.Select(item => item.Name).ToList(), chosen);
+                style.RegisterValueChangedCallback(evt => EditorPrefs.SetString(PrefsKey + "TransitionStyle", styles[style.index].Id));
+                parent.Add(style);
+                float seconds = EditorPrefs.GetFloat(PrefsKey + "TransitionSeconds", 1.5f);
+                UnityEngine.UIElements.Slider duration = new UnityEngine.UIElements.Slider("Длительность (с)", .1f, 6) { value = seconds, showInputField = true };
+                duration.RegisterValueChangedCallback(evt => EditorPrefs.SetFloat(PrefsKey + "TransitionSeconds", evt.newValue));
+                parent.Add(duration);
+                if (TestTransition != null)
+                    Buttons(("Проверить: туда и обратно", (Action)(() => TestTransition(styles[Mathf.Clamp(style.index, 0, styles.Count - 1)].Post, duration.value)),
+                        "Плавно к стилю, пауза, плавно назад"));
+            }, null);
         }
 
         // ------------------------------------------------------------------

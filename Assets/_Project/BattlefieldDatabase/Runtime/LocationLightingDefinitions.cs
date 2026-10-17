@@ -209,6 +209,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         public LocationDaylight Daylight = new LocationDaylight();
         public LocationSunDefinition Sun = new LocationSunDefinition();
         public LocationPostEffects Post = new LocationPostEffects();
+        // Ключи суток обработки кадра (окно «Обработка кадра» → «Время и зоны»).
+        public LocationFrameKeys FrameKeys = new LocationFrameKeys();
         public bool PeopleCastShadows = true;
         public float PeopleShadowLength = 1;
         // Прежняя «толщина тени сбоку» — не используется (данные).
@@ -250,6 +252,16 @@ namespace KingdomSurvival.BattlefieldDatabase
             set { if (IsWorld) World.Post = value; else visual.Post = value; }
         }
 
+        public LocationFrameKeys FrameKeys
+        {
+            get
+            {
+                if (IsWorld) return World.FrameKeys ?? (World.FrameKeys = new LocationFrameKeys());
+                return visual.FrameKeys ?? (visual.FrameKeys = new LocationFrameKeys());
+            }
+            set { if (IsWorld) World.FrameKeys = value; else visual.FrameKeys = value; }
+        }
+
         public bool PeopleCastShadows
         {
             get => IsWorld ? World.PeopleCastShadows : visual.PeopleCastShadows;
@@ -279,6 +291,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             visual.Daylight = UnityEngine.JsonUtility.FromJson<LocationDaylight>(UnityEngine.JsonUtility.ToJson(world.Daylight));
             visual.Sun = UnityEngine.JsonUtility.FromJson<LocationSunDefinition>(UnityEngine.JsonUtility.ToJson(world.Sun));
             visual.Post = UnityEngine.JsonUtility.FromJson<LocationPostEffects>(UnityEngine.JsonUtility.ToJson(world.Post));
+            visual.FrameKeys = (world.FrameKeys ?? new LocationFrameKeys()).Clone();
             visual.PeopleCastShadows = world.PeopleCastShadows;
             visual.PeopleShadowLength = world.PeopleShadowLength;
             visual.ShadowStyle = (world.ShadowStyle ?? new LocationShadowStyle()).Clone();
@@ -291,6 +304,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             world.Daylight = UnityEngine.JsonUtility.FromJson<LocationDaylight>(UnityEngine.JsonUtility.ToJson(visual.Daylight));
             world.Sun = UnityEngine.JsonUtility.FromJson<LocationSunDefinition>(UnityEngine.JsonUtility.ToJson(visual.Sun));
             world.Post = UnityEngine.JsonUtility.FromJson<LocationPostEffects>(UnityEngine.JsonUtility.ToJson(visual.Post));
+            world.FrameKeys = (visual.FrameKeys ?? new LocationFrameKeys()).Clone();
             world.PeopleCastShadows = visual.PeopleCastShadows;
             world.PeopleShadowLength = visual.PeopleShadowLength;
             world.ShadowStyle = (visual.ShadowStyle ?? new LocationShadowStyle()).Clone();

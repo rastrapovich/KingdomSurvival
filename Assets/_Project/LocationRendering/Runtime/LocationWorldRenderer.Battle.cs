@@ -92,7 +92,7 @@ namespace KingdomSurvival.LocationRendering
         // с гибели; выключено или не пал — 0.
         private float DissolveAmount(float diedAt)
         {
-            LocationSpriteEffects s = PostActive ? Sky.Post.Sprites : null;
+            LocationSpriteEffects s = PostActive ? Post.Sprites : null;
             if (s == null || !s.Dissolve || float.IsNaN(diedAt)) return 0;
             float t = Mathf.Clamp01((Seconds - diedAt) / Mathf.Max(.05f, s.DissolveDuration));
             return Mathf.Clamp01(s.DissolveAmount) * t;

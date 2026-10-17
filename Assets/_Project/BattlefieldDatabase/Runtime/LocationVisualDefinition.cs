@@ -285,6 +285,9 @@ namespace KingdomSurvival.BattlefieldDatabase
         public LocationDaylight Daylight = new LocationDaylight();
         public LocationSunDefinition Sun = new LocationSunDefinition();
         public LocationPostEffects Post = new LocationPostEffects();
+        // Своё небо: ключи суток обработки кадра; зоны места — всегда свои.
+        public LocationFrameKeys FrameKeys = new LocationFrameKeys();
+        public List<LocationFrameZone> FrameZones = new List<LocationFrameZone>();
         // Тени людей (исследование и бой на месте).
         public bool PeopleCastShadows = true;
         public float PeopleShadowLength = 1;

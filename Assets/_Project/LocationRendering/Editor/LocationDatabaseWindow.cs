@@ -1063,6 +1063,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 GUI.DrawTexture(frame, lastPreview, ScaleMode.StretchToFill, false);
                 return;
             }
+            renderer.SetFocus(viewCenter);
             renderer.SetTime(hour, (float)now);
             RenderPreviewActors();
             Vector2 world = LocationVisualGeometry.PixelToWorld(Location, viewCenter);

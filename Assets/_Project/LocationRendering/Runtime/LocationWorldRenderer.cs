@@ -493,6 +493,7 @@ namespace KingdomSurvival.LocationRendering
         {
             Hour = Mathf.Repeat(hours, 24);
             Seconds = seconds;
+            UpdateEffectivePost();
             AnimateObjects();
             UpdateSeeThrough();
             AnimateScatter();

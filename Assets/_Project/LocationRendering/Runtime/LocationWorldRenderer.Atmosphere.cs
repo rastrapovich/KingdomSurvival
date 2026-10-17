@@ -53,7 +53,7 @@ namespace KingdomSurvival.LocationRendering
 
         private void UpdateAtmosphere()
         {
-            LocationPostEffects post = Sky.Post;
+            LocationPostEffects post = Post;
             LocationAtmosphereEffects settings = post?.Atmosphere;
             float step = float.IsNaN(atmosphereClock) ? 0 : Mathf.Clamp(Seconds - atmosphereClock, 0, MaxAtmosphereStep);
             atmosphereClock = Seconds;
@@ -212,14 +212,14 @@ namespace KingdomSurvival.LocationRendering
 
         private string WindSignature()
         {
-            LocationSpriteEffects s = Sky.Post?.Sprites;
+            LocationSpriteEffects s = Post?.Sprites;
             return s == null || !s.Wind ? "|-" : "|" + s.WindStrength + ";" + s.WindDirection + ";" + s.WindGusts;
         }
 
         // Ветер для частиц: тот же, что качает рисунки (направление и сила), в единицах мира в секунду.
         private Vector2 ParticleWind()
         {
-            LocationSpriteEffects s = PostActive ? Sky.Post.Sprites : null;
+            LocationSpriteEffects s = PostActive ? Post.Sprites : null;
             if (s == null || !s.Wind) return Vector2.zero;
             return new Vector2(Mathf.Clamp(s.WindDirection, -1, 1) * Mathf.Max(0, s.WindStrength) * 10 * (.6f + Mathf.Clamp01(s.WindGusts) * .4f), 0);
         }

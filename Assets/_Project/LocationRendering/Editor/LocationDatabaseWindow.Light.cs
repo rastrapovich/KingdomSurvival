@@ -369,11 +369,32 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Change = ChangeFrame,
                 Rebuild = BuildSettings,
                 Pulse = strength => renderer?.Pulse(strength),
-                OpenWindow = () => FrameStyleWindow.Open(selectedId)
+                OpenWindow = () => FrameStyleWindow.Open(selectedId),
+                CurrentHour = () => hour,
+                SetHour = value => { hour = value; cycle = false; },
+                ViewCenter = () => viewCenter,
+                SetViewCenter = value => viewCenter = value,
+                TestTransition = TestFrameTransition
             };
             settings.Add(editor.Build());
         }
 
+
+        // Проверка перехода к стилю на предпросмотре: туда, пауза, назад.
+        private void TestFrameTransition(LocationPostEffects target, float seconds)
+        {
+            LocationWorldRenderer shown = renderer;
+            if (shown == null || target == null) return;
+            shown.TransitionTo(target, seconds);
+            double back = EditorApplication.timeSinceStartup + seconds + 1.2;
+            void Wait()
+            {
+                if (EditorApplication.timeSinceStartup < back) return;
+                EditorApplication.update -= Wait;
+                if (renderer == shown) shown.EndTransition(seconds);
+            }
+            EditorApplication.update += Wait;
+        }
         // Правка обработки кадра: без пересборки места, если набор материалов
         // рисунков (эффекты рисунков) не сменился — остальное видно сразу.
         private void ChangeFrame(Action action, bool refreshSettings)
@@ -382,7 +403,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             action();
             EditorUtility.SetDirty(database);
             saveAt = EditorApplication.timeSinceStartup + .5;
-            if (renderer != null && renderer.BuiltSpriteStructure != LocationWorldRenderer.SpriteStructureKey(new LocationSky(Visual, database.worldLighting).Post))
+            if (renderer != null && renderer.BuiltSpriteStructure != renderer.CurrentSpriteStructure)
                 RequestRebuild();
             if (refreshSettings) BuildSettings();
         }

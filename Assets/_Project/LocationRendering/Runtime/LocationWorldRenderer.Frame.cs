@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using KingdomSurvival.ArtAssets;
 using KingdomSurvival.BattlefieldDatabase;
 using UnityEngine;
@@ -42,28 +43,142 @@ namespace KingdomSurvival.LocationRendering
         public string BuiltSpriteStructure { get; private set; }
 
         // Обработка кадра сейчас идёт (включена и не скрыта «до» сравнения).
-        public bool PostActive => frameShown && Sky.Post != null && Sky.Post.Enabled;
+        public bool PostActive => frameShown && Post != null && Post.Enabled;
 
         // Холст для LocationCanvasPass (null — нет).
-        public LocationCanvasEffects ActiveCanvas => PostActive ? Sky.Post.Canvas : null;
+        public LocationCanvasEffects ActiveCanvas => PostActive ? Post.Canvas : null;
 
         // Какие материалы нужны рисункам при этих настройках: другой ключ — пересобрать место.
-        public static string SpriteStructureKey(LocationPostEffects post)
+        public static string SpriteStructureKey(LocationPostEffects post) => SpriteStructureKey(post, null);
+
+        // С ключами суток и зонами: эффект рисунков в любом из них — материалы под него.
+        public static string SpriteStructureKey(LocationPostEffects post, IEnumerable<LocationPostEffects> extra)
         {
-            LocationSpriteEffects s = post != null && post.Enabled ? post.Sprites : null;
-            if (s == null) return "--";
-            bool objects = s.Wind || s.Outline && s.OutlineObjects || s.Distance;
+            if (post == null || !post.Enabled) return "--";
+            bool objects = false;
+            foreach (LocationPostEffects item in new[] { post }.Concat(extra ?? Enumerable.Empty<LocationPostEffects>()))
+            {
+                LocationSpriteEffects s = item?.Sprites;
+                if (s != null && (s.Wind || s.Outline && s.OutlineObjects || s.Distance)) objects = true;
+            }
             // Люди при включённой обработке — всегда материалом со стилем: раздел
             // «Персонажи» правит их цвет на лету, без пересборки места.
-            bool people = true;
-            return (objects ? "O" : "-") + (people ? "P" : "-");
+            return (objects ? "O" : "-") + "P";
+        }
+
+        // Ключи суток и зоны этого места (для набора материалов).
+        private IEnumerable<LocationPostEffects> ExtraPosts()
+        {
+            foreach (LocationFrameKey key in Sky.FrameKeys?.Keys ?? new List<LocationFrameKey>())
+                if (key?.Post != null) yield return key.Post;
+            foreach (LocationFrameZone zone in Definition.FrameZones ?? new List<LocationFrameZone>())
+                if (zone?.Post != null) yield return zone.Post;
+        }
+
+        // Набор материалов по нынешним данным (окна сравнивают с BuiltSpriteStructure).
+        public string CurrentSpriteStructure => SpriteStructureKey(Sky.Post, ExtraPosts());
+
+        // ------------------------------------------------------------------
+        // Итог настроек кадра: основные → ключи суток (по часу) → зоны (по
+        // точке взгляда) → переход к стилю из игры. Нет ни ключей, ни зон, ни
+        // перехода — сами основные (правки видны сразу, без копий).
+        // ------------------------------------------------------------------
+
+        private LocationPostEffects effective, keyScratch, bufferA, bufferB;
+        private Vector2? focus;
+        private LocationPostEffects transitionTarget;
+        private float transitionFrom, transitionGoal, transitionStart, transitionDuration;
+
+        public LocationPostEffects Post
+        {
+            get
+            {
+                if (effective == null) UpdateEffectivePost();
+                return effective;
+            }
+        }
+
+        // Точка, по которой действуют зоны (пиксели рисунка); по умолчанию — центр кадра.
+        public void SetFocus(Vector2 pixel) => focus = pixel;
+        public Vector2 FocusPixel => focus ?? ViewCenter;
+
+        // Плавный переход к другим настройкам кадра (сцена, страх, нечисть) и обратно.
+        public void TransitionTo(LocationPostEffects target, float seconds)
+        {
+            if (target == null) return;
+            transitionFrom = TransitionWeight();
+            transitionTarget = target;
+            transitionGoal = 1;
+            transitionStart = Seconds;
+            transitionDuration = Mathf.Max(0, seconds);
+        }
+
+        // Переход к сохранённому стилю по имени (База локаций → «Сохранённые стили»).
+        public bool TransitionToStyle(string name, float seconds)
+        {
+            LocationFrameStyle style = LocalLocationDatabaseAsset.LoadFrameStyle(name);
+            if (style == null) return false;
+            TransitionTo(style.Post, seconds);
+            return true;
+        }
+
+        public void EndTransition(float seconds)
+        {
+            if (transitionTarget == null) return;
+            transitionFrom = TransitionWeight();
+            transitionGoal = 0;
+            transitionStart = Seconds;
+            transitionDuration = Mathf.Max(0, seconds);
+        }
+
+        // Доля перехода сейчас (0 — основные, 1 — цель).
+        public float TransitionWeight()
+        {
+            if (transitionTarget == null) return 0;
+            float t = transitionDuration <= 0 ? 1 : Mathf.Clamp01((Seconds - transitionStart) / transitionDuration);
+            float weight = Mathf.Lerp(transitionFrom, transitionGoal, t * t * (3 - 2 * t));
+            if (transitionGoal <= 0 && t >= 1) { transitionTarget = null; return 0; }
+            return weight;
+        }
+
+        private LocationPostEffects Next(LocationPostEffects current) => current == bufferA ? (bufferB ??= new LocationPostEffects()) : (bufferA ??= new LocationPostEffects());
+
+        private void UpdateEffectivePost()
+        {
+            LocationPostEffects basePost = Sky.Post;
+            if (basePost == null) Sky.Post = basePost = new LocationPostEffects();
+            basePost.Repair();
+            LocationFrameKeys keys = Sky.FrameKeys;
+            List<LocationFrameZone> zones = Definition.FrameZones;
+            Vector2 point = FocusPixel;
+            float transition = TransitionWeight();
+            bool anyZone = zones != null && zones.Exists(zone => zone != null && zone.Weight(point) > .001f);
+            if ((keys == null || !keys.Active) && !anyZone && transition <= .001f)
+            {
+                effective = basePost;
+                return;
+            }
+            LocationPostEffects result = basePost;
+            if (keys != null && keys.Active) result = keys.AtHour(Hour, keyScratch ??= new LocationPostEffects()) ?? basePost;
+            if (anyZone)
+                foreach (LocationFrameZone zone in zones)
+                {
+                    float weight = zone?.Weight(point) ?? 0;
+                    if (weight <= .001f) continue;
+                    result = LocationFrameBlend.Lerp(result, zone.Post, weight, Next(result));
+                }
+            if (transition > .001f && transitionTarget != null)
+                result = LocationFrameBlend.Lerp(result, transitionTarget, transition, Next(result));
+            // Главный выключатель — всегда основной.
+            result.Enabled = basePost.Enabled;
+            effective = result.Repair();
         }
 
         private void InitializeFrame()
         {
             live.Add(this);
-            LocationPostEffects post = Sky.Post?.Repair();
-            BuiltSpriteStructure = SpriteStructureKey(post);
+            LocationPostEffects post = Post;
+            BuiltSpriteStructure = CurrentSpriteStructure;
             objectStyles = BuiltSpriteStructure[0] == 'O';
             peopleStyles = BuiltSpriteStructure[1] == 'P';
             Shader adjust = Resources.Load<Shader>(AdjustShaderPath);
@@ -138,7 +253,7 @@ namespace KingdomSurvival.LocationRendering
         private void ApplyCharacterLooks()
         {
             if (!peopleStyles) return;
-            LocationCharacterEffects characters = PostActive ? Sky.Post.Characters : null;
+            LocationCharacterEffects characters = PostActive ? Post.Characters : null;
             foreach (Actor actor in actors.Values) ApplyLook(actor.Image, actor.UnitTypeId, characters);
             foreach (BattleFigure figure in battleFigures.Values) ApplyLook(figure.Image, figure.UnitTypeId, characters);
         }
@@ -155,7 +270,7 @@ namespace KingdomSurvival.LocationRendering
         }
 
         // Итоговый вид фигуры типа (для проверок и окна).
-        public LocationCreatureLook CharacterLook(string unitTypeId) => PostActive ? Sky.Post.Characters.Resolve(unitTypeId) : new LocationCreatureLook();
+        public LocationCreatureLook CharacterLook(string unitTypeId) => PostActive ? Post.Characters.Resolve(unitTypeId) : new LocationCreatureLook();
 
         // Камера предпросмотра (окна баз): холст и сглаживание — как у своей.
         public void BindCamera(Camera camera)
@@ -193,7 +308,7 @@ namespace KingdomSurvival.LocationRendering
         public float BattleHit(bool targetOurs, bool defeated)
         {
             if (!PostActive) return 0;
-            float strength = Sky.Post.Lens.HitPulse(targetOurs, defeated);
+            float strength = Post.Lens.HitPulse(targetOurs, defeated);
             if (strength > 0) Pulse(strength);
             return strength;
         }
@@ -375,7 +490,7 @@ namespace KingdomSurvival.LocationRendering
         {
             if (camera == null) return;
             UniversalAdditionalCameraData data = camera.GetUniversalAdditionalCameraData();
-            LocationAntialiasing mode = PostActive ? Sky.Post.Quality.Antialiasing : LocationAntialiasing.None;
+            LocationAntialiasing mode = PostActive ? Post.Quality.Antialiasing : LocationAntialiasing.None;
             data.antialiasing = mode == LocationAntialiasing.None ? AntialiasingMode.None
                 : mode == LocationAntialiasing.Fxaa ? AntialiasingMode.FastApproximateAntialiasing : AntialiasingMode.SubpixelMorphologicalAntiAliasing;
             data.antialiasingQuality = mode == LocationAntialiasing.SmaaHigh ? AntialiasingQuality.High

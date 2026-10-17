@@ -44,6 +44,9 @@ namespace KingdomSurvival.LocationRendering.Editor
         private RenderTexture afterTexture, beforeTexture;
         private double lastTick, nextRepaint, saveAt = -1, rebuildAt = -1;
         private double dissolveStart = -1;
+        private double transitionBackAt = -1;
+        private float transitionSeconds;
+        private bool draggingZone;
         private float dissolveDuration = 1;
 
         private LocalLocationDefinition Location => database?.locations.Find(item => item.Id == selectedId);
@@ -88,7 +91,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
         private void UndoChanged()
         {
-            if (renderer != null && renderer.BuiltSpriteStructure != LocationWorldRenderer.SpriteStructureKey(Sky.Post)) RebuildPreview();
+            if (renderer != null && renderer.BuiltSpriteStructure != renderer.CurrentSpriteStructure) RebuildPreview();
             BuildPanel();
         }
 
@@ -197,7 +200,12 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Pulse = strength => renderer?.Pulse(strength),
                 TestDissolve = StartDissolveTest,
                 Snapshot = Snapshot,
-                ShowsCreatures = true
+                ShowsCreatures = true,
+                CurrentHour = () => hour,
+                SetHour = value => { hour = value; cycle = false; hourSlider?.SetValueWithoutNotify(hour); },
+                ViewCenter = () => center,
+                SetViewCenter = value => center = value,
+                TestTransition = StartTransitionTest
             };
             panel.Add(editor.Build());
         }
@@ -210,7 +218,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             action();
             EditorUtility.SetDirty(database);
             saveAt = EditorApplication.timeSinceStartup + .5;
-            if (renderer != null && renderer.BuiltSpriteStructure != LocationWorldRenderer.SpriteStructureKey(Sky.Post))
+            if (renderer != null && renderer.BuiltSpriteStructure != renderer.CurrentSpriteStructure)
                 rebuildAt = EditorApplication.timeSinceStartup + .2;
             if (rebuildPanel) BuildPanel();
             canvas?.MarkDirtyRepaint();
@@ -225,6 +233,11 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 hour = Mathf.Repeat(hour + delta * 24 / 30, 24);
                 hourSlider?.SetValueWithoutNotify(hour);
+            }
+            if (transitionBackAt > 0 && now >= transitionBackAt)
+            {
+                transitionBackAt = -1;
+                renderer?.EndTransition(transitionSeconds);
             }
             if (saveAt > 0 && now >= saveAt && !dragging)
             {
@@ -340,6 +353,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Texture after = Render(area, false, ref afterTexture);
                 if (after != null) GUI.DrawTexture(area, after, ScaleMode.StretchToFill, false);
             }
+            if (compare != CompareMode.SideBySide) DrawZones(area);
             LocationWorldRenderer.ClearFrameGlobals();
             if (status != null)
             {
@@ -381,6 +395,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 if (style != null) sky.Post = style.Post;
                 renderer.ShowFrameEffects(!before || style != null);
+                renderer.SetFocus(center);
                 renderer.SetTime(hour, (float)EditorApplication.timeSinceStartup);
                 RenderActors();
                 Camera camera = preview.camera;
@@ -523,7 +538,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private void HandleInput(Rect area)
         {
             Event evt = Event.current;
-            if (!area.Contains(evt.mousePosition) && !dragging && !draggingSplit) return;
+            if (!area.Contains(evt.mousePosition) && !dragging && !draggingSplit && !draggingZone) return;
             float splitX = area.x + area.width * split;
             switch (evt.type)
             {
@@ -537,17 +552,20 @@ namespace KingdomSurvival.LocationRendering.Editor
                     break;
                 }
                 case EventType.MouseDown:
-                    if (compare == CompareMode.Curtain && Mathf.Abs(evt.mousePosition.x - splitX) < 10) draggingSplit = true;
+                    if (evt.control && EditedZone() != null) draggingZone = true;
+                    else if (compare == CompareMode.Curtain && Mathf.Abs(evt.mousePosition.x - splitX) < 10) draggingSplit = true;
                     else dragging = true;
                     evt.Use();
                     break;
                 case EventType.MouseDrag:
-                    if (draggingSplit) split = Mathf.Clamp01((evt.mousePosition.x - area.x) / area.width);
+                    if (draggingZone && EditedZone() is LocationFrameZone moved) { Undo.RecordObject(database, "Сдвинуть зону"); moved.Center += evt.delta * (ViewHeight(area) / area.height); EditorUtility.SetDirty(database); saveAt = EditorApplication.timeSinceStartup + .5; }
+                    else if (draggingSplit) split = Mathf.Clamp01((evt.mousePosition.x - area.x) / area.width);
                     else if (dragging) center -= evt.delta * (ViewHeight(area) / area.height);
                     evt.Use();
                     break;
                 case EventType.MouseUp:
-                    dragging = draggingSplit = false;
+                    if (draggingZone) BuildPanel();
+                    dragging = draggingSplit = draggingZone = false;
                     evt.Use();
                     break;
             }
@@ -556,6 +574,73 @@ namespace KingdomSurvival.LocationRendering.Editor
         }
 
         private Vector2 ToPixel(Rect frame, Vector2 mouse) => center + (mouse - frame.center) * (ViewHeight(frame) / frame.height);
+
+        // ------------------------------------------------------------------
+        // Зоны и переходы
+        // ------------------------------------------------------------------
+
+        private LocationFrameZone EditedZone()
+        {
+            string target = FrameEffectsEditor.EditTarget;
+            return target.StartsWith("zone:") ? Visual?.FrameZones?.Find(zone => zone != null && zone.Id == target.Substring(5)) : null;
+        }
+
+        // Зоны места поверх кадра (вкладка «Время и зоны» или правится зона).
+        private void DrawZones(Rect frame)
+        {
+            List<LocationFrameZone> zones = Visual?.FrameZones;
+            if (zones == null || zones.Count == 0 || (!FrameEffectsEditor.IsTimeTab && EditedZone() == null)) return;
+            LocationFrameZone edited = EditedZone();
+            float scale = frame.height / ViewHeight(frame);
+            Vector2 Gui(Vector2 pixel) => frame.center + (pixel - center) * scale;
+            Handles.BeginGUI();
+            foreach (LocationFrameZone zone in zones)
+            {
+                if (zone == null) continue;
+                bool active = zone == edited;
+                Color color = !zone.Enabled ? new Color(.6f, .6f, .6f, .6f) : active ? new Color(.5f, .85f, 1f, 1f) : new Color(1f, .85f, .5f, .8f);
+                Vector2 c = Gui(zone.Center);
+                Vector2 half = zone.Size * scale / 2;
+                Vector2 outer = half + Vector2.one * zone.Feather * scale;
+                Shape(c, half, zone.Ellipse, color, 2);
+                Shape(c, outer, zone.Ellipse, new Color(color.r, color.g, color.b, color.a * .35f), 1);
+                GUI.Label(new Rect(c.x - 80, c.y - half.y - 18, 160, 18), zone.Name + (active ? " (правится)" : ""),
+                    new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter, normal = { textColor = color } });
+            }
+            Handles.EndGUI();
+        }
+
+        private static void Shape(Vector2 center, Vector2 half, bool ellipse, Color color, float width)
+        {
+            Handles.color = color;
+            Vector3[] points;
+            if (ellipse)
+            {
+                const int segments = 48;
+                points = new Vector3[segments + 1];
+                for (int i = 0; i <= segments; i++)
+                {
+                    float a = i / (float)segments * Mathf.PI * 2;
+                    points[i] = center + new Vector2(Mathf.Cos(a) * half.x, Mathf.Sin(a) * half.y);
+                }
+            }
+            else
+                points = new Vector3[]
+                {
+                    center + new Vector2(-half.x, -half.y), center + new Vector2(half.x, -half.y), center + new Vector2(half.x, half.y),
+                    center + new Vector2(-half.x, half.y), center + new Vector2(-half.x, -half.y)
+                };
+            Handles.DrawAAPolyLine(width, points);
+        }
+
+        // Проверка перехода: к стилю, пауза, назад.
+        private void StartTransitionTest(LocationPostEffects target, float seconds)
+        {
+            if (renderer == null || target == null) return;
+            renderer.TransitionTo(target, seconds);
+            transitionSeconds = seconds;
+            transitionBackAt = EditorApplication.timeSinceStartup + seconds + 1.2;
+        }
 
         // ------------------------------------------------------------------
         // Проверки и снимок

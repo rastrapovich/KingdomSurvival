@@ -1185,7 +1185,7 @@ namespace KingdomSurvival.LocationRendering
 
         private void ApplyPost()
         {
-            LocationPostEffects post = Sky.Post?.Repair();
+            LocationPostEffects post = Post;
             bool enabled = PostActive;
             Camera.GetUniversalAdditionalCameraData().renderPostProcessing = enabled;
             postVolume.enabled = enabled;

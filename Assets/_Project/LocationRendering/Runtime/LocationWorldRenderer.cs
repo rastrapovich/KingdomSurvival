@@ -501,6 +501,7 @@ namespace KingdomSurvival.LocationRendering
             ApplyLighting();
             UpdateSunShade();
             UpdateAtmosphere();
+            UpdateStates();
             ApplyCharacterLooks();
         }
 

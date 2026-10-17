@@ -596,6 +596,7 @@ public partial class PrototypeUIController
             });
         }
         localRenderer.SetBattleFigures(localBattleFrames);
+        localRenderer.SetHeroHealth(board.LeaderHealthShare);
         // Клетки хода, цель, путь и кольца — в мире места, под фигурами.
         board.MarksDrawnBelow = true;
         BoardMarksInWorld.Convert(board.Marks, ToPixel, localBattleMarks);
@@ -611,6 +612,7 @@ public partial class PrototypeUIController
         localBattlePanning = false;
         RefreshLocalCameraPanel();
         localRenderer?.ClearBattleFigures();
+        localRenderer?.SetHeroHealth(1);
         localBattleHost?.RemoveFromHierarchy();
         localBattleHost = null;
         // Прежний показ (загрузка, новая партия) — итог не применяется.

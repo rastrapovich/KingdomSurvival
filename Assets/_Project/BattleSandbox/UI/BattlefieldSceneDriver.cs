@@ -91,6 +91,7 @@ namespace KingdomSurvival.BattleSandbox
                 });
             }
             renderer.SetBattleFigures(frames);
+            renderer.SetHeroHealth(board.LeaderHealthShare);
             // Клетки хода, цель, путь и кольца — тоже в мире, под фигурами.
             board.MarksDrawnBelow = true;
             BoardMarksInWorld.Convert(board.Marks, point => ToCanvas(point, frame), marks);

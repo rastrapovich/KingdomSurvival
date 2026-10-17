@@ -374,7 +374,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                 SetHour = value => { hour = value; cycle = false; },
                 ViewCenter = () => viewCenter,
                 SetViewCenter = value => viewCenter = value,
-                TestTransition = TestFrameTransition
+                TestTransition = TestFrameTransition,
+                Hit = strength => renderer?.HitEffects(strength),
+                TestState = name => FrameStateTest.Run(renderer, name)
             };
             settings.Add(editor.Build());
         }

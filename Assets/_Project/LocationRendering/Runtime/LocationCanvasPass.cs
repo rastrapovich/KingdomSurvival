@@ -72,20 +72,160 @@ namespace KingdomSurvival.LocationRendering
         private static void OnBeginCamera(ScriptableRenderContext context, Camera camera)
         {
             if (camera == null || !bound.TryGetValue(camera, out LocationWorldRenderer renderer) || renderer == null) return;
-            LocationCanvasEffects canvas = renderer.ActiveCanvas;
-            if (canvas == null) return;
+            LocationPostEffects post = renderer.PostActive ? renderer.Post : null;
+            if (post == null) return;
             UniversalAdditionalCameraData data = camera.GetUniversalAdditionalCameraData();
             if (data == null || !data.renderPostProcessing) return;
             ScriptableRenderer scriptable = data.scriptableRenderer;
             Material shared = Material();
             if (scriptable == null || shared == null) return;
-            bool early = canvas.Painterly || canvas.Fog;
-            bool late = canvas.Palette || canvas.Paper;
+            LocationCanvasEffects canvas = post.Canvas;
+            LocationFrameRuntime state = renderer.FrameRuntime();
+            LocationFrameQualityLevel quality = LocationWorldRenderer.QualityLevel;
+            bool heavy = quality == LocationFrameQualityLevel.High;
+            bool early = canvas.Painterly && quality != LocationFrameQualityLevel.Low || canvas.Fog || canvas.Sharpen || canvas.TiltShift && heavy || canvas.Ink ||
+                         post.Air.Clouds && state.Outdoor || post.Air.Rays && state.Outdoor && quality != LocationFrameQualityLevel.Low ||
+                         post.Air.HeatHaze && state.Fires.Count > 0 && heavy || state.Stun > .001f;
+            bool late = canvas.Palette || canvas.Paper || post.Tone.SelectiveColor || post.Tone.GradientMap || canvas.Hatching || canvas.Border || canvas.Film ||
+                        state.LowHealth > .001f || state.Stun > .001f || state.Flash > .001f || state.Fade > .001f || state.Letterbox > .001f;
             if (!early && !late) return;
             Write(shared, canvas, renderer.Seconds);
+            WriteExtra(shared, post, state, camera, quality);
             if (early) { before.Material = shared; scriptable.EnqueuePass(before); }
             if (late) { after.Material = shared; scriptable.EnqueuePass(after); }
         }
+
+        private static readonly Vector4[] haze = new Vector4[8];
+        private static readonly Vector4[] selective = new Vector4[6];
+        private static readonly Dictionary<Gradient, KeyValuePair<int, Texture2D>> gradients = new Dictionary<Gradient, KeyValuePair<int, Texture2D>>();
+
+        private static void WriteExtra(Material target, LocationPostEffects post, LocationFrameRuntime state, Camera camera, LocationFrameQualityLevel quality)
+        {
+            LocationCanvasEffects canvas = post.Canvas;
+            LocationAirEffects air = post.Air;
+            LocationGameEffects game = post.Game;
+            LocationToneEffects tone = post.Tone;
+            bool heavy = quality == LocationFrameQualityLevel.High;
+            float seconds = state.Seconds;
+            float halfHeight = camera.orthographic ? camera.orthographicSize : 5;
+            Vector3 position = camera.transform.position;
+            target.SetVector(WorldId, new Vector4(position.x, position.y, halfHeight * camera.aspect, halfHeight));
+
+            // Живописность на среднем качестве — меньшим радиусом, на низком — нет.
+            if (quality == LocationFrameQualityLevel.Medium && canvas.Painterly)
+                target.SetVector(PainterlyId, new Vector4(Mathf.Clamp(canvas.PainterlyRadius, 1, 3), Mathf.Clamp01(canvas.PainterlyStrength), 1, 0));
+            if (quality == LocationFrameQualityLevel.Low)
+                target.SetVector(PainterlyId, Vector4.zero);
+
+            int fires = 0;
+            if (air.HeatHaze && heavy)
+                foreach (Vector2 fire in state.Fires)
+                {
+                    if (fires >= haze.Length) break;
+                    Vector3 viewport = camera.WorldToViewportPoint(new Vector3(fire.x, fire.y, 0));
+                    if (viewport.x < -.3f || viewport.x > 1.3f || viewport.y < -.3f || viewport.y > 1.3f) continue;
+                    haze[fires++] = new Vector4(viewport.x, viewport.y, Mathf.Max(.01f, air.HazeRadius) / (2 * halfHeight), Mathf.Clamp(air.HazeStrength, 0, 3) * state.FireShare);
+                }
+            target.SetVectorArray(HazeId, haze);
+            target.SetVector(HazeParamsId, new Vector4(fires, Mathf.Max(.01f, air.HazeHeight) / (2 * halfHeight), seconds * air.HazeSpeed, 0));
+            target.SetVector(SharpenId, new Vector4(canvas.Sharpen ? Mathf.Clamp(canvas.SharpenStrength, 0, 3) : 0, 0, 0, 0));
+            target.SetVector(TiltId, new Vector4(Mathf.Clamp01(canvas.TiltFocus), Mathf.Clamp01(canvas.TiltBand), canvas.TiltShift && heavy ? Mathf.Clamp(canvas.TiltBlur, 0, 16) : 0,
+                game.Stun ? Mathf.Clamp(game.StunBlur, 0, 16) * state.Stun : 0));
+            target.SetColor(InkColorId, canvas.InkColor);
+            target.SetVector(InkId, new Vector4(Mathf.Clamp01(canvas.InkThreshold), Mathf.Clamp(canvas.InkWidth, .5f, 4), Mathf.Clamp01(canvas.InkStrength), canvas.Ink ? 1 : 0));
+
+            // Облака и лучи — днём и на улице.
+            float day = state.Outdoor ? Mathf.Clamp01(state.DayFactor) : 0;
+            float angle = air.CloudAngle * Mathf.Deg2Rad;
+            Vector2 drift = state.Wind.sqrMagnitude > 1e-6f ? state.Wind.normalized : new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+            Vector2 offset = -drift * seconds * air.CloudSpeed;
+            target.SetVector(CloudsId, new Vector4(Mathf.Clamp01(air.CloudCoverage), Mathf.Clamp01(air.CloudDarkness) * day, Mathf.Max(.5f, air.CloudScale), Mathf.Clamp(air.CloudSoftness, .02f, 1)));
+            target.SetVector(CloudsMoveId, new Vector4(offset.x, offset.y, air.Clouds && day > .001f ? 1 : 0, 0));
+            Vector2 rays = air.RaysFollowSun && state.Sun.sqrMagnitude > 1e-6f
+                ? state.Sun.normalized
+                : new Vector2(Mathf.Cos(air.RaysAngle * Mathf.Deg2Rad), Mathf.Sin(air.RaysAngle * Mathf.Deg2Rad));
+            target.SetColor(RaysColorId, air.RaysColor);
+            target.SetVector(RaysId, new Vector4(rays.x, rays.y, Mathf.Max(0, air.RaysIntensity) * day, Mathf.Max(.05f, air.RaysWidth)));
+            target.SetVector(RaysMoveId, new Vector4(seconds * air.RaysSpeed, Mathf.Clamp01(air.RaysDensity),
+                air.Rays && day > .001f && quality != LocationFrameQualityLevel.Low ? 1 : 0, 0));
+
+            for (int i = 0; i < selective.Length; i++)
+            {
+                LocationSelectiveRange range = i < tone.Selective.Count ? tone.Selective[i] : null;
+                selective[i] = range == null ? new Vector4(0, 1, 0, 0) : new Vector4(range.Hue / 360f, Mathf.Max(0, range.Saturation), Mathf.Clamp(range.Lightness, -1, 1), 0);
+            }
+            target.SetVectorArray(SelectiveId, selective);
+            target.SetVector(SelectiveOnId, new Vector4(tone.SelectiveColor ? 1 : 0, 0, 0, 0));
+            target.SetTexture(GradientTexId, tone.GradientMap ? GradientTexture(tone.GradientColors) : Texture2D.whiteTexture);
+            target.SetVector(GradientId, new Vector4(Mathf.Clamp01(tone.GradientStrength), tone.GradientMap ? 1 : 0, 0, 0));
+            target.SetColor(HatchColorId, canvas.HatchColor);
+            target.SetVector(HatchId, new Vector4(Mathf.Clamp01(canvas.HatchThreshold), Mathf.Clamp(canvas.HatchSpacing, 2, 40), canvas.Hatching ? Mathf.Clamp01(canvas.HatchStrength) : 0,
+                Mathf.Clamp01(canvas.HatchCross)));
+            target.SetVector(FilmId, canvas.Film
+                ? new Vector4(Mathf.Clamp01(canvas.FilmDust), Mathf.Clamp01(canvas.FilmScratches), Mathf.Clamp01(canvas.FilmFlicker), seconds)
+                : new Vector4(0, 0, 0, seconds));
+            target.SetTexture(BorderTexId, canvas.BorderTexture != null ? canvas.BorderTexture : Texture2D.blackTexture);
+            target.SetColor(BorderColorId, canvas.BorderColor);
+            target.SetVector(BorderId, new Vector4(Mathf.Clamp(canvas.BorderSize, 0, .3f), Mathf.Clamp01(canvas.BorderRoughness), canvas.BorderTexture != null ? 1 : 0, canvas.Border ? 1 : 0));
+
+            target.SetColor(HealthColorId, game.LowHealthColor);
+            target.SetVector(HealthId, new Vector4(game.LowHealth ? state.LowHealth * Mathf.Clamp01(game.LowHealthStrength) : 0, Mathf.Max(0, game.LowHealthPulse), seconds, 0));
+            target.SetVector(StunId, game.Stun ? new Vector4(Mathf.Clamp01(game.StunDarkness) * state.Stun, Mathf.Clamp01(game.StunDesaturate) * state.Stun, 0, 0) : Vector4.zero);
+            Color flash = post.Lens.PulseFlashColor;
+            flash.a = state.Flash;
+            target.SetColor(FlashId, flash);
+            Color fade = game.FadeColor;
+            fade.a = state.Fade;
+            target.SetColor(FadeId, fade);
+            target.SetVector(LetterboxId, new Vector4(Mathf.Clamp(state.Letterbox, 0, .45f), 0, 0, 0));
+            target.SetColor(LetterboxColorId, game.LetterboxColor);
+        }
+
+        // Градиентная карта — текстура 256×1 (гамма экрана), пересобирается при правке.
+        private static Texture2D GradientTexture(Gradient gradient)
+        {
+            if (gradient == null) return Texture2D.whiteTexture;
+            int hash = 17;
+            foreach (GradientColorKey key in gradient.colorKeys) hash = hash * 31 ^ key.color.GetHashCode() ^ key.time.GetHashCode() * 7;
+            hash = hash * 31 ^ (int)gradient.mode;
+            if (gradients.TryGetValue(gradient, out KeyValuePair<int, Texture2D> cached) && cached.Key == hash && cached.Value != null) return cached.Value;
+            if (cached.Value != null) Object.DestroyImmediate(cached.Value);
+            Texture2D texture = new Texture2D(256, 1, TextureFormat.RGBA32, false, true) { wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.HideAndDontSave };
+            for (int x = 0; x < 256; x++) texture.SetPixel(x, 0, gradient.Evaluate(x / 255f));
+            texture.Apply();
+            gradients[gradient] = new KeyValuePair<int, Texture2D>(hash, texture);
+            return texture;
+        }
+
+        private static readonly int WorldId = Shader.PropertyToID("_KsWorld");
+        private static readonly int HazeId = Shader.PropertyToID("_KsHaze");
+        private static readonly int HazeParamsId = Shader.PropertyToID("_KsHazeParams");
+        private static readonly int SharpenId = Shader.PropertyToID("_KsSharpen");
+        private static readonly int TiltId = Shader.PropertyToID("_KsTilt");
+        private static readonly int InkColorId = Shader.PropertyToID("_KsInkColor");
+        private static readonly int InkId = Shader.PropertyToID("_KsInk");
+        private static readonly int CloudsId = Shader.PropertyToID("_KsClouds");
+        private static readonly int CloudsMoveId = Shader.PropertyToID("_KsCloudsMove");
+        private static readonly int RaysColorId = Shader.PropertyToID("_KsRaysColor");
+        private static readonly int RaysId = Shader.PropertyToID("_KsRays");
+        private static readonly int RaysMoveId = Shader.PropertyToID("_KsRaysMove");
+        private static readonly int SelectiveId = Shader.PropertyToID("_KsSelective");
+        private static readonly int SelectiveOnId = Shader.PropertyToID("_KsSelectiveOn");
+        private static readonly int GradientTexId = Shader.PropertyToID("_KsGradientTex");
+        private static readonly int GradientId = Shader.PropertyToID("_KsGradient");
+        private static readonly int HatchColorId = Shader.PropertyToID("_KsHatchColor");
+        private static readonly int HatchId = Shader.PropertyToID("_KsHatch");
+        private static readonly int FilmId = Shader.PropertyToID("_KsFilm");
+        private static readonly int BorderTexId = Shader.PropertyToID("_KsBorderTex");
+        private static readonly int BorderColorId = Shader.PropertyToID("_KsBorderColor");
+        private static readonly int BorderId = Shader.PropertyToID("_KsBorder");
+        private static readonly int HealthColorId = Shader.PropertyToID("_KsHealthColor");
+        private static readonly int HealthId = Shader.PropertyToID("_KsHealth");
+        private static readonly int StunId = Shader.PropertyToID("_KsStun");
+        private static readonly int FlashId = Shader.PropertyToID("_KsFlash");
+        private static readonly int FadeId = Shader.PropertyToID("_KsFade");
+        private static readonly int LetterboxId = Shader.PropertyToID("_KsLetterbox");
+        private static readonly int LetterboxColorId = Shader.PropertyToID("_KsLetterboxColor");
 
         private static void Write(Material target, LocationCanvasEffects canvas, float seconds)
         {

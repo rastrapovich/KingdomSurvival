@@ -59,6 +59,35 @@ namespace KingdomSurvival.BattlefieldDatabase
         public AnimationCurve HueVsSaturation = Flat();
         public AnimationCurve SaturationVsSaturation = Flat();
         public AnimationCurve LuminanceVsSaturation = Flat();
+        // Тон по тону: 0.5 — без сдвига.
+        public AnimationCurve HueVsHue = Flat();
+        // Пределы теней и светов для «тени / полутона / света» (доли яркости).
+        public float ShadowsStart = 0;
+        public float ShadowsEnd = .3f;
+        public float HighlightsStart = .55f;
+        public float HighlightsEnd = 1;
+
+        // Выборочная коррекция: 6 цветов (красный, жёлтый, зелёный, голубой, синий, пурпурный).
+        public bool SelectiveColor;
+        public List<LocationSelectiveRange> Selective = new List<LocationSelectiveRange>
+        {
+            new LocationSelectiveRange(), new LocationSelectiveRange(), new LocationSelectiveRange(),
+            new LocationSelectiveRange(), new LocationSelectiveRange(), new LocationSelectiveRange()
+        };
+
+        // Градиентная карта: яркость кадра → свой ряд цветов (2–8 точек).
+        public bool GradientMap;
+        public Gradient GradientColors = DefaultGradient();
+        public float GradientStrength = .5f;
+
+        public static Gradient DefaultGradient()
+        {
+            Gradient gradient = new Gradient();
+            gradient.SetKeys(
+                new[] { new GradientColorKey(new Color(.08f, .07f, .12f), 0), new GradientColorKey(new Color(.45f, .38f, .3f), .5f), new GradientColorKey(new Color(.98f, .9f, .74f), 1) },
+                new[] { new GradientAlphaKey(1, 0), new GradientAlphaKey(1, 1) });
+            return gradient;
+        }
 
         public static AnimationCurve Identity() => new AnimationCurve(new Keyframe(0, 0, 1, 1), new Keyframe(1, 1, 1, 1));
         public static AnimationCurve Flat() => new AnimationCurve(new Keyframe(0, .5f), new Keyframe(1, .5f));
@@ -78,7 +107,22 @@ namespace KingdomSurvival.BattlefieldDatabase
             if (HueVsSaturation == null || HueVsSaturation.length == 0) HueVsSaturation = Flat();
             if (SaturationVsSaturation == null || SaturationVsSaturation.length == 0) SaturationVsSaturation = Flat();
             if (LuminanceVsSaturation == null || LuminanceVsSaturation.length == 0) LuminanceVsSaturation = Flat();
+            if (HueVsHue == null || HueVsHue.length == 0) HueVsHue = Flat();
+            Selective ??= new List<LocationSelectiveRange>();
+            while (Selective.Count < 6) Selective.Add(new LocationSelectiveRange());
+            GradientColors ??= DefaultGradient();
         }
+    }
+
+    // Один цвет выборочной коррекции: сдвиг тона (°), насыщенность (множитель), светлота (−1..1).
+    [Serializable]
+    public sealed class LocationSelectiveRange
+    {
+        public float Hue;
+        public float Saturation = 1;
+        public float Lightness;
+
+        public bool IsIdentity => Mathf.Abs(Hue) < .01f && Mathf.Abs(Saturation - 1) < .001f && Mathf.Abs(Lightness) < .001f;
     }
 
     // «Шар» цвета URP: оттенок (белый — без сдвига) и сдвиг яркости −1..1.
@@ -108,6 +152,12 @@ namespace KingdomSurvival.BattlefieldDatabase
         public LocationPulseTargets PulseOnHitTargets = LocationPulseTargets.Any;
         public float PulseHitStrength = .6f;
         public float PulseKillStrength = 1;
+        // Тряска камеры (доля высоты кадра на пике) и вспышка экрана при ударе — той же силой.
+        public bool PulseShake = true;
+        public float PulseShakeAmount = .012f;
+        public bool PulseFlash;
+        public Color PulseFlashColor = new Color(1, .92f, .85f, 1);
+        public float PulseFlashStrength = .25f;
 
         // Сила всплеска для удара (0 — без всплеска).
         public float HitPulse(bool targetOurs, bool defeated)
@@ -160,6 +210,44 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float PaperStrength = .35f;
         public float PaperScale = 1;
         public float PaperFibers = .5f;
+
+        // Резкость: возвращает чёткость уменьшенным рисункам.
+        public bool Sharpen;
+        public float SharpenStrength = .6f;
+
+        // Тилт-шифт: размытие верха и низа кадра (диорама). Фокус и полоса — доли высоты экрана.
+        public bool TiltShift;
+        public float TiltFocus = .5f;
+        public float TiltBand = .35f;
+        public float TiltBlur = 5;
+
+        // Чернильный контур по краям форм всего кадра.
+        public bool Ink;
+        public Color InkColor = new Color(.1f, .07f, .05f, 1);
+        public float InkThreshold = .35f;
+        public float InkWidth = 1;
+        public float InkStrength = .8f;
+
+        // Штриховка в тенях (гравюра): ниже порога — штрих, ниже второго — перекрёстный.
+        public bool Hatching;
+        public Color HatchColor = new Color(.12f, .09f, .07f, 1);
+        public float HatchThreshold = .35f;
+        public float HatchCross = .18f;
+        public float HatchSpacing = 6;
+        public float HatchStrength = .6f;
+
+        // Рамка кадра: своя текстура (с прозрачностью) или неровный край.
+        public bool Border;
+        public Texture2D BorderTexture;
+        public Color BorderColor = new Color(.08f, .06f, .05f, 1);
+        public float BorderSize = .04f;
+        public float BorderRoughness = .5f;
+
+        // Старая плёнка: пыль, царапины, мерцание.
+        public bool Film;
+        public float FilmDust = .4f;
+        public float FilmScratches = .3f;
+        public float FilmFlicker = .3f;
     }
 
     [Serializable]
@@ -200,6 +288,13 @@ namespace KingdomSurvival.BattlefieldDatabase
         public float DissolveScale = 40;
         // До какой доли растворяется тело: 1 — исчезает, меньше — остаётся следом.
         public float DissolveAmount = 1;
+
+        // Подсветка контура огнём: край рисунка со стороны костра светлеет цветом его света.
+        public bool Rim;
+        public float RimStrength = .8f;
+        public float RimWidth = 2;
+        public bool RimPeople = true;
+        public bool RimObjects;
     }
 
     [Serializable]
@@ -441,6 +536,65 @@ namespace KingdomSurvival.BattlefieldDatabase
 
     public enum LocationAntialiasing { None, Fxaa, SmaaLow, SmaaMedium, SmaaHigh }
 
+    // Свет и воздух: тени облаков по земле, лучи солнца, марево над огнём.
+    // Облака и лучи — в мире (не ездят с камерой), днём и на улице.
+    [Serializable]
+    public sealed class LocationAirEffects
+    {
+        public bool Clouds;
+        public float CloudCoverage = .45f;
+        public float CloudDarkness = .35f;
+        // Размер облака, единицы мира; мягкость края 0..1.
+        public float CloudScale = 8;
+        public float CloudSoftness = .35f;
+        public float CloudSpeed = .4f;
+        // Направление движения, градусы; ветер раздела «Рисунки» — если включён.
+        public float CloudAngle = 20;
+
+        public bool Rays;
+        // Угол лучей — по солнцу места (иначе свой).
+        public bool RaysFollowSun = true;
+        public float RaysAngle = 250;
+        public float RaysIntensity = .2f;
+        public Color RaysColor = new Color(1, .9f, .7f, 1);
+        // Ширина полосы, единицы мира; густота 0..1; скорость дрожания.
+        public float RaysWidth = 1.2f;
+        public float RaysDensity = .5f;
+        public float RaysSpeed = .15f;
+
+        public bool HeatHaze;
+        public float HazeStrength = 1;
+        // Ширина и высота марева над огнём, единицы мира.
+        public float HazeRadius = .6f;
+        public float HazeHeight = 1.6f;
+        public float HazeSpeed = 1;
+    }
+
+    // Игра: состояния героя на экране и кинополосы (их силу задаёт игра:
+    // LocationWorldRenderer.SetHeroHealth / SetStun / FadeTo / SetLetterbox).
+    [Serializable]
+    public sealed class LocationGameEffects
+    {
+        public bool LowHealth = true;
+        // Ниже этой доли здоровья — красные пульсирующие края.
+        public float LowHealthThreshold = .35f;
+        public Color LowHealthColor = new Color(.55f, 0, 0, 1);
+        public float LowHealthStrength = .75f;
+        public float LowHealthPulse = 1.1f;
+
+        public bool Stun = true;
+        public float StunDarkness = .45f;
+        public float StunDesaturate = .6f;
+        // Размытие, пиксели кадра.
+        public float StunBlur = 4;
+
+        public Color FadeColor = Color.black;
+
+        // Кинополосы: постоянные (доля высоты сверху и снизу) и цвет; сцены добавляют свои.
+        public float Letterbox;
+        public Color LetterboxColor = Color.black;
+    }
+
     [Serializable]
     public sealed class LocationFrameQuality
     {
@@ -460,7 +614,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         Atmosphere = 32,
         Quality = 64,
         Characters = 128,
-        All = Color | LightLens | Tone | Canvas | Sprites | Atmosphere | Quality | Characters
+        Game = 256,
+        All = Color | LightLens | Tone | Canvas | Sprites | Atmosphere | Quality | Characters | Game
     }
 
     // Сохранённый стиль кадра («Запомнить настройки»): имя и полный снимок.
@@ -478,7 +633,7 @@ namespace KingdomSurvival.BattlefieldDatabase
         public static readonly LocationFrameSection[] Order =
         {
             LocationFrameSection.Color, LocationFrameSection.LightLens, LocationFrameSection.Tone, LocationFrameSection.Canvas,
-            LocationFrameSection.Sprites, LocationFrameSection.Characters, LocationFrameSection.Atmosphere, LocationFrameSection.Quality
+            LocationFrameSection.Sprites, LocationFrameSection.Characters, LocationFrameSection.Atmosphere, LocationFrameSection.Game, LocationFrameSection.Quality
         };
 
         public static string Title(LocationFrameSection section)
@@ -492,6 +647,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                 case LocationFrameSection.Sprites: return "Рисунки";
                 case LocationFrameSection.Atmosphere: return "Атмосфера";
                 case LocationFrameSection.Characters: return "Персонажи";
+                case LocationFrameSection.Game: return "Игра";
                 case LocationFrameSection.Quality: return "Качество";
                 default: return section.ToString();
             }
@@ -530,6 +686,8 @@ namespace KingdomSurvival.BattlefieldDatabase
             if ((sections & LocationFrameSection.Sprites) != 0) target.Sprites = from.Sprites;
             if ((sections & LocationFrameSection.Atmosphere) != 0) target.Atmosphere = from.Atmosphere;
             if ((sections & LocationFrameSection.Characters) != 0) target.Characters = from.Characters;
+            if ((sections & LocationFrameSection.Atmosphere) != 0) target.Air = from.Air;
+            if ((sections & LocationFrameSection.Game) != 0) target.Game = from.Game;
             if ((sections & LocationFrameSection.Quality) != 0) target.Quality = from.Quality;
             // Применённый стиль включает обработку кадра: иначе его не видно.
             if (sections != LocationFrameSection.None) target.Enabled = true;

@@ -229,7 +229,7 @@ namespace KingdomSurvival.LocationRendering
 
         private void Emit(AtmosphereView view, LocationParticleLayer layer, Rect area, float step)
         {
-            float visible = layer.Visibility(Hour, DayFactor);
+            float visible = layer.Visibility(Hour, DayFactor) * (QualityLevel == LocationFrameQualityLevel.High ? 1 : QualityLevel == LocationFrameQualityLevel.Medium ? .7f : .4f);
             if (visible <= .001f) return;
             switch (view.Kind)
             {

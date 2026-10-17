@@ -22,7 +22,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         private const string PrefsKey = "KS.FrameStyleWindow.";
 
         private enum CompareMode { None, Curtain, SideBySide }
-        private enum CompareSource { Raw, Style }
+        private enum CompareSource { Raw, Style, Reference }
 
         // Набор материалов рисунков сменился — окна с предпросмотром места пересобирают его.
         public static event Action StructureChanged;
@@ -118,6 +118,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 
             VisualElement left = new VisualElement { style = { flexGrow = 1 } };
             left.Add(BuildToolbar());
+            left.Add(BuildToolsBar());
             canvas = new IMGUIContainer(DrawPreview) { style = { flexGrow = 1 } };
             canvas.focusable = true;
             left.Add(canvas);
@@ -171,7 +172,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             { tooltip = "Слева — «до», справа — «после». Шторку двигайте мышью." };
             mode.RegisterValueChangedCallback(evt => { compare = (CompareMode)mode.index; EditorPrefs.SetInt(PrefsKey + "Compare", mode.index); });
             toolbar.Add(mode);
-            PopupField<string> source = new PopupField<string>(new List<string> { "«До» — без обработки", "«До» — выбранный стиль" }, (int)compareSource)
+            PopupField<string> source = new PopupField<string>(new List<string> { "«До» — без обработки", "«До» — выбранный стиль", "«До» — эталонная картинка" }, (int)compareSource)
             { tooltip = "С чем сравнивать: кадр без обработки или выбранный в списке сохранённый стиль" };
             source.RegisterValueChangedCallback(evt => { compareSource = (CompareSource)source.index; EditorPrefs.SetInt(PrefsKey + "CompareSource", source.index); });
             toolbar.Add(source);
@@ -205,7 +206,9 @@ namespace KingdomSurvival.LocationRendering.Editor
                 SetHour = value => { hour = value; cycle = false; hourSlider?.SetValueWithoutNotify(hour); },
                 ViewCenter = () => center,
                 SetViewCenter = value => center = value,
-                TestTransition = StartTransitionTest
+                TestTransition = StartTransitionTest,
+                Hit = strength => renderer?.HitEffects(strength),
+                TestState = name => FrameStateTest.Run(renderer, name)
             };
             panel.Add(editor.Build());
         }
@@ -288,6 +291,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             preview = null;
             Release(ref afterTexture);
             Release(ref beforeTexture);
+            Release(ref referenceFitted);
         }
 
         private static void Release(ref RenderTexture texture)
@@ -324,11 +328,12 @@ namespace KingdomSurvival.LocationRendering.Editor
             if (Event.current.type != EventType.Repaint) return;
 
             UpdateDissolveTest();
+            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
             if (compare == CompareMode.SideBySide)
             {
                 Rect leftFrame = new Rect(area.x, area.y, area.width / 2 - 1, area.height);
                 Rect rightFrame = new Rect(area.x + area.width / 2 + 1, area.y, area.width / 2 - 1, area.height);
-                Texture before = Render(leftFrame, true, ref beforeTexture);
+                Texture before = Before(leftFrame);
                 Texture after = Render(rightFrame, false, ref afterTexture);
                 if (before != null) GUI.DrawTexture(leftFrame, before, ScaleMode.StretchToFill, false);
                 if (after != null) GUI.DrawTexture(rightFrame, after, ScaleMode.StretchToFill, false);
@@ -337,7 +342,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
             else if (compare == CompareMode.Curtain)
             {
-                Texture before = Render(area, true, ref beforeTexture);
+                Texture before = Before(area);
                 Texture after = Render(area, false, ref afterTexture);
                 if (after != null) GUI.DrawTexture(area, after, ScaleMode.StretchToFill, false);
                 float x = area.x + area.width * split;
@@ -354,6 +359,10 @@ namespace KingdomSurvival.LocationRendering.Editor
                 if (after != null) GUI.DrawTexture(area, after, ScaleMode.StretchToFill, false);
             }
             if (compare != CompareMode.SideBySide) DrawZones(area);
+            frameMs = Mathf.Lerp(frameMs, (float)watch.Elapsed.TotalMilliseconds, .2f);
+            Readback(afterTexture);
+            DrawTools(compare == CompareMode.SideBySide ? new Rect(area.x + area.width / 2 + 1, area.y, area.width / 2 - 1, area.height) : area);
+            if (frameLabel != null) frameLabel.text = "кадр " + frameMs.ToString("0.0") + " мс" + (LocationWorldRenderer.QualityLevel != LocationFrameQualityLevel.High ? " · качество: " + (LocationWorldRenderer.QualityLevel == LocationFrameQualityLevel.Medium ? "среднее" : "низкое") : "");
             LocationWorldRenderer.ClearFrameGlobals();
             if (status != null)
             {
@@ -365,8 +374,14 @@ namespace KingdomSurvival.LocationRendering.Editor
             }
         }
 
+        // «До»: эталонная картинка или кадр без обработки / со стилем.
+        private Texture Before(Rect frame) =>
+            compareSource == CompareSource.Reference && reference != null ? ReferenceFor(frame) : Render(frame, true, ref beforeTexture);
+
         private string BeforeName()
         {
+            if (compareSource == CompareSource.Reference)
+                return reference != null ? "до · эталон «" + reference.name + "»" : "до · эталон не выбран";
             if (compareSource == CompareSource.Style)
             {
                 LocationFrameStyle style = database.FindFrameStyle(EditorPrefs.GetString("KS.FrameEffects.Style", ""));
@@ -400,7 +415,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                 RenderActors();
                 Camera camera = preview.camera;
                 Vector2 world = LocationVisualGeometry.PixelToWorld(Location, center);
-                camera.transform.position = new Vector3(world.x, world.y, -10);
+                Vector2 shake = renderer.ShakeOffset;
+                camera.transform.position = new Vector3(world.x + shake.x, world.y + shake.y, -10);
                 camera.transform.rotation = Quaternion.identity;
                 camera.orthographicSize = ViewHeight(frame) / LocationVisualGeometry.PixelsPerUnit / 2;
                 camera.GetUniversalAdditionalCameraData().renderPostProcessing = renderer.PostActive;
@@ -552,6 +568,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                     break;
                 }
                 case EventType.MouseDown:
+                    if (pipette && evt.button == 0) { PickWhiteBalance(area, evt.mousePosition, afterTexture); evt.Use(); break; }
                     if (evt.control && EditedZone() != null) draggingZone = true;
                     else if (compare == CompareMode.Curtain && Mathf.Abs(evt.mousePosition.x - splitX) < 10) draggingSplit = true;
                     else dragging = true;
@@ -640,6 +657,257 @@ namespace KingdomSurvival.LocationRendering.Editor
             renderer.TransitionTo(target, seconds);
             transitionSeconds = seconds;
             transitionBackAt = EditorApplication.timeSinceStartup + seconds + 1.2;
+        }
+
+        // ------------------------------------------------------------------
+        // Инструменты: эталон, гистограмма, пересвет, пипетка, снимок, время кадра
+        // ------------------------------------------------------------------
+
+        private Texture2D reference;
+        private RenderTexture referenceFitted;
+        private bool showHistogram, showClipping, pipette;
+        private readonly int[] histogram = new int[64];
+        private readonly int[,] histogramRgb = new int[3, 64];
+        private Texture2D clipOverlay;
+        private float clipLow, clipHigh;
+        private double nextReadback;
+        private float frameMs;
+        private Label frameLabel;
+        private const int ReadbackWidth = 192, ReadbackHeight = 108;
+
+        private VisualElement BuildToolsBar()
+        {
+            Toolbar tools = new Toolbar();
+            string referencePath = EditorPrefs.GetString(PrefsKey + "Reference", "");
+            reference = string.IsNullOrEmpty(referencePath) ? null : AssetDatabase.LoadAssetAtPath<Texture2D>(referencePath);
+            ObjectField field = new ObjectField("Эталон") { objectType = typeof(Texture2D), allowSceneObjects = false, value = reference };
+            field.tooltip = "Картинка-образец (кадр игры, картина): сравнение шторкой или рядом, «До» — эталонная картинка. Можно перетащить PNG из проводника.";
+            field.labelElement.style.minWidth = 48;
+            field.style.width = 260;
+            void SetReference(Texture2D texture)
+            {
+                reference = texture;
+                field.SetValueWithoutNotify(texture);
+                EditorPrefs.SetString(PrefsKey + "Reference", texture != null ? AssetDatabase.GetAssetPath(texture) : "");
+                if (texture != null && compareSource != CompareSource.Reference)
+                {
+                    compareSource = CompareSource.Reference;
+                    EditorPrefs.SetInt(PrefsKey + "CompareSource", (int)compareSource);
+                    if (compare == CompareMode.None) { compare = CompareMode.Curtain; EditorPrefs.SetInt(PrefsKey + "Compare", (int)compare); }
+                    CreateGUI();
+                }
+            }
+            field.RegisterValueChangedCallback(evt => SetReference(evt.newValue as Texture2D));
+            FrameTextureDrop.MakeDropTarget(field, FrameTextureKind.Particle, texture => EditorApplication.delayCall += () => SetReference(texture),
+                error => EditorUtility.DisplayDialog("Эталон", error, "Понятно"));
+            tools.Add(field);
+            ToolbarToggle histogramToggle = new ToolbarToggle { text = "Гистограмма", value = showHistogram, tooltip = "Распределение яркости и каналов кадра «после»" };
+            histogramToggle.RegisterValueChangedCallback(evt => showHistogram = evt.newValue);
+            tools.Add(histogramToggle);
+            ToolbarToggle clipToggle = new ToolbarToggle { text = "Пересвет", value = showClipping, tooltip = "Красным — ушедшее в белое, синим — в чёрное" };
+            clipToggle.RegisterValueChangedCallback(evt => showClipping = evt.newValue);
+            tools.Add(clipToggle);
+            ToolbarToggle pipetteToggle = new ToolbarToggle { text = "Пипетка баланса", value = pipette, tooltip = "Щёлкните по кадру: этот цвет станет нейтральным (цветной фильтр дня или ночи того, что правится)" };
+            pipetteToggle.RegisterValueChangedCallback(evt => pipette = evt.newValue);
+            tools.Add(pipetteToggle);
+            tools.Add(new ToolbarButton(ShowSnapshotMenu) { text = "Снимок…", tooltip = "Сохранить кадр в высоком разрешении (PNG)" });
+            frameLabel = new Label { style = { unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 8, color = new Color(.75f, .78f, .72f) } };
+            tools.Add(frameLabel);
+            return tools;
+        }
+
+        // Эталон по размеру кадра: заполнить с обрезкой, пропорции сохранить.
+        private Texture ReferenceFor(Rect frame)
+        {
+            if (reference == null) return null;
+            float scale = EditorGUIUtility.pixelsPerPoint;
+            int width = Mathf.Max(8, Mathf.RoundToInt(frame.width * scale)), height = Mathf.Max(8, Mathf.RoundToInt(frame.height * scale));
+            if (referenceFitted == null || referenceFitted.width != width || referenceFitted.height != height)
+            {
+                Release(ref referenceFitted);
+                referenceFitted = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB) { hideFlags = HideFlags.HideAndDontSave };
+                referenceFitted.Create();
+            }
+            float frameAspect = width / (float)height, imageAspect = reference.width / (float)Mathf.Max(1, reference.height);
+            Vector2 crop = frameAspect > imageAspect ? new Vector2(1, imageAspect / frameAspect) : new Vector2(frameAspect / imageAspect, 1);
+            RenderTexture active = RenderTexture.active;
+            Graphics.Blit(reference, referenceFitted, crop, (Vector2.one - crop) / 2);
+            RenderTexture.active = active;
+            return referenceFitted;
+        }
+
+        // Кадр «после» в маленькой копии (гамма экрана): гистограмма и пересвет.
+        private void Readback(Texture source)
+        {
+            if (source == null || (!showHistogram && !showClipping)) return;
+            double now = EditorApplication.timeSinceStartup;
+            if (now < nextReadback) return;
+            nextReadback = now + .25;
+            RenderTexture small = RenderTexture.GetTemporary(ReadbackWidth, ReadbackHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            RenderTexture active = RenderTexture.active;
+            Graphics.Blit(source, small);
+            RenderTexture.active = small;
+            Texture2D read = new Texture2D(ReadbackWidth, ReadbackHeight, TextureFormat.RGBA32, false, false);
+            read.ReadPixels(new Rect(0, 0, ReadbackWidth, ReadbackHeight), 0, 0);
+            read.Apply();
+            RenderTexture.active = active;
+            RenderTexture.ReleaseTemporary(small);
+            Color32[] pixels = read.GetPixels32();
+            DestroyImmediate(read);
+            System.Array.Clear(histogram, 0, histogram.Length);
+            System.Array.Clear(histogramRgb, 0, histogramRgb.Length);
+            if (clipOverlay == null)
+                clipOverlay = new Texture2D(ReadbackWidth, ReadbackHeight, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, hideFlags = HideFlags.HideAndDontSave };
+            Color32[] overlay = new Color32[pixels.Length];
+            int low = 0, high = 0;
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                Color32 c = pixels[i];
+                int luma = (c.r * 54 + c.g * 183 + c.b * 19) >> 8;
+                histogram[Mathf.Min(63, luma >> 2)]++;
+                histogramRgb[0, c.r >> 2]++;
+                histogramRgb[1, c.g >> 2]++;
+                histogramRgb[2, c.b >> 2]++;
+                bool black = c.r <= 4 && c.g <= 4 && c.b <= 4, white = c.r >= 251 || c.g >= 251 || c.b >= 251;
+                if (black) low++;
+                if (white) high++;
+                overlay[i] = white ? new Color32(255, 40, 40, 200) : black ? new Color32(40, 90, 255, 200) : new Color32(0, 0, 0, 0);
+            }
+            clipOverlay.SetPixels32(overlay);
+            clipOverlay.Apply();
+            clipLow = low / (float)pixels.Length;
+            clipHigh = high / (float)pixels.Length;
+        }
+
+        private void DrawTools(Rect area)
+        {
+            if (showClipping && clipOverlay != null) GUI.DrawTexture(area, clipOverlay, ScaleMode.StretchToFill, true);
+            if (!showHistogram) return;
+            Rect box = new Rect(area.xMax - 276, area.yMax - 128, 268, 120);
+            EditorGUI.DrawRect(box, new Color(0, 0, 0, .65f));
+            Rect plot = new Rect(box.x + 6, box.y + 18, box.width - 12, box.height - 24);
+            int peak = 1;
+            for (int i = 0; i < 64; i++) peak = Mathf.Max(peak, histogram[i], histogramRgb[0, i], histogramRgb[1, i], histogramRgb[2, i]);
+            float barWidth = plot.width / 64;
+            for (int i = 0; i < 64; i++)
+            {
+                float h = plot.height * Mathf.Sqrt(histogram[i] / (float)peak);
+                EditorGUI.DrawRect(new Rect(plot.x + i * barWidth, plot.yMax - h, Mathf.Max(1, barWidth - .5f), h), new Color(.85f, .85f, .82f, .55f));
+            }
+            Color[] colors = { new Color(1, .3f, .3f, .9f), new Color(.3f, 1, .3f, .9f), new Color(.4f, .6f, 1, .9f) };
+            Handles.BeginGUI();
+            for (int channel = 0; channel < 3; channel++)
+            {
+                Vector3[] line = new Vector3[64];
+                for (int i = 0; i < 64; i++)
+                    line[i] = new Vector3(plot.x + (i + .5f) * barWidth, plot.yMax - plot.height * Mathf.Sqrt(histogramRgb[channel, i] / (float)peak), 0);
+                Handles.color = colors[channel];
+                Handles.DrawAAPolyLine(1.5f, line);
+            }
+            Handles.EndGUI();
+            GUI.Label(new Rect(box.x + 6, box.y + 1, box.width - 12, 16),
+                "провал " + (clipLow * 100).ToString("0.0") + "% · пересвет " + (clipHigh * 100).ToString("0.0") + "%", EditorStyles.miniBoldLabel);
+        }
+
+        // Пипетка: цвет кадра в точке → нейтральный (цветной фильтр дня или ночи).
+        private void PickWhiteBalance(Rect area, Vector2 mouse, Texture source)
+        {
+            if (source == null) return;
+            RenderTexture small = RenderTexture.GetTemporary(ReadbackWidth, ReadbackHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            RenderTexture active = RenderTexture.active;
+            Graphics.Blit(source, small);
+            RenderTexture.active = small;
+            int x = Mathf.Clamp(Mathf.RoundToInt((mouse.x - area.x) / area.width * ReadbackWidth), 0, ReadbackWidth - 1);
+            int y = Mathf.Clamp(Mathf.RoundToInt((1 - (mouse.y - area.y) / area.height) * ReadbackHeight), 0, ReadbackHeight - 1);
+            Texture2D read = new Texture2D(3, 3, TextureFormat.RGBA32, false, false);
+            read.ReadPixels(new Rect(Mathf.Clamp(x - 1, 0, ReadbackWidth - 3), Mathf.Clamp(y - 1, 0, ReadbackHeight - 3), 3, 3), 0, 0);
+            read.Apply();
+            RenderTexture.active = active;
+            RenderTexture.ReleaseTemporary(small);
+            Color picked = Color.black;
+            foreach (Color c in read.GetPixels()) picked += c;
+            DestroyImmediate(read);
+            picked /= 9;
+            Vector3 linear = new Vector3(Mathf.GammaToLinearSpace(picked.r), Mathf.GammaToLinearSpace(picked.g), Mathf.GammaToLinearSpace(picked.b));
+            float mean = (linear.x + linear.y + linear.z) / 3;
+            if (mean < .002f || Mathf.Min(linear.x, Mathf.Min(linear.y, linear.z)) < .0005f)
+            {
+                EditorUtility.DisplayDialog("Пипетка баланса", "Слишком тёмная или чистая по цвету точка — выберите что-то сероватое (камень, ткань, дорогу).", "Понятно");
+                return;
+            }
+            LocationPostEffects post = EditedPost();
+            LocationColorGrade grade = renderer != null && renderer.DayFactor < .5f && !renderer.Indoor ? post.Night : post.Day;
+            Change(() =>
+            {
+                Color filter = grade.Filter;
+                filter = new Color(filter.r * mean / linear.x, filter.g * mean / linear.y, filter.b * mean / linear.z, 1);
+                float max = Mathf.Max(filter.r, Mathf.Max(filter.g, filter.b));
+                grade.Filter = new Color(filter.r / max, filter.g / max, filter.b / max, 1);
+                post.Enabled = true;
+            }, true);
+            if (status != null) status.text = "Пипетка: цвет " + ColorUtility.ToHtmlStringRGB(picked) + " стал нейтральным (фильтр " + (grade == post.Night ? "ночи" : "дня") + ").";
+        }
+
+        // Что правит панель: основные, ключ суток или зона.
+        private LocationPostEffects EditedPost()
+        {
+            string target = FrameEffectsEditor.EditTarget;
+            LocationSky sky = Sky;
+            if (target.StartsWith("key:") && sky.FrameKeys.Find(target.Substring(4)) is LocationFrameKey key && key.Post != null) return key.Post.Repair();
+            if (EditedZone() is LocationFrameZone zone && zone.Post != null) return zone.Post.Repair();
+            return sky.Post.Repair();
+        }
+
+        private void ShowSnapshotMenu()
+        {
+            if (renderer == null) return;
+            GenericMenu menu = new GenericMenu();
+            menu.AddItem(new GUIContent("Как видно — 1920×1080"), false, () => SaveShot(1920, 1080, false));
+            menu.AddItem(new GUIContent("Как видно — 3840×2160"), false, () => SaveShot(3840, 2160, false));
+            menu.AddItem(new GUIContent("Всё место — 3840 по ширине"), false, () => SaveShot(3840, 0, true));
+            menu.ShowAsContext();
+        }
+
+        private void SaveShot(int width, int height, bool whole)
+        {
+            float keepZoom = zoom;
+            Vector2 keepCenter = center;
+            RenderTexture shot = null;
+            try
+            {
+                if (whole)
+                {
+                    zoom = 1;
+                    center = CanvasSize / 2;
+                    height = Mathf.RoundToInt(width * CanvasSize.y / Mathf.Max(1, CanvasSize.x));
+                }
+                float scale = EditorGUIUtility.pixelsPerPoint;
+                Rect frame = new Rect(0, 0, width / scale, height / scale);
+                Texture rendered = Render(frame, false, ref shot);
+                RenderTexture srgb = RenderTexture.GetTemporary(rendered.width, rendered.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+                RenderTexture active = RenderTexture.active;
+                Graphics.Blit(rendered, srgb);
+                RenderTexture.active = srgb;
+                Texture2D image = new Texture2D(srgb.width, srgb.height, TextureFormat.RGBA32, false, false);
+                image.ReadPixels(new Rect(0, 0, srgb.width, srgb.height), 0, 0);
+                image.Apply();
+                RenderTexture.active = active;
+                RenderTexture.ReleaseTemporary(srgb);
+                string path = EditorUtility.SaveFilePanel("Снимок кадра (PNG)", "", Location.DisplayName + "_" + LocationLightingTest.FormatHour(hour).Replace(":", "-") + ".png", "png");
+                if (!string.IsNullOrEmpty(path))
+                {
+                    System.IO.File.WriteAllBytes(path, image.EncodeToPNG());
+                    EditorUtility.RevealInFinder(path);
+                }
+                DestroyImmediate(image);
+            }
+            finally
+            {
+                Release(ref shot);
+                zoom = keepZoom;
+                center = keepCenter;
+                LocationWorldRenderer.ClearFrameGlobals();
+            }
         }
 
         // ------------------------------------------------------------------

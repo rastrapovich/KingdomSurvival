@@ -73,6 +73,41 @@ Shader "Kingdom Survival/Location Sprite Adjust"
     float4 _KsDissolveParams;
     float4 _KsDissolveEdge;
 
+    // Подсветка контура огнём: до 8 огней — xy (мир), z — радиус, w — сила;
+    // _KsRimColors — их цвет. _KsRimParams: x — огней, y — толщина (пиксели
+    // рисунка), z — сила, w — 1 у людей, 2 у предметов, 3 у всех.
+    float4 _KsRimLights[8];
+    float4 _KsRimColors[8];
+    float4 _KsRimParams;
+
+    half3 KsRim(TEXTURE2D_PARAM(source, sourceSampler), float2 uv, half alpha, float2 world, float flipX)
+    {
+        int count = (int)_KsRimParams.x;
+        if (count <= 0 || alpha < 0.3 || _KsStyle.y > 1.5)
+            return 0;
+        int mode = (int)_KsRimParams.w;
+        bool person = _KsStyle.y > 0.5;
+        if (person ? (mode & 1) == 0 : (mode & 2) == 0)
+            return 0;
+        float width, height;
+        source.GetDimensions(width, height);
+        float2 texel = max(_KsRimParams.y, 0.5) / float2(max(width, 1), max(height, 1));
+        half3 rim = 0;
+        [loop] for (int i = 0; i < count; i++)
+        {
+            float4 light = _KsRimLights[i];
+            float2 toLight = light.xy - world;
+            float fall = saturate(1 - length(toLight) / max(light.z, 1e-3)) * light.w;
+            if (fall <= 0) continue;
+            float2 direction = normalize(toLight + float2(1e-5, 0));
+            direction.x *= flipX < 0 ? -1 : 1;
+            half outside = SAMPLE_TEXTURE2D(source, sourceSampler, uv + direction * texel).a;
+            half edge = saturate(alpha - outside);
+            rim += half3(_KsRimColors[i].rgb) * edge * fall * fall;
+        }
+        return rim * _KsRimParams.z;
+    }
+
     // Ветер: верх рисунка ходит от опоры (вес — высота над опорой к
     // полной высоте размаха), фаза — от положения опоры: соседние деревья
     // качаются вразнобой, порывы проходят волной.
@@ -448,7 +483,12 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 o.normalWS = TransformObjectToWorldDir(input.normal);
             #endif
                 o.ksWorld = positionWS.xy;
-                o.ksFx = float4(KsDistanceFactor(KsBaseWorld(positionWS)), 0, input.positionOS.xy);
+            #if defined(_KS_PARTICLE)
+                float flipX = input.custom.y;
+            #else
+                float flipX = unity_SpriteProps.x;
+            #endif
+                o.ksFx = float4(KsDistanceFactor(KsBaseWorld(positionWS)), flipX, input.positionOS.xy);
                 o.uv = KsUv(input.uv.xy, o.adjust.w);
                 o.lightingUV = half2(ComputeScreenPos(o.positionCS / o.positionCS.w).xy);
                 return o;
@@ -478,6 +518,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
                 half4 lit = KsCombinedLight(surfaceData, inputData, half2(_KsLight.xy));
                 // Край растворения светится сам (тлеет и ночью).
                 lit.rgb = lerp(lit.rgb, half3(_KsDissolveEdge.rgb), edge);
+                lit.rgb += KsRim(TEXTURE2D_ARGS(_MainTex, sampler_MainTex), input.uv, texel.a, input.ksWorld, input.ksFx.y) * main.a;
                 return lit;
             }
             ENDHLSL

@@ -210,6 +210,17 @@ namespace KingdomSurvival.BattleSandbox
             MarkDirtyRepaint();
         }
 
+        // Доля здоровья героя (вождя отряда игрока) 0..1; нет вождя — 1. Для обработки кадра места.
+        public float LeaderHealthShare
+        {
+            get
+            {
+                if (battle == null || string.IsNullOrEmpty(battle.LeaderUnitId)) return 1;
+                SandboxUnitState leader = battle.GetUnit(battle.LeaderUnitId);
+                return leader == null ? 1 : UnityEngine.Mathf.Clamp01(leader.HitPoints / (float)UnityEngine.Mathf.Max(1, leader.MaxHitPoints));
+            }
+        }
+
         public void SetBattle(SandboxBattle value, string targetId)
         {
             battle = value;

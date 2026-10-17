@@ -35,6 +35,9 @@ namespace KingdomSurvival.LocationRendering.Editor
         public Func<Texture2D> Snapshot;
         // Хозяин умеет показать существ на поле (окно «Обработка кадра»).
         public bool ShowsCreatures;
+        // Удар (всплеск, вспышка, тряска) и проверка состояний героя на предпросмотре.
+        public Action<float> Hit;
+        public Action<string> TestState;
         // Открыть отдельное окно (с вкладки Базы локаций).
         public Action OpenWindow;
 
@@ -155,12 +158,13 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 case LocationFrameSection.Color: BuildColor(post); break;
                 case LocationFrameSection.LightLens: BuildLightLens(post); break;
-                case LocationFrameSection.Tone: BuildTone(post); break;
-                case LocationFrameSection.Canvas: BuildCanvas(post); break;
+                case LocationFrameSection.Tone: BuildTone(post); BuildToneExtra(post); break;
+                case LocationFrameSection.Canvas: BuildCanvas(post); BuildCanvasExtra(post); break;
                 case LocationFrameSection.Sprites: BuildSprites(post); break;
-                case LocationFrameSection.Atmosphere: BuildAtmosphere(post); break;
+                case LocationFrameSection.Atmosphere: BuildAir(post); BuildAtmosphere(post); break;
+                case LocationFrameSection.Game: BuildGame(post); break;
                 case LocationFrameSection.Characters: BuildCharacters(post); break;
-                default: BuildQuality(post); break;
+                default: BuildQuality(post); BuildQualityLevel(); BuildCost(post); break;
             }
             parent = root;
             return root;
@@ -547,7 +551,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 LocationLensEffects fresh = new LocationLensEffects();
                 lens.PulseAberration = fresh.PulseAberration; lens.PulseDistortion = fresh.PulseDistortion; lens.PulseDuration = fresh.PulseDuration;
             });
-            Group("Всплеск при ударе в бою", "PulseOnHit", lens.PulseOnHit, value => lens.PulseOnHit = value, () =>
+            Group("Удар в бою: всплеск, тряска, вспышка", "PulseOnHit", lens.PulseOnHit, value => lens.PulseOnHit = value, () =>
             {
                 Help("В бою на месте в момент попадания линза вздрагивает — вид всплеска задаётся в блоке выше. Сила — доля его пика.");
                 Choice("По каким ударам", new List<LocationPulseTargets> { LocationPulseTargets.Any, LocationPulseTargets.Ours, LocationPulseTargets.Enemies },
@@ -555,9 +559,14 @@ namespace KingdomSurvival.LocationRendering.Editor
                     lens.PulseOnHitTargets, value => lens.PulseOnHitTargets = value);
                 Slider("Сила при ударе", lens.PulseHitStrength, 0, 1.5f, value => lens.PulseHitStrength = value);
                 Slider("Сила при гибели цели", lens.PulseKillStrength, 0, 1.5f, value => lens.PulseKillStrength = value);
+                Toggle("Тряска камеры", lens.PulseShake, value => lens.PulseShake = value);
+                Slider("  размах (доля высоты кадра)", lens.PulseShakeAmount, 0, .06f, value => lens.PulseShakeAmount = value);
+                Toggle("Вспышка экрана", lens.PulseFlash, value => lens.PulseFlash = value);
+                ColorField("  цвет вспышки", lens.PulseFlashColor, value => lens.PulseFlashColor = value);
+                Slider("  сила вспышки", lens.PulseFlashStrength, 0, 1, value => lens.PulseFlashStrength = value);
                 if (Pulse != null)
-                    Buttons(("Проверить: удар", (Action)(() => Pulse(lens.PulseHitStrength)), "Всплеск обычного удара в предпросмотре"),
-                        ("Проверить: гибель", (Action)(() => Pulse(lens.PulseKillStrength)), "Всплеск удара, от которого цель пала"));
+                    Buttons(("Проверить: удар", (Action)(() => (Hit ?? Pulse)(lens.PulseHitStrength)), "Удар в предпросмотре: всплеск, вспышка и тряска по галочкам"),
+                        ("Проверить: гибель", (Action)(() => (Hit ?? Pulse)(lens.PulseKillStrength)), "Удар, от которого цель пала"));
             }, () =>
             {
                 LocationLensEffects fresh = new LocationLensEffects();
@@ -746,6 +755,14 @@ namespace KingdomSurvival.LocationRendering.Editor
                 s.DistanceStart = fresh.DistanceStart; s.DistanceEnd = fresh.DistanceEnd; s.DistanceDesaturate = fresh.DistanceDesaturate;
                 s.DistanceHaze = fresh.DistanceHaze; s.DistanceHazeStrength = fresh.DistanceHazeStrength;
             });
+            Group("Подсветка контура огнём", "Rim", s.Rim, value => s.Rim = value, () =>
+            {
+                Help("Край рисунка со стороны костра или факела (свет с «мерцанием») светлеет цветом его света — фигуры «садятся» в свет. Ближе к огню — ярче.");
+                Slider("Сила", s.RimStrength, 0, 3, value => s.RimStrength = value);
+                Slider("Толщина (пиксели рисунка)", s.RimWidth, .5f, 8, value => s.RimWidth = value);
+                Toggle("У людей", s.RimPeople, value => s.RimPeople = value);
+                Toggle("У предметов", s.RimObjects, value => s.RimObjects = value);
+            }, () => { s.RimStrength = fresh.RimStrength; s.RimWidth = fresh.RimWidth; s.RimPeople = fresh.RimPeople; s.RimObjects = fresh.RimObjects; });
             Group("Растворение при гибели", "Dissolve", s.Dissolve, value => s.Dissolve = value, () =>
             {
                 Help("Павший в бою на месте рассыпается тлеющим краем.");
@@ -887,6 +904,240 @@ namespace KingdomSurvival.LocationRendering.Editor
             ColorField("Подкраска", look.Tint, value => write().Tint = value, "Умножение цвета: белый — без подкраски.");
             Slider("Свет солнца (доля)", look.SunLight, 0, 1.5f, value => write().SunLight = value, "Насколько фигура подчиняется свету суток: 0 — не темнеет ночью.");
             Slider("Свет огня (доля)", look.FireLight, 0, 1.5f, value => write().FireLight = value, "Насколько фигуру освещают костры и факелы.");
+        }
+
+        // ------------------------------------------------------------------
+        // Новые блоки: тон точечно, холст, свет и воздух, игра, качество
+        // ------------------------------------------------------------------
+
+        private static readonly string[] SelectiveNames = { "Красные", "Жёлтые", "Зелёные", "Голубые", "Синие", "Пурпурные" };
+
+        private void BuildToneExtra(LocationPostEffects post)
+        {
+            LocationToneEffects tone = post.Tone;
+            Group("Выборочная коррекция цвета", "Selective", tone.SelectiveColor, value => tone.SelectiveColor = value, () =>
+            {
+                Help("Правит только свой цвет круга, не трогая остальные: «зелёный травы — суше и желтее», «синий — темнее». Серое и бледное почти не меняется.");
+                for (int i = 0; i < 6 && i < tone.Selective.Count; i++)
+                {
+                    LocationSelectiveRange range = tone.Selective[i];
+                    Label title = new Label(SelectiveNames[i]) { style = { unityFontStyleAndWeight = FontStyle.Bold, marginTop = 4 } };
+                    parent.Add(title);
+                    Slider("  тон (°)", range.Hue, -60, 60, value => range.Hue = value);
+                    Slider("  насыщенность", range.Saturation, 0, 2, value => range.Saturation = value);
+                    Slider("  светлота", range.Lightness, -1, 1, value => range.Lightness = value);
+                }
+            }, () => { for (int i = 0; i < tone.Selective.Count; i++) tone.Selective[i] = new LocationSelectiveRange(); });
+
+            Group("Градиентная карта (дуотон)", "GradientMap", tone.GradientMap, value => tone.GradientMap = value, () =>
+            {
+                Help("Яркость кадра переводится в свой ряд цветов: слева — тени, справа — света. Две точки — дуотон; до восьми — своя палитра. Сила смешивает с исходным цветом.");
+                GradientField field = new GradientField("Цвета по яркости") { value = tone.GradientColors };
+                field.RegisterValueChangedCallback(evt => Change(() => tone.GradientColors = evt.newValue, false));
+                parent.Add(field);
+                Slider("Сила", tone.GradientStrength, 0, 1, value => tone.GradientStrength = value);
+            }, () => { tone.GradientColors = LocationToneEffects.DefaultGradient(); tone.GradientStrength = .5f; });
+
+            Group("Тон по тону и пределы теней / светов", "ToneRanges", null, null, () =>
+            {
+                Help("Тон по тону — сдвиг тона в зависимости от тона (0.5 — без сдвига); работает при включённых «Кривых». " +
+                     "Пределы — где кончаются тени и начинаются света для «Тени / полутона / света».");
+                Curve("Тон по тону", tone.HueVsHue, value => tone.HueVsHue = value, new Rect(0, 0, 1, 1), new Color(1, .8f, .3f));
+                Slider("Тени: от", tone.ShadowsStart, 0, 1, value => tone.ShadowsStart = value);
+                Slider("Тени: до", tone.ShadowsEnd, 0, 1, value => tone.ShadowsEnd = value);
+                Slider("Света: от", tone.HighlightsStart, 0, 1, value => tone.HighlightsStart = value);
+                Slider("Света: до", tone.HighlightsEnd, 0, 1, value => tone.HighlightsEnd = value);
+            }, () =>
+            {
+                tone.HueVsHue = LocationToneEffects.Flat();
+                tone.ShadowsStart = 0; tone.ShadowsEnd = .3f; tone.HighlightsStart = .55f; tone.HighlightsEnd = 1;
+            });
+        }
+
+        private void BuildCanvasExtra(LocationPostEffects post)
+        {
+            LocationCanvasEffects canvas = post.Canvas;
+            LocationCanvasEffects fresh = new LocationCanvasEffects();
+            Group("Резкость", "Sharpen", canvas.Sharpen, value => canvas.Sharpen = value, () =>
+            {
+                Help("Возвращает чёткость уменьшенным рисункам. Сильная — даёт ореолы по краям.");
+                Slider("Сила", canvas.SharpenStrength, 0, 2, value => canvas.SharpenStrength = value);
+            }, () => canvas.SharpenStrength = fresh.SharpenStrength);
+            Group("Тилт-шифт (диорама)", "TiltShift", canvas.TiltShift, value => canvas.TiltShift = value, () =>
+            {
+                Help("Размытие верха и низа кадра — место смотрится игрушечной диорамой. Только на высоком качестве.");
+                Slider("Фокус (доля высоты снизу)", canvas.TiltFocus, 0, 1, value => canvas.TiltFocus = value);
+                Slider("Полоса резкости", canvas.TiltBand, 0, 1, value => canvas.TiltBand = value);
+                Slider("Размытие (пиксели)", canvas.TiltBlur, 0, 16, value => canvas.TiltBlur = value);
+            }, () => { canvas.TiltFocus = fresh.TiltFocus; canvas.TiltBand = fresh.TiltBand; canvas.TiltBlur = fresh.TiltBlur; });
+            Group("Чернильный контур", "Ink", canvas.Ink, value => canvas.Ink = value, () =>
+            {
+                Help("Линии по краям форм всего кадра — земля, предметы, люди. Выбор манеры игры: включать — решать вам и художнику.");
+                ColorField("Цвет", canvas.InkColor, value => canvas.InkColor = value);
+                Slider("Порог (меньше — больше линий)", canvas.InkThreshold, 0, 1, value => canvas.InkThreshold = value);
+                Slider("Толщина (пиксели)", canvas.InkWidth, .5f, 4, value => canvas.InkWidth = value);
+                Slider("Сила", canvas.InkStrength, 0, 1, value => canvas.InkStrength = value);
+            }, () => { canvas.InkColor = fresh.InkColor; canvas.InkThreshold = fresh.InkThreshold; canvas.InkWidth = fresh.InkWidth; canvas.InkStrength = fresh.InkStrength; });
+            Group("Штриховка в тенях (гравюра)", "Hatching", canvas.Hatching, value => canvas.Hatching = value, () =>
+            {
+                Help("Тени покрываются косым штрихом, глубокие — перекрёстным, как на гравюре. Выбор манеры игры.");
+                ColorField("Цвет штриха", canvas.HatchColor, value => canvas.HatchColor = value);
+                Slider("Порог тени", canvas.HatchThreshold, 0, 1, value => canvas.HatchThreshold = value);
+                Slider("Порог перекрёстного", canvas.HatchCross, 0, 1, value => canvas.HatchCross = value);
+                Slider("Шаг (пиксели)", canvas.HatchSpacing, 2, 30, value => canvas.HatchSpacing = value);
+                Slider("Сила", canvas.HatchStrength, 0, 1, value => canvas.HatchStrength = value);
+            }, () =>
+            {
+                canvas.HatchColor = fresh.HatchColor; canvas.HatchThreshold = fresh.HatchThreshold; canvas.HatchCross = fresh.HatchCross;
+                canvas.HatchSpacing = fresh.HatchSpacing; canvas.HatchStrength = fresh.HatchStrength;
+            });
+            Group("Рамка кадра", "Border", canvas.Border, value => canvas.Border = value, () =>
+            {
+                Help("Край кадра своей текстурой (PNG с прозрачностью — рваная бумага, тиснение; растягивается на весь кадр) или неровной кромкой цвета.");
+                TextureField("Своя рамка (необязательно)", canvas.BorderTexture, value => canvas.BorderTexture = value, FrameTextureKind.Particle);
+                ColorField("Цвет кромки", canvas.BorderColor, value => canvas.BorderColor = value);
+                Slider("Ширина (доля высоты)", canvas.BorderSize, 0, .2f, value => canvas.BorderSize = value);
+                Slider("Неровность", canvas.BorderRoughness, 0, 1, value => canvas.BorderRoughness = value);
+            }, () => { canvas.BorderTexture = null; canvas.BorderColor = fresh.BorderColor; canvas.BorderSize = fresh.BorderSize; canvas.BorderRoughness = fresh.BorderRoughness; });
+            Group("Старая плёнка: пыль и царапины", "Film", canvas.Film, value => canvas.Film = value, () =>
+            {
+                Slider("Пыль", canvas.FilmDust, 0, 1, value => canvas.FilmDust = value);
+                Slider("Царапины", canvas.FilmScratches, 0, 1, value => canvas.FilmScratches = value);
+                Slider("Мерцание", canvas.FilmFlicker, 0, 1, value => canvas.FilmFlicker = value);
+            }, () => { canvas.FilmDust = fresh.FilmDust; canvas.FilmScratches = fresh.FilmScratches; canvas.FilmFlicker = fresh.FilmFlicker; });
+        }
+
+        private void BuildAir(LocationPostEffects post)
+        {
+            LocationAirEffects air = post.Air;
+            LocationAirEffects fresh = new LocationAirEffects();
+            Group("Тени облаков", "Clouds", air.Clouds, value => air.Clouds = value, () =>
+            {
+                Help("Медленные тёмные пятна плывут по земле и всему кадру. Днём и на улице; направление — ветер раздела «Рисунки», если включён.");
+                Slider("Покрытие", air.CloudCoverage, 0, 1, value => air.CloudCoverage = value);
+                Slider("Темнота", air.CloudDarkness, 0, 1, value => air.CloudDarkness = value);
+                Slider("Размер облака (ед. мира)", air.CloudScale, 1, 60, value => air.CloudScale = value);
+                Slider("Мягкость края", air.CloudSoftness, .02f, 1, value => air.CloudSoftness = value);
+                Slider("Скорость", air.CloudSpeed, 0, 3, value => air.CloudSpeed = value);
+                Slider("Направление без ветра (°)", air.CloudAngle, 0, 360, value => air.CloudAngle = value);
+            }, () =>
+            {
+                air.CloudCoverage = fresh.CloudCoverage; air.CloudDarkness = fresh.CloudDarkness; air.CloudScale = fresh.CloudScale;
+                air.CloudSoftness = fresh.CloudSoftness; air.CloudSpeed = fresh.CloudSpeed; air.CloudAngle = fresh.CloudAngle;
+            });
+            Group("Лучи солнца", "Rays", air.Rays, value => air.Rays = value, () =>
+            {
+                Help("Светлые полосы вдоль солнца, ярче на светлом. Днём и на улице; не на низком качестве.");
+                Toggle("Направление — по солнцу места", air.RaysFollowSun, value => air.RaysFollowSun = value);
+                Slider("Свой угол (°)", air.RaysAngle, 0, 360, value => air.RaysAngle = value);
+                Slider("Сила", air.RaysIntensity, 0, 1.5f, value => air.RaysIntensity = value);
+                ColorField("Цвет", air.RaysColor, value => air.RaysColor = value);
+                Slider("Ширина полосы (ед. мира)", air.RaysWidth, .1f, 8, value => air.RaysWidth = value);
+                Slider("Густота", air.RaysDensity, 0, 1, value => air.RaysDensity = value);
+                Slider("Дрожание", air.RaysSpeed, 0, 1, value => air.RaysSpeed = value);
+            }, () =>
+            {
+                air.RaysFollowSun = true; air.RaysAngle = fresh.RaysAngle; air.RaysIntensity = fresh.RaysIntensity; air.RaysColor = fresh.RaysColor;
+                air.RaysWidth = fresh.RaysWidth; air.RaysDensity = fresh.RaysDensity; air.RaysSpeed = fresh.RaysSpeed;
+            });
+            Group("Марево над огнём", "HeatHaze", air.HeatHaze, value => air.HeatHaze = value, () =>
+            {
+                Help("Воздух дрожит над источниками света с «мерцанием» (костры, факелы). Только на высоком качестве.");
+                Slider("Сила", air.HazeStrength, 0, 3, value => air.HazeStrength = value);
+                Slider("Ширина (ед. мира)", air.HazeRadius, .1f, 3, value => air.HazeRadius = value);
+                Slider("Высота (ед. мира)", air.HazeHeight, .2f, 6, value => air.HazeHeight = value);
+                Slider("Скорость", air.HazeSpeed, 0, 4, value => air.HazeSpeed = value);
+            }, () => { air.HazeStrength = fresh.HazeStrength; air.HazeRadius = fresh.HazeRadius; air.HazeHeight = fresh.HazeHeight; air.HazeSpeed = fresh.HazeSpeed; });
+        }
+
+        private void BuildGame(LocationPostEffects post)
+        {
+            LocationGameEffects game = post.Game;
+            LocationGameEffects fresh = new LocationGameEffects();
+            Help("Как выглядят состояния героя и сцены. Силу в данный момент задаёт игра: LocationWorldRenderer.SetHeroHealth(доля), SetStun(сила), " +
+                 "FadeTo(сила, секунды), SetLetterbox(доля, секунды); удар в бою — блок «Удар в бою» на вкладке «Свет и линза».");
+            Group("Мало здоровья", "LowHealth", game.LowHealth, value => game.LowHealth = value, () =>
+            {
+                Slider("Порог (доля здоровья)", game.LowHealthThreshold, .05f, 1, value => game.LowHealthThreshold = value);
+                ColorField("Цвет краёв", game.LowHealthColor, value => game.LowHealthColor = value);
+                Slider("Сила", game.LowHealthStrength, 0, 1, value => game.LowHealthStrength = value);
+                Slider("Пульс (раз в секунду)", game.LowHealthPulse, 0, 4, value => game.LowHealthPulse = value);
+                if (TestState != null) Buttons(("Проверить", (Action)(() => TestState("health")), "Здоровье 10% на 3 секунды"));
+            }, () =>
+            {
+                game.LowHealthThreshold = fresh.LowHealthThreshold; game.LowHealthColor = fresh.LowHealthColor;
+                game.LowHealthStrength = fresh.LowHealthStrength; game.LowHealthPulse = fresh.LowHealthPulse;
+            });
+            Group("Оглушение", "Stun", game.Stun, value => game.Stun = value, () =>
+            {
+                Slider("Затемнение", game.StunDarkness, 0, 1, value => game.StunDarkness = value);
+                Slider("Обесцвечивание", game.StunDesaturate, 0, 1, value => game.StunDesaturate = value);
+                Slider("Размытие (пиксели)", game.StunBlur, 0, 16, value => game.StunBlur = value);
+                if (TestState != null) Buttons(("Проверить", (Action)(() => TestState("stun")), "Оглушение на 2 секунды"));
+            }, () => { game.StunDarkness = fresh.StunDarkness; game.StunDesaturate = fresh.StunDesaturate; game.StunBlur = fresh.StunBlur; });
+            Group("Затемнение и кинополосы", "FadeBars", null, null, () =>
+            {
+                ColorField("Цвет затемнения", game.FadeColor, value => game.FadeColor = value);
+                Slider("Постоянные кинополосы (доля высоты)", game.Letterbox, 0, .25f, value => game.Letterbox = value, "Всегда; сцены добавляют свои через SetLetterbox.");
+                ColorField("Цвет полос", game.LetterboxColor, value => game.LetterboxColor = value);
+                if (TestState != null)
+                    Buttons(("Проверить затемнение", (Action)(() => TestState("fade")), "В цвет и обратно"),
+                        ("Проверить полосы сцены", (Action)(() => TestState("letterbox")), "Полосы выезжают и уходят"));
+            }, () => { game.FadeColor = fresh.FadeColor; game.Letterbox = 0; game.LetterboxColor = fresh.LetterboxColor; });
+        }
+
+        // Стоимость включённых эффектов: оценка для видеокарты (1 — лёгкий, 2 — средний, 3 — тяжёлый).
+        private void BuildCost(LocationPostEffects post)
+        {
+            List<(string name, int cost)> items = new List<(string, int)>();
+            void Add(bool on, string name, int cost) { if (on) items.Add((name, cost)); }
+            LocationCanvasEffects c = post.Canvas;
+            LocationToneEffects t = post.Tone;
+            LocationSpriteEffects s = post.Sprites;
+            Add(post.Bloom, "Свечение", 2);
+            Add(post.Vignette || post.Grain > .001f || post.Tonemapping != LocationTonemapping.None, "Виньетка, зерно, тональная кривая", 1);
+            Add(post.Lens.ChromaticAberration > .001f || Mathf.Abs(post.Lens.Distortion) > .001f, "Линза", 1);
+            Add(t.Lut != null || t.SplitToning || t.ShadowsMidtonesHighlights || t.LiftGammaGain || t.ChannelMixer || t.Curves, "Тон (URP)", 1);
+            Add(t.SelectiveColor, "Выборочная коррекция", 1);
+            Add(t.GradientMap, "Градиентная карта", 1);
+            Add(c.Painterly, "Живописность (радиус " + c.PainterlyRadius + ")", c.PainterlyRadius > 4 ? 3 : 2);
+            Add(c.TiltShift, "Тилт-шифт", 2);
+            Add(c.Sharpen, "Резкость", 1);
+            Add(c.Ink, "Чернильный контур", 2);
+            Add(c.Hatching, "Штриховка", 1);
+            Add(c.Fog, "Туман", 1);
+            Add(c.Palette, "Палитра" + (c.PaletteTexture != null ? " (рисунок)" : ""), c.PaletteTexture != null ? 2 : 1);
+            Add(c.Paper || c.Film || c.Border, "Бумага, плёнка, рамка", 1);
+            Add(post.Air.Clouds, "Тени облаков", 1);
+            Add(post.Air.Rays, "Лучи", 1);
+            Add(post.Air.HeatHaze, "Марево", 1);
+            Add(s.Outline, "Обводка рисунков", 2);
+            Add(s.Rim, "Подсветка контура огнём", 2);
+            Add(s.Wind || s.Distance || s.Dissolve, "Ветер, дальний план, растворение", 1);
+            int particles = post.Atmosphere.All.Count(layer => layer != null && layer.Enabled);
+            Add(particles > 0, "Частицы: слоёв " + particles, particles > 3 ? 2 : 1);
+            Add(post.Quality.Antialiasing != LocationAntialiasing.None, "Сглаживание", post.Quality.Antialiasing == LocationAntialiasing.Fxaa ? 1 : 2);
+            Group("Стоимость эффектов", "Cost", null, null, () =>
+            {
+                if (items.Count == 0) { Help("Включённых эффектов нет."); return; }
+                int total = items.Sum(item => item.cost);
+                Help("Оценка нагрузки на видеокарту по включённым эффектам (не замер). Итог: " + total + " — " +
+                     (total <= 6 ? "низкая" : total <= 14 ? "средняя" : "высокая") + ". Время кадра предпросмотра — в строке инструментов окна.");
+                foreach ((string name, int cost) in items.OrderByDescending(item => item.cost))
+                    parent.Add(new Label((cost == 3 ? "●●● " : cost == 2 ? "●●○ " : "●○○ ") + name) { style = { marginLeft = 4 } });
+            }, null);
+        }
+
+        private void BuildQualityLevel()
+        {
+            Group("Уровень качества", "QualityLevel", null, null, () =>
+            {
+                Help("Один на все места (настройки игры). Высокий — всё; средний — живописность меньшим радиусом, без тилт-шифта и марева, частиц меньше; " +
+                     "низкий — ещё без живописности и лучей, частиц ещё меньше, сглаживание не дороже FXAA. Здесь — чтобы посмотреть, как будет на слабой машине.");
+                Choice("Качество", new List<LocationFrameQualityLevel> { LocationFrameQualityLevel.High, LocationFrameQualityLevel.Medium, LocationFrameQualityLevel.Low },
+                    value => value == LocationFrameQualityLevel.High ? "Высокое" : value == LocationFrameQualityLevel.Medium ? "Среднее" : "Низкое",
+                    LocationWorldRenderer.QualityLevel, value => LocationWorldRenderer.QualityLevel = value);
+            }, null);
         }
 
         private void BuildAtmosphere(LocationPostEffects post)

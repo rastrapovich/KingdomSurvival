@@ -29,6 +29,11 @@ namespace KingdomSurvival.LocationRendering
         private static readonly int DistanceHazeId = Shader.PropertyToID("_KsDistanceHaze");
         private static readonly int DissolveParamsId = Shader.PropertyToID("_KsDissolveParams");
         private static readonly int DissolveEdgeId = Shader.PropertyToID("_KsDissolveEdge");
+        private static readonly int RimLightsId = Shader.PropertyToID("_KsRimLights");
+        private static readonly int RimColorsId = Shader.PropertyToID("_KsRimColors");
+        private static readonly int RimParamsId = Shader.PropertyToID("_KsRimParams");
+        private readonly Vector4[] rimLights = new Vector4[8];
+        private readonly Vector4[] rimColors = new Vector4[8];
 
         private Material styleObjects, styleTrees, stylePlants, stylePeople;
         private bool objectStyles, peopleStyles;
@@ -59,7 +64,7 @@ namespace KingdomSurvival.LocationRendering
             foreach (LocationPostEffects item in new[] { post }.Concat(extra ?? Enumerable.Empty<LocationPostEffects>()))
             {
                 LocationSpriteEffects s = item?.Sprites;
-                if (s != null && (s.Wind || s.Outline && s.OutlineObjects || s.Distance)) objects = true;
+                if (s != null && (s.Wind || s.Outline && s.OutlineObjects || s.Distance || s.Rim && s.RimObjects)) objects = true;
             }
             // Люди при включённой обработке — всегда материалом со стилем: раздел
             // «Персонажи» правит их цвет на лету, без пересборки места.
@@ -309,8 +314,15 @@ namespace KingdomSurvival.LocationRendering
         {
             if (!PostActive) return 0;
             float strength = Post.Lens.HitPulse(targetOurs, defeated);
-            if (strength > 0) Pulse(strength);
+            if (strength > 0) HitEffects(strength);
             return strength;
+        }
+
+        // Удар: всплеск линзы, вспышка и тряска (по галочкам блока «Удар в бою»).
+        public void HitEffects(float strength)
+        {
+            Pulse(strength);
+            HitFlashAndShake(strength);
         }
 
         private float PulseNow(LocationLensEffects lens)
@@ -341,6 +353,7 @@ namespace KingdomSurvival.LocationRendering
             Shader.SetGlobalVector(OutlineParamsId, Vector4.zero);
             Shader.SetGlobalVector(DistanceHazeId, Vector4.zero);
             Shader.SetGlobalVector(DissolveParamsId, Vector4.zero);
+            Shader.SetGlobalVector(RimParamsId, Vector4.zero);
         }
 
         private void ApplyFrameGlobals(LocationPostEffects post)
@@ -364,8 +377,32 @@ namespace KingdomSurvival.LocationRendering
             Shader.SetGlobalColor(DistanceHazeId, s.Distance ? haze : Color.clear);
             Shader.SetGlobalVector(DissolveParamsId, new Vector4(Mathf.Clamp(s.DissolveEdgeWidth, .005f, .5f), Mathf.Max(1, s.DissolveScale), s.Dissolve ? 1 : 0, 0));
             Shader.SetGlobalColor(DissolveEdgeId, s.DissolveEdge);
+            WriteRimLights(s);
         }
 
+
+        // Огни для подсветки контура: свет с мерцанием — положение, радиус,
+        // нынешняя сила (с мерцанием) и цвет.
+        private void WriteRimLights(LocationSpriteEffects s)
+        {
+            int count = 0;
+            if (s.Rim)
+                foreach (Placed item in placed)
+                {
+                    if (count >= rimLights.Length) break;
+                    Light2D light = item.Light;
+                    if (light == null || !light.enabled || item.Data?.Light == null || item.Data.Light.Animation != LocationLightAnimation.Flicker) continue;
+                    Vector3 position = light.transform.position;
+                    float radius = light.lightType == Light2D.LightType.Point ? Mathf.Max(.1f, light.pointLightOuterRadius) : 3;
+                    rimLights[count] = new Vector4(position.x, position.y, radius, Mathf.Max(0, light.intensity));
+                    Color color = light.color;
+                    rimColors[count++] = new Vector4(color.r, color.g, color.b, 1);
+                }
+            Shader.SetGlobalVectorArray(RimLightsId, rimLights);
+            Shader.SetGlobalVectorArray(RimColorsId, rimColors);
+            int mode = (s.RimPeople ? 1 : 0) | (s.RimObjects ? 2 : 0);
+            Shader.SetGlobalVector(RimParamsId, new Vector4(count, Mathf.Clamp(s.RimWidth, .5f, 8), Mathf.Max(0, s.RimStrength), mode));
+        }
         private void InitializeFrameVolume()
         {
             postProfile.Add<ColorLookup>(true);
@@ -401,6 +438,10 @@ namespace KingdomSurvival.LocationRendering
                 smh.shadows.Override(tone.Shadows.Value);
                 smh.midtones.Override(tone.Midtones.Value);
                 smh.highlights.Override(tone.Highlights.Value);
+                smh.shadowsStart.Override(Mathf.Max(0, tone.ShadowsStart));
+                smh.shadowsEnd.Override(Mathf.Max(tone.ShadowsStart + .01f, tone.ShadowsEnd));
+                smh.highlightsStart.Override(Mathf.Max(0, tone.HighlightsStart));
+                smh.highlightsEnd.Override(Mathf.Max(tone.HighlightsStart + .01f, tone.HighlightsEnd));
             }
             if (postProfile.TryGet(out LiftGammaGain lgg))
             {
@@ -449,7 +490,7 @@ namespace KingdomSurvival.LocationRendering
         private void ApplyCurves(ColorCurves target, LocationToneEffects tone)
         {
             int hash = CurveHash(tone.Master) ^ CurveHash(tone.Red) * 3 ^ CurveHash(tone.Green) * 7 ^ CurveHash(tone.Blue) * 11
-                       ^ CurveHash(tone.HueVsSaturation) * 13 ^ CurveHash(tone.SaturationVsSaturation) * 17 ^ CurveHash(tone.LuminanceVsSaturation) * 19;
+                       ^ CurveHash(tone.HueVsSaturation) * 13 ^ CurveHash(tone.SaturationVsSaturation) * 17 ^ CurveHash(tone.LuminanceVsSaturation) * 19 ^ CurveHash(tone.HueVsHue) * 23;
             if (curves != null && hash == curvesHash) return;
             ReleaseCurves();
             curvesHash = hash;
@@ -459,7 +500,7 @@ namespace KingdomSurvival.LocationRendering
                 new TextureCurve(tone.Master, 0, false, range), new TextureCurve(tone.Red, 0, false, range),
                 new TextureCurve(tone.Green, 0, false, range), new TextureCurve(tone.Blue, 0, false, range),
                 new TextureCurve(tone.HueVsSaturation, .5f, true, range), new TextureCurve(tone.SaturationVsSaturation, .5f, false, range),
-                new TextureCurve(tone.LuminanceVsSaturation, .5f, false, range)
+                new TextureCurve(tone.LuminanceVsSaturation, .5f, false, range), new TextureCurve(tone.HueVsHue, .5f, true, range)
             };
             target.master.Override(curves[0]);
             target.red.Override(curves[1]);
@@ -468,6 +509,7 @@ namespace KingdomSurvival.LocationRendering
             target.hueVsSat.Override(curves[4]);
             target.satVsSat.Override(curves[5]);
             target.lumVsSat.Override(curves[6]);
+            target.hueVsHue.Override(curves[7]);
         }
 
         private static int CurveHash(AnimationCurve curve)
@@ -491,6 +533,7 @@ namespace KingdomSurvival.LocationRendering
             if (camera == null) return;
             UniversalAdditionalCameraData data = camera.GetUniversalAdditionalCameraData();
             LocationAntialiasing mode = PostActive ? Post.Quality.Antialiasing : LocationAntialiasing.None;
+            if (QualityLevel == LocationFrameQualityLevel.Low && mode != LocationAntialiasing.None) mode = LocationAntialiasing.Fxaa;
             data.antialiasing = mode == LocationAntialiasing.None ? AntialiasingMode.None
                 : mode == LocationAntialiasing.Fxaa ? AntialiasingMode.FastApproximateAntialiasing : AntialiasingMode.SubpixelMorphologicalAntiAliasing;
             data.antialiasingQuality = mode == LocationAntialiasing.SmaaHigh ? AntialiasingQuality.High

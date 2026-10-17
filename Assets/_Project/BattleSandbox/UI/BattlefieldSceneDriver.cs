@@ -85,7 +85,7 @@ namespace KingdomSurvival.BattleSandbox
                 Vector2 min = ToCanvas(figure.Rect.min, frame), max = ToCanvas(figure.Rect.max, frame);
                 frames.Add(new LocationWorldRenderer.BattleFigureFrame
                 {
-                    Id = figure.UnitId, Sprite = figure.Sprite, Rect = Rect.MinMaxRect(min.x, min.y, max.x, max.y),
+                    Id = figure.UnitId, UnitTypeId = figure.UnitTypeId, Sprite = figure.Sprite, Rect = Rect.MinMaxRect(min.x, min.y, max.x, max.y),
                     Ground = ToCanvas(figure.Ground, frame), Mirrored = figure.Mirrored, FitInside = figure.FitInside,
                     Tint = figure.Tint, Corpse = figure.Corpse
                 });

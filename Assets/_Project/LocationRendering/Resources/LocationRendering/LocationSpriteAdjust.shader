@@ -29,7 +29,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
         _MainTex("Diffuse", 2D) = "white" {}
         _MaskTex("Mask", 2D) = "white" {}
         _NormalMap("Normal Map", 2D) = "bump" {}
-        _KsHsv("Hue (turns), Saturation, Brightness", Vector) = (0, 1, 1, 0)
+        _KsHsv("Hue (turns), Saturation, Brightness, Contrast", Vector) = (0, 1, 1, 0)
         _KsUvRect("Particle UV rect (offset, scale)", Vector) = (0, 0, 1, 1)
         _KsLight("Sun, fire light share, ground-lit", Vector) = (1, 1, 0, 0)
         _KsBend("Bend: top offset xy (world), drop (world)", Vector) = (0, 0, 0, 0)
@@ -217,6 +217,20 @@ Shader "Kingdom Survival/Location Sprite Adjust"
     #else
         return TransformObjectToWorld(float3(0, 0, 0));
     #endif
+    }
+
+    // Контраст экземпляра (_KsHsv.w, −1..1; 0 — без изменений): раздел
+    // «Персонажи» обработки кадра. У ковра и предметов — 0.
+    half3 KsContrast(half3 rgb)
+    {
+        if (abs(_KsHsv.w) < 1e-4)
+            return rgb;
+    #if defined(UNITY_COLORSPACE_GAMMA)
+        const half pivot = 0.5;
+    #else
+        const half pivot = 0.214; // средний серый (sRGB 0.5) в линейном цвете
+    #endif
+        return saturate((rgb - pivot) * (1 + _KsHsv.w) + pivot);
     }
 
     half3 KsAdjust(half3 rgb, float3 hsv)
@@ -443,7 +457,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
             half4 LitFragment(Varyings input) : SV_Target
             {
                 half4 texel = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
-                texel.rgb = KsAdjust(texel.rgb, input.adjust.xyz);
+                texel.rgb = KsContrast(KsAdjust(texel.rgb, input.adjust.xyz));
                 half4 main = input.color * texel;
                 main.a *= KsHoleKeep(input.ksWorld);
                 main.rgb = KsShade(main.rgb, input.ksWorld);
@@ -626,7 +640,7 @@ Shader "Kingdom Survival/Location Sprite Adjust"
             half4 UnlitFragment(Varyings input) : SV_Target
             {
                 half4 texel = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
-                texel.rgb = KsAdjust(texel.rgb, input.adjust.xyz);
+                texel.rgb = KsContrast(KsAdjust(texel.rgb, input.adjust.xyz));
                 half4 color = input.color * texel;
                 color.a *= KsHoleKeep(input.ksWorld);
                 color.rgb = KsShade(color.rgb, input.ksWorld);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using KingdomSurvival.BattlefieldDatabase;
+using KingdomSurvival.UnitDatabase;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -32,6 +33,8 @@ namespace KingdomSurvival.LocationRendering.Editor
         public Action TestDissolve;
         // Снимок кадра без LUT для покраски (null — в этом окне нет).
         public Func<Texture2D> Snapshot;
+        // Хозяин умеет показать существ на поле (окно «Обработка кадра»).
+        public bool ShowsCreatures;
         // Открыть отдельное окно (с вкладки Базы локаций).
         public Action OpenWindow;
 
@@ -44,6 +47,9 @@ namespace KingdomSurvival.LocationRendering.Editor
             get => Mathf.Clamp(EditorPrefs.GetInt(PrefsKey + "Tab", 0), 0, TabTitles.Length - 1);
             set => EditorPrefs.SetInt(PrefsKey + "Tab", value);
         }
+
+        // Открыта вкладка «Персонажи» (окно показывает существ на поле).
+        public static bool IsCharactersTab => LocationFrameSections.Order[Tab] == LocationFrameSection.Characters;
 
         private static string SelectedStyle
         {
@@ -109,6 +115,7 @@ namespace KingdomSurvival.LocationRendering.Editor
                 case LocationFrameSection.Canvas: BuildCanvas(post); break;
                 case LocationFrameSection.Sprites: BuildSprites(post); break;
                 case LocationFrameSection.Atmosphere: BuildAtmosphere(post); break;
+                case LocationFrameSection.Characters: BuildCharacters(post); break;
                 default: BuildQuality(post); break;
             }
             parent = root;
@@ -557,6 +564,133 @@ namespace KingdomSurvival.LocationRendering.Editor
                 s.DissolveDuration = fresh.DissolveDuration; s.DissolveAmount = fresh.DissolveAmount; s.DissolveEdge = fresh.DissolveEdge;
                 s.DissolveEdgeWidth = fresh.DissolveEdgeWidth; s.DissolveScale = fresh.DissolveScale;
             });
+        }
+
+        // ------------------------------------------------------------------
+        // Персонажи
+        // ------------------------------------------------------------------
+
+        public const string CreaturePrefs = PrefsKey + "Creature";
+        public const string CreaturePreviewPrefs = PrefsKey + "CreaturePreview";
+        private static LocationCreatureLook copiedLook;
+
+        private static string CreatureQuery
+        {
+            get => EditorPrefs.GetString(PrefsKey + "CreatureQuery", "");
+            set => EditorPrefs.SetString(PrefsKey + "CreatureQuery", value ?? "");
+        }
+
+        private void BuildCharacters(LocationPostEffects post)
+        {
+            LocationCharacterEffects characters = post.Characters;
+            Help("Цвет существ на месте и в бою на месте — поверх рисунка, до света: подогнать рисунки разных художников под кадр. " +
+                 "Итог — общая поправка, затем своя у типа. Видно сразу на поле; сохраняется в стилях (раздел «Персонажи»).");
+            if (ShowsCreatures)
+            {
+                List<int> modes = new List<int> { 0, 1, 2 };
+                Choice("Показ на поле", modes, mode => mode == 0 ? "Только фигуры места" : mode == 1 ? "Выбранное существо — в центре кадра" : "Все существа в ряд — в центре кадра",
+                    EditorPrefs.GetInt(CreaturePreviewPrefs, 1), mode => EditorPrefs.SetInt(CreaturePreviewPrefs, mode));
+            }
+
+            Group("Общая поправка — все существа", "CharactersAll", null, null, () => LookEditor(() => characters.All, () => characters.All),
+                () => characters.All = new LocationCreatureLook());
+
+            UnitDatabaseAsset units = Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath);
+            if (units == null || units.Units.Count == 0) { Help("База существ пуста или не найдена."); return; }
+            string selectedId = EditorPrefs.GetString(CreaturePrefs, "");
+            UnitDefinitionData selected = units.Units.FirstOrDefault(item => item != null && item.Id == selectedId);
+            if (selected == null)
+            {
+                selected = units.Units.FirstOrDefault(item => item != null);
+                selectedId = selected?.Id ?? "";
+                EditorPrefs.SetString(CreaturePrefs, selectedId);
+            }
+
+            Foldout list = Block("Существа (" + units.Units.Count + ")", "CharactersList", true);
+            VisualElement keep = parent;
+            parent = list;
+            ToolbarSearchField search = new ToolbarSearchField { value = CreatureQuery };
+            search.style.width = StyleKeyword.Auto;
+            parent.Add(search);
+            List<UnitDefinitionData> shown = units.Units.Where(item => item != null && Matches(item, CreatureQuery)).ToList();
+            ListView view = new ListView(shown, 26, () =>
+            {
+                VisualElement row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
+                row.Add(new Image { name = "icon", scaleMode = ScaleMode.ScaleToFit, style = { width = 22, height = 22, marginRight = 6 } });
+                row.Add(new Label { name = "name" });
+                return row;
+            }, (element, index) =>
+            {
+                UnitDefinitionData unit = shown[index];
+                element.Q<Image>("icon").sprite = unit.Portrait != null ? unit.Portrait : unit.BattlefieldSprite;
+                LocationCreatureLook own = characters.Find(unit.Id);
+                bool hasOwn = own != null && !own.IsIdentity;
+                element.Q<Label>("name").text = (hasOwn ? "● " : "   ") + unit.DisplayLabel + "  · " + CategoryTitle(unit.Category) + "  · " + unit.Id;
+                element.tooltip = unit.Id + (hasOwn ? " — есть своя поправка" : "");
+            })
+            { selectionType = SelectionType.Single, fixedItemHeight = 26 };
+            view.style.height = Mathf.Clamp(shown.Count * 26 + 4, 60, 240);
+            int selectedIndex = shown.IndexOf(selected);
+            if (selectedIndex >= 0) view.SetSelectionWithoutNotify(new[] { selectedIndex });
+            view.selectionChanged += items =>
+            {
+                UnitDefinitionData unit = items.OfType<UnitDefinitionData>().FirstOrDefault();
+                if (unit == null || unit.Id == EditorPrefs.GetString(CreaturePrefs, "")) return;
+                EditorPrefs.SetString(CreaturePrefs, unit.Id);
+                Rebuild?.Invoke();
+            };
+            search.RegisterValueChangedCallback(evt => { CreatureQuery = evt.newValue; Rebuild?.Invoke(); });
+            parent.Add(view);
+            Help("● — у существа своя поправка. Выбранное видно на поле: окно «Обработка кадра», «Показ на поле».");
+            parent = keep;
+
+            if (selected == null) return;
+            string id = selected.Id;
+            // Блок выбранного существа открыт по умолчанию — ради него вкладка.
+            if (!EditorPrefs.HasKey(PrefsKey + "Block.CharactersOne")) EditorPrefs.SetBool(PrefsKey + "Block.CharactersOne", true);
+            Group("Существо: " + selected.DisplayLabel + " (" + selected.Id + ")", "CharactersOne", null, null, () =>
+            {
+                LookEditor(() => characters.Find(id) ?? new LocationCreatureLook { UnitId = id }, () => characters.Own(id));
+                Buttons(
+                    ("Копировать вид", (Action)(() => { copiedLook = new LocationCreatureLook(); copiedLook.CopyFrom(characters.Find(id) ?? new LocationCreatureLook()); Rebuild?.Invoke(); }),
+                        "Запомнить поправку существа"),
+                    ("Вставить вид", copiedLook == null ? null : (Action)(() => Change(() => characters.Own(id).CopyFrom(copiedLook), true)),
+                        "Поставить запомненную поправку этому существу"),
+                    ("Вставить всей категории", copiedLook == null ? null : (Action)(() => Change(() =>
+                    {
+                        foreach (UnitDefinitionData unit in units.Units.Where(item => item != null && item.Category == selected.Category))
+                            characters.Own(unit.Id).CopyFrom(copiedLook);
+                    }, true)), "Та же поправка всем существам категории «" + CategoryTitle(selected.Category) + "»"));
+            }, () => characters.Creatures.RemoveAll(item => item.UnitId == id));
+        }
+
+        private static bool Matches(UnitDefinitionData unit, string query) =>
+            string.IsNullOrWhiteSpace(query) ||
+            (unit.DisplayLabel ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
+            (unit.Id ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        private static string CategoryTitle(UnitCategory category)
+        {
+            switch (category)
+            {
+                case UnitCategory.Fighter: return "боец";
+                case UnitCategory.Creature: return "существо";
+                case UnitCategory.Commander: return "командир";
+                default: return "прочее";
+            }
+        }
+
+        // Поля вида: read — что показать, write — куда писать (своя поправка создаётся при первой правке).
+        private void LookEditor(Func<LocationCreatureLook> read, Func<LocationCreatureLook> write)
+        {
+            LocationCreatureLook look = read();
+            Slider("Тон (сдвиг, °)", look.Hue, -180, 180, value => write().Hue = value, "Поворот цвета по кругу: −180..180.");
+            Slider("Насыщенность", look.Saturation, 0, 2, value => write().Saturation = value, "1 — как нарисовано, 0 — серый.");
+            Slider("Яркость", look.Brightness, 0, 2, value => write().Brightness = value);
+            Slider("Контраст", look.Contrast, -1, 1, value => write().Contrast = value, "Меньше нуля — мягче, больше — резче.");
+            ColorField("Подкраска", look.Tint, value => write().Tint = value, "Умножение цвета: белый — без подкраски.");
+            Slider("Свет солнца (доля)", look.SunLight, 0, 1.5f, value => write().SunLight = value, "Насколько фигура подчиняется свету суток: 0 — не темнеет ночью.");
+            Slider("Свет огня (доля)", look.FireLight, 0, 1.5f, value => write().FireLight = value, "Насколько фигуру освещают костры и факелы.");
         }
 
         private void BuildAtmosphere(LocationPostEffects post)

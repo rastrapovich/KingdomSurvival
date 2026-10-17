@@ -999,6 +999,7 @@ namespace KingdomSurvival.BattleSandbox
                     figures.Add(new BoardFigure
                     {
                         UnitId = unit.Id,
+                        UnitTypeId = unit.TypeId,
                         Sprite = image.sprite,
                         Rect = new Rect(image.style.left.value.value, image.style.top.value.value,
                             image.style.width.value.value, image.style.height.value.value),

@@ -500,6 +500,7 @@ namespace KingdomSurvival.LocationRendering
             ApplyLighting();
             UpdateSunShade();
             UpdateAtmosphere();
+            ApplyCharacterLooks();
         }
 
         // ПР-12П: кадры анимированных предметов — по тому же времени, что жизнь
@@ -725,6 +726,7 @@ namespace KingdomSurvival.LocationRendering
                 actors.Remove(id);
             }
             UpdateShadows(peopleOnly: true);
+            ApplyCharacterLooks();
         }
 
         // Без нового списка каждый кадр.

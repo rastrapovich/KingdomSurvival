@@ -14,6 +14,8 @@ namespace KingdomSurvival.LocationRendering
         public struct BattleFigureFrame
         {
             public string Id;
+            // Тип из Базы существ: раздел «Персонажи» обработки кадра.
+            public string UnitTypeId;
             public Sprite Sprite;
             // Прямоугольник картинки и точка земли — пиксели рисунка места (Y вниз).
             public Rect Rect;
@@ -34,6 +36,7 @@ namespace KingdomSurvival.LocationRendering
             public Vector2 Ground;
             public bool Corpse;
             public string SourceId;
+            public string UnitTypeId;
             // Когда фигура пала (секунды рендерера) — растворение павших.
             public float DiedAt = float.NaN;
         }
@@ -80,6 +83,7 @@ namespace KingdomSurvival.LocationRendering
                 }
             }
             UpdateShadows(peopleOnly: true);
+            ApplyCharacterLooks();
         }
 
         public void ClearBattleFigures() => SetBattleFigures(Array.Empty<BattleFigureFrame>());
@@ -118,6 +122,7 @@ namespace KingdomSurvival.LocationRendering
             }
 
             figure.Ground = frame.Ground;
+            figure.UnitTypeId = frame.UnitTypeId;
             if (frame.Corpse && !figure.Corpse) figure.DiedAt = Seconds;
             if (!frame.Corpse) figure.DiedAt = float.NaN;
             figure.Corpse = frame.Corpse;

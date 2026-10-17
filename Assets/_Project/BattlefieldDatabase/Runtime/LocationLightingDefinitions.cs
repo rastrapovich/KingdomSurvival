@@ -93,6 +93,7 @@ namespace KingdomSurvival.BattlefieldDatabase
         public LocationSpriteEffects Sprites = new LocationSpriteEffects();
         public LocationAtmosphereEffects Atmosphere = new LocationAtmosphereEffects();
         public LocationFrameQuality Quality = new LocationFrameQuality();
+        public LocationCharacterEffects Characters = new LocationCharacterEffects();
 
         // Старые данные без новых разделов (null после загрузки) — разделы по умолчанию.
         public LocationPostEffects Repair()
@@ -105,6 +106,8 @@ namespace KingdomSurvival.BattlefieldDatabase
             Sprites ??= new LocationSpriteEffects();
             Atmosphere ??= new LocationAtmosphereEffects();
             Quality ??= new LocationFrameQuality();
+            Characters ??= new LocationCharacterEffects();
+            Characters.Repair();
             Tone.Repair();
             Atmosphere.Repair();
             return this;

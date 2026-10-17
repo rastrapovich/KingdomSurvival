@@ -53,7 +53,9 @@ namespace KingdomSurvival.LocationRendering
             LocationSpriteEffects s = post != null && post.Enabled ? post.Sprites : null;
             if (s == null) return "--";
             bool objects = s.Wind || s.Outline && s.OutlineObjects || s.Distance;
-            bool people = s.Outline && s.OutlinePeople || s.Distance || s.Dissolve;
+            // Люди при включённой обработке — всегда материалом со стилем: раздел
+            // «Персонажи» правит их цвет на лету, без пересборки места.
+            bool people = true;
             return (objects ? "O" : "-") + (people ? "P" : "-");
         }
 
@@ -127,6 +129,33 @@ namespace KingdomSurvival.LocationRendering
             frameBlock.SetVector(StyleId, style);
             image.SetPropertyBlock(frameBlock);
         }
+
+        private static readonly int ColorId = Shader.PropertyToID("_Color");
+
+        // Раздел «Персонажи»: цвет и свет каждой фигуры по типу из Базы
+        // существ (общая поправка, затем своя). Без обработки кадра («до»
+        // сравнения) — как нарисовано. Только фигуры материалом со стилем.
+        private void ApplyCharacterLooks()
+        {
+            if (!peopleStyles) return;
+            LocationCharacterEffects characters = PostActive ? Sky.Post.Characters : null;
+            foreach (Actor actor in actors.Values) ApplyLook(actor.Image, actor.UnitTypeId, characters);
+            foreach (BattleFigure figure in battleFigures.Values) ApplyLook(figure.Image, figure.UnitTypeId, characters);
+        }
+
+        private void ApplyLook(SpriteRenderer image, string unitTypeId, LocationCharacterEffects characters)
+        {
+            if (image == null || image.sharedMaterial == null || (image.sharedMaterial != stylePeople && image.sharedMaterial != adjustLit)) return;
+            LocationCreatureLook look = characters?.Resolve(unitTypeId);
+            image.GetPropertyBlock(frameBlock);
+            frameBlock.SetVector(HsvId, look != null ? look.ShaderHsv : new Vector4(0, 1, 1, 0));
+            frameBlock.SetVector(LightShareId, look != null ? new Vector4(Mathf.Max(0, look.SunLight), Mathf.Max(0, look.FireLight), 0, 0) : new Vector4(1, 1, 0, 0));
+            frameBlock.SetColor(ColorId, look != null ? look.Tint : Color.white);
+            image.SetPropertyBlock(frameBlock);
+        }
+
+        // Итоговый вид фигуры типа (для проверок и окна).
+        public LocationCreatureLook CharacterLook(string unitTypeId) => PostActive ? Sky.Post.Characters.Resolve(unitTypeId) : new LocationCreatureLook();
 
         // Камера предпросмотра (окна баз): холст и сглаживание — как у своей.
         public void BindCamera(Camera camera)

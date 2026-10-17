@@ -7,6 +7,8 @@ namespace KingdomSurvival.BattleSandbox
     public struct BoardFigure
     {
         public string UnitId;
+        // Тип из Базы существ (вид существа в обработке кадра места).
+        public string UnitTypeId;
         public Sprite Sprite;
         // Прямоугольник картинки на поле.
         public Rect Rect;

@@ -205,6 +205,83 @@ namespace KingdomSurvival.LocationRendering
             }
         }
 
+        // «Персонажи»: общая поправка, затем своя у типа (тон и контраст
+        // складываются, остальное умножается).
+        [Test]
+        public void CreatureLook_CombinesGeneralAndOwn()
+        {
+            LocationCharacterEffects characters = new LocationCharacterEffects();
+            characters.All.Hue = 10;
+            characters.All.Saturation = .5f;
+            characters.All.Tint = new Color(1, .5f, 1);
+            LocationCreatureLook own = characters.Own("wolf");
+            own.Hue = 5;
+            own.Saturation = 2;
+            own.Contrast = .3f;
+            own.Tint = new Color(.5f, 1, 1);
+            LocationCreatureLook wolf = characters.Resolve("wolf");
+            Assert.That(wolf.Hue, Is.EqualTo(15));
+            Assert.That(wolf.Saturation, Is.EqualTo(1));
+            Assert.That(wolf.Contrast, Is.EqualTo(.3f).Within(1e-5f));
+            Assert.That(wolf.Tint, Is.EqualTo(new Color(.5f, .5f, 1)));
+            Assert.That(characters.Resolve("bear").Hue, Is.EqualTo(10), "Без своей — только общая.");
+            Assert.That(characters.Own("wolf"), Is.SameAs(own), "Своя одна на тип.");
+            Assert.That(characters.AnyActive, Is.True);
+            Assert.That(new LocationCharacterEffects().AnyActive, Is.False);
+
+            LocationPostEffects style = new LocationPostEffects();
+            style.Characters.Own("wolf").Brightness = 1.5f;
+            LocationPostEffects place = new LocationPostEffects();
+            LocationFrameSections.Copy(style, place, LocationFrameSection.Characters);
+            Assert.That(place.Characters.Find("wolf").Brightness, Is.EqualTo(1.5f), "Раздел «Персонажи» — в стилях.");
+        }
+
+        // Вид существа ложится на фигуру на месте (блок свойств), «до»
+        // сравнения — как нарисовано.
+        [Test]
+        public void CreatureLook_IsAppliedToFigures_AndHiddenForBefore()
+        {
+            (LocalLocationDefinition location, LocationVisualDefinition visual) = Place();
+            visual.Post = new LocationPostEffects { Enabled = true };
+            LocationCreatureLook look = visual.Post.Characters.Own("zz_wolf");
+            look.Saturation = 0;
+            look.Brightness = 1.4f;
+            look.Contrast = .5f;
+            look.Tint = new Color(1, .8f, .6f);
+            look.SunLight = .3f;
+            using (LocationWorldRenderer renderer = new LocationWorldRenderer(location, visual, null))
+            {
+                renderer.SetActors(new[]
+                {
+                    new LocationWorldRenderer.ActorFrame { Id = "wolf", UnitTypeId = "zz_wolf", Pixel = new Vector2(700, 700) },
+                    new LocationWorldRenderer.ActorFrame { Id = "hero", Pixel = new Vector2(900, 700) }
+                }, 0);
+                renderer.SetTime(13, 1);
+                MaterialPropertyBlock block = new MaterialPropertyBlock();
+                SpriteRenderer wolf = Figure(renderer, "wolf");
+                wolf.GetPropertyBlock(block);
+                Assert.That(block.GetVector("_KsHsv"), Is.EqualTo(new Vector4(0, 0, 1.4f, .5f)));
+                Assert.That(block.GetVector("_KsLight"), Is.EqualTo(new Vector4(.3f, 1, 0, 0)));
+                Color tint = block.GetColor("_Color");
+                Assert.That(tint.g, Is.EqualTo(.8f).Within(.02f), "Подкраска.");
+                Figure(renderer, "hero").GetPropertyBlock(block);
+                Assert.That(block.GetVector("_KsHsv"), Is.EqualTo(new Vector4(0, 1, 1, 0)), "Другой тип — без поправки.");
+
+                renderer.ShowFrameEffects(false);
+                renderer.SetTime(13, 1.1f);
+                wolf.GetPropertyBlock(block);
+                Assert.That(block.GetVector("_KsHsv"), Is.EqualTo(new Vector4(0, 1, 1, 0)), "«До» — как нарисовано.");
+            }
+        }
+
+        private static SpriteRenderer Figure(LocationWorldRenderer renderer, string id)
+        {
+            foreach (SpriteRenderer image in renderer.Root.GetComponentsInChildren<SpriteRenderer>())
+                if (image.transform.parent != null && image.transform.parent.name == id) return image;
+            Assert.Fail("Фигура " + id + " не найдена.");
+            return null;
+        }
+
         [Test]
         public void Atmosphere_EmitsOnlyWhenEnabledAndVisible()
         {

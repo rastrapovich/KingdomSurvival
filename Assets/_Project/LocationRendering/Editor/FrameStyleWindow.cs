@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using KingdomSurvival.BattlefieldDatabase;
+using KingdomSurvival.UnitDatabase;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -195,7 +196,8 @@ namespace KingdomSurvival.LocationRendering.Editor
                 Rebuild = BuildPanel,
                 Pulse = strength => renderer?.Pulse(strength),
                 TestDissolve = StartDissolveTest,
-                Snapshot = Snapshot
+                Snapshot = Snapshot,
+                ShowsCreatures = true
             };
             panel.Add(editor.Build());
         }
@@ -436,6 +438,26 @@ namespace KingdomSurvival.LocationRendering.Editor
                     Id = "preview_" + enemy.InstanceId, UnitTypeId = enemy.UnitTypeId,
                     Kind = LocationWorldRenderer.ActorKind.Enemy, Pixel = new Vector2(enemy.Point.X, enemy.Point.Y)
                 });
+            }
+            // Вкладка «Персонажи»: выбранное существо или все существа в ряд —
+            // в центре кадра, чтобы подгонять цвет прямо на поле.
+            int mode = FrameEffectsEditor.IsCharactersTab ? EditorPrefs.GetInt(FrameEffectsEditor.CreaturePreviewPrefs, 1) : 0;
+            UnitDatabaseAsset units = mode > 0 ? Resources.Load<UnitDatabaseAsset>(UnitDatabaseAsset.ResourcesPath) : null;
+            if (units != null)
+            {
+                string chosen = EditorPrefs.GetString(FrameEffectsEditor.CreaturePrefs, "");
+                List<UnitDefinitionData> lineup = mode == 1
+                    ? units.Units.Where(unit => unit != null && unit.Id == chosen).ToList()
+                    : units.Units.Where(unit => unit != null).ToList();
+                float step = renderer.HexSizePixels * 2.4f;
+                int perRow = Mathf.Min(7, Mathf.Max(1, lineup.Count));
+                for (int i = 0; i < lineup.Count; i++)
+                {
+                    int row = i / perRow, column = i % perRow;
+                    int inRow = Mathf.Min(perRow, lineup.Count - row * perRow);
+                    Vector2 pixel = center + new Vector2((column - (inRow - 1) / 2f) * step, (row - (lineup.Count - 1) / perRow / 2f) * step * 1.1f);
+                    frames.Add(new LocationWorldRenderer.ActorFrame { Id = "preview_creature_" + lineup[i].Id, UnitTypeId = lineup[i].Id, Pixel = pixel });
+                }
             }
             renderer.SetActors(frames, (float)EditorApplication.timeSinceStartup);
         }

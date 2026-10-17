@@ -353,6 +353,92 @@ namespace KingdomSurvival.BattlefieldDatabase
         }
     }
 
+    // Вид существа на месте: цвет поверх рисунка (до света) и сколько его
+    // освещают солнце и огонь. Общая поправка — для всех, своя — у типа из
+    // Базы существ; итог — общая, затем своя (тон и контраст складываются,
+    // насыщенность, яркость, подкраска и свет умножаются).
+    [Serializable]
+    public sealed class LocationCreatureLook
+    {
+        // ID типа из Базы существ; пусто — общая поправка.
+        public string UnitId = "";
+        // Сдвиг тона, градусы (−180..180).
+        public float Hue;
+        public float Saturation = 1;
+        public float Brightness = 1;
+        // −1..1: меньше — мягче, больше — резче.
+        public float Contrast;
+        // Подкраска (умножение), белый — без неё.
+        public Color Tint = Color.white;
+        // Доля солнца (общего света суток) и огня: 0 — не темнеет ночью / не освещается огнём.
+        public float SunLight = 1;
+        public float FireLight = 1;
+
+        public bool IsIdentity =>
+            Mathf.Abs(Mathf.DeltaAngle(0, Hue)) < .01f && Mathf.Abs(Saturation - 1) < .001f && Mathf.Abs(Brightness - 1) < .001f &&
+            Mathf.Abs(Contrast) < .001f && Tint == Color.white && Mathf.Abs(SunLight - 1) < .001f && Mathf.Abs(FireLight - 1) < .001f;
+
+        // Для шейдера рисунков: тон в оборотах, насыщенность, яркость, контраст.
+        public Vector4 ShaderHsv => new Vector4(Mathf.DeltaAngle(0, Hue) / 360f, Mathf.Max(0, Saturation), Mathf.Max(0, Brightness), Mathf.Clamp(Contrast, -1, 1));
+
+        public void CopyFrom(LocationCreatureLook other)
+        {
+            Hue = other.Hue; Saturation = other.Saturation; Brightness = other.Brightness; Contrast = other.Contrast;
+            Tint = other.Tint; SunLight = other.SunLight; FireLight = other.FireLight;
+        }
+
+        public static LocationCreatureLook Combine(LocationCreatureLook all, LocationCreatureLook own)
+        {
+            LocationCreatureLook result = new LocationCreatureLook();
+            if (all != null) result.CopyFrom(all);
+            if (own == null) return result;
+            result.UnitId = own.UnitId;
+            result.Hue += own.Hue;
+            result.Saturation *= own.Saturation;
+            result.Brightness *= own.Brightness;
+            result.Contrast += own.Contrast;
+            result.Tint *= own.Tint;
+            result.SunLight *= own.SunLight;
+            result.FireLight *= own.FireLight;
+            return result;
+        }
+    }
+
+    // Раздел «Персонажи» обработки кадра: подгонка цвета существ к месту.
+    [Serializable]
+    public sealed class LocationCharacterEffects
+    {
+        public LocationCreatureLook All = new LocationCreatureLook();
+        public List<LocationCreatureLook> Creatures = new List<LocationCreatureLook>();
+
+        public LocationCreatureLook Find(string unitId) =>
+            string.IsNullOrEmpty(unitId) ? null : Creatures?.Find(item => item != null && item.UnitId == unitId);
+
+        // Своя поправка типа; нет — создаётся (для правки в окне).
+        public LocationCreatureLook Own(string unitId)
+        {
+            LocationCreatureLook look = Find(unitId);
+            if (look != null || string.IsNullOrEmpty(unitId)) return look;
+            Creatures ??= new List<LocationCreatureLook>();
+            look = new LocationCreatureLook { UnitId = unitId };
+            Creatures.Add(look);
+            return look;
+        }
+
+        public LocationCreatureLook Resolve(string unitId) => LocationCreatureLook.Combine(All, Find(unitId));
+
+        // Хоть что-то меняет вид существ.
+        public bool AnyActive => (All != null && !All.IsIdentity) || (Creatures != null && Creatures.Exists(item => item != null && !item.IsIdentity));
+
+        public void Repair()
+        {
+            All ??= new LocationCreatureLook();
+            All.UnitId = "";
+            Creatures ??= new List<LocationCreatureLook>();
+            Creatures.RemoveAll(item => item == null || string.IsNullOrEmpty(item.UnitId));
+        }
+    }
+
     public enum LocationAntialiasing { None, Fxaa, SmaaLow, SmaaMedium, SmaaHigh }
 
     [Serializable]
@@ -373,7 +459,8 @@ namespace KingdomSurvival.BattlefieldDatabase
         Sprites = 16,
         Atmosphere = 32,
         Quality = 64,
-        All = Color | LightLens | Tone | Canvas | Sprites | Atmosphere | Quality
+        Characters = 128,
+        All = Color | LightLens | Tone | Canvas | Sprites | Atmosphere | Quality | Characters
     }
 
     // Сохранённый стиль кадра («Запомнить настройки»): имя и полный снимок.
@@ -391,7 +478,7 @@ namespace KingdomSurvival.BattlefieldDatabase
         public static readonly LocationFrameSection[] Order =
         {
             LocationFrameSection.Color, LocationFrameSection.LightLens, LocationFrameSection.Tone, LocationFrameSection.Canvas,
-            LocationFrameSection.Sprites, LocationFrameSection.Atmosphere, LocationFrameSection.Quality
+            LocationFrameSection.Sprites, LocationFrameSection.Characters, LocationFrameSection.Atmosphere, LocationFrameSection.Quality
         };
 
         public static string Title(LocationFrameSection section)
@@ -404,6 +491,7 @@ namespace KingdomSurvival.BattlefieldDatabase
                 case LocationFrameSection.Canvas: return "Холст";
                 case LocationFrameSection.Sprites: return "Рисунки";
                 case LocationFrameSection.Atmosphere: return "Атмосфера";
+                case LocationFrameSection.Characters: return "Персонажи";
                 case LocationFrameSection.Quality: return "Качество";
                 default: return section.ToString();
             }
@@ -441,6 +529,7 @@ namespace KingdomSurvival.BattlefieldDatabase
             if ((sections & LocationFrameSection.Canvas) != 0) target.Canvas = from.Canvas;
             if ((sections & LocationFrameSection.Sprites) != 0) target.Sprites = from.Sprites;
             if ((sections & LocationFrameSection.Atmosphere) != 0) target.Atmosphere = from.Atmosphere;
+            if ((sections & LocationFrameSection.Characters) != 0) target.Characters = from.Characters;
             if ((sections & LocationFrameSection.Quality) != 0) target.Quality = from.Quality;
             // Применённый стиль включает обработку кадра: иначе его не видно.
             if (sections != LocationFrameSection.None) target.Enabled = true;

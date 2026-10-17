@@ -585,6 +585,7 @@ public partial class PrototypeUIController
             localBattleFrames.Add(new LocationWorldRenderer.BattleFigureFrame
             {
                 Id = figure.UnitId,
+                UnitTypeId = figure.UnitTypeId,
                 Sprite = figure.Sprite,
                 Rect = Rect.MinMaxRect(min.x, min.y, max.x, max.y),
                 Ground = ToPixel(figure.Ground),

@@ -452,7 +452,22 @@ namespace KingdomSurvival.LocationRendering.Editor
             {
                 DragAndDrop.AcceptDrag();
                 UnityEngine.Object dropped = DragAndDrop.objectReferences.FirstOrDefault(item => item is Texture2D || item is Sprite);
-                string path = dropped == null ? (DragAndDrop.paths ?? Array.Empty<string>()).FirstOrDefault(FrameTextureDrop.IsImageFile) : null;
+                string path = dropped == null ? (DragAndDrop.paths ?? Array.Empty<string>()).FirstOrDefault(FrameTextureDrop.IsDroppableFile) : null;
+                // .cube — только LUT: без меню.
+                if (LutTools.IsCube(path))
+                {
+                    Texture2D cube = LutTools.FromCubeFile(path, out string cubeError);
+                    if (cube == null) EditorUtility.DisplayDialog("LUT", cubeError, "Понятно");
+                    else Change(() =>
+                    {
+                        LocationPostEffects post = Sky.Post.Repair();
+                        post.Enabled = true;
+                        post.Tone.Lut = cube;
+                        post.Tone.LutContribution = Mathf.Max(post.Tone.LutContribution, 1);
+                    }, true);
+                    evt.Use();
+                    return;
+                }
                 GenericMenu menu = new GenericMenu();
                 void Item(string title, FrameTextureKind kind, Action<LocationPostEffects, Texture2D> apply) =>
                     menu.AddItem(new GUIContent(title), false, () =>

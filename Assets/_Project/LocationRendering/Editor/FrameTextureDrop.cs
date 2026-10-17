@@ -10,7 +10,7 @@ namespace KingdomSurvival.LocationRendering.Editor
 {
     // ПР-12М: картинки «Обработки кадра» перетаскиванием — в поле или на
     // предпросмотр окна. Годится текстура или спрайт из окна Project и
-    // файл с диска (PNG, JPG, TGA, PSD — из проводника): файл копируется в
+    // файл с диска (PNG, JPG, TGA, PSD, для LUT — и .cube): файл копируется в
     // проект (FrameTextures/<назначение>) и импортируется под назначение.
     // Для LUT покрашенный снимок сразу превращается в полоску LUT.
     public enum FrameTextureKind { Lut, Palette, Paper, Particle }
@@ -35,9 +35,11 @@ namespace KingdomSurvival.LocationRendering.Editor
             !string.IsNullOrEmpty(path) && ImageExtensions.Contains(Path.GetExtension(path).ToLowerInvariant());
 
         // Что-то годное сейчас тащат (текстура, спрайт или файл картинки).
+        public static bool IsDroppableFile(string path) => IsImageFile(path) || LutTools.IsCube(path);
+
         public static bool HasCandidate() =>
             DragAndDrop.objectReferences.Any(item => item is Texture2D || item is Sprite) ||
-            (DragAndDrop.paths ?? Array.Empty<string>()).Any(IsImageFile);
+            (DragAndDrop.paths ?? Array.Empty<string>()).Any(IsDroppableFile);
 
         // Картинка из текущего перетаскивания под назначение; null — нет (error — почему).
         public static Texture2D FromDrag(FrameTextureKind kind, out string error)
@@ -45,9 +47,9 @@ namespace KingdomSurvival.LocationRendering.Editor
             error = null;
             Object dropped = DragAndDrop.objectReferences.FirstOrDefault(item => item is Texture2D || item is Sprite);
             if (dropped != null) return FromObject(dropped, kind, out error);
-            string path = (DragAndDrop.paths ?? Array.Empty<string>()).FirstOrDefault(IsImageFile);
+            string path = (DragAndDrop.paths ?? Array.Empty<string>()).FirstOrDefault(IsDroppableFile);
             if (path != null) return FromFile(path, kind, out error);
-            error = "Перетащите картинку: текстуру, спрайт или файл PNG / JPG.";
+            error = "Перетащите картинку: текстуру, спрайт, файл PNG / JPG или LUT .cube.";
             return null;
         }
 
@@ -69,6 +71,7 @@ namespace KingdomSurvival.LocationRendering.Editor
         {
             error = null;
             if (kind == FrameTextureKind.Lut) return LutTools.FromImageFile(path, out error);
+            if (LutTools.IsCube(path)) { error = "Файл .cube — это LUT: перетащите его в поле LUT (вкладка «Тон») или на кадр."; return null; }
             string full = Path.GetFullPath(path).Replace('\\', '/');
             string project = Path.GetFullPath(Application.dataPath).Replace('\\', '/');
             if (full.StartsWith(project + "/", StringComparison.OrdinalIgnoreCase))

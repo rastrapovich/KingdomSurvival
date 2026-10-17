@@ -367,10 +367,11 @@ namespace KingdomSurvival.LocationRendering.Editor
             LocationToneEffects tone = post.Tone;
             Group("LUT — палитра одним рисунком", "Lut", tone.Lut != null && tone.LutContribution > 0, value => tone.LutContribution = value ? Mathf.Max(tone.LutContribution, 1) : 0, () =>
             {
-                Help("Как сделать: «Снимок для покраски» → откройте PNG в Photoshop или Krita → красьте корректирующими слоями (кривые, цветовой баланс, оттенок) " +
-                     "весь снимок вместе с полоской в левом верхнем углу, размер не меняйте → сохраните PNG → «Извлечь LUT из покрашенного снимка». " +
-                     "Unity применит тот же цвет к каждому кадру.");
-                TextureField("LUT (1024×32)", tone.Lut, value => tone.Lut = value, FrameTextureKind.Lut);
+                Help("Три способа. 1) Готовый LUT: перетащите в поле файл .cube (Photoshop, DaVinci Resolve, наборы из интернета) или PNG-полоску любого размера " +
+                     "(1024×32, 256×16, 4096×64) — она пересчитается в 1024×32. Подходят LUT «для Rec.709 / sRGB», не для LOG-съёмки. " +
+                     "2) Свой: «Снимок для покраски» → красьте корректирующими слоями весь снимок вместе с полоской в левом верхнем углу, размер не меняйте → " +
+                     "перетащите покрашенный PNG в поле. 3) Можно бросить файл прямо на кадр предпросмотра.");
+                TextureField("LUT (полоска, снимок, .cube)", tone.Lut, value => tone.Lut = value, FrameTextureKind.Lut);
                 Slider("Сила", tone.LutContribution, 0, 1, value => tone.LutContribution = value);
                 string problem = LutTools.Problem(tone.Lut);
                 if (problem != null)
@@ -386,7 +387,12 @@ namespace KingdomSurvival.LocationRendering.Editor
                         Texture2D lut = LutTools.ImportPainted();
                         if (lut != null) Change(() => { tone.Lut = lut; tone.LutContribution = Mathf.Max(tone.LutContribution, 1); }, true);
                     }), "Вырезать полоску из PNG и сохранить LUT в проект"));
-                Buttons(("Нейтральный LUT…", (Action)(() =>
+                Buttons(("Загрузить .cube…", (Action)(() =>
+                {
+                    Texture2D lut = LutTools.ImportCubeDialog();
+                    if (lut != null) Change(() => { tone.Lut = lut; tone.LutContribution = Mathf.Max(tone.LutContribution, 1); }, true);
+                }), "LUT в формате .cube → полоска 1024×32 в проекте"),
+                    ("Нейтральный LUT…", (Action)(() =>
                 {
                     Texture2D lut = LutTools.SaveNeutral();
                     if (lut != null) Change(() => tone.Lut = lut, true);
@@ -757,6 +763,7 @@ namespace KingdomSurvival.LocationRendering.Editor
             VisualElement row = Row(false);
             Label hint = new Label(value != null
                 ? value.width + "×" + value.height + " · перетащите другую картинку, чтобы заменить"
+                : kind == FrameTextureKind.Lut ? "Перетащите сюда .cube, PNG-полоску или покрашенный снимок — из Project или проводника"
                 : "Перетащите сюда картинку: из Project или PNG / JPG из проводника");
             hint.style.flexGrow = 1;
             hint.style.fontSize = 10;

@@ -16,6 +16,22 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public readonly Dictionary<string, WorkshopPerson> People = new Dictionary<string, WorkshopPerson>(StringComparer.Ordinal);
         public readonly Dictionary<string, WorkshopFact> Facts = new Dictionary<string, WorkshopFact>(StringComparer.Ordinal);
 
+        // Вложенные картинки мастерской: id вложения → data:image/…;base64.
+        public readonly Dictionary<string, string> Assets = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        // Картинка вложения по ссылке мастерской «/api/attachments?id=…».
+        public string AttachmentData(string url)
+        {
+            const string prefix = "/api/attachments?id=";
+            if (string.IsNullOrEmpty(url))
+                return string.Empty;
+            if (url.StartsWith("data:image/", StringComparison.Ordinal))
+                return url;
+            if (url.StartsWith(prefix, StringComparison.Ordinal) && Assets.TryGetValue(url.Substring(prefix.Length), out string data))
+                return data;
+            return string.Empty;
+        }
+
         public static WorkshopProject Load(string path)
         {
             return Parse(File.ReadAllText(path));
@@ -42,7 +58,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                     Id = person["id"].Str(),
                     Name = person["name"].Str(),
                     Role = person["role"].Str(),
-                    UnityId = person["unityId"].Str()
+                    UnityId = person["unityId"].Str(),
+                    Portrait = person["portrait"].Str()
                 };
                 if (p.Id.Length > 0)
                     project.People[p.Id] = p;
@@ -68,6 +85,14 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             foreach (JsonNode quest in workspace["quests"].Items())
                 project.Quests.Add(WorkshopQuest.Read(quest));
 
+            foreach (JsonNode asset in root["assets"].Items())
+            {
+                string id = asset["id"].Str();
+                string data = asset["data"].Str();
+                if (id.Length > 0 && data.StartsWith("data:image/", StringComparison.Ordinal))
+                    project.Assets[id] = data;
+            }
+
             return project;
         }
     }
@@ -78,6 +103,11 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public string Name = string.Empty;
         public string Role = string.Empty;
         public string UnityId = string.Empty;
+        public string Portrait = string.Empty;
+
+        // ID говорящего в Unity: явное поле или ID вида unity_person_<id>.
+        public string SpeakerId =>
+            UnityId.Length > 0 ? UnityId : Id.StartsWith("unity_person_", StringComparison.Ordinal) ? Id.Substring("unity_person_".Length) : string.Empty;
     }
 
     public sealed class WorkshopFact

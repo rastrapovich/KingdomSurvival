@@ -144,6 +144,11 @@ namespace KingdomSurvival.DialogueDatabase
         [SerializeField] private List<NarrativeEffect> successEffects = new List<NarrativeEffect>();
         [SerializeField] private List<NarrativeEffect> failureEffects = new List<NarrativeEffect>();
 
+        // Авторская подсказка для ответа, показанного неактивным
+        // (DisabledWithHint): почему он сейчас недоступен. Пусто — общий текст
+        // «Пока недоступно.». Добавлено 18.10.2026 (Мастерская квестов).
+        [SerializeField, TextArea(1, 2)] private string unavailableHint = string.Empty;
+
         // Legacy/Normal-переход. Спецификация называет его "NormalNodeId" —
         // здесь это то же самое поле, что и прежде, без переименования, чтобы
         // не ломать уже сохранённые данные prototype_miller.
@@ -156,6 +161,7 @@ namespace KingdomSurvival.DialogueDatabase
         public NarrativeConditionGroup Conditions => conditions ?? (conditions = new NarrativeConditionGroup());
         public DialogueChoiceUnavailablePresentation UnavailablePresentation => unavailablePresentation;
         public NarrativeCheckSpec Check => check;
+        public string UnavailableHint => unavailableHint ?? string.Empty;
         public string SuccessNodeId => successNodeId;
         public string FailureNodeId => failureNodeId;
 

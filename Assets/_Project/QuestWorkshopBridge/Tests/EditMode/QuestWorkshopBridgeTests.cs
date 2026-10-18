@@ -73,7 +73,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Tests
                 ""conditions"": { ""mode"": ""All"", ""items"": [] }, ""effects"": [] }
             ],
             ""choices"": [
-              { ""id"": ""ud:test_guest_gate:c_ask"", ""text"": ""Расспросить."", ""kind"": ""ActiveDecisive"", ""unavailable"": ""DisabledWithHint"",
+              { ""id"": ""ud:test_guest_gate:c_ask"", ""text"": ""Расспросить."", ""kind"": ""ActiveDecisive"", ""unavailable"": ""DisabledWithHint"", ""hint"": ""Гость не доверяет чужим."",
                 ""conditions"": { ""mode"": ""All"", ""items"": [] },
                 ""successNodeId"": ""ud:test_guest_gate:ok"", ""failureNodeId"": ""ud:test_guest_gate:fail"", ""nextNodeId"": """",
                 ""check"": { ""id"": ""unity_check_test_guest_ask"", ""kind"": ""ActiveDecisive"", ""quality"": ""Character"", ""competencyId"": ""negotiation"", ""difficulty"": 13,
@@ -180,6 +180,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Tests
             Assert.That(ask.ChoiceId, Is.EqualTo("c_ask"));
             Assert.That(ask.Kind, Is.EqualTo(DialogueChoiceKind.ActiveDecisive));
             Assert.That(ask.UnavailablePresentation, Is.EqualTo(DialogueChoiceUnavailablePresentation.DisabledWithHint));
+            Assert.That(ask.UnavailableHint, Is.EqualTo("Гость не доверяет чужим."), "Подсказка недоступного ответа переносится.");
             Assert.That(ask.Check.CheckId, Is.EqualTo("test_guest_ask"));
             Assert.That(ask.Check.Kind, Is.EqualTo(NarrativeCheckKind.ActiveDecisive));
             Assert.That(ask.Check.ModifierRules[0].SourceId, Is.EqualTo("knows_custom"));
@@ -351,6 +352,60 @@ namespace KingdomSurvival.QuestWorkshopBridge.Tests
             dialogues.CollectValidationIssuesForDialogue("linked_request", issues);
             Assert.That(issues, Is.Empty, string.Join("\n", issues));
             Assert.That(QuestWorkshopImporter.Analyze(project, dialogues, encounters).Single().State, Is.EqualTo(WorkshopSceneState.Same));
+        }
+
+        [Test]
+        public void Sync_DetectsWhereTheSceneWasEdited()
+        {
+            QuestWorkshopSyncState sync = new QuestWorkshopSyncState();
+            WorkshopProject project = Project();
+            QuestWorkshopImporter.Apply(project, new[] { Scene(project) }, dialogues, encounters, flags, sync);
+            Assert.That(QuestWorkshopImporter.Analyze(project, dialogues, encounters, sync)[0].State, Is.EqualTo(WorkshopSceneState.Same));
+
+            // Правка в Unity: мастерская её не затирает молча.
+            DialogueDefinitionData dialogue = dialogues.FindDialogue("test_guest_gate");
+            SetPrivate(dialogue, "title", "Гость у ворот (правка в Unity)");
+            WorkshopSceneReport unityEdit = QuestWorkshopImporter.Analyze(project, dialogues, encounters, sync)[0];
+            Assert.That(unityEdit.State, Is.EqualTo(WorkshopSceneState.UnityNewer));
+            Assert.That(unityEdit.Transferable, Is.False);
+            Assert.That(unityEdit.AutoTransferable, Is.False);
+
+            // Правка с обеих сторон — конфликт: перенос только явным выбором.
+            WorkshopProject edited = WorkshopProject.Parse(WorkspaceJson.Replace(@"""title"": ""Гость у ворот""", @"""title"": ""Гость у ворот ночью"""));
+            WorkshopSceneReport conflict = QuestWorkshopImporter.Analyze(edited, dialogues, encounters, sync)[0];
+            Assert.That(conflict.State, Is.EqualTo(WorkshopSceneState.Conflict));
+            Assert.That(conflict.Transferable, Is.True);
+            Assert.That(conflict.AutoTransferable, Is.False);
+
+            // Unity вернули как было — правка только в мастерской, её можно переносить сразу.
+            SetPrivate(dialogue, "title", "Гость у ворот");
+            WorkshopSceneReport workshopEdit = QuestWorkshopImporter.Analyze(edited, dialogues, encounters, sync)[0];
+            Assert.That(workshopEdit.State, Is.EqualTo(WorkshopSceneState.Changed));
+            Assert.That(workshopEdit.Direction, Is.EqualTo(WorkshopSyncDirection.WorkshopNewer));
+            Assert.That(workshopEdit.AutoTransferable, Is.True);
+        }
+
+        [Test]
+        public void Speakers_RenameFlowsFromWorkshop()
+        {
+            QuestWorkshopSyncState sync = new QuestWorkshopSyncState();
+            WorkshopProject project = Project();
+            QuestWorkshopImporter.Apply(project, new[] { Scene(project) }, dialogues, encounters, flags, sync);
+            Assert.That(QuestWorkshopImporter.AnalyzeSpeakers(project, dialogues, sync), Is.Empty, "После переноса говорящие совпадают.");
+
+            WorkshopProject renamed = WorkshopProject.Parse(WorkspaceJson.Replace(@"""name"": ""Гость""", @"""name"": ""Путник с мельницы"""));
+            List<WorkshopSpeakerReport> reports = QuestWorkshopImporter.AnalyzeSpeakers(renamed, dialogues, sync);
+            Assert.That(reports.Single().SpeakerId, Is.EqualTo("test_guest"));
+            Assert.That(reports.Single().AutoTransferable, Is.True);
+            WorkshopImportResult result = new WorkshopImportResult();
+            QuestWorkshopImporter.ApplySpeakers(renamed, reports, dialogues, result, sync);
+            Assert.That(dialogues.FindSpeaker("test_guest").DisplayName, Is.EqualTo("Путник с мельницы"));
+            Assert.That(QuestWorkshopImporter.AnalyzeSpeakers(renamed, dialogues, sync), Is.Empty);
+        }
+
+        private static void SetPrivate(object target, string field, object value)
+        {
+            target.GetType().GetField(field, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(target, value);
         }
 
         [Test]

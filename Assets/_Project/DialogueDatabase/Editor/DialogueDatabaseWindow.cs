@@ -761,7 +761,15 @@ namespace KingdomSurvival.DialogueDatabase.Editor
                 if (expanded)
                 {
                     DrawConditionsEditor(conditionGroup, "Доступен, если");
-                    DrawUnavailablePresentationPopup(choice.FindPropertyRelative("unavailablePresentation"));
+                    SerializedProperty presentation = choice.FindPropertyRelative("unavailablePresentation");
+                    DrawUnavailablePresentationPopup(presentation);
+                    if (presentation.enumValueIndex == (int)DialogueChoiceUnavailablePresentation.DisabledWithHint)
+                    {
+                        SerializedProperty hint = choice.FindPropertyRelative("unavailableHint");
+                        hint.stringValue = EditorGUILayout.TextField(
+                            new GUIContent("Подсказка", "Почему ответ недоступен. Пусто — «Пока недоступно.»"),
+                            hint.stringValue);
+                    }
                 }
                 else
                 {

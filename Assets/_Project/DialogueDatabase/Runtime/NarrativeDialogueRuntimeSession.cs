@@ -275,7 +275,11 @@ namespace KingdomSurvival.DialogueDatabase
 
                 if (!conditionsMet)
                 {
-                    AddDisabledIfHinted(disabled, choice, choiceId, "Пока недоступно.");
+                    AddDisabledIfHinted(
+                        disabled,
+                        choice,
+                        choiceId,
+                        string.IsNullOrWhiteSpace(choice.UnavailableHint) ? "Пока недоступно." : choice.UnavailableHint);
                     continue;
                 }
 

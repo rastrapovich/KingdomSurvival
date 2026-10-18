@@ -64,6 +64,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public string failureNodeId = string.Empty;
         public List<NarrativeEffect> successEffects = new List<NarrativeEffect>();
         public List<NarrativeEffect> failureEffects = new List<NarrativeEffect>();
+        public string unavailableHint = string.Empty;
     }
 
     public enum WorkshopIssueSeverity
@@ -284,7 +285,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             {
                 spec.ModifierRules.Add(new NarrativeContextModifierRule
                 {
-                    SourceId = Strip("unity_mod_", modifier.Id),
+                    SourceId = modifier.Id.StartsWith("mod_", StringComparison.Ordinal) ? string.Empty : Strip("unity_mod_", modifier.Id),
                     Label = modifier.Label ?? string.Empty,
                     Value = modifier.Amount,
                     Condition = Conditions(project, modifier.Conditions, issues)
@@ -397,7 +398,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                             ? DialogueChoiceUnavailablePresentation.DisabledWithHint
                             : DialogueChoiceUnavailablePresentation.Hidden,
                         successEffects = Effects(project, choice.Effects, issues),
-                        failureEffects = Effects(project, choice.FailureEffects, issues)
+                        failureEffects = Effects(project, choice.FailureEffects, issues),
+                        unavailableHint = choice.Hint ?? string.Empty
                     };
                     if (string.IsNullOrEmpty(choiceMirror.choiceId))
                         choiceMirror.choiceId = nodeMirror.id + "#c" + choiceIndex;
@@ -424,8 +426,6 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                         RequireTarget(choiceMirror.nextNodeId, nodeIds, choice, issues);
                     }
 
-                    if (choice.Hint.Length > 0)
-                        issues?.Add(Issue(WorkshopIssueSeverity.Info, "Подсказка недоступного ответа в Unity пока не хранится."));
                     nodeMirror.choices.Add(choiceMirror);
                     choiceIndex++;
                 }

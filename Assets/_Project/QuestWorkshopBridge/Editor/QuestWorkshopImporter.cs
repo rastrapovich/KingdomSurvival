@@ -18,7 +18,9 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         Errors,
         New,
         Same,
-        Changed
+        Changed,
+        UnityNewer,
+        Conflict
     }
 
     // Состояние одной сцены мастерской относительно баз Unity.
@@ -26,11 +28,55 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
     {
         public WorkshopScene Scene;
         public WorkshopSceneState State;
+        public WorkshopSyncDirection Direction = WorkshopSyncDirection.Unknown;
+        public string SyncKey = string.Empty;
+        public string WorkshopHash = string.Empty;
         public readonly List<WorkshopIssue> Issues = new List<WorkshopIssue>();
         public readonly List<string> Differences = new List<string>();
         public string EncounterState = string.Empty;
         public bool HasErrors => Issues.Exists(i => i.Severity == WorkshopIssueSeverity.Error);
-        public bool Transferable => !HasErrors && (State == WorkshopSceneState.New || State == WorkshopSceneState.Changed || EncounterState == "новая" || EncounterState == "изменена");
+
+        // Можно перенести (конфликт — только явным выбором).
+        public bool Transferable =>
+            !HasErrors && (State == WorkshopSceneState.New || State == WorkshopSceneState.Changed || State == WorkshopSceneState.Conflict);
+
+        // Безопасно переносить без вопроса: в Unity с прошлой синхронизации не правили.
+        public bool AutoTransferable =>
+            !HasErrors && (State == WorkshopSceneState.New || (State == WorkshopSceneState.Changed && Direction == WorkshopSyncDirection.WorkshopNewer));
+    }
+
+    // Говорящий: имя, роль и портрет между карточкой человека в мастерской и Unity.
+    public sealed class WorkshopSpeakerReport
+    {
+        public WorkshopPerson Person;
+        public string SpeakerId = string.Empty;
+        public string UnityName = string.Empty;
+        public string UnityRole = string.Empty;
+        public WorkshopSyncDirection Direction;
+        public bool NameOrRoleDiffers;
+        public bool PortraitFromWorkshop;
+        public string WorkshopHash = string.Empty;
+
+        public bool Transferable =>
+            PortraitFromWorkshop || (NameOrRoleDiffers && Direction != WorkshopSyncDirection.UnityNewer);
+
+        public bool AutoTransferable =>
+            PortraitFromWorkshop || (NameOrRoleDiffers && Direction == WorkshopSyncDirection.WorkshopNewer);
+
+        public string Describe()
+        {
+            List<string> parts = new List<string>();
+            if (NameOrRoleDiffers)
+            {
+                string where = Direction == WorkshopSyncDirection.UnityNewer ? " (правили в Unity — заберите в мастерской)"
+                    : Direction == WorkshopSyncDirection.Conflict ? " (правили с обеих сторон)" : string.Empty;
+                parts.Add("«" + UnityName + (UnityRole.Length > 0 ? ", " + UnityRole : string.Empty) + "» → «" + Person.Name +
+                          (Person.Role.Length > 0 ? ", " + Person.Role : string.Empty) + "»" + where);
+            }
+            if (PortraitFromWorkshop)
+                parts.Add("портрет из мастерской");
+            return string.Join("; ", parts);
+        }
     }
 
     public sealed class WorkshopImportResult
@@ -38,6 +84,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public readonly List<string> AddedDialogues = new List<string>();
         public readonly List<string> UpdatedDialogues = new List<string>();
         public readonly List<string> AddedSpeakers = new List<string>();
+        public readonly List<string> UpdatedSpeakers = new List<string>();
         public readonly List<string> AddedFlags = new List<string>();
         public readonly List<string> AddedEncounters = new List<string>();
         public readonly List<string> UpdatedEncounters = new List<string>();
@@ -45,7 +92,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public readonly List<string> ValidationIssues = new List<string>();
 
         public bool Changed =>
-            AddedDialogues.Count + UpdatedDialogues.Count + AddedSpeakers.Count + AddedFlags.Count +
+            AddedDialogues.Count + UpdatedDialogues.Count + AddedSpeakers.Count + UpdatedSpeakers.Count + AddedFlags.Count +
             AddedEncounters.Count + UpdatedEncounters.Count > 0;
 
         public string Summary()
@@ -54,6 +101,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             Append(text, "Новые диалоги", AddedDialogues);
             Append(text, "Обновлены диалоги", UpdatedDialogues);
             Append(text, "Новые говорящие", AddedSpeakers);
+            Append(text, "Обновлены говорящие", UpdatedSpeakers);
             Append(text, "Новые флаги реестра", AddedFlags);
             Append(text, "Новые встречи", AddedEncounters);
             Append(text, "Обновлены встречи", UpdatedEncounters);
@@ -74,11 +122,19 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
     // экземплярами баз — окно передаёт ассеты проекта, тесты — временные копии.
     public static class QuestWorkshopImporter
     {
+        // Хеш единицы переноса: диалог в виде сравнения + встреча, если она есть.
+        private static string UnitHash(string dialogueComparable, EncounterDefinition encounter)
+        {
+            return QuestWorkshopSyncState.Hash(dialogueComparable + "|" + (encounter != null ? JsonUtility.ToJson(encounter) : string.Empty));
+        }
+
         public static List<WorkshopSceneReport> Analyze(
             WorkshopProject project,
             DialogueDatabaseAsset dialogues,
-            EncounterDatabaseAsset encounters)
+            EncounterDatabaseAsset encounters,
+            QuestWorkshopSyncState sync = null)
         {
+            sync ??= new QuestWorkshopSyncState();
             List<WorkshopSceneReport> reports = new List<WorkshopSceneReport>();
             Dictionary<string, WorkshopScene> owners = new Dictionary<string, WorkshopScene>(StringComparer.Ordinal);
             foreach (WorkshopQuest quest in project.Quests)
@@ -112,39 +168,136 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                         report.State = WorkshopSceneState.NoUnityId;
                         continue;
                     }
+                    if (scene.Nodes.Count == 0)
+                    {
+                        report.State = WorkshopSceneState.Plan;
+                        continue;
+                    }
 
                     DialogueDefinitionData existing = dialogues.FindDialogue(unityId);
-                    if (scene.Nodes.Count > 0 && !report.HasErrors)
+                    if (!report.HasErrors)
                     {
                         foreach (string issue in DatabaseIssues(project, scene, dialogues, existing))
                             report.Issues.Add(new WorkshopIssue { Severity = WorkshopIssueSeverity.Warning, Message = "Проверка базы диалогов: " + issue });
                     }
-                    if (scene.Nodes.Count > 0)
-                    {
-                        report.Differences.AddRange(QuestWorkshopConverter.DescribeDifferences(project, scene, existing));
-                        report.State = existing == null
-                            ? WorkshopSceneState.New
-                            : QuestWorkshopConverter.SameAsDatabase(project, scene, existing) ? WorkshopSceneState.Same : WorkshopSceneState.Changed;
-                    }
-                    else
-                    {
-                        report.State = WorkshopSceneState.Plan;
-                    }
+                    report.Differences.AddRange(QuestWorkshopConverter.DescribeDifferences(project, scene, existing));
 
-                    if (scene.Encounter != null && scene.Encounter.Enabled && scene.Encounter.EncounterId.Length > 0 && encounters != null)
+                    bool hasEncounter = scene.Encounter != null && scene.Encounter.Enabled && scene.Encounter.EncounterId.Length > 0 && encounters != null;
+                    EncounterDefinition currentEncounter = hasEncounter ? encounters.FindById(scene.Encounter.EncounterId) : null;
+                    EncounterDefinition nextEncounter = hasEncounter ? QuestWorkshopConverter.BuildEncounter(project, scene, currentEncounter) : null;
+                    if (hasEncounter)
                     {
-                        EncounterDefinition current = encounters.FindById(scene.Encounter.EncounterId);
-                        EncounterDefinition next = QuestWorkshopConverter.BuildEncounter(project, scene, current);
-                        report.EncounterState = current == null ? "новая" : QuestWorkshopConverter.SameEncounter(current, next) ? "совпадает" : "изменена";
+                        report.EncounterState = currentEncounter == null ? "новая" : QuestWorkshopConverter.SameEncounter(currentEncounter, nextEncounter) ? "совпадает" : "изменена";
                         if (report.EncounterState != "совпадает")
                             report.Differences.Add("Встреча " + scene.Encounter.EncounterId + ": " + report.EncounterState + ".");
                     }
 
-                    if (report.HasErrors && report.State != WorkshopSceneState.Plan)
+                    report.SyncKey = "unit:" + unityId;
+                    DialogueMirror built = QuestWorkshopConverter.BuildDialogue(project, scene, existing, null);
+                    report.WorkshopHash = UnitHash(QuestWorkshopConverter.Comparable(built), nextEncounter);
+                    if (existing == null)
+                    {
+                        report.State = WorkshopSceneState.New;
+                    }
+                    else
+                    {
+                        string unityHash = UnitHash(QuestWorkshopConverter.Comparable(QuestWorkshopConverter.MirrorOf(existing)), hasEncounter ? currentEncounter : null);
+                        report.Direction = sync.Direction(report.SyncKey, report.WorkshopHash, unityHash);
+                        switch (report.Direction)
+                        {
+                            case WorkshopSyncDirection.Same:
+                                report.State = WorkshopSceneState.Same;
+                                sync.Set(report.SyncKey, unityHash);
+                                break;
+                            case WorkshopSyncDirection.UnityNewer:
+                                report.State = WorkshopSceneState.UnityNewer;
+                                report.Differences.Insert(0, "Эту сцену с прошлой синхронизации правили в Unity — заберите правки в мастерской («Синхронизация с Unity»), иначе перенос их затрёт.");
+                                break;
+                            case WorkshopSyncDirection.Conflict:
+                                report.State = WorkshopSceneState.Conflict;
+                                report.Differences.Insert(0, "Сцену правили и в мастерской, и в Unity. Перенос заменит версию Unity версией мастерской.");
+                                break;
+                            default:
+                                report.State = WorkshopSceneState.Changed;
+                                if (report.Direction == WorkshopSyncDirection.Unknown)
+                                    report.Differences.Insert(0, "Неизвестно, где правили последним: общей точки синхронизации ещё нет.");
+                                break;
+                        }
+                    }
+
+                    if (report.HasErrors)
                         report.State = WorkshopSceneState.Errors;
                 }
             }
             return reports;
+        }
+
+        public static List<WorkshopSpeakerReport> AnalyzeSpeakers(WorkshopProject project, DialogueDatabaseAsset dialogues, QuestWorkshopSyncState sync = null)
+        {
+            sync ??= new QuestWorkshopSyncState();
+            List<WorkshopSpeakerReport> reports = new List<WorkshopSpeakerReport>();
+            foreach (WorkshopPerson person in project.People.Values)
+            {
+                string id = person.SpeakerId;
+                DialogueSpeakerData speaker = id.Length > 0 ? dialogues.FindSpeaker(id) : null;
+                if (speaker == null)
+                    continue;
+                WorkshopSpeakerReport report = new WorkshopSpeakerReport
+                {
+                    Person = person,
+                    SpeakerId = id,
+                    UnityName = speaker.DisplayName ?? string.Empty,
+                    UnityRole = speaker.Role ?? string.Empty,
+                    WorkshopHash = QuestWorkshopSyncState.Hash(person.Name + "\n" + person.Role)
+                };
+                string unityHash = QuestWorkshopSyncState.Hash(report.UnityName + "\n" + report.UnityRole);
+                string key = "speaker:" + id;
+                report.Direction = sync.Direction(key, report.WorkshopHash, unityHash);
+                report.NameOrRoleDiffers = report.Direction != WorkshopSyncDirection.Same && person.Name.Length > 0;
+                if (report.Direction == WorkshopSyncDirection.Same)
+                    sync.Set(key, unityHash);
+                report.PortraitFromWorkshop = speaker.Portrait == null && project.AttachmentData(person.Portrait).Length > 0;
+                if (report.NameOrRoleDiffers || report.PortraitFromWorkshop)
+                    reports.Add(report);
+            }
+            reports.Sort((a, b) => string.CompareOrdinal(a.SpeakerId, b.SpeakerId));
+            return reports;
+        }
+
+        public static void ApplySpeakers(
+            WorkshopProject project,
+            IEnumerable<WorkshopSpeakerReport> reports,
+            DialogueDatabaseAsset dialogues,
+            WorkshopImportResult result,
+            QuestWorkshopSyncState sync = null)
+        {
+            foreach (WorkshopSpeakerReport report in reports)
+            {
+                DialogueSpeakerData speaker = dialogues.FindSpeaker(report.SpeakerId);
+                if (speaker == null)
+                    continue;
+                if (report.NameOrRoleDiffers && report.Direction != WorkshopSyncDirection.UnityNewer)
+                {
+                    SetPrivate(speaker, "displayName", report.Person.Name);
+                    SetPrivate(speaker, "role", report.Person.Role);
+                    sync?.Set("speaker:" + report.SpeakerId, report.WorkshopHash);
+                }
+                if (report.PortraitFromWorkshop)
+                {
+                    Sprite portrait = QuestWorkshopMedia.ImportPortrait(report.SpeakerId, project.AttachmentData(report.Person.Portrait));
+                    if (portrait != null)
+                        SetPrivate(speaker, "portrait", portrait);
+                }
+                result.UpdatedSpeakers.Add(report.SpeakerId);
+            }
+        }
+
+        private static void SetPrivate(object target, string field, object value)
+        {
+            FieldInfo info = target.GetType().GetField(field, BindingFlags.Instance | BindingFlags.NonPublic);
+            if (info == null)
+                throw new MissingFieldException(target.GetType().Name, field);
+            info.SetValue(target, value);
         }
 
         public static WorkshopImportResult Apply(
@@ -152,7 +305,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             IEnumerable<WorkshopScene> scenes,
             DialogueDatabaseAsset dialogues,
             EncounterDatabaseAsset encounters,
-            EncounterFlagRegistryAsset flags)
+            EncounterFlagRegistryAsset flags,
+            QuestWorkshopSyncState sync = null)
         {
             WorkshopImportResult result = new WorkshopImportResult();
             List<DialogueDefinitionData> dialogueList = PrivateList<DialogueDatabaseAsset, DialogueDefinitionData>(dialogues, "dialogues");
@@ -194,6 +348,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                     }
                 }
 
+                EncounterDefinition appliedEncounter = null;
                 if (scene.Encounter != null && scene.Encounter.Enabled && encounters != null)
                 {
                     List<EncounterDefinition> encounterList = PrivateList<EncounterDatabaseAsset, EncounterDefinition>(encounters, "encounters");
@@ -203,11 +358,16 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                     {
                         encounterList.Add(next);
                         result.AddedEncounters.Add(next.EncounterId);
+                        appliedEncounter = next;
                     }
-                    else if (!QuestWorkshopConverter.SameEncounter(current, next))
+                    else
                     {
-                        JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(next), current);
-                        result.UpdatedEncounters.Add(next.EncounterId);
+                        if (!QuestWorkshopConverter.SameEncounter(current, next))
+                        {
+                            JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(next), current);
+                            result.UpdatedEncounters.Add(next.EncounterId);
+                        }
+                        appliedEncounter = current;
                     }
 
                     if (flags != null)
@@ -231,6 +391,10 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                         }
                     }
                 }
+
+                DialogueDefinitionData written = dialogues.FindDialogue(unityId);
+                if (sync != null && written != null)
+                    sync.Set("unit:" + unityId, UnitHash(QuestWorkshopConverter.Comparable(QuestWorkshopConverter.MirrorOf(written)), appliedEncounter));
 
                 List<string> validation = new List<string>();
                 dialogues.CollectValidationIssuesForDialogue(unityId, validation);
@@ -336,7 +500,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             DialogueDatabaseAsset dialogues,
             EncounterDatabaseAsset encounters,
             EncounterFlagRegistryAsset flags,
-            string commit)
+            string commit,
+            Dictionary<string, string> media = null)
         {
             StringBuilder json = new StringBuilder();
             json.Append("{\"format\":\"ks-unity-snapshot\",\"version\":1");
@@ -347,6 +512,11 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             AppendArray(json, "flags", flags != null ? (IEnumerable<object>)flags.Flags : Array.Empty<object>());
             AppendArray(json, "encounters", encounters != null ? (IEnumerable<object>)encounters.Encounters : Array.Empty<object>());
             AppendArray(json, "pools", encounters != null ? (IEnumerable<object>)encounters.Pools : Array.Empty<object>());
+            Dictionary<string, object> mediaMap = new Dictionary<string, object>(StringComparer.Ordinal);
+            if (media != null)
+                foreach (KeyValuePair<string, string> pair in media)
+                    mediaMap[pair.Key] = pair.Value;
+            json.Append(",\"media\":").Append(QuestWorkshopJson.Serialize(mediaMap));
             json.Append('}');
             return json.ToString();
         }

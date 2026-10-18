@@ -236,6 +236,32 @@ public sealed class DialogueDatabaseCheckSystemTests
     }
 
     [Test]
+    public void DisabledChoice_ShowsAuthoredHint_OrDefault()
+    {
+        DialogueDatabaseAsset asset = BuildDemoDatabase();
+        HeroProfileData hero = new HeroProfileData();
+        NarrativeStateData state = new NarrativeStateData();
+        NarrativeDialogueRuntimeSession session = new NarrativeDialogueRuntimeSession();
+        Assert.IsTrue(session.Start(asset, "demo_checks", hero, state, out NarrativeDialogueView view, out string error), error);
+        view = AdvanceCurrentNodeText(session, view);
+        Assert.AreEqual("Пока недоступно.", FindChoice(view.DisabledChoices, "c_secret_disabled").DisabledHint);
+
+        DialogueChoiceData choice = asset.FindDialogue("demo_checks").Nodes[0].Choices[3];
+        SetField(choice, "unavailableHint", "Сначала найди второй ключ.");
+        Assert.AreEqual("Сначала найди второй ключ.", FindChoice(session.BuildView().DisabledChoices, "c_secret_disabled").DisabledHint);
+    }
+
+    private static NarrativeDialogueChoiceView FindChoice(IReadOnlyList<NarrativeDialogueChoiceView> list, string choiceId)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i].ChoiceId == choiceId)
+                return list[i];
+        }
+        return null;
+    }
+
+    [Test]
     public void ActiveDecisive_Choice_Does_Not_Reroll_On_Revisit()
     {
         DialogueDatabaseAsset asset = BuildDemoDatabase();

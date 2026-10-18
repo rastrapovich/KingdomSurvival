@@ -24,6 +24,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public static string Workspace => Path.Combine(Folder, "workspace.json");
         public static string Snapshot => Path.Combine(Folder, "unity-snapshot.json");
         public static string Html => Path.Combine(Folder, "Мастерская квестов.html");
+        public static string SyncState => Path.Combine(Folder, "unity-sync.json");
 
         public static DialogueDatabaseAsset LoadDialogues()
         {
@@ -45,7 +46,9 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         {
             if (!Directory.Exists(Folder))
                 return "Папка мастерской не найдена: " + Folder;
-            string json = QuestWorkshopImporter.BuildSnapshotJson(LoadDialogues(), LoadEncounters(), LoadFlags(), QuestWorkshopImporter.ReadGitCommit(ProjectRoot));
+            DialogueDatabaseAsset dialogues = LoadDialogues();
+            Dictionary<string, string> media = QuestWorkshopMedia.Export(Folder, dialogues);
+            string json = QuestWorkshopImporter.BuildSnapshotJson(dialogues, LoadEncounters(), LoadFlags(), QuestWorkshopImporter.ReadGitCommit(ProjectRoot), media);
             File.WriteAllText(Snapshot, json, new System.Text.UTF8Encoding(false));
             return "Снимок для мастерской обновлён: " + Snapshot;
         }
@@ -62,6 +65,9 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         private WorkshopProject project;
         private List<WorkshopSceneReport> reports = new List<WorkshopSceneReport>();
         private readonly HashSet<WorkshopScene> selected = new HashSet<WorkshopScene>();
+        private List<WorkshopSpeakerReport> speakerReports = new List<WorkshopSpeakerReport>();
+        private readonly HashSet<string> selectedSpeakers = new HashSet<string>(StringComparer.Ordinal);
+        private QuestWorkshopSyncState sync = new QuestWorkshopSyncState();
         private WorkshopSceneReport current;
         private DateTime loadedWriteTime;
         private string loadError = string.Empty;
@@ -99,7 +105,11 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 return;
             }
             WorkshopProject loaded = WorkshopProject.Load(QuestWorkshopPaths.Workspace);
-            List<WorkshopSceneReport> list = QuestWorkshopImporter.Analyze(loaded, QuestWorkshopPaths.LoadDialogues(), QuestWorkshopPaths.LoadEncounters());
+            QuestWorkshopSyncState state = QuestWorkshopSyncState.Load(QuestWorkshopPaths.SyncState);
+            List<WorkshopSceneReport> list = QuestWorkshopImporter.Analyze(loaded, QuestWorkshopPaths.LoadDialogues(), QuestWorkshopPaths.LoadEncounters(), state);
+            foreach (WorkshopSpeakerReport speaker in QuestWorkshopImporter.AnalyzeSpeakers(loaded, QuestWorkshopPaths.LoadDialogues(), state))
+                Debug.Log("Мастерская квестов: говорящий " + speaker.SpeakerId + " — " + speaker.Describe());
+            state.Save(QuestWorkshopPaths.SyncState);
             foreach (IGrouping<WorkshopSceneState, WorkshopSceneReport> group in list.GroupBy(r => r.State))
                 Debug.Log("Мастерская квестов: " + group.Key + " — " + group.Count());
             foreach (WorkshopSceneReport report in list.Where(r => r.State == WorkshopSceneState.Changed || r.State == WorkshopSceneState.Errors || r.EncounterState == "изменена"))
@@ -116,6 +126,14 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             toolbar.Add(new ToolbarButton(OpenWorkshop) { text = "Открыть мастерскую" });
             toolbar.Add(new ToolbarButton(Reload) { text = "Перечитать" });
             toolbar.Add(new ToolbarButton(UpdateSnapshot) { text = "Обновить снимок для мастерской", tooltip = "Записать QuestWorkshop/unity-snapshot.json — его показывает «Из базы Unity»" });
+            ToolbarToggle autoSync = new ToolbarToggle
+            {
+                text = "Автосинхронизация",
+                value = QuestWorkshopAutoSync.Enabled,
+                tooltip = "Сразу переносить в Unity новые сцены и сцены, которые в Unity с прошлой синхронизации не правили. Конфликты и правки из Unity не трогаются."
+            };
+            autoSync.RegisterValueChangedCallback(evt => QuestWorkshopAutoSync.Enabled = evt.newValue);
+            toolbar.Add(autoSync);
             toolbar.Add(new ToolbarSpacer { flex = true });
             toolbar.Add(new ToolbarButton(() => EditorUtility.RevealInFinder(QuestWorkshopPaths.Folder)) { text = "Папка" });
             root.Add(toolbar);
@@ -157,6 +175,25 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             root.Add(resultLabel);
 
             Reload();
+        }
+
+        private void OnEnable()
+        {
+            QuestWorkshopAutoSync.Synced += OnAutoSynced;
+        }
+
+        private void OnDisable()
+        {
+            QuestWorkshopAutoSync.Synced -= OnAutoSynced;
+        }
+
+        private void OnAutoSynced(WorkshopImportResult result)
+        {
+            if (statusLabel == null)
+                return;
+            Reload();
+            if (result != null && result.Changed)
+                resultLabel.text = "Автосинхронизация: " + result.Summary();
         }
 
         private void OnFocus()
@@ -203,7 +240,12 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                     if (dialogues == null)
                         loadError = "База диалогов не найдена: " + QuestWorkshopPaths.DialogueDatabasePath;
                     else
-                        reports = QuestWorkshopImporter.Analyze(project, dialogues, QuestWorkshopPaths.LoadEncounters());
+                    {
+                        sync = QuestWorkshopSyncState.Load(QuestWorkshopPaths.SyncState);
+                        reports = QuestWorkshopImporter.Analyze(project, dialogues, QuestWorkshopPaths.LoadEncounters(), sync);
+                        speakerReports = QuestWorkshopImporter.AnalyzeSpeakers(project, dialogues, sync);
+                        sync.Save(QuestWorkshopPaths.SyncState);
+                    }
                 }
                 catch (Exception error)
                 {
@@ -217,6 +259,11 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             foreach (WorkshopSceneReport report in reports)
                 if (keep.Contains(report.Scene.UnityId) && report.Transferable)
                     selected.Add(report.Scene);
+            HashSet<string> keepSpeakers = new HashSet<string>(selectedSpeakers);
+            selectedSpeakers.Clear();
+            foreach (WorkshopSpeakerReport speaker in speakerReports)
+                if (keepSpeakers.Contains(speaker.SpeakerId) && speaker.Transferable)
+                    selectedSpeakers.Add(speaker.SpeakerId);
             current = current != null ? reports.FirstOrDefault(r => r.Scene.UnityId == current.Scene.UnityId && r.Scene.Id == current.Scene.Id) : null;
             UpdateStatus();
             RebuildList();
@@ -232,12 +279,16 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 statusLabel.text = loadError;
                 return;
             }
-            int pending = reports.Count(r => r.Transferable);
+            int pending = reports.Count(r => r.Transferable && r.State != WorkshopSceneState.Conflict);
+            int unityNewer = reports.Count(r => r.State == WorkshopSceneState.UnityNewer);
+            int conflicts = reports.Count(r => r.State == WorkshopSceneState.Conflict);
             int same = reports.Count(r => r.State == WorkshopSceneState.Same);
             int errors = reports.Count(r => r.State == WorkshopSceneState.Errors || r.State == WorkshopSceneState.NoUnityId);
             int plans = reports.Count(r => r.State == WorkshopSceneState.Plan);
             statusLabel.text = $"Проект «{project.Name}» · сохранён {FormatTime(project.SavedAt)} · версия {project.Revision} · историй {project.Quests.Count}\n" +
-                               $"К переносу: {pending} · совпадает с Unity: {same} · с ошибками: {errors} · только план: {plans}";
+                               $"К переносу: {pending} · правили в Unity: {unityNewer} · конфликтов: {conflicts} · совпадает: {same} · с ошибками: {errors} · план: {plans}" +
+                               (speakerReports.Count > 0 ? $" · говорящих к сверке: {speakerReports.Count}" : string.Empty) +
+                               (QuestWorkshopAutoSync.Enabled ? "\nАвтосинхронизация включена: безопасные изменения мастерской переносятся сами." : string.Empty);
         }
 
         private static string FormatTime(string iso)
@@ -275,6 +326,30 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 .GroupBy(r => string.IsNullOrEmpty(r.Scene.Quest.Line) ? "Без сюжетной линии" : r.Scene.Quest.Line)
                 .OrderBy(g => g.Key, StringComparer.CurrentCulture);
             int shown = 0;
+            if (speakerReports.Count > 0)
+            {
+                Foldout speakers = new Foldout { text = "Говорящие (" + speakerReports.Count + ")", value = true };
+                speakers.style.unityFontStyleAndWeight = FontStyle.Bold;
+                foreach (WorkshopSpeakerReport speaker in speakerReports)
+                {
+                    VisualElement row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, paddingLeft = 4, unityFontStyleAndWeight = FontStyle.Normal } };
+                    Toggle toggle = new Toggle { value = selectedSpeakers.Contains(speaker.SpeakerId) };
+                    toggle.SetEnabled(speaker.Transferable);
+                    toggle.RegisterValueChangedCallback(evt =>
+                    {
+                        if (evt.newValue)
+                            selectedSpeakers.Add(speaker.SpeakerId);
+                        else
+                            selectedSpeakers.Remove(speaker.SpeakerId);
+                        RebuildList();
+                    });
+                    row.Add(toggle);
+                    row.Add(new Label(speaker.SpeakerId + ": " + speaker.Describe()) { style = { whiteSpace = WhiteSpace.Normal, flexShrink = 1 } });
+                    speakers.Add(row);
+                    shown++;
+                }
+                listView.Add(speakers);
+            }
             foreach (IGrouping<string, WorkshopSceneReport> line in lines)
             {
                 Foldout lineFoldout = new Foldout { text = line.Key + " (" + line.Count() + ")", value = true };
@@ -297,7 +372,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             if (shown == 0)
                 listView.Add(new Label(onlyPendingToggle.value ? "Всё совпадает с Unity — переносить нечего." : "Ничего не найдено.") { style = { paddingLeft = 8, paddingTop = 8 } });
 
-            int count = selected.Count;
+            int count = selected.Count + selectedSpeakers.Count;
             transferButton.text = count > 0 ? $"Перенести в Unity ({count})" : "Перенести в Unity";
             transferButton.SetEnabled(count > 0);
         }
@@ -361,7 +436,9 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 WorkshopSceneState.Errors => "ошибки",
                 WorkshopSceneState.New => "новая",
                 WorkshopSceneState.Same => "совпадает",
-                WorkshopSceneState.Changed => "отличается",
+                WorkshopSceneState.Changed => report.Direction == WorkshopSyncDirection.WorkshopNewer ? "из мастерской" : "отличается",
+                WorkshopSceneState.UnityNewer => "правили в Unity",
+                WorkshopSceneState.Conflict => "конфликт",
                 _ => report.State.ToString()
             };
             if (report.State == WorkshopSceneState.Same && (report.EncounterState == "новая" || report.EncounterState == "изменена"))
@@ -378,6 +455,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 case WorkshopSceneState.Errors: return ErrorColor;
                 case WorkshopSceneState.New: return NewColor;
                 case WorkshopSceneState.Changed: return ChangedColor;
+                case WorkshopSceneState.Conflict: return ErrorColor;
+                case WorkshopSceneState.UnityNewer: return PlanColor;
                 default: return report.Transferable ? ChangedColor : SameColor;
             }
         }
@@ -447,14 +526,18 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         {
             selected.Clear();
             foreach (WorkshopSceneReport report in reports)
-                if (report.Transferable && Visible(report))
+                if (report.Transferable && report.State != WorkshopSceneState.Conflict && Visible(report))
                     selected.Add(report.Scene);
+            selectedSpeakers.Clear();
+            foreach (WorkshopSpeakerReport speaker in speakerReports)
+                if (speaker.Transferable && speaker.Direction != WorkshopSyncDirection.Conflict)
+                    selectedSpeakers.Add(speaker.SpeakerId);
             RebuildList();
         }
 
         private void Transfer()
         {
-            if (project == null || selected.Count == 0)
+            if (project == null || selected.Count + selectedSpeakers.Count == 0)
                 return;
             DialogueDatabaseAsset dialogues = QuestWorkshopPaths.LoadDialogues();
             EncounterDatabaseAsset encounters = QuestWorkshopPaths.LoadEncounters();
@@ -466,9 +549,13 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             }
 
             List<WorkshopScene> scenes = reports.Where(r => selected.Contains(r.Scene) && r.Transferable).Select(r => r.Scene).ToList();
-            int updates = reports.Count(r => selected.Contains(r.Scene) && r.State == WorkshopSceneState.Changed);
+            int updates = reports.Count(r => selected.Contains(r.Scene) && (r.State == WorkshopSceneState.Changed || r.State == WorkshopSceneState.Conflict));
+            int conflicts = reports.Count(r => selected.Contains(r.Scene) && r.State == WorkshopSceneState.Conflict);
+            List<WorkshopSpeakerReport> speakers = speakerReports.Where(s => selectedSpeakers.Contains(s.SpeakerId) && s.Transferable).ToList();
             if (!EditorUtility.DisplayDialog("Перенести в Unity",
-                    $"Сцен к переносу: {scenes.Count} (новых: {scenes.Count - updates}, обновлений: {updates}).\n\n" +
+                    $"Сцен к переносу: {scenes.Count} (новых: {scenes.Count - updates}, обновлений: {updates}" +
+                    (conflicts > 0 ? $", из них конфликтов: {conflicts} — правки Unity в них будут заменены" : string.Empty) + ")" +
+                    (speakers.Count > 0 ? $"; говорящих: {speakers.Count}" : string.Empty) + ".\n\n" +
                     "Текст, ответы, проверки и эффекты в базе Unity будут заменены версией мастерской. " +
                     "Иллюстрации, портреты и раскладка графа сохранятся. Отменить можно через Edit → Undo.",
                     "Перенести", "Отмена"))
@@ -481,7 +568,9 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 targets.Add(flags);
             Undo.RecordObjects(targets.ToArray(), "Мастерская квестов: перенос в Unity");
 
-            WorkshopImportResult result = QuestWorkshopImporter.Apply(project, scenes, dialogues, encounters, flags);
+            WorkshopImportResult result = QuestWorkshopImporter.Apply(project, scenes, dialogues, encounters, flags, sync);
+            QuestWorkshopImporter.ApplySpeakers(project, speakers, dialogues, result, sync);
+            sync.Save(QuestWorkshopPaths.SyncState);
             if (result.Changed)
             {
                 foreach (UnityEngine.Object target in targets)
@@ -491,6 +580,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             }
 
             selected.Clear();
+            selectedSpeakers.Clear();
             Reload();
             resultLabel.text = result.Summary() + (result.Changed ? "\nСнимок для мастерской обновлён." : string.Empty);
             Debug.Log("Мастерская квестов: перенос в Unity.\n" + result.Summary());

@@ -216,7 +216,7 @@ MonoBehaviour:
     attack: 2
     defense: 2
     damage: 3
-    movement: 24
+    movement: 4
     initiative: 2
     attackRange: 1
     portrait: {fileID: 21300000, guid: 6e6b1183fa308e64e8773ce8b59a02c9, type: 3}
@@ -296,12 +296,12 @@ MonoBehaviour:
     attackRange: 1
     portrait: {fileID: 21300000, guid: 83fa1a0ca6eee6d49bd02a9b5a3da1c8, type: 3}
     portraitFitMode: 0
-    portraitScale: 1
+    portraitScale: 0.94
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: f307f18609cf733428ea3cf99fca80e4, type: 3}
-    battlefieldScale: 1
+    battlefieldScale: 2.2
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:
@@ -529,12 +529,12 @@ MonoBehaviour:
     attackRange: 1
     portrait: {fileID: 21300000, guid: 34a5d14802a902b44b546cb1c7fec3c4, type: 3}
     portraitFitMode: 0
-    portraitScale: 1
+    portraitScale: 1.04
     portraitOffsetNormalized: {x: 0, y: 0}
     portraitFlipX: 0
     portraitOffset: {x: 0, y: 0}
     battlefieldSprite: {fileID: 21300000, guid: 6fc3b9447087df8429bd11ef4052c2a4, type: 3}
-    battlefieldScale: 1.22
+    battlefieldScale: 1.43
     battlefieldOffset: {x: 0, y: 0}
     animationSetId: 
     tagIds:

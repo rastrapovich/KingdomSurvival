@@ -720,6 +720,569 @@ MonoBehaviour:
       VignetteColor: {r: 0, g: 0, b: 0, a: 1}
       Grain: 0
       Tonemapping: 0
+      GrainType: 0
+      GrainResponse: 0.8
+      Tone:
+        Lut: {fileID: 0}
+        LutContribution: 1
+        SplitToning: 0
+        SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
+        SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
+        SplitBalance: 0
+        ShadowsMidtonesHighlights: 0
+        Shadows:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Midtones:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Highlights:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        LiftGammaGain: 0
+        Lift:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gamma:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gain:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        ChannelMixer: 0
+        MixerRed: {x: 100, y: 0, z: 0}
+        MixerGreen: {x: 0, y: 100, z: 0}
+        MixerBlue: {x: 0, y: 0, z: 100}
+        Curves: 0
+        Master:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Red:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Green:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Blue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        SaturationVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        LuminanceVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsHue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        ShadowsStart: 0
+        ShadowsEnd: 0.3
+        HighlightsStart: 0.55
+        HighlightsEnd: 1
+        SelectiveColor: 0
+        Selective:
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        GradientMap: 0
+        GradientColors:
+          serializedVersion: 2
+          key0: {r: 0.08, g: 0.07, b: 0.12, a: 1}
+          key1: {r: 0.45, g: 0.38, b: 0.3, a: 1}
+          key2: {r: 0.98, g: 0.9, b: 0.74, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 32768
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 3
+          m_NumAlphaKeys: 2
+        GradientStrength: 0.5
+      Lens:
+        ChromaticAberration: 0
+        Distortion: 0
+        DistortionScale: 1
+        PulseAberration: 0.6
+        PulseDistortion: -0.25
+        PulseDuration: 0.45
+        PulseOnHit: 0
+        PulseOnHitTargets: 0
+        PulseHitStrength: 0.6
+        PulseKillStrength: 1
+        PulseShake: 1
+        PulseShakeAmount: 0.012
+        PulseFlash: 0
+        PulseFlashColor: {r: 1, g: 0.92, b: 0.85, a: 1}
+        PulseFlashStrength: 0.25
+      Canvas:
+        Painterly: 0
+        PainterlyRadius: 3
+        PainterlyStrength: 1
+        Fog: 0
+        FogDirection: 0
+        FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
+        FogDensity: 0.35
+        FogStart: 0.45
+        FogEnd: 1
+        FogNoise: 0.35
+        FogNoiseScale: 3
+        FogSpeed: 0.03
+        Palette: 0
+        PaletteLevels: 8
+        PaletteTexture: {fileID: 0}
+        PaletteStrength: 1
+        PaletteDither: 0.3
+        Paper: 0
+        PaperTexture: {fileID: 0}
+        PaperStrength: 0.35
+        PaperScale: 1
+        PaperFibers: 0.5
+        Sharpen: 0
+        SharpenStrength: 0.6
+        TiltShift: 0
+        TiltFocus: 0.5
+        TiltBand: 0.35
+        TiltBlur: 5
+        Ink: 0
+        InkColor: {r: 0.1, g: 0.07, b: 0.05, a: 1}
+        InkThreshold: 0.35
+        InkWidth: 1
+        InkStrength: 0.8
+        Hatching: 0
+        HatchColor: {r: 0.12, g: 0.09, b: 0.07, a: 1}
+        HatchThreshold: 0.35
+        HatchCross: 0.18
+        HatchSpacing: 6
+        HatchStrength: 0.6
+        Border: 0
+        BorderTexture: {fileID: 0}
+        BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
+        BorderSize: 0.04
+        BorderRoughness: 0.5
+        Film: 0
+        FilmDust: 0.4
+        FilmScratches: 0.3
+        FilmFlicker: 0.3
+      Sprites:
+        Wind: 0
+        WindStrength: 0.08
+        WindSpeed: 1
+        WindGusts: 0.5
+        WindHeight: 2.5
+        WindDirection: 0.3
+        WindTrees: 0.6
+        WindPlants: 1
+        Outline: 0
+        OutlineColor: {r: 0.08, g: 0.06, b: 0.05, a: 0.85}
+        OutlineWidth: 1.5
+        OutlinePeople: 1
+        OutlineObjects: 0
+        Distance: 0
+        DistanceStart: 0.55
+        DistanceEnd: 1
+        DistanceDesaturate: 0.45
+        DistanceHaze: {r: 0.6, g: 0.64, b: 0.66, a: 1}
+        DistanceHazeStrength: 0.25
+        Dissolve: 0
+        DissolveDuration: 1.2
+        DissolveEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
+        DissolveEdgeWidth: 0.08
+        DissolveScale: 40
+        DissolveAmount: 1
+        Rim: 0
+        RimStrength: 0.8
+        RimWidth: 2
+        RimPeople: 1
+        RimObjects: 0
+      Atmosphere:
+        Dust:
+          Enabled: 0
+          Density: 4
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 6
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.12
+          WanderFrequency: 0.3
+          Color: {r: 1, g: 0.93, b: 0.78, a: 1}
+          ColorB: {r: 1, g: 0.85, b: 0.6, a: 1}
+          Opacity: 0.45
+          WindShare: 0.3
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Midges:
+          Enabled: 0
+          Density: 25
+          Size: 0.022
+          SizeJitter: 0.3
+          Lifetime: 3
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.9
+          WanderFrequency: 3
+          Color: {r: 0.1, g: 0.09, b: 0.07, a: 1}
+          ColorB: {r: 0.2, g: 0.18, b: 0.12, a: 1}
+          Opacity: 0.8
+          WindShare: 0.1
+          Texture: {fileID: 0}
+          Time: 3
+          FromHour: 17
+          ToHour: 22
+          Stretch: 1
+          Groups: 3
+        Rain:
+          Enabled: 0
+          Density: 60
+          Size: 0.025
+          SizeJitter: 0.3
+          Lifetime: 1.2
+          Speed: 9
+          Angle: 260
+          Spread: 4
+          Gravity: 0
+          Wander: 0
+          WanderFrequency: 0.5
+          Color: {r: 0.75, g: 0.8, b: 0.88, a: 1}
+          ColorB: {r: 0.65, g: 0.7, b: 0.8, a: 1}
+          Opacity: 0.35
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 14
+          Groups: 3
+        Leaves:
+          Enabled: 0
+          Density: 0.6
+          Size: 0.09
+          SizeJitter: 0.4
+          Lifetime: 9
+          Speed: 0.35
+          Angle: 270
+          Spread: 40
+          Gravity: 0.03
+          Wander: 0.5
+          WanderFrequency: 0.4
+          Color: {r: 0.62, g: 0.45, b: 0.16, a: 1}
+          ColorB: {r: 0.45, g: 0.3, b: 0.12, a: 1}
+          Opacity: 0.9
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Sparks:
+          Enabled: 0
+          Density: 6
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 1.6
+          Speed: 0.9
+          Angle: 90
+          Spread: 35
+          Gravity: -0.05
+          Wander: 0.5
+          WanderFrequency: 1.5
+          Color: {r: 1, g: 0.7, b: 0.25, a: 1}
+          ColorB: {r: 1, g: 0.35, b: 0.08, a: 1}
+          Opacity: 1
+          WindShare: 0.4
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Breath:
+          Enabled: 0
+          Density: 0.5
+          Size: 0.16
+          SizeJitter: 0.3
+          Lifetime: 1.6
+          Speed: 0.12
+          Angle: 80
+          Spread: 25
+          Gravity: -0.02
+          Wander: 0.1
+          WanderFrequency: 0.6
+          Color: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+          ColorB: {r: 0.85, g: 0.88, b: 0.92, a: 1}
+          Opacity: 0.22
+          WindShare: 0.5
+          Texture: {fileID: 0}
+          Time: 2
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Version: 0
+      Quality:
+        Antialiasing: 0
+      Characters:
+        All:
+          UnitId: 
+          Hue: 0
+          Saturation: 1
+          Brightness: 1
+          Contrast: 0
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+        Creatures: []
+      Air:
+        Clouds: 0
+        CloudCoverage: 0.45
+        CloudDarkness: 0.35
+        CloudScale: 8
+        CloudSoftness: 0.35
+        CloudSpeed: 0.4
+        CloudAngle: 20
+        Rays: 0
+        RaysFollowSun: 1
+        RaysAngle: 250
+        RaysIntensity: 0.2
+        RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+        RaysWidth: 1.2
+        RaysDensity: 0.5
+        RaysSpeed: 0.15
+        HeatHaze: 0
+        HazeStrength: 1
+        HazeRadius: 0.6
+        HazeHeight: 1.6
+        HazeSpeed: 1
+      Game:
+        LowHealth: 1
+        LowHealthThreshold: 0.35
+        LowHealthColor: {r: 0.55, g: 0, b: 0, a: 1}
+        LowHealthStrength: 0.75
+        LowHealthPulse: 1.1
+        Stun: 1
+        StunDarkness: 0.45
+        StunDesaturate: 0.6
+        StunBlur: 4
+        FadeColor: {r: 0, g: 0, b: 0, a: 1}
+        Letterbox: 0
+        LetterboxColor: {r: 0, g: 0, b: 0, a: 1}
+    FrameKeys:
+      Enabled: 0
+      Keys: []
+    FrameZones: []
     PeopleCastShadows: 1
     PeopleShadowLength: 0.95
     ShadowMinLean: 0.4
@@ -7804,6 +8367,569 @@ MonoBehaviour:
       VignetteColor: {r: 0, g: 0, b: 0, a: 1}
       Grain: 0
       Tonemapping: 0
+      GrainType: 0
+      GrainResponse: 0.8
+      Tone:
+        Lut: {fileID: 0}
+        LutContribution: 1
+        SplitToning: 0
+        SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
+        SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
+        SplitBalance: 0
+        ShadowsMidtonesHighlights: 0
+        Shadows:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Midtones:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Highlights:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        LiftGammaGain: 0
+        Lift:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gamma:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gain:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        ChannelMixer: 0
+        MixerRed: {x: 100, y: 0, z: 0}
+        MixerGreen: {x: 0, y: 100, z: 0}
+        MixerBlue: {x: 0, y: 0, z: 100}
+        Curves: 0
+        Master:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Red:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Green:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Blue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        SaturationVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        LuminanceVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsHue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        ShadowsStart: 0
+        ShadowsEnd: 0.3
+        HighlightsStart: 0.55
+        HighlightsEnd: 1
+        SelectiveColor: 0
+        Selective:
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        GradientMap: 0
+        GradientColors:
+          serializedVersion: 2
+          key0: {r: 0.08, g: 0.07, b: 0.12, a: 1}
+          key1: {r: 0.45, g: 0.38, b: 0.3, a: 1}
+          key2: {r: 0.98, g: 0.9, b: 0.74, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 32768
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 3
+          m_NumAlphaKeys: 2
+        GradientStrength: 0.5
+      Lens:
+        ChromaticAberration: 0
+        Distortion: 0
+        DistortionScale: 1
+        PulseAberration: 0.6
+        PulseDistortion: -0.25
+        PulseDuration: 0.45
+        PulseOnHit: 0
+        PulseOnHitTargets: 0
+        PulseHitStrength: 0.6
+        PulseKillStrength: 1
+        PulseShake: 1
+        PulseShakeAmount: 0.012
+        PulseFlash: 0
+        PulseFlashColor: {r: 1, g: 0.92, b: 0.85, a: 1}
+        PulseFlashStrength: 0.25
+      Canvas:
+        Painterly: 0
+        PainterlyRadius: 3
+        PainterlyStrength: 1
+        Fog: 0
+        FogDirection: 0
+        FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
+        FogDensity: 0.35
+        FogStart: 0.45
+        FogEnd: 1
+        FogNoise: 0.35
+        FogNoiseScale: 3
+        FogSpeed: 0.03
+        Palette: 0
+        PaletteLevels: 8
+        PaletteTexture: {fileID: 0}
+        PaletteStrength: 1
+        PaletteDither: 0.3
+        Paper: 0
+        PaperTexture: {fileID: 0}
+        PaperStrength: 0.35
+        PaperScale: 1
+        PaperFibers: 0.5
+        Sharpen: 0
+        SharpenStrength: 0.6
+        TiltShift: 0
+        TiltFocus: 0.5
+        TiltBand: 0.35
+        TiltBlur: 5
+        Ink: 0
+        InkColor: {r: 0.1, g: 0.07, b: 0.05, a: 1}
+        InkThreshold: 0.35
+        InkWidth: 1
+        InkStrength: 0.8
+        Hatching: 0
+        HatchColor: {r: 0.12, g: 0.09, b: 0.07, a: 1}
+        HatchThreshold: 0.35
+        HatchCross: 0.18
+        HatchSpacing: 6
+        HatchStrength: 0.6
+        Border: 0
+        BorderTexture: {fileID: 0}
+        BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
+        BorderSize: 0.04
+        BorderRoughness: 0.5
+        Film: 0
+        FilmDust: 0.4
+        FilmScratches: 0.3
+        FilmFlicker: 0.3
+      Sprites:
+        Wind: 0
+        WindStrength: 0.08
+        WindSpeed: 1
+        WindGusts: 0.5
+        WindHeight: 2.5
+        WindDirection: 0.3
+        WindTrees: 0.6
+        WindPlants: 1
+        Outline: 0
+        OutlineColor: {r: 0.08, g: 0.06, b: 0.05, a: 0.85}
+        OutlineWidth: 1.5
+        OutlinePeople: 1
+        OutlineObjects: 0
+        Distance: 0
+        DistanceStart: 0.55
+        DistanceEnd: 1
+        DistanceDesaturate: 0.45
+        DistanceHaze: {r: 0.6, g: 0.64, b: 0.66, a: 1}
+        DistanceHazeStrength: 0.25
+        Dissolve: 0
+        DissolveDuration: 1.2
+        DissolveEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
+        DissolveEdgeWidth: 0.08
+        DissolveScale: 40
+        DissolveAmount: 1
+        Rim: 0
+        RimStrength: 0.8
+        RimWidth: 2
+        RimPeople: 1
+        RimObjects: 0
+      Atmosphere:
+        Dust:
+          Enabled: 0
+          Density: 4
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 6
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.12
+          WanderFrequency: 0.3
+          Color: {r: 1, g: 0.93, b: 0.78, a: 1}
+          ColorB: {r: 1, g: 0.85, b: 0.6, a: 1}
+          Opacity: 0.45
+          WindShare: 0.3
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Midges:
+          Enabled: 0
+          Density: 25
+          Size: 0.022
+          SizeJitter: 0.3
+          Lifetime: 3
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.9
+          WanderFrequency: 3
+          Color: {r: 0.1, g: 0.09, b: 0.07, a: 1}
+          ColorB: {r: 0.2, g: 0.18, b: 0.12, a: 1}
+          Opacity: 0.8
+          WindShare: 0.1
+          Texture: {fileID: 0}
+          Time: 3
+          FromHour: 17
+          ToHour: 22
+          Stretch: 1
+          Groups: 3
+        Rain:
+          Enabled: 0
+          Density: 60
+          Size: 0.025
+          SizeJitter: 0.3
+          Lifetime: 1.2
+          Speed: 9
+          Angle: 260
+          Spread: 4
+          Gravity: 0
+          Wander: 0
+          WanderFrequency: 0.5
+          Color: {r: 0.75, g: 0.8, b: 0.88, a: 1}
+          ColorB: {r: 0.65, g: 0.7, b: 0.8, a: 1}
+          Opacity: 0.35
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 14
+          Groups: 3
+        Leaves:
+          Enabled: 0
+          Density: 0.6
+          Size: 0.09
+          SizeJitter: 0.4
+          Lifetime: 9
+          Speed: 0.35
+          Angle: 270
+          Spread: 40
+          Gravity: 0.03
+          Wander: 0.5
+          WanderFrequency: 0.4
+          Color: {r: 0.62, g: 0.45, b: 0.16, a: 1}
+          ColorB: {r: 0.45, g: 0.3, b: 0.12, a: 1}
+          Opacity: 0.9
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Sparks:
+          Enabled: 0
+          Density: 6
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 1.6
+          Speed: 0.9
+          Angle: 90
+          Spread: 35
+          Gravity: -0.05
+          Wander: 0.5
+          WanderFrequency: 1.5
+          Color: {r: 1, g: 0.7, b: 0.25, a: 1}
+          ColorB: {r: 1, g: 0.35, b: 0.08, a: 1}
+          Opacity: 1
+          WindShare: 0.4
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Breath:
+          Enabled: 0
+          Density: 0.5
+          Size: 0.16
+          SizeJitter: 0.3
+          Lifetime: 1.6
+          Speed: 0.12
+          Angle: 80
+          Spread: 25
+          Gravity: -0.02
+          Wander: 0.1
+          WanderFrequency: 0.6
+          Color: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+          ColorB: {r: 0.85, g: 0.88, b: 0.92, a: 1}
+          Opacity: 0.22
+          WindShare: 0.5
+          Texture: {fileID: 0}
+          Time: 2
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Version: 0
+      Quality:
+        Antialiasing: 0
+      Characters:
+        All:
+          UnitId: 
+          Hue: 0
+          Saturation: 1
+          Brightness: 1
+          Contrast: 0
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+        Creatures: []
+      Air:
+        Clouds: 0
+        CloudCoverage: 0.45
+        CloudDarkness: 0.35
+        CloudScale: 8
+        CloudSoftness: 0.35
+        CloudSpeed: 0.4
+        CloudAngle: 20
+        Rays: 0
+        RaysFollowSun: 1
+        RaysAngle: 250
+        RaysIntensity: 0.2
+        RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+        RaysWidth: 1.2
+        RaysDensity: 0.5
+        RaysSpeed: 0.15
+        HeatHaze: 0
+        HazeStrength: 1
+        HazeRadius: 0.6
+        HazeHeight: 1.6
+        HazeSpeed: 1
+      Game:
+        LowHealth: 1
+        LowHealthThreshold: 0.35
+        LowHealthColor: {r: 0.55, g: 0, b: 0, a: 1}
+        LowHealthStrength: 0.75
+        LowHealthPulse: 1.1
+        Stun: 1
+        StunDarkness: 0.45
+        StunDesaturate: 0.6
+        StunBlur: 4
+        FadeColor: {r: 0, g: 0, b: 0, a: 1}
+        Letterbox: 0
+        LetterboxColor: {r: 0, g: 0, b: 0, a: 1}
+    FrameKeys:
+      Enabled: 0
+      Keys: []
+    FrameZones: []
     PeopleCastShadows: 1
     PeopleShadowLength: 1
     ShadowMinLean: 0.4
@@ -8140,6 +9266,569 @@ MonoBehaviour:
       VignetteColor: {r: 0, g: 0, b: 0, a: 1}
       Grain: 0
       Tonemapping: 0
+      GrainType: 0
+      GrainResponse: 0.8
+      Tone:
+        Lut: {fileID: 0}
+        LutContribution: 1
+        SplitToning: 0
+        SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
+        SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
+        SplitBalance: 0
+        ShadowsMidtonesHighlights: 0
+        Shadows:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Midtones:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Highlights:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        LiftGammaGain: 0
+        Lift:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gamma:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gain:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        ChannelMixer: 0
+        MixerRed: {x: 100, y: 0, z: 0}
+        MixerGreen: {x: 0, y: 100, z: 0}
+        MixerBlue: {x: 0, y: 0, z: 100}
+        Curves: 0
+        Master:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Red:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Green:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Blue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        SaturationVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        LuminanceVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsHue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        ShadowsStart: 0
+        ShadowsEnd: 0.3
+        HighlightsStart: 0.55
+        HighlightsEnd: 1
+        SelectiveColor: 0
+        Selective:
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        GradientMap: 0
+        GradientColors:
+          serializedVersion: 2
+          key0: {r: 0.08, g: 0.07, b: 0.12, a: 1}
+          key1: {r: 0.45, g: 0.38, b: 0.3, a: 1}
+          key2: {r: 0.98, g: 0.9, b: 0.74, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 32768
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 3
+          m_NumAlphaKeys: 2
+        GradientStrength: 0.5
+      Lens:
+        ChromaticAberration: 0
+        Distortion: 0
+        DistortionScale: 1
+        PulseAberration: 0.6
+        PulseDistortion: -0.25
+        PulseDuration: 0.45
+        PulseOnHit: 0
+        PulseOnHitTargets: 0
+        PulseHitStrength: 0.6
+        PulseKillStrength: 1
+        PulseShake: 1
+        PulseShakeAmount: 0.012
+        PulseFlash: 0
+        PulseFlashColor: {r: 1, g: 0.92, b: 0.85, a: 1}
+        PulseFlashStrength: 0.25
+      Canvas:
+        Painterly: 0
+        PainterlyRadius: 3
+        PainterlyStrength: 1
+        Fog: 0
+        FogDirection: 0
+        FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
+        FogDensity: 0.35
+        FogStart: 0.45
+        FogEnd: 1
+        FogNoise: 0.35
+        FogNoiseScale: 3
+        FogSpeed: 0.03
+        Palette: 0
+        PaletteLevels: 8
+        PaletteTexture: {fileID: 0}
+        PaletteStrength: 1
+        PaletteDither: 0.3
+        Paper: 0
+        PaperTexture: {fileID: 0}
+        PaperStrength: 0.35
+        PaperScale: 1
+        PaperFibers: 0.5
+        Sharpen: 0
+        SharpenStrength: 0.6
+        TiltShift: 0
+        TiltFocus: 0.5
+        TiltBand: 0.35
+        TiltBlur: 5
+        Ink: 0
+        InkColor: {r: 0.1, g: 0.07, b: 0.05, a: 1}
+        InkThreshold: 0.35
+        InkWidth: 1
+        InkStrength: 0.8
+        Hatching: 0
+        HatchColor: {r: 0.12, g: 0.09, b: 0.07, a: 1}
+        HatchThreshold: 0.35
+        HatchCross: 0.18
+        HatchSpacing: 6
+        HatchStrength: 0.6
+        Border: 0
+        BorderTexture: {fileID: 0}
+        BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
+        BorderSize: 0.04
+        BorderRoughness: 0.5
+        Film: 0
+        FilmDust: 0.4
+        FilmScratches: 0.3
+        FilmFlicker: 0.3
+      Sprites:
+        Wind: 0
+        WindStrength: 0.08
+        WindSpeed: 1
+        WindGusts: 0.5
+        WindHeight: 2.5
+        WindDirection: 0.3
+        WindTrees: 0.6
+        WindPlants: 1
+        Outline: 0
+        OutlineColor: {r: 0.08, g: 0.06, b: 0.05, a: 0.85}
+        OutlineWidth: 1.5
+        OutlinePeople: 1
+        OutlineObjects: 0
+        Distance: 0
+        DistanceStart: 0.55
+        DistanceEnd: 1
+        DistanceDesaturate: 0.45
+        DistanceHaze: {r: 0.6, g: 0.64, b: 0.66, a: 1}
+        DistanceHazeStrength: 0.25
+        Dissolve: 0
+        DissolveDuration: 1.2
+        DissolveEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
+        DissolveEdgeWidth: 0.08
+        DissolveScale: 40
+        DissolveAmount: 1
+        Rim: 0
+        RimStrength: 0.8
+        RimWidth: 2
+        RimPeople: 1
+        RimObjects: 0
+      Atmosphere:
+        Dust:
+          Enabled: 0
+          Density: 4
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 6
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.12
+          WanderFrequency: 0.3
+          Color: {r: 1, g: 0.93, b: 0.78, a: 1}
+          ColorB: {r: 1, g: 0.85, b: 0.6, a: 1}
+          Opacity: 0.45
+          WindShare: 0.3
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Midges:
+          Enabled: 0
+          Density: 25
+          Size: 0.022
+          SizeJitter: 0.3
+          Lifetime: 3
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.9
+          WanderFrequency: 3
+          Color: {r: 0.1, g: 0.09, b: 0.07, a: 1}
+          ColorB: {r: 0.2, g: 0.18, b: 0.12, a: 1}
+          Opacity: 0.8
+          WindShare: 0.1
+          Texture: {fileID: 0}
+          Time: 3
+          FromHour: 17
+          ToHour: 22
+          Stretch: 1
+          Groups: 3
+        Rain:
+          Enabled: 0
+          Density: 60
+          Size: 0.025
+          SizeJitter: 0.3
+          Lifetime: 1.2
+          Speed: 9
+          Angle: 260
+          Spread: 4
+          Gravity: 0
+          Wander: 0
+          WanderFrequency: 0.5
+          Color: {r: 0.75, g: 0.8, b: 0.88, a: 1}
+          ColorB: {r: 0.65, g: 0.7, b: 0.8, a: 1}
+          Opacity: 0.35
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 14
+          Groups: 3
+        Leaves:
+          Enabled: 0
+          Density: 0.6
+          Size: 0.09
+          SizeJitter: 0.4
+          Lifetime: 9
+          Speed: 0.35
+          Angle: 270
+          Spread: 40
+          Gravity: 0.03
+          Wander: 0.5
+          WanderFrequency: 0.4
+          Color: {r: 0.62, g: 0.45, b: 0.16, a: 1}
+          ColorB: {r: 0.45, g: 0.3, b: 0.12, a: 1}
+          Opacity: 0.9
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Sparks:
+          Enabled: 0
+          Density: 6
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 1.6
+          Speed: 0.9
+          Angle: 90
+          Spread: 35
+          Gravity: -0.05
+          Wander: 0.5
+          WanderFrequency: 1.5
+          Color: {r: 1, g: 0.7, b: 0.25, a: 1}
+          ColorB: {r: 1, g: 0.35, b: 0.08, a: 1}
+          Opacity: 1
+          WindShare: 0.4
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Breath:
+          Enabled: 0
+          Density: 0.5
+          Size: 0.16
+          SizeJitter: 0.3
+          Lifetime: 1.6
+          Speed: 0.12
+          Angle: 80
+          Spread: 25
+          Gravity: -0.02
+          Wander: 0.1
+          WanderFrequency: 0.6
+          Color: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+          ColorB: {r: 0.85, g: 0.88, b: 0.92, a: 1}
+          Opacity: 0.22
+          WindShare: 0.5
+          Texture: {fileID: 0}
+          Time: 2
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Version: 0
+      Quality:
+        Antialiasing: 0
+      Characters:
+        All:
+          UnitId: 
+          Hue: 0
+          Saturation: 1
+          Brightness: 1
+          Contrast: 0
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+        Creatures: []
+      Air:
+        Clouds: 0
+        CloudCoverage: 0.45
+        CloudDarkness: 0.35
+        CloudScale: 8
+        CloudSoftness: 0.35
+        CloudSpeed: 0.4
+        CloudAngle: 20
+        Rays: 0
+        RaysFollowSun: 1
+        RaysAngle: 250
+        RaysIntensity: 0.2
+        RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+        RaysWidth: 1.2
+        RaysDensity: 0.5
+        RaysSpeed: 0.15
+        HeatHaze: 0
+        HazeStrength: 1
+        HazeRadius: 0.6
+        HazeHeight: 1.6
+        HazeSpeed: 1
+      Game:
+        LowHealth: 1
+        LowHealthThreshold: 0.35
+        LowHealthColor: {r: 0.55, g: 0, b: 0, a: 1}
+        LowHealthStrength: 0.75
+        LowHealthPulse: 1.1
+        Stun: 1
+        StunDarkness: 0.45
+        StunDesaturate: 0.6
+        StunBlur: 4
+        FadeColor: {r: 0, g: 0, b: 0, a: 1}
+        Letterbox: 0
+        LetterboxColor: {r: 0, g: 0, b: 0, a: 1}
+    FrameKeys:
+      Enabled: 0
+      Keys: []
+    FrameZones: []
     PeopleCastShadows: 1
     PeopleShadowLength: 1
     ShadowMinLean: 0.4
@@ -8731,6 +10420,569 @@ MonoBehaviour:
       VignetteColor: {r: 0, g: 0, b: 0, a: 1}
       Grain: 0
       Tonemapping: 0
+      GrainType: 0
+      GrainResponse: 0.8
+      Tone:
+        Lut: {fileID: 0}
+        LutContribution: 1
+        SplitToning: 0
+        SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
+        SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
+        SplitBalance: 0
+        ShadowsMidtonesHighlights: 0
+        Shadows:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Midtones:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Highlights:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        LiftGammaGain: 0
+        Lift:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gamma:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gain:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        ChannelMixer: 0
+        MixerRed: {x: 100, y: 0, z: 0}
+        MixerGreen: {x: 0, y: 100, z: 0}
+        MixerBlue: {x: 0, y: 0, z: 100}
+        Curves: 0
+        Master:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Red:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Green:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Blue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        SaturationVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        LuminanceVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsHue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        ShadowsStart: 0
+        ShadowsEnd: 0.3
+        HighlightsStart: 0.55
+        HighlightsEnd: 1
+        SelectiveColor: 0
+        Selective:
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        GradientMap: 0
+        GradientColors:
+          serializedVersion: 2
+          key0: {r: 0.08, g: 0.07, b: 0.12, a: 1}
+          key1: {r: 0.45, g: 0.38, b: 0.3, a: 1}
+          key2: {r: 0.98, g: 0.9, b: 0.74, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 32768
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 3
+          m_NumAlphaKeys: 2
+        GradientStrength: 0.5
+      Lens:
+        ChromaticAberration: 0
+        Distortion: 0
+        DistortionScale: 1
+        PulseAberration: 0.6
+        PulseDistortion: -0.25
+        PulseDuration: 0.45
+        PulseOnHit: 0
+        PulseOnHitTargets: 0
+        PulseHitStrength: 0.6
+        PulseKillStrength: 1
+        PulseShake: 1
+        PulseShakeAmount: 0.012
+        PulseFlash: 0
+        PulseFlashColor: {r: 1, g: 0.92, b: 0.85, a: 1}
+        PulseFlashStrength: 0.25
+      Canvas:
+        Painterly: 0
+        PainterlyRadius: 3
+        PainterlyStrength: 1
+        Fog: 0
+        FogDirection: 0
+        FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
+        FogDensity: 0.35
+        FogStart: 0.45
+        FogEnd: 1
+        FogNoise: 0.35
+        FogNoiseScale: 3
+        FogSpeed: 0.03
+        Palette: 0
+        PaletteLevels: 8
+        PaletteTexture: {fileID: 0}
+        PaletteStrength: 1
+        PaletteDither: 0.3
+        Paper: 0
+        PaperTexture: {fileID: 0}
+        PaperStrength: 0.35
+        PaperScale: 1
+        PaperFibers: 0.5
+        Sharpen: 0
+        SharpenStrength: 0.6
+        TiltShift: 0
+        TiltFocus: 0.5
+        TiltBand: 0.35
+        TiltBlur: 5
+        Ink: 0
+        InkColor: {r: 0.1, g: 0.07, b: 0.05, a: 1}
+        InkThreshold: 0.35
+        InkWidth: 1
+        InkStrength: 0.8
+        Hatching: 0
+        HatchColor: {r: 0.12, g: 0.09, b: 0.07, a: 1}
+        HatchThreshold: 0.35
+        HatchCross: 0.18
+        HatchSpacing: 6
+        HatchStrength: 0.6
+        Border: 0
+        BorderTexture: {fileID: 0}
+        BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
+        BorderSize: 0.04
+        BorderRoughness: 0.5
+        Film: 0
+        FilmDust: 0.4
+        FilmScratches: 0.3
+        FilmFlicker: 0.3
+      Sprites:
+        Wind: 0
+        WindStrength: 0.08
+        WindSpeed: 1
+        WindGusts: 0.5
+        WindHeight: 2.5
+        WindDirection: 0.3
+        WindTrees: 0.6
+        WindPlants: 1
+        Outline: 0
+        OutlineColor: {r: 0.08, g: 0.06, b: 0.05, a: 0.85}
+        OutlineWidth: 1.5
+        OutlinePeople: 1
+        OutlineObjects: 0
+        Distance: 0
+        DistanceStart: 0.55
+        DistanceEnd: 1
+        DistanceDesaturate: 0.45
+        DistanceHaze: {r: 0.6, g: 0.64, b: 0.66, a: 1}
+        DistanceHazeStrength: 0.25
+        Dissolve: 0
+        DissolveDuration: 1.2
+        DissolveEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
+        DissolveEdgeWidth: 0.08
+        DissolveScale: 40
+        DissolveAmount: 1
+        Rim: 0
+        RimStrength: 0.8
+        RimWidth: 2
+        RimPeople: 1
+        RimObjects: 0
+      Atmosphere:
+        Dust:
+          Enabled: 0
+          Density: 4
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 6
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.12
+          WanderFrequency: 0.3
+          Color: {r: 1, g: 0.93, b: 0.78, a: 1}
+          ColorB: {r: 1, g: 0.85, b: 0.6, a: 1}
+          Opacity: 0.45
+          WindShare: 0.3
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Midges:
+          Enabled: 0
+          Density: 25
+          Size: 0.022
+          SizeJitter: 0.3
+          Lifetime: 3
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.9
+          WanderFrequency: 3
+          Color: {r: 0.1, g: 0.09, b: 0.07, a: 1}
+          ColorB: {r: 0.2, g: 0.18, b: 0.12, a: 1}
+          Opacity: 0.8
+          WindShare: 0.1
+          Texture: {fileID: 0}
+          Time: 3
+          FromHour: 17
+          ToHour: 22
+          Stretch: 1
+          Groups: 3
+        Rain:
+          Enabled: 0
+          Density: 60
+          Size: 0.025
+          SizeJitter: 0.3
+          Lifetime: 1.2
+          Speed: 9
+          Angle: 260
+          Spread: 4
+          Gravity: 0
+          Wander: 0
+          WanderFrequency: 0.5
+          Color: {r: 0.75, g: 0.8, b: 0.88, a: 1}
+          ColorB: {r: 0.65, g: 0.7, b: 0.8, a: 1}
+          Opacity: 0.35
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 14
+          Groups: 3
+        Leaves:
+          Enabled: 0
+          Density: 0.6
+          Size: 0.09
+          SizeJitter: 0.4
+          Lifetime: 9
+          Speed: 0.35
+          Angle: 270
+          Spread: 40
+          Gravity: 0.03
+          Wander: 0.5
+          WanderFrequency: 0.4
+          Color: {r: 0.62, g: 0.45, b: 0.16, a: 1}
+          ColorB: {r: 0.45, g: 0.3, b: 0.12, a: 1}
+          Opacity: 0.9
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Sparks:
+          Enabled: 0
+          Density: 6
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 1.6
+          Speed: 0.9
+          Angle: 90
+          Spread: 35
+          Gravity: -0.05
+          Wander: 0.5
+          WanderFrequency: 1.5
+          Color: {r: 1, g: 0.7, b: 0.25, a: 1}
+          ColorB: {r: 1, g: 0.35, b: 0.08, a: 1}
+          Opacity: 1
+          WindShare: 0.4
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Breath:
+          Enabled: 0
+          Density: 0.5
+          Size: 0.16
+          SizeJitter: 0.3
+          Lifetime: 1.6
+          Speed: 0.12
+          Angle: 80
+          Spread: 25
+          Gravity: -0.02
+          Wander: 0.1
+          WanderFrequency: 0.6
+          Color: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+          ColorB: {r: 0.85, g: 0.88, b: 0.92, a: 1}
+          Opacity: 0.22
+          WindShare: 0.5
+          Texture: {fileID: 0}
+          Time: 2
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Version: 0
+      Quality:
+        Antialiasing: 0
+      Characters:
+        All:
+          UnitId: 
+          Hue: 0
+          Saturation: 1
+          Brightness: 1
+          Contrast: 0
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+        Creatures: []
+      Air:
+        Clouds: 0
+        CloudCoverage: 0.45
+        CloudDarkness: 0.35
+        CloudScale: 8
+        CloudSoftness: 0.35
+        CloudSpeed: 0.4
+        CloudAngle: 20
+        Rays: 0
+        RaysFollowSun: 1
+        RaysAngle: 250
+        RaysIntensity: 0.2
+        RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+        RaysWidth: 1.2
+        RaysDensity: 0.5
+        RaysSpeed: 0.15
+        HeatHaze: 0
+        HazeStrength: 1
+        HazeRadius: 0.6
+        HazeHeight: 1.6
+        HazeSpeed: 1
+      Game:
+        LowHealth: 1
+        LowHealthThreshold: 0.35
+        LowHealthColor: {r: 0.55, g: 0, b: 0, a: 1}
+        LowHealthStrength: 0.75
+        LowHealthPulse: 1.1
+        Stun: 1
+        StunDarkness: 0.45
+        StunDesaturate: 0.6
+        StunBlur: 4
+        FadeColor: {r: 0, g: 0, b: 0, a: 1}
+        Letterbox: 0
+        LetterboxColor: {r: 0, g: 0, b: 0, a: 1}
+    FrameKeys:
+      Enabled: 0
+      Keys: []
+    FrameZones: []
     PeopleCastShadows: 1
     PeopleShadowLength: 1
     ShadowMinLean: 0.4
@@ -9145,6 +11397,569 @@ MonoBehaviour:
       VignetteColor: {r: 0, g: 0, b: 0, a: 1}
       Grain: 0
       Tonemapping: 0
+      GrainType: 0
+      GrainResponse: 0.8
+      Tone:
+        Lut: {fileID: 0}
+        LutContribution: 1
+        SplitToning: 0
+        SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
+        SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
+        SplitBalance: 0
+        ShadowsMidtonesHighlights: 0
+        Shadows:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Midtones:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Highlights:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        LiftGammaGain: 0
+        Lift:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gamma:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gain:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        ChannelMixer: 0
+        MixerRed: {x: 100, y: 0, z: 0}
+        MixerGreen: {x: 0, y: 100, z: 0}
+        MixerBlue: {x: 0, y: 0, z: 100}
+        Curves: 0
+        Master:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Red:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Green:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Blue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        SaturationVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        LuminanceVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsHue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        ShadowsStart: 0
+        ShadowsEnd: 0.3
+        HighlightsStart: 0.55
+        HighlightsEnd: 1
+        SelectiveColor: 0
+        Selective:
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        GradientMap: 0
+        GradientColors:
+          serializedVersion: 2
+          key0: {r: 0.08, g: 0.07, b: 0.12, a: 1}
+          key1: {r: 0.45, g: 0.38, b: 0.3, a: 1}
+          key2: {r: 0.98, g: 0.9, b: 0.74, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 32768
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 3
+          m_NumAlphaKeys: 2
+        GradientStrength: 0.5
+      Lens:
+        ChromaticAberration: 0
+        Distortion: 0
+        DistortionScale: 1
+        PulseAberration: 0.6
+        PulseDistortion: -0.25
+        PulseDuration: 0.45
+        PulseOnHit: 0
+        PulseOnHitTargets: 0
+        PulseHitStrength: 0.6
+        PulseKillStrength: 1
+        PulseShake: 1
+        PulseShakeAmount: 0.012
+        PulseFlash: 0
+        PulseFlashColor: {r: 1, g: 0.92, b: 0.85, a: 1}
+        PulseFlashStrength: 0.25
+      Canvas:
+        Painterly: 0
+        PainterlyRadius: 3
+        PainterlyStrength: 1
+        Fog: 0
+        FogDirection: 0
+        FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
+        FogDensity: 0.35
+        FogStart: 0.45
+        FogEnd: 1
+        FogNoise: 0.35
+        FogNoiseScale: 3
+        FogSpeed: 0.03
+        Palette: 0
+        PaletteLevels: 8
+        PaletteTexture: {fileID: 0}
+        PaletteStrength: 1
+        PaletteDither: 0.3
+        Paper: 0
+        PaperTexture: {fileID: 0}
+        PaperStrength: 0.35
+        PaperScale: 1
+        PaperFibers: 0.5
+        Sharpen: 0
+        SharpenStrength: 0.6
+        TiltShift: 0
+        TiltFocus: 0.5
+        TiltBand: 0.35
+        TiltBlur: 5
+        Ink: 0
+        InkColor: {r: 0.1, g: 0.07, b: 0.05, a: 1}
+        InkThreshold: 0.35
+        InkWidth: 1
+        InkStrength: 0.8
+        Hatching: 0
+        HatchColor: {r: 0.12, g: 0.09, b: 0.07, a: 1}
+        HatchThreshold: 0.35
+        HatchCross: 0.18
+        HatchSpacing: 6
+        HatchStrength: 0.6
+        Border: 0
+        BorderTexture: {fileID: 0}
+        BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
+        BorderSize: 0.04
+        BorderRoughness: 0.5
+        Film: 0
+        FilmDust: 0.4
+        FilmScratches: 0.3
+        FilmFlicker: 0.3
+      Sprites:
+        Wind: 0
+        WindStrength: 0.08
+        WindSpeed: 1
+        WindGusts: 0.5
+        WindHeight: 2.5
+        WindDirection: 0.3
+        WindTrees: 0.6
+        WindPlants: 1
+        Outline: 0
+        OutlineColor: {r: 0.08, g: 0.06, b: 0.05, a: 0.85}
+        OutlineWidth: 1.5
+        OutlinePeople: 1
+        OutlineObjects: 0
+        Distance: 0
+        DistanceStart: 0.55
+        DistanceEnd: 1
+        DistanceDesaturate: 0.45
+        DistanceHaze: {r: 0.6, g: 0.64, b: 0.66, a: 1}
+        DistanceHazeStrength: 0.25
+        Dissolve: 0
+        DissolveDuration: 1.2
+        DissolveEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
+        DissolveEdgeWidth: 0.08
+        DissolveScale: 40
+        DissolveAmount: 1
+        Rim: 0
+        RimStrength: 0.8
+        RimWidth: 2
+        RimPeople: 1
+        RimObjects: 0
+      Atmosphere:
+        Dust:
+          Enabled: 0
+          Density: 4
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 6
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.12
+          WanderFrequency: 0.3
+          Color: {r: 1, g: 0.93, b: 0.78, a: 1}
+          ColorB: {r: 1, g: 0.85, b: 0.6, a: 1}
+          Opacity: 0.45
+          WindShare: 0.3
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Midges:
+          Enabled: 0
+          Density: 25
+          Size: 0.022
+          SizeJitter: 0.3
+          Lifetime: 3
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.9
+          WanderFrequency: 3
+          Color: {r: 0.1, g: 0.09, b: 0.07, a: 1}
+          ColorB: {r: 0.2, g: 0.18, b: 0.12, a: 1}
+          Opacity: 0.8
+          WindShare: 0.1
+          Texture: {fileID: 0}
+          Time: 3
+          FromHour: 17
+          ToHour: 22
+          Stretch: 1
+          Groups: 3
+        Rain:
+          Enabled: 0
+          Density: 60
+          Size: 0.025
+          SizeJitter: 0.3
+          Lifetime: 1.2
+          Speed: 9
+          Angle: 260
+          Spread: 4
+          Gravity: 0
+          Wander: 0
+          WanderFrequency: 0.5
+          Color: {r: 0.75, g: 0.8, b: 0.88, a: 1}
+          ColorB: {r: 0.65, g: 0.7, b: 0.8, a: 1}
+          Opacity: 0.35
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 14
+          Groups: 3
+        Leaves:
+          Enabled: 0
+          Density: 0.6
+          Size: 0.09
+          SizeJitter: 0.4
+          Lifetime: 9
+          Speed: 0.35
+          Angle: 270
+          Spread: 40
+          Gravity: 0.03
+          Wander: 0.5
+          WanderFrequency: 0.4
+          Color: {r: 0.62, g: 0.45, b: 0.16, a: 1}
+          ColorB: {r: 0.45, g: 0.3, b: 0.12, a: 1}
+          Opacity: 0.9
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Sparks:
+          Enabled: 0
+          Density: 6
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 1.6
+          Speed: 0.9
+          Angle: 90
+          Spread: 35
+          Gravity: -0.05
+          Wander: 0.5
+          WanderFrequency: 1.5
+          Color: {r: 1, g: 0.7, b: 0.25, a: 1}
+          ColorB: {r: 1, g: 0.35, b: 0.08, a: 1}
+          Opacity: 1
+          WindShare: 0.4
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Breath:
+          Enabled: 0
+          Density: 0.5
+          Size: 0.16
+          SizeJitter: 0.3
+          Lifetime: 1.6
+          Speed: 0.12
+          Angle: 80
+          Spread: 25
+          Gravity: -0.02
+          Wander: 0.1
+          WanderFrequency: 0.6
+          Color: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+          ColorB: {r: 0.85, g: 0.88, b: 0.92, a: 1}
+          Opacity: 0.22
+          WindShare: 0.5
+          Texture: {fileID: 0}
+          Time: 2
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Version: 0
+      Quality:
+        Antialiasing: 0
+      Characters:
+        All:
+          UnitId: 
+          Hue: 0
+          Saturation: 1
+          Brightness: 1
+          Contrast: 0
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+        Creatures: []
+      Air:
+        Clouds: 0
+        CloudCoverage: 0.45
+        CloudDarkness: 0.35
+        CloudScale: 8
+        CloudSoftness: 0.35
+        CloudSpeed: 0.4
+        CloudAngle: 20
+        Rays: 0
+        RaysFollowSun: 1
+        RaysAngle: 250
+        RaysIntensity: 0.2
+        RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+        RaysWidth: 1.2
+        RaysDensity: 0.5
+        RaysSpeed: 0.15
+        HeatHaze: 0
+        HazeStrength: 1
+        HazeRadius: 0.6
+        HazeHeight: 1.6
+        HazeSpeed: 1
+      Game:
+        LowHealth: 1
+        LowHealthThreshold: 0.35
+        LowHealthColor: {r: 0.55, g: 0, b: 0, a: 1}
+        LowHealthStrength: 0.75
+        LowHealthPulse: 1.1
+        Stun: 1
+        StunDarkness: 0.45
+        StunDesaturate: 0.6
+        StunBlur: 4
+        FadeColor: {r: 0, g: 0, b: 0, a: 1}
+        Letterbox: 0
+        LetterboxColor: {r: 0, g: 0, b: 0, a: 1}
+    FrameKeys:
+      Enabled: 0
+      Keys: []
+    FrameZones: []
     PeopleCastShadows: 1
     PeopleShadowLength: 1
     ShadowMinLean: 0.4
@@ -15368,6 +18183,569 @@ MonoBehaviour:
       VignetteColor: {r: 0, g: 0, b: 0, a: 1}
       Grain: 0
       Tonemapping: 0
+      GrainType: 0
+      GrainResponse: 0.8
+      Tone:
+        Lut: {fileID: 0}
+        LutContribution: 1
+        SplitToning: 0
+        SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
+        SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
+        SplitBalance: 0
+        ShadowsMidtonesHighlights: 0
+        Shadows:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Midtones:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Highlights:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        LiftGammaGain: 0
+        Lift:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gamma:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gain:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        ChannelMixer: 0
+        MixerRed: {x: 100, y: 0, z: 0}
+        MixerGreen: {x: 0, y: 100, z: 0}
+        MixerBlue: {x: 0, y: 0, z: 100}
+        Curves: 0
+        Master:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Red:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Green:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Blue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        SaturationVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        LuminanceVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsHue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        ShadowsStart: 0
+        ShadowsEnd: 0.3
+        HighlightsStart: 0.55
+        HighlightsEnd: 1
+        SelectiveColor: 0
+        Selective:
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        GradientMap: 0
+        GradientColors:
+          serializedVersion: 2
+          key0: {r: 0.08, g: 0.07, b: 0.12, a: 1}
+          key1: {r: 0.45, g: 0.38, b: 0.3, a: 1}
+          key2: {r: 0.98, g: 0.9, b: 0.74, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 32768
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 3
+          m_NumAlphaKeys: 2
+        GradientStrength: 0.5
+      Lens:
+        ChromaticAberration: 0
+        Distortion: 0
+        DistortionScale: 1
+        PulseAberration: 0.6
+        PulseDistortion: -0.25
+        PulseDuration: 0.45
+        PulseOnHit: 0
+        PulseOnHitTargets: 0
+        PulseHitStrength: 0.6
+        PulseKillStrength: 1
+        PulseShake: 1
+        PulseShakeAmount: 0.012
+        PulseFlash: 0
+        PulseFlashColor: {r: 1, g: 0.92, b: 0.85, a: 1}
+        PulseFlashStrength: 0.25
+      Canvas:
+        Painterly: 0
+        PainterlyRadius: 3
+        PainterlyStrength: 1
+        Fog: 0
+        FogDirection: 0
+        FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
+        FogDensity: 0.35
+        FogStart: 0.45
+        FogEnd: 1
+        FogNoise: 0.35
+        FogNoiseScale: 3
+        FogSpeed: 0.03
+        Palette: 0
+        PaletteLevels: 8
+        PaletteTexture: {fileID: 0}
+        PaletteStrength: 1
+        PaletteDither: 0.3
+        Paper: 0
+        PaperTexture: {fileID: 0}
+        PaperStrength: 0.35
+        PaperScale: 1
+        PaperFibers: 0.5
+        Sharpen: 0
+        SharpenStrength: 0.6
+        TiltShift: 0
+        TiltFocus: 0.5
+        TiltBand: 0.35
+        TiltBlur: 5
+        Ink: 0
+        InkColor: {r: 0.1, g: 0.07, b: 0.05, a: 1}
+        InkThreshold: 0.35
+        InkWidth: 1
+        InkStrength: 0.8
+        Hatching: 0
+        HatchColor: {r: 0.12, g: 0.09, b: 0.07, a: 1}
+        HatchThreshold: 0.35
+        HatchCross: 0.18
+        HatchSpacing: 6
+        HatchStrength: 0.6
+        Border: 0
+        BorderTexture: {fileID: 0}
+        BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
+        BorderSize: 0.04
+        BorderRoughness: 0.5
+        Film: 0
+        FilmDust: 0.4
+        FilmScratches: 0.3
+        FilmFlicker: 0.3
+      Sprites:
+        Wind: 0
+        WindStrength: 0.08
+        WindSpeed: 1
+        WindGusts: 0.5
+        WindHeight: 2.5
+        WindDirection: 0.3
+        WindTrees: 0.6
+        WindPlants: 1
+        Outline: 0
+        OutlineColor: {r: 0.08, g: 0.06, b: 0.05, a: 0.85}
+        OutlineWidth: 1.5
+        OutlinePeople: 1
+        OutlineObjects: 0
+        Distance: 0
+        DistanceStart: 0.55
+        DistanceEnd: 1
+        DistanceDesaturate: 0.45
+        DistanceHaze: {r: 0.6, g: 0.64, b: 0.66, a: 1}
+        DistanceHazeStrength: 0.25
+        Dissolve: 0
+        DissolveDuration: 1.2
+        DissolveEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
+        DissolveEdgeWidth: 0.08
+        DissolveScale: 40
+        DissolveAmount: 1
+        Rim: 0
+        RimStrength: 0.8
+        RimWidth: 2
+        RimPeople: 1
+        RimObjects: 0
+      Atmosphere:
+        Dust:
+          Enabled: 0
+          Density: 4
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 6
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.12
+          WanderFrequency: 0.3
+          Color: {r: 1, g: 0.93, b: 0.78, a: 1}
+          ColorB: {r: 1, g: 0.85, b: 0.6, a: 1}
+          Opacity: 0.45
+          WindShare: 0.3
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Midges:
+          Enabled: 0
+          Density: 25
+          Size: 0.022
+          SizeJitter: 0.3
+          Lifetime: 3
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.9
+          WanderFrequency: 3
+          Color: {r: 0.1, g: 0.09, b: 0.07, a: 1}
+          ColorB: {r: 0.2, g: 0.18, b: 0.12, a: 1}
+          Opacity: 0.8
+          WindShare: 0.1
+          Texture: {fileID: 0}
+          Time: 3
+          FromHour: 17
+          ToHour: 22
+          Stretch: 1
+          Groups: 3
+        Rain:
+          Enabled: 0
+          Density: 60
+          Size: 0.025
+          SizeJitter: 0.3
+          Lifetime: 1.2
+          Speed: 9
+          Angle: 260
+          Spread: 4
+          Gravity: 0
+          Wander: 0
+          WanderFrequency: 0.5
+          Color: {r: 0.75, g: 0.8, b: 0.88, a: 1}
+          ColorB: {r: 0.65, g: 0.7, b: 0.8, a: 1}
+          Opacity: 0.35
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 14
+          Groups: 3
+        Leaves:
+          Enabled: 0
+          Density: 0.6
+          Size: 0.09
+          SizeJitter: 0.4
+          Lifetime: 9
+          Speed: 0.35
+          Angle: 270
+          Spread: 40
+          Gravity: 0.03
+          Wander: 0.5
+          WanderFrequency: 0.4
+          Color: {r: 0.62, g: 0.45, b: 0.16, a: 1}
+          ColorB: {r: 0.45, g: 0.3, b: 0.12, a: 1}
+          Opacity: 0.9
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Sparks:
+          Enabled: 0
+          Density: 6
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 1.6
+          Speed: 0.9
+          Angle: 90
+          Spread: 35
+          Gravity: -0.05
+          Wander: 0.5
+          WanderFrequency: 1.5
+          Color: {r: 1, g: 0.7, b: 0.25, a: 1}
+          ColorB: {r: 1, g: 0.35, b: 0.08, a: 1}
+          Opacity: 1
+          WindShare: 0.4
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Breath:
+          Enabled: 0
+          Density: 0.5
+          Size: 0.16
+          SizeJitter: 0.3
+          Lifetime: 1.6
+          Speed: 0.12
+          Angle: 80
+          Spread: 25
+          Gravity: -0.02
+          Wander: 0.1
+          WanderFrequency: 0.6
+          Color: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+          ColorB: {r: 0.85, g: 0.88, b: 0.92, a: 1}
+          Opacity: 0.22
+          WindShare: 0.5
+          Texture: {fileID: 0}
+          Time: 2
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Version: 0
+      Quality:
+        Antialiasing: 0
+      Characters:
+        All:
+          UnitId: 
+          Hue: 0
+          Saturation: 1
+          Brightness: 1
+          Contrast: 0
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+        Creatures: []
+      Air:
+        Clouds: 0
+        CloudCoverage: 0.45
+        CloudDarkness: 0.35
+        CloudScale: 8
+        CloudSoftness: 0.35
+        CloudSpeed: 0.4
+        CloudAngle: 20
+        Rays: 0
+        RaysFollowSun: 1
+        RaysAngle: 250
+        RaysIntensity: 0.2
+        RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+        RaysWidth: 1.2
+        RaysDensity: 0.5
+        RaysSpeed: 0.15
+        HeatHaze: 0
+        HazeStrength: 1
+        HazeRadius: 0.6
+        HazeHeight: 1.6
+        HazeSpeed: 1
+      Game:
+        LowHealth: 1
+        LowHealthThreshold: 0.35
+        LowHealthColor: {r: 0.55, g: 0, b: 0, a: 1}
+        LowHealthStrength: 0.75
+        LowHealthPulse: 1.1
+        Stun: 1
+        StunDarkness: 0.45
+        StunDesaturate: 0.6
+        StunBlur: 4
+        FadeColor: {r: 0, g: 0, b: 0, a: 1}
+        Letterbox: 0
+        LetterboxColor: {r: 0, g: 0, b: 0, a: 1}
+    FrameKeys:
+      Enabled: 0
+      Keys: []
+    FrameZones: []
     PeopleCastShadows: 1
     PeopleShadowLength: 1
     ShadowMinLean: 0.4
@@ -15619,6 +18997,569 @@ MonoBehaviour:
       VignetteColor: {r: 0, g: 0, b: 0, a: 1}
       Grain: 0
       Tonemapping: 0
+      GrainType: 0
+      GrainResponse: 0.8
+      Tone:
+        Lut: {fileID: 0}
+        LutContribution: 1
+        SplitToning: 0
+        SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
+        SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
+        SplitBalance: 0
+        ShadowsMidtonesHighlights: 0
+        Shadows:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Midtones:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Highlights:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        LiftGammaGain: 0
+        Lift:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gamma:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gain:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        ChannelMixer: 0
+        MixerRed: {x: 100, y: 0, z: 0}
+        MixerGreen: {x: 0, y: 100, z: 0}
+        MixerBlue: {x: 0, y: 0, z: 100}
+        Curves: 0
+        Master:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Red:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Green:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Blue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        SaturationVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        LuminanceVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsHue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        ShadowsStart: 0
+        ShadowsEnd: 0.3
+        HighlightsStart: 0.55
+        HighlightsEnd: 1
+        SelectiveColor: 0
+        Selective:
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        GradientMap: 0
+        GradientColors:
+          serializedVersion: 2
+          key0: {r: 0.08, g: 0.07, b: 0.12, a: 1}
+          key1: {r: 0.45, g: 0.38, b: 0.3, a: 1}
+          key2: {r: 0.98, g: 0.9, b: 0.74, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 32768
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 3
+          m_NumAlphaKeys: 2
+        GradientStrength: 0.5
+      Lens:
+        ChromaticAberration: 0
+        Distortion: 0
+        DistortionScale: 1
+        PulseAberration: 0.6
+        PulseDistortion: -0.25
+        PulseDuration: 0.45
+        PulseOnHit: 0
+        PulseOnHitTargets: 0
+        PulseHitStrength: 0.6
+        PulseKillStrength: 1
+        PulseShake: 1
+        PulseShakeAmount: 0.012
+        PulseFlash: 0
+        PulseFlashColor: {r: 1, g: 0.92, b: 0.85, a: 1}
+        PulseFlashStrength: 0.25
+      Canvas:
+        Painterly: 0
+        PainterlyRadius: 3
+        PainterlyStrength: 1
+        Fog: 0
+        FogDirection: 0
+        FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
+        FogDensity: 0.35
+        FogStart: 0.45
+        FogEnd: 1
+        FogNoise: 0.35
+        FogNoiseScale: 3
+        FogSpeed: 0.03
+        Palette: 0
+        PaletteLevels: 8
+        PaletteTexture: {fileID: 0}
+        PaletteStrength: 1
+        PaletteDither: 0.3
+        Paper: 0
+        PaperTexture: {fileID: 0}
+        PaperStrength: 0.35
+        PaperScale: 1
+        PaperFibers: 0.5
+        Sharpen: 0
+        SharpenStrength: 0.6
+        TiltShift: 0
+        TiltFocus: 0.5
+        TiltBand: 0.35
+        TiltBlur: 5
+        Ink: 0
+        InkColor: {r: 0.1, g: 0.07, b: 0.05, a: 1}
+        InkThreshold: 0.35
+        InkWidth: 1
+        InkStrength: 0.8
+        Hatching: 0
+        HatchColor: {r: 0.12, g: 0.09, b: 0.07, a: 1}
+        HatchThreshold: 0.35
+        HatchCross: 0.18
+        HatchSpacing: 6
+        HatchStrength: 0.6
+        Border: 0
+        BorderTexture: {fileID: 0}
+        BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
+        BorderSize: 0.04
+        BorderRoughness: 0.5
+        Film: 0
+        FilmDust: 0.4
+        FilmScratches: 0.3
+        FilmFlicker: 0.3
+      Sprites:
+        Wind: 0
+        WindStrength: 0.08
+        WindSpeed: 1
+        WindGusts: 0.5
+        WindHeight: 2.5
+        WindDirection: 0.3
+        WindTrees: 0.6
+        WindPlants: 1
+        Outline: 0
+        OutlineColor: {r: 0.08, g: 0.06, b: 0.05, a: 0.85}
+        OutlineWidth: 1.5
+        OutlinePeople: 1
+        OutlineObjects: 0
+        Distance: 0
+        DistanceStart: 0.55
+        DistanceEnd: 1
+        DistanceDesaturate: 0.45
+        DistanceHaze: {r: 0.6, g: 0.64, b: 0.66, a: 1}
+        DistanceHazeStrength: 0.25
+        Dissolve: 0
+        DissolveDuration: 1.2
+        DissolveEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
+        DissolveEdgeWidth: 0.08
+        DissolveScale: 40
+        DissolveAmount: 1
+        Rim: 0
+        RimStrength: 0.8
+        RimWidth: 2
+        RimPeople: 1
+        RimObjects: 0
+      Atmosphere:
+        Dust:
+          Enabled: 0
+          Density: 4
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 6
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.12
+          WanderFrequency: 0.3
+          Color: {r: 1, g: 0.93, b: 0.78, a: 1}
+          ColorB: {r: 1, g: 0.85, b: 0.6, a: 1}
+          Opacity: 0.45
+          WindShare: 0.3
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Midges:
+          Enabled: 0
+          Density: 25
+          Size: 0.022
+          SizeJitter: 0.3
+          Lifetime: 3
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.9
+          WanderFrequency: 3
+          Color: {r: 0.1, g: 0.09, b: 0.07, a: 1}
+          ColorB: {r: 0.2, g: 0.18, b: 0.12, a: 1}
+          Opacity: 0.8
+          WindShare: 0.1
+          Texture: {fileID: 0}
+          Time: 3
+          FromHour: 17
+          ToHour: 22
+          Stretch: 1
+          Groups: 3
+        Rain:
+          Enabled: 0
+          Density: 60
+          Size: 0.025
+          SizeJitter: 0.3
+          Lifetime: 1.2
+          Speed: 9
+          Angle: 260
+          Spread: 4
+          Gravity: 0
+          Wander: 0
+          WanderFrequency: 0.5
+          Color: {r: 0.75, g: 0.8, b: 0.88, a: 1}
+          ColorB: {r: 0.65, g: 0.7, b: 0.8, a: 1}
+          Opacity: 0.35
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 14
+          Groups: 3
+        Leaves:
+          Enabled: 0
+          Density: 0.6
+          Size: 0.09
+          SizeJitter: 0.4
+          Lifetime: 9
+          Speed: 0.35
+          Angle: 270
+          Spread: 40
+          Gravity: 0.03
+          Wander: 0.5
+          WanderFrequency: 0.4
+          Color: {r: 0.62, g: 0.45, b: 0.16, a: 1}
+          ColorB: {r: 0.45, g: 0.3, b: 0.12, a: 1}
+          Opacity: 0.9
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Sparks:
+          Enabled: 0
+          Density: 6
+          Size: 0.03
+          SizeJitter: 0.5
+          Lifetime: 1.6
+          Speed: 0.9
+          Angle: 90
+          Spread: 35
+          Gravity: -0.05
+          Wander: 0.5
+          WanderFrequency: 1.5
+          Color: {r: 1, g: 0.7, b: 0.25, a: 1}
+          ColorB: {r: 1, g: 0.35, b: 0.08, a: 1}
+          Opacity: 1
+          WindShare: 0.4
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Breath:
+          Enabled: 0
+          Density: 0.5
+          Size: 0.16
+          SizeJitter: 0.3
+          Lifetime: 1.6
+          Speed: 0.12
+          Angle: 80
+          Spread: 25
+          Gravity: -0.02
+          Wander: 0.1
+          WanderFrequency: 0.6
+          Color: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+          ColorB: {r: 0.85, g: 0.88, b: 0.92, a: 1}
+          Opacity: 0.22
+          WindShare: 0.5
+          Texture: {fileID: 0}
+          Time: 2
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Version: 0
+      Quality:
+        Antialiasing: 0
+      Characters:
+        All:
+          UnitId: 
+          Hue: 0
+          Saturation: 1
+          Brightness: 1
+          Contrast: 0
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+        Creatures: []
+      Air:
+        Clouds: 0
+        CloudCoverage: 0.45
+        CloudDarkness: 0.35
+        CloudScale: 8
+        CloudSoftness: 0.35
+        CloudSpeed: 0.4
+        CloudAngle: 20
+        Rays: 0
+        RaysFollowSun: 1
+        RaysAngle: 250
+        RaysIntensity: 0.2
+        RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+        RaysWidth: 1.2
+        RaysDensity: 0.5
+        RaysSpeed: 0.15
+        HeatHaze: 0
+        HazeStrength: 1
+        HazeRadius: 0.6
+        HazeHeight: 1.6
+        HazeSpeed: 1
+      Game:
+        LowHealth: 1
+        LowHealthThreshold: 0.35
+        LowHealthColor: {r: 0.55, g: 0, b: 0, a: 1}
+        LowHealthStrength: 0.75
+        LowHealthPulse: 1.1
+        Stun: 1
+        StunDarkness: 0.45
+        StunDesaturate: 0.6
+        StunBlur: 4
+        FadeColor: {r: 0, g: 0, b: 0, a: 1}
+        Letterbox: 0
+        LetterboxColor: {r: 0, g: 0, b: 0, a: 1}
+    FrameKeys:
+      Enabled: 0
+      Keys: []
+    FrameZones: []
     PeopleCastShadows: 1
     PeopleShadowLength: 1
     ShadowMinLean: 0.4
@@ -15828,13 +19769,13 @@ MonoBehaviour:
       MoonLength: 0.26
       MoonOpacity: 0.206
     Post:
-      Enabled: 0
+      Enabled: 1
       Day:
         Exposure: 0
-        Contrast: 0
-        Saturation: 0
-        Temperature: 0
-        Tint: 0
+        Contrast: -4.3
+        Saturation: -4.3
+        Temperature: -11.3
+        Tint: -2.7
         Filter: {r: 1, g: 1, b: 1, a: 1}
       Night:
         Exposure: -0.25
@@ -15843,17 +19784,587 @@ MonoBehaviour:
         Temperature: -18
         Tint: 0
         Filter: {r: 0.82, g: 0.88, b: 1, a: 1}
-      Bloom: 1
+      Bloom: 0
       BloomIntensity: 0.6
       BloomThreshold: 0.9
       BloomScatter: 0.6
       BloomTint: {r: 1, g: 1, b: 1, a: 1}
-      Vignette: 0
-      VignetteIntensity: 0.28
-      VignetteSmoothness: 0.45
+      Vignette: 1
+      VignetteIntensity: 0.308
+      VignetteSmoothness: 0.414
       VignetteColor: {r: 0, g: 0, b: 0, a: 1}
-      Grain: 0
+      Grain: 0.25
       Tonemapping: 0
+      GrainType: 0
+      GrainResponse: 0.676
+      Tone:
+        Lut: {fileID: 2800000, guid: 8f6fb103f357f0b4b95fc0a0933a8f31, type: 3}
+        LutContribution: 0.208
+        SplitToning: 1
+        SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
+        SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
+        SplitBalance: 60
+        ShadowsMidtonesHighlights: 1
+        Shadows:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: -0.17
+        Midtones:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: -0.19
+        Highlights:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0.05
+        LiftGammaGain: 1
+        Lift:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gamma:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: -0.02
+        Gain:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0.33
+        ChannelMixer: 1
+        MixerRed: {x: 100, y: 0, z: 0}
+        MixerGreen: {x: -7, y: 100, z: -8}
+        MixerBlue: {x: 0, y: 0, z: 100}
+        Curves: 0
+        Master:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 34
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0.33333334
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 34
+            weightedMode: 0
+            inWeight: 0.33333334
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Red:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Green:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Blue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        SaturationVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.49809265
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        LuminanceVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsHue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        ShadowsStart: 0
+        ShadowsEnd: 0.3
+        HighlightsStart: 0.55
+        HighlightsEnd: 1
+        SelectiveColor: 0
+        Selective:
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        GradientMap: 0
+        GradientColors:
+          serializedVersion: 2
+          key0: {r: 0.08, g: 0.07, b: 0.12, a: 1}
+          key1: {r: 0.45, g: 0.38, b: 0.3, a: 1}
+          key2: {r: 0.98, g: 0.9, b: 0.74, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 32768
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 3
+          m_NumAlphaKeys: 2
+        GradientStrength: 0.5
+      Lens:
+        ChromaticAberration: 0.1
+        Distortion: -0.21
+        DistortionScale: 1
+        PulseAberration: 1
+        PulseDistortion: 0.15
+        PulseDuration: 0.48
+        PulseOnHit: 1
+        PulseOnHitTargets: 0
+        PulseHitStrength: 0.613
+        PulseKillStrength: 0.99820006
+        PulseShake: 1
+        PulseShakeAmount: 0.012
+        PulseFlash: 0
+        PulseFlashColor: {r: 1, g: 0.92, b: 0.85, a: 1}
+        PulseFlashStrength: 0.25
+      Canvas:
+        Painterly: 1
+        PainterlyRadius: 1
+        PainterlyStrength: 1
+        Fog: 1
+        FogDirection: 0
+        FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
+        FogDensity: 0.046
+        FogStart: 0.034
+        FogEnd: 0.839
+        FogNoise: 1
+        FogNoiseScale: 8.19
+        FogSpeed: 0.072
+        Palette: 1
+        PaletteLevels: 30
+        PaletteTexture: {fileID: 0}
+        PaletteStrength: 0.599
+        PaletteDither: 0.3
+        Paper: 1
+        PaperTexture: {fileID: 0}
+        PaperStrength: 0.296
+        PaperScale: 6
+        PaperFibers: 0.508
+        Sharpen: 1
+        SharpenStrength: 0.78
+        TiltShift: 0
+        TiltFocus: 0.5
+        TiltBand: 0.35
+        TiltBlur: 5
+        Ink: 0
+        InkColor: {r: 0, g: 0, b: 0, a: 1}
+        InkThreshold: 0.351
+        InkWidth: 0.5
+        InkStrength: 1
+        Hatching: 1
+        HatchColor: {r: 0, g: 0, b: 0, a: 1}
+        HatchThreshold: 0.158
+        HatchCross: 0.18
+        HatchSpacing: 6
+        HatchStrength: 0.6
+        Border: 0
+        BorderTexture: {fileID: 0}
+        BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
+        BorderSize: 0.04
+        BorderRoughness: 0.5
+        Film: 0
+        FilmDust: 0.4
+        FilmScratches: 0.3
+        FilmFlicker: 0.3
+      Sprites:
+        Wind: 1
+        WindStrength: 0.117
+        WindSpeed: 1.09
+        WindGusts: 0.5
+        WindHeight: 2.59
+        WindDirection: 0.3
+        WindTrees: 0.506
+        WindPlants: 1
+        Outline: 1
+        OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+        OutlineWidth: 2.35
+        OutlinePeople: 1
+        OutlineObjects: 0
+        Distance: 0
+        DistanceStart: 0.55
+        DistanceEnd: 1
+        DistanceDesaturate: 0.45
+        DistanceHaze: {r: 0.6, g: 0.64, b: 0.66, a: 1}
+        DistanceHazeStrength: 0.25
+        Dissolve: 1
+        DissolveDuration: 5
+        DissolveEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
+        DissolveEdgeWidth: 0.151
+        DissolveScale: 28.2
+        DissolveAmount: 1
+        Rim: 0
+        RimStrength: 0.8
+        RimWidth: 2
+        RimPeople: 1
+        RimObjects: 0
+      Atmosphere:
+        Dust:
+          Enabled: 1
+          Density: 5
+          Size: 0.075
+          SizeJitter: 0.5
+          Lifetime: 6
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.12
+          WanderFrequency: 0.3
+          Color: {r: 1, g: 0.93, b: 0.78, a: 1}
+          ColorB: {r: 1, g: 0.85, b: 0.6, a: 1}
+          Opacity: 0.6
+          WindShare: 0.3
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Midges:
+          Enabled: 1
+          Density: 13
+          Size: 0.03
+          SizeJitter: 0.196
+          Lifetime: 3
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 1.4
+          WanderFrequency: 3
+          Color: {r: 0.55, g: 0.5, b: 0.38, a: 1}
+          ColorB: {r: 0.82, g: 0.76, b: 0.58, a: 1}
+          Opacity: 0.75
+          WindShare: 0.1
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 17
+          ToHour: 22
+          Stretch: 1
+          Groups: 5
+        Rain:
+          Enabled: 0
+          Density: 342
+          Size: 0.026
+          SizeJitter: 0.204
+          Lifetime: 0.3
+          Speed: 9.5
+          Angle: 260
+          Spread: 4
+          Gravity: 0
+          Wander: 0
+          WanderFrequency: 0.5
+          Color: {r: 0.75, g: 0.8, b: 0.88, a: 1}
+          ColorB: {r: 0.65, g: 0.7, b: 0.8, a: 1}
+          Opacity: 0.55
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 12
+          Groups: 3
+        Leaves:
+          Enabled: 1
+          Density: 3.17
+          Size: 0.1
+          SizeJitter: 0.4
+          Lifetime: 6
+          Speed: 0.1
+          Angle: 149
+          Spread: 0
+          Gravity: 0.017
+          Wander: 0.19
+          WanderFrequency: 0.4
+          Color: {r: 0.86, g: 0.58, b: 0.14, a: 1}
+          ColorB: {r: 0.7, g: 0.26, b: 0.09, a: 1}
+          Opacity: 0.9
+          WindShare: 1.78
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Sparks:
+          Enabled: 0
+          Density: 16
+          Size: 0.12
+          SizeJitter: 0.5
+          Lifetime: 1.6
+          Speed: 0.9
+          Angle: 90
+          Spread: 35
+          Gravity: -0.05
+          Wander: 0.5
+          WanderFrequency: 1.5
+          Color: {r: 1, g: 0.7, b: 0.25, a: 1}
+          ColorB: {r: 1, g: 0.35, b: 0.08, a: 1}
+          Opacity: 1
+          WindShare: 0.4
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Breath:
+          Enabled: 0
+          Density: 2
+          Size: 0.204
+          SizeJitter: 0.3
+          Lifetime: 1.3
+          Speed: 0.07
+          Angle: 80
+          Spread: 40
+          Gravity: -0.005
+          Wander: 0.1
+          WanderFrequency: 0.6
+          Color: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+          ColorB: {r: 0.85, g: 0.88, b: 0.92, a: 1}
+          Opacity: 0.4
+          WindShare: 0.5
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Version: 1
+      Quality:
+        Antialiasing: 4
+      Characters:
+        All:
+          UnitId: 
+          Hue: 0
+          Saturation: 1
+          Brightness: 1
+          Contrast: 0
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+        Creatures:
+        - UnitId: militia
+          Hue: -1
+          Saturation: 1.05
+          Brightness: 0.74
+          Contrast: 0.04
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+      Air:
+        Clouds: 0
+        CloudCoverage: 0.45
+        CloudDarkness: 0.35
+        CloudScale: 8
+        CloudSoftness: 0.35
+        CloudSpeed: 0.4
+        CloudAngle: 20
+        Rays: 1
+        RaysFollowSun: 0
+        RaysAngle: 255
+        RaysIntensity: 0.076
+        RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+        RaysWidth: 1.04
+        RaysDensity: 0.494
+        RaysSpeed: 0.035
+        HeatHaze: 0
+        HazeStrength: 1
+        HazeRadius: 0.6
+        HazeHeight: 1.6
+        HazeSpeed: 1
+      Game:
+        LowHealth: 0
+        LowHealthThreshold: 0.35
+        LowHealthColor: {r: 0.55, g: 0, b: 0, a: 1}
+        LowHealthStrength: 0.75
+        LowHealthPulse: 1.1
+        Stun: 0
+        StunDarkness: 0.45
+        StunDesaturate: 0.6
+        StunBlur: 4
+        FadeColor: {r: 0, g: 0, b: 0, a: 1}
+        Letterbox: 0
+        LetterboxColor: {r: 0, g: 0, b: 0, a: 1}
+    FrameKeys:
+      Enabled: 0
+      Keys: []
     PeopleCastShadows: 1
     PeopleShadowLength: 1.28
     ShadowMinLean: 0.4
@@ -15872,3 +20383,1198 @@ MonoBehaviour:
       OcclusionOnObject: 0.559
       OcclusionObjectHeight: 0.588
   worldLightingInitialized: 1
+  frameStyles:
+  - Id: eaf4964d367347e79d569e898a4e6049
+    Name: "\u043F\u0435\u0440\u0432\u044B\u0439"
+    Note: 
+    Post:
+      Enabled: 1
+      Day:
+        Exposure: 0
+        Contrast: -4.3
+        Saturation: -4.3
+        Temperature: -11.3
+        Tint: -2.7
+        Filter: {r: 1, g: 1, b: 1, a: 1}
+      Night:
+        Exposure: -0.25
+        Contrast: 8
+        Saturation: -30
+        Temperature: -18
+        Tint: 0
+        Filter: {r: 0.82, g: 0.88, b: 1, a: 1}
+      Bloom: 0
+      BloomIntensity: 0.6
+      BloomThreshold: 0.9
+      BloomScatter: 0.6
+      BloomTint: {r: 1, g: 1, b: 1, a: 1}
+      Vignette: 1
+      VignetteIntensity: 0.308
+      VignetteSmoothness: 0.414
+      VignetteColor: {r: 0, g: 0, b: 0, a: 1}
+      Grain: 0.25
+      Tonemapping: 0
+      GrainType: 0
+      GrainResponse: 0.676
+      Tone:
+        Lut: {fileID: 2800000, guid: 8f6fb103f357f0b4b95fc0a0933a8f31, type: 3}
+        LutContribution: 0.208
+        SplitToning: 1
+        SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
+        SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
+        SplitBalance: 60
+        ShadowsMidtonesHighlights: 1
+        Shadows:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: -0.17
+        Midtones:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: -0.19
+        Highlights:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0.05
+        LiftGammaGain: 1
+        Lift:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gamma:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: -0.02
+        Gain:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0.33
+        ChannelMixer: 1
+        MixerRed: {x: 100, y: 0, z: 0}
+        MixerGreen: {x: -7, y: 100, z: -8}
+        MixerBlue: {x: 0, y: 0, z: 100}
+        Curves: 0
+        Master:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 34
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0.33333334
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 34
+            weightedMode: 0
+            inWeight: 0.33333334
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Red:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Green:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Blue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        SaturationVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.49809265
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        LuminanceVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsHue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        ShadowsStart: 0
+        ShadowsEnd: 0.3
+        HighlightsStart: 0.55
+        HighlightsEnd: 1
+        SelectiveColor: 0
+        Selective:
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        GradientMap: 0
+        GradientColors:
+          serializedVersion: 2
+          key0: {r: 0.08, g: 0.07, b: 0.12, a: 1}
+          key1: {r: 0.45, g: 0.38, b: 0.3, a: 1}
+          key2: {r: 0.98, g: 0.9, b: 0.74, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 32768
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 3
+          m_NumAlphaKeys: 2
+        GradientStrength: 0.5
+      Lens:
+        ChromaticAberration: 0.1
+        Distortion: -0.21
+        DistortionScale: 1
+        PulseAberration: 1
+        PulseDistortion: 0.15
+        PulseDuration: 0.48
+        PulseOnHit: 1
+        PulseOnHitTargets: 0
+        PulseHitStrength: 0.613
+        PulseKillStrength: 0.99820006
+        PulseShake: 1
+        PulseShakeAmount: 0.012
+        PulseFlash: 0
+        PulseFlashColor: {r: 1, g: 0.92, b: 0.85, a: 1}
+        PulseFlashStrength: 0.25
+      Canvas:
+        Painterly: 1
+        PainterlyRadius: 1
+        PainterlyStrength: 1
+        Fog: 1
+        FogDirection: 0
+        FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
+        FogDensity: 0.046
+        FogStart: 0.034
+        FogEnd: 0.839
+        FogNoise: 1
+        FogNoiseScale: 8.19
+        FogSpeed: 0.072
+        Palette: 1
+        PaletteLevels: 30
+        PaletteTexture: {fileID: 0}
+        PaletteStrength: 0.599
+        PaletteDither: 0.3
+        Paper: 1
+        PaperTexture: {fileID: 0}
+        PaperStrength: 0.296
+        PaperScale: 6
+        PaperFibers: 0.508
+        Sharpen: 1
+        SharpenStrength: 0.78
+        TiltShift: 0
+        TiltFocus: 0.5
+        TiltBand: 0.35
+        TiltBlur: 5
+        Ink: 0
+        InkColor: {r: 0, g: 0, b: 0, a: 1}
+        InkThreshold: 0.351
+        InkWidth: 0.5
+        InkStrength: 1
+        Hatching: 1
+        HatchColor: {r: 0, g: 0, b: 0, a: 1}
+        HatchThreshold: 0.158
+        HatchCross: 0.18
+        HatchSpacing: 6
+        HatchStrength: 0.6
+        Border: 0
+        BorderTexture: {fileID: 0}
+        BorderColor: {r: 0.08, g: 0.06, b: 0.05, a: 1}
+        BorderSize: 0.04
+        BorderRoughness: 0.5
+        Film: 0
+        FilmDust: 0.4
+        FilmScratches: 0.3
+        FilmFlicker: 0.3
+      Sprites:
+        Wind: 1
+        WindStrength: 0.117
+        WindSpeed: 1.09
+        WindGusts: 0.5
+        WindHeight: 2.59
+        WindDirection: 0.3
+        WindTrees: 0.506
+        WindPlants: 1
+        Outline: 1
+        OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+        OutlineWidth: 2.35
+        OutlinePeople: 1
+        OutlineObjects: 0
+        Distance: 0
+        DistanceStart: 0.55
+        DistanceEnd: 1
+        DistanceDesaturate: 0.45
+        DistanceHaze: {r: 0.6, g: 0.64, b: 0.66, a: 1}
+        DistanceHazeStrength: 0.25
+        Dissolve: 1
+        DissolveDuration: 5
+        DissolveEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
+        DissolveEdgeWidth: 0.151
+        DissolveScale: 28.2
+        DissolveAmount: 1
+        Rim: 0
+        RimStrength: 0.8
+        RimWidth: 2
+        RimPeople: 1
+        RimObjects: 0
+      Atmosphere:
+        Dust:
+          Enabled: 1
+          Density: 5
+          Size: 0.075
+          SizeJitter: 0.5
+          Lifetime: 6
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.12
+          WanderFrequency: 0.3
+          Color: {r: 1, g: 0.93, b: 0.78, a: 1}
+          ColorB: {r: 1, g: 0.85, b: 0.6, a: 1}
+          Opacity: 0.6
+          WindShare: 0.3
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Midges:
+          Enabled: 1
+          Density: 13
+          Size: 0.03
+          SizeJitter: 0.196
+          Lifetime: 3
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 1.4
+          WanderFrequency: 3
+          Color: {r: 0.55, g: 0.5, b: 0.38, a: 1}
+          ColorB: {r: 0.82, g: 0.76, b: 0.58, a: 1}
+          Opacity: 0.75
+          WindShare: 0.1
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 17
+          ToHour: 22
+          Stretch: 1
+          Groups: 5
+        Rain:
+          Enabled: 0
+          Density: 342
+          Size: 0.026
+          SizeJitter: 0.204
+          Lifetime: 0.3
+          Speed: 9.5
+          Angle: 260
+          Spread: 4
+          Gravity: 0
+          Wander: 0
+          WanderFrequency: 0.5
+          Color: {r: 0.75, g: 0.8, b: 0.88, a: 1}
+          ColorB: {r: 0.65, g: 0.7, b: 0.8, a: 1}
+          Opacity: 0.55
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 12
+          Groups: 3
+        Leaves:
+          Enabled: 1
+          Density: 3.17
+          Size: 0.1
+          SizeJitter: 0.4
+          Lifetime: 6
+          Speed: 0.1
+          Angle: 149
+          Spread: 0
+          Gravity: 0.017
+          Wander: 0.19
+          WanderFrequency: 0.4
+          Color: {r: 0.86, g: 0.58, b: 0.14, a: 1}
+          ColorB: {r: 0.7, g: 0.26, b: 0.09, a: 1}
+          Opacity: 0.9
+          WindShare: 1.78
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Sparks:
+          Enabled: 0
+          Density: 16
+          Size: 0.12
+          SizeJitter: 0.5
+          Lifetime: 1.6
+          Speed: 0.9
+          Angle: 90
+          Spread: 35
+          Gravity: -0.05
+          Wander: 0.5
+          WanderFrequency: 1.5
+          Color: {r: 1, g: 0.7, b: 0.25, a: 1}
+          ColorB: {r: 1, g: 0.35, b: 0.08, a: 1}
+          Opacity: 1
+          WindShare: 0.4
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Breath:
+          Enabled: 0
+          Density: 2
+          Size: 0.204
+          SizeJitter: 0.3
+          Lifetime: 1.3
+          Speed: 0.07
+          Angle: 80
+          Spread: 40
+          Gravity: -0.005
+          Wander: 0.1
+          WanderFrequency: 0.6
+          Color: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+          ColorB: {r: 0.85, g: 0.88, b: 0.92, a: 1}
+          Opacity: 0.4
+          WindShare: 0.5
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Version: 1
+      Quality:
+        Antialiasing: 4
+      Characters:
+        All:
+          UnitId: 
+          Hue: 0
+          Saturation: 1
+          Brightness: 1
+          Contrast: 0
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+        Creatures:
+        - UnitId: militia
+          Hue: -1
+          Saturation: 1.05
+          Brightness: 0.74
+          Contrast: 0.04
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+      Air:
+        Clouds: 0
+        CloudCoverage: 0.45
+        CloudDarkness: 0.35
+        CloudScale: 8
+        CloudSoftness: 0.35
+        CloudSpeed: 0.4
+        CloudAngle: 20
+        Rays: 1
+        RaysFollowSun: 0
+        RaysAngle: 255
+        RaysIntensity: 0.076
+        RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+        RaysWidth: 1.04
+        RaysDensity: 0.494
+        RaysSpeed: 0.035
+        HeatHaze: 0
+        HazeStrength: 1
+        HazeRadius: 0.6
+        HazeHeight: 1.6
+        HazeSpeed: 1
+      Game:
+        LowHealth: 0
+        LowHealthThreshold: 0.35
+        LowHealthColor: {r: 0.55, g: 0, b: 0, a: 1}
+        LowHealthStrength: 0.75
+        LowHealthPulse: 1.1
+        Stun: 0
+        StunDarkness: 0.45
+        StunDesaturate: 0.6
+        StunBlur: 4
+        FadeColor: {r: 0, g: 0, b: 0, a: 1}
+        Letterbox: 0
+        LetterboxColor: {r: 0, g: 0, b: 0, a: 1}
+  - Id: b0d10f38cf1f4de998e771322721fae7
+    Name: "\u0412\u0422\u041E\u0420\u041E\u0419"
+    Note: 
+    Post:
+      Enabled: 1
+      Day:
+        Exposure: -0.39
+        Contrast: 6.6
+        Saturation: 0.4
+        Temperature: -0.4
+        Tint: 38.5
+        Filter: {r: 1, g: 1, b: 1, a: 1}
+      Night:
+        Exposure: 0
+        Contrast: 0
+        Saturation: 0
+        Temperature: 0
+        Tint: 0
+        Filter: {r: 1, g: 1, b: 1, a: 1}
+      Bloom: 0
+      BloomIntensity: 5
+      BloomThreshold: 0.38
+      BloomScatter: 0.6
+      BloomTint: {r: 1, g: 1, b: 1, a: 1}
+      Vignette: 0
+      VignetteIntensity: 0.188
+      VignetteSmoothness: 0.45
+      VignetteColor: {r: 0, g: 0, b: 0, a: 1}
+      Grain: 0.217
+      Tonemapping: 0
+      GrainType: 0
+      GrainResponse: 0.8
+      Tone:
+        Lut: {fileID: 2800000, guid: cb2256acf568659499291fdd3faef245, type: 3}
+        LutContribution: 0.096
+        SplitToning: 0
+        SplitShadows: {r: 0.42, g: 0.5, b: 0.62, a: 1}
+        SplitHighlights: {r: 0.68, g: 0.6, b: 0.46, a: 1}
+        SplitBalance: 0
+        ShadowsMidtonesHighlights: 1
+        Shadows:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0.21
+        Midtones:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Highlights:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        LiftGammaGain: 0
+        Lift:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0
+        Gamma:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: 0.01
+        Gain:
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          Offset: -0.83
+        ChannelMixer: 0
+        MixerRed: {x: 100, y: 0, z: 0}
+        MixerGreen: {x: -18, y: 100, z: -10}
+        MixerBlue: {x: 0, y: 0, z: 100}
+        Curves: 0
+        Master:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Red:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Green:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        Blue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 1
+            outSlope: 1
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        SaturationVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        LuminanceVsSaturation:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HueVsHue:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.5
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        ShadowsStart: 0
+        ShadowsEnd: 0.3
+        HighlightsStart: 0.55
+        HighlightsEnd: 1
+        SelectiveColor: 1
+        Selective:
+        - Hue: 9
+          Saturation: 1.25
+          Lightness: -0.06
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        - Hue: 0
+          Saturation: 1
+          Lightness: 0
+        GradientMap: 0
+        GradientColors:
+          serializedVersion: 2
+          key0: {r: 0.08, g: 0.07, b: 0.12, a: 1}
+          key1: {r: 0.45, g: 0.38, b: 0.3, a: 1}
+          key2: {r: 0.98, g: 0.9, b: 0.74, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 32768
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 3
+          m_NumAlphaKeys: 2
+        GradientStrength: 0.321
+      Lens:
+        ChromaticAberration: 0.1
+        Distortion: -0.32
+        DistortionScale: 1
+        PulseAberration: 0.6
+        PulseDistortion: -0.25
+        PulseDuration: 0.45
+        PulseOnHit: 0
+        PulseOnHitTargets: 0
+        PulseHitStrength: 0.6
+        PulseKillStrength: 1
+        PulseShake: 1
+        PulseShakeAmount: 0.012
+        PulseFlash: 0
+        PulseFlashColor: {r: 1, g: 0.92, b: 0.85, a: 1}
+        PulseFlashStrength: 0.25
+      Canvas:
+        Painterly: 0
+        PainterlyRadius: 1
+        PainterlyStrength: 1
+        Fog: 1
+        FogDirection: 0
+        FogColor: {r: 0.62, g: 0.66, b: 0.66, a: 1}
+        FogDensity: 0.004
+        FogStart: 0.194
+        FogEnd: 1
+        FogNoise: 1
+        FogNoiseScale: 12
+        FogSpeed: 0.276
+        Palette: 0
+        PaletteLevels: 12
+        PaletteTexture: {fileID: 0}
+        PaletteStrength: 1
+        PaletteDither: 0.3
+        Paper: 0
+        PaperTexture: {fileID: 0}
+        PaperStrength: 0.108
+        PaperScale: 6
+        PaperFibers: 0.45
+        Sharpen: 1
+        SharpenStrength: 0.934
+        TiltShift: 1
+        TiltFocus: 0.507
+        TiltBand: 0.713
+        TiltBlur: 14.87
+        Ink: 0
+        InkColor: {r: 0, g: 0, b: 0, a: 1}
+        InkThreshold: 0.199
+        InkWidth: 0.63
+        InkStrength: 0.446
+        Hatching: 0
+        HatchColor: {r: 0, g: 0, b: 0, a: 1}
+        HatchThreshold: 0.088
+        HatchCross: 0.271
+        HatchSpacing: 7
+        HatchStrength: 0.25
+        Border: 1
+        BorderTexture: {fileID: 0}
+        BorderColor: {r: 0, g: 0, b: 0, a: 1}
+        BorderSize: 0.006
+        BorderRoughness: 1
+        Film: 0
+        FilmDust: 0
+        FilmScratches: 0
+        FilmFlicker: 0.9
+      Sprites:
+        Wind: 1
+        WindStrength: 0.067
+        WindSpeed: 1
+        WindGusts: 0.5
+        WindHeight: 2.5
+        WindDirection: 0.3
+        WindTrees: 0.6
+        WindPlants: 1
+        Outline: 1
+        OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+        OutlineWidth: 1.43
+        OutlinePeople: 1
+        OutlineObjects: 0
+        Distance: 0
+        DistanceStart: 0.55
+        DistanceEnd: 1
+        DistanceDesaturate: 0.45
+        DistanceHaze: {r: 0.6, g: 0.64, b: 0.66, a: 1}
+        DistanceHazeStrength: 0.25
+        Dissolve: 0
+        DissolveDuration: 1.2
+        DissolveEdge: {r: 1, g: 0.45, b: 0.15, a: 1}
+        DissolveEdgeWidth: 0.08
+        DissolveScale: 40
+        DissolveAmount: 1
+        Rim: 0
+        RimStrength: 0.8
+        RimWidth: 2
+        RimPeople: 1
+        RimObjects: 0
+      Atmosphere:
+        Dust:
+          Enabled: 0
+          Density: 5
+          Size: 0.12
+          SizeJitter: 0.5
+          Lifetime: 6
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 0.12
+          WanderFrequency: 0.3
+          Color: {r: 1, g: 0.93, b: 0.78, a: 1}
+          ColorB: {r: 1, g: 0.85, b: 0.6, a: 1}
+          Opacity: 0.6
+          WindShare: 0.3
+          Texture: {fileID: 0}
+          Time: 1
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Midges:
+          Enabled: 0
+          Density: 18.5
+          Size: 0.051
+          SizeJitter: 0.3
+          Lifetime: 3
+          Speed: 0.05
+          Angle: 90
+          Spread: 360
+          Gravity: 0
+          Wander: 1.4
+          WanderFrequency: 3
+          Color: {r: 0.55, g: 0.5, b: 0.38, a: 1}
+          ColorB: {r: 0.82, g: 0.76, b: 0.58, a: 1}
+          Opacity: 0.75
+          WindShare: 0.1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 17
+          ToHour: 22
+          Stretch: 1
+          Groups: 2
+        Rain:
+          Enabled: 0
+          Density: 57
+          Size: 0.022
+          SizeJitter: 0.138
+          Lifetime: 3.4
+          Speed: 9
+          Angle: 260
+          Spread: 4
+          Gravity: 0
+          Wander: 0
+          WanderFrequency: 0.5
+          Color: {r: 0.75, g: 0.8, b: 0.88, a: 1}
+          ColorB: {r: 0.65, g: 0.7, b: 0.8, a: 1}
+          Opacity: 0.55
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 12
+          Groups: 3
+        Leaves:
+          Enabled: 0
+          Density: 4.38
+          Size: 0.08
+          SizeJitter: 0.121
+          Lifetime: 9
+          Speed: 0.35
+          Angle: 270
+          Spread: 40
+          Gravity: 0.03
+          Wander: 0.5
+          WanderFrequency: 0.4
+          Color: {r: 0.86, g: 0.58, b: 0.14, a: 1}
+          ColorB: {r: 0.7, g: 0.26, b: 0.09, a: 1}
+          Opacity: 0.9
+          WindShare: 1
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Sparks:
+          Enabled: 0
+          Density: 16
+          Size: 0.12
+          SizeJitter: 0.5
+          Lifetime: 1.6
+          Speed: 0.9
+          Angle: 90
+          Spread: 35
+          Gravity: -0.05
+          Wander: 0.5
+          WanderFrequency: 1.5
+          Color: {r: 1, g: 0.7, b: 0.25, a: 1}
+          ColorB: {r: 1, g: 0.35, b: 0.08, a: 1}
+          Opacity: 1
+          WindShare: 0.4
+          Texture: {fileID: 0}
+          Time: 0
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Breath:
+          Enabled: 0
+          Density: 2
+          Size: 0.5
+          SizeJitter: 0.3
+          Lifetime: 1.3
+          Speed: 0.07
+          Angle: 80
+          Spread: 40
+          Gravity: -0.005
+          Wander: 0.1
+          WanderFrequency: 0.6
+          Color: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+          ColorB: {r: 0.85, g: 0.88, b: 0.92, a: 1}
+          Opacity: 0.4
+          WindShare: 0.5
+          Texture: {fileID: 0}
+          Time: 2
+          FromHour: 18
+          ToHour: 6
+          Stretch: 1
+          Groups: 3
+        Version: 1
+      Quality:
+        Antialiasing: 4
+      Characters:
+        All:
+          UnitId: 
+          Hue: 0
+          Saturation: 1
+          Brightness: 1
+          Contrast: 0
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+        Creatures:
+        - UnitId: militia
+          Hue: 0
+          Saturation: 1.07
+          Brightness: 0.79
+          Contrast: -0.02
+          Tint: {r: 1, g: 1, b: 1, a: 1}
+          SunLight: 1
+          FireLight: 1
+      Air:
+        Clouds: 1
+        CloudCoverage: 0.592
+        CloudDarkness: 0.396
+        CloudScale: 5
+        CloudSoftness: 0.31
+        CloudSpeed: 0.4
+        CloudAngle: 20
+        Rays: 0
+        RaysFollowSun: 1
+        RaysAngle: 98
+        RaysIntensity: 0.238
+        RaysColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+        RaysWidth: 0.81
+        RaysDensity: 0.258
+        RaysSpeed: 0.158
+        HeatHaze: 0
+        HazeStrength: 1
+        HazeRadius: 0.6
+        HazeHeight: 1.6
+        HazeSpeed: 1
+      Game:
+        LowHealth: 1
+        LowHealthThreshold: 0.35
+        LowHealthColor: {r: 0.55, g: 0, b: 0, a: 1}
+        LowHealthStrength: 0.75
+        LowHealthPulse: 1.1
+        Stun: 1
+        StunDarkness: 0.45
+        StunDesaturate: 0.6
+        StunBlur: 4
+        FadeColor: {r: 0, g: 0, b: 0, a: 1}
+        Letterbox: 0
+        LetterboxColor: {r: 0, g: 0, b: 0, a: 1}

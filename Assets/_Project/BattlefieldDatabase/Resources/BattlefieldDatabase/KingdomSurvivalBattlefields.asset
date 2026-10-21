@@ -21,11 +21,11 @@ MonoBehaviour:
     imageScale: 1.01
     fillColor: {r: 0.7882353, g: 0.3098039, b: 0.3098039, a: 0}
     lineColor: {r: 0, g: 0, b: 0, a: 0.59607846}
-    lineWidth: 1.08
-    gap: 0.121
-    opacity: 0.42
-    difficultColor: {r: 0.29, g: 0.25, b: 0.17, a: 0.40392157}
-    impassableColor: {r: 0.07, g: 0.08, b: 0.09, a: 0.3529412}
+    lineWidth: 3.06
+    gap: 0.147
+    opacity: 0.43
+    difficultColor: {r: 0.29, g: 0.25, b: 0.17, a: 0.1764706}
+    impassableColor: {r: 0.07, g: 0.08, b: 0.09, a: 0.1254902}
     reachableColor: {r: 0.32871866, g: 0.9019608, b: 0.27843133, a: 0.19215687}
     reachableLineWidth: 2.49
     targetColor: {r: 0.58, g: 0.2, b: 0.17, a: 0.8}

@@ -294,6 +294,12 @@ public class GameState
     // и текущий слой исследования.
     public LocalExplorationStateData LocalExploration = new LocalExplorationStateData();
 
+    // Канон v1.58 §9.9: карта «Свободной игры», сгенерированная для этой
+    // партии. Пусто (или поддельный объект JsonUtility) — авторский мир.
+    public GeneratedWorldMap GeneratedMap;
+
+    public bool HasGeneratedMap => GeneratedMap != null && GeneratedMap.IsValid;
+
     public int DailyGoldIncome => 3;
     public int DailyFoodIncome => 7;
 
@@ -442,6 +448,7 @@ public class GameState
         WorldMapDefinitionData worldDefinition = null)
     {
         WorldSeed = worldSeed ?? Guid.NewGuid().GetHashCode();
+        GeneratedMap = null;
 
         // AM-02/AM-07.5 (канон v1.35, §9.9): если авторский мир подключён
         // (через WorldMapDatabaseAsset.ActiveWorld на стороне UI), география

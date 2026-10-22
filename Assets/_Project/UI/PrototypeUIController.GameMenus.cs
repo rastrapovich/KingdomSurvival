@@ -135,7 +135,7 @@ public partial class PrototypeUIController
     // сбрасывает только своё сеансовое состояние, кампанию не трогает.
     private void AdoptCampaign(GameState campaign)
     {
-        EnsureWorldMapGeographyConfigured();
+        EnsureWorldMapGeographyConfigured(campaign);
 
         gameState = campaign;
         isGameOver = false;

@@ -9370,6 +9370,96 @@ MonoBehaviour:
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
+    - id: PR12S-T01
+      title: "12С-1 · Генератор карты свободной игры и рисунок"
+      details: "Ядро: стадии рельеф → озёра и реки → лес и болота → деревни → приметные места → дороги и тропы (мосты, броды) → поля → слоты; разметка клеток и линии из одного результата по seed. Рисовальщик: подложка-узор на всю карту, слои местности, вода с отмелью и тушью, кромка леса, дороги, знаки (рисунки художника или кодом), обработка."
+      category: 3
+      status: 3
+      required: 1
+      order: 59
+      priority: 0
+      verificationType: 1
+      blockerReason: 1
+      dependencies: []
+      acceptanceCriteria:
+      - text: "Одинаковый seed — одинаковая карта; стадии — начало полной карты (EditMode)"
+        done: 1
+      - text: "Стоянка проходима, деревни и места достижимы на нескольких seed (EditMode)"
+        done: 1
+      - text: "Рисунок любой стадии нужного размера (EditMode)"
+        done: 1
+      manualChecks: []
+      fileReferences:
+      - Assets/_Project/Scripts/Core/WorldMapGenerator.cs
+      - Assets/_Project/WorldMapVisual/Runtime/WorldMapPainter.cs
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "WorldMapGeneratorTests; образцы карт выгружены через WorldMapGeneratorTools.ExportSamplesBatch."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12S-T02
+      title: "12С-2 · Окно «Генератор карты»"
+      details: "Блоки настроек со «Сбросить» в духе «Обработки кадра»: масштаб, рельеф, вода, лес, деревни, дороги, приметные места; облик — качество, подложка, местность, тушь, вода, лес, горы, дороги, деревни, знаки, обработка. Сохранённые наборы (всё / генерация / облик), предпросмотр с масштабом и сдвигом, пошаговый показ стадий, наложения разметки и слотов, PNG."
+      category: 5
+      status: 2
+      required: 1
+      order: 60
+      priority: 0
+      verificationType: 3
+      blockerReason: 5
+      dependencies:
+      - PR12S-T01
+      acceptanceCriteria:
+      - text: "Окно компилируется, генератор создаётся и подключается к базе карты"
+        done: 1
+      - text: "Правки, наборы и пошаговый показ работают в открытом редакторе — проверка пользователем"
+        done: 0
+      manualChecks:
+      - "Kingdom Survival → Генератор карты: подвигать ползунки, «▶ По шагам», сохранить и применить набор, назначить узор подложки"
+      fileReferences:
+      - Assets/_Project/WorldMapVisual/Editor/WorldMapGeneratorWindow.cs
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
+    - id: PR12S-T03
+      title: "12С-3 · Своя карта в каждой партии свободной игры, Дом скрыт"
+      details: "Новая партия свободной игры генерирует карту по своему seed; карта сохраняется в партии и не сверяется с авторским миром; рисунок — фон глобальной карты; места встают в слоты генератора (тег place:<id>). Дом временно скрыт: нет кнопки и экрана Дома, маркера Дома, строки запасов; карта всегда открыта, между походами герой стоит на стоянке."
+      category: 7
+      status: 2
+      required: 1
+      order: 61
+      priority: 0
+      verificationType: 3
+      blockerReason: 5
+      dependencies:
+      - PR12S-T01
+      acceptanceCriteria:
+      - text: "Карта переживает сохранение и загрузку; авторская кампания без карты (EditMode)"
+        done: 1
+      - text: "Место с привязкой встаёт у своего знака (EditMode)"
+        done: 1
+      - text: "Новая свободная игра в Play Mode: своя карта, Дома не видно, поход с клика — проверка пользователем"
+        done: 0
+      manualChecks:
+      - "Две новые свободные игры подряд — разные карты; сохранить, выйти, загрузить — та же карта"
+      fileReferences:
+      - Assets/_Project/UI/PrototypeUIController.FreePlayNoHome.cs
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: 
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
   - id: PR15_HOME_WATER
     title: "\u041F\u0420-15. \xAB\u0414\u043E\u043C \u043D\u0430 \u0447\u0443\u0436\u043E\u0439
       \u0432\u043E\u0434\u0435\xBB \u043D\u0430 \u043E\u0431\u0449\u0435\u0439 \u043E\u0441\u043D\u043E\u0432\u0435"

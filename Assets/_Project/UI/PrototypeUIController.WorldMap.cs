@@ -19,12 +19,15 @@ public partial class PrototypeUIController
     // сплошная Plains. Никогда не вызывает старую процедурную генерацию (её
     // больше не существует) — заменяет разрозненные ConfigureTerrain(seed)
     // по всему UI, каждый из которых был потенциальным скрытым откатом к ней.
-    private static void EnsureWorldMapGeographyConfigured()
+    private static void EnsureWorldMapGeographyConfigured(GameState campaign)
     {
         // 12И: правила перемещения (темп, местность) — из ассета настроек.
         WorldMapVisualRuntime.ApplyMovementRules();
         WorldMapDatabaseAsset database = WorldMapVisualRuntime.LoadDatabase();
-        if (database != null && database.ActiveWorld != null)
+        // Канон v1.58 §9.9: сгенерированная карта партии важнее авторского мира.
+        if (campaign != null && campaign.HasGeneratedMap)
+            WorldMapNavigation.ConfigureFromDefinition(campaign.GeneratedMap.ToDefinitionData());
+        else if (database != null && database.ActiveWorld != null)
             WorldMapNavigation.ConfigureFromDefinition(database.ActiveWorld.ToData());
         else
             WorldMapNavigation.ConfigureDefaultTerrain();
@@ -309,6 +312,21 @@ public partial class PrototypeUIController
 
         ConfigureWorldMapFullscreenLayout();
 
+        // Канон v1.58 §9.9: у новой или загруженной партии может быть другое
+        // полотно (сгенерированная карта) — подгоняем размер и пределы масштаба.
+        float previousCanvasWidth = worldMapCanvasWidth;
+        float previousCanvasHeight = worldMapCanvasHeight;
+        ConfigureWorldMapCanvasSize();
+        if (!Mathf.Approximately(previousCanvasWidth, worldMapCanvasWidth) ||
+            !Mathf.Approximately(previousCanvasHeight, worldMapCanvasHeight))
+        {
+            RecalculateWorldMapMinZoom();
+            RecalculateWorldMapMaxZoom();
+            worldMapZoom = Mathf.Clamp(worldMapZoom, worldMapMinZoom, worldMapMaxZoom);
+            ClampWorldMapPan();
+            ApplyWorldMapViewportTransform();
+        }
+
         worldMapBackground?.Clear();
         worldMapArtLayers?.Clear();
         worldMapWater?.Clear();
@@ -335,12 +353,27 @@ public partial class PrototypeUIController
 
         RefreshWorldMapCapital();
         RefreshWorldMapArmyMarker();
+        ApplyFreePlayHomeVisibility();
     }
 
     private void ApplyWorldMapBackground()
     {
         if (worldMapBackground == null)
             return;
+
+        // Канон v1.58 §9.9: у сгенерированной карты свой рисунок.
+        if (gameState != null && gameState.HasGeneratedMap)
+        {
+            WorldMapGeneratorAsset generator = WorldMapVisualRuntime.LoadGenerator();
+            Texture2D art = WorldMapGeneratedArt.Get(
+                gameState.GeneratedMap, generator != null ? generator.Art : WorldMapArtStyle.CreateDefault());
+            worldMapBackground.style.backgroundColor = Color.black;
+            worldMapBackground.style.unityBackgroundImageTintColor = Color.white;
+            worldMapBackground.style.backgroundImage = art != null
+                ? new StyleBackground(Background.FromTexture2D(art))
+                : new StyleBackground(StyleKeyword.None);
+            return;
+        }
 
         WorldMapVisualTheme theme = WorldMapVisualRuntime.LoadActiveTheme();
         if (theme == null)
@@ -364,7 +397,7 @@ public partial class PrototypeUIController
     // и runtime никогда не разошлись.
     private void ApplyWorldMapArtLayers()
     {
-        if (worldMapArtLayers == null)
+        if (worldMapArtLayers == null || (gameState != null && gameState.HasGeneratedMap))
             return;
 
         WorldMapVisualTheme theme = WorldMapVisualRuntime.LoadActiveTheme();

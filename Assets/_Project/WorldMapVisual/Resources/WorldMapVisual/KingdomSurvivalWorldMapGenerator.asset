@@ -1,0 +1,247 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76bee472b884e08469744b9df47557c9, type: 3}
+  m_Name: KingdomSurvivalWorldMapGenerator
+  m_EditorClassIdentifier: KingdomSurvival.WorldMapVisual::KingdomSurvival.WorldMapVisual.WorldMapGeneratorAsset
+  useForFreePlay: 1
+  settings:
+    CanvasWidth: 4160
+    CanvasHeight: 2560
+    HexesAcross: 100
+    ReliefScaleHexes: 26
+    ReliefDetail: 4
+    ReliefRoughness: 0.5
+    MountainRidges: 0.45
+    HillsShare: 0.16
+    MountainsShare: 0.05
+    CliffsShare: 0.2
+    LakesShare: 0.025
+    RiverCount: 3
+    RiverMinLengthHexes: 14
+    RiverWidthHexes: 0.6
+    RiverMeander: 0.5
+    ForestShare: 0.34
+    ForestScaleHexes: 12
+    ForestOnHills: 0.5
+    SwampShare: 0.04
+    MoistureScaleHexes: 20
+    VillageCount: 8
+    VillageMinDistanceHexes: 11
+    VillageNearWater: 0.7
+    FieldRadiusHexes: 3
+    FieldDensity: 0.5
+    ExtraRoadLoops: 0.25
+    RoadsToEdge: 2
+    TrailsToLandmarks: 1
+    RoadAvoidHills: 2.5
+    RoadAvoidForest: 1.7
+    RoadAvoidSwamp: 4
+    RiverCrossingCost: 7
+    RoadWander: 1.2
+    StartClearRadiusHexes: 2
+    Landmarks:
+    - Id: ruins
+      Name: "\u0420\u0443\u0438\u043D\u044B"
+      Enabled: 1
+      Count: 2
+      Terrains: 000000000700000003000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 9
+      LocationId: ruins
+      SlotTags: Ruins
+      DrawMark: 1
+    - Id: mine
+      Name: "\u0421\u0442\u0430\u0440\u0430\u044F \u0448\u0430\u0445\u0442\u0430"
+      Enabled: 1
+      Count: 1
+      Terrains: 0700000008000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 10
+      LocationId: mine
+      SlotTags: Mine, Hills
+      DrawMark: 1
+    - Id: deep-forest
+      Name: "\u0413\u043B\u0443\u0445\u043E\u0439 \u043B\u0435\u0441"
+      Enabled: 1
+      Count: 1
+      Terrains: 03000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 8
+      LocationId: forest
+      SlotTags: Forest
+      DrawMark: 0
+    - Id: barrow
+      Name: "\u041A\u0443\u0440\u0433\u0430\u043D"
+      Enabled: 1
+      Count: 2
+      Terrains: 0000000007000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 7
+      LocationId: 
+      SlotTags: Barrow
+      DrawMark: 1
+    - Id: watermill
+      Name: "\u0412\u043E\u0434\u044F\u043D\u0430\u044F \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0430"
+      Enabled: 1
+      Count: 1
+      Terrains: 
+      NearWater: 1
+      NearVillage: 1
+      MinDistanceHexes: 3
+      LocationId: 
+      SlotTags: Mill, Shore
+      DrawMark: 1
+  art:
+    Resolution: 0.5
+    BaseColor: {r: 0.6, g: 0.58, b: 0.46, a: 1}
+    BasePattern: {fileID: 0}
+    BasePatternTileHexes: 8
+    BasePatternStrength: 1
+    BasePatternTint: {r: 1, g: 1, b: 1, a: 1}
+    TintVariation: 0.12
+    TintVariationScaleHexes: 16
+    DetailPattern: {fileID: 0}
+    DetailPatternTileHexes: 2
+    DetailPatternStrength: 0.35
+    Terrain:
+    - Terrain: 0
+      Enabled: 1
+      Color: {r: 0.62, g: 0.62, b: 0.46, a: 1}
+      Opacity: 0.25
+      Pattern: {fileID: 0}
+      PatternTileHexes: 3
+      PatternStrength: 0.6
+    - Terrain: 1
+      Enabled: 1
+      Color: {r: 0.62, g: 0.62, b: 0.46, a: 1}
+      Opacity: 0.25
+      Pattern: {fileID: 0}
+      PatternTileHexes: 3
+      PatternStrength: 0.6
+    - Terrain: 5
+      Enabled: 1
+      Color: {r: 0.62, g: 0.62, b: 0.46, a: 1}
+      Opacity: 0.25
+      Pattern: {fileID: 0}
+      PatternTileHexes: 3
+      PatternStrength: 0.6
+    - Terrain: 2
+      Enabled: 1
+      Color: {r: 0.78, g: 0.7, b: 0.43, a: 1}
+      Opacity: 0.7
+      Pattern: {fileID: 0}
+      PatternTileHexes: 3
+      PatternStrength: 0.6
+    - Terrain: 3
+      Enabled: 1
+      Color: {r: 0.27, g: 0.34, b: 0.22, a: 1}
+      Opacity: 0.85
+      Pattern: {fileID: 0}
+      PatternTileHexes: 3
+      PatternStrength: 0.6
+    - Terrain: 6
+      Enabled: 1
+      Color: {r: 0.35, g: 0.4, b: 0.31, a: 1}
+      Opacity: 0.85
+      Pattern: {fileID: 0}
+      PatternTileHexes: 3
+      PatternStrength: 0.6
+    - Terrain: 7
+      Enabled: 1
+      Color: {r: 0.6, g: 0.54, b: 0.39, a: 1}
+      Opacity: 0.55
+      Pattern: {fileID: 0}
+      PatternTileHexes: 3
+      PatternStrength: 0.6
+    - Terrain: 8
+      Enabled: 1
+      Color: {r: 0.52, g: 0.5, b: 0.47, a: 1}
+      Opacity: 0.8
+      Pattern: {fileID: 0}
+      PatternTileHexes: 3
+      PatternStrength: 0.6
+    - Terrain: 4
+      Enabled: 1
+      Color: {r: 0.3, g: 0.4, b: 0.42, a: 1}
+      Opacity: 1
+      Pattern: {fileID: 0}
+      PatternTileHexes: 3
+      PatternStrength: 0.6
+    - Terrain: 9
+      Enabled: 1
+      Color: {r: 0.33, g: 0.31, b: 0.31, a: 1}
+      Opacity: 0.9
+      Pattern: {fileID: 0}
+      PatternTileHexes: 3
+      PatternStrength: 0.6
+    EdgeRoughness: 0.55
+    EdgeSoftness: 0.18
+    InkColor: {r: 0.07, g: 0.06, b: 0.05, a: 1}
+    InkWidth: 3
+    ForestOutline: 0.55
+    WaterShallowColor: {r: 0.36, g: 0.47, b: 0.47, a: 1}
+    WaterDeepColor: {r: 0.2, g: 0.3, b: 0.33, a: 1}
+    WaterPattern: {fileID: 0}
+    WaterPatternTileHexes: 4
+    WaterPatternStrength: 0.35
+    RiverWidthScale: 1
+    ShoreBand: 0.25
+    DrawTrees: 1
+    TreeSprites: []
+    TreesPerHex: 4
+    TreeSizeHexes: 0.55
+    TreeSizeJitter: 0.3
+    ConiferShare: 0.6
+    ConiferColor: {r: 0.17, g: 0.26, b: 0.18, a: 1}
+    LeafColor: {r: 0.27, g: 0.35, b: 0.2, a: 1}
+    SparseTreesPerHex: 0.35
+    DrawHills: 1
+    HillSprites: []
+    HillsPerHex: 0.7
+    HillSizeHexes: 0.9
+    HillColor: {r: 0.55, g: 0.5, b: 0.36, a: 1}
+    DrawMountains: 1
+    MountainSprites: []
+    MountainsPerHex: 0.9
+    MountainSizeHexes: 1.3
+    MountainLightColor: {r: 0.66, g: 0.63, b: 0.58, a: 1}
+    MountainShadowColor: {r: 0.36, g: 0.34, b: 0.33, a: 1}
+    RoadColor: {r: 0.72, g: 0.62, b: 0.44, a: 1}
+    RoadWidthHexes: 0.14
+    RoadInk: 0.6
+    RoadDashed: 0
+    TrailColor: {r: 0.45, g: 0.38, b: 0.27, a: 1}
+    TrailWidthHexes: 0.07
+    TrailDashed: 1
+    BridgeColor: {r: 0.42, g: 0.3, b: 0.2, a: 1}
+    VillageSprites: []
+    VillageSizeHexes: 1.8
+    WallColor: {r: 0.55, g: 0.45, b: 0.33, a: 1}
+    RoofColor: {r: 0.36, g: 0.27, b: 0.19, a: 1}
+    MarkStart: 1
+    Landmarks: []
+    LandmarkSizeHexes: 1.4
+    LandmarkColor: {r: 0.5, g: 0.47, b: 0.42, a: 1}
+    Brightness: 0
+    Contrast: 1.05
+    Saturation: 0.85
+    Warmth: 0.15
+    Vignette: 0.35
+    Grain: 0.04
+    PaperTexture: {fileID: 0}
+    PaperTileHexes: 20
+    PaperStrength: 0.5
+  presets: []

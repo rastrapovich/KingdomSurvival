@@ -20,6 +20,14 @@ public static class CampaignSaveService
         if (state == null)
             throw new ArgumentNullException(nameof(state));
 
+        // Канон v1.58 §9.9: сгенерированная карта едет в самом сохранении и
+        // не сверяется с авторским миром базы.
+        if (state.HasGeneratedMap)
+        {
+            worldDefinitionId = GeneratedWorldMap.WorldDefinitionId;
+            geographyVersion = state.GeneratedMap.Version;
+        }
+
         bool hasExpedition = state.ActiveExpedition != null;
         return new CampaignSaveData
         {
@@ -65,6 +73,16 @@ public static class CampaignSaveService
         {
             reason = "в сохранении нет людей Дома";
             return false;
+        }
+
+        if (data.WorldDefinitionId == GeneratedWorldMap.WorldDefinitionId)
+        {
+            if (!data.State.HasGeneratedMap)
+            {
+                reason = "в сохранении нет сгенерированной карты";
+                return false;
+            }
+            return true;
         }
 
         if (!string.IsNullOrEmpty(data.WorldDefinitionId) &&
@@ -136,6 +154,10 @@ public static class CampaignSaveService
         // Канон v1.48 §27: у сохранений до прогрессии она заводится с нуля —
         // уровни берутся из прежних записей бойцов.
         CharacterProgressionService.EnsureState(state);
+
+        // Канон v1.58 §9.9: поддельная карта на месте null — авторский мир.
+        if (!state.HasGeneratedMap)
+            state.GeneratedMap = null;
 
         // ПР-06А: население — производное, пересчитывается из людей.
         HomePeopleService.RecountPopulation(state);

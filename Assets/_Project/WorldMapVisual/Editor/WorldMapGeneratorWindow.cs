@@ -1,0 +1,1257 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+namespace KingdomSurvival.WorldMapVisual.Editor
+{
+    // Канон v1.58 §9.9: окно «Генератор карты». Устроено как «Обработка
+    // кадра»: слева — блоки настроек со «Сбросить» и сохранённые наборы,
+    // справа — большой предпросмотр с масштабом, сдвигом, пошаговым показом
+    // стадий генерации и наложениями (разметка клеток, слоты появления).
+    // Слева сверху — что генерировать (масштаб, рельеф, вода, лес, деревни,
+    // дороги, приметные места), ниже — как выглядит (подложка-узор на всю
+    // карту, местность, тушь, вода, лес, горы, дороги, деревни, знаки,
+    // обработка). Правки идут с Undo; предпросмотр обновляется сам.
+    public sealed class WorldMapGeneratorWindow : EditorWindow
+    {
+        private const string PrefsKey = "KS.WorldMapGenerator.";
+
+        private WorldMapDatabaseAsset database;
+        private WorldMapGeneratorAsset generator;
+
+        private ScrollView settingsScroll;
+        private VisualElement parent;
+        private VisualElement viewport;
+        private VisualElement canvas;
+        private Image mapImage;
+        private Image markupImage;
+        private VisualElement overlay;
+        private Label statusLabel;
+        private Label stageLabel;
+        private SliderInt stageSlider;
+        private IntegerField seedField;
+        private Button playButton;
+
+        private Texture2D mapTexture;
+        private Texture2D markupTexture;
+        private GeneratedWorldMap currentMap;
+        private IVisualElementScheduledItem pendingRefresh;
+        private IVisualElementScheduledItem playItem;
+        private float zoom = 1f;
+        private Vector2 pan;
+        private bool panning;
+        private Vector2 panStart;
+        private Vector2 panOrigin;
+
+        private static int Seed
+        {
+            get => EditorPrefs.GetInt(PrefsKey + "Seed", 1);
+            set => EditorPrefs.SetInt(PrefsKey + "Seed", value);
+        }
+
+        private static int Stage
+        {
+            get => Mathf.Clamp(EditorPrefs.GetInt(PrefsKey + "Stage", (int)WorldMapGenerationStage.Complete), 0, (int)WorldMapGenerationStage.Complete);
+            set => EditorPrefs.SetInt(PrefsKey + "Stage", value);
+        }
+
+        // 0 — черновик, 1 — обычно, 2 — как в игре.
+        private static int Quality
+        {
+            get => Mathf.Clamp(EditorPrefs.GetInt(PrefsKey + "Quality", 1), 0, 2);
+            set => EditorPrefs.SetInt(PrefsKey + "Quality", value);
+        }
+
+        private static bool ShowMarkup
+        {
+            get => EditorPrefs.GetBool(PrefsKey + "Markup", false);
+            set => EditorPrefs.SetBool(PrefsKey + "Markup", value);
+        }
+
+        private static bool ShowSlots
+        {
+            get => EditorPrefs.GetBool(PrefsKey + "Slots", false);
+            set => EditorPrefs.SetBool(PrefsKey + "Slots", value);
+        }
+
+        private static bool ShowSites
+        {
+            get => EditorPrefs.GetBool(PrefsKey + "Sites", false);
+            set => EditorPrefs.SetBool(PrefsKey + "Sites", value);
+        }
+
+        private static bool AutoRefresh
+        {
+            get => EditorPrefs.GetBool(PrefsKey + "Auto", true);
+            set => EditorPrefs.SetBool(PrefsKey + "Auto", value);
+        }
+
+        private static string SelectedPreset
+        {
+            get => EditorPrefs.GetString(PrefsKey + "Preset", "");
+            set => EditorPrefs.SetString(PrefsKey + "Preset", value ?? "");
+        }
+
+        [MenuItem("Kingdom Survival/Генератор карты")]
+        public static void Open()
+        {
+            WorldMapGeneratorWindow window = GetWindow<WorldMapGeneratorWindow>();
+            window.titleContent = new GUIContent("Генератор карты");
+            window.minSize = new Vector2(900f, 560f);
+            window.Show();
+        }
+
+        private void OnEnable()
+        {
+            Undo.undoRedoPerformed += OnUndoRedo;
+        }
+
+        private void OnDisable()
+        {
+            Undo.undoRedoPerformed -= OnUndoRedo;
+            DestroyTexture(ref mapTexture);
+            DestroyTexture(ref markupTexture);
+        }
+
+        private void OnUndoRedo()
+        {
+            if (generator == null)
+                return;
+            RebuildSettings();
+            ScheduleRefresh(true);
+        }
+
+        private void CreateGUI()
+        {
+            database = Resources.Load<WorldMapDatabaseAsset>(WorldMapDatabaseAsset.ResourcesPath);
+            generator = database != null ? database.Generator : null;
+
+            VisualElement root = rootVisualElement;
+            root.Clear();
+            root.style.flexDirection = FlexDirection.Row;
+
+            VisualElement left = new VisualElement();
+            left.style.width = 400;
+            left.style.minWidth = 320;
+            left.style.borderRightWidth = 1;
+            left.style.borderRightColor = new Color(0f, 0f, 0f, 0.4f);
+            settingsScroll = new ScrollView(ScrollViewMode.Vertical);
+            settingsScroll.style.flexGrow = 1;
+            left.Add(settingsScroll);
+            root.Add(left);
+
+            VisualElement right = new VisualElement();
+            right.style.flexGrow = 1;
+            right.Add(BuildToolbar());
+            right.Add(BuildViewport());
+            statusLabel = new Label();
+            statusLabel.style.paddingLeft = 6;
+            statusLabel.style.paddingTop = 2;
+            statusLabel.style.paddingBottom = 4;
+            statusLabel.style.whiteSpace = WhiteSpace.Normal;
+            right.Add(statusLabel);
+            root.Add(right);
+
+            RebuildSettings();
+            ScheduleRefresh(true);
+        }
+
+        // ------------------------------------------------------------------
+        // Предпросмотр
+        // ------------------------------------------------------------------
+
+        private VisualElement BuildToolbar()
+        {
+            VisualElement bar = new VisualElement();
+            bar.style.flexDirection = FlexDirection.Column;
+            bar.style.paddingLeft = bar.style.paddingRight = 6;
+            bar.style.paddingTop = 4;
+
+            VisualElement row = Row(true);
+            seedField = new IntegerField("Seed") { value = Seed, tooltip = "Число, из которого строится карта. Одинаковый seed — одинаковая карта." };
+            seedField.labelElement.style.minWidth = 40;
+            seedField.style.width = 170;
+            seedField.RegisterValueChangedCallback(evt => { Seed = evt.newValue; ScheduleRefresh(true); });
+            row.Add(seedField);
+            row.Add(new Button(() => { seedField.value = UnityEngine.Random.Range(1, 999999); }) { text = "🎲 Другой seed", tooltip = "Новая случайная карта с теми же настройками" });
+            row.Add(new Button(() => ScheduleRefresh(true, 0)) { text = "Сгенерировать" });
+            PopupField<string> quality = new PopupField<string>(new List<string> { "Черновик", "Обычно", "Как в игре" }, Quality) { tooltip = "Качество предпросмотра. «Как в игре» — разрешение из блока «Качество»." };
+            quality.style.width = 110;
+            quality.RegisterValueChangedCallback(evt => { Quality = quality.index; ScheduleRefresh(false); });
+            row.Add(quality);
+            UnityEngine.UIElements.Toggle auto = new UnityEngine.UIElements.Toggle("Сразу") { value = AutoRefresh, tooltip = "Обновлять предпросмотр после каждой правки" };
+            auto.labelElement.style.minWidth = 0;
+            auto.RegisterValueChangedCallback(evt => AutoRefresh = evt.newValue);
+            row.Add(auto);
+            row.Add(new Button(SavePng) { text = "Сохранить PNG…", tooltip = "Рисунок этой карты в разрешении «как в игре»" });
+            bar.Add(row);
+
+            VisualElement stageRow = Row(false);
+            stageSlider = new SliderInt("Стадия", 0, (int)WorldMapGenerationStage.Complete) { value = Stage, tooltip = "Показать карту, собранную до этой стадии" };
+            stageSlider.labelElement.style.minWidth = 50;
+            stageSlider.style.flexGrow = 1;
+            stageSlider.RegisterValueChangedCallback(evt => { Stage = evt.newValue; UpdateStageLabel(); ScheduleRefresh(true, 10); });
+            stageRow.Add(stageSlider);
+            stageLabel = new Label { style = { width = 130, unityTextAlign = TextAnchor.MiddleLeft, unityFontStyleAndWeight = FontStyle.Bold } };
+            stageRow.Add(stageLabel);
+            playButton = new Button(TogglePlay) { text = "▶ По шагам", tooltip = "Показать, как собирается карта: стадия за стадией" };
+            stageRow.Add(playButton);
+            bar.Add(stageRow);
+            UpdateStageLabel();
+
+            VisualElement overlays = Row(true);
+            overlays.Add(OverlayToggle("Разметка клеток", ShowMarkup, value => { ShowMarkup = value; RefreshOverlays(); }, "Местность клеток так, как её видит игра (цвета — из настроек перемещения)"));
+            overlays.Add(OverlayToggle("Слоты мест", ShowSlots, value => { ShowSlots = value; overlay.MarkDirtyRepaint(); }, "Где могут появиться места из Базы карты"));
+            overlays.Add(OverlayToggle("Подписи", ShowSites, value => { ShowSites = value; overlay.MarkDirtyRepaint(); }, "Точки деревень, мест и старта"));
+            overlays.Add(new Button(() => { zoom = 1f; pan = Vector2.zero; ApplyView(); }) { text = "Вписать" });
+            Label hint = new Label("Колесо — масштаб, перетаскивание — сдвиг") { style = { fontSize = 10, color = new Color(0.7f, 0.7f, 0.65f), unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 6 } };
+            overlays.Add(hint);
+            bar.Add(overlays);
+            return bar;
+        }
+
+        private static UnityEngine.UIElements.Toggle OverlayToggle(string label, bool value, Action<bool> set, string tooltip)
+        {
+            UnityEngine.UIElements.Toggle toggle = new UnityEngine.UIElements.Toggle(label) { value = value, tooltip = tooltip };
+            toggle.labelElement.style.minWidth = 0;
+            toggle.style.marginRight = 10;
+            toggle.RegisterValueChangedCallback(evt => set(evt.newValue));
+            return toggle;
+        }
+
+        private VisualElement BuildViewport()
+        {
+            viewport = new VisualElement();
+            viewport.style.flexGrow = 1;
+            viewport.style.overflow = Overflow.Hidden;
+            viewport.style.backgroundColor = new Color(0.05f, 0.05f, 0.05f);
+            viewport.style.marginTop = 4;
+
+            canvas = new VisualElement { pickingMode = PickingMode.Ignore };
+            canvas.style.position = Position.Absolute;
+            mapImage = new Image { scaleMode = ScaleMode.StretchToFill, pickingMode = PickingMode.Ignore };
+            Stretch(mapImage);
+            markupImage = new Image { scaleMode = ScaleMode.StretchToFill, pickingMode = PickingMode.Ignore };
+            Stretch(markupImage);
+            markupImage.style.opacity = 0.55f;
+            overlay = new VisualElement { pickingMode = PickingMode.Ignore };
+            Stretch(overlay);
+            overlay.generateVisualContent += DrawOverlay;
+            canvas.Add(mapImage);
+            canvas.Add(markupImage);
+            canvas.Add(overlay);
+            viewport.Add(canvas);
+
+            viewport.RegisterCallback<GeometryChangedEvent>(_ => ApplyView());
+            viewport.RegisterCallback<WheelEvent>(OnWheel);
+            viewport.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                panning = true;
+                panStart = evt.localPosition;
+                panOrigin = pan;
+                viewport.CapturePointer(evt.pointerId);
+            });
+            viewport.RegisterCallback<PointerMoveEvent>(evt =>
+            {
+                if (!panning)
+                    return;
+                pan = panOrigin + ((Vector2)evt.localPosition - panStart);
+                ApplyView();
+            });
+            viewport.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                panning = false;
+                viewport.ReleasePointer(evt.pointerId);
+            });
+            return viewport;
+        }
+
+        private static void Stretch(VisualElement element)
+        {
+            element.style.position = Position.Absolute;
+            element.style.left = element.style.top = element.style.right = element.style.bottom = 0;
+        }
+
+        private Rect FitRect()
+        {
+            float aspect = currentMap != null ? currentMap.CanvasWidth / currentMap.CanvasHeight
+                : generator != null ? generator.Settings.CanvasWidth / Mathf.Max(1f, generator.Settings.CanvasHeight) : 1.625f;
+            Rect area = viewport.contentRect;
+            if (area.width <= 1f || area.height <= 1f)
+                return new Rect(0, 0, 1, 1);
+            float w = area.width, h = w / aspect;
+            if (h > area.height)
+            {
+                h = area.height;
+                w = h * aspect;
+            }
+            return new Rect((area.width - w) * 0.5f, (area.height - h) * 0.5f, w, h);
+        }
+
+        private void ApplyView()
+        {
+            if (viewport == null)
+                return;
+            Rect fit = FitRect();
+            canvas.style.left = fit.x + pan.x + fit.width * (1f - zoom) * 0.5f;
+            canvas.style.top = fit.y + pan.y + fit.height * (1f - zoom) * 0.5f;
+            canvas.style.width = fit.width * zoom;
+            canvas.style.height = fit.height * zoom;
+            overlay.MarkDirtyRepaint();
+        }
+
+        private void OnWheel(WheelEvent evt)
+        {
+            float old = zoom;
+            zoom = Mathf.Clamp(zoom * Mathf.Pow(1.12f, -evt.delta.y), 0.3f, 12f);
+            // Точка под курсором остаётся на месте.
+            Rect fit = FitRect();
+            Vector2 center = new Vector2(fit.x + fit.width * 0.5f, fit.y + fit.height * 0.5f) + pan;
+            Vector2 mouse = evt.localMousePosition;
+            pan += (mouse - center) * (1f - zoom / old);
+            ApplyView();
+            evt.StopPropagation();
+        }
+
+        private void DrawOverlay(MeshGenerationContext context)
+        {
+            if (currentMap == null)
+                return;
+            Rect rect = overlay.contentRect;
+            Painter2D painter = context.painter2D;
+            Vector2 ToLocal(float x, float y) => new Vector2(x / 100f * rect.width, y / 100f * rect.height);
+
+            if (ShowSlots && currentMap.SpawnSlots != null)
+            {
+                foreach (GeneratedSpawnSlot slot in currentMap.SpawnSlots)
+                {
+                    Vector2 min = ToLocal(slot.MinXPercent, slot.MinYPercent);
+                    Vector2 max = ToLocal(slot.MaxXPercent, slot.MaxYPercent);
+                    bool place = slot.Tags.Any(tag => tag.StartsWith(WorldMapLandmarkRule.PlaceTagPrefix));
+                    painter.fillColor = place ? new Color(1f, 0.5f, 0.2f, 0.35f) : new Color(0.3f, 0.6f, 1f, 0.22f);
+                    painter.strokeColor = place ? new Color(1f, 0.6f, 0.3f, 0.95f) : new Color(0.45f, 0.7f, 1f, 0.9f);
+                    painter.lineWidth = 1f;
+                    painter.BeginPath();
+                    painter.MoveTo(min);
+                    painter.LineTo(new Vector2(max.x, min.y));
+                    painter.LineTo(max);
+                    painter.LineTo(new Vector2(min.x, max.y));
+                    painter.ClosePath();
+                    painter.Fill();
+                    painter.Stroke();
+                }
+            }
+
+            if (ShowSites)
+            {
+                void Dot(float x, float y, Color color, float radius)
+                {
+                    painter.fillColor = color;
+                    painter.strokeColor = Color.black;
+                    painter.lineWidth = 1.5f;
+                    painter.BeginPath();
+                    painter.Arc(ToLocal(x, y), radius, 0f, 360f);
+                    painter.Fill();
+                    painter.Stroke();
+                }
+                foreach (GeneratedMapSite village in currentMap.Villages)
+                    Dot(village.XPercent, village.YPercent, village.IsStart ? new Color(1f, 0.85f, 0.2f) : new Color(0.95f, 0.95f, 0.9f), village.IsStart ? 7f : 5f);
+                foreach (GeneratedMapSite landmark in currentMap.Landmarks)
+                    Dot(landmark.XPercent, landmark.YPercent, new Color(1f, 0.45f, 0.25f), 5f);
+            }
+        }
+
+        private void UpdateStageLabel()
+        {
+            if (stageLabel != null)
+                stageLabel.text = (Stage + 1) + ". " + WorldMapGenerationStages.Title((WorldMapGenerationStage)Stage);
+        }
+
+        private void TogglePlay()
+        {
+            if (playItem != null)
+            {
+                StopPlay();
+                return;
+            }
+            stageSlider.value = 0;
+            playButton.text = "■ Стоп";
+            playItem = rootVisualElement.schedule.Execute(() =>
+            {
+                if (stageSlider.value >= (int)WorldMapGenerationStage.Complete)
+                {
+                    StopPlay();
+                    return;
+                }
+                stageSlider.value++;
+            }).Every(900).StartingIn(900);
+        }
+
+        private void StopPlay()
+        {
+            playItem?.Pause();
+            playItem = null;
+            if (playButton != null)
+                playButton.text = "▶ По шагам";
+        }
+
+        private void ScheduleRefresh(bool regenerate, long delayMs = 250)
+        {
+            if (generator == null || rootVisualElement == null)
+            {
+                ShowStatus();
+                return;
+            }
+            pendingRefresh?.Pause();
+            pendingRefresh = rootVisualElement.schedule.Execute(() => Refresh(regenerate)).StartingIn(delayMs);
+        }
+
+        private void Refresh(bool regenerate)
+        {
+            if (generator == null)
+                return;
+            Stopwatch watch = Stopwatch.StartNew();
+            if (regenerate || currentMap == null)
+                currentMap = generator.Generate(Seed, (WorldMapGenerationStage)Stage);
+            double generateMs = watch.Elapsed.TotalMilliseconds;
+            watch.Restart();
+            float resolution = Quality == 0 ? Mathf.Min(0.2f, generator.Art.Resolution)
+                : Quality == 1 ? Mathf.Min(0.35f, generator.Art.Resolution)
+                : generator.Art.Resolution;
+            DestroyTexture(ref mapTexture);
+            mapTexture = WorldMapPainter.Paint(currentMap, generator.Art, resolution);
+            double paintMs = watch.Elapsed.TotalMilliseconds;
+            mapImage.image = mapTexture;
+            RefreshOverlays();
+            ApplyView();
+            ShowStatus(generateMs, paintMs);
+        }
+
+        private void RefreshOverlays()
+        {
+            DestroyTexture(ref markupTexture);
+            if (ShowMarkup && currentMap != null)
+                markupTexture = BuildMarkupTexture(currentMap);
+            markupImage.image = markupTexture;
+            overlay.MarkDirtyRepaint();
+        }
+
+        private static Texture2D BuildMarkupTexture(GeneratedWorldMap map)
+        {
+            WorldMapMovementSettingsAsset movement = WorldMapVisualRuntime.LoadMovementSettings();
+            WorldMapTerrainLayer layer = map.CreateTerrainLayer();
+            WorldMapHexGrid grid = layer.Grid;
+            int width = 640;
+            int height = Mathf.Max(16, Mathf.RoundToInt(width * map.CanvasHeight / map.CanvasWidth));
+            Color32[] colors = new Color32[16];
+            foreach (WorldMapGameplayTerrainType type in WorldMapTerrainLabels.All)
+                colors[(int)type] = movement != null ? movement.GetTerrainColor(type) : WorldMapMovementSettingsAsset.DefaultColor(type);
+            Color32[] pixels = new Color32[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    double cx = (x + 0.5) / width * map.CanvasWidth;
+                    double cy = (y + 0.5) / height * map.CanvasHeight;
+                    pixels[(height - 1 - y) * width + x] = colors[(int)layer.GetAtPixel(cx, cy)];
+                }
+            }
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, hideFlags = HideFlags.DontSave };
+            texture.SetPixels32(pixels);
+            texture.Apply(false, false);
+            return texture;
+        }
+
+        private void ShowStatus(double generateMs = 0, double paintMs = 0)
+        {
+            if (statusLabel == null)
+                return;
+            if (generator == null)
+            {
+                statusLabel.text = "Генератор не подключён к базе карты — нажмите «Создать генератор» слева.";
+                return;
+            }
+            if (currentMap == null)
+            {
+                statusLabel.text = string.Empty;
+                return;
+            }
+            WorldMapHexGrid grid = currentMap.CreateGrid();
+            statusLabel.text =
+                $"{grid.Columns}×{grid.Rows} клеток · рек {currentMap.Rivers.Count} · дорог и троп {currentMap.Roads.Count} · " +
+                $"мостов и бродов {currentMap.Bridges.Count} · деревень {currentMap.Villages.Count} · мест {currentMap.Landmarks.Count} · " +
+                $"слотов {currentMap.SpawnSlots.Count} · рисунок {(mapTexture != null ? mapTexture.width + "×" + mapTexture.height : "—")} · " +
+                $"генерация {generateMs:0} мс, рисунок {paintMs:0} мс";
+        }
+
+        private void SavePng()
+        {
+            if (generator == null)
+                return;
+            string path = EditorUtility.SaveFilePanel("Сохранить рисунок карты", "", "generated-map-" + Seed + ".png", "png");
+            if (string.IsNullOrEmpty(path))
+                return;
+            GeneratedWorldMap map = generator.Generate(Seed, (WorldMapGenerationStage)Stage);
+            Texture2D texture = WorldMapPainter.Paint(map, generator.Art);
+            WorldMapGeneratorTools.SavePng(texture, path);
+            DestroyImmediate(texture);
+            EditorUtility.RevealInFinder(path);
+        }
+
+        private static void DestroyTexture(ref Texture2D texture)
+        {
+            if (texture != null)
+                DestroyImmediate(texture);
+            texture = null;
+        }
+
+        // ------------------------------------------------------------------
+        // Настройки
+        // ------------------------------------------------------------------
+
+        private WorldMapGenerationSettings S => generator.Settings;
+        private WorldMapArtStyle A => generator.Art;
+
+        // Правка: Undo, запись, обновление предпросмотра (и, если нужно,
+        // перестройка панели — когда меняется состав списков).
+        private void Change(Action action, bool regenerate, bool rebuild = false)
+        {
+            if (generator == null)
+                return;
+            Undo.RecordObject(generator, "Генератор карты");
+            action();
+            EditorUtility.SetDirty(generator);
+            if (rebuild)
+                RebuildSettings();
+            if (AutoRefresh)
+                ScheduleRefresh(regenerate);
+        }
+
+        private void RebuildSettings()
+        {
+            if (settingsScroll == null)
+                return;
+            float scroll = settingsScroll.scrollOffset.y;
+            settingsScroll.Clear();
+            parent = settingsScroll.contentContainer;
+            parent.style.paddingLeft = parent.style.paddingRight = 6;
+            parent.style.paddingBottom = 12;
+
+            Label title = new Label("Генератор карты «Свободной игры»") { style = { unityFontStyleAndWeight = FontStyle.Bold, fontSize = 13, marginTop = 6, marginBottom = 2 } };
+            parent.Add(title);
+
+            if (database == null)
+            {
+                Help("База карты не найдена (Resources/" + WorldMapDatabaseAsset.ResourcesPath + ").");
+                return;
+            }
+            if (generator == null)
+            {
+                Help("У базы карты ещё нет генератора. Создайте его — настройки по умолчанию дадут рабочую карту, которую можно сразу посмотреть.");
+                Buttons(("Создать генератор", () =>
+                {
+                    generator = WorldMapGeneratorTools.EnsureGeneratorAsset(database);
+                    RebuildSettings();
+                    ScheduleRefresh(true, 0);
+                }, null));
+                return;
+            }
+
+            Toggle("Карта свободной игры — генерируется", generator.UseForFreePlay, value => generator.UseForFreePlay = value, false,
+                "Каждая новая партия «Свободной игры» строит свою карту по этим настройкам и своему seed. Выключено — авторский мир, как в кампании.");
+            Help("Каждая новая партия свободной игры получает свою карту: seed партии + эти настройки. Карта сохраняется вместе с партией. " +
+                 "Кампании кризисов идут по авторскому миру (окно «Карта»).");
+
+            BuildPresets();
+
+            Section("Что генерировать");
+            BuildScale();
+            BuildRelief();
+            BuildWater();
+            BuildVegetation();
+            BuildVillages();
+            BuildRoads();
+            BuildLandmarks();
+
+            Section("Как выглядит");
+            BuildQuality();
+            BuildBase();
+            BuildTerrainArt();
+            BuildInk();
+            BuildWaterArt();
+            BuildForestArt();
+            BuildReliefArt();
+            BuildRoadArt();
+            BuildVillageArt();
+            BuildLandmarkArt();
+            BuildPost();
+
+            settingsScroll.schedule.Execute(() => settingsScroll.scrollOffset = new Vector2(0f, scroll));
+        }
+
+        private void BuildPresets()
+        {
+            List<WorldMapGeneratorPreset> presets = generator.Presets;
+            Foldout block = Block("Сохранённые наборы (" + presets.Count + ")", "Presets", true);
+            VisualElement keep = parent;
+            parent = block;
+            WorldMapGeneratorPreset selected = generator.FindPreset(SelectedPreset);
+            if (presets.Count == 0)
+                Help("Наборов пока нет. Настройте карту и нажмите «Запомнить как новый» — потом его можно применить целиком, только генерацию или только облик.");
+            else
+            {
+                List<string> names = presets.Select(preset => preset.Name + (string.IsNullOrEmpty(preset.Note) ? "" : " — " + preset.Note)).ToList();
+                int index = Mathf.Max(0, presets.IndexOf(selected));
+                PopupField<string> popup = new PopupField<string>("Набор", names, index);
+                popup.RegisterValueChangedCallback(_ => { SelectedPreset = presets[popup.index].Id; RebuildSettings(); });
+                parent.Add(popup);
+                if (selected == null)
+                {
+                    selected = presets[index];
+                    SelectedPreset = selected.Id;
+                }
+            }
+            TextField name = new TextField("Имя") { value = selected != null ? selected.Name : "Новый набор" };
+            TextField note = new TextField("Заметка") { value = selected != null ? selected.Note : "", tooltip = "«много воды», «северная тайга», «степь у гор»…" };
+            parent.Add(name);
+            parent.Add(note);
+            Buttons(
+                ("Запомнить как новый", () => Change(() =>
+                {
+                    WorldMapGeneratorPreset preset = new WorldMapGeneratorPreset { Name = Unique(name.value), Note = note.value ?? "", Settings = S.Clone(), Art = A.Clone() };
+                    presets.Add(preset);
+                    SelectedPreset = preset.Id;
+                }, false, true), "Сохранить текущие настройки генерации и облика"),
+                ("Перезаписать", selected == null ? null : (Action)(() => Change(() =>
+                {
+                    selected.Settings = S.Clone();
+                    selected.Art = A.Clone();
+                    selected.Name = string.IsNullOrWhiteSpace(name.value) ? selected.Name : name.value.Trim();
+                    selected.Note = note.value ?? "";
+                }, false, true)), null));
+            Buttons(
+                ("Применить всё", selected == null ? null : (Action)(() => Change(() => { generator.Settings = selected.Settings.Clone(); generator.Art = selected.Art.Clone(); }, true, true)), null),
+                ("Только генерацию", selected == null ? null : (Action)(() => Change(() => generator.Settings = selected.Settings.Clone(), true, true)), "Что и где — без облика"),
+                ("Только облик", selected == null ? null : (Action)(() => Change(() => generator.Art = selected.Art.Clone(), false, true)), "Как выглядит — без изменения карты"),
+                ("Удалить", selected == null ? null : (Action)(() =>
+                {
+                    if (!EditorUtility.DisplayDialog("Удалить набор", "Удалить набор «" + selected.Name + "»?", "Удалить", "Отмена"))
+                        return;
+                    Change(() => { presets.Remove(selected); SelectedPreset = ""; }, false, true);
+                }), null));
+            Buttons(("Всё по умолчанию", () =>
+            {
+                if (EditorUtility.DisplayDialog("Сбросить генератор", "Вернуть все настройки генерации и облика к значениям по умолчанию? Сохранённые наборы останутся.", "Сбросить", "Отмена"))
+                    Change(() => { generator.Settings = WorldMapGenerationSettings.CreateDefault(); generator.Art = WorldMapArtStyle.CreateDefault(); }, true, true);
+            }, null));
+            parent = keep;
+        }
+
+        private string Unique(string name)
+        {
+            string baseName = string.IsNullOrWhiteSpace(name) ? "Набор" : name.Trim();
+            string result = baseName;
+            int n = 2;
+            while (generator.Presets.Any(preset => preset.Name == result))
+                result = baseName + " " + n++;
+            return result;
+        }
+
+        // ---- что генерировать ----
+
+        private void BuildScale()
+        {
+            Group("Масштаб карты", "Scale", () =>
+            {
+                Help("Размер мира — числом клеток пути по ширине: больше клеток — больше мира и дольше дорога через него. Полотно задаёт пропорции и единицу координат.");
+                IntSlider("Клеток по ширине", S.HexesAcross, 20, 300, v => S.HexesAcross = v, true);
+                FloatField("Ширина полотна, px", S.CanvasWidth, v => S.CanvasWidth = v, true);
+                FloatField("Высота полотна, px", S.CanvasHeight, v => S.CanvasHeight = v, true);
+                Buttons(("16:10", () => Change(() => S.CanvasHeight = S.CanvasWidth * 10f / 16f, true, true), null),
+                    ("4:3", () => Change(() => S.CanvasHeight = S.CanvasWidth * 3f / 4f, true, true), null),
+                    ("1:1", () => Change(() => S.CanvasHeight = S.CanvasWidth, true, true), null),
+                    ("Как в авторском мире", database.ActiveWorld == null ? null : (Action)(() => Change(() =>
+                    {
+                        S.CanvasWidth = database.ActiveWorld.MapCanvasWidth;
+                        S.CanvasHeight = database.ActiveWorld.MapCanvasHeight;
+                        S.HexesAcross = database.ActiveWorld.HexesAcross;
+                    }, true, true)), null));
+                Slider("Поляна у старта, клеток", S.StartClearRadiusHexes, 0, 6, v => S.StartClearRadiusHexes = Mathf.RoundToInt(v), true,
+                    "Вокруг точки старта нет воды, гор и леса");
+            }, () =>
+            {
+                WorldMapGenerationSettings d = WorldMapGenerationSettings.CreateDefault();
+                S.HexesAcross = d.HexesAcross; S.CanvasWidth = d.CanvasWidth; S.CanvasHeight = d.CanvasHeight; S.StartClearRadiusHexes = d.StartClearRadiusHexes;
+            });
+        }
+
+        private void BuildRelief()
+        {
+            Group("Рельеф", "Relief", () =>
+            {
+                Slider("Размер форм, клеток", S.ReliefScaleHexes, 4, 120, v => S.ReliefScaleHexes = v, true, "Крупные плавные формы или мелкая пестрота");
+                IntSlider("Детали", S.ReliefDetail, 1, 7, v => S.ReliefDetail = v, true);
+                Slider("Изрезанность", S.ReliefRoughness, 0.1f, 0.9f, v => S.ReliefRoughness = v, true);
+                Slider("Хребты", S.MountainRidges, 0, 1, v => S.MountainRidges = v, true, "0 — округлые возвышенности, 1 — вытянутые гряды");
+                Slider("Доля холмов", S.HillsShare, 0, 0.6f, v => S.HillsShare = v, true);
+                Slider("Доля гор", S.MountainsShare, 0, 0.3f, v => S.MountainsShare = v, true);
+                Slider("Скалы среди гор", S.CliffsShare, 0, 1, v => S.CliffsShare = v, true, "Самые крутые горы становятся непроходимыми скалами");
+            }, () =>
+            {
+                WorldMapGenerationSettings d = WorldMapGenerationSettings.CreateDefault();
+                S.ReliefScaleHexes = d.ReliefScaleHexes; S.ReliefDetail = d.ReliefDetail; S.ReliefRoughness = d.ReliefRoughness;
+                S.MountainRidges = d.MountainRidges; S.HillsShare = d.HillsShare; S.MountainsShare = d.MountainsShare; S.CliffsShare = d.CliffsShare;
+            });
+        }
+
+        private void BuildWater()
+        {
+            Group("Озёра и реки", "Water", () =>
+            {
+                Help("Реки начинаются на возвышенностях и стекают по рельефу к краю карты или в озеро, сливаясь друг с другом. Вода непроходима: переправа — только мостом или бродом там, где реку пересекает дорога или тропа.");
+                Slider("Доля озёр", S.LakesShare, 0, 0.2f, v => S.LakesShare = v, true);
+                IntSlider("Рек", S.RiverCount, 0, 16, v => S.RiverCount = v, true);
+                IntSlider("Наименьшая длина, клеток", S.RiverMinLengthHexes, 2, 80, v => S.RiverMinLengthHexes = v, true);
+                Slider("Ширина в устье, клеток", S.RiverWidthHexes, 0.1f, 2f, v => S.RiverWidthHexes = v, true);
+                Slider("Извилистость", S.RiverMeander, 0, 1, v => S.RiverMeander = v, true);
+            }, () =>
+            {
+                WorldMapGenerationSettings d = WorldMapGenerationSettings.CreateDefault();
+                S.LakesShare = d.LakesShare; S.RiverCount = d.RiverCount; S.RiverMinLengthHexes = d.RiverMinLengthHexes;
+                S.RiverWidthHexes = d.RiverWidthHexes; S.RiverMeander = d.RiverMeander;
+            });
+        }
+
+        private void BuildVegetation()
+        {
+            Group("Лес и болота", "Vegetation", () =>
+            {
+                Slider("Доля леса", S.ForestShare, 0, 0.9f, v => S.ForestShare = v, true);
+                Slider("Размер массивов, клеток", S.ForestScaleHexes, 3, 80, v => S.ForestScaleHexes = v, true);
+                Slider("Лес на холмах", S.ForestOnHills, 0, 1, v => S.ForestOnHills = v, true);
+                Slider("Доля болот", S.SwampShare, 0, 0.3f, v => S.SwampShare = v, true, "Сырые низины, чаще у воды");
+                Slider("Размер пятен влажности", S.MoistureScaleHexes, 3, 80, v => S.MoistureScaleHexes = v, true);
+            }, () =>
+            {
+                WorldMapGenerationSettings d = WorldMapGenerationSettings.CreateDefault();
+                S.ForestShare = d.ForestShare; S.ForestScaleHexes = d.ForestScaleHexes; S.ForestOnHills = d.ForestOnHills;
+                S.SwampShare = d.SwampShare; S.MoistureScaleHexes = d.MoistureScaleHexes;
+            });
+        }
+
+        private void BuildVillages()
+        {
+            Group("Деревни и поля", "Villages", () =>
+            {
+                Help("Первая деревня — точка старта отряда. Остальные ставятся на ровной земле, охотнее у воды, не ближе заданного расстояния.");
+                IntSlider("Деревень (со стартовой)", S.VillageCount, 1, 40, v => S.VillageCount = v, true);
+                IntSlider("Наименьшее расстояние, клеток", S.VillageMinDistanceHexes, 2, 40, v => S.VillageMinDistanceHexes = v, true);
+                Slider("Тяга к воде", S.VillageNearWater, 0, 2, v => S.VillageNearWater = v, true);
+                Slider("Поля вокруг, клеток", S.FieldRadiusHexes, 0, 8, v => S.FieldRadiusHexes = v, true);
+                Slider("Густота полей", S.FieldDensity, 0, 1, v => S.FieldDensity = v, true);
+            }, () =>
+            {
+                WorldMapGenerationSettings d = WorldMapGenerationSettings.CreateDefault();
+                S.VillageCount = d.VillageCount; S.VillageMinDistanceHexes = d.VillageMinDistanceHexes; S.VillageNearWater = d.VillageNearWater;
+                S.FieldRadiusHexes = d.FieldRadiusHexes; S.FieldDensity = d.FieldDensity;
+            });
+        }
+
+        private void BuildRoads()
+        {
+            Group("Дороги и тропы", "Roads", () =>
+            {
+                Help("Дороги связывают все деревни кратчайшей сетью, затем добавляются петли и выходы к краю карты. Путь выбирается по цене местности: холмы, лес и болото дороже, река — мост или брод. К приметным местам ведут тропы.");
+                Slider("Петли", S.ExtraRoadLoops, 0, 1.5f, v => S.ExtraRoadLoops = v, true, "Лишние дороги между соседними деревнями — несколько путей вместо одного");
+                IntSlider("Выходов к краю", S.RoadsToEdge, 0, 8, v => S.RoadsToEdge = v, true);
+                Toggle("Тропы к приметным местам", S.TrailsToLandmarks, v => S.TrailsToLandmarks = v, true);
+                Slider("Петляние", S.RoadWander, 0, 4, v => S.RoadWander = v, true, "0 — кратчайший путь по сетке");
+                Slider("Цена холмов", S.RoadAvoidHills, 1, 10, v => S.RoadAvoidHills = v, true);
+                Slider("Цена леса", S.RoadAvoidForest, 1, 10, v => S.RoadAvoidForest = v, true);
+                Slider("Цена болота", S.RoadAvoidSwamp, 1, 20, v => S.RoadAvoidSwamp = v, true);
+                Slider("Цена переправы", S.RiverCrossingCost, 1, 40, v => S.RiverCrossingCost = v, true, "Больше — меньше мостов, дороги идут вдоль рек");
+            }, () =>
+            {
+                WorldMapGenerationSettings d = WorldMapGenerationSettings.CreateDefault();
+                S.ExtraRoadLoops = d.ExtraRoadLoops; S.RoadsToEdge = d.RoadsToEdge; S.TrailsToLandmarks = d.TrailsToLandmarks; S.RoadWander = d.RoadWander;
+                S.RoadAvoidHills = d.RoadAvoidHills; S.RoadAvoidForest = d.RoadAvoidForest; S.RoadAvoidSwamp = d.RoadAvoidSwamp; S.RiverCrossingCost = d.RiverCrossingCost;
+            });
+        }
+
+        private void BuildLandmarks()
+        {
+            Group("Приметные места (" + S.Landmarks.Count + ")", "Landmarks", () =>
+            {
+                Help("Правило ставит знак на карту и слот появления. «Место из базы» — локация Базы карты, которая встанет именно сюда (её слот получает тег place:<id>). Примеры по умолчанию — рабочие, не факты мира.");
+                List<string> locationIds = new List<string> { "" };
+                List<string> locationNames = new List<string> { "— нет —" };
+                foreach (WorldMapLocationDefinition location in database.Locations)
+                {
+                    if (location == null || string.IsNullOrWhiteSpace(location.Id))
+                        continue;
+                    locationIds.Add(location.Id);
+                    locationNames.Add(location.DisplayName + " (" + location.Id + ")");
+                }
+
+                for (int i = 0; i < S.Landmarks.Count; i++)
+                {
+                    WorldMapLandmarkRule rule = S.Landmarks[i];
+                    if (rule == null)
+                        continue;
+                    int index = i;
+                    Foldout item = Block((rule.Enabled ? "● " : "○ ") + rule.Name + " ×" + rule.Count, "Landmark." + rule.Id, false);
+                    VisualElement keep = parent;
+                    parent = item;
+                    Toggle("Включено", rule.Enabled, v => rule.Enabled = v, true);
+                    Text("Название", rule.Name, v => rule.Name = v);
+                    Text("ID", rule.Id, v => rule.Id = v, "По ID знак берёт свой рисунок в «Как выглядит → Приметные места»");
+                    IntSlider("Сколько", rule.Count, 0, 20, v => rule.Count = v, true);
+                    TerrainMask(rule.Terrains);
+                    Toggle("У воды", rule.NearWater, v => rule.NearWater = v, true);
+                    Toggle("Рядом с деревней", rule.NearVillage, v => rule.NearVillage = v, true);
+                    Slider("Не ближе, клеток", rule.MinDistanceHexes, 0, 40, v => rule.MinDistanceHexes = v, true, "От деревень (если не «рядом с деревней») и от других мест");
+                    int selected = Mathf.Max(0, locationIds.IndexOf(rule.LocationId ?? ""));
+                    PopupField<string> location = new PopupField<string>("Место из базы", locationNames, selected);
+                    location.RegisterValueChangedCallback(_ => Change(() => rule.LocationId = locationIds[location.index], true));
+                    parent.Add(location);
+                    Text("Теги слота", rule.SlotTags, v => rule.SlotTags = v, "Через запятую: Ruins, Hills…");
+                    Toggle("Знак на карте", rule.DrawMark, v => rule.DrawMark = v, true);
+                    Buttons(
+                        ("↑", index == 0 ? null : (Action)(() => Change(() => { S.Landmarks.RemoveAt(index); S.Landmarks.Insert(index - 1, rule); }, true, true)), null),
+                        ("↓", index >= S.Landmarks.Count - 1 ? null : (Action)(() => Change(() => { S.Landmarks.RemoveAt(index); S.Landmarks.Insert(index + 1, rule); }, true, true)), null),
+                        ("Дублировать", () => Change(() =>
+                        {
+                            WorldMapLandmarkRule copy = rule.Clone();
+                            copy.Id = rule.Id + "-copy";
+                            copy.Name = rule.Name + " (копия)";
+                            S.Landmarks.Insert(index + 1, copy);
+                        }, true, true), null),
+                        ("Удалить", () => Change(() => S.Landmarks.RemoveAt(index), true, true), null));
+                    parent = keep;
+                }
+                Buttons(("+ Добавить место", () => Change(() => S.Landmarks.Add(new WorldMapLandmarkRule { Id = "landmark-" + (S.Landmarks.Count + 1) }), true, true), null));
+            }, () => S.Landmarks = WorldMapGenerationSettings.DefaultLandmarks());
+        }
+
+        private void TerrainMask(List<WorldMapGameplayTerrainType> terrains)
+        {
+            Label label = new Label("Где (пусто — любая суша):") { style = { marginTop = 2 } };
+            parent.Add(label);
+            VisualElement row = Row(true);
+            foreach (WorldMapGameplayTerrainType type in WorldMapTerrainLabels.All)
+            {
+                if (type == WorldMapGameplayTerrainType.Water || type == WorldMapGameplayTerrainType.Cliffs)
+                    continue;
+                WorldMapGameplayTerrainType captured = type;
+                UnityEngine.UIElements.Toggle toggle = new UnityEngine.UIElements.Toggle(WorldMapTerrainLabels.Name(type)) { value = terrains.Contains(type) };
+                toggle.labelElement.style.minWidth = 0;
+                toggle.style.marginRight = 8;
+                toggle.RegisterValueChangedCallback(evt => Change(() =>
+                {
+                    terrains.Remove(captured);
+                    if (evt.newValue)
+                        terrains.Add(captured);
+                }, true));
+                row.Add(toggle);
+            }
+            parent.Add(row);
+        }
+
+        // ---- как выглядит ----
+
+        private void BuildQuality()
+        {
+            Group("Качество", "Quality", () =>
+            {
+                Slider("Разрешение рисунка", A.Resolution, 0.1f, 1f, v => A.Resolution = v, false,
+                    "Пикселей рисунка на пиксель полотна. Столько рисует игра; предпросмотр в режимах «Черновик/Обычно» — меньше.");
+                if (generator != null)
+                {
+                    Vector2Int size = new Vector2Int(Mathf.RoundToInt(S.CanvasWidth * A.Resolution), Mathf.RoundToInt(S.CanvasHeight * A.Resolution));
+                    Help("В игре: " + size.x + "×" + size.y + " пикселей.");
+                }
+            }, () => A.Resolution = 0.5f);
+        }
+
+        private void BuildBase()
+        {
+            Group("Подложка", "Base", () =>
+            {
+                Help("Общая подложка: бесшовный узор, который размножается на всю карту. Крупные пятна оттенка и второй мелкий узор прячут повтор.");
+                ColorField("Цвет основы", A.BaseColor, v => A.BaseColor = v);
+                TextureField("Узор подложки", A.BasePattern, v => A.BasePattern = v);
+                Slider("Плитка, клеток", A.BasePatternTileHexes, 0.5f, 60, v => A.BasePatternTileHexes = v);
+                Slider("Сила узора", A.BasePatternStrength, 0, 1, v => A.BasePatternStrength = v);
+                ColorField("Оттенок узора", A.BasePatternTint, v => A.BasePatternTint = v);
+                Slider("Пятна оттенка", A.TintVariation, 0, 0.6f, v => A.TintVariation = v);
+                Slider("Размер пятен, клеток", A.TintVariationScaleHexes, 2, 120, v => A.TintVariationScaleHexes = v);
+                TextureField("Мелкий узор", A.DetailPattern, v => A.DetailPattern = v);
+                Slider("Плитка мелкого, клеток", A.DetailPatternTileHexes, 0.2f, 30, v => A.DetailPatternTileHexes = v);
+                Slider("Сила мелкого", A.DetailPatternStrength, 0, 1, v => A.DetailPatternStrength = v);
+            }, () =>
+            {
+                WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
+                A.BaseColor = d.BaseColor; A.BasePatternTileHexes = d.BasePatternTileHexes; A.BasePatternStrength = d.BasePatternStrength; A.BasePatternTint = d.BasePatternTint;
+                A.TintVariation = d.TintVariation; A.TintVariationScaleHexes = d.TintVariationScaleHexes; A.DetailPatternTileHexes = d.DetailPatternTileHexes; A.DetailPatternStrength = d.DetailPatternStrength;
+            });
+        }
+
+        private void BuildTerrainArt()
+        {
+            Group("Местность", "TerrainArt", () =>
+            {
+                Help("Каждый тип местности — слой поверх подложки: подкраска и свой узор (например, рисунок лесной подстилки или пашни).");
+                Slider("Неровность краёв, клеток", A.EdgeRoughness, 0, 1.5f, v => A.EdgeRoughness = v, false, "0 — видны шестиугольники клеток");
+                Slider("Мягкость переходов, клеток", A.EdgeSoftness, 0, 1, v => A.EdgeSoftness = v);
+                foreach (WorldMapTerrainArt art in A.Terrain)
+                {
+                    if (art == null || art.Terrain == WorldMapGameplayTerrainType.Road || art.Terrain == WorldMapGameplayTerrainType.Trail)
+                        continue;
+                    WorldMapTerrainArt entry = art;
+                    Foldout item = Block((entry.Enabled ? "● " : "○ ") + WorldMapTerrainLabels.Name(entry.Terrain), "TerrainArt." + entry.Terrain, false);
+                    VisualElement keep = parent;
+                    parent = item;
+                    Toggle("Включено", entry.Enabled, v => entry.Enabled = v);
+                    ColorField("Цвет", entry.Color, v => entry.Color = v);
+                    Slider("Непрозрачность", entry.Opacity, 0, 1, v => entry.Opacity = v);
+                    TextureField("Узор", entry.Pattern, v => entry.Pattern = v);
+                    Slider("Плитка, клеток", entry.PatternTileHexes, 0.2f, 60, v => entry.PatternTileHexes = v);
+                    Slider("Сила узора", entry.PatternStrength, 0, 1, v => entry.PatternStrength = v);
+                    parent = keep;
+                }
+            }, () =>
+            {
+                A.Terrain.Clear();
+                A.EnsureTerrainEntries();
+                A.EdgeRoughness = 0.55f;
+                A.EdgeSoftness = 0.18f;
+            });
+        }
+
+        private void BuildInk()
+        {
+            Group("Тушь", "Ink", () =>
+            {
+                Help("Чёрный контур — стиль канона v1.56: берега, кромка леса, дороги, знаки.");
+                ColorField("Цвет туши", A.InkColor, v => A.InkColor = v);
+                Slider("Толщина, px полотна", A.InkWidth, 0, 12, v => A.InkWidth = v);
+                Slider("Кромка леса", A.ForestOutline, 0, 1, v => A.ForestOutline = v);
+            }, () => { WorldMapArtStyle d = WorldMapArtStyle.CreateDefault(); A.InkColor = d.InkColor; A.InkWidth = d.InkWidth; A.ForestOutline = d.ForestOutline; });
+        }
+
+        private void BuildWaterArt()
+        {
+            Group("Вода", "WaterArt", () =>
+            {
+                Help("Озёра рисуются по клеткам, реки — гладкой линией, расширяющейся к устью. У берега — светлая отмель, по кромке — тушь.");
+                ColorField("Мелко", A.WaterShallowColor, v => A.WaterShallowColor = v);
+                ColorField("Глубоко", A.WaterDeepColor, v => A.WaterDeepColor = v);
+                Slider("Отмель, клеток", A.ShoreBand, 0, 1, v => A.ShoreBand = v);
+                Slider("Ширина рек ×", A.RiverWidthScale, 0.2f, 4, v => A.RiverWidthScale = v);
+                TextureField("Рябь (узор)", A.WaterPattern, v => A.WaterPattern = v);
+                Slider("Плитка ряби, клеток", A.WaterPatternTileHexes, 0.5f, 30, v => A.WaterPatternTileHexes = v);
+                Slider("Сила ряби", A.WaterPatternStrength, 0, 1, v => A.WaterPatternStrength = v);
+            }, () =>
+            {
+                WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
+                A.WaterShallowColor = d.WaterShallowColor; A.WaterDeepColor = d.WaterDeepColor; A.ShoreBand = d.ShoreBand; A.RiverWidthScale = d.RiverWidthScale;
+                A.WaterPatternTileHexes = d.WaterPatternTileHexes; A.WaterPatternStrength = d.WaterPatternStrength;
+            });
+        }
+
+        private void BuildForestArt()
+        {
+            Group("Лес", "ForestArt", () =>
+            {
+                Help("Деревья расставляются внутри леса, редкие — на болоте и в поле. Без рисунков — ели и лиственные деревья кодом.");
+                Toggle("Рисовать деревья", A.DrawTrees, v => A.DrawTrees = v);
+                SpriteList("Рисунки деревьев", A.TreeSprites);
+                Slider("Деревьев на клетку", A.TreesPerHex, 0, 12, v => A.TreesPerHex = v);
+                Slider("Размер, клеток", A.TreeSizeHexes, 0.1f, 3, v => A.TreeSizeHexes = v);
+                Slider("Разброс размера", A.TreeSizeJitter, 0, 1, v => A.TreeSizeJitter = v);
+                Slider("Доля елей", A.ConiferShare, 0, 1, v => A.ConiferShare = v);
+                ColorField("Ели", A.ConiferColor, v => A.ConiferColor = v);
+                ColorField("Лиственные", A.LeafColor, v => A.LeafColor = v);
+                Slider("Редкие деревья", A.SparseTreesPerHex, 0, 2, v => A.SparseTreesPerHex = v);
+            }, () =>
+            {
+                WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
+                A.DrawTrees = d.DrawTrees; A.TreesPerHex = d.TreesPerHex; A.TreeSizeHexes = d.TreeSizeHexes; A.TreeSizeJitter = d.TreeSizeJitter;
+                A.ConiferShare = d.ConiferShare; A.ConiferColor = d.ConiferColor; A.LeafColor = d.LeafColor; A.SparseTreesPerHex = d.SparseTreesPerHex;
+            });
+        }
+
+        private void BuildReliefArt()
+        {
+            Group("Холмы и горы", "ReliefArt", () =>
+            {
+                Toggle("Рисовать холмы", A.DrawHills, v => A.DrawHills = v);
+                SpriteList("Рисунки холмов", A.HillSprites);
+                Slider("Холмов на клетку", A.HillsPerHex, 0, 4, v => A.HillsPerHex = v);
+                Slider("Размер холма, клеток", A.HillSizeHexes, 0.2f, 4, v => A.HillSizeHexes = v);
+                ColorField("Цвет холмов", A.HillColor, v => A.HillColor = v);
+                Toggle("Рисовать горы", A.DrawMountains, v => A.DrawMountains = v);
+                SpriteList("Рисунки гор", A.MountainSprites);
+                Slider("Гор на клетку", A.MountainsPerHex, 0, 4, v => A.MountainsPerHex = v);
+                Slider("Размер горы, клеток", A.MountainSizeHexes, 0.2f, 5, v => A.MountainSizeHexes = v);
+                ColorField("Свет", A.MountainLightColor, v => A.MountainLightColor = v);
+                ColorField("Тень", A.MountainShadowColor, v => A.MountainShadowColor = v);
+            }, () =>
+            {
+                WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
+                A.DrawHills = d.DrawHills; A.HillsPerHex = d.HillsPerHex; A.HillSizeHexes = d.HillSizeHexes; A.HillColor = d.HillColor;
+                A.DrawMountains = d.DrawMountains; A.MountainsPerHex = d.MountainsPerHex; A.MountainSizeHexes = d.MountainSizeHexes;
+                A.MountainLightColor = d.MountainLightColor; A.MountainShadowColor = d.MountainShadowColor;
+            });
+        }
+
+        private void BuildRoadArt()
+        {
+            Group("Дороги", "RoadArt", () =>
+            {
+                ColorField("Дорога", A.RoadColor, v => A.RoadColor = v);
+                Slider("Ширина дороги, клеток", A.RoadWidthHexes, 0.02f, 1, v => A.RoadWidthHexes = v);
+                Slider("Тушь вдоль дороги", A.RoadInk, 0, 1, v => A.RoadInk = v);
+                Toggle("Дорога пунктиром", A.RoadDashed, v => A.RoadDashed = v);
+                ColorField("Тропа", A.TrailColor, v => A.TrailColor = v);
+                Slider("Ширина тропы, клеток", A.TrailWidthHexes, 0.02f, 1, v => A.TrailWidthHexes = v);
+                Toggle("Тропа пунктиром", A.TrailDashed, v => A.TrailDashed = v);
+                ColorField("Мосты", A.BridgeColor, v => A.BridgeColor = v);
+            }, () =>
+            {
+                WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
+                A.RoadColor = d.RoadColor; A.RoadWidthHexes = d.RoadWidthHexes; A.RoadInk = d.RoadInk; A.RoadDashed = d.RoadDashed;
+                A.TrailColor = d.TrailColor; A.TrailWidthHexes = d.TrailWidthHexes; A.TrailDashed = d.TrailDashed; A.BridgeColor = d.BridgeColor;
+            });
+        }
+
+        private void BuildVillageArt()
+        {
+            Group("Деревни", "VillageArt", () =>
+            {
+                Help("Рисунок деревни (один на деревню) или домики кодом — чем больше деревня, тем больше домов. Старт отряда отмечен частоколом.");
+                SpriteList("Рисунки деревень", A.VillageSprites);
+                Slider("Размер, клеток", A.VillageSizeHexes, 0.2f, 4, v => A.VillageSizeHexes = v);
+                ColorField("Стены", A.WallColor, v => A.WallColor = v);
+                ColorField("Крыши", A.RoofColor, v => A.RoofColor = v);
+                Toggle("Отмечать старт", A.MarkStart, v => A.MarkStart = v);
+            }, () =>
+            {
+                WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
+                A.VillageSizeHexes = d.VillageSizeHexes; A.WallColor = d.WallColor; A.RoofColor = d.RoofColor; A.MarkStart = d.MarkStart;
+            });
+        }
+
+        private void BuildLandmarkArt()
+        {
+            Group("Приметные места", "LandmarkArt", () =>
+            {
+                Help("Знак по ID правила. Без рисунка — знак кодом: руины, шахта, курган, мельница или камень.");
+                Slider("Размер знаков кодом, клеток", A.LandmarkSizeHexes, 0.2f, 4, v => A.LandmarkSizeHexes = v);
+                ColorField("Цвет камня", A.LandmarkColor, v => A.LandmarkColor = v);
+                foreach (WorldMapLandmarkRule rule in S.Landmarks)
+                {
+                    if (rule == null || string.IsNullOrEmpty(rule.Id))
+                        continue;
+                    WorldMapLandmarkArt art = A.FindLandmark(rule.Id);
+                    string id = rule.Id;
+                    ObjectField field = new ObjectField(rule.Name) { objectType = typeof(Sprite), allowSceneObjects = false, value = art?.Sprite };
+                    field.RegisterValueChangedCallback(evt => Change(() =>
+                    {
+                        WorldMapLandmarkArt entry = A.FindLandmark(id);
+                        if (entry == null)
+                        {
+                            entry = new WorldMapLandmarkArt { RuleId = id, SizeHexes = A.LandmarkSizeHexes };
+                            A.Landmarks.Add(entry);
+                        }
+                        entry.Sprite = evt.newValue as Sprite;
+                    }, false, true));
+                    parent.Add(field);
+                    if (art != null && art.Sprite != null)
+                    {
+                        Slider("   размер, клеток", art.SizeHexes, 0.2f, 4, v => art.SizeHexes = v);
+                        ColorField("   оттенок", art.Tint, v => art.Tint = v);
+                    }
+                }
+            }, () => { A.Landmarks.Clear(); A.LandmarkSizeHexes = 1.4f; A.LandmarkColor = WorldMapArtStyle.CreateDefault().LandmarkColor; });
+        }
+
+        private void BuildPost()
+        {
+            Group("Обработка", "Post", () =>
+            {
+                Slider("Яркость", A.Brightness, -0.5f, 0.5f, v => A.Brightness = v);
+                Slider("Контраст", A.Contrast, 0.3f, 2f, v => A.Contrast = v);
+                Slider("Насыщенность", A.Saturation, 0, 2, v => A.Saturation = v);
+                Slider("Тепло", A.Warmth, -1, 1, v => A.Warmth = v, false, "Теплее (+) или холоднее (−)");
+                Slider("Виньетка", A.Vignette, 0, 1, v => A.Vignette = v);
+                Slider("Зерно", A.Grain, 0, 0.3f, v => A.Grain = v);
+                TextureField("Бумага / холст", A.PaperTexture, v => A.PaperTexture = v);
+                Slider("Плитка бумаги, клеток", A.PaperTileHexes, 1, 120, v => A.PaperTileHexes = v);
+                Slider("Сила бумаги", A.PaperStrength, 0, 1, v => A.PaperStrength = v);
+            }, () =>
+            {
+                WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
+                A.Brightness = d.Brightness; A.Contrast = d.Contrast; A.Saturation = d.Saturation; A.Warmth = d.Warmth;
+                A.Vignette = d.Vignette; A.Grain = d.Grain; A.PaperTileHexes = d.PaperTileHexes; A.PaperStrength = d.PaperStrength;
+            });
+        }
+
+        // ------------------------------------------------------------------
+        // Поля (по образцу панели «Обработка кадра»)
+        // ------------------------------------------------------------------
+
+        private void Section(string title)
+        {
+            Label label = new Label(title.ToUpperInvariant());
+            label.style.marginTop = 12;
+            label.style.marginBottom = 2;
+            label.style.unityFontStyleAndWeight = FontStyle.Bold;
+            label.style.color = new Color(0.62f, 0.75f, 0.85f);
+            parent.Add(label);
+        }
+
+        private Foldout Block(string title, string key, bool open)
+        {
+            string prefs = PrefsKey + "Block." + key;
+            Foldout block = new Foldout { text = title, value = EditorPrefs.GetBool(prefs, open) };
+            block.RegisterValueChangedCallback(evt => { if (evt.target == block) EditorPrefs.SetBool(prefs, evt.newValue); });
+            block.style.marginTop = 6;
+            block.style.paddingLeft = block.style.paddingRight = 6;
+            block.style.paddingTop = 2;
+            block.style.paddingBottom = 4;
+            block.style.backgroundColor = new Color(1, 1, 1, .035f);
+            block.style.borderTopWidth = block.style.borderBottomWidth = block.style.borderLeftWidth = block.style.borderRightWidth = 1;
+            block.style.borderTopColor = block.style.borderBottomColor = block.style.borderLeftColor = block.style.borderRightColor = new Color(1, 1, 1, .09f);
+            block.style.borderTopLeftRadius = block.style.borderTopRightRadius = block.style.borderBottomLeftRadius = block.style.borderBottomRightRadius = 4;
+            Label label = block.Q<UnityEngine.UIElements.Toggle>()?.Q<Label>();
+            if (label != null)
+            {
+                label.style.unityFontStyleAndWeight = FontStyle.Bold;
+                label.style.color = new Color(.88f, .78f, .53f);
+            }
+            block.contentContainer.style.marginLeft = 2;
+            parent.Add(block);
+            return block;
+        }
+
+        private void Group(string title, string key, Action content, Action reset)
+        {
+            Foldout block = Block(title, key, false);
+            VisualElement keep = parent;
+            parent = block;
+            if (reset != null)
+            {
+                VisualElement header = Row(false);
+                header.Add(new VisualElement { style = { flexGrow = 1 } });
+                header.Add(new Button(() => Change(reset, true, true)) { text = "Сбросить", tooltip = "Значения блока — по умолчанию" });
+                block.Add(header);
+            }
+            content();
+            parent = keep;
+        }
+
+        private static VisualElement Row(bool wrap)
+        {
+            VisualElement row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            if (wrap)
+                row.style.flexWrap = Wrap.Wrap;
+            return row;
+        }
+
+        private void Help(string text) => parent.Add(new HelpBox(text, HelpBoxMessageType.Info));
+
+        private void Buttons(params (string text, Action action, string tooltip)[] buttons)
+        {
+            VisualElement row = Row(true);
+            foreach ((string text, Action action, string tooltip) in buttons)
+            {
+                Button button = new Button(action) { text = text, tooltip = tooltip };
+                button.SetEnabled(action != null);
+                row.Add(button);
+            }
+            parent.Add(row);
+        }
+
+        private void Toggle(string label, bool value, Action<bool> set, bool regenerate = false, string tooltip = null)
+        {
+            UnityEngine.UIElements.Toggle field = new UnityEngine.UIElements.Toggle(label) { value = value, tooltip = tooltip };
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), regenerate));
+            parent.Add(field);
+        }
+
+        private void Slider(string label, float value, float min, float max, Action<float> set, bool regenerate = false, string tooltip = null)
+        {
+            UnityEngine.UIElements.Slider field = new UnityEngine.UIElements.Slider(label, min, max) { value = value, showInputField = true, tooltip = tooltip };
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), regenerate));
+            parent.Add(field);
+        }
+
+        private void IntSlider(string label, int value, int min, int max, Action<int> set, bool regenerate = false)
+        {
+            SliderInt field = new SliderInt(label, min, max) { value = value, showInputField = true };
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), regenerate));
+            parent.Add(field);
+        }
+
+        private void FloatField(string label, float value, Action<float> set, bool regenerate = false)
+        {
+            UnityEngine.UIElements.FloatField field = new UnityEngine.UIElements.FloatField(label) { value = value, isDelayed = true };
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), regenerate));
+            parent.Add(field);
+        }
+
+        private void Text(string label, string value, Action<string> set, string tooltip = null)
+        {
+            TextField field = new TextField(label) { value = value ?? "", isDelayed = true, tooltip = tooltip };
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), true, true));
+            parent.Add(field);
+        }
+
+        private void ColorField(string label, Color value, Action<Color> set)
+        {
+            UnityEditor.UIElements.ColorField field = new UnityEditor.UIElements.ColorField(label) { value = value };
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), false));
+            parent.Add(field);
+        }
+
+        private void TextureField(string label, Texture2D value, Action<Texture2D> set)
+        {
+            ObjectField field = new ObjectField(label) { objectType = typeof(Texture2D), allowSceneObjects = false, value = value, tooltip = "Перетащите сюда картинку из Project" };
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue as Texture2D), false));
+            parent.Add(field);
+            if (value != null)
+            {
+                Label hint = new Label(value.width + "×" + value.height + (value.wrapMode == TextureWrapMode.Repeat ? "" : " · для бесшовности нужен узор, сходящийся по краям"))
+                {
+                    style = { fontSize = 10, color = new Color(.7f, .72f, .66f), marginLeft = 4, whiteSpace = WhiteSpace.Normal }
+                };
+                parent.Add(hint);
+            }
+        }
+
+        private void SpriteList(string label, List<Sprite> sprites)
+        {
+            Label title = new Label(label + (sprites.Count == 0 ? " — нет, рисует код" : " (" + sprites.Count + ")")) { style = { marginTop = 2 } };
+            parent.Add(title);
+            for (int i = 0; i < sprites.Count; i++)
+            {
+                int index = i;
+                VisualElement row = Row(false);
+                ObjectField field = new ObjectField { objectType = typeof(Sprite), allowSceneObjects = false, value = sprites[i] };
+                field.style.flexGrow = 1;
+                field.RegisterValueChangedCallback(evt => Change(() => sprites[index] = evt.newValue as Sprite, false));
+                row.Add(field);
+                row.Add(new Button(() => Change(() => sprites.RemoveAt(index), false, true)) { text = "−" });
+                parent.Add(row);
+            }
+            Buttons(("+ рисунок", () => Change(() => sprites.Add(null), false, true), "Добавить рисунок; из нескольких выбирается случайный"));
+        }
+    }
+}

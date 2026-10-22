@@ -94,6 +94,21 @@ public static class WorldMapPopulationService
                 return named;
         }
 
+        // Канон v1.58 §9.9: генератор карты помечает слот приметного места
+        // тегом "place:<id>" — место с этим ID встаёт именно туда.
+        List<WorldMapSpawnSlotDefinition> placeSlots = new List<WorldMapSpawnSlotDefinition>();
+        if (slots != null)
+        {
+            string placeTag = WorldMapLandmarkRule.PlaceTagPrefix + template.Id;
+            foreach (WorldMapSpawnSlotDefinition slot in slots)
+            {
+                if (slot?.Tags != null && slot.Tags.Contains(placeTag))
+                    placeSlots.Add(slot);
+            }
+        }
+        if (placeSlots.Count > 0)
+            return placeSlots[random.Next(placeSlots.Count)];
+
         if (template.RequiredSlotTags != null && template.RequiredSlotTags.Count > 0)
         {
             List<WorldMapSpawnSlotDefinition> matches = new List<WorldMapSpawnSlotDefinition>();

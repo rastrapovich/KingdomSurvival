@@ -23,6 +23,13 @@ namespace KingdomSurvival.WorldMapVisual
             return cachedDatabase;
         }
 
+        // Канон v1.58 §9.9: генератор карты свободной игры из базы карты.
+        public static WorldMapGeneratorAsset LoadGenerator()
+        {
+            WorldMapDatabaseAsset database = LoadDatabase();
+            return database != null ? database.Generator : null;
+        }
+
         public static WorldMapVisualTheme LoadActiveTheme()
         {
             WorldMapDatabaseAsset database = LoadDatabase();

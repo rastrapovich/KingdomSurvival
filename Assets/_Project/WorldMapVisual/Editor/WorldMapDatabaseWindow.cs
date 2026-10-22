@@ -232,6 +232,22 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             databaseSO.ApplyModifiedProperties();
 
+            // Канон v1.58 §9.9: свободная игра строит карту генератором.
+            EditorGUILayout.Space(6f);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Карта свободной игры", EditorStyles.boldLabel);
+            WorldMapGeneratorAsset generator = database.Generator;
+            EditorGUILayout.LabelField(
+                generator == null
+                    ? "Генератор не подключён — свободная игра идёт по Active World."
+                    : generator.UseForFreePlay
+                        ? "Каждая новая партия свободной игры генерирует свою карту; Active World — только для кампаний."
+                        : "Генератор подключён, но выключен — свободная игра идёт по Active World.",
+                EditorStyles.wordWrappedMiniLabel);
+            if (GUILayout.Button("Открыть генератор карты ↗", GUILayout.Height(24f)))
+                WorldMapGeneratorWindow.Open();
+            EditorGUILayout.EndVertical();
+
             WorldMapWorldDefinitionAsset world =
                 activeWorldProp.objectReferenceValue as WorldMapWorldDefinitionAsset;
 

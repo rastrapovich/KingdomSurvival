@@ -176,7 +176,7 @@ public partial class PrototypeUIController
         // Авторская география не хранится в файле сохранения (это
         // статический WorldMapNavigation, не поле GameState) — переприменяем
         // тот же мир до того, как экраны прочитают рельеф/маршрут.
-        EnsureWorldMapGeographyConfigured();
+        EnsureWorldMapGeographyConfigured(restored);
 
         CampaignSession.Begin(restored);
 

@@ -76,8 +76,17 @@ public partial class PrototypeUIController
 
         WorldMapDatabaseAsset database = WorldMapVisualRuntime.LoadDatabase();
         WorldMapWorldDefinitionAsset world = database != null ? database.ActiveWorld : null;
-        worldMapCanvasWidth = world != null ? world.MapCanvasWidth : WorldMapHexGrid.DefaultCanvasWidth;
-        worldMapCanvasHeight = world != null ? world.MapCanvasHeight : WorldMapHexGrid.DefaultCanvasHeight;
+        if (gameState != null && gameState.HasGeneratedMap)
+        {
+            // Канон v1.58 §9.9: полотно сгенерированной карты партии.
+            worldMapCanvasWidth = gameState.GeneratedMap.CanvasWidth;
+            worldMapCanvasHeight = gameState.GeneratedMap.CanvasHeight;
+        }
+        else
+        {
+            worldMapCanvasWidth = world != null ? world.MapCanvasWidth : WorldMapHexGrid.DefaultCanvasWidth;
+            worldMapCanvasHeight = world != null ? world.MapCanvasHeight : WorldMapHexGrid.DefaultCanvasHeight;
+        }
 
         worldMap.style.width = worldMapCanvasWidth;
         worldMap.style.height = worldMapCanvasHeight;

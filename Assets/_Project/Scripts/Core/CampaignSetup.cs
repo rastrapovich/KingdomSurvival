@@ -121,15 +121,27 @@ public sealed class CampaignSetup
     }
 
     // Создаёт новую кампанию и фиксирует её конфигурацию.
+    // Канон v1.58 §9.9: generatedMap — карта, сгенерированная для этой
+    // партии (свободная игра); она заменяет авторский мир и хранится в партии.
     public GameState CreateCampaign(
         IReadOnlyList<WorldMapLocationTemplateData> locationTemplates = null,
-        WorldMapDefinitionData worldDefinition = null)
+        WorldMapDefinitionData worldDefinition = null,
+        GeneratedWorldMap generatedMap = null)
     {
         if (!Validate(out string reason))
             throw new InvalidOperationException("Нельзя начать кампанию: " + reason + ".");
 
+        bool generated = generatedMap != null && generatedMap.IsValid;
+        if (generated)
+        {
+            WorldSeed ??= generatedMap.Seed;
+            worldDefinition = generatedMap.ToDefinitionData();
+        }
+
         GameState state = new GameState();
         state.CreateNewGame(WorldSeed, locationTemplates, worldDefinition);
+        if (generated)
+            state.GeneratedMap = generatedMap;
 
         // ПР-06А: «Обычная жизнь» — Дом кормит себя. Приток 24 при 24
         // жителях — фиксированная настройка пресета, не подгонка под

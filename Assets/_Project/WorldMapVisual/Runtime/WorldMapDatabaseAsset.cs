@@ -16,6 +16,8 @@ namespace KingdomSurvival.WorldMapVisual
 
         [SerializeField] private WorldMapVisualTheme activeTheme;
         [SerializeField] private WorldMapWorldDefinitionAsset activeWorld;
+        // Канон v1.58 §9.9: генератор карты «Свободной игры» (может не быть).
+        [SerializeField] private WorldMapGeneratorAsset generator;
         [SerializeField] private List<WorldMapLocationDefinition> locations =
             new List<WorldMapLocationDefinition>();
 
@@ -25,6 +27,11 @@ namespace KingdomSurvival.WorldMapVisual
         // WorldMapPopulationService) — потребители обязаны переживать
         // отсутствие мира откатом на прежнее процедурное поведение.
         public WorldMapWorldDefinitionAsset ActiveWorld => activeWorld;
+        public WorldMapGeneratorAsset Generator
+        {
+            get => generator;
+            set => generator = value;
+        }
         public IReadOnlyList<WorldMapLocationDefinition> Locations => locations;
 
         public IReadOnlyList<WorldMapLocationTemplateData> BuildRuntimeLocationTemplates()

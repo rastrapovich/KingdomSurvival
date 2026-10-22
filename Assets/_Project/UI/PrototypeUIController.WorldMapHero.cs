@@ -214,7 +214,10 @@ public partial class PrototypeUIController
 
     private void TickWorldMapHeroFigure(float dt, WorldMapMovementSettingsAsset settings)
     {
-        if (!gameState.HasActiveExpedition)
+        // Канон v1.58: в свободной игре Дома нет — между походами герой
+        // стоит на стоянке (точка старта карты), а не исчезает в Доме.
+        bool idleAtStart = !gameState.HasActiveExpedition && IsFreePlayWithoutHome;
+        if (!gameState.HasActiveExpedition && !idleAtStart)
         {
             worldMapHeroImage.style.display = DisplayStyle.None;
             worldMapHeroFallback.style.display = DisplayStyle.None;
@@ -222,11 +225,12 @@ public partial class PrototypeUIController
         }
 
         ExpeditionData expedition = gameState.ActiveExpedition;
-        Vector2 ground = MapPercentToWorldMapViewport(
-            expedition.CurrentMapXPercent,
-            expedition.CurrentMapYPercent);
+        Vector2 ground = idleAtStart
+            ? MapPercentToWorldMapViewport(WorldMapNavigation.CapitalXPercent, WorldMapNavigation.CapitalYPercent)
+            : MapPercentToWorldMapViewport(expedition.CurrentMapXPercent, expedition.CurrentMapYPercent);
 
-        bool running = ContinuousSimulationSystem.IsExpeditionRunning(gameState) &&
+        bool running = !idleAtStart &&
+                       ContinuousSimulationSystem.IsExpeditionRunning(gameState) &&
                        !ContinuousSimulationSystem.IsPaused(gameState);
         if (running)
             UpdateWorldMapHeroFacing(expedition);

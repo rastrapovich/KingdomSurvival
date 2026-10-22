@@ -277,13 +277,24 @@ public partial class PrototypeUIController : MonoBehaviour
     private void StartNewGame(CampaignSetup setup)
     {
         WorldMapDatabaseAsset mapDatabase = WorldMapVisualRuntime.LoadDatabase();
+
+        // Канон v1.58 §9.9: свободная игра получает свою карту из генератора.
+        GeneratedWorldMap generatedMap = null;
+        WorldMapGeneratorAsset generator = WorldMapVisualRuntime.LoadGenerator();
+        if (setup.CrisisId == CampaignStartOptions.FreePlayId && generator != null && generator.UseForFreePlay)
+        {
+            setup.WorldSeed ??= Guid.NewGuid().GetHashCode();
+            generatedMap = generator.Generate(setup.WorldSeed.Value);
+        }
+
         GameState created = setup.CreateCampaign(
             mapDatabase != null
                 ? mapDatabase.BuildRuntimeLocationTemplates()
                 : null,
             mapDatabase != null && mapDatabase.ActiveWorld != null
                 ? mapDatabase.ActiveWorld.ToData()
-                : null);
+                : null,
+            generatedMap);
 
         CampaignSession.Begin(created);
         gameState = created;
@@ -501,6 +512,8 @@ public partial class PrototypeUIController : MonoBehaviour
         RefreshCampNavButtonState();
         if (IsCampScreenOpen)
             RefreshCampScreen();
+
+        ApplyFreePlayHomeVisibility();
     }
 
     private List<string> GetSelectedFighterIdsInArmyOrder()

@@ -62,6 +62,46 @@ namespace KingdomSurvival.WorldMapVisual
         {
             if (art != null)
                 art.EnsureTerrainEntries();
+            if (UpgradeLandmarkCatalog())
+            {
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(this);
+#endif
+            }
+        }
+
+        // 12С-4: каталог мест по лору. Ассет, собранный раньше, получает
+        // недостающие правила по умолчанию и описания у прежних правил;
+        // правки автора (числа, выключенные правила) не трогаются.
+        public const int CurrentLandmarkCatalogVersion = 2;
+        [SerializeField] private int landmarkCatalogVersion;
+
+        public bool UpgradeLandmarkCatalog()
+        {
+            if (landmarkCatalogVersion >= CurrentLandmarkCatalogVersion || settings == null)
+                return false;
+            settings.Landmarks ??= new List<WorldMapLandmarkRule>();
+            foreach (WorldMapLandmarkRule fallback in WorldMapGenerationSettings.DefaultLandmarks())
+            {
+                WorldMapLandmarkRule existing = settings.Landmarks.Find(rule => rule != null && rule.Id == fallback.Id);
+                if (existing == null)
+                {
+                    settings.Landmarks.Add(fallback);
+                    continue;
+                }
+                if (!string.IsNullOrEmpty(existing.Description))
+                    continue;
+                existing.Description = fallback.Description;
+                existing.Source = fallback.Source;
+                existing.Hidden = fallback.Hidden;
+                existing.Threat = fallback.Threat;
+                existing.ExplorationHours = fallback.ExplorationHours;
+                existing.RewardArmySupply = fallback.RewardArmySupply;
+                existing.RewardArmyGold = fallback.RewardArmyGold;
+                existing.Placement = fallback.Placement;
+            }
+            landmarkCatalogVersion = CurrentLandmarkCatalogVersion;
+            return true;
         }
     }
 

@@ -79,6 +79,12 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             set => EditorPrefs.SetBool(PrefsKey + "Slots", value);
         }
 
+        private static bool ShowHidden
+        {
+            get => EditorPrefs.GetBool(PrefsKey + "Hidden", true);
+            set => EditorPrefs.SetBool(PrefsKey + "Hidden", value);
+        }
+
         private static bool ShowSites
         {
             get => EditorPrefs.GetBool(PrefsKey + "Sites", false);
@@ -208,6 +214,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             overlays.Add(OverlayToggle("Разметка клеток", ShowMarkup, value => { ShowMarkup = value; RefreshOverlays(); }, "Местность клеток так, как её видит игра (цвета — из настроек перемещения)"));
             overlays.Add(OverlayToggle("Слоты мест", ShowSlots, value => { ShowSlots = value; overlay.MarkDirtyRepaint(); }, "Где могут появиться места из Базы карты"));
             overlays.Add(OverlayToggle("Подписи", ShowSites, value => { ShowSites = value; overlay.MarkDirtyRepaint(); }, "Точки деревень, мест и старта"));
+            overlays.Add(OverlayToggle("Скрытые места", ShowHidden, value => { ShowHidden = value; ScheduleRefresh(false, 0); }, "Рисовать и места, которые в игре не видны, пока их не найдут"));
             overlays.Add(new Button(() => { zoom = 1f; pan = Vector2.zero; ApplyView(); }) { text = "Вписать" });
             Label hint = new Label("Колесо — масштаб, перетаскивание — сдвиг") { style = { fontSize = 10, color = new Color(0.7f, 0.7f, 0.65f), unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 6 } };
             overlays.Add(hint);
@@ -424,7 +431,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 : Quality == 1 ? Mathf.Min(0.35f, generator.Art.Resolution)
                 : generator.Art.Resolution;
             DestroyTexture(ref mapTexture);
-            mapTexture = WorldMapPainter.Paint(currentMap, generator.Art, resolution);
+            mapTexture = WorldMapPainter.Paint(currentMap, generator.Art, resolution, ShowHidden);
             double paintMs = watch.Elapsed.TotalMilliseconds;
             mapImage.image = mapTexture;
             RefreshOverlays();
@@ -580,6 +587,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
             Section("Как выглядит");
             BuildQuality();
+            BuildIcons();
             BuildBase();
             BuildTerrainArt();
             BuildInk();
@@ -821,6 +829,22 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                     parent.Add(location);
                     Text("Теги слота", rule.SlotTags, v => rule.SlotTags = v, "Через запятую: Ruins, Hills…");
                     Toggle("Знак на карте", rule.DrawMark, v => rule.DrawMark = v, true);
+                    Toggle("На перекрёстке дорог", rule.Placement == WorldMapLandmarkPlacement.Crossroads,
+                        v => rule.Placement = v ? WorldMapLandmarkPlacement.Crossroads : WorldMapLandmarkPlacement.Terrain, true,
+                        "Ставится после дорог на клетку, где сходятся три дороги и больше; «Где» тогда не важно");
+                    Label placeTitle = new Label("Место в игре") { style = { unityFontStyleAndWeight = FontStyle.Bold, marginTop = 4 } };
+                    parent.Add(placeTitle);
+                    Toggle("Скрыто, пока не найдут", rule.Hidden, v => rule.Hidden = v, false,
+                        "Скрытое место не рисуется на карте и не видно меткой, пока отряд его не обнаружит");
+                    TextArea("Описание у входа", rule.Description, v => rule.Description = v);
+                    Text("Угроза", rule.Threat, v => rule.Threat = v);
+                    Slider("Исследование, часов", (float)rule.ExplorationHours, 0, 24, v => rule.ExplorationHours = Math.Round(v * 2.0) / 2.0, false,
+                        "0 — исследовать нечего, только описание");
+                    IntSlider("Припасы за исследование", rule.RewardArmySupply, 0, 20, v => rule.RewardArmySupply = v);
+                    IntSlider("Деньги за исследование", rule.RewardArmyGold, 0, 100, v => rule.RewardArmyGold = v);
+                    Help("Вход внутрь (локальная карта) — через «Место из базы»: у записи Базы карты своя локальная карта в Базе локаций (WorldLocationId). Остальные экземпляры правила — обычные места: описание, исследование, итог.");
+                    if (!string.IsNullOrEmpty(rule.Source))
+                        parent.Add(new Label("Источник типа места: " + rule.Source) { style = { fontSize = 10, color = new Color(.7f, .72f, .66f), whiteSpace = WhiteSpace.Normal } });
                     Buttons(
                         ("↑", index == 0 ? null : (Action)(() => Change(() => { S.Landmarks.RemoveAt(index); S.Landmarks.Insert(index - 1, rule); }, true, true)), null),
                         ("↓", index >= S.Landmarks.Count - 1 ? null : (Action)(() => Change(() => { S.Landmarks.RemoveAt(index); S.Landmarks.Insert(index + 1, rule); }, true, true)), null),
@@ -970,7 +994,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             {
                 Help("Деревья расставляются внутри леса, редкие — на болоте и в поле. Без рисунков — ели и лиственные деревья кодом.");
                 Toggle("Рисовать деревья", A.DrawTrees, v => A.DrawTrees = v);
-                SpriteList("Рисунки деревьев", A.TreeSprites);
                 Slider("Деревьев на клетку", A.TreesPerHex, 0, 12, v => A.TreesPerHex = v);
                 Slider("Размер, клеток", A.TreeSizeHexes, 0.1f, 3, v => A.TreeSizeHexes = v);
                 Slider("Разброс размера", A.TreeSizeJitter, 0, 1, v => A.TreeSizeJitter = v);
@@ -991,12 +1014,10 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Group("Холмы и горы", "ReliefArt", () =>
             {
                 Toggle("Рисовать холмы", A.DrawHills, v => A.DrawHills = v);
-                SpriteList("Рисунки холмов", A.HillSprites);
                 Slider("Холмов на клетку", A.HillsPerHex, 0, 4, v => A.HillsPerHex = v);
                 Slider("Размер холма, клеток", A.HillSizeHexes, 0.2f, 4, v => A.HillSizeHexes = v);
                 ColorField("Цвет холмов", A.HillColor, v => A.HillColor = v);
                 Toggle("Рисовать горы", A.DrawMountains, v => A.DrawMountains = v);
-                SpriteList("Рисунки гор", A.MountainSprites);
                 Slider("Гор на клетку", A.MountainsPerHex, 0, 4, v => A.MountainsPerHex = v);
                 Slider("Размер горы, клеток", A.MountainSizeHexes, 0.2f, 5, v => A.MountainSizeHexes = v);
                 ColorField("Свет", A.MountainLightColor, v => A.MountainLightColor = v);
@@ -1035,7 +1056,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Group("Деревни", "VillageArt", () =>
             {
                 Help("Рисунок деревни (один на деревню) или домики кодом — чем больше деревня, тем больше домов. Старт отряда отмечен частоколом.");
-                SpriteList("Рисунки деревень", A.VillageSprites);
                 Slider("Размер, клеток", A.VillageSizeHexes, 0.2f, 4, v => A.VillageSizeHexes = v);
                 ColorField("Стены", A.WallColor, v => A.WallColor = v);
                 ColorField("Крыши", A.RoofColor, v => A.RoofColor = v);
@@ -1051,34 +1071,91 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             Group("Приметные места", "LandmarkArt", () =>
             {
-                Help("Знак по ID правила. Без рисунка — знак кодом: руины, шахта, курган, мельница или камень.");
+                Help("Знаки мест кодом, если рисунок не назначен (рисунки и иконки — в блоке «Иконки и рисунки»).");
                 Slider("Размер знаков кодом, клеток", A.LandmarkSizeHexes, 0.2f, 4, v => A.LandmarkSizeHexes = v);
                 ColorField("Цвет камня", A.LandmarkColor, v => A.LandmarkColor = v);
+            }, () => { A.LandmarkSizeHexes = 1.4f; A.LandmarkColor = WorldMapArtStyle.CreateDefault().LandmarkColor; });
+        }
+
+        // Все рисунки и иконки карты в одном месте: деревья, болото, холмы,
+        // горы, скалы, мосты, стоянка, деревни и каждое приметное место.
+        // Пустой список — рисует код. Из нескольких рисунков у каждого
+        // дерева или места выбирается свой.
+        private void BuildIcons()
+        {
+            Group("Иконки и рисунки", "Icons", () =>
+            {
+                Help("Перетащите сюда спрайты из Project. «Знак» — рисунок на карте; «Иконка метки» — кнопка места на карте игры, по которой к нему идут. Пусто — рисует код.");
+                SubTitle("Лес и болото");
+                SpriteList("Ели и сосны", A.ConiferSprites);
+                SpriteList("Лиственные", A.LeafSprites);
+                SpriteList("Деревья — общие (если для ели или лиственного своих нет)", A.TreeSprites);
+                SpriteList("Камыш и кочки", A.ReedSprites);
+                SubTitle("Рельеф");
+                SpriteList("Холмы", A.HillSprites);
+                SpriteList("Горы", A.MountainSprites);
+                SpriteList("Скалы (пусто — как горы)", A.CliffSprites);
+                SubTitle("Дороги, деревни, стоянка");
+                SpriteField("Мост", A.BridgeSprite, v => A.BridgeSprite = v);
+                SpriteList("Деревни", A.VillageSprites);
+                SpriteField("Иконка метки деревни", A.VillageIcon, v => A.VillageIcon = v);
+                SpriteField("Стоянка отряда", A.StartSprite, v => A.StartSprite = v);
+                SubTitle("Приметные места");
                 foreach (WorldMapLandmarkRule rule in S.Landmarks)
                 {
                     if (rule == null || string.IsNullOrEmpty(rule.Id))
                         continue;
-                    WorldMapLandmarkArt art = A.FindLandmark(rule.Id);
-                    string id = rule.Id;
-                    ObjectField field = new ObjectField(rule.Name) { objectType = typeof(Sprite), allowSceneObjects = false, value = art?.Sprite };
-                    field.RegisterValueChangedCallback(evt => Change(() =>
-                    {
-                        WorldMapLandmarkArt entry = A.FindLandmark(id);
-                        if (entry == null)
-                        {
-                            entry = new WorldMapLandmarkArt { RuleId = id, SizeHexes = A.LandmarkSizeHexes };
-                            A.Landmarks.Add(entry);
-                        }
-                        entry.Sprite = evt.newValue as Sprite;
-                    }, false, true));
-                    parent.Add(field);
-                    if (art != null && art.Sprite != null)
-                    {
-                        Slider("   размер, клеток", art.SizeHexes, 0.2f, 4, v => art.SizeHexes = v);
-                        ColorField("   оттенок", art.Tint, v => art.Tint = v);
-                    }
+                    WorldMapLandmarkArt art = LandmarkArt(rule.Id);
+                    Foldout item = Block(rule.Name + (art.Sprite != null || art.Icon != null ? "  ●" : ""), "IconRule." + rule.Id, false);
+                    VisualElement keep = parent;
+                    parent = item;
+                    SpriteField("Знак на карте", art.Sprite, v => art.Sprite = v);
+                    SpriteList("Ещё варианты знака", art.Variants);
+                    SpriteField("Иконка метки", art.Icon, v => art.Icon = v);
+                    Slider("Размер знака, клеток", art.SizeHexes, 0.2f, 4, v => art.SizeHexes = v);
+                    ColorField("Оттенок знака", art.Tint, v => art.Tint = v);
+                    parent = keep;
                 }
-            }, () => { A.Landmarks.Clear(); A.LandmarkSizeHexes = 1.4f; A.LandmarkColor = WorldMapArtStyle.CreateDefault().LandmarkColor; });
+            }, () =>
+            {
+                A.ConiferSprites.Clear(); A.LeafSprites.Clear(); A.TreeSprites.Clear(); A.ReedSprites.Clear();
+                A.HillSprites.Clear(); A.MountainSprites.Clear(); A.CliffSprites.Clear(); A.VillageSprites.Clear();
+                A.BridgeSprite = null; A.VillageIcon = null; A.StartSprite = null;
+                A.Landmarks.Clear();
+            });
+        }
+
+        // Запись облика места создаётся сразу (без Undo-шага), чтобы поля
+        // блока всегда было куда писать.
+        private WorldMapLandmarkArt LandmarkArt(string ruleId)
+        {
+            WorldMapLandmarkArt art = A.FindLandmark(ruleId);
+            if (art != null)
+                return art;
+            art = new WorldMapLandmarkArt { RuleId = ruleId, SizeHexes = A.LandmarkSizeHexes };
+            A.Landmarks.Add(art);
+            EditorUtility.SetDirty(generator);
+            return art;
+        }
+
+        private void SubTitle(string text)
+        {
+            parent.Add(new Label(text) { style = { unityFontStyleAndWeight = FontStyle.Bold, marginTop = 6, color = new Color(.8f, .82f, .75f) } });
+        }
+
+        private void SpriteField(string label, Sprite value, Action<Sprite> set)
+        {
+            ObjectField field = new ObjectField(label) { objectType = typeof(Sprite), allowSceneObjects = false, value = value };
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue as Sprite), false, true));
+            parent.Add(field);
+        }
+
+        private void TextArea(string label, string value, Action<string> set)
+        {
+            TextField field = new TextField(label) { value = value ?? "", multiline = true, isDelayed = true };
+            field.style.whiteSpace = WhiteSpace.Normal;
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), false));
+            parent.Add(field);
         }
 
         private void BuildPost()

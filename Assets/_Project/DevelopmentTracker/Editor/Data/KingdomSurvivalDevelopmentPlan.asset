@@ -9460,6 +9460,37 @@ MonoBehaviour:
       completedAt: 
       completedCommit: 
       optionalAutoCheckId: 
+    - id: PR12S-T04
+      title: "12С-4 · Места по лору на сгенерированной карте и иконки"
+      details: "Каталог генератора — 16 типов мест из утверждённых разделов LORE, канона и BESTIARY с источником у каждого; перекрёстки на развилках дорог; деревни и места — настоящие места карты (описание, исследование, итог, скрытые до находки); вход внутрь — через связанную запись Базы карты. Блок «Иконки и рисунки»: деревья, рельеф, мост, стоянка, деревни, знак, варианты и иконка метки каждого места."
+      category: 3
+      status: 2
+      required: 1
+      order: 62
+      priority: 0
+      verificationType: 3
+      blockerReason: 5
+      dependencies:
+      - PR12S-T01
+      acceptanceCriteria:
+      - text: "Каталог с источниками, перекрёстки на развилках, места в партии и после загрузки (EditMode)"
+        done: 1
+      - text: "Старый ассет получает каталог без потери правок автора (EditMode)"
+        done: 1
+      - text: "Иконки назначаются в окне и видны на карте игры — проверка пользователем"
+        done: 0
+      manualChecks:
+      - "Генератор карты → «Иконки и рисунки»: назначить иконку метки пещеры и рисунок ели; новая свободная игра — найти пещеру и зайти в неё"
+      fileReferences:
+      - Assets/_Project/Scripts/Core/GeneratedMapPlaces.cs
+      relatedDialogueIds: []
+      relatedFlagIds: []
+      relatedKnowledgeIds: []
+      blockerNote: 
+      implementationNote: "WorldMapGeneratorTests; образец карты seed 31 со скрытыми местами."
+      completedAt: 
+      completedCommit: 
+      optionalAutoCheckId: 
   - id: PR15_HOME_WATER
     title: "\u041F\u0420-15. \xAB\u0414\u043E\u043C \u043D\u0430 \u0447\u0443\u0436\u043E\u0439
       \u0432\u043E\u0434\u0435\xBB \u043D\u0430 \u043E\u0431\u0449\u0435\u0439 \u043E\u0441\u043D\u043E\u0432\u0435"

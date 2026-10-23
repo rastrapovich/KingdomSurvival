@@ -63,7 +63,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 GeneratedWorldMap map = generator.Generate(seed);
                 double generateSeconds = (DateTime.Now - started).TotalSeconds;
                 started = DateTime.Now;
-                Texture2D texture = WorldMapPainter.Paint(map, generator.Art);
+                Texture2D texture = WorldMapPainter.Paint(map, generator.Art, 0f, Array.IndexOf(Environment.GetCommandLineArgs(), "-ksHidden") >= 0);
                 double paintSeconds = (DateTime.Now - started).TotalSeconds;
                 SavePng(texture, Path.Combine(output, "map-" + seed + ".png"));
                 Debug.Log($"[WorldMapGenerator] seed {seed}: {texture.width}×{texture.height}, генерация {generateSeconds:0.00} с, рисунок {paintSeconds:0.00} с, " +

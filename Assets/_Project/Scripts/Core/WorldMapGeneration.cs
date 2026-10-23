@@ -56,6 +56,12 @@ public static class WorldMapGenerationStages
     }
 }
 
+public enum WorldMapLandmarkPlacement
+{
+    Terrain = 0,
+    Crossroads = 1
+}
+
 // Правило приметного места (руины, шахта, курган...). Примеры по умолчанию —
 // рабочие настройки, не факты мира. LocationId связывает правило с местом
 // из Базы карты: слот этого места получает тег "place:<LocationId>", и
@@ -80,6 +86,23 @@ public sealed class WorldMapLandmarkRule
     public string SlotTags = string.Empty;
     // Ставить ли знак на рисунок карты (место может быть и без знака).
     public bool DrawMark = true;
+
+    // Где ставить: по местности или на перекрёстке дорог (тогда место
+    // выбирается после дорог, на клетке, где сходятся три дороги и больше).
+    public WorldMapLandmarkPlacement Placement = WorldMapLandmarkPlacement.Terrain;
+
+    // Место на карте игры: его находят, к нему приходят, его исследуют
+    // (обычный вход в место — описание, исследование, итог). Скрытое место
+    // не рисуется на карте, пока его не найдут; видимое — видно сразу.
+    public bool Hidden = true;
+    public string Description = string.Empty;
+    public string Threat = "неизвестна";
+    public double ExplorationHours = 2.0;
+    public int RewardArmySupply;
+    public int RewardArmyGold;
+
+    // Откуда тип места (раздел LORE/канона) — для автора, в игру не идёт.
+    public string Source = string.Empty;
 
     public WorldMapLandmarkRule Clone()
     {
@@ -147,37 +170,81 @@ public sealed class WorldMapGenerationSettings
 
     public static WorldMapGenerationSettings CreateDefault() => new WorldMapGenerationSettings();
 
+    // Типы мест взяты из утверждённых разделов источников (поле Source):
+    // LORE §8 — роща, курган, старое городище, заброшенное поселение,
+    // святилище, перекрёсток; канон §28.3 — пещера, шахта, руины,
+    // заброшенный двор, лесное логово; LORE (безопасные места) — охотничья
+    // хижина, пасека; LORE §66.4 — лечебный родник; LORE §24 и эпоха —
+    // водяная мельница. Описания — нейтральные наблюдения без истории
+    // места: кто, когда и зачем — [ОТКРЫТО] и решается в LORE.md.
     public static List<WorldMapLandmarkRule> DefaultLandmarks()
     {
+        List<WorldMapGameplayTerrainType> open = Terrains(WorldMapGameplayTerrainType.OpenGround);
         return new List<WorldMapLandmarkRule>
         {
-            new WorldMapLandmarkRule
-            {
-                Id = "ruins", Name = "Руины", Count = 2, MinDistanceHexes = 9f, LocationId = "ruins", SlotTags = "Ruins",
-                Terrains = new List<WorldMapGameplayTerrainType>
-                    { WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Hills, WorldMapGameplayTerrainType.Forest }
-            },
-            new WorldMapLandmarkRule
-            {
-                Id = "mine", Name = "Старая шахта", Count = 1, MinDistanceHexes = 10f, LocationId = "mine", SlotTags = "Mine, Hills",
-                Terrains = new List<WorldMapGameplayTerrainType> { WorldMapGameplayTerrainType.Hills, WorldMapGameplayTerrainType.Mountains }
-            },
-            new WorldMapLandmarkRule
-            {
-                Id = "deep-forest", Name = "Глухой лес", Count = 1, MinDistanceHexes = 8f, LocationId = "forest", SlotTags = "Forest",
-                DrawMark = false,
-                Terrains = new List<WorldMapGameplayTerrainType> { WorldMapGameplayTerrainType.Forest }
-            },
-            new WorldMapLandmarkRule
-            {
-                Id = "barrow", Name = "Курган", Count = 2, MinDistanceHexes = 7f, SlotTags = "Barrow",
-                Terrains = new List<WorldMapGameplayTerrainType> { WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Hills }
-            },
+            Rule("ruins", "Руины", 2, 9f, "LORE §8, канон §28.3", "Остатки стен из камня и бревна, заросшие травой.",
+                Terrains(WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Hills, WorldMapGameplayTerrainType.Forest),
+                hidden: true, hours: 2, supply: 2, location: "ruins", tags: "Ruins"),
+            Rule("mine", "Старая шахта", 1, 10f, "LORE §17.1, канон §28.6", "Тёмное устье штольни в склоне, рядом — осыпавшийся отвал.",
+                Terrains(WorldMapGameplayTerrainType.Hills, WorldMapGameplayTerrainType.Mountains),
+                hidden: true, hours: 3, supply: 2, location: "mine", tags: "Mine, Hills"),
+            Rule("deep-forest", "Глухой лес", 1, 8f, "канон §24.2, LORE §23", "Лес стоит стеной, тропы теряются в буреломе.",
+                Terrains(WorldMapGameplayTerrainType.Forest), hidden: true, hours: 2, location: "forest", tags: "Forest", mark: false),
+            Rule("cave", "Пещера", 2, 8f, "канон §28.3, LORE: убежище", "Тёмный вход в склоне. Изнутри тянет холодом и сыростью.",
+                Terrains(WorldMapGameplayTerrainType.Hills, WorldMapGameplayTerrainType.Mountains),
+                hidden: true, hours: 3, supply: 2, tags: "Cave, Hills"),
+            Rule("grove", "Роща", 2, 7f, "LORE §8, §17", "Старые деревья стоят тесным кругом, подлеска почти нет.",
+                Terrains(WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Forest),
+                hidden: false, hours: 1, tags: "Grove"),
+            Rule("barrow", "Курган", 2, 7f, "LORE §8, §17.1, §28", "Высокий насыпной холм, поросший травой.",
+                Terrains(WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Hills),
+                hidden: false, hours: 1, tags: "Barrow"),
+            Rule("hillfort", "Старое городище", 1, 9f, "LORE §8, §17", "Оплывшие валы на холме, по гребню — следы частокола.",
+                Terrains(WorldMapGameplayTerrainType.Hills), hidden: false, hours: 3, gold: 10, tags: "Hillfort, Hills"),
+            Rule("abandoned-village", "Заброшенное поселение", 1, 9f, "LORE §8, §16", "Пустые срубы с провалившимися крышами, дворы заросли бурьяном.",
+                Terrains(WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Forest),
+                hidden: false, hours: 3, supply: 3, tags: "AbandonedVillage"),
+            Rule("abandoned-yard", "Заброшенный двор", 1, 7f, "канон §28.3", "Одинокий двор: покосившийся плетень, изба без двери.",
+                Terrains(WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Forest),
+                hidden: true, hours: 2, supply: 2, tags: "AbandonedYard"),
+            Rule("sanctuary", "Старое святилище", 1, 9f, "LORE §8, §16", "Круг из врытых камней и потемневших столбов.",
+                Terrains(WorldMapGameplayTerrainType.Forest, WorldMapGameplayTerrainType.Hills, WorldMapGameplayTerrainType.OpenGround),
+                hidden: true, hours: 2, tags: "Sanctuary"),
+            Rule("crossroads", "Перекрёсток", 2, 6f, "LORE §8, §29", "Здесь сходятся дороги. У обочины — старый столб.",
+                open, hidden: false, hours: 0, tags: "Crossroads, Road", placement: WorldMapLandmarkPlacement.Crossroads),
+            Rule("lair", "Лесное логово", 2, 9f, "канон §28.3, BESTIARY §10", "Под вывороченными корнями — нора, вокруг обглоданные кости.",
+                Terrains(WorldMapGameplayTerrainType.Forest), hidden: true, hours: 1, threat: "высокая", tags: "Lair, Forest"),
+            Rule("spring", "Родник", 1, 6f, "LORE §66.4", "Из-под камня бьёт холодная вода, вокруг выложены камни.",
+                Terrains(WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Forest, WorldMapGameplayTerrainType.Hills),
+                hidden: true, hours: 1, tags: "Spring"),
+            Rule("hunters-hut", "Охотничья хижина", 1, 7f, "LORE: безопасное место как знание региона", "Низкая избушка под елями, у стены — колода для разделки.",
+                Terrains(WorldMapGameplayTerrainType.Forest), hidden: true, hours: 1, supply: 1, tags: "Hut, Forest"),
+            Rule("apiary", "Пасека", 1, 4f, "LORE: безопасное место как знание региона", "Колоды-ульи на поляне у леса, гудят пчёлы.",
+                Terrains(WorldMapGameplayTerrainType.OpenGround, WorldMapGameplayTerrainType.Forest),
+                hidden: true, hours: 1, supply: 1, tags: "Apiary"),
             new WorldMapLandmarkRule
             {
                 Id = "watermill", Name = "Водяная мельница", Count = 1, MinDistanceHexes = 3f, SlotTags = "Mill, Shore",
-                NearWater = true, NearVillage = true
+                NearWater = true, NearVillage = true, Hidden = false, ExplorationHours = 0,
+                Description = "Колесо на протоке, сруб под навесом, скрипит вал.", Source = "LORE §24, канон §2.2.1"
             }
+        };
+    }
+
+    private static List<WorldMapGameplayTerrainType> Terrains(params WorldMapGameplayTerrainType[] types) =>
+        new List<WorldMapGameplayTerrainType>(types);
+
+    private static WorldMapLandmarkRule Rule(
+        string id, string name, int count, float minDistance, string source, string description,
+        List<WorldMapGameplayTerrainType> terrains, bool hidden, double hours, int supply = 0, int gold = 0,
+        string threat = "неизвестна", string location = "", string tags = "", bool mark = true,
+        WorldMapLandmarkPlacement placement = WorldMapLandmarkPlacement.Terrain)
+    {
+        return new WorldMapLandmarkRule
+        {
+            Id = id, Name = name, Count = count, MinDistanceHexes = minDistance, Source = source, Description = description,
+            Terrains = terrains, Hidden = hidden, ExplorationHours = hours, RewardArmySupply = supply, RewardArmyGold = gold,
+            Threat = threat, LocationId = location, SlotTags = tags, DrawMark = mark, Placement = placement
         };
     }
 
@@ -282,6 +349,16 @@ public sealed class GeneratedMapSite
     public int Variant;
     public bool DrawMark = true;
     public bool IsStart;
+
+    // Место карты игры из правила (GeneratedMapPlaces): связанное место
+    // Базы карты, скрытость до находки, описание, угроза, исследование.
+    public string LocationId = string.Empty;
+    public bool Hidden;
+    public string Description = string.Empty;
+    public string Threat = string.Empty;
+    public double ExplorationHours;
+    public int RewardArmySupply;
+    public int RewardArmyGold;
 }
 
 [Serializable]

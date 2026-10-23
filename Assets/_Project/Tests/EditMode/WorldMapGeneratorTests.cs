@@ -204,6 +204,133 @@ public class WorldMapGeneratorTests
     }
 
     [Test]
+    public void DefaultCatalog_CoversLorePlaceTypes_WithSources()
+    {
+        List<WorldMapLandmarkRule> rules = WorldMapGenerationSettings.DefaultLandmarks();
+        string[] expected = { "cave", "grove", "barrow", "hillfort", "abandoned-village", "abandoned-yard", "sanctuary", "crossroads", "lair", "spring", "hunters-hut", "apiary", "mine", "ruins", "watermill" };
+        foreach (string id in expected)
+        {
+            WorldMapLandmarkRule rule = rules.Find(item => item.Id == id);
+            Assert.That(rule, Is.Not.Null, id);
+            Assert.That(rule.Source, Is.Not.Empty, $"У типа места '{id}' должен быть указан источник.");
+            Assert.That(rule.Description, Is.Not.Empty, id);
+        }
+        Assert.That(rules.ConvertAll(rule => rule.Id), Is.Unique);
+    }
+
+    [TestCase(4)]
+    [TestCase(21)]
+    public void Crossroads_StandOnRoadJunctions(int seed)
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), seed);
+        WorldMapTerrainLayer layer = map.CreateTerrainLayer();
+        WorldMapHexGrid grid = layer.Grid;
+        foreach (GeneratedMapSite site in map.Landmarks.FindAll(item => item.Kind == "crossroads"))
+        {
+            WorldMapHexCell cell = grid.CellAt(site.Cell);
+            Assert.That(layer.Get(cell), Is.EqualTo(WorldMapGameplayTerrainType.Road));
+            int roads = 0;
+            for (int d = 0; d < 6; d++)
+            {
+                WorldMapHexCell next = cell.Neighbor(d);
+                if (grid.IsInside(next) && layer.Get(next) == WorldMapGameplayTerrainType.Road)
+                    roads++;
+            }
+            Assert.That(roads, Is.GreaterThanOrEqualTo(3));
+        }
+    }
+
+    [Test]
+    public void FreePlayCampaign_TurnsVillagesAndLandmarksIntoPlaces()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 31);
+        GameState state = new CampaignSetup { CrisisId = CampaignStartOptions.FreePlayId }.CreateCampaign(null, null, map);
+
+        List<LocationData> generated = state.Locations.FindAll(location => location.Id.StartsWith(GeneratedMapPlaces.IdPrefix));
+        Assert.That(generated.ConvertAll(location => location.Id), Is.Unique);
+        Assert.That(generated.FindAll(location => location.PlaceKind == GeneratedMapPlaces.VillageKind).Count,
+            Is.EqualTo(map.Villages.Count - 1), "Каждая деревня, кроме стоянки, — место карты.");
+
+        foreach (GeneratedMapSite site in map.Landmarks)
+        {
+            Assert.That(state.Locations.Exists(location => location.PlaceKind == site.Kind), Is.True, $"У знака '{site.Kind}' нет места.");
+        }
+
+        // Шахта из Базы карты встаёт у знака шахты и не дублируется местом генератора.
+        LocationData mine = state.FindLocation("mine");
+        Assert.That(mine, Is.Not.Null);
+        Assert.That(mine.PlaceKind, Is.EqualTo("mine"));
+        int mineSites = map.Landmarks.FindAll(site => site.Kind == "mine").Count;
+        Assert.That(generated.FindAll(location => location.PlaceKind == "mine").Count, Is.EqualTo(mineSites - 1));
+
+        LocationData cave = generated.Find(location => location.PlaceKind == "cave");
+        if (cave != null)
+        {
+            Assert.That(cave.IsVisibleOnMap, Is.False, "Пещера скрыта, пока её не найдут.");
+            Assert.That(cave.ExplorationHours, Is.GreaterThan(0.0));
+            Assert.That(cave.InteractionDescription, Is.Not.Empty);
+        }
+
+        CampaignSaveData loaded = JsonUtility.FromJson<CampaignSaveData>(JsonUtility.ToJson(CampaignSaveService.ExportCampaign(state)));
+        GameState restored = CampaignSaveService.RestoreCampaign(loaded);
+        Assert.That(restored.Locations.FindAll(location => location.Id.StartsWith(GeneratedMapPlaces.IdPrefix)).Count, Is.EqualTo(generated.Count));
+        Assert.That(restored.FindLocation(generated[0].Id).PlaceKind, Is.EqualTo(generated[0].PlaceKind));
+    }
+
+    [Test]
+    public void OldGeneratorAsset_GetsTheLoreCatalog_WithoutLosingAuthorEdits()
+    {
+        WorldMapGeneratorAsset asset = ScriptableObject.CreateInstance<WorldMapGeneratorAsset>();
+        try
+        {
+            WorldMapGenerationSettings settings = WorldMapGenerationSettings.CreateDefault();
+            settings.HexesAcross = 122;
+            settings.Landmarks = new List<WorldMapLandmarkRule>
+            {
+                new WorldMapLandmarkRule { Id = "barrow", Name = "Курган", Count = 5 }
+            };
+            asset.Settings = settings;
+            typeof(WorldMapGeneratorAsset)
+                .GetField("landmarkCatalogVersion", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .SetValue(asset, 0);
+
+            Assert.That(asset.UpgradeLandmarkCatalog(), Is.True);
+            Assert.That(asset.Settings.HexesAcross, Is.EqualTo(122));
+            WorldMapLandmarkRule barrow = asset.Settings.Landmarks.Find(rule => rule.Id == "barrow");
+            Assert.That(barrow.Count, Is.EqualTo(5), "Число, выбранное автором, остаётся.");
+            Assert.That(barrow.Description, Is.Not.Empty);
+            Assert.That(asset.Settings.Landmarks.Exists(rule => rule.Id == "cave"), Is.True);
+            Assert.That(asset.UpgradeLandmarkCatalog(), Is.False, "Повторно не обновляется.");
+        }
+        finally
+        {
+            Object.DestroyImmediate(asset);
+        }
+    }
+
+    [Test]
+    public void LandmarkArt_PicksVariantsStably()
+    {
+        Texture2D texture = new Texture2D(4, 4);
+        Sprite a = Sprite.Create(texture, new Rect(0, 0, 4, 4), Vector2.zero);
+        Sprite b = Sprite.Create(texture, new Rect(0, 0, 2, 2), Vector2.zero);
+        try
+        {
+            WorldMapLandmarkArt art = new WorldMapLandmarkArt { Sprite = a, Variants = new List<Sprite> { null, b } };
+            Assert.That(art.PickSprite(0), Is.SameAs(a));
+            Assert.That(art.PickSprite(1), Is.SameAs(b));
+            Assert.That(art.PickSprite(7), Is.SameAs(art.PickSprite(7)));
+            Assert.That(new WorldMapLandmarkArt().PickSprite(3), Is.Null);
+        }
+        finally
+        {
+            Object.DestroyImmediate(a);
+            Object.DestroyImmediate(b);
+            Object.DestroyImmediate(texture);
+        }
+    }
+
+    [Test]
     public void ArtStyle_HasAnEntryForEveryTerrain_AndClonesDeep()
     {
         WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();

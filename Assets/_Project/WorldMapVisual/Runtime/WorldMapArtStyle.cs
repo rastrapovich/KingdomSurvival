@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace KingdomSurvival.WorldMapVisual
@@ -59,7 +61,14 @@ namespace KingdomSurvival.WorldMapVisual
 
         [Header("Лес")]
         public bool DrawTrees = true;
+        [Tooltip("Общие рисунки деревьев — если для елей или лиственных своих нет.")]
         public List<Sprite> TreeSprites = new List<Sprite>();
+        [Tooltip("Ели и сосны.")]
+        public List<Sprite> ConiferSprites = new List<Sprite>();
+        [Tooltip("Лиственные деревья.")]
+        public List<Sprite> LeafSprites = new List<Sprite>();
+        [Tooltip("Камыш и кочки на болоте.")]
+        public List<Sprite> ReedSprites = new List<Sprite>();
         [Range(0f, 12f)] public float TreesPerHex = 4f;
         [Range(0.1f, 3f)] public float TreeSizeHexes = 0.55f;
         [Range(0f, 1f)] public float TreeSizeJitter = 0.3f;
@@ -78,6 +87,8 @@ namespace KingdomSurvival.WorldMapVisual
         public Color HillColor = new Color(0.55f, 0.50f, 0.36f, 1f);
         public bool DrawMountains = true;
         public List<Sprite> MountainSprites = new List<Sprite>();
+        [Tooltip("Скалы; пусто — рисунки гор.")]
+        public List<Sprite> CliffSprites = new List<Sprite>();
         [Range(0f, 4f)] public float MountainsPerHex = 0.9f;
         [Range(0.2f, 5f)] public float MountainSizeHexes = 1.3f;
         public Color MountainLightColor = new Color(0.66f, 0.63f, 0.58f, 1f);
@@ -92,6 +103,8 @@ namespace KingdomSurvival.WorldMapVisual
         [Range(0.02f, 1f)] public float TrailWidthHexes = 0.07f;
         public bool TrailDashed = true;
         public Color BridgeColor = new Color(0.42f, 0.30f, 0.20f, 1f);
+        [Tooltip("Рисунок моста; ставится как есть, без поворота вдоль дороги.")]
+        public Sprite BridgeSprite;
 
         [Header("Деревни")]
         public List<Sprite> VillageSprites = new List<Sprite>();
@@ -100,6 +113,10 @@ namespace KingdomSurvival.WorldMapVisual
         public Color RoofColor = new Color(0.36f, 0.27f, 0.19f, 1f);
         [Tooltip("Рисовать точку старта отряда отдельным знаком.")]
         public bool MarkStart = true;
+        [Tooltip("Рисунок стоянки отряда вместо частокола.")]
+        public Sprite StartSprite;
+        [Tooltip("Иконка метки деревни на карте игры.")]
+        public Sprite VillageIcon;
 
         [Header("Приметные места")]
         public List<WorldMapLandmarkArt> Landmarks = new List<WorldMapLandmarkArt>();
@@ -186,6 +203,10 @@ namespace KingdomSurvival.WorldMapVisual
             copy.HillSprites = new List<Sprite>(HillSprites ?? new List<Sprite>());
             copy.MountainSprites = new List<Sprite>(MountainSprites ?? new List<Sprite>());
             copy.VillageSprites = new List<Sprite>(VillageSprites ?? new List<Sprite>());
+            copy.ConiferSprites = new List<Sprite>(ConiferSprites ?? new List<Sprite>());
+            copy.LeafSprites = new List<Sprite>(LeafSprites ?? new List<Sprite>());
+            copy.ReedSprites = new List<Sprite>(ReedSprites ?? new List<Sprite>());
+            copy.CliffSprites = new List<Sprite>(CliffSprites ?? new List<Sprite>());
             return copy;
         }
 
@@ -245,10 +266,37 @@ namespace KingdomSurvival.WorldMapVisual
     public sealed class WorldMapLandmarkArt
     {
         public string RuleId = string.Empty;
+        [Tooltip("Знак на рисунке карты.")]
         public Sprite Sprite;
+        [Tooltip("Ещё варианты знака — у каждого места выбирается свой.")]
+        public List<Sprite> Variants = new List<Sprite>();
+        [Tooltip("Иконка метки места на карте игры (кнопка, по которой идут к месту).")]
+        public Sprite Icon;
         [Range(0.2f, 4f)] public float SizeHexes = 1f;
         public Color Tint = Color.white;
 
-        public WorldMapLandmarkArt Clone() => (WorldMapLandmarkArt)MemberwiseClone();
+        // Знак для места с устойчивым случайным числом variant.
+        public Sprite PickSprite(int variant)
+        {
+            int extra = Variants != null ? Variants.Count(sprite => sprite != null) : 0;
+            int total = (Sprite != null ? 1 : 0) + extra;
+            if (total == 0)
+                return null;
+            int index = Math.Abs(variant) % total;
+            if (Sprite != null)
+            {
+                if (index == 0)
+                    return Sprite;
+                index--;
+            }
+            return Variants.Where(sprite => sprite != null).ElementAt(index);
+        }
+
+        public WorldMapLandmarkArt Clone()
+        {
+            WorldMapLandmarkArt copy = (WorldMapLandmarkArt)MemberwiseClone();
+            copy.Variants = new List<Sprite>(Variants ?? new List<Sprite>());
+            return copy;
+        }
     }
 }

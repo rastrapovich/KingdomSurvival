@@ -16,11 +16,13 @@ namespace KingdomSurvival.WorldMapVisual
     //   насыщенность, тепло, бумага, зерно, виньетка).
     public static class WorldMapPainter
     {
-        public static Texture2D Paint(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride = 0f)
+        // paintHiddenPlaces — рисовать и скрытые места (для редактора); в игре
+        // скрытое место появляется меткой на карте, когда его найдут.
+        public static Texture2D Paint(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride = 0f, bool paintHiddenPlaces = false)
         {
             if (map == null || !map.IsValid)
                 return null;
-            PaintJob job = new PaintJob(map, style ?? WorldMapArtStyle.CreateDefault(), resolutionOverride);
+            PaintJob job = new PaintJob(map, style ?? WorldMapArtStyle.CreateDefault(), resolutionOverride, paintHiddenPlaces);
             job.Run();
             return job.ToTexture();
         }
@@ -44,6 +46,7 @@ namespace KingdomSurvival.WorldMapVisual
             private readonly float scale;
             private readonly float hexPx;
             private readonly float inkPx;
+            private readonly bool paintHiddenPlaces;
             private readonly float[] r;
             private readonly float[] g;
             private readonly float[] b;
@@ -54,8 +57,9 @@ namespace KingdomSurvival.WorldMapVisual
             private readonly Dictionary<UnityEngine.Object, Image> images = new Dictionary<UnityEngine.Object, Image>();
             private float[] waterCoverage;
 
-            public PaintJob(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride)
+            public PaintJob(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride, bool paintHiddenPlaces)
             {
+                this.paintHiddenPlaces = paintHiddenPlaces;
                 this.map = map;
                 this.style = style;
                 style.EnsureTerrainEntries();
@@ -475,6 +479,11 @@ namespace KingdomSurvival.WorldMapVisual
                     Vector2 a = center - direction * length * 0.5f;
                     Vector2 c = center + direction * length * 0.5f;
                     float half = roadHalf * 1.5f;
+                    if (style.BridgeSprite != null)
+                    {
+                        DrawSprite(style.BridgeSprite, center + new Vector2(0f, length * 0.25f), length * 0.6f, Color.white, direction.x < 0f);
+                        continue;
+                    }
                     FillPolygon(new[] { a + normal * half, c + normal * half, c - normal * half, a - normal * half },
                         style.BridgeColor, style.InkColor, Mathf.Max(1f, inkPx * 0.6f), 0f);
                     // Перила — две тёмные черты.
@@ -567,7 +576,7 @@ namespace KingdomSurvival.WorldMapVisual
                 {
                     foreach (GeneratedMapSite landmark in map.Landmarks)
                     {
-                        if (landmark != null && landmark.DrawMark)
+                        if (landmark != null && landmark.DrawMark && (!landmark.Hidden || paintHiddenPlaces))
                             AddLandmark(stamps, landmark);
                     }
                 }
@@ -606,8 +615,8 @@ namespace KingdomSurvival.WorldMapVisual
                     float size = style.TreeSizeHexes * hexPx * (1f + ((float)random.NextDouble() * 2f - 1f) * style.TreeSizeJitter);
                     if (type != WorldMapGameplayTerrainType.Forest)
                         size *= 0.8f;
-                    Sprite sprite = Pick(style.TreeSprites);
                     bool conifer = random.NextDouble() < style.ConiferShare;
+                    Sprite sprite = Pick(conifer ? style.ConiferSprites : style.LeafSprites) ?? Pick(style.TreeSprites);
                     bool flip = random.NextDouble() < 0.5;
                     float shade = 0.9f + (float)random.NextDouble() * 0.2f;
                     stamps.Add(new Stamp
@@ -631,7 +640,13 @@ namespace KingdomSurvival.WorldMapVisual
                     if (!AreaAt(at, WorldMapGameplayTerrainType.Swamp))
                         continue;
                     float size = hexPx * 0.28f * (0.8f + (float)random.NextDouble() * 0.4f);
-                    stamps.Add(new Stamp { Y = at.y, Draw = () => DrawReeds(at, size) });
+                    Sprite sprite = Pick(style.ReedSprites);
+                    bool flip = random.NextDouble() < 0.5;
+                    stamps.Add(new Stamp
+                    {
+                        Y = at.y,
+                        Draw = sprite != null ? () => DrawSprite(sprite, at, size * 1.4f, Color.white, flip) : (Action)(() => DrawReeds(at, size))
+                    });
                 }
             }
 
@@ -647,7 +662,9 @@ namespace KingdomSurvival.WorldMapVisual
                         at = center;
                     float baseSize = mountain ? style.MountainSizeHexes : style.HillSizeHexes;
                     float size = baseSize * hexPx * (0.8f + (float)random.NextDouble() * 0.4f);
-                    Sprite sprite = Pick(mountain ? style.MountainSprites : style.HillSprites);
+                    Sprite sprite = cliff
+                        ? Pick(style.CliffSprites) ?? Pick(style.MountainSprites)
+                        : Pick(mountain ? style.MountainSprites : style.HillSprites);
                     bool flip = random.NextDouble() < 0.5;
                     float skew = ((float)random.NextDouble() * 2f - 1f) * 0.15f;
                     stamps.Add(new Stamp
@@ -693,7 +710,15 @@ namespace KingdomSurvival.WorldMapVisual
                 if (village.IsStart && style.MarkStart)
                 {
                     float ring = size * 0.62f;
-                    stamps.Add(new Stamp { Y = center.y + ring, Order = 2, Draw = () => DrawStartMark(center, ring) });
+                    Sprite startSprite = style.StartSprite;
+                    stamps.Add(new Stamp
+                    {
+                        Y = center.y + ring,
+                        Order = 2,
+                        Draw = startSprite != null
+                            ? () => DrawSprite(startSprite, center + new Vector2(ring * 0.9f, ring * 0.4f), size * 0.6f, Color.white, false)
+                            : (Action)(() => DrawStartMark(center, ring))
+                    });
                 }
             }
 
@@ -702,34 +727,73 @@ namespace KingdomSurvival.WorldMapVisual
                 Vector2 at = ToPixel(landmark.XPercent, landmark.YPercent);
                 WorldMapLandmarkArt art = style.FindLandmark(landmark.Kind);
                 float size = (art != null ? art.SizeHexes : style.LandmarkSizeHexes) * hexPx;
-                if (art != null && art.Sprite != null)
+                Sprite sprite = art?.PickSprite(landmark.Variant);
+                if (sprite != null)
                 {
-                    Sprite sprite = art.Sprite;
                     Color tint = art.Tint;
                     stamps.Add(new Stamp { Y = at.y, Order = 1, Draw = () => DrawSprite(sprite, at + new Vector2(0f, size * 0.3f), size, tint, false) });
                     return;
                 }
                 string kind = (landmark.Kind ?? string.Empty).ToLowerInvariant();
+                int variant = landmark.Variant;
                 Action draw;
-                if (kind.Contains("ruin"))
-                    draw = () => DrawRuins(at, size, landmark.Variant);
+                if (kind.Contains("abandoned-village"))
+                    draw = () => DrawAbandonedVillage(at, size, variant);
+                else if (kind.Contains("yard"))
+                    draw = () => DrawAbandonedYard(at, size);
+                else if (kind.Contains("ruin"))
+                    draw = () => DrawRuins(at, size, variant);
                 else if (kind.Contains("mine"))
                     draw = () => DrawMine(at, size);
+                else if (kind.Contains("cave"))
+                    draw = () => DrawCave(at, size);
                 else if (kind.Contains("barrow") || kind.Contains("kurgan"))
                     draw = () => DrawBarrow(at, size);
                 else if (kind.Contains("mill"))
                     draw = () => DrawMill(at, size);
+                else if (kind.Contains("grove"))
+                    draw = () => DrawGrove(at, size, variant);
+                else if (kind.Contains("hillfort"))
+                    draw = () => DrawHillfort(at, size);
+                else if (kind.Contains("sanctuary"))
+                    draw = () => DrawSanctuary(at, size);
+                else if (kind.Contains("crossroads"))
+                    draw = () => DrawCrossroadsPost(at, size);
+                else if (kind.Contains("lair"))
+                    draw = () => DrawLair(at, size);
+                else if (kind.Contains("spring"))
+                    draw = () => DrawSpring(at, size);
+                else if (kind.Contains("apiary"))
+                    draw = () => DrawApiary(at, size);
+                else if (kind.Contains("hut"))
+                    draw = () => DrawHouse(at, size * 0.6f, false);
                 else
                     draw = () => DrawStandingStone(at, size);
                 stamps.Add(new Stamp { Y = at.y, Order = 1, Draw = draw });
             }
 
+            // Случайный рисунок из списка; пустые строки списка не считаются.
             private Sprite Pick(List<Sprite> sprites, System.Random source = null)
             {
                 if (sprites == null || sprites.Count == 0)
                     return null;
-                Sprite sprite = sprites[(source ?? random).Next(sprites.Count)];
-                return sprite;
+                int valid = 0;
+                foreach (Sprite sprite in sprites)
+                {
+                    if (sprite != null)
+                        valid++;
+                }
+                if (valid == 0)
+                    return null;
+                int index = (source ?? random).Next(valid);
+                foreach (Sprite sprite in sprites)
+                {
+                    if (sprite == null)
+                        continue;
+                    if (index-- == 0)
+                        return sprite;
+                }
+                return null;
             }
 
             // ---- рисунки кодом (тушь + заливка) ----
@@ -895,6 +959,139 @@ namespace KingdomSurvival.WorldMapVisual
                     float angle = i * Mathf.PI / 4f;
                     Vector2 d = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
                     StrokeSegment(wheel - d, wheel + d, Mathf.Max(0.4f, size * 0.025f), style.InkColor, 1f);
+                }
+            }
+
+            // Заброшенное поселение: домики с провалами крыш, без дыма.
+            private void DrawAbandonedVillage(Vector2 center, float size, int variant)
+            {
+                System.Random local = new System.Random(variant);
+                for (int h = 0; h < 4; h++)
+                {
+                    float angle = h * Mathf.PI * 0.5f + (float)local.NextDouble() * 0.7f;
+                    Vector2 at = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle) * 0.6f) * size * (h == 0 ? 0f : 0.32f);
+                    DrawBrokenHouse(at, size * 0.42f, local.NextDouble() < 0.5);
+                }
+            }
+
+            private void DrawAbandonedYard(Vector2 bottom, float size)
+            {
+                DrawBrokenHouse(bottom, size * 0.55f, false);
+                float ink = Mathf.Max(0.5f, size * 0.03f);
+                for (int i = 0; i < 5; i++)
+                {
+                    Vector2 foot = bottom + new Vector2(size * (0.25f + i * 0.09f), size * (0.04f + (i % 2) * 0.02f));
+                    StrokeSegment(foot, foot + new Vector2(i == 3 ? size * 0.06f : 0f, -size * 0.12f), ink, style.InkColor, 0.9f);
+                }
+            }
+
+            private void DrawBrokenHouse(Vector2 bottom, float size, bool flip)
+            {
+                float w = size * 0.5f;
+                float wall = size * 0.38f;
+                float ink = Mathf.Max(0.6f, size * 0.07f);
+                Vector2 bl = bottom + new Vector2(-w * 0.5f, 0f);
+                Vector2 br = bottom + new Vector2(w * 0.5f, 0f);
+                Color wallColor = Mul(style.WallColor, 0.75f);
+                FillPolygon(new[] { bl, br, br - new Vector2(0f, wall), bl - new Vector2(0f, wall * 0.85f) }, wallColor, style.InkColor, ink, 0f);
+                // Половина крыши, вторая провалилась.
+                Vector2 tl = bl - new Vector2(0f, wall * 0.85f);
+                Vector2 ridge = bottom - new Vector2(flip ? -w * 0.05f : w * 0.05f, wall + size * 0.3f);
+                FillPolygon(new[] { tl - new Vector2(w * 0.1f, 0f), bottom - new Vector2(0f, wall * 0.9f), ridge }, Mul(style.RoofColor, 0.7f), style.InkColor, ink, 0f);
+                StrokeSegment(ridge, br - new Vector2(-w * 0.1f, wall * 0.6f), ink * 0.6f, style.InkColor, 0.9f);
+            }
+
+            private void DrawCave(Vector2 bottom, float size)
+            {
+                FillPolygon(new[] { bottom + new Vector2(-size * 0.55f, 0f), bottom + new Vector2(size * 0.55f, 0f), bottom + new Vector2(size * 0.25f, -size * 0.55f), bottom + new Vector2(-size * 0.2f, -size * 0.6f) },
+                    style.MountainShadowColor, style.InkColor, Mathf.Max(0.7f, inkPx * 0.6f), 0.3f);
+                FillEllipse(bottom - new Vector2(0f, size * 0.01f), size * 0.2f, size * 0.28f, style.InkColor, style.InkColor, 0f, 0f, true);
+            }
+
+            // Роща: несколько крупных лиственных деревьев тесным кругом.
+            private void DrawGrove(Vector2 center, float size, int variant)
+            {
+                System.Random local = new System.Random(variant);
+                int trees = 5;
+                for (int t = 0; t < trees; t++)
+                {
+                    float angle = t / (float)trees * Mathf.PI * 2f + (float)local.NextDouble() * 0.4f;
+                    Vector2 at = center + new Vector2(Mathf.Cos(angle) * size * 0.3f, Mathf.Sin(angle) * size * 0.18f);
+                    DrawLeafTree(at, size * (0.55f + (float)local.NextDouble() * 0.15f), 0.85f + (float)local.NextDouble() * 0.2f);
+                }
+            }
+
+            // Городище: оплывший вал кольцом на холме и остатки частокола.
+            private void DrawHillfort(Vector2 center, float size)
+            {
+                FillEllipse(center, size * 0.6f, size * 0.32f, Mul(style.HillColor, 0.95f), style.InkColor, Mathf.Max(0.8f, inkPx * 0.7f), 0.25f);
+                FillEllipse(center, size * 0.38f, size * 0.18f, Mul(style.HillColor, 1.08f), style.InkColor, Mathf.Max(0.6f, inkPx * 0.4f), 0f);
+                float post = Mathf.Max(1f, size * 0.07f);
+                for (int i = 0; i < 9; i++)
+                {
+                    if (i == 3 || i == 6)
+                        continue;
+                    float angle = Mathf.PI + i / 9f * Mathf.PI;
+                    Vector2 foot = center + new Vector2(Mathf.Cos(angle) * size * 0.38f, Mathf.Sin(angle) * size * 0.18f);
+                    StrokeSegment(foot, foot - new Vector2(0f, post * 1.4f), Mathf.Max(0.5f, post * 0.3f), style.InkColor, 0.95f);
+                }
+            }
+
+            // Святилище: круг из врытых камней и столбов.
+            private void DrawSanctuary(Vector2 center, float size)
+            {
+                int stones = 7;
+                for (int i = 0; i < stones; i++)
+                {
+                    float angle = i / (float)stones * Mathf.PI * 2f;
+                    Vector2 foot = center + new Vector2(Mathf.Cos(angle) * size * 0.4f, Mathf.Sin(angle) * size * 0.2f);
+                    if (i % 2 == 0)
+                        DrawStandingStone(foot, size * 0.45f);
+                    else
+                        StrokeSegment(foot, foot - new Vector2(0f, size * 0.3f), Mathf.Max(0.8f, size * 0.035f), Mul(style.BridgeColor, 0.7f), 1f);
+                }
+            }
+
+            private void DrawCrossroadsPost(Vector2 bottom, float size)
+            {
+                float ink = Mathf.Max(0.8f, size * 0.05f);
+                StrokeSegment(bottom, bottom - new Vector2(0f, size * 0.55f), ink, style.BridgeColor, 1f);
+                StrokeSegment(bottom - new Vector2(size * 0.15f, size * 0.42f), bottom - new Vector2(-size * 0.15f, size * 0.42f), ink * 0.8f, style.BridgeColor, 1f);
+                StrokeSegment(bottom, bottom - new Vector2(0f, size * 0.55f), ink * 0.35f, style.InkColor, 1f);
+            }
+
+            private void DrawLair(Vector2 bottom, float size)
+            {
+                FillEllipse(bottom, size * 0.4f, size * 0.2f, Mul(style.HillColor, 0.7f), style.InkColor, Mathf.Max(0.7f, inkPx * 0.6f), 0.2f, true);
+                FillEllipse(bottom, size * 0.15f, size * 0.12f, style.InkColor, style.InkColor, 0f, 0f, true);
+                for (int i = 0; i < 3; i++)
+                {
+                    Vector2 a = bottom + new Vector2(size * (0.22f + i * 0.08f), size * 0.05f);
+                    StrokeSegment(a, a + new Vector2(size * 0.08f, -size * 0.03f), Mathf.Max(0.5f, size * 0.025f), new Color(0.85f, 0.82f, 0.72f), 1f);
+                }
+            }
+
+            private void DrawSpring(Vector2 center, float size)
+            {
+                FillEllipse(center, size * 0.22f, size * 0.12f, style.WaterShallowColor, style.InkColor, Mathf.Max(0.6f, inkPx * 0.5f), 0f);
+                for (int i = 0; i < 6; i++)
+                {
+                    float angle = i / 6f * Mathf.PI * 2f;
+                    Vector2 stone = center + new Vector2(Mathf.Cos(angle) * size * 0.28f, Mathf.Sin(angle) * size * 0.16f);
+                    FillEllipse(stone, size * 0.05f, size * 0.035f, style.LandmarkColor, style.InkColor, Mathf.Max(0.4f, size * 0.015f), 0.3f);
+                }
+            }
+
+            // Пасека: колоды-ульи стоймя у избушки.
+            private void DrawApiary(Vector2 bottom, float size)
+            {
+                DrawHouse(bottom + new Vector2(-size * 0.2f, 0f), size * 0.45f, false);
+                for (int i = 0; i < 3; i++)
+                {
+                    Vector2 foot = bottom + new Vector2(size * (0.08f + i * 0.13f), size * 0.03f * (i % 2));
+                    float w = size * 0.05f;
+                    FillPolygon(new[] { foot + new Vector2(-w, 0f), foot + new Vector2(w, 0f), foot + new Vector2(w, -size * 0.2f), foot + new Vector2(-w, -size * 0.2f) },
+                        style.BridgeColor, style.InkColor, Mathf.Max(0.5f, size * 0.02f), 0.2f);
                 }
             }
 

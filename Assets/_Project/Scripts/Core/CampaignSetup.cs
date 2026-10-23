@@ -141,7 +141,10 @@ public sealed class CampaignSetup
         GameState state = new GameState();
         state.CreateNewGame(WorldSeed, locationTemplates, worldDefinition);
         if (generated)
+        {
             state.GeneratedMap = generatedMap;
+            GeneratedMapPlaces.AddTo(state);
+        }
 
         // ПР-06А: «Обычная жизнь» — Дом кормит себя. Приток 24 при 24
         // жителях — фиксированная настройка пресета, не подгонка под

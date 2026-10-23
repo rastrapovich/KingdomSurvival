@@ -550,7 +550,7 @@ public static class WorldMapGenerator
 
             foreach (WorldMapLandmarkRule rule in settings.Landmarks)
             {
-                if (rule == null || !rule.Enabled || rule.Count <= 0)
+                if (rule == null || !rule.Enabled || rule.Count <= 0 || rule.Placement == WorldMapLandmarkPlacement.Crossroads)
                     continue;
 
                 for (int n = 0; n < rule.Count; n++)
@@ -579,16 +579,76 @@ public static class WorldMapGenerator
                     int cell = candidates[random.Next(candidates.Count)];
                     taken.Add(cell);
                     grid.CellCenter(grid.CellAt(cell), out double x, out double y);
-                    result.Landmarks.Add(new GeneratedMapSite
+                    result.Landmarks.Add(Site(rule, cell, random));
+                }
+            }
+        }
+
+        private GeneratedMapSite Site(WorldMapLandmarkRule rule, int cell, Random random)
+        {
+            grid.CellCenter(grid.CellAt(cell), out double x, out double y);
+            return new GeneratedMapSite
+            {
+                Kind = rule.Id ?? string.Empty,
+                Name = rule.Name ?? string.Empty,
+                Cell = cell,
+                XPercent = grid.PixelToPercentX(x),
+                YPercent = grid.PixelToPercentY(y),
+                Variant = random.Next(1 << 20),
+                DrawMark = rule.DrawMark,
+                LocationId = rule.LocationId ?? string.Empty,
+                Hidden = rule.Hidden,
+                Description = rule.Description ?? string.Empty,
+                Threat = string.IsNullOrWhiteSpace(rule.Threat) ? "неизвестна" : rule.Threat,
+                ExplorationHours = Math.Max(0.0, rule.ExplorationHours),
+                RewardArmySupply = Math.Max(0, rule.RewardArmySupply),
+                RewardArmyGold = Math.Max(0, rule.RewardArmyGold)
+            };
+        }
+
+        // Перекрёсток — клетка дороги, где сходятся три дороги и больше,
+        // в стороне от деревень и других мест.
+        private void PlaceCrossroads(Random random)
+        {
+            List<int> villageCells = new List<int>();
+            foreach (GeneratedMapSite village in result.Villages)
+                villageCells.Add(village.Cell);
+
+            foreach (WorldMapLandmarkRule rule in settings.Landmarks)
+            {
+                if (rule == null || !rule.Enabled || rule.Count <= 0 || rule.Placement != WorldMapLandmarkPlacement.Crossroads)
+                    continue;
+
+                List<int> candidates = new List<int>();
+                for (int i = 0; i < count; i++)
+                {
+                    if (terrain[i] != Road || riverId[i] >= 0 || NearEdge(i, 2))
+                        continue;
+                    int roads = 0;
+                    for (int d = 0; d < 6; d++)
                     {
-                        Kind = rule.Id ?? string.Empty,
-                        Name = rule.Name ?? string.Empty,
-                        Cell = cell,
-                        XPercent = grid.PixelToPercentX(x),
-                        YPercent = grid.PixelToPercentY(y),
-                        Variant = random.Next(1 << 20),
-                        DrawMark = rule.DrawMark
-                    });
+                        int next = neighbors[i * 6 + d];
+                        if (next >= 0 && terrain[next] == Road)
+                            roads++;
+                    }
+                    if (roads >= 3 && NearestDistance(i, villageCells) >= 3)
+                        candidates.Add(i);
+                }
+                Shuffle(candidates, random);
+
+                List<int> taken = new List<int>();
+                foreach (GeneratedMapSite landmark in result.Landmarks)
+                    taken.Add(landmark.Cell);
+                int placed = 0;
+                foreach (int cell in candidates)
+                {
+                    if (placed >= rule.Count)
+                        break;
+                    if (IsNear(cell, taken, Math.Max(3, (int)rule.MinDistanceHexes)))
+                        continue;
+                    taken.Add(cell);
+                    result.Landmarks.Add(Site(rule, cell, random));
+                    placed++;
                 }
             }
         }
@@ -683,6 +743,8 @@ public static class WorldMapGenerator
                     ApplyPath(path, false, bridgeCells);
                 }
             }
+
+            PlaceCrossroads(random);
 
             if (settings.TrailsToLandmarks)
             {

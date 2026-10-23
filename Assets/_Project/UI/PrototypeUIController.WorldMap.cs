@@ -501,9 +501,10 @@ public partial class PrototypeUIController
             WorldMapVisualRuntime.FindLocation(location.Id);
         Sprite icon = definition != null && definition.Icon != null
             ? definition.Icon
-            : theme != null && theme.IconLibrary != null
-                ? theme.IconLibrary.FindIconForLocation(location.Id)
-                : null;
+            : FindGeneratedPlaceIcon(location)
+              ?? (theme != null && theme.IconLibrary != null
+                  ? theme.IconLibrary.FindIconForLocation(location.Id)
+                  : null);
 
         if (icon == null)
             return;
@@ -523,6 +524,21 @@ public partial class PrototypeUIController
 
         node.text = string.Empty;
         node.Add(iconImage);
+    }
+
+    // Канон v1.58 §9.9.1: иконка метки места сгенерированной карты — по
+    // типу места из «Иконок и рисунков» генератора.
+    private static Sprite FindGeneratedPlaceIcon(LocationData location)
+    {
+        if (location == null || string.IsNullOrEmpty(location.PlaceKind))
+            return null;
+        WorldMapGeneratorAsset generator = WorldMapVisualRuntime.LoadGenerator();
+        if (generator == null)
+            return null;
+        if (location.PlaceKind == GeneratedMapPlaces.VillageKind)
+            return generator.Art.VillageIcon != null ? generator.Art.VillageIcon : null;
+        WorldMapLandmarkArt art = generator.Art.FindLandmark(location.PlaceKind);
+        return art != null && art.Icon != null ? art.Icon : null;
     }
 
     private void CreateDestinationMarker()

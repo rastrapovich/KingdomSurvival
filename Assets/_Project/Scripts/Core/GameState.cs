@@ -110,6 +110,11 @@ public class LocationData
     // временный лагерь и войти с выбранной группой.
     public bool IsSettlement;
 
+    // Канон v1.58 §9.9.1: тип места сгенерированной карты (ID правила
+    // генератора: cave, grove, village…) — по нему берётся иконка метки.
+    // Пусто — место не из генератора.
+    public string PlaceKind = string.Empty;
+
     // Литературный текст для Location Interaction (presentation-слой, не
     // Dialogue Database — локация не NPC). Пусто по умолчанию: старые/
     // технические локации без описания получают нейтральный fallback-текст

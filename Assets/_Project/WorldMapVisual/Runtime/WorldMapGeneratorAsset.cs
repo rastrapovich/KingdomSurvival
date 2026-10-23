@@ -45,6 +45,7 @@ namespace KingdomSurvival.WorldMapVisual
                 if (art == null)
                     art = WorldMapArtStyle.CreateDefault();
                 art.EnsureTerrainEntries();
+                art.NormalizePools();
                 return art;
             }
             set => art = value ?? WorldMapArtStyle.CreateDefault();
@@ -60,9 +61,8 @@ namespace KingdomSurvival.WorldMapVisual
 
         private void OnEnable()
         {
-            if (art != null)
-                art.EnsureTerrainEntries();
-            if (UpgradeLandmarkCatalog())
+            bool poolsChanged = art != null && (art.EnsureTerrainEntries() | art.NormalizePools());
+            if (UpgradeLandmarkCatalog() | poolsChanged)
             {
 #if UNITY_EDITOR
                 UnityEditor.EditorUtility.SetDirty(this);

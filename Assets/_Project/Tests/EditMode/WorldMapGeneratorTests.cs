@@ -331,6 +331,74 @@ public class WorldMapGeneratorTests
     }
 
     [Test]
+    public void ArtPools_TakeOldSingleSprites_AndHoldAtMostTen()
+    {
+        Texture2D texture = new Texture2D(4, 4);
+        List<Sprite> created = new List<Sprite>();
+        Sprite Make()
+        {
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 4, 4), Vector2.zero);
+            created.Add(sprite);
+            return sprite;
+        }
+        try
+        {
+            WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+            Sprite bridge = Make();
+            Sprite icon = Make();
+            style.BridgeSprite = bridge;
+            style.Landmarks.Add(new WorldMapLandmarkArt { RuleId = "cave", Icon = icon, Sprite = Make() });
+            for (int i = 0; i < 14; i++)
+                style.ConiferSprites.Add(Make());
+
+            Assert.That(style.NormalizePools(), Is.True);
+            Assert.That(style.BridgeSprite, Is.Null);
+            Assert.That(style.BridgeSprites, Does.Contain(bridge));
+            Assert.That(style.ConiferSprites.Count, Is.EqualTo(WorldMapArtStyle.MaxPoolSize));
+            WorldMapLandmarkArt cave = style.FindLandmark("cave");
+            Assert.That(cave.Icons, Does.Contain(icon));
+            Assert.That(cave.Variants.Count, Is.EqualTo(1));
+            Assert.That(style.NormalizePools(), Is.False, "Повторно ничего не меняется.");
+        }
+        finally
+        {
+            foreach (Sprite sprite in created)
+                Object.DestroyImmediate(sprite);
+            Object.DestroyImmediate(texture);
+        }
+    }
+
+    [Test]
+    public void PickStable_GivesTheSameIconForTheSamePlace_AndUsesThePool()
+    {
+        Texture2D texture = new Texture2D(4, 4);
+        List<Sprite> pool = new List<Sprite>();
+        try
+        {
+            for (int i = 0; i < 10; i++)
+                pool.Add(Sprite.Create(texture, new Rect(0, 0, 4, 4), Vector2.zero));
+            pool.Insert(3, null);
+
+            Assert.That(WorldMapArtStyle.PickStable(pool, "gen-cave-1"), Is.SameAs(WorldMapArtStyle.PickStable(pool, "gen-cave-1")));
+            HashSet<Sprite> used = new HashSet<Sprite>();
+            for (int i = 0; i < 200; i++)
+                used.Add(WorldMapArtStyle.PickStable(pool, "gen-village-" + i));
+            Assert.That(used, Does.Not.Contain(null));
+            Assert.That(used.Count, Is.GreaterThanOrEqualTo(8), "Разные места получают разные иконки из пула.");
+            Assert.That(WorldMapArtStyle.PickStable(new List<Sprite>(), "x"), Is.Null);
+        }
+        finally
+        {
+            foreach (Sprite sprite in pool)
+            {
+                if (sprite != null)
+                    Object.DestroyImmediate(sprite);
+            }
+            Object.DestroyImmediate(texture);
+        }
+    }
+
+    [Test]
     public void ArtStyle_HasAnEntryForEveryTerrain_AndClonesDeep()
     {
         WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();

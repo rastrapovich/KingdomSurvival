@@ -1085,7 +1085,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             Group("Иконки и рисунки", "Icons", () =>
             {
-                Help("Перетащите сюда спрайты из Project. «Знак» — рисунок на карте; «Иконка метки» — кнопка места на карте игры, по которой к нему идут. Пусто — рисует код.");
+                Help("У каждого объекта — пул до " + WorldMapArtStyle.MaxPoolSize + " рисунков: каждому дереву, горе, мосту, деревне или месту достаётся случайный, и он не меняется после загрузки. «Знаки» — рисунки на карте; «Иконки метки» — кнопка места на карте игры, по которой к нему идут. Пусто — рисует код. Выделите спрайты в Project и нажмите «+ выделенные» — добавятся все сразу.");
                 SubTitle("Лес и болото");
                 SpriteList("Ели и сосны", A.ConiferSprites);
                 SpriteList("Лиственные", A.LeafSprites);
@@ -1096,22 +1096,21 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 SpriteList("Горы", A.MountainSprites);
                 SpriteList("Скалы (пусто — как горы)", A.CliffSprites);
                 SubTitle("Дороги, деревни, стоянка");
-                SpriteField("Мост", A.BridgeSprite, v => A.BridgeSprite = v);
+                SpriteList("Мосты", A.BridgeSprites);
                 SpriteList("Деревни", A.VillageSprites);
-                SpriteField("Иконка метки деревни", A.VillageIcon, v => A.VillageIcon = v);
-                SpriteField("Стоянка отряда", A.StartSprite, v => A.StartSprite = v);
+                SpriteList("Иконки метки деревни", A.VillageIcons);
+                SpriteList("Стоянка отряда", A.StartSprites);
                 SubTitle("Приметные места");
                 foreach (WorldMapLandmarkRule rule in S.Landmarks)
                 {
                     if (rule == null || string.IsNullOrEmpty(rule.Id))
                         continue;
                     WorldMapLandmarkArt art = LandmarkArt(rule.Id);
-                    Foldout item = Block(rule.Name + (art.Sprite != null || art.Icon != null ? "  ●" : ""), "IconRule." + rule.Id, false);
+                    Foldout item = Block(rule.Name + "  (знаков " + art.Variants.Count + ", иконок " + art.Icons.Count + ")", "IconRule." + rule.Id, false);
                     VisualElement keep = parent;
                     parent = item;
-                    SpriteField("Знак на карте", art.Sprite, v => art.Sprite = v);
-                    SpriteList("Ещё варианты знака", art.Variants);
-                    SpriteField("Иконка метки", art.Icon, v => art.Icon = v);
+                    SpriteList("Знаки на карте", art.Variants);
+                    SpriteList("Иконки метки", art.Icons);
                     Slider("Размер знака, клеток", art.SizeHexes, 0.2f, 4, v => art.SizeHexes = v);
                     ColorField("Оттенок знака", art.Tint, v => art.Tint = v);
                     parent = keep;
@@ -1120,7 +1119,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             {
                 A.ConiferSprites.Clear(); A.LeafSprites.Clear(); A.TreeSprites.Clear(); A.ReedSprites.Clear();
                 A.HillSprites.Clear(); A.MountainSprites.Clear(); A.CliffSprites.Clear(); A.VillageSprites.Clear();
-                A.BridgeSprite = null; A.VillageIcon = null; A.StartSprite = null;
+                A.BridgeSprites.Clear(); A.VillageIcons.Clear(); A.StartSprites.Clear();
                 A.Landmarks.Clear();
             });
         }
@@ -1141,13 +1140,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private void SubTitle(string text)
         {
             parent.Add(new Label(text) { style = { unityFontStyleAndWeight = FontStyle.Bold, marginTop = 6, color = new Color(.8f, .82f, .75f) } });
-        }
-
-        private void SpriteField(string label, Sprite value, Action<Sprite> set)
-        {
-            ObjectField field = new ObjectField(label) { objectType = typeof(Sprite), allowSceneObjects = false, value = value };
-            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue as Sprite), false, true));
-            parent.Add(field);
         }
 
         private void TextArea(string label, string value, Action<string> set)
@@ -1313,9 +1305,12 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             }
         }
 
+        // Пул рисунков объекта: до MaxPoolSize строк, «+ выделенные» берёт
+        // спрайты, выделенные в Project (и все спрайты выделенных текстур).
         private void SpriteList(string label, List<Sprite> sprites)
         {
-            Label title = new Label(label + (sprites.Count == 0 ? " — нет, рисует код" : " (" + sprites.Count + ")")) { style = { marginTop = 2 } };
+            int max = WorldMapArtStyle.MaxPoolSize;
+            Label title = new Label(label + (sprites.Count == 0 ? " — нет, рисует код" : " (" + sprites.Count + " из " + max + ")")) { style = { marginTop = 2 } };
             parent.Add(title);
             for (int i = 0; i < sprites.Count; i++)
             {
@@ -1328,7 +1323,51 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 row.Add(new Button(() => Change(() => sprites.RemoveAt(index), false, true)) { text = "−" });
                 parent.Add(row);
             }
-            Buttons(("+ рисунок", () => Change(() => sprites.Add(null), false, true), "Добавить рисунок; из нескольких выбирается случайный"));
+            bool full = sprites.Count >= max;
+            Buttons(
+                ("+ рисунок", full ? null : (Action)(() => Change(() => sprites.Add(null), false, true)), "Добавить строку; из нескольких рисунков выбирается случайный"),
+                ("+ выделенные в Project", full ? null : (Action)(() =>
+                {
+                    List<Sprite> selected = SelectedSprites();
+                    if (selected.Count == 0)
+                    {
+                        EditorUtility.DisplayDialog("Рисунки", "В Project не выделено ни одного спрайта или текстуры со спрайтами.", "Понятно");
+                        return;
+                    }
+                    Change(() =>
+                    {
+                        foreach (Sprite sprite in selected)
+                        {
+                            if (sprites.Count >= max)
+                                break;
+                            if (!sprites.Contains(sprite))
+                                sprites.Add(sprite);
+                        }
+                    }, false, true);
+                }), "Добавить все спрайты, выделенные в окне Project (до " + max + ")"),
+                ("Очистить", sprites.Count == 0 ? null : (Action)(() => Change(sprites.Clear, false, true)), null));
+        }
+
+        private static List<Sprite> SelectedSprites()
+        {
+            List<Sprite> result = new List<Sprite>();
+            foreach (UnityEngine.Object selected in Selection.objects)
+            {
+                if (selected is Sprite sprite)
+                {
+                    result.Add(sprite);
+                    continue;
+                }
+                if (selected is Texture2D)
+                {
+                    foreach (UnityEngine.Object asset in AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(selected)))
+                    {
+                        if (asset is Sprite child)
+                            result.Add(child);
+                    }
+                }
+            }
+            return result;
         }
     }
 }

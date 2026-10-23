@@ -535,10 +535,11 @@ public partial class PrototypeUIController
         WorldMapGeneratorAsset generator = WorldMapVisualRuntime.LoadGenerator();
         if (generator == null)
             return null;
+        // Из пула иконок — устойчиво по ID места: после загрузки та же.
         if (location.PlaceKind == GeneratedMapPlaces.VillageKind)
-            return generator.Art.VillageIcon != null ? generator.Art.VillageIcon : null;
+            return WorldMapArtStyle.PickStable(generator.Art.VillageIcons, location.Id);
         WorldMapLandmarkArt art = generator.Art.FindLandmark(location.PlaceKind);
-        return art != null && art.Icon != null ? art.Icon : null;
+        return art?.PickIcon(location.Id);
     }
 
     private void CreateDestinationMarker()

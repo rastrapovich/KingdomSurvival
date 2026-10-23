@@ -479,9 +479,10 @@ namespace KingdomSurvival.WorldMapVisual
                     Vector2 a = center - direction * length * 0.5f;
                     Vector2 c = center + direction * length * 0.5f;
                     float half = roadHalf * 1.5f;
-                    if (style.BridgeSprite != null)
+                    Sprite bridgeSprite = Pick(style.BridgeSprites);
+                    if (bridgeSprite != null)
                     {
-                        DrawSprite(style.BridgeSprite, center + new Vector2(0f, length * 0.25f), length * 0.6f, Color.white, direction.x < 0f);
+                        DrawSprite(bridgeSprite, center + new Vector2(0f, length * 0.25f), length * 0.6f, Color.white, direction.x < 0f);
                         continue;
                     }
                     FillPolygon(new[] { a + normal * half, c + normal * half, c - normal * half, a - normal * half },
@@ -710,7 +711,7 @@ namespace KingdomSurvival.WorldMapVisual
                 if (village.IsStart && style.MarkStart)
                 {
                     float ring = size * 0.62f;
-                    Sprite startSprite = style.StartSprite;
+                    Sprite startSprite = Pick(style.StartSprites, local);
                     stamps.Add(new Stamp
                     {
                         Y = center.y + ring,

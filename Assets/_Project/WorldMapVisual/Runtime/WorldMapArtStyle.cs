@@ -103,8 +103,9 @@ namespace KingdomSurvival.WorldMapVisual
         [Range(0.02f, 1f)] public float TrailWidthHexes = 0.07f;
         public bool TrailDashed = true;
         public Color BridgeColor = new Color(0.42f, 0.30f, 0.20f, 1f);
-        [Tooltip("Рисунок моста; ставится как есть, без поворота вдоль дороги.")]
-        public Sprite BridgeSprite;
+        [Tooltip("Рисунки мостов (до 10); ставятся как есть, без поворота вдоль дороги.")]
+        public List<Sprite> BridgeSprites = new List<Sprite>();
+        [HideInInspector] public Sprite BridgeSprite;
 
         [Header("Деревни")]
         public List<Sprite> VillageSprites = new List<Sprite>();
@@ -113,10 +114,12 @@ namespace KingdomSurvival.WorldMapVisual
         public Color RoofColor = new Color(0.36f, 0.27f, 0.19f, 1f);
         [Tooltip("Рисовать точку старта отряда отдельным знаком.")]
         public bool MarkStart = true;
-        [Tooltip("Рисунок стоянки отряда вместо частокола.")]
-        public Sprite StartSprite;
-        [Tooltip("Иконка метки деревни на карте игры.")]
-        public Sprite VillageIcon;
+        [Tooltip("Рисунки стоянки отряда вместо частокола (до 10).")]
+        public List<Sprite> StartSprites = new List<Sprite>();
+        [Tooltip("Иконки метки деревни на карте игры (до 10).")]
+        public List<Sprite> VillageIcons = new List<Sprite>();
+        [HideInInspector] public Sprite StartSprite;
+        [HideInInspector] public Sprite VillageIcon;
 
         [Header("Приметные места")]
         public List<WorldMapLandmarkArt> Landmarks = new List<WorldMapLandmarkArt>();
@@ -178,6 +181,75 @@ namespace KingdomSurvival.WorldMapVisual
             return changed;
         }
 
+        // У каждого объекта карты — пул до 10 рисунков; из пула каждому
+        // дереву, горе, мосту, деревне или месту достаётся свой рисунок.
+        public const int MaxPoolSize = 10;
+
+        // Прежние одиночные рисунки (мост, стоянка, иконка деревни, знак и
+        // иконка места) переходят в пулы; пулы обрезаются до 10.
+        public bool NormalizePools()
+        {
+            bool changed = false;
+            changed |= Absorb(ref BridgeSprite, ref BridgeSprites);
+            changed |= Absorb(ref StartSprite, ref StartSprites);
+            changed |= Absorb(ref VillageIcon, ref VillageIcons);
+            foreach (List<Sprite> pool in new[]
+                     {
+                         TreeSprites, ConiferSprites, LeafSprites, ReedSprites, HillSprites, MountainSprites,
+                         CliffSprites, VillageSprites, BridgeSprites, StartSprites, VillageIcons
+                     })
+            {
+                changed |= Trim(pool);
+            }
+            if (Landmarks != null)
+            {
+                foreach (WorldMapLandmarkArt landmark in Landmarks)
+                    changed |= landmark != null && landmark.NormalizePools();
+            }
+            return changed;
+        }
+
+        internal static bool Absorb(ref Sprite single, ref List<Sprite> pool)
+        {
+            pool ??= new List<Sprite>();
+            if (single == null)
+                return false;
+            if (!pool.Contains(single))
+                pool.Insert(0, single);
+            single = null;
+            return true;
+        }
+
+        internal static bool Trim(List<Sprite> pool)
+        {
+            if (pool == null || pool.Count <= MaxPoolSize)
+                return false;
+            pool.RemoveRange(MaxPoolSize, pool.Count - MaxPoolSize);
+            return true;
+        }
+
+        // Устойчивый случайный выбор по ключу (ID места): одно и то же
+        // место после загрузки получает ту же иконку. Пустые строки пула
+        // не считаются.
+        public static Sprite PickStable(List<Sprite> pool, string key)
+        {
+            if (pool == null)
+                return null;
+            List<Sprite> valid = pool.Where(sprite => sprite != null).ToList();
+            return valid.Count == 0 ? null : valid[(int)(StableHash(key) % (uint)valid.Count)];
+        }
+
+        public static uint StableHash(string key)
+        {
+            unchecked
+            {
+                uint hash = 2166136261;
+                foreach (char c in key ?? string.Empty)
+                    hash = (hash ^ c) * 16777619;
+                return hash;
+            }
+        }
+
         public WorldMapArtStyle Clone()
         {
             WorldMapArtStyle copy = (WorldMapArtStyle)MemberwiseClone();
@@ -207,6 +279,9 @@ namespace KingdomSurvival.WorldMapVisual
             copy.LeafSprites = new List<Sprite>(LeafSprites ?? new List<Sprite>());
             copy.ReedSprites = new List<Sprite>(ReedSprites ?? new List<Sprite>());
             copy.CliffSprites = new List<Sprite>(CliffSprites ?? new List<Sprite>());
+            copy.BridgeSprites = new List<Sprite>(BridgeSprites ?? new List<Sprite>());
+            copy.StartSprites = new List<Sprite>(StartSprites ?? new List<Sprite>());
+            copy.VillageIcons = new List<Sprite>(VillageIcons ?? new List<Sprite>());
             return copy;
         }
 
@@ -266,12 +341,12 @@ namespace KingdomSurvival.WorldMapVisual
     public sealed class WorldMapLandmarkArt
     {
         public string RuleId = string.Empty;
-        [Tooltip("Знак на рисунке карты.")]
-        public Sprite Sprite;
-        [Tooltip("Ещё варианты знака — у каждого места выбирается свой.")]
+        [Tooltip("Знаки на рисунке карты (до 10) — у каждого места выбирается свой.")]
         public List<Sprite> Variants = new List<Sprite>();
-        [Tooltip("Иконка метки места на карте игры (кнопка, по которой идут к месту).")]
-        public Sprite Icon;
+        [HideInInspector] public Sprite Sprite;
+        [Tooltip("Иконки метки места на карте игры (до 10) — кнопка, по которой идут к месту.")]
+        public List<Sprite> Icons = new List<Sprite>();
+        [HideInInspector] public Sprite Icon;
         [Range(0.2f, 4f)] public float SizeHexes = 1f;
         public Color Tint = Color.white;
 
@@ -292,10 +367,22 @@ namespace KingdomSurvival.WorldMapVisual
             return Variants.Where(sprite => sprite != null).ElementAt(index);
         }
 
+        public Sprite PickIcon(string key) => WorldMapArtStyle.PickStable(Icons, key);
+
+        public bool NormalizePools()
+        {
+            bool changed = WorldMapArtStyle.Absorb(ref Sprite, ref Variants);
+            changed |= WorldMapArtStyle.Absorb(ref Icon, ref Icons);
+            changed |= WorldMapArtStyle.Trim(Variants);
+            changed |= WorldMapArtStyle.Trim(Icons);
+            return changed;
+        }
+
         public WorldMapLandmarkArt Clone()
         {
             WorldMapLandmarkArt copy = (WorldMapLandmarkArt)MemberwiseClone();
             copy.Variants = new List<Sprite>(Variants ?? new List<Sprite>());
+            copy.Icons = new List<Sprite>(Icons ?? new List<Sprite>());
             return copy;
         }
     }

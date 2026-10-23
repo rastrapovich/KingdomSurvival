@@ -48,7 +48,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 return "Папка мастерской не найдена: " + Folder;
             DialogueDatabaseAsset dialogues = LoadDialogues();
             Dictionary<string, string> media = QuestWorkshopMedia.Export(Folder, dialogues);
-            string json = QuestWorkshopImporter.BuildSnapshotJson(dialogues, LoadEncounters(), LoadFlags(), QuestWorkshopImporter.ReadGitCommit(ProjectRoot), media);
+            string json = QuestWorkshopImporter.BuildSnapshotJson(dialogues, LoadEncounters(), LoadFlags(), QuestWorkshopImporter.ReadGitCommit(ProjectRoot), media,
+                WorkshopPlaceAssets.LoadProject(dialogues));
             File.WriteAllText(Snapshot, json, new System.Text.UTF8Encoding(false));
             return "Снимок для мастерской обновлён: " + Snapshot;
         }
@@ -67,6 +68,9 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         private readonly HashSet<WorkshopScene> selected = new HashSet<WorkshopScene>();
         private List<WorkshopSpeakerReport> speakerReports = new List<WorkshopSpeakerReport>();
         private readonly HashSet<string> selectedSpeakers = new HashSet<string>(StringComparer.Ordinal);
+        private List<WorkshopPlaceReport> placeReports = new List<WorkshopPlaceReport>();
+        private readonly HashSet<string> selectedPlaces = new HashSet<string>(StringComparer.Ordinal);
+        private WorkshopPlaceReport currentPlace;
         private QuestWorkshopSyncState sync = new QuestWorkshopSyncState();
         private WorkshopSceneReport current;
         private DateTime loadedWriteTime;
@@ -96,6 +100,47 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             Debug.Log(QuestWorkshopPaths.WriteSnapshot());
         }
 
+        // Для -executeMethod: перенести из мастерской всё, что безопасно
+        // переносить без вопроса (новые сцены и правки мастерской, не
+        // тронутые в Unity; места; говорящие), сохранить базы и снимок.
+        // Конфликты и правки Unity не трогаются — они остаются окну.
+        public static void ApplyBatch()
+        {
+            if (!File.Exists(QuestWorkshopPaths.Workspace))
+            {
+                Debug.LogError("Нет файла мастерской: " + QuestWorkshopPaths.Workspace);
+                return;
+            }
+            WorkshopProject loaded = WorkshopProject.Load(QuestWorkshopPaths.Workspace);
+            QuestWorkshopSyncState state = QuestWorkshopSyncState.Load(QuestWorkshopPaths.SyncState);
+            DialogueDatabaseAsset dialogues = QuestWorkshopPaths.LoadDialogues();
+            EncounterDatabaseAsset encounters = QuestWorkshopPaths.LoadEncounters();
+            EncounterFlagRegistryAsset flags = QuestWorkshopPaths.LoadFlags();
+            List<WorkshopSceneReport> list = QuestWorkshopImporter.Analyze(loaded, dialogues, encounters, state);
+            List<WorkshopScene> scenes = list.Where(r => r.AutoTransferable).Select(r => r.Scene).ToList();
+            foreach (WorkshopSceneReport skipped in list.Where(r => r.Transferable && !r.AutoTransferable))
+                Debug.LogWarning("Мастерская квестов: пропущено (решить в окне): " + skipped.Scene.UnityId + " [" + skipped.State + ", " + skipped.Direction + "]");
+            List<WorkshopSpeakerReport> speakers = QuestWorkshopImporter.AnalyzeSpeakers(loaded, dialogues, state).Where(s => s.AutoTransferable).ToList();
+
+            WorkshopImportResult result = QuestWorkshopImporter.Apply(loaded, scenes, dialogues, encounters, flags, state);
+            QuestWorkshopImporter.ApplySpeakers(loaded, speakers, dialogues, result, state);
+            WorkshopPlaceAssets places = WorkshopPlaceAssets.LoadProject(dialogues);
+            List<WorkshopPlace> placeList = QuestWorkshopPlaces.Analyze(loaded, places).Where(r => r.Transferable).Select(r => r.Place).ToList();
+            QuestWorkshopPlaces.Apply(loaded, placeList, places, result);
+            state.Save(QuestWorkshopPaths.SyncState);
+            if (result.Changed)
+            {
+                EditorUtility.SetDirty(dialogues);
+                if (encounters != null)
+                    EditorUtility.SetDirty(encounters);
+                if (flags != null)
+                    EditorUtility.SetDirty(flags);
+                AssetDatabase.SaveAssets();
+            }
+            QuestWorkshopPaths.WriteSnapshot();
+            Debug.Log("Мастерская квестов: перенос (пакетный).\n" + result.Summary());
+        }
+
         // Для -executeMethod: сверить мастерскую с базами и вывести итог в журнал.
         public static void VerifyBatch()
         {
@@ -115,6 +160,11 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             foreach (WorkshopSceneReport report in list.Where(r => r.State == WorkshopSceneState.Changed || r.State == WorkshopSceneState.Errors || r.EncounterState == "изменена"))
                 Debug.Log("Мастерская квестов: " + report.Scene.UnityId + " [" + report.State + ", встреча: " + report.EncounterState + "]\n  " +
                           string.Join("\n  ", report.Differences.Concat(report.Issues.Select(i => i.ToString()))));
+            foreach (WorkshopPlaceReport place in QuestWorkshopPlaces.Analyze(loaded, WorkshopPlaceAssets.LoadProject()))
+                Debug.Log("Мастерская квестов: место " + place.Place.Name + " [" + place.State + "; " + QuestWorkshopPlaces.Describe(place) + "]" +
+                          (place.Differences.Count + place.Issues.Count > 0
+                              ? "\n  " + string.Join("\n  ", place.Differences.Concat(place.Issues.Select(i => i.ToString())))
+                              : string.Empty));
         }
 
         public void CreateGUI()
@@ -224,6 +274,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         {
             project = null;
             reports = new List<WorkshopSceneReport>();
+            placeReports = new List<WorkshopPlaceReport>();
             loadError = string.Empty;
             string path = QuestWorkshopPaths.Workspace;
             if (!Directory.Exists(QuestWorkshopPaths.Folder))
@@ -244,6 +295,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                         sync = QuestWorkshopSyncState.Load(QuestWorkshopPaths.SyncState);
                         reports = QuestWorkshopImporter.Analyze(project, dialogues, QuestWorkshopPaths.LoadEncounters(), sync);
                         speakerReports = QuestWorkshopImporter.AnalyzeSpeakers(project, dialogues, sync);
+                        placeReports = QuestWorkshopPlaces.Analyze(project, WorkshopPlaceAssets.LoadProject(dialogues));
                         sync.Save(QuestWorkshopPaths.SyncState);
                     }
                 }
@@ -264,10 +316,19 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             foreach (WorkshopSpeakerReport speaker in speakerReports)
                 if (keepSpeakers.Contains(speaker.SpeakerId) && speaker.Transferable)
                     selectedSpeakers.Add(speaker.SpeakerId);
+            HashSet<string> keepPlaces = new HashSet<string>(selectedPlaces);
+            selectedPlaces.Clear();
+            foreach (WorkshopPlaceReport place in placeReports)
+                if (keepPlaces.Contains(place.Place.Id) && place.Transferable)
+                    selectedPlaces.Add(place.Place.Id);
             current = current != null ? reports.FirstOrDefault(r => r.Scene.UnityId == current.Scene.UnityId && r.Scene.Id == current.Scene.Id) : null;
+            currentPlace = currentPlace != null ? placeReports.FirstOrDefault(r => r.Place.Id == currentPlace.Place.Id) : null;
             UpdateStatus();
             RebuildList();
-            ShowDetails(current);
+            if (currentPlace != null)
+                ShowPlaceDetails(currentPlace);
+            else
+                ShowDetails(current);
         }
 
         private void UpdateStatus()
@@ -288,6 +349,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             statusLabel.text = $"Проект «{project.Name}» · сохранён {FormatTime(project.SavedAt)} · версия {project.Revision} · историй {project.Quests.Count}\n" +
                                $"К переносу: {pending} · правили в Unity: {unityNewer} · конфликтов: {conflicts} · совпадает: {same} · с ошибками: {errors} · план: {plans}" +
                                (speakerReports.Count > 0 ? $" · говорящих к сверке: {speakerReports.Count}" : string.Empty) +
+                               (placeReports.Count > 0 ? $"\nМеста в игре: {placeReports.Count} · к переносу: {placeReports.Count(r => r.Transferable)} · с ошибками: {placeReports.Count(r => r.HasErrors)}" : string.Empty) +
                                (QuestWorkshopAutoSync.Enabled ? "\nАвтосинхронизация включена: безопасные изменения мастерской переносятся сами." : string.Empty);
         }
 
@@ -350,6 +412,18 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 }
                 listView.Add(speakers);
             }
+            List<WorkshopPlaceReport> places = placeReports.Where(VisiblePlace).ToList();
+            if (places.Count > 0)
+            {
+                Foldout placeFoldout = new Foldout { text = "Места в игре (" + places.Count + ")", value = true };
+                placeFoldout.style.unityFontStyleAndWeight = FontStyle.Bold;
+                foreach (WorkshopPlaceReport place in places)
+                {
+                    placeFoldout.Add(BuildPlaceRow(place));
+                    shown++;
+                }
+                listView.Add(placeFoldout);
+            }
             foreach (IGrouping<string, WorkshopSceneReport> line in lines)
             {
                 Foldout lineFoldout = new Foldout { text = line.Key + " (" + line.Count() + ")", value = true };
@@ -372,7 +446,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             if (shown == 0)
                 listView.Add(new Label(onlyPendingToggle.value ? "Всё совпадает с Unity — переносить нечего." : "Ничего не найдено.") { style = { paddingLeft = 8, paddingTop = 8 } });
 
-            int count = selected.Count + selectedSpeakers.Count;
+            int count = selected.Count + selectedSpeakers.Count + selectedPlaces.Count;
             transferButton.text = count > 0 ? $"Перенести в Unity ({count})" : "Перенести в Unity";
             transferButton.SetEnabled(count > 0);
         }
@@ -421,10 +495,117 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 if (evt.target is Toggle || (evt.target as VisualElement)?.parent is Toggle)
                     return;
                 current = report;
+                currentPlace = null;
                 RebuildList();
                 ShowDetails(report);
             });
             return row;
+        }
+
+        private bool VisiblePlace(WorkshopPlaceReport report)
+        {
+            if (onlyPendingToggle.value && report.State == WorkshopSceneState.Same)
+                return false;
+            string query = (searchField.value ?? string.Empty).Trim();
+            return query.Length == 0 ||
+                   (report.Place.Name + " " + report.Place.Location.WorldId + " " + report.Place.Location.LocalId).IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private VisualElement BuildPlaceRow(WorkshopPlaceReport report)
+        {
+            VisualElement row = new VisualElement
+            {
+                style =
+                {
+                    flexDirection = FlexDirection.Row, alignItems = Align.Center, paddingLeft = 4, paddingTop = 1, paddingBottom = 1,
+                    unityFontStyleAndWeight = FontStyle.Normal
+                }
+            };
+            if (currentPlace == report)
+                row.style.backgroundColor = new Color(0.3f, 0.5f, 0.9f, 0.18f);
+            Toggle toggle = new Toggle { value = selectedPlaces.Contains(report.Place.Id) };
+            toggle.SetEnabled(report.Transferable);
+            toggle.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue)
+                    selectedPlaces.Add(report.Place.Id);
+                else
+                    selectedPlaces.Remove(report.Place.Id);
+                RebuildList();
+            });
+            row.Add(toggle);
+            string stateText = report.State switch
+            {
+                WorkshopSceneState.Errors => "ошибки",
+                WorkshopSceneState.New => "новое",
+                WorkshopSceneState.Changed => "отличается",
+                _ => "совпадает"
+            };
+            Color stateColor = report.State switch
+            {
+                WorkshopSceneState.Errors => ErrorColor,
+                WorkshopSceneState.New => NewColor,
+                WorkshopSceneState.Changed => ChangedColor,
+                _ => SameColor
+            };
+            row.Add(new Label(stateText)
+            {
+                style =
+                {
+                    backgroundColor = stateColor, paddingLeft = 4, paddingRight = 4, marginRight = 6, minWidth = 88,
+                    unityTextAlign = TextAnchor.MiddleCenter, borderTopLeftRadius = 3, borderTopRightRadius = 3,
+                    borderBottomLeftRadius = 3, borderBottomRightRadius = 3
+                }
+            });
+            row.Add(new Label(report.Place.Name) { style = { flexGrow = 1, overflow = Overflow.Hidden } });
+            row.Add(new Label(report.Place.Location.WorldId + (report.Place.Location.LocalEnabled ? " · " + report.Place.Location.LocalId : string.Empty))
+                { style = { color = new Color(0.55f, 0.55f, 0.55f), marginLeft = 6 } });
+            row.RegisterCallback<MouseDownEvent>(evt =>
+            {
+                if (evt.target is Toggle || (evt.target as VisualElement)?.parent is Toggle)
+                    return;
+                currentPlace = report;
+                current = null;
+                RebuildList();
+                ShowPlaceDetails(report);
+            });
+            return row;
+        }
+
+        private void ShowPlaceDetails(WorkshopPlaceReport report)
+        {
+            if (detailView == null)
+                return;
+            detailView.Clear();
+            WorkshopPlaceLocation location = report.Place.Location;
+            detailView.Add(new Label(report.Place.Name) { style = { fontSize = 15, unityFontStyleAndWeight = FontStyle.Bold, paddingTop = 6, whiteSpace = WhiteSpace.Normal } });
+            detailView.Add(new Label("Место карты: " + location.WorldId + " · режим: " + (location.ModeId.Length > 0 ? location.ModeId : "любой") +
+                                     (location.LocalEnabled ? " · исследуемое место: " + location.LocalId : string.Empty))
+                { style = { whiteSpace = WhiteSpace.Normal, marginTop = 4 } });
+            detailView.Add(new Label(QuestWorkshopPlaces.Describe(report)) { style = { whiteSpace = WhiteSpace.Normal, color = new Color(0.6f, 0.6f, 0.6f) } });
+            detailView.Add(new Label("Перенос обновляет содержание (подписи, диалоги, флаги, противники, столкновения); точки, разметку местности, рисунок и свет места правят в Базе локаций — они сохраняются.")
+                { style = { whiteSpace = WhiteSpace.Normal, marginTop = 6 } });
+            if (report.Differences.Count > 0)
+            {
+                detailView.Add(Header("Что изменится в Unity"));
+                foreach (string line in report.Differences)
+                    detailView.Add(Bullet(line));
+            }
+            if (report.Issues.Count > 0)
+            {
+                detailView.Add(Header("Замечания"));
+                foreach (WorkshopIssue issue in report.Issues)
+                {
+                    Label label = Bullet(issue.ToString());
+                    if (issue.Severity == WorkshopIssueSeverity.Error)
+                        label.style.color = new Color(0.95f, 0.45f, 0.4f);
+                    else if (issue.Severity == WorkshopIssueSeverity.Warning)
+                        label.style.color = new Color(0.95f, 0.7f, 0.3f);
+                    detailView.Add(label);
+                }
+            }
+            if (location.LocalEnabled)
+                detailView.Add(new Button(() => EditorApplication.ExecuteMenuItem("Kingdom Survival/База локаций")) { text = "Открыть Базу локаций", style = { marginTop = 10, alignSelf = Align.FlexStart } });
         }
 
         private static string StateText(WorkshopSceneReport report)
@@ -532,12 +713,16 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             foreach (WorkshopSpeakerReport speaker in speakerReports)
                 if (speaker.Transferable && speaker.Direction != WorkshopSyncDirection.Conflict)
                     selectedSpeakers.Add(speaker.SpeakerId);
+            selectedPlaces.Clear();
+            foreach (WorkshopPlaceReport place in placeReports)
+                if (place.Transferable)
+                    selectedPlaces.Add(place.Place.Id);
             RebuildList();
         }
 
         private void Transfer()
         {
-            if (project == null || selected.Count + selectedSpeakers.Count == 0)
+            if (project == null || selected.Count + selectedSpeakers.Count + selectedPlaces.Count == 0)
                 return;
             DialogueDatabaseAsset dialogues = QuestWorkshopPaths.LoadDialogues();
             EncounterDatabaseAsset encounters = QuestWorkshopPaths.LoadEncounters();
@@ -552,10 +737,13 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             int updates = reports.Count(r => selected.Contains(r.Scene) && (r.State == WorkshopSceneState.Changed || r.State == WorkshopSceneState.Conflict));
             int conflicts = reports.Count(r => selected.Contains(r.Scene) && r.State == WorkshopSceneState.Conflict);
             List<WorkshopSpeakerReport> speakers = speakerReports.Where(s => selectedSpeakers.Contains(s.SpeakerId) && s.Transferable).ToList();
+            List<WorkshopPlace> places = placeReports.Where(r => selectedPlaces.Contains(r.Place.Id) && r.Transferable).Select(r => r.Place).ToList();
+            WorkshopPlaceAssets placeAssets = WorkshopPlaceAssets.LoadProject(dialogues);
             if (!EditorUtility.DisplayDialog("Перенести в Unity",
                     $"Сцен к переносу: {scenes.Count} (новых: {scenes.Count - updates}, обновлений: {updates}" +
                     (conflicts > 0 ? $", из них конфликтов: {conflicts} — правки Unity в них будут заменены" : string.Empty) + ")" +
-                    (speakers.Count > 0 ? $"; говорящих: {speakers.Count}" : string.Empty) + ".\n\n" +
+                    (speakers.Count > 0 ? $"; говорящих: {speakers.Count}" : string.Empty) +
+                    (places.Count > 0 ? $"; мест в игре: {places.Count} (База карты, генератор, База локаций — точки и рисунки мест сохранятся)" : string.Empty) + ".\n\n" +
                     "Текст, ответы, проверки и эффекты в базе Unity будут заменены версией мастерской. " +
                     "Иллюстрации, портреты и раскладка графа сохранятся. Отменить можно через Edit → Undo.",
                     "Перенести", "Отмена"))
@@ -566,10 +754,13 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 targets.Add(encounters);
             if (flags != null)
                 targets.Add(flags);
+            if (places.Count > 0)
+                targets.AddRange(placeAssets.Targets());
             Undo.RecordObjects(targets.ToArray(), "Мастерская квестов: перенос в Unity");
 
             WorkshopImportResult result = QuestWorkshopImporter.Apply(project, scenes, dialogues, encounters, flags, sync);
             QuestWorkshopImporter.ApplySpeakers(project, speakers, dialogues, result, sync);
+            QuestWorkshopPlaces.Apply(project, places, placeAssets, result);
             sync.Save(QuestWorkshopPaths.SyncState);
             if (result.Changed)
             {
@@ -581,6 +772,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
 
             selected.Clear();
             selectedSpeakers.Clear();
+            selectedPlaces.Clear();
             Reload();
             resultLabel.text = result.Summary() + (result.Changed ? "\nСнимок для мастерской обновлён." : string.Empty);
             Debug.Log("Мастерская квестов: перенос в Unity.\n" + result.Summary());

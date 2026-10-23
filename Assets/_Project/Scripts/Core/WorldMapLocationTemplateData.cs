@@ -47,6 +47,28 @@ public sealed class WorldMapLocationTemplateData
     public float FixedXPercent;
     public float FixedYPercent;
 
+    // Режим партии (CampaignConfiguration.CrisisId), в котором место
+    // существует; пусто — во всех режимах. Место истории свободной игры не
+    // появляется в авторском мире кризиса и не сдвигает его расстановку.
+    public string ModeId = string.Empty;
+
+    public bool ExistsIn(string modeId) => string.IsNullOrEmpty(ModeId) || ModeId == modeId;
+
+    public static List<WorldMapLocationTemplateData> ForMode(
+        IReadOnlyList<WorldMapLocationTemplateData> templates,
+        string modeId)
+    {
+        if (templates == null)
+            return null;
+        List<WorldMapLocationTemplateData> result = new List<WorldMapLocationTemplateData>();
+        foreach (WorldMapLocationTemplateData template in templates)
+        {
+            if (template != null && template.ExistsIn(modeId))
+                result.Add(template);
+        }
+        return result;
+    }
+
     public LocationData CreateRuntimeLocation()
     {
         LocationData location = new LocationData(

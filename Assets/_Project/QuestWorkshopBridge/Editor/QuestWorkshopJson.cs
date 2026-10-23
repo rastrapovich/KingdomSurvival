@@ -348,6 +348,16 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             }
         }
 
+        public double Num(double fallback = 0)
+        {
+            switch (value)
+            {
+                case double number: return number;
+                case string text when double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out double parsed): return parsed;
+                default: return fallback;
+            }
+        }
+
         public bool Bool(bool fallback = false)
         {
             switch (value)

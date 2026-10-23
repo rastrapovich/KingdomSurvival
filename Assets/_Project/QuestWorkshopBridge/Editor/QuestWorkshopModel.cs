@@ -5,8 +5,9 @@ using System.IO;
 namespace KingdomSurvival.QuestWorkshopBridge.Editor
 {
     // Проект Мастерской квестов (QuestWorkshop/workspace.json) в том объёме,
-    // который нужен для переноса в Unity. Остальные авторские поля (Хроника,
-    // цели, последствия, паспорт истории) остаются в мастерской.
+    // который нужен для переноса в Unity: сцены, люди, сведения и места с
+    // частью «место в игре» (QuestWorkshopPlaces). Остальные авторские поля
+    // (Хроника, цели, последствия, паспорт истории) остаются в мастерской.
     public sealed class WorkshopProject
     {
         public string SavedAt = string.Empty;
@@ -15,6 +16,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public readonly List<WorkshopQuest> Quests = new List<WorkshopQuest>();
         public readonly Dictionary<string, WorkshopPerson> People = new Dictionary<string, WorkshopPerson>(StringComparer.Ordinal);
         public readonly Dictionary<string, WorkshopFact> Facts = new Dictionary<string, WorkshopFact>(StringComparer.Ordinal);
+        public readonly List<WorkshopPlace> Places = new List<WorkshopPlace>();
 
         // Вложенные картинки мастерской: id вложения → data:image/…;base64.
         public readonly Dictionary<string, string> Assets = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -84,6 +86,9 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
 
             foreach (JsonNode quest in workspace["quests"].Items())
                 project.Quests.Add(WorkshopQuest.Read(quest));
+
+            foreach (JsonNode place in workspace["places"].Items())
+                project.Places.Add(WorkshopPlace.Read(place));
 
             foreach (JsonNode asset in root["assets"].Items())
             {

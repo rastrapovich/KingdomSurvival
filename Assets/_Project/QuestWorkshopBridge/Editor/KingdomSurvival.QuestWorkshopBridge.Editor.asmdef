@@ -4,7 +4,12 @@
   "references": [
     "KingdomSurvival.Core",
     "KingdomSurvival.DialogueDatabase",
-    "KingdomSurvival.Encounters"
+    "KingdomSurvival.Encounters",
+    "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.ArtAssetDatabase",
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.UnitDatabase",
+    "KingdomSurvival.WorldMapVisual"
   ],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],

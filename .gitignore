@@ -96,3 +96,6 @@ __pycache__/
 # снимки Unity, резервные копии). По решению пользователя не хранится в git;
 # в git только импортёр Unity (Assets/_Project/QuestWorkshopBridge).
 /QuestWorkshop/
+# Гайд создания квестов и квест-локаций лежит там же и тоже не в git
+# (решение пользователя 23.10.2026).
+/QuestWorkshop/KingdomSurvival_Quest_Guide_RU.md

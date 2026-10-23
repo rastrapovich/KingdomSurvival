@@ -88,12 +88,19 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public readonly List<string> AddedFlags = new List<string>();
         public readonly List<string> AddedEncounters = new List<string>();
         public readonly List<string> UpdatedEncounters = new List<string>();
+        public readonly List<string> AddedMapLocations = new List<string>();
+        public readonly List<string> UpdatedMapLocations = new List<string>();
+        public readonly List<string> AddedLandmarks = new List<string>();
+        public readonly List<string> UpdatedLandmarks = new List<string>();
+        public readonly List<string> AddedLocalLocations = new List<string>();
+        public readonly List<string> UpdatedLocalLocations = new List<string>();
         public readonly List<string> Skipped = new List<string>();
         public readonly List<string> ValidationIssues = new List<string>();
 
         public bool Changed =>
             AddedDialogues.Count + UpdatedDialogues.Count + AddedSpeakers.Count + UpdatedSpeakers.Count + AddedFlags.Count +
-            AddedEncounters.Count + UpdatedEncounters.Count > 0;
+            AddedEncounters.Count + UpdatedEncounters.Count + AddedMapLocations.Count + UpdatedMapLocations.Count +
+            AddedLandmarks.Count + UpdatedLandmarks.Count + AddedLocalLocations.Count + UpdatedLocalLocations.Count > 0;
 
         public string Summary()
         {
@@ -105,6 +112,12 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             Append(text, "Новые флаги реестра", AddedFlags);
             Append(text, "Новые встречи", AddedEncounters);
             Append(text, "Обновлены встречи", UpdatedEncounters);
+            Append(text, "Новые места карты", AddedMapLocations);
+            Append(text, "Обновлены места карты", UpdatedMapLocations);
+            Append(text, "Новые правила генератора карты", AddedLandmarks);
+            Append(text, "Обновлены правила генератора карты", UpdatedLandmarks);
+            Append(text, "Новые исследуемые места", AddedLocalLocations);
+            Append(text, "Обновлены исследуемые места", UpdatedLocalLocations);
             Append(text, "Пропущены", Skipped);
             Append(text, "Проверка базы диалогов", ValidationIssues);
             return text.Length == 0 ? "Изменений нет." : text.ToString().TrimEnd();
@@ -501,7 +514,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             EncounterDatabaseAsset encounters,
             EncounterFlagRegistryAsset flags,
             string commit,
-            Dictionary<string, string> media = null)
+            Dictionary<string, string> media = null,
+            WorkshopPlaceAssets places = null)
         {
             StringBuilder json = new StringBuilder();
             json.Append("{\"format\":\"ks-unity-snapshot\",\"version\":1");
@@ -512,6 +526,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             AppendArray(json, "flags", flags != null ? (IEnumerable<object>)flags.Flags : Array.Empty<object>());
             AppendArray(json, "encounters", encounters != null ? (IEnumerable<object>)encounters.Encounters : Array.Empty<object>());
             AppendArray(json, "pools", encounters != null ? (IEnumerable<object>)encounters.Pools : Array.Empty<object>());
+            if (places != null)
+                QuestWorkshopPlaces.AppendSnapshot(json, places);
             Dictionary<string, object> mediaMap = new Dictionary<string, object>(StringComparer.Ordinal);
             if (media != null)
                 foreach (KeyValuePair<string, string> pair in media)

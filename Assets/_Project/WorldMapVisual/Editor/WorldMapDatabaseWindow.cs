@@ -818,6 +818,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 EditorGUILayout.PropertyField(
                     location.FindPropertyRelative("initiallyDiscovered"),
                     new GUIContent("Сразу обнаружена"));
+                EditorGUILayout.PropertyField(
+                    location.FindPropertyRelative("modeId"),
+                    new GUIContent("Только в режиме", "ID режима партии (например freeplay.home_region). Пусто — место есть во всех режимах."));
 
                 SerializedProperty modeProp = location.FindPropertyRelative("mode");
                 EditorGUILayout.PropertyField(modeProp, new GUIContent("Placement Mode"));
@@ -914,6 +917,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             location.FindPropertyRelative("initiallyDiscovered").boolValue = false;
             location.FindPropertyRelative("initiallyVisibleOnMap").boolValue = true;
             location.FindPropertyRelative("spawnSlotId").stringValue = string.Empty;
+            location.FindPropertyRelative("modeId").stringValue = string.Empty;
             location.FindPropertyRelative("requiredSlotTags").ClearArray();
             location.FindPropertyRelative("mode").enumValueIndex = (int)WorldMapPlacementMode.Anchored;
             location.FindPropertyRelative("fixedXPercent").floatValue = 50f;

@@ -5,6 +5,11 @@
     "KingdomSurvival.Core",
     "KingdomSurvival.DialogueDatabase",
     "KingdomSurvival.Encounters",
+    "KingdomSurvival.BattlefieldDatabase",
+    "KingdomSurvival.ArtAssetDatabase",
+    "KingdomSurvival.BattleSandbox.Runtime",
+    "KingdomSurvival.UnitDatabase",
+    "KingdomSurvival.WorldMapVisual",
     "KingdomSurvival.QuestWorkshopBridge.Editor"
   ],
   "includePlatforms": ["Editor"],

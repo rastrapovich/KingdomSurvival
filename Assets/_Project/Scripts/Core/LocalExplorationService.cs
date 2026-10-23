@@ -417,6 +417,13 @@ public static class LocalExplorationService
             !location.ResolvedEncounterIds.Contains(result.EncounterId))
             location.ResolvedEncounterIds.Add(result.EncounterId);
 
+        // Флаг исчерпания ставит сама победа: объекты места, открытые этим
+        // флагом, появляются без кода истории (место из Мастерской квестов).
+        LocalEncounterDefinition resolved = definition?.FindEncounter(result.EncounterId);
+        if (result.Outcome == CampaignBattleOutcome.Victory && !string.IsNullOrEmpty(resolved?.ResolvedFlag) &&
+            state.Narrative != null)
+            state.Narrative.SetFlag(resolved.ResolvedFlag);
+
         // Отряд: выжившие — где стояли; при отходе — к безопасной точке
         // (точки без наложения расставит слой места).
         LocalExplorationStateData data = Data(state);

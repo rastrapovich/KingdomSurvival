@@ -6,6 +6,29 @@ using NUnit.Framework;
 // сервис с явными режимами Fixed/Anchored/Temporary.
 public class WorldMapPopulationServiceTests
 {
+    // Место истории одного режима (например, свободной игры из Мастерской
+    // квестов) не попадает в авторский мир другого режима.
+    [Test]
+    public void CreateCampaign_LeavesModeOnlyLocationsOutOfOtherModes()
+    {
+        List<WorldMapLocationTemplateData> templates = WorldMapLocationDefaults.Create().ToList();
+        templates.Add(new WorldMapLocationTemplateData
+        {
+            Id = "test.freeplay_only",
+            Name = "Только свободная игра",
+            Threat = "неизвестна",
+            InitiallyVisibleOnMap = true,
+            ModeId = CampaignStartOptions.FreePlayId
+        });
+
+        GameState crisis = new CampaignSetup { WorldSeed = 7 }.CreateCampaign(templates);
+
+        Assert.IsNull(crisis.FindLocation("test.freeplay_only"));
+        Assert.IsNotNull(crisis.FindLocation("ruins"), "Места без режима есть везде.");
+        Assert.IsTrue(WorldMapLocationTemplateData.ForMode(templates, CampaignStartOptions.FreePlayId).Any(t => t.Id == "test.freeplay_only"));
+        Assert.AreEqual(templates.Count - 1, WorldMapLocationTemplateData.ForMode(templates, crisis.Configuration.CrisisId).Count);
+    }
+
     [Test]
     public void Populate_PlacesFixedLocationAtExactCoordinatesRegardlessOfSeed()
     {

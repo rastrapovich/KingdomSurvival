@@ -139,7 +139,7 @@ public sealed class CampaignSetup
         }
 
         GameState state = new GameState();
-        state.CreateNewGame(WorldSeed, locationTemplates, worldDefinition);
+        state.CreateNewGame(WorldSeed, WorldMapLocationTemplateData.ForMode(locationTemplates, CrisisId), worldDefinition);
         if (generated)
         {
             state.GeneratedMap = generatedMap;

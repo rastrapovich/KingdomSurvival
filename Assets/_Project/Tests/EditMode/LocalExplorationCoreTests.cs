@@ -13,6 +13,7 @@ public sealed class LocalExplorationCoreTests
     private const string TestLocationId = "test.local.cave";
     private const string TestWorldLocationId = "test.world.cave";
     private const string EncounterId = "test.cave.lair";
+    private const string LairClearedFlag = "test.cave.lair_cleared";
 
     [SetUp]
     public void SetUp()
@@ -46,7 +47,8 @@ public sealed class LocalExplorationCoreTests
             BattleIdPrefix = "test.battle.cave.",
             AllowRetreat = true,
             TriggerArea = new LocalAreaData(1100, 300, 100, 500),
-            RetreatPoint = new LocalPointData(400, 540)
+            RetreatPoint = new LocalPointData(400, 540),
+            ResolvedFlag = LairClearedFlag
         };
         cave.Encounters.Add(lair);
         return cave;
@@ -170,6 +172,7 @@ public sealed class LocalExplorationCoreTests
         Assert.AreEqual(CampaignBattleApplyStatus.AlreadyApplied, CampaignBattleBridge.ApplyResult(state, result, new List<string>()));
         Assert.AreEqual(experience, state.Progression.People.Sum(p => p.Experience), "Повтор не начисляет опыт.");
 
+        Assert.IsTrue(state.Narrative.HasFlag(LairClearedFlag), "Победа ставит флаг исчерпания столкновения.");
         Assert.IsEmpty(LocalExplorationService.AliveEnemies(state, cave), "Побеждённые не появляются снова.");
         Assert.IsFalse(LocalExplorationService.IsEncounterActive(state, cave, cave.FindEncounter(EncounterId)));
         Assert.IsNull(LocalExplorationService.EncounterAt(state, cave, 1150, 540), "Зона угрозы больше не начинает бой.");
@@ -210,6 +213,7 @@ public sealed class LocalExplorationCoreTests
         CampaignBattleBridge.ApplyResult(state, result, new List<string>());
 
         Assert.AreEqual(supply - CampaignBattleBridge.RetreatSupplyLoss, state.ArmySupply, "Цена отхода — один раз.");
+        Assert.IsFalse(state.Narrative.HasFlag(LairClearedFlag), "Отход не исчерпывает столкновение.");
         LocalActorStateData heroActor = state.LocalExploration.Party.First(a => a.ActorId == hero);
         Assert.AreEqual(400, heroActor.X, "Отряд у безопасной точки.");
         Assert.AreEqual(540, heroActor.Y);

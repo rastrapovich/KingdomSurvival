@@ -23,6 +23,10 @@ namespace KingdomSurvival.WorldMapVisual
         [SerializeField] private bool initiallyVisibleOnMap = true;
         [SerializeField] private string spawnSlotId = string.Empty;
 
+        // Режим партии, в котором место существует (ID режима, например
+        // свободной игры); пусто — во всех режимах.
+        [SerializeField] private string modeId = string.Empty;
+
         // AM-07.5: набор тегов, которым должен обладать слот появления
         // (WorldMapWorldDefinitionAsset.SpawnSlotEntry.Tags), чтобы Anchored-
         // локация могла в него попасть. Пусто — старое поведение (любой слот
@@ -46,6 +50,7 @@ namespace KingdomSurvival.WorldMapVisual
         public bool InitiallyDiscovered => initiallyDiscovered;
         public bool InitiallyVisibleOnMap => initiallyVisibleOnMap;
         public string SpawnSlotId => spawnSlotId;
+        public string ModeId => modeId;
         public IReadOnlyList<string> RequiredSlotTags => requiredSlotTags;
         public WorldMapPlacementMode Mode => mode;
         public float FixedXPercent => fixedXPercent;
@@ -72,7 +77,8 @@ namespace KingdomSurvival.WorldMapVisual
                 RequiredSlotTags = new List<string>(requiredSlotTags ?? new List<string>()),
                 Mode = mode,
                 FixedXPercent = fixedXPercent,
-                FixedYPercent = fixedYPercent
+                FixedYPercent = fixedYPercent,
+                ModeId = modeId ?? string.Empty
             };
         }
     }

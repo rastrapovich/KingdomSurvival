@@ -88,6 +88,7 @@ namespace KingdomSurvival.FreePlay
             reports.AddRange(FreePlayMillerStory.Refresh(state));
             reports.AddRange(FreePlayMineStory.Refresh(state));
             reports.AddRange(FreePlayKurganStory.Refresh(state));
+            reports.AddRange(FreePlayCaveStory.Refresh(state));
             reports.AddRange(FreePlaySummary.Refresh(state));
             return reports;
         }
@@ -184,6 +185,9 @@ namespace KingdomSurvival.FreePlay
             JournalGoalViewData kurgan = FreePlayKurganStory.BuildGoal(state);
             if (kurgan != null)
                 goals.Add(kurgan);
+            JournalGoalViewData cave = FreePlayCaveStory.BuildGoal(state);
+            if (cave != null)
+                goals.Add(cave);
             foreach (LocationData location in state.Locations)
             {
                 if (location == null || location.IsWaypoint || !location.IsVisibleOnMap || !location.IsDiscovered)
@@ -191,7 +195,7 @@ namespace KingdomSurvival.FreePlay
                 // Хутор ведёт своя история («Уголь для Лады»); место без
                 // осмотра (Чёрный лес) — только через историю.
                 if (location.Id == FreePlayCoalStory.LocationId || location.Id == FreePlayMineStory.LocationId ||
-                    location.Id == FreePlayKurganStory.LocationId ||
+                    location.Id == FreePlayKurganStory.LocationId || location.Id == FreePlayCaveStory.LocationId ||
                     location.ExplorationHours <= 0.0)
                     continue;
                 goals.Add(BuildPlaceGoal(location));

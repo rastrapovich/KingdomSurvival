@@ -147,6 +147,27 @@ namespace KingdomSurvival.QuestWorkshopBridge.Tests
         }
 
         [Test]
+        public void InitialPoints_AreUsedOnlyWhenTheRecordIsCreated()
+        {
+            string withPoints = Workspace
+                .Replace("\"kind\": \"Inspect\", \"text\": \"Тихо.\"", "\"kind\": \"Inspect\", \"text\": \"Тихо.\", \"point\": { \"x\": 1500, \"y\": 600 }")
+                .Replace("{ \"id\": \"cave.lair\", \"allowRetreat\": true,", "{ \"id\": \"cave.lair\", \"area\": { \"x\": 900, \"y\": 300, \"width\": 120, \"height\": 480 }, \"retreat\": { \"x\": 450, \"y\": 540 }, \"allowRetreat\": true,")
+                .Replace("\"battlefieldId\": \"old_mine_01\",", "\"battlefieldId\": \"old_mine_01\", \"entrance\": { \"x\": 260, \"y\": 520, \"label\": \"Лаз\" },");
+            WorkshopProject project = Project(withPoints);
+            QuestWorkshopPlaces.Apply(project, project.Places, assets, new WorkshopImportResult());
+            LocalLocationDefinition place = locals.locations.Single();
+            Assert.That(place.FindObject("cave.depth").Point.X, Is.EqualTo(1500f));
+            Assert.That(place.FindEncounter("cave.lair").TriggerArea.X, Is.EqualTo(900f));
+            Assert.That(place.FindEncounter("cave.lair").RetreatPoint.X, Is.EqualTo(450f));
+            Assert.That(place.Entrances[0].Label, Is.EqualTo("Лаз"));
+            Assert.That(place.Entrances[0].Point.X, Is.EqualTo(260f));
+
+            WorkshopProject moved = Project(withPoints.Replace("\"x\": 1500, \"y\": 600", "\"x\": 700, \"y\": 600"));
+            QuestWorkshopPlaces.Apply(moved, moved.Places, assets, new WorkshopImportResult());
+            Assert.That(locals.locations.Single().FindObject("cave.depth").Point.X, Is.EqualTo(1500f), "Точку существующего объекта правят в Unity, не мастерская.");
+        }
+
+        [Test]
         public void BrokenReferences_AreErrors_AndAreNotTransferred()
         {
             string broken = Workspace

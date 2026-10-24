@@ -16,7 +16,7 @@ MonoBehaviour:
   settings:
     CanvasWidth: 4160
     CanvasHeight: 2560
-    HexesAcross: 100
+    HexesAcross: 59
     ReliefScaleHexes: 26
     ReliefDetail: 4
     ReliefRoughness: 0.5
@@ -60,6 +60,16 @@ MonoBehaviour:
       LocationId: ruins
       SlotTags: Ruins
       DrawMark: 1
+      Placement: 0
+      Hidden: 1
+      Description: "\u041E\u0441\u0442\u0430\u0442\u043A\u0438 \u0441\u0442\u0435\u043D
+        \u0438\u0437 \u043A\u0430\u043C\u043D\u044F \u0438 \u0431\u0440\u0435\u0432\u043D\u0430,
+        \u0437\u0430\u0440\u043E\u0441\u0448\u0438\u0435 \u0442\u0440\u0430\u0432\u043E\u0439."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 2
+      RewardArmySupply: 2
+      RewardArmyGold: 0
+      Source: "LORE \xA78, \u043A\u0430\u043D\u043E\u043D \xA728.3"
     - Id: mine
       Name: "\u0421\u0442\u0430\u0440\u0430\u044F \u0448\u0430\u0445\u0442\u0430"
       Enabled: 1
@@ -71,6 +81,17 @@ MonoBehaviour:
       LocationId: mine
       SlotTags: Mine, Hills
       DrawMark: 1
+      Placement: 0
+      Hidden: 1
+      Description: "\u0422\u0451\u043C\u043D\u043E\u0435 \u0443\u0441\u0442\u044C\u0435
+        \u0448\u0442\u043E\u043B\u044C\u043D\u0438 \u0432 \u0441\u043A\u043B\u043E\u043D\u0435,
+        \u0440\u044F\u0434\u043E\u043C \u2014 \u043E\u0441\u044B\u043F\u0430\u0432\u0448\u0438\u0439\u0441\u044F
+        \u043E\u0442\u0432\u0430\u043B."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 3
+      RewardArmySupply: 2
+      RewardArmyGold: 0
+      Source: "LORE \xA717.1, \u043A\u0430\u043D\u043E\u043D \xA728.6"
     - Id: deep-forest
       Name: "\u0413\u043B\u0443\u0445\u043E\u0439 \u043B\u0435\u0441"
       Enabled: 1
@@ -82,6 +103,16 @@ MonoBehaviour:
       LocationId: forest
       SlotTags: Forest
       DrawMark: 0
+      Placement: 0
+      Hidden: 1
+      Description: "\u041B\u0435\u0441 \u0441\u0442\u043E\u0438\u0442 \u0441\u0442\u0435\u043D\u043E\u0439,
+        \u0442\u0440\u043E\u043F\u044B \u0442\u0435\u0440\u044F\u044E\u0442\u0441\u044F
+        \u0432 \u0431\u0443\u0440\u0435\u043B\u043E\u043C\u0435."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 2
+      RewardArmySupply: 0
+      RewardArmyGold: 0
+      Source: "\u043A\u0430\u043D\u043E\u043D \xA724.2, LORE \xA723"
     - Id: barrow
       Name: "\u041A\u0443\u0440\u0433\u0430\u043D"
       Enabled: 1
@@ -93,6 +124,16 @@ MonoBehaviour:
       LocationId: 
       SlotTags: Barrow
       DrawMark: 1
+      Placement: 0
+      Hidden: 0
+      Description: "\u0412\u044B\u0441\u043E\u043A\u0438\u0439 \u043D\u0430\u0441\u044B\u043F\u043D\u043E\u0439
+        \u0445\u043E\u043B\u043C, \u043F\u043E\u0440\u043E\u0441\u0448\u0438\u0439
+        \u0442\u0440\u0430\u0432\u043E\u0439."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 1
+      RewardArmySupply: 0
+      RewardArmyGold: 0
+      Source: "LORE \xA78, \xA717.1, \xA728"
     - Id: watermill
       Name: "\u0412\u043E\u0434\u044F\u043D\u0430\u044F \u043C\u0435\u043B\u044C\u043D\u0438\u0446\u0430"
       Enabled: 1
@@ -104,8 +145,284 @@ MonoBehaviour:
       LocationId: 
       SlotTags: Mill, Shore
       DrawMark: 1
+      Placement: 0
+      Hidden: 0
+      Description: "\u041A\u043E\u043B\u0435\u0441\u043E \u043D\u0430 \u043F\u0440\u043E\u0442\u043E\u043A\u0435,
+        \u0441\u0440\u0443\u0431 \u043F\u043E\u0434 \u043D\u0430\u0432\u0435\u0441\u043E\u043C,
+        \u0441\u043A\u0440\u0438\u043F\u0438\u0442 \u0432\u0430\u043B."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 0
+      RewardArmySupply: 0
+      RewardArmyGold: 0
+      Source: "LORE \xA724, \u043A\u0430\u043D\u043E\u043D \xA72.2.1"
+    - Id: cave
+      Name: "\u041F\u0435\u0449\u0435\u0440\u0430"
+      Enabled: 1
+      Count: 2
+      Terrains: 0700000008000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 8
+      LocationId: 
+      SlotTags: Cave, Hills
+      DrawMark: 1
+      Placement: 0
+      Hidden: 1
+      Description: "\u0422\u0451\u043C\u043D\u044B\u0439 \u0432\u0445\u043E\u0434
+        \u0432 \u0441\u043A\u043B\u043E\u043D\u0435. \u0418\u0437\u043D\u0443\u0442\u0440\u0438
+        \u0442\u044F\u043D\u0435\u0442 \u0445\u043E\u043B\u043E\u0434\u043E\u043C
+        \u0438 \u0441\u044B\u0440\u043E\u0441\u0442\u044C\u044E."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 3
+      RewardArmySupply: 2
+      RewardArmyGold: 0
+      Source: "\u043A\u0430\u043D\u043E\u043D \xA728.3, LORE: \u0443\u0431\u0435\u0436\u0438\u0449\u0435"
+    - Id: grove
+      Name: "\u0420\u043E\u0449\u0430"
+      Enabled: 1
+      Count: 2
+      Terrains: 0000000003000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 7
+      LocationId: 
+      SlotTags: Grove
+      DrawMark: 1
+      Placement: 0
+      Hidden: 0
+      Description: "\u0421\u0442\u0430\u0440\u044B\u0435 \u0434\u0435\u0440\u0435\u0432\u044C\u044F
+        \u0441\u0442\u043E\u044F\u0442 \u0442\u0435\u0441\u043D\u044B\u043C \u043A\u0440\u0443\u0433\u043E\u043C,
+        \u043F\u043E\u0434\u043B\u0435\u0441\u043A\u0430 \u043F\u043E\u0447\u0442\u0438
+        \u043D\u0435\u0442."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 1
+      RewardArmySupply: 0
+      RewardArmyGold: 0
+      Source: "LORE \xA78, \xA717"
+    - Id: hillfort
+      Name: "\u0421\u0442\u0430\u0440\u043E\u0435 \u0433\u043E\u0440\u043E\u0434\u0438\u0449\u0435"
+      Enabled: 1
+      Count: 1
+      Terrains: 07000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 9
+      LocationId: 
+      SlotTags: Hillfort, Hills
+      DrawMark: 1
+      Placement: 0
+      Hidden: 0
+      Description: "\u041E\u043F\u043B\u044B\u0432\u0448\u0438\u0435 \u0432\u0430\u043B\u044B
+        \u043D\u0430 \u0445\u043E\u043B\u043C\u0435, \u043F\u043E \u0433\u0440\u0435\u0431\u043D\u044E
+        \u2014 \u0441\u043B\u0435\u0434\u044B \u0447\u0430\u0441\u0442\u043E\u043A\u043E\u043B\u0430."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 3
+      RewardArmySupply: 0
+      RewardArmyGold: 10
+      Source: "LORE \xA78, \xA717"
+    - Id: abandoned-village
+      Name: "\u0417\u0430\u0431\u0440\u043E\u0448\u0435\u043D\u043D\u043E\u0435 \u043F\u043E\u0441\u0435\u043B\u0435\u043D\u0438\u0435"
+      Enabled: 1
+      Count: 1
+      Terrains: 0000000003000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 9
+      LocationId: 
+      SlotTags: AbandonedVillage
+      DrawMark: 1
+      Placement: 0
+      Hidden: 0
+      Description: "\u041F\u0443\u0441\u0442\u044B\u0435 \u0441\u0440\u0443\u0431\u044B
+        \u0441 \u043F\u0440\u043E\u0432\u0430\u043B\u0438\u0432\u0448\u0438\u043C\u0438\u0441\u044F
+        \u043A\u0440\u044B\u0448\u0430\u043C\u0438, \u0434\u0432\u043E\u0440\u044B
+        \u0437\u0430\u0440\u043E\u0441\u043B\u0438 \u0431\u0443\u0440\u044C\u044F\u043D\u043E\u043C."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 3
+      RewardArmySupply: 3
+      RewardArmyGold: 0
+      Source: "LORE \xA78, \xA716"
+    - Id: abandoned-yard
+      Name: "\u0417\u0430\u0431\u0440\u043E\u0448\u0435\u043D\u043D\u044B\u0439 \u0434\u0432\u043E\u0440"
+      Enabled: 1
+      Count: 1
+      Terrains: 0000000003000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 7
+      LocationId: 
+      SlotTags: AbandonedYard
+      DrawMark: 1
+      Placement: 0
+      Hidden: 1
+      Description: "\u041E\u0434\u0438\u043D\u043E\u043A\u0438\u0439 \u0434\u0432\u043E\u0440:
+        \u043F\u043E\u043A\u043E\u0441\u0438\u0432\u0448\u0438\u0439\u0441\u044F
+        \u043F\u043B\u0435\u0442\u0435\u043D\u044C, \u0438\u0437\u0431\u0430 \u0431\u0435\u0437
+        \u0434\u0432\u0435\u0440\u0438."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 2
+      RewardArmySupply: 2
+      RewardArmyGold: 0
+      Source: "\u043A\u0430\u043D\u043E\u043D \xA728.3"
+    - Id: sanctuary
+      Name: "\u0421\u0442\u0430\u0440\u043E\u0435 \u0441\u0432\u044F\u0442\u0438\u043B\u0438\u0449\u0435"
+      Enabled: 1
+      Count: 1
+      Terrains: 030000000700000000000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 9
+      LocationId: 
+      SlotTags: Sanctuary
+      DrawMark: 1
+      Placement: 0
+      Hidden: 1
+      Description: "\u041A\u0440\u0443\u0433 \u0438\u0437 \u0432\u0440\u044B\u0442\u044B\u0445
+        \u043A\u0430\u043C\u043D\u0435\u0439 \u0438 \u043F\u043E\u0442\u0435\u043C\u043D\u0435\u0432\u0448\u0438\u0445
+        \u0441\u0442\u043E\u043B\u0431\u043E\u0432."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 2
+      RewardArmySupply: 0
+      RewardArmyGold: 0
+      Source: "LORE \xA78, \xA716"
+    - Id: crossroads
+      Name: "\u041F\u0435\u0440\u0435\u043A\u0440\u0451\u0441\u0442\u043E\u043A"
+      Enabled: 1
+      Count: 2
+      Terrains: 00000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 6
+      LocationId: 
+      SlotTags: Crossroads, Road
+      DrawMark: 1
+      Placement: 1
+      Hidden: 0
+      Description: "\u0417\u0434\u0435\u0441\u044C \u0441\u0445\u043E\u0434\u044F\u0442\u0441\u044F
+        \u0434\u043E\u0440\u043E\u0433\u0438. \u0423 \u043E\u0431\u043E\u0447\u0438\u043D\u044B
+        \u2014 \u0441\u0442\u0430\u0440\u044B\u0439 \u0441\u0442\u043E\u043B\u0431."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 0
+      RewardArmySupply: 0
+      RewardArmyGold: 0
+      Source: "LORE \xA78, \xA729"
+    - Id: lair
+      Name: "\u041B\u0435\u0441\u043D\u043E\u0435 \u043B\u043E\u0433\u043E\u0432\u043E"
+      Enabled: 1
+      Count: 2
+      Terrains: 03000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 9
+      LocationId: 
+      SlotTags: Lair, Forest
+      DrawMark: 1
+      Placement: 0
+      Hidden: 1
+      Description: "\u041F\u043E\u0434 \u0432\u044B\u0432\u043E\u0440\u043E\u0447\u0435\u043D\u043D\u044B\u043C\u0438
+        \u043A\u043E\u0440\u043D\u044F\u043C\u0438 \u2014 \u043D\u043E\u0440\u0430,
+        \u0432\u043E\u043A\u0440\u0443\u0433 \u043E\u0431\u0433\u043B\u043E\u0434\u0430\u043D\u043D\u044B\u0435
+        \u043A\u043E\u0441\u0442\u0438."
+      Threat: "\u0432\u044B\u0441\u043E\u043A\u0430\u044F"
+      ExplorationHours: 1
+      RewardArmySupply: 0
+      RewardArmyGold: 0
+      Source: "\u043A\u0430\u043D\u043E\u043D \xA728.3, BESTIARY \xA710"
+    - Id: spring
+      Name: "\u0420\u043E\u0434\u043D\u0438\u043A"
+      Enabled: 1
+      Count: 1
+      Terrains: 000000000300000007000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 6
+      LocationId: 
+      SlotTags: Spring
+      DrawMark: 1
+      Placement: 0
+      Hidden: 1
+      Description: "\u0418\u0437-\u043F\u043E\u0434 \u043A\u0430\u043C\u043D\u044F
+        \u0431\u044C\u0451\u0442 \u0445\u043E\u043B\u043E\u0434\u043D\u0430\u044F
+        \u0432\u043E\u0434\u0430, \u0432\u043E\u043A\u0440\u0443\u0433 \u0432\u044B\u043B\u043E\u0436\u0435\u043D\u044B
+        \u043A\u0430\u043C\u043D\u0438."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 1
+      RewardArmySupply: 0
+      RewardArmyGold: 0
+      Source: "LORE \xA766.4"
+    - Id: hunters-hut
+      Name: "\u041E\u0445\u043E\u0442\u043D\u0438\u0447\u044C\u044F \u0445\u0438\u0436\u0438\u043D\u0430"
+      Enabled: 1
+      Count: 1
+      Terrains: 03000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 7
+      LocationId: 
+      SlotTags: Hut, Forest
+      DrawMark: 1
+      Placement: 0
+      Hidden: 1
+      Description: "\u041D\u0438\u0437\u043A\u0430\u044F \u0438\u0437\u0431\u0443\u0448\u043A\u0430
+        \u043F\u043E\u0434 \u0435\u043B\u044F\u043C\u0438, \u0443 \u0441\u0442\u0435\u043D\u044B
+        \u2014 \u043A\u043E\u043B\u043E\u0434\u0430 \u0434\u043B\u044F \u0440\u0430\u0437\u0434\u0435\u043B\u043A\u0438."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 1
+      RewardArmySupply: 1
+      RewardArmyGold: 0
+      Source: "LORE: \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u043E\u0435
+        \u043C\u0435\u0441\u0442\u043E \u043A\u0430\u043A \u0437\u043D\u0430\u043D\u0438\u0435
+        \u0440\u0435\u0433\u0438\u043E\u043D\u0430"
+    - Id: apiary
+      Name: "\u041F\u0430\u0441\u0435\u043A\u0430"
+      Enabled: 1
+      Count: 1
+      Terrains: 0000000003000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 4
+      LocationId: 
+      SlotTags: Apiary
+      DrawMark: 1
+      Placement: 0
+      Hidden: 1
+      Description: "\u041A\u043E\u043B\u043E\u0434\u044B-\u0443\u043B\u044C\u0438
+        \u043D\u0430 \u043F\u043E\u043B\u044F\u043D\u0435 \u0443 \u043B\u0435\u0441\u0430,
+        \u0433\u0443\u0434\u044F\u0442 \u043F\u0447\u0451\u043B\u044B."
+      Threat: "\u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u0430"
+      ExplorationHours: 1
+      RewardArmySupply: 1
+      RewardArmyGold: 0
+      Source: "LORE: \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u043E\u0435
+        \u043C\u0435\u0441\u0442\u043E \u043A\u0430\u043A \u0437\u043D\u0430\u043D\u0438\u0435
+        \u0440\u0435\u0433\u0438\u043E\u043D\u0430"
+    - Id: knocking_cave
+      Name: "\u041F\u0435\u0449\u0435\u0440\u0430 \u0437\u0430 \u0437\u0430\u0432\u0430\u043B\u043E\u043C"
+      Enabled: 1
+      Count: 1
+      Terrains: 0700000008000000
+      NearWater: 0
+      NearVillage: 0
+      MinDistanceHexes: 9
+      LocationId: knocking_cave
+      SlotTags: Cave
+      DrawMark: 1
+      Placement: 0
+      Hidden: 0
+      Description: "\u0423\u0441\u0442\u044C\u0435 \u043F\u0435\u0449\u0435\u0440\u044B
+        \u0437\u0430\u043B\u043E\u0436\u0435\u043D\u043E \u043A\u0430\u043C\u043D\u0435\u043C
+        \u2014 \u043F\u043B\u043E\u0442\u043D\u043E, \u0449\u0435\u043B\u044C \u0432
+        \u0449\u0435\u043B\u044C, \u0431\u0443\u0434\u0442\u043E \u0438\u0437\u043D\u0443\u0442\u0440\u0438.
+        \u0418\u0437 \u0433\u043B\u0443\u0431\u0438\u043D\u044B \u043C\u0435\u0440\u043D\u043E
+        \u0441\u0442\u0443\u0447\u0430\u0442: \u0442\u0443\u043A \u2014 \u0442\u0443\u043A-\u0442\u0443\u043A."
+      Threat: "\u0441\u0440\u0435\u0434\u043D\u044F\u044F"
+      ExplorationHours: 0
+      RewardArmySupply: 0
+      RewardArmyGold: 0
+      Source: "\u041C\u0430\u0441\u0442\u0435\u0440\u0441\u043A\u0430\u044F \u043A\u0432\u0435\u0441\u0442\u043E\u0432:
+        place_knocking_cave"
   art:
-    Resolution: 0.5
+    Resolution: 1
     BaseColor: {r: 0.6, g: 0.58, b: 0.46, a: 1}
     BasePattern: {fileID: 0}
     BasePatternTileHexes: 8
@@ -201,6 +518,9 @@ MonoBehaviour:
     ShoreBand: 0.25
     DrawTrees: 1
     TreeSprites: []
+    ConiferSprites: []
+    LeafSprites: []
+    ReedSprites: []
     TreesPerHex: 4
     TreeSizeHexes: 0.55
     TreeSizeJitter: 0.3
@@ -215,6 +535,7 @@ MonoBehaviour:
     HillColor: {r: 0.55, g: 0.5, b: 0.36, a: 1}
     DrawMountains: 1
     MountainSprites: []
+    CliffSprites: []
     MountainsPerHex: 0.9
     MountainSizeHexes: 1.3
     MountainLightColor: {r: 0.66, g: 0.63, b: 0.58, a: 1}
@@ -225,14 +546,139 @@ MonoBehaviour:
     RoadDashed: 0
     TrailColor: {r: 0.45, g: 0.38, b: 0.27, a: 1}
     TrailWidthHexes: 0.07
-    TrailDashed: 1
+    TrailDashed: 0
     BridgeColor: {r: 0.42, g: 0.3, b: 0.2, a: 1}
+    BridgeSprites: []
+    BridgeSprite: {fileID: 0}
     VillageSprites: []
     VillageSizeHexes: 1.8
     WallColor: {r: 0.55, g: 0.45, b: 0.33, a: 1}
     RoofColor: {r: 0.36, g: 0.27, b: 0.19, a: 1}
     MarkStart: 1
-    Landmarks: []
+    StartSprites: []
+    VillageIcons: []
+    StartSprite: {fileID: 0}
+    VillageIcon: {fileID: 0}
+    Landmarks:
+    - RuleId: ruins
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: mine
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: deep-forest
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: barrow
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: watermill
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: cave
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: grove
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: hillfort
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: abandoned-village
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: abandoned-yard
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: sanctuary
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: crossroads
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: lair
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: spring
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: hunters-hut
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: apiary
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
+    - RuleId: knocking_cave
+      Variants: []
+      Sprite: {fileID: 0}
+      Icons: []
+      Icon: {fileID: 0}
+      SizeHexes: 1.4
+      Tint: {r: 1, g: 1, b: 1, a: 1}
     LandmarkSizeHexes: 1.4
     LandmarkColor: {r: 0.5, g: 0.47, b: 0.42, a: 1}
     Brightness: 0
@@ -245,3 +691,4 @@ MonoBehaviour:
     PaperTileHexes: 20
     PaperStrength: 0.5
   presets: []
+  landmarkCatalogVersion: 2

@@ -68,6 +68,10 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public readonly List<WorkshopLocalObject> Objects = new List<WorkshopLocalObject>();
         public readonly List<WorkshopLocalEnemy> Enemies = new List<WorkshopLocalEnemy>();
         public readonly List<WorkshopLocalEncounter> Encounters = new List<WorkshopLocalEncounter>();
+        // Начальные точки — только при создании записи в Unity; дальше точки
+        // правят в Базе локаций, перенос их не трогает.
+        public LocalPointData EntrancePoint;
+        public string EntranceLabel = string.Empty;
 
         public static WorkshopPlaceLocation Read(JsonNode node)
         {
@@ -110,7 +114,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                     OnceOnly = item["onceOnly"].Bool(true),
                     RequiresFlag = item["requiresFlag"].Str().Trim(),
                     HiddenWhenFlag = item["hiddenWhenFlag"].Str().Trim(),
-                    InteractRadius = (float)item["interactRadius"].Num()
+                    InteractRadius = (float)item["interactRadius"].Num(),
+                    Point = ReadPoint(item["point"])
                 });
             foreach (JsonNode item in local["enemies"].Items())
                 location.Enemies.Add(new WorkshopLocalEnemy
@@ -118,7 +123,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                     InstanceId = item["instanceId"].Str().Trim(),
                     UnitTypeId = item["unitTypeId"].Str().Trim(),
                     Level = Math.Max(1, item["level"].Int(1)),
-                    EncounterId = item["encounterId"].Str().Trim()
+                    EncounterId = item["encounterId"].Str().Trim(),
+                    Point = ReadPoint(item["point"])
                 });
             foreach (JsonNode item in local["encounters"].Items())
                 location.Encounters.Add(new WorkshopLocalEncounter
@@ -128,9 +134,29 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                     Intro = item["intro"].Str().Trim(),
                     AllowRetreat = item["allowRetreat"].Bool(true),
                     PreparedCompanionId = item["preparedCompanionId"].Str().Trim(),
-                    ResolvedFlag = item["resolvedFlag"].Str().Trim()
+                    ResolvedFlag = item["resolvedFlag"].Str().Trim(),
+                    Area = ReadArea(item["area"]),
+                    Retreat = ReadPoint(item["retreat"])
                 });
+            JsonNode entrance = local["entrance"];
+            location.EntrancePoint = ReadPoint(entrance);
+            location.EntranceLabel = entrance["label"].Str();
             return location;
+        }
+
+        // Начальная точка {x, y} в пикселях рисунка места; нет — null.
+        private static LocalPointData ReadPoint(JsonNode node)
+        {
+            return node.IsObject && node.Has("x") && node.Has("y")
+                ? new LocalPointData((float)node["x"].Num(), (float)node["y"].Num())
+                : null;
+        }
+
+        private static LocalAreaData ReadArea(JsonNode node)
+        {
+            return node.IsObject && node.Has("x") && node.Has("y") && node["width"].Num() > 0 && node["height"].Num() > 0
+                ? new LocalAreaData((float)node["x"].Num(), (float)node["y"].Num(), (float)node["width"].Num(), (float)node["height"].Num())
+                : null;
         }
     }
 
@@ -147,6 +173,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public string RequiresFlag = string.Empty;
         public string HiddenWhenFlag = string.Empty;
         public float InteractRadius;
+        public LocalPointData Point;
     }
 
     public sealed class WorkshopLocalEnemy
@@ -155,6 +182,7 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public string UnitTypeId = string.Empty;
         public int Level = 1;
         public string EncounterId = string.Empty;
+        public LocalPointData Point;
     }
 
     public sealed class WorkshopLocalEncounter
@@ -166,6 +194,8 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
         public bool AllowRetreat = true;
         public string PreparedCompanionId = string.Empty;
         public string ResolvedFlag = string.Empty;
+        public LocalAreaData Area;
+        public LocalPointData Retreat;
     }
 
     // Базы Unity, в которые переносится место. Окно передаёт ассеты проекта,
@@ -593,6 +623,13 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             rule.MinDistanceHexes = location.MinDistanceHexes > 0 ? location.MinDistanceHexes : 9f;
             rule.SlotTags = location.SlotTags;
             rule.DrawMark = location.DrawMark;
+            // «Место в игре» правила — те же значения, что у места карты
+            // (связанное место берёт их из Базы карты; правило — для согласия).
+            rule.Hidden = !location.Visible;
+            rule.Description = MapDescription(place);
+            rule.Threat = MapThreat(place);
+            rule.ExplorationHours = 0.0;
+            rule.Source = "Мастерская квестов: " + place.Id;
             return rule;
         }
 
@@ -623,9 +660,9 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 LocalObjectDefinition target = location.FindObject(item.Id);
                 if (target == null)
                 {
-                    target = new LocalObjectDefinition { Id = item.Id, Point = layout.NextObjectPoint() };
+                    target = new LocalObjectDefinition { Id = item.Id, Point = item.Point != null ? Copy(item.Point) : layout.NextObjectPoint() };
                     location.Objects.Add(target);
-                    notes?.Add("Объект «" + item.Id + "» — новый" + layout.Hint + ".");
+                    notes?.Add("Объект «" + item.Id + "» — новый" + (item.Point != null ? ", точка " + item.Point : layout.Hint) + ".");
                 }
                 target.Label = item.Label;
                 target.ActionLabel = item.ActionLabel;
@@ -646,6 +683,10 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 {
                     target = new LocalEncounterDefinition { Id = item.Id };
                     layout.PlaceEncounter(target);
+                    if (item.Area != null)
+                        target.TriggerArea = new LocalAreaData(item.Area.X, item.Area.Y, item.Area.Width, item.Area.Height);
+                    if (item.Retreat != null)
+                        target.RetreatPoint = Copy(item.Retreat);
                     location.Encounters.Add(target);
                     notes?.Add("Столкновение «" + item.Id + "» — новое" + layout.Hint + ".");
                 }
@@ -661,7 +702,11 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
                 LocalEnemyDefinition target = location.FindEnemy(item.InstanceId);
                 if (target == null)
                 {
-                    target = new LocalEnemyDefinition { InstanceId = item.InstanceId, Point = layout.NextEnemyPoint(location.FindEncounter(item.EncounterId)) };
+                    target = new LocalEnemyDefinition
+                    {
+                        InstanceId = item.InstanceId,
+                        Point = item.Point != null ? Copy(item.Point) : layout.NextEnemyPoint(location.FindEncounter(item.EncounterId))
+                    };
                     location.Enemies.Add(target);
                     notes?.Add("Противник «" + item.InstanceId + "» — новый" + layout.Hint + ".");
                 }
@@ -700,11 +745,13 @@ namespace KingdomSurvival.QuestWorkshopBridge.Editor
             location.Entrances.Add(new LocalEntranceDefinition
             {
                 Id = source.LocalId + ".entrance",
-                Label = "Выход",
-                Point = new LocalPointData(240, PlaceholderHeight / 2)
+                Label = source.EntranceLabel.Trim().Length > 0 ? source.EntranceLabel.Trim() : "Выход",
+                Point = source.EntrancePoint != null ? Copy(source.EntrancePoint) : new LocalPointData(240, PlaceholderHeight / 2)
             });
             return location;
         }
+
+        private static LocalPointData Copy(LocalPointData point) => new LocalPointData(point.X, point.Y);
 
         // Заготовка точек: объекты — между входом и серединой, столкновения —
         // справа, каждое в своей полосе. В существующем месте новые точки

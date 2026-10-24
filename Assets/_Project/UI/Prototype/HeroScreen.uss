@@ -1,7 +1,9 @@
-/* Экран героя (UI-M03) — статическая раскладка в Prototype_Main.uxml, цвета
-   панелей/кнопок/текста — из Prototype_SharedPanels.uss (.ks-*), здесь то,
-   что специфично для Hero Screen: размеры, сетки, повторяющиеся визуальные
-   паттерны (чипы, слоты, карточки состава), которых нет в общем словаре. */
+/* Экран героя на вкладках — статическая раскладка в Prototype_Main.uxml,
+   цвета панелей/кнопок/текста — из Prototype_SharedPanels.uss (.ks-*), здесь
+   то, что специфично для экрана: вкладки, страницы, сетки, таблица отряда,
+   рабочее место человека (снаряжение / развитие), фильтры и порядок списков.
+   Правило раскладки: всё фиксированного количества помещается без прокрутки
+   на 1920×1080; прокручиваются только списки неизвестной длины. */
 
 .hero-screen-overlay {
     display: none;
@@ -12,22 +14,144 @@
     bottom: 0;
     padding-left: 18px;
     padding-right: 18px;
-    padding-top: 12px;
-    padding-bottom: 12px;
+    padding-top: 10px;
+    padding-bottom: 14px;
+    /* Непрозрачный: под экраном не должны просвечивать карта и кнопки. */
+    background-color: rgb(14, 16, 20);
 }
+
+/* ------------------------------------------------------------------
+   Шапка и вкладки
+   ------------------------------------------------------------------ */
 
 .hero-screen-header {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    height: 44px;
+    height: 50px;
     flex-shrink: 0;
     margin-bottom: 10px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(64, 58, 46);
 }
 
 .hero-screen-title {
     font-size: 20px;
     -unity-font-style: bold;
+    margin-right: 22px;
+}
+
+.hero-screen-tabs {
+    flex-direction: row;
+    align-items: flex-end;
+    height: 100%;
+}
+
+.hero-screen-tab {
+    flex-direction: row;
+    align-items: center;
+    height: 40px;
+    min-width: 132px;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-bottom: -1px;
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: rgba(27, 31, 37, 0.6);
+    border-bottom-width: 0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.hero-screen-tab:hover {
+    background-color: rgb(38, 43, 50);
+}
+
+.hero-screen-tab--active {
+    background-color: rgb(42, 46, 54);
+    border-left-color: rgb(176, 146, 92);
+    border-right-color: rgb(176, 146, 92);
+    border-top-color: rgb(221, 181, 99);
+    border-top-width: 2px;
+}
+
+.hero-screen-tab-key {
+    font-size: 10px;
+    color: rgb(126, 122, 112);
+    margin-right: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(74, 70, 62);
+    border-right-color: rgb(74, 70, 62);
+    border-top-color: rgb(74, 70, 62);
+    border-bottom-color: rgb(74, 70, 62);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.hero-screen-tab-label {
+    font-size: 13px;
+    color: rgb(186, 180, 166);
+    -unity-font-style: bold;
+}
+
+.hero-screen-tab--active .hero-screen-tab-label {
+    color: rgb(255, 239, 202);
+}
+
+.hero-screen-tab--active .hero-screen-tab-key {
+    color: rgb(221, 181, 99);
+    border-left-color: rgb(140, 116, 72);
+    border-right-color: rgb(140, 116, 72);
+    border-top-color: rgb(140, 116, 72);
+    border-bottom-color: rgb(140, 116, 72);
+}
+
+/* Значок на вкладке: сколько ждёт внимания (выбор развития, уход). */
+.hero-screen-tab-badge {
+    display: none;
+    min-width: 18px;
+    height: 18px;
+    margin-left: 8px;
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: rgb(28, 24, 16);
+    background-color: rgb(221, 181, 99);
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+
+.hero-screen-tab-badge--shown {
+    display: flex;
+}
+
+.hero-screen-tab-badge--alert {
+    color: rgb(255, 236, 226);
+    background-color: rgb(166, 72, 58);
+}
+
+.hero-screen-tab-badge--quiet {
+    color: rgb(226, 219, 204);
+    background-color: rgb(74, 78, 86);
+}
+
+.hero-screen-keys-hint {
+    flex-grow: 1;
+    font-size: 10px;
+    -unity-text-align: middle-right;
+    margin-right: 14px;
 }
 
 .hero-screen-close-button {
@@ -35,39 +159,166 @@
     height: 32px;
 }
 
-.hero-screen-columns {
-    flex-direction: row;
+/* ------------------------------------------------------------------
+   Страницы
+   ------------------------------------------------------------------ */
+
+.hero-screen-pages {
     flex-grow: 1;
     min-height: 0;
 }
 
+.hero-screen-page {
+    display: none;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.hero-screen-page--active {
+    display: flex;
+}
+
+.hero-screen-page-row {
+    flex-direction: row;
+}
+
+.hero-screen-page-column {
+    flex-direction: column;
+}
+
+/* Панель, которая забирает оставшуюся высоту колонки/страницы. */
+.hero-screen-grow-panel {
+    flex-grow: 1;
+    min-height: 0;
+    margin-bottom: 0;
+}
+
+/* Прокрутка — только у списков неизвестной длины: шаг колеса крупнее
+   стандартного, полоса тонкая. */
+.hero-screen-list-scroll {
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.hero-screen-list-scroll .unity-scroller--vertical {
+    width: 8px;
+}
+
+.hero-screen-list-scroll .unity-scroller--vertical .unity-slider__dragger {
+    background-color: rgb(110, 96, 70);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.hero-screen-list-scroll .unity-scroller--vertical .unity-slider__tracker {
+    background-color: rgb(30, 33, 39);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.hero-screen-list-scroll .unity-scroller__low-button,
+.hero-screen-list-scroll .unity-scroller__high-button {
+    display: none;
+}
+
+/* Панель инструментов списка: фильтры и порядок — переключатели. */
+.hero-screen-toolbar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    flex-shrink: 0;
+    margin-bottom: 6px;
+}
+
+.hero-screen-toolbar-title {
+    margin-bottom: 0;
+    margin-right: 14px;
+}
+
+.hero-screen-toolbar-caption {
+    font-size: 9px;
+    -unity-font-style: bold;
+    margin-right: 6px;
+}
+
+.hero-screen-toolbar-caption--gap {
+    margin-left: 14px;
+}
+
+.hero-screen-toggle {
+    height: 24px;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-left: 9px;
+    padding-right: 9px;
+    font-size: 11px;
+    color: rgb(186, 180, 166);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.hero-screen-toggle--active {
+    color: rgb(28, 24, 16);
+    background-color: rgb(221, 181, 99);
+    border-left-color: rgb(221, 181, 99);
+    border-right-color: rgb(221, 181, 99);
+    border-top-color: rgb(221, 181, 99);
+    border-bottom-color: rgb(221, 181, 99);
+    -unity-font-style: bold;
+}
+
+.hero-screen-toggle--active:hover {
+    background-color: rgb(232, 197, 124);
+}
+
+.hero-screen-jump-button {
+    height: 30px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 8px;
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+/* ------------------------------------------------------------------
+   Вкладка «Герой»
+   ------------------------------------------------------------------ */
+
 .hero-screen-left-column {
-    width: 26%;
-    margin-right: 12px;
-    min-width: 0;
+    width: 330px;
+    flex-shrink: 0;
+    margin-right: 14px;
 }
 
 .hero-screen-center-column {
     flex-grow: 1;
     min-width: 0;
-    margin-right: 12px;
+    margin-right: 14px;
 }
 
 .hero-screen-right-column {
-    width: 26%;
-    min-width: 0;
+    width: 400px;
+    flex-shrink: 0;
 }
 
-.hero-screen-column-scroll {
+.hero-screen-identity {
     flex-grow: 1;
-    min-height: 0;
+    margin-bottom: 0;
 }
-
-/* Идентичность */
 
 .hero-screen-portrait-slot {
-    height: 240px;
-    margin-bottom: 8px;
+    width: 300px;
+    height: 420px;
+    margin-bottom: 10px;
+    align-self: center;
     background-color: rgb(27, 31, 37);
     border-left-width: 1px;
     border-right-width: 1px;
@@ -79,23 +330,20 @@
     border-bottom-color: rgb(91, 80, 62);
 }
 
-/* Применяется в C# к UnitPortraitElement, вставленному один раз при
-   инициализации в один из статичных слотов выше (identity/roster-card/
-   unit-card) — сам рендеринг портрета (Sprite+Cover/Contain) продолжает
-   делать UnitPortraitElement.SetPortrait, как и раньше; здесь только
-   заставляем его заполнить слот. */
+/* Применяется в C# к UnitPortraitElement, вставленному в статичный слот —
+   сам рендеринг (Sprite+Cover/Contain) делает UnitPortraitElement. */
 .hero-screen-portrait-fill {
     width: 100%;
     height: 100%;
 }
 
 .hero-screen-name {
-    font-size: 17px;
+    font-size: 20px;
     -unity-font-style: bold;
 }
 
 .hero-screen-role {
-    font-size: 11px;
+    font-size: 12px;
     margin-bottom: 8px;
 }
 
@@ -106,19 +354,20 @@
 .hero-screen-experience-row {
     flex-direction: row;
     justify-content: space-between;
+    align-items: flex-end;
 }
 
 .hero-screen-level {
-    font-size: 12px;
+    font-size: 13px;
     -unity-font-style: bold;
 }
 
 .hero-screen-experience-label {
-    font-size: 9px;
+    font-size: 10px;
 }
 
 .hero-screen-experience-track {
-    height: 12px;
+    height: 10px;
     margin-top: 4px;
     background-color: rgb(27, 31, 37);
     border-left-width: 1px;
@@ -129,6 +378,10 @@
     border-right-color: rgb(91, 80, 62);
     border-top-color: rgb(91, 80, 62);
     border-bottom-color: rgb(91, 80, 62);
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
 }
 
 .hero-screen-experience-fill {
@@ -137,7 +390,109 @@
     background-color: rgb(221, 181, 99);
 }
 
-/* Общие переиспользуемые паттерны экрана героя */
+.hero-screen-states-row {
+    margin-top: 10px;
+}
+
+/* Качества: три в ряд, число и шкала 1–10. */
+.hero-screen-stat-wrap-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.hero-screen-stat-box {
+    width: 32%;
+    margin-right: 1%;
+    margin-bottom: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: rgb(33, 37, 44);
+    border-left-width: 2px;
+    border-left-color: rgb(91, 80, 62);
+}
+
+.hero-screen-stat-box:hover {
+    background-color: rgb(51, 48, 36);
+    border-left-color: rgb(221, 181, 99);
+}
+
+.hero-screen-stat-box-caption {
+    font-size: 12px;
+}
+
+.hero-screen-stat-box-value {
+    font-size: 24px;
+    -unity-font-style: bold;
+}
+
+.hero-screen-quality-bar {
+    height: 6px;
+    margin-top: 6px;
+    background-color: rgb(20, 23, 28);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.hero-screen-quality-fill {
+    height: 100%;
+    width: 0%;
+    background-color: rgb(221, 181, 99);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.hero-screen-quality-fill--weak {
+    background-color: rgb(166, 92, 70);
+}
+
+.hero-screen-quality-fill--strong {
+    background-color: rgb(120, 178, 118);
+}
+
+.hero-screen-glance-text {
+    font-size: 12px;
+    white-space: normal;
+    margin-bottom: 6px;
+}
+
+.hero-screen-hero-growth-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.hero-screen-hero-growth-list > .hero-competency-row {
+    width: 49%;
+    margin-right: 1%;
+}
+
+/* Колонки рабочего места человека — на панелях, как и остальной экран. */
+.hero-screen-unit-card-profile,
+.hero-screen-unit-card-stats,
+.hero-screen-unit-card-equipment {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background-color: rgb(42, 46, 54);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62);
+    border-right-color: rgb(91, 80, 62);
+    border-top-color: rgb(91, 80, 62);
+    border-bottom-color: rgb(91, 80, 62);
+}
+
+/* ------------------------------------------------------------------
+   Общие паттерны
+   ------------------------------------------------------------------ */
 
 .hero-screen-wrap-row {
     flex-direction: row;
@@ -146,7 +501,7 @@
 }
 
 .hero-screen-hint {
-    font-size: 9px;
+    font-size: 10px;
     margin-top: 4px;
     white-space: normal;
 }
@@ -158,20 +513,17 @@
 .hero-screen-chip {
     margin-right: 5px;
     margin-top: 3px;
-    padding-left: 7px;
-    padding-right: 7px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    font-size: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    font-size: 11px;
     color: rgb(226, 219, 204);
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px;
 }
-
-/* Состояния — фаза командира всегда золотая (HeroScreenGold), поэтому цвет
-   чипа статичен в CSS; меняется в C# только текст. */
 
 .hero-screen-state-phase-chip {
     background-color: rgba(221, 181, 99, 0.42);
@@ -182,7 +534,8 @@
 }
 
 .hero-screen-states-hint {
-    font-size: 9px;
+    font-size: 11px;
+    margin-top: 0;
 }
 
 /* Запасы отряда */
@@ -200,46 +553,21 @@
 }
 
 .hero-screen-supply-button {
-    width: 30px;
-    height: 26px;
+    width: 34px;
+    height: 28px;
 }
 
 .hero-screen-supply-value {
-    font-size: 15px;
+    font-size: 16px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     flex-grow: 1;
 }
 
-/* Качества / боевые характеристики */
-
-.hero-screen-stat-wrap-grid {
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
-.hero-screen-stat-box {
-    width: 33%;
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 6px;
-    padding-bottom: 6px;
-    margin-bottom: 4px;
-}
-
-.hero-screen-stat-box-caption {
-    font-size: 10px;
-}
-
-.hero-screen-stat-box-value {
-    font-size: 18px;
-    -unity-font-style: bold;
-}
-
-/* Строка характеристики (компетенции / карточка существа) — HeroStatRow.uxml */
+/* Строка характеристики (компетенции / боевые числа) — HeroStatRow.uxml */
 
 .hero-screen-stat-row {
-    height: 34px;
+    height: 32px;
     margin-bottom: 4px;
     padding-left: 10px;
     padding-right: 10px;
@@ -277,13 +605,13 @@
     -unity-font-style: bold;
 }
 
-/* Слоты фиксированного количества: способности / снаряжение / инвентарь */
+/* Человек ждёт выбор развития. */
+.hero-screen-stat-row--attention {
+    border-left-width: 3px;
+    border-left-color: rgb(221, 181, 99);
+}
 
 .hero-screen-slot {
-    margin-right: 6px;
-    margin-bottom: 6px;
-    align-items: center;
-    justify-content: center;
     background-color: rgb(33, 37, 44);
     border-left-width: 1px;
     border-right-width: 1px;
@@ -295,33 +623,20 @@
     border-bottom-color: rgb(91, 80, 62);
 }
 
-.hero-screen-slot-96 {
-    width: 96px;
-    height: 96px;
-}
-
-.hero-screen-slot-76 {
-    width: 76px;
-    height: 76px;
-}
-
-.hero-screen-slot-62 {
-    width: 62px;
-    height: 62px;
-}
-
 .hero-screen-slot-caption {
     font-size: 9px;
+    -unity-font-style: bold;
     white-space: normal;
-    -unity-text-align: middle-center;
 }
 
-/* Состав похода */
+/* ------------------------------------------------------------------
+   Вкладка «Отряд»: состав похода, свита, таблица людей
+   ------------------------------------------------------------------ */
 
 .hero-screen-roster-bar {
     flex-direction: row;
     flex-shrink: 0;
-    margin-top: 10px;
+    margin-bottom: 12px;
 }
 
 .hero-screen-roster-panel {
@@ -335,8 +650,8 @@
 }
 
 .hero-screen-roster-card {
-    width: 168px;
-    margin-right: 8px;
+    width: 176px;
+    margin-right: 10px;
     padding-left: 6px;
     padding-right: 6px;
     padding-top: 6px;
@@ -350,6 +665,17 @@
     border-right-color: rgb(91, 80, 62);
     border-top-color: rgb(91, 80, 62);
     border-bottom-color: rgb(91, 80, 62);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.hero-screen-roster-card:hover {
+    border-left-color: rgb(176, 146, 92);
+    border-right-color: rgb(176, 146, 92);
+    border-top-color: rgb(176, 146, 92);
+    border-bottom-color: rgb(176, 146, 92);
 }
 
 .hero-screen-roster-card-filled {
@@ -361,18 +687,24 @@
     border-right-width: 2px;
     border-top-width: 2px;
     border-bottom-width: 2px;
+    border-left-color: rgb(176, 146, 92);
+    border-right-color: rgb(176, 146, 92);
+    border-top-color: rgb(176, 146, 92);
+    border-bottom-color: rgb(176, 146, 92);
 }
 
 .hero-screen-roster-card-portrait {
-    height: 96px;
+    height: 110px;
     margin-bottom: 5px;
     background-color: rgb(33, 37, 44);
 }
 
 .hero-screen-roster-card-name {
-    font-size: 12px;
+    font-size: 13px;
     -unity-font-style: bold;
     white-space: nowrap;
+    overflow: hidden;
+    color: rgb(226, 219, 204);
 }
 
 .hero-screen-roster-card-name-commander {
@@ -380,8 +712,9 @@
 }
 
 .hero-screen-roster-card-role {
-    font-size: 9px;
+    font-size: 10px;
     white-space: nowrap;
+    overflow: hidden;
 }
 
 .hero-screen-roster-card-status {
@@ -415,10 +748,6 @@
     display: none;
 }
 
-/* HP всегда показывается как MaxHitPoints/MaxHitPoints (система урона ещё
-   не спроектирована — см. CreateHeroScreenHealthBar в старом коде), поэтому
-   заполнение всегда 100% и всегда «зелёное»: статично в CSS, C# только
-   переключает видимость всей полосы (есть юнит / слот пуст). */
 .hero-screen-roster-card-healthbar-fill {
     width: 100%;
     height: 100%;
@@ -431,6 +760,7 @@
 
 .hero-screen-roster-card-role-chip {
     background-color: rgba(91, 80, 62, 0.42);
+    align-self: flex-start;
     display: none;
 }
 
@@ -442,55 +772,9 @@
     display: none;
 }
 
-.hero-screen-roster-available-label {
-    font-size: 9px;
+.hero-screen-roster-card-hint--attention {
+    color: rgb(232, 201, 138);
     -unity-font-style: bold;
-    margin-top: 8px;
-    margin-bottom: 4px;
-}
-
-.hero-screen-roster-available-row {
-    min-height: 24px;
-}
-
-.hero-screen-roster-available-chip {
-    flex-direction: row;
-    align-items: center;
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    margin-right: 6px;
-    margin-bottom: 6px;
-    background-color: rgb(27, 31, 37);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: rgb(91, 80, 62);
-    border-right-color: rgb(91, 80, 62);
-    border-top-color: rgb(91, 80, 62);
-    border-bottom-color: rgb(91, 80, 62);
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    border-bottom-left-radius: 3px;
-    border-bottom-right-radius: 3px;
-}
-
-.hero-screen-roster-available-chip-disabled {
-    border-left-color: rgb(61, 61, 61);
-    border-right-color: rgb(61, 61, 61);
-    border-top-color: rgb(61, 61, 61);
-    border-bottom-color: rgb(61, 61, 61);
-}
-
-.hero-screen-roster-available-chip-label {
-    font-size: 10px;
-    color: rgb(226, 219, 204);
-}
-
-.hero-screen-roster-available-chip-label-disabled {
-    color: rgb(156, 154, 148);
 }
 
 .hero-screen-roster-confirm-row {
@@ -501,21 +785,20 @@
 }
 
 .hero-screen-roster-selected-label {
-    font-size: 10px;
+    font-size: 11px;
 }
 
 .hero-screen-roster-confirm-button {
-    width: 190px;
+    width: 200px;
     height: 30px;
 }
 
 .hero-screen-retinue-panel {
-    width: 320px;
+    width: 360px;
     flex-shrink: 0;
     margin-bottom: 0;
 }
 
-/* ПР-06А: выбор свиты — кнопки вариантов, описание и прогноз для Дома. */
 .hero-screen-retinue-option {
     margin-right: 6px;
     margin-bottom: 6px;
@@ -537,121 +820,327 @@
     margin-top: 4px;
 }
 
-/* Сводка похода (перенесено с удалённого экрана «Армия») */
-
-.hero-screen-journey-summary-block {
-    margin-top: 10px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-    height: 150px;
+/* Таблица людей отряда: одна строка — один человек. */
+.hero-screen-squad-list {
+    flex-direction: column;
 }
 
-.hero-screen-journey-summary-scroll {
-    flex-grow: 1;
-    min-height: 0;
-}
-
-.hero-screen-journey-summary-list {
-    width: 100%;
-}
-
-.journey-summary-entry {
-    margin-bottom: 8px;
-    padding-left: 7px;
-    padding-right: 7px;
-    padding-top: 6px;
-    padding-bottom: 7px;
-    background-color: rgb(33, 38, 46);
-    border-left-width: 2px;
-}
-
-.journey-summary-entry-header {
-    font-size: 10px;
-    -unity-font-style: bold;
-    white-space: normal;
+.hero-squad-row {
+    flex-direction: row;
+    align-items: center;
+    min-height: 62px;
     margin-bottom: 4px;
-    color: rgb(209, 199, 173);
+    padding-left: 8px;
+    padding-right: 8px;
+    background-color: rgb(33, 37, 44);
+    border-left-width: 3px;
+    border-left-color: rgb(64, 66, 70);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
 }
 
-.journey-summary-entry-description {
-    font-size: 9px;
-    white-space: normal;
-    margin-bottom: 5px;
-    color: rgb(184, 186, 184);
+.hero-squad-row:hover {
+    background-color: rgb(44, 45, 44);
 }
 
-.journey-summary-entry-result {
+.hero-squad-row--roster {
+    border-left-color: rgb(176, 146, 92);
+}
+
+.hero-squad-row--commander {
+    border-left-color: rgb(221, 181, 99);
+}
+
+.hero-squad-row--attention {
+    background-color: rgb(46, 42, 32);
+}
+
+.hero-squad-columns {
+    min-height: 24px;
+    flex-shrink: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-left-color: rgba(0, 0, 0, 0);
+    margin-bottom: 2px;
+}
+
+.hero-squad-columns:hover {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.hero-squad-column-title {
     font-size: 9px;
     -unity-font-style: bold;
-    white-space: normal;
+    color: rgb(126, 122, 112);
 }
 
-/* Карточка существа/бойца (модальное окно) */
-
-.hero-screen-unit-card-dimmer {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background-color: rgba(3, 4, 5, 0.74);
-    display: none;
+.hero-squad-cell {
+    margin-right: 12px;
 }
 
-.hero-screen-unit-card {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    margin-left: -630px;
-    margin-top: -335px;
-    width: 1260px;
-    height: 670px;
-    padding-left: 18px;
-    padding-right: 18px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    background-color: rgba(27, 31, 37, 0.995);
-    display: none;
+.hero-squad-cell-person {
+    flex-direction: row;
+    align-items: center;
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.hero-squad-cell-level {
+    width: 150px;
+    flex-shrink: 0;
+}
+
+.hero-squad-cell-health {
+    width: 170px;
+    flex-shrink: 0;
+}
+
+.hero-squad-cell-state {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+}
+
+.hero-squad-cell-status {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.hero-squad-cell-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    width: 330px;
+    flex-shrink: 0;
+    margin-right: 0;
+}
+
+.hero-squad-portrait {
+    width: 40px;
+    height: 56px;
+    flex-shrink: 0;
+    margin-right: 10px;
+    background-color: rgb(20, 23, 28);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-    border-left-color: rgb(115, 97, 64);
-    border-right-color: rgb(115, 97, 64);
-    border-top-color: rgb(115, 97, 64);
-    border-bottom-color: rgb(115, 97, 64);
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
+    border-left-color: rgb(69, 77, 87);
+    border-right-color: rgb(69, 77, 87);
+    border-top-color: rgb(69, 77, 87);
+    border-bottom-color: rgb(69, 77, 87);
 }
 
-.hero-screen-unit-card-header {
-    height: 48px;
+.hero-squad-name {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(226, 219, 204);
+}
+
+.hero-squad-role {
+    font-size: 11px;
+    color: rgb(156, 154, 148);
+}
+
+.hero-squad-value {
+    font-size: 12px;
+    color: rgb(226, 219, 204);
+    white-space: normal;
+}
+
+.hero-squad-value--muted {
+    font-size: 11px;
+    color: rgb(156, 154, 148);
+}
+
+.hero-squad-value--good {
+    color: rgb(132, 190, 136);
+}
+
+.hero-squad-value--bad {
+    color: rgb(224, 136, 112);
+}
+
+.hero-squad-value--gold {
+    color: rgb(232, 201, 138);
+    -unity-font-style: bold;
+}
+
+.hero-mini-bar {
+    height: 6px;
+    margin-top: 4px;
+    background-color: rgb(20, 23, 28);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.hero-mini-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: rgb(221, 181, 99);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.hero-mini-bar-fill--health {
+    background-color: rgb(82, 158, 102);
+}
+
+.hero-mini-bar-fill--hurt {
+    background-color: rgb(196, 132, 62);
+}
+
+.hero-mini-bar-fill--critical {
+    background-color: rgb(178, 74, 62);
+}
+
+.hero-squad-action {
+    height: 26px;
+    margin-left: 4px;
+    margin-right: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 11px;
+}
+
+.hero-squad-action--primary {
+    border-left-color: rgb(176, 146, 92);
+    border-right-color: rgb(176, 146, 92);
+    border-top-color: rgb(176, 146, 92);
+    border-bottom-color: rgb(176, 146, 92);
+    color: rgb(255, 239, 202);
+}
+
+.hero-squad-action--attention {
+    color: rgb(28, 24, 16);
+    background-color: rgb(221, 181, 99);
+    -unity-font-style: bold;
+}
+
+.hero-squad-action--attention:hover {
+    background-color: rgb(232, 197, 124);
+}
+
+/* ------------------------------------------------------------------
+   Рабочее место человека: «Снаряжение» и «Развитие»
+   ------------------------------------------------------------------ */
+
+.hero-screen-unit-card {
+    min-width: 0;
+}
+
+/* Левая полоса — люди отряда; выбранный подсвечен. */
+.hero-screen-people-rail {
+    width: 236px;
+    flex-shrink: 0;
+    margin-right: 14px;
+    margin-bottom: 0;
+}
+
+.hero-people-rail-list {
+    flex-direction: column;
+}
+
+.hero-people-chip {
     flex-direction: row;
-    justify-content: space-between;
     align-items: center;
+    height: 66px;
+    margin-bottom: 5px;
+    padding-left: 6px;
+    padding-right: 6px;
+    background-color: rgb(33, 37, 44);
+    border-left-width: 3px;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.hero-people-chip:hover {
+    background-color: rgb(44, 45, 44);
+}
+
+.hero-people-chip--selected {
+    background-color: rgb(58, 50, 34);
+    border-left-color: rgb(221, 181, 99);
+}
+
+.hero-people-chip--selected:hover {
+    background-color: rgb(64, 55, 37);
+}
+
+.hero-people-chip-portrait {
+    width: 38px;
+    height: 53px;
+    flex-shrink: 0;
+    margin-right: 8px;
+    background-color: rgb(20, 23, 28);
+}
+
+.hero-people-chip-text {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.hero-people-chip-name {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: rgb(226, 219, 204);
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.hero-people-chip-meta {
+    font-size: 10px;
+    color: rgb(156, 154, 148);
+}
+
+.hero-people-chip-mark {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    font-size: 11px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: rgb(28, 24, 16);
+    background-color: rgb(221, 181, 99);
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+
+.hero-screen-unit-card-profile {
+    width: 236px;
+    flex-shrink: 0;
+    margin-right: 14px;
+}
+
+.hero-screen-unit-card-heading {
+    flex-direction: column;
+    margin-bottom: 8px;
 }
 
 .hero-screen-unit-card-title {
     font-size: 20px;
     -unity-font-style: bold;
+    white-space: normal;
 }
 
-.hero-screen-unit-card-close-button {
-    width: 36px;
-    height: 32px;
-}
-
-.hero-screen-unit-card-body {
-    flex-grow: 1;
-    flex-direction: row;
-    margin-top: 10px;
+.hero-screen-unit-card-subtitle {
+    font-size: 12px;
+    margin-top: 2px;
+    white-space: normal;
 }
 
 .hero-screen-unit-card-portrait {
-    width: 220px;
-    height: 308px;
+    width: 236px;
+    height: 330px;
     flex-shrink: 0;
     position: relative;
     background-color: rgb(19, 22, 27);
@@ -674,9 +1163,7 @@
     left: 12px;
     right: 12px;
     bottom: 13px;
-    height: 12px;
-    margin-top: 0;
-    margin-bottom: 0;
+    height: 10px;
     background-color: rgb(14, 15, 18);
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
@@ -684,8 +1171,6 @@
     border-bottom-right-radius: 2px;
 }
 
-/* Тот же случай, что и у карточек состава: HP всегда MaxHitPoints/
-   MaxHitPoints, заполнение статично 100% и зелёное. */
 .hero-screen-unit-card-portrait-healthbar-fill {
     width: 100%;
     height: 100%;
@@ -696,26 +1181,8 @@
     border-bottom-right-radius: 2px;
 }
 
-/* Карточка человека — четыре колонки: профиль | боевые характеристики и
-   теги | снаряжение | развитие. Две правые прокручиваются независимо. */
-.hero-screen-unit-card-heading {
-    flex-direction: column;
-}
-
-.hero-screen-unit-card-subtitle {
-    font-size: 12px;
-    margin-top: 2px;
-}
-
-.hero-screen-unit-card-profile {
-    width: 220px;
-    flex-shrink: 0;
-    margin-right: 18px;
-}
-
 .hero-screen-unit-card-level-row {
     margin-top: 10px;
-    align-items: flex-end;
 }
 
 .hero-screen-unit-card-condition {
@@ -723,72 +1190,17 @@
     margin-top: 10px;
 }
 
-.hero-screen-unit-card-stats {
-    width: 270px;
-    flex-shrink: 0;
-    margin-right: 18px;
-}
-
-.hero-screen-unit-card-column {
-    flex-grow: 1;
-    flex-basis: 0;
-    min-width: 0;
-    margin-left: 0;
-    margin-right: 14px;
-}
-
-/* Командир на экране отряда: портрет слева, имя и опыт справа — чтобы
-   качества и особенности помещались без прокрутки. */
-.hero-screen-identity-body {
+/* Страница рабочего места: показывается одна из двух. */
+.hero-screen-person-page {
+    display: none;
     flex-direction: row;
-    align-items: flex-start;
-}
-
-.hero-screen-identity-body .hero-screen-portrait-slot {
-    width: 100px;
-    height: 140px;
-    flex-shrink: 0;
-    margin-right: 12px;
-    margin-bottom: 0;
-}
-
-.hero-screen-identity-info {
     flex-grow: 1;
     min-width: 0;
+    min-height: 0;
 }
 
-.hero-item-slot.hero-screen-unit-card-slot {
-    width: auto;
-    min-height: 64px;
-    margin-right: 0;
-    margin-bottom: 6px;
-    background-color: rgb(33, 37, 44);
-    border-left-width: 2px;
-    border-left-color: rgb(91, 80, 62);
-}
-
-.hero-screen-unit-card-subsection {
-    margin-top: 12px;
-}
-
-.hero-screen-squad-list {
-    margin-top: 8px;
-}
-
-.hero-screen-inventory-hint {
-    margin-top: 0;
-    margin-bottom: 6px;
-}
-
-/* Человек ждёт выбор развития: строка отряда и подсказка карточки состава. */
-.hero-screen-stat-row--attention {
-    border-left-width: 3px;
-    border-left-color: rgb(221, 181, 99);
-}
-
-.hero-screen-roster-card-hint--attention {
-    color: rgb(232, 201, 138);
-    -unity-font-style: bold;
+.hero-screen-person-page--active {
+    display: flex;
 }
 
 .hero-screen-unit-card-section-title {
@@ -798,13 +1210,300 @@
     margin-bottom: 8px;
 }
 
+.hero-screen-unit-card-stats {
+    width: 260px;
+    flex-shrink: 0;
+    margin-right: 14px;
+}
+
 .hero-screen-unit-card-tags {
     margin-top: 10px;
 }
 
-/* Тултипы (не рендерятся в билде через встроенный VisualElement.tooltip —
-   позиционируются вручную по PointerEnterEvent, см. UI_ARCHITECTURE.md §2:
-   легитимное исключение, поведение, а не структура). */
+.hero-screen-unit-card-equipment {
+    width: 280px;
+    flex-shrink: 0;
+    margin-right: 14px;
+}
+
+.hero-item-slot.hero-screen-unit-card-slot {
+    width: auto;
+    min-height: 92px;
+    margin-right: 0;
+    margin-bottom: 8px;
+    background-color: rgb(33, 37, 44);
+    border-left-width: 3px;
+    border-left-color: rgb(91, 80, 62);
+}
+
+.hero-item-slot.hero-screen-unit-card-slot:hover {
+    background-color: rgb(40, 42, 44);
+}
+
+.hero-screen-unit-card-slot--empty {
+    border-left-color: rgb(64, 66, 70);
+}
+
+.hero-screen-unit-card-slot--empty .hero-item-slot-name {
+    color: rgb(126, 122, 112);
+}
+
+/* Сумка и кладовая */
+.hero-screen-inventory {
+    min-width: 0;
+}
+
+.hero-screen-inventory-hint {
+    margin-top: 0;
+    margin-bottom: 6px;
+}
+
+.hero-pack-grid {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.hero-item-slot.hero-pack-tile {
+    flex-grow: 1;
+    flex-basis: 0;
+    width: auto;
+    min-width: 0;
+    min-height: 104px;
+    margin-right: 6px;
+    margin-bottom: 0;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.hero-pack-tile--empty {
+    border-left-color: rgb(58, 58, 58);
+    border-right-color: rgb(58, 58, 58);
+    border-top-color: rgb(58, 58, 58);
+    border-bottom-color: rgb(58, 58, 58);
+    background-color: rgb(27, 30, 35);
+}
+
+.hero-pack-tile--empty .hero-item-slot-name {
+    color: rgb(110, 108, 102);
+}
+
+/* ------------------------------------------------------------------
+   Вкладка «Развитие»
+   ------------------------------------------------------------------ */
+
+.hero-screen-growth-main {
+    flex-grow: 1;
+    min-width: 0;
+    margin-right: 14px;
+}
+
+.hero-screen-growth-choice-panel {
+    flex-grow: 1;
+    min-height: 0;
+    margin-bottom: 12px;
+}
+
+/* Выбора нет — панель короткая, особенности получают высоту. */
+.hero-screen-growth-choice-panel--idle {
+    flex-grow: 0;
+}
+
+.hero-screen-growth-choice-panel--idle .hero-screen-toolbar {
+    display: none;
+}
+
+.hero-screen-growth-features-panel {
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: 230px;
+    margin-bottom: 0;
+}
+
+/* USS не знает соседнего селектора «+» — класс ставит код вместе с --idle. */
+.hero-screen-growth-features-panel--tall {
+    flex-grow: 1;
+    height: auto;
+    min-height: 0;
+}
+
+.hero-screen-growth-competencies-panel {
+    width: 420px;
+    flex-shrink: 0;
+    margin-bottom: 0;
+}
+
+.hero-growth-choice-grid,
+.hero-growth-feature-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.hero-item-row.hero-growth-card {
+    width: 32.4%;
+    margin-right: 0.9%;
+    min-height: 108px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-left-width: 3px;
+}
+
+.hero-item-row.hero-growth-card:hover {
+    background-color: rgb(46, 42, 32);
+    border-left-color: rgb(221, 181, 99);
+}
+
+.hero-growth-card--personal {
+    border-left-color: rgb(196, 152, 82);
+}
+
+.hero-growth-card--learn {
+    border-left-color: rgb(92, 140, 168);
+}
+
+.hero-growth-card--neutral {
+    border-left-color: rgb(120, 120, 112);
+}
+
+.hero-growth-card-group {
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: rgb(156, 154, 148);
+    margin-bottom: 2px;
+}
+
+.hero-item-row.hero-growth-feature {
+    width: 49%;
+    margin-right: 1%;
+}
+
+.hero-competency-row {
+    margin-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 6px;
+    padding-bottom: 7px;
+    background-color: rgb(33, 37, 42);
+    border-left-width: 3px;
+    border-left-color: rgb(91, 80, 62);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.hero-competency-row:hover {
+    background-color: rgb(51, 48, 36);
+}
+
+.hero-competency-row--capped {
+    border-left-color: rgb(92, 140, 168);
+}
+
+.hero-competency-head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hero-competency-name {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(226, 219, 204);
+}
+
+.hero-competency-pips {
+    flex-direction: row;
+}
+
+.hero-competency-pip {
+    width: 12px;
+    height: 12px;
+    margin-left: 3px;
+    background-color: rgb(20, 23, 28);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(91, 80, 62);
+    border-right-color: rgb(91, 80, 62);
+    border-top-color: rgb(91, 80, 62);
+    border-bottom-color: rgb(91, 80, 62);
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+
+.hero-competency-pip--filled {
+    background-color: rgb(221, 181, 99);
+    border-left-color: rgb(221, 181, 99);
+    border-right-color: rgb(221, 181, 99);
+    border-top-color: rgb(221, 181, 99);
+    border-bottom-color: rgb(221, 181, 99);
+}
+
+.hero-competency-note {
+    font-size: 10px;
+    color: rgb(156, 154, 148);
+    margin-top: 3px;
+    white-space: normal;
+}
+
+/* ------------------------------------------------------------------
+   Вкладка «Поход»: сводка карточками в две колонки
+   ------------------------------------------------------------------ */
+
+.hero-screen-journey-summary-block {
+    flex-grow: 1;
+}
+
+.hero-screen-journey-summary-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.hero-screen-journey-summary-list > .unity-template-container {
+    width: 49.5%;
+    margin-right: 0.5%;
+}
+
+.journey-summary-entry {
+    margin-bottom: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 8px;
+    padding-bottom: 9px;
+    background-color: rgb(33, 38, 46);
+    border-left-width: 3px;
+}
+
+.journey-summary-entry-header {
+    font-size: 12px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 4px;
+    color: rgb(209, 199, 173);
+}
+
+.journey-summary-entry-description {
+    font-size: 11px;
+    white-space: normal;
+    margin-bottom: 5px;
+    color: rgb(184, 186, 184);
+}
+
+.journey-summary-entry-result {
+    font-size: 11px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+/* ------------------------------------------------------------------
+   Подсказки (UI Toolkit в Player не показывает встроенный tooltip —
+   позиционируются вручную по PointerEnterEvent, UI_ARCHITECTURE.md §2).
+   ------------------------------------------------------------------ */
 
 .hero-screen-tooltip {
     display: none;
@@ -842,7 +1541,7 @@
 }
 
 .hero-screen-stat-tooltip-text {
-    font-size: 10px;
+    font-size: 11px;
 }
 
 .hero-screen-tag-tooltip-title {
@@ -855,34 +1554,17 @@
     font-size: 13px;
 }
 
-/* ПР-08: вещи на экране героя — три слота выбранного человека, сумка героя,
-   сюжетные вещи и кладовая Дома. Кнопки действий внутри карточек. */
-
-.hero-item-people {
-    margin-bottom: 6px;
-}
-
-.hero-item-person {
-    height: 26px;
-    font-size: 12px;
-    margin-left: 0;
-    margin-right: 4px;
-    margin-bottom: 4px;
-}
-
-.hero-item-person--selected {
-    border-bottom-width: 2px;
-    border-bottom-color: rgb(221, 181, 99);
-    -unity-font-style: bold;
-}
+/* ------------------------------------------------------------------
+   Вещи (ПР-08): слоты, строки, кнопки действий
+   ------------------------------------------------------------------ */
 
 .hero-item-slot {
     width: 168px;
     min-height: 92px;
-    padding-left: 6px;
-    padding-right: 6px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
     align-items: flex-start;
     justify-content: flex-start;
 }
@@ -905,13 +1587,27 @@
 }
 
 .hero-item-button {
-    height: 22px;
+    height: 24px;
     font-size: 11px;
     margin-left: 0;
     margin-right: 4px;
     margin-top: 2px;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+.hero-item-button--primary {
+    color: rgb(28, 24, 16);
+    background-color: rgb(221, 181, 99);
+    border-left-color: rgb(221, 181, 99);
+    border-right-color: rgb(221, 181, 99);
+    border-top-color: rgb(221, 181, 99);
+    border-bottom-color: rgb(221, 181, 99);
+    -unity-font-style: bold;
+}
+
+.hero-item-button--primary:hover {
+    background-color: rgb(232, 197, 124);
 }
 
 .hero-item-subtitle {
@@ -925,12 +1621,64 @@
 .hero-item-row {
     padding-left: 8px;
     padding-right: 8px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     margin-bottom: 4px;
     background-color: rgb(33, 37, 44);
     border-left-width: 2px;
     border-left-color: rgb(91, 80, 62);
+}
+
+.hero-item-row--fits {
+    border-left-color: rgb(110, 170, 112);
+}
+
+.hero-item-row--unfit {
+    opacity: 0.72;
+}
+
+/* Строка кладовой: имя и метки слева, действия справа. */
+.hero-item-row.hero-store-row {
+    flex-direction: row;
+    align-items: center;
+    min-height: 48px;
+}
+
+.hero-store-row-text {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.hero-store-row-head {
+    flex-direction: row;
+    align-items: center;
+}
+
+.hero-store-row .hero-item-actions {
+    flex-shrink: 0;
+    margin-top: 0;
+    margin-left: 8px;
+}
+
+.hero-item-tag {
+    margin-left: 6px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: rgb(200, 192, 176);
+    background-color: rgb(52, 55, 62);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.hero-item-tag--fits {
+    color: rgb(214, 240, 210);
+    background-color: rgb(58, 102, 64);
 }
 
 .hero-item-message {

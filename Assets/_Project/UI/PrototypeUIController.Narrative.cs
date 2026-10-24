@@ -575,7 +575,7 @@ public partial class PrototypeUIController
             if (string.Equals(completedDialogueId, Chapter01Ids.Dialogues.D10, StringComparison.Ordinal))
             {
                 gameState.Narrative?.SetFlag(Chapter01Ids.Flags.PartyGatheringSeen);
-                OpenHeroScreen();
+                OpenHeroScreenOnTab(HeroScreenTab.Squad);
             }
 
             return;

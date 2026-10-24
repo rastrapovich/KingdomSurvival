@@ -400,6 +400,13 @@ public partial class PrototypeUIController
             return;
         }
 
+        // Экран героя закрывается по Esc, если поверх него ничего нет.
+        if (IsHeroScreenOpen && !IsNarrativeDialogueActive && activeQueuedModal == null)
+        {
+            CloseHeroScreen();
+            return;
+        }
+
         // Esc сначала закрывает то, что открыто поверх карты: карточку места,
         // экран героя, журнал, диалог — у них свои правила закрытия.
         if (gameState == null || isGameOver || HasBlockingModalWork() || IsWorldMapLocationCardVisible())

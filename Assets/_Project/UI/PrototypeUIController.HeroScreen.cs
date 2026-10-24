@@ -5,9 +5,13 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Экран героя (UI-M03) — объединяет прежние «Отряд» и «Панель командира» в
-/// один полноэкранный слой, вызываемый одной кнопкой из нижней полосы
-/// оболочки.
+/// Экран героя (UI-M03) — полноэкранный слой на вкладках, вызываемый одной
+/// кнопкой из нижней полосы оболочки: «Герой» (Командир, качества,
+/// особенности, запасы), «Отряд» (состав похода, свита, таблица людей),
+/// «Снаряжение» и «Развитие» (рабочее место выбранного человека — HeroCard.cs,
+/// HeroItems.cs), «Поход» (сводка похода). Вкладки, полоса людей и горячие
+/// клавиши — PrototypeUIController.HeroScreenTabs.cs, таблица отряда —
+/// PrototypeUIController.HeroSquad.cs.
 ///
 /// Постоянная структура — Prototype_Main.uxml (hero-screen-overlay), общий
 /// стиль — Prototype_SharedPanels.uss (.ks-*) + HeroScreen.uss, повторяемые
@@ -23,10 +27,9 @@ using UnityEngine.UIElements;
 /// прототипа хранит только имя, роль и уровень, поэтому характеристики
 /// разрешаются по роли бойца.
 ///
-/// Экран относится ко всему отряду: слева — Командир (качества и особенности
-/// есть только у него), в центре — люди отряда и запасы, справа — вещи.
-/// Характеристики, теги, снаряжение и развитие каждого человека — в его
-/// карточке (PrototypeUIController.HeroCard.cs).
+/// Качества и особенности есть только у Командира — они на вкладке «Герой».
+/// Характеристики, теги, снаряжение и развитие каждого человека — на
+/// вкладках «Снаряжение» и «Развитие» для выбранного слева человека.
 /// </summary>
 public partial class PrototypeUIController
 {
@@ -113,19 +116,17 @@ public partial class PrototypeUIController
 
     private VisualElement[] heroScreenQualityBoxes;
     private Label[] heroScreenQualityValues;
+    private VisualElement[] heroScreenQualityFills;
     private string[] heroScreenQualityExplanations;
 
     private VisualElement heroScreenTraitsRow;
     private VisualElement heroScreenSquadList;
 
-    private VisualElement heroScreenRosterAvailableRow;
     private Label heroScreenRosterSelectedLabel;
     private Button heroScreenRosterConfirmButton;
     private HeroRosterCardRefs[] heroScreenRosterCards;
 
-    private VisualElement heroScreenUnitCardDimmer;
     private VisualElement heroScreenUnitCard;
-    private Button heroScreenUnitCardCloseButton;
     private Label heroScreenUnitCardTitle;
     private VisualElement heroScreenUnitCardPortraitSlot;
     private UnitPortraitElement heroScreenUnitCardPortrait;
@@ -145,7 +146,6 @@ public partial class PrototypeUIController
 
     private VisualTreeAsset heroChipTemplate;
     private VisualTreeAsset heroStatRowTemplate;
-    private VisualTreeAsset heroRosterAvailableChipTemplate;
     private VisualTreeAsset heroHintTemplate;
 
     private bool heroScreenUiBound;
@@ -177,6 +177,8 @@ public partial class PrototypeUIController
         ok &= BindHeroScreenTooltips();
         ok &= BindHeroItems();
         ok &= BindHeroCard();
+        ok &= BindHeroScreenTabs();
+        ok &= BindHeroSquad();
 
         if (!ok)
             return;
@@ -236,13 +238,15 @@ public partial class PrototypeUIController
     {
         heroScreenQualityBoxes = new VisualElement[HeroScreenQualitySuffixes.Length];
         heroScreenQualityValues = new Label[HeroScreenQualitySuffixes.Length];
+        heroScreenQualityFills = new VisualElement[HeroScreenQualitySuffixes.Length];
         heroScreenQualityExplanations = new string[HeroScreenQualitySuffixes.Length];
         bool ok = true;
         for (int i = 0; i < HeroScreenQualitySuffixes.Length; i++)
         {
             heroScreenQualityBoxes[i] = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-quality-" + HeroScreenQualitySuffixes[i]);
             heroScreenQualityValues[i] = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-quality-" + HeroScreenQualitySuffixes[i] + "-value");
-            ok &= heroScreenQualityBoxes[i] != null && heroScreenQualityValues[i] != null;
+            heroScreenQualityFills[i] = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-quality-" + HeroScreenQualitySuffixes[i] + "-fill");
+            ok &= heroScreenQualityBoxes[i] != null && heroScreenQualityValues[i] != null && heroScreenQualityFills[i] != null;
         }
 
         return ok;
@@ -257,11 +261,10 @@ public partial class PrototypeUIController
 
     private bool BindHeroScreenRoster()
     {
-        heroScreenRosterAvailableRow = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-roster-available-row");
         heroScreenRosterSelectedLabel = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-roster-selected-label");
         heroScreenRosterConfirmButton = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-roster-confirm-button");
 
-        bool ok = heroScreenRosterAvailableRow != null && heroScreenRosterSelectedLabel != null && heroScreenRosterConfirmButton != null;
+        bool ok = heroScreenRosterSelectedLabel != null && heroScreenRosterConfirmButton != null;
 
         heroScreenRosterCards = new HeroRosterCardRefs[HeroScreenRosterCardNames.Length];
         for (int i = 0; i < HeroScreenRosterCardNames.Length; i++)
@@ -301,16 +304,13 @@ public partial class PrototypeUIController
 
     private bool BindHeroScreenUnitCard()
     {
-        heroScreenUnitCardDimmer = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-dimmer");
         heroScreenUnitCard = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card");
-        heroScreenUnitCardCloseButton = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-close-button");
         heroScreenUnitCardTitle = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-title");
         heroScreenUnitCardPortraitSlot = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-portrait");
         heroScreenUnitCardPortraitHealthBar = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-portrait-healthbar");
         heroScreenUnitCardTagsRow = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-tags");
 
-        bool ok = heroScreenUnitCardDimmer != null && heroScreenUnitCard != null && heroScreenUnitCardCloseButton != null &&
-                   heroScreenUnitCardTitle != null && heroScreenUnitCardPortraitSlot != null &&
+        bool ok = heroScreenUnitCard != null && heroScreenUnitCardTitle != null && heroScreenUnitCardPortraitSlot != null &&
                    heroScreenUnitCardPortraitHealthBar != null && heroScreenUnitCardTagsRow != null;
 
         heroScreenUnitCardStatRows = new VisualElement[HeroScreenStatSuffixes.Length];
@@ -365,7 +365,6 @@ public partial class PrototypeUIController
         heroScreenSupplyMinusButton.clicked += OnStableSupplyMinusClicked;
         heroScreenSupplyPlusButton.clicked += OnStableSupplyPlusClicked;
         heroScreenRosterConfirmButton.clicked += OnHeroScreenRosterConfirmClicked;
-        heroScreenUnitCardCloseButton.clicked += HideHeroScreenUnitCard;
 
         heroScreenStatePhaseChip.RegisterCallback<PointerEnterEvent>(_ =>
             ShowHeroScreenTagTooltip(heroScreenStatePhaseChip, heroScreenStatePhaseChip.text, "Где сейчас отряд."));
@@ -395,26 +394,10 @@ public partial class PrototypeUIController
                 heroCardStatExplanations[index] ?? HeroScreenUnitCardStatExplanations[index]));
             row.RegisterCallback<PointerLeaveEvent>(_ => HideHeroScreenStatTooltip());
         }
-
-        heroScreenUnitCardDimmer.focusable = true;
-        heroScreenUnitCardDimmer.RegisterCallback<PointerDownEvent>(evt =>
-        {
-            if (evt.button != 0 || evt.target != heroScreenUnitCardDimmer)
-                return;
-            HideHeroScreenUnitCard();
-            evt.StopPropagation();
-        });
-        heroScreenUnitCardDimmer.RegisterCallback<KeyDownEvent>(evt =>
-        {
-            if (evt.keyCode != KeyCode.Escape)
-                return;
-            HideHeroScreenUnitCard();
-            evt.StopPropagation();
-        });
     }
 
-    // ПКМ на карточке — карточка человека (HeroCard.cs). ЛКМ —
-    // убрать бойца из состава, но только пока refs.ToggleFighterId задан
+    // ПКМ на карточке — вещи человека (вкладка «Снаряжение»). ЛКМ — убрать
+    // бойца из состава, но только пока refs.ToggleFighterId задан
     // (RefreshHeroScreenRoster выставляет его только для реально убираемых
     // бойцов вне похода — не для командира и не во время активной
     // экспедиции). Регистрируется один раз на статичной карточке, а не при
@@ -443,6 +426,14 @@ public partial class PrototypeUIController
                 RefreshHeroScreen();
                 RefreshStableUiAfterStateChange();
                 evt.StopPropagation();
+                return;
+            }
+
+            // Пустое место — таблица ниже сразу показывает свободных.
+            if (evt.button == 0 && refs.PersonId == null && ExpeditionPreparation.CanEdit(gameState))
+            {
+                SetHeroSquadFilter(HeroSquadFilter.Free);
+                evt.StopPropagation();
             }
         });
 
@@ -459,7 +450,15 @@ public partial class PrototypeUIController
             OpenHeroScreen();
     }
 
+    // Открывается на последней вкладке; сюжетный сбор отряда (D10) —
+    // сразу на «Отряде». Отдельное имя, а не перегрузка: тесты вызывают
+    // OpenHeroScreen через отражение.
     private void OpenHeroScreen()
+    {
+        OpenHeroScreenOnTab(heroScreenTab);
+    }
+
+    private void OpenHeroScreenOnTab(HeroScreenTab tab)
     {
         if (heroScreenOverlay == null)
             return;
@@ -473,7 +472,7 @@ public partial class PrototypeUIController
         PauseForBlockingModal();
         heroScreenOverlay.style.display = DisplayStyle.Flex;
         heroScreenOverlay.BringToFront();
-        RefreshHeroScreen();
+        SwitchHeroScreenTab(tab);
     }
 
     private void CloseHeroScreen()
@@ -482,7 +481,8 @@ public partial class PrototypeUIController
             return;
 
         bool wasOpen = IsHeroScreenOpen;
-        HideHeroScreenUnitCard();
+        HideHeroScreenStatTooltip();
+        HideHeroScreenTagTooltip();
         heroScreenOverlay.style.display = DisplayStyle.None;
 
         if (wasOpen)
@@ -519,7 +519,18 @@ public partial class PrototypeUIController
         RefreshHeroScreenRoster(commander, heroUnit);
         // ПР-08: сумка героя, сюжетные вещи, кладовая и опыт Командира.
         RefreshHeroItems();
+        RefreshHeroGrowthSummary();
+        RefreshHeroPeopleRail();
         RefreshHeroPersonCard();
+        // Сводка похода поднимается вместе со стабильным интерфейсом; если
+        // экран открыли раньше — поднять её здесь, пустой список не оставлять.
+        if (!journeySummaryInitialized)
+            InitializeJourneySummaryUi();
+        else
+            RefreshJourneySummaryFromState();
+        if (journeySummaryList != null && journeySummaryList.childCount == 0)
+            RenderJourneySummary();
+        RefreshHeroScreenBadges();
     }
 
     // Как в старом RefreshSupplyBlock/ApplyCompactSupplyText экрана «Армия»,
@@ -564,6 +575,9 @@ public partial class PrototypeUIController
             HeroQuality quality = (HeroQuality)i;
             int value = hero != null ? hero.GetQuality(quality) : HeroProfileData.DefaultQualityValue;
             heroScreenQualityValues[i].text = value + " / " + HeroProfileData.MaxQualityValue;
+            heroScreenQualityFills[i].style.width = Length.Percent(Mathf.Clamp01((float)value / HeroProfileData.MaxQualityValue) * 100f);
+            heroScreenQualityFills[i].EnableInClassList("hero-screen-quality-fill--weak", value <= 3);
+            heroScreenQualityFills[i].EnableInClassList("hero-screen-quality-fill--strong", value >= 7);
             Label caption = heroScreenQualityBoxes[i].Q<Label>(className: "hero-screen-stat-box-caption");
             if (caption != null)
                 caption.text = NarrativeQualityLabels.GetLabel(quality);
@@ -645,68 +659,6 @@ public partial class PrototypeUIController
         heroScreenStatePhaseChip.text = commander != null && commander.State == CommanderState.InCastle
             ? "Дома"
             : "В пути";
-    }
-
-    // Люди отряда (Командир и бойцы, которые сейчас рядом): уровень, здоровье
-    // и отметка ожидающего выбора развития. Клик — карточка человека.
-    private void RefreshHeroScreenSquad()
-    {
-        heroScreenSquadList.Clear();
-        int hurt = 0;
-        int waiting = 0;
-        foreach (ResidentState resident in HomePeopleService.All(gameState))
-        {
-            if (!resident.IsAlive || !IsHeroItemsCandidate(resident))
-                continue;
-
-            string personId = resident.PersonId;
-            PersonProgressionData record = CharacterProgressionService.Get(gameState, personId);
-            bool choice = CharacterProgressionService.PendingChoices(gameState, personId) > 0;
-            bool isHurt = resident.Injury == ResidentInjury.Recovering || resident.Exhausted ||
-                          (resident.HasCombatState && resident.CurrentHitPoints < resident.MaxHitPoints);
-            if (isHurt)
-                hurt++;
-            if (choice)
-                waiting++;
-
-            FighterData data = gameState.FindFighter(personId);
-            CommanderData commander = gameState.GetSelectedCommander();
-            string role = commander != null && commander.Id == personId ? "командир"
-                : data != null ? data.Role.ToLowerInvariant() : resident.RoleLabel;
-            string value = (record != null ? "ур. " + record.Level : string.Empty) +
-                           (resident.HasCombatState ? "  ·  " + resident.CurrentHitPoints + "/" + resident.MaxHitPoints + " HP" : string.Empty) +
-                           (choice ? "  ·  выбор" : string.Empty);
-            string progress = string.Empty;
-            if (record != null)
-            {
-                CharacterProgressionService.GetLevelProgress(gameState, record, out int current, out int required);
-                progress = required > 0 ? "\nОпыт: " + current + " / " + required + " до уровня " + (record.Level + 1) + "." : string.Empty;
-            }
-
-            VisualElement row = AddHeroScreenStatRow(
-                heroScreenSquadList,
-                resident.DisplayName.ToUpperInvariant() + " — " + role,
-                value,
-                DescribeCondition(resident) + progress +
-                (choice ? "\nЖдёт выбор развития." : string.Empty) + "\nКлик — карточка: снаряжение, характеристики, развитие.");
-            if (row == null)
-                continue;
-            row.EnableInClassList("hero-screen-stat-row--attention", choice);
-            row.RegisterCallback<PointerDownEvent>(evt =>
-            {
-                if (evt.button > 1 || isGameOver)
-                    return;
-                HideHeroScreenStatTooltip();
-                ShowHeroPersonCard(personId);
-                evt.StopPropagation();
-            });
-        }
-
-        List<string> summary = new List<string>();
-        summary.Add(hurt == 0 ? "Все целы." : "Нужен уход: " + hurt + ".");
-        if (waiting > 0)
-            summary.Add("Выбор развития ждёт: " + waiting + ".");
-        heroStatesHint.text = string.Join(" ", summary);
     }
 
     // P08-T03: реальный picker состава похода. Источник истины —
@@ -821,41 +773,19 @@ public partial class PrototypeUIController
 
         // ПКМ открывает карточку человека; ждущий выбор развития виден сразу.
         bool choice = refs.PersonId != null && CharacterProgressionService.PendingChoices(gameState, refs.PersonId) > 0;
-        refs.Hint.text = choice ? "ПКМ: выбор развития" : "ПКМ: карточка";
+        refs.Hint.text = choice ? "ждёт выбор развития" : isCommander ? "ПКМ: вещи" : "ЛКМ: убрать · ПКМ: вещи";
         refs.Hint.EnableInClassList("hero-screen-roster-card-hint--attention", choice);
         refs.Hint.style.display = filled ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
-    // Количество доступных бойцов варьируется — динамический список (шаблон
-    // HeroRosterAvailableChip.uxml).
+    // Кого добавить — таблица людей ниже (HeroSquad.cs: «В состав»), здесь
+    // только счёт мест и кнопка сюжетного сбора.
     private void RefreshHeroScreenRosterAvailable(List<FighterData> slotFighters, bool expeditionActive)
     {
-        heroScreenRosterAvailableRow.Clear();
-
-        bool canPick = !expeditionActive && !isGameOver;
-        bool full = slotFighters.Count >= HeroScreenFighterSlots;
-
-        if (!expeditionActive)
-        {
-            int shown = 0;
-            foreach (FighterData fighter in gameState.Fighters)
-            {
-                if (selectedFighterIds.Contains(fighter.Id))
-                    continue;
-
-                AddHeroScreenRosterAvailableChip(fighter, canPick && !full);
-                shown++;
-            }
-
-            if (shown == 0)
-                AddHeroScreenHint(heroScreenRosterAvailableRow, "Все бойцы уже в составе.");
-        }
-        else
-        {
-            AddHeroScreenHint(heroScreenRosterAvailableRow, "Отряд уже в походе.");
-        }
-
-        heroScreenRosterSelectedLabel.text = "Выбрано: " + slotFighters.Count + " / " + HeroScreenFighterSlots;
+        heroScreenRosterSelectedLabel.text = "Бойцов: " + slotFighters.Count + " / " + HeroScreenFighterSlots +
+            (ExpeditionPreparation.CanEdit(gameState)
+                ? "  ·  добавить — «В состав» в таблице ниже"
+                : "  ·  состав закреплён: отряд в походе");
 
         // Кнопка нужна только пока сюжет Главы 01 реально ждёт сбора отряда
         // (N09 решение принято, но экспедиция ещё не создана) — обычный
@@ -869,53 +799,6 @@ public partial class PrototypeUIController
         heroScreenRosterConfirmButton.style.display =
             chapter01AwaitingDeparture ? DisplayStyle.Flex : DisplayStyle.None;
         heroScreenRosterConfirmButton.SetEnabled(chapter01AwaitingDeparture && !isGameOver);
-    }
-
-    private void AddHeroScreenRosterAvailableChip(FighterData fighter, bool canAdd)
-    {
-        VisualTreeAsset template = LoadHeroRosterAvailableChipTemplate();
-        if (template == null)
-            return;
-
-        TemplateContainer instance = template.Instantiate();
-        VisualElement chip = instance.Q<VisualElement>("hero-screen-roster-available-chip");
-        Label label = instance.Q<Label>("hero-screen-roster-available-chip-label");
-
-        if (label != null)
-        {
-            label.text = fighter.Name + " — " + fighter.Role;
-            label.EnableInClassList("hero-screen-roster-available-chip-label-disabled", !canAdd);
-        }
-
-        if (chip != null)
-            chip.EnableInClassList("hero-screen-roster-available-chip-disabled", !canAdd);
-
-        string fighterId = fighter.Id;
-        instance.RegisterCallback<PointerDownEvent>(evt =>
-        {
-            if (isGameOver)
-                return;
-
-            // ПКМ — карточка человека и у того, кто пока не в составе.
-            if (evt.button == 1)
-            {
-                ShowHeroPersonCard(fighterId);
-                evt.StopPropagation();
-                return;
-            }
-
-            if (evt.button != 0 || !canAdd)
-                return;
-
-            if (selectedFighterIds.Count < HeroScreenFighterSlots)
-                selectedFighterIds.Add(fighterId);
-
-            RefreshHeroScreen();
-            RefreshStableUiAfterStateChange();
-            evt.StopPropagation();
-        });
-
-        heroScreenRosterAvailableRow.Add(instance);
     }
 
     // Карта = единственный запуск похода (раздел 2/3/4 инструкции про карту
@@ -944,24 +827,11 @@ public partial class PrototypeUIController
     }
 
     // ------------------------------------------------------------------
-    // Карточка человека — модальное окно с затемнением (наполнение —
-    // PrototypeUIController.HeroCard.cs), боксы характеристик и теги с
-    // настоящими всплывающими подсказками по наведению. UI Toolkit в Player (не в редакторе) НЕ показывает
+    // Всплывающие подсказки по наведению. UI Toolkit в Player (не в редакторе) НЕ показывает
     // встроенный VisualElement.tooltip — поэтому, как и в BattleSandbox,
     // подсказки рисуются вручную отдельными плавающими панелями (легитимное
     // исключение §2 доктрины — поведение/позиционирование, не структура).
     // ------------------------------------------------------------------
-
-    private void HideHeroScreenUnitCard()
-    {
-        HideHeroScreenStatTooltip();
-        HideHeroScreenTagTooltip();
-
-        if (heroScreenUnitCard != null)
-            heroScreenUnitCard.style.display = DisplayStyle.None;
-        if (heroScreenUnitCardDimmer != null)
-            heroScreenUnitCardDimmer.style.display = DisplayStyle.None;
-    }
 
     private void ShowHeroScreenStatTooltip(VisualElement anchor, string title, string explanation)
     {
@@ -1086,8 +956,8 @@ public partial class PrototypeUIController
 
     // ------------------------------------------------------------------
     // Динамические чипы/подсказки (Assets/_Project/UI/Templates) — раздел
-    // 19/2 UI_ARCHITECTURE.md: количество неизвестно заранее (теги героя,
-    // теги существа в карточке, особенности, доступные бойцы), поэтому
+    // 19/2 UI_ARCHITECTURE.md: количество неизвестно заранее (теги человека,
+    // особенности, сюжетные вещи), поэтому
     // клонируются из шаблонов, а не создаются через new VisualElement/Label.
     // ------------------------------------------------------------------
 
@@ -1159,13 +1029,6 @@ public partial class PrototypeUIController
         if (heroStatRowTemplate == null)
             heroStatRowTemplate = Resources.Load<VisualTreeAsset>("Templates/HeroStatRow");
         return heroStatRowTemplate;
-    }
-
-    private VisualTreeAsset LoadHeroRosterAvailableChipTemplate()
-    {
-        if (heroRosterAvailableChipTemplate == null)
-            heroRosterAvailableChipTemplate = Resources.Load<VisualTreeAsset>("Templates/HeroRosterAvailableChip");
-        return heroRosterAvailableChipTemplate;
     }
 
     private VisualTreeAsset LoadHeroHintTemplate()

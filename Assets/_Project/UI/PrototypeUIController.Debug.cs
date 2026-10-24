@@ -58,6 +58,7 @@ public partial class PrototypeUIController
         // видеть результат ContinuousSimulationSystem.Update этого же кадра,
         // а отдельный LateUpdate в другом partial-файле создаёт CS0111.
         HandleGameMenuHotkeys();
+        HandleHeroScreenHotkeys();
         RefreshChapter01ReturnFlow();
         RefreshChapter01HomeFlow();
         RefreshHomePeopleUi();

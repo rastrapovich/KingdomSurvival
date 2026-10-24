@@ -14,7 +14,7 @@ using UnityEngine;
 // Экран "hero-screen" уже существовал в базе (частично, ~57 элементов) —
 // этот проход заменил запись полностью на схему, сгенерированную напрямую
 // из фактического UXML, поэтому в требованиях покрыты и старые, и новые
-// (supply/tooltips/roster-available/roster-card sub-элементы) узлы.
+// (supply/tooltips/roster-card sub-элементы) узлы.
 public sealed class HeroScreenLayoutTests
 {
     private const string HeroScreenId = "hero-screen";
@@ -114,21 +114,22 @@ public sealed class HeroScreenLayoutTests
         }
     }
 
-    // Экран относится ко всему отряду: качества — у Командира в левой
-    // колонке; снаряжение, развитие, характеристики и теги человека — в его
-    // карточке (открывается ПКМ или кликом по строке отряда).
-    [TestCase("hero-screen-qualities", "hero-screen-left-column-scroll")]
-    [TestCase("hero-screen-traits", "hero-screen-left-column-scroll")]
-    [TestCase("hero-screen-squad-list", "hero-screen-states")]
-    [TestCase("hero-screen-inventory", "hero-screen-right-column-scroll")]
+    // Экран на вкладках: качества и особенности — у Командира на «Герое»;
+    // характеристики, теги, снаряжение, сумка и кладовая — на «Снаряжении»,
+    // развитие и компетенции — на «Развитии» рабочего места человека
+    // (hero-screen-unit-card). Длинные списки — каждый в своей прокрутке.
+    [TestCase("hero-screen-qualities", "hero-screen-center-column")]
+    [TestCase("hero-screen-traits", "hero-screen-center-column")]
+    [TestCase("hero-screen-squad-list", "hero-screen-squad-scroll")]
+    [TestCase("hero-screen-inventory", "hero-screen-unit-card-gear")]
     [TestCase("hero-screen-unit-card-profile", "hero-screen-unit-card")]
-    [TestCase("hero-screen-unit-card-stat-attack", "hero-screen-unit-card")]
-    [TestCase("hero-screen-unit-card-tags", "hero-screen-unit-card")]
+    [TestCase("hero-screen-unit-card-stat-attack", "hero-screen-unit-card-stats")]
+    [TestCase("hero-screen-unit-card-tags", "hero-screen-unit-card-stats")]
     [TestCase("hero-screen-equipment-slot-1", "hero-screen-unit-card-equipment")]
-    [TestCase("hero-screen-unit-card-available", "hero-screen-unit-card-equipment")]
-    [TestCase("hero-screen-unit-card-choice", "hero-screen-unit-card-development")]
-    [TestCase("hero-screen-unit-card-competencies", "hero-screen-unit-card-development")]
-    [TestCase("hero-screen-unit-card-features", "hero-screen-unit-card-development")]
+    [TestCase("hero-screen-unit-card-available", "hero-screen-inventory-scroll")]
+    [TestCase("hero-screen-unit-card-choice", "hero-screen-growth-choice-scroll")]
+    [TestCase("hero-screen-unit-card-competencies", "hero-screen-growth-competency-scroll")]
+    [TestCase("hero-screen-unit-card-features", "hero-screen-growth-features-scroll")]
     public void HeroScreen_PersonDetails_LiveInPersonCard(string elementId, string expectedParentId)
     {
         UILayoutScreenDefinition screen = LoadDatabase().FindScreen(HeroScreenId);
@@ -138,6 +139,28 @@ public sealed class HeroScreenLayoutTests
         Assert.AreEqual(expectedParentId, element.ParentId, elementId);
     }
 
+    // Вкладка и её страница: «Снаряжение» и «Развитие» — две страницы одного
+    // рабочего места человека.
+    [TestCase("hero-screen-tab-hero", "hero-screen-page-hero", "hero-screen-pages")]
+    [TestCase("hero-screen-tab-squad", "hero-screen-page-squad", "hero-screen-pages")]
+    [TestCase("hero-screen-tab-gear", "hero-screen-unit-card-gear", "hero-screen-unit-card")]
+    [TestCase("hero-screen-tab-growth", "hero-screen-unit-card-development", "hero-screen-unit-card")]
+    [TestCase("hero-screen-tab-journey", "hero-screen-page-journey", "hero-screen-pages")]
+    public void HeroScreen_EveryTab_HasItsPage(string tabId, string pageId, string pageParentId)
+    {
+        UILayoutScreenDefinition screen = LoadDatabase().FindScreen(HeroScreenId);
+        Assert.IsNotNull(screen);
+        Assert.AreEqual("hero-screen-tabs", screen.FindElement(tabId)?.ParentId, tabId);
+        Assert.IsNotNull(screen.FindElement(tabId + "-badge"), tabId + ": значок вкладки.");
+        Assert.AreEqual(pageParentId, screen.FindElement(pageId)?.ParentId, pageId);
+        Assert.AreEqual("hero-screen-pages", screen.FindElement("hero-screen-unit-card")?.ParentId);
+    }
+
+    // Модальной карточки человека и колонок с общей прокруткой больше нет.
+    [TestCase("hero-screen-unit-card-dimmer")]
+    [TestCase("hero-screen-unit-card-close-button")]
+    [TestCase("hero-screen-columns")]
+    [TestCase("hero-screen-left-column-scroll")]
     [TestCase("hero-screen-equipment")]
     [TestCase("hero-screen-stats")]
     [TestCase("hero-screen-tags")]
@@ -145,7 +168,7 @@ public sealed class HeroScreenLayoutTests
     public void HeroScreen_HasNoPerPersonPanels(string elementId)
     {
         UILayoutScreenDefinition screen = LoadDatabase().FindScreen(HeroScreenId);
-        Assert.IsNull(screen.FindElement(elementId), elementId + " — в карточке человека, а не на экране отряда.");
+        Assert.IsNull(screen.FindElement(elementId), elementId + " — такого узла на экране героя больше нет.");
     }
 
     // Шесть качеств Командира на экране и семь боевых характеристик в

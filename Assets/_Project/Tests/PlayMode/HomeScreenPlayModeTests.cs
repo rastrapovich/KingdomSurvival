@@ -153,6 +153,77 @@ public sealed class HomeScreenPlayModeTests
             root.Q<Label>("hero-screen-unit-card-stat-defense-value").text, "Карточка показывает собранные числа.");
     }
 
+    // Экран героя на вкладках: каждая вкладка показывает свою страницу,
+    // «Снаряжение» и «Развитие» — рабочее место человека; фильтры таблицы
+    // отряда и кладовой сужают списки, порядок по имени — по алфавиту.
+    [UnityTest]
+    public IEnumerator HeroScreen_Tabs_SwitchPages_AndListsFilterAndSort()
+    {
+        AsyncOperation load = SceneManager.LoadSceneAsync(MainScene, LoadSceneMode.Single);
+        while (!load.isDone)
+            yield return null;
+        yield return Frames(20);
+
+        MonoBehaviour controller = FindController();
+        Invoke(controller, "StartNewGameFromMenu");
+        yield return Frames(20);
+        Invoke(controller, "OpenHeroScreen");
+        yield return Frames(5);
+
+        VisualElement root = controller.GetComponent<UIDocument>().rootVisualElement;
+        VisualElement personPlace = root.Q<VisualElement>("hero-screen-unit-card");
+        Assert.IsTrue(root.Q<VisualElement>("hero-screen-page-hero").ClassListContains("hero-screen-page--active"));
+        Assert.AreEqual(DisplayStyle.None, personPlace.style.display.value);
+
+        Click(root.Q<Button>("hero-screen-tab-squad"));
+        yield return Frames(3);
+        Assert.IsTrue(root.Q<VisualElement>("hero-screen-page-squad").ClassListContains("hero-screen-page--active"));
+        Assert.IsFalse(root.Q<VisualElement>("hero-screen-page-hero").ClassListContains("hero-screen-page--active"));
+        List<VisualElement> all = SquadRows(root);
+        Assert.Greater(all.Count, 1, "Таблица отряда: Командир и бойцы.");
+
+        Click(root.Q<Button>("hero-screen-squad-filter-roster"));
+        yield return Frames(3);
+        List<VisualElement> roster = SquadRows(root);
+        Assert.Greater(roster.Count, 0);
+        Assert.LessOrEqual(roster.Count, all.Count);
+        Assert.IsTrue(roster.All(row => row.ClassListContains("hero-squad-row--commander") || row.ClassListContains("hero-squad-row--roster")),
+            "Фильтр «В составе» — только Командир и бойцы похода.");
+
+        Click(root.Q<Button>("hero-screen-squad-filter-all"));
+        Click(root.Q<Button>("hero-screen-squad-sort-name"));
+        yield return Frames(3);
+        List<string> names = SquadRows(root).Select(row => row.Q<Label>(className: "hero-squad-name").text).ToList();
+        CollectionAssert.AreEqual(names.OrderBy(n => n, System.StringComparer.CurrentCulture).ToList(), names, "Порядок «Имя».");
+
+        Click(root.Q<Button>("hero-screen-tab-growth"));
+        yield return Frames(3);
+        Assert.AreEqual(DisplayStyle.Flex, personPlace.style.display.value);
+        Assert.IsTrue(root.Q<VisualElement>("hero-screen-unit-card-development").ClassListContains("hero-screen-person-page--active"));
+        Assert.Greater(root.Q<VisualElement>("hero-screen-people-rail-list").childCount, 1, "Полоса людей отряда.");
+
+        Click(root.Q<Button>("hero-screen-tab-gear"));
+        yield return Frames(3);
+        Assert.IsTrue(root.Q<VisualElement>("hero-screen-unit-card-gear").ClassListContains("hero-screen-person-page--active"));
+        VisualElement store = root.Q<VisualElement>("hero-screen-unit-card-available");
+        Assert.IsTrue(store.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"), "Кладовая показывает свои вещи.");
+
+        Click(root.Q<Button>("hero-screen-inventory-filter-weapon"));
+        yield return Frames(3);
+        Assert.IsFalse(store.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"), "Фильтр «Оружие» прячет защиту.");
+
+        Click(root.Q<Button>("hero-screen-tab-journey"));
+        yield return Frames(3);
+        Assert.IsTrue(root.Q<VisualElement>("hero-screen-page-journey").ClassListContains("hero-screen-page--active"));
+        Assert.AreEqual(DisplayStyle.None, personPlace.style.display.value);
+    }
+
+    private static List<VisualElement> SquadRows(VisualElement root)
+    {
+        return root.Q<VisualElement>("hero-screen-squad-list").Children()
+            .Where(child => child.ClassListContains("hero-squad-row")).ToList();
+    }
+
     [UnityTest]
     public IEnumerator PrepPanel_Buttons_ChangeSharedRoster_AndForecast_PeopleStayHome()
     {

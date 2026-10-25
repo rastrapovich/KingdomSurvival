@@ -40,8 +40,6 @@ namespace KingdomSurvival.BattleSandbox
         private Label titleLabel;
         private UnitPortraitElement portraitImage;
         private VisualElement statTooltip;
-        private Label statTooltipTitle;
-        private Label statTooltipText;
         private string renderedUnitKey;
 
         private void Awake()
@@ -125,15 +123,13 @@ namespace KingdomSurvival.BattleSandbox
                 if (statTooltip.hierarchy.childCount > 0 &&
                     statTooltip.hierarchy.ElementAt(0) is Label tooltipTitle)
                 {
-                    statTooltipTitle = tooltipTitle;
-                    statTooltipTitle.style.fontSize = 16f;
+                    tooltipTitle.style.fontSize = 16f;
                 }
 
                 if (statTooltip.hierarchy.childCount > 1 &&
                     statTooltip.hierarchy.ElementAt(1) is Label tooltipText)
                 {
-                    statTooltipText = tooltipText;
-                    statTooltipText.style.fontSize = 15f;
+                    tooltipText.style.fontSize = 15f;
                 }
             }
 
@@ -144,41 +140,13 @@ namespace KingdomSurvival.BattleSandbox
                 HideChild(info, 9);
                 HideChild(info, 10);
 
-                ConfigureStatRow(
-                    info,
-                    1,
-                    "ЖИЗНИ",
-                    "Текущий запас здоровья бойца. При 0 жизней боец выбывает из боя.");
-                ConfigureStatRow(
-                    info,
-                    2,
-                    "АТАКА",
-                    "Сравнивается с Защитой цели и определяет множитель наносимого урона.");
-                ConfigureStatRow(
-                    info,
-                    3,
-                    "ЗАЩИТА",
-                    "Сравнивается с Атакой противника и влияет на количество получаемого урона.");
-                ConfigureStatRow(
-                    info,
-                    4,
-                    "УРОН",
-                    "Базовое количество урона до применения результата сравнения Атаки и Защиты.");
-                ConfigureStatRow(
-                    info,
-                    5,
-                    "ХОД",
-                    "Запас движения бойца на активацию. Стоимость перемещения зависит от пройденных гексов и местности.");
-                ConfigureStatRow(
-                    info,
-                    6,
-                    "ИНИЦИАТИВА",
-                    "Определяет порядок активации бойцов в начале каждого раунда.");
-                ConfigureStatRow(
-                    info,
-                    7,
-                    "ДАЛЬНОСТЬ АТАКИ",
-                    "Максимальное расстояние в гексах, с которого боец может атаковать цель.");
+                // Подсказки строк не перезаписываются: в них описание окна
+                // бойца с числами (SandboxFighterPresentation) и разбор
+                // Атаки/Защиты/Дальности в бою (BattleSandboxDefenseUiRefiner).
+                // Прежняя замена через кадр показывала цифры на мгновение и
+                // затирала их текстом без чисел.
+                for (int index = 1; index <= 7; index++)
+                    ConfigureStatRow(info, index);
 
                 tagRow = info.Q<VisualElement>(TagRowName);
                 if (tagRow == null)
@@ -195,11 +163,7 @@ namespace KingdomSurvival.BattleSandbox
             EnsureTagTooltip();
         }
 
-        private void ConfigureStatRow(
-            VisualElement info,
-            int index,
-            string titleText,
-            string description)
+        private void ConfigureStatRow(VisualElement info, int index)
         {
             if (info == null || index < 0 || index >= info.hierarchy.childCount)
                 return;
@@ -207,26 +171,6 @@ namespace KingdomSurvival.BattleSandbox
             VisualElement row = info.hierarchy.ElementAt(index);
             row.style.display = DisplayStyle.Flex;
             MakeStatRowCompact(info, index);
-
-            if (row.hierarchy.childCount > 0 && row.hierarchy.ElementAt(0) is Label title)
-                title.text = titleText;
-
-            row.RegisterCallback<PointerEnterEvent>(_ =>
-            {
-                row.schedule.Execute(() => OverrideStatTooltip(titleText, description)).ExecuteLater(1);
-            });
-        }
-
-        private void OverrideStatTooltip(string title, string description)
-        {
-            if (statTooltip == null || statTooltipTitle == null || statTooltipText == null ||
-                statTooltip.resolvedStyle.display == DisplayStyle.None)
-            {
-                return;
-            }
-
-            statTooltipTitle.text = title;
-            statTooltipText.text = description;
         }
 
         private void EnsureTagTooltip()

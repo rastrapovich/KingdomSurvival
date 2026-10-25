@@ -252,7 +252,7 @@ namespace KingdomSurvival.BattleSandbox
                     SandboxCombatStatPresentation.GetRangeSnapshot(state);
                 ShowHoverPopup(
                     row,
-                    "ДАЛЬНОСТЬ",
+                    "ДАЛЬНОСТЬ АТАКИ",
                     "Максимальная гексовая дистанция обычной атаки.\n" +
                     "Для бойца с тегом «Дальний бой» холм даёт +1 к дальности.\n\n" +
                     range.BuildBreakdown());
@@ -285,7 +285,7 @@ namespace KingdomSurvival.BattleSandbox
                     "Максимальное снижение урона — 70%.\n\n" +
                     BuildDefenseBreakdown(defense);
             }
-            else if (tooltipTitle.text == "ДАЛЬНОСТЬ")
+            else if (tooltipTitle.text == "ДАЛЬНОСТЬ АТАКИ")
             {
                 tooltipText.text =
                     "Максимальная гексовая дистанция обычной атаки.\n" +

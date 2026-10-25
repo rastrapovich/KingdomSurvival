@@ -396,8 +396,8 @@ public partial class PrototypeUIController
         }
     }
 
-    // ПКМ на карточке — вещи человека (вкладка «Снаряжение»). ЛКМ — убрать
-    // бойца из состава, но только пока refs.ToggleFighterId задан
+    // ЛКМ на карточке — убрать бойца из состава, но только пока
+    // refs.ToggleFighterId задан
     // (RefreshHeroScreenRoster выставляет его только для реально убираемых
     // бойцов вне похода — не для командира и не во время активной
     // экспедиции). Регистрируется один раз на статичной карточке, а не при
@@ -409,16 +409,6 @@ public partial class PrototypeUIController
         {
             if (isGameOver)
                 return;
-
-            if (evt.button == 1)
-            {
-                if (!string.IsNullOrEmpty(refs.PersonId))
-                {
-                    ShowHeroPersonCard(refs.PersonId);
-                    evt.StopPropagation();
-                }
-                return;
-            }
 
             if (evt.button == 0 && refs.ToggleFighterId != null)
             {
@@ -773,7 +763,7 @@ public partial class PrototypeUIController
 
         // ПКМ открывает карточку человека; ждущий выбор развития виден сразу.
         bool choice = refs.PersonId != null && CharacterProgressionService.PendingChoices(gameState, refs.PersonId) > 0;
-        refs.Hint.text = choice ? "ждёт выбор развития" : isCommander ? "ПКМ: вещи" : "ЛКМ: убрать · ПКМ: вещи";
+        refs.Hint.text = choice ? "ждёт выбор развития" : isCommander ? "ведёт отряд" : "клик — убрать";
         refs.Hint.EnableInClassList("hero-screen-roster-card-hint--attention", choice);
         refs.Hint.style.display = filled ? DisplayStyle.Flex : DisplayStyle.None;
     }

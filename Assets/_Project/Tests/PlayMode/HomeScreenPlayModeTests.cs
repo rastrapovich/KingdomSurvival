@@ -212,6 +212,21 @@ public sealed class HomeScreenPlayModeTests
         yield return Frames(3);
         Assert.IsFalse(store.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"), "Фильтр «Оружие» прячет защиту.");
 
+        // Сумка и кладовая — один список; «В сумке» прячет то, что в кладовой.
+        Click(root.Q<Button>("hero-screen-inventory-filter-all"));
+        Click(root.Q<Button>("hero-screen-inventory-place-pack"));
+        yield return Frames(3);
+        Assert.IsFalse(store.Query<Label>().ToList().Any(l => l.text == "Кольчуга из клети"), "Фильтр «В сумке» прячет кладовую.");
+        Click(root.Q<Button>("hero-screen-inventory-place-all"));
+        yield return Frames(3);
+
+        // Переходы между вкладками — только вкладками: ни в таблице отряда,
+        // ни на «Герое» нет кнопок, ведущих на другие вкладки.
+        string[] links = { "Вещи", "Развитие", "Выбрать развитие" };
+        Assert.IsFalse(root.Q<VisualElement>("hero-screen-squad-list").Query<Button>().ToList().Any(b => links.Contains(b.text)));
+        Assert.AreEqual(0, root.Q<VisualElement>("hero-screen-page-hero").Query<Button>().ToList()
+            .Count(b => !b.ClassListContains("hero-screen-supply-button")), "На «Герое» — только кнопки запасов.");
+
         Click(root.Q<Button>("hero-screen-tab-journey"));
         yield return Frames(3);
         Assert.IsTrue(root.Q<VisualElement>("hero-screen-page-journey").ClassListContains("hero-screen-page--active"));

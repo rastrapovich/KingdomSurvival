@@ -4081,35 +4081,6 @@ MonoBehaviour:
       fontStyle: 0
       horizontalAlignment: 0
       verticalAlignment: 0
-    - id: hero-screen-hero-growth-open
-      displayName: hero-growth-open
-      parentId: hero-screen-hero-growth
-      kind: 3
-      portraitSize: 2
-      targetName: hero-screen-hero-growth-open
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 34
-        y: 196
-        width: 1120
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 11
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
     - id: hero-screen-right-column
       displayName: right column
       parentId: hero-screen-page-hero
@@ -4203,35 +4174,6 @@ MonoBehaviour:
       kind: 4
       portraitSize: 2
       targetName: hero-screen-hero-gear-list
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 34
-        y: 196
-        width: 1120
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 11
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-hero-gear-open
-      displayName: hero-gear-open
-      parentId: hero-screen-hero-gear
-      kind: 3
-      portraitSize: 2
-      targetName: hero-screen-hero-gear-open
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
@@ -4609,35 +4551,6 @@ MonoBehaviour:
       kind: 1
       portraitSize: 2
       targetName: hero-screen-party-glance-label
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 34
-        y: 196
-        width: 1120
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 11
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-party-glance-open
-      displayName: party-glance-open
-      parentId: hero-screen-party-glance
-      kind: 3
-      portraitSize: 2
-      targetName: hero-screen-party-glance-open
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
@@ -8842,22 +8755,22 @@ MonoBehaviour:
       fontStyle: 0
       horizontalAlignment: 0
       verticalAlignment: 0
-    - id: hero-screen-inventory-grid
-      displayName: inventory grid
+    - id: hero-screen-inventory-place-toolbar
+      displayName: inventory-place-toolbar
       parentId: hero-screen-inventory
       kind: 4
       portraitSize: 2
-      targetName: hero-screen-inventory-grid
+      targetName: hero-screen-inventory-place-toolbar
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
       previewText: 
       rect:
         serializedVersion: 2
-        x: 98
-        y: 1618
-        width: 800
-        height: 100
+        x: 34
+        y: 196
+        width: 1120
+        height: 180
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -8871,22 +8784,22 @@ MonoBehaviour:
       fontStyle: 0
       horizontalAlignment: 0
       verticalAlignment: 0
-    - id: hero-screen-inventory-slot-1
-      displayName: inventory slot 1
-      parentId: hero-screen-inventory-grid
-      kind: 0
+    - id: hero-screen-inventory-place-all
+      displayName: inventory-place-all
+      parentId: hero-screen-inventory-place-toolbar
+      kind: 3
       portraitSize: 2
-      targetName: hero-screen-inventory-slot-1
+      targetName: hero-screen-inventory-place-all
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
       previewText: 
       rect:
         serializedVersion: 2
-        x: 114
-        y: 2138
-        width: 720
-        height: 80
+        x: 34
+        y: 196
+        width: 1120
+        height: 180
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -8900,109 +8813,22 @@ MonoBehaviour:
       fontStyle: 0
       horizontalAlignment: 0
       verticalAlignment: 0
-    - id: hero-screen-inventory-slot-1-name
-      displayName: inventory slot 1 name
-      parentId: hero-screen-inventory-slot-1
-      kind: 1
+    - id: hero-screen-inventory-place-pack
+      displayName: inventory-place-pack
+      parentId: hero-screen-inventory-place-toolbar
+      kind: 3
       portraitSize: 2
-      targetName: hero-screen-inventory-slot-1-name
+      targetName: hero-screen-inventory-place-pack
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
       previewText: 
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
+        x: 34
+        y: 196
+        width: 1120
         height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-1-effect
-      displayName: inventory slot 1 effect
-      parentId: hero-screen-inventory-slot-1
-      kind: 1
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-1-effect
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-1-actions
-      displayName: inventory slot 1 actions
-      parentId: hero-screen-inventory-slot-1
-      kind: 0
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-1-actions
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-2
-      displayName: inventory slot 2
-      parentId: hero-screen-inventory-grid
-      kind: 0
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-2
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 114
-        y: 2222
-        width: 720
-        height: 80
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -9016,109 +8842,22 @@ MonoBehaviour:
       fontStyle: 0
       horizontalAlignment: 0
       verticalAlignment: 0
-    - id: hero-screen-inventory-slot-2-name
-      displayName: inventory slot 2 name
-      parentId: hero-screen-inventory-slot-2
-      kind: 1
+    - id: hero-screen-inventory-place-storage
+      displayName: inventory-place-storage
+      parentId: hero-screen-inventory-place-toolbar
+      kind: 3
       portraitSize: 2
-      targetName: hero-screen-inventory-slot-2-name
+      targetName: hero-screen-inventory-place-storage
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0
       previewText: 
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
+        x: 34
+        y: 196
+        width: 1120
         height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-2-effect
-      displayName: inventory slot 2 effect
-      parentId: hero-screen-inventory-slot-2
-      kind: 1
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-2-effect
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-2-actions
-      displayName: inventory slot 2 actions
-      parentId: hero-screen-inventory-slot-2
-      kind: 0
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-2-actions
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-3
-      displayName: inventory slot 3
-      parentId: hero-screen-inventory-grid
-      kind: 0
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-3
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 114
-        y: 2306
-        width: 720
-        height: 80
       sprite: {fileID: 0}
       texture: {fileID: 0}
       imageMode: 0
@@ -9128,296 +8867,6 @@ MonoBehaviour:
       opacity: 1
       font: {fileID: 0}
       fontSize: 11
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-3-name
-      displayName: inventory slot 3 name
-      parentId: hero-screen-inventory-slot-3
-      kind: 1
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-3-name
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-3-effect
-      displayName: inventory slot 3 effect
-      parentId: hero-screen-inventory-slot-3
-      kind: 1
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-3-effect
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-3-actions
-      displayName: inventory slot 3 actions
-      parentId: hero-screen-inventory-slot-3
-      kind: 0
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-3-actions
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-4
-      displayName: inventory slot 4
-      parentId: hero-screen-inventory-grid
-      kind: 0
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-4
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 114
-        y: 2390
-        width: 720
-        height: 80
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 11
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-4-name
-      displayName: inventory slot 4 name
-      parentId: hero-screen-inventory-slot-4
-      kind: 1
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-4-name
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-4-effect
-      displayName: inventory slot 4 effect
-      parentId: hero-screen-inventory-slot-4
-      kind: 1
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-4-effect
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-slot-4-actions
-      displayName: inventory slot 4 actions
-      parentId: hero-screen-inventory-slot-4
-      kind: 0
-      portraitSize: 2
-      targetName: hero-screen-inventory-slot-4-actions
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-story-title
-      displayName: inventory story title
-      parentId: hero-screen-inventory
-      kind: 1
-      portraitSize: 2
-      targetName: hero-screen-inventory-story-title
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-inventory-story
-      displayName: inventory story
-      parentId: hero-screen-inventory
-      kind: 0
-      portraitSize: 2
-      targetName: hero-screen-inventory-story
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
-      textColor: {r: 1, g: 1, b: 1, a: 1}
-      fontStyle: 0
-      horizontalAlignment: 0
-      verticalAlignment: 0
-    - id: hero-screen-unit-card-available-title
-      displayName: unit card available title
-      parentId: hero-screen-inventory
-      kind: 1
-      portraitSize: 2
-      targetName: hero-screen-unit-card-available-title
-      overrideRect: 0
-      overrideBackground: 0
-      overrideText: 0
-      previewText: 
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 320
-        height: 180
-      sprite: {fileID: 0}
-      texture: {fileID: 0}
-      imageMode: 0
-      imageScale: 1
-      imageOffset: {x: 0, y: 0}
-      tint: {r: 1, g: 1, b: 1, a: 1}
-      opacity: 1
-      font: {fileID: 0}
-      fontSize: 12
       textColor: {r: 1, g: 1, b: 1, a: 1}
       fontStyle: 0
       horizontalAlignment: 0
@@ -9776,6 +9225,64 @@ MonoBehaviour:
       kind: 1
       portraitSize: 2
       targetName: hero-screen-inventory-message
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 320
+        height: 180
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-inventory-story-title
+      displayName: inventory story title
+      parentId: hero-screen-inventory
+      kind: 1
+      portraitSize: 2
+      targetName: hero-screen-inventory-story-title
+      overrideRect: 0
+      overrideBackground: 0
+      overrideText: 0
+      previewText: 
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 320
+        height: 180
+      sprite: {fileID: 0}
+      texture: {fileID: 0}
+      imageMode: 0
+      imageScale: 1
+      imageOffset: {x: 0, y: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      opacity: 1
+      font: {fileID: 0}
+      fontSize: 12
+      textColor: {r: 1, g: 1, b: 1, a: 1}
+      fontStyle: 0
+      horizontalAlignment: 0
+      verticalAlignment: 0
+    - id: hero-screen-inventory-story
+      displayName: inventory story
+      parentId: hero-screen-inventory
+      kind: 0
+      portraitSize: 2
+      targetName: hero-screen-inventory-story
       overrideRect: 0
       overrideBackground: 0
       overrideText: 0

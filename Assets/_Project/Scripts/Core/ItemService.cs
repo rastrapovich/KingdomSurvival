@@ -7,7 +7,9 @@ using System.Collections.Generic;
 // кто в отряде, кладовая недоступна («Нужно вернуться в Дом»).
 public static class ItemService
 {
-    public const int HeroPackSize = 4;
+    // Решение пользователя 24.10.2026 (PR08_HERO_ITEMS_SPEC §0.8): сумка
+    // вмещает много вещей; прежний рабочий лимит был 4.
+    public const int HeroPackSize = 30;
     public const string StartingKitGrant = "pr08.grant.starting_kit";
 
     // Стартовое снаряжение (§7 ТЗ с правкой §0.4).

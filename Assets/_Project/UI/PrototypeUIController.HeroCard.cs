@@ -9,8 +9,8 @@ using UnityEngine.UIElements;
 // на «Снаряжении» — собранные боевые характеристики и теги, три слота,
 // сумка и кладовая (HeroItems.cs); на «Развитии» — выбор развития карточками
 // с фильтром по группе, особенности и следы, компетенции с порядком
-// (канон v1.48 §27). Открывается вкладкой, ПКМ по составу, строкой таблицы
-// отряда. Качества — только у Командира, на вкладке «Герой».
+// (канон v1.48 §27). Открывается только вкладкой; человек выбирается в
+// полосе слева. Качества — только у Командира, на вкладке «Герой».
 // Структура — Prototype_Main.uxml, стиль — HeroScreen.uss.
 public partial class PrototypeUIController
 {
@@ -58,7 +58,6 @@ public partial class PrototypeUIController
     private ScrollView heroGrowthChoiceScroll;
     private Label heroHeroGrowthLabel;
     private VisualElement heroHeroGrowthList;
-    private Button heroHeroGrowthOpenButton;
     private HeroToggleGroup<HeroGrowthFilter> heroGrowthFilter;
     private HeroToggleGroup<HeroCompetencySort> heroCompetencySort;
     private readonly string[] heroCardStatExplanations = new string[7];
@@ -84,18 +83,8 @@ public partial class PrototypeUIController
         heroGrowthChoiceScroll = BindRequiredElement<ScrollView>(interfaceRoot, HeroScreenName, "hero-screen-growth-choice-scroll");
         heroHeroGrowthLabel = BindRequiredElement<Label>(interfaceRoot, HeroScreenName, "hero-screen-hero-growth-label");
         heroHeroGrowthList = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-hero-growth-list");
-        heroHeroGrowthOpenButton = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-hero-growth-open");
-        if (heroHeroGrowthOpenButton != null)
-        {
-            heroHeroGrowthOpenButton.clicked += () =>
-            {
-                CommanderData commander = gameState != null ? gameState.GetSelectedCommander() : null;
-                if (commander != null)
-                    ShowHeroPersonOnTab(commander.Id, HeroScreenTab.Growth);
-            };
-        }
 
-        bool ok = heroHeroGrowthLabel != null && heroHeroGrowthList != null && heroHeroGrowthOpenButton != null &&
+        bool ok = heroHeroGrowthLabel != null && heroHeroGrowthList != null &&
 heroCardSubtitle != null && heroCardLevel != null && heroCardExperienceLabel != null &&
                   heroCardExperienceFill != null && heroCardCondition != null && heroCardHealthFill != null &&
                   heroCardMessageLabel != null && heroCardChoice != null && heroCardCompetencies != null &&
@@ -442,7 +431,7 @@ heroCardSubtitle != null && heroCardLevel != null && heroCardExperienceLabel != 
         int pending = CharacterProgressionService.PendingChoices(gameState, commander.Id);
         int next = CharacterProgressionService.ProfileFor(gameState, commander.Id).NextChoiceLevel(record.Level);
         heroHeroGrowthLabel.text = pending > 0
-            ? "Ждёт выбор развития" + (pending > 1 ? ": " + pending : string.Empty) + " — откройте «Развитие»."
+            ? "Ждёт выбор развития" + (pending > 1 ? ": " + pending : string.Empty) + " — вкладка «Развитие»."
             : next > 0 ? "Следующий выбор развития — на уровне " + next + "." : "Выборов развития больше нет.";
 
         List<HeroCompetencyEntry> entries = new List<HeroCompetencyEntry>();

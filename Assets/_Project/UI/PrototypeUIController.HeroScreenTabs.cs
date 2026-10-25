@@ -9,8 +9,9 @@ using UnityEngine.UIElements;
 // человека (hero-screen-unit-card): слева полоса людей отряда, выбранный
 // человек общий для обеих вкладок. Значки на вкладках — сколько ждёт
 // внимания. Клавиши: 1–5 и Q/E — вкладки, ←/→ — другой человек, Esc —
-// закрыть (GameMenus.cs). Переключатели фильтров и порядка всех списков —
-// HeroToggleGroup ниже.
+// закрыть (GameMenus.cs). Других переходов между вкладками на экране нет —
+// ни кнопок, ни кликов по строкам. Переключатели фильтров и порядка всех
+// списков — HeroToggleGroup ниже.
 public partial class PrototypeUIController
 {
     private enum HeroScreenTab
@@ -92,8 +93,6 @@ public partial class PrototypeUIController
     private VisualElement heroScreenGearPage;
     private VisualElement heroScreenGrowthPage;
     private VisualElement heroPeopleRailList;
-    private Button heroScreenHeroGearOpenButton;
-    private Button heroScreenPartyGlanceOpenButton;
 
     private bool IsHeroPersonTab => heroScreenTab == HeroScreenTab.Gear || heroScreenTab == HeroScreenTab.Growth;
 
@@ -115,12 +114,9 @@ public partial class PrototypeUIController
         heroScreenGearPage = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-gear");
         heroScreenGrowthPage = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-unit-card-development");
         heroPeopleRailList = BindRequiredElement<VisualElement>(interfaceRoot, HeroScreenName, "hero-screen-people-rail-list");
-        heroScreenHeroGearOpenButton = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-hero-gear-open");
-        heroScreenPartyGlanceOpenButton = BindRequiredElement<Button>(interfaceRoot, HeroScreenName, "hero-screen-party-glance-open");
 
         ok &= heroScreenPageHero != null && heroScreenPageSquad != null && heroScreenPageJourney != null &&
-              heroScreenGearPage != null && heroScreenGrowthPage != null && heroPeopleRailList != null &&
-              heroScreenHeroGearOpenButton != null && heroScreenPartyGlanceOpenButton != null;
+              heroScreenGearPage != null && heroScreenGrowthPage != null && heroPeopleRailList != null;
         if (!ok)
             return false;
 
@@ -129,14 +125,6 @@ public partial class PrototypeUIController
             HeroScreenTab tab = (HeroScreenTab)i;
             heroScreenTabButtons[i].clicked += () => SwitchHeroScreenTab(tab);
         }
-
-        heroScreenHeroGearOpenButton.clicked += () =>
-        {
-            CommanderData commander = gameState != null ? gameState.GetSelectedCommander() : null;
-            if (commander != null)
-                ShowHeroPersonOnTab(commander.Id, HeroScreenTab.Gear);
-        };
-        heroScreenPartyGlanceOpenButton.clicked += () => SwitchHeroScreenTab(HeroScreenTab.Squad);
 
         // Колесо мыши в списках — крупным шагом: длинный список листается
         // за несколько движений, а не за десятки.
@@ -174,8 +162,10 @@ public partial class PrototypeUIController
         SwitchHeroScreenTab((HeroScreenTab)((((int)heroScreenTab + step) % count + count) % count));
     }
 
-    // Показать человека на вкладке «Снаряжение» (ПКМ по составу, строка
-    // таблицы, вызовы извне). Если открыто «Развитие» — остаётся на нём.
+    // Показать человека на вкладке «Снаряжение» — программный вход (тесты,
+    // будущие вызовы извне). В самом экране переходы между вкладками — только
+    // вкладками; человека выбирают в полосе слева. Если открыто «Развитие» —
+    // остаётся на нём.
     private void ShowHeroPersonCard(string personId)
     {
         ShowHeroPersonOnTab(personId, IsHeroPersonTab ? heroScreenTab : HeroScreenTab.Gear);

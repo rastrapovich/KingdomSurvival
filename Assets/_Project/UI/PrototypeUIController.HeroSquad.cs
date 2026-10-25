@@ -4,7 +4,8 @@ using UnityEngine.UIElements;
 
 // Вкладка «Отряд» экрана героя: таблица людей (Командир и бойцы, которые
 // сейчас рядом) — портрет, уровень и опыт, здоровье, состояние, место в
-// походе и действия: взять в состав / оставить, вещи, развитие. Фильтр
+// походе и одно действие: взять в состав / оставить. Вещи и развитие —
+// на своих вкладках, отсюда на них не ведут ни кнопки, ни клик. Фильтр
 // («Нужен уход», «Ждут выбора»…) и порядок (уровень, здоровье, имя) —
 // переключатели над таблицей; на фильтрах — сколько людей под ним.
 // Состав меняется только командами ExpeditionPreparation (через
@@ -262,18 +263,6 @@ public partial class PrototypeUIController
             else
                 AddHeroSquadAction(actions, "В состав", "hero-squad-action--primary", () => ChangeHeroSquadRoster(personId, true));
         }
-        AddHeroSquadAction(actions, "Вещи", null, () => ShowHeroPersonOnTab(personId, HeroScreenTab.Gear));
-        AddHeroSquadAction(actions, entry.Choice ? "Выбрать развитие" : "Развитие",
-            entry.Choice ? "hero-squad-action--attention" : null,
-            () => ShowHeroPersonOnTab(personId, HeroScreenTab.Growth));
-
-        // Клик по строке (не по кнопке) — его вещи.
-        row.RegisterCallback<ClickEvent>(evt =>
-        {
-            if (isGameOver || evt.target is Button)
-                return;
-            ShowHeroPersonOnTab(personId, HeroScreenTab.Gear);
-        });
         return row;
     }
 

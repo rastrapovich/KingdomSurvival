@@ -178,6 +178,11 @@ public sealed class ItemsPr08Tests
             ItemInstanceData protection = Equipped(state, id, ItemSlot.Protection);
             Assert.IsTrue(ItemService.TryUnequip(state, protection.InstanceId, out string message), message);
         }
+        Assert.AreEqual(4, ItemService.HeroPackCount(state), "Снятое в пути — в сумку героя.");
+
+        // Сумка вмещает много, но не бесконечно: добить до предела.
+        for (int i = ItemService.HeroPackCount(state); i < ItemService.HeroPackSize; i++)
+            ItemService.GrantOnce(state, "test.fill." + i, ItemCatalog.DriedFish, HeroId(state));
         Assert.AreEqual(ItemService.HeroPackSize, ItemService.HeroPackCount(state));
 
         ItemInstanceData weapon = Equipped(state, "garrick", ItemSlot.Weapon);

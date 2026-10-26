@@ -197,14 +197,14 @@ namespace KingdomSurvival.WorldMapVisual
                         float cr = baseColor.r, cg = baseColor.g, cb = baseColor.b;
                         if (pattern != null)
                         {
-                            Color s = pattern.SampleWrapped(x / tilePx, y / tilePx);
+                            Color s = pattern.SampleWrapped(x / tilePx, y / tilePx, pattern.Width / tilePx);
                             float k = style.BasePatternStrength * s.a;
                             cr += (s.r * tint.r - cr) * k;
                             cg += (s.g * tint.g - cg) * k;
                             cb += (s.b * tint.b - cb) * k;
                         }
                         if (detail != null)
-                            Modulate(ref cr, ref cg, ref cb, detail, x / detailPx, y / detailPx, style.DetailPatternStrength);
+                            Modulate(ref cr, ref cg, ref cb, detail, x / detailPx, y / detailPx, style.DetailPatternStrength, detailPx);
                         if (style.DrawBase && style.UseTintVariation && style.TintVariation > 0f)
                         {
                             float v = (float)noise.Fbm(x * variationFrequency, y * variationFrequency, 3, 0.5) * style.TintVariation;
@@ -298,7 +298,7 @@ namespace KingdomSurvival.WorldMapVisual
                         if (pattern != null)
                         {
                             float tile = tiles[area[p]];
-                            Color s = pattern.SampleWrapped(x / tile, y / tile);
+                            Color s = pattern.SampleWrapped(x / tile, y / tile, pattern.Width / tile);
                             float strength = arts[area[p]].PatternStrength * s.a;
                             r[p] += (s.r - r[p]) * strength;
                             g[p] += (s.g - g[p]) * strength;
@@ -388,7 +388,7 @@ namespace KingdomSurvival.WorldMapVisual
                             }
                             if (ripple != null)
                             {
-                                Color s = ripple.SampleWrapped(x / rippleTile, y / rippleTile);
+                                Color s = ripple.SampleWrapped(x / rippleTile, y / rippleTile, ripple.Width / rippleTile);
                                 float k = style.WaterPatternStrength * s.a;
                                 wr += (s.r - wr) * k;
                                 wg += (s.g - wg) * k;
@@ -635,19 +635,19 @@ namespace KingdomSurvival.WorldMapVisual
 
             private void AddReeds(List<Stamp> stamps, Vector2 center)
             {
-                int n = Count(1.4f);
+                int n = Count(style.ReedsPerHex);
                 for (int t = 0; t < n; t++)
                 {
                     Vector2 at = Scatter(center, 0.5f);
                     if (!AreaAt(at, WorldMapGameplayTerrainType.Swamp))
                         continue;
-                    float size = hexPx * 0.28f * (0.8f + (float)random.NextDouble() * 0.4f);
+                    float size = hexPx * style.ReedSizeHexes * (0.8f + (float)random.NextDouble() * 0.4f);
                     Sprite sprite = Pick(style.Pool(style.ReedSprites, style.UseReedSprites));
                     bool flip = random.NextDouble() < 0.5;
                     stamps.Add(new Stamp
                     {
                         Y = at.y,
-                        Draw = sprite != null ? () => DrawSprite(sprite, at, size * 1.4f, Color.white, flip) : (Action)(() => DrawReeds(at, size))
+                        Draw = sprite != null ? () => DrawSprite(sprite, at, size, Color.white, flip) : (Action)(() => DrawReeds(at, size * 0.7f))
                     });
                 }
             }
@@ -1139,7 +1139,7 @@ namespace KingdomSurvival.WorldMapVisual
                             cb -= warmth;
                         }
                         if (paper != null)
-                            Modulate(ref cr, ref cg, ref cb, paper, x / paperTile, y / paperTile, style.PaperStrength);
+                            Modulate(ref cr, ref cg, ref cb, paper, x / paperTile, y / paperTile, style.PaperStrength, paperTile);
                         if (style.UseGrain && style.Grain > 0f)
                         {
                             float n = (Hash(x, y, map.Seed) - 0.5f) * style.Grain;
@@ -1315,25 +1315,33 @@ namespace KingdomSurvival.WorldMapVisual
                 }
             }
 
+            // Рисунок стоит основанием на точке. Высота — по непрозрачной
+            // части рисунка (пустые поля вокруг не уменьшают знак), если
+            // включено «Обрезать пустые поля»; уменьшение — с усреднением.
             private void DrawSprite(Sprite sprite, Vector2 bottom, float targetHeight, Color tint, bool flip)
             {
                 Image image = LoadImage(sprite);
                 if (image == null || targetHeight < 1f)
                     return;
-                float targetWidth = targetHeight * image.Width / Mathf.Max(1f, image.Height);
+                RectInt area = style.TrimSpritePadding ? image.Content : new RectInt(0, 0, image.Width, image.Height);
+                float targetWidth = targetHeight * area.width / Mathf.Max(1f, area.height);
+                float footprint = area.height / targetHeight;
                 int minX = Mathf.Max(0, Mathf.FloorToInt(bottom.x - targetWidth * 0.5f));
                 int maxX = Mathf.Min(width - 1, Mathf.CeilToInt(bottom.x + targetWidth * 0.5f));
                 int minY = Mathf.Max(0, Mathf.FloorToInt(bottom.y - targetHeight));
                 int maxY = Mathf.Min(height - 1, Mathf.CeilToInt(bottom.y));
+                float invW = 1f / image.Width, invH = 1f / image.Height;
                 for (int y = minY; y <= maxY; y++)
                 {
                     float v = (y + 0.5f - (bottom.y - targetHeight)) / targetHeight;
+                    float sv = (area.y + Mathf.Clamp01(v) * area.height) * invH;
                     for (int x = minX; x <= maxX; x++)
                     {
                         float u = (x + 0.5f - (bottom.x - targetWidth * 0.5f)) / targetWidth;
                         if (flip)
                             u = 1f - u;
-                        Color s = image.SampleClamped(u, v);
+                        float su = (area.x + Mathf.Clamp01(u) * area.width) * invW;
+                        Color s = image.SampleClamped(su, sv, footprint);
                         float a = s.a * tint.a;
                         if (a <= 0.003f)
                             continue;
@@ -1535,42 +1543,133 @@ namespace KingdomSurvival.WorldMapVisual
                 }
             }
 
-            public Color SampleWrapped(float u, float v)
+            // Выборка с усреднением: при уменьшении берётся уровень
+            // mip-цепочки (каждый следующий — среднее 2×2 предыдущего, с
+            // премультипликацией по прозрачности), между уровнями — плавно.
+            // footprint — сколько пикселей рисунка приходится на пиксель
+            // карты; 1 и меньше — обычная билинейная выборка.
+            public Color SampleWrapped(float u, float v, float footprint = 1f) =>
+                SampleLevels(u - Mathf.Floor(u), v - Mathf.Floor(v), footprint, true);
+
+            public Color SampleClamped(float u, float v, float footprint = 1f) =>
+                SampleLevels(Mathf.Clamp01(u), Mathf.Clamp01(v), footprint, false);
+
+            // Непрозрачная часть рисунка (без пустых полей), в пикселях.
+            public RectInt Content
             {
-                float x = (u - Mathf.Floor(u)) * Width - 0.5f;
-                float y = (v - Mathf.Floor(v)) * Height - 0.5f;
-                return Sample(x, y, true);
+                get
+                {
+                    if (content.width == 0)
+                        content = FindContent();
+                    return content;
+                }
             }
 
-            public Color SampleClamped(float u, float v) =>
-                Sample(Mathf.Clamp01(u) * Width - 0.5f, Mathf.Clamp01(v) * Height - 0.5f, false);
+            private RectInt content;
+            private List<float[]> levels;
+            private List<Vector2Int> sizes;
 
-            private Color Sample(float x, float y, bool wrap)
+            private RectInt FindContent()
             {
+                int minX = Width, minY = Height, maxX = -1, maxY = -1;
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int x = 0; x < Width; x++)
+                    {
+                        if (Pixels[y * Width + x].a <= 8)
+                            continue;
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+                return maxX < 0 ? new RectInt(0, 0, Width, Height) : new RectInt(minX, minY, maxX - minX + 1, maxY - minY + 1);
+            }
+
+            private void EnsureLevels()
+            {
+                if (levels != null)
+                    return;
+                levels = new List<float[]>();
+                sizes = new List<Vector2Int>();
+                float[] level = new float[Width * Height * 4];
+                const float k = 1f / 255f;
+                for (int i = 0; i < Pixels.Length; i++)
+                {
+                    float a = Pixels[i].a * k;
+                    level[i * 4] = Pixels[i].r * k * a;
+                    level[i * 4 + 1] = Pixels[i].g * k * a;
+                    level[i * 4 + 2] = Pixels[i].b * k * a;
+                    level[i * 4 + 3] = a;
+                }
+                int w = Width, h = Height;
+                levels.Add(level);
+                sizes.Add(new Vector2Int(w, h));
+                while (w > 1 || h > 1)
+                {
+                    int nw = Math.Max(1, (w + 1) / 2), nh = Math.Max(1, (h + 1) / 2);
+                    float[] next = new float[nw * nh * 4];
+                    for (int y = 0; y < nh; y++)
+                    {
+                        for (int x = 0; x < nw; x++)
+                        {
+                            int x0 = Math.Min(w - 1, x * 2), x1 = Math.Min(w - 1, x * 2 + 1);
+                            int y0 = Math.Min(h - 1, y * 2), y1 = Math.Min(h - 1, y * 2 + 1);
+                            for (int c = 0; c < 4; c++)
+                            {
+                                next[(y * nw + x) * 4 + c] = 0.25f * (
+                                    level[(y0 * w + x0) * 4 + c] + level[(y0 * w + x1) * 4 + c] +
+                                    level[(y1 * w + x0) * 4 + c] + level[(y1 * w + x1) * 4 + c]);
+                            }
+                        }
+                    }
+                    level = next;
+                    w = nw;
+                    h = nh;
+                    levels.Add(level);
+                    sizes.Add(new Vector2Int(w, h));
+                }
+            }
+
+            private Color SampleLevels(float u, float v, float footprint, bool wrap)
+            {
+                EnsureLevels();
+                float lod = footprint > 1f ? Mathf.Log(footprint, 2f) : 0f;
+                int l0 = Mathf.Clamp(Mathf.FloorToInt(lod), 0, levels.Count - 1);
+                float t = Mathf.Clamp01(lod - l0);
+                Vector4 c = SampleLevel(l0, u, v, wrap);
+                if (t > 0.01f && l0 + 1 < levels.Count)
+                    c = Vector4.Lerp(c, SampleLevel(l0 + 1, u, v, wrap), t);
+                return c.w > 0.0001f ? new Color(c.x / c.w, c.y / c.w, c.z / c.w, c.w) : new Color(0f, 0f, 0f, 0f);
+            }
+
+            private Vector4 SampleLevel(int index, float u, float v, bool wrap)
+            {
+                float[] level = levels[index];
+                int w = sizes[index].x, h = sizes[index].y;
+                float x = u * w - 0.5f, y = v * h - 0.5f;
                 int x0 = Mathf.FloorToInt(x), y0 = Mathf.FloorToInt(y);
                 float fx = x - x0, fy = y - y0;
-                Color32 c00 = Get(x0, y0, wrap), c10 = Get(x0 + 1, y0, wrap), c01 = Get(x0, y0 + 1, wrap), c11 = Get(x0 + 1, y0 + 1, wrap);
-                const float k = 1f / 255f;
-                return new Color(
-                    Bilinear(c00.r, c10.r, c01.r, c11.r, fx, fy) * k,
-                    Bilinear(c00.g, c10.g, c01.g, c11.g, fx, fy) * k,
-                    Bilinear(c00.b, c10.b, c01.b, c11.b, fx, fy) * k,
-                    Bilinear(c00.a, c10.a, c01.a, c11.a, fx, fy) * k);
+                Vector4 c00 = Texel(level, w, h, x0, y0, wrap), c10 = Texel(level, w, h, x0 + 1, y0, wrap);
+                Vector4 c01 = Texel(level, w, h, x0, y0 + 1, wrap), c11 = Texel(level, w, h, x0 + 1, y0 + 1, wrap);
+                return Vector4.Lerp(Vector4.Lerp(c00, c10, fx), Vector4.Lerp(c01, c11, fx), fy);
             }
 
-            private Color32 Get(int x, int y, bool wrap)
+            private static Vector4 Texel(float[] level, int w, int h, int x, int y, bool wrap)
             {
                 if (wrap)
                 {
-                    x = ((x % Width) + Width) % Width;
-                    y = ((y % Height) + Height) % Height;
+                    x = ((x % w) + w) % w;
+                    y = ((y % h) + h) % h;
                 }
                 else
                 {
-                    x = Mathf.Clamp(x, 0, Width - 1);
-                    y = Mathf.Clamp(y, 0, Height - 1);
+                    x = Mathf.Clamp(x, 0, w - 1);
+                    y = Mathf.Clamp(y, 0, h - 1);
                 }
-                return Pixels[y * Width + x];
+                int i = (y * w + x) * 4;
+                return new Vector4(level[i], level[i + 1], level[i + 2], level[i + 3]);
             }
         }
 
@@ -1580,11 +1679,11 @@ namespace KingdomSurvival.WorldMapVisual
 
         // Умножение на узор, нормированный по его среднему цвету: узор
         // добавляет фактуру, не меняя общий тон.
-        private static void Modulate(ref float cr, ref float cg, ref float cb, Image image, float u, float v, float strength)
+        private static void Modulate(ref float cr, ref float cg, ref float cb, Image image, float u, float v, float strength, float tilePx)
         {
             if (strength <= 0f)
                 return;
-            Color s = image.SampleWrapped(u, v);
+            Color s = image.SampleWrapped(u, v, image.Width / Mathf.Max(1f, tilePx));
             Color avg = image.Average;
             float k = strength * s.a;
             cr *= 1f + (s.r / Mathf.Max(0.05f, avg.r) - 1f) * k;

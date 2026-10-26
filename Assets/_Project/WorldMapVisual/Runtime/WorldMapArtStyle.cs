@@ -53,6 +53,8 @@ namespace KingdomSurvival.WorldMapVisual
         // Свои рисунки: общий выключатель и по пулу. Выключено — пул не
         // берётся (рисует код), но рисунки в нём остаются.
         public bool UseCustomArt = true;
+        [Tooltip("Высота знака считается по нарисованной части, пустые поля вокруг рисунка не уменьшают знак.")]
+        public bool TrimSpritePadding = true;
         public bool UseConiferSprites = true;
         public bool UseLeafSprites = true;
         public bool UseTreeSprites = true;
@@ -128,6 +130,10 @@ namespace KingdomSurvival.WorldMapVisual
         public Color LeafColor = new Color(0.27f, 0.35f, 0.20f, 1f);
         [Tooltip("Деревца на болоте и редкие деревья в поле.")]
         [Range(0f, 2f)] public float SparseTreesPerHex = 0.35f;
+        [Tooltip("Камыш и кочки на болоте: сколько на клетку.")]
+        [Range(0f, 6f)] public float ReedsPerHex = 1.4f;
+        [Tooltip("Высота камыша в клетках (рисунком; кодом — 0,7 от неё).")]
+        [Range(0.1f, 2f)] public float ReedSizeHexes = 0.4f;
 
         [Header("Холмы и горы")]
         public bool DrawHills = true;

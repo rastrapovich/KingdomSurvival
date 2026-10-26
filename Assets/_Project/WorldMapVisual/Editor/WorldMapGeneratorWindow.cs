@@ -186,8 +186,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             row.Add(seedField);
             row.Add(new Button(() => { seedField.value = UnityEngine.Random.Range(1, 999999); }) { text = "🎲 Другой seed", tooltip = "Новая случайная карта с теми же настройками" });
             row.Add(new Button(() => ScheduleRefresh(true, 0)) { text = "Сгенерировать" });
-            PopupField<string> quality = new PopupField<string>(new List<string> { "Черновик", "Обычно", "Как в игре" }, Quality) { tooltip = "Качество предпросмотра. «Как в игре» — разрешение из блока «Качество»." };
-            quality.style.width = 110;
+            PopupField<string> quality = new PopupField<string>(new List<string> { "Черновик (25 %)", "Обычно (60 %)", "Как в игре" }, Quality) { tooltip = "Разрешение предпросмотра. Мелкие знаки видно честно только «Как в игре» — разрешение из блока «Качество»." };
+            quality.style.width = 140;
             quality.RegisterValueChangedCallback(evt => { Quality = quality.index; ScheduleRefresh(false); });
             row.Add(quality);
             UnityEngine.UIElements.Toggle auto = new UnityEngine.UIElements.Toggle("Сразу") { value = AutoRefresh, tooltip = "Обновлять предпросмотр после каждой правки" };
@@ -427,8 +427,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 currentMap = generator.Generate(Seed, (WorldMapGenerationStage)Stage);
             double generateMs = watch.Elapsed.TotalMilliseconds;
             watch.Restart();
-            float resolution = Quality == 0 ? Mathf.Min(0.2f, generator.Art.Resolution)
-                : Quality == 1 ? Mathf.Min(0.35f, generator.Art.Resolution)
+            float resolution = Quality == 0 ? Mathf.Min(0.25f, generator.Art.Resolution)
+                : Quality == 1 ? Mathf.Min(0.6f, generator.Art.Resolution)
                 : generator.Art.Resolution;
             DestroyTexture(ref mapTexture);
             mapTexture = WorldMapPainter.Paint(currentMap, generator.Art, resolution, ShowHidden);
@@ -492,7 +492,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             statusLabel.text =
                 $"{grid.Columns}×{grid.Rows} клеток · рек {currentMap.Rivers.Count} · дорог и троп {currentMap.Roads.Count} · " +
                 $"мостов и бродов {currentMap.Bridges.Count} · деревень {currentMap.Villages.Count} · мест {currentMap.Landmarks.Count} · " +
-                $"слотов {currentMap.SpawnSlots.Count} · рисунок {(mapTexture != null ? mapTexture.width + "×" + mapTexture.height : "—")} · " +
+                $"слотов {currentMap.SpawnSlots.Count} · рисунок {(mapTexture != null ? mapTexture.width + "×" + mapTexture.height + " (" + Mathf.RoundToInt(100f * mapTexture.width / currentMap.CanvasWidth) + " % полотна)" : "—")} · " +
                 $"генерация {generateMs:0} мс, рисунок {paintMs:0} мс";
         }
 
@@ -1089,11 +1089,14 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 ColorField("Ели", A.ConiferColor, v => A.ConiferColor = v);
                 ColorField("Лиственные", A.LeafColor, v => A.LeafColor = v);
                 Slider("Редкие деревья", A.SparseTreesPerHex, 0, 2, v => A.SparseTreesPerHex = v);
+                Slider("Камыша на клетку болота", A.ReedsPerHex, 0, 6, v => A.ReedsPerHex = v);
+                Slider("Высота камыша, клеток", A.ReedSizeHexes, 0.1f, 2, v => A.ReedSizeHexes = v);
             }, () =>
             {
                 WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
                 A.TreesPerHex = d.TreesPerHex; A.TreeSizeHexes = d.TreeSizeHexes; A.TreeSizeJitter = d.TreeSizeJitter;
                 A.ConiferShare = d.ConiferShare; A.ConiferColor = d.ConiferColor; A.LeafColor = d.LeafColor; A.SparseTreesPerHex = d.SparseTreesPerHex;
+                A.ReedsPerHex = d.ReedsPerHex; A.ReedSizeHexes = d.ReedSizeHexes;
             }, A.DrawTrees, v => A.DrawTrees = v);
         }
 
@@ -1174,6 +1177,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Group("Иконки и рисунки", "Icons", () =>
             {
                 Help("У каждого объекта — пул до " + WorldMapArtStyle.MaxPoolSize + " рисунков: каждому дереву, горе, мосту, деревне или месту достаётся случайный, и он не меняется после загрузки. «Знаки» — рисунки на карте; «Иконки метки» — кнопка места на карте игры, по которой к нему идут. Пусто — рисует код. Выделите спрайты в Project и нажмите «+ выделенные» — добавятся все сразу.");
+                Switches(("Обрезать пустые поля рисунков", A.TrimSpritePadding, v => A.TrimSpritePadding = v));
+                Help("Размер знака задаётся в клетках в блоках «Лес», «Холмы и горы», «Деревни», «Приметные места». Рисунок уменьшается с усреднением; мелкие детали (тонкие стебли, штриховка) на размере знака в 20–40 пикселей всё равно сливаются — для карты лучше крупные простые формы и толстый контур.");
                 SubTitle("Лес и болото");
                 SpriteList("Ели и сосны", A.ConiferSprites, A.UseConiferSprites, v => A.UseConiferSprites = v);
                 SpriteList("Лиственные", A.LeafSprites, A.UseLeafSprites, v => A.UseLeafSprites = v);

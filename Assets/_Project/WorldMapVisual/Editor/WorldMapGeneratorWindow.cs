@@ -586,6 +586,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             BuildLandmarks();
 
             Section("Как выглядит");
+            BuildLayers();
             BuildQuality();
             BuildIcons();
             BuildBase();
@@ -888,6 +889,88 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
         // ---- как выглядит ----
 
+        // Все слои облика на одном экране: включить или выключить каждый,
+        // либо всё разом — чтобы посмотреть слой отдельно. Настройки слоёв
+        // при выключении сохраняются.
+        private (string Group, string Label, Func<bool> Get, Action<bool> Set)[] LayerSwitches() => new (string, string, Func<bool>, Action<bool>)[]
+        {
+            ("Подложка", "Подложка", () => A.DrawBase, v => A.DrawBase = v),
+            ("Подложка", "Узор", () => A.UseBasePattern, v => A.UseBasePattern = v),
+            ("Подложка", "Пятна оттенка", () => A.UseTintVariation, v => A.UseTintVariation = v),
+            ("Подложка", "Мелкий узор", () => A.UseDetailPattern, v => A.UseDetailPattern = v),
+            ("Местность", "Местность", () => A.DrawTerrain, v => A.DrawTerrain = v),
+            ("Местность", "Узоры местности", () => A.UseTerrainPatterns, v => A.UseTerrainPatterns = v),
+            ("Вода", "Вода", () => A.DrawWater, v => A.DrawWater = v),
+            ("Вода", "Озёра", () => A.DrawLakes, v => A.DrawLakes = v),
+            ("Вода", "Реки", () => A.DrawRivers, v => A.DrawRivers = v),
+            ("Вода", "Отмель", () => A.DrawShoreBand, v => A.DrawShoreBand = v),
+            ("Вода", "Рябь", () => A.UseWaterPattern, v => A.UseWaterPattern = v),
+            ("Тушь", "Тушь", () => A.DrawInk, v => A.DrawInk = v),
+            ("Тушь", "Тушь берега", () => A.DrawShoreInk, v => A.DrawShoreInk = v),
+            ("Тушь", "Кромка леса", () => A.DrawForestOutline, v => A.DrawForestOutline = v),
+            ("Лес", "Деревья", () => A.DrawTrees, v => A.DrawTrees = v),
+            ("Лес", "Редкие деревья", () => A.DrawSparseTrees, v => A.DrawSparseTrees = v),
+            ("Лес", "Камыш", () => A.DrawReeds, v => A.DrawReeds = v),
+            ("Рельеф", "Холмы", () => A.DrawHills, v => A.DrawHills = v),
+            ("Рельеф", "Горы", () => A.DrawMountains, v => A.DrawMountains = v),
+            ("Рельеф", "Скалы", () => A.DrawCliffs, v => A.DrawCliffs = v),
+            ("Дороги", "Дороги", () => A.DrawRoads, v => A.DrawRoads = v),
+            ("Дороги", "Тропы", () => A.DrawTrails, v => A.DrawTrails = v),
+            ("Дороги", "Мосты", () => A.DrawBridges, v => A.DrawBridges = v),
+            ("Поселения и места", "Деревни", () => A.DrawVillages, v => A.DrawVillages = v),
+            ("Поселения и места", "Стоянка", () => A.MarkStart, v => A.MarkStart = v),
+            ("Поселения и места", "Приметные места", () => A.DrawLandmarks, v => A.DrawLandmarks = v),
+            ("Рисунки", "Свои рисунки и иконки", () => A.UseCustomArt, v => A.UseCustomArt = v),
+            ("Обработка", "Обработка", () => A.DrawPost, v => A.DrawPost = v),
+            ("Обработка", "Цвет", () => A.UseColorAdjust, v => A.UseColorAdjust = v),
+            ("Обработка", "Бумага", () => A.UsePaper, v => A.UsePaper = v),
+            ("Обработка", "Зерно", () => A.UseGrain, v => A.UseGrain = v),
+            ("Обработка", "Виньетка", () => A.UseVignette, v => A.UseVignette = v)
+        };
+
+        private void BuildLayers()
+        {
+            var switches = LayerSwitches();
+            int on = switches.Count(item => item.Get());
+            Group("Слои (" + on + " из " + switches.Length + ")", "Layers", () =>
+            {
+                Help("Каждый слой рисунка можно выключить — настройки слоя сохраняются. «Всё выключить» и включение одного слоя показывают его отдельно. Типы местности и знаки мест выключаются по одному в своих блоках; «Всё» трогает и их.");
+                Buttons(
+                    ("Всё включить", () => Change(() => SetAllLayers(true), false, true), "Включить все слои, типы местности и знаки мест"),
+                    ("Всё выключить", () => Change(() => SetAllLayers(false), false, true), "Выключить все слои — останется ровный цвет основы"));
+                foreach (IGrouping<string, (string Group, string Label, Func<bool> Get, Action<bool> Set)> group in switches.GroupBy(item => item.Group))
+                {
+                    SubTitle(group.Key);
+                    VisualElement row = Row(true);
+                    foreach (var (_, label, get, set) in group)
+                    {
+                        UnityEngine.UIElements.Toggle toggle = new UnityEngine.UIElements.Toggle(label) { value = get() };
+                        toggle.labelElement.style.minWidth = 0;
+                        toggle.style.marginRight = 10;
+                        toggle.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), false, true));
+                        row.Add(toggle);
+                    }
+                    parent.Add(row);
+                }
+            }, null);
+        }
+
+        private void SetAllLayers(bool value)
+        {
+            foreach (var item in LayerSwitches())
+                item.Set(value);
+            foreach (WorldMapTerrainArt terrain in A.Terrain)
+            {
+                if (terrain != null)
+                    terrain.Enabled = value;
+            }
+            foreach (WorldMapLandmarkArt landmark in A.Landmarks)
+            {
+                if (landmark != null)
+                    landmark.Enabled = value;
+            }
+        }
+
         private void BuildQuality()
         {
             Group("Качество", "Quality", () =>
@@ -907,6 +990,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Group("Подложка", "Base", () =>
             {
                 Help("Общая подложка: бесшовный узор, который размножается на всю карту. Крупные пятна оттенка и второй мелкий узор прячут повтор.");
+                Help("Выключенная подложка — ровный «Цвет основы» без узоров и пятен.");
+                Switches(("Узор подложки", A.UseBasePattern, v => A.UseBasePattern = v), ("Пятна оттенка", A.UseTintVariation, v => A.UseTintVariation = v), ("Мелкий узор", A.UseDetailPattern, v => A.UseDetailPattern = v));
                 ColorField("Цвет основы", A.BaseColor, v => A.BaseColor = v);
                 TextureField("Узор подложки", A.BasePattern, v => A.BasePattern = v);
                 Slider("Плитка, клеток", A.BasePatternTileHexes, 0.5f, 60, v => A.BasePatternTileHexes = v);
@@ -922,7 +1007,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
                 A.BaseColor = d.BaseColor; A.BasePatternTileHexes = d.BasePatternTileHexes; A.BasePatternStrength = d.BasePatternStrength; A.BasePatternTint = d.BasePatternTint;
                 A.TintVariation = d.TintVariation; A.TintVariationScaleHexes = d.TintVariationScaleHexes; A.DetailPatternTileHexes = d.DetailPatternTileHexes; A.DetailPatternStrength = d.DetailPatternStrength;
-            });
+            }, A.DrawBase, v => A.DrawBase = v);
         }
 
         private void BuildTerrainArt()
@@ -930,6 +1015,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Group("Местность", "TerrainArt", () =>
             {
                 Help("Каждый тип местности — слой поверх подложки: подкраска и свой узор (например, рисунок лесной подстилки или пашни).");
+                Switches(("Узоры местности", A.UseTerrainPatterns, v => A.UseTerrainPatterns = v));
                 Slider("Неровность краёв, клеток", A.EdgeRoughness, 0, 1.5f, v => A.EdgeRoughness = v, false, "0 — видны шестиугольники клеток");
                 Slider("Мягкость переходов, клеток", A.EdgeSoftness, 0, 1, v => A.EdgeSoftness = v);
                 foreach (WorldMapTerrainArt art in A.Terrain)
@@ -954,7 +1040,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 A.EnsureTerrainEntries();
                 A.EdgeRoughness = 0.55f;
                 A.EdgeSoftness = 0.18f;
-            });
+            }, A.DrawTerrain, v => A.DrawTerrain = v);
         }
 
         private void BuildInk()
@@ -962,10 +1048,11 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Group("Тушь", "Ink", () =>
             {
                 Help("Чёрный контур — стиль канона v1.56: берега, кромка леса, дороги, знаки.");
+                Switches(("Кромка леса", A.DrawForestOutline, v => A.DrawForestOutline = v), ("Тушь берега", A.DrawShoreInk, v => A.DrawShoreInk = v));
                 ColorField("Цвет туши", A.InkColor, v => A.InkColor = v);
                 Slider("Толщина, px полотна", A.InkWidth, 0, 12, v => A.InkWidth = v);
                 Slider("Кромка леса", A.ForestOutline, 0, 1, v => A.ForestOutline = v);
-            }, () => { WorldMapArtStyle d = WorldMapArtStyle.CreateDefault(); A.InkColor = d.InkColor; A.InkWidth = d.InkWidth; A.ForestOutline = d.ForestOutline; });
+            }, () => { WorldMapArtStyle d = WorldMapArtStyle.CreateDefault(); A.InkColor = d.InkColor; A.InkWidth = d.InkWidth; A.ForestOutline = d.ForestOutline; }, A.DrawInk, v => A.DrawInk = v);
         }
 
         private void BuildWaterArt()
@@ -973,6 +1060,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Group("Вода", "WaterArt", () =>
             {
                 Help("Озёра рисуются по клеткам, реки — гладкой линией, расширяющейся к устью. У берега — светлая отмель, по кромке — тушь.");
+                Switches(("Озёра", A.DrawLakes, v => A.DrawLakes = v), ("Реки", A.DrawRivers, v => A.DrawRivers = v), ("Отмель", A.DrawShoreBand, v => A.DrawShoreBand = v), ("Тушь берега", A.DrawShoreInk, v => A.DrawShoreInk = v), ("Рябь", A.UseWaterPattern, v => A.UseWaterPattern = v));
                 ColorField("Мелко", A.WaterShallowColor, v => A.WaterShallowColor = v);
                 ColorField("Глубоко", A.WaterDeepColor, v => A.WaterDeepColor = v);
                 Slider("Отмель, клеток", A.ShoreBand, 0, 1, v => A.ShoreBand = v);
@@ -985,7 +1073,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
                 A.WaterShallowColor = d.WaterShallowColor; A.WaterDeepColor = d.WaterDeepColor; A.ShoreBand = d.ShoreBand; A.RiverWidthScale = d.RiverWidthScale;
                 A.WaterPatternTileHexes = d.WaterPatternTileHexes; A.WaterPatternStrength = d.WaterPatternStrength;
-            });
+            }, A.DrawWater, v => A.DrawWater = v);
         }
 
         private void BuildForestArt()
@@ -993,7 +1081,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Group("Лес", "ForestArt", () =>
             {
                 Help("Деревья расставляются внутри леса, редкие — на болоте и в поле. Без рисунков — ели и лиственные деревья кодом.");
-                Toggle("Рисовать деревья", A.DrawTrees, v => A.DrawTrees = v);
+                Switches(("Редкие деревья", A.DrawSparseTrees, v => A.DrawSparseTrees = v), ("Камыш на болоте", A.DrawReeds, v => A.DrawReeds = v));
                 Slider("Деревьев на клетку", A.TreesPerHex, 0, 12, v => A.TreesPerHex = v);
                 Slider("Размер, клеток", A.TreeSizeHexes, 0.1f, 3, v => A.TreeSizeHexes = v);
                 Slider("Разброс размера", A.TreeSizeJitter, 0, 1, v => A.TreeSizeJitter = v);
@@ -1004,20 +1092,19 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             }, () =>
             {
                 WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
-                A.DrawTrees = d.DrawTrees; A.TreesPerHex = d.TreesPerHex; A.TreeSizeHexes = d.TreeSizeHexes; A.TreeSizeJitter = d.TreeSizeJitter;
+                A.TreesPerHex = d.TreesPerHex; A.TreeSizeHexes = d.TreeSizeHexes; A.TreeSizeJitter = d.TreeSizeJitter;
                 A.ConiferShare = d.ConiferShare; A.ConiferColor = d.ConiferColor; A.LeafColor = d.LeafColor; A.SparseTreesPerHex = d.SparseTreesPerHex;
-            });
+            }, A.DrawTrees, v => A.DrawTrees = v);
         }
 
         private void BuildReliefArt()
         {
             Group("Холмы и горы", "ReliefArt", () =>
             {
-                Toggle("Рисовать холмы", A.DrawHills, v => A.DrawHills = v);
+                Switches(("Холмы", A.DrawHills, v => A.DrawHills = v), ("Горы", A.DrawMountains, v => A.DrawMountains = v), ("Скалы", A.DrawCliffs, v => A.DrawCliffs = v));
                 Slider("Холмов на клетку", A.HillsPerHex, 0, 4, v => A.HillsPerHex = v);
                 Slider("Размер холма, клеток", A.HillSizeHexes, 0.2f, 4, v => A.HillSizeHexes = v);
                 ColorField("Цвет холмов", A.HillColor, v => A.HillColor = v);
-                Toggle("Рисовать горы", A.DrawMountains, v => A.DrawMountains = v);
                 Slider("Гор на клетку", A.MountainsPerHex, 0, 4, v => A.MountainsPerHex = v);
                 Slider("Размер горы, клеток", A.MountainSizeHexes, 0.2f, 5, v => A.MountainSizeHexes = v);
                 ColorField("Свет", A.MountainLightColor, v => A.MountainLightColor = v);
@@ -1035,6 +1122,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             Group("Дороги", "RoadArt", () =>
             {
+                Switches(("Дороги", A.DrawRoads, v => A.DrawRoads = v), ("Тропы", A.DrawTrails, v => A.DrawTrails = v), ("Мосты", A.DrawBridges, v => A.DrawBridges = v));
                 ColorField("Дорога", A.RoadColor, v => A.RoadColor = v);
                 Slider("Ширина дороги, клеток", A.RoadWidthHexes, 0.02f, 1, v => A.RoadWidthHexes = v);
                 Slider("Тушь вдоль дороги", A.RoadInk, 0, 1, v => A.RoadInk = v);
@@ -1059,12 +1147,12 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 Slider("Размер, клеток", A.VillageSizeHexes, 0.2f, 4, v => A.VillageSizeHexes = v);
                 ColorField("Стены", A.WallColor, v => A.WallColor = v);
                 ColorField("Крыши", A.RoofColor, v => A.RoofColor = v);
-                Toggle("Отмечать старт", A.MarkStart, v => A.MarkStart = v);
+                Switches(("Отмечать стоянку", A.MarkStart, v => A.MarkStart = v));
             }, () =>
             {
                 WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
                 A.VillageSizeHexes = d.VillageSizeHexes; A.WallColor = d.WallColor; A.RoofColor = d.RoofColor; A.MarkStart = d.MarkStart;
-            });
+            }, A.DrawVillages, v => A.DrawVillages = v);
         }
 
         private void BuildLandmarkArt()
@@ -1074,7 +1162,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 Help("Знаки мест кодом, если рисунок не назначен (рисунки и иконки — в блоке «Иконки и рисунки»).");
                 Slider("Размер знаков кодом, клеток", A.LandmarkSizeHexes, 0.2f, 4, v => A.LandmarkSizeHexes = v);
                 ColorField("Цвет камня", A.LandmarkColor, v => A.LandmarkColor = v);
-            }, () => { A.LandmarkSizeHexes = 1.4f; A.LandmarkColor = WorldMapArtStyle.CreateDefault().LandmarkColor; });
+            }, () => { A.LandmarkSizeHexes = 1.4f; A.LandmarkColor = WorldMapArtStyle.CreateDefault().LandmarkColor; }, A.DrawLandmarks, v => A.DrawLandmarks = v);
         }
 
         // Все рисунки и иконки карты в одном месте: деревья, болото, холмы,
@@ -1087,30 +1175,31 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             {
                 Help("У каждого объекта — пул до " + WorldMapArtStyle.MaxPoolSize + " рисунков: каждому дереву, горе, мосту, деревне или месту достаётся случайный, и он не меняется после загрузки. «Знаки» — рисунки на карте; «Иконки метки» — кнопка места на карте игры, по которой к нему идут. Пусто — рисует код. Выделите спрайты в Project и нажмите «+ выделенные» — добавятся все сразу.");
                 SubTitle("Лес и болото");
-                SpriteList("Ели и сосны", A.ConiferSprites);
-                SpriteList("Лиственные", A.LeafSprites);
-                SpriteList("Деревья — общие (если для ели или лиственного своих нет)", A.TreeSprites);
-                SpriteList("Камыш и кочки", A.ReedSprites);
+                SpriteList("Ели и сосны", A.ConiferSprites, A.UseConiferSprites, v => A.UseConiferSprites = v);
+                SpriteList("Лиственные", A.LeafSprites, A.UseLeafSprites, v => A.UseLeafSprites = v);
+                SpriteList("Деревья — общие (если для ели или лиственного своих нет)", A.TreeSprites, A.UseTreeSprites, v => A.UseTreeSprites = v);
+                SpriteList("Камыш и кочки", A.ReedSprites, A.UseReedSprites, v => A.UseReedSprites = v);
                 SubTitle("Рельеф");
-                SpriteList("Холмы", A.HillSprites);
-                SpriteList("Горы", A.MountainSprites);
-                SpriteList("Скалы (пусто — как горы)", A.CliffSprites);
+                SpriteList("Холмы", A.HillSprites, A.UseHillSprites, v => A.UseHillSprites = v);
+                SpriteList("Горы", A.MountainSprites, A.UseMountainSprites, v => A.UseMountainSprites = v);
+                SpriteList("Скалы (пусто — как горы)", A.CliffSprites, A.UseCliffSprites, v => A.UseCliffSprites = v);
                 SubTitle("Дороги, деревни, стоянка");
-                SpriteList("Мосты", A.BridgeSprites);
-                SpriteList("Деревни", A.VillageSprites);
-                SpriteList("Иконки метки деревни", A.VillageIcons);
-                SpriteList("Стоянка отряда", A.StartSprites);
+                SpriteList("Мосты", A.BridgeSprites, A.UseBridgeSprites, v => A.UseBridgeSprites = v);
+                SpriteList("Деревни", A.VillageSprites, A.UseVillageSprites, v => A.UseVillageSprites = v);
+                SpriteList("Иконки метки деревни", A.VillageIcons, A.UseVillageIcons, v => A.UseVillageIcons = v);
+                SpriteList("Стоянка отряда", A.StartSprites, A.UseStartSprites, v => A.UseStartSprites = v);
                 SubTitle("Приметные места");
                 foreach (WorldMapLandmarkRule rule in S.Landmarks)
                 {
                     if (rule == null || string.IsNullOrEmpty(rule.Id))
                         continue;
                     WorldMapLandmarkArt art = LandmarkArt(rule.Id);
-                    Foldout item = Block(rule.Name + "  (знаков " + art.Variants.Count + ", иконок " + art.Icons.Count + ")", "IconRule." + rule.Id, false);
+                    Foldout item = Block((art.Enabled ? "● " : "○ ") + rule.Name + "  (знаков " + art.Variants.Count + ", иконок " + art.Icons.Count + ")", "IconRule." + rule.Id, false);
                     VisualElement keep = parent;
                     parent = item;
-                    SpriteList("Знаки на карте", art.Variants);
-                    SpriteList("Иконки метки", art.Icons);
+                    Switches(("Знак на карте", art.Enabled, v => art.Enabled = v));
+                    SpriteList("Знаки на карте", art.Variants, art.UseSprites, v => art.UseSprites = v);
+                    SpriteList("Иконки метки", art.Icons, art.UseIcons, v => art.UseIcons = v);
                     Slider("Размер знака, клеток", art.SizeHexes, 0.2f, 4, v => art.SizeHexes = v);
                     ColorField("Оттенок знака", art.Tint, v => art.Tint = v);
                     parent = keep;
@@ -1121,7 +1210,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 A.HillSprites.Clear(); A.MountainSprites.Clear(); A.CliffSprites.Clear(); A.VillageSprites.Clear();
                 A.BridgeSprites.Clear(); A.VillageIcons.Clear(); A.StartSprites.Clear();
                 A.Landmarks.Clear();
-            });
+            }, A.UseCustomArt, v => A.UseCustomArt = v);
         }
 
         // Запись облика места создаётся сразу (без Undo-шага), чтобы поля
@@ -1154,6 +1243,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             Group("Обработка", "Post", () =>
             {
+                Switches(("Цвет", A.UseColorAdjust, v => A.UseColorAdjust = v), ("Бумага", A.UsePaper, v => A.UsePaper = v), ("Зерно", A.UseGrain, v => A.UseGrain = v), ("Виньетка", A.UseVignette, v => A.UseVignette = v));
                 Slider("Яркость", A.Brightness, -0.5f, 0.5f, v => A.Brightness = v);
                 Slider("Контраст", A.Contrast, 0.3f, 2f, v => A.Contrast = v);
                 Slider("Насыщенность", A.Saturation, 0, 2, v => A.Saturation = v);
@@ -1168,7 +1258,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
                 A.Brightness = d.Brightness; A.Contrast = d.Contrast; A.Saturation = d.Saturation; A.Warmth = d.Warmth;
                 A.Vignette = d.Vignette; A.Grain = d.Grain; A.PaperTileHexes = d.PaperTileHexes; A.PaperStrength = d.PaperStrength;
-            });
+            }, A.DrawPost, v => A.DrawPost = v);
         }
 
         // ------------------------------------------------------------------
@@ -1209,20 +1299,57 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             return block;
         }
 
-        private void Group(string title, string key, Action content, Action reset)
+        // Блок настроек: выключатель слоя (если есть, как в «Обработке
+        // кадра»: ● — включён, ○ — выключен, поля блока гаснут, но
+        // сохраняются), «Сбросить» и поля.
+        private void Group(string title, string key, Action content, Action reset, bool? enabled = null, Action<bool> setEnabled = null)
         {
-            Foldout block = Block(title, key, false);
+            string Title(bool? on) => (on == null ? "" : on.Value ? "● " : "○ ") + title;
+            Foldout block = Block(Title(enabled), key, false);
             VisualElement keep = parent;
             parent = block;
-            if (reset != null)
+            VisualElement body = new VisualElement();
+            if (enabled != null || reset != null)
             {
                 VisualElement header = Row(false);
-                header.Add(new VisualElement { style = { flexGrow = 1 } });
-                header.Add(new Button(() => Change(reset, true, true)) { text = "Сбросить", tooltip = "Значения блока — по умолчанию" });
+                if (enabled != null && setEnabled != null)
+                {
+                    UnityEngine.UIElements.Toggle toggle = new UnityEngine.UIElements.Toggle("Слой включён") { value = enabled.Value };
+                    toggle.style.flexGrow = 1;
+                    toggle.RegisterValueChangedCallback(evt =>
+                    {
+                        Change(() => setEnabled(evt.newValue), false);
+                        body.SetEnabled(evt.newValue);
+                        block.text = Title(evt.newValue);
+                    });
+                    header.Add(toggle);
+                    body.SetEnabled(enabled.Value);
+                }
+                else
+                    header.Add(new VisualElement { style = { flexGrow = 1 } });
+                if (reset != null)
+                    header.Add(new Button(() => Change(reset, true, true)) { text = "Сбросить", tooltip = "Значения блока — по умолчанию (выключатель не трогает)" });
                 block.Add(header);
             }
+            block.Add(body);
+            parent = body;
             content();
             parent = keep;
+        }
+
+        // Строка выключателей подслоёв в одну линию.
+        private void Switches(params (string label, bool value, Action<bool> set)[] switches)
+        {
+            VisualElement row = Row(true);
+            foreach ((string label, bool value, Action<bool> set) in switches)
+            {
+                UnityEngine.UIElements.Toggle toggle = new UnityEngine.UIElements.Toggle(label) { value = value };
+                toggle.labelElement.style.minWidth = 0;
+                toggle.style.marginRight = 10;
+                toggle.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue), false));
+                row.Add(toggle);
+            }
+            parent.Add(row);
         }
 
         private static VisualElement Row(bool wrap)
@@ -1307,11 +1434,21 @@ namespace KingdomSurvival.WorldMapVisual.Editor
 
         // Пул рисунков объекта: до MaxPoolSize строк, «+ выделенные» берёт
         // спрайты, выделенные в Project (и все спрайты выделенных текстур).
-        private void SpriteList(string label, List<Sprite> sprites)
+        private void SpriteList(string label, List<Sprite> sprites, bool? use = null, Action<bool> setUse = null)
         {
             int max = WorldMapArtStyle.MaxPoolSize;
-            Label title = new Label(label + (sprites.Count == 0 ? " — нет, рисует код" : " (" + sprites.Count + " из " + max + ")")) { style = { marginTop = 2 } };
-            parent.Add(title);
+            VisualElement titleRow = Row(false);
+            titleRow.style.marginTop = 2;
+            Label title = new Label(label + (sprites.Count == 0 ? " — нет, рисует код" : " (" + sprites.Count + " из " + max + ")")) { style = { flexGrow = 1, whiteSpace = WhiteSpace.Normal } };
+            titleRow.Add(title);
+            if (use != null && setUse != null)
+            {
+                UnityEngine.UIElements.Toggle toggle = new UnityEngine.UIElements.Toggle("свои") { value = use.Value, tooltip = "Брать рисунки из этого пула; выключено — рисует код, рисунки остаются" };
+                toggle.labelElement.style.minWidth = 0;
+                toggle.RegisterValueChangedCallback(evt => Change(() => setUse(evt.newValue), false));
+                titleRow.Add(toggle);
+            }
+            parent.Add(titleRow);
             for (int i = 0; i < sprites.Count; i++)
             {
                 int index = i;

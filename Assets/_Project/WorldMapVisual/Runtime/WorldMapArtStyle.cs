@@ -18,6 +18,56 @@ namespace KingdomSurvival.WorldMapVisual
         [Tooltip("Пикселей рисунка на пиксель полотна карты. 0,5 — половинное разрешение: быстрее и легче.")]
         [Range(0.1f, 1f)] public float Resolution = 0.5f;
 
+        // Выключатели слоёв: любой слой и любой пул рисунков можно убрать
+        // с карты, не теряя его настроек. Выключенная подложка — ровный
+        // цвет основы; выключенный пул рисунков — знаки кодом.
+        [Header("Слои")]
+        public bool DrawBase = true;
+        public bool UseBasePattern = true;
+        public bool UseTintVariation = true;
+        public bool UseDetailPattern = true;
+        public bool DrawTerrain = true;
+        public bool UseTerrainPatterns = true;
+        public bool DrawInk = true;
+        public bool DrawForestOutline = true;
+        public bool DrawWater = true;
+        public bool DrawLakes = true;
+        public bool DrawRivers = true;
+        public bool DrawShoreBand = true;
+        public bool DrawShoreInk = true;
+        public bool UseWaterPattern = true;
+        public bool DrawSparseTrees = true;
+        public bool DrawReeds = true;
+        public bool DrawCliffs = true;
+        public bool DrawRoads = true;
+        public bool DrawTrails = true;
+        public bool DrawBridges = true;
+        public bool DrawVillages = true;
+        public bool DrawLandmarks = true;
+        public bool DrawPost = true;
+        public bool UseColorAdjust = true;
+        public bool UsePaper = true;
+        public bool UseGrain = true;
+        public bool UseVignette = true;
+
+        // Свои рисунки: общий выключатель и по пулу. Выключено — пул не
+        // берётся (рисует код), но рисунки в нём остаются.
+        public bool UseCustomArt = true;
+        public bool UseConiferSprites = true;
+        public bool UseLeafSprites = true;
+        public bool UseTreeSprites = true;
+        public bool UseReedSprites = true;
+        public bool UseHillSprites = true;
+        public bool UseMountainSprites = true;
+        public bool UseCliffSprites = true;
+        public bool UseBridgeSprites = true;
+        public bool UseVillageSprites = true;
+        public bool UseVillageIcons = true;
+        public bool UseStartSprites = true;
+
+        // Пул с учётом выключателей: null — рисунков не брать.
+        public List<Sprite> Pool(List<Sprite> pool, bool use) => UseCustomArt && use ? pool : null;
+
         [Header("Подложка")]
         public Color BaseColor = new Color(0.60f, 0.58f, 0.46f, 1f);
         [Tooltip("Бесшовный узор, который размножается на всю карту.")]
@@ -103,7 +153,7 @@ namespace KingdomSurvival.WorldMapVisual
         [Range(0.02f, 1f)] public float TrailWidthHexes = 0.07f;
         public bool TrailDashed = true;
         public Color BridgeColor = new Color(0.42f, 0.30f, 0.20f, 1f);
-        [Tooltip("Рисунки мостов (до 10); ставятся как есть, без поворота вдоль дороги.")]
+        [Tooltip("Рисунки мостов (до 20); ставятся как есть, без поворота вдоль дороги.")]
         public List<Sprite> BridgeSprites = new List<Sprite>();
         [HideInInspector] public Sprite BridgeSprite;
 
@@ -114,9 +164,9 @@ namespace KingdomSurvival.WorldMapVisual
         public Color RoofColor = new Color(0.36f, 0.27f, 0.19f, 1f);
         [Tooltip("Рисовать точку старта отряда отдельным знаком.")]
         public bool MarkStart = true;
-        [Tooltip("Рисунки стоянки отряда вместо частокола (до 10).")]
+        [Tooltip("Рисунки стоянки отряда вместо частокола (до 20).")]
         public List<Sprite> StartSprites = new List<Sprite>();
-        [Tooltip("Иконки метки деревни на карте игры (до 10).")]
+        [Tooltip("Иконки метки деревни на карте игры (до 20).")]
         public List<Sprite> VillageIcons = new List<Sprite>();
         [HideInInspector] public Sprite StartSprite;
         [HideInInspector] public Sprite VillageIcon;
@@ -181,12 +231,12 @@ namespace KingdomSurvival.WorldMapVisual
             return changed;
         }
 
-        // У каждого объекта карты — пул до 10 рисунков; из пула каждому
+        // У каждого объекта карты — пул до 20 рисунков; из пула каждому
         // дереву, горе, мосту, деревне или месту достаётся свой рисунок.
-        public const int MaxPoolSize = 10;
+        public const int MaxPoolSize = 20;
 
         // Прежние одиночные рисунки (мост, стоянка, иконка деревни, знак и
-        // иконка места) переходят в пулы; пулы обрезаются до 10.
+        // иконка места) переходят в пулы; пулы обрезаются до 20.
         public bool NormalizePools()
         {
             bool changed = false;
@@ -341,10 +391,16 @@ namespace KingdomSurvival.WorldMapVisual
     public sealed class WorldMapLandmarkArt
     {
         public string RuleId = string.Empty;
-        [Tooltip("Знаки на рисунке карты (до 10) — у каждого места выбирается свой.")]
+        [Tooltip("Рисовать знак этого места на карте.")]
+        public bool Enabled = true;
+        [Tooltip("Брать знаки из пула; выключено — знак кодом.")]
+        public bool UseSprites = true;
+        [Tooltip("Брать иконки метки из пула; выключено — метка без иконки.")]
+        public bool UseIcons = true;
+        [Tooltip("Знаки на рисунке карты (до 20) — у каждого места выбирается свой.")]
         public List<Sprite> Variants = new List<Sprite>();
         [HideInInspector] public Sprite Sprite;
-        [Tooltip("Иконки метки места на карте игры (до 10) — кнопка, по которой идут к месту.")]
+        [Tooltip("Иконки метки места на карте игры (до 20) — кнопка, по которой идут к месту.")]
         public List<Sprite> Icons = new List<Sprite>();
         [HideInInspector] public Sprite Icon;
         [Range(0.2f, 4f)] public float SizeHexes = 1f;

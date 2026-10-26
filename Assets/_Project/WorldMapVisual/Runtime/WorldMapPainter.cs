@@ -181,8 +181,8 @@ namespace KingdomSurvival.WorldMapVisual
 
             private void PaintBase()
             {
-                Image pattern = LoadImage(style.BasePattern);
-                Image detail = LoadImage(style.DetailPattern);
+                Image pattern = style.DrawBase && style.UseBasePattern ? LoadImage(style.BasePattern) : null;
+                Image detail = style.DrawBase && style.UseDetailPattern ? LoadImage(style.DetailPattern) : null;
                 float tilePx = Mathf.Max(4f, style.BasePatternTileHexes * hexPx);
                 float detailPx = Mathf.Max(2f, style.DetailPatternTileHexes * hexPx);
                 double variationFrequency = 1.0 / Mathf.Max(4f, style.TintVariationScaleHexes * hexPx);
@@ -205,7 +205,7 @@ namespace KingdomSurvival.WorldMapVisual
                         }
                         if (detail != null)
                             Modulate(ref cr, ref cg, ref cb, detail, x / detailPx, y / detailPx, style.DetailPatternStrength);
-                        if (style.TintVariation > 0f)
+                        if (style.DrawBase && style.UseTintVariation && style.TintVariation > 0f)
                         {
                             float v = (float)noise.Fbm(x * variationFrequency, y * variationFrequency, 3, 0.5) * style.TintVariation;
                             cr *= 1f + v * 1.1f;
@@ -234,7 +234,7 @@ namespace KingdomSurvival.WorldMapVisual
                 for (int p = 0; p < count; p++)
                 {
                     WorldMapTerrainArt art = arts[area[p]];
-                    if (art == null || !art.Enabled)
+                    if (art == null || !art.Enabled || !style.DrawTerrain)
                         continue;
                     ar[p] = art.Color.r;
                     ag[p] = art.Color.g;
@@ -275,7 +275,7 @@ namespace KingdomSurvival.WorldMapVisual
                 foreach (WorldMapGameplayTerrainType type in WorldMapTerrainLabels.All)
                 {
                     WorldMapTerrainArt art = arts[(int)type];
-                    if (art != null && art.Enabled && art.Pattern != null && art.PatternStrength > 0f)
+                    if (style.DrawTerrain && style.UseTerrainPatterns && art != null && art.Enabled && art.Pattern != null && art.PatternStrength > 0f)
                     {
                         patterns[(int)type] = LoadImage(art.Pattern);
                         tiles[(int)type] = Mathf.Max(2f, art.PatternTileHexes * hexPx);
@@ -319,11 +319,11 @@ namespace KingdomSurvival.WorldMapVisual
                 byte water = (byte)WorldMapGameplayTerrainType.Water;
                 for (int p = 0; p < count; p++)
                 {
-                    if (area[p] == water)
+                    if (style.DrawWater && style.DrawLakes && area[p] == water)
                         waterCoverage[p] = 1f;
                 }
 
-                if (map.Rivers != null)
+                if (style.DrawWater && style.DrawRivers && map.Rivers != null)
                 {
                     foreach (GeneratedMapLine river in map.Rivers)
                     {
@@ -361,7 +361,7 @@ namespace KingdomSurvival.WorldMapVisual
                 float[] toLand = DistanceTransform(isLand);
                 float shorePx = Mathf.Max(1f, style.ShoreBand * hexPx);
                 float deepPx = Mathf.Max(2f, hexPx * 0.9f);
-                Image ripple = LoadImage(style.WaterPattern);
+                Image ripple = style.UseWaterPattern ? LoadImage(style.WaterPattern) : null;
                 float rippleTile = Mathf.Max(2f, style.WaterPatternTileHexes * hexPx);
                 Color shallow = style.WaterShallowColor;
                 Color deep = style.WaterDeepColor;
@@ -379,7 +379,7 @@ namespace KingdomSurvival.WorldMapVisual
                             float wr = Mathf.Lerp(shallow.r, deep.r, depth);
                             float wg = Mathf.Lerp(shallow.g, deep.g, depth);
                             float wb = Mathf.Lerp(shallow.b, deep.b, depth);
-                            if (toLand[p] < shorePx)
+                            if (style.DrawShoreBand && toLand[p] < shorePx)
                             {
                                 float band = 1f - toLand[p] / shorePx;
                                 wr += (shallow.r * 1.25f - wr) * band * 0.6f;
@@ -399,7 +399,7 @@ namespace KingdomSurvival.WorldMapVisual
                             b[p] += (wb - b[p]) * cover;
                         }
 
-                        if (inkPx > 0f && !isWater[p] && toWater[p] <= inkPx + 0.5f)
+                        if (style.DrawInk && style.DrawShoreInk && inkPx > 0f && !isWater[p] && toWater[p] <= inkPx + 0.5f)
                         {
                             float k = Mathf.Clamp01(inkPx + 0.5f - toWater[p]) * 0.92f;
                             Blend(p, ink, k);
@@ -410,7 +410,7 @@ namespace KingdomSurvival.WorldMapVisual
 
             private void PaintForestOutline()
             {
-                if (inkPx <= 0f || style.ForestOutline <= 0f)
+                if (!style.DrawInk || !style.DrawForestOutline || inkPx <= 0f || style.ForestOutline <= 0f)
                     return;
                 int count = width * height;
                 byte forest = (byte)WorldMapGameplayTerrainType.Forest;
@@ -451,23 +451,23 @@ namespace KingdomSurvival.WorldMapVisual
                     (line.Kind == GeneratedMapLine.TrailKind ? trails : roads).Add(ToPixels(line.Points));
                 }
 
-                if (style.RoadInk > 0f && inkPx > 0f)
+                if (style.DrawRoads && style.DrawInk && style.RoadInk > 0f && inkPx > 0f)
                 {
                     foreach (List<Vector2> road in roads)
                         StrokePolyline(road, roadHalf + inkPx * 0.6f, style.InkColor, style.RoadInk, 0f, 0f);
                 }
                 float dash = roadHalf * 6f;
-                foreach (List<Vector2> road in roads)
+                foreach (List<Vector2> road in style.DrawRoads ? roads : new List<List<Vector2>>())
                     StrokePolyline(road, roadHalf, style.RoadColor, 1f, style.RoadDashed ? dash : 0f, dash * 0.6f);
 
                 float trailDash = Mathf.Max(3f, trailHalf * 5f);
-                foreach (List<Vector2> trail in trails)
+                foreach (List<Vector2> trail in style.DrawTrails ? trails : new List<List<Vector2>>())
                     StrokePolyline(trail, trailHalf, style.TrailColor, 0.95f, style.TrailDashed ? trailDash : 0f, trailDash * 0.8f);
             }
 
             private void PaintBridges()
             {
-                if (map.Bridges == null || map.Bridges.Count == 0)
+                if (!style.DrawBridges || map.Bridges == null || map.Bridges.Count == 0)
                     return;
                 float roadHalf = Mathf.Max(0.8f, style.RoadWidthHexes * hexPx * 0.5f);
                 float length = Mathf.Max(roadHalf * 4f, hexPx * 0.7f);
@@ -479,7 +479,7 @@ namespace KingdomSurvival.WorldMapVisual
                     Vector2 a = center - direction * length * 0.5f;
                     Vector2 c = center + direction * length * 0.5f;
                     float half = roadHalf * 1.5f;
-                    Sprite bridgeSprite = Pick(style.BridgeSprites);
+                    Sprite bridgeSprite = Pick(style.Pool(style.BridgeSprites, style.UseBridgeSprites));
                     if (bridgeSprite != null)
                     {
                         DrawSprite(bridgeSprite, center + new Vector2(0f, length * 0.25f), length * 0.6f, Color.white, direction.x < 0f);
@@ -545,12 +545,13 @@ namespace KingdomSurvival.WorldMapVisual
                                 AddTrees(stamps, center, style.TreesPerHex, WorldMapGameplayTerrainType.Forest);
                             break;
                         case WorldMapGameplayTerrainType.Swamp:
-                            AddReeds(stamps, center);
-                            if (style.DrawTrees)
+                            if (style.DrawReeds)
+                                AddReeds(stamps, center);
+                            if (style.DrawTrees && style.DrawSparseTrees)
                                 AddTrees(stamps, center, style.SparseTreesPerHex, WorldMapGameplayTerrainType.Swamp);
                             break;
                         case WorldMapGameplayTerrainType.OpenGround:
-                            if (style.DrawTrees)
+                            if (style.DrawTrees && style.DrawSparseTrees)
                                 AddTrees(stamps, center, style.SparseTreesPerHex * 0.2f, WorldMapGameplayTerrainType.OpenGround);
                             break;
                         case WorldMapGameplayTerrainType.Hills:
@@ -562,7 +563,7 @@ namespace KingdomSurvival.WorldMapVisual
                                 AddRelief(stamps, center, style.MountainsPerHex, true, false);
                             break;
                         case WorldMapGameplayTerrainType.Cliffs:
-                            if (style.DrawMountains)
+                            if (style.DrawCliffs)
                                 AddRelief(stamps, center, style.MountainsPerHex, true, true);
                             break;
                     }
@@ -570,14 +571,14 @@ namespace KingdomSurvival.WorldMapVisual
 
                 if (map.Villages != null)
                 {
-                    foreach (GeneratedMapSite village in map.Villages)
+                    foreach (GeneratedMapSite village in style.DrawVillages ? map.Villages : new List<GeneratedMapSite>())
                         AddVillage(stamps, village);
                 }
                 if (map.Landmarks != null)
                 {
                     foreach (GeneratedMapSite landmark in map.Landmarks)
                     {
-                        if (landmark != null && landmark.DrawMark && (!landmark.Hidden || paintHiddenPlaces))
+                        if (style.DrawLandmarks && landmark != null && landmark.DrawMark && (!landmark.Hidden || paintHiddenPlaces) && style.FindLandmark(landmark.Kind)?.Enabled != false)
                             AddLandmark(stamps, landmark);
                     }
                 }
@@ -617,7 +618,7 @@ namespace KingdomSurvival.WorldMapVisual
                     if (type != WorldMapGameplayTerrainType.Forest)
                         size *= 0.8f;
                     bool conifer = random.NextDouble() < style.ConiferShare;
-                    Sprite sprite = Pick(conifer ? style.ConiferSprites : style.LeafSprites) ?? Pick(style.TreeSprites);
+                    Sprite sprite = Pick(conifer ? style.Pool(style.ConiferSprites, style.UseConiferSprites) : style.Pool(style.LeafSprites, style.UseLeafSprites)) ?? Pick(style.Pool(style.TreeSprites, style.UseTreeSprites));
                     bool flip = random.NextDouble() < 0.5;
                     float shade = 0.9f + (float)random.NextDouble() * 0.2f;
                     stamps.Add(new Stamp
@@ -641,7 +642,7 @@ namespace KingdomSurvival.WorldMapVisual
                     if (!AreaAt(at, WorldMapGameplayTerrainType.Swamp))
                         continue;
                     float size = hexPx * 0.28f * (0.8f + (float)random.NextDouble() * 0.4f);
-                    Sprite sprite = Pick(style.ReedSprites);
+                    Sprite sprite = Pick(style.Pool(style.ReedSprites, style.UseReedSprites));
                     bool flip = random.NextDouble() < 0.5;
                     stamps.Add(new Stamp
                     {
@@ -664,8 +665,8 @@ namespace KingdomSurvival.WorldMapVisual
                     float baseSize = mountain ? style.MountainSizeHexes : style.HillSizeHexes;
                     float size = baseSize * hexPx * (0.8f + (float)random.NextDouble() * 0.4f);
                     Sprite sprite = cliff
-                        ? Pick(style.CliffSprites) ?? Pick(style.MountainSprites)
-                        : Pick(mountain ? style.MountainSprites : style.HillSprites);
+                        ? Pick(style.Pool(style.CliffSprites, style.UseCliffSprites)) ?? Pick(style.Pool(style.MountainSprites, style.UseMountainSprites))
+                        : Pick(mountain ? style.Pool(style.MountainSprites, style.UseMountainSprites) : style.Pool(style.HillSprites, style.UseHillSprites));
                     bool flip = random.NextDouble() < 0.5;
                     float skew = ((float)random.NextDouble() * 2f - 1f) * 0.15f;
                     stamps.Add(new Stamp
@@ -687,7 +688,7 @@ namespace KingdomSurvival.WorldMapVisual
                 Vector2 center = ToPixel(village.XPercent, village.YPercent);
                 System.Random local = new System.Random(village.Variant);
                 float size = style.VillageSizeHexes * hexPx;
-                Sprite sprite = Pick(style.VillageSprites, local);
+                Sprite sprite = Pick(style.Pool(style.VillageSprites, style.UseVillageSprites), local);
                 if (sprite != null)
                 {
                     float spriteHeight = size * (0.8f + village.Size * 0.2f);
@@ -711,7 +712,7 @@ namespace KingdomSurvival.WorldMapVisual
                 if (village.IsStart && style.MarkStart)
                 {
                     float ring = size * 0.62f;
-                    Sprite startSprite = Pick(style.StartSprites, local);
+                    Sprite startSprite = Pick(style.Pool(style.StartSprites, style.UseStartSprites), local);
                     stamps.Add(new Stamp
                     {
                         Y = center.y + ring,
@@ -728,7 +729,7 @@ namespace KingdomSurvival.WorldMapVisual
                 Vector2 at = ToPixel(landmark.XPercent, landmark.YPercent);
                 WorldMapLandmarkArt art = style.FindLandmark(landmark.Kind);
                 float size = (art != null ? art.SizeHexes : style.LandmarkSizeHexes) * hexPx;
-                Sprite sprite = art?.PickSprite(landmark.Variant);
+                Sprite sprite = style.UseCustomArt && art != null && art.UseSprites ? art.PickSprite(landmark.Variant) : null;
                 if (sprite != null)
                 {
                     Color tint = art.Tint;
@@ -1109,7 +1110,9 @@ namespace KingdomSurvival.WorldMapVisual
 
             private void PostProcess()
             {
-                Image paper = LoadImage(style.PaperTexture);
+                if (!style.DrawPost)
+                    return;
+                Image paper = style.UsePaper ? LoadImage(style.PaperTexture) : null;
                 float paperTile = Mathf.Max(4f, style.PaperTileHexes * hexPx);
                 float warmth = style.Warmth * 0.06f;
                 float cx = width * 0.5f, cy = height * 0.5f;
@@ -1119,26 +1122,32 @@ namespace KingdomSurvival.WorldMapVisual
                     for (int x = 0; x < width; x++)
                     {
                         int p = y * width + x;
-                        float cr = r[p] + style.Brightness, cg = g[p] + style.Brightness, cb = b[p] + style.Brightness;
-                        cr = (cr - 0.5f) * style.Contrast + 0.5f;
-                        cg = (cg - 0.5f) * style.Contrast + 0.5f;
-                        cb = (cb - 0.5f) * style.Contrast + 0.5f;
-                        float gray = cr * 0.3f + cg * 0.59f + cb * 0.11f;
-                        cr = gray + (cr - gray) * style.Saturation;
-                        cg = gray + (cg - gray) * style.Saturation;
-                        cb = gray + (cb - gray) * style.Saturation;
-                        cr += warmth;
-                        cb -= warmth;
+                        float cr = r[p], cg = g[p], cb = b[p];
+                        if (style.UseColorAdjust)
+                        {
+                            cr += style.Brightness;
+                            cg += style.Brightness;
+                            cb += style.Brightness;
+                            cr = (cr - 0.5f) * style.Contrast + 0.5f;
+                            cg = (cg - 0.5f) * style.Contrast + 0.5f;
+                            cb = (cb - 0.5f) * style.Contrast + 0.5f;
+                            float gray = cr * 0.3f + cg * 0.59f + cb * 0.11f;
+                            cr = gray + (cr - gray) * style.Saturation;
+                            cg = gray + (cg - gray) * style.Saturation;
+                            cb = gray + (cb - gray) * style.Saturation;
+                            cr += warmth;
+                            cb -= warmth;
+                        }
                         if (paper != null)
                             Modulate(ref cr, ref cg, ref cb, paper, x / paperTile, y / paperTile, style.PaperStrength);
-                        if (style.Grain > 0f)
+                        if (style.UseGrain && style.Grain > 0f)
                         {
                             float n = (Hash(x, y, map.Seed) - 0.5f) * style.Grain;
                             cr += n;
                             cg += n;
                             cb += n;
                         }
-                        if (style.Vignette > 0f)
+                        if (style.UseVignette && style.Vignette > 0f)
                         {
                             float dx = x - cx, dy = y - cy;
                             float d = Mathf.Sqrt(dx * dx + dy * dy) / maxD;

@@ -536,10 +536,11 @@ public partial class PrototypeUIController
         if (generator == null)
             return null;
         // Из пула иконок — устойчиво по ID места: после загрузки та же.
+        WorldMapArtStyle style = generator.Art;
         if (location.PlaceKind == GeneratedMapPlaces.VillageKind)
-            return WorldMapArtStyle.PickStable(generator.Art.VillageIcons, location.Id);
-        WorldMapLandmarkArt art = generator.Art.FindLandmark(location.PlaceKind);
-        return art?.PickIcon(location.Id);
+            return WorldMapArtStyle.PickStable(style.Pool(style.VillageIcons, style.UseVillageIcons), location.Id);
+        WorldMapLandmarkArt art = style.FindLandmark(location.PlaceKind);
+        return style.UseCustomArt && art != null && art.UseIcons ? art.PickIcon(location.Id) : null;
     }
 
     private void CreateDestinationMarker()

@@ -348,7 +348,7 @@ public class WorldMapGeneratorTests
             Sprite icon = Make();
             style.BridgeSprite = bridge;
             style.Landmarks.Add(new WorldMapLandmarkArt { RuleId = "cave", Icon = icon, Sprite = Make() });
-            for (int i = 0; i < 14; i++)
+            for (int i = 0; i < WorldMapArtStyle.MaxPoolSize + 4; i++)
                 style.ConiferSprites.Add(Make());
 
             Assert.That(style.NormalizePools(), Is.True);
@@ -396,6 +396,93 @@ public class WorldMapGeneratorTests
             }
             Object.DestroyImmediate(texture);
         }
+    }
+
+    // Все слои выключены — на карте только ровный цвет основы.
+    private static WorldMapArtStyle AllLayersOff()
+    {
+        WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+        style.DrawBase = style.DrawTerrain = style.DrawWater = style.DrawInk = false;
+        style.DrawTrees = style.DrawReeds = style.DrawHills = style.DrawMountains = style.DrawCliffs = false;
+        style.DrawRoads = style.DrawTrails = style.DrawBridges = false;
+        style.DrawVillages = style.DrawLandmarks = style.MarkStart = false;
+        style.DrawPost = false;
+        return style;
+    }
+
+    [Test]
+    public void AllLayersOff_LeavesOnlyTheFlatBaseColor()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 8);
+        WorldMapArtStyle style = AllLayersOff();
+        Texture2D texture = WorldMapPainter.Paint(map, style, 0.1f, true);
+        try
+        {
+            Color32 expected = style.BaseColor;
+            foreach (Color32 pixel in texture.GetPixels32())
+            {
+                Assert.That(Mathf.Abs(pixel.r - expected.r), Is.LessThanOrEqualTo(1));
+                Assert.That(Mathf.Abs(pixel.g - expected.g), Is.LessThanOrEqualTo(1));
+                Assert.That(Mathf.Abs(pixel.b - expected.b), Is.LessThanOrEqualTo(1));
+            }
+        }
+        finally
+        {
+            Object.DestroyImmediate(texture);
+        }
+    }
+
+    [Test]
+    public void EachLayerSwitch_ChangesThePicture()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 8);
+        Color32[] Paint(WorldMapArtStyle style)
+        {
+            Texture2D texture = WorldMapPainter.Paint(map, style, 0.12f, true);
+            Color32[] pixels = texture.GetPixels32();
+            Object.DestroyImmediate(texture);
+            return pixels;
+        }
+        Color32[] flat = Paint(AllLayersOff());
+
+        (string Name, System.Action<WorldMapArtStyle> TurnOn)[] layers =
+        {
+            ("Местность", s => s.DrawTerrain = true),
+            ("Вода", s => s.DrawWater = true),
+            ("Деревья", s => s.DrawTrees = true),
+            ("Холмы", s => s.DrawHills = true),
+            ("Горы", s => s.DrawMountains = true),
+            ("Дороги", s => s.DrawRoads = true),
+            ("Деревни", s => s.DrawVillages = true),
+            ("Места", s => s.DrawLandmarks = true),
+            ("Обработка", s => s.DrawPost = true)
+        };
+        foreach ((string name, System.Action<WorldMapArtStyle> turnOn) in layers)
+        {
+            WorldMapArtStyle style = AllLayersOff();
+            turnOn(style);
+            Color32[] pixels = Paint(style);
+            int changed = 0;
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                if (!pixels[i].Equals(flat[i]))
+                    changed++;
+            }
+            Assert.That(changed, Is.GreaterThan(0), $"Слой «{name}» не появился, хотя его включили одного.");
+        }
+    }
+
+    [Test]
+    public void PoolSwitches_TurnCustomArtOff_WithoutLosingIt()
+    {
+        WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+        Assert.That(WorldMapArtStyle.MaxPoolSize, Is.EqualTo(20));
+        Assert.That(style.Pool(style.ConiferSprites, style.UseConiferSprites), Is.SameAs(style.ConiferSprites));
+        style.UseConiferSprites = false;
+        Assert.That(style.Pool(style.ConiferSprites, style.UseConiferSprites), Is.Null);
+        style.UseConiferSprites = true;
+        style.UseCustomArt = false;
+        Assert.That(style.Pool(style.HillSprites, style.UseHillSprites), Is.Null, "Общий выключатель гасит все пулы.");
     }
 
     [Test]

@@ -55,6 +55,10 @@ namespace KingdomSurvival.WorldMapVisual
         public bool UseCustomArt = true;
         [Tooltip("Высота знака считается по нарисованной части, пустые поля вокруг рисунка не уменьшают знак.")]
         public bool TrimSpritePadding = true;
+        [Tooltip("Свои рисунки показываются отдельным слоем поверх карты — ровно те картинки, что загружены, чётко при любом приближении. Выключено — впекаются в рисунок карты.")]
+        public bool SignsOverMap = true;
+        [Tooltip("Наибольшая сторона рисунка в слое поверх карты, пикселей.")]
+        [Range(64, 512)] public int SignTextureSize = 256;
         public bool UseConiferSprites = true;
         public bool UseLeafSprites = true;
         public bool UseTreeSprites = true;

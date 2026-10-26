@@ -485,6 +485,78 @@ public class WorldMapGeneratorTests
         Assert.That(style.Pool(style.HillSprites, style.UseHillSprites), Is.Null, "Общий выключатель гасит все пулы.");
     }
 
+    // Рисунок 32×64: верхняя половина красная, нижняя синяя.
+    private static Sprite TwoToneSprite(out Texture2D texture)
+    {
+        texture = new Texture2D(32, 64, TextureFormat.RGBA32, false);
+        Color32[] pixels = new Color32[32 * 64];
+        for (int y = 0; y < 64; y++)
+        {
+            for (int x = 0; x < 32; x++)
+                pixels[y * 32 + x] = y >= 32 ? new Color32(255, 0, 0, 255) : new Color32(0, 0, 255, 255);
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, 32, 64), new Vector2(0.5f, 0f));
+    }
+
+    [Test]
+    public void SignsOverMap_KeepTheLoadedPicture_UprightInTheAtlas()
+    {
+        Sprite sprite = TwoToneSprite(out Texture2D texture);
+        WorldMapSigns signs = null;
+        Texture2D map = null;
+        try
+        {
+            WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+            style.ConiferSprites.Add(sprite);
+            style.LeafSprites.Add(sprite);
+            GeneratedWorldMap generated = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
+            map = WorldMapPainter.Paint(generated, style, 0.1f, false, out signs);
+
+            Assert.That(signs.Items.Count, Is.GreaterThan(0), "Деревья своими рисунками ушли в слой поверх карты.");
+            Assert.That(signs.Atlas, Is.Not.Null);
+            WorldMapSign sign = signs.Items[0];
+            Assert.That(sign.Aspect, Is.EqualTo(0.5f).Within(0.01f));
+            Color top = signs.Atlas.GetPixelBilinear(sign.Uv.center.x, sign.Uv.yMax - sign.Uv.height * 0.1f);
+            Color bottom = signs.Atlas.GetPixelBilinear(sign.Uv.center.x, sign.Uv.yMin + sign.Uv.height * 0.1f);
+            Assert.That(top.r, Is.GreaterThan(0.8f), "Верх рисунка в атласе — верх (красный).");
+            Assert.That(bottom.b, Is.GreaterThan(0.8f), "Низ рисунка в атласе — низ (синий).");
+            Assert.That(signs.Atlas.mipmapCount, Is.GreaterThan(1), "У атласа есть mip-карты.");
+        }
+        finally
+        {
+            signs?.Destroy();
+            Object.DestroyImmediate(map);
+            Object.DestroyImmediate(sprite);
+            Object.DestroyImmediate(texture);
+        }
+    }
+
+    [Test]
+    public void SignsBakedIntoTheMap_WhenOverlayIsOff()
+    {
+        Sprite sprite = TwoToneSprite(out Texture2D texture);
+        WorldMapSigns signs = null;
+        Texture2D map = null;
+        try
+        {
+            WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+            style.ConiferSprites.Add(sprite);
+            style.SignsOverMap = false;
+            map = WorldMapPainter.Paint(WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12), style, 0.1f, false, out signs);
+            Assert.That(signs.Items, Is.Empty);
+            Assert.That(signs.Atlas, Is.Null);
+        }
+        finally
+        {
+            signs?.Destroy();
+            Object.DestroyImmediate(map);
+            Object.DestroyImmediate(sprite);
+            Object.DestroyImmediate(texture);
+        }
+    }
+
     [Test]
     public void ArtStyle_HasAnEntryForEveryTerrain_AndClonesDeep()
     {

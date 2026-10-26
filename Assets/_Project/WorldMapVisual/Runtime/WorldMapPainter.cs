@@ -22,8 +22,23 @@ namespace KingdomSurvival.WorldMapVisual
         {
             if (map == null || !map.IsValid)
                 return null;
-            PaintJob job = new PaintJob(map, style ?? WorldMapArtStyle.CreateDefault(), resolutionOverride, paintHiddenPlaces);
+            PaintJob job = new PaintJob(map, style ?? WorldMapArtStyle.CreateDefault(), resolutionOverride, paintHiddenPlaces, false);
             job.Run();
+            return job.ToTexture();
+        }
+
+        // То же, но свои рисунки (если в облике включено «Рисунки поверх
+        // карты») не впекаются, а уходят в слой signs — его показывает
+        // WorldMapSignLayer. Выключено — signs пуст, всё в рисунке.
+        public static Texture2D Paint(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride, bool paintHiddenPlaces, out WorldMapSigns signs)
+        {
+            signs = new WorldMapSigns();
+            if (map == null || !map.IsValid)
+                return null;
+            WorldMapArtStyle safe = style ?? WorldMapArtStyle.CreateDefault();
+            PaintJob job = new PaintJob(map, safe, resolutionOverride, paintHiddenPlaces, safe.SignsOverMap);
+            job.Run();
+            signs = job.BuildSigns();
             return job.ToTexture();
         }
 
@@ -47,6 +62,8 @@ namespace KingdomSurvival.WorldMapVisual
             private readonly float hexPx;
             private readonly float inkPx;
             private readonly bool paintHiddenPlaces;
+            // Рисунки для слоя поверх карты (null — всё впекается).
+            private readonly List<PendingSign> pendingSigns;
             private readonly float[] r;
             private readonly float[] g;
             private readonly float[] b;
@@ -57,9 +74,11 @@ namespace KingdomSurvival.WorldMapVisual
             private readonly Dictionary<UnityEngine.Object, Image> images = new Dictionary<UnityEngine.Object, Image>();
             private float[] waterCoverage;
 
-            public PaintJob(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride, bool paintHiddenPlaces)
+            public PaintJob(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride, bool paintHiddenPlaces, bool collectSigns)
             {
                 this.paintHiddenPlaces = paintHiddenPlaces;
+                if (collectSigns)
+                    pendingSigns = new List<PendingSign>();
                 this.map = map;
                 this.style = style;
                 style.EnsureTerrainEntries();
@@ -105,6 +124,183 @@ namespace KingdomSurvival.WorldMapVisual
                 PaintBridges();
                 PaintStamps();
                 PostProcess();
+            }
+
+            private struct PendingSign
+            {
+                public Sprite Sprite;
+                public RectInt Area;
+                public float XPercent;
+                public float YPercent;
+                public float HeightPercent;
+                public bool Flip;
+                public Color Tint;
+            }
+
+            // Атлас слоя поверх карты: каждый использованный рисунок (его
+            // нарисованная часть) один раз, не больше SignTextureSize по
+            // большей стороне; если не помещается в 4096×4096 — все рисунки
+            // пропорционально мельче. Цвет прозрачных пикселей у края
+            // продолжает соседний, чтобы mip-карты не давали тёмной каймы.
+            public WorldMapSigns BuildSigns()
+            {
+                WorldMapSigns signs = new WorldMapSigns();
+                if (pendingSigns == null || pendingSigns.Count == 0)
+                    return signs;
+
+                List<(Sprite Sprite, RectInt Area)> keys = new List<(Sprite, RectInt)>();
+                Dictionary<(Sprite, RectInt), int> keyIndex = new Dictionary<(Sprite, RectInt), int>();
+                foreach (PendingSign pending in pendingSigns)
+                {
+                    var key = (pending.Sprite, pending.Area);
+                    if (!keyIndex.ContainsKey(key))
+                    {
+                        keyIndex[key] = keys.Count;
+                        keys.Add(key);
+                    }
+                }
+
+                const int maxAtlas = 4096;
+                const int padding = 4;
+                float maxSide = Mathf.Clamp(style.SignTextureSize, 16, 1024);
+                Vector2Int[] sizes = new Vector2Int[keys.Count];
+                Vector2Int[] positions = new Vector2Int[keys.Count];
+                int atlasWidth = 0, atlasHeight = 0;
+                for (int attempt = 0; attempt < 12; attempt++)
+                {
+                    for (int i = 0; i < keys.Count; i++)
+                    {
+                        RectInt area = keys[i].Area;
+                        float scale = Mathf.Min(1f, maxSide / Mathf.Max(area.width, area.height));
+                        sizes[i] = new Vector2Int(Mathf.Max(1, Mathf.RoundToInt(area.width * scale)), Mathf.Max(1, Mathf.RoundToInt(area.height * scale)));
+                    }
+                    if (Pack(sizes, positions, padding, maxAtlas, out atlasWidth, out atlasHeight))
+                        break;
+                    maxSide *= 0.8f;
+                }
+
+                Color32[] pixels = new Color32[atlasWidth * atlasHeight];
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    Image image = LoadImage(keys[i].Sprite);
+                    if (image == null)
+                        continue;
+                    RectInt area = keys[i].Area;
+                    Vector2Int size = sizes[i];
+                    Vector2Int at = positions[i];
+                    float footprint = area.height / (float)size.y;
+                    for (int row = 0; row < size.y; row++)
+                    {
+                        float v = (area.y + (row + 0.5f) / size.y * area.height) / image.Height;
+                        int atlasRow = at.y + size.y - 1 - row;
+                        for (int column = 0; column < size.x; column++)
+                        {
+                            float u = (area.x + (column + 0.5f) / size.x * area.width) / image.Width;
+                            Color c = image.SampleClamped(u, v, footprint);
+                            pixels[atlasRow * atlasWidth + at.x + column] = c;
+                        }
+                    }
+                    BleedEdges(pixels, atlasWidth, atlasHeight, new RectInt(at.x - padding / 2, at.y - padding / 2, size.x + padding, size.y + padding));
+                }
+
+                Texture2D atlas = new Texture2D(atlasWidth, atlasHeight, TextureFormat.RGBA32, true)
+                {
+                    name = "GeneratedWorldMapSigns",
+                    wrapMode = TextureWrapMode.Clamp,
+                    filterMode = FilterMode.Trilinear,
+                    anisoLevel = 4,
+                    hideFlags = HideFlags.DontSave
+                };
+                atlas.SetPixels32(pixels);
+                atlas.Apply(true, false);
+                signs.Atlas = atlas;
+
+                foreach (PendingSign pending in pendingSigns)
+                {
+                    int i = keyIndex[(pending.Sprite, pending.Area)];
+                    signs.Items.Add(new WorldMapSign
+                    {
+                        XPercent = pending.XPercent,
+                        YPercent = pending.YPercent,
+                        HeightPercent = pending.HeightPercent,
+                        Aspect = pending.Area.width / (float)Mathf.Max(1, pending.Area.height),
+                        Uv = new Rect(positions[i].x / (float)atlasWidth, positions[i].y / (float)atlasHeight,
+                            sizes[i].x / (float)atlasWidth, sizes[i].y / (float)atlasHeight),
+                        Flip = pending.Flip,
+                        Tint = pending.Tint
+                    });
+                }
+                return signs;
+            }
+
+            // Полки: рисунки по убыванию высоты, слева направо; ширина
+            // атласа — около квадратного корня из суммарной площади.
+            private static bool Pack(Vector2Int[] sizes, Vector2Int[] positions, int padding, int maxAtlas, out int atlasWidth, out int atlasHeight)
+            {
+                long area = 0;
+                int widest = 0;
+                foreach (Vector2Int size in sizes)
+                {
+                    area += (long)(size.x + padding) * (size.y + padding);
+                    widest = Mathf.Max(widest, size.x + padding);
+                }
+                atlasWidth = Mathf.Clamp(Mathf.NextPowerOfTwo(Mathf.CeilToInt(Mathf.Sqrt(area * 1.15f))), Mathf.NextPowerOfTwo(widest), maxAtlas);
+                int[] order = new int[sizes.Length];
+                for (int i = 0; i < order.Length; i++)
+                    order[i] = i;
+                System.Array.Sort(order, (a, b) => sizes[b].y.CompareTo(sizes[a].y));
+                int x = padding / 2, y = padding / 2, shelf = 0;
+                foreach (int i in order)
+                {
+                    if (x + sizes[i].x + padding / 2 > atlasWidth)
+                    {
+                        x = padding / 2;
+                        y += shelf + padding;
+                        shelf = 0;
+                    }
+                    positions[i] = new Vector2Int(x, y);
+                    x += sizes[i].x + padding;
+                    shelf = Mathf.Max(shelf, sizes[i].y);
+                }
+                atlasHeight = Mathf.NextPowerOfTwo(y + shelf + padding / 2);
+                return atlasWidth <= maxAtlas && atlasHeight <= maxAtlas;
+            }
+
+            private static void BleedEdges(Color32[] pixels, int width, int height, RectInt region)
+            {
+                int minX = Mathf.Max(0, region.xMin), maxX = Mathf.Min(width - 1, region.xMax - 1);
+                int minY = Mathf.Max(0, region.yMin), maxY = Mathf.Min(height - 1, region.yMax - 1);
+                for (int pass = 0; pass < 3; pass++)
+                {
+                    for (int y = minY; y <= maxY; y++)
+                    {
+                        for (int x = minX; x <= maxX; x++)
+                        {
+                            int p = y * width + x;
+                            if (pixels[p].a > 0)
+                                continue;
+                            int r = 0, g = 0, b = 0, n = 0;
+                            for (int dy = -1; dy <= 1; dy++)
+                            {
+                                for (int dx = -1; dx <= 1; dx++)
+                                {
+                                    int nx = x + dx, ny = y + dy;
+                                    if (nx < minX || ny < minY || nx > maxX || ny > maxY)
+                                        continue;
+                                    Color32 c = pixels[ny * width + nx];
+                                    if (c.a == 0 && (c.r | c.g | c.b) == 0)
+                                        continue;
+                                    r += c.r;
+                                    g += c.g;
+                                    b += c.b;
+                                    n++;
+                                }
+                            }
+                            if (n > 0)
+                                pixels[p] = new Color32((byte)(r / n), (byte)(g / n), (byte)(b / n), 0);
+                        }
+                    }
+                }
             }
 
             public Texture2D ToTexture()
@@ -1324,6 +1520,20 @@ namespace KingdomSurvival.WorldMapVisual
                 if (image == null || targetHeight < 1f)
                     return;
                 RectInt area = style.TrimSpritePadding ? image.Content : new RectInt(0, 0, image.Width, image.Height);
+                if (pendingSigns != null)
+                {
+                    pendingSigns.Add(new PendingSign
+                    {
+                        Sprite = sprite,
+                        Area = area,
+                        XPercent = bottom.x / width * 100f,
+                        YPercent = bottom.y / height * 100f,
+                        HeightPercent = targetHeight / height * 100f,
+                        Flip = flip,
+                        Tint = tint
+                    });
+                    return;
+                }
                 float targetWidth = targetHeight * area.width / Mathf.Max(1f, area.height);
                 float footprint = area.height / targetHeight;
                 int minX = Mathf.Max(0, Mathf.FloorToInt(bottom.x - targetWidth * 0.5f));
@@ -1732,6 +1942,7 @@ namespace KingdomSurvival.WorldMapVisual
     {
         private static GeneratedWorldMap cachedMap;
         private static Texture2D cachedTexture;
+        private static WorldMapSigns cachedSigns;
 
         public static Texture2D Get(GeneratedWorldMap map, WorldMapArtStyle style)
         {
@@ -1741,8 +1952,15 @@ namespace KingdomSurvival.WorldMapVisual
                 return cachedTexture;
             Clear();
             cachedMap = map;
-            cachedTexture = WorldMapPainter.Paint(map, style);
+            cachedTexture = WorldMapPainter.Paint(map, style, 0f, false, out cachedSigns);
             return cachedTexture;
+        }
+
+        // Свои рисунки слоем поверх карты (пусто, если они впечены в рисунок).
+        public static WorldMapSigns GetSigns(GeneratedWorldMap map, WorldMapArtStyle style)
+        {
+            Get(map, style);
+            return ReferenceEquals(map, cachedMap) ? cachedSigns : null;
         }
 
         public static void Clear()
@@ -1755,6 +1973,8 @@ namespace KingdomSurvival.WorldMapVisual
                     UnityEngine.Object.DestroyImmediate(cachedTexture);
             }
             cachedTexture = null;
+            cachedSigns?.Destroy();
+            cachedSigns = null;
             cachedMap = null;
         }
     }

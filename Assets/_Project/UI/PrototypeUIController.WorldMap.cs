@@ -397,8 +397,20 @@ public partial class PrototypeUIController
     // и runtime никогда не разошлись.
     private void ApplyWorldMapArtLayers()
     {
-        if (worldMapArtLayers == null || (gameState != null && gameState.HasGeneratedMap))
+        if (worldMapArtLayers == null)
             return;
+
+        // Канон v1.58 §9.9.1: у сгенерированной карты свои рисунки
+        // художника — слоем поверх рисунка карты, в их разрешении.
+        if (gameState != null && gameState.HasGeneratedMap)
+        {
+            WorldMapGeneratorAsset generator = WorldMapVisualRuntime.LoadGenerator();
+            WorldMapSigns signs = WorldMapGeneratedArt.GetSigns(
+                gameState.GeneratedMap, generator != null ? generator.Art : WorldMapArtStyle.CreateDefault());
+            if (signs != null && signs.Items.Count > 0)
+                worldMapArtLayers.Add(new WorldMapSignLayer { Signs = signs });
+            return;
+        }
 
         WorldMapVisualTheme theme = WorldMapVisualRuntime.LoadActiveTheme();
         if (theme == null)

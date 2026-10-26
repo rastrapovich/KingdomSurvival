@@ -1186,7 +1186,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 SubTitle("Дороги, деревни, стоянка");
                 SpriteList("Мосты", A.BridgeSprites, A.UseBridgeSprites, v => A.UseBridgeSprites = v);
                 SpriteList("Деревни", A.VillageSprites, A.UseVillageSprites, v => A.UseVillageSprites = v);
-                SpriteList("Иконки метки деревни", A.VillageIcons, A.UseVillageIcons, v => A.UseVillageIcons = v);
+                SpriteList("Иконки метки деревни", A.VillageIcons, A.UseVillageIcons, v => A.UseVillageIcons = v, true);
                 SpriteList("Стоянка отряда", A.StartSprites, A.UseStartSprites, v => A.UseStartSprites = v);
                 SubTitle("Приметные места");
                 foreach (WorldMapLandmarkRule rule in S.Landmarks)
@@ -1199,7 +1199,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                     parent = item;
                     Switches(("Знак на карте", art.Enabled, v => art.Enabled = v));
                     SpriteList("Знаки на карте", art.Variants, art.UseSprites, v => art.UseSprites = v);
-                    SpriteList("Иконки метки", art.Icons, art.UseIcons, v => art.UseIcons = v);
+                    SpriteList("Иконки метки", art.Icons, art.UseIcons, v => art.UseIcons = v, true);
                     Slider("Размер знака, клеток", art.SizeHexes, 0.2f, 4, v => art.SizeHexes = v);
                     ColorField("Оттенок знака", art.Tint, v => art.Tint = v);
                     parent = keep;
@@ -1417,28 +1417,81 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             parent.Add(field);
         }
 
+        // Поле текстуры: кружок выбора, перетаскивание картинки или спрайта
+        // из Project и файла из проводника (копируется в проект), «Снять».
         private void TextureField(string label, Texture2D value, Action<Texture2D> set)
         {
-            ObjectField field = new ObjectField(label) { objectType = typeof(Texture2D), allowSceneObjects = false, value = value, tooltip = "Перетащите сюда картинку из Project" };
-            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue as Texture2D), false));
-            parent.Add(field);
+            VisualElement box = new VisualElement();
+            box.style.borderTopWidth = box.style.borderBottomWidth = box.style.borderLeftWidth = box.style.borderRightWidth = 1;
+            box.style.borderTopLeftRadius = box.style.borderTopRightRadius = box.style.borderBottomLeftRadius = box.style.borderBottomRightRadius = 3;
+            Color idleBorder = new Color(1, 1, 1, 0f);
+            SetBorder(box, idleBorder);
+            VisualElement row = Row(false);
+            ObjectField field = new ObjectField(label) { objectType = typeof(Texture2D), allowSceneObjects = false, value = value, tooltip = "Перетащите сюда картинку или спрайт из Project или файл из проводника" };
+            field.style.flexGrow = 1;
+            field.RegisterValueChangedCallback(evt => Change(() => set(evt.newValue as Texture2D), false, true));
+            row.Add(field);
             if (value != null)
+                row.Add(new Button(() => Change(() => set(null), false, true)) { text = "Снять" });
+            box.Add(row);
+            Label hint = new Label(value != null
+                ? value.width + "×" + value.height + (value.wrapMode == TextureWrapMode.Repeat ? " · повтор включён" : " · повтор выключен — плитка будет со швами")
+                : "Перетащите картинку: из Project или PNG / JPG из проводника")
             {
-                Label hint = new Label(value.width + "×" + value.height + (value.wrapMode == TextureWrapMode.Repeat ? "" : " · для бесшовности нужен узор, сходящийся по краям"))
+                style = { fontSize = 10, color = new Color(.7f, .72f, .66f), marginLeft = 4, whiteSpace = WhiteSpace.Normal }
+            };
+            box.Add(hint);
+
+            box.RegisterCallback<DragUpdatedEvent>(evt =>
+            {
+                if (!WorldMapSpriteImport.HasCandidate(DragAndDrop.objectReferences, DragAndDrop.paths))
+                    return;
+                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                SetBorder(box, new Color(0.55f, 0.85f, 0.45f, 0.9f));
+                evt.StopPropagation();
+            }, TrickleDown.TrickleDown);
+            box.RegisterCallback<DragLeaveEvent>(_ => SetBorder(box, idleBorder));
+            box.RegisterCallback<DragExitedEvent>(_ => SetBorder(box, idleBorder));
+            box.RegisterCallback<DragPerformEvent>(evt =>
+            {
+                SetBorder(box, idleBorder);
+                if (!WorldMapSpriteImport.HasCandidate(DragAndDrop.objectReferences, DragAndDrop.paths))
+                    return;
+                DragAndDrop.AcceptDrag();
+                UnityEngine.Object[] objects = DragAndDrop.objectReferences;
+                string[] paths = DragAndDrop.paths;
+                evt.StopPropagation();
+                EditorApplication.delayCall += () =>
                 {
-                    style = { fontSize = 10, color = new Color(.7f, .72f, .66f), marginLeft = 4, whiteSpace = WhiteSpace.Normal }
+                    Texture2D texture = WorldMapSpriteImport.CollectTexture(objects, paths, label);
+                    if (texture == null)
+                        EditorUtility.DisplayDialog("Картинка", "Это не картинка. Годятся PNG, JPG, TGA, PSD.", "Понятно");
+                    else
+                        Change(() => set(texture), false, true);
                 };
-                parent.Add(hint);
-            }
+            }, TrickleDown.TrickleDown);
+            parent.Add(box);
         }
 
-        // Пул рисунков объекта: до MaxPoolSize строк, «+ выделенные» берёт
-        // спрайты, выделенные в Project (и все спрайты выделенных текстур).
-        private void SpriteList(string label, List<Sprite> sprites, bool? use = null, Action<bool> setUse = null)
+        // Пул рисунков объекта (до MaxPoolSize). Рисунки принимаются из
+        // чего угодно: перетаскиванием на весь список (спрайт, картинка
+        // любого импорта, папка из Project, файлы и папки из проводника),
+        // кнопкой «Папка…» и «+ выделенные в Project». Картинки не-Sprite
+        // переводятся в Sprite после вопроса. icons — пул иконок меток.
+        private void SpriteList(string label, List<Sprite> sprites, bool? use = null, Action<bool> setUse = null, bool icons = false)
         {
             int max = WorldMapArtStyle.MaxPoolSize;
+            VisualElement box = new VisualElement();
+            box.style.marginTop = 3;
+            box.style.paddingLeft = box.style.paddingRight = 3;
+            box.style.paddingTop = box.style.paddingBottom = 2;
+            box.style.borderTopLeftRadius = box.style.borderTopRightRadius = box.style.borderBottomLeftRadius = box.style.borderBottomRightRadius = 3;
+            box.style.borderTopWidth = box.style.borderBottomWidth = box.style.borderLeftWidth = box.style.borderRightWidth = 1;
+            Color idleBorder = new Color(1, 1, 1, 0.06f);
+            Color hotBorder = new Color(0.55f, 0.85f, 0.45f, 0.9f);
+            SetBorder(box, idleBorder);
+
             VisualElement titleRow = Row(false);
-            titleRow.style.marginTop = 2;
             Label title = new Label(label + (sprites.Count == 0 ? " — нет, рисует код" : " (" + sprites.Count + " из " + max + ")")) { style = { flexGrow = 1, whiteSpace = WhiteSpace.Normal } };
             titleRow.Add(title);
             if (use != null && setUse != null)
@@ -1448,7 +1501,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 toggle.RegisterValueChangedCallback(evt => Change(() => setUse(evt.newValue), false));
                 titleRow.Add(toggle);
             }
-            parent.Add(titleRow);
+            box.Add(titleRow);
+
             for (int i = 0; i < sprites.Count; i++)
             {
                 int index = i;
@@ -1458,53 +1512,93 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 field.RegisterValueChangedCallback(evt => Change(() => sprites[index] = evt.newValue as Sprite, false));
                 row.Add(field);
                 row.Add(new Button(() => Change(() => sprites.RemoveAt(index), false, true)) { text = "−" });
-                parent.Add(row);
+                box.Add(row);
             }
+
+            Label hint = new Label(sprites.Count >= max
+                ? "Пул полон (" + max + "). Уберите лишние, чтобы добавить новые."
+                : "Перетащите сюда спрайты, картинки, папку из Project или файлы и папки из проводника")
+            {
+                style = { fontSize = 10, color = new Color(.7f, .72f, .66f), whiteSpace = WhiteSpace.Normal, marginLeft = 2 }
+            };
+            box.Add(hint);
+
             bool full = sprites.Count >= max;
-            Buttons(
-                ("+ рисунок", full ? null : (Action)(() => Change(() => sprites.Add(null), false, true)), "Добавить строку; из нескольких рисунков выбирается случайный"),
-                ("+ выделенные в Project", full ? null : (Action)(() =>
-                {
-                    List<Sprite> selected = SelectedSprites();
-                    if (selected.Count == 0)
-                    {
-                        EditorUtility.DisplayDialog("Рисунки", "В Project не выделено ни одного спрайта или текстуры со спрайтами.", "Понятно");
-                        return;
-                    }
-                    Change(() =>
-                    {
-                        foreach (Sprite sprite in selected)
-                        {
-                            if (sprites.Count >= max)
-                                break;
-                            if (!sprites.Contains(sprite))
-                                sprites.Add(sprite);
-                        }
-                    }, false, true);
-                }), "Добавить все спрайты, выделенные в окне Project (до " + max + ")"),
-                ("Очистить", sprites.Count == 0 ? null : (Action)(() => Change(sprites.Clear, false, true)), null));
+            VisualElement buttons = Row(true);
+            void AddButton(string text, Action action, string tooltip)
+            {
+                Button button = new Button(action) { text = text, tooltip = tooltip };
+                button.SetEnabled(action != null);
+                buttons.Add(button);
+            }
+            AddButton("+ рисунок", full ? null : (Action)(() => Change(() => sprites.Add(null), false, true)), "Пустая строка: выбрать рисунок кружком справа");
+            AddButton("Папка…", full ? null : (Action)(() => AddToPool(sprites, WorldMapSpriteImport.CollectFromFolderPanel(label, icons))),
+                "Взять все картинки папки (в проекте или на диске — с диска копируются в " + WorldMapSpriteImport.DiskFolder + ")");
+            AddButton("+ выделенные в Project", full ? null : (Action)(() => AddToPool(sprites,
+                WorldMapSpriteImport.Collect(Selection.objects, null, label, icons))), "Спрайты, картинки и папки, выделенные в окне Project");
+            AddButton("Очистить", sprites.Count == 0 ? null : (Action)(() => Change(sprites.Clear, false, true)), null);
+            box.Add(buttons);
+
+            // Приём перетаскивания на весь список. TrickleDown — раньше полей
+            // строк, которые сами принимают только готовый спрайт.
+            box.RegisterCallback<DragUpdatedEvent>(evt =>
+            {
+                if (!WorldMapSpriteImport.HasCandidate(DragAndDrop.objectReferences, DragAndDrop.paths))
+                    return;
+                DragAndDrop.visualMode = full ? DragAndDropVisualMode.Rejected : DragAndDropVisualMode.Copy;
+                SetBorder(box, hotBorder);
+                evt.StopPropagation();
+            }, TrickleDown.TrickleDown);
+            box.RegisterCallback<DragLeaveEvent>(_ => SetBorder(box, idleBorder));
+            box.RegisterCallback<DragExitedEvent>(_ => SetBorder(box, idleBorder));
+            box.RegisterCallback<DragPerformEvent>(evt =>
+            {
+                SetBorder(box, idleBorder);
+                if (full || !WorldMapSpriteImport.HasCandidate(DragAndDrop.objectReferences, DragAndDrop.paths))
+                    return;
+                DragAndDrop.AcceptDrag();
+                UnityEngine.Object[] objects = DragAndDrop.objectReferences;
+                string[] paths = DragAndDrop.paths;
+                evt.StopPropagation();
+                // После события: импорт и диалог нельзя делать внутри обработки drag.
+                EditorApplication.delayCall += () => AddToPool(sprites, WorldMapSpriteImport.Collect(objects, paths, label, icons));
+            }, TrickleDown.TrickleDown);
+
+            parent.Add(box);
         }
 
-        private static List<Sprite> SelectedSprites()
+        private void AddToPool(List<Sprite> pool, List<Sprite> found)
         {
-            List<Sprite> result = new List<Sprite>();
-            foreach (UnityEngine.Object selected in Selection.objects)
+            int max = WorldMapArtStyle.MaxPoolSize;
+            if (found == null || found.Count == 0)
             {
-                if (selected is Sprite sprite)
-                {
-                    result.Add(sprite);
-                    continue;
-                }
-                if (selected is Texture2D)
-                {
-                    foreach (UnityEngine.Object asset in AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(selected)))
-                    {
-                        if (asset is Sprite child)
-                            result.Add(child);
-                    }
-                }
+                EditorUtility.DisplayDialog("Рисунки", "Не нашлось ни одной картинки-спрайта. Годятся PNG, JPG, TGA, PSD — по одному, папкой или выделением в Project.", "Понятно");
+                return;
             }
-            return result;
+            int added = 0, skipped = 0;
+            Change(() =>
+            {
+                pool.RemoveAll(sprite => sprite == null);
+                foreach (Sprite sprite in found)
+                {
+                    if (pool.Contains(sprite))
+                        continue;
+                    if (pool.Count >= max)
+                    {
+                        skipped++;
+                        continue;
+                    }
+                    pool.Add(sprite);
+                    added++;
+                }
+            }, false, true);
+            if (skipped > 0)
+                EditorUtility.DisplayDialog("Рисунки", "Добавлено " + added + ". Пул вмещает " + max + " рисунков — ещё " + skipped + " не поместились.", "Понятно");
+        }
+
+        private static void SetBorder(VisualElement element, Color color)
+        {
+            element.style.borderTopColor = element.style.borderBottomColor = element.style.borderLeftColor = element.style.borderRightColor = color;
         }
     }
 }

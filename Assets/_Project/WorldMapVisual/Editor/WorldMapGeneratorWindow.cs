@@ -1032,7 +1032,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 Help("Каждый тип местности — слой поверх подложки: подкраска и свой узор (например, рисунок лесной подстилки или пашни).");
                 Switches(("Узоры местности", A.UseTerrainPatterns, v => A.UseTerrainPatterns = v));
                 Slider("Неровность краёв, клеток", A.EdgeRoughness, 0, 1.5f, v => A.EdgeRoughness = v, false, "0 — видны шестиугольники клеток");
-                Slider("Мягкость переходов, клеток", A.EdgeSoftness, 0, 1, v => A.EdgeSoftness = v);
+                Slider("Рваность краёв", A.EdgeRaggedness, 0, 1, v => A.EdgeRaggedness = v, false, "Края местности, воды и узоров — зубцами и выступами, а не растворением (слоями видеокартой)");
+                Slider("Размер зубцов, клеток", A.RaggedScaleHexes, 0.05f, 1.5f, v => A.RaggedScaleHexes = v);
+                Slider("Мягкость переходов (в PNG), клеток", A.EdgeSoftness, 0, 1, v => A.EdgeSoftness = v);
                 foreach (WorldMapTerrainArt art in A.Terrain)
                 {
                     if (art == null || art.Terrain == WorldMapGameplayTerrainType.Road || art.Terrain == WorldMapGameplayTerrainType.Trail)
@@ -1067,6 +1069,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 ColorField("Цвет туши", A.InkColor, v => A.InkColor = v);
                 Slider("Толщина, px полотна", A.InkWidth, 0, 12, v => A.InkWidth = v);
                 Slider("Кромка леса", A.ForestOutline, 0, 1, v => A.ForestOutline = v);
+                Slider("Разнотолщинность мазка", A.InkVariation, 0, 1, v => A.InkVariation = v, false, "0 — ровная линия, 1 — то волосок, то жирный нажим кисти");
+                Slider("Обрывы мазка", A.InkGaps, 0, 0.6f, v => A.InkGaps = v, false, "Места, где кисть отрывается от бумаги");
             }, () => { WorldMapArtStyle d = WorldMapArtStyle.CreateDefault(); A.InkColor = d.InkColor; A.InkWidth = d.InkWidth; A.ForestOutline = d.ForestOutline; }, A.DrawInk, v => A.DrawInk = v);
         }
 

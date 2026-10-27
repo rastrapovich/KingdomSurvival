@@ -134,6 +134,29 @@ namespace KingdomSurvival.WorldMapVisual
         public int GridHeight;
         public float[] Alpha;
         public float UniformAlpha = 1f;
+
+        // Плитка по маске: треугольники области (x, y по три вершины) в
+        // пикселях исходной карты SourceWidth × SourceHeight — край рваный и
+        // чёткий, а не растворение в прозрачность.
+        public float[] Triangles;
+        // Заливка треугольниками без текстуры: цвет Tint или свой цвет у
+        // каждого треугольника (TriangleColors, по одному на треугольник).
+        public Color Tint = Color.white;
+        public Color32[] TriangleColors;
+        // Векторный слой: заливки и мазки туши; рисует Painter2D со
+        // сглаживанием в экранных пикселях — чётко при любом приближении.
+        public List<WorldMapVectorShape> Shapes;
+        public float SourceWidth = 1f;
+        public float SourceHeight = 1f;
+    }
+
+    // Одна заливка: контуры в пикселях исходной карты, один цвет. OddEven —
+    // вложенные контуры вырезают дыры (озеро в лесу, кольцо мазка).
+    public sealed class WorldMapVectorShape
+    {
+        public Color Color = Color.black;
+        public bool OddEven = true;
+        public readonly List<Vector2[]> Contours = new List<Vector2[]>();
     }
 
     // Карта, разложенная на слои: снизу вверх Layers, затем свои рисунки.
@@ -187,7 +210,7 @@ namespace KingdomSurvival.WorldMapVisual
                     return;
                 foreach (WorldMapTextureLayer layer in layers.Layers)
                 {
-                    if (layer?.Texture != null)
+                    if (layer != null && (layer.Texture != null || layer.Shapes != null || layer.Triangles != null))
                         Add(new WorldMapTextureLayerView(layer));
                 }
                 Add(new WorldMapSignLayer { Signs = layers.Signs });
@@ -216,12 +239,89 @@ namespace KingdomSurvival.WorldMapVisual
         private void Draw(MeshGenerationContext context)
         {
             Rect rect = contentRect;
-            if (layer?.Texture == null || rect.width <= 0f || rect.height <= 0f)
+            if (layer == null || rect.width <= 0f || rect.height <= 0f)
                 return;
+            float sx = rect.width / Mathf.Max(1f, layer.SourceWidth), sy = rect.height / Mathf.Max(1f, layer.SourceHeight);
 
+            if (layer.Shapes != null)
+            {
+                Painter2D painter = context.painter2D;
+                foreach (WorldMapVectorShape shape in layer.Shapes)
+                {
+                    if (shape == null || shape.Contours.Count == 0)
+                        continue;
+                    painter.fillColor = shape.Color;
+                    painter.BeginPath();
+                    foreach (Vector2[] contour in shape.Contours)
+                    {
+                        if (contour == null || contour.Length < 3)
+                            continue;
+                        painter.MoveTo(new Vector2(contour[0].x * sx, contour[0].y * sy));
+                        for (int i = 1; i < contour.Length; i++)
+                            painter.LineTo(new Vector2(contour[i].x * sx, contour[i].y * sy));
+                        painter.ClosePath();
+                    }
+                    painter.Fill(shape.OddEven ? FillRule.OddEven : FillRule.NonZero);
+                }
+                return;
+            }
+
+            if (layer.Texture == null && layer.Triangles == null)
+                return;
             float tileW = layer.Tiled ? Mathf.Max(0.0001f, layer.TileWidthPercent / 100f * rect.width) : rect.width;
             float tileH = layer.Tiled ? Mathf.Max(0.0001f, layer.TileHeightPercent / 100f * rect.height) : rect.height;
             Vector2 Uv(float x, float y) => new Vector2(x / tileW, 1f - y / tileH);
+
+            if (layer.Triangles != null)
+            {
+                // Плитка по маске или заливка: готовые треугольники области.
+                // Общие вершины соседних треугольников — одна вершина сетки.
+                Color tint = layer.Tint;
+                Color32 color = new Color(tint.r, tint.g, tint.b, Mathf.Clamp01(tint.a * layer.UniformAlpha));
+                int triangles = layer.Triangles.Length / 6;
+                bool perTriangle = layer.TriangleColors != null && layer.TriangleColors.Length >= triangles;
+                List<Vertex> vertices = new List<Vertex>();
+                List<ushort> indices = new List<ushort>();
+                Dictionary<(float, float, int), ushort> shared = new Dictionary<(float, float, int), ushort>();
+                void Flush()
+                {
+                    if (indices.Count == 0)
+                        return;
+                    MeshWriteData mesh = layer.Texture != null ? context.Allocate(vertices.Count, indices.Count, layer.Texture) : context.Allocate(vertices.Count, indices.Count);
+                    foreach (Vertex vertex in vertices)
+                        mesh.SetNextVertex(vertex);
+                    foreach (ushort index in indices)
+                        mesh.SetNextIndex(index);
+                    vertices.Clear();
+                    indices.Clear();
+                    shared.Clear();
+                }
+                for (int t = 0; t < triangles; t++)
+                {
+                    if (vertices.Count > ushort.MaxValue - 3)
+                        Flush();
+                    if (perTriangle)
+                    {
+                        color = layer.TriangleColors[t];
+                        color.a = (byte)Mathf.RoundToInt(color.a * Mathf.Clamp01(layer.UniformAlpha));
+                    }
+                    int colorKey = color.r | color.g << 8 | color.b << 16 | color.a << 24;
+                    for (int v = 0; v < 3; v++)
+                    {
+                        int i = t * 6 + v * 2;
+                        float x = layer.Triangles[i] * sx, y = layer.Triangles[i + 1] * sy;
+                        if (!shared.TryGetValue((x, y, colorKey), out ushort index))
+                        {
+                            index = (ushort)vertices.Count;
+                            shared[(x, y, colorKey)] = index;
+                            vertices.Add(new Vertex { position = new Vector3(x, y, Vertex.nearZ), tint = color, uv = Uv(x, y) });
+                        }
+                        indices.Add(index);
+                    }
+                }
+                Flush();
+                return;
+            }
 
             if (layer.Alpha == null || layer.GridWidth < 2 || layer.GridHeight < 2)
             {

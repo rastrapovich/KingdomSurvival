@@ -14,7 +14,7 @@ namespace KingdomSurvival.WorldMapVisual
     //   знаки сверху вниз по экрану (деревья, болотный камыш, холмы, горы,
     //   домики деревень, приметные места) → обработка (яркость, контраст,
     //   насыщенность, тепло, бумага, зерно, виньетка).
-    public static class WorldMapPainter
+    public static partial class WorldMapPainter
     {
         // paintHiddenPlaces — рисовать и скрытые места (для редактора); в игре
         // скрытое место появляется меткой на карте, когда его найдут.
@@ -52,7 +52,7 @@ namespace KingdomSurvival.WorldMapVisual
                 Mathf.Max(16, Mathf.RoundToInt(map.CanvasHeight * r)));
         }
 
-        private sealed class PaintJob
+        private sealed partial class PaintJob
         {
             private readonly GeneratedWorldMap map;
             private readonly WorldMapArtStyle style;
@@ -376,43 +376,9 @@ namespace KingdomSurvival.WorldMapVisual
                         AddTiled("Мелкий узор", ModulateCopy(detail), style.DetailPatternTileHexes * hexPx, style.DetailPatternStrength, null, 0, 0);
                 }
 
-                if (!style.DrawTerrain)
-                    return;
-
-                TerrainTint(out float[] ar, out float[] ag, out float[] ab, out float[] aa, out WorldMapTerrainArt[] arts);
-                Color32[] tint = new Color32[width * height];
-                bool any = false;
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        int p = y * width + x;
-                        if (aa[p] <= 0.002f)
-                            continue;
-                        any = true;
-                        Color c = Grade(new Color(ar[p], ag[p], ab[p]));
-                        c.a = aa[p];
-                        tint[(height - 1 - y) * width + x] = c;
-                    }
-                }
-                if (any)
-                    AddStretched("Подкраска местности", tint, width, height);
-
-                if (!style.UseTerrainPatterns)
-                    return;
-                foreach (WorldMapGameplayTerrainType type in WorldMapTerrainLabels.All)
-                {
-                    WorldMapTerrainArt art = arts[(int)type];
-                    if (art == null || !art.Enabled || art.Pattern == null || art.PatternStrength <= 0f)
-                        continue;
-                    Image pattern = LoadImage(art.Pattern);
-                    if (pattern == null)
-                        continue;
-                    byte value = (byte)type;
-                    float[] grid = Grid(p => area[p] == value ? 1f : 0f, out int gw, out int gh);
-                    if (grid != null)
-                        AddTiled("Узор: " + WorldMapTerrainLabels.Name(type), GradedCopy(pattern, Color.white), art.PatternTileHexes * hexPx, art.PatternStrength, grid, gw, gh);
-                }
+                // Местность — векторными заливками с рваным краем и узорами
+                // в тех же границах (WorldMapPainter.Vector.cs).
+                BuildVectorTerrain();
             }
 
             private void BuildUpperLayers()
@@ -434,18 +400,7 @@ namespace KingdomSurvival.WorldMapVisual
                     }
                 }
                 if (any)
-                    AddStretched("Вода, тушь, дороги, знаки", top, width, height);
-
-                if (style.DrawWater && style.UseWaterPattern && style.WaterPattern != null && style.WaterPatternStrength > 0f && waterCoverage != null)
-                {
-                    Image ripple = LoadImage(style.WaterPattern);
-                    if (ripple != null)
-                    {
-                        float[] grid = Grid(p => waterCoverage[p], out int gw, out int gh);
-                        if (grid != null)
-                            AddTiled("Рябь", GradedCopy(ripple, Color.white), style.WaterPatternTileHexes * hexPx, style.WaterPatternStrength, grid, gw, gh);
-                    }
-                }
+                    AddStretched("Знаки кодом", top, width, height);
 
                 if (!style.DrawPost)
                     return;
@@ -484,43 +439,6 @@ namespace KingdomSurvival.WorldMapVisual
                     }
                 }
                 AddStretched("Виньетка и зерно", post, width, height);
-            }
-
-            // Шаг сетки прозрачности плиточных слоёв, в пикселях рисунка.
-            private int GridStep => Mathf.Max(3, Mathf.RoundToInt(hexPx / 6f));
-
-            // Сетка прозрачности: в каждом узле — среднее значение по
-            // окрестности шага сетки. null — слой нигде не виден.
-            private float[] Grid(Func<int, float> value, out int gw, out int gh)
-            {
-                int step = GridStep;
-                gw = width / step + 1;
-                gh = height / step + 1;
-                float[] grid = new float[gw * gh];
-                bool any = false;
-                int half = step / 2;
-                for (int j = 0; j < gh; j++)
-                {
-                    for (int i = 0; i < gw; i++)
-                    {
-                        int x0 = Mathf.Max(0, i * step - half), x1 = Mathf.Min(width - 1, i * step + half);
-                        int y0 = Mathf.Max(0, j * step - half), y1 = Mathf.Min(height - 1, j * step + half);
-                        float sum = 0f;
-                        int n = 0;
-                        for (int y = y0; y <= y1; y += 2)
-                        {
-                            for (int x = x0; x <= x1; x += 2)
-                            {
-                                sum += value(y * width + x);
-                                n++;
-                            }
-                        }
-                        float average = n > 0 ? sum / n : 0f;
-                        grid[j * gw + i] = average;
-                        any |= average > 0.002f;
-                    }
-                }
-                return any ? grid : null;
             }
 
             private void AddTiled(string name, Texture2D texture, float tilePx, float alpha, float[] grid, int gw, int gh)
@@ -895,8 +813,13 @@ namespace KingdomSurvival.WorldMapVisual
                 if (!any)
                     return;
 
-                float[] toWater = DistanceTransform(isWater);
                 float[] toLand = DistanceTransform(isLand);
+                if (layerList != null)
+                {
+                    BuildVectorWater(toLand);
+                    return;
+                }
+                float[] toWater = DistanceTransform(isWater);
                 float shorePx = Mathf.Max(1f, style.ShoreBand * hexPx);
                 float deepPx = Mathf.Max(2f, hexPx * 0.9f);
                 Image ripple = style.UseWaterPattern ? LoadImage(style.WaterPattern) : null;
@@ -946,6 +869,11 @@ namespace KingdomSurvival.WorldMapVisual
 
             private void PaintForestOutline()
             {
+                if (layerList != null)
+                {
+                    BuildVectorForestInk();
+                    return;
+                }
                 if (!style.DrawInk || !style.DrawForestOutline || inkPx <= 0f || style.ForestOutline <= 0f)
                     return;
                 int count = width * height;
@@ -974,6 +902,11 @@ namespace KingdomSurvival.WorldMapVisual
 
             private void PaintRoads()
             {
+                if (layerList != null)
+                {
+                    BuildVectorRoads();
+                    return;
+                }
                 if (map.Roads == null)
                     return;
                 float roadHalf = Mathf.Max(0.8f, style.RoadWidthHexes * hexPx * 0.5f);
@@ -1003,6 +936,11 @@ namespace KingdomSurvival.WorldMapVisual
 
             private void PaintBridges()
             {
+                if (layerList != null)
+                {
+                    BuildVectorBridges();
+                    return;
+                }
                 if (!style.DrawBridges || map.Bridges == null || map.Bridges.Count == 0)
                     return;
                 float roadHalf = Mathf.Max(0.8f, style.RoadWidthHexes * hexPx * 0.5f);

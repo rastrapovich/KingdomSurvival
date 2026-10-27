@@ -98,12 +98,20 @@ namespace KingdomSurvival.WorldMapVisual
         [Range(0f, 1.5f)] public float EdgeRoughness = 0.55f;
         [Tooltip("Мягкость переходов между местностями, в клетках.")]
         [Range(0f, 1f)] public float EdgeSoftness = 0.18f;
+        [Tooltip("Рваность краёв местности, воды и узоров (при слоях видеокартой): зубцы и выступы вместо растворения.")]
+        [Range(0f, 1f)] public float EdgeRaggedness = 0.6f;
+        [Tooltip("Размер зубцов рваного края, в клетках.")]
+        [Range(0.05f, 1.5f)] public float RaggedScaleHexes = 0.3f;
 
         [Header("Тушь")]
         public Color InkColor = new Color(0.07f, 0.06f, 0.05f, 1f);
         [Tooltip("Толщина контура в пикселях полотна (до учёта качества).")]
         [Range(0f, 12f)] public float InkWidth = 3f;
         [Range(0f, 1f)] public float ForestOutline = 0.55f;
+        [Tooltip("Разнотолщинность мазка туши: 0 — ровная линия, 1 — то волосок, то жирный нажим.")]
+        [Range(0f, 1f)] public float InkVariation = 0.6f;
+        [Tooltip("Обрывы мазка — места, где кисть отрывается от бумаги.")]
+        [Range(0f, 0.6f)] public float InkGaps = 0.12f;
 
         [Header("Вода")]
         public Color WaterShallowColor = new Color(0.36f, 0.47f, 0.47f, 1f);

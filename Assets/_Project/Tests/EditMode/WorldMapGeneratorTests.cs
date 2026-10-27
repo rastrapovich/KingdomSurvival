@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using KingdomSurvival.WorldMapVisual;
 using NUnit.Framework;
 using UnityEngine;
@@ -555,23 +556,118 @@ public class WorldMapGeneratorTests
             Assert.That(basePattern.Texture.wrapMode, Is.EqualTo(TextureWrapMode.Repeat));
             Assert.That(basePattern.Texture.mipmapCount, Is.GreaterThan(1));
 
-            WorldMapTextureLayer forest = layers.Layers.Find(layer => layer.Name.Contains(WorldMapTerrainLabels.Name(WorldMapGameplayTerrainType.Forest)));
+            string forestName = WorldMapTerrainLabels.Name(WorldMapGameplayTerrainType.Forest);
+            WorldMapTextureLayer forest = layers.Layers.Find(layer => layer.Name == "Узор: " + forestName);
             Assert.That(forest, Is.Not.Null, "Узор леса — отдельный слой.");
-            Assert.That(forest.Alpha, Is.Not.Null, "Узор леса виден только там, где лес.");
-            Assert.That(forest.Alpha.Length, Is.EqualTo(forest.GridWidth * forest.GridHeight));
+            Assert.That(forest.Triangles, Is.Not.Null.And.Not.Empty, "Узор леса лежит в рваной границе леса, а не растворяется.");
+            Assert.That(forest.Triangles.Length % 6, Is.EqualTo(0));
+
+            WorldMapTextureLayer forestTint = layers.Layers.Find(layer => layer.Name == "Местность: " + forestName);
+            Assert.That(forestTint?.Triangles, Is.Not.Null.And.Not.Empty, "Подкраска леса — заливка треугольниками в рваной границе.");
+            Assert.That(forestTint.Texture, Is.Null);
+            for (int i = 0; i < forestTint.Triangles.Length; i += 2)
+            {
+                Assert.That(forestTint.Triangles[i], Is.InRange(0f, forestTint.SourceWidth));
+                Assert.That(forestTint.Triangles[i + 1], Is.InRange(0f, forestTint.SourceHeight));
+            }
 
             int baseIndex = layers.Layers.IndexOf(basePattern);
-            int tintIndex = layers.Layers.FindIndex(layer => layer.Name == "Подкраска местности");
-            int topIndex = layers.Layers.FindIndex(layer => layer.Name.StartsWith("Вода"));
+            int tintIndex = layers.Layers.IndexOf(forestTint);
+            int waterIndex = layers.Layers.FindIndex(layer => layer.Name == "Вода");
+            int shoreInkIndex = layers.Layers.FindIndex(layer => layer.Name == "Тушь берега");
+            int roadsIndex = layers.Layers.FindIndex(layer => layer.Name == "Дороги и тропы");
             Assert.That(baseIndex, Is.LessThan(tintIndex), "Подложка под подкраской местности.");
             Assert.That(tintIndex, Is.LessThan(layers.Layers.IndexOf(forest)));
-            Assert.That(layers.Layers.IndexOf(forest), Is.LessThan(topIndex), "Узоры под водой, тушью и дорогами.");
+            Assert.That(layers.Layers.IndexOf(forest), Is.LessThan(waterIndex), "Узоры под водой.");
+            Assert.That(waterIndex, Is.LessThan(shoreInkIndex), "Тушь берега поверх воды.");
+            Assert.That(shoreInkIndex, Is.LessThan(roadsIndex), "Дороги поверх туши берега.");
         }
         finally
         {
             layers?.Destroy();
             Object.DestroyImmediate(ground);
             Object.DestroyImmediate(pattern);
+        }
+    }
+
+    // Толщина мазка-кольца по точкам: расстояние между внешним и
+    // внутренним краем.
+    private static List<float> RingWidths(WorldMapLayers layers, string name)
+    {
+        List<float> widths = new List<float>();
+        WorldMapTextureLayer layer = layers.Layers.Find(item => item.Name == name);
+        foreach (WorldMapVectorShape shape in layer.Shapes)
+        {
+            if (shape.Contours.Count != 2 || shape.Contours[0].Length != shape.Contours[1].Length)
+                continue;
+            for (int i = 0; i < shape.Contours[0].Length; i++)
+                widths.Add(Vector2.Distance(shape.Contours[0][i], shape.Contours[1][i]));
+        }
+        return widths;
+    }
+
+    [Test]
+    public void RaggedTerrainEdges_MeetWithoutGapsOrOverlaps()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
+        foreach (float raggedness in new[] { 0f, 1f })
+        {
+            WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+            style.EdgeRaggedness = raggedness;
+            Texture2D ground = WorldMapPainter.Paint(map, style, 0.25f, false, out WorldMapLayers layers);
+            try
+            {
+                double area = 0.0;
+                float canvas = 0f;
+                int fills = 0;
+                foreach (WorldMapTextureLayer layer in layers.Layers)
+                {
+                    if (!layer.Name.StartsWith("Местность: "))
+                        continue;
+                    fills++;
+                    canvas = layer.SourceWidth * layer.SourceHeight;
+                    float[] t = layer.Triangles;
+                    for (int i = 0; i < t.Length; i += 6)
+                        area += Mathf.Abs((t[i + 2] - t[i]) * (t[i + 5] - t[i + 1]) - (t[i + 4] - t[i]) * (t[i + 3] - t[i + 1])) * 0.5;
+                }
+                Assert.That(fills, Is.GreaterThan(2));
+                // Сумма заливок — вся карта без озёр: соседние типы делят край.
+                Assert.That(area, Is.LessThanOrEqualTo(canvas * 1.002), "Рваные края типов не налезают друг на друга (рваность " + raggedness + ").");
+                Assert.That(area, Is.GreaterThan(canvas * 0.9), "Между типами нет щелей (рваность " + raggedness + ").");
+            }
+            finally
+            {
+                layers.Destroy();
+                Object.DestroyImmediate(ground);
+            }
+        }
+    }
+
+    [Test]
+    public void InkStrokes_AreThickerAndThinner_LikeABrush()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
+        WorldMapArtStyle brush = WorldMapArtStyle.CreateDefault();
+        brush.InkGaps = 0f;
+        WorldMapArtStyle even = WorldMapArtStyle.CreateDefault();
+        even.InkGaps = 0f;
+        even.InkVariation = 0f;
+        Texture2D a = WorldMapPainter.Paint(map, brush, 0.25f, false, out WorldMapLayers brushLayers);
+        Texture2D b = WorldMapPainter.Paint(map, even, 0.25f, false, out WorldMapLayers evenLayers);
+        try
+        {
+            List<float> brushWidths = RingWidths(brushLayers, "Тушь берега");
+            List<float> evenWidths = RingWidths(evenLayers, "Тушь берега");
+            Assert.That(brushWidths.Count, Is.GreaterThan(20), "Берега обведены мазками-кольцами.");
+            Assert.That(brushWidths.Max() / brushWidths.Min(), Is.GreaterThan(1.8f), "Мазок то тоньше, то толще.");
+            Assert.That(evenWidths.Max() / evenWidths.Min(), Is.LessThan(1.25f), "Без разнотолщинности — ровная линия.");
+        }
+        finally
+        {
+            brushLayers.Destroy();
+            evenLayers.Destroy();
+            Object.DestroyImmediate(a);
+            Object.DestroyImmediate(b);
         }
     }
 

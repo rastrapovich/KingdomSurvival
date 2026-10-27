@@ -102,6 +102,76 @@ public class WorldMapSpriteImportTests
         Assert.That(((TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture))).wrapMode, Is.EqualTo(TextureWrapMode.Repeat));
     }
 
+    // Картинка, которую Unity нарезала на большой кусок и обрывок 3×3.
+    private static string MakeAccidentallySlicedPicture()
+    {
+        AssetDatabase.CreateFolder("Assets", "__KsSpriteImportTest");
+        string path = ProjectFolder + "/mountain.png";
+        Texture2D texture = new Texture2D(64, 64, TextureFormat.RGBA32, false);
+        Color32[] pixels = new Color32[64 * 64];
+        for (int y = 0; y < 40; y++)
+        {
+            for (int x = 0; x < 40; x++)
+                pixels[y * 64 + x] = new Color32(120, 110, 90, 255);
+        }
+        for (int y = 60; y < 63; y++)
+        {
+            for (int x = 60; x < 63; x++)
+                pixels[y * 64 + x] = new Color32(60, 40, 20, 255);
+        }
+        texture.SetPixels32(pixels);
+        File.WriteAllBytes(path, texture.EncodeToPNG());
+        Object.DestroyImmediate(texture);
+        // Файл импорта — как его пишет Unity при автоматической нарезке.
+        File.WriteAllText(path + ".meta",
+            "fileFormatVersion: 2\nguid: " + System.Guid.NewGuid().ToString("N") + "\nTextureImporter:\n" +
+            "  serializedVersion: 13\n  spriteMode: 2\n  textureType: 8\n  alphaIsTransparency: 1\n" +
+            "  spriteSheet:\n    serializedVersion: 2\n    sprites:\n" +
+            Piece("mountain_0", 0, 0, 40, 40, "11111111111111110800000000000000", 1001) +
+            Piece("mountain_1", 60, 60, 3, 3, "22222222222222220800000000000000", 1002) +
+            "    nameFileIdTable:\n      mountain_0: 1001\n      mountain_1: 1002\n");
+        AssetDatabase.Refresh();
+        return path;
+    }
+
+    private static string Piece(string name, int x, int y, int w, int h, string spriteId, long internalId) =>
+        "    - serializedVersion: 2\n      name: " + name + "\n      rect:\n        serializedVersion: 2\n" +
+        "        x: " + x + "\n        y: " + y + "\n        width: " + w + "\n        height: " + h + "\n" +
+        "      alignment: 0\n      pivot: {x: 0, y: 0}\n      spriteID: " + spriteId + "\n      internalID: " + internalId + "\n";
+
+    [Test]
+    public void AccidentallySlicedPicture_IsRepairedIntoOneSprite()
+    {
+        string path = MakeAccidentallySlicedPicture();
+        List<Sprite> pool = new List<Sprite>();
+        foreach (Object asset in AssetDatabase.LoadAllAssetsAtPath(path))
+        {
+            if (asset is Sprite sprite)
+                pool.Add(sprite);
+        }
+        Assert.That(pool.Count, Is.EqualTo(2), "Подготовка: кусок и обрывок.");
+        Assert.That(WorldMapSpriteImport.IsAccidentallySliced(path), Is.True);
+        Assert.That(WorldMapSpriteImport.CountBrokenPictures(new[] { pool }), Is.EqualTo(1));
+
+        Assert.That(WorldMapSpriteImport.RepairPool(pool, false), Is.True);
+
+        Assert.That(pool.Count, Is.EqualTo(1), "Одна картинка — один рисунок в пуле.");
+        Assert.That(pool[0].rect.width, Is.EqualTo(64f), "Спрайт — вся картинка, а не кусок.");
+        Assert.That(((TextureImporter)AssetImporter.GetAtPath(path)).spriteImportMode, Is.EqualTo(SpriteImportMode.Single));
+        Assert.That(WorldMapSpriteImport.RepairPool(pool, false), Is.False, "Повторно чинить нечего.");
+    }
+
+    [Test]
+    public void AddingASlicedPicture_GivesOneSprite_NotItsDebris()
+    {
+        string path = MakeAccidentallySlicedPicture();
+        Object folder = AssetDatabase.LoadAssetAtPath<Object>(ProjectFolder);
+        List<Sprite> sprites = WorldMapSpriteImport.Collect(new[] { folder }, null, Subfolder, false);
+        Assert.That(sprites.Count, Is.EqualTo(1));
+        Assert.That(AssetDatabase.GetAssetPath(sprites[0]), Is.EqualTo(path));
+        Assert.That(sprites[0].rect.width, Is.EqualTo(64f));
+    }
+
     [Test]
     public void NothingUsable_GivesNoCandidate()
     {

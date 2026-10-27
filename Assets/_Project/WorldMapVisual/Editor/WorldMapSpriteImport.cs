@@ -52,7 +52,14 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             foreach (Object item in objects ?? Array.Empty<Object>())
             {
                 if (item is Sprite sprite)
-                    direct.Add(sprite);
+                {
+                    // Кусок случайно нарезанной картинки — берём картинку целиком.
+                    string spritePath = AssetDatabase.GetAssetPath(sprite);
+                    if (IsAccidentallySliced(spritePath))
+                        AddUnique(textures, spritePath);
+                    else
+                        direct.Add(sprite);
+                }
                 else if (item is Texture2D)
                     AddUnique(textures, AssetDatabase.GetAssetPath(item));
                 else if (IsProjectFolder(item))
@@ -190,13 +197,126 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 }
             }
 
+            List<string> sliced = texturePaths.Where(IsAccidentallySliced).ToList();
+            if (sliced.Count > 0 && ConfirmConversion(
+                    "Картинок, которые Unity нарезала на куски (картинка плюс мелкие обрывки): " + sliced.Count + ".\n" +
+                    "Сделать каждую одним спрайтом? Иначе обрывки будут отброшены, а куски останутся.\n\n" +
+                    string.Join("\n", sliced.Take(6).Select(Path.GetFileName)) + (sliced.Count > 6 ? "\n…" : "")))
+            {
+                foreach (string path in sliced)
+                    MakeSingle(path, icons);
+            }
+
             List<Sprite> sprites = new List<Sprite>();
             foreach (string path in texturePaths)
             {
-                IEnumerable<Sprite> found = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().OrderBy(sprite => sprite.name, StringComparer.OrdinalIgnoreCase);
+                IEnumerable<Sprite> found = WithoutDebris(AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>()).OrderBy(sprite => sprite.name, StringComparer.OrdinalIgnoreCase);
                 sprites.AddRange(found);
             }
             return sprites;
+        }
+
+        // ------------------------------------------------------------------
+        // Случайная нарезка. Unity иногда импортирует одну картинку в режиме
+        // Multiple и режет её на большой кусок и мелкие обрывки (несколько
+        // отбившихся пикселей у края). Обрывок в пуле растягивается до
+        // размера знака и рисуется мутным прямоугольником.
+        // ------------------------------------------------------------------
+
+        // Обрывок — кусок меньше этой доли самого большого куска картинки.
+        private const float DebrisShare = 0.1f;
+
+        private static float Area(Sprite sprite) => sprite.rect.width * sprite.rect.height;
+
+        // Картинка нарезана по ошибке: Multiple, один большой кусок, остальное — обрывки.
+        public static bool IsAccidentallySliced(string path)
+        {
+            if (string.IsNullOrEmpty(path) || !(AssetImporter.GetAtPath(path) is TextureImporter importer) ||
+                importer.spriteImportMode != SpriteImportMode.Multiple)
+                return false;
+            Sprite[] sprites = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().ToArray();
+            if (sprites.Length < 2)
+                return false;
+            float largest = sprites.Max(Area);
+            return sprites.Count(sprite => Area(sprite) >= largest * DebrisShare) == 1;
+        }
+
+        // Одна картинка — один спрайт (Single).
+        public static void MakeSingle(string path, bool icons)
+        {
+            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
+                return;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            TextureImporterSettings settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            settings.spriteAlignment = (int)(icons ? SpriteAlignment.Center : SpriteAlignment.BottomCenter);
+            settings.spriteMeshType = SpriteMeshType.FullRect;
+            importer.SetTextureSettings(settings);
+            importer.SaveAndReimport();
+        }
+
+        // Спрайты картинки без обрывков.
+        private static IEnumerable<Sprite> WithoutDebris(IEnumerable<Sprite> sprites)
+        {
+            List<Sprite> list = sprites.ToList();
+            if (list.Count < 2)
+                return list;
+            float largest = list.Max(Area);
+            return list.Where(sprite => Area(sprite) >= largest * DebrisShare);
+        }
+
+        // Сколько картинок в пулах нарезаны по ошибке или дали обрывки.
+        public static int CountBrokenPictures(IEnumerable<List<Sprite>> pools)
+        {
+            HashSet<string> broken = new HashSet<string>();
+            foreach (List<Sprite> pool in pools)
+            {
+                foreach (Sprite sprite in pool ?? new List<Sprite>())
+                {
+                    if (sprite == null)
+                        continue;
+                    string path = AssetDatabase.GetAssetPath(sprite);
+                    if (IsAccidentallySliced(path) || IsDebris(sprite))
+                        broken.Add(path);
+                }
+            }
+            return broken.Count;
+        }
+
+        private static bool IsDebris(Sprite sprite)
+        {
+            Sprite[] siblings = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(sprite)).OfType<Sprite>().ToArray();
+            return siblings.Length > 1 && Area(sprite) < siblings.Max(Area) * DebrisShare;
+        }
+
+        // Починка пула: случайно нарезанные картинки становятся одним
+        // спрайтом, обрывки убираются, повторы — тоже. true — пул изменён.
+        public static bool RepairPool(List<Sprite> pool, bool icons)
+        {
+            if (pool == null || pool.Count == 0)
+                return false;
+            List<(Sprite Sprite, string Path)> entries = pool
+                .Where(sprite => sprite != null)
+                .Select(sprite => (sprite, AssetDatabase.GetAssetPath(sprite)))
+                .ToList();
+            HashSet<string> sliced = new HashSet<string>(entries.Select(entry => entry.Path).Distinct().Where(IsAccidentallySliced));
+            HashSet<Sprite> debris = new HashSet<Sprite>(entries.Where(entry => !sliced.Contains(entry.Path) && IsDebris(entry.Sprite)).Select(entry => entry.Sprite));
+            if (sliced.Count == 0 && debris.Count == 0 && entries.Count == pool.Count && entries.Select(entry => entry.Sprite).Distinct().Count() == entries.Count)
+                return false;
+
+            foreach (string path in sliced)
+                MakeSingle(path, icons);
+
+            List<Sprite> repaired = new List<Sprite>();
+            foreach ((Sprite sprite, string path) in entries)
+            {
+                Sprite result = sliced.Contains(path) ? AssetDatabase.LoadAssetAtPath<Sprite>(path) : debris.Contains(sprite) ? null : sprite;
+                if (result != null && !repaired.Contains(result))
+                    repaired.Add(result);
+            }
+            pool.Clear();
+            pool.AddRange(repaired);
+            return true;
         }
 
         public static void ConvertToSprite(string path, bool icons)

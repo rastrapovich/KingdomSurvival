@@ -140,6 +140,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             database = Resources.Load<WorldMapDatabaseAsset>(WorldMapDatabaseAsset.ResourcesPath);
             generator = database != null ? database.Generator : null;
+            OfferPoolRepair(false);
 
             VisualElement root = rootVisualElement;
             root.Clear();
@@ -1192,6 +1193,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             {
                 Help("У каждого объекта — пул до " + WorldMapArtStyle.MaxPoolSize + " рисунков: каждому дереву, горе, мосту, деревне или месту достаётся случайный, и он не меняется после загрузки. «Знаки» — рисунки на карте; «Иконки метки» — кнопка места на карте игры, по которой к нему идут. Пусто — рисует код. Выделите спрайты в Project и нажмите «+ выделенные» — добавятся все сразу.");
                 Switches(("Обрезать пустые поля рисунков", A.TrimSpritePadding, v => A.TrimSpritePadding = v));
+                Buttons(("Починить нарезку", () => OfferPoolRepair(true), "Картинки, которые Unity нарезала на куски, — одним спрайтом; обрывки и повторы — из пулов"));
                 IntSlider("Разрешение рисунков, px", A.SignTextureSize, 64, 512, v => A.SignTextureSize = v);
                 Help("«Рисунки поверх карты»: загруженные картинки не впекаются в рисунок карты, а показываются отдельным слоем — видеокартой, в разрешении самих рисунков (до «Разрешения рисунков»), чётко при любом приближении, в окне и в игре. Выключено — впекаются в рисунок карты и мельчают вместе с ним. Размер знака на карте — в клетках, в блоках «Лес», «Холмы и горы», «Деревни», «Приметные места».");
                 SubTitle("Лес и болото");
@@ -1231,6 +1233,57 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 A.BridgeSprites.Clear(); A.VillageIcons.Clear(); A.StartSprites.Clear();
                 A.Landmarks.Clear();
             }, A.UseCustomArt, v => A.UseCustomArt = v);
+        }
+
+        // Все пулы рисунков облика (и иконок меток — с mip-картами).
+        private List<(List<Sprite> Pool, bool Icons)> AllPools()
+        {
+            List<(List<Sprite>, bool)> pools = new List<(List<Sprite>, bool)>
+            {
+                (A.ConiferSprites, false), (A.LeafSprites, false), (A.TreeSprites, false), (A.ReedSprites, false),
+                (A.HillSprites, false), (A.MountainSprites, false), (A.CliffSprites, false), (A.BridgeSprites, false),
+                (A.VillageSprites, false), (A.StartSprites, false), (A.VillageIcons, true)
+            };
+            foreach (WorldMapLandmarkArt landmark in A.Landmarks)
+            {
+                if (landmark == null)
+                    continue;
+                pools.Add((landmark.Variants, false));
+                pools.Add((landmark.Icons, true));
+            }
+            return pools;
+        }
+
+        // Unity иногда режет одну картинку на кусок и обрывки; обрывки в
+        // пуле рисуются мутными прямоугольниками. Окно находит такие
+        // картинки и после вопроса делает каждую одним спрайтом.
+        private void OfferPoolRepair(bool reportClean)
+        {
+            if (generator == null)
+                return;
+            List<(List<Sprite> Pool, bool Icons)> pools = AllPools();
+            int broken = WorldMapSpriteImport.CountBrokenPictures(pools.Select(item => item.Pool));
+            if (broken == 0)
+            {
+                if (reportClean)
+                    EditorUtility.DisplayDialog("Рисунки", "Нарезанных по ошибке картинок и обрывков в пулах нет.", "Понятно");
+                return;
+            }
+            if (!WorldMapSpriteImport.ConfirmConversion(
+                    "В пулах рисунков картинок, которые Unity нарезала на куски: " + broken + ".\n" +
+                    "Мелкие обрывки рисуются на карте мутными прямоугольниками, а счётчик пула показывает лишние рисунки.\n\n" +
+                    "Сделать каждую такую картинку одним спрайтом и убрать обрывки и повторы из пулов?"))
+                return;
+            Undo.RecordObject(generator, "Починить нарезку рисунков");
+            foreach ((List<Sprite> pool, bool icons) in pools)
+                WorldMapSpriteImport.RepairPool(pool, icons);
+            EditorUtility.SetDirty(generator);
+            AssetDatabase.SaveAssetIfDirty(generator);
+            if (settingsScroll != null)
+            {
+                RebuildSettings();
+                ScheduleRefresh(false, 0);
+            }
         }
 
         // Запись облика места создаётся сразу (без Undo-шага), чтобы поля

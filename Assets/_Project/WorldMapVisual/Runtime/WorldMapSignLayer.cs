@@ -114,3 +114,178 @@ namespace KingdomSurvival.WorldMapVisual
         }
     }
 }
+
+namespace KingdomSurvival.WorldMapVisual
+{
+    // Слой текстуры карты для видеокарты. Растянутый (Tiled = false) —
+    // картинка на всю карту (подкраска местности, вода и дороги, виньетка).
+    // Плиточный — текстура художника повтором в её собственном разрешении
+    // (подложка, узоры местности, рябь, бумага); где её видно — сетка
+    // прозрачности Alpha (GridWidth × GridHeight узлов на всю карту, null —
+    // везде одинаково), умноженная на UniformAlpha.
+    public sealed class WorldMapTextureLayer
+    {
+        public string Name = string.Empty;
+        public Texture2D Texture;
+        public bool Tiled;
+        public float TileWidthPercent = 100f;
+        public float TileHeightPercent = 100f;
+        public int GridWidth;
+        public int GridHeight;
+        public float[] Alpha;
+        public float UniformAlpha = 1f;
+    }
+
+    // Карта, разложенная на слои: снизу вверх Layers, затем свои рисунки.
+    // Под всеми — однотонный фон (цвет основы), его даёт сам рисунок карты.
+    public sealed class WorldMapLayers
+    {
+        public readonly List<WorldMapTextureLayer> Layers = new List<WorldMapTextureLayer>();
+        public WorldMapSigns Signs = new WorldMapSigns();
+
+        public void Destroy()
+        {
+            foreach (WorldMapTextureLayer layer in Layers)
+            {
+                if (layer?.Texture == null)
+                    continue;
+                if (Application.isPlaying)
+                    Object.Destroy(layer.Texture);
+                else
+                    Object.DestroyImmediate(layer.Texture);
+                layer.Texture = null;
+            }
+            Layers.Clear();
+            Signs?.Destroy();
+        }
+    }
+
+    // Все слои карты одним элементом: каждый слой текстуры — свой дочерний
+    // элемент, рисунки — сверху. Растягивается на весь элемент карты.
+    public sealed class WorldMapLayersView : VisualElement
+    {
+        private WorldMapLayers layers;
+
+        public WorldMapLayersView()
+        {
+            pickingMode = PickingMode.Ignore;
+            style.position = Position.Absolute;
+            style.left = 0;
+            style.top = 0;
+            style.right = 0;
+            style.bottom = 0;
+        }
+
+        public WorldMapLayers Layers
+        {
+            get => layers;
+            set
+            {
+                layers = value;
+                Clear();
+                if (layers == null)
+                    return;
+                foreach (WorldMapTextureLayer layer in layers.Layers)
+                {
+                    if (layer?.Texture != null)
+                        Add(new WorldMapTextureLayerView(layer));
+                }
+                Add(new WorldMapSignLayer { Signs = layers.Signs });
+            }
+        }
+    }
+
+    public sealed class WorldMapTextureLayerView : VisualElement
+    {
+        private const int QuadsPerChunk = 15000;
+        private readonly WorldMapTextureLayer layer;
+
+        public WorldMapTextureLayerView(WorldMapTextureLayer layer)
+        {
+            this.layer = layer;
+            pickingMode = PickingMode.Ignore;
+            style.position = Position.Absolute;
+            style.left = 0;
+            style.top = 0;
+            style.right = 0;
+            style.bottom = 0;
+            generateVisualContent += Draw;
+            RegisterCallback<GeometryChangedEvent>(_ => MarkDirtyRepaint());
+        }
+
+        private void Draw(MeshGenerationContext context)
+        {
+            Rect rect = contentRect;
+            if (layer?.Texture == null || rect.width <= 0f || rect.height <= 0f)
+                return;
+
+            float tileW = layer.Tiled ? Mathf.Max(0.0001f, layer.TileWidthPercent / 100f * rect.width) : rect.width;
+            float tileH = layer.Tiled ? Mathf.Max(0.0001f, layer.TileHeightPercent / 100f * rect.height) : rect.height;
+            Vector2 Uv(float x, float y) => new Vector2(x / tileW, 1f - y / tileH);
+
+            if (layer.Alpha == null || layer.GridWidth < 2 || layer.GridHeight < 2)
+            {
+                byte a = (byte)Mathf.Clamp(Mathf.RoundToInt(layer.UniformAlpha * 255f), 0, 255);
+                if (a == 0)
+                    return;
+                MeshWriteData mesh = context.Allocate(4, 6, layer.Texture);
+                Color32 tint = new Color32(255, 255, 255, a);
+                mesh.SetNextVertex(new Vertex { position = new Vector3(0f, 0f, Vertex.nearZ), tint = tint, uv = Uv(0f, 0f) });
+                mesh.SetNextVertex(new Vertex { position = new Vector3(rect.width, 0f, Vertex.nearZ), tint = tint, uv = Uv(rect.width, 0f) });
+                mesh.SetNextVertex(new Vertex { position = new Vector3(rect.width, rect.height, Vertex.nearZ), tint = tint, uv = Uv(rect.width, rect.height) });
+                mesh.SetNextVertex(new Vertex { position = new Vector3(0f, rect.height, Vertex.nearZ), tint = tint, uv = Uv(0f, rect.height) });
+                WriteQuadIndices(mesh, 0);
+                return;
+            }
+
+            // Сетка прозрачности: четырёхугольник на клетку сетки, пустые
+            // (все углы прозрачны) пропускаются.
+            int gw = layer.GridWidth, gh = layer.GridHeight;
+            float stepX = rect.width / (gw - 1), stepY = rect.height / (gh - 1);
+            List<int> quads = new List<int>();
+            for (int j = 0; j < gh - 1; j++)
+            {
+                for (int i = 0; i < gw - 1; i++)
+                {
+                    int k = j * gw + i;
+                    if (layer.Alpha[k] > 0.002f || layer.Alpha[k + 1] > 0.002f || layer.Alpha[k + gw] > 0.002f || layer.Alpha[k + gw + 1] > 0.002f)
+                        quads.Add(k);
+                }
+            }
+
+            for (int start = 0; start < quads.Count; start += QuadsPerChunk)
+            {
+                int count = Mathf.Min(QuadsPerChunk, quads.Count - start);
+                MeshWriteData mesh = context.Allocate(count * 4, count * 6, layer.Texture);
+                for (int q = 0; q < count; q++)
+                {
+                    int k = quads[start + q];
+                    int i = k % gw, j = k / gw;
+                    float x0 = i * stepX, x1 = (i + 1) * stepX, y0 = j * stepY, y1 = (j + 1) * stepY;
+                    mesh.SetNextVertex(Corner(x0, y0, layer.Alpha[k], Uv(x0, y0)));
+                    mesh.SetNextVertex(Corner(x1, y0, layer.Alpha[k + 1], Uv(x1, y0)));
+                    mesh.SetNextVertex(Corner(x1, y1, layer.Alpha[k + gw + 1], Uv(x1, y1)));
+                    mesh.SetNextVertex(Corner(x0, y1, layer.Alpha[k + gw], Uv(x0, y1)));
+                    WriteQuadIndices(mesh, q * 4);
+                }
+            }
+        }
+
+        private Vertex Corner(float x, float y, float alpha, Vector2 uv) => new Vertex
+        {
+            position = new Vector3(x, y, Vertex.nearZ),
+            tint = new Color32(255, 255, 255, (byte)Mathf.Clamp(Mathf.RoundToInt(alpha * layer.UniformAlpha * 255f), 0, 255)),
+            uv = uv
+        };
+
+        private static void WriteQuadIndices(MeshWriteData mesh, int first)
+        {
+            mesh.SetNextIndex((ushort)first);
+            mesh.SetNextIndex((ushort)(first + 1));
+            mesh.SetNextIndex((ushort)(first + 2));
+            mesh.SetNextIndex((ushort)first);
+            mesh.SetNextIndex((ushort)(first + 2));
+            mesh.SetNextIndex((ushort)(first + 3));
+        }
+    }
+}

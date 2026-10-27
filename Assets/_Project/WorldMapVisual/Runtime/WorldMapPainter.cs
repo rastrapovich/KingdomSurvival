@@ -22,23 +22,24 @@ namespace KingdomSurvival.WorldMapVisual
         {
             if (map == null || !map.IsValid)
                 return null;
-            PaintJob job = new PaintJob(map, style ?? WorldMapArtStyle.CreateDefault(), resolutionOverride, paintHiddenPlaces, false);
+            PaintJob job = new PaintJob(map, style ?? WorldMapArtStyle.CreateDefault(), resolutionOverride, paintHiddenPlaces, false, false);
             job.Run();
             return job.ToTexture();
         }
 
-        // То же, но свои рисунки (если в облике включено «Рисунки поверх
-        // карты») не впекаются, а уходят в слой signs — его показывает
-        // WorldMapSignLayer. Выключено — signs пуст, всё в рисунке.
-        public static Texture2D Paint(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride, bool paintHiddenPlaces, out WorldMapSigns signs)
+        // Карта для показа слоями: свои рисунки («Рисунки поверх карты») и
+        // текстуры («Текстуры видеокартой») не впекаются, а уходят в layers —
+        // их показывает WorldMapLayersView. Рисунок карты тогда — только то,
+        // что осталось (при текстурах слоями — однотонный цвет основы).
+        public static Texture2D Paint(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride, bool paintHiddenPlaces, out WorldMapLayers layers)
         {
-            signs = new WorldMapSigns();
+            layers = new WorldMapLayers();
             if (map == null || !map.IsValid)
                 return null;
             WorldMapArtStyle safe = style ?? WorldMapArtStyle.CreateDefault();
-            PaintJob job = new PaintJob(map, safe, resolutionOverride, paintHiddenPlaces, safe.SignsOverMap);
+            PaintJob job = new PaintJob(map, safe, resolutionOverride, paintHiddenPlaces, safe.SignsOverMap, safe.TexturesOverMap);
             job.Run();
-            signs = job.BuildSigns();
+            layers = job.TakeLayers();
             return job.ToTexture();
         }
 
@@ -73,9 +74,16 @@ namespace KingdomSurvival.WorldMapVisual
             private readonly System.Random random;
             private readonly Dictionary<UnityEngine.Object, Image> images = new Dictionary<UnityEngine.Object, Image>();
             private float[] waterCoverage;
+            // Слои текстур (null — всё впекается). При слоях r, g, b — цвет
+            // верхнего прозрачного слоя (вода, тушь, дороги, знаки кодом) с
+            // премультипликацией, topAlpha — его прозрачность.
+            private readonly List<WorldMapTextureLayer> layerList;
+            private float[] topAlpha;
 
-            public PaintJob(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride, bool paintHiddenPlaces, bool collectSigns)
+            public PaintJob(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride, bool paintHiddenPlaces, bool collectSigns, bool collectTextures)
             {
+                if (collectTextures)
+                    layerList = new List<WorldMapTextureLayer>();
                 this.paintHiddenPlaces = paintHiddenPlaces;
                 if (collectSigns)
                     pendingSigns = new List<PendingSign>();
@@ -116,14 +124,25 @@ namespace KingdomSurvival.WorldMapVisual
             public void Run()
             {
                 MapAreas();
-                PaintBase();
-                PaintTerrain();
+                if (layerList != null)
+                {
+                    topAlpha = new float[width * height];
+                    BuildGroundLayers();
+                }
+                else
+                {
+                    PaintBase();
+                    PaintTerrain();
+                }
                 PaintWater();
                 PaintForestOutline();
                 PaintRoads();
                 PaintBridges();
                 PaintStamps();
-                PostProcess();
+                if (layerList != null)
+                    BuildUpperLayers();
+                else
+                    PostProcess();
             }
 
             private struct PendingSign
@@ -303,8 +322,324 @@ namespace KingdomSurvival.WorldMapVisual
                 }
             }
 
+            public WorldMapLayers TakeLayers()
+            {
+                WorldMapLayers layers = new WorldMapLayers();
+                if (layerList != null)
+                    layers.Layers.AddRange(layerList);
+                layers.Signs = BuildSigns();
+                return layers;
+            }
+
+            // --------------------------------------------------------------
+            // Слои текстур для видеокарты. Порядок снизу вверх повторяет
+            // запекание: узор подложки → пятна оттенка → мелкий узор →
+            // подкраска местности → узоры местности → вода, тушь, дороги и
+            // знаки кодом → рябь → бумага → виньетка и зерно. Текстуры
+            // художника — копии в собственном разрешении (до 2048) с
+            // mip-картами и повтором, уже с цветокоррекцией «Обработки»
+            // (она линейна и не меняется от смешивания слоёв). Узоры-
+            // множители (мелкий узор, бумага, пятна, виньетка) — светлее
+            // белым, темнее чёрным с прозрачностью.
+            // --------------------------------------------------------------
+
+            private void BuildGroundLayers()
+            {
+                if (style.DrawBase && style.UseBasePattern && style.BasePattern != null && style.BasePatternStrength > 0f)
+                {
+                    Image pattern = LoadImage(style.BasePattern);
+                    if (pattern != null)
+                        AddTiled("Узор подложки", GradedCopy(pattern, style.BasePatternTint), style.BasePatternTileHexes * hexPx, style.BasePatternStrength, null, 0, 0);
+                }
+
+                if (style.DrawBase && style.UseTintVariation && style.TintVariation > 0f)
+                {
+                    const int step = 4;
+                    int lw = width / step + 1, lh = height / step + 1;
+                    double frequency = 1.0 / Mathf.Max(4f, style.TintVariationScaleHexes * hexPx);
+                    Color32[] pixels = new Color32[lw * lh];
+                    for (int y = 0; y < lh; y++)
+                    {
+                        for (int x = 0; x < lw; x++)
+                        {
+                            float v = (float)noise.Fbm(x * step * frequency, y * step * frequency, 3, 0.5) * style.TintVariation;
+                            pixels[(lh - 1 - y) * lw + x] = Encode(1f + v, 1f);
+                        }
+                    }
+                    AddStretched("Пятна оттенка", pixels, lw, lh);
+                }
+
+                if (style.DrawBase && style.UseDetailPattern && style.DetailPattern != null && style.DetailPatternStrength > 0f)
+                {
+                    Image detail = LoadImage(style.DetailPattern);
+                    if (detail != null)
+                        AddTiled("Мелкий узор", ModulateCopy(detail), style.DetailPatternTileHexes * hexPx, style.DetailPatternStrength, null, 0, 0);
+                }
+
+                if (!style.DrawTerrain)
+                    return;
+
+                TerrainTint(out float[] ar, out float[] ag, out float[] ab, out float[] aa, out WorldMapTerrainArt[] arts);
+                Color32[] tint = new Color32[width * height];
+                bool any = false;
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        int p = y * width + x;
+                        if (aa[p] <= 0.002f)
+                            continue;
+                        any = true;
+                        Color c = Grade(new Color(ar[p], ag[p], ab[p]));
+                        c.a = aa[p];
+                        tint[(height - 1 - y) * width + x] = c;
+                    }
+                }
+                if (any)
+                    AddStretched("Подкраска местности", tint, width, height);
+
+                if (!style.UseTerrainPatterns)
+                    return;
+                foreach (WorldMapGameplayTerrainType type in WorldMapTerrainLabels.All)
+                {
+                    WorldMapTerrainArt art = arts[(int)type];
+                    if (art == null || !art.Enabled || art.Pattern == null || art.PatternStrength <= 0f)
+                        continue;
+                    Image pattern = LoadImage(art.Pattern);
+                    if (pattern == null)
+                        continue;
+                    byte value = (byte)type;
+                    float[] grid = Grid(p => area[p] == value ? 1f : 0f, out int gw, out int gh);
+                    if (grid != null)
+                        AddTiled("Узор: " + WorldMapTerrainLabels.Name(type), GradedCopy(pattern, Color.white), art.PatternTileHexes * hexPx, art.PatternStrength, grid, gw, gh);
+                }
+            }
+
+            private void BuildUpperLayers()
+            {
+                Color32[] top = new Color32[width * height];
+                bool any = false;
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        int p = y * width + x;
+                        float a = topAlpha[p];
+                        if (a <= 0.002f)
+                            continue;
+                        any = true;
+                        Color c = Grade(new Color(r[p] / a, g[p] / a, b[p] / a));
+                        c.a = Mathf.Clamp01(a);
+                        top[(height - 1 - y) * width + x] = c;
+                    }
+                }
+                if (any)
+                    AddStretched("Вода, тушь, дороги, знаки", top, width, height);
+
+                if (style.DrawWater && style.UseWaterPattern && style.WaterPattern != null && style.WaterPatternStrength > 0f && waterCoverage != null)
+                {
+                    Image ripple = LoadImage(style.WaterPattern);
+                    if (ripple != null)
+                    {
+                        float[] grid = Grid(p => waterCoverage[p], out int gw, out int gh);
+                        if (grid != null)
+                            AddTiled("Рябь", GradedCopy(ripple, Color.white), style.WaterPatternTileHexes * hexPx, style.WaterPatternStrength, grid, gw, gh);
+                    }
+                }
+
+                if (!style.DrawPost)
+                    return;
+
+                if (style.UsePaper && style.PaperTexture != null && style.PaperStrength > 0f)
+                {
+                    Image paper = LoadImage(style.PaperTexture);
+                    if (paper != null)
+                        AddTiled("Бумага", ModulateCopy(paper), style.PaperTileHexes * hexPx, style.PaperStrength, null, 0, 0);
+                }
+
+                bool vignette = style.UseVignette && style.Vignette > 0f;
+                bool grain = style.UseGrain && style.Grain > 0f;
+                if (!vignette && !grain)
+                    return;
+                Color32[] post = new Color32[width * height];
+                float cx = width * 0.5f, cy = height * 0.5f;
+                float maxD = Mathf.Sqrt(cx * cx + cy * cy);
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        // Затемнение (чёрным) минус осветление зерна.
+                        float dark = 0f;
+                        if (vignette)
+                        {
+                            float dx = x - cx, dy = y - cy;
+                            float d = Mathf.Sqrt(dx * dx + dy * dy) / maxD;
+                            dark = style.Vignette * Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.55f, 1.05f, d));
+                        }
+                        if (grain)
+                            dark -= (Hash(x, y, map.Seed) - 0.5f) * style.Grain * 1.6f;
+                        post[(height - 1 - y) * width + x] = dark >= 0f
+                            ? new Color32(0, 0, 0, ToByte(Mathf.Min(1f, dark)))
+                            : new Color32(255, 255, 255, ToByte(Mathf.Min(1f, -dark)));
+                    }
+                }
+                AddStretched("Виньетка и зерно", post, width, height);
+            }
+
+            // Шаг сетки прозрачности плиточных слоёв, в пикселях рисунка.
+            private int GridStep => Mathf.Max(3, Mathf.RoundToInt(hexPx / 6f));
+
+            // Сетка прозрачности: в каждом узле — среднее значение по
+            // окрестности шага сетки. null — слой нигде не виден.
+            private float[] Grid(Func<int, float> value, out int gw, out int gh)
+            {
+                int step = GridStep;
+                gw = width / step + 1;
+                gh = height / step + 1;
+                float[] grid = new float[gw * gh];
+                bool any = false;
+                int half = step / 2;
+                for (int j = 0; j < gh; j++)
+                {
+                    for (int i = 0; i < gw; i++)
+                    {
+                        int x0 = Mathf.Max(0, i * step - half), x1 = Mathf.Min(width - 1, i * step + half);
+                        int y0 = Mathf.Max(0, j * step - half), y1 = Mathf.Min(height - 1, j * step + half);
+                        float sum = 0f;
+                        int n = 0;
+                        for (int y = y0; y <= y1; y += 2)
+                        {
+                            for (int x = x0; x <= x1; x += 2)
+                            {
+                                sum += value(y * width + x);
+                                n++;
+                            }
+                        }
+                        float average = n > 0 ? sum / n : 0f;
+                        grid[j * gw + i] = average;
+                        any |= average > 0.002f;
+                    }
+                }
+                return any ? grid : null;
+            }
+
+            private void AddTiled(string name, Texture2D texture, float tilePx, float alpha, float[] grid, int gw, int gh)
+            {
+                float tile = Mathf.Max(2f, tilePx);
+                layerList.Add(new WorldMapTextureLayer
+                {
+                    Name = name,
+                    Texture = texture,
+                    Tiled = true,
+                    TileWidthPercent = tile / width * 100f,
+                    TileHeightPercent = tile / height * 100f,
+                    Alpha = grid,
+                    GridWidth = grid != null ? gw : 0,
+                    GridHeight = grid != null ? gh : 0,
+                    UniformAlpha = Mathf.Clamp01(alpha)
+                });
+            }
+
+            private void AddStretched(string name, Color32[] pixels, int w, int h)
+            {
+                Texture2D texture = NewTexture(w, h, true, TextureWrapMode.Clamp, "GeneratedWorldMap " + name);
+                texture.SetPixels32(pixels);
+                texture.Apply(true, false);
+                layerList.Add(new WorldMapTextureLayer { Name = name, Texture = texture });
+            }
+
+            // Копия текстуры художника для плиток: её разрешение (до 2048),
+            // оттенок и цветокоррекция «Обработки», mip-карты, повтор.
+            private Texture2D GradedCopy(Image image, Color tint)
+            {
+                return CopyImage(image, c =>
+                {
+                    Color graded = Grade(new Color(c.r * tint.r, c.g * tint.g, c.b * tint.b));
+                    graded.a = c.a;
+                    return graded;
+                });
+            }
+
+            // Узор-множитель: яркость относительно средней → светлее белым,
+            // темнее чёрным.
+            private Texture2D ModulateCopy(Image image)
+            {
+                float average = Mathf.Max(0.05f, image.Average.r * 0.3f + image.Average.g * 0.59f + image.Average.b * 0.11f);
+                return CopyImage(image, c => Encode((c.r * 0.3f + c.g * 0.59f + c.b * 0.11f) / average, c.a));
+            }
+
+            private Texture2D CopyImage(Image image, Func<Color, Color> convert)
+            {
+                const int maxSide = 2048;
+                float scale = Mathf.Min(1f, maxSide / (float)Mathf.Max(image.Width, image.Height));
+                int w = Mathf.Max(1, Mathf.RoundToInt(image.Width * scale));
+                int h = Mathf.Max(1, Mathf.RoundToInt(image.Height * scale));
+                Color32[] pixels = new Color32[w * h];
+                float footprint = 1f / scale;
+                for (int y = 0; y < h; y++)
+                {
+                    for (int x = 0; x < w; x++)
+                    {
+                        Color c = scale >= 1f
+                            ? (Color)image.Pixels[y * image.Width + x]
+                            : image.SampleWrapped((x + 0.5f) / w, (y + 0.5f) / h, footprint);
+                        pixels[(h - 1 - y) * w + x] = convert(c);
+                    }
+                }
+                Texture2D texture = NewTexture(w, h, true, TextureWrapMode.Repeat, "GeneratedWorldMapPattern");
+                texture.SetPixels32(pixels);
+                texture.Apply(true, false);
+                return texture;
+            }
+
+            private static Color32 Encode(float factor, float alpha)
+            {
+                return factor < 1f
+                    ? new Color32(0, 0, 0, ToByte((1f - factor) * alpha))
+                    : new Color32(255, 255, 255, ToByte(Mathf.Min(1f, factor - 1f) * alpha));
+            }
+
+            // Цветокоррекция «Обработки» (яркость, контраст, насыщенность, тепло).
+            private Color Grade(Color c)
+            {
+                if (!style.DrawPost || !style.UseColorAdjust)
+                    return c;
+                float cr = c.r + style.Brightness, cg = c.g + style.Brightness, cb = c.b + style.Brightness;
+                cr = (cr - 0.5f) * style.Contrast + 0.5f;
+                cg = (cg - 0.5f) * style.Contrast + 0.5f;
+                cb = (cb - 0.5f) * style.Contrast + 0.5f;
+                float gray = cr * 0.3f + cg * 0.59f + cb * 0.11f;
+                cr = gray + (cr - gray) * style.Saturation;
+                cg = gray + (cg - gray) * style.Saturation;
+                cb = gray + (cb - gray) * style.Saturation;
+                float warmth = style.Warmth * 0.06f;
+                return new Color(Mathf.Clamp01(cr + warmth), Mathf.Clamp01(cg), Mathf.Clamp01(cb - warmth), c.a);
+            }
+
+            private static Texture2D NewTexture(int w, int h, bool mips, TextureWrapMode wrap, string name) =>
+                new Texture2D(w, h, TextureFormat.RGBA32, mips)
+                {
+                    name = name,
+                    wrapMode = wrap,
+                    filterMode = mips ? FilterMode.Trilinear : FilterMode.Bilinear,
+                    anisoLevel = mips ? 4 : 1,
+                    hideFlags = HideFlags.DontSave
+                };
+
             public Texture2D ToTexture()
             {
+                // При слоях рисунок карты — однотонный фон цвета основы.
+                if (layerList != null)
+                {
+                    Color ground = Grade(style.BaseColor);
+                    Texture2D flat = NewTexture(4, 4, false, TextureWrapMode.Clamp, "GeneratedWorldMapGround");
+                    Color32[] fill = new Color32[16];
+                    for (int i = 0; i < fill.Length; i++)
+                        fill[i] = new Color(ground.r, ground.g, ground.b, 1f);
+                    flat.SetPixels32(fill);
+                    flat.Apply(false, false);
+                    return flat;
+                }
                 Color32[] pixels = new Color32[width * height];
                 for (int y = 0; y < height; y++)
                 {
@@ -419,11 +754,13 @@ namespace KingdomSurvival.WorldMapVisual
             // Местность: подкраска (с мягкими краями) и узоры
             // --------------------------------------------------------------
 
-            private void PaintTerrain()
+            // Подкраска местности: цвет и непрозрачность типа клетки под каждым
+            // пикселем, с мягкими краями.
+            private void TerrainTint(out float[] ar, out float[] ag, out float[] ab, out float[] aa, out WorldMapTerrainArt[] arts)
             {
                 int count = width * height;
-                float[] ar = new float[count], ag = new float[count], ab = new float[count], aa = new float[count];
-                WorldMapTerrainArt[] arts = new WorldMapTerrainArt[16];
+                ar = new float[count]; ag = new float[count]; ab = new float[count]; aa = new float[count];
+                arts = new WorldMapTerrainArt[16];
                 foreach (WorldMapGameplayTerrainType type in WorldMapTerrainLabels.All)
                     arts[(int)type] = style.FindTerrain(type);
 
@@ -465,6 +802,11 @@ namespace KingdomSurvival.WorldMapVisual
                         }
                     }
                 }
+            }
+
+            private void PaintTerrain()
+            {
+                TerrainTint(out float[] ar, out float[] ag, out float[] ab, out float[] aa, out WorldMapTerrainArt[] arts);
 
                 Image[] patterns = new Image[16];
                 float[] tiles = new float[16];
@@ -582,7 +924,7 @@ namespace KingdomSurvival.WorldMapVisual
                                 wg += (shallow.g * 1.25f - wg) * band * 0.6f;
                                 wb += (shallow.b * 1.2f - wb) * band * 0.6f;
                             }
-                            if (ripple != null)
+                            if (ripple != null && layerList == null)
                             {
                                 Color s = ripple.SampleWrapped(x / rippleTile, y / rippleTile, ripple.Width / rippleTile);
                                 float k = style.WaterPatternStrength * s.a;
@@ -590,9 +932,7 @@ namespace KingdomSurvival.WorldMapVisual
                                 wg += (s.g - wg) * k;
                                 wb += (s.b - wb) * k;
                             }
-                            r[p] += (wr - r[p]) * cover;
-                            g[p] += (wg - g[p]) * cover;
-                            b[p] += (wb - b[p]) * cover;
+                            Blend(p, new Color(wr, wg, wb), cover);
                         }
 
                         if (style.DrawInk && style.DrawShoreInk && inkPx > 0f && !isWater[p] && toWater[p] <= inkPx + 0.5f)
@@ -1369,6 +1709,16 @@ namespace KingdomSurvival.WorldMapVisual
                     return;
                 if (amount > 1f)
                     amount = 1f;
+                if (topAlpha != null)
+                {
+                    // Прозрачный верхний слой: «поверх» с премультипликацией.
+                    float keep = 1f - amount;
+                    r[p] = r[p] * keep + color.r * amount;
+                    g[p] = g[p] * keep + color.g * amount;
+                    b[p] = b[p] * keep + color.b * amount;
+                    topAlpha[p] = topAlpha[p] * keep + amount;
+                    return;
+                }
                 r[p] += (color.r - r[p]) * amount;
                 g[p] += (color.g - g[p]) * amount;
                 b[p] += (color.b - b[p]) * amount;
@@ -1942,7 +2292,7 @@ namespace KingdomSurvival.WorldMapVisual
     {
         private static GeneratedWorldMap cachedMap;
         private static Texture2D cachedTexture;
-        private static WorldMapSigns cachedSigns;
+        private static WorldMapLayers cachedLayers;
 
         public static Texture2D Get(GeneratedWorldMap map, WorldMapArtStyle style)
         {
@@ -1952,15 +2302,16 @@ namespace KingdomSurvival.WorldMapVisual
                 return cachedTexture;
             Clear();
             cachedMap = map;
-            cachedTexture = WorldMapPainter.Paint(map, style, 0f, false, out cachedSigns);
+            cachedTexture = WorldMapPainter.Paint(map, style, 0f, false, out cachedLayers);
             return cachedTexture;
         }
 
-        // Свои рисунки слоем поверх карты (пусто, если они впечены в рисунок).
-        public static WorldMapSigns GetSigns(GeneratedWorldMap map, WorldMapArtStyle style)
+        // Текстуры и свои рисунки слоями поверх рисунка карты (пусто, если
+        // всё впечено в рисунок).
+        public static WorldMapLayers GetLayers(GeneratedWorldMap map, WorldMapArtStyle style)
         {
             Get(map, style);
-            return ReferenceEquals(map, cachedMap) ? cachedSigns : null;
+            return ReferenceEquals(map, cachedMap) ? cachedLayers : null;
         }
 
         public static void Clear()
@@ -1973,8 +2324,8 @@ namespace KingdomSurvival.WorldMapVisual
                     UnityEngine.Object.DestroyImmediate(cachedTexture);
             }
             cachedTexture = null;
-            cachedSigns?.Destroy();
-            cachedSigns = null;
+            cachedLayers?.Destroy();
+            cachedLayers = null;
             cachedMap = null;
         }
     }

@@ -30,8 +30,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private VisualElement canvas;
         private Image mapImage;
         private Image markupImage;
-        private WorldMapSignLayer signLayer;
-        private WorldMapSigns signs;
+        private WorldMapLayersView layersView;
+        private WorldMapLayers layers;
         private VisualElement overlay;
         private Label statusLabel;
         private Label stageLabel;
@@ -124,8 +124,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Undo.undoRedoPerformed -= OnUndoRedo;
             DestroyTexture(ref mapTexture);
             DestroyTexture(ref markupTexture);
-            signs?.Destroy();
-            signs = null;
+            layers?.Destroy();
+            layers = null;
         }
 
         private void OnUndoRedo()
@@ -254,8 +254,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Stretch(overlay);
             overlay.generateVisualContent += DrawOverlay;
             canvas.Add(mapImage);
-            signLayer = new WorldMapSignLayer();
-            canvas.Add(signLayer);
+            layersView = new WorldMapLayersView();
+            canvas.Add(layersView);
             canvas.Add(markupImage);
             canvas.Add(overlay);
             viewport.Add(canvas);
@@ -316,7 +316,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             canvas.style.width = fit.width * zoom;
             canvas.style.height = fit.height * zoom;
             overlay.MarkDirtyRepaint();
-            signLayer?.MarkDirtyRepaint();
+            foreach (VisualElement child in layersView?.Children() ?? Enumerable.Empty<VisualElement>())
+                child.MarkDirtyRepaint();
         }
 
         private void OnWheel(WheelEvent evt)
@@ -438,9 +439,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 : Quality == 1 ? Mathf.Min(0.6f, generator.Art.Resolution)
                 : generator.Art.Resolution;
             DestroyTexture(ref mapTexture);
-            signs?.Destroy();
-            mapTexture = WorldMapPainter.Paint(currentMap, generator.Art, resolution, ShowHidden, out signs);
-            signLayer.Signs = signs;
+            layers?.Destroy();
+            mapTexture = WorldMapPainter.Paint(currentMap, generator.Art, resolution, ShowHidden, out layers);
+            layersView.Layers = layers;
             double paintMs = watch.Elapsed.TotalMilliseconds;
             mapImage.image = mapTexture;
             RefreshOverlays();
@@ -984,6 +985,10 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             Group("Качество", "Quality", () =>
             {
+                Switches(
+                    ("Текстуры видеокартой — в своём разрешении", A.TexturesOverMap, v => A.TexturesOverMap = v),
+                    ("Рисунки поверх карты — как загружены", A.SignsOverMap, v => A.SignsOverMap = v));
+                Help("Включено: подложка, узоры местности, рябь и бумага рисуются видеокартой плитками в разрешении самих текстур, а свои рисунки — отдельным слоем; при любом приближении они чёткие, в окне и в игре. В общий рисунок карты остаются только плавные цвета (подкраска местности, вода, тушь, дороги, знаки кодом), поэтому «Разрешение рисунка» влияет лишь на их края. Выключено — всё впекается в один рисунок и мельчает вместе с ним (так же сохраняется «Сохранить PNG»).");
                 Slider("Разрешение рисунка", A.Resolution, 0.1f, 1f, v => A.Resolution = v, false,
                     "Пикселей рисунка на пиксель полотна. Столько рисует игра; предпросмотр в режимах «Черновик/Обычно» — меньше.");
                 if (generator != null)
@@ -1186,7 +1191,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             Group("Иконки и рисунки", "Icons", () =>
             {
                 Help("У каждого объекта — пул до " + WorldMapArtStyle.MaxPoolSize + " рисунков: каждому дереву, горе, мосту, деревне или месту достаётся случайный, и он не меняется после загрузки. «Знаки» — рисунки на карте; «Иконки метки» — кнопка места на карте игры, по которой к нему идут. Пусто — рисует код. Выделите спрайты в Project и нажмите «+ выделенные» — добавятся все сразу.");
-                Switches(("Рисунки поверх карты — ровно как загружены", A.SignsOverMap, v => A.SignsOverMap = v), ("Обрезать пустые поля рисунков", A.TrimSpritePadding, v => A.TrimSpritePadding = v));
+                Switches(("Обрезать пустые поля рисунков", A.TrimSpritePadding, v => A.TrimSpritePadding = v));
                 IntSlider("Разрешение рисунков, px", A.SignTextureSize, 64, 512, v => A.SignTextureSize = v);
                 Help("«Рисунки поверх карты»: загруженные картинки не впекаются в рисунок карты, а показываются отдельным слоем — видеокартой, в разрешении самих рисунков (до «Разрешения рисунков»), чётко при любом приближении, в окне и в игре. Выключено — впекаются в рисунок карты и мельчают вместе с ним. Размер знака на карте — в клетках, в блоках «Лес», «Холмы и горы», «Деревни», «Приметные места».");
                 SubTitle("Лес и болото");

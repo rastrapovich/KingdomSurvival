@@ -504,7 +504,7 @@ public class WorldMapGeneratorTests
     public void SignsOverMap_KeepTheLoadedPicture_UprightInTheAtlas()
     {
         Sprite sprite = TwoToneSprite(out Texture2D texture);
-        WorldMapSigns signs = null;
+        WorldMapLayers layers = null;
         Texture2D map = null;
         try
         {
@@ -512,21 +512,21 @@ public class WorldMapGeneratorTests
             style.ConiferSprites.Add(sprite);
             style.LeafSprites.Add(sprite);
             GeneratedWorldMap generated = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
-            map = WorldMapPainter.Paint(generated, style, 0.1f, false, out signs);
+            map = WorldMapPainter.Paint(generated, style, 0.1f, false, out layers);
 
-            Assert.That(signs.Items.Count, Is.GreaterThan(0), "Деревья своими рисунками ушли в слой поверх карты.");
-            Assert.That(signs.Atlas, Is.Not.Null);
-            WorldMapSign sign = signs.Items[0];
+            Assert.That(layers.Signs.Items.Count, Is.GreaterThan(0), "Деревья своими рисунками ушли в слой поверх карты.");
+            Assert.That(layers.Signs.Atlas, Is.Not.Null);
+            WorldMapSign sign = layers.Signs.Items[0];
             Assert.That(sign.Aspect, Is.EqualTo(0.5f).Within(0.01f));
-            Color top = signs.Atlas.GetPixelBilinear(sign.Uv.center.x, sign.Uv.yMax - sign.Uv.height * 0.1f);
-            Color bottom = signs.Atlas.GetPixelBilinear(sign.Uv.center.x, sign.Uv.yMin + sign.Uv.height * 0.1f);
+            Color top = layers.Signs.Atlas.GetPixelBilinear(sign.Uv.center.x, sign.Uv.yMax - sign.Uv.height * 0.1f);
+            Color bottom = layers.Signs.Atlas.GetPixelBilinear(sign.Uv.center.x, sign.Uv.yMin + sign.Uv.height * 0.1f);
             Assert.That(top.r, Is.GreaterThan(0.8f), "Верх рисунка в атласе — верх (красный).");
             Assert.That(bottom.b, Is.GreaterThan(0.8f), "Низ рисунка в атласе — низ (синий).");
-            Assert.That(signs.Atlas.mipmapCount, Is.GreaterThan(1), "У атласа есть mip-карты.");
+            Assert.That(layers.Signs.Atlas.mipmapCount, Is.GreaterThan(1), "У атласа есть mip-карты.");
         }
         finally
         {
-            signs?.Destroy();
+            layers?.Destroy();
             Object.DestroyImmediate(map);
             Object.DestroyImmediate(sprite);
             Object.DestroyImmediate(texture);
@@ -534,23 +534,65 @@ public class WorldMapGeneratorTests
     }
 
     [Test]
+    public void TexturesOverMap_KeepTheirOwnResolution_AsTiledLayers()
+    {
+        Texture2D pattern = new Texture2D(96, 96, TextureFormat.RGBA32, false);
+        WorldMapLayers layers = null;
+        Texture2D ground = null;
+        try
+        {
+            WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+            style.BasePattern = pattern;
+            style.FindTerrain(WorldMapGameplayTerrainType.Forest).Pattern = pattern;
+            GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
+            ground = WorldMapPainter.Paint(map, style, 0.1f, false, out layers);
+
+            Assert.That(ground.width, Is.EqualTo(4), "Рисунок карты при слоях — однотонный фон.");
+            WorldMapTextureLayer basePattern = layers.Layers.Find(layer => layer.Name == "Узор подложки");
+            Assert.That(basePattern, Is.Not.Null);
+            Assert.That(basePattern.Tiled, Is.True);
+            Assert.That(basePattern.Texture.width, Is.EqualTo(96), "Текстура в собственном разрешении, а не в разрешении карты.");
+            Assert.That(basePattern.Texture.wrapMode, Is.EqualTo(TextureWrapMode.Repeat));
+            Assert.That(basePattern.Texture.mipmapCount, Is.GreaterThan(1));
+
+            WorldMapTextureLayer forest = layers.Layers.Find(layer => layer.Name.Contains(WorldMapTerrainLabels.Name(WorldMapGameplayTerrainType.Forest)));
+            Assert.That(forest, Is.Not.Null, "Узор леса — отдельный слой.");
+            Assert.That(forest.Alpha, Is.Not.Null, "Узор леса виден только там, где лес.");
+            Assert.That(forest.Alpha.Length, Is.EqualTo(forest.GridWidth * forest.GridHeight));
+
+            int baseIndex = layers.Layers.IndexOf(basePattern);
+            int tintIndex = layers.Layers.FindIndex(layer => layer.Name == "Подкраска местности");
+            int topIndex = layers.Layers.FindIndex(layer => layer.Name.StartsWith("Вода"));
+            Assert.That(baseIndex, Is.LessThan(tintIndex), "Подложка под подкраской местности.");
+            Assert.That(tintIndex, Is.LessThan(layers.Layers.IndexOf(forest)));
+            Assert.That(layers.Layers.IndexOf(forest), Is.LessThan(topIndex), "Узоры под водой, тушью и дорогами.");
+        }
+        finally
+        {
+            layers?.Destroy();
+            Object.DestroyImmediate(ground);
+            Object.DestroyImmediate(pattern);
+        }
+    }
+
+    [Test]
     public void SignsBakedIntoTheMap_WhenOverlayIsOff()
     {
         Sprite sprite = TwoToneSprite(out Texture2D texture);
-        WorldMapSigns signs = null;
+        WorldMapLayers layers = null;
         Texture2D map = null;
         try
         {
             WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
             style.ConiferSprites.Add(sprite);
             style.SignsOverMap = false;
-            map = WorldMapPainter.Paint(WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12), style, 0.1f, false, out signs);
-            Assert.That(signs.Items, Is.Empty);
-            Assert.That(signs.Atlas, Is.Null);
+            map = WorldMapPainter.Paint(WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12), style, 0.1f, false, out layers);
+            Assert.That(layers.Signs.Items, Is.Empty);
+            Assert.That(layers.Signs.Atlas, Is.Null);
         }
         finally
         {
-            signs?.Destroy();
+            layers?.Destroy();
             Object.DestroyImmediate(map);
             Object.DestroyImmediate(sprite);
             Object.DestroyImmediate(texture);

@@ -57,6 +57,8 @@ namespace KingdomSurvival.WorldMapVisual
         public bool TrimSpritePadding = true;
         [Tooltip("Свои рисунки показываются отдельным слоем поверх карты — ровно те картинки, что загружены, чётко при любом приближении. Выключено — впекаются в рисунок карты.")]
         public bool SignsOverMap = true;
+        [Tooltip("Текстуры (подложка, узоры местности, рябь, бумага) рисуются видеокартой слоями в собственном разрешении — чётко при любом приближении. Выключено — впекаются в рисунок карты.")]
+        public bool TexturesOverMap = true;
         [Tooltip("Наибольшая сторона рисунка в слое поверх карты, пикселей.")]
         [Range(64, 512)] public int SignTextureSize = 256;
         public bool UseConiferSprites = true;

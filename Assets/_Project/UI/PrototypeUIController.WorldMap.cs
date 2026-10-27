@@ -401,14 +401,14 @@ public partial class PrototypeUIController
             return;
 
         // Канон v1.58 §9.9.1: у сгенерированной карты свои рисунки
-        // художника — слоем поверх рисунка карты, в их разрешении.
+        // художника и текстуры — слоями поверх рисунка карты, в их разрешении.
         if (gameState != null && gameState.HasGeneratedMap)
         {
             WorldMapGeneratorAsset generator = WorldMapVisualRuntime.LoadGenerator();
-            WorldMapSigns signs = WorldMapGeneratedArt.GetSigns(
+            WorldMapLayers layers = WorldMapGeneratedArt.GetLayers(
                 gameState.GeneratedMap, generator != null ? generator.Art : WorldMapArtStyle.CreateDefault());
-            if (signs != null && signs.Items.Count > 0)
-                worldMapArtLayers.Add(new WorldMapSignLayer { Signs = signs });
+            if (layers != null)
+                worldMapArtLayers.Add(new WorldMapLayersView { Layers = layers });
             return;
         }
 

@@ -130,11 +130,37 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             layers = null;
         }
 
-        // Правка в «Редакторе туши» — перерисовать карту (без новой генерации).
-        private void OnInkChanged()
+        // Правка в «Редакторе туши». Если край заливок не сдвинулся (inkOnly),
+        // перестраиваются только линии туши, дороги и мосты — за доли
+        // секунды; иначе — полная перерисовка карты (без новой генерации).
+        private IVisualElementScheduledItem pendingInk;
+
+        private void OnInkChanged(bool inkOnly)
         {
-            if (generator != null && AutoRefresh)
+            if (generator == null || !AutoRefresh || rootVisualElement == null)
+                return;
+            if (!inkOnly || layers == null)
+            {
                 ScheduleRefresh(false);
+                return;
+            }
+            pendingInk?.Pause();
+            pendingInk = rootVisualElement.schedule.Execute(() =>
+            {
+                if (pendingRefresh != null && pendingRefresh.isActive)
+                    return;
+                Stopwatch watch = Stopwatch.StartNew();
+                if (!WorldMapPainter.RepaintInk(layers, out bool structureChanged))
+                {
+                    ScheduleRefresh(false, 0);
+                    return;
+                }
+                if (structureChanged)
+                    layersView.Layers = layers;
+                else
+                    layersView.RepaintVectors();
+                ShowStatus(0, watch.Elapsed.TotalMilliseconds);
+            }).StartingIn(60);
         }
 
         private void OnUndoRedo()
@@ -267,8 +293,8 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             layersView = new WorldMapLayersView();
             canvas.Add(layersView);
             canvas.Add(markupImage);
-            canvas.Add(overlay);
             viewport.Add(canvas);
+            viewport.Add(overlay);
 
             viewport.RegisterCallback<GeometryChangedEvent>(_ => ApplyView());
             viewport.RegisterCallback<WheelEvent>(OnWheel);
@@ -320,14 +346,25 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             if (viewport == null)
                 return;
+            // Полотно — в размер вписанной карты, масштаб и сдвиг — его
+            // трансформацией (как на карте игры): слои не перестраивают свои
+            // сетки и мазки при каждом шаге колёсика или перетаскивании.
             Rect fit = FitRect();
-            canvas.style.left = fit.x + pan.x + fit.width * (1f - zoom) * 0.5f;
-            canvas.style.top = fit.y + pan.y + fit.height * (1f - zoom) * 0.5f;
-            canvas.style.width = fit.width * zoom;
-            canvas.style.height = fit.height * zoom;
+            canvas.style.left = fit.x;
+            canvas.style.top = fit.y;
+            canvas.style.width = fit.width;
+            canvas.style.height = fit.height;
+            canvas.style.transformOrigin = new TransformOrigin(Length.Percent(50f), Length.Percent(50f));
+            canvas.style.translate = new Translate(pan.x, pan.y);
+            canvas.style.scale = new Scale(new Vector3(zoom, zoom, 1f));
             overlay.MarkDirtyRepaint();
-            foreach (VisualElement child in layersView?.Children() ?? Enumerable.Empty<VisualElement>())
-                child.MarkDirtyRepaint();
+        }
+
+        // Где карта видна сейчас, в координатах окна предпросмотра.
+        private Rect ViewRect()
+        {
+            Rect fit = FitRect();
+            return new Rect(fit.x + pan.x + fit.width * (1f - zoom) * 0.5f, fit.y + pan.y + fit.height * (1f - zoom) * 0.5f, fit.width * zoom, fit.height * zoom);
         }
 
         private void OnWheel(WheelEvent evt)
@@ -347,9 +384,11 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             if (currentMap == null)
                 return;
-            Rect rect = overlay.contentRect;
+            // Наложение лежит поверх всего окна предпросмотра и не
+            // масштабируется вместе с картой: точки и рамки — одного размера.
+            Rect rect = ViewRect();
             Painter2D painter = context.painter2D;
-            Vector2 ToLocal(float x, float y) => new Vector2(x / 100f * rect.width, y / 100f * rect.height);
+            Vector2 ToLocal(float x, float y) => new Vector2(rect.x + x / 100f * rect.width, rect.y + y / 100f * rect.height);
 
             if (ShowSlots && currentMap.SpawnSlots != null)
             {
@@ -425,7 +464,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 playButton.text = "▶ По шагам";
         }
 
-        private void ScheduleRefresh(bool regenerate, long delayMs = 250)
+        private void ScheduleRefresh(bool regenerate, long delayMs = 400)
         {
             if (generator == null || rootVisualElement == null)
             {
@@ -513,7 +552,14 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 $"{grid.Columns}×{grid.Rows} клеток · рек {currentMap.Rivers.Count} · дорог и троп {currentMap.Roads.Count} · " +
                 $"мостов и бродов {currentMap.Bridges.Count} · деревень {currentMap.Villages.Count} · мест {currentMap.Landmarks.Count} · " +
                 $"слотов {currentMap.SpawnSlots.Count} · рисунок {(mapTexture != null ? mapTexture.width + "×" + mapTexture.height + " (" + Mathf.RoundToInt(100f * mapTexture.width / currentMap.CanvasWidth) + " % полотна)" : "—")} · " +
-                $"генерация {generateMs:0} мс, рисунок {paintMs:0} мс";
+                $"генерация {generateMs:0} мс, рисунок {paintMs:0} мс" + StageSummary();
+        }
+
+        // Самые долгие части рисунка — видно, что тормозит.
+        private static string StageSummary()
+        {
+            List<(string Stage, double Ms)> stages = WorldMapPainter.LastStages.Where(stage => stage.Ms >= 50).OrderByDescending(stage => stage.Ms).Take(4).ToList();
+            return stages.Count == 0 ? string.Empty : " (" + string.Join(", ", stages.Select(stage => stage.Stage + " " + stage.Ms.ToString("0"))) + ")";
         }
 
         private void SavePng()

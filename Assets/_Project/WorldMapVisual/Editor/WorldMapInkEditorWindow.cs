@@ -16,7 +16,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
     {
         private const string PrefsKey = "KS.WorldMapInkEditor.";
 
-        public static event Action Changed;
+        // true — правка не двигает край заливок: генератору хватит перерисовать
+        // одну тушь.
+        public static event Action<bool> Changed;
 
         private WorldMapGeneratorAsset generator;
         private VisualElement lineList;
@@ -58,7 +60,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (generator == null)
                 return;
             Rebuild();
-            Changed?.Invoke();
+            Changed?.Invoke(false);
         }
 
         private void CreateGUI()
@@ -285,13 +287,23 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             if (generator == null)
                 return;
             Undo.RecordObject(generator, "Редактор туши");
+            string edgeBefore = FillEdgeKey();
             action();
             EditorUtility.SetDirty(generator);
             if (rebuild)
                 Rebuild();
             else
                 preview?.MarkDirtyRepaint();
-            Changed?.Invoke();
+            Changed?.Invoke(FillEdgeKey() == edgeBefore);
+        }
+
+        // Всё, что двигает край заливок или знаки кодом: общая толщина и
+        // цвет туши, «Заливка по линии туши», включённость и дрожь руки
+        // берега и кромки леса. Остальные правки меняют только линии.
+        private string FillEdgeKey()
+        {
+            string Edge(WorldMapStrokeStyle s) => s.Enabled + " " + (s.Opacity > 0f) + " " + s.WobbleHexes + " " + s.WobbleWaveHexes;
+            return Ink.FillsFollowInk + "|" + A.InkWidth + "|" + A.InkColor + "|" + Edge(Ink.Shore) + "|" + Edge(Ink.ForestEdge);
         }
 
         // ------------------------------------------------------------------

@@ -388,6 +388,32 @@ namespace KingdomSurvival.WorldMapVisual
                         AddMasked("Рябь", GradedCopy(ripple, Color.white), style.WaterPatternTileHexes * hexPx, style.WaterPatternStrength, surface, null);
                 }
 
+                shoreField = shore;
+                depthField = depth;
+                shoreWarp = water.Warp;
+                BuildShoreInk();
+            }
+
+            // Поля воды для туши берега и линий воды — хранятся, чтобы
+            // правка туши перерисовывала только линии (RebuildInk).
+            private float[] shoreField;
+            private float[] depthField;
+            private EdgeWarp shoreWarp;
+
+            private float[] DepthInside(float threshold)
+            {
+                float step = VectorStep;
+                float[] field = new float[depthField.Length];
+                for (int n = 0; n < field.Length; n++)
+                    field[n] = (depthField[n] - threshold) / step;
+                return field;
+            }
+
+            private void BuildShoreInk()
+            {
+                if (shoreField == null)
+                    return;
+                EdgeTerm water = new EdgeTerm(shoreField, shoreWarp, false);
                 if (style.DrawInk && style.DrawShoreInk && inkPx > 0f && Ink.ShoreEchoCount > 0 && Ink.ShoreEcho.Enabled)
                 {
                     // Линии воды вдоль берега, как на старых картах.
@@ -396,7 +422,7 @@ namespace KingdomSurvival.WorldMapVisual
                     int seed = 201;
                     for (int k = 1; k <= Ink.ShoreEchoCount; k++)
                     {
-                        EdgeTerm[] line = { water, new EdgeTerm(Inside(k * Ink.ShoreEchoSpacingHexes * hexPx), still, false) };
+                        EdgeTerm[] line = { water, new EdgeTerm(DepthInside(k * Ink.ShoreEchoSpacingHexes * hexPx), still, false) };
                         foreach (Vector2[] contour in RegionContours(line))
                             Brush.Stroke(echoes, contour, true, Ink.ShoreEcho, inkPx, InkColor(1f), seed++);
                     }
@@ -407,14 +433,14 @@ namespace KingdomSurvival.WorldMapVisual
                 {
                     List<WorldMapVectorShape> ink = new List<WorldMapVectorShape>();
                     int seed = 1;
-                    if (follow)
+                    if (Ink.FillsFollowInk)
                     {
                         foreach (Vector2[] contour in RegionContours(new[] { water }))
                             Brush.Stroke(ink, contour, true, Ink.Shore, inkPx, InkColor(1f), seed++, false);
                     }
                     else
                     {
-                        foreach (Vector2[] contour in Contours(shore, gw, gh))
+                        foreach (Vector2[] contour in Contours(shoreField, GridWidth, GridHeight))
                             Brush.Stroke(ink, Smooth(contour), true, Ink.Shore, inkPx, InkColor(1f), seed++);
                     }
                     AddVector("Тушь берега", ink);
@@ -545,7 +571,8 @@ namespace KingdomSurvival.WorldMapVisual
                     Sprite sprite = Pick(style.Pool(style.BridgeSprites, style.UseBridgeSprites));
                     if (sprite != null)
                     {
-                        DrawSprite(sprite, center + new Vector2(0f, length * 0.25f), length * 0.6f, Color.white, direction.x < 0f);
+                        if (inkTarget == null)
+                            DrawSprite(sprite, center + new Vector2(0f, length * 0.25f), length * 0.6f, Color.white, direction.x < 0f);
                         continue;
                     }
                     Vector2 normal = new Vector2(-direction.y, direction.x);
@@ -1295,7 +1322,70 @@ namespace KingdomSurvival.WorldMapVisual
             {
                 if (shapes == null || shapes.Count == 0)
                     return;
+                if (inkTarget != null)
+                {
+                    WorldMapTextureLayer existing = inkTarget.Find(layer => layer.Name == name);
+                    if (existing != null)
+                    {
+                        existing.Shapes = shapes;
+                        return;
+                    }
+                    // Слоя ещё не было (например, включили линии воды) —
+                    // встаёт на своё место среди слоёв туши.
+                    int order = Array.IndexOf(InkLayerNames, name);
+                    int at = inkTarget.FindIndex(layer => Array.IndexOf(InkLayerNames, layer.Name) > order || Array.IndexOf(UpperLayerNames, layer.Name) >= 0);
+                    inkTarget.Insert(at < 0 ? inkTarget.Count : at, new WorldMapTextureLayer { Name = name, Shapes = shapes, SourceWidth = width, SourceHeight = height });
+                    inkStructureChanged = true;
+                    return;
+                }
                 layerList.Add(new WorldMapTextureLayer { Name = name, Shapes = shapes, SourceWidth = width, SourceHeight = height });
+            }
+
+            // --------------------------------------------------------------
+            // Перерисовка одной туши: правка линии, не трогающая край
+            // заливок, перестраивает только слои линий, дорог и мостов —
+            // заливки, узоры и знаки остаются как были.
+            // --------------------------------------------------------------
+
+            private static readonly string[] InkLayerNames = { "Линии воды у берега", "Тушь берега", "Кромка леса", "Дороги и тропы", "Мосты" };
+            private static readonly string[] UpperLayerNames = { "Знаки кодом", "Бумага", "Виньетка и зерно" };
+            private List<WorldMapTextureLayer> inkTarget;
+            private bool inkStructureChanged;
+
+            public void RebuildInk(List<WorldMapTextureLayer> target, out bool structureChanged)
+            {
+                inkPx = Mathf.Max(0f, style.InkWidth * scale);
+                foreach (WorldMapTextureLayer layer in target)
+                {
+                    if (Array.IndexOf(InkLayerNames, layer.Name) >= 0)
+                        layer.Shapes = new List<WorldMapVectorShape>();
+                }
+                inkTarget = target;
+                inkStructureChanged = false;
+                try
+                {
+                    BuildShoreInk();
+                    BuildVectorForestInk();
+                    BuildVectorRoads();
+                    BuildVectorBridges();
+                }
+                finally
+                {
+                    inkTarget = null;
+                }
+                structureChanged = inkStructureChanged;
+            }
+
+            // После рисунка большие холсты не нужны — для перерисовки туши
+            // хватает полей сетки.
+            public void ReleaseCanvas()
+            {
+                r = g = b = null;
+                topAlpha = null;
+                area = null;
+                waterCoverage = null;
+                tornWarp?.Cache.Clear();
+                shoreWarp?.Cache.Clear();
             }
 
             private void AddFill(string name, Color color, float[] triangles, Color32[] colors, float[] vertexAlpha)

@@ -16,6 +16,40 @@ namespace KingdomSurvival.WorldMapVisual
     //   насыщенность, тепло, бумага, зерно, виньетка).
     public static partial class WorldMapPainter
     {
+        // Сколько заняли части последнего рисунка, мс, — для строки
+        // состояния окна генератора.
+        public static IReadOnlyList<(string Stage, double Ms)> LastStages { get; private set; } = new List<(string, double)>();
+
+        // Память между рисунками карты: пиксели загруженных рисунков и
+        // последний атлас знаков. Правка настроек облика почти никогда не
+        // меняет сами картинки — читать их заново через видеокарту и
+        // пересобирать атлас при каждой перерисовке незачем.
+        private static readonly Dictionary<UnityEngine.Object, (uint Version, Image Image)> SharedImages = new Dictionary<UnityEngine.Object, (uint, Image)>();
+        private static SignAtlas cachedAtlas;
+        private static readonly Dictionary<(Image, string), (Color32[] Pixels, int Width, int Height)> SharedPatterns = new Dictionary<(Image, string), (Color32[], int, int)>();
+
+        private sealed class SignAtlas
+        {
+            public string Key;
+            public Color32[] Pixels;
+            public Vector2Int[] Sizes;
+            public Vector2Int[] Positions;
+            public int Width;
+            public int Height;
+        }
+
+        // Версия картинки: меняется, когда текстура перезагружена или
+        // изменена.
+        private static uint ImageVersion(UnityEngine.Object source) =>
+            source is Sprite sprite ? (sprite.texture != null ? sprite.texture.updateCount : 0u) : source is Texture texture ? texture.updateCount : 0u;
+
+        public static void ClearCaches()
+        {
+            SharedImages.Clear();
+            SharedPatterns.Clear();
+            cachedAtlas = null;
+        }
+
         // paintHiddenPlaces — рисовать и скрытые места (для редактора); в игре
         // скрытое место появляется меткой на карте, когда его найдут.
         public static Texture2D Paint(GeneratedWorldMap map, WorldMapArtStyle style, float resolutionOverride = 0f, bool paintHiddenPlaces = false)
@@ -39,8 +73,34 @@ namespace KingdomSurvival.WorldMapVisual
             WorldMapArtStyle safe = style ?? WorldMapArtStyle.CreateDefault();
             PaintJob job = new PaintJob(map, safe, resolutionOverride, paintHiddenPlaces, safe.SignsOverMap, safe.TexturesOverMap);
             job.Run();
+            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
             layers = job.TakeLayers();
-            return job.ToTexture();
+            Texture2D texture = job.ToTexture();
+            job.Stages.Add(("атлас знаков и текстуры", watch.Elapsed.TotalMilliseconds));
+            LastStages = job.Stages;
+            job.ReleaseCanvas();
+            lastLayered = safe.TexturesOverMap ? (job, layers) : (null, null);
+            return texture;
+        }
+
+        // Последний рисунок слоями — чтобы правка туши перерисовывала только
+        // линии (RepaintInk), а не всю карту.
+        private static (PaintJob Job, WorldMapLayers Layers) lastLayered;
+
+        // Перерисовать только тушь (берег, линии воды, кромка леса, дороги,
+        // тропы, мосты) у рисунка layers по текущим настройкам стиля, с
+        // которым он нарисован. false — этого рисунка уже нет в памяти,
+        // нужен полный. structureChanged — появился новый слой, вид слоёв
+        // надо собрать заново.
+        public static bool RepaintInk(WorldMapLayers layers, out bool structureChanged)
+        {
+            structureChanged = false;
+            if (layers == null || lastLayered.Job == null || !ReferenceEquals(lastLayered.Layers, layers))
+                return false;
+            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+            lastLayered.Job.RebuildInk(layers.Layers, out structureChanged);
+            LastStages = new List<(string, double)> { ("только тушь", watch.Elapsed.TotalMilliseconds) };
+            return true;
         }
 
         // Размер рисунка в пикселях для данного качества.
@@ -61,14 +121,14 @@ namespace KingdomSurvival.WorldMapVisual
             private readonly int height;
             private readonly float scale;
             private readonly float hexPx;
-            private readonly float inkPx;
+            private float inkPx;
             private readonly bool paintHiddenPlaces;
             // Рисунки для слоя поверх карты (null — всё впекается).
             private readonly List<PendingSign> pendingSigns;
-            private readonly float[] r;
-            private readonly float[] g;
-            private readonly float[] b;
-            private readonly byte[] area;
+            private float[] r;
+            private float[] g;
+            private float[] b;
+            private byte[] area;
             private readonly byte[] cellArea;
             private readonly WorldMapNoise noise;
             private readonly System.Random random;
@@ -122,9 +182,19 @@ namespace KingdomSurvival.WorldMapVisual
                 }
             }
 
+            public List<(string Stage, double Ms)> Stages = new List<(string, double)>();
+
             public void Run()
             {
+                System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+                List<(string Stage, double Ms)> stages = new List<(string, double)>();
+                void Stage(string name)
+                {
+                    stages.Add((name, watch.Elapsed.TotalMilliseconds));
+                    watch.Restart();
+                }
                 MapAreas();
+                Stage("разметка");
                 if (layerList != null)
                 {
                     topAlpha = new float[width * height];
@@ -135,15 +205,21 @@ namespace KingdomSurvival.WorldMapVisual
                     PaintBase();
                     PaintTerrain();
                 }
+                Stage("местность");
                 PaintWater();
+                Stage("вода");
                 PaintForestOutline();
                 PaintRoads();
                 PaintBridges();
+                Stage("лес и дороги");
                 PaintStamps();
+                Stage("знаки");
                 if (layerList != null)
                     BuildUpperLayers();
                 else
                     PostProcess();
+                Stage("обработка");
+                Stages = stages;
             }
 
             private struct PendingSign
@@ -183,6 +259,55 @@ namespace KingdomSurvival.WorldMapVisual
                 const int maxAtlas = 4096;
                 const int padding = 4;
                 float maxSide = Mathf.Clamp(style.SignTextureSize, 16, 1024);
+
+                // Тот же набор рисунков, что и в прошлый раз (правка не
+                // касалась рисунков) — атлас берётся готовым.
+                System.Text.StringBuilder text = new System.Text.StringBuilder().Append(maxSide).Append('|');
+                foreach ((Sprite sprite, RectInt area) in keys)
+                    text.Append(sprite.GetEntityId().ToString()).Append(':').Append(ImageVersion(sprite)).Append(':').Append(area.x).Append(',').Append(area.y).Append(',').Append(area.width).Append(',').Append(area.height).Append(';');
+                string atlasKey = text.ToString();
+                SignAtlas cached = cachedAtlas;
+                if (cached == null || cached.Key != atlasKey)
+                {
+                    cached = BuildAtlas(keys, maxSide, padding, maxAtlas);
+                    cached.Key = atlasKey;
+                    cachedAtlas = cached;
+                }
+                Vector2Int[] sizes = cached.Sizes, positions = cached.Positions;
+                int atlasWidth = cached.Width, atlasHeight = cached.Height;
+
+                Texture2D atlas = new Texture2D(atlasWidth, atlasHeight, TextureFormat.RGBA32, true)
+                {
+                    name = "GeneratedWorldMapSigns",
+                    wrapMode = TextureWrapMode.Clamp,
+                    filterMode = FilterMode.Trilinear,
+                    anisoLevel = 4,
+                    hideFlags = HideFlags.DontSave
+                };
+                atlas.SetPixels32(cached.Pixels);
+                atlas.Apply(true, false);
+                signs.Atlas = atlas;
+
+                foreach (PendingSign pending in pendingSigns)
+                {
+                    int i = keyIndex[(pending.Sprite, pending.Area)];
+                    signs.Items.Add(new WorldMapSign
+                    {
+                        XPercent = pending.XPercent,
+                        YPercent = pending.YPercent,
+                        HeightPercent = pending.HeightPercent,
+                        Aspect = pending.Area.width / (float)Mathf.Max(1, pending.Area.height),
+                        Uv = new Rect(positions[i].x / (float)atlasWidth, positions[i].y / (float)atlasHeight,
+                            sizes[i].x / (float)atlasWidth, sizes[i].y / (float)atlasHeight),
+                        Flip = pending.Flip,
+                        Tint = pending.Tint
+                    });
+                }
+                return signs;
+            }
+
+            private SignAtlas BuildAtlas(List<(Sprite Sprite, RectInt Area)> keys, float maxSide, int padding, int maxAtlas)
+            {
                 Vector2Int[] sizes = new Vector2Int[keys.Count];
                 Vector2Int[] positions = new Vector2Int[keys.Count];
                 int atlasWidth = 0, atlasHeight = 0;
@@ -223,34 +348,7 @@ namespace KingdomSurvival.WorldMapVisual
                     BleedEdges(pixels, atlasWidth, atlasHeight, new RectInt(at.x - padding / 2, at.y - padding / 2, size.x + padding, size.y + padding));
                 }
 
-                Texture2D atlas = new Texture2D(atlasWidth, atlasHeight, TextureFormat.RGBA32, true)
-                {
-                    name = "GeneratedWorldMapSigns",
-                    wrapMode = TextureWrapMode.Clamp,
-                    filterMode = FilterMode.Trilinear,
-                    anisoLevel = 4,
-                    hideFlags = HideFlags.DontSave
-                };
-                atlas.SetPixels32(pixels);
-                atlas.Apply(true, false);
-                signs.Atlas = atlas;
-
-                foreach (PendingSign pending in pendingSigns)
-                {
-                    int i = keyIndex[(pending.Sprite, pending.Area)];
-                    signs.Items.Add(new WorldMapSign
-                    {
-                        XPercent = pending.XPercent,
-                        YPercent = pending.YPercent,
-                        HeightPercent = pending.HeightPercent,
-                        Aspect = pending.Area.width / (float)Mathf.Max(1, pending.Area.height),
-                        Uv = new Rect(positions[i].x / (float)atlasWidth, positions[i].y / (float)atlasHeight,
-                            sizes[i].x / (float)atlasWidth, sizes[i].y / (float)atlasHeight),
-                        Flip = pending.Flip,
-                        Tint = pending.Tint
-                    });
-                }
-                return signs;
+                return new SignAtlas { Pixels = pixels, Sizes = sizes, Positions = positions, Width = atlasWidth, Height = atlasHeight };
             }
 
             // Полки: рисунки по убыванию высоты, слева направо; ширина
@@ -471,7 +569,7 @@ namespace KingdomSurvival.WorldMapVisual
             // оттенок и цветокоррекция «Обработки», mip-карты, повтор.
             private Texture2D GradedCopy(Image image, Color tint)
             {
-                return CopyImage(image, c =>
+                return CopyImage(image, "graded " + tint + GradeKey(), c =>
                 {
                     Color graded = Grade(new Color(c.r * tint.r, c.g * tint.g, c.b * tint.b));
                     graded.a = c.a;
@@ -484,32 +582,46 @@ namespace KingdomSurvival.WorldMapVisual
             private Texture2D ModulateCopy(Image image)
             {
                 float average = Mathf.Max(0.05f, image.Average.r * 0.3f + image.Average.g * 0.59f + image.Average.b * 0.11f);
-                return CopyImage(image, c => Encode((c.r * 0.3f + c.g * 0.59f + c.b * 0.11f) / average, c.a));
+                return CopyImage(image, "modulate", c => Encode((c.r * 0.3f + c.g * 0.59f + c.b * 0.11f) / average, c.a));
             }
 
-            private Texture2D CopyImage(Image image, Func<Color, Color> convert)
+            // Пересчёт пикселей узора дорогой (до 2048² точек на узор) и
+            // повторяется при каждой правке; готовые пиксели берутся из
+            // памяти, пока не изменились картинка, оттенок или обработка.
+            private Texture2D CopyImage(Image image, string convertKey, Func<Color, Color> convert)
             {
-                const int maxSide = 2048;
-                float scale = Mathf.Min(1f, maxSide / (float)Mathf.Max(image.Width, image.Height));
-                int w = Mathf.Max(1, Mathf.RoundToInt(image.Width * scale));
-                int h = Mathf.Max(1, Mathf.RoundToInt(image.Height * scale));
-                Color32[] pixels = new Color32[w * h];
-                float footprint = 1f / scale;
-                for (int y = 0; y < h; y++)
+                if (!SharedPatterns.TryGetValue((image, convertKey), out (Color32[] Pixels, int Width, int Height) converted))
                 {
-                    for (int x = 0; x < w; x++)
+                    const int maxSide = 2048;
+                    float scale = Mathf.Min(1f, maxSide / (float)Mathf.Max(image.Width, image.Height));
+                    int w = Mathf.Max(1, Mathf.RoundToInt(image.Width * scale));
+                    int h = Mathf.Max(1, Mathf.RoundToInt(image.Height * scale));
+                    Color32[] pixels = new Color32[w * h];
+                    float footprint = 1f / scale;
+                    for (int y = 0; y < h; y++)
                     {
-                        Color c = scale >= 1f
-                            ? (Color)image.Pixels[y * image.Width + x]
-                            : image.SampleWrapped((x + 0.5f) / w, (y + 0.5f) / h, footprint);
-                        pixels[(h - 1 - y) * w + x] = convert(c);
+                        for (int x = 0; x < w; x++)
+                        {
+                            Color c = scale >= 1f
+                                ? (Color)image.Pixels[y * image.Width + x]
+                                : image.SampleWrapped((x + 0.5f) / w, (y + 0.5f) / h, footprint);
+                            pixels[(h - 1 - y) * w + x] = convert(c);
+                        }
                     }
+                    converted = (pixels, w, h);
+                    if (SharedPatterns.Count > 48)
+                        SharedPatterns.Clear();
+                    SharedPatterns[(image, convertKey)] = converted;
                 }
-                Texture2D texture = NewTexture(w, h, true, TextureWrapMode.Repeat, "GeneratedWorldMapPattern");
-                texture.SetPixels32(pixels);
+                Texture2D texture = NewTexture(converted.Width, converted.Height, true, TextureWrapMode.Repeat, "GeneratedWorldMapPattern");
+                texture.SetPixels32(converted.Pixels);
                 texture.Apply(true, false);
                 return texture;
             }
+
+            private string GradeKey() => style.DrawPost && style.UseColorAdjust
+                ? " " + style.Brightness + " " + style.Contrast + " " + style.Saturation + " " + style.Warmth
+                : " none";
 
             private static Color32 Encode(float factor, float alpha)
             {
@@ -1946,8 +2058,20 @@ namespace KingdomSurvival.WorldMapVisual
                     return null;
                 if (images.TryGetValue(source, out Image cached))
                     return cached;
+                // Пиксели рисунка читаются через видеокарту — дорого; между
+                // рисунками карты они берутся из общей памяти, пока сама
+                // картинка не изменилась.
+                uint version = ImageVersion(source);
+                if (SharedImages.TryGetValue(source, out (uint Version, Image Image) shared) && shared.Version == version)
+                {
+                    images[source] = shared.Image;
+                    return shared.Image;
+                }
                 Image image = source is Sprite sprite ? Image.FromSprite(sprite) : source is Texture2D texture ? Image.FromTexture(texture) : null;
                 images[source] = image;
+                if (SharedImages.Count > 1024)
+                    SharedImages.Clear();
+                SharedImages[source] = (version, image);
                 return image;
             }
         }

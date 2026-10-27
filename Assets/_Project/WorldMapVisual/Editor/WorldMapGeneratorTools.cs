@@ -91,4 +91,22 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             return at >= 0 && at + 1 < args.Length ? args[at + 1] : null;
         }
     }
+
+    // Картинка переимпортирована (перерисована, другие настройки импорта) —
+    // память рисунков карты сбрасывается, следующий рисунок читает её заново.
+    internal sealed class WorldMapPainterCacheReset : AssetPostprocessor
+    {
+        private static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
+        {
+            foreach (string path in imported)
+            {
+                string extension = System.IO.Path.GetExtension(path).ToLowerInvariant();
+                if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".psd" || extension == ".tga")
+                {
+                    WorldMapPainter.ClearCaches();
+                    return;
+                }
+            }
+        }
+    }
 }

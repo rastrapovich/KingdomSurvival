@@ -219,12 +219,25 @@ namespace KingdomSurvival.WorldMapVisual
                 Add(new WorldMapSignLayer { Signs = layers.Signs });
             }
         }
+
+        // Перерисовать только векторные слои (тушь, дороги, мосты) — их
+        // мазки поменялись на месте; заливки и узоры не трогаются.
+        public void RepaintVectors()
+        {
+            foreach (VisualElement child in Children())
+            {
+                if (child is WorldMapTextureLayerView view && view.Layer.Shapes != null)
+                    view.MarkDirtyRepaint();
+            }
+        }
     }
 
     public sealed class WorldMapTextureLayerView : VisualElement
     {
         private const int QuadsPerChunk = 15000;
         private readonly WorldMapTextureLayer layer;
+
+        public WorldMapTextureLayer Layer => layer;
 
         public WorldMapTextureLayerView(WorldMapTextureLayer layer)
         {

@@ -790,6 +790,43 @@ public class WorldMapGeneratorTests
     }
 
     [Test]
+    public void InkOnlyRepaint_RebuildsLines_AndKeepsFills()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
+        WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+        style.Ink.Shore.Gaps = 0f;
+        Texture2D ground = WorldMapPainter.Paint(map, style, 0.25f, false, out WorldMapLayers layers);
+        try
+        {
+            string forestName = "Местность: " + WorldMapTerrainLabels.Name(WorldMapGameplayTerrainType.Forest);
+            float[] forestBefore = layers.Layers.Find(layer => layer.Name == forestName).Triangles;
+            Assert.That(RingWidths(layers, "Тушь берега").Max() / RingWidths(layers, "Тушь берега").Min(), Is.GreaterThan(1.8f));
+
+            style.Ink.Shore.Pressure = 0f;
+            style.Ink.Shore.Nib = 0f;
+            Assert.That(WorldMapPainter.RepaintInk(layers, out bool structureChanged), Is.True);
+            Assert.That(structureChanged, Is.False);
+            List<float> even = RingWidths(layers, "Тушь берега");
+            Assert.That(even.Max() / even.Min(), Is.LessThan(1.25f), "Тушь берега перерисована по новым настройкам.");
+            Assert.That(layers.Layers.Find(layer => layer.Name == forestName).Triangles, Is.SameAs(forestBefore), "Заливки не перестраивались.");
+
+            style.Ink.ShoreEchoCount = 2;
+            Assert.That(WorldMapPainter.RepaintInk(layers, out structureChanged), Is.True);
+            Assert.That(structureChanged, Is.True, "Появился слой линий воды.");
+            int echo = layers.Layers.FindIndex(layer => layer.Name == "Линии воды у берега");
+            Assert.That(echo, Is.GreaterThan(layers.Layers.FindIndex(layer => layer.Name == "Вода")));
+            Assert.That(echo, Is.LessThan(layers.Layers.FindIndex(layer => layer.Name == "Тушь берега")));
+
+            Assert.That(WorldMapPainter.RepaintInk(new WorldMapLayers(), out _), Is.False, "Чужой рисунок — только полной перерисовкой.");
+        }
+        finally
+        {
+            layers.Destroy();
+            Object.DestroyImmediate(ground);
+        }
+    }
+
+    [Test]
     public void ShoreEchoLines_AreDrawnInsideWater()
     {
         GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);

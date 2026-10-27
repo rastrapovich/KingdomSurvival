@@ -5,11 +5,13 @@ using UnityEngine;
 namespace KingdomSurvival.WorldMapVisual
 {
     // Векторная часть рисунка карты (слои видеокартой): заливки местности и
-    // воды с рваным краем и тушь мазками переменной толщины. Всё — контуры
-    // и многоугольники в пикселях исходной карты; их рисует Painter2D со
-    // сглаживанием в экранных пикселях, поэтому край чёткий при любом
-    // приближении. Узоры местности и рябь лежат в тех же рваных границах
-    // (треугольники области вместо растворения в прозрачность).
+    // воды и тушь мазками кисти. Всё — контуры и треугольники в пикселях
+    // исходной карты; видеокарта рисует их чётко при любом приближении.
+    // Область заливки — поле (> 0 внутри), прочитанное со сдвигом по шуму:
+    // зубцы рваного края или дрожь руки. Где край обведён тушью, заливка и
+    // линия строятся по одному и тому же краю — заливка обрывается ровно
+    // по линии туши. Между остальными заливками — переход по выбору
+    // (встык, языками, пятнами, штрихами, размывкой).
     public static partial class WorldMapPainter
     {
         private sealed partial class PaintJob
@@ -19,9 +21,15 @@ namespace KingdomSurvival.WorldMapVisual
 
             // Поле «здесь лес» (> 0 внутри) — по нему же рисуется кромка леса.
             private float[] forestField;
+            private WorldMapInkBrush inkBrush;
+            private WorldMapInkBrush Brush => inkBrush ??= new WorldMapInkBrush(noise, hexPx);
+            private WorldMapInkStyle Ink => style.Ink;
 
             private int GridWidth => Mathf.CeilToInt(width / VectorStep) + 1;
             private int GridHeight => Mathf.CeilToInt(height / VectorStep) + 1;
+
+            private bool ForestInked => style.DrawInk && style.DrawForestOutline && inkPx > 0f && Ink.ForestEdge.Enabled && Ink.ForestEdge.Opacity > 0f;
+            private bool ShoreInked => style.DrawInk && style.DrawShoreInk && inkPx > 0f && Ink.Shore.Enabled && Ink.Shore.Opacity > 0f;
 
             // --------------------------------------------------------------
             // Местность: разбиение на типы без щелей и наложений. В каждом
@@ -88,26 +96,34 @@ namespace KingdomSurvival.WorldMapVisual
                     }
                 }
 
-                float[] best = Filled(nodes, float.MinValue), second = Filled(nodes, float.MinValue);
-                int[] bestType = new int[nodes];
-                for (int t = 0; t < typeCount; t++)
+                int forest = (int)WorldMapGameplayTerrainType.Forest;
+                // Лучшая и вторая оценка в узле; без исключённого типа —
+                // разбиение остальных типов, будто его нет.
+                float[] best = null, second = null;
+                int[] bestType = null;
+                void Rank(int excluded)
                 {
-                    if (score[t] == null)
-                        continue;
-                    for (int n = 0; n < nodes; n++)
+                    best = Filled(nodes, float.MinValue);
+                    second = Filled(nodes, float.MinValue);
+                    bestType = new int[nodes];
+                    for (int t = 0; t < typeCount; t++)
                     {
-                        float value = score[t][n];
-                        if (value > best[n])
+                        if (score[t] == null || t == excluded)
+                            continue;
+                        for (int n = 0; n < nodes; n++)
                         {
-                            second[n] = best[n];
-                            best[n] = value;
-                            bestType[n] = t;
+                            float value = score[t][n];
+                            if (value > best[n])
+                            {
+                                second[n] = best[n];
+                                best[n] = value;
+                                bestType[n] = t;
+                            }
+                            else if (value > second[n])
+                                second[n] = value;
                         }
-                        else if (value > second[n])
-                            second[n] = value;
                     }
                 }
-
                 float[] Field(int t)
                 {
                     float[] field = new float[nodes];
@@ -121,12 +137,23 @@ namespace KingdomSurvival.WorldMapVisual
                     return inside ? field : null;
                 }
 
-                int forest = (int)WorldMapGameplayTerrainType.Forest;
+                Rank(-1);
                 if (score[forest] != null)
                     forestField = Field(forest);
 
                 if (!style.DrawTerrain)
                     return;
+
+                // Лес, обведённый тушью: его край — линия туши (со своей
+                // дрожью руки), остальные заливки обрываются по ней же.
+                EdgeWarp forestWarp = null;
+                bool cutByForest = forestField != null && ForestInked && Ink.FillsFollowInk;
+                if (cutByForest)
+                {
+                    forestWarp = HandWarp(Ink.ForestEdge, 501.0);
+                    Rank(forest);
+                }
+                EdgeWarp torn = TornWarp();
 
                 foreach (WorldMapGameplayTerrainType type in WorldMapTerrainLabels.All)
                 {
@@ -136,29 +163,146 @@ namespace KingdomSurvival.WorldMapVisual
                     WorldMapTerrainArt art = style.FindTerrain(type);
                     if (art == null || !art.Enabled)
                         continue;
-                    float[] field = t == forest ? forestField : Field(t);
-                    if (field == null)
-                        continue;
-
                     bool fill = art.Opacity > 0f;
                     Image pattern = style.UseTerrainPatterns && art.Pattern != null && art.PatternStrength > 0f ? LoadImage(art.Pattern) : null;
                     if (!fill && pattern == null)
                         continue;
-                    float[] triangles = TornTriangles(field, gw, gh);
+
+                    EdgeTerm[] terms;
+                    float[] alpha = null;
+                    if (cutByForest && t == forest)
+                        terms = new[] { new EdgeTerm(forestField, forestWarp, false) };
+                    else
+                    {
+                        float[] field = t == forest ? forestField : Field(t);
+                        if (field == null)
+                            continue;
+                        field = BlendField(field, t, out alpha);
+                        terms = cutByForest
+                            ? new[] { new EdgeTerm(field, torn, false), new EdgeTerm(forestField, forestWarp, true) }
+                            : new[] { new EdgeTerm(field, torn, false) };
+                    }
+
+                    float[] triangles = RegionTriangles(terms, alpha, out float[] vertexAlpha);
                     if (fill)
                     {
                         Color color = Grade(art.Color);
-                        AddFill("Местность: " + WorldMapTerrainLabels.Name(type), new Color(color.r, color.g, color.b, art.Opacity), triangles, null);
+                        AddFill("Местность: " + WorldMapTerrainLabels.Name(type), new Color(color.r, color.g, color.b, art.Opacity), triangles, null, vertexAlpha);
                     }
                     if (pattern != null)
-                        AddMasked("Узор: " + WorldMapTerrainLabels.Name(type), GradedCopy(pattern, Color.white), art.PatternTileHexes * hexPx, art.PatternStrength, triangles);
+                        AddMasked("Узор: " + WorldMapTerrainLabels.Name(type), GradedCopy(pattern, Color.white), art.PatternTileHexes * hexPx, art.PatternStrength, triangles, vertexAlpha);
                 }
             }
 
             // --------------------------------------------------------------
+            // Переход между заливками. Заливка заходит на соседние на
+            // ширину перехода там, где разрешает узор (языки, пятна,
+            // штрихи); при мягкости — тает к краю захода. Сама область
+            // типа остаётся целиком — щелей нет, заходы ложатся поверх.
+            // --------------------------------------------------------------
+
+            private float[] BlendField(float[] field, int salt, out float[] alpha)
+            {
+                alpha = null;
+                float reachPx = style.EdgeBlendWidthHexes * hexPx;
+                if (style.EdgeBlend == WorldMapEdgeBlend.Torn || reachPx <= 0.5f)
+                    return field;
+                float step = VectorStep;
+                int gw = GridWidth, gh = GridHeight, nodes = gw * gh;
+                float[] outside = DistanceOutside(field, gw, gh);
+                double frequency = 1.0 / Mathf.Max(2f, style.EdgeBlendScaleHexes * hexPx);
+                float density = style.EdgeBlendDensity;
+                float threshold = 0.22f - density * 0.5f;
+                float angle = style.EdgeBlendAngle * Mathf.Deg2Rad;
+                float cos = Mathf.Cos(angle), sin = Mathf.Sin(angle);
+                float softness = style.EdgeBlend == WorldMapEdgeBlend.Wash ? Mathf.Max(0.85f, style.EdgeBlendSoftness) : style.EdgeBlendSoftness;
+                float[] result = new float[nodes];
+                if (softness > 0f)
+                    alpha = new float[nodes];
+                double sx = salt * 13.1, sy = -salt * 7.3;
+                for (int j = 0; j < gh; j++)
+                {
+                    for (int i = 0; i < gw; i++)
+                    {
+                        int n = j * gw + i;
+                        float inside = field[n] * step;
+                        float reach = 0f;
+                        if (outside[n] < reachPx * 1.05f)
+                        {
+                            double x = i * step, y = j * step;
+                            switch (style.EdgeBlend)
+                            {
+                                case WorldMapEdgeBlend.Tongues:
+                                    reach = Mathf.Clamp01((float)noise.Fbm(x * frequency + sx, y * frequency + sy, 3, 0.55) * 2.2f + density - 0.3f);
+                                    break;
+                                case WorldMapEdgeBlend.Spots:
+                                    reach = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(threshold - 0.05f, threshold + 0.05f, (float)noise.Fbm(x * frequency * 1.4 + sx, y * frequency * 1.4 + sy, 3, 0.5)));
+                                    break;
+                                case WorldMapEdgeBlend.Streaks:
+                                    double u = x * cos + y * sin, v = -x * sin + y * cos;
+                                    reach = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(threshold - 0.05f, threshold + 0.05f, (float)noise.Fbm(u * frequency * 0.22 + sx, v * frequency * 2.4 + sy, 3, 0.5)));
+                                    break;
+                                default:
+                                    reach = 0.55f + 0.45f * Mathf.Clamp((float)noise.Fbm(x * frequency + sx, y * frequency + sy, 3, 0.55) * 2f, -1f, 1f);
+                                    break;
+                            }
+                            reach *= reachPx;
+                        }
+                        result[n] = Mathf.Max(inside, reach - outside[n]);
+                        if (alpha != null)
+                            alpha[n] = field[n] > 0f ? 1f : reach <= 0f ? 0f : Mathf.Clamp01((reach - outside[n]) / (softness * reach));
+                    }
+                }
+                return result;
+            }
+
+            // Расстояние от узла до области типа, в пикселях (0 внутри):
+            // два прохода по сетке (фаска 1 и √2 шага).
+            private float[] DistanceOutside(float[] field, int gw, int gh)
+            {
+                float step = VectorStep, diagonal = step * 1.4142f;
+                float[] d = new float[gw * gh];
+                for (int n = 0; n < d.Length; n++)
+                    d[n] = field[n] > 0f ? 0f : float.MaxValue / 4f;
+                for (int j = 0; j < gh; j++)
+                {
+                    for (int i = 0; i < gw; i++)
+                    {
+                        int n = j * gw + i;
+                        float v = d[n];
+                        if (i > 0) v = Mathf.Min(v, d[n - 1] + step);
+                        if (j > 0)
+                        {
+                            v = Mathf.Min(v, d[n - gw] + step);
+                            if (i > 0) v = Mathf.Min(v, d[n - gw - 1] + diagonal);
+                            if (i < gw - 1) v = Mathf.Min(v, d[n - gw + 1] + diagonal);
+                        }
+                        d[n] = v;
+                    }
+                }
+                for (int j = gh - 1; j >= 0; j--)
+                {
+                    for (int i = gw - 1; i >= 0; i--)
+                    {
+                        int n = j * gw + i;
+                        float v = d[n];
+                        if (i < gw - 1) v = Mathf.Min(v, d[n + 1] + step);
+                        if (j < gh - 1)
+                        {
+                            v = Mathf.Min(v, d[n + gw] + step);
+                            if (i < gw - 1) v = Mathf.Min(v, d[n + gw + 1] + diagonal);
+                            if (i > 0) v = Mathf.Min(v, d[n + gw - 1] + diagonal);
+                        }
+                        d[n] = v;
+                    }
+                }
+                return d;
+            }
+
+            // --------------------------------------------------------------
             // Вода: заливка ступенями глубины (отмель → мелко → глубже →
-            // глубоко) с рваными краями ступеней, рябь в границах воды,
-            // тушь берега мазком.
+            // глубоко), рябь в границах воды, тушь берега и линии воды
+            // вдоль берега.
             // --------------------------------------------------------------
 
             private void BuildVectorWater(float[] toLand)
@@ -194,6 +338,18 @@ namespace KingdomSurvival.WorldMapVisual
                 // Глубина по расстоянию до берега даёт гребень по оси реки —
                 // ступени тянулись бы вдоль него тонкими шипами.
                 depth = Blur(Blur(depth, gw, gh), gw, gh);
+                float[] Inside(float threshold)
+                {
+                    float[] field = new float[nodes];
+                    for (int n = 0; n < nodes; n++)
+                        field[n] = (depth[n] - threshold) / step;
+                    return field;
+                }
+
+                // Берег, обведённый тушью: край воды и линия — один край.
+                bool follow = ShoreInked && Ink.FillsFollowInk;
+                EdgeWarp torn = TornWarp();
+                EdgeTerm water = new EdgeTerm(shore, follow ? HandWarp(Ink.Shore, 1.0) : torn, false);
 
                 Color shallow = style.WaterShallowColor;
                 Color deep = style.WaterDeepColor;
@@ -202,67 +358,93 @@ namespace KingdomSurvival.WorldMapVisual
                 float deepPx = Mathf.Max(2f, hexPx * 0.9f);
 
                 // Ступени — треугольниками по порядку: каждая следующая
-                // поверх предыдущей.
+                // поверх предыдущей и не выходит за край воды.
                 List<float> fills = new List<float>();
                 List<Color32> colors = new List<Color32>();
-                void Band(float[] field, Color color)
+                float[] Band(EdgeTerm[] terms, Color color)
                 {
-                    float[] triangles = TornTriangles(field, gw, gh);
+                    float[] triangles = RegionTriangles(terms, null, out _);
                     Color graded = Grade(color);
                     Color32 opaque = new Color(graded.r, graded.g, graded.b, 1f);
                     fills.AddRange(triangles);
                     for (int t = 0; t < triangles.Length / 6; t++)
                         colors.Add(opaque);
-                }
-                float[] Inside(float threshold)
-                {
-                    float[] field = new float[nodes];
-                    for (int n = 0; n < nodes; n++)
-                        field[n] = Mathf.Min(shore[n], (depth[n] - threshold) / step);
-                    return field;
+                    return triangles;
                 }
 
-                Band(shore, style.DrawShoreBand ? shoreColor : shallow);
+                float[] surface = Band(new[] { water }, style.DrawShoreBand ? shoreColor : shallow);
                 if (style.DrawShoreBand)
-                    Band(Inside(shorePx), shallow);
-                Band(Inside(deepPx * 0.45f), Color.Lerp(shallow, deep, 0.5f));
-                Band(Inside(deepPx), deep);
+                    Band(new[] { water, new EdgeTerm(Inside(shorePx), torn, false) }, shallow);
+                Band(new[] { water, new EdgeTerm(Inside(deepPx * 0.45f), torn, false) }, Color.Lerp(shallow, deep, 0.5f));
+                Band(new[] { water, new EdgeTerm(Inside(deepPx), torn, false) }, deep);
                 if (fills.Count == 0)
                     return;
-                AddFill("Вода", Color.white, fills.ToArray(), colors.ToArray());
+                AddFill("Вода", Color.white, fills.ToArray(), colors.ToArray(), null);
 
                 if (style.UseWaterPattern && style.WaterPattern != null && style.WaterPatternStrength > 0f)
                 {
                     Image ripple = LoadImage(style.WaterPattern);
                     if (ripple != null)
-                        AddMasked("Рябь", GradedCopy(ripple, Color.white), style.WaterPatternTileHexes * hexPx, style.WaterPatternStrength, TornTriangles(shore, gw, gh));
+                        AddMasked("Рябь", GradedCopy(ripple, Color.white), style.WaterPatternTileHexes * hexPx, style.WaterPatternStrength, surface, null);
                 }
 
-                if (style.DrawInk && style.DrawShoreInk && inkPx > 0f)
+                if (style.DrawInk && style.DrawShoreInk && inkPx > 0f && Ink.ShoreEchoCount > 0 && Ink.ShoreEcho.Enabled)
+                {
+                    // Линии воды вдоль берега, как на старых картах.
+                    List<WorldMapVectorShape> echoes = new List<WorldMapVectorShape>();
+                    EdgeWarp still = new EdgeWarp();
+                    int seed = 201;
+                    for (int k = 1; k <= Ink.ShoreEchoCount; k++)
+                    {
+                        EdgeTerm[] line = { water, new EdgeTerm(Inside(k * Ink.ShoreEchoSpacingHexes * hexPx), still, false) };
+                        foreach (Vector2[] contour in RegionContours(line))
+                            Brush.Stroke(echoes, contour, true, Ink.ShoreEcho, inkPx, InkColor(1f), seed++);
+                    }
+                    AddVector("Линии воды у берега", echoes);
+                }
+
+                if (ShoreInked)
                 {
                     List<WorldMapVectorShape> ink = new List<WorldMapVectorShape>();
-                    Color color = InkColor(0.92f);
                     int seed = 1;
-                    foreach (Vector2[] contour in Contours(shore, gw, gh))
-                        AddInk(ink, Smooth(contour), true, inkPx * 1.15f, color, style.InkVariation, style.InkGaps, seed++, true);
+                    if (follow)
+                    {
+                        foreach (Vector2[] contour in RegionContours(new[] { water }))
+                            Brush.Stroke(ink, contour, true, Ink.Shore, inkPx, InkColor(1f), seed++, false);
+                    }
+                    else
+                    {
+                        foreach (Vector2[] contour in Contours(shore, gw, gh))
+                            Brush.Stroke(ink, Smooth(contour), true, Ink.Shore, inkPx, InkColor(1f), seed++);
+                    }
                     AddVector("Тушь берега", ink);
                 }
             }
 
             private void BuildVectorForestInk()
             {
-                if (forestField == null || !style.DrawInk || !style.DrawForestOutline || inkPx <= 0f || style.ForestOutline <= 0f)
+                if (forestField == null || !ForestInked)
                     return;
                 List<WorldMapVectorShape> ink = new List<WorldMapVectorShape>();
-                Color color = InkColor(style.ForestOutline);
                 int seed = 501;
-                foreach (Vector2[] contour in Contours(forestField, GridWidth, GridHeight))
-                    AddInk(ink, Smooth(contour), true, inkPx * 0.85f, color, style.InkVariation, style.InkGaps * 1.5f, seed++, true);
+                if (Ink.FillsFollowInk)
+                {
+                    foreach (Vector2[] contour in RegionContours(new[] { new EdgeTerm(forestField, HandWarp(Ink.ForestEdge, 501.0), false) }))
+                        Brush.Stroke(ink, contour, true, Ink.ForestEdge, inkPx, InkColor(1f), seed++, false);
+                }
+                else
+                {
+                    foreach (Vector2[] contour in Contours(forestField, GridWidth, GridHeight))
+                        Brush.Stroke(ink, Smooth(contour), true, Ink.ForestEdge, inkPx, InkColor(1f), seed++);
+                }
                 AddVector("Кромка леса", ink);
             }
 
             // --------------------------------------------------------------
-            // Дороги, тропы, мосты — мазками.
+            // Дороги, тропы, мосты. Дорога — полоса цвета дороги, её края
+            // обведены мазками по самой кромке полосы: полоса ложится поверх
+            // внутренней половины мазка, так что край дороги — линия туши,
+            // а на перекрёстках полосы закрывают чужую обводку.
             // --------------------------------------------------------------
 
             private void BuildVectorRoads()
@@ -271,37 +453,80 @@ namespace KingdomSurvival.WorldMapVisual
                     return;
                 float roadWidth = Mathf.Max(1.6f, style.RoadWidthHexes * hexPx);
                 float trailWidth = Mathf.Max(1.2f, style.TrailWidthHexes * hexPx);
+                WorldMapStrokeStyle edge = Ink.RoadEdge;
+                bool edges = style.DrawInk && inkPx > 0f && edge.Enabled && edge.Opacity > 0f;
+                List<WorldMapVectorShape> trails = new List<WorldMapVectorShape>();
                 List<WorldMapVectorShape> ink = new List<WorldMapVectorShape>();
                 List<WorldMapVectorShape> fill = new List<WorldMapVectorShape>();
+                Color road = Grade(style.RoadColor);
+                road.a = 1f;
+                Color trailColor = Grade(style.TrailColor);
+                trailColor.a = 1f;
                 int seed = 1001;
                 foreach (GeneratedMapLine line in map.Roads)
                 {
                     if (line?.Points == null || line.Points.Count < 2)
                         continue;
                     List<Vector2> points = ToPixels(line.Points);
-                    bool trail = line.Kind == GeneratedMapLine.TrailKind;
                     seed++;
-                    if (trail)
+                    if (line.Kind == GeneratedMapLine.TrailKind)
                     {
                         if (!style.DrawTrails)
                             continue;
-                        Color color = Grade(style.TrailColor);
                         float dash = style.TrailDashed ? Mathf.Max(3f, trailWidth * 5f) : 0f;
                         foreach (List<Vector2> part in Dashes(points, dash, dash * 0.8f))
-                            AddInk(fill, part, false, trailWidth, new Color(color.r, color.g, color.b, 0.95f), style.InkVariation * 0.5f, 0f, seed, true);
+                            Brush.Stroke(trails, part, false, Ink.Trail, trailWidth, trailColor, seed);
                         continue;
                     }
                     if (!style.DrawRoads)
                         continue;
-                    if (style.DrawInk && style.RoadInk > 0f && inkPx > 0f)
-                        AddInk(ink, points, false, roadWidth + inkPx * 1.3f, InkColor(style.RoadInk), style.InkVariation * 0.7f, 0f, seed, false);
-                    Color road = Grade(style.RoadColor);
+
+                    List<Vector2> center = WorldMapInkBrush.Resample(points, false, Mathf.Max(1f, hexPx * 0.1f));
+                    if (edge.Enabled && edge.WobbleHexes > 0f)
+                        center = Brush.Wobble(center, false, edge.WobbleHexes * hexPx, edge.WobbleWaveHexes * hexPx, seed);
+                    if (center.Count < 2)
+                        continue;
+                    List<Vector2> left = new List<Vector2>(center.Count), right = new List<Vector2>(center.Count);
+                    for (int i = 0; i < center.Count; i++)
+                    {
+                        Vector2 normal = WorldMapInkBrush.Normal(center, i, false);
+                        left.Add(center[i] + normal * roadWidth * 0.5f);
+                        right.Add(center[i] - normal * roadWidth * 0.5f);
+                    }
+                    if (edges)
+                    {
+                        Brush.Stroke(ink, left, false, edge, inkPx, InkColor(1f), seed * 2, false);
+                        Brush.Stroke(ink, right, false, edge, inkPx, InkColor(1f), seed * 2 + 1, false);
+                    }
                     float roadDash = style.RoadDashed ? roadWidth * 6f : 0f;
-                    foreach (List<Vector2> part in Dashes(points, roadDash, roadDash * 0.6f))
-                        AddInk(fill, part, false, roadWidth, new Color(road.r, road.g, road.b, 1f), style.InkVariation * 0.2f, 0f, seed, style.RoadDashed);
+                    foreach (List<Vector2> part in Dashes(center, roadDash, roadDash * 0.6f))
+                        AddRibbon(fill, part, roadWidth, road);
                 }
-                ink.AddRange(fill);
-                AddVector("Дороги и тропы", ink);
+                trails.AddRange(ink);
+                trails.AddRange(fill);
+                AddVector("Дороги и тропы", trails);
+            }
+
+            // Полоса постоянной ширины вдоль линии.
+            private static void AddRibbon(List<WorldMapVectorShape> shapes, List<Vector2> line, float width, Color color)
+            {
+                if (line.Count < 2)
+                    return;
+                for (int from = 0; from < line.Count - 1; from += WorldMapInkBrush.MaxStrokePoints)
+                {
+                    int to = Mathf.Min(from + WorldMapInkBrush.MaxStrokePoints, line.Count - 1);
+                    Vector2[] outline = new Vector2[(to - from + 1) * 2];
+                    int n = to - from + 1;
+                    for (int k = 0; k < n; k++)
+                    {
+                        Vector2 normal = WorldMapInkBrush.Normal(line, from + k, false);
+                        outline[k] = line[from + k] + normal * width * 0.5f;
+                        outline[n * 2 - 1 - k] = line[from + k] - normal * width * 0.5f;
+                    }
+                    WorldMapVectorShape shape = new WorldMapVectorShape { Color = color, OddEven = false };
+                    shape.Contours.Add(outline);
+                    shapes.Add(shape);
+                }
             }
 
             private void BuildVectorBridges()
@@ -312,7 +537,6 @@ namespace KingdomSurvival.WorldMapVisual
                 float length = Mathf.Max(roadHalf * 4f, hexPx * 0.7f);
                 List<WorldMapVectorShape> shapes = new List<WorldMapVectorShape>();
                 Color plank = Grade(style.BridgeColor);
-                Color ink = InkColor(1f);
                 int seed = 3001;
                 foreach (MapPointData bridge in map.Bridges)
                 {
@@ -330,171 +554,12 @@ namespace KingdomSurvival.WorldMapVisual
                     WorldMapVectorShape deck = new WorldMapVectorShape { Color = new Color(plank.r, plank.g, plank.b, 1f), OddEven = false };
                     deck.Contours.Add(new[] { a + normal * half, c + normal * half, c - normal * half, a - normal * half });
                     shapes.Add(deck);
-                    float rail = Mathf.Max(0.8f, inkPx * 0.7f);
-                    AddInk(shapes, new List<Vector2> { a + normal * half, c + normal * half }, false, rail, ink, style.InkVariation * 0.5f, 0f, seed++, true);
-                    AddInk(shapes, new List<Vector2> { a - normal * half, c - normal * half }, false, rail, ink, style.InkVariation * 0.5f, 0f, seed++, true);
+                    if (!style.DrawInk || inkPx <= 0f)
+                        continue;
+                    Brush.Stroke(shapes, new List<Vector2> { a + normal * half, c + normal * half }, false, Ink.Bridge, inkPx, InkColor(1f), seed++);
+                    Brush.Stroke(shapes, new List<Vector2> { a - normal * half, c - normal * half }, false, Ink.Bridge, inkPx, InkColor(1f), seed++);
                 }
                 AddVector("Мосты", shapes);
-            }
-
-            // --------------------------------------------------------------
-            // Мазок туши: ширина меняется по шуму вдоль линии (то волосок,
-            // то нажим), концы сужаются, местами кисть отрывается.
-            // --------------------------------------------------------------
-
-            private void AddInk(List<WorldMapVectorShape> shapes, List<Vector2> line, bool closed, float width, Color color, float variation, float gaps, int seed, bool taper)
-            {
-                List<Vector2> points = Resample(line, closed, Mathf.Max(1f, Mathf.Min(width * 1.5f, hexPx * 0.15f)));
-                int count = points.Count;
-                if (count < 2)
-                    return;
-                float[] widths = new float[count];
-                bool[] gap = new bool[count];
-                float length = 0f;
-                double lengthFrequency = 1.0 / Mathf.Max(2f, hexPx * 0.9f);
-                double gapFrequency = 1.0 / Mathf.Max(2f, hexPx * 2.2f);
-                bool anyGap = false;
-                for (int i = 0; i < count; i++)
-                {
-                    if (i > 0)
-                        length += Vector2.Distance(points[i - 1], points[i]);
-                    // Нажим: волна вдоль линии — то волосок, то полный мазок.
-                    float n = Mathf.Clamp01(0.5f + (float)noise.Fbm(length * lengthFrequency + seed * 13.7, seed * 3.1, 3, 0.55) * 2.2f);
-                    // Широкое перо: поперёк пера линия толще, вдоль — тоньше.
-                    Vector2 normal = Normal(points, i, closed);
-                    float nib = Mathf.Lerp(0.5f, 1.3f, Mathf.Abs(normal.x * NibAxis.x + normal.y * NibAxis.y));
-                    widths[i] = width * Mathf.Lerp(1f, Mathf.Max(0.15f, (0.25f + 1.5f * n) * nib), variation);
-                    if (gaps > 0f)
-                    {
-                        float g = 0.5f + (float)noise.Fbm(length * gapFrequency + seed * 7.9, 5.3 + seed, 2, 0.5) * 1.2f;
-                        gap[i] = g > 1f - gaps;
-                        anyGap |= gap[i];
-                    }
-                }
-
-                if (closed && !anyGap && count <= MaxStrokePoints)
-                {
-                    // Кольцо: внешний и внутренний край, между ними — тушь.
-                    Vector2[] left = new Vector2[count], right = new Vector2[count];
-                    for (int i = 0; i < count; i++)
-                    {
-                        Vector2 normal = Normal(points, i, true);
-                        left[i] = points[i] + normal * widths[i] * 0.5f;
-                        right[i] = points[i] - normal * widths[i] * 0.5f;
-                    }
-                    WorldMapVectorShape ring = new WorldMapVectorShape { Color = color, OddEven = true };
-                    ring.Contours.Add(left);
-                    ring.Contours.Add(right);
-                    shapes.Add(ring);
-                    return;
-                }
-
-                if (closed && !anyGap)
-                {
-                    // Длинное кольцо — кусками встык (у фигуры Painter2D
-                    // предел вершин), последний кусок замыкается на первую точку.
-                    for (int from = 0; from < count; from += MaxStrokePoints)
-                        AddStrokeRun(shapes, points, widths, from, Mathf.Min(from + MaxStrokePoints, count), true, false, false, color);
-                    return;
-                }
-
-                int start = -1;
-                for (int i = 0; i <= count; i++)
-                {
-                    bool on = i < count && !gap[i];
-                    if (on && start < 0)
-                        start = i;
-                    if ((!on || i == count) && start >= 0)
-                    {
-                        for (int from = start; from < i - 1; from += MaxStrokePoints)
-                        {
-                            int to = Mathf.Min(from + MaxStrokePoints, i - 1);
-                            AddStrokeRun(shapes, points, widths, from, to, false, taper && from == start, taper && to == i - 1, color);
-                        }
-                        start = -1;
-                    }
-                }
-            }
-
-            // Предел точек одного мазка: фигура Painter2D — до 65535 вершин.
-            private const int MaxStrokePoints = 2500;
-
-            // Кусок мазка from..to (индексы по кругу для замкнутой линии).
-            private void AddStrokeRun(List<WorldMapVectorShape> shapes, List<Vector2> points, float[] widths, int from, int to, bool closed, bool taperStart, bool taperEnd, Color color)
-            {
-                int n = to - from + 1;
-                if (n < 2)
-                    return;
-                int count = points.Count;
-                Vector2[] outline = new Vector2[n * 2];
-                float runLength = 0f;
-                for (int i = from + 1; i <= to; i++)
-                    runLength += Vector2.Distance(points[(i - 1) % count], points[i % count]);
-                float taperLength = Mathf.Min(runLength * 0.3f, Mathf.Max(widths[from % count], 1f) * 3f);
-                float walked = 0f;
-                for (int k = 0; k < n; k++)
-                {
-                    int i = (from + k) % count;
-                    if (k > 0)
-                        walked += Vector2.Distance(points[(from + k - 1) % count], points[i]);
-                    float w = widths[i];
-                    if (taperLength > 0f)
-                    {
-                        float distance = Mathf.Min(taperStart ? walked : float.MaxValue, taperEnd ? runLength - walked : float.MaxValue);
-                        if (distance < taperLength)
-                            w *= Mathf.Clamp01(distance / taperLength * 0.85f + 0.15f);
-                    }
-                    Vector2 normal = Normal(points, i, closed);
-                    outline[k] = points[i] + normal * w * 0.5f;
-                    outline[n * 2 - 1 - k] = points[i] - normal * w * 0.5f;
-                }
-                WorldMapVectorShape shape = new WorldMapVectorShape { Color = color, OddEven = false };
-                shape.Contours.Add(outline);
-                shapes.Add(shape);
-            }
-
-            // Направление нажима пера (по диагонали, как держат кисть).
-            private static readonly Vector2 NibAxis = new Vector2(0.6f, 0.8f);
-
-            private static Vector2 Normal(List<Vector2> points, int i, bool closed)
-            {
-                int count = points.Count;
-                Vector2 previous = i > 0 ? points[i - 1] : closed ? points[count - 1] : points[i];
-                Vector2 next = i < count - 1 ? points[i + 1] : closed ? points[0] : points[i];
-                Vector2 tangent = next - previous;
-                if (tangent.sqrMagnitude < 1e-6f)
-                    return Vector2.up;
-                tangent.Normalize();
-                return new Vector2(-tangent.y, tangent.x);
-            }
-
-            private static List<Vector2> Resample(List<Vector2> line, bool closed, float spacing)
-            {
-                List<Vector2> result = new List<Vector2>();
-                if (line.Count == 0)
-                    return result;
-                List<Vector2> source = new List<Vector2>(line);
-                if (closed)
-                    source.Add(line[0]);
-                result.Add(source[0]);
-                float carry = 0f;
-                for (int i = 1; i < source.Count; i++)
-                {
-                    Vector2 a = source[i - 1], b = source[i];
-                    float segment = Vector2.Distance(a, b);
-                    float t = spacing - carry;
-                    while (t <= segment)
-                    {
-                        result.Add(Vector2.Lerp(a, b, t / segment));
-                        t += spacing;
-                    }
-                    carry = segment - (t - spacing);
-                }
-                if (!closed && result.Count > 0 && Vector2.Distance(result[result.Count - 1], source[source.Count - 1]) > spacing * 0.25f)
-                    result.Add(source[source.Count - 1]);
-                if (closed && result.Count > 2 && Vector2.Distance(result[result.Count - 1], result[0]) < spacing * 0.5f)
-                    result.RemoveAt(result.Count - 1);
-                return result;
             }
 
             // Пунктир: куски линии длиной dash через gap; dash 0 — вся линия.
@@ -687,29 +752,85 @@ namespace KingdomSurvival.WorldMapVisual
             }
 
             // --------------------------------------------------------------
-            // Рваный край. Поле читается со сдвигом по шуму (общему для всех
-            // заливок, поэтому соседние типы местности по-прежнему сходятся
-            // без щелей), а у границы — по мелкой подсетке TornSub × TornSub:
-            // зубцы мельче шага сетки. Клетки, до которых граница со сдвигом
-            // дотянуться не может, целиком внутри или снаружи.
+            // Край области. Область — пересечение слагаемых: поле (> 0
+            // внутри) или его дополнение, каждое прочитано со своим сдвигом
+            // по шуму. У границы поле читается по мелкой подсетке
+            // TornSub × TornSub; клетки, до которых граница со сдвигом
+            // дотянуться не может, целиком внутри или снаружи. Треугольники
+            // заливки и контур туши строятся по одним и тем же значениям —
+            // край заливки лежит ровно на линии туши.
             // --------------------------------------------------------------
 
             private const int TornSub = 3;
-            private Dictionary<long, Vector2> tornWarp;
 
-            private float TornPx => style.EdgeRaggedness * Mathf.Max(2f, style.RaggedScaleHexes * hexPx) * 0.45f;
-
-            private float[] TornTriangles(float[] field, int gw, int gh)
+            private sealed class EdgeWarp
             {
-                if (TornPx < 0.05f)
-                    return Triangles(field, gw, gh);
-                byte[] state = TornCellStates(field, gw, gh);
+                public float Px;
+                public double Frequency = 1.0;
+                public int Octaves = 3;
+                public double Salt;
+                public readonly Dictionary<long, Vector2> Cache = new Dictionary<long, Vector2>();
+            }
+
+            private readonly struct EdgeTerm
+            {
+                public readonly float[] Field;
+                public readonly EdgeWarp Warp;
+                public readonly bool Negate;
+
+                public EdgeTerm(float[] field, EdgeWarp warp, bool negate)
+                {
+                    Field = field;
+                    Warp = warp ?? new EdgeWarp();
+                    Negate = negate;
+                }
+            }
+
+            private EdgeWarp tornWarp;
+
+            // Зубцы рваного края — общие для всех заливок, поэтому соседние
+            // типы местности сходятся без щелей.
+            private EdgeWarp TornWarp() => tornWarp ??= new EdgeWarp
+            {
+                Px = style.EdgeRaggedness * Mathf.Max(2f, style.RaggedScaleHexes * hexPx) * 0.45f,
+                Frequency = 1.0 / Mathf.Max(2f, style.RaggedScaleHexes * hexPx),
+                Octaves = 3
+            };
+
+            // Дрожь руки у края, обведённого тушью: плавная, без зубцов.
+            private EdgeWarp HandWarp(WorldMapStrokeStyle stroke, double salt) => new EdgeWarp
+            {
+                Px = stroke.WobbleHexes * hexPx,
+                Frequency = 1.0 / Mathf.Max(2f, stroke.WobbleWaveHexes * hexPx),
+                Octaves = 2,
+                Salt = salt
+            };
+
+            private float[] RegionTriangles(EdgeTerm[] terms, float[] alphaField, out float[] vertexAlpha)
+            {
+                int gw = GridWidth, gh = GridHeight;
+                byte[] state = RegionStates(terms, gw, gh);
                 int gwF = (gw - 1) * TornSub + 1, ghF = (gh - 1) * TornSub + 1;
-                float[] values = new float[(TornSub + 1) * (TornSub + 1)];
+                int side = TornSub + 1;
+                float[] values = new float[side * side];
+                float[] alphas = alphaField != null ? new float[side * side] : null;
                 List<float> result = new List<float>();
+                List<float> resultAlpha = alphaField != null ? new List<float>() : null;
                 List<Vector2> polygon = new List<Vector2>(8);
-                float[] corner = new float[4];
+                List<float> polygonAlpha = new List<float>(8);
+                float[] corner = new float[4], cornerAlpha = new float[4];
                 Vector2[] corners = new Vector2[4];
+
+                void Triangle(Vector2 a, Vector2 b, Vector2 c, float aa, float ab, float ac)
+                {
+                    AddTriangle(result, a, b, c);
+                    if (resultAlpha == null)
+                        return;
+                    resultAlpha.Add(aa);
+                    resultAlpha.Add(ab);
+                    resultAlpha.Add(ac);
+                }
+
                 for (int j = 0; j < gh - 1; j++)
                 {
                     // Клетки целиком внутри идут полосой: одна полоса — два
@@ -720,8 +841,8 @@ namespace KingdomSurvival.WorldMapVisual
                         if (run < 0)
                             return;
                         Vector2 p0 = NodePoint(run, j), p1 = NodePoint(end, j), p2 = NodePoint(end, j + 1), p3 = NodePoint(run, j + 1);
-                        AddTriangle(result, p0, p1, p2);
-                        AddTriangle(result, p0, p2, p3);
+                        Triangle(p0, p1, p2, 1f, 1f, 1f);
+                        Triangle(p0, p2, p3, 1f, 1f, 1f);
                         run = -1;
                     }
                     for (int i = 0; i < gw - 1; i++)
@@ -730,60 +851,198 @@ namespace KingdomSurvival.WorldMapVisual
                         if (cell == 1)
                         {
                             // Граница могла и не пройти через эту клетку.
-                            TornValues(field, gw, gh, gwF, ghF, i, j, values);
+                            RegionValues(terms, gw, gh, gwF, ghF, i, j, values);
                             int positive = 0;
                             foreach (float value in values)
                                 positive += value > 0f ? 1 : 0;
                             cell = positive == 0 ? (byte)0 : positive == values.Length ? (byte)2 : (byte)1;
                         }
+                        if (cell == 0)
+                        {
+                            Flush(i);
+                            continue;
+                        }
                         if (cell == 2)
                         {
-                            if (run < 0)
-                                run = i;
+                            bool solid = alphaField == null || (alphaField[j * gw + i] >= 0.999f && alphaField[j * gw + i + 1] >= 0.999f &&
+                                alphaField[(j + 1) * gw + i] >= 0.999f && alphaField[(j + 1) * gw + i + 1] >= 0.999f);
+                            if (solid)
+                            {
+                                if (run < 0)
+                                    run = i;
+                                continue;
+                            }
+                            Flush(i);
+                            RegionAlpha(terms[0].Warp, alphaField, gw, gh, gwF, i, j, alphas);
+                            Vector2 p0 = NodePoint(i, j), p1 = NodePoint(i + 1, j), p2 = NodePoint(i + 1, j + 1), p3 = NodePoint(i, j + 1);
+                            float a0 = alphas[0], a1 = alphas[TornSub], a2 = alphas[side * side - 1], a3 = alphas[side * TornSub];
+                            Triangle(p0, p1, p2, a0, a1, a2);
+                            Triangle(p0, p2, p3, a0, a2, a3);
                             continue;
                         }
                         Flush(i);
-                        if (cell == 0)
-                            continue;
+                        if (alphas != null)
+                            RegionAlpha(terms[0].Warp, alphaField, gw, gh, gwF, i, j, alphas);
                         for (int sj = 0; sj < TornSub; sj++)
                         {
                             for (int si = 0; si < TornSub; si++)
                             {
                                 int fi = i * TornSub + si, fj = j * TornSub + sj;
-                                corner[0] = values[sj * (TornSub + 1) + si];
-                                corner[1] = values[sj * (TornSub + 1) + si + 1];
-                                corner[2] = values[(sj + 1) * (TornSub + 1) + si + 1];
-                                corner[3] = values[(sj + 1) * (TornSub + 1) + si];
+                                int i0 = sj * side + si, i1 = i0 + 1, i2 = i0 + side + 1, i3 = i0 + side;
+                                corner[0] = values[i0];
+                                corner[1] = values[i1];
+                                corner[2] = values[i2];
+                                corner[3] = values[i3];
                                 if (corner[0] <= 0f && corner[1] <= 0f && corner[2] <= 0f && corner[3] <= 0f)
                                     continue;
+                                if (alphas != null)
+                                {
+                                    cornerAlpha[0] = alphas[i0];
+                                    cornerAlpha[1] = alphas[i1];
+                                    cornerAlpha[2] = alphas[i2];
+                                    cornerAlpha[3] = alphas[i3];
+                                }
                                 corners[0] = FineNodePoint(fi, fj);
                                 corners[1] = FineNodePoint(fi + 1, fj);
                                 corners[2] = FineNodePoint(fi + 1, fj + 1);
                                 corners[3] = FineNodePoint(fi, fj + 1);
                                 polygon.Clear();
+                                polygonAlpha.Clear();
                                 for (int k = 0; k < 4; k++)
                                 {
                                     float v0 = corner[k], v1 = corner[(k + 1) % 4];
                                     if (v0 > 0f)
+                                    {
                                         polygon.Add(corners[k]);
+                                        polygonAlpha.Add(alphas != null ? cornerAlpha[k] : 1f);
+                                    }
                                     if ((v0 > 0f) != (v1 > 0f))
-                                        polygon.Add(Vector2.Lerp(corners[k], corners[(k + 1) % 4], Mathf.Clamp01(v0 / (v0 - v1))));
+                                    {
+                                        float t = Mathf.Clamp01(v0 / (v0 - v1));
+                                        polygon.Add(Vector2.Lerp(corners[k], corners[(k + 1) % 4], t));
+                                        polygonAlpha.Add(alphas != null ? Mathf.Lerp(cornerAlpha[k], cornerAlpha[(k + 1) % 4], t) : 1f);
+                                    }
                                 }
                                 for (int k = 1; k < polygon.Count - 1; k++)
-                                    AddTriangle(result, polygon[0], polygon[k], polygon[k + 1]);
+                                    Triangle(polygon[0], polygon[k], polygon[k + 1], polygonAlpha[0], polygonAlpha[k], polygonAlpha[k + 1]);
                             }
                         }
                     }
                     Flush(gw - 1);
                 }
+                vertexAlpha = resultAlpha?.ToArray();
                 return result.ToArray();
             }
 
-            // Состояние клеток грубой сетки (с внешним кольцом -1..gw-1):
-            // 0 — снаружи, 2 — внутри, 1 — здесь может пройти рваный край.
-            private byte[] TornCellStates(float[] field, int gw, int gh)
+            // Контуры области по подсетке — линия туши по краю заливки.
+            private List<Vector2[]> RegionContours(EdgeTerm[] terms)
             {
-                int reach = Mathf.CeilToInt(TornPx * 1.42f / VectorStep);
+                int gw = GridWidth, gh = GridHeight;
+                byte[] state = RegionStates(terms, gw, gh);
+                int gwF = (gw - 1) * TornSub + 1, ghF = (gh - 1) * TornSub + 1;
+                int side = TornSub + 1;
+                float[] values = new float[side * side];
+                int[] pairs = new int[4];
+                Dictionary<long, Vector2> points = new Dictionary<long, Vector2>();
+                Dictionary<long, List<long>> links = new Dictionary<long, List<long>>();
+                void Point(long key, int fi, int fj, int edge, float a, float b, float c, float d)
+                {
+                    if (!points.ContainsKey(key))
+                        points[key] = FineEdgePoint(fi, fj, edge, a, b, c, d);
+                    if (!links.ContainsKey(key))
+                        links[key] = new List<long>(2);
+                }
+
+                for (int j = -1; j < gh; j++)
+                {
+                    for (int i = -1; i < gw; i++)
+                    {
+                        if (state[(j + 1) * (gw + 1) + i + 1] != 1)
+                            continue;
+                        RegionValues(terms, gw, gh, gwF, ghF, i, j, values);
+                        for (int sj = 0; sj < TornSub; sj++)
+                        {
+                            for (int si = 0; si < TornSub; si++)
+                            {
+                                int fi = i * TornSub + si, fj = j * TornSub + sj;
+                                int i0 = sj * side + si;
+                                float a = values[i0], b = values[i0 + 1], c = values[i0 + side + 1], d = values[i0 + side];
+                                int count = CellSegments(a, b, c, d, pairs);
+                                for (int s = 0; s < count; s++)
+                                {
+                                    long k0 = EdgeKey(gwF, fi, fj, pairs[s * 2]), k1 = EdgeKey(gwF, fi, fj, pairs[s * 2 + 1]);
+                                    Point(k0, fi, fj, pairs[s * 2], a, b, c, d);
+                                    Point(k1, fi, fj, pairs[s * 2 + 1], a, b, c, d);
+                                    links[k0].Add(k1);
+                                    links[k1].Add(k0);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                List<Vector2[]> contours = new List<Vector2[]>();
+                HashSet<long> visited = new HashSet<long>();
+                List<Vector2> contour = new List<Vector2>();
+                foreach (long startKey in links.Keys)
+                {
+                    if (visited.Contains(startKey))
+                        continue;
+                    contour.Clear();
+                    long previous = -1, current = startKey;
+                    while (current >= 0 && !visited.Contains(current))
+                    {
+                        visited.Add(current);
+                        contour.Add(points[current]);
+                        long next = -1;
+                        foreach (long candidate in links[current])
+                        {
+                            if (candidate != previous && !visited.Contains(candidate))
+                            {
+                                next = candidate;
+                                break;
+                            }
+                        }
+                        previous = current;
+                        current = next;
+                    }
+                    Vector2[] simplified = Simplify(contour, VectorStep / TornSub * 0.3f);
+                    if (simplified.Length >= 3)
+                        contours.Add(simplified);
+                }
+                return contours;
+            }
+
+            // Состояние клеток грубой сетки (с внешним кольцом -1..gw-1):
+            // 0 — снаружи, 2 — внутри, 1 — здесь может пройти край.
+            private byte[] RegionStates(EdgeTerm[] terms, int gw, int gh)
+            {
+                byte[] result = null;
+                foreach (EdgeTerm term in terms)
+                {
+                    byte[] states = CellStates(term.Field, gw, gh, term.Warp.Px);
+                    if (term.Negate)
+                    {
+                        for (int n = 0; n < states.Length; n++)
+                            states[n] = (byte)(2 - states[n]);
+                    }
+                    if (result == null)
+                    {
+                        result = states;
+                        continue;
+                    }
+                    for (int n = 0; n < result.Length; n++)
+                    {
+                        byte a = result[n], b = states[n];
+                        result[n] = (byte)(a == 0 || b == 0 ? 0 : a == 2 && b == 2 ? 2 : 1);
+                    }
+                }
+                return result;
+            }
+
+            private byte[] CellStates(float[] field, int gw, int gh, float warpPx)
+            {
+                int reach = Mathf.CeilToInt(warpPx * 1.42f / VectorStep);
                 int pad = reach + 1;
                 int ew = gw + pad * 2, eh = gh + pad * 2;
                 int[] sum = new int[(ew + 1) * (eh + 1)];
@@ -814,8 +1073,8 @@ namespace KingdomSurvival.WorldMapVisual
                 return state;
             }
 
-            // Значения поля в узлах подсетки одной грубой клетки.
-            private void TornValues(float[] field, int gw, int gh, int gwF, int ghF, int i, int j, float[] values)
+            // Значения области в узлах подсетки одной грубой клетки.
+            private void RegionValues(EdgeTerm[] terms, int gw, int gh, int gwF, int ghF, int i, int j, float[] values)
             {
                 float sub = VectorStep / TornSub;
                 for (int sj = 0; sj <= TornSub; sj++)
@@ -826,29 +1085,47 @@ namespace KingdomSurvival.WorldMapVisual
                         float value = -1f;
                         if (fi >= 0 && fj >= 0 && fi < gwF && fj < ghF)
                         {
-                            Vector2 warp = TornWarp(fi, fj, gwF);
-                            value = SampleField(field, gw, gh, fi * sub + warp.x, fj * sub + warp.y);
+                            value = float.MaxValue;
+                            foreach (EdgeTerm term in terms)
+                            {
+                                Vector2 warp = Warp(term.Warp, fi, fj, gwF);
+                                float v = SampleField(term.Field, gw, gh, fi * sub + warp.x, fj * sub + warp.y);
+                                value = Mathf.Min(value, term.Negate ? -v : v);
+                            }
                         }
                         values[sj * (TornSub + 1) + si] = value;
                     }
                 }
             }
 
-            private Vector2 TornWarp(int fi, int fj, int gwF)
+            private void RegionAlpha(EdgeWarp warp, float[] alphaField, int gw, int gh, int gwF, int i, int j, float[] alphas)
             {
-                tornWarp ??= new Dictionary<long, Vector2>();
-                long key = (long)fj * (gwF + 1) + fi;
-                if (tornWarp.TryGetValue(key, out Vector2 warp))
-                    return warp;
                 float sub = VectorStep / TornSub;
-                double frequency = 1.0 / Mathf.Max(2f, style.RaggedScaleHexes * hexPx);
-                double x = fi * sub * frequency, y = fj * sub * frequency;
-                float px = TornPx;
-                warp = new Vector2(
-                    Mathf.Clamp((float)noise.Fbm(x + 13.1, y - 7.7, 3, 0.62) * 2f, -1f, 1f) * px,
-                    Mathf.Clamp((float)noise.Fbm(x - 51.3, y + 29.9, 3, 0.62) * 2f, -1f, 1f) * px);
-                tornWarp[key] = warp;
-                return warp;
+                for (int sj = 0; sj <= TornSub; sj++)
+                {
+                    for (int si = 0; si <= TornSub; si++)
+                    {
+                        int fi = i * TornSub + si, fj = j * TornSub + sj;
+                        Vector2 offset = Warp(warp, fi, fj, gwF);
+                        alphas[sj * (TornSub + 1) + si] = Mathf.Clamp01(SampleField(alphaField, gw, gh, fi * sub + offset.x, fj * sub + offset.y));
+                    }
+                }
+            }
+
+            private Vector2 Warp(EdgeWarp warp, int fi, int fj, int gwF)
+            {
+                if (warp.Px <= 0f)
+                    return Vector2.zero;
+                long key = (long)fj * (gwF + 1) + fi;
+                if (warp.Cache.TryGetValue(key, out Vector2 offset))
+                    return offset;
+                float sub = VectorStep / TornSub;
+                double x = fi * sub * warp.Frequency, y = fj * sub * warp.Frequency;
+                offset = new Vector2(
+                    Mathf.Clamp((float)noise.Fbm(x + 13.1 + warp.Salt, y - 7.7, warp.Octaves, 0.62) * 2f, -1f, 1f) * warp.Px,
+                    Mathf.Clamp((float)noise.Fbm(x - 51.3, y + 29.9 + warp.Salt, warp.Octaves, 0.62) * 2f, -1f, 1f) * warp.Px);
+                warp.Cache[key] = offset;
+                return offset;
             }
 
             private float SampleField(float[] field, int gw, int gh, float x, float y)
@@ -865,6 +1142,47 @@ namespace KingdomSurvival.WorldMapVisual
             {
                 float sub = VectorStep / TornSub;
                 return new Vector2(Mathf.Clamp(fi * sub, 0f, width), Mathf.Clamp(fj * sub, 0f, height));
+            }
+
+            private Vector2 FineEdgePoint(int fi, int fj, int edge, float a, float b, float c, float d)
+            {
+                Vector2 pa, pb;
+                float va, vb;
+                switch (edge)
+                {
+                    case 0: pa = FineNodePoint(fi, fj); pb = FineNodePoint(fi + 1, fj); va = a; vb = b; break;
+                    case 1: pa = FineNodePoint(fi + 1, fj); pb = FineNodePoint(fi + 1, fj + 1); va = b; vb = c; break;
+                    case 2: pa = FineNodePoint(fi + 1, fj + 1); pb = FineNodePoint(fi, fj + 1); va = c; vb = d; break;
+                    default: pa = FineNodePoint(fi, fj); pb = FineNodePoint(fi, fj + 1); va = a; vb = d; break;
+                }
+                float t = Mathf.Abs(va - vb) < 1e-6f ? 0.5f : Mathf.Clamp01(va / (va - vb));
+                return Vector2.Lerp(pa, pb, t);
+            }
+
+            // Отрезки границы в клетке: пары рёбер (0 — верх, 1 — право,
+            // 2 — низ, 3 — лево); седло решает среднее по углам.
+            private static int CellSegments(float a, float b, float c, float d, int[] pairs)
+            {
+                int index = (a > 0f ? 1 : 0) | (b > 0f ? 2 : 0) | (c > 0f ? 4 : 0) | (d > 0f ? 8 : 0);
+                if (index == 0 || index == 15)
+                    return 0;
+                if (index == 5 || index == 10)
+                {
+                    bool centerInside = (a + b + c + d) * 0.25f > 0f;
+                    if ((index == 5) == !centerInside)
+                    {
+                        pairs[0] = 3; pairs[1] = 0; pairs[2] = 1; pairs[3] = 2;
+                    }
+                    else
+                    {
+                        pairs[0] = 0; pairs[1] = 1; pairs[2] = 2; pairs[3] = 3;
+                    }
+                    return 2;
+                }
+                int[] segment = SegmentTable[index];
+                pairs[0] = segment[0];
+                pairs[1] = segment[1];
+                return 1;
             }
 
             private static void AddTriangle(List<float> result, Vector2 a, Vector2 b, Vector2 c)
@@ -980,14 +1298,14 @@ namespace KingdomSurvival.WorldMapVisual
                 layerList.Add(new WorldMapTextureLayer { Name = name, Shapes = shapes, SourceWidth = width, SourceHeight = height });
             }
 
-            private void AddFill(string name, Color color, float[] triangles, Color32[] colors)
+            private void AddFill(string name, Color color, float[] triangles, Color32[] colors, float[] vertexAlpha)
             {
                 if (triangles == null || triangles.Length == 0)
                     return;
-                layerList.Add(new WorldMapTextureLayer { Name = name, Triangles = triangles, Tint = color, TriangleColors = colors, SourceWidth = width, SourceHeight = height });
+                layerList.Add(new WorldMapTextureLayer { Name = name, Triangles = triangles, Tint = color, TriangleColors = colors, VertexAlpha = vertexAlpha, SourceWidth = width, SourceHeight = height });
             }
 
-            private void AddMasked(string name, Texture2D texture, float tilePx, float alpha, float[] triangles)
+            private void AddMasked(string name, Texture2D texture, float tilePx, float alpha, float[] triangles, float[] vertexAlpha)
             {
                 if (triangles == null || triangles.Length == 0)
                 {
@@ -1007,6 +1325,7 @@ namespace KingdomSurvival.WorldMapVisual
                     TileHeightPercent = tile / height * 100f,
                     UniformAlpha = Mathf.Clamp01(alpha),
                     Triangles = triangles,
+                    VertexAlpha = vertexAlpha,
                     SourceWidth = width,
                     SourceHeight = height
                 });

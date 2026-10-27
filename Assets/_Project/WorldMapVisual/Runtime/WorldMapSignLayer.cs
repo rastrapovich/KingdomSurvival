@@ -143,6 +143,9 @@ namespace KingdomSurvival.WorldMapVisual
         // каждого треугольника (TriangleColors, по одному на треугольник).
         public Color Tint = Color.white;
         public Color32[] TriangleColors;
+        // Прозрачность в каждой вершине (по три на треугольник) — заливка
+        // тает к краю захода на соседнюю.
+        public float[] VertexAlpha;
         // Векторный слой: заливки и мазки туши; рисует Painter2D со
         // сглаживанием в экранных пикселях — чётко при любом приближении.
         public List<WorldMapVectorShape> Shapes;
@@ -280,6 +283,7 @@ namespace KingdomSurvival.WorldMapVisual
                 Color32 color = new Color(tint.r, tint.g, tint.b, Mathf.Clamp01(tint.a * layer.UniformAlpha));
                 int triangles = layer.Triangles.Length / 6;
                 bool perTriangle = layer.TriangleColors != null && layer.TriangleColors.Length >= triangles;
+                bool perVertex = layer.VertexAlpha != null && layer.VertexAlpha.Length >= triangles * 3;
                 List<Vertex> vertices = new List<Vertex>();
                 List<ushort> indices = new List<ushort>();
                 Dictionary<(float, float, int), ushort> shared = new Dictionary<(float, float, int), ushort>();
@@ -305,16 +309,19 @@ namespace KingdomSurvival.WorldMapVisual
                         color = layer.TriangleColors[t];
                         color.a = (byte)Mathf.RoundToInt(color.a * Mathf.Clamp01(layer.UniformAlpha));
                     }
-                    int colorKey = color.r | color.g << 8 | color.b << 16 | color.a << 24;
                     for (int v = 0; v < 3; v++)
                     {
                         int i = t * 6 + v * 2;
                         float x = layer.Triangles[i] * sx, y = layer.Triangles[i + 1] * sy;
+                        Color32 vertexColor = color;
+                        if (perVertex)
+                            vertexColor.a = (byte)Mathf.RoundToInt(color.a * Mathf.Clamp01(layer.VertexAlpha[t * 3 + v]));
+                        int colorKey = vertexColor.r | vertexColor.g << 8 | vertexColor.b << 16 | vertexColor.a << 24;
                         if (!shared.TryGetValue((x, y, colorKey), out ushort index))
                         {
                             index = (ushort)vertices.Count;
                             shared[(x, y, colorKey)] = index;
-                            vertices.Add(new Vertex { position = new Vector3(x, y, Vertex.nearZ), tint = color, uv = Uv(x, y) });
+                            vertices.Add(new Vertex { position = new Vector3(x, y, Vertex.nearZ), tint = vertexColor, uv = Uv(x, y) });
                         }
                         indices.Add(index);
                     }

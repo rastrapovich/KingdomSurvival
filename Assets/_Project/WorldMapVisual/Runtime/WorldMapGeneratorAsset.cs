@@ -61,7 +61,7 @@ namespace KingdomSurvival.WorldMapVisual
 
         private void OnEnable()
         {
-            bool poolsChanged = art != null && (art.EnsureTerrainEntries() | art.NormalizePools());
+            bool poolsChanged = art != null && (art.EnsureTerrainEntries() | art.NormalizePools() | art.UpgradeInk());
             if (UpgradeLandmarkCatalog() | poolsChanged)
             {
 #if UNITY_EDITOR

@@ -90,6 +90,7 @@ namespace KingdomSurvival.WorldMapVisual
                 this.map = map;
                 this.style = style;
                 style.EnsureTerrainEntries();
+                style.UpgradeInk();
                 grid = map.CreateGrid();
                 Vector2Int size = TextureSize(map, resolutionOverride > 0f ? resolutionOverride : style.Resolution);
                 width = size.x;
@@ -874,7 +875,7 @@ namespace KingdomSurvival.WorldMapVisual
                     BuildVectorForestInk();
                     return;
                 }
-                if (!style.DrawInk || !style.DrawForestOutline || inkPx <= 0f || style.ForestOutline <= 0f)
+                if (!style.DrawInk || !style.DrawForestOutline || inkPx <= 0f || !style.Ink.ForestEdge.Enabled || style.Ink.ForestEdge.Opacity <= 0f)
                     return;
                 int count = width * height;
                 byte forest = (byte)WorldMapGameplayTerrainType.Forest;
@@ -892,7 +893,7 @@ namespace KingdomSurvival.WorldMapVisual
                 for (int p = 0; p < count; p++)
                 {
                     if (!mask[p] && distance[p] <= edge + 0.5f && waterCoverage[p] < 0.5f)
-                        Blend(p, style.InkColor, Mathf.Clamp01(edge + 0.5f - distance[p]) * style.ForestOutline);
+                        Blend(p, style.InkColor, Mathf.Clamp01(edge + 0.5f - distance[p]) * style.Ink.ForestEdge.Opacity);
                 }
             }
 
@@ -920,10 +921,10 @@ namespace KingdomSurvival.WorldMapVisual
                     (line.Kind == GeneratedMapLine.TrailKind ? trails : roads).Add(ToPixels(line.Points));
                 }
 
-                if (style.DrawRoads && style.DrawInk && style.RoadInk > 0f && inkPx > 0f)
+                if (style.DrawRoads && style.DrawInk && style.Ink.RoadEdge.Enabled && style.Ink.RoadEdge.Opacity > 0f && inkPx > 0f)
                 {
                     foreach (List<Vector2> road in roads)
-                        StrokePolyline(road, roadHalf + inkPx * 0.6f, style.InkColor, style.RoadInk, 0f, 0f);
+                        StrokePolyline(road, roadHalf + inkPx * 0.6f, style.InkColor, style.Ink.RoadEdge.Opacity, 0f, 0f);
                 }
                 float dash = roadHalf * 6f;
                 foreach (List<Vector2> road in style.DrawRoads ? roads : new List<List<Vector2>>())

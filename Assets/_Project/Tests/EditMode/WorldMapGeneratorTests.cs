@@ -643,15 +643,182 @@ public class WorldMapGeneratorTests
         }
     }
 
+    private static bool InsideTriangles(float[] t, Vector2 p)
+    {
+        for (int i = 0; i < t.Length; i += 6)
+        {
+            float d1 = (p.x - t[i + 2]) * (t[i + 1] - t[i + 3]) - (t[i] - t[i + 2]) * (p.y - t[i + 3]);
+            float d2 = (p.x - t[i + 4]) * (t[i + 3] - t[i + 5]) - (t[i + 2] - t[i + 4]) * (p.y - t[i + 5]);
+            float d3 = (p.x - t[i]) * (t[i + 5] - t[i + 1]) - (t[i + 4] - t[i]) * (p.y - t[i + 1]);
+            bool negative = d1 < 0f || d2 < 0f || d3 < 0f, positive = d1 > 0f || d2 > 0f || d3 > 0f;
+            if (!(negative && positive))
+                return true;
+        }
+        return false;
+    }
+
+    // Доля точек линии туши, по разные стороны которой (на δ пикселей)
+    // заливка есть с одной стороны и нет с другой: край заливки — на линии.
+    private static float ShareOnInk(WorldMapLayers layers, string inkLayer, string fillLayer, float delta)
+    {
+        WorldMapTextureLayer ink = layers.Layers.Find(item => item.Name == inkLayer);
+        WorldMapTextureLayer fill = layers.Layers.Find(item => item.Name == fillLayer);
+        int samples = 0, onLine = 0;
+        foreach (WorldMapVectorShape shape in ink.Shapes)
+        {
+            if (shape.Contours.Count != 2 || shape.Contours[0].Length != shape.Contours[1].Length)
+                continue;
+            Vector2[] outer = shape.Contours[0], inner = shape.Contours[1];
+            for (int i = 0; i < outer.Length && samples < 160; i += Mathf.Max(1, outer.Length / 6))
+            {
+                Vector2 middle = (outer[i] + inner[i]) * 0.5f;
+                Vector2 across = (outer[i] - inner[i]).normalized;
+                samples++;
+                if (InsideTriangles(fill.Triangles, middle + across * delta) != InsideTriangles(fill.Triangles, middle - across * delta))
+                    onLine++;
+            }
+        }
+        Assert.That(samples, Is.GreaterThan(40), "Есть кольца туши для проверки (" + inkLayer + ").");
+        return onLine / (float)samples;
+    }
+
+    [Test]
+    public void FillsStopExactlyOnTheInkLine()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
+        WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+        style.Ink.Shore.Gaps = 0f;
+        style.Ink.ForestEdge.Gaps = 0f;
+        style.Ink.Shore.WobbleHexes = 0.06f;
+        Texture2D ground = WorldMapPainter.Paint(map, style, 0.5f, false, out WorldMapLayers layers);
+        try
+        {
+            string forest = "Местность: " + WorldMapTerrainLabels.Name(WorldMapGameplayTerrainType.Forest);
+            float shore = ShareOnInk(layers, "Тушь берега", "Вода", 0.6f);
+            float edge = ShareOnInk(layers, "Кромка леса", forest, 0.6f);
+            Assert.That(shore, Is.GreaterThanOrEqualTo(0.97f), "Край воды лежит на линии туши берега.");
+            Assert.That(edge, Is.GreaterThanOrEqualTo(0.97f), "Заливка леса обрывается по кромке.");
+        }
+        finally
+        {
+            layers.Destroy();
+            Object.DestroyImmediate(ground);
+        }
+    }
+
+    [Test]
+    public void EdgeBlends_OverlapNeighbours_WithoutGaps()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
+        foreach (WorldMapEdgeBlend blend in new[] { WorldMapEdgeBlend.Tongues, WorldMapEdgeBlend.Spots, WorldMapEdgeBlend.Streaks, WorldMapEdgeBlend.Wash })
+        {
+            WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+            style.EdgeBlend = blend;
+            style.EdgeBlendWidthHexes = 0.6f;
+            style.EdgeBlendScaleHexes = 0.8f;
+            Texture2D ground = WorldMapPainter.Paint(map, style, 0.25f, false, out WorldMapLayers layers);
+            try
+            {
+                double area = 0.0;
+                float canvas = 0f;
+                bool melting = false;
+                foreach (WorldMapTextureLayer layer in layers.Layers)
+                {
+                    if (!layer.Name.StartsWith("Местность: "))
+                        continue;
+                    canvas = layer.SourceWidth * layer.SourceHeight;
+                    float[] t = layer.Triangles;
+                    for (int i = 0; i < t.Length; i += 6)
+                        area += Mathf.Abs((t[i + 2] - t[i]) * (t[i + 5] - t[i + 1]) - (t[i + 4] - t[i]) * (t[i + 3] - t[i + 1])) * 0.5;
+                    melting |= layer.VertexAlpha != null && layer.VertexAlpha.Any(alpha => alpha < 0.5f);
+                }
+                Assert.That(area, Is.GreaterThan(canvas * 1.01), "Заливки заходят друг на друга (" + blend + ").");
+                Assert.That(area, Is.GreaterThan(canvas * 0.9), "Щелей нет (" + blend + ").");
+                if (blend == WorldMapEdgeBlend.Wash)
+                    Assert.That(melting, Is.True, "Размывка тает к соседней заливке.");
+            }
+            finally
+            {
+                layers.Destroy();
+                Object.DestroyImmediate(ground);
+            }
+        }
+    }
+
+    [Test]
+    public void InkBrush_Bristles_Strokes_AndGaps_ChangeTheStroke()
+    {
+        WorldMapInkBrush brush = new WorldMapInkBrush(new WorldMapNoise(5), 20f);
+        List<Vector2> line = new List<Vector2>();
+        for (int i = 0; i <= 40; i++)
+            line.Add(new Vector2(i * 10f, Mathf.Sin(i * 0.3f) * 20f));
+        int Shapes(System.Action<WorldMapStrokeStyle> setup)
+        {
+            WorldMapStrokeStyle style = new WorldMapStrokeStyle { Gaps = 0f };
+            setup(style);
+            List<WorldMapVectorShape> shapes = new List<WorldMapVectorShape>();
+            brush.Stroke(shapes, line, false, style, 3f, Color.black, 1);
+            return shapes.Count;
+        }
+        Assert.That(Shapes(_ => { }), Is.EqualTo(1), "Сплошная линия — один мазок.");
+        Assert.That(Shapes(s => s.Bristles = 4), Is.EqualTo(4), "Сухая кисть — мазок на каждый волосок.");
+        Assert.That(Shapes(s => s.StrokeLengthHexes = 1f), Is.GreaterThan(5), "Штрихи внахлёст — много коротких мазков.");
+        Assert.That(Shapes(s => { s.Gaps = 0.5f; s.GapScaleHexes = 1f; }), Is.GreaterThan(1), "Обрывы делят линию.");
+        Assert.That(Shapes(s => s.Enabled = false), Is.EqualTo(0));
+
+        List<WorldMapVectorShape> blunt = new List<WorldMapVectorShape>();
+        brush.Stroke(blunt, line, false, new WorldMapStrokeStyle { Gaps = 0f, Ends = WorldMapStrokeEnd.Blunt }, 3f, Color.black, 1);
+        List<WorldMapVectorShape> pointed = new List<WorldMapVectorShape>();
+        brush.Stroke(pointed, line, false, new WorldMapStrokeStyle { Gaps = 0f, Ends = WorldMapStrokeEnd.Pointed }, 3f, Color.black, 1);
+        Assert.That(blunt[0].Contours[0].Length, Is.GreaterThan(pointed[0].Contours[0].Length), "Тупые концы — со скруглением.");
+    }
+
+    [Test]
+    public void OldInkSettings_MoveIntoLineProfiles()
+    {
+        WorldMapArtStyle style = new WorldMapArtStyle { InkVariation = 0.2f, InkGaps = 0.3f, ForestOutline = 0.4f, RoadInk = 0.7f };
+        Assert.That(style.Ink.Version, Is.EqualTo(0));
+        Assert.That(style.UpgradeInk(), Is.True);
+        Assert.That(style.Ink.Shore.Pressure, Is.EqualTo(0.2f).Within(1e-4f));
+        Assert.That(style.Ink.Shore.Gaps, Is.EqualTo(0.3f).Within(1e-4f));
+        Assert.That(style.Ink.ForestEdge.Opacity, Is.EqualTo(0.4f).Within(1e-4f));
+        Assert.That(style.Ink.RoadEdge.Opacity, Is.EqualTo(0.7f).Within(1e-4f));
+        Assert.That(style.UpgradeInk(), Is.False, "Перенос — один раз.");
+        WorldMapArtStyle copy = style.Clone();
+        copy.Ink.Shore.Pressure = 0.9f;
+        Assert.That(style.Ink.Shore.Pressure, Is.EqualTo(0.2f).Within(1e-4f), "Копия стиля не делит профили туши с оригиналом.");
+    }
+
+    [Test]
+    public void ShoreEchoLines_AreDrawnInsideWater()
+    {
+        GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
+        WorldMapArtStyle style = WorldMapArtStyle.CreateDefault();
+        style.Ink.ShoreEchoCount = 2;
+        Texture2D ground = WorldMapPainter.Paint(map, style, 0.25f, false, out WorldMapLayers layers);
+        try
+        {
+            int echo = layers.Layers.FindIndex(layer => layer.Name == "Линии воды у берега");
+            Assert.That(echo, Is.GreaterThan(layers.Layers.FindIndex(layer => layer.Name == "Вода")));
+            Assert.That(layers.Layers[echo].Shapes, Is.Not.Empty);
+        }
+        finally
+        {
+            layers.Destroy();
+            Object.DestroyImmediate(ground);
+        }
+    }
+
     [Test]
     public void InkStrokes_AreThickerAndThinner_LikeABrush()
     {
         GeneratedWorldMap map = WorldMapGenerator.Generate(WorldMapGenerationSettings.CreateDefault(), 12);
         WorldMapArtStyle brush = WorldMapArtStyle.CreateDefault();
-        brush.InkGaps = 0f;
+        brush.Ink.Shore.Gaps = 0f;
         WorldMapArtStyle even = WorldMapArtStyle.CreateDefault();
-        even.InkGaps = 0f;
-        even.InkVariation = 0f;
+        even.Ink.Shore.Gaps = 0f;
+        even.Ink.Shore.Pressure = 0f;
+        even.Ink.Shore.Nib = 0f;
         Texture2D a = WorldMapPainter.Paint(map, brush, 0.25f, false, out WorldMapLayers brushLayers);
         Texture2D b = WorldMapPainter.Paint(map, even, 0.25f, false, out WorldMapLayers evenLayers);
         try

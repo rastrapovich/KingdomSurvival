@@ -102,16 +102,29 @@ namespace KingdomSurvival.WorldMapVisual
         [Range(0f, 1f)] public float EdgeRaggedness = 0.6f;
         [Tooltip("Размер зубцов рваного края, в клетках.")]
         [Range(0.05f, 1.5f)] public float RaggedScaleHexes = 0.3f;
+        [Tooltip("Как заливки соседних местностей встречаются (при слоях видеокартой).")]
+        public WorldMapEdgeBlend EdgeBlend = WorldMapEdgeBlend.Torn;
+        [Tooltip("Насколько заливка заходит на соседнюю, в клетках.")]
+        [Range(0f, 2f)] public float EdgeBlendWidthHexes = 0.35f;
+        [Tooltip("Размер языков, пятен и штрихов перехода, в клетках.")]
+        [Range(0.05f, 3f)] public float EdgeBlendScaleHexes = 0.6f;
+        [Tooltip("Густота: как часто заливка заходит на соседнюю.")]
+        [Range(0f, 1f)] public float EdgeBlendDensity = 0.5f;
+        [Tooltip("Мягкость: край захода тает к соседней заливке, а не обрывается.")]
+        [Range(0f, 1f)] public float EdgeBlendSoftness = 0.35f;
+        [Tooltip("Направление штрихов сухой кисти, градусы.")]
+        [Range(0f, 180f)] public float EdgeBlendAngle = 30f;
 
         [Header("Тушь")]
         public Color InkColor = new Color(0.07f, 0.06f, 0.05f, 1f);
         [Tooltip("Толщина контура в пикселях полотна (до учёта качества).")]
         [Range(0f, 12f)] public float InkWidth = 3f;
-        [Range(0f, 1f)] public float ForestOutline = 0.55f;
-        [Tooltip("Разнотолщинность мазка туши: 0 — ровная линия, 1 — то волосок, то жирный нажим.")]
-        [Range(0f, 1f)] public float InkVariation = 0.6f;
-        [Tooltip("Обрывы мазка — места, где кисть отрывается от бумаги.")]
-        [Range(0f, 0.6f)] public float InkGaps = 0.12f;
+        [Tooltip("Облик каждого вида линий туши — окно «Редактор туши».")]
+        public WorldMapInkStyle Ink = new WorldMapInkStyle();
+        // Прежние общие настройки туши — только для переноса в Ink (UpgradeInk).
+        [HideInInspector] public float ForestOutline = 0.55f;
+        [HideInInspector] public float InkVariation = 0.6f;
+        [HideInInspector] public float InkGaps = 0.12f;
 
         [Header("Вода")]
         public Color WaterShallowColor = new Color(0.36f, 0.47f, 0.47f, 1f);
@@ -167,7 +180,7 @@ namespace KingdomSurvival.WorldMapVisual
         [Header("Дороги")]
         public Color RoadColor = new Color(0.72f, 0.62f, 0.44f, 1f);
         [Range(0.02f, 1f)] public float RoadWidthHexes = 0.14f;
-        [Range(0f, 1f)] public float RoadInk = 0.6f;
+        [HideInInspector] public float RoadInk = 0.6f;
         public bool RoadDashed;
         public Color TrailColor = new Color(0.45f, 0.38f, 0.27f, 1f);
         [Range(0.02f, 1f)] public float TrailWidthHexes = 0.07f;
@@ -231,6 +244,30 @@ namespace KingdomSurvival.WorldMapVisual
                     return entry;
             }
             return null;
+        }
+
+        // Тушь раньше настраивалась четырьмя общими полями; при первой
+        // загрузке они переносятся в профили линий (идемпотентно).
+        public bool UpgradeInk()
+        {
+            Ink ??= new WorldMapInkStyle();
+            if (Ink.Version >= WorldMapInkStyle.CurrentVersion)
+                return false;
+            foreach (WorldMapInkLine line in Enum.GetValues(typeof(WorldMapInkLine)))
+            {
+                if (line == WorldMapInkLine.ShoreEcho || line == WorldMapInkLine.Bridge)
+                    continue;
+                WorldMapStrokeStyle stroke = Ink.Get(line);
+                stroke.Pressure = Mathf.Clamp01(InkVariation * (line == WorldMapInkLine.Trail ? 0.5f : line == WorldMapInkLine.RoadEdge ? 0.75f : 1f));
+                if (line == WorldMapInkLine.Shore)
+                    stroke.Gaps = InkGaps;
+                else if (line == WorldMapInkLine.ForestEdge)
+                    stroke.Gaps = Mathf.Min(0.8f, InkGaps * 1.5f);
+            }
+            Ink.ForestEdge.Opacity = ForestOutline;
+            Ink.RoadEdge.Opacity = RoadInk;
+            Ink.Version = WorldMapInkStyle.CurrentVersion;
+            return true;
         }
 
         // Идемпотентно: у каждого типа местности есть строка облика.
@@ -323,6 +360,7 @@ namespace KingdomSurvival.WorldMapVisual
         public WorldMapArtStyle Clone()
         {
             WorldMapArtStyle copy = (WorldMapArtStyle)MemberwiseClone();
+            copy.Ink = Ink != null ? JsonUtility.FromJson<WorldMapInkStyle>(JsonUtility.ToJson(Ink)) : new WorldMapInkStyle();
             copy.Terrain = new List<WorldMapTerrainArt>();
             if (Terrain != null)
             {
@@ -359,6 +397,7 @@ namespace KingdomSurvival.WorldMapVisual
         {
             WorldMapArtStyle style = new WorldMapArtStyle();
             style.EnsureTerrainEntries();
+            style.UpgradeInk();
             return style;
         }
     }
@@ -403,6 +442,46 @@ namespace KingdomSurvival.WorldMapVisual
                     art.Color = new Color(0.33f, 0.31f, 0.31f, 1f); art.Opacity = 0.9f; break;
             }
             return art;
+        }
+    }
+
+    // Как встречаются заливки соседних местностей.
+    public enum WorldMapEdgeBlend
+    {
+        Torn,
+        Tongues,
+        Spots,
+        Streaks,
+        Wash
+    }
+
+    public static class WorldMapEdgeBlendLabels
+    {
+        public static readonly WorldMapEdgeBlend[] All =
+            { WorldMapEdgeBlend.Torn, WorldMapEdgeBlend.Tongues, WorldMapEdgeBlend.Spots, WorldMapEdgeBlend.Streaks, WorldMapEdgeBlend.Wash };
+
+        public static string Name(WorldMapEdgeBlend blend)
+        {
+            switch (blend)
+            {
+                case WorldMapEdgeBlend.Tongues: return "Языки внахлёст";
+                case WorldMapEdgeBlend.Spots: return "Пятна и островки";
+                case WorldMapEdgeBlend.Streaks: return "Штрихи сухой кисти";
+                case WorldMapEdgeBlend.Wash: return "Размывка акварелью";
+                default: return "Рваный край встык";
+            }
+        }
+
+        public static string Hint(WorldMapEdgeBlend blend)
+        {
+            switch (blend)
+            {
+                case WorldMapEdgeBlend.Tongues: return "Заливки заходят друг на друга языками и смешиваются там, где легли одна на другую.";
+                case WorldMapEdgeBlend.Spots: return "У края — оторванные пятна и островки одной заливки на другой.";
+                case WorldMapEdgeBlend.Streaks: return "Заходы вытянутыми штрихами в одном направлении, как сухой кистью.";
+                case WorldMapEdgeBlend.Wash: return "Заливка тает к соседней пятнами, как акварель по сырому.";
+                default: return "Заливки сходятся встык рваным краем, без наложения.";
+            }
         }
     }
 

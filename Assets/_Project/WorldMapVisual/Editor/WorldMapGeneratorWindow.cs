@@ -117,15 +117,24 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         private void OnEnable()
         {
             Undo.undoRedoPerformed += OnUndoRedo;
+            WorldMapInkEditorWindow.Changed += OnInkChanged;
         }
 
         private void OnDisable()
         {
             Undo.undoRedoPerformed -= OnUndoRedo;
+            WorldMapInkEditorWindow.Changed -= OnInkChanged;
             DestroyTexture(ref mapTexture);
             DestroyTexture(ref markupTexture);
             layers?.Destroy();
             layers = null;
+        }
+
+        // Правка в «Редакторе туши» — перерисовать карту (без новой генерации).
+        private void OnInkChanged()
+        {
+            if (generator != null && AutoRefresh)
+                ScheduleRefresh(false);
         }
 
         private void OnUndoRedo()
@@ -1034,6 +1043,24 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 Slider("Неровность краёв, клеток", A.EdgeRoughness, 0, 1.5f, v => A.EdgeRoughness = v, false, "0 — видны шестиугольники клеток");
                 Slider("Рваность краёв", A.EdgeRaggedness, 0, 1, v => A.EdgeRaggedness = v, false, "Края местности, воды и узоров — зубцами и выступами, а не растворением (слоями видеокартой)");
                 Slider("Размер зубцов, клеток", A.RaggedScaleHexes, 0.05f, 1.5f, v => A.RaggedScaleHexes = v);
+                int blend = Array.IndexOf(WorldMapEdgeBlendLabels.All, A.EdgeBlend);
+                PopupField<string> blendField = new PopupField<string>("Переход между заливками", WorldMapEdgeBlendLabels.All.Select(WorldMapEdgeBlendLabels.Name).ToList(), Mathf.Max(0, blend))
+                {
+                    tooltip = "Как встречаются заливки соседних местностей (слоями видеокартой). Где есть тушь, заливка всегда обрывается по линии туши."
+                };
+                blendField.RegisterValueChangedCallback(evt => Change(() => A.EdgeBlend = WorldMapEdgeBlendLabels.All[Mathf.Max(0, blendField.index)], false, true));
+                parent.Add(blendField);
+                Help(WorldMapEdgeBlendLabels.Hint(A.EdgeBlend));
+                if (A.EdgeBlend != WorldMapEdgeBlend.Torn)
+                {
+                    Slider("Ширина перехода, клеток", A.EdgeBlendWidthHexes, 0, 2, v => A.EdgeBlendWidthHexes = v, false, "Насколько заливка заходит на соседнюю");
+                    Slider("Размер языков и пятен, клеток", A.EdgeBlendScaleHexes, 0.05f, 3, v => A.EdgeBlendScaleHexes = v);
+                    Slider("Густота", A.EdgeBlendDensity, 0, 1, v => A.EdgeBlendDensity = v, false, "Как часто заливка заходит на соседнюю");
+                    if (A.EdgeBlend != WorldMapEdgeBlend.Wash)
+                        Slider("Мягкость", A.EdgeBlendSoftness, 0, 1, v => A.EdgeBlendSoftness = v, false, "0 — заход обрывается чётко, 1 — тает к соседней заливке");
+                    if (A.EdgeBlend == WorldMapEdgeBlend.Streaks)
+                        Slider("Направление штрихов, °", A.EdgeBlendAngle, 0, 180, v => A.EdgeBlendAngle = v);
+                }
                 Slider("Мягкость переходов (в PNG), клеток", A.EdgeSoftness, 0, 1, v => A.EdgeSoftness = v);
                 foreach (WorldMapTerrainArt art in A.Terrain)
                 {
@@ -1057,6 +1084,9 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 A.EnsureTerrainEntries();
                 A.EdgeRoughness = 0.55f;
                 A.EdgeSoftness = 0.18f;
+                WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
+                A.EdgeRaggedness = d.EdgeRaggedness; A.RaggedScaleHexes = d.RaggedScaleHexes; A.EdgeBlend = d.EdgeBlend; A.EdgeBlendWidthHexes = d.EdgeBlendWidthHexes;
+                A.EdgeBlendScaleHexes = d.EdgeBlendScaleHexes; A.EdgeBlendDensity = d.EdgeBlendDensity; A.EdgeBlendSoftness = d.EdgeBlendSoftness; A.EdgeBlendAngle = d.EdgeBlendAngle;
             }, A.DrawTerrain, v => A.DrawTerrain = v);
         }
 
@@ -1064,14 +1094,12 @@ namespace KingdomSurvival.WorldMapVisual.Editor
         {
             Group("Тушь", "Ink", () =>
             {
-                Help("Чёрный контур — стиль канона v1.56: берега, кромка леса, дороги, знаки.");
+                Help("Чёрный контур — стиль канона v1.56: берега, кромка леса, дороги, знаки. Облик каждой линии (нажим, перо, обрывы, штрихи, сухая кисть) — в «Редакторе туши».");
                 Switches(("Кромка леса", A.DrawForestOutline, v => A.DrawForestOutline = v), ("Тушь берега", A.DrawShoreInk, v => A.DrawShoreInk = v));
                 ColorField("Цвет туши", A.InkColor, v => A.InkColor = v);
                 Slider("Толщина, px полотна", A.InkWidth, 0, 12, v => A.InkWidth = v);
-                Slider("Кромка леса", A.ForestOutline, 0, 1, v => A.ForestOutline = v);
-                Slider("Разнотолщинность мазка", A.InkVariation, 0, 1, v => A.InkVariation = v, false, "0 — ровная линия, 1 — то волосок, то жирный нажим кисти");
-                Slider("Обрывы мазка", A.InkGaps, 0, 0.6f, v => A.InkGaps = v, false, "Места, где кисть отрывается от бумаги");
-            }, () => { WorldMapArtStyle d = WorldMapArtStyle.CreateDefault(); A.InkColor = d.InkColor; A.InkWidth = d.InkWidth; A.ForestOutline = d.ForestOutline; }, A.DrawInk, v => A.DrawInk = v);
+                Buttons(("Редактор туши…", WorldMapInkEditorWindow.Open, "Настройки каждого вида линий туши с предпросмотром"));
+            }, () => { WorldMapArtStyle d = WorldMapArtStyle.CreateDefault(); A.InkColor = d.InkColor; A.InkWidth = d.InkWidth; }, A.DrawInk, v => A.DrawInk = v);
         }
 
         private void BuildWaterArt()
@@ -1147,7 +1175,6 @@ namespace KingdomSurvival.WorldMapVisual.Editor
                 Switches(("Дороги", A.DrawRoads, v => A.DrawRoads = v), ("Тропы", A.DrawTrails, v => A.DrawTrails = v), ("Мосты", A.DrawBridges, v => A.DrawBridges = v));
                 ColorField("Дорога", A.RoadColor, v => A.RoadColor = v);
                 Slider("Ширина дороги, клеток", A.RoadWidthHexes, 0.02f, 1, v => A.RoadWidthHexes = v);
-                Slider("Тушь вдоль дороги", A.RoadInk, 0, 1, v => A.RoadInk = v);
                 Toggle("Дорога пунктиром", A.RoadDashed, v => A.RoadDashed = v);
                 ColorField("Тропа", A.TrailColor, v => A.TrailColor = v);
                 Slider("Ширина тропы, клеток", A.TrailWidthHexes, 0.02f, 1, v => A.TrailWidthHexes = v);
@@ -1156,7 +1183,7 @@ namespace KingdomSurvival.WorldMapVisual.Editor
             }, () =>
             {
                 WorldMapArtStyle d = WorldMapArtStyle.CreateDefault();
-                A.RoadColor = d.RoadColor; A.RoadWidthHexes = d.RoadWidthHexes; A.RoadInk = d.RoadInk; A.RoadDashed = d.RoadDashed;
+                A.RoadColor = d.RoadColor; A.RoadWidthHexes = d.RoadWidthHexes; A.RoadDashed = d.RoadDashed;
                 A.TrailColor = d.TrailColor; A.TrailWidthHexes = d.TrailWidthHexes; A.TrailDashed = d.TrailDashed; A.BridgeColor = d.BridgeColor;
             });
         }
